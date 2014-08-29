@@ -10,14 +10,14 @@ function runCursorHistogramTests() {
         var cursorHistogram = new cursor.CursorHistogram(4, 100);
         ok(cursorHistogram);
 
-        equal(0, cursorHistogram.indexOfScore(14));
-        cursorHistogram.bins[cursorHistogram.indexOfScore(14)]++;
+        equal(0, cursorHistogram.scoreIndex(14));
+        cursorHistogram.bins[cursorHistogram.scoreIndex(14)]++;
 
-        equal(1, cursorHistogram.indexOfScore(35));
-        cursorHistogram.bins[cursorHistogram.indexOfScore(35)]++;
+        equal(1, cursorHistogram.scoreIndex(35));
+        cursorHistogram.bins[cursorHistogram.scoreIndex(35)]++;
 
-        equal(2, cursorHistogram.indexOfScore(65));
-        cursorHistogram.bins[cursorHistogram.indexOfScore(65)]++;
+        equal(2, cursorHistogram.scoreIndex(65));
+        cursorHistogram.bins[cursorHistogram.scoreIndex(65)]++;
 
         cursorHistogram.bins.forEach(function(count, index, counts) {
 
@@ -60,7 +60,7 @@ function runCursorHistogramTests() {
                         // do nothing
                     } else {
 
-                        cursorHistogram.bins[ cursorHistogram.indexOfScore(score) ] += 1;
+                        cursorHistogram.bins[ cursorHistogram.scoreIndex(score) ] += 1;
                     }
 
                 });

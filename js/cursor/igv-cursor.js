@@ -33,7 +33,11 @@ var igv = (function (igv) {
              */
             function initCursor() {
 
-                browser.cursorModel = new cursor.CursorModel(browser);
+
+                var regionDisplayJQueryObject = $('#igvHeaderRegionDisplaySpan');
+
+
+                browser.cursorModel = new cursor.CursorModel(browser, regionDisplayJQueryObject);
                 browser.referenceFrame = new igv.ReferenceFrame("", 0, 1 / browser.cursorModel.framePixelWidth);
 
                 browser.setFrameWidth = function (frameWidthString) {

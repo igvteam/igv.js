@@ -355,7 +355,7 @@ var igv = (function (igv) {
         this.canvas.style.height = heightStr;
         this.canvas.setAttribute("height", newHeight);
 
-        this.track.cursorHistogram.updateHeight(newHeight);
+        this.track.cursorHistogram.updateHeight(this.track, newHeight);
 
         this.update();
     };
@@ -368,7 +368,7 @@ var igv = (function (igv) {
 
     igv.TrackPanel.prototype.repaint = function () {
 
-        if (!this.track || !this.browser.referenceFrame) {
+        if (!this.track) {
             return;
         }
 
@@ -423,6 +423,7 @@ var igv = (function (igv) {
             };
 
             this.track.draw(igvCanvas, refFrame, tileStart, tileEnd, buffer.width, buffer.height, function (task) {
+
 
                     spinner.stop();
 

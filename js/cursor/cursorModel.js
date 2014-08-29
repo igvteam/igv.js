@@ -1,8 +1,9 @@
 var cursor = (function (cursor) {
 
-    cursor.CursorModel = function (browser) {
+    cursor.CursorModel = function (browser, regionDisplayJQueryObject) {
 
         this.browser = browser;
+        this.regionDisplayJQueryObject = regionDisplayJQueryObject;
 
         this.regionWidth = 100;
         this.framePixelWidth = 24;
@@ -16,11 +17,12 @@ var cursor = (function (cursor) {
     };
 
     cursor.CursorModel.prototype.updateRegionDisplay = function() {
-        // TODO -- remove this hardcoded div ID,  or make it a parameter
-        var num = igv.numberFormatter(this.getRegionList().length),
-            den = igv.numberFormatter(this.regions.length);
-        $('#igvHeaderRegionDisplaySpan').text("Regions " + num + " / " + den);
-    }
+
+        var numer = igv.numberFormatter(this.getRegionList().length),
+            denom = igv.numberFormatter(this.regions.length);
+
+        this.regionDisplayJQueryObject.text("Regions " + numer + " / " + denom);
+    };
 
     cursor.CursorModel.prototype.getRegionList = function () {
 
@@ -57,7 +59,7 @@ var cursor = (function (cursor) {
 
             });
 
-            track.cursorHistogram.render();
+            track.cursorHistogram.render(track);
 
             if (continutation) {
                 continutation();
@@ -131,7 +133,6 @@ var cursor = (function (cursor) {
             // If filteredRegions set is > 10,000 downsample
             myself.filteredRegions = downsample(myself.filteredRegions, 10000);
 
-
             myself.browser.update();
 
             // better histogram code
@@ -170,12 +171,11 @@ var cursor = (function (cursor) {
 
                 });
 
-                tp.cursorHistogram.render();
+                tp.cursorHistogram.render(tp.track);
 
             });
 
         }
-
 
         function downsample(array, max) {
 

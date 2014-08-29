@@ -10,6 +10,7 @@ var cursor = (function (cursor) {
         this.bins.length = binCount;
         this.maxCount = 0;
 
+        this.canvasFillStyle = igv.rgbColor(255, 255, 255);
         this.minMaxfillStyle = igv.rgbaColor(64, 64, 64, 0.5);
         this.minMaxEdgefillStyle = igv.rgbaColor(32, 32, 32, 1.0);
 
@@ -36,12 +37,12 @@ var cursor = (function (cursor) {
             return;
         }
 
-        var index = this.indexOfScore(score);
+        var index = this.scoreIndex(score);
         this.bins[ index ] += 1;
         this.maxCount = Math.max(this.maxCount, this.bins[ index ]);
     };
 
-    cursor.CursorHistogram.prototype.indexOfScore = function (score) {
+    cursor.CursorHistogram.prototype.scoreIndex = function (score) {
 
         var value;
 
@@ -57,21 +58,46 @@ var cursor = (function (cursor) {
     };
 
     // Render
-    cursor.CursorHistogram.prototype.render = function () {
-
-        var min = (this.trackPanel.track.trackFilter.minimum) ? this.trackPanel.track.trackFilter.minimum : "-",
-            max = (this.trackPanel.track.trackFilter.maximum) ? this.trackPanel.track.trackFilter.maximum : "-",
-            fillStyle;
+    cursor.CursorHistogram.prototype.render = function (track) {
 
         // Clear canvas
-        this.fillCanvasWithFillStyle(igv.rgbColor(255, 255, 255));
+        this.fillCanvasWithFillStyle(this.canvasFillStyle);
 
         // render histogram
-        this.bins.forEach(histogramRender, this);
+        this.bins.forEach(function (count, index, counts) {
+
+            var x,
+                y,
+                width,
+                height,
+                percent,
+                color;
+
+            if (count) {
+
+                percent = (count/this.maxCount);
+
+                // Symmetric centerline histogram. Pretty.
+                x = ((1.0 - percent) / 2.0) * this.canvasWidth;
+
+                // Asymmetric histogram. Meh.
+//            x = (1.0 - percent) * this.canvasWidth;
+
+                width = (percent) * this.canvasWidth;
+
+                y = (counts.length - 1) - index;
+                height = 1;
+
+                color = (track.color) ? track.color : igv.rgbColor(128, 128, 128);
+
+                this.igvCanvas.fillRect(x, y, width, height, { fillStyle: color });
+            }
+
+        }, this);
 
         // render min/max overlays
-        var minHeight = (this.trackPanel.track.trackFilter.minimum) ? this.trackPanel.track.trackFilter.minimum / this.trackPanel.track.max : undefined;
-        var maxHeight = (this.trackPanel.track.trackFilter.maximum) ? this.trackPanel.track.trackFilter.maximum / this.trackPanel.track.max : undefined;
+        var minHeight = (track.trackFilter.minimum) ? track.trackFilter.minimum / track.max : undefined;
+        var maxHeight = (track.trackFilter.maximum) ? track.trackFilter.maximum / track.max : undefined;
         var height;
 
         // max
@@ -99,32 +125,6 @@ var cursor = (function (cursor) {
         this.igvCanvas.fillRect(0, 0, this.canvasWidth, this.canvasHeight, { fillStyle:fillStyle } );
     };
 
-    function histogramRender(count, index, counts) {
-
-        var x, y, width, height, percent, color;
-
-        if (count) {
-
-            percent = (count/this.maxCount);
-
-            // Symmetric centerline histogram. Pretty.
-            x = ((1.0 - percent) / 2.0) * this.canvasWidth;
-
-            // Asymmetric histogram. Meh.
-//            x = (1.0 - percent) * this.canvasWidth;
-
-            width = (percent) * this.canvasWidth;
-
-            y = (counts.length - 1) - index;
-            height = 1;
-
-            color = (this.trackPanel.track.color) ? this.trackPanel.track.color : igv.rgbColor(128, 128, 128);
-
-            this.igvCanvas.fillRect(x, y, width, height, { fillStyle: color });
-        }
-
-    }
-
     function showX(count, index, counts) {
 
         var yPercent = index/(counts.length - 1),
@@ -143,11 +143,8 @@ var cursor = (function (cursor) {
 
     }
 
-
     // Markup
     cursor.CursorHistogram.prototype.createMarkupWithTrackPanelDiv = function (trackPanel) {
-
-        this.trackPanel = trackPanel;
 
         this.id = this.guid +"_cursorHistogramDiv";
         this.label = trackPanel.track.label +"_cursorHistogramDiv";
@@ -155,7 +152,7 @@ var cursor = (function (cursor) {
         this.igvCanvas = this.canvasWithParentDiv(trackPanel.controlDiv);
 
         // Clear canvas
-        this.fillCanvasWithFillStyle(igv.rgbColor(255, 255, 255));
+        this.fillCanvasWithFillStyle(this.canvasFillStyle);
 
     };
 
@@ -195,7 +192,7 @@ var cursor = (function (cursor) {
         return DOMCanvas;
     };
 
-    cursor.CursorHistogram.prototype.updateHeight = function (height) {
+    cursor.CursorHistogram.prototype.updateHeight = function (track, height) {
 
         this.cursorHistogramDiv.style.height = height + "px";
         this.canvasHeight = this.cursorHistogramDiv.clientHeight;
@@ -203,7 +200,7 @@ var cursor = (function (cursor) {
 
         this.bins = [];
         this.bins.length = this.canvasHeight;
-        this.trackPanel.track.cursorModel.initializeHistogram(this.trackPanel.track);
+        track.cursorModel.initializeHistogram(track);
      };
 
     return cursor;

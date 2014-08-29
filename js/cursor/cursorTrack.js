@@ -50,7 +50,7 @@ var cursor = (function (cursor) {
                     if (color) {
                         myself.color = "rgb(" + color + ")";
 
-                        if (myself.cursorHistogram) myself.cursorHistogram.render();
+                        if (myself.cursorHistogram) myself.cursorHistogram.render(myself);
                     }
                 }
 
