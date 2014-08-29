@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <title>Color Tests</title>
+    <link rel="stylesheet" href="vendor/qunit-1.12.0.css" type="text/css"/>
+</head>
+
+<body>
+<div id="qunit"></div>
+<div id="qunit-fixture"></div>
+<script type="text/javascript" src="vendor/qunit-1.12.0.js"></script>
+<script type="text/javascript" src="../js/bigwig/bufferedReader.js"></script>
+<script type="text/javascript" src="../js/dataloader.js"></script>
+<script type="text/javascript" src="testBufferedReader.js"></script>
+<script type="text/javascript">
+    document.addEventListener('DOMContentLoaded', function () {
+        runBufferedReaderTests();
+    });
+</script>
+
+</body>
+</html>
+

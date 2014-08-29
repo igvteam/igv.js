@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <title>One Test To Test Them All</title>
+    <link rel="stylesheet" href="vendor/qunit-1.12.0.css" type="text/css"/>
+    <script type="text/javascript" src="vendor/qunit-1.12.0.js"></script>
+    <script type="text/javascript" src="../vendor/zlib_and_gzip.min.js"></script>
+
+    <script type="text/javascript" src="../js/genome.js"></script>
+    <script type="text/javascript" src="../js/trackPanel.js"></script>
+    <script type="text/javascript" src="../js/igv-tracks.js"></script>
+
+    <script type="text/javascript" src="../js/igv-color.js"></script>
+    <script type="text/javascript" src="../js/igv-utils.js"></script>
+    <script type="text/javascript" src="../js/parseUtils.js"></script>
+
+    <script type="text/javascript" src="../js/fasta.js"></script>
+    <script type="text/javascript" src="../js/sequenceTrack.js"></script>
+
+    <script type="text/javascript" src="../js/dataloader.js"></script>
+
+    <script type="text/javascript" src="../js/igv-exts.js"></script>
+    <script type="text/javascript" src="../vendor/inflate.js"></script>
+
+    <script type="text/javascript" src="../js/bamReader.js"></script>
+    <script type="text/javascript" src="../js/bamSource.js"></script>
+    <script type="text/javascript" src="../js/bamTrack.js"></script>
+    <script type="text/javascript" src="../js/seg.js"></script>
+    <script type="text/javascript" src="../js/wigSource.js"></script>
+    <script type="text/javascript" src="../js/bedSource.js"></script>
+
+    <script type="text/javascript" src="../js/gtex/eqtlSource.js"></script>
+    <script type="text/javascript" src="../js/binary.js"></script>
+</head>
+
+<body>
+
+<div id="qunit"></div>
+
+<div id="qunit-fixture"></div>
+
+<script type="text/javascript" src="vendor/qunit-1.12.0.js"></script>
+
+<script type="text/javascript" src="helloQUnit.js"></script>
+<script type="text/javascript" src="testBAM.js"></script>
+<script type="text/javascript" src="testBAMTrack.js"></script>
+<script type="text/javascript" src="testBED.js"></script>
+<script type="text/javascript" src="testCrossOrigin.js"></script>
+<script type="text/javascript" src="testDataSource.js"></script>
+<script type="text/javascript" src="testEQTL.js"></script>
+<script type="text/javascript" src="testFasta.js"></script>
+<script type="text/javascript" src="testInflate.js"></script>
+<script type="text/javascript" src="testColor.js"></script>
+<script type="text/javascript" src="testNumberFormatter.js"></script>
+<script type="text/javascript" src="testParseUtils.js"></script>
+<script type="text/javascript" src="testSEGFeatureSource.js"></script>
+<script type="text/javascript" src="testWIGFeatureSource.js"></script>
+
+<script type="text/javascript">
+    document.addEventListener('DOMContentLoaded', function () {
+
+        helloQUnitTests();
+
+        runBAMTests();
+        runBAMTrackTests();
+        runBEDUnitTests();
+        runSEGFeatureSourceTests();
+        runWIGFeatureSourceTests();
+
+        runLocalTests();
+        runDataSourceTests();
+        eqtlUnitTests();
+        runFastaTests();
+        runInflateTests();
+
+        runMathTests();
+        runColorTests();
+
+        runNumberFormatterTests();
+        runParseUtilsTests();
+
+    });
+</script>
+
+</body>
+</html>

@@ -1,0 +1,19 @@
+# Created by .gitignore support plugin (hsz.mobi)
+.DS_STORE
+.idea/workspace.xml
+test/data/cursor
+test/data/bigBedExample.bb
+test/data/inflateTest
+test/data/Heart_Left_Ventricle.portal.sorted.eqtl.bin
+test/data/brain_chr22sample.bam
+test/data/Heart_Left_Ventricle.portal.sorted.eqtl.idx
+test/data/bigWigExample.bw
+test/data/inflateTest.gz
+test/data/brain_chr22sample.bam.bai
+test/data/gstt1_sample.bam
+test/data/gstt1_sample.bam.bai
+test/data/chr1.bw
+test/data/Heart_Left_Ventricle.portal.sorted.eqtl
+test/data/sample.bed.gz
+test/data/test.broadPeak
+test/data/sample.bed

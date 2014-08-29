@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+    <meta name="description" content="">
+    <meta name="author" content="">
+    <link rel="shortcut icon" href=img/favicon.ico>
+
+    <title>IGV - Integrative Genomics Viewer</title>
+
+    <!-- IGV Bootstrap css -->
+    <link href="css/igv.css" type="text/css" rel="stylesheet">
+
+
+    <script src="vendor/jquery-1.11.1.min.js"></script>
+
+    <script type="text/javascript" src="vendor/inflate.js"></script>
+    <script type="text/javascript" src="vendor/zlib_and_gzip.min.js"></script>
+    <!--   <script type="text/javascript" src="vendor/bootstrap/plugins/holder.js"></script>  -->
+
+    <!-- IGV js code -->
+
+
+    <script type="text/javascript" src="js/igv.js"></script>
+    <script type="text/javascript" src="js/browser.js"></script>
+    <script type="text/javascript" src="js/ideogram.js"></script>
+    <script type="text/javascript" src="js/referenceFrame.js"></script>
+    <script type="text/javascript" src="js/igv-canvas.js"></script>
+    <script type="text/javascript" src="js/genome.js"></script>
+    <script type="text/javascript" src="js/trackPanel.js"></script>
+    <script type="text/javascript" src="js/rulertrack.js"></script>
+    <script type="text/javascript" src="js/genetrack.js"></script>
+    <script type="text/javascript" src="js/bedSource.js"></script>
+    <script type="text/javascript" src="js/igv-color.js"></script>
+    <script type="text/javascript" src="js/igv-utils.js"></script>
+    <script type="text/javascript" src="js/parseUtils.js"></script>
+    <script type="text/javascript" src="js/fasta.js"></script>
+    <script type="text/javascript" src="js/sequencetrack.js"></script>
+    <script type="text/javascript" src="js/wigSource.js"></script>
+    <script type="text/javascript" src="js/wigtrack.js"></script>
+    <script type="text/javascript" src="js/dataloader.js"></script>
+    <script type="text/javascript" src="js/igv-exts.js"></script>
+    <script type="text/javascript" src="js/binary.js"></script>
+    <script type="text/javascript" src="js/gtex/eqtltrack.js"></script>
+    <script type="text/javascript" src="js/coverageMap.js"></script>
+    <script type="text/javascript" src="js/alignmentManager.js"></script>
+    <script type="text/javascript" src="js/bamReader.js"></script>
+    <script type="text/javascript" src="js/bamSource.js"></script>
+    <script type="text/javascript" src="js/bamtrack.js"></script>
+    <script type="text/javascript" src="vendor/spin.js"></script>
+    <script type="text/javascript" src="js/intervaltree.js"></script>
+
+    <script type="text/javascript" src="js/encode/encode.js"></script>
+    <script type="text/javascript" src="js/cursor/cursortrack.js"></script>
+    <script type="text/javascript" src="js/cursor/cursorModel.js"></script>
+    <script type="text/javascript" src="js/cursor/cursor-ideogram.js"></script>
+
+</head>
+
+<body>
+
+<div id="myDiv">
+    <table>
+        <tr>
+            <td><a style="color: blue;cursor: pointer"
+                   onclick="igv.browser.loadTrack('http://www.broadinstitute.org/igvdata/BodyMap/hg19/IlluminaHiSeq2000_BodySites/brain_merged/accepted_hits.bam')">Load BodyMap Brain</a></td>
+        </tr>
+        <tr>
+            <td><a style="color: blue;cursor: pointer" onclick="igv.browser.search('chr22:24,375,948-24,384,434')">
+                Goto locus on chr 22</a></td>
+        </tr>
+    </table>
+    <p/>
+</div>
+
+<script type="text/javascript">
+
+    $(document).ready(function () {
+
+        var div = $("#myDiv")[0],
+                browser = igv.createBrowser();
+        div.appendChild(browser.div);
+        browser.startup();
+    });
+
+</script>
+
+
+</body>
+
+</html>
