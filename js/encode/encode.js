@@ -15,22 +15,47 @@ var encode = (function (encode) {
         H3K9AC: "rgb(100, 0, 0)",
         H3K9ME1: "rgb(100, 0, 0)"};
 
-    encode.dataTableRowIndices = { "cell":0, "dataType":1, "antibody":2, "view":3, "replicate":4, "type":5, "lab":6, "path":7 };
-    encode.dataTableRowLabels  = [ "cell",   "dataType",   "antibody",   "view",   "replicate",   "type",   "lab",   "path"   ];
+    /**
+     *       path    cell    dataType        antibody        view    replicate       type    lab     hub
+     * @param file
+     * @param continuation
+     */
 
-    encode.createEncodeDataTablesDataSet = function (file, continuation) {
+    parseEncodeTableFile = function (file, continuation) {
 
-        var dataSet = [];
-        parseEncodeTableFile(file, function (records) {
+        var dataLoader = new igv.DataLoader(file);
 
-            records.forEach(function (record) {
+        dataLoader.loadBinaryString(function (data) {
 
-                var row = [];
-                row.length = encode.dataTableRowLabels.length;
+            var lines = data.split("\n"),
+                dataSet = [ ],
+                path;
 
-                encode.dataTableRowLabels.forEach(function(field){
+            // Raw data items arrive in this order:
+            //
+            // path    cell    dataType        antibody        view    replicate       type    lab     hub
+            //
+            // Reorder to match desired DataTables order in encode.dataTableRowLabels. Discard hub item.
+            //
+            encode.dataTableRowLabels = lines[0].split("\t");
+            encode.dataTableRowLabels.pop();
+            path = encode.dataTableRowLabels.shift();
+            encode.dataTableRowLabels.push(path);
 
-                    row[ encode.dataTableRowIndices[ field ] ] = (undefined === record[ field ] || "" === record[ field ]) ? "": record[ field ];
+            lines.slice(1, lines.length - 1).forEach(function (line) {
+
+                var tokens,
+                    row = [ ],
+                    record = { };
+
+                tokens = line.split("\t");
+                tokens.pop();
+                path = tokens.shift();
+                tokens.push(path);
+
+                tokens.forEach(function (token, index, tks) {
+
+                    row.push( (undefined === token || "" === token) ? "-" : token );
 
                 });
 
@@ -38,7 +63,17 @@ var encode = (function (encode) {
 
             });
 
+            continuation(dataSet);
+        });
+
+    };
+
+    encode.createEncodeDataTablesDataSet = function (file, continuation) {
+
+        parseEncodeTableFile(file, function (dataSet) {
+
             if (continuation) {
+//                continuation(dataSet);
                 continuation(dataSet);
             }
 
@@ -63,43 +98,6 @@ var encode = (function (encode) {
 
         key = antibody.toUpperCase();
         return (antibodyColors[ key ]) ? antibodyColors[ key ] : cursor.defaultColor();
-
-    };
-
-    /**
-     *       path    cell    dataType        antibody        view    replicate       type    lab     hub
-     * @param file
-     * @param continuation
-     */
-
-    parseEncodeTableFile = function (file, continuation) {
-
-        var dataLoader = new igv.DataLoader(file);
-
-        dataLoader.loadBinaryString(function (data) {
-
-            var lines = data.split("\n"),
-                records = [ ],
-                i,
-                len;
-
-            encode.headers = lines[0].split("\t");
-
-            lines.slice(1).forEach(function (line) {
-
-                var tokens = line.split("\t"),
-                    record = { };
-
-                for (i = 0, len = tokens.length; i < len; i++) {
-                    record[ encode.headers[ i ] ] = tokens[ i ];
-                }
-
-                records.push(record);
-
-            });
-
-            continuation(records);
-        });
 
     };
 
