@@ -13,15 +13,15 @@ var igv = (function (igv) {
     var skippedColor = "rgb(150, 170, 170)";
     var expandedHeight = 14;
 
-    igv.BAMTrack = function (url) {
+    igv.BAMTrack = function (url, label) {
 
         var coverageTrackHeightPercentage, alignmentTrackHeightPercentage;
 
         this.url = url;
         this.featureSource = new igv.BamSource(this.url);
-        this.label = "BAMLabel";
+        this.label = (label || "");
         this.id = "bam";
-        this.height = 768;
+        this.height = 400;
         this.alignmentRowHeight = expandedHeight;
 
         // divide the canvas into a coverage track region and an alignment track region
@@ -37,7 +37,8 @@ var igv = (function (igv) {
 
         // Don't try to draw alignments for windows > 10kb
         if (bpEnd - bpStart > 30000) {
-            console.log("Skipping");
+
+            canvas.fillText("Zoom in to see alignments", 600, 20);
             continuation();
             return;
         }

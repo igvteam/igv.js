@@ -65,12 +65,26 @@
     <table>
         <tr>
             <td><a style="color: blue;cursor: pointer"
-                   onclick="igv.browser.loadTrack('http://www.broadinstitute.org/igvdata/BodyMap/hg19/IlluminaHiSeq2000_BodySites/brain_merged/accepted_hits.bam')">Load BodyMap Brain</a></td>
+                   onclick="igv.browser.loadTrack('http://www.broadinstitute.org/igvdata/1KG/b37/data/NA06984/alignment/NA06984.mapped.ILLUMINA.bwa.CEU.low_coverage.20120522.bam', 'NA06984')">Load NA06984 BAM</a></td>
         </tr>
         <tr>
-            <td><a style="color: blue;cursor: pointer" onclick="igv.browser.search('chr22:24,375,948-24,384,434')">
-                Goto locus on chr 22</a></td>
+            <td><a style="color: blue;cursor: pointer" onclick="igv.browser.search('chr1:155,169,232-155,169,271')">
+                Goto chr1:155,169,174-155,169,329</a></td>
         </tr>
+        <tr>
+            <td><a style="color: blue;cursor: pointer" onclick="igv.browser.search('chr1:155,172,193-155,172,564')">
+                Goto chr1:155,172,193-155,172,564</a></td>
+        </tr>
+<!--        <tr>
+            <td><a style="color: blue;cursor: pointer" onclick="igv.browser.zoomIn()">
+                Zoom In</a></td>
+        </tr>
+        <tr>
+            <td><a style="color: blue;cursor: pointer" onclick="igv.browser.zoomOut()">
+                Zoom Out</a></td>
+        </tr>-->
+
+
     </table>
     <p/>
 </div>
@@ -83,6 +97,7 @@
                 browser = igv.createBrowser();
         div.appendChild(browser.div);
         browser.startup();
+
     });
 
 </script>

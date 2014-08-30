@@ -9,12 +9,12 @@ var igv = (function (igv) {
         this.searchURL = "http://www.broadinstitute.org/webservices/igv/locus?genome=hg19&name=";
     };
 
-    igv.Browser.prototype.loadTrack = function (path) {
+    igv.Browser.prototype.loadTrack = function (path, label) {
 
         if (path.endsWith(".bed") || path.endsWith(".bed.gz")) {
             this.addTrack (new igv.GeneTrack(path));
         } else if (path.endsWith(".bam")) {
-            this.addTrack (new igv.BAMTrack(path));
+            this.addTrack (new igv.BAMTrack(path, label));
         } else if (path.endsWith(".wig") || path.endsWith(".wig.gz") ||
             path.endsWith(".bedgraph") || path.endsWith(".bedgraph.gz")) {
             this.addTrack (new igv.WIGTrack(path));

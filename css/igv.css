@@ -116,7 +116,7 @@ input[type='file'] {
 .igv-control-div {
     position: absolute;
     left: 0;
-    width: 150px;
+    width: 0px;
     height: 100%;
     border:none;
     padding: 0;
