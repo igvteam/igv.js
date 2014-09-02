@@ -72,7 +72,7 @@ var cursor = (function (cursor) {
     cursor.CursorModel.prototype.filterRegions = function () {
 
         var trackPackages = [],
-            trackFilterPackages = [],
+            filterPackages = [],
             howmany = 0,
             myself = this,
             noop = true;
@@ -84,7 +84,7 @@ var cursor = (function (cursor) {
                 trackPackages.push({ track: trackPanel.track, trackFilter: trackPanel.track.trackFilter, featureCache: featureCache, cursorHistogram: trackPanel.track.cursorHistogram });
 
                 if (!trackPanel.track.trackFilter.isNoOp()) {
-                    trackFilterPackages.push({trackFilter: trackPanel.track.trackFilter, featureCache: featureCache });
+                    filterPackages.push({trackFilter: trackPanel.track.trackFilter, featureCache: featureCache });
                 }
 
                 if (++howmany == trackPanels.length) runFilters();
@@ -93,7 +93,7 @@ var cursor = (function (cursor) {
 
         function runFilters() {
 
-            if (0 === trackFilterPackages.length) {
+            if (0 === filterPackages.length) {
                 // No filters
                 myself.filteredRegions = myself.regions;
             }
@@ -145,16 +145,16 @@ var cursor = (function (cursor) {
                     var score,
                         doIncludeRegionForHistogramRender = true;
 
-                    trackFilterPackages.forEach(function (tfp) {
+                    filterPackages.forEach(function (fp) {
 
-                        if (tp.trackFilter === tfp.trackFilter) {
+                        if (tp.trackFilter === fp.trackFilter) {
 
                             // do nothing
                         } else if (true === doIncludeRegionForHistogramRender) {
 
-                            score = r.getScore(tfp.featureCache, myself.regionWidth);
+                            score = r.getScore(fp.featureCache, myself.regionWidth);
 
-                            if (false === tfp.trackFilter.isIncluded(score)) {
+                            if (false === fp.trackFilter.isIncluded(score)) {
 
                                 doIncludeRegionForHistogramRender = false;
                             }
@@ -277,29 +277,65 @@ var cursor = (function (cursor) {
      */
     cursor.CursorRegion.prototype.getScore = function (featureCache, regionWidth) {
 
-        var score = -1,
-            featureList,
-            regionStart,
-            regionEnd;
-
-        regionStart = this.location - regionWidth / 2;
-        regionEnd = this.location + regionWidth / 2;
+        var regionStart = this.location - regionWidth / 2,
+            regionEnd   = this.location + regionWidth / 2,
+            score,
+            featureList;
 
         featureList = featureCache.queryFeatures(this.chr, regionStart, regionEnd);
 
-        if (!featureList) {
-            return score;
+        if (!featuresInRegion(featureList, regionStart, regionEnd)) {
+            return -1;
         }
 
+        score = -1;
         featureList.forEach(function (feature) {
 
-            if (undefined === feature.score) {   // Have a feature, but no defined score
+            if (undefined === feature.score) {
+
+                // Have a feature, but no defined score
                 score = 1000;
             } else if (feature.end >= regionStart && feature.start < regionEnd) {
+
+                // Have a feature. Take max score of all features in region
                 score = Math.max(feature.score, score);
+            } else {
+
+                console.log("Ignore individual feature outside region. Feature score " + feature.score + ". Accumulated score " + score + ".");
             }
 
         });
+
+        if (-1 === score) {
+            console.log("Features " + featureList.length + ". Should not return score = -1 for filter consideration.");
+        }
+
+        function featuresInRegion(featureList, regionStart, regionEnd) {
+
+            var feature;
+
+            if (!featureList) {
+
+                return false;
+            } else if (0 === featureList.length) {
+
+                return false;
+            } else if (1 === featureList.length) {
+
+                feature = featureList[0];
+                if (feature.end >= regionStart && feature.start < regionEnd) {
+
+                    return true;
+                } else {
+
+                    return false;
+                }
+
+            }
+
+            return true;
+
+        }
 
         return score;
     };
