@@ -22,13 +22,12 @@ var igv = (function (igv) {
         return (includeMinimum && includeMaximum);
     };
 
-
     // Markup
-    igv.TrackFilter.prototype.createMarkupWithParentDiv = function (parentDiv) {
+    igv.TrackFilter.prototype.createTrackFilterWidgetWithParentElement = function (parentDiv) {
 
         var myself = this;
 
-        parentDiv.innerHTML = this.modalDialog(this.guid);
+        parentDiv.innerHTML = this.createModalDialogWithGUID(this.guid);
 
         $('#' + this.guid + "_dataTarget").on('hidden.bs.modal', function (e) {
 
@@ -66,9 +65,7 @@ var igv = (function (igv) {
 
     };
 
-    // Markup Callbacks
-
-    igv.TrackFilter.prototype.modalDialog = function (guid) {
+    igv.TrackFilter.prototype.createModalDialogWithGUID = function (guid) {
 
         var modalPresentationButton = this.modalPresentationButton(guid);
 

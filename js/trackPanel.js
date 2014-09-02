@@ -147,8 +147,11 @@ var igv = (function (igv) {
             trackFilterButtonDiv.style.top = nextButtonTop + "px";
             trackFilterButtonDiv.style.left = "5px";
 
-            this.track.trackFilter = new igv.TrackFilter(this);
-            this.track.trackFilter.createMarkupWithParentDiv(trackFilterButtonDiv);
+//            this.track.trackFilter = new igv.TrackFilter(this);
+//            this.track.trackFilter.createTrackFilterWidgetWithParentElement(trackFilterButtonDiv);
+
+            this.track.trackFilter = new igv.TrackFilterNextGen(this);
+            this.track.trackFilter.createTrackFilterWidgetWithParentElement(trackFilterButtonDiv);
 
             nextButtonTop += 18;
 
