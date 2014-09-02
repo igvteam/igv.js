@@ -1,18 +1,25 @@
 
 $(document).ready(function(){
 
-    $('#trackFilterTabSet_GUID a').click(function (e) {
+    var obj = $('#trackFilterTabSet_GUID');
+
+    obj.find('a').click(function (e) {
+
+        var that = $(this);
 
         e.preventDefault();
-        $(this).tab('show');
+
+        that.tab('show');
+
     });
 
-    $('#trackFilterTabSet_GUID a[data-toggle="tab"]').on('shown.bs.tab', function (e) {
-        // alert('shown.bs.tab event fired');
+    obj.find('a[data-toggle="tab"]').on('shown.bs.tab', function (e) {
 
-        e.target // activated tab
-        e.relatedTarget // previous tab
+        var thang = $(this)[0],
+            active = e.target,
+            dormant = e.relatedTarget;
 
+        console.log("active " + active.id + " inactive " + dormant.id);
 
     })
 
