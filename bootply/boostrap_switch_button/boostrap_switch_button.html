@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+
+    <meta http-equiv="content-type" content="text/html; charset=UTF-8">
+    <meta charset="utf-8">
+
+    <title>Bootstrap Switch Button</title>
+
+    <meta name="generator" content="Bootply" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+
+    <!-- Bootstrap core CSS -->
+    <link href="//maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap.min.css" rel="stylesheet">
+
+    <link href="//maxcdn.bootstrapcdn.com/font-awesome/4.2.0/css/font-awesome.min.css" rel="stylesheet">
+
+    <!--[if lt IE 9]>
+    <script src="//html5shim.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+
+    <!-- jQuery -->
+    <script src="//code.jquery.com/jquery-1.11.0.min.js"></script>
+
+    <!-- Bootstrap -->
+    <script src="//maxcdn.bootstrapcdn.com/bootstrap/3.2.0/js/bootstrap.min.js"></script>
+
+    <!-- js -->
+    <script src="js/boostrap_switch_button.js"></script>
+
+</head>
+<body>
+<div class="container">
+    <h2>Bootstrap Switch Button</h2>
+    <p class="page-header">Simple Toggle Buttons for Bootstrap 3</p>
+    <h4>Large</h4>
+    <div class="btn-group btn-toggle">
+        <button class="btn btn-lg btn-default">ON</button>
+        <button class="btn btn-lg btn-primary active">OFF</button>
+    </div>
+    <hr>
+
+    <h4>Medium (default)</h4>
+    <div class="btn-group btn-toggle">
+        <button class="btn btn-default">ON</button>
+        <button class="btn btn-primary active">OFF</button>
+    </div>
+    <hr>
+
+    <h4>Small</h4>
+    <div class="btn-group btn-toggle">
+        <button class="btn btn-sm btn-default">ON</button>
+        <button class="btn btn-sm btn-primary active">OFF</button>
+    </div>
+    <hr>
+
+    <h4>Tiny</h4>
+    <div class="btn-group btn-toggle">
+        <button class="btn btn-xs btn-default">ON</button>
+        <button class="btn btn-xs btn-primary active">OFF</button>
+    </div>
+    <hr>
+
+    <h4>More Switch Examples</h4>
+    <ul class="list-inline">
+        <li>
+            <div class="btn-group btn-toggle">
+                <button class="btn btn-xs btn-default">ON</button>
+                <button class="btn btn-xs btn-success active">OFF</button>
+            </div>
+        </li>
+        <li>
+            <div class="btn-group btn-toggle">
+                <button class="btn btn-xs btn-default">ON</button>
+                <button class="btn btn-xs btn-danger active">OFF</button>
+            </div>
+        </li>
+        <li>
+            <div class="btn-group btn-toggle">
+                <button class="btn btn-xs btn-default">ON</button>
+                <button class="btn btn-xs btn-info active">OFF</button>
+            </div>
+        </li>
+        <li>
+            <div class="btn-group btn-toggle">
+                <button class="btn btn-xs btn-success">Y</button>
+                <button class="btn btn-xs btn-danger active">N</button>
+            </div>
+        </li>
+        <li>
+            <div class="btn-group btn-toggle">
+                <button class="btn btn-xs btn-default">1</button>
+                <button class="btn btn-xs btn-primary active">0</button>
+            </div>
+        </li>
+        <li>
+            <div class="btn-group btn-toggle">
+                <button class="btn btn-xs btn-primary active">Preview</button>
+                <button class="btn btn-xs btn-default">Source Code</button>
+            </div>
+        </li>
+        <li>
+            <div class="btn-group btn-toggle">
+                <button class="btn btn-xs btn-info">Yes</button>
+                <button class="btn btn-xs btn-primary active">No</button>
+            </div>
+        </li>
+    </ul>
+    <hr>
+
+    <!-- collapse example -->
+    <h4>Collapse (Show/Hide)</h4>
+    <div class="btn-group btn-toggle">
+        <button class="btn btn-default" data-toggle="collapse" data-target="#collapsible">Open</button>
+        <button class="btn btn-primary active" data-toggle="collapse" data-target="#collapsible">Close</button>
+    </div>
+    <div class="well collapse" id="collapsible">
+        Hello world. Here I am.
+    </div>
+    <hr>
+
+
+    <!-- form radio buttons example -->
+    <h4>Form Radio Buttons</h4>
+    <form class="form">
+        <div class="btn-group btn-toggle" data-toggle="buttons">
+            <label class="btn btn-primary active">
+                <input type="radio" name="options" value="option1"> Option 1
+            </label>
+            <label class="btn btn-default">
+                <input type="radio" name="options" value="option2" checked=""> Option 2
+            </label>
+        </div>
+        <button class="btn btn-default">Submit</button>
+    </form>
+
+</div>
+
+<!-- script references -->
+<script src="//ajax.googleapis.com/ajax/libs/jquery/2.0.2/jquery.min.js"></script>
+<script src="js/bootstrap.min.js"></script>
+<script src="js/scripts.js"></script>
+</body>
+</html>

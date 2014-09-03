@@ -1,28 +1,6 @@
 
 $(document).ready(function(){
 
-    var obj = $('#trackFilterTabSet_GUID');
-
-    obj.find('a').click(function (e) {
-
-        var that = $(this);
-
-        e.preventDefault();
-
-        that.tab('show');
-
-    });
-
-    obj.find('a[data-toggle="tab"]').on('shown.bs.tab', function (e) {
-
-        var thang = $(this)[0],
-            active = e.target,
-            dormant = e.relatedTarget;
-
-        console.log("active " + active.id + " inactive " + dormant.id);
-
-    });
-
     $('.btn-toggle').click(function() {
 
         $(this).find('.btn').toggleClass('active');
@@ -30,15 +8,12 @@ $(document).ready(function(){
         if ($(this).find('.btn-primary').size()>0) {
             $(this).find('.btn').toggleClass('btn-primary');
         }
-
         if ($(this).find('.btn-danger').size()>0) {
             $(this).find('.btn').toggleClass('btn-danger');
         }
-
         if ($(this).find('.btn-success').size()>0) {
             $(this).find('.btn').toggleClass('btn-success');
         }
-
         if ($(this).find('.btn-info').size()>0) {
             $(this).find('.btn').toggleClass('btn-info');
         }
@@ -52,7 +27,5 @@ $(document).ready(function(){
         alert($(this["options"]).val());
         return false;
     });
-
-
 
 });
