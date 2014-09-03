@@ -1,9 +1,10 @@
 
 $(document).ready(function(){
 
-    var obj = $('#trackFilterTabSet_GUID');
+    var trackFilterTabSet = $('#trackFilterTabSet_GUID'),
+        enableDisableButtonGroupOnOffFilter = $('#enableDisableButtonGroupOnOffFilter_GUID');
 
-    obj.find('a').click(function (e) {
+    trackFilterTabSet.find('a').click(function (e) {
 
         var that = $(this);
 
@@ -13,36 +14,31 @@ $(document).ready(function(){
 
     });
 
-    obj.find('a[data-toggle="tab"]').on('shown.bs.tab', function (e) {
+    trackFilterTabSet.find('a[data-toggle="tab"]').on('shown.bs.tab', function (e) {
 
-        var thang = $(this)[0],
-            active = e.target,
+        var active = e.target,
             dormant = e.relatedTarget;
 
         console.log("active " + active.id + " inactive " + dormant.id);
 
     });
 
-    $('.btn-toggle').click(function() {
+    enableDisableButtonGroupOnOffFilter.click(function() {
 
-        var thang = $(this);
+        var thang = $(this),
+            toggleSwitchButtonPair = thang.find('.btn');
 
-        thang.find('.btn').toggleClass('active');
+        toggleSwitchButtonPair.toggleClass('active');
 
         if (thang.find('.btn-primary').size() > 0) {
-            thang.find('.btn').toggleClass('btn-primary');
+            toggleSwitchButtonPair.toggleClass('btn-primary');
         }
 
-        $(this).find('.btn').toggleClass('btn-default');
+        toggleSwitchButtonPair.toggleClass('btn-default');
+
+        console.log("toggle");
 
     });
-
-    $('form').submit(function(){
-
-        alert($(this["options"]).val());
-        return false;
-    });
-
 
 
 });
