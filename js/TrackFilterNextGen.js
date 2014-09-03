@@ -29,12 +29,38 @@ var igv = (function (igv) {
     igv.TrackFilterNextGen.prototype.createTrackFilterWidgetWithParentElement = function (parentDiv) {
 
         var myself = this,
-            modalDialogDataTarget = $('#' + "modalDialogDataTarget_" + this.guid),
-            closeTrackFilterModal = $('#' + "closeTrackFilterModal_" + this.guid),
-            applyTrackFilterModal = $('#' + "applyTrackFilterModal_" + this.guid);
+            trackFilterTabSet,
+            modalDialogDataTarget,
+            closeTrackFilterModal,
+            applyTrackFilterModal;
 
-        // Build markup
         parentDiv.innerHTML = this.createFilterModalMarkupWithGUID(this.guid);
+
+        trackFilterTabSet     = $('#trackFilterTabSet_');
+        modalDialogDataTarget = $('#modalDialogDataTarget_' + this.guid);
+        closeTrackFilterModal = $('#closeTrackFilterModal_' + this.guid);
+        applyTrackFilterModal = $('#applyTrackFilterModal_' + this.guid);
+
+        trackFilterTabSet.find('a').click(function (e) {
+
+            var that = $(this);
+
+            e.preventDefault();
+
+            that.tab('show');
+
+        });
+
+        trackFilterTabSet.find('a[data-toggle="tab"]').on('shown.bs.tab', function (e) {
+
+            var thang = $(this)[0],
+                active = e.target,
+                dormant = e.relatedTarget;
+
+            console.log("active " + active.id + " inactive " + dormant.id);
+
+        });
+
 
         // Add min/max callbacks
         modalDialogDataTarget.on('hidden.bs.modal', function (e) {
