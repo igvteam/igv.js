@@ -36,7 +36,7 @@ var igv = (function (igv) {
 
         parentDiv.innerHTML = this.createFilterModalMarkupWithGUID(this.guid);
 
-        trackFilterTabSet     = $('#trackFilterTabSet_');
+        trackFilterTabSet     = $('#trackFilterTabSet_'     + this.guid);
         modalDialogDataTarget = $('#modalDialogDataTarget_' + this.guid);
         closeTrackFilterModal = $('#closeTrackFilterModal_' + this.guid);
         applyTrackFilterModal = $('#applyTrackFilterModal_' + this.guid);
