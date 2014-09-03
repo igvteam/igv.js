@@ -66,9 +66,19 @@
                         <div class="container"><!-- container -->
                             <div class="row"><!-- row -->
                                 <div class="col-md-6"><!-- column -->
-                                    <div class="btn-group"><!-- btn group -->
-                                        <button id="offFilterID_GUID" type="button" class="btn btn-default">Off</button>
-                                        <button id= "onFilterID_GUID" type="button" class="btn btn-default">On</button>
+                                    <div class="btn-group" data-toggle="buttons"><!-- btn group -->
+
+                                            <label class="btn btn-default active">
+                                                <input type="radio" name="options" id="disabledOnOffFilterID_GUID" checked> Disabled
+                                            </label>
+
+                                            <label class="btn btn-default">
+                                                <input type="radio" name="options" id="enabledOnOffFilterID_GUID"> Enabled
+                                            </label>
+
+                                        <!--<button id="offFilterID_GUID" type="button" class="btn btn-default active" data-toggle="button">Disable</button>-->
+                                        <!--<button id= "onFilterID_GUID" type="button" class="btn btn-default"        data-toggle="button">Enable </button>-->
+
                                     </div><!-- btn group -->
 
                                 </div><!-- column -->
@@ -90,4 +100,3 @@
     </div><!-- /.modal-dialog -->
 
 </div>
-
