@@ -3,8 +3,11 @@ $(document).ready(function(){
 
     $('.btn-toggle').click(function() {
 
-        var thang = $(this),
-            toggleButtonPair = thang.find('.btn');
+        var thang,
+            toggleButtonPair;
+
+        thang = $(this);
+        toggleButtonPair = thang.find('.btn');
 
         toggleButtonPair.toggleClass('active');
 

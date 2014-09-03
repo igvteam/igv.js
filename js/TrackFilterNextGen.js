@@ -32,7 +32,8 @@ var igv = (function (igv) {
             trackFilterTabSet,
             modalDialogDataTarget,
             closeTrackFilterModal,
-            applyTrackFilterModal;
+            applyTrackFilterModal,
+            toggleButtonContainer;
 
         parentDiv.innerHTML = this.createFilterModalMarkupWithGUID(this.guid);
 
@@ -54,8 +55,7 @@ var igv = (function (igv) {
 
         trackFilterTabSet.find('a[data-toggle="tab"]').on('shown.bs.tab', function (e) {
 
-            var thang = $(this)[0],
-                active = e.target,
+            var active = e.target,
                 dormant = e.relatedTarget;
 
             console.log("active " + active.id + " inactive " + dormant.id);
@@ -87,22 +87,24 @@ var igv = (function (igv) {
 
         });
 
-
         // on/off. enable/disable toggle
-        $('.btn-toggle').click(function() {
+        toggleButtonContainer = $('.btn-toggle');
 
-            var thang = $(this),
-                buttonPair = thang.find('.btn');
+        toggleButtonContainer.click(function() {
 
-            buttonPair.toggleClass('active');
+            var thang,
+                toggleButtonPair;
+
+            thang = $(this);
+            toggleButtonPair = thang.find('.btn');
+
+            toggleButtonPair.toggleClass('active');
 
             if (thang.find('.btn-primary').size() > 0) {
-                buttonPair.toggleClass('btn-primary');
+                toggleButtonPair.toggleClass('btn-primary');
             }
 
-            buttonPair.toggleClass('btn-default');
-
-            console.log("toggle");
+            toggleButtonPair.toggleClass('btn-default');
 
         });
 
