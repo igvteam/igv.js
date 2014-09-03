@@ -301,7 +301,7 @@ var cursor = (function (cursor) {
                 score = Math.max(feature.score, score);
             } else {
 
-                console.log("Ignore individual feature outside region. Feature score " + feature.score + ". Accumulated score " + score + ".");
+//                console.log("Ignore individual feature outside region. Feature score " + feature.score + ". Accumulated score " + score + ".");
             }
 
         });

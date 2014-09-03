@@ -33,7 +33,6 @@ var igv = (function (igv) {
             modalDialogDataTarget,
             closeTrackFilterModal,
             applyTrackFilterModal,
-            toggleButtonContainer,
             enableDisableButtonGroupOnOffFilter;
 
         parentDiv.innerHTML = this.createFilterModalMarkupWithGUID(this.guid);
@@ -42,7 +41,7 @@ var igv = (function (igv) {
         modalDialogDataTarget = $('#modalDialogDataTarget_' + this.guid);
         closeTrackFilterModal = $('#closeTrackFilterModal_' + this.guid);
         applyTrackFilterModal = $('#applyTrackFilterModal_' + this.guid);
-        enableDisableButtonGroupOnOffFilter = $('#enableDisableButtonGroupOnOffFilter_' + this.guid);
+        enableDisableButtonGroupOnOffFilter = $('#enableDisableButtonGroupOnOffFilter_' + this.guid + '.btn-toggle');
 
         // filter ui tab managment
         trackFilterTabSet.find('a').click(function (e) {
@@ -92,18 +91,16 @@ var igv = (function (igv) {
         // on/off. enable/disable toggle
         enableDisableButtonGroupOnOffFilter.click(function() {
 
-            var thang = $(this),
-                toggleSwitchButtonPair = thang.find('.btn');
+            var buttonGroup = $(this),
+                toggleSwitchButtonPair = buttonGroup.find('.btn');
 
             toggleSwitchButtonPair.toggleClass('active');
 
-            if (thang.find('.btn-primary').size() > 0) {
+            if (buttonGroup.find('.btn-primary').size() > 0) {
                 toggleSwitchButtonPair.toggleClass('btn-primary');
             }
 
             toggleSwitchButtonPair.toggleClass('btn-default');
-
-            console.log("toggle");
 
         });
 
