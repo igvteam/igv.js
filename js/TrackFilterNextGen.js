@@ -5,6 +5,8 @@ var igv = (function (igv) {
         this.trackPanel = trackPanel;
         this.guid = igv.guid();
         this.doFilter = false;
+        this.activeTab = undefined;
+        this.onOffFilterEnabled = undefined;
     };
 
     igv.TrackFilterNextGen.prototype.onOff = function (score) {
@@ -37,13 +39,19 @@ var igv = (function (igv) {
 
         parentDiv.innerHTML = this.createFilterModalMarkupWithGUID(this.guid);
 
-        trackFilterTabSet     = $('#trackFilterTabSet_'     + this.guid);
-        modalDialogDataTarget = $('#modalDialogDataTarget_' + this.guid);
-        closeTrackFilterModal = $('#closeTrackFilterModal_' + this.guid);
-        applyTrackFilterModal = $('#applyTrackFilterModal_' + this.guid);
-        enableDisableButtonGroupOnOffFilter = $('#enableDisableButtonGroupOnOffFilter_' + this.guid + '.btn-toggle');
-
         // filter ui tab managment
+        trackFilterTabSet = $('#trackFilterTabSet_' + this.guid);
+
+        trackFilterTabSet.find('li').each(function(){
+
+            if ( $( this ).hasClass( "active" ) ) {
+
+                myself.activeTab = $(this).find('a')[0];
+                console.log("active tab " + myself.activeTab.id);
+            }
+
+        });
+
         trackFilterTabSet.find('a').click(function (e) {
 
             var that = $(this);
@@ -56,14 +64,14 @@ var igv = (function (igv) {
 
         trackFilterTabSet.find('a[data-toggle="tab"]').on('shown.bs.tab', function (e) {
 
-            var active = e.target,
-                dormant = e.relatedTarget;
-
-            console.log("active " + active.id + " inactive " + dormant.id);
-
+            myself.activeTab = $(this)[0];
+            console.log("active tab " + myself.activeTab.id);
         });
 
+
         // min/max
+        modalDialogDataTarget = $('#modalDialogDataTarget_' + this.guid);
+
         modalDialogDataTarget.on('hidden.bs.modal', function (e) {
 
             var minimumIsNumber,
@@ -89,6 +97,22 @@ var igv = (function (igv) {
         });
 
         // on/off. enable/disable toggle
+        enableDisableButtonGroupOnOffFilter = $('#enableDisableButtonGroupOnOffFilter_' + this.guid + '.btn-toggle');
+
+        enableDisableButtonGroupOnOffFilter.find('.btn').each(function(){
+
+            var thang;
+
+            if ( $( this ).hasClass( "active" ) ) {
+
+                thang = $(this)[ 0 ].id;
+                myself.onOffFilterEnabled = (thang === ('enableButtonOnOffFilter_' + myself.guid));
+                console.log("on-off filter enabled " + myself.onOffFilterEnabled);
+            }
+
+
+        });
+
         enableDisableButtonGroupOnOffFilter.click(function() {
 
             var buttonGroup = $(this),
@@ -102,14 +126,30 @@ var igv = (function (igv) {
 
             toggleSwitchButtonPair.toggleClass('btn-default');
 
+            toggleSwitchButtonPair.each(function(){
+
+                var thang;
+
+                if ( $( this ).hasClass( "active" ) ) {
+
+                    thang = $(this)[ 0 ].id;
+                    myself.onOffFilterEnabled = (thang === ('enableButtonOnOffFilter_' + myself.guid));
+                }
+            });
+
+            console.log("on-off filter enabled " + myself.onOffFilterEnabled);
+
         });
 
-        // apply filter or dismiss filter widget
+        // dismiss filter widget
+        closeTrackFilterModal = $('#closeTrackFilterModal_' + this.guid);
         closeTrackFilterModal.on('click', function (e) {
 
             myself.doFilter = false;
         });
 
+        // apply filter and dismiss filter widget
+        applyTrackFilterModal = $('#applyTrackFilterModal_' + this.guid);
         applyTrackFilterModal.on('click', function (e) {
 
             myself.doFilter = true;
