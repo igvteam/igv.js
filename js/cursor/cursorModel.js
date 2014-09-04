@@ -307,7 +307,7 @@ var cursor = (function (cursor) {
         });
 
         if (-1 === score) {
-            console.log("Features " + featureList.length + ". Should not return score = -1 for filter consideration.");
+//            console.log("Features " + featureList.length + ". Should not return score = -1 for filter consideration.");
         }
 
         function featuresInRegion(featureList, regionStart, regionEnd) {
