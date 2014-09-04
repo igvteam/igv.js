@@ -125,13 +125,11 @@ var igv = (function (igv) {
             stainColors = [],
             w = this.canvas.width,
             h = this.canvas.height;
-        log("clearing rect. h="+h);
         this.ctx.clearRect(0, 0, w, h);
 
         if (!(genome && genome.chromosomes)) return;
 
         var chromosomes = genome.getChromosomes();
-        log("Current chr: "+referenceFrame.chr);
         var image = this.ideograms;
         
         
@@ -144,7 +142,6 @@ var igv = (function (igv) {
         var longestChr = genome.getChromosome('chr1');
         var cytobands = longestChr.cytobands;
         var maxLen = cytobands[cytobands.length-1].end;
-        log("Longest chr: "+maxLen);
         if (!image || image == null) {
             image = document.createElement('canvas');
             image.width = w;
@@ -154,19 +151,16 @@ var igv = (function (igv) {
             var nr = 0;
            
             for (chr in chromosomes) {
-            	if (nr > 24) break;
+            	if (nr > 23) break;
             	nr++;
             	var chromosome = genome.getChromosome(chr);
             	chromosome.x = nr*chrwidth;
-            	log("Drawing chr "+chr);
             	drawIdeogram(chromosome.x, 0, chromosome, bufferCtx, chrwidth/2,chrheight, maxLen);
             	
             }
             this.ideograms= image;           
         }
-        else {
-        	log("Already got karyo image: "+image);
-        }
+       
         
         this.ctx.drawImage(image, 0, 0);
         
@@ -178,11 +172,10 @@ var igv = (function (igv) {
         var ideoScale = h / maxLen;
 
         var boxPY1 = Math.round(this.browser.referenceFrame.start * ideoScale);
-        var boxPY2 = Math.round((this.browser.referenceFrame.start+100) * ideoScale);
-        log("Drawing red box, py1 ="+boxPY1+", boxPY2="+boxPY2 );
+        //var boxPY2 = Math.round((this.browser.referenceFrame.start+100) * ideoScale);
         this.ctx.strokeStyle = "red";
         this.ctx.lineWidth = 2;
-        this.ctx.strokeRect(chromosome.x-1, boxPY1, chrwidth/2+2, 3 );
+        this.ctx.strokeRect(chromosome.x-2, boxPY1, chrwidth/2+4, 3 );
         this.ctx.restore();
 
         var chromosomeNameWidth = this.chromosomeNameCanvas.width;
@@ -237,11 +230,9 @@ var igv = (function (igv) {
                         bufferCtx.polygon(xC, yC, 1, 0);
                        // g2D.fillPolygon(xC, yC, 3);
                     } else {
-                    	var sy = Math.round(starty);
-                    	var ey = Math.round(endy);
-                    	var dy = Math.round(endy - starty);
+                    	var dy = endy - starty;
                         bufferCtx.fillStyle = getCytobandColor(cytoband); //g2D.setColor(getCytobandColor(cytoband));
-                        bufferCtx.fillRect(ideogramLeft, sy,  ideogramWidth, dy);                    
+                        bufferCtx.fillRect(ideogramLeft, starty,  ideogramWidth, dy);                    
                     }
                 }
                 
@@ -255,7 +246,7 @@ var igv = (function (igv) {
             }
             bufferCtx.fillStyle = null;
             bufferCtx.lineWidth = 1;
-            bufferCtx.strokeStyle = "gray";
+            bufferCtx.strokeStyle = "darkgray";
             bufferCtx.roundRect(ideogramLeft, ideogramTop, ideogramWidth, lastPY, ideogramWidth / 2, 0, 1);
         }
 
