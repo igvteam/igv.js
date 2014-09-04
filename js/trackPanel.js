@@ -150,7 +150,7 @@ var igv = (function (igv) {
 //            this.track.trackFilter = new igv.TrackFilter(this);
 //            this.track.trackFilter.createTrackFilterWidgetWithParentElement(trackFilterButtonDiv);
 
-            this.track.trackFilter = new igv.TrackFilterNextGen(this);
+            this.track.trackFilter = new igv.TrackFilter(this);
             this.track.trackFilter.createTrackFilterWidgetWithParentElement(trackFilterButtonDiv);
 
             nextButtonTop += 18;

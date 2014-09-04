@@ -1,6 +1,6 @@
 var igv = (function (igv) {
 
-    igv.TrackFilterNextGen = function (trackPanel) {
+    igv.TrackFilter = function (trackPanel) {
 
         this.trackPanel = trackPanel;
         this.guid = igv.guid();
@@ -9,15 +9,15 @@ var igv = (function (igv) {
         this.onOffFilterEnabled = undefined;
     };
 
-    igv.TrackFilterNextGen.prototype.onOff = function (score) {
+    igv.TrackFilter.prototype.onOff = function (score) {
         return -1 === score;
     };
 
-    igv.TrackFilterNextGen.prototype.isNoOp = function () {
+    igv.TrackFilter.prototype.isNoOp = function () {
         return undefined === this.minimum && undefined === this.maximum;
     };
 
-    igv.TrackFilterNextGen.prototype.isIncluded = function (score) {
+    igv.TrackFilter.prototype.isIncluded = function (score) {
 
         var includeMinimum,
             includeMaximum;
@@ -28,7 +28,7 @@ var igv = (function (igv) {
         return (includeMinimum && includeMaximum);
     };
 
-    igv.TrackFilterNextGen.prototype.createTrackFilterWidgetWithParentElement = function (parentDiv) {
+    igv.TrackFilter.prototype.createTrackFilterWidgetWithParentElement = function (parentDiv) {
 
         var myself = this,
             trackFilterTabSet,
@@ -179,7 +179,7 @@ var igv = (function (igv) {
 
     };
 
-    igv.TrackFilterNextGen.prototype.createFilterModalMarkupWithGUID = function (guid) {
+    igv.TrackFilter.prototype.createFilterModalMarkupWithGUID = function (guid) {
 
         var re = new RegExp("GUID","g"),
             filterModalPresentationButtonMarkup,
@@ -193,7 +193,7 @@ var igv = (function (igv) {
         return filterModalPresentationButtonMarkup + filterModalMarkup;
     };
 
-    igv.TrackFilterNextGen.prototype.createFilterModalPresentationButtonMarkupWithGUID = function (guid) {
+    igv.TrackFilter.prototype.createFilterModalPresentationButtonMarkupWithGUID = function (guid) {
 
         var re = new RegExp("GUID","g"),
             presentationButton;
