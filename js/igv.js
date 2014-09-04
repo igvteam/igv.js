@@ -42,14 +42,18 @@ var igv = (function (igv) {
             rootDiv = browser.div,
             contentContainer = $('<div class="container-fluid"><div class="row">')[0],
             contentRoot = $('<div id="igvRootDiv" class="igv-root-div">')[0],
+            contentKaryo = $('<div id="igvKaryoDiv" class="igv-karyo-div">')[0],
             contentHeader = $('<div id="igvHeaderDiv" class="igv-header-div">')[0],
             trackContainer = $('<div id="igvTrackContainerDiv" class="igv-track-container-div">')[0];
 
 
         // DOM
+        $(rootDiv).append(contentKaryo);
         $(rootDiv).append(contentContainer);
+        
         $(contentContainer).append(contentRoot);
-        $(contentRoot).append(contentHeader);
+        
+        $(contentRoot).append(contentHeader);        
         $(contentRoot).append(trackContainer);
 
         browser.startup = function () {
@@ -69,6 +73,12 @@ var igv = (function (igv) {
 
             igv.sequenceSource = igv.getFastaSequence(fastaURL);
 
+            
+            browser.karyoPanel = new igv.KaryoPanel(browser);
+            $('#igvKaryoDiv').append(browser.karyoPanel.div);
+            browser.karyoPanel.resize();
+
+            
             browser.ideoPanel = new igv.IdeoPanel(browser);
             $('#igvHeaderDiv').append(browser.ideoPanel.div);
             browser.ideoPanel.resize();
@@ -77,6 +87,7 @@ var igv = (function (igv) {
             igv.loadGenome(cytobandURL, function (genome) {
                 browser.genome = genome;
                 if (browser.ideoPanel) browser.ideoPanel.repaint();
+                if (browser.karyoPanel) browser.karyoPanel.repaint();
             });
 
             browser.addTrack(new igv.RulerTrack());
@@ -91,6 +102,7 @@ var igv = (function (igv) {
 
             window.onresize = throttle(function () {
                 if (browser.ideoPanel) browser.ideoPanel.resize();
+                if (browser.karyoPanel) browser.karyoPanel.resize();
                 browser.trackPanels.forEach(function (panel) {
                     panel.resize();
                 })
