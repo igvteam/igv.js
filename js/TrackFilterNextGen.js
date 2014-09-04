@@ -4,8 +4,8 @@ var igv = (function (igv) {
 
         this.trackPanel = trackPanel;
         this.guid = igv.guid();
-        this.doFilter = false;
-        this.activeTab = undefined;
+        this.minMaxFilterEnabled = false;
+        this.activeTabElement = undefined;
         this.onOffFilterEnabled = undefined;
     };
 
@@ -39,19 +39,22 @@ var igv = (function (igv) {
 
         parentDiv.innerHTML = this.createFilterModalMarkupWithGUID(this.guid);
 
-        // filter ui tab managment
+
+        // tab set
         trackFilterTabSet = $('#trackFilterTabSet_' + this.guid);
 
+        // set currently active tab
         trackFilterTabSet.find('li').each(function(){
 
             if ( $( this ).hasClass( "active" ) ) {
 
-                myself.activeTab = $(this).find('a')[0];
-                console.log("active tab " + myself.activeTab.id);
+                myself.activeTabElement = $(this).find('a')[0];
+//                console.log("active tab " + myself.activeTabElement.id);
             }
 
         });
 
+        // swap tabs
         trackFilterTabSet.find('a').click(function (e) {
 
             var that = $(this);
@@ -62,16 +65,20 @@ var igv = (function (igv) {
 
         });
 
+        // tab swap callback
         trackFilterTabSet.find('a[data-toggle="tab"]').on('shown.bs.tab', function (e) {
 
-            myself.activeTab = $(this)[0];
-            console.log("active tab " + myself.activeTab.id);
+            myself.activeTabElement = $(this)[0];
+//            console.log("active tab " + myself.activeTabElement.id);
         });
 
 
         // min/max
         modalDialogDataTarget = $('#modalDialogDataTarget_' + this.guid);
 
+        // TODO: Currently called after close or apply button click.
+        // TODO: Make this generic to handle filtering for either
+        // TODO: tab.
         modalDialogDataTarget.on('hidden.bs.modal', function (e) {
 
             var minimumIsNumber,
@@ -80,7 +87,22 @@ var igv = (function (igv) {
                 maximumValue = $('#' + 'maximumScoreFilterID_' + myself.guid).val(),
                 filterIconColor;
 
-            if (myself.doFilter) {
+
+
+            console.log("tab: " + myself.activeTabElement.id + " minMaxFilterEnabled: " + myself.minMaxFilterEnabled + " onOffFilterEnabled: " + myself.onOffFilterEnabled);
+
+
+
+
+
+
+
+
+
+
+
+
+            if (myself.minMaxFilterEnabled) {
 
                 minimumIsNumber = igv.isNumber(minimumValue);
                 maximumIsNumber = igv.isNumber(maximumValue);
@@ -101,13 +123,13 @@ var igv = (function (igv) {
 
         enableDisableButtonGroupOnOffFilter.find('.btn').each(function(){
 
-            var thang;
+            var toggleSwitchID;
 
             if ( $( this ).hasClass( "active" ) ) {
 
-                thang = $(this)[ 0 ].id;
-                myself.onOffFilterEnabled = (thang === ('enableButtonOnOffFilter_' + myself.guid));
-                console.log("on-off filter enabled " + myself.onOffFilterEnabled);
+                toggleSwitchID = $(this)[ 0 ].id;
+                myself.onOffFilterEnabled = (toggleSwitchID === ('enableButtonOnOffFilter_' + myself.guid));
+//                console.log("on-off filter enabled " + myself.onOffFilterEnabled);
             }
 
 
@@ -137,7 +159,7 @@ var igv = (function (igv) {
                 }
             });
 
-            console.log("on-off filter enabled " + myself.onOffFilterEnabled);
+//            console.log("on-off filter enabled " + myself.onOffFilterEnabled);
 
         });
 
@@ -145,14 +167,14 @@ var igv = (function (igv) {
         closeTrackFilterModal = $('#closeTrackFilterModal_' + this.guid);
         closeTrackFilterModal.on('click', function (e) {
 
-            myself.doFilter = false;
+            myself.minMaxFilterEnabled = false;
         });
 
         // apply filter and dismiss filter widget
         applyTrackFilterModal = $('#applyTrackFilterModal_' + this.guid);
         applyTrackFilterModal.on('click', function (e) {
 
-            myself.doFilter = true;
+            myself.minMaxFilterEnabled = true;
         });
 
     };

@@ -7,7 +7,7 @@ var igv = (function (igv) {
 
         this.trackPanel = trackPanel;
         this.guid = igv.guid();
-        this.doFilter = false;
+        this.minMaxFilterEnabled = false;
     };
 
     igv.TrackFilter.prototype.isNoOp = function () {
@@ -37,7 +37,7 @@ var igv = (function (igv) {
                 maximumValue = $('#maximum_' + myself.guid).val(),
                 filterIconColor;
 
-            if (myself.doFilter) {
+            if (myself.minMaxFilterEnabled) {
 
                 minimumIsNumber = igv.isNumber(minimumValue);
                 maximumIsNumber = igv.isNumber(maximumValue);
@@ -55,12 +55,12 @@ var igv = (function (igv) {
 
         $('#' + this.guid + "_modalCloseButton").on('click', function (e) {
 
-            myself.doFilter = false;
+            myself.minMaxFilterEnabled = false;
         });
 
         $('#' + this.guid + "_modalApplyButton").on('click', function (e) {
 
-            myself.doFilter = true;
+            myself.minMaxFilterEnabled = true;
         });
 
     };
