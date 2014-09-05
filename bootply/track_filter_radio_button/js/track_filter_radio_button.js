@@ -1,7 +1,8 @@
 
 $(document).ready(function(){
 
-    var enableDisableButtonGroupOnOffFilter = $('#enableDisableButtonGroupOnOffFilter_GUID');
+    var enableDisableButtonGroupOnOffFilter = $('#enableDisableButtonGroupOnOffFilter_GUID'),
+        radioButtonGroupContainer = $('#modalBody_GUID').find('.radio');
 
     enableDisableButtonGroupOnOffFilter.click(function() {
 
@@ -20,5 +21,11 @@ $(document).ready(function(){
 
     });
 
+    radioButtonGroupContainer.click(function() {
+
+        var radio = $(this).find('input');
+
+        console.log("yo");
+    });
 
 });
