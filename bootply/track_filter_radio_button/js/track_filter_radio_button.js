@@ -23,9 +23,9 @@ $(document).ready(function(){
 
     radioButtonGroupContainer.click(function() {
 
-        var radio = $(this).find('input');
+        var radio = $(this).find('input')[0];
 
-        console.log("yo");
+        console.log("radio " + radio.id);
     });
 
 });
