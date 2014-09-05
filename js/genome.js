@@ -8,6 +8,9 @@ var igv = (function (igv) {
         return this.chromosomes[chr];
     }
 
+    igv.Genome.prototype.getChromosomes = function () {
+        return this.chromosomes;
+    }
     igv.Chromosome = function (name, order, cytobands) {
         this.name = name;
         this.order = order;
