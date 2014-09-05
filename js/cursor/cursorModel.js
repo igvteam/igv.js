@@ -280,61 +280,48 @@ var cursor = (function (cursor) {
         var regionStart = this.location - regionWidth / 2,
             regionEnd   = this.location + regionWidth / 2,
             score,
-            featureList;
+            featureCacheQueryResults,
+            features;
 
-        featureList = featureCache.queryFeatures(this.chr, regionStart, regionEnd);
+        featureCacheQueryResults = featureCache.queryFeatures(this.chr, regionStart, regionEnd);
 
-        if (!featuresInRegion(featureList, regionStart, regionEnd)) {
+        // If no features, bail.
+        if (!featureCacheQueryResults || 0 === featureCacheQueryResults.length) {
             return -1;
         }
 
-        score = -1;
-        featureList.forEach(function (feature) {
+        // Only assess scores for features bounded bu the region
+        features = [];
+        featureCacheQueryResults.forEach(function (f){
+
+            if (f.end >= regionStart && f.start < regionEnd) {
+                features.push(f);
+            }
+
+        });
+
+        // If no features, bail.
+        if (0 === features) {
+            return -1;
+        }
+
+        score = 0;
+        featureCacheQueryResults.forEach(function (feature) {
 
             if (undefined === feature.score) {
 
                 // Have a feature, but no defined score
                 score = 1000;
-            } else if (feature.end >= regionStart && feature.start < regionEnd) {
-
-                // Have a feature. Take max score of all features in region
-                score = Math.max(feature.score, score);
             } else {
 
-                console.log("Ignore individual feature outside region. Feature score " + feature.score + ". Accumulated score " + score + ".");
+                // Take max score of all features in region
+                score = Math.max(feature.score, score);
             }
 
         });
 
         if (-1 === score) {
             console.log("Features " + featureList.length + ". Should not return score = -1 for filter consideration.");
-        }
-
-        function featuresInRegion(featureList, regionStart, regionEnd) {
-
-            var feature;
-
-            if (!featureList) {
-
-                return false;
-            } else if (0 === featureList.length) {
-
-                return false;
-            } else if (1 === featureList.length) {
-
-                feature = featureList[0];
-                if (feature.end >= regionStart && feature.start < regionEnd) {
-
-                    return true;
-                } else {
-
-                    return false;
-                }
-
-            }
-
-            return true;
-
         }
 
         return score;

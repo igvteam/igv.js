@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+
+    <meta http-equiv="content-type" content="text/html; charset=UTF-8">
+    <meta charset="utf-8">
+
+    <title>CURSOR: Tabbed Min/Max On/Off Track Filter Development</title>
+
+    <meta name="generator" content="Bootply" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+
+    <!-- Bootstrap core CSS -->
+    <link href="//maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap.min.css" rel="stylesheet">
+
+    <link href="//maxcdn.bootstrapcdn.com/font-awesome/4.2.0/css/font-awesome.min.css" rel="stylesheet">
+
+    <!--[if lt IE 9]>
+    <script src="//html5shim.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+
+    <!-- jQuery -->
+    <script src="//code.jquery.com/jquery-1.11.0.min.js"></script>
+
+    <!-- Bootstrap -->
+    <script src="//maxcdn.bootstrapcdn.com/bootstrap/3.2.0/js/bootstrap.min.js"></script>
+
+    <!-- cursor css -->
+    <link href="../../css/cursor.css" rel="stylesheet">
+
+    <!-- js -->
+    <script src="js/track_filter_modal_on_off.js"></script>
+
+</head>
+<body>
+
+<!-- Button trigger modal -->
+<button class="btn btn-primary btn-md" data-toggle="modal" data-target="#modalDialogDataTarget_GUID">
+    Track Filter
+</button>
+
+<!-- modal dialog -->
+<div id="modalDialogDataTarget_GUID" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+
+    <div class="modal-dialog">
+
+        <div class="modal-content">
+
+            <div class="modal-header">
+                <button id="closeTrackFilterModal_GUID" type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+                <h4 id="modalTitle_GUID" class="modal-title">MODAL_TITLE</h4>
+            </div><!-- /.modal-header -->
+
+            <div id="modalBody_GUID" class="modal-body">
+
+                <ul id="trackFilterTabSet_GUID" class="nav nav-tabs" role="tablist"><!-- Nav tabs -->
+
+                    <li class="active"><a id="trackFilterMinMaxTabLink_GUID" href="#trackFilterMinMaxTab_GUID" role="tab" data-toggle="tab">Min / Max</a></li>
+                    <li>               <a id="trackFilterOnOffTabLink_GUID" href="#trackFilterOnOffTab_GUID"  role="tab" data-toggle="tab">On / Off</a></li>
+
+                </ul><!-- Nav tabs -->
+
+                <div class="tab-content"><!-- Tab pane set -->
+
+                    <div id="trackFilterMinMaxTab_GUID" class="tab-pane active">
+
+                        <div class="spacer20"></div>
+
+                        <div class="container"><!-- container -->
+
+                            <div class="row"><!-- row -->
+
+                                <div class="col-md-3"><!-- column -->
+
+                                    <div class="input-group input-group-md"><!-- input group -->
+                                        <span class="input-group-addon">Minimum</span><input id="minimumScoreFilterID_GUID" type="text" class="form-control" placeholder="Minimum">
+                                    </div><!-- input group -->
+
+                                </div><!-- column -->
+
+                            </div><!-- row -->
+
+                            <div class="spacer20"></div>
+
+                            <div class="row"><!-- row -->
+
+                                <div class="col-md-3"><!-- column -->
+
+                                    <div class="input-group input-group-md"><!-- input group -->
+                                        <span class="input-group-addon">Maximum</span><input id="maximumScoreFilterID_GUID" type="text" class="form-control" placeholder="Maximum">
+                                    </div><!-- input group -->
+
+                                </div><!-- column -->
+
+                            </div><!-- row -->
+
+                        </div><!-- container -->
+
+                        <div class="spacer10"></div>
+
+                    </div><!-- Tab pane -->
+
+                    <div id="trackFilterOnOffTab_GUID" class="tab-pane"><!-- Tab pane -->
+
+                        <div class="spacer20"></div>
+
+                        <div class="container"><!-- container -->
+                            <div class="row"><!-- row -->
+                                <div class="col-md-6"><!-- column -->
+
+                                    <div id="enableDisableButtonGroupOnOffFilter_GUID" class="btn-group btn-toggle">
+                                        <button id= "enableButtonOnOffFilter_GUID" class="btn btn-lg btn-default       ">Enable </button>
+                                        <button id="disableButtonOnOffFilter_GUID" class="btn btn-lg btn-primary active">Disable</button>
+                                    </div>
+
+                                </div><!-- column -->
+                            </div><!-- row -->
+                        </div><!-- container -->
+
+                    </div><!-- Tab pane -->
+
+                </div><!-- Tab pane set -->
+
+            </div><!-- /.modal-body -->
+
+            <div class="modal-footer">
+                <button id="applyTrackFilterModal_GUID" type="button" class="btn btn-default" data-dismiss="modal">Apply</button>
+            </div><!-- /.modal-footer -->
+
+        </div><!-- /.modal-content -->
+
+    </div><!-- /.modal-dialog -->
+
+</div>
+
+</body>
+</html>

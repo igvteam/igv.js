@@ -98,13 +98,12 @@ var igv = (function (igv) {
                 var peak2DataSource = new igv.BedFeatureSource(peak2URL);
                 var tssDataSource = new igv.BedFeatureSource(tssUrl);
 
-                var tssTrack = new cursor.CursorTrack(tssDataSource, browser.cursorModel, browser.referenceFrame, "TSS");
-                tssTrack.height = 40;
+                var tssTrack = new cursor.CursorTrack(tssDataSource, browser.cursorModel, browser.referenceFrame, "TSS", 40);
 
-                var track1 = new cursor.CursorTrack(peakDataSource, browser.cursorModel, browser.referenceFrame, "H3k4me3 H1hesc");
+                var track1 = new cursor.CursorTrack(peakDataSource, browser.cursorModel, browser.referenceFrame, "H3k4me3 H1hesc", browser.trackHeight);
                 track1.color = "rgb(0,150,0)";
 
-                var track2 = new cursor.CursorTrack(peak2DataSource, browser.cursorModel, browser.referenceFrame, "H3k27me3 H1hesc");
+                var track2 = new cursor.CursorTrack(peak2DataSource, browser.cursorModel, browser.referenceFrame, "H3k27me3 H1hesc", browser.trackHeight);
                 track2.color = "rgb(150,0,0)";
 
                 // Set the TSS track as the inital "selected" track (i.e. defines the regions)
@@ -173,7 +172,8 @@ var igv = (function (igv) {
                 return;
             }
 
-            browser.setTrackHeight(Math.round(parseFloat(value, 10)));
+
+            browser.setTrackHeight( Math.round(parseFloat(value, 10)) );
         };
 
         var fileInput = document.getElementById('fileInput');
@@ -191,9 +191,7 @@ var igv = (function (igv) {
 
                 featureSource = new igv.BedFeatureSource(localFile);
 
-                cursorTrack = new cursor.CursorTrack(featureSource, browser.cursorModel,browser.referenceFrame, localFile.name);
-
-                cursorTrack.height = 100;
+                cursorTrack = new cursor.CursorTrack(featureSource, browser.cursorModel,browser.referenceFrame, localFile.name, browser.trackHeight);
                 browser.addTrack(cursorTrack);
 
             }
@@ -204,7 +202,8 @@ var igv = (function (igv) {
         // Load ENCODE DataTables data and build markup for modal dialog.
         encode.createEncodeDataTablesDataSet("test/data/cursor/encode/peaks.hg19.txt", function (dataSet) {
 
-            var myDataTable = $('#encodeModalTable').dataTable( {
+            var encodeModalTable = $('#encodeModalTable'),
+                myDataTable = encodeModalTable.dataTable( {
 
                 "data": dataSet,
                 "scrollY":        "400px",
@@ -228,7 +227,7 @@ var igv = (function (igv) {
 
             } );
 
-            $('#encodeModalTable').find('tbody').on( 'click', 'tr', function () {
+            encodeModalTable.find('tbody').on( 'click', 'tr', function () {
 
                 if ( $(this).hasClass('selected') ) {
 
@@ -282,10 +281,8 @@ var igv = (function (igv) {
 
                         featureSource = new igv.BedFeatureSource(record.path);
 
-                        cursorTrack = new cursor.CursorTrack(featureSource, browser.cursorModel, browser.referenceFrame, encode.encodeTrackLabel(record));
-
+                        cursorTrack = new cursor.CursorTrack(featureSource, browser.cursorModel, browser.referenceFrame, encode.encodeTrackLabel(record), browser.trackHeight);
                         cursorTrack.color = encode.encodeAntibodyColor(record.antibody);
-                        cursorTrack.height = 100;
 
                         browser.addTrack(cursorTrack);
 

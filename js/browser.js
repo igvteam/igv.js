@@ -100,6 +100,8 @@ var igv = (function (igv) {
 
     igv.Browser.prototype.setTrackHeight = function (newHeight) {
 
+        this.trackHeight = newHeight;
+
         this.trackPanels.forEach(function (panel) {
             panel.setTrackHeight(newHeight);
         });

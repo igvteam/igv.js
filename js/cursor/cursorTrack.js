@@ -2,7 +2,7 @@ var cursor = (function (cursor) {
 
     var MAX_FEATURE_COUNT = 100000000;
 
-    cursor.CursorTrack = function (featureSource, cursorModel, referenceFrame, label) {
+    cursor.CursorTrack = function (featureSource, cursorModel, referenceFrame, label, height) {
 
         this.featureSource = featureSource;
         this.cursorModel = cursorModel;
@@ -15,7 +15,7 @@ var cursor = (function (cursor) {
 
         this.featureSource.maxFeatureCount = MAX_FEATURE_COUNT;
         this.id = "";
-        this.height = 80;
+        this.height = height;
         this.max = 1000;
         this.sortDirection = 1;
 
