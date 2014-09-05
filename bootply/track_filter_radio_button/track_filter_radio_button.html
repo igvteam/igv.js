@@ -60,24 +60,64 @@
             <div id="modalBody_GUID" class="modal-body">
 
                 <div class="radio">
+
+                    <div class="spacer20"></div>
+
+                    <div>
                     <label>
-                        <input type="radio" name="trackFilterRadioButtonGroup" id="minMax" value="option1" checked>
-                        Option one is this and that&mdash;be sure to include why it's great
+                        <input id="minMaxRadio_GUID" type="radio" name="trackFilterRadioButtonGroup" value="option1" checked>
+                        Regions containing features whose scores are bounded my min and max
                     </label>
+                    </div>
+
+                    <div class="spacer20"></div>
+
+                    <div class="input-group input-group-md"><!-- minimumScoreFilter input group -->
+                        <span class="input-group-addon">Minimum</span>
+                        <input id="minimumScoreFilterID_GUID" type="text" class="form-control" placeholder="Minimum">
+                    </div><!-- minimumScoreFilter input group -->
+
+                    <div class="spacer20"></div>
+
+                    <div class="input-group input-group-md"><!-- maximumScoreFilter input group -->
+                        <span class="input-group-addon">Maximum</span>
+                        <input id="maximumScoreFilterID_GUID" type="text" class="form-control" placeholder="Maximum">
+                    </div><!-- maximumScoreFilter input group -->
+
+
+                    <div class="spacer20"></div>
+
+
                 </div>
 
-                <div class="radio">
-                    <label>
-                        <input type="radio" name="trackFilterRadioButtonGroup" id="regionContainsFeature" value="option2">
-                        Option two can be something else and selecting it will deselect option one
-                    </label>
-                </div>
+                <hr>
 
                 <div class="radio">
+
+                    <div class="spacer20"></div>
+
                     <label>
-                        <input type="radio" name="trackFilterRadioButtonGroup" id="regionLacksFeature" value="option3">
-                        Option three is disabled
+                        <input id="regionContainsFeatureRadio_GUID" type="radio" name="trackFilterRadioButtonGroup" value="option2">
+                        Regions that contain features
                     </label>
+
+                    <div class="spacer20"></div>
+
+                </div>
+
+                <hr>
+
+                <div class="radio">
+
+                    <div class="spacer20"></div>
+
+                    <label>
+                        <input id="regionLacksFeatureRadio_GUID" type="radio" name="trackFilterRadioButtonGroup" value="option3">
+                        Regions that do not contain features
+                    </label>
+
+                    <div class="spacer20"></div>
+
                 </div>
 
             </div><!-- /.modal-body -->
