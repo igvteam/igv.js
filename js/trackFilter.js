@@ -4,9 +4,8 @@ var igv = (function (igv) {
 
         this.trackPanel = trackPanel;
         this.guid = igv.guid();
-        this.minMaxFilterEnabled = false;
-        this.activeTabElement = undefined;
-        this.onOffFilterEnabled = undefined;
+        this.doFilter = false;
+        this.isFilterActive = true;
     };
 
     igv.TrackFilter.prototype.onOff = function (score) {
@@ -31,47 +30,13 @@ var igv = (function (igv) {
     igv.TrackFilter.prototype.createTrackFilterWidgetWithParentElement = function (parentDiv) {
 
         var myself = this,
-            trackFilterTabSet,
             modalDialogDataTarget,
             closeTrackFilterModal,
             applyTrackFilterModal,
-            enableDisableButtonGroupOnOffFilter;
+            isFilterActiveToggleSwitch,
+            radioButtonGroupContainer;
 
         parentDiv.innerHTML = this.createFilterModalMarkupWithGUID(this.guid);
-
-
-        // tab set
-        trackFilterTabSet = $('#trackFilterTabSet_' + this.guid);
-
-        // set currently active tab
-        trackFilterTabSet.find('li').each(function(){
-
-            if ( $( this ).hasClass( "active" ) ) {
-
-                myself.activeTabElement = $(this).find('a')[0];
-//                console.log("active tab " + myself.activeTabElement.id);
-            }
-
-        });
-
-        // swap tabs
-        trackFilterTabSet.find('a').click(function (e) {
-
-            var that = $(this);
-
-            e.preventDefault();
-
-            that.tab('show');
-
-        });
-
-        // tab swap callback
-        trackFilterTabSet.find('a[data-toggle="tab"]').on('shown.bs.tab', function (e) {
-
-            myself.activeTabElement = $(this)[0];
-//            console.log("active tab " + myself.activeTabElement.id);
-        });
-
 
         // min/max
         modalDialogDataTarget = $('#modalDialogDataTarget_' + this.guid);
@@ -87,22 +52,9 @@ var igv = (function (igv) {
                 maximumValue = $('#' + 'maximumScoreFilterID_' + myself.guid).val(),
                 filterIconColor;
 
+            console.log("filterEnabledd: " + myself.doFilter);
 
-
-            console.log("tab: " + myself.activeTabElement.id + " minMaxFilterEnabled: " + myself.minMaxFilterEnabled + " onOffFilterEnabled: " + myself.onOffFilterEnabled);
-
-
-
-
-
-
-
-
-
-
-
-
-            if (myself.minMaxFilterEnabled) {
+            if (myself.doFilter) {
 
                 minimumIsNumber = igv.isNumber(minimumValue);
                 maximumIsNumber = igv.isNumber(maximumValue);
@@ -118,24 +70,24 @@ var igv = (function (igv) {
 
         });
 
-        // on/off. enable/disable toggle
-        enableDisableButtonGroupOnOffFilter = $('#enableDisableButtonGroupOnOffFilter_' + this.guid + '.btn-toggle');
+        // active/inactive filter toggle switch
+        isFilterActiveToggleSwitch = $('#isFilterActiveToggleSwitch_' + this.guid);
 
-        enableDisableButtonGroupOnOffFilter.find('.btn').each(function(){
+        isFilterActiveToggleSwitch.find('.btn').each(function(){
 
             var toggleSwitchID;
 
             if ( $( this ).hasClass( "active" ) ) {
 
                 toggleSwitchID = $(this)[ 0 ].id;
-                myself.onOffFilterEnabled = (toggleSwitchID === ('enableButtonOnOffFilter_' + myself.guid));
-//                console.log("on-off filter enabled " + myself.onOffFilterEnabled);
+                myself.isFilterActive = (toggleSwitchID === ('isActiveButton_' + myself.guid));
+                console.log("on-off filter enabled " + myself.isFilterActive);
             }
 
 
         });
 
-        enableDisableButtonGroupOnOffFilter.click(function() {
+        isFilterActiveToggleSwitch.click(function() {
 
             var buttonGroup = $(this),
                 toggleSwitchButtonPair = buttonGroup.find('.btn');
@@ -155,26 +107,36 @@ var igv = (function (igv) {
                 if ( $( this ).hasClass( "active" ) ) {
 
                     thang = $(this)[ 0 ].id;
-                    myself.onOffFilterEnabled = (thang === ('enableButtonOnOffFilter_' + myself.guid));
+                    myself.isFilterActive = (thang === ('isActiveButton_' + myself.guid));
                 }
             });
 
-//            console.log("on-off filter enabled " + myself.onOffFilterEnabled);
+            console.log("on-off filter enabled " + myself.isFilterActive);
 
+        });
+
+        // radio button group
+        radioButtonGroupContainer = $('#modalBody_GUID').find('.radio');
+
+        radioButtonGroupContainer.click(function() {
+
+            var radio = $(this).find('input')[0];
+
+            console.log("radio " + radio.id);
         });
 
         // dismiss filter widget
         closeTrackFilterModal = $('#closeTrackFilterModal_' + this.guid);
         closeTrackFilterModal.on('click', function (e) {
 
-            myself.minMaxFilterEnabled = false;
+            myself.doFilter = false;
         });
 
         // apply filter and dismiss filter widget
         applyTrackFilterModal = $('#applyTrackFilterModal_' + this.guid);
         applyTrackFilterModal.on('click', function (e) {
 
-            myself.minMaxFilterEnabled = true;
+            myself.doFilter = true;
         });
 
     };
@@ -187,7 +149,7 @@ var igv = (function (igv) {
 
         filterModalPresentationButtonMarkup = this.createFilterModalPresentationButtonMarkupWithGUID(guid);
 
-        filterModalMarkup = '<!-- modal dialog --> <div id="modalDialogDataTarget_GUID" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true"> <div class="modal-dialog"> <div class="modal-content"> <div class="modal-header"> <button id="closeTrackFilterModal_GUID" type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button> <h4 id="modalTitle_GUID" class="modal-title">MODAL_TITLE</h4> </div><!-- /.modal-header --> <div id="modalBody_GUID" class="modal-body"> <ul id="trackFilterTabSet_GUID" class="nav nav-tabs" role="tablist"><!-- Nav tabs --> <li class="active"><a id="trackFilterMinMaxTabLink_GUID" href="#trackFilterMinMaxTab_GUID" role="tab" data-toggle="tab">Min / Max</a></li> <li> <a id="trackFilterOnOffTabLink_GUID" href="#trackFilterOnOffTab_GUID" role="tab" data-toggle="tab">On / Off</a></li> </ul><!-- Nav tabs --> <div class="tab-content"><!-- Tab pane set --> <div id="trackFilterMinMaxTab_GUID" class="tab-pane active"> <div class="spacer20"></div> <div class="container"><!-- container --> <div class="row"><!-- row --> <div class="col-md-3"><!-- column --> <div class="input-group input-group-md"><!-- input group --> <span class="input-group-addon">Minimum</span><input id="minimumScoreFilterID_GUID" type="text" class="form-control" placeholder="Minimum"> </div><!-- input group --> </div><!-- column --> </div><!-- row --> <div class="spacer20"></div> <div class="row"><!-- row --> <div class="col-md-3"><!-- column --> <div class="input-group input-group-md"><!-- input group --> <span class="input-group-addon">Maximum</span><input id="maximumScoreFilterID_GUID" type="text" class="form-control" placeholder="Maximum"> </div><!-- input group --> </div><!-- column --> </div><!-- row --> </div><!-- container --> <div class="spacer10"></div> </div><!-- Tab pane --> <div id="trackFilterOnOffTab_GUID" class="tab-pane"><!-- Tab pane --> <div class="spacer20"></div> <div class="container"><!-- container --> <div class="row"><!-- row --> <div class="col-md-6"><!-- column --> <div id="enableDisableButtonGroupOnOffFilter_GUID" class="btn-group btn-toggle"> <button id= "enableButtonOnOffFilter_GUID" class="btn btn-lg btn-default ">Enable </button> <button id="disableButtonOnOffFilter_GUID" class="btn btn-lg btn-primary active">Disable</button> </div> </div><!-- column --> </div><!-- row --> </div><!-- container --> </div><!-- Tab pane --> </div><!-- Tab pane set --> </div><!-- /.modal-body --> <div class="modal-footer"> <button id="applyTrackFilterModal_GUID" type="button" class="btn btn-default" data-dismiss="modal">Apply</button> </div><!-- /.modal-footer --> </div><!-- /.modal-content --> </div><!-- /.modal-dialog --> </div>';
+        filterModalMarkup = '<!-- modal dialog --> <div id="modalDialogDataTarget_GUID" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true"> <div class="modal-dialog"> <div class="modal-content"> <div class="modal-header"> <div id="isFilterActiveToggleSwitch_GUID" class="btn-group btn-toggle"> <button id="isActiveButton_GUID" class="btn btn-xs btn-primary active">Active </button> <button id="isInActiveButton_GUID" class="btn btn-xs btn-default" >Inactive</button> </div> <button id="closeTrackFilterModal_GUID" type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button> </div><!-- /.modal-header --> <div id="modalBody_GUID" class="modal-body"> <div class="radio"> <!--<div class="spacer10"></div>--> <div> <label> <input id="minMaxRadio_GUID" type="radio" name="trackFilterRadioButtonGroup" value="option1" checked> Regions containing features whose scores are bounded my min and max </label> </div> <div class="spacer20"></div> <div class="container"><!-- min/max container --> <div class="row"><!-- row --> <div class="col-md-3"><!-- column --> <div class="input-group input-group-md"><!-- minimumScore input group --> <span class="input-group-addon">Minimum</span> <input id="minimumScoreFilterID_GUID" type="text" class="form-control" placeholder="Minimum"> </div><!-- minimumScore input group --> </div><!-- column --> </div><!-- row --> <div class="spacer20"></div> <div class="row"><!-- row --> <div class="col-md-3"><!-- column --> <div class="input-group input-group-md"><!-- maximumScore input group --> <span class="input-group-addon">Maximum</span> <input id="maximumScoreFilterID_GUID" type="text" class="form-control" placeholder="Maximum"> </div><!-- maximumScore input group --> </div><!-- column --> </div><!-- row --> </div><!-- min/max container --> <div class="spacer10"></div> </div> <hr> <div class="radio"> <div class="spacer5"></div> <label> <input id="regionContainsFeatureRadio_GUID" type="radio" name="trackFilterRadioButtonGroup" value="option2"> Regions that contain features </label> <div class="spacer5"></div> </div> <hr> <div class="radio"> <div class="spacer5"></div> <label> <input id="regionLacksFeatureRadio_GUID" type="radio" name="trackFilterRadioButtonGroup" value="option3"> Regions that do not contain features </label> <div class="spacer5"></div> </div> </div><!-- /.modal-body --> <div class="modal-footer"> <button id="applyTrackFilterModal_GUID" type="button" class="btn btn-default" data-dismiss="modal">Apply</button> </div><!-- /.modal-footer --> </div><!-- /.modal-content --> </div><!-- /.modal-dialog --> </div> ';
         filterModalMarkup = filterModalMarkup.replace(re, guid);
 
         return filterModalPresentationButtonMarkup + filterModalMarkup;

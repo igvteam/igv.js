@@ -1,23 +1,34 @@
 
 $(document).ready(function(){
 
-    var enableDisableButtonGroupOnOffFilter = $('#enableDisableButtonGroupOnOffFilter_GUID'),
+    var isFilterActiveToggleSwitch = $('#isFilterActiveToggleSwitch_GUID'),
         radioButtonGroupContainer = $('#modalBody_GUID').find('.radio');
 
-    enableDisableButtonGroupOnOffFilter.click(function() {
+    isFilterActiveToggleSwitch.click(function() {
 
-        var thang = $(this),
-            toggleSwitchButtonPair = thang.find('.btn');
+        var buttonGroup = $(this),
+            toggleSwitchButtonPair = buttonGroup.find('.btn');
 
         toggleSwitchButtonPair.toggleClass('active');
 
-        if (thang.find('.btn-primary').size() > 0) {
+        if (buttonGroup.find('.btn-primary').size() > 0) {
             toggleSwitchButtonPair.toggleClass('btn-primary');
         }
 
         toggleSwitchButtonPair.toggleClass('btn-default');
 
-        console.log("toggle");
+        toggleSwitchButtonPair.each(function(){
+
+            var thang;
+
+            if ( $( this ).hasClass( "active" ) ) {
+
+                thang = $(this)[ 0 ].id;
+                myself.isFilterActive = (thang === ('isActiveButton_GUID'));
+            }
+        });
+
+        console.log("on-off filter enabled " + myself.isFilterActive);
 
     });
 
