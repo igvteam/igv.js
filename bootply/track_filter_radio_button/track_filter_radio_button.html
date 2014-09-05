@@ -59,81 +59,26 @@
 
             <div id="modalBody_GUID" class="modal-body">
 
-                <div class="spacer5"></div>
+                <div class="radio">
+                    <label>
+                        <input type="radio" name="trackFilterRadioButtonGroup" id="minMax" value="option1" checked>
+                        Option one is this and that&mdash;be sure to include why it's great
+                    </label>
+                </div>
 
-                <div class="container"><!-- min/max container -->
+                <div class="radio">
+                    <label>
+                        <input type="radio" name="trackFilterRadioButtonGroup" id="regionContainsFeature" value="option2">
+                        Option two can be something else and selecting it will deselect option one
+                    </label>
+                </div>
 
-                    <div class="row"><!-- row -->
-
-                        <div class="col-md-3"><!-- column -->
-
-                            <input type="radio" id="radio_1" name="trackFilterRadioButtonGroup" value="1">
-
-                        </div><!-- column -->
-
-                    </div><!-- row -->
-
-                    <div class="spacer10"></div>
-
-
-                    <div class="row"><!-- row -->
-
-                        <div class="col-md-3"><!-- column -->
-
-                            <div class="input-group input-group-md"><!-- input group -->
-                                <span class="input-group-addon">Minimum</span><input id="minimumScoreFilterID_GUID" type="text" class="form-control" placeholder="Minimum">
-                            </div><!-- input group -->
-
-                        </div><!-- column -->
-
-                    </div><!-- row -->
-
-                    <div class="spacer10"></div>
-
-                    <div class="row"><!-- row -->
-
-                        <div class="col-md-3"><!-- column -->
-
-                            <div class="input-group input-group-md"><!-- input group -->
-                                <span class="input-group-addon">Maximum</span><input id="maximumScoreFilterID_GUID" type="text" class="form-control" placeholder="Maximum">
-                            </div><!-- input group -->
-
-                        </div><!-- column -->
-
-                    </div><!-- row -->
-
-                </div><!-- min/max container -->
-
-                <div class="spacer10"></div>
-                <div class="spacer5"><hr></div>
-                <div class="spacer10"></div>
-
-                <div class="container"><!--  no feature in region container -->
-
-
-                    <div class="row"><!-- row -->
-                        <div class="col-md-6"><!-- column -->
-                            <input type="radio" id="radio_2" name="trackFilterRadioButtonGroup" value="2">
-                        </div><!-- column -->
-                    </div><!-- row -->
-
-                </div><!--  no feature in region container -->
-
-                <div class="spacer10"></div>
-                <div class="spacer5"><hr></div>
-                <div class="spacer10"></div>
-
-                <div class="container"><!-- yes feature in region container -->
-
-                    <div class="row"><!-- row -->
-                        <div class="col-md-6"><!-- column -->
-                            <input type="radio" id="radio_3" name="trackFilterRadioButtonGroup" value="3">
-                        </div><!-- column -->
-                    </div><!-- row -->
-
-                </div><!-- yes feature in region container -->
-
-                <div class="spacer25"></div>
+                <div class="radio">
+                    <label>
+                        <input type="radio" name="trackFilterRadioButtonGroup" id="regionLacksFeature" value="option3">
+                        Option three is disabled
+                    </label>
+                </div>
 
             </div><!-- /.modal-body -->
 
