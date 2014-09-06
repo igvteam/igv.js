@@ -132,6 +132,9 @@ var igv = (function (igv) {
             this.ideoPanel.repaint();
         }
 
+        if (this.karyoPanel) {
+            this.karyoPanel.repaint();
+        }
         this.trackPanels.forEach(function (panel) {
             panel.repaint();
         });
@@ -143,6 +146,9 @@ var igv = (function (igv) {
             this.ideoPanel.repaint();
         }
 
+        if (this.karyoPanel) {
+            this.karyoPanel.repaint();
+        }
         this.trackPanels.forEach(function (trackPanel) {
 
             trackPanel.update();
