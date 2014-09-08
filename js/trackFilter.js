@@ -38,6 +38,7 @@ var igv = (function (igv) {
 
         parentDiv.innerHTML = this.createFilterModalMarkupWithGUID(this.guid);
 
+
         // min/max
         modalDialogDataTarget = $('#modalDialogDataTarget_' + this.guid);
 
@@ -116,18 +117,32 @@ var igv = (function (igv) {
         });
 
         // radio button group
-        radioButtonGroupContainer = $('#modalBody_GUID').find('.radio');
+        radioButtonGroupContainer = $('#modalBody_' + this.guid).find('.radio');
+
+        radioButtonGroupContainer.each(function(){
+
+            var radio = $(this).find('input')[0];
+
+            console.log("radio " + radio.id + " " + radio.checked);
+        });
 
         radioButtonGroupContainer.click(function() {
 
             var radio = $(this).find('input')[0];
 
-            console.log("radio " + radio.id);
+            console.log("radio " + radio.id + " " + radio.checked);
         });
 
         // dismiss filter widget
         closeTrackFilterModal = $('#closeTrackFilterModal_' + this.guid);
         closeTrackFilterModal.on('click', function (e) {
+
+            radioButtonGroupContainer.each(function(){
+
+                var radio = $(this).find('input')[0];
+
+                console.log("radio " + radio.id + " " + radio.checked);
+            });
 
             myself.doFilter = false;
         });
@@ -149,7 +164,7 @@ var igv = (function (igv) {
 
         filterModalPresentationButtonMarkup = this.createFilterModalPresentationButtonMarkupWithGUID(guid);
 
-        filterModalMarkup = '<!-- modal dialog --> <div id="modalDialogDataTarget_GUID" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true"> <div class="modal-dialog"> <div class="modal-content"> <div class="modal-header"> <div id="isFilterActiveToggleSwitch_GUID" class="btn-group btn-toggle"> <button id="isActiveButton_GUID" class="btn btn-xs btn-primary active">Active </button> <button id="isInActiveButton_GUID" class="btn btn-xs btn-default" >Inactive</button> </div> <button id="closeTrackFilterModal_GUID" type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button> </div><!-- /.modal-header --> <div id="modalBody_GUID" class="modal-body"> <div class="radio"> <!--<div class="spacer10"></div>--> <div> <label> <input id="minMaxRadio_GUID" type="radio" name="trackFilterRadioButtonGroup" value="option1" checked> Regions containing features whose scores are bounded my min and max </label> </div> <div class="spacer20"></div> <div class="container"><!-- min/max container --> <div class="row"><!-- row --> <div class="col-md-3"><!-- column --> <div class="input-group input-group-md"><!-- minimumScore input group --> <span class="input-group-addon">Minimum</span> <input id="minimumScoreFilterID_GUID" type="text" class="form-control" placeholder="Minimum"> </div><!-- minimumScore input group --> </div><!-- column --> </div><!-- row --> <div class="spacer20"></div> <div class="row"><!-- row --> <div class="col-md-3"><!-- column --> <div class="input-group input-group-md"><!-- maximumScore input group --> <span class="input-group-addon">Maximum</span> <input id="maximumScoreFilterID_GUID" type="text" class="form-control" placeholder="Maximum"> </div><!-- maximumScore input group --> </div><!-- column --> </div><!-- row --> </div><!-- min/max container --> <div class="spacer10"></div> </div> <hr> <div class="radio"> <div class="spacer5"></div> <label> <input id="regionContainsFeatureRadio_GUID" type="radio" name="trackFilterRadioButtonGroup" value="option2"> Regions that contain features </label> <div class="spacer5"></div> </div> <hr> <div class="radio"> <div class="spacer5"></div> <label> <input id="regionLacksFeatureRadio_GUID" type="radio" name="trackFilterRadioButtonGroup" value="option3"> Regions that do not contain features </label> <div class="spacer5"></div> </div> </div><!-- /.modal-body --> <div class="modal-footer"> <button id="applyTrackFilterModal_GUID" type="button" class="btn btn-default" data-dismiss="modal">Apply</button> </div><!-- /.modal-footer --> </div><!-- /.modal-content --> </div><!-- /.modal-dialog --> </div> ';
+        filterModalMarkup = '<!-- modal dialog --> <div id="modalDialogDataTarget_GUID" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true"> <div class="modal-dialog"> <div class="modal-content"> <div class="modal-header"> <div id="isFilterActiveToggleSwitch_GUID" class="btn-group btn-toggle"> <button id="isActiveButton_GUID" class="btn btn-xs btn-primary active">Active </button> <button id="isInActiveButton_GUID" class="btn btn-xs btn-default" >Inactive</button> </div> <button id="closeTrackFilterModal_GUID" type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button> </div><!-- /.modal-header --> <div id="modalBody_GUID" class="modal-body"> <div class="radio"> <!--<div class="spacer10"></div>--> <div> <label> <input id="minMaxRadio_GUID" type="radio" name="trackFilterRadioButtonGroup" value="option1" checked="checked"> Regions containing features whose scores are bounded my min and max </label> </div> <div class="spacer20"></div> <div class="container"><!-- min/max container --> <div class="row"><!-- row --> <div class="col-md-3"><!-- column --> <div class="input-group input-group-md"><!-- minimumScore input group --> <span class="input-group-addon">Minimum</span> <input id="minimumScoreFilterID_GUID" type="text" class="form-control" placeholder="Minimum"> </div><!-- minimumScore input group --> </div><!-- column --> </div><!-- row --> <div class="spacer20"></div> <div class="row"><!-- row --> <div class="col-md-3"><!-- column --> <div class="input-group input-group-md"><!-- maximumScore input group --> <span class="input-group-addon">Maximum</span> <input id="maximumScoreFilterID_GUID" type="text" class="form-control" placeholder="Maximum"> </div><!-- maximumScore input group --> </div><!-- column --> </div><!-- row --> </div><!-- min/max container --> <div class="spacer10"></div> </div> <hr> <div class="radio"> <div class="spacer5"></div> <label> <input id="regionContainsFeatureRadio_GUID" type="radio" name="trackFilterRadioButtonGroup" value="option2"> Regions that contain features </label> <div class="spacer5"></div> </div> <hr> <div class="radio"> <div class="spacer5"></div> <label> <input id="regionLacksFeatureRadio_GUID" type="radio" name="trackFilterRadioButtonGroup" value="option3"> Regions that do not contain features </label> <div class="spacer5"></div> </div> </div><!-- /.modal-body --> <div class="modal-footer"> <button id="applyTrackFilterModal_GUID" type="button" class="btn btn-default" data-dismiss="modal">Apply</button> </div><!-- /.modal-footer --> </div><!-- /.modal-content --> </div><!-- /.modal-dialog --> </div>';
         filterModalMarkup = filterModalMarkup.replace(re, guid);
 
         return filterModalPresentationButtonMarkup + filterModalMarkup;
