@@ -5,9 +5,30 @@ igv = (function (igv) {
 
         this.trackPanel = trackPanel;
         this.guid = igv.guid();
-        this.evaluateFilter = false;
+        this.doEvaluateFilter = false;
         this.isFilterActive = true;
         this.radioButton = undefined;
+    };
+
+    igv.TrackFilter.prototype.onHideModalEvaluateFilter = function () {
+
+        var filterIconColor,
+            modalPresentationButton = $('#' + "modalPresentationButton_" + this.guid),
+            minimumElement = $('#' + 'minimumScoreFilterID_' + this.guid),
+            maximumElement = $('#' + 'maximumScoreFilterID_' + this.guid);
+
+        filterIconColor = (this.doEvaluateFilter) ? "red" : "black";
+        modalPresentationButton.css("color", filterIconColor);
+
+        if (this.doEvaluateFilter) {
+
+            this.minimum = igv.isNumber(minimumElement.val()) ? parseFloat(minimumElement.val(), 10) : undefined;
+            this.maximum = igv.isNumber(maximumElement.val()) ? parseFloat(maximumElement.val(), 10) : undefined;
+
+            this.trackPanel.browser.cursorModel.filterRegions();
+
+        }
+
     };
 
     igv.TrackFilter.prototype.evaluate = function (featureCache, region, regionWidth) {
@@ -116,14 +137,14 @@ igv = (function (igv) {
         closeTrackFilterModal = $('#closeTrackFilterModal_' + this.guid);
         closeTrackFilterModal.on('click', function (e) {
 
-            myself.evaluateFilter = false;
+            myself.doEvaluateFilter = false;
         });
 
         // apply filter and dismiss filter widget
         applyTrackFilterModal = $('#applyTrackFilterModal_' + this.guid);
         applyTrackFilterModal.on('click', function (e) {
 
-            myself.evaluateFilter = true;
+            myself.doEvaluateFilter = true;
         });
 
         function chosenRadioButton(radioButtonGroupContainer) {
@@ -171,27 +192,7 @@ igv = (function (igv) {
         return presentationButton;
     };
 
-    igv.TrackFilter.prototype.onHideModalEvaluateFilter = function () {
 
-        var filterIconColor,
-            modalPresentationButton = $('#' + "modalPresentationButton_" + this.guid),
-            minimumElement = $('#' + 'minimumScoreFilterID_' + this.guid),
-            maximumElement = $('#' + 'maximumScoreFilterID_' + this.guid);
-
-        console.log("radio " + this.radioButton.id + " isFilterActive " + this.isFilterActive);
-
-        if (this.evaluateFilter) {
-
-            this.minimum = igv.isNumber(minimumElement.val()) ? parseFloat(minimumElement.val(), 10) : undefined;
-            this.maximum = igv.isNumber(maximumElement.val()) ? parseFloat(maximumElement.val(), 10) : undefined;
-
-            filterIconColor = (undefined === this.minimum && undefined === this.maximum) ? "black" : "red";
-            modalPresentationButton.css("color", filterIconColor);
-
-            this.trackPanel.browser.cursorModel.filterRegions();
-
-        }
-    };
 
     return igv;
 
