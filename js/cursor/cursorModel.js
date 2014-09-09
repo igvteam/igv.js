@@ -146,15 +146,17 @@ var cursor = (function (cursor) {
 
                     filterPackages.forEach(function (filterPackage) {
 
+                        var success;
+
                         if (trackPackage.trackFilter === filterPackage.trackFilter) {
 
                             // do nothing
 
                         } else if (true === doIncludeRegionForHistogramRender) {
 
-                            score = region.getScore(filterPackage.featureCache, myself.regionWidth);
+                            success = filterPackage.trackFilter.evaluate(filterPackage.featureCache, region, myself.regionWidth);
 
-                            if (false === filterPackage.trackFilter.isIncluded(score)) {
+                            if (false === success) {
 
                                 doIncludeRegionForHistogramRender = false;
                             }
