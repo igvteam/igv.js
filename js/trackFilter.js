@@ -12,11 +12,21 @@ igv = (function (igv) {
 
     igv.TrackFilter.prototype.evaluate = function (featureCache, region, regionWidth) {
 
-        var score;
+        var score = region.getScore(featureCache, regionWidth);
 
-        score = region.getScore(featureCache, regionWidth);
+        if ("minMaxRadio_" + this.guid === this.radioButton.id) {
 
-        return this.isIncluded(score);
+            return this.isIncluded(score);
+
+        } else if ("regionContainsFeatureRadio_" + this.guid === this.radioButton.id) {
+
+            return -1 !== score;
+
+        } else if ("regionLacksFeatureRadio_" + this.guid === this.radioButton.id) {
+
+            return -1 === score;
+
+        }
 
     };
 
