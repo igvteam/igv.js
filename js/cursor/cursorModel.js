@@ -103,19 +103,26 @@ var cursor = (function (cursor) {
 
                 myself.regions.forEach(function (region) {
 
-                    var score,
+                    var success,
+                        score,
                         passFilter = true;
 
                     trackPackages.forEach(function (trackPackage) {
 
                         if (true === passFilter) {
 
-                            score = region.getScore(trackPackage.featureCache, myself.regionWidth);
-
-                            if (false === trackPackage.trackFilter.isIncluded(score)) {
+                            success = trackPackage.trackFilter.evaluate(trackPackage.featureCache, region, myself.regionWidth);
+                            if (false === success) {
 
                                 passFilter = false;
                             }
+
+//                            score = region.getScore(trackPackage.featureCache, myself.regionWidth);
+//
+//                            if (false === trackPackage.trackFilter.isIncluded(score)) {
+//
+//                                passFilter = false;
+//                            }
 
                         }
 
