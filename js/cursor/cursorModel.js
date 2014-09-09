@@ -135,25 +135,26 @@ var cursor = (function (cursor) {
             myself.browser.update();
 
             // better histogram code
-            trackPackages.forEach(function (tp) {
+            trackPackages.forEach(function (trackPackage) {
 
-                tp.cursorHistogram.initializeBins();
+                trackPackage.cursorHistogram.initializeBins();
 
-                myself.regions.forEach(function (r) {
+                myself.regions.forEach(function (region) {
 
                     var score,
                         doIncludeRegionForHistogramRender = true;
 
-                    filterPackages.forEach(function (fp) {
+                    filterPackages.forEach(function (filterPackage) {
 
-                        if (tp.trackFilter === fp.trackFilter) {
+                        if (trackPackage.trackFilter === filterPackage.trackFilter) {
 
                             // do nothing
+
                         } else if (true === doIncludeRegionForHistogramRender) {
 
-                            score = r.getScore(fp.featureCache, myself.regionWidth);
+                            score = region.getScore(filterPackage.featureCache, myself.regionWidth);
 
-                            if (false === fp.trackFilter.isIncluded(score)) {
+                            if (false === filterPackage.trackFilter.isIncluded(score)) {
 
                                 doIncludeRegionForHistogramRender = false;
                             }
@@ -164,13 +165,13 @@ var cursor = (function (cursor) {
 
                     if (doIncludeRegionForHistogramRender) {
 
-                        score = r.getScore(tp.featureCache, myself.regionWidth);
-                        tp.cursorHistogram.insertScore(score);
+                        score = region.getScore(trackPackage.featureCache, myself.regionWidth);
+                        trackPackage.cursorHistogram.insertScore(score);
                     }
 
                 });
 
-                tp.cursorHistogram.render(tp.track);
+                trackPackage.cursorHistogram.render(trackPackage.track);
 
             });
 
