@@ -10,11 +10,6 @@ igv = (function (igv) {
         this.radioButton = undefined;
     };
 
-    igv.TrackFilter.prototype.isNoOp = function () {
-
-        return undefined === this.minimum && undefined === this.maximum;
-    };
-
     igv.TrackFilter.prototype.evaluate = function (featureCache, region, regionWidth) {
 
         var score;

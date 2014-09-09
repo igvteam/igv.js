@@ -74,8 +74,7 @@ var cursor = (function (cursor) {
         var trackPackages = [],
             filterPackages = [],
             howmany = 0,
-            myself = this,
-            noop = true;
+            myself = this;
 
         this.browser.trackPanels.forEach(function (trackPanel, tpIndex, trackPanels) {
 
@@ -83,7 +82,7 @@ var cursor = (function (cursor) {
 
                 trackPackages.push({ track: trackPanel.track, trackFilter: trackPanel.track.trackFilter, featureCache: featureCache, cursorHistogram: trackPanel.track.cursorHistogram });
 
-                if (!trackPanel.track.trackFilter.isNoOp()) {
+                if (trackPanel.track.trackFilter.isFilterActive) {
                     filterPackages.push({trackFilter: trackPanel.track.trackFilter, featureCache: featureCache });
                 }
 
@@ -116,13 +115,6 @@ var cursor = (function (cursor) {
 
                                 passFilter = false;
                             }
-
-//                            score = region.getScore(trackPackage.featureCache, myself.regionWidth);
-//
-//                            if (false === trackPackage.trackFilter.isIncluded(score)) {
-//
-//                                passFilter = false;
-//                            }
 
                         }
 
