@@ -57,6 +57,8 @@
     <script type="text/javascript" src="js/cursor/cursorModel.js"></script>
     <script type="text/javascript" src="js/cursor/cursor-ideogram.js"></script>
     <script type="text/javascript" src="js/karyo/karyo.js"></script>
+    <script type="text/javascript" src="js/t2d/t2dVariantSource.js"></script>
+    <script type="text/javascript" src="js/t2d/t2dVariantTrack.js"></script>
 </head>
 
 <body>
@@ -65,7 +67,8 @@
     <table>
         <tr>
             <td><a style="color: blue;cursor: pointer"
-                   onclick="igv.browser.loadTrack('http://www.broadinstitute.org/igvdata/1KG/b37/data/NA06984/alignment/NA06984.mapped.ILLUMINA.bwa.CEU.low_coverage.20120522.bam', 'NA06984')">Load NA06984 BAM</a></td>
+                   onclick="igv.browser.loadTrack('http://www.broadinstitute.org/igvdata/1KG/b37/data/NA06984/alignment/NA06984.mapped.ILLUMINA.bwa.CEU.low_coverage.20120522.bam', 'NA06984')">Load
+                NA06984 BAM</a></td>
         </tr>
         <tr>
             <td><a style="color: blue;cursor: pointer" onclick="igv.browser.search('chr1:155,169,232-155,169,271')">
@@ -75,14 +78,14 @@
             <td><a style="color: blue;cursor: pointer" onclick="igv.browser.search('chr1:155,172,193-155,172,564')">
                 Goto chr1:155,172,193-155,172,564</a></td>
         </tr>
-<!--        <tr>
-            <td><a style="color: blue;cursor: pointer" onclick="igv.browser.zoomIn()">
-                Zoom In</a></td>
-        </tr>
-        <tr>
-            <td><a style="color: blue;cursor: pointer" onclick="igv.browser.zoomOut()">
-                Zoom Out</a></td>
-        </tr>-->
+        <!--        <tr>
+                    <td><a style="color: blue;cursor: pointer" onclick="igv.browser.zoomIn()">
+                        Zoom In</a></td>
+                </tr>
+                <tr>
+                    <td><a style="color: blue;cursor: pointer" onclick="igv.browser.zoomOut()">
+                        Zoom Out</a></td>
+                </tr>-->
 
 
     </table>
@@ -94,7 +97,14 @@
     $(document).ready(function () {
 
         var div = $("#myDiv")[0],
-                browser = igv.createBrowser();
+                options = {
+                    showKaryo: true,
+                    tracks: [
+                        new igv.SequenceTrack(),
+                        new igv.GeneTrack("//igvdata.broadinstitute.org/annotations/hg19/genes/gencode.v18.collapsed.bed")
+                    ]
+                },
+                browser = igv.createBrowser(options);
         div.appendChild(browser.div);
         browser.startup();
 

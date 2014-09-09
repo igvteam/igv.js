@@ -33,7 +33,14 @@ var igv = (function (igv) {
     }
 
 
-    igv.createBrowser = function (type) {
+    /**
+     * Create an igv.browser instance.  This object defines the public API for interacting with the genome browser.
+     *
+     * @param options Object specifying inital configuration options.
+     *
+     * @returns {Browser|*|igv.IdeoPanel.browser|igv.KaryoPanel.browser|cursor.CursorModel.browser|igv.TrackPanel.browser}
+     */
+    igv.createBrowser = function (options) {
 
 
         igv.browser = new igv.Browser("IGV");
@@ -73,10 +80,12 @@ var igv = (function (igv) {
 
             igv.sequenceSource = igv.getFastaSequence(fastaURL);
 
-            
-            browser.karyoPanel = new igv.KaryoPanel(browser);
-            $('#igvKaryoDiv').append(browser.karyoPanel.div);
-            browser.karyoPanel.resize();
+
+            if(options && options.showKaryo) {
+                browser.karyoPanel = new igv.KaryoPanel(browser);
+                $('#igvKaryoDiv').append(browser.karyoPanel.div);
+                browser.karyoPanel.resize();
+            }
 
             
             browser.ideoPanel = new igv.IdeoPanel(browser);
@@ -92,9 +101,14 @@ var igv = (function (igv) {
 
             browser.addTrack(new igv.RulerTrack());
 
-            browser.addTrack(new igv.SequenceTrack(igv.sequenceSource));
+            if(options && options.tracks) {
 
-            browser.addTrack(new igv.GeneTrack(gencodeURL));
+                options.tracks.forEach(function (track) {
+                    browser.addTrack(track);
+                });
+
+            }
+
 
             // TODO: Needs to be a better way to grab the right track and change this
             browser.trackPanels[browser.trackPanels.length - 1].order = 10000;
@@ -108,18 +122,6 @@ var igv = (function (igv) {
                 })
             }, 10);
 
-        }
-
-        function zoomOut() {
-            browser.zoomOut();
-        }
-
-        function zoomIn() {
-            browser.zoomIn();
-        }
-
-        function search(arg) {
-            browser.search(arg);
         }
 
         return browser;

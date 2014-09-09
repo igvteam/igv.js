@@ -70,6 +70,10 @@
     <script type="text/javascript" src="js/cursor/cursorModel.js"></script>
     <script type="text/javascript" src="js/cursor/cursor-ideogram.js"></script>
 
+    <script type="text/javascript" src="js/karyo/karyo.js"></script>
+    <script type="text/javascript" src="js/t2d/t2dVariantSource.js"></script>
+    <script type="text/javascript" src="js/t2d/t2dVariantTrack.js"></script>
+
 </head>
 
 <body>
@@ -138,8 +142,15 @@
 
     $(document).ready(function () {
 
-        var div = $("#myDiv")[0],
-                browser = igv.createBrowser();
+        var div = $("#myDiv")[0], options = {
+                    showKaryo: false,
+                    tracks: [
+                        new igv.MpgTrack("php/postJson.php"),
+                        new igv.SequenceTrack(igv.sequenceSource),
+                        new igv.GeneTrack("//igvdata.broadinstitute.org/annotations/hg19/genes/gencode.v18.collapsed.bed")
+                    ]
+                },
+                browser = igv.createBrowser(options);
         div.appendChild(browser.div);
         browser.startup();
     });

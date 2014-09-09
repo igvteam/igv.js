@@ -118,6 +118,8 @@ var igv = (function (igv) {
         var loader = this,
             oReq = new XMLHttpRequest();
 
+        if(task) task.xhrRequest = oReq;
+
         oReq.open("POST", this.url);
 
         oReq.setRequestHeader("Content-Type", "application/json");
