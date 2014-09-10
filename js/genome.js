@@ -1,6 +1,7 @@
 var igv = (function (igv) {
 
-    igv.Genome = function (chromosomes) {
+    igv.Genome = function (chromosomeNames, chromosomes) {
+        this.chromosomeNames = chromosomeNames;
         this.chromosomes = chromosomes;  // An object (functions as a dictionary)
     }
 
@@ -11,6 +12,7 @@ var igv = (function (igv) {
     igv.Genome.prototype.getChromosomes = function () {
         return this.chromosomes;
     }
+
     igv.Chromosome = function (name, order, cytobands) {
         this.name = name;
         this.order = order;
@@ -18,7 +20,7 @@ var igv = (function (igv) {
         if (cytobands) {
             var len = cytobands.length;
             if (len > 0) {
-                this.length = cytobands[len - 1].end;
+                this.bpLength = cytobands[len - 1].end;
             }
         }
     }
@@ -40,7 +42,7 @@ var igv = (function (igv) {
         }
     }
 
-     igv.GenomicInterval = function(chr, start, end, features) {
+    igv.GenomicInterval = function (chr, start, end, features) {
         this.chr = chr;
         this.start = start;
         this.end = end;
@@ -78,20 +80,24 @@ var igv = (function (igv) {
 
         igv.loadData(url, function (data) {
 
-            var chromosomes = {};
-            var tmpCytoboands = {};
-            var bands = [];
-            var lastChr;
-            var n = 0;
-            var c = 1;
-            var lines = data.split("\n");
-            var len = lines.length;
+            var chromosomes = {},
+                chromosomeNames = [],
+                tmpCytoboands = {},
+                bands = [],
+                lastChr,
+                n = 0,
+                c = 1,
+                lines = data.split("\n"),
+                len = lines.length;
+
             for (var i = 0; i < len; i++) {
                 var tokens = lines[i].split("\t");
                 var chr = tokens[0];
                 if (!lastChr) lastChr = chr;
 
                 if (chr != lastChr) {
+
+                    chromosomeNames.push(lastChr);
 
                     chromosomes[lastChr] = new igv.Chromosome(lastChr, c, bands);
 
@@ -113,7 +119,7 @@ var igv = (function (igv) {
                 }
             }
 
-            continuation(new igv.Genome(chromosomes));
+            continuation(new igv.Genome(chromosomeNames, chromosomes));
         });
     }
 

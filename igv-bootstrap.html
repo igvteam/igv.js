@@ -20,8 +20,8 @@
 
     <!-- HTML5 shim and Respond.js IE8 support of HTML5 elements and media queries -->
     <!--[if lt IE 9]>
-    <script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
-    <script src="https://oss.maxcdn.com/libs/respond.js/1.4.2/respond.min.js"></script>
+    <script src="//oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
+    <script src="//oss.maxcdn.com/libs/respond.js/1.4.2/respond.min.js"></script>
     <![endif]-->
 
     <script src="//code.jquery.com/jquery-1.11.0.min.js"></script>
@@ -142,15 +142,20 @@
 
     $(document).ready(function () {
 
-        var div = $("#myDiv")[0], options = {
-                    showKaryo: false,
-                    tracks: [
-                        new igv.MpgTrack("php/postJson.php"),
-                        new igv.SequenceTrack(igv.sequenceSource),
-                        new igv.GeneTrack("//igvdata.broadinstitute.org/annotations/hg19/genes/gencode.v18.collapsed.bed")
-                    ]
-                },
-                browser = igv.createBrowser(options);
+        var div, options, browser;
+
+        div = $("#myDiv")[0];
+        options = {
+            showKaryo: false,
+            fastaURL: "//igvdata.broadinstitute.org/genomes/seq/hg19/hg19.fasta",
+            cytobandURL: "//igvdata.broadinstitute.org/genomes/seq/hg19/cytoBand.txt",
+            tracks: [
+                new igv.MpgTrack("//www.broadinstitute.org/igvdata/t2d/postJson.php"),
+                new igv.SequenceTrack(),
+                new igv.GeneTrack("//igvdata.broadinstitute.org/annotations/hg19/genes/gencode.v18.collapsed.bed")
+            ]
+        };
+        browser = igv.createBrowser(options);
         div.appendChild(browser.div);
         browser.startup();
     });
