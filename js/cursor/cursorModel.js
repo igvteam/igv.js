@@ -1,5 +1,7 @@
 var cursor = (function (cursor) {
 
+    const resevoirSampledRegionListLength = 10000;
+
     cursor.CursorModel = function (browser, regionDisplayJQueryObject) {
 
         this.browser = browser;
@@ -16,12 +18,21 @@ var cursor = (function (cursor) {
         this.prohibitSelfFilteringTrackHistogram = true;
     };
 
-    cursor.CursorModel.prototype.updateRegionDisplay = function() {
+    cursor.CursorModel.prototype.updateRegionDisplay = function(downsamplingPercentage) {
 
-        var numer = igv.numberFormatter(this.getRegionList().length),
-            denom = igv.numberFormatter(this.regions.length);
+        var numer,
+            denom,
+            downsamplingString = "";
 
-        this.regionDisplayJQueryObject.text("Regions " + numer + " / " + denom);
+        numer = igv.numberFormatter(this.getRegionList().length);
+        denom = igv.numberFormatter(this.regions.length);
+
+        if (downsamplingPercentage < 1.0) {
+
+            downsamplingString = " Downsampling " + Math.floor(100.0 * downsamplingPercentage) + "%";
+        }
+
+        this.regionDisplayJQueryObject.text("Regions " + numer + " / " + denom + downsamplingString);
     };
 
     cursor.CursorModel.prototype.getRegionList = function () {
@@ -39,7 +50,7 @@ var cursor = (function (cursor) {
         for (i = 0, len = features.length; i < len; i++) {
             this.regions.push(new cursor.CursorRegion(features[i]));
         }
-        this.updateRegionDisplay();
+        this.updateRegionDisplay(1);
         this.filterRegions();
 
     };
@@ -127,10 +138,14 @@ var cursor = (function (cursor) {
                 });
             }
 
-            myself.updateRegionDisplay();
+            myself.updateRegionDisplay(resevoirSampledRegionListLength/myself.filteredRegions.length);
 
             // If filteredRegions set is > 10,000 downsample
-            myself.filteredRegions = downsample(myself.filteredRegions, 10000);
+             if (myself.filteredRegions.length >= resevoirSampledRegionListLength) {
+
+                myself.filteredRegions = resevoirSampledRegionList(myself.filteredRegions, resevoirSampledRegionListLength);
+            }
+
 
             myself.browser.update();
 
@@ -179,7 +194,7 @@ var cursor = (function (cursor) {
 
         }
 
-        function downsample(array, max) {
+        function resevoirSampledRegionList(array, max) {
 
             var downsampled = [],
                 len = array.length,
