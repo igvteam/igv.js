@@ -4,6 +4,11 @@ var igv = (function (igv) {
 
     igv.TrackPanel = function (track, browser) {
 
+        this.browser = browser;
+        this.track = track;
+        this.order = 0;
+        this.marginBottom = 10;
+
         var viewportHeight,
             viewportDiv,
             trackDiv,
@@ -14,30 +19,24 @@ var igv = (function (igv) {
             contentWidth,
             closeButton,
             labelButton,
-            trackFilterButtonDiv,
-            filterButton,
-            trackContainerDiv = browser.trackContainerDiv,
-            trackPanel = this;
-
-        this.browser = browser;
-        this.track = track;
-        this.order = 0;
-        this.marginBottom = 10;
+            trackFilterButtonDiv;
 
         viewportHeight = track.height;
 
         // track
         trackDiv = document.createElement("div");
-        trackContainerDiv.appendChild(trackDiv);
+        browser.trackContainerDiv.appendChild(trackDiv);
         trackDiv.className = "igv-track-div";
         trackDiv.style.top = browser.rootHeight + "px";
         trackDiv.style.height = viewportHeight + "px";
+
         this.trackDiv = trackDiv;
 
         // controls
         controlDiv = document.createElement("div");
         trackDiv.appendChild(controlDiv);
         controlDiv.className = "igv-control-div";
+
         this.controlDiv = controlDiv;
 
         if (browser.type === "GTEX") {
@@ -66,6 +65,7 @@ var igv = (function (igv) {
         viewportDiv.className = "igv-viewport-div";
         viewportDiv.style.left = controlDiv.clientWidth + "px";
         viewportDiv.style.height = viewportHeight + "px";
+
         this.viewportDiv = viewportDiv;
 
         // Content
@@ -74,6 +74,7 @@ var igv = (function (igv) {
         viewportDiv.appendChild(contentDiv);  // Note, must do this before getting width for canvas
         contentDiv.className = "igv-content-div";
         contentDiv.style.height = contentHeight + "px";
+
         this.contentDiv = contentDiv;
 
         contentWidth = contentDiv.clientWidth;

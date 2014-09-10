@@ -80,7 +80,7 @@ var cursor = (function (cursor) {
 
     };
 
-    cursor.CursorModel.prototype.filterRegions = function () {
+    cursor.CursorModel.prototype.filterRegions = function (doSortRegions) {
 
         var trackPackages = [],
             filterPackages = [],
@@ -145,7 +145,6 @@ var cursor = (function (cursor) {
 
                 myself.filteredRegions = resevoirSampledRegionList(myself.filteredRegions, resevoirSampledRegionListLength);
             }
-
 
             myself.browser.update();
 
@@ -273,6 +272,8 @@ var cursor = (function (cursor) {
             }
 
 
+
+            this.isSorted = true;
             continuation();
         });
 

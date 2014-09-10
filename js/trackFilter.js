@@ -42,21 +42,25 @@ igv = (function (igv) {
 
     igv.TrackFilter.prototype.onHideModalEvaluateFilter = function () {
 
-        var filterIconColor,
-            modalPresentationButton = $('#' + "modalPresentationButton_" + this.guid),
+        var modalPresentationButton = $('#' + "modalPresentationButton_" + this.guid),
             minimumElement = $('#' + 'minimumScoreFilterID_' + this.guid),
             maximumElement = $('#' + 'maximumScoreFilterID_' + this.guid);
 
-        filterIconColor = (this.doEvaluateFilter) ? "red" : "black";
-        modalPresentationButton.css("color", filterIconColor);
+        this.minimum = igv.isNumber(minimumElement.val()) ? parseFloat(minimumElement.val(), 10) : undefined;
+        this.maximum = igv.isNumber(maximumElement.val()) ? parseFloat(maximumElement.val(), 10) : undefined;
+
+        if ("minMaxRadio_" + this.guid === this.radioButton.id) {
+
+            if (undefined === this.minimum && undefined === this.maximum) {
+                modalPresentationButton.css("color", "black");
+            }
+
+        } else {
+            modalPresentationButton.css("color", (this.doEvaluateFilter) ? "red" : "black");
+        }
 
         if (this.doEvaluateFilter) {
-
-            this.minimum = igv.isNumber(minimumElement.val()) ? parseFloat(minimumElement.val(), 10) : undefined;
-            this.maximum = igv.isNumber(maximumElement.val()) ? parseFloat(maximumElement.val(), 10) : undefined;
-
             this.trackPanel.browser.cursorModel.filterRegions();
-
         }
 
     };
