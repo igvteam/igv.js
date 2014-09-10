@@ -16,7 +16,7 @@ igv = (function (igv) {
             trackFilterOverlayRenderer = function () {
 
                 // do nothing
-                console.log("nothing to see here");
+//                console.log("nothing to see here");
 
             };
 
@@ -187,7 +187,7 @@ igv = (function (igv) {
 
                 if (radio.checked) {
                     chosen = radio;
-                    console.log("radio " + radio.id + " " + radio.checked);
+//                    console.log("radio " + radio.id + " " + radio.checked);
                 }
 
             });
