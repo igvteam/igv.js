@@ -40,6 +40,58 @@ var igv = (function (igv) {
 
         this.ctx = canvas.getContext("2d");
 
+        var tipCanvas = document.createElement('canvas');
+        tipCanvas.style.position = 'absolute';
+        tipCanvas.style.width = "100px";
+        tipCanvas.style.height = "20px";
+        tipCanvas.style.left = "-200px";
+        tipCanvas.setAttribute('width', "100px");    //Must set the width & height of the canvas
+        tipCanvas.setAttribute('height', "20px");
+        var tipCtx = tipCanvas.getContext("2d");
+        contentDiv.appendChild(tipCanvas);
+        
+        this.canvas.onmousemove = function (e) {
+        	var isFirefox = typeof InstallTrigger !== 'undefined';
+
+            var isOpera = !!window.opera || navigator.userAgent.indexOf(' OPR/') >= 0;
+            var isChrome = !!window.chrome && !isOpera;
+
+            var mouseX;
+            var mouseY;
+
+            if (isFirefox) {
+                // It's Firefox
+                mouseX = e.layerX;
+                mouseY = e.layerY;
+            } else {
+                // It's Chrome or Safari and works for both
+                mouseX = e.offsetX;
+                mouseY = e.offsetY;
+            }
+            var hit = false;
+            for (var i = 0; i < igv.guichromosomes.length; i++) {    		
+        		var g = igv.guichromosomes[i];
+        		if (g.x < mouseX && g.right > mouseX && g.y < mouseY && g.bottom > mouseY) {
+        			var dy = mouseY - g.y;
+        			var bp = Math.round(g.size * dy / g.h);
+        			//log("Found chr "+g.name+", bp="+bp+", mousex="+mouseX+", mousey="+mouseY);
+        			tipCanvas.style.left = Math.round(mouseX+20) + "px";
+        			tipCanvas.style.top = Math.round(mouseY-5) + "px";
+        			 
+        			//log("width/height of tip canvas:"+tipCanvas.width+"/"+tipCanvas.height);
+        			//log("tipCanvas.left="+tipCanvas.style.left);
+        			tipCtx.clearRect(0, 0, tipCanvas.width, tipCanvas.height);
+        			tipCtx.fillStyle = 'rgb(255,255,220)';
+        			tipCtx.fillRect(0, 0, tipCanvas.width, tipCanvas.height);
+        			tipCtx.fillStyle = 'rgb(0,0,0)';
+        			var mb = Math.round(bp/1000000);
+        			tipCtx.fillText(g.name+" @ "+mb+" MB", 3, 12);
+                    hit = true;
+        			break;
+        		}
+        	}
+            if (!hit) { tipCanvas.style.left = "-200px"; }
+        }
         this.canvas.onclick = function (e) {
             var isFirefox = typeof InstallTrigger !== 'undefined';
 
@@ -115,11 +167,13 @@ var igv = (function (igv) {
         	log("No chromosomes yet, returning");
         	return;
         }
-        var chrwidth = Math.min(30, w / 24);
+        var totalchrwidth = Math.min(50, w / 25);
+        var chrwidth = Math.min(20, totalchrwidth/2);
         var chrheight = h-40;
         var longestChr = genome.getChromosome('chr1');
         var cytobands = longestChr.cytobands;
         var top = 30;
+        var me = this;
         var maxLen = cytobands[cytobands.length-1].end;
         if (!image || image == null) {
             image = document.createElement('canvas');
@@ -133,17 +187,57 @@ var igv = (function (igv) {
             	if (nr > 23) break;
             	nr++;
             	var chromosome = genome.getChromosome(chr);
-            	chromosome.x = nr*chrwidth;
+            	chromosome.x = nr*totalchrwidth;
             	var guichrom = new Object();
             	guichrom.name = chr;
             	igv.guichromosomes.push(guichrom); 
-            	drawIdeogram(guichrom, chromosome.x, top, chromosome, bufferCtx, chrwidth/2,chrheight, maxLen);
+            	
+            	drawIdeogram(guichrom, chromosome.x, top, chromosome, bufferCtx, chrwidth,chrheight, maxLen);
             	
             }
             this.ideograms= image;           
-        }
-       
         
+	        // now add some tracks?
+	        log("============= PROCESSING "+igv.browser.trackPanels.length+" TRACKS");
+	        for (var i = 0; i < igv.browser.trackPanels.length; i++) {
+	        	var trackPanel = igv.browser.trackPanels[i];
+	        	var track = trackPanel.track;
+	        	log("-------Got track "+i+": ");
+	        	for (var key in track) {
+	        		if (key != "draw" && key != "drawLabel") log("   key "+key+":"+track[key]);
+	        	}
+	        	log("Got track: "+track.label);
+	        	if (track.id == "genes") {
+	        		log("adding gene tracks to karyo view: TODO");
+	        		var source = track.featureSource;
+	        		log("filename="+source.filename);
+	        		nr = 0;	                
+	                for (chr in chromosomes) {
+	                	log("=========== processing chromosome "+chr);
+	                	log("Currently just loading 1 chromosome, until we have some more reasonable tracks to actaully draw in a whole genome view :-)")
+	                	if (nr > 1) break;
+	                	var guichrom = igv.guichromosomes[nr];
+	                	nr++;
+	                	loadfeatures(source, chr, 0, guichrom.size, guichrom, bufferCtx);		                   
+	                }
+	        	}
+	        }
+       
+        }
+        function loadfeatures(source, chr, start, end, guichrom, bufferCtx) {
+        	log("=== loadfeatures of chr "+chr+", x="+guichrom.x);
+        	source.getFeatures(chr, start, end, function (featureList) {
+                if (featureList) {		
+                     len = featureList.length;
+                     log(" -->- loaded: chrom "+chr+" as "+len+" features");
+                     drawFeatures(featureList, guichrom, guichrom.x, top,  bufferCtx, chrwidth,chrheight, maxLen);
+                     me.repaint();
+                }
+                else {
+             	   log("Track has no features yet");
+                }
+     		});
+        }
         this.ctx.drawImage(image, 0, 0);
         
         // Draw red box
@@ -155,11 +249,31 @@ var igv = (function (igv) {
 
         var boxPY1 = top+Math.round(this.browser.referenceFrame.start * ideoScale);
         //var boxPY2 = Math.round((this.browser.referenceFrame.start+100) * ideoScale);
-        this.ctx.strokeStyle = "red";
+        this.ctx.strokeStyle = "rgb(150, 0, 0)";
         this.ctx.lineWidth = 2;
-        this.ctx.strokeRect(chromosome.x-2, boxPY1, chrwidth/2+4, 3 );
+        this.ctx.strokeRect(chromosome.x-3, boxPY1, chrwidth+6, 3 );
         this.ctx.restore();
        
+        function drawFeatures(featurelist, guichrom, ideogramLeft, top, bufferCtx, ideogramWidth, ideogramHeight, longestChr) {
+        	 if (!genome) return;            
+             if (!chromosome) return;
+             if (!featurelist) return;
+             var len = featurelist.length;
+             if (len == 0) return;
+             var scale = ideogramHeight / longestChr;
+             log("drawing "+len+" feaures of chrom "+guichrom.name);
+             var dx = 3;
+             for (var i = 0; i < featurelist.length; i++) {
+                 var feature = featurelist[i];
+                
+                 var starty = scale * feature.start + top;
+                 var endy = scale * feature.end + top;
+                 var dy = Math.max(0.01, endy - starty);
+                 if (i < 3) log("Drawing feature  "+feature.start+"-"+feature.end+" -> "+starty+", dy="+dy);
+                 bufferCtx.fillStyle = 'rgb(0,0,150)'; //g2D.setColor(getCytobandColor(cytoband));
+                 bufferCtx.fillRect(ideogramLeft+ideogramWidth+3, starty,  dx, dy);             
+             }
+        }
         function drawIdeogram(guichrom, ideogramLeft, top, chromosome, bufferCtx, ideogramWidth, ideogramHeight, longestChr) {
            
             if (!genome) return;            
@@ -208,7 +322,8 @@ var igv = (function (igv) {
                             yC[2] = starty;
                             xC[2] = centerx;
                         }
-                        bufferCtx.fillStyle = "rgb(150, 0, 0)"; //g2D.setColor(Color.RED.darker());
+                        // centromer: carl wants another color
+                        bufferCtx.fillStyle = "rgb(220, 150, 100)"; //g2D.setColor(Color.RED.darker());
                         bufferCtx.strokeStyle = "rgb(150, 0, 0)"; //g2D.setColor(Color.RED.darker());
                         bufferCtx.polygon(xC, yC, 1, 0);
                        // g2D.fillPolygon(xC, yC, 3);
