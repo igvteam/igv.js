@@ -247,17 +247,16 @@ var igv = (function (igv) {
             }
         }
 
-        function addTrackHandlers(panel) {
+        function addTrackHandlers(trackPanel) {
 
-            var canvas = panel.canvas;
+            var canvas = trackPanel.canvas;
             var isMouseDown = false;
             var lastMouseX;
-            var referenceFrame = panel.browser.referenceFrame;
-
+            var referenceFrame = trackPanel.browser.referenceFrame;
 
             canvas.onmousemove = throttle(function (e) {
 
-                var mouseX = e.clientX - canvas.offsetLeft;//e.pageX - $(this).offset().left;
+                var mouseX = e.clientX - canvas.offsetLeft;
 
                 if (isMouseDown) {
 
@@ -265,7 +264,10 @@ var igv = (function (igv) {
 
                         referenceFrame.shiftPixels(lastMouseX - mouseX);
 
-//                        if (igv.referenceFrame.start < 0) igv.referenceFrame.start = 0;
+                        if (referenceFrame.start < 0) {
+                            referenceFrame.start = 0;
+                        }
+
 //                        if (igv.genome) {
 //                            var chromosome = igv.genome.getChromosome(igv.referenceFrame.chr);
 //                            var widthBP = Math.round((igv.trackWidth - igv.labelWidth) * igv.referenceFrame.bpPerPixel);
@@ -279,7 +281,7 @@ var igv = (function (igv) {
                     }
 
                     lastMouseX = mouseX;
-                    panel.browser.repaint();
+                    trackPanel.browser.repaint();
                 }
 
             }, 20);
@@ -289,17 +291,16 @@ var igv = (function (igv) {
                 isMouseDown = true;
                 var mouseX = e.clientX - canvas.offsetLeft; //e.pageX - $(this).offset().left;
                 var mouseY = e.clientY - canvas.offsetTop;
-                ; //e.pageY - $(this).offset().top;
 
                 this.lastMouseX = mouseX;
 
 
-            }
+            };
 
             canvas.onmouseup = function (e) {
                 isMouseDown = false;
                 lastMouseX = null;
-            }
+            };
 
             canvas.onmouseout = function (e) {
                 isMouseDown = false;
@@ -310,20 +311,20 @@ var igv = (function (igv) {
                 var mouseX = e.clientX - canvas.offsetLeft; //e.pageX - $(this).offset().left;
                 var mouseY = e.clientY - canvas.offsetTop;
 
-            }
+            };
 
             canvas.ondblclick = function (e) {
                 var mouseX = e.clientX - canvas.offsetLeft; //e.pageX - $(this).offset().left;
                 var mouseY = e.clientY - canvas.offsetTop;
 
-                if (panel.track.handleDblClick) {
-                    panel.track.handleDblClick(mouseX, mouseY, panel.viewportDiv);
+                if (trackPanel.track.handleDblClick) {
+                    trackPanel.track.handleDblClick(mouseX, mouseY, trackPanel.viewportDiv);
                 }
 
                 else {
                     var newCenter = Math.round(igv.referenceFrame.start + mouseX * igv.referenceFrame.bpPerPixel);
                     referenceFrame.bpPerPixel /= 2;
-                    panel.browser.goto(igv.referenceFrame.chr, newCenter);
+                    trackPanel.browser.goto(igv.referenceFrame.chr, newCenter);
                 }
             }
 
