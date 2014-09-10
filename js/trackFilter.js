@@ -10,6 +10,36 @@ igv = (function (igv) {
         this.radioButton = undefined;
     };
 
+    igv.TrackFilter.prototype.makeTrackFilterOverlayRenderer = function (cursorHistogramRenderMinimumOverlay, cursorHistogramRenderMaximumOverlay) {
+
+        var myself = this,
+            trackFilterOverlayRenderer = function () {
+
+                // do nothing
+                console.log("nothing to see here");
+
+            };
+
+        if ("minMaxRadio_" + this.guid === this.radioButton.id) {
+
+            trackFilterOverlayRenderer = function () {
+
+                if (myself.minimum) {
+                    cursorHistogramRenderMinimumOverlay(myself.minimum);
+                }
+
+                if (myself.maximum) {
+                    cursorHistogramRenderMaximumOverlay(myself.maximum);
+                }
+
+            };
+
+
+        }
+
+        return trackFilterOverlayRenderer;
+    };
+
     igv.TrackFilter.prototype.onHideModalEvaluateFilter = function () {
 
         var filterIconColor,
