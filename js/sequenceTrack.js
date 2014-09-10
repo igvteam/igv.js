@@ -1,7 +1,6 @@
 var igv = (function (igv) {
 
-    igv.SequenceTrack = function (sequenceSource) {
-        this.dataSource = sequenceSource;
+    igv.SequenceTrack = function () {
         this.label = "";
         this.id = "sequence";
         this.height = this.preferredHeight;    // The preferred height
@@ -19,7 +18,7 @@ var igv = (function (igv) {
         }
         else {
 
-            this.dataSource.getSequence(chr, tileStart, tileEnd, function (sequence) {
+            igv.sequenceSource.getSequence(chr, tileStart, tileEnd, function (sequence) {
 
                 console.log(chr, igv.numberFormatter(tileStart), igv.numberFormatter(tileEnd), " SEQ");
 

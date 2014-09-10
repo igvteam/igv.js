@@ -1,7 +1,6 @@
 var igv = (function (igv) {
 
     var host = window.location.hostname,
-        fastaURL = "http://igvdata.broadinstitute.org/genomes/seq/hg19/hg19.fasta",
         cytobandURL = "http://igvdata.broadinstitute.org/genomes/seq/hg19/cytoBand.txt",
         gencodeURL = "http://igvdata.broadinstitute.org/annotations/hg19/genes/gencode.v18.collapsed.bed";
 
@@ -33,7 +32,14 @@ var igv = (function (igv) {
     }
 
 
-    igv.createBrowser = function (type) {
+    /**
+     * Create an igv.browser instance.  This object defines the public API for interacting with the genome browser.
+     *
+     * @param options Object specifying inital configuration options.
+     *
+     * @returns {Browser|*|igv.IdeoPanel.browser|igv.KaryoPanel.browser|cursor.CursorModel.browser|igv.TrackPanel.browser}
+     */
+    igv.createBrowser = function (options) {
 
 
         igv.browser = new igv.Browser("IGV");
@@ -50,17 +56,13 @@ var igv = (function (igv) {
         // DOM
         $(rootDiv).append(contentKaryo);
         $(rootDiv).append(contentContainer);
-        
+
         $(contentContainer).append(contentRoot);
-        
-        $(contentRoot).append(contentHeader);        
+
+        $(contentRoot).append(contentHeader);
         $(contentRoot).append(trackContainer);
 
         browser.startup = function () {
-
-            browser.genome = null;
-
-            browser.referenceFrame = null;
 
             browser.controlPanelWidth = 50;
 
@@ -68,58 +70,60 @@ var igv = (function (igv) {
 
             browser.trackPanels = [];
 
-            // Need to set an inital locus, use chr1 for now
-            browser.referenceFrame = new igv.ReferenceFrame("chr1", 1, 240000000);
+            igv.sequenceSource = igv.getFastaSequence(options.fastaURL);
 
-            igv.sequenceSource = igv.getFastaSequence(fastaURL);
+            if (options.showKaryo) {
+                browser.karyoPanel = new igv.KaryoPanel(browser);
+                $('#igvKaryoDiv').append(browser.karyoPanel.div);
+                browser.karyoPanel.resize();
+            }
 
-            
-            browser.karyoPanel = new igv.KaryoPanel(browser);
-            $('#igvKaryoDiv').append(browser.karyoPanel.div);
-            browser.karyoPanel.resize();
 
-            
             browser.ideoPanel = new igv.IdeoPanel(browser);
             $('#igvHeaderDiv').append(browser.ideoPanel.div);
             browser.ideoPanel.resize();
 
 
-            igv.loadGenome(cytobandURL, function (genome) {
+            igv.loadGenome(options.cytobandURL, function (genome) {
+
                 browser.genome = genome;
+
+                // Set inital locus
+                var firstChrName = browser.genome.chromosomeNames[0],
+                    firstChr = browser.genome.chromosomes[firstChrName];
+
+                browser.referenceFrame = new igv.ReferenceFrame(firstChrName, 0, firstChr.bpLength);
+
+
                 if (browser.ideoPanel) browser.ideoPanel.repaint();
                 if (browser.karyoPanel) browser.karyoPanel.repaint();
-            });
 
-            browser.addTrack(new igv.RulerTrack());
 
-            browser.addTrack(new igv.SequenceTrack(igv.sequenceSource));
+                browser.addTrack(new igv.RulerTrack());
 
-            browser.addTrack(new igv.GeneTrack(gencodeURL));
+                // Load initial tracks, if any
+                if (options.tracks) {
+
+                    options.tracks.forEach(function (track) {
+                        browser.addTrack(track);
+                    });
+
+                }
+
 
             // TODO: Needs to be a better way to grab the right track and change this
             browser.trackPanels[browser.trackPanels.length - 1].order = 10000;
 
 
-            window.onresize = throttle(function () {
-                if (browser.ideoPanel) browser.ideoPanel.resize();
-                if (browser.karyoPanel) browser.karyoPanel.resize();
-                browser.trackPanels.forEach(function (panel) {
-                    panel.resize();
-                })
-            }, 10);
+                window.onresize = throttle(function () {
+                    if (browser.ideoPanel) browser.ideoPanel.resize();
+                    if (browser.karyoPanel) browser.karyoPanel.resize();
+                    browser.trackPanels.forEach(function (panel) {
+                        panel.resize();
+                    })
+                }, 10);
+            });
 
-        }
-
-        function zoomOut() {
-            browser.zoomOut();
-        }
-
-        function zoomIn() {
-            browser.zoomIn();
-        }
-
-        function search(arg) {
-            browser.search(arg);
         }
 
         return browser;

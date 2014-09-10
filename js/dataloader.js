@@ -8,15 +8,15 @@ var igv = (function (igv) {
 
         if (this.url.endsWith(".gz")) {
             this.loadArrayBuffer(function (data) {
-                var inflate = new Zlib.Gunzip(new Uint8Array(data));
-                var plain = inflate.decompress();
-                var result = "";
-                for (var i = 0, len = plain.length; i < len; i++) {
-                    result = result + String.fromCharCode(plain[i]);
-                }
-                continuation(result);
-            },
-            task);
+                    var inflate = new Zlib.Gunzip(new Uint8Array(data));
+                    var plain = inflate.decompress();
+                    var result = "";
+                    for (var i = 0, len = plain.length; i < len; i++) {
+                        result = result + String.fromCharCode(plain[i]);
+                    }
+                    continuation(result);
+                },
+                task);
         }
         else {
 
@@ -24,7 +24,7 @@ var igv = (function (igv) {
 
             var oReq = new XMLHttpRequest();   // Note: $.ajax was unreliable with range headers
 
-            if(task) task.xhrRequest = oReq;
+            if (task) task.xhrRequest = oReq;
 
             oReq.open("GET", this.url);
 
@@ -65,7 +65,7 @@ var igv = (function (igv) {
 
         var oReq = new XMLHttpRequest();
 
-        if(task) task.xhrRequest = oReq;
+        if (task) task.xhrRequest = oReq;
 
         oReq.open("GET", this.url);
 
@@ -103,7 +103,7 @@ var igv = (function (igv) {
             // TODO -- handle this
         }
 
-        oReq.onabort = function(event) {
+        oReq.onabort = function (event) {
             console.log("Aborted");
             continuation(null);
         }
@@ -112,6 +112,49 @@ var igv = (function (igv) {
 
     }
 
+
+    igv.DataLoader.prototype.postJson = function (data, continuation, task) {
+
+        var loader = this,
+            oReq = new XMLHttpRequest();
+
+        if(task) task.xhrRequest = oReq;
+
+        oReq.open("POST", this.url);
+
+        oReq.setRequestHeader("Content-Type", "application/json");
+
+        oReq.onload = function (event) {
+
+            loader.status = oReq.status;
+            var resp = oReq.responseText;
+            continuation(resp);
+
+        }
+
+        oReq.onerror = function (event) {
+            //    console.log("Error: " + oReq.responseText);
+
+            if (loader.onerror) {
+                loader.onerror(event);
+            }
+            else {
+                continuation(null);
+            }
+        }
+
+        oReq.ontimeout = function (event) {
+            // TODO -- handle this
+        }
+
+        oReq.onabort = function (event) {
+            console.log("Aborted");
+            continuation(null);
+        }
+
+        oReq.send(JSON.stringify(data));
+
+    }
 
     igv.DataLoader.prototype.loadHeader = function (continuation) {
 
