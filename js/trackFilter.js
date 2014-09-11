@@ -59,7 +59,9 @@ igv = (function (igv) {
             modalPresentationButton.css("color", (this.doEvaluateFilter) ? "red" : "black");
         }
 
-        if (this.doEvaluateFilter) {
+        modalPresentationButton.css("color", (this.isFilterActive) ? "red" : "black");
+
+        if (this.doEvaluateFilter || (!this.isFilterActive)) {
             this.trackPanel.browser.cursorModel.filterRegions();
         }
 
@@ -155,6 +157,7 @@ igv = (function (igv) {
                 }
             });
 
+//            console.log("isFilterActive " + myself.isFilterActive);
         });
 
         // initialize chosen radio button
@@ -225,8 +228,6 @@ igv = (function (igv) {
 
         return presentationButton;
     };
-
-
 
     return igv;
 
