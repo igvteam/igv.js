@@ -66,7 +66,10 @@
     <table>
         <tr>
             <td><a style="color: blue;cursor: pointer"
-                   onclick="igv.browser.loadTrack('http://www.broadinstitute.org/igvdata/1KG/b37/data/NA06984/alignment/NA06984.mapped.ILLUMINA.bwa.CEU.low_coverage.20120522.bam', 'NA06984')">Load NA06984 BAM</a></td>
+                   onclick="igv.browser.loadTrack({
+                     url: 'http://www.broadinstitute.org/igvdata/1KG/b37/data/NA06984/alignment/NA06984.mapped.ILLUMINA.bwa.CEU.low_coverage.20120522.bam',
+                     label: 'NA06984'
+                   }">Load NA06984 BAM</a></td>
         </tr>
         <tr>
             <td><a style="color: blue;cursor: pointer" onclick="igv.browser.search('chr1:155,169,232-155,169,271')">

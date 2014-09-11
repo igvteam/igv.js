@@ -4,12 +4,11 @@
 var igv = (function (igv) {
 
 
-    igv.WIGTrack = function (url) {
-        this.url = url;
+    igv.WIGTrack = function (config) {
+        this.url = config.url;
         this.featureSource = new igv.WIGFeatureSource(this.url);
-
-        this.label = "WIGLabel";
-        this.id = "wig";
+        this.label = config.label;
+        this.id = config.id || this.label;
         this.height = 100;
 
     };
