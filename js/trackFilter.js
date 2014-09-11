@@ -5,7 +5,6 @@ igv = (function (igv) {
 
         this.trackPanel = trackPanel;
         this.guid = igv.guid();
-        this.doEvaluateFilter = false;
         this.isFilterActive = true;
         this.radioButton = undefined;
     };
@@ -40,33 +39,32 @@ igv = (function (igv) {
         return trackFilterOverlayRenderer;
     };
 
-    igv.TrackFilter.prototype.onHideModalEvaluateFilter = function () {
+    igv.TrackFilter.prototype.doEvaluateFilter = function () {
 
         var modalPresentationButton = $('#' + "modalPresentationButton_" + this.guid),
             minimumElement = $('#' + 'minimumScoreFilterID_' + this.guid),
             maximumElement = $('#' + 'maximumScoreFilterID_' + this.guid);
 
-        this.minimum = igv.isNumber(minimumElement.val()) ? parseFloat(minimumElement.val(), 10) : undefined;
-        this.maximum = igv.isNumber(maximumElement.val()) ? parseFloat(maximumElement.val(), 10) : undefined;
-
+        // This will undo this filter if previously set
         if (!this.isFilterActive) {
+            modalPresentationButton.css("color", "black");
             this.trackPanel.browser.cursorModel.filterRegions();
             return;
         }
 
+        modalPresentationButton.css("color", "red");
+
         if ("minMaxRadio_" + this.guid === this.radioButton.id) {
+
+            this.minimum = igv.isNumber(minimumElement.val()) ? parseFloat(minimumElement.val(), 10) : undefined;
+            this.maximum = igv.isNumber(maximumElement.val()) ? parseFloat(maximumElement.val(), 10) : undefined;
 
             if (undefined === this.minimum && undefined === this.maximum) {
                 modalPresentationButton.css("color", "black");
             }
-
-        } else {
-            modalPresentationButton.css("color", (this.doEvaluateFilter) ? "red" : "black");
         }
 
-        if (this.doEvaluateFilter) {
-            this.trackPanel.browser.cursorModel.filterRegions();
-        }
+        this.trackPanel.browser.cursorModel.filterRegions();
 
     };
 
@@ -112,13 +110,13 @@ igv = (function (igv) {
 
         parentDiv.innerHTML = this.createFilterModalMarkupWithGUID(this.guid);
 
-
         // min/max
         modalDialogDataTarget = $('#modalDialogDataTarget_' + this.guid);
 
         modalDialogDataTarget.on('hidden.bs.modal', function (e) {
 
-            myself.onHideModalEvaluateFilter();
+            // do nothing
+
         });
 
         // initialize chosen radio button
@@ -140,14 +138,16 @@ igv = (function (igv) {
         closeTrackFilterModal = $('#closeTrackFilterModal_' + this.guid);
         closeTrackFilterModal.on('click', function (e) {
 
-            myself.doEvaluateFilter = false;
+            // do nothing
+
         });
 
         // apply filter and dismiss filter widget
         applyTrackFilterModal = $('#applyTrackFilterModal_' + this.guid);
         applyTrackFilterModal.on('click', function (e) {
 
-            myself.doEvaluateFilter = true;
+            myself.doEvaluateFilter();
+            
         });
 
         function chosenRadioButton(radioButtonGroupContainer) {
