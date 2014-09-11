@@ -7,9 +7,10 @@ var igv = (function (igv) {
      * @param url - url to the webservice
      * @constructor
      */
-    igv.MpgFeatureSource = function (url) {
+    igv.MpgFeatureSource = function (config) {
 
-        this.url = url;
+        this.url = config.url;
+        this.trait = config.trait;
 
 
     };
@@ -26,30 +27,41 @@ var igv = (function (igv) {
      */
     igv.MpgFeatureSource.prototype.getFeatures = function (queryChr, bpStart, bpEnd, success, task) {
 
-        if(this.cache && cache.chr === queryChr && cache.end > bpStart && cache.start < bpEnd) {
-            success(cache.features);
+        var source = this;
+
+        if(this.cache && this.cache.chr === queryChr) {  // && cache.end > bpStart && cache.start < bpEnd) {
+            success(this.cache.features);
         }
 
         else {
 
             function loadFeatures() {
+
                 var dataLoader = new igv.DataLoader(this.url),
                     data = {
                         "user_group": "ui",
                         "filters": [
-                            { "filter_type": "STRING", "operand": "CHROM", "operator": "EQ", "value": queryChr },
-                            {"filter_type": "FLOAT", "operand": "POS", "operator": "GTE", "value": bpStart },
-                            {"filter_type": "FLOAT", "operand": "POS", "operator": "LTE", "value": bpEnd }
+                            {"operand": "CHROM",  "operator": "EQ","value": "1", "filter_type": "STRING" },
+                            {"operand": "PVALUE", "operator": "LTE", "value": 5E-2, "filter_type": "FLOAT"}
                         ],
-                        "columns": ["ID", "CHROM", "POS", "DBSNP_ID", "Consequence", "Protein_change"]
+                        "trait": source.trait
                     };
+
                 dataLoader.postJson(data, function (result) {
+
                         if (result) {
+
                             var variants = JSON.parse(result).variants;
-                            this.cache = {
+
+                            variants.sort(function(a, b) {
+                                return a.POS - b.POS;
+                            });
+
+                            source.cache = {
                                 chr: queryChr,
                                 start: bpStart,
-                                end: bpEnd
+                                end: bpEnd,
+                                features: variants
                             };
                             success(variants);
                         }

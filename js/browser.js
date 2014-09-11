@@ -41,7 +41,7 @@ var igv = (function (igv) {
      */
     igv.Browser.prototype.addTrack = function (track, position) {
 
-        var trackPanel = new igv.TrackPanel(track, this);
+        var trackPanel = new igv.TrackView(track, this);
 
         if (trackPanel.track instanceof igv.EqtlTrack) {
             trackPanel.trackDiv.style.height = this.trackHeight + "px";

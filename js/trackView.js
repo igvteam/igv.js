@@ -2,7 +2,7 @@ var igv = (function (igv) {
 
     var maxViewportHeight = 400;
 
-    igv.TrackPanel = function (track, browser) {
+    igv.TrackView = function (track, browser) {
 
         this.browser = browser;
         this.track = track;
@@ -39,7 +39,7 @@ var igv = (function (igv) {
 
         this.controlDiv = controlDiv;
 
-        if (browser.type === "GTEX") {
+       // if (browser.type === "GTEX") {
             var controlWidth = controlDiv.clientWidth;
             var controlHeight = controlDiv.clientHeight;
 
@@ -54,7 +54,7 @@ var igv = (function (igv) {
             this.controlCtx = controlCanvas.getContext("2d");
 
 
-        }
+    //    }
 
         // TODO - dat - this is so nothing breaks that is dependent on igv.controlPanelWidth
         igv.controlPanelWidth = controlDiv.clientWidth;
@@ -191,20 +191,23 @@ var igv = (function (igv) {
 
                 labelButton.onclick = function () {
 
-                    track.featureSource.allFeatures(function (featureList) {
+                    if(browser.cursorModel) {
+                        track.featureSource.allFeatures(function (featureList) {
 
-                        browser.referenceFrame.start = 0;
-                        browser.cursorModel.setRegions(featureList);
+                            browser.referenceFrame.start = 0;
+                            browser.cursorModel.setRegions(featureList);
 //                        browser.update();
 
 
-                    });
+                        });
 
-                    browser.trackPanels.forEach(function (trackPanel) {
-                        if (track !== trackPanel.track) {
-                            trackPanel.track.labelButton.className = "btn btn-xs btn-cursor-deselected";
-                        }
-                    });
+
+                        browser.trackPanels.forEach(function (trackPanel) {
+                            if (track !== trackPanel.track) {
+                                trackPanel.track.labelButton.className = "btn btn-xs btn-cursor-deselected";
+                            }
+                        });
+                    }
                     labelButton.className = "btn btn-xs btn-cursor-selected";
 
                 }
@@ -330,7 +333,7 @@ var igv = (function (igv) {
 
     };
 
-    igv.TrackPanel.prototype.resize = function () {
+    igv.TrackView.prototype.resize = function () {
         var canvas = this.canvas,
             contentDiv = this.contentDiv,
             contentWidth = this.viewportDiv.clientWidth;
@@ -344,7 +347,7 @@ var igv = (function (igv) {
         this.update();
     };
 
-    igv.TrackPanel.prototype.setTrackHeight = function (newHeight) {
+    igv.TrackView.prototype.setTrackHeight = function (newHeight) {
 
         var heightStr = newHeight + "px";
         this.track.height = newHeight;
@@ -362,13 +365,13 @@ var igv = (function (igv) {
         this.update();
     };
 
-    igv.TrackPanel.prototype.update = function () {
+    igv.TrackView.prototype.update = function () {
         this.tile = null;
         this.repaint();
 
     };
 
-    igv.TrackPanel.prototype.repaint = function () {
+    igv.TrackView.prototype.repaint = function () {
 
         if (!this.track) {
             return;
@@ -459,7 +462,7 @@ var igv = (function (igv) {
 
     };
 
-    igv.TrackPanel.prototype.paintImage = function () {
+    igv.TrackView.prototype.paintImage = function () {
 
         this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
 
@@ -471,7 +474,7 @@ var igv = (function (igv) {
         }
     };
 
-    igv.TrackPanel.prototype.tooltipText = function (mouseX, mouseY) {
+    igv.TrackView.prototype.tooltipText = function (mouseX, mouseY) {
         return "";
     };
 

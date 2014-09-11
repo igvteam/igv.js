@@ -1,56 +1,257 @@
-/* Move down content because we have a fixed navbar that is 50px tall */
-body {
-    padding-top: 50px;
-    padding-bottom: 20px;
+.buttons-collect {
+    font-family:Arial, Helvetica, sans-serif;
 }
 
-/* A hack to remove the unwanted "No File Chosen" text from the file upload button */
-input[type='file'] {
-    width: 82px;
+div.button-box {
+    float:left;
+    border: solid 1px #ccc;
+    border-right:none;
+    padding: 7px 10px 7px 10px;
+    background-color:#eee;
+    /*
+    max-width:20%;
+    width:19.85%;
+    height: 40px;
+    text-align: center;
+    float:left;
+    border-style: solid;
+    border-color: black;
+    border-width: 1px;
+    */
 }
 
-.well {
-    background-color: rgba(255, 0, 0, 0.5);
+.button-box-first {
+    border-top-left-radius:5px;
+    border-bottom-left-radius:5px;
 }
 
-.row {
-    text-align: center
+.button-box-last {
+    border-right:solid 1px #ccc !important;
+    border-top-right-radius:5px;
+    border-bottom-right-radius:5px;
+    margin-right:10px;
 }
 
-.btn-file {
+.on {
+    background-color: green;
+}
+
+.off {
+    background-color: blue;
+}
+
+.button {
+    float:left;
+    font-size:12px;
+    border: solid 1px #ccc  !important;
+    padding: 5px 10px 5px 10px;
+    background-color:#fff;
+    color: #555;
+    /*
+    color: white;
+    */
+}
+
+.button:hover {
+    background-color:#eFc;
+    border: solid 1px #aaa;
+    color: #000;
+}
+
+.button:active {
+    background-color: #b0f372;
+    border: solid 1px #390;
+    color: #207302;
+    -webkit-box-shadow: inset 0px 0px 5px 0px rgba(0,0,0,0.25);
+    -moz-box-shadow: inset 0px 0px 5px 0px rgba(0,0,0,0.25);
+    box-shadow: inset 0px 0px 5px 0px rgba(0,0,0,0.25);
+}
+
+.two-button {
+    width:45%;
+    margin-left: 2.5%;
+    margin-right: 2.5%;
+    text-align: center;
+    float: left;
+}
+
+.three-button {
+    width: 30%;
+    margin-left: 1.5%;
+    margin-right: 1.5%;
+    text-align: center;
+    float: left;
+
+}
+
+.button-box-title {
+    width: 100%;
+    text-align:center;
+    font-size: 13px;
+    padding-bottom: 5px;
+    /*
+    height: 50%;
+    color: black;
+    */
+}
+
+.btn-left {
+    border-top-left-radius:5px;
+    border-bottom-left-radius:5px;
+}
+
+.btn-right {
+
+    border-top-right-radius:5px;
+    border-bottom-right-radius:5px;
+}
+
+.btn-active, .btn-active:hover {
+    background-color: #b0f372;
+    border: solid 1px #390;
+    color: #207302;
+    -webkit-box-shadow: inset 0px 0px 5px 0px rgba(0,0,0,0.25);
+    -moz-box-shadow: inset 0px 0px 5px 0px rgba(0,0,0,0.25);
+    box-shadow: inset 0px 0px 5px 0px rgba(0,0,0,0.25);
+}
+
+.button-options {
+
+}
+
+
+
+
+.igvexpRootDiv-horizontal-plot {
     position: relative;
-    overflow: hidden;
+    top: 0px;
+    left: 0px;
+    right: 0px;
+    height: 650px;
 }
 
-.btn-file input[type=file] {
+.igvexpRootDiv-vertical-plot {
+    position: relative;
+    top: 0px;
+    left: 0px;
+    right: 0px;
+    height: 1200px;
+}
+
+.expBoxPlotDiv-horizontal-plot {
     position: absolute;
-    top: 0;
-    right: 0;
-    min-width: 100%;
-    min-height: 100%;
-    font-size: 999px;
-    text-align: right;
-    filter: alpha(opacity=0);
-    opacity: 0;
-    outline: none;
-    background: white;
-    cursor: inherit;
-    display: block;
+    top: 150px;
+    left: 100px;
+    right: 100px;
+    height: 400px;
 }
 
-.spacer5 { height: 5px; width: 100%; font-size: 0; margin: 0; padding: 0; border: 0; display: block; }
-.spacer10 { height: 10px; width: 100%; font-size: 0; margin: 0; padding: 0; border: 0; display: block; }
-.spacer15 { height: 15px; width: 100%; font-size: 0; margin: 0; padding: 0; border: 0; display: block; }
-.spacer20 { height: 20px; width: 100%; font-size: 0; margin: 0; padding: 0; border: 0; display: block; }
-.spacer25 { height: 25px; width: 100%; font-size: 0; margin: 0; padding: 0; border: 0; display: block; }
-.spacer30 { height: 30px; width: 100%; font-size: 0; margin: 0; padding: 0; border: 0; display: block; }
-.spacer35 { height: 35px; width: 100%; font-size: 0; margin: 0; padding: 0; border: 0; display: block; }
-.spacer40 { height: 40px; width: 100%; font-size: 0; margin: 0; padding: 0; border: 0; display: block; }
-.spacer45 { height: 45px; width: 100%; font-size: 0; margin: 0; padding: 0; border: 0; display: block; }
-.spacer50 { height: 50px; width: 100%; font-size: 0; margin: 0; padding: 0; border: 0; display: block; }
-.spacer100 { height: 100px; width: 100%; font-size: 0; margin: 0; padding: 0; border: 0; display: block; }
-.spacer200 { height: 200px; width: 100%; font-size: 0; margin: 0; padding: 0; border: 0; display: block; }
+.expBoxPlotDiv-vertical-plot {
+    position: absolute;
+    top: 150px;
+    left: 300px;
+    right: 50px;
+    height: 1000px;
+}
 
+.expBoxPlotDiv-isoform-plot {
+    position: absolute;
+    top: 150px;
+    left: 100px;
+    right: 250px;
+    height: 400px;
+}
+
+.expTickLabelDiv-isoform-plot {
+    position: absolute;
+    top: 550px;
+    left: 100px;
+    right: 150px;
+    height: 150px;
+}
+
+.expTickLabelDiv-horizontal-plot {
+    position: absolute;
+    top: 550px;
+    left: 100px;
+    right: 0px;
+    height: 150px;
+}
+
+.expTickLabelDiv-vertical-plot {
+    position: absolute;
+    top: 1150px;
+    left: 300px;
+    right: -100px;
+    height: 100px;
+}
+
+.expRPKMLabelDiv-horizontal-plot {
+    position: absolute;
+    top: 150px;
+    left: 0px;
+    height: 400px;
+    width: 100px;
+}
+
+.expRPKMLabelDiv-vertical-plot {
+    position: absolute;
+    top: 150px;
+    left: 0px;
+    height: 1000px;
+    width: 300px;
+}
+
+#expTitleDiv {
+    position: absolute;
+    font-size: 40px;
+    text-align: center;
+    top: 100px;
+    left: 100px;
+    right: 250px;
+}
+
+#expLegendDiv {
+    position: absolute;
+    top: 150px;
+    right: 0px;
+    height: 400px;
+    width: 250px;
+}
+
+#expControlDiv {
+    position: absolute;
+    left: 100px;
+}
+
+#expRootDiv {
+    clear:both;
+}
+
+#igvControlDiv {
+    margin-left: 40px;
+    margin-bottom: 20px;
+    border-bottom: medium;
+}
+
+#igvTrackHeightInput {
+    width: 50px;
+}
+
+#igvGtexSelectionDiv {
+    margin-left: 40px;
+    clear: both;
+    padding-top: 10px;
+    padding-bottom: 10px;
+}
+
+.igvZoomButton {
+    float: right;
+}
+
+
+
+/* Move down content because we have a fixed navbar that is 50px tall */
 .igv-gtex-root-div {
     display: block;
     position: relative;
@@ -87,6 +288,7 @@ input[type='file'] {
     user-select: none;
 }
 
+
 .igv-header-div {
     position: absolute;
     top:40px;
@@ -99,11 +301,11 @@ input[type='file'] {
     position: absolute;
     left: 0;
     top:80px;
+    left: 0;
     right: 0;
-    font-family: Arial, Helvetica, sans-serif;
-    font-size: medium;
     /*background-color: darkcyan;*/
 }
+
 
 .igv-track-div {
     position: absolute;
@@ -113,23 +315,25 @@ input[type='file'] {
     /*background-color: darkcyan;*/
 }
 
+
 .igv-control-div {
     position: absolute;
-    left: 0;
+    left: 0px;
     width: 50px;
     height: 100%;
-    border:none;
-    padding: 0;
-    background: none;
+    /*background-color: darkcyan;*/
 }
+
+
 
 .igv-viewport-div {
     position: absolute;
     left: 50px;
-    right: 0;
+    right: 0px;
     height: 100%;
     overflow-x: hidden;
     overflow-y: auto;
+    border-bottom:1px solid lightgrey;
     /*background-color: darkcyan;*/
 }
 
@@ -138,61 +342,12 @@ input[type='file'] {
     width: 100%;
 }
 
-.igv-cursorHistogram-div {
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100px;
-    border:none;
-    padding: 0;
-    background: none;
-    outline: thin solid rgba(64, 64, 64, 1.0);
-}
-
-.igv-filter-histogram-button-div {
-    position: absolute;
-    top: 0;
-    left: 0;
-    border:none;
-    padding: 0;
-    background: none;
-}
-
-.igv-filter-div {
-    position: absolute;
-    width: 128px;
-    border:none;
-    padding: 0;
-    height: 100%;
-    background: none;
-}
-
-.igv-filter-button {
-    position: absolute;
-    width: 128px;
-    border:none;
-    padding: 0;
-    height: 100%;
-    background: none;
-}
-
-.igv-filter-thumbnail-horizonal-line {
-    position: absolute;
-    left: 0;
-    width: 128px;
-    height: 2px;
-    border:none;
-    padding: 0;
-    background-color: rgba(255, 0, 0, .75);
-}
-
-
 #dropdown-list {
     max-height: 200px;
     overflow: auto;
     top: 15px;
     position: relative;
-    left: 50px;
+    left: 50px
 }
 
 
@@ -310,6 +465,3 @@ fieldset[disabled] .btn-cursor-deselected.active {
     color: #FFFFFF;
     background-color: #000000;
 }
-
-
-

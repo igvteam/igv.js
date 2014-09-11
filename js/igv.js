@@ -1,13 +1,7 @@
 var igv = (function (igv) {
 
-    var host = window.location.hostname,
-        cytobandURL = "http://igvdata.broadinstitute.org/genomes/seq/hg19/cytoBand.txt",
-        gencodeURL = "http://igvdata.broadinstitute.org/annotations/hg19/genes/gencode.v18.collapsed.bed";
-
 
     // TODO -- this funtion should be in some utility file to avoid copies
-
-
     function throttle(fn, threshhold, scope) {
         threshhold || (threshhold = 100);
         var last, deferTimer;
@@ -35,9 +29,8 @@ var igv = (function (igv) {
     /**
      * Create an igv.browser instance.  This object defines the public API for interacting with the genome browser.
      *
-     * @param options Object specifying inital configuration options.
+     * @param options Object specifying initial configuration options.
      *
-     * @returns {Browser|*|igv.IdeoPanel.browser|igv.KaryoPanel.browser|cursor.CursorModel.browser|igv.TrackPanel.browser}
      */
     igv.createBrowser = function (options) {
 
@@ -92,13 +85,11 @@ var igv = (function (igv) {
                 var firstChrName = browser.genome.chromosomeNames[0],
                     firstChr = browser.genome.chromosomes[firstChrName];
 
-                browser.referenceFrame = new igv.ReferenceFrame(firstChrName, 0, firstChr.bpLength);
+                browser.referenceFrame = new igv.ReferenceFrame(firstChrName, 0, firstChr.bpLength / browser.trackViewportWidth());
 
 
                 if (browser.ideoPanel) browser.ideoPanel.repaint();
                 if (browser.karyoPanel) browser.karyoPanel.repaint();
-
-
                 browser.addTrack(new igv.RulerTrack());
 
                 // Load initial tracks, if any

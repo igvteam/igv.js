@@ -52,7 +52,7 @@ var igv = (function (igv) {
             fastaURL = "http://www.gtexportal.org/igv/assets/hg19/hg19.fa";
             tissueEqtlMappingURL = "http://www.gtexportal.org/igv/assets/eqtl/tissueEqtlMappings.txt";
             cytobandURL = "http://www.gtexportal.org/igv/assets/hg19/cytoBand.txt";
-            gencodeURL = "http://www.gtexportal.org/igv/assets/hg19/gencode.v18.collapsed.bed";
+            gencodeURL = "http://www.gtexportal.org/igv/assets/hg19/gencode.v18.bed";
 
 
         if (igv.gtexBrowser) {
