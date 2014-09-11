@@ -166,10 +166,9 @@ var cursor = (function (cursor) {
                 // spin spinner
                 spinner = igv.getSpinner(sortTrackPanelPostFiltering.viewportDiv);
 
+                // TODO: This is wacky. Needs to be done to maintain sort direction
+                sortTrackPanelPostFiltering.track.sortDirection *= -1;
                 myself.sortRegions(sortTrackPanelPostFiltering.track.featureSource, sortTrackPanelPostFiltering.track.sortDirection, function (regions) {
-
-//                    sortTrackPanelPostFiltering.track.sortDirection *= -1;
-                    sortTrackPanelPostFiltering.track.sortDirection = 1;
 
                     sortTrackPanelPostFiltering.track.sortButton.className = "fa fa-signal";
                     sortTrackPanelPostFiltering.track.sortButton.style.color = "red";
