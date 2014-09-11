@@ -87,17 +87,22 @@ var cursor = (function (cursor) {
         var trackPackages = [],
             filterPackages = [],
             howmany = 0,
+            sortTrackPanelPostFiltering,
             myself = this;
 
         this.browser.trackPanels.forEach(function (trackPanel, tpIndex, trackPanels) {
 
-            // sorting is lost
-            trackPanel.track.sortButton.className = "fa fa-bar-chart-o";
-            trackPanel.track.sortButton.style.color = "black";
-
             trackPanel.track.getFeatureCache(function (featureCache) {
 
                 trackPackages.push({ track: trackPanel.track, trackFilter: trackPanel.track.trackFilter, featureCache: featureCache, cursorHistogram: trackPanel.track.cursorHistogram });
+
+                if (trackPanel.track.isSorted()) {
+                    sortTrackPanelPostFiltering = trackPanel;
+                }
+
+                // sorting will be lost during filtering
+                trackPanel.track.sortButton.className = "fa fa-bar-chart-o";
+                trackPanel.track.sortButton.style.color = "black";
 
                 if (trackPanel.track.trackFilter.isFilterActive) {
                     filterPackages.push({trackFilter: trackPanel.track.trackFilter, featureCache: featureCache });
@@ -108,6 +113,8 @@ var cursor = (function (cursor) {
         });
 
         function runFilters() {
+
+            var spinner;
 
             if (0 === filterPackages.length) {
                 // No filters
@@ -152,7 +159,31 @@ var cursor = (function (cursor) {
                 myself.filteredRegions = resevoirSampledRegionList(myself.filteredRegions, resevoirSampledRegionListLength);
             }
 
-            myself.browser.update();
+            if (sortTrackPanelPostFiltering) {
+
+                console.log("sort " + sortTrackPanelPostFiltering.track.label);
+
+                // spin spinner
+                spinner = igv.getSpinner(sortTrackPanelPostFiltering.viewportDiv);
+
+                myself.sortRegions(sortTrackPanelPostFiltering.track.featureSource, sortTrackPanelPostFiltering.track.sortDirection, function (regions) {
+
+//                    sortTrackPanelPostFiltering.track.sortDirection *= -1;
+                    sortTrackPanelPostFiltering.track.sortDirection = 1;
+
+                    sortTrackPanelPostFiltering.track.sortButton.className = "fa fa-signal";
+                    sortTrackPanelPostFiltering.track.sortButton.style.color = "red";
+
+                    spinner.stop();
+
+                    myself.browser.update();
+
+                });
+
+            } else {
+                myself.browser.update();
+            }
+
 
             // better histogram code
             trackPackages.forEach(function (trackPackage) {

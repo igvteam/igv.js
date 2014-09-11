@@ -478,10 +478,6 @@ var igv = (function (igv) {
         return "";
     };
 
-    igv.TrackPanel.prototype.setSortButtonDisplay = function (onOff) {
-        this.track.sortButton.style.color = onOff ? "red" : "black";
-    };
-
     function Tile(chr, tileStart, tileEnd, scale, image) {
         this.chr = chr;
         this.startBP = tileStart;
