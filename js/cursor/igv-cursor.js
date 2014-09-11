@@ -41,6 +41,8 @@ var igv = (function (igv) {
                     if (frameWidth > 0) {
 
                         browser.cursorModel.framePixelWidth = frameWidth;
+                        $( "input[id='frameWidthInput']" ).val( browser.cursorModel.framePixelWidth );
+
                         browser.referenceFrame.bpPerPixel = 1 / frameWidth;
                         browser.update();
                     }
@@ -60,12 +62,16 @@ var igv = (function (igv) {
                 browser.zoomIn = function () {
 
                     browser.cursorModel.framePixelWidth *= 2;
+                    $( "input[id='frameWidthInput']" ).val( browser.cursorModel.framePixelWidth );
+
                     browser.update();
                 };
 
                 browser.zoomOut = function () {
 
                     browser.cursorModel.framePixelWidth /= 2;
+                    $( "input[id='frameWidthInput']" ).val( browser.cursorModel.framePixelWidth );
+
                     browser.update();
                 };
 
