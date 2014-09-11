@@ -4,11 +4,16 @@ var cursor = (function (cursor) {
 
     cursor.CursorModel = function (browser, regionDisplayJQueryObject) {
 
+        var thang;
+
         this.browser = browser;
         this.regionDisplayJQueryObject = regionDisplayJQueryObject;
 
         this.regionWidth = 100;
+        $( "input[id='regionSizeInput']" ).val( this.regionWidth );
+
         this.framePixelWidth = 24;
+        $( "input[id='frameWidthInput']" ).val( this.framePixelWidth );
 
         this.frameMargin = 6;
         this.origin = 0;

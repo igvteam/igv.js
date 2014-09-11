@@ -125,7 +125,7 @@ igv = (function (igv) {
         radioButtonGroupContainer = $('#modalBody_' + this.guid).find('.radio');
         myself.radioButton = chosenRadioButton(radioButtonGroupContainer);
 
-        modalPresentationButton = $('#' + "modalPresentationButton_" + this.guid)
+        modalPresentationButton = $('#' + "modalPresentationButton_" + this.guid);
         radioButtonGroupContainer.click(function () {
 
             myself.radioButton = $(this).find('input')[0];

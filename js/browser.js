@@ -4,7 +4,10 @@ var igv = (function (igv) {
 
         this.type = type ? type : "IGV";
         this.div = document.createElement("div");
+
         this.trackHeight = 100;
+        $( "input[id='trackHeightInput']" ).val( this.trackHeight );
+
         this.rootHeight = 0;
         this.searchURL = "http://www.broadinstitute.org/webservices/igv/locus?genome=hg19&name=";
     };
