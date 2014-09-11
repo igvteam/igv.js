@@ -42,14 +42,16 @@ var cursor = (function (cursor) {
 
     cursor.CursorModel.prototype.setRegions = function (features) {
 
-        var len, i;
+        var featuresLength,
+            i;
 
         this.regions = [];
         this.filteredRegions = undefined;
 
-        for (i = 0, len = features.length; i < len; i++) {
+        for (i = 0, featuresLength = features.length; i < featuresLength; i++) {
             this.regions.push(new cursor.CursorRegion(features[i]));
         }
+
         this.updateRegionDisplay(1);
         this.filterRegions();
 
@@ -88,6 +90,10 @@ var cursor = (function (cursor) {
             myself = this;
 
         this.browser.trackPanels.forEach(function (trackPanel, tpIndex, trackPanels) {
+
+            // sorting is lost
+            trackPanel.track.sortButton.className = "fa fa-bar-chart-o";
+            trackPanel.track.sortButton.style.color = "black";
 
             trackPanel.track.getFeatureCache(function (featureCache) {
 
@@ -234,7 +240,7 @@ var cursor = (function (cursor) {
 
         "use strict";
 
-        console.log(navigator.userAgent);
+//        console.log(navigator.userAgent);
 
         var regionWidth = this.regionWidth,
             regions = this.getRegionList(),
@@ -271,9 +277,6 @@ var cursor = (function (cursor) {
                 regions.sort(compFunction);
             }
 
-
-
-            this.isSorted = true;
             continuation();
         });
 

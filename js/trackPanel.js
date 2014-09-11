@@ -96,10 +96,8 @@ var igv = (function (igv) {
 
         }
 
-
         var nextButtonTop = 5;
         if (browser.type === "CURSOR") {
-
 
             var sortButton = document.createElement("i");
             controlDiv.appendChild(sortButton);
@@ -124,7 +122,6 @@ var igv = (function (igv) {
 
                     });
                 }, 100);
-
 
                 browser.trackPanels.forEach(function (trackPanel) {
                     if (track !== trackPanel.track) {
@@ -476,6 +473,10 @@ var igv = (function (igv) {
 
     igv.TrackPanel.prototype.tooltipText = function (mouseX, mouseY) {
         return "";
+    };
+
+    igv.TrackPanel.prototype.setSortButtonDisplay = function (onOff) {
+        this.track.sortButton.style.color = onOff ? "red" : "black";
     };
 
     function Tile(chr, tileStart, tileEnd, scale, image) {

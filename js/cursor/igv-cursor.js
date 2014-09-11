@@ -28,14 +28,9 @@ var igv = (function (igv) {
                 })
             }, 10);
 
-            /**
-             * Additional initialization required for the "CURSOR" app
-             */
             function initCursor() {
 
-
                 var regionDisplayJQueryObject = $('#igvHeaderRegionDisplaySpan');
-
 
                 browser.cursorModel = new cursor.CursorModel(browser, regionDisplayJQueryObject);
                 browser.referenceFrame = new igv.ReferenceFrame("", 0, 1 / browser.cursorModel.framePixelWidth);
@@ -119,9 +114,6 @@ var igv = (function (igv) {
 
                     tssTrack.labelButton.className = "btn btn-xs btn-cursor-selected";
                 });
-
-
-
 
             }
         };
