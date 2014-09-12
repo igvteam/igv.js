@@ -89,20 +89,29 @@
     </table>
     <p/>
 </div>
-
 <script type="text/javascript">
 
     $(document).ready(function () {
 
-        var div = $("#myDiv")[0],
-                browser = igv.createBrowser();
+        var div, options, browser;
+
+        div = $("#myDiv")[0];
+        options = {
+            showKaryo: true,
+            fastaURL: "http://igvdata.broadinstitute.org/genomes/seq/hg19/hg19.fasta",
+            cytobandURL: "http://igvdata.broadinstitute.org/genomes/seq/hg19/cytoBand.txt",
+            tracks: [
+                new igv.SequenceTrack(),
+                new igv.GeneTrack("http://igvdata.broadinstitute.org/annotations/hg19/genes/gencode.v18.collapsed.bed")
+            ]
+        };
+        browser = igv.createBrowser(options);
         div.appendChild(browser.div);
         browser.startup();
 
     });
 
 </script>
-
 
 </body>
 
