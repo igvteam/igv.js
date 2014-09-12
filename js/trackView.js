@@ -323,9 +323,9 @@ var igv = (function (igv) {
                 }
 
                 else {
-                    var newCenter = Math.round(igv.referenceFrame.start + mouseX * igv.referenceFrame.bpPerPixel);
+                    var newCenter = Math.round(trackPanel.browser.referenceFrame.start + mouseX * trackPanel.browser.referenceFrame.bpPerPixel);
                     referenceFrame.bpPerPixel /= 2;
-                    trackPanel.browser.goto(igv.referenceFrame.chr, newCenter);
+                    trackPanel.browser.goto(trackPanel.browser.referenceFrame.chr, newCenter);
                 }
             }
 

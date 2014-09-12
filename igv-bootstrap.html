@@ -145,7 +145,8 @@
 
     $(document).ready(function () {
 
-        var div, options, browser;
+        var div, options, browser,
+                jsonProxy = "//www.broadinstitute.org/igvdata/t2d/postJson.php"; // "php/postJson.php";
 
         div = $("#myDiv")[0];
         options = {
@@ -154,12 +155,12 @@
             cytobandURL: "//igvdata.broadinstitute.org/genomes/seq/hg19/cytoBand.txt",
             tracks: [
                 new igv.T2dTrack({
-                    url: "//www.broadinstitute.org/igvdata/t2d/postJson.php",
+                    url: jsonProxy,
                     trait: "T2D",
                     label: "Type II Diabetes"
                 }),
                 new igv.T2dTrack({
-                    url: "//www.broadinstitute.org/igvdata/t2d/postJson.php",
+                    url: jsonProxy,
                     trait: "HbA1c",
                     label: "HBA1C"
                 }),
