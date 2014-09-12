@@ -6,7 +6,7 @@ var igv = (function (igv) {
         this.div = document.createElement("div");
 
         this.trackHeight = 100;
-        $( "input[id='trackHeightInput']" ).val( this.trackHeight );
+        $("input[id='trackHeightInput']").val(this.trackHeight);
 
         this.rootHeight = 0;
         this.searchURL = "http://www.broadinstitute.org/webservices/igv/locus?genome=hg19&name=";
@@ -16,13 +16,15 @@ var igv = (function (igv) {
 
         var path = config.url;
 
-        if (path.endsWith(".bed") || path.endsWith(".bed.gz")) {
-            this.addTrack (new igv.GeneTrack(config));
+        if (config.type && config.type === 't2d') {
+            this.addTrack(new igv.T2dTrack(config));
+        } else if (path.endsWith(".bed") || path.endsWith(".bed.gz")) {
+            this.addTrack(new igv.GeneTrack(config));
         } else if (path.endsWith(".bam")) {
-            this.addTrack (new igv.BAMTrack(config));
+            this.addTrack(new igv.BAMTrack(config));
         } else if (path.endsWith(".wig") || path.endsWith(".wig.gz") ||
             path.endsWith(".bedgraph") || path.endsWith(".bedgraph.gz")) {
-            this.addTrack (new igv.WIGTrack(config));
+            this.addTrack(new igv.WIGTrack(config));
         }
 
         // TODO -- error message "unsupported filed type"

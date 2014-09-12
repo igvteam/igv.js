@@ -14,8 +14,8 @@
 
     <link href="//maxcdn.bootstrapcdn.com/font-awesome/4.2.0/css/font-awesome.min.css" rel="stylesheet">
 
-    <!-- IGV Bootstrap css -->
-    <link href="css/igv.css" type="text/css" rel="stylesheet">
+    <!-- IGV  css -->
+    <link href="//www.broadinstitute.org/igvdata/t2d/igv.css" type="text/css" rel="stylesheet">
 
 
     <!-- HTML5 shim and Respond.js IE8 support of HTML5 elements and media queries -->
@@ -30,7 +30,7 @@
     <script src="//maxcdn.bootstrapcdn.com/bootstrap/3.2.0/js/bootstrap.min.js"></script>
 
     <!-- IGV js code -->
-    <script type="text/javascript" src="dist/igv-all.js"></script>
+    <script type="text/javascript" src="//www.broadinstitute.org/igvdata/t2d/igv-all.min.js"></script>
 
 
 
@@ -65,10 +65,77 @@
                         <ul id="trackList" class="dropdown-menu">
                             <li>
                                 <a onclick="igv.browser.loadTrack({
+                                   url: '//www.broadinstitute.org/igvdata/t2d/postJson.php',
+                                   trait: 'T2D',
+                                   label: 'Type II Diabetes'
+                                })">fasting glucose</a>
+                            </li>
+                            -
+                            key: FASTING_GLUCOSE
+                            name: fasting glucose
+
+                            -
+                            key: FASTING_INSULIN
+                            name: fasting insulin
+
+                            -
+                            key: HbA1c
+                            name: HBA1C
+
+                            -
+                            key: HOMA_IR
+                            name: HOMA-IR
+
+                            -
+                            key: HOMA_B
+                            name: HOMA-B
+
+                            -
+                            key: BMI
+                            name: BMI
+
+                            -
+                            key: WAIST_CIRCUMFRENCE
+                            name: waist circumference
+
+                            -
+                            key: HIP_CIRCUMFRENCE
+                            name: hip circumference
+
+                            -
+                            key: WAIST_HIP_RATIO
+                            name: waist-hip ratio
+
+                            -
+                            key: HDL
+                            name: HDL
+
+                            -
+                            key: LDL
+                            name: LDL
+
+                            -
+                            key: TRIGLYCERIDES
+                            name: triglycerides
+
+                            -
+                            key: TOTAL_CHOLESTEROL
+                            name: total cholesterol
+
+                            -
+                            key: SYSTOLIC_BLOOD_PRESSURE
+                            name: systolic blood pressure
+
+                            -
+                            key: DIASTOLIC_BLOOD_PRESSURE
+                            name: diastolic blood pressure
+                            <li>
+                                <a onclick="igv.browser.loadTrack({
                                    url: 'http://www.broadinstitute.org/igvdata/BodyMap/hg19/IlluminaHiSeq2000_BodySites/brain_merged/accepted_hits.bam',
                                    label: 'BodyMap Brain'
                                 })">Body
-                                    map brain</a></li>
+                                    map brain</a>
+                            </li>
                         </ul>
                     </li>
                 </ul>
