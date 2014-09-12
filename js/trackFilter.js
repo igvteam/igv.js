@@ -6,6 +6,7 @@ igv = (function (igv) {
         this.trackPanel = trackPanel;
         this.guid = igv.guid();
         this.isFilterActive = true;
+        this.previousRadioButton = undefined;
         this.radioButton = undefined;
     };
 
@@ -19,7 +20,7 @@ igv = (function (igv) {
 
             };
 
-        if ("minMaxRadio_" + this.guid === this.radioButton.id) {
+        if ("minMaxRadio_" + this.guid === this.radioButton[0].id) {
 
             trackFilterOverlayRenderer = function () {
 
@@ -54,7 +55,7 @@ igv = (function (igv) {
 
         modalPresentationButton.css("color", "red");
 
-        if ("minMaxRadio_" + this.guid === this.radioButton.id) {
+        if ("minMaxRadio_" + this.guid === this.radioButton[0].id) {
 
             this.minimum = igv.isNumber(minimumElement.val()) ? parseFloat(minimumElement.val(), 10) : undefined;
             this.maximum = igv.isNumber(maximumElement.val()) ? parseFloat(maximumElement.val(), 10) : undefined;
@@ -72,15 +73,15 @@ igv = (function (igv) {
 
         var score = region.getScore(featureCache, regionWidth);
 
-        if ("minMaxRadio_" + this.guid === this.radioButton.id) {
+        if ("minMaxRadio_" + this.guid === this.radioButton[0].id) {
 
             return this.isIncluded(score);
 
-        } else if ("regionContainsFeatureRadio_" + this.guid === this.radioButton.id) {
+        } else if ("regionContainsFeatureRadio_" + this.guid === this.radioButton[0].id) {
 
             return -1 !== score;
 
-        } else if ("regionLacksFeatureRadio_" + this.guid === this.radioButton.id) {
+        } else if ("regionLacksFeatureRadio_" + this.guid === this.radioButton[0].id) {
 
             return -1 === score;
 
@@ -106,16 +107,31 @@ igv = (function (igv) {
             modalDialogDataTarget,
             closeTrackFilterModal,
             applyTrackFilterModal,
-            radioButtonGroupContainer;
+            radioButtonGroupContainer,
+            modalDialogCallback;
 
         parentDiv.innerHTML = this.createFilterModalMarkupWithGUID(this.guid);
 
         // min/max
         modalDialogDataTarget = $('#modalDialogDataTarget_' + this.guid);
 
+        modalDialogDataTarget.on('shown.bs.modal', function (e) {
+
+            myself.previousRadioButton = myself.radioButton;
+
+            modalDialogCallback = function () {
+
+                // undo radio button if needed
+                myself.radioButton = myself.previousRadioButton;
+                myself.radioButton.prop('checked',true);
+
+            };
+
+        });
+
         modalDialogDataTarget.on('hidden.bs.modal', function (e) {
 
-            // do nothing
+            modalDialogCallback();
 
         });
 
@@ -126,11 +142,15 @@ igv = (function (igv) {
         modalPresentationButton = $('#' + "modalPresentationButton_" + this.guid);
         radioButtonGroupContainer.click(function () {
 
-            myself.radioButton = $(this).find('input')[0];
-            myself.isFilterActive = myself.radioButton.id !== "inActiveFilterRadio_" + myself.guid;
-            if (!myself.isFilterActive) {
-                modalPresentationButton.css("color", "black");
-            }
+            // Remember previous radio button so we can undo
+            myself.previousRadioButton = myself.radioButton;
+            myself.radioButton = $(this).find('input');
+
+//            myself.isFilterActive = myself.radioButton[0].id !== "inActiveFilterRadio_" + myself.guid;
+//
+//            if (!myself.isFilterActive) {
+//                modalPresentationButton.css("color", "black");
+//            }
 
         });
 
@@ -138,16 +158,16 @@ igv = (function (igv) {
         closeTrackFilterModal = $('#closeTrackFilterModal_' + this.guid);
         closeTrackFilterModal.on('click', function (e) {
 
-            // do nothing
-
         });
 
         // apply filter and dismiss filter widget
         applyTrackFilterModal = $('#applyTrackFilterModal_' + this.guid);
         applyTrackFilterModal.on('click', function (e) {
 
-            myself.doEvaluateFilter();
-            
+            modalDialogCallback = function () {
+                myself.doEvaluateFilter();
+            };
+
         });
 
         function chosenRadioButton(radioButtonGroupContainer) {
@@ -156,11 +176,10 @@ igv = (function (igv) {
 
             radioButtonGroupContainer.each(function(){
 
-                var radio = $(this).find('input')[0];
+                var radio = $(this).find('input');
 
-                if (radio.checked) {
+                if (radio[0].checked) {
                     chosen = radio;
-//                    console.log("radio " + radio.id + " " + radio.checked);
                 }
 
             });
