@@ -17,3 +17,5 @@ test/data/Heart_Left_Ventricle.portal.sorted.eqtl
 test/data/sample.bed.gz
 test/data/test.broadPeak
 test/data/sample.bed
+node_modules
+dist

@@ -52,7 +52,7 @@ var igv = (function (igv) {
             fastaURL = "http://www.gtexportal.org/igv/assets/hg19/hg19.fa";
             tissueEqtlMappingURL = "http://www.gtexportal.org/igv/assets/eqtl/tissueEqtlMappings.txt";
             cytobandURL = "http://www.gtexportal.org/igv/assets/hg19/cytoBand.txt";
-            gencodeURL = "http://www.gtexportal.org/igv/assets/hg19/gencode.v18.collapsed.bed";
+            gencodeURL = "http://www.gtexportal.org/igv/assets/hg19/gencode.v18.bed";
 
 
         if (igv.gtexBrowser) {
@@ -251,11 +251,13 @@ var igv = (function (igv) {
 
             browser.addTrack(new igv.SequenceTrack(igv.sequenceSource));
 
-            browser.addTrack(new igv.GeneTrack(gencodeURL));
+            browser.addTrack(new igv.GeneTrack({
+                url: gencodeURL,
+                label: "Genes"
+            }));
 
             // TODO: Needs to be a better way to grab the right track and change this
             browser.trackPanels[browser.trackPanels.length - 1].order = 10000;
-
 
             window.onresize = throttle(function () {
                 if (browser.ideoPanel) browser.ideoPanel.resize();

@@ -2,7 +2,12 @@ var igv = (function (igv) {
 
     var maxViewportHeight = 400;
 
-    igv.TrackPanel = function (track, browser) {
+    igv.TrackView = function (track, browser) {
+
+        this.browser = browser;
+        this.track = track;
+        this.order = 0;
+        this.marginBottom = 10;
 
         var viewportHeight,
             viewportDiv,
@@ -14,33 +19,27 @@ var igv = (function (igv) {
             contentWidth,
             closeButton,
             labelButton,
-            trackFilterButtonDiv,
-            filterButton,
-            trackContainerDiv = browser.trackContainerDiv,
-            trackPanel = this;
-
-        this.browser = browser;
-        this.track = track;
-        this.order = 0;
-        this.marginBottom = 10;
+            trackFilterButtonDiv;
 
         viewportHeight = track.height;
 
         // track
         trackDiv = document.createElement("div");
-        trackContainerDiv.appendChild(trackDiv);
+        browser.trackContainerDiv.appendChild(trackDiv);
         trackDiv.className = "igv-track-div";
         trackDiv.style.top = browser.rootHeight + "px";
         trackDiv.style.height = viewportHeight + "px";
+
         this.trackDiv = trackDiv;
 
         // controls
         controlDiv = document.createElement("div");
         trackDiv.appendChild(controlDiv);
         controlDiv.className = "igv-control-div";
+
         this.controlDiv = controlDiv;
 
-        if (browser.type === "GTEX") {
+       // if (browser.type === "GTEX") {
             var controlWidth = controlDiv.clientWidth;
             var controlHeight = controlDiv.clientHeight;
 
@@ -55,7 +54,7 @@ var igv = (function (igv) {
             this.controlCtx = controlCanvas.getContext("2d");
 
 
-        }
+    //    }
 
         // TODO - dat - this is so nothing breaks that is dependent on igv.controlPanelWidth
         igv.controlPanelWidth = controlDiv.clientWidth;
@@ -66,6 +65,7 @@ var igv = (function (igv) {
         viewportDiv.className = "igv-viewport-div";
         viewportDiv.style.left = controlDiv.clientWidth + "px";
         viewportDiv.style.height = viewportHeight + "px";
+
         this.viewportDiv = viewportDiv;
 
         // Content
@@ -74,6 +74,7 @@ var igv = (function (igv) {
         viewportDiv.appendChild(contentDiv);  // Note, must do this before getting width for canvas
         contentDiv.className = "igv-content-div";
         contentDiv.style.height = contentHeight + "px";
+
         this.contentDiv = contentDiv;
 
         contentWidth = contentDiv.clientWidth;
@@ -95,10 +96,8 @@ var igv = (function (igv) {
 
         }
 
-
         var nextButtonTop = 5;
         if (browser.type === "CURSOR") {
-
 
             var sortButton = document.createElement("i");
             controlDiv.appendChild(sortButton);
@@ -123,7 +122,6 @@ var igv = (function (igv) {
 
                     });
                 }, 100);
-
 
                 browser.trackPanels.forEach(function (trackPanel) {
                     if (track !== trackPanel.track) {
@@ -193,20 +191,23 @@ var igv = (function (igv) {
 
                 labelButton.onclick = function () {
 
-                    track.featureSource.allFeatures(function (featureList) {
+                    if(browser.cursorModel) {
+                        track.featureSource.allFeatures(function (featureList) {
 
-                        browser.referenceFrame.start = 0;
-                        browser.cursorModel.setRegions(featureList);
+                            browser.referenceFrame.start = 0;
+                            browser.cursorModel.setRegions(featureList);
 //                        browser.update();
 
 
-                    });
+                        });
 
-                    browser.trackPanels.forEach(function (trackPanel) {
-                        if (track !== trackPanel.track) {
-                            trackPanel.track.labelButton.className = "btn btn-xs btn-cursor-deselected";
-                        }
-                    });
+
+                        browser.trackPanels.forEach(function (trackPanel) {
+                            if (track !== trackPanel.track) {
+                                trackPanel.track.labelButton.className = "btn btn-xs btn-cursor-deselected";
+                            }
+                        });
+                    }
                     labelButton.className = "btn btn-xs btn-cursor-selected";
 
                 }
@@ -247,17 +248,16 @@ var igv = (function (igv) {
             }
         }
 
-        function addTrackHandlers(panel) {
+        function addTrackHandlers(trackPanel) {
 
-            var canvas = panel.canvas;
+            var canvas = trackPanel.canvas;
             var isMouseDown = false;
             var lastMouseX;
-            var referenceFrame = panel.browser.referenceFrame;
-
+            var referenceFrame = trackPanel.browser.referenceFrame;
 
             canvas.onmousemove = throttle(function (e) {
 
-                var mouseX = e.clientX - canvas.offsetLeft;//e.pageX - $(this).offset().left;
+                var mouseX = e.clientX - canvas.offsetLeft;
 
                 if (isMouseDown) {
 
@@ -265,7 +265,10 @@ var igv = (function (igv) {
 
                         referenceFrame.shiftPixels(lastMouseX - mouseX);
 
-//                        if (igv.referenceFrame.start < 0) igv.referenceFrame.start = 0;
+                        if (referenceFrame.start < 0) {
+                            referenceFrame.start = 0;
+                        }
+
 //                        if (igv.genome) {
 //                            var chromosome = igv.genome.getChromosome(igv.referenceFrame.chr);
 //                            var widthBP = Math.round((igv.trackWidth - igv.labelWidth) * igv.referenceFrame.bpPerPixel);
@@ -279,7 +282,7 @@ var igv = (function (igv) {
                     }
 
                     lastMouseX = mouseX;
-                    panel.browser.repaint();
+                    trackPanel.browser.repaint();
                 }
 
             }, 20);
@@ -289,17 +292,16 @@ var igv = (function (igv) {
                 isMouseDown = true;
                 var mouseX = e.clientX - canvas.offsetLeft; //e.pageX - $(this).offset().left;
                 var mouseY = e.clientY - canvas.offsetTop;
-                ; //e.pageY - $(this).offset().top;
 
                 this.lastMouseX = mouseX;
 
 
-            }
+            };
 
             canvas.onmouseup = function (e) {
                 isMouseDown = false;
                 lastMouseX = null;
-            }
+            };
 
             canvas.onmouseout = function (e) {
                 isMouseDown = false;
@@ -310,20 +312,20 @@ var igv = (function (igv) {
                 var mouseX = e.clientX - canvas.offsetLeft; //e.pageX - $(this).offset().left;
                 var mouseY = e.clientY - canvas.offsetTop;
 
-            }
+            };
 
             canvas.ondblclick = function (e) {
                 var mouseX = e.clientX - canvas.offsetLeft; //e.pageX - $(this).offset().left;
                 var mouseY = e.clientY - canvas.offsetTop;
 
-                if (panel.track.handleDblClick) {
-                    panel.track.handleDblClick(mouseX, mouseY, panel.viewportDiv);
+                if (trackPanel.track.handleDblClick) {
+                    trackPanel.track.handleDblClick(mouseX, mouseY, trackPanel.viewportDiv);
                 }
 
                 else {
-                    var newCenter = Math.round(igv.referenceFrame.start + mouseX * igv.referenceFrame.bpPerPixel);
+                    var newCenter = Math.round(trackPanel.browser.referenceFrame.start + mouseX * trackPanel.browser.referenceFrame.bpPerPixel);
                     referenceFrame.bpPerPixel /= 2;
-                    panel.browser.goto(igv.referenceFrame.chr, newCenter);
+                    trackPanel.browser.goto(trackPanel.browser.referenceFrame.chr, newCenter);
                 }
             }
 
@@ -331,7 +333,7 @@ var igv = (function (igv) {
 
     };
 
-    igv.TrackPanel.prototype.resize = function () {
+    igv.TrackView.prototype.resize = function () {
         var canvas = this.canvas,
             contentDiv = this.contentDiv,
             contentWidth = this.viewportDiv.clientWidth;
@@ -345,7 +347,7 @@ var igv = (function (igv) {
         this.update();
     };
 
-    igv.TrackPanel.prototype.setTrackHeight = function (newHeight) {
+    igv.TrackView.prototype.setTrackHeight = function (newHeight) {
 
         var heightStr = newHeight + "px";
         this.track.height = newHeight;
@@ -363,13 +365,13 @@ var igv = (function (igv) {
         this.update();
     };
 
-    igv.TrackPanel.prototype.update = function () {
+    igv.TrackView.prototype.update = function () {
         this.tile = null;
         this.repaint();
 
     };
 
-    igv.TrackPanel.prototype.repaint = function () {
+    igv.TrackView.prototype.repaint = function () {
 
         if (!this.track) {
             return;
@@ -460,7 +462,7 @@ var igv = (function (igv) {
 
     };
 
-    igv.TrackPanel.prototype.paintImage = function () {
+    igv.TrackView.prototype.paintImage = function () {
 
         this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
 
@@ -472,8 +474,13 @@ var igv = (function (igv) {
         }
     };
 
-    igv.TrackPanel.prototype.tooltipText = function (mouseX, mouseY) {
+    igv.TrackView.prototype.tooltipText = function (mouseX, mouseY) {
         return "";
+    };
+
+
+    igv.TrackView.prototype.setSortButtonDisplay = function (onOff) {
+        this.track.sortButton.style.color = onOff ? "red" : "black";
     };
 
     function Tile(chr, tileStart, tileEnd, scale, image) {

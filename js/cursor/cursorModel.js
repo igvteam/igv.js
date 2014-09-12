@@ -1,12 +1,19 @@
 var cursor = (function (cursor) {
 
+    const resevoirSampledRegionListLength = 10000;
+
     cursor.CursorModel = function (browser, regionDisplayJQueryObject) {
+
+        var thang;
 
         this.browser = browser;
         this.regionDisplayJQueryObject = regionDisplayJQueryObject;
 
         this.regionWidth = 100;
+        $( "input[id='regionSizeInput']" ).val( this.regionWidth );
+
         this.framePixelWidth = 24;
+        $( "input[id='frameWidthInput']" ).val( this.framePixelWidth );
 
         this.frameMargin = 6;
         this.origin = 0;
@@ -16,12 +23,21 @@ var cursor = (function (cursor) {
         this.prohibitSelfFilteringTrackHistogram = true;
     };
 
-    cursor.CursorModel.prototype.updateRegionDisplay = function() {
+    cursor.CursorModel.prototype.updateRegionDisplay = function(downsamplingPercentage) {
 
-        var numer = igv.numberFormatter(this.getRegionList().length),
-            denom = igv.numberFormatter(this.regions.length);
+        var numer,
+            denom,
+            downsamplingString = "";
 
-        this.regionDisplayJQueryObject.text("Regions " + numer + " / " + denom);
+        numer = igv.numberFormatter(this.getRegionList().length);
+        denom = igv.numberFormatter(this.regions.length);
+
+//        if (downsamplingPercentage < 1.0) {
+//
+//            downsamplingString = " Downsampling " + Math.floor(100.0 * downsamplingPercentage) + "%";
+//        }
+
+        this.regionDisplayJQueryObject.text("Regions " + numer + " / " + denom + downsamplingString);
     };
 
     cursor.CursorModel.prototype.getRegionList = function () {
@@ -31,15 +47,17 @@ var cursor = (function (cursor) {
 
     cursor.CursorModel.prototype.setRegions = function (features) {
 
-        var len, i;
+        var featuresLength,
+            i;
 
         this.regions = [];
         this.filteredRegions = undefined;
 
-        for (i = 0, len = features.length; i < len; i++) {
+        for (i = 0, featuresLength = features.length; i < featuresLength; i++) {
             this.regions.push(new cursor.CursorRegion(features[i]));
         }
-        this.updateRegionDisplay();
+
+        this.updateRegionDisplay(1);
         this.filterRegions();
 
     };
@@ -69,13 +87,13 @@ var cursor = (function (cursor) {
 
     };
 
-    cursor.CursorModel.prototype.filterRegions = function () {
+    cursor.CursorModel.prototype.filterRegions = function (doSortRegions) {
 
         var trackPackages = [],
             filterPackages = [],
             howmany = 0,
-            myself = this,
-            noop = true;
+            sortTrackPanelPostFiltering,
+            myself = this;
 
         this.browser.trackPanels.forEach(function (trackPanel, tpIndex, trackPanels) {
 
@@ -83,7 +101,15 @@ var cursor = (function (cursor) {
 
                 trackPackages.push({ track: trackPanel.track, trackFilter: trackPanel.track.trackFilter, featureCache: featureCache, cursorHistogram: trackPanel.track.cursorHistogram });
 
-                if (!trackPanel.track.trackFilter.isNoOp()) {
+                if (trackPanel.track.isSorted()) {
+                    sortTrackPanelPostFiltering = trackPanel;
+                }
+
+                // sorting will be lost during filtering
+                trackPanel.track.sortButton.className = "fa fa-bar-chart-o";
+                trackPanel.track.sortButton.style.color = "black";
+
+                if (trackPanel.track.trackFilter.isFilterActive) {
                     filterPackages.push({trackFilter: trackPanel.track.trackFilter, featureCache: featureCache });
                 }
 
@@ -92,6 +118,8 @@ var cursor = (function (cursor) {
         });
 
         function runFilters() {
+
+            var spinner;
 
             if (0 === filterPackages.length) {
                 // No filters
@@ -103,16 +131,16 @@ var cursor = (function (cursor) {
 
                 myself.regions.forEach(function (region) {
 
-                    var score,
+                    var success,
+                        score,
                         passFilter = true;
 
                     trackPackages.forEach(function (trackPackage) {
 
                         if (true === passFilter) {
 
-                            score = region.getScore(trackPackage.featureCache, myself.regionWidth);
-
-                            if (false === trackPackage.trackFilter.isIncluded(score)) {
+                            success = trackPackage.trackFilter.evaluate(trackPackage.featureCache, region, myself.regionWidth);
+                            if (false === success) {
 
                                 passFilter = false;
                             }
@@ -128,33 +156,62 @@ var cursor = (function (cursor) {
                 });
             }
 
-            myself.updateRegionDisplay();
+            myself.updateRegionDisplay(resevoirSampledRegionListLength/myself.filteredRegions.length);
 
             // If filteredRegions set is > 10,000 downsample
-            myself.filteredRegions = downsample(myself.filteredRegions, 10000);
+             if (myself.filteredRegions.length >= resevoirSampledRegionListLength) {
 
-            myself.browser.update();
+                myself.filteredRegions = resevoirSampledRegionList(myself.filteredRegions, resevoirSampledRegionListLength);
+            }
+
+            if (sortTrackPanelPostFiltering) {
+
+                console.log("sort " + sortTrackPanelPostFiltering.track.label);
+
+                // spin spinner
+                spinner = igv.getSpinner(sortTrackPanelPostFiltering.viewportDiv);
+
+                // TODO: This is wacky. Needs to be done to maintain sort direction
+                sortTrackPanelPostFiltering.track.sortDirection *= -1;
+                myself.sortRegions(sortTrackPanelPostFiltering.track.featureSource, sortTrackPanelPostFiltering.track.sortDirection, function (regions) {
+
+                    sortTrackPanelPostFiltering.track.sortButton.className = "fa fa-signal";
+                    sortTrackPanelPostFiltering.track.sortButton.style.color = "red";
+
+                    spinner.stop();
+
+                    myself.browser.update();
+
+                });
+
+            } else {
+                myself.browser.update();
+            }
+
 
             // better histogram code
-            trackPackages.forEach(function (tp) {
+            trackPackages.forEach(function (trackPackage) {
 
-                tp.cursorHistogram.initializeBins();
+                trackPackage.cursorHistogram.initializeBins();
 
-                myself.regions.forEach(function (r) {
+                myself.regions.forEach(function (region) {
 
                     var score,
                         doIncludeRegionForHistogramRender = true;
 
-                    filterPackages.forEach(function (fp) {
+                    filterPackages.forEach(function (filterPackage) {
 
-                        if (tp.trackFilter === fp.trackFilter) {
+                        var success;
+
+                        if (trackPackage.trackFilter === filterPackage.trackFilter) {
 
                             // do nothing
+
                         } else if (true === doIncludeRegionForHistogramRender) {
 
-                            score = r.getScore(fp.featureCache, myself.regionWidth);
+                            success = filterPackage.trackFilter.evaluate(filterPackage.featureCache, region, myself.regionWidth);
 
-                            if (false === fp.trackFilter.isIncluded(score)) {
+                            if (false === success) {
 
                                 doIncludeRegionForHistogramRender = false;
                             }
@@ -165,19 +222,19 @@ var cursor = (function (cursor) {
 
                     if (doIncludeRegionForHistogramRender) {
 
-                        score = r.getScore(tp.featureCache, myself.regionWidth);
-                        tp.cursorHistogram.insertScore(score);
+                        score = region.getScore(trackPackage.featureCache, myself.regionWidth);
+                        trackPackage.cursorHistogram.insertScore(score);
                     }
 
                 });
 
-                tp.cursorHistogram.render(tp.track);
+                trackPackage.cursorHistogram.render(trackPackage.track);
 
             });
 
         }
 
-        function downsample(array, max) {
+        function resevoirSampledRegionList(array, max) {
 
             var downsampled = [],
                 len = array.length,
@@ -218,7 +275,7 @@ var cursor = (function (cursor) {
 
         "use strict";
 
-        console.log(navigator.userAgent);
+//        console.log(navigator.userAgent);
 
         var regionWidth = this.regionWidth,
             regions = this.getRegionList(),
@@ -254,7 +311,6 @@ var cursor = (function (cursor) {
             else {
                 regions.sort(compFunction);
             }
-
 
             continuation();
         });

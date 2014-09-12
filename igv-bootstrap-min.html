@@ -29,50 +29,10 @@
     <!-- Bootstrap -->
     <script src="//maxcdn.bootstrapcdn.com/bootstrap/3.2.0/js/bootstrap.min.js"></script>
 
-    <script type="text/javascript" src="vendor/inflate.js"></script>
-    <script type="text/javascript" src="vendor/zlib_and_gzip.min.js"></script>
-    <!--   <script type="text/javascript" src="vendor/bootstrap/plugins/holder.js"></script>  -->
-
     <!-- IGV js code -->
+    <script type="text/javascript" src="dist/igv-all.js"></script>
 
 
-    <script type="text/javascript" src="js/igv.js"></script>
-    <script type="text/javascript" src="js/browser.js"></script>
-    <script type="text/javascript" src="js/ideogram.js"></script>
-    <script type="text/javascript" src="js/referenceFrame.js"></script>
-    <script type="text/javascript" src="js/igv-canvas.js"></script>
-    <script type="text/javascript" src="js/genome.js"></script>
-    <script type="text/javascript" src="js/trackView.js"></script>
-    <script type="text/javascript" src="js/rulerTrack.js"></script>
-    <script type="text/javascript" src="js/geneTrack.js"></script>
-    <script type="text/javascript" src="js/bedSource.js"></script>
-    <script type="text/javascript" src="js/igv-color.js"></script>
-    <script type="text/javascript" src="js/igv-utils.js"></script>
-    <script type="text/javascript" src="js/parseUtils.js"></script>
-    <script type="text/javascript" src="js/fasta.js"></script>
-    <script type="text/javascript" src="js/sequenceTrack.js"></script>
-    <script type="text/javascript" src="js/wigSource.js"></script>
-    <script type="text/javascript" src="js/wigTrack.js"></script>
-    <script type="text/javascript" src="js/dataloader.js"></script>
-    <script type="text/javascript" src="js/igv-exts.js"></script>
-    <script type="text/javascript" src="js/binary.js"></script>
-    <script type="text/javascript" src="js/gtex/eqtlTrack.js"></script>
-    <script type="text/javascript" src="js/coverageMap.js"></script>
-    <script type="text/javascript" src="js/alignmentManager.js"></script>
-    <script type="text/javascript" src="js/bamReader.js"></script>
-    <script type="text/javascript" src="js/bamSource.js"></script>
-    <script type="text/javascript" src="js/bamTrack.js"></script>
-    <script type="text/javascript" src="vendor/spin.js"></script>
-    <script type="text/javascript" src="js/intervalTree.js"></script>
-
-    <script type="text/javascript" src="js/encode/encode.js"></script>
-    <script type="text/javascript" src="js/cursor/cursorTrack.js"></script>
-    <script type="text/javascript" src="js/cursor/cursorModel.js"></script>
-    <script type="text/javascript" src="js/cursor/cursor-ideogram.js"></script>
-
-    <script type="text/javascript" src="js/karyo/karyo.js"></script>
-    <script type="text/javascript" src="js/gwas/t2dVariantSource.js"></script>
-    <script type="text/javascript" src="js/gwas/t2dVariantTrack.js"></script>
 
 </head>
 
@@ -145,8 +105,7 @@
 
     $(document).ready(function () {
 
-        var div, options, browser,
-                jsonProxy = "//www.broadinstitute.org/igvdata/t2d/postJson.php"; // "php/postJson.php";
+        var div, options, browser;
 
         div = $("#myDiv")[0];
         options = {
@@ -155,12 +114,12 @@
             cytobandURL: "//igvdata.broadinstitute.org/genomes/seq/hg19/cytoBand.txt",
             tracks: [
                 new igv.T2dTrack({
-                    url: jsonProxy,
+                    url: "//www.broadinstitute.org/igvdata/t2d/postJson.php",
                     trait: "T2D",
                     label: "Type II Diabetes"
                 }),
                 new igv.T2dTrack({
-                    url: jsonProxy,
+                    url: "//www.broadinstitute.org/igvdata/t2d/postJson.php",
                     trait: "HbA1c",
                     label: "HBA1C"
                 }),

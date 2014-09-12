@@ -7,7 +7,7 @@
     <meta name="description" content="">
     <meta name="author" content="">
     <link rel="shortcut icon" href=img/favicon.ico>
-    <title>IGV - Integrative Genomics Viewer</title>
+    <title>CURSOR</title>
 
     <!-- Bootstrap core CSS -->
     <link href="//maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap.min.css" rel="stylesheet">
@@ -49,7 +49,7 @@
     <script type="text/javascript" src="js/referenceFrame.js"></script>
     <script type="text/javascript" src="js/igv-canvas.js"></script>
     <script type="text/javascript" src="js/genome.js"></script>
-    <script type="text/javascript" src="js/trackPanel.js"></script>
+    <script type="text/javascript" src="js/trackView.js"></script>
     <script type="text/javascript" src="js/rulerTrack.js"></script>
     <script type="text/javascript" src="js/geneTrack.js"></script>
     <script type="text/javascript" src="js/bedSource.js"></script>
@@ -92,73 +92,73 @@
         <div class="container-fluid">
 
             <div class="navbar-header">
-                <button type="button" class="navbar-toggle" data-toggle="collapse"
-                        data-target="#bs-example-navbar-collapse-1">
-                    <span class="sr-only">Toggle navigation</span><span class="icon-bar"></span><span class="icon-bar">
-                </span><span class="icon-bar"></span></button>
-
                 <a class="navbar-brand" href="#">CURSOR</a>
             </div>
 
-            <div id="bs-example-navbar-collapse-1" class="collapse navbar-collapse">
+            <button id="encodeModalButton" type="button" class="btn btn-default navbar-btn navbar-left" data-toggle="modal" data-target=".bs-example-modal-lg">
+                ENCODE
+            </button>
 
-                <div class="navbar-form navbar-left"><!-- Launch ENCODE Modal -->
+            <div class="navbar-form navbar-left">
 
-                    <button id="encodeModalButton" class="btn btn-default" data-toggle="modal" data-target=".bs-example-modal-lg">
-                        ENCODE
-                    </button>
+                <label>
+                    Frame Width (pixels)
+                    <input id="frameWidthInput" type="text" class="form-control" placeholder="pixels">
+                </label>
 
-                </div><!-- Launch ENCODE Modal -->
+            </div><!-- Frame Width (pixels) -->
 
-                <div class="navbar-form navbar-left">
+            <div class="navbar-form navbar-left">
 
-                    <div class="input-append">
-                        <input id="frameWidthInput" type="text" class="form-control" placeholder=" Frame Width (pixels)">
+                <label>
+                    Region Size (bp)
+                    <input id="regionSizeInput" type="text" class="form-control" placeholder="bp">
+                </label>
+
+            </div><!-- Region Size (bp) -->
+
+            <div class="navbar-form navbar-left">
+
+                <label>
+                    Track Height (pixels)
+                    <input id="trackHeightInput" type="text" class="form-control" placeholder="pixels">
+                </label>
+
+            </div><!-- Track Height -->
+
+            <div class="navbar-form navbar-left">
+
+                <div class="input-append">
+                    <input type="file" id="fileInput" title="foo" multiple />
+                </div>
+
+            </div><!-- Upload file -->
+
+            <div class="nav navbar-nav navbar-right">
+
+                <div class="well-sm">
+                    <div class="btn-group-sm">
+
+                        <button id="exportRegionsModalPresentationButton" type="button" class="btn btn-default btn-sm">
+                            Export Regions
+                        </button>
+
+                        <button id="sessionManagmentModalPresentationButton" type="button" class="btn btn-default btn-sm">
+                            Save/Restore Session
+                        </button>
+
+                        <button id="fitToScreen" type="button" class="btn btn-default btn-sm">
+                            <span class="fa fa-align-justify"></span>
+                        </button>
+                        <button id="zoomOut" type="button" class="btn btn-default btn-sm">
+                            <span class="glyphicon glyphicon-minus"></span>
+                        </button>
+                        <button id="zoomIn" type="button" class="btn btn-default btn-sm">
+                            <span class="glyphicon glyphicon-plus"></span>
+                        </button>
                     </div>
-
-                </div><!-- Frame Width (pixels) -->
-
-
-                <div class="navbar-form navbar-left">
-
-                    <div class="input-append">
-                        <input id="regionSizeInput" type="text" class="form-control" placeholder="Region Size (bp)">
-                    </div>
-
-                </div><!-- Region Size (bp) -->
-
-                <div class="navbar-form navbar-left">
-
-                    <div class="input-append">
-                        <input id="trackHeightInput" type="text" class="form-control" placeholder="Track Height">
-                    </div>
-
-                </div><!-- Track Height -->
-
-                <div class="navbar-form navbar-left">
-
-                    <div class="input-append">
-                        <input type="file" id="fileInput" title="foo" multiple />
-                    </div>
-
-                </div><!-- Upload file -->
-
-                <div class="nav navbar-nav navbar-right">
-                    <div class="well-sm">
-                        <div class="btn-group-sm">
-                            <!--<span class="btn btn-default btn-file">Upload File<input type="file"></span>-->
-                            <!--<button id="igvHeaderHistogramButton" type="button" class="btn btn-default btn-sm"><span>Histogram Toggle</span></button>-->
-                            <button id="fitToScreen" type="button" class="btn btn-default btn-sm"><span
-                                    class="fa fa-align-justify"></span></button>
-                            <button id="zoomOut" type="button" class="btn btn-default btn-sm"><span
-                                    class="glyphicon glyphicon-minus"></span></button>
-                            <button id="zoomIn" type="button" class="btn btn-default btn-sm"><span
-                                    class="glyphicon glyphicon-plus"></span></button>
-                        </div>
-                    </div>
-                </div><!-- fit to screen | magnify | minify -->
-
-            </div>
+                </div>
+            </div><!-- fit to screen | magnify | minify -->
 
         </div>
 
@@ -167,32 +167,32 @@
     <!-- ENCODE Modal -->
     <div class="modal fade bs-example-modal-lg" id="encodeModal" tabindex="-1" role="dialog" aria-labelledby="encodeModalLabel" aria-hidden="true">
 
-    <div class="modal-dialog modal-lg"><!-- modal dialog -->
+        <div class="modal-dialog modal-lg"><!-- modal dialog -->
 
-    <div class="modal-content"><!-- modal content -->
+            <div class="modal-content"><!-- modal content -->
 
-    <div class="modal-header"><!-- modal header -->
+                <div class="modal-header"><!-- modal header -->
 
-        <button id="encodeModalTopCloseButton" type="button" class="close" data-dismiss="modal"><!-- close -->
-            <span aria-hidden="true">×</span>
-            <span class="sr-only">Close</span>
-        </button>
+                    <button id="encodeModalTopCloseButton" type="button" class="close" data-dismiss="modal"><!-- close -->
+                        <span aria-hidden="true">×</span>
+                        <span class="sr-only">Close</span>
+                    </button>
 
-        <h4 class="modal-title" id="encodeModalLabel">ENCODE</h4><!-- modal title -->
+                    <h4 class="modal-title" id="encodeModalLabel">ENCODE</h4><!-- modal title -->
 
-    </div>
+                </div>
 
-    <div id="encodeModalBody" class="modal-body"><!-- modal body -->
-    </div><!-- modal body -->
+                <div id="encodeModalBody" class="modal-body"><!-- modal body -->
+                </div><!-- modal body -->
 
-    <div class="modal-footer"><!-- modal footer -->
-        <button id="encodeModalBottomCloseButton" type="button" class="btn btn-default" data-dismiss="modal">Close</button><!-- close -->
-        <button id="encodeModalGoButton"          type="button" class="btn btn-primary" data-dismiss="modal">Go</button><!-- Go -->
-    </div><!-- modal footer -->
+                <div class="modal-footer"><!-- modal footer -->
+                    <button id="encodeModalBottomCloseButton" type="button" class="btn btn-default" data-dismiss="modal">Close</button><!-- close -->
+                    <button id="encodeModalGoButton"          type="button" class="btn btn-primary" data-dismiss="modal">Go</button><!-- Go -->
+                </div><!-- modal footer -->
 
-    </div><!-- modal content -->
+            </div><!-- modal content -->
 
-    </div><!-- modal dialog -->
+        </div><!-- modal dialog -->
 
     </div>
 

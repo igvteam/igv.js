@@ -1,10 +1,10 @@
 var igv = (function (igv) {
 
-    igv.GeneTrack = function (url) {
-        this.url = url;
-        this.featureSource = new igv.BedFeatureSource(url);
-        this.label = "Genes";
-        this.id = "genes";
+    igv.GeneTrack = function (config) {
+        this.url = config.url;
+        this.featureSource = new igv.BedFeatureSource(this.url);
+        this.label = config.label;
+        this.id = config.id || config.label;
         this.height = 100;   // The preferred height
     }
 

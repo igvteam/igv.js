@@ -4,20 +4,25 @@ var igv = (function (igv) {
 
         this.type = type ? type : "IGV";
         this.div = document.createElement("div");
+
         this.trackHeight = 100;
+        $( "input[id='trackHeightInput']" ).val( this.trackHeight );
+
         this.rootHeight = 0;
         this.searchURL = "http://www.broadinstitute.org/webservices/igv/locus?genome=hg19&name=";
     };
 
-    igv.Browser.prototype.loadTrack = function (path, label) {
+    igv.Browser.prototype.loadTrack = function (config) {
+
+        var path = config.url;
 
         if (path.endsWith(".bed") || path.endsWith(".bed.gz")) {
-            this.addTrack (new igv.GeneTrack(path));
+            this.addTrack (new igv.GeneTrack(config));
         } else if (path.endsWith(".bam")) {
-            this.addTrack (new igv.BAMTrack(path, label));
+            this.addTrack (new igv.BAMTrack(config));
         } else if (path.endsWith(".wig") || path.endsWith(".wig.gz") ||
             path.endsWith(".bedgraph") || path.endsWith(".bedgraph.gz")) {
-            this.addTrack (new igv.WIGTrack(path));
+            this.addTrack (new igv.WIGTrack(config));
         }
 
         // TODO -- error message "unsupported filed type"
@@ -41,7 +46,7 @@ var igv = (function (igv) {
      */
     igv.Browser.prototype.addTrack = function (track, position) {
 
-        var trackPanel = new igv.TrackPanel(track, this);
+        var trackPanel = new igv.TrackView(track, this);
 
         if (trackPanel.track instanceof igv.EqtlTrack) {
             trackPanel.trackDiv.style.height = this.trackHeight + "px";

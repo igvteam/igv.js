@@ -107,7 +107,7 @@ var igv = (function (igv) {
 
         chromosomeNameCanvas.style.width = "100%";
         chromosomeNameCanvas.style.height = contentHeight + "px";
-        chromosomeNameCanvas.setAttribute('width',50);
+        chromosomeNameCanvas.setAttribute('width', 50);
         chromosomeNameCanvas.setAttribute('height', contentHeight)
 
         this.ideograms = {};
@@ -139,16 +139,16 @@ var igv = (function (igv) {
         // Draw red box
         this.ctx.save();
         var chromosome = this.browser.genome.getChromosome(this.browser.referenceFrame.chr);
-        var ideoScale = w / chromosome.length;
-
+        var ideoScale = w / chromosome.bpLength;
         var widthBP = w * this.browser.referenceFrame.bpPerPixel;
-
-        var boxPX = Math.round(this.browser.referenceFrame.start * ideoScale);
-        var boxW = Math.max(1, Math.round(widthBP * ideoScale));
-        this.ctx.strokeStyle = "red";
-        this.ctx.lineWidth = 2;
-        this.ctx.strokeRect(boxPX, 9, boxW, 15);
-        this.ctx.restore();
+        if (widthBP < chromosome.bpLength) {
+            var boxPX = Math.round(this.browser.referenceFrame.start * ideoScale);
+            var boxW = Math.max(1, Math.round(widthBP * ideoScale));
+            this.ctx.strokeStyle = "red";
+            this.ctx.lineWidth = 2;
+            this.ctx.strokeRect(boxPX, 9, boxW, 15);
+            this.ctx.restore();
+        }
 
         var chromosomeNameWidth = this.chromosomeNameCanvas.width;
         var chromosomeNameHeight = this.chromosomeNameCanvas.height;
@@ -254,4 +254,4 @@ var igv = (function (igv) {
 
     return igv;
 })
-    (igv || {});
+(igv || {});

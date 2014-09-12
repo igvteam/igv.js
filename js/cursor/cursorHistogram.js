@@ -61,6 +61,25 @@ var cursor = (function (cursor) {
     // Render
     cursor.CursorHistogram.prototype.render = function (track) {
 
+        var myself = this;
+        var renderMinimumOverlay = function (minimum) {
+
+            var height = (minimum/track.max) * myself.bins.length;
+            myself.igvCanvas.fillRect(0, myself.bins.length - height, myself.canvasWidth, height, { fillStyle: myself.minMaxfillStyle });
+
+            myself.igvCanvas.fillRect(0, myself.bins.length - height - 1, myself.canvasWidth, 1, { fillStyle: myself.minMaxEdgefillStyle });
+
+        };
+
+        var renderMaximumOverlay = function (maximum) {
+
+            var height = myself.bins.length - ((maximum/track.max) * myself.bins.length);
+            myself.igvCanvas.fillRect(0, 0, myself.canvasWidth, height, { fillStyle: myself.minMaxfillStyle });
+
+            myself.igvCanvas.fillRect(0, height - 1, myself.canvasWidth, 1, { fillStyle: myself.minMaxEdgefillStyle });
+
+        };
+
         // Clear canvas
         this.fillCanvasWithFillStyle(this.canvasFillStyle);
 
@@ -96,29 +115,8 @@ var cursor = (function (cursor) {
 
         }, this);
 
-        // render min/max overlays
-        var minHeight = (track.trackFilter.minimum) ? track.trackFilter.minimum / track.max : undefined;
-        var maxHeight = (track.trackFilter.maximum) ? track.trackFilter.maximum / track.max : undefined;
-        var height;
-
-        // max
-        if (maxHeight) {
-
-            height = this.bins.length - (maxHeight * this.bins.length);
-            this.igvCanvas.fillRect(0, 0, this.canvasWidth, height, { fillStyle: this.minMaxfillStyle });
-
-            this.igvCanvas.fillRect(0, height - 1, this.canvasWidth, 1, { fillStyle: this.minMaxEdgefillStyle });
-
-        }
-
-        // min
-        if (minHeight) {
-
-            height = minHeight * this.bins.length;
-            this.igvCanvas.fillRect(0, this.bins.length - height, this.canvasWidth, height, { fillStyle: this.minMaxfillStyle });
-
-            this.igvCanvas.fillRect(0, this.bins.length - height - 1, this.canvasWidth, 1, { fillStyle: this.minMaxEdgefillStyle });
-        }
+        var renderTrackFilterOverlays = track.trackFilter.makeTrackFilterOverlayRenderer(renderMinimumOverlay, renderMaximumOverlay);
+        renderTrackFilterOverlays();
 
     };
 
