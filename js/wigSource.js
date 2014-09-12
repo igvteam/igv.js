@@ -33,13 +33,15 @@ var igv = (function (igv) {
 
             dataLoader.loadBinaryString(function (data) {
 
-                var lines = data.split("\n");
+                var features,
+                    lines = data.split("\n");
 
                 thisWIGFeatureSource.features = {};
 
                 lines.forEach(parseLine, thisWIGFeatureSource);
 
-                success(thisWIGFeatureSource.features[ chr ]);
+                features = thisWIGFeatureSource.features[ chr ];
+                success(features);
 
             });
         }
