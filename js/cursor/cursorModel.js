@@ -32,10 +32,10 @@ var cursor = (function (cursor) {
         numer = igv.numberFormatter(this.getRegionList().length);
         denom = igv.numberFormatter(this.regions.length);
 
-        if (downsamplingPercentage < 1.0) {
-
-            downsamplingString = " Downsampling " + Math.floor(100.0 * downsamplingPercentage) + "%";
-        }
+//        if (downsamplingPercentage < 1.0) {
+//
+//            downsamplingString = " Downsampling " + Math.floor(100.0 * downsamplingPercentage) + "%";
+//        }
 
         this.regionDisplayJQueryObject.text("Regions " + numer + " / " + denom + downsamplingString);
     };
