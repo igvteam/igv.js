@@ -6,7 +6,7 @@ var igv = (function (igv) {
 
     igv.BEDGraphTrack = function (config) {
         this.url = config.url;
-        this.featureSource = new igv.BedFeatureSource(this.url);
+        this.featureSource = new igv.BEDGraphFeatureSource(this.url);
         this.label = config.label;
         this.id = config.id || this.label;
         this.height = 100;
