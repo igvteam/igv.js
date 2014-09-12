@@ -57,8 +57,12 @@ var igv = (function (igv) {
      */
     function parseLine(line, index, lines) {
 
-        var bedGraphFeature,
-            bedGraphFeatures;
+        var chr,
+            dev_null,
+            piece,
+            parts,
+            feature,
+            features;
 
         if (igv.isBlank(line)) {
             return;
@@ -66,6 +70,42 @@ var igv = (function (igv) {
 
         if (igv.isComment(line)) {
             return;
+        }
+
+        parts = line.split(" ");
+        dev_null = parts.shift();
+        if ('track' === dev_null) {
+            handleTrackLine(parts);
+            return
+        }
+
+        if (!dev_null.startsWith("chr")) {
+            return
+        }
+
+        chr = dev_null;
+
+        features = this.features[ chr ];
+        if (!features) {
+
+            features = { featureList:[], minimum:Number.MAX_VALUE, maximum:-Number.MAX_VALUE };
+            this.features[ chr ] = features;
+        }
+
+        feature = featureForStepFormat(parts);
+        features.featureList.push(feature);
+        features.minimum = Math.min(features.minimum, feature.value);
+        features.maximum = Math.max(features.maximum, feature.value);
+
+        function handleTrackLine(trackLineArray) {
+
+            var format = trackLineArray[ 0 ].split("=")[ 1 ];
+            console.log("track format " + format);
+        }
+
+        function featureForStepFormat(featureLineArray) {
+            return { start: parseInt(featureLineArray[ 0 ], 10), end: parseInt(featureLineArray[ 1 ], 10), value: parseFloat(featureLineArray[ 2 ]) };
+
         }
 
     }

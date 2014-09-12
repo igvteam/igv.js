@@ -22,15 +22,15 @@ function runBEDGraphFeatureSourceTests() {
 
             ok(featureDictionary, "featureContainer.features should be non null");
 
-//            notEqual(featureDictionary.featureList.length, 0, "feature list length is > 0");
-//            console.log("featureList.length " + featureDictionary.featureList.length);
+            notEqual(featureDictionary.featureList.length, 0, "feature list length is > 0");
+            console.log("featureList.length " + featureDictionary.featureList.length);
 
             start();
         };
 
         var chr = "chr19";
-        var bpStart = 9917384;
-        var bpEnd  = 14917884;
+        var bpStart = 49302001;
+        var bpEnd  = 49304701;
 
         featureSource.getFeatures(chr, bpStart, bpEnd, noop);
     });
