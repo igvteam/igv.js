@@ -59,7 +59,6 @@ var igv = (function (igv) {
 
         var chr,
             dev_null,
-            piece,
             parts,
             feature,
             features;
@@ -75,7 +74,11 @@ var igv = (function (igv) {
         parts = line.split(" ");
         dev_null = parts.shift();
         if ('track' === dev_null) {
-            handleTrackLine(parts);
+            this.trackLine = parseTrackLine(parts);
+            return
+        }
+
+        if (!parts || parts.length < 3) {
             return
         }
 
@@ -92,18 +95,49 @@ var igv = (function (igv) {
             this.features[ chr ] = features;
         }
 
-        feature = featureForStepFormat(parts);
+        feature = featureForBEDGraphFormat(parts);
         features.featureList.push(feature);
         features.minimum = Math.min(features.minimum, feature.value);
         features.maximum = Math.max(features.maximum, feature.value);
 
-        function handleTrackLine(trackLineArray) {
+        function parseTrackLine(trackLineArray) {
 
-            var format = trackLineArray[ 0 ].split("=")[ 1 ];
-            console.log("track format " + format);
+            var trackLine = {},
+                moreStuff,
+                item;
+
+            item = trackLineArray.shift();
+            trackLine.format = item.split("=")[ 1 ];
+            if ("bedGraph" !== trackLine.format) {
+                return trackLine;
+            }
+
+
+            // bail for now
+            return trackLine;
+
+
+
+            if (0 === trackLineArray.length) {
+                return trackLine;
+            }
+
+
+
+
+            trackLine.moreStuff = [];
+            trackLineArray.forEach(function (thang, thangs, index) {
+
+                var key = thang.split("=")[ 0 ],
+                    val = thang.split("=")[ 1 ];
+
+                trackLine.moreStuff.push({ key: key, value: val});
+            });
+
+            return trackLine;
         }
 
-        function featureForStepFormat(featureLineArray) {
+        function featureForBEDGraphFormat(featureLineArray) {
             return { start: parseInt(featureLineArray[ 0 ], 10), end: parseInt(featureLineArray[ 1 ], 10), value: parseFloat(featureLineArray[ 2 ]) };
 
         }

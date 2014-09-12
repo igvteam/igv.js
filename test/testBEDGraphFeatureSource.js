@@ -12,7 +12,7 @@ function runBEDGraphFeatureSourceTests() {
 
     });
 
-    asyncTest("WIGFeatureSource getFeatures", 3, function () {
+    asyncTest("BEDGraphFeatureSource getFeatures", 3, function () {
 
         var url = "../test/data/bedgraph-example-uscs.bedgraph";
         var featureSource = new igv.BEDGraphFeatureSource(url);
