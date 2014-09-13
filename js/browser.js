@@ -14,6 +14,24 @@ var igv = (function (igv) {
 
     igv.Browser.prototype.loadTrack = function (config) {
 
+        var attemptedDuplicateTrackAddition = false;
+
+        this.trackPanels.forEach(function (tp, tps, index) {
+
+            if (false === attemptedDuplicateTrackAddition) {
+
+                if (config.url === tp.track.url) {
+                    console.log("Attempted duplicate track addition. Ignore.");
+                    attemptedDuplicateTrackAddition = true;
+                }
+
+            }
+        });
+
+        if (true === attemptedDuplicateTrackAddition) {
+            return;
+        }
+
         var path = config.url;
 
         if (config.type && config.type === 't2d') {
