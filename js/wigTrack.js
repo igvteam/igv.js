@@ -6,7 +6,13 @@ var igv = (function (igv) {
 
     igv.WIGTrack = function (config) {
         this.url = config.url;
-        this.featureSource = new igv.WIGFeatureSource(this.url);
+
+        if (this.url.endsWith(".bedgraph")) {
+            this.featureSource = new igv.BEDGraphFeatureSource(this.url);
+        } else {
+            this.featureSource = new igv.WIGFeatureSource(this.url);
+        }
+
         this.label = config.label;
         this.id = config.id || this.label;
         this.height = 100;
@@ -16,6 +22,7 @@ var igv = (function (igv) {
     /**
      *
      * @param canvas -- a "fabric canvas",  fabricjs.com  (not a Canvas2D)
+     * @param refFrame
      * @param bpStart
      * @param bpEnd
      * @param width

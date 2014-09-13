@@ -39,12 +39,10 @@
     <script type="text/javascript" src="js/fasta.js"></script>
     <script type="text/javascript" src="js/sequenceTrack.js"></script>
 
+    <script type="text/javascript" src="js/bedGraphSource.js"></script>
+
     <script type="text/javascript" src="js/wigSource.js"></script>
     <script type="text/javascript" src="js/wigTrack.js"></script>
-
-    <script type="text/javascript" src="js/bedGraphSource.js"></script>
-    <script type="text/javascript" src="js/bedGraphTrack.js"></script>
-
     <script type="text/javascript" src="js/dataloader.js"></script>
     <script type="text/javascript" src="js/igv-exts.js"></script>
     <script type="text/javascript" src="js/binary.js"></script>
@@ -73,10 +71,18 @@
         <tr>
             <td><a style="color: blue;cursor: pointer"
                    onclick="igv.browser.loadTrack({
-                     url: 'http://www.broadinstitute.org/igvdata/1KG/b37/data/NA06984/alignment/NA06984.mapped.ILLUMINA.bwa.CEU.low_coverage.20120522.bam',
-                     label: 'NA06984'
+//                     url: 'http://www.broadinstitute.org/igvdata/1KG/b37/data/NA06984/alignment/NA06984.mapped.ILLUMINA.bwa.CEU.low_coverage.20120522.bam',
+//                     label: 'NA06984'
+
+                     url: 'https://dl.dropboxusercontent.com/u/11270323/BroadInstitute/dataFormats/BEDGraph/bedgraph-example-uscs.bedgraph',
+                     label: 'My First BEDGraph'
+
                    })">Load
-                NA06984 BAM</a></td>
+                My First BEDGraph</a></td>
+        </tr>
+        <tr>
+            <td><a style="color: blue;cursor: pointer" onclick="igv.browser.search('chr19:49302001-49304701')">
+                (BED Graph) Goto chr19:49,302,001-49,304,701</a></td>
         </tr>
         <tr>
             <td><a style="color: blue;cursor: pointer" onclick="igv.browser.search('chr1:155,169,232-155,169,271')">

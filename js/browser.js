@@ -21,7 +21,6 @@ var igv = (function (igv) {
             if (false === attemptedDuplicateTrackAddition) {
 
                 if (config.url === tp.track.url) {
-                    console.log("Attempted duplicate track addition. Ignore.");
                     attemptedDuplicateTrackAddition = true;
                 }
 
@@ -29,6 +28,7 @@ var igv = (function (igv) {
         });
 
         if (true === attemptedDuplicateTrackAddition) {
+            console.log("Attempted duplicate track addition. Ignore.");
             return;
         }
 
@@ -40,14 +40,13 @@ var igv = (function (igv) {
             this.addTrack(new igv.GeneTrack(config));
         } else if (path.endsWith(".bam")) {
             this.addTrack(new igv.BAMTrack(config));
-        } else if (path.endsWith(".wig") || path.endsWith(".wig.gz") ||
-            path.endsWith(".bedgraph") || path.endsWith(".bedgraph.gz")) {
+        } else if (path.endsWith(".wig") || path.endsWith(".wig.gz") || path.endsWith(".bedgraph") || path.endsWith(".bedgraph.gz")) {
             this.addTrack(new igv.WIGTrack(config));
         }
 
         // TODO -- error message "unsupported filed type"
 
-    }
+    };
 
     /**
      * Add a new track.  Each track is associated with the following DOM elements
