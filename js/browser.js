@@ -28,7 +28,7 @@ var igv = (function (igv) {
         });
 
         if (true === attemptedDuplicateTrackAddition) {
-            console.log("Attempted duplicate track addition. Ignore.");
+            window.alert("Attempted duplicate track addition. Ignore.");
             return;
         }
 
