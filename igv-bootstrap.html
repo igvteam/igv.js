@@ -62,6 +62,7 @@
     <script type="text/javascript" src="js/bamReader.js"></script>
     <script type="text/javascript" src="js/bamSource.js"></script>
     <script type="text/javascript" src="js/bamTrack.js"></script>
+    <script type="text/javascript" src="js/bedGraphSource.js"></script>
     <script type="text/javascript" src="vendor/spin.js"></script>
     <script type="text/javascript" src="js/intervalTree.js"></script>
 
@@ -281,10 +282,18 @@
                     trait: "T2D",
                     label: "Type II Diabetes"
                 }),
-                new igv.SequenceTrack(),
+                new igv.WIGTrack({
+                    url: "//www.broadinstitute.org/igvdata/t2d/recomb_decode.bedgraph",
+                    label: "Recombination rate",
+                    order: 9998
+                }),
+                new igv.SequenceTrack({
+                    order: 9999
+                }),
                 new igv.GeneTrack({
                     url: "//igvdata.broadinstitute.org/annotations/hg19/genes/gencode.v18.collapsed.bed",
-                    label: "Genes"
+                    label: "Genes",
+                    order: 10000
                 })
             ]
         };

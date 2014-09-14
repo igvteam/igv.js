@@ -7,6 +7,7 @@ var igv = (function (igv) {
         this.label = descriptor.label;
         this.id = descriptor.id || descriptor.label;
         this.height = 100;   // The preferred height
+        this.order = descriptor.order;
     }
 
 

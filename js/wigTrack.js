@@ -19,6 +19,7 @@ var igv = (function (igv) {
         this.id = descriptor.id || this.label;
         this.color = descriptor.color || "rgb(150,150,150)"
         this.height = 100;
+        this.order = descriptor.order;
 
     };
 

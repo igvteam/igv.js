@@ -79,7 +79,7 @@ var igv = (function (igv) {
 
         this.trackContainerDiv.appendChild(trackPanel.trackDiv);
 
-        trackPanel.order = this.trackPanels.length;
+        trackPanel.order = track.order || this.trackPanels.length;
 
         this.trackPanels.push(trackPanel);
 
