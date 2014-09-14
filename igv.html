@@ -71,18 +71,10 @@
         <tr>
             <td><a style="color: blue;cursor: pointer"
                    onclick="igv.browser.loadTrack({
-//                     url: 'http://www.broadinstitute.org/igvdata/1KG/b37/data/NA06984/alignment/NA06984.mapped.ILLUMINA.bwa.CEU.low_coverage.20120522.bam',
-//                     label: 'NA06984'
-
-                     url: 'https://dl.dropboxusercontent.com/u/11270323/BroadInstitute/dataFormats/BEDGraph/bedgraph-example-uscs.bedgraph',
-                     label: 'My First BEDGraph'
-
+                     url: 'http://www.broadinstitute.org/igvdata/1KG/b37/data/NA06984/alignment/NA06984.mapped.ILLUMINA.bwa.CEU.low_coverage.20120522.bam',
+                     label: 'NA06984'
                    })">Load
-                My First BEDGraph</a></td>
-        </tr>
-        <tr>
-            <td><a style="color: blue;cursor: pointer" onclick="igv.browser.search('chr19:49302001-49304701')">
-                (BED Graph) Goto chr19:49,302,001-49,304,701</a></td>
+                NA06984 BAM</a></td>
         </tr>
         <tr>
             <td><a style="color: blue;cursor: pointer" onclick="igv.browser.search('chr1:155,169,232-155,169,271')">
@@ -115,16 +107,20 @@
         div = $("#myDiv")[0];
         options = {
             showKaryo: true,
-            fastaURL: "http://igvdata.broadinstitute.org/genomes/seq/hg19/hg19.fasta",
-            cytobandURL: "http://igvdata.broadinstitute.org/genomes/seq/hg19/cytoBand.txt",
+            fastaURL: "//igvdata.broadinstitute.org/genomes/seq/hg19/hg19.fasta",
+            cytobandURL: "//igvdata.broadinstitute.org/genomes/seq/hg19/cytoBand.txt",
             tracks: [
-                new igv.SequenceTrack(),
+                new igv.SequenceTrack({
+                    order: 9999
+                }),
                 new igv.GeneTrack({
                     url: "//igvdata.broadinstitute.org/annotations/hg19/genes/gencode.v18.collapsed.bed",
-                    label: "Genes"
+                    label: "Genes",
+                    order: 10000
                 })
             ]
         };
+        browser
         browser = igv.createBrowser(options);
         div.appendChild(browser.div);
         browser.startup();
