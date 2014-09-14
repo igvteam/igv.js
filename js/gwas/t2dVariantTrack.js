@@ -4,11 +4,12 @@
 var igv = (function (igv) {
 
 
-    igv.T2dTrack = function (config) {
-        this.url = config.url;
-        this.featureSource = new igv.MpgFeatureSource(config);
-        this.label = config.label;
-        this.id = config.trait;
+    igv.T2dTrack = function (descriptor) {
+        this.descriptor = descriptor;
+        this.url = descriptor.url;
+        this.featureSource = new igv.MpgFeatureSource(descriptor);
+        this.label = descriptor.label;
+        this.id = descriptor.trait;
         this.height = 100;   // The preferred height
         this.minLogP = 0;
         this.maxLogP = 10;

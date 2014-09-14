@@ -1,10 +1,11 @@
 var igv = (function (igv) {
 
-    igv.GeneTrack = function (config) {
-        this.url = config.url;
+    igv.GeneTrack = function (descriptor) {
+        this.descriptor = descriptor;
+        this.url = descriptor.url;
         this.featureSource = new igv.BedFeatureSource(this.url);
-        this.label = config.label;
-        this.id = config.id || config.label;
+        this.label = descriptor.label;
+        this.id = descriptor.id || descriptor.label;
         this.height = 100;   // The preferred height
     }
 

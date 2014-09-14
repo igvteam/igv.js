@@ -4,8 +4,10 @@
 var igv = (function (igv) {
 
 
-    igv.WIGTrack = function (config) {
-        this.url = config.url;
+    igv.WIGTrack = function (descriptor) {
+
+        this.descriptor = descriptor;
+        this.url = descriptor.url;
 
         if (this.url.endsWith(".bedgraph")) {
             this.featureSource = new igv.BEDGraphFeatureSource(this.url);
@@ -13,8 +15,8 @@ var igv = (function (igv) {
             this.featureSource = new igv.WIGFeatureSource(this.url);
         }
 
-        this.label = config.label;
-        this.id = config.id || this.label;
+        this.label = descriptor.label;
+        this.id = descriptor.id || this.label;
         this.height = 100;
 
     };
