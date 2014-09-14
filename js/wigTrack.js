@@ -17,6 +17,7 @@ var igv = (function (igv) {
 
         this.label = descriptor.label;
         this.id = descriptor.id || this.label;
+        this.color = descriptor.color || "rgb(150,150,150)"
         this.height = 100;
 
     };
@@ -36,7 +37,8 @@ var igv = (function (igv) {
 
     igv.WIGTrack.prototype.draw = function (canvas, refFrame, bpStart, bpEnd, width, height, continuation) {
 
-        var chr = refFrame.chr;
+        var track=this,
+            chr = refFrame.chr;
 
         this.featureSource.getFeatures(chr, bpStart, bpEnd, function (features) {
 
@@ -71,7 +73,7 @@ var igv = (function (igv) {
                 rectHeight = ((feature.value - featureMin) / denom) * height;
                 rectBaseline = height - rectHeight;
 
-                canvas.fillRect(rectOrigin, rectBaseline, rectWidth, rectHeight, {fillStyle: igv.randomRGB(32, 224)});
+                canvas.fillRect(rectOrigin, rectBaseline, rectWidth, rectHeight, {fillStyle: track.color});
 
             }
         });

@@ -58,7 +58,6 @@ var igv = (function (igv) {
     function parseLine(line, index, lines) {
 
         var chr,
-            dev_null,
             parts,
             feature,
             features;
@@ -71,22 +70,17 @@ var igv = (function (igv) {
             return;
         }
 
-        parts = line.split(" ");
-        dev_null = parts.shift();
-        if ('track' === dev_null) {
-            this.trackLine = parseTrackLine(parts);
-            return
+        if(line.startsWith("track")) {
+            parseTrackLine(line);
         }
+
+        parts = line.split("\t");
 
         if (!parts || parts.length < 3) {
-            return
+            return;
         }
 
-        if (!dev_null.startsWith("chr")) {
-            return
-        }
-
-        chr = dev_null;
+        chr = parts[0];
 
         features = this.features[ chr ];
         if (!features) {
@@ -95,14 +89,20 @@ var igv = (function (igv) {
             this.features[ chr ] = features;
         }
 
-        feature = featureForBEDGraphFormat(parts);
+        feature = {
+            start: parseInt(parts[ 1 ]),
+            end: parseInt(parts[ 2 ]),
+            value: parseFloat(parts[ 3 ])
+        };
+
         features.featureList.push(feature);
         features.minimum = Math.min(features.minimum, feature.value);
         features.maximum = Math.max(features.maximum, feature.value);
 
-        function parseTrackLine(trackLineArray) {
+        function parseTrackLine(line) {
 
-            var trackLine = {},
+            var trackLineArray = line.split(" "),
+                trackLine = {},
                 moreStuff,
                 item;
 
@@ -137,10 +137,6 @@ var igv = (function (igv) {
             return trackLine;
         }
 
-        function featureForBEDGraphFormat(featureLineArray) {
-            return { start: parseInt(featureLineArray[ 0 ], 10), end: parseInt(featureLineArray[ 1 ], 10), value: parseFloat(featureLineArray[ 2 ]) };
-
-        }
 
     }
 
