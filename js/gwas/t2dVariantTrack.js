@@ -4,20 +4,22 @@
 var igv = (function (igv) {
 
 
-    igv.T2dTrack = function (descriptor) {
-        this.descriptor = descriptor;
-        this.url = descriptor.url;
-        this.featureSource = new igv.MpgFeatureSource(descriptor);
-        this.label = descriptor.label;
-        this.id = descriptor.trait;
-        this.height = 100;   // The preferred height
-        this.minLogP = 0;
-        this.maxLogP = 10;
+    igv.T2dTrack = function (config) {
+        this.descriptor = config;
+        this.url = config.url;
+        this.featureSource = new igv.T2DVariantSource(config);
+        this.label = config.label;
+        this.id = config.trait;
+        this.height = config.height || 100;   // The preferred height
+        this.minLogP = config.minLogP || 0;
+        this.maxLogP = config.maxLogP || 15;
+        this.background = config.background || "rgb(245,245,245)"
 
-        this.colorScale = new BinnedColorScale(
-            [5e-8, 5e-4, 0.5],
-            ["rgb(255,50,50)", "rgb(251,100,100)", "rgb(251,170,170)", "rgb(227,238,249)"]
-        );
+        var cs = config.colorScale || {
+            thresholds: [5e-8, 5e-4, 0.5],
+            colors: ["rgb(255,50,50)", "rgb(251,100,100)", "rgb(251,170,170)", "rgb(227,238,249)"]
+        };
+        this.colorScale = new BinnedColorScale(cs);
     }
 
 
@@ -53,7 +55,7 @@ var igv = (function (igv) {
 //        }
 
 
-        canvas.fillRect(0, 0, pixelWidth, pixelHeight, {'fillStyle': "rgb(230, 230, 230)"});
+        canvas.fillRect(0, 0, pixelWidth, pixelHeight, {'fillStyle': this.background});
 
 
         this.featureSource.getFeatures(queryChr, bpStart, bpEnd, function (featureList) {
@@ -139,9 +141,9 @@ var igv = (function (igv) {
      * @param colors - array of colors for bins  (length == thresholds.length + 1)
      * @constructor
      */
-    var BinnedColorScale = function(thresholds, colors) {
-        this.thresholds = thresholds;
-        this.colors = colors;
+    var BinnedColorScale = function(cs) {
+        this.thresholds = cs.thresholds;
+        this.colors = cs.colors;
     }
 
     BinnedColorScale.prototype.getColor = function(value) {

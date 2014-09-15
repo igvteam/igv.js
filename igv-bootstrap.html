@@ -109,8 +109,12 @@
                                     type: 't2d',
                                     url: '//www.broadinstitute.org/igvdata/t2d/postJson.php',
                                     trait: 'FastGlu',
-                                    label: 'fasting glucose'
-                                })">fasting glucose</a>
+                                    label: 'fasting glucose',
+                                    colorScale: {
+                                      thresholds: [5e-8, 5e-4, 0.5],
+                                      colors: ['rgb(100,50,50)', 'rgb(40,100,100)', 'rgb(251,45,170)', 'rgb(227,10,249)']
+                                    }
+                            })">fasting glucose</a>
                         </li>
                         <li>
                             <a onclick="igv.browser.loadTrack({

@@ -7,7 +7,7 @@ var igv = (function (igv) {
      * @param url - url to the webservice
      * @constructor
      */
-    igv.MpgFeatureSource = function (config) {
+    igv.T2DVariantSource = function (config) {
 
         this.url = config.url;
         this.trait = config.trait;
@@ -25,11 +25,11 @@ var igv = (function (igv) {
      * @param bpEnd
      * @param success -- function that takes an array of features as an argument
      */
-    igv.MpgFeatureSource.prototype.getFeatures = function (queryChr, bpStart, bpEnd, success, task) {
+    igv.T2DVariantSource.prototype.getFeatures = function (chr, bpStart, bpEnd, success, task) {
 
         var source = this;
 
-        if (this.cache && this.cache.chr === queryChr && this.cache.end > bpEnd && this.cache.start < bpStart) {
+        if (this.cache && this.cache.chr === chr && this.cache.end > bpEnd && this.cache.start < bpStart) {
             success(this.cache.features);
         }
 
@@ -40,19 +40,22 @@ var igv = (function (igv) {
                 // Get a minimum 10mb window around the requested locus
                 var window = Math.max(bpEnd - bpStart, 10000000) / 2,
                     center = (bpEnd + bpStart) / 2,
+                    queryChr = (chr.startsWith("chr") ? chr.substring(3) : chr),
                     queryStart = Math.max(0, center - window),
                     queryEnd = center + window,
                     dataLoader = new igv.DataLoader(this.url),
                     data = {
                         "user_group": "ui",
                         "filters": [
-                            {"operand": "CHROM", "operator": "EQ", "value": "1", "filter_type": "STRING" },
+                            {"operand": "CHROM", "operator": "EQ", "value": queryChr , "filter_type": "STRING" },
                             {"operand": "POS", "operator": "GT", "value": queryStart, "filter_type": "FLOAT" },
                             {"operand": "POS", "operator": "LT", "value": queryEnd, "filter_type": "FLOAT" },
                             {"operand": "PVALUE", "operator": "LTE", "value": 5E-2, "filter_type": "FLOAT"}
                         ],
                         "trait": source.trait
                     };
+
+                console.log(JSON.stringify(data));
 
                 dataLoader.postJson(data, function (result) {
 
@@ -66,7 +69,7 @@ var igv = (function (igv) {
                                 });
 
                                 source.cache = {
-                                    chr: queryChr,
+                                    chr: chr,
                                     start: queryStart,
                                     end: queryEnd,
                                     features: variants
