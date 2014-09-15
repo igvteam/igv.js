@@ -55,7 +55,6 @@ var igv = (function (igv) {
                         "trait": source.trait
                     };
 
-                console.log(JSON.stringify(data));
 
                 dataLoader.postJson(data, function (result) {
 
