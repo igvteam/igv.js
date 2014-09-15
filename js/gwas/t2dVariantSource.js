@@ -29,7 +29,7 @@ var igv = (function (igv) {
 
         var source = this;
 
-        if(this.cache && this.cache.chr === queryChr) {  // && cache.end > bpStart && cache.start < bpEnd) {
+        if(this.cache && this.cache.chr === queryChr && this.cache.end > bpEnd && this.cache.start < bpStart) {
             success(this.cache.features);
         }
 
@@ -37,11 +37,18 @@ var igv = (function (igv) {
 
             function loadFeatures() {
 
-                var dataLoader = new igv.DataLoader(this.url),
+                // Get a minimum 10mb window around the requested locus
+                var window = Math.max(bpEnd - bpStart, 10000000)/2,
+                    center = (bpEnd + bpStart) / 2,
+                    queryStart = Math.max(0, center - window),
+                    queryEnd = center + window,
+                    dataLoader = new igv.DataLoader(this.url),
                     data = {
                         "user_group": "ui",
                         "filters": [
                             {"operand": "CHROM",  "operator": "EQ","value": "1", "filter_type": "STRING" },
+                            {"operand": "POS",  "operator": "GT","value": queryStart, "filter_type": "FLOAT" },
+                            {"operand": "POS",  "operator": "LT","value": queryEnd, "filter_type": "FLOAT" },
                             {"operand": "PVALUE", "operator": "LTE", "value": 5E-2, "filter_type": "FLOAT"}
                         ],
                         "trait": source.trait
@@ -59,8 +66,8 @@ var igv = (function (igv) {
 
                             source.cache = {
                                 chr: queryChr,
-                                start: bpStart,
-                                end: bpEnd,
+                                start: queryStart,
+                                end: queryEnd,
                                 features: variants
                             };
                             success(variants);
