@@ -46,7 +46,7 @@ var igv = (function (igv) {
      * @param bpEnd
      * @param success -- function that takes an array of features as an argument
      */
-    igv.BedFeatureSource.prototype.getFeatures = function (queryChr, bpStart, bpEnd, success) {
+    igv.BedFeatureSource.prototype.getFeatures = function (queryChr, bpStart, bpEnd, success, task) {
 
         var myself = this;
 
@@ -60,58 +60,10 @@ var igv = (function (igv) {
                 // Finally pass features for query interval to continuation
                 success(myself.featureCache.queryFeatures(queryChr, bpStart, bpEnd));
 
-            });
+            },
+            task);
         }
 
-        function loadFeatures(continuation) {
-
-            if (this.localFile) {
-
-                // TODO -- move this logic to DataLoader
-
-                var localFileDataLoader = new FileReader();
-
-                localFileDataLoader.onload = function (e) {
-
-                    var plain, inflate;
-
-                    if (myself.localFile.name.endsWith(".gz")) {
-                        inflate = new Zlib.Gunzip(new Uint8Array(localFileDataLoader.result));
-
-                        plain = inflate.decompress();
-                    } else {
-
-                        plain = new Uint8Array(localFileDataLoader.result);
-                    }
-
-                    var result = "";
-                    for (var i = 0, len = plain.length; i < len; i++) {
-                        result = result + String.fromCharCode(plain[i]);
-                    }
-
-                    myself.featureLoader(result, continuation);
-
-                };
-
-                localFileDataLoader.onerror = function (e) {
-                    console.log("error uploading local file " + myself.localFile.name);
-                };
-
-                localFileDataLoader.readAsArrayBuffer(this.localFile);
-
-            }
-
-            else {
-
-                var dataLoader = new igv.DataLoader(this.url);
-
-                if (dataLoader) dataLoader.loadBinaryString(function (data) {
-
-                    myself.featureLoader(data, continuation);
-                });
-
-            }
-        }
     };
 
     igv.BedFeatureSource.prototype.allFeatures = function (success) {
@@ -144,7 +96,7 @@ var igv = (function (igv) {
         }
     }
 
-    igv.BedFeatureSource.prototype.loadFeatures = function (continuation) {
+    igv.BedFeatureSource.prototype.loadFeatures = function (continuation, task) {
 
         var myself = this;
         
@@ -172,7 +124,7 @@ var igv = (function (igv) {
                     result = result + String.fromCharCode(plain[i]);
                 }
 
-                myself.featureLoader(result, continuation);
+                myself.featureLoader(result, continuation, task);
 
             };
 
@@ -191,7 +143,8 @@ var igv = (function (igv) {
             if (dataLoader) dataLoader.loadBinaryString(function (data) {
 
                 myself.featureLoader(data, continuation);
-            });
+            },
+            task);
 
         }
     }

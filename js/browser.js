@@ -85,7 +85,9 @@ var igv = (function (igv) {
 
         // Keeps the tracks in the right order and the Gene track pinned to the bottom
         this.trackPanels.sort(function (a, b) {
-            return a.order - b.order;
+            var aOrder = a.order || 0;
+            var bOrder = b.order || 0
+            return aOrder - bOrder;
         });
 
         this.layoutTrackPanels(this.trackPanels);

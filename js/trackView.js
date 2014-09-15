@@ -6,7 +6,7 @@ var igv = (function (igv) {
 
         this.browser = browser;
         this.track = track;
-        this.order = 0;
+        this.order = track.order || 0;
         this.marginBottom = 10;
 
         var viewportHeight,
@@ -411,6 +411,7 @@ var igv = (function (igv) {
             tileStart = Math.max(0, Math.round(refFrame.start - tileWidth / 3));
             tileEnd = tileStart + tileWidth;
 
+
             spinner = igv.getSpinner(this.trackDiv);   // Start a spinner
 
             if (this.currentTask) {
@@ -423,6 +424,7 @@ var igv = (function (igv) {
                     if(this.xhrRequest) {
                         this.xhrRequest.abort();
                     }
+                    spinner.stop();
                 }
 
             };

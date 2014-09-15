@@ -5,7 +5,7 @@ var igv = (function (igv) {
         this.id = "sequence";
         this.height = this.preferredHeight;    // The preferred height
         this.disableButtons =  true;
-        this.order = description.order;
+        this.order = description.order || 9999;
     }
 
     igv.SequenceTrack.prototype.preferredHeight = 15;

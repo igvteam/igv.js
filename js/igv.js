@@ -101,6 +101,10 @@ var igv = (function (igv) {
 
                 }
 
+                if(options.locus) {
+                    browser.search(options.locus);
+                }
+
                 window.onresize = throttle(function () {
                     if (browser.ideoPanel) browser.ideoPanel.resize();
                     if (browser.karyoPanel) browser.karyoPanel.resize();
