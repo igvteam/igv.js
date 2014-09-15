@@ -9,7 +9,7 @@ var igv = (function (igv) {
         this.descriptor = descriptor;
         this.url = descriptor.url;
 
-        if (this.url.endsWith(".bedgraph")) {
+        if (this.url.endsWith(".bedgraph") || this.url.endsWith(".bedgraph.gz")) {
             this.featureSource = new igv.BEDGraphFeatureSource(this.url);
         } else {
             this.featureSource = new igv.WIGFeatureSource(this.url);
@@ -17,7 +17,7 @@ var igv = (function (igv) {
 
         this.label = descriptor.label;
         this.id = descriptor.id || this.label;
-        this.color = descriptor.color || "rgb(150,150,150)"
+        this.color = descriptor.color || "rgb(150,150,150)";
         this.height = 100;
         this.order = descriptor.order;
 
