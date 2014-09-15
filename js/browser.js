@@ -221,9 +221,9 @@ var igv = (function (igv) {
 
         if (this.genome) {
             chromosome = this.genome.getChromosome(this.referenceFrame.chr);
-            if (chromosome && end > chromosome.length) {
-                start -= (end - chromosome.length);
-                end = chromosome.length;
+            if (chromosome && end > chromosome.bpLength) {
+                start -= (end - chromosome.bpLength);
+                end = chromosome.bpLength;
             }
         }
 
@@ -258,7 +258,7 @@ var igv = (function (igv) {
         if (this.genome) {
             var chromosome = this.genome.getChromosome(this.referenceFrame.chr);
             if (chromosome) {
-                chrLength = chromosome.length;
+                chrLength = chromosome.bpLength;
             }
         }
         maxScale = chrLength / viewportWidth;

@@ -88,7 +88,7 @@ var igv = (function (igv) {
         var referenceFrame = browser.referenceFrame,
             chromosome = browser.genome.getChromosome(browser.referenceFrame.chr),
             viewportWidth = browser.trackViewportWidth(),
-            bp = chromosome.length * pixelPosition / viewportWidth;
+            bp = chromosome.bpLength * pixelPosition / viewportWidth;
 
         referenceFrame.start = bp;
         browser.update();

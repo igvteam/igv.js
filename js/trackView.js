@@ -273,9 +273,9 @@ var igv = (function (igv) {
 //                            var chromosome = igv.genome.getChromosome(igv.referenceFrame.chr);
 //                            var widthBP = Math.round((igv.trackWidth - igv.labelWidth) * igv.referenceFrame.bpPerPixel);
 //                            var endBP = igv.referenceFrame.start + widthBP;
-//                            if (chromosome && endBP > chromosome.length) {
+//                            if (chromosome && endBP > chromosome.bpLength) {
 //                                if (endBP > chromosome.length) {
-//                                    igv.referenceFrame.start = chromosome.length - widthBP;
+//                                    igv.referenceFrame.start = chromosome.bpLength - widthBP;
 //                                }
 //                            }
 //                        }
