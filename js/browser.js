@@ -28,6 +28,9 @@ var igv = (function (igv) {
         });
 
         if (true === attemptedDuplicateTrackAddition) {
+
+            jQuery(key).qtip("show");
+
             window.alert("Attempt to load duplicate track.");
             return;
         }
@@ -65,7 +68,8 @@ var igv = (function (igv) {
      */
     igv.Browser.prototype.addTrack = function (track, position) {
 
-        var trackPanel = new igv.TrackView(track, this);
+        var ttt,
+            trackPanel = new igv.TrackView(track, this);
 
         if (trackPanel.track instanceof igv.EqtlTrack) {
             trackPanel.trackDiv.style.height = this.trackHeight + "px";
@@ -78,6 +82,39 @@ var igv = (function (igv) {
         }
 
         this.trackContainerDiv.appendChild(trackPanel.trackDiv);
+
+        // play with qtip
+        ttt = $(trackPanel.trackDiv);
+        ttt.qtip({
+            content: {
+                text: "HULK Me HULK HULK",
+                title: {
+                    text: "Title",
+                    button: true
+                }
+            },
+            show: {
+                event: 'click',
+                solo: true
+            },
+            hide: {
+                fixed: true,
+                event: 'unfocus'
+            },
+            position: {
+                target: 'mouse',
+                viewport: $(window),
+                adjust: {
+                    method: 'flip shift',
+                    mouse: false
+                }
+            },
+            style: {
+                tip: false,
+                widget: false
+            }
+        });
+
 
         trackPanel.order = track.order || this.trackPanels.length;
 
