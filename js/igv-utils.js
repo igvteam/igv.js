@@ -16,32 +16,32 @@ var igv = (function (igv) {
     };
 
     igv.guid = function () {
-        return ("0000" + (Math.random() * Math.pow(36,4) << 0).toString(36)).slice(-4);
+        return ("0000" + (Math.random() * Math.pow(36, 4) << 0).toString(36)).slice(-4);
     };
 
     // Returns a random number between min (inclusive) and max (exclusive)
-    igv.random =  function (min, max) {
+    igv.random = function (min, max) {
         return Math.random() * (max - min) + min;
     };
 
     // StackOverflow: http://stackoverflow.com/a/10810674/116169
-    igv.numberFormatter = function (rawNumber){
+    igv.numberFormatter = function (rawNumber) {
 
         var dec = String(rawNumber).split(/[.,]/),
-            sep    = ',',
+            sep = ',',
             decsep = '.';
 
-        return dec[0].split('').reverse().reduce(function(prev, now, i){
+        return dec[0].split('').reverse().reduce(function (prev, now, i) {
             return i % 3 === 0 ? prev + sep + now : prev + now;
         }).split('').reverse().join('') + (dec[1] ? decsep + dec[1] : '');
     };
 
-    igv.numberUnFormatter = function (formatedNumber){
+    igv.numberUnFormatter = function (formatedNumber) {
 
         return formatedNumber.split(",").join().replace(",", "", "g");
     };
 
-    igv.getSpinner =  function (target) {
+    igv.getSpinner = function (target) {
 
         var opts = {
             lines: 13, // The number of lines to draw
@@ -67,6 +67,24 @@ var igv = (function (igv) {
 
         return spinner;
     };
+
+
+    /**
+     * Create a file from the text and initiate a download.
+     * @param text
+     */
+    igv.download = function (text) {
+
+        var dataLoader = new igv.DataLoader("php/echoPost.php");
+
+        dataLoader.post(text, function(response) {
+
+            var url = "php/download.php?filename=" + response;
+            window.open(url, "Download");
+
+        });
+
+    }
 
     return igv;
 
