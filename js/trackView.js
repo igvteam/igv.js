@@ -34,7 +34,7 @@ var igv = (function (igv) {
 
         this.trackDiv = trackDiv;
 
-//        // Add qtip to data tracks with labels only
+        // Add qtip to data tracks with labels only
 //        if (this.trackDiv.title) {
 //
 //            $(this.trackDiv).qtip({
@@ -297,18 +297,16 @@ var igv = (function (igv) {
 
             var canvas = trackPanel.canvas;
             var isMouseDown = false;
-            var lastMouseX;
+            var lastMouseX = undefined;
             var referenceFrame = trackPanel.browser.referenceFrame;
 
             canvas.onmousedown = function (e) {
 
                 var dx = e.clientX - $(canvas).offset().left;
 
-                console.log("dx " + dx + " bp " + igv.numberFormatter(trackPanel.genomicCoordinateWithEventTap(e)));
-
                 isMouseDown = true;
 
-                this.lastMouseX = dx;
+                lastMouseX = dx;
 
             };
 
@@ -347,13 +345,60 @@ var igv = (function (igv) {
             }, 20);
 
             canvas.onmouseup = function (e) {
+                var dx = e.clientX - $(canvas).offset().left;
+
+                if (0 === Math.abs(dx - lastMouseX)) {
+//                    console.log("onmouseup - x " + dx + " last " + lastMouseX);
+//                    console.log("bp " + igv.numberFormatter(trackPanel.genomicCoordinateWithEventTap(e)));
+
+
+                    $(trackPanel.trackDiv).qtip({
+                        content: {
+                            text: "Genomic location " + igv.numberFormatter(1 + trackPanel.genomicCoordinateWithEventTap(e)),
+                            title: {
+                                text: "Genomic Gymnastics",
+                                button: true
+                            }
+                        },
+                        show: {
+                            event: 'click',
+                            solo: true
+                        },
+                        hide: {
+                            event: 'unfocus'
+                        },
+                        position: {
+                            target: 'mouse',
+                            viewport: $(window),
+                            adjust: {
+                                method: 'flip shift',
+                                mouse: false
+                            }
+                        },
+
+                        style: {
+                            width: 200,
+                            height: 200,
+                            tip: false,
+                            widget: false
+                        }
+                    });
+
+
+
+
+
+
+
+                }
+
                 isMouseDown = false;
-                lastMouseX = null;
+                lastMouseX = undefined;
             };
 
             canvas.onmouseout = function (e) {
                 isMouseDown = false;
-                lastMouseX = null;
+                lastMouseX = undefined;
             };
 
             canvas.ondblclick = function (e) {
@@ -371,10 +416,10 @@ var igv = (function (igv) {
                 }
             };
 
-            canvas.onclick = function (e) {
-                var mouseX = e.clientX - $(canvas).offset().left;
-                var mouseY = e.clientY - $(canvas).offset().top;
-            };
+//            canvas.onclick = function (e) {
+//                var dx = e.clientX - $(canvas).offset().left;
+//                console.log("onclick - x " + dx + " last " + lastMouseX);
+//            };
         }
 
     };
