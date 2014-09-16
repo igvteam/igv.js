@@ -302,25 +302,25 @@ var igv = (function (igv) {
 
             canvas.onmousedown = function (e) {
 
-                var mouseX = e.clientX - canvas.offsetLeft;
+                var dx = e.clientX - $(canvas).offset().left;
+
+                console.log("dx " + dx + " bp " + igv.numberFormatter(trackPanel.genomicCoordinateWithEventTap(e)));
 
                 isMouseDown = true;
 
-                this.lastMouseX = mouseX;
+                this.lastMouseX = dx;
 
             };
 
             canvas.onmousemove = throttle(function (e) {
-                var mouseX = e.clientX - canvas.offsetLeft,
-                    dx = e.clientX - $(this).offset().left;
+                var dx = e.clientX - $(canvas).offset().left;
 
-                console.log("dx " + dx + " bp " + igv.numberFormatter( Math.floor( (trackPanel.browser.referenceFrame.start) + trackPanel.browser.referenceFrame.toBP(dx) ) ));
 
                 if (isMouseDown) {
 
                     if (lastMouseX) {
 
-                        referenceFrame.shiftPixels(lastMouseX - mouseX);
+                        referenceFrame.shiftPixels(lastMouseX - dx);
 
                         if (referenceFrame.start < 0) {
                             referenceFrame.start = 0;
@@ -338,7 +338,7 @@ var igv = (function (igv) {
 //                        }
                     }
 
-                    lastMouseX = mouseX;
+                    lastMouseX = dx;
 
 
                     trackPanel.browser.repaint();
@@ -357,26 +357,32 @@ var igv = (function (igv) {
             };
 
             canvas.ondblclick = function (e) {
-                var mouseX = e.clientX - canvas.offsetLeft; //e.pageX - $(this).offset().left;
-                var mouseY = e.clientY - canvas.offsetTop;
+
+                var mouseX = e.clientX - $(canvas).offset().left;
+                var mouseY = e.clientY - $(canvas).offset().top;
 
                 if (trackPanel.track.handleDblClick) {
                     trackPanel.track.handleDblClick(mouseX, mouseY, trackPanel.viewportDiv);
                 }
-
                 else {
                     var newCenter = Math.round(trackPanel.browser.referenceFrame.start + mouseX * trackPanel.browser.referenceFrame.bpPerPixel);
                     referenceFrame.bpPerPixel /= 2;
                     trackPanel.browser.goto(trackPanel.browser.referenceFrame.chr, newCenter);
                 }
-            }
+            };
 
             canvas.onclick = function (e) {
-                var mouseX = e.clientX - canvas.offsetLeft; //e.pageX - $(this).offset().left;
-                var mouseY = e.clientY - canvas.offsetTop;
-
+                var mouseX = e.clientX - $(canvas).offset().left;
+                var mouseY = e.clientY - $(canvas).offset().top;
             };
         }
+
+    };
+
+    igv.TrackView.prototype.genomicCoordinateWithEventTap = function (event) {
+
+        var pixels = event.clientX - $(this.canvas).offset().left;
+        return Math.floor( (this.browser.referenceFrame.start) + this.browser.referenceFrame.toBP(pixels) );
 
     };
 
