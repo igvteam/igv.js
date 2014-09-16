@@ -68,28 +68,26 @@ var igv = (function (igv) {
      */
     igv.Browser.prototype.addTrack = function (track, position) {
 
-        var ttt,
-            trackPanel = new igv.TrackView(track, this);
+        var trackView = new igv.TrackView(track, this);
 
-        if (trackPanel.track instanceof igv.EqtlTrack) {
-            trackPanel.trackDiv.style.height = this.trackHeight + "px";
-            trackPanel.canvas.height = this.trackHeight;
-            trackPanel.canvas.style.height = this.trackHeight + "px";
-            trackPanel.controlDiv.style.height = this.trackHeight + "px";
-            trackPanel.controlCanvas.height = this.trackHeight;
-            trackPanel.controlCanvas.style.height = this.trackHeight + "px";
-            trackPanel.viewportDiv.style.height = this.trackHeight + "px";
+        if (trackView.track instanceof igv.EqtlTrack) {
+            trackView.trackDiv.style.height = this.trackHeight + "px";
+            trackView.canvas.height = this.trackHeight;
+            trackView.canvas.style.height = this.trackHeight + "px";
+            trackView.controlDiv.style.height = this.trackHeight + "px";
+            trackView.controlCanvas.height = this.trackHeight;
+            trackView.controlCanvas.style.height = this.trackHeight + "px";
+            trackView.viewportDiv.style.height = this.trackHeight + "px";
         }
 
-        this.trackContainerDiv.appendChild(trackPanel.trackDiv);
+        this.trackContainerDiv.appendChild(trackView.trackDiv);
 
         // play with qtip
-        ttt = $(trackPanel.trackDiv);
-        ttt.qtip({
+        $(trackView.trackDiv).qtip({
             content: {
-                text: "HULK Me HULK HULK",
+                text: "Hello from track land",
                 title: {
-                    text: "Title",
+                    text: (trackView.track.label) ? trackView.track.label : "Unlabeled",
                     button: true
                 }
             },
@@ -116,9 +114,9 @@ var igv = (function (igv) {
         });
 
 
-        trackPanel.order = track.order || this.trackPanels.length;
+        trackView.order = track.order || this.trackPanels.length;
 
-        this.trackPanels.push(trackPanel);
+        this.trackPanels.push(trackView);
 
         // Keeps the tracks in the right order and the Gene track pinned to the bottom
         this.trackPanels.sort(function (a, b) {
@@ -130,12 +128,12 @@ var igv = (function (igv) {
         this.layoutTrackPanels(this.trackPanels);
 
         if (this.cursorModel) {
-            this.cursorModel.initializeHistogram(trackPanel.track, function () {
-                trackPanel.repaint()
+            this.cursorModel.initializeHistogram(trackView.track, function () {
+                trackView.repaint()
             });
         }
         else {
-            trackPanel.repaint();
+            trackView.repaint();
         }
 
     };
