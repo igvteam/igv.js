@@ -9,7 +9,8 @@ var igv = (function (igv) {
         this.order = track.order || 0;
         this.marginBottom = 10;
 
-        var viewportHeight,
+        var foo,
+            viewportHeight,
             viewportDiv,
             trackDiv,
             controlDiv,
@@ -29,8 +30,52 @@ var igv = (function (igv) {
         trackDiv.className = "igv-track-div";
         trackDiv.style.top = browser.rootHeight + "px";
         trackDiv.style.height = viewportHeight + "px";
+        trackDiv.title = track.label;
 
         this.trackDiv = trackDiv;
+
+//        // Add qtip to data tracks with labels only
+//        if (this.trackDiv.title) {
+//
+//            $(this.trackDiv).qtip({
+//                content: {
+//                    text: "Hello from track land",
+//                    title: {
+//                        text: this.track.label,
+//                        button: true
+//                    }
+//                },
+//                show: {
+//                    event: 'click',
+//                    solo: true
+//                },
+////                hide: {
+////                    fixed: true,
+////                    event: 'unfocus'
+////                },
+//                hide: {
+//                    event: 'unfocus'
+//                },
+//                position: {
+//                    target: 'mouse',
+//                    viewport: $(window),
+//                    adjust: {
+//                        method: 'flip shift',
+//                        mouse: false
+//                    }
+//                },
+//
+//                style: {
+//                    width: 200,
+//                    height: 200,
+//                    tip: false,
+//                    widget: false
+//                }
+//            });
+//
+//        }
+
+
 
         // controls
         controlDiv = document.createElement("div");
@@ -255,9 +300,21 @@ var igv = (function (igv) {
             var lastMouseX;
             var referenceFrame = trackPanel.browser.referenceFrame;
 
-            canvas.onmousemove = throttle(function (e) {
+            canvas.onmousedown = function (e) {
 
                 var mouseX = e.clientX - canvas.offsetLeft;
+
+                isMouseDown = true;
+
+                this.lastMouseX = mouseX;
+
+            };
+
+            canvas.onmousemove = throttle(function (e) {
+                var mouseX = e.clientX - canvas.offsetLeft,
+                    dx = e.clientX - $(this).offset().left;
+
+                console.log("dx " + dx + " bp " + igv.numberFormatter( Math.floor( (trackPanel.browser.referenceFrame.start) + trackPanel.browser.referenceFrame.toBP(dx) ) ));
 
                 if (isMouseDown) {
 
@@ -282,21 +339,12 @@ var igv = (function (igv) {
                     }
 
                     lastMouseX = mouseX;
+
+
                     trackPanel.browser.repaint();
                 }
 
             }, 20);
-
-            canvas.onmousedown = function (e) {
-
-                isMouseDown = true;
-                var mouseX = e.clientX - canvas.offsetLeft; //e.pageX - $(this).offset().left;
-                var mouseY = e.clientY - canvas.offsetTop;
-
-                this.lastMouseX = mouseX;
-
-
-            };
 
             canvas.onmouseup = function (e) {
                 isMouseDown = false;
@@ -306,12 +354,6 @@ var igv = (function (igv) {
             canvas.onmouseout = function (e) {
                 isMouseDown = false;
                 lastMouseX = null;
-            };
-
-            canvas.onclick = function (e) {
-                var mouseX = e.clientX - canvas.offsetLeft; //e.pageX - $(this).offset().left;
-                var mouseY = e.clientY - canvas.offsetTop;
-
             };
 
             canvas.ondblclick = function (e) {
@@ -329,6 +371,11 @@ var igv = (function (igv) {
                 }
             }
 
+            canvas.onclick = function (e) {
+                var mouseX = e.clientX - canvas.offsetLeft; //e.pageX - $(this).offset().left;
+                var mouseY = e.clientY - canvas.offsetTop;
+
+            };
         }
 
     };
@@ -479,7 +526,6 @@ var igv = (function (igv) {
     igv.TrackView.prototype.tooltipText = function (mouseX, mouseY) {
         return "";
     };
-
 
     igv.TrackView.prototype.setSortButtonDisplay = function (onOff) {
         this.track.sortButton.style.color = onOff ? "red" : "black";
