@@ -34,43 +34,43 @@ var igv = (function (igv) {
 
         this.trackDiv = trackDiv;
 
-        $(this.trackDiv).qtip({
-            content: {
-                title: {
-                    text: "This is title text",
-                    button: true
-                },
-                text: "This is body text"
-            },
-                        show: {
-                            event: 'click',
-                            solo: true
-                        },
+//        $(this.trackDiv).qtip({
+//            content: {
+//                title: {
+//                    text: "This is title text",
+//                    button: true
+//                },
+//                text: "This is body text"
+//            },
+//                        show: {
+//                            event: 'click',
+//                            solo: true
+//                        },
+////            hide: {
+////                delay: 100,
+////                fixed: true
+////            },
 //            hide: {
-//                delay: 100,
+//                event: 'click',
 //                fixed: true
 //            },
-            hide: {
-                event: 'click',
-                fixed: true
-            },
-
-            position: {
-                target: 'mouse',
-                viewport: $(window),
-                adjust: {
-                    method: 'flip shift',
-                    mouse: false
-                }
-            },
-
-            style: {
-                width: 200,
-                height: 200,
-                tip: false,
-                widget: false
-            }
-        });
+//
+//            position: {
+//                target: 'mouse',
+//                viewport: $(window),
+//                adjust: {
+//                    method: 'flip shift',
+//                    mouse: false
+//                }
+//            },
+//
+//            style: {
+//                width: 200,
+//                height: 200,
+//                tip: false,
+//                widget: false
+//            }
+//        });
 
 
 
@@ -345,41 +345,7 @@ var igv = (function (igv) {
 
             canvas.onmouseup = function (e) {
 
-                if (e.clientX === mouseDownX) {
-
-//                    $(trackPanel.trackDiv).qtip({
-//                        content: {
-//                            title: {
-//                                text: "Genomic Gymnastics",
-//                                button: true
-//                            },
-//                            text: "Track " + trackPanel.trackDiv.title + " location " + igv.numberFormatter(1 + trackPanel.genomicCoordinateWithEventTap(e))
-//                        },
-////                        show: {
-////                            event: 'click'
-////                        },
-//                        hide: {
-//                            delay: 100,
-//                            fixed: true
-//                        },
-//                        position: {
-//                            target: 'mouse',
-//                            viewport: $(window),
-//                            adjust: {
-////                                method: 'flip shift',
-//                                mouse: false
-//                            }
-//                        },
-//
-//                        style: {
-//                            width: 200,
-//                            height: 200,
-//                            tip: false,
-//                            widget: false
-//                        }
-//                    });
-
-                }
+                console.log("a " + mouseDownX + " b " + e.clientX);
 
                 isMouseDown = false;
                 lastMouseX = undefined;
