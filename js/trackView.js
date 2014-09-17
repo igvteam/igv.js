@@ -35,28 +35,6 @@ var igv = (function (igv) {
 
         this.trackDiv = trackDiv;
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
         // controls
         controlDiv = document.createElement("div");
         trackDiv.appendChild(controlDiv);
@@ -114,7 +92,6 @@ var igv = (function (igv) {
 
 
 
-
         // popover
         popoverDiv = document.createElement("div");
         this.contentDiv.appendChild(popoverDiv);
@@ -123,29 +100,7 @@ var igv = (function (igv) {
         popoverDiv.title = popoverDiv.id;
         popoverDiv.className = "trackViewPopover";
         popoverDiv.innerHTML = "This is my popover";
-
-        $(this.contentDiv).click(function(){
-
-            var position = $(this).offset(),
-                $show = $("#" + popoverDiv.id);
-
-            $show.css({
-                "top"  : position.top  + "px",
-                "left" : position.left + "px"
-            }).show();
-
-//            $(window).bind("mousedown", function(e){
-//
-//                var eventTargetID = $(e.target);
-//
-//                if (!(eventTargetID.attr("id") === popoverDiv.id)) {
-//
-//                    $show.hide();
-//                    $(window).unbind("mousedown");
-//                }
-//            });
-        });
-
+        popoverDiv.zIndex = 1000;
 
 
 
@@ -321,7 +276,31 @@ var igv = (function (igv) {
 
             canvas.onmousedown = function (e) {
 
-                var dx = e.clientX - $(canvas).offset().left;
+                var contentDivObject = $(trackPanel.contentDiv),
+                    contentDivOffset = contentDivObject.offset(),
+                    canvasOffset = $(canvas).offset(),
+                    dx = e.clientX - canvasOffset.left;
+
+//                $(popoverDiv).css({
+//                    "left": contentDivOffset.left + "px",
+//                    "top":contentDivOffset.top + "px"
+//                }).show();
+
+//                contentDivObject.bind("mousedown", function(e){
+//
+//                    var eventTarget = $(e.target);
+//                    if ((eventTarget.attr("id") === popoverDiv.id)) {
+//
+//                        console.log(popoverDiv.id + " was tapped");
+//                    } else {
+//
+//                        console.log("hide popover then unbind callback");
+//
+////                        $("#show").hide();
+//                        contentDivObject.unbind("mousedown");
+//                    }
+//
+//                });
 
                 isMouseDown = true;
 
@@ -332,7 +311,6 @@ var igv = (function (igv) {
 
             canvas.onmousemove = throttle(function (e) {
                 var dx = e.clientX - $(canvas).offset().left;
-
 
                 if (isMouseDown) {
 
@@ -366,7 +344,15 @@ var igv = (function (igv) {
 
             canvas.onmouseup = function (e) {
 
-                console.log("a " + mouseDownX + " b " + e.clientX);
+                var contentDivObject = $(trackPanel.contentDiv),
+                    contentDivOffset = contentDivObject.offset(),
+                    canvasOffset = $(canvas).offset(),
+                    dx = e.clientX - canvasOffset.left;
+
+                $(popoverDiv).css({
+                    "left": e.clientX - contentDivOffset.left + "px",
+                    "top" : e.clientY - contentDivOffset.top  + "px"
+                });
 
                 isMouseDown = false;
                 lastMouseX = undefined;
