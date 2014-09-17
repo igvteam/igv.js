@@ -34,6 +34,40 @@ var igv = (function (igv) {
 
         this.trackDiv = trackDiv;
 
+        $(this.trackDiv).qtip({
+            content: {
+                title: {
+                    text: "Genomic Gymnastics",
+                    button: true
+                },
+                text: "hello"
+            },
+                        show: {
+                            event: 'click'
+                        },
+            hide: {
+                delay: 100,
+                fixed: true
+            },
+            position: {
+                target: 'mouse',
+                viewport: $(window),
+                adjust: {
+//                                method: 'flip shift',
+                    mouse: false
+                }
+            },
+
+            style: {
+                width: 200,
+                height: 200,
+                tip: false,
+                widget: false
+            }
+        });
+
+
+
         // controls
         controlDiv = document.createElement("div");
         trackDiv.appendChild(controlDiv);
@@ -301,53 +335,55 @@ var igv = (function (igv) {
                     trackPanel.browser.repaint();
                 }
 
-            }, /*20*/1);
+            }, 20);
 
             canvas.onmouseup = function (e) {
 
                 if (e.clientX === mouseDownX) {
 
-                    $(trackPanel.trackDiv).qtip({
-                        content: {
-                            title: {
-                                text: "Genomic Gymnastics",
-                                button: true
-                            },
-                            text: "Track " + trackPanel.trackDiv.title + " location " + igv.numberFormatter(1 + trackPanel.genomicCoordinateWithEventTap(e))
-                        },
-                        show: {
-                            event: 'click'
-                        },
-                        hide: {
-                            delay: 100,
-                            fixed: true
-                        },
-                        position: {
-                            target: 'mouse',
-                            viewport: $(window),
-                            adjust: {
-//                                method: 'flip shift',
-                                mouse: false
-                            }
-                        },
-
-                        style: {
-                            width: 200,
-                            height: 200,
-                            tip: false,
-                            widget: false
-                        }
-                    });
+//                    $(trackPanel.trackDiv).qtip({
+//                        content: {
+//                            title: {
+//                                text: "Genomic Gymnastics",
+//                                button: true
+//                            },
+//                            text: "Track " + trackPanel.trackDiv.title + " location " + igv.numberFormatter(1 + trackPanel.genomicCoordinateWithEventTap(e))
+//                        },
+////                        show: {
+////                            event: 'click'
+////                        },
+//                        hide: {
+//                            delay: 100,
+//                            fixed: true
+//                        },
+//                        position: {
+//                            target: 'mouse',
+//                            viewport: $(window),
+//                            adjust: {
+////                                method: 'flip shift',
+//                                mouse: false
+//                            }
+//                        },
+//
+//                        style: {
+//                            width: 200,
+//                            height: 200,
+//                            tip: false,
+//                            widget: false
+//                        }
+//                    });
 
                 }
 
                 isMouseDown = false;
                 lastMouseX = undefined;
+                mouseDownX = undefined;
             };
 
             canvas.onmouseout = function (e) {
                 isMouseDown = false;
                 lastMouseX = undefined;
+                mouseDownX = undefined;
             };
 
             canvas.ondblclick = function (e) {
