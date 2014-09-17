@@ -268,18 +268,17 @@ var igv = (function (igv) {
 
         function addTrackHandlers(trackPanel) {
 
-            var canvas = trackPanel.canvas;
             var isMouseDown = false;
             var mouseDownX = undefined;
             var lastMouseX = undefined;
             var referenceFrame = trackPanel.browser.referenceFrame;
+            var canvasObject = $(trackPanel.canvas);
+            var canvas = trackPanel.canvas;
 
             canvas.onmousedown = function (e) {
 
-                var contentDivObject = $(trackPanel.contentDiv),
-                    contentDivOffset = contentDivObject.offset(),
-                    canvasOffset = $(canvas).offset(),
-                    dx = e.clientX - canvasOffset.left;
+                var dx = e.clientX - canvasObject.offset().left;
+                var dy = e.clientY - canvasObject.offset().top;
 
 //                $(popoverDiv).css({
 //                    "left": contentDivOffset.left + "px",
@@ -344,15 +343,15 @@ var igv = (function (igv) {
 
             canvas.onmouseup = function (e) {
 
-                var contentDivObject = $(trackPanel.contentDiv),
-                    contentDivOffset = contentDivObject.offset(),
-                    canvasOffset = $(canvas).offset(),
-                    dx = e.clientX - canvasOffset.left;
+                var dx = e.clientX - canvasObject.offset().left;
+                var dy = e.clientY - canvasObject.offset().top;
+
+
 
                 $(popoverDiv).css({
-                    "left": e.clientX - contentDivOffset.left + "px",
-                    "top" : e.clientY - contentDivOffset.top  + "px"
-                });
+                    "left": dx + "px",
+                    "top" : dy + "px"
+                }).show();
 
                 isMouseDown = false;
                 lastMouseX = undefined;
