@@ -34,49 +34,6 @@ var igv = (function (igv) {
 
         this.trackDiv = trackDiv;
 
-        // Add qtip to data tracks with labels only
-//        if (this.trackDiv.title) {
-//
-//            $(this.trackDiv).qtip({
-//                content: {
-//                    text: "Hello from track land",
-//                    title: {
-//                        text: this.track.label,
-//                        button: true
-//                    }
-//                },
-//                show: {
-//                    event: 'click',
-//                    solo: true
-//                },
-////                hide: {
-////                    fixed: true,
-////                    event: 'unfocus'
-////                },
-//                hide: {
-//                    event: 'unfocus'
-//                },
-//                position: {
-//                    target: 'mouse',
-//                    viewport: $(window),
-//                    adjust: {
-//                        method: 'flip shift',
-//                        mouse: false
-//                    }
-//                },
-//
-//                style: {
-//                    width: 200,
-//                    height: 200,
-//                    tip: false,
-//                    widget: false
-//                }
-//            });
-//
-//        }
-
-
-
         // controls
         controlDiv = document.createElement("div");
         trackDiv.appendChild(controlDiv);
@@ -297,6 +254,7 @@ var igv = (function (igv) {
 
             var canvas = trackPanel.canvas;
             var isMouseDown = false;
+            var mouseDownX = undefined;
             var lastMouseX = undefined;
             var referenceFrame = trackPanel.browser.referenceFrame;
 
@@ -306,6 +264,7 @@ var igv = (function (igv) {
 
                 isMouseDown = true;
 
+                mouseDownX = e.clientX;
                 lastMouseX = dx;
 
             };
@@ -342,36 +301,32 @@ var igv = (function (igv) {
                     trackPanel.browser.repaint();
                 }
 
-            }, 20);
+            }, /*20*/1);
 
             canvas.onmouseup = function (e) {
-                var dx = e.clientX - $(canvas).offset().left;
 
-                if (0 === Math.abs(dx - lastMouseX)) {
-//                    console.log("onmouseup - x " + dx + " last " + lastMouseX);
-//                    console.log("bp " + igv.numberFormatter(trackPanel.genomicCoordinateWithEventTap(e)));
-
+                if (e.clientX === mouseDownX) {
 
                     $(trackPanel.trackDiv).qtip({
                         content: {
-                            text: "Genomic location " + igv.numberFormatter(1 + trackPanel.genomicCoordinateWithEventTap(e)),
                             title: {
                                 text: "Genomic Gymnastics",
                                 button: true
-                            }
+                            },
+                            text: "Track " + trackPanel.trackDiv.title + " location " + igv.numberFormatter(1 + trackPanel.genomicCoordinateWithEventTap(e))
                         },
                         show: {
-                            event: 'click',
-                            solo: true
+                            event: 'click'
                         },
                         hide: {
-                            event: 'unfocus'
+                            delay: 100,
+                            fixed: true
                         },
                         position: {
                             target: 'mouse',
                             viewport: $(window),
                             adjust: {
-                                method: 'flip shift',
+//                                method: 'flip shift',
                                 mouse: false
                             }
                         },
@@ -383,12 +338,6 @@ var igv = (function (igv) {
                             widget: false
                         }
                     });
-
-
-
-
-
-
 
                 }
 
@@ -417,8 +366,10 @@ var igv = (function (igv) {
             };
 
 //            canvas.onclick = function (e) {
+//
 //                var dx = e.clientX - $(canvas).offset().left;
-//                console.log("onclick - x " + dx + " last " + lastMouseX);
+//                console.log("movement " + (dx - lastMouseX));
+//
 //            };
         }
 

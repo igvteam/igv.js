@@ -29,8 +29,6 @@ var igv = (function (igv) {
 
         if (true === attemptedDuplicateTrackAddition) {
 
-            jQuery(key).qtip("show");
-
             window.alert("Attempt to load duplicate track.");
             return;
         }
