@@ -37,23 +37,29 @@ var igv = (function (igv) {
         $(this.trackDiv).qtip({
             content: {
                 title: {
-                    text: "Genomic Gymnastics",
+                    text: "This is title text",
                     button: true
                 },
-                text: "hello"
+                text: "This is body text"
             },
                         show: {
-                            event: 'click'
+                            event: 'click',
+                            solo: true
                         },
+//            hide: {
+//                delay: 100,
+//                fixed: true
+//            },
             hide: {
-                delay: 100,
+                event: 'click',
                 fixed: true
             },
+
             position: {
                 target: 'mouse',
                 viewport: $(window),
                 adjust: {
-//                                method: 'flip shift',
+                    method: 'flip shift',
                     mouse: false
                 }
             },
