@@ -77,7 +77,6 @@ var igv = (function (igv) {
         viewportDiv.appendChild(contentDiv);  // Note, must do this before getting width for canvas
         contentDiv.className = "igv-content-div";
         contentDiv.style.height = contentHeight + "px";
-
         this.contentDiv = contentDiv;
 
         contentWidth = contentDiv.clientWidth;
@@ -95,6 +94,7 @@ var igv = (function (igv) {
         // popover
         popoverDiv = document.createElement("div");
         this.contentDiv.appendChild(popoverDiv);
+        this.popoverDiv = popoverDiv;
 
         popoverDiv.id = 'trackViewPopoverShow_' + igv.guid();
         popoverDiv.title = popoverDiv.id;
@@ -270,40 +270,24 @@ var igv = (function (igv) {
 
             var isMouseDown = false;
             var mouseDownX = undefined;
+            var mouseDownY = undefined;
             var lastMouseX = undefined;
             var referenceFrame = trackPanel.browser.referenceFrame;
+            var contentDivObject = $(trackPanel.contentDiv);
             var canvasObject = $(trackPanel.canvas);
             var canvas = trackPanel.canvas;
 
             canvas.onmousedown = function (e) {
 
+                var eventTarget = $(e.target);
                 var dx = e.clientX - canvasObject.offset().left;
                 var dy = e.clientY - canvasObject.offset().top;
 
-//                $(popoverDiv).css({
-//                    "left": contentDivOffset.left + "px",
-//                    "top":contentDivOffset.top + "px"
-//                }).show();
-
-//                contentDivObject.bind("mousedown", function(e){
-//
-//                    var eventTarget = $(e.target);
-//                    if ((eventTarget.attr("id") === popoverDiv.id)) {
-//
-//                        console.log(popoverDiv.id + " was tapped");
-//                    } else {
-//
-//                        console.log("hide popover then unbind callback");
-//
-////                        $("#show").hide();
-//                        contentDivObject.unbind("mousedown");
-//                    }
-//
-//                });
-
                 isMouseDown = true;
 
-                mouseDownX = e.clientX;
+                mouseDownX = dx;
+                mouseDownY = dy;
+
                 lastMouseX = dx;
 
             };
@@ -331,10 +315,10 @@ var igv = (function (igv) {
 //                                }
 //                            }
 //                        }
+
                     }
 
                     lastMouseX = dx;
-
 
                     trackPanel.browser.repaint();
                 }
@@ -346,7 +330,12 @@ var igv = (function (igv) {
                 var dx = e.clientX - canvasObject.offset().left;
                 var dy = e.clientY - canvasObject.offset().top;
 
+                console.log("mouse movement " + (dx - lastMouseX));
 
+//                $(popoverDiv).css({
+//                    "left": mouseDownX + "px",
+//                    "top" : mouseDownY + "px"
+//                }).show();
 
                 $(popoverDiv).css({
                     "left": dx + "px",
@@ -355,13 +344,14 @@ var igv = (function (igv) {
 
                 isMouseDown = false;
                 lastMouseX = undefined;
-                mouseDownX = undefined;
+
+                mouseDownX = mouseDownY = undefined;
             };
 
             canvas.onmouseout = function (e) {
                 isMouseDown = false;
                 lastMouseX = undefined;
-                mouseDownX = undefined;
+                mouseDownX = mouseDownY = undefined;
             };
 
             canvas.ondblclick = function (e) {
