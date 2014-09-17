@@ -1,11 +1,13 @@
 var igv = (function (igv) {
 
-    igv.GeneTrack = function (config) {
-        this.url = config.url;
+    igv.GeneTrack = function (descriptor) {
+        this.descriptor = descriptor;
+        this.url = descriptor.url;
         this.featureSource = new igv.BedFeatureSource(this.url);
-        this.label = config.label;
-        this.id = config.id || config.label;
+        this.label = descriptor.label;
+        this.id = descriptor.id || descriptor.label;
         this.height = 100;   // The preferred height
+        this.order = descriptor.order;
     }
 
 
@@ -18,7 +20,9 @@ var igv = (function (igv) {
      * @param pixelHeight
      * @param continuation  -  Optional.   called on completion, no arguments.
      */
-    igv.GeneTrack.prototype.draw = function (canvas, refFrame, bpStart, bpEnd, pixelWidth, pixelHeight, continuation) {
+    igv.GeneTrack.prototype.draw = function (canvas, refFrame, bpStart, bpEnd, pixelWidth, pixelHeight, continuation, task) {
+
+        console.log("Refresh " + refFrame.chr);
 
         var chr, py, len, py, endBP, xScale, gene, px, px1, pw, exonCount, step, cy, py, direction,
             exon, ePx, ePx1, ePw;
@@ -35,6 +39,8 @@ var igv = (function (igv) {
             if (featureList) {
 
                 len = featureList.length;
+
+                console.log("len =" + featureList.length);
 
                 canvas.setProperties({fillStyle: "rgb(150,150,150)", strokeStyle: "rgb(150,150,150)"});
 
@@ -93,9 +99,13 @@ var igv = (function (igv) {
                     }
                 }
             }
+            else {
+                console.log("No feature list");
+            }
 
             if (continuation) continuation();
-        });
+        },
+        task);
     };
 
     igv.GeneTrack.prototype.drawLabel = function (ctx) {

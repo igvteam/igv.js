@@ -5,7 +5,7 @@ function runWIGFeatureSourceTests() {
 
     test("WIGFeatureSource Construction", 2, function () {
 
-        var url = "../assets/hg19/variableStep.wig";
+        var url = "../test/data/random_5000_lo_0dot1_hi_1.wig";
         var wigFeatureSource = new igv.WIGFeatureSource(url);
         ok(wigFeatureSource, "wigFeatureSource should be non null");
         ok(wigFeatureSource.url, "wigFeatureSource.url should be non null");
@@ -38,25 +38,24 @@ function runWIGFeatureSourceTests() {
 
     asyncTest("WIGFeatureSource getFeatures", 3, function () {
 
-//        var url = "../assets/hg19/heart.SLC25A3.wig";
-        var url = "../assets/hg19/variableStep.wig";
-//        var url = "../assets/hg19/fixedStep.wig";
+        var url = "../test/data/random_5000_lo_0dot1_hi_1.wig";
         var wigFeatureSource = new igv.WIGFeatureSource(url);
         ok(wigFeatureSource, "wigFeatureSource should be non null");
 
-        var noop = function noop(features) {
+        var noop = function noop(featureDictionary) {
 
-            ok(features, "featureContainer.features should be non null");
-            notEqual(features.length, 0, "feature list length is > 0");
-            console.log("features", features.length);
+            ok(featureDictionary, "featureContainer.features should be non null");
+            notEqual(featureDictionary.featureList.length, 0, "feature list length is > 0");
+
+            console.log("featureList.length " + featureDictionary.featureList.length);
 
             //
             start();
-        }
+        };
 
-        var chr = "chr12";
-        var bpStart = 0;
-        var bpEnd = 2400000;
+        var chr = "chr19";
+        var bpStart = 9917384;
+        var bpEnd  = 14917884;
 
         wigFeatureSource.getFeatures(chr, bpStart, bpEnd, noop);
     });

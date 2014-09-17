@@ -12,24 +12,41 @@ var igv = (function (igv) {
         this.searchURL = "http://www.broadinstitute.org/webservices/igv/locus?genome=hg19&name=";
     };
 
-    igv.Browser.prototype.loadTrack = function (config) {
+    igv.Browser.prototype.loadTrack = function (descriptor) {
 
-        var path = config.url;
+        var attemptedDuplicateTrackAddition = false;
 
-        if (config.type && config.type === 't2d') {
-            this.addTrack(new igv.T2dTrack(config));
+        this.trackPanels.forEach(function (tp, tps, index) {
+
+            if (false === attemptedDuplicateTrackAddition) {
+
+                if (JSON.stringify(descriptor) === JSON.stringify(tp.track.descriptor)) {
+                    attemptedDuplicateTrackAddition = true;
+                }
+
+            }
+        });
+
+        if (true === attemptedDuplicateTrackAddition) {
+            window.alert("Attempt to load duplicate track.");
+            return;
+        }
+
+        var path = descriptor.url;
+
+        if (descriptor.type && descriptor.type === 't2d') {
+            this.addTrack(new igv.T2dTrack(descriptor));
         } else if (path.endsWith(".bed") || path.endsWith(".bed.gz")) {
-            this.addTrack(new igv.GeneTrack(config));
+            this.addTrack(new igv.GeneTrack(descriptor));
         } else if (path.endsWith(".bam")) {
-            this.addTrack(new igv.BAMTrack(config));
-        } else if (path.endsWith(".wig") || path.endsWith(".wig.gz") ||
-            path.endsWith(".bedgraph") || path.endsWith(".bedgraph.gz")) {
-            this.addTrack(new igv.WIGTrack(config));
+            this.addTrack(new igv.BAMTrack(descriptor));
+        } else if (path.endsWith(".wig") || path.endsWith(".wig.gz") || path.endsWith(".bedgraph") || path.endsWith(".bedgraph.gz")) {
+            this.addTrack(new igv.WIGTrack(descriptor));
         }
 
         // TODO -- error message "unsupported filed type"
 
-    }
+    };
 
     /**
      * Add a new track.  Each track is associated with the following DOM elements
@@ -62,13 +79,15 @@ var igv = (function (igv) {
 
         this.trackContainerDiv.appendChild(trackPanel.trackDiv);
 
-        trackPanel.order = this.trackPanels.length;
+        trackPanel.order = track.order || this.trackPanels.length;
 
         this.trackPanels.push(trackPanel);
 
         // Keeps the tracks in the right order and the Gene track pinned to the bottom
         this.trackPanels.sort(function (a, b) {
-            return a.order - b.order;
+            var aOrder = a.order || 0;
+            var bOrder = b.order || 0
+            return aOrder - bOrder;
         });
 
         this.layoutTrackPanels(this.trackPanels);
@@ -202,9 +221,9 @@ var igv = (function (igv) {
 
         if (this.genome) {
             chromosome = this.genome.getChromosome(this.referenceFrame.chr);
-            if (chromosome && end > chromosome.length) {
-                start -= (end - chromosome.length);
-                end = chromosome.length;
+            if (chromosome && end > chromosome.bpLength) {
+                start -= (end - chromosome.bpLength);
+                end = chromosome.bpLength;
             }
         }
 
@@ -239,7 +258,7 @@ var igv = (function (igv) {
         if (this.genome) {
             var chromosome = this.genome.getChromosome(this.referenceFrame.chr);
             if (chromosome) {
-                chrLength = chromosome.length;
+                chrLength = chromosome.bpLength;
             }
         }
         maxScale = chrLength / viewportWidth;

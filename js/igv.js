@@ -101,10 +101,9 @@ var igv = (function (igv) {
 
                 }
 
-
-            // TODO: Needs to be a better way to grab the right track and change this
-            browser.trackPanels[browser.trackPanels.length - 1].order = 10000;
-
+                if(options.locus) {
+                    browser.search(options.locus);
+                }
 
                 window.onresize = throttle(function () {
                     if (browser.ideoPanel) browser.ideoPanel.resize();

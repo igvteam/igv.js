@@ -4,18 +4,29 @@
 var igv = (function (igv) {
 
 
-    igv.WIGTrack = function (config) {
-        this.url = config.url;
-        this.featureSource = new igv.WIGFeatureSource(this.url);
-        this.label = config.label;
-        this.id = config.id || this.label;
+    igv.WIGTrack = function (descriptor) {
+
+        this.descriptor = descriptor;
+        this.url = descriptor.url;
+
+        if (this.url.endsWith(".bedgraph") || this.url.endsWith(".bedgraph.gz")) {
+            this.featureSource = new igv.BEDGraphFeatureSource(this.url);
+        } else {
+            this.featureSource = new igv.WIGFeatureSource(this.url);
+        }
+
+        this.label = descriptor.label;
+        this.id = descriptor.id || this.label;
+        this.color = descriptor.color || "rgb(150,150,150)";
         this.height = 100;
+        this.order = descriptor.order;
 
     };
 
     /**
      *
      * @param canvas -- a "fabric canvas",  fabricjs.com  (not a Canvas2D)
+     * @param refFrame
      * @param bpStart
      * @param bpEnd
      * @param width
@@ -27,7 +38,8 @@ var igv = (function (igv) {
 
     igv.WIGTrack.prototype.draw = function (canvas, refFrame, bpStart, bpEnd, width, height, continuation) {
 
-        var chr = refFrame.chr;
+        var track=this,
+            chr = refFrame.chr;
 
         this.featureSource.getFeatures(chr, bpStart, bpEnd, function (features) {
 
@@ -62,7 +74,7 @@ var igv = (function (igv) {
                 rectHeight = ((feature.value - featureMin) / denom) * height;
                 rectBaseline = height - rectHeight;
 
-                canvas.fillRect(rectOrigin, rectBaseline, rectWidth, rectHeight, {fillStyle: igv.randomRGB(32, 224)});
+                canvas.fillRect(rectOrigin, rectBaseline, rectWidth, rectHeight, {fillStyle: track.color});
 
             }
         });

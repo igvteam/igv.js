@@ -7,7 +7,7 @@ var igv = (function (igv) {
      * @param url - url to the webservice
      * @constructor
      */
-    igv.MpgFeatureSource = function (config) {
+    igv.T2DVariantSource = function (config) {
 
         this.url = config.url;
         this.trait = config.trait;
@@ -25,11 +25,11 @@ var igv = (function (igv) {
      * @param bpEnd
      * @param success -- function that takes an array of features as an argument
      */
-    igv.MpgFeatureSource.prototype.getFeatures = function (queryChr, bpStart, bpEnd, success, task) {
+    igv.T2DVariantSource.prototype.getFeatures = function (chr, bpStart, bpEnd, success, task) {
 
         var source = this;
 
-        if(this.cache && this.cache.chr === queryChr) {  // && cache.end > bpStart && cache.start < bpEnd) {
+        if (this.cache && this.cache.chr === chr && this.cache.end > bpEnd && this.cache.start < bpStart) {
             success(this.cache.features);
         }
 
@@ -37,15 +37,24 @@ var igv = (function (igv) {
 
             function loadFeatures() {
 
-                var dataLoader = new igv.DataLoader(this.url),
+                // Get a minimum 10mb window around the requested locus
+                var window = Math.max(bpEnd - bpStart, 10000000) / 2,
+                    center = (bpEnd + bpStart) / 2,
+                    queryChr = (chr.startsWith("chr") ? chr.substring(3) : chr),
+                    queryStart = Math.max(0, center - window),
+                    queryEnd = center + window,
+                    dataLoader = new igv.DataLoader(this.url),
                     data = {
                         "user_group": "ui",
                         "filters": [
-                            {"operand": "CHROM",  "operator": "EQ","value": "1", "filter_type": "STRING" },
+                            {"operand": "CHROM", "operator": "EQ", "value": queryChr , "filter_type": "STRING" },
+                            {"operand": "POS", "operator": "GT", "value": queryStart, "filter_type": "FLOAT" },
+                            {"operand": "POS", "operator": "LT", "value": queryEnd, "filter_type": "FLOAT" },
                             {"operand": "PVALUE", "operator": "LTE", "value": 5E-2, "filter_type": "FLOAT"}
                         ],
                         "trait": source.trait
                     };
+
 
                 dataLoader.postJson(data, function (result) {
 
@@ -53,17 +62,22 @@ var igv = (function (igv) {
 
                             var variants = JSON.parse(result).variants;
 
-                            variants.sort(function(a, b) {
-                                return a.POS - b.POS;
-                            });
+                            if (variants) {
+                                variants.sort(function (a, b) {
+                                    return a.POS - b.POS;
+                                });
 
-                            source.cache = {
-                                chr: queryChr,
-                                start: bpStart,
-                                end: bpEnd,
-                                features: variants
-                            };
-                            success(variants);
+                                source.cache = {
+                                    chr: chr,
+                                    start: queryStart,
+                                    end: queryEnd,
+                                    features: variants
+                                };
+                                success(variants);
+                            }
+                            else {
+                                success(null);
+                            }
                         }
                         else {
                             success(null);

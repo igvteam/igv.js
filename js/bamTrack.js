@@ -13,14 +13,15 @@ var igv = (function (igv) {
     var skippedColor = "rgb(150, 170, 170)";
     var expandedHeight = 14;
 
-    igv.BAMTrack = function (config) {
+    igv.BAMTrack = function (descriptor) {
 
         var coverageTrackHeightPercentage, alignmentTrackHeightPercentage;
 
-        this.url = config.url;
+        this.descriptor = descriptor;
+        this.url = descriptor.url;
         this.featureSource = new igv.BamSource(this.url);
-        this.label = config.label || "";
-        this.id = config.id || this.label;
+        this.label = descriptor.label || "";
+        this.id = descriptor.id || this.label;
         this.height = 400;
         this.alignmentRowHeight = expandedHeight;
 
