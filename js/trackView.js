@@ -9,10 +9,10 @@ var igv = (function (igv) {
         this.order = track.order || 0;
         this.marginBottom = 10;
 
-        var foo,
-            viewportHeight,
+        var viewportHeight,
             viewportDiv,
             trackDiv,
+            popoverDiv,
             controlDiv,
             contentHeight,
             contentDiv,
@@ -20,7 +20,8 @@ var igv = (function (igv) {
             contentWidth,
             closeButton,
             labelButton,
-            trackFilterButtonDiv;
+            trackFilterButtonDiv,
+            thang;
 
         viewportHeight = track.height;
 
@@ -34,43 +35,25 @@ var igv = (function (igv) {
 
         this.trackDiv = trackDiv;
 
-//        $(this.trackDiv).qtip({
-//            content: {
-//                title: {
-//                    text: "This is title text",
-//                    button: true
-//                },
-//                text: "This is body text"
-//            },
-//                        show: {
-//                            event: 'click',
-//                            solo: true
-//                        },
-////            hide: {
-////                delay: 100,
-////                fixed: true
-////            },
-//            hide: {
-//                event: 'click',
-//                fixed: true
-//            },
-//
-//            position: {
-//                target: 'mouse',
-//                viewport: $(window),
-//                adjust: {
-//                    method: 'flip shift',
-//                    mouse: false
-//                }
-//            },
-//
-//            style: {
-//                width: 200,
-//                height: 200,
-//                tip: false,
-//                widget: false
-//            }
-//        });
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -128,6 +111,44 @@ var igv = (function (igv) {
         canvas.style.height = contentHeight + "px";
         canvas.setAttribute('width', contentWidth);    //Must set the width & height of the canvas
         canvas.setAttribute('height', contentHeight);
+
+
+
+
+        // popover
+        popoverDiv = document.createElement("div");
+        this.contentDiv.appendChild(popoverDiv);
+
+        popoverDiv.id = 'trackViewPopoverShow_' + igv.guid();
+        popoverDiv.title = popoverDiv.id;
+        popoverDiv.className = "trackViewPopover";
+        popoverDiv.innerHTML = "This is my popover";
+
+        $(this.contentDiv).click(function(){
+
+            var position = $(this).offset(),
+                $show = $("#" + popoverDiv.id);
+
+            $show.css({
+                "top"  : position.top  + "px",
+                "left" : position.left + "px"
+            }).show();
+
+//            $(window).bind("mousedown", function(e){
+//
+//                var eventTargetID = $(e.target);
+//
+//                if (!(eventTargetID.attr("id") === popoverDiv.id)) {
+//
+//                    $show.hide();
+//                    $(window).unbind("mousedown");
+//                }
+//            });
+        });
+
+
+
+
 
         // filter  -- CURSOR only for now
         if (browser.type === "CURSOR") {
