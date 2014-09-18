@@ -95,7 +95,7 @@ var igv = (function (igv) {
         this.popoverDiv = popoverDiv;
 
         popoverDiv.id = 'trackViewPopoverShow_' + igv.guid();
-        popoverDiv.className = "trackViewPopover";
+        popoverDiv.className = "popover";
         popoverDiv.innerHTML = "This is my popover";
 
 
@@ -267,7 +267,6 @@ var igv = (function (igv) {
             var mouseDownY = undefined;
             var lastMouseX = undefined;
             var referenceFrame = trackPanel.browser.referenceFrame;
-            var contentDivObject = $(trackPanel.contentDiv);
             var canvasObject = $(trackPanel.canvas);
             var canvas = trackPanel.canvas;
 
@@ -323,16 +322,18 @@ var igv = (function (igv) {
 
             canvas.onmouseup = function (e) {
 
-                var dx = e.clientX - canvasObject.offset().left;
-                var dy = e.clientY - canvasObject.offset().top;
-                var threshX = dx - mouseDownX;
-                var threshY = dy - mouseDownY;
-                var thresh;
+                var dx = e.clientX - canvasObject.offset().left,
+                    dy = e.clientY - canvasObject.offset().top,
+                    threshX = dx - mouseDownX,
+                    threshY = dy - mouseDownY,
+                    thresh,
+                    isVisible = undefined;
+
 
                 thresh = Math.floor( Math.sqrt(threshX * threshX + threshY * threshY) );
-//                console.log("thresh " + thresh + " threshX " + threshX + " threshY " + threshY);
-
                 if (thresh < 6) {
+
+                    $(popoverDiv)[0].innerHTML = "Genomic Location " + igv.numberFormatter( trackPanel.genomicCoordinateWithEventTap(e) );
 
                     $(popoverDiv).css({
                         "left": dx + "px",
@@ -340,6 +341,8 @@ var igv = (function (igv) {
                     }).show();
 
                 }
+
+                console.log("popover " + $(popoverDiv).is(":visible") + " location " + igv.numberFormatter( trackPanel.genomicCoordinateWithEventTap(e) ));
 
                 isMouseDown = false;
                 lastMouseX = undefined;

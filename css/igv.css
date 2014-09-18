@@ -4,15 +4,6 @@ body {
     padding-bottom: 20px;
 }
 
-.trackViewPopover {
-    position: absolute;
-    width: 200px;
-    height: 100px;
-    background-color: red;
-    display: none;
-}
-
-
 /* A hack to remove the unwanted "No File Chosen" text from the file upload button */
 input[type='file'] {
     width: 82px;
