@@ -20,8 +20,7 @@ var igv = (function (igv) {
             contentWidth,
             closeButton,
             labelButton,
-            trackFilterButtonDiv,
-            thang;
+            trackFilterButtonDiv;
 
         viewportHeight = track.height;
 
@@ -31,7 +30,6 @@ var igv = (function (igv) {
         trackDiv.className = "igv-track-div";
         trackDiv.style.top = browser.rootHeight + "px";
         trackDiv.style.height = viewportHeight + "px";
-        trackDiv.title = track.label;
 
         this.trackDiv = trackDiv;
 
@@ -97,12 +95,8 @@ var igv = (function (igv) {
         this.popoverDiv = popoverDiv;
 
         popoverDiv.id = 'trackViewPopoverShow_' + igv.guid();
-        popoverDiv.title = popoverDiv.id;
         popoverDiv.className = "trackViewPopover";
         popoverDiv.innerHTML = "This is my popover";
-        popoverDiv.zIndex = 1000;
-
-
 
 
         // filter  -- CURSOR only for now
@@ -283,6 +277,8 @@ var igv = (function (igv) {
                 var dx = e.clientX - canvasObject.offset().left;
                 var dy = e.clientY - canvasObject.offset().top;
 
+                $(popoverDiv).hide();
+
                 isMouseDown = true;
 
                 mouseDownX = dx;
@@ -329,18 +325,21 @@ var igv = (function (igv) {
 
                 var dx = e.clientX - canvasObject.offset().left;
                 var dy = e.clientY - canvasObject.offset().top;
+                var threshX = dx - mouseDownX;
+                var threshY = dy - mouseDownY;
+                var thresh;
 
-                console.log("mouse movement " + (dx - lastMouseX));
+                thresh = Math.floor( Math.sqrt(threshX * threshX + threshY * threshY) );
+//                console.log("thresh " + thresh + " threshX " + threshX + " threshY " + threshY);
 
-//                $(popoverDiv).css({
-//                    "left": mouseDownX + "px",
-//                    "top" : mouseDownY + "px"
-//                }).show();
+                if (thresh < 6) {
 
-                $(popoverDiv).css({
-                    "left": dx + "px",
-                    "top" : dy + "px"
-                }).show();
+                    $(popoverDiv).css({
+                        "left": dx + "px",
+                        "top" : dy + "px"
+                    }).show();
+
+                }
 
                 isMouseDown = false;
                 lastMouseX = undefined;
@@ -369,12 +368,6 @@ var igv = (function (igv) {
                 }
             };
 
-//            canvas.onclick = function (e) {
-//
-//                var dx = e.clientX - $(canvas).offset().left;
-//                console.log("movement " + (dx - lastMouseX));
-//
-//            };
         }
 
     };
