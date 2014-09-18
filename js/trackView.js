@@ -90,18 +90,21 @@ var igv = (function (igv) {
 
 
 
+
         // popover
         popoverDiv = document.createElement("div");
         this.contentDiv.appendChild(popoverDiv);
-        this.popoverDiv = popoverDiv;
 
         popoverDiv.id = 'trackViewPopoverShow_' + igv.guid();
         popoverDiv.className = "popover";
         popoverDiv.innerHTML = "popoverDiv";
 
         popoverCloseDiv = document.createElement("div");
-        this.popoverDiv.appendChild(popoverCloseDiv);
-        popoverCloseDiv.className = "popover_close";
+        popoverDiv.appendChild(popoverCloseDiv);
+        popoverCloseDiv.className = "popoverClose";
+        popoverCloseDiv.innerHTML = "x";
+
+
 
 
         // filter  -- CURSOR only for now
@@ -279,7 +282,8 @@ var igv = (function (igv) {
                 var dx = e.clientX - canvasObject.offset().left;
                 var dy = e.clientY - canvasObject.offset().top;
 
-                $(popoverDiv).hide();
+//                $(popoverCloseDiv).hide();
+//                $(popoverDiv).hide();
 
                 isMouseDown = true;
 
@@ -329,8 +333,7 @@ var igv = (function (igv) {
                     dy = e.clientY - canvasObject.offset().top,
                     threshX = dx - mouseDownX,
                     threshY = dy - mouseDownY,
-                    thresh,
-                    isVisible = undefined;
+                    thresh;
 
 
                 thresh = Math.floor( Math.sqrt(threshX * threshX + threshY * threshY) );
@@ -341,7 +344,14 @@ var igv = (function (igv) {
                     $(popoverDiv).css({
                         "left": dx + "px",
                         "top" : dy + "px"
-                    }).show();
+                    });
+
+//                    $(popoverDiv).css({
+//                        "left": dx + "px",
+//                        "top" : dy + "px"
+//                    }).show();
+//
+//                    $(popoverCloseDiv).show();
 
                 }
 
