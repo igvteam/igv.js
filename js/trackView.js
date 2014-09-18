@@ -163,9 +163,6 @@ var igv = (function (igv) {
             trackFilterButtonDiv.style.top = nextButtonTop + "px";
             trackFilterButtonDiv.style.left = "5px";
 
-//            this.track.trackFilter = new igv.TrackFilter(this);
-//            this.track.trackFilter.createTrackFilterWidgetWithParentElement(trackFilterButtonDiv);
-
             this.track.trackFilter = new igv.TrackFilter(this);
             this.track.trackFilter.createTrackFilterWidgetWithParentElement(trackFilterButtonDiv);
 
@@ -282,8 +279,7 @@ var igv = (function (igv) {
                 var dx = e.clientX - canvasObject.offset().left;
                 var dy = e.clientY - canvasObject.offset().top;
 
-//                $(popoverCloseDiv).hide();
-//                $(popoverDiv).hide();
+                $(popoverDiv).hide();
 
                 isMouseDown = true;
 
@@ -335,27 +331,17 @@ var igv = (function (igv) {
                     threshY = dy - mouseDownY,
                     thresh;
 
-
                 thresh = Math.floor( Math.sqrt(threshX * threshX + threshY * threshY) );
                 if (thresh < 6) {
 
-                    $(popoverDiv)[0].innerHTML = "Genomic Location " + igv.numberFormatter( trackPanel.genomicCoordinateWithEventTap(e) );
+                    $(popoverDiv)[0].innerHTML = "Location: " + igv.numberFormatter( trackPanel.genomicCoordinateWithEventTap(e) );
 
                     $(popoverDiv).css({
                         "left": dx + "px",
                         "top" : dy + "px"
-                    });
-
-//                    $(popoverDiv).css({
-//                        "left": dx + "px",
-//                        "top" : dy + "px"
-//                    }).show();
-//
-//                    $(popoverCloseDiv).show();
+                    }).show();
 
                 }
-
-                console.log("popover " + $(popoverDiv).is(":visible") + " location " + igv.numberFormatter( trackPanel.genomicCoordinateWithEventTap(e) ));
 
                 isMouseDown = false;
                 lastMouseX = undefined;

@@ -1,16 +1,16 @@
 
 .popover {
     position: absolute;
-    overflow: visible;
-    width: 300px;
-    height: 200px;
-    background: yellow;
-    z-index: 99999;
+    top: 0;
+    left: 0;
+    width: 350px;
+    height: 240px;
+    background: #fb2;
     border-radius: 4px;
     -moz-border-radius: 4px;
     -webkit-border-radius: 4px;
     padding:15px 10px;
-    display: block;
+    display:none;
 }
 
 .popoverClose {
@@ -20,9 +20,9 @@
     width: 10px;
     height: 10px;
 	font-size: 8pt;
-	color: white;
-	border: 2px solid yellow;
-	background-color: red;
+	color: #444;
+	border: 2px solid #444;
+	background-color: #fff;
 	cursor: pointer;
 	font-weight: bold;
 	border-radius: 50%;
