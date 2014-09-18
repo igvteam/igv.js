@@ -17,6 +17,7 @@ var igv = (function (igv) {
 
         var coverageTrackHeightPercentage, alignmentTrackHeightPercentage;
 
+        this.doPopup = (descriptor.doPopup) ? descriptor.doPopup : false;
         this.descriptor = descriptor;
         this.url = descriptor.url;
         this.featureSource = new igv.BamSource(this.url);
@@ -52,7 +53,7 @@ var igv = (function (igv) {
 
             if (alignmentManager) {
 
-                console.log(chr, igv.numberFormatter(bpStart), igv.numberFormatter(bpEnd), " BAM");
+                console.log("bamTrack.featureSource.getSequence", chr, igv.numberFormatter(bpStart), igv.numberFormatter(bpEnd));
 
                 igv.sequenceSource.getSequence(chr, bpStart, bpEnd, function (refSeq) {
 

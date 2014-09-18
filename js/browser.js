@@ -162,8 +162,8 @@ var igv = (function (igv) {
         if (this.karyoPanel) {
             this.karyoPanel.repaint();
         }
-        this.trackPanels.forEach(function (panel) {
-            panel.repaint();
+        this.trackPanels.forEach(function (trackView) {
+            trackView.repaint();
         });
     };
 

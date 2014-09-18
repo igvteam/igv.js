@@ -14,6 +14,7 @@ var igv = (function (igv) {
     /**
      *
      * @param canvas   an igv.Canvas
+     * @param refFrame
      * @param bpStart
      * @param bpEnd
      * @param pixelWidth
@@ -22,10 +23,25 @@ var igv = (function (igv) {
      */
     igv.GeneTrack.prototype.draw = function (canvas, refFrame, bpStart, bpEnd, pixelWidth, pixelHeight, continuation, task) {
 
-        console.log("Refresh " + refFrame.chr);
+        console.log("geneTrack.prototype.draw " + refFrame.chr);
 
-        var chr, py, len, py, endBP, xScale, gene, px, px1, pw, exonCount, step, cy, py, direction,
-            exon, ePx, ePx1, ePw;
+        var chr,
+            len,
+            endBP,
+            xScale,
+            gene,
+            px,
+            px1,
+            pw,
+            exonCount,
+            step,
+            cy,
+            py,
+            direction,
+            exon,
+            ePx,
+            ePx1,
+            ePw;
 
         chr = refFrame.chr;
 
@@ -40,7 +56,7 @@ var igv = (function (igv) {
 
                 len = featureList.length;
 
-                console.log("len =" + featureList.length);
+                console.log("geneTrack.featureSource.getFeatures " + featureList.length);
 
                 canvas.setProperties({fillStyle: "rgb(150,150,150)", strokeStyle: "rgb(150,150,150)"});
 

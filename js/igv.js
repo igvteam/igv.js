@@ -46,6 +46,7 @@ var igv = (function (igv) {
             trackContainer = $('<div id="igvTrackContainerDiv" class="igv-track-container-div">')[0];
 
 
+
         // DOM
         $(rootDiv).append(contentKaryo);
         $(rootDiv).append(contentContainer);

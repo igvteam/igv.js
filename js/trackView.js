@@ -91,21 +91,22 @@ var igv = (function (igv) {
 
 
 
-        // popover
-        popoverDiv = document.createElement("div");
-        this.contentDiv.appendChild(popoverDiv);
+        if (this.track.doPopup && true === this.track.doPopup) {
 
-        popoverDiv.id = 'trackViewPopoverShow_' + igv.guid();
-        popoverDiv.className = "popover";
-        popoverDiv.innerHTML = "popoverDiv";
+            // popover
+            popoverDiv = document.createElement("div");
+            this.contentDiv.appendChild(popoverDiv);
 
-        popoverCloseDiv = document.createElement("div");
-        popoverDiv.appendChild(popoverCloseDiv);
-        popoverCloseDiv.className = "popoverClose";
-        popoverCloseDiv.innerHTML = "x";
+            popoverDiv.id = 'trackViewPopoverShow_' + igv.guid();
+            popoverDiv.className = "popover";
+            popoverDiv.innerHTML = "popoverDiv";
 
+            popoverCloseDiv = document.createElement("div");
+            popoverDiv.appendChild(popoverCloseDiv);
+            popoverCloseDiv.className = "popoverClose";
+            popoverCloseDiv.innerHTML = "x";
 
-
+        }
 
         // filter  -- CURSOR only for now
         if (browser.type === "CURSOR") {
@@ -279,7 +280,9 @@ var igv = (function (igv) {
                 var dx = e.clientX - canvasObject.offset().left;
                 var dy = e.clientY - canvasObject.offset().top;
 
-                $(popoverDiv).hide();
+                if (trackPanel.track.doPopup && true === trackPanel.track.doPopup) {
+                    $(popoverDiv).hide();
+                }
 
                 isMouseDown = true;
 
@@ -331,17 +334,24 @@ var igv = (function (igv) {
                     threshY = dy - mouseDownY,
                     thresh;
 
-                thresh = Math.floor( Math.sqrt(threshX * threshX + threshY * threshY) );
-                if (thresh < 6) {
+                if (trackPanel.track.doPopup && true === trackPanel.track.doPopup) {
 
-                    $(popoverDiv)[0].innerHTML = "Location: " + igv.numberFormatter( trackPanel.genomicCoordinateWithEventTap(e) );
+                    thresh = Math.floor( Math.sqrt(threshX * threshX + threshY * threshY) );
+                    if (thresh < 6) {
 
-                    $(popoverDiv).css({
-                        "left": dx + "px",
-                        "top" : dy + "px"
-                    }).show();
+                        $(popoverDiv)[0].innerHTML = "Location: " + igv.numberFormatter( trackPanel.genomicCoordinateWithEventTap(e) );
 
+                        $(popoverDiv).css({
+                            "left": dx + "px",
+                            "top" : dy + "px"
+                        }).show();
+
+                    }
+                    
                 }
+
+
+
 
                 isMouseDown = false;
                 lastMouseX = undefined;
