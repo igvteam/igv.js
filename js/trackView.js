@@ -13,6 +13,7 @@ var igv = (function (igv) {
             viewportDiv,
             trackDiv,
             popoverDiv,
+            popoverCloseDiv,
             controlDiv,
             contentHeight,
             contentDiv,
@@ -96,16 +97,18 @@ var igv = (function (igv) {
 
         popoverDiv.id = 'trackViewPopoverShow_' + igv.guid();
         popoverDiv.className = "popover";
-        popoverDiv.innerHTML = "This is my popover";
+        popoverDiv.innerHTML = "popoverDiv";
+
+        popoverCloseDiv = document.createElement("div");
+        this.popoverDiv.appendChild(popoverCloseDiv);
+        popoverCloseDiv.className = "popover_close";
 
 
         // filter  -- CURSOR only for now
         if (browser.type === "CURSOR") {
 
-//            this.track.cursorHistogram = new cursor.CursorHistogram(this.track.height, this.track.max);
             this.track.cursorHistogram = new cursor.CursorHistogram(controlDiv.clientHeight, this.track.max);
             this.track.cursorHistogram.createMarkupWithTrackPanelDiv(this);
-
         }
 
         var nextButtonTop = 5;
