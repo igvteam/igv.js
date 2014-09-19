@@ -68,7 +68,10 @@ var igv = (function (igv) {
                         i,
                         len,
                         item,
-                        acc;
+                        acc,
+                        foo;
+
+                    foo = igv.allBases;
 
                     if (refSeq) {
                         refSeq = refSeq.toUpperCase();
