@@ -23,7 +23,7 @@ var igv = (function (igv) {
      */
     igv.GeneTrack.prototype.draw = function (canvas, refFrame, bpStart, bpEnd, pixelWidth, pixelHeight, continuation, task) {
 
-        console.log("geneTrack.prototype.draw " + refFrame.chr);
+        console.log("geneTrack.draw " + refFrame.chr);
 
         var chr,
             len,

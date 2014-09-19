@@ -93,19 +93,7 @@ var igv = (function (igv) {
 
         if (this.track.doPopup && true === this.track.doPopup) {
 
-            // popover
-            popoverDiv = document.createElement("div");
-            this.contentDiv.appendChild(popoverDiv);
-
-            popoverDiv.id = 'trackViewPopoverShow_' + igv.guid();
-            popoverDiv.className = "popover";
-            popoverDiv.innerHTML = "popoverDiv";
-
-            popoverCloseDiv = document.createElement("div");
-            popoverDiv.appendChild(popoverCloseDiv);
-            popoverCloseDiv.className = "popoverClose";
-            popoverCloseDiv.innerHTML = "x";
-
+            this.popover = new igv.Popover(this);
         }
 
         // filter  -- CURSOR only for now
@@ -142,10 +130,10 @@ var igv = (function (igv) {
                     });
                 }, 100);
 
-                browser.trackPanels.forEach(function (trackPanel) {
-                    if (track !== trackPanel.track) {
-                        trackPanel.track.sortButton.className = "fa fa-bar-chart-o";
-                        trackPanel.track.sortButton.style.color = "black";
+                browser.trackPanels.forEach(function (trackView) {
+                    if (track !== trackView.track) {
+                        trackView.track.sortButton.className = "fa fa-bar-chart-o";
+                        trackView.track.sortButton.style.color = "black";
                     }
                 });
 
@@ -184,7 +172,7 @@ var igv = (function (igv) {
             closeButton.style.cursor = "pointer";
             closeButton.onclick = function () {
 
-//                removeTrackPanel(trackPanel);
+//                removeTrackView(trackView);
                 browser.removeTrack(track);
 
                 // We removed a track. This removes it's filter. Must update filter chain application
@@ -218,9 +206,9 @@ var igv = (function (igv) {
                         });
 
 
-                        browser.trackPanels.forEach(function (trackPanel) {
-                            if (track !== trackPanel.track) {
-                                trackPanel.track.labelButton.className = "btn btn-xs btn-cursor-deselected";
+                        browser.trackPanels.forEach(function (trackView) {
+                            if (track !== trackView.track) {
+                                trackView.track.labelButton.className = "btn btn-xs btn-cursor-deselected";
                             }
                         });
                     }
@@ -242,12 +230,12 @@ var igv = (function (igv) {
 
         addTrackHandlers(this);
 
-        function removeTrackPanel(trackPanel) {
+        function removeTrackView(trackView) {
 
             var array = browser.trackPanels;
-            array.splice(array.indexOf(trackPanel), 1);
+            array.splice(array.indexOf(trackView), 1);
 
-            browser.trackContainerDiv.removeChild(trackPanel.trackDiv);
+            browser.trackContainerDiv.removeChild(trackView.trackDiv);
 
             browser.rootHeight = 0;
             browser.trackPanels.forEach(function (panel) {
@@ -264,31 +252,24 @@ var igv = (function (igv) {
             }
         }
 
-        function addTrackHandlers(trackPanel) {
+        function addTrackHandlers(trackView) {
 
             var isMouseDown = false;
-            var mouseDownX = undefined;
-            var mouseDownY = undefined;
             var lastMouseX = undefined;
-            var referenceFrame = trackPanel.browser.referenceFrame;
-            var canvasObject = $(trackPanel.canvas);
-            var canvas = trackPanel.canvas;
+            var referenceFrame = trackView.browser.referenceFrame;
+            var canvasObject = $(trackView.canvas);
+            var canvas = trackView.canvas;
 
             canvas.onmousedown = function (e) {
 
-                var eventTarget = $(e.target);
                 var dx = e.clientX - canvasObject.offset().left;
                 var dy = e.clientY - canvasObject.offset().top;
 
-                if (trackPanel.track.doPopup && true === trackPanel.track.doPopup) {
-                    $(popoverDiv).hide();
+                if (trackView.popover) {
+                    trackView.popover.onmousedown(e, dx, dy);
                 }
 
                 isMouseDown = true;
-
-                mouseDownX = dx;
-                mouseDownY = dy;
-
                 lastMouseX = dx;
 
             };
@@ -321,7 +302,7 @@ var igv = (function (igv) {
 
                     lastMouseX = dx;
 
-                    trackPanel.browser.repaint();
+                    trackView.browser.repaint();
                 }
 
             }, 20);
@@ -329,40 +310,19 @@ var igv = (function (igv) {
             canvas.onmouseup = function (e) {
 
                 var dx = e.clientX - canvasObject.offset().left,
-                    dy = e.clientY - canvasObject.offset().top,
-                    threshX = dx - mouseDownX,
-                    threshY = dy - mouseDownY,
-                    thresh;
+                    dy = e.clientY - canvasObject.offset().top;
 
-                if (trackPanel.track.doPopup && true === trackPanel.track.doPopup) {
-
-                    thresh = Math.floor( Math.sqrt(threshX * threshX + threshY * threshY) );
-                    if (thresh < 6) {
-
-                        $(popoverDiv)[0].innerHTML = "Location: " + igv.numberFormatter( trackPanel.genomicCoordinateWithEventTap(e) );
-
-                        $(popoverDiv).css({
-                            "left": dx + "px",
-                            "top" : dy + "px"
-                        }).show();
-
-                    }
-
+                if (trackView.popover) {
+                    trackView.popover.onmouseup(e, dx, dy);
                 }
-
-
-
 
                 isMouseDown = false;
                 lastMouseX = undefined;
-
-                mouseDownX = mouseDownY = undefined;
             };
 
             canvas.onmouseout = function (e) {
                 isMouseDown = false;
                 lastMouseX = undefined;
-                mouseDownX = mouseDownY = undefined;
             };
 
             canvas.ondblclick = function (e) {
@@ -370,13 +330,13 @@ var igv = (function (igv) {
                 var mouseX = e.clientX - $(canvas).offset().left;
                 var mouseY = e.clientY - $(canvas).offset().top;
 
-                if (trackPanel.track.handleDblClick) {
-                    trackPanel.track.handleDblClick(mouseX, mouseY, trackPanel.viewportDiv);
+                if (trackView.track.handleDblClick) {
+                    trackView.track.handleDblClick(mouseX, mouseY, trackView.viewportDiv);
                 }
                 else {
-                    var newCenter = Math.round(trackPanel.browser.referenceFrame.start + mouseX * trackPanel.browser.referenceFrame.bpPerPixel);
+                    var newCenter = Math.round(trackView.browser.referenceFrame.start + mouseX * trackView.browser.referenceFrame.bpPerPixel);
                     referenceFrame.bpPerPixel /= 2;
-                    trackPanel.browser.goto(trackPanel.browser.referenceFrame.chr, newCenter);
+                    trackView.browser.goto(trackView.browser.referenceFrame.chr, newCenter);
                 }
             };
 
