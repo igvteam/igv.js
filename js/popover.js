@@ -45,13 +45,24 @@ var igv = (function (igv) {
 
         var threshX = dx - this.mouseDownX,
             threshY = dy - this.mouseDownY,
-            thresh;
+            thresh,
+            genomicLocation,
+            trackType,
+            base,
+            index,
+            coverageMap = this.trackView.track.featureSource.alignmentManager.coverageMap,
+            refSeq = coverageMap.refSeq;
 
+        trackType = (this.trackView.track instanceof igv.BAMTrack) ? "BAMTrack " : "UnknownTrack";
+        genomicLocation = this.trackView.genomicCoordinateWithEventTap(event);
+
+        index = genomicLocation - coverageMap.bpStart;
+        base = refSeq[ index ];
 
         thresh = Math.floor( Math.sqrt(threshX * threshX + threshY * threshY) );
         if (thresh < 6) {
 
-            this.popoverDiv.innerHTML = "Location: " + igv.numberFormatter( this.trackView.genomicCoordinateWithEventTap(event) );
+            this.popoverDiv.innerHTML = "Track " + trackType + " base " + base + " location " + igv.numberFormatter(genomicLocation);
 
             $(this.popoverDiv).css({
                 "left": dx + "px",
@@ -61,6 +72,7 @@ var igv = (function (igv) {
         }
 
         this.mouseDownX = this.mouseDownY = undefined;
+
     };
 
     return igv;

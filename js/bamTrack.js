@@ -45,7 +45,8 @@ var igv = (function (igv) {
             return;
         }
 
-        var coverageTrackHeight = this.coverageTrackHeight,
+        var myself = this,
+            coverageTrackHeight = this.coverageTrackHeight,
             alignmentRowHeight = this.alignmentRowHeight,
             chr = refFrame.chr;
 
@@ -71,11 +72,8 @@ var igv = (function (igv) {
                         acc,
                         foo;
 
-                    foo = igv.allBases;
-
                     if (refSeq) {
                         refSeq = refSeq.toUpperCase();
-
                     }
 
                     // coverage track
