@@ -347,7 +347,7 @@ var igv = (function (igv) {
                         }).show();
 
                     }
-                    
+
                 }
 
 

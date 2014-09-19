@@ -7,7 +7,7 @@ function runBAMTrackTests() {
 
     // Setup "mock" objects
     if(!igv) igv = {};
-    igv.sequenceSource = igv.getFastaSequence("../assets/hg19/hg19.fa");
+    igv.sequenceSource = igv.getFastaSequence("//igvdata.broadinstitute.org/genomes/seq/hg19/hg19.fasta");
 
     var bamPath = "../test/data/gstt1_sample.bam";
 
@@ -47,7 +47,12 @@ function runBAMTrackTests() {
             beg = /*igv.numberUnFormatter("24,375,000")*/igv.numberUnFormatter("24,371,000"),
             end = /*igv.numberUnFormatter("24,379,000")*/igv.numberUnFormatter("24,383,000"),
             alignment,
-            bamTrack = new igv.BAMTrack(bamPath);
+            bamTrack = new igv.BAMTrack({
+                    url: bamPath,
+                    label: 'bam track unit test',
+                    doPopup: true
+                });
+
 
         bamTrack.featureSource.getFeatures(chr, beg, end, function(alignments) {
 
