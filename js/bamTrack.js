@@ -154,15 +154,21 @@ var igv = (function (igv) {
                     // alignment track
                     alignmentManager.genomicInterval.packedAlignments.forEach(function renderAlignmentRow(alignmentRow, packedAlignmentIndex, packedAlignments) {
 
+                        var arrowHeadWidth = alignmentRowHeight / 2, lineY, rectY, rectHeight, rectInsetY = 1;
+
+                        rectY = (alignmentRowHeight * packedAlignmentIndex) + coverageTrackHeight;
+                        rectHeight = alignmentRowHeight;
+
+
+                        rectY += rectInsetY;
+                        rectHeight -= 2 * rectInsetY;
+
+                        lineY = rectY + rectHeight / 2;
+
                         alignmentRow.forEach(function renderAlignment(alignment) {
 
                             var rectX,
-                                rectY,
-                                rectHeight,
                                 rectEndX,
-                                rectInsetY = 1,
-                                arrowHeadWidth = alignmentRowHeight / 2,
-                                lineY,
                                 blocks = alignment.blocks,
                                 len = alignment.blocks.length,
                                 strand = alignment.strand,
@@ -173,14 +179,6 @@ var igv = (function (igv) {
 
                             rectX = refFrame.toPixels(alignment.start - bpStart);
                             rectEndX = refFrame.toPixels((alignment.start + blocksBBoxLength) - bpStart);
-
-                            rectY = (alignmentRowHeight * packedAlignmentIndex) + coverageTrackHeight;
-                            rectHeight = alignmentRowHeight;
-
-                            rectY += rectInsetY;
-                            rectHeight -= 2 * rectInsetY;
-
-                            lineY = rectY + rectHeight / 2;
 
                             if (blocks.length > 0) {
                                 // todo -- set color based on gap type (deletion or skipped)
