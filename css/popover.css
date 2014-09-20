@@ -5,33 +5,38 @@
     left: 0;
     width: 350px;
     height: 240px;
-    background: #fb2;
-    border-radius: 4px;
-    -moz-border-radius: 4px;
-    -webkit-border-radius: 4px;
-    padding:15px 10px;
-    display:block;
+    background: #0f0;
+}
+
+.popoverContent {
+    position: absolute;
+    top: 5%;
+    left: 5%;
+    width: 90%;
+    height: 90%;
+    background: #fff;
 }
 
 .popoverClose {
     position: absolute;
-    top:  -10px;
+    top: -10px;
     right:-10px;
     width: 10px;
     height: 10px;
-	font-size: 8pt;
-	color: #444;
-	border: 2px solid #444;
-	background-color: #fff;
-	cursor: pointer;
-	font-weight: bold;
-	border-radius: 50%;
-  -moz-border-radius: 50%;
-  -webkit-border-radius: 50%;
-	padding: 1px 3px 2px 3px;
-	text-align:center;
+    font-size: 8pt;
+    color: white;
+    border: 2px solid #0ff;
+    background-color: #ff0000;
+    cursor: pointer;
+    font-weight: bold;
+    border-radius: 50%;
+    -moz-border-radius: 50%;
+    -webkit-border-radius: 50%;
+    padding: 1px 3px 2px 3px;
+    text-align:center;
 }
 
 .popoverClose:hover {
-  background:#911;
+    background:#0000ff;
 }
+

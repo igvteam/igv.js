@@ -12,23 +12,41 @@ var igv = (function (igv) {
 
     igv.Popover.prototype.markupWithParentDiv = function (parentDiv) {
 
-        var popoverDiv,
+        var myself = this,
+            popoverDiv,
+            popoverContentDiv,
             popoverCloseDiv;
 
+        // popover
         popoverDiv = document.createElement('div');
         parentDiv.appendChild(popoverDiv);
-
         this.popoverDiv = popoverDiv;
 
-        popoverDiv.id = "popover_" + igv.guid();
-        popoverDiv.className = "popover";
-//        popoverDiv.innerHTML = "hello popover";
+        this.popoverDiv.id = "popover_" + igv.guid();
+        this.popoverDiv.className = "popover";
 
+        // popover content
+        popoverContentDiv = document.createElement("div");
+        this.popoverDiv.appendChild(popoverContentDiv);
+        this.popoverContentDiv = popoverContentDiv;
+
+        this.popoverContentDiv.className = "popoverContent";
+        this.popoverContentDiv.innerHTML = "blah blah";
+
+        // popover close
         popoverCloseDiv = document.createElement("div");
-        popoverDiv.appendChild(popoverCloseDiv);
+        this.popoverDiv.appendChild(popoverCloseDiv);
+        this.popoverCloseDiv = popoverCloseDiv;
 
-        popoverCloseDiv.className = "popoverClose";
-        popoverCloseDiv.innerHTML = "x";
+        this.popoverCloseDiv.className = "popoverClose";
+        this.popoverCloseDiv.innerHTML = "x";
+
+        this.popoverCloseDiv.onclick = function (e) {
+
+            $(myself.popoverDiv).hide();
+
+        };
+
 
     };
 
@@ -68,7 +86,7 @@ var igv = (function (igv) {
         thresh = Math.floor( Math.sqrt(threshX * threshX + threshY * threshY) );
         if (thresh < 6) {
 
-//            this.popoverDiv.innerHTML = "pa i " + packedAlignmentRowIndex + " pa len " + genomicInterval.packedAlignments.length + " loc " + igv.numberFormatter(genomicLocation) + " refseq " + base;
+            this.popoverContentDiv.innerHTML = "pa i " + packedAlignmentRowIndex + " pa len " + genomicInterval.packedAlignments.length + " loc " + igv.numberFormatter(genomicLocation) + " refseq " + base;
 
             $(this.popoverDiv).css({
                 "left": dx + "px",
