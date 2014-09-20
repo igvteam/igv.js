@@ -25,6 +25,7 @@ var igv = (function (igv) {
         this.id = descriptor.id || this.label;
         this.height = 400;
         this.alignmentRowHeight = expandedHeight;
+        this.alignmentRowYInset = 1;
 
         // divide the canvas into a coverage track region and an alignment track region
         coverageTrackHeightPercentage = 0.15;
@@ -153,15 +154,14 @@ var igv = (function (igv) {
                         var arrowHeadWidth = myself.alignmentRowHeight/2.0,
                             yStrokedLine,
                             yRect,
-                            height,
-                            yInset = 1;
+                            height;
 
-                        yRect = yInset + myself.coverageTrackHeight + (myself.alignmentRowHeight * packedAlignmentIndex);
-                        height = myself.alignmentRowHeight - (2 * yInset);
+                        yRect = myself.alignmentRowYInset + myself.coverageTrackHeight + (myself.alignmentRowHeight * packedAlignmentIndex);
+                        height = myself.alignmentRowHeight - (2 * myself.alignmentRowYInset);
 
                         yStrokedLine = (height/2.0) + yRect;
 
-                        console.log ("index " + packedAlignmentIndex + " computed index " + myself.packedAlignmentIndexWithScreenYOffset(yRect, yInset));
+                        console.log ("index " + packedAlignmentIndex + " computed index " + myself.packedAlignmentIndexWithScreenYOffset(yRect));
 
                         alignmentRow.forEach(function renderAlignment(alignment) {
 
@@ -270,9 +270,9 @@ var igv = (function (igv) {
         // draw label stuff
     };
 
-    igv.BAMTrack.prototype.packedAlignmentIndexWithScreenYOffset = function (yOffset, yInset) {
+    igv.BAMTrack.prototype.packedAlignmentIndexWithScreenYOffset = function (yOffset) {
 
-        var index = (yOffset - (yInset + this.coverageTrackHeight)) / this.alignmentRowHeight;
+        var index = (yOffset - (this.alignmentRowYInset + this.coverageTrackHeight)) / this.alignmentRowHeight;
 
         return Math.floor(index);
 
