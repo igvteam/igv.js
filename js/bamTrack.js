@@ -46,8 +46,6 @@ var igv = (function (igv) {
         }
 
         var myself = this,
-            coverageTrackHeight = this.coverageTrackHeight,
-            alignmentRowHeight = this.alignmentRowHeight,
             chr = refFrame.chr;
 
         this.featureSource.getFeatures(chr, bpStart, bpEnd, function (alignmentManager, task) {
@@ -65,12 +63,10 @@ var igv = (function (igv) {
                         w,
                         h,
                         base,
-                        mismatch,
                         i,
                         len,
                         item,
-                        acc,
-                        foo;
+                        acc;
 
                     if (refSeq) {
                         refSeq = refSeq.toUpperCase();
@@ -94,8 +90,8 @@ var igv = (function (igv) {
                         canvas.setProperties({   fillStyle: coverageColor });
                         canvas.setProperties({ strokeStyle: coverageColor });
 
-                        h = (item.total / coverageMap.maximum) * coverageTrackHeight;
-                        y = coverageTrackHeight - h;
+                        h = (item.total / coverageMap.maximum) * myself.coverageTrackHeight;
+                        y = myself.coverageTrackHeight - h;
 
                         if (refFrame.bpPerPixel > 1) {
 
@@ -137,8 +133,8 @@ var igv = (function (igv) {
                                         return;
                                     }
 
-                                    h = fraction.percent * (item.total / coverageMap.maximum) * coverageTrackHeight;
-                                    y = (coverageTrackHeight - h) - acc;
+                                    h = fraction.percent * (item.total / coverageMap.maximum) * myself.coverageTrackHeight;
+                                    y = (myself.coverageTrackHeight - h) - acc;
                                     acc += h;
 
                                     canvas.setProperties({ fillStyle: igv.nucleotideColors[ fraction.base ] });
@@ -154,16 +150,20 @@ var igv = (function (igv) {
                     // alignment track
                     alignmentManager.genomicInterval.packedAlignments.forEach(function renderAlignmentRow(alignmentRow, packedAlignmentIndex, packedAlignments) {
 
-                        var arrowHeadWidth = alignmentRowHeight / 2, lineY, rectY, rectHeight, rectInsetY = 1;
+                        var arrowHeadWidth = myself.alignmentRowHeight/2.0,
+                            yStrokedLine,
+                            yRect,
+                            rectHeight,
+                            rectInsetY = 1;
 
-                        rectY = (alignmentRowHeight * packedAlignmentIndex) + coverageTrackHeight;
-                        rectHeight = alignmentRowHeight;
+                        yRect = (myself.alignmentRowHeight * packedAlignmentIndex) + myself.coverageTrackHeight;
+                        rectHeight = myself.alignmentRowHeight;
 
 
-                        rectY += rectInsetY;
+                        yRect += rectInsetY;
                         rectHeight -= 2 * rectInsetY;
 
-                        lineY = rectY + rectHeight / 2;
+                        yStrokedLine = yRect + rectHeight / 2;
 
                         alignmentRow.forEach(function renderAlignment(alignment) {
 
@@ -182,7 +182,7 @@ var igv = (function (igv) {
 
                             if (blocks.length > 0) {
                                 // todo -- set color based on gap type (deletion or skipped)
-                                canvas.strokeLine(rectX, lineY, rectEndX, lineY, {strokeStyle: skippedColor});
+                                canvas.strokeLine(rectX, yStrokedLine, rectEndX, yStrokedLine, {strokeStyle: skippedColor});
                             }
 
                             canvas.setProperties({fillStyle: alignmentColor});
@@ -207,15 +207,15 @@ var igv = (function (igv) {
                                 if (strand && blockIndex === len - 1) {
 
                                     x = [rectX, rectEndX, rectEndX + arrowHeadWidth, rectEndX, rectX];
-                                    y = [rectY, rectY, rectY + rectHeight / 2, rectY + rectHeight, rectY + rectHeight];
+                                    y = [yRect, yRect, yRect + rectHeight / 2, yRect + rectHeight, yRect + rectHeight];
                                     canvas.fillPolygon(x, y);
                                 } else if (!strand && blockIndex === 0) {
 
                                     var x = [ blockRectX - arrowHeadWidth, blockRectX, blockEndX, blockEndX, blockRectX];
-                                    var y = [ rectY + rectHeight / 2, rectY, rectY, rectY + rectHeight, rectY + rectHeight]
+                                    var y = [ yRect + rectHeight / 2, yRect, yRect, yRect + rectHeight, yRect + rectHeight]
                                     canvas.fillPolygon(x, y);
                                 } else {
-                                    canvas.fillRect(blockRectX, rectY, blockRectWidth, rectHeight);
+                                    canvas.fillRect(blockRectX, yRect, blockRectWidth, rectHeight);
                                 }
 
                                 // Only do mismatch coloring if a refseq exists to do the comparison
@@ -244,7 +244,7 @@ var igv = (function (igv) {
                                             basePixelPosition = refFrame.toPixels((block.start + i) - bpStart);
                                             basePixelWidth = Math.max(1, refFrame.toPixels(1));
 
-                                            canvas.fillRect(basePixelPosition, rectY, basePixelWidth, rectHeight, { fillStyle: baseColor });
+                                            canvas.fillRect(basePixelPosition, yRect, basePixelWidth, rectHeight, { fillStyle: baseColor });
 
                                         }
                                     }
