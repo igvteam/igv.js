@@ -347,7 +347,9 @@ var igv = (function (igv) {
     igv.TrackView.prototype.genomicCoordinateWithEventTap = function (event) {
 
         var pixels = event.clientX - $(this.canvas).offset().left;
-        return Math.floor( (this.browser.referenceFrame.start) + this.browser.referenceFrame.toBP(pixels) );
+
+        // Add one to convert from 0-based internal coords. to 1-based genomic coords.
+        return 1 + Math.floor( (this.browser.referenceFrame.start) + this.browser.referenceFrame.toBP(pixels) );
 
     };
 

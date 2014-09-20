@@ -272,9 +272,16 @@ var igv = (function (igv) {
 
     igv.BAMTrack.prototype.packedAlignmentRowIndexWithScreenYOffset = function (yOffset) {
 
-        var index = (yOffset - (this.alignmentRowYInset + this.coverageTrackHeight)) / this.alignmentRowHeight;
+        var index = (yOffset - (this.alignmentRowYInset + this.coverageTrackHeight)) / this.alignmentRowHeight,
+            packedAlignments = this.featureSource.alignmentManager.genomicInterval.packedAlignments;
 
-        return Math.floor(index);
+        if (index < 0 || index >= packedAlignments.length) {
+
+            return -1;
+        } else {
+
+            return Math.floor(index);
+        }
 
     };
 

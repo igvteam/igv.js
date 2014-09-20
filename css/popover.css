@@ -10,7 +10,9 @@
     border-radius: 2%;
     -moz-border-radius: 2%;
     -webkit-border-radius: 2%;
+    display: none;
 }
+
 
 .popoverContent {
     position: absolute;
