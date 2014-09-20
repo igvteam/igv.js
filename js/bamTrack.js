@@ -153,22 +153,20 @@ var igv = (function (igv) {
                         var arrowHeadWidth = myself.alignmentRowHeight/2.0,
                             yStrokedLine,
                             yRect,
-                            rectHeight,
-                            rectInsetY = 1;
+                            height,
+                            yInset = 1;
 
-                        yRect = (myself.alignmentRowHeight * packedAlignmentIndex) + myself.coverageTrackHeight;
-                        rectHeight = myself.alignmentRowHeight;
+                        yRect = yInset + myself.coverageTrackHeight + (myself.alignmentRowHeight * packedAlignmentIndex);
+                        height = myself.alignmentRowHeight - (2 * yInset);
 
+                        yStrokedLine = (height/2.0) + yRect;
 
-                        yRect += rectInsetY;
-                        rectHeight -= 2 * rectInsetY;
-
-                        yStrokedLine = yRect + rectHeight / 2;
+                        console.log ("index " + packedAlignmentIndex + " computed index " + myself.packedAlignmentIndexWithScreenYOffset(yRect, yInset));
 
                         alignmentRow.forEach(function renderAlignment(alignment) {
 
-                            var rectX,
-                                rectEndX,
+                            var xRectStart,
+                                xRectEnd,
                                 blocks = alignment.blocks,
                                 len = alignment.blocks.length,
                                 strand = alignment.strand,
@@ -177,12 +175,12 @@ var igv = (function (igv) {
                             if ((alignment.start + blocksBBoxLength) < bpStart) return;
                             if (alignment.start > bpEnd) return;
 
-                            rectX = refFrame.toPixels(alignment.start - bpStart);
-                            rectEndX = refFrame.toPixels((alignment.start + blocksBBoxLength) - bpStart);
+                            xRectStart = refFrame.toPixels(alignment.start - bpStart);
+                            xRectEnd = refFrame.toPixels((alignment.start + blocksBBoxLength) - bpStart);
 
                             if (blocks.length > 0) {
                                 // todo -- set color based on gap type (deletion or skipped)
-                                canvas.strokeLine(rectX, yStrokedLine, rectEndX, yStrokedLine, {strokeStyle: skippedColor});
+                                canvas.strokeLine(xRectStart, yStrokedLine, xRectEnd, yStrokedLine, {strokeStyle: skippedColor});
                             }
 
                             canvas.setProperties({fillStyle: alignmentColor});
@@ -206,16 +204,16 @@ var igv = (function (igv) {
 
                                 if (strand && blockIndex === len - 1) {
 
-                                    x = [rectX, rectEndX, rectEndX + arrowHeadWidth, rectEndX, rectX];
-                                    y = [yRect, yRect, yRect + rectHeight / 2, yRect + rectHeight, yRect + rectHeight];
+                                    x = [xRectStart, xRectEnd, xRectEnd + arrowHeadWidth, xRectEnd, xRectStart];
+                                    y = [yRect, yRect, yRect + height / 2, yRect + height, yRect + height];
                                     canvas.fillPolygon(x, y);
                                 } else if (!strand && blockIndex === 0) {
 
                                     var x = [ blockRectX - arrowHeadWidth, blockRectX, blockEndX, blockEndX, blockRectX];
-                                    var y = [ yRect + rectHeight / 2, yRect, yRect, yRect + rectHeight, yRect + rectHeight]
+                                    var y = [ yRect + height / 2, yRect, yRect, yRect + height, yRect + height];
                                     canvas.fillPolygon(x, y);
                                 } else {
-                                    canvas.fillRect(blockRectX, yRect, blockRectWidth, rectHeight);
+                                    canvas.fillRect(blockRectX, yRect, blockRectWidth, height);
                                 }
 
                                 // Only do mismatch coloring if a refseq exists to do the comparison
@@ -244,7 +242,7 @@ var igv = (function (igv) {
                                             basePixelPosition = refFrame.toPixels((block.start + i) - bpStart);
                                             basePixelWidth = Math.max(1, refFrame.toPixels(1));
 
-                                            canvas.fillRect(basePixelPosition, yRect, basePixelWidth, rectHeight, { fillStyle: baseColor });
+                                            canvas.fillRect(basePixelPosition, yRect, basePixelWidth, height, { fillStyle: baseColor });
 
                                         }
                                     }
@@ -270,6 +268,14 @@ var igv = (function (igv) {
 
     igv.BAMTrack.prototype.drawLabel = function (ctx) {
         // draw label stuff
+    };
+
+    igv.BAMTrack.prototype.packedAlignmentIndexWithScreenYOffset = function (yOffset, yInset) {
+
+        var index = (yOffset - (yInset + this.coverageTrackHeight)) / this.alignmentRowHeight;
+
+        return Math.floor(index);
+
     };
 
     function shadedBaseColor(qual, nucleotide) {
