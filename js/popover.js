@@ -22,7 +22,7 @@ var igv = (function (igv) {
 
         popoverDiv.id = "popover_" + igv.guid();
         popoverDiv.className = "popover";
-        popoverDiv.innerHTML = "hello popover";
+//        popoverDiv.innerHTML = "hello popover";
 
         popoverCloseDiv = document.createElement("div");
         popoverDiv.appendChild(popoverCloseDiv);
@@ -50,7 +50,11 @@ var igv = (function (igv) {
             trackType,
             base,
             index,
-            coverageMap = this.trackView.track.featureSource.alignmentManager.coverageMap,
+            packedAlignmentRowIndex,
+            alignmentManager = this.trackView.track.featureSource.alignmentManager,
+            genomicInterval = alignmentManager.genomicInterval,
+            packedAlignments = genomicInterval.packedAlignments,
+            coverageMap = alignmentManager.coverageMap,
             refSeq = coverageMap.refSeq;
 
         trackType = (this.trackView.track instanceof igv.BAMTrack) ? "BAMTrack " : "UnknownTrack";
@@ -59,10 +63,12 @@ var igv = (function (igv) {
         index = genomicLocation - coverageMap.bpStart;
         base = refSeq[ index ];
 
+        packedAlignmentRowIndex = this.trackView.track.packedAlignmentRowIndexWithScreenYOffset(dy);
+
         thresh = Math.floor( Math.sqrt(threshX * threshX + threshY * threshY) );
         if (thresh < 6) {
 
-            this.popoverDiv.innerHTML = "Track " + trackType + " base " + base + " location " + igv.numberFormatter(genomicLocation);
+//            this.popoverDiv.innerHTML = "pa i " + packedAlignmentRowIndex + " pa len " + genomicInterval.packedAlignments.length + " loc " + igv.numberFormatter(genomicLocation) + " refseq " + base;
 
             $(this.popoverDiv).css({
                 "left": dx + "px",

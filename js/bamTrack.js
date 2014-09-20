@@ -161,7 +161,7 @@ var igv = (function (igv) {
 
                         yStrokedLine = (height/2.0) + yRect;
 
-                        console.log ("index " + packedAlignmentIndex + " computed index " + myself.packedAlignmentIndexWithScreenYOffset(yRect));
+                        console.log ("index " + packedAlignmentIndex + " computed index " + myself.packedAlignmentRowIndexWithScreenYOffset(yRect));
 
                         alignmentRow.forEach(function renderAlignment(alignment) {
 
@@ -270,7 +270,7 @@ var igv = (function (igv) {
         // draw label stuff
     };
 
-    igv.BAMTrack.prototype.packedAlignmentIndexWithScreenYOffset = function (yOffset) {
+    igv.BAMTrack.prototype.packedAlignmentRowIndexWithScreenYOffset = function (yOffset) {
 
         var index = (yOffset - (this.alignmentRowYInset + this.coverageTrackHeight)) / this.alignmentRowHeight;
 
