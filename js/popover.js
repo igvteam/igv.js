@@ -86,7 +86,7 @@ var igv = (function (igv) {
         thresh = Math.floor( Math.sqrt(threshX * threshX + threshY * threshY) );
         if (thresh < 6) {
 
-            this.popoverContentDiv.innerHTML = "pa i " + packedAlignmentRowIndex + " pa len " + genomicInterval.packedAlignments.length + " loc " + igv.numberFormatter(genomicLocation) + " refseq " + base;
+            this.popoverContentDiv.innerHTML = "pack alignments row index " + packedAlignmentRowIndex + "<br>" + " pack alignments " + genomicInterval.packedAlignments.length + "<br>" + " genomic location " + igv.numberFormatter(genomicLocation) + "<br>" + " ref seq base " + base;
 
             $(this.popoverDiv).css({
                 "left": dx + "px",
