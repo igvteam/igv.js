@@ -270,14 +270,16 @@ var igv = (function (igv) {
         // draw label stuff
     };
 
-    igv.BAMTrack.prototype.hitTest = function (genomicLocation, yOffset) {
+    igv.BAMTrack.prototype.featureDetailsWithHitTest = function (genomicLocation, yOffset) {
 
         var alignmentManager = this.featureSource.alignmentManager,
             packedAlignments = alignmentManager.genomicInterval.packedAlignments,
             index,
             alignmentRow,
             targetAlignment,
-            success;
+            success,
+            markup = undefined,
+            refSeqIndex;
 
         index = this.packedAlignmentRowIndexWithScreenYOffset(yOffset);
         if (undefined === index) {
@@ -300,7 +302,17 @@ var igv = (function (igv) {
 
         });
 
-        return targetAlignment;
+        if (success) {
+            markup  = "genomic location " + igv.numberFormatter(genomicLocation) + "<br>";
+            markup += " alignment start " + igv.numberFormatter(targetAlignment.start) + "<br>";
+            markup += "   alignment end " + igv.numberFormatter(targetAlignment.start + alignmentManager.alignmentBlocksBBoxLength(targetAlignment)) + "<br>";
+
+            refSeqIndex = genomicLocation - alignmentManager.coverageMap.bpStart;
+            markup += "    ref seq base " + alignmentManager.coverageMap.refSeq[ refSeqIndex ];
+
+        }
+
+        return markup;
     };
 
     igv.BAMTrack.prototype.packedAlignmentRowIndexWithScreenYOffset = function (yOffset) {

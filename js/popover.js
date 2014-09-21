@@ -71,22 +71,19 @@ var igv = (function (igv) {
             alignmentManager = this.trackView.track.featureSource.alignmentManager,
             coverageMap = alignmentManager.coverageMap,
             refSeq = coverageMap.refSeq,
-            alignment;
+            featureDetails;
 
 //        trackType = (this.trackView.track instanceof igv.BAMTrack) ? "BAMTrack " : "UnknownTrack";
 
         refSeqIndex = genomicLocation - coverageMap.bpStart;
         base = refSeq[ refSeqIndex ];
 
-        alignment = this.trackView.track.hitTest(genomicLocation, dy);
+        featureDetails = this.trackView.track.featureDetailsWithHitTest(genomicLocation, dy);
 
         thresh = Math.floor( Math.sqrt(threshX * threshX + threshY * threshY) );
-        if (alignment && thresh < 6) {
+        if (featureDetails && thresh < 6) {
 
-            this.popoverContentDiv.innerHTML  = "genomic location " + igv.numberFormatter(genomicLocation) + "<br>";
-            this.popoverContentDiv.innerHTML += " alignment start " + igv.numberFormatter(alignment.start) + "<br>";
-            this.popoverContentDiv.innerHTML += "   alignment end " + igv.numberFormatter(alignment.start + alignmentManager.alignmentBlocksBBoxLength(alignment)) + "<br>";
-            this.popoverContentDiv.innerHTML += "    ref seq base " + base;
+            this.popoverContentDiv.innerHTML  = featureDetails + "<br>";
 
             $(this.popoverDiv).css({
                 "left": dx + "px",
