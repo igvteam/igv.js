@@ -228,7 +228,7 @@ var igv = (function (igv) {
                                             readChar = refChar;
                                         }
 
-//                                        if (readChar === "X" || refChar !== readChar) {
+                                        if (readChar === "X" || refChar !== readChar) {
 
                                             if (blockQual && blockQual.length > i) {
                                                 readQual = blockQual.charCodeAt(i);
@@ -244,7 +244,7 @@ var igv = (function (igv) {
 
                                             canvas.fillRect(basePixelPosition, yRect, basePixelWidth, height, { fillStyle: baseColor });
 
-//                                        }
+                                        }
                                     }
 
                                 } // if (refSeq)

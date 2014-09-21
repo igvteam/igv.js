@@ -75,15 +75,16 @@ var igv = (function (igv) {
 
     /**
      *
-     * @param source  RGB components as an array
+     * @param dest  RGB components as an array
+     * @param src  RGB components as an array
      * @param alpha   alpha transparancy in the range 0-1
      * @returns {}
      */
-    igv.getCompositeColor = function (dest, source, alpha) {
+    igv.getCompositeColor = function (dest, src, alpha) {
 
-        var r = Math.floor(alpha * source[0] + (1 - alpha) * dest[0]),
-            g = Math.floor(alpha * source[1] + (1 - alpha) * dest[1]),
-            b = Math.floor(alpha * source[2] + (1 - alpha) * dest[1]);
+        var r = Math.floor(alpha * src[0] + (1 - alpha) * dest[0]),
+            g = Math.floor(alpha * src[1] + (1 - alpha) * dest[1]),
+            b = Math.floor(alpha * src[2] + (1 - alpha) * dest[2]);
 
         return "rgb(" + r + "," + g + "," + b + ")";
 
