@@ -153,11 +153,11 @@ var igv = (function (igv) {
             readChar;
 
         if ((alignment.start + alignmentBlocksBBoxLength) < genomicLocation) {
-
             return undefined;
         }
         else if (alignment.start > genomicLocation) {
-
+            return undefined;
+        } else if (0 === alignment.blocks.len) {
             return undefined;
         }
 
@@ -166,7 +166,12 @@ var igv = (function (igv) {
 
             var index;
 
+
             if (undefined === readChar) {
+
+                if ("*" === block.seq) {
+                    return
+                }
 
                 if (genomicLocation < block.start) {
                     return;
