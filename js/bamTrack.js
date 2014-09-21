@@ -276,7 +276,7 @@ var igv = (function (igv) {
             packedAlignments = alignmentManager.genomicInterval.packedAlignments,
             index,
             alignmentRow,
-            targetAlignment,
+            readChar,
             success,
             markup = undefined,
             refSeqIndex;
@@ -288,27 +288,25 @@ var igv = (function (igv) {
 
         alignmentRow = packedAlignments[ index ];
 
-        targetAlignment = undefined;
+        readChar = undefined;
         success = false;
         alignmentRow.forEach(function (alignment, alignmentIndex, alignments) {
 
-            if (false === success) {
+            if (undefined === readChar) {
 
-                if (alignmentManager.hitTest(alignment, genomicLocation)) {
-                    success = true;
-                    targetAlignment = alignment;
-                }
+                readChar = alignmentManager.alignmentBlockHitTest(alignment, genomicLocation);
             }
 
         });
 
-        if (success) {
+        if (readChar) {
             markup  = "genomic location " + igv.numberFormatter(genomicLocation) + "<br>";
-            markup += " alignment start " + igv.numberFormatter(targetAlignment.start) + "<br>";
-            markup += "   alignment end " + igv.numberFormatter(targetAlignment.start + alignmentManager.alignmentBlocksBBoxLength(targetAlignment)) + "<br>";
+            markup += "readChar " + readChar + "<br>";
+//            markup += "   alignment end " + igv.numberFormatter(targetAlignment.start + alignmentManager.alignmentBlocksBBoxLength(targetAlignment)) + "<br>";
+//            markup += "   alignment strand " + (targetAlignment.strand) ? ">" : "<"  + "<br>";
 
             refSeqIndex = genomicLocation - alignmentManager.coverageMap.bpStart;
-            markup += "    ref seq base " + alignmentManager.coverageMap.refSeq[ refSeqIndex ];
+            markup += "ref seq base " + alignmentManager.coverageMap.refSeq[ refSeqIndex ];
 
         }
 

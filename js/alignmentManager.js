@@ -144,22 +144,45 @@ var igv = (function (igv) {
         return (last.start + last.len) - first.start;
     };
 
-    igv.AlignmentManager.prototype.hitTest = function(alignment, genomicLocation) {
+    igv.AlignmentManager.prototype.alignmentBlockHitTest = function(alignment, genomicLocation) {
 
         var loc = igv.numberFormatter(genomicLocation),
             ss = igv.numberFormatter(alignment.start),
-            ee = igv.numberFormatter(alignment.start + this.alignmentBlocksBBoxLength(alignment));
+            ee = igv.numberFormatter(alignment.start + this.alignmentBlocksBBoxLength(alignment)),
+            alignmentBlocksBBoxLength = this.alignmentBlocksBBoxLength(alignment),
+            readChar;
 
-        if ((alignment.start + this.alignmentBlocksBBoxLength(alignment)) < genomicLocation) {
-            return false;
+        if ((alignment.start + alignmentBlocksBBoxLength) < genomicLocation) {
+
+            return undefined;
         }
         else if (alignment.start > genomicLocation) {
-            return false;
+
+            return undefined;
         }
-        else {
-            console.log("loc " + loc + " ss " + ss + " ee " + ee);
-            return true;
-        }
+
+        readChar = undefined;
+        alignment.blocks.forEach(function (block) {
+
+            var index;
+
+            if (undefined === readChar) {
+
+                if (genomicLocation < block.start) {
+                    return;
+                }
+
+                if (genomicLocation > block.start + block.seq.length) {
+                    return;
+                }
+
+                index = genomicLocation - block.start;
+                readChar = block.seq.charAt( index );
+            }
+
+        });
+
+        return readChar;
     };
 
 
