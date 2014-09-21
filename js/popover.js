@@ -67,8 +67,8 @@ var igv = (function (igv) {
             genomicLocation,
             trackType,
             base,
-            index,
-            packedAlignmentRowIndex,
+            refSeqIndex,
+            success,
             alignmentManager = this.trackView.track.featureSource.alignmentManager,
             genomicInterval = alignmentManager.genomicInterval,
             packedAlignments = genomicInterval.packedAlignments,
@@ -76,17 +76,17 @@ var igv = (function (igv) {
             refSeq = coverageMap.refSeq;
 
         trackType = (this.trackView.track instanceof igv.BAMTrack) ? "BAMTrack " : "UnknownTrack";
+
+        refSeqIndex = genomicLocation - coverageMap.bpStart;
+        base = refSeq[ refSeqIndex ];
+
         genomicLocation = this.trackView.genomicCoordinateWithEventTap(event);
-
-        index = genomicLocation - coverageMap.bpStart;
-        base = refSeq[ index ];
-
-        packedAlignmentRowIndex = this.trackView.track.packedAlignmentRowIndexWithScreenYOffset(dy);
+        success = this.trackView.track.hitTest(genomicLocation, dy);
 
         thresh = Math.floor( Math.sqrt(threshX * threshX + threshY * threshY) );
-        if (thresh < 6) {
+        if (success && thresh < 6) {
 
-            this.popoverContentDiv.innerHTML = "pack alignments row index " + packedAlignmentRowIndex + "<br>" + " pack alignments " + genomicInterval.packedAlignments.length + "<br>" + " genomic location " + igv.numberFormatter(genomicLocation) + "<br>" + " ref seq base " + base;
+            this.popoverContentDiv.innerHTML = "genomic location " + igv.numberFormatter(genomicLocation) + "<br>" + " ref seq base " + base;
 
             $(this.popoverDiv).css({
                 "left": dx + "px",

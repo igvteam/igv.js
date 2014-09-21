@@ -161,7 +161,7 @@ var igv = (function (igv) {
 
                         yStrokedLine = (height/2.0) + yRect;
 
-                        console.log ("index " + packedAlignmentIndex + " computed index " + myself.packedAlignmentRowIndexWithScreenYOffset(yRect));
+//                        console.log ("index " + packedAlignmentIndex + " computed index " + myself.packedAlignmentRowIndexWithScreenYOffset(yRect));
 
                         alignmentRow.forEach(function renderAlignment(alignment) {
 
@@ -170,7 +170,7 @@ var igv = (function (igv) {
                                 blocks = alignment.blocks,
                                 len = alignment.blocks.length,
                                 strand = alignment.strand,
-                                blocksBBoxLength = igv.alignmentBlocksBBoxLength(alignment);
+                                blocksBBoxLength = alignmentManager.alignmentBlocksBBoxLength(alignment);
 
                             if ((alignment.start + blocksBBoxLength) < bpStart) return;
                             if (alignment.start > bpEnd) return;
@@ -270,18 +270,49 @@ var igv = (function (igv) {
         // draw label stuff
     };
 
+    igv.BAMTrack.prototype.hitTest = function (genomicLocation, yOffset) {
+
+
+        var alignmentManager = this.featureSource.alignmentManager,
+            packedAlignments = alignmentManager.genomicInterval.packedAlignments,
+            index,
+            alignmentRow,
+            targetAlignment,
+            success;
+
+        index = this.packedAlignmentRowIndexWithScreenYOffset(yOffset);
+        if (undefined === index) {
+            return false
+        }
+
+        alignmentRow = packedAlignments[ index ];
+
+        targetAlignment = undefined;
+        success = false;
+        alignmentRow.forEach(function (alignment, alignmentIndex, alignments) {
+
+            if (false === success) {
+
+                if (alignmentManager.hitTest(alignment, genomicLocation)) {
+                    success = true;
+                    targetAlignment = alignment;
+                }
+            }
+
+        });
+
+        return success;
+    };
+
     igv.BAMTrack.prototype.packedAlignmentRowIndexWithScreenYOffset = function (yOffset) {
 
-        var index = (yOffset - (this.alignmentRowYInset + this.coverageTrackHeight)) / this.alignmentRowHeight,
-            packedAlignments = this.featureSource.alignmentManager.genomicInterval.packedAlignments;
+        var alignmentManager = this.featureSource.alignmentManager,
+            packedAlignments = alignmentManager.genomicInterval.packedAlignments,
+            index;
 
-        if (index < 0 || index >= packedAlignments.length) {
+        index = Math.floor( (yOffset - (this.alignmentRowYInset + this.coverageTrackHeight)) / this.alignmentRowHeight );
 
-            return -1;
-        } else {
-
-            return Math.floor(index);
-        }
+        return (index < 0 || index >= packedAlignments.length) ? undefined : index;
 
     };
 
