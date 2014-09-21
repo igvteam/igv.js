@@ -64,29 +64,29 @@ var igv = (function (igv) {
         var threshX = dx - this.mouseDownX,
             threshY = dy - this.mouseDownY,
             thresh,
-            genomicLocation,
+            genomicLocation = this.trackView.genomicCoordinateWithEventTap(event),
             trackType,
             base,
             refSeqIndex,
-            success,
             alignmentManager = this.trackView.track.featureSource.alignmentManager,
-            genomicInterval = alignmentManager.genomicInterval,
-            packedAlignments = genomicInterval.packedAlignments,
             coverageMap = alignmentManager.coverageMap,
-            refSeq = coverageMap.refSeq;
+            refSeq = coverageMap.refSeq,
+            alignment;
 
-        trackType = (this.trackView.track instanceof igv.BAMTrack) ? "BAMTrack " : "UnknownTrack";
+//        trackType = (this.trackView.track instanceof igv.BAMTrack) ? "BAMTrack " : "UnknownTrack";
 
         refSeqIndex = genomicLocation - coverageMap.bpStart;
         base = refSeq[ refSeqIndex ];
 
-        genomicLocation = this.trackView.genomicCoordinateWithEventTap(event);
-        success = this.trackView.track.hitTest(genomicLocation, dy);
+        alignment = this.trackView.track.hitTest(genomicLocation, dy);
 
         thresh = Math.floor( Math.sqrt(threshX * threshX + threshY * threshY) );
-        if (success && thresh < 6) {
+        if (alignment && thresh < 6) {
 
-            this.popoverContentDiv.innerHTML = "genomic location " + igv.numberFormatter(genomicLocation) + "<br>" + " ref seq base " + base;
+            this.popoverContentDiv.innerHTML  = "genomic location " + igv.numberFormatter(genomicLocation) + "<br>";
+            this.popoverContentDiv.innerHTML += " alignment start " + igv.numberFormatter(alignment.start) + "<br>";
+            this.popoverContentDiv.innerHTML += "   alignment end " + igv.numberFormatter(alignment.start + alignmentManager.alignmentBlocksBBoxLength(alignment)) + "<br>";
+            this.popoverContentDiv.innerHTML += "    ref seq base " + base;
 
             $(this.popoverDiv).css({
                 "left": dx + "px",

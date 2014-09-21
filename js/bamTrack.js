@@ -272,7 +272,6 @@ var igv = (function (igv) {
 
     igv.BAMTrack.prototype.hitTest = function (genomicLocation, yOffset) {
 
-
         var alignmentManager = this.featureSource.alignmentManager,
             packedAlignments = alignmentManager.genomicInterval.packedAlignments,
             index,
@@ -301,7 +300,7 @@ var igv = (function (igv) {
 
         });
 
-        return success;
+        return targetAlignment;
     };
 
     igv.BAMTrack.prototype.packedAlignmentRowIndexWithScreenYOffset = function (yOffset) {
