@@ -265,12 +265,10 @@ var igv = (function (igv) {
 
             canvas.onmousedown = function (e) {
 
-                var scrollLeft = $(window).scrollLeft();
-                var scrollTop = $(window).scrollTop();
-                var dx = e.clientX - canvasObject.offset().left;
-                var dy = e.clientY - canvasObject.offset().top;
+                var dx = (e.clientX + $(window).scrollLeft()) - canvasObject.offset().left;
+                var dy = (e.clientY + $(window).scrollTop())  - canvasObject.offset().top;
 
-                console.log("scroll top " + scrollTop);
+//                console.log("scroll " + $(window).scrollTop() + " e.client " + e.clientY + " scroll + e.client " + (e.clientY + $(window).scrollTop()));
 
                 if (trackView.popover) {
                     trackView.popover.onmousedown(e, dx, dy);
@@ -316,8 +314,8 @@ var igv = (function (igv) {
 
             canvas.onmouseup = function (e) {
 
-                var dx = e.clientX - canvasObject.offset().left,
-                    dy = e.clientY - canvasObject.offset().top;
+                var dx = (e.clientX + $(window).scrollLeft()) - canvasObject.offset().left;
+                var dy = (e.clientY + $(window).scrollTop())  - canvasObject.offset().top;
 
                 if (trackView.popover) {
                     trackView.popover.onmouseup(e, dx, dy);
