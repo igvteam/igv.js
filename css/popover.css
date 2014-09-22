@@ -32,10 +32,10 @@
     right:4px;
     width: 15px;
     height: 15px;
-    font-size: 8pt;
+    font-size: 10pt;
     color: #444;
-    border: 2px solid #444;
-    background-color: #ddd;
+    border: 2px solid #fff;
+    background-color: #fff;
     cursor: pointer;
     font-weight: bold;
     border-radius: 50%;
@@ -46,8 +46,8 @@
 }
 
 .popoverClose:hover {
-    color: #ddd;
-    border: 2px solid #444;
-    background-color: #444;
+    color: #fff;
+    border: 2px solid #e00;
+    background-color: #e00;
 }
 
