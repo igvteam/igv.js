@@ -21,7 +21,8 @@ var igv = (function (igv) {
             contentWidth,
             closeButton,
             labelButton,
-            trackFilterButtonDiv;
+            trackFilterButtonDiv,
+            rootObject = $(".igv-root-div");
 
         viewportHeight = track.height;
 
@@ -90,8 +91,11 @@ var igv = (function (igv) {
 
         if (this.track.doPopup && true === this.track.doPopup) {
 
-            this.popover = new igv.Popover(this);
-            this.track.popover = this.popover;
+//            this.popover = new igv.Popover(this);
+//            this.track.popover = this.popover;
+
+            rootObject[0].popover = new igv.Popover(rootObject[0], this);
+            this.track.popover = rootObject[0].popover;
         }
 
         // filter  -- CURSOR only for now
@@ -255,7 +259,6 @@ var igv = (function (igv) {
             var isMouseDown = false;
             var lastMouseX = undefined;
             var referenceFrame = trackView.browser.referenceFrame;
-            var rootObject = $(".igv-root-div");
             var canvasObject = $(trackView.canvas);
             var canvas = trackView.canvas;
 
@@ -264,17 +267,19 @@ var igv = (function (igv) {
 //                var dx = (e.clientX + $(window).scrollLeft()) - canvasObject.offset().left;
 //                var dy = (e.clientY + $(window).scrollTop())  - canvasObject.offset().top;
 
-                var dx = e.offsetX;
-                var dy = e.offsetY;
+                var dx = e.offsetX,
+                    dy = e.offsetY,
+                    ppx = canvasObject.offset().left - rootObject.offset().left,
+                    ppy = canvasObject.offset().top - rootObject.offset().top;
 
-//                console.log("e.offsetX " + e.offsetX + " e.offsetY " + e.offsetY);
+                console.log("e.offsetX " + e.offsetX + " e.offsetY " + e.offsetY + " popup x " + (ppx + e.offsetX) + " popup y " + (ppy + e.offsetY));
 
-                if (trackView.popover) {
-                    trackView.popover.onmousedown(e, dx, dy);
+                if (trackView.track.popover) {
+                    trackView.track.popover.onmousedown(e, e.offsetX, e.offsetY, e.offsetX + ppx, e.offsetY + ppy);
                 }
 
                 isMouseDown = true;
-                lastMouseX = dx;
+                lastMouseX = e.offsetX;
 
             };
 
@@ -316,11 +321,13 @@ var igv = (function (igv) {
 //                var dx = (e.clientX + $(window).scrollLeft()) - canvasObject.offset().left;
 //                var dy = (e.clientY + $(window).scrollTop())  - canvasObject.offset().top;
 
-                var dx = e.offsetX;
-                var dy = e.offsetY;
+                var dx = e.offsetX,
+                    dy = e.offsetY,
+                    ppx = canvasObject.offset().left - rootObject.offset().left,
+                    ppy = canvasObject.offset().top - rootObject.offset().top;
 
-                if (trackView.popover) {
-                    trackView.popover.onmouseup(e, dx, dy);
+                if (trackView.track.popover) {
+                    trackView.track.popover.onmouseup(e, e.offsetX, e.offsetY, e.offsetX + ppx, e.offsetY + ppy);
                 }
 
                 isMouseDown = false;

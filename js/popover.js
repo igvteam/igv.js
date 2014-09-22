@@ -3,10 +3,10 @@
  */
 var igv = (function (igv) {
 
-    igv.Popover = function (trackView) {
+    igv.Popover = function (parent, trackView) {
 
         this.trackView = trackView;
-        this.markupWithParentDiv(trackView.contentDiv);
+        this.markupWithParentDiv(parent);
 
     };
 
@@ -55,7 +55,7 @@ var igv = (function (igv) {
         $(this.popoverDiv).hide();
     };
 
-    igv.Popover.prototype.onmousedown = function (event, dx, dy) {
+    igv.Popover.prototype.onmousedown = function (event, dx, dy, popupx, popupy) {
 
         this.mouseDownX = dx;
         this.mouseDownY = dy;
@@ -64,7 +64,7 @@ var igv = (function (igv) {
 
     };
 
-    igv.Popover.prototype.onmouseup = function (event, dx, dy) {
+    igv.Popover.prototype.onmouseup = function (event, dx, dy, popupx, popupy) {
 
         var threshX = dx - this.mouseDownX,
             threshY = dy - this.mouseDownY,
@@ -109,8 +109,8 @@ var igv = (function (igv) {
             this.popoverContentDiv.innerHTML  = featureDetails + "<br>";
 
             $(this.popoverDiv).css({
-                "left": dx + "px",
-                "top" : dy + "px"
+                "left": popupx + "px",
+                "top" : popupy + "px"
             }).show();
 
         }
