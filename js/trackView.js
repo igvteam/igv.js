@@ -88,15 +88,10 @@ var igv = (function (igv) {
         canvas.setAttribute('width', contentWidth);    //Must set the width & height of the canvas
         canvas.setAttribute('height', contentHeight);
 
-
-
-
         if (this.track.doPopup && true === this.track.doPopup) {
 
             this.popover = new igv.Popover(this);
             this.track.popover = this.popover;
-        } else {
-
         }
 
         // filter  -- CURSOR only for now
@@ -260,15 +255,19 @@ var igv = (function (igv) {
             var isMouseDown = false;
             var lastMouseX = undefined;
             var referenceFrame = trackView.browser.referenceFrame;
+            var rootObject = $(".igv-root-div");
             var canvasObject = $(trackView.canvas);
             var canvas = trackView.canvas;
 
             canvas.onmousedown = function (e) {
 
-                var dx = (e.clientX + $(window).scrollLeft()) - canvasObject.offset().left;
-                var dy = (e.clientY + $(window).scrollTop())  - canvasObject.offset().top;
+//                var dx = (e.clientX + $(window).scrollLeft()) - canvasObject.offset().left;
+//                var dy = (e.clientY + $(window).scrollTop())  - canvasObject.offset().top;
 
-//                console.log("scroll " + $(window).scrollTop() + " e.client " + e.clientY + " scroll + e.client " + (e.clientY + $(window).scrollTop()));
+                var dx = e.offsetX;
+                var dy = e.offsetY;
+
+//                console.log("e.offsetX " + e.offsetX + " e.offsetY " + e.offsetY);
 
                 if (trackView.popover) {
                     trackView.popover.onmousedown(e, dx, dy);
@@ -314,8 +313,11 @@ var igv = (function (igv) {
 
             canvas.onmouseup = function (e) {
 
-                var dx = (e.clientX + $(window).scrollLeft()) - canvasObject.offset().left;
-                var dy = (e.clientY + $(window).scrollTop())  - canvasObject.offset().top;
+//                var dx = (e.clientX + $(window).scrollLeft()) - canvasObject.offset().left;
+//                var dy = (e.clientY + $(window).scrollTop())  - canvasObject.offset().top;
+
+                var dx = e.offsetX;
+                var dy = e.offsetY;
 
                 if (trackView.popover) {
                     trackView.popover.onmouseup(e, dx, dy);
