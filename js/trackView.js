@@ -332,14 +332,18 @@ var igv = (function (igv) {
 
             canvas.ondblclick = function (e) {
 
-                var mouseX = e.clientX - $(canvas).offset().left;
-                var mouseY = e.clientY - $(canvas).offset().top;
+//                var dx = e.clientX - $(canvas).offset().left;
+//                var dy = e.clientY - $(canvas).offset().top;
+
+                // compensate for scroll
+                var dx = (e.clientX + $(window).scrollLeft()) - canvasObject.offset().left;
+                var dy = (e.clientY + $(window).scrollTop())  - canvasObject.offset().top;
 
                 if (trackView.track.handleDblClick) {
-                    trackView.track.handleDblClick(mouseX, mouseY, trackView.viewportDiv);
+                    trackView.track.handleDblClick(dx, dy, trackView.viewportDiv);
                 }
                 else {
-                    var newCenter = Math.round(trackView.browser.referenceFrame.start + mouseX * trackView.browser.referenceFrame.bpPerPixel);
+                    var newCenter = Math.round(trackView.browser.referenceFrame.start + dx * trackView.browser.referenceFrame.bpPerPixel);
                     referenceFrame.bpPerPixel /= 2;
                     trackView.browser.goto(trackView.browser.referenceFrame.chr, newCenter);
                 }
