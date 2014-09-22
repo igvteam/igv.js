@@ -38,6 +38,8 @@ var igv = (function (igv) {
 
     igv.BAMTrack.prototype.draw = function (canvas, refFrame, bpStart, bpEnd, width, height, continuation, task) {
 
+        $(this.popover.popoverDiv).hide();
+
         // Don't try to draw alignments for windows > 10kb
         if (bpEnd - bpStart > 30000) {
 
@@ -277,6 +279,7 @@ var igv = (function (igv) {
             packedAlignments = alignmentManager.genomicInterval.packedAlignments,
             packedAlignmentsIndex,
             alignmentRow,
+            alignmentHitTest,
             readChar,
             markup = undefined,
             refSeqIndex;
@@ -348,18 +351,27 @@ var igv = (function (igv) {
             if (undefined === readChar) {
 
                 readChar = alignmentManager.alignmentBlockHitTest(alignment, genomicLocation);
+                alignmentHitTest = alignment;
             }
 
         });
 
         if (readChar) {
-            markup  = "genomic location " + igv.numberFormatter(genomicLocation) + "<br>";
-            markup += "readChar " + readChar + "<br>";
-//            markup += "   alignment end " + igv.numberFormatter(targetAlignment.start + alignmentManager.alignmentBlocksBBoxLength(targetAlignment)) + "<br>";
-//            markup += "   alignment strand " + (targetAlignment.strand) ? ">" : "<"  + "<br>";
+            markup  = "Sample = " + this.label + "<br>";
+            markup += "Location = " + alignmentManager.genomicInterval.chr + ":" + igv.numberFormatter(genomicLocation) + "<br>";
+            markup += "Alignment start = " + igv.numberFormatter(alignmentHitTest.start);
+            if (true === alignmentHitTest.strand) {
+                markup += "(+)" + "<br>";
+            } else {
+                markup += "(-)" + "<br>";
 
-            refSeqIndex = genomicLocation - alignmentManager.coverageMap.bpStart;
-            markup += "ref seq base " + alignmentManager.coverageMap.refSeq[ refSeqIndex ];
+            }
+            markup += "Cigar = " + alignmentHitTest.cigar + "<br>";
+            markup += "Mapping quality = " + alignmentHitTest.mq + "<br>";
+            markup += "Base = " + readChar;
+
+//            refSeqIndex = genomicLocation - alignmentManager.coverageMap.bpStart;
+//            markup += "ref seq base " + alignmentManager.coverageMap.refSeq[ refSeqIndex ];
 
         }
 

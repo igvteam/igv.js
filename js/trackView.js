@@ -94,6 +94,9 @@ var igv = (function (igv) {
         if (this.track.doPopup && true === this.track.doPopup) {
 
             this.popover = new igv.Popover(this);
+            this.track.popover = this.popover;
+        } else {
+
         }
 
         // filter  -- CURSOR only for now
