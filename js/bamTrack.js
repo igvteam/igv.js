@@ -293,16 +293,15 @@ var igv = (function (igv) {
             return undefined;
         }
 
-
         if (packedAlignmentsIndex < 0) {
 
             coverageMapIndex = genomicLocation - coverageMap.bpStart;
             coverage = coverageMap.coverage[ coverageMapIndex ];
 
-            markup   = "Total Count: " + coverage.total + "<br>";
+            markup   = "<span class=\"popoverContentSpan\">Total Count</span> " + coverage.total + "<br>";
 
             // A
-            markup  += "A: " + (coverage.posA + coverage.negA);
+            markup  += "<span class=\"popoverContentSpan\">A</span> " + (coverage.posA + coverage.negA);
             if (coverage.posA + coverage.negA) {
                 markup += " (" + Math.floor( ((coverage.posA + coverage.negA)/coverage.total) * 100.0 ) + "%)" + "<br>";
             } else {
@@ -310,7 +309,7 @@ var igv = (function (igv) {
             }
 
             // C
-            markup  += "C: " + (coverage.posC + coverage.negC);
+            markup  += "<span class=\"popoverContentSpan\">C</span> " + (coverage.posC + coverage.negC);
             if (coverage.posC + coverage.negC) {
                 markup += " (" + Math.floor( ((coverage.posC + coverage.negC)/coverage.total) * 100.0 ) + "%)" + "<br>";
             } else {
@@ -318,7 +317,7 @@ var igv = (function (igv) {
             }
 
             // G
-            markup  += "G: " + (coverage.posG + coverage.negG);
+            markup  += "<span class=\"popoverContentSpan\">G</span> " + (coverage.posG + coverage.negG);
             if (coverage.posG + coverage.negG) {
                 markup += " (" + Math.floor( ((coverage.posG + coverage.negG)/coverage.total) * 100.0 ) + "%)" + "<br>";
             } else {
@@ -326,7 +325,7 @@ var igv = (function (igv) {
             }
 
             // T
-            markup  += "T: " + (coverage.posT + coverage.negT);
+            markup  += "<span class=\"popoverContentSpan\">T</span> " + (coverage.posT + coverage.negT);
             if (coverage.posT + coverage.negT) {
                 markup += " (" + Math.floor( ((coverage.posT + coverage.negT)/coverage.total) * 100.0 ) + "%)" + "<br>";
             } else {
@@ -334,7 +333,7 @@ var igv = (function (igv) {
             }
 
             // N
-            markup  += "N: " + (coverage.posN + coverage.negN);
+            markup  += "<span class=\"popoverContentSpan\">N</span> " + (coverage.posN + coverage.negN);
             if (coverage.posN + coverage.negN) {
                 markup += " (" + Math.floor( ((coverage.posN + coverage.negN)/coverage.total) * 100.0 ) + "%)" + "<br>";
             } else {
@@ -359,18 +358,18 @@ var igv = (function (igv) {
         });
 
         if (readChar) {
-            markup  = "Sample = " + this.label + "<br>";
-            markup += "Location = " + alignmentManager.genomicInterval.chr + ":" + igv.numberFormatter(genomicLocation) + "<br>";
-            markup += "Alignment start = " + igv.numberFormatter(alignmentHitTest.start);
+            markup  = "<span class=\"popoverContentSpan\">Sample</span> " + this.label + "<br>";
+            markup += "<span class=\"popoverContentSpan\">Location</span> " + alignmentManager.genomicInterval.chr + ":" + igv.numberFormatter(genomicLocation) + "<br>";
+            markup += "<span class=\"popoverContentSpan\">Alignment Start</span> " + igv.numberFormatter(alignmentHitTest.start);
             if (true === alignmentHitTest.strand) {
                 markup += "(+)" + "<br>";
             } else {
                 markup += "(-)" + "<br>";
 
             }
-            markup += "Cigar = " + alignmentHitTest.cigar + "<br>";
-            markup += "Mapping quality = " + alignmentHitTest.mq + "<br>";
-            markup += "Base = " + readChar;
+            markup += "<span class=\"popoverContentSpan\">Cigar</span> " + alignmentHitTest.cigar + "<br>";
+            markup += "<span class=\"popoverContentSpan\">Mapping Quality</span> " + alignmentHitTest.mq + "<br>";
+            markup += "<span class=\"popoverContentSpan\">Base</span> " + readChar;
 
 //            refSeqIndex = genomicLocation - alignmentManager.coverageMap.bpStart;
 //            markup += "ref seq base " + alignmentManager.coverageMap.refSeq[ refSeqIndex ];
