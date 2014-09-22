@@ -271,26 +271,76 @@ var igv = (function (igv) {
     igv.BAMTrack.prototype.featureDetailsWithHitTest = function (genomicLocation, yOffset) {
 
         var alignmentManager = this.featureSource.alignmentManager,
+            coverageMap = alignmentManager.coverageMap,
+            coverageMapIndex,
+            coverage,
             packedAlignments = alignmentManager.genomicInterval.packedAlignments,
-            index,
+            packedAlignmentsIndex,
             alignmentRow,
             readChar,
             markup = undefined,
             refSeqIndex;
 
-        index = Math.floor( (yOffset - (this.alignmentRowYInset + this.coverageTrackHeight)) / this.alignmentRowHeight );
+        packedAlignmentsIndex = Math.floor( (yOffset - (this.alignmentRowYInset + this.coverageTrackHeight)) / this.alignmentRowHeight );
 
-        if (index >= packedAlignments.length) {
+        if (packedAlignmentsIndex >= packedAlignments.length) {
+
             return undefined;
         }
 
 
-        if (index < 0) {
-            // do coverage track stuff
-            return undefined;
+        if (packedAlignmentsIndex < 0) {
+
+            coverageMapIndex = genomicLocation - coverageMap.bpStart;
+            coverage = coverageMap.coverage[ coverageMapIndex ];
+
+            markup   = "Total Count: " + coverage.total + "<br>";
+
+            // A
+            markup  += "A: " + (coverage.posA + coverage.negA);
+            if (coverage.posA + coverage.negA) {
+                markup += " (" + Math.floor( ((coverage.posA + coverage.negA)/coverage.total) * 100.0 ) + "%)" + "<br>";
+            } else {
+                markup += "<br>";
+            }
+
+            // C
+            markup  += "C: " + (coverage.posC + coverage.negC);
+            if (coverage.posC + coverage.negC) {
+                markup += " (" + Math.floor( ((coverage.posC + coverage.negC)/coverage.total) * 100.0 ) + "%)" + "<br>";
+            } else {
+                markup += "<br>";
+            }
+
+            // G
+            markup  += "G: " + (coverage.posG + coverage.negG);
+            if (coverage.posG + coverage.negG) {
+                markup += " (" + Math.floor( ((coverage.posG + coverage.negG)/coverage.total) * 100.0 ) + "%)" + "<br>";
+            } else {
+                markup += "<br>";
+            }
+
+            // T
+            markup  += "T: " + (coverage.posT + coverage.negT);
+            if (coverage.posT + coverage.negT) {
+                markup += " (" + Math.floor( ((coverage.posT + coverage.negT)/coverage.total) * 100.0 ) + "%)" + "<br>";
+            } else {
+                markup += "<br>";
+            }
+
+            // N
+            markup  += "N: " + (coverage.posN + coverage.negN);
+            if (coverage.posN + coverage.negN) {
+                markup += " (" + Math.floor( ((coverage.posN + coverage.negN)/coverage.total) * 100.0 ) + "%)" + "<br>";
+            } else {
+                markup += "<br>";
+            }
+
+
+            return markup;
         }
 
-        alignmentRow = packedAlignments[ index ];
+        alignmentRow = packedAlignments[ packedAlignmentsIndex ];
 
         readChar = undefined;
         alignmentRow.forEach(function (alignment, alignmentIndex, alignments) {
