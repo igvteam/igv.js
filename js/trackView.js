@@ -265,8 +265,12 @@ var igv = (function (igv) {
 
             canvas.onmousedown = function (e) {
 
+                var scrollLeft = $(window).scrollLeft();
+                var scrollTop = $(window).scrollTop();
                 var dx = e.clientX - canvasObject.offset().left;
                 var dy = e.clientY - canvasObject.offset().top;
+
+                console.log("scroll top " + scrollTop);
 
                 if (trackView.popover) {
                     trackView.popover.onmousedown(e, dx, dy);
