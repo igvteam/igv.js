@@ -161,8 +161,6 @@ var igv = (function (igv) {
 
                         yStrokedLine = (height/2.0) + yRect;
 
-//                        console.log ("index " + packedAlignmentIndex + " computed index " + myself.packedAlignmentRowIndexWithScreenYOffset(yRect));
-
                         alignmentRow.forEach(function renderAlignment(alignment) {
 
                             var xRectStart,
@@ -277,19 +275,24 @@ var igv = (function (igv) {
             index,
             alignmentRow,
             readChar,
-            success,
             markup = undefined,
             refSeqIndex;
 
-        index = this.packedAlignmentRowIndexWithScreenYOffset(yOffset);
-        if (undefined === index) {
-            return false
+        index = Math.floor( (yOffset - (this.alignmentRowYInset + this.coverageTrackHeight)) / this.alignmentRowHeight );
+
+        if (index >= packedAlignments.length) {
+            return undefined;
+        }
+
+
+        if (index < 0) {
+            // do coverage track stuff
+            return undefined;
         }
 
         alignmentRow = packedAlignments[ index ];
 
         readChar = undefined;
-        success = false;
         alignmentRow.forEach(function (alignment, alignmentIndex, alignments) {
 
             if (undefined === readChar) {
@@ -311,18 +314,6 @@ var igv = (function (igv) {
         }
 
         return markup;
-    };
-
-    igv.BAMTrack.prototype.packedAlignmentRowIndexWithScreenYOffset = function (yOffset) {
-
-        var alignmentManager = this.featureSource.alignmentManager,
-            packedAlignments = alignmentManager.genomicInterval.packedAlignments,
-            index;
-
-        index = Math.floor( (yOffset - (this.alignmentRowYInset + this.coverageTrackHeight)) / this.alignmentRowHeight );
-
-        return (index < 0 || index >= packedAlignments.length) ? undefined : index;
-
     };
 
     function shadedBaseColor(qual, nucleotide) {
