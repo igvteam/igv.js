@@ -38,7 +38,9 @@ var igv = (function (igv) {
 
     igv.BAMTrack.prototype.draw = function (canvas, refFrame, bpStart, bpEnd, width, height, continuation, task) {
 
-        $(this.popover.popoverDiv).hide();
+        console.log("bamTrack.draw");
+
+        this.popover.hidePopover();
 
         // Don't try to draw alignments for windows > 10kb
         if (bpEnd - bpStart > 30000) {

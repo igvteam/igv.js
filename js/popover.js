@@ -50,6 +50,11 @@ var igv = (function (igv) {
 
     };
 
+    igv.Popover.prototype.hidePopover = function () {
+
+        $(this.popoverDiv).hide();
+    };
+
     igv.Popover.prototype.onmousedown = function (event, dx, dy) {
 
         this.mouseDownX = dx;
@@ -64,16 +69,34 @@ var igv = (function (igv) {
         var threshX = dx - this.mouseDownX,
             threshY = dy - this.mouseDownY,
             thresh,
-            genomicLocation = this.trackView.genomicCoordinateWithEventTap(event),
+            genomicLocation,
             trackType,
             base,
             refSeqIndex,
-            alignmentManager = this.trackView.track.featureSource.alignmentManager,
-            coverageMap = alignmentManager.coverageMap,
-            refSeq = coverageMap.refSeq,
+            alignmentManager,
+            coverageMap,
+            refSeq,
             featureDetails;
 
 //        trackType = (this.trackView.track instanceof igv.BAMTrack) ? "BAMTrack " : "UnknownTrack";
+
+        alignmentManager = this.trackView.track.featureSource.alignmentManager;
+        if (!alignmentManager) {
+            return;
+        }
+
+        if (!alignmentManager.coverageMap) {
+            return;
+        }
+
+        coverageMap = alignmentManager.coverageMap;
+        refSeq = coverageMap.refSeq;
+        genomicLocation = this.trackView.genomicCoordinateWithEventTap(event);
+
+
+
+
+
 
         refSeqIndex = genomicLocation - coverageMap.bpStart;
         base = refSeq[ refSeqIndex ];
