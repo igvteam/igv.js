@@ -344,6 +344,16 @@ var igv = (function (igv) {
 
     igv.TrackView.prototype.genomicCoordinateWithEventTap = function (event) {
 
+        var alignmentManager = this.track.featureSource.alignmentManager;
+
+        if (!alignmentManager) {
+            return undefined;
+        }
+
+        if (!alignmentManager.coverageMap) {
+            return undefined;
+        }
+
         var pixels = event.clientX - $(this.canvas).offset().left;
 
         // Add one to convert from 0-based internal coords. to 1-based genomic coords.

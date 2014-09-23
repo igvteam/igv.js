@@ -141,6 +141,10 @@ var igv = (function (igv) {
         var first = alignment.blocks[ 0 ],
             last  = alignment.blocks[ alignment.blocks.length - 1 ];
 
+        if (undefined === last) {
+            console.log("not good");
+        }
+
         return (last.start + last.len) - first.start;
     };
 

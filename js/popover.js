@@ -70,40 +70,19 @@ var igv = (function (igv) {
             threshY = dy - this.mouseDownY,
             thresh,
             genomicLocation,
-            base,
-            refSeqIndex,
-            alignmentManager,
-            coverageMap,
-            refSeq,
             featureDetails;
 
-        alignmentManager = this.trackView.track.featureSource.alignmentManager;
-        if (!alignmentManager) {
-            return;
-        }
-
-        if (!alignmentManager.coverageMap) {
-            return;
-        }
-
-        coverageMap = alignmentManager.coverageMap;
-        refSeq = coverageMap.refSeq;
         genomicLocation = this.trackView.genomicCoordinateWithEventTap(event);
-
-
-
-
-
-
-        refSeqIndex = genomicLocation - coverageMap.bpStart;
-        base = refSeq[ refSeqIndex ];
+        if (undefined === genomicLocation) {
+            return;
+        }
 
         featureDetails = this.trackView.track.featureDetailsWithHitTest(genomicLocation, dy);
 
         thresh = Math.floor( Math.sqrt(threshX * threshX + threshY * threshY) );
         if (featureDetails && thresh < 6) {
 
-            this.popoverContentDiv.innerHTML  = featureDetails + "<br>";
+            this.popoverContentDiv.innerHTML  = featureDetails;
 
             $(this.popoverDiv).css({
                 "left": popupx + "px",
