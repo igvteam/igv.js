@@ -70,15 +70,12 @@ var igv = (function (igv) {
             threshY = dy - this.mouseDownY,
             thresh,
             genomicLocation,
-            trackType,
             base,
             refSeqIndex,
             alignmentManager,
             coverageMap,
             refSeq,
             featureDetails;
-
-//        trackType = (this.trackView.track instanceof igv.BAMTrack) ? "BAMTrack " : "UnknownTrack";
 
         alignmentManager = this.trackView.track.featureSource.alignmentManager;
         if (!alignmentManager) {

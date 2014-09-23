@@ -38,7 +38,7 @@ var igv = (function (igv) {
 
     igv.BAMTrack.prototype.draw = function (canvas, refFrame, bpStart, bpEnd, width, height, continuation, task) {
 
-        console.log("bamTrack.draw");
+//        console.log("bamTrack.draw");
 
         this.popover.hidePopover();
 
@@ -57,7 +57,7 @@ var igv = (function (igv) {
 
             if (alignmentManager) {
 
-                console.log("bamTrack.featureSource.getSequence", chr, igv.numberFormatter(bpStart), igv.numberFormatter(bpEnd));
+//                console.log("bamTrack.featureSource.getSequence", chr, igv.numberFormatter(bpStart), igv.numberFormatter(bpEnd));
 
                 igv.sequenceSource.getSequence(chr, bpStart, bpEnd, function (refSeq) {
 

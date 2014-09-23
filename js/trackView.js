@@ -12,8 +12,6 @@ var igv = (function (igv) {
         var viewportHeight,
             viewportDiv,
             trackDiv,
-            popoverDiv,
-            popoverCloseDiv,
             controlDiv,
             contentHeight,
             contentDiv,
@@ -22,6 +20,7 @@ var igv = (function (igv) {
             closeButton,
             labelButton,
             trackFilterButtonDiv,
+            popup,
             rootObject = $(".igv-root-div");
 
         viewportHeight = track.height;
@@ -90,12 +89,7 @@ var igv = (function (igv) {
         canvas.setAttribute('height', contentHeight);
 
         if (this.track.doPopup && true === this.track.doPopup) {
-
-//            this.popover = new igv.Popover(this);
-//            this.track.popover = this.popover;
-
-            rootObject[0].popover = new igv.Popover(rootObject[0], this);
-            this.track.popover = rootObject[0].popover;
+              this.track.popover = new igv.Popover(rootObject[0], this);
         }
 
         // filter  -- CURSOR only for now
@@ -264,15 +258,10 @@ var igv = (function (igv) {
 
             canvas.onmousedown = function (e) {
 
-//                var dx = (e.clientX + $(window).scrollLeft()) - canvasObject.offset().left;
-//                var dy = (e.clientY + $(window).scrollTop())  - canvasObject.offset().top;
-
-                var dx = e.offsetX,
-                    dy = e.offsetY,
-                    ppx = canvasObject.offset().left - rootObject.offset().left,
+                var ppx = canvasObject.offset().left - rootObject.offset().left,
                     ppy = canvasObject.offset().top - rootObject.offset().top;
 
-                console.log("e.offsetX " + e.offsetX + " e.offsetY " + e.offsetY + " popup x " + (ppx + e.offsetX) + " popup y " + (ppy + e.offsetY));
+//                console.log("e.offsetX " + e.offsetX + " e.offsetY " + e.offsetY + " popup x " + (ppx + e.offsetX) + " popup y " + (ppy + e.offsetY));
 
                 if (trackView.track.popover) {
                     trackView.track.popover.onmousedown(e, e.offsetX, e.offsetY, e.offsetX + ppx, e.offsetY + ppy);
@@ -318,12 +307,7 @@ var igv = (function (igv) {
 
             canvas.onmouseup = function (e) {
 
-//                var dx = (e.clientX + $(window).scrollLeft()) - canvasObject.offset().left;
-//                var dy = (e.clientY + $(window).scrollTop())  - canvasObject.offset().top;
-
-                var dx = e.offsetX,
-                    dy = e.offsetY,
-                    ppx = canvasObject.offset().left - rootObject.offset().left,
+                var ppx = canvasObject.offset().left - rootObject.offset().left,
                     ppy = canvasObject.offset().top - rootObject.offset().top;
 
                 if (trackView.track.popover) {
@@ -341,12 +325,8 @@ var igv = (function (igv) {
 
             canvas.ondblclick = function (e) {
 
-//                var dx = e.clientX - $(canvas).offset().left;
-//                var dy = e.clientY - $(canvas).offset().top;
-
-                // compensate for scroll
-                var dx = (e.clientX + $(window).scrollLeft()) - canvasObject.offset().left;
-                var dy = (e.clientY + $(window).scrollTop())  - canvasObject.offset().top;
+                var dx = e.offsetX,
+                    dy = e.offsetY;
 
                 if (trackView.track.handleDblClick) {
                     trackView.track.handleDblClick(dx, dy, trackView.viewportDiv);

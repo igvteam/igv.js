@@ -23,7 +23,7 @@ var igv = (function (igv) {
      */
     igv.GeneTrack.prototype.draw = function (canvas, refFrame, bpStart, bpEnd, pixelWidth, pixelHeight, continuation, task) {
 
-        console.log("geneTrack.draw " + refFrame.chr);
+//        console.log("geneTrack.draw " + refFrame.chr);
 
         var chr,
             len,
@@ -56,7 +56,7 @@ var igv = (function (igv) {
 
                 len = featureList.length;
 
-                console.log("geneTrack.featureSource.getFeatures " + featureList.length);
+//                console.log("geneTrack.featureSource.getFeatures " + featureList.length);
 
                 canvas.setProperties({fillStyle: "rgb(150,150,150)", strokeStyle: "rgb(150,150,150)"});
 

@@ -123,7 +123,7 @@ var igv = (function (igv) {
             });
         });
 
-        console.log("CoverageMap - chr " + this.chr + " start " + igv.numberFormatter(this.bpStart) + " length " + igv.numberFormatter(this.length));
+//        console.log("CoverageMap - chr " + this.chr + " start " + igv.numberFormatter(this.bpStart) + " length " + igv.numberFormatter(this.length));
 
     };
 
