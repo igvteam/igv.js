@@ -6,7 +6,7 @@ var igv = (function (igv) {
             contentHeader = $('<div class="row"></div>')[0],
             contentHeaderDiv = $('<div id="igvHeaderDiv" class="col-md-12" style="font-size:16px;"><span id="igvHeaderRegionDisplaySpan"></span></div>')[0],
             trackContainer = $('<div id="igvTrackContainerDiv" class="igv-track-container-div">')[0],
-            horizontalScrollBar = $('<div id="cursorHorizontalScrollBar" class="igv-horizontal-scrollbar-div">')[0];
+            horizontalScrollBar = $('<div class="igv-horizontal-scrollbar-container-div">')[0];
 
         // DOM
         $(trackContainer).append(horizontalScrollBar);

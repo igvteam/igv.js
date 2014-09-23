@@ -139,6 +139,7 @@ var igv = (function (igv) {
     igv.Browser.prototype.layoutTrackPanels = function (trackPanels) {
 
         var changingRootHeight = 0;
+
         trackPanels.forEach(function (tp, index, tps) {
 
             if (0 === index) {
@@ -153,10 +154,8 @@ var igv = (function (igv) {
 
         if (this.cursorModel) {
 
-//            console.log("vertical origin " + changingRootHeight);
-
-            $("#cursorHorizontalScrollBar").css({
-                "top" : changingRootHeight + "px"
+            $(".igv-horizontal-scrollbar-container-div").css({
+                "top"   : changingRootHeight + "px"
             });
 
         }

@@ -105,12 +105,12 @@ input[type='file'] {
     background-color: green;
 }
 
-.igv-horizontal-scrollbar-div {
+.igv-horizontal-scrollbar-container-div {
     position: absolute;
     top: 0;
-    left: 0;
+    left:0;
     height:50px;
-    width: 100%;
+    width:100%;
     z-index: 500;
     background-color: red;
 }
