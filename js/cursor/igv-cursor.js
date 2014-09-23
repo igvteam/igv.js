@@ -197,10 +197,29 @@ var igv = (function (igv) {
             initCursor();
 
             window.onresize = throttle(function () {
-                if (browser.ideoPanel) browser.ideoPanel.resize();
+
+                var trackDivWidth,
+                    viewportDivWidth,
+                    percent;
+
+                if (browser.ideoPanel) {
+                    browser.ideoPanel.resize();
+                }
+
                 browser.trackPanels.forEach(function (panel) {
                     panel.resize();
-                })
+                });
+
+                if (browser.cursorModel) {
+
+                    percent = 100.0 * ($(".igv-viewport-div").first().width()/$(".igv-track-div").first().width());
+                    $(".igv-horizontal-scrollbar-div").css({
+                        "width" : percent + "%"
+                    });
+
+                }
+
+
             }, 10);
 
             function initCursor() {
