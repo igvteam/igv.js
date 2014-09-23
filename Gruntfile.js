@@ -21,6 +21,18 @@ module.exports = function (grunt) {
             }
         },
 
+        cssmin: {
+            igv: {
+                files: {
+                    'dist/igv-all.min.css': [
+                        'css/igv.css',
+                        'css/popover.css'
+                    ],
+                }
+
+            }
+        },
+
         uglify: {
             options: {
                 mangle: false
@@ -36,13 +48,12 @@ module.exports = function (grunt) {
 
     // 3. Where we tell Grunt we plan to use this plug-in.
     grunt.loadNpmTasks('grunt-contrib-concat');
-
-
     grunt.loadNpmTasks('grunt-contrib-uglify');
+    grunt.loadNpmTasks('grunt-contrib-cssmin');
 
     // 4. Where we tell Grunt what to do when we type "grunt" into the terminal.
     //grunt.registerTask('default', ['concat:igvexp', 'uglify:igvexp']);
-    grunt.registerTask('default', ['concat:igv', 'uglify:igv']);
+    grunt.registerTask('default', ['concat:igv', 'uglify:igv', 'cssmin:igv']);
 
 
 };

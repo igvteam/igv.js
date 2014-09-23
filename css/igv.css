@@ -1,20 +1,6 @@
-/* Move down content because we have a fixed navbar that is 50px tall */
-body {
-    padding-top: 50px;
-    padding-bottom: 20px;
-}
-
 /* A hack to remove the unwanted "No File Chosen" text from the file upload button */
 input[type='file'] {
     width: 82px;
-}
-
-.well {
-    background-color: rgba(255, 0, 0, 0.5);
-}
-
-.row {
-    text-align: center
 }
 
 .btn-file {
@@ -38,36 +24,129 @@ input[type='file'] {
     display: block;
 }
 
-.spacer5 { height: 5px; width: 100%; font-size: 0; margin: 0; padding: 0; border: 0; display: block; }
-.spacer10 { height: 10px; width: 100%; font-size: 0; margin: 0; padding: 0; border: 0; display: block; }
-.spacer15 { height: 15px; width: 100%; font-size: 0; margin: 0; padding: 0; border: 0; display: block; }
-.spacer20 { height: 20px; width: 100%; font-size: 0; margin: 0; padding: 0; border: 0; display: block; }
-.spacer25 { height: 25px; width: 100%; font-size: 0; margin: 0; padding: 0; border: 0; display: block; }
-.spacer30 { height: 30px; width: 100%; font-size: 0; margin: 0; padding: 0; border: 0; display: block; }
-.spacer35 { height: 35px; width: 100%; font-size: 0; margin: 0; padding: 0; border: 0; display: block; }
-.spacer40 { height: 40px; width: 100%; font-size: 0; margin: 0; padding: 0; border: 0; display: block; }
-.spacer45 { height: 45px; width: 100%; font-size: 0; margin: 0; padding: 0; border: 0; display: block; }
-.spacer50 { height: 50px; width: 100%; font-size: 0; margin: 0; padding: 0; border: 0; display: block; }
-.spacer100 { height: 100px; width: 100%; font-size: 0; margin: 0; padding: 0; border: 0; display: block; }
-.spacer200 { height: 200px; width: 100%; font-size: 0; margin: 0; padding: 0; border: 0; display: block; }
-
-.igv-gtex-root-div {
+.spacer5 {
+    height: 5px;
+    width: 100%;
+    font-size: 0;
+    margin: 0;
+    padding: 0;
+    border: 0;
     display: block;
-    position: relative;
-    left: 0px;
-    right: 0px;
 }
 
-.igv-gtex-control-div {
-    position: absolute;
-    left: 0px;
-    right: 0px;
-    height: 20;
-    background-color: darkcyan;
+.spacer10 {
+    height: 10px;
+    width: 100%;
+    font-size: 0;
+    margin: 0;
+    padding: 0;
+    border: 0;
+    display: block;
+}
+
+.spacer15 {
+    height: 15px;
+    width: 100%;
+    font-size: 0;
+    margin: 0;
+    padding: 0;
+    border: 0;
+    display: block;
+}
+
+.spacer20 {
+    height: 20px;
+    width: 100%;
+    font-size: 0;
+    margin: 0;
+    padding: 0;
+    border: 0;
+    display: block;
+}
+
+.spacer25 {
+    height: 25px;
+    width: 100%;
+    font-size: 0;
+    margin: 0;
+    padding: 0;
+    border: 0;
+    display: block;
+}
+
+.spacer30 {
+    height: 30px;
+    width: 100%;
+    font-size: 0;
+    margin: 0;
+    padding: 0;
+    border: 0;
+    display: block;
+}
+
+.spacer35 {
+    height: 35px;
+    width: 100%;
+    font-size: 0;
+    margin: 0;
+    padding: 0;
+    border: 0;
+    display: block;
+}
+
+.spacer40 {
+    height: 40px;
+    width: 100%;
+    font-size: 0;
+    margin: 0;
+    padding: 0;
+    border: 0;
+    display: block;
+}
+
+.spacer45 {
+    height: 45px;
+    width: 100%;
+    font-size: 0;
+    margin: 0;
+    padding: 0;
+    border: 0;
+    display: block;
+}
+
+.spacer50 {
+    height: 50px;
+    width: 100%;
+    font-size: 0;
+    margin: 0;
+    padding: 0;
+    border: 0;
+    display: block;
+}
+
+.spacer100 {
+    height: 100px;
+    width: 100%;
+    font-size: 0;
+    margin: 0;
+    padding: 0;
+    border: 0;
+    display: block;
+}
+
+.spacer200 {
+    height: 200px;
+    width: 100%;
+    font-size: 0;
+    margin: 0;
+    padding: 0;
+    border: 0;
+    display: block;
 }
 
 .igv-root-div {
-    position: absolute;
+
+    position: relative;
     margin-left: 10px;
     margin-right: 10px;
     left: 0;
@@ -77,7 +156,7 @@ input[type='file'] {
     -moz-box-sizing: border-box;
     box-sizing: border-box;
 
-    -webkit-tap-highlight-color: rgba(0,0,0,0);
+    -webkit-tap-highlight-color: rgba(0, 0, 0, 0);
 
     -webkit-touch-callout: none;
 
@@ -89,7 +168,7 @@ input[type='file'] {
 
 .igv-header-div {
     position: absolute;
-    top:40px;
+    top: 40px;
     left: 0;
     right: 0;
     /*background-color: darkseagreen;*/
@@ -98,7 +177,7 @@ input[type='file'] {
 .igv-track-container-div {
     position: absolute;
     left: 0;
-    top:80px;
+    top: 80px;
     right: 0;
     font-family: Arial, Helvetica, sans-serif;
     font-size: medium;
@@ -118,7 +197,7 @@ input[type='file'] {
     left: 0;
     width: 50px;
     height: 100%;
-    border:none;
+    border: none;
     padding: 0;
     background: none;
 }
@@ -143,7 +222,7 @@ input[type='file'] {
     top: 0;
     left: 0;
     width: 100px;
-    border:none;
+    border: none;
     padding: 0;
     background: none;
     outline: thin solid rgba(64, 64, 64, 1.0);
@@ -153,7 +232,7 @@ input[type='file'] {
     position: absolute;
     top: 0;
     left: 0;
-    border:none;
+    border: none;
     padding: 0;
     background: none;
 }
@@ -161,7 +240,7 @@ input[type='file'] {
 .igv-filter-div {
     position: absolute;
     width: 128px;
-    border:none;
+    border: none;
     padding: 0;
     height: 100%;
     background: none;
@@ -170,7 +249,7 @@ input[type='file'] {
 .igv-filter-button {
     position: absolute;
     width: 128px;
-    border:none;
+    border: none;
     padding: 0;
     height: 100%;
     background: none;
@@ -181,11 +260,10 @@ input[type='file'] {
     left: 0;
     width: 128px;
     height: 2px;
-    border:none;
+    border: none;
     padding: 0;
     background-color: rgba(255, 0, 0, .75);
 }
-
 
 #dropdown-list {
     max-height: 200px;
@@ -195,13 +273,13 @@ input[type='file'] {
     left: 50px;
 }
 
-
 /* Some experimental classes,  */
 .cursor-btn-default {
     color: #333;
     background-color: #fff;
     border-color: #357ebd;
 }
+
 .cursor-btn-default:hover,
 .cursor-btn-default:focus,
 .cursor-btn-default:active,
@@ -211,12 +289,12 @@ input[type='file'] {
     background-color: #ebebeb;
     border-color: #357ebd;
 }
+
 .cursor-btn-selected {
     color: #333;
     background-color: #ebebeb;
     border-color: #357ebd;
 }
-
 
 .btn-cursor-selected {
     color: #ffffff;
@@ -264,7 +342,6 @@ fieldset[disabled] .btn-cursor-selected.active {
     background-color: #ffffff;
 }
 
-
 .btn-cursor-deselected {
     color: #000000;
     background-color: #FFFFFF;
@@ -310,6 +387,7 @@ fieldset[disabled] .btn-cursor-deselected.active {
     color: #FFFFFF;
     background-color: #000000;
 }
+
 
 
 

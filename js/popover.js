@@ -23,14 +23,14 @@ var igv = (function (igv) {
             popoverDiv = popoverDiv;
 
             popoverDiv.id = "popover_" + igv.guid();
-            popoverDiv.className = "popover";
+            popoverDiv.className = "igv-popover";
 
             // popover content
             popoverContentDiv = document.createElement("div");
             popoverDiv.appendChild(popoverContentDiv);
             popoverContentDiv = popoverContentDiv;
 
-            popoverContentDiv.className = "popoverContent";
+            popoverContentDiv.className = "igv-popoverContent";
             popoverContentDiv.innerHTML = "blah blah";
 
             // popover close
@@ -38,7 +38,7 @@ var igv = (function (igv) {
             popoverDiv.appendChild(popoverCloseDiv);
             popoverCloseDiv = popoverCloseDiv;
 
-            popoverCloseDiv.className = "popoverClose";
+            popoverCloseDiv.className = "igv-popoverClose";
             popoverCloseDiv.innerHTML = "x";
 
             popoverCloseDiv.onclick = function (e) {

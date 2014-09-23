@@ -1,5 +1,6 @@
 
-.popover {
+
+.igv-popover {
     position: absolute;
     top: 0;
     left: 0;
@@ -16,7 +17,7 @@
     display: none;
 }
 
-.popoverContent {
+.igv-popoverContent {
     position: absolute;
     top: 5px;
     left: 5px;
@@ -25,11 +26,11 @@
     background: #fff;
 }
 
-.popoverContent .popoverContentSpan {
+.igv-popoverContent .popoverContentSpan {
     font-weight: bold;
 }
 
-.popoverClose {
+.igv-popoverClose {
     position: absolute;
     top: 4px;
     right:4px;
@@ -48,9 +49,8 @@
     text-align:center;
 }
 
-.popoverClose:hover {
+.igv-popoverClose:hover {
     color: #fff;
     border: 2px solid #e00;
     background-color: #e00;
 }
-
