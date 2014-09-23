@@ -298,6 +298,10 @@ var igv = (function (igv) {
             coverageMapIndex = genomicLocation - coverageMap.bpStart;
             coverage = coverageMap.coverage[ coverageMapIndex ];
 
+            if (undefined === coverage) {
+                return undefined;
+            }
+
             markup   = "<span class=\"popoverContentSpan\">Total Count</span> " + coverage.total + "<br>";
 
             // A

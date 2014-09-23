@@ -138,23 +138,33 @@ var igv = (function (igv) {
 
     igv.AlignmentManager.prototype.alignmentBlocksBBoxLength = function(alignment) {
 
-        var first = alignment.blocks[ 0 ],
-            last  = alignment.blocks[ alignment.blocks.length - 1 ];
+        var first,
+            last;
 
-        if (undefined === last) {
-            console.log("not good");
+        if (0 === alignment.blocks.length) {
+            return undefined;
         }
+
+        first = alignment.blocks[ 0 ];
+        last  = alignment.blocks[ alignment.blocks.length - 1 ];
 
         return (last.start + last.len) - first.start;
     };
 
     igv.AlignmentManager.prototype.alignmentBlockHitTest = function(alignment, genomicLocation) {
 
-        var loc = igv.numberFormatter(genomicLocation),
-            ss = igv.numberFormatter(alignment.start),
-            ee = igv.numberFormatter(alignment.start + this.alignmentBlocksBBoxLength(alignment)),
-            alignmentBlocksBBoxLength = this.alignmentBlocksBBoxLength(alignment),
+        var alignmentBlocksBBoxLength,
             readChar;
+
+        if (0 === alignment.blocks.length) {
+            return undefined;
+        }
+
+        alignmentBlocksBBoxLength = this.alignmentBlocksBBoxLength(alignment);
+
+        if (undefined === alignmentBlocksBBoxLength) {
+            return undefined;
+        }
 
         if ((alignment.start + alignmentBlocksBBoxLength) < genomicLocation) {
             return undefined;
