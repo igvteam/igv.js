@@ -40,7 +40,7 @@ var igv = (function (igv) {
 
 //        console.log("bamTrack.draw");
 
-        this.popover.hidePopover();
+//        this.popover.hide();
 
         // Don't try to draw alignments for windows > 10kb
         if (bpEnd - bpStart > 30000) {
@@ -272,7 +272,7 @@ var igv = (function (igv) {
         // draw label stuff
     };
 
-    igv.BAMTrack.prototype.featureDetailsWithHitTest = function (genomicLocation, yOffset) {
+    igv.BAMTrack.prototype.popupString = function (genomicLocation, yOffset) {
 
         var alignmentManager = this.featureSource.alignmentManager,
             coverageMap = alignmentManager.coverageMap,

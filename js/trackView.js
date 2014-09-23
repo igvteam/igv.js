@@ -41,22 +41,22 @@ var igv = (function (igv) {
 
         this.controlDiv = controlDiv;
 
-       // if (browser.type === "GTEX") {
-            var controlWidth = controlDiv.clientWidth;
-            var controlHeight = controlDiv.clientHeight;
+        // if (browser.type === "GTEX") {
+        var controlWidth = controlDiv.clientWidth;
+        var controlHeight = controlDiv.clientHeight;
 
-            var controlCanvas = document.createElement('canvas');
-            controlDiv.appendChild(controlCanvas);
-            controlCanvas.style.position = 'absolute';
-            controlCanvas.style.width = controlWidth + "px";
-            controlCanvas.style.height = controlHeight + "px";
-            controlCanvas.setAttribute('width', controlWidth);
-            controlCanvas.setAttribute('height', controlHeight);
-            this.controlCanvas = controlCanvas;
-            this.controlCtx = controlCanvas.getContext("2d");
+        var controlCanvas = document.createElement('canvas');
+        controlDiv.appendChild(controlCanvas);
+        controlCanvas.style.position = 'absolute';
+        controlCanvas.style.width = controlWidth + "px";
+        controlCanvas.style.height = controlHeight + "px";
+        controlCanvas.setAttribute('width', controlWidth);
+        controlCanvas.setAttribute('height', controlHeight);
+        this.controlCanvas = controlCanvas;
+        this.controlCtx = controlCanvas.getContext("2d");
 
 
-    //    }
+        //    }
 
         // TODO - dat - this is so nothing breaks that is dependent on igv.controlPanelWidth
         igv.controlPanelWidth = controlDiv.clientWidth;
@@ -88,8 +88,8 @@ var igv = (function (igv) {
         canvas.setAttribute('width', contentWidth);    //Must set the width & height of the canvas
         canvas.setAttribute('height', contentHeight);
 
-        if (this.track.doPopup && true === this.track.doPopup) {
-              this.track.popover = new igv.Popover(rootObject[0], this);
+        if (this.track.popupString) {
+            this.track.popover = new igv.Popover(rootObject[0], this);
         }
 
         // filter  -- CURSOR only for now
@@ -191,7 +191,7 @@ var igv = (function (igv) {
 
                 labelButton.onclick = function () {
 
-                    if(browser.cursorModel) {
+                    if (browser.cursorModel) {
                         track.featureSource.allFeatures(function (featureList) {
 
                             browser.referenceFrame.start = 0;
@@ -250,11 +250,13 @@ var igv = (function (igv) {
 
         function addTrackHandlers(trackView) {
 
-            var isMouseDown = false;
-            var lastMouseX = undefined;
-            var referenceFrame = trackView.browser.referenceFrame;
-            var canvasObject = $(trackView.canvas);
-            var canvas = trackView.canvas;
+            var isMouseDown = false,
+                lastMouseX = undefined,
+                mouseDownX = undefined,
+                referenceFrame = trackView.browser.referenceFrame,
+                canvasObject = $(trackView.canvas),
+                canvas = trackView.canvas,
+                dragThreshold = 3;
 
             canvas.onmousedown = function (e) {
 
@@ -264,37 +266,28 @@ var igv = (function (igv) {
 //                console.log("e.offsetX " + e.offsetX + " e.offsetY " + e.offsetY + " popup x " + (ppx + e.offsetX) + " popup y " + (ppy + e.offsetY));
 
                 if (trackView.track.popover) {
-                    trackView.track.popover.onmousedown(e, e.offsetX, e.offsetY, e.offsetX + ppx, e.offsetY + ppy);
+                    trackView.track.popover.hide();
                 }
 
                 isMouseDown = true;
-                lastMouseX = e.offsetX;
+                lastMouseX = e.clientX - $(canvas).offset().left;
+                mouseDownX = e.clientX - $(canvas).offset().left;
 
             };
 
             canvas.onmousemove = throttle(function (e) {
+
                 var dx = e.clientX - $(canvas).offset().left;
 
                 if (isMouseDown) {
 
-                    if (lastMouseX) {
+                    if (mouseDownX && Math.abs(dx - mouseDownX) > dragThreshold) {
 
                         referenceFrame.shiftPixels(lastMouseX - dx);
 
                         if (referenceFrame.start < 0) {
                             referenceFrame.start = 0;
                         }
-
-//                        if (igv.genome) {
-//                            var chromosome = igv.genome.getChromosome(igv.referenceFrame.chr);
-//                            var widthBP = Math.round((igv.trackWidth - igv.labelWidth) * igv.referenceFrame.bpPerPixel);
-//                            var endBP = igv.referenceFrame.start + widthBP;
-//                            if (chromosome && endBP > chromosome.bpLength) {
-//                                if (endBP > chromosome.length) {
-//                                    igv.referenceFrame.start = chromosome.bpLength - widthBP;
-//                                }
-//                            }
-//                        }
 
                     }
 
@@ -307,20 +300,34 @@ var igv = (function (igv) {
 
             canvas.onmouseup = function (e) {
 
-                var ppx = canvasObject.offset().left - rootObject.offset().left,
-                    ppy = canvasObject.offset().top - rootObject.offset().top;
+                var dx = e.clientX - $(canvas).offset().left,
+                    ppx = canvasObject.offset().left - rootObject.offset().left,
+                    ppy = canvasObject.offset().top - rootObject.offset().top,
+                    genomicLocation,
+                    featureDetails;
 
-                if (trackView.track.popover) {
-                    trackView.track.popover.onmouseup(e, e.offsetX, e.offsetY, e.offsetX + ppx, e.offsetY + ppy);
+                if (Math.abs(dx - mouseDownX) <= dragThreshold && trackView.track.popupString) {
+
+                    var genomicLocation = trackView.genomicCoordinateWithEventTap(event);
+                    if (undefined === genomicLocation) {
+                        return;
+                    }
+
+                    featureDetails = trackView.track.popupString(genomicLocation, e.offsetY);
+                    if (featureDetails) {
+                        trackView.track.popover.show(e.offsetX + ppx, e.offsetY + ppy, featureDetails);
+                    }
                 }
 
                 isMouseDown = false;
                 lastMouseX = undefined;
+                mouseDownX = undefined;
             };
 
             canvas.onmouseout = function (e) {
                 isMouseDown = false;
                 lastMouseX = undefined;
+                mouseDownX = undefined;
             };
 
             canvas.ondblclick = function (e) {
@@ -357,7 +364,7 @@ var igv = (function (igv) {
         var pixels = event.clientX - $(this.canvas).offset().left;
 
         // Add one to convert from 0-based internal coords. to 1-based genomic coords.
-        return Math.floor( (this.browser.referenceFrame.start) + this.browser.referenceFrame.toBP(pixels) );
+        return Math.floor((this.browser.referenceFrame.start) + this.browser.referenceFrame.toBP(pixels));
 
     };
 
@@ -447,9 +454,9 @@ var igv = (function (igv) {
             }
             this.currentTask = {
                 canceled: false,
-                abort: function() {
+                abort: function () {
                     this.canceled = true;
-                    if(this.xhrRequest) {
+                    if (this.xhrRequest) {
                         this.xhrRequest.abort();
                     }
                     spinner.stop();
@@ -462,7 +469,7 @@ var igv = (function (igv) {
 
                     spinner.stop();
 
-                    if(task) console.log(task.canceled);
+                    if (task) console.log(task.canceled);
 
                     if (!(task && task.canceled)) {
                         panel.tile = new Tile(chr, tileStart, tileEnd, scale, buffer);
