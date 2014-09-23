@@ -138,7 +138,11 @@ var igv = (function (igv) {
 
     igv.Browser.prototype.layoutTrackPanels = function (trackPanels) {
 
-        var changingRootHeight = 0;
+        var percent,
+            trackDivWidth,
+            controlDivWidth,
+            viewportDivWidth,
+            changingRootHeight = 0;
 
         trackPanels.forEach(function (tp, index, tps) {
 
@@ -154,8 +158,17 @@ var igv = (function (igv) {
 
         if (this.cursorModel) {
 
+            trackDivWidth = $(".igv-track-div").first().width();
+            controlDivWidth = $(".igv-control-div").first().width();
+            viewportDivWidth = $(".igv-viewport-div").first().width();
+
+            percent = Math.floor( 100.0 * (viewportDivWidth/trackDivWidth) );
             $(".igv-horizontal-scrollbar-container-div").css({
-                "top"   : changingRootHeight + "px"
+                "top" : changingRootHeight + "px"
+            });
+
+            $(".igv-horizontal-scrollbar-div").css({
+                "width" : percent + "%"
             });
 
         }

@@ -443,8 +443,6 @@ var igv = (function (igv) {
 
         if (!this.tile || !this.tile.containsRange(chr, startBP, endBP, scale)) {
 
-            var contentDiv = this.contentDiv;
-
             buffer = document.createElement('canvas');
             buffer.width = 3 * this.canvas.width;
             buffer.height = this.canvas.height;
