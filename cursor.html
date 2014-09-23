@@ -205,12 +205,8 @@
 
     $(document).ready(function () {
 
-        var browser;
+        var browser = igv.createCursorBrowser();
 
-        // Build CURSOR browser
-        browser = igv.createCursorBrowser();
-
-        // Launch
         browser.startup();
 
     });
