@@ -21,7 +21,7 @@ var igv = (function (igv) {
 
             igv.sequenceSource.getSequence(chr, tileStart, tileEnd, function (sequence) {
 
-                console.log(chr, igv.numberFormatter(tileStart), igv.numberFormatter(tileEnd), " SEQ");
+//                console.log("squenceTrack - igv.sequenceSource.getSequence", chr, igv.numberFormatter(tileStart), igv.numberFormatter(tileEnd));
 
                 if (sequence) {
 

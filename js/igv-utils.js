@@ -1,5 +1,9 @@
 var igv = (function (igv) {
 
+    igv.domElementRectAsString = function (element) {
+        return " x " + element.clientLeft + " y " + element.clientTop + " w " + element.clientWidth + " h " + element.clientHeight;
+    };
+
     igv.isNumber = function (n) {
 
         if ("" === n) {

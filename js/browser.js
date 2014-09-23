@@ -28,6 +28,7 @@ var igv = (function (igv) {
         });
 
         if (true === attemptedDuplicateTrackAddition) {
+
             window.alert("Attempt to load duplicate track.");
             return;
         }
@@ -65,40 +66,40 @@ var igv = (function (igv) {
      */
     igv.Browser.prototype.addTrack = function (track, position) {
 
-        var trackPanel = new igv.TrackView(track, this);
+        var trackView = new igv.TrackView(track, this);
 
-        if (trackPanel.track instanceof igv.EqtlTrack) {
-            trackPanel.trackDiv.style.height = this.trackHeight + "px";
-            trackPanel.canvas.height = this.trackHeight;
-            trackPanel.canvas.style.height = this.trackHeight + "px";
-            trackPanel.controlDiv.style.height = this.trackHeight + "px";
-            trackPanel.controlCanvas.height = this.trackHeight;
-            trackPanel.controlCanvas.style.height = this.trackHeight + "px";
-            trackPanel.viewportDiv.style.height = this.trackHeight + "px";
+        if (trackView.track instanceof igv.EqtlTrack) {
+            trackView.trackDiv.style.height = this.trackHeight + "px";
+            trackView.canvas.height = this.trackHeight;
+            trackView.canvas.style.height = this.trackHeight + "px";
+            trackView.controlDiv.style.height = this.trackHeight + "px";
+            trackView.controlCanvas.height = this.trackHeight;
+            trackView.controlCanvas.style.height = this.trackHeight + "px";
+            trackView.viewportDiv.style.height = this.trackHeight + "px";
         }
 
-        this.trackContainerDiv.appendChild(trackPanel.trackDiv);
+        this.trackContainerDiv.appendChild(trackView.trackDiv);
 
-        trackPanel.order = track.order || this.trackPanels.length;
+        trackView.order = track.order || this.trackPanels.length;
 
-        this.trackPanels.push(trackPanel);
+        this.trackPanels.push(trackView);
 
         // Keeps the tracks in the right order and the Gene track pinned to the bottom
         this.trackPanels.sort(function (a, b) {
             var aOrder = a.order || 0;
-            var bOrder = b.order || 0
+            var bOrder = b.order || 0;
             return aOrder - bOrder;
         });
 
         this.layoutTrackPanels(this.trackPanels);
 
         if (this.cursorModel) {
-            this.cursorModel.initializeHistogram(trackPanel.track, function () {
-                trackPanel.repaint()
+            this.cursorModel.initializeHistogram(trackView.track, function () {
+                trackView.repaint()
             });
         }
         else {
-            trackPanel.repaint();
+            trackView.repaint();
         }
 
     };
@@ -161,8 +162,8 @@ var igv = (function (igv) {
         if (this.karyoPanel) {
             this.karyoPanel.repaint();
         }
-        this.trackPanels.forEach(function (panel) {
-            panel.repaint();
+        this.trackPanels.forEach(function (trackView) {
+            trackView.repaint();
         });
     };
 

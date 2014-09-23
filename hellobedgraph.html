@@ -12,17 +12,20 @@
 
     <!-- IGV Bootstrap css -->
     <link href="css/igv.css" type="text/css" rel="stylesheet">
-    <link href="css/popover.css" type="text/css" rel="stylesheet">
 
-    <!-- jquery js -->
+    <!-- qtip  css -->
+    <link href="css/jquery.qtip.min.css" type="text/css" rel="stylesheet">
+
+    <!-- jquery  js -->
     <script src="//code.jquery.com/jquery-1.11.0.min.js"></script>
 
-    <!-- Vendor js -->
+    <!-- qtip  js -->
+    <script src="vendor/jquery.qtip.min.js"></script>
+
     <script type="text/javascript" src="vendor/inflate.js"></script>
     <script type="text/javascript" src="vendor/zlib_and_gzip.min.js"></script>
 
-    <!-- IGV js -->
-    <script type="text/javascript" src="js/popover.js"></script>
+    <!-- IGV js code -->
     <script type="text/javascript" src="js/igv.js"></script>
     <script type="text/javascript" src="js/browser.js"></script>
     <script type="text/javascript" src="js/ideogram.js"></script>
@@ -38,7 +41,9 @@
     <script type="text/javascript" src="js/parseUtils.js"></script>
     <script type="text/javascript" src="js/fasta.js"></script>
     <script type="text/javascript" src="js/sequenceTrack.js"></script>
+
     <script type="text/javascript" src="js/bedGraphSource.js"></script>
+
     <script type="text/javascript" src="js/wigSource.js"></script>
     <script type="text/javascript" src="js/wigTrack.js"></script>
     <script type="text/javascript" src="js/dataloader.js"></script>
@@ -52,6 +57,7 @@
     <script type="text/javascript" src="js/bamTrack.js"></script>
     <script type="text/javascript" src="vendor/spin.js"></script>
     <script type="text/javascript" src="js/intervalTree.js"></script>
+
     <script type="text/javascript" src="js/encode/encode.js"></script>
     <script type="text/javascript" src="js/cursor/cursorTrack.js"></script>
     <script type="text/javascript" src="js/cursor/cursorModel.js"></script>
@@ -69,8 +75,7 @@
             <td><a style="color: blue;cursor: pointer"
                    onclick="igv.browser.loadTrack({
                      url: 'http://www.broadinstitute.org/igvdata/1KG/b37/data/NA06984/alignment/NA06984.mapped.ILLUMINA.bwa.CEU.low_coverage.20120522.bam',
-                     label: 'NA06984',
-                     doPopup: true
+                     label: 'NA06984'
                    })">Load
                 NA06984 BAM</a></td>
         </tr>
@@ -82,12 +87,6 @@
             <td><a style="color: blue;cursor: pointer" onclick="igv.browser.search('chr1:155,172,193-155,172,564')">
                 Goto chr1:155,172,193-155,172,564</a></td>
         </tr>
-        <tr>
-            <td>
-                   <input type="button" value="Download" onclick = "igv.download('some random text')">
-
-            </td>
-        </tr>
         <!--        <tr>
                     <td><a style="color: blue;cursor: pointer" onclick="igv.browser.zoomIn()">
                         Zoom In</a></td>
@@ -96,7 +95,10 @@
                     <td><a style="color: blue;cursor: pointer" onclick="igv.browser.zoomOut()">
                         Zoom Out</a></td>
                 </tr>-->
+
+
     </table>
+    <p/>
 </div>
 
 <script type="text/javascript">
@@ -121,7 +123,7 @@
                 })
             ]
         };
-
+        browser
         browser = igv.createBrowser(options);
         div.appendChild(browser.div);
         browser.startup();
@@ -129,6 +131,7 @@
     });
 
 </script>
+
 
 </body>
 

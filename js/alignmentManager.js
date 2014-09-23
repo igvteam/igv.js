@@ -80,7 +80,8 @@ var igv = (function (igv) {
 // packing alignments assumes a sorted list of features as input
     igv.AlignmentManager.prototype.doPackAlignments = function(bucketList, continuation) {
 
-        var allocatedCount = 0,
+        var myself = this,
+            allocatedCount = 0,
             nextStart = this.genomicInterval.features[0].start,
             alignmentRow,
             cnt,
@@ -118,7 +119,7 @@ var igv = (function (igv) {
                 }
 
                 alignmentRow.push(alignment);
-                nextStart = alignment.start + igv.alignmentBlocksBBoxLength(alignment) + alignmentSpace;
+                nextStart = alignment.start + myself.alignmentBlocksBBoxLength(alignment) + alignmentSpace;
                 ++allocatedCount;
 
             } // while (nextStart)
@@ -135,13 +136,64 @@ var igv = (function (igv) {
         continuation(this);
     };
 
-    igv.alignmentBlocksBBoxLength = function(alignment) {
+    igv.AlignmentManager.prototype.alignmentBlocksBBoxLength = function(alignment) {
 
         var first = alignment.blocks[ 0 ],
             last  = alignment.blocks[ alignment.blocks.length - 1 ];
 
+        if (undefined === last) {
+            console.log("not good");
+        }
+
         return (last.start + last.len) - first.start;
     };
+
+    igv.AlignmentManager.prototype.alignmentBlockHitTest = function(alignment, genomicLocation) {
+
+        var loc = igv.numberFormatter(genomicLocation),
+            ss = igv.numberFormatter(alignment.start),
+            ee = igv.numberFormatter(alignment.start + this.alignmentBlocksBBoxLength(alignment)),
+            alignmentBlocksBBoxLength = this.alignmentBlocksBBoxLength(alignment),
+            readChar;
+
+        if ((alignment.start + alignmentBlocksBBoxLength) < genomicLocation) {
+            return undefined;
+        }
+        else if (alignment.start > genomicLocation) {
+            return undefined;
+        } else if (0 === alignment.blocks.len) {
+            return undefined;
+        }
+
+        readChar = undefined;
+        alignment.blocks.forEach(function (block) {
+
+            var index;
+
+
+            if (undefined === readChar) {
+
+                if ("*" === block.seq) {
+                    return
+                }
+
+                if (genomicLocation < block.start) {
+                    return;
+                }
+
+                if (genomicLocation > block.start + block.seq.length) {
+                    return;
+                }
+
+                index = genomicLocation - block.start;
+                readChar = block.seq.charAt( index );
+            }
+
+        });
+
+        return readChar;
+    };
+
 
     function qualityToAlpha(quality) {
 

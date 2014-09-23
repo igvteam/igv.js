@@ -19,7 +19,9 @@ var igv = (function (igv) {
             contentWidth,
             closeButton,
             labelButton,
-            trackFilterButtonDiv;
+            trackFilterButtonDiv,
+            popup,
+            rootObject = $(".igv-root-div");
 
         viewportHeight = track.height;
 
@@ -74,7 +76,6 @@ var igv = (function (igv) {
         viewportDiv.appendChild(contentDiv);  // Note, must do this before getting width for canvas
         contentDiv.className = "igv-content-div";
         contentDiv.style.height = contentHeight + "px";
-
         this.contentDiv = contentDiv;
 
         contentWidth = contentDiv.clientWidth;
@@ -87,13 +88,15 @@ var igv = (function (igv) {
         canvas.setAttribute('width', contentWidth);    //Must set the width & height of the canvas
         canvas.setAttribute('height', contentHeight);
 
+        if (this.track.doPopup && true === this.track.doPopup) {
+              this.track.popover = new igv.Popover(rootObject[0], this);
+        }
+
         // filter  -- CURSOR only for now
         if (browser.type === "CURSOR") {
 
-//            this.track.cursorHistogram = new cursor.CursorHistogram(this.track.height, this.track.max);
             this.track.cursorHistogram = new cursor.CursorHistogram(controlDiv.clientHeight, this.track.max);
             this.track.cursorHistogram.createMarkupWithTrackPanelDiv(this);
-
         }
 
         var nextButtonTop = 5;
@@ -123,10 +126,10 @@ var igv = (function (igv) {
                     });
                 }, 100);
 
-                browser.trackPanels.forEach(function (trackPanel) {
-                    if (track !== trackPanel.track) {
-                        trackPanel.track.sortButton.className = "fa fa-bar-chart-o";
-                        trackPanel.track.sortButton.style.color = "black";
+                browser.trackPanels.forEach(function (trackView) {
+                    if (track !== trackView.track) {
+                        trackView.track.sortButton.className = "fa fa-bar-chart-o";
+                        trackView.track.sortButton.style.color = "black";
                     }
                 });
 
@@ -144,9 +147,6 @@ var igv = (function (igv) {
             trackFilterButtonDiv.className = "igv-filter-histogram-button-div";
             trackFilterButtonDiv.style.top = nextButtonTop + "px";
             trackFilterButtonDiv.style.left = "5px";
-
-//            this.track.trackFilter = new igv.TrackFilter(this);
-//            this.track.trackFilter.createTrackFilterWidgetWithParentElement(trackFilterButtonDiv);
 
             this.track.trackFilter = new igv.TrackFilter(this);
             this.track.trackFilter.createTrackFilterWidgetWithParentElement(trackFilterButtonDiv);
@@ -168,7 +168,7 @@ var igv = (function (igv) {
             closeButton.style.cursor = "pointer";
             closeButton.onclick = function () {
 
-//                removeTrackPanel(trackPanel);
+//                removeTrackView(trackView);
                 browser.removeTrack(track);
 
                 // We removed a track. This removes it's filter. Must update filter chain application
@@ -202,9 +202,9 @@ var igv = (function (igv) {
                         });
 
 
-                        browser.trackPanels.forEach(function (trackPanel) {
-                            if (track !== trackPanel.track) {
-                                trackPanel.track.labelButton.className = "btn btn-xs btn-cursor-deselected";
+                        browser.trackPanels.forEach(function (trackView) {
+                            if (track !== trackView.track) {
+                                trackView.track.labelButton.className = "btn btn-xs btn-cursor-deselected";
                             }
                         });
                     }
@@ -226,12 +226,12 @@ var igv = (function (igv) {
 
         addTrackHandlers(this);
 
-        function removeTrackPanel(trackPanel) {
+        function removeTrackView(trackView) {
 
             var array = browser.trackPanels;
-            array.splice(array.indexOf(trackPanel), 1);
+            array.splice(array.indexOf(trackView), 1);
 
-            browser.trackContainerDiv.removeChild(trackPanel.trackDiv);
+            browser.trackContainerDiv.removeChild(trackView.trackDiv);
 
             browser.rootHeight = 0;
             browser.trackPanels.forEach(function (panel) {
@@ -248,22 +248,38 @@ var igv = (function (igv) {
             }
         }
 
-        function addTrackHandlers(trackPanel) {
+        function addTrackHandlers(trackView) {
 
-            var canvas = trackPanel.canvas;
             var isMouseDown = false;
-            var lastMouseX;
-            var referenceFrame = trackPanel.browser.referenceFrame;
+            var lastMouseX = undefined;
+            var referenceFrame = trackView.browser.referenceFrame;
+            var canvasObject = $(trackView.canvas);
+            var canvas = trackView.canvas;
+
+            canvas.onmousedown = function (e) {
+
+                var ppx = canvasObject.offset().left - rootObject.offset().left,
+                    ppy = canvasObject.offset().top - rootObject.offset().top;
+
+//                console.log("e.offsetX " + e.offsetX + " e.offsetY " + e.offsetY + " popup x " + (ppx + e.offsetX) + " popup y " + (ppy + e.offsetY));
+
+                if (trackView.track.popover) {
+                    trackView.track.popover.onmousedown(e, e.offsetX, e.offsetY, e.offsetX + ppx, e.offsetY + ppy);
+                }
+
+                isMouseDown = true;
+                lastMouseX = e.offsetX;
+
+            };
 
             canvas.onmousemove = throttle(function (e) {
-
-                var mouseX = e.clientX - canvas.offsetLeft;
+                var dx = e.clientX - $(canvas).offset().left;
 
                 if (isMouseDown) {
 
                     if (lastMouseX) {
 
-                        referenceFrame.shiftPixels(lastMouseX - mouseX);
+                        referenceFrame.shiftPixels(lastMouseX - dx);
 
                         if (referenceFrame.start < 0) {
                             referenceFrame.start = 0;
@@ -279,57 +295,69 @@ var igv = (function (igv) {
 //                                }
 //                            }
 //                        }
+
                     }
 
-                    lastMouseX = mouseX;
-                    trackPanel.browser.repaint();
+                    lastMouseX = dx;
+
+                    trackView.browser.repaint();
                 }
 
             }, 20);
 
-            canvas.onmousedown = function (e) {
-
-                isMouseDown = true;
-                var mouseX = e.clientX - canvas.offsetLeft; //e.pageX - $(this).offset().left;
-                var mouseY = e.clientY - canvas.offsetTop;
-
-                this.lastMouseX = mouseX;
-
-
-            };
-
             canvas.onmouseup = function (e) {
+
+                var ppx = canvasObject.offset().left - rootObject.offset().left,
+                    ppy = canvasObject.offset().top - rootObject.offset().top;
+
+                if (trackView.track.popover) {
+                    trackView.track.popover.onmouseup(e, e.offsetX, e.offsetY, e.offsetX + ppx, e.offsetY + ppy);
+                }
+
                 isMouseDown = false;
-                lastMouseX = null;
+                lastMouseX = undefined;
             };
 
             canvas.onmouseout = function (e) {
                 isMouseDown = false;
-                lastMouseX = null;
-            };
-
-            canvas.onclick = function (e) {
-                var mouseX = e.clientX - canvas.offsetLeft; //e.pageX - $(this).offset().left;
-                var mouseY = e.clientY - canvas.offsetTop;
-
+                lastMouseX = undefined;
             };
 
             canvas.ondblclick = function (e) {
-                var mouseX = e.clientX - canvas.offsetLeft; //e.pageX - $(this).offset().left;
-                var mouseY = e.clientY - canvas.offsetTop;
 
-                if (trackPanel.track.handleDblClick) {
-                    trackPanel.track.handleDblClick(mouseX, mouseY, trackPanel.viewportDiv);
+                var dx = e.offsetX,
+                    dy = e.offsetY;
+
+                if (trackView.track.handleDblClick) {
+                    trackView.track.handleDblClick(dx, dy, trackView.viewportDiv);
                 }
-
                 else {
-                    var newCenter = Math.round(trackPanel.browser.referenceFrame.start + mouseX * trackPanel.browser.referenceFrame.bpPerPixel);
+                    var newCenter = Math.round(trackView.browser.referenceFrame.start + dx * trackView.browser.referenceFrame.bpPerPixel);
                     referenceFrame.bpPerPixel /= 2;
-                    trackPanel.browser.goto(trackPanel.browser.referenceFrame.chr, newCenter);
+                    trackView.browser.goto(trackView.browser.referenceFrame.chr, newCenter);
                 }
-            }
+            };
 
         }
+
+    };
+
+    igv.TrackView.prototype.genomicCoordinateWithEventTap = function (event) {
+
+        var alignmentManager = this.track.featureSource.alignmentManager;
+
+        if (!alignmentManager) {
+            return undefined;
+        }
+
+        if (!alignmentManager.coverageMap) {
+            return undefined;
+        }
+
+        var pixels = event.clientX - $(this.canvas).offset().left;
+
+        // Add one to convert from 0-based internal coords. to 1-based genomic coords.
+        return Math.floor( (this.browser.referenceFrame.start) + this.browser.referenceFrame.toBP(pixels) );
 
     };
 
@@ -479,7 +507,6 @@ var igv = (function (igv) {
     igv.TrackView.prototype.tooltipText = function (mouseX, mouseY) {
         return "";
     };
-
 
     igv.TrackView.prototype.setSortButtonDisplay = function (onOff) {
         this.track.sortButton.style.color = onOff ? "red" : "black";

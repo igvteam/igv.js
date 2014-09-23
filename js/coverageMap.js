@@ -42,28 +42,29 @@ var igv = (function (igv) {
     }
 
     Coverage.prototype.isMismatch = function (refBase) {
+
         var sum = 0,
-            that = this;
+            myself = this;
         allBases.forEach(function (base) {
             var key = "qual" + base;
             if (base !== refBase) {
-                sum += that[key];
+                sum += myself[key];
             }
         });
         return sum / this.qual > 0;
 
-    }
+    };
 
     Coverage.prototype.mismatchPercentages = function(refBase) {
 
         var fractions = [],
-            that=this;
+            myself = this;
 
         allBases.forEach(function (base) {
             var bTotal;
             if (base !== refBase) {
-                bTotal = that["pos" + base] + that["neg" + base];
-                fractions.push({base: base, percent: bTotal/that.total})
+                bTotal = myself["pos" + base] + myself["neg" + base];
+                fractions.push({base: base, percent: bTotal/myself.total})
             }
         });
 
@@ -72,23 +73,24 @@ var igv = (function (igv) {
         });
 
         return fractions;
-    }
+    };
 
     igv.CoverageMap = function (genomicInterval, refSeq) {
 
-        var thisCoverageMap;
+        var myself;
 
         this.prefixes = [ "pos", "neg", "qual" ];
         this.bases = [ "A", "T", "C", "G", "N" ];
 
         this.refSeq = refSeq;
+        this.chr = genomicInterval.chr;
         this.bpStart = genomicInterval.start;
         this.length = (genomicInterval.end - genomicInterval.start);
 
         this.coverage = new Array(this.length);
 
         this.maximum = 0;
-        thisCoverageMap = this;
+        myself = this;
         genomicInterval.features.forEach(function (alignment) {
 
             alignment.blocks.forEach(function (block) {
@@ -99,25 +101,44 @@ var igv = (function (igv) {
                     j,
                     q;
 
-                for (i = block.start - thisCoverageMap.bpStart, j = 0; j < block.len; i++, j++) {
+                for (i = block.start - myself.bpStart, j = 0; j < block.len; i++, j++) {
 
-                    if (!thisCoverageMap.coverage[ i ]) thisCoverageMap.coverage[i] = new Coverage();
+                    if (!myself.coverage[ i ]) {
+                        myself.coverage[ i ] = new Coverage();
+                    }
 
                     base = block.seq.charAt(j);
                     key = (alignment.strand) ? "pos" + base : "neg" + base;
                     q = block.qual.charCodeAt(j);
 
-                    thisCoverageMap.coverage[ i ][ key ] += 1;
-                    thisCoverageMap.coverage[ i ][ "qual" + base ] += q;
+                    myself.coverage[ i ][ key ] += 1;
+                    myself.coverage[ i ][ "qual" + base ] += q;
 
-                    thisCoverageMap.coverage[i].total += 1;
-                    thisCoverageMap.coverage[i].qual += q;
+                    myself.coverage[ i ].total += 1;
+                    myself.coverage[ i ].qual += q;
 
-                    thisCoverageMap.maximum = Math.max(thisCoverageMap.coverage[ i ].total, thisCoverageMap.maximum);
+                    myself.maximum = Math.max(myself.coverage[ i ].total, myself.maximum);
                 }
 
             });
         });
+
+//        console.log("CoverageMap - chr " + this.chr + " start " + igv.numberFormatter(this.bpStart) + " length " + igv.numberFormatter(this.length));
+
+    };
+
+    igv.CoverageMap.prototype.coverageAtGenomicLocation = function (genomicLocation) {
+
+        var index = genomicLocation - this.bpStart;
+
+        if (index < 0 || index >= this.coverage.length) {
+
+            return {};
+        } else {
+
+            return coverage[ index ];
+        }
+
 
     };
 

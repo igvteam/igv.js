@@ -22,7 +22,7 @@ var igv = (function (igv) {
         } else {
 
             var expand = 1000,
-                thisSource,
+                myself,
                 qStart,
                 qEnd;
 
@@ -30,16 +30,16 @@ var igv = (function (igv) {
             qStart = Math.max(0, bpStart - expand);
             qEnd = bpEnd + expand;
 
-            thisSource = this;
+            myself = this;
             this.bamFile.readAlignments(chr, qStart, qEnd, function (alignments) {
 
-                thisSource.alignmentManager = new igv.AlignmentManager(new igv.GenomicInterval(chr, qStart, qEnd, alignments));
+                myself.alignmentManager = new igv.AlignmentManager(new igv.GenomicInterval(chr, qStart, qEnd, alignments));
 
-                igv.sequenceSource.getSequence(thisSource.alignmentManager.genomicInterval.chr, thisSource.alignmentManager.genomicInterval.start, thisSource.alignmentManager.genomicInterval.end, function(refSeq){
+                igv.sequenceSource.getSequence(myself.alignmentManager.genomicInterval.chr, myself.alignmentManager.genomicInterval.start, myself.alignmentManager.genomicInterval.end, function(refSeq){
 
-                    thisSource.alignmentManager.coverageMap = new igv.CoverageMap(thisSource.alignmentManager.genomicInterval, refSeq);
+                    myself.alignmentManager.coverageMap = new igv.CoverageMap(myself.alignmentManager.genomicInterval, refSeq);
 
-                    thisSource.alignmentManager.performReservoirSampling(success);
+                    myself.alignmentManager.performReservoirSampling(success);
 
                 }, task);
 

@@ -14,7 +14,7 @@ var igv = (function (igv) {
         }
 
         return inst;
-    }
+    };
 
     var FastaSequence = function (file, indexFile) {
 
@@ -30,6 +30,7 @@ var igv = (function (igv) {
 
             var interval = this.interval;
             if (interval && interval.contains(chr, start, end)) {
+
                 continuation(getSequenceFromInterval(interval, start, end));
             }
             else {
@@ -168,7 +169,7 @@ var igv = (function (igv) {
         };
 
 
-    }
+    };
 
     return igv;
 
