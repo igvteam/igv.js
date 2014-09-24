@@ -111,8 +111,7 @@ input[type='file'] {
     top: 0;
     width: 100px;
     height:100%;
-    border: 2px solid dimgray;
-    background-color: deepskyblue;
+    background-color: #888;
 }
 
 .igv-horizontal-scrollbar-div {
