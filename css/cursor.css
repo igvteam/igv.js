@@ -110,7 +110,7 @@ input[type='file'] {
     top: 0;
     right:0;
     height:100%;
-    background-color: lightgreen;
+    border: 1px solid #888;
 }
 
 .igv-horizontal-scrollbar-container-div {
@@ -119,7 +119,7 @@ input[type='file'] {
     left:0;
     height:50px;
     width:100%;
-    background-color: indianred;
+    /*opacity:0.52;*/
 }
 
 .igv-track-div {
