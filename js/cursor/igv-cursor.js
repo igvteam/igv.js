@@ -5,10 +5,7 @@ var igv = (function (igv) {
         var browser = new igv.Browser("CURSOR"),
             contentHeader = $('<div class="row"></div>')[0],
             contentHeaderDiv = $('<div id="igvHeaderDiv" class="col-md-12" style="font-size:16px;"><span id="igvHeaderRegionDisplaySpan"></span></div>')[0],
-            trackContainer = $('<div id="igvTrackContainerDiv" class="igv-track-container-div">')[0],
-            horizontalScrollBarContainer = $('<div class="igv-horizontal-scrollbar-container-div">')[0],
-            horizontalScrollBar = $('<div class="igv-horizontal-scrollbar-div">')[0],
-            horizontalScrollBarDraggable = $('<div class="igv-horizontal-scrollbar-draggable-div">')[0];
+            trackContainer = $('<div id="igvTrackContainerDiv" class="igv-track-container-div">')[0];
 
         browser.div = $('<div id="igvRootDiv" class="igv-root-div">')[0];
         $(browser.div).append(contentHeader);
@@ -17,11 +14,6 @@ var igv = (function (igv) {
         document.getElementById('igvContainerDiv').appendChild(browser.div);
 
         browser.horizontalScrollbar = new cursor.HorizontalScrollbar( $(trackContainer) );
-
-//        // horizontal scroll bar
-//        $(trackContainer).append(horizontalScrollBarContainer);
-//        $(horizontalScrollBarContainer).append(horizontalScrollBar);
-//        $(horizontalScrollBar).append(horizontalScrollBarDraggable);
 
         // Append event handlers to DOM elements
         document.getElementById('zoomOut').onclick = function (e) {
@@ -318,6 +310,8 @@ var igv = (function (igv) {
                     browser.addTrack(track2);
 
                     tssTrack.labelButton.className = "btn btn-xs btn-cursor-selected";
+
+                    browser.horizontalScrollbar.update(browser.cursorModel, browser.referenceFrame);
                 });
 
             }

@@ -6,13 +6,19 @@
  */
 var cursor = (function (cursor) {
 
-    cursor.HorizontalScrollbar = function (parentDivObject, cursorModel, referenceFrame) {
-
-        this.cursorModel = cursorModel;
-        this.referenceFrame = referenceFrame;
+    cursor.HorizontalScrollbar = function (parentDivObject) {
 
         this.markupWithParentDivObject(parentDivObject);
 
+    };
+
+    cursor.HorizontalScrollbar.prototype.update = function (cursorModel, referenceFrame) {
+
+        var regionsOnScreen;
+
+        regionsOnScreen = $(".igv-horizontal-scrollbar-div").first().width() / cursorModel.framePixelWidth;
+
+        console.log("HorizontalScrollbar.update - regions on screen " + regionsOnScreen);
     };
 
     cursor.HorizontalScrollbar.prototype.markupWithParentDivObject = function (parentDivObject) {
@@ -23,7 +29,6 @@ var cursor = (function (cursor) {
             isMouseDown = undefined,
             lastMouseX = undefined,
             isMouseIn = undefined;
-        ;
 
         // DOM
         horizontalScrollBarContainer = $('<div class="igv-horizontal-scrollbar-container-div">')[0];

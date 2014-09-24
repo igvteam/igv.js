@@ -196,6 +196,9 @@ var igv = (function (igv) {
             trackPanel.update();
 
         });
+
+        this.horizontalScrollbar.update(this.cursorModel, this.referenceFrame);
+
     };
 
     /**
