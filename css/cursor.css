@@ -105,6 +105,16 @@ input[type='file'] {
     background-color: green;
 }
 
+.igv-horizontal-scrollbar-draggable-div {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 100px;
+    height:100%;
+    border: 4px solid dimgray;
+    background-color: deepskyblue;
+}
+
 .igv-horizontal-scrollbar-div {
     position: absolute;
     top: 0;

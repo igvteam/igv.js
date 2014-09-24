@@ -7,7 +7,8 @@ var igv = (function (igv) {
             contentHeaderDiv = $('<div id="igvHeaderDiv" class="col-md-12" style="font-size:16px;"><span id="igvHeaderRegionDisplaySpan"></span></div>')[0],
             trackContainer = $('<div id="igvTrackContainerDiv" class="igv-track-container-div">')[0],
             horizontalScrollBarContainer = $('<div class="igv-horizontal-scrollbar-container-div">')[0],
-            horizontalScrollBar = $('<div class="igv-horizontal-scrollbar-div">')[0];
+            horizontalScrollBar = $('<div class="igv-horizontal-scrollbar-div">')[0],
+            horizontalScrollBarDraggable = $('<div class="igv-horizontal-scrollbar-draggable-div">')[0];
 
         browser.div = $('<div id="igvRootDiv" class="igv-root-div">')[0];
         $(browser.div).append(contentHeader);
@@ -15,8 +16,12 @@ var igv = (function (igv) {
         $(browser.div).append(trackContainer);
         document.getElementById('igvContainerDiv').appendChild(browser.div);
 
-        $(trackContainer).append(horizontalScrollBarContainer);
-        $(horizontalScrollBarContainer).append(horizontalScrollBar);
+        browser.horizontalScrollbar = new cursor.HorizontalScrollbar( $(trackContainer) );
+
+//        // horizontal scroll bar
+//        $(trackContainer).append(horizontalScrollBarContainer);
+//        $(horizontalScrollBarContainer).append(horizontalScrollBar);
+//        $(horizontalScrollBar).append(horizontalScrollBarDraggable);
 
         // Append event handlers to DOM elements
         document.getElementById('zoomOut').onclick = function (e) {
