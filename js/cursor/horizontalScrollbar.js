@@ -16,18 +16,23 @@ var cursor = (function (cursor) {
 
         var horizontalScrollBar = $(".igv-horizontal-scrollbar-div").first(),
             horizontalScrollBarDraggable = $(".igv-horizontal-scrollbar-draggable-div").first(),
+//            regionListLength = cursorModel.getRegionList().length,
+            regionListLength = cursorModel.regions.length,
             regionsOnScreen,
+            left,
             width;
 
         regionsOnScreen = horizontalScrollBar.width() / cursorModel.framePixelWidth;
 
-        width = (regionsOnScreen/cursorModel.getRegionList().length) * horizontalScrollBar.width();
+        left = referenceFrame.toPixels( referenceFrame.start );
+        width = (regionsOnScreen/regionListLength) * horizontalScrollBar.width();
 
         $( horizontalScrollBarDraggable).css({
+            "left": left + "px",
             "width": width + "px"
         });
 
-        console.log("HorizontalScrollbar.update - regions on screen " + regionsOnScreen);
+        console.log("HorizontalScrollbar.update start " + igv.numberFormatter( Math.round(referenceFrame.start) ));
     };
 
     cursor.HorizontalScrollbar.prototype.markupWithParentDivObject = function (parentDivObject) {

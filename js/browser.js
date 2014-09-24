@@ -180,6 +180,9 @@ var igv = (function (igv) {
         this.trackPanels.forEach(function (trackView) {
             trackView.repaint();
         });
+
+        this.horizontalScrollbar.update(this.cursorModel, this.referenceFrame);
+
     };
 
     igv.Browser.prototype.update = function () {
