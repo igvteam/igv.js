@@ -211,7 +211,7 @@ var cursor = (function (cursor) {
             myself.renderMinX = Math.floor(myself.renderMinX);
             myself.renderMaxX = Math.floor(myself.renderMaxX);
 
-            console.log("cursorTrack - referenceFrame.start " + myself.referenceFrame.start + " min | max = " + myself.renderMinX + " | " + myself.renderMaxX);
+//            console.log("cursorTrack - referenceFrame.start " + myself.referenceFrame.start + " min | max = " + myself.renderMinX + " | " + myself.renderMaxX);
 
             continuation();
         }
