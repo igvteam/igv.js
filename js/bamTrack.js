@@ -40,7 +40,6 @@ var igv = (function (igv) {
 
 //        console.log("bamTrack.draw");
 
-//        this.popover.hide();
 
         // Don't try to draw alignments for windows > 10kb
         if (bpEnd - bpStart > 30000) {
@@ -132,7 +131,7 @@ var igv = (function (igv) {
                                 w = Math.max(1, 1.0 / refFrame.bpPerPixel);
 
                                 acc = 0.0;
-                                coverageMap.coverage[i].mismatchPercentages(base).forEach(function(fraction, index, fractions) {
+                                coverageMap.coverage[i].mismatchPercentages(base).forEach(function (fraction, index, fractions) {
 
                                     if (fraction.percent < 0.001) {
                                         return;
@@ -145,7 +144,7 @@ var igv = (function (igv) {
                                     canvas.setProperties({ fillStyle: igv.nucleotideColors[ fraction.base ] });
                                     canvas.fillRect(x, y, w, h);
 
-                                 });
+                                });
 
 
                             }
@@ -155,7 +154,7 @@ var igv = (function (igv) {
                     // alignment track
                     alignmentManager.genomicInterval.packedAlignments.forEach(function renderAlignmentRow(alignmentRow, packedAlignmentIndex, packedAlignments) {
 
-                        var arrowHeadWidth = myself.alignmentRowHeight/2.0,
+                        var arrowHeadWidth = myself.alignmentRowHeight / 2.0,
                             yStrokedLine,
                             yRect,
                             height;
@@ -163,7 +162,7 @@ var igv = (function (igv) {
                         yRect = myself.alignmentRowYInset + myself.coverageTrackHeight + (myself.alignmentRowHeight * packedAlignmentIndex);
                         height = myself.alignmentRowHeight - (2 * myself.alignmentRowYInset);
 
-                        yStrokedLine = (height/2.0) + yRect;
+                        yStrokedLine = (height / 2.0) + yRect;
 
                         alignmentRow.forEach(function renderAlignment(alignment) {
 
@@ -272,7 +271,7 @@ var igv = (function (igv) {
         // draw label stuff
     };
 
-    igv.BAMTrack.prototype.popupString = function (genomicLocation, yOffset) {
+    igv.BAMTrack.prototype.popupString = function (genomicLocation, xOffset, yOffset) {
 
         var alignmentManager = this.featureSource.alignmentManager,
             coverageMap = alignmentManager.coverageMap,
@@ -286,7 +285,7 @@ var igv = (function (igv) {
             markup = undefined,
             refSeqIndex;
 
-        packedAlignmentsIndex = Math.floor( (yOffset - (this.alignmentRowYInset + this.coverageTrackHeight)) / this.alignmentRowHeight );
+        packedAlignmentsIndex = Math.floor((yOffset - (this.alignmentRowYInset + this.coverageTrackHeight)) / this.alignmentRowHeight);
 
         if (packedAlignmentsIndex >= packedAlignments.length) {
 
@@ -302,44 +301,44 @@ var igv = (function (igv) {
                 return undefined;
             }
 
-            markup   = "<span class=\"popoverContentSpan\">Total Count</span> " + coverage.total + "<br>";
+            markup = "<span class=\"popoverContentSpan\">Total Count</span> " + coverage.total + "<br>";
 
             // A
-            markup  += "<span class=\"popoverContentSpan\">A</span> " + (coverage.posA + coverage.negA);
+            markup += "<span class=\"popoverContentSpan\">A</span> " + (coverage.posA + coverage.negA);
             if (coverage.posA + coverage.negA) {
-                markup += " (" + Math.floor( ((coverage.posA + coverage.negA)/coverage.total) * 100.0 ) + "%)" + "<br>";
+                markup += " (" + Math.floor(((coverage.posA + coverage.negA) / coverage.total) * 100.0) + "%)" + "<br>";
             } else {
                 markup += "<br>";
             }
 
             // C
-            markup  += "<span class=\"popoverContentSpan\">C</span> " + (coverage.posC + coverage.negC);
+            markup += "<span class=\"popoverContentSpan\">C</span> " + (coverage.posC + coverage.negC);
             if (coverage.posC + coverage.negC) {
-                markup += " (" + Math.floor( ((coverage.posC + coverage.negC)/coverage.total) * 100.0 ) + "%)" + "<br>";
+                markup += " (" + Math.floor(((coverage.posC + coverage.negC) / coverage.total) * 100.0) + "%)" + "<br>";
             } else {
                 markup += "<br>";
             }
 
             // G
-            markup  += "<span class=\"popoverContentSpan\">G</span> " + (coverage.posG + coverage.negG);
+            markup += "<span class=\"popoverContentSpan\">G</span> " + (coverage.posG + coverage.negG);
             if (coverage.posG + coverage.negG) {
-                markup += " (" + Math.floor( ((coverage.posG + coverage.negG)/coverage.total) * 100.0 ) + "%)" + "<br>";
+                markup += " (" + Math.floor(((coverage.posG + coverage.negG) / coverage.total) * 100.0) + "%)" + "<br>";
             } else {
                 markup += "<br>";
             }
 
             // T
-            markup  += "<span class=\"popoverContentSpan\">T</span> " + (coverage.posT + coverage.negT);
+            markup += "<span class=\"popoverContentSpan\">T</span> " + (coverage.posT + coverage.negT);
             if (coverage.posT + coverage.negT) {
-                markup += " (" + Math.floor( ((coverage.posT + coverage.negT)/coverage.total) * 100.0 ) + "%)" + "<br>";
+                markup += " (" + Math.floor(((coverage.posT + coverage.negT) / coverage.total) * 100.0) + "%)" + "<br>";
             } else {
                 markup += "<br>";
             }
 
             // N
-            markup  += "<span class=\"popoverContentSpan\">N</span> " + (coverage.posN + coverage.negN);
+            markup += "<span class=\"popoverContentSpan\">N</span> " + (coverage.posN + coverage.negN);
             if (coverage.posN + coverage.negN) {
-                markup += " (" + Math.floor( ((coverage.posN + coverage.negN)/coverage.total) * 100.0 ) + "%)" + "<br>";
+                markup += " (" + Math.floor(((coverage.posN + coverage.negN) / coverage.total) * 100.0) + "%)" + "<br>";
             } else {
                 markup += "<br>";
             }
@@ -348,39 +347,42 @@ var igv = (function (igv) {
             return markup;
         }
 
-        alignmentRow = packedAlignments[ packedAlignmentsIndex ];
+        else {
 
-        readChar = undefined;
-        alignmentRow.forEach(function (alignment, alignmentIndex, alignments) {
+            alignmentRow = packedAlignments[ packedAlignmentsIndex ];
 
-            if (undefined === readChar) {
+            readChar = undefined;
+            alignmentRow.forEach(function (alignment, alignmentIndex, alignments) {
 
-                readChar = alignmentManager.alignmentBlockHitTest(alignment, genomicLocation);
-                alignmentHitTest = alignment;
-            }
+                if (undefined === readChar) {
 
-        });
+                    readChar = alignmentManager.alignmentBlockHitTest(alignment, genomicLocation);
+                    alignmentHitTest = alignment;
+                }
 
-        if (readChar) {
-            markup  = "<span class=\"popoverContentSpan\">Sample</span> " + this.label + "<br>";
-            markup += "<span class=\"popoverContentSpan\">Location</span> " + alignmentManager.genomicInterval.chr + ":" + igv.numberFormatter(genomicLocation) + "<br>";
-            markup += "<span class=\"popoverContentSpan\">Alignment Start</span> " + igv.numberFormatter(alignmentHitTest.start);
-            if (true === alignmentHitTest.strand) {
-                markup += "(+)" + "<br>";
-            } else {
-                markup += "(-)" + "<br>";
+            });
 
-            }
-            markup += "<span class=\"popoverContentSpan\">Cigar</span> " + alignmentHitTest.cigar + "<br>";
-            markup += "<span class=\"popoverContentSpan\">Mapping Quality</span> " + alignmentHitTest.mq + "<br>";
-            markup += "<span class=\"popoverContentSpan\">Base</span> " + readChar;
+            if (readChar) {
+                markup = "<span class=\"popoverContentSpan\">Sample</span> " + this.label + "<br>";
+                markup += "<span class=\"popoverContentSpan\">Location</span> " + alignmentManager.genomicInterval.chr + ":" + igv.numberFormatter(genomicLocation) + "<br>";
+                markup += "<span class=\"popoverContentSpan\">Alignment Start</span> " + igv.numberFormatter(alignmentHitTest.start);
+                if (true === alignmentHitTest.strand) {
+                    markup += "(+)" + "<br>";
+                } else {
+                    markup += "(-)" + "<br>";
+
+                }
+                markup += "<span class=\"popoverContentSpan\">Cigar</span> " + alignmentHitTest.cigar + "<br>";
+                markup += "<span class=\"popoverContentSpan\">Mapping Quality</span> " + alignmentHitTest.mq + "<br>";
+                markup += "<span class=\"popoverContentSpan\">Base</span> " + readChar;
 
 //            refSeqIndex = genomicLocation - alignmentManager.coverageMap.bpStart;
 //            markup += "ref seq base " + alignmentManager.coverageMap.refSeq[ refSeqIndex ];
 
-        }
+            }
 
-        return markup;
+            return markup;
+        }
     };
 
     function shadedBaseColor(qual, nucleotide) {

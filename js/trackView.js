@@ -320,7 +320,7 @@ var igv = (function (igv) {
                                     return;
                                 }
 
-                                featureDetails = trackView.track.popupString(genomicLocation, e.offsetY);
+                                featureDetails = trackView.track.popupString(genomicLocation, e.offsetX, e.offsetY);
                                 if (featureDetails) {
                                     trackView.track.popover.show(e.offsetX + ppx, e.offsetY + ppy, featureDetails);
                                 }

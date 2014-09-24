@@ -46,15 +46,6 @@ var igv = (function (igv) {
 
         queryChr = (chr.startsWith("chr") ? chr.substring(3) : chr);
 
-        // Don't try to draw variants for windows > 3 mb
-//        if (bpEnd - bpStart > 3100000) {
-//
-//            canvas.fillText("Zoom in to see variants", 600, 10);
-//            continuation();
-//            return;
-//        }
-
-
         canvas.fillRect(0, 0, pixelWidth, pixelHeight, {'fillStyle': this.background});
 
 
@@ -86,7 +77,10 @@ var igv = (function (igv) {
 
                         py = Math.max(track.dotSize, pixelHeight - Math.round((val - track.minLogP) / yScale));
 
+                        variant.py = py;
+
                         if (color) canvas.setProperties({fillStyle: color, strokeStyle: "black"});
+
                         canvas.fillCircle(px, py, track.dotSize);
                         //canvas.strokeCircle(px, py, radius);
 
@@ -132,6 +126,11 @@ var igv = (function (igv) {
 
 
     };
+
+
+    igv.T2dTrack.prototype.popupString = function(genomicLocation, xOffset, yOffset) {
+        return "hello";
+    }
 
 
     // TODO -- generalize this class and move to top level
