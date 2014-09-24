@@ -250,7 +250,6 @@ var igv = (function (igv) {
 
         function addTrackHandlers(trackView) {
 
-            var isFirefox = typeof InstallTrigger !== 'undefined';
             var isMouseDown = false;
             var lastMouseX = undefined;
             var referenceFrame = trackView.browser.referenceFrame;
