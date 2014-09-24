@@ -48,13 +48,13 @@ var cursor = (function (cursor) {
         horizontalScrollBarContainer = $('<div class="igv-horizontal-scrollbar-container-div">')[0];
         horizontalScrollBar          = $('<div class="igv-horizontal-scrollbar-div">')[0];
         horizontalScrollBarDraggable = $('<div class="igv-horizontal-scrollbar-draggable-div">')[0];
+
         parentDivObject.append(horizontalScrollBarContainer);
         $(horizontalScrollBarContainer).append(horizontalScrollBar);
         $(horizontalScrollBar).append(horizontalScrollBarDraggable);
 
-
         // mouse event handlers
-        $( horizontalScrollBar ).mousedown(function(e) {
+        $( document ).mousedown(function(e) {
             //lastMouseX = e.offsetX;
             lastMouseX = e.screenX;
             isMouseIn = true;
@@ -64,12 +64,11 @@ var cursor = (function (cursor) {
             isMouseDown = true;
         });
 
-        $( horizontalScrollBar ).mousemove(function (e) {
+        $( document ).mousemove(function (e) {
 
             var dx,
                 left;
 
-            //dx = e.offsetX - lastMouseX;
             dx = e.screenX - lastMouseX;
 
             left = $( horizontalScrollBarDraggable).position().left;
@@ -86,19 +85,15 @@ var cursor = (function (cursor) {
                     "left": left + "px"
                 });
 
-                //ht added
                 lastMouseX = e.screenX
-
             }
 
         });
 
-        $( horizontalScrollBar ).mouseup(function(e) {
+        $( document ).mouseup(function(e) {
             isMouseDown = false;
             lastMouseX = undefined;
         });
-
-
 
     };
 
