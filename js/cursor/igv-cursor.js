@@ -268,14 +268,18 @@ var igv = (function (igv) {
 
                 browser.fitToScreen = function () {
 
-                    var regionCount, frameWidth;
+                    var regionCount,
+                        frameWidth;
 
-                    if (!(browser.cursorModel && browser.cursorModel.regions)) return;
+                    if (!(browser.cursorModel && browser.cursorModel.regions)) {
+                        return;
+                    }
 
                     regionCount = browser.cursorModel.getRegionList().length;
 
                     if (regionCount > 0) {
-                        frameWidth = (browser.trackContainerDiv.clientWidth - browser.controlPanelWidth) / regionCount;
+//                        frameWidth = (browser.trackContainerDiv.clientWidth - browser.controlPanelWidth) / regionCount;
+                        frameWidth = $(".igv-viewport-div").first().width() / regionCount;
                         browser.referenceFrame.start = 0;
                         browser.setFrameWidth(frameWidth);
                         $('frameWidthBox').value = frameWidth;

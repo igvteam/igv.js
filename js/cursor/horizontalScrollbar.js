@@ -16,24 +16,29 @@ var cursor = (function (cursor) {
 
         var horizontalScrollBar = $(".igv-horizontal-scrollbar-div").first(),
             horizontalScrollBarDraggable = $(".igv-horizontal-scrollbar-draggable-div").first(),
-//            regionListLength = cursorModel.getRegionList().length,
-            regionListLength = cursorModel.regions.length,
+//            regionListLength = cursorModel.regions.length,
+            regionListLength = cursorModel.getRegionList().length,
             regionsOnScreen,
             left,
-            width;
+            width,
+            framePixelWidthMargin,
+            ratio;
 
-        regionsOnScreen = horizontalScrollBar.width() / cursorModel.framePixelWidth;
+//        framePixelWidthMargin = (cursorModel.framePixelWidth > 1) ? cursorModel.framePixelWidth + (cursorModel.frameMargin/2.0) : cursorModel.framePixelWidth;
+        framePixelWidthMargin = cursorModel.framePixelWidth;
+        regionsOnScreen = horizontalScrollBar.width() / framePixelWidthMargin;
 
-        left = referenceFrame.toPixels( referenceFrame.start );
+//        left = referenceFrame.toPixels( referenceFrame.start );
         width = (regionsOnScreen/regionListLength) * horizontalScrollBar.width();
 
         $( horizontalScrollBarDraggable).css({
-            "left": left + "px",
-            "width": width + "px"
+//            "left": left + "px",
+            "width": Math.floor(width) + "px"
         });
 
-        console.log("HorizontalScrollbar.update start " + igv.numberFormatter( Math.round(referenceFrame.start) ));
-    };
+        console.log("HorizontalScrollbar.update regions on screen " + regionsOnScreen + " scrollbar width " + width);
+
+     };
 
     cursor.HorizontalScrollbar.prototype.markupWithParentDivObject = function (parentDivObject) {
 
