@@ -111,7 +111,7 @@ input[type='file'] {
     top: 0;
     width: 100px;
     height:100%;
-    border: 4px solid dimgray;
+    border: 2px solid dimgray;
     background-color: deepskyblue;
 }
 
@@ -120,6 +120,7 @@ input[type='file'] {
     top: 0;
     right:0;
     height:100%;
+    background-color: rgba(200, 200, 200, .2);
     border: 1px solid #888;
 }
 

@@ -6,7 +6,10 @@
  */
 var cursor = (function (cursor) {
 
-    cursor.HorizontalScrollbar = function (parentDivObject) {
+    cursor.HorizontalScrollbar = function (parentDivObject, cursorModel, referenceFrame) {
+
+        this.cursorModel = cursorModel;
+        this.referenceFrame = referenceFrame;
 
         this.markupWithParentDivObject(parentDivObject);
 
