@@ -97,7 +97,14 @@ var igv = (function (igv) {
 
         var markup = "<table>";
         nameValueArray.forEach(function (nameValue) {
-            markup += "<tr><td><span class=\"popoverContentSpan\">" + nameValue.name + ":</span> </td><td style='padding: 5px'>" + nameValue.value + "</td></tr>";
+
+            if(nameValue.name) {
+                markup += "<tr><td style='padding-right: 5px'><span class=\"popoverContentSpan\">" + nameValue.name + ":</span> </td><td>" + nameValue.value + "</td></tr>";
+            }
+            else {
+                // not a name/value pair
+                markup += "<tr><td>" + nameValue.toString() + "</td></tr>";
+            }
         });
 
         markup += "</table>"

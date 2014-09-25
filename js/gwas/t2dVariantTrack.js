@@ -135,18 +135,26 @@ var igv = (function (igv) {
 
     igv.T2dTrack.prototype.popupData = function (genomicLocation, xOffset, yOffset) {
 
-        var i, len, dist, p;
+        var i, len, p, dbSnp, data;
 
         if (this.po) {
             for (i = 0, len = this.po.length; i < len; i++) {
                 p = this.po[i];
                 if (Math.abs(xOffset - p.x) < this.dotSize && Math.abs(yOffset - p.y) < this.dotSize) {
-                    return [
-                        {name: 'Position', value: p.feature.CHROM + p.feature.POS},
-                        {name: 'DB Snp', value: p.feature.DBSNP_ID},
-                        {name: 'Closest Gene', value: p.feature.CLOSEST_GENE},
-                        {name: 'pValue', value: p.feature.PVALUE}
-                    ];
+                    dbSnp = p.feature.DBSNP_ID;
+                    data = [];
+                    if (dbSnp) {
+                        data.push("<a  target='_blank' href=http://type2diabetesgenetics.org/variant/variantInfo/" + dbSnp + ">" +
+                            p.feature.DBSNP_ID + "</a>");
+                    }
+                    data.push("chr" + p.feature.CHROM + ":" + p.feature.POS.toString());
+                    data.push({name: 'p-value', value: p.feature.PVALUE});
+                    data.push({name: 'z-score', value: p.feature.ZSCORE});
+                    if (dbSnp) {
+                        data.push("<a  target='_blank' href=http://type2diabetesgenetics.org/trait/traitInfo/" + dbSnp +
+                            ">see all available statistics for this variant</a>");
+                    }
+                    return data;
                 }
             }
         }
