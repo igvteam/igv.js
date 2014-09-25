@@ -473,6 +473,7 @@ var igv = (function (igv) {
             }
 
             if (Math.abs(canvasCoords.x - mouseDownX) <= dragThreshold && trackView.track.popupData) {
+                const doubleClickDelay = 300;
                 popupTimer = window.setTimeout(function () {
 
                         var rootX = e.pageX - rootObject.offset().left,
@@ -493,7 +494,7 @@ var igv = (function (igv) {
                         }
                         mouseDownX = undefined;
                     },
-                    500);
+                    doubleClickDelay);
             }
             else {
                 mouseDownX = undefined;
