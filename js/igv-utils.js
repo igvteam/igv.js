@@ -74,21 +74,19 @@ var igv = (function (igv) {
 
 
     /**
-     * Create a file from the text and initiate a download.
-     * @param text
+     * Format markup for popover text from an array of name value pairs [{name, value}]
      */
-    igv.download = function (text) {
+    igv.formatPopoverText = function (nameValueArray) {
 
-        var dataLoader = new igv.DataLoader("php/echoPost.php");
-
-        dataLoader.post(text, function(response) {
-
-            var url = "php/download.php?filename=" + response;
-            window.open(url, "Download");
-
+        var markup = "";
+        nameValueArray.forEach(function (nameValue) {
+            markup += "<span class=\"popoverContentSpan\">" + nameValue.name + "</span> " + nameValue.value + "<br>";
         });
 
+        return markup;
+
     }
+
 
     return igv;
 

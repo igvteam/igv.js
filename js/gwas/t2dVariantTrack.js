@@ -24,7 +24,6 @@ var igv = (function (igv) {
     }
 
 
-
     /**
      *
      * @param canvas   an igv.Canvas
@@ -40,9 +39,17 @@ var igv = (function (igv) {
 
         var chr,
             queryChr,
-            track=this,
+            track = this,
             chr = refFrame.chr,
-            yScale = (track.maxLogP - track.minLogP) / pixelHeight;
+            yScale = (track.maxLogP - track.minLogP) / pixelHeight,
+            enablePopover = (bpEnd - bpStart) < 1000000;
+
+        if (enablePopover) {
+            this.po = [];
+        }
+        else {
+            this.po = undefined;
+        }
 
         queryChr = (chr.startsWith("chr") ? chr.substring(3) : chr);
 
@@ -59,6 +66,7 @@ var igv = (function (igv) {
 
                     py = 20;
 
+
                     for (var i = 0; i < len; i++) {
 
                         variant = featureList[i];
@@ -66,10 +74,10 @@ var igv = (function (igv) {
                         if (variant.POS > bpEnd) break;
 
                         pvalue = variant.PVALUE;
-                        if(!pvalue) continue;
+                        if (!pvalue) continue;
 
                         color = track.colorScale.getColor(pvalue);
-                        val = -Math.log(pvalue)/2.302585092994046;
+                        val = -Math.log(pvalue) / 2.302585092994046;
 
                         xScale = refFrame.bpPerPixel;
 
@@ -77,27 +85,24 @@ var igv = (function (igv) {
 
                         py = Math.max(track.dotSize, pixelHeight - Math.round((val - track.minLogP) / yScale));
 
-                        variant.py = py;
-
                         if (color) canvas.setProperties({fillStyle: color, strokeStyle: "black"});
 
                         canvas.fillCircle(px, py, track.dotSize);
                         //canvas.strokeCircle(px, py, radius);
 
+                        if (enablePopover) track.po.push({x: px, y: py, feature: variant});
 
                     }
                 }
 
-              //  canvas.setProperties({fillStyle: "rgb(250, 250, 250)"});
-              //  canvas.fillRect(0, 0, pixelWidth, pixelHeight);
-
+                //  canvas.setProperties({fillStyle: "rgb(250, 250, 250)"});
+                //  canvas.fillRect(0, 0, pixelWidth, pixelHeight);
 
 
                 if (continuation) continuation();
             },
             task);
     };
-
 
 
     igv.T2dTrack.prototype.paintControl = function (canvas, pixelWidth, pixelHeight) {
@@ -128,8 +133,19 @@ var igv = (function (igv) {
     };
 
 
-    igv.T2dTrack.prototype.popupString = function(genomicLocation, xOffset, yOffset) {
-        return "hello";
+    igv.T2dTrack.prototype.popupData = function (genomicLocation, xOffset, yOffset) {
+
+        var i, len, dist, p;
+
+        if (!this.po) return null;
+
+        for (i = 0, len = this.po.length; i<len; i++) {
+            p = this.po[i];
+            if (Math.abs(xOffset - p.x) < this.dotSize && Math.abs(yOffset - p.y) < this.dotSize) {
+                return p.feature;
+            }
+        }
+
     }
 
 
@@ -140,17 +156,17 @@ var igv = (function (igv) {
      * @param colors - array of colors for bins  (length == thresholds.length + 1)
      * @constructor
      */
-    var BinnedColorScale = function(cs) {
+    var BinnedColorScale = function (cs) {
         this.thresholds = cs.thresholds;
         this.colors = cs.colors;
     }
 
-    BinnedColorScale.prototype.getColor = function(value) {
+    BinnedColorScale.prototype.getColor = function (value) {
 
-        var i, len=this.thresholds.length;
+        var i, len = this.thresholds.length;
 
-        for(i=0; i<len; i++) {
-            if(value < this.thresholds[i]) {
+        for (i = 0; i < len; i++) {
+            if (value < this.thresholds[i]) {
                 return this.colors[i];
             }
         }

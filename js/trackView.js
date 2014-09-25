@@ -88,7 +88,7 @@ var igv = (function (igv) {
         canvas.setAttribute('width', contentWidth);    //Must set the width & height of the canvas
         canvas.setAttribute('height', contentHeight);
 
-        if (this.track.popupString) {
+        if (this.track.popupData) {
             this.track.popover = new igv.Popover(rootObject[0], this);
         }
 
@@ -309,36 +309,34 @@ var igv = (function (igv) {
                 if (popupTimer) {
                     // Cancel previous timer
                     window.clearTimeout(popupTimer);
-                    mouseDownX = undefined;
                     popupTimer = undefined;
                 }
-                else {
-                    if (Math.abs(canvasCoords.x - mouseDownX) <= dragThreshold && trackView.track.popupString) {
-                        popupTimer = window.setTimeout(function () {
 
-                                var rootX = e.pageX - rootObject.offset().left,
-                                    rootY = e.pageY - rootObject.offset().top,
-                                    featureDetails,
-                                    genomicLocation = trackView.genomicCoordinateWithEventTap(e),
-                                    xOffset = Math.round((trackView.tile.startBP - trackView.browser.referenceFrame.start) / trackView.browser.referenceFrame.bpPerPixel);
+                if (Math.abs(canvasCoords.x - mouseDownX) <= dragThreshold && trackView.track.popupData) {
+                    popupTimer = window.setTimeout(function () {
 
-                                if (undefined === genomicLocation) {
-                                    return;
-                                }
+                            var rootX = e.pageX - rootObject.offset().left,
+                                rootY = e.pageY - rootObject.offset().top,
+                                popupData,
+                                genomicLocation = trackView.genomicCoordinateWithEventTap(e),
+                                xOffset = Math.round((trackView.tile.startBP - trackView.browser.referenceFrame.start) / trackView.browser.referenceFrame.bpPerPixel);
 
-                                featureDetails = trackView.track.popupString(genomicLocation, canvasCoords.x - xOffset, canvasCoords.y);
-                                if (featureDetails) {
-                                    trackView.track.popover.show(rootX, rootY, featureDetails);
-                                }
+                            if (undefined === genomicLocation) {
+                                return;
+                            }
 
-                                mouseDownX = undefined;
-                            },
-                            500);
-                    }
-                    else {
-                        mouseDownX = undefined;
-                    }
+                            popupData = trackView.track.popupData(genomicLocation, canvasCoords.x - xOffset, canvasCoords.y);
+                            if (popupData && popupData.length > 0) {
+                                trackView.track.popover.show(rootX, rootY, igv.formatPopoverText(popupData));
+                            }
+                            mouseDownX = undefined;
+                        },
+                        500);
                 }
+                else {
+                    mouseDownX = undefined;
+                }
+
 
                 isMouseDown = false;
                 lastMouseX = undefined;

@@ -30,7 +30,7 @@ var igv = (function (igv) {
         var source = this;
 
         if (this.cache && this.cache.chr === chr && this.cache.end > bpEnd && this.cache.start < bpStart) {
-            success(this.cache.features);
+            success(this.cache.featuresBetween(bpStart, bpEnd));
         }
 
         else {
@@ -47,7 +47,7 @@ var igv = (function (igv) {
                     data = {
                         "user_group": "ui",
                         "filters": [
-                            {"operand": "CHROM", "operator": "EQ", "value": queryChr , "filter_type": "STRING" },
+                            {"operand": "CHROM", "operator": "EQ", "value": queryChr, "filter_type": "STRING" },
                             {"operand": "POS", "operator": "GT", "value": queryStart, "filter_type": "FLOAT" },
                             {"operand": "POS", "operator": "LT", "value": queryEnd, "filter_type": "FLOAT" },
                             {"operand": "PVALUE", "operator": "LTE", "value": 5E-2, "filter_type": "FLOAT"}
@@ -67,12 +67,8 @@ var igv = (function (igv) {
                                     return a.POS - b.POS;
                                 });
 
-                                source.cache = {
-                                    chr: chr,
-                                    start: queryStart,
-                                    end: queryEnd,
-                                    features: variants
-                                };
+                                source.cache = new FeatureCache(chr, queryStart, queryEnd, variants);
+
                                 success(variants);
                             }
                             else {
@@ -88,6 +84,41 @@ var igv = (function (igv) {
 
             loadFeatures.call(this);
         }
+    }
+
+
+    // Experimental linear index feature cache.
+    var FeatureCache = function (chr, start, end, features) {
+
+        var i, bin, lastBin;
+
+        this.chr = chr;
+        this.start = start;
+        this.end = end;
+        this.binSize = (end - start) / 100;
+        this.binIndeces = [0];
+        this.features = features;
+
+        lastBin = 0;
+        for (i = 0; i < features.length; i++) {
+            bin = Math.max(0, Math.floor((features[i].POS - this.start) / this.binSize));
+            if (bin > lastBin) {
+                this.binIndeces.push(i);
+                lastBin = bin;
+            }
+        }
+    }
+
+    FeatureCache.prototype.featuresBetween = function (start, end) {
+
+
+        var startBin = Math.max(0, Math.min(Math.floor((start - this.start) / this.binSize)-1, this.binIndeces.length - 1)),
+            endBin = Math.max(0, Math.min(Math.floor((end - this.start) / this.binSize), this.binIndeces.length - 1)),
+            startIdx = this.binIndeces[startBin],
+            endIdx = this.binIndeces[endBin];
+
+        return this.features; //.slice(startIdx, endIdx);
+
     }
 
 

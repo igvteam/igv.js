@@ -198,7 +198,7 @@ var igv = (function (igv) {
         });
 
         // Load ENCODE DataTables data and build markup for modal dialog.
-        encode.createEncodeDataTablesDataSet("test/data/cursor/encode/peaks.hg19.txt", function (dataSet) {
+        encode.createEncodeDataTablesDataSet("resources/peaks.hg19.txt", function (dataSet) {
 
             var encodeModalTable = $('#encodeModalTable'),
                 myDataTable = encodeModalTable.dataTable( {
