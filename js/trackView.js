@@ -21,7 +21,7 @@ var igv = (function (igv) {
             labelButton,
             trackFilterButtonDiv,
             popup,
-            rootObject = $(".igv-root-div");
+            rootObject = $(".igv-root-div").first();
 
         viewportHeight = track.height;
 
@@ -465,6 +465,7 @@ var igv = (function (igv) {
             e = $.event.fix(e);   // Sets pageX and pageY for browsers that don't support them
 
             var canvasCoords = igv.translateMouseCoordinates(e, canvas);
+            console.log("canvas " + canvasCoords.x + " " + canvasCoords.y);
 
             if (popupTimer) {
                 // Cancel previous timer
@@ -490,7 +491,7 @@ var igv = (function (igv) {
 
                         popupData = trackView.track.popupData(genomicLocation, canvasCoords.x - xOrigin, canvasCoords.y);
                         if (popupData && popupData.length > 0) {
-                            trackView.track.popover.show(rootX, rootY, igv.formatPopoverText(popupData));
+                            trackView.track.popover.show(rootX, rootY, igv.formatPopoverText(popupData), canvasCoords, { x : canvas.clientLeft, y : canvas.clientTop, width : canvas.clientWidth, height : canvas.clientHeight });
                         }
                         mouseDownX = undefined;
                     },

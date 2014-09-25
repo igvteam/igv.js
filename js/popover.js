@@ -54,15 +54,36 @@ var igv = (function (igv) {
         $(popoverDiv).hide();
     };
 
-    igv.Popover.prototype.show = function (popupx, popupy, content) {
+    igv.Popover.prototype.show = function (popupx, popupy, content, containerCoordinates, containerRect) {
+
+        var left,
+            top,
+            popupRect = {},
+            popoverDivObject;
 
         if (content) {
 
+
+            popoverDivObject = $(popoverDiv);
+
+
             popoverContentDiv.innerHTML = content;
 
-            $(popoverDiv).css({
-                "left": popupx + "px",
-                "top": popupy + "px"
+            popupRect = { x : popupx, y : popupy, width : popoverDivObject.outerWidth(), height : popoverDivObject.outerHeight() };
+
+            left = popupx;
+            if (containerCoordinates.x + popupRect.width > containerRect.width) {
+                left = popupx - popupRect.width;
+            }
+
+            top = popupy;
+            if (containerCoordinates.y + popupRect.height > containerRect.height) {
+                top = popupy - popupRect.height;
+            }
+
+            popoverDivObject.css({
+                "left": left + "px",
+                "top" : top  + "px"
             }).show();
 
         }
