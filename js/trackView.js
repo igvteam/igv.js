@@ -55,9 +55,6 @@ var igv = (function (igv) {
         this.controlCanvas = controlCanvas;
         this.controlCtx = controlCanvas.getContext("2d");
 
-
-        //    }
-
         // TODO - dat - this is so nothing breaks that is dependent on igv.controlPanelWidth
         igv.controlPanelWidth = controlDiv.clientWidth;
 
@@ -260,11 +257,7 @@ var igv = (function (igv) {
 
             canvas.onmousedown = function (e) {
 
-                var canvasCoords = translateMouseCoordinates(e, canvas),
-                    rootX = e.pageX - rootObject.offset().left,
-                    rootY = e.pageY - rootObject.offset().top;
-
-//                console.log("e.offsetX " + e.offsetX + " e.offsetY " + e.offsetY + " popup x " + (ppx + e.offsetX) + " popup y " + (ppy + e.offsetY));
+                var canvasCoords = translateMouseCoordinates(e, canvas);
 
                 if (trackView.track.popover) {
                     trackView.track.popover.hide();
@@ -280,6 +273,9 @@ var igv = (function (igv) {
             canvas.onmousemove = throttle(function (e) {
 
                 var coords = translateMouseCoordinates(e, canvas);
+                var pixels,
+                    pixelsEnd,
+                    viewPortWidth;
 
                 if (isMouseDown) {
 
@@ -289,6 +285,16 @@ var igv = (function (igv) {
 
                         if (referenceFrame.start < 0) {
                             referenceFrame.start = 0;
+                        } else {
+
+                            viewPortWidth = $(".igv-viewport-div").first().width();
+                            pixelsEnd = Math.floor( trackView.browser.cursorModel.framePixelWidth * trackView.browser.cursorModel.getRegionList().length );
+                            pixels = Math.floor( trackView.browser.referenceFrame.toPixels( referenceFrame.start ) + viewPortWidth );
+//                            console.log("pixels " + pixels + " end " + pixelsEnd);
+                            if (pixels >= pixelsEnd) {
+                                referenceFrame.start = trackView.browser.referenceFrame.toBP( pixelsEnd - viewPortWidth);
+                            }
+
                         }
 
                     }

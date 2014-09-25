@@ -14,19 +14,21 @@ var cursor = (function (cursor) {
 
     cursor.HorizontalScrollbar.prototype.update = function (cursorModel, referenceFrame) {
 
-        var horizontalScrollBar = $(".igv-horizontal-scrollbar-div").first(),
+        var horizontalScrollBarWidth = $(".igv-horizontal-scrollbar-div").first().width(),
             horizontalScrollBarDraggable = $(".igv-horizontal-scrollbar-draggable-div").first(),
             regionListLength = cursorModel.getRegionList().length,
             regionsOnScreen,
             left,
             width;
 
-        regionsOnScreen = horizontalScrollBar.width() / cursorModel.framePixelWidth;
+        // It is possible that horizontalScrollBarWidth/framePixelWidth results in a region count larger
+        // then the regionListLength so we need to clamp.
+        regionsOnScreen = Math.min(regionListLength, horizontalScrollBarWidth / cursorModel.framePixelWidth);
 
-        width = (regionsOnScreen/regionListLength) * horizontalScrollBar.width();
+        width = (regionsOnScreen/regionListLength) * horizontalScrollBarWidth;
 
         left = referenceFrame.toPixels( referenceFrame.start );
-        left *= (width / horizontalScrollBar.width());
+        left *= (width / horizontalScrollBarWidth);
 
         $( horizontalScrollBarDraggable).css({
             "left": Math.floor( left ) + "px",

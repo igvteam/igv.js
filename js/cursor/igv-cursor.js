@@ -195,9 +195,7 @@ var igv = (function (igv) {
 
             window.onresize = throttle(function () {
 
-                var trackDivWidth,
-                    viewportDivWidth,
-                    percent;
+                var percent;
 
                 if (browser.ideoPanel) {
                     browser.ideoPanel.resize();
@@ -260,7 +258,12 @@ var igv = (function (igv) {
 
                 browser.zoomOut = function () {
 
-                    browser.cursorModel.framePixelWidth /= 2;
+                    var thresholdFramePixelWidth = $(".igv-viewport-div").first().width() / browser.cursorModel.getRegionList().length;
+
+                    browser.cursorModel.framePixelWidth = Math.max(thresholdFramePixelWidth, browser.cursorModel.framePixelWidth/2.0);
+
+//                    console.log("candidate " + browser.cursorModel.framePixelWidth + " threshold " + thresholdFramePixelWidth);
+
                     $( "input[id='frameWidthInput']" ).val( browser.cursorModel.framePixelWidth );
 
                     browser.update();
