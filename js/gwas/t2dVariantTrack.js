@@ -42,7 +42,7 @@ var igv = (function (igv) {
             track = this,
             chr = refFrame.chr,
             yScale = (track.maxLogP - track.minLogP) / pixelHeight,
-            enablePopover = (bpEnd - bpStart) < 1000000;
+            enablePopover = (bpEnd - bpStart) < 10000000;
 
         if (enablePopover) {
             this.po = [];

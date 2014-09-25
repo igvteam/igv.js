@@ -99,7 +99,7 @@ var igv = (function (igv) {
         nameValueArray.forEach(function (nameValue) {
 
             if(nameValue.name) {
-                markup += "<tr><td style='padding-right: 5px'><span class=\"popoverContentSpan\">" + nameValue.name + ":</span> </td><td>" + nameValue.value + "</td></tr>";
+                markup += "<tr><td>" + nameValue.name + ":&nbsp; " + nameValue.value + "</td></tr>";
             }
             else {
                 // not a name/value pair
