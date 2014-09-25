@@ -97,11 +97,13 @@ var igv = (function (igv) {
 
         var markup = "<table>";
         nameValueArray.forEach(function (nameValue) {
-            markup += "<tr><td><span class=\"popoverContentSpan\">" + nameValue.name + ":</span> </td><td>" + nameValue.value + "</td></tr>";
+            markup += "<tr><td><span class=\"popoverContentSpan\">" + nameValue.name + ":</span> </td><td style='padding: 5px'>" + nameValue.value + "</td></tr>";
         });
 
         markup += "</table>"
         return markup;
+
+
 
     }
 
