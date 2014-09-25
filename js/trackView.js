@@ -432,17 +432,21 @@ var igv = (function (igv) {
 
                     referenceFrame.shiftPixels(lastMouseX - coords.x);
 
-                    if (referenceFrame.start < 0) {
-                        referenceFrame.start = 0;
-                    } else {
+                    // clamp left
+                    referenceFrame.start = Math.max(0, referenceFrame.start);
 
+                    // clamp right
+                    if (trackView.browser.cursorModel) {
+
+                        // CURSOR track clamping
                         viewPortWidth = $(".igv-viewport-div").first().width();
                         pixelsEnd = Math.floor( trackView.browser.cursorModel.framePixelWidth * trackView.browser.cursorModel.getRegionList().length );
                         pixels = Math.floor( trackView.browser.referenceFrame.toPixels( referenceFrame.start ) + viewPortWidth );
-//                            console.log("pixels " + pixels + " end " + pixelsEnd);
+
                         if (pixels >= pixelsEnd) {
                             referenceFrame.start = trackView.browser.referenceFrame.toBP( pixelsEnd - viewPortWidth);
                         }
+
 
                     }
 

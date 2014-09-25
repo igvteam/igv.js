@@ -181,7 +181,9 @@ var igv = (function (igv) {
             trackView.repaint();
         });
 
-        this.horizontalScrollbar.update(this.cursorModel, this.referenceFrame);
+        if (this.cursorModel) {
+            this.horizontalScrollbar.update(this.cursorModel, this.referenceFrame);
+        }
 
     };
 
@@ -200,8 +202,9 @@ var igv = (function (igv) {
 
         });
 
-        this.horizontalScrollbar.update(this.cursorModel, this.referenceFrame);
-
+        if (this.cursorModel) {
+            this.horizontalScrollbar.update(this.cursorModel, this.referenceFrame);
+        }
     };
 
     /**

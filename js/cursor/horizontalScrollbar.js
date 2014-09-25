@@ -6,8 +6,9 @@
  */
 var cursor = (function (cursor) {
 
-    cursor.HorizontalScrollbar = function (parentDivObject) {
+    cursor.HorizontalScrollbar = function (browser, parentDivObject) {
 
+        this.browser = browser;
         this.markupWithParentDivObject(parentDivObject);
 
     };
@@ -35,7 +36,7 @@ var cursor = (function (cursor) {
             "width": Math.floor( width ) + "px"
         });
 
-//        console.log("HorizontalScrollbar.update regions on screen " + regionsOnScreen + " scrollbar width " + width);
+        console.log("regions - on screen " + Math.floor(regionsOnScreen) + " total " + regionListLength);
 
      };
 
