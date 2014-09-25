@@ -55,6 +55,9 @@ var igv = (function (igv) {
         this.controlCanvas = controlCanvas;
         this.controlCtx = controlCanvas.getContext("2d");
 
+
+        //    }
+
         // TODO - dat - this is so nothing breaks that is dependent on igv.controlPanelWidth
         igv.controlPanelWidth = controlDiv.clientWidth;
 
@@ -222,189 +225,6 @@ var igv = (function (igv) {
 
         addTrackHandlers(this);
 
-<<<<<<< caac8435bc77aff070af86718c14b991880daa3b
-        function removeTrackView(trackView) {
-
-            var array = browser.trackPanels;
-            array.splice(array.indexOf(trackView), 1);
-
-            browser.trackContainerDiv.removeChild(trackView.trackDiv);
-
-            browser.rootHeight = 0;
-            browser.trackPanels.forEach(function (panel) {
-                panel.trackDiv.style.top = browser.rootHeight + "px";
-                browser.rootHeight += panel.trackDiv.clientHeight;
-
-                browser.div.style.height = browser.rootHeight + 165 + "px";
-            });
-
-            // We removed a track. This removes it's filter. Must
-            // now update filter chain application
-            if (browser.type === "CURSOR") {
-                browser.cursorModel.filterRegions();
-            }
-        }
-
-        function addTrackHandlers(trackView) {
-
-            var isMouseDown = false,
-                lastMouseX = undefined,
-                mouseDownX = undefined,
-                referenceFrame = trackView.browser.referenceFrame,
-                canvas = trackView.canvas,
-                dragThreshold = 3,
-                popupTimer = undefined;
-
-            canvas.onmousedown = function (e) {
-
-                var canvasCoords = translateMouseCoordinates(e, canvas);
-
-                if (trackView.track.popover) {
-                    trackView.track.popover.hide();
-                }
-
-                isMouseDown = true;
-                lastMouseX = canvasCoords.x;
-                mouseDownX = lastMouseX;
-
-
-            };
-
-            canvas.onmousemove = throttle(function (e) {
-
-                var coords = translateMouseCoordinates(e, canvas);
-                var pixels,
-                    pixelsEnd,
-                    viewPortWidth;
-
-                if (isMouseDown) {
-
-                    if (mouseDownX && Math.abs(coords.x - mouseDownX) > dragThreshold) {
-
-                        referenceFrame.shiftPixels(lastMouseX - coords.x);
-
-                        if (referenceFrame.start < 0) {
-                            referenceFrame.start = 0;
-                        } else {
-
-                            viewPortWidth = $(".igv-viewport-div").first().width();
-                            pixelsEnd = Math.floor( trackView.browser.cursorModel.framePixelWidth * trackView.browser.cursorModel.getRegionList().length );
-                            pixels = Math.floor( trackView.browser.referenceFrame.toPixels( referenceFrame.start ) + viewPortWidth );
-//                            console.log("pixels " + pixels + " end " + pixelsEnd);
-                            if (pixels >= pixelsEnd) {
-                                referenceFrame.start = trackView.browser.referenceFrame.toBP( pixelsEnd - viewPortWidth);
-                            }
-
-                        }
-
-                    }
-
-                    lastMouseX = coords.x;
-
-                    trackView.browser.repaint();
-                }
-
-            }, 20);
-
-            canvas.onmouseup = function (e) {
-
-                e = $.event.fix(e);   // Sets pageX and pageY for browsers that don't support them
-
-                var canvasCoords = translateMouseCoordinates(e, canvas);
-
-                if (popupTimer) {
-                    // Cancel previous timer
-                    window.clearTimeout(popupTimer);
-                    popupTimer = undefined;
-                }
-
-                if (Math.abs(canvasCoords.x - mouseDownX) <= dragThreshold && trackView.track.popupData) {
-                    popupTimer = window.setTimeout(function () {
-
-                            var rootX = e.pageX - rootObject.offset().left,
-                                rootY = e.pageY - rootObject.offset().top,
-                                popupData,
-                                genomicLocation = trackView.genomicCoordinateWithEventTap(e),
-                                xOffset = Math.round((trackView.tile.startBP - trackView.browser.referenceFrame.start) / trackView.browser.referenceFrame.bpPerPixel);
-
-                            if (undefined === genomicLocation) {
-                                return;
-                            }
-
-                            popupData = trackView.track.popupData(genomicLocation, canvasCoords.x - xOffset, canvasCoords.y);
-                            if (popupData && popupData.length > 0) {
-                                trackView.track.popover.show(rootX, rootY, igv.formatPopoverText(popupData));
-                            }
-                            mouseDownX = undefined;
-                        },
-                        500);
-                }
-                else {
-                    mouseDownX = undefined;
-                }
-
-
-                isMouseDown = false;
-                lastMouseX = undefined;
-
-            };
-
-            canvas.onmouseout = function (e) {
-                isMouseDown = false;
-                lastMouseX = undefined;
-                mouseDownX = undefined;
-            };
-
-            canvas.ondblclick = function (e) {
-
-                e = $.event.fix(e);   // Sets pageX and pageY for browsers that don't support them
-
-                var canvasCoords = translateMouseCoordinates(e, canvas);
-
-                if (popupTimer) {
-                    window.clearTimeout(popupTimer);
-                    popupTimer = undefined;
-
-                }
-
-                if (trackView.track.handleDblClick) {
-                    trackView.track.handleDblClick(dx, dy, trackView.viewportDiv);
-                }
-                else {
-                    var newCenter = Math.round(trackView.browser.referenceFrame.start + canvasCoords.x * trackView.browser.referenceFrame.bpPerPixel);
-                    referenceFrame.bpPerPixel /= 2;
-                    trackView.browser.goto(trackView.browser.referenceFrame.chr, newCenter);
-                }
-            };
-
-        }
-
-        /**
-         * Translate the mouse coordinates for the event to the coordinates for the given target element
-         * @param e
-         * @param target
-         * @returns {{x: number, y: number}}
-         */
-        function translateMouseCoordinates(e, target) {
-
-            var eFixed = $.event.fix(e),   // Sets pageX and pageY for browsers that don't support them
-                posx = eFixed.pageX - $(target).offset().left,
-                posy = eFixed.pageY - $(target).offset().top;
-
-            return {x: posx, y: posy}
-
-        };
-
-    };
-
-    igv.TrackView.prototype.genomicCoordinateWithEventTap = function (event) {
-
-        var pixels = event.clientX - $(this.canvas).offset().left;
-
-        // Add one to convert from 0-based internal coords. to 1-based genomic coords.
-        return Math.floor((this.browser.referenceFrame.start) + this.browser.referenceFrame.toBP(pixels));
-=======
->>>>>>> 86111edefa37ed86591d6f8a719eee843e32fd1a
 
     };
 
@@ -601,7 +421,10 @@ var igv = (function (igv) {
 
         canvas.onmousemove = igv.throttle(function (e) {
 
-            var coords = igv.translateMouseCoordinates(e, canvas);
+            var coords = igv.translateMouseCoordinates(e, canvas),
+                pixels,
+                pixelsEnd,
+                viewPortWidth;
 
             if (isMouseDown) { // Possibly dragging
 
@@ -611,6 +434,16 @@ var igv = (function (igv) {
 
                     if (referenceFrame.start < 0) {
                         referenceFrame.start = 0;
+                    } else {
+
+                        viewPortWidth = $(".igv-viewport-div").first().width();
+                        pixelsEnd = Math.floor( trackView.browser.cursorModel.framePixelWidth * trackView.browser.cursorModel.getRegionList().length );
+                        pixels = Math.floor( trackView.browser.referenceFrame.toPixels( referenceFrame.start ) + viewPortWidth );
+//                            console.log("pixels " + pixels + " end " + pixelsEnd);
+                        if (pixels >= pixelsEnd) {
+                            referenceFrame.start = trackView.browser.referenceFrame.toBP( pixelsEnd - viewPortWidth);
+                        }
+
                     }
 
                     trackView.browser.repaint();
