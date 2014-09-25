@@ -78,11 +78,12 @@ var igv = (function (igv) {
      */
     igv.formatPopoverText = function (nameValueArray) {
 
-        var markup = "";
+        var markup = "<table>";
         nameValueArray.forEach(function (nameValue) {
-            markup += "<span class=\"popoverContentSpan\">" + nameValue.name + "</span> " + nameValue.value + "<br>";
+            markup += "<tr><td><span class=\"popoverContentSpan\">" + nameValue.name + ":</span> </td><td>" + nameValue.value + "</td></tr>";
         });
 
+        markup += "</table>"
         return markup;
 
     }

@@ -137,14 +137,21 @@ var igv = (function (igv) {
 
         var i, len, dist, p;
 
-        if (!this.po) return null;
-
-        for (i = 0, len = this.po.length; i<len; i++) {
-            p = this.po[i];
-            if (Math.abs(xOffset - p.x) < this.dotSize && Math.abs(yOffset - p.y) < this.dotSize) {
-                return p.feature;
+        if (this.po) {
+            for (i = 0, len = this.po.length; i < len; i++) {
+                p = this.po[i];
+                if (Math.abs(xOffset - p.x) < this.dotSize && Math.abs(yOffset - p.y) < this.dotSize) {
+                    return [
+                        {name: 'Position', value: p.feature.CHROM + p.feature.POS},
+                        {name: 'DB Snp', value: p.feature.DBSNP_ID},
+                        {name: 'Closest Gene', value: p.feature.CLOSEST_GENE},
+                        {name: 'pValue', value: p.feature.PVALUE}
+                    ];
+                }
             }
         }
+
+        return null;
 
     }
 
