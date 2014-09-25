@@ -45,7 +45,7 @@ var igv = (function (igv) {
             };
 
 
-        };
+        }
 
     };
 

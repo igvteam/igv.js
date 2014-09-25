@@ -465,7 +465,7 @@ var igv = (function (igv) {
             e = $.event.fix(e);   // Sets pageX and pageY for browsers that don't support them
 
             var canvasCoords = igv.translateMouseCoordinates(e, canvas);
-            console.log("canvas " + canvasCoords.x + " " + canvasCoords.y);
+//            console.log("canvas " + canvasCoords.x + " " + canvasCoords.y);
 
             if (popupTimer) {
                 // Cancel previous timer
@@ -477,7 +477,8 @@ var igv = (function (igv) {
                 const doubleClickDelay = 300;
                 popupTimer = window.setTimeout(function () {
 
-                        var rootX = e.pageX - rootObject.offset().left,
+                        var popupRepositionHitTestRect = { x : 0, y : 0, width : $(window).width(), height : $(window).height() },
+                            rootX = e.pageX - rootObject.offset().left,
                             rootY = e.pageY - rootObject.offset().top,
                             popupData,
                             genomicLocation = Math.floor((referenceFrame.start) + referenceFrame.toBP(canvasCoords.x)),
@@ -491,7 +492,7 @@ var igv = (function (igv) {
 
                         popupData = trackView.track.popupData(genomicLocation, canvasCoords.x - xOrigin, canvasCoords.y);
                         if (popupData && popupData.length > 0) {
-                            trackView.track.popover.show(rootX, rootY, igv.formatPopoverText(popupData), canvasCoords, { x : canvas.clientLeft, y : canvas.clientTop, width : canvas.clientWidth, height : canvas.clientHeight });
+                            trackView.track.popover.show(rootX, rootY, igv.formatPopoverText(popupData), { x : e.pageX - $(window).scrollLeft(), y : e.pageY - $(window).scrollTop() }, popupRepositionHitTestRect);
                         }
                         mouseDownX = undefined;
                     },
