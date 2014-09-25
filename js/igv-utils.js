@@ -74,6 +74,23 @@ var igv = (function (igv) {
 
 
     /**
+     * Translate the mouse coordinates for the event to the coordinates for the given target element
+     * @param e
+     * @param target
+     * @returns {{x: number, y: number}}
+     */
+    igv.translateMouseCoordinates = function (e, target) {
+
+        var eFixed = $.event.fix(e),   // Sets pageX and pageY for browsers that don't support them
+            posx = eFixed.pageX - $(target).offset().left,
+            posy = eFixed.pageY - $(target).offset().top;
+
+        return {x: posx, y: posy}
+
+    };
+
+
+    /**
      * Format markup for popover text from an array of name value pairs [{name, value}]
      */
     igv.formatPopoverText = function (nameValueArray) {
@@ -86,6 +103,31 @@ var igv = (function (igv) {
         markup += "</table>"
         return markup;
 
+    }
+
+
+
+     igv.throttle = function (fn, threshhold, scope) {
+        threshhold || (threshhold = 200);
+        var last, deferTimer;
+
+        return function () {
+            var context = scope || this;
+
+            var now = +new Date,
+                args = arguments;
+            if (last && now < last + threshhold) {
+                // hold on to it
+                clearTimeout(deferTimer);
+                deferTimer = setTimeout(function () {
+                    last = now;
+                    fn.apply(context, args);
+                }, threshhold);
+            } else {
+                last = now;
+                fn.apply(context, args);
+            }
+        }
     }
 
 

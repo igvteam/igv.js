@@ -259,7 +259,7 @@ var igv = (function (igv) {
             // TODO: Needs to be a better way to grab the right track and change this
             browser.trackPanels[browser.trackPanels.length - 1].order = 10000;
 
-            window.onresize = throttle(function () {
+            window.onresize = igv.throttle(function () {
                 if (browser.ideoPanel) browser.ideoPanel.resize();
                 browser.trackPanels.forEach(function (panel) {
                     panel.resize();
@@ -398,28 +398,6 @@ var igv = (function (igv) {
         return browser;
     }
 
-    function throttle(fn, threshhold, scope) {
-        threshhold || (threshhold = 100);
-        var last, deferTimer;
-
-        return function () {
-            var context = scope || this;
-
-            var now = +new Date,
-                args = arguments;
-            if (last && now < last + threshhold) {
-                // hold on to it
-                clearTimeout(deferTimer);
-                deferTimer = setTimeout(function () {
-                    last = now;
-                    fn.apply(context, args);
-                }, threshhold);
-            } else {
-                last = now;
-                fn.apply(context, args);
-            }
-        }
-    }
 
     igv.GtexSelection = function (selection) {
 

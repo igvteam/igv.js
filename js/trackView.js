@@ -165,7 +165,6 @@ var igv = (function (igv) {
             closeButton.style.cursor = "pointer";
             closeButton.onclick = function () {
 
-//                removeTrackView(trackView);
                 browser.removeTrack(track);
 
                 // We removed a track. This removes it's filter. Must update filter chain application
@@ -223,6 +222,7 @@ var igv = (function (igv) {
 
         addTrackHandlers(this);
 
+<<<<<<< caac8435bc77aff070af86718c14b991880daa3b
         function removeTrackView(trackView) {
 
             var array = browser.trackPanels;
@@ -403,6 +403,8 @@ var igv = (function (igv) {
 
         // Add one to convert from 0-based internal coords. to 1-based genomic coords.
         return Math.floor((this.browser.referenceFrame.start) + this.browser.referenceFrame.toBP(pixels));
+=======
+>>>>>>> 86111edefa37ed86591d6f8a719eee843e32fd1a
 
     };
 
@@ -570,28 +572,131 @@ var igv = (function (igv) {
         return hit;
     };
 
-    function throttle(fn, threshhold, scope) {
-        threshhold || (threshhold = 200);
-        var last, deferTimer;
 
-        return function () {
-            var context = scope || this;
+    function addTrackHandlers(trackView) {
 
-            var now = +new Date,
-                args = arguments;
-            if (last && now < last + threshhold) {
-                // hold on to it
-                clearTimeout(deferTimer);
-                deferTimer = setTimeout(function () {
-                    last = now;
-                    fn.apply(context, args);
-                }, threshhold);
-            } else {
-                last = now;
-                fn.apply(context, args);
+        var isMouseDown = false,
+            lastMouseX = undefined,
+            mouseDownX = undefined,
+            referenceFrame = trackView.browser.referenceFrame,
+            canvas = trackView.canvas,
+            dragThreshold = 3,
+            popupTimer = undefined,
+            rootObject = $(".igv-root-div");
+
+        canvas.onmousedown = function (e) {
+
+            var canvasCoords = igv.translateMouseCoordinates(e, canvas);
+
+            if (trackView.track.popover) {
+                trackView.track.popover.hide();
             }
-        }
+
+            isMouseDown = true;
+            lastMouseX = canvasCoords.x;
+            mouseDownX = lastMouseX;
+
+
+        };
+
+        canvas.onmousemove = igv.throttle(function (e) {
+
+            var coords = igv.translateMouseCoordinates(e, canvas);
+
+            if (isMouseDown) { // Possibly dragging
+
+                if (mouseDownX && Math.abs(coords.x - mouseDownX) > dragThreshold) {
+
+                    referenceFrame.shiftPixels(lastMouseX - coords.x);
+
+                    if (referenceFrame.start < 0) {
+                        referenceFrame.start = 0;
+                    }
+
+                    trackView.browser.repaint();
+                }
+
+                lastMouseX = coords.x;
+
+            }
+
+        }, 20);
+
+
+        canvas.onmouseup = function (e) {
+
+            e = $.event.fix(e);   // Sets pageX and pageY for browsers that don't support them
+
+            var canvasCoords = igv.translateMouseCoordinates(e, canvas);
+
+            if (popupTimer) {
+                // Cancel previous timer
+                window.clearTimeout(popupTimer);
+                popupTimer = undefined;
+            }
+
+            if (Math.abs(canvasCoords.x - mouseDownX) <= dragThreshold && trackView.track.popupData) {
+                popupTimer = window.setTimeout(function () {
+
+                        var rootX = e.pageX - rootObject.offset().left,
+                            rootY = e.pageY - rootObject.offset().top,
+                            popupData,
+                            genomicLocation = Math.floor((referenceFrame.start) + referenceFrame.toBP(canvasCoords.x));
+
+                        xOffset = Math.round((trackView.tile.startBP - referenceFrame.start) / referenceFrame.bpPerPixel);
+
+                        if (undefined === genomicLocation) {
+                            return;
+                        }
+
+                        popupData = trackView.track.popupData(genomicLocation, canvasCoords.x - xOffset, canvasCoords.y);
+                        if (popupData && popupData.length > 0) {
+                            trackView.track.popover.show(rootX, rootY, igv.formatPopoverText(popupData));
+                        }
+                        mouseDownX = undefined;
+                    },
+                    500);
+            }
+            else {
+                mouseDownX = undefined;
+            }
+
+
+            isMouseDown = false;
+            lastMouseX = undefined;
+
+        };
+
+        canvas.onmouseout = function (e) {
+            isMouseDown = false;
+            lastMouseX = undefined;
+            mouseDownX = undefined;
+        };
+
+        canvas.ondblclick = function (e) {
+
+            e = $.event.fix(e);   // Sets pageX and pageY for browsers that don't support them
+
+            var canvasCoords = igv.translateMouseCoordinates(e, canvas);
+
+            if (popupTimer) {
+                window.clearTimeout(popupTimer);
+                popupTimer = undefined;
+
+            }
+
+            if (trackView.track.handleDblClick) {
+                trackView.track.handleDblClick(dx, dy, trackView.viewportDiv);
+            }
+            else {
+                var newCenter = Math.round(referenceFrame.start + canvasCoords.x * referenceFrame.bpPerPixel);
+                referenceFrame.bpPerPixel /= 2;
+                trackView.browser.goto(referenceFrame.chr, newCenter);
+            }
+        };
+
     }
+
 
     return igv;
 })

@@ -1,31 +1,6 @@
 var igv = (function (igv) {
 
 
-    // TODO -- this funtion should be in some utility file to avoid copies
-    function throttle(fn, threshhold, scope) {
-        threshhold || (threshhold = 100);
-        var last, deferTimer;
-
-        return function () {
-            var context = scope || this;
-
-            var now = +new Date,
-                args = arguments;
-            if (last && now < last + threshhold) {
-                // hold on to it
-                clearTimeout(deferTimer);
-                deferTimer = setTimeout(function () {
-                    last = now;
-                    fn.apply(context, args);
-                }, threshhold);
-            } else {
-                last = now;
-                fn.apply(context, args);
-            }
-        }
-    }
-
-
     /**
      * Create an igv.browser instance.  This object defines the public API for interacting with the genome browser.
      *
@@ -106,7 +81,7 @@ var igv = (function (igv) {
                     browser.search(options.locus);
                 }
 
-                window.onresize = throttle(function () {
+                window.onresize = igv.throttle(function () {
                     if (browser.ideoPanel) browser.ideoPanel.resize();
                     if (browser.karyoPanel) browser.karyoPanel.resize();
                     browser.trackPanels.forEach(function (panel) {
