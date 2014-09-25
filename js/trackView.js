@@ -55,9 +55,6 @@ var igv = (function (igv) {
         this.controlCanvas = controlCanvas;
         this.controlCtx = controlCanvas.getContext("2d");
 
-
-        //    }
-
         // TODO - dat - this is so nothing breaks that is dependent on igv.controlPanelWidth
         igv.controlPanelWidth = controlDiv.clientWidth;
 
@@ -278,7 +275,10 @@ var igv = (function (igv) {
 
             canvas.onmousemove = throttle(function (e) {
 
-                var dx = e.clientX - $(canvas).offset().left;
+                var pixels,
+                    pixelsEnd,
+                    viewPortWidth;
+                    dx = e.clientX - $(canvas).offset().left;
 
                 if (isMouseDown) {
 
@@ -288,6 +288,16 @@ var igv = (function (igv) {
 
                         if (referenceFrame.start < 0) {
                             referenceFrame.start = 0;
+                        } else {
+
+                            viewPortWidth = $(".igv-viewport-div").first().width();
+                            pixelsEnd = Math.floor( trackView.browser.cursorModel.framePixelWidth * trackView.browser.cursorModel.getRegionList().length );
+                            pixels = Math.floor( trackView.browser.referenceFrame.toPixels( referenceFrame.start ) + viewPortWidth );
+//                            console.log("pixels " + pixels + " end " + pixelsEnd);
+                            if (pixels >= pixelsEnd) {
+                                referenceFrame.start = trackView.browser.referenceFrame.toBP( pixelsEnd - viewPortWidth);
+                            }
+
                         }
 
                     }
