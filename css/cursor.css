@@ -102,7 +102,34 @@ input[type='file'] {
     right: 0;
     font-family: Arial, Helvetica, sans-serif;
     font-size: medium;
-    /*background-color: darkcyan;*/
+    background-color: green;
+}
+
+.igv-horizontal-scrollbar-draggable-div {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 100px;
+    height:100%;
+    background-color: #888;
+}
+
+.igv-horizontal-scrollbar-div {
+    position: absolute;
+    top: 0;
+    right:0;
+    height:100%;
+    background-color: rgba(200, 200, 200, .2);
+    border: 1px solid #888;
+}
+
+.igv-horizontal-scrollbar-container-div {
+    position: absolute;
+    top: 0;
+    left:0;
+    height:50px;
+    width:100%;
+    /*opacity:0.52;*/
 }
 
 .igv-track-div {

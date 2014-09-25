@@ -7,129 +7,13 @@ var igv = (function (igv) {
             contentHeaderDiv = $('<div id="igvHeaderDiv" class="col-md-12" style="font-size:16px;"><span id="igvHeaderRegionDisplaySpan"></span></div>')[0],
             trackContainer = $('<div id="igvTrackContainerDiv" class="igv-track-container-div">')[0];
 
-        browser.startup = function () {
-
-            browser.genome = null;
-
-            browser.referenceFrame = null;
-
-            browser.controlPanelWidth = 50;
-
-            browser.trackContainerDiv = trackContainer;
-
-            browser.trackPanels = [];
-
-            initCursor();
-
-            window.onresize = throttle(function () {
-                if (browser.ideoPanel) browser.ideoPanel.resize();
-                browser.trackPanels.forEach(function (panel) {
-                    panel.resize();
-                })
-            }, 10);
-
-            function initCursor() {
-
-                var regionDisplayJQueryObject = $('#igvHeaderRegionDisplaySpan');
-
-                browser.cursorModel = new cursor.CursorModel(browser, regionDisplayJQueryObject);
-                browser.referenceFrame = new igv.ReferenceFrame("", 0, 1 / browser.cursorModel.framePixelWidth);
-
-                browser.setFrameWidth = function (frameWidthString) {
-
-                    var frameWidth = parseFloat(frameWidthString);
-                    if (frameWidth > 0) {
-
-                        browser.cursorModel.framePixelWidth = frameWidth;
-                        $( "input[id='frameWidthInput']" ).val( browser.cursorModel.framePixelWidth );
-
-                        browser.referenceFrame.bpPerPixel = 1 / frameWidth;
-                        browser.update();
-                    }
-                };
-
-                browser.setRegionSize = function (regionSizeString) {
-
-                    var regionSize = parseFloat(regionSizeString);
-                    if (regionSize > 0) {
-
-                        browser.cursorModel.regionWidth = regionSize;
-                        browser.update();
-                    }
-
-                };
-
-                browser.zoomIn = function () {
-
-                    browser.cursorModel.framePixelWidth *= 2;
-                    $( "input[id='frameWidthInput']" ).val( browser.cursorModel.framePixelWidth );
-
-                    browser.update();
-                };
-
-                browser.zoomOut = function () {
-
-                    browser.cursorModel.framePixelWidth /= 2;
-                    $( "input[id='frameWidthInput']" ).val( browser.cursorModel.framePixelWidth );
-
-                    browser.update();
-                };
-
-                browser.fitToScreen = function () {
-
-                    var regionCount, frameWidth;
-
-                    if (!(browser.cursorModel && browser.cursorModel.regions)) return;
-
-                    regionCount = browser.cursorModel.getRegionList().length;
-
-                    if (regionCount > 0) {
-                        frameWidth = (browser.trackContainerDiv.clientWidth - browser.controlPanelWidth) / regionCount;
-                        browser.referenceFrame.start = 0;
-                        browser.setFrameWidth(frameWidth);
-                        $('frameWidthBox').value = frameWidth;
-                    }
-                };
-
-                var tssUrl = "test/data/cursor/hg19.tss.bed.gz";
-                var peakURL = "test/data/cursor/wgEncodeBroadHistoneH1hescH3k4me3StdPk.broadPeak.gz";
-                var peak2URL = "test/data/cursor/wgEncodeBroadHistoneH1hescH3k27me3StdPk.broadPeak.gz";
-
-                var peakDataSource = new igv.BedFeatureSource(peakURL);
-                var peak2DataSource = new igv.BedFeatureSource(peak2URL);
-                var tssDataSource = new igv.BedFeatureSource(tssUrl);
-
-                var tssTrack = new cursor.CursorTrack(tssDataSource, browser.cursorModel, browser.referenceFrame, "TSS", 40);
-
-                var track1 = new cursor.CursorTrack(peakDataSource, browser.cursorModel, browser.referenceFrame, "H3k4me3 H1hesc", browser.trackHeight);
-                track1.color = "rgb(0,150,0)";
-
-                var track2 = new cursor.CursorTrack(peak2DataSource, browser.cursorModel, browser.referenceFrame, "H3k27me3 H1hesc", browser.trackHeight);
-                track2.color = "rgb(150,0,0)";
-
-                // Set the TSS track as the inital "selected" track (i.e. defines the regions)
-                tssDataSource.allFeatures(function (featureList) {
-
-                    browser.cursorModel.setRegions(featureList);
-
-                    browser.addTrack(tssTrack);
-
-                    browser.addTrack(track1);
-
-                    browser.addTrack(track2);
-
-                    tssTrack.labelButton.className = "btn btn-xs btn-cursor-selected";
-                });
-
-            }
-        };
-
         browser.div = $('<div id="igvRootDiv" class="igv-root-div">')[0];
         $(browser.div).append(contentHeader);
         $(contentHeader).append(contentHeaderDiv);
         $(browser.div).append(trackContainer);
         document.getElementById('igvContainerDiv').appendChild(browser.div);
 
+        browser.horizontalScrollbar = new cursor.HorizontalScrollbar( $(trackContainer) );
 
         // Append event handlers to DOM elements
         document.getElementById('zoomOut').onclick = function (e) {
@@ -294,6 +178,148 @@ var igv = (function (igv) {
 
         // Append resultant ENCODE DataTables markup
         $('#encodeModalBody').html( '<table cellpadding="0" cellspacing="0" border="0" class="display" id="encodeModalTable"></table>' );
+
+        browser.startup = function () {
+
+            browser.genome = null;
+
+            browser.referenceFrame = null;
+
+            browser.controlPanelWidth = 50;
+
+            browser.trackContainerDiv = trackContainer;
+
+            browser.trackPanels = [];
+
+            initCursor();
+
+            window.onresize = throttle(function () {
+
+                var trackDivWidth,
+                    viewportDivWidth,
+                    percent;
+
+                if (browser.ideoPanel) {
+                    browser.ideoPanel.resize();
+                }
+
+                browser.trackPanels.forEach(function (panel) {
+                    panel.resize();
+                });
+
+                if (browser.cursorModel) {
+
+                    percent = 100.0 * ($(".igv-viewport-div").first().width()/$(".igv-track-div").first().width());
+                    $(".igv-horizontal-scrollbar-div").css({
+                        "width" : percent + "%"
+                    });
+
+                }
+
+
+            }, 10);
+
+            function initCursor() {
+
+                var regionDisplayJQueryObject = $('#igvHeaderRegionDisplaySpan');
+
+                browser.cursorModel = new cursor.CursorModel(browser, regionDisplayJQueryObject);
+                browser.referenceFrame = new igv.ReferenceFrame("", 0, 1 / browser.cursorModel.framePixelWidth);
+
+                browser.setFrameWidth = function (frameWidthString) {
+
+                    var frameWidth = parseFloat(frameWidthString);
+                    if (frameWidth > 0) {
+
+                        browser.cursorModel.framePixelWidth = frameWidth;
+                        $( "input[id='frameWidthInput']" ).val( browser.cursorModel.framePixelWidth );
+
+                        browser.referenceFrame.bpPerPixel = 1 / frameWidth;
+                        browser.update();
+                    }
+                };
+
+                browser.setRegionSize = function (regionSizeString) {
+
+                    var regionSize = parseFloat(regionSizeString);
+                    if (regionSize > 0) {
+
+                        browser.cursorModel.regionWidth = regionSize;
+                        browser.update();
+                    }
+
+                };
+
+                browser.zoomIn = function () {
+
+                    browser.cursorModel.framePixelWidth *= 2;
+                    $( "input[id='frameWidthInput']" ).val( browser.cursorModel.framePixelWidth );
+
+                    browser.update();
+                };
+
+                browser.zoomOut = function () {
+
+                    browser.cursorModel.framePixelWidth /= 2;
+                    $( "input[id='frameWidthInput']" ).val( browser.cursorModel.framePixelWidth );
+
+                    browser.update();
+                };
+
+                browser.fitToScreen = function () {
+
+                    var regionCount,
+                        frameWidth;
+
+                    if (!(browser.cursorModel && browser.cursorModel.regions)) {
+                        return;
+                    }
+
+                    regionCount = browser.cursorModel.getRegionList().length;
+
+                    if (regionCount > 0) {
+//                        frameWidth = (browser.trackContainerDiv.clientWidth - browser.controlPanelWidth) / regionCount;
+                        frameWidth = $(".igv-viewport-div").first().width() / regionCount;
+                        browser.referenceFrame.start = 0;
+                        browser.setFrameWidth(frameWidth);
+                        $('frameWidthBox').value = frameWidth;
+                    }
+                };
+
+                var tssUrl = "test/data/cursor/hg19.tss.bed.gz";
+                var peakURL = "test/data/cursor/wgEncodeBroadHistoneH1hescH3k4me3StdPk.broadPeak.gz";
+                var peak2URL = "test/data/cursor/wgEncodeBroadHistoneH1hescH3k27me3StdPk.broadPeak.gz";
+
+                var peakDataSource = new igv.BedFeatureSource(peakURL);
+                var peak2DataSource = new igv.BedFeatureSource(peak2URL);
+                var tssDataSource = new igv.BedFeatureSource(tssUrl);
+
+                var tssTrack = new cursor.CursorTrack(tssDataSource, browser.cursorModel, browser.referenceFrame, "TSS", 40);
+
+                var track1 = new cursor.CursorTrack(peakDataSource, browser.cursorModel, browser.referenceFrame, "H3k4me3 H1hesc", browser.trackHeight);
+                track1.color = "rgb(0,150,0)";
+
+                var track2 = new cursor.CursorTrack(peak2DataSource, browser.cursorModel, browser.referenceFrame, "H3k27me3 H1hesc", browser.trackHeight);
+                track2.color = "rgb(150,0,0)";
+
+                // Set the TSS track as the inital "selected" track (i.e. defines the regions)
+                tssDataSource.allFeatures(function (featureList) {
+
+                    browser.cursorModel.setRegions(featureList);
+
+                    browser.addTrack(tssTrack);
+
+                    browser.addTrack(track1);
+
+                    browser.addTrack(track2);
+
+                    tssTrack.labelButton.className = "btn btn-xs btn-cursor-selected";
+
+                    browser.horizontalScrollbar.update(browser.cursorModel, browser.referenceFrame);
+                });
+
+            }
+        };
 
         return browser;
     };

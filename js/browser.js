@@ -138,7 +138,9 @@ var igv = (function (igv) {
 
     igv.Browser.prototype.layoutTrackPanels = function (trackPanels) {
 
-        var changingRootHeight;
+        var percent,
+            changingRootHeight = 0;
+
         trackPanels.forEach(function (tp, index, tps) {
 
             if (0 === index) {
@@ -150,6 +152,19 @@ var igv = (function (igv) {
             }
 
         });
+
+        if (this.cursorModel) {
+
+            $(".igv-horizontal-scrollbar-container-div").css({
+                "top" : changingRootHeight + "px"
+            });
+
+            percent = 100.0 * ($(".igv-viewport-div").first().width()/$(".igv-track-div").first().width());
+            $(".igv-horizontal-scrollbar-div").css({
+                "width" : percent + "%"
+            });
+
+        }
 
     };
 
@@ -165,6 +180,9 @@ var igv = (function (igv) {
         this.trackPanels.forEach(function (trackView) {
             trackView.repaint();
         });
+
+        this.horizontalScrollbar.update(this.cursorModel, this.referenceFrame);
+
     };
 
     igv.Browser.prototype.update = function () {
@@ -181,6 +199,9 @@ var igv = (function (igv) {
             trackPanel.update();
 
         });
+
+        this.horizontalScrollbar.update(this.cursorModel, this.referenceFrame);
+
     };
 
     /**
