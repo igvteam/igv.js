@@ -262,7 +262,7 @@ var igv = (function (igv) {
 
                     browser.cursorModel.framePixelWidth = Math.max(thresholdFramePixelWidth, browser.cursorModel.framePixelWidth/2.0);
 
-                    console.log("candidate " + browser.cursorModel.framePixelWidth + " threshold " + thresholdFramePixelWidth);
+//                    console.log("candidate " + browser.cursorModel.framePixelWidth + " threshold " + thresholdFramePixelWidth);
 
                     $( "input[id='frameWidthInput']" ).val( browser.cursorModel.framePixelWidth );
 
