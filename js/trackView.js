@@ -478,15 +478,16 @@ var igv = (function (igv) {
                         var rootX = e.pageX - rootObject.offset().left,
                             rootY = e.pageY - rootObject.offset().top,
                             popupData,
-                            genomicLocation = Math.floor((referenceFrame.start) + referenceFrame.toBP(canvasCoords.x));
-
-                        xOffset = Math.round((trackView.tile.startBP - referenceFrame.start) / referenceFrame.bpPerPixel);
+                            genomicLocation = Math.floor((referenceFrame.start) + referenceFrame.toBP(canvasCoords.x)),
+                            xOrigin;
 
                         if (undefined === genomicLocation) {
                             return;
                         }
 
-                        popupData = trackView.track.popupData(genomicLocation, canvasCoords.x - xOffset, canvasCoords.y);
+                        xOrigin = Math.round( referenceFrame.toPixels( (trackView.tile.startBP - referenceFrame.start) ));
+
+                        popupData = trackView.track.popupData(genomicLocation, canvasCoords.x - xOrigin, canvasCoords.y);
                         if (popupData && popupData.length > 0) {
                             trackView.track.popover.show(rootX, rootY, igv.formatPopoverText(popupData));
                         }
