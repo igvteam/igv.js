@@ -32,7 +32,7 @@ var igv = (function (igv) {
         $(contentRoot).append(trackContainer);
 
         // Popover object -- singleton shared by all components
-        igv.popover = new igv.Popover(browser.div);
+        igv.popover = new igv.Popover(contentRoot);
 
 
         browser.startup = function () {
