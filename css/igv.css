@@ -171,7 +171,6 @@ input[type='file'] {
     top: 40px;
     left: 0;
     right: 0;
-    /*background-color: darkseagreen;*/
 }
 
 .igv-track-container-div {
@@ -181,7 +180,6 @@ input[type='file'] {
     right: 0;
     font-family: Arial, Helvetica, sans-serif;
     font-size: medium;
-    /*background-color: darkcyan;*/
 }
 
 .igv-track-div {
@@ -189,7 +187,6 @@ input[type='file'] {
     left: 0;
     right: 0;
     height: 100%;
-    /*background-color: darkcyan;*/
 }
 
 .igv-control-div {
@@ -209,7 +206,6 @@ input[type='file'] {
     height: 100%;
     overflow-x: hidden;
     overflow-y: auto;
-    /*background-color: darkcyan;*/
 }
 
 .igv-content-div {
@@ -271,7 +267,7 @@ input[type='file'] {
     top: 0;
     left: 0;
     width: 350px;
-    height: 240px;
+    /*height: 240px;*/
     z-index: 1000;
     font-family: Arial, Helvetica, sans-serif;
     font-size: medium;
@@ -288,8 +284,10 @@ input[type='file'] {
     top: 5px;
     left: 5px;
     right: 25px;
-    bottom: 5px;
+    /*bottom: 5px;*/
     background: #fff;
+    /*background: rgba(0, 255, 0, .5);*/
+    /*display: block;*/
 }
 
 .igv-popoverContent .popoverContentSpan {

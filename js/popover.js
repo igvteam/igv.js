@@ -58,16 +58,19 @@ var igv = (function (igv) {
         var igvRootDivObject = $("#igvRootDiv"),
             left,
             top,
+            height,
             containerCoordinates = { x : pageX - $(window).scrollLeft(), y : pageY - $(window).scrollTop() },
             containerRect = { x : 0, y : 0, width : $(window).width(), height : $(window).height() },
             popupRect = {},
             popoverDivObject,
+            popoverContentDivObject,
             popupx = pageX,
             popupy = pageY;
 
         if (content) {
 
-            popoverContentDiv.innerHTML = content;
+            popoverContentDivObject = $(popoverContentDiv);
+            popoverContentDivObject.html(content);
 
             popoverDivObject = $(popoverDiv);
             popupx -= igvRootDivObject.offset().left;
@@ -88,6 +91,12 @@ var igv = (function (igv) {
                 "left": left + "px",
                 "top" : top  + "px"
             }).show();
+
+            height = popoverContentDivObject.height() + 20;
+            popoverDivObject.css({
+                "height": height + "px"
+            });
+
 
         }
 
