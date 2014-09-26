@@ -107,12 +107,12 @@ var igv = (function (igv) {
             }
         });
 
-        markup += "</table>"
+        markup += "</table>";
         return markup;
 
 
 
-    }
+    };
 
 
 

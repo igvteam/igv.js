@@ -344,11 +344,16 @@ var igv = (function (igv) {
             if (readChar) {
 
                 nameValues.push({name: 'Sample', value: this.label});
+                nameValues.push({name: 'Read Name', value: alignmentHitTest.readName });
+
+                //
                 nameValues.push({name: 'Location', value: alignmentManager.genomicInterval.chr + ":" + igv.numberFormatter(genomicLocation)});
                 nameValues.push({name: 'Alignment Start', value: igv.numberFormatter(alignmentHitTest.start)});
                 nameValues.push({name: 'Read Strand', value: (true === alignmentHitTest.strand ? '(+)' : '(-)')});
                 nameValues.push({name: 'Cigar', value: alignmentHitTest.cigar});
                 nameValues.push({name: 'Mapping Quality', value: alignmentHitTest.mq });
+
+                //
                 nameValues.push({name: 'Base', value: readChar});
 
 //            refSeqIndex = genomicLocation - alignmentManager.coverageMap.bpStart;
