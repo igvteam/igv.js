@@ -16,6 +16,8 @@ var igv = (function (igv) {
         this.background = config.background || "rgb(245,245,245)";
         this.dotSize = config.dotSize || 3;
 
+        this.description = "hello world";
+
         var cs = config.colorScale || {
             thresholds: [5e-8, 5e-4, 0.5],
             colors: ["rgb(255,50,50)", "rgb(251,100,100)", "rgb(251,170,170)", "rgb(227,238,249)"]

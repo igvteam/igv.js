@@ -185,7 +185,7 @@ var igv = (function (igv) {
                 labelButton.innerHTML = track.label;
                 track.labelButton = labelButton;
 
-                labelButton.onclick = function () {
+                labelButton.onclick = function (e) {
 
                     if (browser.cursorModel) {
                         track.featureSource.allFeatures(function (featureList) {
@@ -200,7 +200,7 @@ var igv = (function (igv) {
 
                         browser.trackPanels.forEach(function (trackView) {
                             if (track !== trackView.track) {
-                                trackView.track.labelButton.className = "btn btn-xs btn-cursor-deselected";
+                                labelButton.className = "btn btn-xs btn-cursor-deselected";
                             }
                         });
 
@@ -209,7 +209,7 @@ var igv = (function (igv) {
                     else {
 
                         if(track.description) {
-
+                            igv.popover.show(track.description, $(labelButton).offset().left, $(labelButton).offset().top);
                         }
 
 
@@ -377,10 +377,6 @@ var igv = (function (igv) {
             this.ctx.save();
             this.ctx.restore();
         }
-    };
-
-    igv.TrackView.prototype.tooltipText = function (mouseX, mouseY) {
-        return "";
     };
 
     igv.TrackView.prototype.setSortButtonDisplay = function (onOff) {
