@@ -197,7 +197,6 @@ var igv = (function (igv) {
 
                         });
 
-
                         browser.trackPanels.forEach(function (trackView) {
                             if (track !== trackView.track) {
                                 labelButton.className = "btn btn-xs btn-cursor-deselected";
@@ -209,16 +208,12 @@ var igv = (function (igv) {
                     else {
 
                         if(track.description) {
-                            igv.popover.show(track.description, $(labelButton).offset().left, $(labelButton).offset().top);
+                            igv.popover.show(e.pageX, e.pageY, track.description, e);
                         }
-
 
                     }
 
-
-
                 }
-
 
             }
         }
@@ -478,9 +473,7 @@ var igv = (function (igv) {
                 const doubleClickDelay = 300;
                 popupTimer = window.setTimeout(function () {
 
-                        var rootX = e.pageX - rootObject.offset().left,
-                            rootY = e.pageY - rootObject.offset().top,
-                            popupData,
+                        var popupData,
                             genomicLocation = Math.floor((referenceFrame.start) + referenceFrame.toBP(canvasCoords.x)),
                             xOrigin;
 
@@ -492,7 +485,7 @@ var igv = (function (igv) {
 
                         popupData = trackView.track.popupData(genomicLocation, canvasCoords.x - xOrigin, canvasCoords.y);
                         if (popupData && popupData.length > 0) {
-                            igv.popover.show(rootX, rootY, igv.formatPopoverText(popupData), e);
+                            igv.popover.show(e.pageX, e.pageY, igv.formatPopoverText(popupData), e);
                         }
                         mouseDownX = undefined;
                     },

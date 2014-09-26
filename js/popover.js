@@ -55,7 +55,8 @@ var igv = (function (igv) {
 
     igv.Popover.prototype.show = function (popupx, popupy, content, event) {
 
-        var left,
+        var igvRootDivObject = $("#igvRootDiv"),
+            left,
             top,
             containerCoordinates = { x : event.pageX - $(window).scrollLeft(), y : event.pageY - $(window).scrollTop() },
             containerRect = { x : 0, y : 0, width : $(window).width(), height : $(window).height() },
@@ -64,10 +65,11 @@ var igv = (function (igv) {
 
         if (content) {
 
-            popoverDivObject = $(popoverDiv);
-
             popoverContentDiv.innerHTML = content;
 
+            popoverDivObject = $(popoverDiv);
+            popupx -= igvRootDivObject.offset().left;
+            popupy -= igvRootDivObject.offset().top;
             popupRect = { x : popupx, y : popupy, width : popoverDivObject.outerWidth(), height : popoverDivObject.outerHeight() };
 
             left = popupx;
