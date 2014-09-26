@@ -53,18 +53,18 @@ var igv = (function (igv) {
         $(popoverDiv).hide();
     };
 
-    igv.Popover.prototype.show = function (popupx, popupy, content, containerCoordinates, containerRect) {
+    igv.Popover.prototype.show = function (popupx, popupy, content, event) {
 
         var left,
             top,
+            containerCoordinates = { x : event.pageX - $(window).scrollLeft(), y : event.pageY - $(window).scrollTop() },
+            containerRect = { x : 0, y : 0, width : $(window).width(), height : $(window).height() },
             popupRect = {},
             popoverDivObject;
 
         if (content) {
 
-
             popoverDivObject = $(popoverDiv);
-
 
             popoverContentDiv.innerHTML = content;
 
