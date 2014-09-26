@@ -290,8 +290,28 @@ input[type='file'] {
     /*display: block;*/
 }
 
+.igv-popoverPointer {
+    position: absolute;
+    top: 0;
+    left: 0;
+    z-index: 5000;
+}
+
 .igv-popoverContent .popoverContentSpan {
     font-weight: bold;
+}
+
+.igv-popoverCloseElement {
+    position: absolute;
+    top: 4px;
+    right:4px;
+}
+
+.igv-popoverCloseFontAwesome {
+    position: absolute;
+    top: 0;
+    right:0;
+    color: #444;
 }
 
 .igv-popoverClose {
