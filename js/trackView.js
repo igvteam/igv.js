@@ -208,7 +208,7 @@ var igv = (function (igv) {
                     else {
 
                         if(track.description) {
-                            igv.popover.show(e.pageX, e.pageY, track.description, e);
+                            igv.popover.show(e.pageX, e.pageY, track.description);
                         }
 
                     }
@@ -485,7 +485,7 @@ var igv = (function (igv) {
 
                         popupData = trackView.track.popupData(genomicLocation, canvasCoords.x - xOrigin, canvasCoords.y);
                         if (popupData && popupData.length > 0) {
-                            igv.popover.show(e.pageX, e.pageY, igv.formatPopoverText(popupData), e);
+                            igv.popover.show(e.pageX, e.pageY, igv.formatPopoverText(popupData));
                         }
                         mouseDownX = undefined;
                     },
