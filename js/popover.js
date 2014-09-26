@@ -48,6 +48,19 @@ var igv = (function (igv) {
 
     };
 
+    igv.Popover.prototype.testData = function (rows) {
+        var i,
+            name,
+            nameValues = [];
+
+        for (i = 0; i < rows; i++) {
+            name = "name " + i;
+            nameValues.push( { name : name, value : "verbsgohuman" } );
+        }
+
+        return nameValues;
+    };
+
     igv.Popover.prototype.hide = function () {
 
         $(popoverDiv).hide();

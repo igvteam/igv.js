@@ -484,6 +484,9 @@ var igv = (function (igv) {
                         xOrigin = Math.round( referenceFrame.toPixels( (trackView.tile.startBP - referenceFrame.start) ));
 
                         popupData = trackView.track.popupData(genomicLocation, canvasCoords.x - xOrigin, canvasCoords.y);
+
+//                        popupData = igv.popover.testData( Math.floor( igv.random(2, 25) ) );
+
                         if (popupData && popupData.length > 0) {
                             igv.popover.show(e.pageX, e.pageY, igv.formatPopoverText(popupData));
                         }
