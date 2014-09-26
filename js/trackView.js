@@ -88,9 +88,6 @@ var igv = (function (igv) {
         canvas.setAttribute('width', contentWidth);    //Must set the width & height of the canvas
         canvas.setAttribute('height', contentHeight);
 
-        if (this.track.popupData) {
-            this.track.popover = new igv.Popover(rootObject[0], this);
-        }
 
         // filter  -- CURSOR only for now
         if (browser.type === "CURSOR") {
@@ -206,8 +203,19 @@ var igv = (function (igv) {
                                 trackView.track.labelButton.className = "btn btn-xs btn-cursor-deselected";
                             }
                         });
+
+                        labelButton.className = "btn btn-xs btn-cursor-selected";
                     }
-                    labelButton.className = "btn btn-xs btn-cursor-selected";
+                    else {
+
+                        if(track.description) {
+
+                        }
+
+
+                    }
+
+
 
                 }
 
@@ -408,9 +416,7 @@ var igv = (function (igv) {
 
             var canvasCoords = igv.translateMouseCoordinates(e, canvas);
 
-            if (trackView.track.popover) {
-                trackView.track.popover.hide();
-            }
+            igv.popover.hide();
 
             isMouseDown = true;
             lastMouseX = canvasCoords.x;
@@ -492,7 +498,7 @@ var igv = (function (igv) {
 
                         popupData = trackView.track.popupData(genomicLocation, canvasCoords.x - xOrigin, canvasCoords.y);
                         if (popupData && popupData.length > 0) {
-                            trackView.track.popover.show(rootX, rootY, igv.formatPopoverText(popupData), { x : e.pageX - $(window).scrollLeft(), y : e.pageY - $(window).scrollTop() }, popupRepositionHitTestRect);
+                            igv.popover.show(rootX, rootY, igv.formatPopoverText(popupData), { x : e.pageX - $(window).scrollLeft(), y : e.pageY - $(window).scrollTop() }, popupRepositionHitTestRect);
                         }
                         mouseDownX = undefined;
                     },

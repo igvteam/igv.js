@@ -31,6 +31,10 @@ var igv = (function (igv) {
         $(contentRoot).append(contentHeader);
         $(contentRoot).append(trackContainer);
 
+        // Popover object -- singleton shared by all components
+        igv.popover = new igv.Popover(browser.div);
+
+
         browser.startup = function () {
 
             browser.controlPanelWidth = 50;

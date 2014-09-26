@@ -7,9 +7,8 @@ var igv = (function (igv) {
         popoverCloseDiv,
         popoverContentDiv;
 
-    igv.Popover = function (parent, trackView) {
+    igv.Popover = function (parent) {
 
-        this.trackView = trackView;
 
         if (!popoverDiv) {
             markupWithParentDiv(parent);
