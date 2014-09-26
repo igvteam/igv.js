@@ -157,7 +157,7 @@ var igv = (function (igv) {
 
             closeButton = document.createElement("i");
             contentDiv.appendChild(closeButton);
-            closeButton.style.color = "black";
+            closeButton.style.color = "#222";
             closeButton.className = "fa fa-times-circle";
             closeButton.style.position = "absolute";
             closeButton.style.top = "5px";

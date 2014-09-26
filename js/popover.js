@@ -69,7 +69,7 @@ var igv = (function (igv) {
                     $(popoverCloseIcon).addClass   ("fa-times-circle fa-lg");
 
                     $(popoverCloseIcon).css({
-                        "color" : "#f00"
+                        "color" : "#222"
                     });
                 },
 
