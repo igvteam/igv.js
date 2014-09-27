@@ -171,7 +171,7 @@ var igv = (function (igv) {
                                 blocks = alignment.blocks,
                                 len = alignment.blocks.length,
                                 strand = alignment.strand,
-                                blocksBBoxLength = alignmentManager.alignmentBlocksBBoxLength(alignment);
+                                blocksBBoxLength = alignment.lengthOnRef;
 
                             if ((alignment.start + blocksBBoxLength) < bpStart) return;
                             if (alignment.start > bpEnd) return;
@@ -280,10 +280,10 @@ var igv = (function (igv) {
             packedAlignments = alignmentManager.genomicInterval.packedAlignments,
             packedAlignmentsIndex,
             alignmentRow,
-            alignmentHitTest,
+            alignment,
             readChar,
             nameValues = [],
-            tmp;
+            tmp, i, len;
 
         packedAlignmentsIndex = Math.floor((yOffset - (this.alignmentRowYInset + this.coverageTrackHeight)) / this.alignmentRowHeight);
 
@@ -330,34 +330,22 @@ var igv = (function (igv) {
 
             alignmentRow = packedAlignments[ packedAlignmentsIndex ];
 
-            readChar = undefined;
-            alignmentRow.forEach(function (alignment, alignmentIndex, alignments) {
+            alignment = undefined;
 
-                if (undefined === readChar) {
+            for (i = 0, len = alignmentRow.length; i < len; i++) {
 
-                    readChar = alignmentManager.alignmentBlockHitTest(alignment, genomicLocation);
-                    alignmentHitTest = alignment;
+                tmp = alignmentRow[i];
+
+                if (tmp.start <= genomicLocation && (tmp.start + tmp.lengthOnRef >= genomicLocation)) {
+                    alignment = tmp;
+                    break;
                 }
 
-            });
+            }
 
-            if (readChar) {
+            if (alignment) {
 
-                nameValues.push({name: 'Sample', value: this.label});
-                nameValues.push({name: 'Read Name', value: alignmentHitTest.readName });
-
-                //
-                nameValues.push({name: 'Location', value: alignmentManager.genomicInterval.chr + ":" + igv.numberFormatter(genomicLocation)});
-                nameValues.push({name: 'Alignment Start', value: igv.numberFormatter(alignmentHitTest.start)});
-                nameValues.push({name: 'Read Strand', value: (true === alignmentHitTest.strand ? '(+)' : '(-)')});
-                nameValues.push({name: 'Cigar', value: alignmentHitTest.cigar});
-                nameValues.push({name: 'Mapping Quality', value: alignmentHitTest.mq });
-
-                //
-                nameValues.push({name: 'Base', value: readChar});
-
-//            refSeqIndex = genomicLocation - alignmentManager.coverageMap.bpStart;
-//            markup += "ref seq base " + alignmentManager.coverageMap.refSeq[ refSeqIndex ];
+                return alignment.popupData(genomicLocation);
 
             }
         }

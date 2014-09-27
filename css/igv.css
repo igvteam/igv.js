@@ -366,15 +366,15 @@ input[type='file'] {
     border-color: #357ebd;
 }
 
-.cursor-btn-selected {
-    color: #333;
-    background-color: #ebebeb;
-    border-color: #357ebd;
-}
+/*.cursor-btn-selected {*/
+    /*color: #333;*/
+    /*background-color: #ebebeb;*/
+    /*border-color: #357ebd;*/
+/*}*/
 
 .btn-cursor-selected {
     color: #ffffff;
-    background-color: #BD1B30;
+    background-color: #E6E8EB;
     border-color: #ffffff;
 }
 
@@ -384,7 +384,7 @@ input[type='file'] {
 .btn-cursor-selected.active,
 .open .dropdown-toggle.btn-cursor-selected {
     color: #ffffff;
-    background-color: #BD1B30;
+    background-color: #E6E8EB;
     border-color: #ffffff;
 }
 
@@ -409,12 +409,12 @@ fieldset[disabled] .btn-cursor-selected:active,
 .btn-cursor-selected.disabled.active,
 .btn-cursor-selected[disabled].active,
 fieldset[disabled] .btn-cursor-selected.active {
-    background-color: #BD1B30;
+    background-color: #E6E8EB;
     border-color: #ffffff;
 }
 
 .btn-cursor-selected .badge {
-    color: #BD1B30;
+    color: #E6E8EB;
     background-color: #ffffff;
 }
 
@@ -430,7 +430,7 @@ fieldset[disabled] .btn-cursor-selected.active {
 .btn-cursor-deselected.active,
 .open .dropdown-toggle.btn-cursor-deselected {
     color: #000000;
-    background-color: #BD1B30;
+    background-color: #E6E8EB;
     border-color: #000000;
 }
 

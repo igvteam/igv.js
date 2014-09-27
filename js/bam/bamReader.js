@@ -270,7 +270,7 @@ var igv = (function (igv) {
                     var cur = intChunks[0];
                     for (var i = 1; i < intChunks.length; ++i) {
                         var nc = intChunks[i];
-                        if(cur.maxv != null && cur.minv != null && nc.minv.block == cur.maxv.block) { // no point splitting mid-block
+                        if (cur.maxv != null && cur.minv != null && nc.minv.block == cur.maxv.block) { // no point splitting mid-block
                             cur = new Chunk(cur.minv, nc.maxv);
                         } else {
                             mergedChunks.push(cur);
@@ -302,13 +302,13 @@ var igv = (function (igv) {
             var chrId = bam.chrToIndex[chr];
             var chunks;
             if (chrId === undefined) {
-                if(chr.startsWith("chr")) chr = chr.substr(3);
+                if (chr.startsWith("chr")) chr = chr.substr(3);
                 else chr = "chr" + chr;
                 chrId = bam.chrToIndex[chr];
             }
             if (chrId === undefined) {
                 chunks = [];
-            }else {
+            } else {
 
                 bam.blocksForRange(chrId, min, max, function (chunks) {
 
@@ -341,15 +341,15 @@ var igv = (function (igv) {
                             dataLoader.range = {start: fetchMin, size: fetchMax - fetchMin + 1};
                             dataLoader.loadArrayBuffer(function (compressed) {
 
-                                var ba = new Uint8Array(unbgzf(compressed, c.maxv.block - c.minv.block + 1));
+                                    var ba = new Uint8Array(unbgzf(compressed, c.maxv.block - c.minv.block + 1));
 //                                console.log("Decode");
-                                decodeBamRecords(ba, chunks[index].minv.offset, records, min, max, chrId);
-                                ++index;
+                                    decodeBamRecords(ba, chunks[index].minv.offset, records, min, max, chrId);
+                                    ++index;
 
 
-                                return tramp();
-                            },
-                            task);
+                                    return tramp();
+                                },
+                                task);
 
                         }
                     }
@@ -396,7 +396,7 @@ var igv = (function (igv) {
                     return;
                 }
 
-                record = {};
+                record = new igv.BamAlignment();
 
                 refID = readInt(ba, offset + 4);
                 pos = readInt(ba, offset + 8);
@@ -413,6 +413,7 @@ var igv = (function (igv) {
                 flag = (flag_nc & 0xffff0000) >> 16;
                 nc = flag_nc & 0xffff;
 
+                record.flags = flag;
                 record.strand = !(flag & READ_STRAND_FLAG);
 
                 lseq = readInt(ba, offset + 20);
@@ -483,41 +484,8 @@ var igv = (function (igv) {
                 record.readName = readName;
                 record.chr = bam.indexToChr[refID];
 
-                while (p < blockEnd) {
-                    var tag = String.fromCharCode(ba[p]) + String.fromCharCode(ba[p + 1]);
-                    var type = String.fromCharCode(ba[p + 2]);
-                    var value;
-
-                    if (type == 'A') {
-                        value = String.fromCharCode(ba[p + 3]);
-                        p += 4;
-                    } else if (type == 'i' || type == 'I') {
-                        value = readInt(ba, p + 3);
-                        p += 7;
-                    } else if (type == 'c' || type == 'C') {
-                        value = ba[p + 3];
-                        p += 4;
-                    } else if (type == 's' || type == 'S') {
-                        value = readShort(ba, p + 3);
-                        p += 5;
-                    } else if (type == 'f') {
-                        throw 'FIXME need floats';
-                    } else if (type == 'Z') {
-                        p += 3;
-                        value = '';
-                        for (; ;) {
-                            var cc = ba[p++];
-                            if (cc == 0) {
-                                break;
-                            } else {
-                                value += String.fromCharCode(cc);
-                            }
-                        }
-                    } else {
-                        throw 'Unknown type ' + type;
-                    }
-                    record[tag] = value;
-                }
+                record.tagBA = new Uint8Array(ba.buffer.slice(p, blockEnd));  // decode thiese on demand
+                p += blockEnd;
 
                 if (!min || record.start <= max && record.start + record.lengthOnRef >= min) {
                     if (chrId === undefined || refID == chrId) {

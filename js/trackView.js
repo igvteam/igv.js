@@ -203,11 +203,12 @@ var igv = (function (igv) {
                             }
                         });
 
-                        labelButton.className = "btn btn-xs btn-cursor-selected";
+                        //We don't have a concept of track selection, so don't change the visible state (code below commented out)
+                        //labelButton.className = "btn btn-xs btn-cursor-selected";
                     }
                     else {
 
-                        if(track.description) {
+                        if (track.description) {
                             igv.popover.show(e.pageX, e.pageY, track.description);
                         }
 
@@ -400,10 +401,9 @@ var igv = (function (igv) {
             referenceFrame = trackView.browser.referenceFrame,
             canvas = trackView.canvas,
             dragThreshold = 3,
-            popupTimer = undefined,
-            rootObject = $(".igv-root-div");
+            popupTimer = undefined;
 
-        canvas.onmousedown = function (e) {
+        $(canvas).mousedown(function (e) {
 
             var canvasCoords = igv.translateMouseCoordinates(e, canvas);
 
@@ -414,50 +414,51 @@ var igv = (function (igv) {
             mouseDownX = lastMouseX;
 
 
-        };
+        });
 
-        canvas.onmousemove = igv.throttle(function (e) {
+        $(canvas).mousemove(igv.throttle(function (e) {
 
-            var coords = igv.translateMouseCoordinates(e, canvas),
-                pixels,
-                pixelsEnd,
-                viewPortWidth;
+                var coords = igv.translateMouseCoordinates(e, canvas),
+                    pixels,
+                    pixelsEnd,
+                    viewPortWidth;
 
-            if (isMouseDown) { // Possibly dragging
+                if (isMouseDown) { // Possibly dragging
 
-                if (mouseDownX && Math.abs(coords.x - mouseDownX) > dragThreshold) {
+                    if (mouseDownX && Math.abs(coords.x - mouseDownX) > dragThreshold) {
 
-                    referenceFrame.shiftPixels(lastMouseX - coords.x);
+                        referenceFrame.shiftPixels(lastMouseX - coords.x);
 
-                    // clamp left
-                    referenceFrame.start = Math.max(0, referenceFrame.start);
+                        // clamp left
+                        referenceFrame.start = Math.max(0, referenceFrame.start);
 
-                    // clamp right
-                    if (trackView.browser.cursorModel) {
+                        // clamp right
+                        if (trackView.browser.cursorModel) {
 
-                        // CURSOR track clamping
-                        viewPortWidth = $(".igv-viewport-div").first().width();
-                        pixelsEnd = Math.floor( trackView.browser.cursorModel.framePixelWidth * trackView.browser.cursorModel.getRegionList().length );
-                        pixels = Math.floor( trackView.browser.referenceFrame.toPixels( referenceFrame.start ) + viewPortWidth );
+                            // CURSOR track clamping
+                            viewPortWidth = $(".igv-viewport-div").first().width();
+                            pixelsEnd = Math.floor(trackView.browser.cursorModel.framePixelWidth * trackView.browser.cursorModel.getRegionList().length);
+                            pixels = Math.floor(trackView.browser.referenceFrame.toPixels(referenceFrame.start) + viewPortWidth);
 
-                        if (pixels >= pixelsEnd) {
-                            referenceFrame.start = trackView.browser.referenceFrame.toBP( pixelsEnd - viewPortWidth);
+                            if (pixels >= pixelsEnd) {
+                                referenceFrame.start = trackView.browser.referenceFrame.toBP(pixelsEnd - viewPortWidth);
+                            }
+
+
                         }
 
-
+                        trackView.browser.repaint();
                     }
 
-                    trackView.browser.repaint();
+                    lastMouseX = coords.x;
+
                 }
 
-                lastMouseX = coords.x;
-
-            }
-
-        }, 20);
+            }, 20)
+        );
 
 
-        canvas.onmouseup = function (e) {
+        $(canvas).mouseup(function (e) {
 
             e = $.event.fix(e);   // Sets pageX and pageY for browsers that don't support them
 
@@ -481,7 +482,7 @@ var igv = (function (igv) {
                             return;
                         }
 
-                        xOrigin = Math.round( referenceFrame.toPixels( (trackView.tile.startBP - referenceFrame.start) ));
+                        xOrigin = Math.round(referenceFrame.toPixels((trackView.tile.startBP - referenceFrame.start)));
 
                         popupData = trackView.track.popupData(genomicLocation, canvasCoords.x - xOrigin, canvasCoords.y);
 
@@ -502,15 +503,15 @@ var igv = (function (igv) {
             isMouseDown = false;
             lastMouseX = undefined;
 
-        };
+        });
 
-        canvas.onmouseout = function (e) {
+        $(canvas).mouseout(function (e) {
             isMouseDown = false;
             lastMouseX = undefined;
             mouseDownX = undefined;
-        };
+        });
 
-        canvas.ondblclick = function (e) {
+        $(canvas).dblclick(function (e) {
 
             e = $.event.fix(e);   // Sets pageX and pageY for browsers that don't support them
 
@@ -530,7 +531,7 @@ var igv = (function (igv) {
                 referenceFrame.bpPerPixel /= 2;
                 trackView.browser.goto(referenceFrame.chr, newCenter);
             }
-        };
+        });
 
     }
 

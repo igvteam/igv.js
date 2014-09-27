@@ -119,7 +119,7 @@ var igv = (function (igv) {
                 }
 
                 alignmentRow.push(alignment);
-                nextStart = alignment.start + myself.alignmentBlocksBBoxLength(alignment) + alignmentSpace;
+                nextStart = alignment.start + alignment.lengthOnRef + alignmentSpace;
                 ++allocatedCount;
 
             } // while (nextStart)
