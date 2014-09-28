@@ -108,8 +108,12 @@ var igv = (function (igv) {
         nameValues.push({name: 'Read Name', value: this.readName});
         // Sample
         // Read group
-        nameValues.push("-------------------------------")
-        nameValues.push({name: 'Alignment Start', value: igv.numberFormatter(this.start)});
+        nameValues.push("-------------------------------");
+
+        // Add 1 to genomic location to map from 0-based computer units to user-based units
+        nameValues.push({name: 'Location ', value: igv.numberFormatter(1 + genomicLocation)});
+        nameValues.push({name: 'Alignment Start', value: igv.numberFormatter(1 + this.start)});
+
         nameValues.push({name: 'Read Strand', value: (true === this.strand ? '(+)' : '(-)')});
         nameValues.push({name: 'Cigar', value: this.cigar});
         // Mapped

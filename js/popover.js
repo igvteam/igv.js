@@ -119,7 +119,8 @@ var igv = (function (igv) {
             left,
             top,
             height,
-            containerCoordinates = { x : pageX - $(window).scrollLeft(), y : pageY - $(window).scrollTop() },
+//            containerCoordinates = { x : pageX - $(window).scrollLeft(), y : pageY - $(window).scrollTop() },
+            containerCoordinates = { x : pageX, y : pageY },
             containerRect = { x : 0, y : 0, width : $(window).width(), height : $(window).height() },
             popupRect = {},
             popoverDivObject,
@@ -143,9 +144,9 @@ var igv = (function (igv) {
             }
 
             top = popupy;
-            if (containerCoordinates.y + popupRect.height > containerRect.height) {
-                top = popupy - popupRect.height;
-            }
+//            if (containerCoordinates.y + popupRect.height > containerRect.height) {
+//                top = popupy - popupRect.height;
+//            }
 
             popoverDivObject.css({
                 "left": left + "px",
