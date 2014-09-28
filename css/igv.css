@@ -297,6 +297,16 @@ input[type='file'] {
     z-index: 5000;
 }
 
+.igv-popoverContent .igv-popoverNameSpan {
+    font-weight: bold;
+    /*background: #0f0;*/
+}
+
+.igv-popoverContent .igv-popoverValueSpan {
+    word-break: break-all;
+    /*background: #f00;*/
+}
+
 .igv-popoverContent .popoverContentSpan {
     font-weight: bold;
 }

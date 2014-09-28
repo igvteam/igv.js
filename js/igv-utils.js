@@ -100,7 +100,7 @@ var igv = (function (igv) {
 
             if(nameValue.name) {
 //                markup += "<tr><td>" + nameValue.name+ ":&nbsp; " + nameValue.value + "</td></tr>";
-                markup += "<tr><td>" + "<span class=\"popoverContentSpan\">" + nameValue.name + "</span>" + "&nbsp; " + nameValue.value + "</td></tr>";
+                markup += "<tr><td>" + "<span class=\"igv-popoverNameSpan\">" + nameValue.name + "</span>" + "&nbsp; "  + "<span class=\"igv-popoverValueSpan\">" + nameValue.value + "</span>" + "</td></tr>";
             }
             else {
                 // not a name/value pair
