@@ -1,9 +1,8 @@
 <html>
 <head>
  <meta charset="utf-8">
-  <script src="//ajax.googleapis.com/ajax/libs/jquery/2.1.1/jquery.min.js"></script>
-  <link rel="stylesheet" href="//ajax.googleapis.com/ajax/libs/jqueryui/1.11.1/themes/smoothness/jquery-ui.css" />
-  <script src="//ajax.googleapis.com/ajax/libs/jqueryui/1.11.1/jquery-ui.min.js"></script>
+    <!-- jQuery -->
+    <script src="//code.jquery.com/jquery-1.11.0.min.js"></script>
 </head>
 
 <body>
@@ -12,26 +11,31 @@
 $( document ).ready(function() {
 	
 	$('#downloadLink').click(function(){
-		alert('downloading...');
-		var form = document.createElement("form");
-	    form.setAttribute("method", "post");
+
+        var form,
+                hiddenFilenameInput,
+                hiddenDownloadContent;
+
+        form = document.createElement("form");
+        document.body.appendChild(form);
+        form.setAttribute("method", "post");
 	    form.setAttribute("action", "igvdownload.php");
 
-	    var hiddenField = document.createElement("input");
-        hiddenField.setAttribute("type", "hidden");
-        hiddenField.setAttribute("name", "filename");
-        hiddenField.setAttribute("value", $('#filenameText').val());
-        form.appendChild(hiddenField);
+        // file name
+	    hiddenFilenameInput = document.createElement("input");
+        form.appendChild(hiddenFilenameInput);
+        hiddenFilenameInput.setAttribute("type", "hidden");
+        hiddenFilenameInput.setAttribute("name", "filename");
+        hiddenFilenameInput.setAttribute("value", $('#filenameText').val());
 
-	
-        var hiddenField = document.createElement("input");
-        hiddenField.setAttribute("type", "hidden");
-        hiddenField.setAttribute("name", "downloadContent");
-        hiddenField.setAttribute("value", $('#downloadContent').val());
-        form.appendChild(hiddenField);
-        
-        
-        document.body.appendChild(form);
+        // ingest contents of textarea named #downloadContent
+        hiddenDownloadContent = document.createElement("input");
+        form.appendChild(hiddenDownloadContent);
+        hiddenDownloadContent.setAttribute("type", "hidden");
+        hiddenDownloadContent.setAttribute("name", "downloadContent");
+        hiddenDownloadContent.setAttribute("value", $('#downloadContent').val());
+
+        // submit and self distruct
         form.submit();
 		form.detach();
 	});
