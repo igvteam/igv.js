@@ -222,6 +222,10 @@ var igv = (function (igv) {
 
     igv.Browser.prototype.goto = function (chr, start, end) {
 
+        if (igv.popover) {
+            igv.popover.hide();
+        }
+
         // GTEX HACK -- need aliases
         if (this.type === "GTEX" && !chr.startsWith("chr")) chr = "chr" + chr;
 
