@@ -3,9 +3,10 @@ var igv = (function (igv) {
     igv.Browser = function (type) {
 
         this.type = type ? type : "IGV";
-        this.div = document.createElement("div");
+        this.div =$('<div id="igvRootDiv" class="igv-root-div">')[0],
 
-        this.trackHeight = 100;
+
+            this.trackHeight = 100;
         $("input[id='trackHeightInput']").val(this.trackHeight);
 
         this.rootHeight = 0;

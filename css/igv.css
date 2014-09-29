@@ -210,7 +210,10 @@ input[type='file'] {
 
 .igv-content-div {
     position: absolute;
-    width: 100%;
+    margin-left: 10px;
+    margin-right: 10px;
+    left: 0;
+    right: 0;
 }
 
 .igv-cursorHistogram-div {

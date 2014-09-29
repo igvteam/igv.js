@@ -15,7 +15,7 @@ var igv = (function (igv) {
         var browser = igv.browser,
             rootDiv = browser.div,
             contentContainer = $('<div class="container-fluid"><div class="row">')[0],
-            contentRoot = $('<div id="igvRootDiv" class="igv-root-div">')[0],
+            contentRoot = $('<div id="igvContentDiv" class="igv-content-div">')[0],
             contentKaryo = $('<div id="igvKaryoDiv" class="igv-karyo-div">')[0],
             contentHeader = $('<div id="igvHeaderDiv" class="igv-header-div">')[0],
             trackContainer = $('<div id="igvTrackContainerDiv" class="igv-track-container-div">')[0];
