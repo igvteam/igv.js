@@ -14,6 +14,7 @@ var igv = (function (igv) {
 
         if (!popoverDiv) {
             markupWithParentDiv(parent);
+            this.parentDiv = parent;
         }
 
         function markupWithParentDiv (parentDiv) {
@@ -115,8 +116,7 @@ var igv = (function (igv) {
 
     igv.Popover.prototype.show = function (pageX, pageY, content) {
 
-        var igvRootDivObject = $("#igvRootDiv"),
-            left,
+        var left,
             top,
             height,
 //            containerCoordinates = { x : pageX - $(window).scrollLeft(), y : pageY - $(window).scrollTop() },
@@ -134,8 +134,8 @@ var igv = (function (igv) {
             popoverContentDivObject.html(content);
 
             popoverDivObject = $(popoverDiv);
-            popupx -= igvRootDivObject.offset().left;
-            popupy -= igvRootDivObject.offset().top;
+            popupx -= $(this.parentDiv).offset().left;
+            popupy -= $(this.parentDiv).offset().top;
             popupRect = { x : popupx, y : popupy, width : popoverDivObject.outerWidth(), height : popoverDivObject.outerHeight() };
 
             left = popupx;
