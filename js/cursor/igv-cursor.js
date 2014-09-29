@@ -13,7 +13,7 @@ var igv = (function (igv) {
         $(browser.div).append(trackContainer);
         document.getElementById('igvContainerDiv').appendChild(browser.div);
 
-        browser.horizontalScrollbar = new cursor.HorizontalScrollbar(browser, $(trackContainer) );
+        browser.horizontalScrollbar = new cursor.HorizontalScrollbar(browser, $(trackContainer));
 
         // Append event handlers to DOM elements
         document.getElementById('zoomOut').onclick = function (e) {
@@ -55,11 +55,11 @@ var igv = (function (igv) {
             }
 
 
-            browser.setTrackHeight( Math.round(parseFloat(value, 10)) );
+            browser.setTrackHeight(Math.round(parseFloat(value, 10)));
         };
 
         var fileInput = document.getElementById('fileInput');
-        fileInput.addEventListener('change', function(e) {
+        fileInput.addEventListener('change', function (e) {
 
             var localFile,
                 localFiles = fileInput.files,
@@ -67,13 +67,13 @@ var igv = (function (igv) {
                 cursorTrack;
 
 
-            for (var i=0; i < localFiles.length; i++) {
+            for (var i = 0; i < localFiles.length; i++) {
 
                 localFile = localFiles[ i ];
 
                 featureSource = new igv.BedFeatureSource(localFile);
 
-                cursorTrack = new cursor.CursorTrack(featureSource, browser.cursorModel,browser.referenceFrame, localFile.name, browser.trackHeight);
+                cursorTrack = new cursor.CursorTrack(featureSource, browser.cursorModel, browser.referenceFrame, localFile.name, browser.trackHeight);
                 browser.addTrack(cursorTrack);
 
             }
@@ -85,33 +85,33 @@ var igv = (function (igv) {
         encode.createEncodeDataTablesDataSet("resources/peaks.hg19.txt", function (dataSet) {
 
             var encodeModalTable = $('#encodeModalTable'),
-                myDataTable = encodeModalTable.dataTable( {
+                myDataTable = encodeModalTable.dataTable({
 
-                "data": dataSet,
-                "scrollY":        "400px",
-                "scrollCollapse": true,
-                "paging":         false,
+                    "data": dataSet,
+                    "scrollY": "400px",
+                    "scrollCollapse": true,
+                    "paging": false,
 
-                "columns": [
+                    "columns": [
 
-                    { "title": "cell" },
-                    { "title": "dataType" },
+                        { "title": "cell" },
+                        { "title": "dataType" },
 
-                    { "title": "antibody" },
-                    { "title": "view" },
+                        { "title": "antibody" },
+                        { "title": "view" },
 
-                    { "title": "replicate" },
-                    { "title": "type" },
+                        { "title": "replicate" },
+                        { "title": "type" },
 
-                    { "title": "lab" },
-                    { "title": "path" }
-                ]
+                        { "title": "lab" },
+                        { "title": "path" }
+                    ]
 
-            } );
+                });
 
-            encodeModalTable.find('tbody').on( 'click', 'tr', function () {
+            encodeModalTable.find('tbody').on('click', 'tr', function () {
 
-                if ( $(this).hasClass('selected') ) {
+                if ($(this).hasClass('selected')) {
 
                     $(this).removeClass('selected');
                 }
@@ -122,18 +122,18 @@ var igv = (function (igv) {
                     $(this).addClass('selected');
                 }
 
-            } );
+            });
 
-            $('#encodeModalTopCloseButton').on( 'click', function () {
+            $('#encodeModalTopCloseButton').on('click', function () {
                 myDataTable.$('tr.selected').removeClass('selected');
 
-            } );
+            });
 
-            $('#encodeModalBottomCloseButton').on( 'click', function () {
+            $('#encodeModalBottomCloseButton').on('click', function () {
                 myDataTable.$('tr.selected').removeClass('selected');
-            } );
+            });
 
-            $('#encodeModalGoButton').on( 'click', function () {
+            $('#encodeModalGoButton').on('click', function () {
 
                 var featureSource,
                     cursorTrack,
@@ -149,12 +149,12 @@ var igv = (function (igv) {
 
                     tableRows.removeClass('selected');
 
-                    for (var i= 0; i < tableRows.length; i++) {
+                    for (var i = 0; i < tableRows.length; i++) {
 
                         tableRow = tableRows[ i ];
                         tableCells = $('td', tableRow);
 
-                        tableCells.each (function() {
+                        tableCells.each(function () {
 
                             tableCell = $(this)[0];
                             record[ encode.dataTableRowLabels[ tableCell.cellIndex ] ] = tableCell.innerText;
@@ -177,7 +177,7 @@ var igv = (function (igv) {
         });
 
         // Append resultant ENCODE DataTables markup
-        $('#encodeModalBody').html( '<table cellpadding="0" cellspacing="0" border="0" class="display" id="encodeModalTable"></table>' );
+        $('#encodeModalBody').html('<table cellpadding="0" cellspacing="0" border="0" class="display" id="encodeModalTable"></table>');
 
         browser.startup = function () {
 
@@ -207,9 +207,9 @@ var igv = (function (igv) {
 
                 if (browser.cursorModel) {
 
-                    percent = 100.0 * ($(".igv-viewport-div").first().width()/$(".igv-track-div").first().width());
+                    percent = 100.0 * ($(".igv-viewport-div").first().width() / $(".igv-track-div").first().width());
                     $(".igv-horizontal-scrollbar-div").css({
-                        "width" : percent + "%"
+                        "width": percent + "%"
                     });
 
                 }
@@ -230,7 +230,7 @@ var igv = (function (igv) {
                     if (frameWidth > 0) {
 
                         browser.cursorModel.framePixelWidth = frameWidth;
-                        $( "input[id='frameWidthInput']" ).val( browser.cursorModel.framePixelWidth );
+                        $("input[id='frameWidthInput']").val(browser.cursorModel.framePixelWidth);
 
                         browser.referenceFrame.bpPerPixel = 1 / frameWidth;
                         browser.update();
@@ -251,7 +251,7 @@ var igv = (function (igv) {
                 browser.zoomIn = function () {
 
                     browser.cursorModel.framePixelWidth *= 2;
-                    $( "input[id='frameWidthInput']" ).val( browser.cursorModel.framePixelWidth );
+                    $("input[id='frameWidthInput']").val(browser.cursorModel.framePixelWidth);
 
                     browser.update();
                 };
@@ -260,11 +260,11 @@ var igv = (function (igv) {
 
                     var thresholdFramePixelWidth = $(".igv-viewport-div").first().width() / browser.cursorModel.getRegionList().length;
 
-                    browser.cursorModel.framePixelWidth = Math.max(thresholdFramePixelWidth, browser.cursorModel.framePixelWidth/2.0);
+                    browser.cursorModel.framePixelWidth = Math.max(thresholdFramePixelWidth, browser.cursorModel.framePixelWidth / 2.0);
 
 //                    console.log("candidate " + browser.cursorModel.framePixelWidth + " threshold " + thresholdFramePixelWidth);
 
-                    $( "input[id='frameWidthInput']" ).val( browser.cursorModel.framePixelWidth );
+                    $("input[id='frameWidthInput']").val(browser.cursorModel.framePixelWidth);
 
                     browser.update();
                 };
@@ -324,8 +324,72 @@ var igv = (function (igv) {
             }
         };
 
+
+        // Augment standard behavior
+        browser.removeTrack = function (track) {
+
+            this.__proto__.removeTrack.call(this, track);
+            this.cursorModel.filterRegions();
+
+        }
+
         return browser;
     };
+
+
+    igv.cursorAddTrackControlButtons = function (trackView, browser, controlDiv) {
+
+        var sortButton = document.createElement("i"),
+            track = trackView.track,
+            nextButtonTop = 5;
+
+        controlDiv.appendChild(sortButton);
+        sortButton.className = "fa fa-bar-chart-o";
+        sortButton.style.color = "black";
+        sortButton.style.position = "absolute";
+        sortButton.style.top = nextButtonTop + "px";
+        sortButton.style.left = "5px";
+        sortButton.style.cursor = "pointer";
+        nextButtonTop += 18;
+
+        track.sortButton = sortButton;
+        sortButton.onclick = function () {
+
+            browser.cursorModel.sortRegions(track.featureSource, track.sortDirection, function (regions) {
+                browser.update();
+                track.sortDirection *= -1;
+
+            });
+
+            browser.trackPanels.forEach(function (trackView) {
+                if (track !== trackView.track) {
+                    trackView.track.sortButton.className = "fa fa-bar-chart-o";
+                    trackView.track.sortButton.style.color = "black";
+                }
+            });
+
+            sortButton.className = "fa fa-signal";
+            sortButton.style.color = "red";
+
+        };
+
+
+        //
+        trackFilterButtonDiv = document.createElement("div");
+        controlDiv.appendChild(trackFilterButtonDiv);
+
+        trackFilterButtonDiv.id = "filterButtonDiv_" + igv.guid();
+        trackFilterButtonDiv.className = "igv-filter-histogram-button-div";
+        trackFilterButtonDiv.style.top = nextButtonTop + "px";
+        trackFilterButtonDiv.style.left = "5px";
+
+        trackView.track.trackFilter = new igv.TrackFilter(trackView);
+        trackView.track.trackFilter.createTrackFilterWidgetWithParentElement(trackFilterButtonDiv);
+
+        nextButtonTop += 18;
+
+    }
+
 
     return igv;
 

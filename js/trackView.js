@@ -19,9 +19,7 @@ var igv = (function (igv) {
             contentWidth,
             closeButton,
             labelButton,
-            trackFilterButtonDiv,
-            popup,
-            rootObject = $(".igv-root-div").first();
+            trackFilterButtonDiv;
 
         viewportHeight = track.height;
 
@@ -89,66 +87,13 @@ var igv = (function (igv) {
         canvas.setAttribute('height', contentHeight);
 
 
-        // filter  -- CURSOR only for now
+        // CURSOR specific functions
         if (browser.type === "CURSOR") {
 
             this.track.cursorHistogram = new cursor.CursorHistogram(controlDiv.clientHeight, this.track.max);
             this.track.cursorHistogram.createMarkupWithTrackPanelDiv(this);
-        }
 
-        var nextButtonTop = 5;
-        if (browser.type === "CURSOR") {
-
-            var sortButton = document.createElement("i");
-            controlDiv.appendChild(sortButton);
-            sortButton.className = "fa fa-bar-chart-o";
-            sortButton.style.color = "black";
-            sortButton.style.position = "absolute";
-            sortButton.style.top = nextButtonTop + "px";
-            sortButton.style.left = "5px";
-            sortButton.style.cursor = "pointer";
-            nextButtonTop += 18;
-
-            track.sortButton = sortButton;
-            sortButton.onclick = function () {
-
-                var spinner = igv.getSpinner(viewportDiv);   // Start a spinner
-                // Delay 100 ms to give spinner a chance to spin up (we are single threaded)
-                setTimeout(function () {
-                    browser.cursorModel.sortRegions(track.featureSource, track.sortDirection, function (regions) {
-                        spinner.stop();
-                        browser.update();
-                        track.sortDirection *= -1;
-
-                    });
-                }, 100);
-
-                browser.trackPanels.forEach(function (trackView) {
-                    if (track !== trackView.track) {
-                        trackView.track.sortButton.className = "fa fa-bar-chart-o";
-                        trackView.track.sortButton.style.color = "black";
-                    }
-                });
-
-                sortButton.className = "fa fa-signal";
-                sortButton.style.color = "red";
-
-            };
-
-
-            //
-            trackFilterButtonDiv = document.createElement("div");
-            controlDiv.appendChild(trackFilterButtonDiv);
-
-            trackFilterButtonDiv.id = "filterButtonDiv_" + igv.guid();
-            trackFilterButtonDiv.className = "igv-filter-histogram-button-div";
-            trackFilterButtonDiv.style.top = nextButtonTop + "px";
-            trackFilterButtonDiv.style.left = "5px";
-
-            this.track.trackFilter = new igv.TrackFilter(this);
-            this.track.trackFilter.createTrackFilterWidgetWithParentElement(trackFilterButtonDiv);
-
-            nextButtonTop += 18;
+            igv.cursorAddTrackControlButtons(this, browser, controlDiv)
 
         }
 
@@ -166,12 +111,6 @@ var igv = (function (igv) {
             closeButton.onclick = function () {
 
                 browser.removeTrack(track);
-
-                // We removed a track. This removes it's filter. Must update filter chain application
-                if (browser.type === "CURSOR") {
-                    browser.cursorModel.filterRegions();
-                }
-
             };
 
             if (track.label) {
