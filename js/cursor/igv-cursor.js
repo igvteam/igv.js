@@ -57,6 +57,44 @@ var igv = (function (igv) {
 
             browser.setTrackHeight(Math.round(parseFloat(value, 10)));
         };
+        document.getElementById('igvExportRegionsModalPresentationButton').onclick = function (e) {
+
+            var i,
+                acc = "",
+                form,
+                hiddenFilenameInput,
+                hiddenDownloadContent;
+
+            form = document.createElement("form");
+            document.body.appendChild(form);
+            form.setAttribute("method", "post");
+            form.setAttribute("action", "exportRegions/exportregion.php");
+
+            // file name
+            hiddenFilenameInput = document.createElement("input");
+            form.appendChild(hiddenFilenameInput);
+            hiddenFilenameInput.setAttribute("type", "hidden");
+            hiddenFilenameInput.setAttribute("name", "filename");
+            hiddenFilenameInput.setAttribute("value", "igv-cursor-export-region.txt");
+
+            // ingest contents of textarea named #downloadContent
+            hiddenDownloadContent = document.createElement("input");
+            form.appendChild(hiddenDownloadContent);
+            hiddenDownloadContent.setAttribute("type", "hidden");
+            hiddenDownloadContent.setAttribute("name", "downloadContent");
+
+//            hiddenDownloadContent.setAttribute("value", $('#downloadContent').val());
+
+            for (i = 0; i < 100; i++) {
+                acc += "line " + i + " thing 0 thing 1 thing 2\n";
+            }
+            hiddenDownloadContent.setAttribute("value", acc);
+
+            // submit and self distruct
+            form.submit();
+            form.detach();
+
+    };
 
         var fileInput = document.getElementById('fileInput');
         fileInput.addEventListener('change', function (e) {
