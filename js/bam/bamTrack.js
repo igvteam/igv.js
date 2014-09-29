@@ -294,6 +294,9 @@ var igv = (function (igv) {
 
             if (coverage) {
 
+
+                nameValues.push(igv.browser.referenceFrame.chr + ":" + igv.numberFormatter(1 + genomicLocation));
+
                 nameValues.push({name: 'Total Count', value: coverage.total});
 
                 // A

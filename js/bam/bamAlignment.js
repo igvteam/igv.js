@@ -34,16 +34,53 @@ var igv = (function (igv) {
 
     }
 
+    igv.BamAlignment.prototype.isMapped = function () {
+        return (this.flags & READ_UNMAPPED_FLAG) == 0;
+    }
 
     igv.BamAlignment.prototype.isPaired = function () {
         return (this.flags & READ_PAIRED_FLAG) != 0;
     }
 
-    igv.BamAlignment.prototype.isSecondOfPair = function() {
+    igv.BamAlignment.prototype.isProperPair = function () {
+        return (this.flags & PROPER_PAIR_FLAG) != 0;
+    }
+
+    igv.BamAlignment.prototype.isFistOfPair = function () {
+        return (this.flags & FIRST_OF_PAIR_FLAG) != 0;
+    }
+
+    igv.BamAlignment.prototype.isSecondOfPair = function () {
         return (this.flags & SECOND_OF_PAIR_FLAG) != 0;
     }
 
+    igv.BamAlignment.prototype.isNotPrimary = function () {
+        return (this.flags & NOT_PRIMARY_ALIGNMENT_FLAG) != 0;
+    }
 
+    igv.BamAlignment.prototype.isSupplementary = function () {
+        return (this.flags & SUPPLEMENTARY_ALIGNMENT_FLAG) != 0;
+    }
+
+    igv.BamAlignment.prototype.isFailsVendorQualityCheck = function () {
+        return (this.flags & READ_FAILS_VENDOR_QUALITY_CHECK_FLAG) != 0;
+    }
+
+    igv.BamAlignment.prototype.isDuplicate = function () {
+        return (this.flags & DUPLICATE_READ_FLAG) != 0;
+    }
+
+    igv.BamAlignment.prototype.isMateMapped = function () {
+        return (this.flags & MATE_UNMAPPED_FLAG) == 0;
+    }
+
+    igv.BamAlignment.prototype.isNegativeStrand = function () {
+        return (this.flags & READ_STRAND_FLAG) != 0;
+    }
+
+    igv.BamAlignment.prototype.isMateNegativeStrand = function () {
+        return (this.flags & MATE_STRAND_FLAG) != 0;
+    }
 
     igv.BamAlignment.prototype.tags = function () {
 
@@ -111,27 +148,30 @@ var igv = (function (igv) {
         nameValues.push("-------------------------------");
 
         // Add 1 to genomic location to map from 0-based computer units to user-based units
-        nameValues.push({name: 'Location ', value: igv.numberFormatter(1 + genomicLocation)});
         nameValues.push({name: 'Alignment Start', value: igv.numberFormatter(1 + this.start)});
 
         nameValues.push({name: 'Read Strand', value: (true === this.strand ? '(+)' : '(-)')});
         nameValues.push({name: 'Cigar', value: this.cigar});
-        // Mapped
+        nameValues.push({name: 'Mapped', value: yesNo(this.isMapped())});
         nameValues.push({name: 'Mapping Quality', value: this.mq });
+        nameValues.push({name: 'Secondary', value: yesNo(this.isNotPrimary()) });
+        nameValues.push({name: 'Supplementary', value: yesNo(this.isSupplementary()) });
+        nameValues.push({name: 'Duplicate', value: yesNo(this.isDuplicate()) });
+        nameValues.push({name: 'Failed QC', value: yesNo(this.isFailsVendorQualityCheck()) });
 
-        // Secondary
-        // Supplementary
-        // Duplicate
-        // Failed QC
 
-
-        if(this.isPaired()) {
+        if (this.isPaired()) {
             nameValues.push("--------------------------------");
             nameValues.push({name: 'First in Pair', value: !this.isSecondOfPair()});
-            // Mate is Mapped
-            // Mate Start
-            // Mate Strand
-            // Insert Size
+            nameValues.push({name: 'Mate is Mapped', value: yesNo(this.isMateMapped())});
+            if (this.isMapped()) {
+                nameValues.push({name: 'Mate Start', value: this.matePos});
+                nameValues.push({name: 'Mate Strand', value: (this.isMateNegativeStrand() ? '(-)' : '(+)')});
+                nameValues.push({name: 'Insert Size', value: this.tlen});
+                // Mate Start
+                // Mate Strand
+                // Insert Size
+            }
             // First in Pair
             // Pair Orientation
 
@@ -144,14 +184,13 @@ var igv = (function (igv) {
                 nameValues.push({name: key, value: this.tagDict[key]});
             }
         }
-        // -----------------------
-        // tags...
-        //    nameValues.push({name: 'Base', value: readChar});
-
-//            refSeqIndex = genomicLocation - alignmentManager.coverageMap.bpStart;
-//            markup += "ref seq base " + alignmentManager.coverageMap.refSeq[ refSeqIndex ];
 
         return nameValues;
+
+
+        function yesNo(bool) {
+            return bool ? 'Yes' : 'No';
+        }
     }
 
     return igv;
