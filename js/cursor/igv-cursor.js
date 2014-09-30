@@ -63,13 +63,16 @@ var igv = (function (igv) {
             browser.cursorModel.exportRegions();
         };
 
-        // session save/load
+        // session save
         document.getElementById('igvSessionSaveButton').onclick = function (e) {
 //            window.alert("igvSessionSaveButton");
             browser.saveSession();
         };
+
+        // session load
         document.getElementById('igvSessionLoadButton').onclick = function (e) {
-            window.alert("igvSessionSaveButton");
+//            window.alert("igvSessionSaveButton");
+            browser.sessionTeardown();
         };
 
         var fileInput = document.getElementById('fileInput');
@@ -346,6 +349,18 @@ var igv = (function (igv) {
             this.cursorModel.filterRegions();
 
         }
+
+        // tear down pre-existing session
+        browser.sessionTeardown = function () {
+
+            var trackView;
+
+            while (this.trackPanels.length > 0) {
+                trackView = this.trackPanels[ this.trackPanels.length - 1 ];
+                this.removeTrack(trackView.track);
+            }
+
+        };
 
         browser.saveSession = function () {
 
