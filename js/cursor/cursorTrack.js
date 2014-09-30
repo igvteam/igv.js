@@ -23,6 +23,20 @@ var cursor = (function (cursor) {
 
     };
 
+    cursor.CursorTrack.prototype.jsonRepresentation = function () {
+
+        var fs = this.featureSource,
+            json;
+
+        json = {
+            label : this.label,
+            trackHeight : this.height,
+            path : { filename : fs.filename, path : (fs.url) ? fs.url : fs.localFile }
+        };
+
+        return json;
+    };
+
     cursor.defaultColor = function () {
        return "blue";
     };
