@@ -147,9 +147,7 @@ var igv = (function (igv) {
                     data = [];
                     if (dbSnp) {
                         url = "http://type2diabetesgenetics.org/variant/variantInfo/" + dbSnp;
-                       // data.push("<a href=# onclick=window.location='" + url + "'>" +
-                       //     p.feature.DBSNP_ID + "</a>");
-                        data.push("<a target='_blank' href='" + url + "' >" +
+                        data.push("<a href=# onclick=window.location='" + url + "'>" +
                             p.feature.DBSNP_ID + "</a>");
                     }
                     data.push("chr" + p.feature.CHROM + ":" + p.feature.POS.toString());
@@ -157,10 +155,8 @@ var igv = (function (igv) {
                     data.push({name: 'z-score', value: p.feature.ZSCORE});
                     if (dbSnp) {
                         url = "http://type2diabetesgenetics.org/trait/traitInfo/" + dbSnp;
-                      //  data.push("<a href=# onclick=window.lcation='" + url + "'>" +
-                      //      "see all available statistics for this variant</a>");
-                        data.push("<a target='_blank' href='" + url + "'>" +
-                            "see all available statistics for this variant</a>");
+                        data.push("<a href=# onclick=window.lcation='" + url + "'>" +
+                            ">see all available statistics for this variant</a>");
                     }
                     return data;
                 }

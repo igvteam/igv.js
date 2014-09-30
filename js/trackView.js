@@ -36,12 +36,10 @@ var igv = (function (igv) {
         controlDiv = document.createElement("div");
         trackDiv.appendChild(controlDiv);
         controlDiv.className = "igv-control-div";
-
         this.controlDiv = controlDiv;
 
-        // if (browser.type === "GTEX") {
-        var controlWidth = controlDiv.clientWidth;
-        var controlHeight = controlDiv.clientHeight;
+        var controlWidth = 50; // TODO -- get this from stylesheet.  controlDiv.clientWidth;
+        var controlHeight = track.height; //controlDiv.clientHeight;
 
         var controlCanvas = document.createElement('canvas');
         controlDiv.appendChild(controlCanvas);
@@ -63,7 +61,6 @@ var igv = (function (igv) {
         viewportDiv = document.createElement("div");
         trackDiv.appendChild(viewportDiv);
         viewportDiv.className = "igv-viewport-div";
-        viewportDiv.style.left = controlDiv.clientWidth + "px";
         viewportDiv.style.height = viewportHeight + "px";
 
         this.viewportDiv = viewportDiv;
@@ -105,8 +102,8 @@ var igv = (function (igv) {
             closeButton.style.color = "#222";
             closeButton.className = "fa fa-times-circle";
             closeButton.style.position = "absolute";
-            closeButton.style.top = "5px";
-            closeButton.style.right = "5px";
+            closeButton.style.top = "8px";
+            closeButton.style.right = "10px";
             closeButton.style.cursor = "pointer";
             closeButton.onclick = function () {
 
