@@ -214,7 +214,7 @@ var igv = (function (igv) {
                 if (browser.cursorModel) {
 
                     percent = 100.0 * ($(".igv-viewport-div").first().width() / $(".igv-track-div").first().width());
-                    console.log("percent " + percent);
+//                    console.log("percent " + percent);
                     $(".igv-horizontal-scrollbar-div").css({
                         "width": percent + "%"
                     });

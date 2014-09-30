@@ -39,7 +39,7 @@ var cursor = (function (cursor) {
         form.appendChild(hiddenFilenameInput);
         hiddenFilenameInput.setAttribute("type", "hidden");
         hiddenFilenameInput.setAttribute("name", "filename");
-        hiddenFilenameInput.setAttribute("value", "igv-cursor-export-region.txt");
+        hiddenFilenameInput.setAttribute("value", "igv-cursor-exported-regions.bed");
 
         // ingest contents of textarea named #downloadContent
         hiddenDownloadContent = document.createElement("input");
@@ -59,7 +59,7 @@ var cursor = (function (cursor) {
 
     };
 
-    cursor.CursorModel.prototype.updateRegionDisplay = function() {
+    cursor.CursorModel.prototype.updateRegionDisplay = function()  {
 
         var numer,
             denom,
@@ -442,6 +442,7 @@ var cursor = (function (cursor) {
 
         var halfWidth = regionWidth/2;
 
+        // Add 1 to end to conform to BED format
         return this.chr + "\t" + (this.location - halfWidth) + "\t" + (this.location + halfWidth + 1) + "\n";
 
     };
