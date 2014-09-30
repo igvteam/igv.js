@@ -57,12 +57,15 @@ var igv = (function (igv) {
 
             browser.setTrackHeight(Math.round(parseFloat(value, 10)));
         };
-        document.getElementById('igvExportRegionsModalPresentationButton').onclick = function (e) {
-
+        document.getElementById('igvExportRegionsButton').onclick = function (e) {
             browser.cursorModel.exportRegions();
-
-
-    };
+        };
+        document.getElementById('igvSessionSaveButton').onclick = function (e) {
+            window.alert("igvSessionSaveButton");
+        };
+        document.getElementById('igvSessionLoadButton').onclick = function (e) {
+            window.alert("igvSessionSaveButton");
+        };
 
         var fileInput = document.getElementById('fileInput');
         fileInput.addEventListener('change', function (e) {
