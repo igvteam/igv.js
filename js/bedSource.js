@@ -109,7 +109,7 @@ var igv = (function (igv) {
 
                 var plain, inflate;
 
-                if (this.localFile.name.endsWith(".gz")) {
+                if (myself.localFile.name.endsWith(".gz")) {
                     inflate = new Zlib.Gunzip(new Uint8Array(localFileDataLoader.result));
 
                     plain = inflate.decompress();
