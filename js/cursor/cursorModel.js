@@ -4,8 +4,6 @@ var cursor = (function (cursor) {
 
     cursor.CursorModel = function (browser, regionDisplayJQueryObject) {
 
-        var thang;
-
         this.browser = browser;
         this.regionDisplayJQueryObject = regionDisplayJQueryObject;
 
@@ -16,11 +14,49 @@ var cursor = (function (cursor) {
         $( "input[id='frameWidthInput']" ).val( this.framePixelWidth );
 
         this.frameMargin = 6;
-        this.origin = 0;
         this.tracks = [];
         this.regions = [];
 
-        this.prohibitSelfFilteringTrackHistogram = true;
+    };
+
+    cursor.CursorModel.prototype.exportRegions = function() {
+
+        var myself = this,
+            rs,
+            exportedRegions = "",
+            form,
+            hiddenFilenameInput,
+            hiddenDownloadContent;
+
+        form = document.createElement("form");
+        document.body.appendChild(form);
+        form.setAttribute("method", "post");
+        form.setAttribute("action", "exportRegions/exportregion.php");
+
+        // file name
+        hiddenFilenameInput = document.createElement("input");
+        form.appendChild(hiddenFilenameInput);
+        hiddenFilenameInput.setAttribute("type", "hidden");
+        hiddenFilenameInput.setAttribute("name", "filename");
+        hiddenFilenameInput.setAttribute("value", "igv-cursor-export-region.txt");
+
+        // ingest contents of textarea named #downloadContent
+        hiddenDownloadContent = document.createElement("input");
+        form.appendChild(hiddenDownloadContent);
+        hiddenDownloadContent.setAttribute("type", "hidden");
+        hiddenDownloadContent.setAttribute("name", "downloadContent");
+
+        rs = (undefined === this.unsampledFilteredRegions) ? this.regions : this.unsampledFilteredRegions;
+        rs.forEach(function (r) {
+            exportedRegions += r.exportRegion(myself.regionWidth);
+        });
+
+        hiddenDownloadContent.setAttribute("value", exportedRegions);
+
+        // submit and self-destruct
+        form.submit();
+        form.detach();
+
     };
 
     cursor.CursorModel.prototype.updateRegionDisplay = function(downsamplingPercentage) {
@@ -158,15 +194,17 @@ var cursor = (function (cursor) {
 
             myself.updateRegionDisplay(resevoirSampledRegionListLength/myself.filteredRegions.length);
 
-            // If filteredRegions set is > 10,000 downsample
-             if (myself.filteredRegions.length >= resevoirSampledRegionListLength) {
+            // If filteredRegions set is > 10,000 downsample. Keep unsubsampled list.
+            if (myself.filteredRegions.length >= resevoirSampledRegionListLength) {
 
+                myself.unsampledFilteredRegions = (myself.filteredRegions === myself.regions) ? myself.filteredRegions : myself.filteredRegions.slice();
                 myself.filteredRegions = resevoirSampledRegionList(myself.filteredRegions, resevoirSampledRegionListLength);
+            } else {
+
+                myself.unsampledFilteredRegions = myself.filteredRegions;
             }
 
             if (sortTrackPanelPostFiltering) {
-
-                console.log("sort " + sortTrackPanelPostFiltering.track.label);
 
                 // spin spinner
                 spinner = igv.getSpinner(sortTrackPanelPostFiltering.viewportDiv);
@@ -275,11 +313,8 @@ var cursor = (function (cursor) {
 
         "use strict";
 
-//        console.log(navigator.userAgent);
-
         var regionWidth = this.regionWidth,
-            regions = this.getRegionList(),
-            filteredRegions = this.filteredRegions;
+            regions = this.getRegionList();
 
         if (!regions || 0 === regions.length) {
             continuation();
@@ -317,6 +352,7 @@ var cursor = (function (cursor) {
 
 
     };
+
 
     cursor.CursorRegion = function (feature) {
 
@@ -385,12 +421,22 @@ var cursor = (function (cursor) {
 
     cursor.CursorRegion.prototype.isRegionEmpty = function (featureCache, regionWidth) {
 
-        var halfWidth = regionWidth/ 2,
+        var halfWidth = regionWidth/2,
             featureList;
 
         featureList = featureCache.queryFeatures(this.chr, this.location - halfWidth, this.location + halfWidth);
 
         return (featureList) ? true : false;
+
+    };
+
+    // BED Format: The first 100 bases of a chromosome are defined as chromStart=0, chromEnd=100,
+    // and span the bases 0 - 99.
+    cursor.CursorRegion.prototype.exportRegion = function (regionWidth) {
+
+        var halfWidth = regionWidth/2;
+
+        return this.chr + "\t" + (this.location - halfWidth) + "\t" + (this.location + halfWidth + 1) + "\n";
 
     };
 
