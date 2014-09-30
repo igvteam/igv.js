@@ -161,7 +161,8 @@ var igv = (function (igv) {
 
         browser.rootHeight += viewportHeight + this.marginBottom;
 
-        browser.div.style.height = browser.rootHeight + 165 + "px";
+        // TODO -- do something about the magic "300"
+        browser.div.style.height = browser.rootHeight + 300 + "px";
 
         this.canvas = canvas;
         this.ctx = canvas.getContext("2d");
