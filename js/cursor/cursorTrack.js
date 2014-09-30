@@ -112,7 +112,7 @@ var cursor = (function (cursor) {
                 regionBpEnd,
                 top;
 
-            regions = this.cursorModel.getRegionList();
+            regions = this.cursorModel.regionsToRender();
 
             myself.renderMinX =  1000000;
             myself.renderMaxX = -1000000;

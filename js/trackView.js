@@ -374,7 +374,7 @@ var igv = (function (igv) {
 
                             // CURSOR track clamping
                             viewPortWidth = $(".igv-viewport-div").first().width();
-                            pixelsEnd = Math.floor(trackView.browser.cursorModel.framePixelWidth * trackView.browser.cursorModel.getRegionList().length);
+                            pixelsEnd = Math.floor(trackView.browser.cursorModel.framePixelWidth * trackView.browser.cursorModel.regionsToRender().length);
                             pixels = Math.floor(trackView.browser.referenceFrame.toPixels(referenceFrame.start) + viewPortWidth);
 
                             if (pixels >= pixelsEnd) {

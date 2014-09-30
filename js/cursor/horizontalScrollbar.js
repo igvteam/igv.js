@@ -17,7 +17,7 @@ var cursor = (function (cursor) {
 
         var horizontalScrollBarWidth = $(".igv-horizontal-scrollbar-div").first().width(),
             horizontalScrollBarDraggable = $(".igv-horizontal-scrollbar-draggable-div").first(),
-            regionListLength = cursorModel.getRegionList().length,
+            regionListLength = cursorModel.regionsToRender().length,
             regionsOnScreen,
             left,
             width;

@@ -214,6 +214,7 @@ var igv = (function (igv) {
                 if (browser.cursorModel) {
 
                     percent = 100.0 * ($(".igv-viewport-div").first().width() / $(".igv-track-div").first().width());
+                    console.log("percent " + percent);
                     $(".igv-horizontal-scrollbar-div").css({
                         "width": percent + "%"
                     });
@@ -264,7 +265,7 @@ var igv = (function (igv) {
 
                 browser.zoomOut = function () {
 
-                    var thresholdFramePixelWidth = $(".igv-viewport-div").first().width() / browser.cursorModel.getRegionList().length;
+                    var thresholdFramePixelWidth = $(".igv-viewport-div").first().width() / browser.cursorModel.regionsToRender().length;
 
                     browser.cursorModel.framePixelWidth = Math.max(thresholdFramePixelWidth, browser.cursorModel.framePixelWidth / 2.0);
 
@@ -284,7 +285,7 @@ var igv = (function (igv) {
                         return;
                     }
 
-                    regionCount = browser.cursorModel.getRegionList().length;
+                    regionCount = browser.cursorModel.regionsToRender().length;
 
                     if (regionCount > 0) {
 //                        frameWidth = (browser.trackContainerDiv.clientWidth - browser.controlPanelWidth) / regionCount;
