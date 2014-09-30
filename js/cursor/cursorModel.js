@@ -32,7 +32,7 @@ var cursor = (function (cursor) {
         form = document.createElement("form");
         document.body.appendChild(form);
         form.setAttribute("method", "post");
-        form.setAttribute("action", "exportRegions/exportregion.php");
+        form.setAttribute("action", "php/exportregions.php");
 
         // file name
         hiddenFilenameInput = document.createElement("input");
@@ -208,8 +208,7 @@ var cursor = (function (cursor) {
 
             } else {
 
-                // If filteredRegions set is > 10,000 downsample. Keep unsubsampled list.
-                if (myself.filteredRegions.length >= resevoirSampledRegionListLength) {
+                if (myself.filteredRegions.length >= Number.MAX_VALUE /*resevoirSampledRegionListLength*/) {
 
                     myself.subSampledFilteredRegions = resevoirSampledRegionList(myself.filteredRegions, resevoirSampledRegionListLength);
                 } else {
@@ -220,10 +219,7 @@ var cursor = (function (cursor) {
                 myself.browser.update();
             }
 
-
-
             myself.updateRegionDisplay();
-
 
             // better histogram code
             trackPackages.forEach(function (trackPackage) {
@@ -319,14 +315,19 @@ var cursor = (function (cursor) {
             continuation();
         }
 
-        // If filteredRegions set is > 10,000 downsample. Keep unsubsampled list.
-        if (myself.filteredRegions.length >= resevoirSampledRegionListLength) {
+        if (myself.filteredRegions.length >= Number.MAX_VALUE /*resevoirSampledRegionListLength*/) {
 
             myself.subSampledFilteredRegions = resevoirSampledRegionList(myself.filteredRegions, resevoirSampledRegionListLength);
         } else {
 
             myself.subSampledFilteredRegions = myself.filteredRegions;
         }
+
+
+
+
+
+
 
         featureSource.getFeatureCache(function (featureCache) {
 
