@@ -350,9 +350,11 @@ var igv = (function (igv) {
         browser.saveSession = function () {
 
             var session,
+                restoredSession,
                 form,
                 hiddenFilenameInput,
-                hiddenDownloadContent;
+                hiddenDownloadContent,
+                stringified;
 
             form = document.createElement("form");
             document.body.appendChild(form);
@@ -380,7 +382,10 @@ var igv = (function (igv) {
 
             });
 
+            stringified = JSON.stringify(session);
             hiddenDownloadContent.setAttribute("value", JSON.stringify(session));
+
+            restoredSession = JSON.parse(stringified);
 
             // submit and self-destruct
             form.submit();
