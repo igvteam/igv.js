@@ -137,7 +137,7 @@ var igv = (function (igv) {
 
     igv.T2dTrack.prototype.popupData = function (genomicLocation, xOffset, yOffset) {
 
-        var i, len, p, dbSnp, data;
+        var i, len, p, dbSnp, data, url;
 
         if (this.po) {
             for (i = 0, len = this.po.length; i < len; i++) {
@@ -146,15 +146,21 @@ var igv = (function (igv) {
                     dbSnp = p.feature.DBSNP_ID;
                     data = [];
                     if (dbSnp) {
-                        data.push("<a  target='_blank' href=http://type2diabetesgenetics.org/variant/variantInfo/" + dbSnp + ">" +
+                        url = "http://type2diabetesgenetics.org/variant/variantInfo/" + dbSnp;
+                       // data.push("<a href=# onclick=window.location='" + url + "'>" +
+                       //     p.feature.DBSNP_ID + "</a>");
+                        data.push("<a target='_blank' href='" + url + "' >" +
                             p.feature.DBSNP_ID + "</a>");
                     }
                     data.push("chr" + p.feature.CHROM + ":" + p.feature.POS.toString());
                     data.push({name: 'p-value', value: p.feature.PVALUE});
                     data.push({name: 'z-score', value: p.feature.ZSCORE});
                     if (dbSnp) {
-                        data.push("<a  target='_blank' href=http://type2diabetesgenetics.org/trait/traitInfo/" + dbSnp +
-                            ">see all available statistics for this variant</a>");
+                        url = "http://type2diabetesgenetics.org/trait/traitInfo/" + dbSnp;
+                      //  data.push("<a href=# onclick=window.lcation='" + url + "'>" +
+                      //      "see all available statistics for this variant</a>");
+                        data.push("<a target='_blank' href='" + url + "'>" +
+                            "see all available statistics for this variant</a>");
                     }
                     return data;
                 }

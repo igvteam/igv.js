@@ -9,12 +9,12 @@ var igv = (function (igv) {
      */
     igv.createBrowser = function (options) {
 
+        console.log("Create browser");
 
         igv.browser = new igv.Browser("IGV");
 
         var browser = igv.browser,
             rootDiv = browser.div,
-            contentContainer = $('<div class="container-fluid"><div class="row">')[0],
             contentRoot = $('<div id="igvContentDiv" class="igv-content-div">')[0],
             contentKaryo = $('<div id="igvKaryoDiv" class="igv-karyo-div">')[0],
             contentHeader = $('<div id="igvHeaderDiv" class="igv-header-div">')[0],
@@ -24,9 +24,7 @@ var igv = (function (igv) {
 
         // DOM
         $(rootDiv).append(contentKaryo);
-        $(rootDiv).append(contentContainer);
-
-        $(contentContainer).append(contentRoot);
+        $(rootDiv).append(contentRoot);
 
         $(contentRoot).append(contentHeader);
         $(contentRoot).append(trackContainer);
@@ -36,6 +34,8 @@ var igv = (function (igv) {
 
 
         browser.startup = function () {
+
+            console.log("Browser startup");
 
             browser.controlPanelWidth = 50;
 
@@ -85,12 +85,9 @@ var igv = (function (igv) {
                     browser.search(options.locus);
                 }
 
+                // TODO -- why is this function throttled?
                 window.onresize = igv.throttle(function () {
-                    if (browser.ideoPanel) browser.ideoPanel.resize();
-                    if (browser.karyoPanel) browser.karyoPanel.resize();
-                    browser.trackPanels.forEach(function (panel) {
-                        panel.resize();
-                    })
+                   browser.resize();
                 }, 10);
             });
 

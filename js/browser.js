@@ -1,5 +1,7 @@
 var igv = (function (igv) {
 
+    const MIN_TRACK_WIDTH = 500;
+
     igv.Browser = function (type) {
 
         this.type = type ? type : "IGV";
@@ -169,6 +171,14 @@ var igv = (function (igv) {
 
     };
 
+    igv.Browser.prototype.resize = function () {
+        if (this.ideoPanel) this.ideoPanel.resize();
+        if (this.karyoPanel) this.karyoPanel.resize();
+        this.trackPanels.forEach(function (panel) {
+            panel.resize();
+        })
+    }
+
     igv.Browser.prototype.repaint = function () {
 
         if (this.ideoPanel) {
@@ -212,16 +222,23 @@ var igv = (function (igv) {
      * Return the visible width of a track.  All tracks should have the same width.
      */
     igv.Browser.prototype.trackViewportWidth = function () {
+
+        var width;
+
         if (this.trackPanels && this.trackPanels.length > 0) {
-            return this.trackPanels[0].viewportDiv.clientWidth;
+            width = this.trackPanels[0].viewportDiv.clientWidth;
         }
         else {
-            return this.trackContainerDiv.clientWidth;
+            width = this.trackContainerDiv.clientWidth;
         }
+
+        return Math.max(MIN_TRACK_WIDTH, width);
 
     }
 
     igv.Browser.prototype.goto = function (chr, start, end) {
+
+        console.log("goto " + chr + ":" + start + "-" + end);
 
         if (igv.popover) {
             igv.popover.hide();
@@ -307,6 +324,8 @@ var igv = (function (igv) {
     }
 
     igv.Browser.prototype.search = function (feature) {
+
+        console.log("Search " + feature);
 
         if (feature.contains(":") && feature.contains("-")) {
 
