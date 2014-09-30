@@ -17,7 +17,7 @@ function runDataLoaderTests() {
             "columns": ["ID", "CHROM", "POS", "DBSNP_ID", "Consequence", "Protein_change"]
         };
 
-        dataLoader.postJson(data, function (result) {
+        dataLoader.postJson(JSON.stringify(data), function (result) {
 
             ok(result);
 

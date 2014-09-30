@@ -14,9 +14,12 @@ var igv = (function (igv) {
         this.minLogP = config.minLogP || 0;
         this.maxLogP = config.maxLogP || 15;
         this.background = config.background || "rgb(245,245,245)";
-        this.dotSize = config.dotSize || 3;
+        this.dotSize = config.dotSize || 4;
 
-        this.description = config.description;
+        this.description = config.description;  // might be null
+        this.proxy = config.proxy;   // might be null
+
+        this.portalURL = config.portalURL ? config.portalURL : "";
 
         var cs = config.colorScale || {
             thresholds: [5e-8, 5e-4, 0.5],
@@ -142,21 +145,25 @@ var igv = (function (igv) {
         if (this.po) {
             for (i = 0, len = this.po.length; i < len; i++) {
                 p = this.po[i];
-                if (Math.abs(xOffset - p.x) < this.dotSize && Math.abs(yOffset - p.y) < this.dotSize) {
+                if (Math.abs(xOffset - p.x) < this.dotSize && Math.abs(yOffset - p.y) <= this.dotSize) {
                     dbSnp = p.feature.DBSNP_ID;
                     data = [];
                     if (dbSnp) {
-                        url = "http://type2diabetesgenetics.org/variant/variantInfo/" + dbSnp;
-                        data.push("<a href=# onclick=window.location='" + url + "'>" +
+                        url = this.portalURL + "variant/variantInfo/" + dbSnp;
+                       // data.push("<a href=# onclick=window.location='" + url + "'>" +
+                       //     p.feature.DBSNP_ID + "</a>");
+                        data.push("<a target='_blank' href='" + url + "' >" +
                             p.feature.DBSNP_ID + "</a>");
                     }
                     data.push("chr" + p.feature.CHROM + ":" + p.feature.POS.toString());
                     data.push({name: 'p-value', value: p.feature.PVALUE});
                     data.push({name: 'z-score', value: p.feature.ZSCORE});
                     if (dbSnp) {
-                        url = "http://type2diabetesgenetics.org/trait/traitInfo/" + dbSnp;
-                        data.push("<a href=# onclick=window.lcation='" + url + "'>" +
-                            ">see all available statistics for this variant</a>");
+                        url = this.portalURL + "trait/traitInfo/" + dbSnp;
+                      //  data.push("<a href=# onclick=window.lcation='" + url + "'>" +
+                      //      "see all available statistics for this variant</a>");
+                        data.push("<a target='_blank' href='" + url + "'>" +
+                            "see all available statistics for this variant</a>");
                     }
                     return data;
                 }

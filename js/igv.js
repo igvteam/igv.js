@@ -13,6 +13,8 @@ var igv = (function (igv) {
 
         igv.browser = new igv.Browser("IGV");
 
+        igv.browser.flanking = options.flanking;
+
         var browser = igv.browser,
             rootDiv = browser.div,
             contentRoot = $('<div id="igvContentDiv" class="igv-content-div">')[0],

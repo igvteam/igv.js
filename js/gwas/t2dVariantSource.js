@@ -9,9 +9,11 @@ var igv = (function (igv) {
      */
     igv.T2DVariantSource = function (config) {
 
+        this.proxy = (config.proxy ? config.proxy : "//www.broadinstitute.org/igvdata/t2d/postJson.php");   // Always use a proxy for now
         this.url = config.url;
         this.trait = config.trait;
-
+        this.value = config.value ? config.value : "PVALUE";
+        this.valueThreshold = config.valueThreshold ? config.valueThreshold : 5E-2;
 
     };
 
@@ -43,20 +45,23 @@ var igv = (function (igv) {
                     queryChr = (chr.startsWith("chr") ? chr.substring(3) : chr),
                     queryStart = Math.max(0, center - window),
                     queryEnd = center + window,
-                    dataLoader = new igv.DataLoader(this.url),
+                    dataLoader = new igv.DataLoader(this.proxy ? this.proxy : this.url),
                     data = {
                         "user_group": "ui",
                         "filters": [
                             {"operand": "CHROM", "operator": "EQ", "value": queryChr, "filter_type": "STRING" },
                             {"operand": "POS", "operator": "GT", "value": queryStart, "filter_type": "FLOAT" },
                             {"operand": "POS", "operator": "LT", "value": queryEnd, "filter_type": "FLOAT" },
-                            {"operand": "PVALUE", "operator": "LTE", "value": 5E-2, "filter_type": "FLOAT"}
+                            {"operand": source.value, "operator": "LTE", "value": source.valueThreshold, "filter_type": "FLOAT"}
                         ],
                         "trait": source.trait
-                    };
+                    },
+                    tmp =  this.proxy ?
+                        "url=" + this.url + "&data=" + JSON.stringify(data):
+                        JSON.stringify(data);
 
 
-                dataLoader.postJson(data, function (result) {
+                dataLoader.postJson(tmp, function (result) {
 
                         if (result) {
 

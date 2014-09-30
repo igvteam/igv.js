@@ -12,6 +12,12 @@ var igv = (function (igv) {
 
         this.rootHeight = 0;
         this.searchURL = "http://www.broadinstitute.org/webservices/igv/locus?genome=hg19&name=";
+
+
+        if (type === "GTEX") {
+            this.flanking = 1000000;
+        }
+
     };
 
     igv.Browser.prototype.loadTrack = function (descriptor) {
@@ -376,10 +382,12 @@ var igv = (function (igv) {
                                 var start = parseInt(rangeTokens[0].replace(/,/g, ''));
                                 var end = parseInt(rangeTokens[1].replace(/,/g, ''));
 
+                                if(browser.flanking) {
+                                    start -= browser.flanking;
+                                    end += browser.flanking;
+                                }
+
                                 if (browser.type === "GTEX") {
-                                    var flanking = 1000000;
-                                    start -= flanking;
-                                    end += flanking;
                                     igv.selection = new igv.GtexSelection(type == 'gene' ? {gene: feature} : {snp: feature});
                                     browser.goto(chr, start, end);
                                     browser.update();
