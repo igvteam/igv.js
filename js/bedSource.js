@@ -3,10 +3,9 @@
 var igv = (function (igv) {
 
     /**
-     * @param url - url to a .wig file
+     * @param urlOrFile - url to a .wig file
      * @param decode - url to a .wig file
      * @param binary - url to a .wig file
-     * @param localFile - url to a .wig file
      * @constructor
      */
     igv.BedFeatureSource = function (urlOrFile, decode, binary) {

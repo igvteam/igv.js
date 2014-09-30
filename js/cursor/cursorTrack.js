@@ -18,9 +18,21 @@ var cursor = (function (cursor) {
         this.height = height;
         this.max = 1000;
         this.sortDirection = 1;
-        this.renderMinX = 0;
-        this.renderMaxX = 0;
 
+    };
+
+    cursor.CursorTrack.prototype.jsonRepresentation = function () {
+
+        var fs = this.featureSource,
+            json;
+
+        json = {
+            label : this.label,
+            trackHeight : this.height,
+            path : { filename : fs.filename, path : (fs.url) ? fs.url : fs.localFile }
+        };
+
+        return json;
     };
 
     cursor.defaultColor = function () {
@@ -114,9 +126,6 @@ var cursor = (function (cursor) {
 
             regions = this.cursorModel.regionsToRender();
 
-            myself.renderMinX =  1000000;
-            myself.renderMaxX = -1000000;
-
             if (!regions /*|| regions.length == 0*/) {
                 continuation();
             }
@@ -177,8 +186,6 @@ var cursor = (function (cursor) {
                                 fh = this.height - 20;
                             }
 
-                            myself.renderMinX = Math.min(myself.renderMinX, pStart);
-                            myself.renderMaxX = Math.max(myself.renderMaxX, pStart + pw);
                             canvas.fillRect(pStart, top, pw, fh);
 
                         }
@@ -193,25 +200,16 @@ var cursor = (function (cursor) {
                         fh = Math.round(((score / this.max) * maxFeatureHeight));
                         top = this.height - fh;
 
-                        myself.renderMinX = Math.min(myself.renderMinX, pxStart);
-                        myself.renderMaxX = Math.max(myself.renderMaxX, pxStart + pw);
                         canvas.fillRect(pxStart, top, pw, fh);
                     } else if (score === 0) {
                         top = 10;
                         fh = this.height - 20;
 
-                        myself.renderMinX = Math.min(myself.renderMinX, pxStart);
-                        myself.renderMaxX = Math.max(myself.renderMaxX, pxStart + pw);
                         canvas.fillRect(pxStart, top, pw, fh);
                     }
 
                 }
             }
-
-            myself.renderMinX = Math.floor(myself.renderMinX);
-            myself.renderMaxX = Math.floor(myself.renderMaxX);
-
-//            console.log("cursorTrack - referenceFrame.start " + myself.referenceFrame.start + " min | max = " + myself.renderMinX + " | " + myself.renderMaxX);
 
             continuation();
         }

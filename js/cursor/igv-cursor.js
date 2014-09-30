@@ -57,11 +57,16 @@ var igv = (function (igv) {
 
             browser.setTrackHeight(Math.round(parseFloat(value, 10)));
         };
+
+        // export regions
         document.getElementById('igvExportRegionsButton').onclick = function (e) {
             browser.cursorModel.exportRegions();
         };
+
+        // session save/load
         document.getElementById('igvSessionSaveButton').onclick = function (e) {
-            window.alert("igvSessionSaveButton");
+//            window.alert("igvSessionSaveButton");
+            browser.saveSession();
         };
         document.getElementById('igvSessionLoadButton').onclick = function (e) {
             window.alert("igvSessionSaveButton");
@@ -226,114 +231,113 @@ var igv = (function (igv) {
 
 
             }, 10);
+        };
 
-            function initCursor() {
+        function initCursor() {
 
-                var regionDisplayJQueryObject = $('#igvHeaderRegionDisplaySpan');
+            var regionDisplayJQueryObject = $('#igvHeaderRegionDisplaySpan');
 
-                browser.cursorModel = new cursor.CursorModel(browser, regionDisplayJQueryObject);
-                browser.referenceFrame = new igv.ReferenceFrame("", 0, 1 / browser.cursorModel.framePixelWidth);
+            browser.cursorModel = new cursor.CursorModel(browser, regionDisplayJQueryObject);
+            browser.referenceFrame = new igv.ReferenceFrame("", 0, 1 / browser.cursorModel.framePixelWidth);
 
-                browser.setFrameWidth = function (frameWidthString) {
+            browser.setFrameWidth = function (frameWidthString) {
 
-                    var frameWidth = parseFloat(frameWidthString);
-                    if (frameWidth > 0) {
+                var frameWidth = parseFloat(frameWidthString);
+                if (frameWidth > 0) {
 
-                        browser.cursorModel.framePixelWidth = frameWidth;
-                        $("input[id='frameWidthInput']").val(browser.cursorModel.framePixelWidth);
-
-                        browser.referenceFrame.bpPerPixel = 1 / frameWidth;
-                        browser.update();
-                    }
-                };
-
-                browser.setRegionSize = function (regionSizeString) {
-
-                    var regionSize = parseFloat(regionSizeString);
-                    if (regionSize > 0) {
-
-                        browser.cursorModel.regionWidth = regionSize;
-                        browser.update();
-                    }
-
-                };
-
-                browser.zoomIn = function () {
-
-                    browser.cursorModel.framePixelWidth *= 2;
+                    browser.cursorModel.framePixelWidth = frameWidth;
                     $("input[id='frameWidthInput']").val(browser.cursorModel.framePixelWidth);
 
+                    browser.referenceFrame.bpPerPixel = 1 / frameWidth;
                     browser.update();
-                };
+                }
+            };
 
-                browser.zoomOut = function () {
+            browser.setRegionSize = function (regionSizeString) {
 
-                    var thresholdFramePixelWidth = $(".igv-viewport-div").first().width() / browser.cursorModel.regionsToRender().length;
+                var regionSize = parseFloat(regionSizeString);
+                if (regionSize > 0) {
 
-                    browser.cursorModel.framePixelWidth = Math.max(thresholdFramePixelWidth, browser.cursorModel.framePixelWidth / 2.0);
+                    browser.cursorModel.regionWidth = regionSize;
+                    browser.update();
+                }
+
+            };
+
+            browser.zoomIn = function () {
+
+                browser.cursorModel.framePixelWidth *= 2;
+                $("input[id='frameWidthInput']").val(browser.cursorModel.framePixelWidth);
+
+                browser.update();
+            };
+
+            browser.zoomOut = function () {
+
+                var thresholdFramePixelWidth = $(".igv-viewport-div").first().width() / browser.cursorModel.regionsToRender().length;
+
+                browser.cursorModel.framePixelWidth = Math.max(thresholdFramePixelWidth, browser.cursorModel.framePixelWidth / 2.0);
 
 //                    console.log("candidate " + browser.cursorModel.framePixelWidth + " threshold " + thresholdFramePixelWidth);
 
-                    $("input[id='frameWidthInput']").val(browser.cursorModel.framePixelWidth);
+                $("input[id='frameWidthInput']").val(browser.cursorModel.framePixelWidth);
 
-                    browser.update();
-                };
+                browser.update();
+            };
 
-                browser.fitToScreen = function () {
+            browser.fitToScreen = function () {
 
-                    var regionCount,
-                        frameWidth;
+                var regionCount,
+                    frameWidth;
 
-                    if (!(browser.cursorModel && browser.cursorModel.regions)) {
-                        return;
-                    }
+                if (!(browser.cursorModel && browser.cursorModel.regions)) {
+                    return;
+                }
 
-                    regionCount = browser.cursorModel.regionsToRender().length;
+                regionCount = browser.cursorModel.regionsToRender().length;
 
-                    if (regionCount > 0) {
+                if (regionCount > 0) {
 //                        frameWidth = (browser.trackContainerDiv.clientWidth - browser.controlPanelWidth) / regionCount;
-                        frameWidth = $(".igv-viewport-div").first().width() / regionCount;
-                        browser.referenceFrame.start = 0;
-                        browser.setFrameWidth(frameWidth);
-                        $('frameWidthBox').value = frameWidth;
-                    }
-                };
+                    frameWidth = $(".igv-viewport-div").first().width() / regionCount;
+                    browser.referenceFrame.start = 0;
+                    browser.setFrameWidth(frameWidth);
+                    $('frameWidthBox').value = frameWidth;
+                }
+            };
 
-                var tssUrl = "test/data/cursor/hg19.tss.bed.gz";
-                var peakURL = "test/data/cursor/wgEncodeBroadHistoneH1hescH3k4me3StdPk.broadPeak.gz";
-                var peak2URL = "test/data/cursor/wgEncodeBroadHistoneH1hescH3k27me3StdPk.broadPeak.gz";
+            var tssUrl = "test/data/cursor/hg19.tss.bed.gz";
+            var peakURL = "test/data/cursor/wgEncodeBroadHistoneH1hescH3k4me3StdPk.broadPeak.gz";
+            var peak2URL = "test/data/cursor/wgEncodeBroadHistoneH1hescH3k27me3StdPk.broadPeak.gz";
 
-                var peakDataSource = new igv.BedFeatureSource(peakURL);
-                var peak2DataSource = new igv.BedFeatureSource(peak2URL);
-                var tssDataSource = new igv.BedFeatureSource(tssUrl);
+            var peakDataSource = new igv.BedFeatureSource(peakURL);
+            var peak2DataSource = new igv.BedFeatureSource(peak2URL);
+            var tssDataSource = new igv.BedFeatureSource(tssUrl);
 
-                var tssTrack = new cursor.CursorTrack(tssDataSource, browser.cursorModel, browser.referenceFrame, "TSS", 40);
+            var tssTrack = new cursor.CursorTrack(tssDataSource, browser.cursorModel, browser.referenceFrame, "TSS", 40);
 
-                var track1 = new cursor.CursorTrack(peakDataSource, browser.cursorModel, browser.referenceFrame, "H3k4me3 H1hesc", browser.trackHeight);
-                track1.color = "rgb(0,150,0)";
+            var track1 = new cursor.CursorTrack(peakDataSource, browser.cursorModel, browser.referenceFrame, "H3k4me3 H1hesc", browser.trackHeight);
+            track1.color = "rgb(0,150,0)";
 
-                var track2 = new cursor.CursorTrack(peak2DataSource, browser.cursorModel, browser.referenceFrame, "H3k27me3 H1hesc", browser.trackHeight);
-                track2.color = "rgb(150,0,0)";
+            var track2 = new cursor.CursorTrack(peak2DataSource, browser.cursorModel, browser.referenceFrame, "H3k27me3 H1hesc", browser.trackHeight);
+            track2.color = "rgb(150,0,0)";
 
-                // Set the TSS track as the inital "selected" track (i.e. defines the regions)
-                tssDataSource.allFeatures(function (featureList) {
+            // Set the TSS track as the inital "selected" track (i.e. defines the regions)
+            tssDataSource.allFeatures(function (featureList) {
 
-                    browser.cursorModel.setRegions(featureList);
+                browser.cursorModel.setRegions(featureList);
 
-                    browser.addTrack(tssTrack);
+                browser.addTrack(tssTrack);
 
-                    browser.addTrack(track1);
+                browser.addTrack(track1);
 
-                    browser.addTrack(track2);
+                browser.addTrack(track2);
 
-                    tssTrack.labelButton.className = "btn btn-xs btn-cursor-selected";
+                tssTrack.labelButton.className = "btn btn-xs btn-cursor-selected";
 
-                    browser.horizontalScrollbar.update(browser.cursorModel, browser.referenceFrame);
-                });
+                browser.horizontalScrollbar.update(browser.cursorModel, browser.referenceFrame);
+            });
 
-            }
-        };
-
+        }
 
         // Augment standard behavior
         browser.removeTrack = function (track) {
@@ -342,6 +346,52 @@ var igv = (function (igv) {
             this.cursorModel.filterRegions();
 
         }
+
+        browser.saveSession = function () {
+
+            var session,
+                restoredSession,
+                form,
+                hiddenFilenameInput,
+                hiddenDownloadContent,
+                stringified;
+
+            form = document.createElement("form");
+            document.body.appendChild(form);
+            form.setAttribute("method", "post");
+            form.setAttribute("action", "php/exportregions.php");
+
+            // file name
+            hiddenFilenameInput = document.createElement("input");
+            form.appendChild(hiddenFilenameInput);
+            hiddenFilenameInput.setAttribute("type", "hidden");
+            hiddenFilenameInput.setAttribute("name", "filename");
+            hiddenFilenameInput.setAttribute("value", "igv-session-save.json");
+
+            // For attribute named downloadContent, stuff exportedRegions var into it's value
+            hiddenDownloadContent = document.createElement("input");
+            form.appendChild(hiddenDownloadContent);
+            hiddenDownloadContent.setAttribute("type", "hidden");
+            hiddenDownloadContent.setAttribute("name", "downloadContent");
+
+            session = { tracks : [] };
+
+            browser.trackPanels.forEach(function (trackView) {
+
+                session.tracks.push( trackView.track.jsonRepresentation());
+
+            });
+
+            stringified = JSON.stringify(session);
+            hiddenDownloadContent.setAttribute("value", JSON.stringify(session));
+
+            restoredSession = JSON.parse(stringified);
+
+            // submit and self-destruct
+            form.submit();
+            form.detach();
+
+        };
 
         return browser;
     };
