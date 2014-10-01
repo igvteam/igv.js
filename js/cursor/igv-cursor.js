@@ -93,18 +93,34 @@ var igv = (function (igv) {
         sessionInput.addEventListener('change', function (e) {
 
             var fileReader = new FileReader(),
-                sessionFile,
-                sessionFiles = sessionInput.files,
-                session;
+                sessionFile;
 
-            sessionFile = sessionFiles[ 0 ];
+            sessionFile = sessionInput.files[ 0 ];
 
             fileReader.onload = (function(theFile) {
 
                 return function(e) {
 
-                    session = JSON.parse(e.target.result);
+                    var session;
+
                     browser.sessionTeardown();
+
+                    session = JSON.parse(e.target.result);
+
+                    track = session.tracks[ 1 ];
+
+                    session.tracks.forEach(function(t){
+
+                        var featureSource,
+                            cursorTrack;
+
+                        featureSource = new igv.BedFeatureSource(t.path.path);
+                        cursorTrack = new cursor.CursorTrack(featureSource, browser.cursorModel, browser.referenceFrame, t.label, t.trackHeight);
+                        cursorTrack.color = t.color;
+                        browser.addTrack(cursorTrack);
+
+                    });
+
 
                 };
 

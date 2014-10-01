@@ -28,6 +28,7 @@ var cursor = (function (cursor) {
 
         json = {
             label : this.label,
+            color : this.color,
             trackHeight : this.height,
             path : { filename : fs.filename, path : (fs.url) ? fs.url : fs.localFile }
         };
