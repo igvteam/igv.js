@@ -74,7 +74,8 @@ var igv = (function (igv) {
      */
     igv.Browser.prototype.addTrack = function (track, position) {
 
-        var trackView = new igv.TrackView(track, this);
+        var browser = this,
+            trackView = new igv.TrackView(track, this);
 
         if (trackView.track instanceof igv.EqtlTrack) {
             trackView.trackDiv.style.height = this.trackHeight + "px";
@@ -102,7 +103,7 @@ var igv = (function (igv) {
 
         if (this.cursorModel) {
             this.cursorModel.initializeHistogram(trackView.track, function () {
-                this.resize();
+                browser.resize();
             });
         }
         else {
