@@ -18,8 +18,7 @@ var igv = (function (igv) {
             canvas,
             contentWidth,
             closeButton,
-            labelButton,
-            trackFilterButtonDiv;
+            labelButton;
 
         viewportHeight = track.height;
 

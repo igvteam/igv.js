@@ -102,11 +102,12 @@ var igv = (function (igv) {
 
         if (this.cursorModel) {
             this.cursorModel.initializeHistogram(trackView.track, function () {
-                trackView.repaint()
+                this.resize();
             });
         }
         else {
-            trackView.repaint();
+            this.resize();
+            //trackView.repaint();
         }
 
     };
