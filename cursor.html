@@ -129,6 +129,13 @@
 
             </div><!-- Track Height -->
 
+            <div class="navbar-form navbar-left">
+
+                <button class="btn btn-default" data-toggle="modal" data-target="#igvExportRegionsModal">
+                    Export Regions
+                </button>
+
+            </div><!-- Export Regions -->
 
             <div class="navbar-form navbar-left">
 
@@ -148,35 +155,15 @@
 
             </div><!-- Upload File -->
 
-
-            <div class="navbar-form navbar-left">
-
-                <div class="dropdown">
-                    <button class="btn btn-default dropdown-toggle" type="button" id="igvRegionExportDropdownMenu" data-toggle="dropdown">
-                        Export Regions
-                        <span class="caret"></span>
-                    </button>
-                    <ul class="dropdown-menu" role="menu" aria-labelledby="igvRegionExportDropdownMenu">
-                        <li role="presentation"><a role="menuitem" tabindex="-1" href="#">Action</a></li>
-                        <li role="presentation"><a role="menuitem" tabindex="-1" href="#">Another action</a></li>
-                        <li role="presentation" class="divider"></li>
-                        <li role="presentation"><a role="menuitem" tabindex="-1" href="#">Separated link</a></li>
-
-                    </ul>
-                </div>
-
-            </div><!-- Export Regions -->
-
-
             <div class="nav navbar-nav navbar-right">
 
                 <div class="well-sm">
 
                     <div class="btn-group-sm">
 
-                        <!--<button id="igvExportRegionsButton" type="button" class="btn btn-default btn-sm">-->
-                            <!--Export Regions-->
-                        <!--</button>-->
+                        <button id="igvExportRegionsButton" type="button" class="btn btn-default btn-sm">
+                            Export Regions
+                        </button>
 
                         <!--<button id="igvSessionSaveButton" type="button" class="btn btn-default btn-sm">-->
                             <!--Save Session-->
@@ -205,6 +192,57 @@
         </div>
 
     </nav>
+
+
+
+    <!-- Button trigger modal -->
+    <!--<button class="btn btn-primary btn-lg" data-toggle="modal" data-target="#myModal">-->
+        <!--Launch demo modal-->
+    <!--</button>-->
+
+    <!-- Modal -->
+    <div class="modal fade" id="igvExportRegionsModal" tabindex="-1" role="dialog" aria-labelledby="igvExportRegionsModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal">
+                        <span aria-hidden="true">&times;</span>
+                        <span class="sr-only">Close</span>
+                    </button>
+                    <h4 class="modal-title" id="igvExportRegionsModalLabel">Export Regions</h4>
+                </div>
+
+                <div class="modal-body">
+                    <form id="igvExportRegionsModalForm" role="form" action="https://iwww.broadinstitute.org/~liefeld/igvdownload.php" method="post">
+                        <div class="form-group">
+                            <input id="igvExportRegionsModalFilenameInput" class="form-control"  placeholder="Enter filename" type="text" name="filename" value="igv-cursor-modal-form-region-export.bed"/>
+                            <input id="igvExportRegionsModalDownloadContentInput" class="form-control"  type="hidden" name="downloadContent" value="this is the contents of the file"/>
+                        </div>
+
+                        <button id="igvExportRegionsModalSubmitButton" class="btn btn-default" type="submit" name="download" value="download">Submit</button>
+                    </form>
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
     <!-- ENCODE Modal -->
     <div class="modal fade bs-example-modal-lg" id="encodeModal" tabindex="-1" role="dialog" aria-labelledby="encodeModalLabel" aria-hidden="true">
@@ -238,6 +276,28 @@
 
     </div>
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
     <div id="igvContainerDiv" class="container-fluid">
     </div>
 
@@ -250,17 +310,6 @@
         var browser = igv.createCursorBrowser();
 
         browser.startup();
-
-//        $("#igvUploadFilePopover").popover({
-//            html : true,
-//            content: function() {
-//                return $('#igvUploadFileHiddenContent').html();
-//            }
-//        });
-
-//        $("#igvSessionPopover").popover({
-//            placement : 'bottom'
-//        });
 
     });
 

@@ -39,7 +39,7 @@ var cursor = (function (cursor) {
         form.appendChild(hiddenFilenameInput);
         hiddenFilenameInput.setAttribute("type", "hidden");
         hiddenFilenameInput.setAttribute("name", "filename");
-        hiddenFilenameInput.setAttribute("value", "igv-cursor-exported-regions.bed");
+        hiddenFilenameInput.setAttribute("value", "cursor-regions.bed");
 
         // ingest contents of textarea named #downloadContent
         hiddenDownloadContent = document.createElement("input");
