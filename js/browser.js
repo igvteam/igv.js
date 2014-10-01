@@ -106,7 +106,7 @@ var igv = (function (igv) {
 
     };
 
-    
+
     igv.Browser.prototype.reorderTracks = function () {
 
         var browser = this;

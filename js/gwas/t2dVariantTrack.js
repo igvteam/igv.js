@@ -19,7 +19,7 @@ var igv = (function (igv) {
         this.description = config.description;  // might be null
         this.proxy = config.proxy;   // might be null
 
-        this.portalURL = config.portalURL ? config.portalURL : "http://type2diabetesgenetics.org/variant/variantInfo/";
+        this.portalURL = config.portalURL ? config.portalURL : window.location.origin;
 
         var cs = config.colorScale || {
             thresholds: [5e-8, 5e-4, 0.5],
@@ -149,7 +149,7 @@ var igv = (function (igv) {
                     dbSnp = p.feature.DBSNP_ID;
                     data = [];
                     if (dbSnp) {
-                        url = this.portalURL + "variant/variantInfo/" + dbSnp;
+                        url = this.portalURL + "/variant/variantInfo/" + dbSnp;
                        // data.push("<a href=# onclick=window.location='" + url + "'>" +
                        //     p.feature.DBSNP_ID + "</a>");
                         data.push("<a target='_blank' href='" + url + "' >" +
@@ -159,7 +159,7 @@ var igv = (function (igv) {
                     data.push({name: 'p-value', value: p.feature.PVALUE});
                     data.push({name: 'z-score', value: p.feature.ZSCORE});
                     if (dbSnp) {
-                        url = this.portalURL + "trait/traitInfo/" + dbSnp;
+                        url = this.portalURL + "/trait/traitInfo/" + dbSnp;
                       //  data.push("<a href=# onclick=window.lcation='" + url + "'>" +
                       //      "see all available statistics for this variant</a>");
                         data.push("<a target='_blank' href='" + url + "'>" +

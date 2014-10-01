@@ -182,10 +182,10 @@
     position: relative;
     left: 0px;
     right: 0px;
+    padding-bottom: 10px;
     font-family: Arial, Helvetica, sans-serif;
     font-size: medium;
     height: auto;
-    min-height: 100px;
     overflow: hidden;
 }
 

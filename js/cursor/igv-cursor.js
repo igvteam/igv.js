@@ -13,7 +13,8 @@ var igv = (function (igv) {
         $(browser.div).append(trackContainer);
         document.getElementById('igvContainerDiv').appendChild(browser.div);
 
-        browser.horizontalScrollbar = new cursor.HorizontalScrollbar(browser, $(trackContainer));
+        browser.horizontalScrollbar = new cursor.HorizontalScrollbar(browser, $(browser.div));
+
 
         // Append event handlers to DOM elements
         document.getElementById('zoomOut').onclick = function (e) {

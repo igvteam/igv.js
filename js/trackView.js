@@ -340,7 +340,7 @@ var igv = (function (igv) {
 
             var canvasCoords = igv.translateMouseCoordinates(e, canvas);
 
-            igv.popover.hide();
+            if(igv.popover) igv.popover.hide();
 
             isMouseDown = true;
             lastMouseX = canvasCoords.x;
