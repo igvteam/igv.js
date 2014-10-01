@@ -146,11 +146,12 @@ input[type='file'] {
 
 .igv-root-div {
 
-/*    position: relative; */
+    position: relative;
     margin-left: 10px;
     margin-right: 10px;
     left: 0;
     right: 0;
+    height: auto;
 
     -webkit-box-sizing: border-box;
     -moz-box-sizing: border-box;
@@ -166,41 +167,44 @@ input[type='file'] {
     user-select: none;
 }
 
-
 .igv-karyo-div {
 
 }
 
-
 .igv-content-div {
-    position: absolute;
+    position: relative;
     margin-left: 10px;
     margin-right: 10px;
     left: 0;
     right: 0;
+    min-height: 100px;
+    height: auto;
 }
 
 .igv-header-div {
-    position: absolute;
+    position: relative;
     top: 40px;
     left: 0;
     right: 0;
 }
 
 .igv-track-container-div {
-    position: absolute;
+    position: relative;
     left: 0px;
     top: 80px;
     right: 0px;
     font-family: Arial, Helvetica, sans-serif;
     font-size: medium;
+    height: auto;
+    min-height: 100px;
+    overflow: hidden;
 }
 
 .igv-track-div {
-    position: absolute;
+    /* position: absolute;*/
+    position: relative;
     left: 0;
     right: 0;
-    height: 100%;
 }
 
 .igv-control-div {
@@ -270,7 +274,6 @@ input[type='file'] {
     background-color: rgba(255, 0, 0, .75);
 }
 
-
 .igv-popover {
     position: absolute;
     top: 0;
@@ -323,21 +326,21 @@ input[type='file'] {
 .igv-popoverCloseElement {
     position: absolute;
     top: 4px;
-    right:4px;
+    right: 4px;
     cursor: pointer;
 }
 
 .igv-popoverCloseFontAwesome {
     position: absolute;
     top: 0;
-    right:0;
+    right: 0;
     color: #888;
 }
 
 .igv-popoverClose {
     position: absolute;
     top: 4px;
-    right:4px;
+    right: 4px;
     width: 15px;
     height: 15px;
     font-size: 10pt;
@@ -350,7 +353,7 @@ input[type='file'] {
     -moz-border-radius: 50%;
     -webkit-border-radius: 50%;
     /*padding: 1px 3px 2px 3px;*/
-    text-align:center;
+    text-align: center;
 }
 
 .igv-popoverClose:hover {
@@ -358,7 +361,6 @@ input[type='file'] {
     border: 2px solid #e00;
     background-color: #e00;
 }
-
 
 #dropdown-list {
     max-height: 200px;
@@ -386,9 +388,9 @@ input[type='file'] {
 }
 
 /*.cursor-btn-selected {*/
-    /*color: #333;*/
-    /*background-color: #ebebeb;*/
-    /*border-color: #357ebd;*/
+/*color: #333;*/
+/*background-color: #ebebeb;*/
+/*border-color: #357ebd;*/
 /*}*/
 
 .btn-cursor-selected {

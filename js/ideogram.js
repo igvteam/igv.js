@@ -24,7 +24,7 @@ var igv = (function (igv) {
 
         var canvas = document.createElement('canvas');
         canvas.style.position = 'absolute';
-        canvas.style.width = "100%";
+        canvas.style.width = contentWidth;
         canvas.style.height = contentHeight;
         canvas.setAttribute('width', contentWidth);    //Must set the width & height of the canvas
         canvas.setAttribute('height', contentHeight);

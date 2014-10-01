@@ -19,7 +19,7 @@ var igv = (function (igv) {
         this.description = config.description;  // might be null
         this.proxy = config.proxy;   // might be null
 
-        this.portalURL = config.portalURL ? config.portalURL : "";
+        this.portalURL = config.portalURL ? config.portalURL : "http://type2diabetesgenetics.org/variant/variantInfo/";
 
         var cs = config.colorScale || {
             thresholds: [5e-8, 5e-4, 0.5],

@@ -27,7 +27,7 @@ var igv = (function (igv) {
         trackDiv = document.createElement("div");
         browser.trackContainerDiv.appendChild(trackDiv);
         trackDiv.className = "igv-track-div";
-        trackDiv.style.top = browser.rootHeight + "px";
+       // trackDiv.style.top = browser.rootHeight + "px";
         trackDiv.style.height = viewportHeight + "px";
 
         this.trackDiv = trackDiv;
@@ -156,10 +156,10 @@ var igv = (function (igv) {
         }
 
 
-        browser.rootHeight += viewportHeight + this.marginBottom;
+     //   browser.rootHeight += viewportHeight + this.marginBottom;
 
         // TODO -- do something about the magic "300"
-        browser.div.style.height = browser.rootHeight + 300 + "px";
+        //browser.div.style.height = browser.rootHeight + 300 + "px";
 
         this.canvas = canvas;
         this.ctx = canvas.getContext("2d");
