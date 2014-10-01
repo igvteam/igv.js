@@ -87,11 +87,34 @@ var igv = (function (igv) {
             downloadInput.val(session);
         });
 
-        // session load
-        document.getElementById('igvSessionLoadButton').onclick = function (e) {
-            browser.sessionTeardown();
-        };
 
+        // session upload
+        var sessionInput = document.getElementById('igvSessionLoad');
+        sessionInput.addEventListener('change', function (e) {
+
+            var fileReader = new FileReader(),
+                sessionFile,
+                sessionFiles = sessionInput.files,
+                session;
+
+            sessionFile = sessionFiles[ 0 ];
+
+            fileReader.onload = (function(theFile) {
+
+                return function(e) {
+
+                    session = JSON.parse(e.target.result);
+                    browser.sessionTeardown();
+
+                };
+
+            })( sessionFile );
+
+            fileReader.readAsText(sessionFile);
+
+        });
+
+        // file upload
         var fileInput = document.getElementById('igvFileUpload');
         fileInput.addEventListener('change', function (e) {
 

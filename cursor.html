@@ -138,6 +138,30 @@
             </div><!-- Export Regions -->
 
             <div class="navbar-form navbar-left">
+                <button class="btn btn-default" data-toggle="modal" data-target="#igvSaveSessionModal">
+                    Save Session
+                </button>
+            </div><!-- Save Session -->
+
+            <div class="navbar-form navbar-left">
+
+                <div class="dropdown">
+                    <button class="btn btn-default dropdown-toggle" type="button" id="igvSessionLoadDropdownMenu" data-toggle="dropdown">
+                        Load Session
+                        <span class="caret"></span>
+                    </button>
+                    <ul class="dropdown-menu" role="menu" aria-labelledby="igvSessionLoadDropdownMenu">
+                        <li role="presentation">
+                            <a role="menuitem" tabindex="-1" href="#">
+                                <input id="igvSessionLoad" type="file" title="foo" multiple />
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+
+            </div><!-- Load Session -->
+
+            <div class="navbar-form navbar-left">
 
                 <div class="dropdown">
                     <button class="btn btn-default dropdown-toggle" type="button" id="igvFileUploadDropdownMenu" data-toggle="dropdown">
@@ -154,18 +178,6 @@
                 </div>
 
             </div><!-- Upload File -->
-
-            <div class="navbar-form navbar-left">
-                <button class="btn btn-default" data-toggle="modal" data-target="#igvSaveSessionModal">
-                    Save Session
-                </button>
-            </div><!-- Save Session -->
-
-            <div class="navbar-form navbar-left">
-                <button id="igvSessionLoadButton" type="button" class="btn btn-default">
-                    Load Session
-                </button>
-            </div><!-- Load Session -->
 
             <div class="nav navbar-nav navbar-right">
 
