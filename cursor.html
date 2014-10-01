@@ -127,30 +127,50 @@
 
             </div><!-- Track Height -->
 
+
+
+
+
+
+
+
             <div class="navbar-form navbar-left">
 
                 <div class="input-append">
                     <input type="file" id="fileInput" title="foo" multiple />
                 </div>
 
+
+                <!--<a id="igvUploadFilePopover" href="#" tabindex="0" class="btn btn-default" data-toggle="popover" data-trigger="focus" data-placement="right">Upload File</a>-->
+
+                <!--<div id="igvUploadFileHiddenContent" style="display: none">-->
+                    <!--<div><input type="file" id="fileInput" title="foo" multiple /></div>-->
+                <!--</div>-->
+
+                <!--<div id="igvUploadFileHiddenTitle" style="display: none">Upload File</div>-->
+
+
             </div><!-- Upload file -->
+
+
 
             <div class="nav navbar-nav navbar-right">
 
                 <div class="well-sm">
+
                     <div class="btn-group-sm">
 
-                        <button id="igvExportRegionsButton" type="button" class="btn btn-default btn-sm">
-                            Export Regions
-                        </button>
+                        <!--<button id="igvExportRegionsButton" type="button" class="btn btn-default btn-sm">-->
+                            <!--Export Regions-->
+                        <!--</button>-->
 
-                        <button id="igvSessionSaveButton" type="button" class="btn btn-default btn-sm">
-                            Save Session
-                        </button>
+                        <!--<button id="igvSessionSaveButton" type="button" class="btn btn-default btn-sm">-->
+                            <!--Save Session-->
+                        <!--</button>-->
 
-                        <button id="igvSessionLoadButton" type="button" class="btn btn-default btn-sm">
-                            Load Session
-                        </button>
+                        <!--<button id="igvSessionLoadButton" type="button" class="btn btn-default btn-sm">-->
+                            <!--Load Session-->
+                        <!--</button>-->
 
                         <button id="fitToScreen" type="button" class="btn btn-default btn-sm">
                             <span class="fa fa-align-justify"></span>
@@ -162,8 +182,11 @@
                             <span class="glyphicon glyphicon-plus"></span>
                         </button>
                     </div>
+
                 </div>
-            </div><!-- fit to screen | magnify | minify -->
+
+
+            </div><!-- fit to screen | zoom out | zoom in -->
 
         </div>
 
@@ -213,6 +236,17 @@
         var browser = igv.createCursorBrowser();
 
         browser.startup();
+
+//        $("#igvUploadFilePopover").popover({
+//            html : true,
+//            content: function() {
+//                return $('#igvUploadFileHiddenContent').html();
+//            }
+//        });
+
+//        $("#igvSessionPopover").popover({
+//            placement : 'bottom'
+//        });
 
     });
 

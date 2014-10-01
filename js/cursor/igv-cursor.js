@@ -58,22 +58,22 @@ var igv = (function (igv) {
             browser.setTrackHeight(Math.round(parseFloat(value, 10)));
         };
 
-        // export regions
-        document.getElementById('igvExportRegionsButton').onclick = function (e) {
-            browser.cursorModel.exportRegions();
-        };
-
-        // session save
-        document.getElementById('igvSessionSaveButton').onclick = function (e) {
-//            window.alert("igvSessionSaveButton");
-            browser.saveSession();
-        };
-
-        // session load
-        document.getElementById('igvSessionLoadButton').onclick = function (e) {
-//            window.alert("igvSessionSaveButton");
-            browser.sessionTeardown();
-        };
+//        // export regions
+//        document.getElementById('igvExportRegionsButton').onclick = function (e) {
+//            browser.cursorModel.exportRegions();
+//        };
+//
+//        // session save
+//        document.getElementById('igvSessionSaveButton').onclick = function (e) {
+////            window.alert("igvSessionSaveButton");
+//            browser.saveSession();
+//        };
+//
+//        // session load
+//        document.getElementById('igvSessionLoadButton').onclick = function (e) {
+////            window.alert("igvSessionSaveButton");
+//            browser.sessionTeardown();
+//        };
 
         var fileInput = document.getElementById('fileInput');
         fileInput.addEventListener('change', function (e) {
@@ -82,7 +82,6 @@ var igv = (function (igv) {
                 localFiles = fileInput.files,
                 featureSource,
                 cursorTrack;
-
 
             for (var i = 0; i < localFiles.length; i++) {
 
@@ -94,7 +93,6 @@ var igv = (function (igv) {
                 browser.addTrack(cursorTrack);
 
             }
-
 
         });
 
