@@ -75,7 +75,7 @@ var igv = (function (igv) {
 //            browser.sessionTeardown();
 //        };
 
-        var fileInput = document.getElementById('fileInput');
+        var fileInput = document.getElementById('igvFileUpload');
         fileInput.addEventListener('change', function (e) {
 
             var localFile,
