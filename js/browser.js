@@ -72,7 +72,7 @@ var igv = (function (igv) {
      * @param track
      * @param position
      */
-    igv.Browser.prototype.addTrack = function (track, position) {
+    igv.Browser.prototype.addTrack = function (track) {
 
         var browser = this,
             trackView = new igv.TrackView(track, this);
@@ -87,19 +87,23 @@ var igv = (function (igv) {
             trackView.viewportDiv.style.height = this.trackHeight + "px";
         }
 
-        this.trackContainerDiv.appendChild(trackView.trackDiv);
 
         trackView.order = track.order || this.trackPanels.length;
 
         this.trackPanels.push(trackView);
 
-        // Keeps the tracks in the right order and the Gene track pinned to the bottom
+        // Keeps the tracks in the prescribed order
         this.trackPanels.sort(function (a, b) {
             var aOrder = a.order || 0;
             var bOrder = b.order || 0;
             return aOrder - bOrder;
         });
 
+        // Reattach the divs to the dom in the correct order
+        $(this.trackContainerDiv).children().detach();
+        this.trackPanels.forEach(function(tp) {
+           browser.trackContainerDiv.appendChild(tp.trackDiv);
+        });
 
         if (this.cursorModel) {
             this.cursorModel.initializeHistogram(trackView.track, function () {

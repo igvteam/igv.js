@@ -50,9 +50,6 @@ var igv = (function (igv) {
         this.controlCanvas = controlCanvas;
         this.controlCtx = controlCanvas.getContext("2d");
 
-
-        //    }
-
         // TODO - dat - this is so nothing breaks that is dependent on igv.controlPanelWidth
         igv.controlPanelWidth = controlDiv.clientWidth;
 
@@ -102,7 +99,7 @@ var igv = (function (igv) {
             closeButton.className = "fa fa-times-circle";
             closeButton.style.position = "absolute";
             closeButton.style.top = "8px";
-            closeButton.style.right = "10px";
+            closeButton.style.right = "12px";
             closeButton.style.cursor = "pointer";
             closeButton.onclick = function () {
 

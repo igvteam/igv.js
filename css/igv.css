@@ -172,16 +172,6 @@
 
 }
 
-.igv-content-div {
-    position: relative;
-    margin-left: 10px;
-    margin-right: 10px;
-    left: 0;
-    right: 0;
-    min-height: 100px;
-    height: auto;
-}
-
 .igv-header-div {
     position: relative;
     left: 0;
@@ -226,6 +216,16 @@
     overflow-x: hidden;
     overflow-y: auto;
 }
+
+
+.igv-content-div {
+    position: relative;
+    margin-left: 10px;
+    margin-right: 10px;
+    left: 0;
+    right: 0;
+}
+
 
 .igv-cursorHistogram-div {
     position: absolute;
