@@ -58,11 +58,11 @@ var igv = (function (igv) {
             browser.setTrackHeight(Math.round(parseFloat(value, 10)));
         };
 
-        // TODO: TO be replaced with modal form
-        // TODO: export regions via button
-        document.getElementById('igvExportRegionsButton').onclick = function (e) {
-            browser.cursorModel.exportRegions();
-        };
+//        // TODO: TO be replaced with modal form
+//        // TODO: export regions via button
+//        document.getElementById('igvExportRegionsButton').onclick = function (e) {
+//            browser.cursorModel.exportRegions();
+//        };
 
         // export regions via modal form
         $( "#igvExportRegionsModalForm" ).submit(function( event ) {

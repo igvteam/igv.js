@@ -32,7 +32,7 @@ var cursor = (function (cursor) {
         form = document.createElement("form");
         document.body.appendChild(form);
         form.setAttribute("method", "post");
-        form.setAttribute("action", "php/exportregions.php");
+        form.setAttribute("action", "php/igvdownload.php");
 
         // file name
         hiddenFilenameInput = document.createElement("input");

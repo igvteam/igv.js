@@ -161,9 +161,9 @@
 
                     <div class="btn-group-sm">
 
-                        <button id="igvExportRegionsButton" type="button" class="btn btn-default btn-sm">
-                            Export Regions
-                        </button>
+                        <!--<button id="igvExportRegionsButton" type="button" class="btn btn-default btn-sm">-->
+                            <!--Export Regions-->
+                        <!--</button>-->
 
                         <!--<button id="igvSessionSaveButton" type="button" class="btn btn-default btn-sm">-->
                             <!--Save Session-->
@@ -193,13 +193,6 @@
 
     </nav>
 
-
-
-    <!-- Button trigger modal -->
-    <!--<button class="btn btn-primary btn-lg" data-toggle="modal" data-target="#myModal">-->
-        <!--Launch demo modal-->
-    <!--</button>-->
-
     <!-- Modal -->
     <div class="modal fade" id="igvExportRegionsModal" tabindex="-1" role="dialog" aria-labelledby="igvExportRegionsModalLabel" aria-hidden="true">
         <div class="modal-dialog">
@@ -216,33 +209,17 @@
                 <div class="modal-body">
                     <form id="igvExportRegionsModalForm" role="form" action="https://iwww.broadinstitute.org/~liefeld/igvdownload.php" method="post">
                         <div class="form-group">
-                            <input id="igvExportRegionsModalFilenameInput" class="form-control"  placeholder="Enter filename" type="text" name="filename" value="igv-cursor-modal-form-region-export.bed"/>
-                            <input id="igvExportRegionsModalDownloadContentInput" class="form-control"  type="hidden" name="downloadContent" value="this is the contents of the file"/>
+                            <input class="form-control" placeholder="Enter filename" type="text"   name="filename"        value="igv-cursor-modal-form-region-export.bed"/>
+                            <input class="form-control"                              type="hidden" name="downloadContent" value="this is the contents of the file"/>
                         </div>
 
-                        <button id="igvExportRegionsModalSubmitButton" class="btn btn-default" type="submit" name="download" value="download">Submit</button>
+                        <button class="btn btn-default" type="submit" name="download" value="download">Submit</button>
                     </form>
                 </div>
 
             </div>
         </div>
     </div>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
     <!-- ENCODE Modal -->
     <div class="modal fade bs-example-modal-lg" id="encodeModal" tabindex="-1" role="dialog" aria-labelledby="encodeModalLabel" aria-hidden="true">
