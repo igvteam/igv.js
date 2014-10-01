@@ -156,17 +156,16 @@
             </div><!-- Upload File -->
 
             <div class="navbar-form navbar-left">
-                <button id="igvSessionSaveButton" type="button" class="btn btn-default">
+                <button class="btn btn-default" data-toggle="modal" data-target="#igvSaveSessionModal">
                     Save Session
                 </button>
-            </div>
+            </div><!-- Save Session -->
 
             <div class="navbar-form navbar-left">
                 <button id="igvSessionLoadButton" type="button" class="btn btn-default">
                     Load Session
                 </button>
-            </div>
-
+            </div><!-- Load Session -->
 
             <div class="nav navbar-nav navbar-right">
 
@@ -195,14 +194,13 @@
 
                 </div>
 
-
             </div><!-- fit to screen | zoom out | zoom in -->
 
         </div>
 
     </nav>
 
-    <!-- Modal -->
+    <!-- Export Regions Modal -->
     <div class="modal fade" id="igvExportRegionsModal" tabindex="-1" role="dialog" aria-labelledby="igvExportRegionsModalLabel" aria-hidden="true">
         <div class="modal-dialog">
             <div class="modal-content">
@@ -219,6 +217,34 @@
                     <form id="igvExportRegionsModalForm" role="form" action="php/igvdownload.php" method="post">
                         <div class="form-group">
                             <input class="form-control" placeholder="Enter filename" type="text"   name="filename"        value="igv-cursor-modal-form-region-export.bed"/>
+                            <input class="form-control"                              type="hidden" name="downloadContent" value="this is the contents of the file"/>
+                        </div>
+
+                        <button class="btn btn-default" type="submit" name="download" value="download">Submit</button>
+                    </form>
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+    <!-- Save Session Modal -->
+    <div class="modal fade" id="igvSaveSessionModal" tabindex="-1" role="dialog" aria-labelledby="igvSaveSessionModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal">
+                        <span aria-hidden="true">&times;</span>
+                        <span class="sr-only">Close</span>
+                    </button>
+                    <h4 class="modal-title" id="igvSaveSessionModalLabel">Save Session</h4>
+                </div>
+
+                <div class="modal-body">
+                    <form id="igvSaveSessionModalForm" role="form" action="php/igvdownload.php" method="post">
+                        <div class="form-group">
+                            <input class="form-control" placeholder="Enter filename" type="text"   name="filename"        value="igv-cursor-modal-form-session.json"/>
                             <input class="form-control"                              type="hidden" name="downloadContent" value="this is the contents of the file"/>
                         </div>
 
@@ -261,27 +287,6 @@
         </div><!-- modal dialog -->
 
     </div>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
     <div id="igvContainerDiv" class="container-fluid">

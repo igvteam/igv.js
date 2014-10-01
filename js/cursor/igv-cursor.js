@@ -78,15 +78,17 @@ var igv = (function (igv) {
             downloadInput.val(exportedRegions);
         });
 
-        // session save
-        document.getElementById('igvSessionSaveButton').onclick = function (e) {
-//            window.alert("igvSessionSaveButton");
-            browser.saveSession();
-        };
+        // save session via modal form
+        $( "#igvSaveSessionModalForm" ).submit(function( event ) {
+
+            var session = browser.session(),
+                downloadInput = $("#igvSaveSessionModalForm").find('input[name="downloadContent"]');
+
+            downloadInput.val(session);
+        });
 
         // session load
         document.getElementById('igvSessionLoadButton').onclick = function (e) {
-//            window.alert("igvSessionSaveButton");
             browser.sessionTeardown();
         };
 
@@ -363,6 +365,20 @@ var igv = (function (igv) {
 
         }
 
+        browser.session = function () {
+
+            var session;
+
+            session = { tracks : [] };
+
+            browser.trackPanels.forEach(function (trackView) {
+                session.tracks.push( trackView.track.jsonRepresentation());
+            });
+
+            return JSON.stringify(session);
+
+        };
+
         // tear down pre-existing session
         browser.sessionTeardown = function () {
 
@@ -375,6 +391,7 @@ var igv = (function (igv) {
 
         };
 
+        // NOTE: This is depricated and nolonger used
         browser.saveSession = function () {
 
             var session,
@@ -387,7 +404,7 @@ var igv = (function (igv) {
             form = document.createElement("form");
             document.body.appendChild(form);
             form.setAttribute("method", "post");
-            form.setAttribute("action", "php/exportregions.php");
+            form.setAttribute("action", "php/igvdownload.php");
 
             // file name
             hiddenFilenameInput = document.createElement("input");
@@ -423,7 +440,6 @@ var igv = (function (igv) {
 
         return browser;
     };
-
 
     igv.cursorAddTrackControlButtons = function (trackView, browser, controlDiv) {
 
@@ -477,7 +493,6 @@ var igv = (function (igv) {
         nextButtonTop += 18;
 
     }
-
 
     return igv;
 

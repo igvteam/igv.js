@@ -21,6 +21,7 @@ var cursor = (function (cursor) {
 
     };
 
+    // NOTE: This is depricated and nolonger used
     cursor.CursorModel.prototype.exportRegions = function() {
 
         var myself = this,
