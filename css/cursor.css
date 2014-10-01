@@ -5,9 +5,9 @@ body {
 }
 
 /* A hack to remove the unwanted "No File Chosen" text from the file upload button */
-input[type='file'] {
-    width: 82px;
-}
+/*input[type='file'] {*/
+    /*width: 82px;*/
+/*}*/
 
 .well {
     background-color: rgba(255, 0, 0, 0.5);
