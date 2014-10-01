@@ -5,7 +5,7 @@ var igv = (function (igv) {
     igv.Browser = function (type) {
 
         this.type = type ? type : "IGV";
-        this.div =$('<div id="igvRootDiv" class="igv-root-div">')[0];
+        this.div = $('<div id="igvRootDiv" class="igv-root-div">')[0];
 
         this.trackHeight = 100;
         $("input[id='trackHeightInput']").val(this.trackHeight);
@@ -92,18 +92,7 @@ var igv = (function (igv) {
 
         this.trackPanels.push(trackView);
 
-        // Keeps the tracks in the prescribed order
-        this.trackPanels.sort(function (a, b) {
-            var aOrder = a.order || 0;
-            var bOrder = b.order || 0;
-            return aOrder - bOrder;
-        });
-
-        // Reattach the divs to the dom in the correct order
-        $(this.trackContainerDiv).children().detach();
-        this.trackPanels.forEach(function(tp) {
-           browser.trackContainerDiv.appendChild(tp.trackDiv);
-        });
+        this.reorderTracks();
 
         if (this.cursorModel) {
             this.cursorModel.initializeHistogram(trackView.track, function () {
@@ -116,6 +105,23 @@ var igv = (function (igv) {
         }
 
     };
+
+    
+    igv.Browser.prototype.reorderTracks = function () {
+
+        var browser = this;
+
+        this.trackPanels.sort(function (a, b) {
+            var aOrder = a.order || 0;
+            var bOrder = b.order || 0;
+            return aOrder - bOrder;
+        });
+        // Reattach the divs to the dom in the correct order
+        $(this.trackContainerDiv).children().detach();
+        this.trackPanels.forEach(function (tp) {
+            browser.trackContainerDiv.appendChild(tp.trackDiv);
+        });
+    }
 
     igv.Browser.prototype.removeTrack = function (track) {
 
@@ -353,7 +359,7 @@ var igv = (function (igv) {
                                 var start = parseInt(rangeTokens[0].replace(/,/g, ''));
                                 var end = parseInt(rangeTokens[1].replace(/,/g, ''));
 
-                                if(browser.flanking) {
+                                if (browser.flanking) {
                                     start -= browser.flanking;
                                     end += browser.flanking;
                                 }
