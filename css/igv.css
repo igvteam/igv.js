@@ -193,8 +193,6 @@
     position: relative;
     left: 0;
     right: 0;
-    padding-top: 5px;
-    padding-bottom: 5px;
     overflow:hidden;
 }
 
@@ -217,7 +215,6 @@
     overflow-y: auto;
 }
 
-
 .igv-content-div {
     position: relative;
     margin-left: 10px;
@@ -225,7 +222,6 @@
     left: 0;
     right: 0;
 }
-
 
 .igv-cursorHistogram-div {
     position: absolute;

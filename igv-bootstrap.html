@@ -382,13 +382,25 @@
             showKaryo: false,
             fastaURL: "//igvdata.broadinstitute.org/genomes/seq/hg19/hg19.fasta",
             cytobandURL: "//igvdata.broadinstitute.org/genomes/seq/hg19/cytoBand.txt",
-            locus: 'tp53',
+            locus: 'slc30a8',
             flanking: 100000,
             tracks: [
                 new igv.T2dTrack({
                     url: "http://t2dgenetics.org/mysql/rest/server/trait-search",
                     trait: "T2D",
                     label: "Type II Diabetes"
+                }),
+                new igv.T2dTrack({
+                    url: "http://t2dgenetics.org/mysql/rest/server/variant-search",
+                    trait: "T2D",
+                    label: "Exome Chip",
+                    pvalue: "EXOME_T2D_P_value"
+                }),
+                new igv.T2dTrack({
+                    url: "http://t2dgenetics.org/mysql/rest/server/variant-search",
+                    trait: "T2D",
+                    label: "Exome Sequencing",
+                    pvalue: "_13k_T2D_P_EMMAX_FE_IV"
                 }),
                 new igv.WIGTrack({
                     url: "//www.broadinstitute.org/igvdata/t2d/recomb_decode.bedgraph",

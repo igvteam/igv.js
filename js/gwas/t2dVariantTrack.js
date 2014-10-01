@@ -13,7 +13,7 @@ var igv = (function (igv) {
         this.height = config.height || 100;   // The preferred height
         this.minLogP = config.minLogP || 0;
         this.maxLogP = config.maxLogP || 15;
-        this.background = config.background || "rgb(245,245,245)";
+        this.background = config.background || "rgb(225,225,225)";
         this.dotSize = config.dotSize || 4;
 
         this.description = config.description;  // might be null
@@ -25,6 +25,9 @@ var igv = (function (igv) {
             thresholds: [5e-8, 5e-4, 0.5],
             colors: ["rgb(255,50,50)", "rgb(251,100,100)", "rgb(251,170,170)", "rgb(227,238,249)"]
         };
+        
+        this.pvalue = config.pvalue ? config.pvalue : "PVALUE";
+
         this.colorScale = new BinnedColorScale(cs);
     }
 
@@ -58,7 +61,8 @@ var igv = (function (igv) {
 
         queryChr = (chr.startsWith("chr") ? chr.substring(3) : chr);
 
-        canvas.fillRect(0, 0, pixelWidth, pixelHeight, {'fillStyle': this.background});
+        //canvas.fillRect(0, 0, pixelWidth, pixelHeight, {'fillStyle': this.background});
+        canvas.strokeLine(0, pixelHeight-1, pixelWidth, pixelHeight-1, {'strokeStyle': this.background});
 
 
         this.featureSource.getFeatures(queryChr, bpStart, bpEnd, function (featureList) {
@@ -78,7 +82,7 @@ var igv = (function (igv) {
                         if (variant.POS < bpStart) continue;
                         if (variant.POS > bpEnd) break;
 
-                        pvalue = variant.PVALUE;
+                        pvalue = variant[track.pvalue];
                         if (!pvalue) continue;
 
                         color = track.colorScale.getColor(pvalue);
@@ -156,7 +160,7 @@ var igv = (function (igv) {
                             p.feature.DBSNP_ID + "</a>");
                     }
                     data.push("chr" + p.feature.CHROM + ":" + p.feature.POS.toString());
-                    data.push({name: 'p-value', value: p.feature.PVALUE});
+                    data.push({name: 'p-value', value: p.feature[this.pvalue]});
                     data.push({name: 'z-score', value: p.feature.ZSCORE});
                     if (dbSnp) {
                         url = this.portalURL + "/trait/traitInfo/" + dbSnp;
