@@ -132,22 +132,40 @@
 
             <div class="navbar-form navbar-left">
 
-                <div class="input-append">
-                    <input type="file" id="igvFileUpload" title="foo" multiple />
+                <div class="dropdown">
+                    <button class="btn btn-default dropdown-toggle" type="button" id="igvFileUploadDropdownMenu" data-toggle="dropdown">
+                        Upload File
+                        <span class="caret"></span>
+                    </button>
+                    <ul class="dropdown-menu" role="menu" aria-labelledby="igvFileUploadDropdownMenu">
+                        <li role="presentation">
+                            <a role="menuitem" tabindex="-1" href="#">
+                                <input type="file" id="igvFileUpload" title="foo" multiple />
+                            </a>
+                        </li>
+                    </ul>
                 </div>
 
-
-                <!--<a id="igvUploadFilePopover" href="#" tabindex="0" class="btn btn-default" data-toggle="popover" data-trigger="focus" data-placement="right">Upload File</a>-->
-
-                <!--<div id="igvUploadFileHiddenContent" style="display: none">-->
-                    <!--<div><input type="file" id="igvFileUpload" title="foo" multiple /></div>-->
-                <!--</div>-->
-
-                <!--<div id="igvUploadFileHiddenTitle" style="display: none">Upload File</div>-->
+            </div><!-- Upload File -->
 
 
-            </div><!-- Upload file -->
+            <div class="navbar-form navbar-left">
 
+                <div class="dropdown">
+                    <button class="btn btn-default dropdown-toggle" type="button" id="igvRegionExportDropdownMenu" data-toggle="dropdown">
+                        Export Regions
+                        <span class="caret"></span>
+                    </button>
+                    <ul class="dropdown-menu" role="menu" aria-labelledby="igvRegionExportDropdownMenu">
+                        <li role="presentation"><a role="menuitem" tabindex="-1" href="#">Action</a></li>
+                        <li role="presentation"><a role="menuitem" tabindex="-1" href="#">Another action</a></li>
+                        <li role="presentation" class="divider"></li>
+                        <li role="presentation"><a role="menuitem" tabindex="-1" href="#">Separated link</a></li>
+
+                    </ul>
+                </div>
+
+            </div><!-- Export Regions -->
 
 
             <div class="nav navbar-nav navbar-right">
