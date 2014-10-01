@@ -78,17 +78,17 @@ var igv = (function (igv) {
             downloadInput.val(exportedRegions);
         });
 
-//        // session save
-//        document.getElementById('igvSessionSaveButton').onclick = function (e) {
-////            window.alert("igvSessionSaveButton");
-//            browser.saveSession();
-//        };
-//
-//        // session load
-//        document.getElementById('igvSessionLoadButton').onclick = function (e) {
-////            window.alert("igvSessionSaveButton");
-//            browser.sessionTeardown();
-//        };
+        // session save
+        document.getElementById('igvSessionSaveButton').onclick = function (e) {
+//            window.alert("igvSessionSaveButton");
+            browser.saveSession();
+        };
+
+        // session load
+        document.getElementById('igvSessionLoadButton').onclick = function (e) {
+//            window.alert("igvSessionSaveButton");
+            browser.sessionTeardown();
+        };
 
         var fileInput = document.getElementById('igvFileUpload');
         fileInput.addEventListener('change', function (e) {
