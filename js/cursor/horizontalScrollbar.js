@@ -56,6 +56,10 @@ var cursor = (function (cursor) {
 
         parentDivObject.append(horizontalScrollBarContainer);
         $(horizontalScrollBarContainer).append(horizontalScrollBar);
+        $( horizontalScrollBar).css({
+            "left": (this.browser.controlPanelWidth ? this.browser.controlPanelWidth : 50) + "px"
+        });
+
         $(horizontalScrollBar).append(horizontalScrollBarDraggable);
 
         // mouse event handlers

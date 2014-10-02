@@ -13,9 +13,6 @@ var igv = (function (igv) {
         $(browser.div).append(trackContainer);
         document.getElementById('igvContainerDiv').appendChild(browser.div);
 
-        browser.horizontalScrollbar = new cursor.HorizontalScrollbar(browser, $(browser.div));
-
-
         // Append event handlers to DOM elements
         document.getElementById('zoomOut').onclick = function (e) {
             browser.zoomOut()
@@ -252,6 +249,8 @@ var igv = (function (igv) {
 
             browser.controlPanelWidth = 150;
 
+            browser.horizontalScrollbar = new cursor.HorizontalScrollbar(browser, $(browser.div));
+
             browser.trackContainerDiv = trackContainer;
 
             browser.trackPanels = [];
@@ -269,17 +268,6 @@ var igv = (function (igv) {
                 browser.trackPanels.forEach(function (panel) {
                     panel.resize();
                 });
-
-                if (browser.cursorModel) {
-
-                    percent = 100.0 * ($(".igv-viewport-div").first().width() / $(".igv-track-div").first().width());
-//                    console.log("percent " + percent);
-                    $(".igv-horizontal-scrollbar-div").css({
-                        "width": percent + "%"
-                    });
-
-                }
-
 
             }, 10);
         };

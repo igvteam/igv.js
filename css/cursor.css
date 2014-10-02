@@ -60,9 +60,8 @@ body {
 .igv-horizontal-scrollbar-container-div {
     position: relative;
     top: 0;
-    left:0;
+    right:0;
     height:50px;
-    width:100%;
     padding-top: 10px;
     /*opacity:0.52;*/
 }
