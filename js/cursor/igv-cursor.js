@@ -59,12 +59,6 @@ var igv = (function (igv) {
             browser.setTrackHeight(Math.round(parseFloat(value, 10)));
         };
 
-//        // TODO: TO be replaced with modal form
-//        // TODO: export regions via button
-//        document.getElementById('igvExportRegionsButton').onclick = function (e) {
-//            browser.cursorModel.exportRegions();
-//        };
-
         // export regions via modal form
         $( "#igvExportRegionsModalForm" ).submit(function( event ) {
 
@@ -256,7 +250,7 @@ var igv = (function (igv) {
 
             browser.referenceFrame = null;
 
-            browser.controlPanelWidth = 50;
+            browser.controlPanelWidth = 150;
 
             browser.trackContainerDiv = trackContainer;
 

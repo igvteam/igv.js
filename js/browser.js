@@ -70,7 +70,6 @@ var igv = (function (igv) {
      * loaded.
      *
      * @param track
-     * @param position
      */
     igv.Browser.prototype.addTrack = function (track) {
 

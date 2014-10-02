@@ -7,8 +7,7 @@ var igv = (function (igv) {
         this.order = track.order || 0;
         this.marginBottom = 10;
 
-        var viewportHeight,
-            viewportDiv,
+        var viewportDiv,
             trackDiv,
             controlDiv,
             controlCanvas,
@@ -17,40 +16,37 @@ var igv = (function (igv) {
             closeButton,
             labelButton;
 
-        viewportHeight = track.height;
-
         // track
         trackDiv = document.createElement("div");
         browser.trackContainerDiv.appendChild(trackDiv);
         trackDiv.className = "igv-track-div";
-        trackDiv.style.height = viewportHeight + "px";
-
+        trackDiv.style.height = track.height + "px";
         this.trackDiv = trackDiv;
 
         // control
         controlDiv = document.createElement("div");
         trackDiv.appendChild(controlDiv);
         controlDiv.className = "igv-control-div";
+        controlDiv.style.width = browser.controlPanelWidth + "px";
+        controlDiv.style.height = track.height + "px";
         this.controlDiv = controlDiv;
 
         controlCanvas = document.createElement('canvas');
         controlDiv.appendChild(controlCanvas);
         controlCanvas.style.position = 'absolute';
         controlCanvas.style.width = controlDiv.clientWidth + "px";
-        controlCanvas.style.height = track.height + "px";
+        controlCanvas.style.height = controlDiv.clientHeight + "px";
         controlCanvas.setAttribute('width', controlDiv.clientWidth);
-        controlCanvas.setAttribute('height', track.height);
+        controlCanvas.setAttribute('height', controlDiv.clientHeight);
         this.controlCanvas = controlCanvas;
         this.controlCtx = controlCanvas.getContext("2d");
-
-        // TODO - dat - this is so nothing breaks that is dependent on igv.controlPanelWidth
-        igv.controlPanelWidth = controlDiv.clientWidth;
 
         // viewport
         viewportDiv = document.createElement("div");
         trackDiv.appendChild(viewportDiv);
         viewportDiv.className = "igv-viewport-div";
-        viewportDiv.style.height = viewportHeight + "px";
+        viewportDiv.style.height = track.height + "px";
+        viewportDiv.style.left = controlDiv.clientWidth + "px";
         this.viewportDiv = viewportDiv;
 
         // content
@@ -65,7 +61,7 @@ var igv = (function (igv) {
         canvas.style.position = 'absolute';
         canvas.style.width = contentDiv.clientWidth + "px";
         canvas.style.height = track.height + "px";
-        canvas.setAttribute('width', contentDiv.clientWidth);    //Must set the width & height of the canvas
+        canvas.setAttribute('width', contentDiv.clientWidth);
         canvas.setAttribute('height', track.height);
 
 
