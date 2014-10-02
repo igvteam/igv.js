@@ -80,7 +80,7 @@ var igv = (function (igv) {
 
             closeButton = document.createElement("i");
             contentDiv.appendChild(closeButton);
-            closeButton.className = "fa fa-times-circle igv-track-disable-button-div";
+            closeButton.className = "fa fa-times-circle igv-track-disable-button-fontawesome";
             closeButton.onclick = function () {
                 browser.removeTrack(track);
             };
@@ -89,10 +89,7 @@ var igv = (function (igv) {
 
                 labelButton = document.createElement("button");
                 viewportDiv.appendChild(labelButton);
-                labelButton.className = "btn btn-xs btn-cursor-deselected";
-                labelButton.style.position = "absolute";
-                labelButton.style.top = "10px";
-                labelButton.style.left = "10px";
+                labelButton.className = "btn btn-xs btn-cursor-deselected igv-track-label";
                 labelButton.innerHTML = track.label;
                 track.labelButton = labelButton;
 
@@ -110,7 +107,7 @@ var igv = (function (igv) {
 
                         browser.trackPanels.forEach(function (trackView) {
                             if (track !== trackView.track) {
-                                labelButton.className = "btn btn-xs btn-cursor-deselected";
+                                labelButton.className = "btn btn-xs btn-cursor-deselected igv-track-label";
                             }
                         });
 

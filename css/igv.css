@@ -196,7 +196,14 @@
     overflow:hidden;
 }
 
-.igv-track-disable-button-div {
+.igv-track-label {
+    position: absolute;
+    top: 10px;
+    left: 10px;
+    cursor: pointer;
+}
+
+.igv-track-disable-button-fontawesome {
     position: absolute;
     top: 8px;
     right: 12px;
