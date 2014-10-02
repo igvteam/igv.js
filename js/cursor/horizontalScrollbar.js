@@ -17,16 +17,24 @@ var cursor = (function (cursor) {
 
         var horizontalScrollBarWidth = $(".igv-horizontal-scrollbar-div").first().width(),
             horizontalScrollBarDraggable = $(".igv-horizontal-scrollbar-draggable-div").first(),
-            regionListLength = cursorModel.regionsToRender().length,
-            regionsOnScreen,
+            regionCount,
+            regionWidth,
+            onScreenRegionCount,
             left,
             width;
 
-        // It is possible that horizontalScrollBarWidth/framePixelWidth results in a region count larger
-        // then the regionListLength so we need to clamp.
-        regionsOnScreen = Math.min(regionListLength, horizontalScrollBarWidth / cursorModel.framePixelWidth);
 
-        width = (regionsOnScreen/regionListLength) * horizontalScrollBarWidth;
+
+        regionCount = cursorModel.filteredRegions.length;
+        regionWidth = cursorModel.framePixelWidth;
+
+        // It is possible that horizontalScrollBarWidth/framePixelWidth results in a region count larger
+        // then the regionCount so we need to clamp.
+//        onScreenRegionCount = Math.min(regionCount, horizontalScrollBarWidth / cursorModel.framePixelWidth);
+
+        onScreenRegionCount = regionCount / regionWidth;
+
+        width = (onScreenRegionCount/regionCount) * horizontalScrollBarWidth;
 
         left = referenceFrame.toPixels( referenceFrame.start );
         left *= (width / horizontalScrollBarWidth);
@@ -36,7 +44,7 @@ var cursor = (function (cursor) {
             "width": Math.floor( width ) + "px"
         });
 
-        console.log("regions - on screen " + Math.floor(regionsOnScreen) + " total " + regionListLength);
+        console.log("regions - on screen " + Math.floor(onScreenRegionCount) + " total " + regionCount);
 
      };
 
