@@ -62,7 +62,7 @@ var igv = (function (igv) {
         queryChr = (chr.startsWith("chr") ? chr.substring(3) : chr);
 
         //canvas.fillRect(0, 0, pixelWidth, pixelHeight, {'fillStyle': this.background});
-        canvas.strokeLine(0, pixelHeight-1, pixelWidth, pixelHeight-1, {'strokeStyle': this.background});
+        canvas.strokeLine(0, pixelHeight - 1, pixelWidth, pixelHeight - 1, {'strokeStyle': this.background});
 
 
         this.featureSource.getFeatures(queryChr, bpStart, bpEnd, function (featureList) {
@@ -154,18 +154,22 @@ var igv = (function (igv) {
                     data = [];
                     if (dbSnp) {
                         url = this.portalURL + "/variant/variantInfo/" + dbSnp;
-                       // data.push("<a href=# onclick=window.location='" + url + "'>" +
-                       //     p.feature.DBSNP_ID + "</a>");
+                        // data.push("<a href=# onclick=window.location='" + url + "'>" +
+                        //     p.feature.DBSNP_ID + "</a>");
                         data.push("<a target='_blank' href='" + url + "' >" +
                             p.feature.DBSNP_ID + "</a>");
                     }
                     data.push("chr" + p.feature.CHROM + ":" + p.feature.POS.toString());
                     data.push({name: 'p-value', value: p.feature[this.pvalue]});
-                    data.push({name: 'z-score', value: p.feature.ZSCORE});
+
+                    if (p.feature.ZSCORE) {
+                        data.push({name: 'z-score', value: p.feature.ZSCORE});
+                    }
+
                     if (dbSnp) {
                         url = this.portalURL + "/trait/traitInfo/" + dbSnp;
-                      //  data.push("<a href=# onclick=window.lcation='" + url + "'>" +
-                      //      "see all available statistics for this variant</a>");
+                        //  data.push("<a href=# onclick=window.lcation='" + url + "'>" +
+                        //      "see all available statistics for this variant</a>");
                         data.push("<a target='_blank' href='" + url + "'>" +
                             "see all available statistics for this variant</a>");
                     }

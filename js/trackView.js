@@ -23,15 +23,20 @@ var igv = (function (igv) {
         trackDiv.style.height = track.height + "px";
         this.trackDiv = trackDiv;
 
-        // control
+        // controls
+        var controlWidth = browser.controlPanelWidth ? browser.controlPanelWidth : 50;
+
         controlDiv = document.createElement("div");
-        trackDiv.appendChild(controlDiv);
         controlDiv.className = "igv-control-div";
-        controlDiv.style.width = browser.controlPanelWidth + "px";
+        controlDiv.style.width = controlWidth + "px";
         controlDiv.style.height = track.height + "px";
         this.controlDiv = controlDiv;
 
         controlCanvas = document.createElement('canvas');
+        controlDiv.style.width = controlWidth + "px";
+        trackDiv.appendChild(controlDiv);
+        this.controlDiv = controlDiv;
+
         controlDiv.appendChild(controlCanvas);
         controlCanvas.style.position = 'absolute';
         controlCanvas.style.width = controlDiv.clientWidth + "px";
@@ -43,10 +48,10 @@ var igv = (function (igv) {
 
         // viewport
         viewportDiv = document.createElement("div");
-        trackDiv.appendChild(viewportDiv);
         viewportDiv.className = "igv-viewport-div";
-        viewportDiv.style.height = track.height + "px";
         viewportDiv.style.left = controlDiv.clientWidth + "px";
+        viewportDiv.style.height = track.height + "px";
+        trackDiv.appendChild(viewportDiv);
         this.viewportDiv = viewportDiv;
 
         // content
@@ -84,6 +89,7 @@ var igv = (function (igv) {
             closeButton.onclick = function () {
                 browser.removeTrack(track);
             };
+            contentDiv.appendChild(closeButton);
 
             if (track.label) {
 
