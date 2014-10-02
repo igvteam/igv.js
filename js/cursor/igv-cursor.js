@@ -256,7 +256,7 @@ var igv = (function (igv) {
 
             browser.referenceFrame = null;
 
-            browser.controlPanelWidth = 50;
+            browser.controlPanelWidth = 150;
 
             browser.trackContainerDiv = trackContainer;
 

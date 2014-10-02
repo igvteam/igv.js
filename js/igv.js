@@ -68,7 +68,7 @@ var igv = (function (igv) {
                     firstChr = browser.genome.chromosomes[firstChrName];
 
                 browser.referenceFrame = new igv.ReferenceFrame(firstChrName, 0, firstChr.bpLength / browser.trackViewportWidth());
-
+                browser.controlPanelWidth = 50;
 
                 if (browser.ideoPanel) browser.ideoPanel.repaint();
                 if (browser.karyoPanel) browser.karyoPanel.repaint();

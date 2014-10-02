@@ -194,6 +194,7 @@
     left: 0;
     right: 0;
     overflow:hidden;
+    margin-bottom:10px;
 }
 
 .igv-control-div {
@@ -222,6 +223,7 @@
     left: 0;
     right: 0;
 }
+
 
 .igv-cursorHistogram-div {
     position: absolute;

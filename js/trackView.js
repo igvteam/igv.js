@@ -32,12 +32,14 @@ var igv = (function (igv) {
         this.trackDiv = trackDiv;
 
         // controls
+        var controlWidth = browser.controlPanelWidth ? browser.controlPanelWidth : 50;
+        
         controlDiv = document.createElement("div");
-        trackDiv.appendChild(controlDiv);
         controlDiv.className = "igv-control-div";
+        controlDiv.style.width = controlWidth + "px";
+        trackDiv.appendChild(controlDiv);
         this.controlDiv = controlDiv;
 
-        var controlWidth = 50; // TODO -- get this from stylesheet.  controlDiv.clientWidth;
         var controlHeight = track.height; //controlDiv.clientHeight;
 
         var controlCanvas = document.createElement('canvas');
@@ -55,9 +57,11 @@ var igv = (function (igv) {
 
         // The viewport
         viewportDiv = document.createElement("div");
-        trackDiv.appendChild(viewportDiv);
         viewportDiv.className = "igv-viewport-div";
+        viewportDiv.style.left = controlDiv.style.width;
         viewportDiv.style.height = viewportHeight + "px";
+        trackDiv.appendChild(viewportDiv);
+
 
         this.viewportDiv = viewportDiv;
 
@@ -94,9 +98,8 @@ var igv = (function (igv) {
         if (!track.disableButtons) {
 
             closeButton = document.createElement("i");
-            contentDiv.appendChild(closeButton);
-            closeButton.style.color = "#222";
             closeButton.className = "fa fa-times-circle";
+            closeButton.style.color = "#222";
             closeButton.style.position = "absolute";
             closeButton.style.top = "8px";
             closeButton.style.right = "12px";
@@ -105,6 +108,7 @@ var igv = (function (igv) {
 
                 browser.removeTrack(track);
             };
+            contentDiv.appendChild(closeButton);
 
             if (track.label) {
 
