@@ -1,7 +1,5 @@
 var igv = (function (igv) {
 
-    var maxViewportHeight = 400;
-
     igv.TrackView = function (track, browser) {
 
         this.browser = browser;
@@ -13,10 +11,9 @@ var igv = (function (igv) {
             viewportDiv,
             trackDiv,
             controlDiv,
-            contentHeight,
+            controlCanvas,
             contentDiv,
             canvas,
-            contentWidth,
             closeButton,
             labelButton;
 
@@ -30,53 +27,46 @@ var igv = (function (igv) {
 
         this.trackDiv = trackDiv;
 
-        // controls
+        // control
         controlDiv = document.createElement("div");
         trackDiv.appendChild(controlDiv);
         controlDiv.className = "igv-control-div";
         this.controlDiv = controlDiv;
 
-        var controlWidth = 50; // TODO -- get this from stylesheet.  controlDiv.clientWidth;
-        var controlHeight = track.height; //controlDiv.clientHeight;
-
-        var controlCanvas = document.createElement('canvas');
+        controlCanvas = document.createElement('canvas');
         controlDiv.appendChild(controlCanvas);
         controlCanvas.style.position = 'absolute';
-        controlCanvas.style.width = controlWidth + "px";
-        controlCanvas.style.height = controlHeight + "px";
-        controlCanvas.setAttribute('width', controlWidth);
-        controlCanvas.setAttribute('height', controlHeight);
+        controlCanvas.style.width = controlDiv.clientWidth + "px";
+        controlCanvas.style.height = track.height + "px";
+        controlCanvas.setAttribute('width', controlDiv.clientWidth);
+        controlCanvas.setAttribute('height', track.height);
         this.controlCanvas = controlCanvas;
         this.controlCtx = controlCanvas.getContext("2d");
 
         // TODO - dat - this is so nothing breaks that is dependent on igv.controlPanelWidth
         igv.controlPanelWidth = controlDiv.clientWidth;
 
-        // The viewport
+        // viewport
         viewportDiv = document.createElement("div");
         trackDiv.appendChild(viewportDiv);
         viewportDiv.className = "igv-viewport-div";
         viewportDiv.style.height = viewportHeight + "px";
-
         this.viewportDiv = viewportDiv;
 
-        // Content
-        contentHeight = track.height;
+        // content
         contentDiv = document.createElement("div");
-        viewportDiv.appendChild(contentDiv);  // Note, must do this before getting width for canvas
+        viewportDiv.appendChild(contentDiv);
         contentDiv.className = "igv-content-div";
-        contentDiv.style.height = contentHeight + "px";
+        contentDiv.style.height = track.height + "px";
         this.contentDiv = contentDiv;
-
-        contentWidth = contentDiv.clientWidth;
 
         canvas = document.createElement('canvas');
         contentDiv.appendChild(canvas);
         canvas.style.position = 'absolute';
-        canvas.style.width = contentWidth + "px";
-        canvas.style.height = contentHeight + "px";
-        canvas.setAttribute('width', contentWidth);    //Must set the width & height of the canvas
-        canvas.setAttribute('height', contentHeight);
+        canvas.style.width = contentDiv.clientWidth + "px";
+        canvas.style.height = track.height + "px";
+        canvas.setAttribute('width', contentDiv.clientWidth);    //Must set the width & height of the canvas
+        canvas.setAttribute('height', track.height);
 
 
         // CURSOR specific functions
@@ -94,14 +84,8 @@ var igv = (function (igv) {
 
             closeButton = document.createElement("i");
             contentDiv.appendChild(closeButton);
-            closeButton.style.color = "#222";
-            closeButton.className = "fa fa-times-circle";
-            closeButton.style.position = "absolute";
-            closeButton.style.top = "8px";
-            closeButton.style.right = "12px";
-            closeButton.style.cursor = "pointer";
+            closeButton.className = "fa fa-times-circle igv-track-disable-button-div";
             closeButton.onclick = function () {
-
                 browser.removeTrack(track);
             };
 
