@@ -26,7 +26,6 @@ var igv = (function (igv) {
         trackDiv = document.createElement("div");
         browser.trackContainerDiv.appendChild(trackDiv);
         trackDiv.className = "igv-track-div";
-       // trackDiv.style.top = browser.rootHeight + "px";
         trackDiv.style.height = viewportHeight + "px";
 
         this.trackDiv = trackDiv;

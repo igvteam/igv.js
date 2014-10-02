@@ -139,8 +139,7 @@ var cursor = (function (cursor) {
                 }
 
                 // sorting will be lost during filtering
-                trackPanel.track.sortButton.className = "fa fa-bar-chart-o";
-                trackPanel.track.sortButton.style.color = "black";
+                trackPanel.track.sortButton.className = "fa fa-bar-chart-o igv-control-sort-fontawesome";
 
                 if (trackPanel.track.trackFilter.isFilterActive) {
                     filterPackages.push({trackFilter: trackPanel.track.trackFilter, featureCache: featureCache });
@@ -198,8 +197,7 @@ var cursor = (function (cursor) {
                 sortTrackPanelPostFiltering.track.sortDirection *= -1;
                 myself.sortRegions(sortTrackPanelPostFiltering.track.featureSource, sortTrackPanelPostFiltering.track.sortDirection, function () {
 
-                    sortTrackPanelPostFiltering.track.sortButton.className = "fa fa-signal";
-                    sortTrackPanelPostFiltering.track.sortButton.style.color = "red";
+                    sortTrackPanelPostFiltering.track.sortButton.className = "fa fa-bar-chart-o igv-control-sort-fontawesome-selected";
 
                     spinner.stop();
 

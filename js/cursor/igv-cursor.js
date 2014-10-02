@@ -482,17 +482,21 @@ var igv = (function (igv) {
 
     igv.cursorAddTrackControlButtons = function (trackView, browser, controlDiv) {
 
-        var sortButton = document.createElement("i"),
+        var trackFilterButtonDiv,
+            sortButton,
             track = trackView.track,
             nextButtonTop = 5;
 
+        sortButton = document.createElement("i");
         controlDiv.appendChild(sortButton);
-        sortButton.className = "fa fa-bar-chart-o";
-        sortButton.style.color = "black";
-        sortButton.style.position = "absolute";
-        sortButton.style.top = nextButtonTop + "px";
-        sortButton.style.left = "5px";
-        sortButton.style.cursor = "pointer";
+
+        sortButton.className = "fa fa-bar-chart-o igv-control-sort-fontawesome";
+        $(sortButton).css({
+            "position" : "absolute",
+            "top"  : nextButtonTop + "px",
+            "left" : 5             + "px"
+        });
+
         nextButtonTop += 18;
 
         track.sortButton = sortButton;
@@ -506,25 +510,23 @@ var igv = (function (igv) {
 
             browser.trackPanels.forEach(function (trackView) {
                 if (track !== trackView.track) {
-                    trackView.track.sortButton.className = "fa fa-bar-chart-o";
-                    trackView.track.sortButton.style.color = "black";
+                    trackView.track.sortButton.className = "fa fa-bar-chart-o igv-control-sort-fontawesome";
                 }
             });
 
-            sortButton.className = "fa fa-signal";
-            sortButton.style.color = "red";
-
+            trackView.track.sortButton.className = "fa fa-bar-chart-o igv-control-sort-fontawesome-selected";
         };
-
 
         //
         trackFilterButtonDiv = document.createElement("div");
         controlDiv.appendChild(trackFilterButtonDiv);
-
         trackFilterButtonDiv.id = "filterButtonDiv_" + igv.guid();
         trackFilterButtonDiv.className = "igv-filter-histogram-button-div";
-        trackFilterButtonDiv.style.top = nextButtonTop + "px";
-        trackFilterButtonDiv.style.left = "5px";
+        $(trackFilterButtonDiv).css({
+            "position" : "absolute",
+            "top"  : nextButtonTop + "px",
+            "left" : 5             + "px"
+        });
 
         trackView.track.trackFilter = new igv.TrackFilter(trackView);
         trackView.track.trackFilter.createTrackFilterWidgetWithParentElement(trackFilterButtonDiv);

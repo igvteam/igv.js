@@ -206,6 +206,16 @@
     background: none;
 }
 
+.igv-control-sort-fontawesome {
+    cursor: pointer;
+    color: #000000;
+}
+
+.igv-control-sort-fontawesome-selected {
+    cursor: pointer;
+    color: red;
+}
+
 .igv-viewport-div {
     position: absolute;
     left: 50px;
