@@ -18,28 +18,33 @@ var cursor = (function (cursor) {
         var horizontalScrollBarWidth = $(".igv-horizontal-scrollbar-div").first().width(),
             horizontalScrollBarDraggable = $(".igv-horizontal-scrollbar-draggable-div").first(),
             maxRegionPixels,
-            left,
-            width,
-            a,
-            b;
+            trackLeft,
+            horizontalScrollBarDraggableLeft,
+            width;
 
         maxRegionPixels = this.browser.cursorModel.framePixelWidth * this.browser.cursorModel.filteredRegions.length;
 
         width = (horizontalScrollBarWidth/maxRegionPixels) * horizontalScrollBarWidth;
         width = Math.max(5, width);
 
-        left = this.browser.referenceFrame.toPixels( this.browser.referenceFrame.start );
-        left *= (horizontalScrollBarWidth/maxRegionPixels);
+        trackLeft = this.browser.referenceFrame.toPixels( this.browser.referenceFrame.start );
+        horizontalScrollBarDraggableLeft = (horizontalScrollBarWidth/maxRegionPixels) * trackLeft;
 
-        if ((left + width) > horizontalScrollBarWidth) {
-//            a = left + width;
-//            b = (left + width) - horizontalScrollBarWidth;
-            left -= ((left + width) - horizontalScrollBarWidth);
-            width = horizontalScrollBarWidth - left;
+        if ((horizontalScrollBarDraggableLeft + width) > horizontalScrollBarWidth) {
+
+            horizontalScrollBarDraggableLeft -= ((horizontalScrollBarDraggableLeft + width) - horizontalScrollBarWidth);
+            width = horizontalScrollBarWidth - horizontalScrollBarDraggableLeft;
+
+            this.browser.referenceFrame.start = this.browser.referenceFrame.toBP( (maxRegionPixels/horizontalScrollBarWidth) * horizontalScrollBarDraggableLeft );
+
+            // update
+            if (this.browser.ideoPanel) this.browser.ideoPanel.repaint();
+            if (this.browser.karyoPanel) this.browser.karyoPanel.repaint();
+            this.browser.trackPanels.forEach(function (trackPanel) { trackPanel.update(); });
         }
 
         $( horizontalScrollBarDraggable).css({
-            "left": Math.floor( left ) + "px",
+            "left": Math.floor( horizontalScrollBarDraggableLeft ) + "px",
             "width": Math.floor( width ) + "px"
         });
 
