@@ -286,12 +286,12 @@ var igv = (function (igv) {
             lastMouseX = undefined,
             mouseDownX = undefined,
             referenceFrame = trackView.browser.referenceFrame,
-            trackContainerDiv = trackView.browser.trackContainerDiv;
+            trackContainerDiv = trackView.browser.trackContainerDiv,
             canvas = trackView.canvas,
             dragThreshold = 3,
             popupTimer = undefined;
 
-        $(trackContainerDiv).mousedown(function (e) {
+        $(canvas).mousedown(function (e) {
 
             var canvasCoords = igv.translateMouseCoordinates(e, canvas);
 
@@ -304,7 +304,7 @@ var igv = (function (igv) {
 
         });
 
-        $(trackContainerDiv).mousemove(igv.throttle(function (e) {
+        $(canvas).mousemove(igv.throttle(function (e) {
 
                 var coords = igv.translateMouseCoordinates(e, canvas),
                     pixels,
@@ -343,7 +343,7 @@ var igv = (function (igv) {
 
             }, 20));
 
-        $(trackContainerDiv).mouseup(function (e) {
+        $(canvas).mouseup(function (e) {
 
             e = $.event.fix(e);   // Sets pageX and pageY for browsers that don't support them
 
@@ -390,13 +390,13 @@ var igv = (function (igv) {
 
         });
 
-//        $(trackContainerDiv).mouseout(function (e) {
-//            isMouseDown = false;
-//            lastMouseX = undefined;
-//            mouseDownX = undefined;
-//        });
+        $(canvas).mouseout(function (e) {
+            isMouseDown = false;
+            lastMouseX = undefined;
+            mouseDownX = undefined;
+        });
 
-        $(trackContainerDiv).dblclick(function (e) {
+        $(canvas).dblclick(function (e) {
 
             e = $.event.fix(e);   // Sets pageX and pageY for browsers that don't support them
 
