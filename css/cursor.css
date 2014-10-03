@@ -4,11 +4,6 @@ body {
     padding-bottom: 20px;
 }
 
-/* A hack to remove the unwanted "No File Chosen" text from the file upload button */
-/*input[type='file'] {*/
-    /*width: 82px;*/
-/*}*/
-
 .well {
     background-color: rgba(255, 0, 0, 0.5);
 }
@@ -45,25 +40,31 @@ body {
     top: 0;
     width: 100px;
     height:100%;
-    background-color: #888;
+    background-color: #aaa;
 }
+
+.igv-horizontal-scrollbar-draggable-div:hover,
+.igv-horizontal-scrollbar-draggable-div:focus,
+.igv-horizontal-scrollbar-draggable-div:active {
+    background-color: #666;
+}
+
 
 .igv-horizontal-scrollbar-div {
     position: absolute;
     top: 0;
     right:0;
     height:100%;
-    background-color: rgba(200, 200, 200, .2);
-    border: 1px solid #888;
+    background-color: rgba(150, 150, 150, .2);
+    border: 1px solid #fff;
 }
 
 .igv-horizontal-scrollbar-container-div {
     position: relative;
     top: 0;
     right:0;
-    height:50px;
+    height:20px;
     padding-top: 10px;
-    /*opacity:0.52;*/
 }
 
 .igv-cursorHistogram-div {
@@ -105,7 +106,7 @@ body {
     background: none;
 }
 
-.igv-filter-thumbnail-horizonal-line {
+.igv-filter-thumbnail-horizontal-line {
     position: absolute;
     left: 0;
     width: 128px;

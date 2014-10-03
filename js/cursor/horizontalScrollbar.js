@@ -19,15 +19,24 @@ var cursor = (function (cursor) {
             horizontalScrollBarDraggable = $(".igv-horizontal-scrollbar-draggable-div").first(),
             maxRegionPixels,
             left,
-            width;
+            width,
+            a,
+            b;
 
         maxRegionPixels = this.browser.cursorModel.framePixelWidth * this.browser.cursorModel.filteredRegions.length;
 
         width = (horizontalScrollBarWidth/maxRegionPixels) * horizontalScrollBarWidth;
-        width = Math.max(2, width);
+        width = Math.max(5, width);
 
         left = this.browser.referenceFrame.toPixels( this.browser.referenceFrame.start );
         left *= (horizontalScrollBarWidth/maxRegionPixels);
+
+        if ((left + width) > horizontalScrollBarWidth) {
+//            a = left + width;
+//            b = (left + width) - horizontalScrollBarWidth;
+            left -= ((left + width) - horizontalScrollBarWidth);
+            width = horizontalScrollBarWidth - left;
+        }
 
         $( horizontalScrollBarDraggable).css({
             "left": Math.floor( left ) + "px",
