@@ -180,23 +180,13 @@ var igv = (function (igv) {
             tileEnd,
             spinner,
             buffer,
-            startBP,
-            endBP,
-            panel,
+            myself = this,
             igvCanvas,
-            chr,
-            scale,
-            refFrame,
-            tileRefFrame;
+            referenceFrame;
 
-        refFrame = this.browser.referenceFrame;
-        chr = refFrame.chr;
-        startBP = refFrame.start;
-        endBP = startBP + refFrame.toBP(this.canvas.width);
-        scale = refFrame.bpPerPixel;
-        panel = this;
+        referenceFrame = this.browser.referenceFrame;
 
-        if (!this.tile || !this.tile.containsRange(chr, startBP, endBP, scale)) {
+        if (!this.tile || !this.tile.containsRange(referenceFrame.chr, referenceFrame.start, referenceFrame.start + referenceFrame.toBP(this.canvas.width), referenceFrame.bpPerPixel)) {
 
             var contentDiv = this.contentDiv;
 
@@ -205,8 +195,8 @@ var igv = (function (igv) {
             buffer.height = this.canvas.height;
             igvCanvas = new igv.Canvas(buffer);
 
-            tileWidth = Math.round(buffer.width * refFrame.bpPerPixel);
-            tileStart = Math.max(0, Math.round(refFrame.start - tileWidth / 3));
+            tileWidth = Math.round(buffer.width * referenceFrame.bpPerPixel);
+            tileStart = Math.max(0, Math.round(referenceFrame.start - tileWidth / 3));
             tileEnd = tileStart + tileWidth;
 
 
@@ -227,7 +217,7 @@ var igv = (function (igv) {
 
             };
 
-            this.track.draw(igvCanvas, refFrame, tileStart, tileEnd, buffer.width, buffer.height, function (task) {
+            this.track.draw(igvCanvas, referenceFrame, tileStart, tileEnd, buffer.width, buffer.height, function (task) {
 
 
                     spinner.stop();
@@ -235,8 +225,8 @@ var igv = (function (igv) {
                     if (task) console.log(task.canceled);
 
                     if (!(task && task.canceled)) {
-                        panel.tile = new Tile(chr, tileStart, tileEnd, scale, buffer);
-                        panel.paintImage();
+                        myself.tile = new Tile(referenceFrame.chr, tileStart, tileEnd, referenceFrame.bpPerPixel, buffer);
+                        myself.paintImage();
                     }
                 },
                 this.currentTask);
@@ -267,7 +257,7 @@ var igv = (function (igv) {
         this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
 
         if (this.tile) {
-            this.xOffset = Math.round((this.tile.startBP - this.browser.referenceFrame.start) / this.browser.referenceFrame.bpPerPixel);
+            this.xOffset = Math.round(this.browser.referenceFrame.toPixels(this.tile.startBP - this.browser.referenceFrame.start));
             this.ctx.drawImage(this.tile.image, this.xOffset, 0);
             this.ctx.save();
             this.ctx.restore();
@@ -336,7 +326,7 @@ var igv = (function (igv) {
 
                             // CURSOR track clamping
                             viewPortWidth = $(".igv-viewport-div").first().width();
-                            pixelsEnd = Math.floor(trackView.browser.cursorModel.framePixelWidth * trackView.browser.cursorModel.regionsToRender().length);
+                            pixelsEnd = Math.floor(trackView.browser.cursorModel.framePixelWidth * trackView.browser.cursorModel.filteredRegions.length);
                             pixels = Math.floor(trackView.browser.referenceFrame.toPixels(referenceFrame.start) + viewPortWidth);
 
                             if (pixels >= pixelsEnd) {
