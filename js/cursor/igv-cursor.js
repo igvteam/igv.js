@@ -259,7 +259,6 @@ var igv = (function (igv) {
 
             window.onresize = igv.throttle(function () {
 
-                var percent;
 
                 if (browser.ideoPanel) {
                     browser.ideoPanel.resize();
@@ -352,7 +351,7 @@ var igv = (function (igv) {
             var peak2DataSource = new igv.BedFeatureSource(peak2URL);
             var tssDataSource = new igv.BedFeatureSource(tssUrl);
 
-            var tssTrack = new cursor.CursorTrack(tssDataSource, browser.cursorModel, browser.referenceFrame, "TSS", 40);
+            var tssTrack = new cursor.CursorTrack(tssDataSource, browser.cursorModel, browser.referenceFrame, "TSS", browser.trackHeight);
 
             var track1 = new cursor.CursorTrack(peakDataSource, browser.cursorModel, browser.referenceFrame, "H3k4me3 H1hesc", browser.trackHeight);
             track1.color = "rgb(0,150,0)";
@@ -370,8 +369,6 @@ var igv = (function (igv) {
                 browser.addTrack(track1);
 
                 browser.addTrack(track2);
-
-                tssTrack.labelButton.className = "btn btn-xs btn-cursor-selected";
 
                 browser.horizontalScrollbar.update(browser.cursorModel, browser.referenceFrame);
             });

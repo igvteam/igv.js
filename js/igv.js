@@ -13,6 +13,10 @@ var igv = (function (igv) {
 
         igv.browser = new igv.Browser("IGV");
 
+        if(!options.flanking && isT2D(options)) {
+            options.flanking = 100000;   // TODO -- hack for demo, remove
+        }
+
         igv.browser.flanking = options.flanking;
 
         var browser = igv.browser,
@@ -21,7 +25,6 @@ var igv = (function (igv) {
             contentKaryo = $('<div id="igvKaryoDiv" class="igv-karyo-div">')[0],
             contentHeader = $('<div id="igvHeaderDiv" class="igv-header-div">')[0],
             trackContainer = $('<div id="igvTrackContainerDiv" class="igv-track-container-div">')[0];
-
 
 
         // DOM
@@ -83,13 +86,13 @@ var igv = (function (igv) {
 
                 }
 
-                if(options.locus) {
+                if (options.locus) {
                     browser.search(options.locus);
                 }
 
                 // TODO -- why is this function throttled?
                 window.onresize = igv.throttle(function () {
-                   browser.resize();
+                    browser.resize();
                 }, 10);
             });
 
@@ -98,6 +101,18 @@ var igv = (function (igv) {
         return browser;
 
 
+    }
+
+    // TODO -- temporary hack for demo, remove ASAP
+    function isT2D(options) {
+        if (options.tracks && options.tracks.length > 0) {
+            var t = options.tracks[0];
+            var b = t instanceof igv.T2dTrack;
+            return b;
+        }
+        else {
+            return false;
+        }
     }
 
     return igv;

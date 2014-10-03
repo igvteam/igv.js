@@ -38,7 +38,6 @@ var igv = (function (igv) {
         this.controlDiv = controlDiv;
 
         controlDiv.appendChild(controlCanvas);
-        controlCanvas.style.position = 'absolute';
         controlCanvas.style.width = controlDiv.clientWidth + "px";
         controlCanvas.style.height = controlDiv.clientHeight + "px";
         controlCanvas.setAttribute('width', controlDiv.clientWidth);
@@ -106,19 +105,10 @@ var igv = (function (igv) {
 
                             browser.referenceFrame.start = 0;
                             browser.cursorModel.setRegions(featureList);
-//                        browser.update();
 
 
                         });
 
-                        browser.trackPanels.forEach(function (trackView) {
-                            if (track !== trackView.track) {
-                                labelButton.className = "btn btn-xs btn-cursor-deselected igv-track-label";
-                            }
-                        });
-
-                        //We don't have a concept of track selection, so don't change the visible state (code below commented out)
-                        //labelButton.className = "btn btn-xs btn-cursor-selected";
                     }
                     else {
 
@@ -132,12 +122,6 @@ var igv = (function (igv) {
 
             }
         }
-
-
-     //   browser.rootHeight += viewportHeight + this.marginBottom;
-
-        // TODO -- do something about the magic "300"
-        //browser.div.style.height = browser.rootHeight + 300 + "px";
 
         this.canvas = canvas;
         this.ctx = canvas.getContext("2d");
@@ -322,7 +306,7 @@ var igv = (function (igv) {
 
             var canvasCoords = igv.translateMouseCoordinates(e, canvas);
 
-            if(igv.popover) igv.popover.hide();
+            if (igv.popover) igv.popover.hide();
 
             isMouseDown = true;
             lastMouseX = canvasCoords.x;

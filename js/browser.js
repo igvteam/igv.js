@@ -76,18 +76,7 @@ var igv = (function (igv) {
         var browser = this,
             trackView = new igv.TrackView(track, this);
 
-        if (trackView.track instanceof igv.EqtlTrack) {
-            trackView.trackDiv.style.height = this.trackHeight + "px";
-            trackView.canvas.height = this.trackHeight;
-            trackView.canvas.style.height = this.trackHeight + "px";
-            trackView.controlDiv.style.height = this.trackHeight + "px";
-            trackView.controlCanvas.height = this.trackHeight;
-            trackView.controlCanvas.style.height = this.trackHeight + "px";
-            trackView.viewportDiv.style.height = this.trackHeight + "px";
-        }
-
-
-        trackView.order = track.order || this.trackPanels.length;
+        if(!track.order) track.order = this.trackPanels.length;
 
         this.trackPanels.push(trackView);
 
@@ -111,8 +100,8 @@ var igv = (function (igv) {
         var browser = this;
 
         this.trackPanels.sort(function (a, b) {
-            var aOrder = a.order || 0;
-            var bOrder = b.order || 0;
+            var aOrder = a.track.order || 0;
+            var bOrder = b.track.order || 0;
             return aOrder - bOrder;
         });
         // Reattach the divs to the dom in the correct order

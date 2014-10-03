@@ -54,7 +54,10 @@ var cursor = (function (cursor) {
         horizontalScrollBar          = $('<div class="igv-horizontal-scrollbar-div">')[0];
         horizontalScrollBarDraggable = $('<div class="igv-horizontal-scrollbar-draggable-div">')[0];
 
-        parentDivObject.append(horizontalScrollBarContainer);
+        $( horizontalScrollBar).css( "left", this.browser.controlPanelWidth + "px");
+
+
+            parentDivObject.append(horizontalScrollBarContainer);
         $(horizontalScrollBarContainer).append(horizontalScrollBar);
         $( horizontalScrollBar).css({
             "left": (this.browser.controlPanelWidth ? this.browser.controlPanelWidth : 50) + "px"
