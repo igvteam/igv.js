@@ -323,12 +323,11 @@ var igv = (function (igv) {
                         if (trackView.browser.cursorModel) {
 
                             // CURSOR track clamping
-                            viewPortWidth = $(".igv-viewport-div").first().width();
                             pixelsEnd = Math.floor(trackView.browser.cursorModel.framePixelWidth * trackView.browser.cursorModel.filteredRegions.length);
-                            pixels = Math.floor(trackView.browser.referenceFrame.toPixels(referenceFrame.start) + viewPortWidth);
+                            pixels = Math.floor(trackView.browser.referenceFrame.toPixels(referenceFrame.start) + trackView.browser.trackViewportWidth());
 
                             if (pixels >= pixelsEnd) {
-                                referenceFrame.start = trackView.browser.referenceFrame.toBP(pixelsEnd - viewPortWidth);
+                                referenceFrame.start = trackView.browser.referenceFrame.toBP(pixelsEnd - trackView.browser.trackViewportWidth());
                             }
 
 

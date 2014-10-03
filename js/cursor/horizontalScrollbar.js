@@ -6,6 +6,8 @@
  */
 var cursor = (function (cursor) {
 
+    var minimumHorizontalScrollBarDraggableWidth = 6;
+
     cursor.HorizontalScrollbar = function (browser, parentDivObject) {
 
         this.browser = browser;
@@ -17,25 +19,31 @@ var cursor = (function (cursor) {
 
         var horizontalScrollBarWidth = $(".igv-horizontal-scrollbar-div").first().width(),
             horizontalScrollBarDraggable = $(".igv-horizontal-scrollbar-draggable-div").first(),
-            maxRegionPixels,
+            framePixelWidth = this.browser.cursorModel.framePixelWidth,
+            regionListLength = this.browser.cursorModel.filteredRegions.length,
+            referenceFrame = this.browser.referenceFrame,
+            regionBoundsWidth,
             trackLeft,
             horizontalScrollBarDraggableLeft,
             width;
 
-        maxRegionPixels = this.browser.cursorModel.framePixelWidth * this.browser.cursorModel.filteredRegions.length;
+        regionBoundsWidth = framePixelWidth * regionListLength;
 
-        width = (horizontalScrollBarWidth/maxRegionPixels) * horizontalScrollBarWidth;
-        width = Math.max(5, width);
+        width = Math.max(minimumHorizontalScrollBarDraggableWidth, (horizontalScrollBarWidth/regionBoundsWidth) * horizontalScrollBarWidth);
 
-        trackLeft = this.browser.referenceFrame.toPixels( this.browser.referenceFrame.start );
-        horizontalScrollBarDraggableLeft = (horizontalScrollBarWidth/maxRegionPixels) * trackLeft;
+        trackLeft = referenceFrame.toPixels( referenceFrame.start );
+        horizontalScrollBarDraggableLeft = (horizontalScrollBarWidth/regionBoundsWidth) * trackLeft;
 
+        // handle minification with draggable near right edge of scroll bar.
+        // must reposition AND scale draggable AND pan track
         if ((horizontalScrollBarDraggableLeft + width) > horizontalScrollBarWidth) {
 
+            // reposition/rescale draggable
             horizontalScrollBarDraggableLeft -= ((horizontalScrollBarDraggableLeft + width) - horizontalScrollBarWidth);
             width = horizontalScrollBarWidth - horizontalScrollBarDraggableLeft;
 
-            this.browser.referenceFrame.start = this.browser.referenceFrame.toBP( (maxRegionPixels/horizontalScrollBarWidth) * horizontalScrollBarDraggableLeft );
+            // pan track
+            referenceFrame.start = referenceFrame.toBP( (regionBoundsWidth/horizontalScrollBarWidth) * horizontalScrollBarDraggableLeft );
 
             // update
             if (this.browser.ideoPanel) this.browser.ideoPanel.repaint();

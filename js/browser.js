@@ -94,7 +94,6 @@ var igv = (function (igv) {
 
     };
 
-
     igv.Browser.prototype.reorderTracks = function () {
 
         var browser = this;
@@ -139,7 +138,6 @@ var igv = (function (igv) {
         });
 
     };
-
 
     igv.Browser.prototype.resize = function () {
         if (this.ideoPanel) this.ideoPanel.resize();

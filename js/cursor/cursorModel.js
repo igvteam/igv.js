@@ -90,6 +90,7 @@ var cursor = (function (cursor) {
 
         this.filteredRegions = this.regions;
 
+
         this.updateRegionDisplay();
         this.filterRegions();
 
@@ -188,6 +189,8 @@ var cursor = (function (cursor) {
                 });
             }
 
+            var thresholdFramePixelWidth = myself.browser.trackViewportWidth() / myself.filteredRegions.length;
+
             if (sortTrackPanelPostFiltering) {
 
                 // spin spinner
@@ -201,7 +204,12 @@ var cursor = (function (cursor) {
 
                     spinner.stop();
 
-                    myself.browser.update();
+                    if (myself.framePixelWidth < thresholdFramePixelWidth) {
+                        myself.browser.setFrameWidth(thresholdFramePixelWidth);
+                    } else {
+                        myself.browser.update();
+                    }
+
 
                 });
 
@@ -215,7 +223,12 @@ var cursor = (function (cursor) {
                     myself.subSampledFilteredRegions = myself.filteredRegions;
                 }
 
-                myself.browser.update();
+                if (myself.framePixelWidth < thresholdFramePixelWidth) {
+                    myself.browser.setFrameWidth(thresholdFramePixelWidth);
+                } else {
+                    myself.browser.update();
+                }
+                
             }
 
             myself.updateRegionDisplay();

@@ -304,18 +304,16 @@ var igv = (function (igv) {
 
             browser.zoomIn = function () {
 
-                browser.setFrameWidth(browser.cursorModel.framePixelWidth * 2);
+                browser.setFrameWidth(2.0 * browser.cursorModel.framePixelWidth);
                 $("input[id='frameWidthInput']").val(browser.cursorModel.framePixelWidth);
                 browser.update();
             };
 
             browser.zoomOut = function () {
 
-                var thresholdFramePixelWidth = $(".igv-viewport-div").first().width() / browser.cursorModel.regionsToRender().length;
+                var thresholdFramePixelWidth = browser.trackViewportWidth() / browser.cursorModel.regionsToRender().length;
 
-                browser.setFrameWidth(Math.max(thresholdFramePixelWidth, browser.cursorModel.framePixelWidth / 2.0));
-
-//                    console.log("candidate " + browser.cursorModel.framePixelWidth + " threshold " + thresholdFramePixelWidth);
+                browser.setFrameWidth(Math.max(thresholdFramePixelWidth, 0.5 * browser.cursorModel.framePixelWidth));
 
                 $("input[id='frameWidthInput']").val(browser.cursorModel.framePixelWidth);
 
@@ -324,18 +322,14 @@ var igv = (function (igv) {
 
             browser.fitToScreen = function () {
 
-                var regionCount,
-                    frameWidth;
+                var frameWidth;
 
                 if (!(browser.cursorModel && browser.cursorModel.regions)) {
                     return;
                 }
 
-                regionCount = browser.cursorModel.regionsToRender().length;
-
-                if (regionCount > 0) {
-//                        frameWidth = (browser.trackContainerDiv.clientWidth - browser.controlPanelWidth) / regionCount;
-                    frameWidth = $(".igv-viewport-div").first().width() / regionCount;
+                if (browser.cursorModel.regionsToRender().length > 0) {
+                    frameWidth = browser.trackViewportWidth() / browser.cursorModel.regionsToRender().length;
                     browser.referenceFrame.start = 0;
                     browser.setFrameWidth(frameWidth);
                     $('frameWidthBox').value = frameWidth;
