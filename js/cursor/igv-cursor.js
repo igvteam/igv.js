@@ -304,9 +304,8 @@ var igv = (function (igv) {
 
             browser.zoomIn = function () {
 
-                browser.cursorModel.framePixelWidth *= 2;
+                browser.setFrameWidth(browser.cursorModel.framePixelWidth * 2);
                 $("input[id='frameWidthInput']").val(browser.cursorModel.framePixelWidth);
-
                 browser.update();
             };
 
@@ -314,7 +313,7 @@ var igv = (function (igv) {
 
                 var thresholdFramePixelWidth = $(".igv-viewport-div").first().width() / browser.cursorModel.regionsToRender().length;
 
-                browser.cursorModel.framePixelWidth = Math.max(thresholdFramePixelWidth, browser.cursorModel.framePixelWidth / 2.0);
+                browser.setFrameWidth(Math.max(thresholdFramePixelWidth, browser.cursorModel.framePixelWidth / 2.0));
 
 //                    console.log("candidate " + browser.cursorModel.framePixelWidth + " threshold " + thresholdFramePixelWidth);
 
