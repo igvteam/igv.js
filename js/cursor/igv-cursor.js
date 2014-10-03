@@ -370,7 +370,7 @@ var igv = (function (igv) {
 
                 browser.addTrack(track2);
 
-                browser.horizontalScrollbar.update(browser.cursorModel, browser.referenceFrame);
+                browser.horizontalScrollbar.update();
             });
 
         }

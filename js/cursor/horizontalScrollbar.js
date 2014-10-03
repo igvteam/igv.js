@@ -13,25 +13,20 @@ var cursor = (function (cursor) {
 
     };
 
-    cursor.HorizontalScrollbar.prototype.update = function (cursorModel, referenceFrame) {
+    cursor.HorizontalScrollbar.prototype.update = function () {
 
         var horizontalScrollBarWidth = $(".igv-horizontal-scrollbar-div").first().width(),
             horizontalScrollBarDraggable = $(".igv-horizontal-scrollbar-draggable-div").first(),
-            totalRegionCount,
-            regionWidth,
             maxRegionPixels,
             left,
             width;
 
-        totalRegionCount = cursorModel.filteredRegions.length;
-        regionWidth = cursorModel.framePixelWidth;
-
-        maxRegionPixels = regionWidth * totalRegionCount;
+        maxRegionPixels = this.browser.cursorModel.framePixelWidth * this.browser.cursorModel.filteredRegions.length;
 
         width = (horizontalScrollBarWidth/maxRegionPixels) * horizontalScrollBarWidth;
-//        width = Math.min(width, horizontalScrollBarWidth);
+        width = Math.max(2, width);
 
-        left = referenceFrame.toPixels( referenceFrame.start );
+        left = this.browser.referenceFrame.toPixels( this.browser.referenceFrame.start );
         left *= (horizontalScrollBarWidth/maxRegionPixels);
 
         $( horizontalScrollBarDraggable).css({
@@ -43,7 +38,8 @@ var cursor = (function (cursor) {
 
     cursor.HorizontalScrollbar.prototype.markupWithParentDivObject = function (parentDivObject) {
 
-        var horizontalScrollBarContainer,
+        var myself = this,
+            horizontalScrollBarContainer,
             horizontalScrollBar,
             horizontalScrollBarDraggable,
             isMouseDown = undefined,
@@ -58,7 +54,7 @@ var cursor = (function (cursor) {
         $( horizontalScrollBar).css( "left", this.browser.controlPanelWidth + "px");
 
 
-            parentDivObject.append(horizontalScrollBarContainer);
+        parentDivObject.append(horizontalScrollBarContainer);
         $(horizontalScrollBarContainer).append(horizontalScrollBar);
         $( horizontalScrollBar).css({
             "left": (this.browser.controlPanelWidth ? this.browser.controlPanelWidth : 50) + "px"
@@ -79,24 +75,29 @@ var cursor = (function (cursor) {
 
         $( document ).mousemove(function (e) {
 
-            var dx,
+            var maxRegionPixels,
                 left;
-
-            dx = e.screenX - lastMouseX;
-
-            left = $( horizontalScrollBarDraggable).position().left;
 
             if (isMouseDown && isMouseIn && undefined !== lastMouseX) {
 
-                left += dx;
+                left = $(horizontalScrollBarDraggable).position().left;
+                left += (e.screenX - lastMouseX);
 
-                // constrain raw displacement to horizontal scroll bar bbox
+                // clamp
                 left = Math.max(0, left);
                 left = Math.min(($(horizontalScrollBar).width() - $(horizontalScrollBarDraggable).outerWidth()), left);
 
                 $( horizontalScrollBarDraggable).css({
                     "left": left + "px"
                 });
+
+                maxRegionPixels = myself.browser.cursorModel.framePixelWidth * myself.browser.cursorModel.filteredRegions.length;
+                myself.browser.referenceFrame.start = myself.browser.referenceFrame.toBP(left) * (maxRegionPixels/$(horizontalScrollBar).width());
+
+                // update
+                if (myself.browser.ideoPanel) myself.browser.ideoPanel.repaint();
+                if (myself.browser.karyoPanel) myself.browser.karyoPanel.repaint();
+                myself.browser.trackPanels.forEach(function (trackPanel) { trackPanel.update(); });
 
                 lastMouseX = e.screenX
             }

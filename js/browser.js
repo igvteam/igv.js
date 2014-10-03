@@ -163,7 +163,7 @@ var igv = (function (igv) {
         });
 
         if (this.cursorModel) {
-            this.horizontalScrollbar.update(this.cursorModel, this.referenceFrame);
+            this.horizontalScrollbar.update();
         }
 
     };
@@ -184,7 +184,7 @@ var igv = (function (igv) {
         });
 
         if (this.cursorModel) {
-            this.horizontalScrollbar.update(this.cursorModel, this.referenceFrame);
+            this.horizontalScrollbar.update();
         }
     };
 

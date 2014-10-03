@@ -182,20 +182,16 @@ var igv = (function (igv) {
             buffer,
             myself = this,
             igvCanvas,
-            referenceFrame;
-
-        referenceFrame = this.browser.referenceFrame;
+            referenceFrame = this.browser.referenceFrame;
 
         if (!this.tile || !this.tile.containsRange(referenceFrame.chr, referenceFrame.start, referenceFrame.start + referenceFrame.toBP(this.canvas.width), referenceFrame.bpPerPixel)) {
-
-            var contentDiv = this.contentDiv;
 
             buffer = document.createElement('canvas');
             buffer.width = 3 * this.canvas.width;
             buffer.height = this.canvas.height;
             igvCanvas = new igv.Canvas(buffer);
 
-            tileWidth = Math.round(buffer.width * referenceFrame.bpPerPixel);
+            tileWidth = Math.round(referenceFrame.toBP(buffer.width));
             tileStart = Math.max(0, Math.round(referenceFrame.start - tileWidth / 3));
             tileEnd = tileStart + tileWidth;
 
