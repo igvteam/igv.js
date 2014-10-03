@@ -182,9 +182,11 @@ var igv = (function (igv) {
             buffer,
             myself = this,
             igvCanvas,
-            referenceFrame = this.browser.referenceFrame;
+            referenceFrame = this.browser.referenceFrame,
+            refFrameStart = referenceFrame.start,
+            refFrameEnd = refFrameStart + referenceFrame.toBP(this.canvas.width);
 
-        if (!this.tile || !this.tile.containsRange(referenceFrame.chr, referenceFrame.start, referenceFrame.start + referenceFrame.toBP(this.canvas.width), referenceFrame.bpPerPixel)) {
+        if (!this.tile || !this.tile.containsRange(referenceFrame.chr, refFrameStart, refFrameEnd, referenceFrame.bpPerPixel)) {
 
             buffer = document.createElement('canvas');
             buffer.width = 3 * this.canvas.width;
@@ -414,6 +416,9 @@ var igv = (function (igv) {
             else {
                 var newCenter = Math.round(referenceFrame.start + canvasCoords.x * referenceFrame.bpPerPixel);
                 referenceFrame.bpPerPixel /= 2;
+                if(trackView.browser.cursorModel) {
+                    trackView.browser.cursorModel.framePixelWidth *= 2;
+                }
                 trackView.browser.goto(referenceFrame.chr, newCenter);
             }
         });
