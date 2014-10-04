@@ -1,16 +1,23 @@
 var igv = (function (igv) {
 
-    igv.createCursorBrowser = function () {
 
-        var browser = new igv.Browser("CURSOR"),
-            contentHeader = $('<div class="row"></div>')[0],
+    igv.createCursorBrowser = function (options) {
+
+        var contentHeader = $('<div class="row"></div>')[0],
             contentHeaderDiv = $('<div id="igvHeaderDiv" class="col-md-12" style="font-size:16px;"><span id="igvHeaderRegionDisplaySpan"></span></div>')[0],
-            trackContainer = $('<div id="igvTrackContainerDiv" class="igv-track-container-div">')[0];
+            trackContainer = $('<div id="igvTrackContainerDiv" class="igv-track-container-div">')[0],
+            browser = new igv.Browser(options, trackContainer),
+            regionDisplayJQueryObject = $('#igvHeaderRegionDisplaySpan');
 
-        browser.div = $('<div id="igvRootDiv" class="igv-root-div">')[0];
         $(browser.div).append(contentHeader);
         $(contentHeader).append(contentHeaderDiv);
         $(browser.div).append(trackContainer);
+
+        // Override some defaults
+        browser.controlPanelWidth = 150;
+        browser.horizontalScrollbar = new cursor.HorizontalScrollbar(browser, $(browser.div));
+
+
         document.getElementById('igvContainerDiv').appendChild(browser.div);
 
         // Append event handlers to DOM elements
@@ -57,7 +64,7 @@ var igv = (function (igv) {
         };
 
         // export regions via modal form
-        $( "#igvExportRegionsModalForm" ).submit(function( event ) {
+        $("#igvExportRegionsModalForm").submit(function (event) {
 
             var exportedRegions = "",
                 downloadInput = $("#igvExportRegionsModalForm").find('input[name="downloadContent"]');
@@ -70,7 +77,7 @@ var igv = (function (igv) {
         });
 
         // save session via modal form
-        $( "#igvSaveSessionModalForm" ).submit(function( event ) {
+        $("#igvSaveSessionModalForm").submit(function (event) {
 
             var session = browser.session(),
                 downloadInput = $("#igvSaveSessionModalForm").find('input[name="downloadContent"]');
@@ -88,9 +95,9 @@ var igv = (function (igv) {
 
             sessionFile = sessionInput.files[ 0 ];
 
-            fileReader.onload = (function(theFile) {
+            fileReader.onload = (function (theFile) {
 
-                return function(e) {
+                return function (e) {
 
                     var session;
 
@@ -100,7 +107,7 @@ var igv = (function (igv) {
 
                     track = session.tracks[ 1 ];
 
-                    session.tracks.forEach(function(t){
+                    session.tracks.forEach(function (t) {
 
                         var featureSource,
                             cursorTrack;
@@ -115,7 +122,7 @@ var igv = (function (igv) {
 
                 };
 
-            })( sessionFile );
+            })(sessionFile);
 
             fileReader.readAsText(sessionFile);
 
@@ -241,132 +248,73 @@ var igv = (function (igv) {
         // Append resultant ENCODE DataTables markup
         $('#encodeModalBody').html('<table cellpadding="0" cellspacing="0" border="0" class="display" id="encodeModalTable"></table>');
 
-        browser.startup = function () {
 
-            browser.genome = null;
+        browser.cursorModel = new cursor.CursorModel(browser, regionDisplayJQueryObject);
 
-            browser.referenceFrame = null;
+        browser.referenceFrame = new igv.ReferenceFrame("", 0, 1 / browser.cursorModel.framePixelWidth);
 
-            browser.controlPanelWidth = 150;
+        browser.setFrameWidth = function (frameWidthString) {
 
-            browser.horizontalScrollbar = new cursor.HorizontalScrollbar(browser, $(browser.div));
+            if (!igv.isNumber(frameWidthString)) {
+                console.log("bogus " + frameWidthString);
+                return;
+            }
 
-            browser.trackContainerDiv = trackContainer;
+            var frameWidth = parseFloat(frameWidthString);
+            if (frameWidth > 0) {
 
-            browser.trackPanels = [];
+                browser.cursorModel.framePixelWidth = frameWidth;
+                $("input[id='frameWidthInput']").val(browser.cursorModel.framePixelWidth);
 
-            initCursor();
-
-            window.onresize = igv.throttle(function () {
-
-
-                if (browser.ideoPanel) {
-                    browser.ideoPanel.resize();
-                }
-
-                browser.trackPanels.forEach(function (panel) {
-                    panel.resize();
-                });
-
-            }, 10);
+                browser.referenceFrame.bpPerPixel = 1 / frameWidth;
+                browser.update();
+            }
         };
 
-        function initCursor() {
+        browser.setRegionSize = function (regionSizeString) {
 
-            var regionDisplayJQueryObject = $('#igvHeaderRegionDisplaySpan');
+            var regionSize = parseFloat(regionSizeString);
+            if (regionSize > 0) {
 
-            browser.cursorModel = new cursor.CursorModel(browser, regionDisplayJQueryObject);
-            browser.referenceFrame = new igv.ReferenceFrame("", 0, 1 / browser.cursorModel.framePixelWidth);
-
-            browser.setFrameWidth = function (frameWidthString) {
-
-                var frameWidth = parseFloat(frameWidthString);
-                if (frameWidth > 0) {
-
-                    browser.cursorModel.framePixelWidth = frameWidth;
-                    $("input[id='frameWidthInput']").val(browser.cursorModel.framePixelWidth);
-
-                    browser.referenceFrame.bpPerPixel = 1 / frameWidth;
-                    browser.update();
-                }
-            };
-
-            browser.setRegionSize = function (regionSizeString) {
-
-                var regionSize = parseFloat(regionSizeString);
-                if (regionSize > 0) {
-
-                    browser.cursorModel.regionWidth = regionSize;
-                    browser.update();
-                }
-
-            };
-
-            browser.zoomIn = function () {
-
-                browser.setFrameWidth(2.0 * browser.cursorModel.framePixelWidth);
-                $("input[id='frameWidthInput']").val(browser.cursorModel.framePixelWidth);
+                browser.cursorModel.regionWidth = regionSize;
                 browser.update();
-            };
+            }
 
-            browser.zoomOut = function () {
+        };
 
-                var thresholdFramePixelWidth = browser.trackViewportWidth() / browser.cursorModel.regionsToRender().length;
+        browser.zoomIn = function () {
 
-                browser.setFrameWidth(Math.max(thresholdFramePixelWidth, 0.5 * browser.cursorModel.framePixelWidth));
+            browser.setFrameWidth(2.0 * browser.cursorModel.framePixelWidth);
+            $("input[id='frameWidthInput']").val(browser.cursorModel.framePixelWidth);
+            browser.update();
+        };
 
-                $("input[id='frameWidthInput']").val(browser.cursorModel.framePixelWidth);
+        browser.zoomOut = function () {
 
-                browser.update();
-            };
+            var thresholdFramePixelWidth = browser.trackViewportWidth() / browser.cursorModel.regionsToRender().length;
 
-            browser.fitToScreen = function () {
+            browser.setFrameWidth(Math.max(thresholdFramePixelWidth, 0.5 * browser.cursorModel.framePixelWidth));
 
-                var frameWidth;
+            $("input[id='frameWidthInput']").val(browser.cursorModel.framePixelWidth);
 
-                if (!(browser.cursorModel && browser.cursorModel.regions)) {
-                    return;
-                }
+            browser.update();
+        };
 
-                if (browser.cursorModel.regionsToRender().length > 0) {
-                    frameWidth = browser.trackViewportWidth() / browser.cursorModel.regionsToRender().length;
-                    browser.referenceFrame.start = 0;
-                    browser.setFrameWidth(frameWidth);
-                    $('frameWidthBox').value = frameWidth;
-                }
-            };
+        browser.fitToScreen = function () {
 
-            var tssUrl = "test/data/cursor/hg19.tss.bed.gz";
-            var peakURL = "test/data/cursor/wgEncodeBroadHistoneH1hescH3k4me3StdPk.broadPeak.gz";
-            var peak2URL = "test/data/cursor/wgEncodeBroadHistoneH1hescH3k27me3StdPk.broadPeak.gz";
+            var frameWidth;
 
-            var peakDataSource = new igv.BedFeatureSource(peakURL);
-            var peak2DataSource = new igv.BedFeatureSource(peak2URL);
-            var tssDataSource = new igv.BedFeatureSource(tssUrl);
+            if (!(browser.cursorModel && browser.cursorModel.regions)) {
+                return;
+            }
 
-            var tssTrack = new cursor.CursorTrack(tssDataSource, browser.cursorModel, browser.referenceFrame, "TSS", browser.trackHeight);
-
-            var track1 = new cursor.CursorTrack(peakDataSource, browser.cursorModel, browser.referenceFrame, "H3k4me3 H1hesc", browser.trackHeight);
-            track1.color = "rgb(0,150,0)";
-
-            var track2 = new cursor.CursorTrack(peak2DataSource, browser.cursorModel, browser.referenceFrame, "H3k27me3 H1hesc", browser.trackHeight);
-            track2.color = "rgb(150,0,0)";
-
-            // Set the TSS track as the inital "selected" track (i.e. defines the regions)
-            tssDataSource.allFeatures(function (featureList) {
-
-                browser.cursorModel.setRegions(featureList);
-
-                browser.addTrack(tssTrack);
-
-                browser.addTrack(track1);
-
-                browser.addTrack(track2);
-
-                browser.horizontalScrollbar.update();
-            });
-
-        }
+            if (browser.cursorModel.regionsToRender().length > 0) {
+                frameWidth = browser.trackViewportWidth() / browser.cursorModel.regionsToRender().length;
+                browser.referenceFrame.start = 0;
+                browser.setFrameWidth(frameWidth);
+                $('frameWidthBox').value = frameWidth;
+            }
+        };
 
         // Augment standard behavior
         browser.removeTrack = function (track) {
@@ -380,10 +328,10 @@ var igv = (function (igv) {
 
             var session;
 
-            session = { tracks : [] };
+            session = { tracks: [] };
 
             browser.trackPanels.forEach(function (trackView) {
-                session.tracks.push( trackView.track.jsonRepresentation());
+                session.tracks.push(trackView.track.jsonRepresentation());
             });
 
             return JSON.stringify(session);
@@ -430,11 +378,11 @@ var igv = (function (igv) {
             hiddenDownloadContent.setAttribute("type", "hidden");
             hiddenDownloadContent.setAttribute("name", "downloadContent");
 
-            session = { tracks : [] };
+            session = { tracks: [] };
 
             browser.trackPanels.forEach(function (trackView) {
 
-                session.tracks.push( trackView.track.jsonRepresentation());
+                session.tracks.push(trackView.track.jsonRepresentation());
 
             });
 
@@ -448,6 +396,8 @@ var igv = (function (igv) {
             form.detach();
 
         };
+
+        addDemoTracks(browser);
 
         return browser;
     };
@@ -464,9 +414,9 @@ var igv = (function (igv) {
 
         sortButton.className = "fa fa-bar-chart-o igv-control-sort-fontawesome";
         $(sortButton).css({
-            "position" : "absolute",
-            "top"  : nextButtonTop + "px",
-            "left" : 5             + "px"
+            "position": "absolute",
+            "top": nextButtonTop + "px",
+            "left": 5 + "px"
         });
 
         nextButtonTop += 18;
@@ -495,9 +445,9 @@ var igv = (function (igv) {
         trackFilterButtonDiv.id = "filterButtonDiv_" + igv.guid();
         trackFilterButtonDiv.className = "igv-filter-histogram-button-div";
         $(trackFilterButtonDiv).css({
-            "position" : "absolute",
-            "top"  : nextButtonTop + "px",
-            "left" : 5             + "px"
+            "position": "absolute",
+            "top": nextButtonTop + "px",
+            "left": 5 + "px"
         });
 
         trackView.track.trackFilter = new igv.TrackFilter(trackView);
@@ -505,6 +455,38 @@ var igv = (function (igv) {
 
         nextButtonTop += 18;
 
+    }
+
+    function addDemoTracks(browser) {
+        var tssUrl = "test/data/cursor/hg19.tss.bed.gz";
+        var peakURL = "test/data/cursor/wgEncodeBroadHistoneH1hescH3k4me3StdPk.broadPeak.gz";
+        var peak2URL = "test/data/cursor/wgEncodeBroadHistoneH1hescH3k27me3StdPk.broadPeak.gz";
+
+        var peakDataSource = new igv.BedFeatureSource(peakURL);
+        var peak2DataSource = new igv.BedFeatureSource(peak2URL);
+        var tssDataSource = new igv.BedFeatureSource(tssUrl);
+
+        var tssTrack = new cursor.CursorTrack(tssDataSource, browser.cursorModel, browser.referenceFrame, "TSS", browser.trackHeight);
+
+        var track1 = new cursor.CursorTrack(peakDataSource, browser.cursorModel, browser.referenceFrame, "H3k4me3 H1hesc", browser.trackHeight);
+        track1.color = "rgb(0,150,0)";
+
+        var track2 = new cursor.CursorTrack(peak2DataSource, browser.cursorModel, browser.referenceFrame, "H3k27me3 H1hesc", browser.trackHeight);
+        track2.color = "rgb(150,0,0)";
+
+        // Set the TSS track as the inital "selected" track (i.e. defines the regions)
+        tssDataSource.allFeatures(function (featureList) {
+
+            browser.cursorModel.setRegions(featureList);
+
+            browser.addTrack(tssTrack);
+
+            browser.addTrack(track1);
+
+            browser.addTrack(track2);
+
+            browser.horizontalScrollbar.update();
+        });
     }
 
     return igv;

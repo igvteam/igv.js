@@ -3,6 +3,7 @@
 
 var igv = (function (igv) {
 
+    const POPOVER_WINDOW = 30000000;
 
     igv.T2dTrack = function (config) {
         this.descriptor = config;
@@ -45,12 +46,13 @@ var igv = (function (igv) {
      */
     igv.T2dTrack.prototype.draw = function (canvas, refFrame, bpStart, bpEnd, pixelWidth, pixelHeight, continuation, task) {
 
+
         var chr,
             queryChr,
             track = this,
             chr = refFrame.chr,
             yScale = (track.maxLogP - track.minLogP) / pixelHeight,
-            enablePopover = (bpEnd - bpStart) < 10000000;
+            enablePopover = (bpEnd - bpStart) < POPOVER_WINDOW;
 
         if (enablePopover) {
             this.po = [];
@@ -144,14 +146,14 @@ var igv = (function (igv) {
 
     igv.T2dTrack.prototype.popupData = function (genomicLocation, xOffset, yOffset) {
 
-        var i, len, p, dbSnp, data, url;
+        var i, len, p, dbSnp, data, url,
+        data = [];
 
         if (this.po) {
             for (i = 0, len = this.po.length; i < len; i++) {
                 p = this.po[i];
                 if (Math.abs(xOffset - p.x) < this.dotSize && Math.abs(yOffset - p.y) <= this.dotSize) {
                     dbSnp = p.feature.DBSNP_ID;
-                    data = [];
                     if (dbSnp) {
                         url = this.portalURL + "/variant/variantInfo/" + dbSnp;
                         // data.push("<a href=# onclick=window.location='" + url + "'>" +
@@ -173,13 +175,17 @@ var igv = (function (igv) {
                         data.push("<a target='_blank' href='" + url + "'>" +
                             "see all available statistics for this variant</a>");
                     }
-                    return data;
+
+                if(i < len-1) {
+                    data.push("<p/>");
+                }
                 }
             }
+        } else {
+            data.push("Popover not available at this resolution.")
+
         }
-
-        return null;
-
+return data;
     }
 
 

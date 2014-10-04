@@ -282,6 +282,8 @@ var igv = (function (igv) {
 
     function addTrackHandlers(trackView) {
 
+        console.log("...");
+
         var isMouseDown = false,
             lastMouseX = undefined,
             mouseDownX = undefined,

@@ -9,57 +9,54 @@ var igv = (function (igv) {
      */
     igv.createBrowser = function (options) {
 
-        console.log("Create browser");
-
-        igv.browser = new igv.Browser("IGV");
-
-        if(!options.flanking && isT2D(options)) {
-            options.flanking = 100000;   // TODO -- hack for demo, remove
+        if(igv.browser) {
+            console.log("Attempt to create 2 browsers.")
+            return igv.browser;
         }
 
-        igv.browser.flanking = options.flanking;
+        if(!options) options = {};
+        options.type = "IGV";
 
-        var browser = igv.browser,
-            rootDiv = browser.div,
-            contentRoot = $('<div id="igvContentDiv" class="igv-content-div">')[0],
+        console.log("Create browser");
+        if(!options.flanking && isT2D(options)) {  // TODO -- hack for demo, remove
+            options.flanking = 100000;
+        }
+
+        var contentRoot = $('<div id="igvContentDiv" class="igv-content-div">')[0],
             contentKaryo = $('<div id="igvKaryoDiv" class="igv-karyo-div">')[0],
             contentHeader = $('<div id="igvHeaderDiv" class="igv-header-div">')[0],
-            trackContainer = $('<div id="igvTrackContainerDiv" class="igv-track-container-div">')[0];
-
+            trackContainer = $('<div id="igvTrackContainerDiv" class="igv-track-container-div">')[0],
+            browser = new igv.Browser(options, trackContainer),
+            rootDiv = browser.div;
 
         // DOM
         $(rootDiv).append(contentKaryo);
         $(rootDiv).append(contentRoot);
-
         $(contentRoot).append(contentHeader);
         $(contentRoot).append(trackContainer);
 
         // Popover object -- singleton shared by all components
         igv.popover = new igv.Popover(contentRoot);
 
+        if (options.showKaryo) {
+            browser.karyoPanel = new igv.KaryoPanel(browser);
+            $('#igvKaryoDiv').append(browser.karyoPanel.div);
+            browser.karyoPanel.resize();
+        }
+
+
+        browser.ideoPanel = new igv.IdeoPanel(browser);
+        $('#igvHeaderDiv').append(browser.ideoPanel.div);
+        browser.ideoPanel.resize();
+
+
 
         browser.startup = function () {
 
             console.log("Browser startup");
 
-            browser.controlPanelWidth = 50;
-
-            browser.trackContainerDiv = trackContainer;
-
-            browser.trackPanels = [];
 
             igv.sequenceSource = igv.getFastaSequence(options.fastaURL);
-
-            if (options.showKaryo) {
-                browser.karyoPanel = new igv.KaryoPanel(browser);
-                $('#igvKaryoDiv').append(browser.karyoPanel.div);
-                browser.karyoPanel.resize();
-            }
-
-
-            browser.ideoPanel = new igv.IdeoPanel(browser);
-            $('#igvHeaderDiv').append(browser.ideoPanel.div);
-            browser.ideoPanel.resize();
 
 
             igv.loadGenome(options.cytobandURL, function (genome) {
@@ -90,10 +87,6 @@ var igv = (function (igv) {
                     browser.search(options.locus);
                 }
 
-                // TODO -- why is this function throttled?
-                window.onresize = igv.throttle(function () {
-                    browser.resize();
-                }, 10);
             });
 
         }

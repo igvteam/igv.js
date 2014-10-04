@@ -2,21 +2,47 @@ var igv = (function (igv) {
 
     const MIN_TRACK_WIDTH = 500;
 
-    igv.Browser = function (type) {
+    igv.Browser = function (options, trackContainer) {
 
-        this.type = type ? type : "IGV";
+        var browser = this;
+
+        igv.browser = this;   // Make globally visible (for use in html markup).
+
+        this.type = options.type || "IGV";
+
         this.div = $('<div id="igvRootDiv" class="igv-root-div">')[0];
 
         this.trackHeight = 100;
         $("input[id='trackHeightInput']").val(this.trackHeight);
 
-        this.rootHeight = 0;
         this.searchURL = "http://www.broadinstitute.org/webservices/igv/locus?genome=hg19&name=";
 
 
-        if (type === "GTEX") {
+        if (options.flanking) {
+            browser.flanking = options.flanking
+        }
+        else if (this.type === "GTEX") {
             this.flanking = 1000000;
         }
+
+        this.controlPanelWidth = 50;
+
+        this.trackContainerDiv = trackContainer;
+
+        this.trackPanels = [];
+
+
+        window.onresize = igv.throttle(function () {
+
+            if (browser.ideoPanel) {
+                browser.ideoPanel.resize();
+            }
+
+            browser.trackPanels.forEach(function (panel) {
+                panel.resize();
+            });
+
+        }, 10);
 
     };
 
@@ -76,7 +102,7 @@ var igv = (function (igv) {
         var browser = this,
             trackView = new igv.TrackView(track, this);
 
-        if(!track.order) track.order = this.trackPanels.length;
+        if (!track.order) track.order = this.trackPanels.length;
 
         this.trackPanels.push(trackView);
 
