@@ -430,6 +430,20 @@ var igv = (function (igv) {
                         Math.floor(browser.cursorModel.framePixelWidth * browser.cursorModel.filteredRegions.length) :
                         250000000;    // TODO -- get from reference frame, this is the chr length.
 
+                    // Use this for IGV clamping
+//                    if (igv.genome) {
+//
+//                        var chromosome = igv.genome.getChromosome(igv.referenceFrame.chr);
+//                        var widthBP = Math.round((igv.trackWidth - igv.labelWidth) * igv.referenceFrame.bpPerPixel);
+//                        var endBP = igv.referenceFrame.start + widthBP;
+//                        if (chromosome && endBP > chromosome.length) {
+//                            if (endBP > chromosome.length) {
+//                                igv.referenceFrame.start = chromosome.length - widthBP;
+//                            }
+//                        }
+//                    }
+
+
                     pixels = Math.floor(browser.referenceFrame.toPixels(referenceFrame.start) + browser.trackViewportWidth());
 
                     if (pixels >= pixelsEnd) {
