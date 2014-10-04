@@ -465,7 +465,6 @@ fieldset[disabled] .btn-cursor-selected.active {
 .btn-cursor-deselected {
     color: #000000;
     background-color: #FFFFFF;
-    border-color: #000000;
 }
 
 .btn-cursor-deselected:hover,
