@@ -282,15 +282,13 @@ var igv = (function (igv) {
 
     function addTrackHandlers(trackView) {
 
-        console.log("...");
+        // Register track handlers for popup.  Although we are not handling dragging here, we still need to check
+        // for dragging on a mouseup
 
-        var isMouseDown = false,
+      var isMouseDown = false,
             lastMouseX = undefined,
             mouseDownX = undefined,
-            referenceFrame = trackView.browser.referenceFrame,
-            trackContainerDiv = trackView.browser.trackContainerDiv,
             canvas = trackView.canvas,
-            dragThreshold = 3,
             popupTimer = undefined;
 
         $(canvas).mousedown(function (e) {
@@ -306,50 +304,15 @@ var igv = (function (igv) {
 
         });
 
-        $(canvas).mousemove(igv.throttle(function (e) {
-
-                var coords = igv.translateMouseCoordinates(e, canvas),
-                    pixels,
-                    pixelsEnd,
-                    viewPortWidth;
-
-                if (isMouseDown) { // Possibly dragging
-
-                    if (mouseDownX && Math.abs(coords.x - mouseDownX) > dragThreshold) {
-
-                        referenceFrame.shiftPixels(lastMouseX - coords.x);
-
-                        // clamp left
-                        referenceFrame.start = Math.max(0, referenceFrame.start);
-
-                        // clamp right
-                        if (trackView.browser.cursorModel) {
-
-                            // CURSOR track clamping
-                            pixelsEnd = Math.floor(trackView.browser.cursorModel.framePixelWidth * trackView.browser.cursorModel.filteredRegions.length);
-                            pixels = Math.floor(trackView.browser.referenceFrame.toPixels(referenceFrame.start) + trackView.browser.trackViewportWidth());
-
-                            if (pixels >= pixelsEnd) {
-                                referenceFrame.start = trackView.browser.referenceFrame.toBP(pixelsEnd - trackView.browser.trackViewportWidth());
-                            }
-
-
-                        }
-
-                        trackView.browser.repaint();
-                    }
-
-                    lastMouseX = coords.x;
-
-                }
-
-            }, 20));
 
         $(canvas).mouseup(function (e) {
 
             e = $.event.fix(e);   // Sets pageX and pageY for browsers that don't support them
 
-            var canvasCoords = igv.translateMouseCoordinates(e, canvas);
+            var canvasCoords = igv.translateMouseCoordinates(e, canvas),
+                referenceFrame = trackView.browser.referenceFrame;
+
+            if(!referenceFrame) return;
 
             if (popupTimer) {
                 // Cancel previous timer
@@ -357,7 +320,7 @@ var igv = (function (igv) {
                 popupTimer = undefined;
             }
 
-            if (Math.abs(canvasCoords.x - mouseDownX) <= dragThreshold && trackView.track.popupData) {
+            if (Math.abs(canvasCoords.x - mouseDownX) <= igv.constants.dragThreshold && trackView.track.popupData) {
                 const doubleClickDelay = 300;
                 popupTimer = window.setTimeout(function () {
 
@@ -392,36 +355,6 @@ var igv = (function (igv) {
 
         });
 
-        $(canvas).mouseout(function (e) {
-            isMouseDown = false;
-            lastMouseX = undefined;
-            mouseDownX = undefined;
-        });
-
-        $(canvas).dblclick(function (e) {
-
-            e = $.event.fix(e);   // Sets pageX and pageY for browsers that don't support them
-
-            var canvasCoords = igv.translateMouseCoordinates(e, canvas);
-
-            if (popupTimer) {
-                window.clearTimeout(popupTimer);
-                popupTimer = undefined;
-
-            }
-
-            if (trackView.track.handleDblClick) {
-                trackView.track.handleDblClick(dx, dy, trackView.viewportDiv);
-            }
-            else {
-                var newCenter = Math.round(referenceFrame.start + canvasCoords.x * referenceFrame.bpPerPixel);
-                referenceFrame.bpPerPixel /= 2;
-                if(trackView.browser.cursorModel) {
-                    trackView.browser.cursorModel.framePixelWidth *= 2;
-                }
-                trackView.browser.goto(referenceFrame.chr, newCenter);
-            }
-        });
 
     }
 

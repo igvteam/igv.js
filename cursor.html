@@ -75,6 +75,7 @@
     <script type="text/javascript" src="vendor/spin.js"></script>
     <script type="text/javascript" src="js/intervalTree.js"></script>
     <script type="text/javascript" src="js/ucsc-utils.js"></script>
+    <script type="text/javascript" src="js/igv-constants.js"></script>
 
     <script type="text/javascript" src="js/encode/encode.js"></script>
     <script type="text/javascript" src="js/cursor/cursorTrack.js"></script>
@@ -336,8 +337,9 @@
 <script type="text/javascript">
 
     $(document).ready(function () {
-        igv.createCursorBrowser({type: 'CURSOR'});
+        igv.createCursorBrowser({type: 'CURSOR', controlPanelWidth: 150});
     });
+
 
 </script>
 

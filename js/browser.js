@@ -4,41 +4,37 @@ var igv = (function (igv) {
 
     igv.Browser = function (options, trackContainer) {
 
-        var browser = this;
-
         igv.browser = this;   // Make globally visible (for use in html markup).
-
-        this.type = options.type || "IGV";
 
         this.div = $('<div id="igvRootDiv" class="igv-root-div">')[0];
 
-        this.trackHeight = 100;
+
+        this.trackHeight = options.trackHeight || 100;
+
+        this.flanking = options.flanking;
+
+        this.controlPanelWidth = options.controlPanelWidth || 50;
+
+        this.type = options.type || "IGV";
+
+        this.searchURL = options.searchURL || "http://www.broadinstitute.org/webservices/igv/locus?genome=hg19&name=";
+
         $("input[id='trackHeightInput']").val(this.trackHeight);
 
-        this.searchURL = "http://www.broadinstitute.org/webservices/igv/locus?genome=hg19&name=";
-
-
-        if (options.flanking) {
-            browser.flanking = options.flanking
-        }
-        else if (this.type === "GTEX") {
-            this.flanking = 1000000;
-        }
-
-        this.controlPanelWidth = 50;
 
         this.trackContainerDiv = trackContainer;
 
-        this.trackPanels = [];
+        addTrackContainerHandlers(trackContainer);
 
+        this.trackPanels = [];
 
         window.onresize = igv.throttle(function () {
 
-            if (browser.ideoPanel) {
-                browser.ideoPanel.resize();
+            if (igv.browser.ideoPanel) {
+                igv.browser.ideoPanel.resize();
             }
 
-            browser.trackPanels.forEach(function (panel) {
+            igv.browser.trackPanels.forEach(function (panel) {
                 panel.resize();
             });
 
@@ -394,6 +390,92 @@ var igv = (function (igv) {
                 });
             }
         }
+    }
+
+    function addTrackContainerHandlers(trackContainerDiv) {
+
+        var isMouseDown = false,
+            lastMouseX = undefined,
+            mouseDownX = undefined;
+
+        $(trackContainerDiv).mousedown(function (e) {
+            var coords = igv.translateMouseCoordinates(e, trackContainerDiv);
+            isMouseDown = true;
+            lastMouseX = coords.x;
+            mouseDownX = lastMouseX;
+        });
+
+        $(trackContainerDiv).mousemove(igv.throttle(function (e) {
+
+            var browser = igv.browser,
+                coords = igv.translateMouseCoordinates(e, trackContainerDiv),
+                pixels,
+                pixelsEnd,
+                referenceFrame = browser.referenceFrame,
+                isCursor = browser.cursorModel;
+
+            if (!referenceFrame) return;
+
+            if (isMouseDown) { // Possibly dragging
+
+                if (mouseDownX && Math.abs(coords.x - mouseDownX) > igv.constants.dragThreshold) {
+
+                    referenceFrame.shiftPixels(lastMouseX - coords.x);
+
+                    // clamp left
+                    referenceFrame.start = Math.max(0, referenceFrame.start);
+
+                    // clamp right
+                    pixelsEnd = isCursor ?
+                        Math.floor(browser.cursorModel.framePixelWidth * browser.cursorModel.filteredRegions.length) :
+                        250000000;    // TODO -- get from reference frame, this is the chr length.
+
+                    pixels = Math.floor(browser.referenceFrame.toPixels(referenceFrame.start) + browser.trackViewportWidth());
+
+                    if (pixels >= pixelsEnd) {
+                        referenceFrame.start = browser.referenceFrame.toBP(pixelsEnd - browser.trackViewportWidth());
+                    }
+
+
+                    browser.repaint();
+                }
+
+                lastMouseX = coords.x;
+
+            }
+
+        }, 10));
+
+        $(trackContainerDiv).mouseup(function (e) {
+            mouseDownX = undefined;
+            isMouseDown = false;
+            lastMouseX = undefined;
+        });
+
+        $(trackContainerDiv).mouseleave(function (e) {
+            isMouseDown = false;
+            lastMouseX = undefined;
+            mouseDownX = undefined;
+        });
+
+        $(trackContainerDiv).dblclick(function (e) {
+
+            e = $.event.fix(e);   // Sets pageX and pageY for browsers that don't support them
+
+            var canvasCoords = igv.translateMouseCoordinates(e, trackContainerDiv),
+                referenceFrame = igv.browser.referenceFrame;
+
+            if (!referenceFrame) return;
+
+            var newCenter = Math.round(referenceFrame.start + canvasCoords.x * referenceFrame.bpPerPixel);
+            referenceFrame.bpPerPixel /= 2;
+            if (igv.browser.cursorModel) {
+                igv.browser.cursorModel.framePixelWidth *= 2;
+            }
+            igv.browser.goto(referenceFrame.chr, newCenter);
+
+        });
+
     }
 
     return igv;

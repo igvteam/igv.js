@@ -40,15 +40,14 @@ var igv = (function (igv) {
 
         if (options.showKaryo) {
             browser.karyoPanel = new igv.KaryoPanel(browser);
-            $('#igvKaryoDiv').append(browser.karyoPanel.div);
+            $(contentKaryo).append(browser.karyoPanel.div);
             browser.karyoPanel.resize();
         }
 
 
         browser.ideoPanel = new igv.IdeoPanel(browser);
-        $('#igvHeaderDiv').append(browser.ideoPanel.div);
+        $(contentHeader).append(browser.ideoPanel.div);
         browser.ideoPanel.resize();
-
 
 
         browser.startup = function () {

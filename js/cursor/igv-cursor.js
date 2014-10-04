@@ -13,8 +13,6 @@ var igv = (function (igv) {
         $(contentHeader).append(contentHeaderDiv);
         $(browser.div).append(trackContainer);
 
-        // Override some defaults
-        browser.controlPanelWidth = 150;
         browser.horizontalScrollbar = new cursor.HorizontalScrollbar(browser, $(browser.div));
 
 
