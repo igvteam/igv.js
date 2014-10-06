@@ -77,8 +77,11 @@ var igv = (function (igv) {
         // save session via modal form
         $("#igvSaveSessionModalForm").submit(function (event) {
 
-            var session = browser.session(),
-                downloadInput = $("#igvSaveSessionModalForm").find('input[name="downloadContent"]');
+            var session,
+                downloadInput;
+
+            session = browser.session();
+            downloadInput = $("#igvSaveSessionModalForm").find('input[name="downloadContent"]');
 
             downloadInput.val(session);
         });
@@ -110,9 +113,10 @@ var igv = (function (igv) {
                         var featureSource,
                             cursorTrack;
 
-                        featureSource = new igv.BedFeatureSource(t.path.path);
-                        cursorTrack = new cursor.CursorTrack(featureSource, browser.cursorModel, browser.referenceFrame, t.label, t.trackHeight);
+                        featureSource = new igv.BedFeatureSource(t.path);
+                        cursorTrack = new cursor.CursorTrack(featureSource, browser.cursorModel, browser.referenceFrame, t.label, t.height);
                         cursorTrack.color = t.color;
+                        cursorTrack.order = t.order;
                         browser.addTrack(cursorTrack);
 
                     });
