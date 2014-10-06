@@ -198,14 +198,21 @@ var igv = (function (igv) {
             tileStart = Math.max(0, Math.round(referenceFrame.start - tileWidth / 3));
             tileEnd = tileStart + tileWidth;
 
-
-            spinner = igv.getSpinner(this.trackDiv);   // Start a spinner
-
             if (this.currentTask) {
+                if(this.currentTask.chr === referenceFrame.chr && this.currentTask.start === tileStart && this.currentTask.end === tileEnd) {
+                    // This load is already in progress
+                   // console.log("Dup load request -- ignoring");
+                    return;
+                }
                 this.currentTask.abort();
             }
+
+            spinner = igv.getSpinner(this.trackDiv);   // Start a spinner
             this.currentTask = {
                 canceled: false,
+                chr: referenceFrame.chr,
+                start: tileStart,
+                end: tileEnd,
                 abort: function () {
                     this.canceled = true;
                     if (this.xhrRequest) {
@@ -227,6 +234,7 @@ var igv = (function (igv) {
                         myself.tile = new Tile(referenceFrame.chr, tileStart, tileEnd, referenceFrame.bpPerPixel, buffer);
                         myself.paintImage();
                     }
+                    myself.currentTask = undefined;
                 },
                 this.currentTask);
 

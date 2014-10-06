@@ -317,7 +317,7 @@ var igv = (function (igv) {
         this.update();
     }
 
-    igv.Browser.prototype.search = function (feature) {
+    igv.Browser.prototype.search = function (feature, continuation) {
 
         console.log("Search " + feature);
 
@@ -332,6 +332,7 @@ var igv = (function (igv) {
             if (end > start) {
                 this.goto(chr, start, end);
             }
+            if (continuation) continuation();
 
         }
 
@@ -345,13 +346,13 @@ var igv = (function (igv) {
 
                 igv.loadData(url, function (data) {
 
-
                     spinner.stop();
 
-                    var lines = data.split("\n");
-                    var len = lines.length;
-                    // First line is header, skip
-                    var lineNo = 0;
+                    var lines = data.split("\n"),
+                        len = lines.length,
+                        lineNo = 0,
+                        foundFeature = false;
+
                     while (lineNo < len) {
                         // EGFR	chr7:55,086,724-55,275,031	refseq
                         var line = lines[lineNo++];
@@ -384,13 +385,14 @@ var igv = (function (igv) {
                                 else {
                                     browser.goto(chr, start, end);
                                 }
-
-                                return;
-                            }
+                                foundFeature = true;
+                             }
                         }
                     }
-                    // Nothing found
-                    alert('No feature found with name "' + feature + '"');
+
+                    if(!foundFeature) alert('No feature found with name "' + feature + '"');
+
+                    if (continuation) continuation();
                 });
             }
         }

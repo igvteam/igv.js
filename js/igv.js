@@ -9,16 +9,16 @@ var igv = (function (igv) {
      */
     igv.createBrowser = function (options) {
 
-        if(igv.browser) {
+        if (igv.browser) {
             console.log("Attempt to create 2 browsers.")
             return igv.browser;
         }
 
-        if(!options) options = {};
+        if (!options) options = {};
         options.type = "IGV";
 
         console.log("Create browser");
-        if(!options.flanking && isT2D(options)) {  // TODO -- hack for demo, remove
+        if (!options.flanking && isT2D(options)) {  // TODO -- hack for demo, remove
             options.flanking = 100000;
         }
 
@@ -73,18 +73,25 @@ var igv = (function (igv) {
                 if (browser.karyoPanel) browser.karyoPanel.repaint();
                 browser.addTrack(new igv.RulerTrack());
 
-                // Load initial tracks, if any
-                if (options.tracks) {
+                // If an initial locus is specified go there first, then load tracks.  This avoid loading tracks at
+                // a default location then moving
+                if (options.locus) {
+                    browser.search(options.locus, function () {
+                        if (options.tracks) {
+                            options.tracks.forEach(function (track) {
+                                browser.addTrack(track);
+                            });
+                        }
+                    });
 
+                }
+                else if (options.tracks) {
                     options.tracks.forEach(function (track) {
                         browser.addTrack(track);
                     });
 
                 }
 
-                if (options.locus) {
-                    browser.search(options.locus);
-                }
 
             });
 
