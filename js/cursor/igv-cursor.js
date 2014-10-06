@@ -106,18 +106,34 @@ var igv = (function (igv) {
 
                     session = JSON.parse(e.target.result);
 
-                    track = session.tracks[ 1 ];
-
-                    session.tracks.forEach(function (t) {
+                    session.tracks.forEach(function (trackSession) {
 
                         var featureSource,
-                            cursorTrack;
+                            cursorTrack,
+                            trackView;
 
-                        featureSource = new igv.BedFeatureSource(t.path);
-                        cursorTrack = new cursor.CursorTrack(featureSource, browser.cursorModel, browser.referenceFrame, t.label, t.height);
-                        cursorTrack.color = t.color;
-                        cursorTrack.order = t.order;
-                        browser.addTrack(cursorTrack);
+                        featureSource = new igv.BedFeatureSource(trackSession.path);
+                        cursorTrack = new cursor.CursorTrack(featureSource, browser.cursorModel, browser.referenceFrame, trackSession.label, trackSession.height);
+                        cursorTrack.color = trackSession.color;
+                        cursorTrack.order = trackSession.order;
+
+//                        browser.addTrack(cursorTrack);
+
+                        trackView = new igv.TrackView(cursorTrack, browser);
+
+                        if (!cursorTrack.order) {
+                            cursorTrack.order = browser.trackPanels.length;
+                        }
+
+                        cursorTrack.trackFilter.setWithJSON(trackSession.trackFilter);
+
+                        browser.trackPanels.push(trackView);
+
+                        browser.reorderTracks();
+
+                        browser.cursorModel.initializeHistogram(trackView.track, function () {
+                            browser.resize();
+                        });
 
                     });
 

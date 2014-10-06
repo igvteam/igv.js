@@ -11,6 +11,35 @@ igv = (function (igv) {
         this.radioButton = undefined;
     };
 
+    igv.TrackFilter.prototype.setWithJSON = function (json) {
+
+        var myself = this;
+
+        this.isFilterActive = json.isFilterActive;
+        this.radioButton = (undefined === json.radioButtonIDPrefix) ? undefined : radioButtonWithID(json.radioButtonIDPrefix + this.guid);
+
+        function radioButtonWithID(radioButtonID) {
+
+            var chosen = undefined,
+                radioButtonGroupContainer = $('#modalBody_' + myself.guid).find('.radio');
+
+            radioButtonGroupContainer.each(function(){
+
+                var radio = $(this).find('input');
+
+                if (radioButtonID === radio[ 0 ].id) {
+                    chosen = radio;
+                    chosen.prop('checked',true);
+
+                }
+
+            });
+
+            return chosen;
+        }
+
+    };
+
     igv.TrackFilter.prototype.jsonRepresentation = function () {
 
         var myself = this,
