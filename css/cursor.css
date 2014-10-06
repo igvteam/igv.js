@@ -41,6 +41,7 @@ body {
     width: 100px;
     height:100%;
     background-color: #aaa;
+    cursor: pointer;
 }
 
 .igv-horizontal-scrollbar-draggable-div:hover,
