@@ -84,16 +84,17 @@ var igv = (function (igv) {
 
             closeButton = document.createElement("i");
             contentDiv.appendChild(closeButton);
+
             closeButton.className = "fa fa-times-circle igv-track-disable-button-fontawesome";
             closeButton.onclick = function () {
                 browser.removeTrack(track);
             };
-            contentDiv.appendChild(closeButton);
 
             if (track.label) {
 
                 labelButton = document.createElement("button");
                 viewportDiv.appendChild(labelButton);
+
                 labelButton.className = "btn btn-xs btn-cursor-deselected igv-track-label";
                 labelButton.innerHTML = track.label;
                 track.labelButton = labelButton;
