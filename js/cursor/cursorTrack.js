@@ -31,8 +31,8 @@ var cursor = (function (cursor) {
             color : this.color,
             order : this.order,
             height : this.height,
-//            path : { filename : fs.filename, path : (fs.url) ? fs.url : fs.localFile }
-            path : fs.url
+            path : fs.url,
+            trackFilter : this.trackFilter.jsonRepresentation()
         };
 
         return json;

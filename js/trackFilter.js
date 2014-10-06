@@ -5,9 +5,28 @@ igv = (function (igv) {
 
         this.trackPanel = trackPanel;
         this.guid = igv.guid();
-        this.isFilterActive = true;
+//        this.isFilterActive = true;
+        this.isFilterActive = false;
         this.previousRadioButton = undefined;
         this.radioButton = undefined;
+    };
+
+    igv.TrackFilter.prototype.jsonRepresentation = function () {
+
+        var myself = this,
+            re = new RegExp(this.guid, "g"),
+
+            json;
+
+        json = {
+            isFilterActive: this.isFilterActive,
+            radioButtonIDPrefix : (undefined == this.radioButton[0]) ? undefined : this.radioButton[0].id.replace(re, ''),
+            minimum : (undefined === this.minimum) ? undefined : this.minimum,
+            maximum : (undefined === this.maximum) ? undefined : this.maximum
+
+        };
+
+        return json;
     };
 
     igv.TrackFilter.prototype.makeTrackFilterOverlayRenderer = function (cursorHistogramRenderMinimumOverlay, cursorHistogramRenderMaximumOverlay) {
