@@ -181,6 +181,7 @@
     position: relative;
     left: 0;
     right: 0;
+    /*margin-right: 20px;*/
     padding-bottom: 10px;
     font-family: Arial, Helvetica, sans-serif;
     font-size: medium;
@@ -206,7 +207,7 @@
 .igv-track-disable-button-fontawesome {
     position: absolute;
     top: 8px;
-    right: 24px;
+    right: 12px;
     cursor: pointer;
     color: #222;
 }
