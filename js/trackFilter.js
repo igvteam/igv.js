@@ -13,10 +13,29 @@ igv = (function (igv) {
 
     igv.TrackFilter.prototype.setWithJSON = function (json) {
 
-        var myself = this;
+        var myself = this,
+            modalPresentationButton = $('#' + "modalPresentationButton_" + this.guid),
+            minimumElement = $('#' + 'minimumScoreFilterID_' + this.guid),
+            maximumElement = $('#' + 'maximumScoreFilterID_' + this.guid);
 
         this.isFilterActive = json.isFilterActive;
         this.radioButton = (undefined === json.radioButtonIDPrefix) ? undefined : radioButtonWithID(json.radioButtonIDPrefix + this.guid);
+
+        modalPresentationButton.css("color", "black");
+
+        if ("minMaxRadio_" + this.guid === this.radioButton[0].id) {
+
+            minimumElement.val(json.minimum);
+            maximumElement.val(json.maximum);
+
+            if (undefined !== json.minimum || undefined !== json.maximum) {
+                modalPresentationButton.css("color", "red");
+            }
+
+        } else if (this.isFilterActive) {
+            modalPresentationButton.css("color", "red");
+
+        }
 
         function radioButtonWithID(radioButtonID) {
 
@@ -30,7 +49,6 @@ igv = (function (igv) {
                 if (radioButtonID === radio[ 0 ].id) {
                     chosen = radio;
                     chosen.prop('checked',true);
-
                 }
 
             });
