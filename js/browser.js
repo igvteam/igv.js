@@ -29,15 +29,7 @@ var igv = (function (igv) {
         this.trackPanels = [];
 
         window.onresize = igv.throttle(function () {
-
-            if (igv.browser.ideoPanel) {
-                igv.browser.ideoPanel.resize();
-            }
-
-            igv.browser.trackPanels.forEach(function (panel) {
-                panel.resize();
-            });
-
+           igv.browser.resize();
         }, 10);
 
     };

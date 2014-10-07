@@ -39,9 +39,7 @@ var igv = (function (igv) {
         igv.popover = new igv.Popover(contentRoot);
 
         if (options.showKaryo) {
-            browser.karyoPanel = new igv.KaryoPanel(browser);
-            $(contentKaryo).append(browser.karyoPanel.div);
-            browser.karyoPanel.resize();
+            browser.karyoPanel = new igv.KaryoPanel(contentKaryo);
         }
 
 
@@ -50,6 +48,9 @@ var igv = (function (igv) {
         browser.ideoPanel.resize();
 
 
+        /**
+         * Startup function should be called after browser.div is inserted in the DOM.
+         */
         browser.startup = function () {
 
             console.log("Browser startup");
@@ -115,8 +116,7 @@ var igv = (function (igv) {
     }
 
     return igv;
-})
-(igv || {});
+}) (igv || {});
 
 
 
