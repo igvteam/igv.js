@@ -100,7 +100,10 @@ var igv = (function (igv) {
 
                 return function (e) {
 
-                    var session;
+                    var session,
+                        featureSources = [],
+                        trackList = [],
+                        masterFeatureSource;
 
                     browser.sessionTeardown();
 
@@ -109,18 +112,33 @@ var igv = (function (igv) {
                     session.tracks.forEach(function (trackSession) {
 
                         var featureSource,
-                            cursorTrack;
+                            track;
 
                         featureSource = new igv.BedFeatureSource(trackSession.path);
-                        cursorTrack = new cursor.CursorTrack(featureSource, browser.cursorModel, browser.referenceFrame, trackSession.label, trackSession.height);
-                        cursorTrack.color = trackSession.color;
-                        cursorTrack.order = trackSession.order;
+                        featureSources.push( featureSource );
 
-                        browser.addTrack(cursorTrack, trackSession.trackFilter);
+                        track = new cursor.CursorTrack(featureSource, browser.cursorModel, browser.referenceFrame, trackSession.label, trackSession.height);
+                        track.color = trackSession.color;
+                        track.order = trackSession.order;
 
-                        browser.horizontalScrollbar.update();
+                        trackList.push( { track : track, trackFilterJSON : trackSession.trackFilter } );
 
                     });
+
+                    masterFeatureSource = featureSources[ 0 ];
+                    masterFeatureSource.allFeatures(function (featureList) {
+
+                        browser.cursorModel.setRegions(featureList);
+
+                        trackList.forEach(function (trackTrackFilterJSON) {
+                            browser.addTrack(trackTrackFilterJSON.track, trackTrackFilterJSON.trackFilterJSON);
+                        });
+
+                        browser.cursorModel.filterRegions();
+
+                        browser.horizontalScrollbar.update();
+                    });
+
 
                 };
 
