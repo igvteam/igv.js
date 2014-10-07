@@ -117,8 +117,9 @@ var igv = (function (igv) {
                         cursorTrack.color = trackSession.color;
                         cursorTrack.order = trackSession.order;
 
-//                        browser.addTrack(cursorTrack);
-
+                        // TODO: This has been extracted from browser.addTrack
+                        // TODO: I had to hack it to set trackFilter with JSON
+                        // TODO: prior to browser.resize() being called.
                         trackView = new igv.TrackView(cursorTrack, browser);
 
                         if (!cursorTrack.order) {

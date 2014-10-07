@@ -60,9 +60,7 @@ igv = (function (igv) {
 
     igv.TrackFilter.prototype.jsonRepresentation = function () {
 
-        var myself = this,
-            re = new RegExp(this.guid, "g"),
-
+        var re = new RegExp(this.guid, "g"),
             json;
 
         json = {
