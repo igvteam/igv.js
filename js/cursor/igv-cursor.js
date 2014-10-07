@@ -110,7 +110,10 @@ var igv = (function (igv) {
                     session = JSON.parse(e.target.result);
 
                     browser.cursorModel.regionWidth = session.regionWidth;
+                    $("input[id='regionSizeInput']").val(browser.cursorModel.regionWidth);
+
                     browser.cursorModel.framePixelWidth = session.framePixelWidth;
+                    $("input[id='frameWidthInput']").val(browser.cursorModel.framePixelWidth);
 
                     browser.referenceFrame = new igv.ReferenceFrame("", 0, 1.0/browser.cursorModel.framePixelWidth);
 
@@ -301,6 +304,7 @@ var igv = (function (igv) {
             if (regionSize > 0) {
 
                 browser.cursorModel.regionWidth = regionSize;
+                $("input[id='regionSizeInput']").val(browser.cursorModel.regionWidth);
                 browser.update();
             }
 
