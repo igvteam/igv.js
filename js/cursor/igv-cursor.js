@@ -117,6 +117,8 @@ var igv = (function (igv) {
 
                     browser.referenceFrame = new igv.ReferenceFrame("", 0, 1.0/browser.cursorModel.framePixelWidth);
 
+                    $("input[id='trackHeightInput']").val(session.trackHeight);
+
                     session.tracks.forEach(function (trackSession) {
 
                         var featureSource,
@@ -358,6 +360,7 @@ var igv = (function (igv) {
             {
                 regionWidth : browser.cursorModel.regionWidth,
                 framePixelWidth : browser.cursorModel.framePixelWidth,
+                trackHeight : $("#trackHeightInput").val(),
                 tracks: []
             };
 
