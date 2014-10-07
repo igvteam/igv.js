@@ -263,6 +263,7 @@ var igv = (function (igv) {
 
                         cursorTrack = new cursor.CursorTrack(featureSource, browser.cursorModel, browser.referenceFrame, encode.encodeTrackLabel(record), browser.trackHeight);
                         cursorTrack.color = encode.encodeAntibodyColor(record.antibody);
+                        cursorTrack.height = $("#trackHeightInput").val();
 
                         browser.addTrack(cursorTrack);
 
