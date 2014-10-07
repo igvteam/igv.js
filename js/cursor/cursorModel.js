@@ -121,8 +121,7 @@ var cursor = (function (cursor) {
 
     };
 
-    cursor.CursorModel.prototype.filterRegions = function (doSortRegions) {
-
+    cursor.CursorModel.prototype.filterRegions = function () {
         var trackPackages = [],
             filterPackages = [],
             howmany = 0,
@@ -189,9 +188,14 @@ var cursor = (function (cursor) {
                 });
             }
 
+            if (0 === myself.filteredRegions.length) {
+                myself.browser.update();
+                return;
+            }
+
             var thresholdFramePixelWidth = myself.browser.trackViewportWidth() / myself.filteredRegions.length;
 
-            if (sortTrackPanelPostFiltering) {
+            if (undefined !== thresholdFramePixelWidth && sortTrackPanelPostFiltering) {
 
                 // spin spinner
                 spinner = igv.getSpinner(sortTrackPanelPostFiltering.viewportDiv);

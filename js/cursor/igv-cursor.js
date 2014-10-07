@@ -117,16 +117,14 @@ var igv = (function (igv) {
                         cursorTrack.color = trackSession.color;
                         cursorTrack.order = trackSession.order;
 
-                        // TODO: This has been extracted from browser.addTrack
-                        // TODO: I had to hack it to set trackFilter with JSON
-                        // TODO: prior to browser.resize() being called.
+//                        browser.addTrack(cursorTrack);
+
                         trackView = new igv.TrackView(cursorTrack, browser);
+                        cursorTrack.trackFilter.setWithJSON(trackSession.trackFilter);
 
                         if (!cursorTrack.order) {
                             cursorTrack.order = browser.trackPanels.length;
                         }
-
-                        cursorTrack.trackFilter.setWithJSON(trackSession.trackFilter);
 
                         browser.trackPanels.push(trackView);
 
@@ -135,6 +133,8 @@ var igv = (function (igv) {
                         browser.cursorModel.initializeHistogram(trackView.track, function () {
                             browser.resize();
                         });
+
+                        browser.horizontalScrollbar.update();
 
                     });
 
