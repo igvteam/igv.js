@@ -43,7 +43,7 @@ var igv = (function (igv) {
         }
 
 
-        browser.ideoPanel = new igv.IdeoPanel(browser);
+        browser.ideoPanel = new igv.IdeoPanel(rootDiv);
         $(contentHeader).append(browser.ideoPanel.div);
         browser.ideoPanel.resize();
 

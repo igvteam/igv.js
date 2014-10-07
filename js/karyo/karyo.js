@@ -19,11 +19,8 @@ var igv = (function (igv) {
 
         var canvas = $('<canvas class="igv-karyo-canvas"></canvas>')[0];
         $(contentDiv).append(canvas);
-
-        canvas.setAttribute('width', contentDiv.offsetWidth);    //Must set the width & height of the canvas
-        canvas.setAttribute('height',contentDiv.offsetHeight);
-
-
+        canvas.setAttribute('width', contentDiv.offsetWidth);
+        canvas.setAttribute('height', contentDiv.offsetHeight);
         this.canvas = canvas;
         this.ctx = canvas.getContext("2d");
 
@@ -101,14 +98,9 @@ var igv = (function (igv) {
 
     igv.KaryoPanel.prototype.resize = function () {
 
-        var contentHeight = this.div.clientHeight,
-            contentWidth = this.div.clientWidth,
-            canvas = this.canvas;
-        //canvas.style.width = "100%";
-        //canvas.style.height = contentHeight + "px";
-        canvas.setAttribute('width', canvas.offsetWidth);    //Must set the width & height of the canvas
-        canvas.setAttribute('height', canvas.offsetHeight);
-        log("redraw: height is :" + contentHeight);
+        var canvas = this.canvas;
+        canvas.setAttribute('width', canvas.clientWidth);    //Must set the width & height of the canvas
+        canvas.setAttribute('height', canvas.clientHeight);
         this.ideograms = undefined;
         this.repaint();
     }

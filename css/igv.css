@@ -191,7 +191,21 @@
 }
 
 .igv-ideogram-div {
+    height: 40px;
+    width : 100%;
+}
 
+.igv-ideogram-content-div {
+    position:absolute;
+    right: 0px;
+    height: 100%;
+}
+
+.igv-ideogram-canvas {
+    left:0;
+    top:0;
+    width:100%;
+    height:100%;
 }
 
 .igv-track-container-div {
