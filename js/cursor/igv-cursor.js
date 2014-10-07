@@ -109,6 +109,7 @@ var igv = (function (igv) {
 
                     session = JSON.parse(e.target.result);
 
+                    browser.referenceFrame = new igv.ReferenceFrame("", 0, 1.0/session.framePixelWidth);
                     session.tracks.forEach(function (trackSession) {
 
                         var featureSource,
@@ -346,9 +347,7 @@ var igv = (function (igv) {
 
         browser.session = function () {
 
-            var session;
-
-            session = { tracks: [] };
+            var session = { framePixelWidth : browser.cursorModel.framePixelWidth, tracks: [] };
 
             browser.trackPanels.forEach(function (trackView) {
                 session.tracks.push(trackView.track.jsonRepresentation());
