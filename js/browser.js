@@ -93,12 +93,16 @@ var igv = (function (igv) {
      *
      * @param track
      */
-    igv.Browser.prototype.addTrack = function (track) {
+    igv.Browser.prototype.addTrack = function (track, trackFilterJSON) {
 
         var browser = this,
             trackView = new igv.TrackView(track, this);
 
         if (!track.order) track.order = this.trackPanels.length;
+
+        if (trackFilterJSON) {
+            track.trackFilter.setWithJSON(trackFilterJSON);
+        }
 
         this.trackPanels.push(trackView);
 

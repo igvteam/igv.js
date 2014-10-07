@@ -109,35 +109,18 @@ var igv = (function (igv) {
                     session.tracks.forEach(function (trackSession) {
 
                         var featureSource,
-                            cursorTrack,
-                            trackView;
+                            cursorTrack;
 
                         featureSource = new igv.BedFeatureSource(trackSession.path);
                         cursorTrack = new cursor.CursorTrack(featureSource, browser.cursorModel, browser.referenceFrame, trackSession.label, trackSession.height);
                         cursorTrack.color = trackSession.color;
                         cursorTrack.order = trackSession.order;
 
-//                        browser.addTrack(cursorTrack);
-
-                        trackView = new igv.TrackView(cursorTrack, browser);
-                        cursorTrack.trackFilter.setWithJSON(trackSession.trackFilter);
-
-                        if (!cursorTrack.order) {
-                            cursorTrack.order = browser.trackPanels.length;
-                        }
-
-                        browser.trackPanels.push(trackView);
-
-                        browser.reorderTracks();
-
-                        browser.cursorModel.initializeHistogram(trackView.track, function () {
-                            browser.resize();
-                        });
+                        browser.addTrack(cursorTrack, trackSession.trackFilter);
 
                         browser.horizontalScrollbar.update();
 
                     });
-
 
                 };
 
