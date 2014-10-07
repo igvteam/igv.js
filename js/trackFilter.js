@@ -28,6 +28,9 @@ igv = (function (igv) {
             minimumElement.val(json.minimum);
             maximumElement.val(json.maximum);
 
+            this.minimum = json.minimum;
+            this.maximum = json.maximum;
+
             if (undefined !== json.minimum || undefined !== json.maximum) {
                 modalPresentationButton.css("color", "red");
             }
