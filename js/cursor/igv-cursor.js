@@ -109,7 +109,11 @@ var igv = (function (igv) {
 
                     session = JSON.parse(e.target.result);
 
-                    browser.referenceFrame = new igv.ReferenceFrame("", 0, 1.0/session.framePixelWidth);
+                    browser.cursorModel.regionWidth = session.regionWidth;
+                    browser.cursorModel.framePixelWidth = session.framePixelWidth;
+
+                    browser.referenceFrame = new igv.ReferenceFrame("", 0, 1.0/browser.cursorModel.framePixelWidth);
+
                     session.tracks.forEach(function (trackSession) {
 
                         var featureSource,
@@ -139,7 +143,6 @@ var igv = (function (igv) {
 
                         browser.horizontalScrollbar.update();
                     });
-
 
                 };
 
@@ -347,7 +350,12 @@ var igv = (function (igv) {
 
         browser.session = function () {
 
-            var session = { framePixelWidth : browser.cursorModel.framePixelWidth, tracks: [] };
+            var session =
+            {
+                regionWidth : browser.cursorModel.regionWidth,
+                framePixelWidth : browser.cursorModel.framePixelWidth,
+                tracks: []
+            };
 
             browser.trackPanels.forEach(function (trackView) {
                 session.tracks.push(trackView.track.jsonRepresentation());
