@@ -263,7 +263,7 @@ var igv = (function (igv) {
 
                         cursorTrack = new cursor.CursorTrack(featureSource, browser.cursorModel, browser.referenceFrame, encode.encodeTrackLabel(record), browser.trackHeight);
                         cursorTrack.color = encode.encodeAntibodyColor(record.antibody);
-                        cursorTrack.height = $("#trackHeightInput").val();
+                        cursorTrack.height = browser.trackHeight;
 
                         browser.addTrack(cursorTrack);
 
@@ -278,10 +278,11 @@ var igv = (function (igv) {
         // Append resultant ENCODE DataTables markup
         $('#encodeModalBody').html('<table cellpadding="0" cellspacing="0" border="0" class="display" id="encodeModalTable"></table>');
 
-
         browser.cursorModel = new cursor.CursorModel(browser, regionDisplayJQueryObject);
 
         browser.referenceFrame = new igv.ReferenceFrame("", 0, 1 / browser.cursorModel.framePixelWidth);
+
+        addDemoTracks(browser);
 
         browser.setFrameWidth = function (frameWidthString) {
 
@@ -353,7 +354,7 @@ var igv = (function (igv) {
             this.__proto__.removeTrack.call(this, track);
             this.cursorModel.filterRegions();
 
-        }
+        };
 
         browser.session = function () {
 
@@ -361,7 +362,7 @@ var igv = (function (igv) {
             {
                 regionWidth : browser.cursorModel.regionWidth,
                 framePixelWidth : browser.cursorModel.framePixelWidth,
-                trackHeight : $("#trackHeightInput").val(),
+                trackHeight : browser.trackHeight,
                 tracks: []
             };
 
@@ -431,8 +432,6 @@ var igv = (function (igv) {
             form.detach();
 
         };
-
-        addDemoTracks(browser);
 
         return browser;
     };
