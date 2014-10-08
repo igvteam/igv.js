@@ -379,7 +379,7 @@ var igv = (function (igv) {
                 session.tracks.push(trackView.track.jsonRepresentation());
             });
 
-            return JSON.stringify(session);
+            return JSON.stringify(session, undefined, 4);
 
         };
 
