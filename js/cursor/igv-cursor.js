@@ -1,6 +1,5 @@
 var igv = (function (igv) {
 
-
     igv.createCursorBrowser = function (options) {
 
         var contentHeader = $('<div class="row"></div>')[0],
@@ -14,7 +13,6 @@ var igv = (function (igv) {
         $(browser.div).append(trackContainer);
 
         browser.horizontalScrollbar = new cursor.HorizontalScrollbar(browser, $(browser.div));
-
 
         document.getElementById('igvContainerDiv').appendChild(browser.div);
 
@@ -86,7 +84,6 @@ var igv = (function (igv) {
             downloadInput.val(session);
         });
 
-
         // session upload
         var sessionInput = document.getElementById('igvSessionLoad');
         sessionInput.addEventListener('change', function (e) {
@@ -101,10 +98,8 @@ var igv = (function (igv) {
                 return function (e) {
 
                     var session,
-                        featureSources = [],
                         trackList = [],
-                        masterFeatureSource,
-                        dev_null;
+                        designatedTrack;
 
                     browser.sessionTeardown();
 
@@ -123,18 +118,24 @@ var igv = (function (igv) {
                             track;
 
                         featureSource = new igv.BedFeatureSource(trackSession.path);
-                        featureSources.push( featureSource );
 
                         track = new cursor.CursorTrack(featureSource, browser.cursorModel, browser.referenceFrame, trackSession.label, trackSession.height);
                         track.color = trackSession.color;
                         track.order = trackSession.order;
 
+                        if (trackSession.designatedTrack && true === trackSession.designatedTrack) {
+                            designatedTrack = track;
+                        }
+
                         trackList.push( { track : track, trackFilterJSON : trackSession.trackFilter } );
 
                     });
 
-                    masterFeatureSource = featureSources[ 0 ];
-                    masterFeatureSource.allFeatures(function (featureList) {
+                    if (!designatedTrack) {
+                        designatedTrack = trackList[ 0 ];
+                    }
+
+                    designatedTrack.featureSource.allFeatures(function (featureList) {
 
                         browser.cursorModel.setRegions(featureList);
 
@@ -376,7 +377,14 @@ var igv = (function (igv) {
             dev_null = browser.trackViewportWidth();
 
             browser.trackPanels.forEach(function (trackView) {
-                session.tracks.push(trackView.track.jsonRepresentation());
+
+                var jsonRepresentation = trackView.track.jsonRepresentation();
+
+                if (browser.designatedTrack && browser.designatedTrack === trackView.track) {
+                    jsonRepresentation.designatedTrack = true;
+                }
+
+                session.tracks.push( jsonRepresentation );
             });
 
             return JSON.stringify(session, undefined, 4);
@@ -510,6 +518,7 @@ var igv = (function (igv) {
         var tssDataSource = new igv.BedFeatureSource(tssUrl);
 
         var tssTrack = new cursor.CursorTrack(tssDataSource, browser.cursorModel, browser.referenceFrame, "TSS", browser.trackHeight);
+        browser.designatedTrack = tssTrack;
 
         var track1 = new cursor.CursorTrack(peakDataSource, browser.cursorModel, browser.referenceFrame, "H3k4me3 H1hesc", browser.trackHeight);
         track1.color = "rgb(0,150,0)";
@@ -518,7 +527,7 @@ var igv = (function (igv) {
         track2.color = "rgb(150,0,0)";
 
         // Set the TSS track as the inital "selected" track (i.e. defines the regions)
-        tssDataSource.allFeatures(function (featureList) {
+        browser.designatedTrack.featureSource.allFeatures(function (featureList) {
 
             browser.cursorModel.setRegions(featureList);
 

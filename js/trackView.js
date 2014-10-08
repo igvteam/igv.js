@@ -102,7 +102,9 @@ var igv = (function (igv) {
                 labelButton.onclick = function (e) {
 
                     if (browser.cursorModel) {
-                        track.featureSource.allFeatures(function (featureList) {
+
+                        browser.designatedTrack = track;
+                        browser.designatedTrack.featureSource.allFeatures(function (featureList) {
 
                             browser.referenceFrame.start = 0;
                             browser.cursorModel.setRegions(featureList);
