@@ -224,7 +224,7 @@ var igv = (function (igv) {
 
     igv.Browser.prototype.goto = function (chr, start, end) {
 
-        console.log("goto " + chr + ":" + start + "-" + end);
+        console.log("goto " + chr + " : " + start + "-" + end);
 
         if (igv.popover) {
             igv.popover.hide();

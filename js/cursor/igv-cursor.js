@@ -103,7 +103,8 @@ var igv = (function (igv) {
                     var session,
                         featureSources = [],
                         trackList = [],
-                        masterFeatureSource;
+                        masterFeatureSource,
+                        dev_null;
 
                     browser.sessionTeardown();
 
@@ -112,10 +113,6 @@ var igv = (function (igv) {
                     browser.cursorModel.regionWidth = session.regionWidth;
                     $("input[id='regionSizeInput']").val(browser.cursorModel.regionWidth);
 
-                    browser.cursorModel.framePixelWidth = session.framePixelWidth;
-                    $("input[id='frameWidthInput']").val(browser.cursorModel.framePixelWidth);
-
-                    browser.referenceFrame = new igv.ReferenceFrame("", 0, 1.0/browser.cursorModel.framePixelWidth);
 
                     browser.trackHeight = session.trackHeight;
                     $("input[id='trackHeightInput']").val(browser.trackHeight);
@@ -146,6 +143,12 @@ var igv = (function (igv) {
                         });
 
                         browser.cursorModel.filterRegions();
+
+                        browser.setFrameWidth(browser.trackViewportWidth() * session.framePixelWidthUnitless);
+
+                        browser.referenceFrame.bpPerPixel = 1.0/browser.cursorModel.framePixelWidth;
+
+                        browser.goto("", session.start, session.end);
 
                         browser.horizontalScrollbar.update();
                     });
@@ -359,13 +362,18 @@ var igv = (function (igv) {
 
         browser.session = function () {
 
-            var session =
+            var dev_null,
+                session =
             {
+                start : Math.floor(browser.referenceFrame.start),
+                end : Math.floor((browser.referenceFrame.bpPerPixel * browser.trackViewportWidth()) + browser.referenceFrame.start),
                 regionWidth : browser.cursorModel.regionWidth,
-                framePixelWidth : browser.cursorModel.framePixelWidth,
+                framePixelWidthUnitless : (browser.cursorModel.framePixelWidth/browser.trackViewportWidth()),
                 trackHeight : browser.trackHeight,
                 tracks: []
             };
+
+            dev_null = browser.trackViewportWidth();
 
             browser.trackPanels.forEach(function (trackView) {
                 session.tracks.push(trackView.track.jsonRepresentation());
