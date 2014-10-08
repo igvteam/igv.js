@@ -300,9 +300,10 @@ var igv = (function (igv) {
             if (frameWidth > 0) {
 
                 browser.cursorModel.framePixelWidth = frameWidth;
-                $("input[id='frameWidthInput']").val(browser.cursorModel.framePixelWidth);
-
                 browser.referenceFrame.bpPerPixel = 1 / frameWidth;
+
+                $("input[id='frameWidthInput']").val(Math.round(frameWidth * 1000)/1000);
+
                 browser.update();
             }
         };
@@ -322,7 +323,6 @@ var igv = (function (igv) {
         browser.zoomIn = function () {
 
             browser.setFrameWidth(2.0 * browser.cursorModel.framePixelWidth);
-            $("input[id='frameWidthInput']").val(browser.cursorModel.framePixelWidth);
             browser.update();
         };
 
@@ -331,8 +331,6 @@ var igv = (function (igv) {
             var thresholdFramePixelWidth = browser.trackViewportWidth() / browser.cursorModel.regionsToRender().length;
 
             browser.setFrameWidth(Math.max(thresholdFramePixelWidth, 0.5 * browser.cursorModel.framePixelWidth));
-
-            $("input[id='frameWidthInput']").val(browser.cursorModel.framePixelWidth);
 
             browser.update();
         };
@@ -349,8 +347,7 @@ var igv = (function (igv) {
                 frameWidth = browser.trackViewportWidth() / browser.cursorModel.regionsToRender().length;
                 browser.referenceFrame.start = 0;
                 browser.setFrameWidth(frameWidth);
-                $('frameWidthBox').value = frameWidth;
-            }
+             }
         };
 
         // Augment standard behavior
