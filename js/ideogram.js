@@ -23,13 +23,19 @@ var igv = (function (igv) {
         this.ctx = canvas.getContext("2d");
 
 
-        var chromosomeNameDiv = $('<div style="position:absolute;height:100%;left:0px"></div>')[0];
+        var chromosomeNameDiv = $('<div class="igv-ideogram-chr-div"></div>')[0];
         chromosomeNameDiv.style.width = igv.browser.controlPanelWidth + "px";
         this.div.appendChild(chromosomeNameDiv);
 
-        var chromosomeNameCanvas = $('<canvas style="position:absolute;width:100%;height:100%"></canvas>')[0];
-        chromosomeNameCanvas.setAttribute('width', chromosomeNameDiv.clientWidth);
-        chromosomeNameCanvas.setAttribute('height', chromosomeNameCanvas.clientHeight);
+        var chrNameLabel = $('<div style="text-align:right;padding-right: 5px"></div>')[0];
+        $(chromosomeNameDiv).append(chrNameLabel)
+
+        this.chromosomeNameLabel = chrNameLabel;
+
+
+      //  var chromosomeNameCanvas = $('<canvas style="position:absolute;width:100%;height:100%"></canvas>')[0];
+      //  chromosomeNameCanvas.setAttribute('width', chromosomeNameDiv.clientWidth);
+      //  chromosomeNameCanvas.setAttribute('height', chromosomeNameCanvas.clientHeight);
 
 
         this.canvas = canvas;
@@ -37,11 +43,11 @@ var igv = (function (igv) {
 
         this.ctx = canvas.getContext("2d");
 
-        this.chromosomeNameCanvas = chromosomeNameCanvas;
-        chromosomeNameDiv.appendChild(chromosomeNameCanvas);
+      //  this.chromosomeNameCanvas = chromosomeNameCanvas;
+      //  chromosomeNameDiv.appendChild(chromosomeNameCanvas);
 
-        this.chromosomeNameCtx = chromosomeNameCanvas.getContext("2d");
-        this.chromosomeNameCtx.font = "bold 10px Arial";
+      //  this.chromosomeNameCtx = chromosomeNameCanvas.getContext("2d");
+      //  this.chromosomeNameCtx.font = "bold 10px Arial";
 
         this.canvas.onclick = function (e) {
             var isFirefox = typeof InstallTrigger !== 'undefined';
@@ -85,17 +91,10 @@ var igv = (function (igv) {
 
         var contentHeight = this.div.clientHeight,
             contentWidth = this.div.clientWidth,
-            canvas = this.canvas,
-            chromosomeNameCanvas = this.chromosomeNameCanvas;
-        canvas.style.width = "100%";
-        canvas.style.height = contentHeight + "px";
+            canvas = this.canvas;
         canvas.setAttribute('width', contentWidth);    //Must set the width & height of the canvas
         canvas.setAttribute('height', contentHeight);
 
-        chromosomeNameCanvas.style.width = "100%";
-        chromosomeNameCanvas.style.height = contentHeight + "px";
-        chromosomeNameCanvas.setAttribute('width', 50);
-        chromosomeNameCanvas.setAttribute('height', contentHeight)
 
         this.ideograms = {};
         this.repaint();
@@ -138,12 +137,15 @@ var igv = (function (igv) {
                 this.ctx.restore();
             }
 
-            var chromosomeNameWidth = this.chromosomeNameCanvas.width;
-            var chromosomeNameHeight = this.chromosomeNameCanvas.height;
 
-            this.chromosomeNameCtx.clearRect(0, 0, 100, 100);
-            this.chromosomeNameCtx.fillStyle = "rgb(0, 0, 0)";
-            this.chromosomeNameCtx.fillText(referenceFrame.chr, chromosomeNameWidth / 2, chromosomeNameHeight / 2);
+            this.chromosomeNameLabel.innerHTML = referenceFrame.chr;
+
+           // var chromosomeNameWidth = this.chromosomeNameCanvas.width;
+            //var chromosomeNameHeight = this.chromosomeNameCanvas.height;
+
+            //this.chromosomeNameCtx.clearRect(0, 0, 100, 100);
+            //this.chromosomeNameCtx.fillStyle = "rgb(0, 0, 0)";
+            //this.chromosomeNameCtx.fillText(referenceFrame.chr, chromosomeNameWidth / 2, chromosomeNameHeight / 2);
         } catch (e) {
             console.log("Error painting ideogram: " + e.message);
         }

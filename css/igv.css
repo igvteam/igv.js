@@ -208,6 +208,13 @@
     height:100%;
 }
 
+.igv-ideogram-chr-div {
+    position:absolute;
+    height:100%;
+    left:0px;
+    font-size: small;
+}
+
 .igv-track-container-div {
     position: relative;
     left: 0;

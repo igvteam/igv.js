@@ -73,14 +73,14 @@ var igv = (function (igv) {
             var mouseY = mouseCoords.y;
 
 
-            this.getContext("2d").fillRect(mouseX, 0, 10, 10);
-            igv.navigateKaryo(browser, mouseX, mouseY);
+    //        this.getContext("2d").fillRect(mouseX, 0, 10, 10);
+            igv.navigateKaryo(mouseX, mouseY);
         }
 
     }
 
     // Move location of the reference panel by clicking on the genome ideogram
-    igv.navigateKaryo = function (browser, mouseX, mouseY) {
+    igv.navigateKaryo = function (mouseX, mouseY) {
         // check each chromosome if the coordinates are within its bound
         for (var i = 0; i < igv.guichromosomes.length; i++) {
             var g = igv.guichromosomes[i];
@@ -88,7 +88,7 @@ var igv = (function (igv) {
                 var dy = mouseY - g.y;
                 var bp = Math.round(g.size * dy / g.h);
                 log("Going to position " + bp);
-                browser.search(g.name + ":" + bp + "-" + (bp + 10000));
+                igv.browser.goto(g.name, bp, (bp + 10000));
                 break;
             }
         }
