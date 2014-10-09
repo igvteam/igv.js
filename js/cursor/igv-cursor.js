@@ -352,6 +352,11 @@ var igv = (function (igv) {
         browser.removeTrack = function (track) {
 
             this.__proto__.removeTrack.call(this, track);
+
+            if (track === this.designatedTrack) {
+                this.designatedTrack = undefined;
+            }
+
             this.cursorModel.filterRegions();
 
         };
