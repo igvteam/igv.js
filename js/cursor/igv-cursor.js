@@ -98,8 +98,7 @@ var igv = (function (igv) {
                 return function (e) {
 
                     var session,
-                        trackList = [],
-                        designatedTrack;
+                        trackList = [];
 
                     browser.sessionTeardown();
 
@@ -107,7 +106,6 @@ var igv = (function (igv) {
 
                     browser.cursorModel.regionWidth = session.regionWidth;
                     $("input[id='regionSizeInput']").val(browser.cursorModel.regionWidth);
-
 
                     browser.trackHeight = session.trackHeight;
                     $("input[id='trackHeightInput']").val(browser.trackHeight);
@@ -124,18 +122,18 @@ var igv = (function (igv) {
                         track.order = trackSession.order;
 
                         if (trackSession.designatedTrack && true === trackSession.designatedTrack) {
-                            designatedTrack = track;
+                            browser.designatedTrack = track;
                         }
 
                         trackList.push( { track : track, trackFilterJSON : trackSession.trackFilter } );
 
                     });
 
-                    if (!designatedTrack) {
-                        designatedTrack = trackList[ 0 ];
+                    if (!browser.designatedTrack) {
+                        browser.designatedTrack = trackList[ 0 ];
                     }
 
-                    designatedTrack.featureSource.allFeatures(function (featureList) {
+                    browser.designatedTrack.featureSource.allFeatures(function (featureList) {
 
                         browser.cursorModel.setRegions(featureList);
 
