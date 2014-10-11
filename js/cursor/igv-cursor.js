@@ -3,10 +3,9 @@ var igv = (function (igv) {
     igv.createCursorBrowser = function (options) {
 
         var contentHeader = $('<div class="row"></div>')[0],
-            contentHeaderDiv = $('<div id="igvHeaderDiv" class="col-md-12" style="font-size:16px;"><span id="igvHeaderRegionDisplaySpan"></span></div>')[0],
+            contentHeaderDiv = $('<div id="igvHeaderDiv" class="igv-header-div col-md-12" style="font-size:16px;"><span id="igvHeaderRegionDisplaySpan"></span></div>')[0],
             trackContainer = $('<div id="igvTrackContainerDiv" class="igv-track-container-div">')[0],
-            browser = new igv.Browser(options, trackContainer),
-            regionDisplayJQueryObject = $('#igvHeaderRegionDisplaySpan');
+            browser = new igv.Browser(options, trackContainer);
 
         $(browser.div).append(contentHeader);
         $(contentHeader).append(contentHeaderDiv);
@@ -281,7 +280,7 @@ var igv = (function (igv) {
         // Append resultant ENCODE DataTables markup
         $('#encodeModalBody').html('<table cellpadding="0" cellspacing="0" border="0" class="display" id="encodeModalTable"></table>');
 
-        browser.cursorModel = new cursor.CursorModel(browser, regionDisplayJQueryObject);
+        browser.cursorModel = new cursor.CursorModel(browser);
 
         browser.referenceFrame = new igv.ReferenceFrame("", 0, 1 / browser.cursorModel.framePixelWidth);
 

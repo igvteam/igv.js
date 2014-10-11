@@ -2,10 +2,9 @@ var cursor = (function (cursor) {
 
     const resevoirSampledRegionListLength = 10000;
 
-    cursor.CursorModel = function (browser, regionDisplayJQueryObject) {
+    cursor.CursorModel = function (browser) {
 
         this.browser = browser;
-        this.regionDisplayJQueryObject = regionDisplayJQueryObject;
 
         this.regionWidth = 100;
         $( "input[id='regionSizeInput']" ).val( this.regionWidth );
@@ -64,12 +63,13 @@ var cursor = (function (cursor) {
 
         var numer,
             denom,
-            downsamplingString = "";
+            downsamplingString = "",
+            regionsDisplaySpan = $("#igvHeaderRegionDisplaySpan");
 
         numer = igv.numberFormatter(this.filteredRegions.length);
         denom = igv.numberFormatter(this.regions.length);
 
-        this.regionDisplayJQueryObject.text("Regions " + numer + " / " + denom + downsamplingString);
+        regionsDisplaySpan.text("Regions " + numer + " / " + denom + downsamplingString);
     };
 
     cursor.CursorModel.prototype.regionsToRender = function () {

@@ -4,6 +4,12 @@ body {
     padding-bottom: 20px;
 }
 
+
+.igv-header-div {
+    padding-top: 8px;
+    padding-bottom: 8px;
+}
+
 .well {
     background-color: rgba(255, 0, 0, 0.5);
 }
