@@ -17,7 +17,7 @@ var igv = (function (igv) {
 
         if (this.genomicInterval && this.genomicInterval.contains(chr, bpStart, bpEnd)) {
 
-            success(genomicInterval);
+            success(this.genomicInterval);
 
         } else {
 
