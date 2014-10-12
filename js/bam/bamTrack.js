@@ -38,7 +38,7 @@ var igv = (function (igv) {
 
     igv.BAMTrack.prototype.draw = function (canvas, refFrame, bpStart, bpEnd, width, height, continuation, task) {
 
-//        console.log("bamTrack.draw");
+       console.log("bamTrack.draw");
 
 
         // Don't try to draw alignments for windows > 10kb
@@ -52,15 +52,15 @@ var igv = (function (igv) {
         var myself = this,
             chr = refFrame.chr;
 
-        this.featureSource.getFeatures(chr, bpStart, bpEnd, function (alignmentManager, task) {
+        this.featureSource.getFeatures(chr, bpStart, bpEnd, function (features, task) {
 
-            if (alignmentManager) {
+            if (features) {
 
 //                console.log("bamTrack.featureSource.getSequence", chr, igv.numberFormatter(bpStart), igv.numberFormatter(bpEnd));
 
                 igv.sequenceSource.getSequence(chr, bpStart, bpEnd, function (refSeq) {
 
-                    var coverageMap = alignmentManager.coverageMap,
+                    var coverageMap = features.coverageMap,
                         bp,
                         x,
                         y,
@@ -152,7 +152,7 @@ var igv = (function (igv) {
                     }
 
                     // alignment track
-                    alignmentManager.genomicInterval.packedAlignments.forEach(function renderAlignmentRow(alignmentRow, packedAlignmentIndex, packedAlignments) {
+                    features.packedAlignments.forEach(function renderAlignmentRow(alignmentRow, packedAlignmentIndex, packedAlignments) {
 
                         var arrowHeadWidth = myself.alignmentRowHeight / 2.0,
                             yStrokedLine,
