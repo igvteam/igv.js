@@ -24,9 +24,7 @@ var igv = (function (igv) {
             var expand = 1000,
                 myself,
                 qStart,
-                qEnd,
-                coverageMap,
-                packedAlignments;
+                qEnd;
 
             // Expand the query parameters to enable minor changes in window size without forcing a reload
             qStart = Math.max(0, bpStart - expand);
@@ -42,6 +40,9 @@ var igv = (function (igv) {
                     myself.genomicInterval.coverageMap = new igv.CoverageMap(chr, qStart, qEnd, alignments, refSeq);
 
                     myself.genomicInterval.packedAlignments = packAlignments(myself.genomicInterval, alignments);
+
+                    // We don't need the features now, free up the memory
+                    myself.genomicInterval.features = undefined;
 
                     success(myself.genomicInterval);
 

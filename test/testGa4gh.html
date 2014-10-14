@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <title>Hello QUnit</title>
+    <link rel="stylesheet" href="vendor/qunit-1.12.0.css" type="text/css"/>
+</head>
+
+<body>
+<div id="qunit"></div>
+<div id="qunit-fixture"></div>
+<script type="text/javascript" src="vendor/qunit-1.12.0.js"></script>
+<script type="text/javascript" src="testGa4gh.js"></script>
+<script type="text/javascript" src="../js/bam/bamAlignment.js"></script>
+<script type="text/javascript" src="../js/bam/ga4gh.js"></script>
+<script type="text/javascript">
+    document.addEventListener('DOMContentLoaded', function () {
+        runGa4ghTests();
+    });
+</script>
+
+</body>
+</html>

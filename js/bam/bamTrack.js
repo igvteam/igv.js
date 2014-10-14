@@ -186,7 +186,7 @@ var igv = (function (igv) {
 
                             canvas.setProperties({fillStyle: alignmentColor});
 
-                            blocks.forEach(function renderAlignmentBlocks(block, blockIndex) {
+                            blocks.forEach(function (block, blockIndex) {
 
                                 var refOffset = block.start - bpStart,
                                     blockRectX = refFrame.toPixels(refOffset),
