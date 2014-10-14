@@ -27,6 +27,7 @@ var igv = (function (igv) {
         addTrackContainerHandlers(trackContainer);
 
         this.trackPanels = [];
+        this.nextTrackOrder = 0;
 
         window.onresize = igv.throttle(function () {
            igv.browser.resize();
@@ -94,7 +95,10 @@ var igv = (function (igv) {
         var browser = this,
             trackView = new igv.TrackView(track, this);
 
-        if (!track.order) track.order = this.trackPanels.length;
+        if (!track.order) {
+            track.order = (this.nextTrackOrder)++;
+//            track.order = this.trackPanels.length;
+        }
 
         if (trackFilterJSON) {
             track.trackFilter.setWithJSON(trackFilterJSON);
