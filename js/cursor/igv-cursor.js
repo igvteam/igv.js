@@ -91,6 +91,7 @@ var igv = (function (igv) {
                 sessionFile;
 
             sessionFile = sessionInput.files[ 0 ];
+            $("#igvSessionLoadForm")[0].reset();
 
             fileReader.onload = (function (theFile) {
 
@@ -171,6 +172,7 @@ var igv = (function (igv) {
             for (var i = 0; i < localFiles.length; i++) {
 
                 localFile = localFiles[ i ];
+                $("#igvFileUploadForm")[0].reset();
 
                 featureSource = new igv.BedFeatureSource(localFile);
 

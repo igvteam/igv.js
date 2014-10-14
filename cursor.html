@@ -153,15 +153,20 @@
         <div class="navbar-form navbar-left">
 
             <div class="dropdown">
-                <button class="btn btn-default dropdown-toggle" type="button" id="igvSessionLoadDropdownMenu"
-                        data-toggle="dropdown">
+                <button class="btn btn-default dropdown-toggle" type="button" id="igvSessionLoadDropdownMenu" data-toggle="dropdown">
                     Load Session
-                    <span class="caret"></span>
+                    <span class="caret">
+
+                    </span>
                 </button>
                 <ul class="dropdown-menu" role="menu" aria-labelledby="igvSessionLoadDropdownMenu">
                     <li role="presentation">
                         <a role="menuitem" tabindex="-1" href="#">
-                            <input id="igvSessionLoad" type="file" title="foo" multiple/>
+
+                            <form id="igvSessionLoadForm">
+                                <input id="igvSessionLoad" type="file" title="foo" multiple/>
+                            </form>
+
                         </a>
                     </li>
                 </ul>
@@ -181,7 +186,11 @@
                 <ul class="dropdown-menu" role="menu" aria-labelledby="igvFileUploadDropdownMenu">
                     <li role="presentation">
                         <a role="menuitem" tabindex="-1" href="#">
-                            <input type="file" id="igvFileUpload" title="foo" multiple/>
+
+                            <form id="igvFileUploadForm">
+                                <input id="igvFileUpload" type="file" title="foo" multiple/>
+                            </form>
+
                         </a>
                     </li>
                 </ul>
