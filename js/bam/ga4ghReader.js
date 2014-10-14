@@ -1,35 +1,41 @@
 var igv = (function (igv) {
 
 
-    igv.Ga4ghReader = function (url, readsetId, proxy) {
+    igv.Ga4ghReader = function (url, readsetId, authKey, proxy) {
 
         this.url = url;
         this.readsetId = readsetId;
+        this.authKey = authKey;
         this.proxy = proxy;
 
     }
 
-    igv.Ga4ghReader.prototype.readAlignments = function (chr, start, end, success, task) {
+    igv.Ga4ghReader.prototype.readAlignments = function (chr, bpStart, bpEnd, success, task) {
 
-        var window = Math.max(bpEnd - bpStart, 10000000) / 2,
-            center = (bpEnd + bpStart) / 2,
+        var dataLoader,
             queryChr = (chr.startsWith("chr") ? chr.substring(3) : chr),
-            queryStart = Math.max(0, center - window),
-            queryEnd = center + window,
-            dataLoader = new igv.DataLoader(this.proxy ? this.proxy : this.url);
+            readURL,
+            body = {"readsetIds": [this.readsetId], "sequenceName": queryChr, "sequenceStart": bpStart, "sequenceEnd": bpEnd, "maxResults": "10000"},
+            tmp;
 
+        readURL = this.url + "/reads/search";
+        if(this.authKey) {
+            readURL = readURL + "?key=" + this.authKey;
+        }
 
-        var body = {"readsetIds": [this.readsetId], "sequenceName": queryChr, "sequenceStart": queryStart, "sequenceEnd": queryEnd, "maxResults": "10000"},
-            tmp = this.proxy ?
-                "url=" + this.url + "&data=" + JSON.stringify(data) :
-                JSON.stringify(data);
+        dataLoader = new igv.DataLoader(this.proxy ? this.proxy : readURL);
+
+        tmp = this.proxy ?
+            "url=" + readURL + "&data=" + JSON.stringify(body) :
+            JSON.stringify(body);
 
         dataLoader.postJson(tmp, function (result) {
 
                 if (result) {
+                    // TODO -- deal with nextPageToken
 
-                    var jsonRecords = JSON.parse(result).variants,
-                        alignments = igv.decodeGa4ghReads(jsonRecords);
+                    var jsonRecords = JSON.parse(result),
+                        alignments = igv.decodeGa4ghReads(jsonRecords.reads);
                     success(alignments);
 
                 }

@@ -55,13 +55,14 @@ var igv = (function (igv) {
             return;
         }
 
-        var path = config.url;
+        var path = config.url,
+            type = config.type;
 
         if (config.type && config.type === 't2d') {
             this.addTrack(new igv.T2dTrack(config));
         } else if (path.endsWith(".bed") || path.endsWith(".bed.gz")) {
             this.addTrack(new igv.GeneTrack(config));
-        } else if (path.endsWith(".bam") || config.type === "bam") {
+        } else if (path.endsWith(".bam") || type === "bam") {
             this.addTrack(new igv.BAMTrack(config));
         } else if (path.endsWith(".wig") || path.endsWith(".wig.gz") || path.endsWith(".bedgraph") || path.endsWith(".bedgraph.gz")) {
             this.addTrack(new igv.WIGTrack(config));

@@ -81,7 +81,7 @@ var igv = (function (igv) {
                     if (opLtr == 'M' || opLtr == 'EQ' || opLtr == 'X' || opLtr == 'D' || opLtr == 'N' || opLtr == '=')
                         lengthOnRef += parseInt(opLen);
 
-                    cigarArray.push({len: parseInt(opLen), op: opLtr});
+                    cigarArray.push({len: parseInt(opLen), ltr: opLtr});
                     opLen = "";
                 }
             }

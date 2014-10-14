@@ -11,7 +11,7 @@ var igv = (function (igv) {
     igv.BamSource = function (config) {
 
         if (config.sourceType === "ga4gh") {
-            this.bamFile =  new igv.Ga4ghReader(config.url, config.readSetId, config.proxy);
+            this.bamFile = new igv.Ga4ghReader(config.url, config.readsetId, config.authKey, config.proxy);
         }
         else {
             this.bamFile = new igv.BamReader(config.url);
@@ -41,7 +41,7 @@ var igv = (function (igv) {
 
                 myself.genomicInterval = new igv.GenomicInterval(chr, qStart, qEnd);
 
-                igv.sequenceSource.getSequence(myself.genomicInterval.chr, myself.genomicInterval.start, myself.genomicInterval.end, function(refSeq){
+                igv.sequenceSource.getSequence(myself.genomicInterval.chr, myself.genomicInterval.start, myself.genomicInterval.end, function (refSeq) {
 
                     myself.genomicInterval.coverageMap = new igv.CoverageMap(chr, qStart, qEnd, alignments, refSeq);
 
@@ -59,7 +59,7 @@ var igv = (function (igv) {
     };
 
 
-     function packAlignments (genomicInterval, features) {
+    function packAlignments(genomicInterval, features) {
 
         if (features.length === 0) {
 
@@ -69,19 +69,6 @@ var igv = (function (igv) {
 
             var bucketListLength = genomicInterval.end - genomicInterval.start,
                 bucketList = new Array(bucketListLength),
-                i;
-
-            features.forEach(function (alignment) {
-
-                var buckListIndex = alignment.start - genomicInterval.start;
-                if (bucketList[buckListIndex] === undefined) {
-                    bucketList[buckListIndex] = [];
-                }
-                bucketList[buckListIndex].push(alignment);
-            });
-
-
-            var myself = this,
                 allocatedCount = 0,
                 nextStart = genomicInterval.start,
                 alignmentRow,
@@ -89,7 +76,19 @@ var igv = (function (igv) {
                 bucket,
                 alignment,
                 alignmentSpace = 4 * 2,
-                packedAlignments = [];
+                packedAlignments = [],
+                bucketStart = features[0].start;
+
+            features.forEach(function (alignment) {
+
+                var buckListIndex = alignment.start - bucketStart;
+                if (bucketList[buckListIndex] === undefined) {
+                    bucketList[buckListIndex] = [];
+                }
+                bucketList[buckListIndex].push(alignment);
+            });
+
+
 
             while (allocatedCount < features.length) {
 
@@ -100,7 +99,7 @@ var igv = (function (igv) {
 
                     while (!bucket && nextStart <= genomicInterval.end) {
 
-                        index = nextStart - genomicInterval.start;
+                        index = nextStart - bucketStart;
                         if (bucketList[index] === undefined) {
                             ++nextStart;                     // No alignments at this index
                         } else {
@@ -109,16 +108,17 @@ var igv = (function (igv) {
 
                     } // while (bucket)
 
-                    if (!bucket) continue;
-
-                    alignment = bucket.pop();
-                    if (0 === bucket.length) {
-                        bucketList[index] = undefined;
+                    if(!bucket) {
+                        break;
                     }
+                        alignment = bucket.pop();
+                        if (0 === bucket.length) {
+                            bucketList[index] = undefined;
+                        }
 
-                    alignmentRow.push(alignment);
-                    nextStart = alignment.start + alignment.lengthOnRef + alignmentSpace;
-                    ++allocatedCount;
+                        alignmentRow.push(alignment);
+                        nextStart = alignment.start + alignment.lengthOnRef + alignmentSpace;
+                        ++allocatedCount;
 
                 } // while (nextStart)
 
@@ -126,14 +126,13 @@ var igv = (function (igv) {
                     packedAlignments.push(alignmentRow);
                 }
 
-                nextStart = genomicInterval.start;
+                nextStart = bucketStart;
 
             } // while (allocatedCount)
 
             return packedAlignments;
         }
     }
-
 
 
     return igv;
