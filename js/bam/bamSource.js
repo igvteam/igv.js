@@ -8,9 +8,15 @@ var igv = (function (igv) {
      * @param baiPath
      * @constructor
      */
-    igv.BamSource = function (bamPath, baiPath) {
+    igv.BamSource = function (config) {
 
-        this.bamFile = new igv.BamReader(bamPath, baiPath);
+        if (config.sourceType === "ga4gh") {
+            this.bamFile =  new igv.Ga4ghReader(config.url, config.readSetId, config.proxy);
+        }
+        else {
+            this.bamFile = new igv.BamReader(config.url);
+        }
+
     };
 
     igv.BamSource.prototype.getFeatures = function (chr, bpStart, bpEnd, success, task) {

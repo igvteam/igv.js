@@ -12,24 +12,24 @@ var igv = (function (igv) {
     var deletionColor = "black";
     var skippedColor = "rgb(150, 170, 170)";
     var expandedHeight = 14;
+    var trackHeight = 400;
 
-    igv.BAMTrack = function (descriptor) {
+    igv.BAMTrack = function (config) {
 
-        var coverageTrackHeightPercentage, alignmentTrackHeightPercentage;
+        var coverageTrackHeightPercentage = 0.15,
+            alignmentTrackHeightPercentage = 1.0 - coverageTrackHeightPercentage;
 
-        this.doPopup = (descriptor.doPopup) ? descriptor.doPopup : false;
-        this.descriptor = descriptor;
-        this.url = descriptor.url;
-        this.featureSource = new igv.BamSource(this.url);
-        this.label = descriptor.label || "";
-        this.id = descriptor.id || this.label;
-        this.height = 400;
-        this.alignmentRowHeight = expandedHeight;
+        this.config = config;
+        this.url = config.url;
+        this.label = config.label || "";
+        this.id = config.id || this.label;
+        this.height = config.height || trackHeight;
+        this.alignmentRowHeight = config.expadedHeight || expandedHeight;
         this.alignmentRowYInset = 1;
+        this.featureSource = new igv.BamSource(config);
+
 
         // divide the canvas into a coverage track region and an alignment track region
-        coverageTrackHeightPercentage = 0.15;
-        alignmentTrackHeightPercentage = 1.0 - coverageTrackHeightPercentage;
 
         this.coverageTrackHeight = coverageTrackHeightPercentage * this.height;
         this.alignmentTrackHeight = alignmentTrackHeightPercentage * this.height;
@@ -38,7 +38,7 @@ var igv = (function (igv) {
 
     igv.BAMTrack.prototype.draw = function (canvas, refFrame, bpStart, bpEnd, width, height, continuation, task) {
 
-       console.log("bamTrack.draw");
+        console.log("bamTrack.draw");
 
 
         // Don't try to draw alignments for windows > 10kb

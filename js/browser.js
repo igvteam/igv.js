@@ -34,7 +34,7 @@ var igv = (function (igv) {
 
     };
 
-    igv.Browser.prototype.loadTrack = function (descriptor) {
+    igv.Browser.prototype.loadTrack = function (config) {
 
         var attemptedDuplicateTrackAddition = false;
 
@@ -42,7 +42,7 @@ var igv = (function (igv) {
 
             if (false === attemptedDuplicateTrackAddition) {
 
-                if (JSON.stringify(descriptor) === JSON.stringify(tp.track.descriptor)) {
+                if (JSON.stringify(config) === JSON.stringify(tp.track.config)) {
                     attemptedDuplicateTrackAddition = true;
                 }
 
@@ -55,16 +55,16 @@ var igv = (function (igv) {
             return;
         }
 
-        var path = descriptor.url;
+        var path = config.url;
 
-        if (descriptor.type && descriptor.type === 't2d') {
-            this.addTrack(new igv.T2dTrack(descriptor));
+        if (config.type && config.type === 't2d') {
+            this.addTrack(new igv.T2dTrack(config));
         } else if (path.endsWith(".bed") || path.endsWith(".bed.gz")) {
-            this.addTrack(new igv.GeneTrack(descriptor));
-        } else if (path.endsWith(".bam")) {
-            this.addTrack(new igv.BAMTrack(descriptor));
+            this.addTrack(new igv.GeneTrack(config));
+        } else if (path.endsWith(".bam") || config.type === "bam") {
+            this.addTrack(new igv.BAMTrack(config));
         } else if (path.endsWith(".wig") || path.endsWith(".wig.gz") || path.endsWith(".bedgraph") || path.endsWith(".bedgraph.gz")) {
-            this.addTrack(new igv.WIGTrack(descriptor));
+            this.addTrack(new igv.WIGTrack(config));
         }
 
         // TODO -- error message "unsupported filed type"

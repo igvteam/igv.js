@@ -6,7 +6,7 @@ var igv = (function (igv) {
     const POPOVER_WINDOW = 30000000;
 
     igv.T2dTrack = function (config) {
-        this.descriptor = config;
+        this.config = config;
         this.url = config.url;
         this.featureSource = new igv.T2DVariantSource(config);
         this.label = config.label;
