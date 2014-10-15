@@ -102,40 +102,26 @@
                     </span>
             </div>
 
-            <div class="col-xs-1">
-
-                <button id="encodeModalButton" type="button" class="btn btn-default navbar-btn navbar-left" data-toggle="modal" data-target=".bs-example-modal-lg">
-                    ENCODE
-                </button>
-
-            </div><!-- ENCODE -->
-
-            <div class="col-xs-1">
+            <div class="col-xs-2">
                 <label>
                     Frame Width (px)
                     <input id="frameWidthInput" type="text" class="form-control" placeholder="px">
                 </label>
             </div><!-- Frame Width -->
 
-            <div class="col-xs-1">
+            <div class="col-xs-2">
                 <label>
                     Region Size (bp)
                     <input id="regionSizeInput" type="text" class="form-control" placeholder="bp">
                 </label>
             </div><!-- Region Size -->
 
-            <div class="col-xs-1">
+            <div class="col-xs-2">
                 <label>
-                    Track Height (pixels)
-                    <input id="trackHeightInput" type="text" class="form-control" placeholder="pixels">
+                    Track Height (px)
+                    <input id="trackHeightInput" type="text" class="form-control" placeholder="px">
                 </label>
             </div><!-- Track Height -->
-
-            <div class="col-xs-1">
-                <button class="btn btn-default" data-toggle="modal" data-target="#igvExportRegionsModal">
-                    Export Regions
-                </button>
-            </div><!-- Export Regions -->
 
             <div class="col-xs-1">
                 <button class="btn btn-default" data-toggle="modal" data-target="#igvSaveSessionModal">
@@ -143,7 +129,7 @@
                 </button>
             </div><!-- Save Session -->
 
-            <div class="col-xs-1">
+            <div class="col-xs-2">
                 <div class="dropdown">
                     <button id="igvSessionLoadDropdownMenu" class="btn btn-default dropdown-toggle" type="button" data-toggle="dropdown">
                         Load Session
@@ -165,29 +151,7 @@
                 </div>
             </div><!-- Load Session -->
 
-
-            <div class="col-xs-1">
-                <div class="dropdown">
-                    <button id="igvFileUploadDropdownMenu" class="btn btn-default dropdown-toggle" type="button" data-toggle="dropdown">
-                        Upload File
-                        <span class="caret"></span>
-                    </button>
-                    <ul class="dropdown-menu" role="menu" aria-labelledby="igvFileUploadDropdownMenu">
-                        <li role="presentation">
-                            <a role="menuitem" tabindex="-1" href="#">
-
-                                <form id="igvFileUploadForm">
-                                    <input id="igvFileUpload" type="file" title="foo" multiple/>
-                                </form>
-
-                            </a>
-                        </li>
-                    </ul>
-                </div>
-            </div><!-- Upload File -->
-
-
-            <div class="col-xs-1">
+            <div class="col-xs-2">
 
                 <div class="nav navbar-nav navbar-right">
 
@@ -214,8 +178,43 @@
 
         </div><!-- row 0 -->
 
+        <div class="row">
 
+            <div class="col-xs-offset-1 col-xs-2">
 
+                <button id="encodeModalButton" type="button" class="btn btn-default navbar-btn navbar-left" data-toggle="modal" data-target=".bs-example-modal-lg">
+                    ENCODE
+                </button>
+
+            </div><!-- ENCODE -->
+
+            <div class="col-xs-2">
+                <button class="btn btn-default" data-toggle="modal" data-target="#igvExportRegionsModal">
+                    Export Regions
+                </button>
+            </div><!-- Export Regions -->
+
+            <div class="col-xs-2">
+                <div class="dropdown">
+                    <button id="igvFileUploadDropdownMenu" class="btn btn-default dropdown-toggle" type="button" data-toggle="dropdown">
+                        Upload File
+                        <span class="caret"></span>
+                    </button>
+                    <ul class="dropdown-menu" role="menu" aria-labelledby="igvFileUploadDropdownMenu">
+                        <li role="presentation">
+                            <a role="menuitem" tabindex="-1" href="#">
+
+                                <form id="igvFileUploadForm">
+                                    <input id="igvFileUpload" type="file" title="foo" multiple/>
+                                </form>
+
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+            </div><!-- Upload File -->
+
+        </div><!-- row 1 -->
     </div>
 
 </nav>
