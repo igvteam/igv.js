@@ -96,11 +96,20 @@
     <div class="container-fluid">
 
         <div class="row">
+
             <div class="navbar-header col-xs-1">
                     <span class="navbar-brand">
                         CURSOR
                     </span>
             </div>
+
+            <div class="col-xs-2">
+
+                <button id="encodeModalButton" type="button" class="btn btn-default navbar-btn navbar-left" data-toggle="modal" data-target=".bs-example-modal-lg">
+                    ENCODE
+                </button>
+
+            </div><!-- ENCODE -->
 
             <div class="col-xs-2">
                 <label>
@@ -151,44 +160,11 @@
                 </div>
             </div><!-- Load Session -->
 
-            <div class="col-xs-2">
-
-                <div class="nav navbar-nav navbar-right">
-
-                    <div class="well-sm">
-
-                        <div class="btn-group-sm">
-
-                            <button id="fitToScreen" type="button" class="btn btn-default btn-sm">
-                                <span class="fa fa-align-justify"></span>
-                            </button>
-                            <button id="zoomOut" type="button" class="btn btn-default btn-sm">
-                                <span class="glyphicon glyphicon-minus"></span>
-                            </button>
-                            <button id="zoomIn" type="button" class="btn btn-default btn-sm">
-                                <span class="glyphicon glyphicon-plus"></span>
-                            </button>
-                        </div>
-
-                    </div>
-
-                </div>
-
-            </div><!-- fit to screen | zoom out | zoom in -->
-
         </div><!-- row 0 -->
 
         <div class="row">
 
             <div class="col-xs-offset-1 col-xs-2">
-
-                <button id="encodeModalButton" type="button" class="btn btn-default navbar-btn navbar-left" data-toggle="modal" data-target=".bs-example-modal-lg">
-                    ENCODE
-                </button>
-
-            </div><!-- ENCODE -->
-
-            <div class="col-xs-2">
                 <button class="btn btn-default" data-toggle="modal" data-target="#igvExportRegionsModal">
                     Export Regions
                 </button>
@@ -213,6 +189,31 @@
                     </ul>
                 </div>
             </div><!-- Upload File -->
+
+            <div class="col-xs-2">
+
+                <div class="nav navbar-nav navbar-right">
+
+                    <div class="well-sm">
+
+                        <div class="btn-group-sm">
+
+                            <button id="fitToScreen" type="button" class="btn btn-default btn-sm">
+                                <span class="fa fa-align-justify"></span>
+                            </button>
+                            <button id="zoomOut" type="button" class="btn btn-default btn-sm">
+                                <span class="glyphicon glyphicon-minus"></span>
+                            </button>
+                            <button id="zoomIn" type="button" class="btn btn-default btn-sm">
+                                <span class="glyphicon glyphicon-plus"></span>
+                            </button>
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div><!-- fit to screen | zoom out | zoom in -->
 
         </div><!-- row 1 -->
     </div>
