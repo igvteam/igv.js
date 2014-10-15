@@ -95,139 +95,126 @@
 
     <div class="container-fluid">
 
-        <div class="navbar-header">
-            <span class="navbar-brand">CURSOR</span>
-        </div>
+        <div class="row">
+            <div class="navbar-header col-xs-1">
+                    <span class="navbar-brand">
+                        CURSOR
+                    </span>
+            </div>
 
-        <button id="encodeModalButton" type="button" class="btn btn-default navbar-btn navbar-left" data-toggle="modal"
-                data-target=".bs-example-modal-lg">
-            ENCODE
-        </button>
+            <div class="col-xs-1">
 
-        <div class="navbar-form navbar-left">
+                <button id="encodeModalButton" type="button" class="btn btn-default navbar-btn navbar-left" data-toggle="modal" data-target=".bs-example-modal-lg">
+                    ENCODE
+                </button>
 
-            <label>
-                Frame Width (pixels)
-                <input id="frameWidthInput" type="text" class="form-control" placeholder="pixels">
-            </label>
+            </div><!-- ENCODE -->
 
-        </div>
-        <!-- Frame Width (pixels) -->
+            <div class="col-xs-1">
+                <label>
+                    Frame Width (px)
+                    <input id="frameWidthInput" type="text" class="form-control" placeholder="px">
+                </label>
+            </div><!-- Frame Width -->
 
-        <div class="navbar-form navbar-left">
+            <div class="col-xs-1">
+                <label>
+                    Region Size (bp)
+                    <input id="regionSizeInput" type="text" class="form-control" placeholder="bp">
+                </label>
+            </div><!-- Region Size -->
 
-            <label>
-                Region Size (bp)
-                <input id="regionSizeInput" type="text" class="form-control" placeholder="bp">
-            </label>
+            <div class="col-xs-1">
+                <label>
+                    Track Height (pixels)
+                    <input id="trackHeightInput" type="text" class="form-control" placeholder="pixels">
+                </label>
+            </div><!-- Track Height -->
 
-        </div>
-        <!-- Region Size (bp) -->
+            <div class="col-xs-1">
+                <button class="btn btn-default" data-toggle="modal" data-target="#igvExportRegionsModal">
+                    Export Regions
+                </button>
+            </div><!-- Export Regions -->
 
-        <div class="navbar-form navbar-left">
+            <div class="col-xs-1">
+                <button class="btn btn-default" data-toggle="modal" data-target="#igvSaveSessionModal">
+                    Save Session
+                </button>
+            </div><!-- Save Session -->
 
-            <label>
-                Track Height (pixels)
-                <input id="trackHeightInput" type="text" class="form-control" placeholder="pixels">
-            </label>
-
-        </div>
-        <!-- Track Height -->
-
-        <div class="navbar-form navbar-left">
-
-            <button class="btn btn-default" data-toggle="modal" data-target="#igvExportRegionsModal">
-                Export Regions
-            </button>
-
-        </div>
-        <!-- Export Regions -->
-
-        <div class="navbar-form navbar-left">
-            <button class="btn btn-default" data-toggle="modal" data-target="#igvSaveSessionModal">
-                Save Session
-            </button>
-        </div>
-        <!-- Save Session -->
-
-        <div class="navbar-form navbar-left">
-
-            <div class="dropdown">
-                <button class="btn btn-default dropdown-toggle" type="button" id="igvSessionLoadDropdownMenu" data-toggle="dropdown">
-                    Load Session
+            <div class="col-xs-1">
+                <div class="dropdown">
+                    <button id="igvSessionLoadDropdownMenu" class="btn btn-default dropdown-toggle" type="button" data-toggle="dropdown">
+                        Load Session
                     <span class="caret">
 
                     </span>
-                </button>
-                <ul class="dropdown-menu" role="menu" aria-labelledby="igvSessionLoadDropdownMenu">
-                    <li role="presentation">
-                        <a role="menuitem" tabindex="-1" href="#">
-
-                            <form id="igvSessionLoadForm">
-                                <input id="igvSessionLoad" type="file" title="foo" multiple/>
-                            </form>
-
-                        </a>
-                    </li>
-                </ul>
-            </div>
-
-        </div>
-        <!-- Load Session -->
-
-        <div class="navbar-form navbar-left">
-
-            <div class="dropdown">
-                <button class="btn btn-default dropdown-toggle" type="button" id="igvFileUploadDropdownMenu"
-                        data-toggle="dropdown">
-                    Upload File
-                    <span class="caret"></span>
-                </button>
-                <ul class="dropdown-menu" role="menu" aria-labelledby="igvFileUploadDropdownMenu">
-                    <li role="presentation">
-                        <a role="menuitem" tabindex="-1" href="#">
-
-                            <form id="igvFileUploadForm">
-                                <input id="igvFileUpload" type="file" title="foo" multiple/>
-                            </form>
-
-                        </a>
-                    </li>
-                </ul>
-            </div>
-
-        </div>
-        <!-- Upload File -->
-
-        <div class="nav navbar-nav navbar-right">
-
-            <div class="well-sm">
-
-                <div class="btn-group-sm">
-
-                    <!--<button id="igvExportRegionsButton" type="button" class="btn btn-default btn-sm">-->
-                    <!--Export Regions-->
-                    <!--</button>-->
-
-                    <!--<button id="igvSessionLoadButton" type="button" class="btn btn-default btn-sm">-->
-                    <!--Load Session-->
-                    <!--</button>-->
-
-                    <button id="fitToScreen" type="button" class="btn btn-default btn-sm">
-                        <span class="fa fa-align-justify"></span>
                     </button>
-                    <button id="zoomOut" type="button" class="btn btn-default btn-sm">
-                        <span class="glyphicon glyphicon-minus"></span>
+                    <ul class="dropdown-menu" role="menu" aria-labelledby="igvSessionLoadDropdownMenu">
+                        <li role="presentation">
+                            <a role="menuitem" tabindex="-1" href="#">
+
+                                <form id="igvSessionLoadForm">
+                                    <input id="igvSessionLoad" type="file" title="foo" multiple/>
+                                </form>
+
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+            </div><!-- Load Session -->
+
+
+            <div class="col-xs-1">
+                <div class="dropdown">
+                    <button id="igvFileUploadDropdownMenu" class="btn btn-default dropdown-toggle" type="button" data-toggle="dropdown">
+                        Upload File
+                        <span class="caret"></span>
                     </button>
-                    <button id="zoomIn" type="button" class="btn btn-default btn-sm">
-                        <span class="glyphicon glyphicon-plus"></span>
-                    </button>
+                    <ul class="dropdown-menu" role="menu" aria-labelledby="igvFileUploadDropdownMenu">
+                        <li role="presentation">
+                            <a role="menuitem" tabindex="-1" href="#">
+
+                                <form id="igvFileUploadForm">
+                                    <input id="igvFileUpload" type="file" title="foo" multiple/>
+                                </form>
+
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+            </div><!-- Upload File -->
+
+
+            <div class="col-xs-1">
+
+                <div class="nav navbar-nav navbar-right">
+
+                    <div class="well-sm">
+
+                        <div class="btn-group-sm">
+
+                            <button id="fitToScreen" type="button" class="btn btn-default btn-sm">
+                                <span class="fa fa-align-justify"></span>
+                            </button>
+                            <button id="zoomOut" type="button" class="btn btn-default btn-sm">
+                                <span class="glyphicon glyphicon-minus"></span>
+                            </button>
+                            <button id="zoomIn" type="button" class="btn btn-default btn-sm">
+                                <span class="glyphicon glyphicon-plus"></span>
+                            </button>
+                        </div>
+
+                    </div>
+
                 </div>
 
-            </div>
+            </div><!-- fit to screen | zoom out | zoom in -->
 
-        </div>
-        <!-- fit to screen | zoom out | zoom in -->
+        </div><!-- row 0 -->
+
+
 
     </div>
 
