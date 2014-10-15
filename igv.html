@@ -65,6 +65,14 @@
     <script type="text/javascript" src="js/gwas/t2dVariantTrack.js"></script>
     <script type="text/javascript" src="vendor/opentip-native.js"></script>
     <script type="text/javascript" src="js/igv-constants.js"></script>
+
+    <script type="text/javascript" src="js/bigwig/bufferedReader.js"></script>
+    <script type="text/javascript" src="js/bigwig/bwBPTree.js"></script>
+    <script type="text/javascript" src="js/bigwig/bwReader.js"></script>
+    <script type="text/javascript" src="js/bigwig/bwRPTree.js"></script>
+    <script type="text/javascript" src="js/bigwig/bwSource.js"></script>
+    <script type="text/javascript" src="js/bigwig/bwTotalSummary.js"></script>
+    <script type="text/javascript" src="js/set.js"></script>
 </head>
 
 <body>
@@ -106,15 +114,26 @@
             <td><a style="color: blue;cursor: pointer" onclick="igv.browser.search('chr1:155,172,193-155,172,564')">
                 Goto chr1:155,172,193-155,172,564</a></td>
         </tr>
-
-        <!--        <tr>
-                    <td><a style="color: blue;cursor: pointer" onclick="igv.browser.zoomIn()">
-                        Zoom In</a></td>
-                </tr>
-                <tr>
-                    <td><a style="color: blue;cursor: pointer" onclick="igv.browser.zoomOut()">
-                        Zoom Out</a></td>
-                </tr>-->
+        <tr>
+            <td><a style="color: blue;cursor: pointer"
+                   onclick="igv.browser.loadTrack({
+                     url: 'test/data/bigWigExample.bw',
+                     label: 'BigWig'
+                   })">Load
+                BigWig example (chr21)</a></td>
+        </tr>
+        <tr>
+            <td><a style="color: blue;cursor: pointer" onclick="igv.browser.search('chr21:1-48129895')">
+                Goto chr21</a></td>
+        </tr>
+        <tr>
+            <td><a style="color: blue;cursor: pointer" onclick="igv.browser.zoomIn()">
+                Zoom In</a></td>
+        </tr>
+        <tr>
+            <td><a style="color: blue;cursor: pointer" onclick="igv.browser.zoomOut()">
+                Zoom Out</a></td>
+        </tr>
     </table>
 </div>
 <div id="myDiv" style="padding-top: 50px;padding-bottom: 20px;">
