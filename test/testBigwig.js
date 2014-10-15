@@ -2,6 +2,14 @@ function runBigwigTests() {
 
     module("BIGWig");
 
+    function createMockObjects(bpPerPixel) {
+
+        igv = igv || {};
+        igv.browser = igv.browser || {};
+        igv.browser.referenceFrame = {bpPerPixel: bpPerPixel};
+
+    }
+
     asyncTest("Bigwig meta datay", function () {
 
         var url = "../test/data/bigWigExample.bw";
@@ -82,9 +90,11 @@ function runBigwigTests() {
             bpEnd = 19170640,
             bpPerPixel = 0.5478515625;    // To match iOS unit test
 
+        createMockObjects(bpPerPixel);
+
         var bWSource = new igv.BWSource(url);
 
-        bWSource.getFeatures(chr, bpStart, bpEnd, bpPerPixel, function (features) {
+        bWSource.getFeatures(chr, bpStart, bpEnd, function (features) {
 
             ok(features);
 
@@ -103,9 +113,11 @@ function runBigwigTests() {
             bpEnd = 26996291,
             bpPerPixel = 10765.6611328125;    // To match iOS unit test
 
+        createMockObjects(bpPerPixel);
+
         var bWSource = new igv.BWSource(url);
 
-        bWSource.getFeatures(chr, bpStart, bpEnd, bpPerPixel, function (features) {
+        bWSource.getFeatures(chr, bpStart, bpEnd, function (features) {
 
             ok(features);
 
@@ -124,9 +136,11 @@ function runBigwigTests() {
             bpEnd = 33041570,
             bpPerPixel = 0.5;
 
+        createMockObjects(bpPerPixel);
+
         var bWSource = new igv.BWSource(url);
 
-        bWSource.getFeatures(chr, bpStart, bpEnd, bpPerPixel, function (features) {
+        bWSource.getFeatures(chr, bpStart, bpEnd, function (features) {
 
             ok(features);
 
@@ -135,6 +149,7 @@ function runBigwigTests() {
             start();
         });
     });
+
 
     // Bigbed test chr21:33,031,597-33,041,570  => 14,810 features
 

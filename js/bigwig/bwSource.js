@@ -11,12 +11,13 @@ var igv = (function (igv) {
         this.bufferedReader = new igv.BufferedReader(path);
     };
 
-    igv.BWSource.prototype.getFeatures = function (chr, bpStart, bpEnd, bpPerPixel, continuation) {
+    igv.BWSource.prototype.getFeatures = function (chr, bpStart, bpEnd, continuation) {
 
         // Select a biwig "zoom level" appropriate for the current resolution
         var bwReader = this.reader,
             bufferedReader = this.bufferedReader,
-            bwSource = this;
+            bwSource = this,
+            bpPerPixel = igv.browser.referenceFrame.bpPerPixel;
 
         if (!bwReader.zoomLevelHeaders) {
 
@@ -58,7 +59,7 @@ var igv = (function (igv) {
 
                 var chrIdx = bwSource.reader.chromTree.dictionary[chr];
                 if (chrIdx === undefined) {
-                    continuation(nil);
+                    continuation(null);
                 }
                 else {
 

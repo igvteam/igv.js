@@ -67,6 +67,8 @@ var igv = (function (igv) {
             this.addTrack(new igv.BAMTrack(config));
         } else if (path.endsWith(".wig") || path.endsWith(".wig.gz") || path.endsWith(".bedgraph") || path.endsWith(".bedgraph.gz")) {
             this.addTrack(new igv.WIGTrack(config));
+        } else if (type === "bigwig" || path.endsWith(".bw") || path.endsWith(".bigwig")) {
+            this.addTrack(new igv.WIGTrack(config));
         }
 
         // TODO -- error message "unsupported filed type"
