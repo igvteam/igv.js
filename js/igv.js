@@ -30,7 +30,9 @@ var igv = (function (igv) {
             rootDiv = browser.div;
 
         // DOM
-        $(rootDiv).append(contentKaryo);
+        if (options.showKaryo) {
+            $(rootDiv).append(contentKaryo);
+        }
         $(rootDiv).append(contentRoot);
         $(contentRoot).append(contentHeader);
         $(contentRoot).append(trackContainer);
