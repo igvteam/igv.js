@@ -291,6 +291,28 @@ var igv = (function (igv) {
 
         browser.referenceFrame = new igv.ReferenceFrame("", 0, 1 / browser.cursorModel.framePixelWidth);
 
+
+
+
+        // Launch app with session JSON if provided as param
+        var sessionJSONPath = igv.getQueryValue('session') || undefined;
+
+        if (sessionJSONPath) {
+
+            $.getJSON( sessionJSONPath, function( data ) {
+;
+                var session = JSON.parse(data);
+                console.log("yup");
+
+            });
+
+        }
+
+
+
+
+
+        
         addDemoTracks(browser);
 
         browser.setFrameWidth = function (frameWidthString) {
