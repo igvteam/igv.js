@@ -30,7 +30,7 @@ var igv = (function (igv) {
         this.nextTrackOrder = 0;
 
         window.onresize = igv.throttle(function () {
-           igv.browser.resize();
+            igv.browser.resize();
         }, 10);
 
     };
@@ -57,23 +57,46 @@ var igv = (function (igv) {
         }
 
         var path = config.url,
-            type = config.type;
+            type = config.type,
+            newTrack;
 
-        if (config.type && config.type === 't2d') {
-            this.addTrack(new igv.T2dTrack(config));
-        } else if (path.endsWith(".bed") || path.endsWith(".bed.gz")) {
-            this.addTrack(new igv.GeneTrack(config));
-        } else if (path.endsWith(".bam") || type === "bam") {
-            this.addTrack(new igv.BAMTrack(config));
-        } else if (path.endsWith(".wig") || path.endsWith(".wig.gz") || path.endsWith(".bedgraph") || path.endsWith(".bedgraph.gz")) {
-            this.addTrack(new igv.WIGTrack(config));
-        } else if (type === "bigwig" || path.endsWith(".bw") || path.endsWith(".bigwig")) {
-            this.addTrack(new igv.WIGTrack(config));
+        if (!type) type = getType(path);
+
+        if (type === "t2d") {
+            newTrack = new igv.T2dTrack(config);
+        } else if (type === "bed") {
+            newTrack = new igv.GeneTrack(config);
+        } else if (type === "bam") {
+            newTrack = new igv.BAMTrack(config);
+        } else if (type === "wig") {
+            newTrack = new igv.WIGTrack(config);
+        }
+        else {
+            alert("Unknown file type: " + path);
+            return null;
         }
 
         // TODO -- error message "unsupported filed type"
+        this.addTrack(newTrack);
+
+        return newTrack;
+
 
     };
+
+
+    // Get the file type from the path extension
+    function getType(path) {
+        if (path.endsWith(".bed") || path.endsWith(".bed.gz")) {
+            return "bed";
+        } else if (path.endsWith(".bam")) {
+            return "bam"
+        } else if (path.endsWith(".wig") || path.endsWith(".wig.gz") || path.endsWith(".bedgraph") || path.endsWith(".bedgraph.gz")
+            || path.endsWith(".bw") || path.endsWith(".bigwig")) {
+            return "wig"
+        }
+        return null;  // Unknown
+    }
 
     /**
      * Add a new track.  Each track is associated with the following DOM elements
@@ -387,11 +410,11 @@ var igv = (function (igv) {
                                     browser.goto(chr, start, end);
                                 }
                                 foundFeature = true;
-                             }
+                            }
                         }
                     }
 
-                    if(!foundFeature) alert('No feature found with name "' + feature + '"');
+                    if (!foundFeature) alert('No feature found with name "' + feature + '"');
 
                     if (continuation) continuation();
                 });

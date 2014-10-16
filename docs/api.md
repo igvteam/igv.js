@@ -61,12 +61,17 @@ described with a json-style object of properties.   The following example loads 
 Browser Control
 ---------------
 
+
+loadTrack(trackDescriptor)
+
 The igv.browser api
 
 search(locusOrGene) 
 
 goto(chr, start, end)
 
-loadTrack(trackDescriptor)
+zoomIn();
+
+zoomOut();
 
   

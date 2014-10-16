@@ -18,6 +18,8 @@ var igv = (function (igv) {
 
     var FastaSequence = function (file, indexFile) {
 
+        var myself = this;
+
         if (!indexFile) {
             indexFile = file + ".fai";
         }
@@ -28,7 +30,7 @@ var igv = (function (igv) {
         // Coords are UCSC style  (first base is zero)
         this.getSequence = function (chr, start, end, continuation, task) {
 
-            var interval = this.interval;
+            var interval = myself.interval;
             if (interval && interval.contains(chr, start, end)) {
 
                 continuation(getSequenceFromInterval(interval, start, end));
@@ -44,8 +46,8 @@ var igv = (function (igv) {
                     qend = center + 500000;
                 }
                 this.readSequence(chr, qstart, qend, function(seqBytes) {
-                    this.interval = new igv.GenomicInterval(chr, qstart, qend, seqBytes);
-                    continuation(getSequenceFromInterval(this.interval, start, end));
+                    myself.interval = new igv.GenomicInterval(chr, qstart, qend, seqBytes);
+                    continuation(getSequenceFromInterval(myself.interval, start, end));
                 },
                 task);
             }

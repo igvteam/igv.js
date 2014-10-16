@@ -12,6 +12,7 @@ module.exports = function (grunt) {
                     'js/bigwig/*.js',
                     'js/cursor/*.js',
                     'js/gtex/*.js',
+                    'js/bam/*.js',
                     'vendor/inflate.js',
                     'vendor/spin.js',
                     'vendor/inflate.js',

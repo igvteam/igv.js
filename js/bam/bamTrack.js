@@ -31,7 +31,7 @@ var igv = (function (igv) {
 
         // divide the canvas into a coverage track region and an alignment track region
 
-        this.coverageTrackHeight = coverageTrackHeightPercentage * this.height;
+        this.coverageTrackHeight = coverageTrackHeightPercentage * this.height - 5;
         this.alignmentTrackHeight = alignmentTrackHeightPercentage * this.height;
 
     };
@@ -41,10 +41,11 @@ var igv = (function (igv) {
         console.log("bamTrack.draw");
 
 
-        // Don't try to draw alignments for windows > 10kb
+        // Don't try to draw alignments for windows > 30kb
         if (bpEnd - bpStart > 30000) {
-
-            canvas.fillText("Zoom in to see alignments", 600, 20);
+            var x;
+            for (x = 200; x < width; x += 400)
+                canvas.fillText("Zoom in to see alignments", x, 20, {fillStye: 'black'});
             continuation();
             return;
         }
@@ -55,6 +56,8 @@ var igv = (function (igv) {
         this.featureSource.getFeatures(chr, bpStart, bpEnd, function (features, task) {
 
             if (features) {
+
+                myself.coverageMap = features.coverageMap;
 
 //                console.log("bamTrack.featureSource.getSequence", chr, igv.numberFormatter(bpStart), igv.numberFormatter(bpEnd));
 
@@ -159,7 +162,7 @@ var igv = (function (igv) {
                             yRect,
                             height;
 
-                        yRect = myself.alignmentRowYInset + myself.coverageTrackHeight + (myself.alignmentRowHeight * packedAlignmentIndex);
+                        yRect = myself.alignmentRowYInset + myself.coverageTrackHeight + (myself.alignmentRowHeight * packedAlignmentIndex) + 5;
                         height = myself.alignmentRowHeight - (2 * myself.alignmentRowYInset);
 
                         yStrokedLine = (height / 2.0) + yRect;
@@ -273,11 +276,10 @@ var igv = (function (igv) {
 
     igv.BAMTrack.prototype.popupData = function (genomicLocation, xOffset, yOffset) {
 
-        var alignmentManager = this.featureSource.alignmentManager,
-            coverageMap = alignmentManager.coverageMap,
+        var coverageMap = this.featureSource.genomicInterval.coverageMap,
             coverageMapIndex,
             coverage,
-            packedAlignments = alignmentManager.genomicInterval.packedAlignments,
+            packedAlignments = this.featureSource.genomicInterval.packedAlignments,
             packedAlignmentsIndex,
             alignmentRow,
             alignment,
