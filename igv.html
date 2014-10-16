@@ -149,23 +149,21 @@
         div = $("#myDiv")[0];
         options = {
             showKaryo: true,
-            fastaURL: "//igvdata.broadinstitute.org/genomes/seq/hg19/hg19.fasta",
-            cytobandURL: "//igvdata.broadinstitute.org/genomes/seq/hg19/cytoBand.txt",
+            fastaURL: "//dn7ywbm9isq8j.cloudfront.net/genomes/seq/hg19/hg19.fasta",
+            cytobandURL: "//dn7ywbm9isq8j.cloudfront.net/genomes/seq/hg19/cytoBand.txt",
             tracks: [
                 new igv.SequenceTrack({
                     order: 9999
                 }),
                 new igv.GeneTrack({
-                    url: "//igvdata.broadinstitute.org/annotations/hg19/genes/gencode.v18.collapsed.bed",
+                    url: "//dn7ywbm9isq8j.cloudfront.net/annotations/hg19/genes/gencode.v18.collapsed.bed",
                     label: "Genes",
                     order: 10000
                 })
             ]
         };
 
-        browser = igv.createBrowser(options);
-        div.appendChild(browser.div);
-        browser.startup();
+        browser = igv.createBrowser(div, options);
 
     });
 

@@ -7,12 +7,13 @@ var igv = (function (igv) {
      * @param options Object specifying initial configuration options.
      *
      */
-    igv.createBrowser = function (options) {
+    igv.createBrowser = function (parentDiv, options) {
 
         if (igv.browser) {
             console.log("Attempt to create 2 browsers.")
             return igv.browser;
         }
+
 
         if (!options) options = {};
         options.type = "IGV";
@@ -30,6 +31,9 @@ var igv = (function (igv) {
             rootDiv = browser.div;
 
         // DOM
+
+        parentDiv.appendChild(rootDiv);
+
         if (options.showKaryo) {
             $(rootDiv).append(contentKaryo);
         }
@@ -50,55 +54,49 @@ var igv = (function (igv) {
         browser.ideoPanel.resize();
 
 
-        /**
-         * Startup function should be called after browser.div is inserted in the DOM.
-         */
-        browser.startup = function () {
-
-            console.log("Browser startup");
+        console.log("Browser startup");
 
 
-            igv.sequenceSource = igv.getFastaSequence(options.fastaURL);
+        igv.sequenceSource = igv.getFastaSequence(options.fastaURL);
 
 
-            igv.loadGenome(options.cytobandURL, function (genome) {
+        igv.loadGenome(options.cytobandURL, function (genome) {
 
-                browser.genome = genome;
+            browser.genome = genome;
 
-                // Set inital locus
-                var firstChrName = browser.genome.chromosomeNames[0],
-                    firstChr = browser.genome.chromosomes[firstChrName];
+            // Set inital locus
+            var firstChrName = browser.genome.chromosomeNames[0],
+                firstChr = browser.genome.chromosomes[firstChrName];
 
-                browser.referenceFrame = new igv.ReferenceFrame(firstChrName, 0, firstChr.bpLength / browser.trackViewportWidth());
-                browser.controlPanelWidth = 50;
+            browser.referenceFrame = new igv.ReferenceFrame(firstChrName, 0, firstChr.bpLength / browser.trackViewportWidth());
+            browser.controlPanelWidth = 50;
 
-                if (browser.ideoPanel) browser.ideoPanel.repaint();
-                if (browser.karyoPanel) browser.karyoPanel.repaint();
-                browser.addTrack(new igv.RulerTrack());
+            if (browser.ideoPanel) browser.ideoPanel.repaint();
+            if (browser.karyoPanel) browser.karyoPanel.repaint();
+            browser.addTrack(new igv.RulerTrack());
 
-                // If an initial locus is specified go there first, then load tracks.  This avoid loading tracks at
-                // a default location then moving
-                if (options.locus) {
-                    browser.search(options.locus, function () {
-                        if (options.tracks) {
-                            options.tracks.forEach(function (track) {
-                                browser.addTrack(track);
-                            });
-                        }
-                    });
+            // If an initial locus is specified go there first, then load tracks.  This avoid loading tracks at
+            // a default location then moving
+            if (options.locus) {
+                browser.search(options.locus, function () {
+                    if (options.tracks) {
+                        options.tracks.forEach(function (track) {
+                            browser.addTrack(track);
+                        });
+                    }
+                });
 
-                }
-                else if (options.tracks) {
-                    options.tracks.forEach(function (track) {
-                        browser.addTrack(track);
-                    });
+            }
+            else if (options.tracks) {
+                options.tracks.forEach(function (track) {
+                    browser.addTrack(track);
+                });
 
-                }
+            }
 
 
-            });
+        });
 
-        }
 
         return browser;
 
@@ -118,7 +116,7 @@ var igv = (function (igv) {
     }
 
     return igv;
-}) (igv || {});
+})(igv || {});
 
 
 
