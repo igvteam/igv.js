@@ -292,10 +292,9 @@ var igv = (function (igv) {
         browser.referenceFrame = new igv.ReferenceFrame("", 0, 1 / browser.cursorModel.framePixelWidth);
 
 
-
         // Launch app with session JSON if provided as param
-//        var sessionJSONPath = igv.getQueryValue('session') || undefined;
-        var sessionJSONPath = "test/data/cursor/session/cursor-session.txt";
+        var sessionJSONPath = igv.getQueryValue('session') || undefined;
+//        var sessionJSONPath = "test/data/cursor/session/cursor-session.txt";
 
         if ( sessionJSONPath ) {
 
@@ -309,9 +308,7 @@ var igv = (function (igv) {
 
         }
 
-
-        
-//        addDemoTracks(browser);
+        addDemoTracks(browser);
 
         browser.setFrameWidth = function (frameWidthString) {
 
@@ -371,7 +368,7 @@ var igv = (function (igv) {
                 frameWidth = browser.trackViewportWidth() / browser.cursorModel.regionsToRender().length;
                 browser.referenceFrame.start = 0;
                 browser.setFrameWidth(frameWidth);
-             }
+            }
         };
 
         // Augment standard behavior
@@ -391,14 +388,14 @@ var igv = (function (igv) {
 
             var dev_null,
                 session =
-            {
-                start : Math.floor(browser.referenceFrame.start),
-                end : Math.floor((browser.referenceFrame.bpPerPixel * browser.trackViewportWidth()) + browser.referenceFrame.start),
-                regionWidth : browser.cursorModel.regionWidth,
-                framePixelWidthUnitless : (browser.cursorModel.framePixelWidth/browser.trackViewportWidth()),
-                trackHeight : browser.trackHeight,
-                tracks: []
-            };
+                {
+                    start : Math.floor(browser.referenceFrame.start),
+                    end : Math.floor((browser.referenceFrame.bpPerPixel * browser.trackViewportWidth()) + browser.referenceFrame.start),
+                    regionWidth : browser.cursorModel.regionWidth,
+                    framePixelWidthUnitless : (browser.cursorModel.framePixelWidth/browser.trackViewportWidth()),
+                    trackHeight : browser.trackHeight,
+                    tracks: []
+                };
 
             dev_null = browser.trackViewportWidth();
 
