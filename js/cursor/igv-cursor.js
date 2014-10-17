@@ -165,7 +165,7 @@ var igv = (function (igv) {
 
         });
 
-        // file upload
+        // BED file upload
         var fileInput = document.getElementById('igvFileUpload');
         fileInput.addEventListener('change', function (e) {
 
@@ -187,6 +187,27 @@ var igv = (function (igv) {
             }
 
         });
+
+        // BED file URL
+        document.getElementById('igvLoadURL').onchange = function (e) {
+            var obj,
+                path,
+                featureSource,
+                cursorTrack,
+                peakPath = "test/data/cursor/wgEncodeBroadHistoneH1hescH3k4me3StdPk.broadPeak.gz";
+
+            obj = $("#igvLoadURL");
+            path = obj.val();
+            obj.val("");
+
+            featureSource = new igv.BedFeatureSource(peakPath);
+            cursorTrack = new cursor.CursorTrack(featureSource, browser.cursorModel, browser.referenceFrame, "H3k4me3 H1hesc", browser.trackHeight);
+
+//            featureSource = new igv.BedFeatureSource(path);
+//            cursorTrack = new cursor.CursorTrack(featureSource, browser.cursorModel, browser.referenceFrame, "unnamed", browser.trackHeight);
+            browser.addTrack(cursorTrack);
+
+        };
 
         // Load ENCODE DataTables data and build markup for modal dialog.
         encode.createEncodeDataTablesDataSet("resources/peaks.hg19.txt", function (dataSet) {
@@ -423,53 +444,6 @@ var igv = (function (igv) {
                 trackView = this.trackPanels[ this.trackPanels.length - 1 ];
                 this.removeTrack(trackView.track);
             }
-
-        };
-
-        // NOTE: This is depricated and nolonger used
-        browser.saveSession = function () {
-
-            var session,
-                restoredSession,
-                form,
-                hiddenFilenameInput,
-                hiddenDownloadContent,
-                stringified;
-
-            form = document.createElement("form");
-            document.body.appendChild(form);
-            form.setAttribute("method", "post");
-            form.setAttribute("action", "php/igvdownload.php");
-
-            // file name
-            hiddenFilenameInput = document.createElement("input");
-            form.appendChild(hiddenFilenameInput);
-            hiddenFilenameInput.setAttribute("type", "hidden");
-            hiddenFilenameInput.setAttribute("name", "filename");
-            hiddenFilenameInput.setAttribute("value", "igv-session-save.json");
-
-            // For attribute named downloadContent, stuff exportedRegions var into it's value
-            hiddenDownloadContent = document.createElement("input");
-            form.appendChild(hiddenDownloadContent);
-            hiddenDownloadContent.setAttribute("type", "hidden");
-            hiddenDownloadContent.setAttribute("name", "downloadContent");
-
-            session = { tracks: [] };
-
-            browser.trackPanels.forEach(function (trackView) {
-
-                session.tracks.push(trackView.track.jsonRepresentation());
-
-            });
-
-            stringified = JSON.stringify(session);
-            hiddenDownloadContent.setAttribute("value", JSON.stringify(session));
-
-            restoredSession = JSON.parse(stringified);
-
-            // submit and self-destruct
-            form.submit();
-            form.detach();
 
         };
 
