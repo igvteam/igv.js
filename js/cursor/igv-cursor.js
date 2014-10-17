@@ -312,7 +312,7 @@ var igv = (function (igv) {
 
 
 
-        
+
         addDemoTracks(browser);
 
         browser.setFrameWidth = function (frameWidthString) {
