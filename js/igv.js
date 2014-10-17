@@ -75,21 +75,39 @@ var igv = (function (igv) {
             if (browser.karyoPanel) browser.karyoPanel.repaint();
             browser.addTrack(new igv.RulerTrack());
 
-            // If an initial locus is specified go there first, then load tracks.  This avoid loading tracks at
+            // If an initial locus is specified go there first, then load tracks.  This avoids loading track data at
             // a default location then moving
             if (options.locus) {
+
                 browser.search(options.locus, function () {
+
+                    var refFrame = igv.browser.referenceFrame,
+                        start = refFrame.start,
+                        end = start + igv.browser.trackViewportWidth() * refFrame.bpPerPixel,
+                        range = start - end;
+
                     if (options.tracks) {
-                        options.tracks.forEach(function (track) {
-                            browser.addTrack(track);
-                        });
+                        if (range < 100000) {
+                            igv.sequenceSource.getSequence(refFrame.chr, start, end, function (refSeq) {
+                                options.tracks.forEach(function (track) {
+                                    browser.loadTrack(track);
+                                });
+                            });
+                        }
                     }
+                    else {
+                        options.tracks.forEach(function (track) {
+                            browser.loadTrack(track);
+                        });
+
+                    }
+
                 });
 
             }
             else if (options.tracks) {
                 options.tracks.forEach(function (track) {
-                    browser.addTrack(track);
+                    browser.loadTrack(track);
                 });
 
             }

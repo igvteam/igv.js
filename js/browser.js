@@ -70,6 +70,8 @@ var igv = (function (igv) {
             newTrack = new igv.BAMTrack(config);
         } else if (type === "wig") {
             newTrack = new igv.WIGTrack(config);
+        } else if(type === "sequence") {
+            newTrack = new igv.SequenceTrack(config);
         }
         else {
             alert("Unknown file type: " + path);
