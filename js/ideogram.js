@@ -49,19 +49,20 @@ var igv = (function (igv) {
         //  this.chromosomeNameCtx = chromosomeNameCanvas.getContext("2d");
         //  this.chromosomeNameCtx.font = "bold 10px Arial";
 
-        this.canvas.onclick = function (e) {
-
-            var canvasCoords = igv.translateMouseCoordinates(e, canvas),
-                mouseX = canvasCoords.x,
-                referenceFrame = igv.browser.referenceFrame,
-                chromosome = igv.browser.genome.getChromosome(igv.browser.referenceFrame.chr),
-                viewportWidth = canvas.clientWidth,
-                bp = chromosome.bpLength * mouseX / viewportWidth;
-
-            this.getContext("2d").fillRect(mouseX, 0, 10, 10);
-
-            igv.browser.goto(referenceFrame.chr, bp);
-        }
+        // TODO -- this onclick is flaky, causing the browser to hang when bams are loaded
+//        this.canvas.onclick = function (e) {
+//
+//            var canvasCoords = igv.translateMouseCoordinates(e, canvas),
+//                mouseX = canvasCoords.x,
+//                referenceFrame = igv.browser.referenceFrame,
+//                chromosome = igv.browser.genome.getChromosome(igv.browser.referenceFrame.chr),
+//                viewportWidth = canvas.clientWidth,
+//                bp = chromosome.bpLength * mouseX / viewportWidth;
+//
+//            this.getContext("2d").fillRect(mouseX, 0, 10, 10);
+//
+//            igv.browser.goto(referenceFrame.chr, bp);
+//        }
 
     }
 
