@@ -139,6 +139,11 @@ var igv = (function (igv) {
 
                         trackList.forEach(function (trackTrackFilterJSON) {
                             browser.addTrack(trackTrackFilterJSON.track, trackTrackFilterJSON.trackFilterJSON);
+
+                            if (trackTrackFilterJSON.trackFilterJSON) {
+                                trackTrackFilterJSON.track.trackFilter.setWithJSON(trackTrackFilterJSON.trackFilterJSON);
+                            }
+
                         });
 
                         browser.cursorModel.filterRegions();

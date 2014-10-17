@@ -115,7 +115,7 @@ var igv = (function (igv) {
      * @param track
      * @param trackFilterJSON
      */
-    igv.Browser.prototype.addTrack = function (track, trackFilterJSON) {
+    igv.Browser.prototype.addTrack = function (track) {
 
         var browser = this,
             trackView = new igv.TrackView(track, this);
@@ -123,10 +123,6 @@ var igv = (function (igv) {
         if (!track.order) {
             track.order = (this.nextTrackOrder)++;
 //            track.order = this.trackPanels.length;
-        }
-
-        if (trackFilterJSON) {
-            track.trackFilter.setWithJSON(trackFilterJSON);
         }
 
         this.trackPanels.push(trackView);
