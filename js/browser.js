@@ -265,35 +265,31 @@ var igv = (function (igv) {
         // GTEX HACK -- need aliases
         if (this.type === "GTEX" && !chr.startsWith("chr")) chr = "chr" + chr;
 
-        var w, chromosome, viewportWidth;
-
-        viewportWidth = this.trackViewportWidth();
+        var w,
+            chromosome,
+            viewportWidth = this.trackViewportWidth();
 
         this.referenceFrame.chr = chr;
 
-        // If end is undefined,  interpret start as the new center.
+        // If end is undefined,  interpret start as the new center, otherwise compute scale.
         if (!end) {
-
             w = Math.round(viewportWidth * this.referenceFrame.bpPerPixel / 2);
-            start = start - w;
-            end = start + 2 * w;
+            start = Math.max(0, start - w);
         }
-
-        if (start < 0) {
-            end += -start;
-            start = 0;
+        else {
+            this.referenceFrame.bpPerPixel = (end - start) / (viewportWidth);
         }
 
         if (this.genome) {
+            if (!end) end = start + viewportWidth * this.referenceFrame.bpPerPixel;
             chromosome = this.genome.getChromosome(this.referenceFrame.chr);
             if (chromosome && end > chromosome.bpLength) {
                 start -= (end - chromosome.bpLength);
-                end = chromosome.bpLength;
             }
         }
 
         this.referenceFrame.start = start;
-        this.referenceFrame.bpPerPixel = (end - start) / (viewportWidth);
+
         this.update();
     }
 
@@ -437,30 +433,34 @@ var igv = (function (igv) {
 
         $(trackContainerDiv).mousemove(igv.throttle(function (e) {
 
-            var browser = igv.browser,
-                coords = igv.translateMouseCoordinates(e, trackContainerDiv),
-                pixels,
-                pixelsEnd,
-                referenceFrame = browser.referenceFrame,
-                isCursor = browser.cursorModel;
+                var browser = igv.browser,
+                    coords = igv.translateMouseCoordinates(e, trackContainerDiv),
+                    pixels,
+                    pixelsEnd,
+                    referenceFrame = browser.referenceFrame,
+                    isCursor = browser.cursorModel;
 
-            if (!referenceFrame) return;
+                if (!referenceFrame) return;
 
-            if (isMouseDown) { // Possibly dragging
+                if (isMouseDown) { // Possibly dragging
 
-                if (mouseDownX && Math.abs(coords.x - mouseDownX) > igv.constants.dragThreshold) {
+                    if (mouseDownX && Math.abs(coords.x - mouseDownX) > igv.constants.dragThreshold) {
 
-                    referenceFrame.shiftPixels(lastMouseX - coords.x);
+                        referenceFrame.shiftPixels(lastMouseX - coords.x);
 
-                    // clamp left
-                    referenceFrame.start = Math.max(0, referenceFrame.start);
+                        // TODO -- clamping code below is broken for regular IGV => disabled for now, needs fixed
 
-                    // clamp right
-                    pixelsEnd = isCursor ?
-                        Math.floor(browser.cursorModel.framePixelWidth * browser.cursorModel.filteredRegions.length) :
-                        250000000;    // TODO -- get from reference frame, this is the chr length.
+                        if (isCursor) {
 
-                    // Use this for IGV clamping
+                            // clamp left
+                            referenceFrame.start = Math.max(0, referenceFrame.start);
+
+                            // clamp right
+                            pixelsEnd = isCursor ?
+                                Math.floor(browser.cursorModel.framePixelWidth * browser.cursorModel.filteredRegions.length) :
+                                250000000;    // TODO -- get from reference frame, this is the chr length.
+
+                            // Use this for IGV clamping
 //                    if (igv.genome) {
 //
 //                        var chromosome = igv.genome.getChromosome(igv.referenceFrame.chr);
@@ -474,21 +474,26 @@ var igv = (function (igv) {
 //                    }
 
 
-                    pixels = Math.floor(browser.referenceFrame.toPixels(referenceFrame.start) + browser.trackViewportWidth());
+                            pixels = Math.floor(browser.referenceFrame.toPixels(referenceFrame.start) + browser.trackViewportWidth());
 
-                    if (pixels >= pixelsEnd) {
-                        referenceFrame.start = browser.referenceFrame.toBP(pixelsEnd - browser.trackViewportWidth());
+                            if (pixels >= pixelsEnd) {
+                                referenceFrame.start = browser.referenceFrame.toBP(pixelsEnd - browser.trackViewportWidth());
+                            }
+                        }
+
+                        browser.repaint();
                     }
 
+                    lastMouseX = coords.x;
 
-                    browser.repaint();
                 }
-
-                lastMouseX = coords.x;
 
             }
 
-        }, 10));
+            ,
+            10
+        ))
+        ;
 
         $(trackContainerDiv).mouseup(function (e) {
             mouseDownX = undefined;
@@ -523,6 +528,7 @@ var igv = (function (igv) {
     }
 
     return igv;
-})(igv || {});
+})
+(igv || {});
 
 

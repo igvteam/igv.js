@@ -1,7 +1,7 @@
 function runBAMTests() {
 
     if (!igv) igv = {};
-    igv.sequenceSource = igv.getFastaSequence("//igvdata.broadinstitute.org/genomes/seq/hg19/hg19.fasta");
+    igv.sequenceSource = new igv.FastaSequence("//igvdata.broadinstitute.org/genomes/seq/hg19/hg19.fasta");
 
     asyncTest("reference sequence", 1, function () {
 

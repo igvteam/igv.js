@@ -33,9 +33,9 @@ var igv = (function (igv) {
         this.chromosomeNameLabel = chrNameLabel;
 
 
-      //  var chromosomeNameCanvas = $('<canvas style="position:absolute;width:100%;height:100%"></canvas>')[0];
-      //  chromosomeNameCanvas.setAttribute('width', chromosomeNameDiv.clientWidth);
-      //  chromosomeNameCanvas.setAttribute('height', chromosomeNameCanvas.clientHeight);
+        //  var chromosomeNameCanvas = $('<canvas style="position:absolute;width:100%;height:100%"></canvas>')[0];
+        //  chromosomeNameCanvas.setAttribute('width', chromosomeNameDiv.clientWidth);
+        //  chromosomeNameCanvas.setAttribute('height', chromosomeNameCanvas.clientHeight);
 
 
         this.canvas = canvas;
@@ -43,49 +43,27 @@ var igv = (function (igv) {
 
         this.ctx = canvas.getContext("2d");
 
-      //  this.chromosomeNameCanvas = chromosomeNameCanvas;
-      //  chromosomeNameDiv.appendChild(chromosomeNameCanvas);
+        //  this.chromosomeNameCanvas = chromosomeNameCanvas;
+        //  chromosomeNameDiv.appendChild(chromosomeNameCanvas);
 
-      //  this.chromosomeNameCtx = chromosomeNameCanvas.getContext("2d");
-      //  this.chromosomeNameCtx.font = "bold 10px Arial";
+        //  this.chromosomeNameCtx = chromosomeNameCanvas.getContext("2d");
+        //  this.chromosomeNameCtx.font = "bold 10px Arial";
 
         this.canvas.onclick = function (e) {
-            var isFirefox = typeof InstallTrigger !== 'undefined';
 
-            var isOpera = !!window.opera || navigator.userAgent.indexOf(' OPR/') >= 0;
-            var isChrome = !!window.chrome && !isOpera;
-
-            var mouseX;
-            var mouseY;
-
-            if (isFirefox) {
-                // It's Firefox
-                mouseX = e.layerX;
-                mouseY = e.layerY;
-            } else {
-                // It's Chrome or Safari and works for both
-                mouseX = e.offsetX;
-                mouseY = e.offsetY;
-            }
+            var canvasCoords = igv.translateMouseCoordinates(e, canvas),
+                mouseX = canvasCoords.x,
+                referenceFrame = igv.browser.referenceFrame,
+                chromosome = igv.browser.genome.getChromosome(igv.browser.referenceFrame.chr),
+                viewportWidth = canvas.clientWidth,
+                bp = chromosome.bpLength * mouseX / viewportWidth;
 
             this.getContext("2d").fillRect(mouseX, 0, 10, 10);
 
-            igv.navigateIdeogram(igv.browser, mouseX);
+            igv.browser.goto(referenceFrame.chr, bp);
         }
 
     }
-
-    // Move location of the reference panel by clicking on the genome ideogram
-    igv.navigateIdeogram = function (browser, pixelPosition) {
-
-        var referenceFrame = browser.referenceFrame,
-            chromosome = browser.genome.getChromosome(browser.referenceFrame.chr),
-            viewportWidth = browser.trackViewportWidth(),
-            bp = chromosome.bpLength * pixelPosition / viewportWidth;
-
-        referenceFrame.start = bp;
-        browser.update();
-    };
 
     igv.IdeoPanel.prototype.resize = function () {
 
@@ -140,7 +118,7 @@ var igv = (function (igv) {
 
             this.chromosomeNameLabel.innerHTML = referenceFrame.chr;
 
-           // var chromosomeNameWidth = this.chromosomeNameCanvas.width;
+            // var chromosomeNameWidth = this.chromosomeNameCanvas.width;
             //var chromosomeNameHeight = this.chromosomeNameCanvas.height;
 
             //this.chromosomeNameCtx.clearRect(0, 0, 100, 100);

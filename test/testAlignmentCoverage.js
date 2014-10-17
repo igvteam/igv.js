@@ -9,7 +9,7 @@ function runAlignmentCoverageTests() {
             chr = "chr22",
             ss = 24379992,
             ee = 24380390,
-            fastaSequence = igv.getFastaSequence("../assets/hg19/hg19.fa");
+            fastaSequence = new igv.FastaSequence("../assets/hg19/hg19.fa");
 
         fastaSequence.getSequence(chr, ss, ee, function(sequence){
 

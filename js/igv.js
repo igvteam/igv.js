@@ -57,7 +57,7 @@ var igv = (function (igv) {
         console.log("Browser startup");
 
 
-        igv.sequenceSource = igv.getFastaSequence(options.fastaURL);
+        igv.sequenceSource = new igv.FastaSequence(options.fastaURL);
 
 
         igv.loadGenome(options.cytobandURL, function (genome) {

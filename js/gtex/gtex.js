@@ -235,7 +235,7 @@ var igv = (function (igv) {
             browser.referenceFrame = new igv.ReferenceFrame("chr1", 1584102 - 1000000, 2000000 / 1000);
 
 
-            igv.sequenceSource = igv.getFastaSequence(fastaURL);
+            igv.sequenceSource = new igv.FastaSequence(fastaURL);
 
             browser.ideoPanel = new igv.IdeoPanel(browser);
             $('#igvHeaderDiv').append(browser.ideoPanel.div);

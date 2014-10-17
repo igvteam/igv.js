@@ -7,7 +7,7 @@ function runBAMTrackTests() {
 
     // Setup "mock" objects
     if(!igv) igv = {};
-    igv.sequenceSource = igv.getFastaSequence("//igvdata.broadinstitute.org/genomes/seq/hg19/hg19.fasta");
+    igv.sequenceSource = new igv.FastaSequence("//igvdata.broadinstitute.org/genomes/seq/hg19/hg19.fasta");
 
     var bamPath = "../test/data/gstt1_sample.bam";
 
