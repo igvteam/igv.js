@@ -293,27 +293,25 @@ var igv = (function (igv) {
 
 
 
-
         // Launch app with session JSON if provided as param
-        var sessionJSONPath = igv.getQueryValue('session') || undefined;
+//        var sessionJSONPath = igv.getQueryValue('session') || undefined;
+        var sessionJSONPath = "test/data/cursor/session/cursor-session.txt";
 
-        if (sessionJSONPath) {
+        if ( sessionJSONPath ) {
 
-            $.getJSON( sessionJSONPath, function( data ) {
-;
-                var session = JSON.parse(data);
-                console.log("yup");
+            $.getJSON( sessionJSONPath, function( json ) {
+
+                browser.launchSession = json;
+
+                console.log(browser.launchSession);
 
             });
 
         }
 
 
-
-
-
-
-        addDemoTracks(browser);
+        
+//        addDemoTracks(browser);
 
         browser.setFrameWidth = function (frameWidthString) {
 
