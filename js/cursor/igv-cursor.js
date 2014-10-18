@@ -314,8 +314,7 @@ var igv = (function (igv) {
 
 
         // Launch app with session JSON if provided as param
-        var sessionJSONPath = igv.getQueryValue('session') || undefined;
-//        var sessionJSONPath = "test/data/cursor/session/cursor-session.txt";
+        var sessionJSONPath = igv.getQueryValue('session');
 
         if ( sessionJSONPath ) {
 
@@ -323,7 +322,7 @@ var igv = (function (igv) {
 
                 browser.launchSession = json;
 
-                console.log(browser.launchSession);
+                console.log("launchSession: " + JSON.stringify(browser.launchSession));
 
             });
 
