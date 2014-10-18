@@ -11,6 +11,10 @@ var igv = (function (igv) {
         $(contentHeader).append(contentHeaderDiv);
         $(browser.div).append(trackContainer);
 
+        // Add cursor specific methods to the browser object,  some new some overrides
+        addCursorExtensions(browser);
+
+
         browser.horizontalScrollbar = new cursor.HorizontalScrollbar(browser, $(browser.div));
 
         document.getElementById('igvContainerDiv').appendChild(browser.div);
@@ -93,73 +97,16 @@ var igv = (function (igv) {
             sessionFile = sessionInput.files[ 0 ];
             $("#igvSessionLoadForm")[0].reset();
 
-            fileReader.onload = (function (theFile) {
+            fileReader.onload = function (e) {
 
-                return function (e) {
+                var json = e.target.result,
+                    session = JSON.parse(json);
 
-                    var session,
-                        trackList = [];
+                browser.sessionTeardown();
 
-                    browser.sessionTeardown();
+                browser.loadSession(session);
 
-                    session = JSON.parse(e.target.result);
-
-                    browser.cursorModel.regionWidth = session.regionWidth;
-                    $("input[id='regionSizeInput']").val(browser.cursorModel.regionWidth);
-
-                    browser.trackHeight = session.trackHeight;
-                    $("input[id='trackHeightInput']").val(browser.trackHeight);
-
-                    session.tracks.forEach(function (trackSession) {
-
-                        var featureSource,
-                            track;
-
-                        featureSource = new igv.BedFeatureSource(trackSession.path);
-
-                        track = new cursor.CursorTrack(featureSource, browser.cursorModel, browser.referenceFrame, trackSession.label, trackSession.height);
-                        track.color = trackSession.color;
-                        track.order = trackSession.order;
-
-                        if (trackSession.designatedTrack && true === trackSession.designatedTrack) {
-                            browser.designatedTrack = track;
-                        }
-
-                        trackList.push( { track : track, trackFilterJSON : trackSession.trackFilter } );
-
-                    });
-
-                    if (!browser.designatedTrack) {
-                        browser.designatedTrack = trackList[ 0 ];
-                    }
-
-                    browser.designatedTrack.featureSource.allFeatures(function (featureList) {
-
-                        browser.cursorModel.setRegions(featureList);
-
-                        trackList.forEach(function (trackTrackFilterJSON) {
-                            browser.addTrack(trackTrackFilterJSON.track, trackTrackFilterJSON.trackFilterJSON);
-
-                            if (trackTrackFilterJSON.trackFilterJSON) {
-                                trackTrackFilterJSON.track.trackFilter.setWithJSON(trackTrackFilterJSON.trackFilterJSON);
-                            }
-
-                        });
-
-                        browser.cursorModel.filterRegions();
-
-                        browser.setFrameWidth(browser.trackViewportWidth() * session.framePixelWidthUnitless);
-
-                        browser.referenceFrame.bpPerPixel = 1.0/browser.cursorModel.framePixelWidth;
-
-                        browser.goto("", session.start, session.end);
-
-                        browser.horizontalScrollbar.update();
-                    });
-
-                };
-
-            })(sessionFile);
+            };
 
             fileReader.readAsText(sessionFile);
 
@@ -316,19 +263,27 @@ var igv = (function (igv) {
         // Launch app with session JSON if provided as param
         var sessionJSONPath = igv.getQueryValue('session');
 
-        if ( sessionJSONPath ) {
+        if (sessionJSONPath) {
 
-            $.getJSON( sessionJSONPath, function( json ) {
-
-                browser.launchSession = json;
+            $.getJSON(sessionJSONPath, function (session) {
 
                 console.log("launchSession: " + JSON.stringify(browser.launchSession));
+                browser.loadSession(session);
 
             });
 
         }
+        else {
 
-        addDemoTracks(browser);
+            addDemoTracks(browser);
+        }
+
+
+        return browser;
+    };
+
+
+    function addCursorExtensions(browser) {
 
         browser.setFrameWidth = function (frameWidthString) {
 
@@ -343,7 +298,7 @@ var igv = (function (igv) {
                 browser.cursorModel.framePixelWidth = frameWidth;
                 browser.referenceFrame.bpPerPixel = 1 / frameWidth;
 
-                $("input[id='frameWidthInput']").val(Math.round(frameWidth * 1000)/1000);
+                $("input[id='frameWidthInput']").val(Math.round(frameWidth * 1000) / 1000);
 
                 browser.update();
             }
@@ -409,11 +364,11 @@ var igv = (function (igv) {
             var dev_null,
                 session =
                 {
-                    start : Math.floor(browser.referenceFrame.start),
-                    end : Math.floor((browser.referenceFrame.bpPerPixel * browser.trackViewportWidth()) + browser.referenceFrame.start),
-                    regionWidth : browser.cursorModel.regionWidth,
-                    framePixelWidthUnitless : (browser.cursorModel.framePixelWidth/browser.trackViewportWidth()),
-                    trackHeight : browser.trackHeight,
+                    start: Math.floor(browser.referenceFrame.start),
+                    end: Math.floor((browser.referenceFrame.bpPerPixel * browser.trackViewportWidth()) + browser.referenceFrame.start),
+                    regionWidth: browser.cursorModel.regionWidth,
+                    framePixelWidthUnitless: (browser.cursorModel.framePixelWidth / browser.trackViewportWidth()),
+                    trackHeight: browser.trackHeight,
                     tracks: []
                 };
 
@@ -427,7 +382,7 @@ var igv = (function (igv) {
                     jsonRepresentation.designatedTrack = true;
                 }
 
-                session.tracks.push( jsonRepresentation );
+                session.tracks.push(jsonRepresentation);
             });
 
             return JSON.stringify(session, undefined, 4);
@@ -446,8 +401,68 @@ var igv = (function (igv) {
 
         };
 
-        return browser;
-    };
+        browser.loadSession = function (session) {
+
+            var trackList = [];
+
+            browser.sessionTeardown();
+
+            browser.cursorModel.regionWidth = session.regionWidth;
+            $("input[id='regionSizeInput']").val(browser.cursorModel.regionWidth);
+
+            browser.trackHeight = session.trackHeight;
+            $("input[id='trackHeightInput']").val(browser.trackHeight);
+
+            session.tracks.forEach(function (trackSession) {
+
+                var featureSource,
+                    track;
+
+                featureSource = new igv.BedFeatureSource(trackSession.path);
+
+                track = new cursor.CursorTrack(featureSource, browser.cursorModel, browser.referenceFrame, trackSession.label, trackSession.height);
+                track.color = trackSession.color;
+                track.order = trackSession.order;
+
+                if (trackSession.designatedTrack && true === trackSession.designatedTrack) {
+                    browser.designatedTrack = track;
+                }
+
+                trackList.push({ track: track, trackFilterJSON: trackSession.trackFilter });
+
+            });
+
+            if (!browser.designatedTrack) {
+                browser.designatedTrack = trackList[ 0 ];
+            }
+
+            browser.designatedTrack.featureSource.allFeatures(function (featureList) {
+
+                browser.cursorModel.setRegions(featureList);
+
+                trackList.forEach(function (trackTrackFilterJSON) {
+                    browser.addTrack(trackTrackFilterJSON.track, trackTrackFilterJSON.trackFilterJSON);
+
+                    if (trackTrackFilterJSON.trackFilterJSON) {
+                        trackTrackFilterJSON.track.trackFilter.setWithJSON(trackTrackFilterJSON.trackFilterJSON);
+                    }
+
+                });
+
+                browser.cursorModel.filterRegions();
+
+                browser.setFrameWidth(browser.trackViewportWidth() * session.framePixelWidthUnitless);
+
+                browser.referenceFrame.bpPerPixel = 1.0 / browser.cursorModel.framePixelWidth;
+
+                browser.goto("", session.start, session.end);
+
+                browser.horizontalScrollbar.update();
+            });
+
+        };
+    }
+
 
     igv.cursorAddTrackControlButtons = function (trackView, browser, controlDiv) {
 
