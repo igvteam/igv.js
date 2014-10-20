@@ -14,7 +14,8 @@ var igv = (function (igv) {
             contentDiv,
             canvas,
             closeButton,
-            labelButton;
+            labelButton,
+            spinnerFontAwesome;
 
         // track
         trackDiv = document.createElement("div");
@@ -22,6 +23,11 @@ var igv = (function (igv) {
         trackDiv.className = "igv-track-div";
         trackDiv.style.height = track.height + "px";
         this.trackDiv = trackDiv;
+
+        // spinner
+        spinnerFontAwesome = document.createElement("i");
+        this.trackDiv.appendChild(spinnerFontAwesome);
+        spinnerFontAwesome.className = "fa fa-spinner fa-spin igv-spinner-fontawesome-start";
 
         // controls
         var controlWidth = browser.controlPanelWidth ? browser.controlPanelWidth : 50;
@@ -209,7 +215,9 @@ var igv = (function (igv) {
                 this.currentTask.abort();
             }
 
-            spinner = igv.getSpinner(this.trackDiv);   // Start a spinner
+//            spinner = igv.getSpinner(this.trackDiv);   // Start a spinner
+            igv.spinnerStartWithParent(myself.trackDiv);
+
             this.currentTask = {
                 canceled: false,
                 chr: referenceFrame.chr,
@@ -220,15 +228,16 @@ var igv = (function (igv) {
                     if (this.xhrRequest) {
                         this.xhrRequest.abort();
                     }
-                    spinner.stop();
+//                    spinner.stop();
+                    igv.spinnerStopWithParent(myself.trackDiv);
                 }
 
             };
 
             this.track.draw(igvCanvas, referenceFrame, tileStart, tileEnd, buffer.width, buffer.height, function (task) {
 
-
-                    spinner.stop();
+//                    spinner.stop();
+                    igv.spinnerStopWithParent(myself.trackDiv);
 
                     if (task) console.log(task.canceled);
 

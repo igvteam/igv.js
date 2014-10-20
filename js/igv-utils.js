@@ -2,19 +2,19 @@ var igv = (function (igv) {
 
     igv.spinnerStartWithParent = function (parentElement) {
 
-        var thang = $(parentElement);
+        var thang = $(parentElement).find("i.fa-spinner");
 
-        thang.find("i").removeClass("igv-spinner-fontawesome-stop");
-        thang.find("i").addClass   ("igv-spinner-fontawesome-start");
+        thang.removeClass("igv-spinner-fontawesome-stop");
+        thang.addClass   ("igv-spinner-fontawesome-start");
 
     };
 
     igv.spinnerStopWithParent = function (parentElement) {
 
-        var thang = $(parentElement);
+        var thang = $(parentElement).find("i.fa-spinner");
 
-        thang.find("i").removeClass("igv-spinner-fontawesome-start");
-        thang.find("i").addClass   ("igv-spinner-fontawesome-stop");
+        thang.removeClass("igv-spinner-fontawesome-start");
+        thang.addClass   ("igv-spinner-fontawesome-stop");
 
     };
 
