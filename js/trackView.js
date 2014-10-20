@@ -27,7 +27,7 @@ var igv = (function (igv) {
         // spinner
         spinnerFontAwesome = document.createElement("i");
         this.trackDiv.appendChild(spinnerFontAwesome);
-        spinnerFontAwesome.className = "fa fa-spinner fa-spin igv-spinner-fontawesome-start";
+        spinnerFontAwesome.className = "fa fa-spinner fa-2x fa-spin igv-spinner-fontawesome-start";
 
         // controls
         var controlWidth = browser.controlPanelWidth ? browser.controlPanelWidth : 50;
