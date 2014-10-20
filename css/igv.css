@@ -1,3 +1,18 @@
+.igv-spinner-fontawesome-start {
+    position: relative;
+    left:50%;
+    top:50%;
+    z-index: 256;
+    display: inline;
+}
+.igv-spinner-fontawesome-stop {
+    position: relative;
+    left:50%;
+    top:50%;
+    z-index: -256;
+    display: none;
+}
+
 .btn-file {
     position: relative;
     overflow: hidden;

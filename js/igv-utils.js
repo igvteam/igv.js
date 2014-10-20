@@ -1,5 +1,23 @@
 var igv = (function (igv) {
 
+    igv.spinnerStartWithParent = function (parentElement) {
+
+        var thang = $(parentElement);
+
+        thang.find("i").removeClass("igv-spinner-fontawesome-stop");
+        thang.find("i").addClass   ("igv-spinner-fontawesome-start");
+
+    };
+
+    igv.spinnerStopWithParent = function (parentElement) {
+
+        var thang = $(parentElement);
+
+        thang.find("i").removeClass("igv-spinner-fontawesome-start");
+        thang.find("i").addClass   ("igv-spinner-fontawesome-stop");
+
+    };
+
     igv.domElementRectAsString = function (element) {
         return " x " + element.clientLeft + " y " + element.clientTop + " w " + element.clientWidth + " h " + element.clientHeight;
     };
