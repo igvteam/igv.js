@@ -198,7 +198,8 @@ var cursor = (function (cursor) {
             if (undefined !== thresholdFramePixelWidth && sortTrackPanelPostFiltering) {
 
                 // spin spinner
-                spinner = igv.getSpinner(sortTrackPanelPostFiltering.viewportDiv);
+//                spinner = igv.getSpinner(sortTrackPanelPostFiltering.viewportDiv);
+                igv.spinnerStartWithParent(sortTrackPanelPostFiltering.trackDiv);
 
                 // TODO: This is wacky. Needs to be done to maintain sort direction
                 sortTrackPanelPostFiltering.track.sortDirection *= -1;
@@ -206,7 +207,8 @@ var cursor = (function (cursor) {
 
                     sortTrackPanelPostFiltering.track.sortButton.className = "fa fa-bar-chart-o igv-control-sort-fontawesome-selected";
 
-                    spinner.stop();
+//                    spinner.stop();
+                    igv.spinnerStopWithParent(sortTrackPanelPostFiltering.trackDiv);
 
                     if (myself.framePixelWidth < thresholdFramePixelWidth) {
                         myself.browser.setFrameWidth(thresholdFramePixelWidth);

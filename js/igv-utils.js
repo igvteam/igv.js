@@ -90,7 +90,6 @@ var igv = (function (igv) {
         return spinner;
     };
 
-
     /**
      * Translate the mouse coordinates for the event to the coordinates for the given target element
      * @param e
@@ -133,8 +132,6 @@ var igv = (function (igv) {
 
     };
 
-
-
      igv.throttle = function (fn, threshhold, scope) {
         threshhold || (threshhold = 200);
         var last, deferTimer;
@@ -157,7 +154,6 @@ var igv = (function (igv) {
             }
         }
     }
-
 
     return igv;
 

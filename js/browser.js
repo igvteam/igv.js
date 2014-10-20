@@ -358,13 +358,13 @@ var igv = (function (igv) {
 
             if (this.searchURL) {
 
-                var spinner = igv.getSpinner(this.trackContainerDiv);
+//                var spinner = igv.getSpinner(this.trackContainerDiv);
                 var url = this.searchURL + feature;
                 var browser = this;
 
                 igv.loadData(url, function (data) {
 
-                    spinner.stop();
+//                    spinner.stop();
 
                     var lines = data.split("\n"),
                         len = lines.length,
