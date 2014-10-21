@@ -209,9 +209,7 @@ var igv = (function (igv) {
 
             $('#encodeModalGoButton').on('click', function () {
 
-                var featureSource,
-                    cursorTrack,
-                    tableRow,
+                var tableRow,
                     tableRows,
                     tableCell,
                     tableCells,
@@ -235,13 +233,20 @@ var igv = (function (igv) {
 
                         });
 
-                        featureSource = new igv.BedFeatureSource(record.path);
+                        browser.loadTrack({
+                            type: "bed",
+                            url: record.path,
+                            label: encode.encodeTrackLabel(record),
+                            color: encode.encodeAntibodyColor(record.antibody)
+                        });
 
-                        cursorTrack = new cursor.CursorTrack(featureSource, browser.cursorModel, browser.referenceFrame, encode.encodeTrackLabel(record), browser.trackHeight);
-                        cursorTrack.color = encode.encodeAntibodyColor(record.antibody);
-                        cursorTrack.height = browser.trackHeight;
-
-                        browser.addTrack(cursorTrack);
+//                        featureSource = new igv.BedFeatureSource(record.path);
+//
+//                        cursorTrack = new cursor.CursorTrack(featureSource, browser.cursorModel, browser.referenceFrame, encode.encodeTrackLabel(record), browser.trackHeight);
+//                        cursorTrack.color = encode.encodeAntibodyColor(record.antibody);
+//                        cursorTrack.height = browser.trackHeight;
+//
+//                        browser.addTrack(cursorTrack);
 
                     }
 
@@ -285,18 +290,6 @@ var igv = (function (igv) {
                 browser.cursorModel.setRegions(featureList);
                 browser.horizontalScrollbar.update();
             });
-
-
-
-
-
-
-
-
-
-
-
-//            addDemoTracks(browser);
         }
 
 
@@ -384,22 +377,8 @@ var igv = (function (igv) {
 
 //            this.__proto__.loadTrack.call(this, config);
 
-            var attemptedDuplicateTrackAddition = false;
-
-            this.trackPanels.forEach(function (tp, tps, index) {
-
-                if (false === attemptedDuplicateTrackAddition) {
-
-                    if (JSON.stringify(config) === JSON.stringify(tp.track.config)) {
-                        attemptedDuplicateTrackAddition = true;
-                    }
-
-                }
-            });
-
-            if (true === attemptedDuplicateTrackAddition) {
-                window.alert("Attempt to load duplicate track.");
-                return;
+            if (browser.didAttemptedDuplicateTrackAddition(config)) {
+              return;
             }
 
             var path = config.url,

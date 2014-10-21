@@ -37,21 +37,7 @@ var igv = (function (igv) {
 
     igv.Browser.prototype.loadTrack = function (config) {
 
-        var attemptedDuplicateTrackAddition = false;
-
-        this.trackPanels.forEach(function (tp, tps, index) {
-
-            if (false === attemptedDuplicateTrackAddition) {
-
-                if (JSON.stringify(config) === JSON.stringify(tp.track.config)) {
-                    attemptedDuplicateTrackAddition = true;
-                }
-
-            }
-        });
-
-        if (true === attemptedDuplicateTrackAddition) {
-            window.alert("Attempt to load duplicate track.");
+        if (this.didAttemptedDuplicateTrackAddition(config)) {
             return;
         }
 
@@ -82,6 +68,30 @@ var igv = (function (igv) {
 
         return newTrack;
 
+
+    };
+
+
+    igv.Browser.prototype.didAttemptedDuplicateTrackAddition = function (config) {
+
+        var attemptedDuplicateTrackAddition = false;
+
+        this.trackPanels.forEach(function (tp) {
+
+            if (false === attemptedDuplicateTrackAddition) {
+
+                if (JSON.stringify(config) === JSON.stringify(tp.track.config)) {
+                    attemptedDuplicateTrackAddition = true;
+                }
+            }
+        });
+
+        if (true === attemptedDuplicateTrackAddition) {
+            window.alert("Attempt to load duplicate track.");
+            return true;
+        }
+
+        return false;
 
     };
 
