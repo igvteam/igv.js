@@ -137,7 +137,7 @@ var igv = (function (igv) {
                                     acc = 0.0;
                                     coverageMap.coverage[i].mismatchPercentages(base).forEach(function (fraction, index, fractions) {
 
-                                        if (fraction.percent < 0.001) {
+                                        if (fraction.percent < 0.20) {
                                             return;
                                         }
 
