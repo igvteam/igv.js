@@ -10,19 +10,21 @@
 
     <title>IGV - Integrative Genomics Viewer</title>
 
+    <!-- Font Awesome -->
+    <link href="http://maxcdn.bootstrapcdn.com/font-awesome/4.2.0/css/font-awesome.min.css" rel="stylesheet">
+
     <!-- IGV Bootstrap css -->
     <link href="css/igv.css" type="text/css" rel="stylesheet">
 
-
+    <!-- jquery js -->
     <script src="http://code.jquery.com/jquery-1.11.0.min.js"></script>
 
+    <!-- Vendor js -->
     <script type="text/javascript" src="vendor/inflate.js"></script>
     <script type="text/javascript" src="vendor/zlib_and_gzip.min.js"></script>
-    <!--   <script type="text/javascript" src="vendor/bootstrap/plugins/holder.js"></script>  -->
 
-    <!-- IGV js code -->
-
-
+    <!-- IGV js -->
+    <script type="text/javascript" src="js/popover.js"></script>
     <script type="text/javascript" src="js/igv.js"></script>
     <script type="text/javascript" src="js/browser.js"></script>
     <script type="text/javascript" src="js/ideogram.js"></script>
@@ -38,6 +40,7 @@
     <script type="text/javascript" src="js/parseUtils.js"></script>
     <script type="text/javascript" src="js/fasta.js"></script>
     <script type="text/javascript" src="js/sequenceTrack.js"></script>
+    <script type="text/javascript" src="js/bedGraphSource.js"></script>
     <script type="text/javascript" src="js/wigSource.js"></script>
     <script type="text/javascript" src="js/wigTrack.js"></script>
     <script type="text/javascript" src="js/dataloader.js"></script>
@@ -45,13 +48,14 @@
     <script type="text/javascript" src="js/binary.js"></script>
     <script type="text/javascript" src="js/gtex/eqtlTrack.js"></script>
     <script type="text/javascript" src="js/coverageMap.js"></script>
-    <script type="text/javascript" src="js/alignmentManager.js"></script>
-    <script type="text/javascript" src="js/bamReader.js"></script>
-    <script type="text/javascript" src="js/bamSource.js"></script>
-    <script type="text/javascript" src="js/bamTrack.js"></script>
+    <script type="text/javascript" src="js/bam/bamReader.js"></script>
+    <script type="text/javascript" src="js/bam/bamSource.js"></script>
+    <script type="text/javascript" src="js/bam/bamTrack.js"></script>
+    <script type="text/javascript" src="js/bam/bamAlignment.js"></script>
+    <script type="text/javascript" src="js/bam/ga4gh.js"></script>
+    <script type="text/javascript" src="js/bam/ga4ghReader.js"></script>
     <script type="text/javascript" src="vendor/spin.js"></script>
     <script type="text/javascript" src="js/intervalTree.js"></script>
-
     <script type="text/javascript" src="js/encode/encode.js"></script>
     <script type="text/javascript" src="js/cursor/cursorTrack.js"></script>
     <script type="text/javascript" src="js/cursor/cursorModel.js"></script>
@@ -59,14 +63,21 @@
     <script type="text/javascript" src="js/karyo/karyo.js"></script>
     <script type="text/javascript" src="js/gwas/t2dVariantSource.js"></script>
     <script type="text/javascript" src="js/gwas/t2dVariantTrack.js"></script>
-    
-    <script type="text/javascript" src="js/segTrack.js"></script>
-    <script type="text/javascript" src="js/seg.js"></script>
+    <script type="text/javascript" src="vendor/opentip-native.js"></script>
+    <script type="text/javascript" src="js/igv-constants.js"></script>
+
+    <script type="text/javascript" src="js/bigwig/bufferedReader.js"></script>
+    <script type="text/javascript" src="js/bigwig/bwBPTree.js"></script>
+    <script type="text/javascript" src="js/bigwig/bwReader.js"></script>
+    <script type="text/javascript" src="js/bigwig/bwRPTree.js"></script>
+    <script type="text/javascript" src="js/bigwig/bwSource.js"></script>
+    <script type="text/javascript" src="js/bigwig/bwTotalSummary.js"></script>
+    <script type="text/javascript" src="js/set.js"></script>
 </head>
 
 <body>
 
-<div id="myDiv">
+<div id="controls">
     <table>
         <tr>
             <td><a style="color: blue;cursor: pointer"
@@ -77,6 +88,25 @@
                 NA06984 BAM</a></td>
         </tr>
         <tr>
+            <td><a style="color: blue;cursor: pointer"
+                   onclick="igv.browser.loadTrack({
+                     url: 'http://www.broadinstitute.org/igvdata/1KG/b37/data/HG02450/alignment/HG02450.mapped.ILLUMINA.bwa.ACB.low_coverage.20120522.bam',
+                     label: 'HG02450'
+                   })">Load
+                HG02450 BAM</a></td>
+        </tr>
+        <td><a style="color: blue;cursor: pointer"
+               onclick="igv.browser.loadTrack({
+                     sourceType: 'ga4gh',
+                     type: 'bam',
+                     url: 'https://www.googleapis.com/genomics/v1beta',
+                     authKey: 'AIzaSyC-dujgw4P1QvNd8i_c-I-S_P1uxVZzn0w',
+                     readsetId: 'CMvnhpKTFhCjz9_25e_lCw',
+                     label: 'Ga4gh'
+                   })">Load
+            GA4Gh</a></td>
+        </tr>
+        <tr>
             <td><a style="color: blue;cursor: pointer" onclick="igv.browser.search('chr1:155,169,232-155,169,271')">
                 Goto chr1:155,169,174-155,169,329</a></td>
         </tr>
@@ -84,18 +114,30 @@
             <td><a style="color: blue;cursor: pointer" onclick="igv.browser.search('chr1:155,172,193-155,172,564')">
                 Goto chr1:155,172,193-155,172,564</a></td>
         </tr>
-        <!--        <tr>
-                    <td><a style="color: blue;cursor: pointer" onclick="igv.browser.zoomIn()">
-                        Zoom In</a></td>
-                </tr>
-                <tr>
-                    <td><a style="color: blue;cursor: pointer" onclick="igv.browser.zoomOut()">
-                        Zoom Out</a></td>
-                </tr>-->
-
-
+        <tr>
+            <td><a style="color: blue;cursor: pointer"
+                   onclick="igv.browser.loadTrack({
+                     url: 'test/data/bigWigExample.bw',
+                     label: 'BigWig'
+                   })">Load
+                BigWig example (chr21)</a></td>
+        </tr>
+        <tr>
+            <td><a style="color: blue;cursor: pointer" onclick="igv.browser.search('chr21:1-48129895')">
+                Goto chr21</a></td>
+        </tr>
+        <tr>
+            <td><a style="color: blue;cursor: pointer" onclick="igv.browser.zoomIn()">
+                Zoom In</a></td>
+        </tr>
+        <tr>
+            <td><a style="color: blue;cursor: pointer" onclick="igv.browser.zoomOut()">
+                Zoom Out</a></td>
+        </tr>
     </table>
-    <p/>
+</div>
+<div id="myDiv" style="padding-top: 50px;padding-bottom: 20px;">
+
 </div>
 
 <script type="text/javascript">
@@ -107,28 +149,26 @@
         div = $("#myDiv")[0];
         options = {
             showKaryo: true,
-            fastaURL: "http://igvdata.broadinstitute.org/genomes/seq/hg19/hg19.fasta",
-            cytobandURL: "http://igvdata.broadinstitute.org/genomes/seq/hg19/cytoBand.txt",
+            fastaURL: "http://dn7ywbm9isq8j.cloudfront.net/genomes/seq/hg19/hg19.fasta",
+            cytobandURL: "http://dn7ywbm9isq8j.cloudfront.net/genomes/seq/hg19/cytoBand.txt",
             tracks: [
-                new igv.SequenceTrack(),
-                new igv.GeneTrack({
-                    url: "http://igvdata.broadinstitute.org/annotations/hg19/genes/gencode.v18.collapsed.bed",
-                    label: "Genes"
-                }),
-                 new igv.SEGTrack({
-                    url: "irdata/CN_Segments.seg",
-                    label: "Ploidy"
-                })
+                {
+                    type: "sequence",
+                    order: 9999
+                },
+                {
+                    url: "http://dn7ywbm9isq8j.cloudfront.net/annotations/hg19/genes/gencode.v18.collapsed.bed",
+                    label: "Genes",
+                    order: 10000
+                }
             ]
         };
-        browser = igv.createBrowser(options);
-        div.appendChild(browser.div);
-        browser.startup();
+
+        browser = igv.createBrowser(div, options);
 
     });
 
 </script>
-
 
 </body>
 
