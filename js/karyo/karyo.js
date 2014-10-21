@@ -30,7 +30,6 @@ var igv = (function (igv) {
         canvas.style.position = 'absolute';
         canvas.style.width = "100%";
         canvas.style.height = contentHeight;
-        log("canvas height: "+ canvas.style.height);
         canvas.setAttribute('width', contentWidth);    //Must set the width & height of the canvas
         canvas.setAttribute('height', contentHeight);
 
@@ -120,12 +119,13 @@ var igv = (function (igv) {
     // Move location of the reference panel by clicking on the genome ideogram
     igv.navigateKaryo = function (browser, mouseX, mouseY) {
     	// check each chromosome if the coordinates are within its bound
+        log("Got mouse click at "+mouseX+"/"+mouseY);
     	for (var i = 0; i < igv.guichromosomes.length; i++) {    		
     		var g = igv.guichromosomes[i];
     		if (g.x < mouseX && g.right > mouseX && g.y < mouseY && g.bottom > mouseY) {
     			var dy = mouseY - g.y;
     			var bp = Math.round(g.size * dy / g.h);
-    			log("Going to position "+bp);
+    			log("Going to "+g.name+" position "+bp);
     			browser.search(g.name+":"+bp+"-"+(bp+10000));
     			break;
     		}
