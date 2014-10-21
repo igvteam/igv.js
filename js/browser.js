@@ -71,7 +71,6 @@ var igv = (function (igv) {
 
     };
 
-
     igv.Browser.prototype.didAttemptedDuplicateTrackAddition = function (config) {
 
         var attemptedDuplicateTrackAddition = false;
@@ -94,7 +93,6 @@ var igv = (function (igv) {
         return false;
 
     };
-
 
     // Get the file type from the path extension
     function getType(path) {

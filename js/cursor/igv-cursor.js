@@ -406,7 +406,6 @@ var igv = (function (igv) {
 
         };
 
-
         browser.session = function () {
 
             var dev_null,
@@ -451,7 +450,9 @@ var igv = (function (igv) {
 
         browser.loadSession = function (session) {
 
-            var trackList = [];
+            var trackConfigList = [],
+                trackList = [],
+                designatedTrackIndex;
 
             browser.sessionTeardown();
 
@@ -463,26 +464,45 @@ var igv = (function (igv) {
 
             session.tracks.forEach(function (trackSession) {
 
-                var featureSource,
-                    track;
-
-                featureSource = new igv.BedFeatureSource(trackSession.path);
-
-                track = new cursor.CursorTrack(featureSource, browser.cursorModel, browser.referenceFrame, trackSession.label, trackSession.height);
-                track.color = trackSession.color;
-                track.order = trackSession.order;
-
-                if (trackSession.designatedTrack && true === trackSession.designatedTrack) {
-                    browser.designatedTrack = track;
-                }
-
-                trackList.push({ track: track, trackFilterJSON: trackSession.trackFilter });
+                trackConfigList.push({
+                    type: "bed",
+                    url: trackSession.path,
+                    color: trackSession.color,
+                    label: trackSession.label,
+                    order: trackSession.order,
+                    designatedTrack: trackSession.designatedTrack
+                });
 
             });
 
-            if (!browser.designatedTrack) {
-                browser.designatedTrack = trackList[ 0 ];
+            designatedTrackIndex = undefined;
+            trackConfigList.forEach(function(trackConfig, i, trackConfigs){
+
+                if (undefined === designatedTrackIndex) {
+                    if (undefined != trackConfig.designatedTrack && true === trackConfig.designatedTrack) {
+                      designatedTrackIndex = i;
+                    }
+                }
+
+            });
+
+            if (undefined === designatedTrackIndex) {
+                designatedTrackIndex = 0;
             }
+
+            trackConfigList.forEach(function(trackConfig){
+               browser.loadTrack(trackConfig);
+            });
+
+
+            browser.setFrameWidth(browser.trackViewportWidth() * session.framePixelWidthUnitless);
+
+            browser.referenceFrame.bpPerPixel = 1.0 / browser.cursorModel.framePixelWidth;
+
+            browser.goto("", session.start, session.end);
+
+            browser.horizontalScrollbar.update();
+
 
             browser.designatedTrack.featureSource.allFeatures(function (featureList) {
 
@@ -499,13 +519,6 @@ var igv = (function (igv) {
 
                 browser.cursorModel.filterRegions();
 
-                browser.setFrameWidth(browser.trackViewportWidth() * session.framePixelWidthUnitless);
-
-                browser.referenceFrame.bpPerPixel = 1.0 / browser.cursorModel.framePixelWidth;
-
-                browser.goto("", session.start, session.end);
-
-                browser.horizontalScrollbar.update();
             });
 
         };
