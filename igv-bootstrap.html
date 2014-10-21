@@ -97,7 +97,7 @@
     <li class="dropdown" id="loci-menu-dropdown"><a href="#" class="dropdown-toggle"
                                                     data-toggle="dropdown">Loci<b class="caret"></b></a>
         <ul id="locusList" class="dropdown-menu">
-            <li><a onclick="igv.browser.search('brca1')"">brca1</a></li>
+            <li><a onclick="igv.browser.search('brca1')">brca1</a></li>
             <li><a onclick="igv.browser.search('chr22:24,375,948-24,384,434')">chr22:24,375,948-24,384,434</a>
             </li>
             <li><a></a></li>
@@ -378,7 +378,9 @@
 
     $(document).ready(function () {
 
-        var div, options, browser;
+        var div,
+                options,
+                browser;
 
         div = $("#myDiv")[0];
         options = {
