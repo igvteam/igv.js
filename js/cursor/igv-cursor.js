@@ -450,12 +450,6 @@ var igv = (function (igv) {
 
         browser.loadSession = function (session) {
 
-            var j,
-                len,
-                trackConfigList = [],
-                trackList = [],
-                designatedTrackIndex;
-
             browser.sessionTeardown();
 
             browser.cursorModel.regionWidth = session.regionWidth;
@@ -464,48 +458,35 @@ var igv = (function (igv) {
             browser.trackHeight = session.trackHeight;
             $("input[id='trackHeightInput']").val(browser.trackHeight);
 
+            browser.designatedTrack = undefined;
             session.tracks.forEach(function (trackSession) {
 
-                trackConfigList.push({
+                var config = {
                     type: "bed",
                     url: trackSession.path,
                     color: trackSession.color,
                     label: trackSession.label,
                     order: trackSession.order,
                     designatedTrack: trackSession.designatedTrack
-                });
+                };
 
-            });
+                browser.loadTrack(config);
 
-            designatedTrackIndex = undefined;
-            trackConfigList.forEach(function(trackConfig, i, trackConfigs){
+                if (undefined != config.designatedTrack && true === config.designatedTrack) {
 
-                if (undefined === designatedTrackIndex) {
-                    if (undefined != trackConfig.designatedTrack && true === trackConfig.designatedTrack) {
-                        designatedTrackIndex = i;
-                    }
+                    browser.designatedTrack = browser.trackPanels[ (browser.trackPanels.length - 1) ].track;
                 }
 
             });
 
-            if (undefined === designatedTrackIndex) {
-                designatedTrackIndex = 0;
-            }
-
-            for (j = 0, len = trackConfigList.length; j < len; j++) {
-
-                browser.loadTrack(trackConfigList[ j ]);
-                if (j === designatedTrackIndex) {
-                    browser.designatedTrack = browser.trackPanels[ j ].track;
-                    break;
-                }
-
+            if (undefined === browser.designatedTrack) {
+                browser.designatedTrack = browser.trackPanels[ 0 ].track;
             }
 
             browser.designatedTrack.featureSource.allFeatures(function (featureList) {
 
                 browser.cursorModel.setRegions(featureList);
-                
+
                 browser.cursorModel.filterRegions();
 
                 browser.setFrameWidth(browser.trackViewportWidth() * session.framePixelWidthUnitless);
@@ -517,7 +498,6 @@ var igv = (function (igv) {
                 browser.horizontalScrollbar.update();
 
             });
-
 
 
         };
