@@ -138,21 +138,17 @@ var igv = (function (igv) {
         // BED file URL
         document.getElementById('igvLoadURL').onchange = function (e) {
             var obj,
-                path,
-                featureSource,
-                cursorTrack,
-                peakPath = "test/data/cursor/wgEncodeBroadHistoneH1hescH3k4me3StdPk.broadPeak.gz";
+                path;
 
             obj = $("#igvLoadURL");
             path = obj.val();
             obj.val("");
 
-            featureSource = new igv.BedFeatureSource(peakPath);
-            cursorTrack = new cursor.CursorTrack(featureSource, browser.cursorModel, browser.referenceFrame, "H3k4me3 H1hesc", browser.trackHeight);
-
-//            featureSource = new igv.BedFeatureSource(path);
-//            cursorTrack = new cursor.CursorTrack(featureSource, browser.cursorModel, browser.referenceFrame, "unnamed", browser.trackHeight);
-            browser.addTrack(cursorTrack);
+            browser.loadTrack({
+                type: "bed",
+                url: path,
+                label: "Unnamed Track"
+            });
 
         };
 
@@ -240,14 +236,6 @@ var igv = (function (igv) {
                             label: encode.encodeTrackLabel(record),
                             color: encode.encodeAntibodyColor(record.antibody)
                         });
-
-//                        featureSource = new igv.BedFeatureSource(record.path);
-//
-//                        cursorTrack = new cursor.CursorTrack(featureSource, browser.cursorModel, browser.referenceFrame, encode.encodeTrackLabel(record), browser.trackHeight);
-//                        cursorTrack.color = encode.encodeAntibodyColor(record.antibody);
-//                        cursorTrack.height = browser.trackHeight;
-//
-//                        browser.addTrack(cursorTrack);
 
                     }
 
@@ -576,39 +564,6 @@ var igv = (function (igv) {
 
         nextButtonTop += 18;
 
-    }
-
-    function addDemoTracks(browser) {
-        var tssUrl = "test/data/cursor/hg19.tss.bed.gz";
-        var peakURL = "test/data/cursor/wgEncodeBroadHistoneH1hescH3k4me3StdPk.broadPeak.gz";
-        var peak2URL = "test/data/cursor/wgEncodeBroadHistoneH1hescH3k27me3StdPk.broadPeak.gz";
-
-        var peakDataSource = new igv.BedFeatureSource(peakURL);
-        var peak2DataSource = new igv.BedFeatureSource(peak2URL);
-        var tssDataSource = new igv.BedFeatureSource(tssUrl);
-
-        var tssTrack = new cursor.CursorTrack(tssDataSource, browser.cursorModel, browser.referenceFrame, "TSS", browser.trackHeight);
-        browser.designatedTrack = tssTrack;
-
-        var track1 = new cursor.CursorTrack(peakDataSource, browser.cursorModel, browser.referenceFrame, "H3k4me3 H1hesc", browser.trackHeight);
-        track1.color = "rgb(0,150,0)";
-
-        var track2 = new cursor.CursorTrack(peak2DataSource, browser.cursorModel, browser.referenceFrame, "H3k27me3 H1hesc", browser.trackHeight);
-        track2.color = "rgb(150,0,0)";
-
-        // Set the TSS track as the inital "selected" track (i.e. defines the regions)
-        browser.designatedTrack.featureSource.allFeatures(function (featureList) {
-
-            browser.cursorModel.setRegions(featureList);
-
-            browser.addTrack(tssTrack);
-
-            browser.addTrack(track1);
-
-            browser.addTrack(track2);
-
-            browser.horizontalScrollbar.update();
-        });
     }
 
     return igv;
