@@ -11,14 +11,14 @@ var igv = (function (igv) {
     /* igv.BedFeatureSource = function (urlOrFile, decode, binary) */
     igv.BedFeatureSource = function (config) {
 
-//        if (urlOrFile instanceof File) {
-//            this.localFile = urlOrFile;
-//            this.filename = urlOrFile.name;
-//        }
-//        else {
+        if (config.localFile) {
+            this.localFile = config.localFile;
+            this.filename = config.localFile.name;
+        }
+        else {
             this.url = config.url;
             this.filename = config.url;
-//        }
+        }
 
 //        this.decode = decode;
 //        this.binary = binary;

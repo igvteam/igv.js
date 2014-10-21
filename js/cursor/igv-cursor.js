@@ -116,19 +116,20 @@ var igv = (function (igv) {
         fileInput.addEventListener('change', function (e) {
 
             var localFile,
-                localFiles = fileInput.files,
-                featureSource,
-                cursorTrack;
+                localFiles = fileInput.files;
 
             for (var i = 0; i < localFiles.length; i++) {
 
                 localFile = localFiles[ i ];
                 $("#igvFileUploadForm")[0].reset();
 
-                featureSource = new igv.BedFeatureSource(localFile);
+                browser.loadTrack({
+                    type: "bed",
+                    localFile: localFile,
+                    url: undefined,
+                    label: localFile.name
+                });
 
-                cursorTrack = new cursor.CursorTrack(featureSource, browser.cursorModel, browser.referenceFrame, localFile.name, browser.trackHeight);
-                browser.addTrack(cursorTrack);
 
             }
 
