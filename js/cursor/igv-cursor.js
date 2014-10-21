@@ -367,7 +367,7 @@ var igv = (function (igv) {
 //            this.__proto__.loadTrack.call(this, config);
 
             if (browser.didAttemptedDuplicateTrackAddition(config)) {
-              return;
+                return;
             }
 
             var path = config.url,
@@ -450,7 +450,9 @@ var igv = (function (igv) {
 
         browser.loadSession = function (session) {
 
-            var trackConfigList = [],
+            var j,
+                len,
+                trackConfigList = [],
                 trackList = [],
                 designatedTrackIndex;
 
@@ -480,7 +482,7 @@ var igv = (function (igv) {
 
                 if (undefined === designatedTrackIndex) {
                     if (undefined != trackConfig.designatedTrack && true === trackConfig.designatedTrack) {
-                      designatedTrackIndex = i;
+                        designatedTrackIndex = i;
                     }
                 }
 
@@ -490,36 +492,33 @@ var igv = (function (igv) {
                 designatedTrackIndex = 0;
             }
 
-            trackConfigList.forEach(function(trackConfig){
-               browser.loadTrack(trackConfig);
-            });
+            for (j = 0, len = trackConfigList.length; j < len; j++) {
 
+                browser.loadTrack(trackConfigList[ j ]);
+                if (j === designatedTrackIndex) {
+                    browser.designatedTrack = browser.trackPanels[ j ].track;
+                    break;
+                }
 
-            browser.setFrameWidth(browser.trackViewportWidth() * session.framePixelWidthUnitless);
-
-            browser.referenceFrame.bpPerPixel = 1.0 / browser.cursorModel.framePixelWidth;
-
-            browser.goto("", session.start, session.end);
-
-            browser.horizontalScrollbar.update();
-
+            }
 
             browser.designatedTrack.featureSource.allFeatures(function (featureList) {
 
                 browser.cursorModel.setRegions(featureList);
-
-                trackList.forEach(function (trackTrackFilterJSON) {
-                    browser.addTrack(trackTrackFilterJSON.track, trackTrackFilterJSON.trackFilterJSON);
-
-                    if (trackTrackFilterJSON.trackFilterJSON) {
-                        trackTrackFilterJSON.track.trackFilter.setWithJSON(trackTrackFilterJSON.trackFilterJSON);
-                    }
-
-                });
-
+                
                 browser.cursorModel.filterRegions();
 
+                browser.setFrameWidth(browser.trackViewportWidth() * session.framePixelWidthUnitless);
+
+                browser.referenceFrame.bpPerPixel = 1.0 / browser.cursorModel.framePixelWidth;
+
+                browser.goto("", session.start, session.end);
+
+                browser.horizontalScrollbar.update();
+
             });
+
+
 
         };
     }

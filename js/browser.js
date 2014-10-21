@@ -119,10 +119,7 @@ var igv = (function (igv) {
      * greater than the contentDiv height.   Height of contentDiv and canvas are equal, and governed by the data
      * loaded.
      *
-     * trackFilterJSON session data is optionally passes as a param to restore a trackFilters state
-     *
      * @param track
-     * @param trackFilterJSON
      */
     igv.Browser.prototype.addTrack = function (track) {
 
@@ -131,7 +128,10 @@ var igv = (function (igv) {
 
         if (!track.order) {
             track.order = (this.nextTrackOrder)++;
-//            track.order = this.trackPanels.length;
+        }
+
+        if (track.config && track.config.trackFilter) {
+            track.trackFilter.setWithJSON(track.config.trackFilter);
         }
 
         this.trackPanels.push(trackView);
@@ -145,7 +145,6 @@ var igv = (function (igv) {
         }
         else {
             this.resize();
-            //trackView.repaint();
         }
 
     };
