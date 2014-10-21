@@ -59,6 +59,9 @@
     <script type="text/javascript" src="js/karyo/karyo.js"></script>
     <script type="text/javascript" src="js/gwas/t2dVariantSource.js"></script>
     <script type="text/javascript" src="js/gwas/t2dVariantTrack.js"></script>
+    
+    <script type="text/javascript" src="js/segTrack.js"></script>
+    <script type="text/javascript" src="js/seg.js"></script>
 </head>
 
 <body>
@@ -111,6 +114,10 @@
                 new igv.GeneTrack({
                     url: "http://igvdata.broadinstitute.org/annotations/hg19/genes/gencode.v18.collapsed.bed",
                     label: "Genes"
+                }),
+                 new igv.SEGTrack({
+                    url: "irdata/CN_Segments.seg",
+                    label: "Ploidy"
                 })
             ]
         };
