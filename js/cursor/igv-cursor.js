@@ -281,6 +281,20 @@ var igv = (function (igv) {
                 browser.loadTrack(trackConfig);
             });
 
+            browser.designatedTrack.featureSource.allFeatures(function (featureList) {
+                browser.cursorModel.setRegions(featureList);
+                browser.horizontalScrollbar.update();
+            });
+
+
+
+
+
+
+
+
+
+
 
 //            addDemoTracks(browser);
         }
@@ -404,19 +418,19 @@ var igv = (function (igv) {
             }
 
             newTrack = new cursor.CursorTrack(config, browser);
+            if (undefined !== config.designatedTrack && true === config.designatedTrack) {
+                browser.designatedTrack = newTrack;
+            }
 
             this.addTrack(newTrack);
 
             return newTrack;
 
-            // Get the file type from the path extension
             function cursorGetType(path) {
 
                 if (path.endsWith(".bed") || path.endsWith(".bed.gz") || path.endsWith(".broadPeak") || path.endsWith(".broadPeak.gz")) {
-
                     return "bed";
                 } else {
-
                     return undefined;
                 }
 
