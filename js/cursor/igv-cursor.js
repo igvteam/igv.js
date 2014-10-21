@@ -14,7 +14,6 @@ var igv = (function (igv) {
         // Add cursor specific methods to the browser object,  some new some overrides
         addCursorExtensions(browser);
 
-
         browser.horizontalScrollbar = new cursor.HorizontalScrollbar(browser, $(browser.div));
 
         document.getElementById('igvContainerDiv').appendChild(browser.div);
@@ -282,7 +281,6 @@ var igv = (function (igv) {
         return browser;
     };
 
-
     function addCursorExtensions(browser) {
 
         browser.setFrameWidth = function (frameWidthString) {
@@ -462,7 +460,6 @@ var igv = (function (igv) {
 
         };
     }
-
 
     igv.cursorAddTrackControlButtons = function (trackView, browser, controlDiv) {
 
