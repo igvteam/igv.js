@@ -152,7 +152,7 @@ var igv = (function (igv) {
             continuation(null);
         }
 
-        oReq.send(JSON.stringify(data));
+        oReq.send(data);
 
     }
 

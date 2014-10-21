@@ -85,7 +85,7 @@ var igv = (function (igv) {
         features = this.features[ chr ];
         if (!features) {
 
-            features = { featureList:[], minimum:Number.MAX_VALUE, maximum:-Number.MAX_VALUE };
+            features = [];
             this.features[ chr ] = features;
         }
 
@@ -95,9 +95,7 @@ var igv = (function (igv) {
             value: parseFloat(parts[ 3 ])
         };
 
-        features.featureList.push(feature);
-        features.minimum = Math.min(features.minimum, feature.value);
-        features.maximum = Math.max(features.maximum, feature.value);
+        features.push(feature);
 
         function parseTrackLine(line) {
 

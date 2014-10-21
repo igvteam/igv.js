@@ -1,42 +1,27 @@
 
 // Chromosome ideogram
 //
-
 var log = function(txt) {
 	console.log("karyo: "+txt);
 }
 var igv = (function (igv) {
 
-    igv.KaryoPanel = function (browser) {
-
-        this.browser = browser;
-        this.div = document.createElement('div');
-        this.div.style.height = "200px";
-        this.div.style.width = "100%";
+    igv.KaryoPanel = function (parentElement) {
 
         this.ideograms = null;
         igv.guichromosomes = [];
         
-        var contentHeight = this.div.clientHeight;
-        var contentWidth = this.div.clientWidth - browser.controlPanelWidth;
-        var contentDiv = document.createElement("div");
-        contentDiv.style.position = "absolute";
-        contentDiv.style.height = "100%";
-        contentDiv.style.left = browser.controlPanelWidth + "px";
-        contentDiv.style.right = "0px";
-        this.div.appendChild(contentDiv);
+        this.div = $('<div class="igv-karyo-div"></div>')[0];
+        $(parentElement).append(this.div);
 
-        var canvas = document.createElement('canvas');
-        canvas.style.position = 'absolute';
-        canvas.style.width = "100%";
-        canvas.style.height = contentHeight;
-        canvas.setAttribute('width', contentWidth);    //Must set the width & height of the canvas
-        canvas.setAttribute('height', contentHeight);
+        var contentDiv = $('<div class="igv-karyo-content-div"></div>')[0];
+        $(this.div).append(contentDiv);
 
-  
+        var canvas = $('<canvas class="igv-karyo-canvas"></canvas>')[0];
+        $(contentDiv).append(canvas);
+        canvas.setAttribute('width', contentDiv.offsetWidth);
+        canvas.setAttribute('height', contentDiv.offsetHeight);
         this.canvas = canvas;
-        contentDiv.appendChild(canvas);
-
         this.ctx = canvas.getContext("2d");
 
         var tipCanvas = document.createElement('canvas');
@@ -50,23 +35,11 @@ var igv = (function (igv) {
         contentDiv.appendChild(tipCanvas);
         
         this.canvas.onmousemove = function (e) {
-        	var isFirefox = typeof InstallTrigger !== 'undefined';
 
-            var isOpera = !!window.opera || navigator.userAgent.indexOf(' OPR/') >= 0;
-            var isChrome = !!window.chrome && !isOpera;
+            var mouseCoords = igv.translateMouseCoordinates(e, canvas);
+            var mouseX = mouseCoords.x;
+            var mouseY = mouseCoords.y;
 
-            var mouseX;
-            var mouseY;
-
-            if (isFirefox) {
-                // It's Firefox
-                mouseX = e.layerX;
-                mouseY = e.layerY;
-            } else {
-                // It's Chrome or Safari and works for both
-                mouseX = e.offsetX;
-                mouseY = e.offsetY;
-            }
             var hit = false;
             for (var i = 0; i < igv.guichromosomes.length; i++) {    		
         		var g = igv.guichromosomes[i];
@@ -89,36 +62,26 @@ var igv = (function (igv) {
         			break;
         		}
         	}
-            if (!hit) { tipCanvas.style.left = "-200px"; }
+            if (!hit) {
+                tipCanvas.style.left = "-200px";
+        }
         }
         this.canvas.onclick = function (e) {
-            var isFirefox = typeof InstallTrigger !== 'undefined';
 
-            var isOpera = !!window.opera || navigator.userAgent.indexOf(' OPR/') >= 0;
-            var isChrome = !!window.chrome && !isOpera;
+            var mouseCoords = igv.translateMouseCoordinates(e, canvas);
+            var mouseX = mouseCoords.x;
+            var mouseY = mouseCoords.y;
 
-            var mouseX;
-            var mouseY;
 
-            if (isFirefox) {
                 // It's Firefox
-                mouseX = e.layerX;
-                mouseY = e.layerY;
-            } else {
-                // It's Chrome or Safari and works for both
-                mouseX = e.offsetX;
-                mouseY = e.offsetY;
+            igv.navigateKaryo(mouseX, mouseY);
             }
 
-            this.getContext("2d").fillRect(mouseX, 0, 10, 10);
-            igv.navigateKaryo(browser, mouseX, mouseY);
         }
 
-    }
 
+    igv.navigateKaryo = function (mouseX, mouseY) {
     // Move location of the reference panel by clicking on the genome ideogram
-    igv.navigateKaryo = function (browser, mouseX, mouseY) {
-    	// check each chromosome if the coordinates are within its bound
         log("Got mouse click at "+mouseX+"/"+mouseY);
     	for (var i = 0; i < igv.guichromosomes.length; i++) {    		
     		var g = igv.guichromosomes[i];
@@ -126,7 +89,7 @@ var igv = (function (igv) {
     			var dy = mouseY - g.y;
     			var bp = Math.round(g.size * dy / g.h);
     			log("Going to "+g.name+" position "+bp);
-    			browser.search(g.name+":"+bp+"-"+(bp+10000));
+                igv.browser.goto(g.name, bp, (bp + 10000));
     			break;
     		}
     	}
@@ -136,22 +99,17 @@ var igv = (function (igv) {
 
     igv.KaryoPanel.prototype.resize = function () {
 
-        var contentHeight = this.div.clientHeight,
-            contentWidth = this.div.clientWidth,
-            canvas = this.canvas;
-        canvas.style.width = "100%";
-        canvas.style.height = contentHeight + "px";
-        canvas.setAttribute('width', contentWidth);    //Must set the width & height of the canvas
-        canvas.setAttribute('height', contentHeight);
-        log("redraw: height is :"+contentHeight);      
-        
+        var canvas = this.canvas;
+        canvas.setAttribute('width', canvas.clientWidth);    //Must set the width & height of the canvas
+        canvas.setAttribute('height', canvas.clientHeight);
+        this.ideograms = undefined;
         this.repaint();
     }
 
     igv.KaryoPanel.prototype.repaint = function () {
 
-        var genome = this.browser.genome,
-            referenceFrame = this.browser.referenceFrame,
+        var genome = igv.browser.genome,
+            referenceFrame = igv.browser.referenceFrame,
             stainColors = [],
             w = this.canvas.width,
             h = this.canvas.height;
@@ -238,16 +196,16 @@ var igv = (function (igv) {
                 }
      		});
         }
+
         this.ctx.drawImage(image, 0, 0);
         
         // Draw red box
         this.ctx.save();
-        var chromosome = this.browser.genome.getChromosome(this.browser.referenceFrame.chr);
+        var chromosome = igv.browser.genome.getChromosome(referenceFrame.chr);
         cytobands = chromosome.cytobands;
-        var size = cytobands[cytobands.length-1].end;
-        var ideoScale = h / maxLen;
+        var ideoScale = chrheight / maxLen;
 
-        var boxPY1 = top+Math.round(this.browser.referenceFrame.start * ideoScale);
+        var boxPY1 = top + Math.round(referenceFrame.start * ideoScale);
         //var boxPY2 = Math.round((this.browser.referenceFrame.start+100) * ideoScale);
         this.ctx.strokeStyle = "rgb(150, 0, 0)";
         this.ctx.lineWidth = 2;
@@ -274,6 +232,7 @@ var igv = (function (igv) {
                  bufferCtx.fillRect(ideogramLeft+ideogramWidth+3, starty,  dx, dy);             
              }
         }
+
         function drawIdeogram(guichrom, ideogramLeft, top, chromosome, bufferCtx, ideogramWidth, ideogramHeight, longestChr) {
            
             if (!genome) return;            

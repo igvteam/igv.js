@@ -11,6 +11,7 @@
     BRISK_p_STY37_Mapping250K_Sty_A09_147618	2	2994	9950762	1023	-0.021291
 */
 
+
 var igv = (function (igv) {
 
     /**
@@ -38,13 +39,15 @@ var igv = (function (igv) {
             return !success;
         }
 
-        if (6 !== lineTokens.length) {
+        if (6< lineTokens.length) {
+            log("Did not get 6 tokens, not a valid seg file");
             return !success;
         }
 
         for (i=0; i < lineTokens.length; i++) {
             if (lineTokens[ i ] !== matches[ i ]) {
-                return !success;
+                log("Token "+i+"="+lineTokens[i]+" does  not match "+matches[i]);
+                //return !success;
             }
         }
 
@@ -89,9 +92,9 @@ var igv = (function (igv) {
         ss = tokens[2];
         ee = tokens[3];
 
-        dev_null = tokens[4];
+        //dev_null = tokens[4];
 
-        value = tokens[5];
+        value = tokens[4];
         this.minimum = Math.min(this.minimum, value);
         this.maximum = Math.max(this.maximum, value);
 
@@ -106,7 +109,7 @@ var igv = (function (igv) {
             segFeatures = [];
             chrDictionary[ chr ] = segFeatures;
         }
-
+        log("adding feature "+ss+"-"+ee+", value "+value);
         segFeatures.push({ start: ss, end: ee, value: value });
     };
 
@@ -131,17 +134,17 @@ var igv = (function (igv) {
             igv.loadData(this.url, function (data) {
 
                 var lines = data.split("\n");
-
+                log("Got "+lines.length+" lines in :"+this.url);
                 if (!thisSEGFeatureSource.isValidSEGFile(lines.shift())) {
-
+                    log("Not a valid seg file");
                     success(null);
                 } else {
 
                     thisSEGFeatureSource.features = { minimum: Number.MAX_VALUE, maximum: -(Number.MAX_VALUE) };
 
                     lines.forEach(parseLine, thisSEGFeatureSource.features);
-
-                    success(chr, thisSEGFeatureSource.features);
+                    log("Got "+ JSON.stringify(thisSEGFeatureSource.features)+" features");
+                    success(chr, thisSEGFeatureSource);
 
                 }
             });
@@ -149,5 +152,10 @@ var igv = (function (igv) {
 
     };
 
+    
+    
+    var log = function(txt) {
+        console.log("seg: "+txt);
+    }
     return igv;
 })(igv || {});

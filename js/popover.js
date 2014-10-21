@@ -3,98 +3,238 @@
  */
 var igv = (function (igv) {
 
-    igv.Popover = function (parent, trackView) {
+    var popoverDiv,
+        popoverCloseElement,
+        popoverCloseIcon,
+        popoverPointerDiv,
+        popoverContentDiv;
 
-        this.trackView = trackView;
-        this.markupWithParentDiv(parent);
-
-    };
-
-    igv.Popover.prototype.markupWithParentDiv = function (parentDiv) {
-
-        var myself = this,
-            popoverDiv,
-            popoverContentDiv,
-            popoverCloseDiv;
-
-        // popover
-        popoverDiv = document.createElement('div');
-        parentDiv.appendChild(popoverDiv);
-        this.popoverDiv = popoverDiv;
-
-        this.popoverDiv.id = "popover_" + igv.guid();
-        this.popoverDiv.className = "popover";
-
-        // popover content
-        popoverContentDiv = document.createElement("div");
-        this.popoverDiv.appendChild(popoverContentDiv);
-        this.popoverContentDiv = popoverContentDiv;
-
-        this.popoverContentDiv.className = "popoverContent";
-        this.popoverContentDiv.innerHTML = "blah blah";
-
-        // popover close
-        popoverCloseDiv = document.createElement("div");
-        this.popoverDiv.appendChild(popoverCloseDiv);
-        this.popoverCloseDiv = popoverCloseDiv;
-
-        this.popoverCloseDiv.className = "popoverClose";
-        this.popoverCloseDiv.innerHTML = "x";
-
-        this.popoverCloseDiv.onclick = function (e) {
-
-            $(myself.popoverDiv).hide();
-
-        };
+    igv.Popover = function (parent) {
 
 
-    };
-
-    igv.Popover.prototype.hidePopover = function () {
-
-        $(this.popoverDiv).hide();
-    };
-
-    igv.Popover.prototype.onmousedown = function (event, dx, dy, popupx, popupy) {
-
-        this.mouseDownX = dx;
-        this.mouseDownY = dy;
-
-        $(this.popoverDiv).hide();
-
-    };
-
-    igv.Popover.prototype.onmouseup = function (event, dx, dy, popupx, popupy) {
-
-        var threshX = dx - this.mouseDownX,
-            threshY = dy - this.mouseDownY,
-            thresh,
-            genomicLocation,
-            featureDetails;
-
-        genomicLocation = this.trackView.genomicCoordinateWithEventTap(event);
-        if (undefined === genomicLocation) {
-            return;
+        if (!popoverDiv) {
+            markupWithParentDiv(parent);
+            this.parentDiv = parent;
         }
 
-        featureDetails = this.trackView.track.featureDetailsWithHitTest(genomicLocation, dy);
+        function markupWithParentDiv (parentDiv) {
 
-        thresh = Math.floor( Math.sqrt(threshX * threshX + threshY * threshY) );
-        if (featureDetails && thresh < 6) {
+            // popover
+            popoverDiv = document.createElement('div');
+            parentDiv.appendChild(popoverDiv);
+            popoverDiv.id = "popover_" + igv.guid();
+            popoverDiv.className = "igv-popover";
 
-            this.popoverContentDiv.innerHTML  = featureDetails;
+            // popover content
+            popoverContentDiv = document.createElement("div");
+            popoverDiv.appendChild(popoverContentDiv);
+            popoverContentDiv.className = "igv-popoverContent";
 
-            $(this.popoverDiv).css({
-                "left": popupx + "px",
-                "top" : popupy + "px"
+
+
+
+
+
+            // popover pointer
+//            <i class="fa fa-location-arrow"></i>
+//            <i class="fa fa-play"></i>
+//            popoverPointerDiv = document.createElement("i");
+//            popoverDiv.appendChild(popoverPointerDiv);
+//            popoverPointerDiv.className = "igv-popoverPointer fa fa-chevron-right fa-2x fa-rotate-90";
+
+
+
+
+
+
+//            // popover close
+//            popoverCloseElement = document.createElement("div");
+//            popoverDiv.appendChild(popoverCloseElement);
+//            popoverCloseElement.className = "igv-popoverClose";
+//            popoverCloseElement.innerHTML = "x";
+
+            // popover close
+            popoverCloseElement = document.createElement("span");
+            popoverDiv.appendChild(popoverCloseElement);
+            popoverCloseElement.className = "igv-popoverCloseElement";
+
+            popoverCloseIcon = document.createElement("i");
+            popoverCloseElement.appendChild(popoverCloseIcon);
+            popoverCloseIcon.className = "igv-popoverCloseFontAwesome fa fa-times";
+//            popoverCloseIcon.className = "igv-popoverCloseFontAwesome fa fa-times-circle fa-lg";
+
+            $(popoverCloseElement).hover(
+
+                function() {
+                    $(popoverCloseIcon).removeClass("fa-times"       );
+                    $(popoverCloseIcon).addClass   ("fa-times-circle fa-lg");
+
+                    $(popoverCloseIcon).css({
+                        "color" : "#222"
+                    });
+                },
+
+                function() {
+                    $(popoverCloseIcon).removeClass("fa-times-circle fa-lg");
+                    $(popoverCloseIcon).addClass   ("fa-times"       );
+
+                    $(popoverCloseIcon).css({
+                        "color" : "#444"
+                    });
+
+                }
+            );
+
+            popoverCloseElement.onclick = function (e) {
+
+                $(popoverDiv).hide();
+
+            };
+
+
+        }
+
+    };
+
+    igv.Popover.prototype.testData = function (rows) {
+        var i,
+            name,
+            nameValues = [];
+
+        for (i = 0; i < rows; i++) {
+            name = "name " + i;
+            nameValues.push( { name : name, value : "verbsgohuman" } );
+        }
+
+        return nameValues;
+    };
+
+    igv.Popover.prototype.hide = function () {
+
+        $(popoverDiv).hide();
+    };
+
+    igv.Popover.prototype.show = function (pageX, pageY, content) {
+
+        var left,
+            top,
+            height,
+//            containerCoordinates = { x : pageX - $(window).scrollLeft(), y : pageY - $(window).scrollTop() },
+            containerCoordinates = { x : pageX, y : pageY },
+            containerRect = { x : 0, y : 0, width : $(window).width(), height : $(window).height() },
+            popupRect = {},
+            popoverDivObject,
+            popoverContentDivObject,
+            popupx = pageX,
+            popupy = pageY;
+
+        if (content) {
+
+            popoverContentDivObject = $(popoverContentDiv);
+            popoverContentDivObject.html(content);
+
+            popoverDivObject = $(popoverDiv);
+            popupx -= $(this.parentDiv).offset().left;
+            popupy -= $(this.parentDiv).offset().top;
+            popupRect = { x : popupx, y : popupy, width : popoverDivObject.outerWidth(), height : popoverDivObject.outerHeight() };
+
+            left = popupx;
+            if (containerCoordinates.x + popupRect.width > containerRect.width) {
+                left = popupx - popupRect.width;
+            }
+
+            top = popupy;
+//            if (containerCoordinates.y + popupRect.height > containerRect.height) {
+//                top = popupy - popupRect.height;
+//            }
+
+            popoverDivObject.css({
+                "left": left + "px",
+                "top" : top  + "px"
             }).show();
 
-        }
+            height = popoverContentDivObject.height() + 20;
+            popoverDivObject.css({
+                "height": height + "px"
+            });
 
-        this.mouseDownX = this.mouseDownY = undefined;
+
+        }
 
     };
 
     return igv;
 
 })(igv || {});
+
+
+
+
+// OPEN-TIP IMPLEMENTATION
+//
+//igv.Popover = function (parent, trackView) {
+//
+//    this.trackView = trackView;
+//
+//    if (!popover) {
+//        popover = new Opentip(parent);
+//        popover.hide();
+//        parent.mouseout = function (e) {
+//            popover.setContent("");
+//            popover.hide();
+//        }
+//    }
+//
+//    function markupWithParentDiv(parentDiv) {
+//
+//        // popover
+//        popoverDiv = document.createElement('div');
+//        parentDiv.appendChild(popoverDiv);
+//        popoverDiv = popoverDiv;
+//
+//        popoverDiv.id = "popover_" + igv.guid();
+//        popoverDiv.className = "igv-popover";
+//
+//        // popover content
+//        popoverContentDiv = document.createElement("div");
+//        popoverDiv.appendChild(popoverContentDiv);
+//        popoverContentDiv = popoverContentDiv;
+//
+//        popoverContentDiv.className = "igv-popoverContent";
+//        popoverContentDiv.innerHTML = "blah blah";
+//
+//        // popover close
+//        popoverCloseDiv = document.createElement("div");
+//        popoverDiv.appendChild(popoverCloseDiv);
+//        popoverCloseDiv = popoverCloseDiv;
+//
+//        popoverCloseDiv.className = "igv-popoverClose";
+//        popoverCloseDiv.innerHTML = "x";
+//
+//        popoverCloseDiv.onclick = function (e) {
+//
+//            $(popoverDiv).hide();
+//
+//        };
+//
+//
+//    };
+//
+//};
+//
+//igv.Popover.prototype.hide = function () {
+//
+//    popover.hide();
+//    popover.setContent(null);
+//};
+//
+//igv.Popover.prototype.show = function (popupx, popupy, content) {
+//
+//    if (content) {
+//
+//        popover.setContent(content);
+//        popover.show();
+//
+//    }
+//
+//};

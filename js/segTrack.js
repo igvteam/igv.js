@@ -3,14 +3,12 @@
  */
 var igv = (function (igv) {
 
-    igv.SEGTrack = function (url) {
-        this.url = url;
-        this.featureSource = new igv.SEGFeatureSource(this.url);
-
-        this.label = "WIGLabel";
-        this.id = "wig";
-        this.height = 100;
-
+    igv.SEGTrack = function (config) {
+        this.url = config.url;        
+        this.label = config.label;
+        this.id = config.id || config.label;
+        this.height = 100;   // The preferred height
+        this.featureSource = new igv.SEGFeatureSource(this.url);        
     }
 
     /**

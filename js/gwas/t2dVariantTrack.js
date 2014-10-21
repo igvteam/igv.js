@@ -3,9 +3,10 @@
 
 var igv = (function (igv) {
 
+    const POPOVER_WINDOW = 30000000;
 
     igv.T2dTrack = function (config) {
-        this.descriptor = config;
+        this.config = config;
         this.url = config.url;
         this.featureSource = new igv.T2DVariantSource(config);
         this.label = config.label;
@@ -13,16 +14,23 @@ var igv = (function (igv) {
         this.height = config.height || 100;   // The preferred height
         this.minLogP = config.minLogP || 0;
         this.maxLogP = config.maxLogP || 15;
-        this.background = config.background || "rgb(245,245,245)";
-        this.dotSize = config.dotSize || 3;
+        this.background = config.background || "rgb(225,225,225)";
+        this.dotSize = config.dotSize || 4;
+
+        this.description = config.description;  // might be null
+        this.proxy = config.proxy;   // might be null
+
+        this.portalURL = config.portalURL ? config.portalURL : window.location.origin;
 
         var cs = config.colorScale || {
             thresholds: [5e-8, 5e-4, 0.5],
             colors: ["rgb(255,50,50)", "rgb(251,100,100)", "rgb(251,170,170)", "rgb(227,238,249)"]
         };
+        
+        this.pvalue = config.pvalue ? config.pvalue : "PVALUE";
+
         this.colorScale = new BinnedColorScale(cs);
     }
-
 
 
     /**
@@ -38,24 +46,25 @@ var igv = (function (igv) {
      */
     igv.T2dTrack.prototype.draw = function (canvas, refFrame, bpStart, bpEnd, pixelWidth, pixelHeight, continuation, task) {
 
+
         var chr,
             queryChr,
-            track=this,
+            track = this,
             chr = refFrame.chr,
-            yScale = (track.maxLogP - track.minLogP) / pixelHeight;
+            yScale = (track.maxLogP - track.minLogP) / pixelHeight,
+            enablePopover = (bpEnd - bpStart) < POPOVER_WINDOW;
+
+        if (enablePopover) {
+            this.po = [];
+        }
+        else {
+            this.po = undefined;
+        }
 
         queryChr = (chr.startsWith("chr") ? chr.substring(3) : chr);
 
-        // Don't try to draw variants for windows > 3 mb
-//        if (bpEnd - bpStart > 3100000) {
-//
-//            canvas.fillText("Zoom in to see variants", 600, 10);
-//            continuation();
-//            return;
-//        }
-
-
-        canvas.fillRect(0, 0, pixelWidth, pixelHeight, {'fillStyle': this.background});
+        //canvas.fillRect(0, 0, pixelWidth, pixelHeight, {'fillStyle': this.background});
+        canvas.strokeLine(0, pixelHeight - 1, pixelWidth, pixelHeight - 1, {'strokeStyle': this.background});
 
 
         this.featureSource.getFeatures(queryChr, bpStart, bpEnd, function (featureList) {
@@ -68,17 +77,18 @@ var igv = (function (igv) {
 
                     py = 20;
 
+
                     for (var i = 0; i < len; i++) {
 
                         variant = featureList[i];
                         if (variant.POS < bpStart) continue;
                         if (variant.POS > bpEnd) break;
 
-                        pvalue = variant.PVALUE;
-                        if(!pvalue) continue;
+                        pvalue = variant[track.pvalue];
+                        if (!pvalue) continue;
 
                         color = track.colorScale.getColor(pvalue);
-                        val = -Math.log(pvalue)/2.302585092994046;
+                        val = -Math.log(pvalue) / 2.302585092994046;
 
                         xScale = refFrame.bpPerPixel;
 
@@ -87,23 +97,23 @@ var igv = (function (igv) {
                         py = Math.max(track.dotSize, pixelHeight - Math.round((val - track.minLogP) / yScale));
 
                         if (color) canvas.setProperties({fillStyle: color, strokeStyle: "black"});
+
                         canvas.fillCircle(px, py, track.dotSize);
                         //canvas.strokeCircle(px, py, radius);
 
+                        if (enablePopover) track.po.push({x: px, y: py, feature: variant});
 
                     }
                 }
 
-              //  canvas.setProperties({fillStyle: "rgb(250, 250, 250)"});
-              //  canvas.fillRect(0, 0, pixelWidth, pixelHeight);
-
+                //  canvas.setProperties({fillStyle: "rgb(250, 250, 250)"});
+                //  canvas.fillRect(0, 0, pixelWidth, pixelHeight);
 
 
                 if (continuation) continuation();
             },
             task);
     };
-
 
 
     igv.T2dTrack.prototype.paintControl = function (canvas, pixelWidth, pixelHeight) {
@@ -134,6 +144,51 @@ var igv = (function (igv) {
     };
 
 
+    igv.T2dTrack.prototype.popupData = function (genomicLocation, xOffset, yOffset) {
+
+        var i, len, p, dbSnp, data, url,
+        data = [];
+
+        if (this.po) {
+            for (i = 0, len = this.po.length; i < len; i++) {
+                p = this.po[i];
+                if (Math.abs(xOffset - p.x) < this.dotSize && Math.abs(yOffset - p.y) <= this.dotSize) {
+                    dbSnp = p.feature.DBSNP_ID;
+                    if (dbSnp) {
+                        url = this.portalURL + "/variant/variantInfo/" + dbSnp;
+                        // data.push("<a href=# onclick=window.location='" + url + "'>" +
+                        //     p.feature.DBSNP_ID + "</a>");
+                        data.push("<a target='_blank' href='" + url + "' >" +
+                            p.feature.DBSNP_ID + "</a>");
+                    }
+                    data.push("chr" + p.feature.CHROM + ":" + p.feature.POS.toString());
+                    data.push({name: 'p-value', value: p.feature[this.pvalue]});
+
+                    if (p.feature.ZSCORE) {
+                        data.push({name: 'z-score', value: p.feature.ZSCORE});
+                    }
+
+                    if (dbSnp) {
+                        url = this.portalURL + "/trait/traitInfo/" + dbSnp;
+                        //  data.push("<a href=# onclick=window.lcation='" + url + "'>" +
+                        //      "see all available statistics for this variant</a>");
+                        data.push("<a target='_blank' href='" + url + "'>" +
+                            "see all available statistics for this variant</a>");
+                    }
+
+                if(i < len-1) {
+                    data.push("<p/>");
+                }
+                }
+            }
+        } else {
+            data.push("Popover not available at this resolution.")
+
+        }
+return data;
+    }
+
+
     // TODO -- generalize this class and move to top level
     /**
      *
@@ -141,17 +196,17 @@ var igv = (function (igv) {
      * @param colors - array of colors for bins  (length == thresholds.length + 1)
      * @constructor
      */
-    var BinnedColorScale = function(cs) {
+    var BinnedColorScale = function (cs) {
         this.thresholds = cs.thresholds;
         this.colors = cs.colors;
     }
 
-    BinnedColorScale.prototype.getColor = function(value) {
+    BinnedColorScale.prototype.getColor = function (value) {
 
-        var i, len=this.thresholds.length;
+        var i, len = this.thresholds.length;
 
-        for(i=0; i<len; i++) {
-            if(value < this.thresholds[i]) {
+        for (i = 0; i < len; i++) {
+            if (value < this.thresholds[i]) {
                 return this.colors[i];
             }
         }

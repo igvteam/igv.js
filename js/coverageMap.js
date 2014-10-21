@@ -75,7 +75,7 @@ var igv = (function (igv) {
         return fractions;
     };
 
-    igv.CoverageMap = function (genomicInterval, refSeq) {
+    igv.CoverageMap = function (chr, start, end, features, refSeq) {
 
         var myself;
 
@@ -83,15 +83,15 @@ var igv = (function (igv) {
         this.bases = [ "A", "T", "C", "G", "N" ];
 
         this.refSeq = refSeq;
-        this.chr = genomicInterval.chr;
-        this.bpStart = genomicInterval.start;
-        this.length = (genomicInterval.end - genomicInterval.start);
+        this.chr = chr;
+        this.bpStart = start;
+        this.length = (end - start);
 
         this.coverage = new Array(this.length);
 
         this.maximum = 0;
         myself = this;
-        genomicInterval.features.forEach(function (alignment) {
+        features.forEach(function (alignment) {
 
             alignment.blocks.forEach(function (block) {
 

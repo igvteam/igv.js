@@ -101,9 +101,9 @@ var igv = (function (igv) {
         bufferedReader = new igv.BufferedReader(this.path, this.filesize, BUFFER_SIZE);
 
         processing.add(0);  // Zero represents the root node
-        findLeafItems(0, this.rootNode);
+        findLeafItems(this.rootNode, 0);
 
-        function findLeafItems(nodeId, node) {
+        function findLeafItems(node, nodeId) {
 
             if (overlaps(node, chrIdx, startBase, endBase)) {
 
@@ -125,7 +125,7 @@ var igv = (function (igv) {
                                 processing.add(item.childOffset);  // Represent node to-be-loaded by its file position
                                 rpTree.readNode(item.childOffset, bufferedReader, function (node) {
                                     item.childNode = node;
-                                    findLeafItems(item.childOffset, node);
+                                    findLeafItems(node, item.childOffset);
                                 });
                             }
                         }
@@ -134,7 +134,7 @@ var igv = (function (igv) {
 
             }
 
-            processing.remove(nodeId);
+            if(nodeId != undefined) processing.remove(nodeId);
 
             // Wait until all nodes are processed
             if (processing.isEmpty()) {
@@ -178,6 +178,11 @@ var igv = (function (igv) {
     function overlaps(item, chrIdx, startBase, endBase) {
 
         //  if (chrIdx > item.endChrom || chrIdx < item.startChrom) return false;
+
+        if(!item) {
+            console.log("null item");
+            return false;
+        }
 
         return ((chrIdx > item.startChrom) || (chrIdx == item.startChrom && endBase >= item.startBase)) &&
             ((chrIdx < item.endChrom) || (chrIdx == item.endChrom && startBase < item.endBase));

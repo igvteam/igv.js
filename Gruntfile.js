@@ -12,12 +12,25 @@ module.exports = function (grunt) {
                     'js/bigwig/*.js',
                     'js/cursor/*.js',
                     'js/gtex/*.js',
+                    'js/bam/*.js',
                     'vendor/inflate.js',
                     'vendor/spin.js',
                     'vendor/inflate.js',
                     'vendor/zlib_and_gzip.min.js'
                 ],
                 dest: 'dist/igv-all.js'
+            }
+        },
+
+        cssmin: {
+            igv: {
+                files: {
+                    'dist/igv-all.min.css': [
+                        'css/igv.css',
+                        'css/popover.css'
+                    ],
+                }
+
             }
         },
 
@@ -36,13 +49,12 @@ module.exports = function (grunt) {
 
     // 3. Where we tell Grunt we plan to use this plug-in.
     grunt.loadNpmTasks('grunt-contrib-concat');
-
-
     grunt.loadNpmTasks('grunt-contrib-uglify');
+    grunt.loadNpmTasks('grunt-contrib-cssmin');
 
     // 4. Where we tell Grunt what to do when we type "grunt" into the terminal.
     //grunt.registerTask('default', ['concat:igvexp', 'uglify:igvexp']);
-    grunt.registerTask('default', ['concat:igv', 'uglify:igv']);
+    grunt.registerTask('default', ['concat:igv', 'uglify:igv', 'cssmin:igv']);
 
 
 };

@@ -1,20 +1,16 @@
-/* Move down content because we have a fixed navbar that is 50px tall */
-body {
-    padding-top: 50px;
-    padding-bottom: 20px;
+.igv-spinner-fontawesome-start {
+    position: relative;
+    left:50%;
+    top:50%;
+    z-index: 256;
+    display: inline;
 }
-
-/* A hack to remove the unwanted "No File Chosen" text from the file upload button */
-input[type='file'] {
-    width: 82px;
-}
-
-.well {
-    background-color: rgba(255, 0, 0, 0.5);
-}
-
-.row {
-    text-align: center
+.igv-spinner-fontawesome-stop {
+    position: relative;
+    left:50%;
+    top:50%;
+    z-index: -256;
+    display: none;
 }
 
 .btn-file {
@@ -38,46 +34,141 @@ input[type='file'] {
     display: block;
 }
 
-.spacer5 { height: 5px; width: 100%; font-size: 0; margin: 0; padding: 0; border: 0; display: block; }
-.spacer10 { height: 10px; width: 100%; font-size: 0; margin: 0; padding: 0; border: 0; display: block; }
-.spacer15 { height: 15px; width: 100%; font-size: 0; margin: 0; padding: 0; border: 0; display: block; }
-.spacer20 { height: 20px; width: 100%; font-size: 0; margin: 0; padding: 0; border: 0; display: block; }
-.spacer25 { height: 25px; width: 100%; font-size: 0; margin: 0; padding: 0; border: 0; display: block; }
-.spacer30 { height: 30px; width: 100%; font-size: 0; margin: 0; padding: 0; border: 0; display: block; }
-.spacer35 { height: 35px; width: 100%; font-size: 0; margin: 0; padding: 0; border: 0; display: block; }
-.spacer40 { height: 40px; width: 100%; font-size: 0; margin: 0; padding: 0; border: 0; display: block; }
-.spacer45 { height: 45px; width: 100%; font-size: 0; margin: 0; padding: 0; border: 0; display: block; }
-.spacer50 { height: 50px; width: 100%; font-size: 0; margin: 0; padding: 0; border: 0; display: block; }
-.spacer100 { height: 100px; width: 100%; font-size: 0; margin: 0; padding: 0; border: 0; display: block; }
-.spacer200 { height: 200px; width: 100%; font-size: 0; margin: 0; padding: 0; border: 0; display: block; }
-
-.igv-gtex-root-div {
+.spacer5 {
+    height: 5px;
+    width: 100%;
+    font-size: 0;
+    margin: 0;
+    padding: 0;
+    border: 0;
     display: block;
-    position: relative;
-    left: 0px;
-    right: 0px;
 }
 
-.igv-gtex-control-div {
-    position: absolute;
-    left: 0px;
-    right: 0px;
-    height: 20;
-    background-color: darkcyan;
+.spacer10 {
+    height: 10px;
+    width: 100%;
+    font-size: 0;
+    margin: 0;
+    padding: 0;
+    border: 0;
+    display: block;
+}
+
+.spacer15 {
+    height: 15px;
+    width: 100%;
+    font-size: 0;
+    margin: 0;
+    padding: 0;
+    border: 0;
+    display: block;
+}
+
+.spacer20 {
+    height: 20px;
+    width: 100%;
+    font-size: 0;
+    margin: 0;
+    padding: 0;
+    border: 0;
+    display: block;
+}
+
+.spacer25 {
+    height: 25px;
+    width: 100%;
+    font-size: 0;
+    margin: 0;
+    padding: 0;
+    border: 0;
+    display: block;
+}
+
+.spacer30 {
+    height: 30px;
+    width: 100%;
+    font-size: 0;
+    margin: 0;
+    padding: 0;
+    border: 0;
+    display: block;
+}
+
+.spacer35 {
+    height: 35px;
+    width: 100%;
+    font-size: 0;
+    margin: 0;
+    padding: 0;
+    border: 0;
+    display: block;
+}
+
+.spacer40 {
+    height: 40px;
+    width: 100%;
+    font-size: 0;
+    margin: 0;
+    padding: 0;
+    border: 0;
+    display: block;
+}
+
+.spacer45 {
+    height: 45px;
+    width: 100%;
+    font-size: 0;
+    margin: 0;
+    padding: 0;
+    border: 0;
+    display: block;
+}
+
+.spacer50 {
+    height: 50px;
+    width: 100%;
+    font-size: 0;
+    margin: 0;
+    padding: 0;
+    border: 0;
+    display: block;
+}
+
+.spacer100 {
+    height: 100px;
+    width: 100%;
+    font-size: 0;
+    margin: 0;
+    padding: 0;
+    border: 0;
+    display: block;
+}
+
+.spacer200 {
+    height: 200px;
+    width: 100%;
+    font-size: 0;
+    margin: 0;
+    padding: 0;
+    border: 0;
+    display: block;
 }
 
 .igv-root-div {
-    position: absolute;
+
+    position: relative;
     margin-left: 10px;
     margin-right: 10px;
+    padding-top:50px;
     left: 0;
     right: 0;
+    height: auto;
 
     -webkit-box-sizing: border-box;
     -moz-box-sizing: border-box;
     box-sizing: border-box;
 
-    -webkit-tap-highlight-color: rgba(0,0,0,0);
+    -webkit-tap-highlight-color: rgba(0, 0, 0, 0);
 
     -webkit-touch-callout: none;
 
@@ -87,40 +178,112 @@ input[type='file'] {
     user-select: none;
 }
 
+.igv-karyo-div {
+    position: relative;
+    left: 0;
+    top: 0;
+    height:200px;
+}
+
+.igv-karyo-content-div {
+    left:0;
+    top:0;
+    width:100%;
+    height:100%;
+}
+
+.igv-karyo-canvas {
+    left:0;
+    top:0;
+    width:100%;
+    height:100%;
+}
+
 .igv-header-div {
-    position: absolute;
-    top:40px;
+    position: relative;
     left: 0;
     right: 0;
-    /*background-color: darkseagreen;*/
+}
+
+.igv-ideogram-div {
+    height: 40px;
+    width : 100%;
+}
+
+.igv-ideogram-content-div {
+    position:absolute;
+    left:50px;
+    right: 0px;
+    height: 100%;
+}
+
+.igv-ideogram-canvas {
+    left:0;
+    top:0;
+    width:100%;
+    height:100%;
+}
+
+.igv-ideogram-chr-div {
+    position:absolute;
+    height:100%;
+    left:0px;
+    width:50px;
+    font-size: small;
 }
 
 .igv-track-container-div {
-    position: absolute;
+    position: relative;
     left: 0;
-    top:80px;
     right: 0;
-    font-family: Arial, Helvetica, sans-serif;
+    /*margin-right: 20px;*/
+    padding-bottom: 10px;
+   /* font-family: Arial, Helvetica, sans-serif;*/
     font-size: medium;
-    /*background-color: darkcyan;*/
+    height: auto;
+    overflow: hidden;
 }
 
 .igv-track-div {
-    position: absolute;
+    position: relative;
     left: 0;
     right: 0;
-    height: 100%;
-    /*background-color: darkcyan;*/
+    overflow:hidden;
+    margin-bottom:10px;
+}
+
+.igv-track-label {
+    position: absolute;
+    top: 10px;
+    left: 10px;
+    cursor: pointer;
+}
+
+.igv-track-disable-button-fontawesome {
+    position: absolute;
+    top: 8px;
+    right: 12px;
+    cursor: pointer;
+    color: #222;
 }
 
 .igv-control-div {
     position: absolute;
     left: 0;
-    width: 50px;
     height: 100%;
-    border:none;
+    border: none;
     padding: 0;
     background: none;
+}
+
+.igv-control-sort-fontawesome {
+    cursor: pointer;
+    color: #000000;
+}
+
+.igv-control-sort-fontawesome-selected {
+    cursor: pointer;
+    color: red;
 }
 
 .igv-viewport-div {
@@ -130,20 +293,23 @@ input[type='file'] {
     height: 100%;
     overflow-x: hidden;
     overflow-y: auto;
-    /*background-color: darkcyan;*/
 }
 
 .igv-content-div {
-    position: absolute;
-    width: 100%;
+    position: relative;
+    margin-left: 10px;
+    margin-right: 10px;
+    left: 0;
+    right: 0;
 }
+
 
 .igv-cursorHistogram-div {
     position: absolute;
     top: 0;
     left: 0;
     width: 100px;
-    border:none;
+    border: none;
     padding: 0;
     background: none;
     outline: thin solid rgba(64, 64, 64, 1.0);
@@ -153,7 +319,7 @@ input[type='file'] {
     position: absolute;
     top: 0;
     left: 0;
-    border:none;
+    border: none;
     padding: 0;
     background: none;
 }
@@ -161,7 +327,7 @@ input[type='file'] {
 .igv-filter-div {
     position: absolute;
     width: 128px;
-    border:none;
+    border: none;
     padding: 0;
     height: 100%;
     background: none;
@@ -170,22 +336,109 @@ input[type='file'] {
 .igv-filter-button {
     position: absolute;
     width: 128px;
-    border:none;
+    border: none;
     padding: 0;
     height: 100%;
     background: none;
 }
 
-.igv-filter-thumbnail-horizonal-line {
+.igv-filter-thumbnail-horizontal-line {
     position: absolute;
     left: 0;
     width: 128px;
     height: 2px;
-    border:none;
+    border: none;
     padding: 0;
     background-color: rgba(255, 0, 0, .75);
 }
 
+.igv-popover {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 350px;
+    /*height: 240px;*/
+    z-index: 1000;
+    font-family: Arial, Helvetica, sans-serif;
+    font-size: medium;
+    border: 2px solid #444;
+    background: #fff;
+    border-radius: 2%;
+    -moz-border-radius: 2%;
+    -webkit-border-radius: 2%;
+    display: none;
+}
+
+.igv-popoverContent {
+    position: absolute;
+    top: 5px;
+    left: 5px;
+    right: 25px;
+    /*bottom: 5px;*/
+    background: #fff;
+    /*background: rgba(0, 255, 0, .5);*/
+    /*display: block;*/
+}
+
+.igv-popoverPointer {
+    position: absolute;
+    top: 0;
+    left: 0;
+    z-index: 5000;
+}
+
+.igv-popoverContent .igv-popoverNameSpan {
+    font-weight: bold;
+    /*background: #0f0;*/
+}
+
+.igv-popoverContent .igv-popoverValueSpan {
+    word-break: break-all;
+    /*background: #f00;*/
+}
+
+.igv-popoverContent .popoverContentSpan {
+    font-weight: bold;
+}
+
+.igv-popoverCloseElement {
+    position: absolute;
+    top: 4px;
+    right: 4px;
+    cursor: pointer;
+}
+
+.igv-popoverCloseFontAwesome {
+    position: absolute;
+    top: 0;
+    right: 0;
+    color: #888;
+}
+
+.igv-popoverClose {
+    position: absolute;
+    top: 4px;
+    right: 4px;
+    width: 15px;
+    height: 15px;
+    font-size: 10pt;
+    color: #444;
+    border: 2px solid #fff;
+    background-color: #fff;
+    cursor: pointer;
+    font-weight: bold;
+    border-radius: 50%;
+    -moz-border-radius: 50%;
+    -webkit-border-radius: 50%;
+    /*padding: 1px 3px 2px 3px;*/
+    text-align: center;
+}
+
+.igv-popoverClose:hover {
+    color: #fff;
+    border: 2px solid #e00;
+    background-color: #e00;
+}
 
 #dropdown-list {
     max-height: 200px;
@@ -195,13 +448,13 @@ input[type='file'] {
     left: 50px;
 }
 
-
 /* Some experimental classes,  */
 .cursor-btn-default {
     color: #333;
     background-color: #fff;
     border-color: #357ebd;
 }
+
 .cursor-btn-default:hover,
 .cursor-btn-default:focus,
 .cursor-btn-default:active,
@@ -211,16 +464,16 @@ input[type='file'] {
     background-color: #ebebeb;
     border-color: #357ebd;
 }
-.cursor-btn-selected {
-    color: #333;
-    background-color: #ebebeb;
-    border-color: #357ebd;
-}
 
+/*.cursor-btn-selected {*/
+/*color: #333;*/
+/*background-color: #ebebeb;*/
+/*border-color: #357ebd;*/
+/*}*/
 
 .btn-cursor-selected {
     color: #ffffff;
-    background-color: #BD1B30;
+    background-color: #E6E8EB;
     border-color: #ffffff;
 }
 
@@ -230,7 +483,7 @@ input[type='file'] {
 .btn-cursor-selected.active,
 .open .dropdown-toggle.btn-cursor-selected {
     color: #ffffff;
-    background-color: #BD1B30;
+    background-color: #E6E8EB;
     border-color: #ffffff;
 }
 
@@ -255,20 +508,18 @@ fieldset[disabled] .btn-cursor-selected:active,
 .btn-cursor-selected.disabled.active,
 .btn-cursor-selected[disabled].active,
 fieldset[disabled] .btn-cursor-selected.active {
-    background-color: #BD1B30;
+    background-color: #E6E8EB;
     border-color: #ffffff;
 }
 
 .btn-cursor-selected .badge {
-    color: #BD1B30;
+    color: #E6E8EB;
     background-color: #ffffff;
 }
-
 
 .btn-cursor-deselected {
     color: #000000;
     background-color: #FFFFFF;
-    border-color: #000000;
 }
 
 .btn-cursor-deselected:hover,
@@ -277,7 +528,7 @@ fieldset[disabled] .btn-cursor-selected.active {
 .btn-cursor-deselected.active,
 .open .dropdown-toggle.btn-cursor-deselected {
     color: #000000;
-    background-color: #BD1B30;
+    background-color: #E6E8EB;
     border-color: #000000;
 }
 
@@ -310,6 +561,7 @@ fieldset[disabled] .btn-cursor-deselected.active {
     color: #FFFFFF;
     background-color: #000000;
 }
+
 
 
 

@@ -3,15 +3,21 @@
 var igv = (function (igv) {
 
 
+    const VARIANT = "VARIANT";
+    const TRAIT = "TRAIT";
     /**
      * @param url - url to the webservice
      * @constructor
      */
     igv.T2DVariantSource = function (config) {
 
+        this.proxy = (config.proxy ? config.proxy : "//www.broadinstitute.org/igvdata/t2d/postJson.php");   // Always use a proxy for now
         this.url = config.url;
         this.trait = config.trait;
+        this.valueThreshold = config.valueThreshold ? config.valueThreshold : 5E-2;
 
+        this.type = this.url.contains("variant") ? VARIANT : TRAIT;
+        this.pvalue = config.pvalue ? config.pvalue : "PVALUE";
 
     };
 
@@ -30,7 +36,7 @@ var igv = (function (igv) {
         var source = this;
 
         if (this.cache && this.cache.chr === chr && this.cache.end > bpEnd && this.cache.start < bpStart) {
-            success(this.cache.features);
+            success(this.cache.featuresBetween(bpStart, bpEnd));
         }
 
         else {
@@ -43,20 +49,32 @@ var igv = (function (igv) {
                     queryChr = (chr.startsWith("chr") ? chr.substring(3) : chr),
                     queryStart = Math.max(0, center - window),
                     queryEnd = center + window,
-                    dataLoader = new igv.DataLoader(this.url),
-                    data = {
-                        "user_group": "ui",
-                        "filters": [
-                            {"operand": "CHROM", "operator": "EQ", "value": queryChr , "filter_type": "STRING" },
+                    dataLoader = new igv.DataLoader(this.proxy ? this.proxy : this.url),
+                    filters =
+                        [
+                            {"operand": "CHROM", "operator": "EQ", "value": queryChr, "filter_type": "STRING" },
                             {"operand": "POS", "operator": "GT", "value": queryStart, "filter_type": "FLOAT" },
                             {"operand": "POS", "operator": "LT", "value": queryEnd, "filter_type": "FLOAT" },
-                            {"operand": "PVALUE", "operator": "LTE", "value": 5E-2, "filter_type": "FLOAT"}
+                            {"operand": source.pvalue, "operator": "LTE", "value": source.valueThreshold, "filter_type": "FLOAT"}
                         ],
-                        "trait": source.trait
-                    };
+                    columns = source.type === TRAIT ?
+                        ["CHROM", "POS", "DBSNP_ID", "PVALUE", "ZSCORE"] :
+                        ["CHROM","POS",source.pvalue, "DBSNP_ID"],
+                    data = {
+                        "user_group": "ui",
+                        "filters": filters,
+                        "columns": columns
+                    },
+                    tmp;
 
 
-                dataLoader.postJson(data, function (result) {
+                if (source.type === TRAIT) data.trait = source.trait;
+
+                tmp = this.proxy ?
+                    "url=" + this.url + "&data=" + JSON.stringify(data) :
+                    JSON.stringify(data);
+
+                dataLoader.postJson(tmp, function (result) {
 
                         if (result) {
 
@@ -67,12 +85,8 @@ var igv = (function (igv) {
                                     return a.POS - b.POS;
                                 });
 
-                                source.cache = {
-                                    chr: chr,
-                                    start: queryStart,
-                                    end: queryEnd,
-                                    features: variants
-                                };
+                                source.cache = new FeatureCache(chr, queryStart, queryEnd, variants);
+
                                 success(variants);
                             }
                             else {
@@ -88,6 +102,41 @@ var igv = (function (igv) {
 
             loadFeatures.call(this);
         }
+    }
+
+
+    // Experimental linear index feature cache.
+    var FeatureCache = function (chr, start, end, features) {
+
+        var i, bin, lastBin;
+
+        this.chr = chr;
+        this.start = start;
+        this.end = end;
+        this.binSize = (end - start) / 100;
+        this.binIndeces = [0];
+        this.features = features;
+
+        lastBin = 0;
+        for (i = 0; i < features.length; i++) {
+            bin = Math.max(0, Math.floor((features[i].POS - this.start) / this.binSize));
+            if (bin > lastBin) {
+                this.binIndeces.push(i);
+                lastBin = bin;
+            }
+        }
+    }
+
+    FeatureCache.prototype.featuresBetween = function (start, end) {
+
+
+        var startBin = Math.max(0, Math.min(Math.floor((start - this.start) / this.binSize) - 1, this.binIndeces.length - 1)),
+            endBin = Math.max(0, Math.min(Math.floor((end - this.start) / this.binSize), this.binIndeces.length - 1)),
+            startIdx = this.binIndeces[startBin],
+            endIdx = this.binIndeces[endBin];
+
+        return this.features; //.slice(startIdx, endIdx);
+
     }
 
 

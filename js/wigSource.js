@@ -142,14 +142,12 @@ var igv = (function (igv) {
         wigFeatures = this.features[ this.stepFormat.chr ];
         if (!wigFeatures) {
 
-            wigFeatures = { featureList: [], minimum: Number.MAX_VALUE, maximum: -Number.MAX_VALUE };
+            wigFeatures = [];
             this.features[ this.stepFormat.chr ] = wigFeatures;
         }
 
         wigFeature = this.stepFormat.featureForStepFormat(line);
         wigFeatures.featureList.push(wigFeature);
-        wigFeatures.minimum = Math.min(wigFeatures.minimum, wigFeature.value);
-        wigFeatures.maximum = Math.max(wigFeatures.maximum, wigFeature.value);
     };
 
     return igv;

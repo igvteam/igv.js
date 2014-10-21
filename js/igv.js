@@ -1,130 +1,140 @@
 var igv = (function (igv) {
 
 
-    // TODO -- this funtion should be in some utility file to avoid copies
-    function throttle(fn, threshhold, scope) {
-        threshhold || (threshhold = 100);
-        var last, deferTimer;
-
-        return function () {
-            var context = scope || this;
-
-            var now = +new Date,
-                args = arguments;
-            if (last && now < last + threshhold) {
-                // hold on to it
-                clearTimeout(deferTimer);
-                deferTimer = setTimeout(function () {
-                    last = now;
-                    fn.apply(context, args);
-                }, threshhold);
-            } else {
-                last = now;
-                fn.apply(context, args);
-            }
-        }
-    }
-
-
     /**
      * Create an igv.browser instance.  This object defines the public API for interacting with the genome browser.
      *
      * @param options Object specifying initial configuration options.
      *
      */
-    igv.createBrowser = function (options) {
+    igv.createBrowser = function (parentDiv, options) {
+
+        if (igv.browser) {
+            console.log("Attempt to create 2 browsers.")
+            return igv.browser;
+        }
 
 
-        igv.browser = new igv.Browser("IGV");
+        if (!options) options = {};
+        options.type = "IGV";
 
-        var browser = igv.browser,
-            rootDiv = browser.div,
-            contentContainer = $('<div class="container-fluid"><div class="row">')[0],
-            contentRoot = $('<div id="igvRootDiv" class="igv-root-div">')[0],
+        console.log("Create browser");
+        if (!options.flanking && isT2D(options)) {  // TODO -- hack for demo, remove
+            options.flanking = 100000;
+        }
+
+        var contentRoot = $('<div id="igvContentDiv" class="igv-content-div">')[0],
             contentKaryo = $('<div id="igvKaryoDiv" class="igv-karyo-div">')[0],
             contentHeader = $('<div id="igvHeaderDiv" class="igv-header-div">')[0],
-            trackContainer = $('<div id="igvTrackContainerDiv" class="igv-track-container-div">')[0];
-
-
+            trackContainer = $('<div id="igvTrackContainerDiv" class="igv-track-container-div">')[0],
+            browser = new igv.Browser(options, trackContainer),
+            rootDiv = browser.div;
 
         // DOM
-        $(rootDiv).append(contentKaryo);
-        $(rootDiv).append(contentContainer);
 
-        $(contentContainer).append(contentRoot);
+        parentDiv.appendChild(rootDiv);
 
+        if (options.showKaryo) {
+            $(rootDiv).append(contentKaryo);
+        }
+        $(rootDiv).append(contentRoot);
         $(contentRoot).append(contentHeader);
         $(contentRoot).append(trackContainer);
 
-        browser.startup = function () {
+        // Popover object -- singleton shared by all components
+        igv.popover = new igv.Popover(contentRoot);
 
+        if (options.showKaryo) {
+            browser.karyoPanel = new igv.KaryoPanel(contentKaryo);
+        }
+
+
+        browser.ideoPanel = new igv.IdeoPanel(rootDiv);
+        $(contentHeader).append(browser.ideoPanel.div);
+        browser.ideoPanel.resize();
+
+
+        console.log("Browser startup");
+
+
+        igv.sequenceSource = new igv.FastaSequence(options.fastaURL);
+
+
+        igv.loadGenome(options.cytobandURL, function (genome) {
+
+            browser.genome = genome;
+
+            // Set inital locus
+            var firstChrName = browser.genome.chromosomeNames[0],
+                firstChr = browser.genome.chromosomes[firstChrName];
+
+            browser.referenceFrame = new igv.ReferenceFrame(firstChrName, 0, firstChr.bpLength / browser.trackViewportWidth());
             browser.controlPanelWidth = 50;
 
-            browser.trackContainerDiv = trackContainer;
+            if (browser.ideoPanel) browser.ideoPanel.repaint();
+            if (browser.karyoPanel) browser.karyoPanel.repaint();
+            browser.addTrack(new igv.RulerTrack());
 
-            browser.trackPanels = [];
+            // If an initial locus is specified go there first, then load tracks.  This avoids loading track data at
+            // a default location then moving
+            if (options.locus) {
 
-            igv.sequenceSource = igv.getFastaSequence(options.fastaURL);
+                browser.search(options.locus, function () {
 
-            if (options.showKaryo) {
-                browser.karyoPanel = new igv.KaryoPanel(browser);
-                $('#igvKaryoDiv').append(browser.karyoPanel.div);
-                browser.karyoPanel.resize();
+                    var refFrame = igv.browser.referenceFrame,
+                        start = refFrame.start,
+                        end = start + igv.browser.trackViewportWidth() * refFrame.bpPerPixel,
+                        range = start - end;
+
+                    if (options.tracks) {
+                        if (range < 100000) {
+                            igv.sequenceSource.getSequence(refFrame.chr, start, end, function (refSeq) {
+                                options.tracks.forEach(function (track) {
+                                    browser.loadTrack(track);
+                                });
+                            });
+                        }
+                    }
+                    else {
+                        options.tracks.forEach(function (track) {
+                            browser.loadTrack(track);
+                        });
+
+                    }
+
+                });
+
+            }
+            else if (options.tracks) {
+                options.tracks.forEach(function (track) {
+                    browser.loadTrack(track);
+                });
+
             }
 
 
-            browser.ideoPanel = new igv.IdeoPanel(browser);
-            $('#igvHeaderDiv').append(browser.ideoPanel.div);
-            browser.ideoPanel.resize();
+        });
 
-
-            igv.loadGenome(options.cytobandURL, function (genome) {
-
-                browser.genome = genome;
-
-                // Set inital locus
-                var firstChrName = browser.genome.chromosomeNames[0],
-                    firstChr = browser.genome.chromosomes[firstChrName];
-
-                browser.referenceFrame = new igv.ReferenceFrame(firstChrName, 0, firstChr.bpLength / browser.trackViewportWidth());
-
-
-                if (browser.ideoPanel) browser.ideoPanel.repaint();
-                if (browser.karyoPanel) browser.karyoPanel.repaint();
-                browser.addTrack(new igv.RulerTrack());
-
-                // Load initial tracks, if any
-                if (options.tracks) {
-
-                    options.tracks.forEach(function (track) {
-                        browser.addTrack(track);
-                    });
-
-                }
-
-                if(options.locus) {
-                    browser.search(options.locus);
-                }
-
-                window.onresize = throttle(function () {
-                    if (browser.ideoPanel) browser.ideoPanel.resize();
-                    if (browser.karyoPanel) browser.karyoPanel.resize();
-                    browser.trackPanels.forEach(function (panel) {
-                        panel.resize();
-                    })
-                }, 10);
-            });
-
-        }
 
         return browser;
 
 
     }
 
+    // TODO -- temporary hack for demo, remove ASAP
+    function isT2D(options) {
+        if (options.tracks && options.tracks.length > 0) {
+            var t = options.tracks[0];
+            var b = t instanceof igv.T2dTrack;
+            return b;
+        }
+        else {
+            return false;
+        }
+    }
+
     return igv;
-})
-(igv || {});
+})(igv || {});
 
 
 

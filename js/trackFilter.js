@@ -5,9 +5,76 @@ igv = (function (igv) {
 
         this.trackPanel = trackPanel;
         this.guid = igv.guid();
-        this.isFilterActive = true;
+//        this.isFilterActive = true;
+        this.isFilterActive = false;
         this.previousRadioButton = undefined;
         this.radioButton = undefined;
+    };
+
+    igv.TrackFilter.prototype.setWithJSON = function (json) {
+
+        var myself = this,
+            modalPresentationButton = $('#' + "modalPresentationButton_" + this.guid),
+            minimumElement = $('#' + 'minimumScoreFilterID_' + this.guid),
+            maximumElement = $('#' + 'maximumScoreFilterID_' + this.guid);
+
+        this.isFilterActive = json.isFilterActive;
+        this.radioButton = (undefined === json.radioButtonIDPrefix) ? undefined : radioButtonWithID(json.radioButtonIDPrefix + this.guid);
+
+        modalPresentationButton.css("color", "black");
+
+        if ("minMaxRadio_" + this.guid === this.radioButton[0].id) {
+
+            minimumElement.val(json.minimum);
+            maximumElement.val(json.maximum);
+
+            this.minimum = json.minimum;
+            this.maximum = json.maximum;
+
+            if (undefined !== json.minimum || undefined !== json.maximum) {
+                modalPresentationButton.css("color", "red");
+            }
+
+        } else if (this.isFilterActive) {
+            modalPresentationButton.css("color", "red");
+
+        }
+
+        function radioButtonWithID(radioButtonID) {
+
+            var chosen = undefined,
+                radioButtonGroupContainer = $('#modalBody_' + myself.guid).find('.radio');
+
+            radioButtonGroupContainer.each(function(){
+
+                var radio = $(this).find('input');
+
+                if (radioButtonID === radio[ 0 ].id) {
+                    chosen = radio;
+                    chosen.prop('checked',true);
+                }
+
+            });
+
+            return chosen;
+        }
+
+    };
+
+    igv.TrackFilter.prototype.jsonRepresentation = function () {
+
+        var re = new RegExp(this.guid, "g"),
+            json;
+
+        json = {
+            isFilterActive: this.isFilterActive,
+            radioButtonIDPrefix : (undefined == this.radioButton[0]) ? undefined : this.radioButton[0].id.replace(re, ''),
+            minimum : (undefined === this.minimum) ? undefined : this.minimum,
+            maximum : (undefined === this.maximum) ? undefined : this.maximum
+
+        };
+
+        return json;
     };
 
     igv.TrackFilter.prototype.makeTrackFilterOverlayRenderer = function (cursorHistogramRenderMinimumOverlay, cursorHistogramRenderMaximumOverlay) {

@@ -28,7 +28,7 @@ var igv = (function (igv) {
         var regex = new RegExp(regexS);
         var results = regex.exec(window.location.href);
         if (results == null)
-            return "";
+            return undefined;
         else
             return results[1];
     };

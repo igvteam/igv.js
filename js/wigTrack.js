@@ -4,22 +4,34 @@
 var igv = (function (igv) {
 
 
-    igv.WIGTrack = function (descriptor) {
+    igv.WIGTrack = function (config) {
 
-        this.descriptor = descriptor;
-        this.url = descriptor.url;
+        this.config = config;
+        this.url = config.url;
 
-        if (this.url.endsWith(".bedgraph") || this.url.endsWith(".bedgraph.gz")) {
-            this.featureSource = new igv.BEDGraphFeatureSource(this.url);
-        } else {
-            this.featureSource = new igv.WIGFeatureSource(this.url);
+        if (config.url.endsWith(".bedgraph") || config.url.endsWith(".bedgraph.gz")) {
+
+            this.featureSource = new igv.BEDGraphFeatureSource(config.url);
+
+        } else if (config.url.endsWith(".wig") || config.url.endsWith(".wig.gz")) {
+
+            this.featureSource = new igv.WIGFeatureSource(config.url);
+
+        } else if (config.url.endsWith(".bw") || config.url.endsWith(".bigwig") || config.type === "bigwig") {
+
+            this.featureSource = new igv.BWSource(config.url);
         }
 
-        this.label = descriptor.label;
-        this.id = descriptor.id || this.label;
-        this.color = descriptor.color || "rgb(150,150,150)";
+
+        this.label = config.label;
+        this.id = config.id || this.label;
+        this.color = config.color || "rgb(150,150,150)";
         this.height = 100;
-        this.order = descriptor.order;
+        this.order = config.order;
+
+        // Min and max values.  No defaults for these, if they aren't set track will autoscale.
+        this.min = config.min;
+        this.max = config.max;
 
     };
 
@@ -34,22 +46,28 @@ var igv = (function (igv) {
      * @param continuation
      */
 
-    //  this.track.draw(igvCanvas, refFrame, tileStart, tileEnd, buffer.width, buffer.height, function () {
+        //  this.track.draw(igvCanvas, refFrame, tileStart, tileEnd, buffer.width, buffer.height, function () {
 
     igv.WIGTrack.prototype.draw = function (canvas, refFrame, bpStart, bpEnd, width, height, continuation) {
 
-        var track=this,
+        var track = this,
             chr = refFrame.chr;
 
         this.featureSource.getFeatures(chr, bpStart, bpEnd, function (features) {
 
             var featureMin, featureMax, denom;
 
-            if (features) {
-                featureMin = features.minimum;
-                featureMax = features.maximum;
+            if (features && features.length > 0) {
+                featureMin = this.min;
+                featureMax = this.max;
+                if(!featureMin || !featureMax) {
+                    var s = autoscale(features);
+                    featureMin = s.min;
+                    featureMax = s.max;
+                }
                 denom = featureMax - featureMin;
-                features.featureList.forEach(renderFeature);
+
+                features.forEach(renderFeature);
             }
 
             continuation();
@@ -84,6 +102,19 @@ var igv = (function (igv) {
     igv.WIGTrack.prototype.drawLabel = function (ctx) {
         // draw label stuff
     };
+
+    function autoscale(features) {
+        var min = Number.MAX_VALUE,
+            max = -Number.MAX_VALUE;
+
+        features.forEach(function(f) {
+            min = Math.min(min, f.value);
+            max = Math.max(max, f.value);
+        });
+
+        return {min: min, max: max};
+
+    }
 
     return igv;
 

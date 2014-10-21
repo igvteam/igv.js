@@ -15,6 +15,8 @@
     <link href="//maxcdn.bootstrapcdn.com/font-awesome/4.2.0/css/font-awesome.min.css" rel="stylesheet">
 
     <!-- IGV Bootstrap css -->
+
+    <link href="css/igv.css" type="text/css" rel="stylesheet">
     <link href="css/cursor.css" type="text/css" rel="stylesheet">
 
     <!-- HTML5 shim and Respond.js IE8 support of HTML5 elements and media queries -->
@@ -39,7 +41,8 @@
 
     <!-- DataTables JS -->
     <!--<script type="text/javascript" charset="utf8" src="//cdn.datatables.net/1.10.0/js/jquery.dataTables.min.js"></script>-->
-    <script type="text/javascript" charset="utf8" src="//cdn.datatables.net/1.10.2/js/jquery.dataTables.min.js"></script>
+    <script type="text/javascript" charset="utf8"
+            src="//cdn.datatables.net/1.10.2/js/jquery.dataTables.min.js"></script>
 
     <!-- IGV -->
     <script type="text/javascript" src="js/trackFilter.js"></script>
@@ -65,19 +68,20 @@
     <script type="text/javascript" src="js/binary.js"></script>
     <script type="text/javascript" src="js/gtex/eqtlTrack.js"></script>
     <script type="text/javascript" src="js/coverageMap.js"></script>
-    <script type="text/javascript" src="js/alignmentManager.js"></script>
-    <script type="text/javascript" src="js/bamReader.js"></script>
-    <script type="text/javascript" src="js/bamSource.js"></script>
-    <script type="text/javascript" src="js/bamTrack.js"></script>
+    <script type="text/javascript" src="js/bam/bamReader.js"></script>
+    <script type="text/javascript" src="js/bam/bamSource.js"></script>
+    <script type="text/javascript" src="js/bam/bamTrack.js"></script>
     <script type="text/javascript" src="vendor/spin.js"></script>
     <script type="text/javascript" src="js/intervalTree.js"></script>
     <script type="text/javascript" src="js/ucsc-utils.js"></script>
+    <script type="text/javascript" src="js/igv-constants.js"></script>
 
     <script type="text/javascript" src="js/encode/encode.js"></script>
     <script type="text/javascript" src="js/cursor/cursorTrack.js"></script>
     <script type="text/javascript" src="js/cursor/cursorModel.js"></script>
     <script type="text/javascript" src="js/cursor/cursorHistogram.js"></script>
     <script type="text/javascript" src="js/cursor/cursor-ideogram.js"></script>
+    <script type="text/javascript" src="js/cursor/horizontalScrollbar.js"></script>
 
 
 </head>
@@ -87,133 +91,295 @@
 <!-- Everything -->
 <div style="height:445px">
 
-    <nav class="navbar navbar-fixed-top" role="navigation">
+<nav class="navbar navbar-default navbar-fixed-top" role="navigation">
 
-        <div class="container-fluid">
+    <div class="container-fluid">
 
-            <div class="navbar-header">
-                <a class="navbar-brand" href="#">CURSOR</a>
+        <div class="row">
+
+            <div class="navbar-header col-xs-1">
+                    <span class="navbar-brand">
+                        CURSOR
+                    </span>
             </div>
 
-            <button id="encodeModalButton" type="button" class="btn btn-default navbar-btn navbar-left" data-toggle="modal" data-target=".bs-example-modal-lg">
-                ENCODE
-            </button>
+            <div class="col-xs-2">
 
-            <div class="navbar-form navbar-left">
+                <button id="encodeModalButton" type="button" class="btn btn-default navbar-btn navbar-left" data-toggle="modal" data-target=".bs-example-modal-lg">
+                    ENCODE
+                </button>
 
+            </div><!-- ENCODE -->
+
+            <div class="col-xs-2">
                 <label>
-                    Frame Width (pixels)
-                    <input id="frameWidthInput" type="text" class="form-control" placeholder="pixels">
+                    Frame Width (px)
+                    <input id="frameWidthInput" type="text" class="form-control" placeholder="px">
                 </label>
+            </div><!-- Frame Width -->
 
-            </div><!-- Frame Width (pixels) -->
-
-            <div class="navbar-form navbar-left">
-
+            <div class="col-xs-2">
                 <label>
                     Region Size (bp)
                     <input id="regionSizeInput" type="text" class="form-control" placeholder="bp">
                 </label>
+            </div><!-- Region Size -->
 
-            </div><!-- Region Size (bp) -->
-
-            <div class="navbar-form navbar-left">
-
+            <div class="col-xs-2">
                 <label>
-                    Track Height (pixels)
-                    <input id="trackHeightInput" type="text" class="form-control" placeholder="pixels">
+                    Track Height (px)
+                    <input id="trackHeightInput" type="text" class="form-control" placeholder="px">
                 </label>
-
             </div><!-- Track Height -->
 
-            <div class="navbar-form navbar-left">
+            <div class="col-xs-1">
+                <button class="btn btn-default navbar-btn" data-toggle="modal" data-target="#igvSaveSessionModal">
+                    Save Session
+                </button>
+            </div><!-- Save Session -->
 
-                <div class="input-append">
-                    <input type="file" id="fileInput" title="foo" multiple />
+            <div class="col-xs-2">
+                <div class="dropdown">
+                    <button id="igvSessionLoadDropdownMenu" class="btn btn-default navbar-btn dropdown-toggle" type="button" data-toggle="dropdown">
+                        Load Session
+                    <span class="caret">
+
+                    </span>
+                    </button>
+                    <ul class="dropdown-menu" role="menu" aria-labelledby="igvSessionLoadDropdownMenu">
+                        <li role="presentation">
+                            <a role="menuitem" tabindex="-1" href="#">
+
+                                <form id="igvSessionLoadForm">
+                                    <input id="igvSessionLoad" type="file" title="foo" multiple/>
+                                </form>
+
+                            </a>
+                        </li>
+                    </ul>
                 </div>
+            </div><!-- Load Session -->
 
-            </div><!-- Upload file -->
+        </div><!-- row 0 -->
 
-            <div class="nav navbar-nav navbar-right">
+        <div class="row">
 
-                <div class="well-sm">
-                    <div class="btn-group-sm">
+            <div class="col-xs-offset-1 col-xs-2">
+                <button class="btn btn-default navbar-btn" data-toggle="modal" data-target="#igvExportRegionsModal">
+                    Export Regions
+                </button>
+            </div><!-- Export Regions -->
 
-                        <button id="exportRegionsModalPresentationButton" type="button" class="btn btn-default btn-sm">
-                            Export Regions
-                        </button>
+            <div class="col-xs-2">
+                <div class="dropdown">
+                    <button id="igvFileUploadDropdownMenu" class="btn btn-default navbar-btn dropdown-toggle" type="button" data-toggle="dropdown">
+                        Upload File
+                        <span class="caret"></span>
+                    </button>
+                    <ul class="dropdown-menu" role="menu" aria-labelledby="igvFileUploadDropdownMenu">
+                        <li role="presentation">
+                            <a role="menuitem" tabindex="-1" href="#">
 
-                        <button id="sessionManagmentModalPresentationButton" type="button" class="btn btn-default btn-sm">
-                            Save/Restore Session
-                        </button>
+                                <form id="igvFileUploadForm">
+                                    <input id="igvFileUpload" type="file" title="foo" multiple/>
+                                </form>
 
-                        <button id="fitToScreen" type="button" class="btn btn-default btn-sm">
-                            <span class="fa fa-align-justify"></span>
-                        </button>
-                        <button id="zoomOut" type="button" class="btn btn-default btn-sm">
-                            <span class="glyphicon glyphicon-minus"></span>
-                        </button>
-                        <button id="zoomIn" type="button" class="btn btn-default btn-sm">
-                            <span class="glyphicon glyphicon-plus"></span>
-                        </button>
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+            </div><!-- Upload File -->
+
+            <div class="col-xs-2">
+                <label>
+                    Load BED URL
+                    <input id="igvLoadURL" type="text" class="form-control" placeholder="BED URL">
+                </label>
+            </div><!-- Frame Width -->
+
+
+            <div class="col-xs-2">
+
+
+                <ul class="nav navbar-nav navbar-right">
+                    <li>
+                        <div class="btn-group navbar-btn">
+
+                            <button id="zoomOut" class="btn btn-default navbar-btn  btn-sm">
+                                <span class="glyphicon glyphicon-minus">
+
+                                </span>
+                            </button>
+
+                            <button id="fitToScreen" class="btn btn-default navbar-btn btn-sm">
+                                <span class="fa fa-align-justify">
+
+                                </span>
+                            </button>
+
+                            <button id="zoomIn" class="btn btn-default navbar-btn  btn-sm">
+                                <span class="glyphicon glyphicon-plus">
+
+                                </span>
+                            </button>
+
+                        </div>
+                    </li>
+                </ul>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                <!--<div class="nav navbar-nav navbar-right">-->
+
+                        <!--<div class="btn-group-sm">-->
+
+                            <!--<button id="fitToScreen" type="button" class="btn btn-default navbar-btn btn-sm">-->
+                                <!--<span class="fa fa-align-justify"></span>-->
+                            <!--</button>-->
+                            <!--<button id="zoomOut" type="button" class="btn btn-default navbar-btn  btn-sm">-->
+                                <!--<span class="glyphicon glyphicon-minus"></span>-->
+                            <!--</button>-->
+                            <!--<button id="zoomIn" type="button" class="btn btn-default navbar-btn  btn-sm">-->
+                                <!--<span class="glyphicon glyphicon-plus"></span>-->
+                            <!--</button>-->
+                        <!--</div>-->
+
+                <!--</div>-->
+
+            </div><!-- fit to screen | zoom out | zoom in -->
+
+        </div><!-- row 1 -->
+    </div>
+
+</nav>
+
+<!-- Export Regions Modal -->
+<div class="modal fade" id="igvExportRegionsModal" tabindex="-1" role="dialog"
+     aria-labelledby="igvExportRegionsModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal">
+                    <span aria-hidden="true">&times;</span>
+                    <span class="sr-only">Close</span>
+                </button>
+                <h4 class="modal-title" id="igvExportRegionsModalLabel">Export Regions</h4>
+            </div>
+
+            <div class="modal-body">
+                <form id="igvExportRegionsModalForm" role="form" action="php/igvdownload.php" method="post">
+                    <div class="form-group">
+                        <input class="form-control" placeholder="Enter filename" type="text" name="filename"
+                               value="cursor-regions.bed"/>
+                        <input class="form-control" type="hidden" name="downloadContent"
+                               value="this is the contents of the file"/>
                     </div>
-                </div>
-            </div><!-- fit to screen | magnify | minify -->
+
+                    <button class="btn btn-default" type="submit" name="download" value="download">Submit</button>
+                </form>
+            </div>
 
         </div>
+    </div>
+</div>
 
-    </nav>
+<!-- Save Session Modal -->
+<div class="modal fade" id="igvSaveSessionModal" tabindex="-1" role="dialog" aria-labelledby="igvSaveSessionModalLabel"
+     aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
 
-    <!-- ENCODE Modal -->
-    <div class="modal fade bs-example-modal-lg" id="encodeModal" tabindex="-1" role="dialog" aria-labelledby="encodeModalLabel" aria-hidden="true">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal">
+                    <span aria-hidden="true">&times;</span>
+                    <span class="sr-only">Close</span>
+                </button>
+                <h4 class="modal-title" id="igvSaveSessionModalLabel">Save Session</h4>
+            </div>
 
-        <div class="modal-dialog modal-lg"><!-- modal dialog -->
+            <div class="modal-body">
+                <form id="igvSaveSessionModalForm" role="form" action="php/igvdownload.php" method="post">
+                    <div class="form-group">
+                        <input class="form-control" placeholder="Enter filename" type="text" name="filename"
+                               value="cursor-session.txt"/>
+                        <input class="form-control" type="hidden" name="downloadContent"
+                               value="this is the contents of the file"/>
+                    </div>
 
-            <div class="modal-content"><!-- modal content -->
+                    <button class="btn btn-default" type="submit" name="download" value="download">Submit</button>
+                </form>
+            </div>
 
-                <div class="modal-header"><!-- modal header -->
+        </div>
+    </div>
+</div>
 
-                    <button id="encodeModalTopCloseButton" type="button" class="close" data-dismiss="modal"><!-- close -->
-                        <span aria-hidden="true">×</span>
-                        <span class="sr-only">Close</span>
-                    </button>
+<!-- ENCODE Modal -->
+<div class="modal fade bs-example-modal-lg" id="encodeModal" tabindex="-1" role="dialog"
+     aria-labelledby="encodeModalLabel" aria-hidden="true">
 
-                    <h4 class="modal-title" id="encodeModalLabel">ENCODE</h4><!-- modal title -->
+    <div class="modal-dialog modal-lg"><!-- modal dialog -->
 
-                </div>
+        <div class="modal-content"><!-- modal content -->
 
-                <div id="encodeModalBody" class="modal-body"><!-- modal body -->
-                </div><!-- modal body -->
+            <div class="modal-header"><!-- modal header -->
 
-                <div class="modal-footer"><!-- modal footer -->
-                    <button id="encodeModalBottomCloseButton" type="button" class="btn btn-default" data-dismiss="modal">Close</button><!-- close -->
-                    <button id="encodeModalGoButton"          type="button" class="btn btn-primary" data-dismiss="modal">Go</button><!-- Go -->
-                </div><!-- modal footer -->
+                <button id="encodeModalTopCloseButton" type="button" class="close" data-dismiss="modal"><!-- close -->
+                    <span aria-hidden="true">×</span>
+                    <span class="sr-only">Close</span>
+                </button>
 
-            </div><!-- modal content -->
+                <h4 class="modal-title" id="encodeModalLabel">ENCODE</h4><!-- modal title -->
 
-        </div><!-- modal dialog -->
+            </div>
+
+            <div id="encodeModalBody" class="modal-body"><!-- modal body -->
+            </div>
+            <!-- modal body -->
+
+            <div class="modal-footer"><!-- modal footer -->
+                <button id="encodeModalBottomCloseButton" type="button" class="btn btn-default" data-dismiss="modal">
+                    Close
+                </button>
+                <!-- close -->
+                <button id="encodeModalGoButton" type="button" class="btn btn-primary" data-dismiss="modal">Go</button>
+                <!-- Go -->
+            </div>
+            <!-- modal footer -->
+
+        </div>
+        <!-- modal content -->
 
     </div>
+    <!-- modal dialog -->
 
-    <div id="igvContainerDiv" class="container-fluid">
-    </div>
+</div>
+
+
+<div id="igvContainerDiv" class="container-fluid">
+</div>
 
 </div>
 
 <script type="text/javascript">
 
     $(document).ready(function () {
-
-        var browser;
-
-        // Build CURSOR browser
-        browser = igv.createCursorBrowser();
-
-        // Launch
-        browser.startup();
-
+        igv.createCursorBrowser({type: 'CURSOR', controlPanelWidth: 150});
     });
+
 
 </script>
 

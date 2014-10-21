@@ -1,5 +1,23 @@
 var igv = (function (igv) {
 
+    igv.spinnerStartWithParent = function (parentElement) {
+
+        var thang = $(parentElement).find("i.fa-spinner");
+
+        thang.removeClass("igv-spinner-fontawesome-stop");
+        thang.addClass   ("igv-spinner-fontawesome-start");
+
+    };
+
+    igv.spinnerStopWithParent = function (parentElement) {
+
+        var thang = $(parentElement).find("i.fa-spinner");
+
+        thang.removeClass("igv-spinner-fontawesome-start");
+        thang.addClass   ("igv-spinner-fontawesome-stop");
+
+    };
+
     igv.domElementRectAsString = function (element) {
         return " x " + element.clientLeft + " y " + element.clientTop + " w " + element.clientWidth + " h " + element.clientHeight;
     };
@@ -72,22 +90,69 @@ var igv = (function (igv) {
         return spinner;
     };
 
+    /**
+     * Translate the mouse coordinates for the event to the coordinates for the given target element
+     * @param e
+     * @param target
+     * @returns {{x: number, y: number}}
+     */
+    igv.translateMouseCoordinates = function (e, target) {
+
+        var eFixed = $.event.fix(e),   // Sets pageX and pageY for browsers that don't support them
+            posx = eFixed.pageX - $(target).offset().left,
+            posy = eFixed.pageY - $(target).offset().top;
+
+        return {x: posx, y: posy}
+
+    };
+
 
     /**
-     * Create a file from the text and initiate a download.
-     * @param text
+     * Format markup for popover text from an array of name value pairs [{name, value}]
      */
-    igv.download = function (text) {
+    igv.formatPopoverText = function (nameValueArray) {
 
-        var dataLoader = new igv.DataLoader("php/echoPost.php");
+        var markup = "<table>";
+        nameValueArray.forEach(function (nameValue) {
 
-        dataLoader.post(text, function(response) {
-
-            var url = "php/download.php?filename=" + response;
-            window.open(url, "Download");
-
+            if(nameValue.name) {
+//                markup += "<tr><td>" + nameValue.name+ ":&nbsp; " + nameValue.value + "</td></tr>";
+                markup += "<tr><td>" + "<span class=\"igv-popoverNameSpan\">" + nameValue.name + "</span>" + "&nbsp; "  + "<span class=\"igv-popoverValueSpan\">" + nameValue.value + "</span>" + "</td></tr>";
+            }
+            else {
+                // not a name/value pair
+                markup += "<tr><td>" + nameValue.toString() + "</td></tr>";
+            }
         });
 
+        markup += "</table>";
+        return markup;
+
+
+
+    };
+
+     igv.throttle = function (fn, threshhold, scope) {
+        threshhold || (threshhold = 200);
+        var last, deferTimer;
+
+        return function () {
+            var context = scope || this;
+
+            var now = +new Date,
+                args = arguments;
+            if (last && now < last + threshhold) {
+                // hold on to it
+                clearTimeout(deferTimer);
+                deferTimer = setTimeout(function () {
+                    last = now;
+                    fn.apply(context, args);
+                }, threshhold);
+            } else {
+                last = now;
+                fn.apply(context, args);
+            }
+        }
     }
 
     return igv;

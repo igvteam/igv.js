@@ -4,9 +4,10 @@ body {
     padding-bottom: 20px;
 }
 
-/* A hack to remove the unwanted "No File Chosen" text from the file upload button */
-input[type='file'] {
-    width: 82px;
+
+.igv-header-div {
+    padding-top: 64px;
+    padding-bottom: 8px;
 }
 
 .well {
@@ -38,104 +39,39 @@ input[type='file'] {
     display: block;
 }
 
-.spacer5 { height: 5px; width: 100%; font-size: 0; margin: 0; padding: 0; border: 0; display: block; }
-.spacer10 { height: 10px; width: 100%; font-size: 0; margin: 0; padding: 0; border: 0; display: block; }
-.spacer15 { height: 15px; width: 100%; font-size: 0; margin: 0; padding: 0; border: 0; display: block; }
-.spacer20 { height: 20px; width: 100%; font-size: 0; margin: 0; padding: 0; border: 0; display: block; }
-.spacer25 { height: 25px; width: 100%; font-size: 0; margin: 0; padding: 0; border: 0; display: block; }
-.spacer30 { height: 30px; width: 100%; font-size: 0; margin: 0; padding: 0; border: 0; display: block; }
-.spacer35 { height: 35px; width: 100%; font-size: 0; margin: 0; padding: 0; border: 0; display: block; }
-.spacer40 { height: 40px; width: 100%; font-size: 0; margin: 0; padding: 0; border: 0; display: block; }
-.spacer45 { height: 45px; width: 100%; font-size: 0; margin: 0; padding: 0; border: 0; display: block; }
-.spacer50 { height: 50px; width: 100%; font-size: 0; margin: 0; padding: 0; border: 0; display: block; }
-.spacer100 { height: 100px; width: 100%; font-size: 0; margin: 0; padding: 0; border: 0; display: block; }
-.spacer200 { height: 200px; width: 100%; font-size: 0; margin: 0; padding: 0; border: 0; display: block; }
 
-.igv-gtex-root-div {
-    display: block;
+.igv-horizontal-scrollbar-draggable-div {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 100px;
+    height:100%;
+    background-color: #aaa;
+    cursor: pointer;
+}
+
+.igv-horizontal-scrollbar-draggable-div:hover,
+.igv-horizontal-scrollbar-draggable-div:focus,
+.igv-horizontal-scrollbar-draggable-div:active {
+    background-color: #666;
+}
+
+
+.igv-horizontal-scrollbar-div {
+    position: absolute;
+    top: 0;
+    right:0;
+    height:100%;
+    background-color: rgba(150, 150, 150, .2);
+    border: 1px solid #fff;
+}
+
+.igv-horizontal-scrollbar-container-div {
     position: relative;
-    left: 0px;
-    right: 0px;
-}
-
-.igv-gtex-control-div {
-    position: absolute;
-    left: 0px;
-    right: 0px;
-    height: 20;
-    background-color: darkcyan;
-}
-
-.igv-root-div {
-    position: absolute;
-    margin-left: 10px;
-    margin-right: 10px;
-    left: 0;
-    right: 0;
-
-    -webkit-box-sizing: border-box;
-    -moz-box-sizing: border-box;
-    box-sizing: border-box;
-
-    -webkit-tap-highlight-color: rgba(0,0,0,0);
-
-    -webkit-touch-callout: none;
-
-    -webkit-user-select: none;
-    -moz-user-select: none;
-    -ms-user-select: none;
-    user-select: none;
-}
-
-.igv-header-div {
-    position: absolute;
-    top:40px;
-    left: 0;
-    right: 0;
-    /*background-color: darkseagreen;*/
-}
-
-.igv-track-container-div {
-    position: absolute;
-    left: 0;
-    top:80px;
-    right: 0;
-    font-family: Arial, Helvetica, sans-serif;
-    font-size: medium;
-    /*background-color: darkcyan;*/
-}
-
-.igv-track-div {
-    position: absolute;
-    left: 0;
-    right: 0;
-    height: 100%;
-    /*background-color: darkcyan;*/
-}
-
-.igv-control-div {
-    position: absolute;
-    left: 0;
-    width: 150px;
-    height: 100%;
-    border:none;
-    padding: 0;
-    background: none;
-}
-
-.igv-viewport-div {
-    position: absolute;
-    left: 50px;
-    right: 0;
-    height: 100%;
-    overflow-x: hidden;
-    overflow-y: auto;
-    /*background-color: darkcyan;*/
-}
-
-.igv-content-div {
-    position: absolute;
-    width: 100%;
+    top: 0;
+    right:0;
+    height:20px;
+    padding-top: 10px;
 }
 
 .igv-cursorHistogram-div {
@@ -177,7 +113,7 @@ input[type='file'] {
     background: none;
 }
 
-.igv-filter-thumbnail-horizonal-line {
+.igv-filter-thumbnail-horizontal-line {
     position: absolute;
     left: 0;
     width: 128px;
