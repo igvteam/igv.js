@@ -51,7 +51,6 @@ var igv = (function (igv) {
         });
 
         if (true === attemptedDuplicateTrackAddition) {
-
             window.alert("Attempt to load duplicate track.");
             return;
         }

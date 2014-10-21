@@ -258,7 +258,6 @@ var igv = (function (igv) {
 
         browser.referenceFrame = new igv.ReferenceFrame("", 0, 1 / browser.cursorModel.framePixelWidth);
 
-
         // Launch app with session JSON if provided as param
         var sessionJSONPath = igv.getQueryValue('session');
 
@@ -274,7 +273,16 @@ var igv = (function (igv) {
         }
         else {
 
-            addDemoTracks(browser);
+            if (undefined === options.tracks || 0 === options.tracks.length) {
+                return;
+            }
+
+            options.tracks.forEach(function (trackConfig) {
+                browser.loadTrack(trackConfig);
+            });
+
+
+//            addDemoTracks(browser);
         }
 
 
@@ -356,6 +364,66 @@ var igv = (function (igv) {
             this.cursorModel.filterRegions();
 
         };
+
+        // Alter "super" implementation
+        browser.loadTrack = function (config) {
+
+//            this.__proto__.loadTrack.call(this, config);
+
+            var attemptedDuplicateTrackAddition = false;
+
+            this.trackPanels.forEach(function (tp, tps, index) {
+
+                if (false === attemptedDuplicateTrackAddition) {
+
+                    if (JSON.stringify(config) === JSON.stringify(tp.track.config)) {
+                        attemptedDuplicateTrackAddition = true;
+                    }
+
+                }
+            });
+
+            if (true === attemptedDuplicateTrackAddition) {
+                window.alert("Attempt to load duplicate track.");
+                return;
+            }
+
+            var path = config.url,
+                type = config.type,
+                newTrack,
+                newFeatureSource;
+
+            if (!type) {
+                type = cursorGetType(path);
+            }
+
+            if (type !== "bed") {
+                window.alert("Bad Track type");
+                return;
+
+            }
+
+            newTrack = new cursor.CursorTrack(config, browser);
+
+            this.addTrack(newTrack);
+
+            return newTrack;
+
+            // Get the file type from the path extension
+            function cursorGetType(path) {
+
+                if (path.endsWith(".bed") || path.endsWith(".bed.gz") || path.endsWith(".broadPeak") || path.endsWith(".broadPeak.gz")) {
+
+                    return "bed";
+                } else {
+
+                    return undefined;
+                }
+
+            }
+
+        };
+
 
         browser.session = function () {
 

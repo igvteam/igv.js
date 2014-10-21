@@ -2,20 +2,22 @@ var cursor = (function (cursor) {
 
     var MAX_FEATURE_COUNT = 100000000;
 
-    cursor.CursorTrack = function (featureSource, cursorModel, referenceFrame, label, height) {
+    cursor.CursorTrack = function (config, browser) {
 
-        this.featureSource = featureSource;
-        this.cursorModel = cursorModel;
-        this.referenceFrame = referenceFrame;
+        this.config = config;
+        this.url = config.url;
+        this.featureSource = new igv.BedFeatureSource(config);
+        this.featureSource.maxFeatureCount = MAX_FEATURE_COUNT;
+        this.label = config.label;
+        this.height = browser.trackHeight || 100;
+        this.color = config.color || cursor.defaultColor();
 
-        this.label = label;
-        this.color = cursor.defaultColor();
+        this.cursorModel = browser.cursorModel;
+        this.referenceFrame = browser.referenceFrame;
 
         this.cursorHistogram = undefined;
 
-        this.featureSource.maxFeatureCount = MAX_FEATURE_COUNT;
         this.id = "";
-        this.height = height;
         this.max = 1000;
         this.sortDirection = 1;
 
