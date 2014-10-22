@@ -130,10 +130,6 @@ var igv = (function (igv) {
             track.order = (this.nextTrackOrder)++;
         }
 
-        if (track.config && track.config.trackFilter) {
-            track.trackFilter.setWithJSON(track.config.trackFilter);
-        }
-
         this.trackPanels.push(trackView);
 
         this.reorderTracks();

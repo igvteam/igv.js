@@ -450,6 +450,8 @@ var igv = (function (igv) {
 
         browser.loadSession = function (session) {
 
+            var cursorTracks;
+
             browser.sessionTeardown();
 
             browser.cursorModel.regionWidth = session.regionWidth;
@@ -458,34 +460,47 @@ var igv = (function (igv) {
             browser.trackHeight = session.trackHeight;
             $("input[id='trackHeightInput']").val(browser.trackHeight);
 
+            cursorTracks = [];
             browser.designatedTrack = undefined;
             session.tracks.forEach(function (trackSession) {
 
-                var config = {
-                    type: "bed",
-                    url: trackSession.path,
-                    color: trackSession.color,
-                    label: trackSession.label,
-                    order: trackSession.order,
-                    designatedTrack: trackSession.designatedTrack
-                };
+                var cursorTrack,
+                    config = {
+                        type: "bed",
+                        url: trackSession.path,
+                        color: trackSession.color,
+                        label: trackSession.label,
+                        order: trackSession.order,
+                        trackFilter: trackSession.trackFilter,
+                        designatedTrack: trackSession.designatedTrack
+                    };
 
-                browser.loadTrack(config);
-
-                if (undefined != config.designatedTrack && true === config.designatedTrack) {
-
-                    browser.designatedTrack = browser.trackPanels[ (browser.trackPanels.length - 1) ].track;
+                cursorTrack = new cursor.CursorTrack(config, browser);
+                if (undefined !== config.designatedTrack && true === config.designatedTrack) {
+                    browser.designatedTrack = cursorTrack;
                 }
+
+                cursorTracks.push(cursorTrack);
 
             });
 
             if (undefined === browser.designatedTrack) {
-                browser.designatedTrack = browser.trackPanels[ 0 ].track;
+                browser.designatedTrack = cursorTracks[ 0 ];
             }
 
             browser.designatedTrack.featureSource.allFeatures(function (featureList) {
 
                 browser.cursorModel.setRegions(featureList);
+
+                cursorTracks.forEach(function (cursorTrack) {
+
+                    browser.addTrack(cursorTrack);
+
+                    if (cursorTrack.config && cursorTrack.config.trackFilter) {
+                        cursorTrack.trackFilter.setWithJSON(cursorTrack.config.trackFilter);
+                    }
+
+                });
 
                 browser.cursorModel.filterRegions();
 
