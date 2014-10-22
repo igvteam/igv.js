@@ -135,7 +135,13 @@ var igv = (function (igv) {
         this.reorderTracks();
 
         if (this.cursorModel) {
+
             this.cursorModel.initializeHistogram(trackView.track, function () {
+
+                if (track.config && track.config.trackFilter) {
+                    track.trackFilter.setWithJSON(track.config.trackFilter);
+                }
+
                 browser.resize();
             });
         }

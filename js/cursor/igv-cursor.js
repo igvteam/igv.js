@@ -496,9 +496,9 @@ var igv = (function (igv) {
 
                     browser.addTrack(cursorTrack);
 
-                    if (cursorTrack.config && cursorTrack.config.trackFilter) {
-                        cursorTrack.trackFilter.setWithJSON(cursorTrack.config.trackFilter);
-                    }
+//                    if (cursorTrack.config && cursorTrack.config.trackFilter) {
+//                        cursorTrack.trackFilter.setWithJSON(cursorTrack.config.trackFilter);
+//                    }
 
                 });
 
@@ -513,7 +513,6 @@ var igv = (function (igv) {
                 browser.horizontalScrollbar.update();
 
             });
-
 
         };
     }
