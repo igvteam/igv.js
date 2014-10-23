@@ -72,8 +72,7 @@ var igv = (function (igv) {
                         len,
                         item,
                         accumulatedHeight,
-                        rect = { x:0, y:0, width:0, height:0 },
-                        mismatchPercentagesFail;
+                        rect = { x:0, y:0, width:0, height:0 };
 
                     if (refSeq) {
                         refSeq = refSeq.toUpperCase();
@@ -137,7 +136,7 @@ var igv = (function (igv) {
 
                                 refBase = refSeq[i + coverageMap.bpStart - bpStart];
 
-                                if (item.isMismatch(refBase)) {
+                                if (item.isMismatch(refBase) && coverageMap.coverage[i].mismatchTotalPercentage(refBase) > 0.20) {
 
                                     x = refFrame.toPixels(bp - bpStart);
 
@@ -151,31 +150,17 @@ var igv = (function (igv) {
                                     canvas.fillRect(rect.x, rect.y, rect.width, rect.height);
 
                                     accumulatedHeight = 0.0;
-                                    mismatchPercentagesFail = true;
                                     coverageMap.coverage[i].mismatchPercentages(refBase).forEach(function (fraction, index, fractions) {
-
-                                        if (fraction.percent < 0.20) {
-                                            return;
-                                        }
 
                                         h = fraction.percent * (item.total / coverageMap.maximum) * myself.coverageTrackHeight;
                                         y = (myself.coverageTrackHeight - h) - accumulatedHeight;
-                                        accumulatedHeight += h;
 
-                                        mismatchPercentagesFail = false;
+                                        accumulatedHeight += h;
 
                                         canvas.setProperties( { fillStyle: igv.nucleotideColors[ fraction.base ] } );
                                         canvas.fillRect(rect.x, y, rect.width, h);
 
                                     });
-
-                                    // if no mismatches exceed threshold undo above backdrop painting.
-                                    if (true === mismatchPercentagesFail) {
-
-                                        canvas.setProperties( { fillStyle: coverageColor } );
-                                        canvas.fillRect(rect.x, rect.y, rect.width, rect.height);
-                                    }
-
 
                                 }
                             }

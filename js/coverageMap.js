@@ -77,13 +77,12 @@ var igv = (function (igv) {
 
     Coverage.prototype.mismatchTotalPercentage = function(refBase) {
 
-        var myself = this,
-            totalPercentage,
-            fractions = this.mismatchPercentages(refBase);
+        var totalPercentage;
 
         totalPercentage = 0.0;
-        fractions.forEach(function (fraction) {
-            totalPercentage += fraction;
+        this.mismatchPercentages(refBase).forEach(function (fraction) {
+
+            totalPercentage += fraction.percent;
         });
 
         return totalPercentage;
