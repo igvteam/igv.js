@@ -67,11 +67,13 @@ var igv = (function (igv) {
                         y,
                         w,
                         h,
-                        base,
+                        refBase,
                         i,
                         len,
                         item,
-                        acc;
+                        accumulatedHeight,
+                        rect = { x:0, y:0, width:0, height:0 },
+                        mismatchPercentagesFail;
 
                     if (refSeq) {
                         refSeq = refSeq.toUpperCase();
@@ -83,6 +85,9 @@ var igv = (function (igv) {
 
                     // TODO -- covereageMap is sometimes undefined !!!
                     if (coverageMap) {
+
+                        // paint backdrop color for all coverage buckets
+                        w = 1.0 / refFrame.bpPerPixel;
                         for (i = 0, len = coverageMap.coverage.length; i < len; i++) {
 
                             item = coverageMap.coverage[i];
@@ -94,19 +99,19 @@ var igv = (function (igv) {
 
                             x = refFrame.toPixels(bp - bpStart);
 
+                            h = (item.total / coverageMap.maximum) * myself.coverageTrackHeight;
+                            y = myself.coverageTrackHeight - h;
+
                             coverageColor = alignmentColor;
                             canvas.setProperties({   fillStyle: coverageColor });
                             canvas.setProperties({ strokeStyle: coverageColor });
-
-                            h = (item.total / coverageMap.maximum) * myself.coverageTrackHeight;
-                            y = myself.coverageTrackHeight - h;
 
                             if (refFrame.bpPerPixel > 1) {
 
                                 canvas.strokeLine(x, y, x, y + h);
                             } else {
 
-                                canvas.fillRect(x, y, 1.0 / refFrame.bpPerPixel, h);
+                                canvas.fillRect(x, y, w, h);
 
                                 if ((1.0 / refFrame.bpPerPixel) > 4.0) {
                                     canvas.strokeLine(x, y, x, y + h, { strokeStyle: igv.greyScale(255) });
@@ -114,10 +119,13 @@ var igv = (function (igv) {
 
                             }
 
-                        }
+                        } // for (coverageMap.coverage.length)
 
                         // coverage mismatch coloring
                         if (refSeq) {
+
+//                            w = 1.0 / refFrame.bpPerPixel;
+                            w = Math.max(1, 1.0 / refFrame.bpPerPixel);
                             for (i = 0, len = coverageMap.coverage.length; i < len; i++) {
 
                                 item = coverageMap.coverage[i];
@@ -127,28 +135,46 @@ var igv = (function (igv) {
                                 if (bp < bpStart) continue;
                                 if (bp > bpEnd) break;
 
-                                base = refSeq[i + coverageMap.bpStart - bpStart];
+                                refBase = refSeq[i + coverageMap.bpStart - bpStart];
 
-                                if (item.isMismatch(base)) {
+                                if (item.isMismatch(refBase)) {
 
                                     x = refFrame.toPixels(bp - bpStart);
-                                    w = Math.max(1, 1.0 / refFrame.bpPerPixel);
 
-                                    acc = 0.0;
-                                    coverageMap.coverage[i].mismatchPercentages(base).forEach(function (fraction, index, fractions) {
+                                    h = (item.total / coverageMap.maximum) * myself.coverageTrackHeight;
+                                    y = myself.coverageTrackHeight - h;
+
+                                    rect = { x: x, y: y, width: w, height: h };
+
+                                    // paint matched color as backdrop, assuming mismatches will paint atop it.
+                                    canvas.setProperties( { fillStyle: igv.nucleotideColors[ refBase ] } );
+                                    canvas.fillRect(rect.x, rect.y, rect.width, rect.height);
+
+                                    accumulatedHeight = 0.0;
+                                    mismatchPercentagesFail = true;
+                                    coverageMap.coverage[i].mismatchPercentages(refBase).forEach(function (fraction, index, fractions) {
 
                                         if (fraction.percent < 0.20) {
                                             return;
                                         }
 
                                         h = fraction.percent * (item.total / coverageMap.maximum) * myself.coverageTrackHeight;
-                                        y = (myself.coverageTrackHeight - h) - acc;
-                                        acc += h;
+                                        y = (myself.coverageTrackHeight - h) - accumulatedHeight;
+                                        accumulatedHeight += h;
 
-                                        canvas.setProperties({ fillStyle: igv.nucleotideColors[ fraction.base ] });
-                                        canvas.fillRect(x, y, w, h);
+                                        mismatchPercentagesFail = false;
+
+                                        canvas.setProperties( { fillStyle: igv.nucleotideColors[ fraction.base ] } );
+                                        canvas.fillRect(rect.x, y, rect.width, h);
 
                                     });
+
+                                    // if no mismatches exceed threshold undo above backdrop painting.
+                                    if (true === mismatchPercentagesFail) {
+
+                                        canvas.setProperties( { fillStyle: coverageColor } );
+                                        canvas.fillRect(rect.x, rect.y, rect.width, rect.height);
+                                    }
 
 
                                 }
