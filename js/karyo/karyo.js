@@ -132,7 +132,30 @@ var igv = (function (igv) {
         var top = 30;
         var me = this;
         var maxLen = cytobands[cytobands.length - 1].end;
+
         if (!image || image == null) {
+            drawImage.call(this);
+        }
+
+        this.ctx.drawImage(image, 0, 0);
+
+        // Draw red box
+        this.ctx.save();
+
+        var chromosome = igv.browser.genome.getChromosome(referenceFrame.chr);
+        var ideoScale = chromosome.bpLength / chrheight;   // Scale in bp per pixels
+
+        var boxPY1 = top + Math.round(referenceFrame.start / ideoScale);
+        var boxHeight = Math.max(3, (igv.browser.trackViewportWidth() * referenceFrame.bpPerPixel) / ideoScale);
+
+        //var boxPY2 = Math.round((this.browser.referenceFrame.start+100) * ideoScale);
+        this.ctx.strokeStyle = "rgb(150, 0, 0)";
+        this.ctx.lineWidth = 2;
+        this.ctx.strokeRect(chromosome.x - 3, boxPY1, chrwidth + 6, boxHeight);
+        this.ctx.restore();
+
+
+        function drawImage() {
             image = document.createElement('canvas');
             image.width = w;
 
@@ -179,37 +202,7 @@ var igv = (function (igv) {
                     }
                 }
             }
-
         }
-        function loadfeatures(source, chr, start, end, guichrom, bufferCtx) {
-            log("=== loadfeatures of chr " + chr + ", x=" + guichrom.x);
-            source.getFeatures(chr, start, end, function (featureList) {
-                if (featureList) {
-                    len = featureList.length;
-                    log(" -->- loaded: chrom " + chr + " as " + len + " features");
-                    drawFeatures(featureList, guichrom, guichrom.x, top, bufferCtx, chrwidth, chrheight, maxLen);
-                    me.repaint();
-                }
-                else {
-                    log("Track has no features yet");
-                }
-            });
-        }
-
-        this.ctx.drawImage(image, 0, 0);
-
-        // Draw red box
-        this.ctx.save();
-        var chromosome = igv.browser.genome.getChromosome(referenceFrame.chr);
-        cytobands = chromosome.cytobands;
-        var ideoScale = chrheight / maxLen;
-
-        var boxPY1 = top + Math.round(referenceFrame.start * ideoScale);
-        //var boxPY2 = Math.round((this.browser.referenceFrame.start+100) * ideoScale);
-        this.ctx.strokeStyle = "rgb(150, 0, 0)";
-        this.ctx.lineWidth = 2;
-        this.ctx.strokeRect(chromosome.x - 3, boxPY1, chrwidth + 6, 3);
-        this.ctx.restore();
 
         function drawFeatures(featurelist, guichrom, ideogramLeft, top, bufferCtx, ideogramWidth, ideogramHeight, longestChr) {
             if (!genome) return;
@@ -329,6 +322,21 @@ var igv = (function (igv) {
                 return c;
 
             }
+        }
+
+        function loadfeatures(source, chr, start, end, guichrom, bufferCtx) {
+            log("=== loadfeatures of chr " + chr + ", x=" + guichrom.x);
+            source.getFeatures(chr, start, end, function (featureList) {
+                if (featureList) {
+                    len = featureList.length;
+                    log(" -->- loaded: chrom " + chr + " as " + len + " features");
+                    drawFeatures(featureList, guichrom, guichrom.x, top, bufferCtx, chrwidth, chrheight, maxLen);
+                    me.repaint();
+                }
+                else {
+                    log("Track has no features yet");
+                }
+            });
         }
 
     }
