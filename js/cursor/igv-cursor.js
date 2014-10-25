@@ -366,7 +366,7 @@ var igv = (function (igv) {
 
 //            this.__proto__.loadTrack.call(this, config);
 
-            if (browser.didAttemptedDuplicateTrackAddition(config)) {
+            if (browser.isDuplicateTrack(config)) {
                 return;
             }
 
