@@ -2,25 +2,12 @@ var igv = (function (igv) {
 
     igv.createCursorBrowser = function (options) {
 
-        var contentHeader = $('<div class="row"></div>')[0],
-            contentHeaderDiv = $('<div id="igvHeaderDiv" class="igv-header-div col-md-12" style="font-size:16px;"><span id="igvHeaderRegionDisplaySpan"></span></div>')[0],
-            trackContainer = $('<div id="igvTrackContainerDiv" class="igv-track-container-div">')[0],
-            browser = new igv.Browser(options, trackContainer);
+        var contentHeader,
+            contentHeaderDiv,
+            trackContainer,
+            browser;
 
-        $(browser.div).append(contentHeader);
-        $(contentHeader).append(contentHeaderDiv);
-        $(browser.div).append(trackContainer);
-
-        igv.addAjaxExtensions();
-
-        // Add cursor specific methods to the browser object,  some new some overrides
-        addCursorExtensions(browser);
-
-        browser.horizontalScrollbar = new cursor.HorizontalScrollbar(browser, $(browser.div));
-
-        document.getElementById('igvContainerDiv').appendChild(browser.div);
-
-        // Append event handlers to DOM elements
+        // Append event handlers to Header DIV
         document.getElementById('zoomOut').onclick = function (e) {
             browser.zoomOut()
         };
@@ -29,6 +16,16 @@ var igv = (function (igv) {
         };
         document.getElementById('fitToScreen').onclick = function () {
             browser.fitToScreen();
+        };
+        document.getElementById('regionSizeInput').onchange = function (e) {
+
+            var value = $("#regionSizeInput").val();
+            if (!igv.isNumber(value)) {
+                console.log("bogus " + value);
+                return;
+            }
+
+            browser.setRegionSize(parseFloat(value, 10));
         };
         document.getElementById('frameWidthInput').onchange = function (e) {
 
@@ -41,16 +38,6 @@ var igv = (function (igv) {
             browser.setFrameWidth(parseFloat(value, 10));
 
         };
-        document.getElementById('regionSizeInput').onchange = function (e) {
-
-            var value = $("#regionSizeInput").val();
-            if (!igv.isNumber(value)) {
-                console.log("bogus " + value);
-                return;
-            }
-
-            browser.setRegionSize(parseFloat(value, 10));
-        };
         document.getElementById('trackHeightInput').onchange = function (e) {
 
             var value = $("#trackHeightInput").val();
@@ -59,9 +46,50 @@ var igv = (function (igv) {
                 return;
             }
 
-
             browser.setTrackHeight(Math.round(parseFloat(value, 10)));
         };
+
+
+
+
+
+
+        // Construct body DIV tree
+        contentHeader = $('<div class="row"></div>')[0];
+        contentHeaderDiv = $('<div id="igvHeaderDiv" class="igv-header-div col-md-12" style="font-size:16px;"><span id="igvHeaderRegionDisplaySpan"></span></div>')[0];
+        trackContainer = $('<div id="igvTrackContainerDiv" class="igv-track-container-div">')[0];
+
+        browser = new igv.Browser(options, trackContainer);
+        document.getElementById('igvContainerDiv').appendChild(browser.div);
+
+        $(browser.div).append(contentHeader);
+        $(contentHeader).append(contentHeaderDiv);
+        $(browser.div).append(trackContainer);
+
+        igv.addAjaxExtensions();
+
+
+
+        // UNDER CONSTRUCTION
+        return;
+
+
+        // Add cursor specific methods to the browser object,  some new some overrides
+        addCursorExtensions(browser);
+
+        browser.horizontalScrollbar = new cursor.HorizontalScrollbar(browser, $(browser.div));
+
+
+
+
+
+
+
+
+
+
+
+
 
         // export regions via modal form
         $("#igvExportRegionsModalForm").submit(function (event) {

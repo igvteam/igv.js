@@ -14,6 +14,69 @@
 
     <link href="//maxcdn.bootstrapcdn.com/font-awesome/4.2.0/css/font-awesome.min.css" rel="stylesheet">
 
+    <!-- IGV Bootstrap css -->
+    <link href="css/igv.css" type="text/css" rel="stylesheet">
+    <link href="css/cursor.css" type="text/css" rel="stylesheet">
+
+    <!-- jQuery JS -->
+    <script src="//code.jquery.com/jquery-1.11.0.min.js"></script>
+
+    <!-- Bootstrap JS -->
+    <script src="//maxcdn.bootstrapcdn.com/bootstrap/3.2.0/js/bootstrap.min.js"></script>
+
+    <!-- misc. JS -->
+    <script type="text/javascript" src="vendor/inflate.js"></script>
+    <script type="text/javascript" src="vendor/zlib_and_gzip.min.js"></script>
+
+    <!-- DataTables CSS -->
+    <!--<link rel="stylesheet" type="text/css" href="//cdn.datatables.net/1.10.0/css/jquery.dataTables.css">-->
+    <link rel="stylesheet" type="text/css" href="//cdn.datatables.net/1.10.2/css/jquery.dataTables.min.css">
+
+    <!-- DataTables JS -->
+    <!--<script type="text/javascript" charset="utf8" src="//cdn.datatables.net/1.10.0/js/jquery.dataTables.min.js"></script>-->
+    <script type="text/javascript" charset="utf8"
+            src="//cdn.datatables.net/1.10.2/js/jquery.dataTables.min.js"></script>
+
+    <!-- IGV -->
+    <script type="text/javascript" src="js/trackFilter.js"></script>
+    <script type="text/javascript" src="js/browser.js"></script>
+    <script type="text/javascript" src="js/cursor/igv-cursor.js"></script>
+    <script type="text/javascript" src="js/ideogram.js"></script>
+    <script type="text/javascript" src="js/referenceFrame.js"></script>
+    <script type="text/javascript" src="js/igv-canvas.js"></script>
+    <script type="text/javascript" src="js/genome.js"></script>
+    <script type="text/javascript" src="js/trackView.js"></script>
+    <script type="text/javascript" src="js/rulerTrack.js"></script>
+    <script type="text/javascript" src="js/geneTrack.js"></script>
+    <script type="text/javascript" src="js/bedSource.js"></script>
+    <script type="text/javascript" src="js/igv-color.js"></script>
+    <script type="text/javascript" src="js/igv-utils.js"></script>
+    <script type="text/javascript" src="js/parseUtils.js"></script>
+    <script type="text/javascript" src="js/fasta.js"></script>
+    <script type="text/javascript" src="js/sequenceTrack.js"></script>
+    <script type="text/javascript" src="js/wigSource.js"></script>
+    <script type="text/javascript" src="js/wigTrack.js"></script>
+    <script type="text/javascript" src="js/dataloader.js"></script>
+    <script type="text/javascript" src="js/igv-exts.js"></script>
+    <script type="text/javascript" src="js/igvxhr.js"></script>
+    <script type="text/javascript" src="js/binary.js"></script>
+    <script type="text/javascript" src="js/gtex/eqtlTrack.js"></script>
+    <script type="text/javascript" src="js/coverageMap.js"></script>
+    <script type="text/javascript" src="js/bam/bamReader.js"></script>
+    <script type="text/javascript" src="js/bam/bamSource.js"></script>
+    <script type="text/javascript" src="js/bam/bamTrack.js"></script>
+    <script type="text/javascript" src="js/intervalTree.js"></script>
+    <script type="text/javascript" src="js/ucsc-utils.js"></script>
+    <script type="text/javascript" src="js/igv-constants.js"></script>
+
+    <script type="text/javascript" src="js/encode/encode.js"></script>
+    <script type="text/javascript" src="js/cursor/cursorTrack.js"></script>
+    <script type="text/javascript" src="js/cursor/cursorModel.js"></script>
+    <script type="text/javascript" src="js/cursor/cursorHistogram.js"></script>
+    <script type="text/javascript" src="js/cursor/cursor-ideogram.js"></script>
+    <script type="text/javascript" src="js/cursor/horizontalScrollbar.js"></script>
+
+
     <style>
         .igv-cursor-ui-header {
             width: 100%;
@@ -58,6 +121,8 @@
         }
     </style>
 </head>
+
+<body>
 <div class="igv-cursor-ui-header">
     <div class="igv-cursor-ui-holder">
         <div class="igv-cursor-ui">
@@ -77,28 +142,180 @@
             </div>
             <div class="igv-cursor-ui-item">
                 <label>Region length
-                    <input type="text" class="igv-cursor-input-text" value="bp" />
+                    <input id="regionSizeInput" type="text" class="igv-cursor-input-text" placeholder="bp" />
                 </label>
             </div>
             <div class="igv-cursor-ui-item">
                 <label>Frame width
-                    <input type="text" class="igv-cursor-input-text" value="px" />
+                    <input id="frameWidthInput" type="text" class="igv-cursor-input-text" placeholder="px" />
                 </label>
             </div>
             <div class="igv-cursor-ui-item right-border">
                 <label>Track height
-                    <input type="text" class="igv-cursor-input-text" value="px" />
+                    <input id="trackHeightInput" type="text" class="igv-cursor-input-text" placeholder="px" />
                 </label>
             </div>
             <div class="igv-cursor-ui-item">
-                <i class="fa fa-lg fa-compress"></i>
-                <i class="fa fa-lg fa-search-minus"></i>
-                <i class="fa fa-lg fa-search-plus"></i>
+                <i id="fitToScreen" class="fa fa-lg fa-compress"></i>
+                <i id="zoomOut" class="fa fa-lg fa-search-minus"></i>
+                <i id="zoomIn" class="fa fa-lg fa-search-plus"></i>
             </div>
+        </div>
+    </div>
+</div><!-- header -->
+
+
+
+
+
+
+
+
+
+<!-- Export Regions Modal -->
+<div class="modal fade" id="igvExportRegionsModal" tabindex="-1" role="dialog"
+     aria-labelledby="igvExportRegionsModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal">
+                    <span aria-hidden="true">&times;</span>
+                    <span class="sr-only">Close</span>
+                </button>
+                <h4 class="modal-title" id="igvExportRegionsModalLabel">Export Regions</h4>
+            </div>
+
+            <div class="modal-body">
+                <form id="igvExportRegionsModalForm" role="form" action="php/igvdownload.php" method="post">
+                    <div class="form-group">
+                        <input class="form-control" placeholder="Enter filename" type="text" name="filename"
+                               value="cursor-regions.bed"/>
+                        <input class="form-control" type="hidden" name="downloadContent"
+                               value="this is the contents of the file"/>
+                    </div>
+
+                    <button class="btn btn-default" type="submit" name="download" value="download">Submit</button>
+                </form>
+            </div>
+
         </div>
     </div>
 </div>
 
-<body>
+<!-- Save Session Modal -->
+<div class="modal fade" id="igvSaveSessionModal" tabindex="-1" role="dialog" aria-labelledby="igvSaveSessionModalLabel"
+     aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal">
+                    <span aria-hidden="true">&times;</span>
+                    <span class="sr-only">Close</span>
+                </button>
+                <h4 class="modal-title" id="igvSaveSessionModalLabel">Save Session</h4>
+            </div>
+
+            <div class="modal-body">
+                <form id="igvSaveSessionModalForm" role="form" action="php/igvdownload.php" method="post">
+                    <div class="form-group">
+                        <input class="form-control" placeholder="Enter filename" type="text" name="filename"
+                               value="cursor-session.txt"/>
+                        <input class="form-control" type="hidden" name="downloadContent"
+                               value="this is the contents of the file"/>
+                    </div>
+
+                    <button class="btn btn-default" type="submit" name="download" value="download">Submit</button>
+                </form>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+<!-- ENCODE Modal -->
+<div class="modal fade bs-example-modal-lg" id="encodeModal" tabindex="-1" role="dialog"
+     aria-labelledby="encodeModalLabel" aria-hidden="true">
+
+    <div class="modal-dialog modal-lg"><!-- modal dialog -->
+
+        <div class="modal-content"><!-- modal content -->
+
+            <div class="modal-header"><!-- modal header -->
+
+                <button id="encodeModalTopCloseButton" type="button" class="close" data-dismiss="modal"><!-- close -->
+                    <span aria-hidden="true">×</span>
+                    <span class="sr-only">Close</span>
+                </button>
+
+                <h4 class="modal-title" id="encodeModalLabel">ENCODE</h4><!-- modal title -->
+
+            </div>
+
+            <div id="encodeModalBody" class="modal-body"><!-- modal body -->
+            </div>
+            <!-- modal body -->
+
+            <div class="modal-footer"><!-- modal footer -->
+                <button id="encodeModalBottomCloseButton" type="button" class="btn btn-default" data-dismiss="modal">
+                    Close
+                </button>
+                <!-- close -->
+                <button id="encodeModalGoButton" type="button" class="btn btn-primary" data-dismiss="modal">Go</button>
+                <!-- Go -->
+            </div>
+            <!-- modal footer -->
+
+        </div>
+        <!-- modal content -->
+
+    </div>
+    <!-- modal dialog -->
+
+</div>
+
+
+<div id="igvContainerDiv" class="container-fluid">
+</div>
+
+<script type="text/javascript">
+
+    $(document).ready(function () {
+
+        var options;
+
+        options = {
+            trackHeight: 100,
+            controlPanelWidth: 150,
+            type: "CURSOR",
+            tracks: [
+                {
+                    type: "bed",
+                    url: "test/data/cursor/hg19.tss.bed.gz",
+                    label: "TSS",
+                    designatedTrack: true
+                },
+                {
+                    type: "bed",
+                    url: "test/data/cursor/wgEncodeBroadHistoneH1hescH3k4me3StdPk.broadPeak.gz",
+                    label: "H3k4me3 H1hesc",
+                    color: "rgb(0, 150, 0)"
+                },
+                {
+                    type: "bed",
+                    url: "test/data/cursor/wgEncodeBroadHistoneH1hescH3k27me3StdPk.broadPeak.gz",
+                    label: "H3k27me3 H1hesc",
+                    color: "rgb(150, 0, 0)"
+                }
+            ]
+        };
+
+        igv.createCursorBrowser(options);
+    });
+
+</script>
+
 </body>
+
 </html>
