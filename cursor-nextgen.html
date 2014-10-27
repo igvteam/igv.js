@@ -80,18 +80,40 @@
     <div class="igv-cursor-ui-holder">
         <div class="igv-cursor-ui">
             <div class="igv-cursor-ui-item igv-cursor-ui-right-border">
-                <select >
-                    <option value="#">File Open/Save</option>
-                    <option value="#">Data</option>
-                    <option value="#">Select ENCODE</option>
-                    <option value="#">Choose File</option>
-                    <option value="#">Open URL</option>
-                    <hr />
-                    <option value="#">Save Sessions</option>
-                    <option value="#">Load Sessions</option>
-                    <hr />
-                    <option value="#">Export regions</option>
-                </select>
+
+                <!--<select >-->
+                    <!--<option value="#">File Open/Save</option>-->
+                    <!--<option value="#">Data</option>-->
+                    <!--<option value="#">Select ENCODE</option>-->
+                    <!--<option value="#">Choose File</option>-->
+                    <!--<option value="#">Open URL</option>-->
+                    <!--<hr />-->
+                    <!--<option value="#">Save Sessions</option>-->
+                    <!--<option value="#">Load Sessions</option>-->
+                    <!--<hr />-->
+                    <!--<option value="#">Export regions</option>-->
+                <!--</select>-->
+
+
+                <div class="dropdown">
+                    <button id="igvHeaderFileDropdown" class="btn btn-default dropdown-toggle" type="button" data-toggle="dropdown">
+                        Dropdown
+                        <span class="caret"></span>
+                    </button>
+                    <ul class="dropdown-menu" role="menu" aria-labelledby="igvHeaderFileDropdown">
+                        <li role="presentation"><a role="menuitem" tabindex="-1" href="#">File Open/Save</a></li>
+                        <li role="presentation"><a role="menuitem" tabindex="-1" href="#">Data</a></li>
+                        <li role="presentation"><a role="menuitem" tabindex="-1" href="#">Select ENCODE</a></li>
+                        <li role="presentation"><a role="menuitem" tabindex="-1" href="#">Choose File</a></li>
+                        <li role="presentation"><a role="menuitem" tabindex="-1" href="#">Open URL</a></li>
+                        <li role="presentation" class="divider"></li>
+                        <li role="presentation"><a role="menuitem" tabindex="-1" href="#">Save Session</a></li>
+                        <li role="presentation"><a role="menuitem" tabindex="-1" href="#">Load Session</a></li>
+                        <li role="presentation" class="divider"></li>
+                        <li role="presentation"><a role="menuitem" tabindex="-1" href="#">Export Regions</a></li>
+                    </ul>
+                </div>
+
             </div>
             <div class="igv-cursor-ui-item">
                 <label>Region length
