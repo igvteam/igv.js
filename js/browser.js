@@ -37,22 +37,7 @@ var igv = (function (igv) {
 
     igv.Browser.prototype.loadTrack = function (config) {
 
-        var attemptedDuplicateTrackAddition = false;
-
-        this.trackPanels.forEach(function (tp, tps, index) {
-
-            if (false === attemptedDuplicateTrackAddition) {
-
-                if (JSON.stringify(config) === JSON.stringify(tp.track.config)) {
-                    attemptedDuplicateTrackAddition = true;
-                }
-
-            }
-        });
-
-        if (true === attemptedDuplicateTrackAddition) {
-
-            window.alert("Attempt to load duplicate track.");
+        if (this.isDuplicateTrack(config)) {
             return;
         }
 
@@ -70,7 +55,7 @@ var igv = (function (igv) {
             newTrack = new igv.BAMTrack(config);
         } else if (type === "wig") {
             newTrack = new igv.WIGTrack(config);
-        } else if(type === "sequence") {
+        } else if (type === "sequence") {
             newTrack = new igv.SequenceTrack(config);
         }
         else {
@@ -86,6 +71,28 @@ var igv = (function (igv) {
 
     };
 
+    igv.Browser.prototype.isDuplicateTrack = function (config) {
+
+        var attemptedDuplicateTrackAddition = false;
+
+        this.trackPanels.forEach(function (tp) {
+
+            if (false === attemptedDuplicateTrackAddition) {
+
+                if (JSON.stringify(config) === JSON.stringify(tp.track.config)) {
+                    attemptedDuplicateTrackAddition = true;
+                }
+            }
+        });
+
+        if (true === attemptedDuplicateTrackAddition) {
+            window.alert("Attempt to load duplicate track.");
+            return true;
+        }
+
+        return false;
+
+    };
 
     // Get the file type from the path extension
     function getType(path) {
@@ -112,10 +119,7 @@ var igv = (function (igv) {
      * greater than the contentDiv height.   Height of contentDiv and canvas are equal, and governed by the data
      * loaded.
      *
-     * trackFilterJSON session data is optionally passes as a param to restore a trackFilters state
-     *
      * @param track
-     * @param trackFilterJSON
      */
     igv.Browser.prototype.addTrack = function (track) {
 
@@ -124,7 +128,6 @@ var igv = (function (igv) {
 
         if (!track.order) {
             track.order = (this.nextTrackOrder)++;
-//            track.order = this.trackPanels.length;
         }
 
         this.trackPanels.push(trackView);
@@ -132,13 +135,18 @@ var igv = (function (igv) {
         this.reorderTracks();
 
         if (this.cursorModel) {
+
             this.cursorModel.initializeHistogram(trackView.track, function () {
+
+                if (track.config && track.config.trackFilter) {
+                    track.trackFilter.setWithJSON(track.config.trackFilter);
+                }
+
                 browser.resize();
             });
         }
         else {
             this.resize();
-            //trackView.repaint();
         }
 
     };
@@ -434,7 +442,8 @@ var igv = (function (igv) {
                 var browser = igv.browser,
                     coords = igv.translateMouseCoordinates(e, trackContainerDiv),
                     pixels,
-                    pixelsEnd,
+                    maxEnd,
+                    maxStart,
                     referenceFrame = browser.referenceFrame,
                     isCursor = browser.cursorModel;
 
@@ -448,36 +457,23 @@ var igv = (function (igv) {
 
                         // TODO -- clamping code below is broken for regular IGV => disabled for now, needs fixed
 
+
+                        // clamp left
+                        referenceFrame.start = Math.max(0, referenceFrame.start);
+
+                        // clamp right
                         if (isCursor) {
-
-                            // clamp left
-                            referenceFrame.start = Math.max(0, referenceFrame.start);
-
-                            // clamp right
-                            pixelsEnd = isCursor ?
-                                Math.floor(browser.cursorModel.framePixelWidth * browser.cursorModel.filteredRegions.length) :
-                                250000000;    // TODO -- get from reference frame, this is the chr length.
-
-                            // Use this for IGV clamping
-//                    if (igv.genome) {
-//
-//                        var chromosome = igv.genome.getChromosome(igv.referenceFrame.chr);
-//                        var widthBP = Math.round((igv.trackWidth - igv.labelWidth) * igv.referenceFrame.bpPerPixel);
-//                        var endBP = igv.referenceFrame.start + widthBP;
-//                        if (chromosome && endBP > chromosome.length) {
-//                            if (endBP > chromosome.length) {
-//                                igv.referenceFrame.start = chromosome.length - widthBP;
-//                            }
-//                        }
-//                    }
-
-
-                            pixels = Math.floor(browser.referenceFrame.toPixels(referenceFrame.start) + browser.trackViewportWidth());
-
-                            if (pixels >= pixelsEnd) {
-                                referenceFrame.start = browser.referenceFrame.toBP(pixelsEnd - browser.trackViewportWidth());
-                            }
+                            maxEnd = browser.cursorModel.filteredRegions.length;
+                            maxStart = maxEnd - browser.trackViewportWidth() / browser.cursorModel.framePixelWidth;
                         }
+                        else {
+                            var chromosome = browser.genome.getChromosome(browser.referenceFrame.chr);
+                            maxEnd = chromosome.bpLength;
+                            maxStart = maxEnd - browser.trackViewportWidth() * browser.referenceFrame.bpPerPixel;
+                        }
+
+                        if (referenceFrame.start > maxStart) referenceFrame.start = maxStart;
+
 
                         browser.repaint();
                     }

@@ -64,7 +64,7 @@ var igv = (function (igv) {
             var bTotal;
             if (base !== refBase) {
                 bTotal = myself["pos" + base] + myself["neg" + base];
-                fractions.push({base: base, percent: bTotal/myself.total})
+                fractions.push( { base: base, percent: bTotal/myself.total } );
             }
         });
 
@@ -73,6 +73,19 @@ var igv = (function (igv) {
         });
 
         return fractions;
+    };
+
+    Coverage.prototype.mismatchTotalPercentage = function(refBase) {
+
+        var totalPercentage;
+
+        totalPercentage = 0.0;
+        this.mismatchPercentages(refBase).forEach(function (fraction) {
+
+            totalPercentage += fraction.percent;
+        });
+
+        return totalPercentage;
     };
 
     igv.CoverageMap = function (chr, start, end, features, refSeq) {

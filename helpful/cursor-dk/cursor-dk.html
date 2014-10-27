@@ -1,0 +1,93 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+    <style>
+        .igv-cursor-ui-header {
+            width: 100%;
+            height: 40px;
+            background-image:url(images/cursor_logo.png);
+            background-repeat:no-repeat;
+            background-position:0px 3px;
+        }
+
+        .igv-cursor-ui-holder {
+            width: 630px; /*adjust this value as the number of ui items grow.*/
+            margin:auto;
+        }
+
+        .igv-cursor-ui {
+            display:inline-block;
+            border: solid 1px #000;
+            background-color: #fff;
+            border-top: none;
+            border-bottom-left-radius: 5px;
+            border-bottom-right-radius: 5px;
+            padding: 5px 5px 5px 5px;
+        }
+
+        .igv-cursor-ui-item {
+            float:left;
+            padding: 5px 8px 5px 8px;
+            font-family:Arial, Helvetica, sans-serif;
+            font-size: 13px;
+        }
+
+        .igv-cursor-input-text {
+            height: 18px;
+            width: 30px;
+            border: solid 1px #000;
+            border-radius: 3px;
+            padding: 0px 3px 0px 3px;
+        }
+
+        .right-border {
+            border-right: solid 1px #000;
+        }
+    </style>
+    <title>Untitled Document</title>
+</head>
+<div class="igv-cursor-ui-header">
+    <div class="igv-cursor-ui-holder">
+        <div class="igv-cursor-ui">
+            <div class="igv-cursor-ui-item right-border">
+                <select >
+                    <option value="#">File Open/Save</option>
+                    <option value="#">Data</option>
+                    <option value="#">Select ENCODE</option>
+                    <option value="#">Choose File</option>
+                    <option value="#">Open URL</option>
+                    <hr />
+                    <option value="#">Save Sessions</option>
+                    <option value="#">Load Sessions</option>
+                    <hr />
+                    <option value="#">Export regions</option>
+                </select>
+            </div>
+            <div class="igv-cursor-ui-item">
+                <label>Region length
+                    <input type="text" class="igv-cursor-input-text" value="bp" />
+                </label>
+            </div>
+            <div class="igv-cursor-ui-item">
+                <label>Frame width
+                    <input type="text" class="igv-cursor-input-text" value="px" />
+                </label>
+            </div>
+            <div class="igv-cursor-ui-item right-border">
+                <label>Track height
+                    <input type="text" class="igv-cursor-input-text" value="px" />
+                </label>
+            </div>
+            <div class="igv-cursor-ui-item">
+                <img src="images/icon1.jpg" />
+                <img src="images/icon2.jpg" />
+                <img src="images/icon3.jpg" />
+            </div>
+        </div>
+    </div>
+</div>
+
+<body>
+</body>
+</html>

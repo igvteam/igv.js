@@ -5,7 +5,7 @@ var igv = (function (igv) {
         var thang = $(parentElement).find("i.fa-spinner");
 
         thang.removeClass("igv-spinner-fontawesome-stop");
-        thang.addClass   ("igv-spinner-fontawesome-start");
+        thang.addClass("igv-spinner-fontawesome-start");
 
     };
 
@@ -14,7 +14,7 @@ var igv = (function (igv) {
         var thang = $(parentElement).find("i.fa-spinner");
 
         thang.removeClass("igv-spinner-fontawesome-start");
-        thang.addClass   ("igv-spinner-fontawesome-stop");
+        thang.addClass("igv-spinner-fontawesome-stop");
 
     };
 
@@ -63,32 +63,6 @@ var igv = (function (igv) {
         return formatedNumber.split(",").join().replace(",", "", "g");
     };
 
-    igv.getSpinner = function (target) {
-
-        var opts = {
-            lines: 13, // The number of lines to draw
-            length: 6, // The length of each line
-            width: 2, // The line thickness
-            radius: 8, // The radius of the inner circle
-            corners: 1, // Corner roundness (0..1)
-            rotate: 0, // The rotation offset
-            direction: 1, // 1: clockwise, -1: counterclockwise
-            color: '#000', // #rgb or #rrggbb or array of colors
-            speed: 1, // Rounds per second
-            trail: 60, // Afterglow percentage
-            shadow: false, // Whether to render a shadow
-            hwaccel: false, // Whether to use hardware acceleration
-            className: 'spinner', // The CSS class to assign to the spinner
-            zIndex: 2e9, // The z-index (defaults to 2000000000)
-            top: 'auto',
-            left: 'auto'
-        };
-
-        var spinner = new Spinner(opts).spin(target);
-
-
-        return spinner;
-    };
 
     /**
      * Translate the mouse coordinates for the event to the coordinates for the given target element
@@ -115,9 +89,9 @@ var igv = (function (igv) {
         var markup = "<table>";
         nameValueArray.forEach(function (nameValue) {
 
-            if(nameValue.name) {
+            if (nameValue.name) {
 //                markup += "<tr><td>" + nameValue.name+ ":&nbsp; " + nameValue.value + "</td></tr>";
-                markup += "<tr><td>" + "<span class=\"igv-popoverNameSpan\">" + nameValue.name + "</span>" + "&nbsp; "  + "<span class=\"igv-popoverValueSpan\">" + nameValue.value + "</span>" + "</td></tr>";
+                markup += "<tr><td>" + "<span class=\"igv-popoverNameSpan\">" + nameValue.name + "</span>" + "&nbsp; " + "<span class=\"igv-popoverValueSpan\">" + nameValue.value + "</span>" + "</td></tr>";
             }
             else {
                 // not a name/value pair
@@ -129,10 +103,9 @@ var igv = (function (igv) {
         return markup;
 
 
-
     };
 
-     igv.throttle = function (fn, threshhold, scope) {
+    igv.throttle = function (fn, threshhold, scope) {
         threshhold || (threshhold = 200);
         var last, deferTimer;
 
@@ -154,6 +127,56 @@ var igv = (function (igv) {
             }
         }
     }
+
+
+    /**
+     * Extend jQuery's ajax function to handle binary requests.   Credit to Henry Algus:
+     *
+     * http://www.henryalgus.com/reading-binary-files-using-jquery-ajax/
+     */
+    igv.addAjaxExtensions = function () {
+
+        // use this transport for "binary" data type
+        $.ajaxTransport("+binary", function (options, originalOptions, jqXHR) {
+
+            return {
+                // create new XMLHttpRequest
+                send: function(_, callback){
+                    // setup all variables
+                    var xhr = new XMLHttpRequest(),
+                        url = options.url,
+                        type = options.type,
+                        responseType = "arraybuffer",
+                        data = options.data || null;
+
+                    xhr.addEventListener('load', function(){
+                        var data = {};
+                        data[options.dataType] = xhr.response;
+                        // make callback and send data
+                        callback(xhr.status, xhr.statusText, data, xhr.getAllResponseHeaders());
+                    });
+
+                    xhr.open(type, url);
+                    xhr.responseType = responseType;
+
+                    if(options.headers) {
+                        for (var prop in options.headers) {
+                            if( options.headers.hasOwnProperty( prop ) ) {
+                                xhr.setRequestHeader(prop, options.headers[prop]);
+                            }
+                        }
+                    }
+
+                    // TODO -- set any other options values
+                },
+                abort: function(){
+                    jqXHR.abort();
+                }
+            };
+
+        });
+    }
+
 
     return igv;
 

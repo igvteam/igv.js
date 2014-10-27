@@ -8,20 +8,22 @@ var igv = (function (igv) {
      * @param binary - url to a .wig file
      * @constructor
      */
-    igv.BedFeatureSource = function (urlOrFile, decode, binary) {
+    /* igv.BedFeatureSource = function (urlOrFile, decode, binary) */
+    igv.BedFeatureSource = function (config) {
 
-        if (urlOrFile instanceof File) {
-            this.localFile = urlOrFile;
-            this.filename = urlOrFile.name;
+        if (config.localFile) {
+            this.localFile = config.localFile;
+            this.filename = config.localFile.name;
         }
         else {
-            this.url = urlOrFile;
-            this.filename = urlOrFile;
+            this.url = config.url;
+            this.filename = config.url;
         }
-        this.decode = decode;
-        this.binary = binary;
 
-        if (decode === undefined) {
+//        this.decode = decode;
+//        this.binary = binary;
+
+//        if (decode === undefined) {
             if (this.filename.endsWith(".narrowPeak") || this.filename.endsWith(".narrowPeak.gz") ||
                 this.filename.endsWith(".broadPeak") || this.filename.endsWith(".broadPeak.gz")) {
                 this.decode = decodePeak;
@@ -29,7 +31,7 @@ var igv = (function (igv) {
             else {
                 this.decode = decodeBed;
             }
-        }
+//        }
 
         this.maxFeatureCount = Number.MAX_VALUE;
 

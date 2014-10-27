@@ -4,7 +4,8 @@ var igv = (function (igv) {
     /**
      * Create an igv.browser instance.  This object defines the public API for interacting with the genome browser.
      *
-     * @param options Object specifying initial configuration options.
+     * @param parentDiv - DOM tree root
+     * @param options - configuration options.
      *
      */
     igv.createBrowser = function (parentDiv, options) {

@@ -65,13 +65,13 @@
     <script type="text/javascript" src="js/wigTrack.js"></script>
     <script type="text/javascript" src="js/dataloader.js"></script>
     <script type="text/javascript" src="js/igv-exts.js"></script>
+    <script type="text/javascript" src="js/igvxhr.js"></script>
     <script type="text/javascript" src="js/binary.js"></script>
     <script type="text/javascript" src="js/gtex/eqtlTrack.js"></script>
     <script type="text/javascript" src="js/coverageMap.js"></script>
     <script type="text/javascript" src="js/bam/bamReader.js"></script>
     <script type="text/javascript" src="js/bam/bamSource.js"></script>
     <script type="text/javascript" src="js/bam/bamTrack.js"></script>
-    <script type="text/javascript" src="vendor/spin.js"></script>
     <script type="text/javascript" src="js/intervalTree.js"></script>
     <script type="text/javascript" src="js/ucsc-utils.js"></script>
     <script type="text/javascript" src="js/igv-constants.js"></script>
@@ -243,18 +243,18 @@
 
                 <!--<div class="nav navbar-nav navbar-right">-->
 
-                        <!--<div class="btn-group-sm">-->
+                <!--<div class="btn-group-sm">-->
 
-                            <!--<button id="fitToScreen" type="button" class="btn btn-default navbar-btn btn-sm">-->
-                                <!--<span class="fa fa-align-justify"></span>-->
-                            <!--</button>-->
-                            <!--<button id="zoomOut" type="button" class="btn btn-default navbar-btn  btn-sm">-->
-                                <!--<span class="glyphicon glyphicon-minus"></span>-->
-                            <!--</button>-->
-                            <!--<button id="zoomIn" type="button" class="btn btn-default navbar-btn  btn-sm">-->
-                                <!--<span class="glyphicon glyphicon-plus"></span>-->
-                            <!--</button>-->
-                        <!--</div>-->
+                <!--<button id="fitToScreen" type="button" class="btn btn-default navbar-btn btn-sm">-->
+                <!--<span class="fa fa-align-justify"></span>-->
+                <!--</button>-->
+                <!--<button id="zoomOut" type="button" class="btn btn-default navbar-btn  btn-sm">-->
+                <!--<span class="glyphicon glyphicon-minus"></span>-->
+                <!--</button>-->
+                <!--<button id="zoomIn" type="button" class="btn btn-default navbar-btn  btn-sm">-->
+                <!--<span class="glyphicon glyphicon-plus"></span>-->
+                <!--</button>-->
+                <!--</div>-->
 
                 <!--</div>-->
 
@@ -377,9 +377,38 @@
 <script type="text/javascript">
 
     $(document).ready(function () {
-        igv.createCursorBrowser({type: 'CURSOR', controlPanelWidth: 150});
-    });
 
+        var options;
+
+        options = {
+            trackHeight: 100,
+            controlPanelWidth: 150,
+            type: "CURSOR",
+            tracks: [
+                {
+                    type: "bed",
+                    url: "test/data/cursor/hg19.tss.bed.gz",
+                    label: "TSS",
+                    designatedTrack: true
+                },
+                {
+                    type: "bed",
+                    url: "test/data/cursor/wgEncodeBroadHistoneH1hescH3k4me3StdPk.broadPeak.gz",
+                    label: "H3k4me3 H1hesc",
+                    color: "rgb(0, 150, 0)"
+                },
+                {
+                    type: "bed",
+                    url: "test/data/cursor/wgEncodeBroadHistoneH1hescH3k27me3StdPk.broadPeak.gz",
+                    label: "H3k27me3 H1hesc",
+                    color: "rgb(150, 0, 0)"
+                }
+            ]
+        };
+
+//        igv.createCursorBrowser({type: 'CURSOR', controlPanelWidth: 150});
+        igv.createCursorBrowser(options);
+    });
 
 </script>
 

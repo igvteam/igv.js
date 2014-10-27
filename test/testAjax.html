@@ -3,19 +3,20 @@
 <head>
     <title>Test inflate</title>
     <link rel="stylesheet" href="vendor/qunit-1.12.0.css" type="text/css"/>
+    <script src="//code.jquery.com/jquery-1.11.0.min.js"></script>
     <script type="text/javascript" src="vendor/qunit-1.12.0.js"></script>
-    <script type="text/javascript" src="../js/dataloader.js"></script>
-    <script type="text/javascript" src="../js/igvxhr.js"></script>
+    <script type="text/javascript" src="testAjax.js"></script>
+    <script type="text/javascript" src="../js/igv-utils.js"></script>
 </head>
 <body>
 <div id="qunit"></div>
 <div id="qunit-fixture"></div>
 
-<script type="text/javascript" src="testDataLoader.js"></script>
+<script type="text/javascript" src="testDataSource.js"></script>
 
 <script type="text/javascript">
     document.addEventListener('DOMContentLoaded', function () {
-        runDataLoaderTests();
+        ajaxTests();
     });
 </script>
 </body>

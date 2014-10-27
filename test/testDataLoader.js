@@ -4,20 +4,24 @@ function runDataLoaderTests() {
 
     asyncTest("post", function () {
 
-        var url =  "../php/postJson.php"; // "http://t2dgenetics.org/mysql/rest/server/variant-search";
-        var dataLoader = new igv.DataLoader(url);
+        var proxy = "http://www.broadinstitute.org/igvdata/t2d/postJson.php";
+        var url = "http://69.173.71.179:8080/prod/rest/server/trait-search";
+        var dataLoader = new igv.DataLoader(proxy);
 
         var data = {
             "user_group": "ui",
             "filters": [
-                { "filter_type": "STRING", "operand": "CHROM", "operator": "EQ", "value": "9"  },
-                {"filter_type": "FLOAT", "operand": "POS", "operator": "GTE", "value": 21940000 },
-                {"filter_type": "FLOAT", "operand": "POS", "operator": "LTE", "value": 22190000 }
+                {"operand": "CHROM", "operator": "EQ", "value": "8", "filter_type": "STRING"},
+                {"operand": "POS", "operator": "GT", "value": 113075732, "filter_type": "FLOAT"},
+                {"operand": "POS", "operator": "LT", "value": 123075732, "filter_type": "FLOAT"},
+                {"operand": "PVALUE", "operator": "LTE", "value": 0.05, "filter_type": "FLOAT"}
             ],
-            "columns": ["ID", "CHROM", "POS", "DBSNP_ID", "Consequence", "Protein_change"]
+            "columns": ["CHROM", "POS", "DBSNP_ID", "PVALUE", "ZSCORE"], "trait": "T2D"
         };
 
-        dataLoader.postJson(JSON.stringify(data), function (result) {
+        var tmp = "url=" + url + "&data=" + JSON.stringify(data);
+
+        dataLoader.postJson(tmp, function (result) {
 
             ok(result);
 
@@ -27,9 +31,9 @@ function runDataLoaderTests() {
         });
     });
 
-    asyncTest("readByteRange", function () {
+    asyncTest("readByteRange old", function () {
 
-        var url = "http://localhost/igv/test/data/BufferedReaderTest.bin";
+        var url = "data/BufferedReaderTest.bin";
         var dataLoader = new igv.DataLoader(url);
 
         dataLoader.range = {start: 25, size: 100};
@@ -79,5 +83,36 @@ function runDataLoaderTests() {
 
         });
 
+    });
+
+
+    asyncTest("readByteRange new", function () {
+
+        var url = "data/BufferedReaderTest.bin",
+            range = {start: 25, size: 100};
+
+        igvxhr.load(url,
+            {
+                responseType: "arraybuffer",
+                range: range,
+                success: function (arrayBuffer) {
+
+                    ok(arrayBuffer);
+
+                    var dataView = new DataView(arrayBuffer);
+
+                    for (i = 0; i < range.size; i++) {
+
+                        var expectedValue = -128 + range.start + i;
+                        var value = dataView.getInt8(i);
+                        equal(expectedValue, value);
+
+                    }
+
+                    start();
+
+                }
+
+            });
     });
 }
