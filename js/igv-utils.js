@@ -5,7 +5,7 @@ var igv = (function (igv) {
         var thang = $(parentElement).find("i.fa-spinner");
 
         thang.removeClass("igv-spinner-fontawesome-stop");
-        thang.addClass   ("igv-spinner-fontawesome-start");
+        thang.addClass("igv-spinner-fontawesome-start");
 
     };
 
@@ -14,7 +14,7 @@ var igv = (function (igv) {
         var thang = $(parentElement).find("i.fa-spinner");
 
         thang.removeClass("igv-spinner-fontawesome-start");
-        thang.addClass   ("igv-spinner-fontawesome-stop");
+        thang.addClass("igv-spinner-fontawesome-stop");
 
     };
 
@@ -89,9 +89,9 @@ var igv = (function (igv) {
         var markup = "<table>";
         nameValueArray.forEach(function (nameValue) {
 
-            if(nameValue.name) {
+            if (nameValue.name) {
 //                markup += "<tr><td>" + nameValue.name+ ":&nbsp; " + nameValue.value + "</td></tr>";
-                markup += "<tr><td>" + "<span class=\"igv-popoverNameSpan\">" + nameValue.name + "</span>" + "&nbsp; "  + "<span class=\"igv-popoverValueSpan\">" + nameValue.value + "</span>" + "</td></tr>";
+                markup += "<tr><td>" + "<span class=\"igv-popoverNameSpan\">" + nameValue.name + "</span>" + "&nbsp; " + "<span class=\"igv-popoverValueSpan\">" + nameValue.value + "</span>" + "</td></tr>";
             }
             else {
                 // not a name/value pair
@@ -103,10 +103,9 @@ var igv = (function (igv) {
         return markup;
 
 
-
     };
 
-     igv.throttle = function (fn, threshhold, scope) {
+    igv.throttle = function (fn, threshhold, scope) {
         threshhold || (threshhold = 200);
         var last, deferTimer;
 
@@ -128,6 +127,60 @@ var igv = (function (igv) {
             }
         }
     }
+
+
+    /**
+     * Extend jQuery's ajax function to handle binary requests.   Credit to Henry Algus:
+     *
+     * http://www.henryalgus.com/reading-binary-files-using-jquery-ajax/
+     */
+    igv.addAjaxExtensions = function () {
+
+        // use this transport for "binary" data type
+        $.ajaxTransport("+binary", function (options, originalOptions, jqXHR) {
+
+            return {
+                // create new XMLHttpRequest
+                send: function(_, callback){
+                    // setup all variables
+                    var xhr = new XMLHttpRequest(),
+                        url = options.url,
+                        type = options.type,
+                        responseType = "arraybuffer",
+                        data = options.data || null;
+
+                    xhr.addEventListener('load', function(){
+                        var data = {};
+                        data[options.dataType] = xhr.response;
+                        // make callback and send data
+                        callback(xhr.status, xhr.statusText, data, xhr.getAllResponseHeaders());
+                    });
+
+                    xhr.open(type, url);
+                    xhr.responseType = responseType;
+
+                    if(options.headers) {
+                        for (var prop in options.headers) {
+                            if( options.headers.hasOwnProperty( prop ) ) {
+                                xhr.setRequestHeader(prop, options.headers[prop]);
+                            }
+                        }
+                    }
+
+                    // TODO -- set any other options values
+
+                    xhr.setRequestHeader("Cache-control", "no-cache");
+                    xhr.setRequestHeader("If-None-Match", Math.random().toString(36));  // For nasty safari bug https://bugs.webkit.org/show_bug.cgi?id=82672
+                    xhr.send();
+                },
+                abort: function(){
+                    jqXHR.abort();
+                }
+            };
+
+        });
+    }
+
 
     return igv;
 
