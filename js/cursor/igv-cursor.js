@@ -11,6 +11,8 @@ var igv = (function (igv) {
         $(contentHeader).append(contentHeaderDiv);
         $(browser.div).append(trackContainer);
 
+        igv.addAjaxExtensions();
+
         // Add cursor specific methods to the browser object,  some new some overrides
         addCursorExtensions(browser);
 

@@ -168,10 +168,6 @@ var igv = (function (igv) {
                     }
 
                     // TODO -- set any other options values
-
-                    xhr.setRequestHeader("Cache-control", "no-cache");
-                    xhr.setRequestHeader("If-None-Match", Math.random().toString(36));  // For nasty safari bug https://bugs.webkit.org/show_bug.cgi?id=82672
-                    xhr.send();
                 },
                 abort: function(){
                     jqXHR.abort();

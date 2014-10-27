@@ -14,13 +14,15 @@ var igv = (function (igv) {
 
         var myself = this;
 
-        var dataLoader = new igv.DataLoader(this.url);
+        igvxhr.loadString(this.url,
+            {
+                success: function (data) {
+                    decodeFeatures.call(myself, data, continuation);
+                },
+                task: task
+            }
+        );
 
-        dataLoader.loadBinaryString(function (data) {
-
-                decodeFeatures.call(myself, data, continuation);
-            },
-            task);
 
     };
 
