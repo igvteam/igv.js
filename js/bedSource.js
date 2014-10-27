@@ -1,14 +1,6 @@
-// Define a feature source that reads from non-indexed bed files
 
 var igv = (function (igv) {
 
-    /**
-     * @param urlOrFile - url to a .wig file
-     * @param decode - url to a .wig file
-     * @param binary - url to a .wig file
-     * @constructor
-     */
-    /* igv.BedFeatureSource = function (urlOrFile, decode, binary) */
     igv.BedFeatureSource = function (config) {
 
         if (config.localFile) {
@@ -24,13 +16,13 @@ var igv = (function (igv) {
 //        this.binary = binary;
 
 //        if (decode === undefined) {
-            if (this.filename.endsWith(".narrowPeak") || this.filename.endsWith(".narrowPeak.gz") ||
-                this.filename.endsWith(".broadPeak") || this.filename.endsWith(".broadPeak.gz")) {
-                this.decode = decodePeak;
-            }
-            else {
-                this.decode = decodeBed;
-            }
+        if (this.filename.endsWith(".narrowPeak") || this.filename.endsWith(".narrowPeak.gz") ||
+            this.filename.endsWith(".broadPeak") || this.filename.endsWith(".broadPeak.gz")) {
+            this.decode = decodePeak;
+        }
+        else {
+            this.decode = decodeBed;
+        }
 //        }
 
         this.maxFeatureCount = Number.MAX_VALUE;
@@ -56,13 +48,13 @@ var igv = (function (igv) {
         }
         else {
             this.loadFeatures(function (treeMap) {
-                //myself.featureMap = featureMap;
-                myself.featureCache = new FeatureCache(treeMap);
-                // Finally pass features for query interval to continuation
-                success(myself.featureCache.queryFeatures(queryChr, bpStart, bpEnd));
+                    //myself.featureMap = featureMap;
+                    myself.featureCache = new FeatureCache(treeMap);
+                    // Finally pass features for query interval to continuation
+                    success(myself.featureCache.queryFeatures(queryChr, bpStart, bpEnd));
 
-            },
-            task);
+                },
+                task);
         }
 
     };
@@ -99,58 +91,24 @@ var igv = (function (igv) {
 
     igv.BedFeatureSource.prototype.loadFeatures = function (continuation, task) {
 
-        var myself = this;
-        
+        var myself = this,
+            options = {
+            success: function (result) {
+                parseFeatures.call(myself, result, continuation);
+            },
+            task: task
+        };
+
         if (this.localFile) {
-
-            // TODO -- move this logic to DataLoader
-
-            var localFileDataLoader = new FileReader();
-
-            localFileDataLoader.onload = function (e) {
-
-                var plain, inflate;
-
-                if (myself.localFile.name.endsWith(".gz")) {
-                    inflate = new Zlib.Gunzip(new Uint8Array(localFileDataLoader.result));
-
-                    plain = inflate.decompress();
-                } else {
-
-                    plain = new Uint8Array(localFileDataLoader.result);
-                }
-
-                var result = "";
-                for (var i = 0, len = plain.length; i < len; i++) {
-                    result = result + String.fromCharCode(plain[i]);
-                }
-
-                myself.featureLoader(result, continuation, task);
-
-            };
-
-            localFileDataLoader.onerror = function (e) {
-                console.log("error uploading local file " + myself.localFile.name);
-            };
-
-            localFileDataLoader.readAsArrayBuffer(this.localFile);
-
+            igvxhr.loadStringFromFile(this.localFile, options);
         }
 
         else {
-
-            var dataLoader = new igv.DataLoader(this.url);
-
-            if (dataLoader) dataLoader.loadBinaryString(function (data) {
-
-                myself.featureLoader(data, continuation);
-            },
-            task);
-
+            igvxhr.loadString(this.url, options);
         }
     }
 
-    igv.BedFeatureSource.prototype.featureLoader = function (data, continuation) {
+    function parseFeatures(data, continuation) {
 
         var myself = this,
             decode = this.decode,

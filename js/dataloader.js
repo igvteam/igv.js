@@ -59,7 +59,6 @@ var igv = (function (igv) {
         }
     }
 
-
     igv.DataLoader.prototype.loadArrayBuffer = function (continuation, task) {
 
 
@@ -111,7 +110,6 @@ var igv = (function (igv) {
         oReq.send();
 
     }
-
 
     igv.DataLoader.prototype.postJson = function (data, continuation, task) {
 

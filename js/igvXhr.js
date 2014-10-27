@@ -80,12 +80,7 @@ var igvxhr = (function (igvxhr) {
                 {
                     range: range,
                     success: function (data) {
-                        var inflate = new Zlib.Gunzip(new Uint8Array(data));
-                        var plain = inflate.decompress();
-                        var result = "";
-                        for (var i = 0, len = plain.length; i < len; i++) {
-                            result = result + String.fromCharCode(plain[i]);
-                        }
+                        var result = arrayBufferToString(data, true);
                         success(result);
                     },
                     error: error,
@@ -137,6 +132,54 @@ var igvxhr = (function (igvxhr) {
 
             xhr.send();
         }
+    }
+
+
+    igvxhr.loadStringFromFile = function (localfile, options) {
+
+        var fileReader = new FileReader(),
+            success = options.success,
+            error = options.error || options.success,
+            abort = options.abort || options.error,
+            timeout = options.timeout || options.error,
+            range = options.range;
+
+
+        fileReader.onload = function (e) {
+
+            var gzipped = localfile.name.endsWith(".gz"),
+                result = arrayBufferToString(fileReader.result, gzipped);
+
+            success(result, localfile);
+
+        };
+
+        fileReader.onerror = function (e) {
+            console.log("error uploading local file " + localfile.name);
+            error(null, fileReader);
+        };
+
+        fileReader.readAsArrayBuffer(localfile);
+    }
+
+
+    function arrayBufferToString(arraybuffer, gzipped) {
+
+        var plain, inflate;
+
+        if (gzipped) {
+
+            var inflate = new Zlib.Gunzip(new Uint8Array(arraybuffer));
+            var plain = inflate.decompress();
+        }
+        else {
+            plain = new Uint8Array(arraybuffer);
+        }
+        var result = "";
+        for (var i = 0, len = plain.length; i < len; i++) {
+            result = result + String.fromCharCode(plain[i]);
+        }
+        return result;
     }
 
 

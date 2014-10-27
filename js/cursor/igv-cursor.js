@@ -427,11 +427,17 @@ var igv = (function (igv) {
 
                 var jsonRepresentation = trackView.track.jsonRepresentation();
 
-                if (browser.designatedTrack && browser.designatedTrack === trackView.track) {
-                    jsonRepresentation.designatedTrack = true;
-                }
+                if (jsonRepresentation) {
 
-                session.tracks.push(jsonRepresentation);
+                    if (browser.designatedTrack && browser.designatedTrack === trackView.track) {
+                        jsonRepresentation.designatedTrack = true;
+                    }
+
+                    session.tracks.push(jsonRepresentation);
+                }
+                else {
+                    // TODO -- what if there is no json repesentation?
+                }
             });
 
             return JSON.stringify(session, undefined, 4);
