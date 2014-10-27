@@ -12,20 +12,7 @@ var igv = (function (igv) {
             this.filename = config.url;
         }
 
-//        this.decode = decode;
-//        this.binary = binary;
-
-//        if (decode === undefined) {
-        if (this.filename.endsWith(".narrowPeak") || this.filename.endsWith(".narrowPeak.gz") ||
-            this.filename.endsWith(".broadPeak") || this.filename.endsWith(".broadPeak.gz")) {
-            this.decode = decodePeak;
-        }
-        else {
-            this.decode = decodeBed;
-        }
-//        }
-
-        this.maxFeatureCount = Number.MAX_VALUE;
+        this.parser = igv.createBedParser(config.type);
 
     };
 
@@ -91,10 +78,10 @@ var igv = (function (igv) {
 
     igv.BedFeatureSource.prototype.loadFeatures = function (continuation, task) {
 
-        var myself = this,
+        var parser = this.parser,
             options = {
             success: function (result) {
-                parseFeatures.call(myself, result, continuation);
+                parseFeatures(parser, result, continuation);
             },
             task: task
         };
@@ -108,51 +95,14 @@ var igv = (function (igv) {
         }
     }
 
-    function parseFeatures(data, continuation) {
+    function parseFeatures(parser, data, continuation) {
 
-        var myself = this,
-            decode = this.decode,
-            maxFeatureCount = this.maxFeatureCount,
-            feature,
-            featureCache = {},
-            lines = data.split("\n"),
-            len = lines.length,
-            tokens,
-            allFeatures,
-            line,
-            chromosomes = [],    // Temporary cache
-            chr,
-            i,
-            cnt = 0,
-            j;
+        var featureCache = {},
+            chromosomes = [],
 
-        allFeatures = [];
-        for (i = 0; i < len; i++) {
-            line = lines[i];
-            if (line.startsWith("track") || line.startsWith("#") || line.startsWith("browser")) {
-                if (line.startsWith("track")) {
-                    myself.trackProperties = igv.ucsc.parseTrackLine(line);
-                }
-                continue;
-            }
-            tokens = lines[i].split("\t");
-            feature = decode(tokens);
+        // TODO -- parse header (track line)
 
-            if (feature) {
-                if (allFeatures.length < maxFeatureCount) {
-                    allFeatures.push(feature);
-                }
-                else {
-                    // Resevoir sampling,  conditionally replace existing feature with new one.
-                    j = Math.floor(Math.random() * cnt);
-                    if (j < maxFeatureCount) {
-                        allFeatures[j] = feature;
-                    }
-                }
-                cnt++;
-            }
-        }
-
+        allFeatures = parser.parseFeatures(data);
 
         allFeatures.forEach(function (feature) {
             var chr = feature.chr,
@@ -212,94 +162,6 @@ var igv = (function (igv) {
         return tree;
     }
 
-
-    function decodeBed(tokens) {
-
-        var chr, start, end, id, name, tmp, idName, strand, cdStart, exonCount, exonSizes, exonStarts, exons, feature,
-            eStart, eEnd;
-
-        if (tokens.length < 3) return null;
-
-        chr = tokens[0];
-        if (!chr.startsWith("chr")) chr = "chr" + chr;  // TODO -- use genome aliases
-        start = parseInt(tokens[1]);
-        end = tokens.length > 2 ? parseInt(tokens[2]) : start + 1;
-
-        feature = {chr: chr, start: start, end: end};
-
-        if (tokens.length > 3) {
-            // Note: these are very special rules for the gencode gene files.
-            tmp = tokens[3].replace(/"/g, '');
-            idName = tmp.split(';');
-            for (var i = 0; i < idName.length; i++) {
-                var kv = idName[i].split('=');
-                if (kv[0] == "gene_id") {
-                    id = kv[1];
-                }
-                if (kv[0] == "gene_name") {
-                    name = kv[1];
-                }
-            }
-            feature.id = id ? id : tmp;
-            feature.name = name ? name : tmp;
-        }
-
-        if (tokens.length > 4) {
-            feature.score = parseFloat(tokens[4]);
-        }
-        if (tokens.length > 5) {
-            feature.strand = tokens[5];
-        }
-        if (tokens.length > 6) {
-            feature.cdStart = parseInt(tokens[6]);
-        }
-        if (tokens.length > 7) {
-            feature.cdEnd = parseInt(tokens[7]);
-        }
-        if (tokens.length > 8) {
-            feature.rgb = tokens[8];
-        }
-        if (tokens.length > 11) {
-            exonCount = parseInt(tokens[9]);
-            exonSizes = tokens[10].split(',');
-            exonStarts = tokens[11].split(',');
-            exons = [];
-
-            for (var i = 0; i < exonCount; i++) {
-                eStart = start + parseInt(exonStarts[i]);
-                eEnd = eStart + parseInt(exonSizes[i]);
-                exons.push({start: eStart, end: eEnd});
-            }
-
-            feature.exons = exons;
-        }
-
-        return feature;
-
-    }
-
-    function decodePeak(tokens) {
-
-        var tokenCount, chr, start, end, strand, name, score, qValue, signal, pValue;
-
-        tokenCount = tokens.length;
-        if (tokenCount < 9) {
-            return null;
-        }
-
-        chr = tokens[0];
-        start = parseInt(tokens[1]);
-        end = parseInt(tokens[2]);
-        name = tokens[3];
-        score = parseFloat(tokens[4]);
-        strand = tokens[5].trim();
-        signal = parseFloat(tokens[6]);
-        pValue = parseFloat(tokens[7]);
-        qValue = parseFloat(tokens[8]);
-
-        return {chr: chr, start: start, end: end, name: name, score: score, strand: strand, signal: signal,
-            pValue: pValue, qValue: qValue};
-    }
 
     FeatureCache = function (treeMap) {
         this.treeMap = treeMap;

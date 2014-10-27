@@ -41,6 +41,12 @@ var igv = (function (igv) {
             return;
         }
 
+        // Set the track type, if not explicitly specified
+        if (!config.type) {
+            config.type = getType(config.url || config.localFile.name);
+        }
+
+
         var path = config.url,
             type = config.type,
             newTrack;
