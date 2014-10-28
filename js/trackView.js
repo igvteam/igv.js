@@ -359,6 +359,7 @@ var igv = (function (igv) {
                                 igv.popover.show(e.pageX, e.pageY, igv.formatPopoverText(popupData));
                             }
                             mouseDownX = undefined;
+                            browser.popupTimer = undefined;
                         },
                         doubleClickDelay);
                 }
