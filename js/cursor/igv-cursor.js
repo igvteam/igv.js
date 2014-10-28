@@ -247,6 +247,8 @@ var igv = (function (igv) {
 
         $(browser.div).append(contentHeader);
         $(contentHeader).append(cursorUIHeaderBlurbDiv);
+        
+        browser.horizontalScrollbar = new cursor.HorizontalScrollbar(browser, $(browser.div));
         $(browser.div).append(trackContainer);
 
 
@@ -257,7 +259,7 @@ var igv = (function (igv) {
         // Add cursor specific methods to the browser object,  some new some overrides
         addCursorExtensions(browser);
 
-        browser.horizontalScrollbar = new cursor.HorizontalScrollbar(browser, $(browser.div));
+//        browser.horizontalScrollbar = new cursor.HorizontalScrollbar(browser, $(browser.div));
 
 
 
