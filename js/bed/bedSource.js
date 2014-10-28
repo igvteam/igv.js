@@ -92,7 +92,7 @@ var igv = (function (igv) {
         var myself = this,
             idxFile =  (myself.url ? myself.url + ".idx" : null);
 
-        if(queryChr.startsWith("chr")) queryChr = queryChr.substring(3);
+        if(queryChr && queryChr.startsWith("chr")) queryChr = queryChr.substring(3);
 
         if (this.index === undefined && !myself.localFile && queryChr) {  // TODO -  handle local files
 
