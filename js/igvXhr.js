@@ -10,9 +10,9 @@ var igvxhr = (function (igvxhr) {
         var xhr = new XMLHttpRequest(),
             method = options.method || "GET",
             success = options.success,
-            error = options.error || options.success,
-            abort = options.abort || options.error,
-            timeout = options.timeout || options.error,
+            error = options.error || success,
+            abort = options.abort || error,
+            timeout = options.timeout || error,
             task = options.task,
             range = options.range,
             responseType = options.responseType;
@@ -67,9 +67,9 @@ var igvxhr = (function (igvxhr) {
 
         var xhr,
             success = options.success,
-            error = options.error || options.success,
-            abort = options.abort || options.error,
-            timeout = options.timeout || options.error,
+            error = options.error || success,
+            abort = options.abort || error,
+            timeout = options.timeout || error,
             range = options.range,
             task = options.task;
 

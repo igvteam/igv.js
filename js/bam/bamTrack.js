@@ -136,7 +136,7 @@ var igv = (function (igv) {
 
                                 refBase = refSeq[i + coverageMap.bpStart - bpStart];
 
-                                if (item.isMismatch(refBase) && coverageMap.coverage[i].mismatchTotalPercentage(refBase) > 0.20) {
+                                if (item.isMismatch(refBase)) {
 
                                     x = refFrame.toPixels(bp - bpStart);
 

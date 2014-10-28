@@ -51,7 +51,7 @@ var igv = (function (igv) {
                 sum += myself[key];
             }
         });
-        return sum / this.qual > 0;
+        return sum / this.qual > threshold;
 
     };
 

@@ -7,12 +7,7 @@ module.exports = function (grunt) {
         concat: {
             igv: {
                 src: [
-                    'js/*.js', // All JS in the libs folder
-                    'js/gwas/*.js',
-                    'js/bigwig/*.js',
-                    'js/cursor/*.js',
-                    'js/gtex/*.js',
-                    'js/bam/*.js',
+                    'js/**/*.js',
                     'vendor/inflate.js',
                     'vendor/spin.js',
                     'vendor/inflate.js',
