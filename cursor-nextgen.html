@@ -81,36 +81,38 @@
         <div class="igv-cursor-ui">
             <div class="igv-cursor-ui-item igv-cursor-ui-right-border">
 
-                <!--<select >-->
-                    <!--<option value="#">File Open/Save</option>-->
-                    <!--<option value="#">Data</option>-->
-                    <!--<option value="#">Select ENCODE</option>-->
-                    <!--<option value="#">Choose File</option>-->
-                    <!--<option value="#">Open URL</option>-->
-                    <!--<hr />-->
-                    <!--<option value="#">Save Sessions</option>-->
-                    <!--<option value="#">Load Sessions</option>-->
-                    <!--<hr />-->
-                    <!--<option value="#">Export regions</option>-->
-                <!--</select>-->
-
-
                 <div class="dropdown">
                     <button id="igvHeaderFileDropdown" class="btn btn-default dropdown-toggle" type="button" data-toggle="dropdown">
                         Dropdown
                         <span class="caret"></span>
                     </button>
                     <ul class="dropdown-menu" role="menu" aria-labelledby="igvHeaderFileDropdown">
-                        <li role="presentation"><a role="menuitem" tabindex="-1" href="#">File Open/Save</a></li>
-                        <li role="presentation"><a role="menuitem" tabindex="-1" href="#">Data</a></li>
-                        <li role="presentation"><a role="menuitem" tabindex="-1" href="#">Select ENCODE</a></li>
-                        <li role="presentation"><a role="menuitem" tabindex="-1" href="#">Choose File</a></li>
-                        <li role="presentation"><a role="menuitem" tabindex="-1" href="#">Open URL</a></li>
+                        <li role="presentation"><a role="menuitem" tabindex="-1" href="#">Load File</a></li><!-- Upload File -->
+                        <li role="presentation">
+                            <a role="menuitem" tabindex="-1" href="#">
+                                <button id="encodeModalButton" type="button" class="btn btn-default navbar-btn navbar-left" data-toggle="modal" data-target=".bs-example-modal-lg">
+                                    Select ENCODE
+                                </button>
+                            </a>
+                        </li><!-- Select ENCODE -->
+                        <li role="presentation"><a role="menuitem" tabindex="-1" href="#">Load URL</a></li><!-- Load URL -->
                         <li role="presentation" class="divider"></li>
-                        <li role="presentation"><a role="menuitem" tabindex="-1" href="#">Save Session</a></li>
-                        <li role="presentation"><a role="menuitem" tabindex="-1" href="#">Load Session</a></li>
+                        <li role="presentation">
+                            <a role="menuitem" tabindex="-1" href="#">
+                                <button class="btn btn-default navbar-btn" data-toggle="modal" data-target="#igvSaveSessionModal">
+                                    Save Session
+                                </button>
+                            </a>
+                        </li><!-- Save Session -->
+                        <li role="presentation"><a role="menuitem" tabindex="-1" href="#">Load Session</a></li><!-- Load Session -->
                         <li role="presentation" class="divider"></li>
-                        <li role="presentation"><a role="menuitem" tabindex="-1" href="#">Export Regions</a></li>
+                        <li role="presentation">
+                            <a role="menuitem" tabindex="-1" href="#">
+                                <button class="btn btn-default navbar-btn" data-toggle="modal" data-target="#igvExportRegionsModal">
+                                    Export Regions
+                                </button>
+                            </a>
+                        </li><!-- Export Regions -->
                     </ul>
                 </div>
 

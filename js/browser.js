@@ -19,7 +19,7 @@ var igv = (function (igv) {
 
         this.searchURL = options.searchURL || "http://www.broadinstitute.org/webservices/igv/locus?genome=hg19&name=";
 
-//        $("input[id='trackHeightInput']").val(this.trackHeight);
+        $("input[id='trackHeightInput']").val(this.trackHeight);
 
 
         this.trackContainerDiv = trackContainer;

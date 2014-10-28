@@ -49,48 +49,6 @@ var igv = (function (igv) {
             browser.setTrackHeight(Math.round(parseFloat(value, 10)));
         };
 
-
-
-
-
-
-        // Construct body DIV tree
-        contentHeader = $('<div class="row"></div>')[0];
-        contentHeaderDiv = $('<div id="igvHeaderDiv" class="igv-header-div col-md-12" style="font-size:16px;"><span id="igvHeaderRegionDisplaySpan"></span></div>')[0];
-        trackContainer = $('<div id="igvTrackContainerDiv" class="igv-track-container-div">')[0];
-
-        browser = new igv.Browser(options, trackContainer);
-        document.getElementById('igvContainerDiv').appendChild(browser.div);
-
-        $(browser.div).append(contentHeader);
-        $(contentHeader).append(contentHeaderDiv);
-        $(browser.div).append(trackContainer);
-
-        igv.addAjaxExtensions();
-
-
-
-        // UNDER CONSTRUCTION
-        return;
-
-
-        // Add cursor specific methods to the browser object,  some new some overrides
-        addCursorExtensions(browser);
-
-        browser.horizontalScrollbar = new cursor.HorizontalScrollbar(browser, $(browser.div));
-
-
-
-
-
-
-
-
-
-
-
-
-
         // export regions via modal form
         $("#igvExportRegionsModalForm").submit(function (event) {
 
@@ -116,71 +74,71 @@ var igv = (function (igv) {
             downloadInput.val(session);
         });
 
-        // session upload
-        var sessionInput = document.getElementById('igvSessionLoad');
-        sessionInput.addEventListener('change', function (e) {
+//        // session upload
+//        var sessionInput = document.getElementById('igvSessionLoad');
+//        sessionInput.addEventListener('change', function (e) {
+//
+//            var fileReader = new FileReader(),
+//                sessionFile;
+//
+//            sessionFile = sessionInput.files[ 0 ];
+//            $("#igvSessionLoadForm")[0].reset();
+//
+//            fileReader.onload = function (e) {
+//
+//                var json = e.target.result,
+//                    session = JSON.parse(json);
+//
+//                browser.sessionTeardown();
+//
+//                browser.loadSession(session);
+//
+//            };
+//
+//            fileReader.readAsText(sessionFile);
+//
+//        });
 
-            var fileReader = new FileReader(),
-                sessionFile;
+//        // BED file upload
+//        var fileInput = document.getElementById('igvFileUpload');
+//        fileInput.addEventListener('change', function (e) {
+//
+//            var localFile,
+//                localFiles = fileInput.files;
+//
+//            for (var i = 0; i < localFiles.length; i++) {
+//
+//                localFile = localFiles[ i ];
+//                $("#igvFileUploadForm")[0].reset();
+//
+//                browser.loadTrack({
+//                    type: "bed",
+//                    localFile: localFile,
+//                    url: undefined,
+//                    label: localFile.name
+//                });
+//
+//
+//            }
+//
+//        });
 
-            sessionFile = sessionInput.files[ 0 ];
-            $("#igvSessionLoadForm")[0].reset();
-
-            fileReader.onload = function (e) {
-
-                var json = e.target.result,
-                    session = JSON.parse(json);
-
-                browser.sessionTeardown();
-
-                browser.loadSession(session);
-
-            };
-
-            fileReader.readAsText(sessionFile);
-
-        });
-
-        // BED file upload
-        var fileInput = document.getElementById('igvFileUpload');
-        fileInput.addEventListener('change', function (e) {
-
-            var localFile,
-                localFiles = fileInput.files;
-
-            for (var i = 0; i < localFiles.length; i++) {
-
-                localFile = localFiles[ i ];
-                $("#igvFileUploadForm")[0].reset();
-
-                browser.loadTrack({
-                    type: "bed",
-                    localFile: localFile,
-                    url: undefined,
-                    label: localFile.name
-                });
-
-
-            }
-
-        });
-
-        // BED file URL
-        document.getElementById('igvLoadURL').onchange = function (e) {
-            var obj,
-                path;
-
-            obj = $("#igvLoadURL");
-            path = obj.val();
-            obj.val("");
-
-            browser.loadTrack({
-                type: "bed",
-                url: path,
-                label: "Unnamed Track"
-            });
-
-        };
+//        // BED file URL
+//        document.getElementById('igvLoadURL').onchange = function (e) {
+//            var obj,
+//                path;
+//
+//            obj = $("#igvLoadURL");
+//            path = obj.val();
+//            obj.val("");
+//
+//            browser.loadTrack({
+//                type: "bed",
+//                url: path,
+//                label: "Unnamed Track"
+//            });
+//
+//        };
 
         // Load ENCODE DataTables data and build markup for modal dialog.
         encode.createEncodeDataTablesDataSet("resources/peaks.hg19.txt", function (dataSet) {
@@ -277,6 +235,38 @@ var igv = (function (igv) {
 
         // Append resultant ENCODE DataTables markup
         $('#encodeModalBody').html('<table cellpadding="0" cellspacing="0" border="0" class="display" id="encodeModalTable"></table>');
+
+
+
+
+
+
+
+
+        // Construct body DIV tree
+        contentHeader = $('<div class="row"></div>')[0];
+        contentHeaderDiv = $('<div id="igvHeaderDiv" class="igv-header-div col-md-12" style="font-size:16px;"><span id="igvHeaderRegionDisplaySpan"></span></div>')[0];
+        trackContainer = $('<div id="igvTrackContainerDiv" class="igv-track-container-div">')[0];
+
+        browser = new igv.Browser(options, trackContainer);
+        document.getElementById('igvContainerDiv').appendChild(browser.div);
+
+        $(browser.div).append(contentHeader);
+        $(contentHeader).append(contentHeaderDiv);
+        $(browser.div).append(trackContainer);
+
+
+
+        igv.addAjaxExtensions();
+
+
+        // Add cursor specific methods to the browser object,  some new some overrides
+        addCursorExtensions(browser);
+
+        browser.horizontalScrollbar = new cursor.HorizontalScrollbar(browser, $(browser.div));
+
+
+
 
         browser.cursorModel = new cursor.CursorModel(browser);
 
