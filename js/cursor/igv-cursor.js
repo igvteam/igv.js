@@ -247,7 +247,7 @@ var igv = (function (igv) {
 
         $(browser.div).append(contentHeader);
         $(contentHeader).append(cursorUIHeaderBlurbDiv);
-        
+
         browser.horizontalScrollbar = new cursor.HorizontalScrollbar(browser, $(browser.div));
         $(browser.div).append(trackContainer);
 

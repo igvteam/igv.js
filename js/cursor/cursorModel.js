@@ -70,16 +70,16 @@ var cursor = (function (cursor) {
             "display" : "block"
         });
 
-        $(trackLabelSpan).text(this.browser.designatedTrack.label);
+        $(trackLabelSpan).text( this.browser.designatedTrack ? this.browser.designatedTrack.label : "unnamed" );
 
         $(trackLabelSpan).css({
-            "color" : this.browser.designatedTrack.color
+            "color" : this.browser.designatedTrack ? this.browser.designatedTrack.color : cursor.defaultColor()
         });
 
         $(regionCountSpan).text( igv.numberFormatter(this.regions.length) );
 
         $(regionCountSpan).css({
-            "color" : this.browser.designatedTrack.color
+            "color" : this.browser.designatedTrack ? this.browser.designatedTrack.color : cursor.defaultColor()
         });
 
         $(filteredRegionCountSpan).text( igv.numberFormatter(this.filteredRegions.length) );
