@@ -434,7 +434,8 @@ var igv = (function (igv) {
 
         var isMouseDown = false,
             lastMouseX = undefined,
-            mouseDownX = undefined;
+            mouseDownX = undefined,
+            browser = igv.browser;
 
         $(trackContainerDiv).mousedown(function (e) {
             var coords = igv.translateMouseCoordinates(e, trackContainerDiv);
@@ -445,8 +446,7 @@ var igv = (function (igv) {
 
         $(trackContainerDiv).mousemove(igv.throttle(function (e) {
 
-                var browser = igv.browser,
-                    coords = igv.translateMouseCoordinates(e, trackContainerDiv),
+                var coords = igv.translateMouseCoordinates(e, trackContainerDiv),
                     pixels,
                     maxEnd,
                     maxStart,
@@ -496,6 +496,7 @@ var igv = (function (igv) {
         ;
 
         $(trackContainerDiv).mouseup(function (e) {
+
             mouseDownX = undefined;
             isMouseDown = false;
             lastMouseX = undefined;

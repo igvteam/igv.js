@@ -207,9 +207,9 @@ var igv = (function (igv) {
             tileEnd = tileStart + tileWidth;
 
             if (this.currentTask) {
-                if(this.currentTask.chr === referenceFrame.chr && this.currentTask.start === tileStart && this.currentTask.end === tileEnd) {
+                if (this.currentTask.chr === referenceFrame.chr && this.currentTask.start === tileStart && this.currentTask.end === tileEnd) {
                     // This load is already in progress
-                   // console.log("Dup load request -- ignoring");
+                    // console.log("Dup load request -- ignoring");
                     return;
                 }
                 this.currentTask.abort();
@@ -305,11 +305,11 @@ var igv = (function (igv) {
         // Register track handlers for popup.  Although we are not handling dragging here, we still need to check
         // for dragging on a mouseup
 
-      var isMouseDown = false,
+        var isMouseDown = false,
             lastMouseX = undefined,
             mouseDownX = undefined,
             canvas = trackView.canvas,
-            popupTimer = undefined;
+            browser = igv.browser;
 
         $(canvas).mousedown(function (e) {
 
@@ -332,44 +332,39 @@ var igv = (function (igv) {
             var canvasCoords = igv.translateMouseCoordinates(e, canvas),
                 referenceFrame = trackView.browser.referenceFrame;
 
-            if(!referenceFrame) return;
+            if (!referenceFrame) return;
 
-            if (popupTimer) {
+            if (browser.popupTimer) {
                 // Cancel previous timer
-                window.clearTimeout(popupTimer);
-                popupTimer = undefined;
+                console.log("Cancel timer");
+                window.clearTimeout(browser.popupTimer);
+                browser.popupTimer = undefined;
             }
 
-            if (Math.abs(canvasCoords.x - mouseDownX) <= igv.constants.dragThreshold && trackView.track.popupData) {
-                const doubleClickDelay = 300;
-                popupTimer = window.setTimeout(function () {
-
-                        var popupData,
-                            genomicLocation = Math.floor((referenceFrame.start) + referenceFrame.toBP(canvasCoords.x)),
-                            xOrigin;
-
-                        if (undefined === genomicLocation) {
-                            return;
-                        }
-
-                        xOrigin = Math.round(referenceFrame.toPixels((trackView.tile.startBP - referenceFrame.start)));
-
-                        popupData = trackView.track.popupData(genomicLocation, canvasCoords.x - xOrigin, canvasCoords.y);
-
-//                        popupData = igv.popover.testData( Math.floor( igv.random(2, 25) ) );
-
-                        if (popupData && popupData.length > 0) {
-                            igv.popover.show(e.pageX, e.pageY, igv.formatPopoverText(popupData));
-                        }
-                        mouseDownX = undefined;
-                    },
-                    doubleClickDelay);
-            }
             else {
-                mouseDownX = undefined;
+                if (Math.abs(canvasCoords.x - mouseDownX) <= igv.constants.dragThreshold && trackView.track.popupData) {
+                    const doubleClickDelay = 300;
+                    browser.popupTimer = window.setTimeout(function () {
+
+                            var popupData,
+                                genomicLocation = Math.floor((referenceFrame.start) + referenceFrame.toBP(canvasCoords.x)),
+                                xOrigin;
+
+                            if (undefined === genomicLocation) {
+                                return;
+                            }
+                            xOrigin = Math.round(referenceFrame.toPixels((trackView.tile.startBP - referenceFrame.start)));
+                            popupData = trackView.track.popupData(genomicLocation, canvasCoords.x - xOrigin, canvasCoords.y);
+                            if (popupData && popupData.length > 0) {
+                                igv.popover.show(e.pageX, e.pageY, igv.formatPopoverText(popupData));
+                            }
+                            mouseDownX = undefined;
+                        },
+                        doubleClickDelay);
+                }
             }
 
-
+            mouseDownX = undefined;
             isMouseDown = false;
             lastMouseX = undefined;
 
