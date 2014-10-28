@@ -66,6 +66,10 @@ var cursor = (function (cursor) {
             regionCountSpan = igvCursorUIHeaderBlurb.find('span')[1],
             filteredRegionCountSpan = igvCursorUIHeaderBlurb.find('span')[2];
 
+        igvCursorUIHeaderBlurb.css({
+            "display" : "block"
+        });
+
         $(trackLabelSpan).text(this.browser.designatedTrack.label);
 
         $(trackLabelSpan).css({
@@ -79,6 +83,10 @@ var cursor = (function (cursor) {
         });
 
         $(filteredRegionCountSpan).text( igv.numberFormatter(this.filteredRegions.length) );
+
+        $(filteredRegionCountSpan).css({
+            "color" : "rgba(3, 116, 178, 1.0)"
+        });
 
     };
 
