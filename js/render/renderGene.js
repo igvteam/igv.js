@@ -3,22 +3,10 @@ var igv = (function (igv) {
 
     igv.renderGene = function (gene, bpStart, xScale, canvas) {
 
-        var px,
-            px1,
-            pw,
-            exonCount,
-            step,
-            cy,
-            py,
-            direction,
-            exon,
-            ePx,
-            ePx1,
-            ePw;
-
-
-
-        py = 20;
+        var px, px1, pw, exonCount, cy, direction, exon, ePx, ePx1, ePw,
+            py = 20,
+            step = 8,
+            h = 10;
 
         var normalTextStyle = {font: 'bold 10px Arial', fillStyle: "black", strokeStyle: "black"};
 
@@ -29,11 +17,10 @@ var igv = (function (igv) {
         exonCount = gene.exons ? gene.exons.length : 0;
 
         if (exonCount == 0) {
-            canvas.fillRect(px, py, pw, 10);
+            canvas.fillRect(px, py, pw, h);
 
         }
         else {
-            step = 8;
             cy = py + 5;
             canvas.strokeLine(px, cy, px1, cy);
             direction = gene.strand == '+' ? 1 : -1;
@@ -46,7 +33,7 @@ var igv = (function (igv) {
                 ePx = Math.round((exon.start - bpStart) / xScale);
                 ePx1 = Math.round((exon.end - bpStart) / xScale);
                 ePw = Math.max(1, ePx1 - ePx);
-                canvas.fillRect(ePx, py, ePw, 10);
+                canvas.fillRect(ePx, py, ePw, h);
 
             }
         }
