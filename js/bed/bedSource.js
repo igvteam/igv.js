@@ -1,6 +1,11 @@
-
 var igv = (function (igv) {
 
+    /**
+     * feature source for "bed like" files (tab delimited files with 1 feature per line: bed, gff, vcf, etc)
+     *
+     * @param config
+     * @constructor
+     */
     igv.BedFeatureSource = function (config) {
 
         if (config.localFile) {
@@ -12,7 +17,13 @@ var igv = (function (igv) {
             this.filename = config.url;
         }
 
-        this.parser = igv.createBedParser(config.type);
+        // TODO -- move this code to a factory method
+        if (config.type === "vcf") {
+            this.parser = igv.vcfParser();
+        }
+        else {
+            this.parser = igv.bedParser(config.type);
+        }
 
     };
 
@@ -80,11 +91,11 @@ var igv = (function (igv) {
 
         var parser = this.parser,
             options = {
-            success: function (result) {
-                parseFeatures(parser, result, continuation);
-            },
-            task: task
-        };
+                success: function (result) {
+                    parseFeatures(parser, result, continuation);
+                },
+                task: task
+            };
 
         if (this.localFile) {
             igvxhr.loadStringFromFile(this.localFile, options);
@@ -102,7 +113,7 @@ var igv = (function (igv) {
 
         // TODO -- parse header (track line)
 
-        allFeatures = parser.parseFeatures(data);
+            allFeatures = parser.parseFeatures(data);
 
         allFeatures.forEach(function (feature) {
             var chr = feature.chr,

@@ -4,7 +4,10 @@ var igv = (function (igv) {
 
     var maxFeatureCount = Number.MAX_VALUE;    // For future use,  controls downsampling
 
-    igv.createBedParser = function (type) {
+    /**
+     * A factory function.  Return a parser for the given file type.
+     */
+    igv.bedParser = function(type) {
 
         var decode;
 
