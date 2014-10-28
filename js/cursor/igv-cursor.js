@@ -74,71 +74,71 @@ var igv = (function (igv) {
             downloadInput.val(session);
         });
 
-//        // session upload
-//        var sessionInput = document.getElementById('igvSessionLoad');
-//        sessionInput.addEventListener('change', function (e) {
-//
-//            var fileReader = new FileReader(),
-//                sessionFile;
-//
-//            sessionFile = sessionInput.files[ 0 ];
-//            $("#igvSessionLoadForm")[0].reset();
-//
-//            fileReader.onload = function (e) {
-//
-//                var json = e.target.result,
-//                    session = JSON.parse(json);
-//
-//                browser.sessionTeardown();
-//
-//                browser.loadSession(session);
-//
-//            };
-//
-//            fileReader.readAsText(sessionFile);
-//
-//        });
+        // session upload
+        var sessionInput = document.getElementById('igvSessionLoad');
+        sessionInput.addEventListener('change', function (e) {
 
-//        // BED file upload
-//        var fileInput = document.getElementById('igvFileUpload');
-//        fileInput.addEventListener('change', function (e) {
-//
-//            var localFile,
-//                localFiles = fileInput.files;
-//
-//            for (var i = 0; i < localFiles.length; i++) {
-//
-//                localFile = localFiles[ i ];
-//                $("#igvFileUploadForm")[0].reset();
-//
-//                browser.loadTrack({
-//                    type: "bed",
-//                    localFile: localFile,
-//                    url: undefined,
-//                    label: localFile.name
-//                });
-//
-//
-//            }
-//
-//        });
+            var fileReader = new FileReader(),
+                sessionFile;
 
-//        // BED file URL
-//        document.getElementById('igvLoadURL').onchange = function (e) {
-//            var obj,
-//                path;
-//
-//            obj = $("#igvLoadURL");
-//            path = obj.val();
-//            obj.val("");
-//
-//            browser.loadTrack({
-//                type: "bed",
-//                url: path,
-//                label: "Unnamed Track"
-//            });
-//
-//        };
+            sessionFile = sessionInput.files[ 0 ];
+            $("#igvSessionLoadForm")[0].reset();
+
+            fileReader.onload = function (e) {
+
+                var json = e.target.result,
+                    session = JSON.parse(json);
+
+                browser.sessionTeardown();
+
+                browser.loadSession(session);
+
+            };
+
+            fileReader.readAsText(sessionFile);
+
+        });
+
+        // BED file upload
+        var fileInput = document.getElementById('igvFileUpload');
+        fileInput.addEventListener('change', function (e) {
+
+            var localFile,
+                localFiles = fileInput.files;
+
+            for (var i = 0; i < localFiles.length; i++) {
+
+                localFile = localFiles[ i ];
+                $("#igvFileUploadForm")[0].reset();
+
+                browser.loadTrack({
+                    type: "bed",
+                    localFile: localFile,
+                    url: undefined,
+                    label: localFile.name
+                });
+
+
+            }
+
+        });
+
+        // BED URL upload
+        document.getElementById('igvLoadURL').onchange = function (e) {
+            var obj,
+                path;
+
+            obj = $("#igvLoadURL");
+            path = obj.val();
+            obj.val("");
+
+            browser.loadTrack({
+                type: "bed",
+                url: path,
+                label: "Unnamed Track"
+            });
+
+        };
 
         // Load ENCODE DataTables data and build markup for modal dialog.
         encode.createEncodeDataTablesDataSet("resources/peaks.hg19.txt", function (dataSet) {
