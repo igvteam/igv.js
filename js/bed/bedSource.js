@@ -45,9 +45,9 @@ var igv = (function (igv) {
             success(this.featureCache.queryFeatures(queryChr, bpStart, bpEnd));
         }
         else {
-            this.loadFeatures(function (treeMap) {
+            this.loadFeatures(function (featureList) {
                     //myself.featureMap = featureMap;
-                    myself.featureCache = new FeatureCache(treeMap);
+                    myself.featureCache = new igv.FeatureCache(featureList);
                     // Finally pass features for query interval to continuation
                     success(myself.featureCache.queryFeatures(queryChr, bpStart, bpEnd));
 
@@ -77,9 +77,9 @@ var igv = (function (igv) {
             success(this.featureCache);
         }
         else {
-            this.loadFeatures(function (treeMap) {
+            this.loadFeatures(function (featureList) {
                 //myself.featureMap = featureMap;
-                myself.featureCache = new FeatureCache(treeMap);
+                myself.featureCache = new igv.FeatureCache(featureList);
                 // Finally pass features for query interval to continuation
                 success(myself.featureCache);
 
@@ -108,35 +108,10 @@ var igv = (function (igv) {
 
     function parseFeatures(parser, data, continuation) {
 
-        var featureCache = {},
-            chromosomes = [],
+        var allFeatures = parser.parseFeatures(data);
 
-        // TODO -- parse header (track line)
 
-            allFeatures = parser.parseFeatures(data);
-
-        allFeatures.forEach(function (feature) {
-            var chr = feature.chr,
-                geneList = featureCache[chr];
-
-            if (!geneList) {
-                chromosomes.push(chr);
-                geneList = [];
-                featureCache[chr] = geneList;
-            }
-
-            geneList.push(feature);
-
-        });
-
-        // Now build interval tree for each chromosome
-        var treeMap = {};
-        for (i = 0; i < chromosomes.length; i++) {
-            chr = chromosomes[i];
-            treeMap[chr] = buildIntervalTree(featureCache[chr]);
-        }
-
-        continuation(treeMap);
+        continuation(allFeatures);
     };
 
     /**
