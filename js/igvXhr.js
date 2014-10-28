@@ -35,7 +35,12 @@ var igvxhr = (function (igvxhr) {
 
         xhr.onload = function (event) {
 
-            success(xhr.response, xhr);
+            if(xhr.status >= 200 && xhr.status <= 300) {
+                success(xhr.response, xhr);
+            }
+            else {
+                error(null, xhr);
+            }
 
         }
 

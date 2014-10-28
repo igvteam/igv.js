@@ -52,7 +52,7 @@ var igv = (function (igv) {
                     success(myself.featureCache.queryFeatures(queryChr, bpStart, bpEnd));
 
                 },
-                task);
+                task, queryChr, bpStart, bpEnd);
         }
 
     };
@@ -87,22 +87,61 @@ var igv = (function (igv) {
         }
     }
 
-    igv.BedFeatureSource.prototype.loadFeatures = function (continuation, task) {
+    igv.BedFeatureSource.prototype.loadFeatures = function (continuation, task, queryChr, bpStart, bpEnd) {
 
-        var parser = this.parser,
-            options = {
-                success: function (result) {
-                    parseFeatures(parser, result, continuation);
-                },
-                task: task
-            };
+        var myself = this,
+            idxFile =  (myself.url ? myself.url + ".idx" : null);
 
-        if (this.localFile) {
-            igvxhr.loadStringFromFile(this.localFile, options);
+        if(queryChr.startsWith("chr")) queryChr = queryChr.substring(3);
+
+        if (this.index === undefined && !myself.localFile && queryChr) {  // TODO -  handle local files
+
+            igv.loadTribbleIndex(idxFile, function(index) {
+                myself.index = index ? index : false;
+                loadFeaturesWithIndex(index);
+            });
+            return;
+
+        }
+        else {
+            loadFeaturesWithIndex(myself.index);
         }
 
-        else {
-            igvxhr.loadString(this.url, options);
+
+        // TODO If there's an index add range bytes to the options
+
+
+        function loadFeaturesWithIndex(index) {
+            var parser = myself.parser,
+                options = {
+                    success: function (data) {
+                        continuation(parser.parseFeatures(data));
+                    },
+                    task: task
+                };
+
+            if (index && queryChr) {
+                // TODO -- fetching by whole chromosome
+                var chrIdx = index[queryChr];
+                if (chrIdx) {
+                    var blocks = chrIdx.blocks,
+                        lastBlock = blocks[blocks.length - 1],
+                        endPos = lastBlock.position + lastBlock.size,
+                        range = {start: blocks[0].position, size:endPos - blocks[0].position + 1 };
+                    options.range = range;
+                }
+                else {
+                    continuation(null);
+                }
+
+            }
+
+            if (myself.localFile) {
+                igvxhr.loadStringFromFile(myself.localFile, options);
+            }
+            else {
+                igvxhr.loadString(myself.url, options);
+            }
         }
     }
 

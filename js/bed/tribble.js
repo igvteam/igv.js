@@ -10,22 +10,31 @@ var igv = (function (igv) {
             {
                 success: function (arrayBuffer) {
 
+                    if(arrayBuffer) {
 
-                    var index = {};
+                        var index = {};
 
-                    var parser = new igv.BinaryParser(new DataView(arrayBuffer));
+                        var parser = new igv.BinaryParser(new DataView(arrayBuffer));
 
-                    readHeader(parser);  // <= nothing in the header is actually used
+                        readHeader(parser);  // <= nothing in the header is actually used
 
-                    var nChrs = parser.getInt();
-                    while (nChrs-- > 0) {
-                        // todo -- support interval tree index, we're assuming its a linear index
-                        var chrIdx = readLinear(parser);
-                        index[chrIdx.chr] = chrIdx;
+                        var nChrs = parser.getInt();
+                        while (nChrs-- > 0) {
+                            // todo -- support interval tree index, we're assuming its a linear index
+                            var chrIdx = readLinear(parser);
+                            index[chrIdx.chr] = chrIdx;
+                        }
+
+                        continuation(index);
+                    }
+                    else {
+                        continuation(null);
                     }
 
-                   continuation(index);
+                },
 
+                error: function (ignore, xhr) {
+                    continuation(null);
                 }
             });
 
