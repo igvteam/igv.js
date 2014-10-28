@@ -3,7 +3,7 @@ var igv = (function (igv) {
     igv.createCursorBrowser = function (options) {
 
         var contentHeader,
-            contentHeaderDiv,
+            cursorUIHeaderBlurbDiv,
             trackContainer,
             browser;
 
@@ -237,22 +237,16 @@ var igv = (function (igv) {
         $('#encodeModalBody').html('<table cellpadding="0" cellspacing="0" border="0" class="display" id="encodeModalTable"></table>');
 
 
-
-
-
-
-
-
-        // Construct body DIV tree
+        // Construct DOM hierarchy
         contentHeader = $('<div class="row"></div>')[0];
-        contentHeaderDiv = $('<div id="igvHeaderDiv" class="igv-header-div col-md-12" style="font-size:16px;"><span id="igvHeaderRegionDisplaySpan"></span></div>')[0];
+        cursorUIHeaderBlurbDiv = $('<div class="igv-cursor-ui-header-blurb">Primary track is <span></span> with <span></span> total regions (<span></span> regions remain with filters applied)</div>')[0];
         trackContainer = $('<div id="igvTrackContainerDiv" class="igv-track-container-div">')[0];
 
         browser = new igv.Browser(options, trackContainer);
         document.getElementById('igvContainerDiv').appendChild(browser.div);
 
         $(browser.div).append(contentHeader);
-        $(contentHeader).append(contentHeaderDiv);
+        $(contentHeader).append(cursorUIHeaderBlurbDiv);
         $(browser.div).append(trackContainer);
 
 

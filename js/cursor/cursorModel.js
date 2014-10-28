@@ -61,15 +61,25 @@ var cursor = (function (cursor) {
 
     cursor.CursorModel.prototype.updateRegionDisplay = function()  {
 
-        var numer,
-            denom,
-            downsamplingString = "",
-            regionsDisplaySpan = $("#igvHeaderRegionDisplaySpan");
+        var igvCursorUIHeaderBlurb = $('.igv-cursor-ui-header-blurb'),
+            trackLabelSpan = igvCursorUIHeaderBlurb.find('span')[0],
+            regionCountSpan = igvCursorUIHeaderBlurb.find('span')[1],
+            filteredRegionCountSpan = igvCursorUIHeaderBlurb.find('span')[2];
 
-        numer = igv.numberFormatter(this.filteredRegions.length);
-        denom = igv.numberFormatter(this.regions.length);
+        $(trackLabelSpan).text(this.browser.designatedTrack.label);
 
-        regionsDisplaySpan.text("Regions " + numer + " / " + denom + downsamplingString);
+        $(trackLabelSpan).css({
+            "color" : this.browser.designatedTrack.color
+        });
+
+        $(regionCountSpan).text( igv.numberFormatter(this.regions.length) );
+
+        $(regionCountSpan).css({
+            "color" : this.browser.designatedTrack.color
+        });
+
+        $(filteredRegionCountSpan).text( igv.numberFormatter(this.filteredRegions.length) );
+
     };
 
     cursor.CursorModel.prototype.regionsToRender = function () {

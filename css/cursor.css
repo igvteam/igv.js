@@ -25,8 +25,6 @@
 .igv-cursor-ui-item {
     float:left;
     padding: 5px 8px 5px 8px;
-    /*font-family:Arial, Helvetica, sans-serif;*/
-    /*font-size: 13px;*/
 }
 
 .igv-cursor-input-text {
@@ -41,17 +39,13 @@
     border-right: solid 1px #444;
 }
 
-.igv-header-div {
-    padding-top: 64px;
-    padding-bottom: 8px;
+.igv-cursor-ui-header-blurb {
+    text-align: center;
+    /*background-color: rgba(255, 0, 0, 0.5);*/
 }
 
 .well {
     background-color: rgba(255, 0, 0, 0.5);
-}
-
-.row {
-    text-align: center
 }
 
 .btn-file {
