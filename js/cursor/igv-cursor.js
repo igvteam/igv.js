@@ -579,7 +579,7 @@ var igv = (function (igv) {
         //
         trackFilterButtonDiv = document.createElement("div");
         controlDiv.appendChild(trackFilterButtonDiv);
-        trackFilterButtonDiv.id = "filterButtonDiv_" + igv.guid();
+//        trackFilterButtonDiv.id = "filterButtonDiv_" + igv.guid();
         trackFilterButtonDiv.className = "igv-filter-histogram-button-div";
         $(trackFilterButtonDiv).css({
             "position": "absolute",
