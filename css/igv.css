@@ -1,5 +1,5 @@
 .igv-spinner-fontawesome-start {
-    position: relative;
+    position: absolute;
     left:50%;
     top:50%;
     z-index: 256;

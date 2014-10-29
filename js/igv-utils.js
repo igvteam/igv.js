@@ -4,6 +4,8 @@ var igv = (function (igv) {
 
         var thang = $(parentElement).find("i.fa-spinner");
 
+//        return;
+
         thang.removeClass("igv-spinner-fontawesome-stop");
         thang.addClass("igv-spinner-fontawesome-start");
 
@@ -12,6 +14,8 @@ var igv = (function (igv) {
     igv.spinnerStopWithParent = function (parentElement) {
 
         var thang = $(parentElement).find("i.fa-spinner");
+
+//        return;
 
         thang.removeClass("igv-spinner-fontawesome-start");
         thang.addClass("igv-spinner-fontawesome-stop");
