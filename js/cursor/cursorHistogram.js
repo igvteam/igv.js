@@ -5,7 +5,7 @@ var cursor = (function (cursor) {
 
     cursor.CursorHistogram = function (binCount, maxScore) {
 
-        this.guid = igv.guid();
+//        this.guid = igv.guid();
         this.bins = [];
         this.bins.length = binCount;
         this.maxCount = 0;
@@ -145,8 +145,8 @@ var cursor = (function (cursor) {
     // Markup
     cursor.CursorHistogram.prototype.createMarkupWithTrackPanelDiv = function (trackPanel) {
 
-        this.id = this.guid +"_cursorHistogramDiv";
-        this.label = trackPanel.track.label +"_cursorHistogramDiv";
+//        this.id = this.guid +"_cursorHistogramDiv";
+//        this.label = trackPanel.track.label +"_cursorHistogramDiv";
 
         this.igvCanvas = this.canvasWithParentDiv(trackPanel.controlDiv);
 
@@ -161,7 +161,7 @@ var cursor = (function (cursor) {
         parentDiv.appendChild(cursorHistogramDiv);
 
         cursorHistogramDiv.className = "igv-cursorHistogram-div";
-        cursorHistogramDiv.style.height = parentDiv.clientHeight + "px";
+        cursorHistogramDiv.style.height = this.bins.length + "px";
         this.cursorHistogramDiv = cursorHistogramDiv;
 
         var DOMCanvas = this.DOMCanvasWithParentDiv(this.cursorHistogramDiv);
@@ -182,7 +182,6 @@ var cursor = (function (cursor) {
 
         DOMCanvas.setAttribute('width', parentDiv.clientWidth);
         DOMCanvas.setAttribute('height', parentDiv.clientHeight);
-//        DOMCanvas.setAttribute('id', canvasID);
 
         return DOMCanvas;
     };
