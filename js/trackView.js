@@ -159,11 +159,15 @@ var igv = (function (igv) {
         var heightStr = newHeight + "px";
         this.track.height = newHeight;
         this.trackDiv.style.height = heightStr;
-        // this.controlDiv.style.height = heightStr;
-        // this.controlCanvas.style.height = heightStr;
-        // this.controlCanvas.setAttribute("height", newHeight);
+
+        // control panel
+        this.controlDiv.style.height = heightStr;
+        this.controlCanvas.style.height = heightStr;
+        this.controlCanvas.setAttribute("height", newHeight);
+
         this.viewportDiv.style.height = heightStr;
         this.contentDiv.style.height = heightStr;
+
         this.canvas.style.height = heightStr;
         this.canvas.setAttribute("height", newHeight);
 

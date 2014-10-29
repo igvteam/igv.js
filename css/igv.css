@@ -13,27 +13,6 @@
     display: none;
 }
 
-.btn-file {
-    position: relative;
-    overflow: hidden;
-}
-
-.btn-file input[type=file] {
-    position: absolute;
-    top: 0;
-    right: 0;
-    min-width: 100%;
-    min-height: 100%;
-    font-size: 999px;
-    text-align: right;
-    filter: alpha(opacity=0);
-    opacity: 0;
-    outline: none;
-    background: white;
-    cursor: inherit;
-    display: block;
-}
-
 .spacer5 {
     height: 5px;
     width: 100%;
@@ -301,55 +280,6 @@
     margin-right: 10px;
     left: 0;
     right: 0;
-}
-
-
-.igv-cursorHistogram-div {
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100px;
-    border: none;
-    padding: 0;
-    background: none;
-    outline: thin solid rgba(64, 64, 64, 1.0);
-}
-
-.igv-filter-histogram-button-div {
-    position: absolute;
-    top: 0;
-    left: 0;
-    border: none;
-    padding: 0;
-    background: none;
-}
-
-.igv-filter-div {
-    position: absolute;
-    width: 128px;
-    border: none;
-    padding: 0;
-    height: 100%;
-    background: none;
-}
-
-.igv-filter-button {
-    position: absolute;
-    width: 128px;
-    border: none;
-    padding: 0;
-    height: 100%;
-    background: none;
-}
-
-.igv-filter-thumbnail-horizontal-line {
-    position: absolute;
-    left: 0;
-    width: 128px;
-    height: 2px;
-    border: none;
-    padding: 0;
-    background-color: rgba(255, 0, 0, .75);
 }
 
 .igv-popover {
