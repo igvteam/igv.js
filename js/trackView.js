@@ -187,7 +187,6 @@ var igv = (function (igv) {
         var tileWidth,
             tileStart,
             tileEnd,
-            spinner,
             buffer,
             myself = this,
             igvCanvas,
@@ -264,9 +263,9 @@ var igv = (function (igv) {
 
 
         }
-        else {
+       // else {
             this.paintImage();
-        }
+       // }
 
     };
 
@@ -302,6 +301,8 @@ var igv = (function (igv) {
 
     function addTrackHandlers(trackView) {
 
+
+
         // Register track handlers for popup.  Although we are not handling dragging here, we still need to check
         // for dragging on a mouseup
 
@@ -309,7 +310,7 @@ var igv = (function (igv) {
             lastMouseX = undefined,
             mouseDownX = undefined,
             canvas = trackView.canvas,
-            browser = igv.browser;
+            popupTimer;
 
         $(canvas).mousedown(function (e) {
 
@@ -334,17 +335,17 @@ var igv = (function (igv) {
 
             if (!referenceFrame) return;
 
-            if (browser.popupTimer) {
+            if (popupTimer) {
                 // Cancel previous timer
                 console.log("Cancel timer");
-                window.clearTimeout(browser.popupTimer);
-                browser.popupTimer = undefined;
+                window.clearTimeout(popupTimer);
+                popupTimer = undefined;
             }
 
             else {
                 if (Math.abs(canvasCoords.x - mouseDownX) <= igv.constants.dragThreshold && trackView.track.popupData) {
                     const doubleClickDelay = 300;
-                    browser.popupTimer = window.setTimeout(function () {
+                    popupTimer = window.setTimeout(function () {
 
                             var popupData,
                                 genomicLocation = Math.floor((referenceFrame.start) + referenceFrame.toBP(canvasCoords.x)),
@@ -359,7 +360,7 @@ var igv = (function (igv) {
                                 igv.popover.show(e.pageX, e.pageY, igv.formatPopoverText(popupData));
                             }
                             mouseDownX = undefined;
-                            browser.popupTimer = undefined;
+                            popupTimer = undefined;
                         },
                         doubleClickDelay);
                 }

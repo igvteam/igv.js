@@ -15,7 +15,9 @@ var igvxhr = (function (igvxhr) {
             timeout = options.timeout || error,
             task = options.task,
             range = options.range,
-            responseType = options.responseType;
+            responseType = options.responseType,
+            contentType = options.contentType,
+            sendData = options.sendData;
 
         if (task) task.xhrRequest = xhr;
 
@@ -28,7 +30,10 @@ var igvxhr = (function (igvxhr) {
             xhr.setRequestHeader("If-None-Match", Math.random().toString(36));  // For nasty safari bug https://bugs.webkit.org/show_bug.cgi?id=82672
         }
 
-        // retrieve data as an array buffer
+        if(contentType) {
+            xhr.setRequestHeader("Content-Type", "application/json");
+        }
+
         if (responseType) {
             xhr.responseType = responseType;
         }
@@ -57,9 +62,10 @@ var igvxhr = (function (igvxhr) {
             abort(null, xhr);
         }
 
-        xhr.send();
+        xhr.send(sendData);
 
     }
+
 
     /**
      * Load a "raw" string.  This method could have been written on top of loading an array buffer, but less

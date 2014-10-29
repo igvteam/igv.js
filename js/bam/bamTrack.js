@@ -53,7 +53,7 @@ var igv = (function (igv) {
         var myself = this,
             chr = refFrame.chr;
 
-        this.featureSource.getFeatures(chr, bpStart, bpEnd, function (features, task) {
+        this.featureSource.getFeatures(chr, bpStart, bpEnd, function (features) {
 
             if (features) {
 
@@ -282,7 +282,8 @@ var igv = (function (igv) {
                 continuation();
             }
 
-        });
+        },
+        task);
     };
 
     igv.BAMTrack.prototype.drawLabel = function (ctx) {

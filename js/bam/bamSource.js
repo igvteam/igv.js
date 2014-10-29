@@ -37,24 +37,35 @@ var igv = (function (igv) {
             qEnd = bpEnd + expand;
 
             myself = this;
-            this.bamFile.readAlignments(chr, qStart, qEnd, function (alignments) {
+            this.bamFile.readAlignments(chr, qStart, qEnd,
+                function (alignments) {
 
-                myself.genomicInterval = new igv.GenomicInterval(chr, qStart, qEnd);
+                    if (alignments) {  // Can be null on error or aborting
 
-                igv.sequenceSource.getSequence(myself.genomicInterval.chr, myself.genomicInterval.start, myself.genomicInterval.end, function (refSeq) {
+                        myself.genomicInterval = new igv.GenomicInterval(chr, qStart, qEnd);
 
-                    myself.genomicInterval.coverageMap = new igv.CoverageMap(chr, qStart, qEnd, alignments, refSeq);
+                        igv.sequenceSource.getSequence(myself.genomicInterval.chr, myself.genomicInterval.start, myself.genomicInterval.end,
 
-                    myself.genomicInterval.packedAlignments = packAlignments(myself.genomicInterval, alignments);
+                            function (refSeq) {
 
-                    // We don't need the features now, free up the memory
-                    myself.genomicInterval.features = undefined;
+                                if (refSeq) {
 
-                    success(myself.genomicInterval);
+                                    myself.genomicInterval.coverageMap = new igv.CoverageMap(chr, qStart, qEnd, alignments, refSeq);
 
-                }, task);
+                                    myself.genomicInterval.packedAlignments = packAlignments(myself.genomicInterval, alignments);
 
-            });
+                                    // We don't need the features now, free up the memory
+                                    myself.genomicInterval.features = undefined;
+
+                                    success(myself.genomicInterval);
+                                }
+
+                            },
+                            task);
+                    }
+
+                },
+                task);
         }
     };
 
@@ -89,7 +100,6 @@ var igv = (function (igv) {
             });
 
 
-
             while (allocatedCount < features.length) {
 
                 alignmentRow = [];
@@ -108,17 +118,17 @@ var igv = (function (igv) {
 
                     } // while (bucket)
 
-                    if(!bucket) {
+                    if (!bucket) {
                         break;
                     }
-                        alignment = bucket.pop();
-                        if (0 === bucket.length) {
-                            bucketList[index] = undefined;
-                        }
+                    alignment = bucket.pop();
+                    if (0 === bucket.length) {
+                        bucketList[index] = undefined;
+                    }
 
-                        alignmentRow.push(alignment);
-                        nextStart = alignment.start + alignment.lengthOnRef + alignmentSpace;
-                        ++allocatedCount;
+                    alignmentRow.push(alignment);
+                    nextStart = alignment.start + alignment.lengthOnRef + alignmentSpace;
+                    ++allocatedCount;
 
                 } // while (nextStart)
 
