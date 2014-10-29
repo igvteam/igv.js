@@ -82,16 +82,11 @@
     top: 0;
     left: 0;
     width: 100px;
-    border:none;
-    padding: 0;
     background: none;
-    /*outline: thin solid rgba(255, 0, 0, 1.0);*/
-    outline: solid red 2px;
 }
 
 .igv-filter-histogram-button-div {
     position: absolute;
-    top: 0;
-    left: 0;
+    left: 5px;
     background: none;
 }

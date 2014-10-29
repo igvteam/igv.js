@@ -256,11 +256,15 @@
 }
 
 .igv-control-sort-fontawesome {
+    position: absolute;
+    left: 5px;
     cursor: pointer;
     color: #000000;
 }
 
 .igv-control-sort-fontawesome-selected {
+    position: absolute;
+    left: 5px;
     cursor: pointer;
     color: red;
 }

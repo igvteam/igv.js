@@ -551,9 +551,7 @@ var igv = (function (igv) {
 
         sortButton.className = "fa fa-bar-chart-o igv-control-sort-fontawesome";
         $(sortButton).css({
-            "position": "absolute",
-            "top": nextButtonTop + "px",
-            "left": 5 + "px"
+            "top": nextButtonTop + "px"
         });
 
         nextButtonTop += 18;
@@ -579,18 +577,13 @@ var igv = (function (igv) {
         //
         trackFilterButtonDiv = document.createElement("div");
         controlDiv.appendChild(trackFilterButtonDiv);
-//        trackFilterButtonDiv.id = "filterButtonDiv_" + igv.guid();
         trackFilterButtonDiv.className = "igv-filter-histogram-button-div";
         $(trackFilterButtonDiv).css({
-            "position": "absolute",
-            "top": nextButtonTop + "px",
-            "left": 5 + "px"
+            "top": nextButtonTop + "px"
         });
 
         trackView.track.trackFilter = new igv.TrackFilter(trackView);
         trackView.track.trackFilter.createTrackFilterWidgetWithParentElement(trackFilterButtonDiv);
-
-        nextButtonTop += 18;
 
     }
 

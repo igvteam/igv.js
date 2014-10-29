@@ -157,15 +157,12 @@ var cursor = (function (cursor) {
 
     cursor.CursorHistogram.prototype.canvasWithParentDiv = function (parentDiv) {
 
-        var childDiv = document.createElement('div');
-        parentDiv.appendChild(childDiv);
+        var cursorHistogramDiv = document.createElement('div');
+        parentDiv.appendChild(cursorHistogramDiv);
 
-        this.cursorHistogramDiv = childDiv;
-
-        this.cursorHistogramDiv.setAttribute('id', this.id);
-        this.cursorHistogramDiv.className = "igv-cursorHistogram-div";
-        this.cursorHistogramDiv.style.left = 35 + "px";
-        this.cursorHistogramDiv.style.height = this.bins.length + "px";
+        cursorHistogramDiv.className = "igv-cursorHistogram-div";
+        cursorHistogramDiv.style.height = parentDiv.clientHeight + "px";
+        this.cursorHistogramDiv = cursorHistogramDiv;
 
         var DOMCanvas = this.DOMCanvasWithParentDiv(this.cursorHistogramDiv);
 
@@ -175,8 +172,7 @@ var cursor = (function (cursor) {
 
     cursor.CursorHistogram.prototype.DOMCanvasWithParentDiv = function (parentDiv) {
 
-        var canvasID = parentDiv.getAttribute("id") + "_canvas",
-            DOMCanvas;
+        var DOMCanvas;
 
         DOMCanvas = document.createElement('canvas');
         parentDiv.appendChild(DOMCanvas);
@@ -186,7 +182,7 @@ var cursor = (function (cursor) {
 
         DOMCanvas.setAttribute('width', parentDiv.clientWidth);
         DOMCanvas.setAttribute('height', parentDiv.clientHeight);
-        DOMCanvas.setAttribute('id', canvasID);
+//        DOMCanvas.setAttribute('id', canvasID);
 
         return DOMCanvas;
     };

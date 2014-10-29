@@ -15,7 +15,8 @@ var igv = (function (igv) {
             canvas,
             closeButton,
             labelButton,
-            spinnerFontAwesome;
+            spinnerFontAwesome,
+            controlWidth = browser.controlPanelWidth || 50;
 
         // track
         trackDiv = document.createElement("div");
@@ -29,20 +30,16 @@ var igv = (function (igv) {
         this.trackDiv.appendChild(spinnerFontAwesome);
         spinnerFontAwesome.className = "fa fa-spinner fa-2x fa-spin igv-spinner-fontawesome-start";
 
-        // controls
-        var controlWidth = browser.controlPanelWidth ? browser.controlPanelWidth : 50;
-
+        // control div
         controlDiv = document.createElement("div");
+        trackDiv.appendChild(controlDiv);
         controlDiv.className = "igv-control-div";
         controlDiv.style.width = controlWidth + "px";
         controlDiv.style.height = track.height + "px";
         this.controlDiv = controlDiv;
 
+        // control canvas
         controlCanvas = document.createElement('canvas');
-        controlDiv.style.width = controlWidth + "px";
-        trackDiv.appendChild(controlDiv);
-        this.controlDiv = controlDiv;
-
         controlDiv.appendChild(controlCanvas);
         controlCanvas.style.width = controlDiv.clientWidth + "px";
         controlCanvas.style.height = controlDiv.clientHeight + "px";
