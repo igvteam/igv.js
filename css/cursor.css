@@ -1,4 +1,30 @@
 
+.igv-trackfilter-fontawesome {
+    position: absolute;
+    top: 0;
+    left: 0;
+    cursor: pointer;
+    color: grey;
+}
+
+.igv-control-bullseye-stack-fontawesome {
+    font-size: x-small;
+    position: absolute;
+    top: 10px;
+    left: 64px;
+    cursor: pointer;
+    color: grey;
+}
+
+.igv-control-bullseye-fontawesome-selected {
+    color: red;
+    display: inline;
+}
+
+.igv-control-bullseye-fontawesome {
+    display: none;
+}
+
 .igv-cursor-ui-header {
     width: 100%;
     height: 40px;
@@ -67,6 +93,7 @@
     height:100%;
     background-color: rgba(150, 150, 150, .2);
     border: 1px solid #fff;
+    /*outline: solid red 2px;*/
 }
 
 .igv-horizontal-scrollbar-container-div {
@@ -74,7 +101,8 @@
     top: 0;
     right:0;
     height:20px;
-    padding-top: 10px;
+    padding-top: 4px;
+    padding-bottom: 4px;
 }
 
 .igv-cursorHistogram-div {

@@ -10,7 +10,7 @@ var cursor = (function (cursor) {
         this.bins.length = binCount;
         this.maxCount = 0;
 
-        this.canvasFillStyle = igv.greyScale(250);
+        this.canvasFillStyle = igv.greyScale(255);
 //        this.canvasFillStyle = igv.rgbColor(255, 255, 255);
         this.minMaxfillStyle = igv.rgbaColor(64, 64, 64, 0.5);
         this.minMaxEdgefillStyle = igv.rgbaColor(32, 32, 32, 1.0);

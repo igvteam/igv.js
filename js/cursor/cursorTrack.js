@@ -144,7 +144,7 @@ var cursor = (function (cursor) {
             sampleInterval = Math.max(1, Math.floor(1.0 / framePixelWidth));
 
             if (frameMargin > 0) {
-                canvas.fillRect(0, 0, width, height, {fillStyle: 'rgb(250, 250, 250)'});
+                canvas.fillRect(0, 0, width, height, { fillStyle:'rgb(255, 255, 255)' });
             }
 
             canvas.setProperties({ fillStyle: this.color, strokeStyle: this.color });

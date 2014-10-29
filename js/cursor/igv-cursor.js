@@ -291,6 +291,8 @@ var igv = (function (igv) {
                 browser.loadTrack(trackConfig);
             });
 
+            browser.selectDesignatedTrack(browser.designatedTrack.trackFilter.trackPanel);
+
             browser.designatedTrack.featureSource.allFeatures(function (featureList) {
                 browser.cursorModel.setRegions(featureList);
                 browser.horizontalScrollbar.update();
@@ -302,6 +304,33 @@ var igv = (function (igv) {
     };
 
     function addCursorExtensions(browser) {
+
+        browser.selectDesignatedTrack = function (trackView) {
+
+            var currentDesignatedTrackView,
+                faCircle;
+
+            if (browser.designatedTrack && browser.designatedTrack.trackFilter.trackPanel !== trackView) {
+
+                currentDesignatedTrackView = browser.designatedTrack.trackFilter.trackPanel;
+
+                faCircle = $(currentDesignatedTrackView.viewportDiv).find("i.fa-circle");
+                faCircle.removeClass("igv-control-bullseye-fontawesome-selected");
+                faCircle.addClass   ("igv-control-bullseye-fontawesome");
+
+            }
+
+            browser.designatedTrack = trackView.track;
+
+            faCircle = $(trackView.viewportDiv).find("i.fa-circle");
+            faCircle.removeClass("igv-control-bullseye-fontawesome");
+            faCircle.addClass   ("igv-control-bullseye-fontawesome-selected");
+
+            faCircle.css({
+                "color" : trackView.track.color
+            });
+
+        };
 
         browser.setFrameWidth = function (frameWidthString) {
 
@@ -510,6 +539,8 @@ var igv = (function (igv) {
                 browser.designatedTrack = cursorTracks[ 0 ];
             }
 
+            browser.selectDesignatedTrack(browser.designatedTrack.trackFilter.trackPanel);
+
             browser.designatedTrack.featureSource.allFeatures(function (featureList) {
 
                 browser.cursorModel.setRegions(featureList);
@@ -517,10 +548,6 @@ var igv = (function (igv) {
                 cursorTracks.forEach(function (cursorTrack) {
 
                     browser.addTrack(cursorTrack);
-
-//                    if (cursorTrack.config && cursorTrack.config.trackFilter) {
-//                        cursorTrack.trackFilter.setWithJSON(cursorTrack.config.trackFilter);
-//                    }
 
                 });
 
@@ -541,15 +568,18 @@ var igv = (function (igv) {
 
     igv.cursorAddTrackControlButtons = function (trackView, browser) {
 
-        var trackFilterButtonDiv,
+        var track = trackView.track,
+            trackFilterButtonDiv,
             sortButton,
-            track = trackView.track;
+            bullseyeStackSpan,
+            bullseyeOuterIcon,
+            bullseyeInnerIcon;
 
 
         // sort
         sortButton = document.createElement("i");
         trackView.viewportDiv.appendChild(sortButton);
-        sortButton.className = "fa fa-bar-chart-o igv-control-sort-fontawesome";
+        sortButton.className = "glyphicon glyphicon-signal igv-control-sort-fontawesome";
         track.sortButton = sortButton;
         sortButton.onclick = function () {
 
@@ -561,12 +591,13 @@ var igv = (function (igv) {
 
             browser.trackPanels.forEach(function (trackView) {
                 if (track !== trackView.track) {
-                    trackView.track.sortButton.className = "fa fa-bar-chart-o igv-control-sort-fontawesome";
+                    trackView.track.sortButton.className = "glyphicon glyphicon-signal igv-control-sort-fontawesome";
                 }
             });
 
-            trackView.track.sortButton.className = "fa fa-bar-chart-o igv-control-sort-fontawesome-selected";
+            trackView.track.sortButton.className = "glyphicon glyphicon-signal igv-control-sort-fontawesome-selected";
         };
+
 
         // filter
         trackFilterButtonDiv = document.createElement("div");
@@ -576,7 +607,42 @@ var igv = (function (igv) {
         trackView.track.trackFilter = new igv.TrackFilter(trackView);
         trackView.track.trackFilter.createTrackFilterWidgetWithParentElement(trackFilterButtonDiv);
 
-    }
+
+        // bullseye stack
+        bullseyeStackSpan = document.createElement("span");
+        trackView.viewportDiv.appendChild(bullseyeStackSpan);
+        bullseyeStackSpan.className = "fa-stack igv-control-bullseye-stack-fontawesome";
+        track.bullseyeStackSpan = bullseyeStackSpan;
+
+        bullseyeOuterIcon = document.createElement("i");
+        bullseyeStackSpan.appendChild(bullseyeOuterIcon);
+//        bullseyeOuterIcon.className = "fa fa-stack-2x fa-circle-o";
+        bullseyeOuterIcon.className = "fa fa-stack-2x fa-circle-thin";
+
+        bullseyeInnerIcon = document.createElement("i");
+        bullseyeStackSpan.appendChild(bullseyeInnerIcon);
+        bullseyeInnerIcon.className = "fa fa-stack-1x fa-circle igv-control-bullseye-fontawesome";
+
+        bullseyeStackSpan.onclick = function () {
+
+            if (browser.designatedTrack && browser.designatedTrack === trackView.track) {
+
+                return;
+            } else {
+
+                browser.selectDesignatedTrack(trackView);
+            }
+
+            browser.designatedTrack.featureSource.allFeatures(function (featureList) {
+
+                browser.referenceFrame.start = 0;
+                browser.cursorModel.setRegions(featureList);
+
+            });
+
+        };
+
+    };
 
     return igv;
 

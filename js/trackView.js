@@ -93,6 +93,8 @@ var igv = (function (igv) {
                 browser.removeTrack(track);
             };
 
+
+
             if (track.label) {
 
                 labelButton = document.createElement("button");
@@ -106,14 +108,15 @@ var igv = (function (igv) {
 
                     if (browser.cursorModel) {
 
-                        browser.designatedTrack = track;
-                        browser.designatedTrack.featureSource.allFeatures(function (featureList) {
-
-                            browser.referenceFrame.start = 0;
-                            browser.cursorModel.setRegions(featureList);
-
-
-                        });
+//                        browser.designatedTrack = track;
+//
+//                        browser.designatedTrack.featureSource.allFeatures(function (featureList) {
+//
+//                            browser.referenceFrame.start = 0;
+//                            browser.cursorModel.setRegions(featureList);
+//
+//
+//                        });
 
                     }
                     else {
@@ -300,7 +303,6 @@ var igv = (function (igv) {
         return hit;
     };
 
-
     function addTrackHandlers(trackView) {
 
         // Register track handlers for popup.  Although we are not handling dragging here, we still need to check
@@ -374,7 +376,6 @@ var igv = (function (igv) {
 
 
     }
-
 
     return igv;
 })
