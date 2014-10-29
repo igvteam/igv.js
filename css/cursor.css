@@ -87,6 +87,8 @@
 
 .igv-filter-histogram-button-div {
     position: absolute;
-    left: 5px;
+    top: 10px;
+    left: 16px;
+    cursor: pointer;
     background: none;
 }

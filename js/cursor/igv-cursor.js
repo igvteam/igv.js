@@ -539,23 +539,17 @@ var igv = (function (igv) {
         };
     }
 
-    igv.cursorAddTrackControlButtons = function (trackView, browser, controlDiv) {
+    igv.cursorAddTrackControlButtons = function (trackView, browser) {
 
         var trackFilterButtonDiv,
             sortButton,
-            track = trackView.track,
-            nextButtonTop = 5;
+            track = trackView.track;
 
+
+        // sort
         sortButton = document.createElement("i");
-        controlDiv.appendChild(sortButton);
-
+        trackView.viewportDiv.appendChild(sortButton);
         sortButton.className = "fa fa-bar-chart-o igv-control-sort-fontawesome";
-        $(sortButton).css({
-            "top": nextButtonTop + "px"
-        });
-
-        nextButtonTop += 18;
-
         track.sortButton = sortButton;
         sortButton.onclick = function () {
 
@@ -574,13 +568,10 @@ var igv = (function (igv) {
             trackView.track.sortButton.className = "fa fa-bar-chart-o igv-control-sort-fontawesome-selected";
         };
 
-        //
+        // filter
         trackFilterButtonDiv = document.createElement("div");
-        controlDiv.appendChild(trackFilterButtonDiv);
+        trackView.viewportDiv.appendChild(trackFilterButtonDiv);
         trackFilterButtonDiv.className = "igv-filter-histogram-button-div";
-        $(trackFilterButtonDiv).css({
-            "top": nextButtonTop + "px"
-        });
 
         trackView.track.trackFilter = new igv.TrackFilter(trackView);
         trackView.track.trackFilter.createTrackFilterWidgetWithParentElement(trackFilterButtonDiv);

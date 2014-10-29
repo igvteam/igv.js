@@ -234,7 +234,7 @@
 .igv-track-label {
     position: absolute;
     top: 10px;
-    left: 10px;
+    left: 64px;
     cursor: pointer;
 }
 
@@ -257,14 +257,16 @@
 
 .igv-control-sort-fontawesome {
     position: absolute;
-    left: 5px;
+    top: 10px;
+    left: 32px;
     cursor: pointer;
     color: #000000;
 }
 
 .igv-control-sort-fontawesome-selected {
     position: absolute;
-
+    top: 10px;
+    left: 32px;
     cursor: pointer;
     color: red;
 }

@@ -78,7 +78,7 @@ var igv = (function (igv) {
             this.track.cursorHistogram = new cursor.CursorHistogram(controlDiv.clientHeight, this.track.max);
             this.track.cursorHistogram.createMarkupWithTrackPanelDiv(this);
 
-            igv.cursorAddTrackControlButtons(this, browser, controlDiv)
+            igv.cursorAddTrackControlButtons(this, browser);
 
         }
 
