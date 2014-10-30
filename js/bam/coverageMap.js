@@ -80,7 +80,7 @@ var igv = (function (igv) {
         var totalPercentage;
 
         totalPercentage = 0.0;
-        this.mismatchPercentages(refBase).forEach(function (fraction) {
+       this.mismatchPercentages(refBase).forEach(function (fraction) {
 
             totalPercentage += fraction.percent;
         });
