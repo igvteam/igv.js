@@ -221,7 +221,7 @@ var igv = (function (igv) {
             }
 
 //            spinner = igv.getSpinner(this.trackDiv);   // Start a spinner
-            igv.spinnerStartWithParent(myself.trackDiv);
+            igv.startSpinner(myself.trackDiv);
 
             this.currentTask = {
                 canceled: false,
@@ -234,7 +234,7 @@ var igv = (function (igv) {
                         this.xhrRequest.abort();
                     }
 //                    spinner.stop();
-                    igv.spinnerStopWithParent(myself.trackDiv);
+                    igv.stopSpinner(myself.trackDiv);
                 }
 
             };
@@ -242,7 +242,7 @@ var igv = (function (igv) {
             this.track.draw(igvCanvas, referenceFrame, tileStart, tileEnd, buffer.width, buffer.height, function (task) {
 
 //                    spinner.stop();
-                    igv.spinnerStopWithParent(myself.trackDiv);
+                    igv.stopSpinner(myself.trackDiv);
 
                     if (task) console.log(task.canceled);
 

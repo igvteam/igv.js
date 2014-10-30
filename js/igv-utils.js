@@ -1,24 +1,31 @@
 var igv = (function (igv) {
 
-    igv.spinnerStartWithParent = function (parentElement) {
+    /**
+     * Start the spinner for the parent element, if it has one
+     */
+    igv.startSpinner = function (parentElement) {
 
-        var thang = $(parentElement).find("i.fa-spinner");
+        var spinner = $(parentElement).find("i.fa-spinner");
 
-//        return;
-
-        thang.removeClass("igv-spinner-fontawesome-stop");
-        thang.addClass("igv-spinner-fontawesome-start");
+        if (spinner) {
+            spinner.removeClass("igv-spinner-fontawesome-stop");
+            spinner.addClass("igv-spinner-fontawesome-start");
+        }
 
     };
 
-    igv.spinnerStopWithParent = function (parentElement) {
+    /**
+     * Stop the spinner for the parent element, if it has one
+     * @param parentElement
+     */
+    igv.stopSpinner = function (parentElement) {
 
-        var thang = $(parentElement).find("i.fa-spinner");
+        var spinner = $(parentElement).find("i.fa-spinner");
 
-//        return;
-
-        thang.removeClass("igv-spinner-fontawesome-start");
-        thang.addClass("igv-spinner-fontawesome-stop");
+        if (spinner) {
+            spinner.removeClass("igv-spinner-fontawesome-start");
+            spinner.addClass("igv-spinner-fontawesome-stop");
+        }
 
     };
 
@@ -145,7 +152,7 @@ var igv = (function (igv) {
 
             return {
                 // create new XMLHttpRequest
-                send: function(_, callback){
+                send: function (_, callback) {
                     // setup all variables
                     var xhr = new XMLHttpRequest(),
                         url = options.url,
@@ -153,7 +160,7 @@ var igv = (function (igv) {
                         responseType = "arraybuffer",
                         data = options.data || null;
 
-                    xhr.addEventListener('load', function(){
+                    xhr.addEventListener('load', function () {
                         var data = {};
                         data[options.dataType] = xhr.response;
                         // make callback and send data
@@ -163,9 +170,9 @@ var igv = (function (igv) {
                     xhr.open(type, url);
                     xhr.responseType = responseType;
 
-                    if(options.headers) {
+                    if (options.headers) {
                         for (var prop in options.headers) {
-                            if( options.headers.hasOwnProperty( prop ) ) {
+                            if (options.headers.hasOwnProperty(prop)) {
                                 xhr.setRequestHeader(prop, options.headers[prop]);
                             }
                         }
@@ -173,7 +180,7 @@ var igv = (function (igv) {
 
                     // TODO -- set any other options values
                 },
-                abort: function(){
+                abort: function () {
                     jqXHR.abort();
                 }
             };
