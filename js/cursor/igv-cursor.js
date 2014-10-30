@@ -2,7 +2,8 @@ var igv = (function (igv) {
 
     igv.createCursorBrowser = function (options) {
 
-        var contentHeader,
+        var igvCursorUIHolder,
+            contentHeader,
             cursorUIHeaderBlurbDiv,
             trackContainer,
             browser;
@@ -238,31 +239,26 @@ var igv = (function (igv) {
 
 
         // Construct DOM hierarchy
-        contentHeader = $('<div class="row"></div>')[0];
-        cursorUIHeaderBlurbDiv = $('<div class="igv-cursor-ui-header-blurb">Primary track is <span></span> with <span></span> total regions (<span></span> regions remain with filters applied)</div>')[0];
-        trackContainer = $('<div id="igvTrackContainerDiv" class="igv-track-container-div">')[0];
 
+
+        trackContainer = $('<div id="igvTrackContainerDiv" class="igv-track-container-div">')[0];
         browser = new igv.Browser(options, trackContainer);
         document.getElementById('igvContainerDiv').appendChild(browser.div);
 
+        contentHeader = $('<div class="row"></div>')[0];
         $(browser.div).append(contentHeader);
-        $(contentHeader).append(cursorUIHeaderBlurbDiv);
+
+//        cursorUIHeaderBlurbDiv = $('<div class="igv-cursor-ui-header-blurb">Primary track is <span></span> with <span></span> total regions (<span></span> regions remain with filters applied)</div>')[0];
+//        igvCursorUIHolder = $("div.igv-cursor-ui-header").find(".igv-cursor-ui-holder");
+//        igvCursorUIHolder.append(cursorUIHeaderBlurbDiv);
 
         browser.horizontalScrollbar = new cursor.HorizontalScrollbar(browser, $(browser.div));
         $(browser.div).append(trackContainer);
 
-
-
         igv.addAjaxExtensions();
-
 
         // Add cursor specific methods to the browser object,  some new some overrides
         addCursorExtensions(browser);
-
-//        browser.horizontalScrollbar = new cursor.HorizontalScrollbar(browser, $(browser.div));
-
-
-
 
         browser.cursorModel = new cursor.CursorModel(browser);
 
