@@ -30,27 +30,23 @@ var igv = (function (igv) {
             "url=" + readURL + "&data=" + JSON.stringify(body) :
             JSON.stringify(body);
 
-        igvxhr.load(sendURL, {
-            method: "POST",
-            sendData: sendData,
-            task: task,
-            contentType: "application/json",
-            success: function (result) {
+        igvxhr.loadJson(sendURL,
+            {
+                sendData: sendData,
+                task: task,
+                contentType: "application/json",
+                success: function (json) {
 
-                if (result) {
-                    // TODO -- deal with nextPageToken
-
-                    var jsonRecords = JSON.parse(result),
-                        alignments = igv.decodeGa4ghReads(jsonRecords.reads);
-                    success(alignments);
+                    if (json) {
+                        // TODO -- deal with nextPageToken
+                        success(igv.decodeGa4ghReads(json.reads));
+                    }
+                    else {
+                        success(null);
+                    }
 
                 }
-                else {
-                    success(null);
-                }
-
-            }
-        });
+            });
 
 
     }

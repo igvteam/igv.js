@@ -34,21 +34,23 @@ var igv = (function (igv) {
         else {
             // Expand buffer size if needed, but not beyond content length
             bufferSize = Math.max(this.bufferSize, requestedRange.size);
-            if(this.contentLength > 0) {
+            if (this.contentLength > 0) {
                 bufferSize = Math.min(bufferSize, this.contentLength - requestedRange.start - 1);
             }
 
             loadRange = {start: requestedRange.start, size: bufferSize};
-            dataLoader = new igv.DataLoader(this.path);
-            dataLoader.range = loadRange;
 
-            dataLoader.loadArrayBuffer(function (arrayBuffer) {
-                // TODO -- handle error
+            igvxhr.loadArrayBuffer(this.path,
+                {
+                    range: {start: requestedRange.start, size: bufferSize},
+                    success: function (arrayBuffer) {
+                        // TODO -- handle error
 
-                bufferedReader.data = arrayBuffer;
-                bufferedReader.range = loadRange;
-                subbuffer(bufferedReader, requestedRange, asUint8);
-            });
+                        bufferedReader.data = arrayBuffer;
+                        bufferedReader.range = loadRange;
+                        subbuffer(bufferedReader, requestedRange, asUint8);
+                    }
+                });
 
         }
 

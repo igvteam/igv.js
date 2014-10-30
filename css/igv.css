@@ -1,4 +1,5 @@
 .igv-spinner-fontawesome-start {
+
     position: absolute;
     left:50%;
     top:50%;
@@ -245,9 +246,7 @@
 }
 
 .igv-track-div {
-    position: relative;
-    left: 0;
-    right: 0;
+    width: 100%;
     overflow:hidden;
     margin-bottom:10px;
 }

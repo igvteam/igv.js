@@ -49,7 +49,7 @@ var igv = (function (igv) {
                     queryChr = (chr.startsWith("chr") ? chr.substring(3) : chr),
                     queryStart = Math.max(0, center - window),
                     queryEnd = center + window,
-                    dataLoader = new igv.DataLoader(this.proxy ? this.proxy : this.url),
+                    queryURL = this.proxy ? this.proxy : this.url,
                     filters =
                         [
                             {"operand": "CHROM", "operator": "EQ", "value": queryChr, "filter_type": "STRING" },
@@ -59,7 +59,7 @@ var igv = (function (igv) {
                         ],
                     columns = source.type === TRAIT ?
                         ["CHROM", "POS", "DBSNP_ID", "PVALUE", "ZSCORE"] :
-                        ["CHROM","POS",source.pvalue, "DBSNP_ID"],
+                        ["CHROM", "POS", source.pvalue, "DBSNP_ID"],
                     data = {
                         "user_group": "ui",
                         "filters": filters,
@@ -74,30 +74,28 @@ var igv = (function (igv) {
                     "url=" + this.url + "&data=" + JSON.stringify(data) :
                     JSON.stringify(data);
 
-                dataLoader.postJson(tmp, function (result) {
+                igvxhr.loadJson(queryURL, {
+                    sendData: tmp,
+                    task: task,
+                    success: function (json) {
+                        var variants;
 
-                        if (result) {
+                        if (json) {
+                            variants = json.variants;
+                            variants.sort(function (a, b) {
+                                return a.POS - b.POS;
+                            });
+                            source.cache = new FeatureCache(chr, queryStart, queryEnd, variants);
 
-                            var variants = JSON.parse(result).variants;
-
-                            if (variants) {
-                                variants.sort(function (a, b) {
-                                    return a.POS - b.POS;
-                                });
-
-                                source.cache = new FeatureCache(chr, queryStart, queryEnd, variants);
-
-                                success(variants);
-                            }
-                            else {
-                                success(null);
-                            }
+                            success(variants);
                         }
                         else {
                             success(null);
                         }
-                    },
-                    task);
+
+                    }
+                });
+
             }
 
             loadFeatures.call(this);

@@ -35,35 +35,12 @@ var igv = (function (igv) {
                 qend = center + 50000;
             }
 
-            // If a read is in progress cancel it
-            if (this.currentTask) {
-                if(this.currentTask.chr === chr && this.currentTask.start === qstart && this.currentTask.end === qend) {
-                    // This load is already in progress
-                    // console.log("Dup load request -- ignoring");
-                    return;
-                }
-                this.currentTask.abort();
-            }
-
-            this.currentTask = {
-                canceled: false,
-                chr: chr,
-                start: qstart,
-                end: qend,
-                abort: function () {
-                    this.canceled = true;
-                    if (this.xhrRequest) {
-                        this.xhrRequest.abort();
-                    }
-                }
-
-            };
 
             this.readSequence(chr, qstart, qend, function (seqBytes) {
                     myself.interval = new igv.GenomicInterval(chr, qstart, qend, seqBytes);
                     continuation(getSequenceFromInterval(myself.interval, start, end));
                 },
-                this.currentTask);
+                task);
         }
 
         function getSequenceFromInterval(interval, start, end) {

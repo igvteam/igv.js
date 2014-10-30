@@ -5,10 +5,53 @@ var igvxhr = (function (igvxhr) {
         igvxhr.load(url, options);
     }
 
+    igvxhr.loadJson = function(url, options) {
+
+        var success = options.success;
+
+        options.contentType = "application/json";
+        options.success = function (result) {
+            if (result) {
+                success(JSON.parse(result));
+            }
+            else {
+                success(null);
+            }
+        };
+
+        igvxhr.load(url, options);
+
+    }
+
+    /**
+     * Load a "raw" string.
+     */
+    igvxhr.loadString = function (url, options) {
+
+        var success = options.success;
+
+        if (url.endsWith(".gz")) {
+
+            options.responseType = "arraybuffer";
+            options.success = function (data) {
+                var result = arrayBufferToString(data, true);
+                success(result);
+            };
+            igvxhr.load(url, options);
+
+        }
+        else {
+
+            options.mimeType = 'text/plain; charset=x-user-defined';
+            igvxhr.load(url, options);
+        }
+    }
+
     igvxhr.load = function (url, options) {
 
         var xhr = new XMLHttpRequest(),
-            method = options.method || "GET",
+        sendData = options.sendData,
+            method = options.method || (sendData ? "POST" : "GET"),
             success = options.success,
             error = options.error || success,
             abort = options.abort || error,
@@ -17,7 +60,7 @@ var igvxhr = (function (igvxhr) {
             range = options.range,
             responseType = options.responseType,
             contentType = options.contentType,
-            sendData = options.sendData;
+            mimeType = options.mimeType;
 
         if (task) task.xhrRequest = xhr;
 
@@ -30,17 +73,19 @@ var igvxhr = (function (igvxhr) {
             xhr.setRequestHeader("If-None-Match", Math.random().toString(36));  // For nasty safari bug https://bugs.webkit.org/show_bug.cgi?id=82672
         }
 
-        if(contentType) {
-            xhr.setRequestHeader("Content-Type", "application/json");
+        if (contentType) {
+            xhr.setRequestHeader("Content-Type", contentType);
         }
-
+        if (mimeType) {
+            xhr.overrideMimeType(mimeType);
+        }
         if (responseType) {
             xhr.responseType = responseType;
         }
 
         xhr.onload = function (event) {
 
-            if(xhr.status >= 200 && xhr.status <= 300) {
+            if (xhr.status >= 200 && xhr.status <= 300) {
                 success(xhr.response, xhr);
             }
             else {
@@ -64,85 +109,6 @@ var igvxhr = (function (igvxhr) {
 
         xhr.send(sendData);
 
-    }
-
-
-    /**
-     * Load a "raw" string.  This method could have been written on top of loading an array buffer, but less
-     * effeciently.
-     *
-     * @param continuation
-     * @param task
-     */
-    igvxhr.loadString = function (url, options) {
-
-        var xhr,
-            success = options.success,
-            error = options.error || success,
-            abort = options.abort || error,
-            timeout = options.timeout || error,
-            range = options.range,
-            task = options.task;
-
-        if (task) task.xhrRequest = xhr;
-
-        if (url.endsWith(".gz")) {
-            igvxhr.load(url,
-                {
-                    range: range,
-                    success: function (data) {
-                        var result = arrayBufferToString(data, true);
-                        success(result);
-                    },
-                    error: error,
-                    abort: abort,
-                    timeout: timeout,
-                    task: task,
-                    responseType: "arraybuffer"
-                });
-
-        }
-        else {
-
-            xhr = new XMLHttpRequest();   // Note: $.ajax was unreliable with range headers
-
-            if (task) task.xhrRequest = xhr;
-
-            xhr.open("GET", url);
-
-            if (range) {
-                var rangeEnd = range.start + range.size - 1;
-                xhr.setRequestHeader("Range", "bytes=" + range.start + "-" + rangeEnd);
-                xhr.setRequestHeader("Cache-control", "no-cache");
-                xhr.setRequestHeader("If-None-Match", Math.random().toString(36));  // For nasty safari bug https://bugs.webkit.org/show_bug.cgi?id=82672
-            }
-
-            // retrieve data unprocessed as a binary string
-            xhr.overrideMimeType('text/plain; charset=x-user-defined');
-
-            xhr.onload = function (event) {
-
-                var data = xhr.responseText;
-                //   console.log("Data received for: " + loader.url + "  size: " + data.length + "  Status = " + status);
-                success(data, xhr);
-            }
-
-            xhr.onerror = function (event) {
-                console.log("Error: " + event);
-                error(null, xhr);
-            }
-
-            xhr.ontimeout = function (event) {
-                timeout(null, xhr);
-            }
-
-            xhr.onabort = function (event) {
-                console.log("Aborted");
-                abort(null, xhr);
-            }
-
-            xhr.send();
-        }
     }
 
 
