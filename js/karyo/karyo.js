@@ -2,7 +2,7 @@
 //
 
 var log = function (txt) {
-    console.log("karyo: " + txt);
+   // console.log("karyo: " + txt);
 }
 var igv = (function (igv) {
 
