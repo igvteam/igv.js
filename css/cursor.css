@@ -1,19 +1,31 @@
 
 .igv-trackfilter-fontawesome {
-    position: absolute;
+    position: relative;
     top: 0;
     left: 0;
     cursor: pointer;
     color: grey;
 }
 
+.igv-filter-histogram-button-div {
+    margin-left: 2px;
+    margin-right: 2px;
+    position: relative;
+    /*top: 4px;*/
+    /*left: 16px;*/
+    cursor: pointer;
+    background: none;
+}
+
 .igv-control-bullseye-stack-fontawesome {
-    font-size: x-small;
-    position: absolute;
-    top: 10px;
-    left: 64px;
+    margin-left: 2px;
+    margin-right: 2px;
+    position: relative;
+    /*top: 4px;*/
+    /*left: 64px;*/
     cursor: pointer;
     color: grey;
+    font-size: x-small;
 }
 
 .igv-control-bullseye-fontawesome-selected {
@@ -125,13 +137,5 @@
     top: 0;
     left: 0;
     width: 100px;
-    background: none;
-}
-
-.igv-filter-histogram-button-div {
-    position: absolute;
-    top: 10px;
-    left: 16px;
-    cursor: pointer;
     background: none;
 }

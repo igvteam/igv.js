@@ -8,6 +8,7 @@ var igv = (function (igv) {
         this.marginBottom = 10;
 
         var viewportDiv,
+            trackIconContainer,
             trackDiv,
             controlDiv,
             controlCanvas,
@@ -51,10 +52,10 @@ var igv = (function (igv) {
 
         // viewport
         viewportDiv = document.createElement("div");
+        trackDiv.appendChild(viewportDiv);
         viewportDiv.className = "igv-viewport-div";
         viewportDiv.style.left = controlDiv.clientWidth + "px";
         viewportDiv.style.height = track.height + "px";
-        trackDiv.appendChild(viewportDiv);
         this.viewportDiv = viewportDiv;
 
         // content
@@ -64,6 +65,12 @@ var igv = (function (igv) {
         contentDiv.style.height = track.height + "px";
         this.contentDiv = contentDiv;
 
+        // track icon container
+        trackIconContainer = document.createElement("div");
+        viewportDiv.appendChild(trackIconContainer);
+        trackIconContainer.className = "igv-track-icon-container";
+
+        // canvas
         canvas = document.createElement('canvas');
         contentDiv.appendChild(canvas);
         canvas.style.position = 'absolute';
@@ -97,7 +104,7 @@ var igv = (function (igv) {
             if (track.label) {
 
                 labelSpan = document.createElement("span");
-                viewportDiv.appendChild(labelSpan);
+                trackIconContainer.appendChild(labelSpan);
                 labelSpan.className = "igv-track-label-span-base";
                 labelSpan.innerHTML = track.label;
 

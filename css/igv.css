@@ -111,10 +111,22 @@
     margin-bottom:10px;
 }
 
-.igv-track-label-span-base {
+.igv-track-icon-container {
     position: absolute;
-    top: 10px;
-    left: 96px;
+    left: 0;
+    top: 4px;
+    width: auto;
+    height:auto;
+    background: rgba(255, 255, 255, 0.5);
+    display: inline-flex;
+}
+
+.igv-track-label-span-base {
+    margin-left: 2px;
+    margin-right: 2px;
+    position: relative;
+    /*top: 4px;*/
+    /*left: 96px;*/
     cursor: pointer;
 }
 
@@ -148,17 +160,19 @@
 }
 
 .igv-control-sort-fontawesome {
-    position: absolute;
-    top: 10px;
-    left: 38px;
+    margin-left: 2px;
+    margin-right: 2px;
+    position: relative;
+    /*top: 4px;*/
+    /*left: 38px;*/
     cursor: pointer;
     color: grey;
 }
 
 .igv-control-sort-fontawesome-selected {
-    position: absolute;
-    top: 10px;
-    left: 38px;
+    position: relative;
+    /*top: 4px;*/
+    /*left: 38px;*/
     cursor: pointer;
     color: rgba(204, 51, 0, 1);
 }

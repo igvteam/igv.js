@@ -567,17 +567,32 @@ var igv = (function (igv) {
 
         var track = trackView.track,
             trackFilterButtonDiv,
+            trackIconContainer,
             sortButton,
             bullseyeStackSpan,
             bullseyeOuterIcon,
             bullseyeInnerIcon;
 
+        trackIconContainer = $(trackView.viewportDiv).find("div.igv-track-icon-container");
+
+
+        // filter
+        trackFilterButtonDiv = document.createElement("div");
+        trackIconContainer.append($(trackFilterButtonDiv));
+
+        trackFilterButtonDiv.className = "igv-filter-histogram-button-div";
+
+        trackView.track.trackFilter = new igv.TrackFilter(trackView);
+        trackView.track.trackFilter.createTrackFilterWidgetWithParentElement(trackFilterButtonDiv);
+
 
         // sort
         sortButton = document.createElement("i");
-        trackView.viewportDiv.appendChild(sortButton);
+        trackIconContainer.append($(sortButton));
+
         sortButton.className = "glyphicon glyphicon-signal igv-control-sort-fontawesome";
         track.sortButton = sortButton;
+
         sortButton.onclick = function () {
 
             browser.cursorModel.sortRegions(track.featureSource, track.sortDirection, function (regions) {
@@ -595,19 +610,10 @@ var igv = (function (igv) {
             trackView.track.sortButton.className = "glyphicon glyphicon-signal igv-control-sort-fontawesome-selected";
         };
 
-
-        // filter
-        trackFilterButtonDiv = document.createElement("div");
-        trackView.viewportDiv.appendChild(trackFilterButtonDiv);
-        trackFilterButtonDiv.className = "igv-filter-histogram-button-div";
-
-        trackView.track.trackFilter = new igv.TrackFilter(trackView);
-        trackView.track.trackFilter.createTrackFilterWidgetWithParentElement(trackFilterButtonDiv);
-
-
         // bullseye stack
         bullseyeStackSpan = document.createElement("span");
-        trackView.viewportDiv.appendChild(bullseyeStackSpan);
+        trackIconContainer.append($(bullseyeStackSpan));
+
         bullseyeStackSpan.className = "fa-stack igv-control-bullseye-stack-fontawesome";
         track.bullseyeStackSpan = bullseyeStackSpan;
 
