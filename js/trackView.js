@@ -109,9 +109,6 @@ var igv = (function (igv) {
                 labelSpan.innerHTML = track.label;
 
 
-
-
-
 //                labelButton = document.createElement("button");
 //                viewportDiv.appendChild(labelButton);
 //                labelButton.className = "btn btn-xs btn-cursor-deselected igv-track-label";
@@ -134,8 +131,6 @@ var igv = (function (igv) {
 //                        }
 //                    }
 //                }
-
-
 
 
             }
@@ -205,80 +200,94 @@ var igv = (function (igv) {
             igvCanvas,
             referenceFrame = this.browser.referenceFrame,
             refFrameStart = referenceFrame.start,
-            refFrameEnd = refFrameStart + referenceFrame.toBP(this.canvas.width);
+            refFrameEnd = refFrameStart + referenceFrame.toBP(this.canvas.width),
+            currentTask = this.currentTask;
 
         if (!this.tile || !this.tile.containsRange(referenceFrame.chr, refFrameStart, refFrameEnd, referenceFrame.bpPerPixel)) {
 
-            buffer = document.createElement('canvas');
-            buffer.width = 3 * this.canvas.width;
-            buffer.height = this.canvas.height;
-            igvCanvas = new igv.Canvas(buffer);
+            // First see if there is a load in progress that would satisfy the paint request
 
-            tileWidth = Math.round(referenceFrame.toBP(buffer.width));
-            tileStart = Math.max(0, Math.round(referenceFrame.start - tileWidth / 3));
-            tileEnd = tileStart + tileWidth;
+            if (currentTask && currentTask.end >= refFrameEnd && currentTask.start <= refFrameStart) {
 
-            if (this.currentTask) {
-                if (this.currentTask.chr === referenceFrame.chr && this.currentTask.start === tileStart && this.currentTask.end === tileEnd) {
-                    // This load is already in progress
-                    // console.log("Dup load request -- ignoring");
-                    return;
-                }
-                this.currentTask.abort();
+                // Nothing to do but wait for current load task to complete
+
             }
+
+            else {
+
+                // Cancel the current task if any as it will not satisfy the paint request
+                
+                if (currentTask) {
+                    currentTask.abort();
+                }
+
+                buffer = document.createElement('canvas');
+                buffer.width = 3 * this.canvas.width;
+                buffer.height = this.canvas.height;
+                igvCanvas = new igv.Canvas(buffer);
+
+                tileWidth = Math.round(referenceFrame.toBP(buffer.width));
+                tileStart = Math.max(0, Math.round(referenceFrame.start - tileWidth / 3));
+                tileEnd = tileStart + tileWidth;
+
 
 //            spinner = igv.getSpinner(this.trackDiv);   // Start a spinner
-            igv.startSpinner(myself.trackDiv);
+                igv.startSpinner(myself.trackDiv);
 
-            this.currentTask = {
-                canceled: false,
-                chr: referenceFrame.chr,
-                start: tileStart,
-                end: tileEnd,
-                abort: function () {
-                    this.canceled = true;
-                    if (this.xhrRequest) {
-                        this.xhrRequest.abort();
-                    }
+                this.currentTask = {
+                    canceled: false,
+                    chr: referenceFrame.chr,
+                    start: tileStart,
+                    end: tileEnd,
+                    abort: function () {
+                        this.canceled = true;
+                        if (this.xhrRequest) {
+                            this.xhrRequest.abort();
+                        }
 //                    spinner.stop();
-                    igv.stopSpinner(myself.trackDiv);
+                        igv.stopSpinner(myself.trackDiv);
+                    }
+
+                };
+
+                myself.track.draw(igvCanvas, referenceFrame, tileStart, tileEnd, buffer.width, buffer.height, function (task) {
+
+//                    spinner.stop();
+                        igv.stopSpinner(myself.trackDiv);
+
+                        if (task) console.log(task.canceled);
+
+                        if (!(task && task.canceled)) {
+                            myself.tile = new Tile(referenceFrame.chr, tileStart, tileEnd, referenceFrame.bpPerPixel, buffer);
+                            myself.paintImage();
+                        }
+                        myself.currentTask = undefined;
+                    },
+                    myself.currentTask);
+
+                if (myself.track.paintControl) {
+
+                    var buffer2 = document.createElement('canvas');
+                    buffer2.width = this.controlCanvas.width;
+                    buffer2.height = this.controlCanvas.height;
+
+                    var bufferCanvas = new igv.Canvas(buffer2);
+
+                    myself.track.paintControl(bufferCanvas, buffer2.width, buffer2.height);
+
+                    myself.controlCtx.drawImage(buffer2, 0, 0);
                 }
-
-            };
-
-            this.track.draw(igvCanvas, referenceFrame, tileStart, tileEnd, buffer.width, buffer.height, function (task) {
-
-//                    spinner.stop();
-                    igv.stopSpinner(myself.trackDiv);
-
-                    if (task) console.log(task.canceled);
-
-                    if (!(task && task.canceled)) {
-                        myself.tile = new Tile(referenceFrame.chr, tileStart, tileEnd, referenceFrame.bpPerPixel, buffer);
-                        myself.paintImage();
-                    }
-                    myself.currentTask = undefined;
-                },
-                this.currentTask);
-
-            if (this.track.paintControl) {
-
-                var buffer2 = document.createElement('canvas');
-                buffer2.width = this.controlCanvas.width;
-                buffer2.height = this.controlCanvas.height;
-
-                var bufferCanvas = new igv.Canvas(buffer2);
-
-                this.track.paintControl(bufferCanvas, buffer2.width, buffer2.height);
-
-                this.controlCtx.drawImage(buffer2, 0, 0);
             }
 
-
         }
-       // else {
+
+        if (this.tile && this.tile.chr === referenceFrame.chr) {
             this.paintImage();
-       // }
+        }
+        else {
+            this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
+        }
+
 
     };
 
