@@ -373,7 +373,7 @@ var igv = (function (igv) {
             color = igv.nucleotideColors[nucleotide];
         }
         else {
-            color = "(" + foregroundColor[0] + "," + foregroundColor[1] + "," + foregroundColor[2] + "," + alpha + ")";    //igv.getCompositeColor(backgroundColor, foregroundColor, alpha);
+            color = "rgba(" + foregroundColor[0] + "," + foregroundColor[1] + "," + foregroundColor[2] + "," + alpha + ")";    //igv.getCompositeColor(backgroundColor, foregroundColor, alpha);
         }
         return color;
     }

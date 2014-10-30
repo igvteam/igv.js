@@ -122,7 +122,7 @@ var igv = (function (igv) {
 
                     base = block.seq.charAt(j);
                     key = (alignment.strand) ? "pos" + base : "neg" + base;
-                    q = block.qual.charCodeAt(j);
+                    q = block.qual.charCodeAt(j) - 33;
 
                     myself.coverage[ i ][ key ] += 1;
                     myself.coverage[ i ][ "qual" + base ] += q;
