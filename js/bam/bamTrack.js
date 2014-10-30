@@ -170,6 +170,7 @@ var igv = (function (igv) {
             if (features.packedAlignments) {
                 // alignment track
                 features.packedAlignments.forEach(function renderAlignmentRow(alignmentRow, packedAlignmentIndex, packedAlignments) {
+
                     var arrowHeadWidth = myself.alignmentRowHeight / 2.0,
                         yStrokedLine,
                         yRect,
@@ -177,6 +178,7 @@ var igv = (function (igv) {
                     yRect = myself.alignmentRowYInset + myself.coverageTrackHeight + (myself.alignmentRowHeight * packedAlignmentIndex) + 5;
                     height = myself.alignmentRowHeight - (2 * myself.alignmentRowYInset);
                     yStrokedLine = (height / 2.0) + yRect;
+
                     alignmentRow.forEach(function renderAlignment(alignment) {
                         var xRectStart,
                             xRectEnd,
@@ -184,15 +186,20 @@ var igv = (function (igv) {
                             len = alignment.blocks.length,
                             strand = alignment.strand,
                             blocksBBoxLength = alignment.lengthOnRef;
+
                         if ((alignment.start + blocksBBoxLength) < bpStart) return;
                         if (alignment.start > bpEnd) return;
+
                         xRectStart = refFrame.toPixels(alignment.start - bpStart);
                         xRectEnd = refFrame.toPixels((alignment.start + blocksBBoxLength) - bpStart);
+
                         if (blocks.length > 0) {
                             // todo -- set color based on gap type (deletion or skipped)
                             canvas.strokeLine(xRectStart, yStrokedLine, xRectEnd, yStrokedLine, {strokeStyle: skippedColor});
                         }
+
                         canvas.setProperties({fillStyle: alignmentColor});
+
                         blocks.forEach(function (block, blockIndex) {
                             var refOffset = block.start - bpStart,
                                 blockRectX = refFrame.toPixels(refOffset),
@@ -207,6 +214,7 @@ var igv = (function (igv) {
                                 basePixelWidth,
                                 baseColor,
                                 i;
+
                             if (strand && blockIndex === len - 1) {
                                 x = [xRectStart, xRectEnd, xRectEnd + arrowHeadWidth, xRectEnd, xRectStart];
                                 y = [yRect, yRect, yRect + height / 2, yRect + height, yRect + height];
@@ -218,26 +226,31 @@ var igv = (function (igv) {
                             } else {
                                 canvas.fillRect(blockRectX, yRect, blockRectWidth, height);
                             }
+
                             // Only do mismatch coloring if a refseq exists to do the comparison
                             if (refSeq && blockSeq !== "*") {
+
                                 for (i = 0, len = blockSeq.length; i < len; i++) {
+
                                     readChar = blockSeq.charAt(i);
                                     refChar = refSeq.charAt(refOffset + i);
                                     if (readChar === "=") {
                                         readChar = refChar;
                                     }
+
                                     if (readChar === "X" || refChar !== readChar) {
                                         if (blockQual && blockQual.length > i) {
-                                            readQual = blockQual.charCodeAt(i);
+                                            readQual = blockQual.charCodeAt(i) - 33;
                                             baseColor = shadedBaseColor(readQual, readChar);
                                         }
                                         else {
                                             baseColor = igv.nucleotideColors[readChar];
                                         }
-                                        if (!baseColor) baseColor = "gray";
-                                        basePixelPosition = refFrame.toPixels((block.start + i) - bpStart);
-                                        basePixelWidth = Math.max(1, refFrame.toPixels(1));
-                                        canvas.fillRect(basePixelPosition, yRect, basePixelWidth, height, { fillStyle: baseColor });
+                                        if (baseColor) {
+                                            basePixelPosition = refFrame.toPixels((block.start + i) - bpStart);
+                                            basePixelWidth = Math.max(1, refFrame.toPixels(1));
+                                            canvas.fillRect(basePixelPosition, yRect, basePixelWidth, height, { fillStyle: baseColor });
+                                        }
                                     }
                                 }
                             } // if (refSeq)
@@ -346,7 +359,7 @@ var igv = (function (igv) {
             foregroundColor = igv.nucleotideColorComponents[nucleotide],
             backgroundColor = [255, 255, 255];   // White
 
-        if (!foregroundColor) return "grey";
+        if (!foregroundColor) return;
 
         if (qual < minQ) {
             alpha = 0.1;
@@ -357,12 +370,15 @@ var igv = (function (igv) {
         alpha = Math.round(alpha * 10) / 10.0;
 
         if (alpha >= 1) {
-            return igv.nucleotideColors[nucleotide];
+            color = igv.nucleotideColors[nucleotide];
         }
-        color = igv.getCompositeColor(backgroundColor, foregroundColor, alpha);
+        else {
+            color = "(" + foregroundColor[0] + "," + foregroundColor[1] + "," + foregroundColor[2] + "," + alpha + ")";    //igv.getCompositeColor(backgroundColor, foregroundColor, alpha);
+        }
         return color;
     }
 
     return igv;
 
-})(igv || {});
+})
+(igv || {});
