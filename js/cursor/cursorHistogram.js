@@ -5,12 +5,12 @@ var cursor = (function (cursor) {
 
     cursor.CursorHistogram = function (binCount, maxScore) {
 
-        this.guid = igv.guid();
+//        this.guid = igv.guid();
         this.bins = [];
         this.bins.length = binCount;
         this.maxCount = 0;
 
-        this.canvasFillStyle = igv.greyScale(250);
+        this.canvasFillStyle = igv.greyScale(255);
 //        this.canvasFillStyle = igv.rgbColor(255, 255, 255);
         this.minMaxfillStyle = igv.rgbaColor(64, 64, 64, 0.5);
         this.minMaxEdgefillStyle = igv.rgbaColor(32, 32, 32, 1.0);
@@ -145,8 +145,8 @@ var cursor = (function (cursor) {
     // Markup
     cursor.CursorHistogram.prototype.createMarkupWithTrackPanelDiv = function (trackPanel) {
 
-        this.id = this.guid +"_cursorHistogramDiv";
-        this.label = trackPanel.track.label +"_cursorHistogramDiv";
+//        this.id = this.guid +"_cursorHistogramDiv";
+//        this.label = trackPanel.track.label +"_cursorHistogramDiv";
 
         this.igvCanvas = this.canvasWithParentDiv(trackPanel.controlDiv);
 
@@ -157,15 +157,12 @@ var cursor = (function (cursor) {
 
     cursor.CursorHistogram.prototype.canvasWithParentDiv = function (parentDiv) {
 
-        var childDiv = document.createElement('div');
-        parentDiv.appendChild(childDiv);
+        var cursorHistogramDiv = document.createElement('div');
+        parentDiv.appendChild(cursorHistogramDiv);
 
-        this.cursorHistogramDiv = childDiv;
-
-        this.cursorHistogramDiv.setAttribute('id', this.id);
-        this.cursorHistogramDiv.className = "igv-cursorHistogram-div";
-        this.cursorHistogramDiv.style.left = 35 + "px";
-        this.cursorHistogramDiv.style.height = this.bins.length + "px";
+        cursorHistogramDiv.className = "igv-cursorHistogram-div";
+        cursorHistogramDiv.style.height = this.bins.length + "px";
+        this.cursorHistogramDiv = cursorHistogramDiv;
 
         var DOMCanvas = this.DOMCanvasWithParentDiv(this.cursorHistogramDiv);
 
@@ -175,8 +172,7 @@ var cursor = (function (cursor) {
 
     cursor.CursorHistogram.prototype.DOMCanvasWithParentDiv = function (parentDiv) {
 
-        var canvasID = parentDiv.getAttribute("id") + "_canvas",
-            DOMCanvas;
+        var DOMCanvas;
 
         DOMCanvas = document.createElement('canvas');
         parentDiv.appendChild(DOMCanvas);
@@ -186,7 +182,6 @@ var cursor = (function (cursor) {
 
         DOMCanvas.setAttribute('width', parentDiv.clientWidth);
         DOMCanvas.setAttribute('height', parentDiv.clientHeight);
-        DOMCanvas.setAttribute('id', canvasID);
 
         return DOMCanvas;
     };

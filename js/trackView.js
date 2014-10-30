@@ -15,7 +15,8 @@ var igv = (function (igv) {
             canvas,
             closeButton,
             labelButton,
-            spinnerFontAwesome;
+            spinnerFontAwesome,
+            controlWidth = browser.controlPanelWidth || 50;
 
         // track
         trackDiv = document.createElement("div");
@@ -29,20 +30,16 @@ var igv = (function (igv) {
         this.trackDiv.appendChild(spinnerFontAwesome);
         spinnerFontAwesome.className = "fa fa-spinner fa-2x fa-spin igv-spinner-fontawesome-start";
 
-        // controls
-        var controlWidth = browser.controlPanelWidth ? browser.controlPanelWidth : 50;
-
+        // control div
         controlDiv = document.createElement("div");
+        trackDiv.appendChild(controlDiv);
         controlDiv.className = "igv-control-div";
         controlDiv.style.width = controlWidth + "px";
         controlDiv.style.height = track.height + "px";
         this.controlDiv = controlDiv;
 
+        // control canvas
         controlCanvas = document.createElement('canvas');
-        controlDiv.style.width = controlWidth + "px";
-        trackDiv.appendChild(controlDiv);
-        this.controlDiv = controlDiv;
-
         controlDiv.appendChild(controlCanvas);
         controlCanvas.style.width = controlDiv.clientWidth + "px";
         controlCanvas.style.height = controlDiv.clientHeight + "px";
@@ -81,7 +78,7 @@ var igv = (function (igv) {
             this.track.cursorHistogram = new cursor.CursorHistogram(controlDiv.clientHeight, this.track.max);
             this.track.cursorHistogram.createMarkupWithTrackPanelDiv(this);
 
-            igv.cursorAddTrackControlButtons(this, browser, controlDiv)
+            igv.cursorAddTrackControlButtons(this, browser);
 
         }
 
@@ -96,6 +93,8 @@ var igv = (function (igv) {
                 browser.removeTrack(track);
             };
 
+
+
             if (track.label) {
 
                 labelButton = document.createElement("button");
@@ -109,14 +108,15 @@ var igv = (function (igv) {
 
                     if (browser.cursorModel) {
 
-                        browser.designatedTrack = track;
-                        browser.designatedTrack.featureSource.allFeatures(function (featureList) {
-
-                            browser.referenceFrame.start = 0;
-                            browser.cursorModel.setRegions(featureList);
-
-
-                        });
+//                        browser.designatedTrack = track;
+//
+//                        browser.designatedTrack.featureSource.allFeatures(function (featureList) {
+//
+//                            browser.referenceFrame.start = 0;
+//                            browser.cursorModel.setRegions(featureList);
+//
+//
+//                        });
 
                     }
                     else {
@@ -159,11 +159,15 @@ var igv = (function (igv) {
         var heightStr = newHeight + "px";
         this.track.height = newHeight;
         this.trackDiv.style.height = heightStr;
-        // this.controlDiv.style.height = heightStr;
-        // this.controlCanvas.style.height = heightStr;
-        // this.controlCanvas.setAttribute("height", newHeight);
+
+        // control panel
+        this.controlDiv.style.height = heightStr;
+        this.controlCanvas.style.height = heightStr;
+        this.controlCanvas.setAttribute("height", newHeight);
+
         this.viewportDiv.style.height = heightStr;
         this.contentDiv.style.height = heightStr;
+
         this.canvas.style.height = heightStr;
         this.canvas.setAttribute("height", newHeight);
 
@@ -298,7 +302,6 @@ var igv = (function (igv) {
         return hit;
     };
 
-
     function addTrackHandlers(trackView) {
 
 
@@ -374,7 +377,6 @@ var igv = (function (igv) {
 
 
     }
-
 
     return igv;
 })

@@ -6,6 +6,7 @@
     z-index: 256;
     display: inline;
 }
+
 .igv-spinner-fontawesome-stop {
     position: relative;
     left:50%;
@@ -14,25 +15,244 @@
     display: none;
 }
 
-.btn-file {
+.igv-root-div {
+
     position: relative;
+    margin-left: 10px;
+    margin-right: 10px;
+    padding-top:50px;
+    left: 0;
+    right: 0;
+    height: auto;
+
+    -webkit-box-sizing: border-box;
+    -moz-box-sizing: border-box;
+    box-sizing: border-box;
+
+    -webkit-tap-highlight-color: rgba(0, 0, 0, 0);
+
+    -webkit-touch-callout: none;
+
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+}
+
+.igv-karyo-div {
+    position: relative;
+    left: 0;
+    top: 0;
+    height:200px;
+}
+
+.igv-karyo-content-div {
+    left:0;
+    top:0;
+    width:100%;
+    height:100%;
+}
+
+.igv-karyo-canvas {
+    left:0;
+    top:0;
+    width:100%;
+    height:100%;
+}
+
+.igv-header-div {
+    position: relative;
+    left: 0;
+    right: 0;
+}
+
+.igv-ideogram-div {
+    height: 40px;
+    width : 100%;
+}
+
+.igv-ideogram-content-div {
+    position:absolute;
+    left:50px;
+    right: 0px;
+    height: 100%;
+}
+
+.igv-ideogram-canvas {
+    left:0;
+    top:0;
+    width:100%;
+    height:100%;
+}
+
+.igv-ideogram-chr-div {
+    position:absolute;
+    height:100%;
+    left:0px;
+    width:50px;
+    font-size: small;
+}
+
+.igv-track-container-div {
+    position: relative;
+    left: 0;
+    right: 0;
+    padding-top: 8px;
+    padding-bottom: 8px;
+    /*font-size: medium;*/
+    height: auto;
     overflow: hidden;
 }
 
-.btn-file input[type=file] {
+.igv-track-div {
+    width: 100%;
+    overflow:hidden;
+    margin-bottom:10px;
+}
+
+.igv-track-label {
+    position: absolute;
+    top: 10px;
+    left: 96px;
+    cursor: pointer;
+}
+
+.igv-track-disable-button-fontawesome {
+    position: absolute;
+    top: 8px;
+    right: 12px;
+    cursor: pointer;
+    color: #222;
+}
+
+.igv-control-div {
+    position: absolute;
+    left: 0;
+    height: 100%;
+    border: none;
+    padding: 0;
+    background: none;
+}
+
+.igv-control-sort-fontawesome {
+    position: absolute;
+    top: 10px;
+    left: 38px;
+    cursor: pointer;
+    color: grey;
+}
+
+.igv-control-sort-fontawesome-selected {
+    position: absolute;
+    top: 10px;
+    left: 38px;
+    cursor: pointer;
+    color: red;
+}
+
+.igv-viewport-div {
+    position: absolute;
+    left: 50px;
+    right: 0;
+    height: 100%;
+    overflow-x: hidden;
+    overflow-y: auto;
+}
+
+.igv-content-div {
+    position: relative;
+    margin-left: 10px;
+    margin-right: 10px;
+    left: 0;
+    right: 0;
+}
+
+.igv-popover {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 350px;
+    /*height: 240px;*/
+    z-index: 1000;
+    font-family: Arial, Helvetica, sans-serif;
+    font-size: medium;
+    border: 2px solid #444;
+    background: #fff;
+    border-radius: 2%;
+    -moz-border-radius: 2%;
+    -webkit-border-radius: 2%;
+    display: none;
+}
+
+.igv-popoverContent {
+    position: absolute;
+    top: 5px;
+    left: 5px;
+    right: 25px;
+    /*bottom: 5px;*/
+    background: #fff;
+    /*background: rgba(0, 255, 0, .5);*/
+    /*display: block;*/
+}
+
+.igv-popoverPointer {
+    position: absolute;
+    top: 0;
+    left: 0;
+    z-index: 5000;
+}
+
+.igv-popoverContent .igv-popoverNameSpan {
+    font-weight: bold;
+    /*background: #0f0;*/
+}
+
+.igv-popoverContent .igv-popoverValueSpan {
+    word-break: break-all;
+    /*background: #f00;*/
+}
+
+.igv-popoverContent .popoverContentSpan {
+    font-weight: bold;
+}
+
+.igv-popoverCloseElement {
+    position: absolute;
+    top: 4px;
+    right: 4px;
+    cursor: pointer;
+}
+
+.igv-popoverCloseFontAwesome {
     position: absolute;
     top: 0;
     right: 0;
-    min-width: 100%;
-    min-height: 100%;
-    font-size: 999px;
-    text-align: right;
-    filter: alpha(opacity=0);
-    opacity: 0;
-    outline: none;
-    background: white;
-    cursor: inherit;
-    display: block;
+    color: #888;
+}
+
+.igv-popoverClose {
+    position: absolute;
+    top: 4px;
+    right: 4px;
+    width: 15px;
+    height: 15px;
+    font-size: 10pt;
+    color: #444;
+    border: 2px solid #fff;
+    background-color: #fff;
+    cursor: pointer;
+    font-weight: bold;
+    border-radius: 50%;
+    -moz-border-radius: 50%;
+    -webkit-border-radius: 50%;
+    /*padding: 1px 3px 2px 3px;*/
+    text-align: center;
+}
+
+.igv-popoverClose:hover {
+    color: #fff;
+    border: 2px solid #e00;
+    background-color: #e00;
 }
 
 .spacer5 {
@@ -153,290 +373,6 @@
     padding: 0;
     border: 0;
     display: block;
-}
-
-.igv-root-div {
-
-    position: relative;
-    margin-left: 10px;
-    margin-right: 10px;
-    padding-top:50px;
-    left: 0;
-    right: 0;
-    height: auto;
-
-    -webkit-box-sizing: border-box;
-    -moz-box-sizing: border-box;
-    box-sizing: border-box;
-
-    -webkit-tap-highlight-color: rgba(0, 0, 0, 0);
-
-    -webkit-touch-callout: none;
-
-    -webkit-user-select: none;
-    -moz-user-select: none;
-    -ms-user-select: none;
-    user-select: none;
-}
-
-.igv-karyo-div {
-    position: relative;
-    left: 0;
-    top: 0;
-    height:200px;
-}
-
-.igv-karyo-content-div {
-    left:0;
-    top:0;
-    width:100%;
-    height:100%;
-}
-
-.igv-karyo-canvas {
-    left:0;
-    top:0;
-    width:100%;
-    height:100%;
-}
-
-.igv-header-div {
-    position: relative;
-    left: 0;
-    right: 0;
-}
-
-.igv-ideogram-div {
-    height: 40px;
-    width : 100%;
-}
-
-.igv-ideogram-content-div {
-    position:absolute;
-    left:50px;
-    right: 0px;
-    height: 100%;
-}
-
-.igv-ideogram-canvas {
-    left:0;
-    top:0;
-    width:100%;
-    height:100%;
-}
-
-.igv-ideogram-chr-div {
-    position:absolute;
-    height:100%;
-    left:0px;
-    width:50px;
-    font-size: small;
-}
-
-.igv-track-container-div {
-    position: relative;
-    left: 0;
-    right: 0;
-    /*margin-right: 20px;*/
-    padding-bottom: 10px;
-   /* font-family: Arial, Helvetica, sans-serif;*/
-    font-size: medium;
-    height: auto;
-    overflow: hidden;
-}
-
-.igv-track-div {
-    width: 100%;
-    overflow:hidden;
-    margin-bottom:10px;
-}
-
-.igv-track-label {
-    position: absolute;
-    top: 10px;
-    left: 10px;
-    cursor: pointer;
-}
-
-.igv-track-disable-button-fontawesome {
-    position: absolute;
-    top: 8px;
-    right: 12px;
-    cursor: pointer;
-    color: #222;
-}
-
-.igv-control-div {
-    position: absolute;
-    left: 0;
-    height: 100%;
-    border: none;
-    padding: 0;
-    background: none;
-}
-
-.igv-control-sort-fontawesome {
-    cursor: pointer;
-    color: #000000;
-}
-
-.igv-control-sort-fontawesome-selected {
-    cursor: pointer;
-    color: red;
-}
-
-.igv-viewport-div {
-    position: absolute;
-    left: 50px;
-    right: 0;
-    height: 100%;
-    overflow-x: hidden;
-    overflow-y: auto;
-}
-
-.igv-content-div {
-    position: relative;
-    margin-left: 10px;
-    margin-right: 10px;
-    left: 0;
-    right: 0;
-}
-
-
-.igv-cursorHistogram-div {
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100px;
-    border: none;
-    padding: 0;
-    background: none;
-    outline: thin solid rgba(64, 64, 64, 1.0);
-}
-
-.igv-filter-histogram-button-div {
-    position: absolute;
-    top: 0;
-    left: 0;
-    border: none;
-    padding: 0;
-    background: none;
-}
-
-.igv-filter-div {
-    position: absolute;
-    width: 128px;
-    border: none;
-    padding: 0;
-    height: 100%;
-    background: none;
-}
-
-.igv-filter-button {
-    position: absolute;
-    width: 128px;
-    border: none;
-    padding: 0;
-    height: 100%;
-    background: none;
-}
-
-.igv-filter-thumbnail-horizontal-line {
-    position: absolute;
-    left: 0;
-    width: 128px;
-    height: 2px;
-    border: none;
-    padding: 0;
-    background-color: rgba(255, 0, 0, .75);
-}
-
-.igv-popover {
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 350px;
-    /*height: 240px;*/
-    z-index: 1000;
-    font-family: Arial, Helvetica, sans-serif;
-    font-size: medium;
-    border: 2px solid #444;
-    background: #fff;
-    border-radius: 2%;
-    -moz-border-radius: 2%;
-    -webkit-border-radius: 2%;
-    display: none;
-}
-
-.igv-popoverContent {
-    position: absolute;
-    top: 5px;
-    left: 5px;
-    right: 25px;
-    /*bottom: 5px;*/
-    background: #fff;
-    /*background: rgba(0, 255, 0, .5);*/
-    /*display: block;*/
-}
-
-.igv-popoverPointer {
-    position: absolute;
-    top: 0;
-    left: 0;
-    z-index: 5000;
-}
-
-.igv-popoverContent .igv-popoverNameSpan {
-    font-weight: bold;
-    /*background: #0f0;*/
-}
-
-.igv-popoverContent .igv-popoverValueSpan {
-    word-break: break-all;
-    /*background: #f00;*/
-}
-
-.igv-popoverContent .popoverContentSpan {
-    font-weight: bold;
-}
-
-.igv-popoverCloseElement {
-    position: absolute;
-    top: 4px;
-    right: 4px;
-    cursor: pointer;
-}
-
-.igv-popoverCloseFontAwesome {
-    position: absolute;
-    top: 0;
-    right: 0;
-    color: #888;
-}
-
-.igv-popoverClose {
-    position: absolute;
-    top: 4px;
-    right: 4px;
-    width: 15px;
-    height: 15px;
-    font-size: 10pt;
-    color: #444;
-    border: 2px solid #fff;
-    background-color: #fff;
-    cursor: pointer;
-    font-weight: bold;
-    border-radius: 50%;
-    -moz-border-radius: 50%;
-    -webkit-border-radius: 50%;
-    /*padding: 1px 3px 2px 3px;*/
-    text-align: center;
-}
-
-.igv-popoverClose:hover {
-    color: #fff;
-    border: 2px solid #e00;
-    background-color: #e00;
 }
 
 #dropdown-list {
