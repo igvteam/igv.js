@@ -32,11 +32,11 @@ igv = (function (igv) {
             this.maximum = json.maximum;
 
             if (undefined !== json.minimum || undefined !== json.maximum) {
-                modalPresentationButton.css("color", "red");
+                modalPresentationButton.css("color", this.trackPanel.browser.highlightColor);
             }
 
         } else if (this.isFilterActive) {
-            modalPresentationButton.css("color", "red");
+            modalPresentationButton.css("color", this.trackPanel.browser.highlightColor);
 
         }
 
@@ -120,7 +120,7 @@ igv = (function (igv) {
             return;
         }
 
-        modalPresentationButton.css("color", "red");
+        modalPresentationButton.css("color", this.trackPanel.browser.highlightColor);
 
         if ("minMaxRadio_" + this.guid === this.radioButton[0].id) {
 

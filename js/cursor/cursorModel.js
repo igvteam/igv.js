@@ -73,13 +73,13 @@ var cursor = (function (cursor) {
         $(trackLabelSpan).text( this.browser.designatedTrack ? this.browser.designatedTrack.label : "unnamed" );
 
         $(trackLabelSpan).css({
-            "color" : this.browser.designatedTrack ? this.browser.designatedTrack.color : cursor.defaultColor()
+            "color" : this.browser.highlightColor
         });
 
         $(regionCountSpan).text( igv.numberFormatter(this.regions.length) );
 
         $(regionCountSpan).css({
-            "color" : this.browser.designatedTrack ? this.browser.designatedTrack.color : cursor.defaultColor()
+            "color" : this.browser.highlightColor
         });
 
         $(filteredRegionCountSpan).text( igv.numberFormatter(this.filteredRegions.length) );

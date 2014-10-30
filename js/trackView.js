@@ -15,6 +15,7 @@ var igv = (function (igv) {
             canvas,
             closeButton,
             labelButton,
+            labelSpan,
             spinnerFontAwesome,
             controlWidth = browser.controlPanelWidth || 50;
 
@@ -93,41 +94,42 @@ var igv = (function (igv) {
                 browser.removeTrack(track);
             };
 
-
-
             if (track.label) {
 
-                labelButton = document.createElement("button");
-                viewportDiv.appendChild(labelButton);
+                labelSpan = document.createElement("span");
+                viewportDiv.appendChild(labelSpan);
+                labelSpan.className = "igv-track-label-span-base";
+                labelSpan.innerHTML = track.label;
 
-                labelButton.className = "btn btn-xs btn-cursor-deselected igv-track-label";
-                labelButton.innerHTML = track.label;
-                track.labelButton = labelButton;
 
-                labelButton.onclick = function (e) {
 
-                    if (browser.cursorModel) {
 
+
+//                labelButton = document.createElement("button");
+//                viewportDiv.appendChild(labelButton);
+//                labelButton.className = "btn btn-xs btn-cursor-deselected igv-track-label";
+//                labelButton.innerHTML = track.label;
+//                track.labelButton = labelButton;
+//                labelButton.onclick = function (e) {
+//
+//                    if (browser.cursorModel) {
+//
 //                        browser.designatedTrack = track;
-//
 //                        browser.designatedTrack.featureSource.allFeatures(function (featureList) {
-//
 //                            browser.referenceFrame.start = 0;
 //                            browser.cursorModel.setRegions(featureList);
-//
-//
 //                        });
+//
+//                    }
+//                    else {
+//                        if (track.description) {
+//                            igv.popover.show(e.pageX, e.pageY, track.description);
+//                        }
+//                    }
+//                }
 
-                    }
-                    else {
 
-                        if (track.description) {
-                            igv.popover.show(e.pageX, e.pageY, track.description);
-                        }
 
-                    }
-
-                }
 
             }
         }

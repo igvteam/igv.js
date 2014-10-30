@@ -2,9 +2,7 @@ var igv = (function (igv) {
 
     igv.createCursorBrowser = function (options) {
 
-        var igvCursorUIHolder,
-            contentHeader,
-            cursorUIHeaderBlurbDiv,
+        var contentHeader,
             trackContainer,
             browser;
 
@@ -239,18 +237,12 @@ var igv = (function (igv) {
 
 
         // Construct DOM hierarchy
-
-
         trackContainer = $('<div id="igvTrackContainerDiv" class="igv-track-container-div">')[0];
         browser = new igv.Browser(options, trackContainer);
         document.getElementById('igvContainerDiv').appendChild(browser.div);
 
         contentHeader = $('<div class="row"></div>')[0];
         $(browser.div).append(contentHeader);
-
-//        cursorUIHeaderBlurbDiv = $('<div class="igv-cursor-ui-header-blurb">Primary track is <span></span> with <span></span> total regions (<span></span> regions remain with filters applied)</div>')[0];
-//        igvCursorUIHolder = $("div.igv-cursor-ui-header").find(".igv-cursor-ui-holder");
-//        igvCursorUIHolder.append(cursorUIHeaderBlurbDiv);
 
         browser.horizontalScrollbar = new cursor.HorizontalScrollbar(browser, $(browser.div));
         $(browser.div).append(trackContainer);
@@ -263,6 +255,8 @@ var igv = (function (igv) {
         browser.cursorModel = new cursor.CursorModel(browser);
 
         browser.referenceFrame = new igv.ReferenceFrame("", 0, 1 / browser.cursorModel.framePixelWidth);
+
+        browser.highlightColor = "rgb(204, 51, 0)";
 
         // Launch app with session JSON if provided as param
         var sessionJSONPath = igv.getQueryValue('session');
@@ -304,7 +298,8 @@ var igv = (function (igv) {
         browser.selectDesignatedTrack = function (trackView) {
 
             var currentDesignatedTrackView,
-                faCircle;
+                faCircle,
+                trackLabelSpan;
 
             if (browser.designatedTrack && browser.designatedTrack.trackFilter.trackPanel !== trackView) {
 
@@ -313,6 +308,9 @@ var igv = (function (igv) {
                 faCircle = $(currentDesignatedTrackView.viewportDiv).find("i.fa-circle");
                 faCircle.removeClass("igv-control-bullseye-fontawesome-selected");
                 faCircle.addClass   ("igv-control-bullseye-fontawesome");
+
+                trackLabelSpan = $(currentDesignatedTrackView.viewportDiv).find("span.igv-track-label-span-base");
+                trackLabelSpan.removeClass("igv-track-label-span-highlighted");
 
             }
 
@@ -323,8 +321,11 @@ var igv = (function (igv) {
             faCircle.addClass   ("igv-control-bullseye-fontawesome-selected");
 
             faCircle.css({
-                "color" : trackView.track.color
+                "color" : browser.highlightColor
             });
+
+            trackLabelSpan = $(trackView.viewportDiv).find("span.igv-track-label-span-base");
+            trackLabelSpan.addClass("igv-track-label-span-highlighted");
 
         };
 

@@ -110,6 +110,18 @@
     margin-bottom:10px;
 }
 
+.igv-track-label-span-base {
+    position: absolute;
+    top: 10px;
+    left: 96px;
+    cursor: pointer;
+}
+
+.igv-track-label-span-highlighted {
+    font-weight: bold;
+    color: rgba(204, 51, 0, 1);
+}
+
 .igv-track-label {
     position: absolute;
     top: 10px;
@@ -147,7 +159,7 @@
     top: 10px;
     left: 38px;
     cursor: pointer;
-    color: red;
+    color: rgba(204, 51, 0, 1);
 }
 
 .igv-viewport-div {
