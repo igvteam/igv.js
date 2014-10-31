@@ -160,22 +160,26 @@
     background-color: white;
 }
 
+.igv-fontawesome-vertical-center-shim {
+    vertical-align: middle;
+}
+
 .igv-track-icon-container {
     position: absolute;
     left: 0;
     top: 4px;
     width: auto;
     height:auto;
+
     background: rgba(255, 255, 255, 0.75);
-    display: inline-flex;
+
+    display: inline-block;
 }
 
 .igv-track-label-span-base {
     margin-left: 2px;
     margin-right: 2px;
     position: relative;
-    /*top: 4px;*/
-    /*left: 96px;*/
     cursor: pointer;
 }
 
@@ -208,27 +212,28 @@
 }
 
 .igv-control-sort-fontawesome {
-    margin-left: 2px;
-    margin-right: 2px;
+
     position: relative;
-    /*top: 4px;*/
-    /*left: 38px;*/
     cursor: pointer;
     color: grey;
+
+    float: left;
+    margin-left: 2px;
+    margin-right: 2px;
 }
 
 .igv-control-sort-fontawesome-selected {
+
     position: relative;
-    /*top: 4px;*/
-    /*left: 38px;*/
     cursor: pointer;
     color: rgba(204, 51, 0, 1);
+
+    float: left;
+    margin-left: 2px;
+    margin-right: 2px;
 }
 
 .igv-viewport-div {
-
-    margin-left: 8px;
-
     position: absolute;
     left:  50px;
     right: 48px;

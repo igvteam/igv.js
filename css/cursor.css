@@ -18,24 +18,26 @@
 }
 
 .igv-filter-histogram-button-div {
-    margin-left: 2px;
-    margin-right: 2px;
+
     position: relative;
-    /*top: 4px;*/
-    /*left: 16px;*/
     cursor: pointer;
     background: none;
+
+    float: left;
+    margin-left: 2px;
+    margin-right: 2px;
 }
 
 .igv-control-bullseye-stack-fontawesome {
-    margin-left: 2px;
-    margin-right: 2px;
+
     position: relative;
-    /*top: 4px;*/
-    /*left: 64px;*/
     cursor: pointer;
     color: grey;
     font-size: x-small;
+
+    float: left;
+    margin-left: 2px;
+    margin-right: 2px;
 }
 
 .igv-control-bullseye-fontawesome-selected {
