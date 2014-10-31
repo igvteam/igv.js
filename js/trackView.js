@@ -10,6 +10,8 @@ var igv = (function (igv) {
         var viewportDiv,
             trackIconContainer,
             trackDiv,
+            trackManipulationContainer,
+            trackManipulationIconBox,
             controlDiv,
             controlCanvas,
             contentDiv,
@@ -78,6 +80,25 @@ var igv = (function (igv) {
         canvas.style.height = track.height + "px";
         canvas.setAttribute('width', contentDiv.clientWidth);
         canvas.setAttribute('height', track.height);
+
+        // track manipulation container
+        trackManipulationContainer = $('<div class="igv-track-manipulation-container"></div>')[0];
+        $(trackDiv).append( trackManipulationContainer );
+
+        trackManipulationIconBox = $('<div class="igv-track-manipulation-icon-box"></div>')[0];
+        $(trackManipulationContainer).append( trackManipulationIconBox );
+
+        $(trackManipulationIconBox).append( $('<i class="fa fa-chevron-circle-up   igv-track-manipulation-move-up">')[0] );
+        $(trackManipulationIconBox).append( $('<i class="fa fa-chevron-circle-down igv-track-manipulation-move-down">')[0] );
+        $(trackManipulationIconBox).append( $('<i class="fa fa-times               igv-track-manipulation-discard">')[0] );
+
+
+
+
+
+
+
+
 
 
         // CURSOR specific functions
