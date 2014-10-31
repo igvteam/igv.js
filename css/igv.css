@@ -203,9 +203,8 @@
     position: absolute;
     left: 0;
     height: 100%;
-    border: none;
-    padding: 0;
-    background: none;
+    background-color: white;
+    border: 2px solid #444;
 }
 
 .igv-control-sort-fontawesome {
@@ -227,6 +226,9 @@
 }
 
 .igv-viewport-div {
+
+    margin-left: 8px;
+
     position: absolute;
     left:  50px;
     right: 48px;

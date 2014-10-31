@@ -3,18 +3,18 @@
  */
 var cursor = (function (cursor) {
 
-    cursor.CursorHistogram = function (binCount, maxScore) {
+    cursor.CursorHistogram = function (binCount, maxScore, controlDiv) {
 
-//        this.guid = igv.guid();
-        this.bins = [];
-        this.bins.length = binCount;
-        this.maxCount = 0;
+        this.createMarkupAndSetBinLength(controlDiv);
+
+//        this.bins = [];
+//        this.bins.length = binCount;
 
         this.canvasFillStyle = igv.greyScale(255);
-//        this.canvasFillStyle = igv.rgbColor(255, 255, 255);
         this.minMaxfillStyle = igv.rgbaColor(64, 64, 64, 0.5);
         this.minMaxEdgefillStyle = igv.rgbaColor(32, 32, 32, 1.0);
 
+        this.maxCount = 0;
         this.initializeBins();
 
         this.maxScore = maxScore;
@@ -66,18 +66,12 @@ var cursor = (function (cursor) {
 
             var height = (minimum/track.max) * myself.bins.length;
             myself.igvCanvas.fillRect(0, myself.bins.length - height, myself.canvasWidth, height, { fillStyle: myself.minMaxfillStyle });
-
-//            myself.igvCanvas.fillRect(0, myself.bins.length - height - 1, myself.canvasWidth, 1, { fillStyle: myself.minMaxEdgefillStyle });
-
         };
 
         var renderMaximumOverlay = function (maximum) {
 
             var height = myself.bins.length - ((maximum/track.max) * myself.bins.length);
             myself.igvCanvas.fillRect(0, 0, myself.canvasWidth, height, { fillStyle: myself.minMaxfillStyle });
-
-//            myself.igvCanvas.fillRect(0, height - 1, myself.canvasWidth, 1, { fillStyle: myself.minMaxEdgefillStyle });
-
         };
 
         // Clear canvas
@@ -143,34 +137,32 @@ var cursor = (function (cursor) {
     }
 
     // Markup
-    cursor.CursorHistogram.prototype.createMarkupWithTrackPanelDiv = function (trackPanel) {
+    cursor.CursorHistogram.prototype.createMarkupAndSetBinLength = function (parentDiv) {
 
-//        this.id = this.guid +"_cursorHistogramDiv";
-//        this.label = trackPanel.track.label +"_cursorHistogramDiv";
-
-        this.igvCanvas = this.canvasWithParentDiv(trackPanel.controlDiv);
+        this.igvCanvas = this.createCanvasAndSetBinLength(parentDiv);
 
         // Clear canvas
         this.fillCanvasWithFillStyle(this.canvasFillStyle);
 
     };
 
-    cursor.CursorHistogram.prototype.canvasWithParentDiv = function (parentDiv) {
+    cursor.CursorHistogram.prototype.createCanvasAndSetBinLength = function (parentDiv) {
 
         var cursorHistogramDiv = document.createElement('div');
         parentDiv.appendChild(cursorHistogramDiv);
-
         cursorHistogramDiv.className = "igv-cursorHistogram-div";
-        cursorHistogramDiv.style.height = this.bins.length + "px";
-        this.cursorHistogramDiv = cursorHistogramDiv;
 
-        var DOMCanvas = this.DOMCanvasWithParentDiv(this.cursorHistogramDiv);
+        this.cursorHistogramDiv = cursorHistogramDiv;
+        this.bins = [];
+        this.bins.length = cursorHistogramDiv.clientHeight;
+
+        var DOMCanvas = this.createDOMCanvasWithParent(this.cursorHistogramDiv);
 
         var igvCanvas = new igv.Canvas(DOMCanvas);
         return igvCanvas;
     };
 
-    cursor.CursorHistogram.prototype.DOMCanvasWithParentDiv = function (parentDiv) {
+    cursor.CursorHistogram.prototype.createDOMCanvasWithParent = function (parentDiv) {
 
         var DOMCanvas;
 
@@ -186,14 +178,13 @@ var cursor = (function (cursor) {
         return DOMCanvas;
     };
 
-    cursor.CursorHistogram.prototype.updateHeight = function (track, height) {
+    cursor.CursorHistogram.prototype.updateHeightAndInitializeHistogramWithTrack = function (track) {
 
-        this.cursorHistogramDiv.style.height = height + "px";
         this.canvasHeight = this.cursorHistogramDiv.clientHeight;
         this.igvCanvas.canvas.setAttribute('height', this.cursorHistogramDiv.clientHeight);
 
         this.bins = [];
-        this.bins.length = this.canvasHeight;
+        this.bins.length = this.cursorHistogramDiv.clientHeight;
         track.cursorModel.initializeHistogram(track);
      };
 

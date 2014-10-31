@@ -56,7 +56,7 @@ var igv = (function (igv) {
         viewportDiv = document.createElement("div");
         trackDiv.appendChild(viewportDiv);
         viewportDiv.className = "igv-viewport-div";
-        viewportDiv.style.left = controlDiv.clientWidth + "px";
+        viewportDiv.style.left = controlWidth + "px";
         viewportDiv.style.height = track.height + "px";
         this.viewportDiv = viewportDiv;
 
@@ -97,8 +97,8 @@ var igv = (function (igv) {
         // CURSOR specific functions
         if (browser.type === "CURSOR") {
 
-            this.track.cursorHistogram = new cursor.CursorHistogram(controlDiv.clientHeight, this.track.max);
-            this.track.cursorHistogram.createMarkupWithTrackPanelDiv(this);
+            this.track.cursorHistogram = new cursor.CursorHistogram(controlDiv.clientHeight, this.track.max, controlDiv);
+//            this.track.cursorHistogram.createMarkupWithParent(controlDiv);
 
             igv.cursorAddTrackControlButtons(this, browser);
 
@@ -175,6 +175,7 @@ var igv = (function (igv) {
 
         // control panel
         this.controlDiv.style.height = heightStr;
+
         this.controlCanvas.style.height = heightStr;
         this.controlCanvas.setAttribute("height", newHeight);
 
@@ -184,7 +185,10 @@ var igv = (function (igv) {
         this.canvas.style.height = heightStr;
         this.canvas.setAttribute("height", newHeight);
 
-        this.track.cursorHistogram.updateHeight(this.track, newHeight);
+        if (this.browser.type === "CURSOR") {
+            this.track.cursorHistogram.updateHeightAndInitializeHistogramWithTrack(this.track);
+        }
+
 
         this.update();
     };

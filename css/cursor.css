@@ -1,4 +1,13 @@
 
+.igv-cursorHistogram-div {
+    position: absolute;
+    top: 2px;
+    bottom: 2px;
+    left: 2px;
+    right: 2px;
+    background: white;
+}
+
 .igv-trackfilter-fontawesome {
     position: relative;
     top: 0;
@@ -119,7 +128,7 @@
     right:0;
     height:100%;
     background-color: rgba(150, 150, 150, .2);
-    border: 1px solid #fff;
+    /*border: 1px solid #fff;*/
     /*outline: solid red 2px;*/
 }
 
@@ -128,14 +137,6 @@
     top: 0;
     right:0;
     height:20px;
-    padding-top: 4px;
-    padding-bottom: 4px;
-}
-
-.igv-cursorHistogram-div {
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100px;
-    background: none;
+    /*padding-top: 4px;*/
+    /*padding-bottom: 4px;*/
 }
