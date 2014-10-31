@@ -2,7 +2,8 @@ var igv = (function (igv) {
 
     igv.createCursorBrowser = function (options) {
 
-        var contentHeader,
+        var horizontalScrollBarContainer,
+            contentHeader,
             trackContainer,
             browser;
 
@@ -244,7 +245,12 @@ var igv = (function (igv) {
         contentHeader = $('<div class="row"></div>')[0];
         $(browser.div).append(contentHeader);
 
-        browser.horizontalScrollbar = new cursor.HorizontalScrollbar(browser, $(browser.div));
+        // horizontal scrollbar container. fill in the guts after track construction
+        horizontalScrollBarContainer = $('<div class="igv-horizontal-scrollbar-container-div">')[0];
+        $(browser.div).append(horizontalScrollBarContainer);
+
+//        browser.horizontalScrollbar = new cursor.HorizontalScrollbar(browser, $(horizontalScrollBarContainer));
+
         $(browser.div).append(trackContainer);
 
         igv.addAjaxExtensions();
@@ -283,8 +289,16 @@ var igv = (function (igv) {
 
             browser.selectDesignatedTrack(browser.designatedTrack.trackFilter.trackPanel);
 
+
+            horizontalScrollBarContainer = $("div.igv-horizontal-scrollbar-container-div");
+            browser.horizontalScrollbar = new cursor.HorizontalScrollbar(browser, $(horizontalScrollBarContainer));
+
+
+
             browser.designatedTrack.featureSource.allFeatures(function (featureList) {
+
                 browser.cursorModel.setRegions(featureList);
+
                 browser.horizontalScrollbar.update();
             });
         }
@@ -498,7 +512,8 @@ var igv = (function (igv) {
 
         browser.loadSession = function (session) {
 
-            var cursorTracks;
+            var cursorTracks,
+                horizontalScrollBarContainer;
 
             browser.sessionTeardown();
 
@@ -538,6 +553,14 @@ var igv = (function (igv) {
 
             browser.selectDesignatedTrack(browser.designatedTrack.trackFilter.trackPanel);
 
+
+
+            horizontalScrollBarContainer = $("div.igv-horizontal-scrollbar-container-div");
+            browser.horizontalScrollbar = new cursor.HorizontalScrollbar(browser, $(horizontalScrollBarContainer));
+
+
+
+
             browser.designatedTrack.featureSource.allFeatures(function (featureList) {
 
                 browser.cursorModel.setRegions(featureList);
@@ -555,6 +578,7 @@ var igv = (function (igv) {
                 browser.referenceFrame.bpPerPixel = 1.0 / browser.cursorModel.framePixelWidth;
 
                 browser.goto("", session.start, session.end);
+
 
                 browser.horizontalScrollbar.update();
 

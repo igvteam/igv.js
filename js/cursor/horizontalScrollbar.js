@@ -8,10 +8,10 @@ var cursor = (function (cursor) {
 
     var minimumHorizontalScrollBarDraggableWidth = 6;
 
-    cursor.HorizontalScrollbar = function (browser, parentDivObject) {
+    cursor.HorizontalScrollbar = function (browser, horizontalScrollBarContainer) {
 
         this.browser = browser;
-        this.markupWithParentDivObject(parentDivObject);
+        this.markupWithParentDivObject(horizontalScrollBarContainer);
 
     };
 
@@ -58,10 +58,9 @@ var cursor = (function (cursor) {
 
      };
 
-    cursor.HorizontalScrollbar.prototype.markupWithParentDivObject = function (parentDivObject) {
+    cursor.HorizontalScrollbar.prototype.markupWithParentDivObject = function (horizontalScrollBarContainer) {
 
         var myself = this,
-            horizontalScrollBarContainer,
             horizontalScrollBar,
             horizontalScrollBarDraggable,
             isMouseDown = undefined,
@@ -69,15 +68,13 @@ var cursor = (function (cursor) {
             isMouseIn = undefined;
 
         // DOM
-        horizontalScrollBarContainer = $('<div class="igv-horizontal-scrollbar-container-div">')[0];
         horizontalScrollBar          = $('<div class="igv-horizontal-scrollbar-div">')[0];
         horizontalScrollBarDraggable = $('<div class="igv-horizontal-scrollbar-draggable-div">')[0];
 
         $( horizontalScrollBar).css( "left", this.browser.controlPanelWidth + "px");
 
 
-        parentDivObject.append(horizontalScrollBarContainer);
-        $(horizontalScrollBarContainer).append(horizontalScrollBar);
+        horizontalScrollBarContainer.append(horizontalScrollBar);
         $( horizontalScrollBar).css({
             "left": (this.browser.controlPanelWidth ? this.browser.controlPanelWidth : 50) + "px"
         });

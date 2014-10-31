@@ -1,4 +1,43 @@
 
+.igv-horizontal-scrollbar-container-div {
+    position: relative;
+    top: 0;
+    right:0;
+    height:20px;
+
+    background-color: red;
+}
+
+.igv-horizontal-scrollbar-div {
+    position: absolute;
+    top: 0;
+    right:0;
+    height:100%;
+
+    background-color: rgba(150, 150, 150, .2);
+
+    /*display: none;*/
+}
+
+.igv-horizontal-scrollbar-draggable-div {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 100px;
+    height:100%;
+
+    background-color: #aaa;
+    cursor: pointer;
+
+    /*display: none;*/
+}
+
+.igv-horizontal-scrollbar-draggable-div:hover,
+.igv-horizontal-scrollbar-draggable-div:focus,
+.igv-horizontal-scrollbar-draggable-div:active {
+    background-color: #666;
+}
+
 .igv-cursorHistogram-div {
     position: absolute;
     top: 2px;
@@ -107,39 +146,4 @@
     margin:auto;
     text-align: center;
     display: none;
-}
-
-.igv-horizontal-scrollbar-draggable-div {
-    position: absolute;
-    left: 0;
-    top: 0;
-    width: 100px;
-    height:100%;
-    background-color: #aaa;
-    cursor: pointer;
-}
-
-.igv-horizontal-scrollbar-draggable-div:hover,
-.igv-horizontal-scrollbar-draggable-div:focus,
-.igv-horizontal-scrollbar-draggable-div:active {
-    background-color: #666;
-}
-
-.igv-horizontal-scrollbar-div {
-    position: absolute;
-    top: 0;
-    right:0;
-    height:100%;
-    background-color: rgba(150, 150, 150, .2);
-    /*border: 1px solid #fff;*/
-    /*outline: solid red 2px;*/
-}
-
-.igv-horizontal-scrollbar-container-div {
-    position: relative;
-    top: 0;
-    right:0;
-    height:20px;
-    /*padding-top: 4px;*/
-    /*padding-bottom: 4px;*/
 }
