@@ -5,14 +5,11 @@ var cursor = (function (cursor) {
 
     cursor.CursorHistogram = function (binCount, maxScore, controlDiv) {
 
-        this.createMarkupAndSetBinLength(controlDiv);
-
-//        this.bins = [];
-//        this.bins.length = binCount;
-
         this.canvasFillStyle = igv.greyScale(255);
         this.minMaxfillStyle = igv.rgbaColor(64, 64, 64, 0.5);
         this.minMaxEdgefillStyle = igv.rgbaColor(32, 32, 32, 1.0);
+
+        this.createMarkupAndSetBinLength(controlDiv);
 
         this.maxCount = 0;
         this.initializeBins();
