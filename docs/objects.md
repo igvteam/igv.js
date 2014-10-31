@@ -18,6 +18,14 @@ Track
 The "model" object for an igv track.  Responsible for rendering the track on a surface (typically a canvas 
 context) provided by the view.  In some classes renderering is delegated to a pluggable function.
 
+Properties
+
+url   url to the file or webservice for this track
+label  
+height  the track height in pixels
+visibilityWindow   for annotation and alignment tracks, features are not shown when zoomed out past this value
+
+
 
 
 FeatureSource

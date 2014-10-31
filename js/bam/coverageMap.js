@@ -75,18 +75,6 @@ var igv = (function (igv) {
         return fractions;
     };
 
-    Coverage.prototype.mismatchTotalPercentage = function(refBase) {
-
-        var totalPercentage;
-
-        totalPercentage = 0.0;
-       this.mismatchPercentages(refBase).forEach(function (fraction) {
-
-            totalPercentage += fraction.percent;
-        });
-
-        return totalPercentage;
-    };
 
     igv.CoverageMap = function (chr, start, end, features, refSeq) {
 
@@ -140,20 +128,6 @@ var igv = (function (igv) {
 
     };
 
-    igv.CoverageMap.prototype.coverageAtGenomicLocation = function (genomicLocation) {
-
-        var index = genomicLocation - this.bpStart;
-
-        if (index < 0 || index >= this.coverage.length) {
-
-            return {};
-        } else {
-
-            return coverage[ index ];
-        }
-
-
-    };
 
     return igv;
 

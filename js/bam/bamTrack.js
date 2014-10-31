@@ -4,35 +4,30 @@
 var igv = (function (igv) {
 
 
-    var coverageColor;
-    var mismatchColor = "rgb(255, 0, 0)";
-    var alignmentColor = "rgb(185, 185, 185)";
-    var negStrandColor = "rgb(150, 150, 230)";
-    var posStrandColor = "rgb(230, 150, 150)";
-    var deletionColor = "black";
-    var skippedColor = "rgb(150, 170, 170)";
-    var expandedHeight = 14;
-    var trackHeight = 400;
 
     igv.BAMTrack = function (config) {
 
-        var coverageTrackHeightPercentage = 0.15,
-            alignmentTrackHeightPercentage = 1.0 - coverageTrackHeightPercentage;
+        var coverageTrackHeightPercentage = 0.15;
 
+        this.featureSource = new igv.BamSource(config);
         this.config = config;
         this.url = config.url;
         this.label = config.label || "";
         this.id = config.id || this.label;
-        this.height = config.height || trackHeight;
-        this.alignmentRowHeight = config.expadedHeight || expandedHeight;
+        this.height = config.height || 400;
+        this.alignmentRowHeight = config.expandedHeight || 14;
         this.alignmentRowYInset = 1;
-        this.featureSource = new igv.BamSource(config);
+        this.visibilityWindow = config.visibilityWindow || 30000;     // 30kb default
+        this.alignmentColor =  config.alignmentColor || "rgb(185, 185, 185)";
+        this.negStrandColor = config.negStrandColor || "rgb(150, 150, 230)";
+        this.posStrandColor = config.posStrandColor || "rgb(230, 150, 150)";
+        this.deletionColor =  config.deletionColor | "black";
+        this.skippedColor = config.skippedColor || "rgb(150, 170, 170)";
+        this.coverageColor = config.coverageColor || this.alignmentColor;
 
 
         // divide the canvas into a coverage track region and an alignment track region
-
         this.coverageTrackHeight = coverageTrackHeightPercentage * this.height - 5;
-        this.alignmentTrackHeight = alignmentTrackHeightPercentage * this.height;
 
     };
 
@@ -41,8 +36,8 @@ var igv = (function (igv) {
 //        console.log("bamTrack.draw");
 
 
-        // Don't try to draw alignments for windows > 30kb
-        if (bpEnd - bpStart > 30000) {
+        // Don't try to draw alignments for windows > the visibility window
+        if (bpEnd - bpStart > this.visibilityWindow) {
             var x;
             for (x = 200; x < width; x += 400)
                 canvas.fillText("Zoom in to see alignments", x, 20, {fillStye: 'black'});
@@ -52,8 +47,10 @@ var igv = (function (igv) {
 
         var myself = this,
             chr = refFrame.chr,
-            features,
-            refSeq;
+            alignmentColor = this.alignmentColor,
+            coverageColor = this.coverageColor,
+            skippedColor = this.skippedColor,
+            deletionColor = this.deletionColor;
 
 
         this.featureSource.getFeatures(chr, bpStart, bpEnd, function (features) {
@@ -95,8 +92,9 @@ var igv = (function (igv) {
             // coverage track
             canvas.setProperties({ fillStyle: alignmentColor });
             canvas.setProperties({ strokeStyle: alignmentColor });
-            // TODO -- covereageMap is sometimes undefined !!!
-            if (coverageMap) {
+
+
+            if (coverageMap) {// TODO -- why is covereageMap is sometimes undefined !?
 
                 // paint backdrop color for all coverage buckets
                 w = Math.max(1, 1.0 / refFrame.bpPerPixel);
@@ -112,7 +110,6 @@ var igv = (function (igv) {
                     x = refFrame.toPixels(bp - bpStart);
                     h = (item.total / coverageMap.maximum) * myself.coverageTrackHeight;
                     y = myself.coverageTrackHeight - h;
-                    coverageColor = alignmentColor;
 
                     canvas.setProperties({   fillStyle: coverageColor });
                     canvas.setProperties({ strokeStyle: coverageColor });
@@ -219,11 +216,13 @@ var igv = (function (igv) {
                                 x = [xRectStart, xRectEnd, xRectEnd + arrowHeadWidth, xRectEnd, xRectStart];
                                 y = [yRect, yRect, yRect + height / 2, yRect + height, yRect + height];
                                 canvas.fillPolygon(x, y);
+
                             } else if (!strand && blockIndex === 0) {
                                 var x = [ blockRectX - arrowHeadWidth, blockRectX, blockEndX, blockEndX, blockRectX];
                                 var y = [ yRect + height / 2, yRect, yRect, yRect + height, yRect + height];
                                 canvas.fillPolygon(x, y);
                             } else {
+
                                 canvas.fillRect(blockRectX, yRect, blockRectWidth, height);
                             }
 
