@@ -157,6 +157,7 @@
     left: 20px;
     top: 0;
     color: rgba(153, 0, 0, 1);
+    background-color: white;
 }
 
 .igv-track-icon-container {

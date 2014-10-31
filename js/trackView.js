@@ -81,6 +81,9 @@ var igv = (function (igv) {
         canvas.setAttribute('width', contentDiv.clientWidth);
         canvas.setAttribute('height', track.height);
 
+        this.canvas = canvas;
+        this.ctx = canvas.getContext("2d");
+
         // track manipulation container
         trackManipulationContainer = $('<div class="igv-track-manipulation-container"></div>')[0];
         $(trackDiv).append( trackManipulationContainer );
@@ -90,16 +93,6 @@ var igv = (function (igv) {
 
         $(trackManipulationIconBox).append( $('<i class="fa fa-chevron-circle-up   igv-track-manipulation-move-up">')[0] );
         $(trackManipulationIconBox).append( $('<i class="fa fa-chevron-circle-down igv-track-manipulation-move-down">')[0] );
-        $(trackManipulationIconBox).append( $('<i class="fa fa-times               igv-track-manipulation-discard">')[0] );
-
-
-
-
-
-
-
-
-
 
         // CURSOR specific functions
         if (browser.type === "CURSOR") {
@@ -114,13 +107,13 @@ var igv = (function (igv) {
         // Close button
         if (!track.disableButtons) {
 
-            closeButton = document.createElement("i");
-            contentDiv.appendChild(closeButton);
+            $(trackManipulationIconBox).append( $('<i class="fa fa-times igv-track-manipulation-discard">')[0] );
 
-            closeButton.className = "fa fa-times-circle igv-track-disable-button-fontawesome";
-            closeButton.onclick = function () {
+            var thang = $(trackManipulationIconBox).find("i.igv-track-manipulation-discard");
+
+            thang.click(function() {
                 browser.removeTrack(track);
-            };
+            });
 
             if (track.label) {
 
@@ -128,7 +121,6 @@ var igv = (function (igv) {
                 trackIconContainer.appendChild(labelSpan);
                 labelSpan.className = "igv-track-label-span-base";
                 labelSpan.innerHTML = track.label;
-
 
 //                labelButton = document.createElement("button");
 //                viewportDiv.appendChild(labelButton);
@@ -157,11 +149,7 @@ var igv = (function (igv) {
             }
         }
 
-        this.canvas = canvas;
-        this.ctx = canvas.getContext("2d");
-
         addTrackHandlers(this);
-
 
     };
 
