@@ -67,7 +67,7 @@ var cursor = (function (cursor) {
             var height = (minimum/track.max) * myself.bins.length;
             myself.igvCanvas.fillRect(0, myself.bins.length - height, myself.canvasWidth, height, { fillStyle: myself.minMaxfillStyle });
 
-            myself.igvCanvas.fillRect(0, myself.bins.length - height - 1, myself.canvasWidth, 1, { fillStyle: myself.minMaxEdgefillStyle });
+//            myself.igvCanvas.fillRect(0, myself.bins.length - height - 1, myself.canvasWidth, 1, { fillStyle: myself.minMaxEdgefillStyle });
 
         };
 
@@ -76,7 +76,7 @@ var cursor = (function (cursor) {
             var height = myself.bins.length - ((maximum/track.max) * myself.bins.length);
             myself.igvCanvas.fillRect(0, 0, myself.canvasWidth, height, { fillStyle: myself.minMaxfillStyle });
 
-            myself.igvCanvas.fillRect(0, height - 1, myself.canvasWidth, 1, { fillStyle: myself.minMaxEdgefillStyle });
+//            myself.igvCanvas.fillRect(0, height - 1, myself.canvasWidth, 1, { fillStyle: myself.minMaxEdgefillStyle });
 
         };
 
