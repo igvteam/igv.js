@@ -117,10 +117,6 @@
     width: 48px;
     height: 100%;
 
-    border-left-color: #444;
-    border-left-style: solid;
-    border-left-width: thin;
-
     background: white;
     text-align: center;
 }
@@ -211,10 +207,6 @@
     position: absolute;
     left: 0;
     height: 100%;
-    border-color: #444;
-    border-style: solid;
-    border-width: thin;
-
 }
 
 .igv-control-sort-fontawesome {

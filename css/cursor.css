@@ -67,6 +67,65 @@
     margin-right: 2px;
 }
 
+/* Override igv-control-div to add border */
+.igv-control-div {
+    position: absolute;
+    left: 0;
+    height: 100%;
+    border-color: #444;
+    border-style: solid;
+    border-width: thin;
+
+}
+
+.igv-track-manipulation-container {
+    position: absolute;
+    right: 0;
+    width: 48px;
+    height: 100%;
+
+    background: white;
+    text-align: center;
+}
+
+.igv-track-manipulation-icon-box {
+
+    margin: auto;
+
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: 0;
+    bottom: 0;
+
+    width: 100%;
+    height: 30px;
+
+    background: white;
+
+}
+
+.igv-track-manipulation-move-up {
+    position: absolute;
+    left: 4px;
+    top: 0;
+    color: rgba(51, 153, 204, 1);
+}
+
+.igv-track-manipulation-move-down {
+    position: absolute;
+    left: 4px;
+    bottom: 0;
+    color: rgba(51, 153, 204, 1);
+}
+
+.igv-track-manipulation-discard {
+    position: absolute;
+    left: 20px;
+    top: 0;
+    color: rgba(153, 0, 0, 1);
+    background-color: white;
+}
 .igv-control-bullseye-stack-fontawesome {
 
     position: relative;
@@ -147,3 +206,4 @@
     text-align: center;
     display: none;
 }
+
