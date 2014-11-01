@@ -84,25 +84,33 @@ var igv = (function (igv) {
         this.canvas = canvas;
         this.ctx = canvas.getContext("2d");
 
+        if (track.label) {
+
+            labelSpan = document.createElement("span");
+            trackIconContainer.appendChild(labelSpan);
+            labelSpan.className = "igv-track-label-span-base";
+            labelSpan.innerHTML = track.label;
+
+        }
 
         // CURSOR specific functions
         if (browser.type === "CURSOR") {
 
             // track manipulation container
             trackManipulationContainer = $('<div class="igv-track-manipulation-container"></div>')[0];
-            $(trackDiv).append( trackManipulationContainer );
+            $(trackDiv).append(trackManipulationContainer);
 
             trackManipulationIconBox = $('<div class="igv-track-manipulation-icon-box"></div>')[0];
-            $(trackManipulationContainer).append( trackManipulationIconBox );
+            $(trackManipulationContainer).append(trackManipulationIconBox);
 
-            $(trackManipulationIconBox).append( $('<i class="fa fa-chevron-circle-up   igv-track-manipulation-move-up">')[0] );
-            $(trackManipulationIconBox).append( $('<i class="fa fa-chevron-circle-down igv-track-manipulation-move-down">')[0] );
+            $(trackManipulationIconBox).append($('<i class="fa fa-chevron-circle-up   igv-track-manipulation-move-up">')[0]);
+            $(trackManipulationIconBox).append($('<i class="fa fa-chevron-circle-down igv-track-manipulation-move-down">')[0]);
 
-            removeButton  = $('<i class="fa fa-times igv-track-manipulation-discard">')[0];
+            removeButton = $('<i class="fa fa-times igv-track-manipulation-discard">')[0];
 
-            $(trackManipulationIconBox).append(removeButton );
+            $(trackManipulationIconBox).append(removeButton);
 
-            $(removeButton).click(function() {
+            $(removeButton).click(function () {
                 browser.removeTrack(track);
             });
 
@@ -113,50 +121,16 @@ var igv = (function (igv) {
 
         }
 
-        // Close button
-        if (!track.disableButtons) {
+        // Remove button for igv
+        else if (!track.disableButtons) {
 
-//            removeButton  = $('<i class="fa fa-times igv-track-manipulation-discard">')[0];
-//
-//            $(trackManipulationIconBox).append(removeButton );
-//
-//            $(removeButton).click(function() {
-//                browser.removeTrack(track);
-//            });
-
-            if (track.label) {
-
-                labelSpan = document.createElement("span");
-                trackIconContainer.appendChild(labelSpan);
-                labelSpan.className = "igv-track-label-span-base";
-                labelSpan.innerHTML = track.label;
-
-//                labelButton = document.createElement("button");
-//                viewportDiv.appendChild(labelButton);
-//                labelButton.className = "btn btn-xs btn-cursor-deselected igv-track-label";
-//                labelButton.innerHTML = track.label;
-//                track.labelButton = labelButton;
-//                labelButton.onclick = function (e) {
-//
-//                    if (browser.cursorModel) {
-//
-//                        browser.designatedTrack = track;
-//                        browser.designatedTrack.featureSource.allFeatures(function (featureList) {
-//                            browser.referenceFrame.start = 0;
-//                            browser.cursorModel.setRegions(featureList);
-//                        });
-//
-//                    }
-//                    else {
-//                        if (track.description) {
-//                            igv.popover.show(e.pageX, e.pageY, track.description);
-//                        }
-//                    }
-//                }
-
-
-            }
+            removeButton = $('<i class="fa fa-times-circle igv-track-disable-button-fontawesome">')[0];
+            $(contentDiv).append(removeButton);
+            $(removeButton).click(function () {
+                browser.removeTrack(track);
+            });
         }
+
 
         addTrackHandlers(this);
 
@@ -238,7 +212,7 @@ var igv = (function (igv) {
             else {
 
                 // Cancel the current task if any as it will not satisfy the paint request
-                
+
                 if (currentTask) {
                     currentTask.abort();
                 }

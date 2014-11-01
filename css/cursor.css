@@ -39,6 +39,17 @@
 
 }
 
+/* Override viewport div to set right */
+
+.igv-viewport-div {
+    position: absolute;
+    left:  50px;
+    right: 48px;
+    height: 100%;
+    overflow-x: hidden;
+    overflow-y: auto;
+}
+
 .igv-track-manipulation-container {
     position: absolute;
     right: 0;
