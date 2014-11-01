@@ -115,6 +115,15 @@
     overflow-y: auto;
 }
 
+/* Override margin-left and margin-right */
+.igv-content-div {
+    position: relative;
+    margin-left: 0;
+    margin-right: 0;
+    left: 0;
+    right: 0;
+}
+
 .igv-track-manipulation-container {
     position: absolute;
     right: 0;
