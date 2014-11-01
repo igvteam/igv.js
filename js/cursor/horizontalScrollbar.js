@@ -62,21 +62,30 @@ var cursor = (function (cursor) {
 
         var myself = this,
             horizontalScrollBar,
+            horizontalScrollBarShim,
             horizontalScrollBarDraggable,
             anyViewport,
             isMouseDown = undefined,
             lastMouseX = undefined,
             isMouseIn = undefined;
 
-        horizontalScrollBar = $('<div class="igv-horizontal-scrollbar-div">')[0];
-        horizontalScrollBarContainer.append(horizontalScrollBar);
+
+
+        horizontalScrollBarShim = $('<div class="igv-horizontal-scrollbar-shim-div">')[0];
+        horizontalScrollBarContainer.append(horizontalScrollBarShim);
 
         anyViewport = $("div.igv-viewport-div").first();
-        $( horizontalScrollBar).css("left",  anyViewport.css("left"));
-        $( horizontalScrollBar).css("right", anyViewport.css("right"));
+        $( horizontalScrollBarShim).css("left",  anyViewport.css("left"));
+        $( horizontalScrollBarShim).css("right", anyViewport.css("right"));
+
+
+        horizontalScrollBar = $('<div class="igv-horizontal-scrollbar-div">')[0];
+        $(horizontalScrollBarShim).append(horizontalScrollBar);
 
         horizontalScrollBarDraggable = $('<div class="igv-horizontal-scrollbar-draggable-div">')[0];
         $(horizontalScrollBar).append(horizontalScrollBarDraggable);
+
+
 
         // mouse event handlers
         $( document ).mousedown(function(e) {

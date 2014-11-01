@@ -1,43 +1,68 @@
 
 .igv-horizontal-scrollbar-container-div {
+
     position: relative;
+
     top: 0;
     right:0;
-    height:20px;
 
-    /*background-color: red;*/
+    height:16px;
+
+    background-color: white;
+}
+
+.igv-horizontal-scrollbar-shim-div {
+
+    position: absolute;
+
+    top: 0;
+    bottom: 0;
+
+    left:0;
+    right:0;
+
+    background-color: white;
+
+    border-color: #444;
+    border-style: solid;
+    border-width: thin;
+
 }
 
 .igv-horizontal-scrollbar-div {
 
     position: absolute;
-    top: 0;
-    left:0;
-    right:0;
-    height:100%;
 
-    background-color: rgba(150, 150, 150, .2);
-    /*background-color: green;*/
+    top:    1px;
+    bottom: 1px;
+
+    left:   1px;
+    right:  1px;
+
+    background-color: rgba(204, 204, 204, 1);
 
 }
 
 .igv-horizontal-scrollbar-draggable-div {
+
     position: absolute;
+
     left: 0;
     top: 0;
+
     width: 100px;
     height:100%;
 
-    background-color: #aaa;
+    background-color: rgba(153, 153, 153, 1);
+
     cursor: pointer;
 
-    /*display: none;*/
 }
 
 .igv-horizontal-scrollbar-draggable-div:hover,
 .igv-horizontal-scrollbar-draggable-div:focus,
 .igv-horizontal-scrollbar-draggable-div:active {
-    background-color: #666;
+    background-color: rgba(102, 102, 102, 1);
 }
 
 .igv-cursorHistogram-div {
