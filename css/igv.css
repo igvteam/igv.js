@@ -163,7 +163,7 @@
 .igv-viewport-div {
     position: absolute;
     left:  50px;
-    right: 0px;
+    right: 0;
     height: 100%;
     overflow-x: hidden;
     overflow-y: auto;
@@ -171,8 +171,8 @@
 
 .igv-content-div {
     position: relative;
-    margin-left: 10px;
-    margin-right: 10px;
+    /*margin-left: 10px;*/
+    /*margin-right: 10px;*/
     left: 0;
     right: 0;
 }
