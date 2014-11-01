@@ -78,6 +78,17 @@
 
 }
 
+/* Override viewport div to set right */
+
+.igv-viewport-div {
+    position: absolute;
+    left:  50px;
+    right: 48px;
+    height: 100%;
+    overflow-x: hidden;
+    overflow-y: auto;
+}
+
 .igv-track-manipulation-container {
     position: absolute;
     right: 0;
@@ -145,6 +156,29 @@
 
 .igv-control-bullseye-fontawesome {
     display: none;
+}
+
+
+.igv-control-sort-fontawesome {
+
+    position: relative;
+    cursor: pointer;
+    color: grey;
+
+    float: left;
+    margin-left: 2px;
+    margin-right: 2px;
+}
+
+.igv-control-sort-fontawesome-selected {
+
+    position: relative;
+    cursor: pointer;
+    color: rgba(204, 51, 0, 1);
+
+    float: left;
+    margin-left: 2px;
+    margin-right: 2px;
 }
 
 /*Four values apply to 1. top, 2. right, 3. bottom and 4. to the left side*/
