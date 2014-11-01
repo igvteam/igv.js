@@ -56,29 +56,26 @@ var cursor = (function (cursor) {
             "width": Math.floor( width ) + "px"
         });
 
-     };
+    };
 
     cursor.HorizontalScrollbar.prototype.markupWithParentDivObject = function (horizontalScrollBarContainer) {
 
         var myself = this,
             horizontalScrollBar,
             horizontalScrollBarDraggable,
+            anyViewport,
             isMouseDown = undefined,
             lastMouseX = undefined,
             isMouseIn = undefined;
 
-        // DOM
-        horizontalScrollBar          = $('<div class="igv-horizontal-scrollbar-div">')[0];
-        horizontalScrollBarDraggable = $('<div class="igv-horizontal-scrollbar-draggable-div">')[0];
-
-        $( horizontalScrollBar).css( "left", this.browser.controlPanelWidth + "px");
-
-
+        horizontalScrollBar = $('<div class="igv-horizontal-scrollbar-div">')[0];
         horizontalScrollBarContainer.append(horizontalScrollBar);
-        $( horizontalScrollBar).css({
-            "left": (this.browser.controlPanelWidth ? this.browser.controlPanelWidth : 50) + "px"
-        });
 
+        anyViewport = $("div.igv-viewport-div").first();
+        $( horizontalScrollBar).css("left",  anyViewport.css("left"));
+        $( horizontalScrollBar).css("right", anyViewport.css("right"));
+
+        horizontalScrollBarDraggable = $('<div class="igv-horizontal-scrollbar-draggable-div">')[0];
         $(horizontalScrollBar).append(horizontalScrollBarDraggable);
 
         // mouse event handlers

@@ -289,7 +289,6 @@ var igv = (function (igv) {
 
             browser.selectDesignatedTrack(browser.designatedTrack.trackFilter.trackPanel);
 
-
             horizontalScrollBarContainer = $("div.igv-horizontal-scrollbar-container-div");
             browser.horizontalScrollbar = new cursor.HorizontalScrollbar(browser, $(horizontalScrollBarContainer));
 
