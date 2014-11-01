@@ -5,7 +5,7 @@
     right:0;
     height:20px;
 
-    background-color: red;
+    /*background-color: red;*/
 }
 
 .igv-horizontal-scrollbar-div {
@@ -79,7 +79,6 @@
 }
 
 /* Override viewport div to set right */
-
 .igv-viewport-div {
     position: absolute;
     left:  50px;
@@ -97,6 +96,10 @@
 
     background: white;
     text-align: center;
+
+    border-left-width: thin;
+    border-left-color: #444;
+    border-left-style: solid;
 }
 
 .igv-track-manipulation-icon-box {
@@ -157,7 +160,6 @@
 .igv-control-bullseye-fontawesome {
     display: none;
 }
-
 
 .igv-control-sort-fontawesome {
 
