@@ -39,21 +39,26 @@ var igv = (function (igv) {
      */
     igv.BedFeatureSource.prototype.getFeatures = function (queryChr, bpStart, bpEnd, success, task) {
 
-        var myself = this;
+        var myself = this, featureList;
 
-        if (this.featureCache) {
+        if (this.featureCache && queryChr === this.featureCache.queryChr) {
             success(this.featureCache.queryFeatures(queryChr, bpStart, bpEnd));
+            return;
         }
-        else {
-            this.loadFeatures(function (featureList) {
-                    //myself.featureMap = featureMap;
-                    myself.featureCache = new igv.FeatureCache(featureList);
-                    // Finally pass features for query interval to continuation
-                    success(myself.featureCache.queryFeatures(queryChr, bpStart, bpEnd));
 
-                },
-                task, queryChr, bpStart, bpEnd);
-        }
+        this.loadFeatures(function (featureList) {
+                //myself.featureMap = featureMap;
+
+                myself.featureCache = new igv.FeatureCache(featureList);
+
+                // Record chr queried
+                myself.featureCache.queryChr = queryChr;
+
+                // Finally pass features for query interval to continuation
+                success(myself.featureCache.queryFeatures(queryChr, bpStart, bpEnd));
+
+            },
+            task, queryChr);   // Currently loading at granularity of chromosome
 
     };
 
@@ -87,16 +92,16 @@ var igv = (function (igv) {
         }
     }
 
-    igv.BedFeatureSource.prototype.loadFeatures = function (continuation, task, queryChr, bpStart, bpEnd) {
+    igv.BedFeatureSource.prototype.loadFeatures = function (continuation, task, queryChr) {
 
         var myself = this,
-            idxFile =  (myself.url ? myself.url + ".idx" : null);
+            idxFile = (myself.url ? myself.url + ".idx" : null);
 
-        if(queryChr && queryChr.startsWith("chr")) queryChr = queryChr.substring(3);
+        if (queryChr && queryChr.startsWith("chr")) queryChr = queryChr.substring(3);
 
         if (this.index === undefined && !myself.localFile && queryChr) {  // TODO -  handle local files
 
-            igv.loadTribbleIndex(idxFile, function(index) {
+            igv.loadTribbleIndex(idxFile, function (index) {
                 myself.index = index ? index : false;
                 loadFeaturesWithIndex(index);
             });
@@ -120,14 +125,14 @@ var igv = (function (igv) {
                     task: task
                 };
 
-            if (index && queryChr) {
+            if (index) {
                 // TODO -- fetching by whole chromosome
                 var chrIdx = index[queryChr];
                 if (chrIdx) {
                     var blocks = chrIdx.blocks,
                         lastBlock = blocks[blocks.length - 1],
                         endPos = lastBlock.position + lastBlock.size,
-                        range = {start: blocks[0].position, size:endPos - blocks[0].position + 1 };
+                        range = {start: blocks[0].position, size: endPos - blocks[0].position + 1 };
                     options.range = range;
                 }
                 else {

@@ -11,6 +11,61 @@ var igv = (function (igv) {
         this.treeMap = buildTreeMap(featureList);
     }
 
+    igv.FeatureCache.prototype.queryFeatures = function (chr, start, end) {
+
+        var featureList, intervalFeatures, feature, len, i, tree, intervals;
+
+        tree = this.treeMap[chr];
+
+        if (!tree) return [];
+
+        intervals = tree.findOverlapping(start, end);
+
+        if (intervals.length == 0) {
+            return [];
+        }
+        else {
+            // Trim the list of features in the intervals to those
+            // overlapping the requested range.
+            // Assumption: features are sorted by start position
+
+            featureList = [];
+
+            intervals.forEach(function (interval) {
+                intervalFeatures = interval.value;
+                len = intervalFeatures.length;
+                for (i = 0; i < len; i++) {
+                    feature = intervalFeatures[i];
+                    if (feature.start > end) break;
+                    else if (feature.end >= start) {
+                        featureList.push(feature);
+                    }
+                }
+            });
+
+            return featureList;
+        }
+
+    };
+
+    igv.FeatureCache.prototype.allFeatures = function () {
+
+        var allFeatures = [];
+        var treeMap = this.treeMap;
+        if (treeMap) {
+            for (var key in treeMap) {
+                if (treeMap.hasOwnProperty(key)) {
+
+                    var tree = treeMap[key];
+                    tree.mapIntervals(function (interval) {
+                        allFeatures = allFeatures.concat(interval.value);
+                    });
+                }
+            }
+        }
+        return allFeatures;
+
+    }
 
     function buildTreeMap(featureList) {
 
@@ -77,61 +132,6 @@ var igv = (function (igv) {
         return tree;
     }
 
-    igv.FeatureCache.prototype.queryFeatures = function (chr, start, end) {
-
-        var featureList, intervalFeatures, feature, len, i, tree, intervals;
-
-        tree = this.treeMap[chr];
-
-        if (!tree) return [];
-
-        intervals = tree.findOverlapping(start, end);
-
-        if (intervals.length == 0) {
-            return [];
-        }
-        else {
-            // Trim the list of features in the intervals to those
-            // overlapping the requested range.
-            // Assumption: features are sorted by start position
-
-            featureList = [];
-
-            intervals.forEach(function (interval) {
-                intervalFeatures = interval.value;
-                len = intervalFeatures.length;
-                for (i = 0; i < len; i++) {
-                    feature = intervalFeatures[i];
-                    if (feature.start > end) break;
-                    else if (feature.end >= start) {
-                        featureList.push(feature);
-                    }
-                }
-            });
-
-            return featureList;
-        }
-
-    };
-
-    igv.FeatureCache.prototype.allFeatures = function () {
-
-        var allFeatures = [];
-        var treeMap = this.treeMap;
-        if (treeMap) {
-            for (var key in treeMap) {
-                if (treeMap.hasOwnProperty(key)) {
-
-                    var tree = treeMap[key];
-                    tree.mapIntervals(function (interval) {
-                        allFeatures = allFeatures.concat(interval.value);
-                    });
-                }
-            }
-        }
-        return allFeatures;
-
-    }
 
     return igv;
 })(igv || {});
