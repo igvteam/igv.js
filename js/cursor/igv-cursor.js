@@ -612,25 +612,40 @@ var igv = (function (igv) {
         // sort
         sortButton = document.createElement("i");
         trackIconContainer.append($(sortButton));
-
-        sortButton.className = "glyphicon glyphicon-signal igv-control-sort-fontawesome";
+        sortButton.className = "fa fa-signal igv-control-sort-fontawesome";
         track.sortButton = sortButton;
 
         sortButton.onclick = function () {
 
             browser.cursorModel.sortRegions(track.featureSource, track.sortDirection, function (regions) {
+
                 browser.update();
+
+                browser.trackPanels.forEach(function (tp) {
+
+
+                    if (1 === track.sortDirection) {
+
+                        $(tp.track.sortButton).removeClass("fa-flip-horizontal");
+                    } else {
+
+                        $(tp.track.sortButton).addClass("fa-flip-horizontal");
+                    }
+
+                    if (track === tp.track) {
+
+                        $(tp.track.sortButton).addClass("igv-control-sort-fontawesome-selected");
+                    } else {
+
+                        $(tp.track.sortButton).removeClass("igv-control-sort-fontawesome-selected");
+                    }
+                });
+
                 track.sortDirection *= -1;
 
             });
 
-            browser.trackPanels.forEach(function (trackView) {
-                if (track !== trackView.track) {
-                    trackView.track.sortButton.className = "glyphicon glyphicon-signal igv-control-sort-fontawesome";
-                }
-            });
 
-            trackView.track.sortButton.className = "glyphicon glyphicon-signal igv-control-sort-fontawesome-selected";
         };
 
         // bullseye stack

@@ -157,8 +157,7 @@ var cursor = (function (cursor) {
                 }
 
                 // sorting will be lost during filtering
-//                trackPanel.track.sortButton.className = "fa fa-bar-chart-o igv-control-sort-fontawesome";
-                trackPanel.track.sortButton.className = "glyphicon glyphicon-signal igv-control-sort-fontawesome";
+                trackPanel.track.sortButton.className = "fa fa-signal igv-control-sort-fontawesome";
 
                 if (trackPanel.track.trackFilter.isFilterActive) {
                     filterPackages.push({trackFilter: trackPanel.track.trackFilter, featureCache: featureCache });
@@ -221,9 +220,7 @@ var cursor = (function (cursor) {
                 sortTrackPanelPostFiltering.track.sortDirection *= -1;
                 myself.sortRegions(sortTrackPanelPostFiltering.track.featureSource, sortTrackPanelPostFiltering.track.sortDirection, function () {
 
-//                    sortTrackPanelPostFiltering.track.sortButton.className = "fa fa-bar-chart-o igv-control-sort-fontawesome-selected";
-                    sortTrackPanelPostFiltering.track.sortButton.className = "glyphicon glyphicon-signal igv-control-sort-fontawesome-selected";
-
+                    sortTrackPanelPostFiltering.track.sortButton.className = "fa fa-signal igv-control-sort-fontawesome-selected";
                     if (myself.framePixelWidth < thresholdFramePixelWidth) {
                         myself.browser.setFrameWidth(thresholdFramePixelWidth);
                     } else {

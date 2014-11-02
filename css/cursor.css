@@ -100,7 +100,6 @@
     background: rgba(255, 255, 255, 0.75);
 }
 
-
 /* Override igv-control-div to add border */
 .igv-track-control-div {
     width: 100px;
