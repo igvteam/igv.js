@@ -117,13 +117,11 @@
 
 .igv-track-icon-container {
     position: absolute;
-    left: 0;
+    left: 10px;
     top: 4px;
     width: auto;
     height:auto;
-
-    background: rgba(255, 255, 255, 0.75);
-
+    background: rgb(255, 255, 255);
     display: inline-block;
 }
 
