@@ -7,28 +7,25 @@
     <meta name="description" content="">
     <meta name="author" content="">
     <link rel="shortcut icon" href=img/favicon.ico>
+
     <title>IGV - Integrative Genomics Viewer</title>
 
+    <!-- Font Awesome -->
+    <link href="//maxcdn.bootstrapcdn.com/font-awesome/4.2.0/css/font-awesome.min.css" rel="stylesheet">
+
     <!-- IGV Bootstrap css -->
-    <link href="css/gtex.css" type="text/css" rel="stylesheet">
+    <link href="css/igv.css" type="text/css" rel="stylesheet">
 
+    <!-- jquery js -->
+    <script src="//code.jquery.com/jquery-1.11.0.min.js"></script>
 
-    <!-- HTML5 shim and Respond.js IE8 support of HTML5 elements and media queries -->
-    <!--[if lt IE 9]>
-    <script src="//oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
-    <script src="//oss.maxcdn.com/libs/respond.js/1.4.2/respond.min.js"></script>
-    <![endif]-->
-
+    <!-- Vendor js -->
     <script type="text/javascript" src="vendor/inflate.js"></script>
     <script type="text/javascript" src="vendor/zlib_and_gzip.min.js"></script>
 
-    <script type="text/javascript" src="//code.jquery.com/jquery-1.9.1.min.js"></script>
-
-    <!-- IGV js code -->
-
-    <script type="text/javascript" src="js/gtex/gtex.js"></script>
-    <script type="text/javascript" src="js/gtex/eqtlSource.js"></script>
-    <script type="text/javascript" src="js/gtex/eqtlTrack.js"></script>
+    <!-- IGV js -->
+    <script type="text/javascript" src="js/popover.js"></script>
+    <script type="text/javascript" src="js/igv.js"></script>
     <script type="text/javascript" src="js/browser.js"></script>
     <script type="text/javascript" src="js/ideogram.js"></script>
     <script type="text/javascript" src="js/referenceFrame.js"></script>
@@ -37,55 +34,97 @@
     <script type="text/javascript" src="js/trackView.js"></script>
     <script type="text/javascript" src="js/rulerTrack.js"></script>
     <script type="text/javascript" src="js/geneTrack.js"></script>
-    <script type="text/javascript" src="js/bed/bedSource.js"></script>
     <script type="text/javascript" src="js/igv-color.js"></script>
     <script type="text/javascript" src="js/igv-utils.js"></script>
     <script type="text/javascript" src="js/parseUtils.js"></script>
     <script type="text/javascript" src="js/fasta.js"></script>
     <script type="text/javascript" src="js/sequenceTrack.js"></script>
+    <script type="text/javascript" src="js/bedGraphSource.js"></script>
     <script type="text/javascript" src="js/wigSource.js"></script>
     <script type="text/javascript" src="js/wigTrack.js"></script>
     <script type="text/javascript" src="js/dataloader.js"></script>
     <script type="text/javascript" src="js/igv-exts.js"></script>
+    <script type="text/javascript" src="js/igvxhr.js"></script>
     <script type="text/javascript" src="js/binary.js"></script>
+
     <script type="text/javascript" src="js/gtex/eqtlTrack.js"></script>
+    <script type="text/javascript" src="js/gtex/eqtlSource.js"></script>
+    <script type="text/javascript" src="js/gtex/gtex.js"></script>
+
     <script type="text/javascript" src="js/bam/coverageMap.js"></script>
     <script type="text/javascript" src="js/bam/bamReader.js"></script>
     <script type="text/javascript" src="js/bam/bamSource.js"></script>
     <script type="text/javascript" src="js/bam/bamTrack.js"></script>
+    <script type="text/javascript" src="js/bam/bamAlignment.js"></script>
+    <script type="text/javascript" src="js/bam/ga4gh.js"></script>
+    <script type="text/javascript" src="js/bam/ga4ghReader.js"></script>
     <script type="text/javascript" src="js/intervalTree.js"></script>
-
     <script type="text/javascript" src="js/encode/encode.js"></script>
     <script type="text/javascript" src="js/cursor/cursorTrack.js"></script>
     <script type="text/javascript" src="js/cursor/cursorModel.js"></script>
     <script type="text/javascript" src="js/cursor/cursor-ideogram.js"></script>
+    <script type="text/javascript" src="js/karyo/karyo.js"></script>
+    <script type="text/javascript" src="js/gwas/t2dVariantSource.js"></script>
+    <script type="text/javascript" src="js/gwas/t2dVariantTrack.js"></script>
+    <script type="text/javascript" src="vendor/opentip-native.js"></script>
+    <script type="text/javascript" src="js/igv-constants.js"></script>
 
+    <script type="text/javascript" src="js/bed/featureCache.js"></script>
+    <script type="text/javascript" src="js/bed/bedSource.js"></script>
+    <script type="text/javascript" src="js/bed/bedParser.js"></script>
+    <script type="text/javascript" src="js/render/renderGene.js"></script>
+    <script type="text/javascript" src="js/bed/tribble.js"></script>
 
+    <script type="text/javascript" src="js/bigwig/bufferedReader.js"></script>
+    <script type="text/javascript" src="js/bigwig/bwBPTree.js"></script>
+    <script type="text/javascript" src="js/bigwig/bwReader.js"></script>
+    <script type="text/javascript" src="js/bigwig/bwRPTree.js"></script>
+    <script type="text/javascript" src="js/bigwig/bwSource.js"></script>
+    <script type="text/javascript" src="js/bigwig/bwTotalSummary.js"></script>
+    <script type="text/javascript" src="js/set.js"></script>
 </head>
 
 <body>
 
-<div id="myDiv"></div>
+<div id="myDiv" style="padding-top: 50px;padding-bottom: 20px;">
+
+</div>
 
 <script type="text/javascript">
 
-    developmentMode = true;
-
     $(document).ready(function () {
 
+        var div, options, browser;
 
-        var div = $("#myDiv"),
-                developmentMode = true,
-                browser = igv.createGtexBrowser(developmentMode);
-        div.append(browser.div);
-        browser.startup();
+        div = $("#myDiv")[0];
+        options = {
+            showKaryo: false,
+            fastaURL: "//dn7ywbm9isq8j.cloudfront.net/genomes/seq/hg19/hg19.fasta",
+            cytobandURL: "//dn7ywbm9isq8j.cloudfront.net/genomes/seq/hg19/cytoBand.txt",
+            tracks: [
+                {
+                    type: "eqtl",
+                    url: "http://www.gtexportal.org/igv/assets/eqtl/Whole_Blood.portal.eqtl.bin",
+                    label: "Whole Blood"
+                },
+                {
+                    type: "sequence",
+                    order: 9999
+                },
+                {
+                    //url: "//dn7ywbm9isq8j.cloudfront.net/annotations/hg19/genes/gencode.v18.collapsed.bed",
+                    url: "//dn7ywbm9isq8j.cloudfront.net/annotations/hg19/genes/gencode.v18.collapsed.bed",
+                    label: "Genes",
+                    order: 10000
+                }
+            ]
+        };
 
-        //browser.search('actn3');
-        browser.activeTracks(['Whole Blood']);
+        browser = igv.createBrowser(div, options);
+
     });
 
 </script>
-
 
 </body>
 

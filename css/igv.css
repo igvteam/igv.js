@@ -161,6 +161,11 @@
     height: 100%;
 }
 
+
+.igv-track-control-canvas {
+    position: absolute;
+}
+
 .igv-viewport-div {
     position: absolute;
     left:  50px;
@@ -176,6 +181,13 @@
     margin-right: 10px;
     left: 0;
     right: 0;
+    height:100%;
+}
+
+.igv-content-canvas {
+    position: absolute;
+    width: 100%;
+    height: 100%;
 }
 
 .igv-popover {

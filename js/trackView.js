@@ -20,10 +20,12 @@ var igv = (function (igv) {
             spinnerFontAwesome;
 
         // track
-        trackDiv = document.createElement("div");
-        browser.trackContainerDiv.appendChild(trackDiv);
-        trackDiv.className = "igv-track-div";
-        trackDiv.style.height = track.height + "px";
+        trackDiv = $('<div class="igv-track-div">')[0];
+        $(browser.trackContainerDiv).append(trackDiv);
+
+        // Optionally override CSS height
+        if(track.height) trackDiv.style.height = track.height + "px";
+
         this.trackDiv = trackDiv;
 
         // spinner
@@ -37,7 +39,7 @@ var igv = (function (igv) {
         this.controlDiv = controlDiv;
 
         // control canvas.  Canvas width and height attributes must be set.  Its a canvas weirdness.
-        controlCanvas = $('<canvas>')[0];
+        controlCanvas = $('<canvas class ="igv-track-control-canvas">')[0];
         $(controlDiv).append(controlCanvas);
         controlCanvas.setAttribute('width', controlDiv.clientWidth);
         controlCanvas.setAttribute('height', controlDiv.clientHeight);
@@ -50,21 +52,23 @@ var igv = (function (igv) {
         this.viewportDiv = viewportDiv;
 
         // content  -- purpose of this div is to allow vertical scolling on individual tracks, although that is not implemented
-        contentDiv = $('<div class="igv-content-div"></div>')[0]
+        contentDiv = $('<div class="igv-content-div"></div>')[0];
         $(viewportDiv).append(contentDiv);
         this.contentDiv = contentDiv;
 
-        // track icon container
-        trackIconContainer = $('<div class = "igv-track-icon-container">')[0];
-        $(viewportDiv).append(trackIconContainer);
 
         // track content canvas
-        canvas = $('<canvas>')[0];
+        canvas = $('<canvas class = "igv-content-canvas">')[0];
         $(contentDiv).append(canvas);
         canvas.setAttribute('width', contentDiv.clientWidth);
         canvas.setAttribute('height', contentDiv.clientHeight);
         this.canvas = canvas;
         this.ctx = canvas.getContext("2d");
+
+         // track icon container
+        trackIconContainer = $('<div class = "igv-track-icon-container">')[0];
+        $(viewportDiv).append(trackIconContainer);
+
 
         if (track.label) {
 

@@ -63,6 +63,8 @@ var igv = (function (igv) {
             newTrack = new igv.WIGTrack(config);
         } else if (type === "sequence") {
             newTrack = new igv.SequenceTrack(config);
+        } else if (type === "eqtl") {
+            newTrack = new igv.EqtlTrack(config);
         }
         else {
             alert("Unknown file type: " + path);

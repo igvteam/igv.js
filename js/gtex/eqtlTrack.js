@@ -29,10 +29,12 @@ var igv = (function (igv) {
     }
 
 
-    igv.EqtlTrack = function (url, label) {
+    igv.EqtlTrack = function (config) {
 
 
-        var codec = url.endsWith(".bin") ? createEqtlBinary : createEQTL;
+        var url = config.url,
+            label = config.label,
+            codec = url.endsWith(".bin") ? createEqtlBinary : createEQTL;
 
         this.file = url;
         this.featureSource = new igv.EqtlSource(url, codec);
@@ -91,82 +93,80 @@ var igv = (function (igv) {
 
         this.featureSource.getFeatures(chr, bpStart, bpEnd, function (featureList) {
 
-            if (featureList) {
+                if (featureList) {
 
-                var len = featureList.length;
-
-
-                canvas.save();
-
-                // Background
-                canvas.setProperties({fillStyle: "rgb(250, 250, 250)"});
-                canvas.fillRect(0, 0, pixelWidth, pixelHeight);
+                    var len = featureList.length;
 
 
-                function drawEqtls(drawSelected) {
+                    canvas.save();
 
-                    var radius = drawSelected ? 4 : 2,
-                        eqtl, i, px, py, color, isSelected, snp, geneName;
+                    // Background
+                    canvas.setProperties({fillStyle: "rgb(250, 250, 250)"});
+                    canvas.fillRect(0, 0, pixelWidth, pixelHeight);
 
 
-                    //ctx.fillStyle = igv.selection.colorForGene(eqtl.geneName);
-                    canvas.setProperties({
-                        fillStyle: "rgb(180, 180, 180)",
-                        strokeStyle: "rgb(180, 180, 180)"});
+                    function drawEqtls(drawSelected) {
 
-                    for (i = 0; i < len; i++) {
+                        var radius = drawSelected ? 4 : 2,
+                            eqtl, i, px, py, color, isSelected, snp, geneName;
 
-                        eqtl = featureList[i];
-                        snp = eqtl.snp.toUpperCase();
-                        geneName = eqtl.geneName.toUpperCase();
 
-                        isSelected = igv.selection &&
-                            (igv.selection.snp === snp || igv.selection.gene === geneName);
+                        //ctx.fillStyle = igv.selection.colorForGene(eqtl.geneName);
+                        canvas.setProperties({
+                            fillStyle: "rgb(180, 180, 180)",
+                            strokeStyle: "rgb(180, 180, 180)"});
 
-                        if(drawSelected && !isSelected) continue;
+                        for (i = 0; i < len; i++) {
 
-                        // Add eqtl's gene to the selection if this is the selected snp.
-                        // TODO -- this should not be done here in the rendering code.
-                        if (igv.selection && igv.selection.snp === snp) {
-                            igv.selection.addGene(geneName);
+                            eqtl = featureList[i];
+                            snp = eqtl.snp.toUpperCase();
+                            geneName = eqtl.geneName.toUpperCase();
+
+                            isSelected = igv.selection &&
+                                (igv.selection.snp === snp || igv.selection.gene === geneName);
+
+                            if (drawSelected && !isSelected) continue;
+
+                            // Add eqtl's gene to the selection if this is the selected snp.
+                            // TODO -- this should not be done here in the rendering code.
+                            if (igv.selection && igv.selection.snp === snp) {
+                                igv.selection.addGene(geneName);
+                            }
+
+                            if (drawSelected && igv.selection) {
+                                color = igv.selection.colorForGene(geneName);
+                            }
+
+                            if (drawSelected && color === undefined) continue;   // This should be impossible
+
+
+                            px = refFrame.toPixels(Math.round(eqtl.position - bpStart + 0.5));
+                            if (px < 0) continue;
+                            else if (px > pixelWidth) break;
+
+                            py = Math.max(0, pixelHeight - Math.round((eqtl.mLogP - track.minLogP) / yScale));
+                            eqtl.px = px;
+                            eqtl.py = py;
+
+                            if (color) canvas.setProperties({fillStyle: color, strokeStyle: "black"});
+                            canvas.fillCircle(px, py, radius);
+                            canvas.strokeCircle(px, py, radius);
                         }
-
-                        if (drawSelected && igv.selection) {
-                            color = igv.selection.colorForGene(geneName);
-                        }
-
-                        if(drawSelected && color === undefined) continue;   // This should be impossible
-
-
-
-                        px = refFrame.toPixels(Math.round(eqtl.position - bpStart + 0.5));
-                        if (px < 0) continue;
-                        else if (px > pixelWidth) break;
-
-                        py = Math.max(0, pixelHeight - Math.round((eqtl.mLogP - track.minLogP) / yScale));
-                        eqtl.px = px;
-                        eqtl.py = py;
-
-                        if (color) canvas.setProperties({fillStyle: color, strokeStyle: "black"});
-                        canvas.fillCircle(px, py, radius);
-                        canvas.strokeCircle(px, py, radius);
                     }
+
+                    // Draw in two passes, with "selected" eqtls drawn last
+                    drawEqtls(false);
+                    drawEqtls(true);
+
+
+                    canvas.restore();
+
                 }
+                continuation(task);
 
-                // Draw in two passes, with "selected" eqtls drawn last
-                drawEqtls(false);
-                drawEqtls(true);
-
-
-                canvas.restore();
-
-            }
-            continuation(task);
-
-        },
-        task);
+            },
+            task);
     }
-
 
 
     return igv;
