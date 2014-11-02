@@ -54,7 +54,11 @@
     <script type="text/javascript" src="js/igv-exts.js"></script>
     <script type="text/javascript" src="js/igvxhr.js"></script>
     <script type="text/javascript" src="js/binary.js"></script>
+
     <script type="text/javascript" src="js/gtex/eqtlTrack.js"></script>
+    <script type="text/javascript" src="js/gtex/eqtlSource.js"></script>
+    <script type="text/javascript" src="js/gtex/gtex.js"></script>
+
     <script type="text/javascript" src="js/bam/coverageMap.js"></script>
     <script type="text/javascript" src="js/bam/bamReader.js"></script>
     <script type="text/javascript" src="js/bam/bamSource.js"></script>
@@ -393,6 +397,10 @@
             flanking: 100000,
             tracks: [
                 {
+                    type: "eqtl",
+                    url: "http://www.gtexportal.org/igv/assets/eqtl/Skin_Sun_Exposed_Lower_leg.portal.eqtl.bin",
+                    label: "Skin Sun Exposed Lower leg"
+                },                {
                     type: "t2d",
                     url: "http://69.173.71.179:8080/prod/rest/server/trait-search",
                     trait: "T2D",

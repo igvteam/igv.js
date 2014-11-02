@@ -26,6 +26,10 @@ Properties
 - height  the track height in pixels
 - visibilityWindow   for annotation and alignment tracks, features are not shown when zoomed out past this value
 
+Events
+
+- onsearch   Function that will be called upon feature search (e.g. user types gene name in search box)
+
 
 FeatureSource
 -------------

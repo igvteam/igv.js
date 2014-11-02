@@ -355,17 +355,23 @@ var igv = (function (igv) {
 
         console.log("Search " + feature);
 
+        var type, tokens, chr, posTokens, start, end, source, f, tokens, url,
+            browser = this;
+
         if (feature.contains(":") && feature.contains("-")) {
 
-            var tokens = feature.split(":");
-            var chr = tokens[0];
-            var posTokens = tokens[1].split("-");
-            var start = parseInt(posTokens[0].replace(/,/g, "")) - 1;
-            var end = parseInt(posTokens[1].replace(/,/g, ""));
+            type = "locus";
+            tokens = feature.split(":");
+            chr = tokens[0];
+            posTokens = tokens[1].split("-");
+            start = parseInt(posTokens[0].replace(/,/g, "")) - 1;
+            end = parseInt(posTokens[1].replace(/,/g, ""));
 
             if (end > start) {
                 this.goto(chr, start, end);
+                fireOnsearch.call(browser, feature, type);
             }
+
             if (continuation) continuation();
 
         }
@@ -375,8 +381,7 @@ var igv = (function (igv) {
             if (this.searchURL) {
 
 //                var spinner = igv.getSpinner(this.trackContainerDiv);
-                var url = this.searchURL + feature;
-                var browser = this;
+                url = this.searchURL + feature;
 
                 igv.loadData(url, function (data) {
 
@@ -385,26 +390,27 @@ var igv = (function (igv) {
                     var lines = data.split("\n"),
                         len = lines.length,
                         lineNo = 0,
-                        foundFeature = false;
+                        foundFeature = false,
+                        line, tokens, locusTokens, rangeTokens;
 
                     while (lineNo < len) {
                         // EGFR	chr7:55,086,724-55,275,031	refseq
-                        var line = lines[lineNo++];
+                        line = lines[lineNo++];
                         //console.log(line);
-                        var tokens = line.split("\t");
+                        tokens = line.split("\t");
                         //console.log("tokens lenght = " + tokens.length);
                         if (tokens.length >= 3) {
-                            var f = tokens[0];
+                            f = tokens[0];
                             if (f.toUpperCase() == feature.toUpperCase()) {
 
-                                var source = tokens[2].trim();
-                                var type = source == "gtex" ? 'snp' : 'gene';
+                                source = tokens[2].trim();
+                                type = source;
 
-                                var locusTokens = tokens[1].split(":");
-                                var chr = locusTokens[0].trim();
-                                var rangeTokens = locusTokens[1].split("-");
-                                var start = parseInt(rangeTokens[0].replace(/,/g, ''));
-                                var end = parseInt(rangeTokens[1].replace(/,/g, ''));
+                                locusTokens = tokens[1].split(":");
+                                chr = locusTokens[0].trim();
+                                rangeTokens = locusTokens[1].split("-");
+                                start = parseInt(rangeTokens[0].replace(/,/g, ''));
+                                end = parseInt(rangeTokens[1].replace(/,/g, ''));
 
                                 if (browser.flanking) {
                                     start -= browser.flanking;
@@ -424,12 +430,27 @@ var igv = (function (igv) {
                         }
                     }
 
-                    if (!foundFeature) alert('No feature found with name "' + feature + '"');
-
+                    if (foundFeature) {
+                        fireOnsearch.call(browser, feature, type);
+                    }
+                    else {
+                        alert('No feature found with name "' + feature + '"');
+                    }
                     if (continuation) continuation();
                 });
             }
         }
+
+        function fireOnsearch(feature, type) {
+// Notify tracks (important for gtex).   TODO -- replace this with some sort of event model ?
+            this.trackPanels.forEach(function (tp) {
+                var track = tp.track;
+                if (track.onsearch) {
+                    track.onsearch(feature, type);
+                }
+            });
+        }
+
     }
 
     function addTrackContainerHandlers(trackContainerDiv) {

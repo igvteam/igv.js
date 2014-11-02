@@ -10,11 +10,12 @@ var igv = (function (igv) {
         this.url = config.url;
         this.featureSource = new igv.T2DVariantSource(config);
         this.label = config.label;
-        this.id = config.trait;
+        this.trait = config.trait;
         this.height = config.height || 100;   // The preferred height
         this.minLogP = config.minLogP || 0;
         this.maxLogP = config.maxLogP || 15;
-        this.background = config.background || "rgb(225,225,225)";
+        this.background = config.background;    // No default
+        this.divider = config.divider || "rgb(225,225,225)";
         this.dotSize = config.dotSize || 4;
 
         this.description = config.description;  // might be null
@@ -63,8 +64,8 @@ var igv = (function (igv) {
 
         queryChr = (chr.startsWith("chr") ? chr.substring(3) : chr);
 
-        //canvas.fillRect(0, 0, pixelWidth, pixelHeight, {'fillStyle': this.background});
-        canvas.strokeLine(0, pixelHeight - 1, pixelWidth, pixelHeight - 1, {'strokeStyle': this.background});
+        if(this.background) canvas.fillRect(0, 0, pixelWidth, pixelHeight, {'fillStyle': this.background});
+        canvas.strokeLine(0, pixelHeight - 1, pixelWidth, pixelHeight - 1, {'strokeStyle': this.divider});
 
 
         this.featureSource.getFeatures(queryChr, bpStart, bpEnd, function (featureList) {
