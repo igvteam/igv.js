@@ -154,9 +154,10 @@
     color: #222;
 }
 
-.igv-control-div {
+.igv-track-control-div {
     position: absolute;
     left: 0;
+    width: 50px;
     height: 100%;
 }
 

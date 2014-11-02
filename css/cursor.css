@@ -95,9 +95,10 @@
 }
 
 /* Override igv-control-div to add border */
-.igv-control-div {
+.igv-track-control-div {
     position: absolute;
     left: 0;
+    width: 100px;
     height: 100%;
     border-color: #444;
     border-style: solid;
@@ -108,7 +109,7 @@
 /* Override viewport div to set right */
 .igv-viewport-div {
     position: absolute;
-    left:  50px;
+    left:  100px;
     right: 48px;
     height: 100%;
     overflow-x: hidden;

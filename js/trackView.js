@@ -5,7 +5,6 @@ var igv = (function (igv) {
         this.browser = browser;
         this.track = track;
         this.order = track.order || 0;
-        this.marginBottom = 10;
 
         var viewportDiv,
             trackIconContainer,
@@ -17,10 +16,8 @@ var igv = (function (igv) {
             contentDiv,
             canvas,
             removeButton,
-            labelButton,
             labelSpan,
-            spinnerFontAwesome,
-            controlWidth = browser.controlPanelWidth || 50;
+            spinnerFontAwesome;
 
         // track
         trackDiv = document.createElement("div");
@@ -35,52 +32,37 @@ var igv = (function (igv) {
         spinnerFontAwesome.className = "fa fa-spinner fa-2x fa-spin igv-spinner-fontawesome-start";
 
         // control div
-        controlDiv = document.createElement("div");
-        trackDiv.appendChild(controlDiv);
-        controlDiv.className = "igv-control-div";
-        controlDiv.style.width = controlWidth + "px";
-        controlDiv.style.height = track.height + "px";
+        controlDiv = $('<div class="igv-track-control-div"></div>')[0]
+        $(trackDiv).append(controlDiv);
         this.controlDiv = controlDiv;
 
-        // control canvas
-        controlCanvas = document.createElement('canvas');
-        controlDiv.appendChild(controlCanvas);
-        controlCanvas.style.width = controlDiv.clientWidth + "px";
-        controlCanvas.style.height = controlDiv.clientHeight + "px";
+        // control canvas.  Canvas width and height attributes must be set.  Its a canvas weirdness.
+        controlCanvas = $('<canvas>')[0];
+        $(controlDiv).append(controlCanvas);
         controlCanvas.setAttribute('width', controlDiv.clientWidth);
         controlCanvas.setAttribute('height', controlDiv.clientHeight);
         this.controlCanvas = controlCanvas;
         this.controlCtx = controlCanvas.getContext("2d");
 
         // viewport
-        viewportDiv = document.createElement("div");
-        trackDiv.appendChild(viewportDiv);
-        viewportDiv.className = "igv-viewport-div";
-        viewportDiv.style.left = controlWidth + "px";
-        viewportDiv.style.height = track.height + "px";
+        viewportDiv = $('<div class="igv-viewport-div"></div>')[0]
+        $(trackDiv).append(viewportDiv);
         this.viewportDiv = viewportDiv;
 
-        // content
-        contentDiv = document.createElement("div");
-        viewportDiv.appendChild(contentDiv);
-        contentDiv.className = "igv-content-div";
-        contentDiv.style.height = track.height + "px";
+        // content  -- purpose of this div is to allow vertical scolling on individual tracks, although that is not implemented
+        contentDiv = $('<div class="igv-content-div"></div>')[0]
+        $(viewportDiv).append(contentDiv);
         this.contentDiv = contentDiv;
 
         // track icon container
-        trackIconContainer = document.createElement("div");
-        viewportDiv.appendChild(trackIconContainer);
-        trackIconContainer.className = "igv-track-icon-container";
+        trackIconContainer = $('<div class = "igv-track-icon-container">')[0];
+        $(viewportDiv).append(trackIconContainer);
 
-        // canvas
-        canvas = document.createElement('canvas');
-        contentDiv.appendChild(canvas);
-        canvas.style.position = 'absolute';
-        canvas.style.width = contentDiv.clientWidth + "px";
-        canvas.style.height = track.height + "px";
+        // track content canvas
+        canvas = $('<canvas>')[0];
+        $(contentDiv).append(canvas);
         canvas.setAttribute('width', contentDiv.clientWidth);
-        canvas.setAttribute('height', track.height);
-
+        canvas.setAttribute('height', contentDiv.clientHeight);
         this.canvas = canvas;
         this.ctx = canvas.getContext("2d");
 
@@ -93,7 +75,7 @@ var igv = (function (igv) {
 
         }
 
-        // CURSOR specific functions
+        // CURSOR specific stuff
         if (browser.type === "CURSOR") {
 
             // track manipulation container

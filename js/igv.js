@@ -1,6 +1,12 @@
 var igv = (function (igv) {
 
 
+    function createStandardControls(options, rootDiv, contentKaryo) {
+        if (options.showKaryo) {
+            $(rootDiv).append(contentKaryo);
+        }
+    }
+
     /**
      * Create an igv.browser instance.  This object defines the public API for interacting with the genome browser.
      *
@@ -35,9 +41,8 @@ var igv = (function (igv) {
 
         parentDiv.appendChild(rootDiv);
 
-        if (options.showKaryo) {
-            $(rootDiv).append(contentKaryo);
-        }
+        createStandardControls(options, rootDiv, contentKaryo);
+
         $(rootDiv).append(contentRoot);
         $(contentRoot).append(contentHeader);
         $(contentRoot).append(trackContainer);
