@@ -1,16 +1,53 @@
 var igv = (function (igv) {
 
 
-    function createGtexControls(browser, tissueEqtlMappingURL) {
+    igv.createGtexBrowser = function (parentDiv, options) {
 
-        var selectionDiv = $('<div id="igvGtexSelectionDiv">')[0];
+        if (!options) {
+            options = {
+                showKaryo: false,
+                fastaURL: "//dn7ywbm9isq8j.cloudfront.net/genomes/seq/hg19/hg19.fasta",
+                cytobandURL: "//dn7ywbm9isq8j.cloudfront.net/genomes/seq/hg19/cytoBand.txt",
+                tracks: [
+                    {
+                        type: "sequence",
+                        order: 9999
+                    },
+                    {
+                        //url: "//dn7ywbm9isq8j.cloudfront.net/annotations/hg19/genes/gencode.v18.collapsed.bed",
+                        url: "//dn7ywbm9isq8j.cloudfront.net/annotations/hg19/genes/gencode.v18.collapsed.bed",
+                        label: "Genes",
+                        order: 10000
+                    }
+                ]
+            };
+        }
+
+        if (!options.createControls) {
+            options.createControls = createGtexControls;
+        }
+
+        if(!options.tissueEqtlMappingURL) {
+            options.tissueEqtlMappingURL = "http://www.gtexportal.org/igv/assets/eqtl/tissueEqtlMappings.txt";
+        }
+
+        return igv.createBrowser(parentDiv, options);
+
+
+    }
+
+    function createGtexControls(browser, options) {
+
+        var controlDiv = $('<div id="igvControlDiv" class="igv-control-div">')[0],
+        tissueEqtlMappingURL = options.tissueEqtlMappingURL,
+            selectionDiv = $('<div id="igvGtexSelectionDiv" style="margin-bottom:30px">')[0];
 
         loadGtexTissueMappings(tissueEqtlMappingURL, function (records) {
 
 
             records.forEach(function (record) {
 
-                var containerDiv = $('<div style="float:left">');
+                var containerDiv = $('<span style="margin-right: 30px">')[0]; // style="float:left">');
 
                 var cb = $('<input type="checkbox"">')[0];
                 cb.tissueRecord = record;
@@ -30,26 +67,23 @@ var igv = (function (igv) {
                         }
                     }
                 };
-                cb.style.position = "relative";
-                cb.style.float = "left";
                 $(containerDiv).append(cb);
 
                 var span = $('<span>' + record.label + '</span>')[0];
-                span.style.position = "relative";
-                span.style.float = "left";
-                span.style.marginRight = "30px";
                 $(containerDiv).append(span);
 
                 $(selectionDiv).append(containerDiv);
             });
 
-            igv.gtexBrowser.activeTracks(igv.gtexBrowser.tracksToInitialize);
+            //igv.gtexBrowser.activeTracks(igv.gtexBrowser.tracksToInitialize);
         });
 
-        var clearDiv = $('<div style="clear:both">');
-        $(selectionDiv).append(clearDiv);
+        //var clearDiv = $('<div style="clear:both">');
+        //$(selectionDiv).append(clearDiv);
 
-        return selectionDiv;
+        $(controlDiv).append(selectionDiv);
+
+        return controlDiv;
     }
 
     function findTrackWithURL(browser, url) {
