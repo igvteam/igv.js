@@ -357,6 +357,9 @@ var igv = (function (igv) {
                             if (undefined === genomicLocation) {
                                 return;
                             }
+                            if (null === trackView.tile) {
+                                return;
+                            }
                             xOrigin = Math.round(referenceFrame.toPixels((trackView.tile.startBP - referenceFrame.start)));
                             popupData = trackView.track.popupData(genomicLocation, canvasCoords.x - xOrigin, canvasCoords.y);
                             if (popupData && popupData.length > 0) {
