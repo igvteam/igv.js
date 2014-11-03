@@ -144,7 +144,6 @@ var cursor = (function (cursor) {
         var trackPackages = [],
             filterPackages = [],
             howmany = 0,
-            sortButtons,
             sortTrackPanelPostFiltering,
             myself = this;
 
@@ -155,20 +154,12 @@ var cursor = (function (cursor) {
         $(this.browser.trackContainerDiv).find("i.fa-signal").each(function() {
 
             var me = $(this);
-            if (me.hasClass("fa-flip-horizontal")) {
+            if (me.hasClass("igv-control-sort-fontawesome-selected")) {
 
-                me.removeClass("fa-flip-horizontal")
+                me.removeClass("igv-control-sort-fontawesome-selected");
             }
 
          });
-
-        foo.track.sortButton.className = "fa fa-signal igv-control-sort-fontawesome";
-
-
-
-
-
-
 
         this.browser.trackPanels.forEach(function (trackPanel, tpIndex, trackPanels) {
 
@@ -176,7 +167,7 @@ var cursor = (function (cursor) {
 
                 trackPackages.push({ track: trackPanel.track, trackFilter: trackPanel.track.trackFilter, featureCache: featureCache, cursorHistogram: trackPanel.track.cursorHistogram });
 
-                if (trackPanel.track.isSorted()) {
+                if (trackPanel.track.isSortTrack()) {
                     sortTrackPanelPostFiltering = trackPanel;
                 }
 
@@ -189,8 +180,6 @@ var cursor = (function (cursor) {
         });
 
         function runFilters() {
-
-            var spinner;
 
             if (0 === filterPackages.length) {
                 // No filters
@@ -236,12 +225,22 @@ var cursor = (function (cursor) {
 
             if (undefined !== thresholdFramePixelWidth && sortTrackPanelPostFiltering) {
 
+                $(sortTrackPanelPostFiltering.track.sortButton).addClass("igv-control-sort-fontawesome-selected");
 
-                // TODO: This is wacky. Needs to be done to maintain sort direction
-                myself.browser.sortDirection *= -1;
+                $(myself.browser.trackContainerDiv).find("i.fa-signal").each(function() {
+
+                    var me = $(this);
+
+                    if (1 === myself.browser.sortDirection) {
+                        me.removeClass("fa-flip-horizontal");
+                    } else {
+                        me.addClass("fa-flip-horizontal");
+                    }
+
+                });
+
                 myself.sortRegions(sortTrackPanelPostFiltering.track.featureSource, myself.browser.sortDirection, function () {
 
-                    sortTrackPanelPostFiltering.track.sortButton.className = "fa fa-signal igv-control-sort-fontawesome-selected";
                     if (myself.framePixelWidth < thresholdFramePixelWidth) {
                         myself.browser.setFrameWidth(thresholdFramePixelWidth);
                     } else {

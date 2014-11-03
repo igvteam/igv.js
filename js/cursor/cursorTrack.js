@@ -42,8 +42,10 @@ var cursor = (function (cursor) {
        return "blue";
     };
 
-    cursor.CursorTrack.prototype.isSorted = function () {
-        return this.sortButton.style.color === "red";
+    cursor.CursorTrack.prototype.isSortTrack = function () {
+
+        var success = (this === this.cursorModel.browser.sortTrack);
+        return success;
     };
 
     cursor.CursorTrack.prototype.getFeatureCache = function (continuation) {

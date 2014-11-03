@@ -612,6 +612,7 @@ var igv = (function (igv) {
         // sort
 
         browser.sortDirection = undefined;
+        browser.sortTrack = undefined;
 
         sortButton = document.createElement("i");
         trackIconContainer.append($(sortButton));
@@ -621,6 +622,7 @@ var igv = (function (igv) {
         sortButton.onclick = function () {
 
             browser.sortDirection = (undefined === browser.sortDirection) ? 1 : -1 * browser.sortDirection;
+            browser.sortTrack = track;
 
             browser.cursorModel.sortRegions(track.featureSource, browser.sortDirection, function (regions) {
 
