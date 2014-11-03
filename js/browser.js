@@ -134,7 +134,7 @@ var igv = (function (igv) {
         var browser = this,
             trackView = new igv.TrackView(track, this);
 
-        if (!track.order) {
+        if (undefined === track.order) {
             track.order = (this.nextTrackOrder)++;
         }
 
@@ -161,19 +161,22 @@ var igv = (function (igv) {
 
     igv.Browser.prototype.reorderTracks = function () {
 
-        var browser = this;
+        var myself = this;
 
         this.trackPanels.sort(function (a, b) {
             var aOrder = a.track.order || 0;
             var bOrder = b.track.order || 0;
             return aOrder - bOrder;
         });
+
         // Reattach the divs to the dom in the correct order
         $(this.trackContainerDiv).children().detach();
-        this.trackPanels.forEach(function (tp) {
-            browser.trackContainerDiv.appendChild(tp.trackDiv);
+
+        this.trackPanels.forEach(function (trackView, index, trackViews) {
+            myself.trackContainerDiv.appendChild(trackView.trackDiv);
         });
-    }
+
+    };
 
     igv.Browser.prototype.removeTrack = function (track) {
 
@@ -193,6 +196,78 @@ var igv = (function (igv) {
 
     };
 
+    igv.Browser.prototype.reduceTrackOrder = function (trackView) {
+
+        var indices = [],
+            raisable,
+            raiseableOrder;
+
+        if (1 === this.trackPanels.length) {
+            return;
+        }
+
+        this.trackPanels.forEach(function(tv, i, tvs){
+
+            indices.push( { trackView : tv, index : i } );
+
+            if (trackView === tv) {
+                raisable = indices[ i ];
+            }
+
+        });
+
+        if (0 === raisable.index) {
+            raisable.trackView.track.order = 1 + (indices[ this.trackPanels.length - 1 ].trackView.track.order);
+        } else {
+
+            raiseableOrder = raisable.trackView.track.order;
+            raisable.trackView.track.order = indices[ raisable.index - 1 ].trackView.track.order;
+            indices[ raisable.index - 1].trackView.track.order = raiseableOrder;
+        }
+
+        this.reorderTracks();
+
+    };
+
+    igv.Browser.prototype.increaseTrackOrder = function (trackView) {
+
+        var j,
+            order,
+            indices = [],
+            raisable,
+            raiseableOrder;
+
+        if (1 === this.trackPanels.length) {
+            return;
+        }
+
+        this.trackPanels.forEach(function(tv, i, tvs){
+
+            indices.push( { trackView : tv, index : i } );
+
+            if (trackView === tv) {
+                raisable = indices[ i ];
+            }
+
+        });
+
+        if (raisable.index === this.trackPanels.length - 1) {
+
+            for (order = 1 + raisable.trackView.track.order, j = 0; j < raisable.index; order++, j++) {
+                indices[ j ].trackView.track.order = order;
+            }
+
+        } else {
+
+            raiseableOrder = raisable.trackView.track.order;
+            raisable.trackView.track.order = indices[ 1 + raisable.index ].trackView.track.order;
+            indices[ 1 + raisable.index ].trackView.track.order = raiseableOrder;
+        }
+
+        this.reorderTracks();
+
+    };
+
     igv.Browser.prototype.setTrackHeight = function (newHeight) {
 
         this.trackHeight = newHeight;
@@ -209,7 +284,7 @@ var igv = (function (igv) {
         this.trackPanels.forEach(function (panel) {
             panel.resize();
         })
-    }
+    };
 
     igv.Browser.prototype.repaint = function () {
 
@@ -266,7 +341,7 @@ var igv = (function (igv) {
 
         return Math.max(MIN_TRACK_WIDTH, width);
 
-    }
+    };
 
     igv.Browser.prototype.goto = function (chr, start, end) {
 
@@ -305,7 +380,7 @@ var igv = (function (igv) {
         this.referenceFrame.start = start;
 
         this.update();
-    }
+    };
 
     // Zoom in by a factor of 2, keeping the same center location
     igv.Browser.prototype.zoomIn = function () {
@@ -320,7 +395,7 @@ var igv = (function (igv) {
         this.referenceFrame.start = center - newScale * viewportWidth / 2;
         this.referenceFrame.bpPerPixel = newScale;
         this.update();
-    }
+    };
 
     // Zoom out by a factor of 2, keeping the same center location if possible
     igv.Browser.prototype.zoomOut = function () {
@@ -349,7 +424,7 @@ var igv = (function (igv) {
 
         this.referenceFrame.bpPerPixel = newScale;
         this.update();
-    }
+    };
 
     igv.Browser.prototype.search = function (feature, continuation) {
 
@@ -451,7 +526,7 @@ var igv = (function (igv) {
             });
         }
 
-    }
+    };
 
     function addTrackContainerHandlers(trackContainerDiv) {
 

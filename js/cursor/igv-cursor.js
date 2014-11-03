@@ -610,7 +610,6 @@ var igv = (function (igv) {
 
 
         // sort
-
         browser.sortDirection = undefined;
         browser.sortTrack = undefined;
 

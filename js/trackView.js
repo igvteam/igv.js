@@ -4,9 +4,10 @@ var igv = (function (igv) {
 
         this.browser = browser;
         this.track = track;
-        this.order = track.order || 0;
+//        this.order = track.order || 0;
 
-        var viewportDiv,
+        var myself = this,
+            viewportDiv,
             trackIconContainer,
             trackDiv,
             trackManipulationContainer,
@@ -91,6 +92,14 @@ var igv = (function (igv) {
 
             $(trackManipulationIconBox).append($('<i class="fa fa-chevron-circle-up   igv-track-manipulation-move-up">')[0]);
             $(trackManipulationIconBox).append($('<i class="fa fa-chevron-circle-down igv-track-manipulation-move-down">')[0]);
+
+            $(trackManipulationIconBox).find("i.fa-chevron-circle-up").click(function() {
+                browser.reduceTrackOrder(myself)
+            });
+
+            $(trackManipulationIconBox).find("i.fa-chevron-circle-down").click(function() {
+                browser.increaseTrackOrder(myself)
+            });
 
             removeButton = $('<i class="fa fa-times igv-track-manipulation-discard">')[0];
 
