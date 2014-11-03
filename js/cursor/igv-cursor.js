@@ -610,6 +610,9 @@ var igv = (function (igv) {
 
 
         // sort
+
+        browser.sortDirection = undefined;
+
         sortButton = document.createElement("i");
         trackIconContainer.append($(sortButton));
         sortButton.className = "fa fa-signal igv-control-sort-fontawesome";
@@ -617,14 +620,16 @@ var igv = (function (igv) {
 
         sortButton.onclick = function () {
 
-            browser.cursorModel.sortRegions(track.featureSource, track.sortDirection, function (regions) {
+            browser.sortDirection = (undefined === browser.sortDirection) ? 1 : -1 * browser.sortDirection;
+
+            browser.cursorModel.sortRegions(track.featureSource, browser.sortDirection, function (regions) {
 
                 browser.update();
 
                 browser.trackPanels.forEach(function (tp) {
 
 
-                    if (1 === track.sortDirection) {
+                    if (1 === browser.sortDirection) {
 
                         $(tp.track.sortButton).removeClass("fa-flip-horizontal");
                     } else {
@@ -641,10 +646,7 @@ var igv = (function (igv) {
                     }
                 });
 
-                track.sortDirection *= -1;
-
             });
-
 
         };
 

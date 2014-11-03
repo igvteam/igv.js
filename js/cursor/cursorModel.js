@@ -140,11 +140,35 @@ var cursor = (function (cursor) {
     };
 
     cursor.CursorModel.prototype.filterRegions = function () {
+
         var trackPackages = [],
             filterPackages = [],
             howmany = 0,
+            sortButtons,
             sortTrackPanelPostFiltering,
             myself = this;
+
+
+        // TODO: HACK HACK HACK
+        // TODO: Clean this up during sort reorg is finished
+        // TODO: sorting will be lost during filtering
+        $(this.browser.trackContainerDiv).find("i.fa-signal").each(function() {
+
+            var me = $(this);
+            if (me.hasClass("fa-flip-horizontal")) {
+
+                me.removeClass("fa-flip-horizontal")
+            }
+
+         });
+
+        foo.track.sortButton.className = "fa fa-signal igv-control-sort-fontawesome";
+
+
+
+
+
+
 
         this.browser.trackPanels.forEach(function (trackPanel, tpIndex, trackPanels) {
 
@@ -155,9 +179,6 @@ var cursor = (function (cursor) {
                 if (trackPanel.track.isSorted()) {
                     sortTrackPanelPostFiltering = trackPanel;
                 }
-
-                // sorting will be lost during filtering
-                trackPanel.track.sortButton.className = "fa fa-signal igv-control-sort-fontawesome";
 
                 if (trackPanel.track.trackFilter.isFilterActive) {
                     filterPackages.push({trackFilter: trackPanel.track.trackFilter, featureCache: featureCache });
@@ -217,8 +238,8 @@ var cursor = (function (cursor) {
 
 
                 // TODO: This is wacky. Needs to be done to maintain sort direction
-                sortTrackPanelPostFiltering.track.sortDirection *= -1;
-                myself.sortRegions(sortTrackPanelPostFiltering.track.featureSource, sortTrackPanelPostFiltering.track.sortDirection, function () {
+                myself.browser.sortDirection *= -1;
+                myself.sortRegions(sortTrackPanelPostFiltering.track.featureSource, myself.browser.sortDirection, function () {
 
                     sortTrackPanelPostFiltering.track.sortButton.className = "fa fa-signal igv-control-sort-fontawesome-selected";
                     if (myself.framePixelWidth < thresholdFramePixelWidth) {

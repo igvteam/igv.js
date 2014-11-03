@@ -19,8 +19,6 @@ var cursor = (function (cursor) {
 
         this.id = "";
         this.max = 1000;
-        this.sortDirection = 1;
-
     };
 
     cursor.CursorTrack.prototype.jsonRepresentation = function () {
