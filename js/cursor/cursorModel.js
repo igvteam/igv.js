@@ -161,21 +161,21 @@ var cursor = (function (cursor) {
 
          });
 
-        this.browser.trackPanels.forEach(function (trackPanel, tpIndex, trackPanels) {
+        this.browser.trackPanels.forEach(function (trackView, tpIndex, trackViews) {
 
-            trackPanel.track.getFeatureCache(function (featureCache) {
+            trackView.track.getFeatureCache(function (featureCache) {
 
-                trackPackages.push({ track: trackPanel.track, trackFilter: trackPanel.track.trackFilter, featureCache: featureCache, cursorHistogram: trackPanel.track.cursorHistogram });
+                trackPackages.push({ track: trackView.track, trackFilter: trackView.track.trackFilter, featureCache: featureCache, cursorHistogram: trackView.track.cursorHistogram });
 
-                if (trackPanel.track.isSortTrack()) {
-                    sortTrackPanelPostFiltering = trackPanel;
+                if (trackView.track.isSortTrack()) {
+                    sortTrackPanelPostFiltering = trackView;
                 }
 
-                if (trackPanel.track.trackFilter.isFilterActive) {
-                    filterPackages.push({trackFilter: trackPanel.track.trackFilter, featureCache: featureCache });
+                if (trackView.track.trackFilter.isFilterActive) {
+                    filterPackages.push({trackFilter: trackView.track.trackFilter, featureCache: featureCache });
                 }
 
-                if (++howmany == trackPanels.length) runFilters();
+                if (++howmany == trackViews.length) runFilters();
             });
         });
 
