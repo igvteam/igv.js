@@ -7,7 +7,7 @@ var igv = (function (igv) {
     /**
      * A factory function.  Return a parser for the given file type.
      */
-    igv.bedParser = function(type) {
+    igv.BedParser = function(type) {
 
         var decode;
 
@@ -91,7 +91,10 @@ var igv = (function (igv) {
             if (tokens.length < 3) return null;
 
             chr = tokens[0];
+
+
             if (!chr.startsWith("chr")) chr = "chr" + chr;  // TODO -- use genome aliases
+
             start = parseInt(tokens[1]);
             end = tokens.length > 2 ? parseInt(tokens[2]) : start + 1;
 
@@ -158,6 +161,10 @@ var igv = (function (igv) {
             }
 
             chr = tokens[0];
+
+            if (!chr.startsWith("chr")) chr = "chr" + chr;  // TODO -- use genome aliases
+
+
             start = parseInt(tokens[1]);
             end = parseInt(tokens[2]);
             name = tokens[3];

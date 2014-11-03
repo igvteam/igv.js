@@ -9,25 +9,12 @@ module.exports = function (grunt) {
                 src: [
                     'js/**/*.js',
                     'vendor/inflate.js',
-                    'vendor/spin.js',
-                    'vendor/inflate.js',
                     'vendor/zlib_and_gzip.min.js'
                 ],
                 dest: 'dist/igv-all.js'
             }
         },
 
-        cssmin: {
-            igv: {
-                files: {
-                    'dist/igv-all.min.css': [
-                        'css/igv.css',
-                        'css/popover.css'
-                    ],
-                }
-
-            }
-        },
 
         uglify: {
             options: {
@@ -49,7 +36,7 @@ module.exports = function (grunt) {
 
     // 4. Where we tell Grunt what to do when we type "grunt" into the terminal.
     //grunt.registerTask('default', ['concat:igvexp', 'uglify:igvexp']);
-    grunt.registerTask('default', ['concat:igv', 'uglify:igv', 'cssmin:igv']);
+    grunt.registerTask('default', ['concat:igv', 'uglify:igv']);
 
 
 };

@@ -70,29 +70,33 @@ var igv = (function (igv) {
     function buildTreeMap(featureList) {
 
         var featureCache = {},
-            chromosomes = [];
-            
-        featureList.forEach(function (feature) {
-          
-            var chr = feature.chr,
-                geneList = featureCache[chr];
+            chromosomes = [],
+            treeMap = {};
 
-            if (!geneList) {
-                chromosomes.push(chr);
-                geneList = [];
-                featureCache[chr] = geneList;
+        if (featureList) {
+
+            featureList.forEach(function (feature) {
+
+                var chr = feature.chr,
+                    geneList = featureCache[chr];
+
+                if (!geneList) {
+                    chromosomes.push(chr);
+                    geneList = [];
+                    featureCache[chr] = geneList;
+                }
+
+                geneList.push(feature);
+
+            });
+
+
+            // Now build interval tree for each chromosome
+
+            for (i = 0; i < chromosomes.length; i++) {
+                chr = chromosomes[i];
+                treeMap[chr] = buildIntervalTree(featureCache[chr]);
             }
-
-            geneList.push(feature);
-
-        });
-
-
-        // Now build interval tree for each chromosome
-        var treeMap = {};
-        for (i = 0; i < chromosomes.length; i++) {
-            chr = chromosomes[i];
-            treeMap[chr] = buildIntervalTree(featureCache[chr]);
         }
 
         return treeMap;
@@ -134,4 +138,5 @@ var igv = (function (igv) {
 
 
     return igv;
-})(igv || {});
+})
+(igv || {});
