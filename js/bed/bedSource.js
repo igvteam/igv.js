@@ -41,7 +41,7 @@ var igv = (function (igv) {
 
         var myself = this, featureList;
 
-        if (this.featureCache && queryChr === this.featureCache.queryChr) {
+        if (this.featureCache) { //} && queryChr === this.featureCache.queryChr) {
             success(this.featureCache.queryFeatures(queryChr, bpStart, bpEnd));
             return;
         }
