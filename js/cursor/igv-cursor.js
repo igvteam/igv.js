@@ -125,18 +125,8 @@ var igv = (function (igv) {
 
         // BED URL upload
         document.getElementById('igvLoadURL').onchange = function (e) {
-            var obj,
-                path;
 
-            obj = $("#igvLoadURL");
-            path = obj.val();
-            obj.val("");
-
-            browser.loadTrack({
-                type: "bed",
-                url: path,
-                label: "Unnamed Track"
-            });
+            browser.loadTrackPath($("#igvLoadURL"));
 
         };
 
@@ -445,7 +435,7 @@ var igv = (function (igv) {
 
             this.addTrack(newTrack);
 
-            return newTrack;
+//            return newTrack;
 
             function cursorGetType(path) {
 
@@ -456,6 +446,21 @@ var igv = (function (igv) {
                 }
 
             }
+
+        };
+
+        browser.loadTrackPath = function (elementObject) {
+
+            var path = elementObject.val();
+
+//            elementObject.val("");
+//            $("#igvLoadURLForm")[0].reset();
+
+            browser.loadTrack({
+                type: "bed",
+                url: path,
+                label: "Unnamed Track"
+            });
 
         };
 
