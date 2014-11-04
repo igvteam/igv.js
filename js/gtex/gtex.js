@@ -14,7 +14,6 @@ var igv = (function (igv) {
                         order: 9999
                     },
                     {
-                        //url: "//dn7ywbm9isq8j.cloudfront.net/annotations/hg19/genes/gencode.v18.collapsed.bed",
                         url: "//dn7ywbm9isq8j.cloudfront.net/annotations/hg19/genes/gencode.v18.collapsed.bed",
                         label: "Genes",
                         order: 10000
@@ -40,7 +39,52 @@ var igv = (function (igv) {
 
         var controlDiv = $('<div id="igvControlDiv" class="igv-control-div">')[0],
             tissueEqtlMappingURL = options.tissueEqtlMappingURL,
-            selectionDiv = $('<div id="igvGtexSelectionDiv" style="margin-bottom:30px">')[0];
+            selectionDiv = $('<div style="margin-bottom:20px">')[0],
+            widgetDiv = $('<div style="height: 40px">')[0],
+            zoomDiv = $('<div style="float:right">')[0],
+            zoomOutButton = $('<button style="margin-right:5px">Zoom Out&nbsp; </button>')[0],
+            zoomInButton = $('<button>Zoom In&nbsp; </button>')[0],
+            trackHeightDiv = $('<div style="float:left">Track height:&nbsp;</div>')[0],
+            heightBoxInput = $('<input type="text" id="igvTrackHeightInput" value="100"/>')[0],
+            goBoxDiv, goBoxInput, goBoxButton;
+
+
+        zoomOutButton.onclick = function () {
+            igv.browser.zoomOut();
+        }
+
+        zoomInButton.onclick = function () {
+            igv.browser.zoomIn();
+        }
+
+        heightBoxInput.onchange = function () {
+
+            igv.browser.setTrackHeight(heightBoxInput.value);
+        }
+
+        $(trackHeightDiv).append(heightBoxInput);
+        $(zoomDiv).append(zoomOutButton);
+        $(zoomDiv).append(zoomInButton);
+
+        $(widgetDiv).append(trackHeightDiv);
+        $(widgetDiv).append(zoomDiv);
+
+        $(controlDiv).append(selectionDiv);
+        $(controlDiv).append(widgetDiv);
+
+
+        if (options.dev) {
+            goBoxDiv = $('<div style="margin-left:auto;margin-right:auto;width:20%">')[0];
+            goBoxInput = $('<input type="text" id="goBox" value="PDE8B"/>')[0];
+            goBoxButton = $('<button name="goButton"">Go</button>')[0];
+            goBoxInput.onChange = function () {
+                igv.browser.search(goBoxInput.value);
+            }
+            goBoxButton.onclick = function () {
+                igv.browser.search(goBoxInput.value);
+            }
+        }
+
 
         loadGtexTissueMappings(tissueEqtlMappingURL, function (records) {
 
@@ -77,44 +121,6 @@ var igv = (function (igv) {
 
             //igv.gtexBrowser.activeTracks(igv.gtexBrowser.tracksToInitialize);
         });
-
-        //var clearDiv = $('<div style="clear:both">');
-        //$(selectionDiv).append(clearDiv);
-
-        $(controlDiv).append(selectionDiv);
-
-        var zoomInButton = $('<button class="igvZoomButton" name="zoomInButton"  onclick="gtex.zoomIn()">Zoom In&nbsp; </button>')[0],
-            zoomOutButton = $('<button class="igvZoomButton" name="zoomOutButton"  onclick="gtex.zoomOut()">Zoom Out&nbsp; </button>')[0],
-            trackHeightDiv = $('<div style="float:left">Track height:&nbsp;</div>')[0],
-            heightBoxInput = $('<input type="text" id="igvTrackHeightInput" value="100"/>')[0],
-            goBoxDiv = $('<div style="margin-left:auto;margin-right:auto;width:20%">')[0],
-            goBoxInput = $('<input type="text" id="goBox" value="PDE8B"/>')[0],
-            goBoxButton = $('<button name="goButton"">Go</button>')[0];
-
-        $(controlDiv).append(zoomInButton);
-        $(controlDiv).append(zoomOutButton);
-        $(controlDiv).append(trackHeightDiv);
-        $(trackHeightDiv).append(heightBoxInput);
-
-        goBoxInput.onChange = function () {
-            igv.browser.search(goBoxInput.value);
-        }
-        goBoxButton.onclick = function () {
-            igv.browser.search(goBoxInput.value);
-        }
-
-        zoomOutButton.onclick = function () {
-            igv.browser.zoomOut();
-        }
-
-        zoomInButton.onclick = function () {
-            igv.browser.zoomIn();
-        }
-
-        heightBoxInput.onchange = function () {
-
-            igv.browser.setTrackHeight(heightBoxInput.value);
-        }
 
 
         return controlDiv;
