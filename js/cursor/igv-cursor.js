@@ -547,9 +547,8 @@ var igv = (function (igv) {
                 browser.designatedTrack = cursorTracks[ 0 ];
             }
 
-
-            horizontalScrollBarContainer = $("div.igv-horizontal-scrollbar-container-div");
-            browser.horizontalScrollbar = new cursor.HorizontalScrollbar(browser, $(horizontalScrollBarContainer));
+//            horizontalScrollBarContainer = $("div.igv-horizontal-scrollbar-container-div");
+//            browser.horizontalScrollbar = new cursor.HorizontalScrollbar(browser, $(horizontalScrollBarContainer));
 
             browser.designatedTrack.featureSource.allFeatures(function (featureList) {
 
@@ -570,7 +569,6 @@ var igv = (function (igv) {
                 browser.referenceFrame.bpPerPixel = 1.0 / browser.cursorModel.framePixelWidth;
 
                 browser.goto("", session.start, session.end);
-
 
                 browser.horizontalScrollbar.update();
 
