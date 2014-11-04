@@ -292,8 +292,6 @@ var igv = (function (igv) {
             horizontalScrollBarContainer = $("div.igv-horizontal-scrollbar-container-div");
             browser.horizontalScrollbar = new cursor.HorizontalScrollbar(browser, $(horizontalScrollBarContainer));
 
-
-
             browser.designatedTrack.featureSource.allFeatures(function (featureList) {
 
                 browser.cursorModel.setRegions(featureList);
@@ -550,15 +548,9 @@ var igv = (function (igv) {
                 browser.designatedTrack = cursorTracks[ 0 ];
             }
 
-            browser.selectDesignatedTrack(browser.designatedTrack.trackFilter.trackPanel);
-
-
 
             horizontalScrollBarContainer = $("div.igv-horizontal-scrollbar-container-div");
             browser.horizontalScrollbar = new cursor.HorizontalScrollbar(browser, $(horizontalScrollBarContainer));
-
-
-
 
             browser.designatedTrack.featureSource.allFeatures(function (featureList) {
 
@@ -569,6 +561,8 @@ var igv = (function (igv) {
                     browser.addTrack(cursorTrack);
 
                 });
+
+                browser.selectDesignatedTrack(browser.designatedTrack.trackFilter.trackPanel);
 
                 browser.cursorModel.filterRegions();
 
