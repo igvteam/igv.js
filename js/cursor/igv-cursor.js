@@ -82,7 +82,7 @@ var igv = (function (igv) {
                 sessionFile;
 
             sessionFile = sessionInput.files[ 0 ];
-            $("#igvSessionLoadForm")[0].reset();
+//            $("#igvSessionLoadForm")[0].reset();
 
             fileReader.onload = function (e) {
 
@@ -100,34 +100,13 @@ var igv = (function (igv) {
         });
 
         // BED file upload
-        var fileInput = document.getElementById('igvFileUpload');
-        fileInput.addEventListener('change', function (e) {
-
-            var localFile,
-                localFiles = fileInput.files;
-
-            for (var i = 0; i < localFiles.length; i++) {
-
-                localFile = localFiles[ i ];
-                $("#igvFileUploadModalForm")[0].reset();
-
-                browser.loadTrack({
-                    type: "bed",
-                    localFile: localFile,
-                    url: undefined,
-                    label: localFile.name
-                });
-
-
-            }
-
-        });
+        document.getElementById('igvFileUpload').onchange = function (e) {
+            browser.loadTrackFile($("#igvFileUpload")[0]);
+        };
 
         // BED URL upload
         document.getElementById('igvLoadURL').onchange = function (e) {
-
             browser.loadTrackPath($("#igvLoadURL"));
-
         };
 
         // Load ENCODE DataTables data and build markup for modal dialog.
@@ -226,7 +205,6 @@ var igv = (function (igv) {
         // Append resultant ENCODE DataTables markup
         $('#encodeModalBody').html('<table cellpadding="0" cellspacing="0" border="0" class="display" id="encodeModalTable"></table>');
 
-
         // Construct DOM hierarchy
         trackContainer = $('<div id="igvTrackContainerDiv" class="igv-track-container-div">')[0];
         browser = new igv.Browser(options, trackContainer);
@@ -238,8 +216,6 @@ var igv = (function (igv) {
         // horizontal scrollbar container. fill in the guts after track construction
         horizontalScrollBarContainer = $('<div class="igv-horizontal-scrollbar-container-div">')[0];
         $(browser.div).append(horizontalScrollBarContainer);
-
-//        browser.horizontalScrollbar = new cursor.HorizontalScrollbar(browser, $(horizontalScrollBarContainer));
 
         $(browser.div).append(trackContainer);
 
@@ -407,8 +383,6 @@ var igv = (function (igv) {
         // Alter "super" implementation
         browser.loadTrack = function (config) {
 
-//            this.__proto__.loadTrack.call(this, config);
-
             if (browser.isDuplicateTrack(config)) {
                 return;
             }
@@ -449,12 +423,32 @@ var igv = (function (igv) {
 
         };
 
+        browser.loadTrackFile = function (fileInput) {
+
+            var localFile,
+                localFiles = fileInput.files;
+
+            for (var i = 0; i < localFiles.length; i++) {
+
+                localFile = localFiles[ i ];
+
+                browser.loadTrack({
+                    type: "bed",
+                    localFile: localFile,
+                    url: undefined,
+                    label: localFile.name
+                });
+
+
+            }
+
+        };
+
         browser.loadTrackPath = function (elementObject) {
 
             var path = elementObject.val();
 
-//            elementObject.val("");
-//            $("#igvLoadURLForm")[0].reset();
+            elementObject.val("");
 
             browser.loadTrack({
                 type: "bed",
