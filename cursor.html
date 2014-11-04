@@ -191,12 +191,10 @@
 
             <div class="modal-body">
 
-                <!--<form id="igvSessionLoadForm" role="form">-->
                     <div class="form-group">
                         <!--<label for="igvSessionLoad">Load Session</label>-->
                         <input id="igvSessionLoad" type="file" title="Session File" multiple/>
                     </div>
-                <!--</form>-->
 
             </div>
 
@@ -218,12 +216,10 @@
 
             <div class="modal-body">
 
-                <!--<form id="igvLoadURLForm" role="form">-->
                     <div class="form-group">
                         <!--<label for="igvLoadURL">Load URL</label>-->
                         <input id="igvLoadURL" type="text" class="form-control" placeholder="BED URL">
                     </div>
-                <!--</form>-->
 
             </div>
 
@@ -245,12 +241,9 @@
 
             <div class="modal-body">
 
-                <!--<form id="igvFileUploadModalForm" role="form">-->
                     <div class="form-group">
                         <input id="igvFileUpload" type="file" title="BED file" multiple/>
                     </div>
-                <!--</form>-->
-
 
             </div>
 
@@ -275,10 +268,8 @@
             <div class="modal-body">
                 <form id="igvExportRegionsModalForm" role="form" action="php/igvdownload.php" method="post">
                     <div class="form-group">
-                        <input class="form-control" placeholder="Enter filename" type="text" name="filename"
-                               value="cursor-regions.bed"/>
-                        <input class="form-control" type="hidden" name="downloadContent"
-                               value="this is the contents of the file"/>
+                        <input class="form-control" type="text"   name="filename"        value="cursor-regions.bed" placeholder="Enter filename"/>
+                        <input class="form-control" type="hidden" name="downloadContent" value="this is the contents of the file"/>
                     </div>
 
                     <button class="btn btn-default" type="submit" name="download" value="download">Submit</button>
@@ -306,10 +297,8 @@
             <div class="modal-body">
                 <form id="igvSaveSessionModalForm" role="form" action="php/igvdownload.php" method="post">
                     <div class="form-group">
-                        <input class="form-control" placeholder="Enter filename" type="text" name="filename"
-                               value="cursor-session.txt"/>
-                        <input class="form-control" type="hidden" name="downloadContent"
-                               value="this is the contents of the file"/>
+                        <input class="form-control" type="text"   name="filename"        value="cursor-session.txt" placeholder="Enter filename"/>
+                        <input class="form-control" type="hidden" name="downloadContent" value="this is the contents of the file"/>
                     </div>
 
                     <button class="btn btn-default" type="submit" name="download" value="download">Submit</button>
