@@ -109,7 +109,7 @@ var igv = (function (igv) {
             for (var i = 0; i < localFiles.length; i++) {
 
                 localFile = localFiles[ i ];
-                $("#igvFileUploadForm")[0].reset();
+                $("#igvFileUploadModalForm")[0].reset();
 
                 browser.loadTrack({
                     type: "bed",
