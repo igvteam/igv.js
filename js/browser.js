@@ -172,8 +172,10 @@ var igv = (function (igv) {
         // Reattach the divs to the dom in the correct order
         $(this.trackContainerDiv).children().detach();
 
+        console.log("---");
         this.trackPanels.forEach(function (trackView, index, trackViews) {
             myself.trackContainerDiv.appendChild(trackView.trackDiv);
+            console.log("reorderTracks order " + trackView.track.order);
         });
 
     };
@@ -217,13 +219,12 @@ var igv = (function (igv) {
         });
 
         if (0 === raisable.index) {
-            raisable.trackView.track.order = 1 + (indices[ this.trackPanels.length - 1 ].trackView.track.order);
-        } else {
-
-            raiseableOrder = raisable.trackView.track.order;
-            raisable.trackView.track.order = indices[ raisable.index - 1 ].trackView.track.order;
-            indices[ raisable.index - 1].trackView.track.order = raiseableOrder;
+            return;
         }
+
+        raiseableOrder = raisable.trackView.track.order;
+        raisable.trackView.track.order = indices[ raisable.index - 1 ].trackView.track.order;
+        indices[ raisable.index - 1].trackView.track.order = raiseableOrder;
 
         this.reorderTracks();
 
@@ -232,7 +233,6 @@ var igv = (function (igv) {
     igv.Browser.prototype.increaseTrackOrder = function (trackView) {
 
         var j,
-            order,
             indices = [],
             raisable,
             raiseableOrder;
@@ -251,18 +251,13 @@ var igv = (function (igv) {
 
         });
 
-        if (raisable.index === this.trackPanels.length - 1) {
-
-            for (order = 1 + raisable.trackView.track.order, j = 0; j < raisable.index; order++, j++) {
-                indices[ j ].trackView.track.order = order;
-            }
-
-        } else {
-
-            raiseableOrder = raisable.trackView.track.order;
-            raisable.trackView.track.order = indices[ 1 + raisable.index ].trackView.track.order;
-            indices[ 1 + raisable.index ].trackView.track.order = raiseableOrder;
+        if ((this.trackPanels.length - 1) === raisable.index) {
+            return;
         }
+
+        raiseableOrder = raisable.trackView.track.order;
+        raisable.trackView.track.order = indices[ 1 + raisable.index ].trackView.track.order;
+        indices[ 1 + raisable.index ].trackView.track.order = raiseableOrder;
 
         this.reorderTracks();
 
