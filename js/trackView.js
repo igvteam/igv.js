@@ -138,6 +138,12 @@ var igv = (function (igv) {
 
     igv.TrackView.prototype.setTrackHeight = function (newHeight) {
 
+        var minHeight = this.track.minHeight || 10;
+        var maxHeight = this.track.maxHeight || 1000;
+
+        newHeight = Math.max(minHeight, newHeight);
+        newHeight = Math.min(maxHeight, newHeight);
+
         var heightStr = newHeight + "px";
         this.track.height = newHeight;
         this.trackDiv.style.height = heightStr;

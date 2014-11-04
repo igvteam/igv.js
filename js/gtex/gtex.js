@@ -113,7 +113,7 @@ var igv = (function (igv) {
 
         heightBoxInput.onchange = function () {
 
-            igv.browser.setTrackHeight(heightBoxInput);
+            igv.browser.setTrackHeight(heightBoxInput.value);
         }
 
 

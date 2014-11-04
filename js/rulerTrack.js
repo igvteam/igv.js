@@ -3,6 +3,8 @@ var igv = (function (igv) {
     //
     igv.RulerTrack = function () {
         this.height = 50;
+        this.minHeight = this.height;
+        this.maxHeight = this.height;
         this.label = "";
         this.id = "ruler";
         this.disableButtons =  true;

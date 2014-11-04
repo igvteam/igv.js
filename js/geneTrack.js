@@ -6,7 +6,9 @@ var igv = (function (igv) {
         this.featureSource = new igv.BedFeatureSource(this.config);
         this.label = config.label;
         this.id = config.id || config.label;
-        this.height = 100;   // The preferred height
+        this.height = 100;
+        this.minHeight = this.height;
+        this.maxHeight = this.height;
         this.order = config.order;
 
         this.render = igv.renderGene;
