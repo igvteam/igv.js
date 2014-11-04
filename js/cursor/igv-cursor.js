@@ -5,7 +5,8 @@ var igv = (function (igv) {
         var horizontalScrollBarContainer,
             contentHeader,
             trackContainer,
-            browser;
+            browser,
+            thang;
 
         // Append event handlers to Header DIV
         document.getElementById('zoomOut').onclick = function (e) {
@@ -217,6 +218,16 @@ var igv = (function (igv) {
         horizontalScrollBarContainer = $('<div class="igv-horizontal-scrollbar-container-div">')[0];
         $(browser.div).append(horizontalScrollBarContainer);
 
+        // utility div
+        thang = $('<div class="igv-utility-div">');
+        $(browser.div).append(thang[0]);
+
+        // control panel header
+        thang.append($('<div class="igv-control-panel-header-div">Track Summary</div>')[0]);
+
+
+
+        // track container
         $(browser.div).append(trackContainer);
 
         igv.addAjaxExtensions();
