@@ -1,10 +1,10 @@
-function runBAMTests() {
+function bamTests() {
 
     if (!igv) igv = {};
     igv.sequenceSource = new igv.FastaSequence("//igvdata.broadinstitute.org/genomes/seq/hg19/hg19.fasta");
 
 
-    asyncTest("Read index", function () {
+    asyncTest("index", function () {
 
         var bamPath = "../test/data/bam/gstt1_sample.bam",
             bamFile = new igv.BamReader(bamPath, null);
@@ -18,19 +18,6 @@ function runBAMTests() {
             start();
         })
 
-    });
-
-    asyncTest("Read header", function () {
-
-        var bamPath = "../test/data/bam/gstt1_sample.bam",
-            bamFile = new igv.BamReader(bamPath, null);
-
-        bamFile.readHeader(function () {
-
-            equal(bamFile.contentLength, 60872, "bamFile.contentLength");
-
-            start();
-        })
     });
 
     asyncTest("blocksForRange", 4, function () {
@@ -167,22 +154,40 @@ function runBAMTests() {
 
     });
 
-    asyncTest("bam source", function () {
 
-        // this returns 1660 alignments
+    asyncTest("header", function () {
 
-        var chr = "chr22",
-            beg = 24371000;
-            end = 24383000;
-            bamPath = "../test/data/bam/gstt1_sample.bam",
+        var bamPath = "../test/data/bam/gstt1_sample.bam",
             bamFile = new igv.BamReader(bamPath, null);
 
-        bamFile.readAlignments(chr, beg, end, function (alignments) {
+        bamFile.readHeader(function () {
 
-            equal(alignments.length, 1660)
+            equal(bamFile.contentLength, 60872, "bamFile.contentLength");
+
+            ok(bamFile.chrToIndex["chr1"] === 0);
+
+            bamFile.blocksForRange(0, 0, 10000, function (chunks) {
+
+
+
+                start();
+            });
+        })
+    });
+
+    asyncTest("large header", function () {
+
+        var bamPath = "../test/data/bam/IonXpress_078_rawlib.lgheader.bam",
+            bamFile = new igv.BamReader(bamPath, null);
+
+        bamFile.readHeader(function () {
+
+            equal(bamFile.contentLength, 534453);
+
+            ok(!$.isEmptyObject(bamFile.chrToIndex));
+
             start();
-        });
-
+        })
     });
 
 
