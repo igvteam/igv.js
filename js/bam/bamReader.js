@@ -44,48 +44,58 @@ var igv = (function (igv) {
 
         var bam = this;
 
-        var dataLoader = new igv.DataLoader(this.baiPath);
+        igvxhr.loadArrayBuffer(this.baiPath,
+            {
+                success: function (arrayBuffer) {
 
-        dataLoader.loadArrayBuffer(function (arrayBuffer) {
+                    var uncba = new Uint8Array(arrayBuffer),
+                        baiMagic = readInt(uncba, 0),
+                        p = 4,
+                        blockStart, nbin, nintv, ref, nref;
 
-            var uncba = new Uint8Array(arrayBuffer),
-                baiMagic = readInt(uncba, 0),
-                index;
+                    if (baiMagic === BAI_MAGIC) {
 
-            if (baiMagic === BAI_MAGIC) {
+                        nref = readInt(uncba, 4);
+                        p += 4;
 
-                var nref = readInt(uncba, 4);
+                        bam.indices = [];
 
-                bam.indices = [];
+                        for (var ref = 0; ref < nref; ++ref) {
 
-                var p = 8;
-                for (var ref = 0; ref < nref; ++ref) {
-                    var blockStart = p;
-                    var nbin = readInt(uncba, p);
-                    p += 4;
-                    for (var b = 0; b < nbin; ++b) {
-                        var bin = readInt(uncba, p);
-                        var nchnk = readInt(uncba, p + 4);
-                        p += 8 + (nchnk * 16);
+                            blockStart = p;
+                            nbin = readInt(uncba, p);   // # of bins for this sequence
+                            p += 4;
+
+                            for (var b = 0; b < nbin; ++b) {
+
+                                var bin = readInt(uncba, p);
+                                p += 4;
+
+                                var nchnk = readInt(uncba, p);    // # of chunks for this bin
+                                p += 4 + (nchnk * 16);
+                            }
+
+                            nintv = readInt(uncba, p);   // # of intervals
+                            p += 4;
+
+                            p += (nintv * 8);  // advance pointer to end  for this sequence
+
+                            if (nbin > 0) {
+                                // Store index for this sequence as byte array
+                                bam.indices[ref] = new Uint8Array(arrayBuffer, blockStart, p - blockStart);
+                            }
+                        }
+
+                    } else {
+                        // TODO -- throw error
+                        console.log("Not a BAI file");
                     }
-                    var nintv = readInt(uncba, p);
-                    p += 4;
-                    p += (nintv * 8);
-                    if (nbin > 0) {
 
-                        bam.indices[ref] = new Uint8Array(arrayBuffer, blockStart, p - blockStart);
-                    }
+                    continuation(bam.indices);
                 }
+            });
+    }
 
-            } else {
-                // TODO -- throw error
-                console.log("Not a BAI file");
-            }
-
-            continuation(bam.indices);
-        });
-
-    };
 
     function getIndex(continuation) {
 
@@ -108,39 +118,37 @@ var igv = (function (igv) {
         var bam = this;
 
         if (this.contentLength) {
-            readHeader(this);
+            _readHeader(this);
         }
         else {
             // Gen the content length first, so we don't try to read beyond the end of the file
-            readContentLength(this);
+            igvxhr.loadHeader(bam.bamPath,
+                {
+                    success: function (header) {
+                        var contentLengthString = header ? header["Content-Length"] : null;
+                        if (contentLengthString) {
+                            bam.contentLength = parseInt(contentLengthString);
+                        }
+                        else {
+                            bam.contentLength = -1;
+                        }
+
+                        if (!bam.contentLength) bam.contentLength = -1; //Protect against inf loop
+                        _readHeader(bam);
+
+                    },
+                    error: function () {
+                        bam.contentLength = -1;
+                    }
+
+                });
         }
 
-
-        function readContentLength(bam) {
-            var loader = new igv.DataLoader(bam.bamPath);
-            loader.onerror = function () {
-                bam.contentLength = -1;
-            }
-            loader.loadHeader(function (header) {
-                var contentLengthString = header ? header["Content-Length"] : null;
-                if (contentLengthString) {
-                    bam.contentLength = parseInt(contentLengthString);
-                }
-                else {
-                    bam.contentLength = -1;
-                }
-
-                if (!bam.contentLength) bam.contentLength = -1; //Protect against inf loop
-                readHeader(bam);
-
-            });
-        }
-
-        function readHeader(bam) {
+        function _readHeader(bam) {
 
             getIndex.call(bam, function (index) {
 
-                var refId, headerSize;
+                var refId, headerSize, len;
 
                 // Get the first non-null index entry, and fetch the first block from that entry
                 // TODO -- we know the blocksForRange call is synchronous because we have the index, but seems fragile as coded.
@@ -158,55 +166,44 @@ var igv = (function (igv) {
                     }
                 }
 
-                // We need the index tp know the header extent
-//            if (!this.indices) {
-//                bam.readIndex(function () {
-//                    blocksForRange(bam);
-//                });
-//            }
+                igvxhr.loadArrayBuffer(bam.bamPath,
+                    {
+                        range: {start: 0, size: headerSize},
+                        success: function (compressedBuffer) {
 
+                            var unc = unbgzf(compressedBuffer, headerSize);
+                            var uncba = new Uint8Array(unc);
+                            var magic = readInt(uncba, 0);
+                            var headLen = readInt(uncba, 4);
+                            var header = '';
+                            for (var i = 0; i < headLen; ++i) {
+                                header += String.fromCharCode(uncba[i + 8]);
+                            }
 
-                var dataLoader = new igv.DataLoader(bam.bamPath);
+                            var nRef = readInt(uncba, headLen + 8);
+                            var p = headLen + 12;
 
-                // Fetch some bytes for the header.  TODO -- if we need more we'll have to fetch again
-                var len = headerSize;
-                if (bam.contentLength && bam.contentLength > 0) len = Math.min(len, bam.contentLength);
-                dataLoader.range = {start: 0, size: len};
+                            bam.chrToIndex = {};
+                            bam.indexToChr = [];
+                            for (var i = 0; i < nRef; ++i) {
+                                var lName = readInt(uncba, p);
+                                var name = '';
+                                for (var j = 0; j < lName - 1; ++j) {
+                                    name += String.fromCharCode(uncba[p + 4 + j]);
+                                }
+                                var lRef = readInt(uncba, p + lName + 4);
+                                //dlog(name + ': ' + lRef);
 
-                dataLoader.loadArrayBuffer(function (compressedBuffer) {
+                                bam.chrToIndex[name] = i;
+                                bam.indexToChr.push(name);
 
-                    var unc = unbgzf(compressedBuffer, len);
-                    var uncba = new Uint8Array(unc);
-                    var magic = readInt(uncba, 0);
-                    var headLen = readInt(uncba, 4);
-                    var header = '';
-                    for (var i = 0; i < headLen; ++i) {
-                        header += String.fromCharCode(uncba[i + 8]);
-                    }
+                                p = p + 8 + lName;
+                            }
 
-                    var nRef = readInt(uncba, headLen + 8);
-                    var p = headLen + 12;
+                            continuation();
 
-                    bam.chrToIndex = {};
-                    bam.indexToChr = [];
-                    for (var i = 0; i < nRef; ++i) {
-                        var lName = readInt(uncba, p);
-                        var name = '';
-                        for (var j = 0; j < lName - 1; ++j) {
-                            name += String.fromCharCode(uncba[p + 4 + j]);
                         }
-                        var lRef = readInt(uncba, p + lName + 4);
-                        //dlog(name + ': ' + lRef);
-
-                        bam.chrToIndex[name] = i;
-                        bam.indexToChr.push(name);
-
-                        p = p + 8 + lName;
-                    }
-
-                    continuation();
-
-                });
+                    });
             });
         }
     };
