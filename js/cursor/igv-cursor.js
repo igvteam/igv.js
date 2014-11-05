@@ -61,6 +61,9 @@ var igv = (function (igv) {
             });
 
             downloadInput.val(exportedRegions);
+
+            $('#igvExportRegionsModal').modal('hide');
+
         });
 
         // save session via modal form
@@ -73,6 +76,9 @@ var igv = (function (igv) {
             downloadInput = $("#igvSaveSessionModalForm").find('input[name="downloadContent"]');
 
             downloadInput.val(session);
+
+            $('#igvSaveSessionModal').modal('hide');
+            
         });
 
         // session upload
@@ -83,12 +89,13 @@ var igv = (function (igv) {
                 sessionFile;
 
             sessionFile = sessionInput.files[ 0 ];
-//            $("#igvSessionLoadForm")[0].reset();
 
             fileReader.onload = function (e) {
 
                 var json = e.target.result,
                     session = JSON.parse(json);
+
+                $('#igvSessionLoadModal').modal('hide');
 
                 browser.sessionTeardown();
 
@@ -103,11 +110,13 @@ var igv = (function (igv) {
         // BED file upload
         document.getElementById('igvFileUpload').onchange = function (e) {
             browser.loadTrackFile($("#igvFileUpload")[0]);
+            $('#igvFileUploadModal').modal('hide');
         };
 
         // BED URL upload
         document.getElementById('igvLoadURL').onchange = function (e) {
             browser.loadTrackPath($("#igvLoadURL"));
+            $('#igvLoadURLModal').modal('hide');
         };
 
         // Load ENCODE DataTables data and build markup for modal dialog.
