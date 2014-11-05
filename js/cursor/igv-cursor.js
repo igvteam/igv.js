@@ -183,8 +183,18 @@ var igv = (function (igv) {
 
                         tableCells.each(function () {
 
+                            var key,
+                                val,
+                                index;
+
                             tableCell = $(this)[0];
-                            record[ encode.dataTableRowLabels[ tableCell.cellIndex ] ] = tableCell.innerText;
+
+                            index = tableCell.cellIndex;
+                            key = encode.dataTableRowLabels[ index ];
+                            //val = tableCell.innerText;
+                            val = tableCell.innerHTML;
+
+                            record[ key ] = val;
 
                         });
 
@@ -224,8 +234,6 @@ var igv = (function (igv) {
 
         // control panel header
         thang.append($('<div class="igv-control-panel-header-div">Track Summary</div>')[0]);
-
-
 
         // track container
         $(browser.div).append(trackContainer);
