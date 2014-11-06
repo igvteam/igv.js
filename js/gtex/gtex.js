@@ -3,24 +3,26 @@ var igv = (function (igv) {
 
     igv.createGtexBrowser = function (parentDiv, options) {
 
-        if (!options) {
-            options = {
-                showKaryo: false,
-                fastaURL: "//dn7ywbm9isq8j.cloudfront.net/genomes/seq/hg19/hg19.fasta",
-                cytobandURL: "//dn7ywbm9isq8j.cloudfront.net/genomes/seq/hg19/cytoBand.txt",
-                tracks: [
-                    {
-                        type: "sequence",
-                        order: 9999
-                    },
-                    {
-                        url: "//dn7ywbm9isq8j.cloudfront.net/annotations/hg19/genes/gencode.v18.collapsed.bed",
-                        label: "Genes",
-                        order: 10000
-                    }
-                ]
-            };
-        }
+
+        if (!options) options = {};
+
+        options = {
+            showKaryo: false,
+            fastaURL: "//dn7ywbm9isq8j.cloudfront.net/genomes/seq/hg19/hg19.fasta",
+            cytobandURL: "//dn7ywbm9isq8j.cloudfront.net/genomes/seq/hg19/cytoBand.txt",
+            tracks: [
+                {
+                    type: "sequence",
+                    order: 9999
+                },
+                {
+                    url: "//dn7ywbm9isq8j.cloudfront.net/annotations/hg19/genes/gencode.v18.collapsed.bed",
+                    label: "Genes",
+                    order: 10000
+                }
+            ]
+        };
+        
 
         if (!options.createControls) {
             options.createControls = createGtexControls;
