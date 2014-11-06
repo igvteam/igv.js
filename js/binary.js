@@ -92,7 +92,12 @@ var igv = (function (igv) {
         var retValue = this.view.getFloat64(this.position, this.littleEndian);
         this.position += 8;
         return retValue;
+    }
 
+    igv.BinaryParser.prototype.skip = function (n) {
+
+        this.position += n;
+        return this.position;
     }
 
 
