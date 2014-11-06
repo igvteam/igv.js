@@ -300,6 +300,24 @@ var igv = (function (igv) {
 
     function addCursorExtensions(browser) {
 
+        browser.presentSortStatus = function (trackView) {
+
+            $(trackView.track.sortButton).addClass("igv-control-sort-fontawesome-selected");
+
+            $(browser.trackContainerDiv).find("i.fa-signal").each(function() {
+
+                var me = $(this);
+
+                if (1 === browser.sortDirection) {
+                    me.addClass("fa-flip-horizontal");
+                } else {
+                    me.removeClass("fa-flip-horizontal");
+                }
+
+            });
+
+        };
+
         browser.selectDesignatedTrack = function (trackView) {
 
             var currentDesignatedTrackView,
@@ -634,14 +652,25 @@ var igv = (function (igv) {
 
         sortButton = document.createElement("i");
         trackIconContainer.append($(sortButton));
-        sortButton.className = "fa fa-signal igv-control-sort-fontawesome";
+        sortButton.className = "fa fa-signal igv-control-sort-fontawesome fa-flip-horizontal";
         track.sortButton = sortButton;
 
 
         sortButton.onclick = function () {
 
-            browser.sortDirection = (undefined === browser.sortDirection) ? 1 : -1 * browser.sortDirection;
-            browser.sortTrack = track;
+            if (browser.sortTrack === track) {
+
+                browser.sortDirection = (undefined === browser.sortDirection) ? 1 : -1 * browser.sortDirection;
+
+            } else {
+
+                browser.sortTrack = track;
+                if (undefined === browser.sortDirection) {
+
+                    browser.sortDirection = 1;
+                }
+            }
+
 
             browser.cursorModel.sortRegions(track.featureSource, browser.sortDirection, function (regions) {
 
@@ -651,10 +680,10 @@ var igv = (function (igv) {
 
                     if (1 === browser.sortDirection) {
 
-                        $(tp.track.sortButton).removeClass("fa-flip-horizontal");
+                        $(tp.track.sortButton).addClass("fa-flip-horizontal");
                     } else {
 
-                        $(tp.track.sortButton).addClass("fa-flip-horizontal");
+                        $(tp.track.sortButton).removeClass("fa-flip-horizontal");
                     }
 
                     if (track === tp.track) {

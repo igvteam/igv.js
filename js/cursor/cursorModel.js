@@ -106,7 +106,7 @@ var cursor = (function (cursor) {
         var trackPackages = [],
             filterPackages = [],
             howmany = 0,
-            sortTrackPanelPostFiltering,
+            trackViewThatIsSorted,
             myself = this;
 
 
@@ -130,7 +130,7 @@ var cursor = (function (cursor) {
                 trackPackages.push({ track: trackView.track, trackFilter: trackView.track.trackFilter, featureCache: featureCache, cursorHistogram: trackView.track.cursorHistogram });
 
                 if (trackView.track.isSortTrack()) {
-                    sortTrackPanelPostFiltering = trackView;
+                    trackViewThatIsSorted = trackView;
                 }
 
                 if (trackView.track.trackFilter.isFilterActive) {
@@ -185,23 +185,11 @@ var cursor = (function (cursor) {
 
             var thresholdFramePixelWidth = myself.browser.trackViewportWidth() / myself.filteredRegions.length;
 
-            if (undefined !== thresholdFramePixelWidth && sortTrackPanelPostFiltering) {
+            if (undefined !== thresholdFramePixelWidth && trackViewThatIsSorted) {
 
-                $(sortTrackPanelPostFiltering.track.sortButton).addClass("igv-control-sort-fontawesome-selected");
+                myself.browser.presentSortStatus(trackViewThatIsSorted);
 
-                $(myself.browser.trackContainerDiv).find("i.fa-signal").each(function() {
-
-                    var me = $(this);
-
-                    if (1 === myself.browser.sortDirection) {
-                        me.removeClass("fa-flip-horizontal");
-                    } else {
-                        me.addClass("fa-flip-horizontal");
-                    }
-
-                });
-
-                myself.sortRegions(sortTrackPanelPostFiltering.track.featureSource, myself.browser.sortDirection, function () {
+                myself.sortRegions(trackViewThatIsSorted.track.featureSource, myself.browser.sortDirection, function () {
 
                     if (myself.framePixelWidth < thresholdFramePixelWidth) {
                         myself.browser.setFrameWidth(thresholdFramePixelWidth);
