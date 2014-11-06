@@ -208,9 +208,9 @@ var igv = (function (igv) {
             return;
         }
 
-        this.trackPanels.forEach(function(tv, i, tvs){
+        this.trackPanels.forEach(function (tv, i, tvs) {
 
-            indices.push( { trackView : tv, index : i } );
+            indices.push({ trackView: tv, index: i });
 
             if (trackView === tv) {
                 raisable = indices[ i ];
@@ -241,9 +241,9 @@ var igv = (function (igv) {
             return;
         }
 
-        this.trackPanels.forEach(function(tv, i, tvs){
+        this.trackPanels.forEach(function (tv, i, tvs) {
 
-            indices.push( { trackView : tv, index : i } );
+            indices.push({ trackView: tv, index: i });
 
             if (trackView === tv) {
                 raisable = indices[ i ];
@@ -487,14 +487,11 @@ var igv = (function (igv) {
                                     end += browser.flanking;
                                 }
 
-                                if (browser.type === "GTEX") {
-                                    igv.selection = new igv.GtexSelection(type == 'gene' ? {gene: feature} : {snp: feature});
-                                    browser.goto(chr, start, end);
-                                    browser.update();
-                                }
-                                else {
-                                    browser.goto(chr, start, end);
-                                }
+
+                                browser.selection = new igv.GtexSelection(type == 'gtex' ? {snp: feature} : {gene: feature});
+
+                                browser.goto(chr, start, end);
+
                                 foundFeature = true;
                             }
                         }

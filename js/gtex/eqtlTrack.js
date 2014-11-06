@@ -137,10 +137,12 @@ var igv = (function (igv) {
                         eqtl = featureList[i];
                         snp = eqtl.snp.toUpperCase();
                         geneName = eqtl.geneName.toUpperCase();
-                        selection = track.selection;
+                        selection = igv.browser.selection;
                         isSelected = selection &&
                             (selection.snp === snp || selection.gene === geneName);
-
+                        if(geneName === "ACTN3") {
+                            console.log(geneName);
+                        }
                         if (drawSelected && !isSelected) continue;
 
                         // Add eqtl's gene to the selection if this is the selected snp.
@@ -149,7 +151,7 @@ var igv = (function (igv) {
                             selection.addGene(geneName);
                         }
 
-                        if (drawSelected && track.selection) {
+                        if (drawSelected && selection) {
                             color = selection.colorForGene(geneName);
                         }
 
