@@ -6,11 +6,18 @@ var igv = (function (igv) {
 
         if (!options) options = {};
 
-        options = {
-            showKaryo: false,
-            fastaURL: "//dn7ywbm9isq8j.cloudfront.net/genomes/seq/hg19/hg19.fasta",
-            cytobandURL: "//dn7ywbm9isq8j.cloudfront.net/genomes/seq/hg19/cytoBand.txt",
-            tracks: [
+        options.showKaryo = false;
+
+        if (!options.fastaUrl) {
+            options.fastaURL = "//dn7ywbm9isq8j.cloudfront.net/genomes/seq/hg19/hg19.fasta";
+        }
+
+        if (!options.cytobandURL) {
+            options.cytobandURL = "//dn7ywbm9isq8j.cloudfront.net/genomes/seq/hg19/cytoBand.txt";
+        }
+
+        if (!options.track) {
+            options.tracks = [
                 {
                     type: "sequence",
                     order: 9999
@@ -21,7 +28,8 @@ var igv = (function (igv) {
                     order: 10000
                 }
             ]
-        };
+        }
+
 
 
         if (!options.createControls) {
