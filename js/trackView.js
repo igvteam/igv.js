@@ -110,7 +110,6 @@ var igv = (function (igv) {
             });
 
             this.track.cursorHistogram = new cursor.CursorHistogram(controlDiv.clientHeight, this.track.max, controlDiv);
-//            this.track.cursorHistogram.createMarkupWithParent(controlDiv);
 
             igv.cursorAddTrackControlButtons(this, browser);
 

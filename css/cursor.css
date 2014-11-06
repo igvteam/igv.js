@@ -126,7 +126,7 @@
 .igv-trackfilter-fontawesome:focus,
 .igv-trackfilter-fontawesome:active {
     color: rgba(102, 102, 102, 1);
-    font-size: medium;
+    /*font-size: medium;*/
 }
 
 .igv-filter-histogram-button-div {
@@ -246,13 +246,26 @@
     margin-right: 2px;
 }
 
+.igv-control-bullseye-stack-fontawesome:hover,
+.igv-control-bullseye-stack-fontawesome:focus,
+.igv-control-bullseye-stack-fontawesome:active {
+    color: rgba(102, 102, 102, 1);
+    /*font-size: 85%;*/
+}
+
+.igv-control-bullseye-fontawesome {
+    display: none;
+}
+
 .igv-control-bullseye-fontawesome-selected {
     color: #000000;
     display: inline;
 }
 
-.igv-control-bullseye-fontawesome {
-    display: none;
+.igv-control-sort-fontawesome-selected:hover,
+.igv-control-sort-fontawesome-selected:focus,
+.igv-control-sort-fontawesome-selected:active {
+    /*font-size: medium;*/
 }
 
 .igv-control-sort-fontawesome {
@@ -279,26 +292,12 @@
     margin-right: 2px;
 }
 
-.igv-control-bullseye-stack-fontawesome:hover,
-.igv-control-bullseye-stack-fontawesome:focus,
-.igv-control-bullseye-stack-fontawesome:active {
-    color: rgba(102, 102, 102, 1);
-    font-size: 85%;
-}
-
-.igv-control-sort-fontawesome-selected:hover,
-.igv-control-sort-fontawesome-selected:focus,
-.igv-control-sort-fontawesome-selected:active {
-    font-size: medium;
-}
-
 .igv-control-sort-fontawesome:hover,
 .igv-control-sort-fontawesome:focus,
 .igv-control-sort-fontawesome:active {
     color: rgba(102, 102, 102, 1);
-    font-size: medium;
+    /*font-size: medium;*/
 }
-
 
 /*Four values apply to 1. top, 2. right, 3. bottom and 4. to the left side*/
 .igv-cursor-ui-spacer4 {

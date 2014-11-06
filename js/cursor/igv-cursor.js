@@ -637,6 +637,7 @@ var igv = (function (igv) {
         sortButton.className = "fa fa-signal igv-control-sort-fontawesome";
         track.sortButton = sortButton;
 
+
         sortButton.onclick = function () {
 
             browser.sortDirection = (undefined === browser.sortDirection) ? 1 : -1 * browser.sortDirection;
@@ -647,7 +648,6 @@ var igv = (function (igv) {
                 browser.update();
 
                 browser.trackPanels.forEach(function (tp) {
-
 
                     if (1 === browser.sortDirection) {
 
@@ -669,6 +669,8 @@ var igv = (function (igv) {
             });
 
         };
+
+
 
         // bullseye stack
         bullseyeStackSpan = document.createElement("span");
