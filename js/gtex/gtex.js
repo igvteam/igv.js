@@ -22,7 +22,7 @@ var igv = (function (igv) {
                 }
             ]
         };
-        
+
 
         if (!options.createControls) {
             options.createControls = createGtexControls;
@@ -102,9 +102,14 @@ var igv = (function (igv) {
                         track;
 
                     if (e.currentTarget.checked) {
-                        track = igv.createEqtlTrack({url: record.url, label: record.label});
-                        track.disableButtons = false;
-                        browser.addTrack(track);
+
+                        browser.loadTrack(
+                            {
+                                type: "eqtl",
+                                url: record.url,
+                                label: record.label
+                            }
+                        );
                     }
                     else {
                         track = findTrackWithURL(browser, record.url);
