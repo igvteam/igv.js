@@ -20,56 +20,35 @@ var cursor = (function (cursor) {
 
     };
 
-    // NOTE: This is depricated and nolonger used
-    cursor.CursorModel.prototype.exportRegions = function() {
-
-        var myself = this,
-            exportedRegions = "",
-            form,
-            hiddenFilenameInput,
-            hiddenDownloadContent;
-
-        form = document.createElement("form");
-        document.body.appendChild(form);
-        form.setAttribute("method", "post");
-        form.setAttribute("action", "php/igvdownload.php");
-
-        // file name
-        hiddenFilenameInput = document.createElement("input");
-        form.appendChild(hiddenFilenameInput);
-        hiddenFilenameInput.setAttribute("type", "hidden");
-        hiddenFilenameInput.setAttribute("name", "filename");
-        hiddenFilenameInput.setAttribute("value", "cursor-regions.bed");
-
-        // ingest contents of textarea named #downloadContent
-        hiddenDownloadContent = document.createElement("input");
-        form.appendChild(hiddenDownloadContent);
-        hiddenDownloadContent.setAttribute("type", "hidden");
-        hiddenDownloadContent.setAttribute("name", "downloadContent");
-
-        this.filteredRegions.forEach(function (region) {
-            exportedRegions += region.exportRegion(myself.regionWidth);
-        });
-
-        hiddenDownloadContent.setAttribute("value", exportedRegions);
-
-        // submit and self-destruct
-        form.submit();
-        form.detach();
-
-    };
-
     cursor.CursorModel.prototype.updateRegionDisplay = function()  {
 
-        var numer,
-            denom,
-            downsamplingString = "",
-            regionsDisplaySpan = $("#igvHeaderRegionDisplaySpan");
+        var igvCursorUIHeaderBlurb = $('.igv-cursor-ui-header-blurb'),
+            trackLabelSpan = igvCursorUIHeaderBlurb.find('span')[0],
+            regionCountSpan = igvCursorUIHeaderBlurb.find('span')[1],
+            filteredRegionCountSpan = igvCursorUIHeaderBlurb.find('span')[2];
 
-        numer = igv.numberFormatter(this.filteredRegions.length);
-        denom = igv.numberFormatter(this.regions.length);
+        igvCursorUIHeaderBlurb.css({
+            "display" : "block"
+        });
 
-        regionsDisplaySpan.text("Regions " + numer + " / " + denom + downsamplingString);
+        $(trackLabelSpan).text( this.browser.designatedTrack ? this.browser.designatedTrack.label : "unnamed" );
+
+        $(trackLabelSpan).css({
+            "color" : this.browser.highlightColor
+        });
+
+        $(regionCountSpan).text( igv.numberFormatter(this.regions.length) );
+
+        $(regionCountSpan).css({
+            "color" : this.browser.highlightColor
+        });
+
+        $(filteredRegionCountSpan).text( igv.numberFormatter(this.filteredRegions.length) );
+
+        $(filteredRegionCountSpan).css({
+            "color" : "rgba(3, 116, 178, 1.0)"
+        });
+
     };
 
     cursor.CursorModel.prototype.regionsToRender = function () {
@@ -90,10 +69,11 @@ var cursor = (function (cursor) {
 
         this.filteredRegions = this.regions;
 
-
         this.updateRegionDisplay();
+
         this.filterRegions();
 
+        this.browser.fitToScreen();
     };
 
     cursor.CursorModel.prototype.initializeHistogram = function (track, continutation) {
@@ -122,36 +102,46 @@ var cursor = (function (cursor) {
     };
 
     cursor.CursorModel.prototype.filterRegions = function () {
+
         var trackPackages = [],
             filterPackages = [],
             howmany = 0,
             sortTrackPanelPostFiltering,
             myself = this;
 
-        this.browser.trackPanels.forEach(function (trackPanel, tpIndex, trackPanels) {
 
-            trackPanel.track.getFeatureCache(function (featureCache) {
+        // TODO: HACK HACK HACK
+        // TODO: Clean this up during sort reorg is finished
+        // TODO: sorting will be lost during filtering
+        $(this.browser.trackContainerDiv).find("i.fa-signal").each(function() {
 
-                trackPackages.push({ track: trackPanel.track, trackFilter: trackPanel.track.trackFilter, featureCache: featureCache, cursorHistogram: trackPanel.track.cursorHistogram });
+            var me = $(this);
+            if (me.hasClass("igv-control-sort-fontawesome-selected")) {
 
-                if (trackPanel.track.isSorted()) {
-                    sortTrackPanelPostFiltering = trackPanel;
+                me.removeClass("igv-control-sort-fontawesome-selected");
+            }
+
+         });
+
+        this.browser.trackPanels.forEach(function (trackView, tpIndex, trackViews) {
+
+            trackView.track.getFeatureCache(function (featureCache) {
+
+                trackPackages.push({ track: trackView.track, trackFilter: trackView.track.trackFilter, featureCache: featureCache, cursorHistogram: trackView.track.cursorHistogram });
+
+                if (trackView.track.isSortTrack()) {
+                    sortTrackPanelPostFiltering = trackView;
                 }
 
-                // sorting will be lost during filtering
-                trackPanel.track.sortButton.className = "fa fa-bar-chart-o igv-control-sort-fontawesome";
-
-                if (trackPanel.track.trackFilter.isFilterActive) {
-                    filterPackages.push({trackFilter: trackPanel.track.trackFilter, featureCache: featureCache });
+                if (trackView.track.trackFilter.isFilterActive) {
+                    filterPackages.push({trackFilter: trackView.track.trackFilter, featureCache: featureCache });
                 }
 
-                if (++howmany == trackPanels.length) runFilters();
+                if (++howmany == trackViews.length) runFilters();
             });
         });
 
         function runFilters() {
-
-            var spinner;
 
             if (0 === filterPackages.length) {
                 // No filters
@@ -197,18 +187,21 @@ var cursor = (function (cursor) {
 
             if (undefined !== thresholdFramePixelWidth && sortTrackPanelPostFiltering) {
 
-                // spin spinner
-//                spinner = igv.getSpinner(sortTrackPanelPostFiltering.viewportDiv);
-                igv.spinnerStartWithParent(sortTrackPanelPostFiltering.trackDiv);
+                $(sortTrackPanelPostFiltering.track.sortButton).addClass("igv-control-sort-fontawesome-selected");
 
-                // TODO: This is wacky. Needs to be done to maintain sort direction
-                sortTrackPanelPostFiltering.track.sortDirection *= -1;
-                myself.sortRegions(sortTrackPanelPostFiltering.track.featureSource, sortTrackPanelPostFiltering.track.sortDirection, function () {
+                $(myself.browser.trackContainerDiv).find("i.fa-signal").each(function() {
 
-                    sortTrackPanelPostFiltering.track.sortButton.className = "fa fa-bar-chart-o igv-control-sort-fontawesome-selected";
+                    var me = $(this);
 
-//                    spinner.stop();
-                    igv.spinnerStopWithParent(sortTrackPanelPostFiltering.trackDiv);
+                    if (1 === myself.browser.sortDirection) {
+                        me.removeClass("fa-flip-horizontal");
+                    } else {
+                        me.addClass("fa-flip-horizontal");
+                    }
+
+                });
+
+                myself.sortRegions(sortTrackPanelPostFiltering.track.featureSource, myself.browser.sortDirection, function () {
 
                     if (myself.framePixelWidth < thresholdFramePixelWidth) {
                         myself.browser.setFrameWidth(thresholdFramePixelWidth);

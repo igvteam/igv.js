@@ -59,7 +59,6 @@ var igv = (function (igv) {
         }
     }
 
-
     igv.DataLoader.prototype.loadArrayBuffer = function (continuation, task) {
 
 
@@ -109,50 +108,6 @@ var igv = (function (igv) {
         }
 
         oReq.send();
-
-    }
-
-
-    igv.DataLoader.prototype.postJson = function (data, continuation, task) {
-
-        var loader = this,
-            oReq = new XMLHttpRequest();
-
-        if(task) task.xhrRequest = oReq;
-
-        oReq.open("POST", this.url);
-
-        oReq.setRequestHeader("Content-Type", "application/json");
-
-        oReq.onload = function (event) {
-
-            loader.status = oReq.status;
-            var resp = oReq.responseText;
-            continuation(resp);
-
-        }
-
-        oReq.onerror = function (event) {
-            //    console.log("Error: " + oReq.responseText);
-
-            if (loader.onerror) {
-                loader.onerror(event);
-            }
-            else {
-                continuation(null);
-            }
-        }
-
-        oReq.ontimeout = function (event) {
-            // TODO -- handle this
-        }
-
-        oReq.onabort = function (event) {
-            console.log("Aborted");
-            continuation(null);
-        }
-
-        oReq.send(data);
 
     }
 

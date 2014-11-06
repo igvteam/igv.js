@@ -2,25 +2,13 @@ var igv = (function (igv) {
 
     igv.createCursorBrowser = function (options) {
 
-        var contentHeader = $('<div class="row"></div>')[0],
-            contentHeaderDiv = $('<div id="igvHeaderDiv" class="igv-header-div col-md-12" style="font-size:16px;"><span id="igvHeaderRegionDisplaySpan"></span></div>')[0],
-            trackContainer = $('<div id="igvTrackContainerDiv" class="igv-track-container-div">')[0],
-            browser = new igv.Browser(options, trackContainer);
+        var horizontalScrollBarContainer,
+            contentHeader,
+            trackContainer,
+            browser,
+            thang;
 
-        $(browser.div).append(contentHeader);
-        $(contentHeader).append(contentHeaderDiv);
-        $(browser.div).append(trackContainer);
-
-        igv.addAjaxExtensions();
-
-        // Add cursor specific methods to the browser object,  some new some overrides
-        addCursorExtensions(browser);
-
-        browser.horizontalScrollbar = new cursor.HorizontalScrollbar(browser, $(browser.div));
-
-        document.getElementById('igvContainerDiv').appendChild(browser.div);
-
-        // Append event handlers to DOM elements
+        // Append event handlers to Header DIV
         document.getElementById('zoomOut').onclick = function (e) {
             browser.zoomOut()
         };
@@ -29,6 +17,16 @@ var igv = (function (igv) {
         };
         document.getElementById('fitToScreen').onclick = function () {
             browser.fitToScreen();
+        };
+        document.getElementById('regionSizeInput').onchange = function (e) {
+
+            var value = $("#regionSizeInput").val();
+            if (!igv.isNumber(value)) {
+                console.log("bogus " + value);
+                return;
+            }
+
+            browser.setRegionSize(parseFloat(value, 10));
         };
         document.getElementById('frameWidthInput').onchange = function (e) {
 
@@ -41,16 +39,6 @@ var igv = (function (igv) {
             browser.setFrameWidth(parseFloat(value, 10));
 
         };
-        document.getElementById('regionSizeInput').onchange = function (e) {
-
-            var value = $("#regionSizeInput").val();
-            if (!igv.isNumber(value)) {
-                console.log("bogus " + value);
-                return;
-            }
-
-            browser.setRegionSize(parseFloat(value, 10));
-        };
         document.getElementById('trackHeightInput').onchange = function (e) {
 
             var value = $("#trackHeightInput").val();
@@ -58,7 +46,6 @@ var igv = (function (igv) {
                 console.log("bogus " + value);
                 return;
             }
-
 
             browser.setTrackHeight(Math.round(parseFloat(value, 10)));
         };
@@ -74,6 +61,9 @@ var igv = (function (igv) {
             });
 
             downloadInput.val(exportedRegions);
+
+            $('#igvExportRegionsModal').modal('hide');
+
         });
 
         // save session via modal form
@@ -86,6 +76,9 @@ var igv = (function (igv) {
             downloadInput = $("#igvSaveSessionModalForm").find('input[name="downloadContent"]');
 
             downloadInput.val(session);
+
+            $('#igvSaveSessionModal').modal('hide');
+            
         });
 
         // session upload
@@ -96,12 +89,13 @@ var igv = (function (igv) {
                 sessionFile;
 
             sessionFile = sessionInput.files[ 0 ];
-            $("#igvSessionLoadForm")[0].reset();
 
             fileReader.onload = function (e) {
 
                 var json = e.target.result,
                     session = JSON.parse(json);
+
+                $('#igvSessionLoadModal').modal('hide');
 
                 browser.sessionTeardown();
 
@@ -114,44 +108,15 @@ var igv = (function (igv) {
         });
 
         // BED file upload
-        var fileInput = document.getElementById('igvFileUpload');
-        fileInput.addEventListener('change', function (e) {
+        document.getElementById('igvFileUpload').onchange = function (e) {
+            browser.loadTrackFile($("#igvFileUpload")[0]);
+            $('#igvFileUploadModal').modal('hide');
+        };
 
-            var localFile,
-                localFiles = fileInput.files;
-
-            for (var i = 0; i < localFiles.length; i++) {
-
-                localFile = localFiles[ i ];
-                $("#igvFileUploadForm")[0].reset();
-
-                browser.loadTrack({
-                    type: "bed",
-                    localFile: localFile,
-                    url: undefined,
-                    label: localFile.name
-                });
-
-
-            }
-
-        });
-
-        // BED file URL
+        // BED URL upload
         document.getElementById('igvLoadURL').onchange = function (e) {
-            var obj,
-                path;
-
-            obj = $("#igvLoadURL");
-            path = obj.val();
-            obj.val("");
-
-            browser.loadTrack({
-                type: "bed",
-                url: path,
-                label: "Unnamed Track"
-            });
-
+            browser.loadTrackPath($("#igvLoadURL"));
+            $('#igvLoadURLModal').modal('hide');
         };
 
         // Load ENCODE DataTables data and build markup for modal dialog.
@@ -227,8 +192,18 @@ var igv = (function (igv) {
 
                         tableCells.each(function () {
 
+                            var key,
+                                val,
+                                index;
+
                             tableCell = $(this)[0];
-                            record[ encode.dataTableRowLabels[ tableCell.cellIndex ] ] = tableCell.innerText;
+
+                            index = tableCell.cellIndex;
+                            key = encode.dataTableRowLabels[ index ];
+                            //val = tableCell.innerText;
+                            val = tableCell.innerHTML;
+
+                            record[ key ] = val;
 
                         });
 
@@ -250,9 +225,38 @@ var igv = (function (igv) {
         // Append resultant ENCODE DataTables markup
         $('#encodeModalBody').html('<table cellpadding="0" cellspacing="0" border="0" class="display" id="encodeModalTable"></table>');
 
+        // Construct DOM hierarchy
+        trackContainer = $('<div id="igvTrackContainerDiv" class="igv-track-container-div">')[0];
+        browser = new igv.Browser(options, trackContainer);
+        document.getElementById('igvContainerDiv').appendChild(browser.div);
+
+        contentHeader = $('<div class="row"></div>')[0];
+        $(browser.div).append(contentHeader);
+
+        // horizontal scrollbar container. fill in the guts after track construction
+        horizontalScrollBarContainer = $('<div class="igv-horizontal-scrollbar-container-div">')[0];
+        $(browser.div).append(horizontalScrollBarContainer);
+
+        // utility div
+        thang = $('<div class="igv-utility-div">');
+        $(browser.div).append(thang[0]);
+
+        // control panel header
+        thang.append($('<div class="igv-control-panel-header-div">Track Summary</div>')[0]);
+
+        // track container
+        $(browser.div).append(trackContainer);
+
+        igv.addAjaxExtensions();
+
+        // Add cursor specific methods to the browser object,  some new some overrides
+        addCursorExtensions(browser);
+
         browser.cursorModel = new cursor.CursorModel(browser);
 
         browser.referenceFrame = new igv.ReferenceFrame("", 0, 1 / browser.cursorModel.framePixelWidth);
+
+        browser.highlightColor = "rgb(204, 51, 0)";
 
         // Launch app with session JSON if provided as param
         var sessionJSONPath = igv.getQueryValue('session');
@@ -277,8 +281,15 @@ var igv = (function (igv) {
                 browser.loadTrack(trackConfig);
             });
 
+            browser.selectDesignatedTrack(browser.designatedTrack.trackFilter.trackPanel);
+
+            horizontalScrollBarContainer = $("div.igv-horizontal-scrollbar-container-div");
+            browser.horizontalScrollbar = new cursor.HorizontalScrollbar(browser, $(horizontalScrollBarContainer));
+
             browser.designatedTrack.featureSource.allFeatures(function (featureList) {
+
                 browser.cursorModel.setRegions(featureList);
+
                 browser.horizontalScrollbar.update();
             });
         }
@@ -288,6 +299,40 @@ var igv = (function (igv) {
     };
 
     function addCursorExtensions(browser) {
+
+        browser.selectDesignatedTrack = function (trackView) {
+
+            var currentDesignatedTrackView,
+                faCircle,
+                trackLabelSpan;
+
+            if (browser.designatedTrack && browser.designatedTrack.trackFilter.trackPanel !== trackView) {
+
+                currentDesignatedTrackView = browser.designatedTrack.trackFilter.trackPanel;
+
+                faCircle = $(currentDesignatedTrackView.viewportDiv).find("i.fa-circle");
+                faCircle.removeClass("igv-control-bullseye-fontawesome-selected");
+                faCircle.addClass   ("igv-control-bullseye-fontawesome");
+
+                trackLabelSpan = $(currentDesignatedTrackView.viewportDiv).find("span.igv-track-label-span-base");
+                trackLabelSpan.removeClass("igv-track-label-span-highlighted");
+
+            }
+
+            browser.designatedTrack = trackView.track;
+
+            faCircle = $(trackView.viewportDiv).find("i.fa-circle");
+            faCircle.removeClass("igv-control-bullseye-fontawesome");
+            faCircle.addClass   ("igv-control-bullseye-fontawesome-selected");
+
+            faCircle.css({
+                "color" : browser.highlightColor
+            });
+
+            trackLabelSpan = $(trackView.viewportDiv).find("span.igv-track-label-span-base");
+            trackLabelSpan.addClass("igv-track-label-span-highlighted");
+
+        };
 
         browser.setFrameWidth = function (frameWidthString) {
 
@@ -366,8 +411,6 @@ var igv = (function (igv) {
         // Alter "super" implementation
         browser.loadTrack = function (config) {
 
-//            this.__proto__.loadTrack.call(this, config);
-
             if (browser.isDuplicateTrack(config)) {
                 return;
             }
@@ -394,7 +437,7 @@ var igv = (function (igv) {
 
             this.addTrack(newTrack);
 
-            return newTrack;
+//            return newTrack;
 
             function cursorGetType(path) {
 
@@ -405,6 +448,41 @@ var igv = (function (igv) {
                 }
 
             }
+
+        };
+
+        browser.loadTrackFile = function (fileInput) {
+
+            var localFile,
+                localFiles = fileInput.files;
+
+            for (var i = 0; i < localFiles.length; i++) {
+
+                localFile = localFiles[ i ];
+
+                browser.loadTrack({
+                    type: "bed",
+                    localFile: localFile,
+                    url: undefined,
+                    label: localFile.name
+                });
+
+
+            }
+
+        };
+
+        browser.loadTrackPath = function (elementObject) {
+
+            var path = elementObject.val();
+
+            elementObject.val("");
+
+            browser.loadTrack({
+                type: "bed",
+                url: path,
+                label: "Unnamed Track"
+            });
 
         };
 
@@ -427,11 +505,17 @@ var igv = (function (igv) {
 
                 var jsonRepresentation = trackView.track.jsonRepresentation();
 
-                if (browser.designatedTrack && browser.designatedTrack === trackView.track) {
-                    jsonRepresentation.designatedTrack = true;
-                }
+                if (jsonRepresentation) {
 
-                session.tracks.push(jsonRepresentation);
+                    if (browser.designatedTrack && browser.designatedTrack === trackView.track) {
+                        jsonRepresentation.designatedTrack = true;
+                    }
+
+                    session.tracks.push(jsonRepresentation);
+                }
+                else {
+                    // TODO -- what if there is no json repesentation?
+                }
             });
 
             return JSON.stringify(session, undefined, 4);
@@ -452,7 +536,8 @@ var igv = (function (igv) {
 
         browser.loadSession = function (session) {
 
-            var cursorTracks;
+            var cursorTracks,
+                horizontalScrollBarContainer;
 
             browser.sessionTeardown();
 
@@ -490,6 +575,9 @@ var igv = (function (igv) {
                 browser.designatedTrack = cursorTracks[ 0 ];
             }
 
+//            horizontalScrollBarContainer = $("div.igv-horizontal-scrollbar-container-div");
+//            browser.horizontalScrollbar = new cursor.HorizontalScrollbar(browser, $(horizontalScrollBarContainer));
+
             browser.designatedTrack.featureSource.allFeatures(function (featureList) {
 
                 browser.cursorModel.setRegions(featureList);
@@ -498,11 +586,9 @@ var igv = (function (igv) {
 
                     browser.addTrack(cursorTrack);
 
-//                    if (cursorTrack.config && cursorTrack.config.trackFilter) {
-//                        cursorTrack.trackFilter.setWithJSON(cursorTrack.config.trackFilter);
-//                    }
-
                 });
+
+                browser.selectDesignatedTrack(browser.designatedTrack.trackFilter.trackPanel);
 
                 browser.cursorModel.filterRegions();
 
@@ -519,60 +605,107 @@ var igv = (function (igv) {
         };
     }
 
-    igv.cursorAddTrackControlButtons = function (trackView, browser, controlDiv) {
+    igv.cursorAddTrackControlButtons = function (trackView, browser) {
 
-        var trackFilterButtonDiv,
+        var track = trackView.track,
+            trackFilterButtonDiv,
+            trackIconContainer,
             sortButton,
-            track = trackView.track,
-            nextButtonTop = 5;
+            bullseyeStackSpan,
+            bullseyeOuterIcon,
+            bullseyeInnerIcon;
 
-        sortButton = document.createElement("i");
-        controlDiv.appendChild(sortButton);
+        trackIconContainer = $(trackView.viewportDiv).find("div.igv-track-icon-container");
 
-        sortButton.className = "fa fa-bar-chart-o igv-control-sort-fontawesome";
-        $(sortButton).css({
-            "position": "absolute",
-            "top": nextButtonTop + "px",
-            "left": 5 + "px"
-        });
 
-        nextButtonTop += 18;
-
-        track.sortButton = sortButton;
-        sortButton.onclick = function () {
-
-            browser.cursorModel.sortRegions(track.featureSource, track.sortDirection, function (regions) {
-                browser.update();
-                track.sortDirection *= -1;
-
-            });
-
-            browser.trackPanels.forEach(function (trackView) {
-                if (track !== trackView.track) {
-                    trackView.track.sortButton.className = "fa fa-bar-chart-o igv-control-sort-fontawesome";
-                }
-            });
-
-            trackView.track.sortButton.className = "fa fa-bar-chart-o igv-control-sort-fontawesome-selected";
-        };
-
-        //
+        // filter
         trackFilterButtonDiv = document.createElement("div");
-        controlDiv.appendChild(trackFilterButtonDiv);
-        trackFilterButtonDiv.id = "filterButtonDiv_" + igv.guid();
+        trackIconContainer.append($(trackFilterButtonDiv));
+
         trackFilterButtonDiv.className = "igv-filter-histogram-button-div";
-        $(trackFilterButtonDiv).css({
-            "position": "absolute",
-            "top": nextButtonTop + "px",
-            "left": 5 + "px"
-        });
 
         trackView.track.trackFilter = new igv.TrackFilter(trackView);
         trackView.track.trackFilter.createTrackFilterWidgetWithParentElement(trackFilterButtonDiv);
 
-        nextButtonTop += 18;
 
-    }
+        // sort
+        browser.sortDirection = undefined;
+        browser.sortTrack = undefined;
+
+        sortButton = document.createElement("i");
+        trackIconContainer.append($(sortButton));
+        sortButton.className = "fa fa-signal igv-control-sort-fontawesome";
+        track.sortButton = sortButton;
+
+        sortButton.onclick = function () {
+
+            browser.sortDirection = (undefined === browser.sortDirection) ? 1 : -1 * browser.sortDirection;
+            browser.sortTrack = track;
+
+            browser.cursorModel.sortRegions(track.featureSource, browser.sortDirection, function (regions) {
+
+                browser.update();
+
+                browser.trackPanels.forEach(function (tp) {
+
+
+                    if (1 === browser.sortDirection) {
+
+                        $(tp.track.sortButton).removeClass("fa-flip-horizontal");
+                    } else {
+
+                        $(tp.track.sortButton).addClass("fa-flip-horizontal");
+                    }
+
+                    if (track === tp.track) {
+
+                        $(tp.track.sortButton).addClass("igv-control-sort-fontawesome-selected");
+                    } else {
+
+                        $(tp.track.sortButton).removeClass("igv-control-sort-fontawesome-selected");
+                    }
+                });
+
+            });
+
+        };
+
+        // bullseye stack
+        bullseyeStackSpan = document.createElement("span");
+        trackIconContainer.append($(bullseyeStackSpan));
+
+        bullseyeStackSpan.className = "fa-stack igv-control-bullseye-stack-fontawesome";
+        track.bullseyeStackSpan = bullseyeStackSpan;
+
+        bullseyeOuterIcon = document.createElement("i");
+        bullseyeStackSpan.appendChild(bullseyeOuterIcon);
+//        bullseyeOuterIcon.className = "fa fa-stack-2x fa-circle-o";
+        bullseyeOuterIcon.className = "fa fa-stack-2x fa-circle-thin";
+
+        bullseyeInnerIcon = document.createElement("i");
+        bullseyeStackSpan.appendChild(bullseyeInnerIcon);
+        bullseyeInnerIcon.className = "fa fa-stack-1x fa-circle igv-control-bullseye-fontawesome";
+
+        bullseyeStackSpan.onclick = function () {
+
+            if (browser.designatedTrack && browser.designatedTrack === trackView.track) {
+
+                return;
+            } else {
+
+                browser.selectDesignatedTrack(trackView);
+            }
+
+            browser.designatedTrack.featureSource.allFeatures(function (featureList) {
+
+                browser.referenceFrame.start = 0;
+                browser.cursorModel.setRegions(featureList);
+
+            });
+
+        };
+
+    };
 
     return igv;
 

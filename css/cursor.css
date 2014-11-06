@@ -1,252 +1,361 @@
-/* Move down content because we have a fixed navbar that is 50px tall */
-body {
-    padding-top: 50px;
-    padding-bottom: 20px;
-}
 
+.igv-about-link {
 
-.igv-header-div {
-    padding-top: 64px;
-    padding-bottom: 8px;
-}
-
-.well {
-    background-color: rgba(255, 0, 0, 0.5);
-}
-
-.row {
-    text-align: center
-}
-
-.btn-file {
-    position: relative;
-    overflow: hidden;
-}
-
-.btn-file input[type=file] {
     position: absolute;
-    top: 0;
-    right: 0;
-    min-width: 100%;
-    min-height: 100%;
-    font-size: 999px;
-    text-align: right;
-    filter: alpha(opacity=0);
-    opacity: 0;
-    outline: none;
-    background: white;
-    cursor: inherit;
-    display: block;
+    right: 80px;
+    top: 16px;
+
+    color: rgba(0, 51, 153, 1);
+
 }
 
+.igv-about-link:hover,
+.igv-about-link:focus,
+.igv-about-link.active {
+    font-size: 110%;
+}
+
+.igv-utility-div {
+
+    position: relative;
+    width: 100%;
+    height: 12px;
+    background-color: white;
+
+}
+
+.igv-control-panel-header-div {
+
+    position: relative;
+    left: 8px;
+    top: 0;
+    width: 200px;
+    height: 100%;
+
+    font-size: 85%;
+
+    background-color: white;
+}
+
+.igv-horizontal-scrollbar-container-div {
+
+    position: relative;
+
+    top: 0;
+    right:0;
+
+    height:16px;
+
+    background-color: white;
+}
+
+.igv-horizontal-scrollbar-shim-div {
+
+    position: absolute;
+
+    top: 0;
+    bottom: 0;
+
+    left:0;
+    right:0;
+
+    background-color: white;
+
+    border-color: #444;
+    border-style: solid;
+    border-width: thin;
+
+}
+
+.igv-horizontal-scrollbar-div {
+
+    position: absolute;
+
+    top:    1px;
+    bottom: 1px;
+
+    left:   1px;
+    right:  1px;
+
+    background-color: rgba(204, 204, 204, 1);
+
+}
 
 .igv-horizontal-scrollbar-draggable-div {
+
     position: absolute;
+
     left: 0;
     top: 0;
+
     width: 100px;
     height:100%;
-    background-color: #aaa;
+
+    background-color: rgba(153, 153, 153, 1);
+
     cursor: pointer;
+
 }
 
 .igv-horizontal-scrollbar-draggable-div:hover,
 .igv-horizontal-scrollbar-draggable-div:focus,
 .igv-horizontal-scrollbar-draggable-div:active {
-    background-color: #666;
-}
-
-
-.igv-horizontal-scrollbar-div {
-    position: absolute;
-    top: 0;
-    right:0;
-    height:100%;
-    background-color: rgba(150, 150, 150, .2);
-    border: 1px solid #fff;
-}
-
-.igv-horizontal-scrollbar-container-div {
-    position: relative;
-    top: 0;
-    right:0;
-    height:20px;
-    padding-top: 10px;
+    background-color: rgba(102, 102, 102, 1);
 }
 
 .igv-cursorHistogram-div {
     position: absolute;
+    top: 2px;
+    bottom: 2px;
+    left: 2px;
+    right: 2px;
+    background: white;
+    /*display: none;*/
+}
+
+.igv-trackfilter-fontawesome {
+    position: relative;
     top: 0;
     left: 0;
-    width: 100px;
-    border:none;
-    padding: 0;
-    background: none;
-    /*outline: thin solid rgba(64, 64, 64, 1.0);*/
-    outline: thin solid rgba(255, 255, 255, 1.0);
+    cursor: pointer;
+    color: grey;
+}
+
+.igv-trackfilter-fontawesome:hover,
+.igv-trackfilter-fontawesome:focus,
+.igv-trackfilter-fontawesome:active {
+    color: rgba(102, 102, 102, 1);
+    font-size: medium;
 }
 
 .igv-filter-histogram-button-div {
-    position: absolute;
-    top: 0;
-    left: 0;
-    border:none;
-    padding: 0;
-    background: none;
-}
 
-.igv-filter-div {
-    position: absolute;
-    width: 128px;
-    border:none;
-    padding: 0;
-    height: 100%;
-    background: none;
-}
-
-.igv-filter-button {
-    position: absolute;
-    width: 128px;
-    border:none;
-    padding: 0;
-    height: 100%;
-    background: none;
-}
-
-.igv-filter-thumbnail-horizontal-line {
-    position: absolute;
-    left: 0;
-    width: 128px;
-    height: 2px;
-    border:none;
-    padding: 0;
-    background-color: rgba(255, 0, 0, .75);
-}
-
-
-#dropdown-list {
-    max-height: 200px;
-    overflow: auto;
-    top: 15px;
     position: relative;
-    left: 50px;
+    cursor: pointer;
+    background: none;
+
+    float: left;
+    margin-left: 2px;
+    margin-right: 2px;
+}
+
+/* Override track-icon-container to set left and add transparency */
+.igv-track-icon-container {
+    left: 0;
+    background: rgba(255, 255, 255, 0.75);
+}
+
+/* Override igv-control-div to add border */
+.igv-track-control-div {
+    width: 100px;
+    border-color: #444;
+    border-style: solid;
+    border-width: thin;
+
+}
+
+/* Override viewport div to set right */
+.igv-viewport-div {
+    left: 100px;
+    right: 48px;
+}
+
+/* Override margin-left and margin-right */
+.igv-content-div {
+    margin-left: 0;
+    margin-right: 0;
+}
+
+.igv-track-manipulation-container {
+    position: absolute;
+    right: 0;
+    width: 48px;
+    height: 100%;
+
+    background: white;
+    text-align: center;
+
+    border-left-width: thin;
+    border-left-color: #444;
+    border-left-style: solid;
+}
+
+.igv-track-manipulation-icon-box {
+
+    margin: auto;
+
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: 0;
+    bottom: 0;
+
+    width: 100%;
+    height: 30px;
+
+    background: white;
+
+}
+
+.igv-track-manipulation-move-up {
+    position: absolute;
+    left: 4px;
+    top: 0;
+    color: rgba(51, 153, 204, 1);
+}
+
+.igv-track-manipulation-move-down {
+    position: absolute;
+    left: 4px;
+    bottom: 0;
+    color: rgba(51, 153, 204, 1);
+}
+
+.igv-track-manipulation-discard {
+    position: absolute;
+    left: 20px;
+    top: 0;
+    color: rgba(153, 0, 0, 1);
+    background-color: white;
+}
+
+.igv-track-manipulation-move-up:hover,
+.igv-track-manipulation-move-down:hover,
+.igv-track-manipulation-discard:hover,
+/**/
+.igv-track-manipulation-move-up:focus,
+.igv-track-manipulation-move-down:focus,
+.igv-track-manipulation-discard:focus,
+/**/
+.igv-track-manipulation-move-up:active,
+.igv-track-manipulation-move-down:active,
+.igv-track-manipulation-discard:active  {
+    font-size: medium;
 }
 
 
-/* Some experimental classes,  */
-.cursor-btn-default {
-    color: #333;
+
+.igv-control-bullseye-stack-fontawesome {
+
+    position: relative;
+    cursor: pointer;
+    color: grey;
+    font-size: x-small;
+
+    float: left;
+    margin-left: 2px;
+    margin-right: 2px;
+}
+
+.igv-control-bullseye-fontawesome-selected {
+    color: #000000;
+    display: inline;
+}
+
+.igv-control-bullseye-fontawesome {
+    display: none;
+}
+
+.igv-control-sort-fontawesome {
+
+    position: relative;
+    cursor: pointer;
+    color: grey;
+
+    float: left;
+    margin-left: 2px;
+    margin-right: 2px;
+}
+
+.igv-control-sort-fontawesome-selected {
+
+    position: relative;
+    cursor: pointer;
+    color: rgba(204, 51, 0, 1);
+
+    float: left;
+    margin-left: 2px;
+    margin-right: 2px;
+}
+
+.igv-control-bullseye-stack-fontawesome:hover,
+.igv-control-bullseye-stack-fontawesome:focus,
+.igv-control-bullseye-stack-fontawesome:active {
+    color: rgba(102, 102, 102, 1);
+    font-size: 85%;
+}
+
+.igv-control-sort-fontawesome-selected:hover,
+.igv-control-sort-fontawesome-selected:focus,
+.igv-control-sort-fontawesome-selected:active {
+    font-size: medium;
+}
+
+.igv-control-sort-fontawesome:hover,
+.igv-control-sort-fontawesome:focus,
+.igv-control-sort-fontawesome:active {
+    color: rgba(102, 102, 102, 1);
+    font-size: medium;
+}
+
+
+/*Four values apply to 1. top, 2. right, 3. bottom and 4. to the left side*/
+.igv-cursor-ui-spacer4 {
+    padding: 0 2px 0 2px;
+}
+
+.igv-cursor-ui-spacer8 {
+    padding: 0 4px 0 4px;
+}
+
+.igv-cursor-ui-header {
+    margin-top: 4px;
+    width: 100%;
+    height: 40px;
+    background-image:url(../img/cursor_logo.png);
+    background-repeat:no-repeat;
+    background-position: 21px 0;
+}
+
+.igv-cursor-ui-holder {
+    width: 640px; /*adjust this value as the number of ui items grow.*/
+    margin:auto;
+}
+
+.igv-cursor-ui {
+    margin:auto;
+    width: 100%;
+    display:inline-block;
+    border: solid 1px #444;
     background-color: #fff;
-    border-color: #357ebd;
-}
-.cursor-btn-default:hover,
-.cursor-btn-default:focus,
-.cursor-btn-default:active,
-.cursor-btn-default.active,
-.open .dropdown-toggle.btn-default {
-    color: #333;
-    background-color: #ebebeb;
-    border-color: #357ebd;
-}
-.cursor-btn-selected {
-    color: #333;
-    background-color: #ebebeb;
-    border-color: #357ebd;
+    border-top: none;
+    border-bottom-left-radius: 5px;
+    border-bottom-right-radius: 5px;
+    padding: 5px 5px 5px 5px;
 }
 
-
-.btn-cursor-selected {
-    color: #ffffff;
-    background-color: #BD1B30;
-    border-color: #ffffff;
+.igv-cursor-ui-item {
+    float:left;
+    padding: 5px 8px 5px 8px;
 }
 
-.btn-cursor-selected:hover,
-.btn-cursor-selected:focus,
-.btn-cursor-selected:active,
-.btn-cursor-selected.active,
-.open .dropdown-toggle.btn-cursor-selected {
-    color: #ffffff;
-    background-color: #BD1B30;
-    border-color: #ffffff;
+.igv-cursor-input-text {
+    height: 28px;
+    width: 48px;
+    border: solid 1px #444;
+    border-radius: 3px;
+    padding: 0 3px 0 3px;
 }
 
-.btn-cursor-selected:active,
-.btn-cursor-selected.active,
-.open .dropdown-toggle.btn-cursor-selected {
-    background-image: none;
+.igv-cursor-ui-right-border {
+    border-right: solid 1px #444;
 }
 
-.btn-cursor-selected.disabled,
-.btn-cursor-selected[disabled],
-fieldset[disabled] .btn-cursor-selected,
-.btn-cursor-selected.disabled:hover,
-.btn-cursor-selected[disabled]:hover,
-fieldset[disabled] .btn-cursor-selected:hover,
-.btn-cursor-selected.disabled:focus,
-.btn-cursor-selected[disabled]:focus,
-fieldset[disabled] .btn-cursor-selected:focus,
-.btn-cursor-selected.disabled:active,
-.btn-cursor-selected[disabled]:active,
-fieldset[disabled] .btn-cursor-selected:active,
-.btn-cursor-selected.disabled.active,
-.btn-cursor-selected[disabled].active,
-fieldset[disabled] .btn-cursor-selected.active {
-    background-color: #BD1B30;
-    border-color: #ffffff;
+.igv-cursor-ui-header-blurb {
+    padding: 20px 0 8px 0;
+    width: 100%;
+    margin:auto;
+    text-align: center;
+    display: none;
 }
-
-.btn-cursor-selected .badge {
-    color: #BD1B30;
-    background-color: #ffffff;
-}
-
-
-.btn-cursor-deselected {
-    color: #000000;
-    background-color: #FFFFFF;
-    border-color: #000000;
-}
-
-.btn-cursor-deselected:hover,
-.btn-cursor-deselected:focus,
-.btn-cursor-deselected:active,
-.btn-cursor-deselected.active,
-.open .dropdown-toggle.btn-cursor-deselected {
-    color: #000000;
-    background-color: #BD1B30;
-    border-color: #000000;
-}
-
-.btn-cursor-deselected:active,
-.btn-cursor-deselected.active,
-.open .dropdown-toggle.btn-cursor-deselected {
-    background-image: none;
-}
-
-.btn-cursor-deselected.disabled,
-.btn-cursor-deselected[disabled],
-fieldset[disabled] .btn-cursor-deselected,
-.btn-cursor-deselected.disabled:hover,
-.btn-cursor-deselected[disabled]:hover,
-fieldset[disabled] .btn-cursor-deselected:hover,
-.btn-cursor-deselected.disabled:focus,
-.btn-cursor-deselected[disabled]:focus,
-fieldset[disabled] .btn-cursor-deselected:focus,
-.btn-cursor-deselected.disabled:active,
-.btn-cursor-deselected[disabled]:active,
-fieldset[disabled] .btn-cursor-deselected:active,
-.btn-cursor-deselected.disabled.active,
-.btn-cursor-deselected[disabled].active,
-fieldset[disabled] .btn-cursor-deselected.active {
-    background-color: #FFFFFF;
-    border-color: #000000;
-}
-
-.btn-cursor-deselected .badge {
-    color: #FFFFFF;
-    background-color: #000000;
-}
-
-
 

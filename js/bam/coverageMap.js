@@ -51,7 +51,7 @@ var igv = (function (igv) {
                 sum += myself[key];
             }
         });
-        return sum / this.qual > 0;
+        return sum / this.qual > threshold;
 
     };
 
@@ -75,18 +75,6 @@ var igv = (function (igv) {
         return fractions;
     };
 
-    Coverage.prototype.mismatchTotalPercentage = function(refBase) {
-
-        var totalPercentage;
-
-        totalPercentage = 0.0;
-        this.mismatchPercentages(refBase).forEach(function (fraction) {
-
-            totalPercentage += fraction.percent;
-        });
-
-        return totalPercentage;
-    };
 
     igv.CoverageMap = function (chr, start, end, features, refSeq) {
 
@@ -122,7 +110,7 @@ var igv = (function (igv) {
 
                     base = block.seq.charAt(j);
                     key = (alignment.strand) ? "pos" + base : "neg" + base;
-                    q = block.qual.charCodeAt(j);
+                    q = block.qual.charCodeAt(j) - 33;
 
                     myself.coverage[ i ][ key ] += 1;
                     myself.coverage[ i ][ "qual" + base ] += q;
@@ -140,20 +128,6 @@ var igv = (function (igv) {
 
     };
 
-    igv.CoverageMap.prototype.coverageAtGenomicLocation = function (genomicLocation) {
-
-        var index = genomicLocation - this.bpStart;
-
-        if (index < 0 || index >= this.coverage.length) {
-
-            return {};
-        } else {
-
-            return coverage[ index ];
-        }
-
-
-    };
 
     return igv;
 

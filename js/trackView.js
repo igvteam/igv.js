@@ -4,24 +4,29 @@ var igv = (function (igv) {
 
         this.browser = browser;
         this.track = track;
-        this.order = track.order || 0;
-        this.marginBottom = 10;
+//        this.order = track.order || 0;
 
-        var viewportDiv,
+        var myself = this,
+            viewportDiv,
+            trackIconContainer,
             trackDiv,
+            trackManipulationContainer,
+            trackManipulationIconBox,
             controlDiv,
             controlCanvas,
             contentDiv,
             canvas,
-            closeButton,
-            labelButton,
+            removeButton,
+            labelSpan,
             spinnerFontAwesome;
 
         // track
-        trackDiv = document.createElement("div");
-        browser.trackContainerDiv.appendChild(trackDiv);
-        trackDiv.className = "igv-track-div";
-        trackDiv.style.height = track.height + "px";
+        trackDiv = $('<div class="igv-track-div">')[0];
+        $(browser.trackContainerDiv).append(trackDiv);
+
+        // Optionally override CSS height
+        if(track.height) trackDiv.style.height = track.height + "px";
+
         this.trackDiv = trackDiv;
 
         // spinner
@@ -29,114 +34,100 @@ var igv = (function (igv) {
         this.trackDiv.appendChild(spinnerFontAwesome);
         spinnerFontAwesome.className = "fa fa-spinner fa-2x fa-spin igv-spinner-fontawesome-start";
 
-        // controls
-        var controlWidth = browser.controlPanelWidth ? browser.controlPanelWidth : 50;
-
-        controlDiv = document.createElement("div");
-        controlDiv.className = "igv-control-div";
-        controlDiv.style.width = controlWidth + "px";
-        controlDiv.style.height = track.height + "px";
+        // control div
+        controlDiv = $('<div class="igv-track-control-div"></div>')[0]
+        $(trackDiv).append(controlDiv);
         this.controlDiv = controlDiv;
 
-        controlCanvas = document.createElement('canvas');
-        controlDiv.style.width = controlWidth + "px";
-        trackDiv.appendChild(controlDiv);
-        this.controlDiv = controlDiv;
-
-        controlDiv.appendChild(controlCanvas);
-        controlCanvas.style.width = controlDiv.clientWidth + "px";
-        controlCanvas.style.height = controlDiv.clientHeight + "px";
+        // control canvas.  Canvas width and height attributes must be set.  Its a canvas weirdness.
+        controlCanvas = $('<canvas class ="igv-track-control-canvas">')[0];
+        $(controlDiv).append(controlCanvas);
         controlCanvas.setAttribute('width', controlDiv.clientWidth);
         controlCanvas.setAttribute('height', controlDiv.clientHeight);
         this.controlCanvas = controlCanvas;
         this.controlCtx = controlCanvas.getContext("2d");
 
         // viewport
-        viewportDiv = document.createElement("div");
-        viewportDiv.className = "igv-viewport-div";
-        viewportDiv.style.left = controlDiv.clientWidth + "px";
-        viewportDiv.style.height = track.height + "px";
-        trackDiv.appendChild(viewportDiv);
+        viewportDiv = $('<div class="igv-viewport-div"></div>')[0]
+        $(trackDiv).append(viewportDiv);
         this.viewportDiv = viewportDiv;
 
-        // content
-        contentDiv = document.createElement("div");
-        viewportDiv.appendChild(contentDiv);
-        contentDiv.className = "igv-content-div";
-        contentDiv.style.height = track.height + "px";
+        // content  -- purpose of this div is to allow vertical scolling on individual tracks, although that is not implemented
+        contentDiv = $('<div class="igv-content-div"></div>')[0];
+        $(viewportDiv).append(contentDiv);
         this.contentDiv = contentDiv;
 
-        canvas = document.createElement('canvas');
-        contentDiv.appendChild(canvas);
-        canvas.style.position = 'absolute';
-        canvas.style.width = contentDiv.clientWidth + "px";
-        canvas.style.height = track.height + "px";
+
+        // track content canvas
+        canvas = $('<canvas class = "igv-content-canvas">')[0];
+        $(contentDiv).append(canvas);
         canvas.setAttribute('width', contentDiv.clientWidth);
-        canvas.setAttribute('height', track.height);
-
-
-        // CURSOR specific functions
-        if (browser.type === "CURSOR") {
-
-            this.track.cursorHistogram = new cursor.CursorHistogram(controlDiv.clientHeight, this.track.max);
-            this.track.cursorHistogram.createMarkupWithTrackPanelDiv(this);
-
-            igv.cursorAddTrackControlButtons(this, browser, controlDiv)
-
-        }
-
-        // Close button
-        if (!track.disableButtons) {
-
-            closeButton = document.createElement("i");
-            contentDiv.appendChild(closeButton);
-
-            closeButton.className = "fa fa-times-circle igv-track-disable-button-fontawesome";
-            closeButton.onclick = function () {
-                browser.removeTrack(track);
-            };
-
-            if (track.label) {
-
-                labelButton = document.createElement("button");
-                viewportDiv.appendChild(labelButton);
-
-                labelButton.className = "btn btn-xs btn-cursor-deselected igv-track-label";
-                labelButton.innerHTML = track.label;
-                track.labelButton = labelButton;
-
-                labelButton.onclick = function (e) {
-
-                    if (browser.cursorModel) {
-
-                        browser.designatedTrack = track;
-                        browser.designatedTrack.featureSource.allFeatures(function (featureList) {
-
-                            browser.referenceFrame.start = 0;
-                            browser.cursorModel.setRegions(featureList);
-
-
-                        });
-
-                    }
-                    else {
-
-                        if (track.description) {
-                            igv.popover.show(e.pageX, e.pageY, track.description);
-                        }
-
-                    }
-
-                }
-
-            }
-        }
-
+        canvas.setAttribute('height', contentDiv.clientHeight);
         this.canvas = canvas;
         this.ctx = canvas.getContext("2d");
 
-        addTrackHandlers(this);
+         // track icon container
+        trackIconContainer = $('<div class = "igv-track-icon-container">')[0];
+        $(viewportDiv).append(trackIconContainer);
 
+
+        if (track.label) {
+
+            labelSpan = document.createElement("span");
+            trackIconContainer.appendChild(labelSpan);
+            labelSpan.className = "igv-track-label-span-base";
+            labelSpan.innerHTML = track.label;
+
+        }
+
+        // CURSOR specific stuff
+        if (browser.type === "CURSOR") {
+
+            // track manipulation container
+            trackManipulationContainer = $('<div class="igv-track-manipulation-container"></div>')[0];
+            $(trackDiv).append(trackManipulationContainer);
+
+            trackManipulationIconBox = $('<div class="igv-track-manipulation-icon-box"></div>')[0];
+            $(trackManipulationContainer).append(trackManipulationIconBox);
+
+            $(trackManipulationIconBox).append($('<i class="fa fa-chevron-circle-up   igv-track-manipulation-move-up">')[0]);
+            $(trackManipulationIconBox).append($('<i class="fa fa-chevron-circle-down igv-track-manipulation-move-down">')[0]);
+
+            $(trackManipulationIconBox).find("i.fa-chevron-circle-up").click(function() {
+                browser.reduceTrackOrder(myself)
+            });
+
+            $(trackManipulationIconBox).find("i.fa-chevron-circle-down").click(function() {
+                browser.increaseTrackOrder(myself)
+            });
+
+            removeButton = $('<i class="fa fa-times igv-track-manipulation-discard">')[0];
+
+            $(trackManipulationIconBox).append(removeButton);
+
+            $(removeButton).click(function () {
+                browser.removeTrack(track);
+            });
+
+            this.track.cursorHistogram = new cursor.CursorHistogram(controlDiv.clientHeight, this.track.max, controlDiv);
+//            this.track.cursorHistogram.createMarkupWithParent(controlDiv);
+
+            igv.cursorAddTrackControlButtons(this, browser);
+
+        }
+
+        // Remove button for igv
+        else if (!track.disableButtons) {
+
+            removeButton = $('<i class="fa fa-times-circle igv-track-disable-button-fontawesome">')[0];
+            $(contentDiv).append(removeButton);
+            $(removeButton).click(function () {
+                browser.removeTrack(track);
+            });
+        }
+
+
+        addTrackHandlers(this);
 
     };
 
@@ -156,18 +147,32 @@ var igv = (function (igv) {
 
     igv.TrackView.prototype.setTrackHeight = function (newHeight) {
 
+        var minHeight = this.track.minHeight || 10;
+        var maxHeight = this.track.maxHeight || 1000;
+
+        newHeight = Math.max(minHeight, newHeight);
+        newHeight = Math.min(maxHeight, newHeight);
+
         var heightStr = newHeight + "px";
         this.track.height = newHeight;
         this.trackDiv.style.height = heightStr;
-        // this.controlDiv.style.height = heightStr;
-        // this.controlCanvas.style.height = heightStr;
-        // this.controlCanvas.setAttribute("height", newHeight);
+
+        // control panel
+        this.controlDiv.style.height = heightStr;
+
+        this.controlCanvas.style.height = heightStr;
+        this.controlCanvas.setAttribute("height", newHeight);
+
         this.viewportDiv.style.height = heightStr;
         this.contentDiv.style.height = heightStr;
+
         this.canvas.style.height = heightStr;
         this.canvas.setAttribute("height", newHeight);
 
-        this.track.cursorHistogram.updateHeight(this.track, newHeight);
+        if (this.browser.type === "CURSOR") {
+            this.track.cursorHistogram.updateHeightAndInitializeHistogramWithTrack(this.track);
+        }
+
 
         this.update();
     };
@@ -187,86 +192,99 @@ var igv = (function (igv) {
         var tileWidth,
             tileStart,
             tileEnd,
-            spinner,
             buffer,
             myself = this,
             igvCanvas,
             referenceFrame = this.browser.referenceFrame,
             refFrameStart = referenceFrame.start,
-            refFrameEnd = refFrameStart + referenceFrame.toBP(this.canvas.width);
+            refFrameEnd = refFrameStart + referenceFrame.toBP(this.canvas.width),
+            currentTask = this.currentTask;
 
         if (!this.tile || !this.tile.containsRange(referenceFrame.chr, refFrameStart, refFrameEnd, referenceFrame.bpPerPixel)) {
 
-            buffer = document.createElement('canvas');
-            buffer.width = 3 * this.canvas.width;
-            buffer.height = this.canvas.height;
-            igvCanvas = new igv.Canvas(buffer);
+            // First see if there is a load in progress that would satisfy the paint request
 
-            tileWidth = Math.round(referenceFrame.toBP(buffer.width));
-            tileStart = Math.max(0, Math.round(referenceFrame.start - tileWidth / 3));
-            tileEnd = tileStart + tileWidth;
+            if (currentTask && currentTask.end >= refFrameEnd && currentTask.start <= refFrameStart) {
 
-            if (this.currentTask) {
-                if(this.currentTask.chr === referenceFrame.chr && this.currentTask.start === tileStart && this.currentTask.end === tileEnd) {
-                    // This load is already in progress
-                   // console.log("Dup load request -- ignoring");
-                    return;
-                }
-                this.currentTask.abort();
+                // Nothing to do but wait for current load task to complete
+
             }
+
+            else {
+
+                // Cancel the current task if any as it will not satisfy the paint request
+
+                if (currentTask) {
+                    currentTask.abort();
+                }
+
+                buffer = document.createElement('canvas');
+                buffer.width = 3 * this.canvas.width;
+                buffer.height = this.canvas.height;
+                igvCanvas = new igv.Canvas(buffer);
+
+                tileWidth = Math.round(referenceFrame.toBP(buffer.width));
+                tileStart = Math.max(0, Math.round(referenceFrame.start - tileWidth / 3));
+                tileEnd = tileStart + tileWidth;
+
 
 //            spinner = igv.getSpinner(this.trackDiv);   // Start a spinner
-            igv.spinnerStartWithParent(myself.trackDiv);
+                igv.startSpinner(myself.trackDiv);
 
-            this.currentTask = {
-                canceled: false,
-                chr: referenceFrame.chr,
-                start: tileStart,
-                end: tileEnd,
-                abort: function () {
-                    this.canceled = true;
-                    if (this.xhrRequest) {
-                        this.xhrRequest.abort();
-                    }
+                this.currentTask = {
+                    canceled: false,
+                    chr: referenceFrame.chr,
+                    start: tileStart,
+                    end: tileEnd,
+                    abort: function () {
+                        this.canceled = true;
+                        if (this.xhrRequest) {
+                            this.xhrRequest.abort();
+                        }
 //                    spinner.stop();
-                    igv.spinnerStopWithParent(myself.trackDiv);
+                        igv.stopSpinner(myself.trackDiv);
+                    }
+
+                };
+
+                myself.track.draw(igvCanvas, referenceFrame, tileStart, tileEnd, buffer.width, buffer.height, function (task) {
+
+//                    spinner.stop();
+                        igv.stopSpinner(myself.trackDiv);
+
+                        if (task) console.log(task.canceled);
+
+                        if (!(task && task.canceled)) {
+                            myself.tile = new Tile(referenceFrame.chr, tileStart, tileEnd, referenceFrame.bpPerPixel, buffer);
+                            myself.paintImage();
+                        }
+                        myself.currentTask = undefined;
+                    },
+                    myself.currentTask);
+
+                if (myself.track.paintControl) {
+
+                    var buffer2 = document.createElement('canvas');
+                    buffer2.width = this.controlCanvas.width;
+                    buffer2.height = this.controlCanvas.height;
+
+                    var bufferCanvas = new igv.Canvas(buffer2);
+
+                    myself.track.paintControl(bufferCanvas, buffer2.width, buffer2.height);
+
+                    myself.controlCtx.drawImage(buffer2, 0, 0);
                 }
-
-            };
-
-            this.track.draw(igvCanvas, referenceFrame, tileStart, tileEnd, buffer.width, buffer.height, function (task) {
-
-//                    spinner.stop();
-                    igv.spinnerStopWithParent(myself.trackDiv);
-
-                    if (task) console.log(task.canceled);
-
-                    if (!(task && task.canceled)) {
-                        myself.tile = new Tile(referenceFrame.chr, tileStart, tileEnd, referenceFrame.bpPerPixel, buffer);
-                        myself.paintImage();
-                    }
-                    myself.currentTask = undefined;
-                },
-                this.currentTask);
-
-            if (this.track.paintControl) {
-
-                var buffer2 = document.createElement('canvas');
-                buffer2.width = this.controlCanvas.width;
-                buffer2.height = this.controlCanvas.height;
-
-                var bufferCanvas = new igv.Canvas(buffer2);
-
-                this.track.paintControl(bufferCanvas, buffer2.width, buffer2.height);
-
-                this.controlCtx.drawImage(buffer2, 0, 0);
             }
 
-
         }
-        else {
+
+        if (this.tile && this.tile.chr === referenceFrame.chr) {
             this.paintImage();
         }
+        else {
+            this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
+        }
+
 
     };
 
@@ -299,17 +317,18 @@ var igv = (function (igv) {
         return hit;
     };
 
-
     function addTrackHandlers(trackView) {
+
+
 
         // Register track handlers for popup.  Although we are not handling dragging here, we still need to check
         // for dragging on a mouseup
 
-      var isMouseDown = false,
+        var isMouseDown = false,
             lastMouseX = undefined,
             mouseDownX = undefined,
             canvas = trackView.canvas,
-            popupTimer = undefined;
+            popupTimer;
 
         $(canvas).mousedown(function (e) {
 
@@ -332,44 +351,43 @@ var igv = (function (igv) {
             var canvasCoords = igv.translateMouseCoordinates(e, canvas),
                 referenceFrame = trackView.browser.referenceFrame;
 
-            if(!referenceFrame) return;
+            if (!referenceFrame) return;
 
             if (popupTimer) {
                 // Cancel previous timer
+                console.log("Cancel timer");
                 window.clearTimeout(popupTimer);
                 popupTimer = undefined;
             }
 
-            if (Math.abs(canvasCoords.x - mouseDownX) <= igv.constants.dragThreshold && trackView.track.popupData) {
-                const doubleClickDelay = 300;
-                popupTimer = window.setTimeout(function () {
-
-                        var popupData,
-                            genomicLocation = Math.floor((referenceFrame.start) + referenceFrame.toBP(canvasCoords.x)),
-                            xOrigin;
-
-                        if (undefined === genomicLocation) {
-                            return;
-                        }
-
-                        xOrigin = Math.round(referenceFrame.toPixels((trackView.tile.startBP - referenceFrame.start)));
-
-                        popupData = trackView.track.popupData(genomicLocation, canvasCoords.x - xOrigin, canvasCoords.y);
-
-//                        popupData = igv.popover.testData( Math.floor( igv.random(2, 25) ) );
-
-                        if (popupData && popupData.length > 0) {
-                            igv.popover.show(e.pageX, e.pageY, igv.formatPopoverText(popupData));
-                        }
-                        mouseDownX = undefined;
-                    },
-                    doubleClickDelay);
-            }
             else {
-                mouseDownX = undefined;
+                if (Math.abs(canvasCoords.x - mouseDownX) <= igv.constants.dragThreshold && trackView.track.popupData) {
+                    const doubleClickDelay = 300;
+                    popupTimer = window.setTimeout(function () {
+
+                            var popupData,
+                                genomicLocation = Math.floor((referenceFrame.start) + referenceFrame.toBP(canvasCoords.x)),
+                                xOrigin;
+
+                            if (undefined === genomicLocation) {
+                                return;
+                            }
+                            if (null === trackView.tile) {
+                                return;
+                            }
+                            xOrigin = Math.round(referenceFrame.toPixels((trackView.tile.startBP - referenceFrame.start)));
+                            popupData = trackView.track.popupData(genomicLocation, canvasCoords.x - xOrigin, canvasCoords.y);
+                            if (popupData && popupData.length > 0) {
+                                igv.popover.show(e.pageX, e.pageY, igv.formatPopoverText(popupData));
+                            }
+                            mouseDownX = undefined;
+                            popupTimer = undefined;
+                        },
+                        doubleClickDelay);
+                }
             }
 
-
+            mouseDownX = undefined;
             isMouseDown = false;
             lastMouseX = undefined;
 
@@ -377,7 +395,6 @@ var igv = (function (igv) {
 
 
     }
-
 
     return igv;
 })

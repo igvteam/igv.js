@@ -19,16 +19,20 @@ function runDataLoaderTests() {
             "columns": ["CHROM", "POS", "DBSNP_ID", "PVALUE", "ZSCORE"], "trait": "T2D"
         };
 
-        var tmp = "url=" + url + "&data=" + JSON.stringify(data);
+        var tmp = "url=" + url + "&data=" + JSON.stringify(data),
 
-        dataLoader.postJson(tmp, function (result) {
+            options = {
+                sendData: tmp,
+                success: function (result) {
 
-            ok(result);
+                    ok(result);
 
-            var obj = JSON.parse(result);
+                    start();
+                }
+            }
 
-            start();
-        });
+        igvxhr.loadJson(proxy, options);
+
     });
 
     asyncTest("readByteRange old", function () {

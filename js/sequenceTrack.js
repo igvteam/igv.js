@@ -3,12 +3,13 @@ var igv = (function (igv) {
     igv.SequenceTrack = function (description) {
         this.label = "";
         this.id = "sequence";
-        this.height = this.preferredHeight;    // The preferred height
+        this.height = 15;
+        this.minHeight = this.height;
+        this.maxHeight = this.height;
         this.disableButtons =  true;
         this.order = description.order || 9999;
     }
 
-    igv.SequenceTrack.prototype.preferredHeight = 15;
 
     igv.SequenceTrack.prototype.draw = function (canvas, refFrame, tileStart, tileEnd, width, height, continuation) {
 

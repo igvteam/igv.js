@@ -2,7 +2,7 @@
 //
 
 var log = function (txt) {
-    console.log("karyo: " + txt);
+   // console.log("karyo: " + txt);
 }
 var igv = (function (igv) {
 
@@ -71,9 +71,6 @@ var igv = (function (igv) {
             var mouseCoords = igv.translateMouseCoordinates(e, canvas);
             var mouseX = mouseCoords.x;
             var mouseY = mouseCoords.y;
-
-
-    //        this.getContext("2d").fillRect(mouseX, 0, 10, 10);
             igv.navigateKaryo(mouseX, mouseY);
         }
 
@@ -88,7 +85,7 @@ var igv = (function (igv) {
                 var dy = mouseY - g.y;
                 var bp = Math.round(g.size * dy / g.h);
                 log("Going to position " + bp);
-                igv.browser.goto(g.name, bp, (bp + 10000));
+                igv.browser.goto(g.name, bp);
                 break;
             }
         }
@@ -143,7 +140,7 @@ var igv = (function (igv) {
         this.ctx.save();
 
         var chromosome = igv.browser.genome.getChromosome(referenceFrame.chr);
-        var ideoScale = chromosome.bpLength / chrheight;   // Scale in bp per pixels
+        var ideoScale = longestChr.bpLength / chrheight;   // Scale in bp per pixels
 
         var boxPY1 = top + Math.round(referenceFrame.start / ideoScale);
         var boxHeight = Math.max(3, (igv.browser.trackViewportWidth() * referenceFrame.bpPerPixel) / ideoScale);

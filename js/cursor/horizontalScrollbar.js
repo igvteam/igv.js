@@ -8,10 +8,10 @@ var cursor = (function (cursor) {
 
     var minimumHorizontalScrollBarDraggableWidth = 6;
 
-    cursor.HorizontalScrollbar = function (browser, parentDivObject) {
+    cursor.HorizontalScrollbar = function (browser, horizontalScrollBarContainer) {
 
         this.browser = browser;
-        this.markupWithParentDivObject(parentDivObject);
+        this.markupWithParentDivObject(horizontalScrollBarContainer);
 
     };
 
@@ -56,33 +56,36 @@ var cursor = (function (cursor) {
             "width": Math.floor( width ) + "px"
         });
 
-     };
+    };
 
-    cursor.HorizontalScrollbar.prototype.markupWithParentDivObject = function (parentDivObject) {
+    cursor.HorizontalScrollbar.prototype.markupWithParentDivObject = function (horizontalScrollBarContainer) {
 
         var myself = this,
-            horizontalScrollBarContainer,
             horizontalScrollBar,
+            horizontalScrollBarShim,
             horizontalScrollBarDraggable,
+            anyViewport,
             isMouseDown = undefined,
             lastMouseX = undefined,
             isMouseIn = undefined;
 
-        // DOM
-        horizontalScrollBarContainer = $('<div class="igv-horizontal-scrollbar-container-div">')[0];
-        horizontalScrollBar          = $('<div class="igv-horizontal-scrollbar-div">')[0];
+
+
+        horizontalScrollBarShim = $('<div class="igv-horizontal-scrollbar-shim-div">')[0];
+        horizontalScrollBarContainer.append(horizontalScrollBarShim);
+
+        anyViewport = $("div.igv-viewport-div").first();
+        $( horizontalScrollBarShim).css("left",  anyViewport.css("left"));
+        $( horizontalScrollBarShim).css("right", anyViewport.css("right"));
+
+
+        horizontalScrollBar = $('<div class="igv-horizontal-scrollbar-div">')[0];
+        $(horizontalScrollBarShim).append(horizontalScrollBar);
+
         horizontalScrollBarDraggable = $('<div class="igv-horizontal-scrollbar-draggable-div">')[0];
-
-        $( horizontalScrollBar).css( "left", this.browser.controlPanelWidth + "px");
-
-
-        parentDivObject.append(horizontalScrollBarContainer);
-        $(horizontalScrollBarContainer).append(horizontalScrollBar);
-        $( horizontalScrollBar).css({
-            "left": (this.browser.controlPanelWidth ? this.browser.controlPanelWidth : 50) + "px"
-        });
-
         $(horizontalScrollBar).append(horizontalScrollBarDraggable);
+
+
 
         // mouse event handlers
         $( document ).mousedown(function(e) {

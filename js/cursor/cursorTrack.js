@@ -19,8 +19,6 @@ var cursor = (function (cursor) {
 
         this.id = "";
         this.max = 1000;
-        this.sortDirection = 1;
-
     };
 
     cursor.CursorTrack.prototype.jsonRepresentation = function () {
@@ -44,8 +42,10 @@ var cursor = (function (cursor) {
        return "blue";
     };
 
-    cursor.CursorTrack.prototype.isSorted = function () {
-        return this.sortButton.style.color === "red";
+    cursor.CursorTrack.prototype.isSortTrack = function () {
+
+        var success = (this === this.cursorModel.browser.sortTrack);
+        return success;
     };
 
     cursor.CursorTrack.prototype.getFeatureCache = function (continuation) {
@@ -144,7 +144,7 @@ var cursor = (function (cursor) {
             sampleInterval = Math.max(1, Math.floor(1.0 / framePixelWidth));
 
             if (frameMargin > 0) {
-                canvas.fillRect(0, 0, width, height, {fillStyle: 'rgb(250, 250, 250)'});
+                canvas.fillRect(0, 0, width, height, { fillStyle:'rgb(255, 255, 255)' });
             }
 
             canvas.setProperties({ fillStyle: this.color, strokeStyle: this.color });

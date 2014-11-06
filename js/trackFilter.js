@@ -21,7 +21,7 @@ igv = (function (igv) {
         this.isFilterActive = json.isFilterActive;
         this.radioButton = (undefined === json.radioButtonIDPrefix) ? undefined : radioButtonWithID(json.radioButtonIDPrefix + this.guid);
 
-        modalPresentationButton.css("color", "black");
+        modalPresentationButton.css("color", "grey");
 
         if ("minMaxRadio_" + this.guid === this.radioButton[0].id) {
 
@@ -32,11 +32,11 @@ igv = (function (igv) {
             this.maximum = json.maximum;
 
             if (undefined !== json.minimum || undefined !== json.maximum) {
-                modalPresentationButton.css("color", "red");
+                modalPresentationButton.css("color", this.trackPanel.browser.highlightColor);
             }
 
         } else if (this.isFilterActive) {
-            modalPresentationButton.css("color", "red");
+            modalPresentationButton.css("color", this.trackPanel.browser.highlightColor);
 
         }
 
@@ -115,12 +115,12 @@ igv = (function (igv) {
 
         // This will undo this filter if previously set
         if (!this.isFilterActive) {
-            modalPresentationButton.css("color", "black");
+            modalPresentationButton.css("color", "grey");
             this.trackPanel.browser.cursorModel.filterRegions();
             return;
         }
 
-        modalPresentationButton.css("color", "red");
+        modalPresentationButton.css("color", this.trackPanel.browser.highlightColor);
 
         if ("minMaxRadio_" + this.guid === this.radioButton[0].id) {
 
@@ -128,7 +128,7 @@ igv = (function (igv) {
             this.maximum = igv.isNumber(maximumElement.val()) ? parseFloat(maximumElement.val(), 10) : undefined;
 
             if (undefined === this.minimum && undefined === this.maximum) {
-                modalPresentationButton.css("color", "black");
+                modalPresentationButton.css("color", "grey");
             }
         }
 
@@ -271,7 +271,9 @@ igv = (function (igv) {
         var re = new RegExp("GUID", "g"),
             presentationButton;
 
-        presentationButton = '<i id="modalPresentationButton_GUID" class="fa fa-filter" data-toggle="modal" data-target="#modalDialogDataTarget_GUID" style="color: black; position: absolute; top: 0; left: 0; cursor: pointer;"></i>';
+//        presentationButton = '<i id="modalPresentationButton_GUID" class="fa fa-filter" data-toggle="modal" data-target="#modalDialogDataTarget_GUID" style="color: black; position: absolute; top: 0; left: 0; cursor: pointer;"></i>';
+        presentationButton = '<i id="modalPresentationButton_GUID" class="glyphicon glyphicon-filter igv-trackfilter-fontawesome" data-toggle="modal" data-target="#modalDialogDataTarget_GUID"></i>';
+
         presentationButton = presentationButton.replace(re, guid);
 
         return presentationButton;

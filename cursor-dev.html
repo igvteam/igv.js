@@ -82,9 +82,6 @@
 <body>
 
 <div class="igv-cursor-ui-header">
-
-        <a class="igv-about-link" href="http://www.apple.com" target="_blank">About</a>
-
     <div class="igv-cursor-ui-holder">
         <div class="igv-cursor-ui">
             <div class="igv-cursor-ui-item igv-cursor-ui-right-border">
@@ -97,8 +94,6 @@
                     </button><!-- File Open/Save -->
 
                     <ul class="dropdown-menu" role="menu" aria-labelledby="igvHeaderFileDropdown">
-
-                        <li role="presentation" class="dropdown-header">Load date from</li>
 
                         <li role="presentation">
                             <a role="menuitem" tabindex="-1" href="#" data-toggle="modal" data-target="#igvEncodeModal">
@@ -196,10 +191,10 @@
 
             <div class="modal-body">
 
-                    <div class="form-group">
-                        <!--<label for="igvSessionLoad">Load Session</label>-->
-                        <input id="igvSessionLoad" type="file" title="Session File" multiple/>
-                    </div>
+                <div class="form-group">
+                    <!--<label for="igvSessionLoad">Load Session</label>-->
+                    <input id="igvSessionLoad" type="file" title="Session File" multiple/>
+                </div>
 
             </div>
 
@@ -221,10 +216,10 @@
 
             <div class="modal-body">
 
-                    <div class="form-group">
-                        <!--<label for="igvLoadURL">Load URL</label>-->
-                        <input id="igvLoadURL" type="text" class="form-control" placeholder="BED URL">
-                    </div>
+                <div class="form-group">
+                    <!--<label for="igvLoadURL">Load URL</label>-->
+                    <input id="igvLoadURL" type="text" class="form-control" placeholder="BED URL">
+                </div>
 
             </div>
 
@@ -246,9 +241,9 @@
 
             <div class="modal-body">
 
-                    <div class="form-group">
-                        <input id="igvFileUpload" type="file" title="BED file" multiple/>
-                    </div>
+                <div class="form-group">
+                    <input id="igvFileUpload" type="file" title="BED file" multiple/>
+                </div>
 
             </div>
 
@@ -373,6 +368,18 @@
                     url: "test/data/cursor/hg19.tss.bed.gz",
                     label: "TSS",
                     designatedTrack: true
+                },
+                {
+                    type: "bed",
+                    url: "test/data/cursor/wgEncodeBroadHistoneH1hescH3k4me3StdPk.broadPeak.gz",
+                    label: "H3k4me3 H1hesc",
+                    color: "rgb(0, 150, 0)"
+                },
+                {
+                    type: "bed",
+                    url: "test/data/cursor/wgEncodeBroadHistoneH1hescH3k27me3StdPk.broadPeak.gz",
+                    label: "H3k27me3 H1hesc",
+                    color: "rgb(150, 0, 0)"
                 }
             ]
         };

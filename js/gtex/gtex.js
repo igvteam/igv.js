@@ -1,11 +1,146 @@
 var igv = (function (igv) {
 
-    if (!igv.gtex) {
-        igv.gtex = {};
+
+    igv.createGtexBrowser = function (parentDiv, options) {
+
+        if (!options) {
+            options = {
+                showKaryo: false,
+                fastaURL: "//dn7ywbm9isq8j.cloudfront.net/genomes/seq/hg19/hg19.fasta",
+                cytobandURL: "//dn7ywbm9isq8j.cloudfront.net/genomes/seq/hg19/cytoBand.txt",
+                tracks: [
+                    {
+                        type: "sequence",
+                        order: 9999
+                    },
+                    {
+                        url: "//dn7ywbm9isq8j.cloudfront.net/annotations/hg19/genes/gencode.v18.collapsed.bed",
+                        label: "Genes",
+                        order: 10000
+                    }
+                ]
+            };
+        }
+
+        if (!options.createControls) {
+            options.createControls = createGtexControls;
+        }
+
+        if (!options.tissueEqtlMappingURL) {
+            options.tissueEqtlMappingURL = "http://www.gtexportal.org/igv/assets/eqtl/tissueEqtlMappings.txt";
+        }
+
+        return igv.createBrowser(parentDiv, options);
+
 
     }
 
-    igv.loadGtexTissueMappings = function (url, continuation) {
+    function createGtexControls(browser, options) {
+
+        var controlDiv = $('<div id="igvControlDiv" class="igv-control-div">')[0],
+            tissueEqtlMappingURL = options.tissueEqtlMappingURL,
+            selectionDiv = $('<div style="margin-bottom:20px">')[0],
+            widgetDiv = $('<div style="height: 40px">')[0],
+            zoomDiv = $('<div style="float:right">')[0],
+            zoomOutButton = $('<button style="margin-right:5px">Zoom Out&nbsp; </button>')[0],
+            zoomInButton = $('<button>Zoom In&nbsp; </button>')[0],
+            trackHeightDiv = $('<div style="float:left">Track height:&nbsp;</div>')[0],
+            heightBoxInput = $('<input type="text" id="igvTrackHeightInput" value="100"/>')[0],
+            goBoxDiv, goBoxInput, goBoxButton;
+
+
+        zoomOutButton.onclick = function () {
+            igv.browser.zoomOut();
+        }
+
+        zoomInButton.onclick = function () {
+            igv.browser.zoomIn();
+        }
+
+        heightBoxInput.onchange = function () {
+
+            igv.browser.setTrackHeight(heightBoxInput.value);
+        }
+
+        $(trackHeightDiv).append(heightBoxInput);
+        $(zoomDiv).append(zoomOutButton);
+        $(zoomDiv).append(zoomInButton);
+
+        $(widgetDiv).append(trackHeightDiv);
+        $(widgetDiv).append(zoomDiv);
+
+        $(controlDiv).append(selectionDiv);
+        $(controlDiv).append(widgetDiv);
+
+
+        if (options.dev) {
+            goBoxDiv = $('<div style="margin-left:auto;margin-right:auto;width:20%">')[0];
+            goBoxInput = $('<input type="text" id="goBox" value="PDE8B"/>')[0];
+            goBoxButton = $('<button name="goButton"">Go</button>')[0];
+            goBoxInput.onChange = function () {
+                igv.browser.search(goBoxInput.value);
+            }
+            goBoxButton.onclick = function () {
+                igv.browser.search(goBoxInput.value);
+            }
+        }
+
+
+        loadGtexTissueMappings(tissueEqtlMappingURL, function (records) {
+
+
+            records.forEach(function (record) {
+
+                var containerDiv = $('<span style="margin-right: 30px">')[0]; // style="float:left">');
+
+                var cb = $('<input type="checkbox"">')[0];
+                cb.tissueRecord = record;
+                cb.onclick = function (e) {
+                    var record = e.currentTarget.tissueRecord,
+                        track;
+
+                    if (e.currentTarget.checked) {
+                        track = igv.createEqtlTrack({url: record.url, label: record.label});
+                        track.disableButtons = false;
+                        browser.addTrack(track);
+                    }
+                    else {
+                        track = findTrackWithURL(browser, record.url);
+                        if (track) {
+                            browser.removeTrack(track);
+                        }
+                    }
+                };
+                $(containerDiv).append(cb);
+
+                var span = $('<span>' + record.label + '</span>')[0];
+                $(containerDiv).append(span);
+
+                $(selectionDiv).append(containerDiv);
+            });
+
+            //igv.gtexBrowser.activeTracks(igv.gtexBrowser.tracksToInitialize);
+        });
+
+
+        return controlDiv;
+    }
+
+    function findTrackWithURL(browser, url) {
+
+        var i, len = browser.trackPanels.length;
+
+        for (i = 0; i < len; i++) {
+            if (browser.trackPanels[i].track.file === url) {
+                return browser.trackPanels[i].track;
+            }
+        }
+        return null;
+
+    }
+
+
+    function loadGtexTissueMappings(url, continuation) {
 
         var dataLoader = new igv.DataLoader(url);
 
@@ -31,371 +166,6 @@ var igv = (function (igv) {
                 continuation(null);
             });
 
-    }
-
-
-    igv.createEqtlTrack = function (eqtlFile1, name) {
-
-        var eqtlTrack = new igv.EqtlTrack(eqtlFile1, name);
-        return eqtlTrack;
-
-
-    }
-
-    igv.createGtexBrowser = function (developmentMode) {
-
-        var gencodeURL,
-            fastaURL,
-            tissueEqtlMappingURL,
-            cytobandURL;
-
-            fastaURL = "http://www.gtexportal.org/igv/assets/hg19/hg19.fa";
-            tissueEqtlMappingURL = "http://www.gtexportal.org/igv/assets/eqtl/tissueEqtlMappings.txt";
-            cytobandURL = "http://www.gtexportal.org/igv/assets/hg19/cytoBand.txt";
-            gencodeURL = "http://www.gtexportal.org/igv/assets/hg19/gencode.v18.bed";
-
-
-        if (igv.gtexBrowser) {
-            return igv.gtexBrowser;   // Singleton
-        }
-        else {
-            igv.gtexBrowser = new igv.Browser("GTEX");
-        }
-
-        var browser = igv.gtexBrowser,
-            rootDiv = browser.div,
-
-        // navBar = $('<nav class="navbar navbar-fixed-top" role="navigation">')[0],
-            navBar = $('<div>')[0],
-            navBarContainer = $('<div>')[0],
-
-            controlDiv = $('<div id="igvControlDiv"></div>')[0],
-            zoomInButton = $('<button class="igvZoomButton" name="zoomInButton"  onclick="gtex.zoomIn()">Zoom In&nbsp; </button>')[0],
-            zoomOutButton = $('<button class="igvZoomButton" name="zoomOutButton"  onclick="gtex.zoomOut()">Zoom Out&nbsp; </button>')[0],
-
-            trackHeightDiv = $('<div style="float:left">Track height:&nbsp;</div>')[0],
-            heightBoxInput = $('<input type="text" id="igvTrackHeightInput" value="100"/>')[0],
-
-            goBoxDiv = $('<div style="margin-left:auto;margin-right:auto;width:20%">')[0],
-            goBoxInput = $('<input type="text" id="goBox" value="PDE8B"/>')[0],
-            goBoxButton = $('<button name="goButton"">Go</button>')[0],
-
-            testBoxDiv = $('<div style="margin-left:auto;margin-right:auto;width:10%">')[0],
-            testBoxButton1 = $('<button name="testButton1"">Test1</button>')[0],
-            testBoxButton2 = $('<button name="testButton2"">Test2</button>')[0],
-
-            contentContainer = $('<div><div class="row">')[0],
-            contentRoot = $('<div id="igvRootDiv" class="igv-root-div">')[0],
-            contentHeader = $('<div id="igvHeaderDiv" class="igv-header-div">')[0],
-            trackContainer = $('<div id="igvTrackContainerDiv" class="igv-track-container-div">')[0];
-
-
-        // Actions
-        testBoxButton1.onclick = function () {
-            search('HLA-DQB1');
-            search('AP4B1-AS1');
-        }
-        testBoxButton2.onclick = function () {
-            search('AP4B1-AS1');
-            search('HLA-DQB1');
-        }
-
-        goBoxInput.onChange = function () {
-            search(goBoxInput.value);
-        }
-        goBoxButton.onclick = function () {
-            search(goBoxInput.value);
-        }
-        zoomOutButton.onclick = zoomOut;
-        zoomInButton.onclick = zoomIn;
-
-        heightBoxInput.onchange = function () {
-
-            var trackPanels = browser.trackPanels;
-
-            var i;
-
-            for (i = 0; i < trackPanels.length; i++) {
-                if (trackPanels[i].track instanceof igv.EqtlTrack) {
-                    trackPanels[i].trackDiv.style.height = heightBoxInput.value + "px";
-                    trackPanels[i].canvas.height = heightBoxInput.value;
-                    trackPanels[i].canvas.style.height = heightBoxInput.value + "px";
-                    trackPanels[i].controlDiv.style.height = heightBoxInput.value + "px";
-                    trackPanels[i].controlCanvas.height = heightBoxInput.value;
-                    trackPanels[i].controlCanvas.style.height = heightBoxInput.value + "px";
-                    trackPanels[i].viewportDiv.style.height = heightBoxInput.value + "px";
-                }
-            }
-
-            var changingRootHeight = 0;
-
-            trackPanels[0].trackDiv.style.top = "0px";
-
-            changingRootHeight += parseInt(trackPanels[0].trackDiv.style.height) + parseInt(trackPanels[0].marginBottom);
-
-            for (i = 1; i < trackPanels.length; i++) {
-                trackPanels[i].trackDiv.style.top = changingRootHeight + "px";
-                changingRootHeight += parseInt(trackPanels[i].trackDiv.style.height) + parseInt(trackPanels[i].marginBottom);
-            }
-
-            //console.log(this.trackContainerDiv.clientHeight + "  " + trackPanel.trackDiv.style.height + "  " + trackPanel.trackDiv.clientHeight);
-            console.log("Reshaping height.");
-
-            for (i = 1; i < trackPanels.length; i++) {
-                if (trackPanels[i].track instanceof igv.EqtlTrack) {
-                    trackPanels[i].update();
-                }
-            }
-
-        }
-
-        // DOM
-        $(rootDiv).append(navBar);
-        $(navBar).append(navBarContainer);
-
-        $(navBarContainer).append(controlDiv);
-
-
-        $(controlDiv).append(zoomInButton);
-        $(controlDiv).append(zoomOutButton);
-        $(controlDiv).append(trackHeightDiv);
-        $(trackHeightDiv).append(heightBoxInput);
-
-        if (developmentMode === true) {
-            $(controlDiv).append(goBoxDiv);
-            $(goBoxDiv).append(goBoxInput);
-            $(goBoxDiv).append(goBoxButton);
-
-            $(controlDiv).append(testBoxDiv);
-            $(testBoxDiv).append(testBoxButton1);
-            $(testBoxDiv).append(testBoxButton2);
-        }
-
-        $(navBarContainer).append(createGtexControls(browser, tissueEqtlMappingURL));
-
-
-        $(rootDiv).append(contentContainer);
-        $(contentContainer).append(contentRoot);
-        $(contentRoot).append(contentHeader);
-        $(contentRoot).append(trackContainer);
-
-        browser.tracksToInitialize = [];
-
-        browser.activeTracks = function (tissues) {
-
-            var ontissueEqtlMappingURL = "http://www.gtexportal.org/igv/assets/eqtl/tissueEqtlMappings.txt";
-
-            browser.tracksToInitialize = tissues;
-
-            igv.loadGtexTissueMappings(ontissueEqtlMappingURL, function (records) {
-                records.forEach(function (record) {
-                    var track;
-
-                    track = findTrackWithURL(browser, record.url);
-                    if (track) {
-                        browser.removeTrack(track);
-                    }
-                });
-
-                records.forEach(function (record) {
-                    var label = record.label,
-                        url = record.url;
-
-                    if (tissues.indexOf(label) > -1) {
-                        var track = igv.createEqtlTrack(url, label);
-                        track.disableButtons = false;
-                        browser.addTrack(track);
-                    }
-                });
-            });
-
-            var checkBoxes = $('[type|=checkbox]');
-
-            for (var i = 0; i < checkBoxes.length; i++) {
-                checkBoxes[i].checked = (tissues.indexOf(checkBoxes[i].nextSibling.textContent) > -1);
-            }
-
-        };
-
-        browser.startup = function () {
-
-
-            browser.genome = null;
-
-            browser.referenceFrame = null;
-
-            browser.controlPanelWidth = 50;
-
-            browser.trackContainerDiv = trackContainer;
-
-            browser.trackPanels = [];
-
-
-            //rs28525262	1	1584102	ENSG00000189339.7	SLC35E2B
-            browser.referenceFrame = new igv.ReferenceFrame("chr1", 1584102 - 1000000, 2000000 / 1000);
-
-
-            igv.sequenceSource = new igv.FastaSequence(fastaURL);
-
-            browser.ideoPanel = new igv.IdeoPanel(browser);
-            $('#igvHeaderDiv').append(browser.ideoPanel.div);
-            browser.ideoPanel.resize();
-
-
-            igv.loadGenome(cytobandURL, function (genome) {
-                browser.genome = genome;
-                if (browser.ideoPanel) browser.ideoPanel.repaint();
-            });
-
-            browser.addTrack(new igv.RulerTrack());
-
-            browser.addTrack(new igv.SequenceTrack(igv.sequenceSource));
-
-            browser.addTrack(new igv.GeneTrack({
-                url: gencodeURL,
-                label: "Genes"
-            }));
-
-            // TODO: Needs to be a better way to grab the right track and change this
-            browser.trackPanels[browser.trackPanels.length - 1].order = 10000;
-
-            window.onresize = igv.throttle(function () {
-                if (browser.ideoPanel) browser.ideoPanel.resize();
-                browser.trackPanels.forEach(function (panel) {
-                    panel.resize();
-                })
-            }, 10);
-
-
-        }
-
-
-        function search(value) {
-            browser.search(value);
-        }
-
-        function zoomIn() {
-            browser.zoomIn();
-        }
-
-        function zoomOut() {
-            browser.zoomOut();
-        }
-
-
-        function fitToScreen() {
-
-            var regionCount, frameWidth;
-
-            if (!(browser.cursorModel && browser.cursorModel.regions)) return;
-
-            regionCount = browser.cursorModel.regions.length;
-
-            if (regionCount > 0) {
-                frameWidth = (browser.trackContainerDiv.clientWidth - browser.controlPanelWidth) / regionCount;
-                browser.setFrameWidth(frameWidth);
-                $('frameWidthBox').value = frameWidth;
-            }
-        }
-
-
-        function search(value) {
-            browser.search(value);
-        }
-
-        function zoomIn() {
-            browser.zoomIn();
-        }
-
-        function zoomOut() {
-            browser.zoomOut();
-        }
-
-
-        function fitToScreen() {
-
-            var regionCount, frameWidth;
-
-            if (!(browser.cursorModel && browser.cursorModel.regions)) return;
-
-            regionCount = browser.cursorModel.regions.length;
-
-            if (regionCount > 0) {
-                frameWidth = (browser.trackContainerDiv.clientWidth - browser.controlPanelWidth) / regionCount;
-                browser.setFrameWidth(frameWidth);
-                $('frameWidthBox').value = frameWidth;
-            }
-        }
-
-
-        function createGtexControls(browser, tissueEqtlMappingURL) {
-
-            var selectionDiv = $('<div id="igvGtexSelectionDiv">')[0];
-
-            igv.loadGtexTissueMappings(tissueEqtlMappingURL, function (records) {
-
-
-                records.forEach(function (record) {
-
-                    var containerDiv = $('<div style="float:left">');
-
-                    var cb = $('<input type="checkbox"">')[0];
-                    cb.tissueRecord = record;
-                    cb.onclick = function (e) {
-                        var record = e.currentTarget.tissueRecord,
-                            track;
-
-                        if (e.currentTarget.checked) {
-                            track = igv.createEqtlTrack(record.url, record.label);
-                            track.disableButtons = false;
-                            browser.addTrack(track);
-                        }
-                        else {
-                            track = findTrackWithURL(browser, record.url);
-                            if (track) {
-                                browser.removeTrack(track);
-                            }
-                        }
-                    };
-                    cb.style.position = "relative";
-                    cb.style.float = "left";
-                    $(containerDiv).append(cb);
-
-                    var span = $('<span>' + record.label + '</span>')[0];
-                    span.style.position = "relative";
-                    span.style.float = "left";
-                    span.style.marginRight = "30px";
-                    $(containerDiv).append(span);
-
-                    $(selectionDiv).append(containerDiv);
-                });
-
-                igv.gtexBrowser.activeTracks(igv.gtexBrowser.tracksToInitialize);
-            });
-
-            var clearDiv = $('<div style="clear:both">');
-            $(selectionDiv).append(clearDiv);
-
-            return selectionDiv;
-        }
-
-        function findTrackWithURL(browser, url) {
-
-            var i, len = browser.trackPanels.length;
-
-            for (i = 0; i < len; i++) {
-                if (browser.trackPanels[i].track.file === url) {
-                    return browser.trackPanels[i].track;
-                }
-            }
-            return null;
-
-        }
-
-
-
-
-        return browser;
     }
 
 
@@ -466,4 +236,5 @@ var igv = (function (igv) {
 
     return igv;
 
-})(igv || {});
+})
+(igv || {});

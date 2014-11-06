@@ -1,6 +1,17 @@
 var igv = (function (igv) {
 
 
+    function createStandardControls(browser, options) {
+        var controlDiv = $('<div id="igvControlDiv" class="igv-control-div">')[0],
+            contentKaryo;
+        if (options.showKaryo) {
+            contentKaryo = $('<div id="igvKaryoDiv" class="igv-karyo-div">')[0];
+            $(controlDiv).append(contentKaryo);
+            browser.karyoPanel = new igv.KaryoPanel(contentKaryo);
+        }
+        return controlDiv;
+    }
+
     /**
      * Create an igv.browser instance.  This object defines the public API for interacting with the genome browser.
      *
@@ -25,30 +36,31 @@ var igv = (function (igv) {
         }
 
         var contentRoot = $('<div id="igvContentDiv" class="igv-content-div">')[0],
-            contentKaryo = $('<div id="igvKaryoDiv" class="igv-karyo-div">')[0],
             contentHeader = $('<div id="igvHeaderDiv" class="igv-header-div">')[0],
             trackContainer = $('<div id="igvTrackContainerDiv" class="igv-track-container-div">')[0],
             browser = new igv.Browser(options, trackContainer),
-            rootDiv = browser.div;
+            rootDiv = browser.div,
+            controlDiv;
 
         // DOM
 
         parentDiv.appendChild(rootDiv);
 
-        if (options.showKaryo) {
-            $(rootDiv).append(contentKaryo);
-        }
+
+        // Create controls.  This can be customized by passing in a function, which should return a div containing the
+        // controls
+        controlDiv = options.createControls ?
+            options.createControls(browser, options) :
+            createStandardControls(browser,options);
+
+        $(rootDiv).append($(controlDiv));
+
         $(rootDiv).append(contentRoot);
         $(contentRoot).append(contentHeader);
         $(contentRoot).append(trackContainer);
 
         // Popover object -- singleton shared by all components
         igv.popover = new igv.Popover(contentRoot);
-
-        if (options.showKaryo) {
-            browser.karyoPanel = new igv.KaryoPanel(contentKaryo);
-        }
-
 
         browser.ideoPanel = new igv.IdeoPanel(rootDiv);
         $(contentHeader).append(browser.ideoPanel.div);
