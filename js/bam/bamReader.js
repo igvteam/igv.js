@@ -3,6 +3,8 @@
 
 var igv = (function (igv) {
 
+    const B_64K = 65536;
+
     var BAM_MAGIC = 21840194;
     var BAI_MAGIC = 21578050;
     var SECRET_DECODER = ['=', 'A', 'C', 'x', 'G', 'x', 'x', 'x', 'T', 'x', 'x', 'x', 'x', 'x', 'x', 'N'];
@@ -146,65 +148,54 @@ var igv = (function (igv) {
 
         function _readHeader(bam) {
 
-            getIndex.call(bam, function (index) {
+            var refId, len, firstAlignmentB;
 
-                var refId, headerSize, len;
+            len = 1000000;
 
-                // Get the first non-null index entry, and fetch the first block from that entry
-                // TODO -- we know the blocksForRange call is synchronous because we have the index, but seems fragile as coded.
+            if (bam.contentLength > 0) len = Math.min(bam.contentLength, len);
 
-                if (index.length == 0) {
-                    headerSize = bam.contentLength;
-                }
-                else {
-                    for (refId = 0; refId < index.length; refId++) {
-                        if (index[refId]) {
-                            bam.blocksForRange(refId, 0, 1000000000, function (blocks) {
-                                headerSize = blocks[0].minv.block;
-                            })
+            igvxhr.loadArrayBuffer(bam.bamPath,
+                {
+                    range: {start: 0, size: len},
+
+                    success: function (compressedBuffer) {
+
+                        var unc = unbgzf(compressedBuffer, len);
+
+                        var uncba = new Uint8Array(unc);
+
+                        var magic = readInt(uncba, 0);
+                        var samHeaderLen = readInt(uncba, 4);
+                        var samHeader = '';
+                        for (var i = 0; i < samHeaderLen; ++i) {
+                            samHeader += String.fromCharCode(uncba[i + 8]);
                         }
+
+                        var nRef = readInt(uncba, samHeaderLen + 8);
+                        var p = samHeaderLen + 12;
+
+                        bam.chrToIndex = {};
+                        bam.indexToChr = [];
+                        for (var i = 0; i < nRef; ++i) {
+                            var lName = readInt(uncba, p);
+                            var name = '';
+                            for (var j = 0; j < lName - 1; ++j) {
+                                name += String.fromCharCode(uncba[p + 4 + j]);
+                            }
+                            var lRef = readInt(uncba, p + lName + 4);
+                            //dlog(name + ': ' + lRef);
+
+                            bam.chrToIndex[name] = i;
+                            bam.indexToChr.push(name);
+
+                            p = p + 8 + lName;
+                        }
+
+                        continuation();
+
                     }
-                }
+                });
 
-                igvxhr.loadArrayBuffer(bam.bamPath,
-                    {
-                        range: {start: 0, size: headerSize},
-                        success: function (compressedBuffer) {
-
-                            var unc = unbgzf(compressedBuffer, headerSize);
-                            var uncba = new Uint8Array(unc);
-                            var magic = readInt(uncba, 0);
-                            var headLen = readInt(uncba, 4);
-                            var header = '';
-                            for (var i = 0; i < headLen; ++i) {
-                                header += String.fromCharCode(uncba[i + 8]);
-                            }
-
-                            var nRef = readInt(uncba, headLen + 8);
-                            var p = headLen + 12;
-
-                            bam.chrToIndex = {};
-                            bam.indexToChr = [];
-                            for (var i = 0; i < nRef; ++i) {
-                                var lName = readInt(uncba, p);
-                                var name = '';
-                                for (var j = 0; j < lName - 1; ++j) {
-                                    name += String.fromCharCode(uncba[p + 4 + j]);
-                                }
-                                var lRef = readInt(uncba, p + lName + 4);
-                                //dlog(name + ': ' + lRef);
-
-                                bam.chrToIndex[name] = i;
-                                bam.indexToChr.push(name);
-
-                                p = p + 8 + lName;
-                            }
-
-                            continuation();
-
-                        }
-                    });
-            });
         }
     };
 
@@ -631,21 +622,40 @@ var igv = (function (igv) {
     }
 
     function unbgzf(data, lim) {
-        lim = Math.min(lim || 1, data.byteLength - 100);
+
+        lim = data.byteLength - 100;
         var oBlockList = [];
         var ptr = [0];
         var totalSize = 0;
 
+        console.log("");
         while (ptr[0] < lim) {
+
+
             var ba = new Uint8Array(data, ptr[0], 100); // FIXME is this enough for all credible BGZF block headers?
+
             var xlen = (ba[11] << 8) | (ba[10]);
-            // dlog('xlen[' + (ptr[0]) +']=' + xlen);
-            var unc = jszlib_inflate_buffer(data, 12 + xlen + ptr[0], Math.min(65536, data.byteLength - 12 - xlen - ptr[0]), ptr);
-            ptr[0] += 8;
+            var si1 = ba[12];
+            var si2 = ba[13];
+            var slen = (ba[15] << 8) | (ba[14]);
+            var bsize = (ba[17] << 8) | (ba[16]) + 1;
+
+            var start = 12 + xlen + ptr[0];    // Start of CDATA
+            var length = data.byteLength - start;
+
+            if (length < (bsize + 8)) break;
+
+            console.log("" + bsize + "  " + start + "  " + length);
+
+            var unc = jszlib_inflate_buffer(data, start, length, ptr);
+
+            ptr[0] += 8;    // Skipping CRC-32 and size of uncompressed data
+
             totalSize += unc.byteLength;
             oBlockList.push(unc);
         }
 
+        // Concatenate decompressed blocks
         if (oBlockList.length == 1) {
             return oBlockList[0];
         } else {
