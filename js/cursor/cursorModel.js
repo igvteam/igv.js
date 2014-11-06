@@ -20,45 +20,6 @@ var cursor = (function (cursor) {
 
     };
 
-    // NOTE: This is depricated and nolonger used
-    cursor.CursorModel.prototype.exportRegions = function() {
-
-        var myself = this,
-            exportedRegions = "",
-            form,
-            hiddenFilenameInput,
-            hiddenDownloadContent;
-
-        form = document.createElement("form");
-        document.body.appendChild(form);
-        form.setAttribute("method", "post");
-        form.setAttribute("action", "php/igvdownload.php");
-
-        // file name
-        hiddenFilenameInput = document.createElement("input");
-        form.appendChild(hiddenFilenameInput);
-        hiddenFilenameInput.setAttribute("type", "hidden");
-        hiddenFilenameInput.setAttribute("name", "filename");
-        hiddenFilenameInput.setAttribute("value", "cursor-regions.bed");
-
-        // ingest contents of textarea named #downloadContent
-        hiddenDownloadContent = document.createElement("input");
-        form.appendChild(hiddenDownloadContent);
-        hiddenDownloadContent.setAttribute("type", "hidden");
-        hiddenDownloadContent.setAttribute("name", "downloadContent");
-
-        this.filteredRegions.forEach(function (region) {
-            exportedRegions += region.exportRegion(myself.regionWidth);
-        });
-
-        hiddenDownloadContent.setAttribute("value", exportedRegions);
-
-        // submit and self-destruct
-        form.submit();
-        form.detach();
-
-    };
-
     cursor.CursorModel.prototype.updateRegionDisplay = function()  {
 
         var igvCursorUIHeaderBlurb = $('.igv-cursor-ui-header-blurb'),
@@ -108,10 +69,11 @@ var cursor = (function (cursor) {
 
         this.filteredRegions = this.regions;
 
-
         this.updateRegionDisplay();
+
         this.filterRegions();
 
+        this.browser.fitToScreen();
     };
 
     cursor.CursorModel.prototype.initializeHistogram = function (track, continutation) {
