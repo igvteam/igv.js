@@ -115,7 +115,8 @@ var igv = (function (igv) {
                             {
                                 type: "eqtl",
                                 url: record.url,
-                                label: record.label
+                                label: record.label,
+                                disableButtons: true
                             }
                         );
                     }

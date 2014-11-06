@@ -46,6 +46,7 @@ var igv = (function (igv) {
         this.divider = config.divider || "rgb(225,225,225)";
         this.dotSize = config.dotSize || 2;
         this.height = config.height || 100;    // The preferred height
+        this.disableButtons = config.disableButtons;
 
         this.onsearch = function (feature, source) {
             selectedFeature.call(this, feature, source);
