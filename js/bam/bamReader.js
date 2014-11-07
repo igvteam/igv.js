@@ -36,21 +36,6 @@ var igv = (function (igv) {
 
     };
 
-    igv.BamReader.prototype.getIndex = function (continuation) {
-
-        var bam = this;
-        if (bam.index) {
-            continuation(bam.index);
-        }
-        else {
-            igv.loadBamIndex(this.baiPath, function (index) {
-                bam.index = index;
-                continuation(bam.index);
-            });
-        }
-
-    }
-
     /**
      * Read the bam header.  This function is public to support unit testing
      * @param continuation
@@ -59,46 +44,12 @@ var igv = (function (igv) {
 
         var bam = this;
 
-        if (this.contentLength) {
-            _readHeader(this);
-        }
-        else {
+        getContentLength(bam, function (contentLength) {
 
-            this.getIndex( function(bamIndex) {
 
-                var headerSize = bamIndex.headerSize;
+            var len = bam.headerSize + 64000;   // Insure we get the complete compressed block containing the header
 
-                // Gen the content length first, so we don't try to read beyond the end of the file
-                igvxhr.loadHeader(bam.bamPath,
-                    {
-                        success: function (header) {
-                            var contentLengthString = header ? header["Content-Length"] : null;
-                            if (contentLengthString) {
-                                bam.contentLength = parseInt(contentLengthString);
-                            }
-                            else {
-                                bam.contentLength = -1;
-                            }
-
-                            if (!bam.contentLength) bam.contentLength = -1; //Protect against inf loop
-                            _readHeader(bam, headerSize);
-
-                        },
-                        error: function () {
-                            bam.contentLength = -1;
-                        }
-
-                    });
-            });
-        }
-
-        function _readHeader(bam, headerSize) {
-
-            var refId, len, firstAlignmentB;
-
-            len = headerSize + 64000;   // Insure we get the complete compressed block containing the header
-
-            if (bam.contentLength > 0) len = Math.min(bam.contentLength, len);
+            if (contentLength > 0) len = Math.min(contentLength, len);
 
             igvxhr.loadArrayBuffer(bam.bamPath,
                 {
@@ -142,24 +93,16 @@ var igv = (function (igv) {
                     }
                 });
 
-        }
-    };
+        });
+    }
 
     igv.BamReader.prototype.readAlignments = function (chr, min, max, continuation, task) {
 
         var bam = this;
 
-        if (!this.chrToIndex) {
-            bam.readHeader(function () {
-                read();
-            })
-        }
-        else {
-            read();
-        }
+        getChrIndex(this, function (chrToIndex) {
 
-        function read() {
-            var chrId = bam.chrToIndex[chr];
+            var chrId = chrToIndex[chr];
             var chunks;
             if (chrId === undefined) {
                 if (chr.startsWith("chr")) chr = chr.substr(3);
@@ -167,10 +110,10 @@ var igv = (function (igv) {
                 chrId = bam.chrToIndex[chr];
             }
             if (chrId === undefined) {
-                chunks = [];
+                continuation([]);
             } else {
 
-                bam.getIndex(function (index) {
+                getIndex(bam, function (index) {
 
                     index.blocksForRange(chrId, min, max, function (chunks) {
 
@@ -180,45 +123,48 @@ var igv = (function (igv) {
 
 
                         var records = [];
-                        var index = 0;
-                        tramp();
+                        loadNextChunk(0);
 
-                        function tramp() {
-                            if (index >= chunks.length) {
+                        function loadNextChunk(index) {
 
-                                // If we have combined multiple chunks sort records by start position.  I'm not sure this is neccessary
-                                if (index > 1 && records.length > 1) {
-                                    records.sort(function (a, b) {
-                                        return a.start - b.start;
-                                    });
-                                }
+                            var c = chunks[index];
+                            var fetchMin = c.minv.block;
+                            var fetchMax = c.maxv.block + (1 << 16); // *sigh*
 
-                                continuation(records);
-                            } else {
-                                var c = chunks[index];
-                                var fetchMin = c.minv.block;
-                                var fetchMax = c.maxv.block + (1 << 16); // *sigh*
-
-                                var dataLoader = new igv.DataLoader(bam.bamPath);
-                                dataLoader.range = {start: fetchMin, size: fetchMax - fetchMin + 1};
-                                dataLoader.loadArrayBuffer(function (compressed) {
+                            igvxhr.loadArrayBuffer(bam.bamPath,
+                                {
+                                    task: task,
+                                    range: {start: fetchMin, size: fetchMax - fetchMin + 1},
+                                    success: function (compressed) {
 
                                         var ba = new Uint8Array(igv.unbgzf(compressed, c.maxv.block - c.minv.block + 1));
-//                                console.log("Decode");
+
                                         decodeBamRecords(ba, chunks[index].minv.offset, records, min, max, chrId);
-                                        ++index;
+
+                                        index++;
+
+                                        if (index >= chunks.length) {
+
+                                            // If we have combined multiple chunks. Sort records by start position.  I'm not sure this is neccessary
+                                            if (index > 0 && records.length > 1) {
+                                                records.sort(function (a, b) {
+                                                    return a.start - b.start;
+                                                });
+                                            }
+                                            continuation(records);
+                                        }
+                                        else {
+                                            loadNextChunk(index);
+                                        }
+                                    }
+                                });
 
 
-                                        return tramp();
-                                    },
-                                    task);
-
-                            }
                         }
                     });
                 });
             }
-        }
+        });
 
 
         function decodeBamRecords(ba, offset, records, min, max, chrId) {
@@ -428,14 +374,70 @@ var igv = (function (igv) {
 
     }
 
-    function Vob(b, o) {
-        this.block = b;
-        this.offset = o;
+
+    function getIndex(bam, continuation) {
+
+        if (bam.index) {
+            continuation(bam.index);
+        }
+        else {
+            igv.loadBamIndex(bam.baiPath, function (index) {
+                bam.index = index;
+                continuation(bam.index);
+            });
+        }
+
     }
 
-    Vob.prototype.toString = function () {
-        return '' + this.block + ':' + this.offset;
+    function getContentLength(bam, continuation) {
+        if (bam.contentLength) {
+            continuation(bam.contentLength);
+        }
+        else {
+
+            getIndex(bam, function (bamIndex) {
+
+                var headerSize = bamIndex.headerSize;
+
+                // Gen the content length first, so we don't try to read beyond the end of the file
+                igvxhr.loadHeader(bam.bamPath,
+                    {
+                        success: function (header) {
+                            var contentLengthString = header ? header["Content-Length"] : null;
+                            if (contentLengthString) {
+                                bam.contentLength = parseInt(contentLengthString);
+                            }
+                            else {
+                                bam.contentLength = -1;
+                            }
+
+                            if (!bam.contentLength) bam.contentLength = -1; //Protect against inf loop
+                            continuation(bam.contentLength);
+
+                        },
+                        error: function () {
+                            bam.contentLength = -1;
+                            continuation(bam.contentLength);
+                        }
+
+                    });
+            });
+        }
     }
+
+
+    function getChrIndex(bam, continuation) {
+
+        if (bam.chrToIndex) {
+            continuation(bam.chrToIndex);
+        }
+        else {
+            bam.readHeader(function () {
+                continuation(bam.chrToIndex);
+            })
+        }
+    }
+
 
     function readInt(ba, offset) {
         return (ba[offset + 3] << 24) | (ba[offset + 2] << 16) | (ba[offset + 1] << 8) | (ba[offset]);
