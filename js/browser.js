@@ -35,6 +35,26 @@ var igv = (function (igv) {
 
     };
 
+    igv.Browser.prototype.trackLabelWithPath = function (path) {
+
+        var parser = document.createElement('a'),
+            label;
+
+        parser.href = path;
+
+        //parser.protocol; // => "http:"
+        //parser.hostname; // => "example.com"
+        //parser.port;     // => "3000"
+        //parser.pathname; // => "/pathname/"
+        //parser.search;   // => "?search=test"
+        //parser.hash;     // => "#hash"
+        //parser.host;     // => "example.com:3000"
+
+        label = parser.pathname.split('/');
+        return label[ label.length - 1].split('.')[ 0 ];
+
+    };
+
     igv.Browser.prototype.loadTrack = function (config) {
 
         if (this.isDuplicateTrack(config)) {

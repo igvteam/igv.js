@@ -450,8 +450,7 @@ var igv = (function (igv) {
 
             var path = config.url,
                 type = config.type,
-                newTrack,
-                newFeatureSource;
+                newTrack;
 
             if (!type) {
                 type = cursorGetType(path);
@@ -515,7 +514,7 @@ var igv = (function (igv) {
             browser.loadTrack({
                 type: "bed",
                 url: path,
-                label: "Unnamed Track"
+                label: browser.trackLabelWithPath(path)
             });
 
         };
