@@ -1,7 +1,5 @@
 function bamIndexTests() {
 
-    if (!igv) igv = {};
-    igv.sequenceSource = new igv.FastaSequence("//igvdata.broadinstitute.org/genomes/seq/hg19/hg19.fasta");
 
 //
 //    asyncTest("index", function () {

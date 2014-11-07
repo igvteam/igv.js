@@ -26,7 +26,7 @@ var igv = (function (igv) {
 
             if (length < (bsize + 8)) break;
 
-            console.log("" + bsize + "  " + start + "  " + length);
+           // console.log("" + bsize + "  " + start + "  " + length);
 
             var unc = jszlib_inflate_buffer(data, start, length, ptr);
 
