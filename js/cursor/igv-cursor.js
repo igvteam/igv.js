@@ -95,6 +95,8 @@ var igv = (function (igv) {
                 var json = e.target.result,
                     session = JSON.parse(json);
 
+                $("#igvSessionLoad").val("");
+
                 $('#igvSessionLoadModal').modal('hide');
 
                 browser.sessionTeardown();
@@ -109,13 +111,19 @@ var igv = (function (igv) {
 
         // BED file upload
         document.getElementById('igvFileUpload').onchange = function (e) {
-            browser.loadTrackFile($("#igvFileUpload")[0]);
+
+            browser.loadTrackFile($(this)[0]);
+
+            $(this).val("");
             $('#igvFileUploadModal').modal('hide');
         };
 
         // BED URL upload
         document.getElementById('igvLoadURL').onchange = function (e) {
-            browser.loadTrackPath($("#igvLoadURL"));
+
+            browser.loadTrackPath($(this));
+
+            $(this).val("");
             $('#igvLoadURLModal').modal('hide');
         };
 
@@ -492,6 +500,7 @@ var igv = (function (igv) {
                     label: localFile.name
                 });
 
+                localFiles[ i ] = undefined;
 
             }
 
