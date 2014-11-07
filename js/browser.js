@@ -192,10 +192,14 @@ var igv = (function (igv) {
         // Reattach the divs to the dom in the correct order
         $(this.trackContainerDiv).children().detach();
 
-//        console.log("---");
         this.trackPanels.forEach(function (trackView, index, trackViews) {
-            myself.trackContainerDiv.appendChild(trackView.trackDiv);
-//            console.log("reorderTracks order " + trackView.track.order);
+
+            if (myself.type === "CURSOR") {
+                myself.trackContainerDiv.appendChild(trackView.trackHousingDiv);
+            } else {
+                myself.trackContainerDiv.appendChild(trackView.trackDiv);
+            }
+
         });
 
     };

@@ -1,4 +1,30 @@
 
+.igv-housing-div {
+    position: relative;
+    width: 100%;
+}
+
+.igv-header-div {
+    position: relative;
+    height: 24px;
+    width: 100%;
+    background: rgba(0, 255, 0, 1);
+}
+
+/* override */
+.igv-track-container-div {
+    padding-top: 0;
+    padding-bottom: 0;
+}
+
+/* override */
+.igv-track-div {
+    position: relative;
+    width: 100%;
+    overflow:hidden;
+    margin-bottom:0;
+}
+
 .igv-about-link {
 
     position: absolute;

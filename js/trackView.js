@@ -4,11 +4,11 @@ var igv = (function (igv) {
 
         this.browser = browser;
         this.track = track;
-//        this.order = track.order || 0;
 
-        var myself = this,
-            viewportDiv,
+        var viewportDiv,
             trackIconContainer,
+            trackHousingDiv,
+            trackHeaderDiv,
             trackDiv,
             trackManipulationContainer,
             trackManipulationIconBox,
@@ -18,11 +18,32 @@ var igv = (function (igv) {
             canvas,
             removeButton,
             labelSpan,
-            spinnerFontAwesome;
+            spinnerFontAwesome,
+            myself = this;
+
+
+
+
+
 
         // track
-        trackDiv = $('<div class="igv-track-div">')[0];
-        $(browser.trackContainerDiv).append(trackDiv);
+        if (browser.type === "CURSOR") {
+
+            trackHousingDiv = $('<div class="igv-housing-div">')[0];
+            trackHeaderDiv = $('<div class="igv-header-div">Track Header</div>div>')[0];
+            trackDiv = $('<div class="igv-track-div">')[0];
+
+            $(browser.trackContainerDiv).append(trackHousingDiv);
+            $(trackHousingDiv).append(trackHeaderDiv);
+            $(trackHousingDiv).append(trackDiv);
+
+            this.trackHousingDiv = trackHousingDiv;
+
+        } else {
+            trackDiv = $('<div class="igv-track-div">')[0];
+            $(browser.trackContainerDiv).append(trackDiv);
+
+        }
 
         // Optionally override CSS height
         if(track.height) trackDiv.style.height = track.height + "px";
@@ -35,7 +56,7 @@ var igv = (function (igv) {
         spinnerFontAwesome.className = "fa fa-spinner fa-2x fa-spin igv-spinner-fontawesome-start";
 
         // control div
-        controlDiv = $('<div class="igv-track-control-div"></div>')[0]
+        controlDiv = $('<div class="igv-track-control-div"></div>')[0];
         $(trackDiv).append(controlDiv);
         this.controlDiv = controlDiv;
 
@@ -48,7 +69,7 @@ var igv = (function (igv) {
         this.controlCtx = controlCanvas.getContext("2d");
 
         // viewport
-        viewportDiv = $('<div class="igv-viewport-div"></div>')[0]
+        viewportDiv = $('<div class="igv-viewport-div"></div>')[0];
         $(trackDiv).append(viewportDiv);
         this.viewportDiv = viewportDiv;
 
