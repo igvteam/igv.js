@@ -642,7 +642,13 @@ var igv = (function (igv) {
             bullseyeOuterIcon,
             bullseyeInnerIcon;
 
-        trackIconContainer = $(trackView.viewportDiv).find("div.igv-track-icon-container");
+        if ("CURSOR" === browser.type) {
+
+            trackIconContainer = $(trackView.trackHousingDiv).find(".igv-track-icon-container");
+        } else {
+
+            trackIconContainer = $(trackView.viewportDiv).find(".igv-track-icon-container");
+        }
 
 
         // filter

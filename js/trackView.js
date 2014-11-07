@@ -22,15 +22,11 @@ var igv = (function (igv) {
             myself = this;
 
 
-
-
-
-
         // track
-        if (browser.type === "CURSOR") {
+        if ("CURSOR" === browser.type) {
 
             trackHousingDiv = $('<div class="igv-housing-div">')[0];
-            trackHeaderDiv = $('<div class="igv-header-div">Track Header</div>div>')[0];
+            trackHeaderDiv = $('<div class="igv-header-div">')[0];
             trackDiv = $('<div class="igv-track-div">')[0];
 
             $(browser.trackContainerDiv).append(trackHousingDiv);
@@ -56,7 +52,12 @@ var igv = (function (igv) {
         spinnerFontAwesome.className = "fa fa-spinner fa-2x fa-spin igv-spinner-fontawesome-start";
 
         // control div
-        controlDiv = $('<div class="igv-track-control-div"></div>')[0];
+         if ("CURSOR" === browser.type) {
+            controlDiv = $('<div class="igv-track-control-cursor-div">')[0];
+        } else {
+            controlDiv = $('<div class="igv-track-control-div">')[0];
+        }
+
         $(trackDiv).append(controlDiv);
         this.controlDiv = controlDiv;
 
@@ -68,16 +69,21 @@ var igv = (function (igv) {
         this.controlCanvas = controlCanvas;
         this.controlCtx = controlCanvas.getContext("2d");
 
+        // track icon container
+        if ("CURSOR" === browser.type) {
+            trackIconContainer = $('<div class = "igv-track-icon-container">')[0];
+            $(trackDiv).append(trackIconContainer);
+        }
+
         // viewport
-        viewportDiv = $('<div class="igv-viewport-div"></div>')[0];
+        viewportDiv = $('<div class="igv-viewport-div">')[0];
         $(trackDiv).append(viewportDiv);
         this.viewportDiv = viewportDiv;
 
         // content  -- purpose of this div is to allow vertical scolling on individual tracks, although that is not implemented
-        contentDiv = $('<div class="igv-content-div"></div>')[0];
+        contentDiv = $('<div class="igv-content-div">')[0];
         $(viewportDiv).append(contentDiv);
         this.contentDiv = contentDiv;
-
 
         // track content canvas
         canvas = $('<canvas class = "igv-content-canvas">')[0];
@@ -87,28 +93,37 @@ var igv = (function (igv) {
         this.canvas = canvas;
         this.ctx = canvas.getContext("2d");
 
-         // track icon container
-        trackIconContainer = $('<div class = "igv-track-icon-container">')[0];
-        $(viewportDiv).append(trackIconContainer);
+        if ("CURSOR" !== browser.type) {
+            trackIconContainer = $('<div class = "igv-track-icon-container">')[0];
+            $(viewportDiv).append(trackIconContainer);
+        }
 
 
         if (track.label) {
 
-            labelSpan = document.createElement("span");
-            trackIconContainer.appendChild(labelSpan);
-            labelSpan.className = "igv-track-label-span-base";
+            labelSpan = $('<span class="igv-track-label-span-base">')[0];
             labelSpan.innerHTML = track.label;
+
+            if ( "CURSOR" === browser.type) {
+
+                $(trackHeaderDiv).append(labelSpan);
+
+            } else {
+
+                $(trackIconContainer).append(labelSpan);
+
+            }
 
         }
 
         // CURSOR specific stuff
-        if (browser.type === "CURSOR") {
+        if ( "CURSOR" === browser.type) {
 
             // track manipulation container
-            trackManipulationContainer = $('<div class="igv-track-manipulation-container"></div>')[0];
+            trackManipulationContainer = $('<div class="igv-track-manipulation-container">')[0];
             $(trackDiv).append(trackManipulationContainer);
 
-            trackManipulationIconBox = $('<div class="igv-track-manipulation-icon-box"></div>')[0];
+            trackManipulationIconBox = $('<div class="igv-track-manipulation-icon-box">')[0];
             $(trackManipulationContainer).append(trackManipulationIconBox);
 
             $(trackManipulationIconBox).append($('<i class="fa fa-chevron-circle-up   igv-track-manipulation-move-up">')[0]);
@@ -135,8 +150,6 @@ var igv = (function (igv) {
             igv.cursorAddTrackControlButtons(this, browser);
 
         }
-
-        // Remove button for igv
         else if (!track.disableButtons) {
 
             removeButton = $('<i class="fa fa-times-circle igv-track-disable-button-fontawesome">')[0];

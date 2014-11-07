@@ -194,9 +194,11 @@ var igv = (function (igv) {
 
         this.trackPanels.forEach(function (trackView, index, trackViews) {
 
-            if (myself.type === "CURSOR") {
+            if ("CURSOR" === myself.type) {
+
                 myself.trackContainerDiv.appendChild(trackView.trackHousingDiv);
             } else {
+
                 myself.trackContainerDiv.appendChild(trackView.trackDiv);
             }
 
@@ -216,8 +218,17 @@ var igv = (function (igv) {
         }
 
         if (trackPanelRemoved) {
+
             this.trackPanels.splice(this.trackPanels.indexOf(trackPanelRemoved), 1);
-            this.trackContainerDiv.removeChild(trackPanelRemoved.trackDiv);
+
+            if ("CURSOR" === this.type) {
+
+                this.trackContainerDiv.removeChild(trackPanelRemoved.trackHousingDiv);
+            } else {
+
+                this.trackContainerDiv.removeChild(trackPanelRemoved.trackDiv);
+            }
+
         }
 
     };

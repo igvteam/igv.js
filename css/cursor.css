@@ -1,14 +1,54 @@
 
-.igv-housing-div {
+/* override */
+.igv-track-label-span-base {
+    margin-left: 0;
+    margin-right: 0;
     position: relative;
-    width: 100%;
+    top: 0;
+    left: 100px;
+    height: 100%
+    cursor: pointer;
+    background: rgba(255, 255, 0, 1);
+
 }
 
 .igv-header-div {
     position: relative;
     height: 24px;
     width: 100%;
-    background: rgba(0, 255, 0, 1);
+    vertical-align: middle;
+
+}
+
+.igv-track-control-cursor-div {
+    position: absolute;
+    right: 48px;
+    width: 100px;
+    height: 100%;
+    border-color: #444;
+    border-style: solid;
+    border-width: thin;
+}
+
+/* override */
+.igv-viewport-div {
+    left: 100px;
+    right: 148px;
+}
+
+/* override */
+.igv-track-icon-container {
+    left:0;
+    top: 0;
+    width: 100px;
+    height: 100%;
+    background: greenyellow;
+    display: inline;
+}
+
+.igv-housing-div {
+    position: relative;
+    width: 100%;
 }
 
 /* override */
@@ -164,27 +204,6 @@
     float: left;
     margin-left: 2px;
     margin-right: 2px;
-}
-
-/* Override track-icon-container to set left and add transparency */
-.igv-track-icon-container {
-    left: 0;
-    background: rgba(255, 255, 255, 0.75);
-}
-
-/* Override igv-control-div to add border */
-.igv-track-control-div {
-    width: 100px;
-    border-color: #444;
-    border-style: solid;
-    border-width: thin;
-
-}
-
-/* Override viewport div to set right */
-.igv-viewport-div {
-    left: 100px;
-    right: 48px;
 }
 
 /* Override margin-left and margin-right */
