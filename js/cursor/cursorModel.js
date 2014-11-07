@@ -73,7 +73,6 @@ var cursor = (function (cursor) {
 
         this.filterRegions();
 
-        this.browser.fitToScreen();
     };
 
     cursor.CursorModel.prototype.initializeHistogram = function (track, continutation) {
@@ -179,7 +178,11 @@ var cursor = (function (cursor) {
             }
 
             if (0 === myself.filteredRegions.length) {
+
                 myself.browser.update();
+
+                myself.browser.fitToScreen();
+
                 return;
             }
 
@@ -219,6 +222,9 @@ var cursor = (function (cursor) {
             }
 
             myself.updateRegionDisplay();
+
+            myself.browser.fitToScreen();
+
 
             // better histogram code
             trackPackages.forEach(function (trackPackage) {
