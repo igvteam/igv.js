@@ -311,10 +311,10 @@
 .igv-cursor-ui-header {
     margin-top: 4px;
     width: 100%;
-    height: 40px;
+    height: auto;
     background-image:url(../img/cursor_logo.png);
     background-repeat:no-repeat;
-    background-position: 21px 0;
+    background-position: 21px 9px;
 }
 
 .igv-cursor-ui-holder {
@@ -352,7 +352,7 @@
 }
 
 .igv-cursor-ui-header-blurb {
-    padding: 20px 0 8px 0;
+    padding: 4px 0 8px 0;
     width: 100%;
     margin:auto;
     text-align: center;
