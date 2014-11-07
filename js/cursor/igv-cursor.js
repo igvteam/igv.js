@@ -387,13 +387,7 @@ var igv = (function (igv) {
                 browser.cursorModel.regionWidth = regionSize;
                 $("input[id='regionSizeInput']").val(browser.cursorModel.regionWidth);
 
-
-                //browser.update();
-
                 browser.cursorModel.filterRegions();
-
-                browser.fitToScreen();
-
             }
 
         };
