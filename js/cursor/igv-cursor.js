@@ -649,6 +649,7 @@ var igv = (function (igv) {
         // track label
         trackLabelDiv = $('<div class="igv-track-label-div">')[0];
         trackLabelDiv.innerHTML = track.label;
+        trackLabelDiv.title = track.label;
         $(trackIconContainer).append(trackLabelDiv);
 
 
