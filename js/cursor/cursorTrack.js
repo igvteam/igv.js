@@ -187,8 +187,10 @@ var cursor = (function (cursor) {
                                 top = this.height - fh;
                             }
                             else {
-                                top = 10;
-                                fh = this.height - 20;
+                                //top = 10;
+                                top = 0;
+                                //fh = this.height - 20;
+                                fh = this.height;
                             }
 
                             canvas.fillRect(pStart, top, pw, fh);
@@ -207,8 +209,10 @@ var cursor = (function (cursor) {
 
                         canvas.fillRect(pxStart, top, pw, fh);
                     } else if (score === 0) {
-                        top = 10;
-                        fh = this.height - 20;
+                        top = 0;
+                        //top = 10;
+                        //fh = this.height - 20;
+                        fh = this.height;
 
                         canvas.fillRect(pxStart, top, pw, fh);
                     }
