@@ -23,8 +23,8 @@ var cursor = (function (cursor) {
     cursor.CursorModel.prototype.updateRegionDisplay = function()  {
 
         var igvCursorUIHeaderBlurb = $('.igv-cursor-ui-header-blurb'),
-            trackLabelSpan = igvCursorUIHeaderBlurb.find('span')[0],
-            regionCountSpan = igvCursorUIHeaderBlurb.find('span')[1],
+            trackLabelSpan = igvCursorUIHeaderBlurb.find('span')[1],
+            regionCountSpan = igvCursorUIHeaderBlurb.find('span')[0],
             filteredRegionCountSpan = igvCursorUIHeaderBlurb.find('span')[2];
 
         igvCursorUIHeaderBlurb.css({
