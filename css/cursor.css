@@ -10,6 +10,7 @@
     font-size: x-small;
     font-weight: 400;
 }
+
 .igv-track-label-selected-div {
     color: rgba(204, 51, 0, 1);
     font-weight: 800;
@@ -63,6 +64,7 @@
 }
 
 .igv-housing-div {
+    margin-top: 8px;
     position: relative;
     width: 100%;
 }
@@ -108,13 +110,11 @@
 
 .igv-control-panel-header-div {
 
-    position: relative;
-    left: 8px;
+    position: absolute;
+    right: 62px;
     top: 0;
-    width: 200px;
-    height: 100%;
 
-    font-size: 85%;
+    font-size: 75%;
 
     background-color: white;
 }
