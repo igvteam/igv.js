@@ -8,7 +8,6 @@ var igv = (function (igv) {
         var viewportDiv,
             trackIconContainer,
             trackHousingDiv,
-            trackHeaderDiv,
             trackDiv,
             trackManipulationContainer,
             trackManipulationIconBox,
@@ -26,11 +25,9 @@ var igv = (function (igv) {
         if ("CURSOR" === browser.type) {
 
             trackHousingDiv = $('<div class="igv-housing-div">')[0];
-            trackHeaderDiv = $('<div class="igv-header-div">')[0];
             trackDiv = $('<div class="igv-track-div">')[0];
 
             $(browser.trackContainerDiv).append(trackHousingDiv);
-            $(trackHousingDiv).append(trackHeaderDiv);
             $(trackHousingDiv).append(trackDiv);
 
             this.trackHousingDiv = trackHousingDiv;
@@ -52,7 +49,7 @@ var igv = (function (igv) {
         spinnerFontAwesome.className = "fa fa-spinner fa-2x fa-spin igv-spinner-fontawesome-start";
 
         // control div
-         if ("CURSOR" === browser.type) {
+        if ("CURSOR" === browser.type) {
             controlDiv = $('<div class="igv-track-control-cursor-div">')[0];
         } else {
             controlDiv = $('<div class="igv-track-control-div">')[0];
@@ -99,20 +96,11 @@ var igv = (function (igv) {
         }
 
 
-        if (track.label) {
+        if (track.label && "CURSOR" !== browser.type) {
 
             labelSpan = $('<span class="igv-track-label-span-base">')[0];
             labelSpan.innerHTML = track.label;
-
-            if ( "CURSOR" === browser.type) {
-
-                $(trackHeaderDiv).append(labelSpan);
-
-            } else {
-
-                $(trackIconContainer).append(labelSpan);
-
-            }
+            $(trackIconContainer).append(labelSpan);
 
         }
 

@@ -330,24 +330,24 @@ var igv = (function (igv) {
 
             var currentDesignatedTrackView,
                 faCircle,
-                trackLabelSpan;
+                trackLabelDiv;
 
             if (browser.designatedTrack && browser.designatedTrack.trackFilter.trackPanel !== trackView) {
 
                 currentDesignatedTrackView = browser.designatedTrack.trackFilter.trackPanel;
 
-                faCircle = $(currentDesignatedTrackView.viewportDiv).find("i.fa-circle");
+                faCircle = $(currentDesignatedTrackView.trackDiv).find("i.fa-circle");
                 faCircle.removeClass("igv-control-bullseye-fontawesome-selected");
                 faCircle.addClass   ("igv-control-bullseye-fontawesome");
 
-                trackLabelSpan = $(currentDesignatedTrackView.viewportDiv).find("span.igv-track-label-span-base");
-                trackLabelSpan.removeClass("igv-track-label-span-highlighted");
+                trackLabelDiv = $(currentDesignatedTrackView.trackDiv).find("div.igv-track-label-div");
+                trackLabelDiv.removeClass("igv-track-label-selected-div");
 
             }
 
             browser.designatedTrack = trackView.track;
 
-            faCircle = $(trackView.viewportDiv).find("i.fa-circle");
+            faCircle = $(trackView.trackDiv).find("i.fa-circle");
             faCircle.removeClass("igv-control-bullseye-fontawesome");
             faCircle.addClass   ("igv-control-bullseye-fontawesome-selected");
 
@@ -355,8 +355,8 @@ var igv = (function (igv) {
                 "color" : browser.highlightColor
             });
 
-            trackLabelSpan = $(trackView.viewportDiv).find("span.igv-track-label-span-base");
-            trackLabelSpan.addClass("igv-track-label-span-highlighted");
+            trackLabelDiv = $(trackView.trackDiv).find("div.igv-track-label-div");
+            trackLabelDiv.addClass("igv-track-label-selected-div");
 
         };
 
@@ -637,21 +637,60 @@ var igv = (function (igv) {
         var track = trackView.track,
             trackFilterButtonDiv,
             trackIconContainer,
+            trackLabelDiv,
             sortButton,
             bullseyeStackSpan,
             bullseyeOuterIcon,
             bullseyeInnerIcon;
 
-        if ("CURSOR" === browser.type) {
-
-            trackIconContainer = $(trackView.trackHousingDiv).find(".igv-track-icon-container");
-        } else {
-
-            trackIconContainer = $(trackView.viewportDiv).find(".igv-track-icon-container");
-        }
+        trackIconContainer = $(trackView.trackHousingDiv).find(".igv-track-icon-container");
 
 
-        // filter
+        // track label
+        trackLabelDiv = $('<div class="igv-track-label-div">')[0];
+        trackLabelDiv.innerHTML = track.label;
+        $(trackIconContainer).append(trackLabelDiv);
+
+
+
+        // track selection
+        bullseyeStackSpan = document.createElement("span");
+        trackIconContainer.append($(bullseyeStackSpan));
+
+        bullseyeStackSpan.className = "fa-stack igv-control-bullseye-stack-fontawesome";
+        track.bullseyeStackSpan = bullseyeStackSpan;
+
+        bullseyeOuterIcon = document.createElement("i");
+        bullseyeStackSpan.appendChild(bullseyeOuterIcon);
+//        bullseyeOuterIcon.className = "fa fa-stack-2x fa-circle-o";
+        bullseyeOuterIcon.className = "fa fa-stack-2x fa-circle-thin";
+
+        bullseyeInnerIcon = document.createElement("i");
+        bullseyeStackSpan.appendChild(bullseyeInnerIcon);
+        bullseyeInnerIcon.className = "fa fa-stack-1x fa-circle igv-control-bullseye-fontawesome";
+
+        bullseyeStackSpan.onclick = function () {
+
+            if (browser.designatedTrack && browser.designatedTrack === trackView.track) {
+
+                return;
+            } else {
+
+                browser.selectDesignatedTrack(trackView);
+            }
+
+            browser.designatedTrack.featureSource.allFeatures(function (featureList) {
+
+                browser.referenceFrame.start = 0;
+                browser.cursorModel.setRegions(featureList);
+
+            });
+
+        };
+
+
+
+        // track filter
         trackFilterButtonDiv = document.createElement("div");
         trackIconContainer.append($(trackFilterButtonDiv));
 
@@ -659,6 +698,7 @@ var igv = (function (igv) {
 
         trackView.track.trackFilter = new igv.TrackFilter(trackView);
         trackView.track.trackFilter.createTrackFilterWidgetWithParentElement(trackFilterButtonDiv);
+
 
 
         // sort
@@ -669,7 +709,6 @@ var igv = (function (igv) {
         trackIconContainer.append($(sortButton));
         sortButton.className = "fa fa-signal igv-control-sort-fontawesome fa-flip-horizontal";
         track.sortButton = sortButton;
-
 
         sortButton.onclick = function () {
 
@@ -709,43 +748,6 @@ var igv = (function (igv) {
                         $(tp.track.sortButton).removeClass("igv-control-sort-fontawesome-selected");
                     }
                 });
-
-            });
-
-        };
-
-
-
-        // bullseye stack
-        bullseyeStackSpan = document.createElement("span");
-        trackIconContainer.append($(bullseyeStackSpan));
-
-        bullseyeStackSpan.className = "fa-stack igv-control-bullseye-stack-fontawesome";
-        track.bullseyeStackSpan = bullseyeStackSpan;
-
-        bullseyeOuterIcon = document.createElement("i");
-        bullseyeStackSpan.appendChild(bullseyeOuterIcon);
-//        bullseyeOuterIcon.className = "fa fa-stack-2x fa-circle-o";
-        bullseyeOuterIcon.className = "fa fa-stack-2x fa-circle-thin";
-
-        bullseyeInnerIcon = document.createElement("i");
-        bullseyeStackSpan.appendChild(bullseyeInnerIcon);
-        bullseyeInnerIcon.className = "fa fa-stack-1x fa-circle igv-control-bullseye-fontawesome";
-
-        bullseyeStackSpan.onclick = function () {
-
-            if (browser.designatedTrack && browser.designatedTrack === trackView.track) {
-
-                return;
-            } else {
-
-                browser.selectDesignatedTrack(trackView);
-            }
-
-            browser.designatedTrack.featureSource.allFeatures(function (featureList) {
-
-                browser.referenceFrame.start = 0;
-                browser.cursorModel.setRegions(featureList);
 
             });
 

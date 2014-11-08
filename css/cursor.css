@@ -1,3 +1,19 @@
+.igv-track-label-div {
+
+    position: relative;
+    top: 0;
+    left: 0;
+    width: 100%;
+
+    color: grey;
+    font-family: 'PT Sans', sans-serif;
+    font-size: x-small;
+    font-weight: 400;
+}
+.igv-track-label-selected-div {
+    color: rgba(204, 51, 0, 1);
+    font-weight: 800;
+}
 
 /* override */
 .igv-track-label-span-base {
