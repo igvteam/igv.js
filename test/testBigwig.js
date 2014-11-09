@@ -12,7 +12,7 @@ function runBigwigTests() {
 
     asyncTest("Bigwig meta datay", function () {
 
-        var url = "../test/data/bigWigExample.bw";
+        var url = "../test/data/bigwig/bigWigExample.bw";
 
         var bwReader = new igv.BWReader(url);
 
@@ -61,7 +61,7 @@ function runBigwigTests() {
     });
 
     asyncTest("R+ Tree", function () {
-        var url = "../test/data/bigWigExample.bw";
+        var url = "../test/data/bigwig/bigWigExample.bw";
 
         var bwReader = new igv.BWReader(url);
 
@@ -84,7 +84,7 @@ function runBigwigTests() {
     asyncTest("Wig features", function () {
 
         //chr21:19,146,376-19,193,466
-        var url = "../test/data/bigWigExample.bw",
+        var url = "../test/data/bigwig/bigWigExample.bw",
             chr = "chr21",
             bpStart = 19168957,
             bpEnd = 19170640,
@@ -107,7 +107,7 @@ function runBigwigTests() {
     asyncTest("Zoom data", function () {
 
         //chr21:19,146,376-19,193,466
-        var url = "../test/data/bigWigExample.bw",
+        var url = "../test/data/bigwig/bigWigExample.bw",
             chr = "chr21",
             bpStart = 18728264,
             bpEnd = 26996291,
@@ -130,7 +130,7 @@ function runBigwigTests() {
     asyncTest("Bed features", function () {
 
         //chr21:19,146,376-19,193,466
-        var url = "../test/data/bigBedExample.bb",
+        var url = "../test/data/bigwig/bigBedExample.bb",
             chr = "chr21",
             bpStart = 33031597,
             bpEnd = 33041570,
