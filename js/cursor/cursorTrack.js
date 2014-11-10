@@ -164,7 +164,11 @@ var cursor = (function (cursor) {
             framePixelWidth = cursorModel.framePixelWidth; // region width in pixels
             regionWidth = cursorModel.regionWidth;
             frameMargin = cursorModel.frameMargin;
-            scale = regionWidth / (framePixelWidth - frameMargin);
+
+            // Adjust the frame margin so it is no more than 1/4 the width of the region (in pixels)
+            frameMargin = Math.floor(Math.min(framePixelWidth / 4), frameMargin);
+//frameMargin = 0;
+            scale = regionWidth / (framePixelWidth + frameMargin);
 
             sampleInterval = Math.max(1, Math.floor(1.0 / framePixelWidth));
 
@@ -185,13 +189,13 @@ var cursor = (function (cursor) {
                 regionBpStart = region.location - regionWidth / 2;
                 regionBpEnd = region.location + regionWidth / 2;
 
-                pxStart = (regionNumber - start) * framePixelWidth + frameMargin / 2;
+                pxStart = Math.floor((regionNumber - start) * framePixelWidth + frameMargin / 2);
 
                 pxEnd = framePixelWidth > 1 ?
-                    pxStart + framePixelWidth - frameMargin :
+                    Math.floor((regionNumber + 1- start) * framePixelWidth - frameMargin / 2) :
                     pxStart + 1;
 
-                maxFeatureHeight = this.height;
+                 maxFeatureHeight = this.height;
 
                 if (framePixelWidth > 2) {
                     regionFeatures = featureCache.queryFeatures(region.chr, regionBpStart, regionBpEnd);
@@ -226,7 +230,7 @@ var cursor = (function (cursor) {
                 else {
                     // Can't draw individual features, just use region score
                     score = region.getScore(featureCache, regionWidth);
-                    pw = Math.max(1, framePixelWidth);
+                    pw = pxEnd - pxStart;
                     if (score > 0) {
                         // Height proportional to score
                         fh = Math.round(((score / this.max) * maxFeatureHeight));
