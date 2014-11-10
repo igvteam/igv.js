@@ -118,6 +118,9 @@ var igv = (function (igv) {
             goBoxButton.onclick = function () {
                 igv.browser.search(goBoxInput.value);
             }
+            $(goBoxDiv).append(goBoxInput);
+            $(goBoxDiv).append(goBoxButton);
+            $(controlDiv).append(goBoxDiv);
         }
 
 

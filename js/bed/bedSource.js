@@ -43,12 +43,31 @@ var igv = (function (igv) {
             this.indexUrl = config.indexUrl;
         }
 
+        if (config.type) {
+            this.type = type;
+        }
+        else {
+            var fn = this.filename.toLowerCase();
+
+            if (fn.endsWith(".vcf") || fn.endsWith(".vcf.gz")) {
+                this.type = "vcf";
+            } else if (fn.endsWith("narrowpeak") || fn.endsWith("narrowpeak.gz")) {
+                this.type = "narrowPeak";
+            } else if (fn.endsWith("broadpeak") || fn.endsWith("broadpeak.gz")) {
+                this.type = "broadPeak";
+            }
+            else {
+                this.type = "bed";
+            }
+
+        }
+
         // TODO -- move this code to a factory method
-        if (config.type === "vcf") {
+        if (this.type === "vcf") {
             this.parser = igv.vcfParser();
         }
         else {
-            this.parser = igv.BedParser(config.type);
+            this.parser = igv.BedParser(this.type);
         }
 
     };
@@ -69,7 +88,7 @@ var igv = (function (igv) {
         //if (queryChr && queryChr.startsWith("chr")) queryChr = queryChr.substring(3);
 
         var myself = this,
-            range =  new igv.GenomicInterval(queryChr, bpStart, bpEnd),
+            range = new igv.GenomicInterval(queryChr, bpStart, bpEnd),
             featureCache = this.featureCache;
 
         if (featureCache && (featureCache.range === undefined || featureCache.range.chr === queryChr)) {//}   featureCache.range.contains(queryChr, bpStart, bpEnd))) {
@@ -83,7 +102,7 @@ var igv = (function (igv) {
                 myself.featureCache = new igv.FeatureCache(featureList);   // Note - replacing previous cache with new one
 
                 // Record range queried if we have an index
-                if(myself.index) myself.featureCache.range = range;
+                if (myself.index) myself.featureCache.range = range;
 
                 // Finally pass features for query interval to continuation
                 success(myself.featureCache.queryFeatures(queryChr, bpStart, bpEnd));
@@ -135,7 +154,7 @@ var igv = (function (igv) {
             idxFile = myself.indexUrl,
             queryChr = range ? range.chr : undefined;
 
-        if(!idxFile) idxFile = (myself.url ? myself.url + ".idx" : null);
+        if (!idxFile) idxFile = (myself.url ? myself.url + ".idx" : null);
 
         if (this.index === undefined && !myself.localFile && queryChr) {  // TODO -  handle local files
 
@@ -168,7 +187,7 @@ var igv = (function (igv) {
                 var chrIdx = index[queryChr];
 
                 // TODO -- use chr aliaes
-                if(!chrIdx && queryChr.startsWith("chr")) {
+                if (!chrIdx && queryChr.startsWith("chr")) {
                     chrIdx = index[queryChr.substr(3)];
                 }
 

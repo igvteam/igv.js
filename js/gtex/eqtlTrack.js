@@ -26,44 +26,15 @@
 var igv = (function (igv) {
 
 
-    var createEQTL = function (tokens) {
-        var snp = tokens[0];
-        var chr = tokens[1];
-        var position = parseInt(tokens[2]) - 1;
-        var geneId = tokens[3]
-        var geneName = tokens[4];
-        var genePosition = tokens[5];
-        var fStat = parseFloat(tokens[6]);
-        var pValue = parseFloat(tokens[7]);
-        return new Eqtl(snp, chr, position, geneId, geneName, genePosition, fStat, pValue);
-    }
-
-    var createEqtlBinary = function (parser) {
-
-        var snp = parser.getString();
-        var chr = parser.getString();
-        var position = parser.getInt();
-        var geneId = parser.getString();
-        var geneName = parser.getString();
-        //var genePosition = -1;
-        //var fStat = parser.getFloat();
-        var pValue = parser.getFloat();
-        //var qValue = parser.getFloat();
-        //return new Eqtl(snp, chr, position, geneId, geneName, genePosition, fStat, pValue);
-        return new Eqtl(snp, chr, position, geneId, geneName, pValue);
-    }
-
-
     igv.EqtlTrack = function (config) {
 
 
         var url = config.url,
-            label = config.label,
-            codec = url.endsWith(".bin") ? createEqtlBinary : createEQTL;
+            label = config.label;
 
         this.config = config;
         this.url = url;
-        this.featureSource = new igv.EqtlSource(url, codec);
+        this.featureSource = new igv.EqtlSource(url);
         this.label = label;
         this.minLogP = config.minLogP || 3.5;
         this.maxLogP = config.maxLogP || 25;

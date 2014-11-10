@@ -52,21 +52,23 @@ var igv = (function (igv) {
 
             var myself = this;
 
-            var dataLoader = new igv.DataLoader(this.url);
+            igvxhr.loadString(this.url,
+                {
+                    success: function (data) {
 
-            dataLoader.loadBinaryString(function (data) {
+                        var features,
+                            lines = data.split("\n");
 
-                var features,
-                    lines = data.split("\n");
+                        myself.features = {};
 
-                myself.features = {};
+                        lines.forEach(parseLine, myself);
 
-                lines.forEach(parseLine, myself);
+                        features = myself.features[ chr ];
+                        success(features);
 
-                features = myself.features[ chr ];
-                success(features);
+                    }
+                });
 
-            });
         }
     };
 
@@ -95,7 +97,7 @@ var igv = (function (igv) {
             return;
         }
 
-        if(line.startsWith("track")) {
+        if (line.startsWith("track")) {
             parseTrackLine(line);
         }
 
@@ -140,12 +142,9 @@ var igv = (function (igv) {
             return trackLine;
 
 
-
             if (0 === trackLineArray.length) {
                 return trackLine;
             }
-
-
 
 
             trackLine.moreStuff = [];

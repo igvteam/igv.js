@@ -4,9 +4,9 @@ function runBEDUnitTests() {
 
     asyncTest("BED query", 3, function () {
 
-        var url = "../test/data/sample.bed";
+        var url = "../test/data/bed/sample.bed";
 
-        var bedDataSource = new igv.BedFeatureSource(url);
+        var bedDataSource = new igv.BedFeatureSource({url: url});
 
         var chr = "chr1";
         var bpStart = 0;
@@ -30,9 +30,9 @@ function runBEDUnitTests() {
 
     asyncTest("BED all features", 2, function () {
 
-        var url = "../test/data/sample.bed";
+        var url = "../test/data/bed/sample.bed";
 
-        var bedDataSource = new igv.BedFeatureSource(url);
+        var bedDataSource = new igv.BedFeatureSource({url: url});
 
 
         bedDataSource.allFeatures(function (featureList) {
@@ -51,9 +51,9 @@ function runBEDUnitTests() {
 
     asyncTest("BED query gzip", 3, function () {
 
-        var url = "../test/data/sample.bed.gz";
+        var url = "../test/data/bed/sample.bed.gz";
 
-        var bedDataSource = new igv.BedFeatureSource(url);
+        var bedDataSource = new igv.BedFeatureSource({url: url});
 
         var chr = "chr1";
         var bpStart = 0;
@@ -80,9 +80,9 @@ function runBEDUnitTests() {
 
         var url, bedDataSource, chr, bpStart, bpEnd, len, c, feature;
 
-        url = "../test/data/test.broadPeak";
+        url = "../test/data/peak/test.broadPeak";
 
-        bedDataSource = new igv.BedFeatureSource(url);
+        bedDataSource = new igv.BedFeatureSource({url: url});
 
         chr = "chr22";
         bpStart = 17946898;

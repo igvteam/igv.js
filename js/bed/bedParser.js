@@ -36,7 +36,7 @@ var igv = (function (igv) {
 
         var decode;
 
-        if (type === "narrowPeak" || type == "broadPeak") {
+        if (type === "narrowPeak" || type === "broadPeak") {
             decode = decodePeak;
         }
         else {
