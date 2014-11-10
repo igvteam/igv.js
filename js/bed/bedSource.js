@@ -44,7 +44,7 @@ var igv = (function (igv) {
         }
 
         if (config.type) {
-            this.type = type;
+            this.type = config.type;
         }
         else {
             var fn = this.filename.toLowerCase();
