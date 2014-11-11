@@ -36,11 +36,11 @@ var igv = (function (igv) {
 
         if (config.url.endsWith(".bedgraph") || config.url.endsWith(".bedgraph.gz")) {
 
-            this.featureSource = new igv.BEDGraphFeatureSource(config.url);
+            this.featureSource = new igv.BedFeatureSource(config.url);
 
         } else if (config.url.endsWith(".wig") || config.url.endsWith(".wig.gz")) {
 
-            this.featureSource = new igv.WIGFeatureSource(config.url);
+            this.featureSource = new igv.BedFeatureSource(config.url);
 
         } else if (config.url.endsWith(".bw") || config.url.endsWith(".bigwig") || config.type === "bigwig") {
 

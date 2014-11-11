@@ -32,12 +32,18 @@ var igv = (function (igv) {
     /**
      * A factory function.  Return a parser for the given file type.
      */
-    igv.BedParser = function(type) {
+    igv.bedParser = function (type) {
 
-        var decode;
+        var decode, wig;
 
         if (type === "narrowPeak" || type === "broadPeak") {
             decode = decodePeak;
+        }
+        else if (type === "bedgraph") {
+            decode = decodeBedGraph;
+        } else if (type === "wig") {
+            decode = decodeWig;
+            wig = {};
         }
         else {
             decode = decodeBed;
@@ -85,7 +91,18 @@ var igv = (function (igv) {
                     if (line.startsWith("track") || line.startsWith("#") || line.startsWith("browser")) {
                         continue;
                     }
+                    else if (type === "wig" && line.startsWith("fixedStep")) {
+                        wig = parseFixedStep(line);
+                        continue;
+                    }
+                    else if (type === "wig" && line.startsWith("variableStep")) {
+                        wig = parseVariableStep(line);
+                        continue;
+                    }
+
                     tokens = lines[i].split("\t");
+                    if (tokens.length < 1) continue;
+
                     feature = decode(tokens);
 
                     if (feature) {
@@ -201,6 +218,75 @@ var igv = (function (igv) {
 
             return {chr: chr, start: start, end: end, name: name, score: score, strand: strand, signal: signal,
                 pValue: pValue, qValue: qValue};
+        }
+
+        function decodeBedGraph(tokens) {
+
+            var chr, start, end, id, name, tmp, idName, strand, cdStart, exonCount, exonSizes, exonStarts, exons, feature,
+                eStart, eEnd;
+
+            if (tokens.length < 3) return null;
+
+            chr = tokens[0];
+
+
+            if (!chr.startsWith("chr")) chr = "chr" + chr;  // TODO -- use genome aliases
+
+            start = parseInt(tokens[1]);
+
+            end = parseInt(tokens[2]);
+
+            value = parseFloat(tokens[3]);
+
+            return {chr: chr, start: start, end: end, value: value};
+        }
+
+        function decodeWig(tokens) {
+
+            var ss, ee, value;
+
+            if (wig.type === "fixedStep") {
+
+                ss = (wig.index * wig.step) + wig.start;
+                ee = ss + wig.span;
+                value = parseFloat(tokens[0]);
+                ++(wig.index);
+                return isNaN(value) ? null : { chr: wig.chrom, start: ss, end: ee, value: value };
+            }
+            else if (wig.type === "variableStep") {
+
+                if (tokens.length < 2) return null;
+
+                ss = parseInt(tokens[0], 10);
+                ee = ss + wig.span;
+                value = parseFloat(tokens[1]);
+                return isNaN(value) ? null : { chr: wig.chrom, start: ss, end: ee, value: value };
+
+            }
+            else {
+                return decodeBedGraph(tokens);
+            }
+        }
+
+        function parseFixedStep(line) {
+
+            var tokens = line.match(/\S+/g),
+                cc = tokens[1].split("=")[1],
+                ss = parseInt(tokens[2].split("=")[1], 10),
+                step = parseInt(tokens[3].split("=")[1], 10),
+                span = (tokens.length > 4) ? parseInt(tokens[4].split("=")[1], 10) : 1;
+
+            return {type: "fixedStep", chrom: cc, start: ss, step: step, span: span, index: 0};
+
+        }
+
+        function parseVariableStep(line) {
+
+            var tokens = line.match(/\S+/g),
+                cc = tokens[1].split("=")[1],
+                span = tokens.length > 2 ? parseInt(tokens[2].split("=")[1], 10) : 1;
+            return {type: "variableStep", chrom: cc, span: span}
+
         }
 
         function parseTrackLine(line) {
