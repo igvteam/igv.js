@@ -7,7 +7,8 @@ function runBEDGraphFeatureSourceTests() {
     asyncTest("BEDGraphFeatureSource getFeatures", 3, function () {
 
         var url = "../test/data/wig/bedgraph-example-uscs.bedgraph";
-        var featureSource = new igv.BEDGraphFeatureSource(url);
+
+        var featureSource = new igv.BedFeatureSource({url: url});
         ok(featureSource, "featureSource should be non null");
 
         var chr = "chr19";

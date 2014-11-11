@@ -1,4 +1,4 @@
-function runDataLoaderTests() {
+function runT2DTests() {
 
     module("dataLoader");
 

@@ -5,7 +5,7 @@ function runInflateTests() {
     var numberOfAssertions = 5;
     asyncTest("Inflate", numberOfAssertions, function () {
         console.log("Inflate test");
-        var url = "../test/data/inflateTest.gz";
+        var url = "../test/data/misc/inflateTest.gz";
         var dataLoader = new igv.DataLoader(url);
 
         ok(dataLoader, "dataLoader should be non null");
