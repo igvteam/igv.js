@@ -53,11 +53,11 @@ var igv = (function (igv) {
      * @param baiPath
      * @constructor
      */
-    igv.BamReader = function (bamPath, baiPath) {
+    igv.BamReader = function (config) {
 
-        this.bamPath = bamPath;
-        this.baiPath = baiPath || (bamPath + ".bai");
-        // Todo - deal with Picard convention.  WHY DOES THERE HAVE TO BE 2?
+        this.bamPath = config.url;
+        this.baiPath = config.indexUrl || (this.bamPath + ".bai"); // Todo - deal with Picard convention.  WHY DOES THERE HAVE TO BE 2?
+        this.headPath = config.headUrl || this.bamPath;
 
     };
 
@@ -425,7 +425,7 @@ var igv = (function (igv) {
                 var headerSize = bamIndex.headerSize;
 
                 // Gen the content length first, so we don't try to read beyond the end of the file
-                igvxhr.loadHeader(bam.bamPath,
+                igvxhr.loadHeader(bam.headPath,
                     {
                         success: function (header) {
                             var contentLengthString = header ? header["Content-Length"] : null;

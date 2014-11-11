@@ -60,7 +60,7 @@ var igv = (function (igv) {
 
 
     igv.inferFileType = function (path) {
-        var fn = this.filename.toLowerCase();
+        var fn = path.toLowerCase();
 
         if (fn.endsWith(".vcf") || fn.endsWith(".vcf.gz")) {
             return "vcf";

@@ -39,7 +39,7 @@ var igv = (function (igv) {
             this.bamFile = new igv.Ga4ghReader(config.url, config.readsetId, config.authKey, config.proxy);
         }
         else {
-            this.bamFile = new igv.BamReader(config.url);
+            this.bamFile = new igv.BamReader(config);
         }
 
     };
