@@ -10,13 +10,13 @@ sudo apachectl start
 
 The url http://localhost should now display a page.
 
-Next we'll create a symboloic link to our project directory from the Apache home directory.  Modify the paths below
+Next create a symboloic link to the project directory from the Apache home directory.  Modify the paths below
 as appropriate
 
 cd /Library/WebServer/Documents
-sudo ln -s /Users/jrobinso/projects/igv-web igv
+sudo ln -s /Users/jrobinso/projects/igv-web igv-web
 
-Now http://localhost/igv/igv.html should bring up the app.  Likewise http://localhost/igv/tests-server.html will
+Now http://localhost/igv-web/igv.html should bring up the app.  Likewise http://localhost/igv-web/tests-server.html will
 run the unit tests.
 
 

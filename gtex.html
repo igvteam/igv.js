@@ -39,20 +39,16 @@
     <script type="text/javascript" src="js/parseUtils.js"></script>
     <script type="text/javascript" src="js/fasta.js"></script>
     <script type="text/javascript" src="js/sequenceTrack.js"></script>
-    <script type="text/javascript" src="js/bedGraphSource.js"></script>
-    <script type="text/javascript" src="js/wigSource.js"></script>
     <script type="text/javascript" src="js/wigTrack.js"></script>
     <script type="text/javascript" src="js/dataloader.js"></script>
     <script type="text/javascript" src="js/igv-exts.js"></script>
     <script type="text/javascript" src="js/igvxhr.js"></script>
     <script type="text/javascript" src="js/binary.js"></script>
-
     <script type="text/javascript" src="js/gtex/eqtlTrack.js"></script>
-    <script type="text/javascript" src="js/gtex/eqtlSource.js"></script>
-    <script type="text/javascript" src="js/gtex/gtex.js"></script>
-
     <script type="text/javascript" src="js/bam/coverageMap.js"></script>
     <script type="text/javascript" src="js/bam/bamReader.js"></script>
+    <script type="text/javascript" src="js/bam/bamIndex.js"></script>
+    <script type="text/javascript" src="js/bam/bgzf.js"></script>
     <script type="text/javascript" src="js/bam/bamSource.js"></script>
     <script type="text/javascript" src="js/bam/bamTrack.js"></script>
     <script type="text/javascript" src="js/bam/bamAlignment.js"></script>
@@ -82,6 +78,11 @@
     <script type="text/javascript" src="js/bigwig/bwSource.js"></script>
     <script type="text/javascript" src="js/bigwig/bwTotalSummary.js"></script>
     <script type="text/javascript" src="js/set.js"></script>
+
+    <script type="text/javascript" src="js/gtex/gtex.js"></script>
+    <script type="text/javascript" src="js/gtex/eqtlSource.js"></script>
+    <script type="text/javascript" src="js/gtex/eqtlTrack.js"></script>
+
 </head>
 
 <body>
@@ -98,9 +99,11 @@
 
         div = $("#myDiv")[0];
         options = {
+            dev: true,
             showKaryo: false,
             fastaURL: "//dn7ywbm9isq8j.cloudfront.net/genomes/seq/hg19/hg19.fasta",
             cytobandURL: "//dn7ywbm9isq8j.cloudfront.net/genomes/seq/hg19/cytoBand.txt",
+            locus: "actn3",
             tracks: [
                 {
                     type: "eqtl",

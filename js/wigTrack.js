@@ -1,3 +1,28 @@
+/*
+ * The MIT License (MIT)
+ *
+ * Copyright (c) 2014 Broad Institute
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in
+ * all copies or substantial portions of the Software.
+ *
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+ * THE SOFTWARE.
+ */
+
 /**
  * Created by turner on 2/11/14.
  */
@@ -9,17 +34,16 @@ var igv = (function (igv) {
         this.config = config;
         this.url = config.url;
 
-        if (config.url.endsWith(".bedgraph") || config.url.endsWith(".bedgraph.gz")) {
+        // Set the track type, if not explicitly specified
+        if (!config.type) {
+            config.type = igv.inferFileType(config.url || config.localFile.name);
+        }
 
-            this.featureSource = new igv.BEDGraphFeatureSource(config.url);
-
-        } else if (config.url.endsWith(".wig") || config.url.endsWith(".wig.gz")) {
-
-            this.featureSource = new igv.WIGFeatureSource(config.url);
-
-        } else if (config.url.endsWith(".bw") || config.url.endsWith(".bigwig") || config.type === "bigwig") {
-
+        if (config.type === "bigwig") {
             this.featureSource = new igv.BWSource(config.url);
+        }
+        else {
+            this.featureSource = new igv.BedFeatureSource(config.url);
         }
 
 
@@ -60,7 +84,7 @@ var igv = (function (igv) {
             if (features && features.length > 0) {
                 featureMin = this.min;
                 featureMax = this.max;
-                if(!featureMin || !featureMax) {
+                if (!featureMin || !featureMax) {
                     var s = autoscale(features);
                     featureMin = s.min;
                     featureMax = s.max;
@@ -107,7 +131,7 @@ var igv = (function (igv) {
         var min = Number.MAX_VALUE,
             max = -Number.MAX_VALUE;
 
-        features.forEach(function(f) {
+        features.forEach(function (f) {
             min = Math.min(min, f.value);
             max = Math.max(max, f.value);
         });

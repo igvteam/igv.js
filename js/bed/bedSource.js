@@ -1,3 +1,28 @@
+/*
+ * The MIT License (MIT)
+ *
+ * Copyright (c) 2014 Broad Institute
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in
+ * all copies or substantial portions of the Software.
+ *
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+ * THE SOFTWARE.
+ */
+
 var igv = (function (igv) {
 
     /**
@@ -18,12 +43,19 @@ var igv = (function (igv) {
             this.indexUrl = config.indexUrl;
         }
 
+        if (config.type) {
+            this.type = config.type;
+        }
+        else {
+            this.type = igv.inferFileType(this.filename);
+        }
+
         // TODO -- move this code to a factory method
-        if (config.type === "vcf") {
+        if (this.type === "vcf") {
             this.parser = igv.vcfParser();
         }
         else {
-            this.parser = igv.BedParser(config.type);
+            this.parser = igv.bedParser(this.type);
         }
 
     };
@@ -44,7 +76,7 @@ var igv = (function (igv) {
         //if (queryChr && queryChr.startsWith("chr")) queryChr = queryChr.substring(3);
 
         var myself = this,
-            range =  new igv.GenomicInterval(queryChr, bpStart, bpEnd),
+            range = new igv.GenomicInterval(queryChr, bpStart, bpEnd),
             featureCache = this.featureCache;
 
         if (featureCache && (featureCache.range === undefined || featureCache.range.chr === queryChr)) {//}   featureCache.range.contains(queryChr, bpStart, bpEnd))) {
@@ -58,7 +90,7 @@ var igv = (function (igv) {
                 myself.featureCache = new igv.FeatureCache(featureList);   // Note - replacing previous cache with new one
 
                 // Record range queried if we have an index
-                if(myself.index) myself.featureCache.range = range;
+                if (myself.index) myself.featureCache.range = range;
 
                 // Finally pass features for query interval to continuation
                 success(myself.featureCache.queryFeatures(queryChr, bpStart, bpEnd));
@@ -110,7 +142,7 @@ var igv = (function (igv) {
             idxFile = myself.indexUrl,
             queryChr = range ? range.chr : undefined;
 
-        if(!idxFile) idxFile = (myself.url ? myself.url + ".idx" : null);
+        if (!idxFile) idxFile = (myself.url ? myself.url + ".idx" : null);
 
         if (this.index === undefined && !myself.localFile && queryChr) {  // TODO -  handle local files
 
@@ -143,7 +175,7 @@ var igv = (function (igv) {
                 var chrIdx = index[queryChr];
 
                 // TODO -- use chr aliaes
-                if(!chrIdx && queryChr.startsWith("chr")) {
+                if (!chrIdx && queryChr.startsWith("chr")) {
                     chrIdx = index[queryChr.substr(3)];
                 }
 

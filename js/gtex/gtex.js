@@ -1,26 +1,61 @@
+/*
+ * The MIT License (MIT)
+ *
+ * Copyright (c) 2014 Broad Institute
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in
+ * all copies or substantial portions of the Software.
+ *
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+ * THE SOFTWARE.
+ */
+
 var igv = (function (igv) {
 
 
     igv.createGtexBrowser = function (parentDiv, options) {
 
-        if (!options) {
-            options = {
-                showKaryo: false,
-                fastaURL: "//dn7ywbm9isq8j.cloudfront.net/genomes/seq/hg19/hg19.fasta",
-                cytobandURL: "//dn7ywbm9isq8j.cloudfront.net/genomes/seq/hg19/cytoBand.txt",
-                tracks: [
-                    {
-                        type: "sequence",
-                        order: 9999
-                    },
-                    {
-                        url: "//dn7ywbm9isq8j.cloudfront.net/annotations/hg19/genes/gencode.v18.collapsed.bed",
-                        label: "Genes",
-                        order: 10000
-                    }
-                ]
-            };
+
+        if (!options) options = {};
+
+        options.showKaryo = false;
+
+        if (!options.fastaUrl) {
+            options.fastaURL = "//dn7ywbm9isq8j.cloudfront.net/genomes/seq/hg19/hg19.fasta";
         }
+
+        if (!options.cytobandURL) {
+            options.cytobandURL = "//dn7ywbm9isq8j.cloudfront.net/genomes/seq/hg19/cytoBand.txt";
+        }
+
+        if (!options.track) {
+            options.tracks = [
+                {
+                    type: "sequence",
+                    order: 9999
+                },
+                {
+                    url: "//dn7ywbm9isq8j.cloudfront.net/annotations/hg19/genes/gencode.v18.collapsed.bed",
+                    label: "Genes",
+                    order: 10000
+                }
+            ]
+        }
+
+
 
         if (!options.createControls) {
             options.createControls = createGtexControls;
@@ -83,6 +118,9 @@ var igv = (function (igv) {
             goBoxButton.onclick = function () {
                 igv.browser.search(goBoxInput.value);
             }
+            $(goBoxDiv).append(goBoxInput);
+            $(goBoxDiv).append(goBoxButton);
+            $(controlDiv).append(goBoxDiv);
         }
 
 
@@ -100,9 +138,15 @@ var igv = (function (igv) {
                         track;
 
                     if (e.currentTarget.checked) {
-                        track = igv.createEqtlTrack({url: record.url, label: record.label});
-                        track.disableButtons = false;
-                        browser.addTrack(track);
+
+                        browser.loadTrack(
+                            {
+                                type: "eqtl",
+                                url: record.url,
+                                label: record.label,
+                                disableButtons: true
+                            }
+                        );
                     }
                     else {
                         track = findTrackWithURL(browser, record.url);

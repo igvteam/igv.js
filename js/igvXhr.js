@@ -1,3 +1,28 @@
+/*
+ * The MIT License (MIT)
+ *
+ * Copyright (c) 2014 Broad Institute
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in
+ * all copies or substantial portions of the Software.
+ *
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+ * THE SOFTWARE.
+ */
+
 var igvxhr = (function (igvxhr) {
 
     igvxhr.loadArrayBuffer = function (url, options) {
@@ -108,6 +133,66 @@ var igvxhr = (function (igvxhr) {
         }
 
         xhr.send(sendData);
+
+    }
+
+    igvxhr.loadHeader = function (url, options)  {
+
+        var xhr = new XMLHttpRequest(),
+            method = "HEAD",
+            success = options.success,
+            error = options.error || success,
+            timeout = options.timeout || error,
+            loader = this;
+
+
+        xhr.open(method, url);
+
+        xhr.onload = function (event) {
+
+            loader.status = xhr.status;
+            var headerStr = xhr.getAllResponseHeaders();
+            var headerDictionary = parseResponseHeaders(headerStr);
+            success(headerDictionary);
+        }
+
+        xhr.onerror = function (event) {
+
+            console.log("XMLHttpRequest - Error loading" + loader.url);
+                error(event);
+        }
+
+
+        xhr.ontimeout = function (event) {
+            timeout(event);
+        }
+
+
+        xhr.send();
+
+        /**
+         * XmlHttpRequest's getAllResponseHeaders() method returns a string of response
+         * headers according to the format described here:
+         * http://www.w3.org/TR/XMLHttpRequest/#the-getallresponseheaders-method
+         * This method parses that string into a user-friendly key/value pair object.
+         */
+        function parseResponseHeaders(headerStr) {
+            var headers = {};
+            if (!headerStr) {
+                return headers;
+            }
+            var headerPairs = headerStr.split('\u000d\u000a');
+            for (var i = 0, len = headerPairs.length; i < len; i++) {
+                var headerPair = headerPairs[i];
+                var index = headerPair.indexOf('\u003a\u0020');
+                if (index > 0) {
+                    var key = headerPair.substring(0, index);
+                    var val = headerPair.substring(index + 2);
+                    headers[key] = val;
+                }
+            }
+            return headers;
+        }
 
     }
 

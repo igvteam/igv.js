@@ -1,3 +1,28 @@
+/*
+ * The MIT License (MIT)
+ *
+ * Copyright (c) 2014 Broad Institute
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in
+ * all copies or substantial portions of the Software.
+ *
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+ * THE SOFTWARE.
+ */
+
 // Represents a BAM file.
 // Code is based heavily on bam.js, part of the Dalliance Genome Explorer,  (c) Thomas Down 2006-2001.
 
@@ -37,69 +62,6 @@ var igv = (function (igv) {
     };
 
     /**
-     * Read the index.  This method is public to support unit testing.
-     * @param continuation
-     */
-    igv.BamReader.prototype.readIndex = function (continuation) {
-
-        var bam = this;
-
-        var dataLoader = new igv.DataLoader(this.baiPath);
-
-        dataLoader.loadArrayBuffer(function (arrayBuffer) {
-
-            var uncba = new Uint8Array(arrayBuffer),
-                baiMagic = readInt(uncba, 0),
-                index;
-
-            if (baiMagic === BAI_MAGIC) {
-
-                var nref = readInt(uncba, 4);
-
-                bam.indices = [];
-
-                var p = 8;
-                for (var ref = 0; ref < nref; ++ref) {
-                    var blockStart = p;
-                    var nbin = readInt(uncba, p);
-                    p += 4;
-                    for (var b = 0; b < nbin; ++b) {
-                        var bin = readInt(uncba, p);
-                        var nchnk = readInt(uncba, p + 4);
-                        p += 8 + (nchnk * 16);
-                    }
-                    var nintv = readInt(uncba, p);
-                    p += 4;
-                    p += (nintv * 8);
-                    if (nbin > 0) {
-
-                        bam.indices[ref] = new Uint8Array(arrayBuffer, blockStart, p - blockStart);
-                    }
-                }
-
-            } else {
-                // TODO -- throw error
-                console.log("Not a BAI file");
-            }
-
-            continuation(bam.indices);
-        });
-
-    };
-
-    function getIndex(continuation) {
-
-        var bam = this;
-        if (bam.indices) {
-            continuation(bam.indices);
-        }
-        else {
-            bam.readIndex(continuation);
-        }
-
-    }
-
-    /**
      * Read the bam header.  This function is public to support unit testing
      * @param continuation
      */
@@ -107,240 +69,65 @@ var igv = (function (igv) {
 
         var bam = this;
 
-        if (this.contentLength) {
-            readHeader(this);
-        }
-        else {
-            // Gen the content length first, so we don't try to read beyond the end of the file
-            readContentLength(this);
-        }
+        getContentLength(bam, function (contentLength) {
 
 
-        function readContentLength(bam) {
-            var loader = new igv.DataLoader(bam.bamPath);
-            loader.onerror = function () {
-                bam.contentLength = -1;
-            }
-            loader.loadHeader(function (header) {
-                var contentLengthString = header ? header["Content-Length"] : null;
-                if (contentLengthString) {
-                    bam.contentLength = parseInt(contentLengthString);
-                }
-                else {
-                    bam.contentLength = -1;
-                }
+            var len = bam.headerSize + 64000;   // Insure we get the complete compressed block containing the header
 
-                if (!bam.contentLength) bam.contentLength = -1; //Protect against inf loop
-                readHeader(bam);
+            if (contentLength > 0) len = Math.min(contentLength, len);
 
-            });
-        }
+            igvxhr.loadArrayBuffer(bam.bamPath,
+                {
+                    range: {start: 0, size: len},
 
-        function readHeader(bam) {
+                    success: function (compressedBuffer) {
 
-            getIndex.call(bam, function (index) {
+                        var unc = igv.unbgzf(compressedBuffer, len);
 
-                var refId, headerSize;
+                        var uncba = new Uint8Array(unc);
 
-                // Get the first non-null index entry, and fetch the first block from that entry
-                // TODO -- we know the blocksForRange call is synchronous because we have the index, but seems fragile as coded.
-
-                if (index.length == 0) {
-                    headerSize = bam.contentLength;
-                }
-                else {
-                    for (refId = 0; refId < index.length; refId++) {
-                        if (index[refId]) {
-                            bam.blocksForRange(refId, 0, 1000000000, function (blocks) {
-                                headerSize = blocks[0].minv.block;
-                            })
+                        var magic = readInt(uncba, 0);
+                        var samHeaderLen = readInt(uncba, 4);
+                        var samHeader = '';
+                        for (var i = 0; i < samHeaderLen; ++i) {
+                            samHeader += String.fromCharCode(uncba[i + 8]);
                         }
-                    }
-                }
 
-                // We need the index tp know the header extent
-//            if (!this.indices) {
-//                bam.readIndex(function () {
-//                    blocksForRange(bam);
-//                });
-//            }
+                        var nRef = readInt(uncba, samHeaderLen + 8);
+                        var p = samHeaderLen + 12;
 
+                        bam.chrToIndex = {};
+                        bam.indexToChr = [];
+                        for (var i = 0; i < nRef; ++i) {
+                            var lName = readInt(uncba, p);
+                            var name = '';
+                            for (var j = 0; j < lName - 1; ++j) {
+                                name += String.fromCharCode(uncba[p + 4 + j]);
+                            }
+                            var lRef = readInt(uncba, p + lName + 4);
+                            //dlog(name + ': ' + lRef);
 
-                var dataLoader = new igv.DataLoader(bam.bamPath);
+                            bam.chrToIndex[name] = i;
+                            bam.indexToChr.push(name);
 
-                // Fetch some bytes for the header.  TODO -- if we need more we'll have to fetch again
-                var len = headerSize;
-                if (bam.contentLength && bam.contentLength > 0) len = Math.min(len, bam.contentLength);
-                dataLoader.range = {start: 0, size: len};
-
-                dataLoader.loadArrayBuffer(function (compressedBuffer) {
-
-                    var unc = unbgzf(compressedBuffer, len);
-                    var uncba = new Uint8Array(unc);
-                    var magic = readInt(uncba, 0);
-                    var headLen = readInt(uncba, 4);
-                    var header = '';
-                    for (var i = 0; i < headLen; ++i) {
-                        header += String.fromCharCode(uncba[i + 8]);
-                    }
-
-                    var nRef = readInt(uncba, headLen + 8);
-                    var p = headLen + 12;
-
-                    bam.chrToIndex = {};
-                    bam.indexToChr = [];
-                    for (var i = 0; i < nRef; ++i) {
-                        var lName = readInt(uncba, p);
-                        var name = '';
-                        for (var j = 0; j < lName - 1; ++j) {
-                            name += String.fromCharCode(uncba[p + 4 + j]);
+                            p = p + 8 + lName;
                         }
-                        var lRef = readInt(uncba, p + lName + 4);
-                        //dlog(name + ': ' + lRef);
 
-                        bam.chrToIndex[name] = i;
-                        bam.indexToChr.push(name);
+                        continuation();
 
-                        p = p + 8 + lName;
-                    }
-
-                    continuation();
-
-                });
-            });
-        }
-    };
-
-    /**
-     * Fetch blocks for a particular genomic range.  This method is public so it can be unit-tested.
-     *
-     * @param refId  the sequence dictionary index of the chromosome
-     * @param min  genomic start position
-     * @param max  genomic end position
-     * @param continuation
-     */
-    igv.BamReader.prototype.blocksForRange = function (refId, min, max, continuation) {
-
-        var bam = this;
-
-        if (!this.indices) {
-            this.readIndex(function () {
-                blocksForRange(bam);
-            });
-        }
-        else {
-            blocksForRange(bam);
-        }
-
-        function blocksForRange(bam) {
-
-            var index = bam.indices[refId];
-            if (!index) {
-                continuation([]);
-            }
-            else {
-
-                var intBinsL = reg2bins(min, max);
-                var intBins = [];
-                for (var i = 0; i < intBinsL.length; ++i) {
-                    intBins[intBinsL[i]] = true;
-                }
-                var leafChunks = [], otherChunks = [];
-
-                var nbin = readInt(index, 0);
-                var p = 4;
-                for (var b = 0; b < nbin; ++b) {
-                    var bin = readInt(index, p);
-                    var nchnk = readInt(index, p + 4);
-                    // dlog('bin=' + bin + '; nchnk=' + nchnk);
-                    p += 8;
-                    if (intBins[bin]) {
-                        for (var c = 0; c < nchnk; ++c) {
-                            var cs = readVob(index, p);
-                            var ce = readVob(index, p + 8);
-                            (bin < 4681 ? otherChunks : leafChunks).push({minv: cs, maxv: ce});
-                            p += 16;
-                        }
-                    } else {
-                        p += (nchnk * 16);
-                    }
-                }
-
-                var nintv = readInt(index, p);
-                var lowest = null;
-                var minLin = Math.min(min >> 14, nintv - 1), maxLin = Math.min(max >> 14, nintv - 1);
-                for (var i = minLin; i <= maxLin; ++i) {
-                    var lb = readVob(index, p + 4 + (i * 8));
-                    if (!lb) {
-                        continue;
-                    }
-                    if (!lowest || lb.block < lowest.block || lb.offset < lowest.offset) {
-                        lowest = lb;
-                    }
-                }
-
-                var prunedOtherChunks = [];
-                if (lowest != null) {
-                    for (var i = 0; i < otherChunks.length; ++i) {
-                        var chnk = otherChunks[i];
-                        if (chnk.maxv.block >= lowest.block && chnk.maxv.offset >= lowest.offset) {
-                            prunedOtherChunks.push(chnk);
-                        }
-                    }
-                }
-                otherChunks = prunedOtherChunks;
-
-                var intChunks = [];
-                for (var i = 0; i < otherChunks.length; ++i) {
-                    intChunks.push(otherChunks[i]);
-                }
-                for (var i = 0; i < leafChunks.length; ++i) {
-                    intChunks.push(leafChunks[i]);
-                }
-
-                intChunks.sort(function (c0, c1) {
-                    var dif = c0.minv.block - c1.minv.block;
-                    if (dif != 0) {
-                        return dif;
-                    } else {
-                        return c0.minv.offset - c1.minv.offset;
                     }
                 });
-                var mergedChunks = [];
-                if (intChunks.length > 0) {
-                    var cur = intChunks[0];
-                    for (var i = 1; i < intChunks.length; ++i) {
-                        var nc = intChunks[i];
-                        if (cur.maxv != null && cur.minv != null && nc.minv.block == cur.maxv.block) { // no point splitting mid-block
-                            cur = {minv: cur.minv, maxv: nc.maxv};
-                        } else {
-                            mergedChunks.push(cur);
-                            cur = nc;
-                        }
-                    }
-                    mergedChunks.push(cur);
-                }
 
-                continuation(mergedChunks);
-            }
-        }
-    };
+        });
+    }
 
     igv.BamReader.prototype.readAlignments = function (chr, min, max, continuation, task) {
 
         var bam = this;
 
-        if (!this.chrToIndex) {
-            bam.readHeader(function () {
-                read();
-            })
-        }
-        else {
-            read();
-        }
+        getChrIndex(this, function (chrToIndex) {
 
-        function read() {
-            var chrId = bam.chrToIndex[chr];
+            var chrId = chrToIndex[chr];
             var chunks;
             if (chrId === undefined) {
                 if (chr.startsWith("chr")) chr = chr.substr(3);
@@ -348,55 +135,61 @@ var igv = (function (igv) {
                 chrId = bam.chrToIndex[chr];
             }
             if (chrId === undefined) {
-                chunks = [];
+                continuation([]);
             } else {
 
-                bam.blocksForRange(chrId, min, max, function (chunks) {
+                getIndex(bam, function (index) {
 
-                    if (!chunks) {
-                        continuation(null, 'Error in index fetch');
-                    }
+                    index.blocksForRange(chrId, min, max, function (chunks) {
+
+                        if (!chunks) {
+                            continuation(null, 'Error in index fetch');
+                        }
 
 
-                    var records = [];
-                    var index = 0;
-                    tramp();
+                        var records = [];
+                        loadNextChunk(0);
 
-                    function tramp() {
-                        if (index >= chunks.length) {
+                        function loadNextChunk(index) {
 
-                            // If we have combined multiple chunks sort records by start position.  I'm not sure this is neccessary
-                            if (index > 1 && records.length > 1) {
-                                records.sort(function (a, b) {
-                                    return a.start - b.start;
-                                });
-                            }
-
-                            continuation(records);
-                        } else {
                             var c = chunks[index];
                             var fetchMin = c.minv.block;
                             var fetchMax = c.maxv.block + (1 << 16); // *sigh*
 
-                            var dataLoader = new igv.DataLoader(bam.bamPath);
-                            dataLoader.range = {start: fetchMin, size: fetchMax - fetchMin + 1};
-                            dataLoader.loadArrayBuffer(function (compressed) {
+                            igvxhr.loadArrayBuffer(bam.bamPath,
+                                {
+                                    task: task,
+                                    range: {start: fetchMin, size: fetchMax - fetchMin + 1},
+                                    success: function (compressed) {
 
-                                    var ba = new Uint8Array(unbgzf(compressed, c.maxv.block - c.minv.block + 1));
-//                                console.log("Decode");
-                                    decodeBamRecords(ba, chunks[index].minv.offset, records, min, max, chrId);
-                                    ++index;
+                                        var ba = new Uint8Array(igv.unbgzf(compressed, c.maxv.block - c.minv.block + 1));
 
+                                        decodeBamRecords(ba, chunks[index].minv.offset, records, min, max, chrId);
 
-                                    return tramp();
-                                },
-                                task);
+                                        index++;
+
+                                        if (index >= chunks.length) {
+
+                                            // If we have combined multiple chunks. Sort records by start position.  I'm not sure this is neccessary
+                                            if (index > 0 && records.length > 1) {
+                                                records.sort(function (a, b) {
+                                                    return a.start - b.start;
+                                                });
+                                            }
+                                            continuation(records);
+                                        }
+                                        else {
+                                            loadNextChunk(index);
+                                        }
+                                    }
+                                });
+
 
                         }
-                    }
+                    });
                 });
             }
-        }
+        });
 
 
         function decodeBamRecords(ba, offset, records, min, max, chrId) {
@@ -606,14 +399,70 @@ var igv = (function (igv) {
 
     }
 
-    function Vob(b, o) {
-        this.block = b;
-        this.offset = o;
+
+    function getIndex(bam, continuation) {
+
+        if (bam.index) {
+            continuation(bam.index);
+        }
+        else {
+            igv.loadBamIndex(bam.baiPath, function (index) {
+                bam.index = index;
+                continuation(bam.index);
+            });
+        }
+
     }
 
-    Vob.prototype.toString = function () {
-        return '' + this.block + ':' + this.offset;
+    function getContentLength(bam, continuation) {
+        if (bam.contentLength) {
+            continuation(bam.contentLength);
+        }
+        else {
+
+            getIndex(bam, function (bamIndex) {
+
+                var headerSize = bamIndex.headerSize;
+
+                // Gen the content length first, so we don't try to read beyond the end of the file
+                igvxhr.loadHeader(bam.bamPath,
+                    {
+                        success: function (header) {
+                            var contentLengthString = header ? header["Content-Length"] : null;
+                            if (contentLengthString) {
+                                bam.contentLength = parseInt(contentLengthString);
+                            }
+                            else {
+                                bam.contentLength = -1;
+                            }
+
+                            if (!bam.contentLength) bam.contentLength = -1; //Protect against inf loop
+                            continuation(bam.contentLength);
+
+                        },
+                        error: function () {
+                            bam.contentLength = -1;
+                            continuation(bam.contentLength);
+                        }
+
+                    });
+            });
+        }
     }
+
+
+    function getChrIndex(bam, continuation) {
+
+        if (bam.chrToIndex) {
+            continuation(bam.chrToIndex);
+        }
+        else {
+            bam.readHeader(function () {
+                continuation(bam.chrToIndex);
+            })
+        }
+    }
+
 
     function readInt(ba, offset) {
         return (ba[offset + 3] << 24) | (ba[offset + 2] << 16) | (ba[offset + 1] << 8) | (ba[offset]);
@@ -623,64 +472,10 @@ var igv = (function (igv) {
         return (ba[offset + 1] << 8) | (ba[offset]);
     }
 
-    function readVob(ba, offset) {
-        var block = ((ba[offset + 6] & 0xff) * 0x100000000) + ((ba[offset + 5] & 0xff) * 0x1000000) + ((ba[offset + 4] & 0xff) * 0x10000) + ((ba[offset + 3] & 0xff) * 0x100) + ((ba[offset + 2] & 0xff));
-        var bint = (ba[offset + 1] << 8) | (ba[offset]);
-        if (block == 0 && bint == 0) {
-            return null;  // Should only happen in the linear index?
-        } else {
-            return new Vob(block, bint);
-        }
-    }
-
-    function unbgzf(data, lim) {
-        lim = Math.min(lim || 1, data.byteLength - 100);
-        var oBlockList = [];
-        var ptr = [0];
-        var totalSize = 0;
-
-        while (ptr[0] < lim) {
-            var ba = new Uint8Array(data, ptr[0], 100); // FIXME is this enough for all credible BGZF block headers?
-            var xlen = (ba[11] << 8) | (ba[10]);
-            // dlog('xlen[' + (ptr[0]) +']=' + xlen);
-            var unc = jszlib_inflate_buffer(data, 12 + xlen + ptr[0], Math.min(65536, data.byteLength - 12 - xlen - ptr[0]), ptr);
-            ptr[0] += 8;
-            totalSize += unc.byteLength;
-            oBlockList.push(unc);
-        }
-
-        if (oBlockList.length == 1) {
-            return oBlockList[0];
-        } else {
-            var out = new Uint8Array(totalSize);
-            var cursor = 0;
-            for (var i = 0; i < oBlockList.length; ++i) {
-                var b = new Uint8Array(oBlockList[i]);
-                arrayCopy(b, 0, out, cursor, b.length);
-                cursor += b.length;
-            }
-            return out.buffer;
-        }
-    }
-
-    /* calculate the list of bins that may overlap with region [beg,end) (zero-based) */
-    var MAX_BIN = (((1 << 18) - 1) / 7);
-
-    function reg2bins(beg, end) {
-        var i = 0, k, list = [];
-        --end;
-        list.push(0);
-        for (k = 1 + (beg >> 26); k <= 1 + (end >> 26); ++k) list.push(k);
-        for (k = 9 + (beg >> 23); k <= 9 + (end >> 23); ++k) list.push(k);
-        for (k = 73 + (beg >> 20); k <= 73 + (end >> 20); ++k) list.push(k);
-        for (k = 585 + (beg >> 17); k <= 585 + (end >> 17); ++k) list.push(k);
-        for (k = 4681 + (beg >> 14); k <= 4681 + (end >> 14); ++k) list.push(k);
-        return list;
-    }
-
 
     return igv;
 
-})(igv || {});
+})
+(igv || {});
 
 

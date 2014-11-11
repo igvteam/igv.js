@@ -1,3 +1,28 @@
+/*
+ * The MIT License (MIT)
+ *
+ * Copyright (c) 2014 Broad Institute
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in
+ * all copies or substantial portions of the Software.
+ *
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+ * THE SOFTWARE.
+ */
+
 var cursor = (function (cursor) {
 
     const resevoirSampledRegionListLength = 10000;
@@ -23,8 +48,8 @@ var cursor = (function (cursor) {
     cursor.CursorModel.prototype.updateRegionDisplay = function()  {
 
         var igvCursorUIHeaderBlurb = $('.igv-cursor-ui-header-blurb'),
-            trackLabelSpan = igvCursorUIHeaderBlurb.find('span')[0],
-            regionCountSpan = igvCursorUIHeaderBlurb.find('span')[1],
+            trackLabelSpan = igvCursorUIHeaderBlurb.find('span')[1],
+            regionCountSpan = igvCursorUIHeaderBlurb.find('span')[0],
             filteredRegionCountSpan = igvCursorUIHeaderBlurb.find('span')[2];
 
         igvCursorUIHeaderBlurb.css({
@@ -73,7 +98,6 @@ var cursor = (function (cursor) {
 
         this.filterRegions();
 
-        this.browser.fitToScreen();
     };
 
     cursor.CursorModel.prototype.initializeHistogram = function (track, continutation) {
@@ -106,7 +130,7 @@ var cursor = (function (cursor) {
         var trackPackages = [],
             filterPackages = [],
             howmany = 0,
-            sortTrackPanelPostFiltering,
+            trackViewThatIsSorted,
             myself = this;
 
 
@@ -130,7 +154,7 @@ var cursor = (function (cursor) {
                 trackPackages.push({ track: trackView.track, trackFilter: trackView.track.trackFilter, featureCache: featureCache, cursorHistogram: trackView.track.cursorHistogram });
 
                 if (trackView.track.isSortTrack()) {
-                    sortTrackPanelPostFiltering = trackView;
+                    trackViewThatIsSorted = trackView;
                 }
 
                 if (trackView.track.trackFilter.isFilterActive) {
@@ -179,29 +203,21 @@ var cursor = (function (cursor) {
             }
 
             if (0 === myself.filteredRegions.length) {
+
                 myself.browser.update();
+
+                myself.browser.fitToScreen();
+
                 return;
             }
 
             var thresholdFramePixelWidth = myself.browser.trackViewportWidth() / myself.filteredRegions.length;
 
-            if (undefined !== thresholdFramePixelWidth && sortTrackPanelPostFiltering) {
+            if (undefined !== thresholdFramePixelWidth && trackViewThatIsSorted) {
 
-                $(sortTrackPanelPostFiltering.track.sortButton).addClass("igv-control-sort-fontawesome-selected");
+                myself.browser.presentSortStatus(trackViewThatIsSorted);
 
-                $(myself.browser.trackContainerDiv).find("i.fa-signal").each(function() {
-
-                    var me = $(this);
-
-                    if (1 === myself.browser.sortDirection) {
-                        me.removeClass("fa-flip-horizontal");
-                    } else {
-                        me.addClass("fa-flip-horizontal");
-                    }
-
-                });
-
-                myself.sortRegions(sortTrackPanelPostFiltering.track.featureSource, myself.browser.sortDirection, function () {
+                myself.sortRegions(trackViewThatIsSorted.track.featureSource, myself.browser.sortDirection, function () {
 
                     if (myself.framePixelWidth < thresholdFramePixelWidth) {
                         myself.browser.setFrameWidth(thresholdFramePixelWidth);
@@ -231,6 +247,9 @@ var cursor = (function (cursor) {
             }
 
             myself.updateRegionDisplay();
+
+            myself.browser.fitToScreen();
+
 
             // better histogram code
             trackPackages.forEach(function (trackPackage) {

@@ -1,3 +1,28 @@
+/*
+ * The MIT License (MIT)
+ *
+ * Copyright (c) 2014 Broad Institute
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in
+ * all copies or substantial portions of the Software.
+ *
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+ * THE SOFTWARE.
+ */
+
 var igv = (function (igv) {
 
     const MIN_TRACK_WIDTH = 500;
@@ -35,6 +60,26 @@ var igv = (function (igv) {
 
     };
 
+    igv.Browser.prototype.trackLabelWithPath = function (path) {
+
+        var parser = document.createElement('a'),
+            label;
+
+        parser.href = path;
+
+        //parser.protocol; // => "http:"
+        //parser.hostname; // => "example.com"
+        //parser.port;     // => "3000"
+        //parser.pathname; // => "/pathname/"
+        //parser.search;   // => "?search=test"
+        //parser.hash;     // => "#hash"
+        //parser.host;     // => "example.com:3000"
+
+        label = parser.pathname.split('/');
+        return label[ label.length - 1].split('.')[ 0 ];
+
+    };
+
     igv.Browser.prototype.loadTrack = function (config) {
 
         if (this.isDuplicateTrack(config)) {
@@ -43,7 +88,7 @@ var igv = (function (igv) {
 
         // Set the track type, if not explicitly specified
         if (!config.type) {
-            config.type = getType(config.url || config.localFile.name);
+            config.type = igv.inferFileType(config.url || config.localFile.name);
         }
 
 
@@ -51,15 +96,13 @@ var igv = (function (igv) {
             type = config.type,
             newTrack;
 
-        if (!type) type = getType(path);
-
         if (type === "t2d") {
             newTrack = new igv.T2dTrack(config);
         } else if (type === "bed") {
             newTrack = new igv.GeneTrack(config);
         } else if (type === "bam") {
             newTrack = new igv.BAMTrack(config);
-        } else if (type === "wig") {
+        } else if (type === "wig" || type === "bigwig") {
             newTrack = new igv.WIGTrack(config);
         } else if (type === "sequence") {
             newTrack = new igv.SequenceTrack(config);
@@ -102,18 +145,6 @@ var igv = (function (igv) {
 
     };
 
-    // Get the file type from the path extension
-    function getType(path) {
-        if (path.endsWith(".bed") || path.endsWith(".bed.gz")) {
-            return "bed";
-        } else if (path.endsWith(".bam")) {
-            return "bam"
-        } else if (path.endsWith(".wig") || path.endsWith(".wig.gz") || path.endsWith(".bedgraph") || path.endsWith(".bedgraph.gz")
-            || path.endsWith(".bw") || path.endsWith(".bigwig")) {
-            return "wig"
-        }
-        return null;  // Unknown
-    }
 
     /**
      * Add a new track.  Each track is associated with the following DOM elements
@@ -172,10 +203,16 @@ var igv = (function (igv) {
         // Reattach the divs to the dom in the correct order
         $(this.trackContainerDiv).children().detach();
 
-//        console.log("---");
         this.trackPanels.forEach(function (trackView, index, trackViews) {
-            myself.trackContainerDiv.appendChild(trackView.trackDiv);
-//            console.log("reorderTracks order " + trackView.track.order);
+
+            if ("CURSOR" === myself.type) {
+
+                myself.trackContainerDiv.appendChild(trackView.trackHousingDiv);
+            } else {
+
+                myself.trackContainerDiv.appendChild(trackView.trackDiv);
+            }
+
         });
 
     };
@@ -192,8 +229,17 @@ var igv = (function (igv) {
         }
 
         if (trackPanelRemoved) {
+
             this.trackPanels.splice(this.trackPanels.indexOf(trackPanelRemoved), 1);
-            this.trackContainerDiv.removeChild(trackPanelRemoved.trackDiv);
+
+            if ("CURSOR" === this.type) {
+
+                this.trackContainerDiv.removeChild(trackPanelRemoved.trackHousingDiv);
+            } else {
+
+                this.trackContainerDiv.removeChild(trackPanelRemoved.trackDiv);
+            }
+
         }
 
     };
@@ -208,9 +254,9 @@ var igv = (function (igv) {
             return;
         }
 
-        this.trackPanels.forEach(function(tv, i, tvs){
+        this.trackPanels.forEach(function (tv, i, tvs) {
 
-            indices.push( { trackView : tv, index : i } );
+            indices.push({ trackView: tv, index: i });
 
             if (trackView === tv) {
                 raisable = indices[ i ];
@@ -241,9 +287,9 @@ var igv = (function (igv) {
             return;
         }
 
-        this.trackPanels.forEach(function(tv, i, tvs){
+        this.trackPanels.forEach(function (tv, i, tvs) {
 
-            indices.push( { trackView : tv, index : i } );
+            indices.push({ trackView: tv, index: i });
 
             if (trackView === tv) {
                 raisable = indices[ i ];
@@ -487,14 +533,11 @@ var igv = (function (igv) {
                                     end += browser.flanking;
                                 }
 
-                                if (browser.type === "GTEX") {
-                                    igv.selection = new igv.GtexSelection(type == 'gene' ? {gene: feature} : {snp: feature});
-                                    browser.goto(chr, start, end);
-                                    browser.update();
-                                }
-                                else {
-                                    browser.goto(chr, start, end);
-                                }
+
+                                browser.selection = new igv.GtexSelection(type == 'gtex' ? {snp: feature} : {gene: feature});
+
+                                browser.goto(chr, start, end);
+
                                 foundFeature = true;
                             }
                         }

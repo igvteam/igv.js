@@ -4,7 +4,7 @@ function vcfTests() {
 
     asyncTest("VCF parser", function () {
 
-        var url = "../test/data/vcf/example.vcf";
+        var url = "data/vcf/example.vcf";
 
 
         igvxhr.loadString(url, {
@@ -28,7 +28,7 @@ function vcfTests() {
 
     asyncTest("VCF feature source", function () {
 
-        var url = "../test/data/vcf/example.vcf",
+        var url = "data/vcf/example.vcf",
             featureSource = new igv.BedFeatureSource({url: url, type: "vcf"});
 
 

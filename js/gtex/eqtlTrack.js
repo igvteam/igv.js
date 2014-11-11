@@ -1,44 +1,40 @@
+/*
+ * The MIT License (MIT)
+ *
+ * Copyright (c) 2014 Broad Institute
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in
+ * all copies or substantial portions of the Software.
+ *
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+ * THE SOFTWARE.
+ */
+
 var igv = (function (igv) {
-
-
-    var createEQTL = function (tokens) {
-        var snp = tokens[0];
-        var chr = tokens[1];
-        var position = parseInt(tokens[2]) - 1;
-        var geneId = tokens[3]
-        var geneName = tokens[4];
-        var genePosition = tokens[5];
-        var fStat = parseFloat(tokens[6]);
-        var pValue = parseFloat(tokens[7]);
-        return new Eqtl(snp, chr, position, geneId, geneName, genePosition, fStat, pValue);
-    }
-
-    var createEqtlBinary = function (parser) {
-
-        var snp = parser.getString();
-        var chr = parser.getString();
-        var position = parser.getInt();
-        var geneId = parser.getString();
-        var geneName = parser.getString();
-        //var genePosition = -1;
-        //var fStat = parser.getFloat();
-        var pValue = parser.getFloat();
-        //var qValue = parser.getFloat();
-        //return new Eqtl(snp, chr, position, geneId, geneName, genePosition, fStat, pValue);
-        return new Eqtl(snp, chr, position, geneId, geneName, pValue);
-    }
 
 
     igv.EqtlTrack = function (config) {
 
 
         var url = config.url,
-            label = config.label,
-            codec = url.endsWith(".bin") ? createEqtlBinary : createEQTL;
+            label = config.label;
 
         this.config = config;
         this.url = url;
-        this.featureSource = new igv.EqtlSource(url, codec);
+        this.featureSource = new igv.EqtlSource(url);
         this.label = label;
         this.minLogP = config.minLogP || 3.5;
         this.maxLogP = config.maxLogP || 25;
@@ -46,6 +42,7 @@ var igv = (function (igv) {
         this.divider = config.divider || "rgb(225,225,225)";
         this.dotSize = config.dotSize || 2;
         this.height = config.height || 100;    // The preferred height
+        this.disableButtons = config.disableButtons;
 
         this.onsearch = function (feature, source) {
             selectedFeature.call(this, feature, source);
@@ -136,10 +133,12 @@ var igv = (function (igv) {
                         eqtl = featureList[i];
                         snp = eqtl.snp.toUpperCase();
                         geneName = eqtl.geneName.toUpperCase();
-                        selection = track.selection;
+                        selection = igv.browser.selection;
                         isSelected = selection &&
                             (selection.snp === snp || selection.gene === geneName);
-
+                        if(geneName === "ACTN3") {
+                            console.log(geneName);
+                        }
                         if (drawSelected && !isSelected) continue;
 
                         // Add eqtl's gene to the selection if this is the selected snp.
@@ -148,7 +147,7 @@ var igv = (function (igv) {
                             selection.addGene(geneName);
                         }
 
-                        if (drawSelected && track.selection) {
+                        if (drawSelected && selection) {
                             color = selection.colorForGene(geneName);
                         }
 

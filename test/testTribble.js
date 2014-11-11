@@ -7,7 +7,7 @@ function testTribble() {
 
     asyncTest("Tribble index", function () {
 
-        var url = "data/tribble/gencode.v18.collapsed.bed.idx";
+        var url = "data/bed/gencode.v18.collapsed.bed.idx";
 
         igv.loadTribbleIndex(url, function (index) {
 

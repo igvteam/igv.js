@@ -1,3 +1,28 @@
+/*
+ * The MIT License (MIT)
+ *
+ * Copyright (c) 2014 Broad Institute
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in
+ * all copies or substantial portions of the Software.
+ *
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+ * THE SOFTWARE.
+ */
+
 var igv = (function (igv) {
 
     igv.createCursorBrowser = function (options) {
@@ -95,6 +120,8 @@ var igv = (function (igv) {
                 var json = e.target.result,
                     session = JSON.parse(json);
 
+                $("#igvSessionLoad").val("");
+
                 $('#igvSessionLoadModal').modal('hide');
 
                 browser.sessionTeardown();
@@ -109,13 +136,19 @@ var igv = (function (igv) {
 
         // BED file upload
         document.getElementById('igvFileUpload').onchange = function (e) {
-            browser.loadTrackFile($("#igvFileUpload")[0]);
+
+            browser.loadTrackFile($(this)[0]);
+
+            $(this).val("");
             $('#igvFileUploadModal').modal('hide');
         };
 
         // BED URL upload
         document.getElementById('igvLoadURL').onchange = function (e) {
-            browser.loadTrackPath($("#igvLoadURL"));
+
+            browser.loadTrackPath($(this));
+
+            $(this).val("");
             $('#igvLoadURLModal').modal('hide');
         };
 
@@ -300,28 +333,46 @@ var igv = (function (igv) {
 
     function addCursorExtensions(browser) {
 
+        browser.presentSortStatus = function (trackView) {
+
+            $(trackView.track.sortButton).addClass("igv-control-sort-fontawesome-selected");
+
+            $(browser.trackContainerDiv).find("i.fa-signal").each(function() {
+
+                var me = $(this);
+
+                if (1 === browser.sortDirection) {
+                    me.addClass("fa-flip-horizontal");
+                } else {
+                    me.removeClass("fa-flip-horizontal");
+                }
+
+            });
+
+        };
+
         browser.selectDesignatedTrack = function (trackView) {
 
             var currentDesignatedTrackView,
                 faCircle,
-                trackLabelSpan;
+                trackLabelDiv;
 
             if (browser.designatedTrack && browser.designatedTrack.trackFilter.trackPanel !== trackView) {
 
                 currentDesignatedTrackView = browser.designatedTrack.trackFilter.trackPanel;
 
-                faCircle = $(currentDesignatedTrackView.viewportDiv).find("i.fa-circle");
+                faCircle = $(currentDesignatedTrackView.trackDiv).find("i.fa-circle");
                 faCircle.removeClass("igv-control-bullseye-fontawesome-selected");
                 faCircle.addClass   ("igv-control-bullseye-fontawesome");
 
-                trackLabelSpan = $(currentDesignatedTrackView.viewportDiv).find("span.igv-track-label-span-base");
-                trackLabelSpan.removeClass("igv-track-label-span-highlighted");
+                trackLabelDiv = $(currentDesignatedTrackView.trackDiv).find("div.igv-track-label-div");
+                trackLabelDiv.removeClass("igv-track-label-selected-div");
 
             }
 
             browser.designatedTrack = trackView.track;
 
-            faCircle = $(trackView.viewportDiv).find("i.fa-circle");
+            faCircle = $(trackView.trackDiv).find("i.fa-circle");
             faCircle.removeClass("igv-control-bullseye-fontawesome");
             faCircle.addClass   ("igv-control-bullseye-fontawesome-selected");
 
@@ -329,8 +380,8 @@ var igv = (function (igv) {
                 "color" : browser.highlightColor
             });
 
-            trackLabelSpan = $(trackView.viewportDiv).find("span.igv-track-label-span-base");
-            trackLabelSpan.addClass("igv-track-label-span-highlighted");
+            trackLabelDiv = $(trackView.trackDiv).find("div.igv-track-label-div");
+            trackLabelDiv.addClass("igv-track-label-selected-div");
 
         };
 
@@ -360,7 +411,8 @@ var igv = (function (igv) {
 
                 browser.cursorModel.regionWidth = regionSize;
                 $("input[id='regionSizeInput']").val(browser.cursorModel.regionWidth);
-                browser.update();
+
+                browser.cursorModel.filterRegions();
             }
 
         };
@@ -417,8 +469,7 @@ var igv = (function (igv) {
 
             var path = config.url,
                 type = config.type,
-                newTrack,
-                newFeatureSource;
+                newTrack;
 
             if (!type) {
                 type = cursorGetType(path);
@@ -467,6 +518,7 @@ var igv = (function (igv) {
                     label: localFile.name
                 });
 
+                localFiles[ i ] = undefined;
 
             }
 
@@ -481,7 +533,7 @@ var igv = (function (igv) {
             browser.loadTrack({
                 type: "bed",
                 url: path,
-                label: "Unnamed Track"
+                label: browser.trackLabelWithPath(path)
             });
 
         };
@@ -610,67 +662,24 @@ var igv = (function (igv) {
         var track = trackView.track,
             trackFilterButtonDiv,
             trackIconContainer,
+            trackLabelDiv,
             sortButton,
             bullseyeStackSpan,
             bullseyeOuterIcon,
             bullseyeInnerIcon;
 
-        trackIconContainer = $(trackView.viewportDiv).find("div.igv-track-icon-container");
+        trackIconContainer = $(trackView.trackHousingDiv).find(".igv-track-icon-container");
 
 
-        // filter
-        trackFilterButtonDiv = document.createElement("div");
-        trackIconContainer.append($(trackFilterButtonDiv));
-
-        trackFilterButtonDiv.className = "igv-filter-histogram-button-div";
-
-        trackView.track.trackFilter = new igv.TrackFilter(trackView);
-        trackView.track.trackFilter.createTrackFilterWidgetWithParentElement(trackFilterButtonDiv);
+        // track label
+        trackLabelDiv = $('<div class="igv-track-label-div">')[0];
+        trackLabelDiv.innerHTML = track.label;
+        trackLabelDiv.title = track.label;
+        $(trackIconContainer).append(trackLabelDiv);
 
 
-        // sort
-        browser.sortDirection = undefined;
-        browser.sortTrack = undefined;
 
-        sortButton = document.createElement("i");
-        trackIconContainer.append($(sortButton));
-        sortButton.className = "fa fa-signal igv-control-sort-fontawesome";
-        track.sortButton = sortButton;
-
-        sortButton.onclick = function () {
-
-            browser.sortDirection = (undefined === browser.sortDirection) ? 1 : -1 * browser.sortDirection;
-            browser.sortTrack = track;
-
-            browser.cursorModel.sortRegions(track.featureSource, browser.sortDirection, function (regions) {
-
-                browser.update();
-
-                browser.trackPanels.forEach(function (tp) {
-
-
-                    if (1 === browser.sortDirection) {
-
-                        $(tp.track.sortButton).removeClass("fa-flip-horizontal");
-                    } else {
-
-                        $(tp.track.sortButton).addClass("fa-flip-horizontal");
-                    }
-
-                    if (track === tp.track) {
-
-                        $(tp.track.sortButton).addClass("igv-control-sort-fontawesome-selected");
-                    } else {
-
-                        $(tp.track.sortButton).removeClass("igv-control-sort-fontawesome-selected");
-                    }
-                });
-
-            });
-
-        };
-
-        // bullseye stack
+        // track selection
         bullseyeStackSpan = document.createElement("span");
         trackIconContainer.append($(bullseyeStackSpan));
 
@@ -700,6 +709,71 @@ var igv = (function (igv) {
 
                 browser.referenceFrame.start = 0;
                 browser.cursorModel.setRegions(featureList);
+
+            });
+
+        };
+
+
+
+        // track filter
+        trackFilterButtonDiv = document.createElement("div");
+        trackIconContainer.append($(trackFilterButtonDiv));
+
+        trackFilterButtonDiv.className = "igv-filter-histogram-button-div";
+
+        trackView.track.trackFilter = new igv.TrackFilter(trackView);
+        trackView.track.trackFilter.createTrackFilterWidgetWithParentElement(trackFilterButtonDiv);
+
+
+
+        // sort
+        browser.sortDirection = undefined;
+        browser.sortTrack = undefined;
+
+        sortButton = document.createElement("i");
+        trackIconContainer.append($(sortButton));
+        sortButton.className = "fa fa-signal igv-control-sort-fontawesome fa-flip-horizontal";
+        track.sortButton = sortButton;
+
+        sortButton.onclick = function () {
+
+            if (browser.sortTrack === track) {
+
+                browser.sortDirection = (undefined === browser.sortDirection) ? 1 : -1 * browser.sortDirection;
+
+            } else {
+
+                browser.sortTrack = track;
+                if (undefined === browser.sortDirection) {
+
+                    browser.sortDirection = 1;
+                }
+            }
+
+
+            browser.cursorModel.sortRegions(track.featureSource, browser.sortDirection, function (regions) {
+
+                browser.update();
+
+                browser.trackPanels.forEach(function (tp) {
+
+                    if (1 === browser.sortDirection) {
+
+                        $(tp.track.sortButton).addClass("fa-flip-horizontal");
+                    } else {
+
+                        $(tp.track.sortButton).removeClass("fa-flip-horizontal");
+                    }
+
+                    if (track === tp.track) {
+
+                        $(tp.track.sortButton).addClass("igv-control-sort-fontawesome-selected");
+                    } else {
+
+                        $(tp.track.sortButton).removeClass("igv-control-sort-fontawesome-selected");
+                    }
+                });
 
             });
 

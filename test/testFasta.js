@@ -27,7 +27,7 @@ function runFastaTests() {
 
     asyncTest("FastaSequence - Test getSequence", 2, function () {
 
-        var sequence = new igv.FastaSequence("../assets/hg19/hg19.fa");
+        var sequence = new igv.FastaSequence("../test/data/fasta/chr22.fa");
 
         // Note -- coordinates are UCSC style
         // chr22:29565177-29565216
@@ -45,7 +45,7 @@ function runFastaTests() {
 
     asyncTest("FastaSequence - Test readSequence", 2, function () {
 
-        var sequence = new igv.FastaSequence("../assets/hg19/hg19.fa");
+        var sequence = new igv.FastaSequence("../test/data/fasta/chr22.fa");
 
         // Note -- coordinates are UCSC style
         // chr22:29565177-29565216
@@ -63,7 +63,7 @@ function runFastaTests() {
 
     asyncTest("FastaSequence - Test readSequence - with unknown sequence", 1, function () {
 
-        var sequence = new igv.FastaSequence("../assets/hg19/hg19.fa");
+        var sequence = new igv.FastaSequence("../test/data/fasta/chr22.fa");
 
         // Note -- coordinates are UCSC style
         // chr22:29565177-29565216

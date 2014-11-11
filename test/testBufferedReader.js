@@ -4,7 +4,7 @@ function runBufferedReaderTests() {
 
     asyncTest("read", function () {
 
-        var url = "../test/data/BufferedReaderTest.bin";
+        var url = "../test/data/misc/BufferedReaderTest.bin";
         var range = {start: 25, size: 100};
         var bufferedReader = new igv.BufferedReader(url, 256, 16);
 

@@ -1,3 +1,79 @@
+.igv-track-label-div {
+
+    position: relative;
+    top: 0;
+    left: 0;
+    width: 100%;
+
+    color: grey;
+    font-family: 'PT Sans', sans-serif;
+    font-size: x-small;
+    font-weight: 400;
+
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.igv-track-label-selected-div {
+    color: rgba(204, 51, 0, 1);
+    font-weight: 800;
+}
+
+.igv-header-div {
+    position: relative;
+    height: 24px;
+    width: 100%;
+    vertical-align: middle;
+
+}
+
+.igv-track-control-cursor-div {
+
+    position: absolute;
+    right: 48px;
+    width: 100px;
+    height: 100%;
+
+    border-color: #a2a2a2;
+    border-style: solid;
+    border-width: thin;
+}
+
+/* override */
+.igv-viewport-div {
+    left: 100px;
+    right: 150px;
+}
+
+/* override */
+.igv-track-icon-container {
+    left:0;
+    top: 0;
+    width: 100px;
+    height: 100%;
+    /*display: inline;*/
+}
+
+.igv-housing-div {
+    margin-top: 4px;
+    position: relative;
+    width: 100%;
+}
+
+/* override */
+.igv-track-container-div {
+    padding-top: 0;
+    padding-bottom: 0;
+}
+
+/* override */
+.igv-track-div {
+    position: relative;
+    width: 100%;
+    overflow:hidden;
+    margin-bottom:0;
+}
 
 .igv-about-link {
 
@@ -16,25 +92,18 @@
 }
 
 .igv-utility-div {
-
     position: relative;
     width: 100%;
     height: 12px;
-    background-color: white;
-
 }
 
 .igv-control-panel-header-div {
 
-    position: relative;
-    left: 8px;
+    position: absolute;
+    right: 62px;
     top: 0;
-    width: 200px;
-    height: 100%;
 
-    font-size: 85%;
-
-    background-color: white;
+    font-size: 75%;
 }
 
 .igv-horizontal-scrollbar-container-div {
@@ -77,7 +146,7 @@
     left:   1px;
     right:  1px;
 
-    background-color: rgba(204, 204, 204, 1);
+    background-color: #333333;
 
 }
 
@@ -114,10 +183,14 @@
 }
 
 .igv-trackfilter-fontawesome {
+
     position: relative;
-    top: 0;
-    left: 0;
+    float: left;
+
+    padding-top: 2px;
+
     cursor: pointer;
+
     color: grey;
 }
 
@@ -125,7 +198,7 @@
 .igv-trackfilter-fontawesome:focus,
 .igv-trackfilter-fontawesome:active {
     color: rgba(102, 102, 102, 1);
-    font-size: medium;
+    /*font-size: medium;*/
 }
 
 .igv-filter-histogram-button-div {
@@ -137,27 +210,6 @@
     float: left;
     margin-left: 2px;
     margin-right: 2px;
-}
-
-/* Override track-icon-container to set left and add transparency */
-.igv-track-icon-container {
-    left: 0;
-    background: rgba(255, 255, 255, 0.75);
-}
-
-/* Override igv-control-div to add border */
-.igv-track-control-div {
-    width: 100px;
-    border-color: #444;
-    border-style: solid;
-    border-width: thin;
-
-}
-
-/* Override viewport div to set right */
-.igv-viewport-div {
-    left: 100px;
-    right: 48px;
 }
 
 /* Override margin-left and margin-right */
@@ -175,9 +227,9 @@
     background: white;
     text-align: center;
 
-    border-left-width: thin;
-    border-left-color: #444;
-    border-left-style: solid;
+    /*border-left-width: thin;*/
+    /*border-left-color: #444;*/
+    /*border-left-style: solid;*/
 }
 
 .igv-track-manipulation-icon-box {
@@ -201,50 +253,63 @@
     position: absolute;
     left: 4px;
     top: 0;
-    color: rgba(51, 153, 204, 1);
+    /*color: rgba(51, 153, 204, 1);*/
+    color: grey;
 }
 
 .igv-track-manipulation-move-down {
     position: absolute;
     left: 4px;
     bottom: 0;
-    color: rgba(51, 153, 204, 1);
+    /*color: rgba(51, 153, 204, 1);*/
+    color: grey;
 }
 
 .igv-track-manipulation-discard {
     position: absolute;
     left: 20px;
     top: 0;
-    color: rgba(153, 0, 0, 1);
+    /*color: rgba(153, 0, 0, 1);*/
+    color: grey;
     background-color: white;
 }
 
 .igv-track-manipulation-move-up:hover,
 .igv-track-manipulation-move-down:hover,
 .igv-track-manipulation-discard:hover,
-/**/
+    /**/
 .igv-track-manipulation-move-up:focus,
 .igv-track-manipulation-move-down:focus,
 .igv-track-manipulation-discard:focus,
-/**/
+    /**/
 .igv-track-manipulation-move-up:active,
 .igv-track-manipulation-move-down:active,
 .igv-track-manipulation-discard:active  {
     font-size: medium;
+    color: rgba(51, 51, 51, 1);
 }
-
-
 
 .igv-control-bullseye-stack-fontawesome {
 
     position: relative;
-    cursor: pointer;
+    float: left;
+
     color: grey;
+
+    cursor: pointer;
+
     font-size: x-small;
 
-    float: left;
-    margin-left: 2px;
-    margin-right: 2px;
+}
+
+.igv-control-bullseye-stack-fontawesome:hover,
+.igv-control-bullseye-stack-fontawesome:focus,
+.igv-control-bullseye-stack-fontawesome:active {
+    color: rgba(51, 51, 51, 1);
+}
+
+.igv-control-bullseye-fontawesome {
+    display: none;
 }
 
 .igv-control-bullseye-fontawesome-selected {
@@ -252,23 +317,27 @@
     display: inline;
 }
 
-.igv-control-bullseye-fontawesome {
-    display: none;
-}
-
 .igv-control-sort-fontawesome {
 
     position: relative;
-    cursor: pointer;
-    color: grey;
-
     float: left;
-    margin-left: 2px;
-    margin-right: 2px;
+
+    padding-top: 3px;
+
+    cursor: pointer;
+
+    color: grey;
+}
+
+.igv-control-sort-fontawesome:hover,
+.igv-control-sort-fontawesome:focus,
+.igv-control-sort-fontawesome:active {
+    color: rgba(51, 51, 51, 1);
 }
 
 .igv-control-sort-fontawesome-selected {
 
+    padding-top: 3px;
     position: relative;
     cursor: pointer;
     color: rgba(204, 51, 0, 1);
@@ -278,24 +347,10 @@
     margin-right: 2px;
 }
 
-.igv-control-bullseye-stack-fontawesome:hover,
-.igv-control-bullseye-stack-fontawesome:focus,
-.igv-control-bullseye-stack-fontawesome:active {
-    color: rgba(102, 102, 102, 1);
-    font-size: 85%;
-}
-
 .igv-control-sort-fontawesome-selected:hover,
 .igv-control-sort-fontawesome-selected:focus,
 .igv-control-sort-fontawesome-selected:active {
-    font-size: medium;
-}
-
-.igv-control-sort-fontawesome:hover,
-.igv-control-sort-fontawesome:focus,
-.igv-control-sort-fontawesome:active {
-    color: rgba(102, 102, 102, 1);
-    font-size: medium;
+    /*font-size: medium;*/
 }
 
 
@@ -311,10 +366,10 @@
 .igv-cursor-ui-header {
     margin-top: 4px;
     width: 100%;
-    height: 40px;
+    height: auto;
     background-image:url(../img/cursor_logo.png);
     background-repeat:no-repeat;
-    background-position: 21px 0;
+    background-position: 21px 9px;
 }
 
 .igv-cursor-ui-holder {
@@ -352,7 +407,7 @@
 }
 
 .igv-cursor-ui-header-blurb {
-    padding: 20px 0 8px 0;
+    padding: 4px 0 8px 0;
     width: 100%;
     margin:auto;
     text-align: center;

@@ -4,43 +4,6 @@ function bamTests() {
     igv.sequenceSource = new igv.FastaSequence("//igvdata.broadinstitute.org/genomes/seq/hg19/hg19.fasta");
 
 
-    asyncTest("index", function () {
-
-        var bamPath = "../test/data/bam/gstt1_sample.bam",
-            bamFile = new igv.BamReader(bamPath, null);
-
-        bamFile.readIndex(function () {
-
-            equal(15, bamFile.indices.length, "bamFile.indices.length");
-
-            var index = bamFile.indices[14];
-            console.log("index-14 " + index);
-            start();
-        })
-
-    });
-
-    asyncTest("blocksForRange", 4, function () {
-
-        var refID = 14,
-            beg = 24375199,
-            end = 24378544,
-            bamPath = "../test/data/bam/gstt1_sample.bam",
-            bamFile = new igv.BamReader(bamPath, null);
-
-        bamFile.blocksForRange(refID, beg, end, function (chunks) {
-
-            ok(chunks, "chunks are non-null");
-            equal(chunks.length, 1, "chunks.length is correct");
-
-            var chunk = chunks[0];
-            equal(0, chunk.maxv.offset, "chunk.maxv.offset");
-            equal(60872, chunk.maxv.block, "chunk.maxv.block");
-
-            start();
-        })
-    });
-
     asyncTest("alignments for range", function () {
 
         var chr = "chr22",
@@ -165,13 +128,8 @@ function bamTests() {
             equal(bamFile.contentLength, 60872, "bamFile.contentLength");
 
             ok(bamFile.chrToIndex["chr1"] === 0);
+            start();
 
-            bamFile.blocksForRange(0, 0, 10000, function (chunks) {
-
-
-
-                start();
-            });
         })
     });
 

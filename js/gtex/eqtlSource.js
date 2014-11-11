@@ -1,10 +1,35 @@
+/*
+ * The MIT License (MIT)
+ *
+ * Copyright (c) 2014 Broad Institute
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in
+ * all copies or substantial portions of the Software.
+ *
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+ * THE SOFTWARE.
+ */
+
 var igv = (function (igv) {
 
 
-    igv.EqtlSource = function (file, codec) {
+    igv.EqtlSource = function (file) {
         this.file = file;
-        this.codec = codec;
-        this.cache = {};
+        this.codec = file.endsWith(".bin") ? createEqtlBinary : createEQTL,
+            this.cache = {};
         this.binary = file.endsWith(".bin");
         this.compressed = file.endsWith(".compressed.bin");
 
@@ -16,7 +41,9 @@ var igv = (function (igv) {
 
         var source = this,
             cache = this.cache,
-            features = cache[chr];
+            features = cache[chr],
+            file;
+
         if (features) {
             continuation(features);
 
@@ -34,8 +61,7 @@ var igv = (function (igv) {
 
         function loadFeatures(file, chr, continuation) {
 
-            var dataLoader = new igv.DataLoader(file),
-                index = source.index;
+            var index = source.index;
 
 
             if (index) {
@@ -58,31 +84,37 @@ var igv = (function (igv) {
                     var blocks = chrIdx.blocks,
                         lastBlock = blocks[blocks.length - 1],
                         endPos = lastBlock.startPos + lastBlock.size,
-                        len = endPos - blocks[0].startPos + 1;
-                    dataLoader.range = { start: blocks[0].startPos, size: len};
+                        len = endPos - blocks[0].startPos,
+                        range = { start: blocks[0].startPos, size: len};
 
-                    dataLoader.loadArrayBuffer(function (arrayBuffer) {
 
-                            if (arrayBuffer) {
+                    igvxhr.loadArrayBuffer(file,
+                        {
+                            task: task,
+                            range: range,
+                            success: function (arrayBuffer) {
 
-                                var data = new DataView(arrayBuffer);
-                                var parser = new igv.BinaryParser(data);
+                                if (arrayBuffer) {
 
-                                var featureList = [];
-                                var lastOffset = parser.offset;
-                                while (parser.hasNext()) {
-                                    var feature = createEqtlBinary(parser);
-                                    featureList.push(feature);
+                                    var data = new DataView(arrayBuffer);
+                                    var parser = new igv.BinaryParser(data);
+
+                                    var featureList = [];
+                                    var lastOffset = parser.offset;
+                                    while (parser.hasNext()) {
+                                        var feature = createEqtlBinary(parser);
+                                        featureList.push(feature);
+                                    }
+
+                                    continuation(featureList);
+                                }
+                                else {
+                                    continuation(null);
                                 }
 
-                                continuation(featureList);
                             }
-                            else {
-                                continuation(null);
-                            }
+                        });
 
-                        },
-                        task);
 
                 }
                 else {
@@ -140,52 +172,51 @@ var igv = (function (igv) {
          */
         function loadIndex(url, continuation) {
 
+            igvxhr.loadArrayBuffer(url,
+                {
+                    range: {start: 0, size: 200},
+                    success: function (arrayBuffer) {
 
-            var dataLoader = new igv.DataLoader(url);
+                        var data = new DataView(arrayBuffer);
+                        var parser = new igv.BinaryParser(data);
+                        var magicNumber = parser.getInt();
+                        var version = parser.getInt();
+                        var indexPosition = parser.getLong();
+                        var indexSize = parser.getInt();
 
-            dataLoader.range = {start: 0, size: 200};
 
-            dataLoader.loadArrayBuffer(function (arrayBuffer) {
+                        igvxhr.loadArrayBuffer(url, {
 
-                var data = new DataView(arrayBuffer);
-                var parser = new igv.BinaryParser(data);
-                var magicNumber = parser.getInt();
-                var version = parser.getInt();
-                var indexPosition = parser.getLong();
-                var indexSize = parser.getInt();
-                var dataLoader2 = new igv.DataLoader(url);
+                            range: {start: indexPosition, size: indexSize},
+                            success: function (arrayBuffer2) {
 
-                console.log("magic # " + magicNumber);
+                                var data2 = new DataView(arrayBuffer2);
+                                var index = null;
 
-                dataLoader2.range = {start: indexPosition, size: indexSize};
 
-                dataLoader2.loadArrayBuffer(function (arrayBuffer2) {
+                                var parser = new igv.BinaryParser(data2);
+                                var index = {};
+                                var nChrs = parser.getInt();
+                                while (nChrs-- > 0) {
+                                    var chr = parser.getString();
 
-                    var data2 = new DataView(arrayBuffer2);
-                    var test = [],
-                        index = null;
+                                    if (!chr.startsWith("chr")) chr = "chr" + chr;
 
-                    test.push(data2.getUint8(0));
-                    test.push(data2.getUint8(8));
+                                    var position = parser.getLong();
+                                    var size = parser.getInt();
+                                    var blocks = new Array();
+                                    blocks.push(new Block(position, size));
+                                    index[chr] = new ChrIdx(chr, blocks);
+                                }
 
-                    var parser = new igv.BinaryParser(data2);
-                    var index = {};
-                    var nChrs = parser.getInt();
-                    while (nChrs-- > 0) {
-                        var chr = parser.getString();
+                                continuation(index)
+                            }
 
-                        if (!chr.startsWith("chr")) chr = "chr" + chr;
-
-                        var position = parser.getLong();
-                        var size = parser.getInt();
-                        var blocks = new Array();
-                        blocks.push(new Block(position, size));
-                        index[chr] = new ChrIdx(chr, blocks);
+                        });
                     }
 
-                    continuation(index)
                 });
-            });
+
         }
 
 
@@ -200,7 +231,33 @@ var igv = (function (igv) {
         }
     }
 
-    return igv;
+
+    var createEQTL = function (tokens) {
+        var snp = tokens[0];
+        var chr = tokens[1];
+        var position = parseInt(tokens[2]) - 1;
+        var geneId = tokens[3]
+        var geneName = tokens[4];
+        var genePosition = tokens[5];
+        var fStat = parseFloat(tokens[6]);
+        var pValue = parseFloat(tokens[7]);
+        return new Eqtl(snp, chr, position, geneId, geneName, genePosition, fStat, pValue);
+    }
+
+    var createEqtlBinary = function (parser) {
+
+        var snp = parser.getString();
+        var chr = parser.getString();
+        var position = parser.getInt();
+        var geneId = parser.getString();
+        var geneName = parser.getString();
+        //var genePosition = -1;
+        //var fStat = parser.getFloat();
+        var pValue = parser.getFloat();
+        //var qValue = parser.getFloat();
+        //return new Eqtl(snp, chr, position, geneId, geneName, genePosition, fStat, pValue);
+        return new Eqtl(snp, chr, position, geneId, geneName, pValue);
+    }
 
 
     return igv;
