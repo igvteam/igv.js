@@ -34,17 +34,16 @@ var igv = (function (igv) {
         this.config = config;
         this.url = config.url;
 
-        if (config.url.endsWith(".bedgraph") || config.url.endsWith(".bedgraph.gz")) {
+        // Set the track type, if not explicitly specified
+        if (!config.type) {
+            config.type = igv.inferFileType(config.url || config.localFile.name);
+        }
 
-            this.featureSource = new igv.BedFeatureSource(config.url);
-
-        } else if (config.url.endsWith(".wig") || config.url.endsWith(".wig.gz")) {
-
-            this.featureSource = new igv.BedFeatureSource(config.url);
-
-        } else if (config.url.endsWith(".bw") || config.url.endsWith(".bigwig") || config.type === "bigwig") {
-
+        if (config.type === "bigwig") {
             this.featureSource = new igv.BWSource(config.url);
+        }
+        else {
+            this.featureSource = new igv.BedFeatureSource(config.url);
         }
 
 
@@ -85,7 +84,7 @@ var igv = (function (igv) {
             if (features && features.length > 0) {
                 featureMin = this.min;
                 featureMax = this.max;
-                if(!featureMin || !featureMax) {
+                if (!featureMin || !featureMax) {
                     var s = autoscale(features);
                     featureMin = s.min;
                     featureMax = s.max;
@@ -132,7 +131,7 @@ var igv = (function (igv) {
         var min = Number.MAX_VALUE,
             max = -Number.MAX_VALUE;
 
-        features.forEach(function(f) {
+        features.forEach(function (f) {
             min = Math.min(min, f.value);
             max = Math.max(max, f.value);
         });

@@ -47,7 +47,7 @@ var igv = (function (igv) {
      * @param name
      * @returns {*}
      */
-    igv.getQueryValue = function(name) {
+    igv.getQueryValue = function (name) {
         name = name.replace(/[\[]/, "\\\[").replace(/[\]]/, "\\\]");
         var regexS = "[\\?&]" + name + "=([^&#]*)";
         var regex = new RegExp(regexS);
@@ -57,6 +57,33 @@ var igv = (function (igv) {
         else
             return results[1];
     };
+
+
+    igv.inferFileType = function (path) {
+        var fn = this.filename.toLowerCase();
+
+        if (fn.endsWith(".vcf") || fn.endsWith(".vcf.gz")) {
+            return "vcf";
+        } else if (fn.endsWith(".narrowpeak") || fn.endsWith(".narrowpeak.gz")) {
+            return "narrowPeak";
+        } else if (fn.endsWith(".broadpeak") || fn.endsWith(".broadpeak.gz")) {
+            return "broadPeak";
+        } else if (fn.endsWith(".bedgraph") || fn.endsWith(".bedgraph.gz")) {
+            return "bedgraph";
+        } else if (fn.endsWith(".wig") || fn.endsWith(".wig.gz")) {
+            return "wig";
+        } else if (path.endsWith(".bed") || path.endsWith(".bed.gz")) {
+            return "bed";
+        } else if (path.endsWith(".bam")) {
+            return "bam"
+        } else if (path.endsWith(".bw") || path.endsWith(".bigwig")) {
+            return "bigwig"
+        } else if (path.endsWith(".bb") || path.endsWith(".bigbed")) {
+            return "bigwig"
+        } else {
+            return null;
+        }
+    }
 
 
     return igv;

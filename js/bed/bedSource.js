@@ -47,22 +47,7 @@ var igv = (function (igv) {
             this.type = config.type;
         }
         else {
-            var fn = this.filename.toLowerCase();
-
-            if (fn.endsWith(".vcf") || fn.endsWith(".vcf.gz")) {
-                this.type = "vcf";
-            } else if (fn.endsWith(".narrowpeak") || fn.endsWith(".narrowpeak.gz")) {
-                this.type = "narrowPeak";
-            } else if (fn.endsWith(".broadpeak") || fn.endsWith(".broadpeak.gz")) {
-                this.type = "broadPeak";
-            } else if(fn.endsWith(".bedgraph") || fn.endsWith(".bedgraph.gz")) {
-                this.type = "bedgraph";
-            } else if(fn.endsWith(".wig") || fn.endsWith(".wig.gz")) {
-                this.type = "wig";
-            } else {
-                this.type = "bed";
-            }
-
+            this.type = igv.inferFileType(this.filename);
         }
 
         // TODO -- move this code to a factory method

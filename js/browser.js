@@ -88,7 +88,7 @@ var igv = (function (igv) {
 
         // Set the track type, if not explicitly specified
         if (!config.type) {
-            config.type = getType(config.url || config.localFile.name);
+            config.type = igv.inferFileType(config.url || config.localFile.name);
         }
 
 
@@ -96,15 +96,13 @@ var igv = (function (igv) {
             type = config.type,
             newTrack;
 
-        if (!type) type = getType(path);
-
         if (type === "t2d") {
             newTrack = new igv.T2dTrack(config);
         } else if (type === "bed") {
             newTrack = new igv.GeneTrack(config);
         } else if (type === "bam") {
             newTrack = new igv.BAMTrack(config);
-        } else if (type === "wig") {
+        } else if (type === "wig" || type === "bigwig") {
             newTrack = new igv.WIGTrack(config);
         } else if (type === "sequence") {
             newTrack = new igv.SequenceTrack(config);
@@ -147,18 +145,6 @@ var igv = (function (igv) {
 
     };
 
-    // Get the file type from the path extension
-    function getType(path) {
-        if (path.endsWith(".bed") || path.endsWith(".bed.gz")) {
-            return "bed";
-        } else if (path.endsWith(".bam")) {
-            return "bam"
-        } else if (path.endsWith(".wig") || path.endsWith(".wig.gz") || path.endsWith(".bedgraph") || path.endsWith(".bedgraph.gz")
-            || path.endsWith(".bw") || path.endsWith(".bigwig")) {
-            return "wig"
-        }
-        return null;  // Unknown
-    }
 
     /**
      * Add a new track.  Each track is associated with the following DOM elements
