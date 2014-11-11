@@ -72,7 +72,7 @@ var igv = (function (igv) {
         getContentLength(bam, function (contentLength) {
 
 
-            var len = bam.headerSize + 64000;   // Insure we get the complete compressed block containing the header
+            var len = bam.index.headerSize + 64000;   // Insure we get the complete compressed block containing the header
 
             if (contentLength > 0) len = Math.min(contentLength, len);
 
