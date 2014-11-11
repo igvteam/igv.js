@@ -40,10 +40,10 @@ var igv = (function (igv) {
         }
 
         if (config.type === "bigwig") {
-            this.featureSource = new igv.BWSource(config.url);
+            this.featureSource = new igv.BWSource(config);
         }
         else {
-            this.featureSource = new igv.BedFeatureSource(config.url);
+            this.featureSource = new igv.BedFeatureSource(config);
         }
 
 

@@ -39,8 +39,9 @@ var igv = (function (igv) {
     var BUFFER_SIZE = 512000;     //  buffer
 
 
-    igv.BWReader = function (path) {
-        this.path = path;
+    igv.BWReader = function (config) {
+        this.path = config.url;
+        this.headPath = config.headUrl || this.path;
         this.rpTreeCache = {};
     };
 
@@ -61,7 +62,7 @@ var igv = (function (igv) {
 
     igv.BWReader.prototype.loadHeader = function (continuation) {
 
-        var loader = new igv.DataLoader(this.path),
+        var loader = new igv.DataLoader(this.headPath),
             bwReader = this;
 
         loader.getContentLength(function (contentLength) {

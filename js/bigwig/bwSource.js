@@ -30,10 +30,10 @@
 
 var igv = (function (igv) {
 
-    igv.BWSource = function (path) {
+    igv.BWSource = function (config) {
 
-        this.reader = new igv.BWReader(path);
-        this.bufferedReader = new igv.BufferedReader(path);
+        this.reader = new igv.BWReader(config);
+        this.bufferedReader = new igv.BufferedReader(config.url);
     };
 
 
