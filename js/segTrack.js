@@ -36,6 +36,31 @@ var igv = (function (igv) {
         this.maxHeight = this.height;
         this.order = config.order;
 
+        this.posColorScale = new igv.GradientColorScale(
+            {
+                low: 0,
+                lowR: 255,
+                lowG: 255,
+                lowB: 255,
+                high: 1.5,
+                highR: 255,
+                highG: 0,
+                highB: 0
+            }
+        );
+        this.negColorScale = new igv.GradientColorScale(
+            {
+                low: -1.5,
+                lowR: 0,
+                lowG: 0,
+                lowB: 255,
+                high: 1.5,
+                highR: 255,
+                highG: 255,
+                highB: 255
+            }
+        );
+
         this.sampleCount = 0;
         this.samples = {};
 
@@ -63,7 +88,9 @@ var igv = (function (igv) {
 
         this.featureSource.getFeatures(chr, bpStart, bpEnd, function (featureList) {
 
-                var segment, len, sample, i, y, color;
+                var segment, len, sample, i, y, color,
+                    px, px1, pw,
+                    xScale = refFrame.bpPerPixel;
 
                 if (featureList) {
 
@@ -82,17 +109,21 @@ var igv = (function (igv) {
                         if (segment.end < bpStart) continue;
                         if (segment.start > bpEnd) break;
 
-                         y = track.samples[segment.sample] * 10;
+                        y = track.samples[segment.sample] * 10;
 
-                         if(segment.value < 0) {
-                             color = "rgb(0, 0, 255)";
-                         }
+                        if (segment.value < 0) {
+                            color = track.negColorScale.getColor(segment.value);
+                        }
                         else {
-                             color = "rgb(255, 0, 0)"
-                         }
+                            color = track.posColorScale.getColor(segment.value);
+                        }
 
+                        px = Math.round((segment.start - bpStart) / xScale);
+                        px1 = Math.round((segment.end - bpStart) / xScale);
+                        pw = Math.max(1, px1 - px);
 
-                        // TODO -- draw it!!
+                        canvas.fillRect(px, y, pw, 10, {fillStyle: color});
+
                     }
                 }
                 else {

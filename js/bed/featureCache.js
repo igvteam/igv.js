@@ -42,6 +42,16 @@ var igv = (function (igv) {
 
         tree = this.treeMap[chr];
 
+        // TODO -- use chr aliases
+        if(!tree) {
+            if(chr.startsWith("chr")) {
+                tree = this.treeMap[chr.substr(3)];
+            }
+            else {
+                tree = this.treeMap["chr" + chr];
+            }
+        }
+
         if (!tree) return [];
 
         intervals = tree.findOverlapping(start, end);

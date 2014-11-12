@@ -52,10 +52,10 @@ var igv = (function (igv) {
             thresholds: [5e-8, 5e-4, 0.5],
             colors: ["rgb(255,50,50)", "rgb(251,100,100)", "rgb(251,170,170)", "rgb(227,238,249)"]
         };
-        
+
         this.pvalue = config.pvalue ? config.pvalue : "PVALUE";
 
-        this.colorScale = new BinnedColorScale(cs);
+        this.colorScale = new igv.BinnedColorScale(cs);
     }
 
 
@@ -89,7 +89,7 @@ var igv = (function (igv) {
 
         queryChr = (chr.startsWith("chr") ? chr.substring(3) : chr);
 
-        if(this.background) canvas.fillRect(0, 0, pixelWidth, pixelHeight, {'fillStyle': this.background});
+        if (this.background) canvas.fillRect(0, 0, pixelWidth, pixelHeight, {'fillStyle': this.background});
         canvas.strokeLine(0, pixelHeight - 1, pixelWidth, pixelHeight - 1, {'strokeStyle': this.divider});
 
 
@@ -173,7 +173,7 @@ var igv = (function (igv) {
     igv.T2dTrack.prototype.popupData = function (genomicLocation, xOffset, yOffset) {
 
         var i, len, p, dbSnp, data, url,
-        data = [];
+            data = [];
 
         if (this.po) {
             for (i = 0, len = this.po.length; i < len; i++) {
@@ -202,44 +202,18 @@ var igv = (function (igv) {
                             "see all available statistics for this variant</a>");
                     }
 
-                if(i < len-1) {
-                    data.push("<p/>");
-                }
+                    if (i < len - 1) {
+                        data.push("<p/>");
+                    }
                 }
             }
         } else {
             data.push("Popover not available at this resolution.")
 
         }
-return data;
+        return data;
     }
 
-
-    // TODO -- generalize this class and move to top level
-    /**
-     *
-     * @param thresholds - array of threshold values defining bin boundaries in ascending order
-     * @param colors - array of colors for bins  (length == thresholds.length + 1)
-     * @constructor
-     */
-    var BinnedColorScale = function (cs) {
-        this.thresholds = cs.thresholds;
-        this.colors = cs.colors;
-    }
-
-    BinnedColorScale.prototype.getColor = function (value) {
-
-        var i, len = this.thresholds.length;
-
-        for (i = 0; i < len; i++) {
-            if (value < this.thresholds[i]) {
-                return this.colors[i];
-            }
-        }
-
-        return this.colors[this.colors.length - 1];
-
-    }
 
     return igv;
 

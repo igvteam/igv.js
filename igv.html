@@ -70,6 +70,10 @@
     <script type="text/javascript" src="js/bed/bedParser.js"></script>
     <script type="text/javascript" src="js/bed/tribble.js"></script>
 
+
+    <script type="text/javascript" src="js/segTrack.js"></script>
+    <script type="text/javascript" src="js/bed/segParser.js"></script>
+
     <script type="text/javascript" src="js/bigwig/bufferedReader.js"></script>
     <script type="text/javascript" src="js/bigwig/bwBPTree.js"></script>
     <script type="text/javascript" src="js/bigwig/bwReader.js"></script>
@@ -110,6 +114,17 @@
                    })">Load
             GA4Gh</a></td>
         </tr>
+
+        <tr>
+            <td><a style="color: blue;cursor: pointer"
+                   onclick="igv.browser.loadTrack({
+                     url: 'http://igvdata.broadinstitute.org/data/hg18/tcga/gbm/gbmsubtypes/Broad.080528.subtypes.seg.gz',
+                     label: 'SEG data (hg18)'
+                   })">Load
+                SEG data (hg18)</a></td>
+        </tr>
+
+
         <tr>
             <td><a style="color: blue;cursor: pointer" onclick="igv.browser.search('chr1:155,169,232-155,169,271')">
                 Goto chr1:155,169,232-155,169,271</a></td>

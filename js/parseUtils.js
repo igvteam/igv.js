@@ -78,15 +78,15 @@ var igv = (function (igv) {
             return "bedgraph";
         } else if (fn.endsWith(".wig")) {
             return "wig";
-        } else if (path.endsWith(".bed")) {
+        } else if (fn.endsWith(".bed")) {
             return "bed";
-        } else if (path.endsWith(".seg")) {
+        } else if (fn.endsWith(".seg")) {
             return "seg";
-        } else if (path.endsWith(".bam")) {
+        } else if (fn.endsWith(".bam")) {
             return "bam"
-        } else if (path.endsWith(".bw") || path.endsWith(".bigwig")) {
+        } else if (fn.endsWith(".bw") || fn.endsWith(".bigwig")) {
             return "bigwig"
-        } else if (path.endsWith(".bb") || path.endsWith(".bigbed")) {
+        } else if (fn.endsWith(".bb") || fn.endsWith(".bigbed")) {
             return "bigwig"
         } else {
             return null;

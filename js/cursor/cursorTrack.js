@@ -214,9 +214,7 @@ var cursor = (function (cursor) {
                                 top = this.height - fh;
                             }
                             else {
-                                //top = 10;
                                 top = 0;
-                                //fh = this.height - 20;
                                 fh = this.height;
                             }
 
