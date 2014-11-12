@@ -72,9 +72,24 @@ var igvxhr = (function (igvxhr) {
         }
     }
 
+    var createXMLHttpRequest = function(options) {
+    	 var xhr = new XMLHttpRequest();
+    	 if (options.headers) {
+    		 var header_keys = Object.keys(options.headers); 
+    		 for (var i = 0; i < header_keys.length; i++) {
+    			 var key = header_keys[i];
+    			 var value = options.headers[key];
+    			 console.log( "Adding to header: "+key+"="+value);
+    			 xhr.setRequestHeader(key, value);
+    		 }
+    		 
+    	 }
+    	 return xhr;
+    }
+    
     igvxhr.load = function (url, options) {
 
-        var xhr = new XMLHttpRequest(),
+        var xhr = createXMLHttpRequest(options),
         sendData = options.sendData,
             method = options.method || (sendData ? "POST" : "GET"),
             success = options.success,
@@ -138,7 +153,7 @@ var igvxhr = (function (igvxhr) {
 
     igvxhr.loadHeader = function (url, options)  {
 
-        var xhr = new XMLHttpRequest(),
+        var xhr = createXMLHttpRequest(options),
             method = "HEAD",
             success = options.success,
             error = options.error || success,

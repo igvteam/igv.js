@@ -354,16 +354,20 @@ var igv = (function (igv) {
         browser.selectDesignatedTrack = function (trackView) {
 
             var currentDesignatedTrackView,
-                faCircle,
+                bullseyeInner,
+                bullseyeOuter,
                 trackLabelDiv;
 
             if (browser.designatedTrack && browser.designatedTrack.trackFilter.trackPanel !== trackView) {
 
                 currentDesignatedTrackView = browser.designatedTrack.trackFilter.trackPanel;
 
-                faCircle = $(currentDesignatedTrackView.trackDiv).find("i.fa-circle");
-                faCircle.removeClass("igv-control-bullseye-fontawesome-selected");
-                faCircle.addClass   ("igv-control-bullseye-fontawesome");
+                bullseyeInner = $(currentDesignatedTrackView.trackDiv).find("i.fa-circle");
+                bullseyeInner.removeClass("igv-control-bullseye-fontawesome-selected");
+                bullseyeInner.addClass   ("igv-control-bullseye-fontawesome");
+
+                bullseyeOuter = $(currentDesignatedTrackView.trackDiv).find("i.fa-circle-thin");
+                bullseyeOuter.removeClass("igv-control-bullseye-fontawesome-selected");
 
                 trackLabelDiv = $(currentDesignatedTrackView.trackDiv).find("div.igv-track-label-div");
                 trackLabelDiv.removeClass("igv-track-label-selected-div");
@@ -372,13 +376,17 @@ var igv = (function (igv) {
 
             browser.designatedTrack = trackView.track;
 
-            faCircle = $(trackView.trackDiv).find("i.fa-circle");
-            faCircle.removeClass("igv-control-bullseye-fontawesome");
-            faCircle.addClass   ("igv-control-bullseye-fontawesome-selected");
+            bullseyeInner = $(trackView.trackDiv).find("i.fa-circle");
+            bullseyeInner.removeClass("igv-control-bullseye-fontawesome");
+            bullseyeInner.addClass   ("igv-control-bullseye-fontawesome-selected");
 
-            faCircle.css({
-                "color" : browser.highlightColor
-            });
+            bullseyeOuter = $(trackView.trackDiv).find("i.fa-circle-thin");
+            bullseyeOuter.addClass("igv-control-bullseye-fontawesome-selected");
+
+
+            //bullseyeInner.css({
+            //    "color" : browser.highlightColor
+            //});
 
             trackLabelDiv = $(trackView.trackDiv).find("div.igv-track-label-div");
             trackLabelDiv.addClass("igv-track-label-selected-div");

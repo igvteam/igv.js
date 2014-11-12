@@ -25,14 +25,11 @@
 
 var igv = (function (igv) {
 
-    igv.loadTribbleIndex = function (indexFile, continuation) {
+    igv.loadTribbleIndex = function (config, indexFile, continuation) {
 
 
         console.log("Loading " + indexFile);
-
-
-        igvxhr.loadArrayBuffer(indexFile,
-            {
+        var options =  {
                 success: function (arrayBuffer) {
 
                     if(arrayBuffer) {
@@ -61,7 +58,10 @@ var igv = (function (igv) {
                 error: function (ignore, xhr) {
                     continuation(null);
                 }
-            });
+         };
+
+        options.config = config;
+        igvxhr.loadArrayBuffer(indexFile, options);
 
 
         function readHeader(parser) {
