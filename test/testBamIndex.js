@@ -25,7 +25,8 @@ function bamIndexTests() {
             end = 24378544,
             indexPath = "../test/data/bam/gstt1_sample.bam.bai";
 
-        igv.loadBamIndex(indexPath, function (bamIndex) {
+        var config = undefined;
+        igv.loadBamIndex(config, indexPath, function (bamIndex) {
 
             bamIndex.blocksForRange(refID, beg, end, function (chunks) {
 
