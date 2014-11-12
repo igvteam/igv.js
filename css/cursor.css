@@ -202,7 +202,10 @@
 .igv-trackfilter-fontawesome:hover,
 .igv-trackfilter-fontawesome:focus,
 .igv-trackfilter-fontawesome:active {
-    /*color: rgba(102, 102, 102, 1);*/
+    color: rgba(204, 51, 0, 1);
+}
+
+.igv-trackfilter-fontawesome-selected {
     color: rgba(204, 51, 0, 1);
 }
 
