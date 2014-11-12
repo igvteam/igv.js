@@ -74,11 +74,12 @@ var igvxhr = (function (igvxhr) {
 
     var createXMLHttpRequest = function(options) {
     	 var xhr = new XMLHttpRequest();
-    	 if (options.headers) {
-    		 var header_keys = Object.keys(options.headers); 
+    	 if (options.config && options.config.headers) {
+    		 var headers = options.config.headers;
+    		 var header_keys = Object.keys(headers); 
     		 for (var i = 0; i < header_keys.length; i++) {
     			 var key = header_keys[i];
-    			 var value = options.headers[key];
+    			 var value = headers[key];
     			 console.log( "Adding to header: "+key+"="+value);
     			 xhr.setRequestHeader(key, value);
     		 }
