@@ -33,11 +33,12 @@ var igv = (function (igv) {
      * Read the index.  This method is public to support unit testing.
      * @param continuation
      */
-    igv.loadBamIndex = function (indexUrl, continuation) {
+    igv.loadBamIndex = function (indexUrl, config, continuation) {
 
 
         igvxhr.loadArrayBuffer(indexUrl,
             {
+                headers: config.headers,
                 success: function (arrayBuffer) {
 
                     var indices = [],

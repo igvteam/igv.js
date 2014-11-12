@@ -55,6 +55,7 @@ var igv = (function (igv) {
      */
     igv.BamReader = function (config) {
 
+        this.config = config;
         this.bamPath = config.url;
         this.baiPath = config.indexUrl || (this.bamPath + ".bai"); // Todo - deal with Picard convention.  WHY DOES THERE HAVE TO BE 2?
         this.headPath = config.headUrl || this.bamPath;
@@ -78,6 +79,8 @@ var igv = (function (igv) {
 
             igvxhr.loadArrayBuffer(bam.bamPath,
                 {
+                    headers: bam.config.headers,
+
                     range: {start: 0, size: len},
 
                     success: function (compressedBuffer) {
@@ -159,6 +162,7 @@ var igv = (function (igv) {
                             igvxhr.loadArrayBuffer(bam.bamPath,
                                 {
                                     task: task,
+                                    headers: bam.config.headers,
                                     range: {start: fetchMin, size: fetchMax - fetchMin + 1},
                                     success: function (compressed) {
 
@@ -406,7 +410,7 @@ var igv = (function (igv) {
             continuation(bam.index);
         }
         else {
-            igv.loadBamIndex(bam.baiPath, function (index) {
+            igv.loadBamIndex(bam.baiPath, bam.config, function (index) {
                 bam.index = index;
                 continuation(bam.index);
             });
@@ -427,6 +431,7 @@ var igv = (function (igv) {
                 // Gen the content length first, so we don't try to read beyond the end of the file
                 igvxhr.loadHeader(bam.headPath,
                     {
+                        headers: bam.headers,
                         success: function (header) {
                             var contentLengthString = header ? header["Content-Length"] : null;
                             if (contentLengthString) {

@@ -43,17 +43,18 @@ var igv = (function (igv) {
         this.path = config.url;
         this.headPath = config.headUrl || this.path;
         this.rpTreeCache = {};
+        this.config = config;
     };
 
-    igv.BWReader.prototype.getZoomHeaders = function(continuation) {
+    igv.BWReader.prototype.getZoomHeaders = function (continuation) {
 
         var reader = this;
 
-        if(this.zoomLevelHeaders) {
+        if (this.zoomLevelHeaders) {
             continuation(this.zoomLevelHeaders);
         }
         else {
-            this.loadHeader(function() {
+            this.loadHeader(function () {
                 continuation(reader.zoomLevelHeaders);
             });
         }
@@ -62,127 +63,141 @@ var igv = (function (igv) {
 
     igv.BWReader.prototype.loadHeader = function (continuation) {
 
-        var loader = new igv.DataLoader(this.headPath),
-            bwReader = this;
+        var bwReader = this;
 
-        loader.getContentLength(function (contentLength) {
+        igvxhr.getContentLength(this.headPath,
+            {
+                headers: bwReader.config.headers,
 
-            bwReader.contentLength = contentLength;
+                success: function (contentLength) {
 
-            loader.range = {start: 0, size: BBFILE_HEADER_SIZE};
+                    bwReader.contentLength = contentLength;
 
-            loader.loadArrayBuffer(function (data) {
+                    igvxhr.loadArrayBuffer(bwReader.path,
+                        {
+                            headers: bwReader.config.headers,
 
-                // Assume low-to-high unless proven otherwise
-                bwReader.littleEndian = true;
+                            range: {start: 0, size: BBFILE_HEADER_SIZE},
 
-                var binaryParser = new igv.BinaryParser(new DataView(data));
+                            success: function (data) {
 
-                var magic = binaryParser.getUInt();
+                                // Assume low-to-high unless proven otherwise
+                                bwReader.littleEndian = true;
 
-                if (magic === BIGWIG_MAGIC_LTH) {
-                    bwReader.type = "BigWig";
+                                var binaryParser = new igv.BinaryParser(new DataView(data));
+
+                                var magic = binaryParser.getUInt();
+
+                                if (magic === BIGWIG_MAGIC_LTH) {
+                                    bwReader.type = "BigWig";
+                                }
+                                else if (magic == BIGBED_MAGIC_LTH) {
+                                    bwReader.type = "BigBed";
+                                }
+                                else {
+                                    //Try big endian order
+                                    bwReader.littleEndian = false;
+
+                                    binaryParser.littleEndian = false;
+                                    binaryParser.position = 0;
+                                    var magic = binaryParser.getUInt();
+
+                                    if (magic === BIGWIG_MAGIC_HTL) {
+                                        bwReader.type = "BigWig";
+                                    }
+                                    else if (magic == BIGBED_MAGIC_HTL) {
+                                        bwReader.type = "BigBed";
+                                    }
+                                    else {
+                                        // TODO -- error, unknow file type
+                                    }
+
+                                }
+                                // Table 5  "Common header for BigWig and BigBed files"
+                                bwReader.header = {};
+                                bwReader.header.bwVersion = binaryParser.getShort();
+                                bwReader.header.nZoomLevels = binaryParser.getShort();
+                                bwReader.header.chromTreeOffset = binaryParser.getLong();
+                                bwReader.header.fullDataOffset = binaryParser.getLong();
+                                bwReader.header.fullIndexOffset = binaryParser.getLong();
+                                bwReader.header.fieldCount = binaryParser.getShort();
+                                bwReader.header.definedFieldCount = binaryParser.getShort();
+                                bwReader.header.autoSqlOffset = binaryParser.getLong();
+                                bwReader.header.totalSummaryOffset = binaryParser.getLong();
+                                bwReader.header.uncompressBuffSize = binaryParser.getInt();
+                                bwReader.header.reserved = binaryParser.getLong();
+
+                                // Get content length
+                                // HttpResponse *resp = [URLDataLoader loadHeaderSynchronousWithPath:self.path];
+                                // self.filesize = resp.contentLength;
+
+
+                                bwReader.loadZoomHeadersAndChrTree(continuation);
+                            }
+
+                        });
+
                 }
-                else if (magic == BIGBED_MAGIC_LTH) {
-                    bwReader.type = "BigBed";
-                }
-                else {
-                    //Try big endian order
-                    bwReader.littleEndian = false;
 
-                    binaryParser.littleEndian = false;
-                    binaryParser.position = 0;
-                    var magic = binaryParser.getUInt();
-
-                    if (magic === BIGWIG_MAGIC_HTL) {
-                        bwReader.type = "BigWig";
-                    }
-                    else if (magic == BIGBED_MAGIC_HTL) {
-                        bwReader.type = "BigBed";
-                    }
-                    else {
-                        // TODO -- error, unknow file type
-                    }
-
-                }
-                // Table 5  "Common header for BigWig and BigBed files"
-                bwReader.header = {};
-                bwReader.header.bwVersion = binaryParser.getShort();
-                bwReader.header.nZoomLevels = binaryParser.getShort();
-                bwReader.header.chromTreeOffset = binaryParser.getLong();
-                bwReader.header.fullDataOffset = binaryParser.getLong();
-                bwReader.header.fullIndexOffset = binaryParser.getLong();
-                bwReader.header.fieldCount = binaryParser.getShort();
-                bwReader.header.definedFieldCount = binaryParser.getShort();
-                bwReader.header.autoSqlOffset = binaryParser.getLong();
-                bwReader.header.totalSummaryOffset = binaryParser.getLong();
-                bwReader.header.uncompressBuffSize = binaryParser.getInt();
-                bwReader.header.reserved = binaryParser.getLong();
-
-                // Get content length
-                // HttpResponse *resp = [URLDataLoader loadHeaderSynchronousWithPath:self.path];
-                // self.filesize = resp.contentLength;
-
-
-                bwReader.loadZoomHeadersAndChrTree(continuation);
             });
-        });
 
     }
 
     igv.BWReader.prototype.loadZoomHeadersAndChrTree = function (continutation) {
 
 
-        var loader = new igv.DataLoader(this.path),
-            startOffset = BBFILE_HEADER_SIZE,
-            that = this;
+        var startOffset = BBFILE_HEADER_SIZE,
+            bwReader = this;
 
-        loader.range = {start: startOffset, size: (this.header.fullDataOffset - startOffset + 5)};
+        igvxhr.loadArrayBuffer(this.path,
+            {
+                headers: this.config.headers,
+                range: {start: startOffset, size: (this.header.fullDataOffset - startOffset + 5)},
+                success: function (data) {
 
-        loader.loadArrayBuffer(function (data) {
+                    var nZooms = bwReader.header.nZoomLevels,
+                        binaryParser = new igv.BinaryParser(new DataView(data)),
+                        i,
+                        len,
+                        zoomNumber,
+                        zlh;
 
-            var nZooms = that.header.nZoomLevels,
-                binaryParser = new igv.BinaryParser(new DataView(data)),
-                i,
-                len,
-                zoomNumber,
-                zlh;
+                    bwReader.zoomLevelHeaders = [];
 
-            that.zoomLevelHeaders = [];
+                    for (i = 0; i < nZooms; i++) {
+                        zoomNumber = nZooms - i;
+                        zlh = new ZoomLevelHeader(zoomNumber, binaryParser);
+                        bwReader.zoomLevelHeaders.push(zlh);
+                    }
 
-            for (i = 0; i < nZooms; i++) {
-                zoomNumber = nZooms - i;
-                zlh = new ZoomLevelHeader(zoomNumber, binaryParser);
-                that.zoomLevelHeaders.push(zlh);
-            }
+                    // Autosql
+                    if (bwReader.header.autoSqlOffset > 0) {
+                        binaryParser.position = bwReader.header.autoSqlOffset - startOffset;
+                        bwReader.autoSql = binaryParser.getString();
+                    }
 
-            // Autosql
-            if (that.header.autoSqlOffset > 0) {
-                binaryParser.position = that.header.autoSqlOffset - startOffset;
-                that.autoSql = binaryParser.getString();
-            }
+                    // Total summary
+                    if (bwReader.header.totalSummaryOffset > 0) {
+                        binaryParser.position = bwReader.header.totalSummaryOffset - startOffset;
+                        bwReader.totalSummary = new igv.BWTotalSummary(binaryParser);
+                    }
 
-            // Total summary
-            if (that.header.totalSummaryOffset > 0) {
-                binaryParser.position = that.header.totalSummaryOffset - startOffset;
-                that.totalSummary = new igv.BWTotalSummary(binaryParser);
-            }
+                    // Chrom data index
+                    if (bwReader.header.chromTreeOffset > 0) {
+                        binaryParser.position = bwReader.header.chromTreeOffset - startOffset;
+                        bwReader.chromTree = new igv.BPTree(binaryParser, 0);
+                    }
+                    else {
+                        // TODO -- this is an error, not expected
+                    }
 
-            // Chrom data index
-            if (that.header.chromTreeOffset > 0) {
-                binaryParser.position = that.header.chromTreeOffset - startOffset;
-                that.chromTree = new igv.BPTree(binaryParser, 0);
-            }
-            else {
-                // TODO -- this is an error, not expected
-            }
+                    //Finally total data count
+                    binaryParser.position = bwReader.header.fullDataOffset - startOffset;
+                    bwReader.dataCount = binaryParser.getInt();
 
-            //Finally total data count
-            binaryParser.position = that.header.fullDataOffset - startOffset;
-            that.dataCount = binaryParser.getInt();
-
-            continutation();
-        });
+                    continutation();
+                }
+            });
 
     }
 
@@ -194,7 +209,7 @@ var igv = (function (igv) {
         }
         else {
 
-            rpTree = new igv.RPTree(offset, this.contentLength, this.path, this.littleEndian);
+            rpTree = new igv.RPTree(offset, this.contentLength, this.config, this.littleEndian);
             this.rpTreeCache[offset] = rpTree;
             rpTree.load(function () {
                 continuation(rpTree);
@@ -216,4 +231,4 @@ var igv = (function (igv) {
     return igv;
 
 })
-    (igv || {});
+(igv || {});

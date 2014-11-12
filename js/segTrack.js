@@ -36,6 +36,9 @@ var igv = (function (igv) {
         this.maxHeight = this.height;
         this.order = config.order;
 
+        this.sampleCount = 0;
+        this.samples = {};
+
     };
 
     /**
@@ -60,15 +63,34 @@ var igv = (function (igv) {
 
         this.featureSource.getFeatures(chr, bpStart, bpEnd, function (featureList) {
 
-                var segment, len;
+                var segment, len, sample, i, y, color;
 
                 if (featureList) {
 
-                    for (var i = 0, len = featureList.length; i < len; i++) {
+                    for (i = 0, len = featureList.length; i < len; i++) {
+                        sample = featureList[i].sample;
+                        if (!track.samples.hasOwnProperty(sample)) {
+                            track.samples[sample] = track.sampleCount;
+                            track.sampleCount++;
+                        }
+                    }
+
+                    for (i = 0, len = featureList.length; i < len; i++) {
 
                         segment = featureList[i];
+
                         if (segment.end < bpStart) continue;
                         if (segment.start > bpEnd) break;
+
+                         y = track.samples[segment.sample] * 10;
+
+                         if(segment.value < 0) {
+                             color = "rgb(0, 0, 255)";
+                         }
+                        else {
+                             color = "rgb(255, 0, 0)"
+                         }
+
 
                         // TODO -- draw it!!
                     }

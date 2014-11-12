@@ -33,7 +33,7 @@ var igv = (function (igv) {
     igv.BWSource = function (config) {
 
         this.reader = new igv.BWReader(config);
-        this.bufferedReader = new igv.BufferedReader(config.url);
+        this.bufferedReader = new igv.BufferedReader(config);
     };
 
 
