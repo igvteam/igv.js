@@ -23,75 +23,74 @@
  * THE SOFTWARE.
  */
 
-/**
- * Created by turner on 2/18/14.
- */
 var igv = (function (igv) {
 
-    igv.SEGTrack = function (url) {
-        this.url = url;
-        this.featureSource = new igv.SEGFeatureSource(this.url);
-
-        this.label = "WIGLabel";
-        this.id = "wig";
+    igv.SegTrack = function (config) {
+        this.config = config;
+        this.url = config.url;
+        this.featureSource = new igv.BedFeatureSource(this.config);
+        this.label = config.label;
+        this.id = config.id || config.label;
         this.height = 100;
+        this.minHeight = this.height;
+        this.maxHeight = this.height;
+        this.order = config.order;
 
-    }
+    };
 
     /**
      *
-     * @param canvas - an igv.Canvas
+     * @param canvas   an igv.Canvas
+     * @param refFrame
      * @param bpStart
      * @param bpEnd
-     * @param width
-     * @param height
-     * @param continuation
+     * @param pixelWidth
+     * @param pixelHeight
+     * @param continuation  -  Optional.   called on completion, no arguments.
      */
-    igv.SEGTrack.prototype.draw = function (canvas, refFrame, bpStart, bpEnd, width, height, continuation) {
+    igv.SegTrack.prototype.draw = function (canvas, refFrame, bpStart, bpEnd, pixelWidth, pixelHeight, continuation, task) {
 
-        var chr = refFrame.chr;
+//        console.log("geneTrack.draw " + refFrame.chr);
+
+        var chr = refFrame.chr,
+            track = this;
+
+        canvas.fillRect(0, 0, pixelWidth, pixelHeight, {'fillStyle': "rgb(255, 255, 255)"});
+
+
         this.featureSource.getFeatures(chr, bpStart, bpEnd, function (featureList) {
 
-            if (featureList) {
+                var segment, len;
 
-                var pxStart,
-                    pxEnd,
-                    pxWidth,
-                    featureListLength = featureList.features.length,
-                    feature,
-                    featureHeight,
-                    baseline,
-                    denom = featureList.maximum - featureList.minimum;
+                if (featureList) {
 
-                for (var i = 0; i < featureListLength; i++) {
+                    for (var i = 0, len = featureList.length; i < len; i++) {
 
-                    feature = featureList.features[i];
+                        segment = featureList[i];
+                        if (segment.end < bpStart) continue;
+                        if (segment.start > bpEnd) break;
 
-                    if (feature.end < bpStart) continue;
-                    if (feature.start > bpEnd) break;
-
-                    pxStart = refFrame.toPixels(feature.start - bpStart);
-                    pxEnd = refFrame.toPixels(feature.end - bpStart);
-                    pxWidth = Math.max(1, pxEnd - pxStart);
-
-                    featureHeight = ((feature.value - featureList.minimum) / denom) * height;
-
-                    baseline = height - featureHeight;
-
-                    // Use random colors to disambiguate features during implementation of WIG renderer
-                    canvas.fillRect(pxStart, baseline, pxWidth, featureHeight, {fillStyle: igv.randomRGB(0, 255)});
-
+                        // TODO -- draw it!!
+                    }
                 }
-            }
+                else {
+                    console.log("No feature list");
+                }
 
-            continuation();
-
-        });
+                if (continuation) continuation();
+            },
+            task);
     };
 
-    igv.SEGTrack.prototype.drawLabel = function (ctx) {
-        // draw label stuff
-    };
+    igv.SegTrack.prototype.drawLabel = function (ctx) {
+//        ctx.save();
+//        ctx.textAlign = 'right';
+//        ctx.verticalAlign = 'center';
+//        ctx.strokeStyle = "black";
+//        ctx.fillText(this.label, 90, this.height / 2);
+//        ctx.restore();
+
+    }
 
     return igv;
 

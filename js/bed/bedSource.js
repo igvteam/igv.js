@@ -53,7 +53,10 @@ var igv = (function (igv) {
         // TODO -- move this code to a factory method
         if (this.type === "vcf") {
             this.parser = igv.vcfParser();
+        } else if(this.type === "seg") {
+            this.parser = igv.segParser();
         }
+
         else {
             this.parser = igv.bedParser(this.type);
         }
