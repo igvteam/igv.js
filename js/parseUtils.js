@@ -60,20 +60,28 @@ var igv = (function (igv) {
 
 
     igv.inferFileType = function (path) {
+
         var fn = path.toLowerCase();
+        if(fn.endsWith(".gz")) {
+            fn = fn.substr(0, fn.length-3);
+        } else if(fn.endsWith(".txt") || fn.endsWith(".tab")) {
+            fn = fn.substr(0, fn.length-4);
+        }
 
         if (fn.endsWith(".vcf") || fn.endsWith(".vcf.gz")) {
             return "vcf";
-        } else if (fn.endsWith(".narrowpeak") || fn.endsWith(".narrowpeak.gz")) {
+        } else if (fn.endsWith(".narrowpeak")) {
             return "narrowPeak";
-        } else if (fn.endsWith(".broadpeak") || fn.endsWith(".broadpeak.gz")) {
+        } else if (fn.endsWith(".broadpeak")) {
             return "broadPeak";
-        } else if (fn.endsWith(".bedgraph") || fn.endsWith(".bedgraph.gz")) {
+        } else if (fn.endsWith(".bedgraph")) {
             return "bedgraph";
-        } else if (fn.endsWith(".wig") || fn.endsWith(".wig.gz")) {
+        } else if (fn.endsWith(".wig")) {
             return "wig";
-        } else if (path.endsWith(".bed") || path.endsWith(".bed.gz")) {
+        } else if (path.endsWith(".bed")) {
             return "bed";
+        } else if (path.endsWith(".seg")) {
+            return "seg";
         } else if (path.endsWith(".bam")) {
             return "bam"
         } else if (path.endsWith(".bw") || path.endsWith(".bigwig")) {

@@ -23,7 +23,15 @@
  * THE SOFTWARE.
  */
 
-// Define parsers for bed-like files  (.bed, .gff, .vcf, etc)
+/**
+ *  Define parsers for bed-like files  (.bed, .gff, .vcf, etc).  A parser should implement 2 methods
+ *
+ *     parseHeader(data) - return an object representing a header.  Details are format specific
+ *
+ *     parseFeatures(data) - return a list of features
+ *
+ */
+
 
 var igv = (function (igv) {
 
@@ -86,7 +94,8 @@ var igv = (function (igv) {
                     j;
 
                 allFeatures = [];
-                for (i = 0; i < len; i++) {
+
+               for (i = 0; i < len; i++) {
                     line = lines[i];
                     if (line.startsWith("track") || line.startsWith("#") || line.startsWith("browser")) {
                         continue;
@@ -124,6 +133,66 @@ var igv = (function (igv) {
             }
 
         }
+
+        function parseFixedStep(line) {
+
+            var tokens = line.match(/\S+/g),
+                cc = tokens[1].split("=")[1],
+                ss = parseInt(tokens[2].split("=")[1], 10),
+                step = parseInt(tokens[3].split("=")[1], 10),
+                span = (tokens.length > 4) ? parseInt(tokens[4].split("=")[1], 10) : 1;
+
+            return {type: "fixedStep", chrom: cc, start: ss, step: step, span: span, index: 0};
+
+        }
+
+        function parseVariableStep(line) {
+
+            var tokens = line.match(/\S+/g),
+                cc = tokens[1].split("=")[1],
+                span = tokens.length > 2 ? parseInt(tokens[2].split("=")[1], 10) : 1;
+            return {type: "variableStep", chrom: cc, span: span}
+
+        }
+
+        function parseTrackLine(line) {
+            var properties = {},
+                tokens = line.split(/(?:")([^"]+)(?:")|([^\s"]+)(?=\s+|$)/g),
+                tmp = [],
+                i, tk, curr;
+
+            // Clean up tokens array
+            for (i = 1; i < tokens.length; i++) {
+                if (!tokens[i] || tokens[i].trim().length === 0) continue;
+
+                tk = tokens[i].trim();
+
+                if (tk.endsWith("=") > 0) {
+                    curr = tk;
+                }
+                else if (curr) {
+                    tmp.push(curr + tk);
+                    curr = undefined;
+                }
+                else {
+                    tmp.push(tk);
+                }
+
+            }
+
+
+            tmp.forEach(function (str) {
+                if (!str) return;
+                var kv = str.split('=', 2);
+                if (kv.length == 2) {
+                    properties[kv[0]] = kv[1];
+                }
+
+            });
+
+            return properties;
+        }
+
 
         function decodeBed(tokens) {
 
@@ -268,65 +337,9 @@ var igv = (function (igv) {
             }
         }
 
-        function parseFixedStep(line) {
 
-            var tokens = line.match(/\S+/g),
-                cc = tokens[1].split("=")[1],
-                ss = parseInt(tokens[2].split("=")[1], 10),
-                step = parseInt(tokens[3].split("=")[1], 10),
-                span = (tokens.length > 4) ? parseInt(tokens[4].split("=")[1], 10) : 1;
-
-            return {type: "fixedStep", chrom: cc, start: ss, step: step, span: span, index: 0};
-
-        }
-
-        function parseVariableStep(line) {
-
-            var tokens = line.match(/\S+/g),
-                cc = tokens[1].split("=")[1],
-                span = tokens.length > 2 ? parseInt(tokens[2].split("=")[1], 10) : 1;
-            return {type: "variableStep", chrom: cc, span: span}
-
-        }
-
-        function parseTrackLine(line) {
-            var properties = {},
-                tokens = line.split(/(?:")([^"]+)(?:")|([^\s"]+)(?=\s+|$)/g),
-                tmp = [],
-                i, tk, curr;
-
-            // Clean up tokens array
-            for (i = 1; i < tokens.length; i++) {
-                if (!tokens[i] || tokens[i].trim().length === 0) continue;
-
-                tk = tokens[i].trim();
-
-                if (tk.endsWith("=") > 0) {
-                    curr = tk;
-                }
-                else if (curr) {
-                    tmp.push(curr + tk);
-                    curr = undefined;
-                }
-                else {
-                    tmp.push(tk);
-                }
-
-            }
-
-
-            tmp.forEach(function (str) {
-                if (!str) return;
-                var kv = str.split('=', 2);
-                if (kv.length == 2) {
-                    properties[kv[0]] = kv[1];
-                }
-
-            });
-
-            return properties;
-        }
     }
+
 
     return igv;
 })(igv || {});
