@@ -167,8 +167,6 @@ var cursor = (function (cursor) {
 
             // Adjust the frame margin so it is no more than 1/4 the width of the region (in pixels)
             frameMargin = Math.floor(Math.min(framePixelWidth / 4), frameMargin);
-//frameMargin = 0;
-            scale = regionWidth / (framePixelWidth + frameMargin);
 
             sampleInterval = Math.max(1, Math.floor(1.0 / framePixelWidth));
 
@@ -205,7 +203,7 @@ var cursor = (function (cursor) {
                         feature = regionFeatures[i];
                         if (feature.end >= regionBpStart && feature.start < regionBpEnd) {
                             score = feature.score;
-
+                            scale = regionWidth / (framePixelWidth - frameMargin);    // BP per pixel
                             pStart = Math.min(pxEnd, Math.max(pxStart, pxStart + (feature.start - regionBpStart) / scale));
                             pEnd = Math.min(pxEnd, pxStart + (feature.end - regionBpStart) / scale);
                             pw = Math.max(1, pEnd - pStart);

@@ -394,7 +394,7 @@ var cursor = (function (cursor) {
     cursor.CursorRegion = function (feature) {
 
         this.chr = feature.chr;
-        this.location = Math.round((feature.start + feature.end) / 2);
+        this.location = (feature.start + feature.end) / 2;
     };
 
     /**
