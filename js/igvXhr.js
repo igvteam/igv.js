@@ -30,7 +30,7 @@ var igvxhr = (function (igvxhr) {
         igvxhr.load(url, options);
     }
 
-    igvxhr.loadJson = function(url, options) {
+    igvxhr.loadJson = function (url, options) {
 
         var success = options.success;
 
@@ -75,7 +75,7 @@ var igvxhr = (function (igvxhr) {
     igvxhr.load = function (url, options) {
 
         var xhr = new XMLHttpRequest(),
-        sendData = options.sendData,
+            sendData = options.sendData,
             method = options.method || (sendData ? "POST" : "GET"),
             success = options.success,
             error = options.error || success,
@@ -85,7 +85,9 @@ var igvxhr = (function (igvxhr) {
             range = options.range,
             responseType = options.responseType,
             contentType = options.contentType,
-            mimeType = options.mimeType;
+            mimeType = options.mimeType,
+            headers = options.headers,
+            header_keys, key, value, i;
 
         if (task) task.xhrRequest = xhr;
 
@@ -97,7 +99,6 @@ var igvxhr = (function (igvxhr) {
             xhr.setRequestHeader("Cache-control", "no-cache");
             xhr.setRequestHeader("If-None-Match", Math.random().toString(36));  // For nasty safari bug https://bugs.webkit.org/show_bug.cgi?id=82672
         }
-
         if (contentType) {
             xhr.setRequestHeader("Content-Type", contentType);
         }
@@ -106,6 +107,15 @@ var igvxhr = (function (igvxhr) {
         }
         if (responseType) {
             xhr.responseType = responseType;
+        }
+        if (headers) {
+            header_keys = Object.keys(headers);
+            for (i = 0; i < header_keys.length; i++) {
+                key = header_keys[i];
+                value = headers[key];
+                console.log("Adding to header: " + key + "=" + value);
+                xhr.setRequestHeader(key, value);
+            }
         }
 
         xhr.onload = function (event) {
@@ -136,21 +146,30 @@ var igvxhr = (function (igvxhr) {
 
     }
 
-    igvxhr.loadHeader = function (url, options)  {
+    igvxhr.loadHeader = function (url, options) {
 
         var xhr = new XMLHttpRequest(),
             method = "HEAD",
             success = options.success,
             error = options.error || success,
             timeout = options.timeout || error,
-            loader = this;
+            headers = options.headers,
+            header_keys, key, value, i;
 
+        if (headers) {
+            header_keys = Object.keys(headers);
+            for (i = 0; i < header_keys.length; i++) {
+                key = header_keys[i];
+                value = headers[key];
+                console.log("Adding to header: " + key + "=" + value);
+                xhr.setRequestHeader(key, value);
+            }
+        }
 
         xhr.open(method, url);
 
         xhr.onload = function (event) {
 
-            loader.status = xhr.status;
             var headerStr = xhr.getAllResponseHeaders();
             var headerDictionary = parseResponseHeaders(headerStr);
             success(headerDictionary);
@@ -159,7 +178,7 @@ var igvxhr = (function (igvxhr) {
         xhr.onerror = function (event) {
 
             console.log("XMLHttpRequest - Error loading" + loader.url);
-                error(event);
+            error(event);
         }
 
 
@@ -197,6 +216,30 @@ var igvxhr = (function (igvxhr) {
     }
 
 
+    igvxhr.getContentLength = function (url, options) {
+
+        var continuation = options.success;
+
+        if (!options.error) {
+            options.error = function () {
+                continuation(-1);
+            }
+        }
+
+        options.success = function (header) {
+            var contentLengthString = header ? header["Content-Length"] : null;
+            if (contentLengthString) {
+                continuation(parseInt(contentLengthString));
+            }
+            else {
+                continuation(-1);
+            }
+
+        }
+
+        igvxhr.loadHeader(url, options);
+    }
+
     igvxhr.loadStringFromFile = function (localfile, options) {
 
         var fileReader = new FileReader(),
@@ -223,7 +266,6 @@ var igvxhr = (function (igvxhr) {
 
         fileReader.readAsArrayBuffer(localfile);
     }
-
 
     function arrayBufferToString(arraybuffer, gzipped) {
 

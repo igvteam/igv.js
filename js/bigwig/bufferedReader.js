@@ -31,11 +31,12 @@
 var igv = (function (igv) {
 
 
-    igv.BufferedReader = function (path, contentLength, bufferSize) {
-        this.path = path;
+    igv.BufferedReader = function (config, contentLength, bufferSize) {
+        this.path = config.url;
         this.contentLength = contentLength;
         this.bufferSize = bufferSize ? bufferSize : 512000;
         this.range = {start: -1, size: -1};
+        this.config = config;
     }
 
     /**
@@ -65,8 +66,9 @@ var igv = (function (igv) {
 
             loadRange = {start: requestedRange.start, size: bufferSize};
 
-            igvxhr.loadArrayBuffer(this.path,
+            igvxhr.loadArrayBuffer(bufferedReader.path,
                 {
+                    headers: this.config.headers,
                     range: {start: requestedRange.start, size: bufferSize},
                     success: function (arrayBuffer) {
                         // TODO -- handle error

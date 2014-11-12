@@ -10,7 +10,7 @@ function bamTests() {
             beg = 24375199,
             end = 24378544,
             bamPath = "../test/data/bam/gstt1_sample.bam",
-            bamFile = new igv.BamReader(bamPath, null);
+            bamFile = new igv.BamReader({url: bamPath});
 
         bamFile.readAlignments(chr, beg, end, function (alignments) {
 
@@ -37,7 +37,7 @@ function bamTests() {
             bpStart = 24375199,
             bpEnd = 24378544,
             bamPath = "../test/data/bam/brain_chr22sample.bam",
-            bamReader = new igv.BamReader(bamPath, null),
+            bamReader = new igv.BamReader({url: bamPath}),
             blocks;
 
 
@@ -121,7 +121,7 @@ function bamTests() {
     asyncTest("header", function () {
 
         var bamPath = "../test/data/bam/gstt1_sample.bam",
-            bamFile = new igv.BamReader(bamPath, null);
+            bamFile = new igv.BamReader({url: bamPath});
 
         bamFile.readHeader(function () {
 
@@ -136,7 +136,7 @@ function bamTests() {
     asyncTest("large header", function () {
 
         var bamPath = "../test/data/bam/IonXpress_078_rawlib.lgheader.bam",
-            bamFile = new igv.BamReader(bamPath, null);
+            bamFile = new igv.BamReader({url: bamPath});
 
         bamFile.readHeader(function () {
 

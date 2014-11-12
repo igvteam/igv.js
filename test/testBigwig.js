@@ -14,7 +14,7 @@ function runBigwigTests() {
 
         var url = "../test/data/bigwig/bigWigExample.bw";
 
-        var bwReader = new igv.BWReader(url);
+        var bwReader = new igv.BWReader({url: url});
 
         bwReader.loadHeader(function () {
 
@@ -63,7 +63,7 @@ function runBigwigTests() {
     asyncTest("R+ Tree", function () {
         var url = "../test/data/bigwig/bigWigExample.bw";
 
-        var bwReader = new igv.BWReader(url);
+        var bwReader = new igv.BWReader({url: url});
 
         bwReader.loadHeader(function () {
 
@@ -92,7 +92,7 @@ function runBigwigTests() {
 
         createMockObjects(bpPerPixel);
 
-        var bWSource = new igv.BWSource(url);
+        var bWSource = new igv.BWSource({url: url});
 
         bWSource.getFeatures(chr, bpStart, bpEnd, function (features) {
 
@@ -115,7 +115,7 @@ function runBigwigTests() {
 
         createMockObjects(bpPerPixel);
 
-        var bWSource = new igv.BWSource(url);
+        var bWSource = new igv.BWSource({url: url});
 
         bWSource.getFeatures(chr, bpStart, bpEnd, function (features) {
 
@@ -138,7 +138,7 @@ function runBigwigTests() {
 
         createMockObjects(bpPerPixel);
 
-        var bWSource = new igv.BWSource(url);
+        var bWSource = new igv.BWSource({url: url});
 
         bWSource.getFeatures(chr, bpStart, bpEnd, function (features) {
 

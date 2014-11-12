@@ -35,6 +35,8 @@ var igv = (function (igv) {
      */
     igv.BamSource = function (config) {
 
+        this.config = config;
+
         if (config.sourceType === "ga4gh") {
             this.bamFile = new igv.Ga4ghReader(config.url, config.readsetId, config.authKey, config.proxy);
         }

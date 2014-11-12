@@ -37,11 +37,12 @@ var igv = (function (igv) {
     RPTREE_NODE_CHILD_ITEM_SIZE = 24;  // child item size
     var BUFFER_SIZE = 512000;     //  buffer
 
-    igv.RPTree = function (fileOffset, filesize, path, littleEndian) {
+    igv.RPTree = function (fileOffset, filesize, config, littleEndian) {
 
+        this.config = config;
         this.filesize = filesize;
         this.fileOffset = fileOffset; // File offset to beginning of tree
-        this.path = path;
+        this.path = config.url;
         this.littleEndian = littleEndian;
     }
 
@@ -50,7 +51,7 @@ var igv = (function (igv) {
 
         var tree = this,
             rootNodeOffset = this.fileOffset + RPTREE_HEADER_SIZE,
-            bufferedReader = new igv.BufferedReader(this.path, this.filesize, BUFFER_SIZE);
+            bufferedReader = new igv.BufferedReader(this.config, this.filesize, BUFFER_SIZE);
 
         this.readNode(rootNodeOffset, bufferedReader, function (node) {
             tree.rootNode = node;
@@ -123,7 +124,7 @@ var igv = (function (igv) {
         var rpTree = this,
             leafItems = [],
             processing = new Set();
-        bufferedReader = new igv.BufferedReader(this.path, this.filesize, BUFFER_SIZE);
+        bufferedReader = new igv.BufferedReader(this.config, this.filesize, BUFFER_SIZE);
 
         processing.add(0);  // Zero represents the root node
         findLeafItems(this.rootNode, 0);

@@ -33,6 +33,7 @@ var igv = (function (igv) {
      */
     igv.BedFeatureSource = function (config) {
 
+        this.config = config;
         if (config.localFile) {
             this.localFile = config.localFile;
             this.filename = config.localFile.name;
@@ -145,11 +146,11 @@ var igv = (function (igv) {
             idxFile = myself.indexUrl,
             queryChr = range ? range.chr : undefined;
 
-        if (!idxFile) idxFile = (myself.url ? myself.url + ".idx" : null);
+        if (!idxFile) idxFile =  myself.url + ".idx" ;
 
         if (this.index === undefined && !myself.localFile && queryChr && this.type != "wig") {  // TODO -  handle local files
 
-            igv.loadTribbleIndex(idxFile, function (index) {
+            igv.loadTribbleIndex(idxFile, myself.config, function (index) {
                 myself.index = index;              // index might be null => no index, don't try again
                 loadFeaturesWithIndex(index);
             });
@@ -167,6 +168,7 @@ var igv = (function (igv) {
         function loadFeaturesWithIndex(index) {
             var parser = myself.parser,
                 options = {
+                    headers: myself.config.headers,
                     success: function (data) {
                         success(parser.parseFeatures(data));
                     },
