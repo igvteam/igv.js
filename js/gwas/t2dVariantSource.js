@@ -36,6 +36,7 @@ var igv = (function (igv) {
      */
     igv.T2DVariantSource = function (config) {
 
+    	this.config = config;
         this.proxy = (config.proxy ? config.proxy : "//www.broadinstitute.org/igvdata/t2d/postJson.php");   // Always use a proxy for now
         this.url = config.url;
         this.trait = config.trait;
@@ -99,27 +100,30 @@ var igv = (function (igv) {
                     "url=" + this.url + "&data=" + JSON.stringify(data) :
                     JSON.stringify(data);
 
-                igvxhr.loadJson(queryURL, {
-                    sendData: tmp,
-                    task: task,
-                    success: function (json) {
-                        var variants;
+                var options = {
+                        sendData: tmp,
+                        task: task,
+                        success: function (json) {
+                            var variants;
 
-                        if (json) {
-                            variants = json.variants;
-                            variants.sort(function (a, b) {
-                                return a.POS - b.POS;
-                            });
-                            source.cache = new FeatureCache(chr, queryStart, queryEnd, variants);
+                            if (json) {
+                                variants = json.variants;
+                                variants.sort(function (a, b) {
+                                    return a.POS - b.POS;
+                                });
+                                source.cache = new FeatureCache(chr, queryStart, queryEnd, variants);
 
-                            success(variants);
+                                success(variants);
+                            }
+                            else {
+                                success(null);
+                            }
+
                         }
-                        else {
-                            success(null);
-                        }
-
-                    }
-                });
+                };
+                options.config = myself.config;
+                
+                igvxhr.loadJson(queryURL, options);
 
             }
 

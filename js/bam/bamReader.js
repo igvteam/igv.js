@@ -76,8 +76,8 @@ var igv = (function (igv) {
 
             if (contentLength > 0) len = Math.min(contentLength, len);
 
-            igvxhr.loadArrayBuffer(bam.bamPath,
-                {
+            
+            var options = {
                     range: {start: 0, size: len},
 
                     success: function (compressedBuffer) {
@@ -116,7 +116,12 @@ var igv = (function (igv) {
                         continuation();
 
                     }
-                });
+            };
+            
+            // we need the config to get any potential header information when loading data
+            options.config = bam.config;
+            
+            igvxhr.loadArrayBuffer(bam.bamPath, options );
 
         });
     }
@@ -156,8 +161,7 @@ var igv = (function (igv) {
                             var fetchMin = c.minv.block;
                             var fetchMax = c.maxv.block + (1 << 16); // *sigh*
 
-                            igvxhr.loadArrayBuffer(bam.bamPath,
-                                {
+                            var options =  {
                                     task: task,
                                     range: {start: fetchMin, size: fetchMax - fetchMin + 1},
                                     success: function (compressed) {
@@ -182,8 +186,12 @@ var igv = (function (igv) {
                                             loadNextChunk(index);
                                         }
                                     }
-                                });
-
+                            };
+                            
+                            // to pass header information for instance
+                            options.config = bam.config;
+                            
+                            igvxhr.loadArrayBuffer(bam.bamPath, options);
 
                         }
                     });
@@ -406,7 +414,7 @@ var igv = (function (igv) {
             continuation(bam.index);
         }
         else {
-            igv.loadBamIndex(bam.baiPath, function (index) {
+            igv.loadBamIndex(bam.config, bam.baiPath, function (index) {
                 bam.index = index;
                 continuation(bam.index);
             });
@@ -424,28 +432,29 @@ var igv = (function (igv) {
 
                 var headerSize = bamIndex.headerSize;
 
-                // Gen the content length first, so we don't try to read beyond the end of the file
-                igvxhr.loadHeader(bam.headPath,
-                    {
-                        success: function (header) {
-                            var contentLengthString = header ? header["Content-Length"] : null;
-                            if (contentLengthString) {
-                                bam.contentLength = parseInt(contentLengthString);
-                            }
-                            else {
-                                bam.contentLength = -1;
-                            }
+                var options = { success: function (header) {
+                    var contentLengthString = header ? header["Content-Length"] : null;
+                    if (contentLengthString) {
+                        bam.contentLength = parseInt(contentLengthString);
+                    }
+                    else {
+                        bam.contentLength = -1;
+                    }
 
-                            if (!bam.contentLength) bam.contentLength = -1; //Protect against inf loop
-                            continuation(bam.contentLength);
+                    if (!bam.contentLength) bam.contentLength = -1; //Protect against inf loop
+                    continuation(bam.contentLength);
 
-                        },
-                        error: function () {
-                            bam.contentLength = -1;
-                            continuation(bam.contentLength);
-                        }
-
-                    });
+                },
+                error: function () {
+                    bam.contentLength = -1;
+                    continuation(bam.contentLength);
+                }};
+                
+                // we need the config to get any potential header information when loading data
+                options.config = bam.config;
+                
+                // Get the content length first, so we don't try to read beyond the end of the file
+                igvxhr.loadHeader(bam.headPath, options);
             });
         }
     }

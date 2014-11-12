@@ -33,11 +33,10 @@ var igv = (function (igv) {
      * Read the index.  This method is public to support unit testing.
      * @param continuation
      */
-    igv.loadBamIndex = function (indexUrl, continuation) {
+    igv.loadBamIndex = function (config, indexUrl, continuation) {
 
 
-        igvxhr.loadArrayBuffer(indexUrl,
-            {
+    	var options =  {
                 success: function (arrayBuffer) {
 
                     var indices = [],
@@ -99,7 +98,10 @@ var igv = (function (igv) {
 
                     continuation(new igv.BamIndex(indices, blockMin));
                 }
-            });
+        };
+    	options.config = config;
+    	
+        igvxhr.loadArrayBuffer(indexUrl, options);
     }
 
 

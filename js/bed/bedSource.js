@@ -33,6 +33,8 @@ var igv = (function (igv) {
      */
     igv.BedFeatureSource = function (config) {
 
+    	this.config = config;
+    	
         if (config.localFile) {
             this.localFile = config.localFile;
             this.filename = config.localFile.name;
@@ -149,7 +151,7 @@ var igv = (function (igv) {
 
         if (this.index === undefined && !myself.localFile && queryChr && this.type != "wig") {  // TODO -  handle local files
 
-            igv.loadTribbleIndex(idxFile, function (index) {
+            igv.loadTribbleIndex(myself.config, idxFile, function (index) {
                 myself.index = index;              // index might be null => no index, don't try again
                 loadFeaturesWithIndex(index);
             });
@@ -173,6 +175,9 @@ var igv = (function (igv) {
                     task: task
                 };
 
+            // need to add config to options to pass in header information 
+            options.config = myself.config;
+            
             if (index) {
 
                 var chrIdx = index[queryChr];
