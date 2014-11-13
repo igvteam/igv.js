@@ -167,6 +167,9 @@ var igv = (function (igv) {
         var browser = this,
             trackView = new igv.TrackView(track, this);
 
+        // Register view with track.  This is unfortunate, but is needed to support "resize" events.
+        track.trackView = trackView;
+
         if (undefined === track.order) {
             track.order = (this.nextTrackOrder)++;
         }
@@ -413,9 +416,16 @@ var igv = (function (igv) {
         }
 
         if (this.genome) {
-            if (!end) end = start + viewportWidth * this.referenceFrame.bpPerPixel;
             chromosome = this.genome.getChromosome(this.referenceFrame.chr);
-            if (chromosome && end > chromosome.bpLength) {
+
+            var maxBpPerPixel = chromosome.bpLength / viewportWidth;
+            if(this.referenceFrame.bpPerPixel > maxBpPerPixel) this.referenceFrame.bpPerPixel = maxBpPerPixel;
+
+            if (!end) {
+                end = start + viewportWidth * this.referenceFrame.bpPerPixel;
+            }
+
+             if (chromosome && end > chromosome.bpLength) {
                 start -= (end - chromosome.bpLength);
             }
         }
@@ -647,6 +657,8 @@ var igv = (function (igv) {
         });
 
         $(trackContainerDiv).dblclick(function (e) {
+
+            if(e.altKey) return;  // Ignore if alt key is down
 
             e = $.event.fix(e);   // Sets pageX and pageY for browsers that don't support them
 

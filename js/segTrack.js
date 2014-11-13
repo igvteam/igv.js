@@ -25,20 +25,25 @@
 
 var igv = (function (igv) {
 
+    var sortDirection = 1;
+
     igv.SegTrack = function (config) {
+
         this.config = config;
         this.url = config.url;
         this.featureSource = new igv.BedFeatureSource(this.config);
         this.label = config.label;
         this.id = config.id || config.label;
         this.height = 100;
-        this.minHeight = this.height;
-        this.maxHeight = this.height;
+        this.minHeight = config.minHeight || 500;
+        this.maxHeight = config.maxHeight || 500;
+        this.sampleHeight = config.sampleHeight || 2;
         this.order = config.order;
+
 
         this.posColorScale = new igv.GradientColorScale(
             {
-                low: 0,
+                low: 0.1,
                 lowR: 255,
                 lowG: 255,
                 lowB: 255,
@@ -54,7 +59,7 @@ var igv = (function (igv) {
                 lowR: 0,
                 lowG: 0,
                 lowB: 255,
-                high: 1.5,
+                high: -0.1,
                 highR: 255,
                 highG: 255,
                 highB: 255
@@ -81,10 +86,9 @@ var igv = (function (igv) {
 //        console.log("geneTrack.draw " + refFrame.chr);
 
         var chr = refFrame.chr,
-            track = this;
+            track = this
 
         canvas.fillRect(0, 0, pixelWidth, pixelHeight, {'fillStyle': "rgb(255, 255, 255)"});
-
 
         this.featureSource.getFeatures(chr, bpStart, bpEnd, function (featureList) {
 
@@ -102,6 +106,8 @@ var igv = (function (igv) {
                         }
                     }
 
+                    checkSize();
+
                     for (i = 0, len = featureList.length; i < len; i++) {
 
                         segment = featureList[i];
@@ -109,20 +115,23 @@ var igv = (function (igv) {
                         if (segment.end < bpStart) continue;
                         if (segment.start > bpEnd) break;
 
-                        y = track.samples[segment.sample] * 10;
+                        y = track.samples[segment.sample] * track.sampleHeight;
 
-                        if (segment.value < 0) {
+                        if (segment.value < -0.1) {
                             color = track.negColorScale.getColor(segment.value);
                         }
-                        else {
+                        else if (segment.value > 0.1) {
                             color = track.posColorScale.getColor(segment.value);
+                        }
+                        else {
+                            color = "white";
                         }
 
                         px = Math.round((segment.start - bpStart) / xScale);
                         px1 = Math.round((segment.end - bpStart) / xScale);
                         pw = Math.max(1, px1 - px);
 
-                        canvas.fillRect(px, y, pw, 10, {fillStyle: color});
+                        canvas.fillRect(px, y, pw, track.sampleHeight, {fillStyle: color});
 
                     }
                 }
@@ -133,6 +142,20 @@ var igv = (function (igv) {
                 if (continuation) continuation();
             },
             task);
+
+
+        function checkSize() {
+
+            if (track.trackView) {
+
+                var desiredHeight = track.sampleCount * track.sampleHeight;
+                if (desiredHeight > track.trackView.contentDiv.clientHeight) {
+                    track.trackView.setTrackHeight(desiredHeight);
+                }
+
+            }
+
+        }
     };
 
     igv.SegTrack.prototype.drawLabel = function (ctx) {
@@ -144,6 +167,86 @@ var igv = (function (igv) {
 //        ctx.restore();
 
     }
+
+    /**
+     * Sort samples by the average value over the genomic range in the direction indicated (1 = ascending, -1 descending)
+     */
+    igv.SegTrack.prototype.sortSamples = function (chr, bpStart, bpEnd, direction, callback) {
+
+        var track = this,
+            segment, min, max, f, i,
+            len = bpEnd - bpStart,
+            scores = {}, s, sampleNames;
+
+        this.featureSource.getFeatures(chr, bpStart, bpEnd, function (featureList) {
+
+
+            // Compute weighted average score for each sample
+            for (i = 0, len = featureList.length; i < len; i++) {
+
+                segment = featureList[i];
+
+                if (segment.end < bpStart) continue;
+                if (segment.start > bpEnd) break;
+
+                min = Math.max(bpStart, segment.start);
+                max = Math.min(bpEnd, segment.end);
+                f = (max - min) / len;
+
+                s = scores[segment.sample];
+                if (!s) s = 0;
+                scores[segment.sample] = s + f * segment.value;
+
+            }
+
+            // Now sort sample names by score
+            sampleNames = Object.keys(track.samples);
+            sampleNames.sort(function (a, b) {
+
+                var s1 = scores[a];
+                var s2 = scores[b];
+                if (!s1) s1 = Number.MAX_VALUE;
+                if (!s2) s2 = Number.MAX_VALUE;
+
+                if (s1 == s2) return 0;
+                else if (s1 > s2) return direction;
+                else return direction * -1;
+
+            });
+
+            // Finally update sample hash
+            for (i = 0; i < sampleNames.length; i++) {
+                track.samples[sampleNames[i]] = i;
+            }
+
+            callback();
+
+        });
+    }
+
+
+    /**
+     * Handle an alt-click.   TODO perhaps generalize this for all tracks (optional).
+     *
+     * @param event
+     */
+    igv.SegTrack.prototype.altClick = function (genomicLocation, event) {
+
+        // Define a region 5 "pixels" wide in genomic coordinates
+        var refFrame = igv.browser.referenceFrame,
+            bpWidth = refFrame.toBP(2.5),
+            bpStart = genomicLocation - bpWidth,
+            bpEnd = genomicLocation + bpWidth,
+            chr = refFrame.chr,
+            track = this;
+
+        this.sortSamples(chr, bpStart, bpEnd, sortDirection, function () {
+            track.trackView.update();
+        });
+
+        sortDirection *= -1;
+    }
+
 
     return igv;
 
