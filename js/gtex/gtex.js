@@ -31,6 +31,8 @@ var igv = (function (igv) {
 
         if (!options) options = {};
 
+        options.type = "GTEX";
+        
         options.showKaryo = false;
 
         if (!options.fastaUrl) {
