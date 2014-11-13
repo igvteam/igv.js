@@ -384,7 +384,7 @@ var igv = (function (igv) {
             width = this.trackContainerDiv.clientWidth;
         }
 
-       return width;
+        return width;
 
     };
 
@@ -418,13 +418,13 @@ var igv = (function (igv) {
             chromosome = this.genome.getChromosome(this.referenceFrame.chr);
 
             var maxBpPerPixel = chromosome.bpLength / viewportWidth;
-            if(this.referenceFrame.bpPerPixel > maxBpPerPixel) this.referenceFrame.bpPerPixel = maxBpPerPixel;
+            if (this.referenceFrame.bpPerPixel > maxBpPerPixel) this.referenceFrame.bpPerPixel = maxBpPerPixel;
 
             if (!end) {
                 end = start + viewportWidth * this.referenceFrame.bpPerPixel;
             }
 
-             if (chromosome && end > chromosome.bpLength) {
+            if (chromosome && end > chromosome.bpLength) {
                 start -= (end - chromosome.bpLength);
             }
         }
@@ -536,8 +536,11 @@ var igv = (function (igv) {
                                 locusTokens = tokens[1].split(":");
                                 chr = locusTokens[0].trim();
 
-                                // GTEX HACK -- need aliases
-                                if (this.type === "GTEX" && !chr.startsWith("chr")) chr = "chr" + chr;
+
+                                if (this.type === "GTEX") {
+                                    if (!chr.startsWith("chr")) chr = "chr" + chr;   // TODO GTEX HACK -- need aliases
+                                    browser.selection = new igv.GtexSelection(type == 'gtex' ? {snp: feature} : {gene: feature});
+                                }
 
                                 rangeTokens = locusTokens[1].split("-");
                                 start = parseInt(rangeTokens[0].replace(/,/g, ''));
@@ -548,8 +551,6 @@ var igv = (function (igv) {
                                     end += browser.flanking;
                                 }
 
-
-                                browser.selection = new igv.GtexSelection(type == 'gtex' ? {snp: feature} : {gene: feature});
 
                                 browser.goto(chr, start, end);
 
@@ -661,7 +662,7 @@ var igv = (function (igv) {
 
         $(trackContainerDiv).dblclick(function (e) {
 
-            if(e.altKey) return;  // Ignore if alt key is down
+            if (e.altKey) return;  // Ignore if alt key is down
 
             e = $.event.fix(e);   // Sets pageX and pageY for browsers that don't support them
 

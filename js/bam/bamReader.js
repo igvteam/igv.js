@@ -314,7 +314,7 @@ var igv = (function (igv) {
 
                 qseq = '';
                 for (j = 0; j < lseq; ++j) {
-                    qseq += String.fromCharCode(ba[p + j]);
+                    qseq += String.fromCharCode(ba[p + j] + 33);
                 }
                 p += lseq;
 
