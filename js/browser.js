@@ -25,7 +25,6 @@
 
 var igv = (function (igv) {
 
-    const MIN_TRACK_WIDTH = 500;
 
     igv.Browser = function (options, trackContainer) {
 
@@ -385,7 +384,7 @@ var igv = (function (igv) {
             width = this.trackContainerDiv.clientWidth;
         }
 
-        return Math.max(MIN_TRACK_WIDTH, width);
+       return width;
 
     };
 
@@ -536,6 +535,10 @@ var igv = (function (igv) {
 
                                 locusTokens = tokens[1].split(":");
                                 chr = locusTokens[0].trim();
+
+                                // GTEX HACK -- need aliases
+                                if (this.type === "GTEX" && !chr.startsWith("chr")) chr = "chr" + chr;
+
                                 rangeTokens = locusTokens[1].split("-");
                                 start = parseInt(rangeTokens[0].replace(/,/g, ''));
                                 end = parseInt(rangeTokens[1].replace(/,/g, ''));

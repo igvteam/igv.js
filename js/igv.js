@@ -51,14 +51,19 @@ var igv = (function (igv) {
             return igv.browser;
         }
 
+        console.log("Create browser");
 
         if (!options) options = {};
         options.type = "IGV";
 
-        console.log("Create browser");
         if (!options.flanking && isT2D(options)) {  // TODO -- hack for demo, remove
             options.flanking = 100000;
         }
+
+        if (options.genome) {
+            mergeGenome(options);
+        }
+
 
         var contentRoot = $('<div id="igvContentDiv" class="igv-content-div">')[0],
             contentHeader = $('<div id="igvHeaderDiv" class="igv-header-div">')[0],
@@ -76,7 +81,7 @@ var igv = (function (igv) {
         // controls
         controlDiv = options.createControls ?
             options.createControls(browser, options) :
-            createStandardControls(browser,options);
+            createStandardControls(browser, options);
 
         $(rootDiv).append($(controlDiv));
 
@@ -159,6 +164,29 @@ var igv = (function (igv) {
 
     }
 
+    // Merge some standard genome tracks,  this is useful for demos
+    function mergeGenome(options) {
+
+        if (options.genome && options.genome === "hg19") {
+            options.fastaURL = "//dn7ywbm9isq8j.cloudfront.net/genomes/seq/hg19/hg19.fasta";
+            options.cytobandURL = "//dn7ywbm9isq8j.cloudfront.net/genomes/seq/hg19/cytoBand.txt";
+
+            if (!options.tracks) options.tracks = [];
+
+            options.tracks.push(
+                {
+                    type: "sequence",
+                    order: 9999
+                });
+            options.tracks.push(
+                {
+                    url: "//dn7ywbm9isq8j.cloudfront.net/annotations/hg19/genes/gencode.v18.collapsed.bed",
+                    label: "Genes",
+                    order: 10000
+                });
+        }
+    }
+
     // TODO -- temporary hack for demo, remove ASAP
     function isT2D(options) {
         if (options.tracks && options.tracks.length > 0) {
@@ -172,7 +200,8 @@ var igv = (function (igv) {
     }
 
     return igv;
-})(igv || {});
+})
+(igv || {});
 
 
 
