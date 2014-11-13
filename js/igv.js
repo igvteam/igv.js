@@ -54,7 +54,7 @@ var igv = (function (igv) {
         console.log("Create browser");
 
         if (!options) options = {};
-        options.type = "IGV";
+        if(!options.type) options.type = "IGV";
 
         if (!options.flanking && isT2D(options)) {  // TODO -- hack for demo, remove
             options.flanking = 100000;
