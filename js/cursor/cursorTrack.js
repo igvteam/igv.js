@@ -64,7 +64,7 @@ var cursor = (function (cursor) {
     };
 
     cursor.defaultColor = function () {
-       return "blue";
+        return "rgb(  3, 116, 178)";
     };
 
     cursor.CursorTrack.prototype.isSortTrack = function () {

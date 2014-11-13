@@ -366,10 +366,26 @@
 
         var options;
 
+//        options = {
+//            trackHeight: 100,
+//            type: "CURSOR"
+//        };
+
         options = {
             trackHeight: 100,
-            type: "CURSOR"
+            type: "CURSOR",
+            tracks: [
+                {
+                    type: "bed",
+                    url: "test/data/cursor/hg19.tss.bed.gz",
+                    label: "TSS",
+                    designatedTrack: true
+                }
+            ]
         };
+
+
+
 
         igv.createCursorBrowser(options);
     });
