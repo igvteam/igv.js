@@ -54,7 +54,7 @@ var igv = (function (igv) {
         // TODO -- move this code to a factory method
         if (this.type === "vcf") {
             this.parser = igv.vcfParser();
-        } else if(this.type === "seg") {
+        } else if (this.type === "seg") {
             this.parser = igv.segParser();
         }
 
@@ -134,6 +134,13 @@ var igv = (function (igv) {
         }
     }
 
+
+    // seg files don't have an index
+    function isIndexable() {
+        return this.config.indexUrl ||
+            (this.url && !this.url.endsWith(".gz") && this.config.indexed != false && this.type != "wig" );
+    }
+
     /**
      *
      * @param success
@@ -146,10 +153,10 @@ var igv = (function (igv) {
             idxFile = myself.indexUrl,
             queryChr = range ? range.chr : undefined;
 
-        if (!idxFile) idxFile =  myself.url + ".idx" ;
 
-        // seg files don't have an index
-        if (this.index === undefined && !myself.localFile && queryChr && this.type != "seg" && this.type != "wig" && !myself.url.endsWith(".gz")) {  // TODO -  handle local files
+        if (this.index === undefined && queryChr && isIndexable.call(this)) {  // TODO -  handle local files
+
+            if (!idxFile) idxFile = myself.url + ".idx";
 
             igv.loadTribbleIndex(idxFile, myself.config, function (index) {
                 myself.index = index;              // index might be null => no index, don't try again
@@ -161,9 +168,6 @@ var igv = (function (igv) {
         else {
             loadFeaturesWithIndex(myself.index);
         }
-
-
-        // TODO If there's an index add range bytes to the options
 
 
         function loadFeaturesWithIndex(index) {
