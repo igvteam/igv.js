@@ -148,7 +148,8 @@ var igv = (function (igv) {
 
         if (!idxFile) idxFile =  myself.url + ".idx" ;
 
-        if (this.index === undefined && !myself.localFile && queryChr && this.type != "wig" && !myself.url.endsWith(".gz")) {  // TODO -  handle local files
+        // seg files don't have an index
+        if (this.index === undefined && !myself.localFile && queryChr && this.type != "seg" && this.type != "wig" && !myself.url.endsWith(".gz")) {  // TODO -  handle local files
 
             igv.loadTribbleIndex(idxFile, myself.config, function (index) {
                 myself.index = index;              // index might be null => no index, don't try again

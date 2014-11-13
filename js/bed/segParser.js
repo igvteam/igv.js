@@ -73,8 +73,9 @@ var igv = (function (igv) {
             parseHeader: parseHeader,
 
             parseFeatures: function (data) {
+                
                 var feature,
-                    lines = data.split("\n"),
+                    lines = data? data.split("\n") : [] ,
                     len = lines.length,
                     tokens,
                     allFeatures = [],

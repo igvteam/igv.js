@@ -119,8 +119,8 @@ var igvxhr = (function (igvxhr) {
         }
 
         xhr.onload = function (event) {
-
-            if (xhr.status >= 200 && xhr.status <= 300) {
+            // when the url points to a local file, the status is 0 but that is no error
+            if (xhr.status == 0 || (xhr.status >= 200 && xhr.status <= 300)) {
                 success(xhr.response, xhr);
             }
             else {
@@ -265,6 +265,7 @@ var igvxhr = (function (igvxhr) {
         };
 
         fileReader.readAsArrayBuffer(localfile);
+        
     }
 
     function arrayBufferToString(arraybuffer, gzipped) {
