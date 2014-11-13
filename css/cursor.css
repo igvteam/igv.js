@@ -366,21 +366,16 @@
     /*font-size: medium;*/
 }
 
-
-/*Four values apply to 1. top, 2. right, 3. bottom and 4. to the left side*/
-.igv-cursor-ui-spacer4 {
-    padding: 0 2px 0 2px;
-}
-
-.igv-cursor-ui-spacer8 {
-    padding: 0 4px 0 4px;
-}
-
 .igv-cursor-ui-header {
+
     margin-top: 4px;
+
     width: 100%;
     height: auto;
-    background-image:url(../img/cursor_logo.png);
+
+    background: url(../img/cursor_logo.svg);
+    /*background-image:url(../img/cursor_logo.png);*/
+    background-size: 100px 36px;
     background-repeat:no-repeat;
     background-position: 21px 9px;
 }
@@ -427,3 +422,11 @@
     display: none;
 }
 
+/*Four values apply to 1. top, 2. right, 3. bottom and 4. to the left side*/
+.igv-cursor-ui-spacer4 {
+    padding: 0 2px 0 2px;
+}
+
+.igv-cursor-ui-spacer8 {
+    padding: 0 4px 0 4px;
+}
