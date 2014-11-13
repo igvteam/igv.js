@@ -83,17 +83,18 @@ var igv = (function (igv) {
             },
 
             parseFeatures: function (data) {
+
+                if(!data) return null;
+
                 var feature,
                     lines = data.split("\n"),
                     len = lines.length,
                     tokens,
-                    allFeatures,
+                    allFeatures = [],
                     line,
                     i,
                     cnt = 0,
                     j;
-
-                allFeatures = [];
 
                for (i = 0; i < len; i++) {
                     line = lines[i];

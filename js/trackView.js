@@ -64,7 +64,7 @@ var igv = (function (igv) {
         }
 
         // Optionally override CSS height
-        if(track.height) trackDiv.style.height = track.height + "px";
+        if (track.height) trackDiv.style.height = track.height + "px";
 
         this.trackDiv = trackDiv;
 
@@ -130,7 +130,7 @@ var igv = (function (igv) {
         }
 
         // CURSOR specific stuff
-        if ( "CURSOR" === browser.type) {
+        if ("CURSOR" === browser.type) {
 
             // track manipulation container
             trackManipulationContainer = $('<div class="igv-track-manipulation-container">')[0];
@@ -142,11 +142,11 @@ var igv = (function (igv) {
             $(trackManipulationIconBox).append($('<i class="fa fa-chevron-circle-up   igv-track-manipulation-move-up">')[0]);
             $(trackManipulationIconBox).append($('<i class="fa fa-chevron-circle-down igv-track-manipulation-move-down">')[0]);
 
-            $(trackManipulationIconBox).find("i.fa-chevron-circle-up").click(function() {
+            $(trackManipulationIconBox).find("i.fa-chevron-circle-up").click(function () {
                 browser.reduceTrackOrder(myself)
             });
 
-            $(trackManipulationIconBox).find("i.fa-chevron-circle-down").click(function() {
+            $(trackManipulationIconBox).find("i.fa-chevron-circle-down").click(function () {
                 browser.increaseTrackOrder(myself)
             });
 
@@ -196,23 +196,23 @@ var igv = (function (igv) {
         var minHeight = this.track.minHeight || 10;
         var maxHeight = this.track.maxHeight || 1000;
 
-        newHeight = Math.max(minHeight, newHeight);
-        newHeight = Math.min(maxHeight, newHeight);
+        var newTrackHeight = Math.max(minHeight, newHeight);
+        var newTrackHeight = Math.min(maxHeight, newHeight);
 
-        var heightStr = newHeight + "px";
-        this.track.height = newHeight;
-        this.trackDiv.style.height = heightStr;
+        var trackHeightStr = newTrackHeight + "px";
+        this.track.height = newTrackHeight;
+        this.trackDiv.style.height = trackHeightStr;
 
         // control panel
-        this.controlDiv.style.height = heightStr;
+        this.controlDiv.style.height = trackHeightStr;
 
-        this.controlCanvas.style.height = heightStr;
-        this.controlCanvas.setAttribute("height", newHeight);
+        this.controlCanvas.style.height = trackHeightStr;
+        this.controlCanvas.setAttribute("height", newTrackHeight);
 
-        this.viewportDiv.style.height = heightStr;
-        this.contentDiv.style.height = heightStr;
+        this.viewportDiv.style.height = trackHeightStr;
+        this.contentDiv.style.height = newHeight + "px";
 
-        this.canvas.style.height = heightStr;
+        this.canvas.style.height = newHeight + "px";
         this.canvas.setAttribute("height", newHeight);
 
         if (this.browser.type === "CURSOR") {
@@ -395,7 +395,8 @@ var igv = (function (igv) {
             e = $.event.fix(e);   // Sets pageX and pageY for browsers that don't support them
 
             var canvasCoords = igv.translateMouseCoordinates(e, canvas),
-                referenceFrame = trackView.browser.referenceFrame;
+                referenceFrame = trackView.browser.referenceFrame,
+                genomicLocation = Math.floor((referenceFrame.start) + referenceFrame.toBP(canvasCoords.x));
 
             if (!referenceFrame) return;
 
@@ -407,12 +408,17 @@ var igv = (function (igv) {
             }
 
             else {
-                if (Math.abs(canvasCoords.x - mouseDownX) <= igv.constants.dragThreshold && trackView.track.popupData) {
+
+                if (e.altKey) {
+                    if (trackView.track.altClick && trackView.tile) {
+                        trackView.track.altClick(genomicLocation, e);
+                    }
+                } else if (Math.abs(canvasCoords.x - mouseDownX) <= igv.constants.dragThreshold && trackView.track.popupData) {
                     const doubleClickDelay = 300;
+
                     popupTimer = window.setTimeout(function () {
 
                             var popupData,
-                                genomicLocation = Math.floor((referenceFrame.start) + referenceFrame.toBP(canvasCoords.x)),
                                 xOrigin;
 
                             if (undefined === genomicLocation) {
