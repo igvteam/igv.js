@@ -119,7 +119,7 @@ var igv = (function (igv) {
             canvas.setProperties({ strokeStyle: alignmentColor });
 
 
-            if (coverageMap) {// TODO -- why is covereageMap is sometimes undefined !?
+            if (coverageMap) {// TODO -- why is covereageMap sometimes undefined !?
 
                 // paint backdrop color for all coverage buckets
                 w = Math.max(1, 1.0 / refFrame.bpPerPixel);
@@ -264,7 +264,7 @@ var igv = (function (igv) {
 
                                     if (readChar === "X" || refChar !== readChar) {
                                         if (blockQual && blockQual.length > i) {
-                                            readQual = blockQual.charCodeAt(i) - 33;
+                                            readQual = blockQual.charCodeAt(i);
                                             baseColor = shadedBaseColor(readQual, readChar);
                                         }
                                         else {
