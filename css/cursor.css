@@ -151,7 +151,7 @@
     left:   1px;
     right:  1px;
 
-    background-color: #ccc;
+    background-color: #f3f3f3;
 
 }
 
@@ -351,14 +351,13 @@
 
 .igv-control-sort-fontawesome-selected {
 
-    padding-top: 3px;
     position: relative;
+    float: left;
+
+    padding-top: 3px;
+
     cursor: pointer;
     color: rgba(204, 51, 0, 1);
-
-    float: left;
-    margin-left: 2px;
-    margin-right: 2px;
 }
 
 .igv-control-sort-fontawesome-selected:hover,
