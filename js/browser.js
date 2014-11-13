@@ -25,7 +25,6 @@
 
 var igv = (function (igv) {
 
-
     igv.Browser = function (options, trackContainer) {
 
         igv.browser = this;   // Make globally visible (for use in html markup).
@@ -146,7 +145,6 @@ var igv = (function (igv) {
 
     };
 
-
     /**
      * Add a new track.  Each track is associated with the following DOM elements
      *
@@ -163,7 +161,7 @@ var igv = (function (igv) {
      */
     igv.Browser.prototype.addTrack = function (track) {
 
-        var browser = this,
+        var myself = this,
             trackView = new igv.TrackView(track, this);
 
         // Register view with track.  This is unfortunate, but is needed to support "resize" events.
@@ -185,7 +183,9 @@ var igv = (function (igv) {
                     track.trackFilter.setWithJSON(track.config.trackFilter);
                 }
 
-                browser.resize();
+                myself.resize();
+
+
             });
         }
         else {

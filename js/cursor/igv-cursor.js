@@ -103,7 +103,7 @@ var igv = (function (igv) {
             downloadInput.val(session);
 
             $('#igvSaveSessionModal').modal('hide');
-            
+
         });
 
         // session upload
@@ -123,8 +123,6 @@ var igv = (function (igv) {
                 $("#igvSessionLoad").val("");
 
                 $('#igvSessionLoadModal').modal('hide');
-
-                browser.sessionTeardown();
 
                 browser.loadSession(session);
 
@@ -266,9 +264,20 @@ var igv = (function (igv) {
         contentHeader = $('<div class="row"></div>')[0];
         $(browser.div).append(contentHeader);
 
+
+
+
+
+
         // horizontal scrollbar container. fill in the guts after track construction
         horizontalScrollBarContainer = $('<div class="igv-horizontal-scrollbar-container-div">')[0];
         $(browser.div).append(horizontalScrollBarContainer);
+
+
+
+
+
+
 
         // utility div
         thang = $('<div class="igv-utility-div">');
@@ -490,13 +499,36 @@ var igv = (function (igv) {
             }
 
             newTrack = new cursor.CursorTrack(config, browser);
-            if (undefined !== config.designatedTrack && true === config.designatedTrack) {
+            if (undefined === browser.designatedTrack || (undefined !== config.designatedTrack && true === config.designatedTrack)) {
+
                 browser.designatedTrack = newTrack;
+
+                browser.designatedTrack.featureSource.allFeatures(function (featureList) {
+
+                    var horizontalScrollBarContainer;
+
+                    browser.cursorModel.setRegions(featureList);
+
+                    browser.addTrack(browser.designatedTrack);
+
+                    browser.selectDesignatedTrack(browser.designatedTrack.trackFilter.trackPanel);
+
+                    if (undefined === browser.horizontalScrollbar) {
+
+                        horizontalScrollBarContainer = $("div.igv-horizontal-scrollbar-container-div");
+                        browser.horizontalScrollbar = new cursor.HorizontalScrollbar(browser, $(horizontalScrollBarContainer));
+                        browser.horizontalScrollbar.update();
+                    }
+
+                    browser.fitToScreen();
+
+                });
+
             }
+            else {
 
-            this.addTrack(newTrack);
-
-//            return newTrack;
+                browser.addTrack(newTrack);
+            }
 
             function cursorGetType(path) {
 
@@ -596,8 +628,7 @@ var igv = (function (igv) {
 
         browser.loadSession = function (session) {
 
-            var cursorTracks,
-                horizontalScrollBarContainer;
+            var cursorTracks;
 
             browser.sessionTeardown();
 
@@ -634,9 +665,6 @@ var igv = (function (igv) {
             if (undefined === browser.designatedTrack) {
                 browser.designatedTrack = cursorTracks[ 0 ];
             }
-
-//            horizontalScrollBarContainer = $("div.igv-horizontal-scrollbar-container-div");
-//            browser.horizontalScrollbar = new cursor.HorizontalScrollbar(browser, $(horizontalScrollBarContainer));
 
             browser.designatedTrack.featureSource.allFeatures(function (featureList) {
 

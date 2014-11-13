@@ -178,8 +178,7 @@ var cursor = (function (cursor) {
                 myself.regions.forEach(function (region) {
 
                     var success,
-                        score,
-                        passFilter = true;
+                       passFilter = true;
 
                     trackPackages.forEach(function (trackPackage) {
 

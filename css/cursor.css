@@ -261,7 +261,6 @@
     position: absolute;
     left: 4px;
     top: 0;
-    /*color: rgba(51, 153, 204, 1);*/
     color: grey;
 }
 
@@ -269,7 +268,6 @@
     position: absolute;
     left: 4px;
     bottom: 0;
-    /*color: rgba(51, 153, 204, 1);*/
     color: grey;
 }
 
@@ -277,7 +275,6 @@
     position: absolute;
     left: 20px;
     top: 0;
-    /*color: rgba(153, 0, 0, 1);*/
     color: grey;
     background-color: white;
 }
@@ -293,7 +290,7 @@
 .igv-track-manipulation-move-up:active,
 .igv-track-manipulation-move-down:active,
 .igv-track-manipulation-discard:active  {
-    font-size: medium;
+    /*font-size: medium;*/
     color: rgba(51, 51, 51, 1);
 }
 
