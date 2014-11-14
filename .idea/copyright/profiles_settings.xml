@@ -1,7 +1,7 @@
 <component name="CopyrightManager">
   <settings default="">
     <module2copyright>
-      <element module="All" copyright="js" />
+      <element module="js" copyright="js" />
     </module2copyright>
   </settings>
 </component>
