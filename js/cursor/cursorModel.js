@@ -169,7 +169,7 @@ var cursor = (function (cursor) {
                     filterPackages.push({trackFilter: trackView.track.trackFilter, featureCache: featureCache });
                 }
 
-                if (++howmany == trackViews.length) runFilters();
+                if (++howmany === trackViews.length) runFilters();
             });
         });
 

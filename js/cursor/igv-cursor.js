@@ -283,20 +283,9 @@ var igv = (function (igv) {
         contentHeader = $('<div class="row"></div>')[0];
         $(browser.div).append(contentHeader);
 
-
-
-
-
-
         // horizontal scrollbar container. fill in the guts after track construction
         horizontalScrollBarContainer = $('<div class="igv-horizontal-scrollbar-container-div">')[0];
         $(browser.div).append(horizontalScrollBarContainer);
-
-
-
-
-
-
 
         // utility div
         thang = $('<div class="igv-utility-div">');
@@ -341,7 +330,6 @@ var igv = (function (igv) {
             browser.initializeWithOptions(options);
 
         }
-
 
         return browser;
     };
@@ -676,7 +664,6 @@ var igv = (function (igv) {
 
         };
 
-        // tear down pre-existing session
         browser.sessionTeardown = function () {
 
             var trackView,
@@ -696,7 +683,10 @@ var igv = (function (igv) {
 
         browser.loadSession = function (session) {
 
-            var cursorTracks;
+            var cursorTracks,
+                howmany,
+                horizontalScrollBarContainer;
+
 
             browser.sessionTeardown();
 
@@ -734,30 +724,32 @@ var igv = (function (igv) {
                 browser.designatedTrack = cursorTracks[ 0 ];
             }
 
-            browser.designatedTrack.featureSource.allFeatures(function (featureList) {
+            howmany = 0;
+            cursorTracks.forEach(function (cursorTrack) {
 
-                var horizontalScrollBarContainer;
+                browser.addTrack(cursorTrack);
 
-                browser.cursorModel.setRegions(featureList);
+                if (++howmany === cursorTracks.length) {
 
-                cursorTracks.forEach(function (cursorTrack) {
-                    browser.addTrack(cursorTrack);
-                });
+                    browser.selectDesignatedTrack(browser.designatedTrack.trackFilter.trackPanel);
 
-                browser.selectDesignatedTrack(browser.designatedTrack.trackFilter.trackPanel);
+                    horizontalScrollBarContainer = $("div.igv-horizontal-scrollbar-container-div");
+                    browser.horizontalScrollbar = new cursor.HorizontalScrollbar(browser, $(horizontalScrollBarContainer));
 
-                horizontalScrollBarContainer = $("div.igv-horizontal-scrollbar-container-div");
-                browser.horizontalScrollbar = new cursor.HorizontalScrollbar(browser, $(horizontalScrollBarContainer));
+                    browser.designatedTrack.featureSource.allFeatures(function (featureList) {
 
-                browser.cursorModel.filterRegions();
+                        browser.cursorModel.setRegions(featureList);
 
-                browser.setFrameWidth(browser.trackViewportWidth() * session.framePixelWidthUnitless);
+                        browser.setFrameWidth(browser.trackViewportWidth() * session.framePixelWidthUnitless);
 
-                browser.referenceFrame.bpPerPixel = 1.0 / browser.cursorModel.framePixelWidth;
+                        browser.referenceFrame.bpPerPixel = 1.0 / browser.cursorModel.framePixelWidth;
 
-                browser.horizontalScrollbar.update();
+                        browser.goto("", session.start, session.end);
 
-                browser.goto("", session.start, session.end);
+                        browser.horizontalScrollbar.update();
+
+                    });
+                }
 
             });
 
