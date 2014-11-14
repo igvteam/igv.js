@@ -714,6 +714,7 @@ var igv = (function (igv) {
                         color: trackSession.color,
                         label: trackSession.label,
                         order: trackSession.order,
+                        trackHeight: trackSession.height,
                         trackFilter: trackSession.trackFilter,
                         designatedTrack: trackSession.designatedTrack
                     };
