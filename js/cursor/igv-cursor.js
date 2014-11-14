@@ -752,9 +752,12 @@ var igv = (function (igv) {
 
                         browser.referenceFrame.bpPerPixel = 1.0 / browser.cursorModel.framePixelWidth;
 
-                        browser.goto("", session.start, session.end);
+                        //browser.goto("", session.start, session.end);
+                        browser.fitToScreen();
+
 
                         browser.horizontalScrollbar.update();
+
 
                     });
                 }
