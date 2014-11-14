@@ -238,12 +238,28 @@ var igv = (function (igv) {
 
                         });
 
-                        browser.loadTrack({
-                            type: "bed",
-                            url: record.path,
-                            label: encode.encodeTrackLabel(record),
-                            color: encode.encodeAntibodyColor(record.antibody)
-                        });
+                        if (0 === browser.trackPanels.length) {
+
+                            browser.initializeWithTrackConfig({
+                                type: "bed",
+                                url: record.path,
+                                label: encode.encodeTrackLabel(record),
+                                color: encode.encodeAntibodyColor(record.antibody),
+                                designatedTrack: true
+                            });
+
+                        }
+                        else {
+
+                            browser.loadTrack({
+                                type: "bed",
+                                url: record.path,
+                                label: encode.encodeTrackLabel(record),
+                                color: encode.encodeAntibodyColor(record.antibody)
+                            });
+
+                        }
+
 
                     }
 
@@ -319,6 +335,40 @@ var igv = (function (igv) {
                 return;
             }
 
+            browser.initializeWithOptions(options);
+
+        }
+
+
+        return browser;
+    };
+
+    function addCursorExtensions(browser) {
+
+        browser.initializeWithTrackConfig = function (trackConfig) {
+
+            var horizontalScrollBarContainer;
+
+            browser.loadTrack(trackConfig);
+
+            browser.selectDesignatedTrack(browser.designatedTrack.trackFilter.trackPanel);
+
+            horizontalScrollBarContainer = $("div.igv-horizontal-scrollbar-container-div");
+            browser.horizontalScrollbar = new cursor.HorizontalScrollbar(browser, $(horizontalScrollBarContainer));
+
+            browser.designatedTrack.featureSource.allFeatures(function (featureList) {
+
+                browser.cursorModel.setRegions(featureList);
+
+                browser.horizontalScrollbar.update();
+            });
+
+        };
+
+        browser.initializeWithOptions = function (options) {
+
+            var horizontalScrollBarContainer;
+
             options.tracks.forEach(function (trackConfig) {
                 browser.loadTrack(trackConfig);
             });
@@ -334,13 +384,8 @@ var igv = (function (igv) {
 
                 browser.horizontalScrollbar.update();
             });
-        }
 
-
-        return browser;
-    };
-
-    function addCursorExtensions(browser) {
+        };
 
         browser.presentSortStatus = function (trackView) {
 
@@ -499,36 +544,12 @@ var igv = (function (igv) {
             }
 
             newTrack = new cursor.CursorTrack(config, browser);
-            if (undefined === browser.designatedTrack || (undefined !== config.designatedTrack && true === config.designatedTrack)) {
 
+            if (true === config.designatedTrack) {
                 browser.designatedTrack = newTrack;
-
-                browser.designatedTrack.featureSource.allFeatures(function (featureList) {
-
-                    var horizontalScrollBarContainer;
-
-                    browser.cursorModel.setRegions(featureList);
-
-                    browser.addTrack(browser.designatedTrack);
-
-                    browser.selectDesignatedTrack(browser.designatedTrack.trackFilter.trackPanel);
-
-                    if (undefined === browser.horizontalScrollbar) {
-
-                        horizontalScrollBarContainer = $("div.igv-horizontal-scrollbar-container-div");
-                        browser.horizontalScrollbar = new cursor.HorizontalScrollbar(browser, $(horizontalScrollBarContainer));
-                        browser.horizontalScrollbar.update();
-                    }
-
-                    browser.fitToScreen();
-
-                });
-
             }
-            else {
 
-                browser.addTrack(newTrack);
-            }
+            browser.addTrack(newTrack);
 
             function cursorGetType(path) {
 

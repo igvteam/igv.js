@@ -106,6 +106,14 @@ var cursor = (function (cursor) {
 
         track.cursorHistogram.initializeBins();
 
+        if (undefined === this.regions || 0 === this.regions.length) {
+
+            if (continutation) {
+                continutation();
+            }
+
+        }
+
         track.featureSource.getFeatureCache(function (featureCache) {
 
             myself.regions.forEach(function (region) {
