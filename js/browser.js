@@ -100,7 +100,7 @@ var igv = (function (igv) {
             newTrack = new igv.GeneTrack(config);
         } else if (type === "bam") {
             newTrack = new igv.BAMTrack(config);
-        } else if (type === "wig" || type === "bigwig") {
+        } else if (type === "wig" || type === "bigwig" || type === "bedgraph") {
             newTrack = new igv.WIGTrack(config);
         } else if (type === "sequence") {
             newTrack = new igv.SequenceTrack(config);
