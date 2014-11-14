@@ -14,10 +14,14 @@
 
     <link href="//maxcdn.bootstrapcdn.com/font-awesome/4.2.0/css/font-awesome.min.css" rel="stylesheet">
 
-    <!-- IGV Bootstrap css -->
-    <link href="css/igv.css" type="text/css" rel="stylesheet">
-    <link href="css/cursor.css" type="text/css" rel="stylesheet">
+    <!-- IGV css -->
+    <link href="css/igv.css" rel="stylesheet" type="text/css">
 
+    <!-- CURSOR css -->
+    <link href="css/cursor.css" rel="stylesheet" type="text/css">
+
+    <!-- Google fonts -->
+    <link href='http://fonts.googleapis.com/css?family=PT+Sans:400,700' rel='stylesheet' type='text/css'>
     <!-- jQuery JS -->
     <script src="//code.jquery.com/jquery-1.11.0.min.js"></script>
 
@@ -80,6 +84,9 @@
 <body>
 
 <div class="igv-cursor-ui-header">
+
+    <a class="igv-about-link" href="http://www.apple.com" target="_blank">About</a>
+
     <div class="igv-cursor-ui-holder">
         <div class="igv-cursor-ui">
             <div class="igv-cursor-ui-item igv-cursor-ui-right-border">
@@ -92,6 +99,8 @@
                     </button><!-- File Open/Save -->
 
                     <ul class="dropdown-menu" role="menu" aria-labelledby="igvHeaderFileDropdown">
+
+                        <li role="presentation" class="dropdown-header">Load date from</li>
 
                         <li role="presentation">
                             <a role="menuitem" tabindex="-1" href="#" data-toggle="modal" data-target="#igvEncodeModal">
@@ -172,7 +181,7 @@
 </div><!-- header -->
 
 <div class="igv-cursor-ui-header-blurb">
-    Primary track is <span></span> with <span></span> total regions (<span></span> regions remain with filters applied)
+    <span></span> regions based on <span></span> (<span></span> regions remain with filters applied)
 </div>
 
 <div id="igvSessionLoadModal" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="igvSessionLoadModalLabel" aria-hidden="true">
@@ -359,27 +368,7 @@
 
         options = {
             trackHeight: 100,
-            type: "CURSOR",
-            tracks: [
-                {
-                    type: "bed",
-                    url: "test/data/cursor/hg19.tss.bed.gz",
-                    label: "TSS",
-                    designatedTrack: true
-                },
-                {
-                    type: "bed",
-                    url: "test/data/cursor/wgEncodeBroadHistoneH1hescH3k4me3StdPk.broadPeak.gz",
-                    label: "H3k4me3 H1hesc",
-                    color: "rgb(0, 150, 0)"
-                },
-                {
-                    type: "bed",
-                    url: "test/data/cursor/wgEncodeBroadHistoneH1hescH3k27me3StdPk.broadPeak.gz",
-                    label: "H3k27me3 H1hesc",
-                    color: "rgb(150, 0, 0)"
-                }
-            ]
+            type: "CURSOR"
         };
 
         igv.createCursorBrowser(options);
