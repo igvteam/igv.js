@@ -240,6 +240,9 @@ var igv = (function (igv) {
 
                         if (0 === browser.trackPanels.length) {
 
+                            // When loading first track into app
+                            // with no pre-exisiting tracks.
+                            // set track as designated track
                             browser.initializeWithTrackConfig({
                                 type: "bed",
                                 url: record.path,
@@ -572,12 +575,30 @@ var igv = (function (igv) {
 
                 localFile = localFiles[ i ];
 
-                browser.loadTrack({
-                    type: "bed",
-                    localFile: localFile,
-                    url: undefined,
-                    label: localFile.name
-                });
+                if (0 === browser.trackPanels.length) {
+
+                    // When loading first track into app
+                    // with no pre-exisiting tracks.
+                    // set track as designated track
+                    browser.initializeWithTrackConfig({
+                        type: "bed",
+                        localFile: localFile,
+                        url: undefined,
+                        label: localFile.name,
+                        designatedTrack: true
+                    });
+
+                }
+                else {
+
+                    browser.loadTrack({
+                        type: "bed",
+                        localFile: localFile,
+                        url: undefined,
+                        label: localFile.name
+                    });
+
+                }
 
                 localFiles[ i ] = undefined;
 
@@ -591,11 +612,31 @@ var igv = (function (igv) {
 
             elementObject.val("");
 
-            browser.loadTrack({
-                type: "bed",
-                url: path,
-                label: browser.trackLabelWithPath(path)
-            });
+
+            if (0 === browser.trackPanels.length) {
+
+                // When loading first track into app
+                // with no pre-exisiting tracks.
+                // set track as designated track
+                browser.initializeWithTrackConfig({
+                    type: "bed",
+                    url: path,
+                    label: browser.trackLabelWithPath(path),
+                    designatedTrack: true
+                });
+
+            }
+            else {
+
+                browser.loadTrack({
+                    type: "bed",
+                    url: path,
+                    label: browser.trackLabelWithPath(path)
+                });
+
+            }
+
+
 
         };
 
