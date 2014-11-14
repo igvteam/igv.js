@@ -85,7 +85,7 @@
 
 <div class="igv-cursor-ui-header">
 
-    <a class="igv-about-link" href="http://www.apple.com" target="_blank">About</a>
+    <a class="igv-about-link" href="//cursor.businesscatalyst.com/index.html" target="_blank">About</a>
 
     <div class="igv-cursor-ui-holder">
         <div class="igv-cursor-ui">
@@ -368,7 +368,16 @@
 
         options = {
             trackHeight: 100,
-            type: "CURSOR"
+            type: "CURSOR",
+            tracks: [
+                {
+                    type: "bed",
+                    url: "null.bed",
+                    label: "",
+                    trackHeight: 1,
+                    designatedTrack: true
+                }
+            ]
         };
 
 //        options = {
