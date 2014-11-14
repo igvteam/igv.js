@@ -34,7 +34,7 @@ var cursor = (function (cursor) {
         this.featureSource = new igv.BedFeatureSource(config);
         this.featureSource.maxFeatureCount = MAX_FEATURE_COUNT;
         this.label = config.label;
-        this.height = browser.trackHeight || 100;
+        this.height = config.trackHeight || (browser.trackHeight || 100);
         this.color = config.color || cursor.defaultColor();
 
         this.cursorModel = browser.cursorModel;
