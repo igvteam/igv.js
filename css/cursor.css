@@ -90,11 +90,11 @@
 
 }
 
-.igv-about-link:hover,
-.igv-about-link:focus,
-.igv-about-link.active {
-    font-size: 110%;
-}
+/*.igv-about-link:hover,*/
+/*.igv-about-link:focus,*/
+/*.igv-about-link.active {*/
+    /*font-size: 110%;*/
+/*}*/
 
 .igv-utility-div {
     position: relative;
