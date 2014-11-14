@@ -371,7 +371,6 @@
     height: auto;
 
     background: url(../img/cursor_logo.svg);
-    /*background-image:url(../img/cursor_logo.png);*/
     background-size: 100px 36px;
     background-repeat:no-repeat;
     background-position: 21px 9px;
@@ -386,7 +385,7 @@
     margin:auto;
     width: 100%;
     display:inline-block;
-    border: solid 1px #444;
+    border: solid 1px grey;
     background-color: #fff;
     border-top: none;
     border-bottom-left-radius: 5px;
@@ -396,19 +395,41 @@
 
 .igv-cursor-ui-item {
     float:left;
+    color: grey;
+    font-weight: 400;
     padding: 5px 8px 5px 8px;
 }
 
 .igv-cursor-input-text {
     height: 28px;
     width: 48px;
-    border: solid 1px #444;
+    border: solid 1px gray;
     border-radius: 3px;
     padding: 0 3px 0 3px;
 }
 
+.igv-cursor-input-text:hover,
+.igv-cursor-input-text:focus,
+.igv-cursor-input-text:active {
+    color: rgba(51, 51, 51, 1);
+}
+
 .igv-cursor-ui-right-border {
-    border-right: solid 1px #444;
+    border-right: solid 1px gray;
+}
+
+.fa-search-minus:hover,
+.fa-search-minus:focus,
+.fa-search-minus:active,
+/**/
+.fa-search-plus:hover,
+.fa-search-plus:focus,
+.fa-search-plus:active,
+/**/
+.fa-compress:hover,
+.fa-compress:focus,
+.fa-compress:active {
+    color: rgba(51, 51, 51, 1);
 }
 
 .igv-cursor-ui-header-blurb {
