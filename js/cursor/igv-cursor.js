@@ -358,22 +358,29 @@ var igv = (function (igv) {
 
         browser.initializeWithOptions = function (options) {
 
-            var horizontalScrollBarContainer;
+            var howmany,
+                horizontalScrollBarContainer;
 
+            howmany = 0;
             options.tracks.forEach(function (trackConfig) {
+
                 browser.loadTrack(trackConfig);
-            });
 
-            browser.selectDesignatedTrack(browser.designatedTrack.trackFilter.trackPanel);
+                if (++howmany === options.tracks.length) {
 
-            horizontalScrollBarContainer = $("div.igv-horizontal-scrollbar-container-div");
-            browser.horizontalScrollbar = new cursor.HorizontalScrollbar(browser, $(horizontalScrollBarContainer));
+                    browser.selectDesignatedTrack(browser.designatedTrack.trackFilter.trackPanel);
 
-            browser.designatedTrack.featureSource.allFeatures(function (featureList) {
+                    horizontalScrollBarContainer = $("div.igv-horizontal-scrollbar-container-div");
+                    browser.horizontalScrollbar = new cursor.HorizontalScrollbar(browser, $(horizontalScrollBarContainer));
 
-                browser.cursorModel.setRegions(featureList);
+                    browser.designatedTrack.featureSource.allFeatures(function (featureList) {
 
-                browser.horizontalScrollbar.update();
+                        browser.cursorModel.setRegions(featureList);
+
+                        browser.horizontalScrollbar.update();
+                    });
+
+                }
             });
 
         };
