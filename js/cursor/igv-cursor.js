@@ -679,12 +679,18 @@ var igv = (function (igv) {
         // tear down pre-existing session
         browser.sessionTeardown = function () {
 
-            var trackView;
+            var trackView,
+                horizontalScrollBarContainer;
 
             while (this.trackPanels.length > 0) {
                 trackView = this.trackPanels[ this.trackPanels.length - 1 ];
                 this.removeTrack(trackView.track);
             }
+
+            horizontalScrollBarContainer = $("div.igv-horizontal-scrollbar-container-div");
+            $(horizontalScrollBarContainer).empty();
+
+            this.horizontalScrollbar = undefined;
 
         };
 
@@ -730,15 +736,18 @@ var igv = (function (igv) {
 
             browser.designatedTrack.featureSource.allFeatures(function (featureList) {
 
+                var horizontalScrollBarContainer;
+
                 browser.cursorModel.setRegions(featureList);
 
                 cursorTracks.forEach(function (cursorTrack) {
-
                     browser.addTrack(cursorTrack);
-
                 });
 
                 browser.selectDesignatedTrack(browser.designatedTrack.trackFilter.trackPanel);
+
+                horizontalScrollBarContainer = $("div.igv-horizontal-scrollbar-container-div");
+                browser.horizontalScrollbar = new cursor.HorizontalScrollbar(browser, $(horizontalScrollBarContainer));
 
                 browser.cursorModel.filterRegions();
 
@@ -746,9 +755,9 @@ var igv = (function (igv) {
 
                 browser.referenceFrame.bpPerPixel = 1.0 / browser.cursorModel.framePixelWidth;
 
-                browser.goto("", session.start, session.end);
-
                 browser.horizontalScrollbar.update();
+
+                browser.goto("", session.start, session.end);
 
             });
 
