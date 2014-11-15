@@ -177,7 +177,7 @@ var igvxhr = (function (igvxhr) {
 
         xhr.onerror = function (event) {
 
-            console.log("XMLHttpRequest - Error loading" + loader.url);
+            console.log("XMLHttpRequest - Error loading" + url);
             error(event);
         }
 
