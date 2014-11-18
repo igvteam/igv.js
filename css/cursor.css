@@ -118,47 +118,35 @@
     top: 0;
     right:0;
 
-    height:16px;
+    height:12px;
 
+    /*background-color: red;*/
     background-color: white;
 }
 
 .igv-horizontal-scrollbar-shim-div {
 
     position: absolute;
+    height: 100%;
 
-    top: 0;
-    bottom: 0;
-
-    left:0;
-    right:0;
-
-    background-color: white;
-
-    border-color: #444;
-    border-style: solid;
-    border-width: thin;
-
+    outline: 1px solid #444;
+    outline-offset: 1px;
 }
 
 .igv-horizontal-scrollbar-div {
 
     position: absolute;
-
-    top:    1px;
-    bottom: 1px;
-
-    left:   1px;
-    right:  1px;
+    width: 100%;
+    height: 100%;
 
     background-color: #f3f3f3;
+    /*background-color: lime;*/
 
 }
 
 .igv-horizontal-scrollbar-draggable-div {
 
     position: absolute;
-
     left: 0;
     top: 0;
 
