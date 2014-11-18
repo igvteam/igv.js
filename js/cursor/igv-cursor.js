@@ -55,7 +55,7 @@ var igv = (function (igv) {
         };
         document.getElementById('frameWidthInput').onchange = function (e) {
 
-            var value = $("#frameWidthInput").val();
+            var value = $("input[id='frameWidthInput']").val();
             if (!igv.isNumber(value)) {
                 console.log("bogus " + value);
                 return;
@@ -458,10 +458,30 @@ var igv = (function (igv) {
                 browser.cursorModel.framePixelWidth = frameWidth;
                 browser.referenceFrame.bpPerPixel = 1 / frameWidth;
 
-                $("input[id='frameWidthInput']").val(Math.round(frameWidth * 1000) / 1000);
+                //$("input[id='frameWidthInput']").val(Math.round(frameWidth * 1000) / 1000);
+                $("input[id='frameWidthInput']").val(frameWidthNumberFormatter(frameWidth));
 
                 browser.update();
             }
+
+            function frameWidthNumberFormatter(frameWidth) {
+
+                var divisor;
+
+                if (frameWidth < 1) {
+
+                    divisor = 1000;
+                } else if (frameWidth < 100) {
+
+                    divisor = 100;
+                } else {
+                    
+                    divisor = 10;
+                }
+
+                return Math.round(frameWidth * divisor) / divisor;
+            }
+
         };
 
         browser.setRegionSize = function (regionSizeString) {
