@@ -482,17 +482,25 @@ var igv = (function (igv) {
 
         console.log("Search " + feature);
 
-        var type, tokens, chr, posTokens, start, end, source, f, tokens, url,
+        var type, tokens, chr, posTokens, start, end, source, f, tokens, url, chromosome,
             browser = this;
 
-        if (feature.contains(":") && feature.contains("-")) {
+        if (feature.contains(":") && feature.contains("-") || this.genome.getChromosome(feature)) {
 
             type = "locus";
             tokens = feature.split(":");
             chr = tokens[0];
-            posTokens = tokens[1].split("-");
-            start = parseInt(posTokens[0].replace(/,/g, "")) - 1;
-            end = parseInt(posTokens[1].replace(/,/g, ""));
+
+            if(tokens.length == 1) {
+                chromosome = this.genome.getChromosome(feature);
+                start = 0;
+                end = chromosome.bpLength;
+            }
+            else {
+                posTokens = tokens[1].split("-");
+                start = parseInt(posTokens[0].replace(/,/g, "")) - 1;
+                end = parseInt(posTokens[1].replace(/,/g, ""));
+            }
 
             if (end > start) {
                 this.goto(chr, start, end);

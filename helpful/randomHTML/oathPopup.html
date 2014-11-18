@@ -38,6 +38,8 @@
                         expiresIn = gup(url, 'expires_in');
                         win.close();
 
+                        console.log("Access token = " + acToken);
+
                         validateToken(acToken);
                     }
                 } catch(e) {
