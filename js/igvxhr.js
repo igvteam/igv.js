@@ -130,6 +130,17 @@ var igvxhr = (function (igvxhr) {
         }
 
         xhr.onerror = function (event) {
+
+            if(isCrossDomain(url) && url) {
+                // Try the proxy, if it exists.  Presumably this is a php file
+                if(igv.browser.crossDomainProxy && url != igv.browser.crossDomainProxy) {
+
+                    options.sendData = "url=" + url;
+
+                    igvxhr.load(igv.browser.crossDomainProxy, options);
+                    return;
+                }
+            }
             error(null, xhr);
         }
 
@@ -265,7 +276,7 @@ var igvxhr = (function (igvxhr) {
         };
 
         fileReader.readAsArrayBuffer(localfile);
-        
+
     }
 
     function arrayBufferToString(arraybuffer, gzipped) {
@@ -285,6 +296,15 @@ var igvxhr = (function (igvxhr) {
             result = result + String.fromCharCode(plain[i]);
         }
         return result;
+    }
+
+
+    function isCrossDomain(url) {
+
+        var origin = window.location.origin;
+
+        return !url.startsWith(origin);
+
     }
 
 

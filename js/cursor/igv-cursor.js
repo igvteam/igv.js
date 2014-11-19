@@ -336,6 +336,8 @@ var igv = (function (igv) {
 
     function addCursorExtensions(browser) {
 
+        browser.crossDomainProxy = "php/simpleProxy.php";
+
         browser.initializeWithTrackConfig = function (trackConfig) {
 
             var horizontalScrollBarContainer;
