@@ -181,8 +181,13 @@ var igv = (function (igv) {
 
     igv.TrackView.prototype.addRightHandGutterToParentTrackDiv = function (trackDiv) {
 
-        this.trackManipulationContainer = $('<div class="igv-track-manipulation-container">')[0];
-        $(trackDiv).append(this.trackManipulationContainer);
+        var myself = this,
+            removeButton = $('<i class="fa fa-times-circle igv-track-disable-button-fontawesome">')[0];
+
+        $(this.contentDiv).append(removeButton);
+        $(this.contentDiv).click(function () {
+            myself.browser.removeTrack(myself.track);
+        });
 
     };
 
@@ -465,7 +470,8 @@ var igv = (function (igv) {
                 trackManipulationIconBox,
                 removeButton;
 
-            this.__proto__.addRightHandGutterToParentTrackDiv.call(this, trackDiv);
+            this.trackManipulationContainer = $('<div class="igv-track-manipulation-container">')[0];
+            $(trackDiv).append(this.trackManipulationContainer);
 
             trackManipulationIconBox = $('<div class="igv-track-manipulation-icon-box">')[0];
             $(this.trackManipulationContainer).append(trackManipulationIconBox);
