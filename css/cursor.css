@@ -33,7 +33,7 @@
 
 }
 
-.igv-track-righthand-gutter {
+.igv-cursor-histogram-container {
 
     position: absolute;
     right: 48px;
@@ -43,6 +43,15 @@
     border-color: #a2a2a2;
     border-style: solid;
     border-width: thin;
+}
+
+.igv-cursor-histogram-div {
+    position: absolute;
+    top: 2px;
+    bottom: 2px;
+    left: 2px;
+    right: 2px;
+    background: white;
 }
 
 /* override */
@@ -165,16 +174,6 @@
     background-color: rgba(102, 102, 102, 1);
 }
 
-.igv-cursorHistogram-div {
-    position: absolute;
-    top: 2px;
-    bottom: 2px;
-    left: 2px;
-    right: 2px;
-    background: white;
-    /*display: none;*/
-}
-
 .igv-trackfilter-fontawesome {
 
     position: relative;
@@ -197,7 +196,7 @@
     color: rgba(204, 51, 0, 1);
 }
 
-.igv-filter-histogram-button-div {
+.igv-track-filter-button-div {
 
     position: relative;
     cursor: pointer;

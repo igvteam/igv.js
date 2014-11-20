@@ -28,15 +28,15 @@
  */
 var cursor = (function (cursor) {
 
-    cursor.CursorHistogram = function (rightHandGutter, maxScore) {
+    cursor.CursorHistogram = function (cursorHistogramContainer, maxScore) {
 
         this.canvasFillStyle = igv.greyScale(255);
         this.minMaxfillStyle = igv.rgbaColor(64, 64, 64, 0.5);
         this.minMaxEdgefillStyle = igv.rgbaColor(32, 32, 32, 1.0);
 
-        if (rightHandGutter) {
+        if (cursorHistogramContainer) {
 
-            this.createMarkupAndSetBinLength(rightHandGutter);
+            this.createMarkupAndSetBinLength(cursorHistogramContainer);
         } else {
 
             this.bins = [];
@@ -179,7 +179,7 @@ var cursor = (function (cursor) {
 
         var cursorHistogramDiv = document.createElement('div');
         parentDiv.appendChild(cursorHistogramDiv);
-        cursorHistogramDiv.className = "igv-cursorHistogram-div";
+        cursorHistogramDiv.className = "igv-cursor-histogram-div";
 
         this.cursorHistogramDiv = cursorHistogramDiv;
         this.bins = [];

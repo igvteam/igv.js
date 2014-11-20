@@ -893,7 +893,7 @@ var igv = (function (igv) {
         trackFilterButtonDiv = document.createElement("div");
         trackIconContainer.append($(trackFilterButtonDiv));
 
-        trackFilterButtonDiv.className = "igv-filter-histogram-button-div";
+        trackFilterButtonDiv.className = "igv-track-filter-button-div";
 
         trackView.track.trackFilter = new igv.TrackFilter(trackView);
         trackView.track.trackFilter.createTrackFilterWidgetWithParentElement(trackFilterButtonDiv);

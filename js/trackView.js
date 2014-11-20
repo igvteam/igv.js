@@ -27,17 +27,8 @@ var igv = (function (igv) {
 
     igv.TrackView = function (track, browser) {
 
-        var viewportDiv,
-            trackIconContainer,
-            trackHousingDiv,
-            trackDiv,
-            controlDiv,
-            rightHandGutter,
-            controlCanvas,
-            contentDiv,
-            canvas,
-            labelSpan,
-            spinnerFontAwesome;
+        var trackIconContainer,
+            labelSpan;
 
         this.track = track;
         this.browser = browser;
@@ -45,58 +36,47 @@ var igv = (function (igv) {
         // track
         if ("CURSOR" === browser.type) {
 
-            trackHousingDiv = $('<div class="igv-housing-div">')[0];
-            $(browser.trackContainerDiv).append(trackHousingDiv);
+            this.trackHousingDiv = $('<div class="igv-housing-div">')[0];
+            $(browser.trackContainerDiv).append(this.trackHousingDiv);
 
-            trackDiv = $('<div class="igv-track-div">')[0];
-            $(trackHousingDiv).append(trackDiv);
-            this.trackHousingDiv = trackHousingDiv;
+            this.trackDiv = $('<div class="igv-track-div">')[0];
+            $(this.trackHousingDiv).append(this.trackDiv);
 
         } else {
 
-            trackDiv = $('<div class="igv-track-div">')[0];
-            $(browser.trackContainerDiv).append(trackDiv);
+            this.trackDiv = $('<div class="igv-track-div">')[0];
+            $(browser.trackContainerDiv).append(this.trackDiv);
 
-        }
-
-        if ("CURSOR" === browser.type) {
-
-            addTrackViewCursorExtensions(this);
         }
 
         // Optionally override CSS height
-        if (track.height) trackDiv.style.height = track.height + "px";
+        if (track.height) {
+            this.trackDiv.style.height = track.height + "px";
+        }
 
-        this.trackDiv = trackDiv;
+        if ("CURSOR" === browser.type) {
+            addTrackViewCursorExtensions(this);
+        }
 
         // spinner
-        spinnerFontAwesome = document.createElement("i");
-        this.trackDiv.appendChild(spinnerFontAwesome);
-        spinnerFontAwesome.className = "fa fa-spinner fa-2x fa-spin igv-spinner-fontawesome-start";
+        this.trackDiv.appendChild(igv.spinner());
 
         // control div
-        if ("CURSOR" === browser.type) {
+        if ("CURSOR" !== browser.type) {
 
-            rightHandGutter = $('<div class="igv-track-righthand-gutter">')[0];
-            $(trackDiv).append(rightHandGutter);
-
-            this.righthandGutter = rightHandGutter;
-        } else {
-
-            controlDiv = $('<div class="igv-track-control-div">')[0];
-            $(trackDiv).append(controlDiv);
-
-            this.controlDiv = controlDiv;
+            this.controlDiv = $('<div class="igv-left-hand-gutter">')[0];
+            $(this.trackDiv).append(this.controlDiv);
 
             if (this.track.paintControl) {
 
                 // control canvas.  Canvas width and height attributes must be set.  Its a canvas weirdness.
-                controlCanvas = $('<canvas class ="igv-track-control-canvas">')[0];
-                $(controlDiv).append(controlCanvas);
-                controlCanvas.setAttribute('width', controlDiv.clientWidth);
-                controlCanvas.setAttribute('height', controlDiv.clientHeight);
-                this.controlCanvas = controlCanvas;
-                this.controlCtx = controlCanvas.getContext("2d");
+                this.controlCanvas = $('<canvas class ="igv-track-control-canvas">')[0];
+                $(this.controlDiv).append(this.controlCanvas);
+
+                this.controlCanvas.setAttribute('width', this.controlDiv.clientWidth);
+                this.controlCanvas.setAttribute('height', this.controlDiv.clientHeight);
+
+                this.controlCtx = this.controlCanvas.getContext("2d");
             }
 
         }
@@ -104,30 +84,27 @@ var igv = (function (igv) {
         // track icon container
         if ("CURSOR" === browser.type) {
             trackIconContainer = $('<div class = "igv-track-icon-container">')[0];
-            $(trackDiv).append(trackIconContainer);
+            $(this.trackDiv).append(trackIconContainer);
         }
 
         // viewport
-        viewportDiv = $('<div class="igv-viewport-div">')[0];
-        $(trackDiv).append(viewportDiv);
-        this.viewportDiv = viewportDiv;
+        this.viewportDiv = $('<div class="igv-viewport-div">')[0];
+        $(this.trackDiv).append(this.viewportDiv);
 
         // content  -- purpose of this div is to allow vertical scolling on individual tracks, although that is not implemented
-        contentDiv = $('<div class="igv-content-div">')[0];
-        $(viewportDiv).append(contentDiv);
-        this.contentDiv = contentDiv;
+        this.contentDiv = $('<div class="igv-content-div">')[0];
+        $(this.viewportDiv).append(this.contentDiv);
 
         // track content canvas
-        canvas = $('<canvas class = "igv-content-canvas">')[0];
-        $(contentDiv).append(canvas);
-        canvas.setAttribute('width', contentDiv.clientWidth);
-        canvas.setAttribute('height', contentDiv.clientHeight);
-        this.canvas = canvas;
-        this.ctx = canvas.getContext("2d");
+        this.canvas = $('<canvas class = "igv-content-canvas">')[0];
+        $(this.contentDiv).append(this.canvas);
+        this.canvas.setAttribute('width', this.contentDiv.clientWidth);
+        this.canvas.setAttribute('height', this.contentDiv.clientHeight);
+        this.ctx = this.canvas.getContext("2d");
 
         if ("CURSOR" !== browser.type) {
             trackIconContainer = $('<div class = "igv-track-icon-container">')[0];
-            $(viewportDiv).append(trackIconContainer);
+            $(this.viewportDiv).append(trackIconContainer);
         }
 
 
@@ -139,7 +116,7 @@ var igv = (function (igv) {
 
         }
 
-        this.addRightHandGutterToParentTrackDiv(trackDiv);
+        this.addRightHandGutterToParentTrackDiv(this.trackDiv);
 
         addTrackHandlers(this);
 
@@ -455,7 +432,10 @@ var igv = (function (igv) {
                 myself.browser.removeTrack(myself.track);
             });
 
-            this.track.cursorHistogram = new cursor.CursorHistogram(this.righthandGutter, this.track.max);
+            this.cursorHistogramContainer = $('<div class="igv-cursor-histogram-container">')[0];
+            $(trackDiv).append(this.cursorHistogramContainer);
+
+            this.track.cursorHistogram = new cursor.CursorHistogram(this.cursorHistogramContainer, this.track.max);
 
             igv.cursorAddTrackControlButtons(this, this.browser);
 

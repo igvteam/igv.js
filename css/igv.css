@@ -153,7 +153,7 @@
     color: #222;
 }
 
-.igv-track-control-div {
+.igv-left-hand-gutter {
     position: absolute;
     left: 0;
     width: 50px;
