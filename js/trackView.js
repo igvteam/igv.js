@@ -31,16 +31,12 @@ var igv = (function (igv) {
             trackIconContainer,
             trackHousingDiv,
             trackDiv,
-            trackManipulationContainer,
-            trackManipulationIconBox,
             controlDiv,
             controlCanvas,
             contentDiv,
             canvas,
-            removeButton,
             labelSpan,
-            spinnerFontAwesome,
-            myself = this;
+            spinnerFontAwesome;
 
         this.track = track;
         this.browser = browser;
