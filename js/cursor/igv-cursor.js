@@ -459,7 +459,6 @@ var igv = (function (igv) {
                 browser.cursorModel.framePixelWidth = frameWidth;
                 browser.referenceFrame.bpPerPixel = 1 / frameWidth;
 
-                //$("input[id='frameWidthInput']").val(Math.round(frameWidth * 1000) / 1000);
                 $("input[id='frameWidthInput']").val(frameWidthNumberFormatter(frameWidth));
 
                 browser.update();
@@ -511,38 +510,45 @@ var igv = (function (igv) {
             }
         };
 
+        browser.trackContentWidth = function () {
+
+            var width;
+
+            if (this.trackPanels && this.trackPanels.length > 0) {
+                width = this.trackPanels[0].contentDiv.clientWidth;
+            }
+            else {
+                width = this.trackContainerDiv.clientWidth;
+            }
+
+            return width;
+
+        };
+
         // Augment standard behavior of resize
-        //browser.resize = function () {
-        //
-        //    var previousFramePixelWidth,
-        //        previousTrackViewportWidth,
-        //        ratio;
-        //
-        //    if (!browser.horizontalScrollbar) {
-        //
-        //        this.__proto__.resize.call(this);
-        //    }
-        //    else {
-        //
-        //        previousFramePixelWidth = browser.cursorModel.framePixelWidth;
-        //        previousTrackViewportWidth = browser.trackViewportWidth();
-        //
-        //        this.__proto__.resize.call(this);
-        //
-        //        ratio = (browser.trackViewportWidth() / previousTrackViewportWidth);
-        //        console.log("previous " + previousTrackViewportWidth + " new " + browser.trackViewportWidth());
-        //
-        //
-        //
-        //        //this.cursorModel.framePixelWidth = (this.trackViewportWidth() / previousTrackViewportWidth);
-        //        //this.referenceFrame.bpPerPixel = 1.0 / this.cursorModel.framePixelWidth;
-        //        //
-        //        //$("input[id='frameWidthInput']").val(frameWidthNumberFormatter(this.cursorModel.framePixelWidth));
-        //        //
-        //        //this.horizontalScrollbar.update();
-        //    }
-        //
-        //};
+        browser.resize = function () {
+
+            var ratio;
+
+            if (!browser.horizontalScrollbar) {
+
+                this.__proto__.resize.call(this);
+            }
+            else {
+
+                ratio = browser.cursorModel.framePixelWidth / browser.trackContentWidth();
+
+                this.__proto__.resize.call(this);
+
+                browser.cursorModel.framePixelWidth = ratio * browser.trackContentWidth();
+                browser.referenceFrame.bpPerPixel = 1.0 / browser.cursorModel.framePixelWidth;
+
+                $("input[id='frameWidthInput']").val(frameWidthNumberFormatter(browser.cursorModel.framePixelWidth));
+
+                browser.horizontalScrollbar.update();
+            }
+
+        };
 
         // Augment standard behavior of removeTrack
         browser.removeTrack = function (track) {
