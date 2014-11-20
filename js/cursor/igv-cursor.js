@@ -540,11 +540,12 @@ var igv = (function (igv) {
 
                 this.__proto__.resize.call(this);
 
-                browser.cursorModel.framePixelWidth = ratio * browser.trackContentWidth();
-                browser.referenceFrame.bpPerPixel = 1.0 / browser.cursorModel.framePixelWidth;
+                //browser.cursorModel.framePixelWidth = ratio * browser.trackContentWidth();
+                //browser.referenceFrame.bpPerPixel = 1.0 / browser.cursorModel.framePixelWidth;
+                //
+                //$("input[id='frameWidthInput']").val(frameWidthNumberFormatter(browser.cursorModel.framePixelWidth));
 
-                $("input[id='frameWidthInput']").val(frameWidthNumberFormatter(browser.cursorModel.framePixelWidth));
-
+                browser.setFrameWidth( ratio * browser.trackContentWidth() );
                 browser.horizontalScrollbar.update();
             }
 
