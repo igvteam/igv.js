@@ -303,7 +303,6 @@ var igv = (function (igv) {
         addCursorExtensions(browser);
 
         browser.cursorModel = new cursor.CursorModel(browser);
-
         browser.referenceFrame = new igv.ReferenceFrame("", 0, 1 / browser.cursorModel.framePixelWidth);
 
         browser.highlightColor = "rgb(204, 51, 0)";
@@ -466,23 +465,6 @@ var igv = (function (igv) {
                 browser.update();
             }
 
-            function frameWidthNumberFormatter(frameWidth) {
-
-                var divisor;
-
-                if (frameWidth < 1) {
-
-                    divisor = 1000;
-                } else if (frameWidth < 100) {
-
-                    divisor = 100;
-                } else {
-                    
-                    divisor = 10;
-                }
-
-                return Math.round(frameWidth * divisor) / divisor;
-            }
 
         };
 
@@ -529,7 +511,40 @@ var igv = (function (igv) {
             }
         };
 
-        // Augment standard behavior
+        // Augment standard behavior of resize
+        //browser.resize = function () {
+        //
+        //    var previousFramePixelWidth,
+        //        previousTrackViewportWidth,
+        //        ratio;
+        //
+        //    if (!browser.horizontalScrollbar) {
+        //
+        //        this.__proto__.resize.call(this);
+        //    }
+        //    else {
+        //
+        //        previousFramePixelWidth = browser.cursorModel.framePixelWidth;
+        //        previousTrackViewportWidth = browser.trackViewportWidth();
+        //
+        //        this.__proto__.resize.call(this);
+        //
+        //        ratio = (browser.trackViewportWidth() / previousTrackViewportWidth);
+        //        console.log("previous " + previousTrackViewportWidth + " new " + browser.trackViewportWidth());
+        //
+        //
+        //
+        //        //this.cursorModel.framePixelWidth = (this.trackViewportWidth() / previousTrackViewportWidth);
+        //        //this.referenceFrame.bpPerPixel = 1.0 / this.cursorModel.framePixelWidth;
+        //        //
+        //        //$("input[id='frameWidthInput']").val(frameWidthNumberFormatter(this.cursorModel.framePixelWidth));
+        //        //
+        //        //this.horizontalScrollbar.update();
+        //    }
+        //
+        //};
+
+        // Augment standard behavior of removeTrack
         browser.removeTrack = function (track) {
 
             this.__proto__.removeTrack.call(this, track);
@@ -787,6 +802,25 @@ var igv = (function (igv) {
             });
 
         };
+
+        function frameWidthNumberFormatter(frameWidth) {
+
+            var divisor;
+
+            if (frameWidth < 1) {
+
+                divisor = 1000;
+            } else if (frameWidth < 100) {
+
+                divisor = 100;
+            } else {
+
+                divisor = 10;
+            }
+
+            return Math.round(frameWidth * divisor) / divisor;
+        }
+
     }
 
     igv.cursorAddTrackControlButtons = function (trackView, browser) {

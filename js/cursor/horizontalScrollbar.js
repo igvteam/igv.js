@@ -42,33 +42,33 @@ var cursor = (function (cursor) {
 
     cursor.HorizontalScrollbar.prototype.update = function () {
 
-        var horizontalScrollBarWidth = $(".igv-horizontal-scrollbar-div").first().width(),
-            horizontalScrollBarDraggable = $(".igv-horizontal-scrollbar-draggable-div").first(),
+        var scrollBarWidth = $(".igv-horizontal-scrollbar-div").first().width(),
+            scrollBarDraggable = $(".igv-horizontal-scrollbar-draggable-div").first(),
             framePixelWidth = this.browser.cursorModel.framePixelWidth,
             regionListLength = this.browser.cursorModel.filteredRegions.length,
             referenceFrame = this.browser.referenceFrame,
             regionBoundsWidth,
             trackLeft,
-            horizontalScrollBarDraggableLeft,
-            width;
+            scrollBarDraggableLeft,
+            scrollBarDraggableWidth;
 
         regionBoundsWidth = framePixelWidth * regionListLength;
 
-        width = Math.max(minimumHorizontalScrollBarDraggableWidth, (horizontalScrollBarWidth/regionBoundsWidth) * horizontalScrollBarWidth);
+        scrollBarDraggableWidth = Math.max(minimumHorizontalScrollBarDraggableWidth, (scrollBarWidth/regionBoundsWidth) * scrollBarWidth);
 
         trackLeft = referenceFrame.toPixels( referenceFrame.start );
-        horizontalScrollBarDraggableLeft = (horizontalScrollBarWidth/regionBoundsWidth) * trackLeft;
+        scrollBarDraggableLeft = (scrollBarWidth/regionBoundsWidth) * trackLeft;
 
         // handle minification with draggable near right edge of scroll bar.
         // must reposition AND scale draggable AND pan track
-        if ((horizontalScrollBarDraggableLeft + width) > horizontalScrollBarWidth) {
+        if ((scrollBarDraggableLeft + scrollBarDraggableWidth) > scrollBarWidth) {
 
             // reposition/rescale draggable
-            horizontalScrollBarDraggableLeft -= ((horizontalScrollBarDraggableLeft + width) - horizontalScrollBarWidth);
-            width = horizontalScrollBarWidth - horizontalScrollBarDraggableLeft;
+            scrollBarDraggableLeft -= ((scrollBarDraggableLeft + scrollBarDraggableWidth) - scrollBarWidth);
+            scrollBarDraggableWidth = scrollBarWidth - scrollBarDraggableLeft;
 
             // pan track
-            referenceFrame.start = referenceFrame.toBP( (regionBoundsWidth/horizontalScrollBarWidth) * horizontalScrollBarDraggableLeft );
+            referenceFrame.start = referenceFrame.toBP( (regionBoundsWidth/scrollBarWidth) * scrollBarDraggableLeft );
 
             // update
             if (this.browser.ideoPanel) this.browser.ideoPanel.repaint();
@@ -76,9 +76,9 @@ var cursor = (function (cursor) {
             this.browser.trackPanels.forEach(function (trackPanel) { trackPanel.update(); });
         }
 
-        $( horizontalScrollBarDraggable).css({
-            "left": Math.floor( horizontalScrollBarDraggableLeft ) + "px",
-            "width": Math.floor( width ) + "px"
+        $( scrollBarDraggable).css({
+            "left": Math.floor( scrollBarDraggableLeft ) + "px",
+            "width": Math.floor( scrollBarDraggableWidth ) + "px"
         });
 
     };
@@ -94,8 +94,6 @@ var cursor = (function (cursor) {
             lastMouseX = undefined,
             isMouseIn = undefined;
 
-
-
         horizontalScrollBarShim = $('<div class="igv-horizontal-scrollbar-shim-div">')[0];
         horizontalScrollBarContainer.append(horizontalScrollBarShim);
 
@@ -109,8 +107,6 @@ var cursor = (function (cursor) {
 
         horizontalScrollBarDraggable = $('<div class="igv-horizontal-scrollbar-draggable-div">')[0];
         $(horizontalScrollBar).append(horizontalScrollBarDraggable);
-
-
 
         // mouse event handlers
         $( document ).mousedown(function(e) {
@@ -147,7 +143,9 @@ var cursor = (function (cursor) {
                 // update
                 if (myself.browser.ideoPanel) myself.browser.ideoPanel.repaint();
                 if (myself.browser.karyoPanel) myself.browser.karyoPanel.repaint();
-                myself.browser.trackPanels.forEach(function (trackPanel) { trackPanel.update(); });
+                myself.browser.trackPanels.forEach(function (trackPanel) {
+                    trackPanel.update();
+                });
 
                 lastMouseX = e.screenX
             }
