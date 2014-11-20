@@ -27,9 +27,6 @@ var igv = (function (igv) {
 
     igv.TrackView = function (track, browser) {
 
-        this.browser = browser;
-        this.track = track;
-
         var viewportDiv,
             trackIconContainer,
             trackHousingDiv,
@@ -45,22 +42,29 @@ var igv = (function (igv) {
             spinnerFontAwesome,
             myself = this;
 
+        this.track = track;
+        this.browser = browser;
 
         // track
         if ("CURSOR" === browser.type) {
 
             trackHousingDiv = $('<div class="igv-housing-div">')[0];
-            trackDiv = $('<div class="igv-track-div">')[0];
-
             $(browser.trackContainerDiv).append(trackHousingDiv);
-            $(trackHousingDiv).append(trackDiv);
 
+            trackDiv = $('<div class="igv-track-div">')[0];
+            $(trackHousingDiv).append(trackDiv);
             this.trackHousingDiv = trackHousingDiv;
 
         } else {
+
             trackDiv = $('<div class="igv-track-div">')[0];
             $(browser.trackContainerDiv).append(trackDiv);
 
+        }
+
+        if ("CURSOR" === browser.type) {
+
+            addTrackViewCursorExtensions(this);
         }
 
         // Optionally override CSS height
@@ -129,51 +133,60 @@ var igv = (function (igv) {
 
         }
 
+        this.addRightHandGutterToParentTrackDiv(trackDiv);
+
         // CURSOR specific stuff
-        if ("CURSOR" === browser.type) {
-
-            // track manipulation container
-            trackManipulationContainer = $('<div class="igv-track-manipulation-container">')[0];
-            $(trackDiv).append(trackManipulationContainer);
-
-            trackManipulationIconBox = $('<div class="igv-track-manipulation-icon-box">')[0];
-            $(trackManipulationContainer).append(trackManipulationIconBox);
-
-            $(trackManipulationIconBox).append($('<i class="fa fa-chevron-circle-up   igv-track-manipulation-move-up">')[0]);
-            $(trackManipulationIconBox).append($('<i class="fa fa-chevron-circle-down igv-track-manipulation-move-down">')[0]);
-
-            $(trackManipulationIconBox).find("i.fa-chevron-circle-up").click(function () {
-                browser.reduceTrackOrder(myself)
-            });
-
-            $(trackManipulationIconBox).find("i.fa-chevron-circle-down").click(function () {
-                browser.increaseTrackOrder(myself)
-            });
-
-            removeButton = $('<i class="fa fa-times igv-track-manipulation-discard">')[0];
-
-            $(trackManipulationIconBox).append(removeButton);
-
-            $(removeButton).click(function () {
-                browser.removeTrack(track);
-            });
-
-            this.track.cursorHistogram = new cursor.CursorHistogram(controlDiv.clientHeight, this.track.max, controlDiv);
-
-            igv.cursorAddTrackControlButtons(this, browser);
-
-        }
-        else if (!track.disableButtons) {
-
-            removeButton = $('<i class="fa fa-times-circle igv-track-disable-button-fontawesome">')[0];
-            $(contentDiv).append(removeButton);
-            $(removeButton).click(function () {
-                browser.removeTrack(track);
-            });
-        }
+        //if ("CURSOR" === browser.type) {
+        //
+        //    //// track manipulation container
+        //    //trackManipulationContainer = $('<div class="igv-track-manipulation-container">')[0];
+        //    //$(trackDiv).append(trackManipulationContainer);
+        //
+        //    trackManipulationIconBox = $('<div class="igv-track-manipulation-icon-box">')[0];
+        //    $(trackManipulationContainer).append(trackManipulationIconBox);
+        //
+        //    $(trackManipulationIconBox).append($('<i class="fa fa-chevron-circle-up   igv-track-manipulation-move-up">')[0]);
+        //    $(trackManipulationIconBox).append($('<i class="fa fa-chevron-circle-down igv-track-manipulation-move-down">')[0]);
+        //
+        //    $(trackManipulationIconBox).find("i.fa-chevron-circle-up").click(function () {
+        //        browser.reduceTrackOrder(myself)
+        //    });
+        //
+        //    $(trackManipulationIconBox).find("i.fa-chevron-circle-down").click(function () {
+        //        browser.increaseTrackOrder(myself)
+        //    });
+        //
+        //    removeButton = $('<i class="fa fa-times igv-track-manipulation-discard">')[0];
+        //
+        //    $(trackManipulationIconBox).append(removeButton);
+        //
+        //    $(removeButton).click(function () {
+        //        browser.removeTrack(track);
+        //    });
+        //
+        //    this.track.cursorHistogram = new cursor.CursorHistogram(controlDiv.clientHeight, this.track.max, controlDiv);
+        //
+        //    igv.cursorAddTrackControlButtons(this, browser);
+        //
+        //}
+        //else if (!track.disableButtons) {
+        //
+        //    removeButton = $('<i class="fa fa-times-circle igv-track-disable-button-fontawesome">')[0];
+        //    $(contentDiv).append(removeButton);
+        //    $(removeButton).click(function () {
+        //        browser.removeTrack(track);
+        //    });
+        //}
 
 
         addTrackHandlers(this);
+
+    };
+
+    igv.TrackView.prototype.addRightHandGutterToParentTrackDiv = function (trackDiv) {
+
+        this.trackManipulationContainer = $('<div class="igv-track-manipulation-container">')[0];
+        $(trackDiv).append(this.trackManipulationContainer);
 
     };
 
@@ -367,8 +380,6 @@ var igv = (function (igv) {
 
     function addTrackHandlers(trackView) {
 
-
-
         // Register track handlers for popup.  Although we are not handling dragging here, we still need to check
         // for dragging on a mouseup
 
@@ -447,6 +458,45 @@ var igv = (function (igv) {
 
         });
 
+
+    }
+
+    function addTrackViewCursorExtensions(trackView) {
+
+        trackView.addRightHandGutterToParentTrackDiv = function (trackDiv) {
+
+            var myself = this,
+                trackManipulationIconBox,
+                removeButton;
+
+            this.__proto__.addRightHandGutterToParentTrackDiv.call(this, trackDiv);
+
+            trackManipulationIconBox = $('<div class="igv-track-manipulation-icon-box">')[0];
+            $(this.trackManipulationContainer).append(trackManipulationIconBox);
+
+            $(trackManipulationIconBox).append($('<i class="fa fa-chevron-circle-up   igv-track-manipulation-move-up">')[0]);
+            $(trackManipulationIconBox).append($('<i class="fa fa-chevron-circle-down igv-track-manipulation-move-down">')[0]);
+
+            $(trackManipulationIconBox).find("i.fa-chevron-circle-up").click(function () {
+                myself.browser.reduceTrackOrder(myself)
+            });
+
+            $(trackManipulationIconBox).find("i.fa-chevron-circle-down").click(function () {
+                myself.browser.increaseTrackOrder(myself)
+            });
+
+            removeButton = $('<i class="fa fa-times igv-track-manipulation-discard">')[0];
+            $(trackManipulationIconBox).append(removeButton);
+
+            $(removeButton).click(function () {
+                myself.browser.removeTrack(myself.track);
+            });
+
+            this.track.cursorHistogram = new cursor.CursorHistogram(this.controlDiv.clientHeight, this.track.max, this.controlDiv);
+
+            igv.cursorAddTrackControlButtons(this, this.browser);
+
+        };
 
     }
 
