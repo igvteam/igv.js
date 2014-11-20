@@ -28,13 +28,20 @@
  */
 var cursor = (function (cursor) {
 
-    cursor.CursorHistogram = function (binCount, maxScore, controlDiv) {
+    cursor.CursorHistogram = function (rightHandGutter, maxScore) {
 
         this.canvasFillStyle = igv.greyScale(255);
         this.minMaxfillStyle = igv.rgbaColor(64, 64, 64, 0.5);
         this.minMaxEdgefillStyle = igv.rgbaColor(32, 32, 32, 1.0);
 
-        this.createMarkupAndSetBinLength(controlDiv);
+        if (rightHandGutter) {
+
+            this.createMarkupAndSetBinLength(rightHandGutter);
+        } else {
+
+            this.bins = [];
+            this.bins.length = 100;
+        }
 
         this.maxCount = 0;
         this.initializeBins();

@@ -81,8 +81,6 @@ var igv = (function (igv) {
             $(trackDiv).append(rightHandGutter);
 
             this.righthandGutter = rightHandGutter;
-            this.controlDiv = rightHandGutter;
-
         } else {
 
             controlDiv = $('<div class="igv-track-control-div">')[0];
@@ -99,7 +97,6 @@ var igv = (function (igv) {
                 controlCanvas.setAttribute('height', controlDiv.clientHeight);
                 this.controlCanvas = controlCanvas;
                 this.controlCtx = controlCanvas.getContext("2d");
-
             }
 
         }
@@ -188,13 +185,9 @@ var igv = (function (igv) {
         this.track.height = newTrackHeight;
         this.trackDiv.style.height = trackHeightStr;
 
-        //this.controlDiv.style.height = trackHeightStr;
-
         if (this.track.paintControl) {
-
             this.controlCanvas.style.height = trackHeightStr;
             this.controlCanvas.setAttribute("height", newTrackHeight);
-
         }
 
         this.viewportDiv.style.height = trackHeightStr;
@@ -462,7 +455,7 @@ var igv = (function (igv) {
                 myself.browser.removeTrack(myself.track);
             });
 
-            this.track.cursorHistogram = new cursor.CursorHistogram(this.controlDiv.clientHeight, this.track.max, this.controlDiv);
+            this.track.cursorHistogram = new cursor.CursorHistogram(this.righthandGutter, this.track.max);
 
             igv.cursorAddTrackControlButtons(this, this.browser);
 
