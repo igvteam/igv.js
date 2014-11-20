@@ -188,10 +188,9 @@ var igv = (function (igv) {
         this.track.height = newTrackHeight;
         this.trackDiv.style.height = trackHeightStr;
 
-        // control panel
-        this.controlDiv.style.height = trackHeightStr;
+        //this.controlDiv.style.height = trackHeightStr;
 
-        if ("CURSOR" !== this.browser.type) {
+        if (this.track.paintControl) {
 
             this.controlCanvas.style.height = trackHeightStr;
             this.controlCanvas.setAttribute("height", newTrackHeight);
