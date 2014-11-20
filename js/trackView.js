@@ -32,6 +32,7 @@ var igv = (function (igv) {
             trackHousingDiv,
             trackDiv,
             controlDiv,
+            rightHandGutter,
             controlCanvas,
             contentDiv,
             canvas,
@@ -75,21 +76,33 @@ var igv = (function (igv) {
 
         // control div
         if ("CURSOR" === browser.type) {
-            controlDiv = $('<div class="igv-track-control-cursor-div">')[0];
+
+            rightHandGutter = $('<div class="igv-track-righthand-gutter">')[0];
+            $(trackDiv).append(rightHandGutter);
+
+            this.righthandGutter = rightHandGutter;
+            this.controlDiv = rightHandGutter;
+
         } else {
+
             controlDiv = $('<div class="igv-track-control-div">')[0];
+            $(trackDiv).append(controlDiv);
+
+            this.controlDiv = controlDiv;
+
+            if (this.track.paintControl) {
+
+                // control canvas.  Canvas width and height attributes must be set.  Its a canvas weirdness.
+                controlCanvas = $('<canvas class ="igv-track-control-canvas">')[0];
+                $(controlDiv).append(controlCanvas);
+                controlCanvas.setAttribute('width', controlDiv.clientWidth);
+                controlCanvas.setAttribute('height', controlDiv.clientHeight);
+                this.controlCanvas = controlCanvas;
+                this.controlCtx = controlCanvas.getContext("2d");
+
+            }
+
         }
-
-        $(trackDiv).append(controlDiv);
-        this.controlDiv = controlDiv;
-
-        // control canvas.  Canvas width and height attributes must be set.  Its a canvas weirdness.
-        controlCanvas = $('<canvas class ="igv-track-control-canvas">')[0];
-        $(controlDiv).append(controlCanvas);
-        controlCanvas.setAttribute('width', controlDiv.clientWidth);
-        controlCanvas.setAttribute('height', controlDiv.clientHeight);
-        this.controlCanvas = controlCanvas;
-        this.controlCtx = controlCanvas.getContext("2d");
 
         // track icon container
         if ("CURSOR" === browser.type) {
@@ -130,50 +143,6 @@ var igv = (function (igv) {
         }
 
         this.addRightHandGutterToParentTrackDiv(trackDiv);
-
-        // CURSOR specific stuff
-        //if ("CURSOR" === browser.type) {
-        //
-        //    //// track manipulation container
-        //    //trackManipulationContainer = $('<div class="igv-track-manipulation-container">')[0];
-        //    //$(trackDiv).append(trackManipulationContainer);
-        //
-        //    trackManipulationIconBox = $('<div class="igv-track-manipulation-icon-box">')[0];
-        //    $(trackManipulationContainer).append(trackManipulationIconBox);
-        //
-        //    $(trackManipulationIconBox).append($('<i class="fa fa-chevron-circle-up   igv-track-manipulation-move-up">')[0]);
-        //    $(trackManipulationIconBox).append($('<i class="fa fa-chevron-circle-down igv-track-manipulation-move-down">')[0]);
-        //
-        //    $(trackManipulationIconBox).find("i.fa-chevron-circle-up").click(function () {
-        //        browser.reduceTrackOrder(myself)
-        //    });
-        //
-        //    $(trackManipulationIconBox).find("i.fa-chevron-circle-down").click(function () {
-        //        browser.increaseTrackOrder(myself)
-        //    });
-        //
-        //    removeButton = $('<i class="fa fa-times igv-track-manipulation-discard">')[0];
-        //
-        //    $(trackManipulationIconBox).append(removeButton);
-        //
-        //    $(removeButton).click(function () {
-        //        browser.removeTrack(track);
-        //    });
-        //
-        //    this.track.cursorHistogram = new cursor.CursorHistogram(controlDiv.clientHeight, this.track.max, controlDiv);
-        //
-        //    igv.cursorAddTrackControlButtons(this, browser);
-        //
-        //}
-        //else if (!track.disableButtons) {
-        //
-        //    removeButton = $('<i class="fa fa-times-circle igv-track-disable-button-fontawesome">')[0];
-        //    $(contentDiv).append(removeButton);
-        //    $(removeButton).click(function () {
-        //        browser.removeTrack(track);
-        //    });
-        //}
-
 
         addTrackHandlers(this);
 
@@ -222,8 +191,12 @@ var igv = (function (igv) {
         // control panel
         this.controlDiv.style.height = trackHeightStr;
 
-        this.controlCanvas.style.height = trackHeightStr;
-        this.controlCanvas.setAttribute("height", newTrackHeight);
+        if ("CURSOR" !== this.browser.type) {
+
+            this.controlCanvas.style.height = trackHeightStr;
+            this.controlCanvas.setAttribute("height", newTrackHeight);
+
+        }
 
         this.viewportDiv.style.height = trackHeightStr;
         this.contentDiv.style.height = newHeight + "px";
@@ -274,8 +247,6 @@ var igv = (function (igv) {
 
             else {
 
-                // Cancel the current task if any as it will not satisfy the paint request
-
                 if (currentTask) {
                     currentTask.abort();
                 }
@@ -289,8 +260,6 @@ var igv = (function (igv) {
                 tileStart = Math.max(0, Math.round(referenceFrame.start - tileWidth / 3));
                 tileEnd = tileStart + tileWidth;
 
-
-//            spinner = igv.getSpinner(this.trackDiv);   // Start a spinner
                 igv.startSpinner(myself.trackDiv);
 
                 this.currentTask = {
