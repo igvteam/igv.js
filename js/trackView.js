@@ -164,18 +164,18 @@ var igv = (function (igv) {
             removeButton,
             gearButton;
 
-        removeButton = $('<i class="fa fa-times igv-track-manipulation-discard">')[0];
-        $(trackManipulationIconBox).append(removeButton);
-        $(removeButton).click(function () {
-            myself.browser.removeTrack(myself.track);
-        });
-
-        //gearButton = $('<i class="fa fa-gear igv-track-manipulation-gear">')[0];
-        //$(trackManipulationIconBox).append(gearButton);
-        //
-        //$(gearButton).click(function (e) {
-        //    igv.popover.show(e.pageX, e.pageY, igv.formatPopoverText( [ {name: 'name', value: 'value'} ] ));
+        //removeButton = $('<i class="fa fa-times igv-track-manipulation-discard">')[0];
+        //$(trackManipulationIconBox).append(removeButton);
+        //$(removeButton).click(function () {
+        //    myself.browser.removeTrack(myself.track);
         //});
+
+        gearButton = $('<i class="fa fa-gear igv-track-manipulation-gear">')[0];
+        $(trackManipulationIconBox).append(gearButton);
+
+        $(gearButton).click(function (e) {
+            igv.popover.show(e.pageX, e.pageY, igv.formatPopoverText( [ {name: 'name', value: 'value'} ] ));
+        });
 
     };
 
