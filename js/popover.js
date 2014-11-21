@@ -107,31 +107,13 @@ var igv = (function (igv) {
 
     igv.Popover.prototype.show = function (pageX, pageY, content) {
 
-        var left,
-            height,
-            containerCoordinates = { x : pageX, y : pageY },
-            containerRect = { x : 0, y : 0, width : $(window).width(), height : $(window).height() },
-            popupRect = { },
-            popupX = pageX,
-            popupY = pageY;
+        var height;
 
         if (content) {
 
             $(this.popoverContentDiv).html(content);
 
-            popupX -= $(this.parentDiv).offset().left;
-            popupY -= $(this.parentDiv).offset().top;
-            popupRect = { x : popupX, y : popupY, width : $(this.popoverDiv).outerWidth(), height : $(this.popoverDiv).outerHeight() };
-
-            left = popupX;
-            if (containerCoordinates.x + popupRect.width > containerRect.width) {
-                left = popupX - popupRect.width;
-            }
-
-            $(this.popoverDiv).css({
-                "left": left + "px",
-                "top" : popupY  + "px"
-            }).show();
+            $(this.popoverDiv).css( popoverDivPosition(pageX, pageY, this.parentDiv, this.popoverDiv) ).show();
 
             height = $(this.popoverContentDiv).height() + 20;
             $(this.popoverDiv).css({
@@ -139,6 +121,27 @@ var igv = (function (igv) {
             });
         }
     };
+
+    function popoverDivPosition(pageX, pageY, parentDiv, popoverDiv) {
+
+        var left,
+            containerCoordinates = { x : pageX, y : pageY },
+            containerRect = { x : 0, y : 0, width : $(window).width(), height : $(window).height() },
+            popupRect,
+            popupX = pageX,
+            popupY = pageY;
+
+        popupX -= $(parentDiv).offset().left;
+        popupY -= $(parentDiv).offset().top;
+        popupRect = { x : popupX, y : popupY, width : $(popoverDiv).outerWidth(), height : $(popoverDiv).outerHeight() };
+
+        left = popupX;
+        if (containerCoordinates.x + popupRect.width > containerRect.width) {
+            left = popupX - popupRect.width;
+        }
+
+        return { "left" : left + "px", "top" : popupY + "px" };
+    }
 
     return igv;
 
