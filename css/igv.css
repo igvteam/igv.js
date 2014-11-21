@@ -159,8 +159,6 @@
 
 .igv-track-manipulation-icon-box {
 
-    margin: auto;
-
     position: absolute;
     left: 0;
     right: 0;
@@ -169,6 +167,8 @@
 
     width: 100%;
     height: 30px;
+
+    margin: auto;
 
     background: white;
 

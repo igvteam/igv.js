@@ -57,6 +57,14 @@ var igv = (function (igv) {
 
         this.addViewportToParentTrackDiv(this.trackDiv);
 
+        if ("CURSOR" === browser.type) {
+
+            this.cursorHistogramContainer = $('<div class="igv-cursor-histogram-container">')[0];
+            $(this.trackDiv).append(this.cursorHistogramContainer);
+
+            this.track.cursorHistogram = new cursor.CursorHistogram(this.cursorHistogramContainer, this.track.max);
+        }
+
         this.addRightHandGutterToParentTrackDiv(this.trackDiv);
 
         addTrackHandlers(this);
@@ -305,11 +313,6 @@ var igv = (function (igv) {
             $(removeButton).click(function () {
                 myself.browser.removeTrack(myself.track);
             });
-
-            this.cursorHistogramContainer = $('<div class="igv-cursor-histogram-container">')[0];
-            $(this.trackDiv).append(this.cursorHistogramContainer);
-
-            this.track.cursorHistogram = new cursor.CursorHistogram(this.cursorHistogramContainer, this.track.max);
 
         };
 
