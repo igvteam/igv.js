@@ -834,26 +834,22 @@ var igv = (function (igv) {
 
         var track = trackView.track,
             trackFilterButtonDiv,
-            trackIconContainer,
             trackLabelDiv,
             sortButton,
             bullseyeStackSpan,
             bullseyeOuterIcon,
             bullseyeInnerIcon;
 
-        trackIconContainer = $(trackView.cursorTrackContainer).find(".igv-track-icon-container");
-
         // track label
         trackLabelDiv = $('<div class="igv-track-label-div">')[0];
         trackLabelDiv.innerHTML = track.label;
         trackLabelDiv.title = track.label;
-        $(trackIconContainer).append(trackLabelDiv);
-
+        $(trackView.leftHandGutter).append(trackLabelDiv);
 
 
         // track selection
         bullseyeStackSpan = document.createElement("span");
-        trackIconContainer.append($(bullseyeStackSpan));
+        $(trackView.leftHandGutter).append($(bullseyeStackSpan));
 
         bullseyeStackSpan.className = "fa-stack igv-control-bullseye-stack-fontawesome";
         track.bullseyeStackSpan = bullseyeStackSpan;
@@ -890,7 +886,7 @@ var igv = (function (igv) {
 
         // track filter
         trackFilterButtonDiv = document.createElement("div");
-        trackIconContainer.append($(trackFilterButtonDiv));
+        $(trackView.leftHandGutter).append($(trackFilterButtonDiv));
 
         trackFilterButtonDiv.className = "igv-track-filter-button-div";
 
@@ -904,7 +900,7 @@ var igv = (function (igv) {
         browser.sortTrack = undefined;
 
         sortButton = document.createElement("i");
-        trackIconContainer.append($(sortButton));
+        $(trackView.leftHandGutter).append($(sortButton));
         sortButton.className = "fa fa-signal igv-control-sort-fontawesome fa-flip-horizontal";
         track.sortButton = sortButton;
 

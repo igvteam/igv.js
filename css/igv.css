@@ -116,16 +116,6 @@
     vertical-align: middle;
 }
 
-.igv-track-icon-container {
-    position: absolute;
-    left: 10px;
-    top: 4px;
-    width: auto;
-    height:auto;
-    background: rgb(255, 255, 255);
-    display: inline-block;
-}
-
 .igv-track-label-span-base {
     margin-left: 2px;
     margin-right: 2px;
@@ -158,6 +148,16 @@
     left: 0;
     width: 50px;
     height: 100%;
+}
+
+.igv-track-icon-container {
+    position: absolute;
+    left: 10px;
+    top: 4px;
+    width: auto;
+    height:auto;
+    background: rgb(255, 255, 255);
+    display: inline-block;
 }
 
 .igv-track-control-canvas {

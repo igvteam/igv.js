@@ -61,12 +61,14 @@
 }
 
 /* override */
-.igv-track-icon-container {
-    left:0;
+.igv-left-hand-gutter {
+    position: absolute;
+    left: 0;
     top: 0;
     width: 100px;
     height: 100%;
-    /*display: inline;*/
+    background: rgb(255, 255, 255);
+    display: inline-block;
 }
 
 .igv-cursor-track-container {

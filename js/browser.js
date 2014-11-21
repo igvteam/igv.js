@@ -148,7 +148,7 @@ var igv = (function (igv) {
     /**
      * Add a new track.  Each track is associated with the following DOM elements
      *
-     *      controlDiv  - div on the left for track controls and legend
+     *      leftHandGutter  - div on the left for track controls and legend
      *      contentDiv  - a div element wrapping all the track content.  Height can be > viewportDiv height
      *      viewportDiv - a div element through which the track is viewed.  This might have a vertical scrollbar
      *      canvas     - canvas element upon which the track is drawn.  Child of contentDiv
