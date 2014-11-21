@@ -113,7 +113,7 @@ var igv = (function (igv) {
 
             $(this.popoverContentDiv).html(content);
 
-            $(this.popoverDiv).css( popoverDivPosition(pageX, pageY, this.parentDiv, this.popoverDiv) ).show();
+            $(this.popoverDiv).css( popoverDivPosition(pageX, pageY, this) ).show();
 
             height = $(this.popoverContentDiv).height() + 20;
             $(this.popoverDiv).css({
@@ -122,7 +122,7 @@ var igv = (function (igv) {
         }
     };
 
-    function popoverDivPosition(pageX, pageY, parentDiv, popoverDiv) {
+    function popoverDivPosition(pageX, pageY, popover) {
 
         var left,
             containerCoordinates = { x : pageX, y : pageY },
@@ -131,9 +131,9 @@ var igv = (function (igv) {
             popupX = pageX,
             popupY = pageY;
 
-        popupX -= $(parentDiv).offset().left;
-        popupY -= $(parentDiv).offset().top;
-        popupRect = { x : popupX, y : popupY, width : $(popoverDiv).outerWidth(), height : $(popoverDiv).outerHeight() };
+        popupX -= $(popover.parentDiv).offset().left;
+        popupY -= $(popover.parentDiv).offset().top;
+        popupRect = { x : popupX, y : popupY, width : $(popover.popoverDiv).outerWidth(), height : $(popover.popoverDiv).outerHeight() };
 
         left = popupX;
         if (containerCoordinates.x + popupRect.width > containerRect.width) {
