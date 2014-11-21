@@ -181,7 +181,7 @@
 .igv-viewport-div {
     position: absolute;
     left:  50px;
-    right: 0;
+    right: 48px;
     height: 100%;
     overflow-x: hidden;
     overflow-y: auto;

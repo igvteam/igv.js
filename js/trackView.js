@@ -134,18 +134,30 @@ var igv = (function (igv) {
     igv.TrackView.prototype.addRightHandGutterToParentTrackDiv = function (trackDiv) {
 
         var myself = this,
-            removeButton = $('<i class="fa fa-times-circle igv-track-disable-button-fontawesome">')[0];
+            trackManipulationIconBox,
+            removeButton;
 
-        $(this.contentDiv).append(removeButton);
-        $(this.contentDiv).click(function () {
-            myself.browser.removeTrack(myself.track);
-        });
+        this.rightHandGutter = $('<div class="igv-right-hand-gutter">')[0];
+        $(trackDiv).append(this.rightHandGutter);
+
+        trackManipulationIconBox = $('<div class="igv-track-manipulation-icon-box">')[0];
+        $(this.rightHandGutter).append(trackManipulationIconBox);
+
+        this.rightHandGutterCreationHelper(trackManipulationIconBox);
 
     };
 
-    igv.TrackView.prototype.rightHandGutterCreationHelper = function (leftHandGutter) {
+    igv.TrackView.prototype.rightHandGutterCreationHelper = function (trackManipulationIconBox) {
 
-        // do stuff
+        var myself = this,
+            removeButton;
+
+        removeButton = $('<i class="fa fa-times igv-track-manipulation-discard">')[0];
+        $(trackManipulationIconBox).append(removeButton);
+
+        $(removeButton).click(function () {
+            myself.browser.removeTrack(myself.track);
+        });
 
     };
 
@@ -433,17 +445,10 @@ var igv = (function (igv) {
 
         };
 
-        trackView.addRightHandGutterToParentTrackDiv = function (trackDiv) {
+        trackView.rightHandGutterCreationHelper = function (trackManipulationIconBox) {
 
             var myself = this,
-                trackManipulationIconBox,
                 removeButton;
-
-            this.rightHandGutter = $('<div class="igv-right-hand-gutter">')[0];
-            $(trackDiv).append(this.rightHandGutter);
-
-            trackManipulationIconBox = $('<div class="igv-track-manipulation-icon-box">')[0];
-            $(this.rightHandGutter).append(trackManipulationIconBox);
 
             $(trackManipulationIconBox).append($('<i class="fa fa-chevron-circle-up   igv-track-manipulation-move-up">')[0]);
             $(trackManipulationIconBox).append($('<i class="fa fa-chevron-circle-down igv-track-manipulation-move-down">')[0]);
@@ -464,9 +469,10 @@ var igv = (function (igv) {
             });
 
             this.cursorHistogramContainer = $('<div class="igv-cursor-histogram-container">')[0];
-            $(trackDiv).append(this.cursorHistogramContainer);
+            $(this.trackDiv).append(this.cursorHistogramContainer);
 
             this.track.cursorHistogram = new cursor.CursorHistogram(this.cursorHistogramContainer, this.track.max);
+
         };
 
     }
@@ -568,5 +574,5 @@ var igv = (function (igv) {
     }
 
     return igv;
-})
-(igv || {});
+
+})(igv || {});
