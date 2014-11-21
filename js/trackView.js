@@ -165,18 +165,30 @@ var igv = (function (igv) {
             gearButton;
 
         removeButton = $('<i class="fa fa-times igv-track-manipulation-discard">')[0];
-        //$(trackManipulationIconBox).append(removeButton);
         $(removeButton).click(function () {
             myself.browser.removeTrack(myself.track);
             igv.popover.hide();
         });
 
-        gearButton = $('<i class="fa fa-gear igv-track-manipulation-gear">')[0];
+        gearButton = $('<i class="fa fa-gear fa-lg igv-track-manipulation-gear">')[0];
         $(trackManipulationIconBox).append(gearButton);
 
         $(gearButton).click(function (e) {
-            //igv.popover.show(e.pageX, e.pageY, igv.formatPopoverText( [ {name: 'name', value: 'value'} ] ));
-            igv.popover.showElement(e.pageX, e.pageY, removeButton);
+
+            var acc = [],
+                listItem = $('<li>')[0],
+                unorderedList = $('<ul>')[0];
+
+            $(listItem).append(removeButton);
+            acc.push($(listItem).prop('outerHTML'));
+
+            ["foxtrot", "bravo", "lima"].forEach(function (item, i, items) {
+                acc.push('<li>' + item + " " + i + '</li>');
+            });
+
+            $(unorderedList).append( acc.join('') );
+
+            igv.popover.presentTrackMenu(e.pageX, e.pageY, $(removeButton));
         });
 
     };

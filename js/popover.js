@@ -45,7 +45,7 @@ var igv = (function (igv) {
 
         this.parentDiv = parentDiv;
 
-        // popover
+        // popover container
         this.popoverDiv = $('<div class="igv-popover">')[0];
         $(this.parentDiv).append(this.popoverDiv);
 
@@ -53,14 +53,16 @@ var igv = (function (igv) {
         this.popoverContentDiv = $('<div class="igv-popoverContent">')[0];
         $(this.popoverDiv).append(this.popoverContentDiv);
 
-        // popover close
-        popoverCloseElement = $('<span class="igv-popoverCloseElement">')[0];
-        $(this.popoverDiv).append(popoverCloseElement);
+        // popover close button container
+        this.popoverCloseElement = $('<span class="igv-popoverCloseElement">')[0];
+        $(this.popoverDiv).append(this.popoverCloseElement);
 
+        // popover close button
         popoverCloseIcon = $('<i class="fa fa-times igv-popoverCloseFontAwesome">')[0];
-        $(popoverCloseElement).append(popoverCloseIcon);
+        $(this.popoverCloseElement).append(popoverCloseIcon);
 
-        $(popoverCloseElement).hover(
+
+        $(this.popoverCloseElement).hover(
 
             function() {
                 $(popoverCloseIcon).removeClass("fa-times"       );
@@ -82,7 +84,7 @@ var igv = (function (igv) {
             }
         );
 
-        popoverCloseElement.onclick = function (e) {
+        this.popoverCloseElement.onclick = function (e) {
             $(myself.popoverDiv).hide();
         };
 
@@ -105,12 +107,14 @@ var igv = (function (igv) {
         $(this.popoverDiv).hide();
     };
 
-    igv.Popover.prototype.showElement = function (pageX, pageY, element) {
+    igv.Popover.prototype.presentTrackMenu = function (pageX, pageY, element) {
 
         var height;
 
+        $(this.popoverCloseElement).hide();
+
         $(this.popoverContentDiv).empty();
-        $(this.popoverContentDiv).append(element);
+        $(this.popoverContentDiv).append(element[0]);
 
         $(this.popoverDiv).css( popoverDivPosition(pageX, pageY, this) ).show();
 
@@ -128,6 +132,8 @@ var igv = (function (igv) {
         var height;
 
         if (content) {
+
+            $(this.popoverCloseElement).show();
 
             $(this.popoverContentDiv).html(content);
 
