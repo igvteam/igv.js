@@ -121,20 +121,20 @@ var igv = (function (igv) {
 
             popupX -= $(this.parentDiv).offset().left;
             popupY -= $(this.parentDiv).offset().top;
-            popupRect = { x : popupX, y : popupY, width : $(popoverDiv).outerWidth(), height : $(popoverDiv).outerHeight() };
+            popupRect = { x : popupX, y : popupY, width : $(this.popoverDiv).outerWidth(), height : $(this.popoverDiv).outerHeight() };
 
             left = popupX;
             if (containerCoordinates.x + popupRect.width > containerRect.width) {
                 left = popupX - popupRect.width;
             }
 
-            $(popoverDiv).css({
+            $(this.popoverDiv).css({
                 "left": left + "px",
                 "top" : popupY  + "px"
             }).show();
 
             height = $(this.popoverContentDiv).height() + 20;
-            $(popoverDiv).css({
+            $(this.popoverDiv).css({
                 "height": height + "px"
             });
         }
