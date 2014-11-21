@@ -30,9 +30,7 @@ var igv = (function (igv) {
         this.track = track;
         this.browser = browser;
 
-        if ("CURSOR" === browser.type) {
-            addTrackViewCursorExtensions(this);
-        }
+        this.addTrackViewExtensions(browser.type);
 
         if ("CURSOR" === browser.type) {
 
@@ -41,12 +39,10 @@ var igv = (function (igv) {
 
             this.trackDiv = $('<div class="igv-track-div">')[0];
             $(this.cursorTrackContainer).append(this.trackDiv);
-
         } else {
 
             this.trackDiv = $('<div class="igv-track-div">')[0];
             $(browser.trackContainerDiv).append(this.trackDiv);
-
         }
 
         // Optionally override CSS height
@@ -65,6 +61,13 @@ var igv = (function (igv) {
 
         addTrackHandlers(this);
 
+    };
+
+    igv.TrackView.prototype.addTrackViewExtensions = function(browserType) {
+
+        if ("CURSOR" === browserType) {
+            addCursorTrackViewExtensions(this);
+        }
     };
 
     igv.TrackView.prototype.addViewportToParentTrackDiv = function (trackDiv) {
@@ -160,6 +163,157 @@ var igv = (function (igv) {
         });
 
     };
+
+    function addCursorTrackViewExtensions(trackView) {
+
+        trackView.viewportCreationHelper = function (viewportDiv) {
+            // do nothing;
+            //console.log("nadda");
+        };
+
+        trackView.leftHandGutterCreationHelper = function (leftHandGutter) {
+
+            addTrackControlButtons(this, this.browser);
+
+        };
+
+        addTrackControlButtons = function (trackView, browser) {
+
+            var track = trackView.track,
+                trackFilterButtonDiv,
+                trackLabelDiv,
+                sortButton,
+                bullseyeStackSpan,
+                bullseyeOuterIcon,
+                bullseyeInnerIcon;
+
+            // track label
+            trackLabelDiv = $('<div class="igv-track-label-div">')[0];
+            trackLabelDiv.innerHTML = track.label;
+            trackLabelDiv.title = track.label;
+            $(trackView.leftHandGutter).append(trackLabelDiv);
+
+            // track selection
+            bullseyeStackSpan = document.createElement("span");
+            $(trackView.leftHandGutter).append($(bullseyeStackSpan));
+
+            bullseyeStackSpan.className = "fa-stack igv-control-bullseye-stack-fontawesome";
+            track.bullseyeStackSpan = bullseyeStackSpan;
+
+            bullseyeOuterIcon = document.createElement("i");
+            bullseyeStackSpan.appendChild(bullseyeOuterIcon);
+            bullseyeOuterIcon.className = "fa fa-stack-2x fa-circle-thin";
+
+            bullseyeInnerIcon = document.createElement("i");
+            bullseyeStackSpan.appendChild(bullseyeInnerIcon);
+            bullseyeInnerIcon.className = "fa fa-stack-1x fa-circle igv-control-bullseye-fontawesome";
+
+            bullseyeStackSpan.onclick = function () {
+
+                if (browser.designatedTrack && browser.designatedTrack === trackView.track) {
+                    return;
+                } else {
+                    browser.selectDesignatedTrack(trackView);
+                }
+
+                browser.designatedTrack.featureSource.allFeatures(function (featureList) {
+                    browser.referenceFrame.start = 0;
+                    browser.cursorModel.setRegions(featureList);
+                });
+
+            };
+
+            // track filter
+            trackFilterButtonDiv = document.createElement("div");
+            $(trackView.leftHandGutter).append($(trackFilterButtonDiv));
+
+            trackFilterButtonDiv.className = "igv-track-filter-button-div";
+
+            trackView.track.trackFilter = new igv.TrackFilter(trackView);
+            trackView.track.trackFilter.createTrackFilterWidgetWithParentElement(trackFilterButtonDiv);
+
+            // sort
+            browser.sortDirection = undefined;
+            browser.sortTrack = undefined;
+
+            sortButton = document.createElement("i");
+            $(trackView.leftHandGutter).append($(sortButton));
+            sortButton.className = "fa fa-signal igv-control-sort-fontawesome fa-flip-horizontal";
+            track.sortButton = sortButton;
+
+            sortButton.onclick = function () {
+
+                if (browser.sortTrack === track) {
+
+                    browser.sortDirection = (undefined === browser.sortDirection) ? 1 : -1 * browser.sortDirection;
+                } else {
+
+                    browser.sortTrack = track;
+                    if (undefined === browser.sortDirection) {
+                        browser.sortDirection = 1;
+                    }
+                }
+
+                browser.cursorModel.sortRegions(track.featureSource, browser.sortDirection, function (regions) {
+
+                    browser.update();
+
+                    browser.trackPanels.forEach(function (tp) {
+
+                        if (1 === browser.sortDirection) {
+
+                            $(tp.track.sortButton).addClass("fa-flip-horizontal");
+                        } else {
+
+                            $(tp.track.sortButton).removeClass("fa-flip-horizontal");
+                        }
+
+                        if (track === tp.track) {
+
+                            $(tp.track.sortButton).addClass("igv-control-sort-fontawesome-selected");
+                        } else {
+
+                            $(tp.track.sortButton).removeClass("igv-control-sort-fontawesome-selected");
+                        }
+                    });
+
+                });
+
+            };
+
+        };
+
+        trackView.rightHandGutterCreationHelper = function (trackManipulationIconBox) {
+
+            var myself = this,
+                removeButton;
+
+            $(trackManipulationIconBox).append($('<i class="fa fa-chevron-circle-up   igv-track-manipulation-move-up">')[0]);
+            $(trackManipulationIconBox).append($('<i class="fa fa-chevron-circle-down igv-track-manipulation-move-down">')[0]);
+
+            $(trackManipulationIconBox).find("i.fa-chevron-circle-up").click(function () {
+                myself.browser.reduceTrackOrder(myself)
+            });
+
+            $(trackManipulationIconBox).find("i.fa-chevron-circle-down").click(function () {
+                myself.browser.increaseTrackOrder(myself)
+            });
+
+            removeButton = $('<i class="fa fa-times igv-track-manipulation-discard">')[0];
+            $(trackManipulationIconBox).append(removeButton);
+
+            $(removeButton).click(function () {
+                myself.browser.removeTrack(myself.track);
+            });
+
+            this.cursorHistogramContainer = $('<div class="igv-cursor-histogram-container">')[0];
+            $(this.trackDiv).append(this.cursorHistogramContainer);
+
+            this.track.cursorHistogram = new cursor.CursorHistogram(this.cursorHistogramContainer, this.track.max);
+
+        };
+
+    }
 
     igv.TrackView.prototype.resize = function () {
         var canvas = this.canvas,
@@ -325,157 +479,6 @@ var igv = (function (igv) {
             this.ctx.restore();
         }
     };
-
-    function addTrackViewCursorExtensions(trackView) {
-
-        trackView.viewportCreationHelper = function (viewportDiv) {
-            // do nothing;
-            //console.log("nadda");
-        };
-
-        trackView.leftHandGutterCreationHelper = function (leftHandGutter) {
-
-            addTrackControlButtons(this, this.browser);
-
-        };
-
-        addTrackControlButtons = function (trackView, browser) {
-
-            var track = trackView.track,
-                trackFilterButtonDiv,
-                trackLabelDiv,
-                sortButton,
-                bullseyeStackSpan,
-                bullseyeOuterIcon,
-                bullseyeInnerIcon;
-
-            // track label
-            trackLabelDiv = $('<div class="igv-track-label-div">')[0];
-            trackLabelDiv.innerHTML = track.label;
-            trackLabelDiv.title = track.label;
-            $(trackView.leftHandGutter).append(trackLabelDiv);
-
-            // track selection
-            bullseyeStackSpan = document.createElement("span");
-            $(trackView.leftHandGutter).append($(bullseyeStackSpan));
-
-            bullseyeStackSpan.className = "fa-stack igv-control-bullseye-stack-fontawesome";
-            track.bullseyeStackSpan = bullseyeStackSpan;
-
-            bullseyeOuterIcon = document.createElement("i");
-            bullseyeStackSpan.appendChild(bullseyeOuterIcon);
-            bullseyeOuterIcon.className = "fa fa-stack-2x fa-circle-thin";
-
-            bullseyeInnerIcon = document.createElement("i");
-            bullseyeStackSpan.appendChild(bullseyeInnerIcon);
-            bullseyeInnerIcon.className = "fa fa-stack-1x fa-circle igv-control-bullseye-fontawesome";
-
-            bullseyeStackSpan.onclick = function () {
-
-                if (browser.designatedTrack && browser.designatedTrack === trackView.track) {
-                    return;
-                } else {
-                    browser.selectDesignatedTrack(trackView);
-                }
-
-                browser.designatedTrack.featureSource.allFeatures(function (featureList) {
-                    browser.referenceFrame.start = 0;
-                    browser.cursorModel.setRegions(featureList);
-                });
-
-            };
-
-            // track filter
-            trackFilterButtonDiv = document.createElement("div");
-            $(trackView.leftHandGutter).append($(trackFilterButtonDiv));
-
-            trackFilterButtonDiv.className = "igv-track-filter-button-div";
-
-            trackView.track.trackFilter = new igv.TrackFilter(trackView);
-            trackView.track.trackFilter.createTrackFilterWidgetWithParentElement(trackFilterButtonDiv);
-
-            // sort
-            browser.sortDirection = undefined;
-            browser.sortTrack = undefined;
-
-            sortButton = document.createElement("i");
-            $(trackView.leftHandGutter).append($(sortButton));
-            sortButton.className = "fa fa-signal igv-control-sort-fontawesome fa-flip-horizontal";
-            track.sortButton = sortButton;
-
-            sortButton.onclick = function () {
-
-                if (browser.sortTrack === track) {
-
-                    browser.sortDirection = (undefined === browser.sortDirection) ? 1 : -1 * browser.sortDirection;
-                } else {
-
-                    browser.sortTrack = track;
-                    if (undefined === browser.sortDirection) {
-                        browser.sortDirection = 1;
-                    }
-                }
-
-                browser.cursorModel.sortRegions(track.featureSource, browser.sortDirection, function (regions) {
-
-                    browser.update();
-
-                    browser.trackPanels.forEach(function (tp) {
-
-                        if (1 === browser.sortDirection) {
-
-                            $(tp.track.sortButton).addClass("fa-flip-horizontal");
-                        } else {
-
-                            $(tp.track.sortButton).removeClass("fa-flip-horizontal");
-                        }
-
-                        if (track === tp.track) {
-
-                            $(tp.track.sortButton).addClass("igv-control-sort-fontawesome-selected");
-                        } else {
-
-                            $(tp.track.sortButton).removeClass("igv-control-sort-fontawesome-selected");
-                        }
-                    });
-
-                });
-
-            };
-
-        };
-
-        trackView.rightHandGutterCreationHelper = function (trackManipulationIconBox) {
-
-            var myself = this,
-                removeButton;
-
-            $(trackManipulationIconBox).append($('<i class="fa fa-chevron-circle-up   igv-track-manipulation-move-up">')[0]);
-            $(trackManipulationIconBox).append($('<i class="fa fa-chevron-circle-down igv-track-manipulation-move-down">')[0]);
-
-            $(trackManipulationIconBox).find("i.fa-chevron-circle-up").click(function () {
-                myself.browser.reduceTrackOrder(myself)
-            });
-
-            $(trackManipulationIconBox).find("i.fa-chevron-circle-down").click(function () {
-                myself.browser.increaseTrackOrder(myself)
-            });
-
-            removeButton = $('<i class="fa fa-times igv-track-manipulation-discard">')[0];
-            $(trackManipulationIconBox).append(removeButton);
-
-            $(removeButton).click(function () {
-                myself.browser.removeTrack(myself.track);
-            });
-
-            this.cursorHistogramContainer = $('<div class="igv-cursor-histogram-container">')[0];
-            $(this.trackDiv).append(this.cursorHistogramContainer);
-
-            this.track.cursorHistogram = new cursor.CursorHistogram(this.cursorHistogramContainer, this.track.max);
-
-        };
-
-    }
 
     function addTrackHandlers(trackView) {
 

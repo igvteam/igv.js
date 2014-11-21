@@ -300,7 +300,7 @@ var igv = (function (igv) {
         igv.addAjaxExtensions();
 
         // Add cursor specific methods to the browser object,  some new some overrides
-        addBrowserCursorExtensions(browser);
+        addCursorBrowserExtensions(browser);
 
         browser.cursorModel = new cursor.CursorModel(browser);
         browser.referenceFrame = new igv.ReferenceFrame("", 0, 1 / browser.cursorModel.framePixelWidth);
@@ -333,7 +333,7 @@ var igv = (function (igv) {
         return browser;
     };
 
-    function addBrowserCursorExtensions(browser) {
+    function addCursorBrowserExtensions(browser) {
 
         browser.crossDomainProxy = "php/simpleProxy.php";
 

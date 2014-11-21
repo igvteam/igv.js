@@ -157,6 +157,37 @@
     /*border-left-style: solid;*/
 }
 
+.igv-track-manipulation-icon-box {
+
+    margin: auto;
+
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: 0;
+    bottom: 0;
+
+    width: 100%;
+    height: 30px;
+
+    background: white;
+
+}
+
+.igv-track-manipulation-discard {
+    position: absolute;
+    left: 20px;
+    top: 0;
+    color: grey;
+    background-color: white;
+}
+
+.igv-track-manipulation-discard:hover,
+.igv-track-manipulation-discard:focus,
+.igv-track-manipulation-discard:active  {
+    color: rgba(51, 51, 51, 1);
+}
+
 .igv-left-hand-gutter {
     position: absolute;
     left: 0;
