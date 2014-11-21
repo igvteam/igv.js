@@ -210,10 +210,8 @@ var igv = (function (igv) {
         this.trackPanels.forEach(function (trackView, index, trackViews) {
 
             if ("CURSOR" === myself.type) {
-
-                myself.trackContainerDiv.appendChild(trackView.trackHousingDiv);
+                myself.trackContainerDiv.appendChild(trackView.cursorTrackContainer);
             } else {
-
                 myself.trackContainerDiv.appendChild(trackView.trackDiv);
             }
 
@@ -237,10 +235,8 @@ var igv = (function (igv) {
             this.trackPanels.splice(this.trackPanels.indexOf(trackPanelRemoved), 1);
 
             if ("CURSOR" === this.type) {
-
-                this.trackContainerDiv.removeChild(trackPanelRemoved.trackHousingDiv);
+                this.trackContainerDiv.removeChild(trackPanelRemoved.cursorTrackContainer);
             } else {
-
                 this.trackContainerDiv.removeChild(trackPanelRemoved.trackDiv);
             }
 

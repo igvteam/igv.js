@@ -36,11 +36,11 @@ var igv = (function (igv) {
         // track
         if ("CURSOR" === browser.type) {
 
-            this.trackHousingDiv = $('<div class="igv-housing-div">')[0];
-            $(browser.trackContainerDiv).append(this.trackHousingDiv);
+            this.cursorTrackContainer = $('<div class="igv-cursor-track-container">')[0];
+            $(browser.trackContainerDiv).append(this.cursorTrackContainer);
 
             this.trackDiv = $('<div class="igv-track-div">')[0];
-            $(this.trackHousingDiv).append(this.trackDiv);
+            $(this.cursorTrackContainer).append(this.trackDiv);
 
         } else {
 
@@ -75,10 +75,8 @@ var igv = (function (igv) {
 
                 this.controlCanvas.setAttribute('width', this.controlDiv.clientWidth);
                 this.controlCanvas.setAttribute('height', this.controlDiv.clientHeight);
-
                 this.controlCtx = this.controlCanvas.getContext("2d");
             }
-
         }
 
         // track icon container
@@ -173,10 +171,9 @@ var igv = (function (igv) {
         this.canvas.style.height = newHeight + "px";
         this.canvas.setAttribute("height", newHeight);
 
-        if (this.browser.type === "CURSOR") {
+        if ("CURSOR" === this.browser.type) {
             this.track.cursorHistogram.updateHeightAndInitializeHistogramWithTrack(this.track);
         }
-
 
         this.update();
     };

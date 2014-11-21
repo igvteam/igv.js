@@ -841,8 +841,7 @@ var igv = (function (igv) {
             bullseyeOuterIcon,
             bullseyeInnerIcon;
 
-        trackIconContainer = $(trackView.trackHousingDiv).find(".igv-track-icon-container");
-
+        trackIconContainer = $(trackView.cursorTrackContainer).find(".igv-track-icon-container");
 
         // track label
         trackLabelDiv = $('<div class="igv-track-label-div">')[0];
