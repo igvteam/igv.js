@@ -47,7 +47,7 @@ var igv = (function (igv) {
     igv.createBrowser = function (parentDiv, options) {
 
         if (igv.browser) {
-            console.log("Attempt to create 2 browsers.")
+            console.log("Attempt to create 2 browsers.");
             return igv.browser;
         }
 

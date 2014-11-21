@@ -148,7 +148,7 @@ var igv = (function (igv) {
     /**
      * Add a new track.  Each track is associated with the following DOM elements
      *
-     *      controlDiv  - div on the left for track controls and legend
+     *      leftHandGutter  - div on the left for track controls and legend
      *      contentDiv  - a div element wrapping all the track content.  Height can be > viewportDiv height
      *      viewportDiv - a div element through which the track is viewed.  This might have a vertical scrollbar
      *      canvas     - canvas element upon which the track is drawn.  Child of contentDiv
@@ -210,10 +210,8 @@ var igv = (function (igv) {
         this.trackPanels.forEach(function (trackView, index, trackViews) {
 
             if ("CURSOR" === myself.type) {
-
-                myself.trackContainerDiv.appendChild(trackView.trackHousingDiv);
+                myself.trackContainerDiv.appendChild(trackView.cursorTrackContainer);
             } else {
-
                 myself.trackContainerDiv.appendChild(trackView.trackDiv);
             }
 
@@ -237,10 +235,8 @@ var igv = (function (igv) {
             this.trackPanels.splice(this.trackPanels.indexOf(trackPanelRemoved), 1);
 
             if ("CURSOR" === this.type) {
-
-                this.trackContainerDiv.removeChild(trackPanelRemoved.trackHousingDiv);
+                this.trackContainerDiv.removeChild(trackPanelRemoved.cursorTrackContainer);
             } else {
-
                 this.trackContainerDiv.removeChild(trackPanelRemoved.trackDiv);
             }
 

@@ -7,7 +7,7 @@ function runCursorHistogramTests() {
 
     test( "CursorHistogram Creation Test", 4, function() {
 
-        var cursorHistogram = new cursor.CursorHistogram(4, 100);
+        var cursorHistogram = new cursor.CursorHistogram(null, 100);
         ok(cursorHistogram);
 
         equal(0, cursorHistogram.scoreIndex(14));
@@ -39,9 +39,8 @@ function runCursorHistogramTests() {
         featureSource = new igv.BedFeatureSource(peakURL);
 //        featureSource = new igv.BedFeatureSource(tssURL);
 
-        bins = 100;
         maxScore = 1000;
-        cursorHistogram = new cursor.CursorHistogram(bins, maxScore);
+        cursorHistogram = new cursor.CursorHistogram(null, maxScore);
 
         featureSource.allFeatures(function (features) {
 

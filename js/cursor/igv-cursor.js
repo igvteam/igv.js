@@ -300,7 +300,7 @@ var igv = (function (igv) {
         igv.addAjaxExtensions();
 
         // Add cursor specific methods to the browser object,  some new some overrides
-        addCursorExtensions(browser);
+        addCursorBrowserExtensions(browser);
 
         browser.cursorModel = new cursor.CursorModel(browser);
         browser.referenceFrame = new igv.ReferenceFrame("", 0, 1 / browser.cursorModel.framePixelWidth);
@@ -333,7 +333,7 @@ var igv = (function (igv) {
         return browser;
     };
 
-    function addCursorExtensions(browser) {
+    function addCursorBrowserExtensions(browser) {
 
         browser.crossDomainProxy = "php/simpleProxy.php";
 
@@ -829,130 +829,6 @@ var igv = (function (igv) {
         }
 
     }
-
-    igv.cursorAddTrackControlButtons = function (trackView, browser) {
-
-        var track = trackView.track,
-            trackFilterButtonDiv,
-            trackIconContainer,
-            trackLabelDiv,
-            sortButton,
-            bullseyeStackSpan,
-            bullseyeOuterIcon,
-            bullseyeInnerIcon;
-
-        trackIconContainer = $(trackView.trackHousingDiv).find(".igv-track-icon-container");
-
-
-        // track label
-        trackLabelDiv = $('<div class="igv-track-label-div">')[0];
-        trackLabelDiv.innerHTML = track.label;
-        trackLabelDiv.title = track.label;
-        $(trackIconContainer).append(trackLabelDiv);
-
-
-
-        // track selection
-        bullseyeStackSpan = document.createElement("span");
-        trackIconContainer.append($(bullseyeStackSpan));
-
-        bullseyeStackSpan.className = "fa-stack igv-control-bullseye-stack-fontawesome";
-        track.bullseyeStackSpan = bullseyeStackSpan;
-
-        bullseyeOuterIcon = document.createElement("i");
-        bullseyeStackSpan.appendChild(bullseyeOuterIcon);
-//        bullseyeOuterIcon.className = "fa fa-stack-2x fa-circle-o";
-        bullseyeOuterIcon.className = "fa fa-stack-2x fa-circle-thin";
-
-        bullseyeInnerIcon = document.createElement("i");
-        bullseyeStackSpan.appendChild(bullseyeInnerIcon);
-        bullseyeInnerIcon.className = "fa fa-stack-1x fa-circle igv-control-bullseye-fontawesome";
-
-        bullseyeStackSpan.onclick = function () {
-
-            if (browser.designatedTrack && browser.designatedTrack === trackView.track) {
-
-                return;
-            } else {
-
-                browser.selectDesignatedTrack(trackView);
-            }
-
-            browser.designatedTrack.featureSource.allFeatures(function (featureList) {
-
-                browser.referenceFrame.start = 0;
-                browser.cursorModel.setRegions(featureList);
-
-            });
-
-        };
-
-
-
-        // track filter
-        trackFilterButtonDiv = document.createElement("div");
-        trackIconContainer.append($(trackFilterButtonDiv));
-
-        trackFilterButtonDiv.className = "igv-filter-histogram-button-div";
-
-        trackView.track.trackFilter = new igv.TrackFilter(trackView);
-        trackView.track.trackFilter.createTrackFilterWidgetWithParentElement(trackFilterButtonDiv);
-
-
-
-        // sort
-        browser.sortDirection = undefined;
-        browser.sortTrack = undefined;
-
-        sortButton = document.createElement("i");
-        trackIconContainer.append($(sortButton));
-        sortButton.className = "fa fa-signal igv-control-sort-fontawesome fa-flip-horizontal";
-        track.sortButton = sortButton;
-
-        sortButton.onclick = function () {
-
-            if (browser.sortTrack === track) {
-
-                browser.sortDirection = (undefined === browser.sortDirection) ? 1 : -1 * browser.sortDirection;
-
-            } else {
-
-                browser.sortTrack = track;
-                if (undefined === browser.sortDirection) {
-
-                    browser.sortDirection = 1;
-                }
-            }
-
-
-            browser.cursorModel.sortRegions(track.featureSource, browser.sortDirection, function (regions) {
-
-                browser.update();
-
-                browser.trackPanels.forEach(function (tp) {
-
-                    if (1 === browser.sortDirection) {
-
-                        $(tp.track.sortButton).addClass("fa-flip-horizontal");
-                    } else {
-
-                        $(tp.track.sortButton).removeClass("fa-flip-horizontal");
-                    }
-
-                    if (track === tp.track) {
-
-                        $(tp.track.sortButton).addClass("igv-control-sort-fontawesome-selected");
-                    } else {
-
-                        $(tp.track.sortButton).removeClass("igv-control-sort-fontawesome-selected");
-                    }
-                });
-
-            });
-
-        };
-
-    };
 
     return igv;
 

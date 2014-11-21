@@ -33,7 +33,7 @@
 
 }
 
-.igv-track-control-cursor-div {
+.igv-cursor-histogram-container {
 
     position: absolute;
     right: 48px;
@@ -45,6 +45,15 @@
     border-width: thin;
 }
 
+.igv-cursor-histogram-div {
+    position: absolute;
+    top: 2px;
+    bottom: 2px;
+    left: 2px;
+    right: 2px;
+    background: white;
+}
+
 /* override */
 .igv-viewport-div {
     left: 100px;
@@ -52,15 +61,17 @@
 }
 
 /* override */
-.igv-track-icon-container {
-    left:0;
+.igv-left-hand-gutter {
+    position: absolute;
+    left: 0;
     top: 0;
     width: 100px;
     height: 100%;
-    /*display: inline;*/
+    background: rgb(255, 255, 255);
+    display: inline-block;
 }
 
-.igv-housing-div {
+.igv-cursor-track-container {
     margin-top: 4px;
     position: relative;
     width: 100%;
@@ -165,16 +176,6 @@
     background-color: rgba(102, 102, 102, 1);
 }
 
-.igv-cursorHistogram-div {
-    position: absolute;
-    top: 2px;
-    bottom: 2px;
-    left: 2px;
-    right: 2px;
-    background: white;
-    /*display: none;*/
-}
-
 .igv-trackfilter-fontawesome {
 
     position: relative;
@@ -197,7 +198,7 @@
     color: rgba(204, 51, 0, 1);
 }
 
-.igv-filter-histogram-button-div {
+.igv-track-filter-button-div {
 
     position: relative;
     cursor: pointer;
@@ -214,37 +215,6 @@
     margin-right: 0;
 }
 
-.igv-track-manipulation-container {
-    position: absolute;
-    right: 0;
-    width: 48px;
-    height: 100%;
-
-    background: white;
-    text-align: center;
-
-    /*border-left-width: thin;*/
-    /*border-left-color: #444;*/
-    /*border-left-style: solid;*/
-}
-
-.igv-track-manipulation-icon-box {
-
-    margin: auto;
-
-    position: absolute;
-    left: 0;
-    right: 0;
-    top: 0;
-    bottom: 0;
-
-    width: 100%;
-    height: 30px;
-
-    background: white;
-
-}
-
 .igv-track-manipulation-move-up {
     position: absolute;
     left: 4px;
@@ -259,26 +229,14 @@
     color: grey;
 }
 
-.igv-track-manipulation-discard {
-    position: absolute;
-    left: 20px;
-    top: 0;
-    color: grey;
-    background-color: white;
-}
-
 .igv-track-manipulation-move-up:hover,
 .igv-track-manipulation-move-down:hover,
-.igv-track-manipulation-discard:hover,
     /**/
 .igv-track-manipulation-move-up:focus,
 .igv-track-manipulation-move-down:focus,
-.igv-track-manipulation-discard:focus,
     /**/
 .igv-track-manipulation-move-up:active,
-.igv-track-manipulation-move-down:active,
-.igv-track-manipulation-discard:active  {
-    /*font-size: medium;*/
+.igv-track-manipulation-move-down:active {
     color: rgba(51, 51, 51, 1);
 }
 

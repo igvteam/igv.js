@@ -1,4 +1,92 @@
 
+.igv-popover {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 350px;
+    /*height: 240px;*/
+    z-index: 1000;
+    font-family: Arial, Helvetica, sans-serif;
+    font-size: medium;
+    border: 2px solid #444;
+    background: #fff;
+    border-radius: 2%;
+    -moz-border-radius: 2%;
+    -webkit-border-radius: 2%;
+    display: none;
+}
+
+.igv-popoverContent {
+    position: absolute;
+    top: 5px;
+    left: 5px;
+    right: 25px;
+    /*bottom: 5px;*/
+    background: #fff;
+    /*background: rgba(0, 255, 0, .5);*/
+    /*display: block;*/
+}
+
+.igv-popoverPointer {
+    position: absolute;
+    top: 0;
+    left: 0;
+    z-index: 5000;
+}
+
+.igv-popoverContent .igv-popoverNameSpan {
+    font-weight: bold;
+    /*background: #0f0;*/
+}
+
+.igv-popoverContent .igv-popoverValueSpan {
+    word-break: break-all;
+    /*background: #f00;*/
+}
+
+.igv-popoverContent .popoverContentSpan {
+    font-weight: bold;
+}
+
+.igv-popoverCloseElement {
+    position: absolute;
+    top: 4px;
+    right: 4px;
+    cursor: pointer;
+}
+
+.igv-popoverCloseFontAwesome {
+    position: absolute;
+    top: 0;
+    right: 0;
+    color: #888;
+}
+
+.igv-popoverClose {
+    position: absolute;
+    top: 4px;
+    right: 4px;
+    width: 15px;
+    height: 15px;
+    font-size: 10pt;
+    color: #444;
+    border: 2px solid #fff;
+    background-color: #fff;
+    cursor: pointer;
+    font-weight: bold;
+    border-radius: 50%;
+    -moz-border-radius: 50%;
+    -webkit-border-radius: 50%;
+    /*padding: 1px 3px 2px 3px;*/
+    text-align: center;
+}
+
+.igv-popoverClose:hover {
+    color: #fff;
+    border: 2px solid #e00;
+    background-color: #e00;
+}
+
 .igv-spinner-fontawesome-start {
 
     position: absolute;
@@ -116,16 +204,6 @@
     vertical-align: middle;
 }
 
-.igv-track-icon-container {
-    position: absolute;
-    left: 10px;
-    top: 4px;
-    width: auto;
-    height:auto;
-    background: rgb(255, 255, 255);
-    display: inline-block;
-}
-
 .igv-track-label-span-base {
     margin-left: 2px;
     margin-right: 2px;
@@ -153,11 +231,80 @@
     color: #222;
 }
 
-.igv-track-control-div {
+.igv-right-hand-gutter {
+    position: absolute;
+    right: 0;
+    width: 48px;
+    height: 100%;
+
+    background: white;
+    text-align: center;
+
+    /*border-left-width: thin;*/
+    /*border-left-color: #444;*/
+    /*border-left-style: solid;*/
+}
+
+.igv-track-manipulation-icon-box {
+
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: 0;
+    bottom: 0;
+
+    width: 100%;
+    height: 30px;
+
+    margin: auto;
+
+    background: white;
+
+}
+
+.igv-track-manipulation-gear {
+    position: absolute;
+    left: 20px;
+    top: 0;
+    color: grey;
+    background-color: white;
+}
+
+.igv-track-manipulation-gear:hover,
+.igv-track-manipulation-gear:focus,
+.igv-track-manipulation-gear:active  {
+    color: rgba(51, 51, 51, 1);
+}
+
+.igv-track-manipulation-discard {
+    position: absolute;
+    left: 20px;
+    top: 0;
+    color: grey;
+    background-color: white;
+}
+
+.igv-track-manipulation-discard:hover,
+.igv-track-manipulation-discard:focus,
+.igv-track-manipulation-discard:active  {
+    color: rgba(51, 51, 51, 1);
+}
+
+.igv-left-hand-gutter {
     position: absolute;
     left: 0;
     width: 50px;
     height: 100%;
+}
+
+.igv-track-icon-container {
+    position: absolute;
+    left: 10px;
+    top: 4px;
+    width: auto;
+    height:auto;
+    background: rgb(255, 255, 255);
+    display: inline-block;
 }
 
 .igv-track-control-canvas {
@@ -167,7 +314,7 @@
 .igv-viewport-div {
     position: absolute;
     left:  50px;
-    right: 0;
+    right: 48px;
     height: 100%;
     overflow-x: hidden;
     overflow-y: auto;
@@ -188,93 +335,6 @@
     height: 100%;
 }
 
-.igv-popover {
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 350px;
-    /*height: 240px;*/
-    z-index: 1000;
-    font-family: Arial, Helvetica, sans-serif;
-    font-size: medium;
-    border: 2px solid #444;
-    background: #fff;
-    border-radius: 2%;
-    -moz-border-radius: 2%;
-    -webkit-border-radius: 2%;
-    display: none;
-}
-
-.igv-popoverContent {
-    position: absolute;
-    top: 5px;
-    left: 5px;
-    right: 25px;
-    /*bottom: 5px;*/
-    background: #fff;
-    /*background: rgba(0, 255, 0, .5);*/
-    /*display: block;*/
-}
-
-.igv-popoverPointer {
-    position: absolute;
-    top: 0;
-    left: 0;
-    z-index: 5000;
-}
-
-.igv-popoverContent .igv-popoverNameSpan {
-    font-weight: bold;
-    /*background: #0f0;*/
-}
-
-.igv-popoverContent .igv-popoverValueSpan {
-    word-break: break-all;
-    /*background: #f00;*/
-}
-
-.igv-popoverContent .popoverContentSpan {
-    font-weight: bold;
-}
-
-.igv-popoverCloseElement {
-    position: absolute;
-    top: 4px;
-    right: 4px;
-    cursor: pointer;
-}
-
-.igv-popoverCloseFontAwesome {
-    position: absolute;
-    top: 0;
-    right: 0;
-    color: #888;
-}
-
-.igv-popoverClose {
-    position: absolute;
-    top: 4px;
-    right: 4px;
-    width: 15px;
-    height: 15px;
-    font-size: 10pt;
-    color: #444;
-    border: 2px solid #fff;
-    background-color: #fff;
-    cursor: pointer;
-    font-weight: bold;
-    border-radius: 50%;
-    -moz-border-radius: 50%;
-    -webkit-border-radius: 50%;
-    /*padding: 1px 3px 2px 3px;*/
-    text-align: center;
-}
-
-.igv-popoverClose:hover {
-    color: #fff;
-    border: 2px solid #e00;
-    background-color: #e00;
-}
 
 .spacer5 {
     height: 5px;

@@ -25,6 +25,16 @@
 
 var igv = (function (igv) {
 
+
+    igv.spinner = function () {
+
+        // spinner
+        var spinner = document.createElement("i");
+        spinner.className = "fa fa-spinner fa-2x fa-spin igv-spinner-fontawesome-start";
+
+        return spinner;
+    };
+
     /**
      * Start the spinner for the parent element, if it has one
      */
