@@ -105,6 +105,24 @@ var igv = (function (igv) {
         $(this.popoverDiv).hide();
     };
 
+    igv.Popover.prototype.showElement = function (pageX, pageY, element) {
+
+        var height;
+
+        $(this.popoverContentDiv).empty();
+        $(this.popoverContentDiv).append(element);
+
+        $(this.popoverDiv).css( popoverDivPosition(pageX, pageY, this) ).show();
+
+        //height = $(this.popoverContentDiv).height() + 20;
+        height = 128;
+
+        $(this.popoverDiv).css({
+            "height": height + "px"
+        });
+
+    };
+
     igv.Popover.prototype.show = function (pageX, pageY, content) {
 
         var height;
