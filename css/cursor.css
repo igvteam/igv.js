@@ -215,20 +215,6 @@
     margin-right: 0;
 }
 
-.igv-track-manipulation-container {
-    position: absolute;
-    right: 0;
-    width: 48px;
-    height: 100%;
-
-    background: white;
-    text-align: center;
-
-    /*border-left-width: thin;*/
-    /*border-left-color: #444;*/
-    /*border-left-style: solid;*/
-}
-
 .igv-track-manipulation-icon-box {
 
     margin: auto;
