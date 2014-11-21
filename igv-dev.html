@@ -110,48 +110,39 @@
                 </ul>
                 <ul class="nav navbar-nav navbar-left">
                     <li class="dropdown" id="tracks-menu-dropdown">
-                        <a href="#" class="dropdown-toggle" data-toggle="dropdown">Example Tracks<b
-                                class="caret"></b></a>
+                        <a href="#" class="dropdown-toggle" data-toggle="dropdown">Example Tracks<b class="caret"></b></a>
                         <ul id="trackList" class="dropdown-menu">
                             <li>
-                                <a onclick="igv.browser.loadTrack({
+                                <a onclick="igv.browser.loadTrack(
+                                {
                                 url: 'http://www.broadinstitute.org/igvdata/1KG/b37/data/NA06984/alignment/NA06984.mapped.ILLUMINA.bwa.CEU.low_coverage.20120522.bam',
-                                label: 'NA06984'})">NA06984 (Broad server BAM file)</a>
+                                label: 'NA06984'
+                                }
+                                )">NA06984 (Broad server BAM file)</a>
                             </li>
                             <li>
-                                <a onclick="igv.browser.loadTrack({
+                                <a onclick="igv.browser.loadTrack(
+                                {
+                                url: 'https://dl.dropboxusercontent.com/u/11270323/BroadInstitute/dataFormats/BAM/heart.SLC25A3.bam',
+                                label: 'heart SLC25A3'
+                                }
+                                )">heart SLC25A3 (Dugla Dropbox)</a>
+                            </li>
+
+                            <li>
+                                <a onclick="igv.browser.loadTrack(
+                                {
                                 sourceType: 'ga4gh',
                                 type: 'bam',
                                 url: 'https://www.googleapis.com/genomics/v1beta',
                                 authKey: 'AIzaSyC-dujgw4P1QvNd8i_c-I-S_P1uxVZzn0w',
                                 readsetId: 'CMvnhpKTFhCjz9_25e_lCw',
-                                label: 'Ga4gh'})">GA4Gh (Global Alliance, Google server)</a>
-                            </li>
-                            <li>
-                                <a onclick="igv.browser.loadTrack({
-                                url: 'test/GBM-TP.seg.gz',
-                                label: 'GBM Copy # (TCGA Broad GDAC)'})">GBM Copy # (TCGA Broad GDAC))</a>
-                            </li>
-                            <li>
-                                <a onclick="igv.browser.loadTrack({
-                                type: 'eqtl',
-                                url: 'http://www.gtexportal.org/igv/assets/eqtl/Skin_Sun_Exposed_Lower_leg.portal.eqtl.bin',
-                                label: 'Skin Sun Exposed Lower leg'
-                                })">EQTL Skin (GTEX))</a>
-                            </li>
-                            <li>
-                                <a onclick="igv.browser.loadTrack( {
-                                url: '//www.broadinstitute.org/igvdata/t2d/recomb_decode.bedgraph',
-                                label: 'Recombination rate'
-                                })">Recombination Rate</a>
+                                label: 'Ga4gh'
+                                }
+                                )">GA4Gh (Global Alliance, Google server)</a>
                             </li>
                         </ul>
                     </li>
-                </ul>
-
-                </li>
-                </ul>
-                </li>
                 </ul>
                 <div class="nav navbar-nav navbar-left">
                     <div class="well-sm">
