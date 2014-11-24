@@ -147,10 +147,6 @@ var igv = (function (igv) {
 
     }
 
-    igv.RulerTrack.prototype.drawLabel = function (ctx) {
-
-    }
-
     function TickSpacing(majorTick, majorUnit, unitMultiplier) {
         this.majorTick = majorTick;
         this.majorUnit = majorUnit;

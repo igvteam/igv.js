@@ -8,15 +8,14 @@ Misc notes on major object types
 TrackView
 ---------
 
-The "view" object for an igv track.  Responsible for managing painting the track image and managing user 
-interactions with the track.   
+The "view" object for an igv track.  Interface between the track and html elements.
 
 
 Track
 -----
 
 The "model" object for an igv track.  Responsible for rendering the track on a surface (typically a canvas 
-context) provided by the view.  In some classes renderering is delegated to a pluggable function.
+context) provided by the view.  In some cases rendering is delegated to a pluggable function.
 
 Properties
 

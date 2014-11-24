@@ -104,7 +104,7 @@ var igv = (function (igv) {
             tickValue,
             tickLabelNumber;
 
-        this.tickValues.forEach(function(tv, tvindex, tvs){
+        this.tickValues.forEach(function (tv, tvindex, tvs) {
 
             var tickUnit,
                 tickDivisor;
@@ -115,7 +115,7 @@ var igv = (function (igv) {
                 index = tvindex;
 
                 tickUnit = myself.ticks[ index ].units;
-                tickDivisor = igv.numberFormatter( myself.ticks[ index ].value );
+                tickDivisor = igv.numberFormatter(myself.ticks[ index ].value);
                 brake = true;
             }
 
@@ -147,12 +147,7 @@ var igv = (function (igv) {
 //
 //        }
 
-
-    };
-
-    igv.RulerNextGenTrack.prototype.drawLabel = function (ctx) {
-
-    };
+    }
 
     return igv;
 })(igv || {});

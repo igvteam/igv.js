@@ -286,10 +286,6 @@ var igv = (function (igv) {
 
     };
 
-    igv.BAMTrack.prototype.drawLabel = function (ctx) {
-        // draw label stuff
-    };
-
     igv.BAMTrack.prototype.popupData = function (genomicLocation, xOffset, yOffset) {
 
         var coverageMap = this.featureSource.genomicInterval.coverageMap,

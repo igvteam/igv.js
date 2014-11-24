@@ -158,15 +158,6 @@ var igv = (function (igv) {
         }
     };
 
-    igv.SegTrack.prototype.drawLabel = function (ctx) {
-//        ctx.save();
-//        ctx.textAlign = 'right';
-//        ctx.verticalAlign = 'center';
-//        ctx.strokeStyle = "black";
-//        ctx.fillText(this.label, 90, this.height / 2);
-//        ctx.restore();
-
-    }
 
     /**
      * Sort samples by the average value over the genomic range in the direction indicated (1 = ascending, -1 descending)

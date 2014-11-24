@@ -87,10 +87,6 @@ var igv = (function (igv) {
         }
     }
 
-    igv.SequenceTrack.prototype.drawLabel = function (ctx) {
-
-    }
-
     return igv;
 })
     (igv || {});

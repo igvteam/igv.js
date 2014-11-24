@@ -122,11 +122,6 @@ var igv = (function (igv) {
         });
     };
 
-
-    igv.WIGTrack.prototype.drawLabel = function (ctx) {
-        // draw label stuff
-    };
-
     function autoscale(features) {
         var min = Number.MAX_VALUE,
             max = -Number.MAX_VALUE;
