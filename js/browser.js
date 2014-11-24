@@ -96,8 +96,8 @@ var igv = (function (igv) {
 
         if (type === "t2d") {
             newTrack = new igv.T2dTrack(config);
-        } else if (type === "bed") {
-            newTrack = new igv.GeneTrack(config);
+        } else if (type === "bed" || type === "vcf") {
+            newTrack = new igv.BedTrack(config);
         } else if (type === "bam") {
             newTrack = new igv.BAMTrack(config);
         } else if (type === "wig" || type === "bigwig" || type === "bedgraph") {
@@ -487,7 +487,7 @@ var igv = (function (igv) {
             tokens = feature.split(":");
             chr = tokens[0];
 
-            if(tokens.length == 1) {
+            if (tokens.length == 1) {
                 chromosome = this.genome.getChromosome(feature);
                 start = 0;
                 end = chromosome.bpLength;

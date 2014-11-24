@@ -25,10 +25,9 @@
 
 var igv = (function (igv) {
 
-    igv.GeneTrack = function (config) {
+    igv.BedTrack = function (config) {
         this.config = config;
         this.url = config.url;
-        this.featureSource = new igv.BedFeatureSource(this.config);
         this.label = config.label;
         this.id = config.id || config.label;
         this.height = 100;
@@ -36,7 +35,21 @@ var igv = (function (igv) {
         this.maxHeight = this.height;
         this.order = config.order;
 
-        this.render = renderGene;
+        if (config.type) {
+            this.type = config.type;
+        }
+        else {
+            this.type = igv.inferFileType(this.filename);
+        }
+
+        this.featureSource = new igv.BedFeatureSource(this.config);
+
+        if (this.type === "vcf") {
+            this.render = renderVariant;
+        }
+        else {
+            this.render = renderGene;
+        }
     };
 
     /**
@@ -49,11 +62,11 @@ var igv = (function (igv) {
      * @param pixelHeight
      * @param continuation  -  Optional.   called on completion, no arguments.
      */
-    igv.GeneTrack.prototype.draw = function (canvas, refFrame, bpStart, bpEnd, pixelWidth, pixelHeight, continuation, task) {
+    igv.BedTrack.prototype.draw = function (canvas, refFrame, bpStart, bpEnd, pixelWidth, pixelHeight, continuation, task) {
 
 //        console.log("geneTrack.draw " + refFrame.chr);
 
-        var chr =  refFrame.chr,
+        var chr = refFrame.chr,
             track = this;
 
         canvas.fillRect(0, 0, pixelWidth, pixelHeight, {'fillStyle': "rgb(255, 255, 255)"});
@@ -63,32 +76,32 @@ var igv = (function (igv) {
 
                 var gene, len;
 
-            if (featureList) {
+                if (featureList) {
 
-                len = featureList.length;
+                    len = featureList.length;
 
 //                console.log("geneTrack.featureSource.getFeatures " + featureList.length);
 
-                canvas.setProperties({fillStyle: "rgb(150,150,150)", strokeStyle: "rgb(150,150,150)"});
+                    canvas.setProperties({fillStyle: "rgb(150,150,150)", strokeStyle: "rgb(150,150,150)"});
 
-                for (var i = 0; i < len; i++) {
-                    gene = featureList[i];
-                    if (gene.end < bpStart) continue;
-                    if (gene.start > bpEnd) break;
+                    for (var i = 0; i < len; i++) {
+                        gene = featureList[i];
+                        if (gene.end < bpStart) continue;
+                        if (gene.start > bpEnd) break;
 
-                    track.render(gene, bpStart, refFrame.bpPerPixel, canvas);
+                        track.render(gene, bpStart, refFrame.bpPerPixel, canvas);
+                    }
                 }
-            }
-            else {
-                console.log("No feature list");
-            }
+                else {
+                    console.log("No feature list");
+                }
 
-            if (continuation) continuation();
-        },
-        task);
+                if (continuation) continuation();
+            },
+            task);
     };
 
-    igv.GeneTrack.prototype.drawLabel = function (ctx) {
+    igv.BedTrack.prototype.drawLabel = function (ctx) {
 //        ctx.save();
 //        ctx.textAlign = 'right';
 //        ctx.verticalAlign = 'center';
@@ -150,6 +163,24 @@ var igv = (function (igv) {
 
             canvas.fillText(gene.name, px + ((px1 - px) / 2), 2 * py, geneStyle, {rotate: {angle: 45}});
         }
+    }
+
+
+    function renderVariant(variant, bpStart, xScale, canvas) {
+
+        var px, px1, pw,
+            py = 20,
+            h = 10;
+
+
+        px = Math.round((variant.start - bpStart) / xScale);
+        px1 = Math.round((variant.end - bpStart) / xScale);
+        pw = Math.max(1, px1 - px);
+
+
+        canvas.fillRect(px, py, pw, h);
+
+
     }
 
     return igv;

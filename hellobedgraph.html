@@ -34,7 +34,7 @@
     <script type="text/javascript" src="js/genome.js"></script>
     <script type="text/javascript" src="js/trackView.js"></script>
     <script type="text/javascript" src="js/rulerTrack.js"></script>
-    <script type="text/javascript" src="js/geneTrack.js"></script>
+    <script type="text/javascript" src="js/bedTrack.js"></script>
     <script type="text/javascript" src="js/bed/bedSource.js"></script>
     <script type="text/javascript" src="js/igv-color.js"></script>
     <script type="text/javascript" src="js/igv-utils.js"></script>
@@ -111,7 +111,7 @@
                 new igv.SequenceTrack({
                     order: 9999
                 }),
-                new igv.GeneTrack({
+                new igv.BedTrack({
                     url: "//igvdata.broadinstitute.org/annotations/hg19/genes/gencode.v18.collapsed.bed",
                     label: "Genes",
                     order: 10000

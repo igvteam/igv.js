@@ -42,7 +42,7 @@
     <script type="text/javascript" src="js/genome.js"></script>
     <script type="text/javascript" src="js/trackView.js"></script>
     <script type="text/javascript" src="js/rulerTrack.js"></script>
-    <script type="text/javascript" src="js/geneTrack.js"></script>
+    <script type="text/javascript" src="js/bedTrack.js"></script>
     <script type="text/javascript" src="js/igv-color.js"></script>
     <script type="text/javascript" src="js/igv-utils.js"></script>
     <script type="text/javascript" src="js/parseUtils.js"></script>
@@ -82,6 +82,8 @@
     <script type="text/javascript" src="js/karyo/karyo.js"></script>
     <script type="text/javascript" src="js/gwas/t2dVariantSource.js"></script>
     <script type="text/javascript" src="js/gwas/t2dVariantTrack.js"></script>
+
+    <script type="text/javascript" src="js/vcf/vcfParser.js"></script>
 
 </head>
 
@@ -141,6 +143,17 @@
                                 }
                                 )">GA4Gh (Global Alliance, Google server)</a>
                             </li>
+
+                            <li>
+                                <a onclick="igv.browser.loadTrack(
+                                {
+                                type: 'vcf',
+                                url: 'test/data/vcf/TSVC.vcf',
+                                label: 'TSVC Variants'
+                                }
+                                )">VCF Example (chr1)</a>
+                            </li>
+
                         </ul>
                     </li>
                 </ul>
