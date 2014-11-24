@@ -35,84 +35,73 @@
 
 var igv = (function (igv) {
 
-    var maxFeatureCount = Number.MAX_VALUE;    // For future use,  controls downsampling
-
-    /**
-     * A factory function.  Return a parser for the given file type.
-     */
-    igv.segParser = function () {
-
-        var sampleColumn = 0,
-            chrColumn = 1,
-            startColumn = 2,
-            endColumn = 3,
-            dataColumn,
-            parseHeader = function (data) {
-                var lines = data.split("\n"),
-                    len = lines.length,
-                    line,
-                    i,
-                    tokens;
-
-                for (i = 0; i < len; i++) {
-                    line = lines[i];
-                    if (line.startsWith("#")) {
-                        continue;
-                    }
-                    else {
-                        tokens = line.split("\t");
-                        dataColumn = tokens.length - 1;     // Last column
-                        return {headings: tokens, lines: i + 1};
-                        break;
-                    }
-                }
-            };
-
-        return {
-
-            parseHeader: parseHeader,
-
-            parseFeatures: function (data) {
-                
-                var feature,
-                    lines = data? data.split("\n") : [] ,
-                    len = lines.length,
-                    tokens,
-                    allFeatures = [],
-                    line,
-                    i,
-                    header = parseHeader(data);
-
-                dataColumn = header.headings.length - 1;
+    var maxFeatureCount = Number.MAX_VALUE,    // For future use,  controls downsampling
+        sampleColumn = 0,
+        chrColumn = 1,
+        startColumn = 2,
+        endColumn = 3;
 
 
-                for (i = header.lines; i < len; i++) {
+    igv.SegParser = function () {
+   }
 
-                    line = lines[i];
+    igv.SegParser.prototype.parseHeader = function (data) {
 
-                    tokens = lines[i].split("\t");
+        var lines = data.split("\n"),
+            len = lines.length,
+            line,
+            i,
+            tokens;
 
-                    if (tokens.length > dataColumn) {
-
-                        allFeatures.push({
-                            sample: tokens[sampleColumn],
-                            chr: tokens[chrColumn],
-                            start: parseInt(tokens[startColumn]),
-                            end: parseInt(tokens[endColumn]),
-                            value: parseFloat(tokens[dataColumn])
-                        });
-                    }
-                }
-
-                return allFeatures;
-
+        for (i = 0; i < len; i++) {
+            line = lines[i];
+            if (line.startsWith("#")) {
+                continue;
             }
+            else {
+                tokens = line.split("\t");
+                this.header = {headings: tokens, lineCount: i + 1};
+                return this.header;
+                break;
+            }
+        }
+    }
 
 
+    igv.SegParser.prototype.parseFeatures = function (data) {
 
+        var lines = data ? data.split("\n") : [] ,
+            len = lines.length,
+            tokens, allFeatures = [], line, i, dataColumn;
+
+        if (!this.header) {
+            this.header = this.parseHeader(data);
+        }
+        dataColumn = this.header.headings.length - 1;
+
+
+        for (i = this.header.lineCount; i < len; i++) {
+
+            line = lines[i];
+
+            tokens = lines[i].split("\t");
+
+            if (tokens.length > dataColumn) {
+
+                allFeatures.push({
+                    sample: tokens[sampleColumn],
+                    chr: tokens[chrColumn],
+                    start: parseInt(tokens[startColumn]),
+                    end: parseInt(tokens[endColumn]),
+                    value: parseFloat(tokens[dataColumn])
+                });
+            }
         }
 
+        return allFeatures;
+
     }
+
 
     return igv;
 })

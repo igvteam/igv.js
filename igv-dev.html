@@ -84,6 +84,8 @@
     <script type="text/javascript" src="js/gwas/t2dVariantSource.js"></script>
     <script type="text/javascript" src="js/gwas/t2dVariantTrack.js"></script>
 
+    <script type="text/javascript" src="js/bed/segParser.js"></script>
+    <script type="text/javascript" src="js/segTrack.js"></script>
     <script type="text/javascript" src="js/vcf/vcfParser.js"></script>
 
 </head>
@@ -154,7 +156,24 @@
                                 }
                                 )">VCF Example (chr1)</a>
                             </li>
-
+                            <li>
+                                <a onclick="igv.browser.loadTrack({
+                                url: 'test/GBM-TP.seg.gz',
+                                label: 'GBM Copy # (TCGA Broad GDAC)'})">GBM Copy # (TCGA Broad GDAC))</a>
+                            </li>
+                            <li>
+                                <a onclick="igv.browser.loadTrack({
+                                type: 'eqtl',
+                                url: 'http://www.gtexportal.org/igv/assets/eqtl/Skin_Sun_Exposed_Lower_leg.portal.eqtl.bin',
+                                label: 'Skin Sun Exposed Lower leg'
+                                })">EQTL Skin (GTEX))</a>
+                            </li>
+                            <li>
+                                <a onclick="igv.browser.loadTrack( {
+                                url: '//www.broadinstitute.org/igvdata/t2d/recomb_decode.bedgraph',
+                                label: 'Recombination rate'
+                                })">Recombination Rate</a>
+                            </li>
                         </ul>
                     </li>
                 </ul>

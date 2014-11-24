@@ -31,7 +31,7 @@ var igv = (function (igv) {
      * @param config
      * @constructor
      */
-    igv.BedFeatureSource = function (config) {
+    igv.BedFeatureSource = function (config, parser) {
 
         this.config = config;
         if (config.localFile) {
@@ -53,13 +53,13 @@ var igv = (function (igv) {
 
         // TODO -- move this code to a factory method
         if (this.type === "vcf") {
-            this.parser = igv.vcfParser();
+            this.parser = new igv.VcfParser();
         } else if (this.type === "seg") {
-            this.parser = igv.segParser();
+            this.parser = new igv.SegParser();
         }
 
         else {
-            this.parser = igv.bedParser(this.type);
+            this.parser = new igv.BedParser(this.type);
         }
 
     };

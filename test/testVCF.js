@@ -11,7 +11,7 @@ function vcfTests() {
 
             success: function (result) {
 
-                var parser = igv.vcfParser(),
+                var parser = new igv.vcfParser(),
                     featureList = parser.parseFeatures(result);
 
                 ok(featureList);

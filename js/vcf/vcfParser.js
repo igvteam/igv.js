@@ -27,72 +27,72 @@
 
 var igv = (function (igv) {
 
-    igv.vcfParser = function () {
 
-        return  {
+    igv.VcfParser = function () {
 
-            parseHeader: function (data) {
+    }
 
-                var lines = data.split("\n"),
-                    len = lines.length,
-                    line,
-                    i;
+    igv.VcfParser.prototype.parseHeader = function (data) {
 
-                for (i = 0; i < len; i++) {
-                    line = lines[i];
-                    if (line.startsWith("##")) {
+        var lines = data.split("\n"),
+            len = lines.length,
+            line,
+            i;
 
-                        if (line.startsWith("track")) {
-                            return parseTrackLine(line);
-                        }
+        for (i = 0; i < len; i++) {
+            line = lines[i];
+            if (line.startsWith("##")) {
 
-                    }
-                    else {
-                        break;
-                    }
-
-                }
-            },
-
-            parseFeatures: function (data) {
-
-                var lines = data.split("\n"),
-                    len = lines.length,
-                    tokens,
-                    allFeatures,
-                    line,
-                    i,
-                    variant;
-
-                allFeatures = [];
-                for (i = 0; i < len; i++) {
-                    line = lines[i];
-                    if (line.startsWith("#")) {
-                        continue;
-                    }
-                    else {
-                        tokens = lines[i].split("\t");
-                        variant = decode(tokens);
-                        if (variant != null) {
-                            allFeatures.push(decode(tokens));
-                        }
-
-                    }
+                if (line.startsWith("track")) {
+                    return parseTrackLine(line);
                 }
 
-                return allFeatures;
-
-
-                function decode(tokens) {
-
-                    if (tokens.length < 8) return null;
-
-                    return new Variant(tokens);
-
-                }
             }
+            else {
+                break;
+            }
+
         }
     }
+
+    igv.VcfParser.prototype.parseFeatures = function (data) {
+
+        var lines = data.split("\n"),
+            len = lines.length,
+            tokens,
+            allFeatures,
+            line,
+            i,
+            variant;
+
+        allFeatures = [];
+        for (i = 0; i < len; i++) {
+            line = lines[i];
+            if (line.startsWith("#")) {
+                continue;
+            }
+            else {
+                tokens = lines[i].split("\t");
+                variant = decode(tokens);
+                if (variant != null) {
+                    allFeatures.push(decode(tokens));
+                }
+
+            }
+        }
+
+        return allFeatures;
+
+
+        function decode(tokens) {
+
+            if (tokens.length < 8) return null;
+
+            return new Variant(tokens);
+
+        }
+    }
+
 
     function Variant(tokens) {
 
