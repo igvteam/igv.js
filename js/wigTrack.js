@@ -82,9 +82,9 @@ var igv = (function (igv) {
             var featureMin, featureMax, denom;
 
             if (features && features.length > 0) {
-                featureMin = this.min;
-                featureMax = this.max;
-                if (!featureMin || !featureMax) {
+                featureMin = track.min ? track.min : 0;
+                featureMax = track.max;
+                if (featureMax === undefined) {
                     var s = autoscale(features);
                     featureMin = s.min;
                     featureMax = s.max;
