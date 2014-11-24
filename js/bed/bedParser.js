@@ -259,6 +259,10 @@ var igv = (function (igv) {
                 feature.exons = exons;
             }
 
+            feature.popupData = function() {
+                return [{name: "Name", value: feature.name}];
+            }
+
             return feature;
 
         }

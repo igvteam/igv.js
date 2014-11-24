@@ -34,6 +34,8 @@ var igv = (function (igv) {
         this.minHeight = this.height;
         this.maxHeight = this.height;
         this.order = config.order;
+        this.color = config.color || "rgb(150,150,150)";
+        this.currentFeatures = [];
 
         if (config.type) {
             this.type = config.type;
@@ -80,15 +82,11 @@ var igv = (function (igv) {
 
                     len = featureList.length;
 
-//                console.log("geneTrack.featureSource.getFeatures " + featureList.length);
-
-                    canvas.setProperties({fillStyle: "rgb(150,150,150)", strokeStyle: "rgb(150,150,150)"});
-
+                    canvas.setProperties({fillStyle: track.color, strokeStyle: track.color});
                     for (var i = 0; i < len; i++) {
                         gene = featureList[i];
                         if (gene.end < bpStart) continue;
                         if (gene.start > bpEnd) break;
-
                         track.render(gene, bpStart, refFrame.bpPerPixel, canvas);
                     }
                 }
@@ -101,14 +99,42 @@ var igv = (function (igv) {
             task);
     };
 
-    igv.BedTrack.prototype.drawLabel = function (ctx) {
-//        ctx.save();
-//        ctx.textAlign = 'right';
-//        ctx.verticalAlign = 'center';
-//        ctx.strokeStyle = "black";
-//        ctx.fillText(this.label, 90, this.height / 2);
-//        ctx.restore();
+    /**
+     * Return "popup data" for feature @ genomic location.  Data is an array of key-value pairs
+     */
+    igv.BedTrack.prototype.popupData = function (genomicLocation, xOffset, yOffset) {
 
+        // A bit of a trick -- we use the featureCache property rather than method to avoid async load.  If the
+        // feature is not already loaded this won't work,  but the user wouldn't be mousing over it either.
+        if (this.featureSource.featureCache) {
+
+            var chr = igv.browser.referenceFrame.chr;  // TODO -- this should be passed in
+            var tolerance = igv.browser.referenceFrame.bpPerPixel;  // We need some tolerance around genomicLocation, start with +/- 1 pixel
+            var featureList = this.featureSource.featureCache.queryFeatures(chr, genomicLocation - tolerance, genomicLocation + tolerance);
+
+            if (featureList && featureList.length > 0) {
+
+
+                var popupData = [];
+                featureList.forEach(function (feature) {
+                    if (feature.popupData &&
+                        feature.end >= genomicLocation - tolerance &&
+                        feature.start <= genomicLocation + tolerance) {
+                        var featureData = feature.popupData(genomicLocation);
+                        if (featureData) {
+                            if(popupData.length > 0) {
+                                popupData.push("------------");
+                            }
+                            Array.prototype.push.apply(popupData, featureData);
+                        }
+                    }
+                });
+                return popupData;
+            }
+
+        }
+
+        return null;
     }
 
     function renderGene(gene, bpStart, xScale, canvas) {

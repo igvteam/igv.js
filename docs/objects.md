@@ -23,11 +23,16 @@ Properties
 - url   url to the file or webservice for this track
 - label  
 - height  the track height in pixels
-- visibilityWindow   for annotation and alignment tracks, features are not shown when zoomed out past this value
+- visibilityWindow   for indexed annotation and alignment tracks, features are not shown when zoomed out past this value
 
 Events
 
 - onsearch   Function that will be called upon feature search (e.g. user types gene name in search box)
+
+Functions
+
+draw (canvas, refFrame, bpStart, bpEnd, width, height, continuation, task)
+popupData (genomicLocation, xOffset, yOffset)
 
 
 FeatureSource
@@ -46,6 +51,10 @@ Required properties:
 chr
 start
 end
+
+Functions
+
+popupData(genomicLocation)   Optional.  Returns an array of {name value} objects to support popup text
 
 
 

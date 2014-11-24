@@ -85,36 +85,40 @@ var igv = (function (igv) {
 
                 function decode(tokens) {
 
-                    var variant,
-                        pos = parseInt(tokens[1]);
-
                     if (tokens.length < 8) return null;
 
-                    variant = {
-
-                        chr: tokens[0], // TODO -- use genome aliases
-                        pos: pos,
-                        start: pos - 1,
-                        end: pos,
-                        id: tokens[2],
-                        ref: tokens[3],
-                        alt: tokens[4],
-                        qual: parseInt(tokens[5]),
-                        filter: tokens[6],
-                        info: tokens[7]
-
-                        // TODO -- genotype fields
-
-                    };
-
-
-                    return variant;
+                    return new Variant(tokens);
 
                 }
-
-
             }
         }
+    }
+
+    function Variant(tokens) {
+
+        this.chr = tokens[0]; // TODO -- use genome aliases
+        this.pos = parseInt(tokens[1]);
+        this.start = this.pos - 1;
+        this.end = this.pos;
+        this.id = tokens[2];
+        this.ref = tokens[3];
+        this.alt = tokens[4];
+        this.qual = parseInt(tokens[5]);
+        this.filter = tokens[6];
+        this.info = tokens[7];
+        // TODO -- genotype fields
+    }
+
+    Variant.prototype.popupData = function (genomicLocation) {
+
+        return [
+            {name: "ID", value: this.id},
+            {name: "Ref", value: this.ref},
+            {name: "Alt", value: this.alt},
+            {name: "Qual", value: this.qual},
+            {name: "Filter", value: this.filter}
+        ];
+
     }
 
 

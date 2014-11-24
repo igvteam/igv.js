@@ -9,8 +9,7 @@ Client pages interact with IGV through the igv.browser object.  The object is cr
 The first argument is the parent div,  IGV  inserts itself into the dom here. The second argument is an object
 defining configuration options, described in more detail below.   
 
-In the following example IGV is initialized with
-a two initial tracks, genomic sequence and gene annotations.
+In the following example IGV is initialized with two initial tracks, genomic sequence and gene annotations.
 
 
 
@@ -35,7 +34,6 @@ a two initial tracks, genomic sequence and gene annotations.
         
         
 Configuration Options
-
 
 
 
