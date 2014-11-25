@@ -107,14 +107,15 @@ var igv = (function (igv) {
         $(this.popoverDiv).hide();
     };
 
-    igv.Popover.prototype.presentTrackMenu = function (pageX, pageY, element) {
+    igv.Popover.prototype.presentTrackMenu = function (pageX, pageY, dictionary) {
 
         var height;
 
-        $(this.popoverCloseElement).hide();
-
         $(this.popoverContentDiv).empty();
-        $(this.popoverContentDiv).append(element[0]);
+
+        $(this.popoverContentDiv).append(dictionary[ "obj" ]);
+
+        $(dictionary[ "obj" ]).click( dictionary[ "func" ] );
 
         $(this.popoverDiv).css( popoverDivPosition(pageX, pageY, this) ).show();
 
@@ -132,8 +133,6 @@ var igv = (function (igv) {
         var height;
 
         if (content) {
-
-            $(this.popoverCloseElement).show();
 
             $(this.popoverContentDiv).html(content);
 

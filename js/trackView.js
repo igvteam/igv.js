@@ -161,34 +161,46 @@ var igv = (function (igv) {
     igv.TrackView.prototype.rightHandGutterCreationHelper = function (trackManipulationIconBox) {
 
         var myself = this,
-            removeButton,
-            gearButton;
+            trackDeleteButton,
+            gearButton,
+            dictionary = {};
 
-        removeButton = $('<i class="fa fa-times igv-track-manipulation-discard">')[0];
-        $(removeButton).click(function () {
+        //trackDeleteButton = $('<i class="fa fa-times igv-track-manipulation-discard">')[0];
+
+        trackDeleteButton = $('<a href="#">DELETE</a>')[ 0 ];
+
+        //$(trackDeleteButton).click(function () {
+        //    myself.browser.removeTrack(myself.track);
+        //    igv.popover.hide();
+        //});
+
+        dictionary[  "obj" ] = $(trackDeleteButton);
+        dictionary[ "func" ] = function () {
             myself.browser.removeTrack(myself.track);
             igv.popover.hide();
-        });
+        };
 
         gearButton = $('<i class="fa fa-gear fa-lg igv-track-manipulation-gear">')[0];
         $(trackManipulationIconBox).append(gearButton);
 
         $(gearButton).click(function (e) {
 
-            var acc = [],
-                listItem = $('<li>')[0],
-                unorderedList = $('<ul>')[0];
+            //var acc = [],
+            //    listItem = $('<li>')[0],
+            //    unorderedList = $('<ul>')[0];
+            //
+            //$(listItem).append(trackDeleteButton);
+            //acc.push($(listItem).prop('outerHTML'));
+            //
+            //["foxtrot", "bravo", "lima"].forEach(function (item, i, items) {
+            //    acc.push('<li>' + item + " " + i + '</li>');
+            //});
+            //
+            //$(unorderedList).append( acc.join('') );
+            //
+            //igv.popover.presentTrackMenu(e.pageX, e.pageY, $(unorderedList));
 
-            $(listItem).append(removeButton);
-            acc.push($(listItem).prop('outerHTML'));
-
-            ["foxtrot", "bravo", "lima"].forEach(function (item, i, items) {
-                acc.push('<li>' + item + " " + i + '</li>');
-            });
-
-            $(unorderedList).append( acc.join('') );
-
-            igv.popover.presentTrackMenu(e.pageX, e.pageY, $(removeButton));
+            igv.popover.presentTrackMenu(e.pageX, e.pageY, dictionary);
         });
 
     };
