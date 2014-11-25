@@ -165,6 +165,11 @@ var igv = (function (igv) {
             gearButton,
             dictionary = {};
 
+        if (this.track.type && "sequence" === this.track.type) {
+            return;
+        }
+
+
         //trackDeleteButton = $('<i class="fa fa-times igv-track-manipulation-discard">')[0];
 
         trackDeleteButton = $('<a href="#">DELETE</a>')[ 0 ];

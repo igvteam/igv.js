@@ -25,14 +25,15 @@
 
 var igv = (function (igv) {
 
-    igv.SequenceTrack = function (description) {
+    igv.SequenceTrack = function (config) {
         this.label = "";
         this.id = "sequence";
+        this.type = config.type;
         this.height = 15;
         this.minHeight = this.height;
         this.maxHeight = this.height;
         this.disableButtons =  true;
-        this.order = description.order || 9999;
+        this.order = config.order || 9999;
     }
 
 
