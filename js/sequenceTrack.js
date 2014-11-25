@@ -34,8 +34,12 @@ var igv = (function (igv) {
         this.maxHeight = this.height;
         this.disableButtons =  true;
         this.order = config.order || 9999;
-    }
+    };
 
+
+    igv.SequenceTrack.prototype.ignoreTrackMenu = function () {
+        return true;
+    };
 
     igv.SequenceTrack.prototype.draw = function (canvas, refFrame, tileStart, tileEnd, width, height, continuation) {
 
