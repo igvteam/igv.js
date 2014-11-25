@@ -174,6 +174,34 @@ var igv = (function (igv) {
         }
     }
 
+    igv.splitStringRespectingQuotes = function (string, delim) {
+
+        var tokens = [],
+            len = string.length,
+            i,
+            n = 0,
+            quote = false,
+            c;
+
+        if (len > 0) {
+
+            tokens[n] = string.charAt(0);
+            for (i = 1; i < len; i++) {
+                c = string.charAt(i);
+                if (c === '"') {
+                    quote = !quote;
+                }
+                else if (!quote && c === delim) {
+                    n++;
+                    tokens[n] = "";
+                }
+                else {
+                    tokens[n] += c;
+                }
+            }
+        }
+        return tokens;
+    }
 
     /**
      * Extend jQuery's ajax function to handle binary requests.   Credit to Henry Algus:
@@ -222,7 +250,6 @@ var igv = (function (igv) {
 
         });
     }
-
 
     return igv;
 
