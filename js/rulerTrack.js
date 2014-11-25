@@ -33,22 +33,9 @@ var igv = (function (igv) {
         this.label = "";
         this.id = "ruler";
         this.disableButtons =  true;
+        this.ignoreTrackMenu = true;
     }
 
-    /**
-     *
-     * @param canvas - an
-     * @param tileStart
-     * @param tileEnd
-     * @param width
-     * @param height
-     * @param continuation
-     */
-    //   //  this.track.draw(igvCanvas, refFrame, tileStart, tileEnd, buffer.width, buffer.height, function () {
-
-    igv.RulerTrack.prototype.ignoreTrackMenu = function () {
-        return true;
-    };
 
     igv.RulerTrack.prototype.draw = function (canvas, refFrame, tileStart, tileEnd, width, height, continuation) {
 

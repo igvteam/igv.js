@@ -165,7 +165,7 @@ var igv = (function (igv) {
             gearButton,
             dictionary = {};
 
-        if (this.track.ignoreTrackMenu && true == this.track.ignoreTrackMenu()) {
+        if (this.track.ignoreTrackMenu) {
             return;
         }
         
