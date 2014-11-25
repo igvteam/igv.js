@@ -107,15 +107,18 @@ var igv = (function (igv) {
         $(this.popoverDiv).hide();
     };
 
-    igv.Popover.prototype.presentTrackMenu = function (pageX, pageY, dictionary) {
+    igv.Popover.prototype.presentTrackMenu = function (pageX, pageY, objectClick) {
 
         var height;
 
         $(this.popoverContentDiv).empty();
 
-        $(this.popoverContentDiv).append(dictionary[ "obj" ]);
+        // Insert markup in DOM
+        $(this.popoverContentDiv).append(objectClick[ "object" ][ 0 ]);
 
-        $(dictionary[ "obj" ]).click( dictionary[ "func" ] );
+        // Attach click handler AFTER inserting markup in DOM.
+        // Do it beforehand and will have no effect when clicked.
+        objectClick[ "object" ].click(objectClick[ "click" ]);
 
         $(this.popoverDiv).css( popoverDivPosition(pageX, pageY, this) ).show();
 

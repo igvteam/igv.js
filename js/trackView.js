@@ -144,9 +144,7 @@ var igv = (function (igv) {
 
     igv.TrackView.prototype.addRightHandGutterToParentTrackDiv = function (trackDiv) {
 
-        var myself = this,
-            trackManipulationIconBox,
-            removeButton;
+        var trackManipulationIconBox;
 
         this.rightHandGutter = $('<div class="igv-right-hand-gutter">')[0];
         $(trackDiv).append(this.rightHandGutter);
@@ -163,23 +161,17 @@ var igv = (function (igv) {
         var myself = this,
             trackDeleteButton,
             gearButton,
-            dictionary = {};
+            trackMenuItems = [ ],
+            objectClick = { };
 
         if (this.track.ignoreTrackMenu) {
             return;
         }
-        
-        //trackDeleteButton = $('<i class="fa fa-times igv-track-manipulation-discard">')[0];
 
-        trackDeleteButton = $('<a href="#">DELETE</a>')[ 0 ];
+        trackDeleteButton = $('<a href="#">DELETE</a>');
 
-        //$(trackDeleteButton).click(function () {
-        //    myself.browser.removeTrack(myself.track);
-        //    igv.popover.hide();
-        //});
-
-        dictionary[  "obj" ] = $(trackDeleteButton);
-        dictionary[ "func" ] = function () {
+        objectClick[ "object" ] = trackDeleteButton;
+        objectClick[  "click" ] = function () {
             myself.browser.removeTrack(myself.track);
             igv.popover.hide();
         };
@@ -204,7 +196,7 @@ var igv = (function (igv) {
             //
             //igv.popover.presentTrackMenu(e.pageX, e.pageY, $(unorderedList));
 
-            igv.popover.presentTrackMenu(e.pageX, e.pageY, dictionary);
+            igv.popover.presentTrackMenu(e.pageX, e.pageY, objectClick);
         });
 
     };
