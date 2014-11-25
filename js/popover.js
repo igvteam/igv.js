@@ -107,18 +107,30 @@ var igv = (function (igv) {
         $(this.popoverDiv).hide();
     };
 
-    igv.Popover.prototype.presentTrackMenu = function (pageX, pageY, objectClick) {
+    igv.Popover.prototype.presentTrackMenu = function (pageX, pageY, trackMenuItems) {
 
-        var height;
+        var height,
+            acc = [],
+            listItem = $('<li>'),
+            unorderedList = $('<ul>');
+
+        listItem.append(trackMenuItems[ 0 ]);
+        acc.push(listItem.prop('outerHTML'));
+
+        ["foxtrot", "bravo", "lima"].forEach(function (item, i, items) {
+            acc.push('<li>' + item + " " + i + '</li>');
+        });
+
+        unorderedList.append( acc.join('') );
 
         $(this.popoverContentDiv).empty();
 
         // Insert markup in DOM
-        $(this.popoverContentDiv).append(objectClick[ "object" ][ 0 ]);
+        $(this.popoverContentDiv).append(trackMenuItems[ 0 ][ "object" ][ 0 ]);
 
         // Attach click handler AFTER inserting markup in DOM.
         // Do it beforehand and will have no effect when clicked.
-        objectClick[ "object" ].click(objectClick[ "click" ]);
+        trackMenuItems[ 0 ][ "object" ].click(trackMenuItems[ 0 ][ "click" ]);
 
         $(this.popoverDiv).css( popoverDivPosition(pageX, pageY, this) ).show();
 

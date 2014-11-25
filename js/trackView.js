@@ -176,27 +176,14 @@ var igv = (function (igv) {
             igv.popover.hide();
         };
 
+        trackMenuItems.push(objectClick);
+
         gearButton = $('<i class="fa fa-gear fa-lg igv-track-manipulation-gear">')[0];
         $(trackManipulationIconBox).append(gearButton);
 
         $(gearButton).click(function (e) {
 
-            //var acc = [],
-            //    listItem = $('<li>')[0],
-            //    unorderedList = $('<ul>')[0];
-            //
-            //$(listItem).append(trackDeleteButton);
-            //acc.push($(listItem).prop('outerHTML'));
-            //
-            //["foxtrot", "bravo", "lima"].forEach(function (item, i, items) {
-            //    acc.push('<li>' + item + " " + i + '</li>');
-            //});
-            //
-            //$(unorderedList).append( acc.join('') );
-            //
-            //igv.popover.presentTrackMenu(e.pageX, e.pageY, $(unorderedList));
-
-            igv.popover.presentTrackMenu(e.pageX, e.pageY, objectClick);
+            igv.popover.presentTrackMenu(e.pageX, e.pageY, trackMenuItems);
         });
 
     };
