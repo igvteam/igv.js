@@ -64,6 +64,7 @@ var igv = (function (igv) {
         return retValue;
     }
 
+
     igv.BinaryParser.prototype.getUInt = function () {
         var retValue = this.view.getUint32(this.position, this.littleEndian);
         this.position += 4;
@@ -123,6 +124,41 @@ var igv = (function (igv) {
 
         this.position += n;
         return this.position;
+    }
+
+
+    /**
+     * Return a bgzip (bam and tabix) virtual pointer
+     * TODO -- why isn't 8th byte used ?
+     * @returns {*}
+     */
+    igv.BinaryParser.prototype. getVPointer = function() {
+
+        var position = this.position,
+            offset = (this.view.getUint8(position + 1) << 8) | (this.view.getUint8(position)),
+            byte6 = ((this.view.getUint8(position + 6) & 0xff) * 0x100000000),
+            byte5 = ((this.view.getUint8(position + 5) & 0xff) * 0x1000000),
+            byte4 = ((this.view.getUint8(position + 4) & 0xff) * 0x10000),
+            byte3 = ((this.view.getUint8(position + 3) & 0xff) * 0x100),
+            byte2 = ((this.view.getUint8(position + 2) & 0xff)),
+            block = byte6 + byte5 + byte4 + byte3 + byte2;
+        this.position += 8;
+
+        if (block == 0 && offset == 0) {
+            return null;
+        } else {
+            return new VPointer(block, offset);
+        }
+    }
+
+
+    function VPointer(block, offset) {
+        this.block = block;
+        this.offset = offset;
+    }
+
+    VPointer.prototype.print = function() {
+        return "" + this.block + ":" + this.offset;
     }
 
 

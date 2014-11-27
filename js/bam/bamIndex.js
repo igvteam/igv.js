@@ -21,78 +21,61 @@ var igv = (function (igv) {
                 success: function (arrayBuffer) {
 
                     var indices = [],
-                        ba = new Uint8Array(arrayBuffer),
-                        p = 0,
-                        blockMin = MAX_HEADER_SIZE,
-                        magic, blockStart, nbin, nintv, nref, block, i;
+                        magic, nbin, nintv, nref, parser,
+                        blockMin = Number.MAX_VALUE,
+                        binIndex, linearIndex, binNumber, cs, ce, b, i, ref, sequenceIndexMap;
 
                     if (tabix) {
-                        var inflate = new Zlib.Gunzip(new Uint8Array(ba));
-                        ba = inflate.decompress();
+                        var inflate = new Zlib.Gunzip(new Uint8Array(arrayBuffer));
+                        arrayBuffer = inflate.decompress().buffer;
                     }
 
-                    magic = readInt(ba, p);
-                    p += 4;
+                    parser = new igv.BinaryParser(new DataView(arrayBuffer));
+
+                    magic = parser.getInt();
 
                     if (magic === BAI_MAGIC || (tabix && magic === TABIX_MAGIC)) {
 
-                        nref = readInt(ba, p);
-                        p += 4;
+                        nref = parser.getInt();
 
 
                         if (tabix) {
-                            var format = readInt(ba, p);
-                            p += 4;
-                            var col_seq = readInt(ba, p);
-                            p += 4;
-                            var col_beg = readInt(ba, p);
-                            p += 4;
-                            var col_end = readInt(ba, p);
-                            p += 4;
-                            var meta = readInt(ba, p);
-                            p += 4;
-                            var skip = readInt(ba, p);
-                            p += 4;
-                            var l_nm = readInt(ba, p);
-                            p += 4;
+                            // Tabix header parameters aren't used, but they must be read to advance the pointer
+                            var format = parser.getInt();
+                            var col_seq = parser.getInt();
+                            var col_beg = parser.getInt();
+                            var col_end = parser.getInt();
+                            var meta = parser.getInt();
+                            var skip = parser.getInt();
+                            var l_nm = parser.getInt();
 
-                            while (l_nm > 0) {
-                                var seq_name = readString(ba, p);
-                                p += seq_name.length + 1;
-                                l_nm -= (seq_name.length + 1);
+                            sequenceIndexMap = {};
+                            for (i = 0; i < nref; i++) {
+                                var seq_name = parser.getString();
+                                sequenceIndexMap[seq_name] = i;
                             }
                         }
 
-                        for (var ref = 0; ref < nref; ++ref) {
+                        for (ref = 0; ref < nref; ++ref) {
 
-                            var binIndex = {},
-                                linearIndex = [];
+                            binIndex = {};
+                            linearIndex = [];
 
-                            blockStart = p;
+                            nbin = parser.getInt();
 
-                            nbin = readInt(ba, p);
-                            p += 4;
+                            for (b = 0; b < nbin; ++b) {
 
-                            for (var b = 0; b < nbin; ++b) {
-
-                                var binNumber = readInt(ba, p);
-                                p += 4;
-
+                                binNumber = parser.getInt();
                                 binIndex[binNumber] = [];
 
-                                var nchnk = readInt(ba, p); // # of chunks for this bin
-                                p += 4;
+                                var nchnk = parser.getInt(); // # of chunks for this bin
 
-                                // Find the minimum file offset => position of block containing first alignment
                                 for (i = 0; i < nchnk; i++) {
-                                    var cs = readVob(ba, p);
-                                    p += 8;
-                                    var ce = readVob(ba, p);
-                                    p += 8;
-
+                                    cs = parser.getVPointer();
+                                    ce = parser.getVPointer();
                                     if (cs && ce) {
                                         if (cs.block < blockMin) {
-                                            blockMin = cs.block;
+                                            blockMin = cs.block;    // Block containing first alignment
                                         }
                                         binIndex[binNumber].push([cs, ce]);
                                     }
@@ -100,18 +83,13 @@ var igv = (function (igv) {
                             }
 
 
-                            nintv = readInt(ba, p);  // # of intervals
-                            p += 4;
-
+                            nintv = parser.getInt();
                             for (i = 0; i < nintv; i++) {
-                                cs = readVob(ba, p);
-                                p += 8;
+                                cs = parser.getVPointer();
                                 linearIndex.push(cs);   // Might be null
-
                             }
 
                             if (nbin > 0) {
-                                // Store index for this sequence as byte array
                                 indices[ref] = {
                                     binIndex: binIndex,
                                     linearIndex: linearIndex
@@ -123,15 +101,16 @@ var igv = (function (igv) {
                         throw new Error(indexUrl + " is not a " + (tabix ? "tabix" : "bai") + " file");
                     }
 
-                    continuation(new igv.BamIndex(indices, blockMin));
+                    continuation(new igv.BamIndex(indices, blockMin, sequenceIndexMap));
                 }
             });
     }
 
 
-    igv.BamIndex = function (indices, headerSize) {
+    igv.BamIndex = function (indices, headerSize, sequenceIndexMap) {
         this.headerSize = headerSize;
         this.indices = indices;
+        this.sequenceIndexMap = sequenceIndexMap;
 
     }
 
@@ -146,21 +125,23 @@ var igv = (function (igv) {
     igv.BamIndex.prototype.blocksForRange = function (refId, min, max, continuation) {
 
         var bam = this,
-            ba = bam.indices[refId];
+            ba = bam.indices[refId],
+            overlappingBins, leafChunks, otherChunks, nintv, lowest, minLin, lb, prunedOtherChunks, i, chnk, dif,
+            intChunks, mergedChunks;
 
         if (!ba) {
             continuation([]);
         }
         else {
 
-            var intBinsL = reg2bins(min, max);        // List of bin #s that might overlap min, max
-            var leafChunks = [],
-                otherChunks = [];
+            overlappingBins = reg2bins(min, max);        // List of bin #s that might overlap min, max
+            leafChunks = [];
+            otherChunks = [];
 
 
-            intBinsL.forEach(function (bin) {
+            overlappingBins.forEach(function (bin) {
 
-                if(ba.binIndex[bin]) {
+                if (ba.binIndex[bin]) {
                     var chunks = ba.binIndex[bin],
                         nchnk = chunks.length;
 
@@ -173,11 +154,12 @@ var igv = (function (igv) {
                 }
             });
 
-            var nintv = ba.linearIndex.length;
-            var lowest = null;
-            var minLin = Math.min(min >> 14, nintv - 1), maxLin = Math.min(max >> 14, nintv - 1);
-            for (var i = minLin; i <= maxLin; ++i) {
-                var lb = ba.linearIndex[i];
+            // Use the linear index to find the lowest block that could contain alignemnts in the region
+            nintv = ba.linearIndex.length;
+            lowest = null;
+            minLin = Math.min(min >> 14, nintv - 1), maxLin = Math.min(max >> 14, nintv - 1);
+            for (i = minLin; i <= maxLin; ++i) {
+                lb = ba.linearIndex[i];
                 if (!lb) {
                     continue;
                 }
@@ -186,35 +168,35 @@ var igv = (function (igv) {
                 }
             }
 
-            var prunedOtherChunks = [];
+            // Prune chunks that end before the lowest block
+            prunedOtherChunks = [];
             if (lowest != null) {
-                for (var i = 0; i < otherChunks.length; ++i) {
-                    var chnk = otherChunks[i];
+                for (i = 0; i < otherChunks.length; ++i) {
+                    chnk = otherChunks[i];
                     if (chnk.maxv.block >= lowest.block && chnk.maxv.offset >= lowest.offset) {
                         prunedOtherChunks.push(chnk);
                     }
                 }
             }
-            otherChunks = prunedOtherChunks;
 
-            var intChunks = [];
-            for (var i = 0; i < otherChunks.length; ++i) {
-                intChunks.push(otherChunks[i]);
+            intChunks = [];
+            for (i = 0; i < prunedOtherChunks.length; ++i) {
+                intChunks.push(prunedOtherChunks[i]);
             }
-            for (var i = 0; i < leafChunks.length; ++i) {
+            for (i = 0; i < leafChunks.length; ++i) {
                 intChunks.push(leafChunks[i]);
             }
 
             intChunks.sort(function (c0, c1) {
-                var dif = c0.minv.block - c1.minv.block;
+                dif = c0.minv.block - c1.minv.block;
                 if (dif != 0) {
                     return dif;
                 } else {
                     return c0.minv.offset - c1.minv.offset;
                 }
             });
-            
-            var mergedChunks = [];
+
+            mergedChunks = [];
             if (intChunks.length > 0) {
                 var cur = intChunks[0];
                 for (var i = 1; i < intChunks.length; ++i) {
@@ -228,50 +210,11 @@ var igv = (function (igv) {
                 }
                 mergedChunks.push(cur);
             }
-
             continuation(mergedChunks);
         }
 
     };
 
-
-    function Vob(b, o) {
-        this.block = b;
-        this.offset = o;
-    }
-
-    Vob.prototype.toString = function () {
-        return '' + this.block + ':' + this.offset;
-    }
-
-    function readInt(ba, offset) {
-        return (ba[offset + 3] << 24) | (ba[offset + 2] << 16) | (ba[offset + 1] << 8) | (ba[offset]);
-    }
-
-    function readShort(ba, offset) {
-        return (ba[offset + 1] << 8) | (ba[offset]);
-    }
-
-    function readVob(ba, offset) {
-        var block = ((ba[offset + 6] & 0xff) * 0x100000000) + ((ba[offset + 5] & 0xff) * 0x1000000) + ((ba[offset + 4] & 0xff) * 0x10000) + ((ba[offset + 3] & 0xff) * 0x100) + ((ba[offset + 2] & 0xff));
-        var bint = (ba[offset + 1] << 8) | (ba[offset]);
-        if (block == 0 && bint == 0) {
-            return null;  // Should only happen in the linear index?
-        } else {
-            return new Vob(block, bint);
-        }
-    }
-
-    function readString(ba, offset) {
-
-        var s = "";
-        var c;
-        while ((c = ba[offset++]) != 0) {
-            s += String.fromCharCode(c);
-        }
-        return s;
-
-    }
 
     /**
      * Calculate the list of bins that may overlap with region [beg, end]
