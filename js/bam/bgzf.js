@@ -1,14 +1,25 @@
 
-// Code is based heavily on bam.js, part of the Dalliance Genome Explorer,  (c) Thomas Down 2006-2001.
 
 
 var igv = (function (igv) {
 
+    /**
+     * @param url - url to a bgzipped file
+     * @param headers - http headers to include in get requests
+     * @constructor
+     */
+    igv.BGZip = function (url, headers) {
+
+    }
 
 
+
+
+// Uncompress data,  assumed to be series of bgzipped blocks
+// Code is based heavily on bam.js, part of the Dalliance Genome Explorer,  (c) Thomas Down 2006-2001.
     igv.unbgzf = function(data, lim) {
 
-        lim = data.byteLength - 100;
+        lim = lim || data.byteLength - 100;
         var oBlockList = [];
         var ptr = [0];
         var totalSize = 0;

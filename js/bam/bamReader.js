@@ -21,6 +21,8 @@ var igv = (function (igv) {
     var DUPLICATE_READ_FLAG = 0x400;
     var SUPPLEMENTARY_ALIGNMENT_FLAG = 0x800;
 
+    const MAX_GZIP_BLOCK_SIZE = (1 << 16);   //  APPARENTLY.  Where is this documented???
+
 
     /**
      * Class for reading a bam file
@@ -49,7 +51,7 @@ var igv = (function (igv) {
         getContentLength(bam, function (contentLength) {
 
 
-            var len = bam.index.headerSize + 64000;   // Insure we get the complete compressed block containing the header
+            var len = bam.index.headerSize + MAX_GZIP_BLOCK_SIZE;   // Insure we get the complete compressed block containing the header
 
             if (contentLength > 0) len = Math.min(contentLength, len);
 
@@ -117,9 +119,9 @@ var igv = (function (igv) {
                 continuation([]);
             } else {
 
-                getIndex(bam, function (index) {
+                getIndex(bam, function (bamIndex) {
 
-                    index.blocksForRange(chrId, min, max, function (chunks) {
+                    bamIndex.blocksForRange(chrId, min, max, function (chunks) {
 
                         if (!chunks) {
                             continuation(null, 'Error in index fetch');
@@ -129,11 +131,11 @@ var igv = (function (igv) {
                         var records = [];
                         loadNextChunk(0);
 
-                        function loadNextChunk(index) {
+                        function loadNextChunk(chunkNumber) {
 
-                            var c = chunks[index];
+                            var c = chunks[chunkNumber];
                             var fetchMin = c.minv.block;
-                            var fetchMax = c.maxv.block + (1 << 16); // *sigh*
+                            var fetchMax = c.maxv.block; // *sigh*
 
                             igvxhr.loadArrayBuffer(bam.bamPath,
                                 {
@@ -142,16 +144,21 @@ var igv = (function (igv) {
                                     range: {start: fetchMin, size: fetchMax - fetchMin + 1},
                                     success: function (compressed) {
 
-                                        var ba = new Uint8Array(igv.unbgzf(compressed, c.maxv.block - c.minv.block + 1));
+                                        try {
+                                            var ba = new Uint8Array(igv.unbgzf(compressed)); //, c.maxv.block - c.minv.block + 1));
+                                        } catch (e) {
+                                            console.log(e);
+                                            continuation(records);
+                                        }
 
-                                        decodeBamRecords(ba, chunks[index].minv.offset, records, min, max, chrId);
+                                        decodeBamRecords(ba, chunks[chunkNumber].minv.offset, records, min, max, chrId);
 
-                                        index++;
+                                        chunkNumber++;
 
-                                        if (index >= chunks.length) {
+                                        if (chunkNumber >= chunks.length) {
 
                                             // If we have combined multiple chunks. Sort records by start position.  I'm not sure this is neccessary
-                                            if (index > 0 && records.length > 1) {
+                                            if (chunkNumber > 0 && records.length > 1) {
                                                 records.sort(function (a, b) {
                                                     return a.start - b.start;
                                                 });
@@ -159,7 +166,7 @@ var igv = (function (igv) {
                                             continuation(records);
                                         }
                                         else {
-                                            loadNextChunk(index);
+                                            loadNextChunk(chunkNumber);
                                         }
                                     }
                                 });

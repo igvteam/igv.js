@@ -25,6 +25,18 @@
 
 var igv = (function (igv) {
 
+    function getParser(type) {
+// TODO -- move this code to a factory method
+        if (type === "vcf") {
+            return new igv.VcfParser();
+        } else if (type === "seg") {
+            return new igv.SegParser();
+        }
+        else {
+            return new igv.BedParser(type);
+        }
+    }
+
     /**
      * feature source for "bed like" files (tab delimited files with 1 feature per line: bed, gff, vcf, etc)
      *
@@ -51,17 +63,7 @@ var igv = (function (igv) {
             this.type = igv.inferFileType(this.filename);
         }
 
-        // TODO -- move this code to a factory method
-        if (this.type === "vcf") {
-            this.parser = new igv.VcfParser();
-        } else if (this.type === "seg") {
-            this.parser = new igv.SegParser();
-        }
-
-        else {
-            this.parser = new igv.BedParser(this.type);
-        }
-
+        this.parser = getParser(this.type);
     };
 
     /**
@@ -169,13 +171,30 @@ var igv = (function (igv) {
             loadFeaturesWithIndex(myself.index);
         }
 
-
+        /**
+         *
+         * @param index  either an index, or "false" to indicate no index
+         */
         function loadFeaturesWithIndex(index) {
+
+            if(index && !myself.parser.header) {
+                // TODO -- parse header
+                myself.parser.header = {};  // Prevent infinite loop
+                loadFeaturesWithIndex(index);
+                return;
+            }
+
             var parser = myself.parser,
                 options = {
-                    headers: myself.config.headers,
+                    headers: myself.config.headers,           // http headers, not file header
                     success: function (data) {
-                        success(parser.parseFeatures(data));
+
+                        if(!parser.header && !index) {       // If we haven't parsed the header, do it now.  File not indexed.
+                            if(parser.parseHeader) parser.parseHeader(data);
+                            if(!parser.header) parser.header = {};
+                        }
+
+                        success(parser.parseFeatures(data));   // <= PARSING DONE HERE
                     },
                     task: task
                 };

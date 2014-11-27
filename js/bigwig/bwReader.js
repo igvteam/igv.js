@@ -81,6 +81,8 @@ var igv = (function (igv) {
 
                             success: function (data) {
 
+                                if(!data) return;
+
                                 // Assume low-to-high unless proven otherwise
                                 bwReader.littleEndian = true;
 

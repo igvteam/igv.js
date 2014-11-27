@@ -104,7 +104,7 @@ var igv = (function (igv) {
      */
     igv.BedTrack.prototype.popupData = function (genomicLocation, xOffset, yOffset) {
 
-        // A bit of a trick -- we use the featureCache property rather than method to avoid async load.  If the
+        // We use the featureCache property rather than method to avoid async load.  If the
         // feature is not already loaded this won't work,  but the user wouldn't be mousing over it either.
         if (this.featureSource.featureCache) {
 
@@ -123,7 +123,7 @@ var igv = (function (igv) {
                         var featureData = feature.popupData(genomicLocation);
                         if (featureData) {
                             if(popupData.length > 0) {
-                                popupData.push("------------");
+                                popupData.push("<HR>");
                             }
                             Array.prototype.push.apply(popupData, featureData);
                         }
@@ -148,7 +148,11 @@ var igv = (function (igv) {
 
         px = Math.round((gene.start - bpStart) / xScale);
         px1 = Math.round((gene.end - bpStart) / xScale);
-        pw = Math.max(1, px1 - px);
+        pw = px1 - px;
+        if(pw < 3) {
+            pw = 3;
+            px -= 1;
+        }
 
         exonCount = gene.exons ? gene.exons.length : 0;
 
@@ -175,7 +179,7 @@ var igv = (function (igv) {
         }
 
         var geneColor;
-        if (igv.selection) geneColor = igv.selection.colorForGene(gene.name);
+        if (igv.selection) geneColor = igv.selection.colorForGene(gene.name); // TODO -- for gtex, figure out a better way to do this
 
         if ((px1 - px) > 10 || geneColor) {
 
@@ -202,7 +206,10 @@ var igv = (function (igv) {
         px = Math.round((variant.start - bpStart) / xScale);
         px1 = Math.round((variant.end - bpStart) / xScale);
         pw = Math.max(1, px1 - px);
-
+        if(pw < 3) {
+            pw = 3;
+            px -= 1;
+        }
 
         canvas.fillRect(px, py, pw, h);
 

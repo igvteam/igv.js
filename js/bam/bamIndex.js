@@ -1,4 +1,3 @@
-
 // Represents a BAM index.
 // Code is based heavily on bam.js, part of the Dalliance Genome Explorer,  (c) Thomas Down 2006-2001.
 
@@ -6,13 +5,14 @@ var igv = (function (igv) {
 
 
     const BAI_MAGIC = 21578050;
+    const TABIX_MAGIC = 21578324;
     const MAX_HEADER_SIZE = 100000000;   // IF the header is larger than this we can't read it !
 
     /**
      * Read the index.  This method is public to support unit testing.
      * @param continuation
      */
-    igv.loadBamIndex = function (indexUrl, config, continuation) {
+    igv.loadBamIndex = function (indexUrl, config, continuation, tabix) {
 
 
         igvxhr.loadArrayBuffer(indexUrl,
@@ -24,17 +24,49 @@ var igv = (function (igv) {
                         ba = new Uint8Array(arrayBuffer),
                         p = 0,
                         blockMin = MAX_HEADER_SIZE,
-                        baiMagic, blockStart, nbin, nintv, nref, block, i,
+                        magic, blockStart, nbin, nintv, nref, block, i;
 
-                    baiMagic = readInt(ba, p);
+                    if (tabix) {
+                        var inflate = new Zlib.Gunzip(new Uint8Array(ba));
+                        ba = inflate.decompress();
+                    }
+
+                    magic = readInt(ba, p);
                     p += 4;
 
-                    if (baiMagic === BAI_MAGIC) {
+                    if (magic === BAI_MAGIC || (tabix && magic === TABIX_MAGIC)) {
 
                         nref = readInt(ba, p);
                         p += 4;
 
+
+                        if (tabix) {
+                            var format = readInt(ba, p);
+                            p += 4;
+                            var col_seq = readInt(ba, p);
+                            p += 4;
+                            var col_beg = readInt(ba, p);
+                            p += 4;
+                            var col_end = readInt(ba, p);
+                            p += 4;
+                            var meta = readInt(ba, p);
+                            p += 4;
+                            var skip = readInt(ba, p);
+                            p += 4;
+                            var l_nm = readInt(ba, p);
+                            p += 4;
+
+                            while (l_nm > 0) {
+                                var seq_name = readString(ba, p);
+                                p += seq_name.length + 1;
+                                l_nm -= (seq_name.length + 1);
+                            }
+                        }
+
                         for (var ref = 0; ref < nref; ++ref) {
+
+                            var binIndex = {},
+                                linearIndex = [];
 
                             blockStart = p;
 
@@ -43,38 +75,52 @@ var igv = (function (igv) {
 
                             for (var b = 0; b < nbin; ++b) {
 
-                                var bin = readInt(ba, p);
+                                var binNumber = readInt(ba, p);
                                 p += 4;
+
+                                binIndex[binNumber] = [];
 
                                 var nchnk = readInt(ba, p); // # of chunks for this bin
                                 p += 4;
 
-                                // Find the minimum file offset => position of first alignment
-                                for(i=0; i<nchnk; i++) {
-                                    var cs = readVob(ba, p + i*8);
-                                    if(cs && cs.block < blockMin) {
-                                        blockMin = cs.block;
+                                // Find the minimum file offset => position of block containing first alignment
+                                for (i = 0; i < nchnk; i++) {
+                                    var cs = readVob(ba, p);
+                                    p += 8;
+                                    var ce = readVob(ba, p);
+                                    p += 8;
+
+                                    if (cs && ce) {
+                                        if (cs.block < blockMin) {
+                                            blockMin = cs.block;
+                                        }
+                                        binIndex[binNumber].push([cs, ce]);
                                     }
                                 }
-
-                                p += nchnk * 16;
                             }
+
 
                             nintv = readInt(ba, p);  // # of intervals
                             p += 4;
 
-                            p += nintv * 8;  // advance pointer to end  for this sequence
+                            for (i = 0; i < nintv; i++) {
+                                cs = readVob(ba, p);
+                                p += 8;
+                                linearIndex.push(cs);   // Might be null
+
+                            }
 
                             if (nbin > 0) {
                                 // Store index for this sequence as byte array
-                                block = new Uint8Array(arrayBuffer, blockStart, p - blockStart);
-                                indices[ref] = block;
+                                indices[ref] = {
+                                    binIndex: binIndex,
+                                    linearIndex: linearIndex
+                                }
                             }
                         }
 
                     } else {
-                        // TODO -- throw error
-                        console.log("Not a BAI file");
+                        throw new Error(indexUrl + " is not a " + (tabix ? "tabix" : "bai") + " file");
                     }
 
                     continuation(new igv.BamIndex(indices, blockMin));
@@ -100,46 +146,38 @@ var igv = (function (igv) {
     igv.BamIndex.prototype.blocksForRange = function (refId, min, max, continuation) {
 
         var bam = this,
-            ba = bam.indices[refId],
-            ba;
+            ba = bam.indices[refId];
 
         if (!ba) {
             continuation([]);
         }
         else {
 
-            var intBinsL = reg2bins(min, max);
-            var intBins = [];
-            for (var i = 0; i < intBinsL.length; ++i) {
-                intBins[intBinsL[i]] = true;
-            }
+            var intBinsL = reg2bins(min, max);        // List of bin #s that might overlap min, max
             var leafChunks = [],
                 otherChunks = [];
 
-            var nbin = readInt(ba, 0);
-            var p = 4;
-            for (var b = 0; b < nbin; ++b) {
-                var bin = readInt(ba, p);
-                var nchnk = readInt(ba, p + 4);
-                // dlog('bin=' + bin + '; nchnk=' + nchnk);
-                p += 8;
-                if (intBins[bin]) {
-                    for (var c = 0; c < nchnk; ++c) {
-                        var cs = readVob(ba, p);
-                        var ce = readVob(ba, p + 8);
-                        (bin < 4681 ? otherChunks : leafChunks).push({minv: cs, maxv: ce});
-                        p += 16;
-                    }
-                } else {
-                    p += (nchnk * 16);
-                }
-            }
 
-            var nintv = readInt(ba, p);
+            intBinsL.forEach(function (bin) {
+
+                if(ba.binIndex[bin]) {
+                    var chunks = ba.binIndex[bin],
+                        nchnk = chunks.length;
+
+                    for (var c = 0; c < nchnk; ++c) {
+                        var cs = chunks[c][0];
+                        var ce = chunks[c][1];
+                        (bin < 4681 ? otherChunks : leafChunks).push({minv: cs, maxv: ce});
+                    }
+
+                }
+            });
+
+            var nintv = ba.linearIndex.length;
             var lowest = null;
             var minLin = Math.min(min >> 14, nintv - 1), maxLin = Math.min(max >> 14, nintv - 1);
             for (var i = minLin; i <= maxLin; ++i) {
-                var lb = readVob(ba, p + 4 + (i * 8));
+                var lb = ba.linearIndex[i];
                 if (!lb) {
                     continue;
                 }
@@ -175,6 +213,7 @@ var igv = (function (igv) {
                     return c0.minv.offset - c1.minv.offset;
                 }
             });
+            
             var mergedChunks = [];
             if (intChunks.length > 0) {
                 var cur = intChunks[0];
@@ -221,6 +260,17 @@ var igv = (function (igv) {
         } else {
             return new Vob(block, bint);
         }
+    }
+
+    function readString(ba, offset) {
+
+        var s = "";
+        var c;
+        while ((c = ba[offset++]) != 0) {
+            s += String.fromCharCode(c);
+        }
+        return s;
+
     }
 
     /**
