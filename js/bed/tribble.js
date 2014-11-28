@@ -51,7 +51,7 @@ var igv = (function (igv) {
                             index[chrIdx.chr] = chrIdx;
                         }
 
-                        continuation(index);
+                        continuation(new igv.TribbleIndex(index));
                     }
                     else {
                         continuation(null);
@@ -113,7 +113,7 @@ var igv = (function (igv) {
             for (var binNumber = 0; binNumber < nBins; binNumber++) {
                 var nextPos = parser.getLong();
                 var size = nextPos - pos;
-                blocks.push({position: pos, size: size});
+                blocks.push({min:pos, max:nextPos}); //        {position: pos, size: size});
                 pos = nextPos;
             }
 
@@ -125,5 +125,40 @@ var igv = (function (igv) {
     }
 
 
-    return igv;
+    igv.TribbleIndex = function(chrIndexTable) {
+        this.chrIndex = chrIndexTable;      // Dictionary of chr -> tribble index
+    }
+
+    /**
+     * Fetch blocks for a particular genomic range.
+     *
+     * @param refId  the sequence dictionary index of the chromosome
+     * @param min  genomic start position
+     * @param max  genomic end position
+     * @param return an array of {minv: {filePointer, offset}, {maxv: {filePointer, offset}}
+     */
+    igv.TribbleIndex.prototype.blocksForRange = function (queryChr, min, max) { //function (refId, min, max) {
+
+        var chrIdx = this.chrIndex[queryChr];
+        if (!chrIdx && queryChr.startsWith("chr")) {
+            chrIdx = this.chrIndex[queryChr.substr(3)];
+        }
+
+        if (chrIdx) {
+            var blocks = chrIdx.blocks,
+                lastBlock = blocks[blocks.length - 1],
+                mergedBlock = {minv: blocks[0].min,  maxv: lastBlock.max};
+
+            return [mergedBlock];
+        }
+        else {
+            return null;
+        }
+
+
+
+    }
+
+
+        return igv;
 })(igv || {});

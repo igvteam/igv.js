@@ -9,9 +9,13 @@ function testTribble() {
 
         var url = "data/bed/gencode.v18.collapsed.bed.idx";
 
-        igv.loadTribbleIndex(url, function (index) {
+        igv.loadTribbleIndex(url, {}, function (index) {
 
             ok(index);
+
+            var blocks = index.blocksForRange("chr1", 0, Number.MAX_VALUE);
+
+            ok(blocks);
 
             start();
         });
@@ -22,7 +26,7 @@ function testTribble() {
 
         var url = "data/tribble/noSuchFile.idx";
 
-        igv.loadTribbleIndex(url, function (index) {
+        igv.loadTribbleIndex(url, {},  function (index) {
 
             equal(index, null);
 

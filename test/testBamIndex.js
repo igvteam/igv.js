@@ -1,7 +1,6 @@
 function bamIndexTests() {
 
 
-
     asyncTest("blocksForRange", 4, function () {
 
         var refID = 14,
@@ -12,20 +11,19 @@ function bamIndexTests() {
 
         igv.loadBamIndex(indexPath, config, function (bamIndex) {
 
-            bamIndex.blocksForRange(refID, beg, end, function (chunks) {
+            chunks = bamIndex.blocksForRange(refID, beg, end);
 
-                ok(chunks, "chunks are non-null");
-                equal(chunks.length, 1, "chunks.length is correct");
+            ok(chunks, "chunks are non-null");
+            equal(chunks.length, 1, "chunks.length is correct");
 
-                var chunk = chunks[0];
-                equal(0, chunk.maxv.offset, "chunk.maxv.offset");
-                equal(60872, chunk.maxv.block, "chunk.maxv.block");
+            var chunk = chunks[0];
+            equal(0, chunk.maxv.offset, "chunk.maxv.offset");
+            equal(60872, chunk.maxv.block, "chunk.maxv.block");
 
-                start();
-            });
+            start();
+
         });
     });
-
 
 
 //    asyncTest("blocksForRange 1kg", function () {

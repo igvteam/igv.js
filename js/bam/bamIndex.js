@@ -25,6 +25,11 @@ var igv = (function (igv) {
                         blockMin = Number.MAX_VALUE,
                         binIndex, linearIndex, binNumber, cs, ce, b, i, ref, sequenceIndexMap;
 
+                    if(!arrayBuffer) {
+                        continuation(null);
+                        return;
+                    }
+
                     if (tabix) {
                         var inflate = new Zlib.Gunzip(new Uint8Array(arrayBuffer));
                         arrayBuffer = inflate.decompress().buffer;
@@ -101,16 +106,17 @@ var igv = (function (igv) {
                         throw new Error(indexUrl + " is not a " + (tabix ? "tabix" : "bai") + " file");
                     }
 
-                    continuation(new igv.BamIndex(indices, blockMin, sequenceIndexMap));
+                    continuation(new igv.BamIndex(indices, blockMin, sequenceIndexMap, tabix));
                 }
             });
     }
 
 
-    igv.BamIndex = function (indices, headerSize, sequenceIndexMap) {
+    igv.BamIndex = function (indices, headerSize, sequenceIndexMap, tabix) {
         this.headerSize = headerSize;
         this.indices = indices;
         this.sequenceIndexMap = sequenceIndexMap;
+        this.tabix = tabix;
 
     }
 
@@ -120,9 +126,9 @@ var igv = (function (igv) {
      * @param refId  the sequence dictionary index of the chromosome
      * @param min  genomic start position
      * @param max  genomic end position
-     * @param continuation
+     * @param return an array of {minv: {filePointer, offset}, {maxv: {filePointer, offset}}
      */
-    igv.BamIndex.prototype.blocksForRange = function (refId, min, max, continuation) {
+    igv.BamIndex.prototype.blocksForRange = function (refId, min, max) {
 
         var bam = this,
             ba = bam.indices[refId],
@@ -130,7 +136,7 @@ var igv = (function (igv) {
             intChunks, mergedChunks;
 
         if (!ba) {
-            continuation([]);
+            return null;
         }
         else {
 
@@ -210,7 +216,7 @@ var igv = (function (igv) {
                 }
                 mergedChunks.push(cur);
             }
-            continuation(mergedChunks);
+            return mergedChunks;
         }
 
     };

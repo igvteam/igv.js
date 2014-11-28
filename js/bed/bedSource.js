@@ -45,7 +45,7 @@ var igv = (function (igv) {
      */
     igv.BedFeatureSource = function (config, parser) {
 
-        this.config = config;
+        this.config = config || {};
         if (config.localFile) {
             this.localFile = config.localFile;
             this.filename = config.localFile.name;
@@ -87,22 +87,25 @@ var igv = (function (igv) {
 
         if (featureCache && (featureCache.range === undefined || featureCache.range.chr === queryChr)) {//}   featureCache.range.contains(queryChr, bpStart, bpEnd))) {
             success(this.featureCache.queryFeatures(queryChr, bpStart, bpEnd));
-            return;
+
         }
+        else {
+            this.loadFeatures(function (featureList) {
+                    //myself.featureMap = featureMap;
 
-        this.loadFeatures(function (featureList) {
-                //myself.featureMap = featureMap;
+                    myself.featureCache = new igv.FeatureCache(featureList);   // Note - replacing previous cache with new one
 
-                myself.featureCache = new igv.FeatureCache(featureList);   // Note - replacing previous cache with new one
+                    // Record range queried if we have an index
+                    if (myself.index) {
+                        myself.featureCache.range = range;
+                    }
 
-                // Record range queried if we have an index
-                if (myself.index) myself.featureCache.range = range;
+                    // Finally pass features for query interval to continuation
+                    success(myself.featureCache.queryFeatures(queryChr, bpStart, bpEnd));
 
-                // Finally pass features for query interval to continuation
-                success(myself.featureCache.queryFeatures(queryChr, bpStart, bpEnd));
-
-            },
-            task, range);   // Currently loading at granularity of chromosome
+                },
+                task, range);   // Currently loading at granularity of chromosome
+        }
 
     };
 
@@ -139,8 +142,7 @@ var igv = (function (igv) {
 
     // seg files don't have an index
     function isIndexable() {
-        return this.config.indexUrl ||
-            (this.url && !this.url.endsWith(".gz") && this.config.indexed != false && this.type != "wig" );
+        return this.config.indexUrl || (this.type != "wig" && this.config.indexed != false);
     }
 
     /**
@@ -156,30 +158,62 @@ var igv = (function (igv) {
             queryChr = range ? range.chr : undefined;
 
 
-        if (this.index === undefined && queryChr && isIndexable.call(this)) {  // TODO -  handle local files
+        if (this.index === undefined && range && isIndexable.call(this)) {  // TODO -  handle local files
 
-            if (!idxFile) idxFile = myself.url + ".idx";
 
-            igv.loadTribbleIndex(idxFile, myself.config, function (index) {
-                myself.index = index;              // index might be null => no index, don't try again
-                loadFeaturesWithIndex(index);
-            });
+            if (myself.url.endsWith(".gz")) {
+                if (!idxFile) idxFile = myself.url + ".tbi";
+                igv.loadBamIndex(idxFile, myself.config, function (index) {
+                        myself.index = index;              // index might be null => no index, don't try again
+                        loadFeaturesWithIndex(index);
+                    },
+                    true);   // Boolean flag for "tabix"
+
+            }
+            else {
+                if (!idxFile) idxFile = myself.url + ".idx";
+                igv.loadTribbleIndex(idxFile, myself.config, function (index) {
+                    myself.index = index;              // index might be null => no index, don't try again
+                    loadFeaturesWithIndex(index);
+                });
+            }
             return;
 
         }
         else {
-            loadFeaturesWithIndex(myself.index);
+            if (myself.index) {
+                loadFeaturesWithIndex(myself.index);
+            }
+            else {
+                loadFeaturesNoIndex();
+            }
         }
 
-        /**
-         *
-         * @param index  either an index, or "false" to indicate no index
-         */
+
+        function loadFeaturesNoIndex() {
+
+            var parser = myself.parser,
+                options = {
+                    headers: myself.config.headers,           // http headers, not file header
+                    success: function (data) {
+                        myself.header = parser.parseHeader(data);
+                        success(parser.parseFeatures(data));   // <= PARSING DONE HERE
+                    },
+                    task: task
+                };
+
+            if (myself.localFile) {
+                igvxhr.loadStringFromFile(myself.localFile, options);
+            }
+            else {
+                igvxhr.loadString(myself.url, options);
+            }
+        }
+
         function loadFeaturesWithIndex(index) {
 
-            if(index && !myself.parser.header) {
-                // TODO -- parse header
-                myself.parser.header = {};  // Prevent infinite loop
+            if (!myself.header) {
+                myself.header = {};  // TODO -- parse header
                 loadFeaturesWithIndex(index);
                 return;
             }
@@ -189,48 +223,46 @@ var igv = (function (igv) {
                     headers: myself.config.headers,           // http headers, not file header
                     success: function (data) {
 
-                        if(!parser.header && !index) {       // If we haven't parsed the header, do it now.  File not indexed.
-                            if(parser.parseHeader) parser.parseHeader(data);
-                            if(!parser.header) parser.header = {};
-                        }
+                        var inflated;
 
-                        success(parser.parseFeatures(data));   // <= PARSING DONE HERE
+                        if (index.tabix) {
+
+                        }
+                        else {
+                            inflated = data;
+                        }
+                        success(parser.parseFeatures(data))
                     },
                     task: task
                 };
 
-            if (index) {
 
-                var chrIdx = index[queryChr];
+            var blocks = index.blocksForRange(range.chr, range.start, range.end);
 
-                // TODO -- use chr aliaes
-                if (!chrIdx && queryChr.startsWith("chr")) {
-                    chrIdx = index[queryChr.substr(3)];
-                }
-
-                if (chrIdx) {
-                    var blocks = chrIdx.blocks,
-                        lastBlock = blocks[blocks.length - 1],
-                        endPos = lastBlock.position + lastBlock.size,
-                        range = {start: blocks[0].position, size: endPos - blocks[0].position + 1 };
-                    options.range = range;
-                    console.log("Using index");
-                }
-                else {
-                    success(null);
-                    return;
-                }
-
-            }
-
-            if (myself.localFile) {
-                igvxhr.loadStringFromFile(myself.localFile, options);
+            if (!blocks || blocks.length === 0) {
+                success(null);
             }
             else {
-                igvxhr.loadString(myself.url, options);
+
+                var lastBlock = blocks[blocks.length - 1],
+                    startPos = blocks[0].minv.block,
+                    endPos = lastBlock.maxv.block;                 //lastBlock.position + lastBlock.size,
+                range = {start: startPos, size: endPos - startPos + 1 };
+                options.range = range;
+                console.log("Using index");
+
+                if (myself.localFile) {
+                    igvxhr.loadStringFromFile(myself.localFile, options);
+                }
+                else {
+                    igvxhr.loadString(myself.url, options);
+                }
             }
+
         }
+
     }
 
     return igv;
-})(igv || {});
+})
+(igv || {});

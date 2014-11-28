@@ -50,22 +50,22 @@ var igv = (function (igv) {
         var lines = data.split("\n"),
             len = lines.length,
             line,
-            i;
+            i,
+            header;
 
         for (i = 0; i < len; i++) {
             line = lines[i];
             if (line.startsWith("track") || line.startsWith("#") || line.startsWith("browser")) {
 
                 if (line.startsWith("track")) {
-                    return parseTrackLine(line);
+                    header = parseTrackLine(line);
                 }
-
             }
             else {
                 break;
             }
-
         }
+        return header;
     }
 
     igv.BedParser.prototype.parseFeatures = function (data) {

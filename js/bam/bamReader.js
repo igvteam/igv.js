@@ -1,4 +1,3 @@
-
 // Represents a BAM file.
 // Code is based heavily on bam.js, part of the Dalliance Genome Explorer,  (c) Thomas Down 2006-2001.
 
@@ -121,59 +120,59 @@ var igv = (function (igv) {
 
                 getIndex(bam, function (bamIndex) {
 
-                    bamIndex.blocksForRange(chrId, min, max, function (chunks) {
-
-                        if (!chunks) {
-                            continuation(null, 'Error in index fetch');
-                        }
+                    chunks = bamIndex.blocksForRange(chrId, min, max);
 
 
-                        var records = [];
-                        loadNextChunk(0);
+                    if (!chunks) {
+                        continuation(null, 'Error in index fetch');
+                    }
 
-                        function loadNextChunk(chunkNumber) {
 
-                            var c = chunks[chunkNumber];
-                            var fetchMin = c.minv.block;
-                            var fetchMax = c.maxv.block; // *sigh*
+                    var records = [];
+                    loadNextChunk(0);
 
-                            igvxhr.loadArrayBuffer(bam.bamPath,
-                                {
-                                    task: task,
-                                    headers: bam.config.headers,
-                                    range: {start: fetchMin, size: fetchMax - fetchMin + 1},
-                                    success: function (compressed) {
+                    function loadNextChunk(chunkNumber) {
 
-                                        try {
-                                            var ba = new Uint8Array(igv.unbgzf(compressed)); //, c.maxv.block - c.minv.block + 1));
-                                        } catch (e) {
-                                            console.log(e);
-                                            continuation(records);
-                                        }
+                        var c = chunks[chunkNumber];
+                        var fetchMin = c.minv.block;
+                        var fetchMax = c.maxv.block; // *sigh*
 
-                                        decodeBamRecords(ba, chunks[chunkNumber].minv.offset, records, min, max, chrId);
+                        igvxhr.loadArrayBuffer(bam.bamPath,
+                            {
+                                task: task,
+                                headers: bam.config.headers,
+                                range: {start: fetchMin, size: fetchMax - fetchMin + 1},
+                                success: function (compressed) {
 
-                                        chunkNumber++;
-
-                                        if (chunkNumber >= chunks.length) {
-
-                                            // If we have combined multiple chunks. Sort records by start position.  I'm not sure this is neccessary
-                                            if (chunkNumber > 0 && records.length > 1) {
-                                                records.sort(function (a, b) {
-                                                    return a.start - b.start;
-                                                });
-                                            }
-                                            continuation(records);
-                                        }
-                                        else {
-                                            loadNextChunk(chunkNumber);
-                                        }
+                                    try {
+                                        var ba = new Uint8Array(igv.unbgzf(compressed)); //, c.maxv.block - c.minv.block + 1));
+                                    } catch (e) {
+                                        console.log(e);
+                                        continuation(records);
                                     }
-                                });
+
+                                    decodeBamRecords(ba, chunks[chunkNumber].minv.offset, records, min, max, chrId);
+
+                                    chunkNumber++;
+
+                                    if (chunkNumber >= chunks.length) {
+
+                                        // If we have combined multiple chunks. Sort records by start position.  I'm not sure this is neccessary
+                                        if (chunkNumber > 0 && records.length > 1) {
+                                            records.sort(function (a, b) {
+                                                return a.start - b.start;
+                                            });
+                                        }
+                                        continuation(records);
+                                    }
+                                    else {
+                                        loadNextChunk(chunkNumber);
+                                    }
+                                }
+                            });
 
 
-                        }
-                    });
+                    }
                 });
             }
         });
