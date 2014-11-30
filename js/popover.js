@@ -114,12 +114,12 @@ var igv = (function (igv) {
 
         myDiv.append(trackMenuItems[ 0 ][ "object" ][ 0 ]);
 
-        ["foxtrot", "bravo", "lima"].forEach(function (item, i, items) {
-
-            var object = $('<div></div>');
-            object.html("item " + i + " is " + item);
-            myDiv.append(object[ 0 ]);
-        });
+//        ["foxtrot", "bravo", "lima"].forEach(function (item, i, items) {
+//
+//            var object = $('<div></div>');
+//            object.html("item " + i + " is " + item);
+//            myDiv.append(object[ 0 ]);
+//        });
 
         $(this.popoverContentDiv).empty();
 
