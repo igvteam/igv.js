@@ -135,7 +135,7 @@ var igv = (function (igv) {
 
                         var c = chunks[chunkNumber];
                         var fetchMin = c.minv.block;
-                        var fetchMax = c.maxv.block; // *sigh*
+                        var fetchMax = Math.min(bam.contentLength, c.maxv.block + 65000);   // Make sure we get the whole block.
 
                         igvxhr.loadArrayBuffer(bam.bamPath,
                             {

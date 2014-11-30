@@ -101,6 +101,24 @@
                                 label: 'Recombination rate'
                                 })">Recombination Rate</a>
                             </li>
+                            <li>
+                                <a onclick="igv.browser.loadTrack(
+                                {
+                                type: 'vcf',
+                                url: 'http://www.broadinstitute.org/igvdata/test/igv-web/TSVC_variants_IonXpress_078.vcf.gz',
+                                label: 'TSVC Variants 078'
+                                }
+                                )">TSVC Variants 078 (VCF tabix)</a>
+                            </li>
+                            <li>
+                                <a onclick="igv.browser.loadTrack(
+                                {
+                                type: 'bed',
+                                url: 'http://www.broadinstitute.org/igvdata/annotations/hg19/dbSnp/snp137.hg19.bed.gz',
+                                label: 'dbSNP 137'
+                                }
+                                )">dbSNP 137 (bed tabix)</a>
+                            </li>
                         </ul>
                     </li>
                 </ul>

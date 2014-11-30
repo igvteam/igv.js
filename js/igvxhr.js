@@ -59,7 +59,7 @@ var igvxhr = (function (igvxhr) {
 
             options.responseType = "arraybuffer";
             options.success = function (data) {
-                var result = arrayBufferToString(data, true);
+                var result = igv.arrayBufferToString(data, true);
                 success(result);
             };
             igvxhr.load(url, options);
@@ -264,7 +264,7 @@ var igvxhr = (function (igvxhr) {
         fileReader.onload = function (e) {
 
             var gzipped = localfile.name.endsWith(".gz"),
-                result = arrayBufferToString(fileReader.result, gzipped);
+                result = igv.arrayBufferToString(fileReader.result, gzipped);
 
             success(result, localfile);
 
@@ -279,24 +279,6 @@ var igvxhr = (function (igvxhr) {
 
     }
 
-    function arrayBufferToString(arraybuffer, gzipped) {
-
-        var plain, inflate;
-
-        if (gzipped) {
-
-            var inflate = new Zlib.Gunzip(new Uint8Array(arraybuffer));
-            var plain = inflate.decompress();
-        }
-        else {
-            plain = new Uint8Array(arraybuffer);
-        }
-        var result = "";
-        for (var i = 0, len = plain.length; i < len; i++) {
-            result = result + String.fromCharCode(plain[i]);
-        }
-        return result;
-    }
 
 
     function isCrossDomain(url) {

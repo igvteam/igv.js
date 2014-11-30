@@ -115,7 +115,8 @@
                 </ul>
                 <ul class="nav navbar-nav navbar-left">
                     <li class="dropdown" id="tracks-menu-dropdown">
-                        <a href="#" class="dropdown-toggle" data-toggle="dropdown">Example Tracks<b class="caret"></b></a>
+                        <a href="#" class="dropdown-toggle" data-toggle="dropdown">Example Tracks<b
+                                class="caret"></b></a>
                         <ul id="trackList" class="dropdown-menu">
                             <li>
                                 <a onclick="igv.browser.loadTrack(
@@ -151,11 +152,21 @@
                                 <a onclick="igv.browser.loadTrack(
                                 {
                                 type: 'vcf',
-                                url: 'test/data/vcf/TSVC.vcf',
-                                label: 'TSVC Variants'
+                                url: 'http://www.broadinstitute.org/igvdata/test/igv-web/TSVC_variants_IonXpress_078.vcf.gz',
+                                label: 'TSVC Variants 078'
                                 }
-                                )">VCF Example (chr1)</a>
+                                )">TSVC Variants 078 (VCF tabix)</a>
                             </li>
+                            <li>
+                                <a onclick="igv.browser.loadTrack(
+                                {
+                                type: 'bed',
+                                url: 'http://www.broadinstitute.org/igvdata/annotations/hg19/dbSnp/snp137.hg19.bed.gz',
+                                label: 'dbSNP 137'
+                                }
+                                )">dbSNP 137 (bed tabix)</a>
+                            </li>
+
                             <li>
                                 <a onclick="igv.browser.loadTrack({
                                 url: 'test/GBM-TP.seg.gz',
@@ -185,7 +196,8 @@
                 </div>
                 <div class="nav navbar-nav navbar-left">
                     <div class="well-sm">
-                        <button id="goBox" class="btn btn-default" onclick="igv.browser.search($('#goBoxInput')[0].value);">
+                        <button id="goBox" class="btn btn-default"
+                                onclick="igv.browser.search($('#goBoxInput')[0].value);">
                             Search
                         </button>
                     </div>

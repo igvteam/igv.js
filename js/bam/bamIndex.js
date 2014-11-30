@@ -14,7 +14,6 @@ var igv = (function (igv) {
      */
     igv.loadBamIndex = function (indexUrl, config, continuation, tabix) {
 
-
         igvxhr.loadArrayBuffer(indexUrl,
             {
                 headers: config.headers,
@@ -154,13 +153,13 @@ var igv = (function (igv) {
                     for (var c = 0; c < nchnk; ++c) {
                         var cs = chunks[c][0];
                         var ce = chunks[c][1];
-                        (bin < 4681 ? otherChunks : leafChunks).push({minv: cs, maxv: ce});
+                        (bin < 4681 ? otherChunks : leafChunks).push({minv: cs, maxv: ce, bin: bin});
                     }
 
                 }
             });
 
-            // Use the linear index to find the lowest block that could contain alignemnts in the region
+            // Use the linear index to find the lowest block that could contain alignments in the region
             nintv = ba.linearIndex.length;
             lowest = null;
             minLin = Math.min(min >> 14, nintv - 1), maxLin = Math.min(max >> 14, nintv - 1);
@@ -207,7 +206,7 @@ var igv = (function (igv) {
                 var cur = intChunks[0];
                 for (var i = 1; i < intChunks.length; ++i) {
                     var nc = intChunks[i];
-                    if (cur.maxv != null && cur.minv != null && nc.minv.block == cur.maxv.block) { // no point splitting mid-block
+                    if ((nc.minv.block - cur.maxv.block) < 65000) { // Merge blocks that are withing 65k of each other
                         cur = {minv: cur.minv, maxv: nc.maxv};
                     } else {
                         mergedChunks.push(cur);
@@ -228,6 +227,7 @@ var igv = (function (igv) {
      */
     function reg2bins(beg, end) {
         var i = 0, k, list = [];
+        if (end >= 1 << 29)   end = 1 << 29;
         --end;
         list.push(0);
         for (k = 1 + (beg >> 26); k <= 1 + (end >> 26); ++k) list.push(k);

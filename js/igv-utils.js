@@ -203,6 +203,25 @@ var igv = (function (igv) {
         return tokens;
     }
 
+    igv.arrayBufferToString = function(arraybuffer, gzipped) {
+
+        var plain, inflate;
+
+        if (gzipped) {
+
+            var inflate = new Zlib.Gunzip(new Uint8Array(arraybuffer));
+            var plain = inflate.decompress();
+        }
+        else {
+            plain = new Uint8Array(arraybuffer);
+        }
+        var result = "";
+        for (var i = 0, len = plain.length; i < len; i++) {
+            result = result + String.fromCharCode(plain[i]);
+        }
+        return result;
+    }
+
     /**
      * Extend jQuery's ajax function to handle binary requests.   Credit to Henry Algus:
      *
