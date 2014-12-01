@@ -117,6 +117,7 @@ var igv = (function (igv) {
             }
 
         }
+        return header;
     }
 
     igv.VcfParser.prototype.parseFeatures = function (data) {

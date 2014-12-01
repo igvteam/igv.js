@@ -65,6 +65,8 @@ var igv = (function (igv) {
                 break;
             }
         }
+
+        return this.header;
     }
 
 

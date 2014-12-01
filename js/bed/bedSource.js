@@ -25,17 +25,6 @@
 
 var igv = (function (igv) {
 
-    function getParser(type) {
-// TODO -- move this code to a factory method
-        if (type === "vcf") {
-            return new igv.VcfParser();
-        } else if (type === "seg") {
-            return new igv.SegParser();
-        }
-        else {
-            return new igv.BedParser(type);
-        }
-    }
 
     /**
      * feature source for "bed like" files (tab delimited files with 1 feature per line: bed, gff, vcf, etc)
@@ -65,6 +54,18 @@ var igv = (function (igv) {
 
         this.parser = getParser(this.type);
     };
+
+
+    function getParser(type) {
+        if (type === "vcf") {
+            return new igv.VcfParser();
+        } else if (type === "seg") {
+            return new igv.SegParser();
+        }
+        else {
+            return new igv.BedParser(type);
+        }
+    }
 
     /**
      * Required function fo all data source objects.  Fetches features for the
@@ -213,8 +214,10 @@ var igv = (function (igv) {
         function loadFeaturesWithIndex(index) {
 
             if (!myself.header) {
-                myself.header = {};  // TODO -- parse header
-                loadFeaturesWithIndex(index);
+                loadHeaderWithIndex(index, function(header) {
+                    myself.header = header || {};
+                    loadFeaturesWithIndex(index);
+                });
                 return;
             }
             console.log("Using index");
@@ -272,7 +275,7 @@ var igv = (function (igv) {
                         igvxhr.loadStringFromFile(myself.localFile, options);
                     }
                     else {
-                        if(index.tabix) {
+                        if (index.tabix) {
                             igvxhr.loadArrayBuffer(myself.url, options);
                         }
                         else {
@@ -284,6 +287,62 @@ var igv = (function (igv) {
             }
 
         }
+
+        /**
+         * Load the file header (not HTTP header) for an indexed file.
+         *
+         * @param index
+         */
+        function loadHeaderWithIndex(index, continuation) {
+
+            getContentLength(function (contentLength) {
+
+                var rangeEnd = Math.min(contentLength, 65000),
+
+                    options = {
+                        headers: myself.config.headers,           // http headers, not file header
+                        range: {start: 1, size: rangeEnd},
+                        success: function (data) {
+                            myself.header = myself.parser.parseHeader(data);
+                            continuation(myself.header);
+                        },
+
+                        task: task
+                    };
+
+                if (myself.localFile) {
+                    igvxhr.loadStringFromFile(myself.localFile, options);
+                }
+                else {
+                    igvxhr.loadString(myself.url, options);
+                }
+            });
+        }
+
+
+        function getContentLength(continuation) {
+            if (myself.contentLength) {
+                continuation(myself.contentLength);
+            }
+            else {
+
+                // Gen the content length first, so we don't try to read beyond the end of the file
+                igvxhr.getContentLength(myself.headPath, {
+                    headers: myself.config.headers,
+                    success: function (contentLength) {
+                        myself.contentLength = contentLength;
+                        continuation(contentLength);
+
+                    },
+                    error: function () {
+                        myself.contentLength = -1;
+                        continuation(-1);
+                    }
+
+                });
+            }
+        }
+
 
     }
 
