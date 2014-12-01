@@ -240,10 +240,12 @@ var igv = (function (igv) {
                     browser.selectDesignatedTrack(trackView);
                 }
 
-                browser.designatedTrack.featureSource.allFeatures(function (featureList) {
-                    browser.referenceFrame.start = 0;
-                    browser.cursorModel.setRegions(featureList);
-                });
+                if(browser.cursorModel) {
+                    browser.designatedTrack.featureSource.allFeatures(function (featureList) {
+                        browser.referenceFrame.start = 0;
+                        browser.cursorModel.setRegions(featureList);
+                    });
+                }
 
             };
 
