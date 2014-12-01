@@ -243,6 +243,14 @@ if (!Uint8Array.prototype.toText) {
 
 }
 
+var log2 = Math.log(2);
+
+if(!Math.log2) {
+    Math.log2 = function(x) {
+        return Math.log(x) / log2;
+    }
+}
+
 
 
 

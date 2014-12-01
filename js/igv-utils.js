@@ -209,8 +209,9 @@ var igv = (function (igv) {
 
         if (gzipped) {
 
-            var inflate = new Zlib.Gunzip(new Uint8Array(arraybuffer));
-            var plain = inflate.decompress();
+          var inflate = new Zlib.Gunzip(new Uint8Array(arraybuffer));
+          var plain = inflate.decompress();
+            //var plain = igv.unbgzf(arraybuffer);
         }
         else {
             plain = new Uint8Array(arraybuffer);

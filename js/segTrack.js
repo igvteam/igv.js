@@ -92,7 +92,7 @@ var igv = (function (igv) {
 
         this.featureSource.getFeatures(chr, bpStart, bpEnd, function (featureList) {
 
-                var segment, len, sample, i, y, color,
+                var segment, len, sample, i, y, color, value,
                     px, px1, pw,
                     xScale = refFrame.bpPerPixel;
 
@@ -108,6 +108,8 @@ var igv = (function (igv) {
 
                     checkSize();
 
+                    checkForLog(featureList);
+
                     for (i = 0, len = featureList.length; i < len; i++) {
 
                         segment = featureList[i];
@@ -117,11 +119,16 @@ var igv = (function (igv) {
 
                         y = track.samples[segment.sample] * track.sampleHeight;
 
-                        if (segment.value < -0.1) {
-                            color = track.negColorScale.getColor(segment.value);
+                        value = segment.value;
+                        if(!track.isLog) {
+                            value = Math.log2(value/2);
                         }
-                        else if (segment.value > 0.1) {
-                            color = track.posColorScale.getColor(segment.value);
+
+                        if (value < -0.1) {
+                            color = track.negColorScale.getColor(value);
+                        }
+                        else if (value > 0.1) {
+                            color = track.posColorScale.getColor(value);
                         }
                         else {
                             color = "white";
@@ -154,7 +161,19 @@ var igv = (function (igv) {
                 }
 
             }
+        }
 
+        function checkForLog(featureList) {
+            var i;
+            if (track.isLog === undefined) {
+                track.isLog = false;
+                for (i = 0; i < featureList.length; i++) {
+                    if (featureList[i].value < 0) {
+                        track.isLog = true;
+                        return;
+                    }
+                }
+            }
         }
     };
 

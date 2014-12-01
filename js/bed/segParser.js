@@ -92,7 +92,7 @@ var igv = (function (igv) {
 
                 allFeatures.push({
                     sample: tokens[sampleColumn],
-                    chr: "chr" + tokens[chrColumn],
+                    chr: tokens[chrColumn],
                     start: parseInt(tokens[startColumn]),
                     end: parseInt(tokens[endColumn]),
                     value: parseFloat(tokens[dataColumn])

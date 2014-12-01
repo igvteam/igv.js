@@ -167,7 +167,12 @@ var igv = (function (igv) {
                 if (!idxFile) idxFile = myself.url + ".tbi";
                 igv.loadBamIndex(idxFile, myself.config, function (index) {
                         myself.index = index;              // index might be null => no index, don't try again
-                        loadFeaturesWithIndex(index);
+                        if(index) {
+                            loadFeaturesWithIndex(index);
+                        }
+                        else {
+                            loadFeaturesNoIndex();
+                        }
                     },
                     true);   // Boolean flag for "tabix"
 
@@ -224,7 +229,8 @@ var igv = (function (igv) {
             console.log("Using index");
 
             var blocks, processed, allFeatures,
-                refId = index.tabix ? index.sequenceIndexMap[range.chr] : range.chr;
+                tabix = index && index.tabix,
+                refId = tabix ? index.sequenceIndexMap[range.chr] : range.chr;
 
             blocks = index.blocksForRange(refId, range.start, range.end);
 
