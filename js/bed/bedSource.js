@@ -43,6 +43,7 @@ var igv = (function (igv) {
             this.url = config.url;
             this.filename = config.url;
             this.indexUrl = config.indexUrl;
+            this.headUrl = config.headUrl || this.filename;
         }
 
         if (config.type) {
@@ -295,28 +296,29 @@ var igv = (function (igv) {
          */
         function loadHeaderWithIndex(index, continuation) {
 
-            getContentLength(function (contentLength) {
-
-                var rangeEnd = Math.min(contentLength, 65000),
-
-                    options = {
-                        headers: myself.config.headers,           // http headers, not file header
-                        range: {start: 1, size: rangeEnd},
-                        success: function (data) {
-                            myself.header = myself.parser.parseHeader(data);
-                            continuation(myself.header);
-                        },
-
-                        task: task
-                    };
-
-                if (myself.localFile) {
-                    igvxhr.loadStringFromFile(myself.localFile, options);
-                }
-                else {
-                    igvxhr.loadString(myself.url, options);
-                }
-            });
+            continuation({});
+//            getContentLength(function (contentLength) {
+//
+//                var rangeEnd = Math.min(contentLength, 65000),
+//
+//                    options = {
+//                        headers: myself.config.headers,           // http headers, not file header
+//                        range: {start: 0, size: rangeEnd},
+//                        success: function (data) {
+//                            myself.header = myself.parser.parseHeader(data);
+//                            continuation(myself.header);
+//                        },
+//
+//                        task: task
+//                    };
+//
+//                if (myself.localFile) {
+//                    igvxhr.loadStringFromFile(myself.localFile, options);
+//                }
+//                else {
+//                    igvxhr.loadString(myself.url, options);
+//                }
+//            });
         }
 
 
@@ -327,7 +329,7 @@ var igv = (function (igv) {
             else {
 
                 // Gen the content length first, so we don't try to read beyond the end of the file
-                igvxhr.getContentLength(myself.headPath, {
+                igvxhr.getContentLength(myself.headUrl, {
                     headers: myself.config.headers,
                     success: function (contentLength) {
                         myself.contentLength = contentLength;
