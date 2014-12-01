@@ -518,7 +518,7 @@ var igv = (function (igv) {
 
 //                    spinner.stop();
 
-                    var lines = data.split("\n"),
+                    var lines = data.splitLines(),
                         len = lines.length,
                         lineNo = 0,
                         foundFeature = false,

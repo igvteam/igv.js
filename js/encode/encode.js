@@ -52,7 +52,7 @@ var encode = (function (encode) {
 
         dataLoader.loadBinaryString(function (data) {
 
-            var lines = data.split("\n"),
+            var lines = data.splitLines(),
                 dataSet = [ ],
                 path;
 

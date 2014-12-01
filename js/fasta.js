@@ -82,7 +82,7 @@ var igv = (function (igv) {
         var sequence = this;
         igv.loadData(this.indexFile, function (data) {
 
-            var lines = data.split("\n");
+            var lines = data.splitLines();
             var len = lines.length;
             var lineNo = 0;
             sequence.index = {};

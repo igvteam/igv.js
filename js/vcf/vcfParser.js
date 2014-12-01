@@ -37,7 +37,7 @@ var igv = (function (igv) {
 
     igv.VcfParser.prototype.parseHeader = function (data) {
 
-        var lines = data.split("\n"),
+        var lines = data.splitLines(),
             len = lines.length,
             line,
             i,

@@ -47,7 +47,7 @@ var igv = (function (igv) {
 
     igv.SegParser.prototype.parseHeader = function (data) {
 
-        var lines = data.split("\n"),
+        var lines = data.splitLines(),
             len = lines.length,
             line,
             i,
@@ -72,7 +72,7 @@ var igv = (function (igv) {
 
     igv.SegParser.prototype.parseFeatures = function (data) {
 
-        var lines = data ? data.split("\n") : [] ,
+        var lines = data ? data.splitLines() : [] ,
             len = lines.length,
             tokens, allFeatures = [], line, i, dataColumn;
 
@@ -92,7 +92,7 @@ var igv = (function (igv) {
 
                 allFeatures.push({
                     sample: tokens[sampleColumn],
-                    chr: tokens[chrColumn],
+                    chr: "chr" + tokens[chrColumn],
                     start: parseInt(tokens[startColumn]),
                     end: parseInt(tokens[endColumn]),
                     value: parseFloat(tokens[dataColumn])

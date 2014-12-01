@@ -390,9 +390,11 @@ var igv = (function (igv) {
 
     igv.TrackView.prototype.repaint = function () {
 
-        if (!this.track) {
+        if (!(this.track && this.browser && this.browser.referenceFrame)) {
             return;
         }
+
+
 
         var tileWidth,
             tileStart,

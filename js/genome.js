@@ -112,7 +112,7 @@ var igv = (function (igv) {
                 lastChr,
                 n = 0,
                 c = 1,
-                lines = data.split("\n"),
+                lines = data.splitLines(),
                 len = lines.length;
 
             for (var i = 0; i < len; i++) {

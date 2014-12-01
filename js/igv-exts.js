@@ -158,6 +158,12 @@ if (!String.prototype.contains) {
     };
 }
 
+if(!String.prototype.splitLines) {
+    String.prototype.splitLines = function() {
+       return this.split(/\r\n|\n|\r/gm);
+    }
+}
+
 if (!Array.prototype.shuffle) {
     // Randomly shuffle contents of an array
     Array.prototype.shuffle = function () {

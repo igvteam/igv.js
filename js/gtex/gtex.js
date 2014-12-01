@@ -192,7 +192,7 @@ var igv = (function (igv) {
 
         dataLoader.loadBinaryString(function (data) {
 
-                var lines = data.split("\n"),
+                var lines = data.splitLines(),
                     len = lines.length,
                     i,
                     records = [],
