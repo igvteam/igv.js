@@ -25,6 +25,12 @@
 
 var igvxhr = (function (igvxhr) {
 
+    // Compression types
+    const NONE = 0;
+    const GZIP = 1;
+    const BGZF = 2;
+
+
     igvxhr.loadArrayBuffer = function (url, options) {
         options.responseType = "arraybuffer";
         igvxhr.load(url, options);
@@ -53,23 +59,36 @@ var igvxhr = (function (igvxhr) {
      */
     igvxhr.loadString = function (url, options) {
 
-        var success = options.success;
+        var success = options.success,
+            compression, result;
 
-        if (url.endsWith(".gz")) {
+        if (options.bgz) {
+            compression = BGZF;
+        }
+        else if (url.endsWith(".gz")) {
 
+            compression = GZIP;
+        }
+        else {
+            compression = NONE;
+        }
+
+        if (compression === NONE) {
+
+            options.mimeType = 'text/plain; charset=x-user-defined';
+            igvxhr.load(url, options);
+        }
+        else {
             options.responseType = "arraybuffer";
             options.success = function (data) {
-                var result = igv.arrayBufferToString(data, true);
+                var result = igv.arrayBufferToString(data, compression);
                 success(result);
             };
             igvxhr.load(url, options);
 
         }
-        else {
 
-            options.mimeType = 'text/plain; charset=x-user-defined';
-            igvxhr.load(url, options);
-        }
+
     }
 
     igvxhr.load = function (url, options) {
@@ -131,9 +150,9 @@ var igvxhr = (function (igvxhr) {
 
         xhr.onerror = function (event) {
 
-            if(isCrossDomain(url) && url) {
+            if (isCrossDomain(url) && url) {
                 // Try the proxy, if it exists.  Presumably this is a php file
-                if(igv.browser.crossDomainProxy && url != igv.browser.crossDomainProxy) {
+                if (igv.browser.crossDomainProxy && url != igv.browser.crossDomainProxy) {
 
                     options.sendData = "url=" + url;
 
@@ -263,8 +282,20 @@ var igvxhr = (function (igvxhr) {
 
         fileReader.onload = function (e) {
 
-            var gzipped = localfile.name.endsWith(".gz"),
-                result = igv.arrayBufferToString(fileReader.result, gzipped);
+            var compression, result;
+
+            if (options.bgz) {
+                compression = BGZF;
+            }
+            else if (localfile.name.endsWith(".gz")) {
+
+                compression = GZIP;
+            }
+            else {
+                compression = NONE;
+            }
+
+            result = igv.arrayBufferToString(fileReader.result, compression);
 
             success(result, localfile);
 
@@ -280,7 +311,6 @@ var igvxhr = (function (igvxhr) {
     }
 
 
-
     function isCrossDomain(url) {
 
         var origin = window.location.origin;
@@ -289,6 +319,28 @@ var igvxhr = (function (igvxhr) {
 
     }
 
+
+    igv.arrayBufferToString = function (arraybuffer, compression) {
+
+        var plain, inflate;
+
+        if (compression === GZIP) {
+            inflate = new Zlib.Gunzip(new Uint8Array(arraybuffer));
+            plain = inflate.decompress();
+        }
+        else if (compression === BGZF) {
+            plain = new Uint8Array(igv.unbgzf(arraybuffer));
+        }
+        else {
+            plain = new Uint8Array(arraybuffer);
+        }
+
+        var result = "";
+        for (var i = 0, len = plain.length; i < len; i++) {
+            result = result + String.fromCharCode(plain[i]);
+        }
+        return result;
+    }
 
     return igvxhr;
 

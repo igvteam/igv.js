@@ -181,7 +181,12 @@ var igv = (function (igv) {
                 if (!idxFile) idxFile = myself.url + ".idx";
                 igv.loadTribbleIndex(idxFile, myself.config, function (index) {
                     myself.index = index;              // index might be null => no index, don't try again
-                    loadFeaturesWithIndex(index);
+                    if(index) {
+                        loadFeaturesWithIndex(index);
+                    }
+                    else {
+                        loadFeaturesNoIndex();
+                    }
                 });
             }
             return;
@@ -302,29 +307,30 @@ var igv = (function (igv) {
          */
         function loadHeaderWithIndex(index, continuation) {
 
-            continuation({});
-//            getContentLength(function (contentLength) {
-//
-//                var rangeEnd = Math.min(contentLength, 65000),
-//
-//                    options = {
-//                        headers: myself.config.headers,           // http headers, not file header
-//                        range: {start: 0, size: rangeEnd},
-//                        success: function (data) {
-//                            myself.header = myself.parser.parseHeader(data);
-//                            continuation(myself.header);
-//                        },
-//
-//                        task: task
-//                    };
-//
-//                if (myself.localFile) {
-//                    igvxhr.loadStringFromFile(myself.localFile, options);
-//                }
-//                else {
-//                    igvxhr.loadString(myself.url, options);
-//                }
-//            });
+            //continuation({});
+            getContentLength(function (contentLength) {
+
+                var rangeEnd = Math.min(contentLength, 65000),
+
+                    options = {
+                        headers: myself.config.headers,           // http headers, not file header
+                        range: {start: 0, size: rangeEnd},
+                        bgz: true,
+                        success: function (data) {
+                            myself.header = myself.parser.parseHeader(data);
+                            continuation(myself.header);
+                        },
+
+                        task: task
+                    };
+
+                if (myself.localFile) {
+                    igvxhr.loadStringFromFile(myself.localFile, options);
+                }
+                else {
+                    igvxhr.loadString(myself.url, options);
+                }
+            });
         }
 
 
