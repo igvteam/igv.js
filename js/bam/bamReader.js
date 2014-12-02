@@ -128,6 +128,12 @@ var igv = (function (igv) {
 
                     if (!chunks) {
                         continuation(null, 'Error in index fetch');
+                        return;
+                    }
+                    if(chunks.length === 0) {
+                        console.log('No chunks for range ' + chrId + ":" + min + "-" + max);
+                        continuation([]);
+                        return;
                     }
 
 
