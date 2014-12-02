@@ -54,7 +54,7 @@ var igv = (function (igv) {
         $(this.popoverDiv).append(this.popoverContentDiv);
 
         // popover close button container
-        this.popoverCloseElement = $('<span class="igv-popoverCloseElement">')[0];
+        this.popoverCloseElement = $('<div class="igv-popoverCloseElement">')[0];
         $(this.popoverDiv).append(this.popoverCloseElement);
 
         // popover close button
@@ -114,19 +114,21 @@ var igv = (function (igv) {
 
         myDiv.append(trackMenuItems[ 0 ][ "object" ][ 0 ]);
 
-//        ["foxtrot", "bravo", "lima"].forEach(function (item, i, items) {
-//
-//            var object = $('<div></div>');
-//            object.html("item " + i + " is " + item);
-//            myDiv.append(object[ 0 ]);
-//        });
+        ["Track Name", "Track Height", "Feature Color"].forEach(function (item, i, items) {
+
+            var object = $('<div></div>');
+            //object.html("item " + i + " is " + item);
+            object.html(item);
+            myDiv.append(object[ 0 ]);
+        });
 
         $(this.popoverContentDiv).empty();
 
         $(this.popoverContentDiv).append(myDiv[ 0 ]);
 
         // Attach click handler AFTER inserting markup in DOM.
-        // Do it beforehand and will have no effect when clicked.
+        // Insertion beforehand will cause it to have NO effect
+        // when clicked.
         trackMenuItems[ 0 ][ "object" ].click(trackMenuItems[ 0 ][ "click" ]);
 
         $(this.popoverDiv).css( popoverDivPosition(pageX, pageY, this) ).show();

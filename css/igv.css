@@ -3,28 +3,29 @@
     position: absolute;
     top: 0;
     left: 0;
-    width: 350px;
-    /*height: 240px;*/
+    /*width: 350px;*/
+
+    overflow: auto;
+    width: auto;
+
     z-index: 1000;
+
     font-family: Arial, Helvetica, sans-serif;
     font-size: medium;
-    border: 2px solid #444;
+
     background: #fff;
+
+    border: 2px solid #444;
     border-radius: 2%;
     -moz-border-radius: 2%;
     -webkit-border-radius: 2%;
+
     display: none;
 }
 
 .igv-popoverContent {
-    position: absolute;
-    top: 5px;
-    left: 5px;
-    right: 25px;
-    /*bottom: 5px;*/
-    background: #fff;
-    /*background: rgba(0, 255, 0, .5);*/
-    /*display: block;*/
+
+    float: left;
 }
 
 .igv-popoverPointer {
@@ -35,6 +36,7 @@
 }
 
 .igv-popoverContent .igv-popoverNameSpan {
+
     font-weight: bold;
     /*background: #0f0;*/
 }
@@ -49,16 +51,18 @@
 }
 
 .igv-popoverCloseElement {
-    position: absolute;
-    top: 4px;
-    right: 4px;
+
+    float: right;
     cursor: pointer;
 }
 
 .igv-popoverCloseFontAwesome {
-    position: absolute;
+
     top: 0;
     right: 0;
+    width: auto;
+    height: 100%;
+
     color: #888;
 }
 
