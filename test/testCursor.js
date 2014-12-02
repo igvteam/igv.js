@@ -1,5 +1,4 @@
 function runCursorTests() {
-//Users/jrobinso/projects/igv-js/igv/test/data/cursor/wgEncodeBroadHistoneH1hescH3k4me3StdPk.broadPeak
 
     module("Cursor");
 
@@ -8,7 +7,7 @@ function runCursorTests() {
         var peakURL,
             peakDataSource;
 
-        peakURL = "../test/data/cursor/wgEncodeBroadHistoneH1hescH3k27me3StdPk.broadPeak.gz";
+        peakURL = "http://www.broadinstitute.org/igvdata/public/test/data/cursor/wgEncodeBroadHistoneH1hescH3k27me3StdPk.broadPeak.gz";
 
         peakDataSource = new igv.BedFeatureSource(peakURL);
         peakDataSource.getFeatureCache(function (featureCache) {
@@ -29,8 +28,8 @@ function runCursorTests() {
 //
 //        var tssUrl, peakURL, tssDataSource, peakDataSource, region, bpStart, bpEnd, len, cursorModel;
 //
-//        tssUrl = "../test/data/cursor/hg19.tss.bed.gz";
-//        peakURL = "../test/data/cursor/wgEncodeBroadHistoneH1hescH3k4me3StdPk.broadPeak.gz";
+//        tssUrl = "http://www.broadinstitute.org/igvdata/public/test/data/cursor/hg19.tss.bed.gz";
+//        peakURL = "http://www.broadinstitute.org/igvdata/public/test/data/cursor/wgEncodeBroadHistoneH1hescH3k4me3StdPk.broadPeak.gz";
 //
 //        peakDataSource = new igv.BedFeatureSource(peakURL);
 //        tssDataSource = new igv.BedFeatureSource(tssUrl);
@@ -60,8 +59,8 @@ function runCursorTests() {
 //
 //        var tssUrl, peakURL, tssDataSource, peakDataSource, region, bpStart, bpEnd, len, cursorModel;
 //
-//        tssUrl = "../test/data/cursor/hg19.tss.bed.gz";
-//        peakURL = "../test/data/cursor/wgEncodeBroadHistoneH1hescH3k4me3StdPk.broadPeak.gz";
+//        tssUrl = "http://www.broadinstitute.org/igvdata/public/test/data/cursor/hg19.tss.bed.gz";
+//        peakURL = "http://www.broadinstitute.org/igvdata/public/test/data/cursor/wgEncodeBroadHistoneH1hescH3k4me3StdPk.broadPeak.gz";
 //
 //        peakDataSource = new igv.BedFeatureSource(peakURL);
 //        tssDataSource = new igv.BedFeatureSource(tssUrl);

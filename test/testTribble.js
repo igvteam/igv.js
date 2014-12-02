@@ -7,7 +7,7 @@ function testTribble() {
 
     asyncTest("Tribble index", function () {
 
-        var url = "data/bed/gencode.v18.collapsed.bed.idx";
+        var url = "http://www.broadinstitute.org/igvdata/public/test/data/bed/gencode.v18.collapsed.bed.idx";
 
         igv.loadTribbleIndex(url, {}, function (index) {
 
@@ -24,7 +24,7 @@ function testTribble() {
 
     asyncTest("Non-existent index", function () {
 
-        var url = "data/tribble/noSuchFile.idx";
+        var url = "http://www.broadinstitute.org/igvdata/public/test/data/tribble/noSuchFile.idx";
 
         igv.loadTribbleIndex(url, {},  function (index) {
 

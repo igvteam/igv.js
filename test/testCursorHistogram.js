@@ -28,8 +28,8 @@ function runCursorHistogramTests() {
 
     asyncTest("CursorRegion - Lots of scores", function () {
 
-        var peakURL = "../test/data/cursor/wgEncodeBroadHistoneH1hescH3k4me3StdPk.broadPeak.gz",
-            tssURL = "../test/data/cursor/hg19.tss.bed.gz",
+        var peakURL = "http://www.broadinstitute.org/igvdata/public/test/data/cursor/wgEncodeBroadHistoneH1hescH3k4me3StdPk.broadPeak.gz",
+            tssURL = "http://www.broadinstitute.org/igvdata/public/test/test/data/cursor/hg19.tss.bed.gz",
             featureSource,
             cursorModel = new cursor.CursorModel(null),
             bins,
@@ -78,8 +78,8 @@ function runCursorHistogramTests() {
 
 //    asyncTest("CursorRegion - getScore", function () {
 //
-//        var tssUrl = "../test/data/cursor/hg19.tss.bed.gz",
-//            peakURL = "../test/data/cursor/wgEncodeBroadHistoneH1hescH3k4me3StdPk.broadPeak.gz",
+//        var tssUrl = "http://www.broadinstitute.org/igvdata/public/test/data/cursor/hg19.tss.bed.gz",
+//            peakURL = "http://www.broadinstitute.org/igvdata/public/test/data/cursor/wgEncodeBroadHistoneH1hescH3k4me3StdPk.broadPeak.gz",
 //            tssDataSource,
 //            peakDataSource,
 //            region,

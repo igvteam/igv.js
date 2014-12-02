@@ -3,7 +3,7 @@ function eqtlUnitTests() {
 
     asyncTest("EQTL binary file", 2, function () {
 
-        var url = "../test/data/eqtl/Heart_Left_Ventricle.portal.eqtl.bin",
+        var url = "http://www.broadinstitute.org/igvdata/test/data/eqtl/Heart_Left_Ventricle.portal.eqtl.bin",
             featureSource = new igv.EqtlSource(url);
 
 

@@ -36,7 +36,7 @@ function bamTests() {
         var chr = "chr22",
             bpStart = 24375199,
             bpEnd = 24378544,
-            bamPath = "../test/data/bam/brain_chr22sample.bam",
+            bamPath = "http://www.broadinstitute.org/igvdata/public/test/data/bam/brain_chr22sample.bam",
             bamReader = new igv.BamReader({url: bamPath}),
             blocks;
 
@@ -135,7 +135,7 @@ function bamTests() {
 
     asyncTest("large header", function () {
 
-        var bamPath = "../test/data/bam/IonXpress_078_rawlib.lgheader.bam",
+        var bamPath = "http://www.broadinstitute.org/igvdata/public/test/data/bam/IonXpress_078_rawlib.lgheader.bam",
             bamFile = new igv.BamReader({url: bamPath});
 
         bamFile.readHeader(function () {

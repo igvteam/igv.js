@@ -4,7 +4,7 @@ function runBEDUnitTests() {
 
     asyncTest("BED query", 3, function () {
 
-        var url = "../test/data/bed/sample.bed";
+        var url = "http://www.broadinstitute.org/igvdata/public/test/data/bed/sample.bed";
 
         var bedDataSource = new igv.BedFeatureSource({url: url});
 
@@ -30,7 +30,7 @@ function runBEDUnitTests() {
 
     asyncTest("BED all features", 2, function () {
 
-        var url = "../test/data/bed/sample.bed";
+        var url = "http://www.broadinstitute.org/igvdata/public/test/data/bed/sample.bed";
 
         var bedDataSource = new igv.BedFeatureSource({url: url});
 
@@ -51,7 +51,7 @@ function runBEDUnitTests() {
 
     asyncTest("BED query gzip", 3, function () {
 
-        var url = "../test/data/bed/sample.bed.gz";
+        var url = "http://www.broadinstitute.org/igvdata/public/test/data/bed/sample.bed.gz";
 
         var bedDataSource = new igv.BedFeatureSource({url: url});
 

@@ -35,7 +35,7 @@ function runIntervalTreeTests() {
         var peakURL,
             peakDataSource;
 
-        peakURL = "../test/data/cursor/wgEncodeBroadHistoneH1hescH3k27me3StdPk.broadPeak.gz";
+        peakURL = "http://www.broadinstitute.org/igvdata/public/test/data/cursor/wgEncodeBroadHistoneH1hescH3k27me3StdPk.broadPeak.gz";
 
         peakDataSource = new igv.BedFeatureSource({url: peakURL});
         peakDataSource.getFeatures("chr1", 145549159, 145549259, function(featureList) {
