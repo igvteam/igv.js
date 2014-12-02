@@ -30,19 +30,16 @@ var igv = (function (igv) {
         this.url = config.url;
         this.label = config.label;
         this.id = config.id || config.label;
-        this.height = 100;
-        this.minHeight = this.height;
-        this.maxHeight = this.height;
         this.order = config.order;
         this.color = config.color || "rgb(150,150,150)";
-        this.currentFeatures = [];
 
-        if (config.type) {
-            this.type = config.type;
-        }
-        else {
-            this.type = igv.inferFileType(this.filename);
-        }
+        if (!config.type) config.type = igv.inferFileType(this.filename);
+        this.type = config.type;
+
+        this.height = config.height || (this.type === "bed" ? 100 : 50);
+        this.minHeight = config.minHeight || this.height;
+        this.maxHeight = config.maxHeight || this.height;
+
 
         this.featureSource = new igv.BedFeatureSource(this.config);
 
@@ -122,7 +119,7 @@ var igv = (function (igv) {
                         feature.start <= genomicLocation + tolerance) {
                         var featureData = feature.popupData(genomicLocation);
                         if (featureData) {
-                            if(popupData.length > 0) {
+                            if (popupData.length > 0) {
                                 popupData.push("<HR>");
                             }
                             Array.prototype.push.apply(popupData, featureData);
@@ -140,7 +137,7 @@ var igv = (function (igv) {
     function renderGene(gene, bpStart, xScale, canvas) {
 
         var px, px1, pw, exonCount, cy, direction, exon, ePx, ePx1, ePw,
-            py = 20,
+            py = 5,
             step = 8,
             h = 10;
 
@@ -149,7 +146,7 @@ var igv = (function (igv) {
         px = Math.round((gene.start - bpStart) / xScale);
         px1 = Math.round((gene.end - bpStart) / xScale);
         pw = px1 - px;
-        if(pw < 3) {
+        if (pw < 3) {
             pw = 3;
             px -= 1;
         }
@@ -191,7 +188,7 @@ var igv = (function (igv) {
                 geneStyle = normalTextStyle;
             }
 
-            canvas.fillText(gene.name, px + ((px1 - px) / 2), 2 * py, geneStyle, {rotate: {angle: 45}});
+            canvas.fillText(gene.name, px + ((px1 - px) / 2), py+20, geneStyle, {rotate: {angle: 45}});
         }
     }
 
@@ -206,7 +203,7 @@ var igv = (function (igv) {
         px = Math.round((variant.start - bpStart) / xScale);
         px1 = Math.round((variant.end - bpStart) / xScale);
         pw = Math.max(1, px1 - px);
-        if(pw < 3) {
+        if (pw < 3) {
             pw = 3;
             px -= 1;
         }

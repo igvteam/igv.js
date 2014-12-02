@@ -315,7 +315,7 @@ var igv = (function (igv) {
                     options = {
                         headers: myself.config.headers,           // http headers, not file header
                         range: {start: 0, size: rangeEnd},
-                        bgz: true,
+                        bgz: index.tabix,
                         success: function (data) {
                             myself.header = myself.parser.parseHeader(data);
                             continuation(myself.header);
