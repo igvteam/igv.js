@@ -110,13 +110,9 @@ var igv = (function (igv) {
 
         getChrIndex(this, function (chrToIndex) {
 
-            var chrId = chrToIndex[chr];
-            var chunks;
-            if (chrId === undefined) {
-                if (chr.startsWith("chr")) chr = chr.substr(3);
-                else chr = "chr" + chr;
-                chrId = bam.chrToIndex[chr];
-            }
+            var chrId = chrToIndex[chr],
+                chunks;
+
             if (chrId === undefined) {
                 continuation([]);
             } else {

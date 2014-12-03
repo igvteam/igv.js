@@ -27,6 +27,7 @@ var igv = (function (igv) {
 
     igv.loadTribbleIndex = function (indexFile, config, continuation) {
 
+        var genome = igv.browser ? igv.browser.genome : null;
 
         console.log("Loading " + indexFile);
 
@@ -93,7 +94,11 @@ var igv = (function (igv) {
         }
 
         function readLinear(parser) {
+
             var chr = parser.getString();
+
+            // Translate to canonical name
+            if(genome) chr = genome.getChromosomeName(chr);
 
             var binWidth = parser.getInt();
             var nBins = parser.getInt();
@@ -140,9 +145,6 @@ var igv = (function (igv) {
     igv.TribbleIndex.prototype.blocksForRange = function (queryChr, min, max) { //function (refId, min, max) {
 
         var chrIdx = this.chrIndex[queryChr];
-        if (!chrIdx && queryChr.startsWith("chr")) {
-            chrIdx = this.chrIndex[queryChr.substr(3)];
-        }
 
         if (chrIdx) {
             var blocks = chrIdx.blocks,

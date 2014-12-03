@@ -123,7 +123,6 @@ var igv = (function (igv) {
             })
         } else {
             var idxEntry = this.index[chr];
-            if (!idxEntry)   idxEntry = this.index["chr" + chr];
             if (!idxEntry) {
                 console.log("No index entry for chr: " + chr);
 

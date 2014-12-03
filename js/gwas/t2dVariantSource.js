@@ -71,7 +71,7 @@ var igv = (function (igv) {
                 // Get a minimum 10mb window around the requested locus
                 var window = Math.max(bpEnd - bpStart, 10000000) / 2,
                     center = (bpEnd + bpStart) / 2,
-                    queryChr = (chr.startsWith("chr") ? chr.substring(3) : chr),
+                    queryChr = (chr.startsWith("chr") ? chr.substring(3) : chr), // Webservice uses "1,2,3..." convention
                     queryStart = Math.max(0, center - window),
                     queryEnd = center + window,
                     queryURL = this.proxy ? this.proxy : this.url,

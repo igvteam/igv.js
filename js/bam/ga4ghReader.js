@@ -38,7 +38,7 @@ var igv = (function (igv) {
     igv.Ga4ghReader.prototype.readAlignments = function (chr, bpStart, bpEnd, success, task) {
 
         var dataLoader,
-            queryChr = (chr.startsWith("chr") ? chr.substring(3) : chr),
+            queryChr = (chr.startsWith("chr") ? chr.substring(3) : chr),    // TODO -- we need to read the readset header and create an alias table
             readURL,
             body = {"readsetIds": [this.readsetId], "sequenceName": queryChr, "sequenceStart": bpStart, "sequenceEnd": bpEnd, "maxResults": "10000"},
             sendData,

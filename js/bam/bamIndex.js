@@ -14,6 +14,8 @@ var igv = (function (igv) {
      */
     igv.loadBamIndex = function (indexUrl, config, continuation, tabix) {
 
+        var genome = igv.browser ? igv.browser.genome : null;
+
         igvxhr.loadArrayBuffer(indexUrl,
             {
                 headers: config.headers,
@@ -56,6 +58,10 @@ var igv = (function (igv) {
                             sequenceIndexMap = {};
                             for (i = 0; i < nref; i++) {
                                 var seq_name = parser.getString();
+
+                                // Translate to "official" chr name.
+                                if(genome) seq_name = genome.getChromosomeName(seq_name);
+
                                 sequenceIndexMap[seq_name] = i;
                             }
                         }
