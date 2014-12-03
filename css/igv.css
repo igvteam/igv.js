@@ -67,7 +67,34 @@
     display: none;
 }
 
+.igv-igv-popoverHeader {
+    position: relative;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 24px;
+    background-color: orangered;
+}
+
+.igv-popoverClose {
+    position: relative;
+    top: 0;
+    right: 0;
+
+    height: 100%;
+
+    background-color: greenyellow;
+}
+
+.igv-popoverCloseFontAwesome {
+
+    cursor: pointer;
+
+    color: #888;
+}
+
 .igv-popoverContent {
+    /* nuthin */
 }
 
 .igv-popoverPointer {
@@ -90,22 +117,6 @@
 
 .igv-popoverContent .popoverContentSpan {
     font-weight: bold;
-}
-
-.igv-popoverCloseDiv {
-}
-
-.igv-popoverCloseFontAwesome {
-
-    top: 0;
-    right: 0;
-
-    width: auto;
-    height: 100%;
-
-    cursor: pointer;
-
-    color: #888;
 }
 
 .igv-popoverClose {

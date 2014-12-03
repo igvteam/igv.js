@@ -36,7 +36,8 @@ var igv = (function (igv) {
     igv.Popover.prototype.markupWithParentDiv = function(parentDiv) {
 
         var myself = this,
-            popoverCloseDiv,
+            popoverHeader,
+            popoverClose,
             popoverCloseFontAwesome;
 
         if (this.parentDiv) {
@@ -49,13 +50,17 @@ var igv = (function (igv) {
         this.popoverDiv = $('<div class="igv-popover">')[0];
         $(this.parentDiv).append(this.popoverDiv);
 
-        // popover close button container
-        popoverCloseDiv = $('<div class="igv-popoverCloseDiv">');
-        $(this.popoverDiv).append(popoverCloseDiv[ 0 ]);
+        // popover header
+        popoverHeader = $('<div class="igv-popoverHeader">');
+        $(this.popoverDiv).append(popoverHeader[ 0 ]);
+
+        // popover close container
+        popoverClose = $('<div class="igv-popoverClose">');
+        popoverHeader.append(popoverClose[ 0 ]);
 
         // popover close button
         popoverCloseFontAwesome = $('<i class="fa fa-times igv-popoverCloseFontAwesome">');
-        popoverCloseDiv.append(popoverCloseFontAwesome[ 0 ]);
+        popoverClose.append(popoverCloseFontAwesome[ 0 ]);
 
         popoverCloseFontAwesome.hover(
 
@@ -82,10 +87,10 @@ var igv = (function (igv) {
         popoverCloseFontAwesome.click(function () {
             myself.hide();
         });
-        
+
         // popover content
-        this.popoverContentDiv = $('<div class="igv-popoverContent">')[0];
-        $(this.popoverDiv).append(this.popoverContentDiv);
+        this.popoverContentDiv = $('<div class="igv-popoverContent">');
+        $(this.popoverDiv).append(this.popoverContentDiv[ 0 ]);
 
     };
 
@@ -104,7 +109,6 @@ var igv = (function (igv) {
 
     igv.Popover.prototype.hide = function () {
         $(this.popoverDiv).hide();
-        //$(this.popoverContentDiv).empty();
     };
 
     igv.Popover.prototype.presentTrackMenu = function (pageX, pageY, trackMenuItems) {
@@ -116,15 +120,15 @@ var igv = (function (igv) {
 
         ["Track Name", "Track Height", "Feature Color"].forEach(function (item, i, items) {
 
-            var object = $('<div></div>');
+            var object = $('<div>');
             //object.html("item " + i + " is " + item);
             object.html(item);
             myDiv.append(object[ 0 ]);
         });
 
-        $(this.popoverContentDiv).empty();
+        this.popoverContentDiv.empty();
 
-        $(this.popoverContentDiv).append(myDiv[ 0 ]);
+        this.popoverContentDiv.append(myDiv[ 0 ]);
 
         // Attach click handler AFTER inserting markup in DOM.
         // Insertion beforehand will cause it to have NO effect
@@ -133,7 +137,6 @@ var igv = (function (igv) {
 
         $(this.popoverDiv).css( popoverDivPosition(pageX, pageY, this) ).show();
 
-        //height = $(this.popoverContentDiv).height() + 20;
         height = 128;
 
         $(this.popoverDiv).css({
@@ -148,11 +151,11 @@ var igv = (function (igv) {
 
         if (content) {
 
-            $(this.popoverContentDiv).html(content);
+            this.popoverContentDiv.html(content);
 
             $(this.popoverDiv).css( popoverDivPosition(pageX, pageY, this) ).show();
 
-            height = $(this.popoverContentDiv).height() + 20;
+            height = this.popoverContentDiv.height() + 20;
             $(this.popoverDiv).css({
                 "height": height + "px"
             });
