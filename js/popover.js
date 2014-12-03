@@ -85,7 +85,7 @@ var igv = (function (igv) {
         );
 
         this.popoverCloseElement.onclick = function (e) {
-            $(myself.popoverDiv).hide();
+            myself.hide();
         };
 
     };
@@ -105,6 +105,7 @@ var igv = (function (igv) {
 
     igv.Popover.prototype.hide = function () {
         $(this.popoverDiv).hide();
+        //$(this.popoverContentDiv).empty();
     };
 
     igv.Popover.prototype.presentTrackMenu = function (pageX, pageY, trackMenuItems) {
