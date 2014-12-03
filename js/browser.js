@@ -164,6 +164,10 @@ var igv = (function (igv) {
         var myself = this,
             trackView = new igv.TrackView(track, this);
 
+        if (igv.popover) {
+            igv.popover.hide();
+        }
+
         // Register view with track.  This is unfortunate, but is needed to support "resize" events.
         track.trackView = trackView;
 

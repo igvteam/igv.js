@@ -172,8 +172,8 @@ var igv = (function (igv) {
 
         objectClick[ "object" ] = trackDeleteButton;
         objectClick[  "click" ] = function () {
-            myself.browser.removeTrack(myself.track);
             igv.popover.hide();
+            myself.browser.removeTrack(myself.track);
         };
 
         trackMenuItems.push(objectClick);
@@ -518,7 +518,9 @@ var igv = (function (igv) {
 
             var canvasCoords = igv.translateMouseCoordinates(e, canvas);
 
-            if (igv.popover) igv.popover.hide();
+            if (igv.popover) {
+                igv.popover.hide();
+            }
 
             isMouseDown = true;
             lastMouseX = canvasCoords.x;
