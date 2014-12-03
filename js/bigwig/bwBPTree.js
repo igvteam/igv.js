@@ -37,9 +37,9 @@ var igv = (function (igv) {
 
     igv.BPTree = function (binaryParser, treeOffset) {
 
+        var genome = igv.browser ? igv.browser.genome : null;
 
         this.treeOffset = treeOffset; // File offset to beginning of tree
-
         this.header = {};
         this.header.magic = binaryParser.getInt();
         this.header.blockSize = binaryParser.getInt();
@@ -53,41 +53,42 @@ var igv = (function (igv) {
         // Recursively walk tree to populate dictionary
         readTreeNode(binaryParser, -1, this.header.keySize, this.dictionary);
 
-    }
+
+        function readTreeNode(byteBuffer, offset, keySize, dictionary) {
+
+            if (offset >= 0) byteBuffer.position = offset;
+
+            var type = byteBuffer.getByte(),
+                reserved = byteBuffer.getByte(),
+                count = byteBuffer.getShort(),
+                i,
+                key,
+                chromId,
+                chromSize,
+                childOffset,
+                bufferOffset;
 
 
-    function readTreeNode(byteBuffer, offset, keySize, dictionary) {
+            if (type == 1) {
+                for (i = 0; i < count; i++) {
+                    key = byteBuffer.getString(keySize);
 
-        if (offset >= 0) byteBuffer.position = offset;
+                    if(genome) key = genome.getChromosomeName(key);  // Translate to canonical chr name
 
-        var type = byteBuffer.getByte(),
-            reserved = byteBuffer.getByte(),
-            count = byteBuffer.getShort(),
-            i,
-            key,
-            chromId,
-            chromSize,
-            childOffset,
-            bufferOffset;
+                    chromId = byteBuffer.getInt();
+                    chromSize = byteBuffer.getInt();
+                    dictionary[key] = chromId;
 
-
-        if (type == 1) {
-            for (i = 0; i < count; i++) {
-                key = byteBuffer.getString(keySize);
-                chromId = byteBuffer.getInt();
-                chromSize = byteBuffer.getInt();
-                dictionary[key] = chromId;
-
+                }
+            }
+            else { // non-leaf
+                for (i = 0; i < count; i++) {
+                    childOffset = byteBuffer.nextLong();
+                    bufferOffset = childOffset - self.treeOffset;
+                    readTreeNode(byteBuffer, offset, keySize, dictionary);
+                }
             }
         }
-        else { // non-leaf
-            for (i = 0; i < count; i++) {
-                childOffset = byteBuffer.nextLong();
-                bufferOffset = childOffset - self.treeOffset;
-                readTreeNode(byteBuffer, offset, keySize, dictionary);
-            }
-        }
-
     }
 
 
