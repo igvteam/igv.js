@@ -38,7 +38,8 @@ In the following example IGV is initialized with two initial tracks, genomic seq
 Configuration Options
 ---------------------
     
-    showKaryo       optional    If true the whole-genome karyotype view is displayed.  
+    showKaryo       optional    if true the whole-genome karyotype view is displayed. 
+    showNavigation  optional    if true show basic navigation controls (search, zoom in, zoom out)
     genome          required*   genome identifier. Required if fastaURL is not specified.
     fastaURL        required*   url to an indexed fasta file.  Required if genome id is not specified.
     cytobandURL     required*   url to a cytoband file in UCSC format.  Required if genome id is not specified.

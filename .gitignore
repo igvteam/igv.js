@@ -3,3 +3,5 @@
 .idea/workspace.xml
 node_modules
 dist
+
+docs/api.html
