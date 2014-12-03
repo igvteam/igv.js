@@ -39,37 +39,43 @@ var igv = (function (igv) {
             zoomOutButton;
 
         if (options.showNavigation) {
-            navigationDiv = $('<div class="igv-navigation-div">')[0];
 
-            searchDiv = $('<div>')[0];
-            searchInput = $('<input id="goBoxInput"  class="form-control"  placeholder="Locus Search" type="text">')[0];
-            $(searchDiv).append(searchInput);
+            navigationDiv = $('<div class="igv-navigation-div">');
 
-            searchButton = $('<i id="goBoxInput"class="fa fa-search">')[0];
-            $(searchDiv).append(searchButton);
-            $(navigationDiv).append(searchDiv);
+            searchDiv = $('<div>');
+            searchInput = $('<input id="goBoxInput"  class="form-control"  placeholder="Locus Search" type="text">');
+            searchDiv.append(searchInput[ 0 ]);
 
-            zoomDiv = $('<div>')[0];
-            zoomOutButton = $('<i class="fa fa-search-minus">')[0];
-            zoomInButton = $('<i class="fa fa-search-plus">')[0];
-            $(zoomDiv).append(zoomOutButton);
-            $(zoomDiv).append(zoomInButton);
-            $(navigationDiv).append(zoomDiv);
+            searchButton = $('<i id="goBoxInput" class="fa fa-search">');
+            searchDiv.append(searchButton[ 0 ]);
+            navigationDiv.append(searchDiv[ 0 ]);
 
-            $(controlDiv).append(navigationDiv);
+            zoomDiv = $('<div>');
 
-            searchInput.onchange = function () {
+            zoomOutButton = $('<i class="fa fa-search-minus">');
+            zoomInButton = $('<i class="fa fa-search-plus">');
+            zoomDiv.append(zoomOutButton[ 0 ]);
+            zoomDiv.append(zoomInButton[ 0 ]);
+
+            navigationDiv.append(zoomDiv[ 0 ]);
+
+            $(controlDiv).append(navigationDiv[ 0 ]);
+
+            searchInput.change(function () {
                 igv.browser.search($('#goBoxInput')[0].value);
-            };
-            searchButton.onclick = function () {
+            });
+
+            searchButton.click(function () {
                 igv.browser.search($('#goBoxInput')[0].value);
-            };
-            zoomInButton.onclick = function () {
+            });
+
+            zoomInButton.click(function () {
                 igv.browser.zoomIn();
-            }
-            zoomOutButton.onclick = function () {
+            });
+
+            zoomOutButton.click(function () {
                 igv.browser.zoomOut();
-            }
+            });
 
         }
 
