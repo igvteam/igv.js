@@ -36,7 +36,7 @@ var igv = (function (igv) {
     igv.Popover.prototype.markupWithParentDiv = function(parentDiv) {
 
         var myself = this,
-            popoverCloseElement,
+            popoverCloseDiv,
             popoverCloseIcon;
 
         if (this.parentDiv) {
@@ -49,20 +49,15 @@ var igv = (function (igv) {
         this.popoverDiv = $('<div class="igv-popover">')[0];
         $(this.parentDiv).append(this.popoverDiv);
 
-        // popover content
-        this.popoverContentDiv = $('<div class="igv-popoverContent">')[0];
-        $(this.popoverDiv).append(this.popoverContentDiv);
-
         // popover close button container
-        this.popoverCloseElement = $('<div class="igv-popoverCloseElement">')[0];
-        $(this.popoverDiv).append(this.popoverCloseElement);
+        this.popoverCloseDiv = $('<div class="igv-popoverCloseDiv">')[0];
+        $(this.popoverDiv).append(this.popoverCloseDiv);
 
         // popover close button
         popoverCloseIcon = $('<i class="fa fa-times igv-popoverCloseFontAwesome">')[0];
-        $(this.popoverCloseElement).append(popoverCloseIcon);
-
-
-        $(this.popoverCloseElement).hover(
+        $(this.popoverCloseDiv).append(popoverCloseIcon);
+        
+        $(this.popoverCloseDiv).hover(
 
             function() {
                 $(popoverCloseIcon).removeClass("fa-times"       );
@@ -84,9 +79,13 @@ var igv = (function (igv) {
             }
         );
 
-        this.popoverCloseElement.onclick = function (e) {
+        this.popoverCloseDiv.onclick = function (e) {
             myself.hide();
         };
+
+        // popover content
+        this.popoverContentDiv = $('<div class="igv-popoverContent">')[0];
+        $(this.popoverDiv).append(this.popoverContentDiv);
 
     };
 
