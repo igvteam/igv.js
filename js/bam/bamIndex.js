@@ -12,11 +12,11 @@ var igv = (function (igv) {
      * Read the index.  This method is public to support unit testing.
      * @param continuation
      */
-    igv.loadBamIndex = function (indexUrl, config, continuation, tabix) {
+    igv.loadBamIndex = function (indexURL, config, continuation, tabix) {
 
         var genome = igv.browser ? igv.browser.genome : null;
 
-        igvxhr.loadArrayBuffer(indexUrl,
+        igvxhr.loadArrayBuffer(indexURL,
             {
                 headers: config.headers,
                 success: function (arrayBuffer) {
@@ -108,7 +108,7 @@ var igv = (function (igv) {
                         }
 
                     } else {
-                        throw new Error(indexUrl + " is not a " + (tabix ? "tabix" : "bai") + " file");
+                        throw new Error(indexURL + " is not a " + (tabix ? "tabix" : "bai") + " file");
                     }
 
                     continuation(new igv.BamIndex(indices, blockMin, sequenceIndexMap, tabix));

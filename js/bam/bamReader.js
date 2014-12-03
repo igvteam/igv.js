@@ -34,8 +34,8 @@ var igv = (function (igv) {
 
         this.config = config;
         this.bamPath = config.url;
-        this.baiPath = config.indexUrl || (this.bamPath + ".bai"); // Todo - deal with Picard convention.  WHY DOES THERE HAVE TO BE 2?
-        this.headPath = config.headUrl || this.bamPath;
+        this.baiPath = config.indexURL || (this.bamPath + ".bai"); // Todo - deal with Picard convention.  WHY DOES THERE HAVE TO BE 2?
+        this.headPath = config.headURL || this.bamPath;
 
     };
 
