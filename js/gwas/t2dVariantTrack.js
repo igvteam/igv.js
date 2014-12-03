@@ -87,8 +87,6 @@ var igv = (function (igv) {
             this.po = undefined;
         }
 
-        queryChr = (chr.startsWith("chr") ? chr.substring(3) : chr);
-
         if (this.background) canvas.fillRect(0, 0, pixelWidth, pixelHeight, {'fillStyle': this.background});
         canvas.strokeLine(0, pixelHeight - 1, pixelWidth, pixelHeight - 1, {'strokeStyle': this.divider});
 

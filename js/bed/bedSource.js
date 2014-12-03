@@ -80,9 +80,6 @@ var igv = (function (igv) {
      */
     igv.BedFeatureSource.prototype.getFeatures = function (queryChr, bpStart, bpEnd, success, task) {
 
-        // TODO -- tmp hack until we implement chromosome aliasing
-        //if (queryChr && queryChr.startsWith("chr")) queryChr = queryChr.substring(3);
-
         var myself = this,
             range = new igv.GenomicInterval(queryChr, bpStart, bpEnd),
             featureCache = this.featureCache;

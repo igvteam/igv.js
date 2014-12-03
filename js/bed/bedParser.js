@@ -204,10 +204,6 @@ var igv = (function (igv) {
         if (tokens.length < 3) return null;
 
         chr = tokens[0];
-
-
-        if (!chr.startsWith("chr")) chr = "chr" + chr;  // TODO -- use genome aliases
-
         start = parseInt(tokens[1]);
         end = tokens.length > 2 ? parseInt(tokens[2]) : start + 1;
 
@@ -280,10 +276,6 @@ var igv = (function (igv) {
         }
 
         chr = tokens[0];
-
-        if (!chr.startsWith("chr")) chr = "chr" + chr;  // TODO -- use genome aliases
-
-
         start = parseInt(tokens[1]);
         end = parseInt(tokens[2]);
         name = tokens[3];
@@ -299,18 +291,12 @@ var igv = (function (igv) {
 
     function decodeBedGraph(tokens) {
 
-        var chr, start, end, id, name, tmp, idName, strand, cdStart, exonCount, exonSizes, exonStarts, exons, feature,
-            eStart, eEnd;
+        var chr, start, end, value;
 
         if (tokens.length < 3) return null;
 
         chr = tokens[0];
-
-
-        if (!chr.startsWith("chr")) chr = "chr" + chr;  // TODO -- use genome aliases
-
         start = parseInt(tokens[1]);
-
         end = parseInt(tokens[2]);
 
         value = parseFloat(tokens[3]);

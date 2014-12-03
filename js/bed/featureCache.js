@@ -42,16 +42,6 @@ var igv = (function (igv) {
 
         tree = this.treeMap[chr];
 
-        // TODO -- use chr aliases
-        if(!tree) {
-            if(chr.startsWith("chr")) {
-                tree = this.treeMap[chr.substr(3)];
-            }
-            else {
-                tree = this.treeMap["chr" + chr];
-            }
-        }
-
         if (!tree) return [];
 
         intervals = tree.findOverlapping(start, end);
@@ -106,14 +96,20 @@ var igv = (function (igv) {
 
         var featureCache = {},
             chromosomes = [],
-            treeMap = {};
+            treeMap = {},
+            genome = igv.browser ? igv.browser.genome : null;
 
         if (featureList) {
 
             featureList.forEach(function (feature) {
 
                 var chr = feature.chr,
-                    geneList = featureCache[chr];
+                    geneList;
+
+                // Translate to "official" name
+                if(genome) chr = genome.getChromosomeName(chr);
+
+                geneList = featureCache[chr];
 
                 if (!geneList) {
                     chromosomes.push(chr);

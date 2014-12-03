@@ -172,18 +172,19 @@ var igv = (function (igv) {
          */
         function loadIndex(url, continuation) {
 
+            var genome = igv.browser ? igv.browser.genome : null;
+
             igvxhr.loadArrayBuffer(url,
                 {
                     range: {start: 0, size: 200},
                     success: function (arrayBuffer) {
 
-                        var data = new DataView(arrayBuffer);
-                        var parser = new igv.BinaryParser(data);
-                        var magicNumber = parser.getInt();
-                        var version = parser.getInt();
-                        var indexPosition = parser.getLong();
-                        var indexSize = parser.getInt();
-
+                        var data = new DataView(arrayBuffer),
+                            parser = new igv.BinaryParser(data),
+                            magicNumber = parser.getInt(),
+                            version = parser.getInt(),
+                            indexPosition = parser.getLong(),
+                            indexSize = parser.getInt();
 
                         igvxhr.loadArrayBuffer(url, {
 
@@ -198,9 +199,9 @@ var igv = (function (igv) {
                                 var index = {};
                                 var nChrs = parser.getInt();
                                 while (nChrs-- > 0) {
-                                    var chr = parser.getString();
 
-                                    if (!chr.startsWith("chr")) chr = "chr" + chr;
+                                    var chr = parser.getString();
+                                    if (genome) chr = genome.getChromosomeName(chr);
 
                                     var position = parser.getLong();
                                     var size = parser.getInt();

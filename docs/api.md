@@ -38,8 +38,10 @@ Configuration Options
 
 
 showKaryo   optional    true|false  If true the whole-genome karyotype view is displayed.  
-fastaURL    required    url to an indexed fasta file
-cytobandURL required    url to a cytoband file in UCSC format  (<link to format description>
+genome      *           genome identifier.  Currently only "hg19" is recognized. 
+fastaURL    *           url to an indexed fasta file.  Required if genome id is not specified.
+cytobandURL optional    url to a cytoband file in UCSC format  (<link to format description>
+locus       optional
 tracks      optional    array of track descriptors to be displayed initially
       
 Tracks
@@ -53,17 +55,22 @@ described with a json-style object of properties.   The following example loads 
       label: 'HG02450'
     }
                    
- 
- 
+
+General track options applicable ot all types
+
+type      optional   string identifying type of file.  Recognized types include  "bed", "vcf", "bam", and "seg"
+url       required   url to the resource.  Protocol-less urls are recommended if the server supports both http and https (e.g. //www.broadinstitute.org/...)
+indexUrl  optional   url to associated index file (bai, idx, or tbi file)
+headUrl   optional   url for "HEAD" requests.   Useful for Amazon signed urls, where head and get url can differ
+label     optional   user-visible name for the track
  
 
-Browser Control
+Browser Control Functions
 ---------------
 
+The igv.browser api  (preface commands with igv.browser.)
 
-loadTrack(trackDescriptor)
-
-The igv.browser api
+loadTrack(config)
 
 search(locusOrGene) 
 

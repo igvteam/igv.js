@@ -392,12 +392,12 @@ var igv = (function (igv) {
             igv.popover.hide();
         }
 
-        // GTEX HACK -- need aliases
-        if (this.type === "GTEX" && !chr.startsWith("chr")) chr = "chr" + chr;
-
         var w,
             chromosome,
             viewportWidth = this.trackViewportWidth();
+
+        // Translate chr to official name
+        if (this.genome) chr = this.genome.getChromosomeName(chr);
 
         this.referenceFrame.chr = chr;
 
@@ -485,7 +485,7 @@ var igv = (function (igv) {
 
             type = "locus";
             tokens = feature.split(":");
-            chr = tokens[0];
+            chr = this.genome.getChromosomeName(tokens[0]);
 
             if (tokens.length == 1) {
                 chromosome = this.genome.getChromosome(feature);
@@ -538,11 +538,9 @@ var igv = (function (igv) {
                                 type = source;
 
                                 locusTokens = tokens[1].split(":");
-                                chr = locusTokens[0].trim();
-
+                                chr = browser.genome.getChromosomeName(locusTokens[0].trim());
 
                                 if (this.type === "GTEX") {
-                                    if (!chr.startsWith("chr")) chr = "chr" + chr;   // TODO GTEX HACK -- need aliases
                                     browser.selection = new igv.GtexSelection(type == 'gtex' ? {snp: feature} : {gene: feature});
                                 }
 

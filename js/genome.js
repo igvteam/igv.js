@@ -26,8 +26,31 @@
 var igv = (function (igv) {
 
     igv.Genome = function (chromosomeNames, chromosomes) {
+
         this.chromosomeNames = chromosomeNames;
         this.chromosomes = chromosomes;  // An object (functions as a dictionary)
+
+        /**
+         * Return the official chromosome name for the (possibly) alias.  Deals with
+         * 1 <-> chr1,  chrM <-> MT,  IV <-> chr4, etc.  Hardcoded currently for UCSC human genomes.
+         * @param str
+         */
+        var chrAliasTable = {};
+
+        chromosomeNames.forEach(function (name) {
+
+            var alias = name.startsWith("chr") ? name.substring(3) : "chr" + name;
+            chrAliasTable[alias] = name;
+        });
+        chrAliasTable["chrM"] = "MT";
+        chrAliasTable["MT"] = "chrM";
+        this.chrAliasTable = chrAliasTable;
+
+    }
+
+    igv.Genome.prototype.getChromosomeName = function (str) {
+        var chr = this.chrAliasTable[str];
+        return chr ? chr : str;
     }
 
     igv.Genome.prototype.getChromosome = function (chr) {
@@ -81,71 +104,53 @@ var igv = (function (igv) {
     }
 
 
-    /**
-     * Return the official chromosome name for the (possibly) alias.  Deals with
-     * 1 <-> chr1,  chrM <-> MT,  IV <-> chr4, etc.  Hardcoded currently for UCSC human genomes.
-     * @param str
-     */
-    igv.chrAliasTable = {};
-    igv.chrAliasTable.getChromosomeName = function (str) {
-        var chr = igv.chrAliasTable[str];
-        if (chr) return chr;
-        else return str;
-    }
-    for (var i = 0; i < 22; i++) {
-        igv.chrAliasTable[i] = "chr" + i;
-        igv.chrAliasTable[23] = "chrX";
-        igv.chrAliasTable[24] = "chrY";
-        igv.chrAliasTable["X"] = "chrX";
-        igv.chrAliasTable["Y"] = "chrY";
-        igv.chrAliasTable["MT"] = "chrM";
-    }
-
     igv.loadGenome = function (url, continuation) {
 
-        igv.loadData(url, function (data) {
+        igvxhr.loadString(url, {
 
-            var chromosomes = {},
-                chromosomeNames = [],
-                tmpCytoboands = {},
-                bands = [],
-                lastChr,
-                n = 0,
-                c = 1,
-                lines = data.splitLines(),
-                len = lines.length;
+            success: function (data) {
 
-            for (var i = 0; i < len; i++) {
-                var tokens = lines[i].split("\t");
-                var chr = tokens[0];
-                if (!lastChr) lastChr = chr;
+                var chromosomes = {},
+                    chromosomeNames = [],
+                    tmpCytoboands = {},
+                    bands = [],
+                    lastChr,
+                    n = 0,
+                    c = 1,
+                    lines = data.splitLines(),
+                    len = lines.length;
 
-                if (chr != lastChr) {
-
-                    chromosomeNames.push(lastChr);
-
-                    chromosomes[lastChr] = new igv.Chromosome(lastChr, c, bands);
-
-                    tmpCytoboands[lastChr] = bands;
-                    bands = [];
-                    lastChr = chr;
-                    n = 0;
-                    c++;
-                }
-
-                if (tokens.length == 5) {
-                    //10	0	3000000	p15.3	gneg
+                for (var i = 0; i < len; i++) {
+                    var tokens = lines[i].split("\t");
                     var chr = tokens[0];
-                    var start = parseInt(tokens[1]);
-                    var end = parseInt(tokens[2]);
-                    var name = tokens[3];
-                    var stain = tokens[4];
-                    bands[n++] = new igv.Cytoband(start, end, name, stain);
-                }
-            }
+                    if (!lastChr) lastChr = chr;
 
-            continuation(new igv.Genome(chromosomeNames, chromosomes));
-        });
+                    if (chr != lastChr) {
+
+                        chromosomeNames.push(lastChr);
+
+                        chromosomes[lastChr] = new igv.Chromosome(lastChr, c, bands);
+
+                        tmpCytoboands[lastChr] = bands;
+                        bands = [];
+                        lastChr = chr;
+                        n = 0;
+                        c++;
+                    }
+
+                    if (tokens.length == 5) {
+                        //10	0	3000000	p15.3	gneg
+                        var chr = tokens[0];
+                        var start = parseInt(tokens[1]);
+                        var end = parseInt(tokens[2]);
+                        var name = tokens[3];
+                        var stain = tokens[4];
+                        bands[n++] = new igv.Cytoband(start, end, name, stain);
+                    }
+                }
+
+                continuation(new igv.Genome(chromosomeNames, chromosomes));
+            }});
     }
 
     return igv;
