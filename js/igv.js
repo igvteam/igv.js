@@ -40,11 +40,11 @@ var igv = (function (igv) {
 
         if (options.showNavigation) {
 
-            //navigation = $('<div>');
             navigation = $('<div class="igvNavigation">');
             $(controlDiv).append(navigation[ 0 ]);
 
-            //search = $('<div>');
+
+            // search
             search = $('<div class="igvNavigationSearch">');
             navigation.append(search[ 0 ]);
 
@@ -66,7 +66,7 @@ var igv = (function (igv) {
             });
 
 
-            //zoom = $('<div>');
+            // zoom
             zoom = $('<div class="igvNavigationZoom">');
             navigation.append(zoom[ 0 ]);
 
