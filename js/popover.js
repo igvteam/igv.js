@@ -50,39 +50,39 @@ var igv = (function (igv) {
         $(this.parentDiv).append(this.popoverDiv);
 
         // popover close button container
-        popoverCloseDiv = $('<div class="igv-popoverCloseDiv">')[0];
-        $(this.popoverDiv).append(popoverCloseDiv);
+        popoverCloseDiv = $('<div class="igv-popoverCloseDiv">');
+        $(this.popoverDiv).append(popoverCloseDiv[ 0 ]);
 
         // popover close button
-        popoverCloseFontAwesome = $('<i class="fa fa-times igv-popoverCloseFontAwesome">')[0];
-        $(popoverCloseDiv).append(popoverCloseFontAwesome);
+        popoverCloseFontAwesome = $('<i class="fa fa-times igv-popoverCloseFontAwesome">');
+        popoverCloseDiv.append(popoverCloseFontAwesome[ 0 ]);
 
-        $(popoverCloseDiv).hover(
+        popoverCloseFontAwesome.hover(
 
             function() {
-                $(popoverCloseFontAwesome).removeClass("fa-times"       );
-                $(popoverCloseFontAwesome).addClass   ("fa-times-circle fa-lg");
+                popoverCloseFontAwesome.removeClass("fa-times"       );
+                popoverCloseFontAwesome.addClass   ("fa-times-circle fa-lg");
 
-                $(popoverCloseFontAwesome).css({
+                popoverCloseFontAwesome.css({
                     "color" : "#222"
                 });
             },
 
             function() {
-                $(popoverCloseFontAwesome).removeClass("fa-times-circle fa-lg");
-                $(popoverCloseFontAwesome).addClass   ("fa-times"       );
+                popoverCloseFontAwesome.removeClass("fa-times-circle fa-lg");
+                popoverCloseFontAwesome.addClass   ("fa-times"       );
 
-                $(popoverCloseFontAwesome).css({
+                popoverCloseFontAwesome.css({
                     "color" : "#444"
                 });
 
             }
         );
 
-        popoverCloseDiv.onclick = function (e) {
+        popoverCloseFontAwesome.click(function () {
             myself.hide();
-        };
-
+        });
+        
         // popover content
         this.popoverContentDiv = $('<div class="igv-popoverContent">')[0];
         $(this.popoverDiv).append(this.popoverContentDiv);
