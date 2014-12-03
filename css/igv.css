@@ -1,11 +1,31 @@
 
-.igv-navigation {
+.igvNavigation {
 
     position: relative;
     top: 0;
     left: 0;
     width: 100%;
-    background-color: lawngreen;
+    /*background-color: lawngreen;*/
+}
+
+.igvNavigationPadding {
+
+    padding-left: 12px;
+    padding-right: 12px;
+}
+
+.igvNavigationSearchZoom {
+
+    position: relative;
+
+    /*background-color: deepskyblue;*/
+}
+
+.igvNavigationZoom {
+
+    position: relative;
+
+    background-color: lightcoral;
 }
 
 .igv-popover {

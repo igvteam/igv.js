@@ -31,7 +31,7 @@ var igv = (function (igv) {
         var controlDiv = $('<div id="igvControlDiv" class="igv-control-div">')[0],
             contentKaryo,
             navigation,
-            search,
+            searchZoom,
             searchInput,
             searchButton,
             zoom,
@@ -40,36 +40,41 @@ var igv = (function (igv) {
 
         if (options.showNavigation) {
 
-            navigation = $('<div class="igv-navigation">');
+            //navigation = $('<div>');
+            navigation = $('<div class="igvNavigation">');
             $(controlDiv).append(navigation[ 0 ]);
 
-            search = $('<div>');
-            navigation.append(search[ 0 ]);
+            //search = $('<div>');
+            searchZoom = $('<div class="igvNavigationSearchZoom">');
+            navigation.append(searchZoom[ 0 ]);
 
-            searchInput = $('<input class="form-control" type="text" placeholder="Locus Search">');
-            search.append(searchInput[ 0 ]);
+            searchInput = $('<input type="text" placeholder="Locus Search">');
+            searchZoom.append(searchInput[ 0 ]);
 
-            searchButton = $('<i class="fa fa-search">');
-            search.append(searchButton[ 0 ]);
+            searchButton = $('<i class="fa fa-search igvNavigationPadding">');
+            searchZoom.append(searchButton[ 0 ]);
 
-            zoom = $('<div>');
-            navigation.append(zoom[ 0 ]);
+            //zoom = $('<div>');
+            //zoom = $('<div class="igvNavigationZoom">');
+            //navigation.append(zoom[ 0 ]);
 
-            zoomOutButton = $('<i class="fa fa-search-minus">');
-            zoom.append(zoomOutButton[ 0 ]);
+            zoomOutButton = $('<i class="fa fa-search-minus igvNavigationPadding">');
+            //zoom.append(zoomOutButton[ 0 ]);
+            searchZoom.append(zoomOutButton[ 0 ]);
 
-            zoomInButton = $('<i class="fa fa-search-plus">');
-            zoom.append(zoomInButton[ 0 ]);
+            zoomInButton = $('<i class="fa fa-search-plus igvNavigationPadding">');
+            //zoom.append(zoomInButton[ 0 ]);
+            searchZoom.append(zoomInButton[ 0 ]);
 
 
             searchInput.change(function () {
 
-                var thang = $("div.igv-navigation").find("input");
+                var thang = $("div.igvNavigation").find("input");
                 igv.browser.search(thang[0].value);
             });
 
             searchButton.click(function () {
-                var thang = $("div.igv-navigation").find("input");
+                var thang = $("div.igvNavigation").find("input");
                 igv.browser.search(thang[0].value);
             });
 
