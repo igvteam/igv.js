@@ -3,9 +3,9 @@
     position: absolute;
     top: 0;
     left: 0;
+    /*width: 350px;*/
 
     overflow: auto;
-
     width: auto;
 
     z-index: 1000;
