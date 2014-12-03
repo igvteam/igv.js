@@ -42,8 +42,8 @@ var igv = (function (igv) {
         else {
             this.url = config.url;
             this.filename = config.url;
-            this.indexUrl = config.indexUrl;
-            this.headUrl = config.headUrl || this.filename;
+            this.indexURL = config.indexURL;
+            this.headURL = config.headURL || this.filename;
         }
 
         if (config.type) {
@@ -141,7 +141,7 @@ var igv = (function (igv) {
 
     // seg files don't have an index
     function isIndexable() {
-        return this.config.indexUrl || (this.type != "wig" && this.config.indexed != false);
+        return this.config.indexURL || (this.type != "wig" && this.config.indexed != false);
     }
 
     /**
@@ -153,7 +153,7 @@ var igv = (function (igv) {
     igv.BedFeatureSource.prototype.loadFeatures = function (success, task, range) {
 
         var myself = this,
-            idxFile = myself.indexUrl,
+            idxFile = myself.indexURL,
             queryChr = range ? range.chr : undefined;
 
 
@@ -338,7 +338,7 @@ var igv = (function (igv) {
             else {
 
                 // Gen the content length first, so we don't try to read beyond the end of the file
-                igvxhr.getContentLength(myself.headUrl, {
+                igvxhr.getContentLength(myself.headURL, {
                     headers: myself.config.headers,
                     success: function (contentLength) {
                         myself.contentLength = contentLength;

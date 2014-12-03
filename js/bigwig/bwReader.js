@@ -41,7 +41,7 @@ var igv = (function (igv) {
 
     igv.BWReader = function (config) {
         this.path = config.url;
-        this.headPath = config.headUrl || this.path;
+        this.headPath = config.headURL || this.path;
         this.rpTreeCache = {};
         this.config = config;
     };

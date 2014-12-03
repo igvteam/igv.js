@@ -79,8 +79,8 @@ described with a json-style object of properties.   The following example loads 
 Tracks are configured with json-style configuration object. 
 
     url       required   url to the resource.  Protocol-less urls are recommended if the server supports both http and https (e.g. //www.broadinstitute.org/...)
-    indexUrl  optional   url to associated index file (bai, idx, or tbi file)
-    headUrl   optional   url for "HEAD" requests.   Useful for Amazon signed urls, where head and get url can differ
+    indexURL  optional   url to associated index file (bai, idx, or tbi file)
+    headURL   optional   url for "HEAD" requests.   Useful for Amazon signed urls, where head and get url can differ
     type      optional   string identifying type of file.  Recognized types include  "bed", "vcf", "bam", and "seg"
     label     optional   user-visible name for the track
 

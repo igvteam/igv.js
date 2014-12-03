@@ -26,6 +26,16 @@ module.exports = function (grunt) {
                 src: 'dist/igv-all.js',
                 dest: 'dist/igv-all.min.js'
             }
+        },
+
+        md2html: {
+            options: {
+                layout: 'docs/api_layout.html'
+            },
+            igv: {
+                src: ['docs/api.md'],
+                dest: 'docs/api.html'
+            }
         }
 
     });
@@ -34,10 +44,11 @@ module.exports = function (grunt) {
     grunt.loadNpmTasks('grunt-contrib-concat');
     grunt.loadNpmTasks('grunt-contrib-uglify');
     grunt.loadNpmTasks('grunt-contrib-cssmin');
+    grunt.loadNpmTasks('grunt-md2html');
 
     // 4. Where we tell Grunt what to do when we type "grunt" into the terminal.
     //grunt.registerTask('default', ['concat:igvexp', 'uglify:igvexp']);
-    grunt.registerTask('default', ['concat:igv', 'uglify:igv']);
+    grunt.registerTask('default', ['concat:igv', 'uglify:igv', 'md2html:igv']);
 
 
 };
