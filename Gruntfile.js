@@ -34,7 +34,7 @@ module.exports = function (grunt) {
             },
             igv: {
                 src: ['docs/api.md'],
-                dest: 'docs/api.html'
+                dest: 'dist/api.html'
             }
         }
 
