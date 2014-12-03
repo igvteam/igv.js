@@ -1,4 +1,13 @@
 
+.igv-navigation {
+
+    position: relative;
+    top: 0;
+    left: 0;
+    width: 100%;
+    background-color: lawngreen;
+}
+
 .igv-popover {
     position: absolute;
     top: 0;

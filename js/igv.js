@@ -30,43 +30,47 @@ var igv = (function (igv) {
 
         var controlDiv = $('<div id="igvControlDiv" class="igv-control-div">')[0],
             contentKaryo,
-            navigationDiv,
-            searchDiv,
+            navigation,
+            search,
             searchInput,
             searchButton,
-            zoomDiv,
+            zoom,
             zoomInButton,
             zoomOutButton;
 
         if (options.showNavigation) {
 
-            navigationDiv = $('<div class="igv-navigation-div">');
+            navigation = $('<div class="igv-navigation">');
+            $(controlDiv).append(navigation[ 0 ]);
 
-            searchDiv = $('<div>');
-            searchInput = $('<input id="goBoxInput"  class="form-control"  placeholder="Locus Search" type="text">');
-            searchDiv.append(searchInput[ 0 ]);
+            search = $('<div>');
+            navigation.append(search[ 0 ]);
 
-            searchButton = $('<i id="goBoxInput" class="fa fa-search">');
-            searchDiv.append(searchButton[ 0 ]);
-            navigationDiv.append(searchDiv[ 0 ]);
+            searchInput = $('<input class="form-control" type="text" placeholder="Locus Search">');
+            search.append(searchInput[ 0 ]);
 
-            zoomDiv = $('<div>');
+            searchButton = $('<i class="fa fa-search">');
+            search.append(searchButton[ 0 ]);
+
+            zoom = $('<div>');
+            navigation.append(zoom[ 0 ]);
 
             zoomOutButton = $('<i class="fa fa-search-minus">');
+            zoom.append(zoomOutButton[ 0 ]);
+
             zoomInButton = $('<i class="fa fa-search-plus">');
-            zoomDiv.append(zoomOutButton[ 0 ]);
-            zoomDiv.append(zoomInButton[ 0 ]);
+            zoom.append(zoomInButton[ 0 ]);
 
-            navigationDiv.append(zoomDiv[ 0 ]);
-
-            $(controlDiv).append(navigationDiv[ 0 ]);
 
             searchInput.change(function () {
-                igv.browser.search($('#goBoxInput')[0].value);
+
+                var thang = $("div.igv-navigation").find("input");
+                igv.browser.search(thang[0].value);
             });
 
             searchButton.click(function () {
-                igv.browser.search($('#goBoxInput')[0].value);
+                var thang = $("div.igv-navigation").find("input");
+                igv.browser.search(thang[0].value);
             });
 
             zoomInButton.click(function () {
