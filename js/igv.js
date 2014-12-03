@@ -27,13 +27,60 @@ var igv = (function (igv) {
 
 
     function createStandardControls(browser, options) {
+
         var controlDiv = $('<div id="igvControlDiv" class="igv-control-div">')[0],
-            contentKaryo;
+            contentKaryo,
+            navigationDiv,
+            searchDiv,
+            searchInput,
+            searchButton,
+            zoomDiv,
+            zoomInButton,
+            zoomOutButton;
+
+        if (options.showNavigation) {
+            navigationDiv = $('<div class="igv-navigation-div">')[0];
+
+            searchDiv = $('<div>')[0];
+            searchInput = $('<input id="goBoxInput"  class="form-control"  placeholder="Locus Search" type="text">')[0];
+            $(searchDiv).append(searchInput);
+
+            searchButton = $('<i id="goBoxInput"class="fa fa-search">')[0];
+            $(searchDiv).append(searchButton);
+            $(navigationDiv).append(searchDiv);
+
+            zoomDiv = $('<div>')[0];
+            zoomOutButton = $('<i class="fa fa-search-minus">')[0];
+            zoomInButton = $('<i class="fa fa-search-plus">')[0];
+            $(zoomDiv).append(zoomOutButton);
+            $(zoomDiv).append(zoomInButton);
+            $(navigationDiv).append(zoomDiv);
+
+            $(controlDiv).append(navigationDiv);
+
+            searchInput.onchange = function () {
+                igv.browser.search($('#goBoxInput')[0].value);
+            };
+            searchButton.onclick = function () {
+                igv.browser.search($('#goBoxInput')[0].value);
+            };
+            zoomInButton.onclick = function () {
+                igv.browser.zoomIn();
+            }
+            zoomOutButton.onclick = function () {
+                igv.browser.zoomOut();
+            }
+
+        }
+
+
         if (options.showKaryo) {
             contentKaryo = $('<div id="igvKaryoDiv" class="igv-karyo-div">')[0];
             $(controlDiv).append(contentKaryo);
             browser.karyoPanel = new igv.KaryoPanel(contentKaryo);
         }
+
+
         return controlDiv;
     }
 
@@ -54,7 +101,7 @@ var igv = (function (igv) {
         console.log("Create browser");
 
         if (!options) options = {};
-        if(!options.type) options.type = "IGV";
+        if (!options.type) options.type = "IGV";
 
         if (!options.flanking && isT2D(options)) {  // TODO -- hack for demo, remove
             options.flanking = 100000;
