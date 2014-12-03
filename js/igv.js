@@ -31,7 +31,7 @@ var igv = (function (igv) {
         var controlDiv = $('<div id="igvControlDiv" class="igv-control-div">')[0],
             contentKaryo,
             navigation,
-            searchZoom,
+            search,
             searchInput,
             searchButton,
             zoom,
@@ -45,27 +45,14 @@ var igv = (function (igv) {
             $(controlDiv).append(navigation[ 0 ]);
 
             //search = $('<div>');
-            searchZoom = $('<div class="igvNavigationSearchZoom">');
-            navigation.append(searchZoom[ 0 ]);
+            search = $('<div class="igvNavigationSearch">');
+            navigation.append(search[ 0 ]);
 
             searchInput = $('<input type="text" placeholder="Locus Search">');
-            searchZoom.append(searchInput[ 0 ]);
+            search.append(searchInput[ 0 ]);
 
             searchButton = $('<i class="fa fa-search fa-lg igvNavigationPadding">');
-            searchZoom.append(searchButton[ 0 ]);
-
-            //zoom = $('<div>');
-            //zoom = $('<div class="igvNavigationZoom">');
-            //navigation.append(zoom[ 0 ]);
-
-            zoomOutButton = $('<i class="fa fa-minus-circle fa-lg igvNavigationPadding">');
-            //zoom.append(zoomOutButton[ 0 ]);
-            searchZoom.append(zoomOutButton[ 0 ]);
-
-            zoomInButton = $('<i class="fa fa-plus-circle fa-lg igvNavigationPadding">');
-            //zoom.append(zoomInButton[ 0 ]);
-            searchZoom.append(zoomInButton[ 0 ]);
-
+            search.append(searchButton[ 0 ]);
 
             searchInput.change(function () {
 
@@ -77,6 +64,20 @@ var igv = (function (igv) {
                 var thang = $("div.igvNavigation").find("input");
                 igv.browser.search(thang[0].value);
             });
+
+
+            //zoom = $('<div>');
+            zoom = $('<div class="igvNavigationZoom">');
+            navigation.append(zoom[ 0 ]);
+
+            //zoomOutButton = $('<i class="fa fa-minus-circle fa-lg igvNavigationPadding">');
+            zoomOutButton = $('<i class="fa fa-search-minus fa-lg igvNavigationPadding">');
+
+            zoom.append(zoomOutButton[ 0 ]);
+
+            //zoomInButton = $('<i class="fa fa-plus-circle fa-lg igvNavigationPadding">');
+            zoomInButton = $('<i class="fa fa-search-plus fa-lg igvNavigationPadding">');
+            zoom.append(zoomInButton[ 0 ]);
 
             zoomInButton.click(function () {
                 igv.browser.zoomIn();

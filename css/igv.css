@@ -4,19 +4,26 @@
     position: relative;
     top: 0;
     left: 0;
-    width: 100%;
+
+    height: 32px;
+    width: auto;
+
+    margin-left: 48px;
+    margin-right: 32px;
+    margin-bottom: 32px;
     /*background-color: lawngreen;*/
 }
 
-.igvNavigationPadding {
-
-    padding-left: 12px;
-    padding-right: 12px;
-}
-
-.igvNavigationSearchZoom {
+.igvNavigationSearch {
 
     position: relative;
+    top: 0;
+    left: 0;
+
+    height: 100%;
+    width: 220px;
+
+    float: left;
 
     /*background-color: deepskyblue;*/
 }
@@ -25,7 +32,16 @@
 
     position: relative;
 
-    background-color: lightcoral;
+    height: 100%;
+    float: right;
+
+    /*background-color: lightcoral;*/
+}
+
+.igvNavigationPadding {
+
+    padding-left: 8px;
+    padding-right: 8px;
 }
 
 .igv-popover {
@@ -34,7 +50,6 @@
     left: 0;
 
     overflow: auto;
-
     width: auto;
 
     z-index: 1000;
