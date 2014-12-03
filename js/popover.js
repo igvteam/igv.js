@@ -37,7 +37,7 @@ var igv = (function (igv) {
 
         var myself = this,
             popoverCloseDiv,
-            popoverCloseIcon;
+            popoverCloseFontAwesome;
 
         if (this.parentDiv) {
             return;
@@ -50,36 +50,36 @@ var igv = (function (igv) {
         $(this.parentDiv).append(this.popoverDiv);
 
         // popover close button container
-        this.popoverCloseDiv = $('<div class="igv-popoverCloseDiv">')[0];
-        $(this.popoverDiv).append(this.popoverCloseDiv);
+        popoverCloseDiv = $('<div class="igv-popoverCloseDiv">')[0];
+        $(this.popoverDiv).append(popoverCloseDiv);
 
         // popover close button
-        popoverCloseIcon = $('<i class="fa fa-times igv-popoverCloseFontAwesome">')[0];
-        $(this.popoverCloseDiv).append(popoverCloseIcon);
-        
-        $(this.popoverCloseDiv).hover(
+        popoverCloseFontAwesome = $('<i class="fa fa-times igv-popoverCloseFontAwesome">')[0];
+        $(popoverCloseDiv).append(popoverCloseFontAwesome);
+
+        $(popoverCloseDiv).hover(
 
             function() {
-                $(popoverCloseIcon).removeClass("fa-times"       );
-                $(popoverCloseIcon).addClass   ("fa-times-circle fa-lg");
+                $(popoverCloseFontAwesome).removeClass("fa-times"       );
+                $(popoverCloseFontAwesome).addClass   ("fa-times-circle fa-lg");
 
-                $(popoverCloseIcon).css({
+                $(popoverCloseFontAwesome).css({
                     "color" : "#222"
                 });
             },
 
             function() {
-                $(popoverCloseIcon).removeClass("fa-times-circle fa-lg");
-                $(popoverCloseIcon).addClass   ("fa-times"       );
+                $(popoverCloseFontAwesome).removeClass("fa-times-circle fa-lg");
+                $(popoverCloseFontAwesome).addClass   ("fa-times"       );
 
-                $(popoverCloseIcon).css({
+                $(popoverCloseFontAwesome).css({
                     "color" : "#444"
                 });
 
             }
         );
 
-        this.popoverCloseDiv.onclick = function (e) {
+        popoverCloseDiv.onclick = function (e) {
             myself.hide();
         };
 

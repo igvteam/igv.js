@@ -68,8 +68,6 @@
 }
 
 .igv-popoverContent {
-
-    float: left;
 }
 
 .igv-popoverPointer {
@@ -95,17 +93,17 @@
 }
 
 .igv-popoverCloseDiv {
-
-    float: right;
-    cursor: pointer;
 }
 
 .igv-popoverCloseFontAwesome {
 
     top: 0;
     right: 0;
+
     width: auto;
     height: 100%;
+
+    cursor: pointer;
 
     color: #888;
 }
