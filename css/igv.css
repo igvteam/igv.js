@@ -54,7 +54,7 @@
 
     overflow-y: hidden;
     /*width: 100%;*/
-    /*height: auto;*/
+    height: auto;
 
     z-index: 1000;
 
@@ -115,6 +115,7 @@
 .igv-popoverContent {
 
     width: auto;
+    height:auto;
 
     /*background-color: hotpink;*/
 }

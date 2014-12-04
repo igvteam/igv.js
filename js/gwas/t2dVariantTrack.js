@@ -170,7 +170,11 @@ var igv = (function (igv) {
 
     igv.T2dTrack.prototype.popupData = function (genomicLocation, xOffset, yOffset) {
 
-        var i, len, p, dbSnp, data, url,
+        var i,
+            len,
+            p,
+            dbSnp,
+            url,
             data = [];
 
         if (this.po) {
@@ -179,11 +183,7 @@ var igv = (function (igv) {
                 if (Math.abs(xOffset - p.x) < this.dotSize && Math.abs(yOffset - p.y) <= this.dotSize) {
                     dbSnp = p.feature.DBSNP_ID;
                     if (dbSnp) {
-                        url = this.portalURL + "/variant/variantInfo/" + dbSnp;
-                        // data.push("<a href=# onclick=window.location='" + url + "'>" +
-                        //     p.feature.DBSNP_ID + "</a>");
-                        data.push("<a target='_blank' href='" + url + "' >" +
-                            p.feature.DBSNP_ID + "</a>");
+                        data.push("<a target='_blank' href='" + url + "' >" + p.feature.DBSNP_ID + "</a>");
                     }
                     data.push("chr" + p.feature.CHROM + ":" + p.feature.POS.toString());
                     data.push({name: 'p-value', value: p.feature[this.pvalue]});
@@ -194,10 +194,7 @@ var igv = (function (igv) {
 
                     if (dbSnp) {
                         url = this.portalURL + "/trait/traitInfo/" + dbSnp;
-                        //  data.push("<a href=# onclick=window.lcation='" + url + "'>" +
-                        //      "see all available statistics for this variant</a>");
-                        data.push("<a target='_blank' href='" + url + "'>" +
-                            "see all available statistics for this variant</a>");
+                        data.push("<a target='_blank' href='" + url + "'>" + "see all available statistics for this variant</a>");
                     }
 
                     if (i < len - 1) {
@@ -210,7 +207,7 @@ var igv = (function (igv) {
 
         }
         return data;
-    }
+    };
 
 
     return igv;

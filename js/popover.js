@@ -137,12 +137,6 @@ var igv = (function (igv) {
 
         this.popover.css( popoverPosition(pageX, pageY, this) ).show();
 
-        height = 128;
-
-        this.popover.css({
-            "height": height + "px"
-        });
-
     };
 
     igv.Popover.prototype.show = function (pageX, pageY, content) {
@@ -154,11 +148,7 @@ var igv = (function (igv) {
             this.popoverContent.html(content);
 
             this.popover.css( popoverPosition(pageX, pageY, this) ).show();
-
-            height = this.popoverContent.height() + 20;
-            this.popover.css({
-                "height": height + "px"
-            });
+            
         }
     };
 
