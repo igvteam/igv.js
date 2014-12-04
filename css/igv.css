@@ -53,8 +53,8 @@
     top: 0;
     left: 0;
 
-    overflow: auto;
-    width: auto;
+    overflow-y: auto;
+    /*width: 100%;*/
     /*height: auto;*/
 
     z-index: 1000;
