@@ -47,12 +47,12 @@ var igv = (function (igv) {
         this.parentDiv = parentDiv;
 
         // popover container
-        this.popoverDiv = $('<div class="igv-popover">');
-        $(this.parentDiv).append(this.popoverDiv[ 0 ]);
+        this.popover = $('<div class="igv-popover">');
+        $(this.parentDiv).append(this.popover[ 0 ]);
 
         // popover header
         popoverHeader = $('<div class="igv-popoverHeader">');
-        this.popoverDiv.append(popoverHeader[ 0 ]);
+        this.popover.append(popoverHeader[ 0 ]);
 
         // popover close container
         popoverClose = $('<div class="igv-popoverClose">');
@@ -89,8 +89,8 @@ var igv = (function (igv) {
         });
 
         // popover content
-        this.popoverContentDiv = $('<div class="igv-popoverContent">');
-        this.popoverDiv.append(this.popoverContentDiv[ 0 ]);
+        this.popoverContent = $('<div class="igv-popoverContent">');
+        this.popover.append(this.popoverContent[ 0 ]);
 
     };
 
@@ -108,7 +108,7 @@ var igv = (function (igv) {
     };
 
     igv.Popover.prototype.hide = function () {
-        this.popoverDiv.hide();
+        this.popover.hide();
     };
 
     igv.Popover.prototype.presentTrackMenu = function (pageX, pageY, trackMenuItems) {
@@ -126,20 +126,20 @@ var igv = (function (igv) {
             myDiv.append(object[ 0 ]);
         });
 
-        this.popoverContentDiv.empty();
+        this.popoverContent.empty();
 
-        this.popoverContentDiv.append(myDiv[ 0 ]);
+        this.popoverContent.append(myDiv[ 0 ]);
 
         // Attach click handler AFTER inserting markup in DOM.
         // Insertion beforehand will cause it to have NO effect
         // when clicked.
         trackMenuItems[ 0 ][ "object" ].click(trackMenuItems[ 0 ][ "click" ]);
 
-        this.popoverDiv.css( popoverDivPosition(pageX, pageY, this) ).show();
+        this.popover.css( popoverPosition(pageX, pageY, this) ).show();
 
         height = 128;
 
-        this.popoverDiv.css({
+        this.popover.css({
             "height": height + "px"
         });
 
@@ -151,18 +151,18 @@ var igv = (function (igv) {
 
         if (content) {
 
-            this.popoverContentDiv.html(content);
+            this.popoverContent.html(content);
 
-            this.popoverDiv.css( popoverDivPosition(pageX, pageY, this) ).show();
+            this.popover.css( popoverPosition(pageX, pageY, this) ).show();
 
-            height = this.popoverContentDiv.height() + 20;
-            this.popoverDiv.css({
+            height = this.popoverContent.height() + 20;
+            this.popover.css({
                 "height": height + "px"
             });
         }
     };
 
-    function popoverDivPosition(pageX, pageY, popover) {
+    function popoverPosition(pageX, pageY, popoverWidget) {
 
         var left,
             containerCoordinates = { x : pageX, y : pageY },
@@ -171,9 +171,9 @@ var igv = (function (igv) {
             popupX = pageX,
             popupY = pageY;
 
-        popupX -= $(popover.parentDiv).offset().left;
-        popupY -= $(popover.parentDiv).offset().top;
-        popupRect = { x : popupX, y : popupY, width : popover.popoverDiv.outerWidth(), height : popover.popoverDiv.outerHeight() };
+        popupX -= $(popoverWidget.parentDiv).offset().left;
+        popupY -= $(popoverWidget.parentDiv).offset().top;
+        popupRect = { x : popupX, y : popupY, width : popoverWidget.popover.outerWidth(), height : popoverWidget.popover.outerHeight() };
 
         left = popupX;
         if (containerCoordinates.x + popupRect.width > containerRect.width) {
