@@ -178,7 +178,7 @@ var igv = (function (igv) {
 
         trackMenuItems.push(objectClick);
 
-        gearButton = $('<i class="fa fa-gear fa-lg igv-track-manipulation-gear">')[0];
+        gearButton = $('<i class="fa fa-gear fa-lg igv-track-manipulation-gear igv-track-icon">')[0];
         $(trackManipulationIconBox).append(gearButton);
 
         $(gearButton).click(function (e) {
