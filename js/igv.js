@@ -51,7 +51,7 @@ var igv = (function (igv) {
             searchInput = $('<input type="text" placeholder="Locus Search">');
             search.append(searchInput[ 0 ]);
 
-            searchButton = $('<i class="fa fa-search fa-lg igvNavigationPadding">');
+            searchButton = $('<i class="igv-track-icon fa fa-search fa-lg igvNavigationPadding">');
             search.append(searchButton[ 0 ]);
 
             searchInput.change(function () {
@@ -71,12 +71,12 @@ var igv = (function (igv) {
             navigation.append(zoom[ 0 ]);
 
             //zoomOutButton = $('<i class="fa fa-minus-circle fa-lg igvNavigationPadding">');
-            zoomOutButton = $('<i class="fa fa-search-minus fa-lg igvNavigationPadding">');
+            zoomOutButton = $('<i class="igv-track-icon fa fa-search-minus fa-lg igvNavigationPadding">');
 
             zoom.append(zoomOutButton[ 0 ]);
 
             //zoomInButton = $('<i class="fa fa-plus-circle fa-lg igvNavigationPadding">');
-            zoomInButton = $('<i class="fa fa-search-plus fa-lg igvNavigationPadding">');
+            zoomInButton = $('<i class="igv-track-icon fa fa-search-plus fa-lg igvNavigationPadding">');
             zoom.append(zoomInButton[ 0 ]);
 
             zoomInButton.click(function () {

@@ -96,6 +96,8 @@
     width: 24px;
 
     text-align: center;
+    line-height: 24px;
+
 
     color: #444;
 
@@ -117,14 +119,9 @@
     width: auto;
     height:auto;
 
-    /*background-color: hotpink;*/
-}
+    padding: 4px;
 
-.igv-popoverPointer {
-    position: absolute;
-    top: 0;
-    left: 0;
-    z-index: 5000;
+    /*background-color: hotpink;*/
 }
 
 .igv-popoverContent .igv-popoverNameSpan {
@@ -317,18 +314,21 @@
 
 }
 
-.igv-track-manipulation-gear {
-    position: absolute;
-    left: 20px;
-    top: 0;
+.igv-track-icon {
     color: grey;
     background-color: white;
 }
 
-.igv-track-manipulation-gear:hover,
-.igv-track-manipulation-gear:focus,
-.igv-track-manipulation-gear:active  {
+.igv-track-icon:hover,
+.igv-track-icon:focus,
+.igv-track-icon:active  {
     color: rgba(51, 51, 51, 1);
+}
+
+.igv-track-manipulation-gear {
+    position: absolute;
+    left: 20px;
+    top: 0;
 }
 
 .igv-track-manipulation-discard {
