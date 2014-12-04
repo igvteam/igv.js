@@ -59,6 +59,8 @@
     z-index: 1000;
 
     font-family: 'PT Sans', sans-serif;
+    font-size: small;
+    font-weight: 400;
 
     background: #fff;
 
@@ -111,10 +113,6 @@
 }
 
 .igv-popoverContent {
-
-    position: relative;
-    top: 24px;
-    left: 0;
 
     width: auto;
 
