@@ -148,7 +148,7 @@ var igv = (function (igv) {
             this.popoverContent.html(content);
 
             this.popover.css( popoverPosition(pageX, pageY, this) ).show();
-            
+
         }
     };
 
