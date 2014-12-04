@@ -47,12 +47,12 @@ var igv = (function (igv) {
         this.parentDiv = parentDiv;
 
         // popover container
-        this.popoverDiv = $('<div class="igv-popover">')[0];
-        $(this.parentDiv).append(this.popoverDiv);
+        this.popoverDiv = $('<div class="igv-popover">');
+        $(this.parentDiv).append(this.popoverDiv[ 0 ]);
 
         // popover header
         popoverHeader = $('<div class="igv-popoverHeader">');
-        $(this.popoverDiv).append(popoverHeader[ 0 ]);
+        this.popoverDiv.append(popoverHeader[ 0 ]);
 
         // popover close container
         popoverClose = $('<div class="igv-popoverClose">');
@@ -90,7 +90,7 @@ var igv = (function (igv) {
 
         // popover content
         this.popoverContentDiv = $('<div class="igv-popoverContent">');
-        $(this.popoverDiv).append(this.popoverContentDiv[ 0 ]);
+        this.popoverDiv.append(this.popoverContentDiv[ 0 ]);
 
     };
 
@@ -108,7 +108,7 @@ var igv = (function (igv) {
     };
 
     igv.Popover.prototype.hide = function () {
-        $(this.popoverDiv).hide();
+        this.popoverDiv.hide();
     };
 
     igv.Popover.prototype.presentTrackMenu = function (pageX, pageY, trackMenuItems) {
@@ -135,11 +135,11 @@ var igv = (function (igv) {
         // when clicked.
         trackMenuItems[ 0 ][ "object" ].click(trackMenuItems[ 0 ][ "click" ]);
 
-        $(this.popoverDiv).css( popoverDivPosition(pageX, pageY, this) ).show();
+        this.popoverDiv.css( popoverDivPosition(pageX, pageY, this) ).show();
 
         height = 128;
 
-        $(this.popoverDiv).css({
+        this.popoverDiv.css({
             "height": height + "px"
         });
 
@@ -153,10 +153,10 @@ var igv = (function (igv) {
 
             this.popoverContentDiv.html(content);
 
-            $(this.popoverDiv).css( popoverDivPosition(pageX, pageY, this) ).show();
+            this.popoverDiv.css( popoverDivPosition(pageX, pageY, this) ).show();
 
             height = this.popoverContentDiv.height() + 20;
-            $(this.popoverDiv).css({
+            this.popoverDiv.css({
                 "height": height + "px"
             });
         }
@@ -173,7 +173,7 @@ var igv = (function (igv) {
 
         popupX -= $(popover.parentDiv).offset().left;
         popupY -= $(popover.parentDiv).offset().top;
-        popupRect = { x : popupX, y : popupY, width : $(popover.popoverDiv).outerWidth(), height : $(popover.popoverDiv).outerHeight() };
+        popupRect = { x : popupX, y : popupY, width : popover.popoverDiv.outerWidth(), height : popover.popoverDiv.outerHeight() };
 
         left = popupX;
         if (containerCoordinates.x + popupRect.width > containerRect.width) {
