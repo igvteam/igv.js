@@ -1,4 +1,5 @@
 
+/* navigation bar */
 .igvNavigation {
 
     position: relative;
@@ -44,13 +45,17 @@
     padding-right: 8px;
 }
 
+
+/* pop up menu */
 .igv-popover {
+
     position: absolute;
     top: 0;
     left: 0;
 
-    overflow: auto;
+    /*overflow: auto;*/
     width: auto;
+    height: auto;
 
     z-index: 1000;
 
@@ -68,12 +73,15 @@
 }
 
 .igv-igv-popoverHeader {
+
     position: relative;
     top: 0;
     left: 0;
+
     width: 100%;
     height: 24px;
-    background-color: orangered;
+
+    background-color: dodgerblue;
 }
 
 .igv-popoverClose {
@@ -82,6 +90,7 @@
     right: 0;
 
     height: 100%;
+    width: 24px;
 
     background-color: greenyellow;
 }
@@ -89,12 +98,18 @@
 .igv-popoverCloseFontAwesome {
 
     cursor: pointer;
-
     color: #888;
 }
 
 .igv-popoverContent {
-    /* nuthin */
+
+    position: relative;
+    top: 24px;
+    left: 0;
+
+    width: 100%;
+
+    background-color: hotpink;
 }
 
 .igv-popoverPointer {
