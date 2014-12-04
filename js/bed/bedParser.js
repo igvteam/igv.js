@@ -257,10 +257,8 @@ var igv = (function (igv) {
         }
 
         feature.popupData = function () {
-            return [
-                {name: "Name", value: feature.name}
-            ];
-        }
+            return [ { name : "Name", value : feature.name } ];
+        };
 
         return feature;
 

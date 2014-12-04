@@ -114,9 +114,9 @@ var igv = (function (igv) {
                         feature.start <= genomicLocation + tolerance) {
                         var featureData = feature.popupData(genomicLocation);
                         if (featureData) {
-                            if (popupData.length > 0) {
-                                popupData.push("<HR>");
-                            }
+                            //if (popupData.length > 0) {
+                            //    popupData.push("<HR>");
+                            //}
                             Array.prototype.push.apply(popupData, featureData);
                         }
                     }
