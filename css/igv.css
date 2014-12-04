@@ -53,7 +53,7 @@
     top: 0;
     left: 0;
 
-    overflow-y: auto;
+    overflow-y: hidden;
     /*width: 100%;*/
     /*height: auto;*/
 
@@ -81,24 +81,27 @@
     width: 100%;
     height: 24px;
 
-    background-color: dodgerblue;
+    background-color: #ccc;
 }
 
 .igv-popoverClose {
-    position: relative;
-    top: 0;
-    right: 0;
+
+    position: absolute;
+    top: 4px;
+    right: 4px;
 
     height: 100%;
     width: 24px;
 
-    background-color: greenyellow;
+    text-align: center;
+
+    color: #444;
+
+    /*background-color: greenyellow;*/
 }
 
-.igv-popoverCloseFontAwesome {
-
-    cursor: pointer;
-    color: #888;
+.igv-popoverClose:hover {
+    color: #fff;
 }
 
 .igv-popoverContent {
@@ -107,9 +110,9 @@
     top: 24px;
     left: 0;
 
-    width: 100%;
+    width: auto;
 
-    background-color: hotpink;
+    /*background-color: hotpink;*/
 }
 
 .igv-popoverPointer {
@@ -134,29 +137,10 @@
     font-weight: bold;
 }
 
-.igv-popoverClose {
-    position: absolute;
-    top: 4px;
-    right: 4px;
-    width: 15px;
-    height: 15px;
-    font-size: 10pt;
-    color: #444;
-    border: 2px solid #fff;
-    background-color: #fff;
-    cursor: pointer;
-    font-weight: bold;
-    border-radius: 50%;
-    -moz-border-radius: 50%;
-    -webkit-border-radius: 50%;
-    /*padding: 1px 3px 2px 3px;*/
-    text-align: center;
-}
+.igv-popoverCloseFontAwesome {
 
-.igv-popoverClose:hover {
-    color: #fff;
-    border: 2px solid #e00;
-    background-color: #e00;
+    cursor: pointer;
+    color: #888;
 }
 
 .igv-spinner-fontawesome-start {
