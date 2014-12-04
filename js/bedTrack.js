@@ -25,21 +25,16 @@
 
 var igv = (function (igv) {
 
+
+    igv.configTrack = function(track, config) {
+        track.url = config.url;
+    }
+
     igv.BedTrack = function (config) {
-        this.config = config;
-        this.url = config.url;
-        this.label = config.label;
-        this.id = config.id || config.label;
-        this.order = config.order;
-        this.color = config.color || "rgb(150,150,150)";
 
         if (!config.type) config.type = igv.inferFileType(this.filename);
-        this.type = config.type;
 
-        this.height = config.height || (this.type === "bed" ? 100 : 50);
-        this.minHeight = config.minHeight || this.height;
-        this.maxHeight = config.maxHeight || this.height;
-
+        igv.configTrack(this, config);
 
         this.featureSource = new igv.BedFeatureSource(this.config);
 
