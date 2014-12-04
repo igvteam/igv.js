@@ -53,9 +53,9 @@
     top: 0;
     left: 0;
 
-    /*overflow: auto;*/
+    overflow: auto;
     width: auto;
-    height: auto;
+    /*height: auto;*/
 
     z-index: 1000;
 
