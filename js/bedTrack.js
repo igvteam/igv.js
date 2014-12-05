@@ -60,13 +60,12 @@ var igv = (function (igv) {
 
 //        console.log("geneTrack.draw " + refFrame.chr);
 
-        var chr = refFrame.chr,
-            track = this;
+        var track = this;
 
         canvas.fillRect(0, 0, pixelWidth, pixelHeight, {'fillStyle': "rgb(255, 255, 255)"});
 
 
-        this.featureSource.getFeatures(chr, bpStart, bpEnd, function (featureList) {
+        this.featureSource.getFeatures(refFrame.chr, bpStart, bpEnd, function (featureList) {
 
                 var gene, len;
 

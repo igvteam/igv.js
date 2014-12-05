@@ -34,8 +34,8 @@ var igv = (function (igv) {
         this.featureSource = new igv.BedFeatureSource(this.config);
         this.label = config.label;
         this.id = config.id || config.label;
-        this.height = 100;
-        this.minHeight = config.minHeight || 500;
+        this.height = config.height || 100;
+        this.minHeight = config.minHeight || 0;
         this.maxHeight = config.maxHeight || 500;
         this.sampleHeight = config.sampleHeight || 2;
         this.order = config.order;
@@ -90,7 +90,7 @@ var igv = (function (igv) {
 
         canvas.fillRect(0, 0, pixelWidth, pixelHeight, {'fillStyle': "rgb(255, 255, 255)"});
 
-        this.featureSource.getFeatures(chr, bpStart, bpEnd, function (featureList) {
+       this.featureSource.getFeatures(chr, bpStart, bpEnd, function (featureList) {
 
                 var segment, len, sample, i, y, color, value,
                     px, px1, pw,

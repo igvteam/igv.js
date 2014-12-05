@@ -94,8 +94,10 @@ var igv = (function (igv) {
             igv.browser.zoomIn();
         }
 
+        /**
+         * Change height of all tracks
+         */
         heightBoxInput.onchange = function () {
-
             igv.browser.setTrackHeight(heightBoxInput.value);
         }
 
