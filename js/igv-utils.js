@@ -138,8 +138,7 @@ var igv = (function (igv) {
             if (nameValue.name) {
 
                 markup += (nameValue.borderTop) ? "<tr class=\"igv-popoverBorderTop\"><td>" : "<tr><td>";
-                //markup += "<span class=\"igv-popoverName\">" + nameValue.name + "</span>" + "&nbsp; " + "<span class=\"igv-popoverValue\">" + nameValue.value + "</span>" + "</td></tr>";
-                markup += "<span class=\"igv-popoverName\">" + nameValue.name + "</span>" + "<span class=\"igv-popoverValue\">" + nameValue.value + "</span>" + "</td></tr>";
+                markup += "<span class=\"igv-popoverName\">" + nameValue.name.toUpperCase() + "</span>" + "<span class=\"igv-popoverValue\">" + nameValue.value + "</span>" + "</td></tr>";
             }
         });
 

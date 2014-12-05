@@ -61,6 +61,7 @@
     font-family: 'PT Sans', sans-serif;
     font-size: small;
     font-weight: 400;
+    color: #444;
 
     background: #fff;
 
@@ -83,6 +84,8 @@
     border-bottom-color: #a2a2a2;
     border-bottom-style: solid;
     border-bottom-width: thin;
+
+    background-color: #eee;
 
 }
 
@@ -132,11 +135,13 @@
 
 .igv-popoverContent .igv-popoverName {
     font-weight: bold;
-    padding-right: 2px;
+    padding-right: 4px;
+    /*float: left;*/
 }
 
 .igv-popoverContent .igv-popoverValue {
-    padding-left: 2px;
+    padding-left: 4px;
+    /*float: right;*/
 }
 
 /* spinner */
