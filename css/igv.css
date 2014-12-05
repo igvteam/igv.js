@@ -130,16 +130,13 @@
     border-top-width: thin;
 }
 
-.igv-popoverContent .igv-popoverNameSpan {
+.igv-popoverContent .igv-popoverName {
     font-weight: bold;
+    padding-right: 2px;
 }
 
-.igv-popoverContent .igv-popoverValueSpan {
-    word-break: break-all;
-}
-
-.igv-popoverContent .popoverContentSpan {
-    font-weight: bold;
+.igv-popoverContent .igv-popoverValue {
+    padding-left: 2px;
 }
 
 /* spinner */

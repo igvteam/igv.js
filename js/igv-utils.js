@@ -100,8 +100,8 @@ var igv = (function (igv) {
             decsep = '.';
 
         return dec[0].split('').reverse().reduce(function (prev, now, i) {
-            return i % 3 === 0 ? prev + sep + now : prev + now;
-        }).split('').reverse().join('') + (dec[1] ? decsep + dec[1] : '');
+                return i % 3 === 0 ? prev + sep + now : prev + now;
+            }).split('').reverse().join('') + (dec[1] ? decsep + dec[1] : '');
     };
 
     igv.numberUnFormatter = function (formatedNumber) {
@@ -137,13 +137,9 @@ var igv = (function (igv) {
 
             if (nameValue.name) {
 
-                if (nameValue.borderTop) {
-
-                    markup += "<tr class=\"igv-popoverBorderTop\"><td>" + "<span class=\"igv-popoverNameSpan\">" + nameValue.name + "</span>" + "&nbsp; " + "<span class=\"igv-popoverValueSpan\">" + nameValue.value + "</span>" + "</td></tr>";
-                } else {
-
-                    markup += "<tr><td>"                                + "<span class=\"igv-popoverNameSpan\">" + nameValue.name + "</span>" + "&nbsp; " + "<span class=\"igv-popoverValueSpan\">" + nameValue.value + "</span>" + "</td></tr>";
-                }
+                markup += (nameValue.borderTop) ? "<tr class=\"igv-popoverBorderTop\"><td>" : "<tr><td>";
+                //markup += "<span class=\"igv-popoverName\">" + nameValue.name + "</span>" + "&nbsp; " + "<span class=\"igv-popoverValue\">" + nameValue.value + "</span>" + "</td></tr>";
+                markup += "<span class=\"igv-popoverName\">" + nameValue.name + "</span>" + "<span class=\"igv-popoverValue\">" + nameValue.value + "</span>" + "</td></tr>";
             }
         });
 
