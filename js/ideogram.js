@@ -36,6 +36,14 @@ var igv = (function (igv) {
         this.div = $('<div class="igv-ideogram-div"></div>')[0];
         $(parentElement).append(this.div);
 
+        // ideogram label
+        var chromosomeNameDiv = $('<div class="igv-ideogram-chr-div"></div>');
+        this.div.appendChild(chromosomeNameDiv[ 0 ]);
+
+        this.chromosomeNameLabel = $('<div>')[0];
+        $(chromosomeNameDiv).append(this.chromosomeNameLabel);
+
+        // ideogram content
         var contentDiv = $('<div class="igv-ideogram-content-div"></div>')[0];
         $(this.div).append(contentDiv);
         contentDiv.style.left = igv.browser.controlPanelWidth + "px";
@@ -47,49 +55,7 @@ var igv = (function (igv) {
         this.canvas = canvas;
         this.ctx = canvas.getContext("2d");
 
-
-        var chromosomeNameDiv = $('<div class="igv-ideogram-chr-div"></div>')[0];
-        chromosomeNameDiv.style.width = igv.browser.controlPanelWidth + "px";
-        this.div.appendChild(chromosomeNameDiv);
-
-        var chrNameLabel = $('<div style="text-align:right;padding-right: 5px"></div>')[0];
-        $(chromosomeNameDiv).append(chrNameLabel)
-
-        this.chromosomeNameLabel = chrNameLabel;
-
-
-        //  var chromosomeNameCanvas = $('<canvas style="position:absolute;width:100%;height:100%"></canvas>')[0];
-        //  chromosomeNameCanvas.setAttribute('width', chromosomeNameDiv.clientWidth);
-        //  chromosomeNameCanvas.setAttribute('height', chromosomeNameCanvas.clientHeight);
-
-
-        this.canvas = canvas;
-        contentDiv.appendChild(canvas);
-
-        this.ctx = canvas.getContext("2d");
-
-        //  this.chromosomeNameCanvas = chromosomeNameCanvas;
-        //  chromosomeNameDiv.appendChild(chromosomeNameCanvas);
-
-        //  this.chromosomeNameCtx = chromosomeNameCanvas.getContext("2d");
-        //  this.chromosomeNameCtx.font = "bold 10px Arial";
-
-        // TODO -- this onclick is flaky, causing the browser to hang when bams are loaded
-//        this.canvas.onclick = function (e) {
-//
-//            var canvasCoords = igv.translateMouseCoordinates(e, canvas),
-//                mouseX = canvasCoords.x,
-//                referenceFrame = igv.browser.referenceFrame,
-//                chromosome = igv.browser.genome.getChromosome(igv.browser.referenceFrame.chr),
-//                viewportWidth = canvas.clientWidth,
-//                bp = chromosome.bpLength * mouseX / viewportWidth;
-//
-//            this.getContext("2d").fillRect(mouseX, 0, 10, 10);
-//
-//            igv.browser.goto(referenceFrame.chr, bp);
-//        }
-
-    }
+    };
 
     igv.IdeoPanel.prototype.resize = function () {
 
@@ -102,7 +68,7 @@ var igv = (function (igv) {
 
         this.ideograms = {};
         this.repaint();
-    }
+    };
 
     igv.IdeoPanel.prototype.repaint = function () {
 

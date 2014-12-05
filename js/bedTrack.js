@@ -126,7 +126,7 @@ var igv = (function (igv) {
         }
 
         return null;
-    }
+    };
 
     function renderGene(gene, bpStart, xScale, canvas) {
 
