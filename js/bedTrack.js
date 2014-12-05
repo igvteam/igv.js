@@ -58,12 +58,9 @@ var igv = (function (igv) {
      */
     igv.BedTrack.prototype.draw = function (canvas, refFrame, bpStart, bpEnd, pixelWidth, pixelHeight, continuation, task) {
 
-//        console.log("geneTrack.draw " + refFrame.chr);
-
         var track = this;
 
         canvas.fillRect(0, 0, pixelWidth, pixelHeight, {'fillStyle': "rgb(255, 255, 255)"});
-
 
         this.featureSource.getFeatures(refFrame.chr, bpStart, bpEnd, function (featureList) {
 
@@ -189,10 +186,11 @@ var igv = (function (igv) {
 
     function renderVariant(variant, bpStart, xScale, canvas) {
 
-        var px, px1, pw,
+        var px,
+            px1,
+            pw,
             py = 20,
             h = 10;
-
 
         px = Math.round((variant.start - bpStart) / xScale);
         px1 = Math.round((variant.end - bpStart) / xScale);

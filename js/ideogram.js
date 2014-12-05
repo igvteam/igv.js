@@ -69,7 +69,8 @@ var igv = (function (igv) {
     igv.IdeoPanel.prototype.repaint = function () {
 
         try {
-            var image,
+            var y,
+                image,
                 bufferCtx,
                 chromosome,
                 ideoScale,
@@ -96,12 +97,13 @@ var igv = (function (igv) {
 
                 bufferCtx = image.getContext('2d');
 
-                drawIdeogram(bufferCtx, this.canvas.width, 13);
+                drawIdeogram(bufferCtx, this.canvas.width, image.height);
 
                 this.ideograms[igv.browser.referenceFrame.chr] = image;
             }
 
-            this.ctx.drawImage(image, 0, (this.canvas.height - image.height) / 2.0);
+            y = (this.canvas.height - image.height) / 2.0;
+            this.ctx.drawImage(image, 0, y);
 
             // Draw red box
             this.ctx.save();
@@ -117,7 +119,7 @@ var igv = (function (igv) {
 
                 this.ctx.strokeStyle = "red";
                 this.ctx.lineWidth = 2;
-                this.ctx.strokeRect(boxPX, 9, boxW, 15);
+                this.ctx.strokeRect(boxPX, y, boxW, image.height + this.ctx.lineWidth - 1);
                 this.ctx.restore();
             }
 
