@@ -59,12 +59,8 @@ var igv = (function (igv) {
 
     igv.IdeoPanel.prototype.resize = function () {
 
-        var contentHeight = this.div.clientHeight,
-            contentWidth = this.div.clientWidth,
-            canvas = this.canvas;
-        canvas.setAttribute('width', contentWidth);    //Must set the width & height of the canvas
-        canvas.setAttribute('height', contentHeight);
-
+        this.canvas.setAttribute('width',  this.div.clientWidth);
+        this.canvas.setAttribute('height', this.div.clientHeight);
 
         this.ideograms = {};
         this.repaint();
@@ -73,49 +69,59 @@ var igv = (function (igv) {
     igv.IdeoPanel.prototype.repaint = function () {
 
         try {
-            var genome = igv.browser.genome,
+            var image,
+                bufferCtx,
+                chromosome,
+                ideoScale,
+                widthBP,
+                boxPX,
+                boxW,
+                genome = igv.browser.genome,
                 referenceFrame = igv.browser.referenceFrame,
-                stainColors = [],
-                w = this.canvas.width,
-                h = this.canvas.height;
-            this.ctx.clearRect(0, 0, w, h);
+                stainColors = [];
 
-            if (!(genome && genome.getChromosome(referenceFrame.chr))) return;
+            this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
 
-            var image = this.ideograms[igv.browser.referenceFrame.chr];
+            if (!(genome && genome.getChromosome(referenceFrame.chr))) {
+                return;
+            }
+
+            image = this.ideograms[igv.browser.referenceFrame.chr];
+
             if (!image) {
+
                 image = document.createElement('canvas');
-                image.width = w;
+                image.width = this.canvas.width;
                 image.height = 13;
-                var bufferCtx = image.getContext('2d');
-                drawIdeogram(bufferCtx, w, 13);
+
+                bufferCtx = image.getContext('2d');
+
+                drawIdeogram(bufferCtx, this.canvas.width, 13);
+
                 this.ideograms[igv.browser.referenceFrame.chr] = image;
             }
-            this.ctx.drawImage(image, 0, 10);
+
+            this.ctx.drawImage(image, 0, (this.canvas.height - image.height) / 2.0);
 
             // Draw red box
             this.ctx.save();
-            var chromosome = igv.browser.genome.getChromosome(igv.browser.referenceFrame.chr);
-            var ideoScale = w / chromosome.bpLength;
-            var widthBP = w * igv.browser.referenceFrame.bpPerPixel;
+
+            chromosome = igv.browser.genome.getChromosome(igv.browser.referenceFrame.chr);
+            ideoScale = this.canvas.width / chromosome.bpLength;
+
+            widthBP = this.canvas.width * igv.browser.referenceFrame.bpPerPixel;
             if (widthBP < chromosome.bpLength) {
-                var boxPX = Math.round(igv.browser.referenceFrame.start * ideoScale);
-                var boxW = Math.max(1, Math.round(widthBP * ideoScale));
+
+                boxPX = Math.round(igv.browser.referenceFrame.start * ideoScale);
+                boxW = Math.max(1, Math.round(widthBP * ideoScale));
+
                 this.ctx.strokeStyle = "red";
                 this.ctx.lineWidth = 2;
                 this.ctx.strokeRect(boxPX, 9, boxW, 15);
                 this.ctx.restore();
             }
 
-
             this.chromosomeNameLabel.innerHTML = referenceFrame.chr;
-
-            // var chromosomeNameWidth = this.chromosomeNameCanvas.width;
-            //var chromosomeNameHeight = this.chromosomeNameCanvas.height;
-
-            //this.chromosomeNameCtx.clearRect(0, 0, 100, 100);
-            //this.chromosomeNameCtx.fillStyle = "rgb(0, 0, 0)";
-            //this.chromosomeNameCtx.fillText(referenceFrame.chr, chromosomeNameWidth / 2, chromosomeNameHeight / 2);
         } catch (e) {
             console.log("Error painting ideogram: " + e.message);
         }
