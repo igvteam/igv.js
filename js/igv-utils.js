@@ -136,7 +136,6 @@ var igv = (function (igv) {
         nameValueArray.forEach(function (nameValue) {
 
             if (nameValue.name) {
-//                markup += "<tr><td>" + nameValue.name+ ":&nbsp; " + nameValue.value + "</td></tr>";
                 markup += "<tr><td>" + "<span class=\"igv-popoverNameSpan\">" + nameValue.name + "</span>" + "&nbsp; " + "<span class=\"igv-popoverValueSpan\">" + nameValue.value + "</span>" + "</td></tr>";
             }
             else {
