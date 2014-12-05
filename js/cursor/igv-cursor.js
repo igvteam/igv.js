@@ -301,6 +301,7 @@ var igv = (function (igv) {
 
         // Add cursor specific methods to the browser object,  some new some overrides
         addCursorBrowserExtensions(browser);
+        addCursorTrackViewExtensions(browser);
 
         browser.cursorModel = new cursor.CursorModel(browser);
         browser.referenceFrame = new igv.ReferenceFrame("", 0, 1 / browser.cursorModel.framePixelWidth);
@@ -827,6 +828,256 @@ var igv = (function (igv) {
 
             return Math.round(frameWidth * divisor) / divisor;
         }
+    }
+
+
+    function addCursorTrackViewExtensions(browser) {
+
+        igv.TrackView.prototype.viewportCreationHelper = function (viewportDiv) {
+            // do nothing;
+            //console.log("nadda");
+        };
+
+        igv.TrackView.prototype.leftHandGutterCreationHelper = function (leftHandGutter) {
+
+            var trackView = this,
+                track = trackView.track,
+                trackFilterButtonDiv,
+                trackLabelDiv,
+                sortButton,
+                bullseyeStackSpan,
+                bullseyeOuterIcon,
+                bullseyeInnerIcon;
+
+            // track label
+            trackLabelDiv = $('<div class="igv-track-label-div">')[0];
+            trackLabelDiv.innerHTML = track.label;
+            trackLabelDiv.title = track.label;
+            $(trackView.leftHandGutter).append(trackLabelDiv);
+
+            // track selection
+            bullseyeStackSpan = document.createElement("span");
+            $(trackView.leftHandGutter).append($(bullseyeStackSpan));
+
+            bullseyeStackSpan.className = "fa-stack igv-control-bullseye-stack-fontawesome";
+            track.bullseyeStackSpan = bullseyeStackSpan;
+
+            bullseyeOuterIcon = document.createElement("i");
+            bullseyeStackSpan.appendChild(bullseyeOuterIcon);
+            bullseyeOuterIcon.className = "fa fa-stack-2x fa-circle-thin";
+
+            bullseyeInnerIcon = document.createElement("i");
+            bullseyeStackSpan.appendChild(bullseyeInnerIcon);
+            bullseyeInnerIcon.className = "fa fa-stack-1x fa-circle igv-control-bullseye-fontawesome";
+
+            bullseyeStackSpan.onclick = function () {
+
+                if (browser.designatedTrack && browser.designatedTrack === trackView.track) {
+                    return;
+                } else {
+                    browser.selectDesignatedTrack(trackView);
+                }
+
+                if(browser.cursorModel) {
+                    browser.designatedTrack.featureSource.allFeatures(function (featureList) {
+                        browser.referenceFrame.start = 0;
+                        browser.cursorModel.setRegions(featureList);
+                    });
+                }
+
+            };
+
+            // track filter
+            trackFilterButtonDiv = document.createElement("div");
+            $(trackView.leftHandGutter).append($(trackFilterButtonDiv));
+
+            trackFilterButtonDiv.className = "igv-track-filter-button-div";
+
+            trackView.track.trackFilter = new igv.TrackFilter(trackView);
+            trackView.track.trackFilter.createTrackFilterWidgetWithParentElement(trackFilterButtonDiv);
+
+            // sort
+            browser.sortDirection = undefined;
+            browser.sortTrack = undefined;
+
+            sortButton = document.createElement("i");
+            $(trackView.leftHandGutter).append($(sortButton));
+            sortButton.className = "fa fa-signal igv-control-sort-fontawesome fa-flip-horizontal";
+            track.sortButton = sortButton;
+
+            sortButton.onclick = function () {
+
+                if (browser.sortTrack === track) {
+
+                    browser.sortDirection = (undefined === browser.sortDirection) ? 1 : -1 * browser.sortDirection;
+                } else {
+
+                    browser.sortTrack = track;
+                    if (undefined === browser.sortDirection) {
+                        browser.sortDirection = 1;
+                    }
+                }
+
+                browser.cursorModel.sortRegions(track.featureSource, browser.sortDirection, function (regions) {
+
+                    browser.update();
+
+                    browser.trackPanels.forEach(function (tp) {
+
+                        if (1 === browser.sortDirection) {
+
+                            $(tp.track.sortButton).addClass("fa-flip-horizontal");
+                        } else {
+
+                            $(tp.track.sortButton).removeClass("fa-flip-horizontal");
+                        }
+
+                        if (track === tp.track) {
+
+                            $(tp.track.sortButton).addClass("igv-control-sort-fontawesome-selected");
+                        } else {
+
+                            $(tp.track.sortButton).removeClass("igv-control-sort-fontawesome-selected");
+                        }
+                    });
+
+                });
+
+            };
+
+        };
+
+        igv.TrackView.prototype.rightHandGutterCreationHelper = function (trackManipulationIconBox) {
+
+            var myself = this,
+                removeButton;
+
+            $(trackManipulationIconBox).append($('<i class="fa fa-chevron-circle-up   igv-track-manipulation-move-up">')[0]);
+            $(trackManipulationIconBox).append($('<i class="fa fa-chevron-circle-down igv-track-manipulation-move-down">')[0]);
+
+            $(trackManipulationIconBox).find("i.fa-chevron-circle-up").click(function () {
+                myself.browser.reduceTrackOrder(myself)
+            });
+
+            $(trackManipulationIconBox).find("i.fa-chevron-circle-down").click(function () {
+                myself.browser.increaseTrackOrder(myself)
+            });
+
+            removeButton = $('<i class="fa fa-times igv-track-manipulation-discard">')[0];
+            $(trackManipulationIconBox).append(removeButton);
+
+            $(removeButton).click(function () {
+                myself.browser.removeTrack(myself.track);
+            });
+
+        };
+
+
+        igv.TrackView.prototype.repaint = function () {
+
+            if (!(this.track && this.browser && this.browser.referenceFrame)) {
+                return;
+            }
+
+            console.log("Repaint " + this.track.label + "  " + this.canvas.height);
+
+
+            var tileWidth,
+                tileStart,
+                tileEnd,
+                buffer,
+                myself = this,
+                igvCanvas,
+                referenceFrame = this.browser.referenceFrame,
+                refFrameStart = referenceFrame.start,
+                refFrameEnd = refFrameStart + referenceFrame.toBP(this.canvas.width);
+
+            if (!this.tile || !this.tile.containsRange(referenceFrame.chr, refFrameStart, refFrameEnd, referenceFrame.bpPerPixel)) {
+
+                // First see if there is a load in progress that would satisfy the paint request
+
+                if (myself.currentTask && !myself.currentTask.complete && myself.currentTask.end >= refFrameEnd && myself.currentTask.start <= refFrameStart) {
+
+                    // Nothing to do but wait for current load task to complete
+
+                }
+
+                else {
+
+                    if (myself.currentTask) {
+                        if(!myself.currentTask.complete) myself.currentTask.abort();
+                        myself.currentTask = null;
+                    }
+
+
+                    igv.startSpinner(myself.trackDiv);
+
+                    myself.currentTask = {
+                        canceled: false,
+                        chr: referenceFrame.chr,
+                        start: tileStart,
+                        end: tileEnd,
+                        abort: function () {
+                            this.canceled = true;
+                            if (this.xhrRequest) {
+                                this.xhrRequest.abort();
+                            }
+//                    spinner.stop();
+                            igv.stopSpinner(myself.trackDiv);
+                        }
+
+                    };
+
+                    buffer = document.createElement('canvas');
+                    buffer.width = 3 * this.canvas.width;
+                    buffer.height = this.canvas.height;
+                    igvCanvas = new igv.Canvas(buffer);
+
+                    tileWidth = Math.round(referenceFrame.toBP(buffer.width));
+                    tileStart = Math.max(0, Math.round(referenceFrame.start - tileWidth / 3));
+                    tileEnd = tileStart + tileWidth;
+
+                    myself.track.draw(igvCanvas, referenceFrame, tileStart, tileEnd, buffer.width, buffer.height, function (task) {
+
+//                    spinner.stop();
+                            igv.stopSpinner(myself.trackDiv);
+
+                            if (myself.currentTask) console.log("Canceled ? " + myself.currentTask.canceled);
+
+                            if (!(myself.currentTask && myself.currentTask.canceled)) {
+                                myself.tile = new igv.TrackImageTile(referenceFrame.chr, tileStart, tileEnd, referenceFrame.bpPerPixel, buffer);
+                                myself.paintImage();
+
+                            }
+                            myself.currentTask = undefined;
+                        },
+                        myself.currentTask);
+
+                    if (myself.track.paintControl) {
+
+                        var buffer2 = document.createElement('canvas');
+                        buffer2.width = this.controlCanvas.width;
+                        buffer2.height = this.controlCanvas.height;
+
+                        var bufferCanvas = new igv.Canvas(buffer2);
+
+                        myself.track.paintControl(bufferCanvas, buffer2.width, buffer2.height);
+
+                        myself.controlCtx.drawImage(buffer2, 0, 0);
+                    }
+                }
+
+            }
+
+            if (this.tile && this.tile.chr === referenceFrame.chr) {
+                this.paintImage();
+            }
+            else {
+                this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
+            }
+
+
+        };
 
     }
 

@@ -30,8 +30,6 @@ var igv = (function (igv) {
         this.track = track;
         this.browser = browser;
 
-        this.addTrackViewExtensions(browser.type);
-
         if ("CURSOR" === browser.type) {
 
             this.cursorTrackContainer = $('<div class="igv-cursor-track-container">')[0];
@@ -69,13 +67,6 @@ var igv = (function (igv) {
 
         addTrackHandlers(this);
 
-    };
-
-    igv.TrackView.prototype.addTrackViewExtensions = function(browserType) {
-
-        if ("CURSOR" === browserType) {
-            addCursorTrackViewExtensions(this);
-        }
     };
 
     igv.TrackView.prototype.addViewportToParentTrackDiv = function (trackDiv) {
@@ -188,154 +179,6 @@ var igv = (function (igv) {
 
     };
 
-    function addCursorTrackViewExtensions(trackView) {
-
-        trackView.viewportCreationHelper = function (viewportDiv) {
-            // do nothing;
-            //console.log("nadda");
-        };
-
-        trackView.leftHandGutterCreationHelper = function (leftHandGutter) {
-
-            addTrackControlButtons(this, this.browser);
-
-        };
-
-        addTrackControlButtons = function (trackView, browser) {
-
-            var track = trackView.track,
-                trackFilterButtonDiv,
-                trackLabelDiv,
-                sortButton,
-                bullseyeStackSpan,
-                bullseyeOuterIcon,
-                bullseyeInnerIcon;
-
-            // track label
-            trackLabelDiv = $('<div class="igv-track-label-div">')[0];
-            trackLabelDiv.innerHTML = track.label;
-            trackLabelDiv.title = track.label;
-            $(trackView.leftHandGutter).append(trackLabelDiv);
-
-            // track selection
-            bullseyeStackSpan = document.createElement("span");
-            $(trackView.leftHandGutter).append($(bullseyeStackSpan));
-
-            bullseyeStackSpan.className = "fa-stack igv-control-bullseye-stack-fontawesome";
-            track.bullseyeStackSpan = bullseyeStackSpan;
-
-            bullseyeOuterIcon = document.createElement("i");
-            bullseyeStackSpan.appendChild(bullseyeOuterIcon);
-            bullseyeOuterIcon.className = "fa fa-stack-2x fa-circle-thin";
-
-            bullseyeInnerIcon = document.createElement("i");
-            bullseyeStackSpan.appendChild(bullseyeInnerIcon);
-            bullseyeInnerIcon.className = "fa fa-stack-1x fa-circle igv-control-bullseye-fontawesome";
-
-            bullseyeStackSpan.onclick = function () {
-
-                if (browser.designatedTrack && browser.designatedTrack === trackView.track) {
-                    return;
-                } else {
-                    browser.selectDesignatedTrack(trackView);
-                }
-
-                if(browser.cursorModel) {
-                    browser.designatedTrack.featureSource.allFeatures(function (featureList) {
-                        browser.referenceFrame.start = 0;
-                        browser.cursorModel.setRegions(featureList);
-                    });
-                }
-
-            };
-
-            // track filter
-            trackFilterButtonDiv = document.createElement("div");
-            $(trackView.leftHandGutter).append($(trackFilterButtonDiv));
-
-            trackFilterButtonDiv.className = "igv-track-filter-button-div";
-
-            trackView.track.trackFilter = new igv.TrackFilter(trackView);
-            trackView.track.trackFilter.createTrackFilterWidgetWithParentElement(trackFilterButtonDiv);
-
-            // sort
-            browser.sortDirection = undefined;
-            browser.sortTrack = undefined;
-
-            sortButton = document.createElement("i");
-            $(trackView.leftHandGutter).append($(sortButton));
-            sortButton.className = "fa fa-signal igv-control-sort-fontawesome fa-flip-horizontal";
-            track.sortButton = sortButton;
-
-            sortButton.onclick = function () {
-
-                if (browser.sortTrack === track) {
-
-                    browser.sortDirection = (undefined === browser.sortDirection) ? 1 : -1 * browser.sortDirection;
-                } else {
-
-                    browser.sortTrack = track;
-                    if (undefined === browser.sortDirection) {
-                        browser.sortDirection = 1;
-                    }
-                }
-
-                browser.cursorModel.sortRegions(track.featureSource, browser.sortDirection, function (regions) {
-
-                    browser.update();
-
-                    browser.trackPanels.forEach(function (tp) {
-
-                        if (1 === browser.sortDirection) {
-
-                            $(tp.track.sortButton).addClass("fa-flip-horizontal");
-                        } else {
-
-                            $(tp.track.sortButton).removeClass("fa-flip-horizontal");
-                        }
-
-                        if (track === tp.track) {
-
-                            $(tp.track.sortButton).addClass("igv-control-sort-fontawesome-selected");
-                        } else {
-
-                            $(tp.track.sortButton).removeClass("igv-control-sort-fontawesome-selected");
-                        }
-                    });
-
-                });
-
-            };
-
-        };
-
-        trackView.rightHandGutterCreationHelper = function (trackManipulationIconBox) {
-
-            var myself = this,
-                removeButton;
-
-            $(trackManipulationIconBox).append($('<i class="fa fa-chevron-circle-up   igv-track-manipulation-move-up">')[0]);
-            $(trackManipulationIconBox).append($('<i class="fa fa-chevron-circle-down igv-track-manipulation-move-down">')[0]);
-
-            $(trackManipulationIconBox).find("i.fa-chevron-circle-up").click(function () {
-                myself.browser.reduceTrackOrder(myself)
-            });
-
-            $(trackManipulationIconBox).find("i.fa-chevron-circle-down").click(function () {
-                myself.browser.increaseTrackOrder(myself)
-            });
-
-            removeButton = $('<i class="fa fa-times igv-track-manipulation-discard">')[0];
-            $(trackManipulationIconBox).append(removeButton);
-
-            $(removeButton).click(function () {
-                myself.browser.removeTrack(myself.track);
-            });
-
-        };
-
-    }
-
     igv.TrackView.prototype.resize = function () {
         var canvas = this.canvas,
             contentDiv = this.contentDiv,
@@ -353,14 +196,18 @@ var igv = (function (igv) {
     igv.TrackView.prototype.setTrackHeight = function (newHeight) {
 
         var newTrackHeight,
+            newContentHeight,
             trackHeightStr,
             minHeight = this.track.minHeight || 10,
             maxHeight = this.track.maxHeight || 1000;
 
         newTrackHeight = Math.max(minHeight, newHeight);
         newTrackHeight = Math.min(maxHeight, newTrackHeight);
-
         trackHeightStr = newTrackHeight + "px";
+
+        newContentHeight = Math.max(newTrackHeight, newHeight);
+
+console.log("Track height: " + newTrackHeight + "   content height: " + newContentHeight);
         this.track.height = newTrackHeight;
         this.trackDiv.style.height = trackHeightStr;
 
@@ -370,10 +217,11 @@ var igv = (function (igv) {
         }
 
         this.viewportDiv.style.height = trackHeightStr;
-        this.contentDiv.style.height = newHeight + "px";
+        this.contentDiv.style.height = newContentHeight + "px";
 
-        this.canvas.style.height = newHeight + "px";
-        this.canvas.setAttribute("height", newHeight);
+        this.canvas.style.height = newContentHeight + "px";
+        this.canvas.setAttribute("height", newContentHeight);
+        this.ctx = this.canvas.getContext("2d");
 
         if ("CURSOR" === this.browser.type) {
             this.track.cursorHistogram.updateHeightAndInitializeHistogramWithTrack(this.track);
@@ -394,6 +242,7 @@ var igv = (function (igv) {
             return;
         }
 
+console.log("Repaint " + this.track.label + "  " + this.canvas.height);
 
 
         var tileWidth,
@@ -404,14 +253,13 @@ var igv = (function (igv) {
             igvCanvas,
             referenceFrame = this.browser.referenceFrame,
             refFrameStart = referenceFrame.start,
-            refFrameEnd = refFrameStart + referenceFrame.toBP(this.canvas.width),
-            currentTask = this.currentTask;
+            refFrameEnd = refFrameStart + referenceFrame.toBP(this.canvas.width);
 
         if (!this.tile || !this.tile.containsRange(referenceFrame.chr, refFrameStart, refFrameEnd, referenceFrame.bpPerPixel)) {
 
             // First see if there is a load in progress that would satisfy the paint request
 
-            if (currentTask && currentTask.end >= refFrameEnd && currentTask.start <= refFrameStart) {
+            if (myself.currentTask && !myself.currentTask.complete && myself.currentTask.end >= refFrameEnd && myself.currentTask.start <= refFrameStart) {
 
                 // Nothing to do but wait for current load task to complete
 
@@ -419,22 +267,15 @@ var igv = (function (igv) {
 
             else {
 
-                if (currentTask) {
-                    currentTask.abort();
+                if (myself.currentTask) {
+                    if(!myself.currentTask.complete) myself.currentTask.abort();
+                    myself.currentTask = null;
                 }
 
-                buffer = document.createElement('canvas');
-                buffer.width = 3 * this.canvas.width;
-                buffer.height = this.canvas.height;
-                igvCanvas = new igv.Canvas(buffer);
-
-                tileWidth = Math.round(referenceFrame.toBP(buffer.width));
-                tileStart = Math.max(0, Math.round(referenceFrame.start - tileWidth / 3));
-                tileEnd = tileStart + tileWidth;
 
                 igv.startSpinner(myself.trackDiv);
 
-                this.currentTask = {
+                myself.currentTask = {
                     canceled: false,
                     chr: referenceFrame.chr,
                     start: tileStart,
@@ -450,16 +291,26 @@ var igv = (function (igv) {
 
                 };
 
+                buffer = document.createElement('canvas');
+                buffer.width = 3 * this.canvas.width;
+                buffer.height = this.canvas.height;
+                igvCanvas = new igv.Canvas(buffer);
+
+                tileWidth = Math.round(referenceFrame.toBP(buffer.width));
+                tileStart = Math.max(0, Math.round(referenceFrame.start - tileWidth / 3));
+                tileEnd = tileStart + tileWidth;
+
                 myself.track.draw(igvCanvas, referenceFrame, tileStart, tileEnd, buffer.width, buffer.height, function (task) {
 
 //                    spinner.stop();
                         igv.stopSpinner(myself.trackDiv);
 
-                        if (task) console.log(task.canceled);
+                        if (myself.currentTask) console.log("Canceled ? " + myself.currentTask.canceled);
 
-                        if (!(task && task.canceled)) {
-                            myself.tile = new Tile(referenceFrame.chr, tileStart, tileEnd, referenceFrame.bpPerPixel, buffer);
+                        if (!(myself.currentTask && myself.currentTask.canceled)) {
+                            myself.tile = new igv.TrackImageTile(referenceFrame.chr, tileStart, tileEnd, referenceFrame.bpPerPixel, buffer);
                             myself.paintImage();
+
                         }
                         myself.currentTask = undefined;
                     },
@@ -500,6 +351,9 @@ var igv = (function (igv) {
             this.ctx.drawImage(this.tile.image, this.xOffset, 0);
             this.ctx.save();
             this.ctx.restore();
+
+
+            console.log("Paint image " + this.track.label + "  " + this.tile.image.height);
         }
     };
 
@@ -588,18 +442,20 @@ var igv = (function (igv) {
 
     }
 
-    Tile.prototype.containsRange = function (chr, start, end, scale) {
-        var hit = this.scale == scale && start >= this.startBP && end <= this.endBP && chr === this.chr;
-        return hit;
-    };
 
-    function Tile(chr, tileStart, tileEnd, scale, image) {
+     igv.TrackImageTile = function(chr, tileStart, tileEnd, scale, image) {
         this.chr = chr;
         this.startBP = tileStart;
         this.endBP = tileEnd;
         this.scale = scale;
         this.image = image;
     }
+
+
+    igv.TrackImageTile.prototype.containsRange = function (chr, start, end, scale) {
+        var hit = this.scale == scale && start >= this.startBP && end <= this.endBP && chr === this.chr;
+        return hit;
+    };
 
     return igv;
 
