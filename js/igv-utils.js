@@ -130,17 +130,20 @@ var igv = (function (igv) {
     /**
      * Format markup for popover text from an array of name value pairs [{name, value}]
      */
-    igv.formatPopoverText = function (nameValueArray) {
+    igv.formatPopoverText = function (nameValues) {
 
         var markup = "<table>";
-        nameValueArray.forEach(function (nameValue) {
+        nameValues.forEach(function (nameValue) {
 
             if (nameValue.name) {
-                markup += "<tr><td>" + "<span class=\"igv-popoverNameSpan\">" + nameValue.name + "</span>" + "&nbsp; " + "<span class=\"igv-popoverValueSpan\">" + nameValue.value + "</span>" + "</td></tr>";
-            }
-            else {
-                // not a name/value pair
-                markup += "<tr><td>" + nameValue.toString() + "</td></tr>";
+
+                if (nameValue.borderTop) {
+
+                    markup += "<tr class=\"igv-popoverBorderTop\"><td>" + "<span class=\"igv-popoverNameSpan\">" + nameValue.name + "</span>" + "&nbsp; " + "<span class=\"igv-popoverValueSpan\">" + nameValue.value + "</span>" + "</td></tr>";
+                } else {
+
+                    markup += "<tr><td>"                                + "<span class=\"igv-popoverNameSpan\">" + nameValue.name + "</span>" + "&nbsp; " + "<span class=\"igv-popoverValueSpan\">" + nameValue.value + "</span>" + "</td></tr>";
+                }
             }
         });
 

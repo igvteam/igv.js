@@ -124,15 +124,18 @@
     /*background-color: hotpink;*/
 }
 
-.igv-popoverContent .igv-popoverNameSpan {
+.igv-popoverContent .igv-popoverBorderTop {
+    border-top-color: #a2a2a2;
+    border-top-style: solid;
+    border-top-width: thin;
+}
 
+.igv-popoverContent .igv-popoverNameSpan {
     font-weight: bold;
-    /*background: #0f0;*/
 }
 
 .igv-popoverContent .igv-popoverValueSpan {
     word-break: break-all;
-    /*background: #f00;*/
 }
 
 .igv-popoverContent .popoverContentSpan {
