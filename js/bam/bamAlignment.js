@@ -165,34 +165,36 @@ var igv = (function (igv) {
 
     igv.BamAlignment.prototype.popupData = function (genomicLocation) {
 
+        var isFirst;
+
         nameValues = [];
 
-        nameValues.push({name: 'Read Name', value: this.readName});
+        nameValues.push({ name: 'Read Name', value: this.readName });
         // Sample
         // Read group
         nameValues.push("-------------------------------");
 
         // Add 1 to genomic location to map from 0-based computer units to user-based units
-        nameValues.push({name: 'Alignment Start', value: igv.numberFormatter(1 + this.start)});
+        nameValues.push({ name: 'Alignment Start', value: igv.numberFormatter(1 + this.start), borderTop: true });
 
-        nameValues.push({name: 'Read Strand', value: (true === this.strand ? '(+)' : '(-)')});
-        nameValues.push({name: 'Cigar', value: this.cigar});
-        nameValues.push({name: 'Mapped', value: yesNo(this.isMapped())});
-        nameValues.push({name: 'Mapping Quality', value: this.mq });
-        nameValues.push({name: 'Secondary', value: yesNo(this.isNotPrimary()) });
-        nameValues.push({name: 'Supplementary', value: yesNo(this.isSupplementary()) });
-        nameValues.push({name: 'Duplicate', value: yesNo(this.isDuplicate()) });
-        nameValues.push({name: 'Failed QC', value: yesNo(this.isFailsVendorQualityCheck()) });
+        nameValues.push({ name: 'Read Strand', value: (true === this.strand ? '(+)' : '(-)'), borderTop: true });
+        nameValues.push({ name: 'Cigar', value: this.cigar });
+        nameValues.push({ name: 'Mapped', value: yesNo(this.isMapped()) });
+        nameValues.push({ name: 'Mapping Quality', value: this.mq });
+        nameValues.push({ name: 'Secondary', value: yesNo(this.isNotPrimary()) });
+        nameValues.push({ name: 'Supplementary', value: yesNo(this.isSupplementary()) });
+        nameValues.push({ name: 'Duplicate', value: yesNo(this.isDuplicate()) });
+        nameValues.push({ name: 'Failed QC', value: yesNo(this.isFailsVendorQualityCheck()) });
 
 
         if (this.isPaired()) {
             nameValues.push("--------------------------------");
-            nameValues.push({name: 'First in Pair', value: !this.isSecondOfPair()});
-            nameValues.push({name: 'Mate is Mapped', value: yesNo(this.isMateMapped())});
+            nameValues.push({ name: 'First in Pair', value: !this.isSecondOfPair(), borderTop: true });
+            nameValues.push({ name: 'Mate is Mapped', value: yesNo(this.isMateMapped()) });
             if (this.isMapped()) {
-                nameValues.push({name: 'Mate Start', value: this.matePos});
-                nameValues.push({name: 'Mate Strand', value: (this.isMateNegativeStrand() ? '(-)' : '(+)')});
-                nameValues.push({name: 'Insert Size', value: this.tlen});
+                nameValues.push({ name: 'Mate Start', value: this.matePos });
+                nameValues.push({ name: 'Mate Strand', value: (this.isMateNegativeStrand() ? '(-)' : '(+)') });
+                nameValues.push({ name: 'Insert Size', value: this.tlen });
                 // Mate Start
                 // Mate Strand
                 // Insert Size
@@ -204,9 +206,18 @@ var igv = (function (igv) {
 
         nameValues.push("--------------------------------");
         this.tags();
+        isFirst = true;
         for (var key in this.tagDict) {
+
             if (this.tagDict.hasOwnProperty(key)) {
-                nameValues.push({name: key, value: this.tagDict[key]});
+
+                if (isFirst) {
+                    nameValues.push({ name: key, value: this.tagDict[key], borderTop: true });
+                    isFirst = false;
+                } else {
+                    nameValues.push({ name: key, value: this.tagDict[key] });
+                }
+
             }
         }
 
