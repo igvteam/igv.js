@@ -137,8 +137,9 @@ var igv = (function (igv) {
 
             if (nameValue.name) {
 
-                markup += (nameValue.borderTop) ? "<tr class=\"igv-popoverBorderTop\"><td>" : "<tr><td>";
-                markup += "<span class=\"igv-popoverName\">" + nameValue.name.toUpperCase() + "</span>" + "<span class=\"igv-popoverValue\">" + nameValue.value + "</span>" + "</td></tr>";
+                //markup += (nameValue.borderTop) ? "<tr class=\"igv-popoverBorderTop igv-popoverBorderBottom\"><td>" : "<tr class=\"igv-popoverBorderBottom\"><td>";
+                markup += "<tr class=\"igv-popoverBorderBottom\">";
+                markup += "<td><span class=\"igv-popoverName\">" + nameValue.name.toUpperCase() + "</span>" + "<span class=\"igv-popoverValue\">" + nameValue.value + "</span>" + "</td></tr>";
             }
         });
 
