@@ -59,7 +59,8 @@
     z-index: 1000;
 
     font-family: 'PT Sans', sans-serif;
-    font-size: small;
+    /*font-size: small;*/
+    font-size: x-small;
     font-weight: 400;
     color: #444;
 
