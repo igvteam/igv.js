@@ -32,66 +32,72 @@ var igv = (function (igv) {
         this.height = 15;
         this.minHeight = this.height;
         this.maxHeight = this.height;
-        this.disableButtons =  true;
+        this.disableButtons = true;
         this.order = config.order || 9999;
         this.ignoreTrackMenu = true;
     };
 
 
-    igv.SequenceTrack.prototype.draw = function (canvas, refFrame, tileStart, tileEnd, width, height, continuation) {
+    igv.SequenceTrack.prototype.getFeatures = function (chr, bpStart, bpEnd, continuation, task) {
 
-        var chr = refFrame.chr;
-
-        if (refFrame.bpPerPixel > 1) {
-            continuation();
+        if (igv.browser.referenceFrame.bpPerPixel > 1) {
+            continuation(null);
+            return;
         }
         else {
+            this.sequenceSource.getFeatures(chr, bpStart, bpEnd, continuation, task)
+        }
+    }
 
-            igv.sequenceSource.getSequence(chr, tileStart, tileEnd, function (sequence) {
+    igv.SequenceTrack.prototype.draw = function (options) {
 
-//                console.log("squenceTrack - igv.sequenceSource.getSequence", chr, igv.numberFormatter(tileStart), igv.numberFormatter(tileEnd));
+        var track = this,
+            sequence = options.features,
+            canvas = options.context,
+            bpPerPixel = options.bpPerPixel,
+            bpStart = options.bpStart,
+            pixelWidth = options.pixelWidth,
+            pixelHeight = options.pixelHeight,
+            bpEnd = bpStart + pixelWidth * bpPerPixel + 1;
 
-                if (sequence) {
+        if (sequence) {
 
 
-                    var len = sequence.length;
-                    var w = 1 / refFrame.bpPerPixel;
+            var len = sequence.length;
+            var w = 1 / refFrame.bpPerPixel;
 
-                    var y = height / 2;
-                    for (var pos = tileStart; pos <= tileEnd; pos++) {
+            var y = height / 2;
+            for (var pos = tileStart; pos <= tileEnd; pos++) {
 
-                        var offset = pos - tileStart;
-                        if (offset < len) {
+                var offset = pos - tileStart;
+                if (offset < len) {
 //                            var b = sequence.charAt(offset);
-                            var b = sequence[ offset ];
-                            var p0 = Math.floor(offset * w);
-                            var p1 = Math.floor((offset + 1) * w);
-                            var pc = Math.round((p0 + p1) / 2);
-                            var c = igv.nucleotideColors[ b ];
+                    var b = sequence[ offset ];
+                    var p0 = Math.floor(offset * w);
+                    var p1 = Math.floor((offset + 1) * w);
+                    var pc = Math.round((p0 + p1) / 2);
+                    var c = igv.nucleotideColors[ b ];
 
-                            if (!c) c = "gray";
+                    if (!c) c = "gray";
 
-                            if (refFrame.bpPerPixel > 1 / 10) {
+                    if (bpPerPixel > 1 / 10) {
 
-                                canvas.fillRect(p0, 0, p1 - p0, 10, {fillStyle: c});
-                            }
-                            else {
+                        canvas.fillRect(p0, 0, p1 - p0, 10, {fillStyle: c});
+                    }
+                    else {
 
-                                canvas.strokeText(b, pc, y, {strokeStyle: c, font: 'normal 10px Arial', textAlign: 'center'});
-                            }
-                        }
+                        canvas.strokeText(b, pc, y, {strokeStyle: c, font: 'normal 10px Arial', textAlign: 'center'});
                     }
                 }
-
-                continuation();
-            });
-
+            }
         }
+
+
     }
 
     return igv;
 })
-    (igv || {});
+(igv || {});
 
 
 

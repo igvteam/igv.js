@@ -29,7 +29,6 @@
 var igv = (function (igv) {
 
 
-
     igv.BAMTrack = function (config) {
 
         var coverageTrackHeightPercentage = 0.15;
@@ -43,64 +42,61 @@ var igv = (function (igv) {
         this.alignmentRowHeight = config.expandedHeight || 14;
         this.alignmentRowYInset = 1;
         this.visibilityWindow = config.visibilityWindow || 30000;     // 30kb default
-        this.alignmentColor =  config.alignmentColor || "rgb(185, 185, 185)";
+        this.alignmentColor = config.alignmentColor || "rgb(185, 185, 185)";
         this.negStrandColor = config.negStrandColor || "rgb(150, 150, 230)";
         this.posStrandColor = config.posStrandColor || "rgb(230, 150, 150)";
-        this.deletionColor =  config.deletionColor | "black";
+        this.deletionColor = config.deletionColor | "black";
         this.skippedColor = config.skippedColor || "rgb(150, 170, 170)";
         this.coverageColor = config.coverageColor || this.alignmentColor;
-
 
         // divide the canvas into a coverage track region and an alignment track region
         this.coverageTrackHeight = coverageTrackHeightPercentage * this.height - 5;
 
     };
 
-    igv.BAMTrack.prototype.draw = function (canvas, refFrame, bpStart, bpEnd, width, height, continuation, task) {
-
-//        console.log("bamTrack.draw");
-
+    igv.BAMTrack.prototype.getFeatures = function (chr, bpStart, bpEnd, continuation, task) {
 
         // Don't try to draw alignments for windows > the visibility window
-        if (bpEnd - bpStart > this.visibilityWindow) {
-            var x;
-            for (x = 200; x < width; x += 400)
-                canvas.fillText("Zoom in to see alignments", x, 20, {fillStye: 'black'});
-            continuation();
+        if (igv.browser.trackBPWidth() > this.visibilityWindow) {
+            continuation({exceedsVisibilityWindow: true});
             return;
         }
 
-        var myself = this,
-            chr = refFrame.chr,
+        this.featureSource.getFeatures(chr, bpStart, bpEnd, continuation, task);
+
+    }
+
+    igv.BAMTrack.prototype.draw = function (options) {
+
+        var features = options.features,
+            canvas = options.context,
+            bpPerPixel = options.bpPerPixel,
+            bpStart = options.bpStart,
+            pixelWidth = options.pixelWidth,
+            pixelHeight = options.pixelHeight,
+            myself = this,
             alignmentColor = this.alignmentColor,
             coverageColor = this.coverageColor,
             skippedColor = this.skippedColor,
-            deletionColor = this.deletionColor;
+            deletionColor = this.deletionColor,
+            bpEnd = bpStart + pixelWidth * bpPerPixel + 1;
+
+        if (features.exceedsVisibilityWindow) {
+            var x;
+            for (x = 200; x < pixelWidth; x += 400)
+                canvas.fillText("Zoom in to see alignments", x, 20, {fillStye: 'black'});
+            return;
+        }
 
 
-        this.featureSource.getFeatures(chr, bpStart, bpEnd, function (features) {
-
-                if (features) {
-
-                    igv.sequenceSource.getSequence(chr, bpStart, bpEnd, function (refSeq) {
-                            drawCoverage(features, refSeq);
-                            drawAlignments(features, refSeq);
-                            continuation();
-
-                        },
-                        task);
-
-                } else {
-                    continuation();
-                }
-
-            },
-            task);
+        if (features) {
+            drawCoverage(features.coverageMap, features.sequence);
+            drawAlignments(features.packedAlignments, features.sequence);
+        }
 
 
-        function drawCoverage(features, refSeq) {
-            var coverageMap = features.coverageMap,
-                bp,
+        function drawCoverage(coverageMap, sequence) {
+            var bp,
                 x,
                 y,
                 w,
@@ -111,8 +107,8 @@ var igv = (function (igv) {
                 item,
                 accumulatedHeight,
                 rect = { x: 0, y: 0, width: 0, height: 0 };
-            if (refSeq) {
-                refSeq = refSeq.toUpperCase();
+            if (sequence) {
+                sequence = sequence.toUpperCase();
             }
             // coverage track
             canvas.setProperties({ fillStyle: alignmentColor });
@@ -122,7 +118,7 @@ var igv = (function (igv) {
             if (coverageMap) {// TODO -- why is covereageMap sometimes undefined !?
 
                 // paint backdrop color for all coverage buckets
-                w = Math.max(1, 1.0 / refFrame.bpPerPixel);
+                w = Math.max(1, 1.0 / bpPerPixel);
                 for (i = 0, len = coverageMap.coverage.length; i < len; i++) {
 
                     bp = (coverageMap.bpStart + i);
@@ -132,7 +128,7 @@ var igv = (function (igv) {
                     item = coverageMap.coverage[i];
                     if (!item) continue;
 
-                    x = refFrame.toPixels(bp - bpStart);
+                    x = (bp - bpStart) / bpPerPixel;
                     h = (item.total / coverageMap.maximum) * myself.coverageTrackHeight;
                     y = myself.coverageTrackHeight - h;
 
@@ -142,9 +138,9 @@ var igv = (function (igv) {
 
                 } // for (coverageMap.coverage.length)
                 // coverage mismatch coloring
-                if (refSeq) {
+                if (sequence) {
 
-                    w = Math.max(1, 1.0 / refFrame.bpPerPixel);
+                    w = Math.max(1, 1.0 / bpPerPixel);
 
                     for (i = 0, len = coverageMap.coverage.length; i < len; i++) {
 
@@ -155,9 +151,9 @@ var igv = (function (igv) {
                         item = coverageMap.coverage[i];
                         if (!item) continue;
 
-                        refBase = refSeq[i + coverageMap.bpStart - bpStart];
+                        refBase = sequence[i + coverageMap.bpStart - bpStart];
                         if (item.isMismatch(refBase)) {
-                            x = refFrame.toPixels(bp - bpStart);
+                            x = (bp - bpStart) / bpPerPixel;
                             h = (item.total / coverageMap.maximum) * myself.coverageTrackHeight;
                             y = myself.coverageTrackHeight - h;
                             rect = { x: x, y: y, width: w, height: h };
@@ -179,19 +175,19 @@ var igv = (function (igv) {
             }
         }
 
-        function drawAlignments(features, refSeq) {
+        function drawAlignments(packedAlignments, sequence) {
 
-            if (refSeq) {
-                refSeq = refSeq.toUpperCase();
+            if (sequence) {
+                sequence = sequence.toUpperCase();
             }
             // coverage track
             canvas.setProperties({ fillStyle: alignmentColor });
             canvas.setProperties({ strokeStyle: alignmentColor });
 
-            // TODO -- features.packedAlignments can be undefined !!!
-            if (features.packedAlignments) {
+            // TODO -- now can packedAlignments be undefined?
+            if (packedAlignments) {
                 // alignment track
-                features.packedAlignments.forEach(function renderAlignmentRow(alignmentRow, packedAlignmentIndex, packedAlignments) {
+                packedAlignments.forEach(function renderAlignmentRow(alignmentRow, packedAlignmentIndex, packedAlignments) {
 
                     var arrowHeadWidth = myself.alignmentRowHeight / 2.0,
                         yStrokedLine,
@@ -212,8 +208,8 @@ var igv = (function (igv) {
                         if ((alignment.start + blocksBBoxLength) < bpStart) return;
                         if (alignment.start > bpEnd) return;
 
-                        xRectStart = refFrame.toPixels(alignment.start - bpStart);
-                        xRectEnd = refFrame.toPixels((alignment.start + blocksBBoxLength) - bpStart);
+                        xRectStart = (alignment.start - bpStart) / bpPerPixel;
+                        xRectEnd = ((alignment.start + blocksBBoxLength) - bpStart) / bpPerPixel;
 
                         if (blocks.length > 0) {
                             // todo -- set color based on gap type (deletion or skipped)
@@ -224,8 +220,8 @@ var igv = (function (igv) {
 
                         blocks.forEach(function (block, blockIndex) {
                             var refOffset = block.start - bpStart,
-                                blockRectX = refFrame.toPixels(refOffset),
-                                blockEndX = refFrame.toPixels((block.start + block.len) - bpStart),
+                                blockRectX = refOffset / bpPerPixel,
+                                blockEndX = ((block.start + block.len) - bpStart) / bpPerPixel,
                                 blockRectWidth = Math.max(1, blockEndX - blockRectX),
                                 blockSeq = block.seq.toUpperCase(),
                                 blockQual = block.qual,
@@ -252,12 +248,12 @@ var igv = (function (igv) {
                             }
 
                             // Only do mismatch coloring if a refseq exists to do the comparison
-                            if (refSeq && blockSeq !== "*") {
+                            if (sequence && blockSeq !== "*") {
 
                                 for (i = 0, len = blockSeq.length; i < len; i++) {
 
                                     readChar = blockSeq.charAt(i);
-                                    refChar = refSeq.charAt(refOffset + i);
+                                    refChar = sequence.charAt(refOffset + i);
                                     if (readChar === "=") {
                                         readChar = refChar;
                                     }
@@ -271,13 +267,13 @@ var igv = (function (igv) {
                                             baseColor = igv.nucleotideColors[readChar];
                                         }
                                         if (baseColor) {
-                                            basePixelPosition = refFrame.toPixels((block.start + i) - bpStart);
-                                            basePixelWidth = Math.max(1, refFrame.toPixels(1));
+                                            basePixelPosition = ((block.start + i) - bpStart) / bpPerPixel;
+                                            basePixelWidth = Math.max(1, 1 / bpPerPixel);
                                             canvas.fillRect(basePixelPosition, yRect, basePixelWidth, height, { fillStyle: baseColor });
                                         }
                                     }
                                 }
-                            } // if (refSeq)
+                            }
                         });
                     });
                 });

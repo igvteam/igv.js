@@ -32,30 +32,40 @@ var igv = (function (igv) {
         this.maxHeight = this.height;
         this.label = "";
         this.id = "ruler";
-        this.disableButtons =  true;
+        this.disableButtons = true;
         this.ignoreTrackMenu = true;
+
     }
 
 
-    igv.RulerTrack.prototype.draw = function (canvas, refFrame, tileStart, tileEnd, width, height, continuation) {
+    igv.RulerTrack.prototype.getFeatures = function (chr, bpStart, bpEnd, success, task) {
+        success([]);
+    }
 
+
+    igv.RulerTrack.prototype.draw = function (options) {
+
+        var canvas = options.context,
+            bpStart = options.bpStart,
+            bpPerPixel = options.bpPerPixel,
+            width = options.pixelWidth;
 
         canvas.setProperties({textAlign: 'center'});
 
 
-        var range = Math.floor(1100 * refFrame.bpPerPixel);
+        var range = Math.floor(1100 * bpPerPixel);
         var ts = findSpacing(range);
         var spacing = ts.majorTick;
 
         // Find starting point closest to the current origin
-        var nTick = Math.floor(tileStart / spacing) - 1;
+        var nTick = Math.floor(bpStart / spacing) - 1;
         var x = 0
 
         //int strEnd = Integer.MIN_VALUE;
         while (x < width) {
 
             var l = Math.floor(nTick * spacing);
-            x = Math.round(((l - 1) - tileStart + 0.5) / refFrame.bpPerPixel);
+            x = Math.round(((l - 1) - bpStart + 0.5) / bpPerPixel);
             var chrPosition = formatNumber(l / ts.unitMultiplier, 0) + " " + ts.majorUnit;
             //var chrPosition = "" + (l / ts.unitMultiplier) + " " + ts.majorUnit;
             //int strWidth = g.getFontMetrics().stringWidth(chrPosition);
@@ -73,8 +83,6 @@ var igv = (function (igv) {
         }
         canvas.strokeLine(0, this.height - 1, width, this.height - 1);
 
-
-        continuation();
 
         function formatNumber(anynum, decimal) {
             //decimal  - the number of decimals after the digit from 0 to 3

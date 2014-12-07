@@ -388,6 +388,10 @@ var igv = (function (igv) {
 
     };
 
+    igv.Browser.prototype.trackBPWidth = function () {
+        return this.referenceFrame.bpPerPixel * this.trackViewportWidth();
+    }
+
     igv.Browser.prototype.goto = function (chr, start, end) {
 
         console.log("goto " + chr + " : " + start + "-" + end);

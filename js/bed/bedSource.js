@@ -73,19 +73,19 @@ var igv = (function (igv) {
      * range requested and passes them on to the success function.  Usually this is
      * a function that renders the features on the canvas
      *
-     * @param queryChr
+     * @param chr
      * @param bpStart
      * @param bpEnd
      * @param success -- function that takes an array of features as an argument
      */
-    igv.BedFeatureSource.prototype.getFeatures = function (queryChr, bpStart, bpEnd, success, task) {
+    igv.BedFeatureSource.prototype.getFeatures = function (chr, bpStart, bpEnd, success, task) {
 
         var myself = this,
-            range = new igv.GenomicInterval(queryChr, bpStart, bpEnd),
+            range = new igv.GenomicInterval(chr, bpStart, bpEnd),
             featureCache = this.featureCache;
 
-        if (featureCache && (featureCache.range === undefined || featureCache.range.chr === queryChr)) {//}   featureCache.range.contains(queryChr, bpStart, bpEnd))) {
-            success(this.featureCache.queryFeatures(queryChr, bpStart, bpEnd));
+        if (featureCache && (featureCache.range === undefined || featureCache.range.chr === chr)) {//}   featureCache.range.contains(queryChr, bpStart, bpEnd))) {
+            success(this.featureCache.queryFeatures(chr, bpStart, bpEnd));
 
         }
         else {
@@ -100,10 +100,11 @@ var igv = (function (igv) {
                     }
 
                     // Finally pass features for query interval to continuation
-                    success(myself.featureCache.queryFeatures(queryChr, bpStart, bpEnd));
+                    success(myself.featureCache.queryFeatures(chr, bpStart, bpEnd));
 
                 },
-                task, range);   // Currently loading at granularity of chromosome
+                task,
+                range);   // Currently loading at granularity of chromosome
         }
 
     };

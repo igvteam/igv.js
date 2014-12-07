@@ -142,7 +142,7 @@ var igv = (function (igv) {
                 variant = decode(tokens);
                 if (variant != null) {
                     variant.header = this.header;       // Keep a pointer to the header to interpret fields for popup text
-                    allFeatures.push(decode(tokens));
+                    allFeatures.push(variant);
                 }
 
             }
@@ -153,9 +153,12 @@ var igv = (function (igv) {
 
         function decode(tokens) {
 
-            if (tokens.length < 8) return null;
-
-            return new Variant(tokens);
+            if (tokens.length < 8) {
+                return null;
+            }
+            else {
+                return new Variant(tokens);
+            }
 
         }
     }
@@ -180,7 +183,7 @@ var igv = (function (igv) {
 
         var fields, infoFields;
 
-            fields = [
+        fields = [
             {name: "ID", value: this.id},
             {name: "Ref", value: this.ref},
             {name: "Alt", value: this.alt},
@@ -191,12 +194,11 @@ var igv = (function (igv) {
 
         infoFields = this.info.split(";");
         infoFields.forEach(function (f) {
-           var tokens = f.split("=");
-            if(tokens.length > 1) {
+            var tokens = f.split("=");
+            if (tokens.length > 1) {
                 fields.push({name: tokens[0], value: tokens[1]});   // TODO -- use header to add descriptive tooltip
             }
         });
-
 
 
         return fields;

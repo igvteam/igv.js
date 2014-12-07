@@ -63,13 +63,13 @@ var igv = (function (igv) {
 
                         success: function (compressedBuffer) {
 
-                            var unc = igv.unbgzf(compressedBuffer, len);
+                            var unc = igv.unbgzf(compressedBuffer, len),
+                                uncba = new Uint8Array(unc),
+                                magic = readInt(uncba, 0),
+                                samHeaderLen = readInt(uncba, 4),
+                                samHeader = '',
+                                genome = igv.browser ? igv.browser.genome : null;
 
-                            var uncba = new Uint8Array(unc);
-
-                            var magic = readInt(uncba, 0);
-                            var samHeaderLen = readInt(uncba, 4);
-                            var samHeader = '';
                             for (var i = 0; i < samHeaderLen; ++i) {
                                 samHeader += String.fromCharCode(uncba[i + 8]);
                             }
@@ -87,6 +87,8 @@ var igv = (function (igv) {
                                 }
                                 var lRef = readInt(uncba, p + lName + 4);
                                 //dlog(name + ': ' + lRef);
+
+                                if(genome) name = genome.getChromosomeName(name);
 
                                 bam.chrToIndex[name] = i;
                                 bam.indexToChr.push(name);
