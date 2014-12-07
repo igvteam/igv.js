@@ -207,7 +207,7 @@ var igv = (function (igv) {
 
         newContentHeight = Math.max(newTrackHeight, newHeight);
 
-console.log("Track height: " + newTrackHeight + "   content height: " + newContentHeight);
+        console.log("Track height: " + newTrackHeight + "   content height: " + newContentHeight);
         this.track.height = newTrackHeight;
         this.trackDiv.style.height = trackHeightStr;
 
@@ -236,103 +236,108 @@ console.log("Track height: " + newTrackHeight + "   content height: " + newConte
 
     };
 
+    /**
+     * Repaint the view, using a cached image if available.  If no image covering the view is available a new one
+     * is created, delegating the draw details to the track object.
+     *
+     * NOTE:  This method is overriden in the CURSOR initialization code.
+     */
     igv.TrackView.prototype.repaint = function () {
 
-        if (!(this.track && this.browser && this.browser.referenceFrame)) {
+        if (!(viewIsReady.call(this))) {
             return;
         }
 
-console.log("Repaint " + this.track.label + "  " + this.canvas.height);
-
-
-        var tileWidth,
-            tileStart,
-            tileEnd,
-            buffer,
-            myself = this,
+        var pixelWidth,
+            bpWidth,
+            bpStart,
+            bpEnd,
+            self = this,
             igvCanvas,
             referenceFrame = this.browser.referenceFrame,
             refFrameStart = referenceFrame.start,
-            refFrameEnd = refFrameStart + referenceFrame.toBP(this.canvas.width);
+            refFrameEnd = refFrameStart + referenceFrame.toBP(this.canvas.width),
+            success;
 
-        if (!this.tile || !this.tile.containsRange(referenceFrame.chr, refFrameStart, refFrameEnd, referenceFrame.bpPerPixel)) {
+
+        if (!hasCachedImaged.call(this)) {
 
             // First see if there is a load in progress that would satisfy the paint request
-
-            if (myself.currentTask && !myself.currentTask.complete && myself.currentTask.end >= refFrameEnd && myself.currentTask.start <= refFrameStart) {
-
+            if (this.currentTask && this.currentTask.end >= refFrameEnd && this.currentTask.start <= refFrameStart) {
                 // Nothing to do but wait for current load task to complete
-
             }
 
             else {
 
-                if (myself.currentTask) {
-                    if(!myself.currentTask.complete) myself.currentTask.abort();
-                    myself.currentTask = null;
+                if (this.currentTask) {
+                    this.currentTask.abort();
                 }
 
+                pixelWidth = 3 * this.canvas.width;
+                bpWidth = Math.round(referenceFrame.toBP(pixelWidth));
+                bpStart = Math.max(0, Math.round(referenceFrame.start - bpWidth / 3));
+                bpEnd = bpStart + bpWidth;
+                success = function (features) {
 
-                igv.startSpinner(myself.trackDiv);
+                    igv.stopSpinner(self.trackDiv);
+                    self.currentTask = undefined;
 
-                myself.currentTask = {
-                    canceled: false,
-                    chr: referenceFrame.chr,
-                    start: tileStart,
-                    end: tileEnd,
+                    if (features) {
+
+                        // TODO -- adjust track height here.
+
+                        var buffer = document.createElement('canvas');
+                        buffer.width = pixelWidth;
+                        buffer.height = self.canvas.height;
+                        igvCanvas = new igv.Canvas(buffer);
+
+                        self.track.draw({
+                            features: features,
+                            context: igvCanvas,
+                            bpStart: bpStart,
+                            bpPerPixel: referenceFrame.bpPerPixel,
+                            pixelWidth: buffer.width,
+                            pixelHeight: buffer.height
+                        });
+
+                        if (self.track.paintControl) {
+
+                            var buffer2 = document.createElement('canvas');
+                            buffer2.width = self.controlCanvas.width;
+                            buffer2.height = self.controlCanvas.height;
+
+                            var bufferCanvas = new igv.Canvas(buffer2);
+
+                            self.track.paintControl(bufferCanvas, buffer2.width, buffer2.height);
+
+                            self.controlCtx.drawImage(buffer2, 0, 0);
+                        }
+
+                        self.tile = new Tile(referenceFrame.chr, bpStart, bpEnd, referenceFrame.bpPerPixel, buffer);
+                        self.paintImage();
+                    }
+
+                };
+
+                this.currentTask = {
                     abort: function () {
                         this.canceled = true;
                         if (this.xhrRequest) {
                             this.xhrRequest.abort();
                         }
-//                    spinner.stop();
-                        igv.stopSpinner(myself.trackDiv);
+                        igv.stopSpinner(self.trackDiv);
+                        self.currentTask = undefined;
                     }
-
                 };
 
-                buffer = document.createElement('canvas');
-                buffer.width = 3 * this.canvas.width;
-                buffer.height = this.canvas.height;
-                igvCanvas = new igv.Canvas(buffer);
+                igv.startSpinner(self.trackDiv);
 
-                tileWidth = Math.round(referenceFrame.toBP(buffer.width));
-                tileStart = Math.max(0, Math.round(referenceFrame.start - tileWidth / 3));
-                tileEnd = tileStart + tileWidth;
-
-                myself.track.draw(igvCanvas, referenceFrame, tileStart, tileEnd, buffer.width, buffer.height, function (task) {
-
-//                    spinner.stop();
-                        igv.stopSpinner(myself.trackDiv);
-
-                        if (myself.currentTask) console.log("Canceled ? " + myself.currentTask.canceled);
-
-                        if (!(myself.currentTask && myself.currentTask.canceled)) {
-                            myself.tile = new igv.TrackImageTile(referenceFrame.chr, tileStart, tileEnd, referenceFrame.bpPerPixel, buffer);
-                            myself.paintImage();
-
-                        }
-                        myself.currentTask = undefined;
-                    },
-                    myself.currentTask);
-
-                if (myself.track.paintControl) {
-
-                    var buffer2 = document.createElement('canvas');
-                    buffer2.width = this.controlCanvas.width;
-                    buffer2.height = this.controlCanvas.height;
-
-                    var bufferCanvas = new igv.Canvas(buffer2);
-
-                    myself.track.paintControl(bufferCanvas, buffer2.width, buffer2.height);
-
-                    myself.controlCtx.drawImage(buffer2, 0, 0);
-                }
+                this.track.getFeatures(referenceFrame.chr, bpStart, bpEnd, success, self.currentTask);
             }
 
         }
 
-        if (this.tile && this.tile.chr === referenceFrame.chr) {
+        if (this.tile && this.tile.overlapsRange(referenceFrame.chr, refFrameStart, refFrameEnd)) {
             this.paintImage();
         }
         else {
@@ -340,7 +345,35 @@ console.log("Repaint " + this.track.label + "  " + this.canvas.height);
         }
 
 
+        function hasCachedImaged() {
+            return this.tile && this.tile.containsRange(referenceFrame.chr, refFrameStart, refFrameEnd, referenceFrame.bpPerPixel);
+        }
+
+
+        function viewIsReady() {
+            return this.track && this.browser && this.browser.referenceFrame;
+        }
+
+
+    }
+
+
+    function Tile(chr, tileStart, tileEnd, scale, image) {
+        this.chr = chr;
+        this.startBP = tileStart;
+        this.endBP = tileEnd;
+        this.scale = scale;
+        this.image = image;
+    }
+
+
+    Tile.prototype.containsRange = function (chr, start, end, scale) {
+        return this.scale === scale && start >= this.startBP && end <= this.endBP && chr === this.chr;
     };
+
+    Tile.prototype.overlapsRange = function (chr, start, end) {
+        return this.chr === chr && this.endBP >= start && this.startBP <= end;
+    }
 
     igv.TrackView.prototype.paintImage = function () {
 
@@ -442,21 +475,7 @@ console.log("Repaint " + this.track.label + "  " + this.canvas.height);
 
     }
 
-
-     igv.TrackImageTile = function(chr, tileStart, tileEnd, scale, image) {
-        this.chr = chr;
-        this.startBP = tileStart;
-        this.endBP = tileEnd;
-        this.scale = scale;
-        this.image = image;
-    }
-
-
-    igv.TrackImageTile.prototype.containsRange = function (chr, start, end, scale) {
-        var hit = this.scale == scale && start >= this.startBP && end <= this.endBP && chr === this.chr;
-        return hit;
-    };
-
     return igv;
+
 
 })(igv || {});

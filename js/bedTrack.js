@@ -26,7 +26,7 @@
 var igv = (function (igv) {
 
 
-    igv.configTrack = function(track, config) {
+    igv.configTrack = function (track, config) {
         track.url = config.url;
     }
 
@@ -46,46 +46,46 @@ var igv = (function (igv) {
         }
     };
 
-    /**
-     *
-     * @param canvas   an igv.Canvas
-     * @param refFrame
-     * @param bpStart
-     * @param bpEnd
-     * @param pixelWidth
-     * @param pixelHeight
-     * @param continuation  -  Optional.   called on completion, no arguments.
-     */
-    igv.BedTrack.prototype.draw = function (canvas, refFrame, bpStart, bpEnd, pixelWidth, pixelHeight, continuation, task) {
+    igv.BedTrack.prototype.getFeatures = function (chr, bpStart, bpEnd, continuation, task) {
 
-        var track = this;
+        this.featureSource.getFeatures(chr, bpStart, bpEnd, continuation, task)
+    }
+
+
+    igv.BedTrack.prototype.draw = function (options) {
+
+        var track = this,
+            featureList = options.features,
+            canvas = options.context,
+            bpPerPixel = options.bpPerPixel,
+            bpStart = options.bpStart,
+            pixelWidth = options.pixelWidth,
+            pixelHeight = options.pixelHeight,
+            bpEnd = bpStart + pixelWidth * bpPerPixel + 1;
+
 
         canvas.fillRect(0, 0, pixelWidth, pixelHeight, {'fillStyle': "rgb(255, 255, 255)"});
 
-        this.featureSource.getFeatures(refFrame.chr, bpStart, bpEnd, function (featureList) {
 
-                var gene, len;
+        var gene, len;
 
-                if (featureList) {
+        if (featureList) {
 
-                    len = featureList.length;
+            len = featureList.length;
 
-                    canvas.setProperties({fillStyle: track.color, strokeStyle: track.color});
-                    for (var i = 0; i < len; i++) {
-                        gene = featureList[i];
-                        if (gene.end < bpStart) continue;
-                        if (gene.start > bpEnd) break;
-                        track.render(gene, bpStart, refFrame.bpPerPixel, canvas);
-                    }
-                }
-                else {
-                    console.log("No feature list");
-                }
+            canvas.setProperties({fillStyle: track.color, strokeStyle: track.color});
+            for (var i = 0; i < len; i++) {
+                gene = featureList[i];
+                if (gene.end < bpStart) continue;
+                if (gene.start > bpEnd) break;
+                track.render(gene, bpStart, bpPerPixel, canvas);
+            }
+        }
+        else {
+            console.log("No feature list");
+        }
 
-                if (continuation) continuation();
-            },
-            task);
-    };
+    }
 
     /**
      * Return "popup data" for feature @ genomic location.  Data is an array of key-value pairs
@@ -123,7 +123,7 @@ var igv = (function (igv) {
         }
 
         return null;
-    };
+    }
 
     function renderGene(gene, bpStart, xScale, canvas) {
 
@@ -179,18 +179,17 @@ var igv = (function (igv) {
                 geneStyle = normalTextStyle;
             }
 
-            canvas.fillText(gene.name, px + ((px1 - px) / 2), py+20, geneStyle, {rotate: {angle: 45}});
+            canvas.fillText(gene.name, px + ((px1 - px) / 2), py + 20, geneStyle, {rotate: {angle: 45}});
         }
     }
 
 
     function renderVariant(variant, bpStart, xScale, canvas) {
 
-        var px,
-            px1,
-            pw,
+        var px, px1, pw,
             py = 20,
             h = 10;
+
 
         px = Math.round((variant.start - bpStart) / xScale);
         px1 = Math.round((variant.end - bpStart) / xScale);

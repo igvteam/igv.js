@@ -59,24 +59,22 @@ var igv = (function (igv) {
     }
 
 
-    /**
-     *
-     * @param canvas   an igv.Canvas
-     * @param bpStart
-     * @param bpEnd
-     * @param pixelWidth
-     * @param pixelHeight
-     * @param continuation  -  Optional.   called on completion, no arguments.
-     *
-     * "ID", "CHROM", "POS", "DBSNP_ID", "Consequence", "Protein_change"
-     */
-    igv.T2dTrack.prototype.draw = function (canvas, refFrame, bpStart, bpEnd, pixelWidth, pixelHeight, continuation, task) {
+    igv.T2dTrack.prototype.getFeatures = function (chr, bpStart, bpEnd, continuation, task) {
+
+        this.featureSource.getFeatures(chr, bpStart, bpEnd, continuation, task)
+    }
 
 
-        var chr,
-            queryChr,
-            track = this,
-            chr = refFrame.chr,
+    igv.T2dTrack.prototype.draw = function (options) {
+
+        var track = this,
+            featureList = options.features,
+            canvas = options.context,
+            bpPerPixel = options.bpPerPixel,
+            bpStart = options.bpStart,
+            pixelWidth = options.pixelWidth,
+            pixelHeight = options.pixelHeight,
+            bpEnd = bpStart + pixelWidth * bpPerPixel + 1,
             yScale = (track.maxLogP - track.minLogP) / pixelHeight,
             enablePopover = (bpEnd - bpStart) < POPOVER_WINDOW;
 
@@ -90,53 +88,43 @@ var igv = (function (igv) {
         if (this.background) canvas.fillRect(0, 0, pixelWidth, pixelHeight, {'fillStyle': this.background});
         canvas.strokeLine(0, pixelHeight - 1, pixelWidth, pixelHeight - 1, {'strokeStyle': this.divider});
 
+        var variant, len, xScale, px, px1, pw, py, color, pvalue, val;
 
-        this.featureSource.getFeatures(queryChr, bpStart, bpEnd, function (featureList) {
+        if (featureList) {
 
-                var variant, len, xScale, px, px1, pw, py, color, pvalue, val;
+            len = featureList.length;
 
-                if (featureList) {
-
-                    len = featureList.length;
-
-                    py = 20;
+            py = 20;
 
 
-                    for (var i = 0; i < len; i++) {
+            for (var i = 0; i < len; i++) {
 
-                        variant = featureList[i];
-                        if (variant.POS < bpStart) continue;
-                        if (variant.POS > bpEnd) break;
+                variant = featureList[i];
+                if (variant.POS < bpStart) continue;
+                if (variant.POS > bpEnd) break;
 
-                        pvalue = variant[track.pvalue];
-                        if (!pvalue) continue;
+                pvalue = variant[track.pvalue];
+                if (!pvalue) continue;
 
-                        color = track.colorScale.getColor(pvalue);
-                        val = -Math.log(pvalue) / 2.302585092994046;
+                color = track.colorScale.getColor(pvalue);
+                val = -Math.log(pvalue) / 2.302585092994046;
 
-                        xScale = refFrame.bpPerPixel;
+                xScale = bpPerPixel;
 
-                        px = Math.round((variant.POS - bpStart) / xScale);
+                px = Math.round((variant.POS - bpStart) / xScale);
 
-                        py = Math.max(track.dotSize, pixelHeight - Math.round((val - track.minLogP) / yScale));
+                py = Math.max(track.dotSize, pixelHeight - Math.round((val - track.minLogP) / yScale));
 
-                        if (color) canvas.setProperties({fillStyle: color, strokeStyle: "black"});
+                if (color) canvas.setProperties({fillStyle: color, strokeStyle: "black"});
 
-                        canvas.fillCircle(px, py, track.dotSize);
-                        //canvas.strokeCircle(px, py, radius);
+                canvas.fillCircle(px, py, track.dotSize);
+                //canvas.strokeCircle(px, py, radius);
 
-                        if (enablePopover) track.po.push({x: px, y: py, feature: variant});
+                if (enablePopover) track.po.push({x: px, y: py, feature: variant});
 
-                    }
-                }
+            }
+        }
 
-                //  canvas.setProperties({fillStyle: "rgb(250, 250, 250)"});
-                //  canvas.fillRect(0, 0, pixelWidth, pixelHeight);
-
-
-                if (continuation) continuation();
-            },
-            task);
     };
 
 

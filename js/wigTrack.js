@@ -59,67 +59,63 @@ var igv = (function (igv) {
 
     };
 
-    /**
-     *
-     * @param canvas -- a "fabric canvas",  fabricjs.com  (not a Canvas2D)
-     * @param refFrame
-     * @param bpStart
-     * @param bpEnd
-     * @param width
-     * @param height
-     * @param continuation
-     */
 
-        //  this.track.draw(igvCanvas, refFrame, tileStart, tileEnd, buffer.width, buffer.height, function () {
+    igv.WIGTrack.prototype.getFeatures = function (chr, bpStart, bpEnd, continuation, task) {
 
-    igv.WIGTrack.prototype.draw = function (canvas, refFrame, bpStart, bpEnd, width, height, continuation) {
+        this.featureSource.getFeatures(chr, bpStart, bpEnd, continuation, task)
+    }
+
+
+    igv.WIGTrack.prototype.draw = function (options) {
 
         var track = this,
-            chr = refFrame.chr;
+            features = options.features,
+            canvas = options.context,
+            bpPerPixel = options.bpPerPixel,
+            bpStart = options.bpStart,
+            pixelWidth = options.pixelWidth,
+            pixelHeight = options.pixelHeight,
+            bpEnd = bpStart + pixelWidth * bpPerPixel + 1,
+            featureMin, featureMax, denom;
 
-        this.featureSource.getFeatures(chr, bpStart, bpEnd, function (features) {
-
-            var featureMin, featureMax, denom;
-
-            if (features && features.length > 0) {
-                featureMin = track.min ? track.min : 0;
-                featureMax = track.max;
-                if (featureMax === undefined) {
-                    var s = autoscale(features);
-                    featureMin = s.min;
-                    featureMax = s.max;
-                }
-                denom = featureMax - featureMin;
-
-                features.forEach(renderFeature);
+        if (features && features.length > 0) {
+            featureMin = track.min ? track.min : 0;
+            featureMax = track.max;
+            if (featureMax === undefined) {
+                var s = autoscale(features);
+                featureMin = s.min;
+                featureMax = s.max;
             }
+            denom = featureMax - featureMin;
 
-            continuation();
+            features.forEach(renderFeature);
+        }
 
-            function renderFeature(feature, index, featureList) {
 
-                var centroid = 128,
-                    delta = 32,
-                    rectOrigin,
-                    rectEnd,
-                    rectWidth,
-                    rectHeight,
-                    rectBaseline,
-                    rect;
+        function renderFeature(feature, index, featureList) {
 
-                if (feature.end < bpStart) return;
-                if (feature.start > bpEnd) return;
+            var centroid = 128,
+                delta = 32,
+                rectOrigin,
+                rectEnd,
+                rectWidth,
+                rectHeight,
+                rectBaseline,
+                rect;
 
-                rectOrigin = refFrame.toPixels(feature.start - bpStart);
-                rectEnd = refFrame.toPixels(feature.end - bpStart);
-                rectWidth = Math.max(1, rectEnd - rectOrigin);
-                rectHeight = ((feature.value - featureMin) / denom) * height;
-                rectBaseline = height - rectHeight;
+            if (feature.end < bpStart) return;
+            if (feature.start > bpEnd) return;
 
-                canvas.fillRect(rectOrigin, rectBaseline, rectWidth, rectHeight, {fillStyle: track.color});
+            rectOrigin = (feature.start - bpStart) / bpPerPixel;
+            rectEnd = (feature.end - bpStart) / bpPerPixel;
+            rectWidth = Math.max(1, rectEnd - rectOrigin);
+            rectHeight = ((feature.value - featureMin) / denom) * pixelHeight;
+            rectBaseline = pixelHeight - rectHeight;
 
-            }
-        });
+            canvas.fillRect(rectOrigin, rectBaseline, rectWidth, rectHeight, {fillStyle: track.color});
+
+        }
+
     };
 
     function autoscale(features) {

@@ -95,9 +95,13 @@ var igv = (function (igv) {
     }
 
 
-    igv.RulerNextGenTrack.prototype.draw = function (canvas, refFrame, tileStart, tileEnd, width, height, continuation) {
+    igv.RulerTrack.prototype.draw =   function (options) {
 
-        var myself = this,
+        var canvas = options.context,
+            bpStart = options.bpStart,
+            bpPerPixel = options.bpPerPixel,
+            width = options.pixelWidth,
+            myself = this,
             incrementPoints = 0,
             index = 0,
             brake = false,
@@ -109,7 +113,7 @@ var igv = (function (igv) {
             var tickUnit,
                 tickDivisor;
 
-            incrementPoints = Math.floor(tv / refFrame.bpPerPixel);
+            incrementPoints = Math.floor(tv / bpPerPixel);
             if (false === brake && incrementPoints > TickSeparationThreshold) {
 
                 index = tvindex;
@@ -122,7 +126,7 @@ var igv = (function (igv) {
         });
 
         tickValue = this.tickValues[ index ];
-        tickLabelNumber = tileStart;
+        tickLabelNumber = bpStart;
 
 //        self.tickLabel.text = [self tickLabelStringWithTickLabelNumber:tickLabelNumber tickIndex:index igvContextLength:[igvContext length]];
 //

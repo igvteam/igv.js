@@ -46,45 +46,40 @@ var igv = (function (igv) {
 
     };
 
-    igv.BamSource.prototype.getFeatures = function (chr, bpStart, bpEnd, success, task) {
+    igv.BamSource.prototype.getFeatures = function (chr, bpStart, bpEnd, continuation, task) {
+
 
         if (this.genomicInterval && this.genomicInterval.contains(chr, bpStart, bpEnd)) {
 
-            success(this.genomicInterval);
+            continuation(this.genomicInterval);
 
         } else {
 
-            var expand = 1000,
-                myself,
-                qStart,
-                qEnd;
+            var myself = this;
 
-            // Expand the query parameters to enable minor changes in window size without forcing a reload
-            qStart = Math.max(0, bpStart - expand);
-            qEnd = bpEnd + expand;
+            this.bamFile.readAlignments(chr, bpStart, bpEnd,
 
-            myself = this;
-            this.bamFile.readAlignments(chr, qStart, qEnd,
                 function (alignments) {
 
                     if (alignments) {  // Can be null on error or aborting
 
-                        myself.genomicInterval = new igv.GenomicInterval(chr, qStart, qEnd);
+                        myself.genomicInterval = new igv.GenomicInterval(chr, bpStart, bpEnd);
 
                         igv.sequenceSource.getSequence(myself.genomicInterval.chr, myself.genomicInterval.start, myself.genomicInterval.end,
 
-                            function (refSeq) {
+                            function (sequence) {
 
-                                if (refSeq) {
+                                if (sequence) {
 
-                                    myself.genomicInterval.coverageMap = new igv.CoverageMap(chr, qStart, qEnd, alignments, refSeq);
+                                    myself.genomicInterval.coverageMap = new igv.CoverageMap(chr, bpStart, bpEnd, alignments, sequence);
 
                                     myself.genomicInterval.packedAlignments = packAlignments(myself.genomicInterval, alignments);
 
-                                    // We don't need the features now, free up the memory
                                     myself.genomicInterval.features = undefined;
 
-                                    success(myself.genomicInterval);
+                                    myself.genomicInterval.sequence = sequence;
+
+                                    continuation(myself.genomicInterval);
                                 }
 
                             },

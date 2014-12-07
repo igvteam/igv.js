@@ -1045,7 +1045,7 @@ var igv = (function (igv) {
                             if (myself.currentTask) console.log("Canceled ? " + myself.currentTask.canceled);
 
                             if (!(myself.currentTask && myself.currentTask.canceled)) {
-                                myself.tile = new igv.TrackImageTile(referenceFrame.chr, tileStart, tileEnd, referenceFrame.bpPerPixel, buffer);
+                                myself.tile = new Tile(referenceFrame.chr, tileStart, tileEnd, referenceFrame.bpPerPixel, buffer);
                                 myself.paintImage();
 
                             }
@@ -1075,6 +1075,22 @@ var igv = (function (igv) {
             else {
                 this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
             }
+
+
+
+            function Tile (chr, tileStart, tileEnd, scale, image) {
+                this.chr = chr;
+                this.startBP = tileStart;
+                this.endBP = tileEnd;
+                this.scale = scale;
+                this.image = image;
+            }
+
+
+            Tile.prototype.containsRange = function (chr, start, end, scale) {
+                var hit = this.scale == scale && start >= this.startBP && end <= this.endBP && chr === this.chr;
+                return hit;
+            };
 
 
         };

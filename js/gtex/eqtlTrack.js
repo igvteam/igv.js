@@ -76,100 +76,97 @@ var igv = (function (igv) {
 
     };
 
-    /**
-     *
-     * @param canvas   an igv.Canvas
-     * @param bpStart
-     * @param bpEnd
-     * @param pixelWidth
-     * @param pixelHeight
-     * @param continuation  -  Optional.   called on completion, no arguments.
-     * @param task - Optional.  Represents the current task (computation)
-     */
-    igv.EqtlTrack.prototype.draw = function (canvas, refFrame, bpStart, bpEnd, pixelWidth, pixelHeight, continuation, task) {
+
+    igv.EqtlTrack.prototype.getFeatures = function (chr, bpStart, bpEnd, continuation, task) {
+
+        this.featureSource.getFeatures(chr, bpStart, bpEnd, continuation, task)
+    }
+
+
+    igv.EqtlTrack.prototype.draw = function (options) {
 
         var track = this,
-            chr = refFrame.chr,
+            featureList = options.features,
+            canvas = options.context,
+            bpPerPixel = options.bpPerPixel,
+            bpStart = options.bpStart,
+            pixelWidth = options.pixelWidth,
+            pixelHeight = options.pixelHeight,
+            bpEnd = bpStart + pixelWidth * bpPerPixel + 1,
             yScale = (track.maxLogP - track.minLogP) / pixelHeight;
 
         // Background
         if (this.background) canvas.fillRect(0, 0, pixelWidth, pixelHeight, {'fillStyle': this.background});
         canvas.strokeLine(0, pixelHeight - 1, pixelWidth, pixelHeight - 1, {'strokeStyle': this.divider});
 
-        this.featureSource.getFeatures(chr, bpStart, bpEnd, function (featureList) {
+        if (canvas) {
 
-                if (featureList) {
-
-                    var len = featureList.length;
+            var len = featureList.length;
 
 
-                    canvas.save();
+            canvas.save();
 
 
-                    // Draw in two passes, with "selected" eqtls drawn last
-                    drawEqtls(false);
-                    drawEqtls(true);
+            // Draw in two passes, with "selected" eqtls drawn last
+            drawEqtls(false);
+            drawEqtls(true);
 
 
-                    canvas.restore();
+            canvas.restore();
 
+        }
+
+        function drawEqtls(drawSelected) {
+
+            var radius = drawSelected ? 2 * track.dotSize : track.dotSize,
+                eqtl, i, px, py, color, isSelected, snp, geneName, selection;
+
+
+            //ctx.fillStyle = igv.selection.colorForGene(eqtl.geneName);
+            canvas.setProperties({
+                fillStyle: "rgb(180, 180, 180)",
+                strokeStyle: "rgb(180, 180, 180)"});
+
+            for (i = 0; i < len; i++) {
+
+                eqtl = featureList[i];
+                snp = eqtl.snp.toUpperCase();
+                geneName = eqtl.geneName.toUpperCase();
+                selection = igv.browser.selection;
+                isSelected = selection &&
+                    (selection.snp === snp || selection.gene === geneName);
+                if (geneName === "ACTN3") {
+                    console.log(geneName);
                 }
-                continuation(task);
+                if (drawSelected && !isSelected) continue;
 
-
-                function drawEqtls(drawSelected) {
-
-                    var radius = drawSelected ? 2 * track.dotSize : track.dotSize,
-                        eqtl, i, px, py, color, isSelected, snp, geneName, selection;
-
-
-                    //ctx.fillStyle = igv.selection.colorForGene(eqtl.geneName);
-                    canvas.setProperties({
-                        fillStyle: "rgb(180, 180, 180)",
-                        strokeStyle: "rgb(180, 180, 180)"});
-
-                    for (i = 0; i < len; i++) {
-
-                        eqtl = featureList[i];
-                        snp = eqtl.snp.toUpperCase();
-                        geneName = eqtl.geneName.toUpperCase();
-                        selection = igv.browser.selection;
-                        isSelected = selection &&
-                            (selection.snp === snp || selection.gene === geneName);
-                        if(geneName === "ACTN3") {
-                            console.log(geneName);
-                        }
-                        if (drawSelected && !isSelected) continue;
-
-                        // Add eqtl's gene to the selection if this is the selected snp.
-                        // TODO -- this should not be done here in the rendering code.
-                        if (selection && selection.snp === snp) {
-                            selection.addGene(geneName);
-                        }
-
-                        if (drawSelected && selection) {
-                            color = selection.colorForGene(geneName);
-                        }
-
-                        if (drawSelected && color === undefined) continue;   // This should be impossible
-
-
-                        px = refFrame.toPixels(Math.round(eqtl.position - bpStart + 0.5));
-                        if (px < 0) continue;
-                        else if (px > pixelWidth) break;
-
-                        py = Math.max(0, pixelHeight - Math.round((eqtl.mLogP - track.minLogP) / yScale));
-                        eqtl.px = px;
-                        eqtl.py = py;
-
-                        if (color) canvas.setProperties({fillStyle: color, strokeStyle: "black"});
-                        canvas.fillCircle(px, py, radius);
-                        canvas.strokeCircle(px, py, radius);
-                    }
+                // Add eqtl's gene to the selection if this is the selected snp.
+                // TODO -- this should not be done here in the rendering code.
+                if (selection && selection.snp === snp) {
+                    selection.addGene(geneName);
                 }
 
-            },
-            task);
+                if (drawSelected && selection) {
+                    color = selection.colorForGene(geneName);
+                }
+
+                if (drawSelected && color === undefined) continue;   // This should be impossible
+
+
+                px = (Math.round(eqtl.position - bpStart + 0.5)) / bpPerPixel;
+                if (px < 0) continue;
+                else if (px > pixelWidth) break;
+
+                py = Math.max(0, pixelHeight - Math.round((eqtl.mLogP - track.minLogP) / yScale));
+                eqtl.px = px;
+                eqtl.py = py;
+
+                if (color) canvas.setProperties({fillStyle: color, strokeStyle: "black"});
+                canvas.fillCircle(px, py, radius);
+                canvas.strokeCircle(px, py, radius);
+            }
+        }
+
     }
 
 

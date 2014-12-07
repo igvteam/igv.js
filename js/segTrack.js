@@ -71,84 +71,81 @@ var igv = (function (igv) {
 
     };
 
-    /**
-     *
-     * @param canvas   an igv.Canvas
-     * @param refFrame
-     * @param bpStart
-     * @param bpEnd
-     * @param pixelWidth
-     * @param pixelHeight
-     * @param continuation  -  Optional.   called on completion, no arguments.
-     */
-    igv.SegTrack.prototype.draw = function (canvas, refFrame, bpStart, bpEnd, pixelWidth, pixelHeight, continuation, task) {
+    igv.SegTrack.prototype.getFeatures = function (chr, bpStart, bpEnd, continuation, task) {
 
-//        console.log("geneTrack.draw " + refFrame.chr);
+        this.featureSource.getFeatures(chr, bpStart, bpEnd, continuation, task)
+    }
 
-        var chr = refFrame.chr,
-            track = this
+
+    igv.SegTrack.prototype.draw = function (options) {
+
+        var track = this,
+            featureList = options.features,
+            canvas = options.context,
+            bpPerPixel = options.bpPerPixel,
+            bpStart = options.bpStart,
+            pixelWidth = options.pixelWidth,
+            pixelHeight = options.pixelHeight,
+            bpEnd = bpStart + pixelWidth * bpPerPixel + 1,
+            featureMin, featureMax, denom;
+
+
+
+        var segment, len, sample, i, y, color, value,
+            px, px1, pw,
+            xScale = bpPerPixel;
 
         canvas.fillRect(0, 0, pixelWidth, pixelHeight, {'fillStyle': "rgb(255, 255, 255)"});
 
-       this.featureSource.getFeatures(chr, bpStart, bpEnd, function (featureList) {
+        if (featureList) {
 
-                var segment, len, sample, i, y, color, value,
-                    px, px1, pw,
-                    xScale = refFrame.bpPerPixel;
+            for (i = 0, len = featureList.length; i < len; i++) {
+                sample = featureList[i].sample;
+                if (!track.samples.hasOwnProperty(sample)) {
+                    track.samples[sample] = track.sampleCount;
+                    track.sampleCount++;
+                }
+            }
 
-                if (featureList) {
+            checkSize();
 
-                    for (i = 0, len = featureList.length; i < len; i++) {
-                        sample = featureList[i].sample;
-                        if (!track.samples.hasOwnProperty(sample)) {
-                            track.samples[sample] = track.sampleCount;
-                            track.sampleCount++;
-                        }
-                    }
+            checkForLog(featureList);
 
-                    checkSize();
+            for (i = 0, len = featureList.length; i < len; i++) {
 
-                    checkForLog(featureList);
+                segment = featureList[i];
 
-                    for (i = 0, len = featureList.length; i < len; i++) {
+                if (segment.end < bpStart) continue;
+                if (segment.start > bpEnd) break;
 
-                        segment = featureList[i];
+                y = track.samples[segment.sample] * track.sampleHeight;
 
-                        if (segment.end < bpStart) continue;
-                        if (segment.start > bpEnd) break;
+                value = segment.value;
+                if (!track.isLog) {
+                    value = Math.log2(value / 2);
+                }
 
-                        y = track.samples[segment.sample] * track.sampleHeight;
-
-                        value = segment.value;
-                        if(!track.isLog) {
-                            value = Math.log2(value/2);
-                        }
-
-                        if (value < -0.1) {
-                            color = track.negColorScale.getColor(value);
-                        }
-                        else if (value > 0.1) {
-                            color = track.posColorScale.getColor(value);
-                        }
-                        else {
-                            color = "white";
-                        }
-
-                        px = Math.round((segment.start - bpStart) / xScale);
-                        px1 = Math.round((segment.end - bpStart) / xScale);
-                        pw = Math.max(1, px1 - px);
-
-                        canvas.fillRect(px, y, pw, track.sampleHeight, {fillStyle: color});
-
-                    }
+                if (value < -0.1) {
+                    color = track.negColorScale.getColor(value);
+                }
+                else if (value > 0.1) {
+                    color = track.posColorScale.getColor(value);
                 }
                 else {
-                    console.log("No feature list");
+                    color = "white";
                 }
 
-                if (continuation) continuation();
-            },
-            task);
+                px = Math.round((segment.start - bpStart) / xScale);
+                px1 = Math.round((segment.end - bpStart) / xScale);
+                pw = Math.max(1, px1 - px);
+
+                canvas.fillRect(px, y, pw, track.sampleHeight, {fillStyle: color});
+
+            }
+        }
+        else {
+            console.log("No feature list");
+        }
 
 
         function checkSize() {
