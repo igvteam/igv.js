@@ -285,6 +285,12 @@ var igv = (function (igv) {
                     if (features) {
 
                         // TODO -- adjust track height here.
+                        if(self.track.computePixelHeight) {
+                            var desiredHeight = self.track.computePixelHeight(features);
+                            if (desiredHeight > self.contentDiv.clientHeight) {
+                                self.setTrackHeight(desiredHeight);
+                            }
+                        }
 
                         var buffer = document.createElement('canvas');
                         buffer.width = pixelWidth;

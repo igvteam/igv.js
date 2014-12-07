@@ -107,8 +107,6 @@ var igv = (function (igv) {
                 }
             }
 
-            checkSize();
-
             checkForLog(featureList);
 
             for (i = 0, len = featureList.length; i < len; i++) {
@@ -148,18 +146,6 @@ var igv = (function (igv) {
         }
 
 
-        function checkSize() {
-
-            if (track.trackView) {
-
-                var desiredHeight = track.sampleCount * track.sampleHeight;
-                if (desiredHeight > track.trackView.contentDiv.clientHeight) {
-                    track.trackView.setTrackHeight(desiredHeight);
-                }
-
-            }
-        }
-
         function checkForLog(featureList) {
             var i;
             if (track.isLog === undefined) {
@@ -173,6 +159,25 @@ var igv = (function (igv) {
             }
         }
     };
+
+
+    /**
+     * Optional method to compute pixel height to accomodate the list of features.  The implementation below
+     * has side effects (modifiying the samples hash).  This is unfortunate, but harmless.
+     *
+     * @param features
+     * @returns {number}
+     */
+    igv.SegTrack.prototype.computePixelHeight = function(features) {
+        for (i = 0, len = features.length; i < len; i++) {
+            sample = features[i].sample;
+            if (!this.samples.hasOwnProperty(sample)) {
+                this.samples[sample] = this.sampleCount;
+                this.sampleCount++;
+            }
+        }
+        return this.sampleCount * this.sampleHeight;
+    }
 
 
     /**
