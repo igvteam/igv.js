@@ -70,11 +70,11 @@ var igv = (function (igv) {
             zoom = $('<div class="igvNavigationZoom">');
             navigation.append(zoom[ 0 ]);
 
-            zoomOutButton = $('<i class="igv-track-icon fa fa-minus-square-o fa-lg igvNavigationPadding">');
+            zoomOutButton = $('<i class="igv-track-icon fa fa-minus-square-o fa-2x" style="padding-right: 4px;">');
 
             zoom.append(zoomOutButton[ 0 ]);
 
-             zoomInButton = $('<i class="igv-track-icon fa fa-plus-square-o fa-lg igvNavigationPadding">');
+             zoomInButton = $('<i class="igv-track-icon fa fa-plus-square-o fa-2x">');
             zoom.append(zoomInButton[ 0 ]);
 
             zoomInButton.click(function () {
