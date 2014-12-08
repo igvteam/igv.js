@@ -139,7 +139,7 @@ var igv = (function (igv) {
 
     };
 
-    igv.Popover.prototype.show = function (pageX, pageY, content) {
+    igv.Popover.prototype.presentTrackPopup = function (pageX, pageY, content) {
 
         var height;
 
