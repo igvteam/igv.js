@@ -476,7 +476,7 @@ var igv = (function (igv) {
                             xOrigin = Math.round(referenceFrame.toPixels((trackView.tile.startBP - referenceFrame.start)));
                             popupData = trackView.track.popupData(genomicLocation, canvasCoords.x - xOrigin, canvasCoords.y);
                             if (popupData && popupData.length > 0) {
-                                igv.popover.show(e.pageX, e.pageY, igv.formatPopoverText(popupData));
+                                igv.popover.presentTrackPopup(e.pageX, e.pageY, igv.formatPopoverText(popupData));
                             }
                             mouseDownX = undefined;
                             popupTimer = undefined;
