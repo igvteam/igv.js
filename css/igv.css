@@ -62,6 +62,7 @@
     /*font-size: small;*/
     font-size: x-small;
     font-weight: 400;
+    font-weight: bold;
     color: #444;
 
     background: #fff;
@@ -252,7 +253,7 @@
     position: absolute;
     top: 0;
     left:50px;
-    right: 0;
+    right: 48px;
 
     height: 100%;
 
