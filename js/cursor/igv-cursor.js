@@ -389,7 +389,7 @@ var igv = (function (igv) {
 
         browser.presentSortStatus = function (trackView) {
 
-            $(trackView.track.sortButton).addClass("igv-control-sort-fontawesome-selected");
+            $(trackView.track.sortButton).addClass("igv-control-sort-fa-selected");
 
             $(browser.trackContainerDiv).find("i.fa-signal").each(function() {
 
@@ -417,11 +417,11 @@ var igv = (function (igv) {
                 currentDesignatedTrackView = browser.designatedTrack.trackFilter.trackPanel;
 
                 bullseyeInner = $(currentDesignatedTrackView.trackDiv).find("i.fa-circle");
-                bullseyeInner.removeClass("igv-control-bullseye-fontawesome-selected");
-                bullseyeInner.addClass   ("igv-control-bullseye-fontawesome");
+                bullseyeInner.removeClass("igv-control-bullseye-fa-selected");
+                bullseyeInner.addClass   ("igv-control-bullseye-fa");
 
                 bullseyeOuter = $(currentDesignatedTrackView.trackDiv).find("i.fa-circle-thin");
-                bullseyeOuter.removeClass("igv-control-bullseye-fontawesome-selected");
+                bullseyeOuter.removeClass("igv-control-bullseye-fa-selected");
 
                 trackLabelDiv = $(currentDesignatedTrackView.trackDiv).find("div.igv-track-label-div");
                 trackLabelDiv.removeClass("igv-track-label-selected-div");
@@ -431,11 +431,11 @@ var igv = (function (igv) {
             browser.designatedTrack = trackView.track;
 
             bullseyeInner = $(trackView.trackDiv).find("i.fa-circle");
-            bullseyeInner.removeClass("igv-control-bullseye-fontawesome");
-            bullseyeInner.addClass   ("igv-control-bullseye-fontawesome-selected");
+            bullseyeInner.removeClass("igv-control-bullseye-fa");
+            bullseyeInner.addClass   ("igv-control-bullseye-fa-selected");
 
             bullseyeOuter = $(trackView.trackDiv).find("i.fa-circle-thin");
-            bullseyeOuter.addClass("igv-control-bullseye-fontawesome-selected");
+            bullseyeOuter.addClass("igv-control-bullseye-fa-selected");
 
 
             //bullseyeInner.css({
@@ -859,7 +859,7 @@ var igv = (function (igv) {
             bullseyeStackSpan = document.createElement("span");
             $(trackView.leftHandGutter).append($(bullseyeStackSpan));
 
-            bullseyeStackSpan.className = "fa-stack igv-control-bullseye-stack-fontawesome";
+            bullseyeStackSpan.className = "fa-stack igv-control-bullseye-stack-fa";
             track.bullseyeStackSpan = bullseyeStackSpan;
 
             bullseyeOuterIcon = document.createElement("i");
@@ -868,7 +868,7 @@ var igv = (function (igv) {
 
             bullseyeInnerIcon = document.createElement("i");
             bullseyeStackSpan.appendChild(bullseyeInnerIcon);
-            bullseyeInnerIcon.className = "fa fa-stack-1x fa-circle igv-control-bullseye-fontawesome";
+            bullseyeInnerIcon.className = "fa fa-stack-1x fa-circle igv-control-bullseye-fa";
 
             bullseyeStackSpan.onclick = function () {
 
@@ -902,7 +902,7 @@ var igv = (function (igv) {
 
             sortButton = document.createElement("i");
             $(trackView.leftHandGutter).append($(sortButton));
-            sortButton.className = "fa fa-signal igv-control-sort-fontawesome fa-flip-horizontal";
+            sortButton.className = "fa fa-signal igv-control-sort-fa fa-flip-horizontal";
             track.sortButton = sortButton;
 
             sortButton.onclick = function () {
@@ -934,10 +934,10 @@ var igv = (function (igv) {
 
                         if (track === tp.track) {
 
-                            $(tp.track.sortButton).addClass("igv-control-sort-fontawesome-selected");
+                            $(tp.track.sortButton).addClass("igv-control-sort-fa-selected");
                         } else {
 
-                            $(tp.track.sortButton).removeClass("igv-control-sort-fontawesome-selected");
+                            $(tp.track.sortButton).removeClass("igv-control-sort-fa-selected");
                         }
                     });
 
@@ -952,8 +952,8 @@ var igv = (function (igv) {
             var myself = this,
                 removeButton;
 
-            $(trackManipulationIconBox).append($('<i class="fa fa-chevron-circle-up   igv-track-manipulation-move-up">')[0]);
-            $(trackManipulationIconBox).append($('<i class="fa fa-chevron-circle-down igv-track-manipulation-move-down">')[0]);
+            $(trackManipulationIconBox).append($('<i class="fa fa-chevron-circle-up   igv-track-menu-move-up">')[0]);
+            $(trackManipulationIconBox).append($('<i class="fa fa-chevron-circle-down igv-track-menu-move-down">')[0]);
 
             $(trackManipulationIconBox).find("i.fa-chevron-circle-up").click(function () {
                 myself.browser.reduceTrackOrder(myself)
@@ -963,7 +963,7 @@ var igv = (function (igv) {
                 myself.browser.increaseTrackOrder(myself)
             });
 
-            removeButton = $('<i class="fa fa-times igv-track-manipulation-discard">')[0];
+            removeButton = $('<i class="fa fa-times igv-track-menu-discard">')[0];
             $(trackManipulationIconBox).append(removeButton);
 
             $(removeButton).click(function () {

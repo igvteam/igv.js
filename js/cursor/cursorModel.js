@@ -148,9 +148,9 @@ var cursor = (function (cursor) {
         $(this.browser.trackContainerDiv).find("i.fa-signal").each(function() {
 
             var me = $(this);
-            if (me.hasClass("igv-control-sort-fontawesome-selected")) {
+            if (me.hasClass("igv-control-sort-fa-selected")) {
 
-                me.removeClass("igv-control-sort-fontawesome-selected");
+                me.removeClass("igv-control-sort-fa-selected");
             }
 
          });
