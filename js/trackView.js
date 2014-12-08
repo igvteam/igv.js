@@ -263,8 +263,10 @@ var igv = (function (igv) {
         if (!hasCachedImaged.call(this)) {
 
             // First see if there is a load in progress that would satisfy the paint request
-            if (this.currentTask && this.currentTask.end >= refFrameEnd && this.currentTask.start <= refFrameStart) {
+            if (this.currentTask && (isNotIndexed(track) ||
+                (this.currentTask.end >= refFrameEnd && this.currentTask.start <= refFrameStart))) {
                 // Nothing to do but wait for current load task to complete
+                console.log("Skipping repaint");
             }
 
             else {
@@ -285,7 +287,7 @@ var igv = (function (igv) {
                     if (features) {
 
                         // TODO -- adjust track height here.
-                        if(self.track.computePixelHeight) {
+                        if (self.track.computePixelHeight) {
                             var desiredHeight = self.track.computePixelHeight(features);
                             if (desiredHeight > self.contentDiv.clientHeight) {
                                 self.setTrackHeight(desiredHeight);
@@ -358,6 +360,14 @@ var igv = (function (igv) {
 
         function viewIsReady() {
             return this.track && this.browser && this.browser.referenceFrame;
+        }
+
+        /**
+         * Return true if the track is known to be not indexed.
+         * @param track
+         */
+        function isNotIndexed(track) {
+            return track.featureSource && track.featureSource.indexed === false;
         }
 
 

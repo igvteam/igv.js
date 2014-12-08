@@ -180,9 +180,11 @@ var igv = (function (igv) {
                 igv.loadTribbleIndex(idxFile, myself.config, function (index) {
                     myself.index = index;              // index might be null => no index, don't try again
                     if(index) {
+                        myself.indexed = true;
                         loadFeaturesWithIndex(index);
                     }
                     else {
+                        myself.indexed = false;
                         loadFeaturesNoIndex();
                     }
                 });
