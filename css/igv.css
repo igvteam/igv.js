@@ -149,7 +149,7 @@
 
 .igv-popoverContent .igv-popoverValue {
     padding-left: 4px;
-    float: right;
+    float: left;
 }
 
 /* spinner */
