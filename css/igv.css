@@ -128,26 +128,26 @@
     /*background-color: hotpink;*/
 }
 
-.igv-popoverContent .igv-popoverBorderTop {
+.igv-popoverBorderTop {
     border-top-color: #a2a2a2;
     /*border-top-color: #f00;*/
     border-top-style: solid;
     border-top-width: thin;
 }
 
-.igv-popoverContent .igv-popoverBorderBottom {
+.igv-popoverBorderBottom {
     border-bottom-color: #eee;
     border-bottom-style: solid;
     border-bottom-width: thin;
 }
 
-.igv-popoverContent .igv-popoverName {
+.igv-popoverName {
     font-weight: bold;
     padding-right: 4px;
     float: left;
 }
 
-.igv-popoverContent .igv-popoverValue {
+.igv-popoverValue {
     padding-left: 4px;
     float: left;
 }
@@ -362,6 +362,11 @@
     position: absolute;
     left: 20px;
     top: 0;
+}
+
+.igv-track-menu-item {
+    padding-left: 2px;
+    padding-right: 2px;
 }
 
 .igv-track-menu-discard {
