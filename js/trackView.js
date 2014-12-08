@@ -92,7 +92,9 @@ var igv = (function (igv) {
 
     igv.TrackView.prototype.viewportCreationHelper = function (viewportDiv) {
 
-        var trackIconContainer,
+        var myself = this,
+            labelButton,
+            trackIconContainer,
             labelSpan;
 
         if ("CURSOR" !== this.browser.type) {
@@ -102,9 +104,34 @@ var igv = (function (igv) {
 
             if (this.track.label) {
 
-                labelSpan = $('<span class="igv-track-label-span-base">')[0];
-                labelSpan.innerHTML = this.track.label;
-                $(trackIconContainer).append(labelSpan);
+                if (myself.track.description) {
+
+                    labelButton = document.createElement("button");
+                    viewportDiv.appendChild(labelButton);
+
+                    labelButton.className = "btn btn-xs btn-cursor-deselected";
+                    labelButton.style.position = "absolute";
+                    labelButton.style.top = "10px";
+                    labelButton.style.left = "10px";
+                    labelButton.innerHTML = this.track.label;
+
+                    this.track.labelButton = labelButton;
+
+                    labelButton.onclick = function (e) {
+                        igv.popover.presentTrackPopup(e.pageX, e.pageY, myself.track.description);
+                    }
+
+                } else {
+
+                    labelSpan = $('<span class="igv-track-label-span-base">')[0];
+                    labelSpan.innerHTML = this.track.label;
+                    $(trackIconContainer).append(labelSpan);
+
+                }
+            }
+
+            if (this.track.label) {
+
             }
         }
     };
