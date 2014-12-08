@@ -255,34 +255,38 @@ var igv = (function (igv) {
             self = this,
             igvCanvas,
             referenceFrame = this.browser.referenceFrame,
+            chr = referenceFrame.chr,
             refFrameStart = referenceFrame.start,
             refFrameEnd = refFrameStart + referenceFrame.toBP(this.canvas.width),
             success;
 
 
-        if (!hasCachedImaged.call(this)) {
+        if (!hasCachedImaged.call(this, chr, refFrameEnd, refFrameEnd, referenceFrame.bpPerPixel)) {
 
             // First see if there is a load in progress that would satisfy the paint request
-            if (this.currentTask && (isNotIndexed(track) ||
-                (this.currentTask.end >= refFrameEnd && this.currentTask.start <= refFrameStart))) {
+            if (this.currentLoadTask && (isNotIndexed(this.track) ||
+                (this.currentLoadTask.end >= refFrameEnd && this.currentLoadTask.start <= refFrameStart))) {
                 // Nothing to do but wait for current load task to complete
-                console.log("Skipping repaint");
+                console.log("Skipping load");
             }
 
             else {
 
-                if (this.currentTask) {
-                    this.currentTask.abort();
+                // If there is a load in progress cancel it
+                if (this.currentLoadTask) {
+                    this.currentLoadTask.abort();
                 }
 
+                // Expand the requested range so we can pan a bit without reloading
                 pixelWidth = 3 * this.canvas.width;
                 bpWidth = Math.round(referenceFrame.toBP(pixelWidth));
                 bpStart = Math.max(0, Math.round(referenceFrame.start - bpWidth / 3));
                 bpEnd = bpStart + bpWidth;
+
                 success = function (features) {
 
                     igv.stopSpinner(self.trackDiv);
-                    self.currentTask = undefined;
+                    self.currentLoadTask = undefined;
 
                     if (features) {
 
@@ -327,20 +331,20 @@ var igv = (function (igv) {
 
                 };
 
-                this.currentTask = {
+                this.currentLoadTask = {
                     abort: function () {
                         this.canceled = true;
                         if (this.xhrRequest) {
                             this.xhrRequest.abort();
                         }
                         igv.stopSpinner(self.trackDiv);
-                        self.currentTask = undefined;
+                        self.currentLoadTask = undefined;
                     }
                 };
 
                 igv.startSpinner(self.trackDiv);
 
-                this.track.getFeatures(referenceFrame.chr, bpStart, bpEnd, success, self.currentTask);
+                this.track.getFeatures(referenceFrame.chr, bpStart, bpEnd, success, self.currentLoadTask);
             }
 
         }
@@ -352,9 +356,11 @@ var igv = (function (igv) {
             this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
         }
 
-
-        function hasCachedImaged() {
-            return this.tile && this.tile.containsRange(referenceFrame.chr, refFrameStart, refFrameEnd, referenceFrame.bpPerPixel);
+        /**
+         * Return true if we have a cached image (the "tile") that covers the requested range at the requested resolution
+         */
+        function hasCachedImaged(chr, start, end, bpPerPixel) {
+            return this.tile && this.tile.containsRange(chr, start, end, bpPerPixel);
         }
 
 
@@ -400,9 +406,6 @@ var igv = (function (igv) {
             this.ctx.drawImage(this.tile.image, this.xOffset, 0);
             this.ctx.save();
             this.ctx.restore();
-
-
-            console.log("Paint image " + this.track.label + "  " + this.tile.image.height);
         }
     };
 
