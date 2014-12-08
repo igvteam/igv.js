@@ -330,7 +330,7 @@
     /*border-left-style: solid;*/
 }
 
-.igv-track-menu-icon-box {
+.igv-app-icon-box {
 
     position: absolute;
     left: 0;
@@ -347,14 +347,14 @@
 
 }
 
-.igv-track-menu-icon {
+.igv-app-icon {
     color: grey;
     background-color: white;
 }
 
-.igv-track-menu-icon:hover,
-.igv-track-menu-icon:focus,
-.igv-track-menu-icon:active  {
+.igv-app-icon:hover,
+.igv-app-icon:focus,
+.igv-app-icon:active  {
     color: rgba(51, 51, 51, 1);
 }
 
@@ -364,9 +364,25 @@
     top: 0;
 }
 
-.igv-track-menu-item {
+.igv-track-menu-container {
     padding-left: 2px;
     padding-right: 2px;
+}
+
+.igv-track-menu-container a {
+    color: inherit;
+    text-decoration: none;
+}
+
+.igv-track-menu-item {
+    /* nuthin */
+}
+
+.igv-track-menu-item:hover,
+.igv-track-menu-item:focus,
+.igv-track-menu-item:active  {
+    font-weight: bolder;
+    color: rgba(51, 51, 51, 1);
 }
 
 .igv-track-menu-discard {
@@ -390,7 +406,7 @@
     height: 100%;
 }
 
-.igv-track-menu-icon-container {
+.igv-app-icon-container {
     position: absolute;
     left: 10px;
     top: 4px;
