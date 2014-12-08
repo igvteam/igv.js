@@ -274,7 +274,7 @@ var igv = (function (igv) {
             success;
 
 
-        if (!hasCachedImaged.call(this, chr, refFrameEnd, refFrameEnd, referenceFrame.bpPerPixel)) {
+        if (!hasCachedImaged.call(this, chr, refFrameStart, refFrameEnd, referenceFrame.bpPerPixel)) {
 
             // First see if there is a load in progress that would satisfy the paint request
             if (this.currentLoadTask && (isNotIndexed(this.track) ||
@@ -345,6 +345,8 @@ var igv = (function (igv) {
                 };
 
                 this.currentLoadTask = {
+                    start: bpStart,
+                    end: bpEnd,
                     abort: function () {
                         this.canceled = true;
                         if (this.xhrRequest) {
