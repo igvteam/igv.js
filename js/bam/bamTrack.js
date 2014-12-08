@@ -69,7 +69,7 @@ var igv = (function (igv) {
 
     igv.BAMTrack.prototype.draw = function (options) {
 
-        var features = options.features,
+        var genomicInterval = options.features,
             canvas = options.context,
             bpPerPixel = options.bpPerPixel,
             bpStart = options.bpStart,
@@ -82,7 +82,7 @@ var igv = (function (igv) {
             deletionColor = this.deletionColor,
             bpEnd = bpStart + pixelWidth * bpPerPixel + 1;
 
-        if (features.exceedsVisibilityWindow) {
+        if (genomicInterval.exceedsVisibilityWindow) {
             var x;
             for (x = 200; x < pixelWidth; x += 400)
                 canvas.fillText("Zoom in to see alignments", x, 20, {fillStye: 'black'});
@@ -90,13 +90,13 @@ var igv = (function (igv) {
         }
 
 
-        if (features) {
-            drawCoverage(features.coverageMap, features.sequence);
-            drawAlignments(features.packedAlignments, features.sequence);
+        if (genomicInterval) {
+            drawCoverage(genomicInterval.coverageMap);
+            drawAlignments(genomicInterval);
         }
 
 
-        function drawCoverage(coverageMap, sequence) {
+        function drawCoverage(coverageMap) {
             var bp,
                 x,
                 y,
@@ -107,10 +107,12 @@ var igv = (function (igv) {
                 len,
                 item,
                 accumulatedHeight,
-                rect = { x: 0, y: 0, width: 0, height: 0 };
-            if (sequence) {
-                sequence = sequence.toUpperCase();
-            }
+                rect = { x: 0, y: 0, width: 0, height: 0 },
+                sequence;
+
+
+            if (coverageMap.refSeq) sequence = coverageMap.refSeq.toUpperCase();
+
             // coverage track
             canvas.setProperties({ fillStyle: alignmentColor });
             canvas.setProperties({ strokeStyle: alignmentColor });
@@ -152,7 +154,7 @@ var igv = (function (igv) {
                         item = coverageMap.coverage[i];
                         if (!item) continue;
 
-                        refBase = sequence[i + coverageMap.bpStart - bpStart];
+                        refBase = sequence[i];
                         if (item.isMismatch(refBase)) {
                             x = (bp - bpStart) / bpPerPixel;
                             h = (item.total / coverageMap.maximum) * myself.coverageTrackHeight;
@@ -177,6 +179,10 @@ var igv = (function (igv) {
         }
 
         function drawAlignments(packedAlignments, sequence) {
+
+        var packedAlignments = genomicInterval.packedAlignments,
+            sequence = genomicInterval.sequence,
+            sequenceStart = genomicInterval.start;
 
             if (sequence) {
                 sequence = sequence.toUpperCase();
@@ -221,6 +227,7 @@ var igv = (function (igv) {
 
                         blocks.forEach(function (block, blockIndex) {
                             var refOffset = block.start - bpStart,
+                                seqOffset = block.start - sequenceStart,
                                 blockRectX = refOffset / bpPerPixel,
                                 blockEndX = ((block.start + block.len) - bpStart) / bpPerPixel,
                                 blockRectWidth = Math.max(1, blockEndX - blockRectX),
@@ -254,7 +261,7 @@ var igv = (function (igv) {
                                 for (i = 0, len = blockSeq.length; i < len; i++) {
 
                                     readChar = blockSeq.charAt(i);
-                                    refChar = sequence.charAt(refOffset + i);
+                                    refChar = sequence.charAt(seqOffset + i);
                                     if (readChar === "=") {
                                         readChar = refChar;
                                     }
@@ -375,9 +382,9 @@ var igv = (function (igv) {
      * @param features
      * @returns {number}
      */
-    igv.BAMTrack.prototype.computePixelHeight = function(features) {
+    igv.BAMTrack.prototype.computePixelHeight = function (features) {
 
-        if(features.packedAlignments) {
+        if (features.packedAlignments) {
             return this.alignmentRowYInset + this.coverageTrackHeight + (this.alignmentRowHeight * features.packedAlignments.length) + 5;
         }
         else {
