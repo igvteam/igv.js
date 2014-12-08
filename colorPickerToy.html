@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html>
+<head lang="en">
+    <meta charset="UTF-8">
+    <title>Color Picker Toy</title>
+
+    <link rel="stylesheet" type="text/css" href="http://ajax.googleapis.com/ajax/libs/jqueryui/1.8.16/themes/ui-lightness/jquery-ui.css"/>
+    <link rel="stylesheet" type="text/css" href="colorpickers/vanderlee-github-io/jquery.colorpicker.css"/>
+
+    <script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.js"></script>
+    <script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jqueryui/1.8.16/jquery-ui.js"></script>
+
+    <script type="text/javascript" src="colorpickers/vanderlee-github-io/jquery.colorpicker.js"></script>
+
+    <script type="text/javascript" src="colorpickers/vanderlee-github-io/i18n/jquery.ui.colorpicker-nl.js"></script>
+    <script type="text/javascript" src="colorpickers/vanderlee-github-io/swatches/jquery.ui.colorpicker-pantone.js"></script>
+    <script type="text/javascript" src="colorpickers/vanderlee-github-io/parts/jquery.ui.colorpicker-rgbslider.js"></script>
+    <script type="text/javascript" src="colorpickers/vanderlee-github-io/parts/jquery.ui.colorpicker-memory.js"></script>
+    <script type="text/javascript" src="colorpickers/vanderlee-github-io/parsers/jquery.ui.colorpicker-cmyk-parser.js"></script>
+    <script type="text/javascript" src="colorpickers/vanderlee-github-io/parsers/jquery.ui.colorpicker-cmyk-percentage-parser.js"></script>
+
+</head>
+<body>
+<div id="tab-no-inline">
+    <h2>Popup from any element (&lt;em&gt;)</h2>
+    Click <em>Emphasized</em> to present colorpicker.
+
+    <script>
+        $(function() {
+            $('em').colorpicker({
+                inline: false
+            });
+        });
+    </script>
+</div>
+
+</body>
+</html>
