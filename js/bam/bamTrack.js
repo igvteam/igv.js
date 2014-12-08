@@ -39,6 +39,7 @@ var igv = (function (igv) {
         this.label = config.label || "";
         this.id = config.id || this.label;
         this.height = config.height || 400;
+        this.maxHeight = config.maxHeight || this.height;
         this.alignmentRowHeight = config.expandedHeight || 14;
         this.alignmentRowYInset = 1;
         this.visibilityWindow = config.visibilityWindow || 30000;     // 30kb default
@@ -365,6 +366,26 @@ var igv = (function (igv) {
         return nameValues;
 
     };
+
+
+    /**
+     * Optional method to compute pixel height to accomodate the list of features.  The implementation below
+     * has side effects (modifiying the samples hash).  This is unfortunate, but harmless.
+     *
+     * @param features
+     * @returns {number}
+     */
+    igv.BAMTrack.prototype.computePixelHeight = function(features) {
+
+        if(features.packedAlignments) {
+            return this.alignmentRowYInset + this.coverageTrackHeight + (this.alignmentRowHeight * features.packedAlignments.length) + 5;
+        }
+        else {
+            return this.height;
+        }
+
+    }
+
 
     function shadedBaseColor(qual, nucleotide) {
 
