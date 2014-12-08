@@ -51,7 +51,7 @@ var igv = (function (igv) {
 
         // spinner
         var spinner = document.createElement("i");
-        spinner.className = "fa fa-spinner fa-2x fa-spin igv-spinner-fontawesome-start";
+        spinner.className = "fa fa-spinner fa-2x fa-spin igv-spinner-fa-start";
 
         return spinner;
     };
@@ -64,8 +64,8 @@ var igv = (function (igv) {
         var spinner = $(parentElement).find("i.fa-spinner");
 
         if (spinner) {
-            spinner.removeClass("igv-spinner-fontawesome-stop");
-            spinner.addClass("igv-spinner-fontawesome-start");
+            spinner.removeClass("igv-spinner-fa-stop");
+            spinner.addClass("igv-spinner-fa-start");
         }
 
     };
@@ -79,8 +79,8 @@ var igv = (function (igv) {
         var spinner = $(parentElement).find("i.fa-spinner");
 
         if (spinner) {
-            spinner.removeClass("igv-spinner-fontawesome-start");
-            spinner.addClass("igv-spinner-fontawesome-stop");
+            spinner.removeClass("igv-spinner-fa-start");
+            spinner.addClass("igv-spinner-fa-stop");
         }
 
     };

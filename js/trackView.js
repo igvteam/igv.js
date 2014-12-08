@@ -97,7 +97,7 @@ var igv = (function (igv) {
 
         if ("CURSOR" !== this.browser.type) {
 
-            trackIconContainer = $('<div class = "igv-track-icon-container">')[0];
+            trackIconContainer = $('<div class = "igv-track-menu-icon-container">')[0];
             $(viewportDiv).append(trackIconContainer);
 
             if (this.track.label) {
@@ -140,7 +140,7 @@ var igv = (function (igv) {
         this.rightHandGutter = $('<div class="igv-right-hand-gutter">')[0];
         $(trackDiv).append(this.rightHandGutter);
 
-        trackManipulationIconBox = $('<div class="igv-track-manipulation-icon-box">')[0];
+        trackManipulationIconBox = $('<div class="igv-track-menu-icon-box">')[0];
         $(this.rightHandGutter).append(trackManipulationIconBox);
 
         this.rightHandGutterCreationHelper(trackManipulationIconBox);
@@ -169,7 +169,7 @@ var igv = (function (igv) {
 
         trackMenuItems.push(objectClick);
 
-        gearButton = $('<i class="fa fa-gear fa-lg igv-track-manipulation-gear igv-track-icon">')[0];
+        gearButton = $('<i class="fa fa-gear fa-lg igv-track-menu-gear igv-track-menu-icon">')[0];
         $(trackManipulationIconBox).append(gearButton);
 
         $(gearButton).click(function (e) {

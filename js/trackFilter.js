@@ -55,12 +55,12 @@ igv = (function (igv) {
 
             if (undefined !== json.minimum || undefined !== json.maximum) {
 
-                modalPresentationButton.addClass("igv-trackfilter-fontawesome-selected");
+                modalPresentationButton.addClass("igv-trackfilter-fa-selected");
             }
 
         } else if (this.isFilterActive) {
 
-            modalPresentationButton.addClass("igv-trackfilter-fontawesome-selected");
+            modalPresentationButton.addClass("igv-trackfilter-fa-selected");
         }
 
         function radioButtonWithID(radioButtonID) {
@@ -139,13 +139,13 @@ igv = (function (igv) {
         // This will undo this filter if previously set
         if (!this.isFilterActive) {
 
-            modalPresentationButton.removeClass("igv-trackfilter-fontawesome-selected");
+            modalPresentationButton.removeClass("igv-trackfilter-fa-selected");
 
             this.trackPanel.browser.cursorModel.filterRegions();
             return;
         }
 
-        modalPresentationButton.addClass("igv-trackfilter-fontawesome-selected");
+        modalPresentationButton.addClass("igv-trackfilter-fa-selected");
 
         if ("minMaxRadio_" + this.guid === this.radioButton[0].id) {
 
@@ -154,7 +154,7 @@ igv = (function (igv) {
 
             if (undefined === this.minimum && undefined === this.maximum) {
 
-                modalPresentationButton.removeClass("igv-trackfilter-fontawesome-selected");
+                modalPresentationButton.removeClass("igv-trackfilter-fa-selected");
             }
         }
 
@@ -298,7 +298,7 @@ igv = (function (igv) {
             presentationButton;
 
 //        presentationButton = '<i id="modalPresentationButton_GUID" class="fa fa-filter" data-toggle="modal" data-target="#modalDialogDataTarget_GUID" style="color: black; position: absolute; top: 0; left: 0; cursor: pointer;"></i>';
-        presentationButton = '<i id="modalPresentationButton_GUID" class="glyphicon glyphicon-filter igv-trackfilter-fontawesome" data-toggle="modal" data-target="#modalDialogDataTarget_GUID"></i>';
+        presentationButton = '<i id="modalPresentationButton_GUID" class="glyphicon glyphicon-filter igv-trackfilter-fa" data-toggle="modal" data-target="#modalDialogDataTarget_GUID"></i>';
 
         presentationButton = presentationButton.replace(re, guid);
 
