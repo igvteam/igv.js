@@ -6,82 +6,63 @@
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
     <meta name="description" content="">
     <meta name="author" content="">
+
     <link rel="shortcut icon" href=img/favicon.ico>
     <title>IGV - Integrative Genomics Viewer</title>
 
-    <!-- Bootstrap core CSS -->
-    <link href="//maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Color Picker CSS -->
+    <link rel="stylesheet" type="text/css" href="//ajax.googleapis.com/ajax/libs/jqueryui/1.11.2/themes/smoothness/jquery-ui.css"/>
+    <link rel="stylesheet" type="text/css" href="colorpickers/vanderlee-github-io/jquery.colorpicker.css"/>
 
-    <link href="//maxcdn.bootstrapcdn.com/font-awesome/4.2.0/css/font-awesome.min.css" rel="stylesheet">
+    <!-- Google fonts -->
+    <link rel="stylesheet" type="text/css" href='http://fonts.googleapis.com/css?family=PT+Sans:400,700'>
 
-    <!-- IGV Bootstrap css -->
-    <link href="css/igv.css" type="text/css" rel="stylesheet">
+    <!-- Custom Bootstrap CSS -->
+    <link rel="stylesheet" type="text/css" href="bootstrap/bootstrap-theme.css">
+    <link rel="stylesheet" type="text/css" href="bootstrap/bootstrap.css">
 
+    <!-- Font Awesome CSS -->
+    <link rel="stylesheet" type="text/css" href="//maxcdn.bootstrapcdn.com/font-awesome/4.2.0/css/font-awesome.min.css">
 
-    <!-- HTML5 shim and Respond.js IE8 support of HTML5 elements and media queries -->
-    <!--[if lt IE 9]>
-    <script src="//oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
-    <script src="//oss.maxcdn.com/libs/respond.js/1.4.2/respond.min.js"></script>
-    <![endif]-->
+    <!-- IGV CSS -->
+    <link rel="stylesheet" type="text/css" href="css/igv.css">
 
-    <script src="//code.jquery.com/jquery-1.11.0.min.js"></script>
+    <!-- jQuery JS -->
+    <script type="text/javascript" src="//ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
+    <script type="text/javascript" src="//ajax.googleapis.com/ajax/libs/jqueryui/1.11.2/jquery-ui.min.js"></script>
 
-    <!-- Bootstrap -->
-    <script src="//maxcdn.bootstrapcdn.com/bootstrap/3.2.0/js/bootstrap.min.js"></script>
+    <!-- Color Picker JS -->
+    <script type="text/javascript" src="colorpickers/vanderlee-github-io/jquery.colorpicker.js"></script>
+    <script type="text/javascript" src="colorpickers/vanderlee-github-io/i18n/jquery.ui.colorpicker-nl.js"></script>
+    <script type="text/javascript" src="colorpickers/vanderlee-github-io/swatches/jquery.ui.colorpicker-pantone.js"></script>
+    <script type="text/javascript" src="colorpickers/vanderlee-github-io/parts/jquery.ui.colorpicker-rgbslider.js"></script>
+    <script type="text/javascript" src="colorpickers/vanderlee-github-io/parts/jquery.ui.colorpicker-memory.js"></script>
+    <script type="text/javascript" src="colorpickers/vanderlee-github-io/parsers/jquery.ui.colorpicker-cmyk-parser.js"></script>
+    <script type="text/javascript" src="colorpickers/vanderlee-github-io/parsers/jquery.ui.colorpicker-cmyk-percentage-parser.js"></script>
 
-    <script type="text/javascript" src="vendor/inflate.js"></script>
-    <script type="text/javascript" src="vendor/zlib_and_gzip.min.js"></script>
-    <!--   <script type="text/javascript" src="vendor/bootstrap/plugins/holder.js"></script>  -->
+    <!-- Custom Bootstrap JS -->
+    <script type="text/javascript" src="bootstrap/bootstrap.js"></script>
 
-    <script type="text/javascript" src="js/igv.js"></script>
-    <script type="text/javascript" src="js/popover.js"></script>
-    <script type="text/javascript" src="js/browser.js"></script>
-    <script type="text/javascript" src="js/ideogram.js"></script>
-    <script type="text/javascript" src="js/referenceFrame.js"></script>
-    <script type="text/javascript" src="js/igv-canvas.js"></script>
-    <script type="text/javascript" src="js/genome.js"></script>
-    <script type="text/javascript" src="js/trackView.js"></script>
-    <script type="text/javascript" src="js/rulerTrack.js"></script>
-    <script type="text/javascript" src="js/bedTrack.js"></script>
-    <script type="text/javascript" src="js/igv-color.js"></script>
-    <script type="text/javascript" src="js/igv-utils.js"></script>
-    <script type="text/javascript" src="js/parseUtils.js"></script>
-    <script type="text/javascript" src="js/fasta.js"></script>
-    <script type="text/javascript" src="js/sequenceTrack.js"></script>
-    <script type="text/javascript" src="js/wigTrack.js"></script>
-    <script type="text/javascript" src="js/dataloader.js"></script>
-    <script type="text/javascript" src="js/igv-exts.js"></script>
-    <script type="text/javascript" src="js/igvxhr.js"></script>
-    <script type="text/javascript" src="js/binary.js"></script>
+    <!-- IGV JS-->
+    <script type="text/javascript" src="dist/igv-all.min.js"></script>
 
-    <script type="text/javascript" src="js/gtex/eqtlTrack.js"></script>
-    <script type="text/javascript" src="js/gtex/eqtlSource.js"></script>
-    <script type="text/javascript" src="js/gtex/gtex.js"></script>
+    <!-- Google analytics -->
+    <script>
+        (function (i, s, o, g, r, a, m) {
+            i['GoogleAnalyticsObject'] = r;
+            i[r] = i[r] || function () {
+                (i[r].q = i[r].q || []).push(arguments)
+            }, i[r].l = 1 * new Date();
+            a = s.createElement(o),
+                    m = s.getElementsByTagName(o)[0];
+            a.async = 1;
+            a.src = g;
+            m.parentNode.insertBefore(a, m)
+        })(window, document, 'script', '//www.google-analytics.com/analytics.js', 'ga');
 
-    <script type="text/javascript" src="js/bam/coverageMap.js"></script>
-    <script type="text/javascript" src="js/bam/bamReader.js"></script>
-    <script type="text/javascript" src="js/bam/bgzf.js"></script>
-    <script type="text/javascript" src="js/bam/bamSource.js"></script>
-    <script type="text/javascript" src="js/bam/bamTrack.js"></script>
-    <script type="text/javascript" src="js/bam/bamAlignment.js"></script>
-    <script type="text/javascript" src="js/bam/ga4gh.js"></script>
-    <script type="text/javascript" src="js/bam/ga4ghReader.js"></script>
-    <script type="text/javascript" src="js/intervalTree.js"></script>
-    <script type="text/javascript" src="js/igv-constants.js"></script>
-
-    <script type="text/javascript" src="js/bed/featureCache.js"></script>
-    <script type="text/javascript" src="js/bed/bedSource.js"></script>
-    <script type="text/javascript" src="js/bed/bedParser.js"></script>
-    <script type="text/javascript" src="js/bed/tribble.js"></script>
-
-    <script type="text/javascript" src="js/encode/encode.js"></script>
-    <script type="text/javascript" src="js/cursor/cursorTrack.js"></script>
-    <script type="text/javascript" src="js/cursor/cursorModel.js"></script>
-    <script type="text/javascript" src="js/cursor/cursor-ideogram.js"></script>
-
-    <script type="text/javascript" src="js/karyo/karyo.js"></script>
-    <script type="text/javascript" src="js/gwas/t2dVariantSource.js"></script>
-    <script type="text/javascript" src="js/gwas/t2dVariantTrack.js"></script>
+        ga('create', 'UA-56881203-3', 'auto');
+        ga('send', 'pageview');
+    </script>
 
 </head>
 
