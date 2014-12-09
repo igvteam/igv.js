@@ -9,7 +9,14 @@ module.exports = function (grunt) {
                 src: [
                     'js/**/*.js',
                     'vendor/inflate.js',
-                    'vendor/zlib_and_gzip.min.js'
+                    'vendor/zlib_and_gzip.min.js',
+                    'vendor/colorpickers/vanderlee-github-io/jquery.colorpicker.js',
+                    'vendor/colorpickers/vanderlee-github-io/i18n/jquery.ui.colorpicker-nl.js',
+                    'vendor/colorpickers/vanderlee-github-io/swatches/jquery.ui.colorpicker-pantone.js',
+                    'vendor/colorpickers/vanderlee-github-io/parts/jquery.ui.colorpicker-rgbslider.js',
+                    'vendor/colorpickers/vanderlee-github-io/parts/jquery.ui.colorpicker-memory.js',
+                    'vendor/colorpickers/vanderlee-github-io/parsers/jquery.ui.colorpicker-cmyk-parser.js',
+                    'vendor/colorpickers/vanderlee-github-io/parsers/jquery.ui.colorpicker-cmyk-percentage-parser.js'
                 ],
                 dest: 'dist/igv-all.js'
             }
