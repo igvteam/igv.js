@@ -55,7 +55,40 @@ var igv = (function (igv) {
 
         trackColorItem[ "object" ] = $('<div id="featureColorPicker" class="igv-track-menu-item">Feature Color</div>');
         trackColorItem[  "click" ] = function () {
-            $("#featureColorPicker").colorpicker(igv.colorPickerConfig);
+
+            $("#featureColorPicker").colorpicker(
+
+                {
+                    inline: false,
+
+                    init:			function(event, color) {
+                        console.log('colorpicker.init', color.formatted);
+                    },
+
+                    select:			function(event, color) {
+                        console.log('colorpicker.select', color.formatted);
+                    },
+
+                    close:			function(event, color) {
+                        console.log('colorpicker.close', color.formatted + ' r:' + color.rgb.r + ' g:' + color.rgb.g + ' b:' + color.rgb.b + ' a:' + color.a);
+                    },
+
+                    ok:         	function(event, color) {
+                        console.log('colorpicker.ok', color.formatted + ' r:' + color.rgb.r + ' g:' + color.rgb.g + ' b:' + color.rgb.b + ' a:' + color.a);
+                        igv.setTrackColor(trackView.track, igv.rgbColor(Math.floor(255 * color.rgb.r), Math.floor(255 * color.rgb.g), Math.floor(255 * color.rgb.b)));
+
+                    },
+
+                    open:         	function(event, color) {
+                        console.log('colorpicker.open', color.formatted + ' r:' + color.rgb.r + ' g:' + color.rgb.g + ' b:' + color.rgb.b + ' a:' + color.a);
+                    },
+
+                    cancel:			function(event, color) {
+                        console.log('colorpicker.cancel', color.formatted + ' r:' + color.rgb.r + ' g:' + color.rgb.g + ' b:' + color.rgb.b + ' a:' + color.a);
+                    }
+                }
+
+            );
         };
 
         menuItems.push(trackColorItem);
@@ -76,6 +109,7 @@ var igv = (function (igv) {
         },
         ok:         	function(event, color) {
             console.log('colorpicker.ok', color.formatted + ' r:' + color.rgb.r + ' g:' + color.rgb.g + ' b:' + color.rgb.b + ' a:' + color.a);
+
         },
         open:         	function(event, color) {
             console.log('colorpicker.open', color.formatted + ' r:' + color.rgb.r + ' g:' + color.rgb.g + ' b:' + color.rgb.b + ' a:' + color.a);
