@@ -167,7 +167,9 @@ var igv = (function (igv) {
         }
 
         var geneColor;
-        if (igv.selection) geneColor = igv.selection.colorForGene(gene.name); // TODO -- for gtex, figure out a better way to do this
+        if (igv.selection) {
+            geneColor = igv.selection.colorForGene(gene.name);
+        } // TODO -- for gtex, figure out a better way to do this
 
         if ((px1 - px) > 10 || geneColor) {
 
