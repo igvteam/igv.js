@@ -25,6 +25,36 @@
 
 var igv = (function (igv) {
 
+    igv.trackMenuItems = function (popover, trackView) {
+
+        var menuItems = [ ],
+            deleteItem;
+
+        deleteItem = { };
+        deleteItem[ "object" ] = $('<div class="igv-track-menu-item">DELETE</div>');
+        deleteItem[  "click" ] = function () {
+            popover.hide();
+            trackView.browser.removeTrack(trackView.track);
+        };
+
+        menuItems.push(deleteItem);
+        ["Track Name", "Track Height", "Feature Color"].forEach(function (label) {
+
+            var menuItem = { };
+
+            menuItem[ "object" ] = $('<div class="igv-track-menu-item">');
+            menuItem[ "object" ].html(label);
+
+            menuItem[ "click" ] = function () {
+                console.log(label);
+            };
+
+            menuItems.push(menuItem);
+        });
+
+        return menuItems
+    };
+
     igv.colorPickerConfig = {
         inline: false,
         init:			function(event, color) {
