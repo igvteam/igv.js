@@ -28,9 +28,9 @@ var igv = (function (igv) {
     igv.trackMenuItems = function (popover, trackView) {
 
         var menuItems = [ ],
-            deleteItem;
+            deleteItem = { },
+            trackColorItem = { };
 
-        deleteItem = { };
         deleteItem[ "object" ] = $('<div class="igv-track-menu-item">DELETE</div>');
         deleteItem[  "click" ] = function () {
             popover.hide();
@@ -38,7 +38,7 @@ var igv = (function (igv) {
         };
 
         menuItems.push(deleteItem);
-        ["Track Name", "Track Height", "Feature Color"].forEach(function (label) {
+        ["Track Name", "Track Height"].forEach(function (label) {
 
             var menuItem = { };
 
@@ -51,6 +51,14 @@ var igv = (function (igv) {
 
             menuItems.push(menuItem);
         });
+
+
+        trackColorItem[ "object" ] = $('<div id="featureColorPicker" class="igv-track-menu-item">Feature Color</div>');
+        trackColorItem[  "click" ] = function () {
+            $("#featureColorPicker").colorpicker(igv.colorPickerConfig);
+        };
+
+        menuItems.push(trackColorItem);
 
         return menuItems
     };
