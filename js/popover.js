@@ -113,14 +113,22 @@ var igv = (function (igv) {
 
     igv.Popover.prototype.presentTrackMenu = function (pageX, pageY, trackView) {
 
-        var container = $('<div class="igv-track-menu-container">'),
+        var hr = $('<hr>'),
+            container = $('<div class="igv-track-menu-container">'),
             trackMenuItems = igv.trackMenuItems(this, trackView);
 
-        trackMenuItems.forEach(function (trackMenuItem) {
+        trackMenuItems.forEach(function (trackMenuItem, index, tmi) {
 
             var ob = trackMenuItem[ "object" ];
 
-            container.append(ob[ 0 ]);
+            if (index === (trackMenuItems.length - 1)) {
+
+                container.append(hr[ 0 ]);
+                container.append(ob[ 0 ]);
+            } else {
+                container.append(ob[ 0 ]);
+            }
+
         });
 
         this.popoverContent.empty();

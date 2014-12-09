@@ -31,14 +31,7 @@ var igv = (function (igv) {
             deleteItem = { },
             trackColorItem = { };
 
-        deleteItem[ "object" ] = $('<div class="igv-track-menu-item">DELETE</div>');
-        deleteItem[  "click" ] = function () {
-            popover.hide();
-            trackView.browser.removeTrack(trackView.track);
-        };
-
-        menuItems.push(deleteItem);
-        ["Track Name", "Track Height"].forEach(function (label) {
+        ["Set track name", "Set track height"].forEach(function (label) {
 
             var menuItem = { };
 
@@ -49,15 +42,12 @@ var igv = (function (igv) {
                 console.log(label);
             };
 
-            menuItem[ "init" ] = undefined;
-
             menuItems.push(menuItem);
         });
 
 
-        trackColorItem[ "object" ] = $('<div id="featureColorPicker" class="igv-track-menu-item">Feature Color</div>');
-        trackColorItem[  "click" ] = undefined;
-        trackColorItem[  "init" ] = function () {
+        trackColorItem[ "object" ] = $('<div id="featureColorPicker" class="igv-track-menu-item">Set feature color</div>');
+        trackColorItem[   "init" ] = function () {
 
             $("#featureColorPicker").colorpicker(
 
@@ -96,6 +86,14 @@ var igv = (function (igv) {
         };
 
         menuItems.push(trackColorItem);
+
+        deleteItem[ "object" ] = $('<div class="igv-track-menu-item">Remove track</div>');
+        deleteItem[  "click" ] = function () {
+            popover.hide();
+            trackView.browser.removeTrack(trackView.track);
+        };
+
+        menuItems.push(deleteItem);
 
         return menuItems
     };
