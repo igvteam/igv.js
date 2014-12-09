@@ -45,31 +45,29 @@ var igv = (function (igv) {
             return;
         }
         else {
-            this.sequenceSource.getFeatures(chr, bpStart, bpEnd, continuation, task)
+            igv.sequenceSource.getSequence(chr, bpStart, bpEnd, continuation, task)
         }
     }
 
     igv.SequenceTrack.prototype.draw = function (options) {
 
-        var track = this,
-            sequence = options.features,
+        var sequence = options.features,
             canvas = options.context,
             bpPerPixel = options.bpPerPixel,
             bpStart = options.bpStart,
             pixelWidth = options.pixelWidth,
-            pixelHeight = options.pixelHeight,
             bpEnd = bpStart + pixelWidth * bpPerPixel + 1;
 
         if (sequence) {
 
 
             var len = sequence.length;
-            var w = 1 / refFrame.bpPerPixel;
+            var w = 1 / bpPerPixel;
 
-            var y = height / 2;
-            for (var pos = tileStart; pos <= tileEnd; pos++) {
+            var y = this.height / 2;
+            for (var pos = bpStart; pos <= bpEnd; pos++) {
 
-                var offset = pos - tileStart;
+                var offset = pos - bpStart;
                 if (offset < len) {
 //                            var b = sequence.charAt(offset);
                     var b = sequence[ offset ];
