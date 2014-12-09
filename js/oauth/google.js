@@ -1,6 +1,6 @@
 var oauth = (function (oauth) {
 
-    // Define singleton object fo google genomics api
+    // Define singleton object for google oauth
 
     if (!oauth.google) {
 
