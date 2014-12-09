@@ -127,7 +127,16 @@ var igv = (function (igv) {
 
     function renderGene(gene, bpStart, xScale, canvas) {
 
-        var px, px1, pw, exonCount, cy, direction, exon, ePx, ePx1, ePw,
+        var px,
+            px1,
+            pw,
+            exonCount,
+            cy,
+            direction,
+            exon,
+            ePx,
+            ePx1,
+            ePw,
             py = 5,
             step = 8,
             h = 10;
