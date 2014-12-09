@@ -109,7 +109,7 @@ var igv = (function (igv) {
                     labelButton = document.createElement("button");
                     viewportDiv.appendChild(labelButton);
 
-                    labelButton.className = "btn btn-xs btn-cursor-deselected";
+                    labelButton.className = "btn btn-xs btn-cursor-deselected igv-track-label-span-base";
                     labelButton.style.position = "absolute";
                     labelButton.style.top = "10px";
                     labelButton.style.left = "10px";

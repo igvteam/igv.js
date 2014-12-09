@@ -290,6 +290,13 @@
 }
 
 .igv-track-label-span-base {
+
+    font-family: 'PT Sans', sans-serif;
+    /*font-size: small;*/
+    font-size: small;
+    font-weight: 400;
+    color: #444;
+
     margin-left: 2px;
     margin-right: 2px;
     position: relative;
