@@ -111,19 +111,28 @@ var igv = (function (igv) {
         this.popover.hide();
     };
 
-    igv.Popover.prototype.presentTrackMenu = function (pageX, pageY, trackMenuItems) {
+    igv.Popover.prototype.presentTrackMenu = function (pageX, pageY, trackView) {
 
-        var item = $('<div class="igv-track-menu-item">'),
+        var myself = this,
+            deleteButton,
+            wrapper = $('<div class="igv-track-menu-item">'),
             container = $('<div class="igv-track-menu-container">');
 
-        item.append(trackMenuItems[ 0 ][ "object" ][ 0 ]);
-        container.append(item[ 0 ]);
+        deleteButton = { };
+        deleteButton[ "object" ] = $('<a href="#">DELETE</a>');
+        deleteButton[  "click" ] = function () {
+            myself.hide();
+            trackView.browser.removeTrack(trackView.track);
+        };
+
+        wrapper.append(deleteButton[ "object" ][ 0 ]);
+        container.append(wrapper[ 0 ]);
 
         ["Track Name", "Track Height", "Feature Color"].forEach(function (item, i, items) {
 
-            var object = $('<div class="igv-track-menu-item">');
-            object.html(item);
-            container.append(object[ 0 ]);
+            var menuItem = $('<div class="igv-track-menu-item">');
+            menuItem.html(item);
+            container.append(menuItem[ 0 ]);
         });
 
         this.popoverContent.empty();
@@ -133,7 +142,7 @@ var igv = (function (igv) {
         // Attach click handler AFTER inserting markup in DOM.
         // Insertion beforehand will cause it to have NO effect
         // when clicked.
-        trackMenuItems[ 0 ][ "object" ].click(trackMenuItems[ 0 ][ "click" ]);
+        deleteButton[ "object" ].click(deleteButton[ "click" ]);
 
         this.popover.css( popoverPosition(pageX, pageY, this) ).show();
 

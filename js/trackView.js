@@ -177,31 +177,17 @@ var igv = (function (igv) {
     igv.TrackView.prototype.rightHandGutterCreationHelper = function (trackManipulationIconBox) {
 
         var myself = this,
-            trackDeleteButton,
-            gearButton,
-            trackMenuItems = [ ],
-            objectClick = { };
+            gearButton;
 
         if (this.track.ignoreTrackMenu) {
             return;
         }
 
-        trackDeleteButton = $('<a href="#">DELETE</a>');
-
-        objectClick[ "object" ] = trackDeleteButton;
-        objectClick[  "click" ] = function () {
-            igv.popover.hide();
-            myself.browser.removeTrack(myself.track);
-        };
-
-        trackMenuItems.push(objectClick);
-
-        gearButton = $('<i class="fa fa-gear fa-lg igv-track-menu-gear igv-app-icon">')[0];
-        $(trackManipulationIconBox).append(gearButton);
+        gearButton = $('<i class="fa fa-gear fa-lg igv-track-menu-gear igv-app-icon">');
+        $(trackManipulationIconBox).append(gearButton[ 0 ]);
 
         $(gearButton).click(function (e) {
-
-            igv.popover.presentTrackMenu(e.pageX, e.pageY, trackMenuItems);
+            igv.popover.presentTrackMenu(e.pageX, e.pageY, myself);
         });
 
     };
