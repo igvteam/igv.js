@@ -172,7 +172,7 @@ var igv = (function (igv) {
         nameValues.push({ name: 'Read Name', value: this.readName });
         // Sample
         // Read group
-        nameValues.push("-------------------------------");
+        nameValues.push("<hr>");
 
         // Add 1 to genomic location to map from 0-based computer units to user-based units
         nameValues.push({ name: 'Alignment Start', value: igv.numberFormatter(1 + this.start), borderTop: true });
@@ -188,7 +188,7 @@ var igv = (function (igv) {
 
 
         if (this.isPaired()) {
-            nameValues.push("--------------------------------");
+            nameValues.push("<hr>");
             nameValues.push({ name: 'First in Pair', value: !this.isSecondOfPair(), borderTop: true });
             nameValues.push({ name: 'Mate is Mapped', value: yesNo(this.isMateMapped()) });
             if (this.isMapped()) {
@@ -204,7 +204,7 @@ var igv = (function (igv) {
 
         }
 
-        nameValues.push("--------------------------------");
+        nameValues.push("<hr>");
         this.tags();
         isFirst = true;
         for (var key in this.tagDict) {
