@@ -31,61 +31,61 @@ var igv = (function (igv) {
             deleteItem = { },
             trackColorItem = { };
 
-//        ["Set track name", "Set track height"].forEach(function (label) {
-//
-//            var menuItem = { };
-//
-//            menuItem[ "object" ] = $('<div class="igv-track-menu-item">');
-//            menuItem[ "object" ].html(label);
-//
-//            menuItem[ "click" ] = function () {
-//                console.log(label);
-//            };
-//
-//            menuItems.push(menuItem);
-//        });
-//
-//
-//        trackColorItem[ "object" ] = $('<div id="featureColorPicker" class="igv-track-menu-item">Set feature color</div>');
-//        trackColorItem[   "init" ] = function () {
-//
-//            $("#featureColorPicker").colorpicker(
-//
-//                {
-//                    inline: false,
-//
-//                    init:			function(event, color) {
-//                        console.log('colorpicker.init', color.formatted);
-//                    },
-//
-//                    select:			function(event, color) {
-//                        console.log('colorpicker.select', color.formatted);
-//                    },
-//
-//                    close:			function(event, color) {
-//                        console.log('colorpicker.close', color.formatted + ' r:' + color.rgb.r + ' g:' + color.rgb.g + ' b:' + color.rgb.b + ' a:' + color.a);
-//                    },
-//
-//                    ok:         	function(event, color) {
-//                        console.log('colorpicker.ok', color.formatted + ' r:' + color.rgb.r + ' g:' + color.rgb.g + ' b:' + color.rgb.b + ' a:' + color.a);
-//                        igv.setTrackColor(trackView.track, igv.rgbColor(Math.floor(255 * color.rgb.r), Math.floor(255 * color.rgb.g), Math.floor(255 * color.rgb.b)));
-//                        trackView.update();
-//
-//                    },
-//
-//                    open:         	function(event, color) {
-//                        console.log('colorpicker.open', color.formatted + ' r:' + color.rgb.r + ' g:' + color.rgb.g + ' b:' + color.rgb.b + ' a:' + color.a);
-//                    },
-//
-//                    cancel:			function(event, color) {
-//                        console.log('colorpicker.cancel', color.formatted + ' r:' + color.rgb.r + ' g:' + color.rgb.g + ' b:' + color.rgb.b + ' a:' + color.a);
-//                    }
-//                }
-//
-//            );
-//        };
-//
-//        menuItems.push(trackColorItem);
+        ["Set track name", "Set track height"].forEach(function (label) {
+
+            var menuItem = { };
+
+            menuItem[ "object" ] = $('<div class="igv-track-menu-item">');
+            menuItem[ "object" ].html(label);
+
+            menuItem[ "click" ] = function () {
+                console.log(label);
+            };
+
+            menuItems.push(menuItem);
+        });
+
+
+        trackColorItem[ "object" ] = $('<div id="featureColorPicker" class="igv-track-menu-item">Set feature color</div>');
+        trackColorItem[   "init" ] = function () {
+
+            $("#featureColorPicker").colorpicker(
+
+                {
+                    inline: false,
+
+                    init:			function(event, color) {
+                        console.log('colorpicker.init', color.formatted);
+                    },
+
+                    select:			function(event, color) {
+                        console.log('colorpicker.select', color.formatted);
+                    },
+
+                    close:			function(event, color) {
+                        console.log('colorpicker.close', color.formatted + ' r:' + color.rgb.r + ' g:' + color.rgb.g + ' b:' + color.rgb.b + ' a:' + color.a);
+                    },
+
+                    ok:         	function(event, color) {
+                        console.log('colorpicker.ok', color.formatted + ' r:' + color.rgb.r + ' g:' + color.rgb.g + ' b:' + color.rgb.b + ' a:' + color.a);
+                        igv.setTrackColor(trackView.track, igv.rgbColor(Math.floor(255 * color.rgb.r), Math.floor(255 * color.rgb.g), Math.floor(255 * color.rgb.b)));
+                        trackView.update();
+
+                    },
+
+                    open:         	function(event, color) {
+                        console.log('colorpicker.open', color.formatted + ' r:' + color.rgb.r + ' g:' + color.rgb.g + ' b:' + color.rgb.b + ' a:' + color.a);
+                    },
+
+                    cancel:			function(event, color) {
+                        console.log('colorpicker.cancel', color.formatted + ' r:' + color.rgb.r + ' g:' + color.rgb.g + ' b:' + color.rgb.b + ' a:' + color.a);
+                    }
+                }
+
+            );
+        };
+
+        menuItems.push(trackColorItem);
 
         deleteItem[ "object" ] = $('<div class="igv-track-menu-item">Remove track</div>');
         deleteItem[  "click" ] = function () {
