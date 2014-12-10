@@ -97,29 +97,6 @@ var igv = (function (igv) {
         return menuItems
     };
 
-    igv.colorPickerConfig = {
-        inline: false,
-        init:			function(event, color) {
-            console.log('colorpicker.init', color.formatted);
-        },
-        select:			function(event, color) {
-            console.log('colorpicker.select', color.formatted);
-        },
-        close:			function(event, color) {
-            console.log('colorpicker.close', color.formatted + ' r:' + color.rgb.r + ' g:' + color.rgb.g + ' b:' + color.rgb.b + ' a:' + color.a);
-        },
-        ok:         	function(event, color) {
-            console.log('colorpicker.ok', color.formatted + ' r:' + color.rgb.r + ' g:' + color.rgb.g + ' b:' + color.rgb.b + ' a:' + color.a);
-
-        },
-        open:         	function(event, color) {
-            console.log('colorpicker.open', color.formatted + ' r:' + color.rgb.r + ' g:' + color.rgb.g + ' b:' + color.rgb.b + ' a:' + color.a);
-        },
-        cancel:			function(event, color) {
-            console.log('colorpicker.cancel', color.formatted + ' r:' + color.rgb.r + ' g:' + color.rgb.g + ' b:' + color.rgb.b + ' a:' + color.a);
-        }
-    };
-
     igv.spinner = function () {
 
         // spinner
