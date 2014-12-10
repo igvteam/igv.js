@@ -129,14 +129,16 @@ var igv = (function (igv) {
 
     igv.KaryoPanel.prototype.repaint = function () {
 
+
         var genome = igv.browser.genome,
             referenceFrame = igv.browser.referenceFrame,
             stainColors = [],
             w = this.canvas.width,
             h = this.canvas.height;
+
         this.ctx.clearRect(0, 0, w, h);
 
-        if (!(genome && genome.chromosomes)) return;
+        if (!(genome && referenceFrame && genome.chromosomes && referenceFrame.chr)) return;
 
         var chromosomes = genome.getChromosomes();
         var image = this.ideograms;
@@ -200,9 +202,9 @@ var igv = (function (igv) {
             this.ideograms = image;
 
             // now add some tracks?
-            log("============= PROCESSING " + igv.browser.trackPanels.length + " TRACKS");
-            for (var i = 0; i < igv.browser.trackPanels.length; i++) {
-                var trackPanel = igv.browser.trackPanels[i];
+            log("============= PROCESSING " + igv.browser.trackViews.length + " TRACKS");
+            for (var i = 0; i < igv.browser.trackViews.length; i++) {
+                var trackPanel = igv.browser.trackViews[i];
                 var track = trackPanel.track;
                 log("-------Got track " + i + ": ");
                 for (var key in track) {

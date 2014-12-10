@@ -83,7 +83,7 @@ var igv = (function (igv) {
 
             this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
 
-            if (!(genome && genome.getChromosome(referenceFrame.chr))) {
+            if (!(genome && referenceFrame &&  genome.getChromosome(referenceFrame.chr))) {
                 return;
             }
 

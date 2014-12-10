@@ -155,7 +155,7 @@ var cursor = (function (cursor) {
 
          });
 
-        this.browser.trackPanels.forEach(function (trackView, tpIndex, trackViews) {
+        this.browser.trackViews.forEach(function (trackView, tpIndex, trackViews) {
 
             trackView.track.getFeatureCache(function (featureCache) {
 

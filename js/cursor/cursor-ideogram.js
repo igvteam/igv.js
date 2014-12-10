@@ -92,7 +92,7 @@ var igv = (function (igv) {
             return;
 
             var model = igv.cursorModel,
-                trackPanels = igv.trackPanels,
+                trackPanels = igv.trackViews,
                 regionList = model.regions,  // TODO -- use filtered regions
                 sampleInterval, dh, px, regionNumber, base,
                 bh, tracks, len, region, maxFeatureHeight;

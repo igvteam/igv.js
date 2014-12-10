@@ -167,6 +167,7 @@ var igv = (function (igv) {
         igv.loadGenome(options.cytobandURL, function (genome) {
 
             browser.genome = genome;
+            browser.addTrack(new igv.RulerTrack());
 
             // Set inital locus
             var firstChrName = browser.genome.chromosomeNames[0],
@@ -177,7 +178,6 @@ var igv = (function (igv) {
 
             if (browser.ideoPanel) browser.ideoPanel.repaint();
             if (browser.karyoPanel) browser.karyoPanel.repaint();
-            browser.addTrack(new igv.RulerTrack());
 
             // If an initial locus is specified go there first, then load tracks.  This avoids loading track data at
             // a default location then moving
