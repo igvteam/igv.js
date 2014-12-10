@@ -113,22 +113,13 @@ var igv = (function (igv) {
 
     igv.Popover.prototype.presentTrackMenu = function (pageX, pageY, trackView) {
 
-        var hr = $('<hr>'),
-            container = $('<div class="igv-track-menu-container">'),
+        var container = $('<div class="igv-track-menu-container">'),
             trackMenuItems = igv.trackMenuItems(this, trackView);
 
         trackMenuItems.forEach(function (trackMenuItem, index, tmi) {
 
             var ob = trackMenuItem[ "object" ];
-
-            if (index === (trackMenuItems.length - 1)) {
-
-                container.append(hr[ 0 ]);
-                container.append(ob[ 0 ]);
-            } else {
-                container.append(ob[ 0 ]);
-            }
-
+            container.append(ob[ 0 ]);
         });
 
         this.popoverContent.empty();
@@ -138,7 +129,6 @@ var igv = (function (igv) {
         // Attach click handler AFTER inserting markup in DOM.
         // Insertion beforehand will cause it to have NO effect
         // when clicked.
-
         trackMenuItems.forEach(function (trackMenuItem) {
 
             var ob = trackMenuItem[ "object"],
