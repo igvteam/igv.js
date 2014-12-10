@@ -238,7 +238,7 @@ var igv = (function (igv) {
 
                         });
 
-                        if (0 === browser.trackPanels.length) {
+                        if (0 === browser.trackViews.length) {
 
                             // When loading first track into app
                             // with no pre-exisiting tracks.
@@ -515,8 +515,8 @@ var igv = (function (igv) {
 
             var width;
 
-            if (this.trackPanels && this.trackPanels.length > 0) {
-                width = this.trackPanels[0].contentDiv.clientWidth;
+            if (this.trackViews && this.trackViews.length > 0) {
+                width = this.trackViews[0].contentDiv.clientWidth;
             }
             else {
                 width = this.trackContainerDiv.clientWidth;
@@ -615,7 +615,7 @@ var igv = (function (igv) {
 
                 localFile = localFiles[ i ];
 
-                if (0 === browser.trackPanels.length) {
+                if (0 === browser.trackViews.length) {
 
                     // When loading first track into app
                     // with no pre-exisiting tracks.
@@ -653,7 +653,7 @@ var igv = (function (igv) {
             elementObject.val("");
 
 
-            if (0 === browser.trackPanels.length) {
+            if (0 === browser.trackViews.length) {
 
                 // When loading first track into app
                 // with no pre-exisiting tracks.
@@ -695,7 +695,7 @@ var igv = (function (igv) {
 
             dev_null = browser.trackViewportWidth();
 
-            browser.trackPanels.forEach(function (trackView) {
+            browser.trackViews.forEach(function (trackView) {
 
                 var jsonRepresentation = trackView.track.jsonRepresentation();
 
@@ -721,8 +721,8 @@ var igv = (function (igv) {
             var trackView,
                 horizontalScrollBarContainer;
 
-            while (this.trackPanels.length > 0) {
-                trackView = this.trackPanels[ this.trackPanels.length - 1 ];
+            while (this.trackViews.length > 0) {
+                trackView = this.trackViews[ this.trackViews.length - 1 ];
                 this.removeTrack(trackView.track);
             }
 
@@ -922,7 +922,7 @@ var igv = (function (igv) {
 
                     browser.update();
 
-                    browser.trackPanels.forEach(function (tp) {
+                    browser.trackViews.forEach(function (tp) {
 
                         if (1 === browser.sortDirection) {
 

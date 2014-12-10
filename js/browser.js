@@ -49,7 +49,7 @@ var igv = (function (igv) {
 
         addTrackContainerHandlers(trackContainer);
 
-        this.trackPanels = [];
+        this.trackViews = [];
         this.nextTrackOrder = 0;
 
         window.onresize = igv.throttle(function () {
@@ -126,7 +126,7 @@ var igv = (function (igv) {
 
         var attemptedDuplicateTrackAddition = false;
 
-        this.trackPanels.forEach(function (tp) {
+        this.trackViews.forEach(function (tp) {
 
             if (false === attemptedDuplicateTrackAddition) {
 
@@ -175,7 +175,7 @@ var igv = (function (igv) {
             track.order = (this.nextTrackOrder)++;
         }
 
-        this.trackPanels.push(trackView);
+        this.trackViews.push(trackView);
 
         this.reorderTracks();
 
@@ -202,7 +202,7 @@ var igv = (function (igv) {
 
         var myself = this;
 
-        this.trackPanels.sort(function (a, b) {
+        this.trackViews.sort(function (a, b) {
             var aOrder = a.track.order || 0;
             var bOrder = b.track.order || 0;
             return aOrder - bOrder;
@@ -211,7 +211,7 @@ var igv = (function (igv) {
         // Reattach the divs to the dom in the correct order
         $(this.trackContainerDiv).children().detach();
 
-        this.trackPanels.forEach(function (trackView, index, trackViews) {
+        this.trackViews.forEach(function (trackView, index, trackViews) {
 
             if ("CURSOR" === myself.type) {
                 myself.trackContainerDiv.appendChild(trackView.cursorTrackContainer);
@@ -227,16 +227,16 @@ var igv = (function (igv) {
 
         // Find track panel
         var trackPanelRemoved;
-        for (var i = 0; i < this.trackPanels.length; i++) {
-            if (track === this.trackPanels[i].track) {
-                trackPanelRemoved = this.trackPanels[i];
+        for (var i = 0; i < this.trackViews.length; i++) {
+            if (track === this.trackViews[i].track) {
+                trackPanelRemoved = this.trackViews[i];
                 break;
             }
         }
 
         if (trackPanelRemoved) {
 
-            this.trackPanels.splice(this.trackPanels.indexOf(trackPanelRemoved), 1);
+            this.trackViews.splice(this.trackViews.indexOf(trackPanelRemoved), 1);
 
             if ("CURSOR" === this.type) {
                 this.trackContainerDiv.removeChild(trackPanelRemoved.cursorTrackContainer);
@@ -254,11 +254,11 @@ var igv = (function (igv) {
             raisable,
             raiseableOrder;
 
-        if (1 === this.trackPanels.length) {
+        if (1 === this.trackViews.length) {
             return;
         }
 
-        this.trackPanels.forEach(function (tv, i, tvs) {
+        this.trackViews.forEach(function (tv, i, tvs) {
 
             indices.push({ trackView: tv, index: i });
 
@@ -287,11 +287,11 @@ var igv = (function (igv) {
             raisable,
             raiseableOrder;
 
-        if (1 === this.trackPanels.length) {
+        if (1 === this.trackViews.length) {
             return;
         }
 
-        this.trackPanels.forEach(function (tv, i, tvs) {
+        this.trackViews.forEach(function (tv, i, tvs) {
 
             indices.push({ trackView: tv, index: i });
 
@@ -301,7 +301,7 @@ var igv = (function (igv) {
 
         });
 
-        if ((this.trackPanels.length - 1) === raisable.index) {
+        if ((this.trackViews.length - 1) === raisable.index) {
             return;
         }
 
@@ -317,7 +317,7 @@ var igv = (function (igv) {
 
         this.trackHeight = newHeight;
 
-        this.trackPanels.forEach(function (panel) {
+        this.trackViews.forEach(function (panel) {
             panel.setTrackHeight(newHeight);
         });
 
@@ -326,7 +326,7 @@ var igv = (function (igv) {
     igv.Browser.prototype.resize = function () {
         if (this.ideoPanel) this.ideoPanel.resize();
         if (this.karyoPanel) this.karyoPanel.resize();
-        this.trackPanels.forEach(function (panel) {
+        this.trackViews.forEach(function (panel) {
             panel.resize();
         })
     };
@@ -340,7 +340,7 @@ var igv = (function (igv) {
         if (this.karyoPanel) {
             this.karyoPanel.repaint();
         }
-        this.trackPanels.forEach(function (trackView) {
+        this.trackViews.forEach(function (trackView) {
             trackView.repaint();
         });
 
@@ -359,7 +359,7 @@ var igv = (function (igv) {
         if (this.karyoPanel) {
             this.karyoPanel.repaint();
         }
-        this.trackPanels.forEach(function (trackPanel) {
+        this.trackViews.forEach(function (trackPanel) {
 
             trackPanel.update();
 
@@ -377,8 +377,8 @@ var igv = (function (igv) {
 
         var width;
 
-        if (this.trackPanels && this.trackPanels.length > 0) {
-            width = this.trackPanels[0].viewportDiv.clientWidth;
+        if (this.trackViews && this.trackViews.length > 0) {
+            width = this.trackViews[0].viewportDiv.clientWidth;
         }
         else {
             width = this.trackContainerDiv.clientWidth;
@@ -582,7 +582,7 @@ var igv = (function (igv) {
 
         function fireOnsearch(feature, type) {
 // Notify tracks (important for gtex).   TODO -- replace this with some sort of event model ?
-            this.trackPanels.forEach(function (tp) {
+            this.trackViews.forEach(function (tp) {
                 var track = tp.track;
                 if (track.onsearch) {
                     track.onsearch(feature, type);

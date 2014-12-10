@@ -176,11 +176,11 @@ var igv = (function (igv) {
 
     function findTrackWithURL(browser, url) {
 
-        var i, len = browser.trackPanels.length;
+        var i, len = browser.trackViews.length;
 
         for (i = 0; i < len; i++) {
-            if (browser.trackPanels[i].track.file === url) {
-                return browser.trackPanels[i].track;
+            if (browser.trackViews[i].track.file === url) {
+                return browser.trackViews[i].track;
             }
         }
         return null;

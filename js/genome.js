@@ -32,7 +32,7 @@ var igv = (function (igv) {
 
         /**
          * Return the official chromosome name for the (possibly) alias.  Deals with
-         * 1 <-> chr1,  chrM <-> MT,  IV <-> chr4, etc.  Hardcoded currently for UCSC human genomes.
+         * 1 <-> chr1,  chrM <-> MT,  IV <-> chr4, etc.
          * @param str
          */
         var chrAliasTable = {};

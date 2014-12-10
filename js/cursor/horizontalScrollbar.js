@@ -73,7 +73,7 @@ var cursor = (function (cursor) {
             // update
             if (this.browser.ideoPanel) this.browser.ideoPanel.repaint();
             if (this.browser.karyoPanel) this.browser.karyoPanel.repaint();
-            this.browser.trackPanels.forEach(function (trackPanel) { trackPanel.update(); });
+            this.browser.trackViews.forEach(function (trackPanel) { trackPanel.update(); });
         }
 
         $( scrollBarDraggable).css({
@@ -143,7 +143,7 @@ var cursor = (function (cursor) {
                 // update
                 if (myself.browser.ideoPanel) myself.browser.ideoPanel.repaint();
                 if (myself.browser.karyoPanel) myself.browser.karyoPanel.repaint();
-                myself.browser.trackPanels.forEach(function (trackPanel) {
+                myself.browser.trackViews.forEach(function (trackPanel) {
                     trackPanel.update();
                 });
 
