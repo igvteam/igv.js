@@ -183,7 +183,7 @@ var igv = (function (igv) {
             return;
         }
 
-        gearButton = $('<i class="fa fa-gear fa-lg igv-track-menu-gear igv-app-icon">');
+        gearButton = $('<i class="fa fa-gear fa-lg igv-track-menu-gear igv-app-icon" style="padding-top: 5px">');
         $(trackManipulationIconBox).append(gearButton[ 0 ]);
 
         $(gearButton).click(function (e) {
