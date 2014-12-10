@@ -45,7 +45,6 @@ var igv = (function (igv) {
             menuItems.push(menuItem);
         });
 
-
         trackColorItem[ "object" ] = $('<div id="featureColorPicker" class="igv-track-menu-item">Set feature color</div>');
         trackColorItem[   "init" ] = function () {
 
@@ -59,7 +58,7 @@ var igv = (function (igv) {
                     },
 
                     select:			function(event, color) {
-                        console.log('colorpicker.select', color.formatted);
+                        //console.log('colorpicker.select', color.formatted);
                     },
 
                     close:			function(event, color) {
