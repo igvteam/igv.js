@@ -31,16 +31,35 @@ var igv = (function (igv) {
             deleteItem = { },
             trackColorItem = { };
 
-        ["Set track name", "Set track height"].forEach(function (label) {
+        ["Set track name", "Set track height"].forEach(function (label, index, labels) {
 
             var menuItem = { };
 
             menuItem[ "object" ] = $('<div class="igv-track-menu-item">');
             menuItem[ "object" ].html(label);
 
-            menuItem[ "click" ] = function () {
-                console.log(label);
-            };
+            if (0 === index) {
+
+                menuItem[ "click" ] = function () {
+
+                    var trackMenuPopupDialog;
+
+                    trackMenuPopupDialog = new igv.TrackMenuPopupDialog("Name", "Paul Robeson", function() {
+                        console.log("ok " + trackMenuPopupDialog.name.val());
+                        trackMenuPopupDialog.dialogForm.dialog( "close" );
+                    });
+
+                    trackMenuPopupDialog.dialogForm.dialog( "open" );
+                };
+
+            } else {
+
+                menuItem[ "click" ] = function () {
+                    console.log(label);
+                };
+
+            }
+
 
             menuItems.push(menuItem);
         });

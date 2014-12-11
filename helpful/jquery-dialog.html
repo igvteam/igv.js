@@ -7,11 +7,90 @@
     <!-- jQuery UI CSS -->
     <link rel="stylesheet" type="text/css" href="//ajax.googleapis.com/ajax/libs/jqueryui/1.11.2/themes/smoothness/jquery-ui.css"/>
 
+    <!-- Google fonts -->
+    <link rel="stylesheet" type="text/css" href='http://fonts.googleapis.com/css?family=PT+Sans:400,700'>
+
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" type="text/css" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.1/css/bootstrap.min.css">
+    <link rel="stylesheet" type="text/css" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.1/css/bootstrap-theme.min.css">
+
+    <!-- Font Awesome CSS -->
+    <link rel="stylesheet" type="text/css" href="//maxcdn.bootstrapcdn.com/font-awesome/4.2.0/css/font-awesome.min.css">
+
+    <!-- IGV CSS -->
+    <link rel="stylesheet" type="text/css" href="../css/igv.css">
+
     <!-- jQuery JS -->
     <script type="text/javascript" src="//ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
 
     <!-- jQuery UI CSS -->
     <script type="text/javascript" src="//ajax.googleapis.com/ajax/libs/jqueryui/1.11.2/jquery-ui.min.js"></script>
+
+    <!-- Bootstrap JS -->
+    <script type="text/javascript" src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.1/js/bootstrap.min.js"></script>
+
+    <!-- Vendor JS -->
+    <script type="text/javascript" src="../vendor/inflate.js"></script>
+    <script type="text/javascript" src="../vendor/zlib_and_gzip.min.js"></script>
+
+    <!-- IGV JS -->
+    <script type="text/javascript" src="../js/igv.js"></script>
+    <script type="text/javascript" src="../js/popover.js"></script>
+    <script type="text/javascript" src="../js/browser.js"></script>
+    <script type="text/javascript" src="../js/ideogram.js"></script>
+    <script type="text/javascript" src="../js/referenceFrame.js"></script>
+    <script type="text/javascript" src="../js/igv-canvas.js"></script>
+    <script type="text/javascript" src="../js/genome.js"></script>
+    <script type="text/javascript" src="../js/trackView.js"></script>
+    <script type="text/javascript" src="../js/rulerTrack.js"></script>
+    <script type="text/javascript" src="../js/bedTrack.js"></script>
+    <script type="text/javascript" src="../js/igv-color.js"></script>
+    <script type="text/javascript" src="../js/igv-utils.js"></script>
+    <script type="text/javascript" src="../js/parseUtils.js"></script>
+    <script type="text/javascript" src="../js/fasta.js"></script>
+    <script type="text/javascript" src="../js/sequenceTrack.js"></script>
+    <script type="text/javascript" src="../js/wigTrack.js"></script>
+    <script type="text/javascript" src="../js/dataloader.js"></script>
+    <script type="text/javascript" src="../js/igv-exts.js"></script>
+    <script type="text/javascript" src="../js/igvxhr.js"></script>
+    <script type="text/javascript" src="../js/binary.js"></script>
+
+    <script type="text/javascript" src="../js/gtex/eqtlTrack.js"></script>
+    <script type="text/javascript" src="../js/gtex/eqtlSource.js"></script>
+    <script type="text/javascript" src="../js/gtex/gtex.js"></script>
+
+    <script type="text/javascript" src="../js/bam/coverageMap.js"></script>
+    <script type="text/javascript" src="../js/bam/bamReader.js"></script>
+    <script type="text/javascript" src="../js/bam/bgzf.js"></script>
+    <script type="text/javascript" src="../js/bam/bamSource.js"></script>
+    <script type="text/javascript" src="../js/bam/bamTrack.js"></script>
+    <script type="text/javascript" src="../js/bam/bamAlignment.js"></script>
+    <script type="text/javascript" src="../js/bam/ga4gh.js"></script>
+    <script type="text/javascript" src="../js/bam/ga4ghReader.js"></script>
+    <script type="text/javascript" src="../js/bam/bamIndex.js"></script>
+    <script type="text/javascript" src="../js/intervalTree.js"></script>
+    <script type="text/javascript" src="../js/igv-constants.js"></script>
+
+    <script type="text/javascript" src="../js/bed/featureCache.js"></script>
+    <script type="text/javascript" src="../js/bed/bedSource.js"></script>
+    <script type="text/javascript" src="../js/bed/bedParser.js"></script>
+    <script type="text/javascript" src="../js/bed/tribble.js"></script>
+
+    <script type="text/javascript" src="../js/encode/encode.js"></script>
+    <script type="text/javascript" src="../js/cursor/cursorTrack.js"></script>
+    <script type="text/javascript" src="../js/cursor/cursorModel.js"></script>
+    <script type="text/javascript" src="../js/cursor/cursor-ideogram.js"></script>
+
+    <script type="text/javascript" src="../js/karyo/karyo.js"></script>
+    <script type="text/javascript" src="../js/gwas/t2dVariantSource.js"></script>
+    <script type="text/javascript" src="../js/gwas/t2dVariantTrack.js"></script>
+
+    <script type="text/javascript" src="../js/bed/segParser.js"></script>
+    <script type="text/javascript" src="../js/segTrack.js"></script>
+    <script type="text/javascript" src="../js/bed/vcfParser.js"></script>
+
+    <script type="text/javascript" src="../js/trackCore.js"></script>
+    <script type="text/javascript" src="../js/trackMenuPopupDialog.js"></script>
 
 </head>
 <body>
@@ -33,52 +112,21 @@
 <script>
     $(function() {
 
-        var str,
-                html,
-                dialogForm,
-                form,
-                name,
-                allFields;
+        var trackMenuPopupDialog;
 
-        str = '<div id="dialog-form" title="Create new user"> <form> <fieldset> <label for="name">Name</label> <input type="text" name="name" id="name" value="Jane Smith"> <!--<input type="text" name="name" id="name" value="Jane Smith" class="text ui-widget-content ui-corner-all">--> <!--<input type="submit" tabindex="-1" style="position:absolute; top:-1000px">--> </fieldset> </form> </div> ';
-        html = $.parseHTML( str );
-        $( "body" ).append( html );
-
-        dialogForm = $( "#dialog-form");
-        form = dialogForm.find( "form" );
-        name = $( "#name" );
-        allFields = $( [] ).add( name );
-
-        dialogForm.dialog({
-            autoOpen: false,
-            height: 256,
-            width: 300,
-            modal: true,
-            buttons: {
-                "add user": function() {
-                    $( "#users").find(" tbody").append( "<tr>" + "<td>" + name.val() + "</td>" + "</tr>" );
-                    dialogForm.dialog( "close" );
-                },
-                cancel: function() {
-                    dialogForm.dialog( "close" );
-                }
-            },
-            close: function() {
-                form[ 0 ].reset();
-                allFields.removeClass( "ui-state-error" );
-            }
-        });
-
-        form.on( "submit", function( event ) {
-            event.preventDefault();
-            $( "#users").find(" tbody").append( "<tr>" + "<td>" + name.val() + "</td>" + "</tr>" );
-            dialogForm.dialog( "close" );
+        trackMenuPopupDialog = new igv.TrackMenuPopupDialog("Name", "Paul Robeson", function() {
+            $( "#users").find(" tbody").append( "<tr>" + "<td>" + trackMenuPopupDialog.name.val() + "</td>" + "</tr>" );
+            console.log("take action");
+            trackMenuPopupDialog.dialogForm.dialog( "close" );
         });
 
         $( "#create-user" ).button().on( "click", function() {
-            dialogForm.dialog( "open" );
+            trackMenuPopupDialog.dialogForm.dialog( "open" );
         });
+
     });
+
+
 </script>
 
 </body>
