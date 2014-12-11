@@ -36,12 +36,13 @@ var igv = (function (igv) {
 
     igv.Ga4ghReader.prototype.readAlignments = function (chr, bpStart, bpEnd, success, task) {
 
-        var dataLoader,
-            queryChr = (chr.startsWith("chr") ? chr.substring(3) : chr),    // TODO -- we need to read the readset header and create an alias table
+        var queryChr = (chr.startsWith("chr") ? chr.substring(3) : chr),    // TODO -- we need to read the readset header and create an alias table
             readURL,
             body = {"readsetIds": [this.readsetId], "sequenceName": queryChr, "sequenceStart": bpStart, "sequenceEnd": bpEnd, "maxResults": "10000"},
             sendData,
-            sendURL;
+            sendURL,
+            pageToken,
+            alignments;
 
         readURL = this.url + "/reads/search";
         if (this.authKey) {
@@ -50,27 +51,53 @@ var igv = (function (igv) {
 
         sendURL = this.proxy ? this.proxy : readURL;
 
-        sendData = this.proxy ?
-            "url=" + readURL + "&data=" + JSON.stringify(body) :
-            JSON.stringify(body);
+        // Start the recursive load cycle.  Data is fetched in chunks, if more data is available a "nextPageToken" is returned.
+        loadChunk();
 
-        igvxhr.loadJson(sendURL,
-            {
-                sendData: sendData,
-                task: task,
-                contentType: "application/json",
-                success: function (json) {
+        function loadChunk(pageToken) {
 
-                    if (json) {
-                        // TODO -- deal with nextPageToken
-                        success(igv.decodeGa4ghReads(json.reads));
+            if (pageToken) {
+                body.pageToken = pageToken;
+            }
+            else {
+                if (body.pageToken != undefined) delete body.pageToken;    // Remove previous page token, if any
+            }
+
+            sendData = this.proxy ?
+                "url=" + readURL + "&data=" + JSON.stringify(body) :
+                JSON.stringify(body);
+
+            igvxhr.loadJson(sendURL,
+                {
+                    sendData: sendData,
+                    task: task,
+                    contentType: "application/json",
+                    success: function (json) {
+                        var nextPageToken, tmp;
+
+                        if (json) {
+
+                            tmp = igv.decodeGa4ghReads(json.reads);
+                            alignments = alignments ? alignments.concat(tmp) : tmp;
+
+                            nextPageToken = json["nextPageToken"];
+
+                            if (nextPageToken) {
+                                loadChunk(nextPageToken);  // TODO -- these should be processed (downsampled) here
+                            }
+                            else {
+                                success(alignments);
+                            }
+
+
+                        }
+                        else {
+                            success(alignments);
+                        }
+
                     }
-                    else {
-                        success(null);
-                    }
-
-                }
-            });
+                });
+        }
 
 
     }
