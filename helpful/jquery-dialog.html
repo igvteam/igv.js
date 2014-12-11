@@ -114,7 +114,7 @@
 
         var trackMenuPopupDialog;
 
-        trackMenuPopupDialog = new igv.TrackMenuPopupDialog("Name", "Paul Robeson", function() {
+        trackMenuPopupDialog = new igv.TrackMenuPopupDialog("My Dialog", "Name", function() {
             $( "#users").find(" tbody").append( "<tr>" + "<td>" + trackMenuPopupDialog.name.val() + "</td>" + "</tr>" );
             console.log("take action");
             trackMenuPopupDialog.dialogForm.dialog( "close" );
