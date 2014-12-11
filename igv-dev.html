@@ -154,7 +154,7 @@
                             <li>
                                 <a onclick="igv.browser.loadTrack({
                                 type: 'eqtl',
-                                url: 'http://www.gtexportal.org/igv/assets/eqtl/Skin_Sun_Exposed_Lower_leg.portal.eqtl.bin',
+                                url: '//www.gtexportal.org/igv/assets/eqtl/Skin_Sun_Exposed_Lower_leg.portal.eqtl.bin',
                                 label: 'Skin Sun Exposed Lower leg'
                                 })">EQTL Skin (GTEX))</a>
                             </li>
@@ -168,7 +168,7 @@
                                 <a onclick="igv.browser.loadTrack(
                                 {
                                 type: 'vcf',
-                                url: 'http://www.broadinstitute.org/igvdata/test/igv-web/TSVC_variants_IonXpress_078.vcf.gz',
+                                url: '//www.broadinstitute.org/igvdata/test/igv-web/TSVC_variants_IonXpress_078.vcf.gz',
                                 label: 'TSVC Variants 078'
                                 }
                                 )">TSVC Variants 078 (VCF tabix)</a>
@@ -177,7 +177,7 @@
                                 <a onclick="igv.browser.loadTrack(
                                 {
                                 type: 'bed',
-                                url: 'http://www.broadinstitute.org/igvdata/annotations/hg19/dbSnp/snp137.hg19.bed.gz',
+                                url: '//www.broadinstitute.org/igvdata/annotations/hg19/dbSnp/snp137.hg19.bed.gz',
                                 label: 'dbSNP 137'
                                 }
                                 )">dbSNP 137 (bed tabix)</a>
@@ -214,6 +214,7 @@
                 },
                 {
                     url: "//dn7ywbm9isq8j.cloudfront.net/annotations/hg19/genes/gencode.v18.collapsed.bed",
+                    indexed: false,
                     label: "Genes",
                     order: 10000
                 }
