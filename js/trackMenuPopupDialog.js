@@ -33,14 +33,7 @@ var igv = (function (igv) {
         var dialogLabelRE,
             inputValueRE,
             htmlString,
-            myself,
-            thang;
-
-        thang = $( "#dialog-form" );
-
-        if (thang && thang.length !== 0) {
-            thang.remove();
-        }
+            myself;
 
         htmlString = '<div id="dialog-form" title="DIALOG_LABEL"><form><fieldset><input type="text" name="name" id="name" value="INPUT_VALUE"></fieldset></form></div>';
 
@@ -73,6 +66,8 @@ var igv = (function (igv) {
             close: function() {
                 console.log("close");
                 myself.form[ 0 ].reset();
+                myself.dialogForm.remove();
+                myself.dialogForm = undefined;
             }
         });
 

@@ -94,46 +94,39 @@ var igv = (function (igv) {
 
         var myself = this,
             labelButton,
-            trackIconContainer,
-            labelSpan;
+            trackIconContainer;
 
         if ("CURSOR" !== this.browser.type) {
 
             trackIconContainer = $('<div class = "igv-app-icon-container">')[0];
             $(viewportDiv).append(trackIconContainer);
 
-            if (this.track.label) {
+            if (myself.track.description) {
 
-                if (myself.track.description) {
+                labelButton = document.createElement("button");
+                viewportDiv.appendChild(labelButton);
+                this.track.labelButton = labelButton;
 
-                    labelButton = document.createElement("button");
-                    viewportDiv.appendChild(labelButton);
+                labelButton.className = "btn btn-xs btn-cursor-deselected igv-track-label-span-base";
+                labelButton.style.position = "absolute";
+                labelButton.style.top = "10px";
+                labelButton.style.left = "10px";
+                labelButton.innerHTML = this.track.label;
 
-                    labelButton.className = "btn btn-xs btn-cursor-deselected igv-track-label-span-base";
-                    labelButton.style.position = "absolute";
-                    labelButton.style.top = "10px";
-                    labelButton.style.left = "10px";
-                    labelButton.innerHTML = this.track.label;
 
-                    this.track.labelButton = labelButton;
-
-                    labelButton.onclick = function (e) {
-                        igv.popover.presentTrackPopup(e.pageX, e.pageY, myself.track.description);
-                    }
-
-                } else {
-
-                    labelSpan = $('<span class="igv-track-label-span-base">')[0];
-                    labelSpan.innerHTML = this.track.label;
-                    $(trackIconContainer).append(labelSpan);
-
+                labelButton.onclick = function (e) {
+                    igv.popover.presentTrackPopup(e.pageX, e.pageY, myself.track.description);
                 }
+
+            } else {
+
+                this.track.labelSpan = $('<span class="igv-track-label-span-base">')[0];
+                this.track.labelSpan.innerHTML = this.track.label;
+                $(trackIconContainer).append(this.track.labelSpan);
+
             }
 
-            if (this.track.label) {
-
-            }
-        }
+        } // if ("CURSOR" !== this.browser.type)
     };
 
     igv.TrackView.prototype.addLeftHandGutterToParentTrackDiv = function (trackDiv) {

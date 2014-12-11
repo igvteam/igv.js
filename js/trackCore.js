@@ -35,7 +35,7 @@ var igv = (function (igv) {
 
         track.config = config;
         track.url = config.url;
-        track.label = config.label;
+        track.label = config.label || "";
         track.id = config.id || config.label;
         track.order = config.order;
         track.color = config.color || "rgb(150,150,150)";
@@ -45,7 +45,7 @@ var igv = (function (igv) {
         track.height = config.height || ("bed" === config.type ? 100 : 50);
         track.minHeight = config.minHeight || track.height;
         track.maxHeight = config.maxHeight || track.height;
-    }
+    };
 
     igv.setTrackHeight = function (track, newHeight) {
 
@@ -56,21 +56,31 @@ var igv = (function (igv) {
         if (track.trackView) {
             track.trackView.setTrackHeight(newHeight);
         }
-    }
+    };
 
     igv.setTrackLabel = function (track, label) {
+
         track.label = label;
+
+        if (track.description) {
+
+            track.labelButton.innerHTML = track.label;
+        } else {
+
+            track.labelSpan.innerHTML = track.label;
+        }
+
         if(track.trackView) {
             track.trackView.repaint();
         }
-    }
+    };
 
     igv.setTrackColor = function(track, color) {
         track.color = color;
         if(track.trackView) {
             track.trackView.repaint();
         }
-    }
+    };
 
 
     return igv;

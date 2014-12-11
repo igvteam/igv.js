@@ -47,10 +47,10 @@ var igv = (function (igv) {
                         var trackMenuPopupDialog = new igv.TrackMenuPopupDialog(label, "My Track", function() {
 
                             console.log("ok " + trackMenuPopupDialog.name.val());
-                            trackMenuPopupDialog.dialogForm.dialog( "close" );
-
                             igv.setTrackLabel(trackView.track, trackMenuPopupDialog.name.val());
                             trackView.update();
+
+                            trackMenuPopupDialog.dialogForm.dialog( "close" );
                         });
 
                         trackMenuPopupDialog.dialogForm.dialog( "open" );
@@ -68,10 +68,10 @@ var igv = (function (igv) {
                             var value = parseFloat(trackMenuPopupDialog.name.val(), 10);
 
                             console.log("ok " + value);
-                            trackMenuPopupDialog.dialogForm.dialog( "close" );
-
                             igv.setTrackHeight(trackView.track, value);
                             trackView.update();
+
+                            trackMenuPopupDialog.dialogForm.dialog( "close" );
                         });
 
                         trackMenuPopupDialog.dialogForm.dialog( "open" );
@@ -83,9 +83,6 @@ var igv = (function (igv) {
 
             menuItems.push(menuItem);
         });
-
-
-
 
         trackColorItem[ "object" ] = $('<div id="featureColorPicker" class="igv-track-menu-item">Set feature color</div>');
         trackColorItem[   "init" ] = function () {
