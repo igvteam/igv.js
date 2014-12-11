@@ -56,13 +56,13 @@ var igv = (function (igv) {
 
             searchInput.change(function () {
 
-                var thang = $("div.igvNavigation").find("input");
-                igv.browser.search(thang[0].value);
+                var searchInput = $("div.igvNavigation").find("input");
+                igv.browser.search(searchInput[0].value);
             });
 
             searchButton.click(function () {
-                var thang = $("div.igvNavigation").find("input");
-                igv.browser.search(thang[0].value);
+                var searchInput = $("div.igvNavigation").find("input");
+                igv.browser.search(searchInput[0].value);
             });
 
 
@@ -74,7 +74,7 @@ var igv = (function (igv) {
 
             zoom.append(zoomOutButton[ 0 ]);
 
-             zoomInButton = $('<i class="igv-app-icon fa fa-plus-square-o fa-2x">');
+            zoomInButton = $('<i class="igv-app-icon fa fa-plus-square-o fa-2x">');
             zoom.append(zoomInButton[ 0 ]);
 
             zoomInButton.click(function () {

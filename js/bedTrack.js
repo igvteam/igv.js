@@ -25,14 +25,7 @@
 
 var igv = (function (igv) {
 
-
-    igv.configTrack = function (track, config) {
-        track.url = config.url;
-    }
-
     igv.BedTrack = function (config) {
-
-        if (!config.type) config.type = igv.inferFileType(this.filename);
 
         igv.configTrack(this, config);
 

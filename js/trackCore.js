@@ -31,6 +31,8 @@ var igv = (function (igv) {
 
     igv.configTrack = function (track, config) {
 
+        if (!config.type) config.type = igv.inferFileType(this.filename);
+
         track.config = config;
         track.url = config.url;
         track.label = config.label;
@@ -43,7 +45,6 @@ var igv = (function (igv) {
         track.height = config.height || ("bed" === config.type ? 100 : 50);
         track.minHeight = config.minHeight || track.height;
         track.maxHeight = config.maxHeight || track.height;
-
     }
 
     igv.setTrackHeight = function (track, newHeight) {

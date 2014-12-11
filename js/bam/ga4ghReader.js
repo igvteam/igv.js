@@ -26,12 +26,11 @@
 var igv = (function (igv) {
 
 
-    igv.Ga4ghReader = function (url, readsetId, authKey, proxy) {
-
-        this.url = url;
-        this.readsetId = readsetId;
-        this.authKey = authKey;
-        this.proxy = proxy;
+    igv.Ga4ghReader = function (config) {
+        this.url = config.url;
+        this.proxy = config.proxy;
+        this.readsetId = config.readsetId;
+        this.authKey = config.authKey || 'AIzaSyC-dujgw4P1QvNd8i_c-I-S_P1uxVZzn0w';  // Default only works for localhost & broadinstitute.org
 
     }
 
