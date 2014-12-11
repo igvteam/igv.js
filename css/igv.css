@@ -141,6 +141,17 @@
     border-bottom-width: thin;
 }
 
+.igv-popover-table {
+    table-layout: fixed;
+    width: 256px;
+}
+
+.igv-popover-td {
+    white-space: nowrap;
+    overflow: hidden;         /* <- this does seem to be required */
+    text-overflow: ellipsis;
+}
+
 .igv-popoverName {
     font-weight: bold;
     padding-right: 4px;

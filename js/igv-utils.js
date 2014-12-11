@@ -244,11 +244,12 @@ var igv = (function (igv) {
      */
     igv.formatPopoverText = function (nameValueArray) {
 
-        var markup = "<table>";
+        var markup = "<table class=\"igv-popover-table\">";
+
         nameValueArray.forEach(function (nameValue) {
 
             if (nameValue.name) {
-                markup += "<tr><td>" + "<span class=\"igv-popoverName\">" + nameValue.name + "</span>" + "&nbsp; " + "<span class=\"igv-popoverValue\">" + nameValue.value + "</span>" + "</td></tr>";
+                markup += "<tr><td class=\"igv-popover-td\">" + "<span class=\"igv-popoverName\">" + nameValue.name + "</span>" + "&nbsp; " + "<span class=\"igv-popoverValue\">" + nameValue.value + "</span>" + "</td></tr>";
             }
             else {
                 // not a name/value pair
