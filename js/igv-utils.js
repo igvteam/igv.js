@@ -29,7 +29,7 @@ var igv = (function (igv) {
 
         var menuItems = [ ],
             deleteItem = { },
-            trackColorItem = { };
+            trackColorItem = {};
 
         ["Set track name", "Set track height"].forEach(function (label, index, labels) {
 
@@ -38,31 +38,54 @@ var igv = (function (igv) {
             menuItem[ "object" ] = $('<div class="igv-track-menu-item">');
             menuItem[ "object" ].html(label);
 
-            if (0 === index) {
+            switch (index) {
 
-                menuItem[ "click" ] = function () {
+                case 0 :
+                {
+                    menuItem[ "click" ] = function () {
 
-                    var trackMenuPopupDialog;
+                        var trackMenuPopupDialog = new igv.TrackMenuPopupDialog(label, "My Track", function() {
 
-                    trackMenuPopupDialog = new igv.TrackMenuPopupDialog("Name", "Paul Robeson", function() {
-                        console.log("ok " + trackMenuPopupDialog.name.val());
-                        trackMenuPopupDialog.dialogForm.dialog( "close" );
-                    });
+                            console.log("ok " + trackMenuPopupDialog.name.val());
+                            trackMenuPopupDialog.dialogForm.dialog( "close" );
 
-                    trackMenuPopupDialog.dialogForm.dialog( "open" );
-                };
+                            igv.setTrackLabel(trackView.track, trackMenuPopupDialog.name.val());
+                            trackView.update();
+                        });
 
-            } else {
+                        trackMenuPopupDialog.dialogForm.dialog( "open" );
+                    };
 
-                menuItem[ "click" ] = function () {
-                    console.log(label);
-                };
+                }
+                    break;
 
+                case 1 :
+                {
+                    menuItem[ "click" ] = function () {
+
+                        var trackMenuPopupDialog = new igv.TrackMenuPopupDialog(label, "250", function() {
+
+                            var value = parseFloat(trackMenuPopupDialog.name.val(), 10);
+
+                            console.log("ok " + value);
+                            trackMenuPopupDialog.dialogForm.dialog( "close" );
+
+                            igv.setTrackHeight(trackView.track, value);
+                            trackView.update();
+                        });
+
+                        trackMenuPopupDialog.dialogForm.dialog( "open" );
+                    };
+
+                }
+                    break;
             }
-
 
             menuItems.push(menuItem);
         });
+
+
+
 
         trackColorItem[ "object" ] = $('<div id="featureColorPicker" class="igv-track-menu-item">Set feature color</div>');
         trackColorItem[   "init" ] = function () {
@@ -102,7 +125,6 @@ var igv = (function (igv) {
 
             );
         };
-
         menuItems.push(trackColorItem);
 
         deleteItem[ "object" ] = $('<div class="igv-track-menu-item">Remove track</div>');
@@ -110,8 +132,8 @@ var igv = (function (igv) {
             popover.hide();
             trackView.browser.removeTrack(trackView.track);
         };
-
         menuItems.push(deleteItem);
+
 
         return menuItems
     };

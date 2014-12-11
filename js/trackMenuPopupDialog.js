@@ -28,9 +28,11 @@
  */
 var igv = (function (igv) {
 
-    igv.TrackMenuPopupDialog = function (label, value, ok) {
+    igv.TrackMenuPopupDialog = function (dialogLabel, inputValue, ok) {
 
-        var htmlString,
+        var dialogLabelRE,
+            inputValueRE,
+            htmlString,
             myself,
             thang;
 
@@ -40,7 +42,15 @@ var igv = (function (igv) {
             thang.remove();
         }
 
-        htmlString = '<div id="dialog-form" title="Create new user"><form><fieldset><label for="name">Name</label><input type="text" name="name" id="name" value="Jane Smith"></fieldset></form></div>';
+        htmlString = '<div id="dialog-form" title="DIALOG_LABEL"><form><fieldset><input type="text" name="name" id="name" value="INPUT_VALUE"></fieldset></form></div>';
+
+        dialogLabelRE = new RegExp("DIALOG_LABEL", "g");
+        htmlString = htmlString.replace(dialogLabelRE, dialogLabel);
+
+        inputValueRE = new RegExp("INPUT_VALUE", "g");
+        htmlString = htmlString.replace(inputValueRE, inputValue);
+
+
         $( "body" ).append( $.parseHTML( htmlString ) );
 
         this.dialogForm = $( "#dialog-form" );
