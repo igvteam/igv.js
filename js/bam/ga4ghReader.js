@@ -41,7 +41,6 @@ var igv = (function (igv) {
             body = {"readsetIds": [this.readsetId], "sequenceName": queryChr, "sequenceStart": bpStart, "sequenceEnd": bpEnd, "maxResults": "10000"},
             sendData,
             sendURL,
-            pageToken,
             alignments;
 
         readURL = this.url + "/reads/search";

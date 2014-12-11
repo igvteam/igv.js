@@ -226,6 +226,7 @@ var igv = (function (igv) {
     }
 
     // Merge some standard genome tracks,  this is useful for demos
+    // TODO -- move this to external json
     function mergeGenome(options) {
 
         if (options.genome && options.genome === "hg19") {
@@ -241,7 +242,8 @@ var igv = (function (igv) {
                 });
             options.tracks.push(
                 {
-                    url: "//dn7ywbm9isq8j.cloudfront.net/annotations/hg19/genes/gencode.v18.collapsed.bed",
+                    url: "//dn7ywbm9isq8j.cloudfront.net/annotations/hg19/genes/gencode.v18.collapsed.bed.gz",
+                    indexed: false,
                     label: "Genes",
                     order: 10000
                 });
