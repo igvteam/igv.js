@@ -13,60 +13,8 @@
     <!-- jQuery UI CSS -->
     <script type="text/javascript" src="//ajax.googleapis.com/ajax/libs/jqueryui/1.11.2/jquery-ui.min.js"></script>
 
-    <script>
-        $(function() {
-
-            var dialogForm = $( "#dialog-form"),
-                    form = dialogForm.find( "form" ),
-                    name = $( "#name" ),
-                    allFields = $( [] ).add( name );
-
-            dialogForm.dialog({
-                autoOpen: false,
-                height: 256,
-                width: 300,
-                modal: true,
-                buttons: {
-                    "add user": function() {
-                        $( "#users").find(" tbody").append( "<tr>" + "<td>" + name.val() + "</td>" + "</tr>" );
-                        dialogForm.dialog( "close" );
-                    },
-                    cancel: function() {
-                        dialogForm.dialog( "close" );
-                    }
-                },
-                close: function() {
-                    form[ 0 ].reset();
-                    allFields.removeClass( "ui-state-error" );
-                }
-            });
-
-            form.on( "submit", function( event ) {
-                event.preventDefault();
-                $( "#users").find(" tbody").append( "<tr>" + "<td>" + name.val() + "</td>" + "</tr>" );
-                dialogForm.dialog( "close" );
-            });
-
-            $( "#create-user" ).button().on( "click", function() {
-                dialogForm.dialog( "open" );
-            });
-        });
-    </script>
 </head>
 <body>
-
-<div id="dialog-form" title="Create new user">
-
-    <form>
-        <fieldset>
-            <label for="name">Name</label>
-            <input type="text" name="name" id="name" value="Jane Smith">
-            <!--<input type="text" name="name" id="name" value="Jane Smith" class="text ui-widget-content ui-corner-all">-->
-            <!--<input type="submit" tabindex="-1" style="position:absolute; top:-1000px">-->
-        </fieldset>
-    </form>
-
-</div>
 
 <div id="users-contain" class="ui-widget">
     <h1>Existing Users:</h1>
@@ -81,6 +29,60 @@
 </div>
 
 <button id="create-user">create user</button>
+
+
+<div id="dialog-form" title="Create new user">
+
+    <form>
+        <fieldset>
+            <label for="name">Name</label>
+            <input type="text" name="name" id="name" value="Jane Smith">
+            <!--<input type="text" name="name" id="name" value="Jane Smith" class="text ui-widget-content ui-corner-all">-->
+            <!--<input type="submit" tabindex="-1" style="position:absolute; top:-1000px">-->
+        </fieldset>
+    </form>
+
+</div>
+
+<script>
+    $(function() {
+
+        var dialogForm = $( "#dialog-form"),
+                form = dialogForm.find( "form" ),
+                name = $( "#name" ),
+                allFields = $( [] ).add( name );
+
+        dialogForm.dialog({
+            autoOpen: false,
+            height: 256,
+            width: 300,
+            modal: true,
+            buttons: {
+                "add user": function() {
+                    $( "#users").find(" tbody").append( "<tr>" + "<td>" + name.val() + "</td>" + "</tr>" );
+                    dialogForm.dialog( "close" );
+                },
+                cancel: function() {
+                    dialogForm.dialog( "close" );
+                }
+            },
+            close: function() {
+                form[ 0 ].reset();
+                allFields.removeClass( "ui-state-error" );
+            }
+        });
+
+        form.on( "submit", function( event ) {
+            event.preventDefault();
+            $( "#users").find(" tbody").append( "<tr>" + "<td>" + name.val() + "</td>" + "</tr>" );
+            dialogForm.dialog( "close" );
+        });
+
+        $( "#create-user" ).button().on( "click", function() {
+            dialogForm.dialog( "open" );
+        });
+    });
+</script>
 
 </body>
 </html>
