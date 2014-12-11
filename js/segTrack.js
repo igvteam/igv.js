@@ -29,31 +29,28 @@ var igv = (function (igv) {
 
     igv.SegTrack = function (config) {
 
-        this.config = config;
-        this.url = config.url;
-        this.featureSource = new igv.BedFeatureSource(this.config);
-        this.label = config.label;
-        this.id = config.id || config.label;
-        this.height = config.height || 100;
-        this.minHeight = config.minHeight || 0;
-        this.maxHeight = config.maxHeight || 500;
+        // Override generic defaults before calling core config
+        config.minHeight = config.minHeight || 0;
+        config.maxHeight = config.maxHeight || 500;
+
+        igv.configTrack(this, config);
         this.sampleHeight = config.sampleHeight || 2;
-        this.order = config.order;
 
-
-        this.posColorScale = new igv.GradientColorScale(
-            {
-                low: 0.1,
-                lowR: 255,
-                lowG: 255,
-                lowB: 255,
-                high: 1.5,
-                highR: 255,
-                highG: 0,
-                highB: 0
-            }
-        );
-        this.negColorScale = new igv.GradientColorScale(
+        this.posColorScale = config.posColorScale ||
+            new igv.GradientColorScale(
+                {
+                    low: 0.1,
+                    lowR: 255,
+                    lowG: 255,
+                    lowB: 255,
+                    high: 1.5,
+                    highR: 255,
+                    highG: 0,
+                    highB: 0
+                }
+            );
+        this.negColorScale = config.negColorScale ||
+            new igv.GradientColorScale(
             {
                 low: -1.5,
                 lowR: 0,
@@ -68,6 +65,7 @@ var igv = (function (igv) {
 
         this.sampleCount = 0;
         this.samples = {};
+        this.featureSource = new igv.BedFeatureSource(this.config);
 
     };
 
@@ -88,7 +86,6 @@ var igv = (function (igv) {
             pixelHeight = options.pixelHeight,
             bpEnd = bpStart + pixelWidth * bpPerPixel + 1,
             featureMin, featureMax, denom;
-
 
 
         var segment, len, sample, i, y, color, value,
@@ -168,7 +165,7 @@ var igv = (function (igv) {
      * @param features
      * @returns {number}
      */
-    igv.SegTrack.prototype.computePixelHeight = function(features) {
+    igv.SegTrack.prototype.computePixelHeight = function (features) {
         for (i = 0, len = features.length; i < len; i++) {
             sample = features[i].sample;
             if (!this.samples.hasOwnProperty(sample)) {
