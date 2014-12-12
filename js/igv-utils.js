@@ -44,12 +44,10 @@ var igv = (function (igv) {
                 {
                     menuItem[ "click" ] = function () {
 
-                        var trackMenuPopupDialog = new igv.TrackMenuPopupDialog(label, "My Track", function() {
+                        var trackMenuPopupDialog = new igv.TrackMenuPopupDialog(popover, label, "My Track", function() {
 
-                            console.log("ok " + trackMenuPopupDialog.name.val());
                             igv.setTrackLabel(trackView.track, trackMenuPopupDialog.name.val());
                             trackView.update();
-
                             trackMenuPopupDialog.dialogForm.dialog( "close" );
                         });
 
@@ -63,14 +61,12 @@ var igv = (function (igv) {
                 {
                     menuItem[ "click" ] = function () {
 
-                        var trackMenuPopupDialog = new igv.TrackMenuPopupDialog(label, "250", function() {
+                        var trackMenuPopupDialog = new igv.TrackMenuPopupDialog(popover, label, "250", function() {
 
                             var value = parseFloat(trackMenuPopupDialog.name.val(), 10);
 
-                            console.log("ok " + value);
                             igv.setTrackHeight(trackView.track, value);
                             trackView.update();
-
                             trackMenuPopupDialog.dialogForm.dialog( "close" );
                         });
 
@@ -93,7 +89,7 @@ var igv = (function (igv) {
                     inline: false,
 
                     init:			function(event, color) {
-                        console.log('colorpicker.init', color.formatted);
+                        //console.log('colorpicker.init', color.formatted);
                     },
 
                     select:			function(event, color) {
@@ -101,22 +97,23 @@ var igv = (function (igv) {
                     },
 
                     close:			function(event, color) {
-                        console.log('colorpicker.close', color.formatted + ' r:' + color.rgb.r + ' g:' + color.rgb.g + ' b:' + color.rgb.b + ' a:' + color.a);
+                        //console.log('colorpicker.close', color.formatted + ' r:' + color.rgb.r + ' g:' + color.rgb.g + ' b:' + color.rgb.b + ' a:' + color.a);
                     },
 
                     ok:         	function(event, color) {
-                        console.log('colorpicker.ok', color.formatted + ' r:' + color.rgb.r + ' g:' + color.rgb.g + ' b:' + color.rgb.b + ' a:' + color.a);
+                        //console.log('colorpicker.ok', color.formatted + ' r:' + color.rgb.r + ' g:' + color.rgb.g + ' b:' + color.rgb.b + ' a:' + color.a);
                         igv.setTrackColor(trackView.track, igv.rgbColor(Math.floor(255 * color.rgb.r), Math.floor(255 * color.rgb.g), Math.floor(255 * color.rgb.b)));
                         trackView.update();
+                        popover.hide();
 
                     },
 
                     open:         	function(event, color) {
-                        console.log('colorpicker.open', color.formatted + ' r:' + color.rgb.r + ' g:' + color.rgb.g + ' b:' + color.rgb.b + ' a:' + color.a);
+                        //console.log('colorpicker.open', color.formatted + ' r:' + color.rgb.r + ' g:' + color.rgb.g + ' b:' + color.rgb.b + ' a:' + color.a);
                     },
 
                     cancel:			function(event, color) {
-                        console.log('colorpicker.cancel', color.formatted + ' r:' + color.rgb.r + ' g:' + color.rgb.g + ' b:' + color.rgb.b + ' a:' + color.a);
+                        //console.log('colorpicker.cancel', color.formatted + ' r:' + color.rgb.r + ' g:' + color.rgb.g + ' b:' + color.rgb.b + ' a:' + color.a);
                     }
                 }
 
