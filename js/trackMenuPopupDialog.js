@@ -28,7 +28,7 @@
  */
 var igv = (function (igv) {
 
-    igv.TrackMenuPopupDialog = function (dialogLabel, inputValue, ok) {
+    igv.TrackMenuPopupDialog = function (trackMenu, dialogLabel, inputValue, ok) {
 
         var dialogLabelRE,
             inputValueRE,
@@ -68,6 +68,7 @@ var igv = (function (igv) {
                 myself.form[ 0 ].reset();
                 myself.dialogForm.remove();
                 myself.dialogForm = undefined;
+                trackMenu.hide();
             }
         });
 
