@@ -43,7 +43,6 @@ var igv = (function (igv) {
         inputValueRE = new RegExp("INPUT_VALUE", "g");
         htmlString = htmlString.replace(inputValueRE, inputValue);
 
-
         $( "body" ).append( $.parseHTML( htmlString ) );
 
         this.dialogForm = $( "#dialog-form" );
@@ -68,7 +67,7 @@ var igv = (function (igv) {
                 myself.form[ 0 ].reset();
                 myself.dialogForm.remove();
                 myself.dialogForm = undefined;
-                trackMenu.hide();
+                if (trackMenu) trackMenu.hide();
             }
         });
 
