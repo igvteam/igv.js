@@ -64,6 +64,11 @@ var igv = (function (igv) {
                         var trackMenuPopupDialog = new igv.TrackMenuPopupDialog(popover, label, "250", function() {
 
                             var value = parseFloat(trackMenuPopupDialog.name.val(), 10);
+                            //TODO -- what if val is not a number?
+
+                            // Override min or max values, if defined
+                            if(trackView.track.min != undefined) trackView.track.min = Math.min(trackView.track.min, value);
+                            if(trackView.track.max != undefined) trackView.track.max = Math.max(trackView.track.max, value);
 
                             igv.setTrackHeight(trackView.track, value);
                             trackView.update();
