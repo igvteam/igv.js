@@ -204,11 +204,11 @@ var igv = (function (igv) {
         var newTrackHeight,
             newContentHeight,
             trackHeightStr,
-            minHeight = this.track.minHeight || 10,
-            maxHeight = this.track.maxHeight || 1000;
+            minHeight = this.track.minHeight,
+            maxHeight = this.track.maxHeight;
 
-        newTrackHeight = Math.max(minHeight, newHeight);
-        newTrackHeight = Math.min(maxHeight, newTrackHeight);
+        if(minHeight) newTrackHeight = Math.max(minHeight, newHeight);
+        if(maxHeight) newTrackHeight = Math.min(maxHeight, newTrackHeight);
         trackHeightStr = newTrackHeight + "px";
 
         newContentHeight = Math.max(newTrackHeight, newHeight);

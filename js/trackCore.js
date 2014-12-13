@@ -43,8 +43,7 @@ var igv = (function (igv) {
         track.type = config.type;
 
         track.height = config.height || ("bed" === config.type ? 100 : 50);
-        track.minHeight = config.minHeight || track.height;
-        track.maxHeight = config.maxHeight || track.height;
+
     };
 
     igv.setTrackHeight = function (track, newHeight) {
