@@ -33,7 +33,7 @@ var igv = (function (igv) {
         this.markupWithParentDiv(parentDiv)
     };
 
-    igv.Popover.prototype.markupWithParentDiv = function(parentDiv) {
+    igv.Popover.prototype.markupWithParentDiv = function (parentDiv) {
 
         var myself = this,
             popoverHeader,
@@ -63,22 +63,21 @@ var igv = (function (igv) {
         popoverClose.append(popoverCloseFontAwesome[ 0 ]);
 
         popoverCloseFontAwesome.hover(
-
-            function() {
-                popoverCloseFontAwesome.removeClass("fa-times"       );
-                popoverCloseFontAwesome.addClass   ("fa-times-circle fa-lg");
+            function () {
+                popoverCloseFontAwesome.removeClass("fa-times");
+                popoverCloseFontAwesome.addClass("fa-times-circle fa-lg");
 
                 popoverCloseFontAwesome.css({
-                    "color" : "#222"
+                    "color": "#222"
                 });
             },
 
-            function() {
+            function () {
                 popoverCloseFontAwesome.removeClass("fa-times-circle fa-lg");
-                popoverCloseFontAwesome.addClass   ("fa-times"       );
+                popoverCloseFontAwesome.addClass("fa-times");
 
                 popoverCloseFontAwesome.css({
-                    "color" : "#444"
+                    "color": "#444"
                 });
 
             }
@@ -101,7 +100,7 @@ var igv = (function (igv) {
 
         for (i = 0; i < rows; i++) {
             name = "name " + i;
-            nameValues.push( { name : name, value : "verbsgohuman" } );
+            nameValues.push({ name: name, value: "verbsgohuman" });
         }
 
         return nameValues;
@@ -113,13 +112,17 @@ var igv = (function (igv) {
 
     igv.Popover.prototype.presentTrackMenu = function (pageX, pageY, trackView) {
 
-        var container = $('<div class="igv-track-menu-container">'),
+        var self = this,
+            container = $('<div class="igv-track-menu-container">'),
             trackMenuItems = igv.trackMenuItems(this, trackView);
 
         trackMenuItems.forEach(function (trackMenuItem, index, tmi) {
-
-            var ob = trackMenuItem[ "object" ];
-            container.append(ob[ 0 ]);
+            if (trackMenuItem.object) {
+                var ob = trackMenuItem.object;
+                container.append(ob[ 0 ]);
+            } else {
+                container.append(trackMenuItem)
+            }
         });
 
         this.popoverContent.empty();
@@ -131,12 +134,12 @@ var igv = (function (igv) {
         // when clicked.
         trackMenuItems.forEach(function (trackMenuItem) {
 
-            var ob = trackMenuItem[ "object"],
-                cl = trackMenuItem[ "click"],
-                init = trackMenuItem[ "init"];
+            var ob = trackMenuItem.object,
+                cl = trackMenuItem.click,
+                init = trackMenuItem.init;
 
             if (cl) {
-                ob.click( cl );
+                ob.click(cl);
             }
 
             if (init) {
@@ -145,7 +148,7 @@ var igv = (function (igv) {
 
         });
 
-        this.popover.css( popoverPosition(pageX, pageY, this) ).show();
+        this.popover.css(popoverPosition(pageX, pageY, this)).show();
 
     };
 
@@ -157,7 +160,7 @@ var igv = (function (igv) {
 
             this.popoverContent.html(content);
 
-            this.popover.css( popoverPosition(pageX, pageY, this) ).show();
+            this.popover.css(popoverPosition(pageX, pageY, this)).show();
 
         }
     };
@@ -165,22 +168,22 @@ var igv = (function (igv) {
     function popoverPosition(pageX, pageY, popoverWidget) {
 
         var left,
-            containerCoordinates = { x : pageX, y : pageY },
-            containerRect = { x : 0, y : 0, width : $(window).width(), height : $(window).height() },
+            containerCoordinates = { x: pageX, y: pageY },
+            containerRect = { x: 0, y: 0, width: $(window).width(), height: $(window).height() },
             popupRect,
             popupX = pageX,
             popupY = pageY;
 
         popupX -= $(popoverWidget.parentDiv).offset().left;
         popupY -= $(popoverWidget.parentDiv).offset().top;
-        popupRect = { x : popupX, y : popupY, width : popoverWidget.popover.outerWidth(), height : popoverWidget.popover.outerHeight() };
+        popupRect = { x: popupX, y: popupY, width: popoverWidget.popover.outerWidth(), height: popoverWidget.popover.outerHeight() };
 
         left = popupX;
         if (containerCoordinates.x + popupRect.width > containerRect.width) {
             left = popupX - popupRect.width;
         }
 
-        return { "left" : left + "px", "top" : popupY + "px" };
+        return { "left": left + "px", "top": popupY + "px" };
     }
 
     return igv;

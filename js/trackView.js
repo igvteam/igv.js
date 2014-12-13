@@ -79,8 +79,6 @@ var igv = (function (igv) {
         this.contentDiv = $('<div class="igv-content-div">')[0];
         $(this.viewportDiv).append(this.contentDiv);
 
-        if (!this.track.scrollable) this.contentDiv.style.height = "100%";
-
         // track content canvas
         this.canvas = $('<canvas class = "igv-content-canvas">')[0];
         $(this.contentDiv).append(this.canvas);
