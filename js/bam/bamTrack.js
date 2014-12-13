@@ -31,13 +31,9 @@ var igv = (function (igv) {
 
     igv.BAMTrack = function (config) {
 
-        var coverageTrackHeightPercentage = 0.15;
-
-        // Override generic defaults before calling core config
-        config.height = config.height || 400;
-
         igv.configTrack(this, config);
 
+        this.coverageTrackHeight = config.coverageTrackHeight || 50;
         this.alignmentRowHeight = config.alignmentRowHeight || 14;
         this.visibilityWindow = config.visibilityWindow || 30000;     // 30kb default
         this.alignmentColor = config.alignmentColor || "rgb(185, 185, 185)";
@@ -49,7 +45,6 @@ var igv = (function (igv) {
 
         this.alignmentRowYInset = 1;
         // divide the canvas into a coverage track region and an alignment track region
-        this.coverageTrackHeight = coverageTrackHeightPercentage * this.height - 5;
 
         this.featureSource = new igv.BamSource(config);
     };

@@ -57,9 +57,7 @@ Tracks are configured with json-style configuration objects.   All paramters are
     type      string identifying type of file.  Recognized types include  "bed", "vcf", "bam", and "seg"
     label     user-visible name for the track
     color     default color for features.  Can be overriden in certain file formats
-    height    inital track height
-    minHeight minimum height for tracks that change height dynamically
-    maxHeight maximum height for tracks that change height dynamically
+    height    initial track height
     order     integer specifying tracks vertical placement relative to other tracks.  Use to pin tracks to top (large negative number) or bottom (large positive number)
 
 ###Alignment track (type = "bam")

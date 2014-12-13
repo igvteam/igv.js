@@ -46,17 +46,6 @@ var igv = (function (igv) {
 
     };
 
-    igv.setTrackHeight = function (track, newHeight) {
-
-        if (track.minHeight != undefined) newHeight = Math.max(track.minHeight, newHeight);
-        if (track.maxHeight != undefined) newHeight = Math.min(track.maxHeight, newHeight);
-        track.height = newHeight;
-
-        if (track.trackView) {
-            track.trackView.setTrackHeight(newHeight);
-        }
-    };
-
     igv.setTrackLabel = function (track, label) {
 
         track.label = label;
