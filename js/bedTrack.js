@@ -118,6 +118,13 @@ var igv = (function (igv) {
         return null;
     }
 
+    igv.BedTrack.prototype.popupMenuItems = function (popover) {
+        return [
+            igv.colorPickerMenuItem(popover, this.trackView, "Set feature color")
+        ];
+
+    }
+
     function renderGene(gene, bpStart, xScale, canvas) {
 
         var px,

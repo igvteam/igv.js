@@ -27,111 +27,114 @@ var igv = (function (igv) {
 
     igv.trackMenuItems = function (popover, trackView) {
 
-        var menuItems = [ ],
-            deleteItem = { },
-            trackColorItem = {};
-
-        ["Set track name", "Set track height"].forEach(function (label, index, labels) {
-
-            var menuItem = { };
-
-            menuItem[ "object" ] = $('<div class="igv-track-menu-item">');
-            menuItem[ "object" ].html(label);
-
-            switch (index) {
-
-                case 0 :
+        var trackItems,
+            menuItems = [
                 {
-                    menuItem[ "click" ] = function () {
+                    object: $('<div class="igv-track-menu-item">Set track name</div>'),
+                    click: function () {
                         var initialValue = trackView.track.label;
-                        var trackMenuPopupDialog = new igv.TrackMenuPopupDialog(popover, label, initialValue, function() {
+                        var trackMenuPopupDialog = new igv.TrackMenuPopupDialog(popover, "Track name", initialValue, function () {
 
                             igv.setTrackLabel(trackView.track, trackMenuPopupDialog.name.val());
                             trackView.update();
-                            trackMenuPopupDialog.dialogForm.dialog( "close" );
+                            trackMenuPopupDialog.dialogForm.dialog("close");
                         });
 
-                        trackMenuPopupDialog.dialogForm.dialog( "open" );
-                    };
-
-                }
-                    break;
-
-                case 1 :
+                        trackMenuPopupDialog.dialogForm.dialog("open");
+                    }
+                },
                 {
-                    menuItem[ "click" ] = function () {
+                    object: $('<div class="igv-track-menu-item">Set track height</div>'),
+                    click: function () {
 
                         var value = trackView.track.height;
-                        var trackMenuPopupDialog = new igv.TrackMenuPopupDialog(popover, label, value.toString(), function() {
+                        var trackMenuPopupDialog = new igv.TrackMenuPopupDialog(popover, "Track height", value.toString(), function () {
 
                             var value = parseFloat(trackMenuPopupDialog.name.val(), 10);
                             //TODO -- what if val is not a number?
 
                             trackView.setTrackHeight(value);
-                            trackMenuPopupDialog.dialogForm.dialog( "close" );
+                            trackMenuPopupDialog.dialogForm.dialog("close");
                         });
 
-                        trackMenuPopupDialog.dialogForm.dialog( "open" );
-                    };
-
-                }
-                    break;
-            }
-
-            menuItems.push(menuItem);
-        });
-
-        trackColorItem[ "object" ] = $('<div id="featureColorPicker" class="igv-track-menu-item">Set feature color</div>');
-        trackColorItem[   "init" ] = function () {
-
-            $("#featureColorPicker").colorpicker(
-
-                {
-                    inline: false,
-
-                    init:			function(event, color) {
-                        //console.log('colorpicker.init', color.formatted);
-                    },
-
-                    select:			function(event, color) {
-                        //console.log('colorpicker.select', color.formatted);
-                    },
-
-                    close:			function(event, color) {
-                        //console.log('colorpicker.close', color.formatted + ' r:' + color.rgb.r + ' g:' + color.rgb.g + ' b:' + color.rgb.b + ' a:' + color.a);
-                    },
-
-                    ok:         	function(event, color) {
-                        //console.log('colorpicker.ok', color.formatted + ' r:' + color.rgb.r + ' g:' + color.rgb.g + ' b:' + color.rgb.b + ' a:' + color.a);
-                        igv.setTrackColor(trackView.track, igv.rgbColor(Math.floor(255 * color.rgb.r), Math.floor(255 * color.rgb.g), Math.floor(255 * color.rgb.b)));
-                        trackView.update();
-                        popover.hide();
-
-                    },
-
-                    open:         	function(event, color) {
-                        //console.log('colorpicker.open', color.formatted + ' r:' + color.rgb.r + ' g:' + color.rgb.g + ' b:' + color.rgb.b + ' a:' + color.a);
-                    },
-
-                    cancel:			function(event, color) {
-                        //console.log('colorpicker.cancel', color.formatted + ' r:' + color.rgb.r + ' g:' + color.rgb.g + ' b:' + color.rgb.b + ' a:' + color.a);
+                        trackMenuPopupDialog.dialogForm.dialog("open");
                     }
                 }
+            ];
 
-            );
-        };
-        menuItems.push(trackColorItem);
+        if (trackView.track.popupMenuItems) {
 
-        deleteItem[ "object" ] = $('<div class="igv-track-menu-item">Remove track</div>');
-        deleteItem[  "click" ] = function () {
-            popover.hide();
-            trackView.browser.removeTrack(trackView.track);
-        };
-        menuItems.push(deleteItem);
+            trackItems = trackView.track.popupMenuItems(popover);
 
+            if (trackItems && trackItems.length > 0) {
 
-        return menuItems
+                menuItems.push("<hr>");
+
+                trackItems.forEach(function (menuItem) {
+                    menuItems.push(menuItem);
+                });
+            }
+        }
+
+        menuItems.push("<hr>");
+
+        menuItems.push(
+            {
+                object: $('<div class="igv-track-menu-item">Remove track</div>'),
+                click: function () {
+                    popover.hide();
+                    trackView.browser.removeTrack(trackView.track);
+                }
+            }
+        );
+
+        return menuItems;
+
     };
+
+
+    igv.colorPickerMenuItem = function (popover, trackView, label) {
+        return {
+            object: $('<div id="featureColorPicker" class="igv-track-menu-item">' + label + '</div>'),
+            init: function () {
+
+                $("#featureColorPicker").colorpicker(
+                    {
+                        inline: false,
+
+                        init: function (event, color) {
+                            //console.log('colorpicker.init', color.formatted);
+                        },
+
+                        select: function (event, color) {
+                            //console.log('colorpicker.select', color.formatted);
+                        },
+
+                        close: function (event, color) {
+                            //console.log('colorpicker.close', color.formatted + ' r:' + color.rgb.r + ' g:' + color.rgb.g + ' b:' + color.rgb.b + ' a:' + color.a);
+                        },
+
+                        ok: function (event, color) {
+                            //console.log('colorpicker.ok', color.formatted + ' r:' + color.rgb.r + ' g:' + color.rgb.g + ' b:' + color.rgb.b + ' a:' + color.a);
+                            igv.setTrackColor(trackView.track, igv.rgbColor(Math.floor(255 * color.rgb.r), Math.floor(255 * color.rgb.g), Math.floor(255 * color.rgb.b)));
+                            trackView.update();
+                            popover.hide();
+
+                        },
+
+                        open: function (event, color) {
+                            //console.log('colorpicker.open', color.formatted + ' r:' + color.rgb.r + ' g:' + color.rgb.g + ' b:' + color.rgb.b + ' a:' + color.a);
+                        },
+
+                        cancel: function (event, color) {
+                            //console.log('colorpicker.cancel', color.formatted + ' r:' + color.rgb.r + ' g:' + color.rgb.g + ' b:' + color.rgb.b + ' a:' + color.a);
+                        }
+                    }
+                );
+            }
+        }
+    }
+
 
     igv.spinner = function () {
 
@@ -207,8 +210,8 @@ var igv = (function (igv) {
             decsep = '.';
 
         return dec[0].split('').reverse().reduce(function (prev, now, i) {
-                return i % 3 === 0 ? prev + sep + now : prev + now;
-            }).split('').reverse().join('') + (dec[1] ? decsep + dec[1] : '');
+            return i % 3 === 0 ? prev + sep + now : prev + now;
+        }).split('').reverse().join('') + (dec[1] ? decsep + dec[1] : '');
     };
 
     igv.numberUnFormatter = function (formatedNumber) {
