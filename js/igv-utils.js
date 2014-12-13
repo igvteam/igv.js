@@ -43,8 +43,8 @@ var igv = (function (igv) {
                 case 0 :
                 {
                     menuItem[ "click" ] = function () {
-
-                        var trackMenuPopupDialog = new igv.TrackMenuPopupDialog(popover, label, "My Track", function() {
+                        var initialValue = trackView.track.label;
+                        var trackMenuPopupDialog = new igv.TrackMenuPopupDialog(popover, label, initialValue, function() {
 
                             igv.setTrackLabel(trackView.track, trackMenuPopupDialog.name.val());
                             trackView.update();
@@ -61,17 +61,13 @@ var igv = (function (igv) {
                 {
                     menuItem[ "click" ] = function () {
 
-                        var trackMenuPopupDialog = new igv.TrackMenuPopupDialog(popover, label, "250", function() {
+                        var value = trackView.track.height;
+                        var trackMenuPopupDialog = new igv.TrackMenuPopupDialog(popover, label, value.toString(), function() {
 
                             var value = parseFloat(trackMenuPopupDialog.name.val(), 10);
                             //TODO -- what if val is not a number?
 
-                            // Override min or max values, if defined
-                            if(trackView.track.min != undefined) trackView.track.min = Math.min(trackView.track.min, value);
-                            if(trackView.track.max != undefined) trackView.track.max = Math.max(trackView.track.max, value);
-
-                            igv.setTrackHeight(trackView.track, value);
-                            trackView.update();
+                            trackView.setTrackHeight(value);
                             trackMenuPopupDialog.dialogForm.dialog( "close" );
                         });
 

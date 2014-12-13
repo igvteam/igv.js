@@ -29,10 +29,6 @@ var igv = (function (igv) {
 
     igv.SegTrack = function (config) {
 
-        // Override generic defaults before calling core config
-        config.minHeight = config.minHeight || 0;
-        config.maxHeight = config.maxHeight || 500;
-
         igv.configTrack(this, config);
         this.sampleHeight = config.sampleHeight || 2;
 

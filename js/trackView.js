@@ -75,9 +75,11 @@ var igv = (function (igv) {
         this.viewportDiv = $('<div class="igv-viewport-div">')[0];
         $(trackDiv).append(this.viewportDiv);
 
-        // content  -- purpose of this div is to allow vertical scolling on individual tracks, although that is not implemented
+        // content  -- purpose of this div is to allow vertical scrolling on individual tracks,
         this.contentDiv = $('<div class="igv-content-div">')[0];
         $(this.viewportDiv).append(this.contentDiv);
+
+        if (!this.track.scrollable) this.contentDiv.style.height = "100%";
 
         // track content canvas
         this.canvas = $('<canvas class = "igv-content-canvas">')[0];
@@ -201,37 +203,27 @@ var igv = (function (igv) {
 
     igv.TrackView.prototype.setTrackHeight = function (newHeight) {
 
-        var newTrackHeight,
-            newContentHeight,
-            trackHeightStr,
-            minHeight = this.track.minHeight,
-            maxHeight = this.track.maxHeight;
+        var trackHeightStr;
 
-        if(minHeight) newTrackHeight = Math.max(minHeight, newHeight);
-        if(maxHeight) newTrackHeight = Math.min(maxHeight, newTrackHeight);
-        trackHeightStr = newTrackHeight + "px";
+        trackHeightStr = newHeight + "px";
 
-        newContentHeight = Math.max(newTrackHeight, newHeight);
-
-        console.log("Track height: " + newTrackHeight + "   content height: " + newContentHeight);
-        this.track.height = newTrackHeight;
+        this.track.height = newHeight;
         this.trackDiv.style.height = trackHeightStr;
 
         if (this.track.paintControl) {
             this.controlCanvas.style.height = trackHeightStr;
-            this.controlCanvas.setAttribute("height", newTrackHeight);
+            this.controlCanvas.setAttribute("height", newHeight);
         }
-
         this.viewportDiv.style.height = trackHeightStr;
-        this.contentDiv.style.height = newContentHeight + "px";
 
-        this.canvas.style.height = newContentHeight + "px";
-        this.canvas.setAttribute("height", newContentHeight);
-        this.ctx = this.canvas.getContext("2d");
+        // Reset the canvas height attribute as its height might have changed
+        this.canvas.setAttribute("height", this.canvas.clientHeight);
 
         if ("CURSOR" === this.browser.type) {
             this.track.cursorHistogram.updateHeightAndInitializeHistogramWithTrack(this.track);
         }
+
+        this.heightSetExplicitly = true;
 
         this.update();
     };
@@ -297,7 +289,7 @@ var igv = (function (igv) {
                     if (features) {
 
                         // TODO -- adjust track height here.
-                        if (self.track.computePixelHeight) {
+                        if (!self.heightSetExplicity && self.track.computePixelHeight) {
                             var desiredHeight = self.track.computePixelHeight(features);
                             if (desiredHeight > self.contentDiv.clientHeight) {
                                 self.setTrackHeight(desiredHeight);
