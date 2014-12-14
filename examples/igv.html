@@ -47,13 +47,18 @@
 
     <style type="text/css">
 
-        div#trackList > div {
 
+
+        #trackList {
             font-family: 'PT Sans', sans-serif;
             font-size: small;
             font-weight: 400;
+        }
+
+        div#trackList > div, h3 {
+
             color: #444;
-            margin-left: 28px;
+            margin-left: 48px;
             margin-top: 4px;
             margin-bottom: 4px;
 
@@ -80,7 +85,7 @@
 
     <div id="trackList">
 
-    <div><h3>Example tracks - click to load</h3></div>
+    <h3>Example tracks - click to load</h3>
 
         <div onclick="igv.browser.loadTrack({
                                 url: 'http://www.broadinstitute.org/igvdata/1KG/b37/data/NA06984/alignment/NA06984.mapped.ILLUMINA.bwa.CEU.low_coverage.20120522.bam',
