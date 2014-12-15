@@ -88,7 +88,7 @@ var igv = (function (igv) {
         });
 
         // popover content
-        this.popoverContent = $('<div class="igv-popoverContent">');
+        this.popoverContent = $('<div>');
         this.popover.append(this.popoverContent[ 0 ]);
 
     };
@@ -127,6 +127,7 @@ var igv = (function (igv) {
 
         this.popoverContent.empty();
 
+        this.popoverContent.removeClass("igv-popoverTrackPopupContent");
         this.popoverContent.append(container[ 0 ]);
 
         // Attach click handler AFTER inserting markup in DOM.
@@ -154,15 +155,15 @@ var igv = (function (igv) {
 
     igv.Popover.prototype.presentTrackPopup = function (pageX, pageY, content) {
 
-        var height;
-
-        if (content) {
-
-            this.popoverContent.html(content);
-
-            this.popover.css(popoverPosition(pageX, pageY, this)).show();
-
+        if (!content) {
+            return;
         }
+
+        this.popoverContent.addClass("igv-popoverTrackPopupContent");
+        this.popoverContent.html(content);
+
+        this.popover.css(popoverPosition(pageX, pageY, this)).show();
+
     };
 
     function popoverPosition(pageX, pageY, popoverWidget) {
