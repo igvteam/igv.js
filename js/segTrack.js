@@ -70,15 +70,17 @@ var igv = (function (igv) {
 
     igv.SegTrack.prototype.popupMenuItems = function (popover) {
 
-        var myself = this;
-        var str;
+        var myself = this,
+            str,
+            thang;
 
         str = (this.sampleExpandHeight === this.sampleHeight) ? "Squish" : "Expand";
-        str += " Sample Height";
+        str = '<div class=\"igv-track-menu-item\">' + str + " Sample Hgt" + '</div>';
+        thang = $(str);
 
         return [
             {
-                object: $('<div class="igv-track-menu-item">Toggle Sample Height</div>'),
+                object: thang,
                 click: function () {
                     popover.hide();
                     myself.toggleSampleHeight();
@@ -92,7 +94,6 @@ var igv = (function (igv) {
 
         this.sampleHeight = (this.sampleExpandHeight === this.sampleHeight) ? this.sampleSquishHeight : this.sampleExpandHeight;
         this.trackView.update();
-
     };
 
     igv.SegTrack.prototype.getFeatures = function (chr, bpStart, bpEnd, continuation, task) {
