@@ -137,26 +137,22 @@
     border-bottom-width: thin;
 }
 
-.igv-popover-table {
-    /*table-layout: fixed;*/
-    /*width: 256px;*/
-}
+.igv-popoverNameValue {
 
-.igv-popover-td {
-    /*white-space: nowrap;*/
-    /*overflow: hidden;         *//* <- this does seem to be required */
-    /*text-overflow: ellipsis;*/
+    text-wrap: none;
+    white-space:nowrap;
+
+    /*color: lightgreen;*/
+    /*background-color: #0d3349;*/
 }
 
 .igv-popoverName {
     font-weight: bold;
     padding-right: 4px;
-    float: left;
 }
 
 .igv-popoverValue {
     padding-left: 4px;
-    float: left;
 }
 
 /* spinner */
