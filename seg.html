@@ -103,89 +103,11 @@
 
     <script type="text/javascript" src="js/trackMenuPopupDialog.js"></script>
 
-    <style type="text/css">
-
-        #trackList {
-
-            font-family: 'PT Sans', sans-serif;
-            font-size: small;
-            font-weight: 400;
-        }
-
-        div#trackList > div, div#trackList > h3 {
-
-            color: #444;
-            margin-left: 48px;
-            margin-top: 4px;
-            margin-bottom: 4px;
-
-            padding-left: 32px;
-
-            width: 300px;
-        }
-
-        div#trackList > div:hover,
-        div#trackList > div:focus,
-        div#trackList > div:active  {
-            cursor: pointer;
-            color: white;
-            background-color: rgba(49, 106, 246, 1);
-        }
-
-    </style>
-
 </head>
 
 <body>
 
 <div id="myDiv" style="padding-top: 50px;padding-bottom: 20px; height: auto">
-
-    <div id="trackList">
-
-        <h3>Example tracks - click to load</h3>
-
-        <div onclick="igv.browser.loadTrack({
-                                url: 'http://www.broadinstitute.org/igvdata/1KG/b37/data/NA06984/alignment/NA06984.mapped.ILLUMINA.bwa.CEU.low_coverage.20120522.bam',
-                                label: 'NA06984'})">NA06984 (Broad server BAM file)</div>
-
-        <div onclick="igv.browser.loadTrack({
-                                sourceType: 'ga4gh',
-                                type: 'bam',
-                                url: 'https://www.googleapis.com/genomics/v1beta',
-                                authKey: 'AIzaSyC-dujgw4P1QvNd8i_c-I-S_P1uxVZzn0w',
-                                readsetId: 'CMvnhpKTFhCjz9_25e_lCw',
-                                label: 'Ga4gh'})">GA4Gh (Global Alliance, Google server)</div>
-
-        <div onclick="igv.browser.loadTrack({
-                                url: '//www.broadinstitute.org/igvdata/test/igv-web/segmented_data_080520.seg.gz',
-                                label: 'GBM Copy # (TCGA Broad GDAC)'})">GBM Copy # (TCGA Broad GDAC))</div>
-
-        <div onclick="igv.browser.loadTrack({
-                                type: 'eqtl',
-                                url: '//www.gtexportal.org/igv/assets/eqtl/Skin_Sun_Exposed_Lower_leg.portal.eqtl.bin',
-                                label: 'Skin Sun Exposed Lower leg'})">EQTL Skin (GTEX))</div>
-
-
-        <div onclick="igv.browser.loadTrack( {
-                                url: '//www.broadinstitute.org/igvdata/t2d/recomb_decode.bedgraph',
-                                label: 'Recombination rate'})">Recombination Rate</div>
-
-
-        <div onclick="igv.browser.loadTrack(
-                                {
-                                type: 'vcf',
-                                url: '//www.broadinstitute.org/igvdata/test/igv-web/TSVC_variants_IonXpress_078.vcf.gz',
-                                label: 'TSVC Variants 078'
-                                })">TSVC Variants 078 (VCF tabix)</div>
-
-        <div onclick="igv.browser.loadTrack(
-                                {
-                                type: 'bed',
-                                url: '//www.broadinstitute.org/igvdata/annotations/hg19/dbSnp/snp137.hg19.bed.gz',
-                                label: 'dbSNP 137'
-                                })">dbSNP 137 (bed tabix)</div>
-
-    </div>
 
 </div>
 
@@ -203,7 +125,7 @@
                             url: '//www.broadinstitute.org/igvdata/test/igv-web/segmented_data_080520.seg.gz',
                             indexed: false,
                             label: 'Segmented CN',
-                            sampleSquishHeight: 4,
+                            sampleSquishHeight: 2,
                             sampleExpandHeight: 12
                         }
                     ]
