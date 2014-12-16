@@ -33,20 +33,20 @@ var igv = (function (igv) {
         this.sampleHeight = config.sampleHeight || 2;
 
         this.posColorScale = config.posColorScale ||
-            new igv.GradientColorScale(
-                {
-                    low: 0.1,
-                    lowR: 255,
-                    lowG: 255,
-                    lowB: 255,
-                    high: 1.5,
-                    highR: 255,
-                    highG: 0,
-                    highB: 0
-                }
-            );
+        new igv.GradientColorScale(
+            {
+                low: 0.1,
+                lowR: 255,
+                lowG: 255,
+                lowB: 255,
+                high: 1.5,
+                highR: 255,
+                highG: 0,
+                highB: 0
+            }
+        );
         this.negColorScale = config.negColorScale ||
-            new igv.GradientColorScale(
+        new igv.GradientColorScale(
             {
                 low: -1.5,
                 lowR: 0,
@@ -65,38 +65,58 @@ var igv = (function (igv) {
 
     };
 
+    igv.SegTrack.prototype.setSampleHeight = function (sampleHeight) {
+
+        this.sampleHeight = sampleHeight;
+        this.trackView.update();
+
+    };
+
     igv.SegTrack.prototype.getFeatures = function (chr, bpStart, bpEnd, continuation, task) {
 
         this.featureSource.getFeatures(chr, bpStart, bpEnd, continuation, task)
-    }
-
+    };
 
     igv.SegTrack.prototype.draw = function (options) {
 
-        var track = this,
-            featureList = options.features,
-            canvas = options.context,
-            bpPerPixel = options.bpPerPixel,
-            bpStart = options.bpStart,
-            pixelWidth = options.pixelWidth,
-            pixelHeight = options.pixelHeight,
-            bpEnd = bpStart + pixelWidth * bpPerPixel + 1,
-            featureMin, featureMax, denom;
+        var myself = this,
+            featureList,
+            canvas,
+            bpPerPixel,
+            bpStart,
+            pixelWidth,
+            pixelHeight,
+            bpEnd,
+            segment,
+            len,
+            sample,
+            i,
+            y,
+            color,
+            value,
+            px,
+            px1,
+            pw,
+            xScale;
 
-
-        var segment, len, sample, i, y, color, value,
-            px, px1, pw,
-            xScale = bpPerPixel;
-
+        canvas = options.context;
+        pixelWidth = options.pixelWidth;
+        pixelHeight = options.pixelHeight;
         canvas.fillRect(0, 0, pixelWidth, pixelHeight, {'fillStyle': "rgb(255, 255, 255)"});
 
+        featureList = options.features;
         if (featureList) {
+
+            bpPerPixel = options.bpPerPixel;
+            bpStart = options.bpStart;
+            bpEnd = bpStart + pixelWidth * bpPerPixel + 1;
+            xScale = bpPerPixel;
 
             for (i = 0, len = featureList.length; i < len; i++) {
                 sample = featureList[i].sample;
-                if (!track.samples.hasOwnProperty(sample)) {
-                    track.samples[sample] = track.sampleCount;
-                    track.sampleCount++;
+                if (!myself.samples.hasOwnProperty(sample)) {
+                    myself.samples[sample] = myself.sampleCount;
+                    myself.sampleCount++;
                 }
             }
 
@@ -109,18 +129,18 @@ var igv = (function (igv) {
                 if (segment.end < bpStart) continue;
                 if (segment.start > bpEnd) break;
 
-                y = track.samples[segment.sample] * track.sampleHeight;
+                y = myself.samples[segment.sample] * myself.sampleHeight;
 
                 value = segment.value;
-                if (!track.isLog) {
+                if (!myself.isLog) {
                     value = Math.log2(value / 2);
                 }
 
                 if (value < -0.1) {
-                    color = track.negColorScale.getColor(value);
+                    color = myself.negColorScale.getColor(value);
                 }
                 else if (value > 0.1) {
-                    color = track.posColorScale.getColor(value);
+                    color = myself.posColorScale.getColor(value);
                 }
                 else {
                     color = "white";
@@ -130,7 +150,7 @@ var igv = (function (igv) {
                 px1 = Math.round((segment.end - bpStart) / xScale);
                 pw = Math.max(1, px1 - px);
 
-                canvas.fillRect(px, y, pw, track.sampleHeight, {fillStyle: color});
+                canvas.fillRect(px, y, pw, myself.sampleHeight, {fillStyle: color});
 
             }
         }
@@ -141,18 +161,17 @@ var igv = (function (igv) {
 
         function checkForLog(featureList) {
             var i;
-            if (track.isLog === undefined) {
-                track.isLog = false;
+            if (myself.isLog === undefined) {
+                myself.isLog = false;
                 for (i = 0; i < featureList.length; i++) {
                     if (featureList[i].value < 0) {
-                        track.isLog = true;
+                        myself.isLog = true;
                         return;
                     }
                 }
             }
         }
     };
-
 
     /**
      * Optional method to compute pixel height to accomodate the list of features.  The implementation below
@@ -170,21 +189,25 @@ var igv = (function (igv) {
             }
         }
         return this.sampleCount * this.sampleHeight;
-    }
-
+    };
 
     /**
      * Sort samples by the average value over the genomic range in the direction indicated (1 = ascending, -1 descending)
      */
     igv.SegTrack.prototype.sortSamples = function (chr, bpStart, bpEnd, direction, callback) {
 
-        var track = this,
-            segment, min, max, f, i,
+        var myself = this,
+            segment,
+            min,
+            max,
+            f,
+            i,
+            s,
+            sampleNames,
             len = bpEnd - bpStart,
-            scores = {}, s, sampleNames;
+            scores = { };
 
         this.featureSource.getFeatures(chr, bpStart, bpEnd, function (featureList) {
-
 
             // Compute weighted average score for each sample
             for (i = 0, len = featureList.length; i < len; i++) {
@@ -205,7 +228,7 @@ var igv = (function (igv) {
             }
 
             // Now sort sample names by score
-            sampleNames = Object.keys(track.samples);
+            sampleNames = Object.keys(myself.samples);
             sampleNames.sort(function (a, b) {
 
                 var s1 = scores[a];
@@ -221,18 +244,18 @@ var igv = (function (igv) {
 
             // Finally update sample hash
             for (i = 0; i < sampleNames.length; i++) {
-                track.samples[sampleNames[i]] = i;
+                myself.samples[sampleNames[i]] = i;
             }
 
             callback();
 
         });
-    }
-
+    };
 
     /**
      * Handle an alt-click.   TODO perhaps generalize this for all tracks (optional).
      *
+     * @param genomicLocation
      * @param event
      */
     igv.SegTrack.prototype.altClick = function (genomicLocation, event) {
@@ -250,7 +273,7 @@ var igv = (function (igv) {
         });
 
         sortDirection *= -1;
-    }
+    };
 
 
     return igv;
