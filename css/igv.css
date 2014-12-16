@@ -235,16 +235,18 @@
 
 .igv-ideogram-chr-div {
 
+    font-family: 'PT Sans', sans-serif;
+    font-size: small;
+    font-weight: 400;
+
+    color: #444;
+
     position: absolute;
     left: 0;
     top: 50%;
-
     transform: translateY(-50%);
 
     padding-left: 12px;
-
-    font-size: small;
-    font-weight: 400;
 
     float: left;
 
