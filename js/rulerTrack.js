@@ -57,7 +57,7 @@ var igv = (function (igv) {
 
         // Find starting point closest to the current origin
         var nTick = Math.floor(bpStart / spacing) - 1;
-        var x = 0
+        var x = 0;
 
         //int strEnd = Integer.MIN_VALUE;
         while (x < width) {
@@ -65,12 +65,7 @@ var igv = (function (igv) {
             var l = Math.floor(nTick * spacing);
             x = Math.round(((l - 1) - bpStart + 0.5) / bpPerPixel);
             var chrPosition = formatNumber(l / ts.unitMultiplier, 0) + " " + ts.majorUnit;
-            //var chrPosition = "" + (l / ts.unitMultiplier) + " " + ts.majorUnit;
-            //int strWidth = g.getFontMetrics().stringWidth(chrPosition);
-            //int strPosition = x - strWidth / 2;
-            //if (strPosition > strEnd) {
 
-            //final int height = getHeight();
             if (nTick % 1 == 0) {
                 canvas.fillText(chrPosition, x, this.height - 15);
             }

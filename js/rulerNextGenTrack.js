@@ -105,6 +105,7 @@ var igv = (function (igv) {
     igv.RulerNextGenTrack.prototype.draw = function (options) {
 
         var myself = this,
+            range,
             incrementPixels,
             index,
             tickValue,
@@ -114,6 +115,8 @@ var igv = (function (igv) {
             canvas,
             i,
             x;
+
+        range = Math.floor(1100 * options.bpStart);
 
         index = 0;
         incrementPixels = 0;
@@ -139,9 +142,13 @@ var igv = (function (igv) {
                 canvas.fillText(tickLabel, x, myself.height - 15);
             }
 
+            canvas.strokeLine(x, this.height - 10, x, this.height - 2);
+
             tickLabelNumber += tickValue;
             tickLabel = myself.tickLabelString(tickLabelNumber, index, options.bpPerPixel * options.pixelWidth);
         }
+
+        canvas.strokeLine(0, this.height - 1, options.pixelWidth, this.height - 1);
 
     };
 
