@@ -262,25 +262,6 @@ var igv = (function (igv) {
 
     };
 
-    //igv.formatPopoverText = function (nameValues) {
-    //
-    //    var markup = "<table>";
-    //    nameValues.forEach(function (nameValue) {
-    //
-    //        if (nameValue.name) {
-    //
-    //            //markup += (nameValue.borderTop) ? "<tr class=\"igv-popoverBorderTop igv-popoverBorderBottom\"><td>" : "<tr class=\"igv-popoverBorderBottom\"><td>";
-    //            markup += "<tr class=\"igv-popoverBorderBottom\">";
-    //            markup += "<td><span class=\"igv-popoverName\">" + nameValue.name.toUpperCase() + "</span>" + "<span class=\"igv-popoverValue\">" + nameValue.value + "</span>" + "</td></tr>";
-    //        }
-    //    });
-    //
-    //    markup += "</table>";
-    //    return markup;
-    //
-    //
-    //};
-
     igv.throttle = function (fn, threshhold, scope) {
         threshhold || (threshhold = 200);
         var last, deferTimer;
