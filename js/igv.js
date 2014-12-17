@@ -167,7 +167,8 @@ var igv = (function (igv) {
         igv.loadGenome(options.cytobandURL, function (genome) {
 
             browser.genome = genome;
-            browser.addTrack(new igv.RulerTrack());
+            //browser.addTrack(new igv.RulerTrack());
+            browser.addTrack(new igv.RulerNextGenTrack());
 
             // Set inital locus
             var firstChrName = browser.genome.chromosomeNames[0],
