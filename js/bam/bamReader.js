@@ -88,7 +88,7 @@ var igv = (function (igv) {
                                 var lRef = readInt(uncba, p + lName + 4);
                                 //dlog(name + ': ' + lRef);
 
-                                if(genome) name = genome.getChromosomeName(name);
+                                if (genome) name = genome.getChromosomeName(name);
 
                                 bam.chrToIndex[name] = i;
                                 bam.indexToChr.push(name);
@@ -128,7 +128,7 @@ var igv = (function (igv) {
                         continuation(null, 'Error in index fetch');
                         return;
                     }
-                    if(chunks.length === 0) {
+                    if (chunks.length === 0) {
                         console.log('No chunks for range ' + chrId + ":" + min + "-" + max);
                         continuation([]);
                         return;
@@ -204,6 +204,7 @@ var igv = (function (igv) {
                 matePos,
                 tlen,
                 readName,
+                i,
                 j,
                 p,
                 lengthOnRef,
@@ -301,13 +302,19 @@ var igv = (function (igv) {
                 p += seqBytes;
                 record.seq = seq;
 
-                qseq = '';
-                for (j = 0; j < lseq; ++j) {
-                    qseq += String.fromCharCode(ba[p + j] + 33);
+
+                if (lseq === 1 && String.fromCharCode(ba[p + j] + 33) === "*") {
+                    // TODO == how to represent this?
+                }
+                else {
+                    record.qual = [];
+                    for (j = 0; j < lseq; ++j) {
+                        record.qual.push(ba[p + j] - 33);
+                    }
                 }
                 p += lseq;
 
-                record.qual = qseq;
+
                 record.start = pos;
                 record.mq = mq;
                 record.readName = readName;
@@ -376,7 +383,7 @@ var igv = (function (igv) {
                     case '=' :
                     case 'X' :
                         blockSeq = record.seq === "*" ? "*" : record.seq.substr(seqOffset, c.len);
-                        blockQuals = record.qual === "*" ? "*" : record.qual.substr(seqOffset, c.len);
+                        blockQuals = record.qual ? record.qual.slice(seqOffset, c.len) : undefined;
                         blocks.push({start: pos, len: c.len, seq: blockSeq, qual: blockQuals});
                         seqOffset += c.len;
                         pos += c.len;
