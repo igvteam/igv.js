@@ -114,7 +114,6 @@ var igv = (function (igv) {
     igv.RulerNextGenTrack.prototype.draw = function (options) {
 
         var myself = this,
-            range,
             incrementPixels,
             index,
             tickValue,
