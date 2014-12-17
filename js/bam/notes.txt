@@ -22,5 +22,5 @@ Block properties
 start
 len 
 seq 
-qua
+qual
 

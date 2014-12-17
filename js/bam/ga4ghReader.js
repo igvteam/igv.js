@@ -38,7 +38,7 @@ var igv = (function (igv) {
 
         var queryChr = (chr.startsWith("chr") ? chr.substring(3) : chr),    // TODO -- we need to read the readset header and create an alias table
             readURL,
-            body = {"readsetIds": [this.readsetId], "sequenceName": queryChr, "sequenceStart": bpStart, "sequenceEnd": bpEnd, "maxResults": "10000"},
+            body = {"readGroupSetIds": [this.readsetId], "referenceName": queryChr, "start": bpStart, "end": bpEnd, "pageSize": "10000"},
             sendData,
             sendURL,
             alignments;
@@ -76,7 +76,7 @@ var igv = (function (igv) {
 
                         if (json) {
 
-                            tmp = igv.decodeGa4ghReads(json.reads);
+                            tmp = igv.decodeGa4ghReads(json.alignments);
                             alignments = alignments ? alignments.concat(tmp) : tmp;
 
                             nextPageToken = json["nextPageToken"];

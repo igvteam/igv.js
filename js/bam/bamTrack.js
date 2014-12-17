@@ -262,7 +262,7 @@ var igv = (function (igv) {
 
                                     if (readChar === "X" || refChar !== readChar) {
                                         if (blockQual && blockQual.length > i) {
-                                            readQual = blockQual.charCodeAt(i) - 33;
+                                            readQual = blockQual[i];
                                             baseColor = shadedBaseColor(readQual, readChar);
                                         }
                                         else {
