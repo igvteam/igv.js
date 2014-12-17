@@ -64,6 +64,7 @@ var igv = (function (igv) {
 
         this.sampleCount = 0;
         this.samples = {};
+        this.sampleNames = [];
         this.featureSource = new igv.BedFeatureSource(this.config);
 
     };
@@ -138,9 +139,10 @@ var igv = (function (igv) {
 
             for (i = 0, len = featureList.length; i < len; i++) {
                 sample = featureList[i].sample;
-                if (!myself.samples.hasOwnProperty(sample)) {
-                    myself.samples[sample] = myself.sampleCount;
-                    myself.sampleCount++;
+                if (!this.samples.hasOwnProperty(sample)) {
+                    this.samples[sample] = myself.sampleCount;
+                    this.sampleNames.push(sample);
+                    this.sampleCount++;
                 }
             }
 
@@ -209,6 +211,7 @@ var igv = (function (igv) {
             sample = features[i].sample;
             if (!this.samples.hasOwnProperty(sample)) {
                 this.samples[sample] = this.sampleCount;
+                this.sampleNames.push(sample);
                 this.sampleCount++;
             }
         }
@@ -270,6 +273,7 @@ var igv = (function (igv) {
             for (i = 0; i < sampleNames.length; i++) {
                 myself.samples[sampleNames[i]] = i;
             }
+            myself.sampleNames = sampleNames;
 
             callback();
 
@@ -299,6 +303,18 @@ var igv = (function (igv) {
         sortDirection *= -1;
     };
 
+    igv.SegTrack.prototype.popupData = function (genomicLocation, xOffset, yOffset) {
+
+        var sampleName,
+            row = Math.floor(yOffset / this.sampleHeight);
+
+        if(row < this.sampleNames.length) {
+            sampleName = this.sampleNames[row];
+            return [{name: "Sample", value: sampleName}];
+        }
+
+        return null;
+    }
 
     return igv;
 
