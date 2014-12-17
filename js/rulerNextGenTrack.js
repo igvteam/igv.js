@@ -31,10 +31,12 @@ var igv = (function (igv) {
     var TickSeparationThreshold = 50;
 
     igv.RulerNextGenTrack = function () {
+
         this.height = 50;
         this.label = "";
         this.id = "ruler";
-        this.disableButtons =  true;
+        this.disableButtons = true;
+        this.ignoreTrackMenu = true;
 
         this.ticks = getTicks();
 
@@ -96,81 +98,75 @@ var igv = (function (igv) {
 
     };
 
+    igv.RulerNextGenTrack.prototype.getFeatures = function (chr, bpStart, bpEnd, success, task) {
+        success([]);
+    };
+
     igv.RulerNextGenTrack.prototype.draw = function (options) {
 
         var myself = this,
-            increment,
+            incrementPixels,
             index,
-            done,
             tickValue,
             tickLabelNumber,
             tickLabel,
             toggle,
             canvas,
+            i,
             x;
 
         index = 0;
-        increment = 0; // pixels
-        done = false;
-        this.tickValues.forEach(function (tv, i, tvs) {
+        incrementPixels = 0;
+        for (i = 0; i < this.tickValues.length; i++) {
 
-            increment = Math.floor(tv / options.bpPerPixel);
-            if (false === done && increment > TickSeparationThreshold) {
+            incrementPixels = Math.floor(this.tickValues[ i ] / options.bpPerPixel);
+            if (incrementPixels > TickSeparationThreshold) {
+
                 index = i;
-                done = true;
+                break;
             }
-
-        });
+        }
 
         tickValue = this.tickValues[ index ];
-        tickLabel = this.tickLabelString(options.bpStart, index, options.pixelWidth);
+        tickLabel = this.tickLabelString(options.bpStart, index, options.bpPerPixel * options.pixelWidth);
 
         canvas = options.context;
         canvas.setProperties( { textAlign: 'center' } );
         tickLabelNumber = options.bpStart;
-        for (x = 0, toggle = 0; x < options.pixelWidth; x += increment, toggle++) {
-
-            //CGSize tickLabelSize = [self.tickLabel.text sizeWithAttributes:[NSDictionary dictionaryWithObject:self.tickLabel.font forKey:NSFontAttributeName]];
+        for (x = 0, toggle = 0; x < options.pixelWidth; x += incrementPixels, toggle++) {
 
             if (toggle % 2) {
-
-                //[self.tickLabel.text drawInRect:[IGVMath rectWithCenter:CGPointMake(x, CGRectGetHeight(rect) - (tickLabelSize.height / 2.0)) size:tickLabelSize]
-                //withAttributes:[NSDictionary dictionaryWithObject:self.tickLabel.font forKey:NSFontAttributeName]];
-
                 canvas.fillText(tickLabel, x, myself.height - 15);
-
             }
 
-            //UIRectFill(CGRectMake(x, CGRectGetMinY(rect), 1, CGRectGetHeight(rect) - tickLabelSize.height));
-
             tickLabelNumber += tickValue;
-
-            //self.tickLabel.text = [self tickLabelStringWithTickLabelNumber:tickLabelNumber tickIndex:index igvContextLength:[igvContext length]];
-            tickLabel = myself.tickLabelString(tickLabelNumber, index, options.pixelWidth);
-
+            tickLabel = myself.tickLabelString(tickLabelNumber, index, options.bpPerPixel * options.pixelWidth);
         }
 
     };
 
-    igv.RulerNextGenTrack.prototype.tickLabelString = function (tickLabelNumber, tickIndex, pixelWidth) {
+    igv.RulerNextGenTrack.prototype.tickLabelString = function (tickLabelNumber, tickIndex, basesLength) {
 
-        var tickUnit,
+        var str,
+            tickUnit,
             tickDivisor;
 
-        if (pixelWidth > 1e3) {
+        tickUnit    = this.ticks[ tickIndex ].units;
+        tickDivisor = this.ticks[ tickIndex ].divisor;
+
+        if (basesLength > 1e3) {
             tickUnit = "kb";
             tickDivisor = 1e3;
         }
-        else if (pixelWidth > 4e7) {
+
+        if (basesLength > 4e7) {
             tickUnit = "mb";
             tickDivisor = 1e6;
         }
-        else {
-            tickUnit = this.ticks[ tickIndex].units;
-            tickDivisor = this.ticks[ tickIndex].divisor;
-        }
 
-        return igv.numberFormatter(Math.floor(tickLabelNumber / tickDivisor)) + " " + tickUnit;
+        str = igv.numberFormatter(Math.floor(tickLabelNumber / tickDivisor)) + " " + tickUnit;
+
+        return str;
     };
 
     return igv;
