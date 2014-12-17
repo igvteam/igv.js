@@ -36,31 +36,31 @@ var igv = (function (igv) {
         this.sampleHeight = this.sampleSquishHeight;
 
         this.posColorScale = config.posColorScale ||
-        new igv.GradientColorScale(
-            {
-                low: 0.1,
-                lowR: 255,
-                lowG: 255,
-                lowB: 255,
-                high: 1.5,
-                highR: 255,
-                highG: 0,
-                highB: 0
-            }
-        );
+            new igv.GradientColorScale(
+                {
+                    low: 0.1,
+                    lowR: 255,
+                    lowG: 255,
+                    lowB: 255,
+                    high: 1.5,
+                    highR: 255,
+                    highG: 0,
+                    highB: 0
+                }
+            );
         this.negColorScale = config.negColorScale ||
-        new igv.GradientColorScale(
-            {
-                low: -1.5,
-                lowR: 0,
-                lowG: 0,
-                lowB: 255,
-                high: -0.1,
-                highR: 255,
-                highG: 255,
-                highB: 255
-            }
-        );
+            new igv.GradientColorScale(
+                {
+                    low: -1.5,
+                    lowR: 0,
+                    lowG: 0,
+                    lowB: 255,
+                    high: -0.1,
+                    highR: 255,
+                    highG: 255,
+                    highB: 255
+                }
+            );
 
         this.sampleCount = 0;
         this.samples = {};
@@ -306,11 +306,30 @@ var igv = (function (igv) {
     igv.SegTrack.prototype.popupData = function (genomicLocation, xOffset, yOffset) {
 
         var sampleName,
-            row = Math.floor(yOffset / this.sampleHeight);
+            row = Math.floor(yOffset / this.sampleHeight),
+            items;
 
-        if(row < this.sampleNames.length) {
+        if (row < this.sampleNames.length) {
+
             sampleName = this.sampleNames[row];
-            return [{name: "Sample", value: sampleName}];
+
+            items = [
+                {name: "Sample", value: sampleName}
+            ];
+
+            // We use the featureCache property rather than method to avoid async load.  If the
+            // feature is not already loaded this won't work,  but the user wouldn't be mousing over it either.
+            if (this.featureSource.featureCache) {
+                var chr = igv.browser.referenceFrame.chr;  // TODO -- this should be passed in
+                var featureList = this.featureSource.featureCache.queryFeatures(chr, genomicLocation, genomicLocation);
+                featureList.forEach(function (f) {
+                    if (f.sample === sampleName) {
+                        items.push({name: "Value", value: f.value});
+                    }
+                });
+            }
+
+            return items;
         }
 
         return null;
