@@ -49,23 +49,28 @@ var igv = (function (igv) {
                 kb = { units : "kb", divisor: 1e3 },
                  b = { units :  "b", divisor:   1 };
 
-            divisors.push(mb); // 1e8
-            divisors.push(mb); // 5e7
-            divisors.push(mb); // 1e7
-            divisors.push(mb); // 5e6
-            divisors.push(mb); // 1e6
-
-            divisors.push(kb); // 5e5
-            divisors.push(kb); // 1e5
-            divisors.push(kb); // 5e4
-            divisors.push(kb); // 1e4
-            divisors.push(kb); // 5e3
-            divisors.push(kb); // 1e3
-
-            divisors.push(b); // 5e2
-            divisors.push(b); // 1e2
-            divisors.push(b); // 5e1
             divisors.push(b); // 1e1
+            divisors.push(b); // 5e1
+
+            divisors.push(b); // 1e2
+            divisors.push(b); // 5e2
+
+            divisors.push(kb); // 1e3
+            divisors.push(kb); // 5e3
+
+            divisors.push(kb); // 1e4
+            divisors.push(kb); // 5e4
+
+            divisors.push(kb); // 1e5
+            divisors.push(kb); // 5e5
+
+            divisors.push(mb); // 1e6
+            divisors.push(mb); // 5e6
+
+            divisors.push(mb); // 1e7
+            divisors.push(mb); // 5e7
+
+            divisors.push(mb); // 1e8
 
             return divisors;
         }
@@ -74,24 +79,28 @@ var igv = (function (igv) {
 
             var values = [];
 
-            values.push(1e8); // 1e8
-            values.push(5e7); // 5e7
-            values.push(1e7); // 1e7
-            values.push(5e6); // 5e6
-            values.push(1e6); // 1e6
-
-
-            values.push(5e5); // 5e5
-            values.push(1e5); // 1e5
-            values.push(5e4); // 5e4
-            values.push(1e4); // 1e4
-            values.push(5e3); // 5e3
-            values.push(1e3); // 1e3
-
-            values.push(5e2); // 5e2
-            values.push(1e2); // 1e2
-            values.push(5e1); // 5e1
             values.push(1e1); // 1e1
+            values.push(5e1); // 5e1
+
+            values.push(1e2); // 1e2
+            values.push(5e2); // 5e2
+
+            values.push(1e3); // 1e3
+            values.push(5e3); // 5e3
+
+            values.push(1e4); // 1e4
+            values.push(5e4); // 5e4
+
+            values.push(1e5); // 1e5
+            values.push(5e5); // 5e5
+
+            values.push(1e6); // 1e6
+            values.push(5e6); // 5e6
+
+            values.push(1e7); // 1e7
+            values.push(5e7); // 5e7
+            
+            values.push(1e8); // 1e8
 
             return values;
         }
@@ -116,8 +125,6 @@ var igv = (function (igv) {
             i,
             x;
 
-        range = Math.floor(1100 * options.bpStart);
-
         index = 0;
         incrementPixels = 0;
         for (i = 0; i < this.tickValues.length; i++) {
@@ -138,9 +145,9 @@ var igv = (function (igv) {
         tickLabelNumber = options.bpStart;
         for (x = 0, toggle = 0; x < options.pixelWidth; x += incrementPixels, toggle++) {
 
-            if (toggle % 2) {
+            //if (toggle % 2) {
                 canvas.fillText(tickLabel, x, myself.height - 15);
-            }
+            //}
 
             canvas.strokeLine(x, this.height - 10, x, this.height - 2);
 
