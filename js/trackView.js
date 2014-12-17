@@ -289,7 +289,7 @@ var igv = (function (igv) {
                         // TODO -- adjust track height here.
                         if (!self.heightSetExplicity && self.track.computePixelHeight) {
                             var desiredHeight = self.track.computePixelHeight(features);
-                            if (desiredHeight > self.contentDiv.clientHeight) {
+                            if (desiredHeight != self.contentDiv.clientHeight) {
                                 self.setTrackHeight(desiredHeight);
                             }
                         }
