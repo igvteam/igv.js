@@ -23,163 +23,164 @@
  * THE SOFTWARE.
  */
 
+/**
+ * Created by turner on 10/17/14.
+ */
 var igv = (function (igv) {
 
-    //
+    var TickSeparationThreshold = 50;
+
     igv.RulerTrack = function () {
+
         this.height = 50;
         this.label = "";
         this.id = "ruler";
         this.disableButtons = true;
         this.ignoreTrackMenu = true;
 
-    }
+        this.ticks = getTicks();
 
+        this.tickValues = getTickValues();
+
+        function getTicks () {
+
+            var divisors = [],
+                mb = { units : "mb", divisor: 1e6 },
+                kb = { units : "kb", divisor: 1e3 },
+                 b = { units :  "b", divisor:   1 };
+
+            divisors.push(b); // 1e1
+            divisors.push(b); // 5e1
+
+            divisors.push(b); // 1e2
+            divisors.push(b); // 5e2
+
+            divisors.push(kb); // 1e3
+            divisors.push(kb); // 5e3
+
+            divisors.push(kb); // 1e4
+            divisors.push(kb); // 5e4
+
+            divisors.push(kb); // 1e5
+            divisors.push(kb); // 5e5
+
+            divisors.push(mb); // 1e6
+            divisors.push(mb); // 5e6
+
+            divisors.push(mb); // 1e7
+            divisors.push(mb); // 5e7
+
+            divisors.push(mb); // 1e8
+
+            return divisors;
+        }
+
+        function getTickValues () {
+
+            var values = [];
+
+            values.push(1e1); // 1e1
+            values.push(5e1); // 5e1
+
+            values.push(1e2); // 1e2
+            values.push(5e2); // 5e2
+
+            values.push(1e3); // 1e3
+            values.push(5e3); // 5e3
+
+            values.push(1e4); // 1e4
+            values.push(5e4); // 5e4
+
+            values.push(1e5); // 1e5
+            values.push(5e5); // 5e5
+
+            values.push(1e6); // 1e6
+            values.push(5e6); // 5e6
+
+            values.push(1e7); // 1e7
+            values.push(5e7); // 5e7
+            
+            values.push(1e8); // 1e8
+
+            return values;
+        }
+
+    };
 
     igv.RulerTrack.prototype.getFeatures = function (chr, bpStart, bpEnd, success, task) {
         success([]);
-    }
-
+    };
 
     igv.RulerTrack.prototype.draw = function (options) {
 
-        var canvas = options.context,
-            bpStart = options.bpStart,
-            bpPerPixel = options.bpPerPixel,
-            width = options.pixelWidth;
+        var myself = this,
+            incrementPixels,
+            index,
+            tickValue,
+            tickLabelNumber,
+            tickLabel,
+            toggle,
+            canvas,
+            i,
+            x;
 
-        canvas.setProperties({textAlign: 'center'});
+        index = 0;
+        incrementPixels = 0;
+        for (i = 0; i < this.tickValues.length; i++) {
 
+            incrementPixels = Math.floor(this.tickValues[ i ] / options.bpPerPixel);
+            if (incrementPixels > TickSeparationThreshold) {
 
-        var range = Math.floor(1100 * bpPerPixel);
-        var ts = findSpacing(range);
-        var spacing = ts.majorTick;
+                index = i;
+                break;
+            }
+        }
 
-        // Find starting point closest to the current origin
-        var nTick = Math.floor(bpStart / spacing) - 1;
-        var x = 0;
+        tickValue = this.tickValues[ index ];
+        tickLabel = this.tickLabelString(options.bpStart, index, options.bpPerPixel * options.pixelWidth);
 
-        //int strEnd = Integer.MIN_VALUE;
-        while (x < width) {
+        canvas = options.context;
+        canvas.setProperties( { textAlign: 'center' } );
+        tickLabelNumber = options.bpStart;
+        for (x = 0, toggle = 0; x < options.pixelWidth; x += incrementPixels, toggle++) {
 
-            var l = Math.floor(nTick * spacing);
-            x = Math.round(((l - 1) - bpStart + 0.5) / bpPerPixel);
-            var chrPosition = formatNumber(l / ts.unitMultiplier, 0) + " " + ts.majorUnit;
-
-            if (nTick % 1 == 0) {
-                canvas.fillText(chrPosition, x, this.height - 15);
+            if (toggle % 2) {
+                canvas.fillText(tickLabel, x, myself.height - 15);
             }
 
             canvas.strokeLine(x, this.height - 10, x, this.height - 2);
 
-            nTick++;
-        }
-        canvas.strokeLine(0, this.height - 1, width, this.height - 1);
-
-
-        function formatNumber(anynum, decimal) {
-            //decimal  - the number of decimals after the digit from 0 to 3
-            //-- Returns the passed number as a string in the xxx,xxx.xx format.
-            //anynum = eval(obj.value);
-            var divider = 10;
-            switch (decimal) {
-                case 0:
-                    divider = 1;
-                    break;
-                case 1:
-                    divider = 10;
-                    break;
-                case 2:
-                    divider = 100;
-                    break;
-                default:       //for 3 decimal places
-                    divider = 1000;
-            }
-
-            var workNum = Math.abs((Math.round(anynum * divider) / divider));
-
-            var workStr = "" + workNum
-
-            if (workStr.indexOf(".") == -1) {
-                workStr += "."
-            }
-
-            var dStr = workStr.substr(0, workStr.indexOf("."));
-            var dNum = dStr - 0
-            var pStr = workStr.substr(workStr.indexOf("."))
-
-            while (pStr.length - 1 < decimal) {
-                pStr += "0"
-            }
-
-            if (pStr == '.') pStr = '';
-
-            //--- Adds a comma in the thousands place.
-            if (dNum >= 1000) {
-                var dLen = dStr.length
-                dStr = parseInt("" + (dNum / 1000)) + "," + dStr.substring(dLen - 3, dLen)
-            }
-
-            //-- Adds a comma in the millions place.
-            if (dNum >= 1000000) {
-                dLen = dStr.length
-                dStr = parseInt("" + (dNum / 1000000)) + "," + dStr.substring(dLen - 7, dLen)
-            }
-            var retval = dStr + pStr
-            //-- Put numbers in parentheses if negative.
-            if (anynum < 0) {
-                retval = "(" + retval + ")";
-            }
-
-            //You could include a dollar sign in the return value.
-            //retval =  "$"+retval
-            return retval;
+            tickLabelNumber += tickValue;
+            tickLabel = myself.tickLabelString(tickLabelNumber, index, options.bpPerPixel * options.pixelWidth);
         }
 
+        canvas.strokeLine(0, this.height - 1, options.pixelWidth, this.height - 1);
 
-    }
+    };
 
-    function TickSpacing(majorTick, majorUnit, unitMultiplier) {
-        this.majorTick = majorTick;
-        this.majorUnit = majorUnit;
-        this.unitMultiplier = unitMultiplier;
-    }
+    igv.RulerTrack.prototype.tickLabelString = function (tickLabelNumber, tickIndex, basesLength) {
 
-    function findSpacing(maxValue) {
+        var str,
+            tickUnit,
+            tickDivisor;
 
-        if (maxValue < 10) {
-            return new TickSpacing(1, "", 1);
+        tickUnit    = this.ticks[ tickIndex ].units;
+        tickDivisor = this.ticks[ tickIndex ].divisor;
+
+        if (basesLength > 1e3) {
+            tickUnit = "kb";
+            tickDivisor = 1e3;
         }
 
-
-        // Now man zeroes?
-        var nZeroes = Math.floor(log10(maxValue));
-        var majorUnit = "";
-        var unitMultiplier = 1;
-        if (nZeroes > 9) {
-            majorUnit = "gb";
-            unitMultiplier = 1000000000;
-        }
-        if (nZeroes > 6) {
-            majorUnit = "mb";
-            unitMultiplier = 1000000;
-        } else if (nZeroes > 3) {
-            majorUnit = "kb";
-            unitMultiplier = 1000;
+        if (basesLength > 4e7) {
+            tickUnit = "mb";
+            tickDivisor = 1e6;
         }
 
-        var nMajorTicks = maxValue / Math.pow(10, nZeroes - 1);
-        if (nMajorTicks < 25) {
-            return new TickSpacing(Math.pow(10, nZeroes - 1), majorUnit, unitMultiplier);
-        } else {
-            return new TickSpacing(Math.pow(10, nZeroes) / 2, majorUnit, unitMultiplier);
-        }
+        str = igv.numberFormatter(Math.floor(tickLabelNumber / tickDivisor)) + " " + tickUnit;
 
-        function log10(x) {
-            var dn = Math.log(10);
-            return Math.log(x) / dn;
-        }
-    }
+        return str;
+    };
 
     return igv;
 })(igv || {});
