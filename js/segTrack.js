@@ -71,17 +71,11 @@ var igv = (function (igv) {
 
     igv.SegTrack.prototype.popupMenuItems = function (popover) {
 
-        var myself = this,
-            str,
-            thang;
-
-        str = (this.sampleExpandHeight === this.sampleHeight) ? "Squish" : "Expand";
-        str = '<div class=\"igv-track-menu-item\">' + str + " Sample Hgt" + '</div>';
-        thang = $(str);
+        var myself = this;
 
         return [
             {
-                object: thang,
+                label: (this.sampleExpandHeight === this.sampleHeight) ? "Squish sample hgt" : "Expand sample hgt",
                 click: function () {
                     popover.hide();
                     myself.toggleSampleHeight();

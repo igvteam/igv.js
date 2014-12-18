@@ -70,8 +70,20 @@ var igv = (function (igv) {
 
                 menuItems.push("<hr>");
 
-                trackItems.forEach(function (menuItem) {
-                    menuItems.push(menuItem);
+                trackItems.forEach(function (trackItem) {
+
+                    var str;
+
+                    if (trackItem.label) {
+
+                        str = '<div class=\"igv-track-menu-item\">' + trackItem.label + '</div>';
+
+                        menuItems.push( { object: $(str), click: trackItem.click, init: trackItem.init } );
+                    } else {
+
+                        menuItems.push(trackItem);
+                    }
+
                 });
             }
         }
