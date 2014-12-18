@@ -119,7 +119,7 @@
 
 .igv-popoverTrackPopupContent {
     overflow: auto;
-    max-width: 256px;
+    max-width: 384px;
     max-height: 384px;
 }
 
