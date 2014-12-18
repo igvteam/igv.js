@@ -4,21 +4,28 @@ function vcfTests() {
 
     asyncTest("VCF parser", function () {
 
-        var url = "data/vcf/example.vcf";
+        var url = "data/vcf/example.vcf";  // Example from 4.2 spec
 
 
         igvxhr.loadString(url, {
 
             success: function (result) {
 
-                var parser = new igv.vcfParser(),
-                    featureList = parser.parseFeatures(result);
+                var parser = new igv.VcfParser(),
+                    featureList = parser.parseFeatures(result),
+                    micro;
 
                 ok(featureList);
 
                 var len = featureList.length;
 
                 equal(5, len);   // # of features on chr 1 (determined by greping file)
+
+                // The microsatellite
+                micro = featureList[4];
+                equal(micro.start, 1234567);
+                equal(micro.end, 1234570);
+                equal(2, micro.alleles.length);
 
                 start();
             }
@@ -38,7 +45,7 @@ function vcfTests() {
 
             var len = featureList.length;
 
-            equal(5, len);   // # of features on chr 1 (determined by greping file)
+            equal(5, len);   // # of features on chr 1 (
 
             start();
         });

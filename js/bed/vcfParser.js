@@ -166,16 +166,61 @@ var igv = (function (igv) {
 
     function Variant(tokens) {
 
+        var self = this,
+            altTokens;
+
         this.chr = tokens[0]; // TODO -- use genome aliases
         this.pos = parseInt(tokens[1]);
-        this.start = this.pos - 1;
-        this.end = this.pos;
         this.id = tokens[2];
         this.ref = tokens[3];
         this.alt = tokens[4];
         this.qual = parseInt(tokens[5]);
         this.filter = tokens[6];
         this.info = tokens[7];
+
+        //Alleles
+        altTokens = this.alt.split(",");
+
+        if (altTokens.length > 0) {
+
+            this.alleles = [];
+
+            this.start = Number.MAX_VALUE;
+            this.end = 0;
+
+            altTokens.forEach(function (alt) {
+                var a, s, e, diff;
+                if (alt.length > 0) {
+
+                    diff = self.ref.length - alt.length;
+
+                    if (diff > 0) {
+                        // deletion, assume left padded
+                        s = self.pos - 1 + alt.length;
+                        e = s + diff;
+                    } else if (diff < 0) {
+                        // Insertion, assume left padded, insertion begins to "right" of last ref base
+                        s = self.pos - 1 + self.ref.length;
+                        e = s + 1;     // Insertion between s & 3
+                    }
+                    else {
+                        // Substitution, SNP if seq.length == 1
+                        s = self.pos - 1;
+                        e = s + alt.length;
+                    }
+                    self.alleles.push({allele: alt, start: s, end: e});
+                    self.start = Math.min(self.start, s);
+                    self.end = Math.max(self.end, e);
+                }
+
+            });
+        }
+        else {
+            // Is this even legal VCF?  (NO alt alleles)
+            this.start = this.pos - 1;
+            this.end = this.pos;
+        }
+
         // TODO -- genotype fields
     }
 
