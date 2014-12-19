@@ -1,7 +1,7 @@
 input[type=search] {
 
     width: 128px;
-    height:32px;
+    height:28px;
 
     font-family: 'PT Sans', sans-serif;
     font-size: medium;
@@ -11,6 +11,7 @@ input[type=search] {
     border: thin solid #444;
     border-radius: .25em;
 }
+
 /* navigation bar */
 .igvNavigation {
 
@@ -394,8 +395,13 @@ input[type=search] {
 }
 
 .igv-track-menu-item {
+
     padding-left: 4px;
     padding-right: 4px;
+
+    padding-top: 2px;
+    padding-bottom: 2px;
+
     background-color: white;
 }
 
