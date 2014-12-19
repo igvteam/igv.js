@@ -180,7 +180,7 @@ var igv = (function (igv) {
             geneColor = igv.selection.colorForGene(gene.name);
         } // TODO -- for gtex, figure out a better way to do this
 
-        if ((px1 - px) > 10 || geneColor) {
+        if ((px1 - px) > 2 || geneColor) {
 
             var geneStyle;
             if (geneColor) {
