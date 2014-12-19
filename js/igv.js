@@ -32,7 +32,6 @@ var igv = (function (igv) {
             contentKaryo,
             navigation,
             search,
-            searchInput,
             searchButton,
             zoom,
             zoomInButton,
@@ -48,21 +47,19 @@ var igv = (function (igv) {
             search = $('<div class="igvNavigationSearch">');
             navigation.append(search[ 0 ]);
 
-            searchInput = $('<input type="text" placeholder="Locus Search">');
-            search.append(searchInput[ 0 ]);
+            //browser.searchInput = $('<input type="text" placeholder="Locus Search">');
+            browser.searchInput = $('<input type="search" placeholder="Locus Search">');
+            search.append(browser.searchInput[ 0 ]);
 
             searchButton = $('<i class="igv-app-icon fa fa-search fa-lg igvNavigationPadding">');
             search.append(searchButton[ 0 ]);
 
-            searchInput.change(function () {
-
-                var searchInput = $("div.igvNavigation").find("input");
-                igv.browser.search(searchInput[0].value);
+            browser.searchInput.change(function () {
+                browser.search(browser.searchInput[0].value);
             });
 
             searchButton.click(function () {
-                var searchInput = $("div.igvNavigation").find("input");
-                igv.browser.search(searchInput[0].value);
+                browser.search(browser.searchInput[0].value);
             });
 
 
@@ -112,7 +109,7 @@ var igv = (function (igv) {
             return igv.browser;
         }
 
-        console.log("Create browser");
+        //console.log("Create browser");
 
         if (!options) options = {};
         if (!options.type) options.type = "IGV";
@@ -158,7 +155,7 @@ var igv = (function (igv) {
         browser.ideoPanel.resize();
 
 
-        console.log("Browser startup");
+        //console.log("Browser startup");
 
 
         igv.sequenceSource = new igv.FastaSequence(options.fastaURL);
