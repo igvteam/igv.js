@@ -114,7 +114,8 @@ var cursor = (function (cursor) {
 
         }
 
-        track.featureSource.getFeatureCache(function (featureCache) {
+        // NOTE -- don't access track's feature source directly!
+        track.getFeatureCache(function (featureCache) {
 
             myself.regions.forEach(function (region) {
 

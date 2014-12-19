@@ -60,7 +60,7 @@ var igv = (function (igv) {
             this.cursorHistogramContainer = $('<div class="igv-cursor-histogram-container">')[0];
             $(this.trackDiv).append(this.cursorHistogramContainer);
 
-            this.track.cursorHistogram = new cursor.CursorHistogram(this.cursorHistogramContainer, this.track.max);
+            this.track.cursorHistogram = new cursor.CursorHistogram(this.cursorHistogramContainer, this.track);
         }
 
         this.addRightHandGutterToParentTrackDiv(this.trackDiv);

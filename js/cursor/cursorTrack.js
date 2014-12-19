@@ -43,7 +43,6 @@ var cursor = (function (cursor) {
         this.cursorHistogram = undefined;
 
         this.id = "";
-        this.max = 2000;
     };
 
     cursor.CursorTrack.prototype.jsonRepresentation = function () {
@@ -52,12 +51,12 @@ var cursor = (function (cursor) {
             json;
 
         json = {
-            label : this.label,
-            color : this.color,
-            order : this.order,
-            height : this.height,
-            path : fs.url,
-            trackFilter : this.trackFilter.jsonRepresentation()
+            label: this.label,
+            color: this.color,
+            order: this.order,
+            height: this.height,
+            path: fs.url,
+            trackFilter: this.trackFilter.jsonRepresentation()
         };
 
         return json;
@@ -82,7 +81,13 @@ var cursor = (function (cursor) {
         }
         else {
             this.featureSource.getFeatureCache(function (featureCache) {
+
                 var name, color;
+
+                if (!myself.max) {
+                    // Initial load -- set track max value
+                    myself.max = maxValue(featureCache.allFeatures(), 98);
+                }
 
                 myself.featureCache = featureCache;
 
@@ -105,6 +110,21 @@ var cursor = (function (cursor) {
                 continuation(featureCache);
             });
         }
+    }
+
+    function maxValue(featureList, percentile) {
+
+        var idx = Math.floor(featureList.length * percentile / 100),
+            s1, s2;
+
+        featureList.sort(function (a, b) {
+            if (a.score > b.score) return 1;
+            else if (a.score < b.score) return -1;
+            else return 0;
+        });
+
+        return featureList[idx].score
+
     }
 
     /**
@@ -171,7 +191,7 @@ var cursor = (function (cursor) {
             sampleInterval = Math.max(1, Math.floor(1.0 / framePixelWidth));
 
             if (frameMargin > 0) {
-                canvas.fillRect(0, 0, width, height, { fillStyle:'rgb(255, 255, 255)' });
+                canvas.fillRect(0, 0, width, height, { fillStyle: 'rgb(255, 255, 255)' });
             }
 
             canvas.setProperties({ fillStyle: this.color, strokeStyle: this.color });
@@ -190,10 +210,10 @@ var cursor = (function (cursor) {
                 pxStart = Math.floor((regionNumber - start) * framePixelWidth + frameMargin / 2);
 
                 pxEnd = framePixelWidth > 1 ?
-                    Math.floor((regionNumber + 1- start) * framePixelWidth - frameMargin / 2) :
+                    Math.floor((regionNumber + 1 - start) * framePixelWidth - frameMargin / 2) :
                     pxStart + 1;
 
-                 maxFeatureHeight = this.height;
+                maxFeatureHeight = this.height;
 
                 if (framePixelWidth > 2) {
                     regionFeatures = featureCache.queryFeatures(region.chr, regionBpStart, regionBpEnd);
@@ -217,9 +237,9 @@ var cursor = (function (cursor) {
                                 top = 0;
                                 fh = this.height;
                             }
-if(score > this.max) {
-    console.log(score);
-}
+                            if (score > this.max) {
+                                console.log(score);
+                            }
                             canvas.fillRect(pStart, top, pw, fh);
 
                         }

@@ -28,8 +28,9 @@
  */
 var cursor = (function (cursor) {
 
-    cursor.CursorHistogram = function (cursorHistogramContainer, maxScore) {
+    cursor.CursorHistogram = function (cursorHistogramContainer, track) {
 
+        this.track = track;
         this.canvasFillStyle = igv.greyScale(255);
         this.minMaxfillStyle = igv.rgbaColor(64, 64, 64, 0.5);
         this.minMaxEdgefillStyle = igv.rgbaColor(32, 32, 32, 1.0);
@@ -45,8 +46,6 @@ var cursor = (function (cursor) {
 
         this.maxCount = 0;
         this.initializeBins();
-
-        this.maxScore = maxScore;
 
     };
 
@@ -76,17 +75,15 @@ var cursor = (function (cursor) {
 
     cursor.CursorHistogram.prototype.scoreIndex = function (score) {
 
-        var value;
-
-        score = Math.floor(score);
-        score = Math.min(this.maxScore, score);
+        var value,
+            maxScore = this.track.max;
 
         // Handle edge condition
-        if (this.maxScore === score) {
+        if (score >= maxScore) {
             return (this.bins.length - 1);
         }
 
-        value = (score / this.maxScore);
+        value = (score / maxScore);
         value *= this.bins.length;
 
         return Math.floor(value);
