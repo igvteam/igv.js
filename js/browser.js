@@ -394,15 +394,15 @@ var igv = (function (igv) {
 
     igv.Browser.prototype.goto = function (chr, start, end) {
 
-        console.log("goto " + chr + " : " + start + "-" + end);
+        var w,
+            chromosome,
+            viewportWidth = this.trackViewportWidth();
+
+        console.log("goto " + chr + " : " + igv.numberFormatter(start) + "-" + igv.numberFormatter(end));
 
         if (igv.popover) {
             igv.popover.hide();
         }
-
-        var w,
-            chromosome,
-            viewportWidth = this.trackViewportWidth();
 
         // Translate chr to official name
         if (this.genome) chr = this.genome.getChromosomeName(chr);
@@ -486,7 +486,16 @@ var igv = (function (igv) {
 
         console.log("Search " + feature);
 
-        var type, tokens, chr, posTokens, start, end, source, f, tokens, url, chromosome,
+        var type,
+            chr,
+            posTokens,
+            start,
+            end,
+            source,
+            f,
+            tokens,
+            url,
+            chromosome,
             browser = this;
 
         if (feature.contains(":") && feature.contains("-") || this.genome.getChromosome(feature)) {

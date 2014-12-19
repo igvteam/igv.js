@@ -253,7 +253,7 @@ var igv = (function (igv) {
 
     igv.TrackView.prototype.update = function () {
 
-        console.log("Update");
+        //console.log("Update");
         this.tile = null;
         this.repaint();
 
