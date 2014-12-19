@@ -30,8 +30,10 @@ var igv = (function (igv) {
     igv.SegTrack = function (config) {
 
         igv.configTrack(this, config);
+
+        this.maxHeight = config.maxHeight || 500;
         this.sampleSquishHeight = config.sampleSquishHeight || 2;
-        this.sampleExpandHeight = config.sampleExpandHeight || 8;
+        this.sampleExpandHeight = config.sampleExpandHeight || 12;
 
         this.sampleHeight = this.sampleSquishHeight;
 

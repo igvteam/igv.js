@@ -43,7 +43,7 @@ var cursor = (function (cursor) {
         this.cursorHistogram = undefined;
 
         this.id = "";
-        this.max = 1000;
+        this.max = 2000;
     };
 
     cursor.CursorTrack.prototype.jsonRepresentation = function () {
@@ -217,7 +217,9 @@ var cursor = (function (cursor) {
                                 top = 0;
                                 fh = this.height;
                             }
-
+if(score > this.max) {
+    console.log(score);
+}
                             canvas.fillRect(pStart, top, pw, fh);
 
                         }

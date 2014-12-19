@@ -54,6 +54,8 @@ var igv = (function (igv) {
                             //TODO -- what if val is not a number?
 
                             trackView.setTrackHeight(value);
+                            trackView.heightSetExplicitly = true;
+
                             trackMenuPopupDialog.dialogForm.dialog("close");
                         });
 

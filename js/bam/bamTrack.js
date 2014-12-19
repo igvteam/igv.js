@@ -47,6 +47,8 @@ var igv = (function (igv) {
         // divide the canvas into a coverage track region and an alignment track region
 
         this.featureSource = new igv.BamSource(config);
+
+        this.maxHeight = config.maxHeight || 500;
     };
 
     igv.BAMTrack.prototype.getFeatures = function (chr, bpStart, bpEnd, continuation, task) {
