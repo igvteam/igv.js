@@ -68,6 +68,8 @@ var cursor = (function (cursor) {
         }
 
         var index = this.scoreIndex(score);
+        //console.log("CursorHistogram.insertScore - index " + index);
+
         this.bins[ index ] += 1;
         this.maxCount = Math.max(this.maxCount, this.bins[ index ]);
     };
@@ -75,6 +77,9 @@ var cursor = (function (cursor) {
     cursor.CursorHistogram.prototype.scoreIndex = function (score) {
 
         var value;
+
+        score = Math.floor(score);
+        score = Math.min(this.maxScore, score);
 
         // Handle edge condition
         if (this.maxScore === score) {
