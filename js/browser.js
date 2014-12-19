@@ -398,7 +398,7 @@ var igv = (function (igv) {
             chromosome,
             viewportWidth = this.trackViewportWidth();
 
-        console.log("goto " + chr + " : " + igv.numberFormatter(start) + "-" + igv.numberFormatter(end));
+        console.log("goto " + chr + " : " + start + "-" + end);
 
         if (igv.popover) {
             igv.popover.hide();

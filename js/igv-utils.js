@@ -70,31 +70,39 @@ var igv = (function (igv) {
 
             if (trackItems && trackItems.length > 0) {
 
-                menuItems.push("<hr>");
+                //menuItems.push("<hr>");
 
-                trackItems.forEach(function (trackItem) {
+                trackItems.forEach(function (trackItem, i) {
 
                     var str;
 
                     if (trackItem.label) {
 
-                        str = '<div class=\"igv-track-menu-item\">' + trackItem.label + '</div>';
+                        str = (0 === i) ? '<div class=\"igv-track-menu-item igv-track-menu-border-top\">' : '<div class=\"igv-track-menu-item\">';
+                        str += + trackItem.label + '</div>';
 
                         menuItems.push( { object: $(str), click: trackItem.click, init: trackItem.init } );
                     } else {
 
-                        menuItems.push(trackItem);
+                        if (0 === i) {
+                            trackItem.object.addClass("igv-track-menu-border-top");
+                            menuItems.push(trackItem);
+                        }
+                        else {
+                            menuItems.push(trackItem);
+                        }
+
                     }
 
                 });
             }
         }
 
-        menuItems.push("<hr>");
+        //menuItems.push("<hr>");
 
         menuItems.push(
             {
-                object: $('<div class="igv-track-menu-item">Remove track</div>'),
+                object: $('<div class="igv-track-menu-item igv-track-menu-border-top">Remove track</div>'),
                 click: function () {
                     popover.hide();
                     trackView.browser.removeTrack(trackView.track);
@@ -105,7 +113,6 @@ var igv = (function (igv) {
         return menuItems;
 
     };
-
 
     igv.colorPickerMenuItem = function (popover, trackView, label) {
         return {
@@ -147,8 +154,7 @@ var igv = (function (igv) {
                 );
             }
         }
-    }
-
+    };
 
     igv.spinner = function () {
 
@@ -233,7 +239,6 @@ var igv = (function (igv) {
         return formatedNumber.split(",").join().replace(",", "", "g");
     };
 
-
     /**
      * Translate the mouse coordinates for the event to the coordinates for the given target element
      * @param e
@@ -249,7 +254,6 @@ var igv = (function (igv) {
         return {x: posx, y: posy}
 
     };
-
 
     /**
      * Format markup for popover text from an array of name value pairs [{name, value}]
@@ -297,7 +301,7 @@ var igv = (function (igv) {
                 fn.apply(context, args);
             }
         }
-    }
+    };
 
     igv.splitStringRespectingQuotes = function (string, delim) {
 
@@ -326,8 +330,7 @@ var igv = (function (igv) {
             }
         }
         return tokens;
-    }
-
+    };
 
     /**
      * Extend jQuery's ajax function to handle binary requests.   Credit to Henry Algus:
@@ -375,8 +378,7 @@ var igv = (function (igv) {
             };
 
         });
-    }
-
+    };
 
     return igv;
 
