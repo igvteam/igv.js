@@ -199,7 +199,7 @@ var igv = (function (igv) {
         this.update();
     };
 
-    igv.TrackView.prototype.setTrackHeight = function (newHeight) {
+    igv.TrackView.prototype.setTrackHeight = function (newHeight, update) {
 
         var trackHeightStr;
 
@@ -220,13 +220,40 @@ var igv = (function (igv) {
         if ("CURSOR" === this.browser.type) {
             this.track.cursorHistogram.updateHeightAndInitializeHistogramWithTrack(this.track);
         }
+        if (update === undefined || update === true) this.update();
+    };
 
-        this.heightSetExplicitly = true;
+    /**
+     * Set the content height of the track
+     *
+     * @param newHeight
+     * @param update
+     */
+    igv.TrackView.prototype.setContentHeight = function (newHeight, update) {
 
-        this.update();
+        contentHeightStr = newHeight + "px";
+        if (this.track.paintControl) {
+            this.controlCanvas.style.height = contentHeightStr;
+            this.controlCanvas.setAttribute("height", newHeight);
+        }
+        this.contentDiv.style.height = contentHeightStr;
+        this.canvas.setAttribute("height", this.canvas.clientHeight);
+
+        //If the track defines a "nominal" height, increase viewport height up to that value
+        //If newHeight is < current track div height, shrink the track div.
+        //Don't override an explicit setting (i.e. set by user from menu).
+        if (!this.heightSetExplicitly &&
+            ((this.track.maxHeight && this.trackDiv.clientHeight < this.track.maxHeight) ||
+                newHeight < this.trackDiv.clientHeight)) {
+            this.setTrackHeight(Math.min(this.track.maxHeight, newHeight), false);
+        }
+
+        if (update === undefined || update === true) this.update();
     };
 
     igv.TrackView.prototype.update = function () {
+
+        console.log("Update");
         this.tile = null;
         this.repaint();
 
@@ -287,10 +314,10 @@ var igv = (function (igv) {
                     if (features) {
 
                         // TODO -- adjust track height here.
-                        if (!self.heightSetExplicity && self.track.computePixelHeight) {
+                        if (self.track.computePixelHeight) {
                             var desiredHeight = self.track.computePixelHeight(features);
                             if (desiredHeight != self.contentDiv.clientHeight) {
-                                self.setTrackHeight(desiredHeight);
+                                self.setContentHeight(desiredHeight, false);
                             }
                         }
 
