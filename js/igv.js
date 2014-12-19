@@ -51,15 +51,16 @@ var igv = (function (igv) {
             browser.searchInput = $('<input type="search" placeholder="Locus Search">');
             search.append(browser.searchInput[ 0 ]);
 
-            searchButton = $('<i class="igv-app-icon fa fa-search fa-lg igvNavigationPadding">');
+            searchButton = $('<i class="igv-app-icon fa fa-search fa-lg igvNavigationMarginLeft12">');
             search.append(searchButton[ 0 ]);
 
             browser.searchInput.change(function () {
-                browser.search(browser.searchInput[0].value);
+
+                browser.search($(this).val());
             });
 
             searchButton.click(function () {
-                browser.search(browser.searchInput[0].value);
+                browser.search(browser.searchInput.val());
             });
 
 

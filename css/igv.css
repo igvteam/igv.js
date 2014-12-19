@@ -52,6 +52,16 @@ input[type=search] {
     /*background-color: lightcoral;*/
 }
 
+.igvNavigationMarginLeft12 {
+
+    margin-left: 12px;
+}
+
+.igvNavigationMarginLeft8 {
+
+    margin-left: 8px;
+}
+
 .igvNavigationPadding {
 
     padding-left: 12px;
