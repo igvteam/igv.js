@@ -47,16 +47,33 @@ var igv = (function (igv) {
                     object: $('<div class="igv-track-menu-item">Set track height</div>'),
                     click: function () {
 
-                        var value = trackView.track.height;
-                        var trackMenuPopupDialog = new igv.TrackMenuPopupDialog(popover, "Track height", value.toString(), function () {
+                        var trackMenuPopupDialog = new igv.TrackMenuPopupDialog(popover, "Track height", trackView.track.height.toString(), function () {
 
-                            var value = parseFloat(trackMenuPopupDialog.name.val(), 10);
-                            //TODO -- what if val is not a number?
+                            var str,
+                                numberString = trackMenuPopupDialog.name.val(),
+                                number = parseFloat(numberString, 10);
 
-                            trackView.setTrackHeight(value);
-                            trackView.heightSetExplicitly = true;
+                            if (!$.isNumeric(numberString)) {
 
-                            trackMenuPopupDialog.dialogForm.dialog("close");
+                                trackMenuPopupDialog.name.addClass( "ui-state-error" );
+
+                                str = numberString + " is not a valid number";
+                                trackMenuPopupDialog.updateTips( str );
+                            }
+                            else if (number < trackView.browser.trackHeight || number > 1000) {
+
+                                trackMenuPopupDialog.name.addClass( "ui-state-error" );
+
+                                str = "must be between " + trackView.browser.trackHeight + " and " + 1000;
+                                trackMenuPopupDialog.updateTips( str );
+                            }
+                            else {
+
+                                trackView.setTrackHeight( number );
+                                trackView.heightSetExplicitly = true;
+                                trackMenuPopupDialog.dialogForm.dialog("close");
+                            }
+
                         });
 
                         trackMenuPopupDialog.dialogForm.dialog("open");
