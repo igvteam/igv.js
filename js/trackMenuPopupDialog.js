@@ -30,12 +30,12 @@ var igv = (function (igv) {
 
     igv.TrackMenuPopupDialog = function (trackMenu, dialogLabel, inputValue, ok) {
 
-        var dialogLabelRE,
+        var myself = this,
+            dialogLabelRE,
             inputValueRE,
-            htmlString,
-            myself;
+            htmlString;
 
-        htmlString = '<div id="dialog-form" title="DIALOG_LABEL"><form><fieldset><input type="text" name="name" id="name" value="INPUT_VALUE"></fieldset></form></div>';
+        htmlString = '<div id="dialog-form" title="DIALOG_LABEL"><p class="validateTips"></p><form><fieldset><input type="text" name="name" id="name" value="INPUT_VALUE"></fieldset></form></div>';
 
         dialogLabelRE = new RegExp("DIALOG_LABEL", "g");
         htmlString = htmlString.replace(dialogLabelRE, dialogLabel);
@@ -48,8 +48,9 @@ var igv = (function (igv) {
         this.dialogForm = $( "#dialog-form" );
         this.form = this.dialogForm.find( "form" );
         this.name = $( "#name" );
+        this.tips = $( ".validateTips" );
 
-        myself = this;
+
         this.dialogForm.dialog({
             autoOpen: false,
             height: 256,
@@ -81,9 +82,15 @@ var igv = (function (igv) {
 
     };
 
+    igv.TrackMenuPopupDialog.prototype.updateTips = function ( t ) {
 
-    igv.TrackMenuPopupDialog.prototype.doSomethingAmazing = function() {
+        var myself = this;
 
+        this.tips.text( t ).addClass( "ui-state-highlight" );
+
+        setTimeout(function() {
+            myself.tips.removeClass( "ui-state-highlight", 1500 );
+        }, 500 );
     };
 
     return igv;
