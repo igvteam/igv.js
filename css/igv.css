@@ -1,16 +1,22 @@
-input[type=search] {
 
-    width: 128px;
-    height:28px;
-
-    font-family: 'PT Sans', sans-serif;
-    font-size: medium;
-    font-weight: 400;
-    color: #444;
-
-    border: thin solid #444;
-    border-radius: .25em;
+.validateTips {
+    border: 1px solid transparent;
+    padding: 0.3em;
 }
+
+/*input[type=search] {*/
+
+    /*width: 128px;*/
+    /*height:28px;*/
+
+    /*font-family: 'PT Sans', sans-serif;*/
+    /*font-size: medium;*/
+    /*font-weight: 400;*/
+    /*color: #444;*/
+
+    /*border: thin solid #444;*/
+    /*border-radius: .25em;*/
+/*}*/
 
 /* navigation bar */
 .igvNavigation {
