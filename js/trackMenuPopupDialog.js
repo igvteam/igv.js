@@ -28,7 +28,7 @@
  */
 var igv = (function (igv) {
 
-    igv.TrackMenuPopupDialog = function (trackMenu, dialogLabel, inputValue, ok) {
+    igv.TrackMenuPopupDialog = function (trackMenu, dialogLabel, inputValue, ok, width, height) {
 
         var myself = this,
             dialogLabelRE,
@@ -50,11 +50,10 @@ var igv = (function (igv) {
         this.name = $( "#name" );
         this.tips = $( ".validateTips" );
 
-
         this.dialogForm.dialog({
             autoOpen: false,
-            height: 256,
-            width: 300,
+            width: (width || 320),
+            height: (height || 256),
             modal: true,
             buttons: {
                 "ok": ok,

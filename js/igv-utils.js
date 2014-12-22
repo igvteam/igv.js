@@ -35,9 +35,19 @@ var igv = (function (igv) {
                         var initialValue = trackView.track.label;
                         var trackMenuPopupDialog = new igv.TrackMenuPopupDialog(popover, "Track name", initialValue, function () {
 
-                            igv.setTrackLabel(trackView.track, trackMenuPopupDialog.name.val());
-                            trackView.update();
-                            trackMenuPopupDialog.dialogForm.dialog("close");
+                            if (!trackMenuPopupDialog.name.val()) {
+
+                                trackMenuPopupDialog.name.addClass( "ui-state-error" );
+
+                                trackMenuPopupDialog.updateTips( "may not be blank" );
+                            }
+                            else {
+
+                                igv.setTrackLabel(trackView.track, trackMenuPopupDialog.name.val());
+                                trackView.update();
+                                trackMenuPopupDialog.dialogForm.dialog("close");
+                            }
+
                         });
 
                         trackMenuPopupDialog.dialogForm.dialog("open");
@@ -60,11 +70,11 @@ var igv = (function (igv) {
                                 str = numberString + " is not a valid number";
                                 trackMenuPopupDialog.updateTips( str );
                             }
-                            else if (number < trackView.browser.trackHeight || number > 1000) {
+                            else if (number < trackView.browser.trackHeight || number > trackView.browser.maxTrackHeight) {
 
                                 trackMenuPopupDialog.name.addClass( "ui-state-error" );
 
-                                str = "must be between " + trackView.browser.trackHeight + " and " + 1000;
+                                str = "must be between " + trackView.browser.trackHeight + " and " + igv.numberFormatter(trackView.browser.maxTrackHeight);
                                 trackMenuPopupDialog.updateTips( str );
                             }
                             else {
@@ -74,7 +84,7 @@ var igv = (function (igv) {
                                 trackMenuPopupDialog.dialogForm.dialog("close");
                             }
 
-                        });
+                        }, 320, 256);
 
                         trackMenuPopupDialog.dialogForm.dialog("open");
                     }

@@ -33,6 +33,7 @@ var igv = (function (igv) {
 
 
         this.trackHeight = options.trackHeight || 100;
+        this.maxTrackHeight = 10000;
 
         this.flanking = options.flanking;
 
