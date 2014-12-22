@@ -4,6 +4,12 @@ module.exports = function (grunt) {
     grunt.initConfig({
         pkg: grunt.file.readJSON('package.json'),
 
+        qunit: {
+            hello: [
+                'test/helloQUnit.html'
+             ]
+        },
+
         concat: {
             igv: {
                 src: [
@@ -52,6 +58,7 @@ module.exports = function (grunt) {
     grunt.loadNpmTasks('grunt-contrib-uglify');
     grunt.loadNpmTasks('grunt-contrib-cssmin');
     grunt.loadNpmTasks('grunt-md2html');
+    grunt.loadNpmTasks('grunt-contrib-qunit');
 
     // 4. Where we tell Grunt what to do when we type "grunt" into the terminal.
     //grunt.registerTask('default', ['concat:igvexp', 'uglify:igvexp']);
