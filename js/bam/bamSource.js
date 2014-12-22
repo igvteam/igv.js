@@ -29,8 +29,7 @@ var igv = (function (igv) {
      }
      * A wrapper around a bam file that provides a simple cache
      *
-     * @param bamPath
-     * @param baiPath
+     * @param config
      * @constructor
      */
     igv.BamSource = function (config) {

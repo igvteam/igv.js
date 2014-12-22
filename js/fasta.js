@@ -35,7 +35,7 @@ var igv = (function (igv) {
 
         this.file = file;
         this.indexFile = indexFile;
-    }
+    };
 
     igv.FastaSequence.prototype.getSequence = function (chr, start, end, continuation, task) {
 
