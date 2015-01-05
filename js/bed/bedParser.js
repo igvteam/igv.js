@@ -43,7 +43,7 @@ var igv = (function (igv) {
     igv.BedParser = function (type) {
         this.type = type;
 
-    }
+    };
 
     igv.BedParser.prototype.parseHeader = function (data) {
 
@@ -66,7 +66,7 @@ var igv = (function (igv) {
             }
         }
         return header;
-    }
+    };
 
     igv.BedParser.prototype.parseFeatures = function (data) {
 
@@ -90,9 +90,10 @@ var igv = (function (igv) {
         }
         else if (type === "bedgraph") {
             decode = decodeBedGraph;
-        } else if (type === "wig") {
+        }
+        else if (type === "wig") {
             decode = decodeWig;
-            wig = {};
+            //wig = {};
         }
         else {
             decode = decodeBed;
@@ -115,7 +116,7 @@ var igv = (function (igv) {
             tokens = lines[i].split("\t");
             if (tokens.length < 1) continue;
 
-            feature = decode(tokens);
+            feature = decode(tokens, wig);
 
             if (feature) {
                 if (allFeatures.length < maxFeatureCount) {
@@ -133,8 +134,7 @@ var igv = (function (igv) {
         }
 
         return allFeatures;
-    }
-
+    };
 
     function parseFixedStep(line) {
 
@@ -195,8 +195,7 @@ var igv = (function (igv) {
         return properties;
     }
 
-
-    function decodeBed(tokens) {
+    function decodeBed(tokens, ignore) {
 
         var chr, start, end, id, name, tmp, idName, strand, cdStart, exonCount, exonSizes, exonStarts, exons, feature,
             eStart, eEnd;
@@ -264,7 +263,7 @@ var igv = (function (igv) {
 
     }
 
-    function decodePeak(tokens) {
+    function decodePeak(tokens, ignore) {
 
         var tokenCount, chr, start, end, strand, name, score, qValue, signal, pValue;
 
@@ -287,7 +286,7 @@ var igv = (function (igv) {
             pValue: pValue, qValue: qValue};
     }
 
-    function decodeBedGraph(tokens) {
+    function decodeBedGraph(tokens, ignore) {
 
         var chr, start, end, value;
 
@@ -302,9 +301,11 @@ var igv = (function (igv) {
         return {chr: chr, start: start, end: end, value: value};
     }
 
-    function decodeWig(tokens) {
+    function decodeWig(tokens, wig) {
 
-        var ss, ee, value;
+        var ss,
+            ee,
+            value;
 
         if (wig.type === "fixedStep") {
 
@@ -328,7 +329,6 @@ var igv = (function (igv) {
             return decodeBedGraph(tokens);
         }
     }
-
 
     return igv;
 })
