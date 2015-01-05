@@ -149,7 +149,7 @@ var igv = (function (igv) {
      *
      * @param success
      * @param task
-     * @param reange -- genomic range to load.  For use with indexed source (optional)
+     * @param range -- genomic range to load.  For use with indexed source (optional)
      */
     igv.BedFeatureSource.prototype.loadFeatures = function (success, task, range) {
 
