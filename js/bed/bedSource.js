@@ -250,7 +250,7 @@ var igv = (function (igv) {
                 blocks.forEach(function (block) {
 
                     var startPos = block.minv.block,
-                        endPos = block.maxv.block + (index.tabix ? 65000 : 0),
+                        endPos = block.maxv.block + (index.tabix ? 16653 : 0),
                         options = {
                             headers: myself.config.headers,           // http headers, not file header
                             range: {start: startPos, size: endPos - startPos + 1 },
