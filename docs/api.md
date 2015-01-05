@@ -45,6 +45,7 @@ Configuration Options
     genome          required*   genome identifier. Required if fastaURL is not specified.
     tracks          optional    array of track descriptors to be displayed initially 
     locus           optional    initial genome location
+    flanking        optional    distance (in bp) to pad either side of gene when navigating 
             
 
 ###General track options applicable ot all types
@@ -58,6 +59,7 @@ Tracks are configured with json-style configuration objects.   All paramters are
     label     user-visible name for the track
     color     default color for features.  Can be overriden in certain file formats
     height    initial track height
+    maxHeight maximum track height for those track types that expand automatically.  Can be overriden by user via menu
     order     integer specifying tracks vertical placement relative to other tracks.  Use to pin tracks to top (large negative number) or bottom (large positive number)
 
 ###Alignment track (type = "bam")
