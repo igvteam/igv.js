@@ -234,7 +234,7 @@ var igv = (function (igv) {
             {name: "Alt", value: this.alt},
             {name: "Qual", value: this.qual},
             {name: "Filter", value: this.filter},
-            "---------"
+            "<hr>"
         ];
 
         infoFields = this.info.split(";");
