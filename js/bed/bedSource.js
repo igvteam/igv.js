@@ -77,6 +77,7 @@ var igv = (function (igv) {
      * @param bpStart
      * @param bpEnd
      * @param success -- function that takes an array of features as an argument
+     * @param task
      */
     igv.BedFeatureSource.prototype.getFeatures = function (chr, bpStart, bpEnd, success, task) {
 
