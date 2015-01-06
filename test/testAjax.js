@@ -34,7 +34,7 @@ function ajaxTests() {
 
     asyncTest("readByteRange", function () {
 
-        var url = "data/BufferedReaderTest.bin",
+        var url = "data/misc/BufferedReaderTest.bin",
             range1 = {start: 25, size: 100},
             range2 = {start: 50, size: 75}
 
