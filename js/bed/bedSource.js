@@ -32,7 +32,7 @@ var igv = (function (igv) {
      * @param config
      * @constructor
      */
-    igv.BedFeatureSource = function (config, parser) {
+    igv.BedFeatureSource = function (config) {
 
         this.config = config || {};
         if (config.localFile) {
@@ -142,7 +142,11 @@ var igv = (function (igv) {
 
     // seg files don't have an index
     function isIndexable() {
-        return this.config.indexURL || (this.type != "wig" && this.config.indexed != false);
+        var configIndexURL = this.config.indexURL,
+            type = this.type,
+            configIndexed = this.config.indexed;
+
+        return configIndexURL || (type != "wig" && configIndexed != false);
     }
 
     /**
@@ -155,10 +159,11 @@ var igv = (function (igv) {
 
         var myself = this,
             idxFile = myself.indexURL,
-            queryChr = range ? range.chr : undefined;
+            queryChr = range ? range.chr : undefined,
+            isIndeedIndexible = isIndexable.call(this);
 
 
-        if (this.index === undefined && range && isIndexable.call(this)) {  // TODO -  handle local files
+        if (this.index === undefined && range && isIndeedIndexible) {  // TODO -  handle local files
 
 
             if (myself.url.endsWith(".gz")) {

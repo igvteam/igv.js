@@ -2,37 +2,53 @@
 
 function testTribble() {
 
-    module("Tribble");
-
-
     asyncTest("Tribble index", function () {
 
-        var url = "http://www.broadinstitute.org/igvdata/public/test/data/bed/gencode.v18.collapsed.bed.idx";
+        var config,
+            featureSource,
+            index;
 
-        igv.loadTribbleIndex(url, {}, function (index) {
+        config = {
+            type: 'bedgraph',
+            url: '//www.broadinstitute.org/igvdata/t2d/recomb_decode.bedgraph'
+        };
 
-            ok(index);
+        ok(config);
 
-            var blocks = index.blocksForRange("chr1", 0, Number.MAX_VALUE);
+        featureSource = new igv.BedFeatureSource(config);
+        ok(featureSource);
 
-            ok(blocks);
+        //start();
 
-            start();
-        });
+        index = config.url + ".idx";
+
+        igv.loadTribbleIndex(
+            index,
+            config,
+            function (index) {
+
+                ok(index);
+
+                //var blocks = index.blocksForRange("chr1", 0, Number.MAX_VALUE);
+                //
+                //ok(blocks);
+
+                start();
+            });
     });
 
 
-    asyncTest("Non-existent index", function () {
-
-        var url = "http://www.broadinstitute.org/igvdata/public/test/data/tribble/noSuchFile.idx";
-
-        igv.loadTribbleIndex(url, {},  function (index) {
-
-            equal(index, null);
-
-            start();
-        });
-    });
+    //asyncTest("Non-existent index", function () {
+    //
+    //    var url = "http://www.broadinstitute.org/igvdata/public/test/data/tribble/noSuchFile.idx";
+    //
+    //    igv.loadTribbleIndex(url, {},  function (index) {
+    //
+    //        equal(index, null);
+    //
+    //        start();
+    //    });
+    //});
 
 }
 
