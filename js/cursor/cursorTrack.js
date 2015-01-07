@@ -269,7 +269,7 @@ var cursor = (function (cursor) {
                     }
 
                     pw = pxEnd - pxStart;
-                    if (true === myself.scoreless || 0 === score) {
+                    if (true === myself.scoreless) {
 
                         top = 0;
                         fh = myself.height;
