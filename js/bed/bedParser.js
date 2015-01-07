@@ -75,7 +75,7 @@ var igv = (function (igv) {
         var decode,
             wig,
             feature,
-            lines = data.split("\n"),
+            lines = data.splitLines(),
             len = lines.length,
             tokens,
             allFeatures = [],
@@ -113,7 +113,7 @@ var igv = (function (igv) {
                 continue;
             }
 
-            tokens = lines[i].split("\t");
+            tokens = lines[i].split(/\s+/);
             if (tokens.length < 1) continue;
 
             feature = decode(tokens, wig);
