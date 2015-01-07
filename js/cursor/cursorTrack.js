@@ -86,9 +86,10 @@ var cursor = (function (cursor) {
                     name,
                     color;
 
+                allFeatures = featureCache.allFeatures();
+
                 if (undefined === myself.scoreless) {
                     myself.scoreless = true;
-                    allFeatures = featureCache.allFeatures();
                     allFeatures.forEach(function(f){
 
                         // do stuff
@@ -100,7 +101,6 @@ var cursor = (function (cursor) {
                     });
                 }
 
-                //myself.max = maxValue(allFeatures, 98);
                 myself.max = (false === myself.scoreless) ? maxValue(allFeatures, 98) : undefined;
 
                 myself.featureCache = featureCache;
