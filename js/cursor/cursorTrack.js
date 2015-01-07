@@ -82,12 +82,24 @@ var cursor = (function (cursor) {
         else {
             this.featureSource.getFeatureCache(function (featureCache) {
 
-                var name, color;
+                var allFeatures,
+                    name,
+                    color;
 
-                if (!myself.max) {
-                    // Initial load -- set track max value
-                    myself.max = maxValue(featureCache.allFeatures(), 98);
-                }
+                myself.scoreless = true;
+                allFeatures = featureCache.allFeatures();
+                allFeatures.forEach(function(f){
+
+                    // do stuff
+                    if (true === myself.scoreless) {
+                        if (f.score) {
+                            myself.scoreless = false;
+                        }
+                    }
+                });
+
+                //myself.max = maxValue(allFeatures, 98);
+                myself.max = (false === myself.scoreless) ? maxValue(allFeatures, 98) : undefined;
 
                 myself.featureCache = featureCache;
 
@@ -110,14 +122,14 @@ var cursor = (function (cursor) {
                 continuation(featureCache);
             });
         }
-    }
+    };
 
     function maxValue(featureList, percentile) {
 
-        var idx = Math.floor(featureList.length * percentile / 100),
-            s1, s2;
+        var idx = Math.floor(featureList.length * percentile / 100);
 
         featureList.sort(function (a, b) {
+
             if (a.score > b.score) return 1;
             else if (a.score < b.score) return -1;
             else return 0;
@@ -216,6 +228,7 @@ var cursor = (function (cursor) {
                 maxFeatureHeight = this.height;
 
                 if (framePixelWidth > 2) {
+
                     regionFeatures = featureCache.queryFeatures(region.chr, regionBpStart, regionBpEnd);
 
                     for (i = 0, flen = regionFeatures.length; i < flen; i++) {
@@ -246,20 +259,25 @@ var cursor = (function (cursor) {
                     }
                 }
                 else {
-                    // Can't draw individual features, just use region score
-                    score = region.getScore(featureCache, regionWidth);
-                    pw = pxEnd - pxStart;
-                    if (score > 0) {
-                        // Height proportional to score
-                        fh = Math.round(((score / this.max) * maxFeatureHeight));
-                        top = this.height - fh;
 
-                        canvas.fillRect(pxStart, top, pw, fh);
-                    } else if (score === 0) {
+                    if (false === myself.scoreless) {
+
+                        // Can't draw individual features, just use region score
+                        score = region.getScore(featureCache, regionWidth);
+                    }
+
+                    pw = pxEnd - pxStart;
+                    if (true === myself.scoreless || 0 === score) {
+
                         top = 0;
-                        //top = 10;
-                        //fh = this.height - 20;
-                        fh = this.height;
+                        fh = myself.height;
+                        canvas.fillRect(pxStart, top, pw, fh);
+
+                    }
+                    else if (score > 0) {
+                        // Height proportional to score
+                        fh = Math.round(((score / myself.max) * maxFeatureHeight));
+                        top = myself.height - fh;
 
                         canvas.fillRect(pxStart, top, pw, fh);
                     }
@@ -269,7 +287,7 @@ var cursor = (function (cursor) {
 
             continuation();
         }
-    }
+    };
 
     cursor.CursorTrack.prototype.drawLabel = function (ctx) {
         // draw label stuff
