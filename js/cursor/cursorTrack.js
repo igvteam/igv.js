@@ -86,17 +86,19 @@ var cursor = (function (cursor) {
                     name,
                     color;
 
-                myself.scoreless = true;
-                allFeatures = featureCache.allFeatures();
-                allFeatures.forEach(function(f){
+                if (undefined === myself.scoreless) {
+                    myself.scoreless = true;
+                    allFeatures = featureCache.allFeatures();
+                    allFeatures.forEach(function(f){
 
-                    // do stuff
-                    if (true === myself.scoreless) {
-                        if (f.score) {
-                            myself.scoreless = false;
+                        // do stuff
+                        if (true === myself.scoreless) {
+                            if (f.score) {
+                                myself.scoreless = false;
+                            }
                         }
-                    }
-                });
+                    });
+                }
 
                 //myself.max = maxValue(allFeatures, 98);
                 myself.max = (false === myself.scoreless) ? maxValue(allFeatures, 98) : undefined;
