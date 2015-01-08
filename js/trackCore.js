@@ -44,6 +44,8 @@ var igv = (function (igv) {
 
         track.height = config.height || ("bed" === config.type ? 100 : 50);
 
+        if(config.visibilityWindow) track.visibilityWindow = config.visibilityWindow;
+
     };
 
     igv.setTrackLabel = function (track, label) {

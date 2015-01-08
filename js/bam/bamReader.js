@@ -51,7 +51,7 @@ var igv = (function (igv) {
 
             getIndex(bam, function (index) {
 
-                var len = index.headerSize + MAX_GZIP_BLOCK_SIZE;   // Insure we get the complete compressed block containing the header
+                var len = index.headerSize + MAX_GZIP_BLOCK_SIZE + 100;   // Insure we get the complete compressed block containing the header
 
                 if (contentLength > 0) len = Math.min(contentLength, len);
 

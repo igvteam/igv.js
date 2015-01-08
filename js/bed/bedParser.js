@@ -138,7 +138,7 @@ var igv = (function (igv) {
 
     function parseFixedStep(line) {
 
-        var tokens = line.match(/\S+/g),
+        var tokens = line.split(/\s+/),
             cc = tokens[1].split("=")[1],
             ss = parseInt(tokens[2].split("=")[1], 10),
             step = parseInt(tokens[3].split("=")[1], 10),
@@ -150,7 +150,7 @@ var igv = (function (igv) {
 
     function parseVariableStep(line) {
 
-        var tokens = line.match(/\S+/g),
+        var tokens = line.split(/\s+/),
             cc = tokens[1].split("=")[1],
             span = tokens.length > 2 ? parseInt(tokens[2].split("=")[1], 10) : 1;
         return {type: "variableStep", chrom: cc, span: span}

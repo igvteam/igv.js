@@ -103,6 +103,11 @@ var igv = (function (igv) {
             this.end >= end;
     }
 
+    igv.GenomicInterval.prototype.containsRange = function (range) {
+        return this.chr === range.chr &&
+            this.start <= range.start &&
+            this.end >= range.end;
+    }
 
     igv.loadGenome = function (url, continuation) {
 

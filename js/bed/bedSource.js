@@ -25,6 +25,7 @@
 
 var igv = (function (igv) {
 
+    const MAX_GZIP_BLOCK_SIZE = (1 << 16);
 
     /**
      * feature source for "bed like" files (tab delimited files with 1 feature per line: bed, gff, vcf, etc)
@@ -85,7 +86,7 @@ var igv = (function (igv) {
             range = new igv.GenomicInterval(chr, bpStart, bpEnd),
             featureCache = this.featureCache;
 
-        if (featureCache && (featureCache.range === undefined || featureCache.range.chr === chr)) {//}   featureCache.range.contains(queryChr, bpStart, bpEnd))) {
+        if (featureCache && (featureCache.range === undefined || featureCache.range.containsRange(range))) {//}   featureCache.range.contains(queryChr, bpStart, bpEnd))) {
             success(this.featureCache.queryFeatures(chr, bpStart, bpEnd));
 
         }
@@ -150,6 +151,20 @@ var igv = (function (igv) {
         return configIndexURL || (type != "wig" && configIndexed != false);
     }
 
+
+    function loadIndex(continuation) {
+        var idxFile = this.indexURL;
+        if (this.url.endsWith(".gz")) {
+            if (!idxFile) idxFile = this.url + ".tbi";
+            igv.loadBamIndex(idxFile, this.config, continuation, true);
+        }
+        else {
+            if (!idxFile) idxFile = this.url + ".idx";
+            igv.loadTribbleIndex(idxFile, this.config, continuation);
+        }
+        return;
+    }
+
     /**
      *
      * @param success
@@ -159,52 +174,28 @@ var igv = (function (igv) {
     igv.BedFeatureSource.prototype.loadFeatures = function (success, task, range) {
 
         var myself = this,
-            idxFile = myself.indexURL,
-            queryChr = range ? range.chr : undefined,
             isIndeedIndexible = isIndexable.call(this);
 
+        if (this.indexed === undefined && isIndeedIndexible) {
 
-        if (this.index === undefined && range && isIndeedIndexible) {  // TODO -  handle local files
-
-
-            if (myself.url.endsWith(".gz")) {
-                if (!idxFile) idxFile = myself.url + ".tbi";
-                igv.loadBamIndex(idxFile, myself.config, function (index) {
-                        myself.index = index;              // index might be null => no index, don't try again
-                        if(index) {
-                            loadFeaturesWithIndex(index);
-                        }
-                        else {
-                            loadFeaturesNoIndex();
-                        }
-                    },
-                    true);   // Boolean flag for "tabix"
-
-            }
-            else {
-                if (!idxFile) idxFile = myself.url + ".idx";
-                igv.loadTribbleIndex(idxFile, myself.config, function (index) {
-                    myself.index = index;              // index might be null => no index, don't try again
-                    if(index) {
-                        myself.indexed = true;
-                        loadFeaturesWithIndex(index);
-                    }
-                    else {
-                        myself.indexed = false;
-                        loadFeaturesNoIndex();
-                    }
-                });
-            }
+            loadIndex.call(this, function (index) {
+                if (index) {
+                    myself.index = index;
+                    myself.indexed = true;
+                }
+                else {
+                    myself.indexed = false;
+                }
+                myself.loadFeatures(success, task, range);
+            });
             return;
+        }
 
+        if (this.index) {
+            loadFeaturesWithIndex(this.index);
         }
         else {
-            if (myself.index) {
-                loadFeaturesWithIndex(myself.index);
-            }
-            else {
-                loadFeaturesNoIndex();
-            }
+            loadFeaturesNoIndex();
         }
 
 
@@ -231,7 +222,7 @@ var igv = (function (igv) {
         function loadFeaturesWithIndex(index) {
 
             if (!myself.header) {
-                loadHeaderWithIndex(index, function(header) {
+                loadHeaderWithIndex(index, function (header) {
                     myself.header = header || {};
                     loadFeaturesWithIndex(index);
                 });
@@ -256,13 +247,15 @@ var igv = (function (igv) {
                 blocks.forEach(function (block) {
 
                     var startPos = block.minv.block,
-                        endPos = block.maxv.block + (index.tabix ? 16653 : 0),
+                        startOffset = block.minv.offset,
+                        endPos = block.maxv.block + (index.tabix ? MAX_GZIP_BLOCK_SIZE + 100 : 0);
                         options = {
                             headers: myself.config.headers,           // http headers, not file header
                             range: {start: startPos, size: endPos - startPos + 1 },
                             success: function (data) {
 
-                                var inflated;
+                                var inflated, slicedData,
+                                    byteLength = data.byteLength;
 
                                 processed++;
 
@@ -275,7 +268,8 @@ var igv = (function (igv) {
                                     inflated = data;
                                 }
 
-                                allFeatures = allFeatures.concat(myself.parser.parseFeatures(inflated));
+                                slicedData = startOffset ? inflated.slice(startOffset) : inflated;
+                                allFeatures = allFeatures.concat(myself.parser.parseFeatures(slicedData));
 
                                 if (processed === blocks.length) {
                                     allFeatures.sort(function (a, b) {

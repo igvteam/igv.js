@@ -41,9 +41,15 @@ var igv = (function (igv) {
 
     igv.BedTrack.prototype.getFeatures = function (chr, bpStart, bpEnd, continuation, task) {
 
-        this.featureSource.getFeatures(chr, bpStart, bpEnd, continuation, task)
+        // Don't try to draw alignments for windows > the visibility window
+        if (this.visibilityWindow && igv.browser.trackBPWidth() > this.visibilityWindow) {
+            continuation({exceedsVisibilityWindow: true});
+        }
+        else {
+            this.
+                featureSource.getFeatures(chr, bpStart, bpEnd, continuation, task)
+        }
     }
-
 
     igv.BedTrack.prototype.draw = function (options) {
 
@@ -58,6 +64,13 @@ var igv = (function (igv) {
 
 
         canvas.fillRect(0, 0, pixelWidth, pixelHeight, {'fillStyle': "rgb(255, 255, 255)"});
+
+        if (options.features.exceedsVisibilityWindow) {
+            var x;
+            for (x = 200; x < pixelWidth; x += 400)
+                canvas.fillText("Zoom in to see features", x, 20, {fillStye: 'black'});
+            return;
+        }
 
 
         var gene, len;
