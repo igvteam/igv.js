@@ -2,106 +2,95 @@ function runBEDUnitTests() {
 
     asyncTest("BED query", function () {
 
-        var url = "http://www.broadinstitute.org/igvdata/public/test/data/bed/sample.bed";
+        var chr = "chr1",
+            bpStart = 67655271,
+            bpEnd   = 67684468,
+            featureSource = new igv.BedFeatureSource({
+                type: 'bed',
+                url: 'data/bed/basic_feature_3_columns.bed'
+            });
 
-        var bedDataSource = new igv.BedFeatureSource({url: url});
+        featureSource.getFeatures(chr, bpStart, bpEnd, function (features) {
 
-        var chr = "chr1";
-        var bpStart = 0;
-        var bpEnd = 2400000;
-        bedDataSource.getFeatures(chr, bpStart, bpEnd, function (featureList) {
+            ok(features);
+            equal(128, features.length);   // feature count. Determined by grepping file
+            equal(chr, features[ 0 ].chr); // ensure features chromosome is specified chromosome
 
-            ok(featureList);
+            start();
+        }, undefined);
 
-            var len = featureList.length;
+    });
 
-            equal(100, len);   // # of features on chr 1 (determined by greping file)
+    asyncTest("BED all features", function () {
 
-            // Test 1 feature, insure its on chr1
-            var c = featureList[0].chr;
-            equal(chr, c);
+        var featureSource = new igv.BedFeatureSource({
+                type: 'bed',
+                url: 'data/bed/basic_feature_3_columns.bed'
+            });
+
+        featureSource.allFeatures(function (features) {
+
+            ok(features);
+            equal(128, features.length);   // feature count. Determined by grepping file
 
             start();
         });
 
     });
 
-    asyncTest("BED all features", 2, function () {
+    asyncTest("BED query gzip", function () {
 
-        var url = "http://www.broadinstitute.org/igvdata/public/test/data/bed/sample.bed";
+        var chr = "chr1",
+            bpStart = 67655271,
+            bpEnd   = 67684468,
+            featureSource = new igv.BedFeatureSource({
+                type: 'bed',
+                url: 'data/bed/basic_feature_3_columns.bed.gz'
+            });
 
-        var bedDataSource = new igv.BedFeatureSource({url: url});
+        featureSource.getFeatures(chr, bpStart, bpEnd, function (features) {
 
-
-        bedDataSource.allFeatures(function (featureList) {
-
-            ok(featureList);
-
-            var len = featureList.length;
-
-            equal(100, len);   // # of features on chr 1 (determined by greping file)
-
+            ok(features);
+            equal(128, features.length);   // feature count. Determined by grepping file
+            equal(chr, features[ 0 ].chr); // ensure features chromosome is specified chromosome
 
             start();
-        });
+        }, undefined);
 
     });
 
-    asyncTest("BED query gzip", 3, function () {
+    asyncTest("broadPeak parsing ", function () {
 
-        var url = "http://www.broadinstitute.org/igvdata/public/test/data/bed/sample.bed.gz";
+        var featureSource,
+            chr,
+            bpStart,
+            bpEnd;
 
-        var bedDataSource = new igv.BedFeatureSource({url: url});
-
-        var chr = "chr1";
-        var bpStart = 0;
-        var bpEnd = 2400000;
-        bedDataSource.getFeatures(chr, bpStart, bpEnd, function (featureList) {
-
-            ok(featureList);
-
-            var len = featureList.length;
-
-            equal(100, len);   // # of features on chr 1 (determined by greping file)
-
-            // Test 1 feature, insure its on chr1
-            var c = featureList[0].chr;
-            equal(chr, c);
-
-            start();
+        featureSource = new igv.BedFeatureSource({
+            type: 'broadPeak',
+            url: "data/peak/test.broadPeak"
         });
-
-    });
-
-
-    asyncTest("broadPeak parsing ", 6, function () {
-
-        var url, bedDataSource, chr, bpStart, bpEnd, len, c, feature;
-
-        url = "../test/data/peak/test.broadPeak";
-
-        bedDataSource = new igv.BedFeatureSource({url: url});
 
         chr = "chr22";
-        bpStart = 17946898;
-        bpEnd = 18123485;
-        bedDataSource.getFeatures(chr, bpStart, bpEnd, function (featureList) {
+        bpStart = 16847690;
+        bpEnd = 20009819;
+        featureSource.getFeatures(chr, bpStart, bpEnd, function (features) {
 
-            ok(featureList);
+            var feature;
 
-            len = featureList.length;
+            ok(features);
+            equal(features.length, 100);   // # of features over this region
 
-            equal(len, 5);   // # of features over this region
-
-            // Test 1 feature, insure its on chr22
-            feature = featureList[0];
+            feature = features[0];
             equal(chr, feature.chr);
-            equal(feature.start, 17946898);
+
+            equal(feature.start, 16847690);
             ok(feature.end > bpStart);
-            equal(feature.signal, 16.723002);
+            equal(feature.signal, 5.141275);
 
             start();
-        });
+
+        }, undefined);
 
     });
 
