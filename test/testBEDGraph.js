@@ -3,29 +3,23 @@
  */
 function runBEDGraphFeatureSourceTests() {
 
+    asyncTest("BEDGraphFeatureSource getFeatures", function () {
 
-    asyncTest("BEDGraphFeatureSource getFeatures", 3, function () {
+        var chr = "chr19",
+            bpStart = 49302001,
+            bpEnd   = 49304701,
+            featureSource = new igv.BedFeatureSource({
+                type: 'bedgraph',
+                url: 'data/wig/bedgraph-example-uscs.bedgraph'
+            });
 
-        var url = "../test/data/wig/bedgraph-example-uscs.bedgraph";
+        featureSource.getFeatures(chr, bpStart, bpEnd, function(features) {
 
-        var featureSource = new igv.BedFeatureSource({url: url});
-        ok(featureSource, "featureSource should be non null");
-
-        var chr = "chr19";
-        var bpStart = 49302001;
-        var bpEnd  = 49304701;
-
-        featureSource.getFeatures(chr, bpStart, bpEnd, function(featureList) {
-
-
-            ok(featureList, "featureContainer.features should be non null");
-
-            equal(featureList.length, 9);
-
-            console.log("featureList.length " + featureList.length);
+            ok(features);
+            equal(features.length, 9);
 
             start();
-        });
+        }, undefined);
 
     });
 
