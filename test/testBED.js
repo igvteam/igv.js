@@ -1,8 +1,6 @@
 function runBEDUnitTests() {
 
-    module("BED");
-
-    asyncTest("BED query", 3, function () {
+    asyncTest("BED query", function () {
 
         var url = "http://www.broadinstitute.org/igvdata/public/test/data/bed/sample.bed";
 
