@@ -3,14 +3,15 @@
  */
 function runAlignmentCoverageTests() {
 
-    asyncTest("AlignmentController - FastaSequence - Test getSequence method", 1, function () {
+    asyncTest("FastaSequence - test getSequence method", function () {
 
         var chr = "chr22",
             ss = 29565176,
             ee = 29565216,
             fastaSequence;
 
-        fastaSequence = new igv.FastaSequence("http://www.broadinstitute.org/igvdata/test/data/fasta/chr22.fa");
+        fastaSequence = new igv.FastaSequence("http://dn7ywbm9isq8j.cloudfront.net/genomes/seq/hg19/hg19.fasta");
+        ok(fastaSequence);
 
         fastaSequence.getSequence(chr, ss, ee, function(sequence){
 
@@ -19,42 +20,38 @@ function runAlignmentCoverageTests() {
 
             start();
 
-        });
+        }, undefined);
 
     });
 
-//    asyncTest("AlignmentController - Test Sequence Callback", 3, function () {
-//
-//        var str,
-//            chr = "chr22",
-//            ss = 24379992,
-//            ee = 24380390,
-//            bamPath = "http://www.broadinstitute.org/igvdata/BodyMap/hg19/IlluminaHiSeq2000_BodySites/brain_merged/accepted_hits.bam",
-//            bamSource = new igv.BamSource(bamPath, null);
-//
-//        bamSource.getFeatures(chr, ss, ee, function(alignmentManager) {
-//
-//            ok(alignmentManager, "alignmentManager");
-//            ok(alignmentManager.genomicInterval, "alignmentManager.genomicInterval");
-//            ok(alignmentManager.sequenceSource, "alignmentManager.sequenceSource");
-//
-////            alignmentManager.sequenceSource.readSequence(alignmentManager.genomicInterval.chr, alignmentManager.genomicInterval.start, alignmentManager.genomicInterval.end, function(sequence){
-////
-////                var ssa = igv.numberFormatter(alignmentManager.sequenceSource.interval.start),
-////                    ssb = igv.numberFormatter(alignmentManager.sequenceSource.interval.end),
-////                    aca = igv.numberFormatter(alignmentManager.genomicInterval.start),
-////                    acb = igv.numberFormatter(alignmentManager.genomicInterval.end);
-////
-////                ok(sequence, "sequence");
-////                equal(sequence.length, (alignmentManager.genomicInterval.end - alignmentManager.genomicInterval.start));
-////
-////                start();
-////            });
-//
-//            start();
-//
-//        })
-//    });
+    asyncTest("AlignmentController - test BAM feature source get features", function () {
+
+        var bamSource;
+
+        igv.sequenceSource = new igv.FastaSequence("//igvdata.broadinstitute.org/genomes/seq/hg19/hg19.fasta");
+
+        bamSource = new igv.BamSource({
+            type: 'bam',
+            url: 'http://www.broadinstitute.org/igvdata/1KG/b37/data/NA06984/alignment/NA06984.mapped.ILLUMINA.bwa.CEU.low_coverage.20120522.bam',
+            label: 'NA06984'});
+
+        bamSource.getFeatures("chr22", 24379992, 24380390, function(genomicInterval) {
+
+            ok(genomicInterval, "genomicInterval");
+            ok(genomicInterval.chr, "genomicInterval.chr");
+            ok(genomicInterval.sequence, "genomicInterval.sequence");
+            ok(genomicInterval.coverageMap, "genomicInterval.coverageMap");
+
+            igv.sequenceSource.readSequence(genomicInterval.chr, genomicInterval.start, genomicInterval.end, function(sequence){
+
+                ok(sequence, "sequence");
+                equal(sequence.length, (genomicInterval.end - genomicInterval.start));
+
+                start();
+            }, undefined);
+
+        }, undefined)
+    });
 
 //    asyncTest("AlignmentController - Test Block Sequence Creation", 1, function () {
 //
