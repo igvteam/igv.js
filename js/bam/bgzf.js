@@ -24,7 +24,6 @@ var igv = (function (igv) {
         var ptr = [0];
         var totalSize = 0;
 
-        console.log("");
         while (ptr[0] < lim) {
 
 
