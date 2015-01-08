@@ -1,7 +1,5 @@
 function runBigwigTests() {
 
-    module("BIGWig");
-
     function createMockObjects(bpPerPixel) {
 
         igv = igv || {};
@@ -12,15 +10,17 @@ function runBigwigTests() {
 
     asyncTest("Bigwig meta datay", function () {
 
-        var url = "http://www.broadinstitute.org/igvdata/test/data/bigwig/bigWigExample.bw";
+        var url,
+            bwReader;
 
-        var bwReader = new igv.BWReader({url: url});
+        url = "http://www.broadinstitute.org/igvdata/test/data/bigwig/bigWigExample.bw";
+        bwReader = new igv.BWReader({url: url});
+        ok(bwReader);
 
         bwReader.loadHeader(function () {
 
-            ok(bwReader);
-
             var header = bwReader.header;
+
             ok(header);
 
             equal(20093017, bwReader.contentLength);
@@ -77,9 +77,6 @@ function runBigwigTests() {
             });
         });
     });
-
-
-    //   igv.BWSource.prototype.getFeatures = function (chr, bpStart, bpEnd, bpPerPixel, continuation) {
 
     asyncTest("Wig features", function () {
 
@@ -149,9 +146,6 @@ function runBigwigTests() {
             start();
         });
     });
-
-
-    // Bigbed test chr21:33,031,597-33,041,570  => 14,810 features
 
 
 }
