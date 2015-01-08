@@ -19,13 +19,15 @@ var igv = (function (igv) {
 // Code is based heavily on bam.js, part of the Dalliance Genome Explorer,  (c) Thomas Down 2006-2001.
     igv.unbgzf = function(data, lim) {
 
+        var oBlockList = [],
+            ptr = [0],
+            totalSize = 0;
+
         lim = lim || data.byteLength - 100;
-        var oBlockList = [];
-        var ptr = [0];
-        var totalSize = 0;
 
         while (ptr[0] < lim) {
 
+            //console.log("lim " + lim + " data.byteLength " + data.byteLength);
 
             var ba = new Uint8Array(data, ptr[0], 100);
 
@@ -39,8 +41,6 @@ var igv = (function (igv) {
             var length = data.byteLength - start;
 
             if (length < (bsize + 8)) break;
-
-           // console.log("" + bsize + "  " + start + "  " + length);
 
             var unc = jszlib_inflate_buffer(data, start, length, ptr);
 

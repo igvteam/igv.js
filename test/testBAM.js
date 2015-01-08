@@ -2,37 +2,37 @@ function runBAMTests() {
 
     igv.sequenceSource = new igv.FastaSequence("//igvdata.broadinstitute.org/genomes/seq/hg19/hg19.fasta");
 
-    asyncTest("alignments for range", function () {
+    //asyncTest("alignments for range", function () {
+    //
+    //    var chr = "chr22",
+    //        beg = 24375199,
+    //        end = 24378544,
+    //        bamFile;
+    //
+    //    bamFile = new igv.BamReader({
+    //        type: 'bam',
+    //        url: 'data/bam/gstt1_sample.bam',
+    //        label: 'BAM unit test'});
+    //
+    //    bamFile.readAlignments(chr, beg, end, function (alignments) {
+    //
+    //        ok(alignments, "alignments");
+    //        equal(alignments.length, 1660, "alignments.length");
+    //
+    //
+    //        start();
+    //    }, undefined);
+    //});
 
-        var chr = "chr22",
-            beg = 24375199,
-            end = 24378544,
-            bamFile;
-
-        bamFile = new igv.BamReader({
-            type: 'bam',
-            url: 'data/bam/gstt1_sample.bam',
-            label: 'BAM unit test'});
-
-        bamFile.readAlignments(chr, beg, end, function (alignments) {
-
-            ok(alignments, "alignments");
-            equal(alignments.length, 1660, "alignments.length");
-
-
-            start();
-        }, undefined);
-    });
-
-    ///**
-    // * Look for a known alignment and check expected vs actual block sequence
-    // *   Read name     = HWI-BRUNOP16X_0001:3:44:7498:170339#0
-    // *   Read sequence = NNCCACGCGCTGCCGCCATGTGGCCAGCTTGGGTCGGCCTTCGAAGACTTGGCAGCCAGCACCCACGGGATGCAT
-    // *   Cigar         = 69M204N6M
-    // *      => block1 sequence = readSeq.substr(0,69)
-    // *         block2 sequence = readSeq.substr(69)
-    // *
-    // */
+    /**
+    * Look for a known alignment and check expected vs actual block sequence
+    *   Read name     = HWI-BRUNOP16X_0001:3:44:7498:170339#0
+    *   Read sequence = NNCCACGCGCTGCCGCCATGTGGCCAGCTTGGGTCGGCCTTCGAAGACTTGGCAGCCAGCACCCACGGGATGCAT
+    *   Cigar         = 69M204N6M
+    *      => block1 sequence = readSeq.substr(0,69)
+    *         block2 sequence = readSeq.substr(69)
+    *
+    */
     //asyncTest("block sequence", 9, function () {
     //
     //    var chr = "chr22",
@@ -118,36 +118,40 @@ function runBAMTests() {
     //    });
     //
     //});
-    //
-    //asyncTest("header", function () {
-    //
-    //    var bamPath = "../test/data/bam/gstt1_sample.bam",
-    //        bamFile = new igv.BamReader({url: bamPath});
-    //
-    //    bamFile.readHeader(function () {
-    //
-    //        equal(bamFile.contentLength, 60872, "bamFile.contentLength");
-    //
-    //        ok(bamFile.chrToIndex["chr1"] === 0);
-    //        start();
-    //
-    //    })
-    //});
-    //
-    //asyncTest("large header", function () {
-    //
-    //    var bamPath = "http://www.broadinstitute.org/igvdata/public/test/data/bam/IonXpress_078_rawlib.lgheader.bam",
-    //        bamFile = new igv.BamReader({url: bamPath});
-    //
-    //    bamFile.readHeader(function () {
-    //
-    //        equal(bamFile.contentLength, 534453);
-    //
-    //        ok(!$.isEmptyObject(bamFile.chrToIndex));
-    //
-    //        start();
-    //    })
-    //});
+
+    asyncTest("header", function () {
+
+        var bamPath = "data/bam/gstt1_sample.bam",
+            bamFile = new igv.BamReader({
+                type: 'bam',
+                //url: 'http://www.broadinstitute.org/igvdata/1KG/b37/data/NA06984/alignment/NA06984.mapped.ILLUMINA.bwa.CEU.low_coverage.20120522.bam',
+                url: bamPath,
+                label: 'NA06984'});
+
+        bamFile.readHeader(function () {
+
+            equal(bamFile.contentLength, 60872, "bamFile.contentLength");
+
+            ok(bamFile.chrToIndex["chr1"] === 0);
+            start();
+
+        })
+    });
+
+    asyncTest("large header", function () {
+
+        var bamPath = "http://www.broadinstitute.org/igvdata/public/test/data/bam/IonXpress_078_rawlib.lgheader.bam",
+            bamFile = new igv.BamReader({url: bamPath});
+
+        bamFile.readHeader(function () {
+
+            equal(bamFile.contentLength, 534453);
+
+            ok(!$.isEmptyObject(bamFile.chrToIndex));
+
+            start();
+        })
+    });
 
 
 }

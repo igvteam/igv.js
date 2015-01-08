@@ -137,8 +137,19 @@ var igv = (function (igv) {
 
         var bam = this,
             ba = bam.indices[refId],
-            overlappingBins, leafChunks, otherChunks, nintv, lowest, minLin, lb, prunedOtherChunks, i, chnk, dif,
-            intChunks, mergedChunks;
+            overlappingBins,
+            leafChunks,
+            otherChunks,
+            nintv,
+            lowest,
+            minLin,
+            lb,
+            prunedOtherChunks,
+            i,
+            chnk,
+            dif,
+            intChunks,
+            mergedChunks;
 
         if (!ba) {
             return null;
