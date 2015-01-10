@@ -71,15 +71,27 @@ function runCursorTests() {
 
         featureSource.getFeatureCache(function (featureCache) {
 
-            var region,
+            var cursorRegion,
                 regionWidth,
                 score;
 
-            region = new cursor.CursorRegion({chr: "chr22", start: 16847690, end: 16857344});
+            ok(featureCache);
+            /*
+
+            The cursorRegion bounds the first 5 rows of test.broadPeak
+
+            chr22	16847690	16857344	.	354	.	5.141275	14.1	-1
+            chr22	16849961	16850402	.	530	.	11.891913	13.6	-1
+            chr22	16850687	16850928	.	1000	.	38.081260	15.7	-1
+            chr22	16856352	16856575	.	526	.	11.758595	3.9	-1
+            chr22	16858350	16858617	.	476	.	9.820849	3.0	-1
+            */
+
+            cursorRegion = new cursor.CursorRegion({chr: "chr22", start: 16847690, end: 16857344});
             regionWidth = 16857344 - 16847690;
 
-            score = region.getScore(featureCache, regionWidth);
-            console.log("Score=" + score);
+            score = cursorRegion.getScore(featureCache, regionWidth);
+            equal(score, 1000); // The heighest score in the region is 1000
 
             start();
         });
