@@ -7,6 +7,7 @@ var igv = (function (igv) {
     const BAI_MAGIC = 21578050;
     const TABIX_MAGIC = 21578324;
     const MAX_HEADER_SIZE = 100000000;   // IF the header is larger than this we can't read it !
+    const MAX_GZIP_BLOCK_SIZE = (1 << 16);
 
     /**
      * Read the index.  This method is public to support unit testing.
@@ -137,8 +138,19 @@ var igv = (function (igv) {
 
         var bam = this,
             ba = bam.indices[refId],
-            overlappingBins, leafChunks, otherChunks, nintv, lowest, minLin, lb, prunedOtherChunks, i, chnk, dif,
-            intChunks, mergedChunks;
+            overlappingBins,
+            leafChunks,
+            otherChunks,
+            nintv,
+            lowest,
+            minLin,
+            lb,
+            prunedOtherChunks,
+            i,
+            chnk,
+            dif,
+            intChunks,
+            mergedChunks;
 
         if (!ba) {
             return null;
