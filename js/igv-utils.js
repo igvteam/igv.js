@@ -103,14 +103,13 @@ var igv = (function (igv) {
 
                     var str;
 
+                    console.log("Adding trackitem menu "+i+": "+JSON.stringify(trackItem));
                     if (trackItem.label) {
-
                         str = (0 === i) ? '<div class=\"igv-track-menu-item igv-track-menu-border-top\">' : '<div class=\"igv-track-menu-item\">';
-                        str += + trackItem.label + '</div>';
+                        str = str+  trackItem.label + '</div>';
 
                         menuItems.push( { object: $(str), click: trackItem.click, init: trackItem.init } );
                     } else {
-
                         if (0 === i) {
                             trackItem.object.addClass("igv-track-menu-border-top");
                             menuItems.push(trackItem);

@@ -312,7 +312,7 @@ var igv = (function (igv) {
                     self.currentLoadTask = undefined;
 
                     if (features) {
-
+                        //console.log("trackView, success: got features "+JSON.stringify(features));
                         // TODO -- adjust track height here.
                         if (self.track.computePixelHeight) {
                             var desiredHeight = self.track.computePixelHeight(features);
@@ -320,12 +320,12 @@ var igv = (function (igv) {
                                 self.setContentHeight(desiredHeight, false);
                             }
                         }
-
+                       
                         var buffer = document.createElement('canvas');
                         buffer.width = pixelWidth;
                         buffer.height = self.canvas.height;
                         igvCanvas = new igv.Canvas(buffer);
-
+                      
                         self.track.draw({
                             features: features,
                             context: igvCanvas,
@@ -350,6 +350,9 @@ var igv = (function (igv) {
 
                         self.tile = new Tile(referenceFrame.chr, bpStart, bpEnd, referenceFrame.bpPerPixel, buffer);
                         self.paintImage();
+                    }
+                    else {
+                       // console.log("trackView, success: got NO fetaures");
                     }
 
                 };
@@ -423,7 +426,7 @@ var igv = (function (igv) {
     }
 
     igv.TrackView.prototype.paintImage = function () {
-
+       
         this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
 
         if (this.tile) {

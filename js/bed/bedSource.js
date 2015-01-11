@@ -145,9 +145,8 @@ var igv = (function (igv) {
     function isIndexable() {
         var configIndexURL = this.config.indexURL,
             type = this.type,
-            configIndexed = this.config.indexed;
-
-        return configIndexURL || (type != "wig" && configIndexed != false);
+            configIndexed = this.config.indexed;        
+        return configIndexURL || (type != "wig"  && configIndexed != false);
     }
 
     /**
@@ -162,8 +161,7 @@ var igv = (function (igv) {
             idxFile = myself.indexURL,
             queryChr = range ? range.chr : undefined,
             isIndeedIndexible = isIndexable.call(this);
-
-
+            
         if (this.index === undefined && range && isIndeedIndexible) {  // TODO -  handle local files
 
 
