@@ -2,91 +2,43 @@ function runGa4ghTests() {
 
     module("Ga4gh");
 
+    /*
+     https://www.googleapis.com/genomics/v1beta2/variants/search?key=AIzaSyC-dujgw4P1QvNd8i_c-I-S_P1uxVZzn0w
 
-//    asyncTest("Fasta index", 5, function () {                         ©
-//
-//        var sequence = igv.FastaSequence.ance();
-//
-//        sequence.loadIndex(function (index) {
-//
-//            ok(index, "Expected non-nil index.  Got: " + index);
-//
-//            var indexEntry = index["chr22"];
-//
-//            equal(indexEntry.size, 51304566, "indexEntry size");
-//            equal(indexEntry.position, 7, "indexEntry position");
-//            equal(indexEntry.basesPerLine, 50, "indexEntry basesPerLine");
-//            equal(indexEntry.bytesPerLine, 51, "indexEntry bytesPerLine");
-//            start();
-//        });
-//
-//    });
-
-    test("Decode read test", function () {
+     {
+     "variantSetIds": [
+     "10473108253681171589"
+     ],
+     "referenceName": "1",
+     "start": "155158585",
+     "end": "155158624"
+     }
 
 
-        var sampleJson = {
-            "id": "ChZDTXZuaHBLVEZoQ2p6OV8yNWVfbEN3EgExGPip_UkoAA",
-            "name": "SRR068145.68016244",
-            "readsetId": "CMvnhpKTFhCjz9_25e_lCw",
-            "flags": 163,
-            "referenceSequenceName": "1",
-            "position": 155145465,
-            "mappingQuality": 60,
-            "cigar": "101M",
-            "mateReferenceSequenceName": "1",
-            "matePosition": 155145765,
-            "templateLength": 385,
-            "originalBases": "CCCCTCCAAGAACTCCCGGGACTGCAGCCACACGCCCCAACTCCCCACACCGCGCGGCAACCCCTACGTATTGCCCAGCCCCGGACACCCCGAACCCTCCC",
-            "alignedBases": "CCCCTCCAAGAACTCCCGGGACTGCAGCCACACGCCCCAACTCCCCACACCGCGCGGCAACCCCTACGTATTGCCCAGCCCCGGACACCCCGAACCCTCCC",
-            "baseQuality": "?BCABAACDECFEGFEE=FFDGHHFGHDFEGGG=GFFEGH@IGFFFHGFGF=G=G=GGADFEFEHFG=C/DD7=@EGCEDFG=\u003eBGAFFF-/\u003e\u003c6DCFC\u003c8",
-            "tags": {
-                "AM": [
-                    "37"
-                ],
-                "BQ": [
-                    "FHHC@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@"
-                ],
-                "MD": [
-                    "72C28"
-                ],
-                "MQ": [
-                    "60"
-                ],
-                "NM": [
-                    "1"
-                ],
-                "RG": [
-                    "SRR068145"
-                ],
-                "SM": [
-                    "37"
-                ],
-                "X0": [
-                    "1"
-                ],
-                "X1": [
-                    "0"
-                ],
-                "XT": [
-                    "U"
-                ]
-            }
-        };
+     */
 
-        var alignments = igv.decodeGa4ghReads([sampleJson]);
-        ok(alignments);
+    asyncTest("variant search", function () {
 
-        var alignment = alignments[0];
+        var reader = new igv.Ga4ghReader({
+                type: "vcf",
+                url: "https://www.googleapis.com/genomics/v1beta2",
+                entityId: "10473108253681171589"
+            }),
+            chr = "1",
+            bpStart = 155158585,
+            bpEnd = 155158624;
 
-        equal(101, alignment.lengthOnRef);
-        equal(true, alignment.strand);
+        reader.readObjects(chr, bpStart, bpEnd, function (variants) {
 
+            ok(variants);
+            equal(variants.length, 2);
+            start();
 
+        })
     });
 
-    test("Decode header test", function () {
 
+    test("Decode bam header", function () {
 
         var sampleJson = {
             "id": "CMvnhpKTFhCjz9_25e_lCw",

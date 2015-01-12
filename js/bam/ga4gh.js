@@ -57,10 +57,13 @@ var igv = (function (igv) {
 
     /**
      * Decode an array of ga4gh read records
+     *
+
      */
-    igv.decodeGa4ghReads = function (jsonRecords) {
+    igv.decodeGa4ghReads = function (json) {
 
         var i,
+            jsonRecords = json.alignments,
             len = jsonRecords.length,
             json,
             alignment,

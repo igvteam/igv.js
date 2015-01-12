@@ -27,23 +27,41 @@ var igv = (function (igv) {
 
 
     igv.Ga4ghReader = function (config) {
+
+        this.config = config;
         this.url = config.url;
         this.proxy = config.proxy;
-        this.readsetId = config.readsetId;
+        this.entityId = config.entityId || config.readsetId;
         this.authKey = config.authKey || 'AIzaSyC-dujgw4P1QvNd8i_c-I-S_P1uxVZzn0w';  // Default only works for localhost & broadinstitute.org
+
+        // set service endpoint
+        if (config.type === "vcf") {
+            this.endpoint = "variants";
+            this.decode = function (json) {
+                return json.variants;
+            }
+        }
+        else {
+            // default
+            this.endpoint = "reads";
+            this.decode = igv.decodeGa4ghReads;
+        }
 
     }
 
     igv.Ga4ghReader.prototype.readAlignments = function (chr, bpStart, bpEnd, success, task) {
+        return this.readObjects(chr, bpStart, bpEnd, success, task);
+    }
+
+    igv.Ga4ghReader.prototype.readObjects = function (chr, bpStart, bpEnd, success, task) {
 
         var queryChr = (chr.startsWith("chr") ? chr.substring(3) : chr),    // TODO -- we need to read the readset header and create an alias table
             readURL,
-            body = {"readGroupSetIds": [this.readsetId], "referenceName": queryChr, "start": bpStart, "end": bpEnd, "pageSize": "10000"},
-            sendData,
+            body = requestJson.call(this, queryChr, bpStart, bpEnd),
             sendURL,
-            alignments;
+            decode = this.decode;
 
-        readURL = this.url + "/reads/search";
+        readURL = this.url + "/" + this.endpoint + "/search";
         if (this.authKey) {
             readURL = readURL + "?key=" + this.authKey;
         }
@@ -62,7 +80,7 @@ var igv = (function (igv) {
                 if (body.pageToken != undefined) delete body.pageToken;    // Remove previous page token, if any
             }
 
-            sendData = this.proxy ?
+            var sendData = this.proxy ?
                 "url=" + readURL + "&data=" + JSON.stringify(body) :
                 JSON.stringify(body);
 
@@ -72,12 +90,13 @@ var igv = (function (igv) {
                     task: task,
                     contentType: "application/json",
                     success: function (json) {
-                        var nextPageToken, tmp;
+                        var nextPageToken, tmp, objects;
 
                         if (json) {
 
-                            tmp = igv.decodeGa4ghReads(json.alignments);
-                            alignments = alignments ? alignments.concat(tmp) : tmp;
+                            tmp = decode(json);
+
+                            objects = objects ? objects.concat(tmp) : tmp;
 
                             nextPageToken = json["nextPageToken"];
 
@@ -85,13 +104,13 @@ var igv = (function (igv) {
                                 loadChunk(nextPageToken);  // TODO -- these should be processed (downsampled) here
                             }
                             else {
-                                success(alignments);
+                                success(objects);
                             }
 
 
                         }
                         else {
-                            success(alignments);
+                            success(objects);
                         }
 
                     }
@@ -99,6 +118,17 @@ var igv = (function (igv) {
         }
 
 
+        function requestJson(chr, bpStart, bpEnd) {
+
+            if (this.endpoint === "variants") {
+                return {"variantSetIds": [this.entityId], "referenceName": chr, "start": bpStart, "end": bpEnd, "pageSize": "10000"};
+            }
+            else {
+                return {"readGroupSetIds": [this.entityId], "referenceName": chr, "start": bpStart, "end": bpEnd, "pageSize": "10000"};
+            }
+
+
+        }
     }
 
 

@@ -58,6 +58,12 @@ popupData(genomicLocation)   Optional.  Returns an array of {name value} objects
 
 
 
+Variant
+-------
+
+Follow the [GA4GH model] (http://ga4gh.org/documentation/api/v0.5.1/ga4gh_api.html) 
+
+
 DataFeature
 ------------
 
