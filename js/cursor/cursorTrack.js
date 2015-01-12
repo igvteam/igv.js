@@ -31,6 +31,7 @@ var cursor = (function (cursor) {
 
         this.config = config;
         this.url = config.url;
+        this.config.indexed = false;  // NEVER use indexes for cursor
         this.featureSource = new igv.BedFeatureSource(config);
         this.featureSource.maxFeatureCount = MAX_FEATURE_COUNT;
         this.label = config.label;

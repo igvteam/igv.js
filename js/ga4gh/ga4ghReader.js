@@ -38,7 +38,14 @@ var igv = (function (igv) {
         if (config.type === "vcf") {
             this.endpoint = "variants";
             this.decode = function (json) {
-                return json.variants;
+
+                var jsonVariants = json.variants,
+                    variants = [];
+                jsonVariants.forEach(function (json) {
+                    variants.push(igv.createGAVariant(json));
+                });
+
+                return variants;
             }
         }
         else {
@@ -49,11 +56,7 @@ var igv = (function (igv) {
 
     }
 
-    igv.Ga4ghReader.prototype.readAlignments = function (chr, bpStart, bpEnd, success, task) {
-        return this.readObjects(chr, bpStart, bpEnd, success, task);
-    }
-
-    igv.Ga4ghReader.prototype.readObjects = function (chr, bpStart, bpEnd, success, task) {
+    igv.Ga4ghReader.prototype.readFeatures = function (chr, bpStart, bpEnd, success, task) {
 
         var queryChr = (chr.startsWith("chr") ? chr.substring(3) : chr),    // TODO -- we need to read the readset header and create an alias table
             readURL,

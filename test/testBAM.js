@@ -7,14 +7,14 @@ function runBAMTests() {
     //    var chr = "chr22",
     //        beg = 24375199,
     //        end = 24378544,
-    //        bamFile;
+    //        bamReader;
     //
-    //    bamFile = new igv.BamReader({
+    //    bamReader = new igv.BamReader({
     //        type: 'bam',
     //        url: 'data/bam/gstt1_sample.bam',
     //        label: 'BAM unit test'});
     //
-    //    bamFile.readAlignments(chr, beg, end, function (alignments) {
+    //    bamReader.readAlignments(chr, beg, end, function (alignments) {
     //
     //        ok(alignments, "alignments");
     //        equal(alignments.length, 1660, "alignments.length");
