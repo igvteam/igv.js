@@ -7,7 +7,7 @@ function runCursorTests() {
 
         peakURL = "data/peak/test.broadPeak";
 
-        featureSource = new igv.BedFeatureSource({ type: 'bed', url: peakURL });
+        featureSource = new igv.FeatureSource({ type: 'bed', url: peakURL });
         featureSource.allFeatures(function (features) {
 
             ok(features);
@@ -42,7 +42,7 @@ function runCursorTests() {
 
         peakURL = "data/peak/test.broadPeak";
 
-        featureSource = new igv.BedFeatureSource({ type: 'bed', url: peakURL });
+        featureSource = new igv.FeatureSource({ type: 'bed', url: peakURL });
 
         featureSource.getFeatures("chr22", 16847690, 16857344, function (features) {
 
@@ -67,7 +67,7 @@ function runCursorTests() {
 
         peakURL = "data/peak/test.broadPeak";
 
-        featureSource = new igv.BedFeatureSource({ type: 'bed', url: peakURL });
+        featureSource = new igv.FeatureSource({ type: 'bed', url: peakURL });
 
         featureSource.getFeatureCache(function (featureCache) {
 
@@ -106,8 +106,8 @@ function runCursorTests() {
 //        tssUrl = "http://www.broadinstitute.org/igvdata/public/test/data/cursor/hg19.tss.bed.gz";
 //        peakURL = "http://www.broadinstitute.org/igvdata/public/test/data/cursor/wgEncodeBroadHistoneH1hescH3k4me3StdPk.broadPeak.gz";
 //
-//        peakDataSource = new igv.BedFeatureSource(peakURL);
-//        tssDataSource = new igv.BedFeatureSource(tssUrl);
+//        peakDataSource = new igv.FeatureSource(peakURL);
+//        tssDataSource = new igv.FeatureSource(tssUrl);
 //        cursorModel = new cursor.CursorModel(null);
 //
 //        tssDataSource.allFeatures(function (featureList) {
@@ -137,8 +137,8 @@ function runCursorTests() {
 //        tssUrl = "http://www.broadinstitute.org/igvdata/public/test/data/cursor/hg19.tss.bed.gz";
 //        peakURL = "http://www.broadinstitute.org/igvdata/public/test/data/cursor/wgEncodeBroadHistoneH1hescH3k4me3StdPk.broadPeak.gz";
 //
-//        peakDataSource = new igv.BedFeatureSource(peakURL);
-//        tssDataSource = new igv.BedFeatureSource(tssUrl);
+//        peakDataSource = new igv.FeatureSource(peakURL);
+//        tssDataSource = new igv.FeatureSource(tssUrl);
 //        cursorModel = new cursor.CursorModel(null);
 //
 //        tssDataSource.allFeatures(function (featureList) {

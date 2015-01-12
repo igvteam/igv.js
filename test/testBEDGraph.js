@@ -8,7 +8,7 @@ function runBEDGraphFeatureSourceTests() {
         var chr = "chr19",
             bpStart = 49302001,
             bpEnd   = 49304701,
-            featureSource = new igv.BedFeatureSource({
+            featureSource = new igv.FeatureSource({
                 type: 'bedgraph',
                 url: 'data/wig/bedgraph-example-uscs.bedgraph'
             });

@@ -33,7 +33,7 @@ var igv = (function (igv) {
      * @param config
      * @constructor
      */
-    igv.BedFeatureSource = function (config) {
+    igv.FeatureSource = function (config) {
 
         this.reader = new igv.FeatureFileReader(config);
 
@@ -60,7 +60,7 @@ var igv = (function (igv) {
      * @param success -- function that takes an array of features as an argument
      * @param task
      */
-    igv.BedFeatureSource.prototype.getFeatures = function (chr, bpStart, bpEnd, success, task) {
+    igv.FeatureSource.prototype.getFeatures = function (chr, bpStart, bpEnd, success, task) {
 
         var myself = this,
             range = new igv.GenomicInterval(chr, bpStart, bpEnd),
@@ -89,7 +89,7 @@ var igv = (function (igv) {
 
     };
 
-    igv.BedFeatureSource.prototype.allFeatures = function (success) {
+    igv.FeatureSource.prototype.allFeatures = function (success) {
 
         this.getFeatureCache(function (featureCache) {
             success(featureCache.allFeatures());
@@ -101,7 +101,7 @@ var igv = (function (igv) {
      * Get the feature cache.  This method is exposed for use by cursor.  Loads all features (index not used).
      * @param success
      */
-    igv.BedFeatureSource.prototype.getFeatureCache = function (success) {
+    igv.FeatureSource.prototype.getFeatureCache = function (success) {
 
         var myself = this;
 
