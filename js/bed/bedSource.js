@@ -86,20 +86,18 @@ var igv = (function (igv) {
             range = new igv.GenomicInterval(chr, bpStart, bpEnd),
             featureCache = this.featureCache;
 
-        if (featureCache && (featureCache.range === undefined || featureCache.range.containsRange(range))) {//}   featureCache.range.contains(queryChr, bpStart, bpEnd))) {
+        if (featureCache && (featureCache.range === undefined || featureCache.range.containsRange(range))) {
             success(this.featureCache.queryFeatures(chr, bpStart, bpEnd));
 
         }
         else {
+            // TODO -- reuse cached features that overelap new region
             this.loadFeatures(function (featureList) {
-                    //myself.featureMap = featureMap;
 
-                    myself.featureCache = new igv.FeatureCache(featureList);   // Note - replacing previous cache with new one
+                    myself.featureCache = myself.index ?
+                        new igv.FeatureCache(featureList, range) :
+                        new igv.FeatureCache(featureList);   // Note - replacing previous cache with new one
 
-                    // Record range queried if we have an index
-                    if (myself.index) {
-                        myself.featureCache.range = range;
-                    }
 
                     // Finally pass features for query interval to continuation
                     success(myself.featureCache.queryFeatures(chr, bpStart, bpEnd));
