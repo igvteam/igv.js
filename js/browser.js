@@ -95,7 +95,7 @@ var igv = (function (igv) {
             type = config.type,
             newTrack;
 
-         console.log("Browser: got track type: "+type);
+       //  console.log("Browser: got track type: "+type);
         if (type === "t2d") {
             newTrack = new igv.T2dTrack(config);
         } else if (type === "bed" || type === "vcf") {

@@ -62,7 +62,7 @@ var igv = (function (igv) {
                             var str,
                                 numberString = trackMenuPopupDialog.name.val(),
                                 number = parseFloat(numberString, 10);
-
+                                console.log("Converted "+numberString+" to "+number);
                             if (!$.isNumeric(numberString)) {
 
                                 trackMenuPopupDialog.name.addClass( "ui-state-error" );

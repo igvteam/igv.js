@@ -70,8 +70,10 @@ var igv = (function (igv) {
 
     igv.BedParser.prototype.parseFeatures = function (data) {
 
-        if (!data) return null;
-
+        if (!data) {
+            console.log("parseFeatures: no data");
+            return null;
+        }
         var decode,
             wig,
             feature,
@@ -85,6 +87,7 @@ var igv = (function (igv) {
             j,
             type = this.type;
 
+       // console.log("parseFeatures: type="+type);
         if (type === "narrowPeak" || type === "broadPeak") {
             decode = decodePeak;
         }
@@ -95,12 +98,17 @@ var igv = (function (igv) {
             decode = decodeWig;
             //wig = {};
         }
+        else if (type === "aneu") {
+            decode = decodeAneu;
+            //wig = {};
+        }
         else {
             decode = decodeBed;
         }
 
         for (i = 0; i < len; i++) {
             line = lines[i];
+           // console.log("parseFeatures: got line "+line);
             if (line.startsWith("track") || line.startsWith("#") || line.startsWith("browser")) {
                 continue;
             }
@@ -118,6 +126,7 @@ var igv = (function (igv) {
 
             feature = decode(tokens, wig);
 
+            //console.log("parseFeatures: got feature  "+JSON.stringify(feature));
             if (feature) {
                 if (allFeatures.length < maxFeatureCount) {
                     allFeatures.push(feature);
@@ -132,7 +141,7 @@ var igv = (function (igv) {
                 cnt++;
             }
         }
-
+        //console.log("parseFeaturess: "+cnt);
         return allFeatures;
     };
 
@@ -200,6 +209,7 @@ var igv = (function (igv) {
         var chr, start, end, id, name, tmp, idName, strand, cdStart, exonCount, exonSizes, exonStarts, exons, feature,
             eStart, eEnd;
 
+        
         if (tokens.length < 3) return null;
 
         chr = tokens[0];
@@ -262,7 +272,34 @@ var igv = (function (igv) {
         return feature;
 
     }
+    function decodeAneu(tokens, ignore) {
 
+        var chr, start, end, id, name, tmp, idName, strand, cdStart, feature,
+            eStart, eEnd;
+
+        
+        if (tokens.length < 4) return null;
+
+       // console.log("Decoding aneu.tokens="+JSON.stringify(tokens));
+        chr = tokens[1];
+        start = parseInt(tokens[2]);
+        end = tokens.length > 3 ? parseInt(tokens[3]) : start + 1;
+
+        feature = {chr: chr, start: start, end: end};
+        
+        if (tokens.length > 4) {
+            feature.score = parseFloat(tokens[4]);
+            feature.value = feature.score;
+        }
+        
+                
+        feature.popupData = function () {
+            return [ { name : "Name", value : feature.name } ];
+        };
+
+        return feature;
+
+    }
     function decodePeak(tokens, ignore) {
 
         var tokenCount, chr, start, end, strand, name, score, qValue, signal, pValue;

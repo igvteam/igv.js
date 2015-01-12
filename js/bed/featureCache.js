@@ -101,14 +101,17 @@ var igv = (function (igv) {
 
         if (featureList) {
 
+           // console.log("Creating treemap with "+featureList.length+" features");
             featureList.forEach(function (feature) {
 
                 var chr = feature.chr,
                     geneList;
 
+                 
                 // Translate to "official" name
                 if(genome) chr = genome.getChromosomeName(chr);
 
+               
                 geneList = featureCache[chr];
 
                 if (!geneList) {
@@ -126,9 +129,11 @@ var igv = (function (igv) {
 
             for (i = 0; i < chromosomes.length; i++) {
                 chr = chromosomes[i];
+               //  console.log("processing chr "+chr+",  "+featureCache[chr].length+" features");
                 treeMap[chr] = buildIntervalTree(featureCache[chr]);
             }
         }
+        else console.log("cannot create treemap, no features");
 
         return treeMap;
     };
@@ -148,6 +153,7 @@ var igv = (function (igv) {
 
         chunkSize = Math.max(10, Math.round(len / 100));
 
+        //console.log("buildIntervalTree with "+featureList.length+" features");
         featureList.sort(function (f1, f2) {
             return (f1.start === f2.start ? 0 : (f1.start > f2.start ? 1 : -1));
         });

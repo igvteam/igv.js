@@ -32,14 +32,15 @@ var igv = (function (igv) {
         igv.configTrack(this, config);
 
         this.maxHeight = config.maxHeight || 500;
-        this.sampleSquishHeight = config.sampleSquishHeight || 2;
-        this.sampleExpandHeight = config.sampleExpandHeight || 12;
+        this.sampleSquishHeight = config.sampleSquishHeight || 10;
+        this.sampleExpandHeight = config.sampleExpandHeight || 30;
 
         this.sampleHeight = this.sampleExpandHeight;
 
         
-        this.highColor = config.highColor || 'rbg(0,0,200)';
-        this.lowColor = config.lowColor || 'rgb(200,0,0)';
+        this.highColor = config.highColor || 'rgb(30,30,255)';
+        this.lowColor = config.lowColor || 'rgb(220,0,0)';
+        this.midColor = config.midColor || 'rgb(150,150,150)';
         this.posColorScale = config.posColorScale ||
             new igv.GradientColorScale(
                 {
@@ -71,67 +72,60 @@ var igv = (function (igv) {
         this.samples = {};
         this.sampleNames = [];
         
-        // TODO: multiple feature sources? one for redline, one for diff file?
-        // parse json file and create config for both
-        var configred = config;
-        var configdiff = config;
-        // set file/url for red and diff file
-        
         console.log("AneuTrack: config: "+JSON.stringify(config));
+        var me = this;
+        this.config = config;
         
-        var afterJsonLoaded = function(json) {
-            console.log("Got json: "+json+", diff :"+json.diff);
-            this.featureSource = new igv.AneuFeatureSource(config, json.diff);            
-            this.featureSourceRed = new igv.AneuFeatureSource(config, json.redline);
-        };
-        var myself = this;
-        afterload = {
-                    headers: myself.config.headers,           // http headers, not file header
-                    success: afterJsonLoaded                    
-        };
-        if (config.localFile) {
-            igvxhr.loadStringFromFile(config.localFile, afterload);
-        }
-        else {
-            igvxhr.loadString(config.url, afterload);
-        }   
         
     };
 
+    
     igv.AneuTrack.prototype.popupMenuItems = function (popover) {
 
         var myself = this;
 
-        return [
-            {
-                label: (this.sampleExpandHeight === this.sampleHeight) ? "Squish sample height" : "Expand sample height",
-                click: function () {
-                    popover.hide();
-                    myself.toggleSampleHeight();
-                }
-            }
+        return [           
         ];
 
     };
-
-    igv.AneuTrack.prototype.toggleSampleHeight = function () {
-
-        this.sampleHeight = (this.sampleExpandHeight === this.sampleHeight) ? this.sampleSquishHeight : this.sampleExpandHeight;
-        this.trackView.update();
-    };
-
+    
     igv.AneuTrack.prototype.getFeatures = function (chr, bpStart, bpEnd, continuation, task) {
         var me = this;
-        // first load diff file, then load redline file, THEN call continuation
-        var loadsecondfile = function(redlinedata) {
-            console.log("Got redlinedata: "+JSON.stringify(redlinedata));
-            me.redlinedata = redlinedata;
-            console.log("Now loading diff data");
-            this.featureSource.getFeatures(chr, bpStart, bpEnd, continuation, task);
-        }
-        console.log("About to load redline file");
-        this.featureSourceRed.getFeatures(chr, bpStart, bpEnd, loadsecondfile, task);
+        if (this.featureSourceRed) {
+            // first load diff file, then load redline file, THEN call continuation
+            var loadsecondfile = function(redlinedata) {
+                //console.log("loadsecondfile: argument redlinedata: "+JSON.stringify(redlinedata));
+                me.redlinedata = redlinedata;
+                //console.log("Now loading diff data, using original continuation");
+                me.featureSource.getFeatures(chr, bpStart, bpEnd, continuation, task);
+            };
+            //console.log("About to load redline file");
+            this.featureSourceRed.getFeatures(chr, bpStart, bpEnd, loadsecondfile, task);
         
+        }
+        else {
+           console.log("Data is not loaded yet. Loading json first");
+           
+           var afterJsonLoaded = function(json) {
+                json = JSON.parse(json);               
+                console.log("Got json: "+json+", diff :"+json.diff);
+                me.featureSource = new igv.AneuFeatureSource(config, json.diff);            
+                me.featureSourceRed = new igv.AneuFeatureSource(config, json.redline);
+                me.getFeatures(chr, bpStart, bpEnd, continuation, task);
+            };
+           
+            afterload = {
+                        headers: me.config.headers,           // http headers, not file header
+                        success: afterJsonLoaded                    
+            };
+            var config = me.config;
+            if (config.localFile) {
+                igvxhr.loadStringFromFile(config.localFile, afterload);
+            }
+            else {
+                igvxhr.loadString(config.url, afterload);
+            }   
+            }
     };
     
     
@@ -159,29 +153,30 @@ var igv = (function (igv) {
             pw,
             xScale;
 
-        console.log("Draw called. redline="+this.redlindata);
+        //console.log("Draw called. redline="+this.redlindata);
             
         canvas = options.context;
         pixelWidth = options.pixelWidth;
         pixelHeight = options.pixelHeight;
         canvas.fillRect(0, 0, pixelWidth, pixelHeight, {'fillStyle': "rgb(255, 255, 255)"});
 
+        var max = -1000;
+        var min = 10000;
         
-        var drawFeatureList = function(featureList) {
+        // deubugging
+        window.track  = this;
+        var drawFeatureList = function(featureList, debug) {
             bpPerPixel = options.bpPerPixel;
             bpStart = options.bpStart;
             bpEnd = bpStart + pixelWidth * bpPerPixel + 1;
             xScale = bpPerPixel;
-
            
-           var max = -1000;
-           var min = 10000;
             for (i = 0, len = featureList.length; i < len; i++) {
                 sample = featureList[i].sample;
                 var value = featureList[i].value;
                 if (value > max) max = value;
                 if (value < min) min = value;
-                if (!this.samples.hasOwnProperty(sample)) {
+                if (sample && this.samples && this.samples.hasOwnProperty(sample)) {
                     this.samples[sample] = myself.sampleCount;
                     this.sampleNames.push(sample);
                     this.sampleCount++;
@@ -194,19 +189,24 @@ var igv = (function (igv) {
                 min = 0;
                 expected = 0;
             }
+            var maxheight = myself.height;
             
-            console.log("AneuTrack: Drawing "+featureList.length+" features between "+bpStart+"-"+bpEnd);
+            //console.log("AneuTrack: Drawing "+featureList.length+" features between "+bpStart+"-"+bpEnd+", maxheight="+maxheight);
+            //console.log("AneuTrack: Drawing: min ="+min+", max="+max);
             for (i = 0, len = featureList.length; i < len; i++) {
 
                 segment = featureList[i];
-                console.log("   Feature: "+JSON.stringify(segment));
+                if (debug == true) console.log("Feature: "+JSON.stringify(segment));
                 if (segment.end < bpStart) continue;
                 if (segment.start > bpEnd) break;
 
-                y = myself.samples[segment.sample] * myself.sampleHeight;
+                if (segment.sample) {
+                    y = myself.samples[segment.sample] * myself.sampleHeight;
+                }
+                else y = 0;
 
-                value = segment.value;
-                color = 'gray';
+                value = segment.score;
+                color = myself.midColor;
                 if (myself.isLog) {
                     value = Math.log2(value / 2);                                
                     if (value < expected-0.1) {
@@ -228,40 +228,38 @@ var igv = (function (igv) {
                 
                 px = Math.round((segment.start - bpStart) / xScale);
                 px1 = Math.round((segment.end - bpStart) / xScale);
-                pw = Math.max(1, px1 - px);                
-                if (this.sampleExpandHeight === this.sampleHeight) {
-                    // expanded
-                    // the value determines the height
-                    var h = computeH(min, max, value, myself.sampleHeight);
-                    console.log("       Got value "+value+", expected="+expected+", color="+color+", h="+h);
-                    // use different plot types
-                    canvas.fillRect(px, y+h, pw, 2, {fillStyle: color});
+                pw = Math.max(2, px1 - px);                
+                
+               
+                // the value determines the height
+                var h = computeH(min, max, value, maxheight);
+                if (debug == true)  console.log("       Got value "+value+", h="+h+", y+h+"+(y+h)+", px="+px+", px1="+px1+", pw="+pw+", color="+color);
+                // use different plot types
+                canvas.fillRect(px, y+h, pw, 2, {fillStyle: color});
                     
-                }
-                else {
-                    canvas.fillRect(px, y, pw, this.sampleHeight, {fillStyle: color});
-                }
+                
+                
             }
         }
-        if (options.featureList) {
+        if (options.features) {
         
-              console.log("Drawing diff data first");
-              drawFeatureList(featureList);              
+            //  console.log("Drawing diff data first");
+              drawFeatureList(options.features, false);              
         }
         else {
-            console.log("No diff feature list");
+            console.log("No diff feature list. options="+JSON.stringify(options));
         }
         if (this.redlinedata) {
-            console.log("Drawing redline data on top");
-            drawFeatureList(this.redlinedata);               
+           // console.log("Drawing redline data on top");
+            drawFeatureList(this.redlinedata, false);               
         }
         else {
             console.log("No redline feature list");
         }
         
         function computeH (min, max, value, maxpixels) {
-            console.log("comptuteH. min/max="+min+"-"+max+", height="+myself.sampleHeight);
-            return Math.round((value - min)/max* maxpixels);
+            //console.log("comptuteH. min/max="+min+"/"+max+", maxpixels="+maxpixels);
+            return maxpixels - Math.round((value - min)/max* maxpixels);
         }
 
         function checkForLog(featureList) {
@@ -286,16 +284,20 @@ var igv = (function (igv) {
      * @returns {number}
      */
     igv.AneuTrack.prototype.computePixelHeight = function (features) {
+       // console.log("computePixelHeight");
         for (i = 0, len = features.length; i < len; i++) {
             sample = features[i].sample;
-            if (!this.samples.hasOwnProperty(sample)) {
+            if (this.samples && !this.samples.hasOwnProperty(sample)) {
                 this.samples[sample] = this.sampleCount;
                 this.sampleNames.push(sample);
                 this.sampleCount++;
             }
         }
+        this.sampleCount = Math.max(1, this.sampleCount);
         var h = Math.max(30, this.sampleCount * this.sampleHeight);
-        //console.log("Computed height for "+features.length+" features, samplecount "+this.sampleCount+" and height "+ this.sampleHeight+": "+h);
+        this.height = h;
+        console.log("Computed height for "+features.length+" features, samplecount "+this.sampleCount+" and height "+ this.sampleHeight+": "+h);
+        return h;
     };
 
     /**
@@ -389,33 +391,41 @@ var igv = (function (igv) {
             row = Math.floor(yOffset / this.sampleHeight),
             items;
 
+            console.log("popupData for row "+row+", sampleNames="+JSON.stringify(this.sampleNames));
         if (row < this.sampleNames.length) {
 
             sampleName = this.sampleNames[row];
 
-            items = [
-                {name: "Sample", value: sampleName}
-            ];
+            if (sampleName) {
+                items = [
+                    {name: "Sample", value: sampleName}
+                ];
 
+            }
+            else {
+                items = [];
+            }
             // We use the featureCache property rather than method to avoid async load.  If the
             // feature is not already loaded this won't work,  but the user wouldn't be mousing over it either.
             if (this.featureSource.featureCache) {
-                p("Got cached diff data");
                 var chr = igv.browser.referenceFrame.chr;  // TODO -- this should be passed in
                 var featureList = this.featureSource.featureCache.queryFeatures(chr, genomicLocation, genomicLocation);
                 featureList.forEach(function (f) {
                     if (f.sample === sampleName) {
                         items.push({name: "Value", value: f.value});
+                        items.push({name: "Start", value: f.start});
+                        items.push({name: "End", value: f.end});
                     }
                 });
             }
             if (this.featureSourceRed.featureCache) {
-                p("Got cached redline data too");
                 var chr = igv.browser.referenceFrame.chr;  // TODO -- this should be passed in
                 var featureList = this.featureSourceRed.featureCache.queryFeatures(chr, genomicLocation, genomicLocation);
                 featureList.forEach(function (f) {
                     if (f.sample === sampleName) {
                         items.push({name: "Value", value: f.value});
+                        items.push({name: "Start", value: f.start});
+                        items.push({name: "End", value: f.end});
                     }
                 });
             }

@@ -35,26 +35,31 @@ var igv = (function (igv) {
 
         this.config = config || {};
         // check if type is redline or diff
-        console.log("AneuFeatureSource:  filename="+thefilename);
+        console.log("AneuFeatureSource:  filename="+thefilename+", config="+JSON.stringify(config));
         // need function to cut off last part of file and add redline or diff file
      
         var getPath = function(urlorfile) {            
             var last = urlorfile.lastIndexOf("/");
-            var path = urlorfile.substring(0, last);
+            var path = urlorfile.substring(0, last+1);
             console.log("Getting path of file or url "+urlorfile+"="+path);
             return path;
         }
      
         if (config.localFile) {
+            
             var path = getPath(config.localFile.name);
             this.localFile = config.localFile;
             this.filename =path + thefilename;
+            console.log("Got localfile: "+JSON.stringify(config)+", this.filename="+this.filename);
         }
         else {
+            
             var path = getPath(config.url);
-            this.url = config.url;
-            this.filename =path + thefilename;         
+            
+            this.url =path + thefilename;         
+            this.filename = thefilename;
             this.headURL = config.headURL || this.filename;
+            console.log("Got URL: "+config.url+"-> url="+this.url);
         }
         
         if (config.type) {
@@ -90,17 +95,22 @@ var igv = (function (igv) {
             featureCache = this.featureCache;
 
         if (featureCache && (featureCache.range === undefined || featureCache.range.containsRange(range))) {//}   featureCache.range.contains(queryChr, bpStart, bpEnd))) {
-            success(this.featureCache.queryFeatures(chr, bpStart, bpEnd));
+            var features = this.featureCache.queryFeatures(chr, bpStart, bpEnd);
+           // console.log("getFeatures: got "+features.length+" cached features on chr "+chr);
+            success(features);
 
         }
         else {
+          //  console.log("getFeatures: calling loadFeatures");
             this.loadFeatures(function (featureList) {
-                    //myself.featureMap = featureMap;
-
-                    myself.featureCache = new igv.FeatureCache(featureList);   // Note - replacing previous cache with new one
-                  
+                    console.log("Creating featureCache with "+featureList.length+ " features");
+                    myself.featureCache = new igv.FeatureCache(featureList);   // Note - replacing previous cache with new one                    
                     // Finally pass features for query interval to continuation
-                    success(myself.featureCache.queryFeatures(chr, bpStart, bpEnd));
+                    
+                    var features = myself.featureCache.queryFeatures(chr, bpStart, bpEnd);
+                  //  console.log("calling success "+success);
+                  //  console.log("features from queryCache "+features);
+                    success(features);
 
                 },
                 task,
@@ -147,20 +157,30 @@ var igv = (function (igv) {
      */
     igv.AneuFeatureSource.prototype.loadFeatures = function (success, task, range) {
 
-        var myself = this,     
-        var parser = myself.parser,
-        options = {
+        var myself = this   ;
+        var parser = myself.parser;
+        var options = {
                     headers: myself.config.headers,           // http headers, not file header
                     success: function (data) {
+                       // console.log("Loaded data, calling parser.parseFeatures: parser="+parser);
                         myself.header = parser.parseHeader(data);
-                        success(parser.parseFeatures(data));   // <= PARSING DONE HERE
+                        var features = parser.parseFeatures(data);
+                        //console.log("Calling success "+success);
+                        //console.log("nr features in argument "+features.length);
+                        success(features);   // <= PARSING DONE HERE
+                    },
+                    error: function(msg) {
+                       console.log("Error loading: "+msg);
                     },
                     task: task
         };
+        console.log("=================== load features. File is: "+myself.localFile+"/"+myself.url);
         if (myself.localFile) {
+            console.log("Loading local file: "+JSON.stringify(localFile));
             igvxhr.loadStringFromFile(myself.localFile, options);
         }
         else {
+            console.log("Loading URL "+myself.url);
             igvxhr.loadString(myself.url, options);
         }        
         

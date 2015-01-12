@@ -204,7 +204,7 @@ var igv = (function (igv) {
         var trackHeightStr;
 
         trackHeightStr = newHeight + "px";
-
+       
         this.track.height = newHeight;
         this.trackDiv.style.height = trackHeightStr;
 
@@ -245,7 +245,8 @@ var igv = (function (igv) {
         if (!this.heightSetExplicitly &&
             ((this.track.maxHeight && this.trackDiv.clientHeight < this.track.maxHeight) ||
                 newHeight < this.trackDiv.clientHeight)) {
-            this.setTrackHeight(Math.min(this.track.maxHeight, newHeight), false);
+                var h = Math.min(this.track.maxHeight, newHeight);                
+            this.setTrackHeight(h, false);
         }
 
         if (update === undefined || update === true) this.update();
@@ -316,6 +317,7 @@ var igv = (function (igv) {
                         // TODO -- adjust track height here.
                         if (self.track.computePixelHeight) {
                             var desiredHeight = self.track.computePixelHeight(features);
+                            //console.log("Computed desiredHeight="+desiredHeight);
                             if (desiredHeight != self.contentDiv.clientHeight) {
                                 self.setContentHeight(desiredHeight, false);
                             }
