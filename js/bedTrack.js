@@ -29,7 +29,7 @@ var igv = (function (igv) {
 
         igv.configTrack(this, config);
 
-        this.featureSource = new igv.BedFeatureSource(this.config);
+        this.featureSource = new igv.FeatureSource(this.config);
 
         if (this.type === "vcf") {
             this.render = renderVariant;

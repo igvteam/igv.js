@@ -35,7 +35,7 @@ function runIntervalTreeTests() {
     //    var url = "data/peak/test.broadPeak",
     //        featureSource;
     //
-    //    featureSource = new igv.BedFeatureSource({ type: 'bed', url: url });
+    //    featureSource = new igv.FeatureSource({ type: 'bed', url: url });
     //    ok(featureSource);
     //
     //    featureSource.allFeatures(function(featureList) {
@@ -56,7 +56,7 @@ function runIntervalTreeTests() {
         var url = "data/peak/test.broadPeak",
             featureSource;
 
-        featureSource = new igv.BedFeatureSource({ type: 'bed', url: url });
+        featureSource = new igv.FeatureSource({ type: 'bed', url: url });
         ok(featureSource);
 
         featureSource.getFeatures("chr22", 16847690, 16857344, function(featureList) {

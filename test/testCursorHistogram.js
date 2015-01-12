@@ -36,8 +36,8 @@ function runCursorHistogramTests() {
             maxScore,
             cursorHistogram;
 
-        featureSource = new igv.BedFeatureSource(peakURL);
-//        featureSource = new igv.BedFeatureSource(tssURL);
+        featureSource = new igv.FeatureSource(peakURL);
+//        featureSource = new igv.FeatureSource(tssURL);
 
         maxScore = 1000;
         cursorHistogram = new cursor.CursorHistogram(null, maxScore);
@@ -85,8 +85,8 @@ function runCursorHistogramTests() {
 //            region,
 //            cursorModel;
 //
-//        peakDataSource = new igv.BedFeatureSource(peakURL);
-//        tssDataSource = new igv.BedFeatureSource(tssUrl);
+//        peakDataSource = new igv.FeatureSource(peakURL);
+//        tssDataSource = new igv.FeatureSource(tssUrl);
 //        cursorModel = new cursor.CursorModel(null);
 //
 //        tssDataSource.allFeatures(function (featureList) {
