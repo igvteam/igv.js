@@ -35,9 +35,21 @@ var igv = (function (igv) {
      */
     igv.FeatureSource = function (config) {
 
-        this.reader = new igv.FeatureFileReader(config);
-
         this.config = config || {};
+
+        if (config.sourceType === "ga4gh") {
+            // TODO -- using adapter until readFeatures interface is consistent
+            var wrappedReader = new igv.Ga4ghReader(config);
+            this.reader = {
+                readFeatures: function(success, task, range) {
+                   return wrappedReader.readFeatures(range.chr, range.start, range.end, success, task);
+                }
+            }
+        }
+        else {
+            this.reader = new igv.FeatureFileReader(config);
+        }
+
 
         if (config.type) {
             this.type = config.type;
@@ -74,7 +86,7 @@ var igv = (function (igv) {
             // TODO -- reuse cached features that overelap new region
             this.reader.readFeatures(function (featureList) {
 
-                    myself.featureCache = myself.index ?
+                    myself.featureCache = myself.index || myself.config.sourceType === "ga4gh" ?
                         new igv.FeatureCache(featureList, range) :
                         new igv.FeatureCache(featureList);   // Note - replacing previous cache with new one
 

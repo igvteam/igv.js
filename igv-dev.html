@@ -103,6 +103,7 @@
     <script type="text/javascript" src="js/bed/segParser.js"></script>
     <script type="text/javascript" src="js/segTrack.js"></script>
     <script type="text/javascript" src="js/variant/vcfParser.js"></script>
+    <script type="text/javascript" src="js/variant/variant.js"></script>
 
     <script type="text/javascript" src="js/trackCore.js"></script>
 
@@ -159,7 +160,15 @@
                                 type: 'bam',
                                 url: 'https://www.googleapis.com/genomics/v1beta2',
                                 readsetId: 'CMvnhpKTFhCjz9_25e_lCw',
-                                label: 'Ga4gh'})">GA4Gh (Global Alliance, Google server)</div>
+                                label: 'Ga4gh'})">GA4Gh Alignments (Global Alliance, Google server)</div>
+
+        <div onclick="igv.browser.loadTrack({
+                                sourceType: 'ga4gh',
+                                type: 'vcf',
+                                url: 'https://www.googleapis.com/genomics/v1beta2',
+                                entityId: '10473108253681171589',
+                                visibilityWindow: 100000,
+                                label: 'Ga4gh'})">GA4Gh Variants (Global Alliance, Google server)</div>
 
         <div onclick="igv.browser.loadTrack({
                                 url: '//www.broadinstitute.org/igvdata/test/igv-web/segmented_data_080520.seg.gz',
