@@ -34,6 +34,8 @@ var igv = (function (igv) {
         this.entityId = config.entityId || config.readsetId;
         this.authKey = config.authKey || 'AIzaSyC-dujgw4P1QvNd8i_c-I-S_P1uxVZzn0w';  // Default only works for localhost & broadinstitute.org
 
+        this.chrNameMap = {};   // Dataset chr name -> genome chr name (aliases)
+
         // set service endpoint
         if (config.type === "vcf") {
             this.endpoint = "variants";
@@ -62,7 +64,8 @@ var igv = (function (igv) {
             readURL,
             body = requestJson.call(this, queryChr, bpStart, bpEnd),
             sendURL,
-            decode = this.decode;
+            decode = this.decode,
+            features;
 
         readURL = this.url + "/" + this.endpoint + "/search";
         if (this.authKey) {
@@ -93,13 +96,13 @@ var igv = (function (igv) {
                     task: task,
                     contentType: "application/json",
                     success: function (json) {
-                        var nextPageToken, tmp, objects;
+                        var nextPageToken, tmp;
 
                         if (json) {
 
                             tmp = decode(json);
 
-                            objects = objects ? objects.concat(tmp) : tmp;
+                            features = features ? features.concat(tmp) : tmp;
 
                             nextPageToken = json["nextPageToken"];
 
@@ -107,13 +110,13 @@ var igv = (function (igv) {
                                 loadChunk(nextPageToken);  // TODO -- these should be processed (downsampled) here
                             }
                             else {
-                                success(objects);
+                                success(features);
                             }
 
 
                         }
                         else {
-                            success(objects);
+                            success(features);
                         }
 
                     }
@@ -124,7 +127,12 @@ var igv = (function (igv) {
         function requestJson(chr, bpStart, bpEnd) {
 
             if (this.endpoint === "variants") {
-                return {"variantSetIds": [this.entityId], "referenceName": chr, "start": bpStart, "end": bpEnd, "pageSize": "10000"};
+                return {
+                    "variantSetIds": [this.entityId],
+                    "referenceName": chr,
+                    "start": bpStart.toString(),
+                    "end": bpEnd.toString(),
+                    "pageSize": "10000"};
             }
             else {
                 return {"readGroupSetIds": [this.entityId], "referenceName": chr, "start": bpStart, "end": bpEnd, "pageSize": "10000"};

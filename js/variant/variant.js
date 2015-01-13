@@ -55,13 +55,14 @@ var igv = (function (igv) {
         var variant = new igv.Variant();
 
         variant.chr = json.referenceName;
-        variant.pos = json.start;
+        variant.pos = parseInt(json.start);
         variant.names = arrayToCommaString(json.names);
         variant.ref = json.referenceBases + '';
         variant.alt = json.alternateBases + '';
         variant.qual = json.quality;
         variant.filter = arrayToCommaString(json.filter);
         variant.info = json.info;
+        variant.calls = json.calls;
 
         computeStart(variant);
 
