@@ -37,7 +37,7 @@ var igv = (function (igv) {
         this.config = config;
 
         if (config.sourceType === "ga4gh") {
-            this.bamReader = new igv.Ga4ghReader(config);
+            this.bamReader = new igv.Ga4ghAlignmentReader(config);
         }
         else {
             this.bamReader = new igv.BamReader(config);

@@ -39,7 +39,7 @@ var igv = (function (igv) {
 
         if (config.sourceType === "ga4gh") {
             // TODO -- using adapter until readFeatures interface is consistent
-            var wrappedReader = new igv.Ga4ghReader(config);
+            var wrappedReader = new igv.Ga4ghVariantReader(config);
             this.reader = {
                 readFeatures: function(success, task, range) {
                    return wrappedReader.readFeatures(range.chr, range.start, range.end, success, task);

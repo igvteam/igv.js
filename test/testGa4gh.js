@@ -19,7 +19,7 @@ function runGa4ghTests() {
 
     asyncTest("variant search", function () {
 
-        var reader = new igv.Ga4ghReader({
+        var reader = new igv.Ga4ghVariantReader({
                 type: "vcf",
                 url: "https://www.googleapis.com/genomics/v1beta2",
                 entityId: "10473108253681171589"
@@ -41,30 +41,30 @@ function runGa4ghTests() {
 
 
     // Query over wide region -- this takes some time, mainly here as a performance test
-//    asyncTest("variant search muc1", function () {
+    asyncTest("variant search muc1", function () {
 
-//        var reader = new igv.Ga4ghReader({
-//                type: "vcf",
-//                url: "https://www.googleapis.com/genomics/v1beta2",
-//                entityId: "10473108253681171589"
-//            }),
-//            chr = "chr1",
-//            bpStart = 155156300,
-//            bpEnd = 155164706;
-//
-//       // var t0 = (new Date()).getTime();
-//
-//        reader.readFeatures(chr, bpStart, bpEnd, function (variants) {
-//
-//            ok(variants);
-//            equal(variants.length, 77);
-//         //  var dt = (new Date()).getTime() - t0;
-//         //   console.log("T = " + (dt / 1000));
-//
-//            start();
-//
-//        })
-//    });
+        var reader = new igv.Ga4ghVariantReader({
+                type: "vcf",
+                url: "https://www.googleapis.com/genomics/v1beta2",
+                entityId: "10473108253681171589"
+            }),
+            chr = "chr1",
+            bpStart = 155156300,
+            bpEnd = 155164706;
+
+        var t0 = (new Date()).getTime();
+
+        reader.readFeatures(chr, bpStart, bpEnd, function (variants) {
+
+            ok(variants);
+            equal(variants.length, 77);
+           var dt = (new Date()).getTime() - t0;
+            console.log("T = " + (dt / 1000));
+
+            start();
+
+        })
+    });
 
 
     test("Decode bam header", function () {
