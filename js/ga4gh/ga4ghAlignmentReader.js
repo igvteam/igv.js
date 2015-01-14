@@ -30,9 +30,8 @@ var igv = (function (igv) {
 
         this.config = config;
         this.url = config.url;
-        this.entityId = config.entityId || config.readsetId;
+        this.readsetId = config.readsetId;
         this.authKey = config.authKey || 'AIzaSyC-dujgw4P1QvNd8i_c-I-S_P1uxVZzn0w';  // Default only works for localhost & broadinstitute.org
-        this.endpoint = "reads";
         this.decode = igv.decodeGa4ghReads;
 
     }
@@ -43,7 +42,7 @@ var igv = (function (igv) {
         var queryChr = (chr.startsWith("chr") ? chr.substring(3) : chr),    // TODO -- we need to read the readset header and create an alias table
             readURL,
             body = {
-                "readGroupSetIds": [this.entityId],
+                "readGroupSetIds": [this.readsetId],
                 "referenceName": queryChr,
                 "start": bpStart,
                 "end": bpEnd,
@@ -51,13 +50,9 @@ var igv = (function (igv) {
             },
             decode = this.decode;
 
-        readURL = this.url + "/" + this.endpoint + "/search";
+        readURL = this.url + "/reads/search";
         if (this.authKey) {
             readURL = readURL + "?key=" + this.authKey;
-
-            if (this.endpoint === "variants") {
-                readURL += "&fields=nextPageToken,variants(alternateBases,filter,info,names,quality,referenceBases,referenceName,start)";
-            }
         }
 
         igv.ga4ghSearch(readURL, body, decode, success, task);

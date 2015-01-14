@@ -2,27 +2,29 @@ function runGa4ghTests() {
 
     module("Ga4gh");
 
-    /*
-     https://www.googleapis.com/genomics/v1beta2/variants/search?key=AIzaSyC-dujgw4P1QvNd8i_c-I-S_P1uxVZzn0w
+    asyncTest("variantSet search", function () {
 
-     {
-     "variantSetIds": [
-     "10473108253681171589"
-     ],
-     "referenceName": "1",
-     "start": "155158585",
-     "end": "155158624"
-     }
+        var reader = new igv.Ga4ghVariantReader({
+                type: "vcf",
+                url: "https://www.googleapis.com/genomics/v1beta2",
+            variantSetId: "10473108253681171589"
+            });
 
+        reader.readMetadata(function (json) {
 
-     */
+            ok(json);
+
+            start();
+
+        })
+    });
 
     asyncTest("variant search", function () {
 
         var reader = new igv.Ga4ghVariantReader({
                 type: "vcf",
                 url: "https://www.googleapis.com/genomics/v1beta2",
-                entityId: "10473108253681171589"
+                variantSetId: "10473108253681171589"
             }),
             chr = "1",
             bpStart = 155158585,
@@ -46,9 +48,9 @@ function runGa4ghTests() {
         var reader = new igv.Ga4ghVariantReader({
                 type: "vcf",
                 url: "https://www.googleapis.com/genomics/v1beta2",
-                entityId: "10473108253681171589"
+                variantSetId: "10473108253681171589"
             }),
-            chr = "chr1",
+            chr = "1",
             bpStart = 155156300,
             bpEnd = 155164706;
 

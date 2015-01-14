@@ -30,9 +30,8 @@ var igv = (function (igv) {
 
         this.config = config;
         this.url = config.url;
-        this.entityId = config.entityId || config.readsetId;
+        this.variantSetId = config.variantSetId || config.readsetId;
         this.authKey = config.authKey || 'AIzaSyC-dujgw4P1QvNd8i_c-I-S_P1uxVZzn0w';  // Default only works for localhost & broadinstitute.org
-        this.endpoint = "variants";
         this.decode = function (json) {
 
             var jsonVariants = json.variants,
@@ -49,29 +48,73 @@ var igv = (function (igv) {
 
     igv.Ga4ghVariantReader.prototype.readFeatures = function (chr, bpStart, bpEnd, success, task) {
 
-        var queryChr = (chr.startsWith("chr") ? chr.substring(3) : chr),
-            readURL,
-            body = {
-                "variantSetIds": [this.entityId],
-                "referenceName": queryChr,
-                "start": bpStart.toString(),
-                "end": bpEnd.toString(),
-                "pageSize": "10000"},
-            decode = this.decode;
+        var myself = this;
 
-        readURL = this.url + "/" + this.endpoint + "/search";
-        if (this.authKey) {
-            readURL = readURL + "?key=" + this.authKey;
+        getChrNameMap(function (chrNameMap) {
 
-            if (this.endpoint === "variants") {
+            var queryChr = chrNameMap.hasOwnProperty(chr) ? chrNameMap[chr] : chr,
+                readURL,
+                body = {
+                    "variantSetIds": [myself.variantSetId],
+                    "referenceName": queryChr,
+                    "start": bpStart.toString(),
+                    "end": bpEnd.toString(),
+                    "pageSize": "10000"},
+                decode = myself.decode;
+
+            readURL = myself.url + "/variants/search";
+            if (myself.authKey) {
+                readURL = readURL + "?key=" + myself.authKey;
                 readURL += "&fields=nextPageToken,variants(alternateBases,filter,info,names,quality,referenceBases,referenceName,start)";
             }
-        }
 
-        igv.ga4ghSearch(readURL, body, decode, success, task);
+            igv.ga4ghSearch(readURL, body, decode, success, task);
+        });
+
+
+        function getChrNameMap(continuation) {
+
+            if (myself.chrNameMap) {
+                continuation(myself.chrNameMap);
+            }
+
+            else {
+                myself.readMetadata(function (json) {
+
+                    myself.metadata = json.metadata;
+                    myself.chrNameMap = {};
+                    if (json.referenceBounds && igv.browser) {
+                        json.referenceBounds.forEach(function (rb) {
+                            var refName = rb.referenceName,
+                                alias = igv.browser.genome.getChromosomeName(refName);
+                            myself.chrNameMap[alias] = refName;
+
+                        });
+                    }
+                    continuation(myself.chrNameMap);
+
+                })
+            }
+
+        }
 
     }
 
+
+    igv.Ga4ghVariantReader.prototype.readMetadata = function (success, task) {
+
+        var url = readURL = this.url + "/variantsets/" + this.variantSetId;
+        if (this.authKey) {
+            url = url + "?key=" + this.authKey;
+        }
+
+        igvxhr.loadJson(url,
+            {
+                success: success,
+                task: task
+            });
+
+    }
 
     return igv;
 
