@@ -76,6 +76,20 @@ var igv = (function (igv) {
         }
     }
 
+    igv.ga4ghGet = function (requestJson) {
+
+        var url = requestJson.url + "/" + requestJson.entity + "/" + requestJson.entityId;
+        if (requestJson.authKey) {
+            url = url + "?key=" + requestJson.authKey;
+        }
+
+        igvxhr.loadJson(url,
+            {
+                success: requestJson.success,
+                task: requestJson.task
+            });
+    }
+
 
     return igv;
 
