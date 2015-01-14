@@ -30,7 +30,7 @@ var igv = (function (igv) {
 
         this.config = config;
         this.url = config.url;
-        this.readsetId = config.readsetId;
+        this.readGroupSetIds = config.readGroupSetIds;
         this.authKey = config.authKey || 'AIzaSyC-dujgw4P1QvNd8i_c-I-S_P1uxVZzn0w';  // Default only works for localhost & broadinstitute.org
         this.decode = igv.decodeGa4ghReads;
 
@@ -40,9 +40,9 @@ var igv = (function (igv) {
     igv.Ga4ghAlignmentReader.prototype.readFeatures = function (chr, bpStart, bpEnd, success, task) {
 
         var queryChr = (chr.startsWith("chr") ? chr.substring(3) : chr),    // TODO -- we need to read the readset header and create an alias table
-            readURL,
+            readURL = this.url + "/reads/search",
             body = {
-                "readGroupSetIds": [this.readsetId],
+                "readGroupSetIds": [this.readGroupSetIds],
                 "referenceName": queryChr,
                 "start": bpStart,
                 "end": bpEnd,
@@ -50,13 +50,52 @@ var igv = (function (igv) {
             },
             decode = this.decode;
 
-        readURL = this.url + "/reads/search";
         if (this.authKey) {
             readURL = readURL + "?key=" + this.authKey;
         }
 
         igv.ga4ghSearch(readURL, body, decode, success, task);
 
+    }
+
+
+
+    igv.Ga4ghAlignmentReader.prototype.readMetadata = function (success, task) {
+
+        var self = this;
+
+        igv.ga4ghGet({
+            url: this.url,
+            entity: "readgroupsets",
+            entityId: this.readGroupSetIds,
+            authKey: this.authKey,
+            success: function (json) {
+
+                var readURL = self.url + "/references/search",
+                    body = {
+                        "referenceSetId": json.referenceSetId
+                    }
+
+                if (self.authKey) {
+                    readURL = readURL + "?key=" + self.authKey;
+                }
+
+                igv.ga4ghSearch(readURL, body,
+                    function (j) {
+                        return j.references;
+                    },
+                    function (references) {
+                        var refNames = [];
+                        references.forEach(function (ref) {
+
+                           refNames.push(ref.name);
+                        });
+                        success(json);
+                    }, task);
+
+            },
+            task: task
+        });
     }
 
 

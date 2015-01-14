@@ -30,7 +30,7 @@ var igv = (function (igv) {
 
         this.config = config;
         this.url = config.url;
-        this.variantSetId = config.variantSetId || config.readsetId;
+        this.variantSetId = config.variantSetId;
         this.authKey = config.authKey || 'AIzaSyC-dujgw4P1QvNd8i_c-I-S_P1uxVZzn0w';  // Default only works for localhost & broadinstitute.org
         this.decode = function (json) {
 
@@ -103,16 +103,15 @@ var igv = (function (igv) {
 
     igv.Ga4ghVariantReader.prototype.readMetadata = function (success, task) {
 
-        var url = readURL = this.url + "/variantsets/" + this.variantSetId;
-        if (this.authKey) {
-            url = url + "?key=" + this.authKey;
-        }
 
-        igvxhr.loadJson(url,
-            {
-                success: success,
-                task: task
-            });
+        igv.ga4ghGet({
+            url: this.url,
+            entity: "variantsets",
+            entityId: this.variantSetId,
+            authKey: this.authKey,
+            success: success,
+            task: task
+        })
 
     }
 

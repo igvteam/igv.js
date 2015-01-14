@@ -2,7 +2,7 @@ function runGa4ghTests() {
 
     module("Ga4gh");
 
-    asyncTest("variantSet search", function () {
+    asyncTest("variantSet metdata", function () {
 
         var reader = new igv.Ga4ghVariantReader({
                 type: "vcf",
@@ -43,25 +43,43 @@ function runGa4ghTests() {
 
 
     // Query over wide region -- this takes some time, mainly here as a performance test
-    asyncTest("variant search muc1", function () {
+//    asyncTest("variant search muc1", function () {
+//
+//        var reader = new igv.Ga4ghVariantReader({
+//                type: "vcf",
+//                url: "https://www.googleapis.com/genomics/v1beta2",
+//                variantSetId: "10473108253681171589"
+//            }),
+//            chr = "1",
+//            bpStart = 155156300,
+//            bpEnd = 155164706;
+//
+//        var t0 = (new Date()).getTime();
+//
+//        reader.readFeatures(chr, bpStart, bpEnd, function (variants) {
+//
+//            ok(variants);
+//            equal(variants.length, 77);
+//           var dt = (new Date()).getTime() - t0;
+//            console.log("T = " + (dt / 1000));
+//
+//            start();
+//
+//        })
+//    });
 
-        var reader = new igv.Ga4ghVariantReader({
-                type: "vcf",
-                url: "https://www.googleapis.com/genomics/v1beta2",
-                variantSetId: "10473108253681171589"
-            }),
-            chr = "1",
-            bpStart = 155156300,
-            bpEnd = 155164706;
 
-        var t0 = (new Date()).getTime();
+    asyncTest("readGroupSet metdata", function () {
 
-        reader.readFeatures(chr, bpStart, bpEnd, function (variants) {
+        var reader = new igv.Ga4ghAlignmentReader({
+            type: "bam",
+            url: "https://www.googleapis.com/genomics/v1beta2",
+            readGroupSetIds: 'CMvnhpKTFhCjz9_25e_lCw'
+        });
 
-            ok(variants);
-            equal(variants.length, 77);
-           var dt = (new Date()).getTime() - t0;
-            console.log("T = " + (dt / 1000));
+        reader.readMetadata(function (json) {
+
+            ok(json);
 
             start();
 
