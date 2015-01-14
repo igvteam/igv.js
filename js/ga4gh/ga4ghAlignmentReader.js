@@ -32,32 +32,76 @@ var igv = (function (igv) {
         this.url = config.url;
         this.readGroupSetIds = config.readGroupSetIds;
         this.authKey = config.authKey || 'AIzaSyC-dujgw4P1QvNd8i_c-I-S_P1uxVZzn0w';  // Default only works for localhost & broadinstitute.org
-        this.decode = igv.decodeGa4ghReads;
-
     }
 
 
     igv.Ga4ghAlignmentReader.prototype.readFeatures = function (chr, bpStart, bpEnd, success, task) {
 
-        var queryChr = (chr.startsWith("chr") ? chr.substring(3) : chr),    // TODO -- we need to read the readset header and create an alias table
-            readURL = this.url + "/reads/search",
-            body = {
-                "readGroupSetIds": [this.readGroupSetIds],
-                "referenceName": queryChr,
-                "start": bpStart,
-                "end": bpEnd,
-                "pageSize": "10000"
-            },
-            decode = this.decode;
+        var self = this;
 
-        if (this.authKey) {
-            readURL = readURL + "?key=" + this.authKey;
+        getChrNameMap(function (chrNameMap) {
+
+            var queryChr = chrNameMap.hasOwnProperty(chr) ? chrNameMap[chr] : chr,
+                readURL = self.url + "/reads/search",
+                body = {
+                    "readGroupSetIds": [self.readGroupSetIds],
+                    "referenceName": queryChr,
+                    "start": bpStart,
+                    "end": bpEnd,
+                    "pageSize": "10000"
+                },
+                decode = igv.decodeGa4ghReads;
+
+            if (self.authKey) {
+                readURL = readURL + "?key=" + self.authKey;
+            }
+
+
+            igv.ga4ghSearch(readURL, body, decode, success, task);
+
+        });
+
+        function getChrNameMap(continuation) {
+
+            if (self.chrNameMap) {
+                continuation(self.chrNameMap);
+            }
+
+            else {
+                self.readMetadata(function (json) {
+
+                    var readURL = self.url + "/references/search",
+                        body = {
+                            "referenceSetId": json.referenceSetId
+                        }
+
+                    if (self.authKey) {
+                        readURL = readURL + "?key=" + self.authKey;
+                    }
+
+                    self.metadata = json.metadata;
+                    self.chrNameMap = {};
+
+                    igv.ga4ghSearch(readURL, body,
+                        function (j) {
+                            return j.references;
+                        },
+                        function (references) {
+
+                            references.forEach(function (ref) {
+                                var refName = ref.name,
+                                    alias = igv.browser.genome.getChromosomeName(refName);
+                                self.chrNameMap[alias] = refName;
+                            });
+                            continuation(self.chrNameMap);
+
+                        }, task);
+                });
+            }
+
         }
 
-        igv.ga4ghSearch(readURL, body, decode, success, task);
-
     }
-
 
 
     igv.Ga4ghAlignmentReader.prototype.readMetadata = function (success, task) {
@@ -88,7 +132,7 @@ var igv = (function (igv) {
                         var refNames = [];
                         references.forEach(function (ref) {
 
-                           refNames.push(ref.name);
+                            refNames.push(ref.name);
                         });
                         success(json);
                     }, task);
