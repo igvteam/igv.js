@@ -140,7 +140,7 @@ var igv = (function (igv) {
      * @param refId  the sequence dictionary index of the chromosome
      * @param min  genomic start position
      * @param max  genomic end position
-     * @param return an array of {minv: {filePointer, offset}, {maxv: {filePointer, offset}}
+     * @param return an array of {minv: {block: filePointer, offset: 0}, {maxv: {block: filePointer, offset: 0}}
      */
     igv.TribbleIndex.prototype.blocksForRange = function (queryChr, min, max) { //function (refId, min, max) {
 
@@ -149,7 +149,7 @@ var igv = (function (igv) {
         if (chrIdx) {
             var blocks = chrIdx.blocks,
                 lastBlock = blocks[blocks.length - 1],
-                mergedBlock = {minv: blocks[0].min,  maxv: lastBlock.max};
+                mergedBlock = {minv: {block: blocks[0].min, offset: 0},  maxv: {block: lastBlock.max, offset: 0}};
 
             return [mergedBlock];
         }
