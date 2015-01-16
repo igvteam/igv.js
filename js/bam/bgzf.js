@@ -27,7 +27,7 @@ var igv = (function (igv) {
 
         while (ptr[0] < lim) {
 
-            //console.log("lim " + lim + " data.byteLength " + data.byteLength);
+            console.log("lim " + lim + " data.byteLength " + data.byteLength);
 
             var ba = new Uint8Array(data, ptr[0], 100);
 
