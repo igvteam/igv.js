@@ -26,9 +26,14 @@
 var igv = (function (igv) {
 
 
-    igv.ga4ghSearch = function (url, body, decode, success, task) {
+    igv.ga4ghSearch = function (requestJson) {
 
-        var results;
+        var results,
+            url = requestJson.url,
+            body = requestJson.body,
+            decode = requestJson.decode,
+            success = requestJson.success,
+            task = requestJson.task;
 
         // Start the recursive load cycle.  Data is fetched in chunks, if more data is available a "nextPageToken" is returned.
         loadChunk();
@@ -54,7 +59,7 @@ var igv = (function (igv) {
 
                         if (json) {
 
-                            tmp = decode(json);
+                            tmp = decode ? decode(json) : json;
 
                             results = results ? results.concat(tmp) : tmp;
 

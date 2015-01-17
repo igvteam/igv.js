@@ -42,22 +42,26 @@ var igv = (function (igv) {
         getChrNameMap(function (chrNameMap) {
 
             var queryChr = chrNameMap.hasOwnProperty(chr) ? chrNameMap[chr] : chr,
-                readURL = self.url + "/reads/search",
-                body = {
-                    "readGroupSetIds": [self.readGroupSetIds],
-                    "referenceName": queryChr,
-                    "start": bpStart,
-                    "end": bpEnd,
-                    "pageSize": "10000"
-                },
-                decode = igv.decodeGa4ghReads;
+                readURL = self.url + "/reads/search";
 
             if (self.authKey) {
                 readURL = readURL + "?key=" + self.authKey;
             }
 
 
-            igv.ga4ghSearch(readURL, body, decode, success, task);
+            igv.ga4ghSearch({
+                url: readURL,
+                body: {
+                    "readGroupSetIds": [self.readGroupSetIds],
+                    "referenceName": queryChr,
+                    "start": bpStart,
+                    "end": bpEnd,
+                    "pageSize": "10000"
+                },
+                decode: igv.decodeGa4ghReads,
+                success: success,
+                task: task
+            });
 
         });
 
@@ -70,32 +74,39 @@ var igv = (function (igv) {
             else {
                 self.readMetadata(function (json) {
 
-                    var readURL = self.url + "/references/search",
-                        body = {
-                            "referenceSetId": json.referenceSetId
-                        }
-
-                    if (self.authKey) {
-                        readURL = readURL + "?key=" + self.authKey;
-                    }
-
-                    self.metadata = json.metadata;
                     self.chrNameMap = {};
 
-                    igv.ga4ghSearch(readURL, body,
-                        function (j) {
-                            return j.references;
-                        },
-                        function (references) {
+                    if (igv.browser) {
 
-                            references.forEach(function (ref) {
-                                var refName = ref.name,
-                                    alias = igv.browser.genome.getChromosomeName(refName);
-                                self.chrNameMap[alias] = refName;
-                            });
-                            continuation(self.chrNameMap);
+                        // Query for reference names to build an alias table (map of genome ref names -> dataset ref names)
+                        var readURL = self.url + "/references/search";
+                        if (self.authKey) {
+                            readURL = readURL + "?key=" + self.authKey;
+                        }
 
-                        }, task);
+                        igv.ga4ghSearch({
+                            url: readURL,
+                            body: {
+                                "referenceSetId": json.referenceSetId
+                            },
+                            decode: function (j) {
+                                return j.references;
+                            },
+                            success: function (references) {
+                                references.forEach(function (ref) {
+                                    var refName = ref.name,
+                                        alias = igv.browser.genome.getChromosomeName(refName);
+                                    self.chrNameMap[alias] = refName;
+                                });
+                                continuation(self.chrNameMap);
+
+                            },
+                            task: task});
+                    }
+                    else {
+                        // No browser object, can't build map.  This can occur when run from unit tests
+                        continuation(self.chrNameMap);
+                    }
                 });
             }
 
@@ -106,38 +117,12 @@ var igv = (function (igv) {
 
     igv.Ga4ghAlignmentReader.prototype.readMetadata = function (success, task) {
 
-        var self = this;
-
         igv.ga4ghGet({
             url: this.url,
             entity: "readgroupsets",
             entityId: this.readGroupSetIds,
             authKey: this.authKey,
-            success: function (json) {
-
-                var readURL = self.url + "/references/search",
-                    body = {
-                        "referenceSetId": json.referenceSetId
-                    }
-
-                if (self.authKey) {
-                    readURL = readURL + "?key=" + self.authKey;
-                }
-
-                igv.ga4ghSearch(readURL, body,
-                    function (j) {
-                        return j.references;
-                    },
-                    function (references) {
-                        var refNames = [];
-                        references.forEach(function (ref) {
-
-                            refNames.push(ref.name);
-                        });
-                        success(json);
-                    }, task);
-
-            },
+            success: success,
             task: task
         });
     }

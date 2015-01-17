@@ -32,16 +32,6 @@ var igv = (function (igv) {
         this.url = config.url;
         this.variantSetId = config.variantSetId;
         this.authKey = config.authKey || 'AIzaSyC-dujgw4P1QvNd8i_c-I-S_P1uxVZzn0w';  // Default only works for localhost & broadinstitute.org
-        this.decode = function (json) {
-
-            var jsonVariants = json.variants,
-                variants = [];
-            jsonVariants.forEach(function (json) {
-                variants.push(igv.createGAVariant(json));
-            });
-
-            return variants;
-        }
 
     }
 
@@ -53,22 +43,31 @@ var igv = (function (igv) {
         getChrNameMap(function (chrNameMap) {
 
             var queryChr = chrNameMap.hasOwnProperty(chr) ? chrNameMap[chr] : chr,
-                readURL,
-                body = {
-                    "variantSetIds": [myself.variantSetId],
-                    "referenceName": queryChr,
-                    "start": bpStart.toString(),
-                    "end": bpEnd.toString(),
-                    "pageSize": "10000"},
-                decode = myself.decode;
+                readURL = myself.url + "/variants/search";
 
-            readURL = myself.url + "/variants/search";
             if (myself.authKey) {
                 readURL = readURL + "?key=" + myself.authKey;
                 readURL += "&fields=nextPageToken,variants(alternateBases,filter,info,names,quality,referenceBases,referenceName,start)";
             }
 
-            igv.ga4ghSearch(readURL, body, decode, success, task);
+            igv.ga4ghSearch({
+                url: readURL,
+                body: {
+                    "variantSetIds": [myself.variantSetId],
+                    "referenceName": queryChr,
+                    "start": bpStart.toString(),
+                    "end": bpEnd.toString(),
+                    "pageSize": "10000"},
+                decode: function (json) {
+                    var variants = [];
+                    json.variants.forEach(function (json) {
+                        variants.push(igv.createGAVariant(json));
+                    });
+
+                    return variants;
+                },
+                success: success,
+                task: task});
         });
 
 
