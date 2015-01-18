@@ -29,10 +29,11 @@ var igv = (function (igv) {
 
         igv.configTrack(this, config);
 
-        this.displayMode = config.displayMode || "COLLAPSED";    // COLLAPSED | EXPANDED | SQUISHED
+        this.displayMode = config.displayMode || "EXPANDED"; // "COLLAPSED";    // COLLAPSED | EXPANDED | SQUISHED
         this.collapsedHeight = config.collapsedHeight || this.height;
-        this.expandedRowHeight = config.expandedRowHeight || 20;
-        this.squishedRowHeight = config.squishedRowHeight || 10
+        this.expandedRowHeight = config.expandedRowHeight || 30;
+        this.squishedRowHeight = config.squishedRowHeight || 10;
+        this.labelThreshold = 1000000;
 
         this.featureSource = new igv.FeatureSource(this.config);
 
@@ -40,7 +41,7 @@ var igv = (function (igv) {
             this.render = renderVariant;
         }
         else {
-            this.render = renderGene;
+            this.render = renderFeature;
         }
     };
 
@@ -57,14 +58,14 @@ var igv = (function (igv) {
 
     igv.FeatureTrack.prototype.computePixelHeight = function (features) {
 
-        if(this.displayMode === "COLLAPSED") {
+        if (this.displayMode === "COLLAPSED") {
             return this.collapsedHeight;
         }
         else {
             var maxRow = 0;
             features.forEach(function (f) {
 
-                if(f.row && f.row > maxRow) maxRow = f.row;
+                if (f.row && f.row > maxRow) maxRow = f.row;
 
             });
 
@@ -107,7 +108,7 @@ var igv = (function (igv) {
                 gene = featureList[i];
                 if (gene.end < bpStart) continue;
                 if (gene.start > bpEnd) break;
-                track.render(gene, bpStart, bpPerPixel, canvas);
+                track.render.call(this, gene, bpStart, bpPerPixel, canvas);
             }
         }
         else {
@@ -161,7 +162,7 @@ var igv = (function (igv) {
 
     }
 
-    function renderGene(gene, bpStart, xScale, canvas) {
+    function renderFeature(feature, bpStart, xScale, canvas) {
 
         var px,
             px1,
@@ -175,19 +176,26 @@ var igv = (function (igv) {
             ePw,
             py = 5,
             step = 8,
-            h = 10;
+            h = 10,
+            transform,
+            normalTextStyle = {font: 'bold 10px Arial', fillStyle: "black", strokeStyle: "black"};
 
-        var normalTextStyle = {font: 'bold 10px Arial', fillStyle: "black", strokeStyle: "black"};
-
-        px = Math.round((gene.start - bpStart) / xScale);
-        px1 = Math.round((gene.end - bpStart) / xScale);
+        px = Math.round((feature.start - bpStart) / xScale);
+        px1 = Math.round((feature.end - bpStart) / xScale);
         pw = px1 - px;
         if (pw < 3) {
             pw = 3;
             px -= 1;
         }
 
-        exonCount = gene.exons ? gene.exons.length : 0;
+        if(this.displayMode === "SQUISHED" && feature.row != undefined) {
+            py = this.squishedRowHeight * feature.row;
+        }
+        else if(this.displayMode === "EXPANDED" && feature.row != undefined) {
+            py = this.expandedRowHeight * feature.row;
+        }
+
+        exonCount = feature.exons ? feature.exons.length : 0;
 
         if (exonCount == 0) {
             canvas.fillRect(px, py, pw, h);
@@ -196,13 +204,13 @@ var igv = (function (igv) {
         else {
             cy = py + 5;
             canvas.strokeLine(px, cy, px1, cy);
-            direction = gene.strand == '+' ? 1 : -1;
+            direction = feature.strand == '+' ? 1 : -1;
             for (var x = px + step / 2; x < px1; x += step) {
                 canvas.strokeLine(x - direction * 2, cy - 2, x, cy);
                 canvas.strokeLine(x - direction * 2, cy + 2, x, cy);
             }
             for (var e = 0; e < exonCount; e++) {
-                exon = gene.exons[e];
+                exon = feature.exons[e];
                 ePx = Math.round((exon.start - bpStart) / xScale);
                 ePx1 = Math.round((exon.end - bpStart) / xScale);
                 ePw = Math.max(1, ePx1 - ePx);
@@ -213,10 +221,10 @@ var igv = (function (igv) {
 
         var geneColor;
         if (igv.selection) {
-            geneColor = igv.selection.colorForGene(gene.name);
+            geneColor = igv.selection.colorForGene(feature.name);
         } // TODO -- for gtex, figure out a better way to do this
 
-        if ((px1 - px) > 2 || geneColor) {
+        if ((px1 - px) > 20 || geneColor) {
 
             var geneStyle;
             if (geneColor) {
@@ -226,7 +234,13 @@ var igv = (function (igv) {
                 geneStyle = normalTextStyle;
             }
 
-            canvas.fillText(gene.name, px + ((px1 - px) / 2), py + 20, geneStyle, {rotate: {angle: 45}});
+
+            if (this.displayMode === "COLLAPSED" && this.labelDisplayMode === "SLANT") {
+                transform =  {rotate: {angle: 45}};
+            }
+
+            var labelY = transform ? py + 20 : py + 25;
+            canvas.fillText(feature.name, px + ((px1 - px) / 2), labelY, geneStyle, transform);
         }
     }
 
