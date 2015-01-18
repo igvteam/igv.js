@@ -98,7 +98,7 @@ var igv = (function (igv) {
         if (type === "t2d") {
             newTrack = new igv.T2dTrack(config);
         } else if (type === "bed" || type === "vcf") {
-            newTrack = new igv.BedTrack(config);
+            newTrack = new igv.FeatureTrack(config);
         } else if (type === "bam") {
             newTrack = new igv.BAMTrack(config);
         } else if (type === "wig" || type === "bigwig" || type === "bedgraph") {

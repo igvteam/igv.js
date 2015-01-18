@@ -174,7 +174,7 @@ var igv = (function (igv) {
             }
         }
 
-        function drawAlignments(packedAlignments, sequence) {
+        function drawAlignments(genomicInterval) {
 
         var packedAlignments = genomicInterval.packedAlignments,
             sequence = genomicInterval.sequence,
@@ -187,7 +187,7 @@ var igv = (function (igv) {
             canvas.setProperties({ fillStyle: alignmentColor });
             canvas.setProperties({ strokeStyle: alignmentColor });
 
-            // TODO -- now can packedAlignments be undefined?
+            // TODO -- how can packedAlignments be undefined?
             if (packedAlignments) {
                 // alignment track
                 packedAlignments.forEach(function renderAlignmentRow(alignmentRow, packedAlignmentIndex, packedAlignments) {
