@@ -34,7 +34,7 @@ var igv = (function (igv) {
 
         this.config = config;
         this.url = url;
-        this.featureSource = new igv.EqtlSource(url);
+        this.featureSource = new igv.GtexSource(url);
         this.label = label;
         this.minLogP = config.minLogP || 3.5;
         this.maxLogP = config.maxLogP || 25;

@@ -99,8 +99,7 @@ var igv = (function (igv) {
 
         } else {
 
-            var bucketListLength = genomicInterval.end - genomicInterval.start,
-                bucketList = new Array(bucketListLength),
+            var bucketList = [],
                 allocatedCount = 0,
                 nextStart = genomicInterval.start,
                 alignmentRow,

@@ -41,8 +41,8 @@ var igv = (function (igv) {
             // TODO -- using adapter until readFeatures interface is consistent
             var wrappedReader = new igv.Ga4ghVariantReader(config);
             this.reader = {
-                readFeatures: function(success, task, range) {
-                   return wrappedReader.readFeatures(range.chr, range.start, range.end, success, task);
+                readFeatures: function (success, task, range) {
+                    return wrappedReader.readFeatures(range.chr, range.start, range.end, success, task);
                 }
             }
         }
@@ -90,6 +90,8 @@ var igv = (function (igv) {
                         new igv.FeatureCache(featureList, range) :
                         new igv.FeatureCache(featureList);   // Note - replacing previous cache with new one
 
+                    // Assign overlapping features to rows
+                    packFeatures(featureList);
 
                     // Finally pass features for query interval to continuation
                     success(myself.featureCache.queryFeatures(chr, bpStart, bpEnd));
@@ -131,6 +133,70 @@ var igv = (function (igv) {
         }
     }
 
+
+    function packFeatures(features) {
+
+        if (features.length === 0) {
+            return;
+        }
+
+        // Segregate by chromosome
+
+        var chrFeatureMap = {},
+            chrs = [];
+        features.forEach(function (feature) {
+
+            var chr = feature.chr,
+                flist = chrFeatureMap[chr];
+
+            if (!flist) {
+                flist = [];
+                chrFeatureMap[chr] = flist;
+                chrs.push(chr);
+            }
+
+            flist.push(feature);
+        });
+
+        // Loop through chrosomosomes and pack features;
+
+        chrs.forEach(function (chr) {
+
+            pack(chrFeatureMap[chr]);
+        });
+
+
+        function pack(featureList) {
+
+            var rows = [];
+
+            featureList.sort(function (a, b) {
+                return a.start - b.start;
+            })
+
+
+            rows.push(-1000);
+            featureList.forEach(function (feature) {
+
+                var i,
+                    r,
+                    len = rows.length,
+                    start = feature.start;
+
+                for (r = 0; r < len; r++) {
+                    if (start > rows[r]) {
+                        feature.row = r;
+                        rows[r] = feature.end;
+                        return;
+                    }
+                }
+                feature.row = r;
+                rows[r] = feature.end;
+
+
+            });
+        }
+    }
 
     return igv;
 })

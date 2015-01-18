@@ -25,9 +25,14 @@
 
 var igv = (function (igv) {
 
-    igv.BedTrack = function (config) {
+    igv.FeatureTrack = function (config) {
 
         igv.configTrack(this, config);
+
+        this.displayMode = config.displayMode || "COLLAPSED";    // COLLAPSED | EXPANDED | SQUISHED
+        this.collapsedHeight = config.collapsedHeight || this.height;
+        this.expandedRowHeight = config.expandedRowHeight || 20;
+        this.squishedRowHeight = config.squishedRowHeight || 10
 
         this.featureSource = new igv.FeatureSource(this.config);
 
@@ -39,19 +44,37 @@ var igv = (function (igv) {
         }
     };
 
-    igv.BedTrack.prototype.getFeatures = function (chr, bpStart, bpEnd, continuation, task) {
+    igv.FeatureTrack.prototype.getFeatures = function (chr, bpStart, bpEnd, continuation, task) {
 
         // Don't try to draw alignments for windows > the visibility window
         if (this.visibilityWindow && igv.browser.trackBPWidth() > this.visibilityWindow) {
             continuation({exceedsVisibilityWindow: true});
         }
         else {
-            this.
-                featureSource.getFeatures(chr, bpStart, bpEnd, continuation, task)
+            this.featureSource.getFeatures(chr, bpStart, bpEnd, continuation, task)
         }
     }
 
-    igv.BedTrack.prototype.draw = function (options) {
+    igv.FeatureTrack.prototype.computePixelHeight = function (features) {
+
+        if(this.displayMode === "COLLAPSED") {
+            return this.collapsedHeight;
+        }
+        else {
+            var maxRow = 0;
+            features.forEach(function (f) {
+
+                if(f.row && f.row > maxRow) maxRow = f.row;
+
+            });
+
+            return  (maxRow + 1) * (this.displayMode === "SQUISHED" ? this.squishedRowHeight : this.expandedRowHeight);
+
+        }
+
+    };
+
+    igv.FeatureTrack.prototype.draw = function (options) {
 
         var track = this,
             featureList = options.features,
@@ -96,7 +119,7 @@ var igv = (function (igv) {
     /**
      * Return "popup data" for feature @ genomic location.  Data is an array of key-value pairs
      */
-    igv.BedTrack.prototype.popupData = function (genomicLocation, xOffset, yOffset) {
+    igv.FeatureTrack.prototype.popupData = function (genomicLocation, xOffset, yOffset) {
 
         // We use the featureCache property rather than method to avoid async load.  If the
         // feature is not already loaded this won't work,  but the user wouldn't be mousing over it either.
@@ -131,7 +154,7 @@ var igv = (function (igv) {
         return null;
     }
 
-    igv.BedTrack.prototype.popupMenuItems = function (popover) {
+    igv.FeatureTrack.prototype.popupMenuItems = function (popover) {
         return [
             igv.colorPickerMenuItem(popover, this.trackView, "Set feature color")
         ];

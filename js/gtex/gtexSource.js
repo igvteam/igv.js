@@ -26,7 +26,7 @@
 var igv = (function (igv) {
 
 
-    igv.EqtlSource = function (file) {
+    igv.GtexSource = function (file) {
         this.file = file;
         this.codec = file.endsWith(".bin") ? createEqtlBinary : createEQTL,
             this.cache = {};
@@ -36,7 +36,7 @@ var igv = (function (igv) {
     }
 
 
-    igv.EqtlSource.prototype.getFeatures = function (chr, bpStart, bpEnd, continuation, task) {
+    igv.GtexSource.prototype.getFeatures = function (chr, bpStart, bpEnd, continuation, task) {
 
 
         var source = this,

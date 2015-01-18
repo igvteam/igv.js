@@ -119,21 +119,27 @@ var igv = (function (igv) {
         }
 
         if (this.index) {
-            loadFeaturesWithIndex(this.index);
+            loadFeaturesWithIndex(this.index, packFeatures);
         }
         else {
-            loadFeaturesNoIndex();
+            loadFeaturesNoIndex(packFeatures);
         }
 
+        function packFeatures(features) {
 
-        function loadFeaturesNoIndex() {
+            // TODO pack
+            success(features);
+
+        }
+
+        function loadFeaturesNoIndex(continuation) {
 
             var parser = myself.parser,
                 options = {
                     headers: myself.config.headers,           // http headers, not file header
                     success: function (data) {
                         myself.header = parser.parseHeader(data);
-                        success(parser.parseFeatures(data));   // <= PARSING DONE HERE
+                        continuation(parser.parseFeatures(data));   // <= PARSING DONE HERE
                     },
                     task: task
                 };
@@ -146,12 +152,12 @@ var igv = (function (igv) {
             }
         }
 
-        function loadFeaturesWithIndex(index) {
+        function loadFeaturesWithIndex(index, continuation) {
 
             if (!myself.header) {
                 loadHeaderWithIndex(index, function (header) {
                     myself.header = header || {};
-                    loadFeaturesWithIndex(index);
+                    loadFeaturesWithIndex(index, continuation);
                 });
                 return;
             }
@@ -202,7 +208,7 @@ var igv = (function (igv) {
                                     allFeatures.sort(function (a, b) {
                                         return a.start - b.start;
                                     });
-                                    success(allFeatures);
+                                    continuation(allFeatures);
                                 }
                             },
                             task: task
@@ -286,6 +292,7 @@ var igv = (function (igv) {
 
 
     }
+
 
     return igv;
 })
