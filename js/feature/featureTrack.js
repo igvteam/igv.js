@@ -33,7 +33,7 @@ var igv = (function (igv) {
         this.collapsedHeight = config.collapsedHeight || this.height;
         this.expandedRowHeight = config.expandedRowHeight || 30;
         this.squishedRowHeight = config.squishedRowHeight || 15;
-        this.maxTrackHeight = config.maxTrackHeight || Math.max(500, this.trackHeight);
+        this.maxTrackHeight = config.maxTrackHeight || Math.max(500, this.height);
         this.labelThreshold = 1000000;
 
         this.featureSource = new igv.FeatureSource(this.config);
