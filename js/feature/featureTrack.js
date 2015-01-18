@@ -29,10 +29,10 @@ var igv = (function (igv) {
 
         igv.configTrack(this, config);
 
-        this.displayMode = config.displayMode || "EXPANDED"; // "COLLAPSED";    // COLLAPSED | EXPANDED | SQUISHED
+        this.displayMode = config.displayMode || "SQUISHED"; // "COLLAPSED";    // COLLAPSED | EXPANDED | SQUISHED
         this.collapsedHeight = config.collapsedHeight || this.height;
         this.expandedRowHeight = config.expandedRowHeight || 30;
-        this.squishedRowHeight = config.squishedRowHeight || 10;
+        this.squishedRowHeight = config.squishedRowHeight || 15;
         this.labelThreshold = 1000000;
 
         this.featureSource = new igv.FeatureSource(this.config);
@@ -126,27 +126,37 @@ var igv = (function (igv) {
         // feature is not already loaded this won't work,  but the user wouldn't be mousing over it either.
         if (this.featureSource.featureCache) {
 
-            var chr = igv.browser.referenceFrame.chr;  // TODO -- this should be passed in
-            var tolerance = igv.browser.referenceFrame.bpPerPixel;  // We need some tolerance around genomicLocation, start with +/- 1 pixel
-            var featureList = this.featureSource.featureCache.queryFeatures(chr, genomicLocation - tolerance, genomicLocation + tolerance);
+            var chr = igv.browser.referenceFrame.chr,  // TODO -- this should be passed in
+                tolerance = igv.browser.referenceFrame.bpPerPixel,  // We need some tolerance around genomicLocation, start with +/- 1 pixel
+                featureList = this.featureSource.featureCache.queryFeatures(chr, genomicLocation - tolerance, genomicLocation + tolerance),
+                row;
+
+            if (this.displayMode != "COLLAPSED") {
+                row = (Math.floor)(this.displayMode === "SQUISHED" ? yOffset / this.squishedRowHeight : yOffset / this.expandedRowHeight);
+            }
 
             if (featureList && featureList.length > 0) {
 
 
                 var popupData = [];
                 featureList.forEach(function (feature) {
-                    if (feature.popupData &&
-                        feature.end >= genomicLocation - tolerance &&
-                        feature.start <= genomicLocation + tolerance) {
-                        var featureData = feature.popupData(genomicLocation);
-                        if (featureData) {
-                            if (popupData.length > 0) {
-                                popupData.push("<HR>");
+                        if (feature.popupData &&
+                            feature.end >= genomicLocation - tolerance &&
+                            feature.start <= genomicLocation + tolerance) {
+
+                            if (row === undefined || feature.row === undefined || row === feature.row) {
+                                var featureData = feature.popupData(genomicLocation);
+                                if (featureData) {
+                                    if (popupData.length > 0) {
+                                        popupData.push("<HR>");
+                                    }
+                                    Array.prototype.push.apply(popupData, featureData);
+                                }
                             }
-                            Array.prototype.push.apply(popupData, featureData);
                         }
                     }
-                });
+                )
+                ;
                 return popupData;
             }
 
@@ -178,7 +188,7 @@ var igv = (function (igv) {
             step = 8,
             h = 10,
             transform,
-            normalTextStyle = {font: 'bold 10px Arial', fillStyle: "black", strokeStyle: "black"};
+            normalTextStyle = {font: 'bold 10px Arial', fillStyle: this.color, strokeStyle: "black"};
 
         px = Math.round((feature.start - bpStart) / xScale);
         px1 = Math.round((feature.end - bpStart) / xScale);
@@ -188,10 +198,10 @@ var igv = (function (igv) {
             px -= 1;
         }
 
-        if(this.displayMode === "SQUISHED" && feature.row != undefined) {
+        if (this.displayMode === "SQUISHED" && feature.row != undefined) {
             py = this.squishedRowHeight * feature.row;
         }
-        else if(this.displayMode === "EXPANDED" && feature.row != undefined) {
+        else if (this.displayMode === "EXPANDED" && feature.row != undefined) {
             py = this.expandedRowHeight * feature.row;
         }
 
@@ -224,7 +234,7 @@ var igv = (function (igv) {
             geneColor = igv.selection.colorForGene(feature.name);
         } // TODO -- for gtex, figure out a better way to do this
 
-        if ((px1 - px) > 20 || geneColor) {
+        if (((px1 - px) > 20 || geneColor) && this.displayMode != "SQUISHED") {
 
             var geneStyle;
             if (geneColor) {
@@ -236,7 +246,7 @@ var igv = (function (igv) {
 
 
             if (this.displayMode === "COLLAPSED" && this.labelDisplayMode === "SLANT") {
-                transform =  {rotate: {angle: 45}};
+                transform = {rotate: {angle: 45}};
             }
 
             var labelY = transform ? py + 20 : py + 25;
@@ -267,4 +277,5 @@ var igv = (function (igv) {
 
     return igv;
 
-})(igv || {});
+})
+(igv || {});
