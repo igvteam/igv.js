@@ -28,7 +28,7 @@ var igv = (function (igv) {
     igv.FeatureTrack = function (config) {
 
         igv.configTrack(this, config);
-
+        
         this.displayMode = config.displayMode || "SQUISHED"; // "COLLAPSED";    // COLLAPSED | EXPANDED | SQUISHED
         this.collapsedHeight = config.collapsedHeight || this.height;
         this.expandedRowHeight = config.expandedRowHeight || 30;
@@ -164,14 +164,19 @@ var igv = (function (igv) {
         }
 
         return null;
-    }
+    };
 
     igv.FeatureTrack.prototype.popupMenuItems = function (popover) {
-        return [
-            igv.colorPickerMenuItem(popover, this.trackView, "Set feature color")
-        ];
 
-    }
+        //var rgbArray = this.color.replace(/[^\d,]/g, '').split(',');
+        //if (rgbArray.length > 3) {
+        //    rgbArray.pop();
+        //}
+
+        return [
+            igv.colorPickerMenuItem(popover, this.trackView, "Set feature color", this.color)
+        ];
+    };
 
     function renderFeature(feature, bpStart, xScale, canvas) {
 
