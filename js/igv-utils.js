@@ -148,7 +148,12 @@ var igv = (function (igv) {
 
                 $("#featureColorPicker").colorpicker(
                     {
+                        parts: /*'full'*/[ 'header', 'map', 'bar', 'hsv', 'rgb', 'preview', 'swatches', 'footer' ],
+
                         inline: false,
+
+                        title: trackView.track.label + " Feature Color Picker",
+
                         color: trackColor,
 
                         init: function (event, color) {
