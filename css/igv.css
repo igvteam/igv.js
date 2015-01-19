@@ -167,6 +167,7 @@
 
 .igv-popoverNameValue {
 
+    cursor: default;
     text-wrap: none;
     white-space:nowrap;
 
@@ -384,6 +385,8 @@
 }
 
 .igv-app-icon {
+
+    cursor: pointer;
     color: grey;
     background-color: white;
 }
@@ -395,6 +398,7 @@
 }
 
 .igv-track-menu-gear {
+    cursor: pointer;
     position: absolute;
     left: 20px;
     top: 0;
@@ -412,6 +416,7 @@
 
 .igv-track-menu-item {
 
+    cursor: pointer;
     padding-left: 4px;
     padding-right: 4px;
 
