@@ -15,7 +15,7 @@ function testTribble() {
 
         ok(config);
 
-        featureSource = new igv.BedFeatureSource(config);
+        featureSource = new igv.FeatureSource(config);
         ok(featureSource);
 
         //start();

@@ -8,7 +8,7 @@ function runWIGFeatureSourceTests() {
 
         var url = "data/wig/fixedStep-example.wig";
 
-        var wigFeatureSource = new igv.BedFeatureSource({url: url});
+        var wigFeatureSource = new igv.FeatureSource({url: url});
 
         ok(wigFeatureSource, "wigFeatureSource should be non null");
 
@@ -52,7 +52,7 @@ function runWIGFeatureSourceTests() {
 
         var url = "data/wig/variableStep-example.wig";
 
-        var wigFeatureSource = new igv.BedFeatureSource({url: url});
+        var wigFeatureSource = new igv.FeatureSource({url: url});
 
         ok(wigFeatureSource);
 

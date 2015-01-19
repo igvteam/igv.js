@@ -67,7 +67,7 @@ var igv = (function (igv) {
         this.sampleCount = 0;
         this.samples = {};
         this.sampleNames = [];
-        this.featureSource = new igv.BedFeatureSource(this.config);
+        this.featureSource = new igv.FeatureSource(this.config);
 
     };
 
