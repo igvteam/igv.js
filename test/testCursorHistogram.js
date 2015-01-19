@@ -8,9 +8,31 @@ function runCursorHistogramTests() {
     test( "CursorHistogram Creation Test", 11, function() {
 
 
+<<<<<<< HEAD
         var score,
             cursorHistogram = new cursor.CursorHistogram(null, null);
         ok(cursorHistogram);
+=======
+        featureSource = new igv.FeatureSource(peakURL);
+//        featureSource = new igv.FeatureSource(tssURL);
+
+        maxScore = 1000;
+        cursorHistogram = new cursor.CursorHistogram(null, maxScore);
+
+        featureSource.allFeatures(function (features) {
+
+            ok(features);
+
+            cursorModel.setRegions(features);
+
+            featureSource.getFeatureCache(function (featureCache) {
+
+                cursorModel.regions.forEach(function (region) {
+
+                    var score = region.getScore(featureCache, region.regionWidth);
+
+                    if (score < 0) {
+>>>>>>> 42860ae42599bc23110e895035bcb5edee6a82ae
 
         // maximum track score is 100
         cursorHistogram.track = { max : 100 };
@@ -94,8 +116,8 @@ function runCursorHistogramTests() {
 //            region,
 //            cursorModel;
 //
-//        peakDataSource = new igv.BedFeatureSource(peakURL);
-//        tssDataSource = new igv.BedFeatureSource(tssUrl);
+//        peakDataSource = new igv.FeatureSource(peakURL);
+//        tssDataSource = new igv.FeatureSource(tssUrl);
 //        cursorModel = new cursor.CursorModel(null);
 //
 //        tssDataSource.allFeatures(function (featureList) {

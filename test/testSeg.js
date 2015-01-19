@@ -6,7 +6,7 @@ function runSegUnitTests() {
 
         var url = "http://www.broadinstitute.org/igvdata/test/igv-web/segmented_data_080520.seg.gz";
 
-        var bedDataSource = new igv.BedFeatureSource( { url: url, indexed: false } );
+        var bedDataSource = new igv.FeatureSource( { url: url, indexed: false } );
 
         //var chr = "23";
         //var bpStart = 0;
@@ -37,7 +37,7 @@ function runSegUnitTests() {
     //
     //    var url = "http://www.broadinstitute.org/igvdata/test/igv-web/segmented_data_080520.seg.gz";
     //
-    //    var bedDataSource = new igv.BedFeatureSource({url: url});
+    //    var bedDataSource = new igv.FeatureSource({url: url});
     //
     //
     //    bedDataSource.allFeatures(function (featureList) {

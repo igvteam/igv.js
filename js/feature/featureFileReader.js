@@ -33,7 +33,7 @@ var igv = (function (igv) {
      * @param config
      * @constructor
      */
-    igv.BedFeatureSource = function (config) {
+    igv.FeatureFileReader = function (config) {
 
         this.config = config || {};
         if (config.localFile) {
@@ -69,79 +69,6 @@ var igv = (function (igv) {
         }
     }
 
-    /**
-     * Required function fo all data source objects.  Fetches features for the
-     * range requested and passes them on to the success function.  Usually this is
-     * a function that renders the features on the canvas
-     *
-     * @param chr
-     * @param bpStart
-     * @param bpEnd
-     * @param success -- function that takes an array of features as an argument
-     * @param task
-     */
-    igv.BedFeatureSource.prototype.getFeatures = function (chr, bpStart, bpEnd, success, task) {
-
-        var myself = this,
-            range = new igv.GenomicInterval(chr, bpStart, bpEnd),
-            featureCache = this.featureCache;
-
-        if (featureCache && (featureCache.range === undefined || featureCache.range.containsRange(range))) {//}   featureCache.range.contains(queryChr, bpStart, bpEnd))) {
-            success(this.featureCache.queryFeatures(chr, bpStart, bpEnd));
-
-        }
-        else {
-            this.loadFeatures(function (featureList) {
-                    //myself.featureMap = featureMap;
-
-                    myself.featureCache = new igv.FeatureCache(featureList);   // Note - replacing previous cache with new one
-
-                    // Record range queried if we have an index
-                    if (myself.index) {
-                        myself.featureCache.range = range;
-                    }
-
-                    // Finally pass features for query interval to continuation
-                    success(myself.featureCache.queryFeatures(chr, bpStart, bpEnd));
-
-                },
-                task,
-                range);   // Currently loading at granularity of chromosome
-        }
-
-    };
-
-    igv.BedFeatureSource.prototype.allFeatures = function (success) {
-
-        this.getFeatureCache(function (featureCache) {
-            success(featureCache.allFeatures());
-        });
-
-    };
-
-    /**
-     * Get the feature cache.  This method is exposed for use by cursor.  Loads all features (index not used).
-     * @param success
-     */
-    igv.BedFeatureSource.prototype.getFeatureCache = function (success) {
-
-        var myself = this;
-
-        if (this.featureCache) {
-            success(this.featureCache);
-        }
-        else {
-            this.loadFeatures(function (featureList) {
-                //myself.featureMap = featureMap;
-                myself.featureCache = new igv.FeatureCache(featureList);
-                // Finally pass features for query interval to continuation
-                success(myself.featureCache);
-
-            });
-        }
-    }
-
-
     // seg files don't have an index
     function isIndexable() {
         var configIndexURL = this.config.indexURL,
@@ -171,7 +98,7 @@ var igv = (function (igv) {
      * @param task
      * @param range -- genomic range to load.  For use with indexed source (optional)
      */
-    igv.BedFeatureSource.prototype.loadFeatures = function (success, task, range) {
+    igv.FeatureFileReader.prototype.readFeatures = function (success, task, range) {
 
         var myself = this,
             isIndeedIndexible = isIndexable.call(this);
@@ -186,27 +113,33 @@ var igv = (function (igv) {
                 else {
                     myself.indexed = false;
                 }
-                myself.loadFeatures(success, task, range);
+                myself.readFeatures(success, task, range);
             });
             return;
         }
 
         if (this.index) {
-            loadFeaturesWithIndex(this.index);
+            loadFeaturesWithIndex(this.index, packFeatures);
         }
         else {
-            loadFeaturesNoIndex();
+            loadFeaturesNoIndex(packFeatures);
         }
 
+        function packFeatures(features) {
 
-        function loadFeaturesNoIndex() {
+            // TODO pack
+            success(features);
+
+        }
+
+        function loadFeaturesNoIndex(continuation) {
 
             var parser = myself.parser,
                 options = {
                     headers: myself.config.headers,           // http headers, not file header
                     success: function (data) {
                         myself.header = parser.parseHeader(data);
-                        success(parser.parseFeatures(data));   // <= PARSING DONE HERE
+                        continuation(parser.parseFeatures(data));   // <= PARSING DONE HERE
                     },
                     task: task
                 };
@@ -219,12 +152,12 @@ var igv = (function (igv) {
             }
         }
 
-        function loadFeaturesWithIndex(index) {
+        function loadFeaturesWithIndex(index, continuation) {
 
             if (!myself.header) {
                 loadHeaderWithIndex(index, function (header) {
                     myself.header = header || {};
-                    loadFeaturesWithIndex(index);
+                    loadFeaturesWithIndex(index, continuation);
                 });
                 return;
             }
@@ -275,7 +208,7 @@ var igv = (function (igv) {
                                     allFeatures.sort(function (a, b) {
                                         return a.start - b.start;
                                     });
-                                    success(allFeatures);
+                                    continuation(allFeatures);
                                 }
                             },
                             task: task
@@ -359,6 +292,7 @@ var igv = (function (igv) {
 
 
     }
+
 
     return igv;
 })

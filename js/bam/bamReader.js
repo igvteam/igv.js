@@ -106,7 +106,7 @@ var igv = (function (igv) {
         });
     }
 
-    igv.BamReader.prototype.readAlignments = function (chr, min, max, continuation, task) {
+    igv.BamReader.prototype.readFeatures = function (chr, min, max, continuation, task) {
 
         var bam = this;
 

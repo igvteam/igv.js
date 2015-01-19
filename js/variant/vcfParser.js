@@ -120,6 +120,12 @@ var igv = (function (igv) {
         return header;
     }
 
+    /**
+     * Parse data as a collection of Variant objects.
+     *
+     * @param data
+     * @returns {Array}
+     */
     igv.VcfParser.prototype.parseFeatures = function (data) {
 
         var lines = data.split("\n"),
@@ -171,12 +177,14 @@ var igv = (function (igv) {
 
         this.chr = tokens[0]; // TODO -- use genome aliases
         this.pos = parseInt(tokens[1]);
-        this.id = tokens[2];
+        this.names = tokens[2];    // id in VCF
         this.ref = tokens[3];
         this.alt = tokens[4];
         this.qual = parseInt(tokens[5]);
         this.filter = tokens[6];
         this.info = tokens[7];
+
+        // "ids" ("names" in ga4gh)
 
         //Alleles
         altTokens = this.alt.split(",");
@@ -226,10 +234,11 @@ var igv = (function (igv) {
 
     Variant.prototype.popupData = function (genomicLocation) {
 
-        var fields, infoFields;
+        var fields, infoFields, nameString;
+
 
         fields = [
-            {name: "ID", value: this.id},
+            {name: "Names", value: this.names},
             {name: "Ref", value: this.ref},
             {name: "Alt", value: this.alt},
             {name: "Qual", value: this.qual},

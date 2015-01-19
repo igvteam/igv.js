@@ -93,12 +93,21 @@
                                 url: 'http://www.broadinstitute.org/igvdata/1KG/b37/data/NA06984/alignment/NA06984.mapped.ILLUMINA.bwa.CEU.low_coverage.20120522.bam',
                                 label: 'NA06984'})">NA06984 (Broad server BAM file)</div>
 
+
         <div onclick="igv.browser.loadTrack({
                                 sourceType: 'ga4gh',
                                 type: 'bam',
                                 url: 'https://www.googleapis.com/genomics/v1beta2',
-                                readsetId: 'CMvnhpKTFhCjz9_25e_lCw',
-                                label: 'Ga4gh'})">GA4Gh (Global Alliance, Google server)</div>
+                                readGroupSetIds: 'CMvnhpKTFhCjz9_25e_lCw',
+                                label: 'Ga4gh Reads'})">GA4Gh Alignments (Global Alliance, Google server)</div>
+
+        <div onclick="igv.browser.loadTrack({
+                                sourceType: 'ga4gh',
+                                type: 'vcf',
+                                url: 'https://www.googleapis.com/genomics/v1beta2',
+                                variantSetId: '10473108253681171589',
+                                visibilityWindow: 100000,
+                                label: 'Ga4gh Variants'})">GA4Gh Variants (Global Alliance, Google server)</div>
 
         <div onclick="igv.browser.loadTrack({
                                 url: '//www.broadinstitute.org/igvdata/test/igv-web/segmented_data_080520.seg.gz',
@@ -144,7 +153,7 @@
 
         div = $("#myDiv")[0];
         options = {
-            showKaryo: true,
+            showKaryo: false,
             showNavigation: true,
             fastaURL: "//dn7ywbm9isq8j.cloudfront.net/genomes/seq/hg19/hg19.fasta",
             cytobandURL: "//dn7ywbm9isq8j.cloudfront.net/genomes/seq/hg19/cytoBand.txt",

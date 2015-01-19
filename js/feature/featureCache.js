@@ -29,11 +29,13 @@ var igv = (function (igv) {
      * Object for caching lists of features.  Supports effecient queries for sub-range  (chr, start, end)
      *
      * @param featureList
+     * @param The genomic range spanned by featureList (optional)
      * @constructor
      */
 
-    igv.FeatureCache = function (featureList) {
+    igv.FeatureCache = function (featureList, range) {
         this.treeMap = buildTreeMap(featureList);
+        this.range = range;
     }
 
     igv.FeatureCache.prototype.queryFeatures = function (chr, start, end) {

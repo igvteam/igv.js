@@ -31,7 +31,8 @@ var cursor = (function (cursor) {
 
         this.config = config;
         this.url = config.url;
-        this.featureSource = new igv.BedFeatureSource(config);
+        this.config.indexed = false;  // NEVER use indexes for cursor
+        this.featureSource = new igv.FeatureSource(config);
         this.featureSource.maxFeatureCount = MAX_FEATURE_COUNT;
         this.label = config.label;
         this.height = config.trackHeight || (browser.trackHeight || 100);
