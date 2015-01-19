@@ -106,7 +106,7 @@ var igv = (function (igv) {
                     if (trackItem.label) {
 
                         str = (0 === i) ? '<div class=\"igv-track-menu-item igv-track-menu-border-top\">' : '<div class=\"igv-track-menu-item\">';
-                        str += + trackItem.label + '</div>';
+                        str += trackItem.label + '</div>';
 
                         menuItems.push( { object: $(str), click: trackItem.click, init: trackItem.init } );
                     } else {
