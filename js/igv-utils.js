@@ -141,14 +141,15 @@ var igv = (function (igv) {
 
     };
 
-    igv.colorPickerMenuItem = function (popover, trackView, label) {
+    igv.colorPickerMenuItem = function (popover, trackView, trackLabel, trackColor) {
         return {
-            object: $('<div id="featureColorPicker" class="igv-track-menu-item">' + label + '</div>'),
+            object: $('<div id="featureColorPicker" class="igv-track-menu-item">' + trackLabel + '</div>'),
             init: function () {
 
                 $("#featureColorPicker").colorpicker(
                     {
                         inline: false,
+                        color: trackColor,
 
                         init: function (event, color) {
                             //console.log('colorpicker.init', color.formatted);
