@@ -329,7 +329,8 @@ var igv = (function (igv) {
         }
 
         return null;
-    }
+    };
+
 
     return igv;
 
