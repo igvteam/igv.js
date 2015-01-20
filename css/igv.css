@@ -41,11 +41,25 @@
     left: 0;
 
     height: 100%;
-    width: 220px;
+    width: 260px;
 
     float: left;
 
     /*background-color: deepskyblue;*/
+}
+
+.igvNavigationSearchInput {
+
+    height: 65%;
+    width: 75%;
+    padding-left: 8px;
+
+    font-family: 'PT Sans', sans-serif;
+    font-size: small;
+    font-weight: 400;
+    color: #444;
+
+
 }
 
 .igvNavigationZoom {

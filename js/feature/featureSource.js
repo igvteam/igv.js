@@ -75,10 +75,10 @@ var igv = (function (igv) {
     igv.FeatureSource.prototype.getFeatures = function (chr, bpStart, bpEnd, success, task) {
 
         var myself = this,
-            range = new igv.GenomicInterval(chr, bpStart, bpEnd),
+            genomicInterval = new igv.GenomicInterval(chr, bpStart, bpEnd),
             featureCache = this.featureCache;
 
-        if (featureCache && (featureCache.range === undefined || featureCache.range.containsRange(range))) {
+        if (featureCache && (featureCache.range === undefined || featureCache.range.containsRange(genomicInterval))) {
             success(this.featureCache.queryFeatures(chr, bpStart, bpEnd));
 
         }
@@ -87,7 +87,7 @@ var igv = (function (igv) {
             this.reader.readFeatures(function (featureList) {
 
                     myself.featureCache = myself.index || myself.config.sourceType === "ga4gh" ?
-                        new igv.FeatureCache(featureList, range) :
+                        new igv.FeatureCache(featureList, genomicInterval) :
                         new igv.FeatureCache(featureList);   // Note - replacing previous cache with new one
 
                     // Assign overlapping features to rows
@@ -98,7 +98,7 @@ var igv = (function (igv) {
 
                 },
                 task,
-                range);   // Currently loading at granularity of chromosome
+                genomicInterval);   // Currently loading at granularity of chromosome
         }
 
     };

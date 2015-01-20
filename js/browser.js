@@ -353,6 +353,8 @@ var igv = (function (igv) {
 
     igv.Browser.prototype.update = function () {
 
+        this.updateLocusSearch(this.referenceFrame);
+
         if (this.ideoPanel) {
             this.ideoPanel.repaint();
         }
@@ -360,15 +362,33 @@ var igv = (function (igv) {
         if (this.karyoPanel) {
             this.karyoPanel.repaint();
         }
+
         this.trackViews.forEach(function (trackPanel) {
-
             trackPanel.update();
-
         });
 
         if (this.cursorModel) {
             this.horizontalScrollbar.update();
         }
+    };
+
+    igv.Browser.prototype.updateLocusSearch = function (referenceFrame) {
+
+        var chr,
+            ss,
+            ee,
+            str;
+
+        if (this.searchInput) {
+
+            chr = referenceFrame.chr;
+            ss = igv.numberFormatter(Math.floor(referenceFrame.start));
+            ee = igv.numberFormatter(Math.floor(referenceFrame.start + this.trackBPWidth()));
+
+            str = chr + ":" + ss + "-" + ee;
+            this.searchInput.val(str);
+        }
+
     };
 
     /**
@@ -391,7 +411,7 @@ var igv = (function (igv) {
 
     igv.Browser.prototype.trackBPWidth = function () {
         return this.referenceFrame.bpPerPixel * this.trackViewportWidth();
-    }
+    };
 
     igv.Browser.prototype.goto = function (chr, start, end) {
 
@@ -399,14 +419,14 @@ var igv = (function (igv) {
             chromosome,
             viewportWidth = this.trackViewportWidth();
 
-        console.log("goto " + chr + " : " + start + "-" + end);
-
         if (igv.popover) {
             igv.popover.hide();
         }
 
         // Translate chr to official name
-        if (this.genome) chr = this.genome.getChromosomeName(chr);
+        if (this.genome) {
+            chr = this.genome.getChromosomeName(chr);
+        }
 
         this.referenceFrame.chr = chr;
 
@@ -485,8 +505,6 @@ var igv = (function (igv) {
 
     igv.Browser.prototype.search = function (feature, continuation) {
 
-        console.log("Search " + feature);
-
         var type,
             chr,
             posTokens,
@@ -524,17 +542,11 @@ var igv = (function (igv) {
             if (continuation) continuation();
 
         }
-
         else {
 
             if (this.searchURL) {
-
-//                var spinner = igv.getSpinner(this.trackContainerDiv);
                 url = this.searchURL + feature;
-
                 igv.loadData(url, function (data) {
-
-//                    spinner.stop();
 
                     var lines = data.splitLines(),
                         len = lines.length,
@@ -618,54 +630,51 @@ var igv = (function (igv) {
 
         $(trackContainerDiv).mousemove(igv.throttle(function (e) {
 
-                var coords = igv.translateMouseCoordinates(e, trackContainerDiv),
-                    pixels,
-                    maxEnd,
-                    maxStart,
-                    referenceFrame = browser.referenceFrame,
-                    isCursor = browser.cursorModel;
+            var coords = igv.translateMouseCoordinates(e, trackContainerDiv),
+                pixels,
+                maxEnd,
+                maxStart,
+                referenceFrame = browser.referenceFrame,
+                isCursor = browser.cursorModel;
 
-                if (!referenceFrame) return;
+            if (!referenceFrame) return;
 
-                if (isMouseDown) { // Possibly dragging
+            if (isMouseDown) { // Possibly dragging
 
-                    if (mouseDownX && Math.abs(coords.x - mouseDownX) > igv.constants.dragThreshold) {
+                if (mouseDownX && Math.abs(coords.x - mouseDownX) > igv.constants.dragThreshold) {
 
-                        referenceFrame.shiftPixels(lastMouseX - coords.x);
+                    referenceFrame.shiftPixels(lastMouseX - coords.x);
 
-                        // TODO -- clamping code below is broken for regular IGV => disabled for now, needs fixed
-
-
-                        // clamp left
-                        referenceFrame.start = Math.max(0, referenceFrame.start);
-
-                        // clamp right
-                        if (isCursor) {
-                            maxEnd = browser.cursorModel.filteredRegions.length;
-                            maxStart = maxEnd - browser.trackViewportWidth() / browser.cursorModel.framePixelWidth;
-                        }
-                        else {
-                            var chromosome = browser.genome.getChromosome(browser.referenceFrame.chr);
-                            maxEnd = chromosome.bpLength;
-                            maxStart = maxEnd - browser.trackViewportWidth() * browser.referenceFrame.bpPerPixel;
-                        }
-
-                        if (referenceFrame.start > maxStart) referenceFrame.start = maxStart;
+                    // TODO -- clamping code below is broken for regular IGV => disabled for now, needs fixed
 
 
-                        browser.repaint();
+                    // clamp left
+                    referenceFrame.start = Math.max(0, referenceFrame.start);
+
+                    // clamp right
+                    if (isCursor) {
+                        maxEnd = browser.cursorModel.filteredRegions.length;
+                        maxStart = maxEnd - browser.trackViewportWidth() / browser.cursorModel.framePixelWidth;
+                    }
+                    else {
+                        var chromosome = browser.genome.getChromosome(referenceFrame.chr);
+                        maxEnd = chromosome.bpLength;
+                        maxStart = maxEnd - browser.trackViewportWidth() * referenceFrame.bpPerPixel;
                     }
 
-                    lastMouseX = coords.x;
+                    if (referenceFrame.start > maxStart) referenceFrame.start = maxStart;
 
+                    browser.updateLocusSearch(referenceFrame);
+
+
+                    browser.repaint();
                 }
+
+                lastMouseX = coords.x;
 
             }
 
-            ,
-            10
-        ))
-        ;
+        }, 10));
 
         $(trackContainerDiv).mouseup(function (e) {
 
