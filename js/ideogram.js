@@ -33,34 +33,69 @@ var igv = (function (igv) {
 
         this.ideograms = {};
 
-        this.div = $('<div class="igv-ideogram-div"></div>')[0];
-        $(parentElement).append(this.div);
+        this.div = $('<div class="igv-ideogram-div"></div>');
+        $(parentElement).append(this.div[ 0 ]);
 
         // ideogram label
         var chromosomeNameDiv = $('<div class="igv-ideogram-chr-div"></div>');
-        this.div.appendChild(chromosomeNameDiv[ 0 ]);
+        this.div.append(chromosomeNameDiv[ 0 ]);
 
         this.chromosomeNameLabel = $('<div>')[0];
         $(chromosomeNameDiv).append(this.chromosomeNameLabel);
 
         // ideogram content
-        var contentDiv = $('<div class="igv-ideogram-content-div"></div>')[0];
-        $(this.div).append(contentDiv);
-        contentDiv.style.left = igv.browser.controlPanelWidth + "px";
+        this.contentDiv = $('<div class="igv-ideogram-content-div"></div>');
+        $(this.div).append(this.contentDiv[ 0 ]);
 
-        var canvas = $('<canvas class="igv-ideogram-canvas"></canvas>')[0];
-        $(contentDiv).append(canvas);
-        canvas.setAttribute('width', contentDiv.clientWidth);
-        canvas.setAttribute('height', contentDiv.clientHeight);
-        this.canvas = canvas;
-        this.ctx = canvas.getContext("2d");
+        var myself = this;
+        this.contentDiv.click(function (e) {
+
+            var x,
+                xPercentage,
+                chr,
+                chrLength,
+                locusLength,
+                chrCoveragePercentage,
+                locus;
+
+
+            x = $(this).offset().left;
+            xPercentage =(e.pageX - x) / myself.contentDiv.width();
+
+            locusLength = igv.browser.trackBPWidth();
+            chr = igv.browser.genome.getChromosome(igv.browser.referenceFrame.chr);
+            chrLength =  chr.bpLength;
+            chrCoveragePercentage = locusLength/chrLength;
+
+            if (xPercentage - (chrCoveragePercentage/2.0) < 0) {
+                //console.log("bail left " + (xPercentage - (chrCoveragePercentage/2.0)));
+                return;
+            }
+
+            if (xPercentage + (chrCoveragePercentage/2.0) > 1.0) {
+                //console.log("bail right " + (xPercentage + (chrCoveragePercentage/2.0) - 1.0));
+                return;
+            }
+
+            locus = igv.browser.referenceFrame.chr + ":" + igv.numberFormatter(Math.floor((xPercentage - (chrCoveragePercentage/2.0)) * chrLength)) + "-" + igv.numberFormatter(Math.floor((xPercentage + (chrCoveragePercentage/2.0)) * chrLength));
+            igv.browser.search(locus, undefined);
+
+        });
+
+        this.contentDiv.css({ "left": igv.browser.controlPanelWidth + "px" });
+
+        this.canvas = $('<canvas class="igv-ideogram-canvas"></canvas>')[0];
+        $(this.contentDiv).append(this.canvas);
+        this.canvas.setAttribute('width', this.contentDiv.width());
+        this.canvas.setAttribute('height', this.contentDiv.height());
+        this.ctx = this.canvas.getContext("2d");
 
     };
 
     igv.IdeoPanel.prototype.resize = function () {
 
-        this.canvas.setAttribute('width',  this.div.clientWidth);
-        this.canvas.setAttribute('height', this.div.clientHeight);
+        this.canvas.setAttribute('width',  this.div.width());
+        this.canvas.setAttribute('height', this.div.height());
 
         this.ideograms = {};
         this.repaint();
