@@ -1424,11 +1424,15 @@
 						}
 
 						if (!inst.inline) {
+
 							html += '<div class="ui-dialog-buttonset">';
+
+							html += '<button class="ui-colorpicker-ok">' + /*inst._getRegional('ok')*/ "ok" + '</button>';
+
 							if (inst.options.showCancelButton) {
-								html += '<button class="ui-colorpicker-cancel">' + inst._getRegional('cancel') + '</button>';
+								html += '<button class="ui-colorpicker-cancel">' + /*inst._getRegional('cancel')*/ "cancel" + '</button>';
 							}
-							html += '<button class="ui-colorpicker-ok">' + inst._getRegional('ok') + '</button>';
+
 							html += '</div>';
 						}
 
@@ -1473,7 +1477,8 @@
 						$('input', part).attr('checked', false).button( "refresh" );
 					}
 
-					$('.ui-colorpicker-cancel', part).button(inst.changed ? 'enable' : 'disable');
+					//$('.ui-colorpicker-cancel', part).button(inst.changed ? 'enable' : 'disable');
+					$('.ui-colorpicker-cancel', part).button('enable');
 				};
 
 				this.update = function () {};
