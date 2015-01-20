@@ -156,7 +156,7 @@ var igv = (function (igv) {
 
                         color: trackColor,
 
-                        showCancelButton: false,
+                        //showCancelButton: false,
 
                         init: function (event, color) {
                             //console.log('colorpicker.init', color.formatted);
