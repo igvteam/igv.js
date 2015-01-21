@@ -45,7 +45,6 @@ var igv = (function (igv) {
 
         $("input[id='trackHeightInput']").val(this.trackHeight);
 
-
         this.trackContainerDiv = trackContainer;
 
         addTrackContainerHandlers(trackContainer);
@@ -514,8 +513,7 @@ var igv = (function (igv) {
             f,
             tokens,
             url,
-            chromosome,
-            browser = this;
+            chromosome;
 
         if (feature.contains(":") && feature.contains("-") || this.genome.getChromosome(feature)) {
 
@@ -536,7 +534,7 @@ var igv = (function (igv) {
 
             if (end > start) {
                 this.goto(chr, start, end);
-                fireOnsearch.call(browser, feature, type);
+                fireOnsearch.call(igv.browser, feature, type);
             }
 
             if (continuation) continuation();
@@ -568,23 +566,23 @@ var igv = (function (igv) {
                                 type = source;
 
                                 locusTokens = tokens[1].split(":");
-                                chr = browser.genome.getChromosomeName(locusTokens[0].trim());
+                                chr = igv.browser.genome.getChromosomeName(locusTokens[0].trim());
 
                                 if (this.type === "GTEX") {
-                                    browser.selection = new igv.GtexSelection(type == 'gtex' ? {snp: feature} : {gene: feature});
+                                    igv.browser.selection = new igv.GtexSelection(type == 'gtex' ? {snp: feature} : {gene: feature});
                                 }
 
                                 rangeTokens = locusTokens[1].split("-");
                                 start = parseInt(rangeTokens[0].replace(/,/g, ''));
                                 end = parseInt(rangeTokens[1].replace(/,/g, ''));
 
-                                if (browser.flanking) {
-                                    start -= browser.flanking;
-                                    end += browser.flanking;
+                                if (igv.browser.flanking) {
+                                    start -= igv.browser.flanking;
+                                    end += igv.browser.flanking;
                                 }
 
 
-                                browser.goto(chr, start, end);
+                                igv.browser.goto(chr, start, end);
 
                                 foundFeature = true;
                             }
@@ -592,7 +590,7 @@ var igv = (function (igv) {
                     }
 
                     if (foundFeature) {
-                        fireOnsearch.call(browser, feature, type);
+                        fireOnsearch.call(igv.browser, feature, type);
                     }
                     else {
                         alert('No feature found with name "' + feature + '"');
@@ -616,13 +614,21 @@ var igv = (function (igv) {
 
     function addTrackContainerHandlers(trackContainerDiv) {
 
-        var isMouseDown = false,
+        var isRulerTrack = false,
+            isMouseDown = false,
             lastMouseX = undefined,
-            mouseDownX = undefined,
-            browser = igv.browser;
+            mouseDownX = undefined;
 
         $(trackContainerDiv).mousedown(function (e) {
+
             var coords = igv.translateMouseCoordinates(e, trackContainerDiv);
+
+            isRulerTrack = ($(e.target).parent().parent().parent()[ 0 ].dataset.rulerTrack) ? true : false;
+
+            if (isRulerTrack) {
+                return;
+            }
+
             isMouseDown = true;
             lastMouseX = coords.x;
             mouseDownX = lastMouseX;
@@ -631,13 +637,18 @@ var igv = (function (igv) {
         $(trackContainerDiv).mousemove(igv.throttle(function (e) {
 
             var coords = igv.translateMouseCoordinates(e, trackContainerDiv),
-                pixels,
                 maxEnd,
                 maxStart,
-                referenceFrame = browser.referenceFrame,
-                isCursor = browser.cursorModel;
+                referenceFrame = igv.browser.referenceFrame,
+                isCursor = igv.browser.cursorModel;
 
-            if (!referenceFrame) return;
+            if (isRulerTrack) {
+                return;
+            }
+
+            if (!referenceFrame) {
+                return;
+            }
 
             if (isMouseDown) { // Possibly dragging
 
@@ -653,21 +664,21 @@ var igv = (function (igv) {
 
                     // clamp right
                     if (isCursor) {
-                        maxEnd = browser.cursorModel.filteredRegions.length;
-                        maxStart = maxEnd - browser.trackViewportWidth() / browser.cursorModel.framePixelWidth;
+                        maxEnd = igv.browser.cursorModel.filteredRegions.length;
+                        maxStart = maxEnd - igv.browser.trackViewportWidth() / igv.browser.cursorModel.framePixelWidth;
                     }
                     else {
-                        var chromosome = browser.genome.getChromosome(referenceFrame.chr);
+                        var chromosome = igv.browser.genome.getChromosome(referenceFrame.chr);
                         maxEnd = chromosome.bpLength;
-                        maxStart = maxEnd - browser.trackViewportWidth() * referenceFrame.bpPerPixel;
+                        maxStart = maxEnd - igv.browser.trackViewportWidth() * referenceFrame.bpPerPixel;
                     }
 
                     if (referenceFrame.start > maxStart) referenceFrame.start = maxStart;
 
-                    browser.updateLocusSearch(referenceFrame);
+                    igv.browser.updateLocusSearch(referenceFrame);
 
 
-                    browser.repaint();
+                    igv.browser.repaint();
                 }
 
                 lastMouseX = coords.x;
@@ -678,18 +689,30 @@ var igv = (function (igv) {
 
         $(trackContainerDiv).mouseup(function (e) {
 
+            if (isRulerTrack) {
+                return;
+            }
+
             mouseDownX = undefined;
             isMouseDown = false;
             lastMouseX = undefined;
         });
 
         $(trackContainerDiv).mouseleave(function (e) {
+
+            if (isRulerTrack) {
+                return;
+            }
             isMouseDown = false;
             lastMouseX = undefined;
             mouseDownX = undefined;
         });
 
         $(trackContainerDiv).dblclick(function (e) {
+
+            if (isRulerTrack) {
+                return;
+            }
 
             if (e.altKey) return;  // Ignore if alt key is down
 
