@@ -27,7 +27,9 @@ var igv = (function (igv) {
 
     igv.trackMenuItems = function (popover, trackView) {
 
-        var trackItems,
+        // TODO Figure out why trackView.track.height is sometimes (Genes track) non-numeric
+        var trackHeight = $.isNumeric(trackView.track.height) ? trackView.track.height : 100,
+            trackItems,
             menuItems = [
                 {
                     object: $('<div class="igv-track-menu-item">Set track name</div>'),
@@ -57,7 +59,7 @@ var igv = (function (igv) {
                     object: $('<div class="igv-track-menu-item">Set track height</div>'),
                     click: function () {
 
-                        var trackMenuPopupDialog = new igv.TrackMenuPopupDialog(popover, "Track height", trackView.track.height.toString(), function () {
+                        var trackMenuPopupDialog = new igv.TrackMenuPopupDialog(popover, "Track height", trackHeight.toString(), function () {
 
                             var str,
                                 numberString = trackMenuPopupDialog.name.val(),
