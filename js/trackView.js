@@ -73,7 +73,9 @@ var igv = (function (igv) {
 
         if (this.track instanceof igv.RulerTrack) {
 
-            console.log("Hold on there buddy, no ruler tracks please!")
+            console.log("Hold on there buddy, no ruler tracks please!");
+
+            addRulerTrackHandlers(this);
         } else {
 
             addTrackHandlers(this);
@@ -445,6 +447,34 @@ var igv = (function (igv) {
             this.ctx.restore();
         }
     };
+
+    function addRulerTrackHandlers(trackView) {
+
+        var isMouseDown = false;
+
+        $(trackView.contentDiv).mousedown(function (e) {
+            console.log(trackView.trackDiv.dataset.rulerTrack + " mouseDown");
+            isMouseDown = true;
+        });
+
+        $(trackView.contentDiv).mousemove(function (e) {
+
+            if (isMouseDown) {
+                console.log(trackView.trackDiv.dataset.rulerTrack + " mousemove");
+            }
+
+        });
+
+        $(trackView.contentDiv).mouseup(function (e) {
+
+            if (isMouseDown) {
+                console.log(trackView.trackDiv.dataset.rulerTrack + " mouseup");
+                isMouseDown = false;
+            }
+
+        });
+
+    }
 
     function addTrackHandlers(trackView) {
 
