@@ -462,6 +462,11 @@
 }
 
 .igv-app-icon-container {
+
+    border-color: #444;
+    border-style: solid;
+    border-width: thin;
+
     position: absolute;
     left: 10px;
     top: 4px;
