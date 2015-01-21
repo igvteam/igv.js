@@ -27,6 +27,8 @@ var igv = (function (igv) {
 
     igv.TrackView = function (track, browser) {
 
+        var toStr;
+
         this.track = track;
         this.browser = browser;
 
@@ -41,6 +43,10 @@ var igv = (function (igv) {
 
             this.trackDiv = $('<div class="igv-track-div">')[0];
             $(browser.trackContainerDiv).append(this.trackDiv);
+
+            if (this.track instanceof igv.RulerTrack) {
+                this.trackDiv.dataset.rulerTrack = "rulerTrack";
+            }
         }
 
         // Optionally override CSS height
@@ -65,7 +71,13 @@ var igv = (function (igv) {
 
         this.addRightHandGutterToParentTrackDiv(this.trackDiv);
 
-        addTrackHandlers(this);
+        if (this.track instanceof igv.RulerTrack) {
+
+            console.log("Hold on there buddy, no ruler tracks please!")
+        } else {
+
+            addTrackHandlers(this);
+        }
 
     };
 
@@ -404,8 +416,7 @@ var igv = (function (igv) {
         }
 
 
-    }
-
+    };
 
     function Tile(chr, tileStart, tileEnd, scale, image) {
         this.chr = chr;
@@ -415,14 +426,13 @@ var igv = (function (igv) {
         this.image = image;
     }
 
-
     Tile.prototype.containsRange = function (chr, start, end, scale) {
         return this.scale === scale && start >= this.startBP && end <= this.endBP && chr === this.chr;
     };
 
     Tile.prototype.overlapsRange = function (chr, start, end) {
         return this.chr === chr && this.endBP >= start && this.startBP <= end;
-    }
+    };
 
     igv.TrackView.prototype.paintImage = function () {
 
@@ -444,12 +454,11 @@ var igv = (function (igv) {
         var isMouseDown = false,
             lastMouseX = undefined,
             mouseDownX = undefined,
-            canvas = trackView.canvas,
             popupTimer;
 
-        $(canvas).mousedown(function (e) {
+        $(trackView.canvas).mousedown(function (e) {
 
-            var canvasCoords = igv.translateMouseCoordinates(e, canvas);
+            var canvasCoords = igv.translateMouseCoordinates(e, trackView.canvas);
 
             if (igv.popover) {
                 igv.popover.hide();
@@ -462,12 +471,11 @@ var igv = (function (igv) {
 
         });
 
-
-        $(canvas).mouseup(function (e) {
+        $(trackView.canvas).mouseup(function (e) {
 
             e = $.event.fix(e);   // Sets pageX and pageY for browsers that don't support them
 
-            var canvasCoords = igv.translateMouseCoordinates(e, canvas),
+            var canvasCoords = igv.translateMouseCoordinates(e, trackView.canvas),
                 referenceFrame = trackView.browser.referenceFrame,
                 genomicLocation = Math.floor((referenceFrame.start) + referenceFrame.toBP(canvasCoords.x));
 
@@ -517,8 +525,7 @@ var igv = (function (igv) {
             lastMouseX = undefined;
 
         });
-
-
+        
     }
 
     return igv;

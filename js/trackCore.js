@@ -28,7 +28,6 @@
 
 var igv = (function (igv) {
 
-
     igv.configTrack = function (track, config) {
 
         if (!config.type) config.type = igv.inferFileType(this.filename);
