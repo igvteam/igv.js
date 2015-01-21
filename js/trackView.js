@@ -98,10 +98,8 @@ var igv = (function (igv) {
 
         if ("CURSOR" !== this.browser.type) {
 
-            trackIconContainer = $('<div class = "igv-app-icon-container">')[0];
-            $(viewportDiv).append(trackIconContainer);
 
-            if (myself.track.description) {
+            if (this.track.description) {
 
                 labelButton = document.createElement("button");
                 viewportDiv.appendChild(labelButton);
@@ -113,16 +111,20 @@ var igv = (function (igv) {
                 labelButton.style.left = "10px";
                 labelButton.innerHTML = this.track.label;
 
-
                 labelButton.onclick = function (e) {
                     igv.popover.presentTrackPopup(e.pageX, e.pageY, myself.track.description);
                 }
 
             } else {
 
-                this.track.labelSpan = $('<span class="igv-track-label-span-base">')[0];
-                this.track.labelSpan.innerHTML = this.track.label;
-                $(trackIconContainer).append(this.track.labelSpan);
+                if (this.track.label) {
+                    trackIconContainer = $('<div class="igv-app-icon-container">');
+                    $(viewportDiv).append(trackIconContainer[ 0 ]);
+
+                    this.track.labelSpan = $('<span class="igv-track-label-span-base">')[0];
+                    this.track.labelSpan.innerHTML = this.track.label;
+                    $(trackIconContainer).append(this.track.labelSpan);
+                }
 
             }
 
@@ -244,7 +246,7 @@ var igv = (function (igv) {
         //Don't override an explicit setting (i.e. set by user from menu).
         if (!this.heightSetExplicitly &&
             ((this.track.maxHeight && this.trackDiv.clientHeight < this.track.maxHeight) ||
-                newHeight < this.trackDiv.clientHeight)) {
+            newHeight < this.trackDiv.clientHeight)) {
             this.setTrackHeight(Math.min(this.track.maxHeight, newHeight), false);
         }
 
