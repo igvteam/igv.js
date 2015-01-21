@@ -63,9 +63,11 @@ var igv = (function (igv) {
         popoverClose.append(popoverCloseFontAwesome[ 0 ]);
 
         popoverCloseFontAwesome.hover(
+
             function () {
                 popoverCloseFontAwesome.removeClass("fa-times");
-                popoverCloseFontAwesome.addClass("fa-times-circle fa-lg");
+                popoverCloseFontAwesome.addClass("fa-times-circle");
+                //popoverCloseFontAwesome.addClass("fa-times-circle fa-lg");
 
                 popoverCloseFontAwesome.css({
                     "color": "#222"
@@ -73,7 +75,8 @@ var igv = (function (igv) {
             },
 
             function () {
-                popoverCloseFontAwesome.removeClass("fa-times-circle fa-lg");
+                popoverCloseFontAwesome.removeClass("fa-times-circle");
+                //popoverCloseFontAwesome.removeClass("fa-times-circle fa-lg");
                 popoverCloseFontAwesome.addClass("fa-times");
 
                 popoverCloseFontAwesome.css({
