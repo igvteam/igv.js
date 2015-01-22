@@ -50,17 +50,18 @@ var igv = (function (igv) {
         var myself = this;
         this.contentDiv.click(function (e) {
 
-            var x,
+            var xy,
                 xPercentage,
                 chr,
                 chrLength,
                 locusLength,
                 chrCoveragePercentage,
                 locus;
+            
+            xy = igv.translateMouseCoordinates(e, myself.contentDiv);
+            xPercentage = xy.x / myself.contentDiv.width();
 
-
-            x = $(this).offset().left;
-            xPercentage =(e.pageX - x) / myself.contentDiv.width();
+            //console.log(Math.floor(xPercentage * 100.0) +" %");
 
             locusLength = igv.browser.trackBPWidth();
             chr = igv.browser.genome.getChromosome(igv.browser.referenceFrame.chr);
