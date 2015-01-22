@@ -1,3 +1,19 @@
+.igv-ruler-sweeper-div {
+
+    display: none;
+
+    pointer-events: none;
+
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 0;
+    height:100%;
+
+    z-index:99999;
+
+    background-color: rgba(255, 0, 0, 0.5);
+}
 
 .validateTips {
     border: 1px solid transparent;

@@ -27,7 +27,7 @@ var igv = (function (igv) {
 
     igv.TrackView = function (track, browser) {
 
-        var toStr;
+        var rulerSweeper;
 
         this.track = track;
         this.browser = browser;
@@ -43,10 +43,6 @@ var igv = (function (igv) {
 
             this.trackDiv = $('<div class="igv-track-div">')[0];
             $(browser.trackContainerDiv).append(this.trackDiv);
-
-            if (this.track instanceof igv.RulerTrack) {
-                this.trackDiv.dataset.rulerTrack = "rulerTrack";
-            }
         }
 
         // Optionally override CSS height
@@ -74,6 +70,28 @@ var igv = (function (igv) {
         if (this.track instanceof igv.RulerTrack) {
 
             console.log("Hold on there buddy, no ruler tracks please!");
+
+            this.trackDiv.dataset.rulerTrack = "rulerTrack";
+
+            // ruler sweeper widget surface
+            this.rulerSweeper = $('<div class="igv-ruler-sweeper-div">');
+            $(this.contentDiv).append(this.rulerSweeper[ 0 ]);
+
+            //this.rulerSweeper.resizable({
+            //
+            //        start: function(e, ui) {
+            //            //console.log("begin resize");
+            //        },
+            //
+            //        resize: function(e, ui) {
+            //            //console.log("resize");
+            //        },
+            //
+            //        stop: function(e, ui) {
+            //            //console.log("end resize");
+            //        }
+            //
+            //    });
 
             addRulerTrackHandlers(this);
         } else {
@@ -450,39 +468,58 @@ var igv = (function (igv) {
 
     function addRulerTrackHandlers(trackView) {
 
-        var isMouseDown = false,
-            posDown = undefined,
-            posMove = undefined;
+        var isMouseDown = undefined,
+            isMouseIn = undefined,
+            mouseDownXY = undefined,
+            mouseMoveXY = undefined,
+            left,
+            width,
+            chr,
+            chrLength,
+            chrPercentage,
+            locusLength,
+            locusPercentage;
 
-        $(trackView.contentDiv).mousedown(function (e) {
-            posDown = igv.translateMouseCoordinates(e, trackView.contentDiv);
-            //console.log(trackView.trackDiv.dataset.rulerTrack + " down  x " + posDown.x);
+        $(trackView.contentDiv).mousedown(function(e) {
             isMouseDown = true;
         });
 
-        $(trackView.contentDiv).mousemove(function (e) {
+        $(document).mousedown(function (e) {
 
-            if (isMouseDown) {
-                posMove = igv.translateMouseCoordinates(e, trackView.contentDiv);
-                console.log(trackView.trackDiv.dataset.rulerTrack + " move dx " + Math.abs(posMove.x - posDown.x));
+            locusLength = $(trackView.contentDiv).width();
+
+            mouseDownXY = igv.translateMouseCoordinates(e, trackView.contentDiv);
+
+            left = mouseDownXY.x;
+            width = 0;
+            trackView.rulerSweeper.css( { "display" : "inline", "left" : left + "px", "width" : width + "px" } );
+
+            isMouseIn = true;
+        });
+
+        $(document).mousemove(function (e) {
+
+            var dx;
+
+            if (isMouseDown && isMouseIn) {
+
+                mouseMoveXY = igv.translateMouseCoordinates(e, trackView.contentDiv);
+                dx = mouseMoveXY.x - mouseDownXY.x;
+
+                width = Math.abs(dx);
+                trackView.rulerSweeper.css( { "width" : width + "px" } );
+                if (dx < 0) {
+                    left = mouseDownXY.x + dx;
+                    trackView.rulerSweeper.css( { "left" : left + "px" } );
+                }
             }
 
         });
 
-        $(trackView.contentDiv).mouseout(function (e) {
+        $(document).mouseup(function (e) {
 
             isMouseDown = false;
-            console.log(trackView.trackDiv.dataset.rulerTrack + " move out");
-
-        });
-
-        $(trackView.contentDiv).mouseup(function (e) {
-
-            if (isMouseDown) {
-                posMove = igv.translateMouseCoordinates(e, trackView.contentDiv);
-                console.log(trackView.trackDiv.dataset.rulerTrack + "   up dx " + Math.abs(posMove.x - posDown.x));
-                isMouseDown = false;
-            }
+            trackView.rulerSweeper.css( { "display" : "none", "left" : 0 + "px", "width" : 0 + "px" } );
 
         });
 
@@ -567,7 +604,7 @@ var igv = (function (igv) {
             lastMouseX = undefined;
 
         });
-        
+
     }
 
     return igv;
