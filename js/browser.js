@@ -381,7 +381,7 @@ var igv = (function (igv) {
         if (this.searchInput) {
 
             chr = referenceFrame.chr;
-            ss = igv.numberFormatter(Math.floor(referenceFrame.start));
+            ss = igv.numberFormatter(Math.floor(referenceFrame.start + 1));
             ee = igv.numberFormatter(Math.floor(referenceFrame.start + this.trackBPWidth()));
 
             str = chr + ":" + ss + "-" + ee;
@@ -560,7 +560,7 @@ var igv = (function (igv) {
                         //console.log("tokens lenght = " + tokens.length);
                         if (tokens.length >= 3) {
                             f = tokens[0];
-                            if (f.toUpperCase() == feature.toUpperCase()) {
+                            if (f.toUpperCase() === feature.toUpperCase()) {
 
                                 source = tokens[2].trim();
                                 type = source;

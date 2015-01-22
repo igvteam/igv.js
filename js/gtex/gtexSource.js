@@ -151,7 +151,6 @@ var igv = (function (igv) {
             //this.fStat = fStat;
             this.pValue = pValue;
 
-            this.mLogP = -Math.log(pValue) / Math.LN10;
         }
 
 
