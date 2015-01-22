@@ -57,7 +57,7 @@ var igv = (function (igv) {
                 locusLength,
                 chrCoveragePercentage,
                 locus;
-            
+
             xy = igv.translateMouseCoordinates(e, myself.contentDiv);
             xPercentage = xy.x / myself.contentDiv.width();
 
