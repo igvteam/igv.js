@@ -24,6 +24,7 @@
  */
 
 // Experimental class for fetching features from an mpg webservice.
+// http://immvar.broadinstitute.org:3000/load_data?chromosome=&start=&end=&categories=
 
 var igv = (function (igv) {
 
@@ -34,15 +35,11 @@ var igv = (function (igv) {
      * @param url - url to the webservice
      * @constructor
      */
-    igv.T2DVariantSource = function (config) {
+    igv.ImmVarSource = function (config) {
 
-        this.proxy = (config.proxy ? config.proxy : "//www.broadinstitute.org/igvdata/t2d/postJson.php");   // Always use a proxy for now
         this.url = config.url;
-        this.trait = config.trait;
+        this.cellConditionId = config.cellConditionId;
         this.valueThreshold = config.valueThreshold ? config.valueThreshold : 5E-2;
-
-        this.type = this.url.contains("variant") ? VARIANT : TRAIT;
-        this.pvalue = config.pvalue ? config.pvalue : "PVALUE";
 
     };
 
@@ -56,7 +53,7 @@ var igv = (function (igv) {
      * @param bpEnd
      * @param success -- function that takes an array of features as an argument
      */
-    igv.T2DVariantSource.prototype.getFeatures = function (chr, bpStart, bpEnd, success, task) {
+    igv.ImmVarSource.prototype.getFeatures = function (chr, bpStart, bpEnd, success, task) {
 
         var source = this;
 
@@ -68,51 +65,29 @@ var igv = (function (igv) {
 
             function loadFeatures() {
 
-                // Get a minimum 10mb window around the requested locus
-                var window = Math.max(bpEnd - bpStart, 10000000) / 2,
+                // Get a minimum 1mb window around the requested locus
+                var window = Math.max(bpEnd - bpStart, 1000000) / 2,
                     center = (bpEnd + bpStart) / 2,
-                    queryChr = (chr.startsWith("chr") ? chr.substring(3) : chr), // Webservice uses "1,2,3..." convention
+                    queryChr = chr,                              // TODO -- chr alias
                     queryStart = Math.max(0, center - window),
                     queryEnd = center + window,
-                    queryURL = this.proxy ? this.proxy : this.url,
-                    filters =
-                        [
-                            {"operand": "CHROM", "operator": "EQ", "value": queryChr, "filter_type": "STRING" },
-                            {"operand": "POS", "operator": "GT", "value": queryStart, "filter_type": "FLOAT" },
-                            {"operand": "POS", "operator": "LT", "value": queryEnd, "filter_type": "FLOAT" },
-                            {"operand": source.pvalue, "operator": "LTE", "value": source.valueThreshold, "filter_type": "FLOAT"}
-                        ],
-                    columns = source.type === TRAIT ?
-                        ["CHROM", "POS", "DBSNP_ID", "PVALUE", "ZSCORE"] :
-                        ["CHROM", "POS", source.pvalue, "DBSNP_ID"],
-                    data = {
-                        "user_group": "ui",
-                        "filters": filters,
-                        "columns": columns
-                    },
-                    tmp;
+                    queryURL = this.url + "?chromosome=" + queryChr + "&start=" + queryStart + "&end=" + queryEnd +
+                        "&cell_condition_id=" + this.cellConditionId;
 
-
-                if (source.type === TRAIT) data.trait = source.trait;
-
-                tmp = this.proxy ?
-                    "url=" + this.url + "&data=" + JSON.stringify(data) :
-                    JSON.stringify(data);
 
                 igvxhr.loadJson(queryURL, {
-                    sendData: tmp,
                     task: task,
                     success: function (json) {
                         var variants;
 
                         if (json) {
-                            variants = json.variants;
-                            variants.sort(function (a, b) {
-                                return a.POS - b.POS;
-                            });
-                            source.cache = new FeatureCache(chr, queryStart, queryEnd, variants);
+                            //variants = json.variants;
+                            //variants.sort(function (a, b) {
+                            //    return a.POS - b.POS;
+                            //});
+                            //source.cache = new FeatureCache(chr, queryStart, queryEnd, variants);
 
-                            success(variants);
+                            success(json);
                         }
                         else {
                             success(null);
