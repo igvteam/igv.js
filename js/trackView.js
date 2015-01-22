@@ -456,7 +456,7 @@ var igv = (function (igv) {
 
         $(trackView.contentDiv).mousedown(function (e) {
             posDown = igv.translateMouseCoordinates(e, trackView.contentDiv);
-            console.log(trackView.trackDiv.dataset.rulerTrack + " down  x " + posDown.x);
+            //console.log(trackView.trackDiv.dataset.rulerTrack + " down  x " + posDown.x);
             isMouseDown = true;
         });
 
@@ -466,6 +466,13 @@ var igv = (function (igv) {
                 posMove = igv.translateMouseCoordinates(e, trackView.contentDiv);
                 console.log(trackView.trackDiv.dataset.rulerTrack + " move dx " + Math.abs(posMove.x - posDown.x));
             }
+
+        });
+
+        $(trackView.contentDiv).mouseout(function (e) {
+
+            isMouseDown = false;
+            console.log(trackView.trackDiv.dataset.rulerTrack + " move out");
 
         });
 
