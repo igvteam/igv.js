@@ -450,17 +450,21 @@ var igv = (function (igv) {
 
     function addRulerTrackHandlers(trackView) {
 
-        var isMouseDown = false;
+        var isMouseDown = false,
+            posDown = undefined,
+            posMove = undefined;
 
         $(trackView.contentDiv).mousedown(function (e) {
-            console.log(trackView.trackDiv.dataset.rulerTrack + " mouseDown");
+            posDown = igv.translateMouseCoordinates(e, trackView.contentDiv);
+            console.log(trackView.trackDiv.dataset.rulerTrack + " down  x " + posDown.x);
             isMouseDown = true;
         });
 
         $(trackView.contentDiv).mousemove(function (e) {
 
             if (isMouseDown) {
-                console.log(trackView.trackDiv.dataset.rulerTrack + " mousemove");
+                posMove = igv.translateMouseCoordinates(e, trackView.contentDiv);
+                console.log(trackView.trackDiv.dataset.rulerTrack + " move dx " + Math.abs(posMove.x - posDown.x));
             }
 
         });
@@ -468,7 +472,8 @@ var igv = (function (igv) {
         $(trackView.contentDiv).mouseup(function (e) {
 
             if (isMouseDown) {
-                console.log(trackView.trackDiv.dataset.rulerTrack + " mouseup");
+                posMove = igv.translateMouseCoordinates(e, trackView.contentDiv);
+                console.log(trackView.trackDiv.dataset.rulerTrack + "   up dx " + Math.abs(posMove.x - posDown.x));
                 isMouseDown = false;
             }
 
