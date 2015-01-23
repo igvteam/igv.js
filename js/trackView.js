@@ -462,6 +462,7 @@ var igv = (function (igv) {
             ppbRealtime,
             ruleSweepWidthBP,
             rulerWidth,
+            ppbThreshholdMet,
             dx;
 
         $(document).mousedown(function (e) {
@@ -500,6 +501,16 @@ var igv = (function (igv) {
                 bppRealtime = ruleSweepWidthBP / rulerWidth;
                 ppbRealtime = 1.0/bppRealtime;
 
+                //console.log("bpp-rt " + Math.floor(bppRealtime) + " ppb-rt " + Math.floor(ppbRealtime));
+
+                if (Math.floor(1.0/bppRealtime) > igv.browser.pixelPerBasepairThreshold()) {
+                    ppbThreshholdMet = false;
+                    trackView.rulerSweeper.css( { backgroundColor: 'rgba(64, 64, 64, 0.125)' } );
+                } else {
+                    ppbThreshholdMet = true;
+                    trackView.rulerSweeper.css( { backgroundColor: 'rgba(68, 134, 247, 0.75)' } );
+                }
+
             }
 
         });
@@ -512,21 +523,19 @@ var igv = (function (igv) {
 
             if (isMouseDown) {
 
-                console.log("ruler-sweep-bp " + igv.numberFormatter( Math.floor( ruleSweepWidthBP ) ) + " bpp-rt " + bppRealtime + " ppb-rt " + ppbRealtime);
+                isMouseDown = false;
+                isMouseIn = false;
 
                 trackView.rulerSweeper.css( { "display" : "none", "left" : 0 + "px", "width" : 0 + "px" } );
 
+                if (ppbThreshholdMet) {
 
-                ss = Math.floor(igv.browser.referenceFrame.start + (left * igv.browser.referenceFrame.bpPerPixel));
-                ee = ss + Math.floor(rulerSweepWidth * igv.browser.referenceFrame.bpPerPixel);
+                    ss = Math.floor(igv.browser.referenceFrame.start + (left * igv.browser.referenceFrame.bpPerPixel));
+                    ee = ss + Math.floor(rulerSweepWidth * igv.browser.referenceFrame.bpPerPixel);
 
-                //console.log("browser.goto(" + igv.browser.referenceFrame.chr + ":" + igv.numberFormatter(ss) + "-" + igv.numberFormatter(ee) + ")");
-
-                locus = igv.browser.referenceFrame.chr + ":" + igv.numberFormatter(ss) + "-" + igv.numberFormatter(ee);
-                igv.browser.search(locus, undefined);
-
-                isMouseDown = false;
-                isMouseIn = false;
+                    locus = igv.browser.referenceFrame.chr + ":" + igv.numberFormatter(ss) + "-" + igv.numberFormatter(ee);
+                    igv.browser.search(locus, undefined);
+                }
 
             }
 
