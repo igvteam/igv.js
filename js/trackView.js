@@ -69,8 +69,6 @@ var igv = (function (igv) {
 
         if (this.track instanceof igv.RulerTrack) {
 
-            console.log("Hold on there buddy, no ruler tracks please!");
-
             this.trackDiv.dataset.rulerTrack = "rulerTrack";
 
             // ruler sweeper widget surface
@@ -518,8 +516,16 @@ var igv = (function (igv) {
 
         $(document).mouseup(function (e) {
 
+            var ss,
+                ee;
+
             isMouseDown = false;
             trackView.rulerSweeper.css( { "display" : "none", "left" : 0 + "px", "width" : 0 + "px" } );
+
+            ss = igv.browser.referenceFrame.start + (left * igv.browser.referenceFrame.bpPerPixel);
+            ee = ss + (width * igv.browser.referenceFrame.bpPerPixel);
+
+            igv.browser.goto(igv.browser.referenceFrame.chr, ss, ee);
 
         });
 
