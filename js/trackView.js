@@ -75,26 +75,12 @@ var igv = (function (igv) {
             this.rulerSweeper = $('<div class="igv-ruler-sweeper-div">');
             $(this.contentDiv).append(this.rulerSweeper[ 0 ]);
 
-            //this.rulerSweeper.resizable({
-            //
-            //        start: function(e, ui) {
-            //            //console.log("begin resize");
-            //        },
-            //
-            //        resize: function(e, ui) {
-            //            //console.log("resize");
-            //        },
-            //
-            //        stop: function(e, ui) {
-            //            //console.log("end resize");
-            //        }
-            //
-            //    });
-
             addRulerTrackHandlers(this);
+
         } else {
 
             addTrackHandlers(this);
+
         }
 
     };
@@ -471,20 +457,9 @@ var igv = (function (igv) {
             mouseDownXY = undefined,
             mouseMoveXY = undefined,
             left,
-            width,
-            chr,
-            chrLength,
-            chrPercentage,
-            locusLength,
-            locusPercentage;
-
-        $(trackView.contentDiv).mousedown(function(e) {
-            isMouseDown = true;
-        });
+            width;
 
         $(document).mousedown(function (e) {
-
-            locusLength = $(trackView.contentDiv).width();
 
             mouseDownXY = igv.translateMouseCoordinates(e, trackView.contentDiv);
 
@@ -493,6 +468,12 @@ var igv = (function (igv) {
             trackView.rulerSweeper.css( { "display" : "inline", "left" : left + "px", "width" : width + "px" } );
 
             isMouseIn = true;
+        });
+
+
+        $(trackView.contentDiv).mousedown(function(e) {
+
+            isMouseDown = true;
         });
 
         $(document).mousemove(function (e) {
@@ -516,16 +497,30 @@ var igv = (function (igv) {
 
         $(document).mouseup(function (e) {
 
-            var ss,
+            var locus,
+                ss,
                 ee;
 
-            isMouseDown = false;
-            trackView.rulerSweeper.css( { "display" : "none", "left" : 0 + "px", "width" : 0 + "px" } );
+            if (isMouseDown) {
 
-            ss = igv.browser.referenceFrame.start + (left * igv.browser.referenceFrame.bpPerPixel);
-            ee = ss + (width * igv.browser.referenceFrame.bpPerPixel);
+                trackView.rulerSweeper.css( { "display" : "none", "left" : 0 + "px", "width" : 0 + "px" } );
 
-            igv.browser.goto(igv.browser.referenceFrame.chr, ss, ee);
+
+                ss = Math.floor(igv.browser.referenceFrame.start + (left * igv.browser.referenceFrame.bpPerPixel));
+                ee = ss + Math.floor(width * igv.browser.referenceFrame.bpPerPixel);
+
+                console.log("browser.goto(" + igv.browser.referenceFrame.chr + ":" + igv.numberFormatter(ss) + "-" + igv.numberFormatter(ee) + ")");
+
+                //igv.browser.goto(igv.browser.referenceFrame.chr, ss, ee);
+
+                locus = igv.browser.referenceFrame.chr + ":" + igv.numberFormatter(ss) + "-" + igv.numberFormatter(ee);
+                igv.browser.search(locus, undefined);
+
+                isMouseDown = false;
+                isMouseIn = false;
+
+            }
+
 
         });
 
