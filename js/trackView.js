@@ -457,15 +457,20 @@ var igv = (function (igv) {
             mouseDownXY = undefined,
             mouseMoveXY = undefined,
             left,
-            width;
+            rulerSweepWidth,
+            bppRealtime,
+            ppbRealtime,
+            ruleSweepWidthBP,
+            rulerWidth,
+            dx;
 
         $(document).mousedown(function (e) {
 
             mouseDownXY = igv.translateMouseCoordinates(e, trackView.contentDiv);
 
             left = mouseDownXY.x;
-            width = 0;
-            trackView.rulerSweeper.css( { "display" : "inline", "left" : left + "px", "width" : width + "px" } );
+            rulerSweepWidth = 0;
+            trackView.rulerSweeper.css( { "display" : "inline", "left" : left + "px", "width" : rulerSweepWidth + "px" } );
 
             isMouseIn = true;
         });
@@ -478,19 +483,23 @@ var igv = (function (igv) {
 
         $(document).mousemove(function (e) {
 
-            var dx;
-
             if (isMouseDown && isMouseIn) {
 
                 mouseMoveXY = igv.translateMouseCoordinates(e, trackView.contentDiv);
                 dx = mouseMoveXY.x - mouseDownXY.x;
 
-                width = Math.abs(dx);
-                trackView.rulerSweeper.css( { "width" : width + "px" } );
+                rulerSweepWidth = Math.abs(dx);
+                trackView.rulerSweeper.css( { "width" : rulerSweepWidth + "px" } );
                 if (dx < 0) {
                     left = mouseDownXY.x + dx;
                     trackView.rulerSweeper.css( { "left" : left + "px" } );
                 }
+
+                ruleSweepWidthBP = igv.browser.referenceFrame.bpPerPixel * rulerSweepWidth;
+                rulerWidth = $(trackView.contentDiv).width();
+                bppRealtime = ruleSweepWidthBP / rulerWidth;
+                ppbRealtime = 1.0/bppRealtime;
+
             }
 
         });
@@ -503,15 +512,15 @@ var igv = (function (igv) {
 
             if (isMouseDown) {
 
+                console.log("ruler-sweep-bp " + igv.numberFormatter( Math.floor( ruleSweepWidthBP ) ) + " bpp-rt " + bppRealtime + " ppb-rt " + ppbRealtime);
+
                 trackView.rulerSweeper.css( { "display" : "none", "left" : 0 + "px", "width" : 0 + "px" } );
 
 
                 ss = Math.floor(igv.browser.referenceFrame.start + (left * igv.browser.referenceFrame.bpPerPixel));
-                ee = ss + Math.floor(width * igv.browser.referenceFrame.bpPerPixel);
+                ee = ss + Math.floor(rulerSweepWidth * igv.browser.referenceFrame.bpPerPixel);
 
-                console.log("browser.goto(" + igv.browser.referenceFrame.chr + ":" + igv.numberFormatter(ss) + "-" + igv.numberFormatter(ee) + ")");
-
-                //igv.browser.goto(igv.browser.referenceFrame.chr, ss, ee);
+                //console.log("browser.goto(" + igv.browser.referenceFrame.chr + ":" + igv.numberFormatter(ss) + "-" + igv.numberFormatter(ee) + ")");
 
                 locus = igv.browser.referenceFrame.chr + ":" + igv.numberFormatter(ss) + "-" + igv.numberFormatter(ee);
                 igv.browser.search(locus, undefined);

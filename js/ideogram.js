@@ -61,21 +61,17 @@ var igv = (function (igv) {
             xy = igv.translateMouseCoordinates(e, myself.contentDiv);
             xPercentage = xy.x / myself.contentDiv.width();
 
-            //console.log(Math.floor(xPercentage * 100.0) +" %");
-
             locusLength = igv.browser.trackBPWidth();
             chr = igv.browser.genome.getChromosome(igv.browser.referenceFrame.chr);
             chrLength =  chr.bpLength;
             chrCoveragePercentage = locusLength/chrLength;
 
             if (xPercentage - (chrCoveragePercentage/2.0) < 0) {
-                //console.log("bail left " + (xPercentage - (chrCoveragePercentage/2.0)));
                 return;
             }
 
             if (xPercentage + (chrCoveragePercentage/2.0) > 1.0) {
-                //console.log("bail right " + (xPercentage + (chrCoveragePercentage/2.0) - 1.0));
-                return;
+                 return;
             }
 
             locus = igv.browser.referenceFrame.chr + ":" + igv.numberFormatter(Math.floor((xPercentage - (chrCoveragePercentage/2.0)) * chrLength)) + "-" + igv.numberFormatter(Math.floor((xPercentage + (chrCoveragePercentage/2.0)) * chrLength));
