@@ -470,11 +470,17 @@ var igv = (function (igv) {
     // Zoom in by a factor of 2, keeping the same center location
     igv.Browser.prototype.zoomIn = function () {
 
-        var newScale, center, viewportWidth;
+        var newScale,
+            center,
+            viewportWidth;
+
         viewportWidth = this.trackViewportWidth();
 
-        newScale = Math.max(1 / 14, this.referenceFrame.bpPerPixel / 2);
-        if (newScale == this.referenceFrame.bpPerPixel) return;
+        newScale = Math.max(1/14, this.referenceFrame.bpPerPixel / 2);
+        if (newScale === this.referenceFrame.bpPerPixel) {
+            //console.log("zoom in bail bpp " + newScale + " width " + (viewportWidth/14.0));
+            return;
+        }
 
         center = this.referenceFrame.start + this.referenceFrame.bpPerPixel * viewportWidth / 2;
         this.referenceFrame.start = center - newScale * viewportWidth / 2;
