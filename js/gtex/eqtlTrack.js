@@ -45,12 +45,9 @@ var igv = (function (igv) {
         this.height = config.height || 100;    // The preferred height
         this.disableButtons = config.disableButtons;
 
-        if(config.sourceType && config.sourceType === "immvar") {
             this.featureSource = new igv.FeatureSource(config);
-        }
-        else {
-            this.featureSource = new igv.GtexSource(url);
-        }
+
+
 
         this.onsearch = function (feature, source) {
             selectedFeature.call(this, feature, source);

@@ -4,7 +4,7 @@ function eqtlUnitTests() {
     asyncTest("EQTL binary file", 2, function () {
 
         var url = "http://www.broadinstitute.org/igvdata/test/data/eqtl/Heart_Left_Ventricle.portal.eqtl.bin",
-            featureSource = new igv.GtexSource(url);
+            featureSource = new igv.GtexReader(url);
 
 
         var chr = "chr1";
