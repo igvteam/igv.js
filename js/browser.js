@@ -376,13 +376,22 @@ var igv = (function (igv) {
         var chr,
             ss,
             ee,
-            str;
+            str,
+            end,
+            chromosome;
 
         if (this.searchInput) {
 
             chr = referenceFrame.chr;
             ss = igv.numberFormatter(Math.floor(referenceFrame.start + 1));
-            ee = igv.numberFormatter(Math.floor(referenceFrame.start + this.trackBPWidth()));
+
+            end = referenceFrame.start + this.trackBPWidth();
+            if(this.genome) {
+                chromosome = this.genome.getChromosome(chr);
+                if(chromosome) end = Math.min(end, chromosome.bpLength);
+            }
+
+            ee = igv.numberFormatter(Math.floor(end));
 
             str = chr + ":" + ss + "-" + ee;
             this.searchInput.val(str);

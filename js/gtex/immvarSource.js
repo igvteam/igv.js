@@ -69,8 +69,8 @@ var igv = (function (igv) {
                 var window = Math.max(bpEnd - bpStart, 1000000) / 2,
                     center = (bpEnd + bpStart) / 2,
                     queryChr = chr,                              // TODO -- chr alias
-                    queryStart = Math.max(0, center - window),
-                    queryEnd = center + window,
+                    queryStart = Math.round(Math.max(0, center - window)),
+                    queryEnd = Math.round(center + window),
                     queryURL = this.url + "?chromosome=" + queryChr + "&start=" + queryStart + "&end=" + queryEnd +
                         "&cell_condition_id=" + this.cellConditionId;
 
@@ -87,7 +87,7 @@ var igv = (function (igv) {
                             //});
                             //source.cache = new FeatureCache(chr, queryStart, queryEnd, variants);
 
-                            success(json);
+                            success(json.eqtls);
                         }
                         else {
                             success(null);

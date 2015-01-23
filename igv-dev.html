@@ -11,7 +11,8 @@
 
     <!-- jQuery UI CSS -->
     <!--<link rel="stylesheet" type="text/css" href="//ajax.googleapis.com/ajax/libs/jqueryui/1.11.2/themes/smoothness/jquery-ui.css"/>-->
-    <link rel="stylesheet" type="text/css" href="//ajax.googleapis.com/ajax/libs/jqueryui/1.11.2/themes/redmond/jquery-ui.css"/>
+    <link rel="stylesheet" type="text/css"
+          href="//ajax.googleapis.com/ajax/libs/jqueryui/1.11.2/themes/redmond/jquery-ui.css"/>
 
     <!-- Color Picker CSS -->
     <link rel="stylesheet" type="text/css" href="vendor/colorpickers/vanderlee-github-io/jquery.colorpicker.css"/>
@@ -34,12 +35,18 @@
 
     <!-- Color Picker JS -->
     <script type="text/javascript" src="vendor/colorpickers/vanderlee-github-io/jquery.colorpicker.js"></script>
-    <script type="text/javascript" src="vendor/colorpickers/vanderlee-github-io/i18n/jquery.ui.colorpicker-nl.js"></script>
-    <script type="text/javascript" src="vendor/colorpickers/vanderlee-github-io/swatches/jquery.ui.colorpicker-pantone.js"></script>
-    <script type="text/javascript" src="vendor/colorpickers/vanderlee-github-io/parts/jquery.ui.colorpicker-rgbslider.js"></script>
-    <script type="text/javascript" src="vendor/colorpickers/vanderlee-github-io/parts/jquery.ui.colorpicker-memory.js"></script>
-    <script type="text/javascript" src="vendor/colorpickers/vanderlee-github-io/parsers/jquery.ui.colorpicker-cmyk-parser.js"></script>
-    <script type="text/javascript" src="vendor/colorpickers/vanderlee-github-io/parsers/jquery.ui.colorpicker-cmyk-percentage-parser.js"></script>
+    <script type="text/javascript"
+            src="vendor/colorpickers/vanderlee-github-io/i18n/jquery.ui.colorpicker-nl.js"></script>
+    <script type="text/javascript"
+            src="vendor/colorpickers/vanderlee-github-io/swatches/jquery.ui.colorpicker-pantone.js"></script>
+    <script type="text/javascript"
+            src="vendor/colorpickers/vanderlee-github-io/parts/jquery.ui.colorpicker-rgbslider.js"></script>
+    <script type="text/javascript"
+            src="vendor/colorpickers/vanderlee-github-io/parts/jquery.ui.colorpicker-memory.js"></script>
+    <script type="text/javascript"
+            src="vendor/colorpickers/vanderlee-github-io/parsers/jquery.ui.colorpicker-cmyk-parser.js"></script>
+    <script type="text/javascript"
+            src="vendor/colorpickers/vanderlee-github-io/parsers/jquery.ui.colorpicker-cmyk-percentage-parser.js"></script>
 
     <!-- Vendor JS -->
     <script type="text/javascript" src="vendor/inflate.js"></script>
@@ -72,6 +79,7 @@
     <script type="text/javascript" src="js/gtex/eqtlTrack.js"></script>
     <script type="text/javascript" src="js/gtex/gtexSource.js"></script>
     <script type="text/javascript" src="js/gtex/gtex.js"></script>
+    <script type="text/javascript" src="js/gtex/immvarSource.js"></script>
 
     <script type="text/javascript" src="js/bam/coverageMap.js"></script>
     <script type="text/javascript" src="js/bam/bamReader.js"></script>
@@ -137,7 +145,7 @@
 
         div#trackList > div:hover,
         div#trackList > div:focus,
-        div#trackList > div:active  {
+        div#trackList > div:active {
             cursor: pointer;
             color: white;
             background-color: rgba(49, 106, 246, 1);
@@ -158,14 +166,16 @@
         <div onclick="igv.browser.loadTrack({
                                 type: 'bam',
                                 url: 'http://www.broadinstitute.org/igvdata/1KG/b37/data/NA06984/alignment/NA06984.mapped.ILLUMINA.bwa.CEU.low_coverage.20120522.bam',
-                                label: 'NA06984'})">NA06984 (Broad server BAM file)</div>
+                                label: 'NA06984'})">NA06984 (Broad server BAM file)
+        </div>
 
         <div onclick="igv.browser.loadTrack({
                                 sourceType: 'ga4gh',
                                 type: 'bam',
                                 url: 'https://www.googleapis.com/genomics/v1beta2',
                                 readGroupSetIds: 'CMvnhpKTFhCjz9_25e_lCw',
-                                label: 'Ga4gh'})">GA4Gh Alignments (Global Alliance, Google server)</div>
+                                label: 'Ga4gh'})">GA4Gh Alignments (Global Alliance, Google server)
+        </div>
 
         <div onclick="igv.browser.loadTrack({
                                 sourceType: 'ga4gh',
@@ -173,29 +183,45 @@
                                 url: 'https://www.googleapis.com/genomics/v1beta2',
                                 variantSetId: '10473108253681171589',
                                 visibilityWindow: 100000,
-                                label: 'Ga4gh'})">GA4Gh Variants (Global Alliance, Google server)</div>
+                                label: 'Ga4gh'})">GA4Gh Variants (Global Alliance, Google server)
+        </div>
 
         <div onclick="igv.browser.loadTrack({
                                 url: '//www.broadinstitute.org/igvdata/test/igv-web/segmented_data_080520.seg.gz',
                                 indexed: false,
-                                label: 'GBM Copy # (TCGA Broad GDAC)'})">GBM Copy # (TCGA Broad GDAC))</div>
+                                label: 'GBM Copy # (TCGA Broad GDAC)'})">GBM Copy # (TCGA Broad GDAC))
+        </div>
 
         <div onclick="igv.browser.loadTrack({
                                 type: 'eqtl',
                                 url: '//www.gtexportal.org/igv/assets/eqtl/Skin_Sun_Exposed_Lower_leg.portal.eqtl.bin',
-                                label: 'Skin Sun Exposed Lower leg'})">EQTL Skin (GTEX))</div>
+                                label: 'Skin Sun Exposed Lower leg'})">EQTL Skin (GTEX))
+        </div>
+
+        <div onclick="igv.browser.loadTrack({
+                                type: 'eqtl',
+                                sourceType: 'immvar',
+                                url: '//immvar.broadinstitute.org:3000/load_data',
+                                pValueField: 'p_value',
+                                geneField: 'gene',
+                                cellConditionId: 22,
+                                minLogP: 0,
+                                label: 'Dendritic cell, Baseline, Caucasian'})">Dendritic cell (ImmVar))
+        </div>
 
 
         <div onclick="igv.browser.loadTrack( {
                                 url: '//www.broadinstitute.org/igvdata/t2d/recomb_decode.bedgraph',
-                                label: 'Recombination rate'})">Recombination Rate</div>
+                                label: 'Recombination rate'})">Recombination Rate
+        </div>
 
         <div onclick="igv.browser.loadTrack(
                                 {
                                 type: 'vcf',
                                 url: '//www.broadinstitute.org/igvdata/test/igv-web/TSVC_variants_IonXpress_078.vcf.gz',
                                 label: 'TSVC Variants 078'
-                                })">TSVC Variants 078 (VCF tabix)</div>
+                                })">TSVC Variants 078 (VCF tabix)
+        </div>
 
         <div onclick="igv.browser.loadTrack(
                                 {
@@ -203,7 +229,8 @@
                                 url: '//www.broadinstitute.org/igvdata/test/igv-web/example.vcf',
                                 indexed: false,
                                 label: 'Example vcf'
-                                })">Example VCF (4.2 spec)</div>
+                                })">Example VCF (4.2 spec)
+        </div>
 
         <div onclick="igv.browser.loadTrack(
                                 {
@@ -211,7 +238,8 @@
                                 url: '//www.broadinstitute.org/igvdata/annotations/hg19/dbSnp/snp137.hg19.bed.gz',
                                 label: 'dbSNP 137',
                                 visibilityWindow: 200000
-                                })">dbSNP 137 (bed tabix)</div>
+                                })">dbSNP 137 (bed tabix)
+        </div>
 
         <div onclick="igv.browser.search('chr10');">GOTO</div>
 
