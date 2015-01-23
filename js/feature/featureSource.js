@@ -45,6 +45,8 @@ var igv = (function (igv) {
                     return wrappedReader.readFeatures(range.chr, range.start, range.end, success, task);
                 }
             }
+        } else if(config.sourceType === "immvar") {
+            this.reader = new igv.ImmVarReader(config);
         }
         else {
             this.reader = new igv.FeatureFileReader(config);
@@ -86,7 +88,7 @@ var igv = (function (igv) {
             // TODO -- reuse cached features that overelap new region
             this.reader.readFeatures(function (featureList) {
 
-                    myself.featureCache = myself.index || myself.config.sourceType === "ga4gh" ?
+                    myself.featureCache = myself.index || myself.config.sourceType === "ga4gh" || myself.config.sourceType === "immvar" ?
                         new igv.FeatureCache(featureList, genomicInterval) :
                         new igv.FeatureCache(featureList);   // Note - replacing previous cache with new one
 

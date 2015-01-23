@@ -41,20 +41,19 @@ function runImmVarTests() {
     asyncTest("immvar", function () {
 
         var url = "http://immvar.broadinstitute.org:3000/load_data",
-            chr = "chr10",
-            start = 6090663,
-            end = 6146339,
+            range = {chr: "chr10", start: 6090663, end: 6146339},
+            task = null,
             source;
 
-        var source = new igv.ImmVarSource({url: url, cellConditionId: 1, pValueField: "p_value"});
+        var source = new igv.ImmVarReader({url: url, cellConditionId: 1, pValueField: "p_value"});
 
-        source.getFeatures(chr, start, end, function(features) {
+        source.readFeatures(function (features) {
 
             ok(features);
 
             start();
 
-        });
+        }, task, range);
     })
 
 }
