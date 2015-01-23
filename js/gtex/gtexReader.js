@@ -26,50 +26,31 @@
 var igv = (function (igv) {
 
 
-    igv.GtexSource = function (file) {
-        this.file = file;
-        this.codec = file.endsWith(".bin") ? createEqtlBinary : createEQTL,
+    igv.GtexReader = function (config) {
+
+        this.file = config.url;
+        this.codec = this.file.endsWith(".bin") ? createEqtlBinary : createEQTL,
             this.cache = {};
-        this.binary = file.endsWith(".bin");
-        this.compressed = file.endsWith(".compressed.bin");
+        this.binary = this.file.endsWith(".bin");
+        this.compressed = this.file.endsWith(".compressed.bin");
 
     }
 
 
-    igv.GtexSource.prototype.getFeatures = function (chr, bpStart, bpEnd, continuation, task) {
+    igv.GtexReader.prototype.readFeatures = function (continuation, task, genomicRange) {
 
-
-        var source = this,
-            cache = this.cache,
-            features = cache[chr],
-            file;
-
-        if (features) {
-            continuation(features);
-
-        } else {
-            loadFeatures(this.file, chr, function (features) {
-
-                if (features) {
-                    cache[chr] = features;
-                }
-                continuation(features);
-
-            });
-        }
-
-
-        function loadFeatures(file, chr, continuation) {
-
-            var index = source.index;
+        var chr = genomicRange.chr,
+            self = this,
+            file = this.file,
+            index = self.index;
 
 
             if (index) {
                 loadWithIndex(index, chr, continuation)
             }
             else {
-                loadIndex(source.file, function (index) {
-                    source.index = index;
+                loadIndex(self.file, function (index) {
+                    self.index = index;
                     loadWithIndex(index, chr, continuation);
 
                 });
@@ -136,7 +117,7 @@ var igv = (function (igv) {
                 }
 
             }
-        }
+
 
 
         //function Eqtl(snp, chr, position, geneId, geneName, genePosition, fStat, pValue) {
@@ -145,6 +126,8 @@ var igv = (function (igv) {
             this.snp = snp;
             this.chr = chr;
             this.position = position;
+            this.start = position;
+            this.end = position + 1;
             this.geneId = geneId;
             this.geneName = geneName;
             //this.genePosition = genePosition;
