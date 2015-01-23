@@ -417,6 +417,10 @@ var igv = (function (igv) {
 
     };
 
+    igv.Browser.prototype.pixelPerBasepairThreshold = function () {
+        return 14.0;
+    };
+
     igv.Browser.prototype.trackBPWidth = function () {
         return this.referenceFrame.bpPerPixel * this.trackViewportWidth();
     };
@@ -476,7 +480,7 @@ var igv = (function (igv) {
 
         viewportWidth = this.trackViewportWidth();
 
-        newScale = Math.max(1/14, this.referenceFrame.bpPerPixel / 2);
+        newScale = Math.max(1.0 / this.pixelPerBasepairThreshold(), this.referenceFrame.bpPerPixel / 2);
         if (newScale === this.referenceFrame.bpPerPixel) {
             //console.log("zoom in bail bpp " + newScale + " width " + (viewportWidth/14.0));
             return;
