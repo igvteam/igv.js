@@ -46,7 +46,7 @@ function runImmVarTests() {
             end = 6146339,
             source;
 
-        var source = new igv.ImmVarSource({url: url, cellConditionId: 1});
+        var source = new igv.ImmVarSource({url: url, cellConditionId: 1, pValueField: "p_value"});
 
         source.getFeatures(chr, start, end, function(features) {
 
