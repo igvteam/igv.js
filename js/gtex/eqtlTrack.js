@@ -46,7 +46,7 @@ var igv = (function (igv) {
         this.disableButtons = config.disableButtons;
 
         if(config.sourceType && config.sourceType === "immvar") {
-            this.featureSource = new igv.ImmVarSource(config);
+            this.featureSource = new igv.FeatureSource(config);
         }
         else {
             this.featureSource = new igv.GtexSource(url);
