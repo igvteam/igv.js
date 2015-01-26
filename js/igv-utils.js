@@ -154,7 +154,7 @@ var igv = (function (igv) {
 
                         inline: false,
 
-                        title: trackView.track.label + " Feature Color Picker",
+                        title: "Feature Color Picker",
 
                         color: trackColor,
 
