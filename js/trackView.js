@@ -116,14 +116,14 @@ var igv = (function (igv) {
 
                 labelButton.onclick = function (e) {
                     igv.popover.presentTrackPopup(e.pageX, e.pageY, myself.track.description);
-                }
+                };
 
             } else {
 
                 this.track.labelSpan = $('<span class="igv-track-label-span-base">')[0];
                 this.track.labelSpan.innerHTML = this.track.label;
-                $(trackIconContainer).append(this.track.labelSpan);
-
+                //$(trackIconContainer).append(this.track.labelSpan);
+                $(this.leftHandGutter).append(this.track.labelSpan);
             }
 
         } // if ("CURSOR" !== this.browser.type)
@@ -136,7 +136,7 @@ var igv = (function (igv) {
         $(trackDiv).append(this.leftHandGutter);
 
         this.leftHandGutterCreationHelper(this.leftHandGutter);
-
+       
     };
 
     igv.TrackView.prototype.leftHandGutterCreationHelper = function (leftHandGutter) {
