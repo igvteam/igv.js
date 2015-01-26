@@ -87,8 +87,14 @@ var igv = (function (igv) {
 
 
         if (options.showKaryo) {
-            contentKaryo = $('<div id="igvKaryoDiv" class="igv-karyo-div">')[0];
-            $(controlDiv).append(contentKaryo);
+            contentKaryo = $('#igvKaryoDiv')[0];
+            console.log("got contentkaryo: "+contentKaryo);
+            if (!contentKaryo ) {
+        	console.log("Creating karyo div");
+        	contentKaryo = $('<div id="igvKaryoDiv" class="igv-karyo-div">')[0];
+        	$(controlDiv).append(contentKaryo);
+            }
+            else console.log("Found karyo div, reusing it");
             browser.karyoPanel = new igv.KaryoPanel(contentKaryo);
         }
 

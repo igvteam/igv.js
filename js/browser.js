@@ -94,6 +94,7 @@ var igv = (function (igv) {
             type = config.type,
             newTrack;
 
+       //  console.log("Browser: got track type: "+type);
         if (type === "t2d") {
             newTrack = new igv.T2dTrack(config);
         } else if (type === "bed" || type === "vcf") {
@@ -108,6 +109,8 @@ var igv = (function (igv) {
             newTrack = new igv.EqtlTrack(config);
         } else if (type === "seg") {
             newTrack = new igv.SegTrack(config);
+        } else if (type === "aneu") {
+            newTrack = new igv.AneuTrack(config);
         }
         else {
             alert("Unknown file type: " + path);

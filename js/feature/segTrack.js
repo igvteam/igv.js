@@ -35,8 +35,11 @@ var igv = (function (igv) {
         this.sampleSquishHeight = config.sampleSquishHeight || 2;
         this.sampleExpandHeight = config.sampleExpandHeight || 12;
 
-        this.sampleHeight = this.sampleSquishHeight;
+        this.sampleHeight = this.sampleExpandHeight;
 
+        
+        this.highColor = config.highColor || 'rbg(0,0,200)';
+        this.lowColor = config.lowColor || 'rgb(200,0,0)';
         this.posColorScale = config.posColorScale ||
             new igv.GradientColorScale(
                 {
@@ -77,7 +80,7 @@ var igv = (function (igv) {
 
         return [
             {
-                label: (this.sampleExpandHeight === this.sampleHeight) ? "Squish sample hgt" : "Expand sample hgt",
+                label: (this.sampleExpandHeight === this.sampleHeight) ? "Squish sample height" : "Expand sample height",
                 click: function () {
                     popover.hide();
                     myself.toggleSampleHeight();
@@ -100,6 +103,7 @@ var igv = (function (igv) {
 
     igv.SegTrack.prototype.draw = function (options) {
 
+        
         var myself = this,
             featureList,
             canvas,
@@ -133,53 +137,85 @@ var igv = (function (igv) {
             bpEnd = bpStart + pixelWidth * bpPerPixel + 1;
             xScale = bpPerPixel;
 
+           
+           var max = -1000;
+           var min = 10000;
             for (i = 0, len = featureList.length; i < len; i++) {
                 sample = featureList[i].sample;
+                var value = featureList[i].value;
+                if (value > max) max = value;
+                if (value < min) min = value;
                 if (!this.samples.hasOwnProperty(sample)) {
                     this.samples[sample] = myself.sampleCount;
                     this.sampleNames.push(sample);
                     this.sampleCount++;
                 }
             }
-
+            
             checkForLog(featureList);
-
+            var expected = 2;
+            if (myself.isLog) {
+                min = 0;
+                expected = 0;
+            }
+            
+            console.log("SegTrack: Drawing "+featureList.length+" features between "+bpStart+"-"+bpEnd);
             for (i = 0, len = featureList.length; i < len; i++) {
 
                 segment = featureList[i];
-
+                console.log("   Feature: "+JSON.stringify(segment));
                 if (segment.end < bpStart) continue;
                 if (segment.start > bpEnd) break;
 
                 y = myself.samples[segment.sample] * myself.sampleHeight;
 
                 value = segment.value;
-                if (!myself.isLog) {
-                    value = Math.log2(value / 2);
-                }
-
-                if (value < -0.1) {
-                    color = myself.negColorScale.getColor(value);
-                }
-                else if (value > 0.1) {
-                    color = myself.posColorScale.getColor(value);
+                color = 'gray';
+                if (myself.isLog) {
+                    value = Math.log2(value / 2);                                
+                    if (value < expected-0.1) {
+                        color = myself.negColorScale.getColor(value);
+                    }
+                    else if (value > expected+0.1) {
+                        color = myself.posColorScale.getColor(value);
+                    }
                 }
                 else {
-                    color = "white";
+                    if (value < expected-0.1) {
+                        color = myself.lowColor;
+                    }
+                    else if (value > expected+0.1) {
+                        color = myself.highColor;
+                    }
                 }
-
+                
+                
                 px = Math.round((segment.start - bpStart) / xScale);
                 px1 = Math.round((segment.end - bpStart) / xScale);
-                pw = Math.max(1, px1 - px);
-
-                canvas.fillRect(px, y, pw, myself.sampleHeight, {fillStyle: color});
+                pw = Math.max(1, px1 - px);                
+                if (this.sampleExpandHeight === this.sampleHeight) {
+                    // expanded
+                    // the value determines the height
+                    var h = computeH(min, max, value, myself.sampleHeight);
+                    console.log("       Got value "+value+", expected="+expected+", color="+color+", h="+h);
+                    // use different plot types
+                    canvas.fillRect(px, y+h, pw, 2, {fillStyle: color});
+                    
+                }
+                else {
+                    canvas.fillRect(px, y, pw, this.sampleHeight, {fillStyle: color});
+                }
 
             }
         }
         else {
             console.log("No feature list");
         }
-
+        
+        function computeH (min, max, value, maxpixels) {
+            console.log("comptuteH. min/max="+min+"-"+max+", height="+myself.sampleHeight);
+            return Math.round((value - min)/max* maxpixels);
+        }
 
         function checkForLog(featureList) {
             var i;
@@ -211,7 +247,8 @@ var igv = (function (igv) {
                 this.sampleCount++;
             }
         }
-        return this.sampleCount * this.sampleHeight;
+        var h = Math.max(30, this.sampleCount * this.sampleHeight);
+        //console.log("Computed height for "+features.length+" features, samplecount "+this.sampleCount+" and height "+ this.sampleHeight+": "+h);
     };
 
     /**

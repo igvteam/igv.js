@@ -61,6 +61,7 @@ var igv = (function (igv) {
                 },
 
                 error: function (ignore, xhr) {
+                    console.log("no index file, continuing");
                     continuation(null);
                 }
             });

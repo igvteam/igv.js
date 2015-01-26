@@ -64,7 +64,7 @@ var igv = (function (igv) {
                             var str,
                                 numberString = trackMenuPopupDialog.name.val(),
                                 number = parseFloat(numberString, 10);
-
+                                console.log("Converted "+numberString+" to "+number);
                             if (!$.isNumeric(numberString)) {
 
                                 trackMenuPopupDialog.name.addClass( "ui-state-error" );
@@ -105,14 +105,13 @@ var igv = (function (igv) {
 
                     var str;
 
+                    console.log("Adding trackitem menu "+i+": "+JSON.stringify(trackItem));
                     if (trackItem.label) {
-
                         str = (0 === i) ? '<div class=\"igv-track-menu-item igv-track-menu-border-top\">' : '<div class=\"igv-track-menu-item\">';
-                        str += trackItem.label + '</div>';
+                        str = str+  trackItem.label + '</div>';
 
                         menuItems.push( { object: $(str), click: trackItem.click, init: trackItem.init } );
                     } else {
-
                         if (0 === i) {
                             trackItem.object.addClass("igv-track-menu-border-top");
                             menuItems.push(trackItem);
