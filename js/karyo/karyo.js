@@ -1,4 +1,4 @@
-
+// checking if this change is in there
 var igv = (function (igv) {
 
     var log = function (txt) {
