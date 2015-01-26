@@ -108,6 +108,8 @@ var igv = (function (igv) {
             newTrack = new igv.EqtlTrack(config);
         } else if (type === "seg") {
             newTrack = new igv.SegTrack(config);
+        } else if (type === "aneu") {
+            newTrack = new igv.AneuTrack(config);
         }
         else {
             alert("Unknown file type: " + path);

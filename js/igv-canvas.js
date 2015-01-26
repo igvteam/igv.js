@@ -66,6 +66,68 @@ var igv = (function (igv) {
     };
 
 
+     igv.Canvas.prototype.dashedLine = function( x1, y1, x2, y2, dashLen, properties) {
+	x1 = Math.round(x1);
+	y1 = Math.round(y1);
+	x2 = Math.round(x2);
+	y2 = Math.round(y2);
+	dashLen = Math.round(dashLen);
+	
+	if (properties) {
+	    this.ctx.save();
+	    this.setProperties(properties, this);
+	}
+
+	if (dashLen == undefined) dashLen = 2;
+	this.ctx.moveTo(x1, y1);
+
+	var dX = x2 - x1;
+	var dY = y2 - y1;
+	var dashes = Math.floor(Math.sqrt(dX * dX + dY * dY) / dashLen);
+	var dashX = dX / dashes;
+	var dashY = dY / dashes;
+	console.log("Drawing dashed line "+x1+"/"+y1+"-"+x2+"/"+y2+":"+dashLen+", nrdashes  "+dashes);
+	
+	var q = 0;
+	while (q++ < dashes) {
+	    x1 += dashX;
+	    y1 += dashY;
+	    this.ctx[q % 2 == 0 ? 'moveTo' : 'lineTo'](x1, y1);
+	}
+	this.ctx[q % 2 == 0 ? 'moveTo' : 'lineTo'](x2, y2);
+
+	if (properties) this.ctx.restore();
+    };
+    
+    
+    igv.Canvas.prototype.lineTo = function(x, y, properties) {
+	x = Math.round(x);
+	y = Math.round(y);
+
+	if (properties) {
+	    this.ctx.save();
+	    this.setProperties(properties, this);
+	}
+
+	this.ctx.lineTo(x, y);
+
+	if (properties) this.ctx.restore();
+    };
+    
+    igv.Canvas.prototype.moveTo = function(x, y, properties) {
+	x = Math.round(x);
+	y = Math.round(y);
+
+	if (properties) {
+	    this.ctx.save();
+	    this.setProperties(properties, this);
+	}
+
+	this.ctx.moveTo(x, y);
+
+	if (properties) this.ctx.restore();
+    };
+    
     igv.Canvas.prototype.strokeLine = function (x1, y1, x2, y2, properties) {
 
         x1 = Math.floor(x1) + 0.5;
