@@ -87,8 +87,13 @@ var igv = (function (igv) {
 
 
         if (options.showKaryo) {
-            contentKaryo = $('<div id="igvKaryoDiv" class="igv-karyo-div">')[0];
-            $(controlDiv).append(contentKaryo);
+            contentKaryo = $('#igvKaryoDiv')[0];
+            // if a karyo div already exists in the page, use that one.
+            // this allows the placement of the karyo view on the side, for instance
+            if (!contentKaryo ) {                
+                contentKaryo = $('<div id="igvKaryoDiv" class="igv-karyo-div">')[0];
+                $(controlDiv).append(contentKaryo);
+            }            
             browser.karyoPanel = new igv.KaryoPanel(contentKaryo);
         }
 
