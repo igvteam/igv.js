@@ -56,7 +56,7 @@ var igv = (function (igv) {
             if ((end - start) < 100000) {
                 var w = (end - start);
                 var center = Math.round(start + w / 2);
-                qstart = center - 50000;
+                qstart = Math.max(0, center - 50000);
                 qend = center + 50000;
             }
 

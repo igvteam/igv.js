@@ -45,7 +45,6 @@ var igv = (function (igv) {
 
         $("input[id='trackHeightInput']").val(this.trackHeight);
 
-
         this.trackContainerDiv = trackContainer;
 
         addTrackContainerHandlers(trackContainer);
@@ -99,7 +98,7 @@ var igv = (function (igv) {
         if (type === "t2d") {
             newTrack = new igv.T2dTrack(config);
         } else if (type === "bed" || type === "vcf") {
-            newTrack = new igv.BedTrack(config);
+            newTrack = new igv.FeatureTrack(config);
         } else if (type === "bam") {
             newTrack = new igv.BAMTrack(config);
         } else if (type === "wig" || type === "bigwig" || type === "bedgraph") {
@@ -356,6 +355,8 @@ var igv = (function (igv) {
 
     igv.Browser.prototype.update = function () {
 
+        this.updateLocusSearch(this.referenceFrame);
+
         if (this.ideoPanel) {
             this.ideoPanel.repaint();
         }
@@ -363,15 +364,42 @@ var igv = (function (igv) {
         if (this.karyoPanel) {
             this.karyoPanel.repaint();
         }
+
         this.trackViews.forEach(function (trackPanel) {
-
             trackPanel.update();
-
         });
 
         if (this.cursorModel) {
             this.horizontalScrollbar.update();
         }
+    };
+
+    igv.Browser.prototype.updateLocusSearch = function (referenceFrame) {
+
+        var chr,
+            ss,
+            ee,
+            str,
+            end,
+            chromosome;
+
+        if (this.searchInput) {
+
+            chr = referenceFrame.chr;
+            ss = igv.numberFormatter(Math.floor(referenceFrame.start + 1));
+
+            end = referenceFrame.start + this.trackBPWidth();
+            if(this.genome) {
+                chromosome = this.genome.getChromosome(chr);
+                if(chromosome) end = Math.min(end, chromosome.bpLength);
+            }
+
+            ee = igv.numberFormatter(Math.floor(end));
+
+            str = chr + ":" + ss + "-" + ee;
+            this.searchInput.val(str);
+        }
+
     };
 
     /**
@@ -392,9 +420,13 @@ var igv = (function (igv) {
 
     };
 
+    igv.Browser.prototype.pixelPerBasepairThreshold = function () {
+        return 14.0;
+    };
+
     igv.Browser.prototype.trackBPWidth = function () {
         return this.referenceFrame.bpPerPixel * this.trackViewportWidth();
-    }
+    };
 
     igv.Browser.prototype.goto = function (chr, start, end) {
 
@@ -402,14 +434,14 @@ var igv = (function (igv) {
             chromosome,
             viewportWidth = this.trackViewportWidth();
 
-        console.log("goto " + chr + " : " + start + "-" + end);
-
         if (igv.popover) {
             igv.popover.hide();
         }
 
         // Translate chr to official name
-        if (this.genome) chr = this.genome.getChromosomeName(chr);
+        if (this.genome) {
+            chr = this.genome.getChromosomeName(chr);
+        }
 
         this.referenceFrame.chr = chr;
 
@@ -445,11 +477,17 @@ var igv = (function (igv) {
     // Zoom in by a factor of 2, keeping the same center location
     igv.Browser.prototype.zoomIn = function () {
 
-        var newScale, center, viewportWidth;
+        var newScale,
+            center,
+            viewportWidth;
+
         viewportWidth = this.trackViewportWidth();
 
-        newScale = Math.max(1 / 14, this.referenceFrame.bpPerPixel / 2);
-        if (newScale == this.referenceFrame.bpPerPixel) return;
+        newScale = Math.max(1.0 / this.pixelPerBasepairThreshold(), this.referenceFrame.bpPerPixel / 2);
+        if (newScale === this.referenceFrame.bpPerPixel) {
+            //console.log("zoom in bail bpp " + newScale + " width " + (viewportWidth/14.0));
+            return;
+        }
 
         center = this.referenceFrame.start + this.referenceFrame.bpPerPixel * viewportWidth / 2;
         this.referenceFrame.start = center - newScale * viewportWidth / 2;
@@ -488,8 +526,6 @@ var igv = (function (igv) {
 
     igv.Browser.prototype.search = function (feature, continuation) {
 
-        console.log("Search " + feature);
-
         var type,
             chr,
             posTokens,
@@ -499,8 +535,7 @@ var igv = (function (igv) {
             f,
             tokens,
             url,
-            chromosome,
-            browser = this;
+            chromosome;
 
         if (feature.contains(":") && feature.contains("-") || this.genome.getChromosome(feature)) {
 
@@ -521,23 +556,17 @@ var igv = (function (igv) {
 
             if (end > start) {
                 this.goto(chr, start, end);
-                fireOnsearch.call(browser, feature, type);
+                fireOnsearch.call(igv.browser, feature, type);
             }
 
             if (continuation) continuation();
 
         }
-
         else {
 
             if (this.searchURL) {
-
-//                var spinner = igv.getSpinner(this.trackContainerDiv);
                 url = this.searchURL + feature;
-
                 igv.loadData(url, function (data) {
-
-//                    spinner.stop();
 
                     var lines = data.splitLines(),
                         len = lines.length,
@@ -553,29 +582,29 @@ var igv = (function (igv) {
                         //console.log("tokens lenght = " + tokens.length);
                         if (tokens.length >= 3) {
                             f = tokens[0];
-                            if (f.toUpperCase() == feature.toUpperCase()) {
+                            if (f.toUpperCase() === feature.toUpperCase()) {
 
                                 source = tokens[2].trim();
                                 type = source;
 
                                 locusTokens = tokens[1].split(":");
-                                chr = browser.genome.getChromosomeName(locusTokens[0].trim());
+                                chr = igv.browser.genome.getChromosomeName(locusTokens[0].trim());
 
                                 if (this.type === "GTEX") {
-                                    browser.selection = new igv.GtexSelection(type == 'gtex' ? {snp: feature} : {gene: feature});
+                                    igv.browser.selection = new igv.GtexSelection(type == 'gtex' ? {snp: feature} : {gene: feature});
                                 }
 
                                 rangeTokens = locusTokens[1].split("-");
                                 start = parseInt(rangeTokens[0].replace(/,/g, ''));
                                 end = parseInt(rangeTokens[1].replace(/,/g, ''));
 
-                                if (browser.flanking) {
-                                    start -= browser.flanking;
-                                    end += browser.flanking;
+                                if (igv.browser.flanking) {
+                                    start -= igv.browser.flanking;
+                                    end += igv.browser.flanking;
                                 }
 
 
-                                browser.goto(chr, start, end);
+                                igv.browser.goto(chr, start, end);
 
                                 foundFeature = true;
                             }
@@ -583,7 +612,7 @@ var igv = (function (igv) {
                     }
 
                     if (foundFeature) {
-                        fireOnsearch.call(browser, feature, type);
+                        fireOnsearch.call(igv.browser, feature, type);
                     }
                     else {
                         alert('No feature found with name "' + feature + '"');
@@ -607,13 +636,21 @@ var igv = (function (igv) {
 
     function addTrackContainerHandlers(trackContainerDiv) {
 
-        var isMouseDown = false,
+        var isRulerTrack = false,
+            isMouseDown = false,
             lastMouseX = undefined,
-            mouseDownX = undefined,
-            browser = igv.browser;
+            mouseDownX = undefined;
 
         $(trackContainerDiv).mousedown(function (e) {
+
             var coords = igv.translateMouseCoordinates(e, trackContainerDiv);
+
+            isRulerTrack = ($(e.target).parent().parent().parent()[ 0 ].dataset.rulerTrack) ? true : false;
+
+            if (isRulerTrack) {
+                return;
+            }
+
             isMouseDown = true;
             lastMouseX = coords.x;
             mouseDownX = lastMouseX;
@@ -621,56 +658,62 @@ var igv = (function (igv) {
 
         $(trackContainerDiv).mousemove(igv.throttle(function (e) {
 
-                var coords = igv.translateMouseCoordinates(e, trackContainerDiv),
-                    pixels,
-                    maxEnd,
-                    maxStart,
-                    referenceFrame = browser.referenceFrame,
-                    isCursor = browser.cursorModel;
+            var coords = igv.translateMouseCoordinates(e, trackContainerDiv),
+                maxEnd,
+                maxStart,
+                referenceFrame = igv.browser.referenceFrame,
+                isCursor = igv.browser.cursorModel;
 
-                if (!referenceFrame) return;
+            if (isRulerTrack) {
+                return;
+            }
 
-                if (isMouseDown) { // Possibly dragging
+            if (!referenceFrame) {
+                return;
+            }
 
-                    if (mouseDownX && Math.abs(coords.x - mouseDownX) > igv.constants.dragThreshold) {
+            if (isMouseDown) { // Possibly dragging
 
-                        referenceFrame.shiftPixels(lastMouseX - coords.x);
+                if (mouseDownX && Math.abs(coords.x - mouseDownX) > igv.constants.dragThreshold) {
 
-                        // TODO -- clamping code below is broken for regular IGV => disabled for now, needs fixed
+                    referenceFrame.shiftPixels(lastMouseX - coords.x);
 
-
-                        // clamp left
-                        referenceFrame.start = Math.max(0, referenceFrame.start);
-
-                        // clamp right
-                        if (isCursor) {
-                            maxEnd = browser.cursorModel.filteredRegions.length;
-                            maxStart = maxEnd - browser.trackViewportWidth() / browser.cursorModel.framePixelWidth;
-                        }
-                        else {
-                            var chromosome = browser.genome.getChromosome(browser.referenceFrame.chr);
-                            maxEnd = chromosome.bpLength;
-                            maxStart = maxEnd - browser.trackViewportWidth() * browser.referenceFrame.bpPerPixel;
-                        }
-
-                        if (referenceFrame.start > maxStart) referenceFrame.start = maxStart;
+                    // TODO -- clamping code below is broken for regular IGV => disabled for now, needs fixed
 
 
-                        browser.repaint();
+                    // clamp left
+                    referenceFrame.start = Math.max(0, referenceFrame.start);
+
+                    // clamp right
+                    if (isCursor) {
+                        maxEnd = igv.browser.cursorModel.filteredRegions.length;
+                        maxStart = maxEnd - igv.browser.trackViewportWidth() / igv.browser.cursorModel.framePixelWidth;
+                    }
+                    else {
+                        var chromosome = igv.browser.genome.getChromosome(referenceFrame.chr);
+                        maxEnd = chromosome.bpLength;
+                        maxStart = maxEnd - igv.browser.trackViewportWidth() * referenceFrame.bpPerPixel;
                     }
 
-                    lastMouseX = coords.x;
+                    if (referenceFrame.start > maxStart) referenceFrame.start = maxStart;
 
+                    igv.browser.updateLocusSearch(referenceFrame);
+
+
+                    igv.browser.repaint();
                 }
+
+                lastMouseX = coords.x;
 
             }
 
-            ,
-            10
-        ))
-        ;
+        }, 10));
 
         $(trackContainerDiv).mouseup(function (e) {
+
+            if (isRulerTrack) {
+                return;
+            }
 
             mouseDownX = undefined;
             isMouseDown = false;
@@ -678,12 +721,20 @@ var igv = (function (igv) {
         });
 
         $(trackContainerDiv).mouseleave(function (e) {
+
+            if (isRulerTrack) {
+                return;
+            }
             isMouseDown = false;
             lastMouseX = undefined;
             mouseDownX = undefined;
         });
 
         $(trackContainerDiv).dblclick(function (e) {
+
+            if (isRulerTrack) {
+                return;
+            }
 
             if (e.altKey) return;  // Ignore if alt key is down
 

@@ -37,10 +37,10 @@ var igv = (function (igv) {
         this.config = config;
 
         if (config.sourceType === "ga4gh") {
-            this.bamFile = new igv.Ga4ghReader(config);
+            this.bamReader = new igv.Ga4ghAlignmentReader(config);
         }
         else {
-            this.bamFile = new igv.BamReader(config);
+            this.bamReader = new igv.BamReader(config);
         }
 
     };
@@ -56,7 +56,7 @@ var igv = (function (igv) {
 
             var myself = this;
 
-            this.bamFile.readAlignments(chr, bpStart, bpEnd,
+            this.bamReader.readFeatures(chr, bpStart, bpEnd,
 
                 function (alignments) {
 
@@ -99,8 +99,7 @@ var igv = (function (igv) {
 
         } else {
 
-            var bucketListLength = genomicInterval.end - genomicInterval.start,
-                bucketList = new Array(bucketListLength),
+            var bucketList = [],
                 allocatedCount = 0,
                 nextStart = genomicInterval.start,
                 alignmentRow,

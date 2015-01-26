@@ -26,29 +26,14 @@
 var igv = (function (igv) {
 
 
-    igv.Ga4ghReader = function (config) {
-        this.url = config.url;
-        this.proxy = config.proxy;
-        this.readsetId = config.readsetId;
-        this.authKey = config.authKey || 'AIzaSyC-dujgw4P1QvNd8i_c-I-S_P1uxVZzn0w';  // Default only works for localhost & broadinstitute.org
+    igv.ga4ghSearch = function (requestJson) {
 
-    }
-
-    igv.Ga4ghReader.prototype.readAlignments = function (chr, bpStart, bpEnd, success, task) {
-
-        var queryChr = (chr.startsWith("chr") ? chr.substring(3) : chr),    // TODO -- we need to read the readset header and create an alias table
-            readURL,
-            body = {"readGroupSetIds": [this.readsetId], "referenceName": queryChr, "start": bpStart, "end": bpEnd, "pageSize": "10000"},
-            sendData,
-            sendURL,
-            alignments;
-
-        readURL = this.url + "/reads/search";
-        if (this.authKey) {
-            readURL = readURL + "?key=" + this.authKey;
-        }
-
-        sendURL = this.proxy ? this.proxy : readURL;
+        var results,
+            url = requestJson.url,
+            body = requestJson.body,
+            decode = requestJson.decode,
+            success = requestJson.success,
+            task = requestJson.task;
 
         // Start the recursive load cycle.  Data is fetched in chunks, if more data is available a "nextPageToken" is returned.
         loadChunk();
@@ -62,11 +47,9 @@ var igv = (function (igv) {
                 if (body.pageToken != undefined) delete body.pageToken;    // Remove previous page token, if any
             }
 
-            sendData = this.proxy ?
-                "url=" + readURL + "&data=" + JSON.stringify(body) :
-                JSON.stringify(body);
+            var sendData = JSON.stringify(body);
 
-            igvxhr.loadJson(sendURL,
+            igvxhr.loadJson(url,
                 {
                     sendData: sendData,
                     task: task,
@@ -76,8 +59,9 @@ var igv = (function (igv) {
 
                         if (json) {
 
-                            tmp = igv.decodeGa4ghReads(json.alignments);
-                            alignments = alignments ? alignments.concat(tmp) : tmp;
+                            tmp = decode ? decode(json) : json;
+
+                            results = results ? results.concat(tmp) : tmp;
 
                             nextPageToken = json["nextPageToken"];
 
@@ -85,20 +69,30 @@ var igv = (function (igv) {
                                 loadChunk(nextPageToken);  // TODO -- these should be processed (downsampled) here
                             }
                             else {
-                                success(alignments);
+                                success(results);
                             }
-
-
                         }
                         else {
-                            success(alignments);
+                            success(results);
                         }
 
                     }
                 });
         }
+    }
 
+    igv.ga4ghGet = function (requestJson) {
 
+        var url = requestJson.url + "/" + requestJson.entity + "/" + requestJson.entityId;
+        if (requestJson.authKey) {
+            url = url + "?key=" + requestJson.authKey;
+        }
+
+        igvxhr.loadJson(url,
+            {
+                success: requestJson.success,
+                task: requestJson.task
+            });
     }
 
 

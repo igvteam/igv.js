@@ -47,7 +47,7 @@ var igv = (function (igv) {
             search = $('<div class="igvNavigationSearch">');
             navigation.append(search[ 0 ]);
 
-            browser.searchInput = $('<input type="text" placeholder="Locus Search">');
+            browser.searchInput = $('<input class="igvNavigationSearchInput" type="text" placeholder="Locus Search">');
             //browser.searchInput = $('<input type="search" placeholder="Locus Search">');
             search.append(browser.searchInput[ 0 ]);
 
@@ -116,8 +116,6 @@ var igv = (function (igv) {
             return igv.browser;
         }
 
-        //console.log("Create browser");
-
         if (!options) options = {};
         if (!options.type) options.type = "IGV";
 
@@ -179,6 +177,8 @@ var igv = (function (igv) {
 
             browser.referenceFrame = new igv.ReferenceFrame(firstChrName, 0, firstChr.bpLength / browser.trackViewportWidth());
             browser.controlPanelWidth = 50;
+
+            browser.updateLocusSearch(browser.referenceFrame);
 
             if (browser.ideoPanel) browser.ideoPanel.repaint();
             if (browser.karyoPanel) browser.karyoPanel.repaint();

@@ -1,22 +1,24 @@
+.igv-ruler-sweeper-div {
+
+    display: none;
+
+    pointer-events: none;
+
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 0;
+    height:100%;
+
+    z-index:99999;
+
+    background-color: rgba(68, 134, 247, 0.5);
+}
 
 .validateTips {
     border: 1px solid transparent;
     padding: 0.3em;
 }
-
-/*input[type=search] {*/
-
-    /*width: 128px;*/
-    /*height:28px;*/
-
-    /*font-family: 'PT Sans', sans-serif;*/
-    /*font-size: medium;*/
-    /*font-weight: 400;*/
-    /*color: #444;*/
-
-    /*border: thin solid #444;*/
-    /*border-radius: .25em;*/
-/*}*/
 
 /* navigation bar */
 .igvNavigation {
@@ -41,11 +43,25 @@
     left: 0;
 
     height: 100%;
-    width: 220px;
+    width: 260px;
 
     float: left;
 
     /*background-color: deepskyblue;*/
+}
+
+.igvNavigationSearchInput {
+
+    height: 65%;
+    width: 75%;
+    padding-left: 8px;
+
+    font-family: 'Open Sans', sans-serif;
+    font-size: small;
+    font-weight: 400;
+    color: #444;
+
+
 }
 
 .igvNavigationZoom {
@@ -108,7 +124,7 @@
     left: 0;
 
     width: 100%;
-    height: 24px;
+    height: 20px;
 
     border-bottom-color: #a2a2a2;
     border-bottom-style: solid;
@@ -121,15 +137,14 @@
 .igv-popoverClose {
 
     position: absolute;
-    top: 0;
-    right: 0;
+    top: 3px;
+    right: 3px;
 
     height: 100%;
-    width: 24px;
+    width: 16px;
 
     text-align: center;
-    line-height: 24px;
-
+    line-height: 100%;
 
     color: #444;
 
@@ -140,6 +155,7 @@
 
     cursor: pointer;
     color: #888;
+    font-size: small;
 }
 
 .igv-popoverClose:hover {
@@ -167,6 +183,7 @@
 
 .igv-popoverNameValue {
 
+    cursor: default;
     text-wrap: none;
     white-space:nowrap;
 
@@ -384,6 +401,8 @@
 }
 
 .igv-app-icon {
+
+    cursor: pointer;
     color: grey;
     background-color: white;
 }
@@ -395,6 +414,7 @@
 }
 
 .igv-track-menu-gear {
+    cursor: pointer;
     position: absolute;
     left: 20px;
     top: 0;
@@ -412,6 +432,7 @@
 
 .igv-track-menu-item {
 
+    cursor: pointer;
     padding-left: 4px;
     padding-right: 4px;
 
@@ -457,6 +478,11 @@
 }
 
 .igv-app-icon-container {
+
+    border-color: #444;
+    border-style: solid;
+    border-width: thin;
+
     position: absolute;
     left: 10px;
     top: 4px;
@@ -481,8 +507,8 @@
 
 .igv-content-div {
     position: relative;
-    margin-left: 10px;
-    margin-right: 10px;
+    /*margin-left: 10px;*/
+    /*margin-right: 10px;*/
     left: 0;
     right: 0;
     height:100%;

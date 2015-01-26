@@ -41,11 +41,6 @@
 
 <body>
 
-<p><h3>
-This example accesses a public google resource (a 1kg BAM) using the ga4gh api.  It uses a public API key and will only
-work from localhost or broadinstitute.org
-</h3></p>
-
 <div id="myDiv" style="padding-top: 10px;padding-bottom: 10px;"></div>
 
 <script type="text/javascript">
@@ -63,7 +58,15 @@ work from localhost or broadinstitute.org
                             type: 'bam',
                             url: 'https://www.googleapis.com/genomics/v1beta2',
                             readsetId: 'CMvnhpKTFhCjz9_25e_lCw',
-                            label: 'Ga4gh'}
+                            label: 'Ga4gh Reads'
+                        },
+                        {
+                            sourceType: 'ga4gh',
+                            type: 'vcf',
+                            url: 'https://www.googleapis.com/genomics/v1beta2',
+                            variantSetId: '10473108253681171589',
+                            visibilityWindow: 100000,
+                            label: 'Ga4gh Variants'}
                     ]
                 };
 

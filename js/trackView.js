@@ -27,6 +27,8 @@ var igv = (function (igv) {
 
     igv.TrackView = function (track, browser) {
 
+        var rulerSweeper;
+
         this.track = track;
         this.browser = browser;
 
@@ -65,7 +67,21 @@ var igv = (function (igv) {
 
         this.addRightHandGutterToParentTrackDiv(this.trackDiv);
 
-        addTrackHandlers(this);
+        if (this.track instanceof igv.RulerTrack) {
+
+            this.trackDiv.dataset.rulerTrack = "rulerTrack";
+
+            // ruler sweeper widget surface
+            this.rulerSweeper = $('<div class="igv-ruler-sweeper-div">');
+            $(this.contentDiv).append(this.rulerSweeper[ 0 ]);
+
+            addRulerTrackHandlers(this);
+
+        } else {
+
+            addTrackHandlers(this);
+
+        }
 
     };
 
@@ -98,10 +114,8 @@ var igv = (function (igv) {
 
         if ("CURSOR" !== this.browser.type) {
 
-            trackIconContainer = $('<div class = "igv-app-icon-container">')[0];
-            $(viewportDiv).append(trackIconContainer);
 
-            if (myself.track.description) {
+            if (this.track.description) {
 
                 labelButton = document.createElement("button");
                 viewportDiv.appendChild(labelButton);
@@ -113,17 +127,21 @@ var igv = (function (igv) {
                 labelButton.style.left = "10px";
                 labelButton.innerHTML = this.track.label;
 
-
                 labelButton.onclick = function (e) {
                     igv.popover.presentTrackPopup(e.pageX, e.pageY, myself.track.description);
-                };
+                }
 
             } else {
 
-                this.track.labelSpan = $('<span class="igv-track-label-span-base">')[0];
-                this.track.labelSpan.innerHTML = this.track.label;
-                //$(trackIconContainer).append(this.track.labelSpan);
-                $(this.leftHandGutter).append(this.track.labelSpan);
+                if (this.track.label) {
+                    trackIconContainer = $('<div class="igv-app-icon-container">');
+                    $(viewportDiv).append(trackIconContainer[ 0 ]);
+
+                    this.track.labelSpan = $('<span class="igv-track-label-span-base">')[0];
+                    this.track.labelSpan.innerHTML = this.track.label;
+                    $(trackIconContainer).append(this.track.labelSpan);
+                }
+
             }
 
         } // if ("CURSOR" !== this.browser.type)
@@ -136,7 +154,7 @@ var igv = (function (igv) {
         $(trackDiv).append(this.leftHandGutter);
 
         this.leftHandGutterCreationHelper(this.leftHandGutter);
-       
+
     };
 
     igv.TrackView.prototype.leftHandGutterCreationHelper = function (leftHandGutter) {
@@ -204,7 +222,7 @@ var igv = (function (igv) {
         var trackHeightStr;
 
         trackHeightStr = newHeight + "px";
-       
+
         this.track.height = newHeight;
         this.trackDiv.style.height = trackHeightStr;
 
@@ -244,9 +262,8 @@ var igv = (function (igv) {
         //Don't override an explicit setting (i.e. set by user from menu).
         if (!this.heightSetExplicitly &&
             ((this.track.maxHeight && this.trackDiv.clientHeight < this.track.maxHeight) ||
-                newHeight < this.trackDiv.clientHeight)) {
-                var h = Math.min(this.track.maxHeight, newHeight);                
-            this.setTrackHeight(h, false);
+            newHeight < this.trackDiv.clientHeight)) {
+            this.setTrackHeight(Math.min(this.track.maxHeight, newHeight), false);
         }
 
         if (update === undefined || update === true) this.update();
@@ -313,21 +330,20 @@ var igv = (function (igv) {
                     self.currentLoadTask = undefined;
 
                     if (features) {
-                        //console.log("trackView, success: got features "+JSON.stringify(features));
+
                         // TODO -- adjust track height here.
                         if (self.track.computePixelHeight) {
                             var desiredHeight = self.track.computePixelHeight(features);
-                            //console.log("Computed desiredHeight="+desiredHeight);
                             if (desiredHeight != self.contentDiv.clientHeight) {
                                 self.setContentHeight(desiredHeight, false);
                             }
                         }
-                       
+
                         var buffer = document.createElement('canvas');
                         buffer.width = pixelWidth;
                         buffer.height = self.canvas.height;
                         igvCanvas = new igv.Canvas(buffer);
-                      
+
                         self.track.draw({
                             features: features,
                             context: igvCanvas,
@@ -352,9 +368,6 @@ var igv = (function (igv) {
 
                         self.tile = new Tile(referenceFrame.chr, bpStart, bpEnd, referenceFrame.bpPerPixel, buffer);
                         self.paintImage();
-                    }
-                    else {
-                       // console.log("trackView, success: got NO fetaures");
                     }
 
                 };
@@ -407,8 +420,7 @@ var igv = (function (igv) {
         }
 
 
-    }
-
+    };
 
     function Tile(chr, tileStart, tileEnd, scale, image) {
         this.chr = chr;
@@ -418,17 +430,16 @@ var igv = (function (igv) {
         this.image = image;
     }
 
-
     Tile.prototype.containsRange = function (chr, start, end, scale) {
         return this.scale === scale && start >= this.startBP && end <= this.endBP && chr === this.chr;
     };
 
     Tile.prototype.overlapsRange = function (chr, start, end) {
         return this.chr === chr && this.endBP >= start && this.startBP <= end;
-    }
+    };
 
     igv.TrackView.prototype.paintImage = function () {
-       
+
         this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
 
         if (this.tile) {
@@ -439,6 +450,100 @@ var igv = (function (igv) {
         }
     };
 
+    function addRulerTrackHandlers(trackView) {
+
+        var isMouseDown = undefined,
+            isMouseIn = undefined,
+            mouseDownXY = undefined,
+            mouseMoveXY = undefined,
+            left,
+            rulerSweepWidth,
+            bppRealtime,
+            ppbRealtime,
+            ruleSweepWidthBP,
+            rulerWidth,
+            ppbThreshholdMet,
+            dx;
+
+        $(document).mousedown(function (e) {
+
+            mouseDownXY = igv.translateMouseCoordinates(e, trackView.contentDiv);
+
+            left = mouseDownXY.x;
+            rulerSweepWidth = 0;
+            trackView.rulerSweeper.css( { "display" : "inline", "left" : left + "px", "width" : rulerSweepWidth + "px" } );
+
+            isMouseIn = true;
+        });
+
+
+        $(trackView.contentDiv).mousedown(function(e) {
+
+            isMouseDown = true;
+        });
+
+        $(document).mousemove(function (e) {
+
+            if (isMouseDown && isMouseIn) {
+
+                mouseMoveXY = igv.translateMouseCoordinates(e, trackView.contentDiv);
+                dx = mouseMoveXY.x - mouseDownXY.x;
+
+                rulerSweepWidth = Math.abs(dx);
+                trackView.rulerSweeper.css( { "width" : rulerSweepWidth + "px" } );
+                if (dx < 0) {
+                    left = mouseDownXY.x + dx;
+                    trackView.rulerSweeper.css( { "left" : left + "px" } );
+                }
+
+                ruleSweepWidthBP = igv.browser.referenceFrame.bpPerPixel * rulerSweepWidth;
+                rulerWidth = $(trackView.contentDiv).width();
+                bppRealtime = ruleSweepWidthBP / rulerWidth;
+                ppbRealtime = 1.0/bppRealtime;
+
+                //console.log("bpp-rt " + Math.floor(bppRealtime) + " ppb-rt " + Math.floor(ppbRealtime));
+
+                if (Math.floor(1.0/bppRealtime) > igv.browser.pixelPerBasepairThreshold()) {
+                    ppbThreshholdMet = false;
+                    trackView.rulerSweeper.css( { backgroundColor: 'rgba(64, 64, 64, 0.125)' } );
+                } else {
+                    ppbThreshholdMet = true;
+                    trackView.rulerSweeper.css( { backgroundColor: 'rgba(68, 134, 247, 0.75)' } );
+                }
+
+            }
+
+        });
+
+        $(document).mouseup(function (e) {
+
+            var locus,
+                ss,
+                ee;
+
+            if (isMouseDown) {
+
+                isMouseDown = false;
+                isMouseIn = false;
+
+                trackView.rulerSweeper.css( { "display" : "none", "left" : 0 + "px", "width" : 0 + "px" } );
+
+                if (ppbThreshholdMet) {
+
+                    ss = Math.floor(igv.browser.referenceFrame.start + (left * igv.browser.referenceFrame.bpPerPixel));
+                    ee = ss + Math.floor(rulerSweepWidth * igv.browser.referenceFrame.bpPerPixel);
+
+                    locus = igv.browser.referenceFrame.chr + ":" + igv.numberFormatter(ss) + "-" + igv.numberFormatter(ee);
+                    igv.browser.search(locus, undefined);
+                }
+
+            }
+
+
+        });
+
+    }
+
     function addTrackHandlers(trackView) {
 
         // Register track handlers for popup.  Although we are not handling dragging here, we still need to check
@@ -447,12 +552,11 @@ var igv = (function (igv) {
         var isMouseDown = false,
             lastMouseX = undefined,
             mouseDownX = undefined,
-            canvas = trackView.canvas,
             popupTimer;
 
-        $(canvas).mousedown(function (e) {
+        $(trackView.canvas).mousedown(function (e) {
 
-            var canvasCoords = igv.translateMouseCoordinates(e, canvas);
+            var canvasCoords = igv.translateMouseCoordinates(e, trackView.canvas);
 
             if (igv.popover) {
                 igv.popover.hide();
@@ -465,12 +569,11 @@ var igv = (function (igv) {
 
         });
 
-
-        $(canvas).mouseup(function (e) {
+        $(trackView.canvas).mouseup(function (e) {
 
             e = $.event.fix(e);   // Sets pageX and pageY for browsers that don't support them
 
-            var canvasCoords = igv.translateMouseCoordinates(e, canvas),
+            var canvasCoords = igv.translateMouseCoordinates(e, trackView.canvas),
                 referenceFrame = trackView.browser.referenceFrame,
                 genomicLocation = Math.floor((referenceFrame.start) + referenceFrame.toBP(canvasCoords.x));
 
@@ -520,7 +623,6 @@ var igv = (function (igv) {
             lastMouseX = undefined;
 
         });
-
 
     }
 

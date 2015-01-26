@@ -5,7 +5,7 @@ function runBEDUnitTests() {
         var chr = "chr1",
             bpStart = 67655271,
             bpEnd   = 67684468,
-            featureSource = new igv.BedFeatureSource({
+            featureSource = new igv.FeatureSource({
                 type: 'bed',
                 url: 'data/bed/basic_feature_3_columns.bed'
             });
@@ -23,7 +23,7 @@ function runBEDUnitTests() {
 
     asyncTest("BED all features", function () {
 
-        var featureSource = new igv.BedFeatureSource({
+        var featureSource = new igv.FeatureSource({
                 type: 'bed',
                 url: 'data/bed/basic_feature_3_columns.bed'
             });
@@ -43,7 +43,7 @@ function runBEDUnitTests() {
         var chr = "chr1",
             bpStart = 67655271,
             bpEnd   = 67684468,
-            featureSource = new igv.BedFeatureSource({
+            featureSource = new igv.FeatureSource({
                 type: 'bed',
                 url: 'data/bed/basic_feature_3_columns.bed.gz'
             });
@@ -66,7 +66,7 @@ function runBEDUnitTests() {
             bpStart,
             bpEnd;
 
-        featureSource = new igv.BedFeatureSource({
+        featureSource = new igv.FeatureSource({
             type: 'broadPeak',
             url: "data/peak/test.broadPeak"
         });

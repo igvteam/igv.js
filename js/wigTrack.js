@@ -43,7 +43,7 @@ var igv = (function (igv) {
             this.featureSource = new igv.BWSource(config);
         }
         else {
-            this.featureSource = new igv.BedFeatureSource(config);
+            this.featureSource = new igv.FeatureSource(config);
         }
 
 
