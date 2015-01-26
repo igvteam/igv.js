@@ -95,6 +95,10 @@ var igv = (function (igv) {
             decode = decodeWig;
             //wig = {};
         }
+        else if (type === "aneu") {
+            decode = decodeAneu;
+            //wig = {};
+        }
         else {
             decode = decodeBed;
         }
@@ -136,6 +140,35 @@ var igv = (function (igv) {
         return allFeatures;
     };
 
+    function decodeAneu(tokens, ignore) {
+
+        var chr, start, end, id, name, tmp, idName, strand, cdStart, feature,
+            eStart, eEnd;
+
+        
+        if (tokens.length < 4) return null;
+
+       // console.log("Decoding aneu.tokens="+JSON.stringify(tokens));
+        chr = tokens[1];
+        start = parseInt(tokens[2]);
+        end = tokens.length > 3 ? parseInt(tokens[3]) : start + 1;
+
+        feature = {chr: chr, start: start, end: end};
+        
+        if (tokens.length > 4) {
+            feature.score = parseFloat(tokens[4]);
+            feature.value = feature.score;
+        }
+        
+                
+        feature.popupData = function () {
+            return [ { name : "Name", value : feature.name } ];
+        };
+
+        return feature;
+
+    }
+    
     function parseFixedStep(line) {
 
         var tokens = line.split(/\s+/),
