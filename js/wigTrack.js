@@ -63,7 +63,7 @@ var igv = (function (igv) {
     igv.WIGTrack.prototype.getFeatures = function (chr, bpStart, bpEnd, continuation, task) {
 
         this.featureSource.getFeatures(chr, bpStart, bpEnd, continuation, task)
-    }
+    };
 
 
     igv.WIGTrack.prototype.draw = function (options) {
@@ -76,17 +76,19 @@ var igv = (function (igv) {
             pixelWidth = options.pixelWidth,
             pixelHeight = options.pixelHeight,
             bpEnd = bpStart + pixelWidth * bpPerPixel + 1,
-            featureMin, featureMax, denom;
+            featureValueMinimum,
+            featureValueMaximum,
+            featureValueRange;
 
         if (features && features.length > 0) {
-            featureMin = track.min ? track.min : 0;
-            featureMax = track.max;
-            if (featureMax === undefined) {
+            featureValueMinimum = track.min ? track.min : 0;
+            featureValueMaximum = track.max;
+            if (featureValueMaximum === undefined) {
                 var s = autoscale(features);
-                featureMin = s.min;
-                featureMax = s.max;
+                featureValueMinimum = s.min;
+                featureValueMaximum = s.max;
             }
-            denom = featureMax - featureMin;
+            featureValueRange = featureValueMaximum - featureValueMinimum;
 
             features.forEach(renderFeature);
         }
@@ -94,25 +96,48 @@ var igv = (function (igv) {
 
         function renderFeature(feature, index, featureList) {
 
-            var centroid = 128,
-                delta = 32,
-                rectOrigin,
+            var yUnitless,
+                heightUnitLess,
+                x,
+                y,
+                width,
+                height,
                 rectEnd,
-                rectWidth,
-                rectHeight,
-                rectBaseline,
-                rect;
+                rectBaseline;
 
             if (feature.end < bpStart) return;
             if (feature.start > bpEnd) return;
 
-            rectOrigin = (feature.start - bpStart) / bpPerPixel;
+            x = (feature.start - bpStart) / bpPerPixel;
             rectEnd = (feature.end - bpStart) / bpPerPixel;
-            rectWidth = Math.max(1, rectEnd - rectOrigin);
-            rectHeight = ((feature.value - featureMin) / denom) * pixelHeight;
-            rectBaseline = pixelHeight - rectHeight;
+            width = Math.max(1, rectEnd - x);
 
-            canvas.fillRect(rectOrigin, rectBaseline, rectWidth, rectHeight, {fillStyle: track.color});
+            //height = ((feature.value - featureValueMinimum) / featureValueRange) * pixelHeight;
+            //rectBaseline = pixelHeight - height;
+            //canvas.fillRect(rectOrigin, rectBaseline, rectWidth, rectHeight, {fillStyle: track.color});
+
+            if (signsDiffer(featureValueMinimum, featureValueMaximum)) {
+
+                if (feature.value < 0) {
+                    yUnitless = featureValueMaximum/featureValueRange;
+                    heightUnitLess = -feature.value/featureValueRange;
+                } else {
+                    yUnitless = ((featureValueMaximum - feature.value)/featureValueRange);
+                    heightUnitLess = feature.value/featureValueRange;
+                }
+
+            }
+            else if (featureValueMaximum < 0) {
+                yUnitless = 0;
+                heightUnitLess = -feature.value/featureValueRange;
+            }
+            else {
+                yUnitless = 1.0 - feature.value/featureValueRange ;
+                heightUnitLess = feature.value/featureValueRange;
+            }
+
+            //canvas.fillRect(x, yUnitless * pixelHeight, width, heightUnitLess * pixelHeight, { fillStyle: igv.randomRGB(64, 255) });
+            canvas.fillRect(x, yUnitless * pixelHeight, width, heightUnitLess * pixelHeight, { fillStyle: track.color });
 
         }
 
@@ -129,6 +154,10 @@ var igv = (function (igv) {
 
         return {min: min, max: max};
 
+    }
+
+    function signsDiffer(a, b) {
+        return (a > 0 && b < 0 || a < 0 && b > 0);
     }
 
     return igv;
