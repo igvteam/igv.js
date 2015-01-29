@@ -202,9 +202,7 @@ var igv = (function (igv) {
                 lseq,
                 mateRefID,
                 matePos,
-                tlen,
                 readName,
-                i,
                 j,
                 p,
                 lengthOnRef,
@@ -212,8 +210,7 @@ var igv = (function (igv) {
                 c,
                 cigarArray,
                 seq,
-                seqBytes,
-                qseq;
+                seqBytes;
 
             while (true) {
 
@@ -247,10 +244,8 @@ var igv = (function (igv) {
                 lseq = readInt(ba, offset + 20);
 
                 mateRefID = readInt(ba, offset + 24);
-                record.matePos = readInt(ba, offset + 28);
-
-
-                record.tlen = readInt(ba, offset + 32);
+                matePos = readInt(ba, offset + 28);
+                record.fragmentLength = readInt(ba, offset + 32);
 
                 readName = '';
                 for (j = 0; j < nl - 1; ++j) {
@@ -319,7 +314,14 @@ var igv = (function (igv) {
                 record.mq = mq;
                 record.readName = readName;
                 record.chr = bam.indexToChr[refID];
-                record.mateChr = bam.indexToChr[mateRefID];
+
+                if(mateRefID >= 0) {
+                    record.mate = {
+                        chr: bam.indexToChr[mateRefID],
+                        position: matePos
+                    };
+                }
+
 
                 record.tagBA = new Uint8Array(ba.buffer.slice(p, blockEnd));  // decode thiese on demand
                 p += blockEnd;
