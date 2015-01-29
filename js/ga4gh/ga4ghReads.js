@@ -66,43 +66,68 @@ var igv = (function (igv) {
             jsonRecords = json.alignments,
             len = jsonRecords.length,
             json,
+            read,
             alignment,
             cigarDecoded,
-            alignments = [];
+            alignments = [],
+            genome = igv.browser.genome,
+            mate;
 
         for (i = 0; i < len; i++) {
 
             json = jsonRecords[i];
 
-            alignment = new igv.BamAlignment();
+            read = new igv.BamAlignment();
 
-            alignment.readName = json.fragmentName;
-            alignment.tlen = json.fragmentLength;
+            read.readName = json.fragmentName;
+            read.properPlacement = json.properPlacement;
+            read.duplicateFragment = json.duplicateFragment;
+            read.numberReads = json.numberReads;
+            read.fragmentLength = json.fragmentLength;
+            read.readNumber = json.readNumber;
+            read.failedVendorQualityChecks = json.failedVendorQualityChecks;
+            read.secondaryAlignment = json.secondaryAlignment;
+            read.supplementaryAlignment = json.supplementaryAlignment;
 
-            alignment.chr = json.alignment.position.referenceName;
-            alignment.start = parseInt(json.alignment.position.position);   // TODO -- this should be a long?
-            alignment.strand = !(json.alignment.position.reverseStrand);
-            alignment.mq = json.alignment.mappingQuality;
-            alignment.cigar = encodeCigar(json.alignment.cigar);
+            read.seq = json.alignedSequence;
+            read.qual = json.alignedQuality;
+            read.matePos = json.nextMatePosition;
+            read.tagDict = json.info;
 
-            alignment.seq = json.alignedSequence;
-            alignment.qual = json.alignedQuality;
+            read.flags = encodeFlags(json);
 
-            alignment.matePos = json.nextMatePosition;
 
-            alignment.numberReads = json.numberReads;
+            alignment = json.alignment;
+            if (alignment) {
+                read.mapped = true;
 
-            alignment.tagDict = json.info;
+                read.chr = json.alignment.position.referenceName;
+                if (genome) read.chr = genome.getChromosomeName(read.chr);
 
-            cigarDecoded = translateCigar(json.alignment.cigar);
+                read.start = parseInt(json.alignment.position.position);
+                read.strand = !(json.alignment.position.reverseStrand);
+                read.mq = json.alignment.mappingQuality;
+                read.cigar = encodeCigar(json.alignment.cigar);
+                cigarDecoded = translateCigar(json.alignment.cigar);
 
-            alignment.lengthOnRef = cigarDecoded.lengthOnRef;
+                read.lengthOnRef = cigarDecoded.lengthOnRef;
 
-            alignment.blocks = makeBlocks(alignment, cigarDecoded.array);
+                read.blocks = makeBlocks(read, cigarDecoded.array);
+            }
+            else {
+                read.mapped = false;
+            }
 
-            alignment.flags = encodeFlags(json);
+            mate = json.nextMatePosition;
+            if (mate) {
+                read.mate = {
+                    chr: mate.referenceFrame,
+                    position: parseInt(mate.position),
+                    strand: !mate.reverseStrand
+                };
+            }
 
-            alignments.push(alignment);
+            alignments.push(read);
 
         }
 
