@@ -86,7 +86,7 @@ var igv = (function (igv) {
 
         // Set the track type, if not explicitly specified
         if (!config.type) {
-            config.type = igv.inferFileType(config.url || config.localFile.name);
+            config.type = igv.inferFileType(config.url || (config.localFile && config.localFile.name));
         }
 
 
