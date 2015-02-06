@@ -257,6 +257,7 @@ var igv = (function (igv) {
 
                         refBase = sequence[i];
                         if (item.isMismatch(refBase)) {
+
                             x = (bp - bpStart) / bpPerPixel;
                             h = (item.total / coverageMap.maximum) * myself.coverageTrackHeight;
                             y = myself.coverageTrackHeight - h;
@@ -326,7 +327,7 @@ var igv = (function (igv) {
 
                         canvas.setProperties({fillStyle: alignmentColor});
 
-                        blocks.forEach(function (block, blockIndex) {
+                        blocks.forEach(function (block, bi, bs) {
                             var refOffset = block.start - bpStart,
                                 seqOffset = block.start - sequenceStart,
                                 blockRectX = refOffset / bpPerPixel,
@@ -342,12 +343,12 @@ var igv = (function (igv) {
                                 baseColor,
                                 i;
 
-                            if (strand && blockIndex === len - 1) {
+                            if (strand && bi === len - 1) {
                                 x = [xRectStart, xRectEnd, xRectEnd + arrowHeadWidth, xRectEnd, xRectStart];
                                 y = [yRect, yRect, yRect + height / 2, yRect + height, yRect + height];
                                 canvas.fillPolygon(x, y);
 
-                            } else if (!strand && blockIndex === 0) {
+                            } else if (!strand && bi === 0) {
                                 var x = [ blockRectX - arrowHeadWidth, blockRectX, blockEndX, blockEndX, blockRectX];
                                 var y = [ yRect + height / 2, yRect, yRect, yRect + height, yRect + height];
                                 canvas.fillPolygon(x, y);
@@ -370,7 +371,7 @@ var igv = (function (igv) {
                                     if (readChar === "X" || refChar !== readChar) {
                                         if (blockQual && blockQual.length > i) {
                                             readQual = blockQual[i];
-                                            baseColor = shadedBaseColor(readQual, readChar);
+                                            baseColor = shadedBaseColor(readQual, readChar, i + block.start);
                                         }
                                         else {
                                             baseColor = igv.nucleotideColors[readChar];
@@ -495,7 +496,7 @@ var igv = (function (igv) {
     };
 
 
-    function shadedBaseColor(qual, nucleotide) {
+    function shadedBaseColor(qual, nucleotide, genomicLocation) {
 
         var color,
             alpha,
@@ -503,6 +504,12 @@ var igv = (function (igv) {
             maxQ = 20,  //prefs.getAsInt(PreferenceManager.SAM_BASE_QUALITY_MAX);
             foregroundColor = igv.nucleotideColorComponents[nucleotide],
             backgroundColor = [255, 255, 255];   // White
+
+
+        if (61889529 === genomicLocation) {
+            // NOTE: Add 1 when presenting genomic location
+            console.log("shadedBaseColor - locus " + igv.numberFormatter(1 + genomicLocation) + " qual " + qual);
+        }
 
         if (!foregroundColor) return;
 

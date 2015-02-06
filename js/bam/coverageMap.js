@@ -101,7 +101,7 @@ var igv = (function (igv) {
     };
 
 
-    igv.CoverageMap = function (chr, start, end, features, refSeq) {
+    igv.CoverageMap = function (chr, start, end, alignments, refSeq) {
 
         var myself;
 
@@ -117,9 +117,9 @@ var igv = (function (igv) {
 
         this.maximum = 0;
         myself = this;
-        features.forEach(function (alignment) {
+        alignments.forEach(function (alignment, ai, as) {
 
-            alignment.blocks.forEach(function (block) {
+            alignment.blocks.forEach(function (block, bi, bs) {
 
                 var key,
                     base,
@@ -144,6 +144,11 @@ var igv = (function (igv) {
                     myself.coverage[ i ].qual += q;
 
                     myself.maximum = Math.max(myself.coverage[ i ].total, myself.maximum);
+
+                    if (61889529 === (j + block.start)) {
+                        // NOTE: Add 1 when presenting genomic location
+                        console.log("locus " + igv.numberFormatter(1 + 61889529) + " base " + base + " qual " + q);
+                    }
                 }
 
             });
