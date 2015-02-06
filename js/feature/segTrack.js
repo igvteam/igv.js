@@ -290,10 +290,11 @@ var igv = (function (igv) {
             bpStart = genomicLocation - bpWidth,
             bpEnd = genomicLocation + bpWidth,
             chr = refFrame.chr,
-            track = this;
+            myself = this;
 
         this.sortSamples(chr, bpStart, bpEnd, sortDirection, function () {
-            track.trackView.update();
+            myself.trackView.update();
+            $(myself.trackView.viewportDiv).scrollTop( 0 );
         });
 
         sortDirection *= -1;

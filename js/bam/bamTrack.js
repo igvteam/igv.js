@@ -28,6 +28,7 @@
  */
 var igv = (function (igv) {
 
+    var sortDirection = 1;
 
     igv.BAMTrack = function (config) {
 
@@ -50,6 +51,110 @@ var igv = (function (igv) {
 
         this.maxHeight = config.maxHeight || 500;
     };
+    
+    igv.BAMTrack.prototype.sortAlignmentRows = function (chr, bpStart, bpEnd, direction, callback) {
+
+        this.featureSource.getFeatures(chr, bpStart, bpEnd, function (genomicInterval) {
+
+            traverseAlignmentRows(chr, bpStart, bpEnd, genomicInterval, direction);
+
+            callback();
+
+        });
+    };
+
+    function traverseAlignmentRows(chr, bpStart, bpEnd, genomicInterval, sortDirection) {
+
+        var alignmentRows = genomicInterval.packedAlignments.slice(0),
+            sequence = genomicInterval.sequence,
+            scoreboard = { 'A' : 512, 'C' : 256, 'G' : 128, 'T' : 64 },
+            scores;
+
+        scores = [];
+        scores.length = alignmentRows.length;
+
+        if (sequence) {
+            sequence = sequence.toUpperCase();
+        } else {
+            console.log("No sequence, no traversal. No discussion!");
+            return;
+        }
+
+        alignmentRows.forEach(function (alignmentRow, ar_i, ars) {
+
+            scores[ ar_i ] = { 'score' : 4, 'index' : ar_i };
+
+            alignmentRow.forEach(function (alignment, a_i, as) {
+
+                if ((alignment.start + alignment.lengthOnRef) < bpStart || alignment.start > bpEnd) {
+                    // do nothing
+                } else {
+
+                    alignment.blocks.forEach(function (block, bl_i, bls) {
+
+                        /*
+                         block definition - { start, len, seq, qual }
+                         */
+
+                        var referenceSequenceOffset,
+                            refChar,
+                            readChar,
+                            i;
+
+                        if ("*" !== block.seq) {
+
+                            referenceSequenceOffset = block.start - genomicInterval.start;
+                            for (i = 0; i < block.seq.length; i++) {
+
+                                //
+                                if (bpStart === (i + block.start)) {
+
+                                    readChar = block.seq.charAt(i);
+                                    refChar = sequence.charAt(i + referenceSequenceOffset);
+                                    if (readChar === "=") {
+                                        scores[ ar_i ] = { 'score' : 8, 'index' : ar_i };
+                                    } else {
+                                        scores[ ar_i ] = { 'score' : scoreboard[ readChar ], 'index' : ar_i };
+                                    }
+
+                                }
+
+                            } // block.seq.length
+
+                        }
+
+                    }); // alignment.blocks
+                }
+
+            }); // alignmentRow
+
+        }); // alignmentRows
+
+        scores.sort(function(a, b) {
+            var sa = a.score,
+                sb = b.score;
+            return (sortDirection < 0) ? sa - sb : sb - sa;
+        });
+
+        scores.forEach(function(s, i, ss){
+            console.log("i " + i + " index " + s.index + " score " + s.score);
+            genomicInterval.packedAlignments[ i ] = alignmentRows[ s.index ];
+        });
+
+    }
+
+    igv.BAMTrack.prototype.altClick = function (genomicLocation, event) {
+
+        var chr = igv.browser.referenceFrame.chr,
+            myself = this;
+
+        this.sortAlignmentRows(chr, genomicLocation, (1 + genomicLocation), sortDirection, function () {
+            myself.trackView.update();
+            $(myself.trackView.viewportDiv).scrollTop(0);
+        });
+
+        sortDirection *= -1;
+    };
 
     igv.BAMTrack.prototype.getFeatures = function (chr, bpStart, bpEnd, continuation, task) {
 
@@ -61,7 +166,7 @@ var igv = (function (igv) {
 
         this.featureSource.getFeatures(chr, bpStart, bpEnd, continuation, task);
 
-    }
+    };
 
     igv.BAMTrack.prototype.draw = function (options) {
 
@@ -270,6 +375,7 @@ var igv = (function (igv) {
                                         else {
                                             baseColor = igv.nucleotideColors[readChar];
                                         }
+
                                         if (baseColor) {
                                             basePixelPosition = ((block.start + i) - bpStart) / bpPerPixel;
                                             basePixelWidth = Math.max(1, 1 / bpPerPixel);
@@ -370,7 +476,6 @@ var igv = (function (igv) {
 
     };
 
-
     /**
      * Optional method to compute pixel height to accomodate the list of features.  The implementation below
      * has side effects (modifiying the samples hash).  This is unfortunate, but harmless.
@@ -387,7 +492,7 @@ var igv = (function (igv) {
             return this.height;
         }
 
-    }
+    };
 
 
     function shadedBaseColor(qual, nucleotide) {

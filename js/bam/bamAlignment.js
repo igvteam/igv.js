@@ -194,7 +194,7 @@ var igv = (function (igv) {
             if (this.isMapped()) {
                 nameValues.push({ name: 'Mate Start', value: this.matePos });
                 nameValues.push({ name: 'Mate Strand', value: (this.isMateNegativeStrand() ? '(-)' : '(+)') });
-                nameValues.push({ name: 'Insert Size', value: this.tlen });
+                nameValues.push({ name: 'Insert Size', value: this.fragmentLength });
                 // Mate Start
                 // Mate Strand
                 // Insert Size
