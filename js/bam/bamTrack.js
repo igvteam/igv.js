@@ -245,7 +245,7 @@ var igv = (function (igv) {
                     // coverage mismatch coloring
                     if (sequence) {
 
-                        if (171167156 === bp) {
+                        if (61889562 === bp) {
                             console.log("bp " + igv.numberFormatter(bp));
                         }
 
@@ -256,7 +256,7 @@ var igv = (function (igv) {
                             canvas.fillRect(x, y, w, h);
 
                             accumulatedHeight = 0.0;
-                            ["A", "C", "T", "G", "N"].forEach(function(nucleotide){
+                            [ "A", "C", "T", "G" ].forEach(function(nucleotide){
 
                                 var count,
                                     hh;
@@ -517,7 +517,7 @@ var igv = (function (igv) {
             backgroundColor = [255, 255, 255];   // White
 
 
-        if (171167156 === genomicLocation) {
+        if (61889562 === genomicLocation) {
             // NOTE: Add 1 when presenting genomic location
             console.log("shadedBaseColor - locus " + igv.numberFormatter(1 + genomicLocation) + " qual " + qual);
         }

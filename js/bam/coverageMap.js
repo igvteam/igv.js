@@ -35,6 +35,7 @@ var igv = (function (igv) {
      */
     var allBases = ["A", "C", "T", "G", "N"];
     var threshold = 0.2;
+    var qualityWeight = true;
 
     function Coverage() {
         this.posA = 0;
@@ -68,17 +69,18 @@ var igv = (function (igv) {
 
     Coverage.prototype.isMismatch = function (refBase) {
 
-        var sum = 0,
-            myself = this;
+        var mismatchQualitySum = 0,
+            myself = this,
+            thresh = threshold * (qualityWeight ? this.qual : this.total);
 
-        allBases.forEach(function (base) {
+        [ "A", "T", "C", "G" ].forEach(function (base) {
 
             if (base !== refBase) {
-                sum += (myself[ "pos" + base] + myself[ "neg" + base])/* * myself[ "qual" + base]*/;
+                mismatchQualitySum += (qualityWeight ? myself[ "qual" + base] : (myself[ "pos" + base ] + myself[ "neg" + base ]));
             }
         });
 
-        return (sum / this.total/* * this.qual*/) > threshold;
+        return mismatchQualitySum >= thresh;
 
     };
 
@@ -126,9 +128,9 @@ var igv = (function (igv) {
 
                     myself.maximum = Math.max(myself.coverage[ i ].total, myself.maximum);
 
-                    if (171167156 === (j + block.start)) {
+                    if (61889562 === (j + block.start)) {
                         // NOTE: Add 1 when presenting genomic location
-                        console.log("locus " + igv.numberFormatter(1 + 171167156) + " base " + base + " qual " + q);
+                        console.log("locus " + igv.numberFormatter(1 + 61889562) + " base " + base + " qual " + q);
                     }
                 }
 
