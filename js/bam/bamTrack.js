@@ -245,6 +245,10 @@ var igv = (function (igv) {
                     // coverage mismatch coloring
                     if (sequence) {
 
+                        if (171167156 === bp) {
+                            console.log("bp " + igv.numberFormatter(bp));
+                        }
+
                         refBase = sequence[i];
                         if (item.isMismatch(refBase)) {
 
@@ -252,37 +256,31 @@ var igv = (function (igv) {
                             canvas.fillRect(x, y, w, h);
 
                             accumulatedHeight = 0.0;
-
                             ["A", "C", "T", "G", "N"].forEach(function(nucleotide){
 
-                                var fraction,
-                                    count,
+                                var count,
                                     hh;
 
                                 count = item[ "pos" + nucleotide] + item[ "neg" + nucleotide];
-                                hh = h * (count/item.total);
+
+
+                                // non-logoritmic
+                                hh = (count / coverageMap.maximum) * myself.coverageTrackHeight;
+
+                                // logoritmic
+                                //hh = (((count/item.total) * log10(1 + item.total)) / coverageMap.maximum) * myself.coverageTrackHeight;
+
 
                                 y = (myself.coverageTrackHeight - hh) - accumulatedHeight;
-
                                 accumulatedHeight += hh;
 
                                 canvas.setProperties({ fillStyle: igv.nucleotideColors[ nucleotide ] });
                                 canvas.fillRect(x, y, w, hh);
 
+                                function log10(val) {
+                                    return Math.log(val) / Math.LN10;
+                                }
                             });
-
-
-                            //coverageMap.coverage[i].mismatchPercentages(refBase).forEach(function (fraction, index, fractions) {
-                            //
-                            //    h = fraction.percent * (item.total / coverageMap.maximum) * myself.coverageTrackHeight;
-                            //
-                            //    y = (myself.coverageTrackHeight - h) - accumulatedHeight;
-                            //
-                            //    accumulatedHeight += h;
-                            //
-                            //    canvas.setProperties({ fillStyle: igv.nucleotideColors[ fraction.base ] });
-                            //    canvas.fillRect(x, y, w, h);
-                            //});
 
                         }
 
@@ -519,7 +517,7 @@ var igv = (function (igv) {
             backgroundColor = [255, 255, 255];   // White
 
 
-        if (61889529 === genomicLocation) {
+        if (171167156 === genomicLocation) {
             // NOTE: Add 1 when presenting genomic location
             console.log("shadedBaseColor - locus " + igv.numberFormatter(1 + genomicLocation) + " qual " + qual);
         }

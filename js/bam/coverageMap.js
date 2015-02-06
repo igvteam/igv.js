@@ -70,36 +70,17 @@ var igv = (function (igv) {
 
         var sum = 0,
             myself = this;
-        allBases.forEach(function (base) {
-            var key = "qual" + base;
-            if (base !== refBase) {
-                sum += myself[key];
-            }
-        });
-        return sum / this.qual > threshold;
-
-    };
-
-    Coverage.prototype.mismatchPercentages = function(refBase) {
-
-        var fractions = [],
-            myself = this;
 
         allBases.forEach(function (base) {
-            var bTotal;
+
             if (base !== refBase) {
-                bTotal = myself["pos" + base] + myself["neg" + base];
-                fractions.push( { base: base, percent: bTotal/myself.total } );
+                sum += myself[ "pos" + base] + myself[ "neg" + base];
             }
         });
 
-        fractions.sort(function(a, b) {
-            return a.percent - b.percent;
-        });
+        return sum / this.total > threshold;
 
-        return fractions;
     };
-
 
     igv.CoverageMap = function (chr, start, end, alignments, refSeq) {
 
@@ -145,9 +126,9 @@ var igv = (function (igv) {
 
                     myself.maximum = Math.max(myself.coverage[ i ].total, myself.maximum);
 
-                    if (61889529 === (j + block.start)) {
+                    if (171167156 === (j + block.start)) {
                         // NOTE: Add 1 when presenting genomic location
-                        console.log("locus " + igv.numberFormatter(1 + 61889529) + " base " + base + " qual " + q);
+                        console.log("locus " + igv.numberFormatter(1 + 171167156) + " base " + base + " qual " + q);
                     }
                 }
 
