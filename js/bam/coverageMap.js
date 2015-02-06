@@ -74,11 +74,11 @@ var igv = (function (igv) {
         allBases.forEach(function (base) {
 
             if (base !== refBase) {
-                sum += myself[ "pos" + base] + myself[ "neg" + base];
+                sum += (myself[ "pos" + base] + myself[ "neg" + base])/* * myself[ "qual" + base]*/;
             }
         });
 
-        return sum / this.total > threshold;
+        return (sum / this.total/* * this.qual*/) > threshold;
 
     };
 
