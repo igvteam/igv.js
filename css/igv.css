@@ -1,3 +1,39 @@
+/* Bend jQuery UI to my will*/
+.ui-widget {
+
+    font-family: 'PT Sans', sans-serif;
+    /*font-family: Lucida Grande,Lucida Sans,Arial,sans-serif;*/
+    /*font-size: 1.1em;*/
+    font-size: medium;
+    font-weight: 400;
+}
+.ui-widget .ui-widget {
+    /*font-size: 1em;*/
+    font-size: medium;
+    font-weight: 400;
+}
+.ui-widget input,
+.ui-widget select,
+.ui-widget textarea,
+.ui-widget button {
+    font-family: 'PT Sans', sans-serif;
+    /*font-family: Lucida Grande,Lucida Sans,Arial,sans-serif;*/
+    /*font-size: 1em;*/
+    font-size: medium;
+    font-weight: 400;
+}
+
+.ui-widget-header {
+    font-weight: 400;
+}
+
+/* IGV classes */
+div.ui-dialog fieldset {
+    border: 0;
+}
+
+
+
 .igv-ruler-sweeper-div {
 
     display: none;

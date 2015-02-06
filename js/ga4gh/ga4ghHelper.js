@@ -26,9 +26,24 @@
 var igv = (function (igv) {
 
 
+    igv.ga4ghGet = function (requestJson) {
+
+        var url = requestJson.url + "/" + requestJson.entity + "/" + requestJson.entityId;
+        if (requestJson.authKey) {
+            url = url + "?key=" + requestJson.authKey;
+        }
+
+        igvxhr.loadJson(url,
+            {
+                success: requestJson.success,
+                task: requestJson.task
+            });
+    }
+
+
     igv.ga4ghSearch = function (requestJson) {
 
-        var results,
+        var results = [],
             url = requestJson.url,
             body = requestJson.body,
             decode = requestJson.decode,
@@ -61,12 +76,18 @@ var igv = (function (igv) {
 
                             tmp = decode ? decode(json) : json;
 
-                            results = results ? results.concat(tmp) : tmp;
+                            tmp.forEach(function (a) {
+                                var keep = true;           // TODO -- conditionally keep (downsample)
+                                if (keep) {
+                                    results.push(a);
+                                }
+                            });
+
 
                             nextPageToken = json["nextPageToken"];
 
                             if (nextPageToken) {
-                                loadChunk(nextPageToken);  // TODO -- these should be processed (downsampled) here
+                                loadChunk(nextPageToken);
                             }
                             else {
                                 success(results);
@@ -79,20 +100,6 @@ var igv = (function (igv) {
                     }
                 });
         }
-    }
-
-    igv.ga4ghGet = function (requestJson) {
-
-        var url = requestJson.url + "/" + requestJson.entity + "/" + requestJson.entityId;
-        if (requestJson.authKey) {
-            url = url + "?key=" + requestJson.authKey;
-        }
-
-        igvxhr.loadJson(url,
-            {
-                success: requestJson.success,
-                task: requestJson.task
-            });
     }
 
 

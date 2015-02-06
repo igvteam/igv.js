@@ -77,7 +77,7 @@
     <script type="text/javascript" src="js/binary.js"></script>
 
     <script type="text/javascript" src="js/gtex/eqtlTrack.js"></script>
-    <script type="text/javascript" src="js/gtex/gtexSource.js"></script>
+    <script type="text/javascript" src="js/gtex/gtexReader.js"></script>
     <script type="text/javascript" src="js/gtex/gtex.js"></script>
     <script type="text/javascript" src="js/gtex/immvarReader.js"></script>
 
@@ -164,6 +164,27 @@
         <h3>Example tracks - click to load</h3>
 
         <div onclick="igv.browser.loadTrack({
+                                 type : 'wig',
+                                  url : 'https://dl.dropboxusercontent.com/u/11270323/BroadInstitute/dataFormats/WIG/random_5000_lo_0dot1_hi_1.wig',
+                                label : 'Random 0.1 to 1.0'
+                                })">Random 0.1 to 1.0
+        </div>
+
+        <div onclick="igv.browser.loadTrack({
+                                 type : 'wig',
+                                  url : 'https://dl.dropboxusercontent.com/u/11270323/BroadInstitute/dataFormats/WIG/random_10000.wig',
+                                label : 'Random -1 to +1'
+                                })">Random -1 to +1
+        </div>
+
+        <div onclick="igv.browser.loadTrack({
+                                 type : 'wig',
+                                  url : 'https://dl.dropboxusercontent.com/u/11270323/BroadInstitute/dataFormats/WIG/random_5000_lo_neg_1_hi_0.wig',
+                                label : 'Random -1 to 0'
+                                })">Random Random -1 to 0
+        </div>
+
+        <div onclick="igv.browser.loadTrack({
                                 type: 'bam',
                                 url: 'http://www.broadinstitute.org/igvdata/1KG/b37/data/NA06984/alignment/NA06984.mapped.ILLUMINA.bwa.CEU.low_coverage.20120522.bam',
                                 label: 'NA06984'})">NA06984 (Broad server BAM file)
@@ -195,6 +216,7 @@
         <div onclick="igv.browser.loadTrack({
                                 type: 'eqtl',
                                 url: '//www.gtexportal.org/igv/assets/eqtl/Skin_Sun_Exposed_Lower_leg.portal.eqtl.bin',
+                                indexed: false,
                                 label: 'Skin Sun Exposed Lower leg'})">EQTL Skin (GTEX))
         </div>
 
@@ -257,7 +279,7 @@
 
         div = $("#myDiv")[0];
         options = {
-            showKaryo: true,
+            showKaryo: false,
             showNavigation: true,
             fastaURL: "//dn7ywbm9isq8j.cloudfront.net/genomes/seq/hg19/hg19.fasta",
             cytobandURL: "//dn7ywbm9isq8j.cloudfront.net/genomes/seq/hg19/cytoBand.txt",
@@ -269,11 +291,9 @@
                     order: 9999
                 },
                 {
-                    url: "//dn7ywbm9isq8j.cloudfront.net/annotations/hg19/genes/gencode.v18.collapsed.bed",
-                    indexed: false,
-                    //displayMode: "SQUISHED",
-                    label: "Genes",
-                    order: 10000
+                    type: 'bam',
+                    url: 'http://www.broadinstitute.org/igvdata/1KG/b37/data/NA06984/alignment/NA06984.mapped.ILLUMINA.bwa.CEU.low_coverage.20120522.bam',
+                    label: 'NA06984'
                 }
             ]
         };
