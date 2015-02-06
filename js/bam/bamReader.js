@@ -351,13 +351,14 @@ var igv = (function (igv) {
          */
         function makeBlocks(record, cigarArray) {
 
-
             var blocks = [],
                 seqOffset = 0,
                 pos = record.start,
                 len = cigarArray.length,
                 blockSeq,
-                blockQuals;
+                blockQuals,
+                minQ = 5,  //prefs.getAsInt(PreferenceManager.SAM_BASE_QUALITY_MIN)
+                maxQ = 20; //prefs.getAsInt(PreferenceManager.SAM_BASE_QUALITY_MAX)
 
             for (var i = 0; i < len; i++) {
 
@@ -384,12 +385,24 @@ var igv = (function (igv) {
                     case 'EQ' :
                     case '=' :
                     case 'X' :
+
                         blockSeq = record.seq === "*" ? "*" : record.seq.substr(seqOffset, c.len);
+
                         blockQuals = record.qual ? record.qual.slice(seqOffset, c.len) : undefined;
-                        blocks.push({start: pos, len: c.len, seq: blockSeq, qual: blockQuals});
+
+                        for (var j = 0; j < blockQuals.length; j++) {
+                            blockQuals[ j ] = Math.max(blockQuals[ j ], minQ);
+                            blockQuals[ j ] = Math.min(blockQuals[ j ], maxQ);
+                        }
+
+                        blocks.push( { start: pos, len: c.len, seq: blockSeq, qual: blockQuals } );
+
                         seqOffset += c.len;
+
                         pos += c.len;
+
                         break;
+
                     default :
                         console.log("Error processing cigar element: " + c.len + c.ltr);
                 }

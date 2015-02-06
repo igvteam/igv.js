@@ -51,7 +51,7 @@ var igv = (function (igv) {
 
         this.maxHeight = config.maxHeight || 500;
     };
-    
+
     igv.BAMTrack.prototype.sortAlignmentRows = function (chr, bpStart, bpEnd, direction, callback) {
 
         this.featureSource.getFeatures(chr, bpStart, bpEnd, function (genomicInterval) {
@@ -208,7 +208,6 @@ var igv = (function (igv) {
                 len,
                 item,
                 accumulatedHeight,
-                rect = { x: 0, y: 0, width: 0, height: 0 },
                 sequence;
 
 
@@ -218,8 +217,8 @@ var igv = (function (igv) {
             canvas.setProperties({ fillStyle: alignmentColor });
             canvas.setProperties({ strokeStyle: alignmentColor });
 
-
-            if (coverageMap) {// TODO -- why is covereageMap sometimes undefined !?
+            // TODO -- why is covereageMap sometimes undefined !?
+            if (coverageMap) {
 
                 // paint backdrop color for all coverage buckets
                 w = Math.max(1, 1.0 / bpPerPixel);
@@ -232,59 +231,73 @@ var igv = (function (igv) {
                     item = coverageMap.coverage[i];
                     if (!item) continue;
 
-                    x = (bp - bpStart) / bpPerPixel;
                     h = (item.total / coverageMap.maximum) * myself.coverageTrackHeight;
+
+
                     y = myself.coverageTrackHeight - h;
+                    x = (bp - bpStart) / bpPerPixel;
 
                     canvas.setProperties({   fillStyle: coverageColor });
                     canvas.setProperties({ strokeStyle: coverageColor });
                     canvas.fillRect(x, y, w, h);
 
-                } // for (coverageMap.coverage.length)
-                // coverage mismatch coloring
-                if (sequence) {
 
-                    w = Math.max(1, 1.0 / bpPerPixel);
-
-                    for (i = 0, len = coverageMap.coverage.length; i < len; i++) {
-
-                        bp = (coverageMap.bpStart + i);
-                        if (bp < bpStart) continue;
-                        if (bp > bpEnd) break;
-
-                        item = coverageMap.coverage[i];
-                        if (!item) continue;
+                    // coverage mismatch coloring
+                    if (sequence) {
 
                         refBase = sequence[i];
                         if (item.isMismatch(refBase)) {
 
-                            x = (bp - bpStart) / bpPerPixel;
-                            h = (item.total / coverageMap.maximum) * myself.coverageTrackHeight;
-                            y = myself.coverageTrackHeight - h;
-                            rect = { x: x, y: y, width: w, height: h };
-
                             canvas.setProperties({ fillStyle: igv.nucleotideColors[ refBase ] });
-                            canvas.fillRect(rect.x, rect.y, rect.width, rect.height);
+                            canvas.fillRect(x, y, w, h);
+
                             accumulatedHeight = 0.0;
 
-                            coverageMap.coverage[i].mismatchPercentages(refBase).forEach(function (fraction, index, fractions) {
-                                h = fraction.percent * (item.total / coverageMap.maximum) * myself.coverageTrackHeight;
-                                y = (myself.coverageTrackHeight - h) - accumulatedHeight;
-                                accumulatedHeight += h;
-                                canvas.setProperties({ fillStyle: igv.nucleotideColors[ fraction.base ] });
-                                canvas.fillRect(rect.x, y, rect.width, h);
+                            ["A", "C", "T", "G", "N"].forEach(function(nucleotide){
+
+                                var fraction,
+                                    count,
+                                    hh;
+
+                                count = item[ "pos" + nucleotide] + item[ "neg" + nucleotide];
+                                hh = h * (count/item.total);
+
+                                y = (myself.coverageTrackHeight - hh) - accumulatedHeight;
+
+                                accumulatedHeight += hh;
+
+                                canvas.setProperties({ fillStyle: igv.nucleotideColors[ nucleotide ] });
+                                canvas.fillRect(x, y, w, hh);
+
                             });
+
+
+                            //coverageMap.coverage[i].mismatchPercentages(refBase).forEach(function (fraction, index, fractions) {
+                            //
+                            //    h = fraction.percent * (item.total / coverageMap.maximum) * myself.coverageTrackHeight;
+                            //
+                            //    y = (myself.coverageTrackHeight - h) - accumulatedHeight;
+                            //
+                            //    accumulatedHeight += h;
+                            //
+                            //    canvas.setProperties({ fillStyle: igv.nucleotideColors[ fraction.base ] });
+                            //    canvas.fillRect(x, y, w, h);
+                            //});
+
                         }
+
                     }
+
                 }
-            }
+
+             }
         }
 
         function drawAlignments(genomicInterval) {
 
-        var packedAlignments = genomicInterval.packedAlignments,
-            sequence = genomicInterval.sequence,
-            sequenceStart = genomicInterval.start;
+            var packedAlignments = genomicInterval.packedAlignments,
+                sequence = genomicInterval.sequence,
+                sequenceStart = genomicInterval.start;
 
             if (sequence) {
                 sequence = sequence.toUpperCase();
