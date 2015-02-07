@@ -71,12 +71,12 @@ var igv = (function (igv) {
 
         var mismatchQualitySum = 0,
             myself = this,
-            thresh = threshold * (qualityWeight ? this.qual : this.total);
+            thresh = threshold * ((qualityWeight && this.qual) ? this.qual : this.total);
 
         [ "A", "T", "C", "G" ].forEach(function (base) {
 
             if (base !== refBase) {
-                mismatchQualitySum += (qualityWeight ? myself[ "qual" + base] : (myself[ "pos" + base ] + myself[ "neg" + base ]));
+                mismatchQualitySum += ((qualityWeight && myself.qual) ? myself[ "qual" + base] : (myself[ "pos" + base ] + myself[ "neg" + base ]));
             }
         });
 
@@ -128,10 +128,10 @@ var igv = (function (igv) {
 
                     myself.maximum = Math.max(myself.coverage[ i ].total, myself.maximum);
 
-                    if (61889562 === (j + block.start)) {
-                        // NOTE: Add 1 when presenting genomic location
-                        console.log("locus " + igv.numberFormatter(1 + 61889562) + " base " + base + " qual " + q);
-                    }
+                    //if (171168321 === (j + block.start)) {
+                    //    // NOTE: Add 1 when presenting genomic location
+                    //    console.log("locus " + igv.numberFormatter(1 + 171168321) + " base " + base + " qual " + q);
+                    //}
                 }
 
             });
