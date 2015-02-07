@@ -390,11 +390,6 @@ var igv = (function (igv) {
 
                         blockQuals = record.qual ? record.qual.slice(seqOffset, c.len) : undefined;
 
-                        //for (var j = 0; j < blockQuals.length; j++) {
-                        //    blockQuals[ j ] = Math.max(blockQuals[ j ], minQ);
-                        //    blockQuals[ j ] = Math.min(blockQuals[ j ], maxQ);
-                        //}
-
                         blocks.push( { start: pos, len: c.len, seq: blockSeq, qual: blockQuals } );
 
                         seqOffset += c.len;

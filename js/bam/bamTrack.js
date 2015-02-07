@@ -245,7 +245,7 @@ var igv = (function (igv) {
                     // coverage mismatch coloring
                     if (sequence) {
 
-                        if (61889562 === bp) {
+                        if (171167156 === bp) {
                             console.log("bp " + igv.numberFormatter(bp));
                         }
 
@@ -517,10 +517,10 @@ var igv = (function (igv) {
             backgroundColor = [255, 255, 255];   // White
 
 
-        if (61889562 === genomicLocation) {
-            // NOTE: Add 1 when presenting genomic location
-            console.log("shadedBaseColor - locus " + igv.numberFormatter(1 + genomicLocation) + " qual " + qual);
-        }
+        //if (171167156 === genomicLocation) {
+        //    // NOTE: Add 1 when presenting genomic location
+        //    console.log("shadedBaseColor - locus " + igv.numberFormatter(1 + genomicLocation) + " qual " + qual);
+        //}
 
         if (!foregroundColor) return;
 
