@@ -304,7 +304,7 @@ var igv = (function (igv) {
                 else {
                     record.qual = [];
                     for (j = 0; j < lseq; ++j) {
-                        record.qual.push(ba[p + j] - 33);
+                        record.qual.push(ba[p + j]);
                     }
                 }
                 p += lseq;
