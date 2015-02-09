@@ -51,7 +51,7 @@ var igv = (function (igv) {
 
         this.maxHeight = config.maxHeight || 500;
     };
-    
+
     igv.BAMTrack.prototype.sortAlignmentRows = function (chr, bpStart, bpEnd, direction, callback) {
 
         this.featureSource.getFeatures(chr, bpStart, bpEnd, function (genomicInterval) {
@@ -208,7 +208,6 @@ var igv = (function (igv) {
                 len,
                 item,
                 accumulatedHeight,
-                rect = { x: 0, y: 0, width: 0, height: 0 },
                 sequence;
 
 
@@ -218,8 +217,8 @@ var igv = (function (igv) {
             canvas.setProperties({ fillStyle: alignmentColor });
             canvas.setProperties({ strokeStyle: alignmentColor });
 
-
-            if (coverageMap) {// TODO -- why is covereageMap sometimes undefined !?
+            // TODO -- why is covereageMap sometimes undefined !?
+            if (coverageMap) {
 
                 // paint backdrop color for all coverage buckets
                 w = Math.max(1, 1.0 / bpPerPixel);
@@ -232,58 +231,71 @@ var igv = (function (igv) {
                     item = coverageMap.coverage[i];
                     if (!item) continue;
 
-                    x = (bp - bpStart) / bpPerPixel;
                     h = (item.total / coverageMap.maximum) * myself.coverageTrackHeight;
+
+
                     y = myself.coverageTrackHeight - h;
+                    x = (bp - bpStart) / bpPerPixel;
 
                     canvas.setProperties({   fillStyle: coverageColor });
                     canvas.setProperties({ strokeStyle: coverageColor });
                     canvas.fillRect(x, y, w, h);
 
-                } // for (coverageMap.coverage.length)
-                // coverage mismatch coloring
-                if (sequence) {
 
-                    w = Math.max(1, 1.0 / bpPerPixel);
+                    // coverage mismatch coloring
+                    if (sequence) {
 
-                    for (i = 0, len = coverageMap.coverage.length; i < len; i++) {
-
-                        bp = (coverageMap.bpStart + i);
-                        if (bp < bpStart) continue;
-                        if (bp > bpEnd) break;
-
-                        item = coverageMap.coverage[i];
-                        if (!item) continue;
+                        if (171167156 === bp) {
+                            console.log("bp " + igv.numberFormatter(bp));
+                        }
 
                         refBase = sequence[i];
                         if (item.isMismatch(refBase)) {
-                            x = (bp - bpStart) / bpPerPixel;
-                            h = (item.total / coverageMap.maximum) * myself.coverageTrackHeight;
-                            y = myself.coverageTrackHeight - h;
-                            rect = { x: x, y: y, width: w, height: h };
 
                             canvas.setProperties({ fillStyle: igv.nucleotideColors[ refBase ] });
-                            canvas.fillRect(rect.x, rect.y, rect.width, rect.height);
-                            accumulatedHeight = 0.0;
+                            canvas.fillRect(x, y, w, h);
 
-                            coverageMap.coverage[i].mismatchPercentages(refBase).forEach(function (fraction, index, fractions) {
-                                h = fraction.percent * (item.total / coverageMap.maximum) * myself.coverageTrackHeight;
-                                y = (myself.coverageTrackHeight - h) - accumulatedHeight;
-                                accumulatedHeight += h;
-                                canvas.setProperties({ fillStyle: igv.nucleotideColors[ fraction.base ] });
-                                canvas.fillRect(rect.x, y, rect.width, h);
+                            accumulatedHeight = 0.0;
+                            [ "A", "C", "T", "G" ].forEach(function(nucleotide){
+
+                                var count,
+                                    hh;
+
+                                count = item[ "pos" + nucleotide] + item[ "neg" + nucleotide];
+
+
+                                // non-logoritmic
+                                hh = (count / coverageMap.maximum) * myself.coverageTrackHeight;
+
+                                // logoritmic
+                                //hh = (((count/item.total) * log10(1 + item.total)) / coverageMap.maximum) * myself.coverageTrackHeight;
+
+
+                                y = (myself.coverageTrackHeight - hh) - accumulatedHeight;
+                                accumulatedHeight += hh;
+
+                                canvas.setProperties({ fillStyle: igv.nucleotideColors[ nucleotide ] });
+                                canvas.fillRect(x, y, w, hh);
+
+                                function log10(val) {
+                                    return Math.log(val) / Math.LN10;
+                                }
                             });
+
                         }
+
                     }
+
                 }
-            }
+
+             }
         }
 
         function drawAlignments(genomicInterval) {
 
-        var packedAlignments = genomicInterval.packedAlignments,
-            sequence = genomicInterval.sequence,
-            sequenceStart = genomicInterval.start;
+            var packedAlignments = genomicInterval.packedAlignments,
+                sequence = genomicInterval.sequence,
+                sequenceStart = genomicInterval.start;
 
             if (sequence) {
                 sequence = sequence.toUpperCase();
@@ -326,7 +338,7 @@ var igv = (function (igv) {
 
                         canvas.setProperties({fillStyle: alignmentColor});
 
-                        blocks.forEach(function (block, blockIndex) {
+                        blocks.forEach(function (block, bi, bs) {
                             var refOffset = block.start - bpStart,
                                 seqOffset = block.start - sequenceStart,
                                 blockRectX = refOffset / bpPerPixel,
@@ -342,12 +354,12 @@ var igv = (function (igv) {
                                 baseColor,
                                 i;
 
-                            if (strand && blockIndex === len - 1) {
+                            if (strand && bi === len - 1) {
                                 x = [xRectStart, xRectEnd, xRectEnd + arrowHeadWidth, xRectEnd, xRectStart];
                                 y = [yRect, yRect, yRect + height / 2, yRect + height, yRect + height];
                                 canvas.fillPolygon(x, y);
 
-                            } else if (!strand && blockIndex === 0) {
+                            } else if (!strand && bi === 0) {
                                 var x = [ blockRectX - arrowHeadWidth, blockRectX, blockEndX, blockEndX, blockRectX];
                                 var y = [ yRect + height / 2, yRect, yRect, yRect + height, yRect + height];
                                 canvas.fillPolygon(x, y);
@@ -370,7 +382,7 @@ var igv = (function (igv) {
                                     if (readChar === "X" || refChar !== readChar) {
                                         if (blockQual && blockQual.length > i) {
                                             readQual = blockQual[i];
-                                            baseColor = shadedBaseColor(readQual, readChar);
+                                            baseColor = shadedBaseColor(readQual, readChar, i + block.start);
                                         }
                                         else {
                                             baseColor = igv.nucleotideColors[readChar];
@@ -495,7 +507,7 @@ var igv = (function (igv) {
     };
 
 
-    function shadedBaseColor(qual, nucleotide) {
+    function shadedBaseColor(qual, nucleotide, genomicLocation) {
 
         var color,
             alpha,
@@ -503,6 +515,12 @@ var igv = (function (igv) {
             maxQ = 20,  //prefs.getAsInt(PreferenceManager.SAM_BASE_QUALITY_MAX);
             foregroundColor = igv.nucleotideColorComponents[nucleotide],
             backgroundColor = [255, 255, 255];   // White
+
+
+        //if (171167156 === genomicLocation) {
+        //    // NOTE: Add 1 when presenting genomic location
+        //    console.log("shadedBaseColor - locus " + igv.numberFormatter(1 + genomicLocation) + " qual " + qual);
+        //}
 
         if (!foregroundColor) return;
 

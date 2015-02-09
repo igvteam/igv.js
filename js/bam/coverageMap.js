@@ -35,6 +35,7 @@ var igv = (function (igv) {
      */
     var allBases = ["A", "C", "T", "G", "N"];
     var threshold = 0.2;
+    var qualityWeight = true;
 
     function Coverage() {
         this.posA = 0;
@@ -68,40 +69,22 @@ var igv = (function (igv) {
 
     Coverage.prototype.isMismatch = function (refBase) {
 
-        var sum = 0,
-            myself = this;
-        allBases.forEach(function (base) {
-            var key = "qual" + base;
+        var mismatchQualitySum = 0,
+            myself = this,
+            thresh = threshold * ((qualityWeight && this.qual) ? this.qual : this.total);
+
+        [ "A", "T", "C", "G" ].forEach(function (base) {
+
             if (base !== refBase) {
-                sum += myself[key];
-            }
-        });
-        return sum / this.qual > threshold;
-
-    };
-
-    Coverage.prototype.mismatchPercentages = function(refBase) {
-
-        var fractions = [],
-            myself = this;
-
-        allBases.forEach(function (base) {
-            var bTotal;
-            if (base !== refBase) {
-                bTotal = myself["pos" + base] + myself["neg" + base];
-                fractions.push( { base: base, percent: bTotal/myself.total } );
+                mismatchQualitySum += ((qualityWeight && myself.qual) ? myself[ "qual" + base] : (myself[ "pos" + base ] + myself[ "neg" + base ]));
             }
         });
 
-        fractions.sort(function(a, b) {
-            return a.percent - b.percent;
-        });
+        return mismatchQualitySum >= thresh;
 
-        return fractions;
     };
 
-
-    igv.CoverageMap = function (chr, start, end, features, refSeq) {
+    igv.CoverageMap = function (chr, start, end, alignments, refSeq) {
 
         var myself;
 
@@ -117,9 +100,9 @@ var igv = (function (igv) {
 
         this.maximum = 0;
         myself = this;
-        features.forEach(function (alignment) {
+        alignments.forEach(function (alignment, ai, as) {
 
-            alignment.blocks.forEach(function (block) {
+            alignment.blocks.forEach(function (block, bi, bs) {
 
                 var key,
                     base,
@@ -144,6 +127,11 @@ var igv = (function (igv) {
                     myself.coverage[ i ].qual += q;
 
                     myself.maximum = Math.max(myself.coverage[ i ].total, myself.maximum);
+
+                    //if (171168321 === (j + block.start)) {
+                    //    // NOTE: Add 1 when presenting genomic location
+                    //    console.log("locus " + igv.numberFormatter(1 + 171168321) + " base " + base + " qual " + q);
+                    //}
                 }
 
             });
