@@ -65,7 +65,7 @@ var igv = (function (igv) {
 
     function traverseAlignmentRows(chr, bpStart, bpEnd, genomicInterval, sortDirection) {
 
-        var alignmentRows = genomicInterval.packedAlignments.slice(0),
+        var alignmentRows = genomicInterval.packedAlignmentRows.slice(0),
             sequence = genomicInterval.sequence,
             scoreboard = { 'A' : 512, 'C' : 256, 'G' : 128, 'T' : 64 },
             scores;
@@ -84,7 +84,7 @@ var igv = (function (igv) {
 
             scores[ ar_i ] = { 'score' : 4, 'index' : ar_i };
 
-            alignmentRow.forEach(function (alignment, a_i, as) {
+            alignmentRow.alignments.forEach(function (alignment, a_i, as) {
 
                 if ((alignment.start + alignment.lengthOnRef) < bpStart || alignment.start > bpEnd) {
                     // do nothing
@@ -138,7 +138,7 @@ var igv = (function (igv) {
 
         scores.forEach(function(s, i, ss){
             console.log("i " + i + " index " + s.index + " score " + s.score);
-            genomicInterval.packedAlignments[ i ] = alignmentRows[ s.index ];
+            genomicInterval.packedAlignmentRows[ i ] = alignmentRows[ s.index ];
         });
 
     }
@@ -190,12 +190,10 @@ var igv = (function (igv) {
             return;
         }
 
-
         if (genomicInterval) {
             drawCoverage(genomicInterval.coverageMap);
             drawAlignments(genomicInterval);
         }
-
 
         function drawCoverage(coverageMap) {
             var bp,
@@ -293,7 +291,7 @@ var igv = (function (igv) {
 
         function drawAlignments(genomicInterval) {
 
-            var packedAlignments = genomicInterval.packedAlignments,
+            var packedAlignmentRows = genomicInterval.packedAlignmentRows,
                 sequence = genomicInterval.sequence,
                 sequenceStart = genomicInterval.start;
 
@@ -304,20 +302,20 @@ var igv = (function (igv) {
             canvas.setProperties({ fillStyle: alignmentColor });
             canvas.setProperties({ strokeStyle: alignmentColor });
 
-            // TODO -- how can packedAlignments be undefined?
-            if (packedAlignments) {
+            // TODO -- how can packedAlignmentRows be undefined?
+            if (packedAlignmentRows) {
                 // alignment track
-                packedAlignments.forEach(function renderAlignmentRow(alignmentRow, packedAlignmentIndex, packedAlignments) {
+                packedAlignmentRows.forEach(function renderAlignmentRow(alignmentRow, i) {
 
                     var arrowHeadWidth = myself.alignmentRowHeight / 2.0,
                         yStrokedLine,
                         yRect,
                         height;
-                    yRect = myself.alignmentRowYInset + myself.coverageTrackHeight + (myself.alignmentRowHeight * packedAlignmentIndex) + 5;
+                    yRect = myself.alignmentRowYInset + myself.coverageTrackHeight + (myself.alignmentRowHeight * i) + 5;
                     height = myself.alignmentRowHeight - (2 * myself.alignmentRowYInset);
                     yStrokedLine = (height / 2.0) + yRect;
 
-                    alignmentRow.forEach(function renderAlignment(alignment) {
+                    alignmentRow.alignments.forEach(function renderAlignment(alignment) {
                         var xRectStart,
                             xRectEnd,
                             blocks = alignment.blocks,
@@ -409,8 +407,7 @@ var igv = (function (igv) {
         var coverageMap = this.featureSource.genomicInterval.coverageMap,
             coverageMapIndex,
             coverage,
-            packedAlignments = this.featureSource.genomicInterval.packedAlignments,
-            packedAlignmentsIndex,
+            packedAlignmentRows = this.featureSource.genomicInterval.packedAlignmentRows,
             alignmentRow,
             alignment,
             nameValues = [],
@@ -460,15 +457,15 @@ var igv = (function (igv) {
 
         }
 
-        else if (packedAlignmentsIndex < packedAlignments.length) {
+        else if (packedAlignmentsIndex < packedAlignmentRows.length) {
 
-            alignmentRow = packedAlignments[ packedAlignmentsIndex ];
+            alignmentRow = packedAlignmentRows[ packedAlignmentsIndex ];
 
             alignment = undefined;
 
-            for (i = 0, len = alignmentRow.length; i < len; i++) {
+            for (i = 0, len = alignmentRow.alignments.length; i < len; i++) {
 
-                tmp = alignmentRow[i];
+                tmp = alignmentRow.alignments[ i ];
 
                 if (tmp.start <= genomicLocation && (tmp.start + tmp.lengthOnRef >= genomicLocation)) {
                     alignment = tmp;
@@ -497,8 +494,8 @@ var igv = (function (igv) {
      */
     igv.BAMTrack.prototype.computePixelHeight = function (features) {
 
-        if (features.packedAlignments) {
-            return this.alignmentRowYInset + this.coverageTrackHeight + (this.alignmentRowHeight * features.packedAlignments.length) + 5;
+        if (features.packedAlignmentRows) {
+            return this.alignmentRowYInset + this.coverageTrackHeight + (this.alignmentRowHeight * features.packedAlignmentRows.length) + 5;
         }
         else {
             return this.height;
