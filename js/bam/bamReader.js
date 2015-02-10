@@ -185,11 +185,11 @@ var igv = (function (igv) {
         });
 
 
-        function decodeBamRecords(ba, offset, records, min, max, chrId) {
+        function decodeBamRecords(ba, offset, alignments, min, max, chrId) {
 
             var blockSize,
                 blockEnd,
-                record,
+                alignment,
                 refID,
                 pos,
                 bmn,
@@ -221,7 +221,7 @@ var igv = (function (igv) {
                     return;
                 }
 
-                record = new igv.BamAlignment();
+                alignment = new igv.BamAlignment();
 
                 refID = readInt(ba, offset + 4);
                 pos = readInt(ba, offset + 8);
@@ -238,14 +238,14 @@ var igv = (function (igv) {
                 flag = (flag_nc & 0xffff0000) >> 16;
                 nc = flag_nc & 0xffff;
 
-                record.flags = flag;
-                record.strand = !(flag & READ_STRAND_FLAG);
+                alignment.flags = flag;
+                alignment.strand = !(flag & READ_STRAND_FLAG);
 
                 lseq = readInt(ba, offset + 20);
 
                 mateRefID = readInt(ba, offset + 24);
                 matePos = readInt(ba, offset + 28);
-                record.fragmentLength = readInt(ba, offset + 32);
+                alignment.fragmentLength = readInt(ba, offset + 32);
 
                 readName = '';
                 for (j = 0; j < nl - 1; ++j) {
@@ -279,10 +279,10 @@ var igv = (function (igv) {
 
                     cigarArray.push({len: opLen, ltr: opLtr});
                 }
-                record.cigar = cigar;
-                record.lengthOnRef = lengthOnRef;
+                alignment.cigar = cigar;
+                alignment.lengthOnRef = lengthOnRef;
 
-                if (record.start + record.lengthOnRef < min) continue;  // Record out-of-range "to the left", skip to next one
+                if (alignment.start + alignment.lengthOnRef < min) continue;  // Record out-of-range "to the left", skip to next one
 
 
                 seq = '';
@@ -295,41 +295,41 @@ var igv = (function (igv) {
                 seq = seq.substring(0, lseq);  // seq might have one extra character (if lseq is an odd number)
 
                 p += seqBytes;
-                record.seq = seq;
+                alignment.seq = seq;
 
 
                 if (lseq === 1 && String.fromCharCode(ba[p + j] + 33) === "*") {
                     // TODO == how to represent this?
                 }
                 else {
-                    record.qual = [];
+                    alignment.qual = [];
                     for (j = 0; j < lseq; ++j) {
-                        record.qual.push(ba[p + j]);
+                        alignment.qual.push(ba[p + j]);
                     }
                 }
                 p += lseq;
 
 
-                record.start = pos;
-                record.mq = mq;
-                record.readName = readName;
-                record.chr = bam.indexToChr[refID];
+                alignment.start = pos;
+                alignment.mq = mq;
+                alignment.readName = readName;
+                alignment.chr = bam.indexToChr[refID];
 
                 if(mateRefID >= 0) {
-                    record.mate = {
+                    alignment.mate = {
                         chr: bam.indexToChr[mateRefID],
                         position: matePos
                     };
                 }
 
 
-                record.tagBA = new Uint8Array(ba.buffer.slice(p, blockEnd));  // decode thiese on demand
+                alignment.tagBA = new Uint8Array(ba.buffer.slice(p, blockEnd));  // decode thiese on demand
                 p += blockEnd;
 
-                if (!min || record.start <= max && record.start + record.lengthOnRef >= min) {
+                if (!min || alignment.start <= max && alignment.start + alignment.lengthOnRef >= min) {
                     if (chrId === undefined || refID == chrId) {
-                        record.blocks = makeBlocks(record, cigarArray);
-                        records.push(record);
+                        alignment.blocks = makeBlocks(alignment, cigarArray);
+                        alignments.push(alignment);
                     }
                 }
                 offset = blockEnd;

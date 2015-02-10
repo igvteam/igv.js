@@ -72,7 +72,7 @@ var igv = (function (igv) {
 
                                     myself.genomicInterval.coverageMap = new igv.CoverageMap(chr, bpStart, bpEnd, alignments, sequence);
 
-                                    myself.genomicInterval.packedAlignments = packAlignments(myself.genomicInterval, alignments);
+                                    myself.genomicInterval.packedAlignmentRows = packAlignmentRows(myself.genomicInterval, alignments);
 
                                     myself.genomicInterval.features = undefined;
 
@@ -91,9 +91,9 @@ var igv = (function (igv) {
     };
 
 
-    function packAlignments(genomicInterval, features) {
+    function packAlignmentRows(genomicInterval, alignments) {
 
-        if (features.length === 0) {
+        if (alignments.length === 0) {
 
             return [];
 
@@ -107,10 +107,10 @@ var igv = (function (igv) {
                 bucket,
                 alignment,
                 alignmentSpace = 4 * 2,
-                packedAlignments = [],
-                bucketStart = features[0].start;
+                packedAlignmentRows = [],
+                bucketStart = alignments[0].start;
 
-            features.forEach(function (alignment) {
+            alignments.forEach(function (alignment) {
 
                 var buckListIndex = alignment.start - bucketStart;
                 if (bucketList[buckListIndex] === undefined) {
@@ -120,9 +120,9 @@ var igv = (function (igv) {
             });
 
 
-            while (allocatedCount < features.length) {
+            while (allocatedCount < alignments.length) {
 
-                alignmentRow = [];
+                alignmentRow = new igv.BamAlignmentRow();
                 while (nextStart <= genomicInterval.end) {
 
                     bucket = undefined;
@@ -146,21 +146,21 @@ var igv = (function (igv) {
                         bucketList[index] = undefined;
                     }
 
-                    alignmentRow.push(alignment);
+                    alignmentRow.alignments.push(alignment);
                     nextStart = alignment.start + alignment.lengthOnRef + alignmentSpace;
                     ++allocatedCount;
 
                 } // while (nextStart)
 
-                if (alignmentRow.length > 0) {
-                    packedAlignments.push(alignmentRow);
+                if (alignmentRow.alignments.length > 0) {
+                    packedAlignmentRows.push(alignmentRow);
                 }
 
                 nextStart = bucketStart;
 
             } // while (allocatedCount)
 
-            return packedAlignments;
+            return packedAlignmentRows;
         }
     }
 
