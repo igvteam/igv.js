@@ -64,7 +64,8 @@ var igv = (function (igv) {
     function sortAlignmentRows(chr, bpStart, bpEnd, genomicInterval) {
 
         var alignmentRows = genomicInterval.packedAlignmentRows,
-            sequence = genomicInterval.sequence;
+            sequence = genomicInterval.sequence,
+            coverageMap = genomicInterval.coverageMap;
 
         if (sequence) {
             sequence = sequence.toUpperCase();
@@ -74,7 +75,7 @@ var igv = (function (igv) {
         }
 
         alignmentRows.forEach(function(alignmentRow){
-            alignmentRow.updateScore(bpStart, bpEnd, genomicInterval, sequence);
+            alignmentRow.updateScore(bpStart, bpEnd, genomicInterval);
         });
 
         alignmentRows.sort(function(a, b) {
@@ -214,19 +215,12 @@ var igv = (function (igv) {
                                 // non-logoritmic
                                 hh = (count / coverageMap.maximum) * myself.coverageTrackHeight;
 
-                                // logoritmic
-                                //hh = (((count/item.total) * log10(1 + item.total)) / coverageMap.maximum) * myself.coverageTrackHeight;
-
-
                                 y = (myself.coverageTrackHeight - hh) - accumulatedHeight;
                                 accumulatedHeight += hh;
 
                                 canvas.setProperties({ fillStyle: igv.nucleotideColors[ nucleotide ] });
                                 canvas.fillRect(x, y, w, hh);
 
-                                function log10(val) {
-                                    return Math.log(val) / Math.LN10;
-                                }
                             });
 
                         }
@@ -451,7 +445,6 @@ var igv = (function (igv) {
         }
 
     };
-
 
     function shadedBaseColor(qual, nucleotide, genomicLocation) {
 
