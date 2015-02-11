@@ -48,7 +48,7 @@ var igv = (function (igv) {
         }
         else {
 
-            console.log("Cache miss: " + (interval === undefined ? "nil" : interval.chr + ":" + interval.start + "-" + interval.end));
+            //console.log("Cache miss: " + (interval === undefined ? "nil" : interval.chr + ":" + interval.start + "-" + interval.end));
 
             // Expand query, to minimum of 100kb
             var qstart = start;
@@ -114,7 +114,7 @@ var igv = (function (igv) {
 
     igv.FastaSequence.prototype.readSequence = function (chr, qstart, qend, continuation, task) {
 
-        console.log("Read sequence " + chr + ":" + qstart + "-" + qend);
+        //console.log("Read sequence " + chr + ":" + qstart + "-" + qend);
         var fasta = this;
 
         if (!this.index) {

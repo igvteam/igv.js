@@ -54,7 +54,7 @@ var igv = (function (igv) {
 
         this.featureSource.getFeatures(chr, bpStart, bpEnd, function (genomicInterval) {
 
-            traverseAlignmentRows(chr, bpStart, bpEnd, genomicInterval);
+            sortAlignmentRows(chr, bpStart, bpEnd, genomicInterval);
 
             callback();
 
@@ -63,17 +63,8 @@ var igv = (function (igv) {
 
     function sortAlignmentRows(chr, bpStart, bpEnd, genomicInterval) {
 
-    }
-
-    function traverseAlignmentRows(chr, bpStart, bpEnd, genomicInterval) {
-
-        var alignmentRows = genomicInterval.packedAlignmentRows.slice(0),
-            sequence = genomicInterval.sequence,
-            scoreboard = { 'A' : 512, 'C' : 256, 'G' : 128, 'T' : 64 },
-            scores;
-
-        scores = [];
-        scores.length = alignmentRows.length;
+        var alignmentRows = genomicInterval.packedAlignmentRows,
+            sequence = genomicInterval.sequence;
 
         if (sequence) {
             sequence = sequence.toUpperCase();
@@ -82,65 +73,22 @@ var igv = (function (igv) {
             return;
         }
 
-        alignmentRows.forEach(function (alignmentRow, ar_i, ars) {
-
-            scores[ ar_i ] = { 'score' : 4, 'index' : ar_i };
-
-            alignmentRow.alignments.forEach(function (alignment, a_i, as) {
-
-                if ((alignment.start + alignment.lengthOnRef) < bpStart || alignment.start > bpEnd) {
-                    // do nothing
-                } else {
-
-                    alignment.blocks.forEach(function (block, bl_i, bls) {
-
-                        /*
-                         block definition - { start, len, seq, qual }
-                         */
-
-                        var referenceSequenceOffset,
-                            refChar,
-                            readChar,
-                            i;
-
-                        if ("*" !== block.seq) {
-
-                            referenceSequenceOffset = block.start - genomicInterval.start;
-                            for (i = 0; i < block.seq.length; i++) {
-
-                                //
-                                if (bpStart === (i + block.start)) {
-
-                                    readChar = block.seq.charAt(i);
-                                    refChar = sequence.charAt(i + referenceSequenceOffset);
-                                    if (readChar === "=") {
-                                        scores[ ar_i ] = { 'score' : 8, 'index' : ar_i };
-                                    } else {
-                                        scores[ ar_i ] = { 'score' : scoreboard[ readChar ], 'index' : ar_i };
-                                    }
-
-                                }
-
-                            } // block.seq.length
-
-                        }
-
-                    }); // alignment.blocks
-                }
-
-            }); // alignmentRow
-
-        }); // alignmentRows
-
-        scores.sort(function(a, b) {
-            var sa = a.score,
-                sb = b.score;
-            return sa - sb;
+        alignmentRows.forEach(function(alignmentRow){
+            alignmentRow.updateScore(bpStart, bpEnd, genomicInterval, sequence);
         });
 
-        scores.forEach(function(s, i, ss){
-            console.log("i " + i + " index " + s.index + " score " + s.score);
-            genomicInterval.packedAlignmentRows[ i ] = alignmentRows[ s.index ];
+        alignmentRows.sort(function(a, b) {
+
+            if (undefined === a.score) {
+                console.log("a undefined score");
+                a.score = Number.MAX_VALUE;
+            }
+            else if (undefined === b.score) {
+                console.log("b undefined score");
+                b.score = Number.MAX_VALUE;
+            }
+
+            return a.score - b.score;
         });
 
     }
@@ -244,9 +192,9 @@ var igv = (function (igv) {
                     // coverage mismatch coloring
                     if (sequence) {
 
-                        if (171167156 === bp) {
-                            console.log("bp " + igv.numberFormatter(bp));
-                        }
+                        //if (171167156 === bp) {
+                        //    console.log("bp " + igv.numberFormatter(bp));
+                        //}
 
                         refBase = sequence[i];
                         if (item.isMismatch(refBase)) {

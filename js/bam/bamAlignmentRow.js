@@ -31,10 +31,70 @@ var igv = (function (igv) {
     igv.BamAlignmentRow = function () {
 
         this.alignments = [];
+        this.score = undefined;
     };
 
-    igv.BamAlignmentRow.prototype.addAlignment = function (alignment) {
-        this.alignments.push(alignment);
+    igv.BamAlignmentRow.prototype.updateScore = function (bpStart, bpEnd, genomicInterval, sequence) {
+
+        var insertionScore = undefined,
+            baseScore = undefined,
+            myself = this;
+
+        this.alignments.forEach(function(alignment){
+
+            if ((alignment.start + alignment.lengthOnRef) < bpStart || alignment.start > bpEnd) {
+
+            } else {
+
+                alignment.blocks.forEach(function (block) {
+
+                    /*
+                     block definition - { start, len, seq, qual }
+                     */
+
+                    var referenceSequenceOffset,
+                        reference,
+                        base;
+
+                    if ("*" !== block.seq) {
+
+                        referenceSequenceOffset = block.start - genomicInterval.start;
+
+                        for (var i = 0, blockSequenceLength = block.seq.length; i < blockSequenceLength; i++) {
+
+                            //
+                            if (bpStart === (i + block.start)) {
+
+                                reference = sequence.charAt(i + referenceSequenceOffset);
+                                base = block.seq.charAt(i);
+
+                                if (base === 'N') {
+                                    baseScore = 2;
+                                }
+                                else if (base === reference) {
+                                    baseScore = 3;
+                                } else {
+                                    console.log("BamAlignmentRow.prototype.updateScore TODO handle " + base);
+                                    baseScore = 1;
+                                }
+
+                            }
+
+                        } // block.seq.length
+
+                    }
+                    // block.seq === "*" indicating reference matches base
+                    else {
+                        console.log("BamAlignmentRow.prototype.updateScore - block.seq " + block.seq);
+                        baseScore = 3;
+                    }
+
+                }); // alignment.blocks
+            }
+
+        });
+
+        this.score = (undefined === baseScore) ? Number.MAX_VALUE : baseScore;
     };
 
     return igv;
