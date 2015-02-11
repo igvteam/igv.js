@@ -34,9 +34,11 @@ var igv = (function (igv) {
         this.score = undefined;
     };
 
-    igv.BamAlignmentRow.prototype.updateScore = function (bpStart, bpEnd, genomicInterval, sequence) {
+    igv.BamAlignmentRow.prototype.updateScore = function (bpStart, bpEnd, genomicInterval) {
 
-        var insertionScore = undefined,
+        var sequence = genomicInterval.sequence,
+            coverageMap = genomicInterval.coverageMap,
+            insertionScore = undefined,
             baseScore = undefined,
             myself = this;
 
@@ -52,30 +54,39 @@ var igv = (function (igv) {
                      block definition - { start, len, seq, qual }
                      */
 
-                    var referenceSequenceOffset,
-                        reference,
-                        base;
+                    var reference,
+                        base,
+                        coverage,
+                        count,
+                        phred;
 
                     if ("*" !== block.seq) {
 
-                        referenceSequenceOffset = block.start - genomicInterval.start;
+                        for (var i = 0, indexReferenceSequence = block.start - genomicInterval.start, bpBlockSequence = block.start, lengthBlockSequence = block.seq.length; i < lengthBlockSequence; i++, indexReferenceSequence++, bpBlockSequence++) {
 
-                        for (var i = 0, blockSequenceLength = block.seq.length; i < blockSequenceLength; i++) {
+                            if (bpStart === bpBlockSequence) {
 
-                            //
-                            if (bpStart === (i + block.start)) {
-
-                                reference = sequence.charAt(i + referenceSequenceOffset);
+                                reference = sequence.charAt(indexReferenceSequence);
                                 base = block.seq.charAt(i);
+
+                                if (base === "=") {
+                                    base = reference;
+                                }
 
                                 if (base === 'N') {
                                     baseScore = 2;
                                 }
                                 else if (base === reference) {
                                     baseScore = 3;
+                                }
+                                else if (base === "X" || base !== reference){
+
+                                    coverage = coverageMap.coverage[ (bpBlockSequence - coverageMap.bpStart) ];
+                                    count = coverage[ "pos" + base ] + coverage[ "neg" + base ];
+                                    phred = (coverage.qual) ? coverage.qual : 0;
+                                    baseScore = -(count + (phred / 1000.0));
                                 } else {
-                                    console.log("BamAlignmentRow.prototype.updateScore TODO handle " + base);
-                                    baseScore = 1;
+                                    console.log("BamAlignmentRow.updateScore - huh?");
                                 }
 
                             }
