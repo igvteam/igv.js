@@ -42,7 +42,8 @@ var igv = (function (igv) {
             var alias = name.startsWith("chr") ? name.substring(3) : "chr" + name;
             chrAliasTable[alias] = name;
         });
-        chrAliasTable["chrM"] = "MT";
+        // CR: this caused a problem when I select chrM in the karyo view
+        //chrAliasTable["chrM"] = "MT";
         chrAliasTable["MT"] = "chrM";
         this.chrAliasTable = chrAliasTable;
 
