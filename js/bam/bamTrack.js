@@ -28,8 +28,6 @@
  */
 var igv = (function (igv) {
 
-    var sortDirection = 1;
-
     igv.BAMTrack = function (config) {
 
         igv.configTrack(this, config);
@@ -52,18 +50,22 @@ var igv = (function (igv) {
         this.maxHeight = config.maxHeight || 500;
     };
 
-    igv.BAMTrack.prototype.sortAlignmentRows = function (chr, bpStart, bpEnd, direction, callback) {
+    igv.BAMTrack.prototype.sortAlignmentRows = function (chr, bpStart, bpEnd, callback) {
 
         this.featureSource.getFeatures(chr, bpStart, bpEnd, function (genomicInterval) {
 
-            traverseAlignmentRows(chr, bpStart, bpEnd, genomicInterval, direction);
+            traverseAlignmentRows(chr, bpStart, bpEnd, genomicInterval);
 
             callback();
 
         });
     };
 
-    function traverseAlignmentRows(chr, bpStart, bpEnd, genomicInterval, sortDirection) {
+    function sortAlignmentRows(chr, bpStart, bpEnd, genomicInterval) {
+
+    }
+
+    function traverseAlignmentRows(chr, bpStart, bpEnd, genomicInterval) {
 
         var alignmentRows = genomicInterval.packedAlignmentRows.slice(0),
             sequence = genomicInterval.sequence,
@@ -133,7 +135,7 @@ var igv = (function (igv) {
         scores.sort(function(a, b) {
             var sa = a.score,
                 sb = b.score;
-            return (sortDirection < 0) ? sa - sb : sb - sa;
+            return sa - sb;
         });
 
         scores.forEach(function(s, i, ss){
@@ -148,12 +150,11 @@ var igv = (function (igv) {
         var chr = igv.browser.referenceFrame.chr,
             myself = this;
 
-        this.sortAlignmentRows(chr, genomicLocation, (1 + genomicLocation), sortDirection, function () {
+        this.sortAlignmentRows(chr, genomicLocation, (1 + genomicLocation), function () {
             myself.trackView.update();
             $(myself.trackView.viewportDiv).scrollTop(0);
         });
 
-        sortDirection *= -1;
     };
 
     igv.BAMTrack.prototype.getFeatures = function (chr, bpStart, bpEnd, continuation, task) {
@@ -408,10 +409,10 @@ var igv = (function (igv) {
             coverageMapIndex,
             coverage,
             packedAlignmentRows = this.featureSource.genomicInterval.packedAlignmentRows,
+            packedAlignmentsIndex,
             alignmentRow,
             alignment,
-            nameValues = [],
-            tmp, i, len;
+            nameValues = [];
 
         packedAlignmentsIndex = Math.floor((yOffset - (this.alignmentRowYInset + this.coverageTrackHeight)) / this.alignmentRowHeight);
 
@@ -463,7 +464,7 @@ var igv = (function (igv) {
 
             alignment = undefined;
 
-            for (i = 0, len = alignmentRow.alignments.length; i < len; i++) {
+            for (var i = 0, len = alignmentRow.alignments.length, tmp; i < len; i++) {
 
                 tmp = alignmentRow.alignments[ i ];
 
