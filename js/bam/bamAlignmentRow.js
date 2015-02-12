@@ -72,60 +72,66 @@ var igv = (function (igv) {
             return Number.MAX_VALUE;
         }
 
-        baseScore = undefined;
-        alignment.blocks.forEach(function (block) {
+        if (sortOption.sort === "NUCLEOTIDE") {
 
-            var sequence = genomicInterval.sequence,
-                coverageMap = genomicInterval.coverageMap,
-                reference,
-                base,
-                coverage,
-                count,
-                phred;
+            baseScore = undefined;
 
-            if ("*" !== block.seq) {
+            alignment.blocks.forEach(function (block) {
 
-                for (var i = 0, indexReferenceSequence = block.start - genomicInterval.start, bpBlockSequence = block.start, lengthBlockSequence = block.seq.length;
-                     i < lengthBlockSequence;
-                     i++, indexReferenceSequence++, bpBlockSequence++) {
+                var sequence = genomicInterval.sequence,
+                    coverageMap = genomicInterval.coverageMap,
+                    reference,
+                    base,
+                    coverage,
+                    count,
+                    phred;
 
-                    if (bpStart === bpBlockSequence) {
+                if ("*" !== block.seq) {
 
-                        reference = sequence.charAt(indexReferenceSequence);
-                        base = block.seq.charAt(i);
+                    for (var i = 0, indexReferenceSequence = block.start - genomicInterval.start, bpBlockSequence = block.start, lengthBlockSequence = block.seq.length;
+                         i < lengthBlockSequence;
+                         i++, indexReferenceSequence++, bpBlockSequence++) {
 
-                        if (base === "=") {
-                            base = reference;
-                        }
+                        if (bpStart === bpBlockSequence) {
 
-                        if (base === 'N') {
-                            baseScore = 2;
-                        }
-                        else if (base === reference) {
-                            baseScore = 3;
-                        }
-                        else if (base === "X" || base !== reference){
+                            reference = sequence.charAt(indexReferenceSequence);
+                            base = block.seq.charAt(i);
 
-                            coverage = coverageMap.coverage[ (bpBlockSequence - coverageMap.bpStart) ];
-                            count = coverage[ "pos" + base ] + coverage[ "neg" + base ];
-                            phred = (coverage.qual) ? coverage.qual : 0;
-                            baseScore = -(count + (phred / 1000.0));
-                        } else {
-                            console.log("BamAlignmentRow.caculateScore - huh?");
-                        }
+                            if (base === "=") {
+                                base = reference;
+                            }
 
-                    } // bpStart === bpBlockSequence
+                            if (base === 'N') {
+                                baseScore = 2;
+                            }
+                            else if (base === reference) {
+                                baseScore = 3;
+                            }
+                            else if (base === "X" || base !== reference){
 
-                } // block.seq.length
+                                coverage = coverageMap.coverage[ (bpBlockSequence - coverageMap.bpStart) ];
+                                count = coverage[ "pos" + base ] + coverage[ "neg" + base ];
+                                phred = (coverage.qual) ? coverage.qual : 0;
+                                baseScore = -(count + (phred / 1000.0));
+                            } else {
+                                console.log("BamAlignmentRow.caculateScore - huh?");
+                            }
 
-            }
-            else {
-                baseScore = 3;
-            }
+                        } // bpStart === bpBlockSequence
 
-        });
+                    } // block.seq.length
 
-        return (undefined === baseScore) ? Number.MAX_VALUE : baseScore;
+                }
+                else {
+                    baseScore = 3;
+                }
+
+            });
+
+            return (undefined === baseScore) ? Number.MAX_VALUE : baseScore;
+        }
+
+        return Number.MAX_VALUE;
 
     };
 
