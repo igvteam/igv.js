@@ -41,6 +41,7 @@ var igv = (function (igv) {
         this.deletionColor = config.deletionColor | "black";
         this.skippedColor = config.skippedColor || "rgb(150, 170, 170)";
         this.coverageColor = config.coverageColor || this.alignmentColor;
+        this.sortOption = config.sortOption || { sort : "NUCLEOTIDE" };
 
         this.alignmentRowYInset = 1;
         // divide the canvas into a coverage track region and an alignment track region
@@ -63,9 +64,9 @@ var igv = (function (igv) {
 
     function sortAlignmentRows(chr, bpStart, bpEnd, genomicInterval) {
 
-        var alignmentRows = genomicInterval.packedAlignmentRows,
-            sequence = genomicInterval.sequence,
-            coverageMap = genomicInterval.coverageMap;
+        var myself = this,
+            alignmentRows = genomicInterval.packedAlignmentRows,
+            sequence = genomicInterval.sequence;
 
         if (sequence) {
             sequence = sequence.toUpperCase();
@@ -74,8 +75,8 @@ var igv = (function (igv) {
             return;
         }
 
-        alignmentRows.forEach(function(alignmentRow){
-            alignmentRow.updateScore(bpStart, bpEnd, genomicInterval);
+        alignmentRows.forEach(function(alignmentRow, index){
+            alignmentRow.updateScore(bpStart, bpEnd, genomicInterval, myself.sortOption, index);
         });
 
         alignmentRows.sort(function(a, b) {

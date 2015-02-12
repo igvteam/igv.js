@@ -34,78 +34,99 @@ var igv = (function (igv) {
         this.score = undefined;
     };
 
-    igv.BamAlignmentRow.prototype.updateScore = function (bpStart, bpEnd, genomicInterval) {
+    igv.BamAlignmentRow.prototype.findCenterAlignment = function (bpStart, bpEnd) {
 
-        var sequence = genomicInterval.sequence,
-            coverageMap = genomicInterval.coverageMap,
-            insertionScore = undefined,
-            baseScore = undefined,
-            myself = this;
+        var centerAlignment = undefined;
 
-        this.alignments.forEach(function(alignment){
+        // find single alignment that overlaps sort location
+        this.alignments.forEach(function(a){
 
-            if ((alignment.start + alignment.lengthOnRef) < bpStart || alignment.start > bpEnd) {
+            if (undefined === centerAlignment) {
 
-            } else {
+                if ((a.start + a.lengthOnRef) < bpStart || a.start > bpEnd) {
+                    // do nothing
+                } else {
+                    centerAlignment = a;
+                }
 
-                alignment.blocks.forEach(function (block) {
-
-                    /*
-                     block definition - { start, len, seq, qual }
-                     */
-
-                    var reference,
-                        base,
-                        coverage,
-                        count,
-                        phred;
-
-                    if ("*" !== block.seq) {
-
-                        for (var i = 0, indexReferenceSequence = block.start - genomicInterval.start, bpBlockSequence = block.start, lengthBlockSequence = block.seq.length; i < lengthBlockSequence; i++, indexReferenceSequence++, bpBlockSequence++) {
-
-                            if (bpStart === bpBlockSequence) {
-
-                                reference = sequence.charAt(indexReferenceSequence);
-                                base = block.seq.charAt(i);
-
-                                if (base === "=") {
-                                    base = reference;
-                                }
-
-                                if (base === 'N') {
-                                    baseScore = 2;
-                                }
-                                else if (base === reference) {
-                                    baseScore = 3;
-                                }
-                                else if (base === "X" || base !== reference){
-
-                                    coverage = coverageMap.coverage[ (bpBlockSequence - coverageMap.bpStart) ];
-                                    count = coverage[ "pos" + base ] + coverage[ "neg" + base ];
-                                    phred = (coverage.qual) ? coverage.qual : 0;
-                                    baseScore = -(count + (phred / 1000.0));
-                                } else {
-                                    console.log("BamAlignmentRow.updateScore - huh?");
-                                }
-
-                            }
-
-                        } // block.seq.length
-
-                    }
-                    // block.seq === "*" indicating reference matches base
-                    else {
-                        console.log("BamAlignmentRow.prototype.updateScore - block.seq " + block.seq);
-                        baseScore = 3;
-                    }
-
-                }); // alignment.blocks
             }
 
         });
 
-        this.score = (undefined === baseScore) ? Number.MAX_VALUE : baseScore;
+        return centerAlignment;
+    };
+
+    igv.BamAlignmentRow.prototype.updateScore = function (bpStart, bpEnd, genomicInterval, sortOption, rowIndex) {
+
+        this.score = this.caculateScore(bpStart, bpEnd, genomicInterval, sortOption, rowIndex);
+
+    };
+
+    igv.BamAlignmentRow.prototype.caculateScore = function (bpStart, bpEnd, genomicInterval, sortOption, rowIndex) {
+
+        var baseScore,
+            alignment;
+
+        alignment = this.findCenterAlignment(bpStart, bpEnd);
+        if (undefined === alignment) {
+            return Number.MAX_VALUE;
+        }
+
+        baseScore = undefined;
+        alignment.blocks.forEach(function (block) {
+
+            var sequence = genomicInterval.sequence,
+                coverageMap = genomicInterval.coverageMap,
+                reference,
+                base,
+                coverage,
+                count,
+                phred;
+
+            if ("*" !== block.seq) {
+
+                for (var i = 0, indexReferenceSequence = block.start - genomicInterval.start, bpBlockSequence = block.start, lengthBlockSequence = block.seq.length;
+                     i < lengthBlockSequence;
+                     i++, indexReferenceSequence++, bpBlockSequence++) {
+
+                    if (bpStart === bpBlockSequence) {
+
+                        reference = sequence.charAt(indexReferenceSequence);
+                        base = block.seq.charAt(i);
+
+                        if (base === "=") {
+                            base = reference;
+                        }
+
+                        if (base === 'N') {
+                            baseScore = 2;
+                        }
+                        else if (base === reference) {
+                            baseScore = 3;
+                        }
+                        else if (base === "X" || base !== reference){
+
+                            coverage = coverageMap.coverage[ (bpBlockSequence - coverageMap.bpStart) ];
+                            count = coverage[ "pos" + base ] + coverage[ "neg" + base ];
+                            phred = (coverage.qual) ? coverage.qual : 0;
+                            baseScore = -(count + (phred / 1000.0));
+                        } else {
+                            console.log("BamAlignmentRow.caculateScore - huh?");
+                        }
+
+                    } // bpStart === bpBlockSequence
+
+                } // block.seq.length
+
+            }
+            else {
+                baseScore = 3;
+            }
+
+        });
+
+        return (undefined === baseScore) ? Number.MAX_VALUE : baseScore;
+
     };
 
     return igv;
