@@ -53,19 +53,20 @@ var igv = (function (igv) {
 
     igv.BAMTrack.prototype.sortAlignmentRows = function (chr, bpStart, bpEnd, callback) {
 
+        var myself = this;
+
         this.featureSource.getFeatures(chr, bpStart, bpEnd, function (genomicInterval) {
 
-            sortAlignmentRows(chr, bpStart, bpEnd, genomicInterval);
+            sortAlignmentRows(chr, bpStart, bpEnd, genomicInterval, myself.sortOption);
 
             callback();
 
         });
     };
 
-    function sortAlignmentRows(chr, bpStart, bpEnd, genomicInterval) {
+    function sortAlignmentRows(chr, bpStart, bpEnd, genomicInterval, sortOption) {
 
-        var myself = this,
-            alignmentRows = genomicInterval.packedAlignmentRows,
+        var alignmentRows = genomicInterval.packedAlignmentRows,
             sequence = genomicInterval.sequence;
 
         if (sequence) {
@@ -76,7 +77,7 @@ var igv = (function (igv) {
         }
 
         alignmentRows.forEach(function(alignmentRow, index){
-            alignmentRow.updateScore(bpStart, bpEnd, genomicInterval, myself.sortOption, index);
+            alignmentRow.updateScore(bpStart, bpEnd, genomicInterval, sortOption, index);
         });
 
         alignmentRows.sort(function(a, b) {
