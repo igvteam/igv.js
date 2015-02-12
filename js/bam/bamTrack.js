@@ -235,8 +235,7 @@ var igv = (function (igv) {
         function drawAlignments(genomicInterval) {
 
             var packedAlignmentRows = genomicInterval.packedAlignmentRows,
-                sequence = genomicInterval.sequence,
-                sequenceStart = genomicInterval.start;
+                sequence = genomicInterval.sequence;
 
             if (sequence) {
                 sequence = sequence.toUpperCase();
@@ -250,69 +249,65 @@ var igv = (function (igv) {
                 // alignment track
                 packedAlignmentRows.forEach(function renderAlignmentRow(alignmentRow, i) {
 
-                    var arrowHeadWidth = myself.alignmentRowHeight / 2.0,
+                    var widthArrowHead = myself.alignmentRowHeight / 2.0,
                         yStrokedLine,
                         yRect,
                         height;
+
                     yRect = myself.alignmentRowYInset + myself.coverageTrackHeight + (myself.alignmentRowHeight * i) + 5;
                     height = myself.alignmentRowHeight - (2 * myself.alignmentRowYInset);
                     yStrokedLine = (height / 2.0) + yRect;
 
                     alignmentRow.alignments.forEach(function renderAlignment(alignment) {
-                        var xRectStart,
-                            xRectEnd,
-                            blocks = alignment.blocks,
-                            len = alignment.blocks.length,
-                            strand = alignment.strand,
-                            blocksBBoxLength = alignment.lengthOnRef;
 
-                        if ((alignment.start + blocksBBoxLength) < bpStart) return;
+                        var xStart,
+                            xEnd;
+
+                        if ((alignment.start + alignment.lengthOnRef) < bpStart) return;
                         if (alignment.start > bpEnd) return;
 
-                        xRectStart = (alignment.start - bpStart) / bpPerPixel;
-                        xRectEnd = ((alignment.start + blocksBBoxLength) - bpStart) / bpPerPixel;
+                        xStart = (alignment.start - bpStart) / bpPerPixel;
+                        xEnd = ((alignment.start + alignment.lengthOnRef) - bpStart) / bpPerPixel;
 
-                        if (blocks.length > 0) {
+                        if (alignment.blocks.length > 0) {
                             // todo -- set color based on gap type (deletion or skipped)
-                            canvas.strokeLine(xRectStart, yStrokedLine, xRectEnd, yStrokedLine, {strokeStyle: skippedColor});
+                            canvas.strokeLine(xStart, yStrokedLine, xEnd, yStrokedLine, {strokeStyle: skippedColor});
                         }
 
                         canvas.setProperties({fillStyle: alignmentColor});
 
-                        blocks.forEach(function (block, bi, bs) {
+                        alignment.blocks.forEach(function (block, indexBlocks) {
                             var refOffset = block.start - bpStart,
-                                seqOffset = block.start - sequenceStart,
-                                blockRectX = refOffset / bpPerPixel,
-                                blockEndX = ((block.start + block.len) - bpStart) / bpPerPixel,
-                                blockRectWidth = Math.max(1, blockEndX - blockRectX),
+                                seqOffset = block.start - genomicInterval.start,
+                                xBlockStart = refOffset / bpPerPixel,
+                                xBlockEnd = ((block.start + block.len) - bpStart) / bpPerPixel,
+                                widthBlock = Math.max(1, xBlockEnd - xBlockStart),
                                 blockSeq = block.seq.toUpperCase(),
-                                blockQual = block.qual,
                                 refChar,
                                 readChar,
                                 readQual,
-                                basePixelPosition,
-                                basePixelWidth,
-                                baseColor,
-                                i;
+                                xBase,
+                                widthBase,
+                                colorBase;
 
-                            if (strand && bi === len - 1) {
-                                x = [xRectStart, xRectEnd, xRectEnd + arrowHeadWidth, xRectEnd, xRectStart];
+                            if (alignment.strand && indexBlocks === alignment.blocks.length - 1) {
+                                x = [xStart, xEnd, xEnd + widthArrowHead, xEnd, xStart];
                                 y = [yRect, yRect, yRect + height / 2, yRect + height, yRect + height];
                                 canvas.fillPolygon(x, y);
 
-                            } else if (!strand && bi === 0) {
-                                var x = [ blockRectX - arrowHeadWidth, blockRectX, blockEndX, blockEndX, blockRectX];
+                            } else if (!alignment.strand && indexBlocks === 0) {
+                                var x = [ xBlockStart - widthArrowHead, xBlockStart, xBlockEnd, xBlockEnd, xBlockStart];
                                 var y = [ yRect + height / 2, yRect, yRect, yRect + height, yRect + height];
                                 canvas.fillPolygon(x, y);
                             } else {
 
-                                canvas.fillRect(blockRectX, yRect, blockRectWidth, height);
+                                canvas.fillRect(xBlockStart, yRect, widthBlock, height);
                             }
 
                             // Only do mismatch coloring if a refseq exists to do the comparison
                             if (sequence && blockSeq !== "*") {
 
-                                for (i = 0, len = blockSeq.length; i < len; i++) {
+                                for (var i = 0, len = blockSeq.length; i < len; i++) {
 
                                     readChar = blockSeq.charAt(i);
                                     refChar = sequence.charAt(seqOffset + i);
@@ -321,18 +316,18 @@ var igv = (function (igv) {
                                     }
 
                                     if (readChar === "X" || refChar !== readChar) {
-                                        if (blockQual && blockQual.length > i) {
-                                            readQual = blockQual[i];
-                                            baseColor = shadedBaseColor(readQual, readChar, i + block.start);
+                                        if (block.qual && block.qual.length > i) {
+                                            readQual = block.qual[ i ];
+                                            colorBase = shadedBaseColor(readQual, readChar, i + block.start);
                                         }
                                         else {
-                                            baseColor = igv.nucleotideColors[readChar];
+                                            colorBase = igv.nucleotideColors[readChar];
                                         }
 
-                                        if (baseColor) {
-                                            basePixelPosition = ((block.start + i) - bpStart) / bpPerPixel;
-                                            basePixelWidth = Math.max(1, 1 / bpPerPixel);
-                                            canvas.fillRect(basePixelPosition, yRect, basePixelWidth, height, { fillStyle: baseColor });
+                                        if (colorBase) {
+                                            xBase = ((block.start + i) - bpStart) / bpPerPixel;
+                                            widthBase = Math.max(1, 1 / bpPerPixel);
+                                            canvas.fillRect(xBase, yRect, widthBase, height, { fillStyle: colorBase });
                                         }
                                     }
                                 }
