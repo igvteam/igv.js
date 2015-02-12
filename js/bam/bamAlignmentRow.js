@@ -72,7 +72,7 @@ var igv = (function (igv) {
             return Number.MAX_VALUE;
         }
 
-        if (sortOption.sort === "NUCLEOTIDE") {
+        if ("NUCLEOTIDE" === sortOption.sort) {
 
             baseScore = undefined;
 
@@ -129,6 +129,14 @@ var igv = (function (igv) {
             });
 
             return (undefined === baseScore) ? Number.MAX_VALUE : baseScore;
+        }
+        else if ("STRAND" === sortOption.sort) {
+
+            return alignment.strand ? 1 : -1;
+        }
+        else if ("START" === sortOption.sort) {
+
+            return alignment.start;
         }
 
         return Number.MAX_VALUE;
