@@ -56,13 +56,13 @@ var igv = (function (igv) {
         return centerAlignment;
     };
 
-    igv.BamAlignmentRow.prototype.updateScore = function (bpStart, bpEnd, genomicInterval, sortOption, rowIndex) {
+    igv.BamAlignmentRow.prototype.updateScore = function (bpStart, bpEnd, genomicInterval, sortOption) {
 
-        this.score = this.caculateScore(bpStart, bpEnd, genomicInterval, sortOption, rowIndex);
+        this.score = this.caculateScore(bpStart, bpEnd, genomicInterval, sortOption);
 
     };
 
-    igv.BamAlignmentRow.prototype.caculateScore = function (bpStart, bpEnd, genomicInterval, sortOption, rowIndex) {
+    igv.BamAlignmentRow.prototype.caculateScore = function (bpStart, bpEnd, genomicInterval, sortOption) {
 
         var baseScore,
             alignment;

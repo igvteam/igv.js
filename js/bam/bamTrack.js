@@ -51,20 +51,17 @@ var igv = (function (igv) {
         this.maxHeight = config.maxHeight || 500;
     };
 
-    igv.BAMTrack.prototype.sortAlignmentRows = function (chr, bpStart, bpEnd, callback) {
+    igv.BAMTrack.prototype.sortAlignmentRows = function (bpStart, bpEnd, callback) {
 
         var myself = this;
+        this.featureSource.getFeatures(igv.browser.referenceFrame.chr, bpStart, bpEnd, function (genomicInterval) {
 
-        this.featureSource.getFeatures(chr, bpStart, bpEnd, function (genomicInterval) {
-
-            sortAlignmentRows(chr, bpStart, bpEnd, genomicInterval, myself.sortOption);
-
+            doSortAlignmentRows(bpStart, bpEnd, genomicInterval, myself.sortOption);
             callback();
-
         });
     };
 
-    function sortAlignmentRows(chr, bpStart, bpEnd, genomicInterval, sortOption) {
+    function doSortAlignmentRows(bpStart, bpEnd, genomicInterval, sortOption) {
 
         var alignmentRows = genomicInterval.packedAlignmentRows,
             sequence = genomicInterval.sequence;
@@ -76,21 +73,11 @@ var igv = (function (igv) {
             return;
         }
 
-        alignmentRows.forEach(function(alignmentRow, index){
-            alignmentRow.updateScore(bpStart, bpEnd, genomicInterval, sortOption, index);
+        alignmentRows.forEach(function(alignmentRow){
+            alignmentRow.updateScore(bpStart, bpEnd, genomicInterval, sortOption);
         });
 
         alignmentRows.sort(function(a, b) {
-
-            if (undefined === a.score) {
-                console.log("a undefined score");
-                a.score = Number.MAX_VALUE;
-            }
-            else if (undefined === b.score) {
-                console.log("b undefined score");
-                b.score = Number.MAX_VALUE;
-            }
-
             return a.score - b.score;
         });
 
@@ -98,10 +85,8 @@ var igv = (function (igv) {
 
     igv.BAMTrack.prototype.altClick = function (genomicLocation, event) {
 
-        var chr = igv.browser.referenceFrame.chr,
-            myself = this;
-
-        this.sortAlignmentRows(chr, genomicLocation, (1 + genomicLocation), function () {
+        var myself = this;
+        this.sortAlignmentRows(genomicLocation, (1 + genomicLocation), function () {
             myself.trackView.update();
             $(myself.trackView.viewportDiv).scrollTop(0);
         });
