@@ -28,6 +28,18 @@
  */
 var igv = (function (igv) {
 
+    var filters = {
+
+        noop : function (alignment, threshold) {
+            return true;
+        },
+
+        mappingQuality : function (alignment, threshold) {
+            return alignment.mq > threshold;
+        }
+
+    };
+
     igv.BAMTrack = function (config) {
 
         igv.configTrack(this, config);
@@ -49,6 +61,40 @@ var igv = (function (igv) {
         this.featureSource = new igv.BamSource(config);
 
         this.maxHeight = config.maxHeight || 500;
+    };
+
+    igv.BAMTrack.prototype.filterAlignments = function (thresholdFunction, callback) {
+
+        var pixelWidth,
+            bpWidth,
+            bpStart,
+            bpEnd,
+            myself = this;
+
+        pixelWidth = 3 * this.trackView.canvas.width;
+        bpWidth = Math.round(igv.browser.referenceFrame.toBP(pixelWidth));
+        bpStart = Math.max(0, Math.round(igv.browser.referenceFrame.start - bpWidth / 3));
+        bpEnd = bpStart + bpWidth;
+
+        this.featureSource.getFeatures(igv.browser.referenceFrame.chr, bpStart, bpEnd, function (genomicInterval) {
+
+            //var ss = igv.numberFormatter(genomicInterval.start),
+            //    ee = igv.numberFormatter(genomicInterval.end),
+            //    bpp = igv.browser.referenceFrame.bpPerPixel;
+            //
+            //console.log("GI - bpp " + bpp + " start " + ss + " end " + ee + " sequence length " + genomicInterval.sequence.length);
+
+
+            genomicInterval.packedAlignmentRows.forEach(function(alignmentRow){
+                alignmentRow.alignments.forEach(function(alignment){
+
+                    var threshold = 14;
+                    alignment.hidden = thresholdFunction(alignment, threshold);
+                });
+            });
+
+            callback();
+        });
     };
 
     igv.BAMTrack.prototype.sortAlignmentRows = function (bpStart, bpEnd, callback) {
@@ -85,11 +131,21 @@ var igv = (function (igv) {
 
     igv.BAMTrack.prototype.altClick = function (genomicLocation, event) {
 
-        var myself = this;
-        this.sortAlignmentRows(genomicLocation, (1 + genomicLocation), function () {
+        var thresholdFunction,
+            myself;
+
+        thresholdFunction = filters[ "mappingQuality" ];
+        myself = this;
+
+        this.filterAlignments(thresholdFunction, function () {
             myself.trackView.update();
             $(myself.trackView.viewportDiv).scrollTop(0);
         });
+
+        //this.sortAlignmentRows(genomicLocation, (1 + genomicLocation), function () {
+        //    myself.trackView.update();
+        //    $(myself.trackView.viewportDiv).scrollTop(0);
+        //});
 
     };
 
@@ -216,7 +272,7 @@ var igv = (function (igv) {
 
                 }
 
-             }
+            }
         }
 
         function drawAlignments(genomicInterval) {
