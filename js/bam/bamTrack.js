@@ -28,7 +28,37 @@
  */
 var igv = (function (igv) {
 
-    var filters = {
+    igv.BAMTrack = function (config) {
+
+        igv.configTrack(this, config);
+
+        this.coverageTrackHeight = config.coverageTrackHeight || 50;
+        this.alignmentRowHeight = config.alignmentRowHeight || 14;
+        this.visibilityWindow = config.visibilityWindow || 30000;     // 30kb default
+        this.alignmentColor = config.alignmentColor || "rgb(185, 185, 185)";
+        this.negStrandColor = config.negStrandColor || "rgb(150, 150, 230)";
+        this.posStrandColor = config.posStrandColor || "rgb(230, 150, 150)";
+        this.deletionColor = config.deletionColor | "black";
+        this.skippedColor = config.skippedColor || "rgb(150, 170, 170)";
+        this.coverageColor = config.coverageColor || this.alignmentColor;
+
+        // sort alignment rows
+        this.sortOption = config.sortOption || { sort : "NUCLEOTIDE" };
+
+        // filter alignments
+        this.filterOption = config.filterOption || { name : "mappingQuality", params : [ undefined, 50 ] };
+
+        // divide the canvas into a coverage track region and an alignment track region
+        this.alignmentRowYInset = 1;
+
+        this.featureSource = new igv.BamSource(config);
+
+        this.maxHeight = config.maxHeight || 500;
+    };
+
+    igv.BAMTrack.pingpong = 1;
+
+    igv.BAMTrack.filters = {
 
         noop : function () {
             return function (alignment) {
@@ -53,30 +83,34 @@ var igv = (function (igv) {
         }
     };
 
-    igv.BAMTrack = function (config) {
+    igv.BAMTrack.prototype.selectFilter = function (key) {
 
-        igv.configTrack(this, config);
+        var k,
+            keys,
+            index,
+            a,
+            b;
 
-        this.coverageTrackHeight = config.coverageTrackHeight || 50;
-        this.alignmentRowHeight = config.alignmentRowHeight || 14;
-        this.visibilityWindow = config.visibilityWindow || 30000;     // 30kb default
-        this.alignmentColor = config.alignmentColor || "rgb(185, 185, 185)";
-        this.negStrandColor = config.negStrandColor || "rgb(150, 150, 230)";
-        this.posStrandColor = config.posStrandColor || "rgb(230, 150, 150)";
-        this.deletionColor = config.deletionColor | "black";
-        this.skippedColor = config.skippedColor || "rgb(150, 170, 170)";
-        this.coverageColor = config.coverageColor || this.alignmentColor;
-        this.sortOption = config.sortOption || { sort : "NUCLEOTIDE" };
+        keys = [ key, "noop" ];
 
-        this.alignmentRowYInset = 1;
-        // divide the canvas into a coverage track region and an alignment track region
+        index = ++(igv.BAMTrack.pingpong) % 2;
 
-        this.featureSource = new igv.BamSource(config);
+        k = keys[ index ];
 
-        this.maxHeight = config.maxHeight || 500;
+        if ("mappingQuality" === k) {
+            a = this.filterOption[ "params" ][ 0 ];
+            b = this.filterOption[ "params" ][ 1 ];
+            return igv.BAMTrack.filters[ k ](a, b);
+        }
+
+        if ("noop" === k) {
+            return igv.BAMTrack.filters[ k ]();
+        }
+
+        return undefined;
     };
 
-    igv.BAMTrack.prototype.filterAlignments = function (thresholdFunction, callback) {
+    igv.BAMTrack.prototype.filterAlignments = function (filter, callback) {
 
         var pixelWidth,
             bpWidth,
@@ -91,17 +125,9 @@ var igv = (function (igv) {
 
         this.featureSource.getFeatures(igv.browser.referenceFrame.chr, bpStart, bpEnd, function (genomicInterval) {
 
-            //var ss = igv.numberFormatter(genomicInterval.start),
-            //    ee = igv.numberFormatter(genomicInterval.end),
-            //    bpp = igv.browser.referenceFrame.bpPerPixel;
-            //
-            //console.log("GI - bpp " + bpp + " start " + ss + " end " + ee + " sequence length " + genomicInterval.sequence.length);
-
-
             genomicInterval.packedAlignmentRows.forEach(function(alignmentRow){
                 alignmentRow.alignments.forEach(function(alignment){
-
-                    alignment.hidden = thresholdFunction(alignment);
+                    alignment.hidden = filter(alignment);
                 });
             });
 
@@ -141,23 +167,26 @@ var igv = (function (igv) {
 
     }
 
-    igv.BAMTrack.prototype.altClick = function (genomicLocation, event) {
+    igv.BAMTrack.prototype.shiftClick = function (genomicLocation, event) {
 
-        var thresholdFunction,
-            myself;
+        var myself = this,
+            filter;
 
-        thresholdFunction = filters[ "mappingQuality" ](undefined, 8);
-        myself = this;
+        filter = this.selectFilter(this.filterOption.name);
 
-        this.filterAlignments(thresholdFunction, function () {
+        this.filterAlignments(filter, function () {
             myself.trackView.update();
             $(myself.trackView.viewportDiv).scrollTop(0);
         });
 
-        //this.sortAlignmentRows(genomicLocation, (1 + genomicLocation), function () {
-        //    myself.trackView.update();
-        //    $(myself.trackView.viewportDiv).scrollTop(0);
-        //});
+    };
+
+    igv.BAMTrack.prototype.altClick = function (genomicLocation, event) {
+
+        this.sortAlignmentRows(genomicLocation, (1 + genomicLocation), function () {
+            myself.trackView.update();
+            $(myself.trackView.viewportDiv).scrollTop(0);
+        });
 
     };
 

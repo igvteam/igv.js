@@ -588,10 +588,19 @@ var igv = (function (igv) {
 
             else {
 
-                if (e.altKey) {
+                if(e.shiftKey) {
+
+                    if (trackView.track.shiftClick && trackView.tile) {
+                        trackView.track.shiftClick(genomicLocation, e);
+                    }
+
+                }
+                else if (e.altKey) {
+
                     if (trackView.track.altClick && trackView.tile) {
                         trackView.track.altClick(genomicLocation, e);
                     }
+
                 } else if (Math.abs(canvasCoords.x - mouseDownX) <= igv.constants.dragThreshold && trackView.track.popupData) {
                     const doubleClickDelay = 300;
 
