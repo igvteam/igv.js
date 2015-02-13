@@ -35,11 +35,32 @@ var igv = (function (igv) {
         this.coverageTrackHeight = config.coverageTrackHeight || 50;
         this.alignmentRowHeight = config.alignmentRowHeight || 14;
         this.visibilityWindow = config.visibilityWindow || 30000;     // 30kb default
+
         this.alignmentColor = config.alignmentColor || "rgb(185, 185, 185)";
-        this.negStrandColor = config.negStrandColor || "rgb(150, 150, 230)";
-        this.posStrandColor = config.posStrandColor || "rgb(230, 150, 150)";
+
+        this.negStrandColor = config.negStrandColor || "rgba(150, 150, 230, 0.75)";
+        this.posStrandColor = config.posStrandColor || "rgba(230, 150, 150, 0.75)";
+
         this.deletionColor = config.deletionColor | "black";
+
         this.skippedColor = config.skippedColor || "rgb(150, 170, 170)";
+
+        this.alignmentShading = config.alignmentShading || "none";
+
+        var myself = this;
+        this.alignmentShadingOptions = {
+
+            none : function (alignment) {
+                return myself.alignmentColor;
+            },
+
+            strand : function (alignment) {
+                return alignment.strand ? myself.posStrandColor : myself.negStrandColor;
+            }
+
+        };
+
+
         this.coverageColor = config.coverageColor || this.alignmentColor;
 
         // sort alignment rows
@@ -55,6 +76,7 @@ var igv = (function (igv) {
 
         this.maxHeight = config.maxHeight || 500;
     };
+
 
     igv.BAMTrack.counter = 1;
 
@@ -323,9 +345,9 @@ var igv = (function (igv) {
             if (sequence) {
                 sequence = sequence.toUpperCase();
             }
-            // coverage track
-            canvas.setProperties({ fillStyle: alignmentColor });
-            canvas.setProperties({ strokeStyle: alignmentColor });
+
+            canvas.setProperties({ fillStyle: myself.alignmentColor });
+            canvas.setProperties({ strokeStyle: myself.alignmentColor });
 
             // TODO -- how can packedAlignmentRows be undefined?
             if (packedAlignmentRows) {
@@ -335,16 +357,19 @@ var igv = (function (igv) {
                     var widthArrowHead = myself.alignmentRowHeight / 2.0,
                         yStrokedLine,
                         yRect,
-                        height;
+                        height,
+                        pingpong;
 
                     yRect = myself.alignmentRowYInset + myself.coverageTrackHeight + (myself.alignmentRowHeight * i) + 5;
                     height = myself.alignmentRowHeight - (2 * myself.alignmentRowYInset);
                     yStrokedLine = (height / 2.0) + yRect;
 
+                    pingpong = 0;
                     alignmentRow.alignments.forEach(function renderAlignment(alignment) {
 
                         var xStart,
-                            xEnd;
+                            xEnd,
+                            canvasColor;
 
                         if (true === alignment.hidden) {
                             return;
@@ -361,7 +386,14 @@ var igv = (function (igv) {
                             canvas.strokeLine(xStart, yStrokedLine, xEnd, yStrokedLine, {strokeStyle: skippedColor});
                         }
 
-                        canvas.setProperties({fillStyle: alignmentColor});
+
+                        canvasColor = myself.alignmentShadingOptions[ myself.alignmentShading ](alignment);
+
+                        canvas.setProperties( { fillStyle: canvasColor } );
+
+
+
+
 
                         alignment.blocks.forEach(function (block, indexBlocks) {
                             var refOffset = block.start - bpStart,
