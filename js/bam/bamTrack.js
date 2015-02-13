@@ -46,7 +46,7 @@ var igv = (function (igv) {
         this.sortOption = config.sortOption || { sort : "NUCLEOTIDE" };
 
         // filter alignments
-        this.filterOption = config.filterOption || { name : "mappingQuality", params : [ undefined, 50 ] };
+        this.filterOption = config.filterOption || { name : "mappingQuality", params : [ 30, undefined ] };
 
         // divide the canvas into a coverage track region and an alignment track region
         this.alignmentRowYInset = 1;
@@ -56,7 +56,7 @@ var igv = (function (igv) {
         this.maxHeight = config.maxHeight || 500;
     };
 
-    igv.BAMTrack.pingpong = 1;
+    igv.BAMTrack.counter = 1;
 
     igv.BAMTrack.filters = {
 
@@ -85,26 +85,17 @@ var igv = (function (igv) {
 
     igv.BAMTrack.prototype.selectFilter = function (key) {
 
-        var k,
-            keys,
-            index,
-            a,
+        var a,
             b;
 
-        keys = [ key, "noop" ];
-
-        index = ++(igv.BAMTrack.pingpong) % 2;
-
-        k = keys[ index ];
-
-        if ("mappingQuality" === k) {
+        if ("mappingQuality" === key) {
             a = this.filterOption[ "params" ][ 0 ];
             b = this.filterOption[ "params" ][ 1 ];
-            return igv.BAMTrack.filters[ k ](a, b);
+            return igv.BAMTrack.filters[ key ](a, b);
         }
 
-        if ("noop" === k) {
-            return igv.BAMTrack.filters[ k ]();
+        if ("noop" === key) {
+            return igv.BAMTrack.filters[ key ]();
         }
 
         return undefined;
@@ -169,10 +160,18 @@ var igv = (function (igv) {
 
     igv.BAMTrack.prototype.shiftClick = function (genomicLocation, event) {
 
-        var myself = this,
+        var index,
+            keys = [],
+            myself = this,
             filter;
 
-        filter = this.selectFilter(this.filterOption.name);
+        for(var k in igv.BAMTrack.filters) {
+            keys.push( k );
+        }
+
+        index = ++(igv.BAMTrack.counter) % keys.length;
+
+        filter = this.selectFilter(keys[ index ]);
 
         this.filterAlignments(filter, function () {
             myself.trackView.update();
