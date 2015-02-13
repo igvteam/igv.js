@@ -30,14 +30,27 @@ var igv = (function (igv) {
 
     var filters = {
 
-        noop : function (alignment, threshold) {
-            return true;
+        noop : function () {
+            return function (alignment) {
+                return true;
+            };
         },
 
-        mappingQuality : function (alignment, threshold) {
-            return alignment.mq > threshold;
-        }
+        mappingQuality : function (lower, upper) {
 
+            return function (alignment) {
+
+                if (lower && alignment.mq < lower) {
+                    return false;
+                }
+
+                if (upper && alignment.mq > upper) {
+                    return false;
+                }
+
+                return true;
+            }
+        }
     };
 
     igv.BAMTrack = function (config) {
@@ -88,8 +101,7 @@ var igv = (function (igv) {
             genomicInterval.packedAlignmentRows.forEach(function(alignmentRow){
                 alignmentRow.alignments.forEach(function(alignment){
 
-                    var threshold = 14;
-                    alignment.hidden = thresholdFunction(alignment, threshold);
+                    alignment.hidden = thresholdFunction(alignment);
                 });
             });
 
@@ -134,7 +146,7 @@ var igv = (function (igv) {
         var thresholdFunction,
             myself;
 
-        thresholdFunction = filters[ "mappingQuality" ];
+        thresholdFunction = filters[ "mappingQuality" ](undefined, 8);
         myself = this;
 
         this.filterAlignments(thresholdFunction, function () {
@@ -305,6 +317,10 @@ var igv = (function (igv) {
 
                         var xStart,
                             xEnd;
+
+                        if (undefined !== alignment.hidden && false === alignment.hidden) {
+                            return;
+                        }
 
                         if ((alignment.start + alignment.lengthOnRef) < bpStart) return;
                         if (alignment.start > bpEnd) return;
