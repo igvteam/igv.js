@@ -62,7 +62,7 @@ var igv = (function (igv) {
 
         noop : function () {
             return function (alignment) {
-                return true;
+                return false;
             };
         },
 
@@ -71,14 +71,14 @@ var igv = (function (igv) {
             return function (alignment) {
 
                 if (lower && alignment.mq < lower) {
-                    return false;
+                    return true;
                 }
 
                 if (upper && alignment.mq > upper) {
-                    return false;
+                    return true;
                 }
 
-                return true;
+                return false;
             }
         }
     };
@@ -346,7 +346,7 @@ var igv = (function (igv) {
                         var xStart,
                             xEnd;
 
-                        if (undefined !== alignment.hidden && false === alignment.hidden) {
+                        if (true === alignment.hidden) {
                             return;
                         }
 
