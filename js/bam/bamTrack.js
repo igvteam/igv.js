@@ -148,12 +148,12 @@ var igv = (function (igv) {
         });
     };
 
-    igv.BAMTrack.prototype.sortAlignmentRows = function (bpStart, bpEnd, callback) {
+    igv.BAMTrack.prototype.sortAlignmentRows = function (bpStart, bpEnd, sortOption, callback) {
 
         var myself = this;
         this.featureSource.getFeatures(igv.browser.referenceFrame.chr, bpStart, bpEnd, function (genomicInterval) {
 
-            doSortAlignmentRows(bpStart, bpEnd, genomicInterval, myself.sortOption);
+            doSortAlignmentRows(bpStart, bpEnd, genomicInterval, sortOption);
             callback();
         });
     };
@@ -180,6 +180,7 @@ var igv = (function (igv) {
 
     }
 
+    // Shift - Click to Filter alignments
     igv.BAMTrack.prototype.shiftClick = function (genomicLocation, event) {
 
         var index,
@@ -202,9 +203,12 @@ var igv = (function (igv) {
 
     };
 
+    // Alt - Click to Sort alignment rows
     igv.BAMTrack.prototype.altClick = function (genomicLocation, event) {
 
-        this.sortAlignmentRows(genomicLocation, (1 + genomicLocation), function () {
+        var myself = this;
+
+        this.sortAlignmentRows(genomicLocation, (1 + genomicLocation), myself.sortOption, function () {
             myself.trackView.update();
             $(myself.trackView.viewportDiv).scrollTop(0);
         });
