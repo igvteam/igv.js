@@ -26,8 +26,7 @@ var igv = (function (igv) {
     /**
      * Class for reading a bam file
      *
-     * @param bamPath
-     * @param baiPath
+     * @param config
      * @constructor
      */
     igv.BamReader = function (config) {
@@ -104,7 +103,7 @@ var igv = (function (igv) {
 
 
         });
-    }
+    };
 
     igv.BamReader.prototype.readFeatures = function (chr, min, max, continuation, task) {
 
@@ -407,8 +406,7 @@ var igv = (function (igv) {
 
         }
 
-    }
-
+    };
 
     function getIndex(bam, continuation) {
 
@@ -447,7 +445,6 @@ var igv = (function (igv) {
         }
     }
 
-
     function getChrIndex(bam, continuation) {
 
         if (bam.chrToIndex) {
@@ -460,7 +457,6 @@ var igv = (function (igv) {
         }
     }
 
-
     function readInt(ba, offset) {
         return (ba[offset + 3] << 24) | (ba[offset + 2] << 16) | (ba[offset + 1] << 8) | (ba[offset]);
     }
@@ -468,7 +464,6 @@ var igv = (function (igv) {
     function readShort(ba, offset) {
         return (ba[offset + 1] << 8) | (ba[offset]);
     }
-
 
     return igv;
 
