@@ -77,7 +77,6 @@ var igv = (function (igv) {
         this.maxHeight = config.maxHeight || 500;
     };
 
-
     igv.BAMTrack.counter = 1;
 
     igv.BAMTrack.filters = {
