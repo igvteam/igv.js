@@ -28,8 +28,6 @@
  */
 var igv = (function (igv) {
 
-    var sortDirection = 1;
-
     igv.BAMTrack = function (config) {
 
         igv.configTrack(this, config);
@@ -37,41 +35,132 @@ var igv = (function (igv) {
         this.coverageTrackHeight = config.coverageTrackHeight || 50;
         this.alignmentRowHeight = config.alignmentRowHeight || 14;
         this.visibilityWindow = config.visibilityWindow || 30000;     // 30kb default
+
         this.alignmentColor = config.alignmentColor || "rgb(185, 185, 185)";
-        this.negStrandColor = config.negStrandColor || "rgb(150, 150, 230)";
-        this.posStrandColor = config.posStrandColor || "rgb(230, 150, 150)";
+
+        this.negStrandColor = config.negStrandColor || "rgba(150, 150, 230, 0.75)";
+        this.posStrandColor = config.posStrandColor || "rgba(230, 150, 150, 0.75)";
+
         this.deletionColor = config.deletionColor | "black";
+
         this.skippedColor = config.skippedColor || "rgb(150, 170, 170)";
+
+        this.alignmentShading = config.alignmentShading || "none";
+
+        var myself = this;
+        this.alignmentShadingOptions = {
+
+            none : function (alignment) {
+                return myself.alignmentColor;
+            },
+
+            strand : function (alignment) {
+                return alignment.strand ? myself.posStrandColor : myself.negStrandColor;
+            }
+
+        };
+
+
         this.coverageColor = config.coverageColor || this.alignmentColor;
 
-        this.alignmentRowYInset = 1;
+        // sort alignment rows
+        this.sortOption = config.sortOption || { sort : "NUCLEOTIDE" };
+
+        // filter alignments
+        this.filterOption = config.filterOption || { name : "mappingQuality", params : [ 30, undefined ] };
+
         // divide the canvas into a coverage track region and an alignment track region
+        this.alignmentRowYInset = 1;
 
         this.featureSource = new igv.BamSource(config);
 
         this.maxHeight = config.maxHeight || 500;
     };
 
-    igv.BAMTrack.prototype.sortAlignmentRows = function (chr, bpStart, bpEnd, direction, callback) {
+    igv.BAMTrack.counter = 1;
 
-        this.featureSource.getFeatures(chr, bpStart, bpEnd, function (genomicInterval) {
+    igv.BAMTrack.filters = {
 
-            traverseAlignmentRows(chr, bpStart, bpEnd, genomicInterval, direction);
+        noop : function () {
+            return function (alignment) {
+                return false;
+            };
+        },
+
+        mappingQuality : function (lower, upper) {
+
+            return function (alignment) {
+
+                if (lower && alignment.mq < lower) {
+                    return true;
+                }
+
+                if (upper && alignment.mq > upper) {
+                    return true;
+                }
+
+                return false;
+            }
+        }
+    };
+
+    igv.BAMTrack.prototype.selectFilter = function (key) {
+
+        var a,
+            b;
+
+        if ("mappingQuality" === key) {
+            a = this.filterOption[ "params" ][ 0 ];
+            b = this.filterOption[ "params" ][ 1 ];
+            return igv.BAMTrack.filters[ key ](a, b);
+        }
+
+        if ("noop" === key) {
+            return igv.BAMTrack.filters[ key ]();
+        }
+
+        return undefined;
+    };
+
+    igv.BAMTrack.prototype.filterAlignments = function (filter, callback) {
+
+        var pixelWidth,
+            bpWidth,
+            bpStart,
+            bpEnd,
+            myself = this;
+
+        pixelWidth = 3 * this.trackView.canvas.width;
+        bpWidth = Math.round(igv.browser.referenceFrame.toBP(pixelWidth));
+        bpStart = Math.max(0, Math.round(igv.browser.referenceFrame.start - bpWidth / 3));
+        bpEnd = bpStart + bpWidth;
+
+        this.featureSource.getFeatures(igv.browser.referenceFrame.chr, bpStart, bpEnd, function (genomicInterval) {
+
+            genomicInterval.packedAlignmentRows.forEach(function(alignmentRow){
+                alignmentRow.alignments.forEach(function(alignment){
+                    alignment.hidden = filter(alignment);
+                });
+            });
 
             callback();
-
         });
     };
 
-    function traverseAlignmentRows(chr, bpStart, bpEnd, genomicInterval, sortDirection) {
+    igv.BAMTrack.prototype.sortAlignmentRows = function (bpStart, bpEnd, sortOption, callback) {
 
-        var alignmentRows = genomicInterval.packedAlignments.slice(0),
-            sequence = genomicInterval.sequence,
-            scoreboard = { 'A' : 512, 'C' : 256, 'G' : 128, 'T' : 64 },
-            scores;
+        var myself = this;
+        this.featureSource.getFeatures(igv.browser.referenceFrame.chr, bpStart, bpEnd, function (genomicInterval) {
 
-        scores = [];
-        scores.length = alignmentRows.length;
+            doSortAlignmentRows(bpStart, bpEnd, genomicInterval, sortOption);
+            callback();
+        });
+    };
+
+    function doSortAlignmentRows(bpStart, bpEnd, genomicInterval, sortOption) {
+
+        var alignmentRows = genomicInterval.packedAlignmentRows,
+            sequence = genomicInterval.sequence;
 
         if (sequence) {
             sequence = sequence.toUpperCase();
@@ -80,80 +169,49 @@ var igv = (function (igv) {
             return;
         }
 
-        alignmentRows.forEach(function (alignmentRow, ar_i, ars) {
-
-            scores[ ar_i ] = { 'score' : 4, 'index' : ar_i };
-
-            alignmentRow.forEach(function (alignment, a_i, as) {
-
-                if ((alignment.start + alignment.lengthOnRef) < bpStart || alignment.start > bpEnd) {
-                    // do nothing
-                } else {
-
-                    alignment.blocks.forEach(function (block, bl_i, bls) {
-
-                        /*
-                         block definition - { start, len, seq, qual }
-                         */
-
-                        var referenceSequenceOffset,
-                            refChar,
-                            readChar,
-                            i;
-
-                        if ("*" !== block.seq) {
-
-                            referenceSequenceOffset = block.start - genomicInterval.start;
-                            for (i = 0; i < block.seq.length; i++) {
-
-                                //
-                                if (bpStart === (i + block.start)) {
-
-                                    readChar = block.seq.charAt(i);
-                                    refChar = sequence.charAt(i + referenceSequenceOffset);
-                                    if (readChar === "=") {
-                                        scores[ ar_i ] = { 'score' : 8, 'index' : ar_i };
-                                    } else {
-                                        scores[ ar_i ] = { 'score' : scoreboard[ readChar ], 'index' : ar_i };
-                                    }
-
-                                }
-
-                            } // block.seq.length
-
-                        }
-
-                    }); // alignment.blocks
-                }
-
-            }); // alignmentRow
-
-        }); // alignmentRows
-
-        scores.sort(function(a, b) {
-            var sa = a.score,
-                sb = b.score;
-            return (sortDirection < 0) ? sa - sb : sb - sa;
+        alignmentRows.forEach(function(alignmentRow){
+            alignmentRow.updateScore(bpStart, bpEnd, genomicInterval, sortOption);
         });
 
-        scores.forEach(function(s, i, ss){
-            console.log("i " + i + " index " + s.index + " score " + s.score);
-            genomicInterval.packedAlignments[ i ] = alignmentRows[ s.index ];
+        alignmentRows.sort(function(a, b) {
+            return a.score - b.score;
         });
 
     }
 
-    igv.BAMTrack.prototype.altClick = function (genomicLocation, event) {
+    // Shift - Click to Filter alignments
+    igv.BAMTrack.prototype.shiftClick = function (genomicLocation, event) {
 
-        var chr = igv.browser.referenceFrame.chr,
-            myself = this;
+        var index,
+            keys = [],
+            myself = this,
+            filter;
 
-        this.sortAlignmentRows(chr, genomicLocation, (1 + genomicLocation), sortDirection, function () {
+        for(var k in igv.BAMTrack.filters) {
+            keys.push( k );
+        }
+
+        index = ++(igv.BAMTrack.counter) % keys.length;
+
+        filter = this.selectFilter(keys[ index ]);
+
+        this.filterAlignments(filter, function () {
             myself.trackView.update();
             $(myself.trackView.viewportDiv).scrollTop(0);
         });
 
-        sortDirection *= -1;
+    };
+
+    // Alt - Click to Sort alignment rows
+    igv.BAMTrack.prototype.altClick = function (genomicLocation, event) {
+
+        var myself = this;
+
+        this.sortAlignmentRows(genomicLocation, (1 + genomicLocation), myself.sortOption, function () {
+            myself.trackView.update();
+            $(myself.trackView.viewportDiv).scrollTop(0);
+        });
+
     };
 
     igv.BAMTrack.prototype.getFeatures = function (chr, bpStart, bpEnd, continuation, task) {
@@ -190,12 +248,10 @@ var igv = (function (igv) {
             return;
         }
 
-
         if (genomicInterval) {
             drawCoverage(genomicInterval.coverageMap);
             drawAlignments(genomicInterval);
         }
-
 
         function drawCoverage(coverageMap) {
             var bp,
@@ -245,9 +301,9 @@ var igv = (function (igv) {
                     // coverage mismatch coloring
                     if (sequence) {
 
-                        if (171167156 === bp) {
-                            console.log("bp " + igv.numberFormatter(bp));
-                        }
+                        //if (171167156 === bp) {
+                        //    console.log("bp " + igv.numberFormatter(bp));
+                        //}
 
                         refBase = sequence[i];
                         if (item.isMismatch(refBase)) {
@@ -267,19 +323,12 @@ var igv = (function (igv) {
                                 // non-logoritmic
                                 hh = (count / coverageMap.maximum) * myself.coverageTrackHeight;
 
-                                // logoritmic
-                                //hh = (((count/item.total) * log10(1 + item.total)) / coverageMap.maximum) * myself.coverageTrackHeight;
-
-
                                 y = (myself.coverageTrackHeight - hh) - accumulatedHeight;
                                 accumulatedHeight += hh;
 
                                 canvas.setProperties({ fillStyle: igv.nucleotideColors[ nucleotide ] });
                                 canvas.fillRect(x, y, w, hh);
 
-                                function log10(val) {
-                                    return Math.log(val) / Math.LN10;
-                                }
                             });
 
                         }
@@ -288,90 +337,99 @@ var igv = (function (igv) {
 
                 }
 
-             }
+            }
         }
 
         function drawAlignments(genomicInterval) {
 
-            var packedAlignments = genomicInterval.packedAlignments,
-                sequence = genomicInterval.sequence,
-                sequenceStart = genomicInterval.start;
+            var packedAlignmentRows = genomicInterval.packedAlignmentRows,
+                sequence = genomicInterval.sequence;
 
             if (sequence) {
                 sequence = sequence.toUpperCase();
             }
-            // coverage track
-            canvas.setProperties({ fillStyle: alignmentColor });
-            canvas.setProperties({ strokeStyle: alignmentColor });
 
-            // TODO -- how can packedAlignments be undefined?
-            if (packedAlignments) {
+            canvas.setProperties({ fillStyle: myself.alignmentColor });
+            canvas.setProperties({ strokeStyle: myself.alignmentColor });
+
+            // TODO -- how can packedAlignmentRows be undefined?
+            if (packedAlignmentRows) {
                 // alignment track
-                packedAlignments.forEach(function renderAlignmentRow(alignmentRow, packedAlignmentIndex, packedAlignments) {
+                packedAlignmentRows.forEach(function renderAlignmentRow(alignmentRow, i) {
 
-                    var arrowHeadWidth = myself.alignmentRowHeight / 2.0,
+                    var widthArrowHead = myself.alignmentRowHeight / 2.0,
                         yStrokedLine,
                         yRect,
-                        height;
-                    yRect = myself.alignmentRowYInset + myself.coverageTrackHeight + (myself.alignmentRowHeight * packedAlignmentIndex) + 5;
+                        height,
+                        pingpong;
+
+                    yRect = myself.alignmentRowYInset + myself.coverageTrackHeight + (myself.alignmentRowHeight * i) + 5;
                     height = myself.alignmentRowHeight - (2 * myself.alignmentRowYInset);
                     yStrokedLine = (height / 2.0) + yRect;
 
-                    alignmentRow.forEach(function renderAlignment(alignment) {
-                        var xRectStart,
-                            xRectEnd,
-                            blocks = alignment.blocks,
-                            len = alignment.blocks.length,
-                            strand = alignment.strand,
-                            blocksBBoxLength = alignment.lengthOnRef;
+                    pingpong = 0;
+                    alignmentRow.alignments.forEach(function renderAlignment(alignment) {
 
-                        if ((alignment.start + blocksBBoxLength) < bpStart) return;
-                        if (alignment.start > bpEnd) return;
+                        var xStart,
+                            xEnd,
+                            canvasColor;
 
-                        xRectStart = (alignment.start - bpStart) / bpPerPixel;
-                        xRectEnd = ((alignment.start + blocksBBoxLength) - bpStart) / bpPerPixel;
-
-                        if (blocks.length > 0) {
-                            // todo -- set color based on gap type (deletion or skipped)
-                            canvas.strokeLine(xRectStart, yStrokedLine, xRectEnd, yStrokedLine, {strokeStyle: skippedColor});
+                        if (true === alignment.hidden) {
+                            return;
                         }
 
-                        canvas.setProperties({fillStyle: alignmentColor});
+                        if ((alignment.start + alignment.lengthOnRef) < bpStart) return;
+                        if (alignment.start > bpEnd) return;
 
-                        blocks.forEach(function (block, bi, bs) {
+                        xStart = (alignment.start - bpStart) / bpPerPixel;
+                        xEnd = ((alignment.start + alignment.lengthOnRef) - bpStart) / bpPerPixel;
+
+                        if (alignment.blocks.length > 0) {
+                            // todo -- set color based on gap type (deletion or skipped)
+                            canvas.strokeLine(xStart, yStrokedLine, xEnd, yStrokedLine, {strokeStyle: skippedColor});
+                        }
+
+
+                        canvasColor = myself.alignmentShadingOptions[ myself.alignmentShading ](alignment);
+
+                        canvas.setProperties( { fillStyle: canvasColor } );
+
+
+
+
+
+                        alignment.blocks.forEach(function (block, indexBlocks) {
                             var refOffset = block.start - bpStart,
-                                seqOffset = block.start - sequenceStart,
-                                blockRectX = refOffset / bpPerPixel,
-                                blockEndX = ((block.start + block.len) - bpStart) / bpPerPixel,
-                                blockRectWidth = Math.max(1, blockEndX - blockRectX),
+                                seqOffset = block.start - genomicInterval.start,
+                                xBlockStart = refOffset / bpPerPixel,
+                                xBlockEnd = ((block.start + block.len) - bpStart) / bpPerPixel,
+                                widthBlock = Math.max(1, xBlockEnd - xBlockStart),
                                 blockSeq = block.seq.toUpperCase(),
-                                blockQual = block.qual,
                                 refChar,
                                 readChar,
                                 readQual,
-                                basePixelPosition,
-                                basePixelWidth,
-                                baseColor,
-                                i;
+                                xBase,
+                                widthBase,
+                                colorBase;
 
-                            if (strand && bi === len - 1) {
-                                x = [xRectStart, xRectEnd, xRectEnd + arrowHeadWidth, xRectEnd, xRectStart];
+                            if (alignment.strand && indexBlocks === alignment.blocks.length - 1) {
+                                x = [xStart, xEnd, xEnd + widthArrowHead, xEnd, xStart];
                                 y = [yRect, yRect, yRect + height / 2, yRect + height, yRect + height];
                                 canvas.fillPolygon(x, y);
 
-                            } else if (!strand && bi === 0) {
-                                var x = [ blockRectX - arrowHeadWidth, blockRectX, blockEndX, blockEndX, blockRectX];
+                            } else if (!alignment.strand && indexBlocks === 0) {
+                                var x = [ xBlockStart - widthArrowHead, xBlockStart, xBlockEnd, xBlockEnd, xBlockStart];
                                 var y = [ yRect + height / 2, yRect, yRect, yRect + height, yRect + height];
                                 canvas.fillPolygon(x, y);
                             } else {
 
-                                canvas.fillRect(blockRectX, yRect, blockRectWidth, height);
+                                canvas.fillRect(xBlockStart, yRect, widthBlock, height);
                             }
 
                             // Only do mismatch coloring if a refseq exists to do the comparison
                             if (sequence && blockSeq !== "*") {
 
-                                for (i = 0, len = blockSeq.length; i < len; i++) {
+                                for (var i = 0, len = blockSeq.length; i < len; i++) {
 
                                     readChar = blockSeq.charAt(i);
                                     refChar = sequence.charAt(seqOffset + i);
@@ -380,18 +438,18 @@ var igv = (function (igv) {
                                     }
 
                                     if (readChar === "X" || refChar !== readChar) {
-                                        if (blockQual && blockQual.length > i) {
-                                            readQual = blockQual[i];
-                                            baseColor = shadedBaseColor(readQual, readChar, i + block.start);
+                                        if (block.qual && block.qual.length > i) {
+                                            readQual = block.qual[ i ];
+                                            colorBase = shadedBaseColor(readQual, readChar, i + block.start);
                                         }
                                         else {
-                                            baseColor = igv.nucleotideColors[readChar];
+                                            colorBase = igv.nucleotideColors[readChar];
                                         }
 
-                                        if (baseColor) {
-                                            basePixelPosition = ((block.start + i) - bpStart) / bpPerPixel;
-                                            basePixelWidth = Math.max(1, 1 / bpPerPixel);
-                                            canvas.fillRect(basePixelPosition, yRect, basePixelWidth, height, { fillStyle: baseColor });
+                                        if (colorBase) {
+                                            xBase = ((block.start + i) - bpStart) / bpPerPixel;
+                                            widthBase = Math.max(1, 1 / bpPerPixel);
+                                            canvas.fillRect(xBase, yRect, widthBase, height, { fillStyle: colorBase });
                                         }
                                     }
                                 }
@@ -409,12 +467,11 @@ var igv = (function (igv) {
         var coverageMap = this.featureSource.genomicInterval.coverageMap,
             coverageMapIndex,
             coverage,
-            packedAlignments = this.featureSource.genomicInterval.packedAlignments,
+            packedAlignmentRows = this.featureSource.genomicInterval.packedAlignmentRows,
             packedAlignmentsIndex,
             alignmentRow,
             alignment,
-            nameValues = [],
-            tmp, i, len;
+            nameValues = [];
 
         packedAlignmentsIndex = Math.floor((yOffset - (this.alignmentRowYInset + this.coverageTrackHeight)) / this.alignmentRowHeight);
 
@@ -460,15 +517,15 @@ var igv = (function (igv) {
 
         }
 
-        else if (packedAlignmentsIndex < packedAlignments.length) {
+        else if (packedAlignmentsIndex < packedAlignmentRows.length) {
 
-            alignmentRow = packedAlignments[ packedAlignmentsIndex ];
+            alignmentRow = packedAlignmentRows[ packedAlignmentsIndex ];
 
             alignment = undefined;
 
-            for (i = 0, len = alignmentRow.length; i < len; i++) {
+            for (var i = 0, len = alignmentRow.alignments.length, tmp; i < len; i++) {
 
-                tmp = alignmentRow[i];
+                tmp = alignmentRow.alignments[ i ];
 
                 if (tmp.start <= genomicLocation && (tmp.start + tmp.lengthOnRef >= genomicLocation)) {
                     alignment = tmp;
@@ -497,15 +554,14 @@ var igv = (function (igv) {
      */
     igv.BAMTrack.prototype.computePixelHeight = function (features) {
 
-        if (features.packedAlignments) {
-            return this.alignmentRowYInset + this.coverageTrackHeight + (this.alignmentRowHeight * features.packedAlignments.length) + 5;
+        if (features.packedAlignmentRows) {
+            return this.alignmentRowYInset + this.coverageTrackHeight + (this.alignmentRowHeight * features.packedAlignmentRows.length) + 5;
         }
         else {
             return this.height;
         }
 
     };
-
 
     function shadedBaseColor(qual, nucleotide, genomicLocation) {
 

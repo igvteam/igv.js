@@ -37,6 +37,14 @@ var igv = (function (igv) {
             zoomInButton,
             zoomOutButton;
 
+        if (undefined !== options.coverageThreshold) {
+            igv.CoverageMap.threshold = options.coverageThreshold;
+        }
+
+        if (undefined !== options.coverageQualityWeight) {
+            igv.CoverageMap.qualityWeight = options.coverageQualityWeight;
+        }
+
         if (options.showNavigation) {
 
             navigation = $('<div class="igvNavigation">');
@@ -84,7 +92,6 @@ var igv = (function (igv) {
             });
 
         }
-
 
         if (options.showKaryo) {
             contentKaryo = $('#igvKaryoDiv')[0];
