@@ -56,7 +56,7 @@ var igv = (function (igv) {
      */
 
     igv.BamAlignment = function () {
-
+        this.hidden = false;
     }
 
     igv.BamAlignment.prototype.isMapped = function () {

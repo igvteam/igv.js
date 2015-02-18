@@ -35,17 +35,15 @@ var igv = (function (igv) {
         this.ignoreTrackMenu = true;
     };
 
-
     igv.SequenceTrack.prototype.getFeatures = function (chr, bpStart, bpEnd, continuation, task) {
 
         if (igv.browser.referenceFrame.bpPerPixel > 1) {
             continuation(null);
-            return;
         }
         else {
             igv.sequenceSource.getSequence(chr, bpStart, bpEnd, continuation, task)
         }
-    }
+    };
 
     igv.SequenceTrack.prototype.draw = function (options) {
 
@@ -57,7 +55,6 @@ var igv = (function (igv) {
             bpEnd = bpStart + pixelWidth * bpPerPixel + 1;
 
         if (sequence) {
-
 
             var len = sequence.length;
             var w = 1 / bpPerPixel;
@@ -88,8 +85,7 @@ var igv = (function (igv) {
             }
         }
 
-
-    }
+    };
 
     return igv;
 })

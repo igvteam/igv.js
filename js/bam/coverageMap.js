@@ -28,68 +28,9 @@
  */
 var igv = (function (igv) {
 
-    /**
-     * @param genomicInterval - genomic interval
-     * @param refSeq - reference sequence
-     * @constructor
-     */
-    var allBases = ["A", "C", "T", "G", "N"];
-    var threshold = 0.2;
-    var qualityWeight = true;
-
-    function Coverage() {
-        this.posA = 0;
-        this.negA = 0;
-
-        this.posT = 0;
-        this.negT = 0;
-
-        this.posC = 0;
-        this.negC = 0;
-        this.posG = 0;
-
-        this.negG = 0;
-
-        this.posN = 0;
-        this.negN = 0;
-
-        this.pos = 0;
-        this.neg = 0;
-
-        this.qualA = 0;
-        this.qualT = 0;
-        this.qualC = 0;
-        this.qualG = 0;
-        this.qualN = 0;
-
-        this.qual = 0;
-
-        this.total = 0;
-    }
-
-    Coverage.prototype.isMismatch = function (refBase) {
-
-        var mismatchQualitySum = 0,
-            myself = this,
-            thresh = threshold * ((qualityWeight && this.qual) ? this.qual : this.total);
-
-        [ "A", "T", "C", "G" ].forEach(function (base) {
-
-            if (base !== refBase) {
-                mismatchQualitySum += ((qualityWeight && myself.qual) ? myself[ "qual" + base] : (myself[ "pos" + base ] + myself[ "neg" + base ]));
-            }
-        });
-
-        return mismatchQualitySum >= thresh;
-
-    };
-
     igv.CoverageMap = function (chr, start, end, alignments, refSeq) {
 
-        var myself;
-
-        this.prefixes = [ "pos", "neg", "qual" ];
-        this.bases = [ "A", "T", "C", "G", "N" ];
+        var myself = this;
 
         this.refSeq = refSeq;
         this.chr = chr;
@@ -99,10 +40,10 @@ var igv = (function (igv) {
         this.coverage = new Array(this.length);
 
         this.maximum = 0;
-        myself = this;
-        alignments.forEach(function (alignment, ai, as) {
 
-            alignment.blocks.forEach(function (block, bi, bs) {
+        alignments.forEach(function (alignment) {
+
+            alignment.blocks.forEach(function (block) {
 
                 var key,
                     base,
@@ -137,10 +78,58 @@ var igv = (function (igv) {
             });
         });
 
-//        console.log("CoverageMap - chr " + this.chr + " start " + igv.numberFormatter(this.bpStart) + " length " + igv.numberFormatter(this.length));
-
     };
 
+    igv.CoverageMap.threshold = 0.2;
+    igv.CoverageMap.qualityWeight = true;
+
+    function Coverage() {
+        this.posA = 0;
+        this.negA = 0;
+
+        this.posT = 0;
+        this.negT = 0;
+
+        this.posC = 0;
+        this.negC = 0;
+        this.posG = 0;
+
+        this.negG = 0;
+
+        this.posN = 0;
+        this.negN = 0;
+
+        this.pos = 0;
+        this.neg = 0;
+
+        this.qualA = 0;
+        this.qualT = 0;
+        this.qualC = 0;
+        this.qualG = 0;
+        this.qualN = 0;
+
+        this.qual = 0;
+
+        this.total = 0;
+    }
+
+    Coverage.prototype.isMismatch = function (refBase) {
+
+        var myself = this,
+            mismatchQualitySum,
+            threshold = igv.CoverageMap.threshold * ((igv.CoverageMap.qualityWeight && this.qual) ? this.qual : this.total);
+
+        mismatchQualitySum = 0;
+        [ "A", "T", "C", "G" ].forEach(function (base) {
+
+            if (base !== refBase) {
+                mismatchQualitySum += ((igv.CoverageMap.qualityWeight && myself.qual) ? myself[ "qual" + base] : (myself[ "pos" + base ] + myself[ "neg" + base ]));
+            }
+        });
+
+        return mismatchQualitySum >= threshold;
+
+    };
 
     return igv;
 

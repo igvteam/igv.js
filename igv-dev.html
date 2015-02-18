@@ -87,6 +87,7 @@
     <script type="text/javascript" src="js/bam/bamSource.js"></script>
     <script type="text/javascript" src="js/bam/bamTrack.js"></script>
     <script type="text/javascript" src="js/bam/bamAlignment.js"></script>
+    <script type="text/javascript" src="js/bam/bamAlignmentRow.js"></script>
     <script type="text/javascript" src="js/bam/bamIndex.js"></script>
 
 
@@ -279,6 +280,10 @@
 
         div = $("#myDiv")[0];
         options = {
+
+//            coverageThreshold: 0.02,
+//            coverageQualityWeight: false,
+
             showKaryo: false,
             showNavigation: true,
             fastaURL: "//dn7ywbm9isq8j.cloudfront.net/genomes/seq/hg19/hg19.fasta",
@@ -292,9 +297,34 @@
                 },
                 {
                     type: 'bam',
+
                     url: 'http://www.broadinstitute.org/igvdata/1KG/b37/data/NA06984/alignment/NA06984.mapped.ILLUMINA.bwa.CEU.low_coverage.20120522.bam',
+
+                    alignmentShading: "strand",
+//                    alignmentShading: "none",
+
+                    sortOption:
+                    {
+                        sort : "NUCLEOTIDE"
+//                        sort : "START"
+//                        sort : "STRAND"
+                    },
+
+                    filterOption :
+                    {
+                        name : "mappingQuality",
+                        params : [ 10, 40 ]
+                    },
+
                     label: 'NA06984'
+                },
+                {
+                    url: "//dn7ywbm9isq8j.cloudfront.net/annotations/hg19/genes/gencode.v18.collapsed.bed",
+                    indexed: false,
+                    label: "Genes",
+                    order: 10000
                 }
+
             ]
         };
 
