@@ -281,14 +281,17 @@
         div = $("#myDiv")[0];
         options = {
 
-//            coverageThreshold: 0.02,
-//            coverageQualityWeight: false,
-
             showKaryo: false,
             showNavigation: true,
             fastaURL: "//dn7ywbm9isq8j.cloudfront.net/genomes/seq/hg19/hg19.fasta",
             cytobandURL: "//dn7ywbm9isq8j.cloudfront.net/genomes/seq/hg19/cytoBand.txt",
             flanking: 1000,
+            trackDefaults : {
+                bam: {
+                    coverageThreshold: 0.2,
+                    coverageQualityWeight: true
+                }
+            },
             tracks: [
 
                 {
@@ -305,16 +308,27 @@
 
                     sortOption:
                     {
-                        sort : "NUCLEOTIDE"
+//                        sort : "NUCLEOTIDE"
 //                        sort : "START"
-//                        sort : "STRAND"
+                        sort : "STRAND"
                     },
 
                     filterOption :
                     {
-                        name : "mappingQuality",
-                        params : [ 10, 40 ]
+                        name : "strand",
+                        params : [ false ]
                     },
+
+//                    filterOption :
+//                    {
+//                        name : "noop"
+//                    },
+
+//                    filterOption :
+//                    {
+//                        name : "mappingQuality",
+//                        params : [ 10, 40 ]
+//                    },
 
                     label: 'NA06984'
                 },
@@ -330,6 +344,7 @@
 
         browser = igv.createBrowser(div, options);
     });
+
 
 </script>
 

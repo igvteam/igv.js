@@ -37,14 +37,6 @@ var igv = (function (igv) {
             zoomInButton,
             zoomOutButton;
 
-        if (undefined !== options.coverageThreshold) {
-            igv.CoverageMap.threshold = options.coverageThreshold;
-        }
-
-        if (undefined !== options.coverageQualityWeight) {
-            igv.CoverageMap.qualityWeight = options.coverageQualityWeight;
-        }
-
         if (options.showNavigation) {
 
             navigation = $('<div class="igvNavigation">');
@@ -165,12 +157,21 @@ var igv = (function (igv) {
         $(contentHeader).append(browser.ideoPanel.div);
         browser.ideoPanel.resize();
 
-
-        //console.log("Browser startup");
-
-
         igv.sequenceSource = new igv.FastaSequence(options.fastaURL);
 
+        if (options.trackDefaults) {
+
+            if (undefined !== options.trackDefaults.bam) {
+
+                if (undefined !== options.trackDefaults.bam.coverageThreshold) {
+                    igv.CoverageMap.threshold = options.trackDefaults.bam.coverageThreshold;
+                }
+
+                if (undefined !== options.trackDefaults.bam.coverageQualityWeight) {
+                    igv.CoverageMap.qualityWeight = options.trackDefaults.bam.coverageQualityWeight;
+                }
+            }
+        }
 
         igv.loadGenome(options.cytobandURL, function (genome) {
 
