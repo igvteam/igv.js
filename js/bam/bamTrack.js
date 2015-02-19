@@ -32,36 +32,29 @@ var igv = (function (igv) {
 
         igv.configTrack(this, config);
 
+        // divide the canvas into a coverage track region and an alignment track region
+        this.alignmentRowYInset = 1;
+
         this.coverageTrackHeight = config.coverageTrackHeight || 50;
-        this.alignmentRowHeight = config.alignmentRowHeight || 14;
+
+        this.maxHeight = config.maxHeight || 500;
+
         this.visibilityWindow = config.visibilityWindow || 30000;     // 30kb default
 
-        this.alignmentColor = config.alignmentColor || "rgb(185, 185, 185)";
+        this.alignmentRowHeight = config.alignmentRowHeight || 14;
 
+        this.alignmentColor = config.alignmentColor || "rgb(185, 185, 185)";
         this.negStrandColor = config.negStrandColor || "rgba(150, 150, 230, 0.75)";
         this.posStrandColor = config.posStrandColor || "rgba(230, 150, 150, 0.75)";
-
         this.deletionColor = config.deletionColor | "black";
 
         this.skippedColor = config.skippedColor || "rgb(150, 170, 170)";
-
-        this.alignmentShading = config.alignmentShading || "none";
-
-        var myself = this;
-        this.alignmentShadingOptions = {
-
-            none : function (alignment) {
-                return myself.alignmentColor;
-            },
-
-            strand : function (alignment) {
-                return alignment.strand ? myself.posStrandColor : myself.negStrandColor;
-            }
-
-        };
-
-
         this.coverageColor = config.coverageColor || this.alignmentColor;
+
+
+
+        // alignment shading options
+        this.alignmentShading = config.alignmentShading || "none";
 
         // sort alignment rows
         this.sortOption = config.sortOption || { sort : "NUCLEOTIDE" };
@@ -69,12 +62,19 @@ var igv = (function (igv) {
         // filter alignments
         this.filterOption = config.filterOption || { name : "mappingQuality", params : [ 30, undefined ] };
 
-        // divide the canvas into a coverage track region and an alignment track region
-        this.alignmentRowYInset = 1;
+         this.featureSource = new igv.BamSource(config);
+    };
 
-        this.featureSource = new igv.BamSource(config);
+    igv.BAMTrack.alignmentShadingOptions = {
 
-        this.maxHeight = config.maxHeight || 500;
+        none : function (bamTrack, alignment) {
+            return bamTrack.alignmentColor;
+        },
+
+        strand : function (bamTrack, alignment) {
+            return alignment.strand ? bamTrack.posStrandColor : bamTrack.negStrandColor;
+        }
+
     };
 
     igv.BAMTrack.counter = 1;
@@ -87,8 +87,13 @@ var igv = (function (igv) {
             };
         },
 
-        mappingQuality : function (lower, upper) {
+        strand : function (strand) {
+            return function (alignment) {
+                return alignment.strand === strand;
+            };
+        },
 
+        mappingQuality : function (lower, upper) {
             return function (alignment) {
 
                 if (lower && alignment.mq < lower) {
@@ -104,31 +109,38 @@ var igv = (function (igv) {
         }
     };
 
-    igv.BAMTrack.prototype.selectFilter = function (key) {
+    igv.BAMTrack.selectFilter = function (bamTrack, filterOption) {
 
         var a,
             b;
 
-        if ("mappingQuality" === key) {
-            a = this.filterOption[ "params" ][ 0 ];
-            b = this.filterOption[ "params" ][ 1 ];
-            return igv.BAMTrack.filters[ key ](a, b);
+        if ("mappingQuality" === filterOption.name) {
+            a = bamTrack.filterOption[ "params" ][ 0 ];
+            b = bamTrack.filterOption[ "params" ][ 1 ];
+            return igv.BAMTrack.filters[ filterOption.name ](a, b);
         }
 
-        if ("noop" === key) {
-            return igv.BAMTrack.filters[ key ]();
+        if ("strand" === filterOption.name) {
+            a = bamTrack.filterOption[ "params" ][ 0 ];
+            return igv.BAMTrack.filters[ filterOption.name ](a);
+        }
+
+        if ("noop" === filterOption.name) {
+            return igv.BAMTrack.filters[ filterOption.name ]();
         }
 
         return undefined;
     };
 
-    igv.BAMTrack.prototype.filterAlignments = function (filter, callback) {
+    igv.BAMTrack.prototype.filterAlignments = function (filterOption, callback) {
 
         var pixelWidth,
             bpWidth,
             bpStart,
             bpEnd,
-            myself = this;
+            filter;
+
+        filter = igv.BAMTrack.selectFilter(this, filterOption);
 
         pixelWidth = 3 * this.trackView.canvas.width;
         bpWidth = Math.round(igv.browser.referenceFrame.toBP(pixelWidth));
@@ -145,6 +157,18 @@ var igv = (function (igv) {
 
             callback();
         });
+    };
+
+    // Shift - Click to Filter alignments
+    igv.BAMTrack.prototype.shiftClick = function (genomicLocation, event) {
+
+        var myself = this;
+
+        this.filterAlignments(this.filterOption, function () {
+            myself.trackView.update();
+            $(myself.trackView.viewportDiv).scrollTop(0);
+        });
+
     };
 
     igv.BAMTrack.prototype.sortAlignmentRows = function (bpStart, bpEnd, sortOption, callback) {
@@ -178,29 +202,6 @@ var igv = (function (igv) {
         });
 
     }
-
-    // Shift - Click to Filter alignments
-    igv.BAMTrack.prototype.shiftClick = function (genomicLocation, event) {
-
-        var index,
-            keys = [],
-            myself = this,
-            filter;
-
-        for(var k in igv.BAMTrack.filters) {
-            keys.push( k );
-        }
-
-        index = ++(igv.BAMTrack.counter) % keys.length;
-
-        filter = this.selectFilter(keys[ index ]);
-
-        this.filterAlignments(filter, function () {
-            myself.trackView.update();
-            $(myself.trackView.viewportDiv).scrollTop(0);
-        });
-
-    };
 
     // Alt - Click to Sort alignment rows
     igv.BAMTrack.prototype.altClick = function (genomicLocation, event) {
@@ -390,7 +391,7 @@ var igv = (function (igv) {
                         }
 
 
-                        canvasColor = myself.alignmentShadingOptions[ myself.alignmentShading ](alignment);
+                        canvasColor = igv.BAMTrack.alignmentShadingOptions[ myself.alignmentShading ](myself, alignment);
 
                         canvas.setProperties( { fillStyle: canvasColor } );
 
