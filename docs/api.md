@@ -75,12 +75,14 @@ Tracks configuration uses json-style objects.   With exception of "url" all para
 
     visibilityWindow    Window size in bp at which alignments are loaded.  Default = 30000 (30kb)    
     alignmentRowHeight  height of each alignment row.   Default = 14
+    coverageTrackHeight  height of coverage track   Default = 50
     alignmentColor      default color for alignments    Default = "rgb(185, 185, 185)"
     negStrandColor      for "color by strand" option.  Default = "rgb(150, 150, 230)"
     posStrandColor      for "color by strand" option.  Default = "rgb(230, 150, 150)"
     deletionColor       color of line connecting blocks from deletion (cigar = "d").  Default = "black"
     skippedColor        color of line connection blocks for cigar "n". Default = "rgb(150, 170, 170)"
     coverageColor       color of coverage track. Default = "rgb(185, 185, 185)"
+    
     alignmentShading	alignment shading.  Options: "none" (default) or "strand"
     sortOption			sort criteria. Options: "NUCLEOTIDE" (default), "START", or "STRAND"
 
@@ -95,8 +97,24 @@ Tracks configuration uses json-style objects.   With exception of "url" all para
 
 
 
-##Track API##
-Specific track types have an API that controls both the style of rendering used to present features and how - if desired - features are filtered out of a presentation. 
+###Track API###
+Some track types have an API that controls both the style of rendering used to present features and how - if desired - features are filtered out of a presentation. 
+
+####Alignment Shading####
+Here we set alignment rendering color based on the strand. Using `"none"` sets the color to the current `alignmentColor` setting for the track.
+
+	var bamTrack = new igv.BAMTrack(config);
+	bamTrack.alignmentShading = "strand";
+
+####Alignment Row Sorting####
+Alignment rows can be sorted by nucleotide, start location, or strand using the strings `"NUCLEOTIDE"`, `"START"` or `"STRAND"` respectively. Here we sort by nucleotide.
+
+	var bamTrack = new igv.BAMTrack(config);
+	bamTrack.sortOption = { sort: "NUCLEOTIDE" };
+
+Sort is performed with the `sortAlignmentRows(genomicLocation, sortOption, continuation)` function.
+
+	bamTrack.sortAlignmentRows(genomicLocation, bamTrack.sortOption, continuation);
 
 #Browser Control API#
 

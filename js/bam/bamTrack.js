@@ -32,16 +32,11 @@ var igv = (function (igv) {
 
         igv.configTrack(this, config);
 
-        // divide the canvas into a coverage track region and an alignment track region
-        this.alignmentRowYInset = 1;
-
-        this.coverageTrackHeight = config.coverageTrackHeight || 50;
-
-        this.maxHeight = config.maxHeight || 500;
-
         this.visibilityWindow = config.visibilityWindow || 30000;     // 30kb default
 
         this.alignmentRowHeight = config.alignmentRowHeight || 14;
+
+        this.coverageTrackHeight = config.coverageTrackHeight || 50;
 
         this.alignmentColor = config.alignmentColor || "rgb(185, 185, 185)";
         this.negStrandColor = config.negStrandColor || "rgba(150, 150, 230, 0.75)";
@@ -50,6 +45,12 @@ var igv = (function (igv) {
 
         this.skippedColor = config.skippedColor || "rgb(150, 170, 170)";
         this.coverageColor = config.coverageColor || this.alignmentColor;
+
+        this.maxHeight = config.maxHeight || 500;
+
+
+        // divide the canvas into a coverage track region and an alignment track region
+        this.alignmentRowYInset = 1;
 
 
 
@@ -171,17 +172,17 @@ var igv = (function (igv) {
 
     };
 
-    igv.BAMTrack.prototype.sortAlignmentRows = function (bpStart, bpEnd, sortOption, callback) {
+    igv.BAMTrack.prototype.sortAlignmentRows = function (genomicLocation, sortOption, callback) {
 
         var myself = this;
-        this.featureSource.getFeatures(igv.browser.referenceFrame.chr, bpStart, bpEnd, function (genomicInterval) {
+        this.featureSource.getFeatures(igv.browser.referenceFrame.chr, genomicLocation, (1 + genomicLocation), function (genomicInterval) {
 
-            doSortAlignmentRows(bpStart, bpEnd, genomicInterval, sortOption);
+            doSortAlignmentRows(genomicLocation, genomicInterval, sortOption);
             callback();
         });
     };
 
-    function doSortAlignmentRows(bpStart, bpEnd, genomicInterval, sortOption) {
+    function doSortAlignmentRows(genomicLocation, genomicInterval, sortOption) {
 
         var alignmentRows = genomicInterval.packedAlignmentRows,
             sequence = genomicInterval.sequence;
@@ -194,7 +195,7 @@ var igv = (function (igv) {
         }
 
         alignmentRows.forEach(function(alignmentRow){
-            alignmentRow.updateScore(bpStart, bpEnd, genomicInterval, sortOption);
+            alignmentRow.updateScore(genomicLocation, genomicInterval, sortOption);
         });
 
         alignmentRows.sort(function(a, b) {
@@ -208,7 +209,7 @@ var igv = (function (igv) {
 
         var myself = this;
 
-        this.sortAlignmentRows(genomicLocation, (1 + genomicLocation), myself.sortOption, function () {
+        this.sortAlignmentRows(genomicLocation, this.sortOption, function () {
             myself.trackView.update();
             $(myself.trackView.viewportDiv).scrollTop(0);
         });
