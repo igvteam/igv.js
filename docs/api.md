@@ -116,6 +116,34 @@ Sort is performed with the `sortAlignmentRows(genomicLocation, sortOption, conti
 
 	bamTrack.sortAlignmentRows(genomicLocation, bamTrack.sortOption, continuation);
 
+####Alignment Row Filtering####
+Alignment rows can be filtered by mapping quality and strand. Filtering is performed by basing a filter options object to the function `bamTrack.filterAlignments(filterOption, continuation)`.
+
+Here is the format of a filter option:
+  
+	{
+		name : filterName,
+		params : [ param0, param1, ..., paramN ]
+	}
+
+Supported filters:
+#####mapping quality#####
+Set either to `undefined` to ignore that threshold
+	
+	{
+		name : mappingQuality,
+		params : [ lowQuality, lowQuality ]
+	}
+
+#####strand#####
+	
+	{
+		name : strand,
+		params : [ true or false ]
+	}
+
+
+
 #Browser Control API#
 
 After initialization the browser can be controlled through the object "igv.browser" using the commands described below.
