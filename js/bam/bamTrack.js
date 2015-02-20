@@ -439,7 +439,7 @@ var igv = (function (igv) {
                                     yRect + height,
                                     yRect];
 
-                                canvas.setProperties( { fillStyle: "rgba(255, 0, 0, 1.0)" } );
+                                //canvas.setProperties( { fillStyle: "rgba(255, 0, 0, 1.0)" } );
                                 canvas.fillPolygon(x, y);
 
                             }
@@ -457,11 +457,11 @@ var igv = (function (igv) {
                                     yRect + height,
                                     yRect];
 
-                                canvas.setProperties( { fillStyle: "rgba(0, 255, 0, 1.0)" } );
+                                //canvas.setProperties( { fillStyle: "rgba(0, 255, 0, 1.0)" } );
                                 canvas.fillPolygon(x, y);
                             }
 
-                            canvas.setProperties( { fillStyle: canvasColor } );
+                            //canvas.setProperties( { fillStyle: canvasColor } );
                             //canvas.fillRect(xBlockStart, yRect, widthBlock, height, { fillStyle: "rgba(0, 255, 0, 0.25)" });
                             canvas.fillRect(xBlockStart, yRect, widthBlock, height);
 
@@ -484,7 +484,6 @@ var igv = (function (igv) {
                                         }
                                         else {
                                             colorBase = igv.nucleotideColors[readChar];
-                                            console.log("match " + colorBase);
                                         }
 
                                         if (colorBase) {
@@ -495,8 +494,6 @@ var igv = (function (igv) {
                                         }
                                     }
                                 }
-                            } else {
-                                console.log("* === blockSeq");
                             }
 
                         });
