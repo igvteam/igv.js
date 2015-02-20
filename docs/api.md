@@ -82,10 +82,6 @@ Tracks configuration uses json-style objects.   With exception of "url" all para
     deletionColor       color of line connecting blocks from deletion (cigar = "d").  Default = "black"
     skippedColor        color of line connection blocks for cigar "n". Default = "rgb(150, 170, 170)"
     coverageColor       color of coverage track. Default = "rgb(185, 185, 185)"
-    
-    alignmentShading	alignment shading.  Options: "none" (default) or "strand"
-    sortOption			sort criteria. Options: "NUCLEOTIDE" (default), "START", or "STRAND"
-
 
 ####Copy number track (type = "seg")####
 
