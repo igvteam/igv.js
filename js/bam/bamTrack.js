@@ -392,13 +392,11 @@ var igv = (function (igv) {
                             for (var c = 0; c < alignment.cigar.length; c++) {
 
                                 if      ("D" === alignment.cigar.charAt( c )) {
-                                    //console.log("index " + indexAlignment + " deletion near " + igv.numberFormatter(alignment.start));
                                     canvas.strokeLine(xStart, yStrokedLine, xEnd, yStrokedLine, {strokeStyle: deletionColor});
                                     break;
                                 }
                                 else if ("N" === alignment.cigar.charAt( c )) {
-                                    //console.log("index " + indexAlignment + " skipped near " + igv.numberFormatter(alignment.start));
-                                    canvas.strokeLine(xStart, yStrokedLine, xEnd, yStrokedLine, {strokeStyle: skippedColor});
+                                     canvas.strokeLine(xStart, yStrokedLine, xEnd, yStrokedLine, {strokeStyle: skippedColor});
                                     break;
                                 }
 
