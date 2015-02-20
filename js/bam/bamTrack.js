@@ -407,7 +407,6 @@ var igv = (function (igv) {
                         }
 
                         canvasColor = igv.BAMTrack.alignmentShadingOptions[ myself.alignmentShading ](myself, alignment);
-
                         canvas.setProperties( { fillStyle: canvasColor } );
 
                         alignment.blocks.forEach(function (block, indexBlocks) {
@@ -422,20 +421,47 @@ var igv = (function (igv) {
                                 readQual,
                                 xBase,
                                 widthBase,
-                                colorBase;
+                                colorBase,
+                                x,
+                                y;
 
                             if      ( true === alignment.strand && indexBlocks === alignment.blocks.length - 1) {
-                                x = [xStart, xEnd, xEnd + widthArrowHead, xEnd, xStart];
-                                y = [yRect, yRect, yRect + height / 2, yRect + height, yRect + height];
-                                //canvas.fillPolygon(x, y);
+
+                                x = [
+                                    xEnd,
+                                    xEnd + widthArrowHead,
+                                    xEnd,
+                                    xEnd];
+
+                                y = [
+                                    yRect,
+                                    yRect + (height/2.0),
+                                    yRect + height,
+                                    yRect];
+
+                                canvas.setProperties( { fillStyle: "rgba(255, 0, 0, 1.0)" } );
+                                canvas.fillPolygon(x, y);
 
                             }
                             else if (false === alignment.strand && indexBlocks === 0) {
-                                var x = [ xBlockStart - widthArrowHead, xBlockStart, xBlockEnd, xBlockEnd, xBlockStart];
-                                var y = [ yRect + height / 2, yRect, yRect, yRect + height, yRect + height];
-                                //canvas.fillPolygon(x, y);
+
+                                x = [
+                                    xBlockStart,
+                                    xBlockStart - widthArrowHead,
+                                    xBlockStart,
+                                    xBlockStart];
+
+                                y = [
+                                    yRect,
+                                    yRect + (height/2.0),
+                                    yRect + height,
+                                    yRect];
+
+                                canvas.setProperties( { fillStyle: "rgba(0, 255, 0, 1.0)" } );
+                                canvas.fillPolygon(x, y);
                             }
 
+                            canvas.setProperties( { fillStyle: canvasColor } );
                             //canvas.fillRect(xBlockStart, yRect, widthBlock, height, { fillStyle: "rgba(0, 255, 0, 0.25)" });
                             canvas.fillRect(xBlockStart, yRect, widthBlock, height);
 
