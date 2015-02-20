@@ -66,7 +66,7 @@ var igv = (function (igv) {
         // filter alignments
         this.filterOption = config.filterOption || { name : "mappingQuality", params : [ 30, undefined ] };
 
-         this.featureSource = new igv.BamSource(config);
+        this.featureSource = new igv.BamSource(config);
     };
 
     igv.BAMTrack.alignmentShadingOptions = {
@@ -365,14 +365,12 @@ var igv = (function (igv) {
                     var widthArrowHead = myself.alignmentRowHeight / 2.0,
                         yStrokedLine,
                         yRect,
-                        height,
-                        pingpong;
+                        height;
 
                     yRect = myself.alignmentRowYInset + myself.coverageTrackHeight + (myself.alignmentRowHeight * i) + 5;
                     height = myself.alignmentRowHeight - (2 * myself.alignmentRowYInset);
                     yStrokedLine = (height / 2.0) + yRect;
 
-                    pingpong = 0;
                     alignmentRow.alignments.forEach(function renderAlignment(alignment, indexAlignment) {
 
                         var xStart,
@@ -393,13 +391,13 @@ var igv = (function (igv) {
 
                             for (var c = 0; c < alignment.cigar.length; c++) {
 
-                                if ("D" === alignment.cigar.charAt( c )) {
-                                    console.log("index " + indexAlignment + " deletion near " + igv.numberFormatter(alignment.start));
+                                if      ("D" === alignment.cigar.charAt( c )) {
+                                    //console.log("index " + indexAlignment + " deletion near " + igv.numberFormatter(alignment.start));
                                     canvas.strokeLine(xStart, yStrokedLine, xEnd, yStrokedLine, {strokeStyle: deletionColor});
                                     break;
                                 }
                                 else if ("N" === alignment.cigar.charAt( c )) {
-                                    console.log("index " + indexAlignment + " skipped near " + igv.numberFormatter(alignment.start));
+                                    //console.log("index " + indexAlignment + " skipped near " + igv.numberFormatter(alignment.start));
                                     canvas.strokeLine(xStart, yStrokedLine, xEnd, yStrokedLine, {strokeStyle: skippedColor});
                                     break;
                                 }
@@ -408,14 +406,9 @@ var igv = (function (igv) {
 
                         }
 
-
                         canvasColor = igv.BAMTrack.alignmentShadingOptions[ myself.alignmentShading ](myself, alignment);
 
                         canvas.setProperties( { fillStyle: canvasColor } );
-
-
-
-
 
                         alignment.blocks.forEach(function (block, indexBlocks) {
                             var refOffset = block.start - bpStart,
@@ -431,19 +424,21 @@ var igv = (function (igv) {
                                 widthBase,
                                 colorBase;
 
-                            if (alignment.strand && indexBlocks === alignment.blocks.length - 1) {
+                            if      ( true === alignment.strand && indexBlocks === alignment.blocks.length - 1) {
                                 x = [xStart, xEnd, xEnd + widthArrowHead, xEnd, xStart];
                                 y = [yRect, yRect, yRect + height / 2, yRect + height, yRect + height];
-                                canvas.fillPolygon(x, y);
+                                //canvas.fillPolygon(x, y);
 
-                            } else if (!alignment.strand && indexBlocks === 0) {
+                            }
+                            else if (false === alignment.strand && indexBlocks === 0) {
                                 var x = [ xBlockStart - widthArrowHead, xBlockStart, xBlockEnd, xBlockEnd, xBlockStart];
                                 var y = [ yRect + height / 2, yRect, yRect, yRect + height, yRect + height];
-                                canvas.fillPolygon(x, y);
-                            } else {
-
-                                canvas.fillRect(xBlockStart, yRect, widthBlock, height);
+                                //canvas.fillPolygon(x, y);
                             }
+
+                            //canvas.fillRect(xBlockStart, yRect, widthBlock, height, { fillStyle: "rgba(0, 255, 0, 0.25)" });
+                            canvas.fillRect(xBlockStart, yRect, widthBlock, height);
+
 
                             // Only do mismatch coloring if a refseq exists to do the comparison
                             if (sequence && blockSeq !== "*") {
@@ -463,15 +458,19 @@ var igv = (function (igv) {
                                         }
                                         else {
                                             colorBase = igv.nucleotideColors[readChar];
+                                            console.log("match " + colorBase);
                                         }
 
                                         if (colorBase) {
+
                                             xBase = ((block.start + i) - bpStart) / bpPerPixel;
                                             widthBase = Math.max(1, 1 / bpPerPixel);
                                             canvas.fillRect(xBase, yRect, widthBase, height, { fillStyle: colorBase });
                                         }
                                     }
                                 }
+                            } else {
+                                console.log("* === blockSeq");
                             }
 
                         });
