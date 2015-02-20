@@ -39,11 +39,14 @@ var igv = (function (igv) {
         this.coverageTrackHeight = config.coverageTrackHeight || 50;
 
         this.alignmentColor = config.alignmentColor || "rgb(185, 185, 185)";
+
         this.negStrandColor = config.negStrandColor || "rgba(150, 150, 230, 0.75)";
         this.posStrandColor = config.posStrandColor || "rgba(230, 150, 150, 0.75)";
-        this.deletionColor = config.deletionColor | "black";
+
+        this.deletionColor = config.deletionColor || "black";
 
         this.skippedColor = config.skippedColor || "rgb(150, 170, 170)";
+
         this.coverageColor = config.coverageColor || this.alignmentColor;
 
         this.maxHeight = config.maxHeight || 500;
@@ -370,7 +373,7 @@ var igv = (function (igv) {
                     yStrokedLine = (height / 2.0) + yRect;
 
                     pingpong = 0;
-                    alignmentRow.alignments.forEach(function renderAlignment(alignment) {
+                    alignmentRow.alignments.forEach(function renderAlignment(alignment, indexAlignment) {
 
                         var xStart,
                             xEnd,
@@ -387,8 +390,22 @@ var igv = (function (igv) {
                         xEnd = ((alignment.start + alignment.lengthOnRef) - bpStart) / bpPerPixel;
 
                         if (alignment.blocks.length > 0) {
-                            // todo -- set color based on gap type (deletion or skipped)
-                            canvas.strokeLine(xStart, yStrokedLine, xEnd, yStrokedLine, {strokeStyle: skippedColor});
+
+                            for (var c = 0; c < alignment.cigar.length; c++) {
+
+                                if ("D" === alignment.cigar.charAt( c )) {
+                                    console.log("index " + indexAlignment + " deletion near " + igv.numberFormatter(alignment.start));
+                                    canvas.strokeLine(xStart, yStrokedLine, xEnd, yStrokedLine, {strokeStyle: deletionColor});
+                                    break;
+                                }
+                                else if ("N" === alignment.cigar.charAt( c )) {
+                                    console.log("index " + indexAlignment + " skipped near " + igv.numberFormatter(alignment.start));
+                                    canvas.strokeLine(xStart, yStrokedLine, xEnd, yStrokedLine, {strokeStyle: skippedColor});
+                                    break;
+                                }
+
+                            }
+
                         }
 
 
@@ -456,6 +473,7 @@ var igv = (function (igv) {
                                     }
                                 }
                             }
+
                         });
                     });
                 });
