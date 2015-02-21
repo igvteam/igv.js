@@ -239,12 +239,10 @@ var igv = (function (igv) {
             bpStart = options.bpStart,
             pixelWidth = options.pixelWidth,
             pixelHeight = options.pixelHeight,
-            myself = this,
-            alignmentColor = this.alignmentColor,
-            coverageColor = this.coverageColor,
             skippedColor = this.skippedColor,
             deletionColor = this.deletionColor,
-            bpEnd = bpStart + pixelWidth * bpPerPixel + 1;
+            bpEnd = bpStart + pixelWidth * bpPerPixel + 1,
+            myself = this;
 
         if (genomicInterval.exceedsVisibilityWindow) {
             var x;
@@ -274,10 +272,6 @@ var igv = (function (igv) {
 
             if (coverageMap.refSeq) sequence = coverageMap.refSeq.toUpperCase();
 
-            // coverage track
-            canvas.setProperties({ fillStyle: alignmentColor });
-            canvas.setProperties({ strokeStyle: alignmentColor });
-
             // TODO -- why is covereageMap sometimes undefined !?
             if (coverageMap) {
 
@@ -298,10 +292,9 @@ var igv = (function (igv) {
                     y = myself.coverageTrackHeight - h;
                     x = (bp - bpStart) / bpPerPixel;
 
-                    canvas.setProperties({   fillStyle: coverageColor });
-                    canvas.setProperties({ strokeStyle: coverageColor });
+                    canvas.setProperties({   fillStyle: myself.coverageColor });
+                    canvas.setProperties({ strokeStyle: myself.coverageColor });
                     canvas.fillRect(x, y, w, h);
-
 
                     // coverage mismatch coloring
                     if (sequence) {
@@ -354,8 +347,6 @@ var igv = (function (igv) {
                 sequence = sequence.toUpperCase();
             }
 
-            canvas.setProperties({ fillStyle: myself.alignmentColor });
-            canvas.setProperties({ strokeStyle: myself.alignmentColor });
 
             // TODO -- how can packedAlignmentRows be undefined?
             if (packedAlignmentRows) {
@@ -387,6 +378,8 @@ var igv = (function (igv) {
                         xStart = (alignment.start - bpStart) / bpPerPixel;
                         xEnd = ((alignment.start + alignment.lengthOnRef) - bpStart) / bpPerPixel;
 
+                        canvasColor = igv.BAMTrack.alignmentShadingOptions[ myself.alignmentShading ](myself, alignment);
+
                         if (alignment.blocks.length > 0) {
 
                             for (var c = 0; c < alignment.cigar.length; c++) {
@@ -404,8 +397,8 @@ var igv = (function (igv) {
 
                         }
 
-                        canvasColor = igv.BAMTrack.alignmentShadingOptions[ myself.alignmentShading ](myself, alignment);
-                        canvas.setProperties( { fillStyle: canvasColor } );
+                        canvas.setProperties({   fillStyle: canvasColor });
+                        canvas.setProperties({ strokeStyle: canvasColor});
 
                         alignment.blocks.forEach(function (block, indexBlocks) {
                             var refOffset = block.start - bpStart,
@@ -437,9 +430,7 @@ var igv = (function (igv) {
                                     yRect + height,
                                     yRect];
 
-                                //canvas.setProperties( { fillStyle: "rgba(255, 0, 0, 1.0)" } );
-                                canvas.fillPolygon(x, y);
-
+                                canvas.fillPolygon(x, y, { fillStyle: canvasColor });
                             }
                             else if (false === alignment.strand && indexBlocks === 0) {
 
@@ -455,14 +446,11 @@ var igv = (function (igv) {
                                     yRect + height,
                                     yRect];
 
-                                //canvas.setProperties( { fillStyle: "rgba(0, 255, 0, 1.0)" } );
-                                canvas.fillPolygon(x, y);
+                                canvas.fillPolygon(x, y, { fillStyle: canvasColor });
                             }
 
-                            //canvas.setProperties( { fillStyle: canvasColor } );
-                            //canvas.fillRect(xBlockStart, yRect, widthBlock, height, { fillStyle: "rgba(0, 255, 0, 0.25)" });
-                            canvas.fillRect(xBlockStart, yRect, widthBlock, height);
-
+                            canvas.fillRect(xBlockStart, yRect, widthBlock, height, { fillStyle: "white" });
+                            canvas.fillRect(xBlockStart, yRect, widthBlock, height, { fillStyle: canvasColor });
 
                             // Only do mismatch coloring if a refseq exists to do the comparison
                             if (sequence && blockSeq !== "*") {
