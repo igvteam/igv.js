@@ -37,8 +37,6 @@ var igv = (function (igv) {
         this.sampleSquishHeight = config.sampleSquishHeight || 2;
         this.sampleExpandHeight = config.sampleExpandHeight || 12;
 
-        this.sampleHeight = ("SQUISHED" === this.displayMode) ? this.sampleSquishHeight : this.sampleExpandHeight;
-
         this.posColorScale = config.posColorScale ||
             new igv.GradientColorScale(
                 {
@@ -91,7 +89,6 @@ var igv = (function (igv) {
 
     igv.SegTrack.prototype.toggleSampleHeight = function () {
 
-        this.sampleHeight = ("SQUISHED" === this.displayMode) ? this.sampleExpandHeight : this.sampleSquishHeight;
         this.displayMode  = ("SQUISHED" === this.displayMode) ? "EXPANDED" : "SQUISHED";
 
         this.trackView.update();
@@ -122,7 +119,10 @@ var igv = (function (igv) {
             px,
             px1,
             pw,
-            xScale;
+            xScale,
+            sampleHeight;
+
+        sampleHeight = ("SQUISHED" === this.displayMode) ? this.sampleSquishHeight : this.sampleExpandHeight;
 
         canvas = options.context;
         pixelWidth = options.pixelWidth;
@@ -155,7 +155,7 @@ var igv = (function (igv) {
                 if (segment.end < bpStart) continue;
                 if (segment.start > bpEnd) break;
 
-                y = myself.samples[segment.sample] * myself.sampleHeight;
+                y = myself.samples[segment.sample] * sampleHeight;
 
                 value = segment.value;
                 if (!myself.isLog) {
@@ -176,7 +176,7 @@ var igv = (function (igv) {
                 px1 = Math.round((segment.end - bpStart) / xScale);
                 pw = Math.max(1, px1 - px);
 
-                canvas.fillRect(px, y, pw, myself.sampleHeight, {fillStyle: color});
+                canvas.fillRect(px, y, pw, sampleHeight, {fillStyle: color});
 
             }
         }
@@ -207,6 +207,9 @@ var igv = (function (igv) {
      * @returns {number}
      */
     igv.SegTrack.prototype.computePixelHeight = function (features) {
+
+        var sampleHeight = ("SQUISHED" === this.displayMode) ? this.sampleSquishHeight : this.sampleExpandHeight;
+
         for (i = 0, len = features.length; i < len; i++) {
             sample = features[i].sample;
             if (!this.samples.hasOwnProperty(sample)) {
@@ -215,7 +218,8 @@ var igv = (function (igv) {
                 this.sampleCount++;
             }
         }
-        return this.sampleCount * this.sampleHeight;
+
+        return this.sampleCount * sampleHeight;
     };
 
     /**
@@ -306,9 +310,12 @@ var igv = (function (igv) {
 
     igv.SegTrack.prototype.popupData = function (genomicLocation, xOffset, yOffset) {
 
-        var sampleName,
-            row = Math.floor(yOffset / this.sampleHeight),
+        var sampleHeight = ("SQUISHED" === this.displayMode) ? this.sampleSquishHeight : this.sampleExpandHeight,
+            sampleName,
+            row,
             items;
+
+        row = Math.floor(yOffset / sampleHeight);
 
         if (row < this.sampleNames.length) {
 
