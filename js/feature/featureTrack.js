@@ -30,10 +30,13 @@ var igv = (function (igv) {
         igv.configTrack(this, config);
 
         this.displayMode = config.displayMode || "COLLAPSED";    // COLLAPSED | EXPANDED | SQUISHED
+
         this.collapsedHeight = config.collapsedHeight || this.height;
         this.expandedRowHeight = config.expandedRowHeight || 30;
         this.squishedRowHeight = config.squishedRowHeight || 15;
-        this.maxTrackHeight = config.maxTrackHeight || Math.max(500, this.height);
+
+        this.maxHeight = config.maxHeight || Math.max(500, this.height);
+
         this.labelThreshold = 1000000;
 
         this.featureSource = new igv.FeatureSource(this.config);

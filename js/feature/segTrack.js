@@ -31,11 +31,13 @@ var igv = (function (igv) {
 
         igv.configTrack(this, config);
 
+        this.displayMode = config.displayMode || "SQUISHED"; // EXPANDED | SQUISHED
+
         this.maxHeight = config.maxHeight || 500;
         this.sampleSquishHeight = config.sampleSquishHeight || 2;
         this.sampleExpandHeight = config.sampleExpandHeight || 12;
 
-        this.sampleHeight = this.sampleSquishHeight;
+        this.sampleHeight = ("SQUISHED" === this.displayMode) ? this.sampleSquishHeight : this.sampleExpandHeight;
 
         this.posColorScale = config.posColorScale ||
             new igv.GradientColorScale(
@@ -77,7 +79,7 @@ var igv = (function (igv) {
 
         return [
             {
-                label: (this.sampleExpandHeight === this.sampleHeight) ? "Squish sample hgt" : "Expand sample hgt",
+                label: ("SQUISHED" === this.displayMode) ? "Expand sample hgt" : "Squish sample hgt" ,
                 click: function () {
                     popover.hide();
                     myself.toggleSampleHeight();
@@ -89,7 +91,9 @@ var igv = (function (igv) {
 
     igv.SegTrack.prototype.toggleSampleHeight = function () {
 
-        this.sampleHeight = (this.sampleExpandHeight === this.sampleHeight) ? this.sampleSquishHeight : this.sampleExpandHeight;
+        this.sampleHeight = ("SQUISHED" === this.displayMode) ? this.sampleExpandHeight : this.sampleSquishHeight;
+        this.displayMode  = ("SQUISHED" === this.displayMode) ? "EXPANDED" : "SQUISHED";
+
         this.trackView.update();
     };
 
