@@ -58,7 +58,7 @@ var igv = (function (igv) {
         else {
             this.featureSource.getFeatures(chr, bpStart, bpEnd, continuation, task)
         }
-    }
+    };
 
     igv.FeatureTrack.prototype.computePixelHeight = function (features) {
 
@@ -67,9 +67,9 @@ var igv = (function (igv) {
         }
         else {
             var maxRow = 0;
-            features.forEach(function (f) {
+            features.forEach(function (feature) {
 
-                if (f.row && f.row > maxRow) maxRow = f.row;
+                if (feature.row && feature.row > maxRow) maxRow = feature.row;
 
             });
 
@@ -100,15 +100,11 @@ var igv = (function (igv) {
             return;
         }
 
-
-        var gene, len;
-
         if (featureList) {
 
-            len = featureList.length;
+            canvas.setProperties( { fillStyle: track.color, strokeStyle: track.color } );
 
-            canvas.setProperties({fillStyle: track.color, strokeStyle: track.color});
-            for (var i = 0; i < len; i++) {
+            for (var gene, i = 0, len = featureList.length; i < len; i++) {
                 gene = featureList[i];
                 if (gene.end < bpStart) continue;
                 if (gene.start > bpEnd) break;
@@ -119,7 +115,7 @@ var igv = (function (igv) {
             console.log("No feature list");
         }
 
-    }
+    };
 
     /**
      * Return "popup data" for feature @ genomic location.  Data is an array of key-value pairs
@@ -158,9 +154,8 @@ var igv = (function (igv) {
                                 }
                             }
                         }
-                    }
-                )
-                ;
+                    });
+
                 return popupData;
             }
 
@@ -171,8 +166,34 @@ var igv = (function (igv) {
 
     igv.FeatureTrack.prototype.popupMenuItems = function (popover) {
 
+        var myself = this;
+
         return [
-            igv.colorPickerMenuItem(popover, this.trackView, "Set feature color", this.color)
+            igv.colorPickerMenuItem(popover, this.trackView, "Set feature color", this.color),
+            {
+                label: "Expand track hgt",
+                click: function () {
+                    popover.hide();
+                    myself.displayMode = "EXPANDED";
+                    myself.trackView.update();
+                }
+            },
+            {
+                label: "Collapse track hgt" ,
+                click: function () {
+                    popover.hide();
+                    myself.displayMode = "COLLAPSED";
+                    myself.trackView.update();
+                }
+            },
+            {
+                label: "Squish track hgt" ,
+                click: function () {
+                    popover.hide();
+                    myself.displayMode = "SQUISHED";
+                    myself.trackView.update();
+                }
+            }
         ];
     };
 
@@ -257,7 +278,6 @@ var igv = (function (igv) {
             canvas.fillText(feature.name, px + ((px1 - px) / 2), labelY, geneStyle, transform);
         }
     }
-
 
     function renderVariant(variant, bpStart, xScale, canvas) {
 
