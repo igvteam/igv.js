@@ -99,8 +99,6 @@ var igv = (function (igv) {
 
             if (trackItems && trackItems.length > 0) {
 
-                //menuItems.push("<hr>");
-
                 trackItems.forEach(function (trackItem, i) {
 
                     var str;
@@ -126,8 +124,6 @@ var igv = (function (igv) {
                 });
             }
         }
-
-        //menuItems.push("<hr>");
 
         menuItems.push(
             {

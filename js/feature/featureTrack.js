@@ -140,21 +140,21 @@ var igv = (function (igv) {
 
                 var popupData = [];
                 featureList.forEach(function (feature) {
-                        if (feature.popupData &&
-                            feature.end >= genomicLocation - tolerance &&
-                            feature.start <= genomicLocation + tolerance) {
+                    if (feature.popupData &&
+                        feature.end >= genomicLocation - tolerance &&
+                        feature.start <= genomicLocation + tolerance) {
 
-                            if (row === undefined || feature.row === undefined || row === feature.row) {
-                                var featureData = feature.popupData(genomicLocation);
-                                if (featureData) {
-                                    if (popupData.length > 0) {
-                                        popupData.push("<HR>");
-                                    }
-                                    Array.prototype.push.apply(popupData, featureData);
+                        if (row === undefined || feature.row === undefined || row === feature.row) {
+                            var featureData = feature.popupData(genomicLocation);
+                            if (featureData) {
+                                if (popupData.length > 0) {
+                                    popupData.push("<HR>");
                                 }
+                                Array.prototype.push.apply(popupData, featureData);
                             }
                         }
-                    });
+                    }
+                });
 
                 return popupData;
             }
@@ -166,35 +166,41 @@ var igv = (function (igv) {
 
     igv.FeatureTrack.prototype.popupMenuItems = function (popover) {
 
-        var myself = this;
+        var myself = this,
+            lut,
+            menuItems = [];
 
-        return [
-            igv.colorPickerMenuItem(popover, this.trackView, "Set feature color", this.color),
-            {
-                label: "Expand track hgt",
-                click: function () {
-                    popover.hide();
-                    myself.displayMode = "EXPANDED";
-                    myself.trackView.update();
-                }
-            },
-            {
-                label: "Collapse track hgt" ,
-                click: function () {
-                    popover.hide();
-                    myself.displayMode = "COLLAPSED";
-                    myself.trackView.update();
-                }
-            },
-            {
-                label: "Squish track hgt" ,
-                click: function () {
-                    popover.hide();
-                    myself.displayMode = "SQUISHED";
-                    myself.trackView.update();
-                }
+        menuItems.push(igv.colorPickerMenuItem(popover, this.trackView, "Set feature color", this.color));
+
+        lut =
+        {
+            "EXPANDED"  : [ { label: "Collapse track hgt", displayMode: "COLLAPSED" }, { label: "Squish track hgt",     displayMode: "SQUISHED"     } ],
+            "COLLAPSED" : [ { label: "Expand track hgt",    displayMode: "EXPANDED" }, { label: "Squish track hgt",     displayMode: "SQUISHED"     } ],
+            "SQUISHED"  : [ { label: "Expand track hgt",    displayMode: "EXPANDED" }, { label: "Collapse track hgt",   displayMode: "COLLAPSED"    } ]
+        };
+
+        ["EXPANDED", "COLLAPSED", "SQUISHED" ].forEach(function(displayMode){
+
+            if (displayMode === myself.displayMode) {
+
+                lut[ displayMode ].forEach(function(item){
+
+                    menuItems.push(
+                        {
+                            label: item.label,
+                            click: function () {
+                                popover.hide();
+                                myself.displayMode = item.displayMode;
+                                myself.trackView.update();
+                            }
+                        }
+                    );
+                });
             }
-        ];
+        });
+
+        return menuItems;
+
     };
 
     function renderFeature(feature, bpStart, xScale, canvas) {
