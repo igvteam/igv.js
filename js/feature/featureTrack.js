@@ -257,8 +257,8 @@ var igv = (function (igv) {
         }
 
         var geneColor;
-        if (igv.selection) {
-            geneColor = igv.selection.colorForGene(feature.name);
+        if (igv.browser.selection) {
+            geneColor = igv.browser.selection.colorForGene(feature.name);
         } // TODO -- for gtex, figure out a better way to do this
 
         if (((px1 - px) > 20 || geneColor) && this.displayMode != "SQUISHED") {
