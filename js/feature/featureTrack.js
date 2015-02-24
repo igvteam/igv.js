@@ -172,32 +172,72 @@ var igv = (function (igv) {
 
         menuItems.push(igv.colorPickerMenuItem(popover, this.trackView, "Set feature color", this.color));
 
+
+
         lut =
         {
-            "EXPANDED"  : [ { label: "Collapse track hgt", displayMode: "COLLAPSED" }, { label: "Squish track hgt",     displayMode: "SQUISHED"     } ],
-            "COLLAPSED" : [ { label: "Expand track hgt",    displayMode: "EXPANDED" }, { label: "Squish track hgt",     displayMode: "SQUISHED"     } ],
-            "SQUISHED"  : [ { label: "Expand track hgt",    displayMode: "EXPANDED" }, { label: "Collapse track hgt",   displayMode: "COLLAPSED"    } ]
+            "EXPANDED"  : "Expand track hgt",
+            "COLLAPSED" : "Collapse track hgt",
+            "SQUISHED"  : "Squish track hgt"
         };
 
-        ["EXPANDED", "COLLAPSED", "SQUISHED" ].forEach(function(displayMode){
+        ["EXPANDED", "SQUISHED", "COLLAPSED" ].forEach(function(displayMode, index){
+
+            var chosen,
+                checkMark     = '<i class="fa fa-check fa-check-shim"></i>',
+                checkMarkNone = '<i class="fa fa-check fa-check-shim fa-check-hidden"></i>',
+                trackMenuItem = '<div class=\"igv-track-menu-item\">',
+                trackMenuItemFirst = '<div class=\"igv-track-menu-item igv-track-menu-border-top\">',
+                str;
+
+            chosen = (0 === index) ? trackMenuItemFirst : trackMenuItem;
 
             if (displayMode === myself.displayMode) {
-
-                lut[ displayMode ].forEach(function(item){
-
-                    menuItems.push(
-                        {
-                            label: item.label,
-                            click: function () {
-                                popover.hide();
-                                myself.displayMode = item.displayMode;
-                                myself.trackView.update();
-                            }
-                        }
-                    );
-                });
+                str = chosen + checkMark     + lut[ displayMode ] + '</div>';
+            } else {
+                str = chosen + checkMarkNone + lut[ displayMode ] + '</div>';
             }
+
+            menuItems.push(
+                {
+                    object: $(str),
+                    click: function () {
+                        popover.hide();
+                        myself.displayMode = displayMode;
+                        myself.trackView.update();
+                    }
+                }
+            );
+
         });
+
+        // This is a depricated approach. Present the non-enabled track height display modes.
+
+        //lut =
+        //{
+        //    "EXPANDED"  : [ { label: "Collapse track hgt", displayMode: "COLLAPSED" }, { label: "Squish track hgt",     displayMode: "SQUISHED"     } ],
+        //    "COLLAPSED" : [ { label: "Expand track hgt",    displayMode: "EXPANDED" }, { label: "Squish track hgt",     displayMode: "SQUISHED"     } ],
+        //    "SQUISHED"  : [ { label: "Expand track hgt",    displayMode: "EXPANDED" }, { label: "Collapse track hgt",   displayMode: "COLLAPSED"    } ]
+        //};
+        //["EXPANDED", "COLLAPSED", "SQUISHED" ].forEach(function(displayMode){
+        //
+        //    if (displayMode === myself.displayMode) {
+        //
+        //        lut[ displayMode ].forEach(function(item){
+        //
+        //            menuItems.push(
+        //                {
+        //                    label: item.label,
+        //                    click: function () {
+        //                        popover.hide();
+        //                        myself.displayMode = item.displayMode;
+        //                        myself.trackView.update();
+        //                    }
+        //                }
+        //            );
+        //        });
+        //    }
+        //});
 
         return menuItems;
 
