@@ -215,7 +215,7 @@ var igv = (function (igv) {
             step = 8,
             h = 10,
             transform,
-            normalTextStyle = {font: 'bold 10px Arial', fillStyle: this.color, strokeStyle: "black"};
+            fontStyle;
 
         px = Math.round((feature.start - bpStart) / xScale);
         px1 = Math.round((feature.end - bpStart) / xScale);
@@ -256,6 +256,8 @@ var igv = (function (igv) {
             }
         }
 
+        fontStyle = { font: '10px PT Sans', fillStyle: this.color, strokeStyle: this.color };
+
         var geneColor;
         if (igv.selection) {
             geneColor = igv.selection.colorForGene(feature.name);
@@ -263,12 +265,13 @@ var igv = (function (igv) {
 
         if (((px1 - px) > 20 || geneColor) && this.displayMode != "SQUISHED") {
 
-            var geneStyle;
+            var geneFontStyle;
             if (geneColor) {
-                geneStyle = {font: 'bold 12px Arial', fillStyle: geneColor, strokeStyle: geneColor}
+                //geneFontStyle = {font: 'bold 12px Arial', fillStyle: geneColor, strokeStyle: geneColor}
+                geneFontStyle = { font: '10px PT Sans', fillStyle: geneColor, strokeStyle: geneColor }
             }
             else {
-                geneStyle = normalTextStyle;
+                geneFontStyle = fontStyle;
             }
 
 
@@ -277,7 +280,7 @@ var igv = (function (igv) {
             }
 
             var labelY = transform ? py + 20 : py + 25;
-            canvas.fillText(feature.name, px + ((px1 - px) / 2), labelY, geneStyle, transform);
+            canvas.fillText(feature.name, px + ((px1 - px) / 2), labelY, geneFontStyle, transform);
         }
     }
 
