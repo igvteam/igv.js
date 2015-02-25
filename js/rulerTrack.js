@@ -42,27 +42,32 @@ var igv = (function (igv) {
 
     igv.RulerTrack.prototype.draw = function (options) {
 
-        var canvas = options.context,
-            bpStart = options.bpStart,
-            bpPerPixel = options.bpPerPixel,
-            width = options.pixelWidth;
+        var fontStyle,
+            canvas = options.context,
+            range,
+            ts,
+            spacing,
+            nTick,
+            x;
 
-        canvas.setProperties({textAlign: 'center'});
 
+        //fontStyle = { textAlign: 'center', font: 'bold 12px Arial', fillStyle: "green", strokeStyle: "red"};
+        fontStyle = { textAlign: 'center', font: '10px PT Sans', fillStyle: "rgba(64, 64, 64, 1)", strokeStyle: "rgba(64, 64, 64, 1)" };
 
-        var range = Math.floor(1100 * bpPerPixel);
-        var ts = findSpacing(range);
-        var spacing = ts.majorTick;
+        range = Math.floor(1100 * options.bpPerPixel);
+        ts = findSpacing(range);
+        spacing = ts.majorTick;
 
         // Find starting point closest to the current origin
-        var nTick = Math.floor(bpStart / spacing) - 1;
-        var x = 0;
+        nTick = Math.floor(options.bpStart / spacing) - 1;
+        x = 0;
 
-        //int strEnd = Integer.MIN_VALUE;
-        while (x < width) {
+        //canvas.setProperties({textAlign: 'center'});
+        canvas.setProperties( fontStyle );
+        while (x < options.pixelWidth) {
 
             var l = Math.floor(nTick * spacing);
-            x = Math.round(((l - 1) - bpStart + 0.5) / bpPerPixel);
+            x = Math.round(((l - 1) - options.bpStart + 0.5) / options.bpPerPixel);
             var chrPosition = formatNumber(l / ts.unitMultiplier, 0) + " " + ts.majorUnit;
 
             if (nTick % 1 == 0) {
@@ -73,7 +78,7 @@ var igv = (function (igv) {
 
             nTick++;
         }
-        canvas.strokeLine(0, this.height - 1, width, this.height - 1);
+        canvas.strokeLine(0, this.height - 1, options.pixelWidth, this.height - 1);
 
 
         function formatNumber(anynum, decimal) {
