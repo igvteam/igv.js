@@ -326,7 +326,7 @@ var igv = (function (igv) {
 
                 success = function (features) {
 
-                    igv.stopSpinner(self.trackDiv);
+                    igv.stopSpinnerObject(self.trackDiv);
                     self.currentLoadTask = undefined;
 
                     if (features) {
@@ -375,17 +375,20 @@ var igv = (function (igv) {
                 this.currentLoadTask = {
                     start: bpStart,
                     end: bpEnd,
+                    stopSpinner: function() {
+                        igv.stopSpinnerObject(self.trackDiv);
+                    },
                     abort: function () {
                         this.canceled = true;
                         if (this.xhrRequest) {
                             this.xhrRequest.abort();
                         }
-                        igv.stopSpinner(self.trackDiv);
+                        igv.stopSpinnerObject(self.trackDiv);
                         self.currentLoadTask = undefined;
                     }
                 };
 
-                igv.startSpinner(self.trackDiv);
+                igv.startSpinnerObject(self.trackDiv);
 
                 this.track.getFeatures(referenceFrame.chr, bpStart, bpEnd, success, self.currentLoadTask);
             }

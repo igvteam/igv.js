@@ -242,12 +242,15 @@ var igv = (function (igv) {
             skippedColor = this.skippedColor,
             deletionColor = this.deletionColor,
             bpEnd = bpStart + pixelWidth * bpPerPixel + 1,
-            myself = this;
+            myself = this,
+            zoomInNoticeFontStyle = { font: '16px PT Sans', fillStyle: "rgba(64, 64, 64, 1)", strokeStyle: "rgba(64, 64, 64, 1)" };
 
         if (genomicInterval.exceedsVisibilityWindow) {
-            var x;
-            for (x = 200; x < pixelWidth; x += 400)
-                canvas.fillText("Zoom in to see alignments", x, 20, {fillStye: 'black'});
+
+            for (var x = 200; x < pixelWidth; x += 400) {
+                canvas.fillText("Zoom in to see alignments", x, 20, zoomInNoticeFontStyle);
+            }
+
             return;
         }
 

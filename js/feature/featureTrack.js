@@ -88,15 +88,17 @@ var igv = (function (igv) {
             bpStart = options.bpStart,
             pixelWidth = options.pixelWidth,
             pixelHeight = options.pixelHeight,
-            bpEnd = bpStart + pixelWidth * bpPerPixel + 1;
+            bpEnd = bpStart + pixelWidth * bpPerPixel + 1,
+            zoomInNoticeFontStyle = { font: '16px PT Sans', fillStyle: "rgba(64, 64, 64, 1)", strokeStyle: "rgba(64, 64, 64, 1)" };
 
 
         canvas.fillRect(0, 0, pixelWidth, pixelHeight, {'fillStyle': "rgb(255, 255, 255)"});
 
         if (options.features.exceedsVisibilityWindow) {
-            var x;
-            for (x = 200; x < pixelWidth; x += 400)
-                canvas.fillText("Zoom in to see features", x, 20, {fillStye: 'black'});
+
+            for (var x = 200; x < pixelWidth; x += 400) {
+                canvas.fillText("Zoom in to see features", x, 20, zoomInNoticeFontStyle);
+            }
             return;
         }
 
@@ -267,7 +269,6 @@ var igv = (function (igv) {
 
             var geneFontStyle;
             if (geneColor) {
-                //geneFontStyle = {font: 'bold 12px Arial', fillStyle: geneColor, strokeStyle: geneColor}
                 geneFontStyle = { font: '10px PT Sans', fillStyle: geneColor, strokeStyle: geneColor }
             }
             else {

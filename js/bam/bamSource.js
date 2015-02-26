@@ -57,7 +57,6 @@ var igv = (function (igv) {
             var myself = this;
 
             this.bamReader.readFeatures(chr, bpStart, bpEnd,
-
                 function (alignments) {
 
                     if (alignments) {  // Can be null on error or aborting
