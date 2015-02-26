@@ -107,9 +107,7 @@ var igv = (function (igv) {
                     // Finally pass features for query interval to continuation
                     success(myself.featureCache.queryFeatures(chr, bpStart, bpEnd));
 
-                },
-                task,
-                genomicInterval);   // Currently loading at granularity of chromosome
+                }, task, genomicInterval);   // Currently loading at granularity of chromosome
         }
 
     };

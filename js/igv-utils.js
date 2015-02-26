@@ -199,15 +199,23 @@ var igv = (function (igv) {
     };
 
     /**
+     * Find spinner
+     */
+    igv.findSpinnerObject = function (parentElement) {
+
+        return $(parentElement).find("i.fa-spinner");
+    };
+
+    /**
      * Start the spinner for the parent element, if it has one
      */
-    igv.startSpinner = function (parentElement) {
+    igv.startSpinnerObject = function (parentElement) {
 
-        var spinner = $(parentElement).find("i.fa-spinner");
+        var spinnerObject = $(parentElement).find("i.fa-spinner");
 
-        if (spinner) {
-            spinner.removeClass("igv-spinner-fa-stop");
-            spinner.addClass("igv-spinner-fa-start");
+        if (spinnerObject) {
+            spinnerObject.removeClass("igv-spinner-fa-stop");
+            spinnerObject.addClass("igv-spinner-fa-start");
         }
 
     };
@@ -216,7 +224,7 @@ var igv = (function (igv) {
      * Stop the spinner for the parent element, if it has one
      * @param parentElement
      */
-    igv.stopSpinner = function (parentElement) {
+    igv.stopSpinnerObject = function (parentElement) {
 
         var spinner = $(parentElement).find("i.fa-spinner");
 
