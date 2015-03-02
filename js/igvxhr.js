@@ -184,7 +184,10 @@ var igvxhr = (function (igvxhr) {
             error = options.error || success,
             timeout = options.timeout || error,
             headers = options.headers,
-            header_keys, key, value, i;
+            header_keys,
+            key,
+            value,
+            i;
 
         xhr.open(method, url);
 
@@ -208,6 +211,7 @@ var igvxhr = (function (igvxhr) {
         xhr.onerror = function (event) {
 
             console.log("XMLHttpRequest - Error loading" + url);
+
             error(event);
         }
 

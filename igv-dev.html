@@ -187,6 +187,13 @@
 
         <div onclick="igv.browser.loadTrack({
                                 type: 'bam',
+//                                url: 'http://www.broadinstitute.org/igvdata/1KG/b37/data/NA06984/alignment/NA06984.mapped.ILLUMINA.bwa.CEU.low_coverage.20120522.bam',
+                                url: 'http://www.etutitsnidaorb.org/igvdata/1KG/b37/data/NA06984/alignment/NA06984.mapped.ILLUMINA.bwa.CEU.low_coverage.20120522.bam',
+                                label: 'Unreachable BAM URL Test'})">Unreachable BAM URL Test
+        </div>
+
+        <div onclick="igv.browser.loadTrack({
+                                type: 'bam',
                                 url: 'http://www.broadinstitute.org/igvdata/1KG/b37/data/NA06984/alignment/NA06984.mapped.ILLUMINA.bwa.CEU.low_coverage.20120522.bam',
                                 label: 'NA06984'})">NA06984 (Broad server BAM file)
         </div>
@@ -281,14 +288,17 @@
         div = $("#myDiv")[0];
         options = {
 
-//            coverageThreshold: 0.02,
-//            coverageQualityWeight: false,
-
             showKaryo: false,
             showNavigation: true,
             fastaURL: "//dn7ywbm9isq8j.cloudfront.net/genomes/seq/hg19/hg19.fasta",
             cytobandURL: "//dn7ywbm9isq8j.cloudfront.net/genomes/seq/hg19/cytoBand.txt",
             flanking: 1000,
+            trackDefaults : {
+                bam: {
+                    coverageThreshold: 0.2,
+                    coverageQualityWeight: true
+                }
+            },
             tracks: [
 
                 {
@@ -298,31 +308,50 @@
                 {
                     type: 'bam',
 
+//                     deletionColor: "rgb(255, 0, 0)",
+//                      skippedColor: "rgb(0, 255, 0)",
+//                    alignmentColor: "rgba(128, 128, 128, 0.25)",
+//                    coverageColor: "rgba(128, 128, 128, 0.75)",
+
                     url: 'http://www.broadinstitute.org/igvdata/1KG/b37/data/NA06984/alignment/NA06984.mapped.ILLUMINA.bwa.CEU.low_coverage.20120522.bam',
 
-                    alignmentShading: "strand",
-//                    alignmentShading: "none",
+//                    alignmentShading: "strand",
+                    alignmentShading: "none",
 
                     sortOption:
                     {
-                        sort : "NUCLEOTIDE"
+//                        sort : "NUCLEOTIDE"
 //                        sort : "START"
-//                        sort : "STRAND"
+                        sort : "STRAND"
                     },
 
                     filterOption :
                     {
-                        name : "mappingQuality",
-                        params : [ 10, 40 ]
+                        name : "strand",
+                        params : [ false ]
                     },
+
+//                    filterOption :
+//                    {
+//                        name : "noop"
+//                    },
+
+//                    filterOption :
+//                    {
+//                        name : "mappingQuality",
+//                        params : [ 10, 40 ]
+//                    },
 
                     label: 'NA06984'
                 },
                 {
+                    label: "Genes",
                     url: "//dn7ywbm9isq8j.cloudfront.net/annotations/hg19/genes/gencode.v18.collapsed.bed",
                     indexed: false,
-                    label: "Genes",
-                    order: 10000
+                    order: 10000,
+
+                    displayMode: "EXPANDED"
+
                 }
 
             ]
@@ -330,6 +359,7 @@
 
         browser = igv.createBrowser(div, options);
     });
+
 
 </script>
 

@@ -1,3 +1,12 @@
+
+.fa-check-shim {
+    padding-right: 2px;
+}
+
+.fa-check-hidden {
+    color: rgba(255, 255, 255, 0);
+}
+
 /* Bend jQuery UI to my will*/
 .ui-widget {
 
@@ -31,8 +40,6 @@
 div.ui-dialog fieldset {
     border: 0;
 }
-
-
 
 .igv-ruler-sweeper-div {
 
