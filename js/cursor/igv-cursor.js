@@ -1010,7 +1010,7 @@ var igv = (function (igv) {
                     }
 
 
-                    igv.startSpinner(myself.trackDiv);
+                    igv.startSpinnerObject(myself.trackDiv);
 
                     myself.currentTask = {
                         canceled: false,
@@ -1023,7 +1023,7 @@ var igv = (function (igv) {
                                 this.xhrRequest.abort();
                             }
 //                    spinner.stop();
-                            igv.stopSpinner(myself.trackDiv);
+                            igv.stopSpinnerObject(myself.trackDiv);
                         }
 
                     };
@@ -1040,7 +1040,7 @@ var igv = (function (igv) {
                     myself.track.draw(igvCanvas, referenceFrame, tileStart, tileEnd, buffer.width, buffer.height, function (task) {
 
 //                    spinner.stop();
-                            igv.stopSpinner(myself.trackDiv);
+                            igv.stopSpinnerObject(myself.trackDiv);
 
                             if (myself.currentTask) console.log("Canceled ? " + myself.currentTask.canceled);
 

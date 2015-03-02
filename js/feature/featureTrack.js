@@ -30,10 +30,13 @@ var igv = (function (igv) {
         igv.configTrack(this, config);
 
         this.displayMode = config.displayMode || "COLLAPSED";    // COLLAPSED | EXPANDED | SQUISHED
+
         this.collapsedHeight = config.collapsedHeight || this.height;
         this.expandedRowHeight = config.expandedRowHeight || 30;
         this.squishedRowHeight = config.squishedRowHeight || 15;
-        this.maxTrackHeight = config.maxTrackHeight || Math.max(500, this.height);
+
+        this.maxHeight = config.maxHeight || Math.max(500, this.height);
+
         this.labelThreshold = 1000000;
 
         this.featureSource = new igv.FeatureSource(this.config);
@@ -55,7 +58,7 @@ var igv = (function (igv) {
         else {
             this.featureSource.getFeatures(chr, bpStart, bpEnd, continuation, task)
         }
-    }
+    };
 
     igv.FeatureTrack.prototype.computePixelHeight = function (features) {
 
@@ -64,9 +67,9 @@ var igv = (function (igv) {
         }
         else {
             var maxRow = 0;
-            features.forEach(function (f) {
+            features.forEach(function (feature) {
 
-                if (f.row && f.row > maxRow) maxRow = f.row;
+                if (feature.row && feature.row > maxRow) maxRow = feature.row;
 
             });
 
@@ -85,27 +88,25 @@ var igv = (function (igv) {
             bpStart = options.bpStart,
             pixelWidth = options.pixelWidth,
             pixelHeight = options.pixelHeight,
-            bpEnd = bpStart + pixelWidth * bpPerPixel + 1;
+            bpEnd = bpStart + pixelWidth * bpPerPixel + 1,
+            zoomInNoticeFontStyle = { font: '16px PT Sans', fillStyle: "rgba(64, 64, 64, 1)", strokeStyle: "rgba(64, 64, 64, 1)" };
 
 
         canvas.fillRect(0, 0, pixelWidth, pixelHeight, {'fillStyle': "rgb(255, 255, 255)"});
 
         if (options.features.exceedsVisibilityWindow) {
-            var x;
-            for (x = 200; x < pixelWidth; x += 400)
-                canvas.fillText("Zoom in to see features", x, 20, {fillStye: 'black'});
+
+            for (var x = 200; x < pixelWidth; x += 400) {
+                canvas.fillText("Zoom in to see features", x, 20, zoomInNoticeFontStyle);
+            }
             return;
         }
 
-
-        var gene, len;
-
         if (featureList) {
 
-            len = featureList.length;
+            canvas.setProperties( { fillStyle: track.color, strokeStyle: track.color } );
 
-            canvas.setProperties({fillStyle: track.color, strokeStyle: track.color});
-            for (var i = 0; i < len; i++) {
+            for (var gene, i = 0, len = featureList.length; i < len; i++) {
                 gene = featureList[i];
                 if (gene.end < bpStart) continue;
                 if (gene.start > bpEnd) break;
@@ -116,7 +117,7 @@ var igv = (function (igv) {
             console.log("No feature list");
         }
 
-    }
+    };
 
     /**
      * Return "popup data" for feature @ genomic location.  Data is an array of key-value pairs
@@ -141,23 +142,22 @@ var igv = (function (igv) {
 
                 var popupData = [];
                 featureList.forEach(function (feature) {
-                        if (feature.popupData &&
-                            feature.end >= genomicLocation - tolerance &&
-                            feature.start <= genomicLocation + tolerance) {
+                    if (feature.popupData &&
+                        feature.end >= genomicLocation - tolerance &&
+                        feature.start <= genomicLocation + tolerance) {
 
-                            if (row === undefined || feature.row === undefined || row === feature.row) {
-                                var featureData = feature.popupData(genomicLocation);
-                                if (featureData) {
-                                    if (popupData.length > 0) {
-                                        popupData.push("<HR>");
-                                    }
-                                    Array.prototype.push.apply(popupData, featureData);
+                        if (row === undefined || feature.row === undefined || row === feature.row) {
+                            var featureData = feature.popupData(genomicLocation);
+                            if (featureData) {
+                                if (popupData.length > 0) {
+                                    popupData.push("<HR>");
                                 }
+                                Array.prototype.push.apply(popupData, featureData);
                             }
                         }
                     }
-                )
-                ;
+                });
+
                 return popupData;
             }
 
@@ -168,9 +168,37 @@ var igv = (function (igv) {
 
     igv.FeatureTrack.prototype.popupMenuItems = function (popover) {
 
-        return [
-            igv.colorPickerMenuItem(popover, this.trackView, "Set feature color", this.color)
-        ];
+        var myself = this,
+            menuItems = [],
+            lut = { "EXPANDED": "Expand track hgt", "COLLAPSED": "Collapse track hgt", "SQUISHED": "Squish track hgt" },
+            checkMark     = '<i class="fa fa-check fa-check-shim"></i>',
+            checkMarkNone = '<i class="fa fa-check fa-check-shim fa-check-hidden"></i>',
+            trackMenuItem = '<div class=\"igv-track-menu-item\">',
+            trackMenuItemFirst = '<div class=\"igv-track-menu-item igv-track-menu-border-top\">';
+
+        menuItems.push(igv.colorPickerMenuItem(popover, this.trackView, "Set feature color", this.color));
+
+        [ "EXPANDED", "SQUISHED", "COLLAPSED" ].forEach(function(displayMode, index){
+
+            var chosen,
+                str;
+
+            chosen = (0 === index) ? trackMenuItemFirst : trackMenuItem;
+            str = (displayMode === myself.displayMode) ? chosen + checkMark + lut[ displayMode ] + '</div>' : chosen + checkMarkNone + lut[ displayMode ] + '</div>';
+
+            menuItems.push({
+                object: $(str),
+                click: function () {
+                    popover.hide();
+                    myself.displayMode = displayMode;
+                    myself.trackView.update();
+                }
+            });
+
+        });
+
+        return menuItems;
+
     };
 
     function renderFeature(feature, bpStart, xScale, canvas) {
@@ -189,7 +217,7 @@ var igv = (function (igv) {
             step = 8,
             h = 10,
             transform,
-            normalTextStyle = {font: 'bold 10px Arial', fillStyle: this.color, strokeStyle: "black"};
+            fontStyle;
 
         px = Math.round((feature.start - bpStart) / xScale);
         px1 = Math.round((feature.end - bpStart) / xScale);
@@ -230,6 +258,8 @@ var igv = (function (igv) {
             }
         }
 
+        fontStyle = { font: '10px PT Sans', fillStyle: this.color, strokeStyle: this.color };
+
         var geneColor;
         if (igv.selection) {
             geneColor = igv.selection.colorForGene(feature.name);
@@ -237,12 +267,12 @@ var igv = (function (igv) {
 
         if (((px1 - px) > 20 || geneColor) && this.displayMode != "SQUISHED") {
 
-            var geneStyle;
+            var geneFontStyle;
             if (geneColor) {
-                geneStyle = {font: 'bold 12px Arial', fillStyle: geneColor, strokeStyle: geneColor}
+                geneFontStyle = { font: '10px PT Sans', fillStyle: geneColor, strokeStyle: geneColor }
             }
             else {
-                geneStyle = normalTextStyle;
+                geneFontStyle = fontStyle;
             }
 
 
@@ -251,10 +281,9 @@ var igv = (function (igv) {
             }
 
             var labelY = transform ? py + 20 : py + 25;
-            canvas.fillText(feature.name, px + ((px1 - px) / 2), labelY, geneStyle, transform);
+            canvas.fillText(feature.name, px + ((px1 - px) / 2), labelY, geneFontStyle, transform);
         }
     }
-
 
     function renderVariant(variant, bpStart, xScale, canvas) {
 

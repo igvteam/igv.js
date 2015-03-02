@@ -163,7 +163,9 @@ var igv = (function (igv) {
             }
             console.log("Using index");
 
-            var blocks, processed, allFeatures,
+            var blocks,
+                processed,
+                allFeatures,
                 tabix = index && index.tabix,
                 refId = tabix ? index.sequenceIndexMap[range.chr] : range.chr;
 
@@ -174,45 +176,45 @@ var igv = (function (igv) {
             }
             else {
 
-                allFeatures = [],
-                    processed = 0;
+                allFeatures = [];
+                processed = 0;
 
                 blocks.forEach(function (block) {
 
                     var startPos = block.minv.block,
                         startOffset = block.minv.offset,
                         endPos = block.maxv.block + (index.tabix ? MAX_GZIP_BLOCK_SIZE + 100 : 0);
-                        options = {
-                            headers: myself.config.headers,           // http headers, not file header
-                            range: {start: startPos, size: endPos - startPos + 1 },
-                            success: function (data) {
+                    options = {
+                        headers: myself.config.headers,           // http headers, not file header
+                        range: {start: startPos, size: endPos - startPos + 1 },
+                        success: function (data) {
 
-                                var inflated, slicedData,
-                                    byteLength = data.byteLength;
+                            var inflated, slicedData,
+                                byteLength = data.byteLength;
 
-                                processed++;
+                            processed++;
 
-                                if (index.tabix) {
+                            if (index.tabix) {
 
-                                    inflated = igv.arrayBufferToString(igv.unbgzf(data));
-                                    // need to decompress data
-                                }
-                                else {
-                                    inflated = data;
-                                }
+                                inflated = igv.arrayBufferToString(igv.unbgzf(data));
+                                // need to decompress data
+                            }
+                            else {
+                                inflated = data;
+                            }
 
-                                slicedData = startOffset ? inflated.slice(startOffset) : inflated;
-                                allFeatures = allFeatures.concat(myself.parser.parseFeatures(slicedData));
+                            slicedData = startOffset ? inflated.slice(startOffset) : inflated;
+                            allFeatures = allFeatures.concat(myself.parser.parseFeatures(slicedData));
 
-                                if (processed === blocks.length) {
-                                    allFeatures.sort(function (a, b) {
-                                        return a.start - b.start;
-                                    });
-                                    continuation(allFeatures);
-                                }
-                            },
-                            task: task
-                        };
+                            if (processed === blocks.length) {
+                                allFeatures.sort(function (a, b) {
+                                    return a.start - b.start;
+                                });
+                                continuation(allFeatures);
+                            }
+                        },
+                        task: task
+                    };
 
 
                     // Async load

@@ -56,9 +56,9 @@ var igv = (function (igv) {
         return centerAlignment;
     };
 
-    igv.BamAlignmentRow.prototype.updateScore = function (bpStart, bpEnd, genomicInterval, sortOption) {
+    igv.BamAlignmentRow.prototype.updateScore = function (genomicLocation, genomicInterval, sortOption) {
 
-        this.score = this.caculateScore(bpStart, bpEnd, genomicInterval, sortOption);
+        this.score = this.caculateScore(genomicLocation, (1 + genomicLocation), genomicInterval, sortOption);
 
     };
 
