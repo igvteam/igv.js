@@ -589,7 +589,7 @@ var igv = (function (igv) {
                                 locusTokens = tokens[1].split(":");
                                 chr = igv.browser.genome.getChromosomeName(locusTokens[0].trim());
 
-                                if (this.type === "GTEX") {
+                                if (igv.browser.type === "GTEX") {
                                     igv.browser.selection = new igv.GtexSelection(type == 'gtex' ? {snp: feature} : {gene: feature});
                                 }
 
