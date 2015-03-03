@@ -146,7 +146,7 @@ var igvxhr = (function (igvxhr) {
                 error(null, xhr);
             }
 
-        }
+        };
 
         xhr.onerror = function (event) {
 
@@ -161,20 +161,21 @@ var igvxhr = (function (igvxhr) {
                 }
             }
             error(null, xhr);
-        }
+        };
 
         xhr.ontimeout = function (event) {
+            console.log("Aborted");
             timeout(null, xhr);
-        }
+        };
 
         xhr.onabort = function (event) {
             console.log("Aborted");
             abort(null, xhr);
-        }
+        };
 
         xhr.send(sendData);
 
-    }
+    };
 
     igvxhr.loadHeader = function (url, options) {
 
@@ -209,15 +210,12 @@ var igvxhr = (function (igvxhr) {
         }
 
         xhr.onerror = function (event) {
-
-            console.log("XMLHttpRequest - Error loading" + url);
-
-            error(event);
+            error(null);
         }
 
 
         xhr.ontimeout = function (event) {
-            timeout(event);
+            timeout(null);
         }
 
 

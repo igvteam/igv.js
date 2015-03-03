@@ -89,8 +89,7 @@ var igv = (function (igv) {
             if (!idxFile) idxFile = this.url + ".idx";
             igv.loadTribbleIndex(idxFile, this.config, continuation);
         }
-        return;
-    }
+     }
 
     /**
      *
@@ -140,6 +139,9 @@ var igv = (function (igv) {
                     success: function (data) {
                         myself.header = parser.parseHeader(data);
                         continuation(parser.parseFeatures(data));   // <= PARSING DONE HERE
+                    },
+                    error: function () {
+                        task.stopSpinner();
                     },
                     task: task
                 };
