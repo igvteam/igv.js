@@ -146,6 +146,7 @@ var igv = (function (igv) {
                         browser.loadTrack(
                             {
                                 type: "eqtl",
+                                sourceType: 'gtex',
                                 url: record.url,
                                 label: record.label,
                                 disableButtons: true
