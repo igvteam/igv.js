@@ -27,8 +27,6 @@ var igv = (function (igv) {
 
     igv.TrackView = function (track, browser) {
 
-        var rulerSweeper;
-
         this.track = track;
         this.browser = browser;
 
