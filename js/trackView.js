@@ -373,7 +373,7 @@ var igv = (function (igv) {
                 this.currentLoadTask = {
                     start: bpStart,
                     end: bpEnd,
-                    stopSpinner: function() {
+                    error: function() {
                         igv.stopSpinnerObject(self.trackDiv);
                         self.browser.removeTrack(self.track);
                         window.alert("Unreachable track URL");
@@ -406,12 +406,12 @@ var igv = (function (igv) {
          * Return true if we have a cached image (the "tile") that covers the requested range at the requested resolution
          */
         function hasCachedImaged(chr, start, end, bpPerPixel) {
-            return self.tile && self.tile.containsRange(chr, start, end, bpPerPixel);
+            return this.tile && this.tile.containsRange(chr, start, end, bpPerPixel);
         }
 
 
         function viewIsReady() {
-            return self.track && self.browser && self.browser.referenceFrame;
+            return this.track && this.browser && this.browser.referenceFrame;
         }
 
         /**

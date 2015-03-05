@@ -141,7 +141,7 @@ var igv = (function (igv) {
                         continuation(parser.parseFeatures(data));   // <= PARSING DONE HERE
                     },
                     error: function () {
-                        task.stopSpinner();
+                        task.error();
                     },
                     task: task
                 };
