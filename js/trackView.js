@@ -375,6 +375,7 @@ var igv = (function (igv) {
                     end: bpEnd,
                     stopSpinner: function() {
                         igv.stopSpinnerObject(self.trackDiv);
+                        self.browser.removeTrack(self.track);
                     },
                     abort: function () {
                         this.canceled = true;
