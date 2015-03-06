@@ -373,10 +373,10 @@ var igv = (function (igv) {
                 this.currentLoadTask = {
                     start: bpStart,
                     end: bpEnd,
-                    error: function() {
+                    error: function(unused, xhr) {
                         igv.stopSpinnerObject(self.trackDiv);
                         self.browser.removeTrack(self.track);
-                        window.alert("Unreachable track URL");
+                        window.alert("Unreachable track URL. Request status: " + xhr.status);
                     },
                     abort: function () {
                         this.canceled = true;

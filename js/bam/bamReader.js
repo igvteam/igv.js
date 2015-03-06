@@ -438,10 +438,10 @@ var igv = (function (igv) {
                     continuation(bam.contentLength);
 
                 },
-                error: function () {
+                error: function (unused, xhr) {
                     bam.contentLength = -1;
                     continuation(bam.contentLength);
-                    error();
+                    error(unused, xhr);
                 }
 
             });
