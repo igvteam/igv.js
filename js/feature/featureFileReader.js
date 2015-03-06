@@ -140,9 +140,7 @@ var igv = (function (igv) {
                         myself.header = parser.parseHeader(data);
                         continuation(parser.parseFeatures(data));   // <= PARSING DONE HERE
                     },
-                    error: function () {
-                        task.error();
-                    },
+                    error: task.error,
                     task: task
                 };
 

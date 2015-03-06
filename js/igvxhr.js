@@ -210,7 +210,7 @@ var igvxhr = (function (igvxhr) {
         }
 
         xhr.onerror = function (event) {
-            error(null);
+            error(null, xhr);
         }
 
 
