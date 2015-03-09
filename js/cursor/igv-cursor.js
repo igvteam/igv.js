@@ -979,7 +979,7 @@ var igv = (function (igv) {
                 return;
             }
 
-            console.log("Repaint " + this.track.label + "  " + this.canvas.height);
+            //console.log("Repaint " + this.track.label + "  " + this.canvas.height);
 
 
             var tileWidth,
