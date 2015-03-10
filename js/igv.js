@@ -35,7 +35,34 @@ var igv = (function (igv) {
             searchButton,
             zoom,
             zoomInButton,
-            zoomOutButton;
+            zoomOutButton,
+            fileInput = document.getElementById('fileInput');
+
+        if (fileInput) {
+
+            fileInput.addEventListener('change', function(e) {
+
+                var localFile = fileInput.files[ 0 ],
+                    featureFileReader;
+
+                featureFileReader = new igv.FeatureFileReader( { localFile: localFile } );
+                featureFileReader.readFeatures(function(){
+                    console.log("success reading " + localFile.name );
+                });
+
+
+                //fileReader = new FileReader();
+                //
+                //fileReader.onload = function(e) {
+                //    //fileDisplayArea.innerText = fileReader.result;
+                //    console.log("file contents " + fileReader.result);
+                //};
+                //
+                //fileReader.readAsText(file);
+
+            });
+
+        }
 
         if (options.showNavigation) {
 
@@ -89,10 +116,10 @@ var igv = (function (igv) {
             contentKaryo = $('#igvKaryoDiv')[0];
             // if a karyo div already exists in the page, use that one.
             // this allows the placement of the karyo view on the side, for instance
-            if (!contentKaryo ) {                
+            if (!contentKaryo ) {
                 contentKaryo = $('<div id="igvKaryoDiv" class="igv-karyo-div">')[0];
                 $(controlDiv).append(contentKaryo);
-            }            
+            }
             browser.karyoPanel = new igv.KaryoPanel(contentKaryo);
         }
 

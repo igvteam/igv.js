@@ -247,7 +247,6 @@ var igvxhr = (function (igvxhr) {
 
     }
 
-
     igvxhr.getContentLength = function (url, options) {
 
         var continuation = options.success;
@@ -312,7 +311,6 @@ var igvxhr = (function (igvxhr) {
 
     }
 
-
     function isCrossDomain(url) {
 
         var origin = window.location.origin;
@@ -320,7 +318,6 @@ var igvxhr = (function (igvxhr) {
         return !url.startsWith(origin);
 
     }
-
 
     igv.arrayBufferToString = function (arraybuffer, compression) {
 
