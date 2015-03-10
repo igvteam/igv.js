@@ -40,14 +40,14 @@ var igv = (function (igv) {
 
         if (fileInput) {
 
-            fileInput.addEventListener('change', function(e) {
+            fileInput.addEventListener('change', function (e) {
 
-                var localFile = fileInput.files[ 0 ],
+                var localFile = fileInput.files[0],
                     featureFileReader;
 
-                featureFileReader = new igv.FeatureFileReader( { localFile: localFile } );
-                featureFileReader.readFeatures(function(){
-                    console.log("success reading " + localFile.name );
+                featureFileReader = new igv.FeatureFileReader({localFile: localFile});
+                featureFileReader.readFeatures(function () {
+                    console.log("success reading " + localFile.name);
                 });
 
 
@@ -67,19 +67,19 @@ var igv = (function (igv) {
         if (options.showNavigation) {
 
             navigation = $('<div class="igvNavigation">');
-            $(controlDiv).append(navigation[ 0 ]);
+            $(controlDiv).append(navigation[0]);
 
 
             // search
             search = $('<div class="igvNavigationSearch">');
-            navigation.append(search[ 0 ]);
+            navigation.append(search[0]);
 
             browser.searchInput = $('<input class="igvNavigationSearchInput" type="text" placeholder="Locus Search">');
             //browser.searchInput = $('<input type="search" placeholder="Locus Search">');
-            search.append(browser.searchInput[ 0 ]);
+            search.append(browser.searchInput[0]);
 
             searchButton = $('<i class="igv-app-icon fa fa-search fa-lg igvNavigationMarginLeft12">');
-            search.append(searchButton[ 0 ]);
+            search.append(searchButton[0]);
 
             browser.searchInput.change(function () {
 
@@ -93,14 +93,14 @@ var igv = (function (igv) {
 
             // zoom
             zoom = $('<div class="igvNavigationZoom">');
-            navigation.append(zoom[ 0 ]);
+            navigation.append(zoom[0]);
 
             zoomOutButton = $('<i class="igv-app-icon fa fa-minus-square-o fa-2x" style="padding-right: 4px;">');
 
-            zoom.append(zoomOutButton[ 0 ]);
+            zoom.append(zoomOutButton[0]);
 
             zoomInButton = $('<i class="igv-app-icon fa fa-plus-square-o fa-2x">');
-            zoom.append(zoomInButton[ 0 ]);
+            zoom.append(zoomInButton[0]);
 
             zoomInButton.click(function () {
                 igv.browser.zoomIn();
@@ -116,7 +116,7 @@ var igv = (function (igv) {
             contentKaryo = $('#igvKaryoDiv')[0];
             // if a karyo div already exists in the page, use that one.
             // this allows the placement of the karyo view on the side, for instance
-            if (!contentKaryo ) {
+            if (!contentKaryo) {
                 contentKaryo = $('<div id="igvKaryoDiv" class="igv-karyo-div">')[0];
                 $(controlDiv).append(contentKaryo);
             }
@@ -229,6 +229,7 @@ var igv = (function (igv) {
                         range = start - end;
 
                     if (options.tracks) {
+
                         if (range < 100000) {
                             igv.sequenceSource.getSequence(refFrame.chr, start, end, function (refSeq) {
                                 options.tracks.forEach(function (track) {
@@ -236,12 +237,11 @@ var igv = (function (igv) {
                                 });
                             });
                         }
-                    }
-                    else {
-                        options.tracks.forEach(function (track) {
-                            browser.loadTrack(track);
-                        });
-
+                        else {
+                            options.tracks.forEach(function (track) {
+                                browser.loadTrack(track);
+                            });
+                        }
                     }
 
                 });
