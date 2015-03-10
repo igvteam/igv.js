@@ -119,7 +119,8 @@ var igv = (function (igv) {
         // TODO -- error message "unsupported filed type"
         this.addTrack(newTrack);
 
-        return newTrack;
+        // Not needed
+        //return newTrack;
 
 
     };
