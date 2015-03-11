@@ -30,37 +30,47 @@ var igvxhr = (function (igvxhr) {
     const GZIP = 1;
     const BGZF = 2;
 
-    igvxhr.isReachable = function (url) {
+    igvxhr.isReachable = function (url, continuation) {
 
         var request = new XMLHttpRequest();
 
-        request.open("GET", url);
+        request.open("HEAD", url, false);
 
         request.onload = function (event) {
 
-            console.log("igvxhr.isReachable - onload");
+            if (0 === request.status) {
+                console.log("igvxhr.isReachable - onload - failure - status " + request.status);
+                continuation(false, request.status);
+            }
+            else if (request.status >= 200 && request.status <= 300) {
+                console.log("igvxhr.isReachable - onload - success - status " + request.status);
+                continuation(true, request.status);
+            }
+            else {
+                console.log("igvxhr.isReachable - onload - failure - status " + request.status);
+                continuation(false, request.status);
+            }
 
         };
 
         request.onerror = function (event) {
-
-            console.log("igvxhr.isReachable - onload");
-
+            console.log("igvxhr.isReachable - onerror - status " + request.status);
+            continuation(false, request.status);
         };
 
         request.ontimeout = function (event) {
-
-            console.log("igvxhr.isReachable - onload");
-
+            console.log("igvxhr.isReachable - ontimeout - status " + request.status);
+            continuation(false, request.status);
         };
 
         request.onabort = function (event) {
-
-            console.log("igvxhr.isReachable - onload");
-
+            console.log("igvxhr.isReachable - onabort - status " + request.status);
+            continuation(false, request.status);
         };
 
+        console.log("igvxhr.isReachable - send - before");
         request.send(null);
+        console.log("igvxhr.isReachable - send - after");
 
     };
 

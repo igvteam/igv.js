@@ -80,9 +80,32 @@ var igv = (function (igv) {
 
     igv.Browser.prototype.loadTrack = function (config) {
 
+        var myself = this;
+
+        if (config.url) {
+
+            igvxhr.isReachable(config.url, function (success, requestStatus) {
+
+                if (true === success) {
+                    myself.doLoadTrack(config);
+                } else {
+                    window.alert("Status: " + requestStatus + " unreachable track URL: " + config.url);
+                }
+
+            });
+
+        } else {
+
+            myself.doLoadTrack(config);
+        }
+    };
+
+    igv.Browser.prototype.doLoadTrack = function (config) {
+
         if (this.isDuplicateTrack(config)) {
             return;
         }
+
 
         // Set the track type, if not explicitly specified
         if (!config.type) {
@@ -123,7 +146,8 @@ var igv = (function (igv) {
         //return newTrack;
 
 
-    };
+
+    }
 
     igv.Browser.prototype.isDuplicateTrack = function (config) {
 
