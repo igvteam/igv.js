@@ -114,7 +114,7 @@ var igv = (function (igv) {
                     }
                 });
             }
-        }, task.error);
+        });
 
 
         function decodeBamRecords(ba, offset, alignments, min, max, chrId) {
@@ -346,7 +346,7 @@ var igv = (function (igv) {
      * @param continuation
      * @param stopSpinner
      */
-    igv.BamReader.prototype.readHeader = function (continuation, error) {
+    igv.BamReader.prototype.readHeader = function (continuation) {
 
         var bam = this;
 
@@ -406,7 +406,7 @@ var igv = (function (igv) {
             });
 
 
-        }, error);
+        });
     };
 
     function getIndex(bam, continuation) {
@@ -423,7 +423,7 @@ var igv = (function (igv) {
 
     }
 
-    function getContentLength(bam, continuation, error) {
+    function getContentLength(bam, continuation) {
 
         if (bam.contentLength) {
             continuation(bam.contentLength);
@@ -441,14 +441,13 @@ var igv = (function (igv) {
                 error: function (unused, xhr) {
                     bam.contentLength = -1;
                     continuation(bam.contentLength);
-                    error(unused, xhr);
                 }
 
             });
         }
     }
 
-    function getChrIndex(bam, continuation, error) {
+    function getChrIndex(bam, continuation) {
 
         if (bam.chrToIndex) {
             continuation(bam.chrToIndex);
@@ -456,7 +455,7 @@ var igv = (function (igv) {
         else {
             bam.readHeader(function () {
                 continuation(bam.chrToIndex);
-            }, error)
+            })
         }
     }
 

@@ -107,6 +107,19 @@ div.ui-dialog fieldset {
 
 }
 
+.igvUserFeedback {
+
+    position: relative;
+
+    height: 100%;
+    float: left;
+
+    font-family: 'Open Sans', sans-serif;
+    font-size: small;
+    font-weight: 400;
+    color: #444;
+}
+
 .igvNavigationZoom {
 
     position: relative;
