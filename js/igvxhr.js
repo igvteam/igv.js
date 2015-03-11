@@ -30,6 +30,39 @@ var igvxhr = (function (igvxhr) {
     const GZIP = 1;
     const BGZF = 2;
 
+    igvxhr.isReachable = function (url) {
+
+        var request = new XMLHttpRequest();
+
+        request.open("GET", url);
+
+        request.onload = function (event) {
+
+            console.log("igvxhr.isReachable - onload");
+
+        };
+
+        request.onerror = function (event) {
+
+            console.log("igvxhr.isReachable - onload");
+
+        };
+
+        request.ontimeout = function (event) {
+
+            console.log("igvxhr.isReachable - onload");
+
+        };
+
+        request.onabort = function (event) {
+
+            console.log("igvxhr.isReachable - onload");
+
+        };
+
+        request.send(null);
+
+    };
 
     igvxhr.loadArrayBuffer = function (url, options) {
         options.responseType = "arraybuffer";
