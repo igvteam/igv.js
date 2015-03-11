@@ -50,16 +50,6 @@ var igv = (function (igv) {
                     console.log("success reading " + localFile.name);
                 });
 
-
-                //fileReader = new FileReader();
-                //
-                //fileReader.onload = function(e) {
-                //    //fileDisplayArea.innerText = fileReader.result;
-                //    console.log("file contents " + fileReader.result);
-                //};
-                //
-                //fileReader.readAsText(file);
-
             });
 
         }
@@ -89,6 +79,11 @@ var igv = (function (igv) {
             searchButton.click(function () {
                 browser.search(browser.searchInput.val());
             });
+
+
+            // user feedback
+            browser.userFeedback = $('<div class="igvUserFeedback">');
+            navigation.append(browser.userFeedback[0]);
 
 
             // zoom

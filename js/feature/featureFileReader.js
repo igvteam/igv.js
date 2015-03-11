@@ -140,7 +140,6 @@ var igv = (function (igv) {
                         myself.header = parser.parseHeader(data);
                         continuation(parser.parseFeatures(data));   // <= PARSING DONE HERE
                     },
-                    error: (task) ? task.error : undefined,
                     task: task
                 };
 
@@ -242,7 +241,6 @@ var igv = (function (igv) {
          */
         function loadHeaderWithIndex(index, continuation) {
 
-            //continuation({});
             getContentLength(function (contentLength) {
 
                 var rangeEnd = Math.min(contentLength, 65000),
@@ -255,7 +253,6 @@ var igv = (function (igv) {
                             myself.header = myself.parser.parseHeader(data);
                             continuation(myself.header);
                         },
-
                         task: task
                     };
 

@@ -89,7 +89,8 @@ var igv = (function (igv) {
                 if (true === success) {
                     myself.doLoadTrack(config);
                 } else {
-                    window.alert("Status: " + requestStatus + " unreachable track URL: " + config.url);
+                    myself.userFeedback.append("Status: " + requestStatus + " unreachable track URL: " + config.url);
+                    //window.alert("Status: " + requestStatus + " unreachable track URL: " + config.url);
                 }
 
             });
