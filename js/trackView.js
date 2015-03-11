@@ -306,7 +306,7 @@ var igv = (function (igv) {
             if (this.currentLoadTask && (isNotIndexed(this.track) ||
                 (this.currentLoadTask.end >= refFrameEnd && this.currentLoadTask.start <= refFrameStart))) {
                 // Nothing to do but wait for current load task to complete
-                console.log("Skipping load");
+                //console.log("Skipping load");
             }
 
             else {
