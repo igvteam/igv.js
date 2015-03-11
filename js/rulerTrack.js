@@ -43,7 +43,7 @@ var igv = (function (igv) {
     igv.RulerTrack.prototype.draw = function (options) {
 
         var fontStyle,
-            canvas = options.context,
+            ctx = options.context,
             range,
             ts,
             spacing,
@@ -63,7 +63,7 @@ var igv = (function (igv) {
         x = 0;
 
         //canvas.setProperties({textAlign: 'center'});
-        igv.Canvas.setProperties.call(canvas.ctx, fontStyle );
+        igv.Canvas.setProperties.call(ctx, fontStyle );
         while (x < options.pixelWidth) {
 
             var l = Math.floor(nTick * spacing);
@@ -71,14 +71,14 @@ var igv = (function (igv) {
             var chrPosition = formatNumber(l / ts.unitMultiplier, 0) + " " + ts.majorUnit;
 
             if (nTick % 1 == 0) {
-                canvas.fillText(chrPosition, x, this.height - 15);
+                igv.Canvas.fillText.call(ctx, chrPosition, x, this.height - 15);
             }
 
-            canvas.strokeLine(x, this.height - 10, x, this.height - 2);
+            igv.Canvas.strokeLine.call(ctx, x, this.height - 10, x, this.height - 2);
 
             nTick++;
         }
-        canvas.strokeLine(0, this.height - 1, options.pixelWidth, this.height - 1);
+        igv.Canvas.strokeLine.call(ctx, 0, this.height - 1, options.pixelWidth, this.height - 1);
 
 
         function formatNumber(anynum, decimal) {

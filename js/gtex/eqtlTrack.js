@@ -54,7 +54,7 @@ var igv = (function (igv) {
         }
     }
 
-    igv.EqtlTrack.prototype.paintControl = function (canvas, pixelWidth, pixelHeight) {
+    igv.EqtlTrack.prototype.paintControl = function (ctx, pixelWidth, pixelHeight) {
 
         var track = this,
             yScale = (track.maxLogP - track.minLogP) / pixelHeight;
@@ -63,20 +63,20 @@ var igv = (function (igv) {
             'textAlign': 'right',
             'strokeStyle': "black"};
 
-        canvas.fillRect(0, 0, pixelWidth, pixelHeight, {'fillStyle': "rgb(255, 255, 255)"});
+        igv.Canvas.fillRect.call(ctx, 0, 0, pixelWidth, pixelHeight, {'fillStyle': "rgb(255, 255, 255)"});
 
         for (var p = 4; p <= track.maxLogP; p += 2) {
             var yp = pixelHeight - Math.round((p - track.minLogP) / yScale);
             // TODO: Dashes may not actually line up with correct scale. Ask Jim about this
-            canvas.strokeLine(45, yp - 2, 50, yp - 2, font); // Offset dashes up by 2 pixel
-            canvas.fillText(p, 44, yp + 2, font); // Offset numbers down by 2 pixels; TODO: error
+            igv.Canvas.strokeLine.call(ctx, 45, yp - 2, 50, yp - 2, font); // Offset dashes up by 2 pixel
+            igv.Canvas.fillText.call(ctx, p, 44, yp + 2, font); // Offset numbers down by 2 pixels; TODO: error
         }
 
 
         font['textAlign'] = 'center';
 
 
-        canvas.fillText("-log10(pvalue)", pixelWidth / 2, pixelHeight / 2, font, {rotate: {angle: -90}});
+        igv.Canvas.fillText.call(ctx, "-log10(pvalue)", pixelWidth / 2, pixelHeight / 2, font, {rotate: {angle: -90}});
 
 
     };
@@ -92,7 +92,7 @@ var igv = (function (igv) {
 
         var track = this,
             featureList = options.features,
-            canvas = options.context,
+            ctx = options.context,
             bpPerPixel = options.bpPerPixel,
             bpStart = options.bpStart,
             pixelWidth = options.pixelWidth,
@@ -101,15 +101,15 @@ var igv = (function (igv) {
             yScale = (track.maxLogP - track.minLogP) / pixelHeight;
 
         // Background
-        if (this.background) canvas.fillRect(0, 0, pixelWidth, pixelHeight, {'fillStyle': this.background});
-        canvas.strokeLine(0, pixelHeight - 1, pixelWidth, pixelHeight - 1, {'strokeStyle': this.divider});
+        if (this.background) igv.Canvas.fillRect.call(ctx, 0, 0, pixelWidth, pixelHeight, {'fillStyle': this.background});
+        igv.Canvas.strokeLine.call(ctx, 0, pixelHeight - 1, pixelWidth, pixelHeight - 1, {'strokeStyle': this.divider});
 
         if (canvas) {
 
             var len = featureList.length;
 
 
-            canvas.save();
+            ctx.save();
 
 
             // Draw in two passes, with "selected" eqtls drawn last
@@ -117,7 +117,7 @@ var igv = (function (igv) {
             drawEqtls(true);
 
 
-            canvas.restore();
+            ctx.restore();
 
         }
 
@@ -128,7 +128,7 @@ var igv = (function (igv) {
 
 
             //ctx.fillStyle = igv.selection.colorForGene(eqtl.geneName);
-            igv.Canvas.setProperties.call(canvas.ctx, {
+            igv.Canvas.setProperties.call(ctx, {
                 fillStyle: "rgb(180, 180, 180)",
                 strokeStyle: "rgb(180, 180, 180)"});
 
@@ -168,8 +168,8 @@ var igv = (function (igv) {
                 eqtl.py = py;
 
                 if (color) canvas.setProperties({fillStyle: color, strokeStyle: "black"});
-                canvas.fillCircle(px, py, radius);
-                canvas.strokeCircle(px, py, radius);
+                igv.Canvas.fillCircle.call(ctx, px, py, radius);
+                igv.Canvas.strokeCircle.call(ctx, px, py, radius);
             }
         }
 

@@ -234,7 +234,7 @@ var igv = (function (igv) {
     igv.BAMTrack.prototype.draw = function (options) {
 
         var genomicInterval = options.features,
-            canvas = options.context,
+            ctx = options.context,
             bpPerPixel = options.bpPerPixel,
             bpStart = options.bpStart,
             pixelWidth = options.pixelWidth,
@@ -248,7 +248,7 @@ var igv = (function (igv) {
         if (genomicInterval.exceedsVisibilityWindow) {
 
             for (var x = 200; x < pixelWidth; x += 400) {
-                canvas.fillText("Zoom in to see alignments", x, 20, zoomInNoticeFontStyle);
+                igv.Canvas.fillText.call(ctx, "Zoom in to see alignments", x, 20, zoomInNoticeFontStyle);
             }
 
             return;
@@ -295,8 +295,8 @@ var igv = (function (igv) {
                     y = myself.coverageTrackHeight - h;
                     x = (bp - bpStart) / bpPerPixel;
 
-                    igv.Canvas.setProperties.call(canvas.ctx, {fillStyle: myself.coverageColor, trokeStyle: myself.coverageColor });
-                    canvas.fillRect(x, y, w, h);
+                    igv.Canvas.setProperties.call(ctx, {fillStyle: myself.coverageColor, trokeStyle: myself.coverageColor });
+                    igv.Canvas.fillRect.call(ctx, x, y, w, h);
 
                     // coverage mismatch coloring
                     if (sequence) {
@@ -308,8 +308,8 @@ var igv = (function (igv) {
                         refBase = sequence[i];
                         if (item.isMismatch(refBase)) {
 
-                            igv.Canvas.setProperties.call(canvas.ctx, { fillStyle: igv.nucleotideColors[ refBase ] });
-                            canvas.fillRect(x, y, w, h);
+                            igv.Canvas.setProperties.call(ctx, { fillStyle: igv.nucleotideColors[ refBase ] });
+                            igv.Canvas.fillRect.call(ctx, x, y, w, h);
 
                             accumulatedHeight = 0.0;
                             [ "A", "C", "T", "G" ].forEach(function(nucleotide){
@@ -326,8 +326,8 @@ var igv = (function (igv) {
                                 y = (myself.coverageTrackHeight - hh) - accumulatedHeight;
                                 accumulatedHeight += hh;
 
-                                igv.Canvas.setProperties.call(canvas.ctx, { fillStyle: igv.nucleotideColors[ nucleotide ] });
-                                canvas.fillRect(x, y, w, hh);
+                                igv.Canvas.setProperties.call(ctx, { fillStyle: igv.nucleotideColors[ nucleotide ] });
+                                igv.Canvas.fillRect.call(ctx, x, y, w, hh);
 
                             });
 
@@ -387,11 +387,11 @@ var igv = (function (igv) {
                             for (var c = 0; c < alignment.cigar.length; c++) {
 
                                 if      ("D" === alignment.cigar.charAt( c )) {
-                                    canvas.strokeLine(xStart, yStrokedLine, xEnd, yStrokedLine, {strokeStyle: deletionColor});
+                                    igv.Canvas.strokeLine.call(ctx, xStart, yStrokedLine, xEnd, yStrokedLine, {strokeStyle: deletionColor});
                                     break;
                                 }
                                 else if ("N" === alignment.cigar.charAt( c )) {
-                                     canvas.strokeLine(xStart, yStrokedLine, xEnd, yStrokedLine, {strokeStyle: skippedColor});
+                                    igv.Canvas.strokeLine.call(ctx, xStart, yStrokedLine, xEnd, yStrokedLine, {strokeStyle: skippedColor});
                                     break;
                                 }
 
@@ -399,7 +399,7 @@ var igv = (function (igv) {
 
                         }
 
-                        igv.Canvas.setProperties.call(canvas.ctx, {   fillStyle: canvasColor , strokeStyle: canvasColor});
+                        igv.Canvas.setProperties.call(ctx, {   fillStyle: canvasColor , strokeStyle: canvasColor});
 
                         alignment.blocks.forEach(function (block, indexBlocks) {
                             var refOffset = block.start - bpStart,
@@ -431,7 +431,7 @@ var igv = (function (igv) {
                                     yRect + height,
                                     yRect];
 
-                                canvas.fillPolygon(x, y, { fillStyle: canvasColor });
+                                igv.Canvas.fillPolygon.call(ctx, x, y, { fillStyle: canvasColor });
                             }
                             else if (false === alignment.strand && indexBlocks === 0) {
 
@@ -447,11 +447,11 @@ var igv = (function (igv) {
                                     yRect + height,
                                     yRect];
 
-                                canvas.fillPolygon(x, y, { fillStyle: canvasColor });
+                                igv.Canvas.fillPolygon.call(ctx, x, y, { fillStyle: canvasColor });
                             }
 
-                            canvas.fillRect(xBlockStart, yRect, widthBlock, height, { fillStyle: "white" });
-                            canvas.fillRect(xBlockStart, yRect, widthBlock, height, { fillStyle: canvasColor });
+                            igv.Canvas.fillRect.call(ctx, xBlockStart, yRect, widthBlock, height, { fillStyle: "white" });
+                            igv.Canvas.fillRect.call(ctx, xBlockStart, yRect, widthBlock, height, { fillStyle: canvasColor });
 
                             // Only do mismatch coloring if a refseq exists to do the comparison
                             if (sequence && blockSeq !== "*") {
@@ -477,7 +477,7 @@ var igv = (function (igv) {
 
                                             xBase = ((block.start + i) - bpStart) / bpPerPixel;
                                             widthBase = Math.max(1, 1 / bpPerPixel);
-                                            canvas.fillRect(xBase, yRect, widthBase, height, { fillStyle: colorBase });
+                                            igv.Canvas.fillRect.call(ctx, xBase, yRect, widthBase, height, { fillStyle: colorBase });
                                         }
                                     }
                                 }

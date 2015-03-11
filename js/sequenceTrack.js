@@ -48,7 +48,7 @@ var igv = (function (igv) {
     igv.SequenceTrack.prototype.draw = function (options) {
 
         var sequence = options.features,
-            canvas = options.context,
+            ctx = options.context,
             bpPerPixel = options.bpPerPixel,
             bpStart = options.bpStart,
             pixelWidth = options.pixelWidth,
@@ -75,11 +75,11 @@ var igv = (function (igv) {
 
                     if (bpPerPixel > 1 / 10) {
 
-                        canvas.fillRect(p0, 0, p1 - p0, 10, {fillStyle: c});
+                        igv.Canvas.fillRect.call(ctx, p0, 0, p1 - p0, 10, {fillStyle: c});
                     }
                     else {
 
-                        canvas.strokeText(b, pc, y, {strokeStyle: c, font: 'normal 10px Arial', textAlign: 'center'});
+                        igv.Canvas.strokeText.call(ctx, b, pc, y, {strokeStyle: c, font: 'normal 10px Arial', textAlign: 'center'});
                     }
                 }
             }
