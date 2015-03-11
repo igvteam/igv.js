@@ -115,7 +115,7 @@ var igv = (function (igv) {
 
                 py = Math.max(track.dotSize, pixelHeight - Math.round((val - track.minLogP) / yScale));
 
-                if (color) canvas.setProperties({fillStyle: color, strokeStyle: "black"});
+                if (color) igv.Canvas.setProperties.call(canvas.ctx, {fillStyle: color, strokeStyle: "black"});
 
                 canvas.fillCircle(px, py, track.dotSize);
                 //canvas.strokeCircle(px, py, radius);

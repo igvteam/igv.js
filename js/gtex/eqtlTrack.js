@@ -128,7 +128,7 @@ var igv = (function (igv) {
 
 
             //ctx.fillStyle = igv.selection.colorForGene(eqtl.geneName);
-            canvas.setProperties({
+            igv.Canvas.setProperties.call(canvas.ctx, {
                 fillStyle: "rgb(180, 180, 180)",
                 strokeStyle: "rgb(180, 180, 180)"});
 

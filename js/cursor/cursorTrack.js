@@ -209,7 +209,7 @@ var cursor = (function (cursor) {
                 canvas.fillRect(0, 0, width, height, { fillStyle: 'rgb(255, 255, 255)' });
             }
 
-            canvas.setProperties({ fillStyle: this.color, strokeStyle: this.color });
+            igv.Canvas.setProperties.call(canvas.ctx, { fillStyle: this.color, strokeStyle: this.color });
 
 
             for (regionNumber = Math.floor(start), len = regions.length;
