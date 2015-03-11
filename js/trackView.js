@@ -292,7 +292,7 @@ var igv = (function (igv) {
             bpStart,
             bpEnd,
             self = this,
-            igvCanvas,
+            ctx,
             referenceFrame = this.browser.referenceFrame,
             chr = referenceFrame.chr,
             refFrameStart = referenceFrame.start,
@@ -340,11 +340,11 @@ var igv = (function (igv) {
                         var buffer = document.createElement('canvas');
                         buffer.width = pixelWidth;
                         buffer.height = self.canvas.height;
-                        igvCanvas = new igv.Canvas(buffer);
+                        ctx =  buffer.getContext('2d');
 
                         self.track.draw({
                             features: features,
-                            context: igvCanvas,
+                            context: ctx,
                             bpStart: bpStart,
                             bpPerPixel: referenceFrame.bpPerPixel,
                             pixelWidth: buffer.width,
@@ -357,9 +357,9 @@ var igv = (function (igv) {
                             buffer2.width = self.controlCanvas.width;
                             buffer2.height = self.controlCanvas.height;
 
-                            var bufferCanvas = new igv.Canvas(buffer2);
+                            var ctx2 =  buffer2.getContext('2d');
 
-                            self.track.paintControl(bufferCanvas, buffer2.width, buffer2.height);
+                            self.track.paintControl(ctx2, buffer2.width, buffer2.height);
 
                             self.controlCtx.drawImage(buffer2, 0, 0);
                         }

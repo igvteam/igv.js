@@ -69,7 +69,7 @@ var igv = (function (igv) {
 
         var track = this,
             featureList = options.features,
-            canvas = options.context,
+            ctx = options.context,
             bpPerPixel = options.bpPerPixel,
             bpStart = options.bpStart,
             pixelWidth = options.pixelWidth,
@@ -85,8 +85,8 @@ var igv = (function (igv) {
             this.po = undefined;
         }
 
-        if (this.background) canvas.fillRect(0, 0, pixelWidth, pixelHeight, {'fillStyle': this.background});
-        canvas.strokeLine(0, pixelHeight - 1, pixelWidth, pixelHeight - 1, {'strokeStyle': this.divider});
+        if (this.background) igv.Canvas.fillRect.call(ctx, 0, 0, pixelWidth, pixelHeight, {'fillStyle': this.background});
+        igv.Canvas.strokeLine.call(ctx, 0, pixelHeight - 1, pixelWidth, pixelHeight - 1, {'strokeStyle': this.divider});
 
         var variant, len, xScale, px, px1, pw, py, color, pvalue, val;
 
@@ -115,9 +115,9 @@ var igv = (function (igv) {
 
                 py = Math.max(track.dotSize, pixelHeight - Math.round((val - track.minLogP) / yScale));
 
-                if (color) igv.Canvas.setProperties.call(canvas.ctx, {fillStyle: color, strokeStyle: "black"});
+                if (color) igv.Canvas.setProperties.call(ctx, {fillStyle: color, strokeStyle: "black"});
 
-                canvas.fillCircle(px, py, track.dotSize);
+                igv.Canvas.fillCircle.call(ctx, px, py, track.dotSize);
                 //canvas.strokeCircle(px, py, radius);
 
                 if (enablePopover) track.po.push({x: px, y: py, feature: variant});
@@ -128,7 +128,7 @@ var igv = (function (igv) {
     };
 
 
-    igv.T2dTrack.prototype.paintControl = function (canvas, pixelWidth, pixelHeight) {
+    igv.T2dTrack.prototype.paintControl = function (ctx, pixelWidth, pixelHeight) {
 
         var track = this,
             yScale = (track.maxLogP - track.minLogP) / pixelHeight;
@@ -137,20 +137,20 @@ var igv = (function (igv) {
             'textAlign': 'right',
             'strokeStyle': "black"};
 
-        canvas.fillRect(0, 0, pixelWidth, pixelHeight, {'fillStyle': "rgb(255, 255, 255)"});
+        igv.Canvas.fillRect.call(ctx, 0, 0, pixelWidth, pixelHeight, {'fillStyle': "rgb(255, 255, 255)"});
 
         for (var p = 2; p < track.maxLogP; p += 2) {
             var yp = pixelHeight - Math.round((p - track.minLogP) / yScale);
             // TODO: Dashes may not actually line up with correct scale. Ask Jim about this
-            canvas.strokeLine(45, yp - 2, 50, yp - 2, font); // Offset dashes up by 2 pixel
-            canvas.fillText(p, 44, yp + 2, font); // Offset numbers down by 2 pixels; TODO: error
+            igv.Canvas.strokeLine.call(ctx, 45, yp - 2, 50, yp - 2, font); // Offset dashes up by 2 pixel
+            igv.Canvas.strokeLine.call(ctx, p, 44, yp + 2, font); // Offset numbers down by 2 pixels; TODO: error
         }
 
 
         font['textAlign'] = 'center';
 
 
-        canvas.fillText("-log10(pvalue)", pixelWidth / 2, pixelHeight / 2, font, {rotate: {angle: -90}});
+        igv.Canvas.fillText.call(ctx.ctx, "-log10(pvalue)", pixelWidth / 2, pixelHeight / 2, font, {rotate: {angle: -90}});
 
 
     };
