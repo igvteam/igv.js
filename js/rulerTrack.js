@@ -63,7 +63,7 @@ var igv = (function (igv) {
         x = 0;
 
         //canvas.setProperties({textAlign: 'center'});
-        canvas.setProperties( fontStyle );
+        igv.Canvas.setProperties.call(canvas.ctx, fontStyle );
         while (x < options.pixelWidth) {
 
             var l = Math.floor(nTick * spacing);

@@ -295,8 +295,7 @@ var igv = (function (igv) {
                     y = myself.coverageTrackHeight - h;
                     x = (bp - bpStart) / bpPerPixel;
 
-                    canvas.setProperties({   fillStyle: myself.coverageColor });
-                    canvas.setProperties({ strokeStyle: myself.coverageColor });
+                    igv.Canvas.setProperties.call(canvas.ctx, {fillStyle: myself.coverageColor, trokeStyle: myself.coverageColor });
                     canvas.fillRect(x, y, w, h);
 
                     // coverage mismatch coloring
@@ -309,7 +308,7 @@ var igv = (function (igv) {
                         refBase = sequence[i];
                         if (item.isMismatch(refBase)) {
 
-                            canvas.setProperties({ fillStyle: igv.nucleotideColors[ refBase ] });
+                            igv.Canvas.setProperties.call(canvas.ctx, { fillStyle: igv.nucleotideColors[ refBase ] });
                             canvas.fillRect(x, y, w, h);
 
                             accumulatedHeight = 0.0;
@@ -327,7 +326,7 @@ var igv = (function (igv) {
                                 y = (myself.coverageTrackHeight - hh) - accumulatedHeight;
                                 accumulatedHeight += hh;
 
-                                canvas.setProperties({ fillStyle: igv.nucleotideColors[ nucleotide ] });
+                                igv.Canvas.setProperties.call(canvas.ctx, { fillStyle: igv.nucleotideColors[ nucleotide ] });
                                 canvas.fillRect(x, y, w, hh);
 
                             });
@@ -400,8 +399,7 @@ var igv = (function (igv) {
 
                         }
 
-                        canvas.setProperties({   fillStyle: canvasColor });
-                        canvas.setProperties({ strokeStyle: canvasColor});
+                        igv.Canvas.setProperties.call(canvas.ctx, {   fillStyle: canvasColor , strokeStyle: canvasColor});
 
                         alignment.blocks.forEach(function (block, indexBlocks) {
                             var refOffset = block.start - bpStart,

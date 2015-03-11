@@ -66,68 +66,68 @@ var igv = (function (igv) {
     };
 
 
-     igv.Canvas.prototype.dashedLine = function( x1, y1, x2, y2, dashLen, properties) {
-	x1 = Math.round(x1);
-	y1 = Math.round(y1);
-	x2 = Math.round(x2);
-	y2 = Math.round(y2);
-	dashLen = Math.round(dashLen);
-	
-	if (properties) {
-	    this.ctx.save();
-	    this.setProperties(properties, this);
-	}
+    igv.Canvas.prototype.dashedLine = function (x1, y1, x2, y2, dashLen, properties) {
+        x1 = Math.round(x1);
+        y1 = Math.round(y1);
+        x2 = Math.round(x2);
+        y2 = Math.round(y2);
+        dashLen = Math.round(dashLen);
 
-	if (dashLen == undefined) dashLen = 2;
-	this.ctx.moveTo(x1, y1);
+        if (properties) {
+            this.ctx.save();
+            igv.Canvas.setProperties.call(this.ctx, properties);
+        }
 
-	var dX = x2 - x1;
-	var dY = y2 - y1;
-	var dashes = Math.floor(Math.sqrt(dX * dX + dY * dY) / dashLen);
-	var dashX = dX / dashes;
-	var dashY = dY / dashes;
-	console.log("Drawing dashed line "+x1+"/"+y1+"-"+x2+"/"+y2+":"+dashLen+", nrdashes  "+dashes);
-	
-	var q = 0;
-	while (q++ < dashes) {
-	    x1 += dashX;
-	    y1 += dashY;
-	    this.ctx[q % 2 == 0 ? 'moveTo' : 'lineTo'](x1, y1);
-	}
-	this.ctx[q % 2 == 0 ? 'moveTo' : 'lineTo'](x2, y2);
+        if (dashLen == undefined) dashLen = 2;
+        this.ctx.moveTo(x1, y1);
 
-	if (properties) this.ctx.restore();
+        var dX = x2 - x1;
+        var dY = y2 - y1;
+        var dashes = Math.floor(Math.sqrt(dX * dX + dY * dY) / dashLen);
+        var dashX = dX / dashes;
+        var dashY = dY / dashes;
+        console.log("Drawing dashed line " + x1 + "/" + y1 + "-" + x2 + "/" + y2 + ":" + dashLen + ", nrdashes  " + dashes);
+
+        var q = 0;
+        while (q++ < dashes) {
+            x1 += dashX;
+            y1 += dashY;
+            this.ctx[q % 2 == 0 ? 'moveTo' : 'lineTo'](x1, y1);
+        }
+        this.ctx[q % 2 == 0 ? 'moveTo' : 'lineTo'](x2, y2);
+
+        if (properties) this.ctx.restore();
     };
-    
-    
-    igv.Canvas.prototype.lineTo = function(x, y, properties) {
-	x = Math.round(x);
-	y = Math.round(y);
 
-	if (properties) {
-	    this.ctx.save();
-	    this.setProperties(properties, this);
-	}
 
-	this.ctx.lineTo(x, y);
+    igv.Canvas.prototype.lineTo = function (x, y, properties) {
+        x = Math.round(x);
+        y = Math.round(y);
 
-	if (properties) this.ctx.restore();
+        if (properties) {
+            this.ctx.save();
+            igv.Canvas.setProperties.call(this.ctx, properties);
+        }
+
+        this.ctx.lineTo(x, y);
+
+        if (properties) this.ctx.restore();
     };
-    
-    igv.Canvas.prototype.moveTo = function(x, y, properties) {
-	x = Math.round(x);
-	y = Math.round(y);
 
-	if (properties) {
-	    this.ctx.save();
-	    this.setProperties(properties, this);
-	}
+    igv.Canvas.prototype.moveTo = function (x, y, properties) {
+        x = Math.round(x);
+        y = Math.round(y);
 
-	this.ctx.moveTo(x, y);
+        if (properties) {
+            this.ctx.save();
+            igv.Canvas.setProperties.call(this.ctx, properties);
+        }
 
-	if (properties) this.ctx.restore();
+        this.ctx.moveTo(x, y);
+
+        if (properties) this.ctx.restore();
     };
-    
+
     igv.Canvas.prototype.strokeLine = function (x1, y1, x2, y2, properties) {
 
         x1 = Math.floor(x1) + 0.5;
@@ -136,7 +136,7 @@ var igv = (function (igv) {
         y2 = Math.floor(y2) + 0.5;
 
         this.ctx.save();
-        if (properties) this.setProperties(properties);
+        if (properties) igv.Canvas.setProperties.call(this.ctx, properties);
 
         this.ctx.beginPath();
         this.ctx.moveTo(x1, y1);
@@ -154,7 +154,7 @@ var igv = (function (igv) {
 
         if (properties) {
             this.ctx.save();
-            this.setProperties(properties, this);
+            igv.Canvas.setProperties.call(this.ctx, properties);
         }
 
         this.ctx.fillRect(x, y, w, h);
@@ -168,7 +168,7 @@ var igv = (function (igv) {
 
         if (properties) {
             this.ctx.save();
-            this.setProperties(properties, this);
+            igv.Canvas.setProperties.call(this.ctx, properties);
         }
 
         this.ctx.strokeRect(x, y, w, h);
@@ -183,7 +183,7 @@ var igv = (function (igv) {
 
         if (properties) {
             this.ctx.save();
-            this.setProperties(properties, this);
+            igv.Canvas.setProperties.call(this.ctx, properties);
         }
 
         this.ctx.fillRect(x, y, width, height);
@@ -213,7 +213,7 @@ var igv = (function (igv) {
         }
 
         this.ctx.save();
-        if (properties)   this.setProperties(properties, this);
+        if (properties)   igv.Canvas.setProperties.call(this.ctx, properties);
 
         this.ctx.beginPath();
         this.ctx.moveTo(x[0], y[0]);
@@ -231,7 +231,7 @@ var igv = (function (igv) {
 
         if (properties) {
             this.ctx.save();
-            this.setProperties(properties, this);
+            igv.Canvas.setProperties.call(this.ctx, properties);
         }
 
 
@@ -266,7 +266,7 @@ var igv = (function (igv) {
 
         if (properties) {
             //this.ctx.save();
-            this.setProperties(properties);
+            igv.Canvas.setProperties.call(this.ctx, properties);
         }
 
         this.ctx.save();
@@ -316,6 +316,22 @@ var igv = (function (igv) {
         this.ctx.fill();
     };
 
+
+    // HELPER FUNCTIONS
+    /**
+     * Set styling properties.  For now this is just a pass-through to the underlying canvas context.
+     *
+     * @param properties
+     */
+    igv.Canvas.setProperties = function (properties) {
+
+        for (var key in properties) {
+            if (properties.hasOwnProperty(key)) {
+                var value = properties[key];
+                this[key] = value;
+            }
+        }
+    };
 
     return igv;
 })(igv || {});

@@ -104,7 +104,7 @@ var igv = (function (igv) {
 
         if (featureList) {
 
-            canvas.setProperties( { fillStyle: track.color, strokeStyle: track.color } );
+            igv.Canvas.setProperties.call(canvas.ctx,  { fillStyle: track.color, strokeStyle: track.color } );
 
             for (var gene, i = 0, len = featureList.length; i < len; i++) {
                 gene = featureList[i];
