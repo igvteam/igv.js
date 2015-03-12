@@ -182,6 +182,79 @@ var igv = (function (igv) {
             this.beginPath();
             this.arc(x, y, radius, 0, 2 * Math.PI);
             this.fill();
+        },
+
+        drawArrowhead: function (x, y, size, lineWidth) {
+
+            this.save();
+            if (!size) {
+                size = 5;
+            }
+            if (lineWidth) {
+                this.lineWidth = lineWidth;
+            }
+            this.beginPath();
+            this.moveTo(x, y - size / 2);
+            this.lineTo(x, y + size / 2);
+            this.lineTo(x + size, y);
+            this.lineTo(x, y - size / 2);
+            this.closePath();
+            this.fill();
+            this.restore();
+        },
+
+        roundRect: function (x, y, width, height, radius, fill, stroke) {
+
+            this.save();
+            if (typeof stroke == "undefined") {
+                stroke = true;
+            }
+            if (typeof radius === "undefined") {
+                radius = 5;
+            }
+            this.beginPath();
+            this.moveTo(x + radius, y);
+            this.lineTo(x + width - radius, y);
+            this.quadraticCurveTo(x + width, y, x + width, y + radius);
+            this.lineTo(x + width, y + height - radius);
+            this.quadraticCurveTo(x + width, y + height, x + width - radius, y + height);
+            this.lineTo(x + radius, y + height);
+            this.quadraticCurveTo(x, y + height, x, y + height - radius);
+            this.lineTo(x, y + radius);
+            this.quadraticCurveTo(x, y, x + radius, y);
+            this.closePath();
+            if (stroke) {
+                this.stroke();
+            }
+            if (fill) {
+                this.fill();
+            }
+            this.restore();
+        },
+
+        polygon: function (x, y, fill, stroke) {
+
+            this.save();
+            if (typeof stroke == "undefined") {
+                stroke = true;
+            }
+
+            this.beginPath();
+            var len = x.length;
+            this.moveTo(x[0], y[0]);
+            for (var i = 1; i < len; i++) {
+                this.lineTo(x[i], y[i]);
+                // this.moveTo(x[i], y[i]);
+            }
+
+            this.closePath();
+            if (stroke) {
+                this.stroke();
+            }
+            if (fill) {
+                this.fill();
+            }
+            this.restore();
         }
     }
 
