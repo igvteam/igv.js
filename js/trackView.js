@@ -113,10 +113,6 @@ var igv = (function (igv) {
         if ("CURSOR" !== this.browser.type) {
 
 
-            $(viewportDiv).scroll(function() {
-                console.log("viewportDiv scrolled " + this.scrollTop());
-            });
-
             if (this.track.description) {
 
                 labelButton = document.createElement("button");
@@ -136,12 +132,22 @@ var igv = (function (igv) {
             } else {
 
                 if (this.track.label) {
+
                     trackIconContainer = $('<div class="igv-app-icon-container">');
                     $(viewportDiv).append(trackIconContainer[ 0 ]);
 
                     this.track.labelSpan = $('<span class="igv-track-label-span-base">')[0];
                     this.track.labelSpan.innerHTML = this.track.label;
                     $(trackIconContainer).append(this.track.labelSpan);
+
+                    $(viewportDiv).scroll(function() {
+
+                        console.log("viewportDiv scrolled " + $(viewportDiv).scrollTop());
+
+                        trackIconContainer.css( { "top" : $(viewportDiv).scrollTop() + "px" } );
+
+                    });
+
                 }
 
             }

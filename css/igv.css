@@ -579,13 +579,18 @@ div.ui-dialog fieldset {
     border-style: solid;
     border-width: thin;
 
+    background: rgb(255, 255, 255);
+
+    display: inline-block;
+
     position: absolute;
     left: 10px;
-    top: 4px;
+    top: 0;
     width: auto;
     height:auto;
-    background: rgb(255, 255, 255);
-    display: inline-block;
+
+    margin-top: 4px;
+
 }
 
 .igv-track-control-canvas {
