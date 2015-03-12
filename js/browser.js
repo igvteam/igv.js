@@ -89,7 +89,7 @@ var igv = (function (igv) {
                 if (true === success) {
                     myself.doLoadTrack(config);
                 } else {
-                    myself.userFeedbackBodyCopy.html("Request status " + requestStatus + ". URL is unreachable.");
+                    myself.userFeedbackBodyCopy.html("Error. Track URL is unreachable. Status " + requestStatus + ".");
                     myself.userFeedback.show();
                 }
 
