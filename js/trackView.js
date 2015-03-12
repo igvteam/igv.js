@@ -113,6 +113,10 @@ var igv = (function (igv) {
         if ("CURSOR" !== this.browser.type) {
 
 
+            $(viewportDiv).scroll(function() {
+                console.log("viewportDiv scrolled " + this.scrollTop());
+            });
+
             if (this.track.description) {
 
                 labelButton = document.createElement("button");
