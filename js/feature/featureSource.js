@@ -91,7 +91,7 @@ var igv = (function (igv) {
             this.reader.readFeatures(function (featureList) {
 
                     function isIndexed() {
-                        return  myself.index ||
+                        return  myself.reader.indexed ||
                             myself.config.sourceType === "ga4gh" ||
                             myself.config.sourceType === "immvar" ||
                             myself.config.sourceType === "gtex";
