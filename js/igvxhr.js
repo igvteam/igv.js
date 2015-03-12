@@ -34,7 +34,7 @@ var igvxhr = (function (igvxhr) {
 
         var request = new XMLHttpRequest();
 
-        request.open("HEAD", url, false);
+        request.open("HEAD", url, true);
 
         request.onload = function (event) {
 
