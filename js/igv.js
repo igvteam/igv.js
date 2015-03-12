@@ -85,6 +85,21 @@ var igv = (function (igv) {
             browser.userFeedback = $('<div class="igvUserFeedback">');
             navigation.append(browser.userFeedback[0]);
 
+            browser.userFeedbackAlert = $('<i class="fa fa-exclamation-triangle igvUserFeedbackAlert">');
+            browser.userFeedback.append(browser.userFeedbackAlert[0]);
+
+            browser.userFeedbackBodyCopy = $('<span>');
+            browser.userFeedback.append(browser.userFeedbackBodyCopy[0]);
+
+            browser.userFeedbackDismiss = $('<i class="fa fa-times-circle igvUserFeedbackDismiss">');
+            browser.userFeedback.append(browser.userFeedbackDismiss[0]);
+
+            browser.userFeedbackDismiss.click(function () {
+                browser.userFeedbackBodyCopy.html("");
+                browser.userFeedback.hide();
+            });
+
+            browser.userFeedback.hide();
 
             // zoom
             zoom = $('<div class="igvNavigationZoom">');
