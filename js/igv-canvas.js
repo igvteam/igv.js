@@ -23,207 +23,168 @@
  * THE SOFTWARE.
  */
 
+
+// Define singleton collection of helper functions.  The "this" paramter in these functions is a canvas 2d context.
+//
+// Example usage
+//
+//    igv.Canvas.strokeLine.call(context, 0, 0, 10, 10);
+//
+
 var igv = (function (igv) {
 
-    igv.Canvas = function (canvas) {
+    igv.Canvas = {
 
-        this.canvas = canvas;
 
-        this.ctx = canvas.getContext('2d');
+        setProperties: function (properties) {
 
-    };
-
-    /**
-     * Set styling properties.  For now this is just a pass-through to the underlying canvas context.
-     *
-     * @param properties
-     */
-    igv.Canvas.prototype.setProperties = function (properties) {
-
-        for (var key in properties) {
-            if (properties.hasOwnProperty(key)) {
-                var value = properties[key];
-                this.ctx[key] = value;
+            for (var key in properties) {
+                if (properties.hasOwnProperty(key)) {
+                    var value = properties[key];
+                    this[key] = value;
+                }
             }
-        }
-    };
+        },
 
-    igv.Canvas.strokeLine = function (x1, y1, x2, y2, properties) {
+        strokeLine: function (x1, y1, x2, y2, properties) {
 
-        x1 = Math.floor(x1) + 0.5;
-        y1 = Math.floor(y1) + 0.5;
-        x2 = Math.floor(x2) + 0.5;
-        y2 = Math.floor(y2) + 0.5;
+            x1 = Math.floor(x1) + 0.5;
+            y1 = Math.floor(y1) + 0.5;
+            x2 = Math.floor(x2) + 0.5;
+            y2 = Math.floor(y2) + 0.5;
 
-        this.save();
-        if (properties) igv.Canvas.setProperties.call(this, properties);
-
-        this.beginPath();
-        this.moveTo(x1, y1);
-        this.lineTo(x2, y2);
-        this.stroke();
-        this.restore();
-    };
-
-
-    igv.Canvas.fillRect = function (x, y, w, h, properties) {
-
-        var c;
-        x = Math.round(x);
-        y = Math.round(y);
-
-        if (properties) {
             this.save();
-            igv.Canvas.setProperties.call(this, properties);
-        }
+            if (properties) igv.Canvas.setProperties.call(this, properties);
 
-        this.fillRect(x, y, w, h);
+            this.beginPath();
+            this.moveTo(x1, y1);
+            this.lineTo(x2, y2);
+            this.stroke();
+            this.restore();
+        },
 
-        if (properties) this.restore();
-    };
+        fillRect: function (x, y, w, h, properties) {
 
+            var c;
+            x = Math.round(x);
+            y = Math.round(y);
 
-//        + (CGRect)rectWithCenter:(CGPoint)center size:(CGSize)size {
-//
-//        CGSize halfSize = CGSizeMake(size.width/2.0, size.height/2.0);
-//
-//        return CGRectMake(center.x - halfSize.width, center.y - halfSize.height, size.width, size.height);
-//    }
+            if (properties) {
+                this.save();
+                igv.Canvas.setProperties.call(this, properties);
+            }
 
-    /**
-     *
-     * @param x - array of "x" values
-     * @param y - array of "y" values
-     * @param properties
-     */
-    igv.Canvas.fillPolygon = function (x, y, properties) {
+            this.fillRect(x, y, w, h);
 
-        var i, len = x.length;
-        for (i = 0; i < len; i++) {
-            x[i] = Math.round(x[i]);
-            y[i] = Math.round(y[i]);
-        }
+            if (properties) this.restore();
+        },
 
-        this.save();
-        if (properties)   igv.Canvas.setProperties.call(this, properties);
+        fillPolygon: function (x, y, properties) {
 
-        this.beginPath();
-        this.moveTo(x[0], y[0]);
-        for (i = 1; i < len; i++) {
-            this.lineTo(x[i], y[i]);
-        }
-        this.closePath();
-        this.fill();
+            var i, len = x.length;
+            for (i = 0; i < len; i++) {
+                x[i] = Math.round(x[i]);
+                y[i] = Math.round(y[i]);
+            }
 
-        this.restore();
-    };
-
-
-    igv.Canvas.fillText = function (text, x, y, properties, transforms) {
-
-        if (properties) {
             this.save();
-            igv.Canvas.setProperties.call(this, properties);
-        }
+            if (properties)   igv.Canvas.setProperties.call(this, properties);
+
+            this.beginPath();
+            this.moveTo(x[0], y[0]);
+            for (i = 1; i < len; i++) {
+                this.lineTo(x[i], y[i]);
+            }
+            this.closePath();
+            this.fill();
+
+            this.restore();
+        },
+
+        fillText: function (text, x, y, properties, transforms) {
+
+            if (properties) {
+                this.save();
+                igv.Canvas.setProperties.call(this, properties);
+            }
 
 
-        this.save();
+            this.save();
 
-        this.translate(x, y);
-        if (transforms) {
+            this.translate(x, y);
+            if (transforms) {
 
-            for (var transform in transforms) {
-                var value = transforms[transform];
+                for (var transform in transforms) {
+                    var value = transforms[transform];
 
-                // TODO: Add error checking for robustness
-                if (transform == 'translate') {
-                    this.translate(value['x'], value['y']);
+                    // TODO: Add error checking for robustness
+                    if (transform == 'translate') {
+                        this.translate(value['x'], value['y']);
+                    }
+                    if (transform == 'rotate') {
+                        this.rotate(value['angle'] * Math.PI / 180);
+                    }
                 }
-                if (transform == 'rotate') {
-                    this.rotate(value['angle'] * Math.PI / 180);
+
+            }
+
+            this.fillText(text, 0, 0);
+            this.restore();
+
+            if (properties) this.restore();
+
+        },
+
+        strokeText: function (text, x, y, properties, transforms) {
+
+            if (properties) {
+                //this.ctx.save();
+                igv.Canvas.setProperties.call(this, properties);
+            }
+
+            this.save();
+
+            this.translate(x, y);
+            if (transforms) {
+
+                for (var transform in transforms) {
+                    var value = transforms[transform];
+
+                    // TODO: Add error checking for robustness
+                    if (transform == 'translate') {
+                        this.translate(value['x'], value['y']);
+                    }
+                    if (transform == 'rotate') {
+                        this.rotate(value['angle'] * Math.PI / 180);
+                    }
                 }
             }
 
-        }
 
-        this.fillText(text, 0, 0);
-        this.restore();
+            this.strokeText(text, 0, 0);
+            this.restore();
+            //this.ctx.strokeText(text, x, y);
 
-        if (properties) this.restore();
-
-    };
-
-
-    igv.Canvas.strokeText = function (text, x, y, properties, transforms) {
-
-        if (properties) {
-            //this.ctx.save();
-            igv.Canvas.setProperties.call(this, properties);
-        }
-
-        this.save();
-
-        this.translate(x, y);
-        if (transforms) {
-
-            for (var transform in transforms) {
-                var value = transforms[transform];
-
-                // TODO: Add error checking for robustness
-                if (transform == 'translate') {
-                    this.translate(value['x'], value['y']);
-                }
-                if (transform == 'rotate') {
-                    this.rotate(value['angle'] * Math.PI / 180);
-                }
+            if (properties) {
+                //this.ctx.restore();
             }
+        },
 
+        strokeCircle: function (x, y, radius) {
+
+            this.beginPath();
+            this.arc(x, y, radius, 0, 2 * Math.PI);
+            this.stroke();
+        },
+
+        fillCircle: function (x, y, radius) {
+
+            this.beginPath();
+            this.arc(x, y, radius, 0, 2 * Math.PI);
+            this.fill();
         }
+    }
 
-
-        this.strokeText(text, 0, 0);
-        this.restore();
-        //this.ctx.strokeText(text, x, y);
-
-
-        if (properties) {
-            //this.ctx.restore();
-        }
-
-
-    };
-
-    igv.Canvas.strokeCircle = function (x, y, radius) {
-
-        this.beginPath();
-        this.arc(x, y, radius, 0, 2 * Math.PI);
-        this.stroke();
-    };
-
-
-    igv.Canvas.fillCircle = function (x, y, radius) {
-
-        this.beginPath();
-        this.arc(x, y, radius, 0, 2 * Math.PI);
-        this.fill();
-    };
-
-
-    // HELPER FUNCTIONS
-    /**
-     * Set styling properties.  For now this is just a pass-through to the underlying canvas context.
-     *
-     * @param properties
-     */
-    igv.Canvas.setProperties = function (properties) {
-
-        for (var key in properties) {
-            if (properties.hasOwnProperty(key)) {
-                var value = properties[key];
-                this[key] = value;
-            }
-        }
-    };
 
     return igv;
 })(igv || {});

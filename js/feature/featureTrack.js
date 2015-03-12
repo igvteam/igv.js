@@ -110,7 +110,7 @@ var igv = (function (igv) {
                 gene = featureList[i];
                 if (gene.end < bpStart) continue;
                 if (gene.start > bpEnd) break;
-                track.render.call(this, gene, bpStart, bpPerPixel, ctx);
+                track.render.call(this, gene, bpStart, bpPerPixel, pixelHeight, ctx);
             }
         }
         else {
@@ -201,7 +201,16 @@ var igv = (function (igv) {
 
     };
 
-    function renderFeature(feature, bpStart, xScale, ctx) {
+    /**
+     *
+     * @param feature
+     * @param bpStart  genomic location of the left edge of the current canvas
+     * @param xScale  scale in base-pairs per pixel
+     * @param pixelHeight  pixel height of the current canvas
+     * @param ctx  the canvas 2d context
+     */
+
+    function renderFeature(feature, bpStart, xScale, pixelHeight, ctx) {
 
         var px,
             px1,
@@ -285,7 +294,15 @@ var igv = (function (igv) {
         }
     }
 
-    function renderVariant(variant, bpStart, xScale, ctx) {
+    /**
+     *
+     * @param variant
+     * @param bpStart  genomic location of the left edge of the current canvas
+     * @param xScale  scale in base-pairs per pixel
+     * @param pixelHeight  pixel height of the current canvas
+     * @param ctx  the canvas 2d context
+     */
+    function renderVariant(variant, bpStart, xScale, pixelHeight, ctx) {
 
         var px, px1, pw,
             py = 20,
