@@ -85,13 +85,13 @@ var igv = (function (igv) {
             browser.userFeedback = $('<div class="igvUserFeedback">');
             navigation.append(browser.userFeedback[0]);
 
-            browser.userFeedbackAlert = $('<i class="fa fa-exclamation-triangle igvUserFeedbackAlert">');
+            browser.userFeedbackAlert = $('<i class="fa fa-exclamation-triangle fa-lg igvUserFeedbackAlert">');
             browser.userFeedback.append(browser.userFeedbackAlert[0]);
 
-            browser.userFeedbackBodyCopy = $('<span>');
+            browser.userFeedbackBodyCopy = $('<div class="igvUserFeedbackBodyCopy">');
             browser.userFeedback.append(browser.userFeedbackBodyCopy[0]);
 
-            browser.userFeedbackDismiss = $('<i class="fa fa-times-circle igvUserFeedbackDismiss">');
+            browser.userFeedbackDismiss = $('<i class="fa fa-times-circle fa-lg igv-app-icon igvUserFeedbackDismiss">');
             browser.userFeedback.append(browser.userFeedbackDismiss[0]);
 
             browser.userFeedbackDismiss.click(function () {

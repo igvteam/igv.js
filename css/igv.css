@@ -110,10 +110,8 @@ div.ui-dialog fieldset {
 .igvUserFeedback {
 
     position: relative;
-
-    width: 50%;
-    height: 100%;
     float: left;
+    padding: 8px;
 
     font-family: 'Open Sans', sans-serif;
     font-size: small;
@@ -125,6 +123,14 @@ div.ui-dialog fieldset {
     border-width: thin;
 
     line-height: 100%;
+
+}
+
+.igvUserFeedbackBodyCopy {
+    position: relative;
+    float: left;
+    padding-left: 8px;
+    padding-right: 8px;
 }
 
 .igvUserFeedbackAlert {
@@ -132,7 +138,10 @@ div.ui-dialog fieldset {
     position: relative;
     float: left;
 
-    color: #ffe113;
+    /*color: #ffe113;*/
+    color: red;
+
+    line-height: inherit;
 
 }
 
@@ -141,9 +150,8 @@ div.ui-dialog fieldset {
     position: relative;
     float: right;
 
-    cursor: pointer;
-    color: grey;
-    background-color: white;
+    line-height: inherit;
+
 }
 
 .igvUserFeedbackDismiss:hover,
