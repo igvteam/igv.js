@@ -306,7 +306,7 @@ var igvxhr = (function (igvxhr) {
                 continuation(parseInt(contentLengthString));
             }
             else {
-                continuation(-1);
+                continuation(Math.MAX_VALUE);    // Don't know the content length
             }
 
         }
