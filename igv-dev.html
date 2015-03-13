@@ -242,6 +242,7 @@
 
         <div onclick="igv.browser.loadTrack({
                                 type: 'eqtl',
+                                sourceType: 'gtex',
                                 url: '//www.gtexportal.org/igv/assets/eqtl/Skin_Sun_Exposed_Lower_leg.portal.eqtl.bin',
                                 indexed: false,
                                 label: 'Skin Sun Exposed Lower leg'})">EQTL Skin (GTEX))
@@ -324,45 +325,7 @@
                     type: "sequence",
                     order: 9999
                 },
-                {
-                    type: 'bam',
-
-//                     deletionColor: "rgb(255, 0, 0)",
-//                      skippedColor: "rgb(0, 255, 0)",
-//                    alignmentColor: "rgba(128, 128, 128, 0.25)",
-//                    coverageColor: "rgba(128, 128, 128, 0.75)",
-
-                    url: 'http://www.broadinstitute.org/igvdata/1KG/b37/data/NA06984/alignment/NA06984.mapped.ILLUMINA.bwa.CEU.low_coverage.20120522.bam',
-
-//                    alignmentShading: "strand",
-                    alignmentShading: "none",
-
-                    sortOption:
-                    {
-//                        sort : "NUCLEOTIDE"
-//                        sort : "START"
-                        sort : "STRAND"
-                    },
-
-                    filterOption :
-                    {
-                        name : "strand",
-                        params : [ false ]
-                    },
-
-//                    filterOption :
-//                    {
-//                        name : "noop"
-//                    },
-
-//                    filterOption :
-//                    {
-//                        name : "mappingQuality",
-//                        params : [ 10, 40 ]
-//                    },
-
-                    label: 'NA06984'
-                },
+,
                 {
                     label: "Genes",
                     url: "//dn7ywbm9isq8j.cloudfront.net/annotations/hg19/genes/gencode.v18.collapsed.bed",
