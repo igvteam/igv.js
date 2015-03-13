@@ -56,9 +56,7 @@ var igv = (function (igv) {
                 chrLength,
                 locusLength,
                 chrCoveragePercentage,
-                locus,
-                start,
-                end;
+                locus;
 
             xy = igv.translateMouseCoordinates(e, myself.contentDiv);
             xPercentage = xy.x / myself.contentDiv.width();
@@ -69,22 +67,16 @@ var igv = (function (igv) {
             chrCoveragePercentage = locusLength/chrLength;
 
             if (xPercentage - (chrCoveragePercentage/2.0) < 0) {
-
-                start = 1;
-                end = chrCoveragePercentage * chrLength;
+                xPercentage = chrCoveragePercentage/2.0;
                 //return;
             }
-            else if (xPercentage + (chrCoveragePercentage/2.0) > 1.0) {
-                start = (1.0 - chrCoveragePercentage) * chrLength;
-                end = chrLength;
+
+            if (xPercentage + (chrCoveragePercentage/2.0) > 1.0) {
+                xPercentage = 1.0 - chrCoveragePercentage/2.0;
                 //return;
             }
-            else {
-                start = (xPercentage - chrCoveragePercentage/2.0) * chrLength;
-                end   = (xPercentage + chrCoveragePercentage/2.0) * chrLength;
-            }
 
-            locus = igv.browser.referenceFrame.chr + ":" + igv.numberFormatter(Math.floor(start)) + "-" + igv.numberFormatter(Math.floor(end));
+            locus = igv.browser.referenceFrame.chr + ":" + igv.numberFormatter(Math.floor((xPercentage - (chrCoveragePercentage/2.0)) * chrLength)) + "-" + igv.numberFormatter(Math.floor((xPercentage + (chrCoveragePercentage/2.0)) * chrLength));
             igv.browser.search(locus, undefined);
 
         });
