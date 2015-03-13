@@ -281,8 +281,8 @@ var igv = (function (igv) {
 
                     },
                     error: function () {
-                        myself.contentLength = -1;
-                        continuation(-1);
+                        myself.contentLength = Math.MAX_VALUE;;
+                        continuation(myself.contentLength);
                     }
 
                 });

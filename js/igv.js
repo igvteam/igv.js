@@ -194,8 +194,6 @@ var igv = (function (igv) {
         $(contentHeader).append(browser.ideoPanel.div);
         browser.ideoPanel.resize();
 
-        igv.sequenceSource = new igv.FastaSequence(options.fastaURL);
-
         if (options.trackDefaults) {
 
             if (undefined !== options.trackDefaults.bam) {
@@ -210,7 +208,7 @@ var igv = (function (igv) {
             }
         }
 
-        igv.loadGenome(options.cytobandURL, function (genome) {
+        igv.loadGenome(options.fastaURL, options.cytobandURL, function (genome) {
 
             browser.genome = genome;
             browser.addTrack(new igv.RulerTrack());
@@ -241,7 +239,7 @@ var igv = (function (igv) {
                     if (options.tracks) {
 
                         if (range < 100000) {
-                            igv.sequenceSource.getSequence(refFrame.chr, start, end, function (refSeq) {
+                            genome.sequence.getSequence(refFrame.chr, start, end, function (refSeq) {
                                 options.tracks.forEach(function (track) {
                                     browser.loadTrack(track);
                                 });
