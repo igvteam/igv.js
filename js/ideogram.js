@@ -77,7 +77,8 @@ var igv = (function (igv) {
             }
 
             locus = igv.browser.referenceFrame.chr + ":" + igv.numberFormatter(1 + Math.floor((xPercentage - (chrCoveragePercentage/2.0)) * chrLength)) + "-" + igv.numberFormatter(Math.floor((xPercentage + (chrCoveragePercentage/2.0)) * chrLength));
-            console.log("chr length " + igv.numberFormatter(chrLength) + " locus " + locus);
+
+            //console.log("chr length " + igv.numberFormatter(chrLength) + " locus " + locus);
 
             igv.browser.search(locus, undefined);
 
@@ -109,10 +110,12 @@ var igv = (function (igv) {
                 image,
                 bufferCtx,
                 chromosome,
-                ideoScale,
+                bpPerPixel,
+                width,
                 widthBP,
-                boxPX,
-                boxW,
+                x,
+                xBP,
+                bpPerPixelIdeogram,
                 genome = igv.browser.genome,
                 referenceFrame = igv.browser.referenceFrame,
                 stainColors = [];
@@ -145,17 +148,25 @@ var igv = (function (igv) {
             this.ctx.save();
 
             chromosome = igv.browser.genome.getChromosome(igv.browser.referenceFrame.chr);
-            ideoScale = this.canvas.width / chromosome.bpLength;
 
+            xBP = igv.browser.referenceFrame.start;
             widthBP = this.canvas.width * igv.browser.referenceFrame.bpPerPixel;
+
+            bpPerPixelIdeogram = chromosome.bpLength/this.canvas.width;
+
             if (widthBP < chromosome.bpLength) {
 
-                boxPX = Math.round(igv.browser.referenceFrame.start * ideoScale);
-                boxW = Math.max(1, Math.round(widthBP * ideoScale));
+                x     = Math.floor(                  xBP/bpPerPixelIdeogram );
+                width = Math.floor(Math.max(1.0, widthBP/bpPerPixelIdeogram));
+
+                x = Math.max(0, x);
+                x = Math.min(this.canvas.width - width, x);
+
+                //console.log("canvas " + this.canvas.width + " xstart " + x + " xend " + (x + width));
 
                 this.ctx.strokeStyle = "red";
                 this.ctx.lineWidth = 2;
-                this.ctx.strokeRect(boxPX, y, boxW, image.height + this.ctx.lineWidth - 1);
+                this.ctx.strokeRect(x, y, width, image.height + this.ctx.lineWidth - 1);
                 this.ctx.restore();
             }
 
@@ -163,7 +174,6 @@ var igv = (function (igv) {
         } catch (e) {
             console.log("Error painting ideogram: " + e.message);
         }
-
 
         function drawIdeogram(bufferCtx, ideogramWidth, ideogramHeight) {
 
@@ -257,7 +267,7 @@ var igv = (function (igv) {
             }
         }
 
-    }
+    };
 
     return igv;
 })
