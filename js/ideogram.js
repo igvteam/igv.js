@@ -109,12 +109,12 @@ var igv = (function (igv) {
                 image,
                 bufferCtx,
                 chromosome,
-                bpPerPixel,
+                widthPercentage,
+                xPercentage,
                 width,
                 widthBP,
                 x,
                 xBP,
-                bpPerPixelIdeogram,
                 genome = igv.browser.genome,
                 referenceFrame = igv.browser.referenceFrame,
                 stainColors = [];
@@ -148,20 +148,21 @@ var igv = (function (igv) {
 
             chromosome = igv.browser.genome.getChromosome(igv.browser.referenceFrame.chr);
 
-            xBP = igv.browser.referenceFrame.start;
-            widthBP = this.canvas.width * igv.browser.referenceFrame.bpPerPixel;
-
-            bpPerPixelIdeogram = chromosome.bpLength/this.canvas.width;
+            widthBP = Math.floor(igv.browser.trackBPWidth());
+                xBP = igv.browser.referenceFrame.start;
 
             if (widthBP < chromosome.bpLength) {
 
-                x     = Math.floor(                  xBP/bpPerPixelIdeogram );
-                width = Math.floor(Math.max(1.0, widthBP/bpPerPixelIdeogram));
+                widthPercentage = widthBP/chromosome.bpLength;
+                    xPercentage =     xBP/chromosome.bpLength;
+
+                x =     Math.floor(    xPercentage * this.canvas.width);
+                width = Math.floor(widthPercentage * this.canvas.width);
+
+                console.log("canvas end " + this.canvas.width + " xEnd " + (x + width));
 
                 x = Math.max(0, x);
                 x = Math.min(this.canvas.width - width, x);
-
-                //console.log("canvas " + this.canvas.width + " xstart " + x + " xend " + (x + width));
 
                 this.ctx.strokeStyle = "red";
                 this.ctx.lineWidth = 2;
