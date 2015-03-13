@@ -159,7 +159,7 @@ var igv = (function (igv) {
                 x =     Math.floor(    xPercentage * this.canvas.width);
                 width = Math.floor(widthPercentage * this.canvas.width);
 
-                console.log("canvas end " + this.canvas.width + " xEnd " + (x + width));
+                //console.log("canvas end " + this.canvas.width + " xEnd " + (x + width));
 
                 x = Math.max(0, x);
                 x = Math.min(this.canvas.width - width, x);

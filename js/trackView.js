@@ -471,10 +471,7 @@ var igv = (function (igv) {
             mouseMoveXY = undefined,
             left,
             rulerSweepWidth,
-            bppRealtime,
-            ppbRealtime,
-            ruleSweepWidthBP,
-            rulerWidth,
+            rulerWidth = $(trackView.contentDiv).width(),
             ppbThreshholdMet,
             dx;
 
@@ -489,7 +486,6 @@ var igv = (function (igv) {
             isMouseIn = true;
         });
 
-
         $(trackView.contentDiv).mousedown(function(e) {
 
             isMouseDown = true;
@@ -503,20 +499,18 @@ var igv = (function (igv) {
                 dx = mouseMoveXY.x - mouseDownXY.x;
 
                 rulerSweepWidth = Math.abs(dx);
+
+                //rulerSweepWidth = Math.max(rulerSweepWidth, (rulerWidth * igv.browser.pixelPerBasepairThreshold()) / igv.browser.referenceFrame.bpPerPixel);
+
+
                 trackView.rulerSweeper.css( { "width" : rulerSweepWidth + "px" } );
+
                 if (dx < 0) {
                     left = mouseDownXY.x + dx;
                     trackView.rulerSweeper.css( { "left" : left + "px" } );
                 }
 
-                ruleSweepWidthBP = igv.browser.referenceFrame.bpPerPixel * rulerSweepWidth;
-                rulerWidth = $(trackView.contentDiv).width();
-                bppRealtime = ruleSweepWidthBP / rulerWidth;
-                ppbRealtime = 1.0/bppRealtime;
-
-                //console.log("bpp-rt " + Math.floor(bppRealtime) + " ppb-rt " + Math.floor(ppbRealtime));
-
-                if (Math.floor(1.0/bppRealtime) > igv.browser.pixelPerBasepairThreshold()) {
+                if (sweepWidthThresholdUnmet(rulerSweepWidth)) {
                     ppbThreshholdMet = false;
                     trackView.rulerSweeper.css( { backgroundColor: 'rgba(64, 64, 64, 0.125)' } );
                 } else {
@@ -526,6 +520,21 @@ var igv = (function (igv) {
 
             }
 
+            function sweepWidthThresholdUnmet(sweepWidth) {
+
+                //if ( sweepWidth < (rulerWidth * igv.browser.pixelPerBasepairThreshold()) / igv.browser.referenceFrame.bpPerPixel ) {
+                //    return true;
+                //} else {
+                //    return false;
+                //}
+
+                if ( Math.floor( rulerWidth / (igv.browser.referenceFrame.bpPerPixel * sweepWidth) ) > igv.browser.pixelPerBasepairThreshold() ) {
+                    return true;
+                } else {
+                    return false;
+                }
+
+            }
         });
 
         $(document).mouseup(function (e) {
