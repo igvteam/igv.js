@@ -63,7 +63,7 @@ var igv = (function (igv) {
 
                         myself.genomicInterval = new igv.GenomicInterval(chr, bpStart, bpEnd);
 
-                        igv.sequenceSource.getSequence(myself.genomicInterval.chr, myself.genomicInterval.start, myself.genomicInterval.end,
+                        igv.browser.sequence.getSequence(myself.genomicInterval.chr, myself.genomicInterval.start, myself.genomicInterval.end,
 
                             function (sequence) {
 

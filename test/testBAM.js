@@ -1,6 +1,11 @@
 function runBAMTests() {
 
-    igv.sequenceSource = new igv.FastaSequence("//igvdata.broadinstitute.org/genomes/seq/hg19/hg19.fasta");
+    // Mock object
+    igv.browser = {
+        genome: {
+            sequence: new igv.FastaSequence("//igvdata.broadinstitute.org/genomes/seq/hg19/hg19.fasta")
+        }
+    }
 
     //asyncTest("alignments for range", function () {
     //

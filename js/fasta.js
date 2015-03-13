@@ -77,14 +77,17 @@ var igv = (function (igv) {
 
     };
 
-    igv.FastaSequence.prototype.loadIndex = function (callback) {
+    igv.FastaSequence.prototype.loadIndex = function (continuation) {
 
         var sequence = this;
+
         igv.loadData(this.indexFile, function (data) {
 
             var lines = data.splitLines();
             var len = lines.length;
             var lineNo = 0;
+
+            sequence.chromosomeNames = [];
             sequence.index = {};
             while (lineNo < len) {
 
@@ -102,12 +105,13 @@ var igv = (function (igv) {
                         size: size, position: position, basesPerLine: basesPerLine, bytesPerLine: bytesPerLine
                     };
 
+                    sequence.chromosomeNames.push(chr);
                     sequence.index[chr] = indexEntry;
                 }
             }
 
-            if (callback) {
-                callback(sequence.index);
+            if (continuation) {
+                continuation(sequence.index);
             }
         });
     };

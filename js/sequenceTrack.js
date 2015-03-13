@@ -41,7 +41,7 @@ var igv = (function (igv) {
             continuation(null);
         }
         else {
-            igv.sequenceSource.getSequence(chr, bpStart, bpEnd, continuation, task)
+            igv.browser.genome.sequence.getSequence(chr, bpStart, bpEnd, continuation, task)
         }
     };
 
