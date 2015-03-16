@@ -104,7 +104,7 @@ var igv = (function (igv) {
         if (this.background) igv.Canvas.fillRect.call(ctx, 0, 0, pixelWidth, pixelHeight, {'fillStyle': this.background});
         igv.Canvas.strokeLine.call(ctx, 0, pixelHeight - 1, pixelWidth, pixelHeight - 1, {'strokeStyle': this.divider});
 
-        if (canvas) {
+        if (ctx) {
 
             var len = featureList.length;
 
