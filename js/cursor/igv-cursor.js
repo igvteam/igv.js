@@ -315,7 +315,8 @@ var igv = (function (igv) {
 
             $.getJSON(sessionJSONPath, function (session) {
 
-                console.log("launchSession: " + JSON.stringify(browser.launchSession));
+
+                console.log("launchSession: " + JSON.stringify(session));
                 browser.loadSession(session);
 
             });
