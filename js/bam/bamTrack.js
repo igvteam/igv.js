@@ -82,7 +82,7 @@ var igv = (function (igv) {
         },
 
         firstOfPairStrand : function (bamTrack, alignment) {
-            return alignment.isFistOfPair() ? bamTrack.negStrandColor : bamTrack.posStrandColor;
+            return alignment.isFistOfPair() ? bamTrack.posStrandColor : bamTrack.negStrandColor;
         }
 
     };
