@@ -43,7 +43,8 @@ var igv = (function (igv) {
         this.negStrandColor = config.negStrandColor || "rgba(150, 150, 230, 0.75)";
         this.posStrandColor = config.posStrandColor || "rgba(230, 150, 150, 0.75)";
 
-        this.fistOfPair = "rgba(0, 150, 0, 0.75)";
+        this.firstInfPairColor = "rgba(150, 150, 230, 0.75)";
+        this.secondInPairColor = "rgba(230, 150, 150, 0.75)";
 
         this.deletionColor = config.deletionColor || "black";
 
@@ -77,12 +78,21 @@ var igv = (function (igv) {
         },
 
         strand : function (bamTrack, alignment) {
-            //return alignment.strand ? bamTrack.posStrandColor : bamTrack.negStrandColor;
-            return alignment.isNegativeStrand() ? bamTrack.negStrandColor : bamTrack.posStrandColor;
+             return alignment.isNegativeStrand() ? bamTrack.negStrandColor : bamTrack.posStrandColor;
         },
 
         firstOfPairStrand : function (bamTrack, alignment) {
-            return alignment.isFistOfPair() ? bamTrack.posStrandColor : bamTrack.negStrandColor;
+
+            if (alignment.isFistOfPair()) {
+                return bamTrack.firstInfPairColor;
+            }
+            else if (alignment.isSecondOfPair()) {
+                return bamTrack.secondInPairColor;
+            }
+            else {
+                return bamTrack.alignmentColor;
+            }
+
         }
 
     };
