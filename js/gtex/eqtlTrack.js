@@ -167,7 +167,7 @@ var igv = (function (igv) {
                 eqtl.px = px;
                 eqtl.py = py;
 
-                if (color) canvas.setProperties({fillStyle: color, strokeStyle: "black"});
+                if (color) igv.Canvas.setProperties.call(ctx, {fillStyle: color, strokeStyle: "black"});
                 igv.Canvas.fillCircle.call(ctx, px, py, radius);
                 igv.Canvas.strokeCircle.call(ctx, px, py, radius);
             }
