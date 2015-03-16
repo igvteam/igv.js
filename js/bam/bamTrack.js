@@ -55,10 +55,9 @@ var igv = (function (igv) {
         // divide the canvas into a coverage track region and an alignment track region
         this.alignmentRowYInset = 1;
 
-
-
         // alignment shading options
-        this.alignmentShading = config.alignmentShading || "none";
+        //this.alignmentShading = config.alignmentShading || "none";
+        this.alignmentShading = "none";
 
         // sort alignment rows
         this.sortOption = config.sortOption || { sort : "NUCLEOTIDE" };
@@ -76,6 +75,10 @@ var igv = (function (igv) {
         },
 
         strand : function (bamTrack, alignment) {
+            return alignment.strand ? bamTrack.posStrandColor : bamTrack.negStrandColor;
+        },
+
+        firstOfPairStrand : function (bamTrack, alignment) {
             return alignment.strand ? bamTrack.posStrandColor : bamTrack.negStrandColor;
         }
 
@@ -573,6 +576,43 @@ var igv = (function (igv) {
         return nameValues;
 
     };
+
+    igv.BAMTrack.prototype.popupMenuItems = function (popover) {
+
+        var myself = this,
+            menuItems = [],
+            lut = { "none": "None", "strand": "Read Strand", "firstOfPairStrand": "First of Pair Strand" },
+            checkMark     = '<i class="fa fa-check fa-check-shim"></i>',
+            checkMarkNone = '<i class="fa fa-check fa-check-shim fa-check-hidden"></i>',
+            trackMenuItem = '<div class=\"igv-track-menu-item\">',
+            trackMenuItemFirst = '<div class=\"igv-track-menu-item igv-track-menu-border-top\">';
+
+        //menuItems.push(igv.colorPickerMenuItem(popover, this.trackView, "Set feature color", this.color));
+
+        [ "none", "strand", "firstOfPairStrand" ].forEach(function(alignmentShading, index){
+
+            var chosen,
+                str;
+
+            chosen = (0 === index) ? trackMenuItemFirst : trackMenuItem;
+            str = (alignmentShading === myself.alignmentShading) ? chosen + checkMark + lut[ alignmentShading ] + '</div>' : chosen + checkMarkNone + lut[ alignmentShading ] + '</div>';
+
+            menuItems.push({
+                object: $(str),
+                click: function () {
+                    popover.hide();
+
+                    myself.alignmentShading = alignmentShading;
+                    myself.trackView.update();
+                }
+            });
+
+        });
+
+        return menuItems;
+
+    };
+
 
     /**
      * Optional method to compute pixel height to accomodate the list of features.  The implementation below
