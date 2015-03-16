@@ -180,7 +180,7 @@ var igv = (function (igv) {
         var i, len = browser.trackViews.length;
 
         for (i = 0; i < len; i++) {
-            if (browser.trackViews[i].track.file === url) {
+            if (browser.trackViews[i].track.url === url) {
                 return browser.trackViews[i].track;
             }
         }
