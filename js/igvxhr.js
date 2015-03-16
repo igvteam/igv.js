@@ -158,8 +158,7 @@ var igvxhr = (function (igvxhr) {
         if (range) {
             var rangeEnd = range.start + range.size - 1;
             xhr.setRequestHeader("Range", "bytes=" + range.start + "-" + rangeEnd);
-            xhr.setRequestHeader("Cache-control", "no-cache");
-            xhr.setRequestHeader("If-None-Match", Math.random().toString(36));  // For nasty safari bug https://bugs.webkit.org/show_bug.cgi?id=82672
+            //xhr.setRequestHeader("If-None-Match", Math.random().toString(36));  // For nasty safari bug https://bugs.webkit.org/show_bug.cgi?id=82672
         }
         if (contentType) {
             xhr.setRequestHeader("Content-Type", contentType);
