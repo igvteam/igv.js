@@ -119,6 +119,13 @@
     <script type="text/javascript" src="js/variant/vcfParser.js"></script>
     <script type="text/javascript" src="js/variant/variant.js"></script>
 
+    <script type="text/javascript" src="js/bigwig/bufferedReader.js"></script>
+    <script type="text/javascript" src="js/bigwig/bwBPTree.js"></script>
+    <script type="text/javascript" src="js/bigwig/bwReader.js"></script>
+    <script type="text/javascript" src="js/bigwig/bwRPTree.js"></script>
+    <script type="text/javascript" src="js/bigwig/bwSource.js"></script>
+    <script type="text/javascript" src="js/bigwig/bwTotalSummary.js"></script>
+
     <script type="text/javascript" src="js/trackCore.js"></script>
 
     <script type="text/javascript" src="js/trackMenuPopupDialog.js"></script>
@@ -291,6 +298,15 @@
                                 })">dbSNP 137 (bed tabix)
         </div>
 
+        <div onclick="igv.browser.loadTrack(
+                                {
+                                url: 'https://www.encodeproject.org/files/ENCFF002ADR/@@download/ENCFF002ADR.bigBed',
+                                label: 'ENCFF002ADR',
+                                visibilityWindow: 200000
+                                })">Encode bigbed
+        </div>
+
+
         <div onclick="igv.browser.search('chr10');">GOTO</div>
 
     </div>
@@ -329,7 +345,7 @@
                 {
                     label: "Genes",
                     url: "//dn7ywbm9isq8j.cloudfront.net/annotations/hg19/genes/gencode.v18.collapsed.bed",
-                    indexed: false,
+                    //indexed: false,
                     order: 10000,
 
                     displayMode: "EXPANDED"
