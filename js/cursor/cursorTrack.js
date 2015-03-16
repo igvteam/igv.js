@@ -48,15 +48,14 @@ var cursor = (function (cursor) {
 
     cursor.CursorTrack.prototype.jsonRepresentation = function () {
 
-        var fs = this.featureSource,
-            json;
+        var json;
 
         json = {
             label: this.label,
             color: this.color,
             order: this.order,
             height: this.height,
-            path: fs.url,
+            path: this.featureSource.config.url,
             trackFilter: this.trackFilter.jsonRepresentation()
         };
 
