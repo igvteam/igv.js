@@ -98,7 +98,16 @@ var igv = (function (igv) {
          * Change height of all tracks
          */
         heightBoxInput.onchange = function () {
-            igv.browser.setTrackHeight(heightBoxInput.value);
+            igv.browser.trackHeight = heightBoxInput.value;
+
+            igv.browser.trackViews.forEach(function (panel) {
+                if (panel.track instanceof igv.FeatureTrack ||
+                    panel.track instanceof igv.SequenceTrack ||
+                    panel.track instanceof igv.RulerTrack) {
+                    return;
+                }
+                panel.setTrackHeight(heightBoxInput.value);
+            });
         }
 
         $(trackHeightDiv).append(heightBoxInput);
