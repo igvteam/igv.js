@@ -346,6 +346,11 @@ var igv = (function (igv) {
         this.trackHeight = newHeight;
 
         this.trackViews.forEach(function (panel) {
+            if (panel.track instanceof igv.RulerTrack ||
+                panel.track instanceof igv.FeatureTrack ||
+                panel.track instanceof igv.SequenceTrack) {
+                return;
+            }
             panel.setTrackHeight(newHeight);
         });
 
