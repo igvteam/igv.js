@@ -78,16 +78,24 @@ var igv = (function (igv) {
         },
 
         strand : function (bamTrack, alignment) {
-            //return alignment.isNegativeStrand() ? bamTrack.negStrandColor : bamTrack.posStrandColor;
             return alignment.strand ? bamTrack.posStrandColor : bamTrack.negStrandColor;
         },
 
         firstOfPairStrand : function (bamTrack, alignment) {
 
-            if (alignment.isFistOfPair()) {
-                return alignment.strand ? bamTrack.posStrandColor : bamTrack.negStrandColor;
-            }
-            else {
+            if (alignment.isPaired()) {
+
+                if (alignment.isFistOfPair()) {
+                    return alignment.strand ? bamTrack.posStrandColor : bamTrack.negStrandColor;
+                }
+                else if (alignment.isSecondOfPair()) {
+                    return alignment.strand ? bamTrack.negStrandColor : bamTrack.posStrandColor;
+                }
+                else {
+                    console.log("ERROR. Paired alignments are either first or second.")
+                }
+
+            } else {
                 return bamTrack.alignmentColor;
             }
 
@@ -189,13 +197,15 @@ var igv = (function (igv) {
 
     };
 
-    igv.BAMTrack.prototype.sortAlignmentRows = function (genomicLocation, sortOption, callback) {
+    igv.BAMTrack.prototype.sortAlignmentRows = function (genomicLocation, sortOption) {
 
         var myself = this;
+
         this.featureSource.getFeatures(igv.browser.referenceFrame.chr, genomicLocation, (1 + genomicLocation), function (genomicInterval) {
 
             doSortAlignmentRows(genomicLocation, genomicInterval, sortOption);
-            callback();
+            myself.trackView.update();
+            $(myself.trackView.viewportDiv).scrollTop(0);
         });
     };
 
@@ -224,12 +234,7 @@ var igv = (function (igv) {
     // Alt - Click to Sort alignment rows
     igv.BAMTrack.prototype.altClick = function (genomicLocation, event) {
 
-        var myself = this;
-
-        this.sortAlignmentRows(genomicLocation, this.sortOption, function () {
-            myself.trackView.update();
-            $(myself.trackView.viewportDiv).scrollTop(0);
-        });
+        this.sortAlignmentRows(genomicLocation, this.sortOption);
 
     };
 
