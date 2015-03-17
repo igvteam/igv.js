@@ -149,7 +149,8 @@ var igv = (function (igv) {
                                 sourceType: 'gtex',
                                 url: record.url,
                                 label: record.label,
-                                disableButtons: true
+                                disableButtons: true,
+                                height: browser.trackHeight
                             }
                         );
                     }
