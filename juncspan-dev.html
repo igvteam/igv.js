@@ -1,0 +1,366 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+    <meta name="description" content="">
+    <meta name="author" content="">
+    <link rel="shortcut icon" href=img/favicon.ico>
+    <title>IGV - Integrative Genomics Viewer</title>
+
+    <!-- jQuery UI CSS -->
+    <!--<link rel="stylesheet" type="text/css" href="//ajax.googleapis.com/ajax/libs/jqueryui/1.11.2/themes/smoothness/jquery-ui.css"/>-->
+    <link rel="stylesheet" type="text/css"
+          href="//ajax.googleapis.com/ajax/libs/jqueryui/1.11.2/themes/redmond/jquery-ui.css"/>
+
+    <!-- Color Picker CSS -->
+    <link rel="stylesheet" type="text/css" href="vendor/colorpickers/vanderlee-github-io/jquery.colorpicker.css"/>
+
+    <!-- Google fonts -->
+    <link rel="stylesheet" type="text/css" href='//fonts.googleapis.com/css?family=PT+Sans:400,700'>
+    <link rel="stylesheet" type="text/css" href='//fonts.googleapis.com/css?family=Open+Sans'>
+
+    <!-- Font Awesome CSS -->
+    <link rel="stylesheet" type="text/css" href="//maxcdn.bootstrapcdn.com/font-awesome/4.2.0/css/font-awesome.min.css">
+
+    <!-- IGV CSS -->
+    <link rel="stylesheet" type="text/css" href="css/igv.css">
+
+    <!-- jQuery JS -->
+    <script type="text/javascript" src="//ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
+
+    <!-- jQuery UI JS -->
+    <script type="text/javascript" src="//ajax.googleapis.com/ajax/libs/jqueryui/1.11.2/jquery-ui.min.js"></script>
+
+    <!-- Color Picker JS -->
+    <script type="text/javascript" src="vendor/colorpickers/vanderlee-github-io/jquery.colorpicker.js"></script>
+    <script type="text/javascript"
+            src="vendor/colorpickers/vanderlee-github-io/i18n/jquery.ui.colorpicker-nl.js"></script>
+    <script type="text/javascript"
+            src="vendor/colorpickers/vanderlee-github-io/swatches/jquery.ui.colorpicker-pantone.js"></script>
+    <script type="text/javascript"
+            src="vendor/colorpickers/vanderlee-github-io/parts/jquery.ui.colorpicker-rgbslider.js"></script>
+    <script type="text/javascript"
+            src="vendor/colorpickers/vanderlee-github-io/parts/jquery.ui.colorpicker-memory.js"></script>
+    <script type="text/javascript"
+            src="vendor/colorpickers/vanderlee-github-io/parsers/jquery.ui.colorpicker-cmyk-parser.js"></script>
+    <script type="text/javascript"
+            src="vendor/colorpickers/vanderlee-github-io/parsers/jquery.ui.colorpicker-cmyk-percentage-parser.js"></script>
+
+    <!-- Vendor JS -->
+    <script type="text/javascript" src="vendor/inflate.js"></script>
+    <script type="text/javascript" src="vendor/zlib_and_gzip.min.js"></script>
+
+    <!-- IGV JS -->
+    <script type="text/javascript" src="js/igv.js"></script>
+    <script type="text/javascript" src="js/popover.js"></script>
+    <script type="text/javascript" src="js/browser.js"></script>
+    <script type="text/javascript" src="js/ideogram.js"></script>
+    <script type="text/javascript" src="js/referenceFrame.js"></script>
+    <script type="text/javascript" src="js/igv-canvas.js"></script>
+    <script type="text/javascript" src="js/genome.js"></script>
+    <script type="text/javascript" src="js/trackView.js"></script>
+
+    <script type="text/javascript" src="js/rulerTrack.js"></script>
+
+    <script type="text/javascript" src="js/feature/featureTrack.js"></script>
+    <script type="text/javascript" src="js/igv-color.js"></script>
+    <script type="text/javascript" src="js/igv-utils.js"></script>
+    <script type="text/javascript" src="js/parseUtils.js"></script>
+    <script type="text/javascript" src="js/fasta.js"></script>
+    <script type="text/javascript" src="js/sequenceTrack.js"></script>
+    <script type="text/javascript" src="js/wigTrack.js"></script>
+    <script type="text/javascript" src="js/dataloader.js"></script>
+    <script type="text/javascript" src="js/igv-exts.js"></script>
+    <script type="text/javascript" src="js/igvxhr.js"></script>
+    <script type="text/javascript" src="js/binary.js"></script>
+
+    <script type="text/javascript" src="js/gtex/eqtlTrack.js"></script>
+    <script type="text/javascript" src="js/gtex/gtexReader.js"></script>
+    <script type="text/javascript" src="js/gtex/gtex.js"></script>
+    <script type="text/javascript" src="js/gtex/immvarReader.js"></script>
+
+    <script type="text/javascript" src="js/bam/coverageMap.js"></script>
+    <script type="text/javascript" src="js/bam/bamReader.js"></script>
+    <script type="text/javascript" src="js/bam/bgzf.js"></script>
+    <script type="text/javascript" src="js/bam/bamSource.js"></script>
+    <script type="text/javascript" src="js/bam/bamTrack.js"></script>
+    <script type="text/javascript" src="js/bam/bamAlignment.js"></script>
+    <script type="text/javascript" src="js/bam/bamAlignmentRow.js"></script>
+    <script type="text/javascript" src="js/bam/bamIndex.js"></script>
+
+
+    <script type="text/javascript" src="js/ga4gh/ga4ghReads.js"></script>
+    <script type="text/javascript" src="js/ga4gh/ga4ghAlignmentReader.js"></script>
+    <script type="text/javascript" src="js/ga4gh/ga4ghVariantReader.js"></script>
+    <script type="text/javascript" src="js/ga4gh/ga4ghHelper.js"></script>
+
+    <script type="text/javascript" src="js/intervalTree.js"></script>
+    <script type="text/javascript" src="js/igv-constants.js"></script>
+
+    <script type="text/javascript" src="js/feature/featureCache.js"></script>
+    <script type="text/javascript" src="js/feature/featureSource.js"></script>
+    <script type="text/javascript" src="js/feature/bedParser.js"></script>
+    <script type="text/javascript" src="js/feature/tribble.js"></script>
+    <script type="text/javascript" src="js/feature/featureFileReader.js"></script>
+
+    <script type="text/javascript" src="js/encode/encode.js"></script>
+    <script type="text/javascript" src="js/cursor/cursorTrack.js"></script>
+    <script type="text/javascript" src="js/cursor/cursorModel.js"></script>
+    <script type="text/javascript" src="js/cursor/cursor-ideogram.js"></script>
+
+    <script type="text/javascript" src="js/karyo/karyo.js"></script>
+    <script type="text/javascript" src="js/gwas/t2dVariantSource.js"></script>
+    <script type="text/javascript" src="js/gwas/t2dVariantTrack.js"></script>
+
+    <script type="text/javascript" src="js/feature/segParser.js"></script>
+    <script type="text/javascript" src="js/feature/segTrack.js"></script>
+    <script type="text/javascript" src="js/variant/vcfParser.js"></script>
+    <script type="text/javascript" src="js/variant/variant.js"></script>
+
+    <script type="text/javascript" src="js/trackCore.js"></script>
+
+    <script type="text/javascript" src="js/trackMenuPopupDialog.js"></script>
+
+    <style type="text/css">
+
+        #trackList {
+
+            font-family: 'PT Sans', sans-serif;
+            font-size: small;
+            font-weight: 400;
+        }
+
+        div#trackList > div, div#trackList > h3 {
+
+            color: #444;
+            margin-left: 48px;
+            margin-top: 4px;
+            margin-bottom: 4px;
+
+            padding-left: 32px;
+
+            width: 300px;
+        }
+
+        div#trackList > div:hover,
+        div#trackList > div:focus,
+        div#trackList > div:active {
+            cursor: pointer;
+            color: white;
+            background-color: rgba(49, 106, 246, 1);
+        }
+
+    </style>
+
+</head>
+
+<body>
+
+
+
+<div>
+<h2>IGV for fusions in sample: BT474</h2>
+    <select id='fusion_list'>
+        <option>-- fusion --</option>
+        <option value='ACACA--STAC2'>ACACA--STAC2 FusionInspector[68,87]; SoapFuse[49,64]; StarFusion[56,41]; TophatFusion[65,50]; TrinityFusion[.,.]</option>
+        <option value='ACSF2--MED1'>ACSF2--MED1 </option>
+        <option value='ACTN4--ACTN1'>ACTN4--ACTN1 TrinityFusion[.,.]</option>
+        <option value='AHCTF1--NAAA'>AHCTF1--NAAA FusionInspector[2,1]; SoapFuse[34,15]; StarFusion[1,1]</option>
+        <option value='APLP2--ZDHHC16'>APLP2--ZDHHC16 StarFusion[1,1]</option>
+        <option value='ATP5B--XBP1'>ATP5B--XBP1 TophatFusion[2,0]</option>
+        <option value='ATXN3--ANP32B'>ATXN3--ANP32B StarFusion[1,1]</option>
+        <option value='BCAS1--ZNF44'>BCAS1--ZNF44 SoapFuse[2,4]</option>
+        <option value='BRD4--RFX1'>BRD4--RFX1 FusionInspector[0,5]; FusionInspector[5,6]; SoapFuse[10,1]; SoapFuse[6,2]; StarFusion[8,2]</option>
+        <option value='CARS2--MTRNR2L12'>CARS2--MTRNR2L12 TophatFusion[1,1]</option>
+        <option value='CPNE1--PI3'>CPNE1--PI3 FusionInspector[3,2]; SoapFuse[4,2]</option>
+        <option value='CTSB--RPS3'>CTSB--RPS3 StarFusion[1,1]</option>
+        <option value='DHFR--PCBD2'>DHFR--PCBD2 TophatFusion[3,0]; TophatFusion[5,17]</option>
+        <option value='DHRS2--DHFR'>DHRS2--DHFR TophatFusion[1,1]</option>
+        <option value='DIDO1--TTI1'>DIDO1--TTI1 FusionInspector[4,1]; FusionInspector[7,5]; SoapFuse[4,2]; StarFusion[10,2]; TophatFusion[1,7]</option>
+        <option value='DLG2--HFM1'>DLG2--HFM1 TophatFusion[2,6]</option>
+        <option value='DYNLL1--FAM129B'>DYNLL1--FAM129B TophatFusion[2,0]</option>
+        <option value='EIF4G2--HSP90AB1'>EIF4G2--HSP90AB1 TophatFusion[2,0]</option>
+        <option value='ERBB2--PES1'>ERBB2--PES1 StarFusion[1,1]</option>
+        <option value='ERBB2--RPS9'>ERBB2--RPS9 TophatFusion[2,0]</option>
+        <option value='FADS2--FADS3'>FADS2--FADS3 StarFusion[0,2]</option>
+        <option value='FADS2--HNRNPAB'>FADS2--HNRNPAB TophatFusion[2,0]</option>
+        <option value='FASN--ALDOA'>FASN--ALDOA TophatFusion[2,0]</option>
+        <option value='FBXL20--WBSCR17'>FBXL20--WBSCR17 TophatFusion[2,5]</option>
+        <option value='FITM2--UQCC1'>FITM2--UQCC1 StarFusion[2,1]</option>
+        <option value='GABRB3--RYR3'>GABRB3--RYR3 TophatFusion[2,1]</option>
+        <option value='GLB1--CMTM7'>GLB1--CMTM7 FusionInspector[5,4]; SoapFuse[5,2]; StarFusion[4,2]; TophatFusion[2,5]</option>
+        <option value='HNRNPL--FXYD3'>HNRNPL--FXYD3 StarFusion[1,1]</option>
+        <option value='HSPA8--RALB'>HSPA8--RALB StarFusion[1,1]</option>
+        <option value='IRX5--IRX2'>IRX5--IRX2 TrinityFusion[.,.]</option>
+        <option value='KDM4B--KDM4A'>KDM4B--KDM4A TrinityFusion[.,.]</option>
+        <option value='KRT19--ACTN4'>KRT19--ACTN4 TophatFusion[2,0]</option>
+        <option value='LAMP1--MCF2L'>LAMP1--MCF2L FusionInspector[5,3]; SoapFuse[5,2]; StarFusion[3,1]</option>
+        <option value='MAGED1--MAGED2'>MAGED1--MAGED2 StarFusion[1,1]</option>
+        <option value='MED1--ACSF2'>MED1--ACSF2 FusionInspector[6,7]; FusionInspector[9,15]; SoapFuse[10,8]; StarFusion[10,7]; TophatFusion[11,11]</option>
+        <option value='MED1--STXBP4'>MED1--STXBP4 FusionInspector[14,20]; SoapFuse[14,15]; StarFusion[15,4]; TophatFusion[13,14]</option>
+        <option value='MED13--BCAS3'>MED13--BCAS3 FusionInspector[2,3]; FusionInspector[7,3]; SoapFuse[2,3]; SoapFuse[7,2]; StarFusion[13,2]; TrinityFusion[.,.]</option>
+        <option value='MTRNR2L8--HSP90AB1'>MTRNR2L8--HSP90AB1 TophatFusion[1,4]</option>
+        <option value='MTRNR2L8--RPL19'>MTRNR2L8--RPL19 TophatFusion[2,0]; TophatFusion[2,0]</option>
+        <option value='MUC6--ERBB2'>MUC6--ERBB2 TophatFusion[2,0]</option>
+        <option value='MUC6--NCL'>MUC6--NCL TophatFusion[2,0]</option>
+        <option value='MUC6--PTGES2'>MUC6--PTGES2 TophatFusion[2,0]</option>
+        <option value='NAA50--KIAA2018'>NAA50--KIAA2018 SoapFuse[1,1]</option>
+        <option value='NCL--PTMA'>NCL--PTMA FusionInspector[1,239]; FusionInspector[1,27]; FusionInspector[62,3]; SoapFuse[4,2]</option>
+        <option value='NCOA2--ZNF704'>NCOA2--ZNF704 FusionInspector[5,1]; SoapFuse[4,2]</option>
+        <option value='NUMA1--FCHSD2'>NUMA1--FCHSD2 TophatFusion[3,1]</option>
+        <option value='PCBD2--CD63'>PCBD2--CD63 TophatFusion[1,3]</option>
+        <option value='PCBD2--HFM1'>PCBD2--HFM1 TophatFusion[1,16]</option>
+        <option value='PIP4K2B--RAD51C'>PIP4K2B--RAD51C FusionInspector[1,1]; FusionInspector[1,2]; FusionInspector[1,3]; FusionInspector[3,2]; SoapFuse[1,1]; SoapFuse[2,3]; SoapFuse[3,2]; SoapFuse[4,1]; StarFusion[4,1]; TophatFusion[1,1]; TophatFusion[1,2]; TophatFusion[1,2]</option>
+        <option value='PKM--TAF15'>PKM--TAF15 TophatFusion[2,0]</option>
+        <option value='PPDPF--MTRNR2L8'>PPDPF--MTRNR2L8 TophatFusion[1,3]</option>
+        <option value='PRDX5--DHFR'>PRDX5--DHFR TophatFusion[1,6]</option>
+        <option value='PREX1--YWHAZ'>PREX1--YWHAZ TophatFusion[2,0]</option>
+        <option value='PSMD3--ACTG1'>PSMD3--ACTG1 </option>
+        <option value='PTPRF--PTPRS'>PTPRF--PTPRS TrinityFusion[.,.]</option>
+        <option value='PUM1--PUM2'>PUM1--PUM2 TrinityFusion[.,.]</option>
+        <option value='RAB22A--MYO9B'>RAB22A--MYO9B FusionInspector[10,18]; SoapFuse[9,17]; StarFusion[13,6]; TophatFusion[8,7]; TrinityFusion[.,.]; TrinityFusion[.,.]</option>
+        <option value='RAB35--DHFR'>RAB35--DHFR TophatFusion[1,1]</option>
+        <option value='RBM12--PI3'>RBM12--PI3 SoapFuse[4,2]</option>
+        <option value='RBM12--WFDC12'>RBM12--WFDC12 TophatFusion[1,2]</option>
+        <option value='RP11-529J17.3--HERC2'>RP11-529J17.3--HERC2 </option>
+        <option value='RPL19--ERBB2'>RPL19--ERBB2 </option>
+        <option value='RPS16--CDK11B'>RPS16--CDK11B StarFusion[1,1]</option>
+        <option value='RPS6KB1--SNF8'>RPS6KB1--SNF8 FusionInspector[40,75]; FusionInspector[49,1]; SoapFuse[38,43]; SoapFuse[45,1]; StarFusion[38,26]; TophatFusion[1,43]; TophatFusion[54,43]; TrinityFusion[.,.]</option>
+        <option value='SCNN1A--PTK7'>SCNN1A--PTK7 StarFusion[1,1]</option>
+        <option value='SKA2--MYO19'>SKA2--MYO19 FusionInspector[3,12]; FusionInspector[4,8]; SoapFuse[3,5]; SoapFuse[4,8]; TophatFusion[5,5]; TophatFusion[5,5]</option>
+        <option value='SPATA5--PSPHP1'>SPATA5--PSPHP1 SoapFuse[3,6]</option>
+        <option value='SRSF12--SRSF10'>SRSF12--SRSF10 StarFusion[0,3]</option>
+        <option value='STARD3--DOK5'>STARD3--DOK5 FusionInspector[8,7]; SoapFuse[8,6]; StarFusion[8,3]; TophatFusion[6,6]</option>
+        <option value='STX16--RAE1'>STX16--RAE1 FusionInspector[20,4]; FusionInspector[21,11]; FusionInspector[24,3]; FusionInspector[26,1]; FusionInspector[29,2]; SoapFuse[23,5]; SoapFuse[27,1]; SoapFuse[32,1]; StarFusion[10,2]; TophatFusion[6,27]</option>
+        <option value='STX16-NPEPL1--RAE1'>STX16-NPEPL1--RAE1 FusionInspector[19,2]; FusionInspector[19,2]; FusionInspector[21,1]; SoapFuse[13,5]</option>
+        <option value='STX7--STX12'>STX7--STX12 TrinityFusion[.,.]</option>
+        <option value='TAGLN2--RPL19'>TAGLN2--RPL19 TophatFusion[2,0]</option>
+        <option value='TAOK3--TAOK1'>TAOK3--TAOK1 TrinityFusion[.,.]</option>
+        <option value='THRA--SKAP1'>THRA--SKAP1 TophatFusion[2,63]; TophatFusion[25,16]; TophatFusion[84,63]</option>
+        <option value='TIMM17B--P4HB'>TIMM17B--P4HB StarFusion[1,1]</option>
+        <option value='TNS3--TENC1'>TNS3--TENC1 TrinityFusion[.,.]</option>
+        <option value='TOB1--SYNRG'>TOB1--SYNRG FusionInspector[29,72]; SoapFuse[32,44]; StarFusion[45,14]; TophatFusion[27,24]</option>
+        <option value='TP53RK--SLC13A3'>TP53RK--SLC13A3 SoapFuse[3,2]; SoapFuse[4,2]</option>
+        <option value='TPD52L2--DNAJC5'>TPD52L2--DNAJC5 FusionInspector[0,4]; FusionInspector[8,12]; SoapFuse[10,9]</option>
+        <option value='TRIM37--MYO19'>TRIM37--MYO19 FusionInspector[6,3]; FusionInspector[7,1]; StarFusion[3,2]; TophatFusion[2,8]</option>
+        <option value='TRPC4AP--MRPL45'>TRPC4AP--MRPL45 FusionInspector[3,7]; FusionInspector[5,5]; SoapFuse[2,2]; SoapFuse[5,2]; StarFusion[7,3]</option>
+        <option value='TSPO--OAZ1'>TSPO--OAZ1 TophatFusion[2,0]</option>
+        <option value='UBE2D2--NOSIP'>UBE2D2--NOSIP StarFusion[1,1]</option>
+        <option value='UNC119B--UNC119'>UNC119B--UNC119 TrinityFusion[.,.]</option>
+        <option value='USF2--DHFR'>USF2--DHFR TophatFusion[2,0]</option>
+        <option value='USP32--MED1'>USP32--MED1 FusionInspector[6,4]; SoapFuse[3,3]</option>
+        <option value='VAMP8--VAMP5'>VAMP8--VAMP5 FusionInspector[3,2]; SoapFuse[5,4]; SoapFuse[6,4]</option>
+        <option value='VAPB--IKZF3'>VAPB--IKZF3 FusionInspector[35,31]; FusionInspector[43,3]; FusionInspector[9,8]; SoapFuse[39,23]; SoapFuse[45,3]; SoapFuse[9,4]; StarFusion[46,16]; TophatFusion[19,28]; TophatFusion[3,6]; TophatFusion[4,9]</option>
+        <option value='VAX2--ATP6V1B1'>VAX2--ATP6V1B1 SoapFuse[3,1]</option>
+        <option value='YBX1--MALAT1'>YBX1--MALAT1 TophatFusion[2,0]</option>
+        <option value='YBX3--HSPA1A'>YBX3--HSPA1A TophatFusion[2,0]</option>
+        <option value='YBX3--HSPA1B'>YBX3--HSPA1B TophatFusion[2,0]</option>
+        <option value='YWHAB--YWHAZ'>YWHAB--YWHAZ StarFusion[1,1]</option>
+        <option value='ZMYND8--CEP250'>ZMYND8--CEP250 FusionInspector[16,6]; FusionInspector[49,22]; SoapFuse[2,2]; SoapFuse[40,19]; StarFusion[45,2]; TophatFusion[10,34]; TrinityFusion[.,.]; TrinityFusion[.,.]</option>
+    </select>
+
+    </div>
+
+    <script>
+        document.getElementById("fusion_list").onchange = function() {
+            var fusion = this.value;
+            igv.browser.search(fusion);
+        }
+    </script>
+
+
+
+    <div id="fusion_descr"></div>
+
+    <div id="myDiv" style="padding-top: 50px;padding-bottom: 20px;"></div>
+
+
+<div id="myDiv" style="padding-top: 50px;padding-bottom: 20px; height: auto">
+
+
+</div>
+
+
+<script type="text/javascript">
+
+    $(document).ready(function () {
+
+        var div,
+                options,
+                browser;
+
+        div = $("#myDiv")[0];
+
+        options = {
+            showKaryo: false,
+            showNavigation: true,
+            fastaURL: "//caique.broadinstitute.org/FusionWeb/BREAST_CANCER/BT474/FUSION_INSPECTOR/finspector.fa",
+            cytobandURL: "//caique.broadinstitute.org/FusionWeb/BREAST_CANCER/BT474/FUSION_INSPECTOR/cytoBand.txt",
+            tracks: [
+                {
+                    type: "sequence"
+
+                },
+
+                {
+                    label: "ref_annot",
+                    url: "//caique.broadinstitute.org/FusionWeb/BREAST_CANCER/BT474/FUSION_INSPECTOR/finspector.bed.sorted.bed.gz",
+                    displayMode: "SQUISHED",
+                    indexed: false
+
+                },
+
+                {
+                    label: "Trinity_fusion",
+                    url: "//caique.broadinstitute.org/FusionWeb/BREAST_CANCER/BT474/FUSION_INSPECTOR/finspector.gmap_trinity_GG.fusions.gff3.bed.sorted.bed.gz",
+                    displayMode: "EXPANDED",
+                    color: "green",
+                    indexed: false
+
+                },
+
+
+                {
+                    url: "//caique.broadinstitute.org/FusionWeb/BREAST_CANCER/BT474/FUSION_INSPECTOR/finspector.fusion_preds.coalesced.summary.junction_reads.bam.bed.sorted.bed.gz",
+                    label: "FInspector_junction_reads",
+                    displayMode: "SQUISHED",
+                    maxHeight: 20,
+                    color: "cyan",
+                    indexed: false
+
+                },
+
+                {
+                    url: "//caique.broadinstitute.org/FusionWeb/BREAST_CANCER/BT474/FUSION_INSPECTOR/finspector.fusion_preds.coalesced.summary.spanning_reads.bam.bed.sorted.bed.gz",
+                    label: "FInspector_spanning_reads",
+                    displayMode: "SQUISHED",
+                    maxHeight: 20,
+                    color: "purple",
+                    indexed: false
+                },
+
+                {
+                    type: "FusionJuncSpan",
+                    url: "//caique.broadinstitute.org/FusionWeb/BREAST_CANCER/BT474/FUSION_INSPECTOR/finspector.fusion_preds.coalesced.summary.JuncSpan",
+                    label: "FusionEvidence",
+                    displayMode: "SQUISHED",
+                    indexed: false
+
+                }
+
+
+            ]
+        };
+
+
+        browser = igv.createBrowser(div, options);
+    });
+
+
+</script>
+
+</body>
+
+</html>
