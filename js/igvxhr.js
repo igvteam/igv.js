@@ -153,6 +153,13 @@ var igvxhr = (function (igvxhr) {
 
         if (task) task.xhrRequest = xhr;
 
+        if(range) {
+            // Add random seed. For nasty safari bug https://bugs.webkit.org/show_bug.cgi?id=82672
+            // TODO -- add some "isSafari" test?
+            url += url.contains("?") ? "&" : "?";
+            url += "someRandomSeed=" + Math.random().toString(36);
+        }
+
         xhr.open(method, url);
 
         if (range) {
