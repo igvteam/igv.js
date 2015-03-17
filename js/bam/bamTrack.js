@@ -85,10 +85,7 @@ var igv = (function (igv) {
         firstOfPairStrand : function (bamTrack, alignment) {
 
             if (alignment.isFistOfPair()) {
-                return bamTrack.firstInfPairColor;
-            }
-            else if (alignment.isSecondOfPair()) {
-                return bamTrack.secondInPairColor;
+                return alignment.strand ? bamTrack.posStrandColor : bamTrack.negStrandColor;
             }
             else {
                 return bamTrack.alignmentColor;
