@@ -211,17 +211,11 @@
                                 <!--})">Random Random -1 to 0-->
         <!--</div>-->
 
+        <!--There is a bug with cross origin foo -->
         <div onclick="igv.browser.loadTrack({
                                 type: 'bam',
-//                                url: 'http://www.broadinstitute.org/igvdata/1KG/b37/data/NA06984/alignment/NA06984.mapped.ILLUMINA.bwa.CEU.low_coverage.20120522.bam',
-                                url: 'http://www.etutitsnidaorb.org/igvdata/1KG/b37/data/NA06984/alignment/NA06984.mapped.ILLUMINA.bwa.CEU.low_coverage.20120522.bam',
-                                label: 'Unreachable BAM URL Test'})">Unreachable BAM URL Test
-        </div>
-
-        <div onclick="igv.browser.loadTrack({
-                                type: 'bam',
-                                url: 'http://www.broadinstitute.org/igvdata/1KG/b37/data/NA06984/alignment/NA06984.mapped.ILLUMINA.bwa.CEU.low_coverage.20120522.bam',
-                                label: 'NA06984'})">NA06984 (BAM - Broad Server)
+                                url: 'http://hgdownload.cse.ucsc.edu/goldenPath/hg19/encodeDCC/wgEncodeOpenChromFaire/wgEncodeOpenChromFaireMrta2041AlnRep1.bam',
+                                label: 'MRT_A204 FaireSeq Alignments rep 1'})">MRT_A204 FaireSeq Alignments rep 1 (BAM)
         </div>
 
         <div onclick="igv.browser.loadTrack({
@@ -230,15 +224,6 @@
                                 url: 'https://www.googleapis.com/genomics/v1beta2',
                                 readGroupSetIds: 'CMvnhpKTFhCjz9_25e_lCw',
                                 label: 'Ga4gh'})">GA4Gh Alignments (Global Alliance, Google server) (BAM)
-        </div>
-
-        <div onclick="igv.browser.loadTrack({
-                                sourceType: 'ga4gh',
-                                type: 'vcf',
-                                url: 'https://www.googleapis.com/genomics/v1beta2',
-                                variantSetId: '10473108253681171589',
-                                visibilityWindow: 100000,
-                                label: 'Ga4gh'})">GA4Gh Variants (Global Alliance, Google server)
         </div>
 
         <div onclick="igv.browser.loadTrack({
