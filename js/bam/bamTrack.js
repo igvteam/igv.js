@@ -78,7 +78,8 @@ var igv = (function (igv) {
         },
 
         strand : function (bamTrack, alignment) {
-             return alignment.isNegativeStrand() ? bamTrack.negStrandColor : bamTrack.posStrandColor;
+            //return alignment.isNegativeStrand() ? bamTrack.negStrandColor : bamTrack.posStrandColor;
+            return alignment.strand ? bamTrack.posStrandColor : bamTrack.negStrandColor;
         },
 
         firstOfPairStrand : function (bamTrack, alignment) {
