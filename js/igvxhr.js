@@ -149,11 +149,14 @@ var igvxhr = (function (igvxhr) {
             contentType = options.contentType,
             mimeType = options.mimeType,
             headers = options.headers,
+            isSafari = navigator.vendor.indexOf("Apple")==0 && /\sSafari\//.test(navigator.userAgent),
             header_keys, key, value, i;
 
         if (task) task.xhrRequest = xhr;
 
-        if(range) {
+        if(range && isSafari) {
+
+            console.log(isSafari);
             // Add random seed. For nasty safari bug https://bugs.webkit.org/show_bug.cgi?id=82672
             // TODO -- add some "isSafari" test?
             url += url.contains("?") ? "&" : "?";
@@ -165,7 +168,6 @@ var igvxhr = (function (igvxhr) {
         if (range) {
             var rangeEnd = range.start + range.size - 1;
             xhr.setRequestHeader("Range", "bytes=" + range.start + "-" + rangeEnd);
-            //xhr.setRequestHeader("If-None-Match", Math.random().toString(36));  // For nasty safari bug https://bugs.webkit.org/show_bug.cgi?id=82672
         }
         if (contentType) {
             xhr.setRequestHeader("Content-Type", contentType);
