@@ -500,9 +500,6 @@ var igv = (function (igv) {
 
                 rulerSweepWidth = Math.abs(dx);
 
-                //rulerSweepWidth = Math.max(rulerSweepWidth, (rulerWidth * igv.browser.pixelPerBasepairThreshold()) / igv.browser.referenceFrame.bpPerPixel);
-
-
                 trackView.rulerSweeper.css( { "width" : rulerSweepWidth + "px" } );
 
                 if (dx < 0) {
@@ -510,14 +507,9 @@ var igv = (function (igv) {
                     trackView.rulerSweeper.css( { "left" : left + "px" } );
                 }
 
-                if (sweepWidthThresholdUnmet(rulerSweepWidth)) {
-                    ppbThreshholdMet = false;
-                    trackView.rulerSweeper.css( { backgroundColor: 'rgba(64, 64, 64, 0.125)' } );
-                } else {
-                    ppbThreshholdMet = true;
-                    trackView.rulerSweeper.css( { backgroundColor: 'rgba(68, 134, 247, 0.75)' } );
-                }
+                ppbThreshholdMet = !sweepWidthThresholdUnmet(rulerSweepWidth);
 
+                trackView.rulerSweeper.css( { backgroundColor: 'rgba(68, 134, 247, 0.75)' } );
             }
 
             function sweepWidthThresholdUnmet(sweepWidth) {
