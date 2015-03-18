@@ -95,7 +95,8 @@ var igv = (function (igv) {
 
         function readLinear(parser) {
 
-            var chr = parser.getString();
+            var chr = parser.getString(),
+                blockMax = 0;
 
             // Translate to canonical name
             if(genome) chr = genome.getChromosomeName(chr);
@@ -120,6 +121,8 @@ var igv = (function (igv) {
                 var size = nextPos - pos;
                 blocks.push({min:pos, max:nextPos}); //        {position: pos, size: size});
                 pos = nextPos;
+
+                if(nextPos > blockMax) blockMax = nextPos;
             }
 
             return  {chr: chr, blocks: blocks};
