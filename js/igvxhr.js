@@ -166,7 +166,7 @@ var igvxhr = (function (igvxhr) {
         xhr.open(method, url);
 
         if (range) {
-            var rangeEnd = range.start + range.size - 1;
+            var rangeEnd = range.size ? range.start + range.size - 1 : "";
             xhr.setRequestHeader("Range", "bytes=" + range.start + "-" + rangeEnd);
         }
         if (contentType) {
@@ -203,14 +203,25 @@ var igvxhr = (function (igvxhr) {
 
             if (isCrossDomain(url) && url) {
                 // Try the proxy, if it exists.  Presumably this is a php file
-                if (igv.browser.crossDomainProxy && url != igv.browser.crossDomainProxy) {
+                if (igv.browser.crossDomainProxy && url != igv.browser.crossDomainProxy && ! options.crossDomainRetried) {
 
                     options.sendData = "url=" + url;
+                    options.crossDomainRetried = true;
 
                     igvxhr.load(igv.browser.crossDomainProxy, options);
                     return;
                 }
             }
+
+            if(xhr.status === 416 && options.range && !options.rangeRetried) {
+                // Unsatisfied range error, presumably because we tried to read off the end.  Try again leaving the
+                // end off
+                options.range.size = undefined;
+                options.rangeRetried = true;
+                igv.xhr.load(url, options);
+                return;
+            }
+
             error(null, xhr);
         };
 
