@@ -49,7 +49,7 @@ var igv = (function (igv) {
 
         var bufferedReader = this,
             hasData = (this.data && (this.range.start <= requestedRange.start) &&
-                ((this.range.start + this.range.size) >= (requestedRange.start + requestedRange.size))),
+            ((this.range.start + this.range.size) >= (requestedRange.start + requestedRange.size))),
             bufferSize,
             loadRange;
 
@@ -59,16 +59,18 @@ var igv = (function (igv) {
         else {
             // Expand buffer size if needed, but not beyond content length
             bufferSize = Math.max(this.bufferSize, requestedRange.size);
-            if (this.contentLength > 0) {
-                bufferSize = Math.min(bufferSize, this.contentLength - requestedRange.start - 1);
-            }
 
-            loadRange = {start: requestedRange.start, size: bufferSize};
+            if (this.contentLength > 0 && requestedRange.start + bufferSize > this.contentLength) {
+                loadRange = {start: requestedRange.start};
+            }
+            else {
+                loadRange = {start: requestedRange.start, size: bufferSize};
+            }
 
             igvxhr.loadArrayBuffer(bufferedReader.path,
                 {
                     headers: this.config.headers,
-                    range: {start: requestedRange.start, size: bufferSize},
+                    range: loadRange,
                     success: function (arrayBuffer) {
                         // TODO -- handle error
 
@@ -83,10 +85,11 @@ var igv = (function (igv) {
 
         function subbuffer(bufferedReader, requestedRange, asUint8) {
 
-            var bufferStart = requestedRange.start - bufferedReader.range.start,
+            var len = bufferedReader.data.byteLength,
+                bufferStart = requestedRange.start - bufferedReader.range.start,
                 result = asUint8 ?
-                    new Uint8Array(bufferedReader.data, bufferStart, requestedRange.size) :
-                    new DataView(bufferedReader.data, bufferStart, requestedRange.size);
+                    new Uint8Array(bufferedReader.data, bufferStart, len) :
+                    new DataView(bufferedReader.data, bufferStart, len);
             continutation(result);
         }
 

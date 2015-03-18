@@ -72,15 +72,19 @@ var igv = (function (igv) {
 
                     function loadNextChunk(chunkNumber) {
 
-                        var c = chunks[chunkNumber];
-                        var fetchMin = c.minv.block;
-                        var fetchMax = Math.min(bam.contentLength, c.maxv.block + 65000);   // Make sure we get the whole block.
+                        var c = chunks[chunkNumber],
+                            fetchMin = c.minv.block,
+                            fetchMax = c.maxv.block + 65000,   // Make sure we get the whole block.
+                            range =
+                                (bam.contentLength > 0 && fetchMax > bam.contentLength) ?
+                                {start: fetchMin} :
+                                {start: fetchMin, size: fetchMax - fetchMin + 1};
 
                         igvxhr.loadArrayBuffer(bam.bamPath,
                             {
                                 task: task,
                                 headers: bam.config.headers,
-                                range: {start: fetchMin, size: fetchMax - fetchMin + 1},
+                                range: range,
                                 success: function (compressed) {
 
                                     try {
@@ -350,63 +354,94 @@ var igv = (function (igv) {
 
         var bam = this;
 
-        getIndex(bam, function (index) {
+        getContentLength(bam, function (contentLength) {
 
-            var contentLength = index.blockMax,
-                len = index.headerSize + MAX_GZIP_BLOCK_SIZE + 100;   // Insure we get the complete compressed block containing the header
+            getIndex(bam, function (index) {
 
-            bam.contentLength = contentLength;
+                var contentLength = index.blockMax,
+                    len = index.headerSize + MAX_GZIP_BLOCK_SIZE + 100;   // Insure we get the complete compressed block containing the header
 
-            if (contentLength > 0) len = Math.min(contentLength, len);
+                if (contentLength <= 0) contentLength = index.blockMax;  // Approximate
 
-            igvxhr.loadArrayBuffer(bam.bamPath,
-                {
-                    headers: bam.config.headers,
+                bam.contentLength = contentLength;
 
-                    range: {start: 0, size: len},
+                if (contentLength > 0) len = Math.min(contentLength, len);
 
-                    success: function (compressedBuffer) {
+                igvxhr.loadArrayBuffer(bam.bamPath,
+                    {
+                        headers: bam.config.headers,
 
-                        var unc = igv.unbgzf(compressedBuffer, len),
-                            uncba = new Uint8Array(unc),
-                            magic = readInt(uncba, 0),
-                            samHeaderLen = readInt(uncba, 4),
-                            samHeader = '',
-                            genome = igv.browser ? igv.browser.genome : null;
+                        range: {start: 0, size: len},
 
-                        for (var i = 0; i < samHeaderLen; ++i) {
-                            samHeader += String.fromCharCode(uncba[i + 8]);
-                        }
+                        success: function (compressedBuffer) {
 
-                        var nRef = readInt(uncba, samHeaderLen + 8);
-                        var p = samHeaderLen + 12;
+                            var unc = igv.unbgzf(compressedBuffer, len),
+                                uncba = new Uint8Array(unc),
+                                magic = readInt(uncba, 0),
+                                samHeaderLen = readInt(uncba, 4),
+                                samHeader = '',
+                                genome = igv.browser ? igv.browser.genome : null;
 
-                        bam.chrToIndex = {};
-                        bam.indexToChr = [];
-                        for (var i = 0; i < nRef; ++i) {
-                            var lName = readInt(uncba, p);
-                            var name = '';
-                            for (var j = 0; j < lName - 1; ++j) {
-                                name += String.fromCharCode(uncba[p + 4 + j]);
+                            for (var i = 0; i < samHeaderLen; ++i) {
+                                samHeader += String.fromCharCode(uncba[i + 8]);
                             }
-                            var lRef = readInt(uncba, p + lName + 4);
-                            //dlog(name + ': ' + lRef);
 
-                            if (genome) name = genome.getChromosomeName(name);
+                            var nRef = readInt(uncba, samHeaderLen + 8);
+                            var p = samHeaderLen + 12;
 
-                            bam.chrToIndex[name] = i;
-                            bam.indexToChr.push(name);
+                            bam.chrToIndex = {};
+                            bam.indexToChr = [];
+                            for (var i = 0; i < nRef; ++i) {
+                                var lName = readInt(uncba, p);
+                                var name = '';
+                                for (var j = 0; j < lName - 1; ++j) {
+                                    name += String.fromCharCode(uncba[p + 4 + j]);
+                                }
+                                var lRef = readInt(uncba, p + lName + 4);
+                                //dlog(name + ': ' + lRef);
 
-                            p = p + 8 + lName;
+                                if (genome) name = genome.getChromosomeName(name);
+
+                                bam.chrToIndex[name] = i;
+                                bam.indexToChr.push(name);
+
+                                p = p + 8 + lName;
+                            }
+
+                            continuation();
+
                         }
-
-                        continuation();
-
-                    }
-                });
+                    });
+            });
         });
 
     };
+
+
+    function getContentLength(bam, continuation) {
+
+        if (bam.contentLength) {
+            continuation(bam.contentLength);
+        }
+        else {
+
+            // Gen the content length first, so we don't try to read beyond the end of the file
+            igvxhr.getContentLength(bam.headPath, {
+                headers: bam.headers,
+                success: function (contentLength) {
+                    bam.contentLength = contentLength;
+                    continuation(bam.contentLength);
+
+                },
+                error: function (unused, xhr) {
+                    bam.contentLength = -1;
+                    continuation(bam.contentLength);
+                }
+
+            });
+        }
+    }
+
 
     function getIndex(bam, continuation) {
 
