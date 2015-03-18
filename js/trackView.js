@@ -554,18 +554,18 @@ var igv = (function (igv) {
                     chromosome = igv.browser.genome.getChromosome(igv.browser.referenceFrame.chr);
                     chromosomeLength = chromosome.bpLength;
 
-                    trackHalfWidthBP = igv.browser.trackWidthBP()/2;
+                    trackHalfWidthBP = igv.browser.trackViewportWidthBP()/2;
                     centroidZoom = (ee + ss)/2;
 
                     if (centroidZoom - trackHalfWidthBP < 0) {
 
                         ss = 1;
-                        ee = igv.browser.trackWidthBP();
+                        ee = igv.browser.trackViewportWidthBP();
                     }
                     else if (centroidZoom + trackHalfWidthBP > chromosomeLength){
 
                         ee = chromosomeLength;
-                        ss = ee - igv.browser.trackWidthBP();
+                        ss = ee - igv.browser.trackViewportWidthBP();
                     }
                     else {
                         ss = centroidZoom - trackHalfWidthBP;
