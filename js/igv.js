@@ -81,25 +81,25 @@ var igv = (function (igv) {
             });
 
 
-            // user feedback
-            browser.userFeedback = $('<div class="igvUserFeedback">');
-            navigation.append(browser.userFeedback[0]);
-
-            browser.userFeedbackAlert = $('<i class="fa fa-exclamation-triangle fa-lg igvUserFeedbackAlert">');
-            browser.userFeedback.append(browser.userFeedbackAlert[0]);
-
-            browser.userFeedbackBodyCopy = $('<div class="igvUserFeedbackBodyCopy">');
-            browser.userFeedback.append(browser.userFeedbackBodyCopy[0]);
-
-            browser.userFeedbackDismiss = $('<i class="fa fa-times-circle fa-lg igv-app-icon igvUserFeedbackDismiss">');
-            browser.userFeedback.append(browser.userFeedbackDismiss[0]);
-
-            browser.userFeedbackDismiss.click(function () {
-                browser.userFeedbackBodyCopy.html("");
-                browser.userFeedback.hide();
-            });
-
-            browser.userFeedback.hide();
+            //// user feedback
+            //browser.userFeedback = $('<div class="igvUserFeedback">');
+            //navigation.append(browser.userFeedback[0]);
+            //
+            //browser.userFeedbackAlert = $('<i class="fa fa-exclamation-triangle fa-lg igvUserFeedbackAlert">');
+            //browser.userFeedback.append(browser.userFeedbackAlert[0]);
+            //
+            //browser.userFeedbackBodyCopy = $('<div class="igvUserFeedbackBodyCopy">');
+            //browser.userFeedback.append(browser.userFeedbackBodyCopy[0]);
+            //
+            //browser.userFeedbackDismiss = $('<i class="fa fa-times-circle fa-lg igv-app-icon igvUserFeedbackDismiss">');
+            //browser.userFeedback.append(browser.userFeedbackDismiss[0]);
+            //
+            //browser.userFeedbackDismiss.click(function () {
+            //    browser.userFeedbackBodyCopy.html("");
+            //    browser.userFeedback.hide();
+            //});
+            //
+            //browser.userFeedback.hide();
 
             // zoom
             zoom = $('<div class="igvNavigationZoom">');
@@ -187,6 +187,42 @@ var igv = (function (igv) {
         $(contentDiv).append(headerDiv);
         $(contentDiv).append(trackContainerDiv);
 
+
+
+
+        // user feedback
+        browser.userFeedback = $('<div class="igvUserFeedback">');
+        $(contentDiv).append(browser.userFeedback[0]);
+
+        // header
+        browser.userFeedbackHeader = $('<div class="igvUserFeedbackHeader">');
+        browser.userFeedback.append(browser.userFeedbackHeader[0]);
+
+        // alert
+        browser.userFeedbackAlert = $('<i class="fa fa-exclamation-triangle fa-lg igvUserFeedbackAlert">');
+        browser.userFeedbackHeader.append(browser.userFeedbackAlert[0]);
+
+        // dismiss
+        browser.userFeedbackDismiss = $('<i class="fa fa-times-circle fa-lg igvUserFeedbackDismiss">');
+        browser.userFeedbackHeader.append(browser.userFeedbackDismiss[0]);
+
+        browser.userFeedbackDismiss.click(function () {
+            browser.userFeedbackBodyCopy.html("");
+            browser.userFeedback.hide();
+        });
+
+        // copy
+        browser.userFeedbackBodyCopy = $('<div class="igvUserFeedbackBodyCopy">');
+        browser.userFeedback.append(browser.userFeedbackBodyCopy[0]);
+
+        browser.userFeedback.hide();
+        //browser.userFeedback.show();
+
+
+
+
+
+
         // Popover object -- singleton shared by all components
         igv.popover = new igv.Popover(contentDiv);
 
@@ -264,6 +300,9 @@ var igv = (function (igv) {
 
 
         });
+
+
+
 
 
         return browser;
