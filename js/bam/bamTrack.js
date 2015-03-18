@@ -241,7 +241,7 @@ var igv = (function (igv) {
     igv.BAMTrack.prototype.getFeatures = function (chr, bpStart, bpEnd, continuation, task) {
 
         // Don't try to draw alignments for windows > the visibility window
-        if (igv.browser.trackBPWidth() > this.visibilityWindow) {
+        if (igv.browser.trackWidthBP() > this.visibilityWindow) {
             continuation({exceedsVisibilityWindow: true});
             return;
         }

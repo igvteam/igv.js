@@ -544,7 +544,6 @@ var igv = (function (igv) {
                 ee,
                 trackHalfWidthBP,
                 centroidZoom,
-                delta,
                 chromosome,
                 chromosomeLength;
 
@@ -563,22 +562,23 @@ var igv = (function (igv) {
                     chromosome = igv.browser.genome.getChromosome(igv.browser.referenceFrame.chr);
                     chromosomeLength = chromosome.bpLength;
 
-                    trackHalfWidthBP = igv.browser.trackBPWidth()/2;
+                    trackHalfWidthBP = igv.browser.trackWidthBP()/2;
                     centroidZoom = (ee + ss)/2;
 
                     if (centroidZoom - trackHalfWidthBP < 0) {
-                        delta = centroidZoom;
+
+                        ss = 1;
+                        ee = igv.browser.trackWidthBP();
                     }
                     else if (centroidZoom + trackHalfWidthBP > chromosomeLength){
 
-                        delta = chromosomeLength - centroidZoom;
+                        ee = chromosomeLength;
+                        ss = ee - igv.browser.trackWidthBP();
                     }
                     else {
-                        delta = trackHalfWidthBP;
+                        ss = centroidZoom - trackHalfWidthBP;
+                        ee = centroidZoom + trackHalfWidthBP;
                     }
-
-                    ss = centroidZoom - delta;
-                    ee = centroidZoom + delta;
 
                 }
 
