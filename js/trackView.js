@@ -541,7 +541,12 @@ var igv = (function (igv) {
 
             var locus,
                 ss,
-                ee;
+                ee,
+                trackHalfWidthBP,
+                centroidZoom,
+                delta,
+                chromosome,
+                chromosomeLength;
 
             if (isMouseDown) {
 
@@ -550,17 +555,38 @@ var igv = (function (igv) {
 
                 trackView.rulerSweeper.css( { "display" : "none", "left" : 0 + "px", "width" : 0 + "px" } );
 
-                if (ppbThreshholdMet) {
+                ss = Math.floor(igv.browser.referenceFrame.start + (left * igv.browser.referenceFrame.bpPerPixel));
+                ee = ss + Math.floor(rulerSweepWidth * igv.browser.referenceFrame.bpPerPixel);
 
-                    ss = Math.floor(igv.browser.referenceFrame.start + (left * igv.browser.referenceFrame.bpPerPixel));
-                    ee = ss + Math.floor(rulerSweepWidth * igv.browser.referenceFrame.bpPerPixel);
+                if (!ppbThreshholdMet) {
 
-                    locus = igv.browser.referenceFrame.chr + ":" + igv.numberFormatter(ss) + "-" + igv.numberFormatter(ee);
-                    igv.browser.search(locus, undefined);
+                    chromosome = igv.browser.genome.getChromosome(igv.browser.referenceFrame.chr);
+                    chromosomeLength = chromosome.bpLength;
+
+                    trackHalfWidthBP = igv.browser.trackBPWidth()/2;
+                    centroidZoom = (ee + ss)/2;
+
+                    if (centroidZoom - trackHalfWidthBP < 0) {
+                        delta = centroidZoom;
+                    }
+                    else if (centroidZoom + trackHalfWidthBP > chromosomeLength){
+
+                        delta = chromosomeLength - centroidZoom;
+                    }
+                    else {
+                        delta = trackHalfWidthBP;
+                    }
+
+                    ss = centroidZoom - delta;
+                    ee = centroidZoom + delta;
+
                 }
 
-            }
+                locus = igv.browser.referenceFrame.chr + ":" + igv.numberFormatter(1 + ss) + "-" + igv.numberFormatter(ee);
+                igv.browser.search(locus, undefined);
 
+
+            }
 
         });
 
