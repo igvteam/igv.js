@@ -417,6 +417,11 @@ var igv = (function (igv) {
         else {
             igv.loadBamIndex(bam.baiPath, bam.config, function (index) {
                 bam.index = index;
+
+                // Override contentLength
+                bam.contentLength = index.blockMax;
+
+
                 continuation(bam.index);
             });
         }

@@ -288,7 +288,7 @@ var igvxhr = (function (igvxhr) {
                 var headerPair = headerPairs[i];
                 var index = headerPair.indexOf('\u003a\u0020');
                 if (index > 0) {
-                    var key = headerPair.substring(0, index);
+                    var key = headerPair.substring(0, index).toLowerCase();
                     var val = headerPair.substring(index + 2);
                     headers[key] = val;
                 }
@@ -309,12 +309,13 @@ var igvxhr = (function (igvxhr) {
         }
 
         options.success = function (header) {
-            var contentLengthString = header ? header["Content-Length"] : null;
+
+            var contentLengthString = header ? header["content-length"] : null;
             if (contentLengthString) {
                 continuation(parseInt(contentLengthString));
             }
             else {
-                continuation(Math.MAX_VALUE);    // Don't know the content length
+                continuation(-1);    // Don't know the content length
             }
 
         }
