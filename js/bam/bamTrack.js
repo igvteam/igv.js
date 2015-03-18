@@ -597,7 +597,7 @@ var igv = (function (igv) {
 
         var myself = this,
             menuItems = [],
-            lut = { "none": "None", "strand": "Read Strand", "firstOfPairStrand": "First of Pair Strand" },
+            lut = { "none": "Color: None", "strand": "Color: Read Strand", "firstOfPairStrand": "Color: 1st of Pair Strand" },
             checkMark     = '<i class="fa fa-check fa-check-shim"></i>',
             checkMarkNone = '<i class="fa fa-check fa-check-shim fa-check-hidden"></i>',
             trackMenuItem = '<div class=\"igv-track-menu-item\">',
@@ -628,7 +628,6 @@ var igv = (function (igv) {
         return menuItems;
 
     };
-
 
     /**
      * Optional method to compute pixel height to accomodate the list of features.  The implementation below
