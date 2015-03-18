@@ -39,45 +39,45 @@ var igvxhr = (function (igvxhr) {
         request.onload = function (event) {
 
             if (0 === request.status) {
-                console.log("igvxhr.isReachable - onload - failure - status " + request.status);
+                //console.log("igvxhr.isReachable - onload - failure - status " + request.status);
                 continuation(false, request.status);
             }
             else if (request.status >= 200 && request.status <= 300) {
-                console.log("igvxhr.isReachable - onload - success - status " + request.status);
+                //console.log("igvxhr.isReachable - onload - success - status " + request.status);
                 continuation(true, request.status);
             }
             else {
-                console.log("igvxhr.isReachable - onload - failure - status " + request.status);
+                //console.log("igvxhr.isReachable - onload - failure - status " + request.status);
                 continuation(false, request.status);
             }
 
         };
 
         request.onerror = function (event) {
-            console.log("igvxhr.isReachable - onerror - status " + request.status);
+            //console.log("igvxhr.isReachable - onerror - status " + request.status);
             continuation(false, request.status);
         };
 
         request.ontimeout = function (event) {
-            console.log("igvxhr.isReachable - ontimeout - status " + request.status);
+            //console.log("igvxhr.isReachable - ontimeout - status " + request.status);
             continuation(false, request.status);
         };
 
         request.onabort = function (event) {
-            console.log("igvxhr.isReachable - onabort - status " + request.status);
+            //console.log("igvxhr.isReachable - onabort - status " + request.status);
             continuation(false, request.status);
         };
 
-        console.log("igvxhr.isReachable - send - before");
+        //console.log("igvxhr.isReachable - send - before");
         request.send(null);
-        console.log("igvxhr.isReachable - send - after");
+        //console.log("igvxhr.isReachable - send - after");
 
     };
 
     igvxhr.loadArrayBuffer = function (url, options) {
         options.responseType = "arraybuffer";
         igvxhr.load(url, options);
-    }
+    };
 
     igvxhr.loadJson = function (url, options) {
 
@@ -95,7 +95,7 @@ var igvxhr = (function (igvxhr) {
 
         igvxhr.load(url, options);
 
-    }
+    };
 
     /**
      * Load a "raw" string.
@@ -132,7 +132,7 @@ var igvxhr = (function (igvxhr) {
         }
 
 
-    }
+    };
 
     igvxhr.load = function (url, options) {
 
@@ -296,7 +296,7 @@ var igvxhr = (function (igvxhr) {
             return headers;
         }
 
-    }
+    };
 
     igvxhr.getContentLength = function (url, options) {
 
@@ -321,7 +321,7 @@ var igvxhr = (function (igvxhr) {
         }
 
         igvxhr.loadHeader(url, options);
-    }
+    };
 
     igvxhr.loadStringFromFile = function (localfile, options) {
 
@@ -361,7 +361,7 @@ var igvxhr = (function (igvxhr) {
 
         fileReader.readAsArrayBuffer(localfile);
 
-    }
+    };
 
     function isCrossDomain(url) {
 
@@ -391,7 +391,7 @@ var igvxhr = (function (igvxhr) {
             result = result + String.fromCharCode(plain[i]);
         }
         return result;
-    }
+    };
 
     return igvxhr;
 
