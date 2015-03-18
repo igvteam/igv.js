@@ -52,7 +52,7 @@ var igv = (function (igv) {
     igv.FeatureTrack.prototype.getFeatures = function (chr, bpStart, bpEnd, continuation, task) {
 
         // Don't try to draw alignments for windows > the visibility window
-        if (this.visibilityWindow && igv.browser.trackWidthBP() > this.visibilityWindow) {
+        if (this.visibilityWindow && igv.browser.trackViewportWidthBP() > this.visibilityWindow) {
             continuation({exceedsVisibilityWindow: true});
         }
         else {

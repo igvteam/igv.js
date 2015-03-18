@@ -413,7 +413,7 @@ var igv = (function (igv) {
             chr = referenceFrame.chr;
             ss = igv.numberFormatter(Math.floor(referenceFrame.start + 1));
 
-            end = referenceFrame.start + this.trackWidthBP();
+            end = referenceFrame.start + this.trackViewportWidthBP();
             if(this.genome) {
                 chromosome = this.genome.getChromosome(chr);
                 if(chromosome) end = Math.min(end, chromosome.bpLength);
@@ -449,7 +449,7 @@ var igv = (function (igv) {
         return 14.0;
     };
 
-    igv.Browser.prototype.trackWidthBP = function () {
+    igv.Browser.prototype.trackViewportWidthBP = function () {
         return this.referenceFrame.bpPerPixel * this.trackViewportWidth();
     };
 
