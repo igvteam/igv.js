@@ -51,8 +51,7 @@ var igv = (function (igv) {
             hasData = (this.data && (this.range.start <= requestedRange.start) &&
                 ((this.range.start + this.range.size) >= (requestedRange.start + requestedRange.size))),
             bufferSize,
-            loadRange,
-            dataLoader;
+            loadRange;
 
         if (hasData) {
             subbuffer(bufferedReader, requestedRange, asUint8);

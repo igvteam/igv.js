@@ -247,7 +247,7 @@ var igv = (function (igv) {
                 alignment.readName = readName;
                 alignment.chr = bam.indexToChr[refID];
 
-                if(mateRefID >= 0) {
+                if (mateRefID >= 0) {
                     alignment.mate = {
                         chr: bam.indexToChr[mateRefID],
                         position: matePos
@@ -322,7 +322,7 @@ var igv = (function (igv) {
 
                         blockQuals = record.qual ? record.qual.slice(seqOffset, c.len) : undefined;
 
-                        blocks.push( { start: pos, len: c.len, seq: blockSeq, qual: blockQuals } );
+                        blocks.push({start: pos, len: c.len, seq: blockSeq, qual: blockQuals});
 
                         seqOffset += c.len;
 
@@ -350,63 +350,62 @@ var igv = (function (igv) {
 
         var bam = this;
 
-        getContentLength(bam, function (contentLength) {
+        getIndex(bam, function (index) {
 
-            getIndex(bam, function (index) {
+            var contentLength = index.blockMax,
+                len = index.headerSize + MAX_GZIP_BLOCK_SIZE + 100;   // Insure we get the complete compressed block containing the header
 
-                var len = index.headerSize + MAX_GZIP_BLOCK_SIZE + 100;   // Insure we get the complete compressed block containing the header
+            bam.contentLength = contentLength;
 
-                if (contentLength > 0) len = Math.min(contentLength, len);
+            if (contentLength > 0) len = Math.min(contentLength, len);
 
-                igvxhr.loadArrayBuffer(bam.bamPath,
-                    {
-                        headers: bam.config.headers,
+            igvxhr.loadArrayBuffer(bam.bamPath,
+                {
+                    headers: bam.config.headers,
 
-                        range: {start: 0, size: len},
+                    range: {start: 0, size: len},
 
-                        success: function (compressedBuffer) {
+                    success: function (compressedBuffer) {
 
-                            var unc = igv.unbgzf(compressedBuffer, len),
-                                uncba = new Uint8Array(unc),
-                                magic = readInt(uncba, 0),
-                                samHeaderLen = readInt(uncba, 4),
-                                samHeader = '',
-                                genome = igv.browser ? igv.browser.genome : null;
+                        var unc = igv.unbgzf(compressedBuffer, len),
+                            uncba = new Uint8Array(unc),
+                            magic = readInt(uncba, 0),
+                            samHeaderLen = readInt(uncba, 4),
+                            samHeader = '',
+                            genome = igv.browser ? igv.browser.genome : null;
 
-                            for (var i = 0; i < samHeaderLen; ++i) {
-                                samHeader += String.fromCharCode(uncba[i + 8]);
-                            }
-
-                            var nRef = readInt(uncba, samHeaderLen + 8);
-                            var p = samHeaderLen + 12;
-
-                            bam.chrToIndex = {};
-                            bam.indexToChr = [];
-                            for (var i = 0; i < nRef; ++i) {
-                                var lName = readInt(uncba, p);
-                                var name = '';
-                                for (var j = 0; j < lName - 1; ++j) {
-                                    name += String.fromCharCode(uncba[p + 4 + j]);
-                                }
-                                var lRef = readInt(uncba, p + lName + 4);
-                                //dlog(name + ': ' + lRef);
-
-                                if (genome) name = genome.getChromosomeName(name);
-
-                                bam.chrToIndex[name] = i;
-                                bam.indexToChr.push(name);
-
-                                p = p + 8 + lName;
-                            }
-
-                            continuation();
-
+                        for (var i = 0; i < samHeaderLen; ++i) {
+                            samHeader += String.fromCharCode(uncba[i + 8]);
                         }
-                    });
-            });
 
+                        var nRef = readInt(uncba, samHeaderLen + 8);
+                        var p = samHeaderLen + 12;
 
+                        bam.chrToIndex = {};
+                        bam.indexToChr = [];
+                        for (var i = 0; i < nRef; ++i) {
+                            var lName = readInt(uncba, p);
+                            var name = '';
+                            for (var j = 0; j < lName - 1; ++j) {
+                                name += String.fromCharCode(uncba[p + 4 + j]);
+                            }
+                            var lRef = readInt(uncba, p + lName + 4);
+                            //dlog(name + ': ' + lRef);
+
+                            if (genome) name = genome.getChromosomeName(name);
+
+                            bam.chrToIndex[name] = i;
+                            bam.indexToChr.push(name);
+
+                            p = p + 8 + lName;
+                        }
+
+                        continuation();
+
+                    }
+                });
         });
+
     };
 
     function getIndex(bam, continuation) {
@@ -428,29 +427,6 @@ var igv = (function (igv) {
 
     }
 
-    function getContentLength(bam, continuation) {
-
-        if (bam.contentLength) {
-            continuation(bam.contentLength);
-        }
-        else {
-
-            // Gen the content length first, so we don't try to read beyond the end of the file
-            igvxhr.getContentLength(bam.headPath, {
-                headers: bam.headers,
-                success: function (contentLength) {
-                    bam.contentLength = contentLength;
-                    continuation(bam.contentLength);
-
-                },
-                error: function (unused, xhr) {
-                    bam.contentLength = -1;
-                    continuation(bam.contentLength);
-                }
-
-            });
-        }
-    }
 
     function getChrIndex(bam, continuation) {
 

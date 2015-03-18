@@ -82,7 +82,7 @@ var igv = (function (igv) {
 
         var myself = this;
 
-        if (config.url && !config.sourceType && false===true) {    // TODO The test for sourcetype is a crude check if this is a webservice.  Fix.
+        if (config.url && !config.sourceType) {    // TODO The test for sourcetype is a crude check if this is a webservice.  Fix.
 
             igvxhr.isReachable(config.url, function (success, requestStatus) {
 
