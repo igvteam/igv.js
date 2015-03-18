@@ -61,7 +61,7 @@ var igv = (function (igv) {
             xy = igv.translateMouseCoordinates(e, myself.contentDiv);
             xPercentage = xy.x / myself.contentDiv.width();
 
-            locusLength = igv.browser.trackBPWidth();
+            locusLength = igv.browser.trackWidthBP();
             chr = igv.browser.genome.getChromosome(igv.browser.referenceFrame.chr);
             chrLength = chr.bpLength;
             chrCoveragePercentage = locusLength / chrLength;
@@ -148,7 +148,7 @@ var igv = (function (igv) {
 
             chromosome = igv.browser.genome.getChromosome(igv.browser.referenceFrame.chr);
 
-            widthBP = Math.floor(igv.browser.trackBPWidth());
+            widthBP = Math.floor(igv.browser.trackWidthBP());
                 xBP = igv.browser.referenceFrame.start;
 
             if (widthBP < chromosome.bpLength) {
