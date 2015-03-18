@@ -80,27 +80,6 @@ var igv = (function (igv) {
                 browser.search(browser.searchInput.val());
             });
 
-
-            //// user feedback
-            //browser.userFeedback = $('<div class="igvUserFeedback">');
-            //navigation.append(browser.userFeedback[0]);
-            //
-            //browser.userFeedbackAlert = $('<i class="fa fa-exclamation-triangle fa-lg igvUserFeedbackAlert">');
-            //browser.userFeedback.append(browser.userFeedbackAlert[0]);
-            //
-            //browser.userFeedbackBodyCopy = $('<div class="igvUserFeedbackBodyCopy">');
-            //browser.userFeedback.append(browser.userFeedbackBodyCopy[0]);
-            //
-            //browser.userFeedbackDismiss = $('<i class="fa fa-times-circle fa-lg igv-app-icon igvUserFeedbackDismiss">');
-            //browser.userFeedback.append(browser.userFeedbackDismiss[0]);
-            //
-            //browser.userFeedbackDismiss.click(function () {
-            //    browser.userFeedbackBodyCopy.html("");
-            //    browser.userFeedback.hide();
-            //});
-            //
-            //browser.userFeedback.hide();
-
             // zoom
             zoom = $('<div class="igvNavigationZoom">');
             navigation.append(zoom[0]);
@@ -188,40 +167,9 @@ var igv = (function (igv) {
         $(contentDiv).append(trackContainerDiv);
 
 
-
-
         // user feedback
-        browser.userFeedback = $('<div class="igvUserFeedback">');
-        $(contentDiv).append(browser.userFeedback[0]);
-
-        // header
-        browser.userFeedbackHeader = $('<div class="igvUserFeedbackHeader">');
-        browser.userFeedback.append(browser.userFeedbackHeader[0]);
-
-        // alert
-        browser.userFeedbackAlert = $('<i class="fa fa-exclamation-triangle fa-lg igvUserFeedbackAlert">');
-        browser.userFeedbackHeader.append(browser.userFeedbackAlert[0]);
-
-        // dismiss
-        browser.userFeedbackDismiss = $('<i class="fa fa-times-circle fa-lg igvUserFeedbackDismiss">');
-        browser.userFeedbackHeader.append(browser.userFeedbackDismiss[0]);
-
-        browser.userFeedbackDismiss.click(function () {
-            browser.userFeedbackBodyCopy.html("");
-            browser.userFeedback.hide();
-        });
-
-        // copy
-        browser.userFeedbackBodyCopy = $('<div class="igvUserFeedbackBodyCopy">');
-        browser.userFeedback.append(browser.userFeedbackBodyCopy[0]);
-
+        browser.userFeedback = new igv.UserFeedback( $(contentDiv) );
         browser.userFeedback.hide();
-        //browser.userFeedback.show();
-
-
-
-
-
 
         // Popover object -- singleton shared by all components
         igv.popover = new igv.Popover(contentDiv);

@@ -86,10 +86,16 @@ var igv = (function (igv) {
 
             igvxhr.isReachable(config.url, function (success, requestStatus) {
 
+                var parts;
+
                 if (true === success) {
+
                     myself.doLoadTrack(config);
                 } else {
-                    myself.userFeedbackBodyCopy.html("<p>ERROR<\p>Resource unreachable. <\p><p>" + config.url + "<\p><p>Status: " + requestStatus + "<\p>");
+
+                    parts = igv.parseUri(config.url);
+
+                    myself.userFeedback.bodyCopy("<p>ERROR: Track file " + parts[ "file" ] + " is unreachable<\p><p>HTTP request status: " + requestStatus + "<\p>");
                     myself.userFeedback.show();
                 }
 
@@ -149,7 +155,7 @@ var igv = (function (igv) {
 
 
 
-    }
+    };
 
     igv.Browser.prototype.isDuplicateTrack = function (config) {
 

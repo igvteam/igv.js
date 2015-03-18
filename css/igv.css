@@ -107,38 +107,14 @@ div.ui-dialog fieldset {
 
 }
 
-/*.igvUserFeedback {*/
-
-    /*position: absolute;*/
-    /*left:25%;*/
-    /*top: 25%;*/
-
-    /*width: 400px;*/
-    /*height: 256px;*/
-
-    /*background-color: white;*/
-
-    /*font-family: 'Open Sans', sans-serif;*/
-    /*font-size: small;*/
-    /*font-weight: 400;*/
-    /*color: #444;*/
-
-    /*border-color: #a2a2a2;*/
-    /*border-style: solid;*/
-    /*border-width: thin;*/
-
-    /*line-height: 100%;*/
-
-/*}*/
-
 .igvUserFeedback {
 
     position:fixed;
     top: 50%;
     left: 50%;
 
-    width:30em;
-    height:18em;
+    width:36em;
+    height:27em;
 
     margin-top: -9em; /*set to a negative number 1/2 of your height*/
     margin-left: -15em; /*set to a negative number 1/2 of your width*/
@@ -168,7 +144,7 @@ div.ui-dialog fieldset {
     border-bottom-style: solid;
     border-bottom-width: thin;
 
-    background-color: lightgrey;
+    background-color: white;
 }
 
 .igvUserFeedbackBodyCopy {
@@ -193,7 +169,6 @@ div.ui-dialog fieldset {
     padding: 8px;
 
     color: red;
-
 }
 
 .igvUserFeedbackDismiss {
