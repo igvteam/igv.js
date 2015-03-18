@@ -98,6 +98,7 @@ var igv = (function (igv) {
         } else {
 
             myself.doLoadTrack(config);
+
         }
     };
 
