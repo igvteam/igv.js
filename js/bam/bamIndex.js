@@ -25,6 +25,7 @@ var igv = (function (igv) {
                     var indices = [],
                         magic, nbin, nintv, nref, parser,
                         blockMin = Number.MAX_VALUE,
+                        blockMax = 0,
                         binIndex, linearIndex, binNumber, cs, ce, b, i, ref, sequenceIndexMap;
 
                     if(!arrayBuffer) {
@@ -88,6 +89,9 @@ var igv = (function (igv) {
                                         if (cs.block < blockMin) {
                                             blockMin = cs.block;    // Block containing first alignment
                                         }
+                                        if(ce.block > blockMax) {
+                                            blockMax = ce.block;
+                                        }
                                         binIndex[binNumber].push([cs, ce]);
                                     }
                                 }
@@ -111,18 +115,19 @@ var igv = (function (igv) {
                     } else {
                         throw new Error(indexURL + " is not a " + (tabix ? "tabix" : "bai") + " file");
                     }
-
-                    continuation(new igv.BamIndex(indices, blockMin, sequenceIndexMap, tabix));
+//console.log("Block max =" + blockMax);
+                    continuation(new igv.BamIndex(indices, blockMin, blockMax, sequenceIndexMap, tabix));
                 }
             });
     }
 
 
-    igv.BamIndex = function (indices, headerSize, sequenceIndexMap, tabix) {
+    igv.BamIndex = function (indices, headerSize, blockMax, sequenceIndexMap, tabix) {
         this.headerSize = headerSize;
         this.indices = indices;
         this.sequenceIndexMap = sequenceIndexMap;
         this.tabix = tabix;
+        this.blockMax = blockMax;
 
     }
 
