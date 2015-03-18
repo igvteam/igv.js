@@ -163,10 +163,10 @@ var igv = (function (igv) {
         }
 
 
-        var contentRoot = $('<div id="igvContentDiv" class="igv-content-div">')[0],
-            contentHeader = $('<div id="igvHeaderDiv" class="igv-header-div">')[0],
-            trackContainer = $('<div id="igvTrackContainerDiv" class="igv-track-container-div">')[0],
-            browser = new igv.Browser(options, trackContainer),
+        var contentDiv = $('<div id="igvContentDiv" class="igv-content-div">')[0],
+            headerDiv = $('<div id="igvHeaderDiv" class="igv-header-div">')[0],
+            trackContainerDiv = $('<div id="igvTrackContainerDiv" class="igv-track-container-div">')[0],
+            browser = new igv.Browser(options, trackContainerDiv),
             rootDiv = browser.div,
             controlDiv;
 
@@ -183,15 +183,15 @@ var igv = (function (igv) {
 
         $(rootDiv).append($(controlDiv));
 
-        $(rootDiv).append(contentRoot);
-        $(contentRoot).append(contentHeader);
-        $(contentRoot).append(trackContainer);
+        $(rootDiv).append(contentDiv);
+        $(contentDiv).append(headerDiv);
+        $(contentDiv).append(trackContainerDiv);
 
         // Popover object -- singleton shared by all components
-        igv.popover = new igv.Popover(contentRoot);
+        igv.popover = new igv.Popover(contentDiv);
 
         browser.ideoPanel = new igv.IdeoPanel(rootDiv);
-        $(contentHeader).append(browser.ideoPanel.div);
+        $(headerDiv).append(browser.ideoPanel.div);
         browser.ideoPanel.resize();
 
         if (options.trackDefaults) {

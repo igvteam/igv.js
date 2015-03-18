@@ -142,7 +142,7 @@ var igv = (function (igv) {
 
                     $(viewportDiv).scroll(function() {
 
-                        console.log("viewportDiv scrolled " + $(viewportDiv).scrollTop());
+                        //console.log("viewportDiv scrolled " + $(viewportDiv).scrollTop());
 
                         trackIconContainer.css( { "top" : $(viewportDiv).scrollTop() + "px" } );
 
