@@ -130,6 +130,8 @@
 
     <script type="text/javascript" src="js/trackMenuPopupDialog.js"></script>
 
+    <script type="text/javascript" src="js/set.js"></script>
+
     <style type="text/css">
 
         #trackList {
@@ -296,6 +298,15 @@
                                 visibilityWindow: 200000
                                 })">Encode bigbed
         </div>
+
+        <div onclick="igv.browser.loadTrack(
+                                {
+                                url: 'http://hgdownload.cse.ucsc.edu/goldenPath/hg19/encodeDCC/wgEncodeBroadHistone/wgEncodeBroadHistoneGm12878H3k4me3StdSig.bigWig',
+                                label: 'Gm12878H3k4me3'
+                                })">Encode bigwig
+        </div>
+
+
 
 
         <div onclick="igv.browser.search('chr10');">GOTO</div>
