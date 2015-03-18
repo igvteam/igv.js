@@ -35,8 +35,6 @@ var igv = (function (igv) {
     var BIGBED_MAGIC_LTH = 0x8789F2EB; // BigBed Magic Low to High
     var BIGBED_MAGIC_HTL = 0xEBF28987; // BigBed Magic High to Low
     var BBFILE_HEADER_SIZE = 64;
-    var ZOOM_LEVEL_HEADER_SIZE = 24;
-    var BUFFER_SIZE = 512000;     //  buffer
 
 
     igv.BWReader = function (config) {
@@ -49,19 +47,17 @@ var igv = (function (igv) {
     igv.BWReader.prototype.getZoomHeaders = function (continuation) {
 
         var reader = this;
-
         if (this.zoomLevelHeaders) {
-            continuation(this.zoomLevelHeaders);
+            continuation(reader.zoomLevelHeaders);
         }
         else {
-            this.loadHeader(function () {
+            loadHeader.call(this, function () {
                 continuation(reader.zoomLevelHeaders);
             });
         }
-
     }
 
-    igv.BWReader.prototype.loadHeader = function (continuation) {
+    function loadHeader(continuation) {
 
         var bwReader = this;
 
@@ -81,7 +77,7 @@ var igv = (function (igv) {
 
                             success: function (data) {
 
-                                if(!data) return;
+                                if (!data) return;
 
                                 // Assume low-to-high unless proven otherwise
                                 bwReader.littleEndian = true;
