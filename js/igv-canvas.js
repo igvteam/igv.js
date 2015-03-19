@@ -34,7 +34,7 @@
 var igv = (function (igv) {
 
 
-    var debug = true;
+    var debug = false;
 
         var log = function(msg) {
         	if (debug) {
