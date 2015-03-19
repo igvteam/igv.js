@@ -329,7 +329,7 @@ var igv = (function (igv) {
             px -= 1;
         }
 
-        ctx.fillRect.call(px, py, pw, h);
+        ctx.fillRect(px, py, pw, h);
 
 
     }
