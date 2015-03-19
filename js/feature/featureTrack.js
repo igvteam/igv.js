@@ -44,6 +44,10 @@ var igv = (function (igv) {
         if (this.type === "vcf") {
             this.render = renderVariant;
         }
+        else if (this.type == "FusionJuncSpan") {
+            // needed for FusionInspector, bhaas
+            this.render = renderFusionJuncSpan;
+        }
         else {
             this.render = renderFeature;
         }
@@ -246,18 +250,22 @@ var igv = (function (igv) {
         exonCount = feature.exons ? feature.exons.length : 0;
 
         if (exonCount == 0) {
+           // single-exon transcript
            ctx.fillRect(px, py, pw, h);
 
         }
         else {
+            // multi-exon transcript
             cy = py + 5;
-            igv.Canvas.strokeLine.call(ctx, px, cy, px1, cy);
+            igv.Canvas.strokeLine.call(ctx, px, cy, px1, cy); // center line for introns
             direction = feature.strand == '+' ? 1 : -1;
             for (var x = px + step / 2; x < px1; x += step) {
+                // draw arrowheads along central line indicating transcribed orientation
                 igv.Canvas.strokeLine.call(ctx, x - direction * 2, cy - 2, x, cy);
                 igv.Canvas.strokeLine.call(ctx, x - direction * 2, cy + 2, x, cy);
             }
             for (var e = 0; e < exonCount; e++) {
+                // draw the exons
                 exon = feature.exons[e];
                 ePx = Math.round((exon.start - bpStart) / xScale);
                 ePx1 = Math.round((exon.end - bpStart) / xScale);
@@ -266,6 +274,10 @@ var igv = (function (igv) {
 
             }
         }
+
+        //////////////////////
+        // add feature labels
+        //////////////////////
 
         fontStyle = { font: '10px PT Sans', fillStyle: this.color, strokeStyle: this.color };
 
@@ -321,6 +333,80 @@ var igv = (function (igv) {
 
 
     }
+
+
+    /**
+     *
+     * @param feature
+     * @param bpStart  genomic location of the left edge of the current canvas
+     * @param xScale  scale in base-pairs per pixel
+     * @param pixelHeight  pixel height of the current canvas
+     * @param ctx  the canvas 2d context
+     */
+    function renderFusionJuncSpan (feature, bpStart, xScale, pixelHeight, ctx) {
+
+
+
+        var px = Math.round((feature.start - bpStart) / xScale);
+        var px1 = Math.round((feature.end - bpStart) / xScale);
+        pw = px1 - px;
+        if (pw < 3) {
+            pw = 3;
+            px -= 1;
+        }
+
+        var py = 5, h=10; // defaults borrowed from renderFeature above
+
+        if (this.displayMode === "SQUISHED" && feature.row != undefined) {
+            py = this.squishedRowHeight * feature.row;
+        }
+        else if (this.displayMode === "EXPANDED" && feature.row != undefined) {
+            py = this.expandedRowHeight * feature.row;
+        }
+
+        var   cy = py + 5;
+        var top_y = cy-5;
+        var bottom_y = cy + 5;
+
+        //igv.Canvas.strokeLine.call(ctx, px, cy, px1, cy); // center line for introns
+
+        // draw the junction arc
+        var junction_left_px = Math.round( (feature.junction_left - bpStart) / xScale );
+        var junction_right_px = Math.round( (feature.junction_right - bpStart) / xScale);
+
+
+        ctx.beginPath();
+        ctx.moveTo(junction_left_px,cy);
+        ctx.bezierCurveTo(junction_left_px, top_y, junction_right_px, top_y, junction_right_px, cy);
+
+        ctx.lineWidth = 1;
+        ctx.strokeStyle='blue';
+        ctx.stroke();
+
+        // draw the spanning arcs
+        var spanning_coords = feature.spanning_frag_coords;
+        for (var i = 0; i < spanning_coords.length; i++) {
+            var spanning_info = spanning_coords[i];
+
+            var span_left_px = Math.round( (spanning_info.left - bpStart) / xScale);
+            var span_right_px = Math.round( (spanning_info.right - bpStart) / xScale);
+
+
+            ctx.beginPath();
+            ctx.moveTo(span_left_px, cy);
+            ctx.bezierCurveTo(span_left_px, bottom_y, span_right_px, bottom_y, span_right_px, cy);
+
+            ctx.lineWidth = 1;
+            ctx.strokeStyle='purple';
+            ctx.stroke();
+        }
+
+
+    }
+
+
+
+
 
     return igv;
 

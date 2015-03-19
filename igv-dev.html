@@ -312,6 +312,18 @@
 
         <div onclick="igv.browser.search('chr10');">GOTO</div>
 
+        <div onclick="igv.browser.loadTrack (
+                                {
+                                type: 'arc',
+                                url: '//caique.broadinstitute.org/data/Hg19_UCSC_genes.bed.gz',
+                                label: 'ucsc_genes',
+                                displayMode: 'SQUISHED',
+                                maxHeight: 10
+                                })">UCSC genes (bed)
+
+        </div>
+
+
     </div>
 
 </div>
