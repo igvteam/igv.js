@@ -515,6 +515,7 @@ var igv = (function (igv) {
                 ss,
                 ee,
                 trackHalfWidthBP,
+                trackWidthBP,
                 centroidZoom,
                 chromosome,
                 chromosomeLength;
@@ -526,35 +527,39 @@ var igv = (function (igv) {
 
                 trackView.rulerSweeper.css( { "display" : "none", "left" : 0 + "px", "width" : 0 + "px" } );
 
-                ss = Math.floor(igv.browser.referenceFrame.start + (left * igv.browser.referenceFrame.bpPerPixel));
-                ee = ss + Math.floor(rulerSweepWidth * igv.browser.referenceFrame.bpPerPixel);
+                ss = igv.browser.referenceFrame.start + (left * igv.browser.referenceFrame.bpPerPixel);
+                ee = ss + rulerSweepWidth * igv.browser.referenceFrame.bpPerPixel;
 
                 if ( sweepWidthThresholdUnmet(rulerSweepWidth) ) {
 
                     chromosome = igv.browser.genome.getChromosome(igv.browser.referenceFrame.chr);
                     chromosomeLength = chromosome.bpLength;
 
-                    trackHalfWidthBP = igv.browser.trackViewportWidthBP()/2;
+                    trackWidthBP = igv.browser.trackViewportWidth()/igv.browser.pixelPerBasepairThreshold();
+                    trackHalfWidthBP = 0.5 * trackWidthBP;
+
                     centroidZoom = (ee + ss)/2;
 
                     if (centroidZoom - trackHalfWidthBP < 0) {
 
                         ss = 1;
-                        ee = igv.browser.trackViewportWidthBP();
+                        //ee = igv.browser.trackViewportWidthBP();
+                        ee = trackWidthBP;
                     }
                     else if (centroidZoom + trackHalfWidthBP > chromosomeLength){
 
                         ee = chromosomeLength;
-                        ss = ee - igv.browser.trackViewportWidthBP();
+                        //ss = 1 + ee - igv.browser.trackViewportWidthBP();
+                        ss = 1 + ee - trackWidthBP;
                     }
                     else {
-                        ss = centroidZoom - trackHalfWidthBP;
-                        ee = centroidZoom + trackHalfWidthBP;
+                        ss = 1 + centroidZoom - trackHalfWidthBP;
+                        ee =     centroidZoom + trackHalfWidthBP;
                     }
 
                 }
 
-                locus = igv.browser.referenceFrame.chr + ":" + igv.numberFormatter(1 + ss) + "-" + igv.numberFormatter(ee);
+                locus = igv.browser.referenceFrame.chr + ":" + igv.numberFormatter(Math.floor(ss)) + "-" + igv.numberFormatter(Math.floor(ee));
                 igv.browser.search(locus, undefined);
 
 
@@ -564,7 +569,7 @@ var igv = (function (igv) {
 
         function sweepWidthThresholdUnmet(sweepWidth) {
 
-            if ( Math.floor( rulerWidth / (igv.browser.referenceFrame.bpPerPixel * sweepWidth) ) > igv.browser.pixelPerBasepairThreshold() ) {
+            if ( (rulerWidth / (igv.browser.referenceFrame.bpPerPixel * sweepWidth) ) > igv.browser.pixelPerBasepairThreshold() ) {
                 return true;
             } else {
                 return false;
