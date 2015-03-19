@@ -31,7 +31,9 @@ var igv = (function (igv) {
         this.config = config;
         this.url = config.url;
         this.readGroupSetIds = config.readGroupSetIds;
-        this.authKey = config.authKey || 'AIzaSyC-dujgw4P1QvNd8i_c-I-S_P1uxVZzn0w';  // Default only works for localhost & broadinstitute.org
+        this.authKey = config.authKey === undefined ?
+            'AIzaSyC-dujgw4P1QvNd8i_c-I-S_P1uxVZzn0w' :  // Default only works for localhost & broadinstitute.org
+            config.authKey;
     }
 
 
@@ -101,7 +103,8 @@ var igv = (function (igv) {
                                 continuation(self.chrNameMap);
 
                             },
-                            task: task});
+                            task: task
+                        });
                     }
                     else {
                         // No browser object, can't build map.  This can occur when run from unit tests
