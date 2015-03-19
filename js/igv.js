@@ -133,6 +133,10 @@ var igv = (function (igv) {
         if (!options) options = {};
         if (!options.type) options.type = "IGV";
 
+        if(options.oauthToken) {
+            oauth.google.access_token = options.oauthToken;
+        }
+
         if (!options.flanking && isT2D(options)) {  // TODO -- hack for demo, remove
             options.flanking = 100000;
         }
