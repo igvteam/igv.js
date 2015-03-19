@@ -460,7 +460,26 @@ var igv = (function (igv) {
         return this.referenceFrame.bpPerPixel * this.trackViewportWidth();
     };
 
+    
+    igv.Browser.prototype.removeAllTracks = function () {
+        var tracks = this.trackViews;
+        
+         for (var i = 0; i < tracks.length; i++) {
+            var track = this.trackViews[i].track;
+            this.removeTrack(track);
+         }
+    }; 
+    
+    igv.Browser.prototype.setGotoCallback = function (gotocallback) {
+        this.gotocallback = gotocallback;
+    };
+    
     igv.Browser.prototype.goto = function (chr, start, end) {
+
+        if (typeof this.gotocallback != "undefined") {
+            //console.log("Got chr="+chr+", start="+start+", end="+end+", also using callback "+this.gotocallback);
+            this.gotocallback(chr, start, end);
+        }
 
         var w,
             chromosome,
@@ -488,17 +507,23 @@ var igv = (function (igv) {
 
         if (this.genome) {
             chromosome = this.genome.getChromosome(this.referenceFrame.chr);
-
-            var maxBpPerPixel = chromosome.bpLength / viewportWidth;
-            if (this.referenceFrame.bpPerPixel > maxBpPerPixel) this.referenceFrame.bpPerPixel = maxBpPerPixel;
-
-            if (!end) {
-                end = start + viewportWidth * this.referenceFrame.bpPerPixel;
+            if (!chromosome) {
+                if (console && console.log) console.log("Could not find chromsome "+this.referenceFrame.chr );
             }
+            else {
+                if (!chromosome.bpLength) chromosome.bpLength = 1;
+        
+                var maxBpPerPixel = chromosome.bpLength / viewportWidth;
+                if (this.referenceFrame.bpPerPixel > maxBpPerPixel) this.referenceFrame.bpPerPixel = maxBpPerPixel;
 
-            if (chromosome && end > chromosome.bpLength) {
-                start -= (end - chromosome.bpLength);
-            }
+                if (!end) {
+                    end = start + viewportWidth * this.referenceFrame.bpPerPixel;
+                }
+
+                if (chromosome && end > chromosome.bpLength) {
+                    start -= (end - chromosome.bpLength);
+                }
+           }
         }
 
         this.referenceFrame.start = start;
