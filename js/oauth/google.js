@@ -18,7 +18,6 @@ var oauth = (function (oauth) {
             "response_type=token&" +
             "client_id=661332306814-8nt29308rppg325bkq372vli8nm3na14.apps.googleusercontent.com";
 
-        var acToken;
         var tokenType;
         var expiresIn;
         var user;
@@ -35,12 +34,12 @@ var oauth = (function (oauth) {
                         if (win.document.URL.indexOf(REDIRECT) != -1) {
                             window.clearInterval(pollTimer);
                             var url = win.document.URL;
-                            acToken = oauth.google.gup(url, 'access_token');
+                            oauth.google.access_token = oauth.google.gup(url, 'access_token');
                             tokenType = oauth.google.gup(url, 'token_type');
                             expiresIn = oauth.google.gup(url, 'expires_in');
                             win.close();
 
-                            oauth.google.validateToken(acToken);
+                            oauth.google.validateToken(oauth.google.access_token);
                         }
                     } catch (e) {
                     }
@@ -55,8 +54,8 @@ var oauth = (function (oauth) {
                     success: function (responseText) {
                         oauth.google.getUserInfo();
                         loggedIn = true;
-                        $('#loginText').hide();
-                        $('#logoutText').show();
+                        //$('#loginText').hide();
+                        //$('#logoutText').show();
                     },
                     dataType: "jsonp"
                 });
@@ -64,13 +63,13 @@ var oauth = (function (oauth) {
 
             getUserInfo: function () {
                 $.ajax({
-                    url: 'https://www.googleapis.com/oauth2/v1/userinfo?access_token=' + acToken,
+                    url: 'https://www.googleapis.com/oauth2/v1/userinfo?access_token=' + oauth.google.access_token,
                     data: null,
                     success: function (resp) {
                         user = resp;
                         console.log(user);
-                        $('#uName').text('Welcome ' + user.name);
-                        $('#imgHolder').attr('src', user.picture);
+                        //$('#uName').text('Welcome ' + user.name);
+                        //$('#imgHolder').attr('src', user.picture);
                     },
                     dataType: "jsonp"
                 });
