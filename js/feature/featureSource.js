@@ -145,9 +145,9 @@ var igv = (function (igv) {
 
     function packFeatures(features) {
 
-        if (features.length === 0) {
+        if (features == null || features.length === 0) {
             return;
-        }
+        }  
 
         // Segregate by chromosome
 

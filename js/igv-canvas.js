@@ -33,6 +33,24 @@
 
 var igv = (function (igv) {
 
+
+    var debug = true;
+
+        var log = function(msg) {
+        	if (debug) {
+        	    var d = new Date();
+        	    var time = d.getHours() + ":" + d.getMinutes() + ":" + d.getSeconds();
+        	    if (typeof copy != "undefined") {
+                    copy(msg);
+        	    }
+        	    if (typeof console != "undefined") {
+        			console.log("igv-canvas: " + time + " " + msg);			    
+        	    }
+        	   
+        	}
+        };
+
+        
     igv.Canvas = {
 
 
@@ -53,6 +71,8 @@ var igv = (function (igv) {
             x2 = Math.floor(x2) + 0.5;
             y2 = Math.floor(y2) + 0.5;
 
+            log("stroke line, prop: "+properties);
+            
             this.save();
             if (properties) igv.Canvas.setProperties.call(this, properties);
 
@@ -69,6 +89,7 @@ var igv = (function (igv) {
             x = Math.round(x);
             y = Math.round(y);
 
+            log("fillRect");
             if (properties) {
                 this.save();
                 igv.Canvas.setProperties.call(this, properties);
@@ -137,12 +158,12 @@ var igv = (function (igv) {
 
         strokeText: function (text, x, y, properties, transforms) {
 
-            if (properties) {
-                //this.ctx.save();
+
+            this.save();
+            if (properties) {                
                 igv.Canvas.setProperties.call(this, properties);
             }
 
-            this.save();
 
             this.translate(x, y);
             if (transforms) {
@@ -163,11 +184,7 @@ var igv = (function (igv) {
 
             this.strokeText(text, 0, 0);
             this.restore();
-            //this.ctx.strokeText(text, x, y);
-
-            if (properties) {
-                //this.ctx.restore();
-            }
+           
         },
 
         strokeCircle: function (x, y, radius) {
@@ -255,10 +272,64 @@ var igv = (function (igv) {
                 this.fill();
             }
             this.restore();
+        },
+        dashedLine: function( x1, y1, x2, y2, dashLen, properties) {
+            this.save();
+            x1 = Math.round(x1);
+            y1 = Math.round(y1);
+            x2 = Math.round(x2);
+            y2 = Math.round(y2);
+            dashLen = Math.round(dashLen);
+            log("dashedLine");
+            if (properties) igv.Canvas.setProperties.call(this, properties);
+
+            if (dashLen == undefined) dashLen = 2;
+            this.moveTo(x1, y1);
+
+            var dX = x2 - x1;
+            var dY = y2 - y1;
+            var dashes = Math.floor(Math.sqrt(dX * dX + dY * dY) / dashLen);
+            var dashX = dX / dashes;
+            var dashY = dY / dashes;
+            
+            var q = 0;
+            while (q++ < dashes) {
+                x1 += dashX;
+                y1 += dashY;
+                this[q % 2 == 0 ? 'moveTo' : 'lineTo'](x1, y1);
+            }
+            this[q % 2 == 0 ? 'moveTo' : 'lineTo'](x2, y2);
+
+            this.restore();
+         },
+                        
+         lineTo: function(x, y, properties) {
+             
+             log("lineTo");
+             this.save();
+            x = Math.round(x);
+            y = Math.round(y);
+
+            if (properties) igv.Canvas.setProperties.call(this, properties);
+            this.lineTo(x, y);
+
+            this.restore();
+         },
+            
+         moveTo:  function(x, y, properties) {
+             log("moveTo");
+             this.save();
+            x = Math.round(x);
+            y = Math.round(y);
+
+            if (properties) igv.Canvas.setProperties.call(this, properties);
+
+            this.moveTo(x, y);
+
+            this.restore();
         }
+            
     }
-
-
     return igv;
 })(igv || {});
 

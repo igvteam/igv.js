@@ -252,17 +252,17 @@ var igvxhr = (function (igvxhr) {
             value,
             i;
 
+        xhr.open(method, url);
+
         if (headers) {
             header_keys = Object.keys(headers);
             for (i = 0; i < header_keys.length; i++) {
                 key = header_keys[i];
                 value = headers[key];
-                console.log("Adding to header: " + key + "=" + value);
+                if (console && console.log) console.log("Adding to header: " + key + "=" + value);
                 xhr.setRequestHeader(key, value);
             }
         }
-
-        xhr.open(method, url);
 
         xhr.onload = function (event) {
 
