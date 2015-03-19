@@ -127,7 +127,7 @@ var igv = (function (igv) {
 
         if (type === "t2d") {
             newTrack = new igv.T2dTrack(config);
-        } else if (type === "bed" || type === "vcf") {
+        } else if (type === "bed" || type === "vcf" || type == "arc" || type == "FusionJuncSpan") {
             newTrack = new igv.FeatureTrack(config);
         } else if (type === "bam") {
             newTrack = new igv.BAMTrack(config);
