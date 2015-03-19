@@ -80,9 +80,40 @@ var igv = (function (igv) {
 
     igv.Browser.prototype.loadTrack = function (config) {
 
+        var myself = this;
+
+        if (config.url && !config.sourceType) {    // TODO The test for sourcetype is a crude check if this is a webservice.  Fix.
+
+            igvxhr.isReachable(config.url, function (success, requestStatus) {
+
+                var parts;
+
+                if (true === success) {
+
+                    myself.doLoadTrack(config);
+                } else {
+
+                    parts = igv.parseUri(config.url);
+
+                    myself.userFeedback.bodyCopy("<p>ERROR: Track file " + parts[ "file" ] + " is unreachable<\p><p>HTTP request status: " + requestStatus + "<\p>");
+                    myself.userFeedback.show();
+                }
+
+            });
+
+        } else {
+
+            myself.doLoadTrack(config);
+
+        }
+    };
+
+    igv.Browser.prototype.doLoadTrack = function (config) {
+
         if (this.isDuplicateTrack(config)) {
             return;
         }
+
 
         // Set the track type, if not explicitly specified
         if (!config.type) {
@@ -119,7 +150,9 @@ var igv = (function (igv) {
         // TODO -- error message "unsupported filed type"
         this.addTrack(newTrack);
 
-        return newTrack;
+        // Not needed
+        //return newTrack;
+
 
 
     };
@@ -387,7 +420,7 @@ var igv = (function (igv) {
             chr = referenceFrame.chr;
             ss = igv.numberFormatter(Math.floor(referenceFrame.start + 1));
 
-            end = referenceFrame.start + this.trackBPWidth();
+            end = referenceFrame.start + this.trackViewportWidthBP();
             if(this.genome) {
                 chromosome = this.genome.getChromosome(chr);
                 if(chromosome) end = Math.min(end, chromosome.bpLength);
@@ -423,7 +456,7 @@ var igv = (function (igv) {
         return 14.0;
     };
 
-    igv.Browser.prototype.trackBPWidth = function () {
+    igv.Browser.prototype.trackViewportWidthBP = function () {
         return this.referenceFrame.bpPerPixel * this.trackViewportWidth();
     };
 
@@ -589,7 +622,7 @@ var igv = (function (igv) {
                                 locusTokens = tokens[1].split(":");
                                 chr = igv.browser.genome.getChromosomeName(locusTokens[0].trim());
 
-                                if (this.type === "GTEX") {
+                                if (igv.browser.type === "GTEX") {
                                     igv.browser.selection = new igv.GtexSelection(type == 'gtex' ? {snp: feature} : {gene: feature});
                                 }
 

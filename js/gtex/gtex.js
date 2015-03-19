@@ -98,7 +98,16 @@ var igv = (function (igv) {
          * Change height of all tracks
          */
         heightBoxInput.onchange = function () {
-            igv.browser.setTrackHeight(heightBoxInput.value);
+            igv.browser.trackHeight = heightBoxInput.value;
+
+            igv.browser.trackViews.forEach(function (panel) {
+                if (panel.track instanceof igv.FeatureTrack ||
+                    panel.track instanceof igv.SequenceTrack ||
+                    panel.track instanceof igv.RulerTrack) {
+                    return;
+                }
+                panel.setTrackHeight(heightBoxInput.value);
+            });
         }
 
         $(trackHeightDiv).append(heightBoxInput);
@@ -146,9 +155,11 @@ var igv = (function (igv) {
                         browser.loadTrack(
                             {
                                 type: "eqtl",
+                                sourceType: 'gtex',
                                 url: record.url,
                                 label: record.label,
-                                disableButtons: true
+                                disableButtons: true,
+                                height: browser.trackHeight
                             }
                         );
                     }
@@ -179,7 +190,7 @@ var igv = (function (igv) {
         var i, len = browser.trackViews.length;
 
         for (i = 0; i < len; i++) {
-            if (browser.trackViews[i].track.file === url) {
+            if (browser.trackViews[i].track.url === url) {
                 return browser.trackViews[i].track;
             }
         }

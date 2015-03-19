@@ -35,24 +35,41 @@ var igv = (function (igv) {
             searchButton,
             zoom,
             zoomInButton,
-            zoomOutButton;
+            zoomOutButton,
+            fileInput = document.getElementById('fileInput');
+
+        if (fileInput) {
+
+            fileInput.addEventListener('change', function (e) {
+
+                var localFile = fileInput.files[0],
+                    featureFileReader;
+
+                featureFileReader = new igv.FeatureFileReader({localFile: localFile});
+                featureFileReader.readFeatures(function () {
+                    console.log("success reading " + localFile.name);
+                });
+
+            });
+
+        }
 
         if (options.showNavigation) {
 
             navigation = $('<div class="igvNavigation">');
-            $(controlDiv).append(navigation[ 0 ]);
+            $(controlDiv).append(navigation[0]);
 
 
             // search
             search = $('<div class="igvNavigationSearch">');
-            navigation.append(search[ 0 ]);
+            navigation.append(search[0]);
 
             browser.searchInput = $('<input class="igvNavigationSearchInput" type="text" placeholder="Locus Search">');
             //browser.searchInput = $('<input type="search" placeholder="Locus Search">');
-            search.append(browser.searchInput[ 0 ]);
+            search.append(browser.searchInput[0]);
 
             searchButton = $('<i class="igv-app-icon fa fa-search fa-lg igvNavigationMarginLeft12">');
-            search.append(searchButton[ 0 ]);
+            search.append(searchButton[0]);
 
             browser.searchInput.change(function () {
 
@@ -63,17 +80,16 @@ var igv = (function (igv) {
                 browser.search(browser.searchInput.val());
             });
 
-
             // zoom
             zoom = $('<div class="igvNavigationZoom">');
-            navigation.append(zoom[ 0 ]);
+            navigation.append(zoom[0]);
 
             zoomOutButton = $('<i class="igv-app-icon fa fa-minus-square-o fa-2x" style="padding-right: 4px;">');
 
-            zoom.append(zoomOutButton[ 0 ]);
+            zoom.append(zoomOutButton[0]);
 
             zoomInButton = $('<i class="igv-app-icon fa fa-plus-square-o fa-2x">');
-            zoom.append(zoomInButton[ 0 ]);
+            zoom.append(zoomInButton[0]);
 
             zoomInButton.click(function () {
                 igv.browser.zoomIn();
@@ -89,10 +105,10 @@ var igv = (function (igv) {
             contentKaryo = $('#igvKaryoDiv')[0];
             // if a karyo div already exists in the page, use that one.
             // this allows the placement of the karyo view on the side, for instance
-            if (!contentKaryo ) {                
+            if (!contentKaryo) {
                 contentKaryo = $('<div id="igvKaryoDiv" class="igv-karyo-div">')[0];
                 $(controlDiv).append(contentKaryo);
-            }            
+            }
             browser.karyoPanel = new igv.KaryoPanel(contentKaryo);
         }
 
@@ -126,10 +142,10 @@ var igv = (function (igv) {
         }
 
 
-        var contentRoot = $('<div id="igvContentDiv" class="igv-content-div">')[0],
-            contentHeader = $('<div id="igvHeaderDiv" class="igv-header-div">')[0],
-            trackContainer = $('<div id="igvTrackContainerDiv" class="igv-track-container-div">')[0],
-            browser = new igv.Browser(options, trackContainer),
+        var contentDiv = $('<div id="igvContentDiv" class="igv-content-div">')[0],
+            headerDiv = $('<div id="igvHeaderDiv" class="igv-header-div">')[0],
+            trackContainerDiv = $('<div id="igvTrackContainerDiv" class="igv-track-container-div">')[0],
+            browser = new igv.Browser(options, trackContainerDiv),
             rootDiv = browser.div,
             controlDiv;
 
@@ -146,18 +162,21 @@ var igv = (function (igv) {
 
         $(rootDiv).append($(controlDiv));
 
-        $(rootDiv).append(contentRoot);
-        $(contentRoot).append(contentHeader);
-        $(contentRoot).append(trackContainer);
+        $(rootDiv).append(contentDiv);
+        $(contentDiv).append(headerDiv);
+        $(contentDiv).append(trackContainerDiv);
+
+
+        // user feedback
+        browser.userFeedback = new igv.UserFeedback( $(contentDiv) );
+        browser.userFeedback.hide();
 
         // Popover object -- singleton shared by all components
-        igv.popover = new igv.Popover(contentRoot);
+        igv.popover = new igv.Popover(contentDiv);
 
         browser.ideoPanel = new igv.IdeoPanel(rootDiv);
-        $(contentHeader).append(browser.ideoPanel.div);
+        $(headerDiv).append(browser.ideoPanel.div);
         browser.ideoPanel.resize();
-
-        igv.sequenceSource = new igv.FastaSequence(options.fastaURL);
 
         if (options.trackDefaults) {
 
@@ -173,7 +192,7 @@ var igv = (function (igv) {
             }
         }
 
-        igv.loadGenome(options.cytobandURL, function (genome) {
+        igv.loadGenome(options.fastaURL, options.cytobandURL, function (genome) {
 
             browser.genome = genome;
             browser.addTrack(new igv.RulerTrack());
@@ -202,19 +221,19 @@ var igv = (function (igv) {
                         range = start - end;
 
                     if (options.tracks) {
+
                         if (range < 100000) {
-                            igv.sequenceSource.getSequence(refFrame.chr, start, end, function (refSeq) {
+                            genome.sequence.getSequence(refFrame.chr, start, end, function (refSeq) {
                                 options.tracks.forEach(function (track) {
                                     browser.loadTrack(track);
                                 });
                             });
                         }
-                    }
-                    else {
-                        options.tracks.forEach(function (track) {
-                            browser.loadTrack(track);
-                        });
-
+                        else {
+                            options.tracks.forEach(function (track) {
+                                browser.loadTrack(track);
+                            });
+                        }
                     }
 
                 });
@@ -229,6 +248,9 @@ var igv = (function (igv) {
 
 
         });
+
+
+
 
 
         return browser;

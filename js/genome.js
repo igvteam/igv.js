@@ -25,8 +25,9 @@
 
 var igv = (function (igv) {
 
-    igv.Genome = function (chromosomeNames, chromosomes) {
+    igv.Genome = function (sequence, chromosomeNames, chromosomes) {
 
+        this.sequence = sequence;
         this.chromosomeNames = chromosomeNames;
         this.chromosomes = chromosomes;  // An object (functions as a dictionary)
 
@@ -61,16 +62,10 @@ var igv = (function (igv) {
         return this.chromosomes;
     }
 
-    igv.Chromosome = function (name, order, cytobands) {
+    igv.Chromosome = function (name, order, bpLength) {
         this.name = name;
         this.order = order;
-        this.cytobands = cytobands;
-        if (cytobands) {
-            var len = cytobands.length;
-            if (len > 0) {
-                this.bpLength = cytobands[len - 1].end;
-            }
-        }
+        this.bpLength = bpLength;
     }
 
     igv.Cytoband = function (start, end, name, typestain) {
@@ -109,53 +104,72 @@ var igv = (function (igv) {
             this.end >= range.end;
     }
 
-    igv.loadGenome = function (url, continuation) {
+    igv.loadGenome = function (fastaUrl, cytobandUrl, continuation) {
 
-        igvxhr.loadString(url, {
+        var sequence = new igv.FastaSequence(fastaUrl);
 
-            success: function (data) {
+        sequence.loadIndex(function (fastaIndex) {
 
-                var chromosomes = {},
-                    chromosomeNames = [],
-                    tmpCytoboands = {},
-                    bands = [],
-                    lastChr,
-                    n = 0,
-                    c = 1,
-                    lines = data.splitLines(),
-                    len = lines.length;
+            var chrNames = sequence.chromosomeNames,
+                chromosomes = {},
+                order = 0;
 
-                for (var i = 0; i < len; i++) {
-                    var tokens = lines[i].split("\t");
-                    var chr = tokens[0];
-                    if (!lastChr) lastChr = chr;
+            chrNames.forEach(function (chrName) {
+                var bpLength = fastaIndex[chrName].size;
+                chromosomes[chrName] = new igv.Chromosome(chrName, order++, bpLength);
+            })
 
-                    if (chr != lastChr) {
+            if(cytobandUrl) {
+                igvxhr.loadString(cytobandUrl, {
 
-                        chromosomeNames.push(lastChr);
+                    success: function (data) {
 
-                        chromosomes[lastChr] = new igv.Chromosome(lastChr, c, bands);
+                        var chromosome,
+                            tmpCytoboands = {},
+                            bands = [],
+                            lastChr,
+                            n = 0,
+                            c = 1,
+                            lines = data.splitLines(),
+                            len = lines.length;
 
-                        tmpCytoboands[lastChr] = bands;
-                        bands = [];
-                        lastChr = chr;
-                        n = 0;
-                        c++;
+                        for (var i = 0; i < len; i++) {
+                            var tokens = lines[i].split("\t");
+                            var chr = tokens[0];
+                            if (!lastChr) lastChr = chr;
+
+                            if (chr != lastChr) {
+
+                                chromosome = chromosomes[lastChr];
+
+                                if(chromosome) chromosome.cytobands = bands;
+
+                                tmpCytoboands[lastChr] = bands;
+                                bands = [];
+                                lastChr = chr;
+                                n = 0;
+                                c++;
+                            }
+
+                            if (tokens.length == 5) {
+                                //10	0	3000000	p15.3	gneg
+                                var chr = tokens[0];
+                                var start = parseInt(tokens[1]);
+                                var end = parseInt(tokens[2]);
+                                var name = tokens[3];
+                                var stain = tokens[4];
+                                bands[n++] = new igv.Cytoband(start, end, name, stain);
+                            }
+                        }
+
+                        continuation(new igv.Genome(sequence, chrNames, chromosomes));
                     }
-
-                    if (tokens.length == 5) {
-                        //10	0	3000000	p15.3	gneg
-                        var chr = tokens[0];
-                        var start = parseInt(tokens[1]);
-                        var end = parseInt(tokens[2]);
-                        var name = tokens[3];
-                        var stain = tokens[4];
-                        bands[n++] = new igv.Cytoband(start, end, name, stain);
-                    }
-                }
-
-                continuation(new igv.Genome(chromosomeNames, chromosomes));
-            }});
+                });
+            }
+            else {
+                continuation(new igv.Genome(sequence, chrNames, chromosomes));
+            }
+        });
     }
 
     return igv;

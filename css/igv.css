@@ -107,6 +107,88 @@ div.ui-dialog fieldset {
 
 }
 
+.igvUserFeedback {
+
+    position:fixed;
+    top: 50%;
+    left: 50%;
+
+    width:36em;
+    height:27em;
+
+    margin-top: -9em; /*set to a negative number 1/2 of your height*/
+    margin-left: -15em; /*set to a negative number 1/2 of your width*/
+
+    background-color: white;
+
+    border-color: #a2a2a2;
+    border-style: solid;
+    border-width: thin;
+
+    font-family: 'Open Sans', sans-serif;
+    font-size: medium;
+    font-weight: 400;
+    color: #444;
+
+}
+
+.igvUserFeedbackHeader {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    width: 100%;
+    height: 32px;
+
+    border-bottom-color: #a2a2a2;
+    border-bottom-style: solid;
+    border-bottom-width: thin;
+
+    background-color: white;
+}
+
+.igvUserFeedbackBodyCopy {
+
+    padding-left: 48px;
+    padding-top: 8px;
+    padding-right: 48px;
+    padding-bottom: 8px;
+    position: absolute;
+    top: 33px;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: white;
+}
+
+.igvUserFeedbackAlert {
+
+    position: absolute;
+    top: 0;
+    left: 0;
+    padding: 8px;
+
+    color: red;
+}
+
+.igvUserFeedbackDismiss {
+
+    position: absolute;
+    top: 0;
+    right: 0;
+    padding: 8px;
+
+    cursor: pointer;
+    color: grey;
+
+}
+
+.igvUserFeedbackDismiss:hover,
+.igvUserFeedbackDismiss:focus,
+.igvUserFeedbackDismiss:active  {
+    color: rgba(51, 51, 51, 1);
+}
+
 .igvNavigationZoom {
 
     position: relative;
@@ -526,13 +608,18 @@ div.ui-dialog fieldset {
     border-style: solid;
     border-width: thin;
 
+    background: rgb(255, 255, 255);
+
+    display: inline-block;
+
     position: absolute;
     left: 10px;
-    top: 4px;
+    top: 0;
     width: auto;
     height:auto;
-    background: rgb(255, 255, 255);
-    display: inline-block;
+
+    margin-top: 4px;
+
 }
 
 .igv-track-control-canvas {

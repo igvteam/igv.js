@@ -30,11 +30,54 @@ var igvxhr = (function (igvxhr) {
     const GZIP = 1;
     const BGZF = 2;
 
+    igvxhr.isReachable = function (url, continuation) {
+
+        var request = new XMLHttpRequest();
+
+        request.open("HEAD", url, true);
+
+        request.onload = function (event) {
+
+            if (0 === request.status) {
+                console.log("igvxhr.isReachable - onload - failure - status " + request.status);
+                continuation(false, request.status);
+            }
+            else if (request.status >= 200 && request.status <= 300) {
+                console.log("igvxhr.isReachable - onload - success - status " + request.status);
+                continuation(true, request.status);
+            }
+            else {
+                console.log("igvxhr.isReachable - onload - failure - status " + request.status);
+                continuation(false, request.status);
+            }
+
+        };
+
+        request.onerror = function (event) {
+            console.log("igvxhr.isReachable - onerror - status " + request.status);
+            continuation(false, request.status);
+        };
+
+        request.ontimeout = function (event) {
+            console.log("igvxhr.isReachable - ontimeout - status " + request.status);
+            continuation(false, request.status);
+        };
+
+        request.onabort = function (event) {
+            console.log("igvxhr.isReachable - onabort - status " + request.status);
+            continuation(false, request.status);
+        };
+
+        console.log("igvxhr.isReachable - send - before");
+        request.send(null);
+        console.log("igvxhr.isReachable - send - after");
+
+    };
 
     igvxhr.loadArrayBuffer = function (url, options) {
         options.responseType = "arraybuffer";
         igvxhr.load(url, options);
-    }
+    };
 
     igvxhr.loadJson = function (url, options) {
 
@@ -52,7 +95,7 @@ var igvxhr = (function (igvxhr) {
 
         igvxhr.load(url, options);
 
-    }
+    };
 
     /**
      * Load a "raw" string.
@@ -89,7 +132,7 @@ var igvxhr = (function (igvxhr) {
         }
 
 
-    }
+    };
 
     igvxhr.load = function (url, options) {
 
@@ -106,17 +149,25 @@ var igvxhr = (function (igvxhr) {
             contentType = options.contentType,
             mimeType = options.mimeType,
             headers = options.headers,
+            isSafari = navigator.vendor.indexOf("Apple")==0 && /\sSafari\//.test(navigator.userAgent),
             header_keys, key, value, i;
 
         if (task) task.xhrRequest = xhr;
 
+        if(range && isSafari) {
+
+            console.log(isSafari);
+            // Add random seed. For nasty safari bug https://bugs.webkit.org/show_bug.cgi?id=82672
+            // TODO -- add some "isSafari" test?
+            url += url.contains("?") ? "&" : "?";
+            url += "someRandomSeed=" + Math.random().toString(36);
+        }
+
         xhr.open(method, url);
 
         if (range) {
-            var rangeEnd = range.start + range.size - 1;
+            var rangeEnd = range.size ? range.start + range.size - 1 : "";
             xhr.setRequestHeader("Range", "bytes=" + range.start + "-" + rangeEnd);
-            xhr.setRequestHeader("Cache-control", "no-cache");
-            xhr.setRequestHeader("If-None-Match", Math.random().toString(36));  // For nasty safari bug https://bugs.webkit.org/show_bug.cgi?id=82672
         }
         if (contentType) {
             xhr.setRequestHeader("Content-Type", contentType);
@@ -146,35 +197,47 @@ var igvxhr = (function (igvxhr) {
                 error(null, xhr);
             }
 
-        }
+        };
 
         xhr.onerror = function (event) {
 
             if (isCrossDomain(url) && url) {
                 // Try the proxy, if it exists.  Presumably this is a php file
-                if (igv.browser.crossDomainProxy && url != igv.browser.crossDomainProxy) {
+                if (igv.browser.crossDomainProxy && url != igv.browser.crossDomainProxy && ! options.crossDomainRetried) {
 
                     options.sendData = "url=" + url;
+                    options.crossDomainRetried = true;
 
                     igvxhr.load(igv.browser.crossDomainProxy, options);
                     return;
                 }
             }
+
+            if(xhr.status === 416 && options.range && !options.rangeRetried) {
+                // Unsatisfied range error, presumably because we tried to read off the end.  Try again leaving the
+                // end off
+                options.range.size = undefined;
+                options.rangeRetried = true;
+                igv.xhr.load(url, options);
+                return;
+            }
+
             error(null, xhr);
-        }
+        };
 
         xhr.ontimeout = function (event) {
+            console.log("Aborted");
             timeout(null, xhr);
-        }
+        };
 
         xhr.onabort = function (event) {
             console.log("Aborted");
             abort(null, xhr);
-        }
+        };
 
         xhr.send(sendData);
 
-    }
+    };
 
     igvxhr.loadHeader = function (url, options) {
 
@@ -209,15 +272,12 @@ var igvxhr = (function (igvxhr) {
         }
 
         xhr.onerror = function (event) {
-
-            console.log("XMLHttpRequest - Error loading" + url);
-
-            error(event);
+            error(null, xhr);
         }
 
 
         xhr.ontimeout = function (event) {
-            timeout(event);
+            timeout(null);
         }
 
 
@@ -239,7 +299,7 @@ var igvxhr = (function (igvxhr) {
                 var headerPair = headerPairs[i];
                 var index = headerPair.indexOf('\u003a\u0020');
                 if (index > 0) {
-                    var key = headerPair.substring(0, index);
+                    var key = headerPair.substring(0, index).toLowerCase();
                     var val = headerPair.substring(index + 2);
                     headers[key] = val;
                 }
@@ -247,8 +307,7 @@ var igvxhr = (function (igvxhr) {
             return headers;
         }
 
-    }
-
+    };
 
     igvxhr.getContentLength = function (url, options) {
 
@@ -261,18 +320,19 @@ var igvxhr = (function (igvxhr) {
         }
 
         options.success = function (header) {
-            var contentLengthString = header ? header["Content-Length"] : null;
+
+            var contentLengthString = header ? header["content-length"] : null;
             if (contentLengthString) {
                 continuation(parseInt(contentLengthString));
             }
             else {
-                continuation(-1);
+                continuation(-1);    // Don't know the content length
             }
 
         }
 
         igvxhr.loadHeader(url, options);
-    }
+    };
 
     igvxhr.loadStringFromFile = function (localfile, options) {
 
@@ -312,8 +372,7 @@ var igvxhr = (function (igvxhr) {
 
         fileReader.readAsArrayBuffer(localfile);
 
-    }
-
+    };
 
     function isCrossDomain(url) {
 
@@ -322,7 +381,6 @@ var igvxhr = (function (igvxhr) {
         return !url.startsWith(origin);
 
     }
-
 
     igv.arrayBufferToString = function (arraybuffer, compression) {
 
@@ -344,7 +402,7 @@ var igvxhr = (function (igvxhr) {
             result = result + String.fromCharCode(plain[i]);
         }
         return result;
-    }
+    };
 
     return igvxhr;
 

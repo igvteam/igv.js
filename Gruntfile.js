@@ -62,7 +62,8 @@ module.exports = function (grunt) {
 
     // 4. Where we tell Grunt what to do when we type "grunt" into the terminal.
     //grunt.registerTask('default', ['concat:igvexp', 'uglify:igvexp']);
-    grunt.registerTask('default', ['concat:igv', 'uglify:igv', 'md2html:igv']);
+    //grunt.registerTask('default', ['concat:igv', 'uglify:igv', 'md2html:igv']);
+    grunt.registerTask('default', ['qunit:hello', 'concat:igv', 'uglify:igv', 'md2html:igv']);
 
 
 };

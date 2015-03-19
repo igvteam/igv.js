@@ -48,15 +48,14 @@ var cursor = (function (cursor) {
 
     cursor.CursorTrack.prototype.jsonRepresentation = function () {
 
-        var fs = this.featureSource,
-            json;
+        var json;
 
         json = {
             label: this.label,
             color: this.color,
             order: this.order,
             height: this.height,
-            path: fs.url,
+            path: this.featureSource.config.url,
             trackFilter: this.trackFilter.jsonRepresentation()
         };
 
@@ -152,7 +151,7 @@ var cursor = (function (cursor) {
      * @param height -- pixel height
      * @param continuation -- called when done.  No arguments
      */
-    cursor.CursorTrack.prototype.draw = function (canvas, refFrame, start, end, width, height, continuation) {
+    cursor.CursorTrack.prototype.draw = function (ctx, refFrame, start, end, width, height, continuation) {
 
         var myself = this;
 
@@ -206,10 +205,10 @@ var cursor = (function (cursor) {
             sampleInterval = Math.max(1, Math.floor(1.0 / framePixelWidth));
 
             if (frameMargin > 0) {
-                canvas.fillRect(0, 0, width, height, { fillStyle: 'rgb(255, 255, 255)' });
+                igv.Canvas.fillRect.call(ctx, 0, 0, width, height, { fillStyle: 'rgb(255, 255, 255)' });
             }
 
-            canvas.setProperties({ fillStyle: this.color, strokeStyle: this.color });
+            igv.Canvas.setProperties.call(ctx, { fillStyle: this.color, strokeStyle: this.color });
 
 
             for (regionNumber = Math.floor(start), len = regions.length;
@@ -256,7 +255,7 @@ var cursor = (function (cursor) {
                             if (score > this.max) {
                                 console.log(score);
                             }
-                            canvas.fillRect(pStart, top, pw, fh);
+                            igv.Canvas.fillRect.call(ctx, pStart, top, pw, fh);
 
                         }
                     }
@@ -274,7 +273,7 @@ var cursor = (function (cursor) {
 
                         top = 0;
                         fh = myself.height;
-                        canvas.fillRect(pxStart, top, pw, fh);
+                        igv.Canvas.fillRect.call(ctx, pxStart, top, pw, fh);
 
                     }
                     else if (score > 0) {
@@ -282,7 +281,7 @@ var cursor = (function (cursor) {
                         fh = Math.round(((score / myself.max) * maxFeatureHeight));
                         top = myself.height - fh;
 
-                        canvas.fillRect(pxStart, top, pw, fh);
+                        igv.Canvas.fillRect.call(ctx, pxStart, top, pw, fh);
                     }
 
                 }
