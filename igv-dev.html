@@ -194,24 +194,24 @@
 
         <!--&lt;!&ndash; locus chr19:9917384-14917884 &ndash;&gt;-->
         <!--<div onclick="igv.browser.loadTrack({-->
-                                 <!--type : 'wig',-->
-                                  <!--url : 'https://dl.dropboxusercontent.com/u/11270323/BroadInstitute/dataFormats/WIG/random_5000_lo_0dot1_hi_1.wig',-->
-                                <!--label : 'Random 0.1 to 1.0'-->
-                                <!--})">Random 0.1 to 1.0-->
+        <!--type : 'wig',-->
+        <!--url : 'https://dl.dropboxusercontent.com/u/11270323/BroadInstitute/dataFormats/WIG/random_5000_lo_0dot1_hi_1.wig',-->
+        <!--label : 'Random 0.1 to 1.0'-->
+        <!--})">Random 0.1 to 1.0-->
         <!--</div>-->
 
         <!--<div onclick="igv.browser.loadTrack({-->
-                                 <!--type : 'wig',-->
-                                  <!--url : 'https://dl.dropboxusercontent.com/u/11270323/BroadInstitute/dataFormats/WIG/random_10000.wig',-->
-                                <!--label : 'Random -1 to +1'-->
-                                <!--})">Random -1 to +1-->
+        <!--type : 'wig',-->
+        <!--url : 'https://dl.dropboxusercontent.com/u/11270323/BroadInstitute/dataFormats/WIG/random_10000.wig',-->
+        <!--label : 'Random -1 to +1'-->
+        <!--})">Random -1 to +1-->
         <!--</div>-->
 
         <!--<div onclick="igv.browser.loadTrack({-->
-                                 <!--type : 'wig',-->
-                                  <!--url : 'https://dl.dropboxusercontent.com/u/11270323/BroadInstitute/dataFormats/WIG/random_5000_lo_neg_1_hi_0.wig',-->
-                                <!--label : 'Random -1 to 0'-->
-                                <!--})">Random Random -1 to 0-->
+        <!--type : 'wig',-->
+        <!--url : 'https://dl.dropboxusercontent.com/u/11270323/BroadInstitute/dataFormats/WIG/random_5000_lo_neg_1_hi_0.wig',-->
+        <!--label : 'Random -1 to 0'-->
+        <!--})">Random Random -1 to 0-->
         <!--</div>-->
 
 
@@ -224,7 +224,7 @@
         <div onclick="igv.browser.loadTrack({
                                 type: 'bam',
                                 url: 'http://hgdownload.cse.ucsc.edu/goldenPath/hg19/encodeDCC/wgEncodeOpenChromFaire/wgEncodeOpenChromFaireMrta2041AlnRep1.bam',
-                                label: 'MRT_A204 FaireSeq Alignments rep 1'})">MRT_A204 FaireSeq Alignments rep 1 (BAM)
+                                label: 'MRT_A204 FaireSeq Alignments rep 1'})">MRT_A204 FaireSeq Alignments rep 1
         </div>
 
         <div onclick="igv.browser.loadTrack({
@@ -232,7 +232,18 @@
                                 type: 'bam',
                                 url: 'https://www.googleapis.com/genomics/v1beta2',
                                 readGroupSetIds: 'CMvnhpKTFhCjz9_25e_lCw',
-                                label: 'Ga4gh'})">GA4Gh Alignments (Global Alliance, Google server) (BAM)
+                                authKey: 'AIzaSyC-dujgw4P1QvNd8i_c-I-S_P1uxVZzn0w',
+                                label: 'Ga4gh alignments'})">GA4Gh Alignments (Global Alliance, Google server)
+        </div>
+
+
+        <div onclick="igv.browser.loadTrack({
+                                sourceType: 'ga4gh',
+                                type: 'vcf',
+                                url: 'https://www.googleapis.com/genomics/v1beta2',
+                                variantSetId: '10473108253681171589',
+                                label: 'Ga4gh variants'
+                                })">Ga4gh Variants
         </div>
 
         <div onclick="igv.browser.loadTrack({
@@ -308,20 +319,15 @@
         </div>
 
 
-
-
         <div onclick="igv.browser.search('chr10');">GOTO</div>
 
-        <div onclick="igv.browser.loadTrack (
-                                {
-                                type: 'arc',
-                                url: '//caique.broadinstitute.org/data/Hg19_UCSC_genes.bed.gz',
-                                label: 'ucsc_genes',
-                                displayMode: 'SQUISHED',
-                                maxHeight: 10
-                                })">UCSC genes (bed)
-
-        </div>
+        <div onclick="igv.browser.loadTrack ({
+        label: 'JuncSpanView',
+        type: 'FusionJuncSpan',
+        url: '//caique.broadinstitute.org/FusionWeb/SIMULATED_FUSIONS/sim_adipose/FUSION_INSPECTOR/finspector.fusion_preds.coalesced.summary.igv.FusionJuncSpan',
+        displayMode: 'SQUISHED',
+        indexed: false
+        })">Function Junction</div>
 
 
     </div>
@@ -344,7 +350,7 @@
             fastaURL: "//dn7ywbm9isq8j.cloudfront.net/genomes/seq/hg19/hg19.fasta",
             cytobandURL: "//dn7ywbm9isq8j.cloudfront.net/genomes/seq/hg19/cytoBand.txt",
             flanking: 1000,
-            trackDefaults : {
+            trackDefaults: {
                 bam: {
                     coverageThreshold: 0.2,
                     coverageQualityWeight: true

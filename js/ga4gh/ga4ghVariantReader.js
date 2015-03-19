@@ -31,7 +31,7 @@ var igv = (function (igv) {
         this.config = config;
         this.url = config.url;
         this.variantSetId = config.variantSetId;
-        this.authKey = config.authKey || 'AIzaSyC-dujgw4P1QvNd8i_c-I-S_P1uxVZzn0w';  // Default only works for localhost & broadinstitute.org
+        this.authKey = config.authKey;
 
     }
 
