@@ -472,7 +472,6 @@ var igv = (function (igv) {
             left,
             rulerSweepWidth,
             rulerWidth = $(trackView.contentDiv).width(),
-            ppbThreshholdMet,
             dx;
 
         $(document).mousedown(function (e) {
@@ -487,7 +486,6 @@ var igv = (function (igv) {
         });
 
         $(trackView.contentDiv).mousedown(function(e) {
-
             isMouseDown = true;
         });
 
@@ -507,25 +505,7 @@ var igv = (function (igv) {
                     trackView.rulerSweeper.css( { "left" : left + "px" } );
                 }
 
-                ppbThreshholdMet = !sweepWidthThresholdUnmet(rulerSweepWidth);
-
                 trackView.rulerSweeper.css( { backgroundColor: 'rgba(68, 134, 247, 0.75)' } );
-            }
-
-            function sweepWidthThresholdUnmet(sweepWidth) {
-
-                //if ( sweepWidth < (rulerWidth * igv.browser.pixelPerBasepairThreshold()) / igv.browser.referenceFrame.bpPerPixel ) {
-                //    return true;
-                //} else {
-                //    return false;
-                //}
-
-                if ( Math.floor( rulerWidth / (igv.browser.referenceFrame.bpPerPixel * sweepWidth) ) > igv.browser.pixelPerBasepairThreshold() ) {
-                    return true;
-                } else {
-                    return false;
-                }
-
             }
         });
 
@@ -549,7 +529,7 @@ var igv = (function (igv) {
                 ss = Math.floor(igv.browser.referenceFrame.start + (left * igv.browser.referenceFrame.bpPerPixel));
                 ee = ss + Math.floor(rulerSweepWidth * igv.browser.referenceFrame.bpPerPixel);
 
-                if (!ppbThreshholdMet) {
+                if ( sweepWidthThresholdUnmet(rulerSweepWidth) ) {
 
                     chromosome = igv.browser.genome.getChromosome(igv.browser.referenceFrame.chr);
                     chromosomeLength = chromosome.bpLength;
@@ -581,6 +561,16 @@ var igv = (function (igv) {
             }
 
         });
+
+        function sweepWidthThresholdUnmet(sweepWidth) {
+
+            if ( Math.floor( rulerWidth / (igv.browser.referenceFrame.bpPerPixel * sweepWidth) ) > igv.browser.pixelPerBasepairThreshold() ) {
+                return true;
+            } else {
+                return false;
+            }
+
+        }
 
     }
 
