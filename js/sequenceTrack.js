@@ -37,7 +37,7 @@ var igv = (function (igv) {
 
     igv.SequenceTrack.prototype.getFeatures = function (chr, bpStart, bpEnd, continuation, task) {
 
-        if (igv.browser.referenceFrame.bpPerPixel > 1) {
+        if (igv.browser.referenceFrame.bpPerPixel > 1/*igv.browser.trackViewportWidthBP() > 30000*/) {
             continuation(null);
         }
         else {
