@@ -135,7 +135,7 @@
 
     <script type="text/javascript" src="js/set.js"></script>
 
-    <script src = "js/oauth/google.js"></script>
+    <script src="js/oauth/google.js"></script>
 </head>
 
 <body>
@@ -146,15 +146,25 @@
 
     <p></p>
 
-    <a href = '#' onclick="igv.browser.loadTrack({
+    <a href='#' onclick="igv.browser.loadTrack({
                                 sourceType: 'ga4gh',
                                 type: 'bam',
                                 url: 'https://www.googleapis.com/genomics/v1beta2',
                                 readGroupSetIds: 'CMvnhpKTFhCjz9_25e_lCw',
-                                label: 'Ga4gh',
-                                authKey: false       // Disable access by key, we are testing oAuth
-                                })">Click to load Ga4gh BAM,
+                                label: 'Ga4gh BAM'
+                                })">Click to load Ga4gh BAM
 
+    </a>
+
+    <p></p>
+
+    <a href='#' onclick="igv.browser.loadTrack({
+                                sourceType: 'ga4gh',
+                                type: 'vcf',
+                                url: 'https://www.googleapis.com/genomics/v1beta2',
+                                variantSetId: '10473108253681171589',
+                                label: 'Ga4gh variants'
+                                })">Click to load Ga4gh Variants
     </a>
 
 </div>
