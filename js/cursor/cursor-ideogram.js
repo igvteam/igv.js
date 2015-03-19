@@ -74,7 +74,7 @@ var igv = (function (igv) {
             image = document.createElement('canvas');
             image.width = w;
             image.height = h;
-            var bufferCtx = new igv.Canvas(image);
+            var bufferCtx = image.getContext('2d');
             drawIdeogram(bufferCtx, w, h);
             //this.image = image;
         }

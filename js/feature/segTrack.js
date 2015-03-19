@@ -103,7 +103,7 @@ var igv = (function (igv) {
 
         var myself = this,
             featureList,
-            canvas,
+            ctx,
             bpPerPixel,
             bpStart,
             pixelWidth,
@@ -124,10 +124,10 @@ var igv = (function (igv) {
 
         sampleHeight = ("SQUISHED" === this.displayMode) ? this.sampleSquishHeight : this.sampleExpandHeight;
 
-        canvas = options.context;
+        ctx = options.context;
         pixelWidth = options.pixelWidth;
         pixelHeight = options.pixelHeight;
-        canvas.fillRect(0, 0, pixelWidth, pixelHeight, {'fillStyle': "rgb(255, 255, 255)"});
+        igv.Canvas.fillRect.call(ctx, 0, 0, pixelWidth, pixelHeight, {'fillStyle': "rgb(255, 255, 255)"});
 
         featureList = options.features;
         if (featureList) {
@@ -176,7 +176,7 @@ var igv = (function (igv) {
                 px1 = Math.round((segment.end - bpStart) / xScale);
                 pw = Math.max(1, px1 - px);
 
-                canvas.fillRect(px, y, pw, sampleHeight, {fillStyle: color});
+                igv.Canvas.fillRect.call(ctx, px, y, pw, sampleHeight, {fillStyle: color});
 
             }
         }

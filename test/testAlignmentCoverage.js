@@ -7,12 +7,12 @@ function runAlignmentCoverageTests() {
 
         var chr = "chr22",
             ss = 29565176,
-            ee = 29565216;
+            ee = 29565216,
 
-        igv.sequenceSource = new igv.FastaSequence("http://dn7ywbm9isq8j.cloudfront.net/genomes/seq/hg19/hg19.fasta");
-        ok(igv.sequenceSource);
+            sequenceSource = new igv.FastaSequence("http://dn7ywbm9isq8j.cloudfront.net/genomes/seq/hg19/hg19.fasta");
+        ok(sequenceSource);
 
-        igv.sequenceSource.getSequence("chr22", ss, ee, function(sequence){
+        sequenceSource.getSequence("chr22", ss, ee, function (sequence) {
 
             ok(sequence, "sequence");
             equal(sequence.length, (ee - ss));
@@ -27,21 +27,26 @@ function runAlignmentCoverageTests() {
 
         var bamSource;
 
-        igv.sequenceSource = new igv.FastaSequence("//igvdata.broadinstitute.org/genomes/seq/hg19/hg19.fasta");
-
+        // Mock object
+        igv.browser = {
+            genome: {
+                sequence: new igv.FastaSequence("//igvdata.broadinstitute.org/genomes/seq/hg19/hg19.fasta")
+            }
+        }
         bamSource = new igv.BamSource({
             type: 'bam',
             url: 'http://www.broadinstitute.org/igvdata/1KG/b37/data/NA06984/alignment/NA06984.mapped.ILLUMINA.bwa.CEU.low_coverage.20120522.bam',
-            label: 'NA06984'});
+            label: 'NA06984'
+        });
 
-        bamSource.getFeatures("chr22", 24379992, 24380390, function(genomicInterval) {
+        bamSource.getFeatures("chr22", 24379992, 24380390, function (genomicInterval) {
 
             ok(genomicInterval, "genomicInterval");
             ok(genomicInterval.chr, "genomicInterval.chr");
             ok(genomicInterval.sequence, "genomicInterval.sequence");
             ok(genomicInterval.coverageMap, "genomicInterval.coverageMap");
 
-            igv.sequenceSource.readSequence(genomicInterval.chr, genomicInterval.start, genomicInterval.end, function(sequence){
+            igv.browser.genome.sequence.readSequence(genomicInterval.chr, genomicInterval.start, genomicInterval.end, function (sequence) {
 
                 ok(sequence, "sequence");
                 equal(sequence.length, (genomicInterval.end - genomicInterval.start));
@@ -56,14 +61,20 @@ function runAlignmentCoverageTests() {
 
         var bamSource;
 
-        igv.sequenceSource = new igv.FastaSequence("//igvdata.broadinstitute.org/genomes/seq/hg19/hg19.fasta");
+        // Mock object
+        igv.browser = {
+            genome: {
+                sequence: new igv.FastaSequence("//igvdata.broadinstitute.org/genomes/seq/hg19/hg19.fasta")
+            }
+        }
 
         bamSource = new igv.BamSource({
             type: 'bam',
             url: 'http://www.broadinstitute.org/igvdata/1KG/b37/data/NA06984/alignment/NA06984.mapped.ILLUMINA.bwa.CEU.low_coverage.20120522.bam',
-            label: 'NA06984'});
+            label: 'NA06984'
+        });
 
-        bamSource.getFeatures("chr22", 24379992, 24380390, function(genomicInterval) {
+        bamSource.getFeatures("chr22", 24379992, 24380390, function (genomicInterval) {
 
             ok(genomicInterval, "genomicInterval");
             //ok(genomicInterval.features, "genomicInterval.features");

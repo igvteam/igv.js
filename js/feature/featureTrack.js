@@ -52,7 +52,7 @@ var igv = (function (igv) {
     igv.FeatureTrack.prototype.getFeatures = function (chr, bpStart, bpEnd, continuation, task) {
 
         // Don't try to draw alignments for windows > the visibility window
-        if (this.visibilityWindow && igv.browser.trackBPWidth() > this.visibilityWindow) {
+        if (this.visibilityWindow && igv.browser.trackViewportWidthBP() > this.visibilityWindow) {
             continuation({exceedsVisibilityWindow: true});
         }
         else {
@@ -83,7 +83,7 @@ var igv = (function (igv) {
 
         var track = this,
             featureList = options.features,
-            canvas = options.context,
+            ctx = options.context,
             bpPerPixel = options.bpPerPixel,
             bpStart = options.bpStart,
             pixelWidth = options.pixelWidth,
@@ -92,25 +92,25 @@ var igv = (function (igv) {
             zoomInNoticeFontStyle = { font: '16px PT Sans', fillStyle: "rgba(64, 64, 64, 1)", strokeStyle: "rgba(64, 64, 64, 1)" };
 
 
-        canvas.fillRect(0, 0, pixelWidth, pixelHeight, {'fillStyle': "rgb(255, 255, 255)"});
+        igv.Canvas.fillRect.call(ctx, 0, 0, pixelWidth, pixelHeight, {'fillStyle': "rgb(255, 255, 255)"});
 
         if (options.features.exceedsVisibilityWindow) {
 
             for (var x = 200; x < pixelWidth; x += 400) {
-                canvas.fillText("Zoom in to see features", x, 20, zoomInNoticeFontStyle);
+                igv.Canvas.fillText.call(ctx, "Zoom in to see features", x, 20, zoomInNoticeFontStyle);
             }
             return;
         }
 
         if (featureList) {
 
-            canvas.setProperties( { fillStyle: track.color, strokeStyle: track.color } );
+            igv.Canvas.setProperties.call(ctx,  { fillStyle: track.color, strokeStyle: track.color } );
 
             for (var gene, i = 0, len = featureList.length; i < len; i++) {
                 gene = featureList[i];
                 if (gene.end < bpStart) continue;
                 if (gene.start > bpEnd) break;
-                track.render.call(this, gene, bpStart, bpPerPixel, canvas);
+                track.render.call(this, gene, bpStart, bpPerPixel, pixelHeight, ctx);
             }
         }
         else {
@@ -201,7 +201,16 @@ var igv = (function (igv) {
 
     };
 
-    function renderFeature(feature, bpStart, xScale, canvas) {
+    /**
+     *
+     * @param feature
+     * @param bpStart  genomic location of the left edge of the current canvas
+     * @param xScale  scale in base-pairs per pixel
+     * @param pixelHeight  pixel height of the current canvas
+     * @param ctx  the canvas 2d context
+     */
+
+    function renderFeature(feature, bpStart, xScale, pixelHeight, ctx) {
 
         var px,
             px1,
@@ -237,23 +246,23 @@ var igv = (function (igv) {
         exonCount = feature.exons ? feature.exons.length : 0;
 
         if (exonCount == 0) {
-            canvas.fillRect(px, py, pw, h);
+           ctx.fillRect(px, py, pw, h);
 
         }
         else {
             cy = py + 5;
-            canvas.strokeLine(px, cy, px1, cy);
+            igv.Canvas.strokeLine.call(ctx, px, cy, px1, cy);
             direction = feature.strand == '+' ? 1 : -1;
             for (var x = px + step / 2; x < px1; x += step) {
-                canvas.strokeLine(x - direction * 2, cy - 2, x, cy);
-                canvas.strokeLine(x - direction * 2, cy + 2, x, cy);
+                igv.Canvas.strokeLine.call(ctx, x - direction * 2, cy - 2, x, cy);
+                igv.Canvas.strokeLine.call(ctx, x - direction * 2, cy + 2, x, cy);
             }
             for (var e = 0; e < exonCount; e++) {
                 exon = feature.exons[e];
                 ePx = Math.round((exon.start - bpStart) / xScale);
                 ePx1 = Math.round((exon.end - bpStart) / xScale);
                 ePw = Math.max(1, ePx1 - ePx);
-                canvas.fillRect(ePx, py, ePw, h);
+                ctx.fillRect(ePx, py, ePw, h);
 
             }
         }
@@ -261,8 +270,8 @@ var igv = (function (igv) {
         fontStyle = { font: '10px PT Sans', fillStyle: this.color, strokeStyle: this.color };
 
         var geneColor;
-        if (igv.selection) {
-            geneColor = igv.selection.colorForGene(feature.name);
+        if (igv.browser.selection) {
+            geneColor = igv.browser.selection.colorForGene(feature.name);
         } // TODO -- for gtex, figure out a better way to do this
 
         if (((px1 - px) > 20 || geneColor) && this.displayMode != "SQUISHED") {
@@ -281,11 +290,19 @@ var igv = (function (igv) {
             }
 
             var labelY = transform ? py + 20 : py + 25;
-            canvas.fillText(feature.name, px + ((px1 - px) / 2), labelY, geneFontStyle, transform);
+            igv.Canvas.fillText.call(ctx, feature.name, px + ((px1 - px) / 2), labelY, geneFontStyle, transform);
         }
     }
 
-    function renderVariant(variant, bpStart, xScale, canvas) {
+    /**
+     *
+     * @param variant
+     * @param bpStart  genomic location of the left edge of the current canvas
+     * @param xScale  scale in base-pairs per pixel
+     * @param pixelHeight  pixel height of the current canvas
+     * @param ctx  the canvas 2d context
+     */
+    function renderVariant(variant, bpStart, xScale, pixelHeight, ctx) {
 
         var px, px1, pw,
             py = 20,
@@ -300,7 +317,7 @@ var igv = (function (igv) {
             px -= 1;
         }
 
-        canvas.fillRect(px, py, pw, h);
+        ctx.fillRect.call(px, py, pw, h);
 
 
     }

@@ -72,15 +72,19 @@ var igv = (function (igv) {
 
                     function loadNextChunk(chunkNumber) {
 
-                        var c = chunks[chunkNumber];
-                        var fetchMin = c.minv.block;
-                        var fetchMax = Math.min(bam.contentLength, c.maxv.block + 65000);   // Make sure we get the whole block.
+                        var c = chunks[chunkNumber],
+                            fetchMin = c.minv.block,
+                            fetchMax = c.maxv.block + 65000,   // Make sure we get the whole block.
+                            range =
+                                (bam.contentLength > 0 && fetchMax > bam.contentLength) ?
+                                {start: fetchMin} :
+                                {start: fetchMin, size: fetchMax - fetchMin + 1};
 
                         igvxhr.loadArrayBuffer(bam.bamPath,
                             {
                                 task: task,
                                 headers: bam.config.headers,
-                                range: {start: fetchMin, size: fetchMax - fetchMin + 1},
+                                range: range,
                                 success: function (compressed) {
 
                                     try {
@@ -114,7 +118,7 @@ var igv = (function (igv) {
                     }
                 });
             }
-        }, task.stopSpinner);
+        });
 
 
         function decodeBamRecords(ba, offset, alignments, min, max, chrId) {
@@ -247,7 +251,7 @@ var igv = (function (igv) {
                 alignment.readName = readName;
                 alignment.chr = bam.indexToChr[refID];
 
-                if(mateRefID >= 0) {
+                if (mateRefID >= 0) {
                     alignment.mate = {
                         chr: bam.indexToChr[mateRefID],
                         position: matePos
@@ -322,7 +326,7 @@ var igv = (function (igv) {
 
                         blockQuals = record.qual ? record.qual.slice(seqOffset, c.len) : undefined;
 
-                        blocks.push( { start: pos, len: c.len, seq: blockSeq, qual: blockQuals } );
+                        blocks.push({start: pos, len: c.len, seq: blockSeq, qual: blockQuals});
 
                         seqOffset += c.len;
 
@@ -346,7 +350,7 @@ var igv = (function (igv) {
      * @param continuation
      * @param stopSpinner
      */
-    igv.BamReader.prototype.readHeader = function (continuation, stopSpinner) {
+    igv.BamReader.prototype.readHeader = function (continuation) {
 
         var bam = this;
 
@@ -354,7 +358,12 @@ var igv = (function (igv) {
 
             getIndex(bam, function (index) {
 
-                var len = index.headerSize + MAX_GZIP_BLOCK_SIZE + 100;   // Insure we get the complete compressed block containing the header
+                var contentLength = index.blockMax,
+                    len = index.headerSize + MAX_GZIP_BLOCK_SIZE + 100;   // Insure we get the complete compressed block containing the header
+
+                if (contentLength <= 0) contentLength = index.blockMax;  // Approximate
+
+                bam.contentLength = contentLength;
 
                 if (contentLength > 0) len = Math.min(contentLength, len);
 
@@ -404,26 +413,12 @@ var igv = (function (igv) {
                         }
                     });
             });
+        });
 
-
-        }, stopSpinner);
     };
 
-    function getIndex(bam, continuation) {
 
-        if (bam.index) {
-            continuation(bam.index);
-        }
-        else {
-            igv.loadBamIndex(bam.baiPath, bam.config, function (index) {
-                bam.index = index;
-                continuation(bam.index);
-            });
-        }
-
-    }
-
-    function getContentLength(bam, continuation, stopSpinner) {
+    function getContentLength(bam, continuation) {
 
         if (bam.contentLength) {
             continuation(bam.contentLength);
@@ -438,17 +433,37 @@ var igv = (function (igv) {
                     continuation(bam.contentLength);
 
                 },
-                error: function () {
+                error: function (unused, xhr) {
                     bam.contentLength = -1;
                     continuation(bam.contentLength);
-                    stopSpinner();
                 }
 
             });
         }
     }
 
-    function getChrIndex(bam, continuation, stopSpinner) {
+
+    function getIndex(bam, continuation) {
+
+        if (bam.index) {
+            continuation(bam.index);
+        }
+        else {
+            igv.loadBamIndex(bam.baiPath, bam.config, function (index) {
+                bam.index = index;
+
+                // Override contentLength
+                bam.contentLength = index.blockMax;
+
+
+                continuation(bam.index);
+            });
+        }
+
+    }
+
+
+    function getChrIndex(bam, continuation) {
 
         if (bam.chrToIndex) {
             continuation(bam.chrToIndex);
@@ -456,7 +471,7 @@ var igv = (function (igv) {
         else {
             bam.readHeader(function () {
                 continuation(bam.chrToIndex);
-            }, stopSpinner)
+            })
         }
     }
 

@@ -70,7 +70,7 @@ var igv = (function (igv) {
 
         var track = this,
             features = options.features,
-            canvas = options.context,
+            ctx = options.context,
             bpPerPixel = options.bpPerPixel,
             bpStart = options.bpStart,
             pixelWidth = options.pixelWidth,
@@ -137,7 +137,7 @@ var igv = (function (igv) {
             }
 
             //canvas.fillRect(x, yUnitless * pixelHeight, width, heightUnitLess * pixelHeight, { fillStyle: igv.randomRGB(64, 255) });
-            canvas.fillRect(x, yUnitless * pixelHeight, width, heightUnitLess * pixelHeight, { fillStyle: track.color });
+            igv.Canvas.fillRect.call(ctx, x,  yUnitless * pixelHeight, width, heightUnitLess * pixelHeight, { fillStyle: track.color });
 
         }
 

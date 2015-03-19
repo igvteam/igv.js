@@ -37,10 +37,10 @@ var igv = (function (igv) {
     RPTREE_NODE_CHILD_ITEM_SIZE = 24;  // child item size
     var BUFFER_SIZE = 512000;     //  buffer
 
-    igv.RPTree = function (fileOffset, filesize, config, littleEndian) {
+    igv.RPTree = function (fileOffset, contentLength, config, littleEndian) {
 
         this.config = config;
-        this.filesize = filesize;
+        this.filesize = contentLength;
         this.fileOffset = fileOffset; // File offset to beginning of tree
         this.path = config.url;
         this.littleEndian = littleEndian;
@@ -160,7 +160,7 @@ var igv = (function (igv) {
 
             }
 
-            if(nodeId != undefined) processing.remove(nodeId);
+            if(nodeId != undefined) processing.delete(nodeId);
 
             // Wait until all nodes are processed
             if (processing.isEmpty()) {

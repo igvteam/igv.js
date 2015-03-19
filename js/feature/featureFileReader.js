@@ -89,7 +89,6 @@ var igv = (function (igv) {
             if (!idxFile) idxFile = this.url + ".idx";
             igv.loadTribbleIndex(idxFile, this.config, continuation);
         }
-        return;
     }
 
     /**
@@ -186,7 +185,7 @@ var igv = (function (igv) {
                         endPos = block.maxv.block + (index.tabix ? MAX_GZIP_BLOCK_SIZE + 100 : 0);
                     options = {
                         headers: myself.config.headers,           // http headers, not file header
-                        range: {start: startPos, size: endPos - startPos + 1 },
+                        range: {start: startPos, size: endPos - startPos + 1},
                         success: function (data) {
 
                             var inflated, slicedData,
@@ -242,22 +241,30 @@ var igv = (function (igv) {
          */
         function loadHeaderWithIndex(index, continuation) {
 
-            //continuation({});
+
             getContentLength(function (contentLength) {
 
-                var rangeEnd = Math.min(contentLength, 65000),
+                // If the contentLength is unknown, and we have a tabix index, get an approximate value from the index
+                if (contentLength <= 0 && index.blockMax) {
+                    myself.contentLength = index.blockMax;
+                }
 
-                    options = {
-                        headers: myself.config.headers,           // http headers, not file header
-                        range: {start: 0, size: rangeEnd},
-                        bgz: index.tabix,
-                        success: function (data) {
-                            myself.header = myself.parser.parseHeader(data);
-                            continuation(myself.header);
-                        },
+                var options = {
+                    headers: myself.config.headers,           // http headers, not file header
+                    bgz: index.tabix,
+                    success: function (data) {
+                        myself.header = myself.parser.parseHeader(data);
+                        continuation(myself.header);
+                    },
+                    task: task
+                };
 
-                        task: task
-                    };
+                // Get 65kb for the header (very generous).  If the content length is known or approximately known and
+                // < 65kb read the whole file  (omit range specifier)
+                if (contentLength <= 0 || contentLength > 65000) {
+                    options.range = {start: 0, size: 65000};
+                }
+
 
                 if (myself.localFile) {
                     igvxhr.loadStringFromFile(myself.localFile, options);
@@ -279,13 +286,16 @@ var igv = (function (igv) {
                 igvxhr.getContentLength(myself.headURL, {
                     headers: myself.config.headers,
                     success: function (contentLength) {
+
+                        console.log("CL = " + contentLength);
+
                         myself.contentLength = contentLength;
                         continuation(contentLength);
 
                     },
                     error: function () {
                         myself.contentLength = -1;
-                        continuation(-1);
+                        continuation(myself.contentLength);
                     }
 
                 });

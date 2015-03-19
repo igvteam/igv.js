@@ -28,16 +28,21 @@ var igv = (function (igv) {
 
     igv.ga4ghGet = function (requestJson) {
 
-        var url = requestJson.url + "/" + requestJson.entity + "/" + requestJson.entityId;
+        var url = requestJson.url + "/" + requestJson.entity + "/" + requestJson.entityId,
+            options,
+            headers;
+
         if (requestJson.authKey) {
             url = url + "?key=" + requestJson.authKey;
         }
 
-        igvxhr.loadJson(url,
-            {
-                success: requestJson.success,
-                task: requestJson.task
-            });
+        options = {
+            success: requestJson.success,
+            task: requestJson.task,
+            headers: ga4ghHeaders()
+        };
+
+        igvxhr.loadJson(url, options);
     }
 
 
@@ -69,6 +74,7 @@ var igv = (function (igv) {
                     sendData: sendData,
                     task: task,
                     contentType: "application/json",
+                    headers: ga4ghHeaders(),
                     success: function (json) {
                         var nextPageToken, tmp;
 
@@ -100,6 +106,19 @@ var igv = (function (igv) {
                     }
                 });
         }
+    }
+
+    function ga4ghHeaders() {
+
+        var headers = {},
+            acToken = oauth.google.access_token;
+
+        headers["Cache-Control"] = "no-cache";
+        if (acToken) {
+            headers["Authorization"] = "Bearer " + acToken;
+        }
+        return headers;
+
     }
 
 
