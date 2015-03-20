@@ -40,11 +40,11 @@ var igv = (function (igv) {
         this.userFeedback.append(this.userFeedbackHeader[0]);
 
         // alert
-        this.userFeedbackAlert = $('<i class="fa fa-exclamation-triangle fa-lg igvUserFeedbackAlert">');
+        this.userFeedbackAlert = $('<i class="fa fa-exclamation-triangle fa-20px igvUserFeedbackAlert">');
         this.userFeedbackHeader.append(this.userFeedbackAlert[0]);
 
         // dismiss
-        this.userFeedbackDismiss = $('<i class="fa fa-times-circle fa-lg igvUserFeedbackDismiss">');
+        this.userFeedbackDismiss = $('<i class="fa fa-times-circle fa-20px igvUserFeedbackDismiss">');
         this.userFeedbackHeader.append(this.userFeedbackDismiss[0]);
 
         this.userFeedbackDismiss.click(function () {

@@ -67,7 +67,6 @@ var igv = (function (igv) {
             function () {
                 popoverCloseFontAwesome.removeClass("fa-times");
                 popoverCloseFontAwesome.addClass("fa-times-circle");
-                //popoverCloseFontAwesome.addClass("fa-times-circle fa-lg");
 
                 popoverCloseFontAwesome.css({
                     "color": "#222"
