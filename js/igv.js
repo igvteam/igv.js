@@ -68,7 +68,7 @@ var igv = (function (igv) {
             //browser.searchInput = $('<input type="search" placeholder="Locus Search">');
             search.append(browser.searchInput[0]);
 
-            searchButton = $('<i class="igv-app-icon fa fa-search fa-lg igvNavigationMarginLeft12">');
+            searchButton = $('<i class="igv-app-icon fa fa-search fa-24px igvNavigationMarginLeft12">');
             search.append(searchButton[0]);
 
             browser.searchInput.change(function () {
@@ -84,11 +84,11 @@ var igv = (function (igv) {
             zoom = $('<div class="igvNavigationZoom">');
             navigation.append(zoom[0]);
 
-            zoomOutButton = $('<i class="igv-app-icon fa fa-minus-square-o fa-2x" style="padding-right: 4px;">');
+            zoomOutButton = $('<i class="igv-app-icon fa fa-minus-square-o fa-24px" style="padding-right: 4px;">');
 
             zoom.append(zoomOutButton[0]);
 
-            zoomInButton = $('<i class="igv-app-icon fa fa-plus-square-o fa-2x">');
+            zoomInButton = $('<i class="igv-app-icon fa fa-plus-square-o fa-24px">');
             zoom.append(zoomInButton[0]);
 
             zoomInButton.click(function () {
