@@ -641,6 +641,8 @@ div.ui-dialog fieldset {
     width: auto;
     height:auto;
 
+    max-width: 200px;
+
     margin-top: 4px;
 
 }
