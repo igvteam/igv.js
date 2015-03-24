@@ -58,14 +58,15 @@ var igv = (function (igv) {
     igv.trackMenuItems = function (popover, trackView) {
 
         // TODO Figure out why trackView.track.height is sometimes (Genes track) non-numeric
-        var trackHeight = $.isNumeric(trackView.track.height) ? trackView.track.height : igv.browser.trackHeight,
+        var trackMenuPopupDialog,
+            trackHeight = $.isNumeric(trackView.track.height) ? trackView.track.height : igv.browser.trackHeight,
             trackItems,
             menuItems = [
                 {
                     object: $('<div class="igv-track-menu-item">Set track name</div>'),
                     click: function () {
-                        var initialValue = trackView.track.label;
-                        var trackMenuPopupDialog = new igv.TrackMenuPopupDialog(popover, "Track name", initialValue, function () {
+
+                        trackMenuPopupDialog = new igv.TrackMenuPopupDialog(popover, "Track name", trackView.track.label, function () {
 
                             if (!trackMenuPopupDialog.name.val()) {
 
@@ -76,7 +77,7 @@ var igv = (function (igv) {
                             else {
 
                                 igv.setTrackLabel(trackView.track, trackMenuPopupDialog.name.val());
-                                trackView.update();
+                                //trackView.update();
                                 trackMenuPopupDialog.dialogForm.dialog("close");
                             }
 
@@ -89,7 +90,7 @@ var igv = (function (igv) {
                     object: $('<div class="igv-track-menu-item">Set track height</div>'),
                     click: function () {
 
-                        var trackMenuPopupDialog = new igv.TrackMenuPopupDialog(popover, "Track height", trackHeight.toString(), function () {
+                        trackMenuPopupDialog = new igv.TrackMenuPopupDialog(popover, "Track height", trackHeight.toString(), function () {
 
                             var str,
                                 numberString = trackMenuPopupDialog.name.val(),
@@ -176,7 +177,10 @@ var igv = (function (igv) {
 
                 $("#featureColorPicker").colorpicker(
                     {
-                        parts: /*'full'*/[ 'header', 'map', 'bar', 'hsv', 'rgb', 'preview', 'swatches', 'footer' ],
+
+                        parts: [ 'header', 'map', 'bar', 'hsv', 'rgb', 'preview', 'swatches', 'footer' ],
+
+                        okOnEnter: true,
 
                         inline: false,
 
@@ -184,35 +188,34 @@ var igv = (function (igv) {
 
                         color: trackColor,
 
-                        //showCancelButton: false,
-
-                        init: function (event, color) {
-                            //console.log('colorpicker.init', color.formatted);
-                        },
-
-                        select: function (event, color) {
-                            //console.log('colorpicker.select', color.formatted);
-                        },
-
-                        close: function (event, color) {
-                            //console.log('colorpicker.close', color.formatted + ' r:' + color.rgb.r + ' g:' + color.rgb.g + ' b:' + color.rgb.b + ' a:' + color.a);
-                        },
-
                         ok: function (event, color) {
-                            //console.log('colorpicker.ok', color.formatted + ' r:' + color.rgb.r + ' g:' + color.rgb.g + ' b:' + color.rgb.b + ' a:' + color.a);
                             igv.setTrackColor(trackView.track, igv.rgbColor(Math.floor(255 * color.rgb.r), Math.floor(255 * color.rgb.g), Math.floor(255 * color.rgb.b)));
                             trackView.update();
                             popover.hide();
 
                         },
 
-                        open: function (event, color) {
-                            //console.log('colorpicker.open', color.formatted + ' r:' + color.rgb.r + ' g:' + color.rgb.g + ' b:' + color.rgb.b + ' a:' + color.a);
-                        },
+                        //init: function (event, color) {
+                        //    //console.log('colorpicker.init', color.formatted);
+                        //},
+                        //
+                        //select: function (event, color) {
+                        //    //console.log('colorpicker.select', color.formatted);
+                        //},
+                        //
+                        //close: function (event, color) {
+                        //    console.log('colorpicker.close', color.formatted + ' r:' + color.rgb.r + ' g:' + color.rgb.g + ' b:' + color.rgb.b + ' a:' + color.a);
+                        //},
+                        //
+                        //
+                        //open: function (event, color) {
+                        //    //console.log('colorpicker.open', color.formatted + ' r:' + color.rgb.r + ' g:' + color.rgb.g + ' b:' + color.rgb.b + ' a:' + color.a);
+                        //},
+                        //
+                        //cancel: function (event, color) {
+                        //    console.log('colorpicker.cancel', color.formatted + ' r:' + color.rgb.r + ' g:' + color.rgb.g + ' b:' + color.rgb.b + ' a:' + color.a);
+                        //}
 
-                        cancel: function (event, color) {
-                            //console.log('colorpicker.cancel', color.formatted + ' r:' + color.rgb.r + ' g:' + color.rgb.g + ' b:' + color.rgb.b + ' a:' + color.a);
-                        }
                     }
                 );
             }
@@ -301,8 +304,8 @@ var igv = (function (igv) {
             decsep = '.';
 
         return dec[0].split('').reverse().reduce(function (prev, now, i) {
-            return i % 3 === 0 ? prev + sep + now : prev + now;
-        }).split('').reverse().join('') + (dec[1] ? decsep + dec[1] : '');
+                return i % 3 === 0 ? prev + sep + now : prev + now;
+            }).split('').reverse().join('') + (dec[1] ? decsep + dec[1] : '');
     };
 
     igv.numberUnFormatter = function (formatedNumber) {

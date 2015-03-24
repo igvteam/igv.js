@@ -25,6 +25,180 @@
 
 var igv = (function (igv) {
 
+    /**
+     * Create an igv.browser instance.  This object defines the public API for interacting with the genome browser.
+     *
+     * @param parentDiv - DOM tree root
+     * @param options - configuration options.
+     *
+     */
+    igv.createBrowser = function (parentDiv, options) {
+
+        var contentDiv,
+            headerDiv,
+            trackContainerDiv,
+            browser,
+            rootDiv,
+            controlDiv;
+
+        if (igv.browser) {
+            console.log("Attempt to create 2 browsers.");
+            return igv.browser;
+        }
+
+        if (!options) options = {};
+        if (!options.type) options.type = "IGV";
+
+        if(options.oauthToken) {
+            oauth.google.access_token = options.oauthToken;
+        }
+
+        if (!options.flanking && isT2D(options)) {  // TODO -- hack for demo, remove
+            options.flanking = 100000;
+        }
+
+        if (options.genome) {
+            mergeGenome(options);
+        }
+
+        trackContainerDiv = $('<div id="igvTrackContainerDiv" class="igv-track-container-div">')[0];
+        browser = new igv.Browser(options, trackContainerDiv);
+        rootDiv = browser.div;
+
+
+        // DOM
+        parentDiv.appendChild(rootDiv);
+
+        // Create controls.  This can be customized by passing in a function, which should return a div containing the
+        // controls
+        controlDiv = options.createControls ?
+            options.createControls(browser, options) :
+            createStandardControls(browser, options);
+
+        $(rootDiv).append($(controlDiv));
+
+        contentDiv = $('<div id="igvContentDiv" class="igv-content-div">')[0];
+        $(rootDiv).append(contentDiv);
+
+        headerDiv = $('<div id="igvHeaderDiv" class="igv-header-div">')[0];
+        $(contentDiv).append(headerDiv);
+
+        $(contentDiv).append(trackContainerDiv);
+
+
+        // user feedback
+        browser.userFeedback = new igv.UserFeedback( $(contentDiv) );
+        browser.userFeedback.hide();
+
+        // Popover object -- singleton shared by all components
+        igv.popover = new igv.Popover(contentDiv);
+
+        // extend jquery ui dialog widget to support enter key triggering "ok" button press.
+        $.extend($.ui.dialog.prototype.options, {
+
+            create: function() {
+
+                var $this = $(this);
+
+                // focus first button and bind enter to it
+                $this.parent().find('.ui-dialog-buttonpane button:first').focus();
+
+                $this.keypress(function(e) {
+
+                    if( e.keyCode == $.ui.keyCode.ENTER ) {
+                        $this.parent().find('.ui-dialog-buttonpane button:first').click();
+                        return false;
+                    }
+
+                });
+            }
+
+        });
+
+
+        browser.ideoPanel = new igv.IdeoPanel(rootDiv);
+        $(headerDiv).append(browser.ideoPanel.div);
+        browser.ideoPanel.resize();
+
+        if (options.trackDefaults) {
+
+            if (undefined !== options.trackDefaults.bam) {
+
+                if (undefined !== options.trackDefaults.bam.coverageThreshold) {
+                    igv.CoverageMap.threshold = options.trackDefaults.bam.coverageThreshold;
+                }
+
+                if (undefined !== options.trackDefaults.bam.coverageQualityWeight) {
+                    igv.CoverageMap.qualityWeight = options.trackDefaults.bam.coverageQualityWeight;
+                }
+            }
+        }
+
+        igv.loadGenome(options.fastaURL, options.cytobandURL, function (genome) {
+
+            browser.genome = genome;
+            browser.addTrack(new igv.RulerTrack());
+
+            // Set inital locus
+            var firstChrName = browser.genome.chromosomeNames[0],
+                firstChr = browser.genome.chromosomes[firstChrName];
+
+            browser.referenceFrame = new igv.ReferenceFrame(firstChrName, 0, firstChr.bpLength / browser.trackViewportWidth());
+            browser.controlPanelWidth = 50;
+
+            browser.updateLocusSearch(browser.referenceFrame);
+
+            if (browser.ideoPanel) browser.ideoPanel.repaint();
+            if (browser.karyoPanel) browser.karyoPanel.repaint();
+
+            // If an initial locus is specified go there first, then load tracks.  This avoids loading track data at
+            // a default location then moving
+            if (options.locus) {
+
+                browser.search(options.locus, function () {
+
+                    var refFrame = igv.browser.referenceFrame,
+                        start = refFrame.start,
+                        end = start + igv.browser.trackViewportWidth() * refFrame.bpPerPixel,
+                        range = start - end;
+
+                    if (options.tracks) {
+
+                        if (range < 100000) {
+                            genome.sequence.getSequence(refFrame.chr, start, end, function (refSeq) {
+                                options.tracks.forEach(function (track) {
+                                    browser.loadTrack(track);
+                                });
+                            });
+                        }
+                        else {
+                            options.tracks.forEach(function (track) {
+                                browser.loadTrack(track);
+                            });
+                        }
+                    }
+
+                });
+
+            }
+            else if (options.tracks) {
+                options.tracks.forEach(function (track) {
+                    browser.loadTrack(track);
+                });
+
+            }
+
+
+        });
+
+
+
+
+
+        return browser;
+
+
+    };
 
     function createStandardControls(browser, options) {
 
@@ -114,152 +288,6 @@ var igv = (function (igv) {
 
 
         return controlDiv;
-    }
-
-    /**
-     * Create an igv.browser instance.  This object defines the public API for interacting with the genome browser.
-     *
-     * @param parentDiv - DOM tree root
-     * @param options - configuration options.
-     *
-     */
-    igv.createBrowser = function (parentDiv, options) {
-
-        if (igv.browser) {
-            console.log("Attempt to create 2 browsers.");
-            return igv.browser;
-        }
-
-        if (!options) options = {};
-        if (!options.type) options.type = "IGV";
-
-        if(options.oauthToken) {
-            oauth.google.access_token = options.oauthToken;
-        }
-
-        if (!options.flanking && isT2D(options)) {  // TODO -- hack for demo, remove
-            options.flanking = 100000;
-        }
-
-        if (options.genome) {
-            mergeGenome(options);
-        }
-
-
-        var contentDiv = $('<div id="igvContentDiv" class="igv-content-div">')[0],
-            headerDiv = $('<div id="igvHeaderDiv" class="igv-header-div">')[0],
-            trackContainerDiv = $('<div id="igvTrackContainerDiv" class="igv-track-container-div">')[0],
-            browser = new igv.Browser(options, trackContainerDiv),
-            rootDiv = browser.div,
-            controlDiv;
-
-        // DOM
-
-        parentDiv.appendChild(rootDiv);
-
-
-        // Create controls.  This can be customized by passing in a function, which should return a div containing the
-        // controls
-        controlDiv = options.createControls ?
-            options.createControls(browser, options) :
-            createStandardControls(browser, options);
-
-        $(rootDiv).append($(controlDiv));
-
-        $(rootDiv).append(contentDiv);
-        $(contentDiv).append(headerDiv);
-        $(contentDiv).append(trackContainerDiv);
-
-
-        // user feedback
-        browser.userFeedback = new igv.UserFeedback( $(contentDiv) );
-        browser.userFeedback.hide();
-
-        // Popover object -- singleton shared by all components
-        igv.popover = new igv.Popover(contentDiv);
-
-        browser.ideoPanel = new igv.IdeoPanel(rootDiv);
-        $(headerDiv).append(browser.ideoPanel.div);
-        browser.ideoPanel.resize();
-
-        if (options.trackDefaults) {
-
-            if (undefined !== options.trackDefaults.bam) {
-
-                if (undefined !== options.trackDefaults.bam.coverageThreshold) {
-                    igv.CoverageMap.threshold = options.trackDefaults.bam.coverageThreshold;
-                }
-
-                if (undefined !== options.trackDefaults.bam.coverageQualityWeight) {
-                    igv.CoverageMap.qualityWeight = options.trackDefaults.bam.coverageQualityWeight;
-                }
-            }
-        }
-
-        igv.loadGenome(options.fastaURL, options.cytobandURL, function (genome) {
-
-            browser.genome = genome;
-            browser.addTrack(new igv.RulerTrack());
-
-            // Set inital locus
-            var firstChrName = browser.genome.chromosomeNames[0],
-                firstChr = browser.genome.chromosomes[firstChrName];
-
-            browser.referenceFrame = new igv.ReferenceFrame(firstChrName, 0, firstChr.bpLength / browser.trackViewportWidth());
-            browser.controlPanelWidth = 50;
-
-            browser.updateLocusSearch(browser.referenceFrame);
-
-            if (browser.ideoPanel) browser.ideoPanel.repaint();
-            if (browser.karyoPanel) browser.karyoPanel.repaint();
-
-            // If an initial locus is specified go there first, then load tracks.  This avoids loading track data at
-            // a default location then moving
-            if (options.locus) {
-
-                browser.search(options.locus, function () {
-
-                    var refFrame = igv.browser.referenceFrame,
-                        start = refFrame.start,
-                        end = start + igv.browser.trackViewportWidth() * refFrame.bpPerPixel,
-                        range = start - end;
-
-                    if (options.tracks) {
-
-                        if (range < 100000) {
-                            genome.sequence.getSequence(refFrame.chr, start, end, function (refSeq) {
-                                options.tracks.forEach(function (track) {
-                                    browser.loadTrack(track);
-                                });
-                            });
-                        }
-                        else {
-                            options.tracks.forEach(function (track) {
-                                browser.loadTrack(track);
-                            });
-                        }
-                    }
-
-                });
-
-            }
-            else if (options.tracks) {
-                options.tracks.forEach(function (track) {
-                    browser.loadTrack(track);
-                });
-
-            }
-
-
-        });
-
-
-
-
-
-        return browser;
-
-
     }
 
     // Merge some standard genome tracks,  this is useful for demos
