@@ -51,19 +51,26 @@ var igv = (function (igv) {
         this.tips = $( ".validateTips" );
 
         this.dialogForm.dialog({
+
             autoOpen: false,
+
             width: (width || 320),
+
             height: (height || 256),
+
             modal: true,
+
             buttons: {
-                "ok": ok,
+                ok: ok,
+
                 cancel: function() {
-                    console.log("cancel");
+
                     myself.dialogForm.dialog( "close" );
                 }
             },
+
             close: function() {
-                console.log("close");
+
                 myself.form[ 0 ].reset();
                 myself.dialogForm.remove();
                 myself.dialogForm = undefined;
