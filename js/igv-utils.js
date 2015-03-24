@@ -55,21 +55,10 @@ var igv = (function (igv) {
         }
     };
 
-
-
-
-
-
-
-
-
-
-
-
     igv.trackMenuItems = function (popover, trackView) {
 
         // TODO Figure out why trackView.track.height is sometimes (Genes track) non-numeric
-        var trackHeight = $.isNumeric(trackView.track.height) ? trackView.track.height : 100,
+        var trackHeight = $.isNumeric(trackView.track.height) ? trackView.track.height : igv.browser.trackHeight,
             trackItems,
             menuItems = [
                 {
