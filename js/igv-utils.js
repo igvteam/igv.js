@@ -178,43 +178,28 @@ var igv = (function (igv) {
                 $("#featureColorPicker").colorpicker(
                     {
 
+                        title: "Feature Color Picker",
+
+                        color: trackColor,
+
                         parts: [ 'header', 'map', 'bar', 'hsv', 'rgb', 'preview', 'swatches', 'footer' ],
 
                         okOnEnter: true,
 
                         inline: false,
 
-                        title: "Feature Color Picker",
-
-                        color: trackColor,
-
                         ok: function (event, color) {
-                            igv.setTrackColor(trackView.track, igv.rgbColor(Math.floor(255 * color.rgb.r), Math.floor(255 * color.rgb.g), Math.floor(255 * color.rgb.b)));
+
+                            var r = Math.floor(255 * color.rgb.r),
+                                g = Math.floor(255 * color.rgb.g),
+                                b = Math.floor(255 * color.rgb.b);
+
+                            igv.setTrackColor(trackView.track, igv.rgbColor(r, g, b));
+
                             trackView.update();
                             popover.hide();
 
-                        },
-
-                        //init: function (event, color) {
-                        //    //console.log('colorpicker.init', color.formatted);
-                        //},
-                        //
-                        //select: function (event, color) {
-                        //    //console.log('colorpicker.select', color.formatted);
-                        //},
-                        //
-                        //close: function (event, color) {
-                        //    console.log('colorpicker.close', color.formatted + ' r:' + color.rgb.r + ' g:' + color.rgb.g + ' b:' + color.rgb.b + ' a:' + color.a);
-                        //},
-                        //
-                        //
-                        //open: function (event, color) {
-                        //    //console.log('colorpicker.open', color.formatted + ' r:' + color.rgb.r + ' g:' + color.rgb.g + ' b:' + color.rgb.b + ' a:' + color.a);
-                        //},
-                        //
-                        //cancel: function (event, color) {
-                        //    console.log('colorpicker.cancel', color.formatted + ' r:' + color.rgb.r + ' g:' + color.rgb.g + ' b:' + color.rgb.b + ' a:' + color.a);
-                        //}
+                        }
 
                     }
                 );
