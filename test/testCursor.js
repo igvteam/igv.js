@@ -99,7 +99,6 @@ function runCursorTests() {
 
     });
 
-<<<<<<< HEAD
     asyncTest("Get All Scores ", function () {
 
         var url = "data/bed/basic_feature_3_columns.bed.gz",
@@ -141,38 +140,6 @@ function runCursorTests() {
         });
 
     });
-=======
-//    asyncTest("Get allscores ", function () {
-//
-//        var tssUrl, peakURL, tssDataSource, peakDataSource, region, bpStart, bpEnd, len, cursorModel;
-//
-//        tssUrl = "http://www.broadinstitute.org/igvdata/public/test/data/cursor/hg19.tss.bed.gz";
-//        peakURL = "http://www.broadinstitute.org/igvdata/public/test/data/cursor/wgEncodeBroadHistoneH1hescH3k4me3StdPk.broadPeak.gz";
-//
-//        peakDataSource = new igv.FeatureSource(peakURL);
-//        tssDataSource = new igv.FeatureSource(tssUrl);
-//        cursorModel = new cursor.CursorModel(null);
-//
-//        tssDataSource.allFeatures(function (featureList) {
-//
-//            ok(featureList);
-//
-//            cursorModel.setRegions(featureList);
-//            region = cursorModel.regions[1];
-//
-//
-//            peakDataSource.getFeatureCache(function (featureCache) {
-//
-//                var regionWidth = 1000000;
-//                var score = region.getScore(featureCache, regionWidth);
-//                console.log("Score=" + score);
-//
-//                start();
-//            });
-//        });
-//
-//    });
->>>>>>> 42860ae42599bc23110e895035bcb5edee6a82ae
 
 //    asyncTest("Sort ", function () {
 //
