@@ -7,7 +7,10 @@ module.exports = function (grunt) {
         qunit: {
             hello: [
                 'test/helloQUnit.html'
-             ]
+             ],
+            all: [
+                'test/*.html'
+            ]
         },
 
         concat: {
