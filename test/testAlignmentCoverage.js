@@ -32,7 +32,8 @@ function runAlignmentCoverageTests() {
             genome: {
                 sequence: new igv.FastaSequence("//igvdata.broadinstitute.org/genomes/seq/hg19/hg19.fasta")
             }
-        }
+        };
+
         bamSource = new igv.BamSource({
             type: 'bam',
             url: 'http://www.broadinstitute.org/igvdata/1KG/b37/data/NA06984/alignment/NA06984.mapped.ILLUMINA.bwa.CEU.low_coverage.20120522.bam',

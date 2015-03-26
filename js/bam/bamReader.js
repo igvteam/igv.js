@@ -400,7 +400,9 @@ var igv = (function (igv) {
                                 var lRef = readInt(uncba, p + lName + 4);
                                 //dlog(name + ': ' + lRef);
 
-                                if (genome) name = genome.getChromosomeName(name);
+                                if (genome && genome.getChromosomeName) {
+                                    name = genome.getChromosomeName(name);
+                                }
 
                                 bam.chrToIndex[name] = i;
                                 bam.indexToChr.push(name);
