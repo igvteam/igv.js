@@ -88,8 +88,8 @@ var igv = (function (igv) {
             var len = bufferedReader.data.byteLength,
                 bufferStart = requestedRange.start - bufferedReader.range.start,
                 result = asUint8 ?
-                    new Uint8Array(bufferedReader.data, bufferStart, len) :
-                    new DataView(bufferedReader.data, bufferStart, len);
+                    new Uint8Array(bufferedReader.data, bufferStart, len - bufferStart) :
+                    new DataView(bufferedReader.data, bufferStart, len - bufferStart);
             continutation(result);
         }
 
