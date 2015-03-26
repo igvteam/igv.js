@@ -55,7 +55,7 @@ var igv = (function (igv) {
 
         this.readNode(rootNodeOffset, bufferedReader, function (node) {
             tree.rootNode = node;
-            continuation(this);
+            continuation(tree);
         });
 
     }
