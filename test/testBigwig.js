@@ -8,7 +8,7 @@ function runBigwigTests() {
 
     }
 
-    asyncTest("Bigwig meta datay", function () {
+    asyncTest("Bigwig meta data", function () {
 
         var url,
             bwReader;
