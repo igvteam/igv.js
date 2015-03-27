@@ -1,7 +1,5 @@
 function runBufferedReaderTests() {
 
-    module("BUfferedReader");
-
     asyncTest("read", function () {
 
         var url = "../test/data/misc/BufferedReaderTest.bin";
