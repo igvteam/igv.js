@@ -13,25 +13,22 @@ function runCursorTests() {
             ok(features);
             equal(features.length, 100);
 
-            start();
+            featureSource.getFeatureCache(function (featureCache) {
+
+                var region,
+                    regionWidth,
+                    score;
+
+                region = new cursor.CursorRegion({chr: "chr22", start: 16847690, end: 16857344});
+                regionWidth = 16857344 - 16847690;
+
+                score = region.getScore(featureCache, regionWidth);
+                console.log("Score=" + score);
+
+                start();
+            });
+
         });
-
-
-        //featureSource.getFeatureCache(function (featureCache) {
-        //
-        //    var region,
-        //        regionWidth,
-        //        score;
-        //
-        //    region = new cursor.CursorRegion({chr: "chr22", start: 16847690, end: 16857344});
-        //    regionWidth = 16857344 - 16847690;
-        //
-        //    score = region.getScore(featureCache, regionWidth);
-        //    console.log("Score=" + score);
-        //
-        //    start();
-        //});
-
 
     });
 
@@ -99,47 +96,45 @@ function runCursorTests() {
 
     });
 
-    asyncTest("Get All Scores ", function () {
-
-        var url = "data/bed/basic_feature_3_columns.bed.gz",
-             featureSource;
-
-
-
-        featureSource = new igv.BedFeatureSource({ type: 'bed', url: url });
-        featureSource.allFeatures(function (features) {
-
-            var broadPeakFeatureSource,
-                broadPeakURL = "data/peak/test.broadPeak";
-
-            ok(features);
-
-            broadPeakFeatureSource = new igv.BedFeatureSource({ type: 'bed', url: broadPeakURL });
-            ok(broadPeakFeatureSource);
-
-            broadPeakFeatureSource.getFeatureCache(function (featureCache) {
-
-                var cursorModel,
-                    region,
-                    regionWidth = 1000000,
-                    score;
-
-                ok(featureCache);
-
-                cursorModel = new cursor.CursorModel(null);
-                ok(cursorModel);
-
-                cursorModel.setRegions(features);
-                region = cursorModel.regions[ 1 ];
-
-                score = region.getScore(featureCache, regionWidth);
-                console.log("score " + score);
-
-                start();
-            });
-        });
-
-    });
+    //asyncTest("Get All Scores ", function () {
+    //
+    //    var url = "data/bed/basic_feature_3_columns.bed.gz",
+    //         featureSource;
+    //
+    //    featureSource = new igv.FeatureSource({ type: 'bed', url: url });
+    //    featureSource.allFeatures(function (features) {
+    //
+    //        var broadPeakFeatureSource,
+    //            broadPeakURL = "data/peak/test.broadPeak";
+    //
+    //        ok(features);
+    //
+    //        //broadPeakFeatureSource = new igv.FeatureSource({ type: 'bed', url: broadPeakURL });
+    //        //ok(broadPeakFeatureSource);
+    //        //
+    //        //broadPeakFeatureSource.getFeatureCache(function (featureCache) {
+    //        //
+    //        //    var cursorModel,
+    //        //        region,
+    //        //        regionWidth = 1000000,
+    //        //        score;
+    //        //
+    //        //    ok(featureCache);
+    //        //
+    //        //    cursorModel = new cursor.CursorModel(null);
+    //        //    ok(cursorModel);
+    //        //
+    //        //    cursorModel.setRegions(features);
+    //        //    region = cursorModel.regions[ 1 ];
+    //        //
+    //        //    score = region.getScore(featureCache, regionWidth);
+    //        //    console.log("score " + score);
+    //        //
+    //        //    start();
+    //        //});
+    //    });
+    //
+    //});
 
 //    asyncTest("Sort ", function () {
 //
