@@ -51,27 +51,27 @@ var igv = (function (igv) {
             continuation(reader.zoomLevelHeaders);
         }
         else {
-            loadHeader.call(this, function () {
+            this.loadHeader(function () {
                 continuation(reader.zoomLevelHeaders);
             });
         }
     }
 
-    function loadHeader(continuation) {
+    igv.BWReader.prototype.loadHeader = function(continuation) {
 
-        var bwReader = this;
+        var that = this;
 
         igvxhr.getContentLength(this.headPath,
             {
-                headers: bwReader.config.headers,
+                headers: that.config.headers,
 
                 success: function (contentLength) {
 
-                    bwReader.contentLength = contentLength;
+                    that.contentLength = contentLength;
 
-                    igvxhr.loadArrayBuffer(bwReader.path,
+                    igvxhr.loadArrayBuffer(that.path,
                         {
-                            headers: bwReader.config.headers,
+                            headers: that.config.headers,
 
                             range: {start: 0, size: BBFILE_HEADER_SIZE},
 
@@ -80,31 +80,31 @@ var igv = (function (igv) {
                                 if (!data) return;
 
                                 // Assume low-to-high unless proven otherwise
-                                bwReader.littleEndian = true;
+                                that.littleEndian = true;
 
                                 var binaryParser = new igv.BinaryParser(new DataView(data));
 
                                 var magic = binaryParser.getUInt();
 
                                 if (magic === BIGWIG_MAGIC_LTH) {
-                                    bwReader.type = "BigWig";
+                                    that.type = "BigWig";
                                 }
                                 else if (magic == BIGBED_MAGIC_LTH) {
-                                    bwReader.type = "BigBed";
+                                    that.type = "BigBed";
                                 }
                                 else {
                                     //Try big endian order
-                                    bwReader.littleEndian = false;
+                                    that.littleEndian = false;
 
                                     binaryParser.littleEndian = false;
                                     binaryParser.position = 0;
                                     var magic = binaryParser.getUInt();
 
                                     if (magic === BIGWIG_MAGIC_HTL) {
-                                        bwReader.type = "BigWig";
+                                        that.type = "BigWig";
                                     }
                                     else if (magic == BIGBED_MAGIC_HTL) {
-                                        bwReader.type = "BigBed";
+                                        that.type = "BigBed";
                                     }
                                     else {
                                         // TODO -- error, unknow file type
@@ -112,25 +112,25 @@ var igv = (function (igv) {
 
                                 }
                                 // Table 5  "Common header for BigWig and BigBed files"
-                                bwReader.header = {};
-                                bwReader.header.bwVersion = binaryParser.getShort();
-                                bwReader.header.nZoomLevels = binaryParser.getShort();
-                                bwReader.header.chromTreeOffset = binaryParser.getLong();
-                                bwReader.header.fullDataOffset = binaryParser.getLong();
-                                bwReader.header.fullIndexOffset = binaryParser.getLong();
-                                bwReader.header.fieldCount = binaryParser.getShort();
-                                bwReader.header.definedFieldCount = binaryParser.getShort();
-                                bwReader.header.autoSqlOffset = binaryParser.getLong();
-                                bwReader.header.totalSummaryOffset = binaryParser.getLong();
-                                bwReader.header.uncompressBuffSize = binaryParser.getInt();
-                                bwReader.header.reserved = binaryParser.getLong();
+                                that.header = {};
+                                that.header.bwVersion = binaryParser.getShort();
+                                that.header.nZoomLevels = binaryParser.getShort();
+                                that.header.chromTreeOffset = binaryParser.getLong();
+                                that.header.fullDataOffset = binaryParser.getLong();
+                                that.header.fullIndexOffset = binaryParser.getLong();
+                                that.header.fieldCount = binaryParser.getShort();
+                                that.header.definedFieldCount = binaryParser.getShort();
+                                that.header.autoSqlOffset = binaryParser.getLong();
+                                that.header.totalSummaryOffset = binaryParser.getLong();
+                                that.header.uncompressBuffSize = binaryParser.getInt();
+                                that.header.reserved = binaryParser.getLong();
 
                                 // Get content length
                                 // HttpResponse *resp = [URLDataLoader loadHeaderSynchronousWithPath:self.path];
                                 // self.filesize = resp.contentLength;
 
 
-                                bwReader.loadZoomHeadersAndChrTree(continuation);
+                                that.loadZoomHeadersAndChrTree(continuation);
                             }
 
                         });
