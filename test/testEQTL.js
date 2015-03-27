@@ -1,27 +1,28 @@
 function eqtlUnitTests() {
 
+    asyncTest("EQTL binary file", function () {
 
-    asyncTest("EQTL binary file", 2, function () {
+        var path = "http://www.broadinstitute.org/igvdata/test/data/eqtl/Heart_Left_Ventricle.portal.eqtl.bin",
+            featureSource,
+            chr = "chr1",
+            bpStart = 0,
+            bpEnd = 2500000;
 
-        var url = "http://www.broadinstitute.org/igvdata/test/data/eqtl/Heart_Left_Ventricle.portal.eqtl.bin",
-            featureSource = new igv.GtexReader(url);
+        featureSource = new igv.FeatureSource({ type: 'eqtl', url: path });
+        ok(featureSource, "featureSource");
 
+        featureSource.getFeatures(chr, bpStart, bpEnd, function (features) {
 
-        var chr = "chr1";
-        var bpStart = 0;
-        var bpEnd = 2500000;
+            var len;
 
-        featureSource.getFeatures(chr, bpStart, bpEnd, function (featureList) {
+            ok(features);
 
-            ok(featureList);
-
-            var len = featureList.length;
+            len = features.length;
 
             equal(len, 5293);   // # of features on chr 1 (determined by greping file)
 
-
             start();
-        });
+        }, undefined);
 
     });
 
