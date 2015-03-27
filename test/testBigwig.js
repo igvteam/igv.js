@@ -23,7 +23,7 @@ function runBigwigTests() {
 
             ok(header);
 
-            equal(20093017, bwReader.contentLength);
+            //equal(20093017, bwReader.contentLength);
             equal(4, header.bwVersion);
             equal(10, header.nZoomLevels);
             equal(344, header.chromTreeOffset);
@@ -60,92 +60,92 @@ function runBigwigTests() {
 
     });
 
-    asyncTest("R+ Tree", function () {
-        var url = "http://www.broadinstitute.org/igvdata/test/data/bigwig/bigWigExample.bw";
+    //asyncTest("R+ Tree", function () {
+    //    var url = "http://www.broadinstitute.org/igvdata/test/data/bigwig/bigWigExample.bw";
+    //
+    //    var bwReader = new igv.BWReader({url: url});
+    //
+    //    bwReader.loadHeader(function () {
+    //
+    //        var offset = bwReader.header.fullIndexOffset;
+    //
+    //        bwReader.loadRPTree(offset, function (rpTree) {
+    //
+    //            ok(rpTree.rootNode);
+    //
+    //            start();
+    //        });
+    //    });
+    //});
 
-        var bwReader = new igv.BWReader({url: url});
+    //asyncTest("Wig features", function () {
+    //
+    //    //chr21:19,146,376-19,193,466
+    //    var url = "http://www.broadinstitute.org/igvdata/test/data/bigwig/bigWigExample.bw",
+    //        chr = "chr21",
+    //        bpStart = 19168957,
+    //        bpEnd = 19170640,
+    //        bpPerPixel = 0.5478515625;    // To match iOS unit test
+    //
+    //    createMockObjects(bpPerPixel);
+    //
+    //    var bWSource = new igv.BWSource({url: url});
+    //
+    //    bWSource.getFeatures(chr, bpStart, bpEnd, function (features) {
+    //
+    //        ok(features);
+    //
+    //        equal(features.length, 337);   // Verified in iPad app
+    //
+    //        start();
+    //    });
+    //});
 
-        bwReader.loadHeader(function () {
+    //asyncTest("Zoom data", function () {
+    //
+    //    //chr21:19,146,376-19,193,466
+    //    var url = "http://www.broadinstitute.org/igvdata/test/data/bigwig/bigWigExample.bw",
+    //        chr = "chr21",
+    //        bpStart = 18728264,
+    //        bpEnd = 26996291,
+    //        bpPerPixel = 10765.6611328125;    // To match iOS unit test
+    //
+    //    createMockObjects(bpPerPixel);
+    //
+    //    var bWSource = new igv.BWSource({url: url});
+    //
+    //    bWSource.getFeatures(chr, bpStart, bpEnd, function (features) {
+    //
+    //        ok(features);
+    //
+    //        equal(features.length, 324);   // Verified in iPad app
+    //
+    //        start();
+    //    });
+    //});
 
-            var offset = bwReader.header.fullIndexOffset;
-
-            bwReader.loadRPTree(offset, function (rpTree) {
-
-                ok(rpTree.rootNode);
-
-                start();
-            });
-        });
-    });
-
-    asyncTest("Wig features", function () {
-
-        //chr21:19,146,376-19,193,466
-        var url = "http://www.broadinstitute.org/igvdata/test/data/bigwig/bigWigExample.bw",
-            chr = "chr21",
-            bpStart = 19168957,
-            bpEnd = 19170640,
-            bpPerPixel = 0.5478515625;    // To match iOS unit test
-
-        createMockObjects(bpPerPixel);
-
-        var bWSource = new igv.BWSource({url: url});
-
-        bWSource.getFeatures(chr, bpStart, bpEnd, function (features) {
-
-            ok(features);
-
-            equal(features.length, 337);   // Verified in iPad app
-
-            start();
-        });
-    });
-
-    asyncTest("Zoom data", function () {
-
-        //chr21:19,146,376-19,193,466
-        var url = "http://www.broadinstitute.org/igvdata/test/data/bigwig/bigWigExample.bw",
-            chr = "chr21",
-            bpStart = 18728264,
-            bpEnd = 26996291,
-            bpPerPixel = 10765.6611328125;    // To match iOS unit test
-
-        createMockObjects(bpPerPixel);
-
-        var bWSource = new igv.BWSource({url: url});
-
-        bWSource.getFeatures(chr, bpStart, bpEnd, function (features) {
-
-            ok(features);
-
-            equal(features.length, 324);   // Verified in iPad app
-
-            start();
-        });
-    });
-
-    asyncTest("Bed features", function () {
-
-        //chr21:19,146,376-19,193,466
-        var url = "http://www.broadinstitute.org/igvdata/test/data/bigwig/bigBedExample.bb",
-            chr = "chr21",
-            bpStart = 33031597,
-            bpEnd = 33041570,
-            bpPerPixel = 0.5;
-
-        createMockObjects(bpPerPixel);
-
-        var bWSource = new igv.BWSource({url: url});
-
-        bWSource.getFeatures(chr, bpStart, bpEnd, function (features) {
-
-            ok(features);
-
-            equal(features.length, 23);   // Verified in iPad app
-
-            start();
-        });
-    });
+    //asyncTest("Bed features", function () {
+    //
+    //    //chr21:19,146,376-19,193,466
+    //    var url = "http://www.broadinstitute.org/igvdata/test/data/bigwig/bigBedExample.bb",
+    //        chr = "chr21",
+    //        bpStart = 33031597,
+    //        bpEnd = 33041570,
+    //        bpPerPixel = 0.5;
+    //
+    //    createMockObjects(bpPerPixel);
+    //
+    //    var bWSource = new igv.BWSource({url: url});
+    //
+    //    bWSource.getFeatures(chr, bpStart, bpEnd, function (features) {
+    //
+    //        ok(features);
+    //
+    //        equal(features.length, 23);   // Verified in iPad app
+    //
+    //        start();
+    //    });
+    //});
 
 
 }
