@@ -34,10 +34,7 @@ var igv = (function (igv) {
         this.collapsedHeight = config.collapsedHeight || this.height;
         this.expandedRowHeight = config.expandedRowHeight || 30;
         this.squishedRowHeight = config.squishedRowHeight || 15;
-
-        this.maxHeight = config.maxHeight || Math.max(500, this.height);
-
-        this.labelThreshold = 1000000;
+        this.maxRows = config.maxRows || 500;
 
         this.featureSource = new igv.FeatureSource(this.config);
 
@@ -64,6 +61,13 @@ var igv = (function (igv) {
         }
     };
 
+    /**
+     * The required height in pixels required for the track content.   This is not the visible track height, which
+     * can be smaller or larger.
+     *
+     * @param features
+     * @returns {*}
+     */
     igv.FeatureTrack.prototype.computePixelHeight = function (features) {
 
         if (this.displayMode === "COLLAPSED") {
@@ -174,7 +178,7 @@ var igv = (function (igv) {
 
         var myself = this,
             menuItems = [],
-            lut = { "EXPANDED": "Expand track hgt", "COLLAPSED": "Collapse track hgt", "SQUISHED": "Squish track hgt" },
+            lut = {"COLLAPSED": "Collapse", "SQUISHED": "Squish track hgt",  "EXPANDED": "Expand" },
             checkMark     = '<i class="fa fa-check fa-check-shim"></i>',
             checkMarkNone = '<i class="fa fa-check fa-check-shim fa-check-hidden"></i>',
             trackMenuItem = '<div class=\"igv-track-menu-item\">',

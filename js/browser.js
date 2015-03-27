@@ -31,10 +31,6 @@ var igv = (function (igv) {
 
         this.div = $('<div id="igvRootDiv" class="igv-root-div">')[0];
 
-
-        this.trackHeight = options.trackHeight || 100;
-        this.maxTrackHeight = 10000;
-
         this.flanking = options.flanking;
 
         this.controlPanelWidth = options.controlPanelWidth || 50;

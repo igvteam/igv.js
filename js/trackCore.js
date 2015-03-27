@@ -42,6 +42,8 @@ var igv = (function (igv) {
         track.type = config.type;
 
         track.height = config.height || ("bed" === config.type ? 100 : 50);
+        track.minHeight = config.minHeight || Math.min(25, this.height);
+        track.maxHeight = config.maxHeight || Math.max(1000, this.height);
 
         if(config.visibilityWindow) track.visibilityWindow = config.visibilityWindow;
 

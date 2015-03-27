@@ -30,10 +30,17 @@ var igv = (function (igv) {
 
         var url = requestJson.url + "/" + requestJson.entity + "/" + requestJson.entityId,
             options,
-            headers;
+            headers,
+            acToken = oauth.google.access_token,
+            paramSeparator = "?";
 
         if (requestJson.authKey) {
-            url = url + "?key=" + requestJson.authKey;
+            url = url + paramSeparator + "key=" + requestJson.authKey;
+            paramSeparator = "&";
+        }
+
+        if(acToken) {
+            url = url + paramSeparator + "access_token=" + encodeURIComponent(acToken);
         }
 
         options = {
@@ -53,7 +60,19 @@ var igv = (function (igv) {
             body = requestJson.body,
             decode = requestJson.decode,
             success = requestJson.success,
-            task = requestJson.task;
+            task = requestJson.task,
+            acToken = oauth.google.access_token,
+            paramSeparator = "?";
+
+        if (requestJson.authKey) {
+            url = url + paramSeparator + "key=" + requestJson.authKey;
+            paramSeparator = "&";
+        }
+
+        if(acToken) {
+            url = url + paramSeparator + "access_token=" + encodeURIComponent(acToken);
+        }
+
 
         // Start the recursive load cycle.  Data is fetched in chunks, if more data is available a "nextPageToken" is returned.
         loadChunk();

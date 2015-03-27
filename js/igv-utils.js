@@ -94,7 +94,9 @@ var igv = (function (igv) {
 
                             var str,
                                 numberString = trackMenuPopupDialog.name.val(),
-                                number = parseFloat(numberString, 10);
+                                number = parseFloat(numberString, 10),
+                                minHeight = trackView.track.minHeight || 25,
+                                maxHeight = trackView.track.maxHeight || 1000;
 
                             if (!$.isNumeric(numberString)) {
 
@@ -103,11 +105,15 @@ var igv = (function (igv) {
                                 str = numberString + " is not a valid number";
                                 trackMenuPopupDialog.updateTips( str );
                             }
-                            else if (number < trackView.browser.trackHeight || number > trackView.browser.maxTrackHeight) {
+
+                            // If track specifies a minimum height use it
+
+
+                            else if (number < minHeight || number > maxHeight) {
 
                                 trackMenuPopupDialog.name.addClass( "ui-state-error" );
 
-                                str = "must be between " + trackView.browser.trackHeight + " and " + igv.numberFormatter(trackView.browser.maxTrackHeight);
+                                str = "must be between " + minHeight + " and " + igv.numberFormatter(maxHeight);
                                 trackMenuPopupDialog.updateTips( str );
                             }
                             else {
