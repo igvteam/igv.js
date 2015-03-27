@@ -57,7 +57,7 @@ function runCursorTests() {
 
     });
 
-    asyncTest("Get features in range", function () {
+    asyncTest("Get features in range and get score.", function () {
 
         var peakURL,
             featureSource;
@@ -96,72 +96,47 @@ function runCursorTests() {
 
     });
 
-    //asyncTest("Get All Scores ", function () {
-    //
-    //    var url = "data/bed/basic_feature_3_columns.bed.gz",
-    //         featureSource;
-    //
-    //    featureSource = new igv.FeatureSource({ type: 'bed', url: url });
-    //    featureSource.allFeatures(function (features) {
-    //
-    //        var broadPeakFeatureSource,
-    //            broadPeakURL = "data/peak/test.broadPeak";
-    //
-    //        ok(features);
-    //
-    //        //broadPeakFeatureSource = new igv.FeatureSource({ type: 'bed', url: broadPeakURL });
-    //        //ok(broadPeakFeatureSource);
-    //        //
-    //        //broadPeakFeatureSource.getFeatureCache(function (featureCache) {
-    //        //
-    //        //    var cursorModel,
-    //        //        region,
-    //        //        regionWidth = 1000000,
-    //        //        score;
-    //        //
-    //        //    ok(featureCache);
-    //        //
-    //        //    cursorModel = new cursor.CursorModel(null);
-    //        //    ok(cursorModel);
-    //        //
-    //        //    cursorModel.setRegions(features);
-    //        //    region = cursorModel.regions[ 1 ];
-    //        //
-    //        //    score = region.getScore(featureCache, regionWidth);
-    //        //    console.log("score " + score);
-    //        //
-    //        //    start();
-    //        //});
-    //    });
-    //
-    //});
+    asyncTest("Get All Scores ", function () {
 
-//    asyncTest("Sort ", function () {
-//
-//        var tssUrl, peakURL, tssDataSource, peakDataSource, region, bpStart, bpEnd, len, cursorModel;
-//
-//        tssUrl = "http://www.broadinstitute.org/igvdata/public/test/data/cursor/hg19.tss.bed.gz";
-//        peakURL = "http://www.broadinstitute.org/igvdata/public/test/data/cursor/wgEncodeBroadHistoneH1hescH3k4me3StdPk.broadPeak.gz";
-//
-//        peakDataSource = new igv.FeatureSource(peakURL);
-//        tssDataSource = new igv.FeatureSource(tssUrl);
-//        cursorModel = new cursor.CursorModel(null);
-//
-//        tssDataSource.allFeatures(function (featureList) {
-//
-//            ok(featureList);
-//
-//            cursorModel.setRegions(featureList);
-//
-//            cursorModel.sortRegions(peakDataSource, 1, function (regions) {
-//
-//                ok(regions);
-//
-//                start();
-//            });
-//        });
-//
-//    });
+        var url = "data/bed/basic_feature_3_columns.bed.gz",
+             featureSource;
+
+        featureSource = new igv.FeatureSource({ type: 'bed', url: url });
+        featureSource.allFeatures(function (features) {
+
+            var broadPeakFeatureSource,
+                broadPeakURL = "data/peak/test.broadPeak";
+
+            ok(features);
+
+            //start();
+
+            broadPeakFeatureSource = new igv.FeatureSource({ type: 'bed', url: broadPeakURL });
+            ok(broadPeakFeatureSource);
+
+            broadPeakFeatureSource.getFeatureCache(function (featureCache) {
+
+                var cursorModel,
+                    region,
+                    regionWidth = 1000000,
+                    score;
+
+                ok(featureCache);
+
+                cursorModel = new cursor.CursorModel(null);
+                ok(cursorModel);
+
+                cursorModel.setRegions(features);
+                region = cursorModel.regions[ 1 ];
+
+                score = region.getScore(featureCache, regionWidth);
+                console.log("score " + score);
+
+                start();
+            });
+        });
+
+    });
 
 
 }
