@@ -690,7 +690,6 @@ var igv = (function (igv) {
                     end: Math.floor((browser.referenceFrame.bpPerPixel * browser.trackViewportWidth()) + browser.referenceFrame.start),
                     regionWidth: browser.cursorModel.regionWidth,
                     framePixelWidthUnitless: (browser.cursorModel.framePixelWidth / browser.trackViewportWidth()),
-                    trackHeight: browser.trackHeight,
                     tracks: []
                 };
 
@@ -745,9 +744,6 @@ var igv = (function (igv) {
 
             browser.cursorModel.regionWidth = session.regionWidth;
             $("input[id='regionSizeInput']").val(browser.cursorModel.regionWidth);
-
-            browser.trackHeight = session.trackHeight;
-            $("input[id='trackHeightInput']").val(browser.trackHeight);
 
             cursorTracks = [];
             browser.designatedTrack = undefined;

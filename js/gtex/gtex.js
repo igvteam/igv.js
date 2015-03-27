@@ -98,7 +98,6 @@ var igv = (function (igv) {
          * Change height of all tracks
          */
         heightBoxInput.onchange = function () {
-            igv.browser.trackHeight = heightBoxInput.value;
 
             igv.browser.trackViews.forEach(function (panel) {
                 if (panel.track instanceof igv.FeatureTrack ||
@@ -159,7 +158,7 @@ var igv = (function (igv) {
                                 url: record.url,
                                 label: record.label,
                                 disableButtons: true,
-                                height: browser.trackHeight
+                                height: 100
                             }
                         );
                     }

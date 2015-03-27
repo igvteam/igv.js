@@ -143,7 +143,7 @@ var igv = (function (igv) {
     }
 
 
-    function packFeatures(features) {
+    function packFeatures(features, maxRows) {
 
         if (features == null || features.length === 0) {
             return;
@@ -171,11 +171,13 @@ var igv = (function (igv) {
 
         chrs.forEach(function (chr) {
 
-            pack(chrFeatureMap[chr]);
+            pack(chrFeatureMap[chr], maxRows);
         });
 
 
-        function pack(featureList) {
+        // Assigns a row # to each feature.  If the feature does not fit in any row and #rows == maxRows no
+        // row number is assigned.
+        function pack(featureList, maxRows) {
 
             var rows = [];
 
@@ -189,7 +191,7 @@ var igv = (function (igv) {
 
                 var i,
                     r,
-                    len = rows.length,
+                    len = Math.min(rows.length, maxRows),
                     start = feature.start;
 
                 for (r = 0; r < len; r++) {
