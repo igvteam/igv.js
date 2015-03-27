@@ -1,9 +1,5 @@
 function runDataLoaderTests() {
 
-    module("dataLoader");
-
-
-
     asyncTest("readByteRange new", function () {
 
         var url = "data/misc/BufferedReaderTest.bin",

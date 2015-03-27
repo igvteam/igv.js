@@ -94,9 +94,9 @@ var cursor = (function (cursor) {
 
         this.filteredRegions = this.regions;
 
-        //this.updateRegionDisplay();
-        //
-        //this.filterRegions();
+        this.updateRegionDisplay();
+
+        this.filterRegions();
 
     };
 

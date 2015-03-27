@@ -25,7 +25,6 @@
 
 var igv = (function (igv) {
 
-
     igv.GtexReader = function (config) {
 
         this.file = config.url;
@@ -34,8 +33,7 @@ var igv = (function (igv) {
         this.binary = this.file.endsWith(".bin");
         this.compressed = this.file.endsWith(".compressed.bin");
 
-    }
-
+    };
 
     igv.GtexReader.prototype.readFeatures = function (continuation, task, genomicRange) {
 
@@ -212,8 +210,7 @@ var igv = (function (igv) {
             this.chr = chr;
             this.blocks = blocks;
         }
-    }
-
+    };
 
     var createEQTL = function (tokens) {
         var snp = tokens[0];
@@ -225,7 +222,7 @@ var igv = (function (igv) {
         var fStat = parseFloat(tokens[6]);
         var pValue = parseFloat(tokens[7]);
         return new Eqtl(snp, chr, position, geneId, geneName, genePosition, fStat, pValue);
-    }
+    };
 
     var createEqtlBinary = function (parser) {
 
@@ -240,7 +237,7 @@ var igv = (function (igv) {
         //var qValue = parser.getFloat();
         //return new Eqtl(snp, chr, position, geneId, geneName, genePosition, fStat, pValue);
         return new Eqtl(snp, chr, position, geneId, geneName, pValue);
-    }
+    };
 
 
     return igv;
