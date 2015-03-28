@@ -64,8 +64,17 @@ var igv = (function (igv) {
 
     };
 
+    igv.FeatureSource.prototype.getHeader = function (continuation) {
 
-    /**
+        if(this.reader.readHeader) {
+            this.reader.readHeader(continuation);
+        }
+        else {
+            continuation(null);
+        }
+    }
+
+        /**
      * Required function fo all data source objects.  Fetches features for the
      * range requested and passes them on to the success function.  Usually this is
      * a function that renders the features on the canvas
