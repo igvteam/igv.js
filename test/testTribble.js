@@ -13,12 +13,8 @@ function testTribble() {
             url: '//www.broadinstitute.org/igvdata/t2d/recomb_decode.bedgraph'
         };
 
-        ok(config);
-
         featureSource = new igv.FeatureSource(config);
         ok(featureSource);
-
-        //start();
 
         index = config.url + ".idx";
 
