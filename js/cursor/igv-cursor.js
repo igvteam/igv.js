@@ -135,7 +135,7 @@ var igv = (function (igv) {
         // BED file upload
         document.getElementById('igvFileUpload').onchange = function (e) {
 
-            browser.loadTrackFile($(this)[0]);
+            browser.loadTrackFile($(this)[0].files);
 
             $(this).val("");
             $('#igvFileUploadModal').modal('hide');
@@ -144,7 +144,7 @@ var igv = (function (igv) {
         // BED URL upload
         document.getElementById('igvLoadURL').onchange = function (e) {
 
-            browser.loadTrackPath($(this));
+            browser.loadTrackPath($(this).val());
 
             $(this).val("");
             $('#igvLoadURLModal').modal('hide');
@@ -607,11 +607,8 @@ var igv = (function (igv) {
 
         };
 
-        browser.loadTrackFile = function (fileInput) {
-
-            var localFile,
-                localFiles = fileInput.files;
-
+        browser.loadTrackFile = function (localFiles) {
+            
             for (var i = 0; i < localFiles.length; i++) {
 
                 localFile = localFiles[ i ];
@@ -647,12 +644,7 @@ var igv = (function (igv) {
 
         };
 
-        browser.loadTrackPath = function (elementObject) {
-
-            var path = elementObject.val();
-
-            elementObject.val("");
-
+        browser.loadTrackPath = function (path) {
 
             if (0 === browser.trackViews.length) {
 
@@ -851,6 +843,7 @@ var igv = (function (igv) {
             trackLabelDiv.innerHTML = track.label;
             trackLabelDiv.title = track.label;
             $(trackView.leftHandGutter).append(trackLabelDiv);
+            track.trackLabelDiv = trackLabelDiv;  // DON'T REMOVE THIS!
 
             // track selection
             bullseyeStackSpan = document.createElement("span");
