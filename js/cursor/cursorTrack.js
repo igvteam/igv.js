@@ -80,51 +80,72 @@ var cursor = (function (cursor) {
             continuation(this.featureCache);
         }
         else {
-            this.featureSource.getFeatureCache(function (featureCache) {
 
-                var allFeatures,
-                    name,
-                    color;
+            // Check for the header (track line).  If we haven't loaded it yet do that first
+            if (myself.header === undefined && myself.featureSource.getHeader) {
+                myself.featureSource.getHeader(function (header) {
+                    //console.log("Set header: " + header);
+                    setHeader.call(myself, header);
+                    myself.getFeatureCache(continuation);
+                    return;
+                });
+            }
+            else {
 
-                allFeatures = featureCache.allFeatures();
+                this.featureSource.getFeatureCache(function (featureCache) {
 
-                if (undefined === myself.scoreless) {
-                    myself.scoreless = true;
-                    allFeatures.forEach(function(f){
+                    var allFeatures,
+                        name,
+                        color;
 
-                        // do stuff
-                        if (true === myself.scoreless) {
-                            if (f.score) {
-                                myself.scoreless = false;
+                    allFeatures = featureCache.allFeatures();
+
+                    if (undefined === myself.scoreless) {
+                        myself.scoreless = true;
+                        allFeatures.forEach(function (f) {
+
+                            // do stuff
+                            if (true === myself.scoreless) {
+                                if (f.score) {
+                                    myself.scoreless = false;
+                                }
                             }
+                        });
+                    }
+
+                    myself.max = (false === myself.scoreless) ? maxValue(allFeatures, 98) : undefined;
+
+                    myself.featureCache = featureCache;
+
+                    continuation(featureCache);
+
+                });
+            }
+
+            function setHeader(header) {
+
+                if (header) {
+                    myself.header = header;
+                    if (header.name && !myself.config.label) {
+                        myself.label = header.name;
+                        if (myself.trackLabelDiv) {
+                            myself.trackLabelDiv.innerHTML = header.name;
+                            myself.trackLabelDiv.title = header.label;
                         }
-                    });
-                }
-
-                myself.max = (false === myself.scoreless) ? maxValue(allFeatures, 98) : undefined;
-
-                myself.featureCache = featureCache;
-
-                // TODO -- fix this use of a side effect
-                if (myself.featureSource.trackProperties) {
-                    name = myself.featureSource.trackProperties["name"];
-                    if (name) {
-                        myself.label = name;
-                        myself.labelButton.innerHTML = name;
                     }
-
-                    color = myself.featureSource.trackProperties["color"];
-                    if (color) {
-                        myself.color = "rgb(" + color + ")";
-
-                        if (myself.cursorHistogram) myself.cursorHistogram.render(myself);
+                    if (header.color && !myself.config.color) {
+                        myself.color = "rgb(" + header.color + ")";
+                        if (myself.cursorHistogram) myself.cursorHistogram.render(this);
                     }
                 }
+                else {
+                    this.header = null;   // Insure it has a value other than undefined
+                }
 
-                continuation(featureCache);
-            });
+            }
         }
-    };
+    }
+
 
     function maxValue(featureList, percentile) {
 
@@ -205,10 +226,10 @@ var cursor = (function (cursor) {
             sampleInterval = Math.max(1, Math.floor(1.0 / framePixelWidth));
 
             if (frameMargin > 0) {
-                igv.Canvas.fillRect.call(ctx, 0, 0, width, height, { fillStyle: 'rgb(255, 255, 255)' });
+                igv.Canvas.fillRect.call(ctx, 0, 0, width, height, {fillStyle: 'rgb(255, 255, 255)'});
             }
 
-            igv.Canvas.setProperties.call(ctx, { fillStyle: this.color, strokeStyle: this.color });
+            igv.Canvas.setProperties.call(ctx, {fillStyle: this.color, strokeStyle: this.color});
 
 
             for (regionNumber = Math.floor(start), len = regions.length;
@@ -225,7 +246,7 @@ var cursor = (function (cursor) {
 
                 pxEnd = framePixelWidth > 1 ?
                     Math.floor((regionNumber + 1 - start) * framePixelWidth - frameMargin / 2) :
-                    pxStart + 1;
+                pxStart + 1;
 
                 maxFeatureHeight = this.height;
 
