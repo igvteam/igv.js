@@ -91,13 +91,28 @@ var igv = (function (igv) {
         }
     }
 
-    /**
-     *
-     * @param success
-     * @param task
-     * @param range -- genomic range to load.  For use with indexed source (optional)
-     */
-    igv.FeatureFileReader.prototype.readFeatures = function (success, task, range) {
+
+    function loadFeaturesNoIndex(continuation, task) {
+
+        var parser = this.parser,
+            options = {
+                headers: this.config.headers,           // http headers, not file header
+                success: (function (data) {
+                    this.header = parser.parseHeader(data);
+                    continuation(parser.parseFeatures(data));   // <= PARSING DONE HERE
+                }).bind(this),
+                task: task
+            };
+
+        if (this.localFile) {
+            igvxhr.loadStringFromFile(this.localFile, options);
+        }
+        else {
+            igvxhr.loadString(this.url, options);
+        }
+    }
+
+    igv.FeatureFileReader.prototype.readHeader = function (continuation) {
 
         var myself = this,
             isIndeedIndexible = isIndexable.call(this);
@@ -112,54 +127,114 @@ var igv = (function (igv) {
                 else {
                     myself.indexed = false;
                 }
-                myself.readFeatures(success, task, range);
+                myself.readHeader(continuation);
             });
             return;
         }
 
         if (this.index) {
+            loadHeaderWithIndex(this.index, continuation);
+        }
+        else {
+            loadFeaturesNoIndex.call(this, function(features) {
+                // Features are ignored, we are after the header (TODO -- fix this dependency on side effect)
+                continuation(myself.header);
+            });
+        }
+
+        /**
+         * Load the file header (not HTTP header) for an indexed file.
+         *
+         * @param index
+         */
+        function loadHeaderWithIndex(index, continuation) {
+
+
+            getContentLength(function (contentLength) {
+
+                // If the contentLength is unknown, and we have a tabix index, get an approximate value from the index
+                if (contentLength <= 0 && index.blockMax) {
+                    myself.contentLength = index.blockMax;
+                }
+
+                var options = {
+                    headers: myself.config.headers,           // http headers, not file header
+                    bgz: index.tabix,
+                    success: function (data) {
+                        myself.header = myself.parser.parseHeader(data);
+                        continuation(myself.header);
+                    }
+                };
+
+                // Get 65kb for the header (very generous).  If the content length is known or approximately known and
+                // < 65kb read the whole file  (omit range specifier)
+                if (contentLength <= 0 || contentLength > 65000) {
+                    options.range = {start: 0, size: 65000};
+                }
+
+
+                if (myself.localFile) {
+                    igvxhr.loadStringFromFile(myself.localFile, options);
+                }
+                else {
+                    igvxhr.loadString(myself.url, options);
+                }
+            });
+
+
+            function getContentLength(continuation) {
+                if (myself.contentLength) {
+                    continuation(myself.contentLength);
+                }
+                else {
+
+                    // Gen the content length first, so we don't try to read beyond the end of the file
+                    igvxhr.getContentLength(myself.headURL, {
+                        headers: myself.config.headers,
+                        success: function (contentLength) {
+
+                            console.log("CL = " + contentLength);
+
+                            myself.contentLength = contentLength;
+                            continuation(contentLength);
+
+                        },
+                        error: function () {
+                            myself.contentLength = -1;
+                            continuation(myself.contentLength);
+                        }
+
+                    });
+                }
+            }
+        }
+
+    }
+
+        /**
+     *
+     * @param success
+     * @param task
+     * @param range -- genomic range to load.  For use with indexed source (optional)
+     */
+    igv.FeatureFileReader.prototype.readFeatures = function (success, task, range) {
+
+        var myself = this;
+
+        if (this.index) {
             loadFeaturesWithIndex(this.index, packFeatures);
         }
         else {
-            loadFeaturesNoIndex(packFeatures);
+            loadFeaturesNoIndex.call(this, packFeatures, task);
         }
 
         function packFeatures(features) {
-
             // TODO pack
             success(features);
-
-        }
-
-        function loadFeaturesNoIndex(continuation) {
-
-            var parser = myself.parser,
-                options = {
-                    headers: myself.config.headers,           // http headers, not file header
-                    success: function (data) {
-                        myself.header = parser.parseHeader(data);
-                        continuation(parser.parseFeatures(data));   // <= PARSING DONE HERE
-                    },
-                    task: task
-                };
-
-            if (myself.localFile) {
-                igvxhr.loadStringFromFile(myself.localFile, options);
-            }
-            else {
-                igvxhr.loadString(myself.url, options);
-            }
         }
 
         function loadFeaturesWithIndex(index, continuation) {
 
-            if (!myself.header) {
-                loadHeaderWithIndex(index, function (header) {
-                    myself.header = header || {};
-                    loadFeaturesWithIndex(index, continuation);
-                });
-                return;
-            }
             console.log("Using index");
 
             var blocks,
@@ -234,73 +309,7 @@ var igv = (function (igv) {
 
         }
 
-        /**
-         * Load the file header (not HTTP header) for an indexed file.
-         *
-         * @param index
-         */
-        function loadHeaderWithIndex(index, continuation) {
 
-
-            getContentLength(function (contentLength) {
-
-                // If the contentLength is unknown, and we have a tabix index, get an approximate value from the index
-                if (contentLength <= 0 && index.blockMax) {
-                    myself.contentLength = index.blockMax;
-                }
-
-                var options = {
-                    headers: myself.config.headers,           // http headers, not file header
-                    bgz: index.tabix,
-                    success: function (data) {
-                        myself.header = myself.parser.parseHeader(data);
-                        continuation(myself.header);
-                    },
-                    task: task
-                };
-
-                // Get 65kb for the header (very generous).  If the content length is known or approximately known and
-                // < 65kb read the whole file  (omit range specifier)
-                if (contentLength <= 0 || contentLength > 65000) {
-                    options.range = {start: 0, size: 65000};
-                }
-
-
-                if (myself.localFile) {
-                    igvxhr.loadStringFromFile(myself.localFile, options);
-                }
-                else {
-                    igvxhr.loadString(myself.url, options);
-                }
-            });
-        }
-
-
-        function getContentLength(continuation) {
-            if (myself.contentLength) {
-                continuation(myself.contentLength);
-            }
-            else {
-
-                // Gen the content length first, so we don't try to read beyond the end of the file
-                igvxhr.getContentLength(myself.headURL, {
-                    headers: myself.config.headers,
-                    success: function (contentLength) {
-
-                        console.log("CL = " + contentLength);
-
-                        myself.contentLength = contentLength;
-                        continuation(contentLength);
-
-                    },
-                    error: function () {
-                        myself.contentLength = -1;
-                        continuation(myself.contentLength);
-                    }
-
-                });
-            }
-        }
 
 
     }

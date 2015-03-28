@@ -50,6 +50,25 @@ var igv = (function (igv) {
         }
     };
 
+    igv.FeatureTrack.prototype.getHeader = function (continuation) {
+      var track = this;
+        this.featureSource.getHeader(function (header) {
+
+            if(header) {
+                // Header (from track line).  Set properties,unless set in the config (config takes precedence)
+                if(header.name && !track.config.label) {
+                    track.label = header.name;
+                }
+                if(header.color && !track.config.color) {
+                    track.color = "rgb(" + header.color + ")";
+                }
+            }
+
+            continuation(header);
+
+        });
+    }
+
     igv.FeatureTrack.prototype.getFeatures = function (chr, bpStart, bpEnd, continuation, task) {
 
         // Don't try to draw alignments for windows > the visibility window
@@ -81,7 +100,7 @@ var igv = (function (igv) {
 
             });
 
-            return  (maxRow + 1) * (this.displayMode === "SQUISHED" ? this.squishedRowHeight : this.expandedRowHeight);
+            return (maxRow + 1) * (this.displayMode === "SQUISHED" ? this.squishedRowHeight : this.expandedRowHeight);
 
         }
 
@@ -97,7 +116,11 @@ var igv = (function (igv) {
             pixelWidth = options.pixelWidth,
             pixelHeight = options.pixelHeight,
             bpEnd = bpStart + pixelWidth * bpPerPixel + 1,
-            zoomInNoticeFontStyle = { font: '16px PT Sans', fillStyle: "rgba(64, 64, 64, 1)", strokeStyle: "rgba(64, 64, 64, 1)" };
+            zoomInNoticeFontStyle = {
+                font: '16px PT Sans',
+                fillStyle: "rgba(64, 64, 64, 1)",
+                strokeStyle: "rgba(64, 64, 64, 1)"
+            };
 
 
         igv.Canvas.fillRect.call(ctx, 0, 0, pixelWidth, pixelHeight, {'fillStyle': "rgb(255, 255, 255)"});
@@ -112,7 +135,7 @@ var igv = (function (igv) {
 
         if (featureList) {
 
-            igv.Canvas.setProperties.call(ctx,  { fillStyle: track.color, strokeStyle: track.color } );
+            igv.Canvas.setProperties.call(ctx, {fillStyle: track.color, strokeStyle: track.color});
 
             for (var gene, i = 0, len = featureList.length; i < len; i++) {
                 gene = featureList[i];
@@ -178,21 +201,21 @@ var igv = (function (igv) {
 
         var myself = this,
             menuItems = [],
-            lut = {"COLLAPSED": "Collapse", "SQUISHED": "Squish track hgt",  "EXPANDED": "Expand" },
-            checkMark     = '<i class="fa fa-check fa-check-shim"></i>',
+            lut = {"COLLAPSED": "Collapse", "SQUISHED": "Squish track hgt", "EXPANDED": "Expand"},
+            checkMark = '<i class="fa fa-check fa-check-shim"></i>',
             checkMarkNone = '<i class="fa fa-check fa-check-shim fa-check-hidden"></i>',
             trackMenuItem = '<div class=\"igv-track-menu-item\">',
             trackMenuItemFirst = '<div class=\"igv-track-menu-item igv-track-menu-border-top\">';
 
         menuItems.push(igv.colorPickerMenuItem(popover, this.trackView, "Set feature color", this.color));
 
-        [ "EXPANDED", "SQUISHED", "COLLAPSED" ].forEach(function(displayMode, index){
+        ["EXPANDED", "SQUISHED", "COLLAPSED"].forEach(function (displayMode, index) {
 
             var chosen,
                 str;
 
             chosen = (0 === index) ? trackMenuItemFirst : trackMenuItem;
-            str = (displayMode === myself.displayMode) ? chosen + checkMark + lut[ displayMode ] + '</div>' : chosen + checkMarkNone + lut[ displayMode ] + '</div>';
+            str = (displayMode === myself.displayMode) ? chosen + checkMark + lut[displayMode] + '</div>' : chosen + checkMarkNone + lut[displayMode] + '</div>';
 
             menuItems.push({
                 object: $(str),
@@ -254,8 +277,8 @@ var igv = (function (igv) {
         exonCount = feature.exons ? feature.exons.length : 0;
 
         if (exonCount == 0) {
-           // single-exon transcript
-           ctx.fillRect(px, py, pw, h);
+            // single-exon transcript
+            ctx.fillRect(px, py, pw, h);
 
         }
         else {
@@ -283,7 +306,7 @@ var igv = (function (igv) {
         // add feature labels
         //////////////////////
 
-        fontStyle = { font: '10px PT Sans', fillStyle: this.color, strokeStyle: this.color };
+        fontStyle = {font: '10px PT Sans', fillStyle: this.color, strokeStyle: this.color};
 
         var geneColor;
         if (igv.browser.selection) {
@@ -294,7 +317,7 @@ var igv = (function (igv) {
 
             var geneFontStyle;
             if (geneColor) {
-                geneFontStyle = { font: '10px PT Sans', fillStyle: geneColor, strokeStyle: geneColor }
+                geneFontStyle = {font: '10px PT Sans', fillStyle: geneColor, strokeStyle: geneColor}
             }
             else {
                 geneFontStyle = fontStyle;
@@ -347,8 +370,7 @@ var igv = (function (igv) {
      * @param pixelHeight  pixel height of the current canvas
      * @param ctx  the canvas 2d context
      */
-    function renderFusionJuncSpan (feature, bpStart, xScale, pixelHeight, ctx) {
-
+    function renderFusionJuncSpan(feature, bpStart, xScale, pixelHeight, ctx) {
 
 
         var px = Math.round((feature.start - bpStart) / xScale);
@@ -359,7 +381,7 @@ var igv = (function (igv) {
             px -= 1;
         }
 
-        var py = 5, h=10; // defaults borrowed from renderFeature above
+        var py = 5, h = 10; // defaults borrowed from renderFeature above
 
         if (this.displayMode === "SQUISHED" && feature.row != undefined) {
             py = this.squishedRowHeight * feature.row;
@@ -368,23 +390,23 @@ var igv = (function (igv) {
             py = this.expandedRowHeight * feature.row;
         }
 
-        var   cy = py + 5;
-        var top_y = cy-5;
+        var cy = py + 5;
+        var top_y = cy - 5;
         var bottom_y = cy + 5;
 
         //igv.Canvas.strokeLine.call(ctx, px, cy, px1, cy); // center line for introns
 
         // draw the junction arc
-        var junction_left_px = Math.round( (feature.junction_left - bpStart) / xScale );
-        var junction_right_px = Math.round( (feature.junction_right - bpStart) / xScale);
+        var junction_left_px = Math.round((feature.junction_left - bpStart) / xScale);
+        var junction_right_px = Math.round((feature.junction_right - bpStart) / xScale);
 
 
         ctx.beginPath();
-        ctx.moveTo(junction_left_px,cy);
+        ctx.moveTo(junction_left_px, cy);
         ctx.bezierCurveTo(junction_left_px, top_y, junction_right_px, top_y, junction_right_px, cy);
 
         ctx.lineWidth = 1;
-        ctx.strokeStyle='blue';
+        ctx.strokeStyle = 'blue';
         ctx.stroke();
 
         // draw the spanning arcs
@@ -392,8 +414,8 @@ var igv = (function (igv) {
         for (var i = 0; i < spanning_coords.length; i++) {
             var spanning_info = spanning_coords[i];
 
-            var span_left_px = Math.round( (spanning_info.left - bpStart) / xScale);
-            var span_right_px = Math.round( (spanning_info.right - bpStart) / xScale);
+            var span_left_px = Math.round((spanning_info.left - bpStart) / xScale);
+            var span_right_px = Math.round((spanning_info.right - bpStart) / xScale);
 
 
             ctx.beginPath();
@@ -401,15 +423,12 @@ var igv = (function (igv) {
             ctx.bezierCurveTo(span_left_px, bottom_y, span_right_px, bottom_y, span_right_px, cy);
 
             ctx.lineWidth = 1;
-            ctx.strokeStyle='purple';
+            ctx.strokeStyle = 'purple';
             ctx.stroke();
         }
 
 
     }
-
-
-
 
 
     return igv;

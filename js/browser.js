@@ -106,6 +106,8 @@ var igv = (function (igv) {
 
     igv.Browser.prototype.doLoadTrack = function (config) {
 
+        var browser = this;
+
         if (this.isDuplicateTrack(config)) {
             return;
         }
@@ -142,13 +144,21 @@ var igv = (function (igv) {
             alert("Unknown file type: " + path);
             return null;
         }
-
         // TODO -- error message "unsupported filed type"
-        this.addTrack(newTrack);
 
-        // Not needed
-        //return newTrack;
+        loadHeader(newTrack);
 
+        function loadHeader(track) {
+
+            if(track.getHeader) {
+               track.getHeader(function (header) {
+                   browser.addTrack(track);
+               })
+            }
+            else {
+                browser.addTrack(newTrack);
+            }
+        }
 
 
     };
