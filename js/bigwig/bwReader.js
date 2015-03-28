@@ -59,44 +59,42 @@ var igv = (function (igv) {
 
     igv.BWReader.prototype.loadHeader = function(continuation) {
 
-        var bwReader = this;
-
-        igvxhr.loadArrayBuffer(bwReader.path,
+        igvxhr.loadArrayBuffer(this.path,
             {
-                headers: bwReader.config.headers,
+                headers: this.config.headers,
 
                 range: {start: 0, size: BBFILE_HEADER_SIZE},
 
-                success: function (data) {
+                success: (function (data) {
 
                     if (!data) return;
 
                     // Assume low-to-high unless proven otherwise
-                    bwReader.littleEndian = true;
+                    this.littleEndian = true;
 
                     var binaryParser = new igv.BinaryParser(new DataView(data));
 
                     var magic = binaryParser.getUInt();
 
                     if (magic === BIGWIG_MAGIC_LTH) {
-                        bwReader.type = "BigWig";
+                        this.type = "BigWig";
                     }
                     else if (magic == BIGBED_MAGIC_LTH) {
-                        bwReader.type = "BigBed";
+                        this.type = "BigBed";
                     }
                     else {
                         //Try big endian order
-                        bwReader.littleEndian = false;
+                        this.littleEndian = false;
 
                         binaryParser.littleEndian = false;
                         binaryParser.position = 0;
                         var magic = binaryParser.getUInt();
 
                         if (magic === BIGWIG_MAGIC_HTL) {
-                            bwReader.type = "BigWig";
+                            this.type = "BigWig";
                         }
                         else if (magic == BIGBED_MAGIC_HTL) {
-                            bwReader.type = "BigBed";
+                            this.type = "BigBed";
                         }
                         else {
                             // TODO -- error, unknown file type  or BE
@@ -104,21 +102,21 @@ var igv = (function (igv) {
 
                     }
                     // Table 5  "Common header for BigWig and BigBed files"
-                    bwReader.header = {};
-                    bwReader.header.bwVersion = binaryParser.getShort();
-                    bwReader.header.nZoomLevels = binaryParser.getShort();
-                    bwReader.header.chromTreeOffset = binaryParser.getLong();
-                    bwReader.header.fullDataOffset = binaryParser.getLong();
-                    bwReader.header.fullIndexOffset = binaryParser.getLong();
-                    bwReader.header.fieldCount = binaryParser.getShort();
-                    bwReader.header.definedFieldCount = binaryParser.getShort();
-                    bwReader.header.autoSqlOffset = binaryParser.getLong();
-                    bwReader.header.totalSummaryOffset = binaryParser.getLong();
-                    bwReader.header.uncompressBuffSize = binaryParser.getInt();
-                    bwReader.header.reserved = binaryParser.getLong();
+                    this.header = {};
+                    this.header.bwVersion = binaryParser.getShort();
+                    this.header.nZoomLevels = binaryParser.getShort();
+                    this.header.chromTreeOffset = binaryParser.getLong();
+                    this.header.fullDataOffset = binaryParser.getLong();
+                    this.header.fullIndexOffset = binaryParser.getLong();
+                    this.header.fieldCount = binaryParser.getShort();
+                    this.header.definedFieldCount = binaryParser.getShort();
+                    this.header.autoSqlOffset = binaryParser.getLong();
+                    this.header.totalSummaryOffset = binaryParser.getLong();
+                    this.header.uncompressBuffSize = binaryParser.getInt();
+                    this.header.reserved = binaryParser.getLong();
 
-                   loadZoomHeadersAndChrTree.call(bwReader, continuation);
-                }
+                   loadZoomHeadersAndChrTree.call(this, continuation);
+                }).bind(this)
 
             });
 
