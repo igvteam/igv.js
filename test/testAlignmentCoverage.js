@@ -8,8 +8,8 @@ function runAlignmentCoverageTests() {
         var chr = "chr22",
             ss = 29565176,
             ee = 29565216,
-
             sequenceSource = new igv.FastaSequence("http://dn7ywbm9isq8j.cloudfront.net/genomes/seq/hg19/hg19.fasta");
+
         ok(sequenceSource);
 
         sequenceSource.getSequence("chr22", ss, ee, function (sequence) {
@@ -39,6 +39,7 @@ function runAlignmentCoverageTests() {
             url: 'http://www.broadinstitute.org/igvdata/1KG/b37/data/NA06984/alignment/NA06984.mapped.ILLUMINA.bwa.CEU.low_coverage.20120522.bam',
             label: 'NA06984'
         });
+        ok(bamSource, "bamSource");
 
         bamSource.getFeatures("chr22", 24379992, 24380390, function (genomicInterval) {
 
