@@ -95,12 +95,13 @@ var igv = (function (igv) {
     function loadFeaturesNoIndex(continuation, task) {
 
         var parser = this.parser,
+            self = this,
             options = {
                 headers: this.config.headers,           // http headers, not file header
                 success: (function (data) {
-                    this.header = parser.parseHeader(data);
+                    self.header = parser.parseHeader(data);
                     continuation(parser.parseFeatures(data));   // <= PARSING DONE HERE
-                }).bind(this),
+                }),
                 task: task
             };
 
