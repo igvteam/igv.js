@@ -59,9 +59,11 @@ var igv = (function (igv) {
 
     igv.BWReader.prototype.loadHeader = function(continuation) {
 
-        igvxhr.loadArrayBuffer(this.path,
+        var self = this;
+
+        igvxhr.loadArrayBuffer(self.path,
             {
-                headers: this.config.headers,
+                headers: self.config.headers,
 
                 range: {start: 0, size: BBFILE_HEADER_SIZE},
 
@@ -70,31 +72,31 @@ var igv = (function (igv) {
                     if (!data) return;
 
                     // Assume low-to-high unless proven otherwise
-                    this.littleEndian = true;
+                    self.littleEndian = true;
 
                     var binaryParser = new igv.BinaryParser(new DataView(data));
 
                     var magic = binaryParser.getUInt();
 
                     if (magic === BIGWIG_MAGIC_LTH) {
-                        this.type = "BigWig";
+                        self.type = "BigWig";
                     }
                     else if (magic == BIGBED_MAGIC_LTH) {
-                        this.type = "BigBed";
+                        self.type = "BigBed";
                     }
                     else {
                         //Try big endian order
-                        this.littleEndian = false;
+                        self.littleEndian = false;
 
                         binaryParser.littleEndian = false;
                         binaryParser.position = 0;
                         var magic = binaryParser.getUInt();
 
                         if (magic === BIGWIG_MAGIC_HTL) {
-                            this.type = "BigWig";
+                            self.type = "BigWig";
                         }
                         else if (magic == BIGBED_MAGIC_HTL) {
-                            this.type = "BigBed";
+                            self.type = "BigBed";
                         }
                         else {
                             // TODO -- error, unknown file type  or BE
@@ -102,21 +104,21 @@ var igv = (function (igv) {
 
                     }
                     // Table 5  "Common header for BigWig and BigBed files"
-                    this.header = {};
-                    this.header.bwVersion = binaryParser.getShort();
-                    this.header.nZoomLevels = binaryParser.getShort();
-                    this.header.chromTreeOffset = binaryParser.getLong();
-                    this.header.fullDataOffset = binaryParser.getLong();
-                    this.header.fullIndexOffset = binaryParser.getLong();
-                    this.header.fieldCount = binaryParser.getShort();
-                    this.header.definedFieldCount = binaryParser.getShort();
-                    this.header.autoSqlOffset = binaryParser.getLong();
-                    this.header.totalSummaryOffset = binaryParser.getLong();
-                    this.header.uncompressBuffSize = binaryParser.getInt();
-                    this.header.reserved = binaryParser.getLong();
+                    self.header = {};
+                    self.header.bwVersion = binaryParser.getShort();
+                    self.header.nZoomLevels = binaryParser.getShort();
+                    self.header.chromTreeOffset = binaryParser.getLong();
+                    self.header.fullDataOffset = binaryParser.getLong();
+                    self.header.fullIndexOffset = binaryParser.getLong();
+                    self.header.fieldCount = binaryParser.getShort();
+                    self.header.definedFieldCount = binaryParser.getShort();
+                    self.header.autoSqlOffset = binaryParser.getLong();
+                    self.header.totalSummaryOffset = binaryParser.getLong();
+                    self.header.uncompressBuffSize = binaryParser.getInt();
+                    self.header.reserved = binaryParser.getLong();
 
                    loadZoomHeadersAndChrTree.call(this, continuation);
-                }).bind(this)
+                })
 
             });
 
