@@ -447,6 +447,8 @@ var igv = (function (igv) {
 
     function getIndex(bam, continuation) {
 
+        var bamIndex = bam.index;
+        
         if (bam.index) {
             continuation(bam.index);
         }

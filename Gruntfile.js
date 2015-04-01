@@ -9,6 +9,10 @@ module.exports = function (grunt) {
             all: ['test/**/*.html']
         },
 
+        connect: {
+            uses_defaults: {}
+        },
+
         concat: {
             igv: {
                 src: [
@@ -26,7 +30,6 @@ module.exports = function (grunt) {
                 dest: 'dist/igv-all.js'
             }
         },
-
 
         uglify: {
             options: {
@@ -58,6 +61,7 @@ module.exports = function (grunt) {
     grunt.loadNpmTasks('grunt-contrib-cssmin');
     grunt.loadNpmTasks('grunt-md2html');
     grunt.loadNpmTasks('grunt-contrib-qunit');
+    grunt.loadNpmTasks('grunt-contrib-connect');
 
     // 4. Where we tell Grunt what to do when we type "grunt" into the terminal.
     //grunt.registerTask('default', ['concat:igvexp', 'uglify:igvexp']);

@@ -7,61 +7,61 @@ function runBAMTests() {
         }
     };
 
-    asyncTest("alignments for range", function () {
-
-        var chr = "chr22",
-            beg = 24375199,
-            end = 24378544,
-            bamReader;
-
-        bamReader = new igv.BamReader({
-            type: 'bam',
-            url: 'data/bam/gstt1_sample.bam',
-            label: 'BAM unit test'});
-
-        bamReader.readFeatures(chr, beg, end, function (alignments) {
-
-            ok(alignments, "alignments");
-            equal(alignments.length, 1660, "alignments.length");
-
-
-            start();
-        }, undefined);
-    });
-
-    asyncTest("header", function () {
-
-        var bamPath = "data/bam/gstt1_sample.bam",
-            bamFile = new igv.BamReader({
-                type: 'bam',
-                //url: 'http://www.broadinstitute.org/igvdata/1KG/b37/data/NA06984/alignment/NA06984.mapped.ILLUMINA.bwa.CEU.low_coverage.20120522.bam',
-                url: bamPath,
-                label: 'NA06984'});
-
-        bamFile.readHeader(function () {
-
-            equal(bamFile.contentLength, 60872, "bamFile.contentLength");
-
-            ok(bamFile.chrToIndex["chr1"] === 0);
-            start();
-
-        })
-    });
-
-    //asyncTest("large header", function () {
+    //asyncTest("alignments for range", function () {
     //
-    //    var bamPath = "http://www.broadinstitute.org/igvdata/public/test/data/bam/IonXpress_078_rawlib.lgheader.bam",
-    //        bamFile = new igv.BamReader( { type: 'bam', url: bamPath, label: 'bigBigBig'} );
+    //    var chr = "chr22",
+    //        beg = 24375199,
+    //        end = 24378544,
+    //        bamReader;
+    //
+    //    bamReader = new igv.BamReader({
+    //        type: 'bam',
+    //        url: 'data/bam/gstt1_sample.bam',
+    //        label: 'BAM unit test'});
+    //
+    //    bamReader.readFeatures(chr, beg, end, function (alignments) {
+    //
+    //        ok(alignments, "alignments");
+    //        equal(alignments.length, 1660, "alignments.length");
+    //
+    //
+    //        start();
+    //    }, undefined);
+    //});
+
+    //asyncTest("header", function () {
+    //
+    //    var bamPath = "data/bam/gstt1_sample.bam",
+    //        bamFile = new igv.BamReader({
+    //            type: 'bam',
+    //            //url: 'http://www.broadinstitute.org/igvdata/1KG/b37/data/NA06984/alignment/NA06984.mapped.ILLUMINA.bwa.CEU.low_coverage.20120522.bam',
+    //            url: bamPath,
+    //            label: 'NA06984'});
     //
     //    bamFile.readHeader(function () {
     //
-    //        equal(bamFile.contentLength, 534453);
+    //        equal(bamFile.contentLength, 60872, "bamFile.contentLength");
     //
-    //        ok(!$.isEmptyObject(bamFile.chrToIndex));
-    //
+    //        ok(bamFile.chrToIndex["chr1"] === 0);
     //        start();
+    //
     //    })
     //});
+
+    asyncTest("large header", function () {
+
+        var bamPath = "http://www.broadinstitute.org/igvdata/public/test/data/bam/IonXpress_078_rawlib.lgheader.bam",
+            bamFile = new igv.BamReader( { type: 'bam', url: bamPath, label: 'bigBigBig'} );
+
+        bamFile.readHeader(function () {
+
+            equal(bamFile.contentLength, 534453);
+
+            ok(!$.isEmptyObject(bamFile.chrToIndex));
+
+            start();
+        })
+    });
 
     /**
      * Look for a known alignment and check expected vs actual block sequence
