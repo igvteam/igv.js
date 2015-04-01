@@ -158,9 +158,9 @@ if (!String.prototype.contains) {
     };
 }
 
-if(!String.prototype.splitLines) {
-    String.prototype.splitLines = function() {
-       return this.split(/\r\n|\n|\r/gm);
+if (!String.prototype.splitLines) {
+    String.prototype.splitLines = function () {
+        return this.split(/\r\n|\n|\r/gm);
     }
 }
 
@@ -245,9 +245,24 @@ if (!Uint8Array.prototype.toText) {
 
 var log2 = Math.log(2);
 
-if(!Math.log2) {
-    Math.log2 = function(x) {
+if (!Math.log2) {
+    Math.log2 = function (x) {
         return Math.log(x) / log2;
+    }
+}
+
+// Implementation of bind().  This is included primarily for use with phantom.js, which does not implement it.
+// Attributed to John Resig
+
+if (!Function.prototype.bind) {
+    Function.prototype.bind = function () {
+        var fn = this,
+            args = Array.prototype.slice.call(arguments),
+            object = args.shift();
+        return function () {
+            return fn.apply(object,
+                args.concat(Array.prototype.slice.call(arguments)));
+        }
     }
 }
 
