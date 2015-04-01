@@ -135,7 +135,15 @@ var igv = (function (igv) {
         // BED file upload
         document.getElementById('igvFileUpload').onchange = function (e) {
 
-            browser.loadTrackFile($(this)[0].files);
+            var localFile = $(this)[ 0 ].files[ 0 ],
+                config = { type: "bed", localFile: localFile, label: localFile.name };
+
+            if (0 === igv.browser.trackViews.length) {
+                config.designatedTrack = true;
+                igv.browser.initializeWithTrackConfig(config);
+            } else {
+                igv.browser.loadTrack(config);
+            }
 
             $(this).val("");
             $('#igvFileUploadModal').modal('hide');
@@ -144,11 +152,8 @@ var igv = (function (igv) {
         // BED URL upload
         document.getElementById('igvLoadURL').onchange = function (e) {
 
-            var config = { };
-
-            config.type = "bed";
-            config.url = $(this).val();
-            config.label = igv.browser.trackLabelWithPath(config.url);
+            var path = $(this).val(),
+                config = { type: "bed", url: path, label: igv.browser.trackLabelWithPath(path) };
 
             if (0 === igv.browser.trackViews.length) {
                 config.designatedTrack = true;
@@ -618,72 +623,6 @@ var igv = (function (igv) {
 
         };
 
-        browser.loadTrackFile = function (localFiles) {
-            
-            for (var i = 0; i < localFiles.length; i++) {
-
-                localFile = localFiles[ i ];
-
-                if (0 === browser.trackViews.length) {
-
-                    // When loading first track into app
-                    // with no pre-exisiting tracks.
-                    // set track as designated track
-                    browser.initializeWithTrackConfig({
-                        type: "bed",
-                        localFile: localFile,
-                        url: undefined,
-                        label: localFile.name,
-                        designatedTrack: true
-                    });
-
-                }
-                else {
-
-                    browser.loadTrack({
-                        type: "bed",
-                        localFile: localFile,
-                        url: undefined,
-                        label: localFile.name
-                    });
-
-                }
-
-                localFiles[ i ] = undefined;
-
-            }
-
-        };
-
-        //browser.loadTrackPath = function (path) {
-        //
-        //    if (0 === browser.trackViews.length) {
-        //
-        //        // When loading first track into app
-        //        // with no pre-exisiting tracks.
-        //        // set track as designated track
-        //        browser.initializeWithTrackConfig({
-        //            type: "bed",
-        //            url: path,
-        //            label: browser.trackLabelWithPath(path),
-        //            designatedTrack: true
-        //        });
-        //
-        //    }
-        //    else {
-        //
-        //        browser.loadTrack({
-        //            type: "bed",
-        //            url: path,
-        //            label: browser.trackLabelWithPath(path)
-        //        });
-        //
-        //    }
-        //
-        //
-        //
-        //};
-
         browser.session = function () {
 
             var dev_null,
@@ -830,7 +769,6 @@ var igv = (function (igv) {
         }
     }
 
-
     function addCursorTrackViewExtensions(browser) {
 
         igv.TrackView.prototype.viewportCreationHelper = function (viewportDiv) {
@@ -972,7 +910,6 @@ var igv = (function (igv) {
             });
 
         };
-
 
         igv.TrackView.prototype.repaint = function () {
 
