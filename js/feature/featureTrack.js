@@ -30,7 +30,7 @@ var igv = (function (igv) {
         igv.configTrack(this, config);
 
         this.displayMode = config.displayMode || "COLLAPSED";    // COLLAPSED | EXPANDED | SQUISHED
-
+        this.labelDisplayMode = config.labelDisplayMode;
         this.collapsedHeight = config.collapsedHeight || this.height;
         this.expandedRowHeight = config.expandedRowHeight || 30;
         this.squishedRowHeight = config.squishedRowHeight || 15;
