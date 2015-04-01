@@ -51,15 +51,15 @@ var igv = (function (igv) {
     };
 
     igv.FeatureTrack.prototype.getHeader = function (continuation) {
-      var track = this;
+        var track = this;
         this.featureSource.getHeader(function (header) {
 
-            if(header) {
+            if (header) {
                 // Header (from track line).  Set properties,unless set in the config (config takes precedence)
-                if(header.name && !track.config.label) {
+                if (header.name && !track.config.label) {
                     track.label = header.name;
                 }
-                if(header.color && !track.config.color) {
+                if (header.color && !track.config.color) {
                     track.color = "rgb(" + header.color + ")";
                 }
             }
@@ -201,7 +201,7 @@ var igv = (function (igv) {
 
         var myself = this,
             menuItems = [],
-            lut = {"COLLAPSED": "Collapse", "SQUISHED": "Squish track hgt", "EXPANDED": "Expand"},
+            lut = {"COLLAPSED": "Collapse", "SQUISHED": "Squish", "EXPANDED": "Expand"},
             checkMark = '<i class="fa fa-check fa-check-shim"></i>',
             checkMarkNone = '<i class="fa fa-check fa-check-shim fa-check-hidden"></i>',
             trackMenuItem = '<div class=\"igv-track-menu-item\">',
@@ -209,7 +209,7 @@ var igv = (function (igv) {
 
         menuItems.push(igv.colorPickerMenuItem(popover, this.trackView, "Set feature color", this.color));
 
-        ["EXPANDED", "SQUISHED", "COLLAPSED"].forEach(function (displayMode, index) {
+        ["COLLAPSED", "SQUISHED", "EXPANDED"].forEach(function (displayMode, index) {
 
             var chosen,
                 str;

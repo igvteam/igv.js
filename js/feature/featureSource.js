@@ -89,7 +89,8 @@ var igv = (function (igv) {
 
         var myself = this,
             genomicInterval = new igv.GenomicInterval(chr, bpStart, bpEnd),
-            featureCache = this.featureCache;
+            featureCache = this.featureCache,
+            maxRows = this.config.maxRows || 500;
 
         if (featureCache && (featureCache.range === undefined || featureCache.range.containsRange(genomicInterval))) {
             success(this.featureCache.queryFeatures(chr, bpStart, bpEnd));
@@ -111,7 +112,7 @@ var igv = (function (igv) {
                         new igv.FeatureCache(featureList);   // Note - replacing previous cache with new one
 
                     // Assign overlapping features to rows
-                    packFeatures(featureList);
+                    packFeatures(featureList, maxRows);
 
                     // Finally pass features for query interval to continuation
                     success(myself.featureCache.queryFeatures(chr, bpStart, bpEnd));
