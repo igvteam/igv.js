@@ -5,12 +5,8 @@ module.exports = function (grunt) {
         pkg: grunt.file.readJSON('package.json'),
 
         qunit: {
-            hello: [
-                'test/helloQUnit.html'
-             ],
-            all: [
-                'test/*.html'
-            ]
+            hello: [ 'test/helloQUnit.html' ],
+            all: ['test/**/*.html']
         },
 
         concat: {
@@ -68,6 +64,13 @@ module.exports = function (grunt) {
     //grunt.registerTask('default', ['concat:igv', 'uglify:igv', 'md2html:igv']);
     grunt.registerTask('default', ['concat:igv', 'uglify:igv', 'md2html:igv']);
 
+    grunt.task.registerTask('unittest', 'Run one unit test.', function(testname) {
 
+        if(!!testname)
+            grunt.config('qunit.all', ['test/' + testname + '.html']);
+
+        grunt.task.run('qunit:all');
+
+    });
 };
 
