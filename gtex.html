@@ -9,14 +9,18 @@
     <link rel="shortcut icon" href=img/favicon.ico>
     <title>IGV - Integrative Genomics Viewer</title>
 
+
     <!-- jQuery UI CSS -->
-    <link rel="stylesheet" type="text/css" href="//ajax.googleapis.com/ajax/libs/jqueryui/1.11.2/themes/smoothness/jquery-ui.css"/>
+    <!--<link rel="stylesheet" type="text/css" href="//ajax.googleapis.com/ajax/libs/jqueryui/1.11.2/themes/smoothness/jquery-ui.css"/>-->
+    <link rel="stylesheet" type="text/css"
+          href="//ajax.googleapis.com/ajax/libs/jqueryui/1.11.2/themes/redmond/jquery-ui.css"/>
 
     <!-- Color Picker CSS -->
     <link rel="stylesheet" type="text/css" href="vendor/colorpickers/vanderlee-github-io/jquery.colorpicker.css"/>
 
     <!-- Google fonts -->
-    <link rel="stylesheet" type="text/css" href='http://fonts.googleapis.com/css?family=PT+Sans:400,700'>
+    <link rel="stylesheet" type="text/css" href='//fonts.googleapis.com/css?family=PT+Sans:400,700'>
+    <link rel="stylesheet" type="text/css" href='//fonts.googleapis.com/css?family=Open+Sans'>
 
     <!-- Font Awesome CSS -->
     <link rel="stylesheet" type="text/css" href="//maxcdn.bootstrapcdn.com/font-awesome/4.2.0/css/font-awesome.min.css">
@@ -27,17 +31,23 @@
     <!-- jQuery JS -->
     <script type="text/javascript" src="//ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
 
-    <!-- jQuery UI CSS -->
+    <!-- jQuery UI JS -->
     <script type="text/javascript" src="//ajax.googleapis.com/ajax/libs/jqueryui/1.11.2/jquery-ui.min.js"></script>
 
     <!-- Color Picker JS -->
     <script type="text/javascript" src="vendor/colorpickers/vanderlee-github-io/jquery.colorpicker.js"></script>
-    <script type="text/javascript" src="vendor/colorpickers/vanderlee-github-io/i18n/jquery.ui.colorpicker-nl.js"></script>
-    <script type="text/javascript" src="vendor/colorpickers/vanderlee-github-io/swatches/jquery.ui.colorpicker-pantone.js"></script>
-    <script type="text/javascript" src="vendor/colorpickers/vanderlee-github-io/parts/jquery.ui.colorpicker-rgbslider.js"></script>
-    <script type="text/javascript" src="vendor/colorpickers/vanderlee-github-io/parts/jquery.ui.colorpicker-memory.js"></script>
-    <script type="text/javascript" src="vendor/colorpickers/vanderlee-github-io/parsers/jquery.ui.colorpicker-cmyk-parser.js"></script>
-    <script type="text/javascript" src="vendor/colorpickers/vanderlee-github-io/parsers/jquery.ui.colorpicker-cmyk-percentage-parser.js"></script>
+    <script type="text/javascript"
+            src="vendor/colorpickers/vanderlee-github-io/i18n/jquery.ui.colorpicker-nl.js"></script>
+    <script type="text/javascript"
+            src="vendor/colorpickers/vanderlee-github-io/swatches/jquery.ui.colorpicker-pantone.js"></script>
+    <script type="text/javascript"
+            src="vendor/colorpickers/vanderlee-github-io/parts/jquery.ui.colorpicker-rgbslider.js"></script>
+    <script type="text/javascript"
+            src="vendor/colorpickers/vanderlee-github-io/parts/jquery.ui.colorpicker-memory.js"></script>
+    <script type="text/javascript"
+            src="vendor/colorpickers/vanderlee-github-io/parsers/jquery.ui.colorpicker-cmyk-parser.js"></script>
+    <script type="text/javascript"
+            src="vendor/colorpickers/vanderlee-github-io/parsers/jquery.ui.colorpicker-cmyk-percentage-parser.js"></script>
 
     <!-- Vendor JS -->
     <script type="text/javascript" src="vendor/inflate.js"></script>
@@ -45,6 +55,7 @@
 
     <!-- IGV JS -->
     <script type="text/javascript" src="js/igv.js"></script>
+    <script type="text/javascript" src="js/userFeedback.js"></script>
     <script type="text/javascript" src="js/popover.js"></script>
     <script type="text/javascript" src="js/browser.js"></script>
     <script type="text/javascript" src="js/ideogram.js"></script>
@@ -70,6 +81,7 @@
     <script type="text/javascript" src="js/gtex/eqtlTrack.js"></script>
     <script type="text/javascript" src="js/gtex/gtexReader.js"></script>
     <script type="text/javascript" src="js/gtex/gtex.js"></script>
+    <script type="text/javascript" src="js/gtex/immvarReader.js"></script>
 
     <script type="text/javascript" src="js/bam/coverageMap.js"></script>
     <script type="text/javascript" src="js/bam/bamReader.js"></script>
@@ -77,6 +89,7 @@
     <script type="text/javascript" src="js/bam/bamSource.js"></script>
     <script type="text/javascript" src="js/bam/bamTrack.js"></script>
     <script type="text/javascript" src="js/bam/bamAlignment.js"></script>
+    <script type="text/javascript" src="js/bam/bamAlignmentRow.js"></script>
     <script type="text/javascript" src="js/bam/bamIndex.js"></script>
 
 
@@ -108,9 +121,20 @@
     <script type="text/javascript" src="js/variant/vcfParser.js"></script>
     <script type="text/javascript" src="js/variant/variant.js"></script>
 
+    <script type="text/javascript" src="js/bigwig/bufferedReader.js"></script>
+    <script type="text/javascript" src="js/bigwig/bwBPTree.js"></script>
+    <script type="text/javascript" src="js/bigwig/bwReader.js"></script>
+    <script type="text/javascript" src="js/bigwig/bwRPTree.js"></script>
+    <script type="text/javascript" src="js/bigwig/bwSource.js"></script>
+    <script type="text/javascript" src="js/bigwig/bwTotalSummary.js"></script>
+
     <script type="text/javascript" src="js/trackCore.js"></script>
 
     <script type="text/javascript" src="js/trackMenuPopupDialog.js"></script>
+
+    <script type="text/javascript" src="js/set.js"></script>
+
+    <script src="js/oauth/google.js"></script>
 
 </head>
 
@@ -147,6 +171,7 @@
                     //url: "//dn7ywbm9isq8j.cloudfront.net/annotations/hg19/genes/gencode.v18.collapsed.bed",
                     url: "//dn7ywbm9isq8j.cloudfront.net/annotations/hg19/genes/gencode.v18.collapsed.bed",
                     label: "Genes",
+                    labelDisplayMode: "SLANT",
                     order: 10000
                 }
             ]

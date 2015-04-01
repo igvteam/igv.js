@@ -43,7 +43,7 @@ var igv = (function (igv) {
             options.cytobandURL = "//dn7ywbm9isq8j.cloudfront.net/genomes/seq/hg19/cytoBand.txt";
         }
 
-        if (!options.track) {
+        if (!options.tracks) {
             options.tracks = [
                 {
                     type: "sequence",
