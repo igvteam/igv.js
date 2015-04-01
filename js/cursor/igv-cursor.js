@@ -144,7 +144,18 @@ var igv = (function (igv) {
         // BED URL upload
         document.getElementById('igvLoadURL').onchange = function (e) {
 
-            browser.loadTrackPath($(this).val());
+            var config = { };
+
+            config.type = "bed";
+            config.url = $(this).val();
+            config.label = igv.browser.trackLabelWithPath(config.url);
+
+            if (0 === igv.browser.trackViews.length) {
+                config.designatedTrack = true;
+                igv.browser.initializeWithTrackConfig(config);
+            } else {
+                igv.browser.loadTrack(config);
+            }
 
             $(this).val("");
             $('#igvLoadURLModal').modal('hide');
@@ -644,34 +655,34 @@ var igv = (function (igv) {
 
         };
 
-        browser.loadTrackPath = function (path) {
-
-            if (0 === browser.trackViews.length) {
-
-                // When loading first track into app
-                // with no pre-exisiting tracks.
-                // set track as designated track
-                browser.initializeWithTrackConfig({
-                    type: "bed",
-                    url: path,
-                    label: browser.trackLabelWithPath(path),
-                    designatedTrack: true
-                });
-
-            }
-            else {
-
-                browser.loadTrack({
-                    type: "bed",
-                    url: path,
-                    label: browser.trackLabelWithPath(path)
-                });
-
-            }
-
-
-
-        };
+        //browser.loadTrackPath = function (path) {
+        //
+        //    if (0 === browser.trackViews.length) {
+        //
+        //        // When loading first track into app
+        //        // with no pre-exisiting tracks.
+        //        // set track as designated track
+        //        browser.initializeWithTrackConfig({
+        //            type: "bed",
+        //            url: path,
+        //            label: browser.trackLabelWithPath(path),
+        //            designatedTrack: true
+        //        });
+        //
+        //    }
+        //    else {
+        //
+        //        browser.loadTrack({
+        //            type: "bed",
+        //            url: path,
+        //            label: browser.trackLabelWithPath(path)
+        //        });
+        //
+        //    }
+        //
+        //
+        //
+        //};
 
         browser.session = function () {
 
