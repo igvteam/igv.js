@@ -124,7 +124,7 @@ var igv = (function (igv) {
 
                 $('#igvSessionLoadModal').modal('hide');
 
-                browser.loadSession(session);
+                browser.initializeWithSession(session);
 
             };
 
@@ -135,15 +135,9 @@ var igv = (function (igv) {
         // BED file upload
         document.getElementById('igvFileUpload').onchange = function (e) {
 
-            var localFile = $(this)[ 0 ].files[ 0 ],
-                config = { type: "bed", localFile: localFile, label: localFile.name };
+            var localFile = $(this)[ 0 ].files[ 0 ];
 
-            if (0 === igv.browser.trackViews.length) {
-                config.designatedTrack = true;
-                igv.browser.initializeWithTrackConfig(config);
-            } else {
-                igv.browser.loadTrackNexGen(config);
-            }
+            configureTrackWithLocalFileOrPath( { type: "bed", localFile: localFile, label: localFile.name } );
 
             $(this).val("");
             $('#igvFileUploadModal').modal('hide');
@@ -152,8 +146,16 @@ var igv = (function (igv) {
         // BED URL upload
         document.getElementById('igvLoadURL').onchange = function (e) {
 
-            var path = $(this).val(),
-                config = { type: "bed", url: path, label: igv.browser.trackLabelWithPath(path) };
+            var path = $(this).val();
+
+            configureTrackWithLocalFileOrPath( { type: "bed", url: path, label: igv.browser.trackLabelWithPath(path) } );
+
+            $(this).val("");
+            $('#igvLoadURLModal').modal('hide');
+
+        };
+
+        function configureTrackWithLocalFileOrPath(config) {
 
             if (0 === igv.browser.trackViews.length) {
                 config.designatedTrack = true;
@@ -162,9 +164,7 @@ var igv = (function (igv) {
                 igv.browser.loadTrackNexGen(config);
             }
 
-            $(this).val("");
-            $('#igvLoadURLModal').modal('hide');
-        };
+        }
 
         // Load ENCODE DataTables data and build markup for modal dialog.
         encode.createEncodeDataTablesDataSet("resources/peaks.hg19.txt", function (dataSet) {
@@ -333,7 +333,7 @@ var igv = (function (igv) {
 
 
                 console.log("launchSession: " + JSON.stringify(session));
-                browser.loadSession(session);
+                browser.initializeWithSession(session);
 
             });
 
@@ -354,6 +354,69 @@ var igv = (function (igv) {
     function addCursorBrowserExtensions(browser) {
 
         browser.crossDomainProxy = "php/simpleProxy.php";
+
+
+        // TODO - Make this real.
+        browser.loadTrackNexGen = function (config) {
+
+            var path,
+                type,
+                track;
+
+            if (browser.isDuplicateTrack(config)) {
+                return;
+            }
+
+            path = config.url;
+            type = config.type;
+            if (!type) {
+                type = cursorGetType(path);
+            }
+
+            if (type !== "bed") {
+                window.alert("Bad Track type");
+                return;
+            }
+
+            track = new cursor.CursorTrack(config, browser);
+
+            if (true === config.designatedTrack) {
+                browser.designatedTrack = track;
+            }
+
+            browser.loadTracks([ track ]);
+
+            function cursorGetType(path) {
+
+                if (path.endsWith(".bed") || path.endsWith(".bed.gz") || path.endsWith(".broadPeak") || path.endsWith(".broadPeak.gz")) {
+                    return "bed";
+                } else {
+                    return undefined;
+                }
+
+            }
+
+        };
+
+        browser.loadTracks = function (tracks) {
+
+            tracks.forEach(function (t, index) {
+
+                t.getFeatureCache(function(ignored){
+
+                    if ((1 + index) === tracks.length) {
+
+                        tracks.forEach(function(tt){
+
+                            browser.addTrack(tt);
+                        });
+                    }
+
+                });
+
+            });
+
+        };
 
         // Alter "super" implementation
         browser.loadTrack = function (config) {
@@ -449,88 +512,14 @@ var igv = (function (igv) {
 
         };
 
-        // TODO - Make this real.
-        browser.loadTrackNexGen = function (config, continuation) {
-
-            var path,
-                type,
-                track;
-
-            if (browser.isDuplicateTrack(config)) {
-                return;
-            }
-
-            path = config.url;
-            type = config.type;
-            if (!type) {
-                type = cursorGetType(path);
-            }
-
-            if (type !== "bed") {
-                window.alert("Bad Track type");
-                return;
-            }
-
-            track = new cursor.CursorTrack(config, browser);
-
-            if (true === config.designatedTrack) {
-                browser.designatedTrack = track;
-            }
-
-            browser.loadTracks([ track ]);
-
-            function cursorGetType(path) {
-
-                if (path.endsWith(".bed") || path.endsWith(".bed.gz") || path.endsWith(".broadPeak") || path.endsWith(".broadPeak.gz")) {
-                    return "bed";
-                } else {
-                    return undefined;
-                }
-
-            }
-
-        };
-
-        browser.loadTracks = function (tracks) {
-
-            tracks.forEach(function (t, index) {
-
-                t.getFeatureCache(function(ignored){
-
-                    if (index === tracks.length - 1) {
-
-                        tracks.forEach(function(tt){
-
-                            browser.addTrack(tt);
-                        });
-                    }
-
-                });
-
-            });
-
-            function cursorGetType(path) {
-
-                if (path.endsWith(".bed") || path.endsWith(".bed.gz") || path.endsWith(".broadPeak") || path.endsWith(".broadPeak.gz")) {
-                    return "bed";
-                } else {
-                    return undefined;
-                }
-
-            }
-
-        };
-
         browser.initializeWithTrackConfig = function (config) {
-
-            var horizontalScrollBarContainer;
 
             browser.loadTrack(config);
 
-            horizontalScrollBarContainer = $("div.igv-horizontal-scrollbar-container-div");
-            browser.horizontalScrollbar = new cursor.HorizontalScrollbar(browser, $(horizontalScrollBarContainer));
-
             browser.designatedTrack.featureSource.allFeatures(function (features) {
+
+                var horizontalScrollBarContainer = $("div.igv-horizontal-scrollbar-container-div");
+                browser.horizontalScrollbar = new cursor.HorizontalScrollbar(browser, $(horizontalScrollBarContainer));
 
                 browser.cursorModel.setRegions(features);
 
@@ -541,22 +530,19 @@ var igv = (function (igv) {
 
         browser.initializeWithOptions = function (options) {
 
-            var howmany,
-                horizontalScrollBarContainer;
-
-            howmany = 0;
+            var howmany = 0;
             options.tracks.forEach(function (trackConfig) {
 
                 browser.loadTrack(trackConfig);
 
                 if (++howmany === options.tracks.length) {
 
-                    horizontalScrollBarContainer = $("div.igv-horizontal-scrollbar-container-div");
-                    browser.horizontalScrollbar = new cursor.HorizontalScrollbar(browser, $(horizontalScrollBarContainer));
+                    browser.designatedTrack.featureSource.allFeatures(function (features) {
 
-                    browser.designatedTrack.featureSource.allFeatures(function (featureList) {
+                        var horizontalScrollBarContainer = $("div.igv-horizontal-scrollbar-container-div");
+                        browser.horizontalScrollbar = new cursor.HorizontalScrollbar(browser, $(horizontalScrollBarContainer));
 
-                        browser.cursorModel.setRegions(featureList);
+                        browser.cursorModel.setRegions(features);
 
                         browser.horizontalScrollbar.update();
                     });
@@ -566,23 +552,21 @@ var igv = (function (igv) {
 
         };
 
-        browser.loadSession = function (session) {
+        browser.initializeWithSession = function (session) {
 
-            var cursorTracks,
-                howmany,
-                horizontalScrollBarContainer;
-
+            var tracks,
+                howmany;
 
             browser.sessionTeardown();
 
             browser.cursorModel.regionWidth = session.regionWidth;
             $("input[id='regionSizeInput']").val(browser.cursorModel.regionWidth);
 
-            cursorTracks = [];
+            tracks = [];
             browser.designatedTrack = undefined;
             session.tracks.forEach(function (trackSession) {
 
-                var cursorTrack,
+                var track,
                     config = {
                         type: "bed",
                         url: trackSession.path,
@@ -594,32 +578,32 @@ var igv = (function (igv) {
                         designatedTrack: trackSession.designatedTrack
                     };
 
-                cursorTrack = new cursor.CursorTrack(config, browser);
+                track = new cursor.CursorTrack(config, browser);
                 if (undefined !== config.designatedTrack && true === config.designatedTrack) {
-                    browser.designatedTrack = cursorTrack;
+                    browser.designatedTrack = track;
                 }
 
-                cursorTracks.push(cursorTrack);
+                tracks.push(track);
 
             });
 
             if (undefined === browser.designatedTrack) {
-                browser.designatedTrack = cursorTracks[ 0 ];
+                browser.designatedTrack = tracks[ 0 ];
             }
 
             howmany = 0;
-            cursorTracks.forEach(function (cursorTrack) {
+            tracks.forEach(function (track) {
 
-                browser.addTrack(cursorTrack);
+                browser.addTrack(track);
 
-                if (++howmany === cursorTracks.length) {
+                if (++howmany === tracks.length) {
 
-                    horizontalScrollBarContainer = $("div.igv-horizontal-scrollbar-container-div");
-                    browser.horizontalScrollbar = new cursor.HorizontalScrollbar(browser, $(horizontalScrollBarContainer));
+                    browser.designatedTrack.featureSource.allFeatures(function (features) {
 
-                    browser.designatedTrack.featureSource.allFeatures(function (featureList) {
+                        var horizontalScrollBarContainer = $("div.igv-horizontal-scrollbar-container-div");
+                        browser.horizontalScrollbar = new cursor.HorizontalScrollbar(browser, $(horizontalScrollBarContainer));
 
-                        browser.cursorModel.setRegions(featureList);
+                        browser.cursorModel.setRegions(features);
 
                         browser.setFrameWidth(browser.trackViewportWidth() * session.framePixelWidthUnitless);
 
@@ -627,7 +611,6 @@ var igv = (function (igv) {
 
                         //browser.goto("", session.start, session.end);
                         browser.fitToScreen();
-
 
                         browser.horizontalScrollbar.update();
 
