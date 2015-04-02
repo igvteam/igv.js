@@ -355,6 +355,100 @@ var igv = (function (igv) {
 
         browser.crossDomainProxy = "php/simpleProxy.php";
 
+        // Alter "super" implementation
+        browser.loadTrack = function (config) {
+
+            var path,
+                type,
+                track;
+
+            if (browser.isDuplicateTrack(config)) {
+                return;
+            }
+
+            path = config.url;
+            type = config.type;
+            if (!type) {
+                type = cursorGetType(path);
+            }
+
+            if (type !== "bed") {
+                window.alert("Bad Track type");
+                return;
+            }
+
+            track = new cursor.CursorTrack(config, browser);
+
+            if (true === config.designatedTrack) {
+                browser.designatedTrack = track;
+            }
+
+            browser.addTrack(track);
+
+            function cursorGetType(path) {
+
+                if (path.endsWith(".bed") || path.endsWith(".bed.gz") || path.endsWith(".broadPeak") || path.endsWith(".broadPeak.gz")) {
+                    return "bed";
+                } else {
+                    return undefined;
+                }
+
+            }
+
+        };
+
+        browser.session = function () {
+
+            var dev_null,
+                session =
+                {
+                    start: Math.floor(browser.referenceFrame.start),
+                    end: Math.floor((browser.referenceFrame.bpPerPixel * browser.trackViewportWidth()) + browser.referenceFrame.start),
+                    regionWidth: browser.cursorModel.regionWidth,
+                    framePixelWidthUnitless: (browser.cursorModel.framePixelWidth / browser.trackViewportWidth()),
+                    tracks: []
+                };
+
+            dev_null = browser.trackViewportWidth();
+
+            browser.trackViews.forEach(function (trackView) {
+
+                var jsonRepresentation = trackView.track.jsonRepresentation();
+
+                if (jsonRepresentation) {
+
+                    if (browser.designatedTrack && browser.designatedTrack === trackView.track) {
+                        jsonRepresentation.designatedTrack = true;
+                    }
+
+                    session.tracks.push(jsonRepresentation);
+                }
+                else {
+                    // TODO -- what if there is no json repesentation?
+                }
+            });
+
+            return JSON.stringify(session, undefined, 4);
+
+        };
+
+        browser.sessionTeardown = function () {
+
+            var trackView,
+                horizontalScrollBarContainer;
+
+            while (this.trackViews.length > 0) {
+                trackView = this.trackViews[ this.trackViews.length - 1 ];
+                this.removeTrack(trackView.track);
+            }
+
+            horizontalScrollBarContainer = $("div.igv-horizontal-scrollbar-container-div");
+            $(horizontalScrollBarContainer).empty();
+
+            this.horizontalScrollbar = undefined;
+
+        };
+
         // TODO - Make this real.
         browser.loadTrackNexGen = function (config, continuation) {
 
@@ -468,6 +562,79 @@ var igv = (function (igv) {
                     });
 
                 }
+            });
+
+        };
+
+        browser.loadSession = function (session) {
+
+            var cursorTracks,
+                howmany,
+                horizontalScrollBarContainer;
+
+
+            browser.sessionTeardown();
+
+            browser.cursorModel.regionWidth = session.regionWidth;
+            $("input[id='regionSizeInput']").val(browser.cursorModel.regionWidth);
+
+            cursorTracks = [];
+            browser.designatedTrack = undefined;
+            session.tracks.forEach(function (trackSession) {
+
+                var cursorTrack,
+                    config = {
+                        type: "bed",
+                        url: trackSession.path,
+                        color: trackSession.color,
+                        label: trackSession.label,
+                        order: trackSession.order,
+                        trackHeight: trackSession.height,
+                        trackFilter: trackSession.trackFilter,
+                        designatedTrack: trackSession.designatedTrack
+                    };
+
+                cursorTrack = new cursor.CursorTrack(config, browser);
+                if (undefined !== config.designatedTrack && true === config.designatedTrack) {
+                    browser.designatedTrack = cursorTrack;
+                }
+
+                cursorTracks.push(cursorTrack);
+
+            });
+
+            if (undefined === browser.designatedTrack) {
+                browser.designatedTrack = cursorTracks[ 0 ];
+            }
+
+            howmany = 0;
+            cursorTracks.forEach(function (cursorTrack) {
+
+                browser.addTrack(cursorTrack);
+
+                if (++howmany === cursorTracks.length) {
+
+                    horizontalScrollBarContainer = $("div.igv-horizontal-scrollbar-container-div");
+                    browser.horizontalScrollbar = new cursor.HorizontalScrollbar(browser, $(horizontalScrollBarContainer));
+
+                    browser.designatedTrack.featureSource.allFeatures(function (featureList) {
+
+                        browser.cursorModel.setRegions(featureList);
+
+                        browser.setFrameWidth(browser.trackViewportWidth() * session.framePixelWidthUnitless);
+
+                        browser.referenceFrame.bpPerPixel = 1.0 / browser.cursorModel.framePixelWidth;
+
+                        //browser.goto("", session.start, session.end);
+                        browser.fitToScreen();
+
+
+                        browser.horizontalScrollbar.update();
+
+
+                    });
+                }
+
             });
 
         };
@@ -647,173 +814,6 @@ var igv = (function (igv) {
             }
 
             this.cursorModel.filterRegions();
-
-        };
-
-        // Alter "super" implementation
-        browser.loadTrack = function (config) {
-
-            var path,
-                type,
-                track;
-
-            if (browser.isDuplicateTrack(config)) {
-                return;
-            }
-
-            path = config.url;
-            type = config.type;
-            if (!type) {
-                type = cursorGetType(path);
-            }
-
-            if (type !== "bed") {
-                window.alert("Bad Track type");
-                return;
-            }
-
-            track = new cursor.CursorTrack(config, browser);
-
-            if (true === config.designatedTrack) {
-                browser.designatedTrack = track;
-            }
-
-            browser.addTrack(track);
-
-            function cursorGetType(path) {
-
-                if (path.endsWith(".bed") || path.endsWith(".bed.gz") || path.endsWith(".broadPeak") || path.endsWith(".broadPeak.gz")) {
-                    return "bed";
-                } else {
-                    return undefined;
-                }
-
-            }
-
-        };
-
-        browser.session = function () {
-
-            var dev_null,
-                session =
-                {
-                    start: Math.floor(browser.referenceFrame.start),
-                    end: Math.floor((browser.referenceFrame.bpPerPixel * browser.trackViewportWidth()) + browser.referenceFrame.start),
-                    regionWidth: browser.cursorModel.regionWidth,
-                    framePixelWidthUnitless: (browser.cursorModel.framePixelWidth / browser.trackViewportWidth()),
-                    tracks: []
-                };
-
-            dev_null = browser.trackViewportWidth();
-
-            browser.trackViews.forEach(function (trackView) {
-
-                var jsonRepresentation = trackView.track.jsonRepresentation();
-
-                if (jsonRepresentation) {
-
-                    if (browser.designatedTrack && browser.designatedTrack === trackView.track) {
-                        jsonRepresentation.designatedTrack = true;
-                    }
-
-                    session.tracks.push(jsonRepresentation);
-                }
-                else {
-                    // TODO -- what if there is no json repesentation?
-                }
-            });
-
-            return JSON.stringify(session, undefined, 4);
-
-        };
-
-        browser.sessionTeardown = function () {
-
-            var trackView,
-                horizontalScrollBarContainer;
-
-            while (this.trackViews.length > 0) {
-                trackView = this.trackViews[ this.trackViews.length - 1 ];
-                this.removeTrack(trackView.track);
-            }
-
-            horizontalScrollBarContainer = $("div.igv-horizontal-scrollbar-container-div");
-            $(horizontalScrollBarContainer).empty();
-
-            this.horizontalScrollbar = undefined;
-
-        };
-
-        browser.loadSession = function (session) {
-
-            var cursorTracks,
-                howmany,
-                horizontalScrollBarContainer;
-
-
-            browser.sessionTeardown();
-
-            browser.cursorModel.regionWidth = session.regionWidth;
-            $("input[id='regionSizeInput']").val(browser.cursorModel.regionWidth);
-
-            cursorTracks = [];
-            browser.designatedTrack = undefined;
-            session.tracks.forEach(function (trackSession) {
-
-                var cursorTrack,
-                    config = {
-                        type: "bed",
-                        url: trackSession.path,
-                        color: trackSession.color,
-                        label: trackSession.label,
-                        order: trackSession.order,
-                        trackHeight: trackSession.height,
-                        trackFilter: trackSession.trackFilter,
-                        designatedTrack: trackSession.designatedTrack
-                    };
-
-                cursorTrack = new cursor.CursorTrack(config, browser);
-                if (undefined !== config.designatedTrack && true === config.designatedTrack) {
-                    browser.designatedTrack = cursorTrack;
-                }
-
-                cursorTracks.push(cursorTrack);
-
-            });
-
-            if (undefined === browser.designatedTrack) {
-                browser.designatedTrack = cursorTracks[ 0 ];
-            }
-
-            howmany = 0;
-            cursorTracks.forEach(function (cursorTrack) {
-
-                browser.addTrack(cursorTrack);
-
-                if (++howmany === cursorTracks.length) {
-
-                    horizontalScrollBarContainer = $("div.igv-horizontal-scrollbar-container-div");
-                    browser.horizontalScrollbar = new cursor.HorizontalScrollbar(browser, $(horizontalScrollBarContainer));
-
-                    browser.designatedTrack.featureSource.allFeatures(function (featureList) {
-
-                        browser.cursorModel.setRegions(featureList);
-
-                        browser.setFrameWidth(browser.trackViewportWidth() * session.framePixelWidthUnitless);
-
-                        browser.referenceFrame.bpPerPixel = 1.0 / browser.cursorModel.framePixelWidth;
-
-                        //browser.goto("", session.start, session.end);
-                        browser.fitToScreen();
-
-
-                        browser.horizontalScrollbar.update();
-
-
-                    });
-                }
-
-            });
 
         };
 
