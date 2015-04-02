@@ -142,7 +142,7 @@ var igv = (function (igv) {
                 config.designatedTrack = true;
                 igv.browser.initializeWithTrackConfig(config);
             } else {
-                igv.browser.loadTrack(config);
+                igv.browser.loadTrackNexGen(config);
             }
 
             $(this).val("");
@@ -159,7 +159,7 @@ var igv = (function (igv) {
                 config.designatedTrack = true;
                 igv.browser.initializeWithTrackConfig(config);
             } else {
-                igv.browser.loadTrack(config);
+                igv.browser.loadTrackNexGen(config);
             }
 
             $(this).val("");
@@ -355,20 +355,90 @@ var igv = (function (igv) {
 
         browser.crossDomainProxy = "php/simpleProxy.php";
 
-        browser.initializeWithTrackConfig = function (trackConfig) {
+        // TODO - Make this real.
+        browser.loadTrackNexGen = function (config, continuation) {
+
+            var path,
+                type,
+                track;
+
+            if (browser.isDuplicateTrack(config)) {
+                return;
+            }
+
+            path = config.url;
+            type = config.type;
+            if (!type) {
+                type = cursorGetType(path);
+            }
+
+            if (type !== "bed") {
+                window.alert("Bad Track type");
+                return;
+            }
+
+            track = new cursor.CursorTrack(config, browser);
+
+            if (true === config.designatedTrack) {
+                browser.designatedTrack = track;
+            }
+
+            browser.loadTracks([ track ]);
+
+            function cursorGetType(path) {
+
+                if (path.endsWith(".bed") || path.endsWith(".bed.gz") || path.endsWith(".broadPeak") || path.endsWith(".broadPeak.gz")) {
+                    return "bed";
+                } else {
+                    return undefined;
+                }
+
+            }
+
+        };
+
+        browser.loadTracks = function (tracks) {
+
+            tracks.forEach(function (t, index) {
+
+                t.getFeatureCache(function(ignored){
+
+                    if (index === tracks.length - 1) {
+
+                        tracks.forEach(function(tt){
+
+                            browser.addTrack(tt);
+                        });
+                    }
+
+                });
+
+            });
+
+            function cursorGetType(path) {
+
+                if (path.endsWith(".bed") || path.endsWith(".bed.gz") || path.endsWith(".broadPeak") || path.endsWith(".broadPeak.gz")) {
+                    return "bed";
+                } else {
+                    return undefined;
+                }
+
+            }
+
+        };
+
+        browser.initializeWithTrackConfig = function (config) {
 
             var horizontalScrollBarContainer;
 
-            browser.loadTrack(trackConfig);
-
-            browser.selectDesignatedTrack(browser.designatedTrack.trackFilter.trackPanel);
+            browser.loadTrack(config);
 
             horizontalScrollBarContainer = $("div.igv-horizontal-scrollbar-container-div");
             browser.horizontalScrollbar = new cursor.HorizontalScrollbar(browser, $(horizontalScrollBarContainer));
 
-            browser.designatedTrack.featureSource.allFeatures(function (featureList) {
+            browser.designatedTrack.featureSource.allFeatures(function (features) {
 
-                browser.cursorModel.setRegions(featureList);
+                browser.cursorModel.setRegions(features);
 
                 browser.horizontalScrollbar.update();
             });
@@ -386,8 +456,6 @@ var igv = (function (igv) {
                 browser.loadTrack(trackConfig);
 
                 if (++howmany === options.tracks.length) {
-
-                    browser.selectDesignatedTrack(browser.designatedTrack.trackFilter.trackPanel);
 
                     horizontalScrollBarContainer = $("div.igv-horizontal-scrollbar-container-div");
                     browser.horizontalScrollbar = new cursor.HorizontalScrollbar(browser, $(horizontalScrollBarContainer));
@@ -585,14 +653,16 @@ var igv = (function (igv) {
         // Alter "super" implementation
         browser.loadTrack = function (config) {
 
+            var path,
+                type,
+                track;
+
             if (browser.isDuplicateTrack(config)) {
                 return;
             }
 
-            var path = config.url,
-                type = config.type,
-                newTrack;
-
+            path = config.url;
+            type = config.type;
             if (!type) {
                 type = cursorGetType(path);
             }
@@ -600,16 +670,15 @@ var igv = (function (igv) {
             if (type !== "bed") {
                 window.alert("Bad Track type");
                 return;
-
             }
 
-            newTrack = new cursor.CursorTrack(config, browser);
+            track = new cursor.CursorTrack(config, browser);
 
             if (true === config.designatedTrack) {
-                browser.designatedTrack = newTrack;
+                browser.designatedTrack = track;
             }
 
-            browser.addTrack(newTrack);
+            browser.addTrack(track);
 
             function cursorGetType(path) {
 
@@ -722,8 +791,6 @@ var igv = (function (igv) {
                 browser.addTrack(cursorTrack);
 
                 if (++howmany === cursorTracks.length) {
-
-                    browser.selectDesignatedTrack(browser.designatedTrack.trackFilter.trackPanel);
 
                     horizontalScrollBarContainer = $("div.igv-horizontal-scrollbar-container-div");
                     browser.horizontalScrollbar = new cursor.HorizontalScrollbar(browser, $(horizontalScrollBarContainer));
