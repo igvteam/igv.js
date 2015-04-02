@@ -105,7 +105,8 @@ var igv = (function (igv) {
             i,
             cnt = 0,
             j,
-            decode = this.decode;
+            decode = this.decode,
+            type = this.type;
 
 
 
