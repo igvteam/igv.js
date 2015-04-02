@@ -63,7 +63,7 @@ var igv = (function (igv) {
             this.decode = decodeFusionJuncSpan;
         }
         else {
-            decode = decodeBed;
+            this.decode = decodeBed;
         }
 
     };
