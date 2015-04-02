@@ -38,18 +38,23 @@ var igv = (function (igv) {
 
         this.featureSource = new igv.FeatureSource(this.config);
 
-        if (this.type === "vcf") {
+        // Set the render function.  This can optionally be passed in the config
+        if (config.render) {
+            this.render = config.render;
+        } else if (this.type === "vcf") {
             this.render = renderVariant;
-
         }
         else if (this.type == "FusionJuncSpan") {
-            // needed for FusionInspector, bhaas
             this.render = renderFusionJuncSpan;
-            this.height = config.height || 50;
-            this.autoHeight = false;
         }
         else {
             this.render = renderFeature;
+        }
+
+        // Set some defaults for the function junc span track
+        if (this.type == "FusionJuncSpan") {
+            this.height = config.height || 50;
+            this.autoHeight = false;
         }
     };
 

@@ -26,9 +26,9 @@
 /**
  *  Define parsers for bed-like files  (.bed, .gff, .vcf, etc).  A parser should implement 2 methods
  *
- *     parseHeader(data) - return an object representing a header.  Details are format specific
+ *     parseHeader(data) - return an object representing a header or metadata.  Details are format specific
  *
- *     parseFeatures(data) - return a list of features
+ *     parseFeatures(data) - return an array of features
  *
  */
 
@@ -40,12 +40,35 @@ var igv = (function (igv) {
     /**
      * A factory function.  Return a parser for the given file type.
      */
-    igv.BedParser = function (type) {
+    igv.FeatureParser = function (type, decode) {
         this.type = type;
+
+        if(decode) {
+            this.decode = decode;
+        }
+        if (type === "narrowPeak" || type === "broadPeak") {
+            this.decode = decodePeak;
+        }
+        else if (type === "bedgraph") {
+            this.decode = decodeBedGraph;
+        }
+        else if (type === "wig") {
+            this.decode = decodeWig;
+        }
+        else if (type === "aneu") {
+            this.decode = decodeAneu;
+        }
+        else if (type == 'FusionJuncSpan') {
+            // bhaas, needed for FusionInspector view
+            this.decode = decodeFusionJuncSpan;
+        }
+        else {
+            decode = decodeBed;
+        }
 
     };
 
-    igv.BedParser.prototype.parseHeader = function (data) {
+    igv.FeatureParser.prototype.parseHeader = function (data) {
 
         var lines = data.splitLines(),
             len = lines.length,
@@ -68,12 +91,11 @@ var igv = (function (igv) {
         return header;
     };
 
-    igv.BedParser.prototype.parseFeatures = function (data) {
+    igv.FeatureParser.prototype.parseFeatures = function (data) {
 
         if (!data) return null;
 
-        var decode,
-            wig,
+        var wig,
             feature,
             lines = data.splitLines(),
             len = lines.length,
@@ -83,29 +105,9 @@ var igv = (function (igv) {
             i,
             cnt = 0,
             j,
-            type = this.type;
+            decode = this.decode;
 
-        if (type === "narrowPeak" || type === "broadPeak") {
-            decode = decodePeak;
-        }
-        else if (type === "bedgraph") {
-            decode = decodeBedGraph;
-        }
-        else if (type === "wig") {
-            decode = decodeWig;
-            //wig = {};
-        }
-        else if (type === "aneu") {
-            decode = decodeAneu;
-            //wig = {};
-        }
-        else if (type == 'FusionJuncSpan') {
-            // bhaas, needed for FusionInspector view
-            decode = decodeFusionJuncSpan;
-        }
-        else {
-            decode = decodeBed;
-        }
+
 
         for (i = 0; i < len; i++) {
             line = lines[i];

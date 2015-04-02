@@ -42,11 +42,11 @@ var igv = (function (igv) {
         this.background = config.background;    // No default
         this.divider = config.divider || "rgb(225,225,225)";
         this.dotSize = config.dotSize || 2;
-        this.height = config.height || 100;    // The preferred height
+        this.height = config.height || 100;
+        this.autoHeight = false;
         this.disableButtons = config.disableButtons;
 
-            this.featureSource = new igv.FeatureSource(config);
-
+        this.featureSource = new igv.FeatureSource(config);
 
 
         this.onsearch = function (feature, source) {
@@ -59,9 +59,11 @@ var igv = (function (igv) {
         var track = this,
             yScale = (track.maxLogP - track.minLogP) / pixelHeight;
 
-        var font = {'font': 'normal 10px Arial',
+        var font = {
+            'font': 'normal 10px Arial',
             'textAlign': 'right',
-            'strokeStyle': "black"};
+            'strokeStyle': "black"
+        };
 
         igv.Canvas.fillRect.call(ctx, 0, 0, pixelWidth, pixelHeight, {'fillStyle': "rgb(255, 255, 255)"});
 
@@ -130,7 +132,8 @@ var igv = (function (igv) {
             //ctx.fillStyle = igv.selection.colorForGene(eqtl.geneName);
             igv.Canvas.setProperties.call(ctx, {
                 fillStyle: "rgb(180, 180, 180)",
-                strokeStyle: "rgb(180, 180, 180)"});
+                strokeStyle: "rgb(180, 180, 180)"
+            });
 
             for (i = 0; i < len; i++) {
 
@@ -139,7 +142,7 @@ var igv = (function (igv) {
                 geneName = eqtl[track.geneField].toUpperCase();
                 selection = igv.browser.selection;
                 isSelected = selection &&
-                    (selection.snp === snp || selection.gene === geneName);
+                (selection.snp === snp || selection.gene === geneName);
 
                 if (drawSelected && !isSelected) continue;
 
@@ -161,7 +164,7 @@ var igv = (function (igv) {
                 else if (px > pixelWidth) break;
 
                 var mLogP = -Math.log(eqtl[track.pValueField]) / Math.LN10;
-                if(mLogP < track.minLogP) continue;
+                if (mLogP < track.minLogP) continue;
 
                 py = Math.max(0, pixelHeight - Math.round((mLogP - track.minLogP) / yScale));
                 eqtl.px = px;
