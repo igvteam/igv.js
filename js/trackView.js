@@ -44,7 +44,7 @@ var igv = (function (igv) {
         }
 
         // Optionally override CSS height
-        if (track.height) {
+        if (track.height) {          // Explicit height set, perhaps track.config.height?
             this.trackDiv.style.height = track.height + "px";
         }
 
@@ -71,7 +71,7 @@ var igv = (function (igv) {
 
             // ruler sweeper widget surface
             this.rulerSweeper = $('<div class="igv-ruler-sweeper-div">');
-            $(this.contentDiv).append(this.rulerSweeper[ 0 ]);
+            $(this.contentDiv).append(this.rulerSweeper[0]);
 
             addRulerTrackHandlers(this);
 
@@ -134,17 +134,17 @@ var igv = (function (igv) {
                 if (this.track.label) {
 
                     trackIconContainer = $('<div class="igv-app-icon-container">');
-                    $(viewportDiv).append(trackIconContainer[ 0 ]);
+                    $(viewportDiv).append(trackIconContainer[0]);
 
                     this.track.labelSpan = $('<span class="igv-track-label-span-base">')[0];
                     this.track.labelSpan.innerHTML = this.track.label;
                     $(trackIconContainer).append(this.track.labelSpan);
 
-                    $(viewportDiv).scroll(function() {
+                    $(viewportDiv).scroll(function () {
 
                         //console.log("viewportDiv scrolled " + $(viewportDiv).scrollTop());
 
-                        trackIconContainer.css( { "top" : $(viewportDiv).scrollTop() + "px" } );
+                        trackIconContainer.css({"top": $(viewportDiv).scrollTop() + "px"});
 
                     });
 
@@ -203,7 +203,7 @@ var igv = (function (igv) {
         }
 
         gearButton = $('<i class="fa fa-gear fa-20px igv-track-menu-gear igv-app-icon" style="padding-top: 5px">');
-        $(trackManipulationIconBox).append(gearButton[ 0 ]);
+        $(trackManipulationIconBox).append(gearButton[0]);
 
         $(gearButton).click(function (e) {
             igv.popover.presentTrackMenu(e.pageX, e.pageY, myself);
@@ -227,27 +227,12 @@ var igv = (function (igv) {
 
     igv.TrackView.prototype.setTrackHeight = function (newHeight, update) {
 
-        var trackHeightStr;
+        setTrackHeight_.call(this, newHeight, false);
 
-        trackHeightStr = newHeight + "px";
+        this.track.autoHeight = false;   // Explicitly setting track height turns off auto-scale
 
-        this.track.height = newHeight;
-        this.trackDiv.style.height = trackHeightStr;
-
-        if (this.track.paintControl) {
-            this.controlCanvas.style.height = trackHeightStr;
-            this.controlCanvas.setAttribute("height", newHeight);
-        }
-        this.viewportDiv.style.height = trackHeightStr;
-
-        // Reset the canvas height attribute as its height might have changed
-        this.canvas.setAttribute("height", this.canvas.clientHeight);
-
-        if ("CURSOR" === this.browser.type) {
-            this.track.cursorHistogram.updateHeightAndInitializeHistogramWithTrack(this.track);
-        }
-        if (update === undefined || update === true) this.update();
     };
+
 
     /**
      * Set the content height of the track
@@ -258,24 +243,52 @@ var igv = (function (igv) {
     igv.TrackView.prototype.setContentHeight = function (newHeight, update) {
 
         contentHeightStr = newHeight + "px";
-        if (this.track.paintControl) {
-            this.controlCanvas.style.height = contentHeightStr;
-            this.controlCanvas.setAttribute("height", newHeight);
-        }
-        this.contentDiv.style.height = contentHeightStr;
-        this.canvas.setAttribute("height", this.canvas.clientHeight);
 
-        //If the track defines a "nominal" height, increase viewport height up to that value
-        //If newHeight is < current track div height, shrink the track div.
-        //Don't override an explicit setting (i.e. set by user from menu).
-        if (!this.heightSetExplicitly &&
-            ((this.track.maxHeight && this.trackDiv.clientHeight < this.track.maxHeight) ||
-            newHeight < this.trackDiv.clientHeight)) {
-            this.setTrackHeight(Math.min(this.track.maxHeight, newHeight), false);
+        this.contentDiv.style.height = contentHeightStr;
+
+        if (this.track.autoHeight) {
+            setTrackHeight_.call(this, newHeight, false);
+        }
+        else {
+            this.canvas.setAttribute("height", this.canvas.clientHeight);
+            if (this.track.paintControl) {
+                this.controlCanvas.style.height = contentHeightStr;
+                this.controlCanvas.setAttribute("height", newHeight);
+            }
         }
 
         if (update === undefined || update === true) this.update();
+    }
+
+
+    function setTrackHeight_ (newHeight, update) {
+
+        var trackHeightStr;
+
+        trackHeightStr = newHeight + "px";
+
+        //this.track.height = newHeight;
+
+        this.trackDiv.style.height = trackHeightStr;
+
+        if (this.track.paintControl) {
+            this.controlCanvas.style.height = trackHeightStr;
+            this.controlCanvas.setAttribute("height", newHeight);
+        }
+
+        this.viewportDiv.style.height = trackHeightStr;
+
+        // Reset the canvas height attribute as its height might have changed
+        this.canvas.setAttribute("height", this.canvas.clientHeight);
+
+        if ("CURSOR" === this.browser.type) {
+            this.track.cursorHistogram.updateHeightAndInitializeHistogramWithTrack(this.track);
+        }
+
+        if (update === undefined || update === true) this.update();
+
     };
+
 
     igv.TrackView.prototype.update = function () {
 
@@ -341,16 +354,16 @@ var igv = (function (igv) {
 
                         // TODO -- adjust track height here.
                         if (self.track.computePixelHeight) {
-                            var desiredHeight = self.track.computePixelHeight(features);
-                            if (desiredHeight != self.contentDiv.clientHeight) {
-                                self.setContentHeight(desiredHeight, false);
+                            var requiredHeight = self.track.computePixelHeight(features);
+                            if (requiredHeight != self.contentDiv.clientHeight) {
+                                self.setContentHeight(requiredHeight, true);
                             }
                         }
 
                         var buffer = document.createElement('canvas');
                         buffer.width = pixelWidth;
                         buffer.height = self.canvas.height;
-                        ctx =  buffer.getContext('2d');
+                        ctx = buffer.getContext('2d');
 
                         self.track.draw({
                             features: features,
@@ -367,7 +380,7 @@ var igv = (function (igv) {
                             buffer2.width = self.controlCanvas.width;
                             buffer2.height = self.controlCanvas.height;
 
-                            var ctx2 =  buffer2.getContext('2d');
+                            var ctx2 = buffer2.getContext('2d');
 
                             self.track.paintControl(ctx2, buffer2.width, buffer2.height);
 
@@ -480,12 +493,12 @@ var igv = (function (igv) {
 
             left = mouseDownXY.x;
             rulerSweepWidth = 0;
-            trackView.rulerSweeper.css( { "display" : "inline", "left" : left + "px", "width" : rulerSweepWidth + "px" } );
+            trackView.rulerSweeper.css({"display": "inline", "left": left + "px", "width": rulerSweepWidth + "px"});
 
             isMouseIn = true;
         });
 
-        $(trackView.contentDiv).mousedown(function(e) {
+        $(trackView.contentDiv).mousedown(function (e) {
             isMouseDown = true;
         });
 
@@ -498,14 +511,14 @@ var igv = (function (igv) {
 
                 rulerSweepWidth = Math.abs(dx);
 
-                trackView.rulerSweeper.css( { "width" : rulerSweepWidth + "px" } );
+                trackView.rulerSweeper.css({"width": rulerSweepWidth + "px"});
 
                 if (dx < 0) {
                     left = mouseDownXY.x + dx;
-                    trackView.rulerSweeper.css( { "left" : left + "px" } );
+                    trackView.rulerSweeper.css({"left": left + "px"});
                 }
 
-                trackView.rulerSweeper.css( { backgroundColor: 'rgba(68, 134, 247, 0.75)' } );
+                trackView.rulerSweeper.css({backgroundColor: 'rgba(68, 134, 247, 0.75)'});
             }
         });
 
@@ -525,20 +538,20 @@ var igv = (function (igv) {
                 isMouseDown = false;
                 isMouseIn = false;
 
-                trackView.rulerSweeper.css( { "display" : "none", "left" : 0 + "px", "width" : 0 + "px" } );
+                trackView.rulerSweeper.css({"display": "none", "left": 0 + "px", "width": 0 + "px"});
 
                 ss = igv.browser.referenceFrame.start + (left * igv.browser.referenceFrame.bpPerPixel);
                 ee = ss + rulerSweepWidth * igv.browser.referenceFrame.bpPerPixel;
 
-                if ( sweepWidthThresholdUnmet(rulerSweepWidth) ) {
+                if (sweepWidthThresholdUnmet(rulerSweepWidth)) {
 
                     chromosome = igv.browser.genome.getChromosome(igv.browser.referenceFrame.chr);
                     chromosomeLength = chromosome.bpLength;
 
-                    trackWidthBP = igv.browser.trackViewportWidth()/igv.browser.pixelPerBasepairThreshold();
+                    trackWidthBP = igv.browser.trackViewportWidth() / igv.browser.pixelPerBasepairThreshold();
                     trackHalfWidthBP = 0.5 * trackWidthBP;
 
-                    centroidZoom = (ee + ss)/2;
+                    centroidZoom = (ee + ss) / 2;
 
                     if (centroidZoom - trackHalfWidthBP < 0) {
 
@@ -546,7 +559,7 @@ var igv = (function (igv) {
                         //ee = igv.browser.trackViewportWidthBP();
                         ee = trackWidthBP;
                     }
-                    else if (centroidZoom + trackHalfWidthBP > chromosomeLength){
+                    else if (centroidZoom + trackHalfWidthBP > chromosomeLength) {
 
                         ee = chromosomeLength;
                         //ss = 1 + ee - igv.browser.trackViewportWidthBP();
@@ -554,7 +567,7 @@ var igv = (function (igv) {
                     }
                     else {
                         ss = 1 + centroidZoom - trackHalfWidthBP;
-                        ee =     centroidZoom + trackHalfWidthBP;
+                        ee = centroidZoom + trackHalfWidthBP;
                     }
 
                 }
@@ -569,7 +582,7 @@ var igv = (function (igv) {
 
         function sweepWidthThresholdUnmet(sweepWidth) {
 
-            if ( (rulerWidth / (igv.browser.referenceFrame.bpPerPixel * sweepWidth) ) > igv.browser.pixelPerBasepairThreshold() ) {
+            if ((rulerWidth / (igv.browser.referenceFrame.bpPerPixel * sweepWidth) ) > igv.browser.pixelPerBasepairThreshold()) {
                 return true;
             } else {
                 return false;
@@ -623,7 +636,7 @@ var igv = (function (igv) {
 
             else {
 
-                if(e.shiftKey) {
+                if (e.shiftKey) {
 
                     if (trackView.track.shiftClick && trackView.tile) {
                         trackView.track.shiftClick(genomicLocation, e);
