@@ -231,10 +231,11 @@ var cursor = (function (cursor) {
 
             igv.Canvas.setProperties.call(ctx, {fillStyle: this.color, strokeStyle: this.color});
 
-
             for (regionNumber = Math.floor(start), len = regions.length;
                  regionNumber < len && regionNumber < end;
                  regionNumber += sampleInterval) {
+
+                //igv.Canvas.setProperties.call(ctx, {fillStyle: igv.randomRGB(128, 255), strokeStyle: this.color});
 
                 region = regions[regionNumber];
 
@@ -276,6 +277,7 @@ var cursor = (function (cursor) {
                             if (score > this.max) {
                                 console.log(score);
                             }
+
                             igv.Canvas.fillRect.call(ctx, pStart, top, pw, fh);
 
                         }

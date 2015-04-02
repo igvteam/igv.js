@@ -369,28 +369,22 @@
 
         var options;
 
-//        options = {
-//            trackHeight: 100,
-//            type: "CURSOR"
-//        };
-
         options = {
             trackHeight: 100,
-            type: "CURSOR",
-            tracks: [
+            type: "CURSOR"
+        };
+
+//        options = {
+//            trackHeight: 100,
+//            type: "CURSOR",
+//            tracks: [
 //                {
 //                    type: "bed",
-//                    url: "http://hgdownload.cse.ucsc.edu/goldenPath/hg19/encodeDCC/wgEncodeSydhTfbs/wgEncodeSydhTfbsHek293Tcf7l2UcdPk.narrowPeak.gz",
-//                    label: "TCF7L2 HEK293 -",
-//                    designatedTrack: true
-//                },
-                {
-                    type: "bed",
-                    url: "test/data/bed/basic_feature_3_columns.bed.gz",
-                    label: "3 Column BED"
-                }
-            ]
-        };
+//                    url: "test/data/bed/basic_feature_3_columns.bed.gz",
+//                    label: "3 Column BED"
+//                }
+//            ]
+//        };
 
 
         igv.createCursorBrowser(options);
