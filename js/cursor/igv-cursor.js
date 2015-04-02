@@ -388,7 +388,6 @@ var igv = (function (igv) {
 
         };
 
-        // TODO - Make this real.
         browser.loadTrackWithConfigNexGen = function (configurations) {
 
             var tracks = [];
@@ -420,46 +419,6 @@ var igv = (function (igv) {
 
         };
 
-        function cursorTrackWithConfig(config, browser){
-
-            var path,
-                type,
-                track;
-
-            if (browser.isDuplicateTrack(config)) {
-                return undefined;
-            }
-
-            path = config.url;
-            type = config.type;
-            if (!type) {
-                type = cursorGetType(path);
-            }
-
-            if (type !== "bed") {
-                window.alert("Bad Track type");
-                return undefined;
-            }
-
-            track = new cursor.CursorTrack(config, browser);
-
-            if (config.designatedTrack && true === config.designatedTrack) {
-                browser.designatedTrack = track;
-            }
-
-            function cursorGetType(path) {
-
-                if (path.endsWith(".bed") || path.endsWith(".bed.gz") || path.endsWith(".broadPeak") || path.endsWith(".broadPeak.gz")) {
-                    return "bed";
-                } else {
-                    return undefined;
-                }
-
-            }
-
-            return track;
-        }
-
         browser.loadTracks = function (tracks, continuation) {
 
             var trackCount = tracks.length;
@@ -473,12 +432,183 @@ var igv = (function (igv) {
 
                         // do stuff
                         continuation();
-                        
+
                     }
 
                 });
 
             });
+
+        };
+
+        browser.initializeWithTrackConfigNextGen = function (configurations) {
+
+            var tracks = [];
+            configurations.forEach(function(configuration){
+
+                var track = cursorTrackWithConfig(configuration, browser);
+
+                if (undefined !== track) {
+                    tracks.push(track);
+                }
+
+            });
+
+            if (0 === tracks.length) {
+                return;
+            }
+
+            if (undefined === browser.designatedTrack) {
+                browser.designatedTrack = tracks[ 0 ];
+            }
+
+            browser.loadTracks(tracks, function(){
+
+                tracks.forEach(function(track){
+                    browser.addTrack(track);
+                });
+
+                browser.designatedTrack.featureSource.allFeatures(function (features) {
+
+                    var horizontalScrollBarContainer = $("div.igv-horizontal-scrollbar-container-div");
+                    browser.horizontalScrollbar = new cursor.HorizontalScrollbar(browser, $(horizontalScrollBarContainer));
+
+                    browser.cursorModel.setRegions(features);
+
+                    browser.horizontalScrollbar.update();
+                });
+
+            });
+
+        };
+
+        browser.initializeWithSession = function (session) {
+
+            var tracks;
+
+            browser.sessionTeardown();
+
+            browser.cursorModel.regionWidth = session.regionWidth;
+            $("input[id='regionSizeInput']").val(browser.cursorModel.regionWidth);
+
+
+            tracks = [];
+            session.tracks.forEach(function(trackSession){
+
+                var track,
+                    config = {
+                        type: "bed",
+                        url: trackSession.path,
+                        color: trackSession.color,
+                        label: trackSession.label,
+                        order: trackSession.order,
+                        trackHeight: trackSession.height,
+                        trackFilter: trackSession.trackFilter,
+                        designatedTrack: trackSession.designatedTrack
+                    };
+
+                track = cursorTrackWithConfig(config, browser);
+                if (undefined !== track) {
+                    tracks.push(track);
+                }
+
+                if (config.designatedTrack && true === config.designatedTrack) {
+                    browser.designatedTrack = track;
+                }
+
+            });
+
+            if (0 === tracks.length) {
+                return;
+            }
+
+            if (undefined === browser.designatedTrack) {
+                browser.designatedTrack = tracks[ 0 ];
+            }
+
+            browser.loadTracks(tracks, function(){
+
+                tracks.forEach(function(track){
+                    browser.addTrack(track);
+                });
+
+                browser.designatedTrack.featureSource.allFeatures(function (features) {
+
+                    var horizontalScrollBarContainer = $("div.igv-horizontal-scrollbar-container-div");
+                    browser.horizontalScrollbar = new cursor.HorizontalScrollbar(browser, $(horizontalScrollBarContainer));
+
+                    browser.cursorModel.setRegions(features);
+
+                    browser.setFrameWidth(browser.trackViewportWidth() * session.framePixelWidthUnitless);
+
+                    browser.referenceFrame.bpPerPixel = 1.0 / browser.cursorModel.framePixelWidth;
+
+                    //browser.goto("", session.start, session.end);
+                    browser.fitToScreen();
+
+                    browser.horizontalScrollbar.update();
+
+                });
+
+            });
+
+            //tracks = [];
+            //browser.designatedTrack = undefined;
+            //session.tracks.forEach(function (trackSession) {
+            //
+            //    var track,
+            //        config = {
+            //            type: "bed",
+            //            url: trackSession.path,
+            //            color: trackSession.color,
+            //            label: trackSession.label,
+            //            order: trackSession.order,
+            //            trackHeight: trackSession.height,
+            //            trackFilter: trackSession.trackFilter,
+            //            designatedTrack: trackSession.designatedTrack
+            //        };
+            //
+            //    track = new cursor.CursorTrack(config, browser);
+            //    if (undefined !== config.designatedTrack && true === config.designatedTrack) {
+            //        browser.designatedTrack = track;
+            //    }
+            //
+            //    tracks.push(track);
+            //
+            //});
+            //
+            //if (undefined === browser.designatedTrack) {
+            //    browser.designatedTrack = tracks[ 0 ];
+            //}
+
+            //howmany = 0;
+            //tracks.forEach(function (track) {
+            //
+            //    browser.addTrack(track);
+            //
+            //    if (++howmany === tracks.length) {
+            //
+            //        browser.designatedTrack.featureSource.allFeatures(function (features) {
+            //
+            //            var horizontalScrollBarContainer = $("div.igv-horizontal-scrollbar-container-div");
+            //            browser.horizontalScrollbar = new cursor.HorizontalScrollbar(browser, $(horizontalScrollBarContainer));
+            //
+            //            browser.cursorModel.setRegions(features);
+            //
+            //            browser.setFrameWidth(browser.trackViewportWidth() * session.framePixelWidthUnitless);
+            //
+            //            browser.referenceFrame.bpPerPixel = 1.0 / browser.cursorModel.framePixelWidth;
+            //
+            //            //browser.goto("", session.start, session.end);
+            //            browser.fitToScreen();
+            //
+            //            browser.horizontalScrollbar.update();
+            //
+            //
+            //        });
+            //    }
+            //
+            //});
 
         };
 
@@ -534,63 +664,6 @@ var igv = (function (igv) {
 
         };
 
-        browser.initializeWithTrackConfigNextGen = function (configurations) {
-
-            var tracks = [];
-            configurations.forEach(function(configuration){
-
-                var track = cursorTrackWithConfig(configuration, browser);
-
-                if (undefined !== track) {
-                    tracks.push(track);
-                }
-
-            });
-
-            if (0 === tracks.length) {
-                return;
-            }
-
-            if (undefined === browser.designatedTrack) {
-                browser.designatedTrack = tracks[ 0 ];
-            }
-
-            browser.loadTracks(tracks, function(){
-
-                tracks.forEach(function(track){
-                    browser.addTrack(track);
-                });
-
-                browser.designatedTrack.featureSource.allFeatures(function (features) {
-
-                    var horizontalScrollBarContainer = $("div.igv-horizontal-scrollbar-container-div");
-                    browser.horizontalScrollbar = new cursor.HorizontalScrollbar(browser, $(horizontalScrollBarContainer));
-
-                    browser.cursorModel.setRegions(features);
-
-                    browser.horizontalScrollbar.update();
-                });
-
-            });
-
-        };
-
-        browser.initializeWithTrackConfig = function (config) {
-
-            browser.loadTrack(config);
-
-            browser.designatedTrack.featureSource.allFeatures(function (features) {
-
-                var horizontalScrollBarContainer = $("div.igv-horizontal-scrollbar-container-div");
-                browser.horizontalScrollbar = new cursor.HorizontalScrollbar(browser, $(horizontalScrollBarContainer));
-
-                browser.cursorModel.setRegions(features);
-
-                browser.horizontalScrollbar.update();
-            });
-
-        };
-
         browser.initializeWithOptions = function (options) {
 
             var howmany = 0;
@@ -611,76 +684,6 @@ var igv = (function (igv) {
                     });
 
                 }
-            });
-
-        };
-
-        browser.initializeWithSession = function (session) {
-
-            var tracks,
-                howmany;
-
-            browser.sessionTeardown();
-
-            browser.cursorModel.regionWidth = session.regionWidth;
-            $("input[id='regionSizeInput']").val(browser.cursorModel.regionWidth);
-
-            tracks = [];
-            browser.designatedTrack = undefined;
-            session.tracks.forEach(function (trackSession) {
-
-                var track,
-                    config = {
-                        type: "bed",
-                        url: trackSession.path,
-                        color: trackSession.color,
-                        label: trackSession.label,
-                        order: trackSession.order,
-                        trackHeight: trackSession.height,
-                        trackFilter: trackSession.trackFilter,
-                        designatedTrack: trackSession.designatedTrack
-                    };
-
-                track = new cursor.CursorTrack(config, browser);
-                if (undefined !== config.designatedTrack && true === config.designatedTrack) {
-                    browser.designatedTrack = track;
-                }
-
-                tracks.push(track);
-
-            });
-
-            if (undefined === browser.designatedTrack) {
-                browser.designatedTrack = tracks[ 0 ];
-            }
-
-            howmany = 0;
-            tracks.forEach(function (track) {
-
-                browser.addTrack(track);
-
-                if (++howmany === tracks.length) {
-
-                    browser.designatedTrack.featureSource.allFeatures(function (features) {
-
-                        var horizontalScrollBarContainer = $("div.igv-horizontal-scrollbar-container-div");
-                        browser.horizontalScrollbar = new cursor.HorizontalScrollbar(browser, $(horizontalScrollBarContainer));
-
-                        browser.cursorModel.setRegions(features);
-
-                        browser.setFrameWidth(browser.trackViewportWidth() * session.framePixelWidthUnitless);
-
-                        browser.referenceFrame.bpPerPixel = 1.0 / browser.cursorModel.framePixelWidth;
-
-                        //browser.goto("", session.start, session.end);
-                        browser.fitToScreen();
-
-                        browser.horizontalScrollbar.update();
-
-
-                    });
-                }
-
             });
 
         };
@@ -880,6 +883,47 @@ var igv = (function (igv) {
 
             return Math.round(frameWidth * divisor) / divisor;
         }
+
+        function cursorTrackWithConfig(config, browser){
+
+            var path,
+                type,
+                track;
+
+            if (browser.isDuplicateTrack(config)) {
+                return undefined;
+            }
+
+            path = config.url;
+            type = config.type;
+            if (!type) {
+                type = cursorGetType(path);
+            }
+
+            if (type !== "bed") {
+                window.alert("Bad Track type");
+                return undefined;
+            }
+
+            track = new cursor.CursorTrack(config, browser);
+
+            if (config.designatedTrack && true === config.designatedTrack) {
+                browser.designatedTrack = track;
+            }
+
+            function cursorGetType(path) {
+
+                if (path.endsWith(".bed") || path.endsWith(".bed.gz") || path.endsWith(".broadPeak") || path.endsWith(".broadPeak.gz")) {
+                    return "bed";
+                } else {
+                    return undefined;
+                }
+
+            }
+
+            return track;
+        }
+
     }
 
     function addCursorTrackViewExtensions(browser) {
