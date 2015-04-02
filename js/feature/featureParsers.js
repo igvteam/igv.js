@@ -46,7 +46,7 @@ var igv = (function (igv) {
         if(decode) {
             this.decode = decode;
         }
-        if (type === "narrowPeak" || type === "broadPeak") {
+        else if (type === "narrowPeak" || type === "broadPeak") {
             this.decode = decodePeak;
         }
         else if (type === "bedgraph") {
