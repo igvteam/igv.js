@@ -246,7 +246,7 @@ var igv = (function (igv) {
         start = parseInt(tokens[1]);
         end = tokens.length > 2 ? parseInt(tokens[2]) : start + 1;
 
-        feature = {chr: chr, start: start, end: end};
+        feature = {chr: chr, start: start, end: end, score: 1000};
 
         if (tokens.length > 3) {
             // Note: these are very special rules for the gencode gene files.
