@@ -384,7 +384,15 @@ var igv = (function (igv) {
                 browser.designatedTrack = track;
             }
 
-            browser.loadTracks([ track ]);
+            browser.loadTracks([ track ], function(){
+
+                [ track ].forEach(function(track){
+
+                    browser.addTrack(track);
+
+                });
+
+            });
 
             function cursorGetType(path) {
 
@@ -398,18 +406,20 @@ var igv = (function (igv) {
 
         };
 
-        browser.loadTracks = function (tracks) {
+        browser.loadTracks = function (tracks, continuation) {
 
-            tracks.forEach(function (t, index) {
+            var trackCount = tracks.length;
+
+            tracks.forEach(function (t) {
 
                 t.getFeatureCache(function(ignored){
 
-                    if ((1 + index) === tracks.length) {
+                    --trackCount;
+                    if (0 === trackCount) {
 
-                        tracks.forEach(function(tt){
-
-                            browser.addTrack(tt);
-                        });
+                        // do stuff
+                        continuation();
+                        
                     }
 
                 });
