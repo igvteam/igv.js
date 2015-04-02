@@ -54,18 +54,18 @@ var igv = (function (igv) {
             this.type = igv.inferFileType(this.filename);
         }
 
-        this.parser = getParser(this.type);
+        this.parser = getParser(this.type, config.decode);
     };
 
 
-    function getParser(type) {
+    function getParser(type, decode) {
         if (type === "vcf") {
             return new igv.VcfParser();
         } else if (type === "seg") {
             return new igv.SegParser();
         }
         else {
-            return new igv.BedParser(type);
+            return new igv.FeatureParser(type, decode);
         }
     }
 

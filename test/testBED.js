@@ -38,6 +38,23 @@ function runBEDUnitTests() {
 
     });
 
+    asyncTest("BED track line", function () {
+
+        var featureSource = new igv.FeatureSource({
+            type: 'bed',
+            url: 'data/bed/basic_feature_3_columns.bed'
+        });
+
+        featureSource.getHeader(function (header) {
+
+            ok(header);
+            equal(header.name, "Basic Features");
+            equal(header.color, "255,0,0");
+            start();
+        });
+
+    });
+
     asyncTest("BED query gzip", function () {
 
         var chr = "chr1",
@@ -94,16 +111,6 @@ function runBEDUnitTests() {
 
     });
 
-//
-//    test( "UCSC track line", 2, function() {
-//
-//        var trackLine = 'track name="My Track" color=(0,0,0)';
-//
-//        var trackProperties = igv.ucsc.parseTrackLine(trackLine);
-//
-//        equal('My Track', trackProperties["name"]);
-//        equal('(0,0,0)', trackProperties["color"]);
-//
-//    });
+
 
 }

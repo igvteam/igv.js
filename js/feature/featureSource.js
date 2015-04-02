@@ -51,6 +51,7 @@ var igv = (function (igv) {
             this.reader = new igv.GtexReader(config);
         }
         else {
+            // Default for all sorts of ascii tab-delimited file formts
             this.reader = new igv.FeatureFileReader(config);
         }
 

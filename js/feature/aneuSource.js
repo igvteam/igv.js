@@ -74,7 +74,7 @@ var igv = (function (igv) {
 
 
     function getParser(type) {        
-        return new igv.BedParser(type);        
+        return new igv.FeatureParser(type);
     }
 
     /**
