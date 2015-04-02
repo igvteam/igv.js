@@ -40,10 +40,13 @@ var igv = (function (igv) {
 
         if (this.type === "vcf") {
             this.render = renderVariant;
+
         }
         else if (this.type == "FusionJuncSpan") {
             // needed for FusionInspector, bhaas
             this.render = renderFusionJuncSpan;
+            this.height = config.height || 50;
+            this.autoHeight = false;
         }
         else {
             this.render = renderFeature;
@@ -82,7 +85,7 @@ var igv = (function (igv) {
 
     /**
      * The required height in pixels required for the track content.   This is not the visible track height, which
-     * can be smaller or larger.
+     * can be smaller (with a scrollbar) or larger.
      *
      * @param features
      * @returns {*}
@@ -90,7 +93,7 @@ var igv = (function (igv) {
     igv.FeatureTrack.prototype.computePixelHeight = function (features) {
 
         if (this.displayMode === "COLLAPSED") {
-            return this.collapsedHeight;
+            return this.expandedRowHeight * 1;
         }
         else {
             var maxRow = 0;
