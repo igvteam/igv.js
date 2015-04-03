@@ -100,20 +100,8 @@ var cursor = (function (cursor) {
 
                     allFeatures = featureCache.allFeatures();
 
-                    if (undefined === myself.scoreless) {
-                        myself.scoreless = true;
-                        allFeatures.forEach(function (f) {
 
-                            // do stuff
-                            if (true === myself.scoreless) {
-                                if (f.score) {
-                                    myself.scoreless = false;
-                                }
-                            }
-                        });
-                    }
-
-                    myself.max = (false === myself.scoreless) ? maxValue(allFeatures, 98) : undefined;
+                    myself.max = percentile(allFeatures, 98);
 
                     myself.featureCache = featureCache;
 
@@ -147,9 +135,9 @@ var cursor = (function (cursor) {
     }
 
 
-    function maxValue(featureList, percentile) {
+    function percentile(featureList, per) {
 
-        var idx = Math.floor(featureList.length * percentile / 100);
+        var idx = Math.floor(featureList.length * per / 100);
 
         featureList.sort(function (a, b) {
 
@@ -285,21 +273,9 @@ var cursor = (function (cursor) {
                 }
                 else {
 
-                    if (false === myself.scoreless) {
-
-                        // Can't draw individual features, just use region score
-                        score = region.getScore(featureCache, regionWidth);
-                    }
-
                     pw = pxEnd - pxStart;
-                    if (true === myself.scoreless) {
 
-                        top = 0;
-                        fh = myself.height;
-                        igv.Canvas.fillRect.call(ctx, pxStart, top, pw, fh);
-
-                    }
-                    else if (score > 0) {
+                    if (score > 0) {
                         // Height proportional to score
                         fh = Math.round(((score / myself.max) * maxFeatureHeight));
                         top = myself.height - fh;
