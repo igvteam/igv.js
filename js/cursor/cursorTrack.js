@@ -274,7 +274,7 @@ var cursor = (function (cursor) {
                 else {
 
                     pw = pxEnd - pxStart;
-
+                    score = region.getScore(featureCache, regionWidth);
                     if (score > 0) {
                         // Height proportional to score
                         fh = Math.round(((score / myself.max) * maxFeatureHeight));
