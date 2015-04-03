@@ -48,8 +48,10 @@ var igv = (function (igv) {
             this.trackDiv.style.height = track.height + "px";
         }
 
-        // spinner
-        this.trackDiv.appendChild(igv.spinner());
+        // one spinner per track - IGV only
+        if ("CURSOR" !== browser.type) {
+            this.trackDiv.appendChild(igv.spinner());
+        }
 
         this.addLeftHandGutterToParentTrackDiv(this.trackDiv);
 
@@ -233,7 +235,6 @@ var igv = (function (igv) {
 
     };
 
-
     /**
      * Set the content height of the track
      *
@@ -258,8 +259,7 @@ var igv = (function (igv) {
         }
 
         if (update === undefined || update === true) this.update();
-    }
-
+    };
 
     function setTrackHeight_ (newHeight, update) {
 
@@ -287,8 +287,7 @@ var igv = (function (igv) {
 
         if (update === undefined || update === true) this.update();
 
-    };
-
+    }
 
     igv.TrackView.prototype.update = function () {
 
@@ -347,7 +346,7 @@ var igv = (function (igv) {
 
                 success = function (features) {
 
-                    igv.stopSpinnerObject(self.trackDiv);
+                    igv.stopSpinnerAtParentElement(self.trackDiv);
                     self.currentLoadTask = undefined;
 
                     if (features) {
@@ -411,7 +410,7 @@ var igv = (function (igv) {
                     }
                 };
 
-                igv.startSpinnerObject(self.trackDiv);
+                igv.startSpinnerAtParentElement(self.trackDiv);
 
                 this.track.getFeatures(referenceFrame.chr, bpStart, bpEnd, success, self.currentLoadTask);
             }

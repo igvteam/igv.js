@@ -285,6 +285,10 @@ var igv = (function (igv) {
         // Construct DOM hierarchy
         trackContainer = $('<div id="igvTrackContainerDiv" class="igv-track-container-div">')[0];
         browser = new igv.Browser(options, trackContainer);
+
+        browser.div.appendChild(igv.spinner());
+        igv.stopSpinnerAtParentElement(browser.div);
+
         document.getElementById('igvContainerDiv').appendChild(browser.div);
 
         contentHeader = $('<div class="row"></div>')[0];
@@ -367,9 +371,9 @@ var igv = (function (igv) {
                 browser.designatedTrack = tracks[ 0 ];
             }
 
-            browser.loadTracks(tracks, function(){
+            browser.getFeaturesForTracks(tracks, function () {
 
-                tracks.forEach(function(track){
+                tracks.forEach(function (track) {
                     browser.addTrack(track);
                 });
 
@@ -398,9 +402,9 @@ var igv = (function (igv) {
                 browser.designatedTrack = tracks[ 0 ];
             }
 
-            browser.loadTracks(tracks, function(){
+            browser.getFeaturesForTracks(tracks, function () {
 
-                tracks.forEach(function(track){
+                tracks.forEach(function (track) {
                     browser.addTrack(track);
                 });
 
@@ -461,9 +465,9 @@ var igv = (function (igv) {
                 browser.designatedTrack = tracks[ 0 ];
             }
 
-            browser.loadTracks(tracks, function(){
+            browser.getFeaturesForTracks(tracks, function () {
 
-                tracks.forEach(function(track){
+                tracks.forEach(function (track) {
                     browser.addTrack(track);
                 });
 
@@ -562,9 +566,9 @@ var igv = (function (igv) {
                 browser.designatedTrack = tracks[ 0 ];
             }
 
-            browser.loadTracks(tracks, function(){
+            browser.getFeaturesForTracks(tracks, function () {
 
-                tracks.forEach(function(track){
+                tracks.forEach(function (track) {
                     browser.addTrack(track);
                 });
 
@@ -582,16 +586,20 @@ var igv = (function (igv) {
 
         };
         
-        browser.loadTracks = function (tracks, continuation) {
+        browser.getFeaturesForTracks = function (tracks, continuation) {
 
             var trackCount = tracks.length;
 
-            tracks.forEach(function (t) {
+            igv.startSpinnerAtParentElement(browser.div);
 
-                t.getFeatureCache(function(ignored){
+            tracks.forEach(function (track) {
+
+                track.getFeatureCache(function(ignored){
 
                     --trackCount;
                     if (0 === trackCount) {
+
+                        igv.stopSpinnerAtParentElement(browser.div);
 
                         // do stuff
                         continuation();
@@ -1021,7 +1029,7 @@ var igv = (function (igv) {
                     }
 
 
-                    igv.startSpinnerObject(myself.trackDiv);
+                    //igv.startSpinnerObject(myself.trackDiv);
 
                     myself.currentTask = {
                         canceled: false,
@@ -1033,8 +1041,8 @@ var igv = (function (igv) {
                             if (this.xhrRequest) {
                                 this.xhrRequest.abort();
                             }
-//                    spinner.stop();
-                            igv.stopSpinnerObject(myself.trackDiv);
+
+                            //igv.stopSpinnerObject(myself.trackDiv);
                         }
 
                     };
@@ -1050,8 +1058,7 @@ var igv = (function (igv) {
 
                     myself.track.draw(ctx, referenceFrame, tileStart, tileEnd, buffer.width, buffer.height, function (task) {
 
-//                    spinner.stop();
-                            igv.stopSpinnerObject(myself.trackDiv);
+                            //igv.stopSpinnerObject(myself.trackDiv);
 
                             if (!(myself.currentTask && myself.currentTask.canceled)) {
                                 myself.tile = new Tile(referenceFrame.chr, tileStart, tileEnd, referenceFrame.bpPerPixel, buffer);
@@ -1068,7 +1075,7 @@ var igv = (function (igv) {
                         buffer2.width = this.controlCanvas.width;
                         buffer2.height = this.controlCanvas.height;
 
-                        var ctx2 =  buffer2.getContext('2d');;
+                        var ctx2 =  buffer2.getContext('2d');
 
                         myself.track.paintControl(ctx2, buffer2.width, buffer2.height);
 
