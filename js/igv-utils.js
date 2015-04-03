@@ -216,7 +216,7 @@ var igv = (function (igv) {
 
         // spinner
         var spinner = document.createElement("i");
-        spinner.className = "fa fa-spinner fa-24px fa-spin igv-spinner-fa-start";
+        spinner.className = "fa fa-spinner fa-spin fa-24px igv-spinner-fa";
 
         return spinner;
     };
@@ -224,21 +224,26 @@ var igv = (function (igv) {
     /**
      * Find spinner
      */
-    igv.findSpinnerObject = function (parentElement) {
-
+    igv.getSpinnerObjectWithParentElement = function (parentElement) {
         return $(parentElement).find("i.fa-spinner");
+    };
+
+    /**
+     * Is spinner spinning ?
+     */
+    igv.isSpinning = function (spinnerObject) {
+        return spinnerObject && spinnerObject.hasClass("fa-spin");
     };
 
     /**
      * Start the spinner for the parent element, if it has one
      */
-    igv.startSpinnerObject = function (parentElement) {
+    igv.startSpinnerAtParentElement = function (parentElement) {
 
-        var spinnerObject = $(parentElement).find("i.fa-spinner");
+        var spinnerObject = igv.getSpinnerObjectWithParentElement(parentElement);
 
         if (spinnerObject) {
-            spinnerObject.removeClass("igv-spinner-fa-stop");
-            spinnerObject.addClass("igv-spinner-fa-start");
+            spinnerObject.show();
         }
 
     };
@@ -247,13 +252,12 @@ var igv = (function (igv) {
      * Stop the spinner for the parent element, if it has one
      * @param parentElement
      */
-    igv.stopSpinnerObject = function (parentElement) {
+    igv.stopSpinnerAtParentElement = function (parentElement) {
 
-        var spinner = $(parentElement).find("i.fa-spinner");
+        var spinnerObject = igv.getSpinnerObjectWithParentElement(parentElement);
 
-        if (spinner) {
-            spinner.removeClass("igv-spinner-fa-start");
-            spinner.addClass("igv-spinner-fa-stop");
+        if (spinnerObject) {
+            spinnerObject.hide();
         }
 
     };
