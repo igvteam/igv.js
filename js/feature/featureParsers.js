@@ -41,7 +41,9 @@ var igv = (function (igv) {
      * A factory function.  Return a parser for the given file type.
      */
     igv.FeatureParser = function (type, decode) {
+
         this.type = type;
+        this.skipRows = 0;   // The number of fixed header rows to skip.  Override for specific types as needed
 
         if(decode) {
             this.decode = decode;
@@ -58,9 +60,13 @@ var igv = (function (igv) {
         else if (type === "aneu") {
             this.decode = decodeAneu;
         }
-        else if (type == 'FusionJuncSpan') {
+        else if (type === 'FusionJuncSpan') {
             // bhaas, needed for FusionInspector view
             this.decode = decodeFusionJuncSpan;
+        }
+        else if (type === 'gtexGWAS') {
+            this.skipRows = 1;
+            // KANE -- your decode function here
         }
         else {
             this.decode = decodeBed;
@@ -110,7 +116,7 @@ var igv = (function (igv) {
 
 
 
-        for (i = 0; i < len; i++) {
+        for (i = this.skipRows; i < len; i++) {
             line = lines[i];
             if (line.startsWith("track") || line.startsWith("#") || line.startsWith("browser")) {
                 continue;
