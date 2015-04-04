@@ -340,7 +340,7 @@ var igv = (function (igv) {
                 return;
             }
 
-            browser.initializeWithOptions(options);
+            browser.initializeWithTrackConfigurations(options.tracks);
 
         }
 
@@ -543,47 +543,6 @@ var igv = (function (igv) {
             $(horizontalScrollBarContainer).empty();
 
             this.horizontalScrollbar = undefined;
-
-        };
-
-        browser.initializeWithOptions = function (options) {
-
-            var tracks = [];
-            options.tracks.forEach(function(configuration){
-
-                var track = cursorTrackWithConfig(configuration, browser);
-
-                if (undefined !== track) {
-                    tracks.push(track);
-                }
-
-            });
-
-            if (0 === tracks.length) {
-                return;
-            }
-
-            if (undefined === browser.designatedTrack) {
-                browser.designatedTrack = tracks[ 0 ];
-            }
-
-            browser.getFeaturesForTracks(tracks, function () {
-
-                tracks.forEach(function (track) {
-                    browser.addTrack(track);
-                });
-
-                browser.designatedTrack.featureSource.allFeatures(function (features) {
-
-                    var horizontalScrollBarContainer = $("div.igv-horizontal-scrollbar-container-div");
-                    browser.horizontalScrollbar = new cursor.HorizontalScrollbar(browser, $(horizontalScrollBarContainer));
-
-                    browser.cursorModel.setRegions(features);
-
-                    browser.horizontalScrollbar.update();
-                });
-
-            });
 
         };
         
