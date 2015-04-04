@@ -286,6 +286,7 @@ var igv = (function (igv) {
         trackContainer = $('<div id="igvTrackContainerDiv" class="igv-track-container-div">')[0];
         browser = new igv.Browser(options, trackContainer);
 
+        // Attach spinner to root div
         browser.div.appendChild(igv.spinner());
         igv.stopSpinnerAtParentElement(browser.div);
 
