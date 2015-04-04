@@ -353,27 +353,10 @@ div.ui-dialog fieldset {
 .igv-spinner-fa {
 
     position: absolute;
-    left:50%;
     top:50%;
+    left:50%;
     z-index: 256;
     display: inline;
-}
-
-.igv-spinner-fa-start {
-
-    position: absolute;
-    left:50%;
-    top:50%;
-    z-index: 256;
-    display: inline;
-}
-
-.igv-spinner-fa-stop {
-    position: absolute;
-    left:50%;
-    top:50%;
-    z-index: -256;
-    display: none;
 }
 
 .igv-root-div {
