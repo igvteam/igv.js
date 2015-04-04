@@ -81,13 +81,12 @@
 .igv-track-container-div {
     padding-top: 0;
     padding-bottom: 0;
+    overflow: visible;
 }
 
 /* override */
 .igv-track-div {
-    position: relative;
-    width: 100%;
-    overflow:hidden;
+    overflow:visible;
     margin-bottom:0;
 }
 
