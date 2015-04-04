@@ -125,6 +125,9 @@ var cursor = (function (cursor) {
                         myself.color = "rgb(" + header.color + ")";
                         if (myself.cursorHistogram) myself.cursorHistogram.render(this);
                     }
+                    if(header.height && !myself.config.trackHeight) {
+                        myself.height = header.height;
+                    }
                 }
                 else {
                     this.header = null;   // Insure it has a value other than undefined
