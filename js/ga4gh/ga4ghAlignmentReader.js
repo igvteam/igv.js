@@ -31,9 +31,7 @@ var igv = (function (igv) {
         this.config = config;
         this.url = config.url;
         this.readGroupSetIds = config.readGroupSetIds;
-        this.authKey = config.authKey === undefined ?
-            'AIzaSyC-dujgw4P1QvNd8i_c-I-S_P1uxVZzn0w' :  // Default only works for localhost & broadinstitute.org
-            config.authKey;
+        this.authKey = config.authKey;   // Might be undefined or nill
     }
 
 
