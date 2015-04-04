@@ -267,7 +267,7 @@ var igv = (function (igv) {
 
         trackHeightStr = newHeight + "px";
 
-        //this.track.height = newHeight;
+        this.track.height = newHeight;
 
         this.trackDiv.style.height = trackHeightStr;
 
