@@ -118,7 +118,6 @@ var igv = (function (igv) {
                             else {
 
                                 trackView.setTrackHeight( number );
-                                trackView.heightSetExplicitly = true;
                                 trackMenuPopupDialog.dialogForm.dialog("close");
                             }
 

@@ -229,7 +229,7 @@ var igv = (function (igv) {
 
     igv.TrackView.prototype.setTrackHeight = function (newHeight, update) {
 
-        setTrackHeight_.call(this, newHeight, false);
+        setTrackHeight_.call(this, newHeight, update || true);
 
         this.track.autoHeight = false;   // Explicitly setting track height turns off auto-scale
 
@@ -241,7 +241,7 @@ var igv = (function (igv) {
      * @param newHeight
      * @param update
      */
-    igv.TrackView.prototype.setContentHeight = function (newHeight, update) {
+    igv.TrackView.prototype.setContentHeight = function (newHeight) {
 
         contentHeightStr = newHeight + "px";
 
@@ -258,7 +258,7 @@ var igv = (function (igv) {
             }
         }
 
-        if (update === undefined || update === true) this.update();
+        this.update();
     };
 
     function setTrackHeight_ (newHeight, update) {
@@ -355,7 +355,7 @@ var igv = (function (igv) {
                         if (self.track.computePixelHeight) {
                             var requiredHeight = self.track.computePixelHeight(features);
                             if (requiredHeight != self.contentDiv.clientHeight) {
-                                self.setContentHeight(requiredHeight, true);
+                                self.setContentHeight(requiredHeight);
                             }
                         }
 
