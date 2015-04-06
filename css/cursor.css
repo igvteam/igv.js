@@ -3,6 +3,18 @@
     padding-top:18px;
 }
 
+/* spinner */
+
+.igv-spinner-container {
+    padding: 24px;
+    background-color: rgba(255, 255, 255, 0.75);
+}
+
+.igv-fa-spinner {
+    color: darkslategrey;
+    font-size: 48px;
+}
+
 .igv-track-label-div {
 
     position: relative;

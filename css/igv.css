@@ -357,8 +357,11 @@ div.ui-dialog fieldset {
     left:50%;
     z-index: 256;
     display: inline;
+}
 
-    /*background-color: #0066bb;*/
+.igv-fa-spinner {
+    color: grey;
+    font-size: 24px;
 }
 
 .igv-root-div {
