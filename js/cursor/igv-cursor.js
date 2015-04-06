@@ -277,7 +277,7 @@ var igv = (function (igv) {
         browser = new igv.Browser(options, trackContainer);
 
         // Attach spinner to root div
-        browser.div.appendChild(igv.spinner(64));
+        browser.div.appendChild(igv.spinner());
         igv.stopSpinnerAtParentElement(browser.div);
 
         document.getElementById('igvContainerDiv').appendChild(browser.div);
