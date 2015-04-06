@@ -49,9 +49,9 @@ var igv = (function (igv) {
         }
 
         // one spinner per track - IGV only
-        if ("CURSOR" !== browser.type) {
+        //if ("CURSOR" !== browser.type) {
             this.trackDiv.appendChild(igv.spinner());
-        }
+        //}
 
         this.addLeftHandGutterToParentTrackDiv(this.trackDiv);
 

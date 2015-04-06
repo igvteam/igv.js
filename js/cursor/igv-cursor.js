@@ -925,9 +925,6 @@ var igv = (function (igv) {
                 return;
             }
 
-            //console.log("Repaint " + this.track.label + "  " + this.canvas.height);
-
-
             var tileWidth,
                 tileStart,
                 tileEnd,
@@ -955,8 +952,7 @@ var igv = (function (igv) {
                         myself.currentTask = null;
                     }
 
-
-                    //igv.startSpinnerObject(myself.trackDiv);
+                    igv.startSpinnerAtParentElement(myself.trackDiv);
 
                     myself.currentTask = {
                         canceled: false,
@@ -969,7 +965,7 @@ var igv = (function (igv) {
                                 this.xhrRequest.abort();
                             }
 
-                            //igv.stopSpinnerObject(myself.trackDiv);
+                            igv.stopSpinnerAtParentElement(myself.trackDiv);
                         }
 
                     };
@@ -983,9 +979,12 @@ var igv = (function (igv) {
                     tileStart = Math.max(0, Math.round(referenceFrame.start - tileWidth / 3));
                     tileEnd = tileStart + tileWidth;
 
+                    console.log("before cursor draw");
                     myself.track.draw(ctx, referenceFrame, tileStart, tileEnd, buffer.width, buffer.height, function (task) {
 
-                            //igv.stopSpinnerObject(myself.trackDiv);
+                            console.log(" after cursor draw");
+
+                            igv.stopSpinnerAtParentElement(myself.trackDiv);
 
                             if (!(myself.currentTask && myself.currentTask.canceled)) {
                                 myself.tile = new Tile(referenceFrame.chr, tileStart, tileEnd, referenceFrame.bpPerPixel, buffer);
