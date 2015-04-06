@@ -211,7 +211,7 @@ var igv = (function (igv) {
         }
     };
 
-    igv.spinner = function (spinnerSize) {
+    igv.spinner = function () {
 
         // spinner
         var spinnerContainer,
@@ -223,11 +223,6 @@ var igv = (function (igv) {
 
         spinner = document.createElement("i");
         spinner.className = "igv-fa-spinner fa fa-spinner fa-spin";
-
-        //fontSize = (spinnerSize) ? spinnerSize + "px" : "24px";
-        //$(spinner).css({
-        //    "font-size": fontSize
-        //});
 
         spinnerContainer.appendChild(spinner);
 
