@@ -214,24 +214,25 @@ var igv = (function (igv) {
     igv.spinner = function () {
 
         // spinner
-        var spinner = document.createElement("i");
-        spinner.className = "fa fa-spinner fa-spin fa-24px igv-spinner-fa";
+        var spinnerContainer,
+            spinner;
 
-        return spinner;
+        spinnerContainer = document.createElement("div");
+        spinnerContainer.className = "igv-spinner-container";
+
+        spinner = document.createElement("i");
+        spinner.className = "fa fa-spinner fa-spin fa-24px";
+
+        spinnerContainer.appendChild(spinner);
+
+        return spinnerContainer;
     };
 
     /**
      * Find spinner
      */
     igv.getSpinnerObjectWithParentElement = function (parentElement) {
-        return $(parentElement).find("i.fa-spinner");
-    };
-
-    /**
-     * Is spinner spinning ?
-     */
-    igv.isSpinning = function (spinnerObject) {
-        return spinnerObject && spinnerObject.hasClass("fa-spin");
+        return $(parentElement).find("div.igv-spinner-container");
     };
 
     /**
