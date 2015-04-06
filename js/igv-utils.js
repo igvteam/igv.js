@@ -211,17 +211,23 @@ var igv = (function (igv) {
         }
     };
 
-    igv.spinner = function () {
+    igv.spinner = function (spinnerSize) {
 
         // spinner
         var spinnerContainer,
-            spinner;
+            spinner,
+            fontSize;
 
         spinnerContainer = document.createElement("div");
         spinnerContainer.className = "igv-spinner-container";
 
         spinner = document.createElement("i");
-        spinner.className = "fa fa-spinner fa-spin fa-24px";
+        spinner.className = "igv-fa-spinner fa fa-spinner fa-spin";
+
+        //fontSize = (spinnerSize) ? spinnerSize + "px" : "24px";
+        //$(spinner).css({
+        //    "font-size": fontSize
+        //});
 
         spinnerContainer.appendChild(spinner);
 

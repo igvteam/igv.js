@@ -277,7 +277,7 @@ var igv = (function (igv) {
         browser = new igv.Browser(options, trackContainer);
 
         // Attach spinner to root div
-        browser.div.appendChild(igv.spinner());
+        browser.div.appendChild(igv.spinner(64));
         igv.stopSpinnerAtParentElement(browser.div);
 
         document.getElementById('igvContainerDiv').appendChild(browser.div);
@@ -526,7 +526,7 @@ var igv = (function (igv) {
                     --trackCount;
                     if (0 === trackCount) {
 
-                        //igv.stopSpinnerAtParentElement(browser.div);
+                        igv.stopSpinnerAtParentElement(browser.div);
 
                         // do stuff
                         continuation();
