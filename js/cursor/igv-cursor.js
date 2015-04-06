@@ -157,14 +157,8 @@ var igv = (function (igv) {
 
         function configureTrackWithLocalFileOrPath(config) {
 
-            if (0 === igv.browser.trackViews.length) {
-                config.designatedTrack = true;
-                igv.browser.initializeWithTrackConfigurations([config]);
-            }
-            else {
-                igv.browser.loadTrackWithConfigurations([config]);
-            }
-
+            config.designatedTrack = (0 === igv.browser.trackViews.length) ? true : undefined;
+            igv.browser.loadTrackWithConfigurations([config]);
         }
 
         // Load ENCODE DataTables data and build markup for modal dialog.
@@ -265,13 +259,9 @@ var igv = (function (igv) {
 
                     } // for (tableRows)
 
-                    if (0 === browser.trackViews.length) {
-                        configurations[ 0 ].designatedTrack = true;
-                        igv.browser.initializeWithTrackConfigurations(configurations);
-                    }
-                    else {
-                        igv.browser.loadTrackWithConfigurations(configurations);
-                    }
+                    configurations[ 0 ].designatedTrack = (0 === igv.browser.trackViews.length) ? true : undefined;
+                    igv.browser.loadTrackWithConfigurations(configurations);
+
 
                 }
 
@@ -340,7 +330,7 @@ var igv = (function (igv) {
                 return;
             }
 
-            browser.initializeWithTrackConfigurations(options.tracks);
+            browser.loadTrackWithConfigurations(options.tracks);
 
         }
 
@@ -353,7 +343,9 @@ var igv = (function (igv) {
 
         browser.loadTrackWithConfigurations = function (configurations) {
 
-            var tracks = [];
+            var tracks = [],
+                doInitialize;
+
             configurations.forEach(function(configuration){
 
                 var track = cursorTrackWithConfig(configuration, browser);
@@ -374,50 +366,25 @@ var igv = (function (igv) {
 
             browser.getFeaturesForTracks(tracks, function () {
 
+                doInitialize = (0 === igv.browser.trackViews.length);
+
                 tracks.forEach(function (track) {
                     browser.addTrack(track);
                 });
 
-            });
+                if (doInitialize) {
+                    browser.designatedTrack.featureSource.allFeatures(function (features) {
 
-        };
+                        var horizontalScrollBarContainer = $("div.igv-horizontal-scrollbar-container-div");
+                        browser.horizontalScrollbar = new cursor.HorizontalScrollbar(browser, $(horizontalScrollBarContainer));
 
-        browser.initializeWithTrackConfigurations = function (configurations) {
+                        browser.cursorModel.setRegions(features);
 
-            var tracks = [];
-            configurations.forEach(function(configuration){
-
-                var track = cursorTrackWithConfig(configuration, browser);
-
-                if (undefined !== track) {
-                    tracks.push(track);
+                        browser.horizontalScrollbar.update();
+                    });
                 }
 
-            });
 
-            if (0 === tracks.length) {
-                return;
-            }
-
-            if (undefined === browser.designatedTrack) {
-                browser.designatedTrack = tracks[ 0 ];
-            }
-
-            browser.getFeaturesForTracks(tracks, function () {
-
-                tracks.forEach(function (track) {
-                    browser.addTrack(track);
-                });
-
-                browser.designatedTrack.featureSource.allFeatures(function (features) {
-
-                    var horizontalScrollBarContainer = $("div.igv-horizontal-scrollbar-container-div");
-                    browser.horizontalScrollbar = new cursor.HorizontalScrollbar(browser, $(horizontalScrollBarContainer));
-
-                    browser.cursorModel.setRegions(features);
-
-                    browser.horizontalScrollbar.update();
-                });
 
             });
 
