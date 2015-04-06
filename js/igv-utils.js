@@ -252,7 +252,7 @@ var igv = (function (igv) {
      * @param parentElement
      */
     igv.stopSpinnerAtParentElement = function (parentElement) {
-
+        
         var spinnerObject = igv.getSpinnerObjectWithParentElement(parentElement);
 
         if (spinnerObject) {
