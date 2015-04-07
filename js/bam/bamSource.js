@@ -54,30 +54,33 @@ var igv = (function (igv) {
 
         } else {
 
-            var myself = this;
+            var self = this;
 
             this.bamReader.readFeatures(chr, bpStart, bpEnd,
+
                 function (alignments) {
 
                     if (alignments) {  // Can be null on error or aborting
 
-                        myself.genomicInterval = new igv.GenomicInterval(chr, bpStart, bpEnd);
+                        self.genomicInterval = new igv.GenomicInterval(chr, bpStart, bpEnd);
 
-                        igv.browser.genome.sequence.getSequence(myself.genomicInterval.chr, myself.genomicInterval.start, myself.genomicInterval.end,
+                        igv.browser.genome.sequence.getSequence(self.genomicInterval.chr, self.genomicInterval.start, self.genomicInterval.end,
 
                             function (sequence) {
 
+                                var maxRows = self.config.maxRows || 500;
+
                                 if (sequence) {
 
-                                    myself.genomicInterval.coverageMap = new igv.CoverageMap(chr, bpStart, bpEnd, alignments, sequence);
+                                    self.genomicInterval.coverageMap = new igv.CoverageMap(chr, bpStart, bpEnd, alignments, sequence);
 
-                                    myself.genomicInterval.packedAlignmentRows = packAlignmentRows(myself.genomicInterval, alignments);
+                                    self.genomicInterval.packedAlignmentRows = packAlignmentRows(self.genomicInterval, alignments, maxRows);
 
-                                    myself.genomicInterval.features = undefined;
+                                    self.genomicInterval.features = undefined;
 
-                                    myself.genomicInterval.sequence = sequence;
+                                    self.genomicInterval.sequence = sequence;
 
-                                    continuation(myself.genomicInterval);
+                                    continuation(self.genomicInterval);
                                 }
 
                             },
@@ -90,7 +93,7 @@ var igv = (function (igv) {
     };
 
 
-    function packAlignmentRows(genomicInterval, alignments) {
+    function packAlignmentRows(genomicInterval, alignments, maxRows) {
 
         if (alignments.length === 0) {
 
@@ -119,9 +122,10 @@ var igv = (function (igv) {
             });
 
 
-            while (allocatedCount < alignments.length) {
+            while (allocatedCount < alignments.length && packedAlignmentRows.length < maxRows) {
 
                 alignmentRow = new igv.BamAlignmentRow();
+
                 while (nextStart <= genomicInterval.end) {
 
                     bucket = undefined;

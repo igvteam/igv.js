@@ -34,7 +34,6 @@ var igv = (function (igv) {
         this.collapsedHeight = config.collapsedHeight || this.height;
         this.expandedRowHeight = config.expandedRowHeight || 30;
         this.squishedRowHeight = config.squishedRowHeight || 15;
-        this.maxRows = config.maxRows || 500;
 
         this.featureSource = new igv.FeatureSource(this.config);
 
