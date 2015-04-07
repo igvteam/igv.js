@@ -174,7 +174,7 @@ var igv = (function (igv) {
 
                     "columns": [
 
-                        { "title": "cell" },
+                        { "title": "cell", "width" : "5%" },
                         { "title": "dataType" },
 
                         { "title": "antibody" },
