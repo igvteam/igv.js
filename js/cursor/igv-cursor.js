@@ -161,33 +161,43 @@ var igv = (function (igv) {
             igv.browser.loadTrackWithConfigurations([config]);
         }
 
+        // Append resultant ENCODE DataTables markup
+        $('#encodeModalBody').html('<table id="encodeModalTable" cellpadding="0" cellspacing="0" border="0" class="display"></table>');
+
         // Load ENCODE DataTables data and build markup for modal dialog.
         encode.createEncodeDataTablesDataSet("resources/peaks.hg19.txt", function (dataSet) {
 
             var encodeModalTable = $('#encodeModalTable'),
-                myDataTable = encodeModalTable.dataTable({
+                dataTableObject,
+                dataTableAPIInstance;
 
-                    "data": dataSet,
-                    "scrollY": "400px",
-                    "scrollCollapse": true,
-                    "paging": false,
+            dataTableObject = encodeModalTable.dataTable({
 
-                    "columns": [
+                "data": dataSet,
+                "scrollX": true,
+                "scrollY": "400px",
+                "scrollCollapse": true,
+                "paging": false,
 
-                        { "title": "cell", "width" : "5%" },
-                        { "title": "dataType" },
+                "columns": [
 
-                        { "title": "antibody" },
-                        { "title": "view" },
+                    { "title": "cell", "width": "5%" },
+                    { "title": "dataType", "width": "5%" },
 
-                        { "title": "replicate" },
-                        { "title": "type" },
+                    { "title": "antibody", "width": "10%"  },
+                    { "title": "view", "width": "10%"  },
 
-                        { "title": "lab" },
-                        { "title": "path" }
-                    ]
+                    { "title": "replicate", "width": "5%"  },
+                    { "title": "type", "width": "10%"  },
 
-                });
+                    { "title": "lab", "width": "10%"  },
+                    { "title": "path", "width": "45%"  }
+                ]
+
+            });
+
+            dataTableAPIInstance = encodeModalTable.DataTable();
+            dataTableAPIInstance.columns.adjust();
 
             encodeModalTable.find('tbody').on('click', 'tr', function () {
 
@@ -204,13 +214,24 @@ var igv = (function (igv) {
 
             });
 
+            $('#igvEncodeModal').on('shown.bs.modal', function (e) {
+
+                var encodeModalTable = $('#encodeModalTable'),
+                    dataTableAPIInstance;
+
+                console.log("ENCODE Modal - Shown");
+
+                dataTableAPIInstance = encodeModalTable.DataTable();
+                dataTableAPIInstance.columns.adjust();
+            });
+
             $('#encodeModalTopCloseButton').on('click', function () {
-                myDataTable.$('tr.selected').removeClass('selected');
+                dataTableObject.$('tr.selected').removeClass('selected');
 
             });
 
             $('#encodeModalBottomCloseButton').on('click', function () {
-                myDataTable.$('tr.selected').removeClass('selected');
+                dataTableObject.$('tr.selected').removeClass('selected');
             });
 
             $('#encodeModalGoButton').on('click', function () {
@@ -222,7 +243,7 @@ var igv = (function (igv) {
                     record = {},
                     configurations = [];
 
-                tableRows = myDataTable.$('tr.selected');
+                tableRows = dataTableObject.$('tr.selected');
 
                 if (0 < tableRows.length) {
 
@@ -267,10 +288,8 @@ var igv = (function (igv) {
 
             });
 
-        });
 
-        // Append resultant ENCODE DataTables markup
-        $('#encodeModalBody').html('<table cellpadding="0" cellspacing="0" border="0" class="display" id="encodeModalTable"></table>');
+        });
 
         // Construct DOM hierarchy
         trackContainer = $('<div id="igvTrackContainerDiv" class="igv-track-container-div">')[0];
@@ -512,7 +531,7 @@ var igv = (function (igv) {
             this.horizontalScrollbar = undefined;
 
         };
-        
+
         browser.getFeaturesForTracks = function (tracks, continuation) {
 
             var trackCount = tracks.length;
