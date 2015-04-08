@@ -27,6 +27,14 @@ var igv = (function (igv) {
 
     igv.TrackView = function (track, browser) {
 
+        var self = this,
+            isMouseDown = undefined,
+            lastMouseY = undefined,
+            clampTop,
+            clampBottom;
+
+
+
         this.track = track;
         this.browser = browser;
 
@@ -53,6 +61,7 @@ var igv = (function (igv) {
             this.trackDiv.appendChild(igv.spinner());
         }
 
+        // CURSOR - Track Drag & Drop
         if ("CURSOR" === browser.type) {
 
             this.igvTrackManipulationHandle = $('<div class="igv-track-manipulation-handle">')[0];
@@ -63,12 +72,59 @@ var igv = (function (igv) {
 
             this.igvTrackManipulationHandleDownContainer = $('<div class="igv-track-manipulation-handle-down-container hvr-icon-sink">')[0];
             $(this.igvTrackManipulationHandle).append(this.igvTrackManipulationHandleDownContainer);
+
+            // CURSOR Histogram
+
+            $( document ).mousedown(function(e) {
+                lastMouseY = e.screenY;
+                self.isMouseIn = true;
+            });
+
+            $( self.igvTrackManipulationHandle ).mousedown(function(e) {
+                isMouseDown = true;
+
+                clampTop = 0;
+                clampBottom = $(igv.browser.trackContainerDiv).height() - $(self.igvTrackManipulationHandle).outerHeight();
+
+            });
+
+            $( document ).mousemove(function (e) {
+
+                var top;
+
+                if (isMouseDown && self.isMouseIn && undefined !== lastMouseY) {
+
+                    top = $(self.trackDiv).position().top;
+                    top += (e.screenY - lastMouseY);
+
+                    //// clamp
+                    top = Math.max(clampTop, top);
+                    top = Math.min(clampBottom, top);
+
+                    $( self.trackDiv).css({
+                        "top": top + "px"
+                    });
+
+                    lastMouseY = e.screenY
+                }
+
+            });
+
+            $( document ).mouseup(function(e) {
+                isMouseDown = false;
+                lastMouseY = undefined;
+                self.isMouseIn = undefined;
+            });
+
+
+
         }
 
         this.addLeftHandGutterToParentTrackDiv(this.trackDiv);
 
         this.addViewportToParentTrackDiv(this.trackDiv);
 
+        // CURSOR - Histogram
         if ("CURSOR" === browser.type) {
 
             this.cursorHistogramContainer = $('<div class="igv-cursor-histogram-container">')[0];
