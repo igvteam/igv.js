@@ -219,7 +219,7 @@ var igv = (function (igv) {
                 var encodeModalTable = $('#encodeModalTable'),
                     dataTableAPIInstance;
 
-                console.log("ENCODE Modal - Shown");
+                //console.log("ENCODE Modal - Shown");
 
                 dataTableAPIInstance = encodeModalTable.DataTable();
                 dataTableAPIInstance.columns.adjust();
