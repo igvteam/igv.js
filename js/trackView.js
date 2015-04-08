@@ -53,6 +53,18 @@ var igv = (function (igv) {
             this.trackDiv.appendChild(igv.spinner());
         }
 
+        if ("CURSOR" === browser.type) {
+
+            this.igvTrackManipulationHandle = $('<div class="igv-track-manipulation-handle">')[0];
+            $(this.trackDiv).append(this.igvTrackManipulationHandle);
+
+            this.igvTrackManipulationHandleUpContainer = $('<div class="igv-track-manipulation-handle-up-container hvr-icon-float">')[0];
+            $(this.igvTrackManipulationHandle).append(this.igvTrackManipulationHandleUpContainer);
+
+            this.igvTrackManipulationHandleDownContainer = $('<div class="igv-track-manipulation-handle-down-container hvr-icon-sink">')[0];
+            $(this.igvTrackManipulationHandle).append(this.igvTrackManipulationHandleDownContainer);
+        }
+
         this.addLeftHandGutterToParentTrackDiv(this.trackDiv);
 
         this.addViewportToParentTrackDiv(this.trackDiv);
