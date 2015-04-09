@@ -1,4 +1,5 @@
 Chr	 Position (GRCh37)	Strongest SNP-Risk Allele	Chr Position (GRCh38)	Disease/Phenotype	P-value	Odds ratio or beta	PUBMEDID
+<<<<<<< HEAD
 chr1	240045908	rs536477-? x rs1937920-?	1:240045908	Venous thromboembolism (gene x gene interaction)	3.00E-09	1.59	23509962
 chr1	240597214	rs9287237-T	1:240597214	Bone mineral density	2.00E-09	0.19	23437003
 chr1	242040775	rs1635501-C	1:242040775	Menopause (age at onset)	8.00E-10	0.16	22267201
