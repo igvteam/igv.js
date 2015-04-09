@@ -29,9 +29,10 @@ var igv = (function (igv) {
 
         var horizontalScrollBarContainer,
             contentHeader,
-            trackContainer,
+            trackContainerDiv,
             browser,
-            thang;
+            thang,
+            po;
 
         // Append event handlers to Header DIV
         document.getElementById('zoomOut').onclick = function (e) {
@@ -292,8 +293,8 @@ var igv = (function (igv) {
         });
 
         // Construct DOM hierarchy
-        trackContainer = $('<div id="igvTrackContainerDiv" class="igv-track-container-div">')[0];
-        browser = new igv.Browser(options, trackContainer);
+        trackContainerDiv = $('<div id="igvTrackContainerDiv" class="igv-track-container-div">')[0];
+        browser = new igv.Browser(options, trackContainerDiv);
 
         // Attach spinner to root div
         browser.div.appendChild(igv.spinner());
@@ -316,7 +317,11 @@ var igv = (function (igv) {
         thang.append($('<div class="igv-control-panel-header-div">Track Summary</div>')[0]);
 
         // track container
-        $(browser.div).append(trackContainer);
+        $(browser.div).append(trackContainerDiv);
+
+        // Popover object -- singleton shared by all components
+        igv.popover = new igv.Popover(browser.trackContainerDiv);
+
 
         igv.addAjaxExtensions();
 
@@ -916,7 +921,8 @@ var igv = (function (igv) {
         igv.TrackView.prototype.rightHandGutterCreationHelper = function (trackManipulationIconBox) {
 
             var myself = this,
-                removeButton;
+                removeButton,
+                gearButton;
 
             $(trackManipulationIconBox).append($('<i class="fa fa-chevron-circle-up   igv-track-menu-move-up">')[0]);
             $(trackManipulationIconBox).append($('<i class="fa fa-chevron-circle-down igv-track-menu-move-down">')[0]);
@@ -929,12 +935,23 @@ var igv = (function (igv) {
                 myself.browser.increaseTrackOrder(myself)
             });
 
-            removeButton = $('<i class="fa fa-times igv-track-menu-discard">')[0];
-            $(trackManipulationIconBox).append(removeButton);
 
-            $(removeButton).click(function () {
-                myself.browser.removeTrack(myself.track);
+
+            //removeButton = $('<i class="fa fa-times igv-track-menu-discard">')[0];
+            //$(trackManipulationIconBox).append(removeButton);
+
+            //$(removeButton).click(function () {
+            //    myself.browser.removeTrack(myself.track);
+            //});
+
+
+            gearButton = $('<i class="fa fa-gear fa-20px igv-track-menu-gear igv-app-icon" style="padding-top: 5px">');
+            $(trackManipulationIconBox).append(gearButton[0]);
+
+            $(gearButton).click(function (e) {
+                igv.popover.presentTrackMenu(e.pageX, e.pageY, myself);
             });
+
 
         };
 
