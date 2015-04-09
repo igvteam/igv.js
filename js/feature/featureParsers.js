@@ -63,12 +63,11 @@ var igv = (function (igv) {
         else if (type === 'FusionJuncSpan') {
             // bhaas, needed for FusionInspector view
             this.decode = decodeFusionJuncSpan;
-        } else if (type === 'gtexGWAS') {
-            this.decode = decomeGtexGWAS;
         }
         else if (type === 'gtexGWAS') {
             this.skipRows = 1;
             // KANE -- your decode function here
+            this.decode = decodeGtexGWAS;
         }
         else {
             this.decode = decodeBed;
@@ -465,22 +464,23 @@ var igv = (function (igv) {
         var tokenCount, chr, start, end, strand, name, score, qValue, signal, pValue;
 
         tokenCount = tokens.length;
-        if (tokenCount < 9) {
+        if (tokenCount < 8) {
             return null;
         }
 
         chr = tokens[0];
-        start = parseInt(tokens[1]);
-        end = parseInt(tokens[2]);
-        name = tokens[3];
-        score = parseFloat(tokens[4]);
-        strand = tokens[5].trim();
-        signal = parseFloat(tokens[6]);
-        pValue = parseFloat(tokens[7]);
-        qValue = parseFloat(tokens[8]);
+        start = parseInt(tokens[1]) - 1;
+        end = parseInt(tokens[1]) + 100;
+        //name = tokens[3];
+        //score = parseFloat(tokens[4]);
+        //strand = tokens[5].trim();
+        //signal = parseFloat(tokens[6]);
+        //pValue = parseFloat(tokens[7]);
+        //qValue = parseFloat(tokens[8]);
 
-        return {chr: chr, start: start, end: end, name: name, score: score, strand: strand, signal: signal,
-            pValue: pValue, qValue: qValue};
+        //return {chr: chr, start: start, end: end, name: name, score: score, strand: strand, signal: signal,
+        //    pValue: pValue, qValue: qValue};
+        return {chr: chr, start: start, end: end};
     }
 
 
