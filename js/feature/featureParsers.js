@@ -48,7 +48,6 @@ var igv = (function (igv) {
         if (decode) {
             this.decode = decode;
         }
-<<<<<<< HEAD
         switch (type) {
             case "narrowPeak":
             case "broadPeak":
