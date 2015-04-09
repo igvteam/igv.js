@@ -67,6 +67,13 @@ var cursor = (function (cursor) {
 
     };
 
+    cursor.CursorTrack.prototype.popupData = function (genomicLocation, xOffset, yOffset) {
+
+        console.log("CURSOR track - popupData");
+        return null;
+    };
+
+
     cursor.defaultColor = function () {
         return "rgb(  3, 116, 178)";
     };
