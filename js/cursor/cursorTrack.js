@@ -69,7 +69,44 @@ var cursor = (function (cursor) {
 
     cursor.CursorTrack.prototype.popupData = function (genomicLocation, xOffset, yOffset) {
 
-        console.log("CURSOR track - popupData");
+        // TODO - Cloned from featureTrack. Adapt as needed.
+        //if (this.featureSource.featureCache) {
+        //
+        //    var chr = igv.browser.referenceFrame.chr,  // TODO -- this should be passed in
+        //        tolerance = igv.browser.referenceFrame.bpPerPixel,  // We need some tolerance around genomicLocation, start with +/- 1 pixel
+        //        featureList = this.featureSource.featureCache.queryFeatures(chr, genomicLocation - tolerance, genomicLocation + tolerance),
+        //        row,
+        //        popupData;
+        //
+        //    //if (this.displayMode != "COLLAPSED") {
+        //    //    row = (Math.floor)(this.displayMode === "SQUISHED" ? yOffset / this.squishedRowHeight : yOffset / this.expandedRowHeight);
+        //    //}
+        //
+        //    if (featureList && featureList.length > 0) {
+        //
+        //        popupData = [];
+        //        featureList.forEach(function (feature) {
+        //            if (feature.popupData &&
+        //                feature.end >= genomicLocation - tolerance &&
+        //                feature.start <= genomicLocation + tolerance) {
+        //
+        //                if (row === undefined || feature.row === undefined || row === feature.row) {
+        //                    var featureData = feature.popupData(genomicLocation);
+        //                    if (featureData) {
+        //                        if (popupData.length > 0) {
+        //                            popupData.push("<HR>");
+        //                        }
+        //                        Array.prototype.push.apply(popupData, featureData);
+        //                    }
+        //                }
+        //            }
+        //        });
+        //
+        //        return popupData;
+        //    }
+        //
+        //}
+
         return null;
     };
 
