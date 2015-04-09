@@ -29,21 +29,20 @@ var cursor = (function (cursor) {
 
     cursor.CursorTrack = function (config, browser) {
 
-        this.config = config;
-        this.url = config.url;
+        igv.configTrack(this, config);
+
+        this.color = config.color || cursor.defaultColor();
+
         this.config.indexed = false;  // NEVER use indexes for cursor
         this.featureSource = new igv.FeatureSource(config);
         this.featureSource.maxFeatureCount = MAX_FEATURE_COUNT;
-        this.label = config.label;
-        this.height = config.trackHeight || 100;
-        this.color = config.color || cursor.defaultColor();
+
 
         this.cursorModel = browser.cursorModel;
         this.referenceFrame = browser.referenceFrame;
 
         this.cursorHistogram = undefined;
 
-        this.id = "";
     };
 
     cursor.CursorTrack.prototype.jsonRepresentation = function () {
@@ -61,6 +60,19 @@ var cursor = (function (cursor) {
 
         return json;
     };
+
+    cursor.CursorTrack.prototype.popupMenuItems = function (popover) {
+
+        return [ igv.colorPickerMenuItem(popover, this.trackView, "Set feature color", this.color) ];
+
+    };
+
+    cursor.CursorTrack.prototype.popupData = function (genomicLocation, xOffset, yOffset) {
+
+        console.log("CURSOR track - popupData");
+        return null;
+    };
+
 
     cursor.defaultColor = function () {
         return "rgb(  3, 116, 178)";
@@ -100,20 +112,8 @@ var cursor = (function (cursor) {
 
                     allFeatures = featureCache.allFeatures();
 
-                    if (undefined === myself.scoreless) {
-                        myself.scoreless = true;
-                        allFeatures.forEach(function (f) {
 
-                            // do stuff
-                            if (true === myself.scoreless) {
-                                if (f.score) {
-                                    myself.scoreless = false;
-                                }
-                            }
-                        });
-                    }
-
-                    myself.max = (false === myself.scoreless) ? maxValue(allFeatures, 98) : undefined;
+                    myself.max = percentile(allFeatures, 98);
 
                     myself.featureCache = featureCache;
 
@@ -137,6 +137,9 @@ var cursor = (function (cursor) {
                         myself.color = "rgb(" + header.color + ")";
                         if (myself.cursorHistogram) myself.cursorHistogram.render(this);
                     }
+                    if(header.height && !myself.config.trackHeight) {
+                        myself.height = header.height;
+                    }
                 }
                 else {
                     this.header = null;   // Insure it has a value other than undefined
@@ -147,9 +150,9 @@ var cursor = (function (cursor) {
     }
 
 
-    function maxValue(featureList, percentile) {
+    function percentile(featureList, per) {
 
-        var idx = Math.floor(featureList.length * percentile / 100);
+        var idx = Math.floor(featureList.length * per / 100);
 
         featureList.sort(function (a, b) {
 
@@ -231,10 +234,11 @@ var cursor = (function (cursor) {
 
             igv.Canvas.setProperties.call(ctx, {fillStyle: this.color, strokeStyle: this.color});
 
-
             for (regionNumber = Math.floor(start), len = regions.length;
                  regionNumber < len && regionNumber < end;
                  regionNumber += sampleInterval) {
+
+                //igv.Canvas.setProperties.call(ctx, {fillStyle: igv.randomRGB(128, 255), strokeStyle: this.color});
 
                 region = regions[regionNumber];
 
@@ -248,7 +252,7 @@ var cursor = (function (cursor) {
                     Math.floor((regionNumber + 1 - start) * framePixelWidth - frameMargin / 2) :
                 pxStart + 1;
 
-                maxFeatureHeight = this.height;
+                maxFeatureHeight = height;
 
                 if (framePixelWidth > 2) {
 
@@ -267,15 +271,16 @@ var cursor = (function (cursor) {
                             if (score) {
                                 // Height proportional to score
                                 fh = Math.round(((score / this.max) * maxFeatureHeight));
-                                top = this.height - fh;
+                                top = height - fh;
                             }
                             else {
                                 top = 0;
-                                fh = this.height;
+                                fh = height;
                             }
                             if (score > this.max) {
                                 console.log(score);
                             }
+
                             igv.Canvas.fillRect.call(ctx, pStart, top, pw, fh);
 
                         }
@@ -283,24 +288,12 @@ var cursor = (function (cursor) {
                 }
                 else {
 
-                    if (false === myself.scoreless) {
-
-                        // Can't draw individual features, just use region score
-                        score = region.getScore(featureCache, regionWidth);
-                    }
-
                     pw = pxEnd - pxStart;
-                    if (true === myself.scoreless) {
-
-                        top = 0;
-                        fh = myself.height;
-                        igv.Canvas.fillRect.call(ctx, pxStart, top, pw, fh);
-
-                    }
-                    else if (score > 0) {
+                    score = region.getScore(featureCache, regionWidth);
+                    if (score > 0) {
                         // Height proportional to score
                         fh = Math.round(((score / myself.max) * maxFeatureHeight));
-                        top = myself.height - fh;
+                        top = height - fh;
 
                         igv.Canvas.fillRect.call(ctx, pxStart, top, pw, fh);
                     }

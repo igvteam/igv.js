@@ -118,7 +118,6 @@ var igv = (function (igv) {
                             else {
 
                                 trackView.setTrackHeight( number );
-                                trackView.heightSetExplicitly = true;
                                 trackMenuPopupDialog.dialogForm.dialog("close");
                             }
 
@@ -215,30 +214,37 @@ var igv = (function (igv) {
     igv.spinner = function () {
 
         // spinner
-        var spinner = document.createElement("i");
-        spinner.className = "fa fa-spinner fa-24px fa-spin igv-spinner-fa-start";
+        var spinnerContainer,
+            spinner,
+            fontSize;
 
-        return spinner;
+        spinnerContainer = document.createElement("div");
+        spinnerContainer.className = "igv-spinner-container";
+
+        spinner = document.createElement("i");
+        spinner.className = "igv-fa-spinner fa fa-spinner fa-spin";
+
+        spinnerContainer.appendChild(spinner);
+
+        return spinnerContainer;
     };
 
     /**
      * Find spinner
      */
-    igv.findSpinnerObject = function (parentElement) {
-
-        return $(parentElement).find("i.fa-spinner");
+    igv.getSpinnerObjectWithParentElement = function (parentElement) {
+        return $(parentElement).find("div.igv-spinner-container");
     };
 
     /**
      * Start the spinner for the parent element, if it has one
      */
-    igv.startSpinnerObject = function (parentElement) {
+    igv.startSpinnerAtParentElement = function (parentElement) {
 
-        var spinnerObject = $(parentElement).find("i.fa-spinner");
+        var spinnerObject = igv.getSpinnerObjectWithParentElement(parentElement);
 
         if (spinnerObject) {
-            spinnerObject.removeClass("igv-spinner-fa-stop");
-            spinnerObject.addClass("igv-spinner-fa-start");
+            spinnerObject.show();
         }
 
     };
@@ -247,13 +253,12 @@ var igv = (function (igv) {
      * Stop the spinner for the parent element, if it has one
      * @param parentElement
      */
-    igv.stopSpinnerObject = function (parentElement) {
+    igv.stopSpinnerAtParentElement = function (parentElement) {
+        
+        var spinnerObject = igv.getSpinnerObjectWithParentElement(parentElement);
 
-        var spinner = $(parentElement).find("i.fa-spinner");
-
-        if (spinner) {
-            spinner.removeClass("igv-spinner-fa-start");
-            spinner.addClass("igv-spinner-fa-stop");
+        if (spinnerObject) {
+            spinnerObject.hide();
         }
 
     };

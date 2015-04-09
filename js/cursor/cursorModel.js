@@ -479,10 +479,11 @@ var cursor = (function (cursor) {
     // and span the bases 0 - 99.
     cursor.CursorRegion.prototype.exportRegion = function (regionWidth) {
 
-        var halfWidth = regionWidth/2;
+        var halfWidth = regionWidth/ 2,
+            ss = Math.floor(    this.location - halfWidth),
+            ee = Math.floor(1 + this.location + halfWidth);
 
-        // Add 1 to end to conform to BED format
-        return this.chr + "\t" + (this.location - halfWidth) + "\t" + (this.location + halfWidth + 1) + "\n";
+        return this.chr + "\t" + ss + "\t" + ee + "\n";
 
     };
 

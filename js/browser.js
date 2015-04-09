@@ -224,8 +224,15 @@ var igv = (function (igv) {
 
             this.cursorModel.initializeHistogram(trackView.track, function () {
 
+                if (myself.designatedTrack === track) {
+                    myself.selectDesignatedTrack(myself.designatedTrack.trackFilter.trackPanel);
+                }
+
                 if (track.config && track.config.trackFilter) {
+
                     track.trackFilter.setWithJSON(track.config.trackFilter);
+
+
                 }
 
                 myself.resize();
