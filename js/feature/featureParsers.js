@@ -48,6 +48,7 @@ var igv = (function (igv) {
         if (decode) {
             this.decode = decode;
         }
+<<<<<<< HEAD
         switch (type) {
             case "narrowPeak":
             case "broadPeak":
@@ -71,6 +72,7 @@ var igv = (function (igv) {
                 break;
             case "gtexGWAS":
                 this.skipRows = 1;
+                this.decode = decodeGtexGWAS;
                 break;
             default:
                 this.decode = decodeBed;
@@ -469,22 +471,23 @@ var igv = (function (igv) {
         var tokenCount, chr, start, end, strand, name, score, qValue, signal, pValue;
 
         tokenCount = tokens.length;
-        if (tokenCount < 9) {
+        if (tokenCount < 8) {
             return null;
         }
 
         chr = tokens[0];
-        start = parseInt(tokens[1]);
-        end = parseInt(tokens[2]);
-        name = tokens[3];
-        score = parseFloat(tokens[4]);
-        strand = tokens[5].trim();
-        signal = parseFloat(tokens[6]);
-        pValue = parseFloat(tokens[7]);
-        qValue = parseFloat(tokens[8]);
+        start = parseInt(tokens[1]) - 1;
+        end = parseInt(tokens[1]) + 100;
+        //name = tokens[3];
+        //score = parseFloat(tokens[4]);
+        //strand = tokens[5].trim();
+        //signal = parseFloat(tokens[6]);
+        //pValue = parseFloat(tokens[7]);
+        //qValue = parseFloat(tokens[8]);
 
-        return {chr: chr, start: start, end: end, name: name, score: score, strand: strand, signal: signal,
-            pValue: pValue, qValue: qValue};
+        //return {chr: chr, start: start, end: end, name: name, score: score, strand: strand, signal: signal,
+        //    pValue: pValue, qValue: qValue};
+        return {chr: chr, start: start, end: end};
     }
 
 
