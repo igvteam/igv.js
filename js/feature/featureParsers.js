@@ -63,6 +63,8 @@ var igv = (function (igv) {
         else if (type === 'FusionJuncSpan') {
             // bhaas, needed for FusionInspector view
             this.decode = decodeFusionJuncSpan;
+        } else if (type === 'gtexGWAS') {
+            this.decode = decomeGtexGWAS;
         }
         else if (type === 'gtexGWAS') {
             this.skipRows = 1;
@@ -456,6 +458,29 @@ var igv = (function (igv) {
 
         return feature;
 
+    }
+
+    function decodeGtexGWAS(tokens, ignore) {
+
+        var tokenCount, chr, start, end, strand, name, score, qValue, signal, pValue;
+
+        tokenCount = tokens.length;
+        if (tokenCount < 9) {
+            return null;
+        }
+
+        chr = tokens[0];
+        start = parseInt(tokens[1]);
+        end = parseInt(tokens[2]);
+        name = tokens[3];
+        score = parseFloat(tokens[4]);
+        strand = tokens[5].trim();
+        signal = parseFloat(tokens[6]);
+        pValue = parseFloat(tokens[7]);
+        qValue = parseFloat(tokens[8]);
+
+        return {chr: chr, start: start, end: end, name: name, score: score, strand: strand, signal: signal,
+            pValue: pValue, qValue: qValue};
     }
 
 
