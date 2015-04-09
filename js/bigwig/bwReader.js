@@ -117,7 +117,7 @@ var igv = (function (igv) {
                     self.header.uncompressBuffSize = binaryParser.getInt();
                     self.header.reserved = binaryParser.getLong();
 
-                   loadZoomHeadersAndChrTree.call(this, continuation);
+                   loadZoomHeadersAndChrTree.call(self, continuation);
                 })
 
             });
@@ -129,55 +129,55 @@ var igv = (function (igv) {
 
 
         var startOffset = BBFILE_HEADER_SIZE,
-            bwReader = this;
+            self = this;
 
         igvxhr.loadArrayBuffer(this.path,
             {
-                headers: this.config.headers,
+                headers: self.config.headers,
                 range: {start: startOffset, size: (this.header.fullDataOffset - startOffset + 5)},
                 success: function (data) {
 
-                    var nZooms = bwReader.header.nZoomLevels,
+                    var nZooms = self.header.nZoomLevels,
                         binaryParser = new igv.BinaryParser(new DataView(data)),
                         i,
                         len,
                         zoomNumber,
                         zlh;
 
-                    bwReader.zoomLevelHeaders = [];
+                    self.zoomLevelHeaders = [];
 
-                    bwReader.firstZoomDataOffset = Number.MAX_VALUE;
+                    self.firstZoomDataOffset = Number.MAX_VALUE;
                     for (i = 0; i < nZooms; i++) {
                         zoomNumber = nZooms - i;
                         zlh = new ZoomLevelHeader(zoomNumber, binaryParser);
-                        bwReader.firstZoomDataOffset = Math.min(zlh.dataOffset, bwReader.firstZoomDataOffset);
-                        bwReader.zoomLevelHeaders.push(zlh);
+                        self.firstZoomDataOffset = Math.min(zlh.dataOffset, self.firstZoomDataOffset);
+                        self.zoomLevelHeaders.push(zlh);
                     }
 
                     // Autosql
-                    if (bwReader.header.autoSqlOffset > 0) {
-                        binaryParser.position = bwReader.header.autoSqlOffset - startOffset;
-                        bwReader.autoSql = binaryParser.getString();
+                    if (self.header.autoSqlOffset > 0) {
+                        binaryParser.position = self.header.autoSqlOffset - startOffset;
+                        self.autoSql = binaryParser.getString();
                     }
 
                     // Total summary
-                    if (bwReader.header.totalSummaryOffset > 0) {
-                        binaryParser.position = bwReader.header.totalSummaryOffset - startOffset;
-                        bwReader.totalSummary = new igv.BWTotalSummary(binaryParser);
+                    if (self.header.totalSummaryOffset > 0) {
+                        binaryParser.position = self.header.totalSummaryOffset - startOffset;
+                        self.totalSummary = new igv.BWTotalSummary(binaryParser);
                     }
 
                     // Chrom data index
-                    if (bwReader.header.chromTreeOffset > 0) {
-                        binaryParser.position = bwReader.header.chromTreeOffset - startOffset;
-                        bwReader.chromTree = new igv.BPTree(binaryParser, 0);
+                    if (self.header.chromTreeOffset > 0) {
+                        binaryParser.position = self.header.chromTreeOffset - startOffset;
+                        self.chromTree = new igv.BPTree(binaryParser, 0);
                     }
                     else {
                         // TODO -- this is an error, not expected
                     }
 
                     //Finally total data count
-                    binaryParser.position = bwReader.header.fullDataOffset - startOffset;
-                    bwReader.dataCount = binaryParser.getInt();
+                    binaryParser.position = self.header.fullDataOffset - startOffset;
+                    self.dataCount = binaryParser.getInt();
 
                     continutation();
                 }

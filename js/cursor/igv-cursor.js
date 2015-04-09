@@ -29,7 +29,7 @@ var igv = (function (igv) {
 
         var horizontalScrollBarContainer,
             contentHeader,
-            trackContainer,
+            trackContainerDiv,
             browser,
             thang;
 
@@ -124,7 +124,7 @@ var igv = (function (igv) {
 
                 $('#igvSessionLoadModal').modal('hide');
 
-                browser.loadSession(session);
+                browser.initializeWithSession(session);
 
             };
 
@@ -135,15 +135,9 @@ var igv = (function (igv) {
         // BED file upload
         document.getElementById('igvFileUpload').onchange = function (e) {
 
-            var localFile = $(this)[ 0 ].files[ 0 ],
-                config = { type: "bed", localFile: localFile, label: localFile.name };
+            var localFile = $(this)[ 0 ].files[ 0 ];
 
-            if (0 === igv.browser.trackViews.length) {
-                config.designatedTrack = true;
-                igv.browser.initializeWithTrackConfig(config);
-            } else {
-                igv.browser.loadTrack(config);
-            }
+            configureTrackWithLocalFileOrPath( { type: "bed", localFile: localFile, label: localFile.name } );
 
             $(this).val("");
             $('#igvFileUploadModal').modal('hide');
@@ -152,47 +146,58 @@ var igv = (function (igv) {
         // BED URL upload
         document.getElementById('igvLoadURL').onchange = function (e) {
 
-            var path = $(this).val(),
-                config = { type: "bed", url: path, label: igv.browser.trackLabelWithPath(path) };
+            var path = $(this).val();
 
-            if (0 === igv.browser.trackViews.length) {
-                config.designatedTrack = true;
-                igv.browser.initializeWithTrackConfig(config);
-            } else {
-                igv.browser.loadTrack(config);
-            }
+            configureTrackWithLocalFileOrPath( { type: "bed", url: path, label: igv.browser.trackLabelWithPath(path) } );
 
             $(this).val("");
             $('#igvLoadURLModal').modal('hide');
+
         };
+
+        function configureTrackWithLocalFileOrPath(config) {
+
+            config.designatedTrack = (0 === igv.browser.trackViews.length) ? true : undefined;
+            igv.browser.loadTrackWithConfigurations([config]);
+        }
+
+        // Append resultant ENCODE DataTables markup
+        $('#encodeModalBody').html('<table id="encodeModalTable" cellpadding="0" cellspacing="0" border="0" class="display"></table>');
 
         // Load ENCODE DataTables data and build markup for modal dialog.
         encode.createEncodeDataTablesDataSet("resources/peaks.hg19.txt", function (dataSet) {
 
             var encodeModalTable = $('#encodeModalTable'),
-                myDataTable = encodeModalTable.dataTable({
+                dataTableObject,
+                dataTableAPIInstance;
 
-                    "data": dataSet,
-                    "scrollY": "400px",
-                    "scrollCollapse": true,
-                    "paging": false,
+            dataTableObject = encodeModalTable.dataTable({
 
-                    "columns": [
+                "data": dataSet,
+                "scrollX": true,
+                "scrollY": "400px",
+                "scrollCollapse": true,
+                "paging": false,
 
-                        { "title": "cell" },
-                        { "title": "dataType" },
+                "columns": [
 
-                        { "title": "antibody" },
-                        { "title": "view" },
+                    { "title": "cell", "width": "5%" },
+                    { "title": "dataType", "width": "5%" },
 
-                        { "title": "replicate" },
-                        { "title": "type" },
+                    { "title": "antibody", "width": "10%"  },
+                    { "title": "view", "width": "10%"  },
 
-                        { "title": "lab" },
-                        { "title": "path" }
-                    ]
+                    { "title": "replicate", "width": "5%"  },
+                    { "title": "type", "width": "10%"  },
 
-                });
+                    { "title": "lab", "width": "10%"  },
+                    { "title": "path", "width": "45%"  }
+                ]
+
+            });
+
+            dataTableAPIInstance = encodeModalTable.DataTable();
+            dataTableAPIInstance.columns.adjust();
 
             encodeModalTable.find('tbody').on('click', 'tr', function () {
 
@@ -209,13 +214,24 @@ var igv = (function (igv) {
 
             });
 
+            $('#igvEncodeModal').on('shown.bs.modal', function (e) {
+
+                var encodeModalTable = $('#encodeModalTable'),
+                    dataTableAPIInstance;
+
+                //console.log("ENCODE Modal - Shown");
+
+                dataTableAPIInstance = encodeModalTable.DataTable();
+                dataTableAPIInstance.columns.adjust();
+            });
+
             $('#encodeModalTopCloseButton').on('click', function () {
-                myDataTable.$('tr.selected').removeClass('selected');
+                dataTableObject.$('tr.selected').removeClass('selected');
 
             });
 
             $('#encodeModalBottomCloseButton').on('click', function () {
-                myDataTable.$('tr.selected').removeClass('selected');
+                dataTableObject.$('tr.selected').removeClass('selected');
             });
 
             $('#encodeModalGoButton').on('click', function () {
@@ -224,9 +240,10 @@ var igv = (function (igv) {
                     tableRows,
                     tableCell,
                     tableCells,
-                    record = {};
+                    record = {},
+                    configurations = [];
 
-                tableRows = myDataTable.$('tr.selected');
+                tableRows = dataTableObject.$('tr.selected');
 
                 if (0 < tableRows.length) {
 
@@ -254,46 +271,34 @@ var igv = (function (igv) {
 
                         });
 
-                        if (0 === browser.trackViews.length) {
+                        configurations.push({
+                            type: "bed",
+                            url: record.path,
+                            label: encode.encodeTrackLabel(record),
+                            color: encode.encodeAntibodyColor(record.antibody),
+                        });
 
-                            // When loading first track into app
-                            // with no pre-exisiting tracks.
-                            // set track as designated track
-                            browser.initializeWithTrackConfig({
-                                type: "bed",
-                                url: record.path,
-                                label: encode.encodeTrackLabel(record),
-                                color: encode.encodeAntibodyColor(record.antibody),
-                                designatedTrack: true
-                            });
+                    } // for (tableRows)
 
-                        }
-                        else {
+                    configurations[ 0 ].designatedTrack = (0 === igv.browser.trackViews.length) ? true : undefined;
+                    igv.browser.loadTrackWithConfigurations(configurations);
 
-                            browser.loadTrack({
-                                type: "bed",
-                                url: record.path,
-                                label: encode.encodeTrackLabel(record),
-                                color: encode.encodeAntibodyColor(record.antibody)
-                            });
-
-                        }
-
-
-                    }
 
                 }
 
             });
 
+
         });
 
-        // Append resultant ENCODE DataTables markup
-        $('#encodeModalBody').html('<table cellpadding="0" cellspacing="0" border="0" class="display" id="encodeModalTable"></table>');
-
         // Construct DOM hierarchy
-        trackContainer = $('<div id="igvTrackContainerDiv" class="igv-track-container-div">')[0];
-        browser = new igv.Browser(options, trackContainer);
+        trackContainerDiv = $('<div id="igvTrackContainerDiv" class="igv-track-container-div">')[0];
+        browser = new igv.Browser(options, trackContainerDiv);
+
+        // Attach spinner to root div
+        browser.div.appendChild(igv.spinner());
+        igv.stopSpinnerAtParentElement(browser.div);
+
         document.getElementById('igvContainerDiv').appendChild(browser.div);
 
         contentHeader = $('<div class="row"></div>')[0];
@@ -311,7 +316,33 @@ var igv = (function (igv) {
         thang.append($('<div class="igv-control-panel-header-div">Track Summary</div>')[0]);
 
         // track container
-        $(browser.div).append(trackContainer);
+        $(browser.div).append(trackContainerDiv);
+
+        // Popover object -- singleton shared by all components
+        igv.popover = new igv.Popover(browser.div);
+
+
+        // extend jquery ui dialog widget to support enter key triggering "ok" button press.
+        $.extend($.ui.dialog.prototype.options, {
+
+            create: function() {
+
+                var $this = $(this);
+
+                // focus first button and bind enter to it
+                $this.parent().find('.ui-dialog-buttonpane button:first').focus();
+
+                $this.keypress(function(e) {
+
+                    if( e.keyCode == $.ui.keyCode.ENTER ) {
+                        $this.parent().find('.ui-dialog-buttonpane button:first').click();
+                        return false;
+                    }
+
+                });
+            }
+
+        });
 
         igv.addAjaxExtensions();
 
@@ -333,7 +364,7 @@ var igv = (function (igv) {
 
 
                 console.log("launchSession: " + JSON.stringify(session));
-                browser.loadSession(session);
+                browser.initializeWithSession(session);
 
             });
 
@@ -344,7 +375,7 @@ var igv = (function (igv) {
                 return;
             }
 
-            browser.initializeWithOptions(options);
+            browser.loadTrackWithConfigurations(options.tracks);
 
         }
 
@@ -355,51 +386,200 @@ var igv = (function (igv) {
 
         browser.crossDomainProxy = "php/simpleProxy.php";
 
-        browser.initializeWithTrackConfig = function (trackConfig) {
+        browser.loadTrackWithConfigurations = function (configurations) {
 
-            var horizontalScrollBarContainer;
+            var tracks = [],
+                doInitialize;
 
-            browser.loadTrack(trackConfig);
+            configurations.forEach(function(configuration){
 
-            browser.selectDesignatedTrack(browser.designatedTrack.trackFilter.trackPanel);
+                var track = cursorTrackWithConfig(configuration, browser);
 
-            horizontalScrollBarContainer = $("div.igv-horizontal-scrollbar-container-div");
-            browser.horizontalScrollbar = new cursor.HorizontalScrollbar(browser, $(horizontalScrollBarContainer));
+                if (undefined !== track) {
+                    tracks.push(track);
+                }
 
-            browser.designatedTrack.featureSource.allFeatures(function (featureList) {
+            });
 
-                browser.cursorModel.setRegions(featureList);
+            if (0 === tracks.length) {
+                return;
+            }
 
-                browser.horizontalScrollbar.update();
+            if (undefined === browser.designatedTrack) {
+                browser.designatedTrack = tracks[ 0 ];
+            }
+
+            browser.getFeaturesForTracks(tracks, function () {
+
+                doInitialize = (0 === igv.browser.trackViews.length);
+
+                tracks.forEach(function (track) {
+                    browser.addTrack(track);
+                });
+
+                if (doInitialize) {
+                    browser.designatedTrack.featureSource.allFeatures(function (features) {
+
+                        var horizontalScrollBarContainer = $("div.igv-horizontal-scrollbar-container-div");
+                        browser.horizontalScrollbar = new cursor.HorizontalScrollbar(browser, $(horizontalScrollBarContainer));
+
+                        browser.cursorModel.setRegions(features);
+
+                        browser.horizontalScrollbar.update();
+                    });
+                }
+
+
+
             });
 
         };
 
-        browser.initializeWithOptions = function (options) {
+        browser.initializeWithSession = function (session) {
 
-            var howmany,
-                horizontalScrollBarContainer;
+            var tracks;
 
-            howmany = 0;
-            options.tracks.forEach(function (trackConfig) {
+            browser.sessionTeardown();
 
-                browser.loadTrack(trackConfig);
+            browser.cursorModel.regionWidth = session.regionWidth;
+            $("input[id='regionSizeInput']").val(browser.cursorModel.regionWidth);
 
-                if (++howmany === options.tracks.length) {
+            tracks = [];
+            session.tracks.forEach(function(trackSession){
 
-                    browser.selectDesignatedTrack(browser.designatedTrack.trackFilter.trackPanel);
+                var track,
+                    config = {
+                        type: "bed",
+                        url: trackSession.path,
+                        color: trackSession.color,
+                        label: trackSession.label,
+                        order: trackSession.order,
+                        height: trackSession.height,
+                        trackFilter: trackSession.trackFilter,
+                        designatedTrack: trackSession.designatedTrack
+                    };
 
-                    horizontalScrollBarContainer = $("div.igv-horizontal-scrollbar-container-div");
+                track = cursorTrackWithConfig(config, browser);
+                if (undefined !== track) {
+                    tracks.push(track);
+                }
+
+                if (config.designatedTrack && true === config.designatedTrack) {
+                    browser.designatedTrack = track;
+                }
+
+            });
+
+            if (0 === tracks.length) {
+                return;
+            }
+
+            if (undefined === browser.designatedTrack) {
+                browser.designatedTrack = tracks[ 0 ];
+            }
+
+            browser.getFeaturesForTracks(tracks, function () {
+
+                tracks.forEach(function (track) {
+                    browser.addTrack(track);
+                });
+
+                browser.designatedTrack.featureSource.allFeatures(function (features) {
+
+                    var horizontalScrollBarContainer = $("div.igv-horizontal-scrollbar-container-div");
                     browser.horizontalScrollbar = new cursor.HorizontalScrollbar(browser, $(horizontalScrollBarContainer));
 
-                    browser.designatedTrack.featureSource.allFeatures(function (featureList) {
+                    browser.cursorModel.setRegions(features);
 
-                        browser.cursorModel.setRegions(featureList);
+                    browser.setFrameWidth(browser.trackViewportWidth() * session.framePixelWidthUnitless);
 
-                        browser.horizontalScrollbar.update();
-                    });
+                    browser.referenceFrame.bpPerPixel = 1.0 / browser.cursorModel.framePixelWidth;
 
+                    //browser.goto("", session.start, session.end);
+                    browser.fitToScreen();
+
+                    browser.horizontalScrollbar.update();
+
+                });
+
+            });
+
+        };
+
+        browser.session = function () {
+
+            var dev_null,
+                session =
+                {
+                    start: Math.floor(browser.referenceFrame.start),
+                    end: Math.floor((browser.referenceFrame.bpPerPixel * browser.trackViewportWidth()) + browser.referenceFrame.start),
+                    regionWidth: browser.cursorModel.regionWidth,
+                    framePixelWidthUnitless: (browser.cursorModel.framePixelWidth / browser.trackViewportWidth()),
+                    tracks: []
+                };
+
+            dev_null = browser.trackViewportWidth();
+
+            browser.trackViews.forEach(function (trackView) {
+
+                var jsonRepresentation = trackView.track.jsonRepresentation();
+
+                if (jsonRepresentation) {
+
+                    if (browser.designatedTrack && browser.designatedTrack === trackView.track) {
+                        jsonRepresentation.designatedTrack = true;
+                    }
+
+                    session.tracks.push(jsonRepresentation);
                 }
+                else {
+                    // TODO -- what if there is no json repesentation?
+                }
+            });
+
+            return JSON.stringify(session, undefined, 4);
+
+        };
+
+        browser.sessionTeardown = function () {
+
+            var trackView,
+                horizontalScrollBarContainer;
+
+            while (this.trackViews.length > 0) {
+                trackView = this.trackViews[ this.trackViews.length - 1 ];
+                this.removeTrack(trackView.track);
+            }
+
+            horizontalScrollBarContainer = $("div.igv-horizontal-scrollbar-container-div");
+            $(horizontalScrollBarContainer).empty();
+
+            this.horizontalScrollbar = undefined;
+
+        };
+
+        browser.getFeaturesForTracks = function (tracks, continuation) {
+
+            var trackCount = tracks.length;
+
+            igv.startSpinnerAtParentElement(browser.div);
+
+            tracks.forEach(function (track) {
+
+                track.getFeatureCache(function(ignored){
+
+                    --trackCount;
+                    if (0 === trackCount) {
+
+                        igv.stopSpinnerAtParentElement(browser.div);
+
+                        // do stuff
+                        continuation();
+
+                    }
+
+                });
+
             });
 
         };
@@ -582,174 +762,6 @@ var igv = (function (igv) {
 
         };
 
-        // Alter "super" implementation
-        browser.loadTrack = function (config) {
-
-            if (browser.isDuplicateTrack(config)) {
-                return;
-            }
-
-            var path = config.url,
-                type = config.type,
-                newTrack;
-
-            if (!type) {
-                type = cursorGetType(path);
-            }
-
-            if (type !== "bed") {
-                window.alert("Bad Track type");
-                return;
-
-            }
-
-            newTrack = new cursor.CursorTrack(config, browser);
-
-            if (true === config.designatedTrack) {
-                browser.designatedTrack = newTrack;
-            }
-
-            browser.addTrack(newTrack);
-
-            function cursorGetType(path) {
-
-                if (path.endsWith(".bed") || path.endsWith(".bed.gz") || path.endsWith(".broadPeak") || path.endsWith(".broadPeak.gz")) {
-                    return "bed";
-                } else {
-                    return undefined;
-                }
-
-            }
-
-        };
-
-        browser.session = function () {
-
-            var dev_null,
-                session =
-                {
-                    start: Math.floor(browser.referenceFrame.start),
-                    end: Math.floor((browser.referenceFrame.bpPerPixel * browser.trackViewportWidth()) + browser.referenceFrame.start),
-                    regionWidth: browser.cursorModel.regionWidth,
-                    framePixelWidthUnitless: (browser.cursorModel.framePixelWidth / browser.trackViewportWidth()),
-                    tracks: []
-                };
-
-            dev_null = browser.trackViewportWidth();
-
-            browser.trackViews.forEach(function (trackView) {
-
-                var jsonRepresentation = trackView.track.jsonRepresentation();
-
-                if (jsonRepresentation) {
-
-                    if (browser.designatedTrack && browser.designatedTrack === trackView.track) {
-                        jsonRepresentation.designatedTrack = true;
-                    }
-
-                    session.tracks.push(jsonRepresentation);
-                }
-                else {
-                    // TODO -- what if there is no json repesentation?
-                }
-            });
-
-            return JSON.stringify(session, undefined, 4);
-
-        };
-
-        browser.sessionTeardown = function () {
-
-            var trackView,
-                horizontalScrollBarContainer;
-
-            while (this.trackViews.length > 0) {
-                trackView = this.trackViews[ this.trackViews.length - 1 ];
-                this.removeTrack(trackView.track);
-            }
-
-            horizontalScrollBarContainer = $("div.igv-horizontal-scrollbar-container-div");
-            $(horizontalScrollBarContainer).empty();
-
-            this.horizontalScrollbar = undefined;
-
-        };
-
-        browser.loadSession = function (session) {
-
-            var cursorTracks,
-                howmany,
-                horizontalScrollBarContainer;
-
-
-            browser.sessionTeardown();
-
-            browser.cursorModel.regionWidth = session.regionWidth;
-            $("input[id='regionSizeInput']").val(browser.cursorModel.regionWidth);
-
-            cursorTracks = [];
-            browser.designatedTrack = undefined;
-            session.tracks.forEach(function (trackSession) {
-
-                var cursorTrack,
-                    config = {
-                        type: "bed",
-                        url: trackSession.path,
-                        color: trackSession.color,
-                        label: trackSession.label,
-                        order: trackSession.order,
-                        trackHeight: trackSession.height,
-                        trackFilter: trackSession.trackFilter,
-                        designatedTrack: trackSession.designatedTrack
-                    };
-
-                cursorTrack = new cursor.CursorTrack(config, browser);
-                if (undefined !== config.designatedTrack && true === config.designatedTrack) {
-                    browser.designatedTrack = cursorTrack;
-                }
-
-                cursorTracks.push(cursorTrack);
-
-            });
-
-            if (undefined === browser.designatedTrack) {
-                browser.designatedTrack = cursorTracks[ 0 ];
-            }
-
-            howmany = 0;
-            cursorTracks.forEach(function (cursorTrack) {
-
-                browser.addTrack(cursorTrack);
-
-                if (++howmany === cursorTracks.length) {
-
-                    browser.selectDesignatedTrack(browser.designatedTrack.trackFilter.trackPanel);
-
-                    horizontalScrollBarContainer = $("div.igv-horizontal-scrollbar-container-div");
-                    browser.horizontalScrollbar = new cursor.HorizontalScrollbar(browser, $(horizontalScrollBarContainer));
-
-                    browser.designatedTrack.featureSource.allFeatures(function (featureList) {
-
-                        browser.cursorModel.setRegions(featureList);
-
-                        browser.setFrameWidth(browser.trackViewportWidth() * session.framePixelWidthUnitless);
-
-                        browser.referenceFrame.bpPerPixel = 1.0 / browser.cursorModel.framePixelWidth;
-
-                        //browser.goto("", session.start, session.end);
-                        browser.fitToScreen();
-
-
-                        browser.horizontalScrollbar.update();
-
-
-                    });
-                }
-
-            });
-
-        };
-
         function frameWidthNumberFormatter(frameWidth) {
 
             var divisor;
@@ -767,6 +779,47 @@ var igv = (function (igv) {
 
             return Math.round(frameWidth * divisor) / divisor;
         }
+
+        function cursorTrackWithConfig(config, browser){
+
+            var path,
+                type,
+                track;
+
+            if (browser.isDuplicateTrack(config)) {
+                return undefined;
+            }
+
+            path = config.url;
+            type = config.type;
+            if (!type) {
+                type = cursorGetType(path);
+            }
+
+            if (type !== "bed") {
+                window.alert("Bad Track type");
+                return undefined;
+            }
+
+            track = new cursor.CursorTrack(config, browser);
+
+            if (config.designatedTrack && true === config.designatedTrack) {
+                browser.designatedTrack = track;
+            }
+
+            function cursorGetType(path) {
+
+                if (path.endsWith(".bed") || path.endsWith(".bed.gz") || path.endsWith(".broadPeak") || path.endsWith(".broadPeak.gz")) {
+                    return "bed";
+                } else {
+                    return undefined;
+                }
+
+            }
+
+            return track;
+        }
+
     }
 
     function addCursorTrackViewExtensions(browser) {
@@ -889,7 +942,8 @@ var igv = (function (igv) {
         igv.TrackView.prototype.rightHandGutterCreationHelper = function (trackManipulationIconBox) {
 
             var myself = this,
-                removeButton;
+                removeButton,
+                gearButton;
 
             $(trackManipulationIconBox).append($('<i class="fa fa-chevron-circle-up   igv-track-menu-move-up">')[0]);
             $(trackManipulationIconBox).append($('<i class="fa fa-chevron-circle-down igv-track-menu-move-down">')[0]);
@@ -902,12 +956,23 @@ var igv = (function (igv) {
                 myself.browser.increaseTrackOrder(myself)
             });
 
-            removeButton = $('<i class="fa fa-times igv-track-menu-discard">')[0];
-            $(trackManipulationIconBox).append(removeButton);
 
-            $(removeButton).click(function () {
-                myself.browser.removeTrack(myself.track);
+
+            //removeButton = $('<i class="fa fa-times igv-track-menu-discard">')[0];
+            //$(trackManipulationIconBox).append(removeButton);
+
+            //$(removeButton).click(function () {
+            //    myself.browser.removeTrack(myself.track);
+            //});
+
+
+            gearButton = $('<i class="fa fa-gear fa-20px igv-track-menu-gear igv-app-icon" style="padding-top: 5px">');
+            $(trackManipulationIconBox).append(gearButton[0]);
+
+            $(gearButton).click(function (e) {
+                igv.popover.presentTrackMenu(e.pageX, e.pageY, myself);
             });
+
 
         };
 
@@ -916,9 +981,6 @@ var igv = (function (igv) {
             if (!(this.track && this.browser && this.browser.referenceFrame)) {
                 return;
             }
-
-            //console.log("Repaint " + this.track.label + "  " + this.canvas.height);
-
 
             var tileWidth,
                 tileStart,
@@ -947,8 +1009,7 @@ var igv = (function (igv) {
                         myself.currentTask = null;
                     }
 
-
-                    igv.startSpinnerObject(myself.trackDiv);
+                    //igv.startSpinnerAtParentElement(myself.trackDiv);
 
                     myself.currentTask = {
                         canceled: false,
@@ -960,8 +1021,8 @@ var igv = (function (igv) {
                             if (this.xhrRequest) {
                                 this.xhrRequest.abort();
                             }
-//                    spinner.stop();
-                            igv.stopSpinnerObject(myself.trackDiv);
+
+                            //igv.stopSpinnerAtParentElement(myself.trackDiv);
                         }
 
                     };
@@ -977,8 +1038,7 @@ var igv = (function (igv) {
 
                     myself.track.draw(ctx, referenceFrame, tileStart, tileEnd, buffer.width, buffer.height, function (task) {
 
-//                    spinner.stop();
-                            igv.stopSpinnerObject(myself.trackDiv);
+                            //igv.stopSpinnerAtParentElement(myself.trackDiv);
 
                             if (!(myself.currentTask && myself.currentTask.canceled)) {
                                 myself.tile = new Tile(referenceFrame.chr, tileStart, tileEnd, referenceFrame.bpPerPixel, buffer);
@@ -995,7 +1055,7 @@ var igv = (function (igv) {
                         buffer2.width = this.controlCanvas.width;
                         buffer2.height = this.controlCanvas.height;
 
-                        var ctx2 =  buffer2.getContext('2d');;
+                        var ctx2 =  buffer2.getContext('2d');
 
                         myself.track.paintControl(ctx2, buffer2.width, buffer2.height);
 

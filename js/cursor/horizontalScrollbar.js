@@ -91,8 +91,7 @@ var cursor = (function (cursor) {
             horizontalScrollBarDraggable,
             anyViewport,
             isMouseDown = undefined,
-            lastMouseX = undefined,
-            isMouseIn = undefined;
+            lastMouseX = undefined;
 
         horizontalScrollBarShim = $('<div class="igv-horizontal-scrollbar-shim-div">')[0];
         horizontalScrollBarContainer.append(horizontalScrollBarShim);
@@ -112,7 +111,7 @@ var cursor = (function (cursor) {
         $( document ).mousedown(function(e) {
             //lastMouseX = e.offsetX;
             lastMouseX = e.screenX;
-            isMouseIn = true;
+            myself.isMouseIn = true;
         });
 
         $( horizontalScrollBarDraggable ).mousedown(function(e) {
@@ -124,7 +123,7 @@ var cursor = (function (cursor) {
             var maxRegionPixels,
                 left;
 
-            if (isMouseDown && isMouseIn && undefined !== lastMouseX) {
+            if (isMouseDown && myself.isMouseIn && undefined !== lastMouseX) {
 
                 left = $(horizontalScrollBarDraggable).position().left;
                 left += (e.screenX - lastMouseX);
@@ -155,6 +154,7 @@ var cursor = (function (cursor) {
         $( document ).mouseup(function(e) {
             isMouseDown = false;
             lastMouseX = undefined;
+            myself.isMouseIn = undefined;
         });
 
     };

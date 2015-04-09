@@ -46,6 +46,10 @@ var igv = (function (igv) {
         track.minHeight = config.minHeight || Math.min(25, this.height);
         track.maxHeight = config.maxHeight || Math.max(1000, this.height);
 
+        // Set maxRows -- protects against pathological feature and bam packing cases
+        if(config.maxRows === undefined) config.maxRows = 500;
+        track.maxRows = config.maxRows;
+
         if(config.visibilityWindow) track.visibilityWindow = config.visibilityWindow;
 
     };
@@ -59,7 +63,14 @@ var igv = (function (igv) {
             track.labelButton.innerHTML = track.label;
         } else {
 
-            track.labelSpan.innerHTML = track.label;
+            if ("CURSOR" !== this.browser.type) {
+                track.labelSpan.innerHTML = track.label;
+            }
+            else {
+
+                // handle CURSOR track label
+                track.trackLabelDiv.innerHTML = track.label
+            }
         }
 
         if(track.trackView) {
@@ -68,10 +79,21 @@ var igv = (function (igv) {
     };
 
     igv.setTrackColor = function(track, color) {
+
         track.color = color;
+
         if(track.trackView) {
+
             track.trackView.repaint();
+
+            if ("CURSOR" === this.browser.type) {
+                if (track.cursorHistogram) {
+                    track.cursorHistogram.render(track);
+                }
+            }
+
         }
+
     };
 
 

@@ -27,6 +27,14 @@ var igv = (function (igv) {
 
     igv.TrackView = function (track, browser) {
 
+        var self = this,
+            isMouseDown = undefined,
+            lastMouseY = undefined,
+            clampTop,
+            clampBottom;
+
+
+
         this.track = track;
         this.browser = browser;
 
@@ -48,13 +56,75 @@ var igv = (function (igv) {
             this.trackDiv.style.height = track.height + "px";
         }
 
-        // spinner
-        this.trackDiv.appendChild(igv.spinner());
+        // one spinner per track - IGV only
+        if ("CURSOR" !== browser.type) {
+            this.trackDiv.appendChild(igv.spinner());
+        }
+
+        // CURSOR - Track Drag & Drop
+        if ("CURSOR" === browser.type) {
+
+            this.igvTrackManipulationHandle = $('<div class="igv-track-manipulation-handle">')[0];
+            $(this.trackDiv).append(this.igvTrackManipulationHandle);
+
+            this.igvTrackManipulationHandleUpContainer = $('<div class="igv-track-manipulation-handle-up-container hvr-icon-float">')[0];
+            $(this.igvTrackManipulationHandle).append(this.igvTrackManipulationHandleUpContainer);
+
+            this.igvTrackManipulationHandleDownContainer = $('<div class="igv-track-manipulation-handle-down-container hvr-icon-sink">')[0];
+            $(this.igvTrackManipulationHandle).append(this.igvTrackManipulationHandleDownContainer);
+
+            // CURSOR Histogram
+
+            $( document ).mousedown(function(e) {
+                lastMouseY = e.screenY;
+                self.isMouseIn = true;
+            });
+
+            $( self.igvTrackManipulationHandle ).mousedown(function(e) {
+                isMouseDown = true;
+
+                clampTop = 0;
+                clampBottom = $(igv.browser.trackContainerDiv).height() - $(self.igvTrackManipulationHandle).outerHeight();
+
+            });
+
+            $( document ).mousemove(function (e) {
+
+                var top;
+
+                if (isMouseDown && self.isMouseIn && undefined !== lastMouseY) {
+
+                    top = $(self.trackDiv).position().top;
+                    top += (e.screenY - lastMouseY);
+
+                    //// clamp
+                    top = Math.max(clampTop, top);
+                    top = Math.min(clampBottom, top);
+
+                    $( self.trackDiv).css({
+                        "top": top + "px"
+                    });
+
+                    lastMouseY = e.screenY
+                }
+
+            });
+
+            $( document ).mouseup(function(e) {
+                isMouseDown = false;
+                lastMouseY = undefined;
+                self.isMouseIn = undefined;
+            });
+
+
+
+        }
 
         this.addLeftHandGutterToParentTrackDiv(this.trackDiv);
 
         this.addViewportToParentTrackDiv(this.trackDiv);
 
+        // CURSOR - Histogram
         if ("CURSOR" === browser.type) {
 
             this.cursorHistogramContainer = $('<div class="igv-cursor-histogram-container">')[0];
@@ -227,12 +297,11 @@ var igv = (function (igv) {
 
     igv.TrackView.prototype.setTrackHeight = function (newHeight, update) {
 
-        setTrackHeight_.call(this, newHeight, false);
+        setTrackHeight_.call(this, newHeight, update || true);
 
         this.track.autoHeight = false;   // Explicitly setting track height turns off auto-scale
 
     };
-
 
     /**
      * Set the content height of the track
@@ -240,7 +309,7 @@ var igv = (function (igv) {
      * @param newHeight
      * @param update
      */
-    igv.TrackView.prototype.setContentHeight = function (newHeight, update) {
+    igv.TrackView.prototype.setContentHeight = function (newHeight) {
 
         contentHeightStr = newHeight + "px";
 
@@ -257,9 +326,8 @@ var igv = (function (igv) {
             }
         }
 
-        if (update === undefined || update === true) this.update();
-    }
-
+        this.update();
+    };
 
     function setTrackHeight_ (newHeight, update) {
 
@@ -267,7 +335,7 @@ var igv = (function (igv) {
 
         trackHeightStr = newHeight + "px";
 
-        //this.track.height = newHeight;
+        this.track.height = newHeight;
 
         this.trackDiv.style.height = trackHeightStr;
 
@@ -287,8 +355,7 @@ var igv = (function (igv) {
 
         if (update === undefined || update === true) this.update();
 
-    };
-
+    }
 
     igv.TrackView.prototype.update = function () {
 
@@ -347,7 +414,7 @@ var igv = (function (igv) {
 
                 success = function (features) {
 
-                    igv.stopSpinnerObject(self.trackDiv);
+                    igv.stopSpinnerAtParentElement(self.trackDiv);
                     self.currentLoadTask = undefined;
 
                     if (features) {
@@ -356,7 +423,7 @@ var igv = (function (igv) {
                         if (self.track.computePixelHeight) {
                             var requiredHeight = self.track.computePixelHeight(features);
                             if (requiredHeight != self.contentDiv.clientHeight) {
-                                self.setContentHeight(requiredHeight, true);
+                                self.setContentHeight(requiredHeight);
                             }
                         }
 
@@ -411,7 +478,7 @@ var igv = (function (igv) {
                     }
                 };
 
-                igv.startSpinnerObject(self.trackDiv);
+                igv.startSpinnerAtParentElement(self.trackDiv);
 
                 this.track.getFeatures(referenceFrame.chr, bpStart, bpEnd, success, self.currentLoadTask);
             }

@@ -348,22 +348,18 @@ div.ui-dialog fieldset {
     padding-left: 4px;
 }
 
-/* spinner */
-.igv-spinner-fa-start {
+.igv-spinner-container {
 
     position: absolute;
-    left:50%;
     top:50%;
+    left:50%;
     z-index: 256;
     display: inline;
 }
 
-.igv-spinner-fa-stop {
-    position: relative;
-    left:50%;
-    top:50%;
-    z-index: -256;
-    display: none;
+.igv-fa-spinner {
+    color: grey;
+    font-size: 24px;
 }
 
 .igv-root-div {
@@ -469,7 +465,6 @@ div.ui-dialog fieldset {
     position: relative;
     left: 0;
     right: 0;
-    height: auto;
     overflow: hidden;
 }
 
