@@ -79,10 +79,21 @@ var igv = (function (igv) {
     };
 
     igv.setTrackColor = function(track, color) {
+
         track.color = color;
+
         if(track.trackView) {
+
             track.trackView.repaint();
+
+            if ("CURSOR" === this.browser.type) {
+                if (track.cursorHistogram) {
+                    track.cursorHistogram.render(track);
+                }
+            }
+
         }
+
     };
 
 
