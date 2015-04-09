@@ -63,7 +63,14 @@ var igv = (function (igv) {
             track.labelButton.innerHTML = track.label;
         } else {
 
-            track.labelSpan.innerHTML = track.label;
+            if ("CURSOR" !== this.browser.type) {
+                track.labelSpan.innerHTML = track.label;
+            }
+            else {
+
+                // handle CURSOR track label
+                track.trackLabelDiv.innerHTML = track.label
+            }
         }
 
         if(track.trackView) {

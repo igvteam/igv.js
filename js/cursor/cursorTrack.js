@@ -29,21 +29,21 @@ var cursor = (function (cursor) {
 
     cursor.CursorTrack = function (config, browser) {
 
-        this.config = config;
-        this.url = config.url;
+        igv.configTrack(this, config);
+
+        this.color = config.color || cursor.defaultColor();
+        //this.id = "";
+
         this.config.indexed = false;  // NEVER use indexes for cursor
         this.featureSource = new igv.FeatureSource(config);
         this.featureSource.maxFeatureCount = MAX_FEATURE_COUNT;
-        this.label = config.label;
-        this.height = config.trackHeight || 100;
-        this.color = config.color || cursor.defaultColor();
+
 
         this.cursorModel = browser.cursorModel;
         this.referenceFrame = browser.referenceFrame;
 
         this.cursorHistogram = undefined;
 
-        this.id = "";
     };
 
     cursor.CursorTrack.prototype.jsonRepresentation = function () {
