@@ -166,7 +166,8 @@
 .igv-track-container-div {
     padding-top: 0;
     padding-bottom: 0;
-    overflow: visible;
+    /*overflow: visible;*/
+    min-height: 100px;
 }
 
 /* override */

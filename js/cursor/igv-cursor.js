@@ -320,7 +320,7 @@ var igv = (function (igv) {
         $(browser.div).append(trackContainerDiv);
 
         // Popover object -- singleton shared by all components
-        igv.popover = new igv.Popover(browser.trackContainerDiv);
+        igv.popover = new igv.Popover(browser.div);
 
 
         igv.addAjaxExtensions();
