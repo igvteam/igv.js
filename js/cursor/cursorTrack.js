@@ -32,7 +32,6 @@ var cursor = (function (cursor) {
         igv.configTrack(this, config);
 
         this.color = config.color || cursor.defaultColor();
-        //this.id = "";
 
         this.config.indexed = false;  // NEVER use indexes for cursor
         this.featureSource = new igv.FeatureSource(config);
@@ -60,6 +59,12 @@ var cursor = (function (cursor) {
         };
 
         return json;
+    };
+
+    cursor.CursorTrack.prototype.popupMenuItems = function (popover) {
+
+        return [ igv.colorPickerMenuItem(popover, this.trackView, "Set feature color", this.color) ];
+
     };
 
     cursor.defaultColor = function () {
