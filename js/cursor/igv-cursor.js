@@ -31,8 +31,7 @@ var igv = (function (igv) {
             contentHeader,
             trackContainerDiv,
             browser,
-            thang,
-            po;
+            thang;
 
         // Append event handlers to Header DIV
         document.getElementById('zoomOut').onclick = function (e) {
@@ -455,7 +454,7 @@ var igv = (function (igv) {
                         color: trackSession.color,
                         label: trackSession.label,
                         order: trackSession.order,
-                        trackHeight: trackSession.height,
+                        height: trackSession.height,
                         trackFilter: trackSession.trackFilter,
                         designatedTrack: trackSession.designatedTrack
                     };
