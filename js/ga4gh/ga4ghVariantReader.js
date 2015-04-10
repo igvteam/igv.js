@@ -54,6 +54,7 @@ var igv = (function (igv) {
                 url: readURL,
                 body: {
                     "variantSetIds": [myself.variantSetId],
+                    "callSetIds": [],            // Empty for now, we don't use genotypes yet
                     "referenceName": queryChr,
                     "start": bpStart.toString(),
                     "end": bpEnd.toString(),

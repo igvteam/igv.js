@@ -333,9 +333,13 @@ var igv = (function (igv) {
 
         var trackHeightStr;
 
+        if(this.track.minHeight) newHeight = Math.max(this.track.minHeight, newHeight);
+        if(this.track.maxHeight) newHeight = Math.min(this.track.maxHeight, newHeight);
+        if(newHeight === this.track.height) return;   // Nothing to do
+
         trackHeightStr = newHeight + "px";
 
-        this.track.height = newHeight;
+        this.track.height = newHeight;    // Recorded on track for use when saving sessions
 
         this.trackDiv.style.height = trackHeightStr;
 

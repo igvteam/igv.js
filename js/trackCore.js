@@ -50,7 +50,12 @@ var igv = (function (igv) {
         if(config.maxRows === undefined) config.maxRows = 500;
         track.maxRows = config.maxRows;
 
-        if(config.visibilityWindow) track.visibilityWindow = config.visibilityWindow;
+        if(config.visibilityWindow) {
+            track.visibilityWindow = config.visibilityWindow;
+        } else if(config.type = "vcf") {
+            config.visibilityWindow = 1000000;
+            track.visibilityWindow = config.visibilityWindow;
+        }
 
     };
 
