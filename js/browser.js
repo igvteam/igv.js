@@ -133,7 +133,7 @@ var igv = (function (igv) {
             newTrack = new igv.WIGTrack(config);
         } else if (type === "sequence") {
             newTrack = new igv.SequenceTrack(config);
-        } else if (type === "eqtl") {
+        } else if (type === "eqtl" || type === "gtexGWAS") {
             newTrack = new igv.EqtlTrack(config);
         } else if (type === "seg") {
             newTrack = new igv.SegTrack(config);
