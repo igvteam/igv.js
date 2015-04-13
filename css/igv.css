@@ -613,11 +613,57 @@ div.ui-dialog fieldset {
     color: rgba(51, 51, 51, 1);
 }
 
-.igv-left-hand-gutter {
+
+
+.igv-track-manipulation-handle {
+
+    cursor: pointer;
+
     position: absolute;
     left: 0;
+    top: 0;
+
+    width: 24px;
+    height: 100%;
+
+    font-size: medium;
+    color: #e7e7e7;
+
+    background-color: #e7e7e7;
+}
+
+.igv-track-manipulation-handle:hover,
+.igv-track-manipulation-handle:focus,
+.igv-track-manipulation-handle:active {
+
+    border-color: #a2a2a2;
+    border-style: solid;
+    border-width: thin;
+
+    color: grey;
+    background-color: white;
+
+}
+
+
+
+
+.igv-left-hand-gutter {
+    position: absolute;
+    left: 30px;
     width: 50px;
     height: 100%;
+}
+
+
+
+.igv-viewport-div {
+    position: absolute;
+    left:  80px;
+    right: 48px;
+    height: 100%;
+    overflow-x: hidden;
+    overflow-y: auto;
 }
 
 .igv-app-icon-container {
@@ -644,15 +690,6 @@ div.ui-dialog fieldset {
 
 .igv-track-control-canvas {
     position: absolute;
-}
-
-.igv-viewport-div {
-    position: absolute;
-    left:  50px;
-    right: 48px;
-    height: 100%;
-    overflow-x: hidden;
-    overflow-y: auto;
 }
 
 .igv-content-div {
