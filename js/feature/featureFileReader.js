@@ -47,12 +47,11 @@ var igv = (function (igv) {
             this.headURL = config.headURL || this.filename;
         }
 
-        if (config.type) {
-            this.type = config.type;
+        if (!config.type) {
+            config.type = igv.inferFileType(this.filename);
         }
-        else {
-            this.type = igv.inferFileType(this.filename);
-        }
+
+        this.type = config.type;
 
         this.parser = getParser(this.type, config.decode);
     };

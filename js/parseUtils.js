@@ -68,7 +68,7 @@ var igv = (function (igv) {
             fn = fn.substr(0, fn.length-4);
         }
 
-        if (fn.endsWith(".vcf") || fn.endsWith(".vcf.gz")) {
+        if (fn.endsWith(".vcf")) {
             return "vcf";
         } else if (fn.endsWith(".narrowpeak")) {
             return "narrowPeak";
@@ -88,6 +88,8 @@ var igv = (function (igv) {
             return "bigwig"
         } else if (fn.endsWith(".bb") || fn.endsWith(".bigbed")) {
             return "bigwig"
+        } else if (fn.endsWith(".gff") || fn.endsWith(".gff3")) {
+            return "gff"
         } else {
             return null;
         }

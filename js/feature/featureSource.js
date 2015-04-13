@@ -37,6 +37,13 @@ var igv = (function (igv) {
 
         this.config = config || {};
 
+        if (config.type) {
+            this.type = config.type;
+        }
+        else if(config.url) {
+            this.type = igv.inferFileType(config.url);
+        }
+
         if (config.sourceType === "ga4gh") {
             // TODO -- using adapter until readFeatures interface is consistent
             var wrappedReader = new igv.Ga4ghVariantReader(config);
@@ -55,13 +62,6 @@ var igv = (function (igv) {
             this.reader = new igv.FeatureFileReader(config);
         }
 
-
-        if (config.type) {
-            this.type = config.type;
-        }
-        else {
-            this.type = igv.inferFileType(this.filename);
-        }
 
     };
 
