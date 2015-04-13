@@ -62,63 +62,54 @@ var igv = (function (igv) {
         }
 
         // CURSOR - Track Drag & Drop
-        //if ("CURSOR" === browser.type) {
-        //
-        //    this.igvTrackManipulationHandle = $('<div class="igv-track-manipulation-handle">')[0];
-        //    $(this.trackDiv).append(this.igvTrackManipulationHandle);
-        //
-        //    this.igvTrackManipulationHandleUpContainer = $('<div class="igv-track-manipulation-handle-up-container hvr-icon-float">')[0];
-        //    $(this.igvTrackManipulationHandle).append(this.igvTrackManipulationHandleUpContainer);
-        //
-        //    this.igvTrackManipulationHandleDownContainer = $('<div class="igv-track-manipulation-handle-down-container hvr-icon-sink">')[0];
-        //    $(this.igvTrackManipulationHandle).append(this.igvTrackManipulationHandleDownContainer);
-        //
-        //    // CURSOR Histogram
-        //
-        //    $( document ).mousedown(function(e) {
-        //        lastMouseY = e.screenY;
-        //        self.isMouseIn = true;
-        //    });
-        //
-        //    $( self.igvTrackManipulationHandle ).mousedown(function(e) {
-        //        isMouseDown = true;
-        //
-        //        clampTop = 0;
-        //        clampBottom = $(igv.browser.trackContainerDiv).height() - $(self.igvTrackManipulationHandle).outerHeight();
-        //
-        //    });
-        //
-        //    $( document ).mousemove(function (e) {
-        //
-        //        var top;
-        //
-        //        if (isMouseDown && self.isMouseIn && undefined !== lastMouseY) {
-        //
-        //            top = $(self.trackDiv).position().top;
-        //            top += (e.screenY - lastMouseY);
-        //
-        //            //// clamp
-        //            top = Math.max(clampTop, top);
-        //            top = Math.min(clampBottom, top);
-        //
-        //            $( self.trackDiv).css({
-        //                "top": top + "px"
-        //            });
-        //
-        //            lastMouseY = e.screenY
-        //        }
-        //
-        //    });
-        //
-        //    $( document ).mouseup(function(e) {
-        //        isMouseDown = false;
-        //        lastMouseY = undefined;
-        //        self.isMouseIn = undefined;
-        //    });
-        //
-        //
-        //
-        //}
+        if ("CURSOR" !== browser.type) {
+
+            this.igvTrackManipulationHandle = $('<div class="igv-track-manipulation-handle">')[0];
+            $(this.trackDiv).append(this.igvTrackManipulationHandle);
+
+            $( document ).mousedown(function(e) {
+                lastMouseY = e.screenY;
+                self.isMouseIn = true;
+            });
+
+            $( self.igvTrackManipulationHandle ).mousedown(function(e) {
+                isMouseDown = true;
+
+                clampTop = 0;
+                clampBottom = $(igv.browser.trackContainerDiv).height() - $(self.igvTrackManipulationHandle).outerHeight();
+
+            });
+
+            $( document ).mousemove(function (e) {
+
+                var top;
+
+                if (isMouseDown && self.isMouseIn && undefined !== lastMouseY) {
+
+                    top = $(self.trackDiv).position().top;
+                    top += (e.screenY - lastMouseY);
+
+                    top = Math.max(clampTop, top);
+                    top = Math.min(clampBottom, top);
+
+                    $( self.trackDiv).css({
+                        "top": top + "px"
+                    });
+
+                    lastMouseY = e.screenY
+                }
+
+            });
+
+            $( document ).mouseup(function(e) {
+                isMouseDown = false;
+                lastMouseY = undefined;
+                self.isMouseIn = undefined;
+            });
+
+
+
+        }
 
         this.addLeftHandGutterToParentTrackDiv(this.trackDiv);
 
