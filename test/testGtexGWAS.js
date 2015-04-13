@@ -5,8 +5,10 @@ function runGtexGWASUnitTests() {
         var chr = "chr1",
             //bpStart = 67655271,
             //bpEnd   = 67684468,
-            bpStart = 1,
-            bpEnd   = 1000000000000000,
+            //bpStart = 1,
+            //bpEnd   = 1000000000000000,
+            bpStart = 240045908,
+            bpEnd   = 249168436,
             featureSource = new igv.FeatureSource({
                 type: 'gtexGWAS',
                 url: 'data/misc/GWAS_catalog_SNPs_Pval5E08_hg19_040115_subset.txt'
