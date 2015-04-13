@@ -626,10 +626,16 @@ div.ui-dialog fieldset {
     width: 24px;
     height: 100%;
 
-    font-size: medium;
-    color: #e7e7e7;
+    box-sizing: border-box;
 
-    background-color: #e7e7e7;
+    font-size: medium;
+
+    border-color: #e3e3e3;
+    border-style: solid;
+    border-width: thin;
+
+    background-color: white;
+
 }
 
 .igv-track-manipulation-handle:hover,
@@ -637,11 +643,7 @@ div.ui-dialog fieldset {
 .igv-track-manipulation-handle:active {
 
     border-color: #a2a2a2;
-    border-style: solid;
-    border-width: thin;
-
-    color: grey;
-    background-color: white;
+    background-color: #a2a2a2;
 
 }
 
