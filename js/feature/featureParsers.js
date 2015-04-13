@@ -45,31 +45,36 @@ var igv = (function (igv) {
         this.type = type;
         this.skipRows = 0;   // The number of fixed header rows to skip.  Override for specific types as needed
 
-        if(decode) {
+        if (decode) {
             this.decode = decode;
         }
-        else if (type === "narrowPeak" || type === "broadPeak") {
-            this.decode = decodePeak;
-        }
-        else if (type === "bedgraph") {
-            this.decode = decodeBedGraph;
-        }
-        else if (type === "wig") {
-            this.decode = decodeWig;
-        }
-        else if (type === "aneu") {
-            this.decode = decodeAneu;
-        }
-        else if (type === 'FusionJuncSpan') {
-            // bhaas, needed for FusionInspector view
-            this.decode = decodeFusionJuncSpan;
-        }
-        else if (type === 'gtexGWAS') {
-            this.skipRows = 1;
-            // KANE -- your decode function here
-        }
-        else {
-            this.decode = decodeBed;
+        switch (type) {
+            case "narrowPeak":
+            case "broadPeak":
+                this.decode = decodePeak;
+                break;
+            case "bedgraph":
+                this.decode = decodeBedGraph;
+                break;
+            case "wig":
+                this.decode = decodeWig;
+                break;
+            case "gff" :
+                this.decode = decodeGFF;
+                break;
+            case "aneu":
+                this.decode = decodeAneu;
+                break;
+            case "FusionJuncSpan":
+                // bhaas, needed for FusionInspector view
+                this.decode = decodeFusionJuncSpan;
+                break;
+            case "gtexGWAS":
+                this.skipRows = 1;
+                break;
+            default:
+                this.decode = decodeBed;
+
         }
 
     };
@@ -115,7 +120,6 @@ var igv = (function (igv) {
             type = this.type;
 
 
-
         for (i = this.skipRows; i < len; i++) {
             line = lines[i];
             if (line.startsWith("track") || line.startsWith("#") || line.startsWith("browser")) {
@@ -158,30 +162,30 @@ var igv = (function (igv) {
         var chr, start, end, id, name, tmp, idName, strand, cdStart, feature,
             eStart, eEnd;
 
-        
+
         if (tokens.length < 4) return null;
 
-       // console.log("Decoding aneu.tokens="+JSON.stringify(tokens));
+        // console.log("Decoding aneu.tokens="+JSON.stringify(tokens));
         chr = tokens[1];
         start = parseInt(tokens[2]);
         end = tokens.length > 3 ? parseInt(tokens[3]) : start + 1;
 
         feature = {chr: chr, start: start, end: end};
-        
+
         if (tokens.length > 4) {
             feature.score = parseFloat(tokens[4]);
             feature.value = feature.score;
         }
-        
-                
+
+
         feature.popupData = function () {
-            return [ { name : "Name", value : feature.name } ];
+            return [{name: "Name", value: feature.name}];
         };
 
         return feature;
 
     }
-    
+
     function parseFixedStep(line) {
 
         var tokens = line.split(/\s+/),
@@ -302,7 +306,7 @@ var igv = (function (igv) {
         }
 
         feature.popupData = function () {
-            return [ { name : "Name", value : feature.name } ];
+            return [{name: "Name", value: feature.name}];
         };
 
         return feature;
@@ -328,8 +332,10 @@ var igv = (function (igv) {
         pValue = parseFloat(tokens[7]);
         qValue = parseFloat(tokens[8]);
 
-        return {chr: chr, start: start, end: end, name: name, score: score, strand: strand, signal: signal,
-            pValue: pValue, qValue: qValue};
+        return {
+            chr: chr, start: start, end: end, name: name, score: score, strand: strand, signal: signal,
+            pValue: pValue, qValue: qValue
+        };
     }
 
     function decodeBedGraph(tokens, ignore) {
@@ -359,7 +365,7 @@ var igv = (function (igv) {
             ee = ss + wig.span;
             value = parseFloat(tokens[0]);
             ++(wig.index);
-            return isNaN(value) ? null : { chr: wig.chrom, start: ss, end: ee, value: value };
+            return isNaN(value) ? null : {chr: wig.chrom, start: ss, end: ee, value: value};
         }
         else if (wig.type === "variableStep") {
 
@@ -368,7 +374,7 @@ var igv = (function (igv) {
             ss = parseInt(tokens[0], 10);
             ee = ss + wig.span;
             value = parseFloat(tokens[1]);
-            return isNaN(value) ? null : { chr: wig.chrom, start: ss, end: ee, value: value };
+            return isNaN(value) ? null : {chr: wig.chrom, start: ss, end: ee, value: value};
 
         }
         else {
@@ -451,7 +457,7 @@ var igv = (function (igv) {
 
 
         feature.popupData = function () {
-            return [ { name : "Name", value : feature.name } ];
+            return [{name: "Name", value: feature.name}];
         };
 
         return feature;
@@ -459,9 +465,32 @@ var igv = (function (igv) {
     }
 
 
+    /**
+     * Decode a single gff record (1 line in file).  Aggregations such as gene models are constructed at a higher level.
+     * @param tokens
+     * @param ignore
+     * @returns {*}
+     */
+    function decodeGFF(tokens, ignore) {
 
+        var tokenCount, chr, start, end, strand, type, score, phase, attributeString, id, parent, attributes;
 
+        tokenCount = tokens.length;
+        if (tokenCount < 9) {
+            return null;      // Not a valid gff record
+        }
 
+        chr = tokens[0];
+        type = tokens[2];
+        start = parseInt(tokens[3]) - 1;
+        end = parseInt(tokens[4]);
+        score = "." === tokens[5] ? 0 : parseFloat(tokens[5]);
+        strand = tokens[6];
+        phase = "." === tokens[7] ? 0 : parseInt(tokens[7]);
+        attributeString = tokens[8];
+
+        return {chr: chr, start: start, end: end, score: score, strand: strand};
+    }
 
     return igv;
 })
