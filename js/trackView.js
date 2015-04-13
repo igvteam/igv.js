@@ -61,7 +61,7 @@ var igv = (function (igv) {
             this.trackDiv.appendChild(igv.spinner());
         }
 
-        // CURSOR - Track Drag & Drop
+        // Track Drag & Drop
         if ("CURSOR" !== browser.type && isTrackDraggable(this.track)) {
 
             this.igvTrackManipulationHandle = $('<div class="igv-track-manipulation-handle">')[0];
@@ -75,8 +75,8 @@ var igv = (function (igv) {
             $( self.igvTrackManipulationHandle ).mousedown(function(e) {
                 isMouseDown = true;
 
-                clampTop = 0;
-                clampBottom = $(igv.browser.trackContainerDiv).height() - $(self.igvTrackManipulationHandle).outerHeight();
+                //clampTop = 0;
+                //clampBottom = $(igv.browser.trackContainerDiv).height() - $(self.igvTrackManipulationHandle).outerHeight();
 
             });
 
@@ -89,10 +89,10 @@ var igv = (function (igv) {
                     top = $(self.trackDiv).position().top;
                     top += (e.screenY - lastMouseY);
 
-                    top = Math.max(clampTop, top);
-                    top = Math.min(clampBottom, top);
+                    //top = Math.max(clampTop, top);
+                    //top = Math.min(clampBottom, top);
 
-                    $( self.trackDiv).css({
+                    $(self.trackDiv).css({
                         "top": top + "px"
                     });
 
@@ -105,9 +105,16 @@ var igv = (function (igv) {
                 isMouseDown = false;
                 lastMouseY = undefined;
                 self.isMouseIn = undefined;
+
+                $(self.trackDiv).css({
+                    "top": undefined
+                });
+
+                // rely on default top value to set track "y" value.
+                $(self.trackDiv).css('top', 'auto');
+                //igv.browser.reorderTracks();
+
             });
-
-
 
         }
 
