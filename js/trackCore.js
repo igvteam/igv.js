@@ -52,7 +52,8 @@ var igv = (function (igv) {
 
         if(config.visibilityWindow) {
             track.visibilityWindow = config.visibilityWindow;
-        } else if(config.type = "vcf") {
+        }
+        else if("vcf" === config.type) {
             config.visibilityWindow = 1000000;
             track.visibilityWindow = config.visibilityWindow;
         }
