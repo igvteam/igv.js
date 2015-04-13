@@ -193,7 +193,7 @@ var igv = (function (igv) {
                         headers: myself.config.headers,
                         success: function (contentLength) {
 
-                            console.log("CL = " + contentLength);
+                            //console.log("CL = " + contentLength);
 
                             myself.contentLength = contentLength;
                             continuation(contentLength);
@@ -235,7 +235,7 @@ var igv = (function (igv) {
 
         function loadFeaturesWithIndex(index, continuation) {
 
-            console.log("Using index");
+            //console.log("Using index");
 
             var blocks,
                 processed,

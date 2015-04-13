@@ -29,7 +29,7 @@ var igv = (function (igv) {
 
         var genome = igv.browser ? igv.browser.genome : null;
 
-        console.log("Loading " + indexFile);
+        //console.log("Loading " + indexFile);
 
 
         igvxhr.loadArrayBuffer(indexFile,
