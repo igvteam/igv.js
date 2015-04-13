@@ -62,7 +62,7 @@ var igv = (function (igv) {
         }
 
         // CURSOR - Track Drag & Drop
-        if ("CURSOR" !== browser.type) {
+        if ("CURSOR" !== browser.type && isTrackDraggable(this.track)) {
 
             this.igvTrackManipulationHandle = $('<div class="igv-track-manipulation-handle">')[0];
             $(this.trackDiv).append(this.igvTrackManipulationHandle);
@@ -140,6 +140,19 @@ var igv = (function (igv) {
 
             addTrackHandlers(this);
 
+        }
+
+        function isTrackDraggable (track) {
+
+            if (track instanceof igv.RulerTrack) {
+
+                return false;
+            } else if (track instanceof igv.SequenceTrack) {
+
+                return false;
+            }
+
+            return true;
         }
 
     };
