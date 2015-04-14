@@ -83,7 +83,7 @@ var igv = (function (igv) {
 
         });
 
-        this.contentDiv.css({"left": igv.browser.controlPanelWidth + "px"});
+        //this.contentDiv.css({"left": igv.browser.controlPanelWidth + "px"});
 
         this.canvas = $('<canvas class="igv-ideogram-canvas"></canvas>')[0];
         $(this.contentDiv).append(this.canvas);
