@@ -467,13 +467,14 @@ var igv = (function (igv) {
 
     /**
      * Decode a single gff record (1 line in file).  Aggregations such as gene models are constructed at a higher level.
+     *      ctg123 . mRNA            1050  9000  .  +  .  ID=mRNA00001;Parent=gene00001
      * @param tokens
      * @param ignore
      * @returns {*}
      */
     function decodeGFF(tokens, ignore) {
 
-        var tokenCount, chr, start, end, strand, type, score, phase, attributeString, id, parent, attributes;
+        var tokenCount, chr, start, end, strand, type, score, phase, attributeString, id, parent;
 
         tokenCount = tokens.length;
         if (tokenCount < 9) {
@@ -489,7 +490,37 @@ var igv = (function (igv) {
         phase = "." === tokens[7] ? 0 : parseInt(tokens[7]);
         attributeString = tokens[8];
 
-        return {chr: chr, start: start, end: end, score: score, strand: strand};
+        // Find ID and Parent
+        attributeString.split(';').forEach(function (kv) {
+            var t = kv.split('=', 2);
+            if(t.length == 2) {
+                if("ID" === t[0]) id = t[1];
+                else if("Parent"=== t[0]) parent = t[1];
+            }
+
+        });
+
+        return {
+            id: id,
+            parent: parent,
+            chr: chr,
+            start: start,
+            end: end,
+            score: score,
+            strand: strand,
+            attributeString: attributeString,
+            popupData: function () {
+                var kvs = this.attributeString.split(';'),
+                    pd = [];
+                kvs.forEach(function (kv) {
+                    var t = kv.split('=', 2);
+                    if(t.length === 2)
+                        pd.push({name: t[0], value: t[1]});
+                });
+                return pd;
+            }
+
+        };
     }
 
     return igv;
