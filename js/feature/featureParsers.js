@@ -478,7 +478,7 @@ var igv = (function (igv) {
 
         chr = tokens[0];
         start = parseInt(tokens[1]) - 1;
-        end = parseInt(tokens[1]) + 100;
+        end = parseInt(tokens[3].split(':')[1]);
         //name = tokens[3];
         //score = parseFloat(tokens[4]);
         //strand = tokens[5].trim();
