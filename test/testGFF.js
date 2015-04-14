@@ -16,6 +16,10 @@ function runGFFUnitTests() {
             equal(23, features.length);   // feature count. Determined by grepping file
             equal(chr, features[ 0 ].chr); // ensure features chromosome is specified chromosome
 
+            features.forEach(function (f){
+               var pd = f.popupData();
+            });
+
             start();
         }, undefined);
 
