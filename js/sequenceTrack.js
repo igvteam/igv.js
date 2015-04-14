@@ -28,7 +28,7 @@ var igv = (function (igv) {
     igv.SequenceTrack = function (config) {
         this.label = "";
         this.id = "sequence";
-        this.type = config.type;
+        this.type = config.type || "dna";             //   dna | rna | prot
         this.height = 15;
         this.disableButtons = true;
         this.order = config.order || 9999;
@@ -52,24 +52,34 @@ var igv = (function (igv) {
             bpPerPixel = options.bpPerPixel,
             bpStart = options.bpStart,
             pixelWidth = options.pixelWidth,
-            bpEnd = bpStart + pixelWidth * bpPerPixel + 1;
+            bpEnd = bpStart + pixelWidth * bpPerPixel + 1,
+            len, w, y, pos, offset, b, p0, p1, pc, c;
 
         if (sequence) {
 
-            var len = sequence.length;
-            var w = 1 / bpPerPixel;
+            len = sequence.length;
+            w = 1 / bpPerPixel;
 
-            var y = this.height / 2;
-            for (var pos = bpStart; pos <= bpEnd; pos++) {
+            y = this.height / 2;
+            for (pos = bpStart; pos <= bpEnd; pos++) {
 
-                var offset = pos - bpStart;
+                offset = pos - bpStart;
                 if (offset < len) {
 //                            var b = sequence.charAt(offset);
-                    var b = sequence[ offset ];
-                    var p0 = Math.floor(offset * w);
-                    var p1 = Math.floor((offset + 1) * w);
-                    var pc = Math.round((p0 + p1) / 2);
-                    var c = igv.nucleotideColors[ b ];
+                    b = sequence[offset];
+                    p0 = Math.floor(offset * w);
+                    p1 = Math.floor((offset + 1) * w);
+                    pc = Math.round((p0 + p1) / 2);
+
+                    if (this.color) {
+                        c = this.color;
+                    }
+                    else if ("dna" === this.type) {
+                        c = igv.nucleotideColors[b];
+                    }
+                    else {
+                        c = "rgb(0, 0, 150)";
+                    }
 
                     if (!c) c = "gray";
 
@@ -79,7 +89,11 @@ var igv = (function (igv) {
                     }
                     else {
 
-                        igv.Canvas.strokeText.call(ctx, b, pc, y, {strokeStyle: c, font: 'normal 10px Arial', textAlign: 'center'});
+                        igv.Canvas.strokeText.call(ctx, b, pc, y, {
+                            strokeStyle: c,
+                            font: 'normal 10px Arial',
+                            textAlign: 'center'
+                        });
                     }
                 }
             }
