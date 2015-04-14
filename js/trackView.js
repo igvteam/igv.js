@@ -59,7 +59,7 @@ var igv = (function (igv) {
         }
 
         // Track Drag & Drop
-        if ("CURSOR" !== browser.type && isTrackDraggable(this.track)) {
+        if (0 === 1 && "CURSOR" !== browser.type && isTrackDraggable(this.track)) {
             makeTrackDraggable(this.track);
         }
 
