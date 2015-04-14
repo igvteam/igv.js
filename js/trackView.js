@@ -33,8 +33,6 @@ var igv = (function (igv) {
             clampTop,
             clampBottom;
 
-
-
         this.track = track;
         this.browser = browser;
 
@@ -86,8 +84,13 @@ var igv = (function (igv) {
 
                 if (isMouseDown && self.isMouseIn && undefined !== lastMouseY) {
 
+                    console.log("e.screenY " + e.screenY + " lastMouseY " + lastMouseY);
+
                     top = $(self.trackDiv).position().top;
+
+                    //console.log("BEFORE top " + top + " e.screenY - lastMouseY " + (e.screenY - lastMouseY));
                     top += (e.screenY - lastMouseY);
+                    //console.log(" AFTER top " + top + " e.screenY - lastMouseY " + (e.screenY - lastMouseY));
 
                     //top = Math.max(clampTop, top);
                     //top = Math.min(clampBottom, top);
@@ -106,8 +109,9 @@ var igv = (function (igv) {
                 lastMouseY = undefined;
                 self.isMouseIn = undefined;
 
+
                 $(self.trackDiv).css({
-                    "top": undefined
+                    "top": auto
                 });
 
                 // rely on default top value to set track "y" value.
