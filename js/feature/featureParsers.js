@@ -467,6 +467,7 @@ var igv = (function (igv) {
 
     function decodeGtexGWAS(tokens, ignore) {
 
+
         var tokenCount, chr, start, end, strand, name, score, qValue, signal, pValue;
 
         tokenCount = tokens.length;
@@ -527,6 +528,7 @@ var igv = (function (igv) {
         return {
             id: id,
             parent: parent,
+            type: type,
             chr: chr,
             start: start,
             end: end,
