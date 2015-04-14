@@ -71,6 +71,7 @@ var igv = (function (igv) {
                 break;
             case "gtexGWAS":
                 this.skipRows = 1;
+                this.decode = decodeGtexGWAS;
                 break;
             default:
                 this.decode = decodeBed;
@@ -462,6 +463,56 @@ var igv = (function (igv) {
 
         return feature;
 
+    }
+
+    function decodeGtexGWAS(tokens, ignore) {
+<<<<<<< HEAD
+=======
+
+        var tokenCount, chr, start, end, strand, name, score, qValue, signal, pValue;
+
+        tokenCount = tokens.length;
+        if (tokenCount < 8) {
+            return null;
+        }
+
+        chr = tokens[0];
+        start = parseInt(tokens[1]) - 1;
+        end = parseInt(tokens[3].split(':')[1]);
+        //name = tokens[3];
+        //score = parseFloat(tokens[4]);
+        //strand = tokens[5].trim();
+        //signal = parseFloat(tokens[6]);
+        //pValue = parseFloat(tokens[7]);
+        //qValue = parseFloat(tokens[8]);
+
+        //return {chr: chr, start: start, end: end, name: name, score: score, strand: strand, signal: signal,
+        //    pValue: pValue, qValue: qValue};
+        return {chr: chr, start: start, end: end};
+    }
+
+>>>>>>> a49c2fbc2f5e02ae2202da12bb8248b2c4ef872e
+
+        var tokenCount, chr, start, end, strand, name, score, qValue, signal, pValue;
+
+        tokenCount = tokens.length;
+        if (tokenCount < 8) {
+            return null;
+        }
+
+        chr = tokens[0];
+        start = parseInt(tokens[1]) - 1;
+        end = parseInt(tokens[1]) + 100;
+        //name = tokens[3];
+        //score = parseFloat(tokens[4]);
+        //strand = tokens[5].trim();
+        //signal = parseFloat(tokens[6]);
+        //pValue = parseFloat(tokens[7]);
+        //qValue = parseFloat(tokens[8]);
+
+        //return {chr: chr, start: start, end: end, name: name, score: score, strand: strand, signal: signal,
+        //    pValue: pValue, qValue: qValue};
+        return {chr: chr, start: start, end: end};
     }
 
 
