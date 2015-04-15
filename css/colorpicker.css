@@ -1,0 +1,16 @@
+.grid {
+
+    top: 0;
+    left: 0;
+
+    min-width: 512px;
+    min-height: 512px;
+    background-color: rgba(78, 199, 255, 0.26);
+    z-index: 1999;
+}
+
+.grid:after {
+    content: "";
+    display: table;
+    clear: both;
+}
