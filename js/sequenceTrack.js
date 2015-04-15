@@ -74,8 +74,8 @@ var igv = (function (igv) {
                     if (this.color) {
                         c = this.color;
                     }
-                    else if ("dna" === this.type) {
-                        c = igv.nucleotideColors[b];
+                    else if ("dna" === this.type || "sequence" === this.type) {
+                        c = igv.nucleotideColors[ b ];
                     }
                     else {
                         c = "rgb(0, 0, 150)";
