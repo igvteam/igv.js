@@ -62,6 +62,13 @@ var igv = (function (igv) {
             trackItems,
             menuItems = [
                 {
+                    object: $('<div class="igv-track-menu-item">Set Feature Color</div>'),
+                    click: function () {
+
+                        trackMenuPopupDialog = new igv.ColorPickerPopupDialog();
+                    }
+                },
+                {
                     object: $('<div class="igv-track-menu-item">Set track name</div>'),
                     click: function () {
 
