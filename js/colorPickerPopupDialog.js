@@ -30,27 +30,41 @@ var igv = (function (igv) {
 
     igv.ColorPickerPopupDialog = function (parentObject) {
 
-        var colorPickerContainer,
-            colorPicker,
-            col_1_3,
-            col_2_3;
+        var colorPickerContainer = $('<div class="grid-container">'),
+            colorPickerHeader = $('<div class="grid-header">'),
+            colorPickerRect = $('<div class="grid-rect">');
 
-        colorPickerContainer = $('<div class="grid-container">');
+        colorPickerContainer.append(colorPickerHeader[ 0 ]);
+        colorPickerContainer.append(colorPickerRect[ 0 ]);
 
-        colorPicker = $('<div class="grid">');
+        count(2).forEach(function(){
 
-        col_1_3 = $('<div class="col col-1-3">');
-        col_1_3.text(".col-1-3");
+            var colorPicker = $('<div class="grid-50 grid">');
 
-        col_2_3 = $('<div class="col col-2-3">');
-        col_2_3.text(".col-2-3");
+            count(4).forEach(function(){
 
-        colorPicker.append( col_1_3[ 0 ] );
-        colorPicker.append( col_2_3[ 0 ] );
-        colorPickerContainer.append( colorPicker[ 0 ]);
+                var column = $('<div class="col col-1-4">');
+
+                column.text(".col-1-4");
+                colorPicker.append( column[ 0 ] );
+
+            });
+
+            colorPickerRect.append( colorPicker[ 0 ]);
+
+        });
 
         parentObject.append( colorPickerContainer[ 0 ] );
 
+        function count(c) {
+
+            var list = [];
+            for (var i = 0; i < c; i++) {
+                list.push(i);
+            }
+
+            return list;
+        }
     };
 
     return igv;
