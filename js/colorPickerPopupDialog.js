@@ -28,13 +28,28 @@
  */
 var igv = (function (igv) {
 
-    igv.ColorPickerPopupDialog = function () {
+    igv.ColorPickerPopupDialog = function (parentObject) {
 
-        var self = this,
-            colorPicker;
+        var colorPickerContainer,
+            colorPicker,
+            col_1_3,
+            col_2_3;
+
+        colorPickerContainer = $('<div class="grid-container">');
 
         colorPicker = $('<div class="grid">');
-        $( "body" ).append( colorPicker[ 0 ] );
+
+        col_1_3 = $('<div class="col col-1-3">');
+        col_1_3.text(".col-1-3");
+
+        col_2_3 = $('<div class="col col-2-3">');
+        col_2_3.text(".col-2-3");
+
+        colorPicker.append( col_1_3[ 0 ] );
+        colorPicker.append( col_2_3[ 0 ] );
+        colorPickerContainer.append( colorPicker[ 0 ]);
+
+        parentObject.append( colorPickerContainer[ 0 ] );
 
     };
 
