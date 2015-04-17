@@ -30,13 +30,18 @@ var igv = (function (igv) {
 
     igv.ColorPickerPopupDialog = function (parentObject) {
 
-        var colorPickerContainer = $('<div class="grid-container">'),
+        var self = this,
             colorPickerHeader = $('<div class="grid-header">'),
             colorPickerRect = $('<div class="grid-rect">');
 
-        colorPickerContainer.append(colorPickerHeader[ 0 ]);
-        colorPickerContainer.append(colorPickerRect[ 0 ]);
+        this.colorPickerContainer = $('<div class="grid-container">');
+        this.colorPickerContainer.append(colorPickerHeader[ 0 ]);
 
+        igv.dialogCloseWithParentObject(colorPickerHeader, function () {
+            self.hide();
+        });
+
+        this.colorPickerContainer.append(colorPickerRect[ 0 ]);
 
         count(2).forEach(function(){
 
@@ -55,7 +60,7 @@ var igv = (function (igv) {
 
         });
 
-        parentObject.append( colorPickerContainer[ 0 ] );
+        parentObject.append( this.colorPickerContainer[ 0 ] );
 
         function count(c) {
 
@@ -66,6 +71,14 @@ var igv = (function (igv) {
 
             return list;
         }
+    };
+
+    igv.ColorPickerPopupDialog.prototype.hide = function () {
+        this.colorPickerContainer.hide();
+    };
+
+    igv.ColorPickerPopupDialog.prototype.show = function () {
+        this.colorPickerContainer.show();
     };
 
     return igv;

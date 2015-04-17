@@ -14,12 +14,15 @@
 
 
 .grid-header {
-    height: 15%;
+    position: relative;
+    top: 0;
+    left: 0;
+    height: 10%;
     background-color: rgba(24, 164, 113, 0.36);
 }
 
 .grid-rect {
-    height: 85%;
+    height: 90%;
 }
 
 .grid-50 {
