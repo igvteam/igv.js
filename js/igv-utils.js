@@ -34,6 +34,7 @@ var igv = (function (igv) {
                 {
                     object: $('<div class="igv-track-menu-item">Set Feature Color</div>'),
                     click: function () {
+                        igv.colorPickerPopupDialog.track = trackView.track;
                         igv.colorPickerPopupDialog.show();
                     }
                 },

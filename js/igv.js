@@ -94,7 +94,7 @@ var igv = (function (igv) {
         igv.popover = new igv.Popover(contentDiv);
 
         // Color Picker Object -- singleton shared by all components
-        igv.colorPickerPopupDialog = new igv.ColorPickerPopupDialog( $(contentDiv) );
+        igv.colorPickerPopupDialog = new igv.ColorPicker($(contentDiv));
         igv.colorPickerPopupDialog.hide();
 
         // extend jquery ui dialog widget to support enter key triggering "ok" button press.
