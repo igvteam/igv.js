@@ -289,7 +289,7 @@ div.ui-dialog fieldset {
 
 }
 
-.igv-popoverClose {
+.igv-dialog-close-container {
 
     position: absolute;
     top: 3px;
@@ -306,14 +306,14 @@ div.ui-dialog fieldset {
     /*background-color: greenyellow;*/
 }
 
-.igv-popoverCloseFontAwesome {
+.igv-dialog-close-fa {
 
     cursor: pointer;
     color: #888;
     font-size: small;
 }
 
-.igv-popoverClose:hover {
+.igv-dialog-close-container:hover {
     color: #fff;
 }
 

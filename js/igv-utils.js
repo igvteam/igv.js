@@ -25,6 +25,42 @@
 
 var igv = (function (igv) {
 
+    igv.dialogCloseWithParentObject = function(parentObject, closer) {
+
+        var closeContainer = $('<div class="igv-dialog-close-container">'),
+            close_fa = $('<i class="fa fa-times igv-dialog-close-fa">');
+
+        closeContainer.append(close_fa[ 0 ]);
+        parentObject.append(closeContainer[ 0 ]);
+
+        close_fa.hover(
+
+            function () {
+                close_fa.removeClass("fa-times");
+                close_fa.addClass("fa-times-circle");
+
+                close_fa.css({
+                    "color": "#222"
+                });
+            },
+
+            function () {
+                close_fa.removeClass("fa-times-circle");
+                //close_fa.removeClass("fa-times-circle fa-lg");
+                close_fa.addClass("fa-times");
+
+                close_fa.css({
+                    "color": "#444"
+                });
+
+            }
+        );
+
+        close_fa.click(closer);
+
+    };
+
+
     igv.parseUri = function(str) {
 
         var	o   = igv.parseUri.options,

@@ -37,6 +37,7 @@ var igv = (function (igv) {
         colorPickerContainer.append(colorPickerHeader[ 0 ]);
         colorPickerContainer.append(colorPickerRect[ 0 ]);
 
+
         count(2).forEach(function(){
 
             var colorPicker = $('<div class="grid-50 grid">');
