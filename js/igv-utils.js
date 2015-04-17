@@ -25,72 +25,6 @@
 
 var igv = (function (igv) {
 
-    igv.dialogCloseWithParentObject = function(parentObject, closer) {
-
-        var closeContainer = $('<div class="igv-dialog-close-container">'),
-            close_fa = $('<i class="fa fa-times igv-dialog-close-fa">');
-
-        closeContainer.append(close_fa[ 0 ]);
-        parentObject.append(closeContainer[ 0 ]);
-
-        close_fa.hover(
-
-            function () {
-                close_fa.removeClass("fa-times");
-                close_fa.addClass("fa-times-circle");
-
-                close_fa.css({
-                    "color": "#222"
-                });
-            },
-
-            function () {
-                close_fa.removeClass("fa-times-circle");
-                //close_fa.removeClass("fa-times-circle fa-lg");
-                close_fa.addClass("fa-times");
-
-                close_fa.css({
-                    "color": "#444"
-                });
-
-            }
-        );
-
-        close_fa.click(closer);
-
-    };
-
-
-    igv.parseUri = function(str) {
-
-        var	o   = igv.parseUri.options,
-            m   = o.parser[o.strictMode ? "strict" : "loose"].exec(str),
-            uri = {},
-            i   = 14;
-
-        while (i--) uri[o.key[i]] = m[i] || "";
-
-        uri[o.q.name] = {};
-        uri[o.key[12]].replace(o.q.parser, function ($0, $1, $2) {
-            if ($1) uri[o.q.name][$1] = $2;
-        });
-
-        return uri;
-    };
-
-    igv.parseUri.options = {
-        strictMode: false,
-        key: ["source","protocol","authority","userInfo","user","password","host","port","relative","path","directory","file","query","anchor"],
-        q:   {
-            name:   "queryKey",
-            parser: /(?:^|&)([^&=]*)=?([^&]*)/g
-        },
-        parser: {
-            strict: /^(?:([^:\/?#]+):)?(?:\/\/((?:(([^:@]*)(?::([^:@]*))?)?@)?([^:\/?#]*)(?::(\d*))?))?((((?:[^?#\/]*\/)*)([^?#]*))(?:\?([^#]*))?(?:#(.*))?)/,
-            loose:  /^(?:(?![^:@]+:[^:@\/]*@)([^:\/?#.]+):)?(?:\/\/)?((?:(([^:@]*)(?::([^:@]*))?)?@)?([^:\/?#]*)(?::(\d*))?)(((\/(?:[^?#](?![^?#\/]*\.[^?#\/.]+(?:[?#]|$)))*\/?)?([^?#\/]*))(?:\?([^#]*))?(?:#(.*))?)/
-        }
-    };
-
     igv.trackMenuItems = function (popover, trackView) {
 
         var trackMenuPopupDialog,
@@ -100,8 +34,7 @@ var igv = (function (igv) {
                 {
                     object: $('<div class="igv-track-menu-item">Set Feature Color</div>'),
                     click: function () {
-
-                        trackMenuPopupDialog = new igv.ColorPickerPopupDialog($("body"));
+                        igv.colorPickerPopupDialog.show();
                     }
                 },
                 {
@@ -254,6 +187,41 @@ var igv = (function (igv) {
         }
     };
 
+    igv.dialogCloseWithParentObject = function(parentObject, closer) {
+
+        var closeContainer = $('<div class="igv-dialog-close-container">'),
+            close_fa = $('<i class="fa fa-times igv-dialog-close-fa">');
+
+        closeContainer.append(close_fa[ 0 ]);
+        parentObject.append(closeContainer[ 0 ]);
+
+        close_fa.hover(
+
+            function () {
+                close_fa.removeClass("fa-times");
+                close_fa.addClass("fa-times-circle");
+
+                close_fa.css({
+                    "color": "#222"
+                });
+            },
+
+            function () {
+                close_fa.removeClass("fa-times-circle");
+                //close_fa.removeClass("fa-times-circle fa-lg");
+                close_fa.addClass("fa-times");
+
+                close_fa.css({
+                    "color": "#444"
+                });
+
+            }
+        );
+
+        close_fa.click(closer);
+
+    };
+
     igv.spinner = function () {
 
         // spinner
@@ -304,6 +272,36 @@ var igv = (function (igv) {
             spinnerObject.hide();
         }
 
+    };
+
+    igv.parseUri = function(str) {
+
+        var	o   = igv.parseUri.options,
+            m   = o.parser[o.strictMode ? "strict" : "loose"].exec(str),
+            uri = {},
+            i   = 14;
+
+        while (i--) uri[o.key[i]] = m[i] || "";
+
+        uri[o.q.name] = {};
+        uri[o.key[12]].replace(o.q.parser, function ($0, $1, $2) {
+            if ($1) uri[o.q.name][$1] = $2;
+        });
+
+        return uri;
+    };
+
+    igv.parseUri.options = {
+        strictMode: false,
+        key: ["source","protocol","authority","userInfo","user","password","host","port","relative","path","directory","file","query","anchor"],
+        q:   {
+            name:   "queryKey",
+            parser: /(?:^|&)([^&=]*)=?([^&]*)/g
+        },
+        parser: {
+            strict: /^(?:([^:\/?#]+):)?(?:\/\/((?:(([^:@]*)(?::([^:@]*))?)?@)?([^:\/?#]*)(?::(\d*))?))?((((?:[^?#\/]*\/)*)([^?#]*))(?:\?([^#]*))?(?:#(.*))?)/,
+            loose:  /^(?:(?![^:@]+:[^:@\/]*@)([^:\/?#.]+):)?(?:\/\/)?((?:(([^:@]*)(?::([^:@]*))?)?@)?([^:\/?#]*)(?::(\d*))?)(((\/(?:[^?#](?![^?#\/]*\.[^?#\/.]+(?:[?#]|$)))*\/?)?([^?#\/]*))(?:\?([^#]*))?(?:#(.*))?)/
+        }
     };
 
     igv.domElementRectAsString = function (element) {
