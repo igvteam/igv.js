@@ -35,10 +35,8 @@ var igv = (function (igv) {
 
     igv.Popover.prototype.markupWithParentDiv = function (parentDiv) {
 
-        var myself = this,
-            popoverHeader,
-            popoverClose,
-            popoverCloseFontAwesome;
+        var self = this,
+            popoverHeader;
 
         if (this.parentDiv) {
             return;
@@ -54,39 +52,8 @@ var igv = (function (igv) {
         popoverHeader = $('<div class="igv-popoverHeader">');
         this.popover.append(popoverHeader[ 0 ]);
 
-        // popover close container
-        popoverClose = $('<div class="igv-popoverClose">');
-        popoverHeader.append(popoverClose[ 0 ]);
-
-        // popover close button
-        popoverCloseFontAwesome = $('<i class="fa fa-times igv-popoverCloseFontAwesome">');
-        popoverClose.append(popoverCloseFontAwesome[ 0 ]);
-
-        popoverCloseFontAwesome.hover(
-
-            function () {
-                popoverCloseFontAwesome.removeClass("fa-times");
-                popoverCloseFontAwesome.addClass("fa-times-circle");
-
-                popoverCloseFontAwesome.css({
-                    "color": "#222"
-                });
-            },
-
-            function () {
-                popoverCloseFontAwesome.removeClass("fa-times-circle");
-                //popoverCloseFontAwesome.removeClass("fa-times-circle fa-lg");
-                popoverCloseFontAwesome.addClass("fa-times");
-
-                popoverCloseFontAwesome.css({
-                    "color": "#444"
-                });
-
-            }
-        );
-
-        popoverCloseFontAwesome.click(function () {
-            myself.hide();
+        igv.dialogCloseWithParentObject(popoverHeader, function () {
+            self.hide();
         });
 
         // popover content
