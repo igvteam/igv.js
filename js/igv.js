@@ -100,6 +100,10 @@ var igv = (function (igv) {
             [ "#12006C", "#00D1AA", "#FF8737", "#FF3131" ]
         ];
 
+        if (options.palette) {
+            colorPickerPalette.push(options.palette);
+        }
+
         igv.colorPicker = new igv.ColorPicker($(contentDiv), colorPickerPalette);
         igv.colorPicker.hide();
 

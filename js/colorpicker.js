@@ -46,7 +46,7 @@ var igv = (function (igv) {
             self.hide();
         });
 
-        count(2).forEach(function(rowDigit, r, rowDigits){
+        count(palette.length).forEach(function(rowDigit, r, rowDigits){
 
             var colorPicker,
                 colorPickerRect;
