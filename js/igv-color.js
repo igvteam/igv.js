@@ -28,6 +28,13 @@
  */
 var igv = (function (igv) {
 
+    igv.hex2Color = function(hex) {
+
+        var cooked = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
+
+        return "rgb(" + parseInt(cooked[ 1 ], 16) + "," + parseInt(cooked[ 2 ], 16) + "," + parseInt(cooked[ 3 ], 16) + ")";
+    };
+
     igv.rgbaColor = function (r, g, b, a) {
 
         r = clamp(r, 0, 255);
