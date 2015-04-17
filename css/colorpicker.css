@@ -37,7 +37,6 @@
 }
 
 .grid-rect {
-    height: 200px;
     background-color: rgb(142, 142, 142);
 }
 
@@ -46,6 +45,7 @@
 }
 
 .grid {
+    height: 100px;
 }
 
 .grid:after {

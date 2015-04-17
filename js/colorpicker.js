@@ -31,8 +31,7 @@ var igv = (function (igv) {
     igv.ColorPicker = function (parentObject, palette) {
 
         var self = this,
-            colorPickerHeader,
-            colorPickerRect;
+            colorPickerHeader;
 
 
         this.colorPickerContainer = $('<div class="grid-container ui-widget-content">');
@@ -47,13 +46,12 @@ var igv = (function (igv) {
             self.hide();
         });
 
-        colorPickerRect = $('<div class="grid-rect">');
-        this.colorPickerContainer.append(colorPickerRect[ 0 ]);
-
         count(2).forEach(function(rowDigit, r, rowDigits){
 
-            var colorPicker = $('<div class="grid-50 grid">');
+            var colorPicker,
+                colorPickerRect;
 
+            colorPicker = $('<div class="grid">');
             count(4).forEach(function(colDigit, c, colDigits){
 
                 var column = $('<div class="col col-1-4">');
@@ -73,7 +71,11 @@ var igv = (function (igv) {
 
             });
 
+            colorPickerRect = $('<div class="grid-rect">');
             colorPickerRect.append( colorPicker[ 0 ]);
+
+            self.colorPickerContainer.append(colorPickerRect[ 0 ]);
+
 
         });
 
