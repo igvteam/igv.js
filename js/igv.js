@@ -39,7 +39,8 @@ var igv = (function (igv) {
             trackContainerDiv,
             browser,
             rootDiv,
-            controlDiv;
+            controlDiv,
+            colorPickerPalette;
 
         if (igv.browser) {
             console.log("Attempt to create 2 browsers.");
@@ -94,8 +95,13 @@ var igv = (function (igv) {
         igv.popover = new igv.Popover(contentDiv);
 
         // Color Picker Object -- singleton shared by all components
-        igv.colorPickerPopupDialog = new igv.ColorPicker($(contentDiv));
-        igv.colorPickerPopupDialog.hide();
+        colorPickerPalette = [
+            [ "#69D2E7", "#A7DBD8", "#F38630", "#FA6900" ],
+            [ "#98D9B6", "#3EC9A7", "#2B879E", "#616668" ]
+        ];
+
+        igv.colorPicker = new igv.ColorPicker($(contentDiv), colorPickerPalette);
+        igv.colorPicker.hide();
 
         // extend jquery ui dialog widget to support enter key triggering "ok" button press.
         $.extend($.ui.dialog.prototype.options, {

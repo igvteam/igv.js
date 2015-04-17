@@ -28,7 +28,7 @@
  */
 var igv = (function (igv) {
 
-    igv.ColorPicker = function (parentObject) {
+    igv.ColorPicker = function (parentObject, palette) {
 
         var self = this,
             colorPickerHeader,
@@ -48,18 +48,23 @@ var igv = (function (igv) {
         colorPickerRect = $('<div class="grid-rect">');
         this.colorPickerContainer.append(colorPickerRect[ 0 ]);
 
-        count(2).forEach(function(){
+        count(2).forEach(function(rowDigit, r, rowDigits){
 
             var colorPicker = $('<div class="grid-50 grid">');
 
-            count(4).forEach(function(){
+            count(4).forEach(function(colDigit, c, colDigits){
 
                 var column = $('<div class="col col-1-4">');
 
                 column.text(".col-1-4");
 
+                column.css( { "background-color" : palette[ r ][ c ] } );
+
                 column.click(function(){
-                    console.log("Yo!. Gonna color " + self.track.label);
+
+                    igv.setTrackColor(self.trackView.track, igv.hex2Color( palette[ r ][ c ] ));
+                    self.trackView.update();
+
                 });
 
                 colorPicker.append( column[ 0 ] );
@@ -69,7 +74,6 @@ var igv = (function (igv) {
             colorPickerRect.append( colorPicker[ 0 ]);
 
         });
-
 
         function count(c) {
 

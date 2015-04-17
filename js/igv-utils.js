@@ -32,13 +32,6 @@ var igv = (function (igv) {
             trackItems,
             menuItems = [
                 {
-                    object: $('<div class="igv-track-menu-item">Set Feature Color</div>'),
-                    click: function () {
-                        igv.colorPickerPopupDialog.track = trackView.track;
-                        igv.colorPickerPopupDialog.show();
-                    }
-                },
-                {
                     object: $('<div class="igv-track-menu-item">Set track name</div>'),
                     click: function () {
 
@@ -152,38 +145,13 @@ var igv = (function (igv) {
     };
 
     igv.colorPickerMenuItem = function (popover, trackView, trackLabel, trackColor) {
-        return {
-            object: $('<div id="featureColorPicker" class="igv-track-menu-item">' + trackLabel + '</div>'),
-            init: function () {
 
-                $("#featureColorPicker").colorpicker(
-                    {
-
-                        title: "Feature Color Picker",
-
-                        color: trackColor,
-
-                        parts: [ 'header', 'map', 'bar', 'hsv', 'rgb', 'preview', 'swatches', 'footer' ],
-
-                        okOnEnter: true,
-
-                        inline: false,
-
-                        ok: function (event, color) {
-
-                            var r = Math.floor(255 * color.rgb.r),
-                                g = Math.floor(255 * color.rgb.g),
-                                b = Math.floor(255 * color.rgb.b);
-
-                            igv.setTrackColor(trackView.track, igv.rgbColor(r, g, b));
-
-                            trackView.update();
-                            popover.hide();
-
-                        }
-
-                    }
-                );
+        return                 {
+            object: $('<div class="igv-track-menu-item">Set Feature Color</div>'),
+            click: function () {
+                igv.colorPicker.trackView = trackView;
+                igv.colorPicker.show();
+                popover.hide();
             }
         }
     };
