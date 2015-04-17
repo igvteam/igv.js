@@ -96,8 +96,8 @@ var igv = (function (igv) {
 
         // Color Picker Object -- singleton shared by all components
         colorPickerPalette = [
-            [ "#69D2E7", "#A7DBD8", "#F38630", "#FA6900" ],
-            [ "#98D9B6", "#3EC9A7", "#2B879E", "#616668" ]
+            [ "#A8C5A7", "#718289", "#5A2960", "#4D031C" ],
+            [ "#12006C", "#00D1AA", "#FF8737", "#FF3131" ]
         ];
 
         igv.colorPicker = new igv.ColorPicker($(contentDiv), colorPickerPalette);

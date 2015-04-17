@@ -58,7 +58,7 @@ var igv = (function (igv) {
 
                 var column = $('<div class="col col-1-4">');
 
-                column.text(".col-1-4");
+                //column.text(".col-1-4");
 
                 column.css( { "background-color" : palette[ r ][ c ] } );
 
