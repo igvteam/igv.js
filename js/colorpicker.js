@@ -35,8 +35,10 @@ var igv = (function (igv) {
             colorPickerRect;
 
 
-        this.colorPickerContainer = $('<div class="grid-container">');
+        this.colorPickerContainer = $('<div class="grid-container ui-widget-content">');
         parentObject.append( this.colorPickerContainer[ 0 ] );
+
+        this.colorPickerContainer.draggable();
 
         colorPickerHeader = $('<div class="grid-header">');
         this.colorPickerContainer.append(colorPickerHeader[ 0 ]);
