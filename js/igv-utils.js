@@ -146,7 +146,7 @@ var igv = (function (igv) {
 
     igv.colorPickerMenuItem = function (popover, trackView, trackLabel, trackColor) {
 
-        return                 {
+        return {
             object: $('<div class="igv-track-menu-item">Set Feature Color</div>'),
             click: function () {
                 igv.colorPicker.trackView = trackView;

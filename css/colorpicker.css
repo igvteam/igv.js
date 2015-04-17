@@ -14,6 +14,8 @@
 
 .grid-header {
 
+    cursor: move;
+
     position: relative;
     top: 0;
     left: 0;
@@ -31,7 +33,7 @@
 .grid-header:focus,
 .grid-header:active  {
     /*border-color: rgb(173, 173, 173);*/
-    background-color: rgb(173, 173, 173);
+    background-color: rgb(142, 142, 142);
 }
 
 .grid-rect {
