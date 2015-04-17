@@ -1,11 +1,11 @@
 .grid-container {
 
-    border: #a2a2a2;
-    border: solid;
-    border-width: thin;
+    /*border: #a2a2a2;*/
+    /*border: solid;*/
+    /*border-width: thin;*/
 
     width:400px;
-    height:200px;
+    /*height:200px;*/
 
     margin: 0 auto;
 
@@ -14,15 +14,23 @@
 
 
 .grid-header {
+
     position: relative;
     top: 0;
     left: 0;
-    height: 10%;
-    background-color: rgba(24, 164, 113, 0.36);
+
+    height: 24px;
+
+    border-color: rgb(132, 132, 132);
+    border-style: solid;
+    border-width: thin;
+
+    /*background-color: rgb(132, 132, 132);*/
+    background-color: white;
 }
 
 .grid-rect {
-    height: 90%;
+    height: 200px;
 }
 
 .grid-50 {
@@ -44,9 +52,11 @@
 
 .col {
     height: 100%;
-    border: #a2a2a2;
-    border: solid;
+
+    border-color: rgb(132, 132, 132);
+    border-style: solid;
     border-width: thin;
+
     opacity: 1.0;
 }
 
