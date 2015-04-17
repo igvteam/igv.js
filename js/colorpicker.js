@@ -56,7 +56,7 @@ var igv = (function (igv) {
 
             count(4).forEach(function(colDigit, c, colDigits){
 
-                var column = $('<div class="col col-1-4 hvr-float">');
+                var column = $('<div class="col col-1-4">');
 
                 //column.text(".col-1-4");
 
