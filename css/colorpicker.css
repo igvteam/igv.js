@@ -1,11 +1,10 @@
 .grid-container {
 
-    /*border: #a2a2a2;*/
-    /*border: solid;*/
-    /*border-width: thin;*/
+    border-color: rgb(43, 43, 43);
+    border-style: solid;
+    border-width: thin;
 
     width:400px;
-    /*height:200px;*/
 
     margin: 0 auto;
 
@@ -21,9 +20,9 @@
 
     height: 24px;
 
-    border-color: rgb(194, 194, 194);
-    border-style: solid;
-    border-width: thin;
+    border-bottom-color: rgb(43, 43, 43);
+    border-bottom-style: solid;
+    border-bottom-width: thin;
 
     background-color: rgb(194, 194, 194);
 }
@@ -31,12 +30,13 @@
 .grid-header:hover,
 .grid-header:focus,
 .grid-header:active  {
-    border-color: rgb(173, 173, 173);
+    /*border-color: rgb(173, 173, 173);*/
     background-color: rgb(173, 173, 173);
 }
 
 .grid-rect {
     height: 200px;
+    background-color: rgb(142, 142, 142);
 }
 
 .grid-50 {
@@ -58,19 +58,15 @@
 
 .col {
     height: 100%;
-
-    /*border-color: rgb(132, 132, 132);*/
-    /*border-style: solid;*/
-    /*border-width: thin;*/
-
-    /*opacity: 1.0;*/
 }
 
 .col:hover,
 .col:focus,
 .col:active  {
     cursor:pointer;
-    /*border-width: medium;*/
+    border-color: rgb(43, 43, 43);
+    border-style: solid;
+    border-width: medium;
 }
 
 .col-1-3 {
