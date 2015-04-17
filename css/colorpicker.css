@@ -21,12 +21,18 @@
 
     height: 24px;
 
-    border-color: rgb(132, 132, 132);
+    border-color: rgb(194, 194, 194);
     border-style: solid;
     border-width: thin;
 
-    /*background-color: rgb(132, 132, 132);*/
-    background-color: white;
+    background-color: rgb(194, 194, 194);
+}
+
+.grid-header:hover,
+.grid-header:focus,
+.grid-header:active  {
+    border-color: rgb(173, 173, 173);
+    background-color: rgb(173, 173, 173);
 }
 
 .grid-rect {
@@ -53,18 +59,18 @@
 .col {
     height: 100%;
 
-    border-color: rgb(132, 132, 132);
-    border-style: solid;
-    border-width: thin;
+    /*border-color: rgb(132, 132, 132);*/
+    /*border-style: solid;*/
+    /*border-width: thin;*/
 
-    opacity: 1.0;
+    /*opacity: 1.0;*/
 }
 
 .col:hover,
 .col:focus,
 .col:active  {
     cursor:pointer;
-    border-width: medium;
+    /*border-width: medium;*/
 }
 
 .col-1-3 {
