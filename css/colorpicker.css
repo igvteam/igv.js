@@ -26,18 +26,18 @@
     border-bottom-style: solid;
     border-bottom-width: thin;
 
-    background-color: rgb(194, 194, 194);
+    background-color: rgb(255, 255, 255);
 }
 
 .grid-header:hover,
 .grid-header:focus,
 .grid-header:active  {
     /*border-color: rgb(173, 173, 173);*/
-    background-color: rgb(142, 142, 142);
+    background-color: rgb(218, 218, 218);
 }
 
 .grid-rect {
-    background-color: rgb(142, 142, 142);
+    background-color: rgb(255, 255, 255);
 }
 
 .grid {
@@ -59,15 +59,15 @@
     border-color: rgb(255, 255, 255);
     border-style: solid;
     border-width: thick;
+
+    border-radius: 8px;
+
 }
 
 .col:hover,
 .col:focus,
 .col:active  {
     cursor:pointer;
-    /*border-color: rgb(43, 43, 43);*/
-    /*border-style: solid;*/
-    /*border-width: medium;*/
 }
 
 .col-1-3 {
