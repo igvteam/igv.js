@@ -1,16 +1,16 @@
 .grid-container {
 
-    border-color: rgb(43, 43, 43);
+    border-color: rgb(128, 128, 128);
+    /*border-color: rgb(255, 255, 255);*/
     border-style: solid;
     border-width: thin;
 
-    width:400px;
+    width:200px;
 
     margin: 0 auto;
 
     z-index: 1999;
 }
-
 
 .grid-header {
 
@@ -40,12 +40,8 @@
     background-color: rgb(142, 142, 142);
 }
 
-.grid-50 {
-    height: 50%;
-}
-
 .grid {
-    height: 100px;
+    height: 50px;
 }
 
 .grid:after {
@@ -60,15 +56,18 @@
 
 .col {
     height: 100%;
+    border-color: rgb(255, 255, 255);
+    border-style: solid;
+    border-width: thick;
 }
 
 .col:hover,
 .col:focus,
 .col:active  {
     cursor:pointer;
-    border-color: rgb(43, 43, 43);
-    border-style: solid;
-    border-width: medium;
+    /*border-color: rgb(43, 43, 43);*/
+    /*border-style: solid;*/
+    /*border-width: medium;*/
 }
 
 .col-1-3 {

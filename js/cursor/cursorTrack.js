@@ -110,7 +110,6 @@ var cursor = (function (cursor) {
         return null;
     };
 
-
     cursor.defaultColor = function () {
         return "rgb(  3, 116, 178)";
     };

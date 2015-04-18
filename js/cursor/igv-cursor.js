@@ -31,7 +31,8 @@ var igv = (function (igv) {
             contentHeader,
             trackContainerDiv,
             browser,
-            thang;
+            thang,
+            colorPickerPalette;
 
         // Append event handlers to Header DIV
         document.getElementById('zoomOut').onclick = function (e) {
@@ -320,6 +321,20 @@ var igv = (function (igv) {
 
         // Popover object -- singleton shared by all components
         igv.popover = new igv.Popover(browser.div);
+
+
+        // Color Picker Object -- singleton shared by all components
+        colorPickerPalette = [
+            [ "#A8C5A7", "#718289", "#5A2960", "#4D031C" ],
+            [ "#12006C", "#00D1AA", "#FF8737", "#FF3131" ]
+        ];
+
+        if (options.palette) {
+            colorPickerPalette.push(options.palette);
+        }
+
+        igv.colorPicker = new igv.ColorPicker($(browser.div), colorPickerPalette);
+        igv.colorPicker.hide();
 
 
         // extend jquery ui dialog widget to support enter key triggering "ok" button press.
