@@ -32,37 +32,42 @@ var igvxhr = (function (igvxhr) {
 
     igvxhr.isReachable = function (url, continuation) {
 
-        var request = new XMLHttpRequest();
+        continuation(true);
 
-        request.open("HEAD", url, true);
+        // Implementation is broken -- dependent on HEAD request which isn't allowed or doesn't work for most webservices
+        // and CORS accessed files  (method not allowed).   have to rethink this.
 
-        request.onload = function (event) {
-
-            if (0 === request.status) {
-                continuation(false, request.status);
-            }
-            else if (request.status >= 200 && request.status <= 300) {
-                continuation(true, request.status);
-            }
-            else {
-                continuation(false, request.status);
-            }
-
-        };
-
-        request.onerror = function (event) {
-            continuation(false, request.status);
-        };
-
-        request.ontimeout = function (event) {
-            continuation(false, request.status);
-        };
-
-        request.onabort = function (event) {
-            continuation(false, request.status);
-        };
-
-        request.send(null);
+        //var request = new XMLHttpRequest();
+        //
+        //request.open("HEAD", url, true);
+        //
+        //request.onload = function (event) {
+        //
+        //    if (0 === request.status) {
+        //        continuation(false, request.status);
+        //    }
+        //    else if (request.status >= 200 && request.status <= 300) {
+        //        continuation(true, request.status);
+        //    }
+        //    else {
+        //        continuation(false, request.status);
+        //    }
+        //
+        //};
+        //
+        //request.onerror = function (event) {
+        //    continuation(false, request.status);
+        //};
+        //
+        //request.ontimeout = function (event) {
+        //    continuation(false, request.status);
+        //};
+        //
+        //request.onabort = function (event) {
+        //    continuation(false, request.status);
+        //};
+        //
+        //request.send(null);
 
     };
 

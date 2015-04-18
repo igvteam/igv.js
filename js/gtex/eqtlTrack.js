@@ -138,7 +138,7 @@ var igv = (function (igv) {
             for (i = 0; i < len; i++) {
 
                 eqtl = featureList[i];
-                snp = eqtl.snp ?  eqtl.snp.toUpperCase() : undefined;
+                snp = eqtl.snp.toUpperCase();
                 geneName = eqtl[track.geneField].toUpperCase();
                 selection = igv.browser.selection;
                 isSelected = selection &&
