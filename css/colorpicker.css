@@ -17,24 +17,20 @@
 
     cursor: move;
 
+    border-bottom-color: rgb(196, 196, 196);
+    border-bottom-style: solid;
+    border-bottom-width: thin ;
+
     position: relative;
     top: 0;
     left: 0;
 
     height: 24px;
-
-    /*border-bottom-color: rgb(43, 43, 43);*/
-    /*border-bottom-style: solid;*/
-    /*border-bottom-width: thin;*/
-
-    /*background-color: rgb(255, 255, 255);*/
 }
 
 .grid-header:hover,
 .grid-header:focus,
 .grid-header:active  {
-    /*border-color: rgb(173, 173, 173);*/
-    /*background-color: rgb(218, 218, 218);*/
 }
 
 .grid-rect {
