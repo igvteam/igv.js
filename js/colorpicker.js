@@ -54,11 +54,12 @@ var igv = (function (igv) {
             colorPicker = $('<div class="grid">');
             count(4).forEach(function(colDigit, c, colDigits){
 
-                var column = $('<div class="col col-1-4">');
+                var column = $('<div class="col col-1-4 col-fa">'),
+                    filler = $('<div class="col-filler">');
 
                 //column.text(".col-1-4");
 
-                column.css( { "background-color" : palette[ r ][ c ] } );
+                //column.css( { "background-color" : palette[ r ][ c ] } );
 
                 column.click(function(){
 
@@ -67,6 +68,8 @@ var igv = (function (igv) {
 
                 });
 
+                filler.css( { "background-color" : palette[ r ][ c ] } );
+                column.append( filler[ 0 ] );
                 colorPicker.append( column[ 0 ] );
 
             });
