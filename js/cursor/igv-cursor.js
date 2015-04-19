@@ -325,8 +325,8 @@ var igv = (function (igv) {
 
         // Color Picker Object -- singleton shared by all components
         colorPickerPalette = [
-            [ "#A8C5A7", "#718289", "#5A2960", "#4D031C" ],
-            [ "#12006C", "#00D1AA", "#FF8737", "#FF3131" ]
+            [ "#EDD09F", "#A6C3B1", "#339DA5", "#132D3C" ],
+            [ "#E74538", "#EB8E2E", "#F6C54F", "#A7CB8E" ]
         ];
 
         if (options.palette) {
