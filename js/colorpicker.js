@@ -28,11 +28,25 @@
  */
 var igv = (function (igv) {
 
-    igv.ColorPicker = function (parentObject, palette) {
+    igv.ColorPicker = function (parentObject, userPalettes) {
 
         var self = this,
-            colorPickerHeader;
+            colorPickerHeader,
+            palette;
 
+        // Color Picker Object -- singleton shared by all components
+        palette = [
+            [ "#666666", "#0000cc", "#009900", "#cc0000" ],
+            [ "#ffcc00", "#9900cc", "#00ccff", "#ff6600" ]
+        ];
+
+        if (userPalettes) {
+
+            userPalettes.forEach(function(userPalette){
+
+                palette.push(userPalette);
+            });
+        }
 
         this.colorPickerContainer = $('<div class="grid-container ui-widget-content">');
         parentObject.append( this.colorPickerContainer[ 0 ] );
@@ -81,6 +95,16 @@ var igv = (function (igv) {
 
 
         });
+
+        function palette4x1( userPalette ) {
+
+            var rows = userPalette.length % 4;
+            for (var i = 0; i < c; i++) {
+                list.push(i);
+            }
+
+            return list;
+        }
 
         function count(c) {
 

@@ -94,17 +94,7 @@ var igv = (function (igv) {
         // Popover object -- singleton shared by all components
         igv.popover = new igv.Popover(contentDiv);
 
-        // Color Picker Object -- singleton shared by all components
-        colorPickerPalette = [
-            [ "#EDD09F", "#A6C3B1", "#339DA5", "#132D3C" ],
-            [ "#E74538", "#EB8E2E", "#F6C54F", "#A7CB8E" ]
-        ];
-
-        if (options.palette) {
-            colorPickerPalette.push(options.palette);
-        }
-
-        igv.colorPicker = new igv.ColorPicker($(contentDiv), colorPickerPalette);
+        igv.colorPicker = new igv.ColorPicker($(contentDiv), options.palette);
         igv.colorPicker.hide();
 
         // extend jquery ui dialog widget to support enter key triggering "ok" button press.

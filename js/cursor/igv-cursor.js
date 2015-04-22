@@ -323,17 +323,7 @@ var igv = (function (igv) {
         igv.popover = new igv.Popover(browser.div);
 
 
-        // Color Picker Object -- singleton shared by all components
-        colorPickerPalette = [
-            [ "#EDD09F", "#A6C3B1", "#339DA5", "#132D3C" ],
-            [ "#E74538", "#EB8E2E", "#F6C54F", "#A7CB8E" ]
-        ];
-
-        if (options.palette) {
-            colorPickerPalette.push(options.palette);
-        }
-
-        igv.colorPicker = new igv.ColorPicker($(browser.div), colorPickerPalette);
+        igv.colorPicker = new igv.ColorPicker($(browser.div), options.palette);
         igv.colorPicker.hide();
 
 
