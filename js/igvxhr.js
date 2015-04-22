@@ -180,7 +180,7 @@ var igvxhr = (function (igvxhr) {
             for (i = 0; i < header_keys.length; i++) {
                 key = header_keys[i];
                 value = headers[key];
-                console.log("Adding to header: " + key + "=" + value);
+               // console.log("Adding to header: " + key + "=" + value);
                 xhr.setRequestHeader(key, value);
             }
         }
