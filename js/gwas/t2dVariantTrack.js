@@ -150,7 +150,7 @@ var igv = (function (igv) {
         font['textAlign'] = 'center';
 
 
-        igv.Canvas.fillText.call(ctx.ctx, "-log10(pvalue)", pixelWidth / 2, pixelHeight / 2, font, {rotate: {angle: -90}});
+        igv.Canvas.fillText.call(ctx, "-log10(pvalue)", pixelWidth / 2, pixelHeight / 2, font, {rotate: {angle: -90}});
 
 
     };

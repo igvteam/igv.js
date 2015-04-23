@@ -31,8 +31,9 @@ var igv = (function (igv) {
             contentHeader,
             trackContainerDiv,
             browser,
-            thang,
-            colorPickerPalette;
+            utilityDiv,
+            colorPickerPalette,
+            encodeTable = options.encodeTable || "resources/peaks.hg19.txt";
 
         // Append event handlers to Header DIV
         document.getElementById('zoomOut').onclick = function (e) {
@@ -166,7 +167,7 @@ var igv = (function (igv) {
         $('#encodeModalBody').html('<table id="encodeModalTable" cellpadding="0" cellspacing="0" border="0" class="display"></table>');
 
         // Load ENCODE DataTables data and build markup for modal dialog.
-        encode.createEncodeDataTablesDataSet("resources/peaks.hg19.txt", function (dataSet) {
+        encode.createEncodeDataTablesDataSet(encodeTable, function (dataSet) {
 
             var encodeModalTable = $('#encodeModalTable'),
                 dataTableObject,
@@ -276,7 +277,7 @@ var igv = (function (igv) {
                             type: "bed",
                             url: record.path,
                             label: encode.encodeTrackLabel(record),
-                            color: encode.encodeAntibodyColor(record.antibody),
+                            color: encode.encodeAntibodyColor(record.antibody)
                         });
 
                     } // for (tableRows)
@@ -310,11 +311,11 @@ var igv = (function (igv) {
         $(browser.div).append(horizontalScrollBarContainer);
 
         // utility div
-        thang = $('<div class="igv-utility-div">');
-        $(browser.div).append(thang[0]);
+        utilityDiv = $('<div class="igv-utility-div">');
+        $(browser.div).append(utilityDiv[0]);
 
         // control panel header
-        thang.append($('<div class="igv-control-panel-header-div">Track Summary</div>')[0]);
+        utilityDiv.append($('<div class="igv-control-panel-header-div">Track Summary</div>')[0]);
 
         // track container
         $(browser.div).append(trackContainerDiv);
