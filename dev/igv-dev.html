@@ -250,18 +250,6 @@
                                 label: 'Skin Sun Exposed Lower leg'})">EQTL Skin (GTEX))
         </div>
 
-        <div onclick="igv.browser.loadTrack({
-                                type: 'eqtl',
-                                sourceType: 'immvar',
-                                url: '//immvar.broadinstitute.org:3000/load_data',
-                                pValueField: 'p_value',
-                                geneField: 'gene',
-                                cellConditionId: 22,
-                                minLogP: 0,
-                                label: 'Dendritic cell, Baseline, Caucasian'})">Dendritic cell (ImmVar))
-        </div>
-
-
         <div onclick="igv.browser.loadTrack( {
                                 url: '//www.broadinstitute.org/igvdata/t2d/recomb_decode.bedgraph',
                                 label: 'Recombination rate'})">Recombination Rate
@@ -348,13 +336,14 @@
             },
             palette: [
                 [ "#00A0B0", "#6A4A3C", "#CC333F", "#EB6841" ]
-            ],
+            ]
+            ,
             tracks: [
-
                 {
                     type: "sequence",
                     order: -9999
-                },
+                }
+                ,
                 {
                     label: "Genes",
                     url: "//dn7ywbm9isq8j.cloudfront.net/annotations/hg19/genes/gencode.v18.collapsed.bed",
@@ -364,7 +353,6 @@
                     displayMode: "EXPANDED"
 
                 }
-
             ]
         };
 

@@ -118,10 +118,17 @@ var igv = (function (igv) {
     };
 
     igv.ColorPicker.prototype.hide = function () {
+        $(this.colorPickerContainer).offset( { left: 0, top: 0 } );
         this.colorPickerContainer.hide();
     };
 
     igv.ColorPicker.prototype.show = function () {
+
+        var track_origin = $(this.trackView.trackDiv).offset(),
+            track_size = { width: $(this.trackView.trackDiv).outerWidth(), height: $(this.trackView.trackDiv).outerHeight()},
+            size = { width: $(this.colorPickerContainer).outerWidth(), height: $(this.colorPickerContainer).outerHeight()};
+
+        $(this.colorPickerContainer).offset( { left: (track_size.width - size.width)/2, top: track_origin.top } );
         this.colorPickerContainer.show();
     };
 

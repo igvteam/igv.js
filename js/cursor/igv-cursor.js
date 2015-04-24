@@ -323,7 +323,7 @@ var igv = (function (igv) {
         // Popover object -- singleton shared by all components
         igv.popover = new igv.Popover(browser.div);
 
-
+        // ColorPicker object -- singleton shared by all components
         igv.colorPicker = new igv.ColorPicker($(browser.div), options.palette);
         igv.colorPicker.hide();
 
