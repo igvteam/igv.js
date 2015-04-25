@@ -86,7 +86,7 @@ var igv = (function (igv) {
 
                 count(4).forEach(function(colDigit, c, colDigits){
 
-                    column = $('<div class="col col-1-4 col-fa">');
+                    column = $('<div class="col col-1-4">');
                     filler = $('<div class="col-filler">');
                     column.click(function(){
 
@@ -105,16 +105,23 @@ var igv = (function (igv) {
 
                 rowContainer.append( $('<hr class="grid-dividing-line">')[ 0 ]);
 
-                column = $('<div class="col col-1-4 col-fa">');
-                filler = $('<div class="col-filler">');
+                column = $('<div class="col col-1-4">');
+                self.trackColorTile = $('<div class="col-filler">');
                 column.click(function(){
 
-                    igv.setTrackColor(self.trackView.track, igv.hex2Color( "#eee" ));
+                    var color = self.trackColorTile.css( "background-color" );
+
+                    igv.setTrackColor(self.trackView.track, color);
                     self.trackView.update();
                 });
 
-                filler.css( { "background-color" : "#eee" } );
-                column.append( filler[ 0 ] );
+                self.trackColorTile.css( { "background-color" : "#eee" } );
+                column.append( self.trackColorTile[ 0 ] );
+                row.append( column[ 0 ] );
+
+                // label
+                column = $('<div class="col col-3-4 col-label">');
+                column.text("Current color");
                 row.append( column[ 0 ] );
 
             }
@@ -150,6 +157,8 @@ var igv = (function (igv) {
         $(this.colorPickerContainer).offset( { left: (track_size.width - size.width)/2, top: track_origin.top } );
 
         this.colorPickerHeaderBlurb.text( this.trackView.track.label);
+
+        this.trackColorTile.css( { "background-color" : this.trackView.track.color } );
 
         this.colorPickerContainer.show();
     };
