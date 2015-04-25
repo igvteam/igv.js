@@ -96,6 +96,15 @@
 
 }
 
+.col-filler:hover,
+.col-filler:focus,
+.col-filler:active  {
+
+    border-width: medium;
+    border-color: rgb(71, 71, 71);
+
+}
+
 .col-fa {
 
     color: white;
@@ -107,12 +116,12 @@
 
 }
 
-.col:hover,
-.col:focus,
-.col:active  {
-    cursor:pointer;
-    opacity: 0.75;
-}
+/*.col:hover,*/
+/*.col:focus,*/
+/*.col:active  {*/
+    /*cursor:pointer;*/
+    /*opacity: 0.75;*/
+/*}*/
 
 .col-1-3 {
     width: 33.33%;
