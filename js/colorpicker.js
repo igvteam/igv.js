@@ -28,7 +28,7 @@
  */
 var igv = (function (igv) {
 
-    igv.ColorPicker = function (parentObject, userPalettes) {
+    igv.ColorPicker = function (parentObject, userPalette) {
 
         var self = this,
             palette;
@@ -50,20 +50,25 @@ var igv = (function (igv) {
         this.colorPickerContainer.append(this.colorPickerHeader[ 0 ]);
 
         // Color Picker Object -- singleton shared by all components
-        if (userPalettes) {
+        palette = [
+            [ "#666666", "#0000cc", "#009900", "#cc0000" ],
+            [ "#ffcc00", "#9900cc", "#00ccff", "#ff6600" ]
+        ];
 
-            //userPalettes.forEach(function(userPalette){
-            //
-            //    palette.push(userPalette);
-            //});
+        if (userPalette) {
 
-            palette = userPalettes;
-        } else {
+            if ("replace" === userPalette.usage) {
 
-            palette = [
-                [ "#666666", "#0000cc", "#009900", "#cc0000" ],
-                [ "#ffcc00", "#9900cc", "#00ccff", "#ff6600" ]
-            ];
+                palette = userPalette.colors;
+
+            } else if ("append" === userPalette.usage) {
+
+                userPalette.colors.forEach(function(row){
+
+                    palette.push(row);
+                });
+
+            }
 
         }
 
