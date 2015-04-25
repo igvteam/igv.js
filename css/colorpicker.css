@@ -94,6 +94,21 @@
     padding: 2px;
 }
 
+
+.col-label {
+
+    margin-top: 8px;
+
+    text-align: center;
+    vertical-align: middle;
+
+    font-family: 'PT Sans', sans-serif;
+    font-size: medium;
+    font-weight: 200;
+
+    color: #575757;
+}
+
 .col-filler {
 
     width: 100%;
@@ -143,4 +158,12 @@
 
 .col-1-4 {
     width: 25%;
+}
+
+.col-2-4 {
+    width: 50%;
+}
+
+.col-3-4 {
+    width: 75%;
 }
