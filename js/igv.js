@@ -325,7 +325,7 @@ var igv = (function (igv) {
     function isT2D(options) {
         if (options.tracks && options.tracks.length > 0) {
             var t = options.tracks[0];
-            var b = t instanceof igv.T2dTrack;
+            var b = t instanceof igv.GWASTrack;
             return b;
         }
         else {

@@ -28,7 +28,7 @@ var igv = (function (igv) {
     const MAX_GZIP_BLOCK_SIZE = (1 << 16);
 
     /**
-     * feature source for "bed like" files (tab delimited files with 1 feature per line: bed, gff, vcf, etc)
+     * Reader for "bed like" files (tab delimited files with 1 feature per line: bed, gff, vcf, etc)
      *
      * @param config
      * @constructor
@@ -47,25 +47,26 @@ var igv = (function (igv) {
             this.headURL = config.headURL || this.filename;
         }
 
-        if (!config.type) {
-            config.type = igv.inferFileType(this.filename);
+        if (!config.format) {
+            igv.inferTypes(config);
         }
+        this.format = config.format;
 
-        this.type = config.type;
-
-        this.parser = getParser(this.type, config.decode);
+        this.parser = getParser(this.format, config.decode);
     };
 
 
-    function getParser(type, decode) {
-        if (type === "vcf") {
-            return new igv.VcfParser();
-        } else if (type === "seg") {
-            return new igv.SegParser();
+    function getParser(featureType, decode) {
+
+        switch (featureType) {
+            case "vcf":
+                return new igv.VcfParser();
+            case "seg" :
+                return new igv.SegParser();
+            default:
+                return new igv.FeatureParser(featureType, decode);
         }
-        else {
-            return new igv.FeatureParser(type, decode);
-        }
+
     }
 
     // seg files don't have an index
@@ -136,7 +137,7 @@ var igv = (function (igv) {
             loadHeaderWithIndex(this.index, continuation);
         }
         else {
-            loadFeaturesNoIndex.call(this, function(features) {
+            loadFeaturesNoIndex.call(this, function (features) {
                 // Features are ignored, we are after the header (TODO -- fix this dependency on side effect)
                 continuation(myself.header);
             });
@@ -211,7 +212,7 @@ var igv = (function (igv) {
 
     }
 
-        /**
+    /**
      *
      * @param success
      * @param task
@@ -308,8 +309,6 @@ var igv = (function (igv) {
             }
 
         }
-
-
 
 
     }

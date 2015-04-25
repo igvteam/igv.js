@@ -42,8 +42,8 @@ Supplies features on demand to a track.  Typically each track will contain a ded
 a file or webservice.
 
 
-AnnotationFeature
------------------
+Feature Types
+-------------
 
 
 Required properties:
