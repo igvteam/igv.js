@@ -33,20 +33,6 @@ var igv = (function (igv) {
         var self = this,
             palette;
 
-        // Color Picker Object -- singleton shared by all components
-        palette = [
-            [ "#666666", "#0000cc", "#009900", "#cc0000" ],
-            [ "#ffcc00", "#9900cc", "#00ccff", "#ff6600" ]
-        ];
-
-        if (userPalettes) {
-
-            userPalettes.forEach(function(userPalette){
-
-                palette.push(userPalette);
-            });
-        }
-
         this.colorPickerContainer = $('<div class="grid-container ui-widget-content">');
         parentObject.append( this.colorPickerContainer[ 0 ] );
 
@@ -63,6 +49,24 @@ var igv = (function (igv) {
 
         this.colorPickerContainer.append(this.colorPickerHeader[ 0 ]);
 
+        // Color Picker Object -- singleton shared by all components
+        if (userPalettes) {
+
+            //userPalettes.forEach(function(userPalette){
+            //
+            //    palette.push(userPalette);
+            //});
+
+            palette = userPalettes;
+        } else {
+
+            palette = [
+                [ "#666666", "#0000cc", "#009900", "#cc0000" ],
+                [ "#ffcc00", "#9900cc", "#00ccff", "#ff6600" ]
+            ];
+
+        }
+
         count(palette.length).forEach(function(rowDigit, r, rowDigits){
 
             var colorPicker,
@@ -73,10 +77,6 @@ var igv = (function (igv) {
 
                 var column = $('<div class="col col-1-4 col-fa">'),
                     filler = $('<div class="col-filler">');
-
-                //column.text(".col-1-4");
-
-                //column.css( { "background-color" : palette[ r ][ c ] } );
 
                 column.click(function(){
 
@@ -98,16 +98,6 @@ var igv = (function (igv) {
 
 
         });
-
-        function palette4x1( userPalette ) {
-
-            var rows = userPalette.length % 4;
-            for (var i = 0; i < c; i++) {
-                list.push(i);
-            }
-
-            return list;
-        }
 
         function count(c) {
 
