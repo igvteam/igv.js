@@ -72,35 +72,56 @@ var igv = (function (igv) {
 
         }
 
-        count(palette.length).forEach(function(rowDigit, r, rowDigits){
+        count(1 + palette.length).forEach(function(rowDigit, r, rowDigits){
 
-            var colorPicker,
-                colorPickerRect;
+            var row,
+                rowContainer,
+                column,
+                filler;
 
-            colorPicker = $('<div class="grid">');
-            count(4).forEach(function(colDigit, c, colDigits){
+            rowContainer = $('<div class="grid-rect">');
+            row = $('<div class="grid">');
 
-                var column = $('<div class="col col-1-4 col-fa">'),
+            if (r < palette.length) {
+
+                count(4).forEach(function(colDigit, c, colDigits){
+
+                    column = $('<div class="col col-1-4 col-fa">');
                     filler = $('<div class="col-filler">');
+                    column.click(function(){
 
-                column.click(function(){
+                        igv.setTrackColor(self.trackView.track, igv.hex2Color( palette[ r ][ c ] ));
+                        self.trackView.update();
 
-                    igv.setTrackColor(self.trackView.track, igv.hex2Color( palette[ r ][ c ] ));
-                    self.trackView.update();
+                    });
+
+                    filler.css( { "background-color" : palette[ r ][ c ] } );
+                    column.append( filler[ 0 ] );
+                    row.append( column[ 0 ] );
 
                 });
 
-                filler.css( { "background-color" : palette[ r ][ c ] } );
+            } else {
+
+                rowContainer.append( $('<hr class="grid-dividing-line">')[ 0 ]);
+
+                column = $('<div class="col col-1-4 col-fa">');
+                filler = $('<div class="col-filler">');
+                column.click(function(){
+
+                    igv.setTrackColor(self.trackView.track, igv.hex2Color( "#eee" ));
+                    self.trackView.update();
+                });
+
+                filler.css( { "background-color" : "#eee" } );
                 column.append( filler[ 0 ] );
-                colorPicker.append( column[ 0 ] );
+                row.append( column[ 0 ] );
 
-            });
+            }
 
-            colorPickerRect = $('<div class="grid-rect">');
-            colorPickerRect.append( colorPicker[ 0 ]);
+            rowContainer.append( row[ 0 ]);
 
-            self.colorPickerContainer.append(colorPickerRect[ 0 ]);
-
+            self.colorPickerContainer.append(rowContainer[ 0 ]);
 
         });
 

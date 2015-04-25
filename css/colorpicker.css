@@ -50,6 +50,16 @@
     color: #575757;
 
 }
+
+.grid-dividing-line {
+    display: block;
+    height: 1px;
+    border: 0;
+    border-top: 1px solid rgb(196, 196, 196);
+    /*margin: 1em 0;*/
+    /*padding: 0;*/
+}
+
 .grid-rect {
 
     border-radius: 4px;
