@@ -31,7 +31,6 @@ var igv = (function (igv) {
     igv.ColorPicker = function (parentObject, userPalettes) {
 
         var self = this,
-            colorPickerHeader,
             palette;
 
         // Color Picker Object -- singleton shared by all components
@@ -53,12 +52,16 @@ var igv = (function (igv) {
 
         this.colorPickerContainer.draggable();
 
-        colorPickerHeader = $('<div class="grid-header">');
-        this.colorPickerContainer.append(colorPickerHeader[ 0 ]);
+        this.colorPickerHeader = $('<div class="grid-header">');
+        this.colorPickerHeaderBlurb = $('<div class="grid-header-blurb">');
 
-        igv.dialogCloseWithParentObject(colorPickerHeader, function () {
+        this.colorPickerHeader.append(this.colorPickerHeaderBlurb[ 0 ]);
+
+        igv.dialogCloseWithParentObject(this.colorPickerHeader, function () {
             self.hide();
         });
+
+        this.colorPickerContainer.append(this.colorPickerHeader[ 0 ]);
 
         count(palette.length).forEach(function(rowDigit, r, rowDigits){
 
@@ -129,6 +132,9 @@ var igv = (function (igv) {
             size = { width: $(this.colorPickerContainer).outerWidth(), height: $(this.colorPickerContainer).outerHeight()};
 
         $(this.colorPickerContainer).offset( { left: (track_size.width - size.width)/2, top: track_origin.top } );
+
+        this.colorPickerHeaderBlurb.text( this.trackView.track.label);
+
         this.colorPickerContainer.show();
     };
 
