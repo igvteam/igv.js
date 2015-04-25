@@ -30,7 +30,7 @@ var igv = (function (igv) {
 
     const POPOVER_WINDOW = 30000000;
 
-    igv.T2dTrack = function (config) {
+    igv.GWASTrack = function (config) {
         this.config = config;
         this.url = config.url;
         this.featureSource = new igv.T2DVariantSource(config);
@@ -59,13 +59,13 @@ var igv = (function (igv) {
     }
 
 
-    igv.T2dTrack.prototype.getFeatures = function (chr, bpStart, bpEnd, continuation, task) {
+    igv.GWASTrack.prototype.getFeatures = function (chr, bpStart, bpEnd, continuation, task) {
 
         this.featureSource.getFeatures(chr, bpStart, bpEnd, continuation, task)
     }
 
 
-    igv.T2dTrack.prototype.draw = function (options) {
+    igv.GWASTrack.prototype.draw = function (options) {
 
         var track = this,
             featureList = options.features,
@@ -128,7 +128,7 @@ var igv = (function (igv) {
     };
 
 
-    igv.T2dTrack.prototype.paintControl = function (ctx, pixelWidth, pixelHeight) {
+    igv.GWASTrack.prototype.paintControl = function (ctx, pixelWidth, pixelHeight) {
 
         var track = this,
             yScale = (track.maxLogP - track.minLogP) / pixelHeight;
@@ -156,7 +156,7 @@ var igv = (function (igv) {
     };
 
 
-    igv.T2dTrack.prototype.popupData = function (genomicLocation, xOffset, yOffset) {
+    igv.GWASTrack.prototype.popupData = function (genomicLocation, xOffset, yOffset) {
 
         var i,
             len,

@@ -34,12 +34,11 @@ var igv = (function (igv) {
         this.config = config;
         this.url = config.url;
 
-        // Set the track type, if not explicitly specified
-        if (!config.type) {
-            config.type = igv.inferFileType(config.url || config.localFile.name);
+        if (!config.format) {
+            igv.inferTypes(config);
         }
 
-        if (config.type === "bigwig") {
+        if ("bigwig" === config.format) {
             this.featureSource = new igv.BWSource(config);
         }
         else {

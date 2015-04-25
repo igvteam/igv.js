@@ -66,7 +66,7 @@ var igv = (function (igv) {
             this.type = config.type;
         }
         else {
-            this.type = igv.inferFileType(this.filename);
+            this.type = igv.inferFileFormat(this.filename);
         }
 
         this.parser = getParser(this.type);

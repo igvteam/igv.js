@@ -70,7 +70,7 @@ var igv = (function (igv) {
         //parser.host;     // => "example.com:3000"
 
         label = parser.pathname.split('/');
-        return label[ label.length - 1].split('.')[ 0 ];
+        return label[label.length - 1].split('.')[0];
 
     };
 
@@ -91,7 +91,7 @@ var igv = (function (igv) {
 
                     parts = igv.parseUri(config.url);
 
-                    myself.userFeedback.bodyCopy("<p>ERROR: Track file " + parts[ "file" ] + " is unreachable<\p><p>HTTP request status: " + requestStatus + "<\p>");
+                    myself.userFeedback.bodyCopy("<p>ERROR: Track file " + parts["file"] + " is unreachable<\p><p>HTTP request status: " + requestStatus + "<\p>");
                     myself.userFeedback.show();
                 }
 
@@ -112,28 +112,24 @@ var igv = (function (igv) {
             return;
         }
 
-
-        // Set the track type, if not explicitly specified
-        if (!config.type) {
-            config.type = igv.inferFileType(config.url || (config.localFile && config.localFile.name));
-        }
+        igv.inferTypes(config);
 
 
         var path = config.url,
-            type = config.type,
+            type = config.featureType,
             newTrack;
 
-        if (type === "t2d") {
-            newTrack = new igv.T2dTrack(config);
-        } else if (type === "bed" || type === "vcf" || type == "arc" || type == "FusionJuncSpan") {
+        if (type === "gwas") {
+            newTrack = new igv.GWASTrack(config);
+        } else if (type === "annotation") {
             newTrack = new igv.FeatureTrack(config);
-        } else if (type === "bam") {
+        } else if (type === "alignment") {
             newTrack = new igv.BAMTrack(config);
-        } else if (type === "wig" || type === "bigwig" || type === "bedgraph") {
+        } else if (type === "data") {
             newTrack = new igv.WIGTrack(config);
         } else if (type === "sequence") {
             newTrack = new igv.SequenceTrack(config);
-        } else if (type === "eqtl" || type === "gtexGWAS") {
+        } else if (type === "eqtl") {
             newTrack = new igv.EqtlTrack(config);
         } else if (type === "seg") {
             newTrack = new igv.SegTrack(config);
@@ -150,18 +146,18 @@ var igv = (function (igv) {
 
         function loadHeader(track) {
 
-            if(track.getHeader) {
-               track.getHeader(function (header) {
-                   browser.addTrack(track);
-               })
+            if (track.getHeader) {
+                track.getHeader(function (header) {
+                    browser.addTrack(track);
+                })
             }
             else {
                 browser.addTrack(newTrack);
             }
         }
 
-
     };
+
 
     igv.Browser.prototype.isDuplicateTrack = function (config) {
 
@@ -308,10 +304,10 @@ var igv = (function (igv) {
 
         this.trackViews.forEach(function (tv, i, tvs) {
 
-            indices.push({ trackView: tv, index: i });
+            indices.push({trackView: tv, index: i});
 
             if (trackView === tv) {
-                raisable = indices[ i ];
+                raisable = indices[i];
             }
 
         });
@@ -321,8 +317,8 @@ var igv = (function (igv) {
         }
 
         raiseableOrder = raisable.trackView.track.order;
-        raisable.trackView.track.order = indices[ raisable.index - 1 ].trackView.track.order;
-        indices[ raisable.index - 1].trackView.track.order = raiseableOrder;
+        raisable.trackView.track.order = indices[raisable.index - 1].trackView.track.order;
+        indices[raisable.index - 1].trackView.track.order = raiseableOrder;
 
         this.reorderTracks();
 
@@ -341,10 +337,10 @@ var igv = (function (igv) {
 
         this.trackViews.forEach(function (tv, i, tvs) {
 
-            indices.push({ trackView: tv, index: i });
+            indices.push({trackView: tv, index: i});
 
             if (trackView === tv) {
-                raisable = indices[ i ];
+                raisable = indices[i];
             }
 
         });
@@ -354,8 +350,8 @@ var igv = (function (igv) {
         }
 
         raiseableOrder = raisable.trackView.track.order;
-        raisable.trackView.track.order = indices[ 1 + raisable.index ].trackView.track.order;
-        indices[ 1 + raisable.index ].trackView.track.order = raiseableOrder;
+        raisable.trackView.track.order = indices[1 + raisable.index].trackView.track.order;
+        indices[1 + raisable.index].trackView.track.order = raiseableOrder;
 
         this.reorderTracks();
 
@@ -434,9 +430,9 @@ var igv = (function (igv) {
             ss = igv.numberFormatter(Math.floor(referenceFrame.start + 1));
 
             end = referenceFrame.start + this.trackViewportWidthBP();
-            if(this.genome) {
+            if (this.genome) {
                 chromosome = this.genome.getChromosome(chr);
-                if(chromosome) end = Math.min(end, chromosome.bpLength);
+                if (chromosome) end = Math.min(end, chromosome.bpLength);
             }
 
             ee = igv.numberFormatter(Math.floor(end));
@@ -473,20 +469,20 @@ var igv = (function (igv) {
         return this.referenceFrame.bpPerPixel * this.trackViewportWidth();
     };
 
-    
+
     igv.Browser.prototype.removeAllTracks = function () {
         var tracks = this.trackViews;
-        
-         for (var i = 0; i < tracks.length; i++) {
+
+        for (var i = 0; i < tracks.length; i++) {
             var track = this.trackViews[i].track;
             this.removeTrack(track);
-         }
-    }; 
-    
+        }
+    };
+
     igv.Browser.prototype.setGotoCallback = function (gotocallback) {
         this.gotocallback = gotocallback;
     };
-    
+
     igv.Browser.prototype.goto = function (chr, start, end) {
 
         if (typeof this.gotocallback != "undefined") {
@@ -521,11 +517,11 @@ var igv = (function (igv) {
         if (this.genome) {
             chromosome = this.genome.getChromosome(this.referenceFrame.chr);
             if (!chromosome) {
-                if (console && console.log) console.log("Could not find chromsome "+this.referenceFrame.chr );
+                if (console && console.log) console.log("Could not find chromsome " + this.referenceFrame.chr);
             }
             else {
                 if (!chromosome.bpLength) chromosome.bpLength = 1;
-        
+
                 var maxBpPerPixel = chromosome.bpLength / viewportWidth;
                 if (this.referenceFrame.bpPerPixel > maxBpPerPixel) this.referenceFrame.bpPerPixel = maxBpPerPixel;
 
@@ -536,7 +532,7 @@ var igv = (function (igv) {
                 if (chromosome && end > chromosome.bpLength) {
                     start -= (end - chromosome.bpLength);
                 }
-           }
+            }
         }
 
         this.referenceFrame.start = start;
@@ -715,7 +711,7 @@ var igv = (function (igv) {
 
             var coords = igv.translateMouseCoordinates(e, trackContainerDiv);
 
-            isRulerTrack = ($(e.target).parent().parent().parent()[ 0 ].dataset.rulerTrack) ? true : false;
+            isRulerTrack = ($(e.target).parent().parent().parent()[0].dataset.rulerTrack) ? true : false;
 
             if (isRulerTrack) {
                 return;

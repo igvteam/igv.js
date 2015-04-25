@@ -59,41 +59,6 @@ var igv = (function (igv) {
     };
 
 
-    igv.inferFileType = function (path) {
-
-        var fn = path.toLowerCase();
-        if(fn.endsWith(".gz")) {
-            fn = fn.substr(0, fn.length-3);
-        } else if(fn.endsWith(".txt") || fn.endsWith(".tab")) {
-            fn = fn.substr(0, fn.length-4);
-        }
-
-        if (fn.endsWith(".vcf")) {
-            return "vcf";
-        } else if (fn.endsWith(".narrowpeak")) {
-            return "narrowPeak";
-        } else if (fn.endsWith(".broadpeak")) {
-            return "broadPeak";
-        } else if (fn.endsWith(".bedgraph")) {
-            return "bedgraph";
-        } else if (fn.endsWith(".wig")) {
-            return "wig";
-        } else if (fn.endsWith(".bed")) {
-            return "bed";
-        } else if (fn.endsWith(".seg")) {
-            return "seg";
-        } else if (fn.endsWith(".bam")) {
-            return "bam"
-        } else if (fn.endsWith(".bw") || fn.endsWith(".bigwig")) {
-            return "bigwig"
-        } else if (fn.endsWith(".bb") || fn.endsWith(".bigbed")) {
-            return "bigwig"
-        } else if (fn.endsWith(".gff") || fn.endsWith(".gff3")) {
-            return "gff"
-        } else {
-            return null;
-        }
-    }
 
 
     return igv;
