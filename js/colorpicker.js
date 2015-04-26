@@ -31,7 +31,11 @@ var igv = (function (igv) {
     igv.ColorPicker = function (parentObject, userPalette) {
 
         var self = this,
-            palette;
+            palette,
+            row,
+            rowContainer,
+            column,
+            filler;
 
         this.colorPickerContainer = $('<div class="grid-container ui-widget-content">');
         parentObject.append( this.colorPickerContainer[ 0 ] );
@@ -72,60 +76,21 @@ var igv = (function (igv) {
 
         }
 
-        count(1 + palette.length).forEach(function(r){
-
-            var row,
-                rowContainer,
-                column,
-                filler;
+        count(palette.length).forEach(function(r){
 
             rowContainer = $('<div class="grid-rect">');
             row = $('<div class="grid">');
 
-            if (r < palette.length) {
+            count(4).forEach(function(c){
 
-                count(4).forEach(function(c){
+                makeColumn(row, r, c, function () {
 
-                    makeRow(row, r, c, function(){
-
-                        igv.setTrackColor(self.trackView.track, igv.hex2Color( palette[ r ][ c ] ));
-                        self.trackView.update();
-
-                    });
-
-                });
-
-            } else {
-
-                // dividing line
-                rowContainer.append( $('<hr class="grid-dividing-line">')[ 0 ]);
-
-
-
-                // current color
-                column = $('<div class="col col-1-4">');
-                self.trackColorTile = $('<div class="col-filler">');
-                column.click(function(){
-
-                    var color = self.trackColorTile.css( "background-color" );
-
-                    igv.setTrackColor(self.trackView.track, color);
+                    igv.setTrackColor(self.trackView.track, igv.hex2Color(palette[r][c]));
                     self.trackView.update();
+
                 });
 
-                self.trackColorTile.css( { "background-color" : "#eee" } );
-                column.append( self.trackColorTile[ 0 ] );
-                row.append( column[ 0 ] );
-
-                // label
-                column = $('<div class="col col-3-4 col-label">');
-                column.text("Current color");
-                row.append( column[ 0 ] );
-
-
-
-
-            }
+            });
 
             rowContainer.append( row[ 0 ]);
 
@@ -133,7 +98,67 @@ var igv = (function (igv) {
 
         });
 
-        function makeRow(row, r, c, clickHandler) {
+        // user enter color
+        self.userEnterColorRowContainer = $('<div class="grid-rect">');
+
+        // dividing line
+        self.userEnterColorRowContainer.append( $('<hr class="grid-dividing-line">')[ 0 ]);
+
+        column = $('<div class="col col-4-4">');
+
+        self.systemColorPicker = $('<input class="user-color-input" type="text" value="#ff0000">');
+        self.systemColorPicker.change(function () {
+
+            var hex = $(this).val();
+            //console.log("yo. color baby. " + hex);
+
+            igv.setTrackColor(self.trackView.track, igv.hex2Color( hex ));
+            self.trackView.update();
+
+        });
+
+        column.append( self.systemColorPicker[ 0 ] );
+
+        row = $('<div class="grid">');
+        row.append( column[ 0 ] );
+
+        self.userEnterColorRowContainer.append( row[ 0 ]);
+
+        self.colorPickerContainer.append(self.userEnterColorRowContainer[ 0 ]);
+
+
+        // current color
+        self.currentColorRowContainer = $('<div class="grid-rect">');
+
+        // dividing line
+        self.currentColorRowContainer.append( $('<hr class="grid-dividing-line">')[ 0 ]);
+
+        column = $('<div class="col col-1-4">');
+        self.trackColorTile = $('<div class="col-filler">');
+        column.click(function(){
+
+            var color = self.trackColorTile.css( "background-color" );
+
+            igv.setTrackColor(self.trackView.track, color);
+            self.trackView.update();
+        });
+
+        self.trackColorTile.css( { "background-color" : "#eee" } );
+        column.append( self.trackColorTile[ 0 ] );
+
+        row = $('<div class="grid">');
+        row.append( column[ 0 ] );
+
+        column = $('<div class="col col-3-4 col-label">');
+        column.text("Current color");
+        row.append( column[ 0 ] );
+
+        self.currentColorRowContainer.append( row[ 0 ]);
+
+        self.colorPickerContainer.append(self.currentColorRowContainer[ 0 ]);
+
+
+        function makeColumn(row, r, c, clickHandler) {
 
             var column = $('<div class="col col-1-4">'),
                 filler = $('<div class="col-filler">');
@@ -142,6 +167,7 @@ var igv = (function (igv) {
 
             filler.css( { "background-color" : palette[ r ][ c ] } );
             column.append( filler[ 0 ] );
+
             row.append( column[ 0 ] );
 
         }
