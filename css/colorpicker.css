@@ -37,8 +37,6 @@
 
 .grid-header-blurb {
 
-    /*padding-top: 2px;*/
-
     margin-top: 4px;
     text-align: center;
     vertical-align: middle;
@@ -56,8 +54,6 @@
     height: 1px;
     border: 0;
     border-top: 1px solid rgb(196, 196, 196);
-    /*margin: 1em 0;*/
-    /*padding: 0;*/
 }
 
 .grid-rect {
@@ -69,8 +65,6 @@
 
     padding-left: 4px;
     padding-right: 4px;
-    /*padding-top: 2px;*/
-    /*padding-bottom: 2px;*/
 
     background-color: rgb(255, 255, 255);
 }
@@ -94,6 +88,21 @@
     padding: 2px;
 }
 
+
+.user-color-input {
+
+    width: 100%;
+
+    text-align: center;
+    vertical-align: middle;
+
+    font-family: 'PT Sans', sans-serif;
+    font-size: x-large;
+    font-weight: 200;
+
+    color: #575757;
+
+}
 
 .col-label {
 
@@ -140,13 +149,6 @@
     vertical-align: bottom;
 
 }
-
-/*.col:hover,*/
-/*.col:focus,*/
-/*.col:active  {*/
-    /*cursor:pointer;*/
-    /*opacity: 0.75;*/
-/*}*/
 
 .col-1-3 {
     width: 33.33%;
