@@ -72,7 +72,7 @@ var igv = (function (igv) {
 
         }
 
-        count(1 + palette.length).forEach(function(rowDigit, r, rowDigits){
+        count(1 + palette.length).forEach(function(r){
 
             var row,
                 rowContainer,
@@ -84,27 +84,25 @@ var igv = (function (igv) {
 
             if (r < palette.length) {
 
-                count(4).forEach(function(colDigit, c, colDigits){
+                count(4).forEach(function(c){
 
-                    column = $('<div class="col col-1-4">');
-                    filler = $('<div class="col-filler">');
-                    column.click(function(){
+                    makeRow(row, r, c, function(){
 
                         igv.setTrackColor(self.trackView.track, igv.hex2Color( palette[ r ][ c ] ));
                         self.trackView.update();
 
                     });
 
-                    filler.css( { "background-color" : palette[ r ][ c ] } );
-                    column.append( filler[ 0 ] );
-                    row.append( column[ 0 ] );
-
                 });
 
             } else {
 
+                // dividing line
                 rowContainer.append( $('<hr class="grid-dividing-line">')[ 0 ]);
 
+
+
+                // current color
                 column = $('<div class="col col-1-4">');
                 self.trackColorTile = $('<div class="col-filler">');
                 column.click(function(){
@@ -124,6 +122,9 @@ var igv = (function (igv) {
                 column.text("Current color");
                 row.append( column[ 0 ] );
 
+
+
+
             }
 
             rowContainer.append( row[ 0 ]);
@@ -131,6 +132,19 @@ var igv = (function (igv) {
             self.colorPickerContainer.append(rowContainer[ 0 ]);
 
         });
+
+        function makeRow(row, r, c, clickHandler) {
+
+            var column = $('<div class="col col-1-4">'),
+                filler = $('<div class="col-filler">');
+
+            column.click(clickHandler);
+
+            filler.css( { "background-color" : palette[ r ][ c ] } );
+            column.append( filler[ 0 ] );
+            row.append( column[ 0 ] );
+
+        }
 
         function count(c) {
 
