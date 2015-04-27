@@ -54,7 +54,7 @@ var igv = (function (igv) {
         }
     }
 
-    igv.EqtlTrack.prototype.paintControl = function (ctx, pixelWidth, pixelHeight) {
+    igv.EqtlTrack.prototype.paintAxis = function (ctx, pixelWidth, pixelHeight) {
 
         var track = this,
             yScale = (track.maxLogP - track.minLogP) / pixelHeight;

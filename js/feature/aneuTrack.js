@@ -200,7 +200,7 @@ var igv = (function (igv) {
         else color = this.midColor;
         return color;
     };
-    igv.AneuTrack.prototype.paintControl = function (ctx, pixelWidth, pixelHeight) {
+    igv.AneuTrack.prototype.paintAxis = function (ctx, pixelWidth, pixelHeight) {
 
         var track = this,
             yScale = (track.maxLogP - track.minLogP) / pixelHeight;
