@@ -33,7 +33,6 @@ var igv = (function (igv) {
         var self = this,
             palette,
             row,
-            rowContainer,
             column,
             filler;
 
@@ -76,53 +75,17 @@ var igv = (function (igv) {
 
         }
 
+        // color palette
         count(palette.length).forEach(function(r){
-
             self.colorPickerContainer.append(makeRow(r)[ 0 ]);
-
         });
 
+        // dividing line
         self.colorPickerContainer.append($('<hr class="grid-dividing-line">')[ 0 ]);
 
-        self.userColors = [];
-        count(8).forEach(function(c){
-            self.userColors.push(makeRowGone());
-            self.colorPickerContainer.append(self.userColors[ c ][ 0 ]);
-        });
-        self.nextUserColorsRowIndex = 0;
+        self.colorPickerContainer.append(makeRowUserColors()[ 0 ]);
 
-        // user enter color
-        self.userEnterColorRowContainer = $('<div class="grid-rect">');
-
-        column = $('<div class="col col-4-4">');
-
-        self.systemColorPicker = $('<input class="user-color-input" type="text" value="#ff0000">');
-        self.systemColorPicker.change(function () {
-
-            var hex = $(this).val();
-            igv.setTrackColor(self.trackView.track, igv.hex2Color( hex ));
-            self.trackView.update();
-        });
-
-        column.append( self.systemColorPicker[ 0 ] );
-
-        row = $('<div class="grid">');
-        row.append( column[ 0 ] );
-
-        self.userEnterColorRowContainer.append( row[ 0 ]);
-
-        self.colorPickerContainer.append(self.userEnterColorRowContainer[ 0 ]);
-
-
-
-
-
-
-
-
-
-
-
+        // dividing line
         self.colorPickerContainer.append($('<hr class="grid-dividing-line">')[ 0 ]);
 
 
@@ -152,13 +115,84 @@ var igv = (function (igv) {
 
         self.colorPickerContainer.append(self.currentColorRowContainer[ 0 ]);
 
+        function addUserColor(hex) {
+
+            if (undefined === self.userColorsIndex) {
+
+                self.userColorsIndex = 0;
+                self.userColorsRowIndex = 0;
+            } else if (4 === self.userColorsRowIndex) {
+
+                self.userColorsRowIndex = 0;
+                self.userColorsIndex = (1 + self.userColorsIndex) % self.userColors.length;
+            }
+
+            presentUserColor(hex, self.userColorsIndex, self.userColorsRowIndex);
+
+            ++(self.userColorsRowIndex);
+
+        }
+
+        function presentUserColor(hex, c, r) {
+
+            var rowContainer,
+                filler;
+
+            rowContainer = self.userColors[ c ];
+            rowContainer.removeClass( "grid-rect-gone" );
+            rowContainer.addClass( "grid-rect" );
+
+            filler = rowContainer.find(".grid").find(".col").find(".col-filler").eq(r);
+            filler.css( { "background-color" : hex } );
+
+        }
+
+        function makeRowUserColors() {
+
+            var rowContainer,
+                row,
+                column,
+                userColorInput;
+
+            self.userColors = [];
+
+            count(8).forEach(function(c){
+                self.userColors.push(makeRowGone());
+                self.colorPickerContainer.append(self.userColors[ c ][ 0 ]);
+            });
+
+            self.userColorsIndex = undefined;
+            self.userColorsRowIndex = 0;
+
+            userColorInput = $('<input class="user-color-input" type="text" value="#ff0000">');
+            userColorInput.change(function () {
+
+                var hex = $(this).val();
+                igv.setTrackColor(self.trackView.track, igv.hex2Color( hex ));
+                self.trackView.update();
+
+                addUserColor(hex);
+            });
+
+            column = $('<div class="col col-4-4">');
+            column.append( userColorInput[ 0 ] );
+
+            row = $('<div class="grid">');
+            row.append( column[ 0 ] );
+
+            rowContainer = $('<div class="grid-rect">');
+            rowContainer.append( row[ 0 ]);
+
+            return rowContainer;
+        }
+
         function makeRowGone(r) {
 
             var rowContainer = $('<div class="grid-rect-gone">'),
                 row = $('<div class="grid">');
 
             count(4).forEach(function(c){
-                row.append( makeColumn(r, c, "#ff0000")[ 0 ] );
+                row.append( makeColumn(r, c, "#eeeeee")[ 0 ] );
             });
 
             rowContainer.append(row);
