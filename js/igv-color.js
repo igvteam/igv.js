@@ -32,6 +32,10 @@ var igv = (function (igv) {
 
         var cooked = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
 
+        if (null === cooked) {
+            return undefined;
+        }
+
         return "rgb(" + parseInt(cooked[ 1 ], 16) + "," + parseInt(cooked[ 2 ], 16) + "," + parseInt(cooked[ 3 ], 16) + ")";
     };
 
