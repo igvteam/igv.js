@@ -50,10 +50,15 @@
 }
 
 .grid-dividing-line {
+
     display: block;
+
     height: 1px;
+
     border: 0;
     border-top: 1px solid rgb(196, 196, 196);
+
+    margin: 8px;
 }
 
 .grid-rect {
@@ -67,6 +72,10 @@
     padding-right: 4px;
 
     background-color: rgb(255, 255, 255);
+}
+
+.grid-rect-gone {
+    display: none;
 }
 
 .grid {
@@ -87,7 +96,6 @@
     height: 100%;
     padding: 2px;
 }
-
 
 .user-color-input {
 
@@ -122,18 +130,6 @@
 
     width: 100%;
     height: 100%;
-
-    border-color: rgb(255, 255, 255);
-    border-style: solid;
-    border-width: thin;
-    border-radius: 4px;
-
-}
-
-.col-filler-empty {
-
-    width: 100%;
-    height: 0;
 
     border-color: rgb(255, 255, 255);
     border-style: solid;

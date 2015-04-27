@@ -84,6 +84,13 @@ var igv = (function (igv) {
 
         self.colorPickerContainer.append($('<hr class="grid-dividing-line">')[ 0 ]);
 
+        self.userColors = [];
+        count(8).forEach(function(c){
+            self.userColors.push(makeRowGone());
+            self.colorPickerContainer.append(self.userColors[ c ][ 0 ]);
+        });
+        self.nextUserColorsRowIndex = 0;
+
         // user enter color
         self.userEnterColorRowContainer = $('<div class="grid-rect">');
 
@@ -107,10 +114,19 @@ var igv = (function (igv) {
         self.colorPickerContainer.append(self.userEnterColorRowContainer[ 0 ]);
 
 
+
+
+
+
+
+
+
+
+
         self.colorPickerContainer.append($('<hr class="grid-dividing-line">')[ 0 ]);
 
 
-        // current color
+        // Initial color
         self.currentColorRowContainer = $('<div class="grid-rect">');
 
         self.trackColorTile = $('<div class="col-filler">');
@@ -129,12 +145,25 @@ var igv = (function (igv) {
         row.append( column[ 0 ] );
 
         column = $('<div class="col col-3-4 col-label">');
-        column.text("Current color");
+        column.text("Initial color");
         row.append( column[ 0 ] );
 
         self.currentColorRowContainer.append( row[ 0 ]);
 
         self.colorPickerContainer.append(self.currentColorRowContainer[ 0 ]);
+
+        function makeRowGone(r) {
+
+            var rowContainer = $('<div class="grid-rect-gone">'),
+                row = $('<div class="grid">');
+
+            count(4).forEach(function(c){
+                row.append( makeColumn(r, c, "#ff0000")[ 0 ] );
+            });
+
+            rowContainer.append(row);
+            return rowContainer;
+        }
 
         function makeRow(r) {
 
@@ -142,19 +171,19 @@ var igv = (function (igv) {
                 row = $('<div class="grid">');
 
             count(4).forEach(function(c){
-                row.append( makeColumn(r, c)[ 0 ] );
+                row.append( makeColumn(r, c, palette[ r ][ c ])[ 0 ] );
             });
 
             rowContainer.append(row);
             return rowContainer;
         }
 
-        function makeColumn(r, c) {
+        function makeColumn(r, c, color) {
 
             var column = $('<div class="col col-1-4">'),
                 filler = $('<div class="col-filler">');
 
-            filler.css( { "background-color" : palette[ r ][ c ] } );
+            filler.css( { "background-color" : color } );
             column.append( filler[ 0 ] );
 
             column.click(function () {
