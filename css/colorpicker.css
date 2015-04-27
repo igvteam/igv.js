@@ -97,7 +97,7 @@
     vertical-align: middle;
 
     font-family: 'PT Sans', sans-serif;
-    font-size: x-large;
+    font-size: medium;
     font-weight: 200;
 
     color: #575757;
@@ -122,6 +122,18 @@
 
     width: 100%;
     height: 100%;
+
+    border-color: rgb(255, 255, 255);
+    border-style: solid;
+    border-width: thin;
+    border-radius: 4px;
+
+}
+
+.col-filler-empty {
+
+    width: 100%;
+    height: 0;
 
     border-color: rgb(255, 255, 255);
     border-style: solid;

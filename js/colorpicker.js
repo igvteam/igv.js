@@ -78,23 +78,7 @@ var igv = (function (igv) {
 
         count(palette.length).forEach(function(r){
 
-            rowContainer = $('<div class="grid-rect">');
-            row = $('<div class="grid">');
-
-            count(4).forEach(function(c){
-
-                makeColumn(row, r, c, function () {
-
-                    igv.setTrackColor(self.trackView.track, igv.hex2Color(palette[r][c]));
-                    self.trackView.update();
-
-                });
-
-            });
-
-            rowContainer.append( row[ 0 ]);
-
-            self.colorPickerContainer.append(rowContainer[ 0 ]);
+            self.colorPickerContainer.append(makeRow(r)[ 0 ]);
 
         });
 
@@ -110,11 +94,8 @@ var igv = (function (igv) {
         self.systemColorPicker.change(function () {
 
             var hex = $(this).val();
-            //console.log("yo. color baby. " + hex);
-
             igv.setTrackColor(self.trackView.track, igv.hex2Color( hex ));
             self.trackView.update();
-
         });
 
         column.append( self.systemColorPicker[ 0 ] );
@@ -133,18 +114,17 @@ var igv = (function (igv) {
         // dividing line
         self.currentColorRowContainer.append( $('<hr class="grid-dividing-line">')[ 0 ]);
 
-        column = $('<div class="col col-1-4">');
         self.trackColorTile = $('<div class="col-filler">');
+        self.trackColorTile.css( { "background-color" : "#eee" } );
+
+        column = $('<div class="col col-1-4">');
+        column.append( self.trackColorTile[ 0 ] );
+
         column.click(function(){
-
-            var color = self.trackColorTile.css( "background-color" );
-
-            igv.setTrackColor(self.trackView.track, color);
+            igv.setTrackColor(self.trackView.track, $(this).find(".col-filler").css( "background-color" ));
             self.trackView.update();
         });
 
-        self.trackColorTile.css( { "background-color" : "#eee" } );
-        column.append( self.trackColorTile[ 0 ] );
 
         row = $('<div class="grid">');
         row.append( column[ 0 ] );
@@ -157,19 +137,35 @@ var igv = (function (igv) {
 
         self.colorPickerContainer.append(self.currentColorRowContainer[ 0 ]);
 
+        function makeRow(r) {
 
-        function makeColumn(row, r, c, clickHandler) {
+            var rowContainer = $('<div class="grid-rect">'),
+                row = $('<div class="grid">');
+
+            count(4).forEach(function(c){
+                row.append( makeColumn(r, c)[ 0 ] );
+            });
+
+            rowContainer.append(row);
+            return rowContainer;
+        }
+
+        function makeColumn(r, c) {
 
             var column = $('<div class="col col-1-4">'),
                 filler = $('<div class="col-filler">');
 
-            column.click(clickHandler);
-
             filler.css( { "background-color" : palette[ r ][ c ] } );
             column.append( filler[ 0 ] );
 
-            row.append( column[ 0 ] );
+            column.click(function () {
 
+                igv.setTrackColor(self.trackView.track, $(this).find(".col-filler").css( "background-color" ));
+                self.trackView.update();
+
+            });
+
+            return column;
         }
 
         function count(c) {
