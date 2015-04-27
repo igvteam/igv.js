@@ -80,11 +80,13 @@ var igv = (function (igv) {
         // dividing line
         self.colorPickerContainer.append($('<hr class="grid-dividing-line">')[ 0 ]);
 
+        // user colors
         self.colorPickerContainer.append(rowOfUserColors()[ 0 ]);
 
         // dividing line
         self.colorPickerContainer.append($('<hr class="grid-dividing-line">')[ 0 ]);
 
+        // initial track color
         self.colorPickerContainer.append(rowOfInitialColor()[ 0 ]);
 
         function rowOfInitialColor() {
@@ -127,6 +129,7 @@ var igv = (function (igv) {
             var rowContainer,
                 row,
                 column,
+                filler,
                 userColorInput;
 
             self.userColors = [];
@@ -139,20 +142,36 @@ var igv = (function (igv) {
             self.userColorsIndex = undefined;
             self.userColorsRowIndex = 0;
 
-            userColorInput = $('<input class="user-color-input" type="text" value="#ff0000">');
+            row = $('<div class="grid">');
+
+            // column
+            column = $('<div class="col col-1-4">');
+            filler = $('<div class="col-filler-user-color">');
+            filler.css( { "background-color" : "#000000" } );
+            column.append(filler[ 0 ]);
+            row.append( column[ 0 ] );
+
+            // column
+            column = $('<div class="col col-3-4">');
+            userColorInput = $('<input class="user-color-input" type="text" value="#000000">');
             userColorInput.change(function () {
 
-                var hex = $(this).val();
-                igv.setTrackColor(self.trackView.track, igv.hex2Color( hex ));
+                var color = igv.hex2Color( $(this).val() );
+
+                if (undefined === color) {
+                    return;
+                }
+
+                igv.setTrackColor(self.trackView.track, color);
                 self.trackView.update();
 
-                addUserColor(hex);
+                addUserColor( $(this).val() );
             });
-
-            column = $('<div class="col col-4-4">');
+            userColorInput.keyup(function() {
+                var v = $(this).val();
+                console.log("key up " + v);
+            });
             column.append( userColorInput[ 0 ] );
-
-            row = $('<div class="grid">');
             row.append( column[ 0 ] );
 
             rowContainer = $('<div class="grid-rect">');
