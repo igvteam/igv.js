@@ -82,11 +82,10 @@ var igv = (function (igv) {
 
         });
 
+        self.colorPickerContainer.append($('<hr class="grid-dividing-line">')[ 0 ]);
+
         // user enter color
         self.userEnterColorRowContainer = $('<div class="grid-rect">');
-
-        // dividing line
-        self.userEnterColorRowContainer.append( $('<hr class="grid-dividing-line">')[ 0 ]);
 
         column = $('<div class="col col-4-4">');
 
@@ -108,11 +107,11 @@ var igv = (function (igv) {
         self.colorPickerContainer.append(self.userEnterColorRowContainer[ 0 ]);
 
 
+        self.colorPickerContainer.append($('<hr class="grid-dividing-line">')[ 0 ]);
+
+
         // current color
         self.currentColorRowContainer = $('<div class="grid-rect">');
-
-        // dividing line
-        self.currentColorRowContainer.append( $('<hr class="grid-dividing-line">')[ 0 ]);
 
         self.trackColorTile = $('<div class="col-filler">');
         self.trackColorTile.css( { "background-color" : "#eee" } );
