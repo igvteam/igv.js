@@ -31,10 +31,7 @@ var igv = (function (igv) {
     igv.ColorPicker = function (parentObject, userPalette) {
 
         var self = this,
-            palette,
-            row,
-            column,
-            filler;
+            palette;
 
         this.colorPickerContainer = $('<div class="grid-container ui-widget-content">');
         parentObject.append( this.colorPickerContainer[ 0 ] );
@@ -83,71 +80,49 @@ var igv = (function (igv) {
         // dividing line
         self.colorPickerContainer.append($('<hr class="grid-dividing-line">')[ 0 ]);
 
-        self.colorPickerContainer.append(makeRowUserColors()[ 0 ]);
+        self.colorPickerContainer.append(rowOfUserColors()[ 0 ]);
 
         // dividing line
         self.colorPickerContainer.append($('<hr class="grid-dividing-line">')[ 0 ]);
 
+        self.colorPickerContainer.append(rowOfInitialColor()[ 0 ]);
 
-        // Initial color
-        self.currentColorRowContainer = $('<div class="grid-rect">');
-
-        self.trackColorTile = $('<div class="col-filler">');
-        self.trackColorTile.css( { "background-color" : "#eee" } );
-
-        column = $('<div class="col col-1-4">');
-        column.append( self.trackColorTile[ 0 ] );
-
-        column.click(function(){
-            igv.setTrackColor(self.trackView.track, $(this).find(".col-filler").css( "background-color" ));
-            self.trackView.update();
-        });
-
-
-        row = $('<div class="grid">');
-        row.append( column[ 0 ] );
-
-        column = $('<div class="col col-3-4 col-label">');
-        column.text("Initial color");
-        row.append( column[ 0 ] );
-
-        self.currentColorRowContainer.append( row[ 0 ]);
-
-        self.colorPickerContainer.append(self.currentColorRowContainer[ 0 ]);
-
-        function addUserColor(hex) {
-
-            if (undefined === self.userColorsIndex) {
-
-                self.userColorsIndex = 0;
-                self.userColorsRowIndex = 0;
-            } else if (4 === self.userColorsRowIndex) {
-
-                self.userColorsRowIndex = 0;
-                self.userColorsIndex = (1 + self.userColorsIndex) % self.userColors.length;
-            }
-
-            presentUserColor(hex, self.userColorsIndex, self.userColorsRowIndex);
-
-            ++(self.userColorsRowIndex);
-
-        }
-
-        function presentUserColor(hex, c, r) {
+        function rowOfInitialColor() {
 
             var rowContainer,
-                filler;
+                row,
+                column;
 
-            rowContainer = self.userColors[ c ];
-            rowContainer.removeClass( "grid-rect-gone" );
-            rowContainer.addClass( "grid-rect" );
+            row = $('<div class="grid">');
 
-            filler = rowContainer.find(".grid").find(".col").find(".col-filler").eq(r);
-            filler.css( { "background-color" : hex } );
+            // initial color tile
+            self.trackColorTile = $('<div class="col-filler">');
+            self.trackColorTile.css( { "background-color" : "#eee" } );
 
+            column = $('<div class="col col-1-4">');
+            column.append( self.trackColorTile[ 0 ] );
+
+            column.click(function(){
+                igv.setTrackColor(self.trackView.track, $(this).find(".col-filler").css( "background-color" ));
+                self.trackView.update();
+            });
+
+            row.append( column[ 0 ] );
+
+
+            // initial color label
+            column = $('<div class="col col-3-4 col-label">');
+            column.text("Initial color");
+            row.append( column[ 0 ] );
+
+
+            rowContainer = $('<div class="grid-rect">');
+            rowContainer.append(row[ 0 ]);
+
+            return rowContainer;
         }
 
-        function makeRowUserColors() {
+        function rowOfUserColors() {
 
             var rowContainer,
                 row,
@@ -157,7 +132,7 @@ var igv = (function (igv) {
             self.userColors = [];
 
             count(8).forEach(function(c){
-                self.userColors.push(makeRowGone());
+                self.userColors.push(hiddenRow());
                 self.colorPickerContainer.append(self.userColors[ c ][ 0 ]);
             });
 
@@ -183,10 +158,43 @@ var igv = (function (igv) {
             rowContainer = $('<div class="grid-rect">');
             rowContainer.append( row[ 0 ]);
 
+            function addUserColor(hex) {
+
+                if (undefined === self.userColorsIndex) {
+
+                    self.userColorsIndex = 0;
+                    self.userColorsRowIndex = 0;
+                } else if (4 === self.userColorsRowIndex) {
+
+                    self.userColorsRowIndex = 0;
+                    self.userColorsIndex = (1 + self.userColorsIndex) % self.userColors.length;
+                }
+
+                presentUserColor(hex, self.userColorsIndex, self.userColorsRowIndex);
+
+                ++(self.userColorsRowIndex);
+
+            }
+
+            function presentUserColor(hex, c, r) {
+
+                var rowContainer,
+                    filler;
+
+                rowContainer = self.userColors[ c ];
+                rowContainer.removeClass( "grid-rect-gone" );
+                rowContainer.addClass( "grid-rect" );
+
+                filler = rowContainer.find(".grid").find(".col").find(".col-filler").eq(r);
+                filler.css( { "background-color" : hex } );
+
+            }
+
             return rowContainer;
+
         }
 
-        function makeRowGone(r) {
+        function hiddenRow(r) {
 
             var rowContainer = $('<div class="grid-rect-gone">'),
                 row = $('<div class="grid">');
@@ -254,7 +262,7 @@ var igv = (function (igv) {
 
         $(this.colorPickerContainer).offset( { left: (track_size.width - size.width)/2, top: track_origin.top } );
 
-        this.colorPickerHeaderBlurb.text( this.trackView.track.label);
+        this.colorPickerHeaderBlurb.text(this.trackView.track.label);
 
         this.trackColorTile.css( { "background-color" : this.trackView.track.color } );
 
