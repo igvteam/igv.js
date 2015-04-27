@@ -89,41 +89,6 @@ var igv = (function (igv) {
         // initial track color
         self.colorPickerContainer.append(rowOfInitialColor()[ 0 ]);
 
-        function rowOfInitialColor() {
-
-            var rowContainer,
-                row,
-                column;
-
-            row = $('<div class="grid">');
-
-            // initial color tile
-            self.trackColorTile = $('<div class="col-filler">');
-            self.trackColorTile.css( { "background-color" : "#eee" } );
-
-            column = $('<div class="col col-1-4">');
-            column.append( self.trackColorTile[ 0 ] );
-
-            column.click(function(){
-                igv.setTrackColor(self.trackView.track, $(this).find(".col-filler").css( "background-color" ));
-                self.trackView.update();
-            });
-
-            row.append( column[ 0 ] );
-
-
-            // initial color label
-            column = $('<div class="col col-3-4 col-label">');
-            column.text("Initial color");
-            row.append( column[ 0 ] );
-
-
-            rowContainer = $('<div class="grid-rect">');
-            rowContainer.append(row[ 0 ]);
-
-            return rowContainer;
-        }
-
         function rowOfUserColors() {
 
             var rowContainer,
@@ -144,15 +109,15 @@ var igv = (function (igv) {
 
             row = $('<div class="grid">');
 
-            // column
-            column = $('<div class="col col-1-4">');
-            filler = $('<div class="col-filler-user-color">');
-            filler.css( { "background-color" : "#000000" } );
-            column.append(filler[ 0 ]);
-            row.append( column[ 0 ] );
+            //// column
+            //column = $('<div class="col col-1-4">');
+            //filler = $('<div class="col-filler-user-color">');
+            //filler.css( { "background-color" : "#000000" } );
+            //column.append(filler[ 0 ]);
+            //row.append( column[ 0 ] );
 
             // column
-            column = $('<div class="col col-3-4">');
+            column = $('<div class="col col-4-4">');
             userColorInput = $('<input class="user-color-input" type="text" value="#000000">');
             userColorInput.change(function () {
 
@@ -168,8 +133,25 @@ var igv = (function (igv) {
                 addUserColor( $(this).val() );
             });
             userColorInput.keyup(function() {
-                var v = $(this).val();
-                console.log("key up " + v);
+
+                var value = $(this).val(),
+                    color;
+
+                //if ("" === value) {
+                //    $(this).val("#000000");
+                //    $(this).css( { "color" : "#000000" } );
+                //    return;
+                //}
+
+                color = igv.hex2Color( $(this).val() );
+
+                if (undefined === color) {
+                    return;
+                }
+
+                $(this).css( { "color" : color } );
+
+                //console.log("key up " + v);
             });
             column.append( userColorInput[ 0 ] );
             row.append( column[ 0 ] );
@@ -211,6 +193,41 @@ var igv = (function (igv) {
 
             return rowContainer;
 
+        }
+
+        function rowOfInitialColor() {
+
+            var rowContainer,
+                row,
+                column;
+
+            row = $('<div class="grid">');
+
+            // initial color tile
+            self.trackColorTile = $('<div class="col-filler">');
+            self.trackColorTile.css( { "background-color" : "#eee" } );
+
+            column = $('<div class="col col-1-4">');
+            column.append( self.trackColorTile[ 0 ] );
+
+            column.click(function(){
+                igv.setTrackColor(self.trackView.track, $(this).find(".col-filler").css( "background-color" ));
+                self.trackView.update();
+            });
+
+            row.append( column[ 0 ] );
+
+
+            // initial color label
+            column = $('<div class="col col-3-4 col-label">');
+            column.text("Initial color");
+            row.append( column[ 0 ] );
+
+
+            rowContainer = $('<div class="grid-rect">');
+            rowContainer.append(row[ 0 ]);
+
+            return rowContainer;
         }
 
         function hiddenRow(r) {
