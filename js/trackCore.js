@@ -169,15 +169,9 @@ var igv = (function (igv) {
                 config.format = "vcf";
                 config.featureType = "variant";
                 break;
-            case "arc":
-                config.format = "bed";
-                config.featureType = "annotation";
-                config.renderType = "arc";
-                break;
             case "FusionJuncSpan":
                 config.format = "bed";
-                config.featureType = "annotation";
-                config.renderType = "arc";
+                config.featureType = "FusionJuncSpan";
                 break;
             case "wig":
                 config.format = "wig";
@@ -219,6 +213,7 @@ var igv = (function (igv) {
                 break;
             case "sequence":
                 config.featureType = "sequence";
+                config.sequenceType = "dna";
                 break;
             default:
         }

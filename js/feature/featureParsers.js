@@ -40,15 +40,15 @@ var igv = (function (igv) {
     /**
      * A factory function.  Return a parser for the given file type.
      */
-    igv.FeatureParser = function (featureType, decode) {
+    igv.FeatureParser = function (format, decode) {
 
-        this.type = featureType;
+        this.type = format;
         this.skipRows = 0;   // The number of fixed header rows to skip.  Override for specific types as needed
 
         if (decode) {
             this.decode = decode;
         }
-        switch (featureType) {
+        switch (format) {
             case "narrowPeak":
             case "broadPeak":
                 this.decode = decodePeak;

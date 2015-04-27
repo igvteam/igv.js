@@ -56,15 +56,15 @@ var igv = (function (igv) {
     };
 
 
-    function getParser(featureType, decode) {
+    function getParser(format, decode) {
 
-        switch (featureType) {
+        switch (format) {
             case "vcf":
                 return new igv.VcfParser();
             case "seg" :
                 return new igv.SegParser();
             default:
-                return new igv.FeatureParser(featureType, decode);
+                return new igv.FeatureParser(format, decode);
         }
 
     }

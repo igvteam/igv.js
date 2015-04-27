@@ -28,7 +28,7 @@ var igv = (function (igv) {
     igv.SequenceTrack = function (config) {
         this.label = "";
         this.id = "sequence";
-        this.type = config.type || "dna";             //   dna | rna | prot
+        this.sequenceType = config.sequenceType || "dna";             //   dna | rna | prot
         this.height = 15;
         this.disableButtons = true;
         this.order = config.order || 9999;
@@ -74,7 +74,7 @@ var igv = (function (igv) {
                     if (this.color) {
                         c = this.color;
                     }
-                    else if ("dna" === this.type) {
+                    else if ("dna" === this.sequenceType) {
                         c = igv.nucleotideColors[ b ];
                     }
                     else {
