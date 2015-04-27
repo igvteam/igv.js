@@ -491,7 +491,7 @@ var igv = (function (igv) {
 
         //return {chr: chr, start: start, end: end, name: name, score: score, strand: strand, signal: signal,
         //    pValue: pValue, qValue: qValue};
-        return {chr: chr, start: start, end: end, pValue: pValue};
+        return {chr: chr, start: start, end: end, pvalue: pValue};
     }
 
     /**

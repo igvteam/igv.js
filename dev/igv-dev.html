@@ -269,15 +269,23 @@
         </div>
 
 
-        <div onclick="igv.browser.search('chr10');">GOTO</div>
+        <div onclick="igv.browser.loadTrack(
+                                {
+                                url: '../test/data/misc/GWAS_catalog_SNPs_Pval5E08_hg19_040115_subset.txt',
+                                label: 'gtex GWAS',
+                                format: 'gtexGWAS',
+                                featureType: 'gwas',
+                                colorScale:  {
+                                thresholds: [5e-8, 5e-4, 0.05],
+                                colors: ['rgb(0,102,51)', 'rgb(122,179,23)', 'rgb(158,213,76)', 'rgb(227,238,249)']
+                                },
+                                description: ('<strong>GWAS</strong><br/>'+
+                                'Put description of track here')
+                                })">gtex GWAS test
+        </div>
 
-        <div onclick="igv.browser.loadTrack ({
-        label: 'JuncSpanView',
-        type: 'FusionJuncSpan',
-        url: '//caique.broadinstitute.org/FusionWeb/SIMULATED_FUSIONS/sim_adipose/FUSION_INSPECTOR/finspector.fusion_preds.coalesced.summary.igv.FusionJuncSpan',
-        displayMode: 'SQUISHED',
-        indexed: false
-        })">Function Junction</div>
+
+        <div onclick="igv.browser.search('chr10');">GOTO</div>
 
 
     </div>
@@ -306,7 +314,7 @@
                     coverageQualityWeight: true
                 }
             },
-            palette: { usage: /*"replace"*/ "append", colors: [[ "#00A0B0", "#6A4A3C", "#CC333F", "#EB6841" ]] },
+            palette: {usage: /*"replace"*/ "append", colors: [["#00A0B0", "#6A4A3C", "#CC333F", "#EB6841"]]},
             tracks: [
                 {
                     type: "sequence",
