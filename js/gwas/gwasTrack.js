@@ -33,7 +33,6 @@ var igv = (function (igv) {
     igv.GWASTrack = function (config) {
         this.config = config;
         this.url = config.url;
-        this.featureSource = new igv.T2DVariantSource(config);
         this.label = config.label;
         this.trait = config.trait;
         this.height = config.height || 100;   // The preferred height
@@ -56,6 +55,14 @@ var igv = (function (igv) {
         this.pvalue = config.pvalue ? config.pvalue : "PVALUE";
 
         this.colorScale = new igv.BinnedColorScale(cs);
+
+        // An obvious hack -- the source should be passed in as an arbument
+        if(config.format && ("gtexGWAS" === config.format)) {
+            this.featureSource = new igv.FeatureSource(config);
+        } else {
+            this.featureSource = new igv.T2DVariantSource(config);
+        }
+
     }
 
 
@@ -88,22 +95,21 @@ var igv = (function (igv) {
         if (this.background) igv.Canvas.fillRect.call(ctx, 0, 0, pixelWidth, pixelHeight, {'fillStyle': this.background});
         igv.Canvas.strokeLine.call(ctx, 0, pixelHeight - 1, pixelWidth, pixelHeight - 1, {'strokeStyle': this.divider});
 
-        var variant, len, xScale, px, px1, pw, py, color, pvalue, val;
+        var variant, pos, len, xScale, px, px1, pw, py, color, pvalue, val;
 
         if (featureList) {
-
             len = featureList.length;
-
-            py = 20;
-
 
             for (var i = 0; i < len; i++) {
 
                 variant = featureList[i];
-                if (variant.POS < bpStart) continue;
-                if (variant.POS > bpEnd) break;
 
-                pvalue = variant[track.pvalue];
+                pos = variant.POS || variant.start;     // TODO fixme
+
+                if (pos < bpStart) continue;
+                if (pos > bpEnd) break;
+
+                pvalue = variant.pvalue || variant[track.pvalue];
                 if (!pvalue) continue;
 
                 color = track.colorScale.getColor(pvalue);
@@ -111,7 +117,7 @@ var igv = (function (igv) {
 
                 xScale = bpPerPixel;
 
-                px = Math.round((variant.POS - bpStart) / xScale);
+                px = Math.round((pos - bpStart) / xScale);
 
                 py = Math.max(track.dotSize, pixelHeight - Math.round((val - track.minLogP) / yScale));
 
@@ -163,18 +169,27 @@ var igv = (function (igv) {
             p,
             dbSnp,
             url,
-            data = [];
+            data = [],
+            chr,
+            pos,
+            pvalue;
 
         if (this.po) {
             for (i = 0, len = this.po.length; i < len; i++) {
                 p = this.po[i];
+
                 if (Math.abs(xOffset - p.x) < this.dotSize && Math.abs(yOffset - p.y) <= this.dotSize) {
+
+                    chr = p.feature.CHROM || p.feature.chr;   // TODO fixme
+                    pos = p.feature.POS || p.feature.start;   // TODO fixme
+                    pvalue = p.feature[this.pvalue] || p.feature.pvalue;
                     dbSnp = p.feature.DBSNP_ID;
+
                     if (dbSnp) {
-                        data.push("<a target='_blank' href='" + url + "' >" + p.feature.DBSNP_ID + "</a>");
+                        data.push("<a target='_blank' href='" + url + "' >" + dbSnp + "</a>");
                     }
-                    data.push("chr" + p.feature.CHROM + ":" + p.feature.POS.toString());
-                    data.push({name: 'p-value', value: p.feature[this.pvalue]});
+                    data.push(chr + ":" + pos.toString());
+                    data.push({name: 'p-value', value: pvalue});
 
                     if (p.feature.ZSCORE) {
                         data.push({name: 'z-score', value: p.feature.ZSCORE});
