@@ -33,6 +33,9 @@ var igv = (function (igv) {
         var self = this,
             palette;
 
+        this.rgb_re = /rgb\(([0-9]+),([0-9]+),([0-9]+)\)/;
+        this.hex_re = new RegExp('^#([0-9A-Fa-f]{2})([0-9A-Fa-f]{2})([0-9A-Fa-f]{2})$');
+
         this.colorPickerContainer = $('<div class="grid-container ui-widget-content">');
         parentObject.append( this.colorPickerContainer[ 0 ] );
 
@@ -121,38 +124,58 @@ var igv = (function (igv) {
             userColorInput = $('<input class="user-color-input" type="text" value="#000000">');
             userColorInput.change(function () {
 
-                var color = igv.hex2Color( $(this).val() );
+                var value = $(this).val(),
+                    rgb,
+                    hex;
 
-                if (undefined === color) {
-                    return;
+                rgb = self.rgb_re.exec(value);
+                if (null !== rgb) {
+
+                    igv.setTrackColor(self.trackView.track, rgb[ 0 ]);
+                    self.trackView.update();
+                    addUserColor( rgb[ 0 ] );
+                } else {
+
+                    hex = self.hex_re.exec(value);
+                    if (null !== hex) {
+
+                        igv.setTrackColor(self.trackView.track, igv.hex2Color( hex[ 0 ] ));
+                        self.trackView.update();
+                        addUserColor( hex[ 0 ] );
+
+                    }
                 }
 
-                igv.setTrackColor(self.trackView.track, color);
-                self.trackView.update();
-
-                addUserColor( $(this).val() );
             });
+
             userColorInput.keyup(function() {
 
                 var value = $(this).val(),
-                    color;
+                    rgb,
+                    hex;
 
-                //if ("" === value) {
-                //    $(this).val("#000000");
-                //    $(this).css( { "color" : "#000000" } );
-                //    return;
-                //}
-
-                color = igv.hex2Color( $(this).val() );
-
-                if (undefined === color) {
+                if ("" === value) {
+                    $(this).css( { "color" : "#222222" } );
                     return;
                 }
 
-                $(this).css( { "color" : color } );
+                rgb = self.rgb_re.exec(value);
+                if (null !== rgb) {
 
-                //console.log("key up " + v);
+                    $(this).css( { "color" : rgb[ 0 ] } );
+
+                } else {
+
+                    hex = self.hex_re.exec(value);
+                    if (null !== hex) {
+
+                        $(this).css( { "color" : hex[ 0 ] } );
+
+                    }
+                }
+
             });
+
             column.append( userColorInput[ 0 ] );
             row.append( column[ 0 ] );
 
