@@ -149,7 +149,7 @@ var igv = (function (igv) {
             var yp = pixelHeight - Math.round((p - track.minLogP) / yScale);
             // TODO: Dashes may not actually line up with correct scale. Ask Jim about this
             igv.Canvas.strokeLine.call(ctx, 45, yp - 2, 50, yp - 2, font); // Offset dashes up by 2 pixel
-            igv.Canvas.strokeLine.call(ctx, p, 44, yp + 2, font); // Offset numbers down by 2 pixels; TODO: error
+            igv.Canvas.fillText.call(ctx, p, 44, yp + 2, font); // Offset numbers down by 2 pixels;
         }
 
 
