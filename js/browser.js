@@ -119,28 +119,37 @@ var igv = (function (igv) {
             type = config.featureType,
             newTrack;
 
-        if (type === "gwas") {
-            newTrack = new igv.GWASTrack(config);
-        } else if (type === "annotation") {
-            newTrack = new igv.FeatureTrack(config);
-        } else if (type === "alignment") {
-            newTrack = new igv.BAMTrack(config);
-        } else if (type === "data") {
-            newTrack = new igv.WIGTrack(config);
-        } else if (type === "sequence") {
-            newTrack = new igv.SequenceTrack(config);
-        } else if (type === "eqtl") {
-            newTrack = new igv.EqtlTrack(config);
-        } else if (type === "seg") {
-            newTrack = new igv.SegTrack(config);
-        } else if (type === "aneu") {
-            newTrack = new igv.AneuTrack(config);
+        switch (type) {
+            case "gwas":
+                newTrack = new igv.GWASTrack(config);
+                break;
+            case "annotation":
+            case "variant":
+            case "FusionJuncSpan":
+                newTrack = new igv.FeatureTrack(config);
+                break;
+            case "alignment":
+                newTrack = new igv.BAMTrack(config);
+                break;
+            case "data":
+                newTrack = new igv.WIGTrack(config);
+                break;
+            case "sequence":
+                newTrack = new igv.SequenceTrack(config);
+                break;
+            case "eqtl":
+                newTrack = new igv.EqtlTrack(config);
+                break;
+            case "seg":
+                newTrack = new igv.SegTrack(config);
+                break;
+            case "aneu":
+                newTrack = new igv.AneuTrack(config);
+                break;
+            default:
+                alert("Unknown file type: " + path);
+                return null;
         }
-        else {
-            alert("Unknown file type: " + path);
-            return null;
-        }
-        // TODO -- error message "unsupported filed type"
 
         loadHeader(newTrack);
 
@@ -155,8 +164,7 @@ var igv = (function (igv) {
                 browser.addTrack(newTrack);
             }
         }
-
-    };
+    }
 
 
     igv.Browser.prototype.isDuplicateTrack = function (config) {
@@ -540,7 +548,7 @@ var igv = (function (igv) {
         this.update();
     };
 
-    // Zoom in by a factor of 2, keeping the same center location
+// Zoom in by a factor of 2, keeping the same center location
     igv.Browser.prototype.zoomIn = function () {
 
         var newScale,
@@ -561,7 +569,7 @@ var igv = (function (igv) {
         this.update();
     };
 
-    // Zoom out by a factor of 2, keeping the same center location if possible
+// Zoom out by a factor of 2, keeping the same center location if possible
     igv.Browser.prototype.zoomOut = function () {
 
         var newScale, maxScale, center, chrLength, widthBP, viewportWidth;

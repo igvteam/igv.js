@@ -61,20 +61,14 @@ var igv = (function (igv) {
             this.headURL = config.headURL || this.filename;
          //   console.log("Got URL: "+config.url+"-> url="+this.url);
         }
-        
-        if (config.type) {
-            this.type = config.type;
-        }
-        else {
-            this.type = igv.inferFileFormat(this.filename);
-        }
 
-        this.parser = getParser(this.type);
+
+        this.parser = getParser("aneu");
     };
 
 
-    function getParser(type) {        
-        return new igv.FeatureParser(type);
+    function getParser(format) {
+        return new igv.FeatureParser(format);
     }
 
     /**
