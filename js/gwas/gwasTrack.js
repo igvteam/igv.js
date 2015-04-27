@@ -134,7 +134,7 @@ var igv = (function (igv) {
     };
 
 
-    igv.GWASTrack.prototype.paintControl = function (ctx, pixelWidth, pixelHeight) {
+    igv.GWASTrack.prototype.paintAxis = function (ctx, pixelWidth, pixelHeight) {
 
         var track = this,
             yScale = (track.maxLogP - track.minLogP) / pixelHeight;

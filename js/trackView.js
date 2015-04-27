@@ -306,7 +306,7 @@ var igv = (function (igv) {
 
     igv.TrackView.prototype.leftHandGutterCreationHelper = function (leftHandGutter) {
 
-        if (this.track.paintControl) {
+        if (this.track.paintAxis) {
 
             // control canvas.  Canvas width and height attributes must be set.  Its a canvas weirdness.
             this.controlCanvas = $('<canvas class ="igv-track-control-canvas">')[0];
@@ -389,7 +389,7 @@ var igv = (function (igv) {
         }
         else {
             this.canvas.setAttribute("height", this.canvas.clientHeight);
-            if (this.track.paintControl) {
+            if (this.track.paintAxis) {
                 this.controlCanvas.style.height = contentHeightStr;
                 this.controlCanvas.setAttribute("height", newHeight);
             }
@@ -412,7 +412,7 @@ var igv = (function (igv) {
 
         this.trackDiv.style.height = trackHeightStr;
 
-        if (this.track.paintControl) {
+        if (this.track.paintAxis) {
             this.controlCanvas.style.height = trackHeightStr;
             this.controlCanvas.setAttribute("height", newHeight);
         }
@@ -514,7 +514,7 @@ var igv = (function (igv) {
                             pixelHeight: buffer.height
                         });
 
-                        if (self.track.paintControl) {
+                        if (self.track.paintAxis) {
 
                             var buffer2 = document.createElement('canvas');
                             buffer2.width = self.controlCanvas.width;
@@ -522,7 +522,7 @@ var igv = (function (igv) {
 
                             var ctx2 = buffer2.getContext('2d');
 
-                            self.track.paintControl(ctx2, buffer2.width, buffer2.height);
+                            self.track.paintAxis(ctx2, buffer2.width, buffer2.height);
 
                             self.controlCtx.drawImage(buffer2, 0, 0);
                         }

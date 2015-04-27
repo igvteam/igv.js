@@ -1055,7 +1055,7 @@ var igv = (function (igv) {
                         },
                         myself.currentTask);
 
-                    if (myself.track.paintControl) {
+                    if (myself.track.paintAxis) {
 
                         var buffer2 = document.createElement('canvas');
                         buffer2.width = this.controlCanvas.width;
@@ -1063,7 +1063,7 @@ var igv = (function (igv) {
 
                         var ctx2 =  buffer2.getContext('2d');
 
-                        myself.track.paintControl(ctx2, buffer2.width, buffer2.height);
+                        myself.track.paintAxis(ctx2, buffer2.width, buffer2.height);
 
                         myself.controlCtx.drawImage(buffer2, 0, 0);
                     }
