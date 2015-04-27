@@ -75,6 +75,7 @@ var igv = (function (igv) {
                 break;
             default:
                 this.decode = decodeBed;
+                this.decode.splitPattern = /\s+/;
 
         }
 
@@ -118,7 +119,8 @@ var igv = (function (igv) {
             cnt = 0,
             j,
             decode = this.decode,
-            type = this.type;
+            type = this.type,
+            splitPattern = decode.splitPattern || "\t";
 
 
         for (i = this.skipRows; i < len; i++) {
@@ -135,7 +137,7 @@ var igv = (function (igv) {
                 continue;
             }
 
-            tokens = lines[i].split(/\s+/);
+            tokens = lines[i].split(splitPattern);
             if (tokens.length < 1) continue;
 
             feature = decode(tokens, wig);
@@ -313,6 +315,8 @@ var igv = (function (igv) {
         return feature;
 
     }
+
+
 
     function decodePeak(tokens, ignore) {
 
