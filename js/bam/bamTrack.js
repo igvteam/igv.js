@@ -50,8 +50,6 @@ var igv = (function (igv) {
 
         this.skippedColor = config.skippedColor || "rgb(150, 170, 170)";
 
-        this.coverageColor = config.coverageColor || this.color;
-
         this.maxHeight = config.maxHeight || 500;
 
 
@@ -314,7 +312,7 @@ var igv = (function (igv) {
                     y = myself.coverageTrackHeight - h;
                     x = (bp - bpStart) / bpPerPixel;
 
-                    igv.Canvas.setProperties.call(ctx, {fillStyle: myself.coverageColor, trokeStyle: myself.coverageColor });
+                    igv.Canvas.setProperties.call(ctx, {fillStyle: myself.color, strokeStyle: myself.color });
                     igv.Canvas.fillRect.call(ctx, x, y, w, h);
 
                     // coverage mismatch coloring
