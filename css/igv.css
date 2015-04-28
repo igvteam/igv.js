@@ -516,7 +516,7 @@ div.ui-dialog fieldset {
 
 .igv-right-hand-gutter {
     position: absolute;
-    right: 24px;
+    right: 16px;
     width: 48px;
     height: 100%;
 
@@ -546,7 +546,6 @@ div.ui-dialog fieldset {
 }
 
 .igv-app-icon {
-
     cursor: pointer;
     color: grey;
     background-color: white;
@@ -559,10 +558,16 @@ div.ui-dialog fieldset {
 }
 
 .igv-track-menu-gear {
-    cursor: pointer;
+
     position: absolute;
-    left: 20px;
     top: 0;
+    right: 0;
+
+    padding-top: 4px;
+    padding-right: 6px;
+
+    cursor: pointer;
+
 }
 
 .igv-track-menu-container {
@@ -615,8 +620,6 @@ div.ui-dialog fieldset {
     color: rgba(51, 51, 51, 1);
 }
 
-
-
 .igv-track-drag-scrim {
 
     position: absolute;
@@ -630,13 +633,14 @@ div.ui-dialog fieldset {
     background-color: rgba(68, 134, 247, 0.25);
 
 }
+
 .igv-track-manipulation-handle {
 
     cursor: pointer;
 
     position: absolute;
     right: 0;
-    width: 24px;
+    width: 16px;
 
     height: 100%;
 
@@ -675,7 +679,7 @@ div.ui-dialog fieldset {
 .igv-viewport-div {
     position: absolute;
     left:  50px;
-    right: 72px;
+    right: 64px;
     height: 100%;
     overflow-x: hidden;
     overflow-y: auto;
