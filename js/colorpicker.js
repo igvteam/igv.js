@@ -33,7 +33,8 @@ var igv = (function (igv) {
         var self = this,
             palette;
 
-        this.rgb_re = /rgb\(([0-9]+),([0-9]+),([0-9]+)\)/;
+        //this.rgb_re = /rgb\((\d{1,3}),(\d{1,3}),(\d{1,3})\)/;
+        this.rgb_re = /([012]\d\d|\d\d{0,1})(\s*?,\s*?)([012]\d\d|\d\d{0,1})(\s*?,\s*?)([012]\d\d|\d\d{0,1})/;
         this.hex_re = new RegExp('^#([0-9A-Fa-f]{2})([0-9A-Fa-f]{2})([0-9A-Fa-f]{2})$');
 
         this.colorPickerContainer = $('<div class="grid-container ui-widget-content">');
@@ -124,54 +125,30 @@ var igv = (function (igv) {
             userColorInput = $('<input class="user-color-input" type="text" value="#000000">');
             userColorInput.change(function () {
 
-                var value = $(this).val(),
-                    rgb,
-                    hex;
+                var color = parseColor($(this).val());
 
-                rgb = self.rgb_re.exec(value);
-                if (null !== rgb) {
-
-                    igv.setTrackColor(self.trackView.track, rgb[ 0 ]);
+                if (undefined !== color) {
+                    igv.setTrackColor(self.trackView.track, color);
                     self.trackView.update();
-                    addUserColor( rgb[ 0 ] );
-                } else {
-
-                    hex = self.hex_re.exec(value);
-                    if (null !== hex) {
-
-                        igv.setTrackColor(self.trackView.track, igv.hex2Color( hex[ 0 ] ));
-                        self.trackView.update();
-                        addUserColor( hex[ 0 ] );
-
-                    }
+                    addUserColor( color );
                 }
+
 
             });
 
             userColorInput.keyup(function() {
 
                 var value = $(this).val(),
-                    rgb,
-                    hex;
+                    color;
 
                 if ("" === value) {
                     $(this).css( { "color" : "#222222" } );
                     return;
                 }
 
-                rgb = self.rgb_re.exec(value);
-                if (null !== rgb) {
-
-                    $(this).css( { "color" : rgb[ 0 ] } );
-
-                } else {
-
-                    hex = self.hex_re.exec(value);
-                    if (null !== hex) {
-
-                        $(this).css( { "color" : hex[ 0 ] } );
-
-                    }
+                color = parseColor($(this).val());
+                if (undefined !== color) {
+                    $(this).css( { "color" : color } );
                 }
 
             });
@@ -181,6 +158,25 @@ var igv = (function (igv) {
 
             rowContainer = $('<div class="grid-rect">');
             rowContainer.append( row[ 0 ]);
+
+            function parseColor(value) {
+
+                var rgb,
+                    hex;
+
+                rgb = self.rgb_re.exec(value);
+
+                if (null !== rgb) {
+                    return "rgb(" + rgb[ 0 ] + ")";
+                } else {
+                    hex = self.hex_re.exec(value);
+                    if (null !== hex) {
+                        return igv.hex2Color( hex[ 0 ] );
+                    }
+                }
+
+                return undefined;
+            }
 
             function addUserColor(hex) {
 
