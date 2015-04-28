@@ -438,7 +438,7 @@ div.ui-dialog fieldset {
     color: #444;
 
     position: absolute;
-    left: 30px;
+    left: 0;
     top: 50%;
     width: 50px;
     transform: translateY(-50%);
@@ -450,8 +450,8 @@ div.ui-dialog fieldset {
 
     position: absolute;
     top: 0;
-    left:80px;
-    right: 48px;
+    left:50px;
+    right: 64px;
 
     height: 100%;
 }
