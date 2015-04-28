@@ -58,13 +58,6 @@ var igv = (function (igv) {
             this.trackDiv.appendChild(igv.spinner());
         }
 
-        // Track Drag & Drop
-        if ("CURSOR" !== browser.type && isTrackDraggable(this.track)) {
-            makeTrackDraggable(this.track);
-        }
-
-        //makeTrackDraggable(this.track);
-
         this.addLeftHandGutterToParentTrackDiv(this.trackDiv);
 
         this.addViewportToParentTrackDiv(this.trackDiv);
@@ -79,6 +72,11 @@ var igv = (function (igv) {
         }
 
         this.addRightHandGutterToParentTrackDiv(this.trackDiv);
+
+        // Track Drag & Drop
+        if ("CURSOR" !== browser.type && isTrackDraggable(this.track)) {
+            makeTrackDraggable(this.track);
+        }
 
         if (this.track instanceof igv.RulerTrack) {
 
@@ -298,14 +296,11 @@ var igv = (function (igv) {
         this.rightHandGutter = $('<div class="igv-right-hand-gutter">')[0];
         $(trackDiv).append(this.rightHandGutter);
 
-        trackManipulationIconBox = $('<div class="igv-track-menu-icon-box">')[0];
-        $(this.rightHandGutter).append(trackManipulationIconBox);
-
-        this.rightHandGutterCreationHelper(trackManipulationIconBox);
+        this.rightHandGutterCreationHelper($(this.rightHandGutter));
 
     };
 
-    igv.TrackView.prototype.rightHandGutterCreationHelper = function (trackManipulationIconBox) {
+    igv.TrackView.prototype.rightHandGutterCreationHelper = function (parent) {
 
         var myself = this,
             gearButton;
@@ -314,8 +309,8 @@ var igv = (function (igv) {
             return;
         }
 
-        gearButton = $('<i class="fa fa-gear fa-20px igv-track-menu-gear igv-app-icon" style="padding-top: 5px">');
-        $(trackManipulationIconBox).append(gearButton[0]);
+        gearButton = $('<i class="fa fa-gear fa-20px igv-track-menu-gear igv-app-icon">');
+        $(parent).append(gearButton[0]);
 
         $(gearButton).click(function (e) {
             igv.popover.presentTrackMenu(e.pageX, e.pageY, myself);
