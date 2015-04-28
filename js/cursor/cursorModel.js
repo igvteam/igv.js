@@ -56,7 +56,7 @@ var cursor = (function (cursor) {
             "display" : "block"
         });
 
-        $(trackLabelSpan).text( this.browser.designatedTrack ? this.browser.designatedTrack.label : "unnamed" );
+        $(trackLabelSpan).text( this.browser.designatedTrack ? this.browser.designatedTrack.name : "unnamed" );
 
         $(trackLabelSpan).css({
             "color" : this.browser.highlightColor

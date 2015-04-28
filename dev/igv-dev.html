@@ -207,13 +207,13 @@
         <div onclick="igv.browser.loadTrack({
                                 type: 'bam',
                                 url: 'http://www.broadinstitute.org/igvdata/1KG/b37/data/NA06984/alignment/NA06984.mapped.ILLUMINA.bwa.CEU.low_coverage.20120522.bam',
-                                label: 'NA06984'})">NA06984 (BAM - Broad Server)
+                                name: 'NA06984'})">NA06984 (BAM - Broad Server)
         </div>
 
         <div onclick="igv.browser.loadTrack({
                                 type: 'bam',
                                 url: 'http://hgdownload.cse.ucsc.edu/goldenPath/hg19/encodeDCC/wgEncodeOpenChromFaire/wgEncodeOpenChromFaireMrta2041AlnRep1.bam',
-                                label: 'MRT_A204 FaireSeq Alignments rep 1'})">MRT_A204 FaireSeq Alignments rep 1
+                                name: 'MRT_A204 FaireSeq Alignments rep 1'})">MRT_A204 FaireSeq Alignments rep 1
         </div>
 
         <div onclick="igv.browser.loadTrack({
@@ -222,13 +222,13 @@
                                 url: 'https://www.googleapis.com/genomics/v1beta2',
                                 readGroupSetIds: 'CMvnhpKTFhCjz9_25e_lCw',
                                 authKey: 'AIzaSyC-dujgw4P1QvNd8i_c-I-S_P1uxVZzn0w',
-                                label: 'Ga4gh alignments'})">GA4Gh Alignments (Global Alliance, Google server)
+                                name: 'Ga4gh alignments'})">GA4Gh Alignments (Global Alliance, Google server)
         </div>
 
         <div onclick="igv.browser.loadTrack({
                                 url: '//www.broadinstitute.org/igvdata/test/igv-web/segmented_data_080520.seg.gz',
                                 indexed: false,
-                                label: 'GBM Copy # (TCGA Broad GDAC)'})">GBM Copy # (TCGA Broad GDAC)) (SEG)
+                                name: 'GBM Copy # (TCGA Broad GDAC)'})">GBM Copy # (TCGA Broad GDAC)) (SEG)
         </div>
 
         <div onclick="igv.browser.loadTrack({
@@ -236,19 +236,19 @@
                                 sourceType: 'gtex',
                                 url: '//www.gtexportal.org/igv/assets/eqtl/Skin_Sun_Exposed_Lower_leg.portal.eqtl.bin',
                                 indexed: false,
-                                label: 'Skin Sun Exposed Lower leg'})">EQTL Skin (GTEX))
+                                name: 'Skin Sun Exposed Lower leg'})">EQTL Skin (GTEX))
         </div>
 
         <div onclick="igv.browser.loadTrack( {
                                 url: '//www.broadinstitute.org/igvdata/t2d/recomb_decode.bedgraph',
-                                label: 'Recombination rate'})">Recombination Rate
+                                name: 'Recombination rate'})">Recombination Rate
         </div>
 
         <div onclick="igv.browser.loadTrack(
                                 {
                                 type: 'bed',
                                 url: '//www.broadinstitute.org/igvdata/annotations/hg19/dbSnp/snp137.hg19.bed.gz',
-                                label: 'dbSNP 137',
+                                name: 'dbSNP 137',
                                 visibilityWindow: 200000
                                 })">dbSNP 137 (bed tabix)
         </div>
@@ -256,7 +256,7 @@
         <div onclick="igv.browser.loadTrack(
                                 {
                                 url: 'https://www.encodeproject.org/files/ENCFF002ADR/@@download/ENCFF002ADR.bigBed',
-                                label: 'ENCFF002ADR',
+                                name: 'ENCFF002ADR',
                                 visibilityWindow: 200000
                                 })">Encode bigbed
         </div>
@@ -264,7 +264,7 @@
         <div onclick="igv.browser.loadTrack(
                                 {
                                 url: 'http://hgdownload.cse.ucsc.edu/goldenPath/hg19/encodeDCC/wgEncodeBroadHistone/wgEncodeBroadHistoneGm12878H3k4me3StdSig.bigWig',
-                                label: 'Gm12878H3k4me3'
+                                name: 'Gm12878H3k4me3'
                                 })">Encode bigwig
         </div>
 
@@ -272,7 +272,7 @@
         <div onclick="igv.browser.loadTrack(
                                 {
                                 url: '../test/data/misc/GWAS_catalog_SNPs_Pval5E08_hg19_040115_subset.txt',
-                                label: 'gtex GWAS',
+                                name: 'gtex GWAS',
                                 format: 'gtexGWAS',
                                 featureType: 'gwas',
                                 colorScale:  {
@@ -322,7 +322,7 @@
                 }
                 ,
                 {
-                    label: "Genes",
+                    name: "Genes",
                     url: "//dn7ywbm9isq8j.cloudfront.net/annotations/hg19/genes/gencode.v18.collapsed.bed",
                     //indexed: false,
                     order: 10000,

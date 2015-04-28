@@ -262,7 +262,7 @@ var igv = (function (igv) {
                 labelButton.style.position = "absolute";
                 labelButton.style.top = "10px";
                 labelButton.style.left = "10px";
-                labelButton.innerHTML = this.track.label;
+                labelButton.innerHTML = this.track.name;
 
                 labelButton.onclick = function (e) {
                     igv.popover.presentTrackPopup(e.pageX, e.pageY, myself.track.description);
@@ -270,13 +270,13 @@ var igv = (function (igv) {
 
             } else {
 
-                if (this.track.label) {
+                if (this.track.name) {
 
                     trackIconContainer = $('<div class="igv-app-icon-container">');
                     $(viewportDiv).append(trackIconContainer[0]);
 
                     this.track.labelSpan = $('<span class="igv-track-label-span-base">')[0];
-                    this.track.labelSpan.innerHTML = this.track.label;
+                    this.track.labelSpan.innerHTML = this.track.name;
                     $(trackIconContainer).append(this.track.labelSpan);
 
                     $(viewportDiv).scroll(function () {

@@ -211,7 +211,7 @@ var igv = (function (igv) {
 
                         if (cytoband.type == 'c') { // centermere: "acen"
 
-                            if (cytoband.label.charAt(0) == 'p') {
+                            if (cytoband.name.charAt(0) == 'p') {
                                 xC[0] = start;
                                 yC[0] = ideogramHeight + ideogramTop;
                                 xC[1] = start;

@@ -237,7 +237,7 @@ var igv = (function (igv) {
                 var trackPanel = igv.browser.trackViews[i];
                 var track = trackPanel.track;                                
                 if (track.getSummary && track.loadSummary ) {
-                    log("Found track with summary: " + track.label);
+                    log("Found track with summary: " + track.name);
                     
                     var source = track;
                    
@@ -352,7 +352,7 @@ var igv = (function (igv) {
                     var endy = scale * cytoband.end + top;
                     if (endy > lastPY) {
                         if (cytoband.type == 'c') { // centermere: "acen"
-                            if (cytoband.label.charAt(0) == 'p') {
+                            if (cytoband.name.charAt(0) == 'p') {
                                 yC[0] = starty;
                                 xC[0] = ideogramWidth + ideogramLeft;
                                 yC[1] = starty;

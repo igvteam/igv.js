@@ -51,7 +51,7 @@ var igv = (function (igv) {
                 },
                 {
                     url: "//dn7ywbm9isq8j.cloudfront.net/annotations/hg19/genes/gencode.v18.collapsed.bed",
-                    label: "Genes",
+                    name: "Genes",
                     order: 10000
                 }
             ]
@@ -156,7 +156,7 @@ var igv = (function (igv) {
                                 type: "eqtl",
                                 sourceType: 'gtex',
                                 url: record.url,
-                                label: record.label,
+                                name: record.name,
                                 disableButtons: true,
                                 height: 100
                             }
@@ -171,7 +171,7 @@ var igv = (function (igv) {
                 };
                 $(containerDiv).append(cb);
 
-                var span = $('<span>' + record.label + '</span>')[0];
+                var span = $('<span>' + record.name + '</span>')[0];
                 $(containerDiv).append(span);
 
                 $(selectionDiv).append(containerDiv);
@@ -213,7 +213,7 @@ var igv = (function (igv) {
                 for (i = 0; i < len; i++) {
                     tokens = lines[i].split('\t');
                     if (tokens.length == 2) {
-                        records.push({label: tokens[0], url: tokens[1]});
+                        records.push({name: tokens[0], url: tokens[1]});
                     }
                 }
 

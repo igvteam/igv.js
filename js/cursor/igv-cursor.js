@@ -139,7 +139,7 @@ var igv = (function (igv) {
 
             var localFile = $(this)[ 0 ].files[ 0 ];
 
-            configureTrackWithLocalFileOrPath( { type: "bed", localFile: localFile, label: localFile.name } );
+            configureTrackWithLocalFileOrPath( { type: "bed", localFile: localFile} );
 
             $(this).val("");
             $('#igvFileUploadModal').modal('hide');
@@ -150,7 +150,7 @@ var igv = (function (igv) {
 
             var path = $(this).val();
 
-            configureTrackWithLocalFileOrPath( { type: "bed", url: path, label: igv.browser.trackLabelWithPath(path) } );
+            configureTrackWithLocalFileOrPath( { type: "bed", url: path, name: igv.browser.trackLabelWithPath(path) } );
 
             $(this).val("");
             $('#igvLoadURLModal').modal('hide');
@@ -276,7 +276,7 @@ var igv = (function (igv) {
                         configurations.push({
                             type: "bed",
                             url: record.path,
-                            label: encode.encodeTrackLabel(record),
+                            name: encode.encodeTrackLabel(record),
                             color: encode.encodeAntibodyColor(record.antibody)
                         });
 
@@ -390,8 +390,6 @@ var igv = (function (igv) {
 
     function addCursorBrowserExtensions(browser) {
 
-        browser.crossDomainProxy = "php/simpleProxy.php";
-
         browser.loadTrackWithConfigurations = function (configurations) {
 
             var tracks = [],
@@ -458,7 +456,7 @@ var igv = (function (igv) {
                         type: "bed",
                         url: trackSession.path,
                         color: trackSession.color,
-                        label: trackSession.label,
+                        name: trackSession.name || trackSession.label,   // label is (deprecated) synonym for name
                         order: trackSession.order,
                         height: trackSession.height,
                         trackFilter: trackSession.trackFilter,
@@ -848,8 +846,8 @@ var igv = (function (igv) {
 
             // track label
             trackLabelDiv = $('<div class="igv-track-label-div">')[0];
-            trackLabelDiv.innerHTML = track.label;
-            trackLabelDiv.title = track.label;
+            trackLabelDiv.innerHTML = track.name;
+            trackLabelDiv.title = track.name;
             $(trackView.leftHandGutter).append(trackLabelDiv);
             track.trackLabelDiv = trackLabelDiv;  // DON'T REMOVE THIS!
 
