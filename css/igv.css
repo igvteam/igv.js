@@ -516,7 +516,7 @@ div.ui-dialog fieldset {
 
 .igv-right-hand-gutter {
     position: absolute;
-    right: 16px;
+    right: 0;
     width: 48px;
     height: 100%;
 
@@ -639,7 +639,7 @@ div.ui-dialog fieldset {
     cursor: pointer;
 
     position: absolute;
-    right: 0;
+    right: 48px;
     width: 16px;
 
     height: 100%;
