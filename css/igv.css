@@ -516,7 +516,7 @@ div.ui-dialog fieldset {
 
 .igv-right-hand-gutter {
     position: absolute;
-    right: 0;
+    right: 24px;
     width: 48px;
     height: 100%;
 
@@ -635,8 +635,8 @@ div.ui-dialog fieldset {
     cursor: pointer;
 
     position: absolute;
-    left: 0;
-    top: 0;
+    right: 0;
+    widht: 24px;
 
     width: 24px;
     height: 100%;
@@ -648,8 +648,8 @@ div.ui-dialog fieldset {
     border-color: #a2a2a2;
     border-style: solid;
     border-width: thin;
-    border-top-left-radius: 4px;
-    border-bottom-left-radius: 4px;
+    border-top-right-radius: 4px;
+    border-bottom-right-radius: 4px;
 
     z-index: 512;
 
@@ -666,19 +666,17 @@ div.ui-dialog fieldset {
 
 }
 
-
 .igv-left-hand-gutter {
     position: absolute;
-    left: 30px;
+    left: 0;
     width: 50px;
     height: 100%;
 }
 
-
 .igv-viewport-div {
     position: absolute;
-    left:  80px;
-    right: 48px;
+    left:  50px;
+    right: 72px;
     height: 100%;
     overflow-x: hidden;
     overflow-y: auto;
@@ -724,7 +722,6 @@ div.ui-dialog fieldset {
     width: 100%;
     height: 100%;
 }
-
 
 .spacer5 {
     height: 5px;
