@@ -641,7 +641,8 @@ div.ui-dialog fieldset {
     position: absolute;
     right: 36px;
     width: 12px;
-    /*width: 16px;*/
+
+    margin-left: 2px;
 
     height: 100%;
 
@@ -680,7 +681,7 @@ div.ui-dialog fieldset {
 .igv-viewport-div {
     position: absolute;
     left:  50px;
-    right: 48px;
+    right: 50px;
     height: 100%;
     overflow-x: hidden;
     overflow-y: auto;
