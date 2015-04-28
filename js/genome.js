@@ -71,7 +71,7 @@ var igv = (function (igv) {
     igv.Cytoband = function (start, end, name, typestain) {
         this.start = start;
         this.end = end;
-        this.label = name;
+        this.name = name;
         this.stain = 0;
 
         // Set the type, either p, n, or c

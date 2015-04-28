@@ -35,7 +35,7 @@ var igv = (function (igv) {
                     object: $('<div class="igv-track-menu-item">Set track name</div>'),
                     click: function () {
 
-                        trackMenuPopupDialog = new igv.TrackMenuPopupDialog(popover, "Track name", trackView.track.label, function () {
+                        trackMenuPopupDialog = new igv.TrackMenuPopupDialog(popover, "Track name", trackView.track.name, function () {
 
                             if (!trackMenuPopupDialog.name.val()) {
 
@@ -108,10 +108,10 @@ var igv = (function (igv) {
 
                     var str;
 
-                    if (trackItem.label) {
+                    if (trackItem.name) {
 
                         str = (0 === i) ? '<div class=\"igv-track-menu-item igv-track-menu-border-top\">' : '<div class=\"igv-track-menu-item\">';
-                        str = str + trackItem.label + '</div>';
+                        str = str + trackItem.name + '</div>';
 
                         menuItems.push( { object: $(str), click: trackItem.click, init: trackItem.init } );
                     } else {

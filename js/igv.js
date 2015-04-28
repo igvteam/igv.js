@@ -315,7 +315,7 @@ var igv = (function (igv) {
                 {
                     url: "//dn7ywbm9isq8j.cloudfront.net/annotations/hg19/genes/gencode.v18.collapsed.bed.gz",
                     indexed: false,
-                    label: "Genes",
+                    name: "Genes",
                     order: 10000
                 });
         }

@@ -59,8 +59,8 @@ var igv = (function (igv) {
 
             if (header) {
                 // Header (from track line).  Set properties,unless set in the config (config takes precedence)
-                if (header.name && !track.config.label) {
-                    track.label = header.name;
+                if (header.name && !track.config.name) {
+                    track.name = header.name;
                 }
                 if (header.color && !track.config.color) {
                     track.color = "rgb(" + header.color + ")";

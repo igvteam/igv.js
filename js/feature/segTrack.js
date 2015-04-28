@@ -77,7 +77,7 @@ var igv = (function (igv) {
 
         return [
             {
-                label: ("SQUISHED" === this.displayMode) ? "Expand sample hgt" : "Squish sample hgt" ,
+                name: ("SQUISHED" === this.displayMode) ? "Expand sample hgt" : "Squish sample hgt" ,
                 click: function () {
                     popover.hide();
                     myself.toggleSampleHeight();

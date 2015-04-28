@@ -38,8 +38,18 @@ var igv = (function (igv) {
 
         track.config = config;
         track.url = config.url;
-        track.label = config.label || "";
-        track.id = config.id || config.label;
+
+        config.name = config.name || config.label;   // synonym for name, label is deprecated
+        if (config.name) {
+            track.name = config.name;
+        }
+        else {
+            if (config.localFile) track.name = config.localFile.name;
+            else track.name = config.url;
+
+        }
+
+        track.id = config.id || track.name;
         track.order = config.order;
         track.color = config.color || "rgb(150,150,150)";
 
@@ -214,20 +224,20 @@ var igv = (function (igv) {
 
     igv.setTrackLabel = function (track, label) {
 
-        track.label = label;
+        track.name = label;
 
         if (track.description) {
 
-            track.labelButton.innerHTML = track.label;
+            track.labelButton.innerHTML = track.name;
         } else {
 
             if ("CURSOR" !== this.browser.type) {
-                track.labelSpan.innerHTML = track.label;
+                track.labelSpan.innerHTML = track.name;
             }
             else {
 
                 // handle CURSOR track label
-                track.trackLabelDiv.innerHTML = track.label
+                track.trackLabelDiv.innerHTML = track.name
             }
         }
 

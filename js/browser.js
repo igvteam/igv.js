@@ -39,6 +39,9 @@ var igv = (function (igv) {
 
         this.searchURL = options.searchURL || "//www.broadinstitute.org/webservices/igv/locus?genome=hg19&name=";
 
+        this.crossDomainProxy = options.crossDomainProxy || "php/simpleProxy.php";
+
+
         $("input[id='trackHeightInput']").val(this.trackHeight);
 
         this.trackContainerDiv = trackContainer;

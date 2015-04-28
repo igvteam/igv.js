@@ -321,7 +321,7 @@ var igv = (function (igv) {
 
         $(this.colorPickerContainer).offset( { left: (track_size.width - size.width)/2, top: track_origin.top } );
 
-        this.colorPickerHeaderBlurb.text(this.trackView.track.label);
+        this.colorPickerHeaderBlurb.text(this.trackView.track.name);
 
         this.trackColorTile.css( { "background-color" : this.trackView.track.color } );
 

@@ -30,11 +30,11 @@ var igv = (function (igv) {
 
 
         var url = config.url,
-            label = config.label;
+            label = config.name;
 
         this.config = config;
         this.url = url;
-        this.label = label;
+        this.name = label;
         this.pValueField = config.pValueField || "pValue";
         this.geneField = config.geneField || "geneName";
         this.minLogP = config.minLogP || 3.5;

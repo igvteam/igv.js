@@ -46,8 +46,8 @@ var igv = (function (igv) {
         }
 
 
-        this.label = config.label;
-        this.id = config.id || this.label;
+        this.name = config.name;
+        this.id = config.id || this.name;
         this.color = config.color || "rgb(150,150,150)";
         this.height = 100;
         this.order = config.order;

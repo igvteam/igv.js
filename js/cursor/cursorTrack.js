@@ -50,7 +50,7 @@ var cursor = (function (cursor) {
         var json;
 
         json = {
-            label: this.label,
+            name: this.name,
             color: this.color,
             order: this.order,
             height: this.height,
@@ -162,11 +162,11 @@ var cursor = (function (cursor) {
 
                 if (header) {
                     myself.header = header;
-                    if (header.name && !myself.config.label) {
-                        myself.label = header.name;
+                    if (header.name && !myself.config.name) {
+                        myself.name = header.name;
                         if (myself.trackLabelDiv) {
                             myself.trackLabelDiv.innerHTML = header.name;
-                            myself.trackLabelDiv.title = header.label;
+                            myself.trackLabelDiv.title = header.name;
                         }
                     }
                     if (header.color && !myself.config.color) {
