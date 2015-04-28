@@ -309,7 +309,7 @@ var igv = (function (igv) {
             options.tracks.push(
                 {
                     type: "sequence",
-                    order: 9999
+                    order: -9999
                 });
             options.tracks.push(
                 {

@@ -33,6 +33,7 @@ var igv = (function (igv) {
         this.id = "ruler";
         this.disableButtons = true;
         this.ignoreTrackMenu = true;
+        this.order = -Number.MAX_VALUE;
 
     };
 
