@@ -648,7 +648,7 @@ div.ui-dialog fieldset {
 
     font-size: medium;
 
-    border-color: #a2a2a2;
+    border-color: #e5e5e5;
     border-style: solid;
     border-width: thin;
     border-top-right-radius: 4px;
@@ -656,7 +656,7 @@ div.ui-dialog fieldset {
 
     z-index: 512;
 
-    background-color: #a2a2a2;
+    background-color: #e5e5e5;
 
 }
 
@@ -664,8 +664,8 @@ div.ui-dialog fieldset {
 .igv-track-manipulation-handle:focus,
 .igv-track-manipulation-handle:active {
 
-    border-color: #797979;
-    background-color: #797979;
+    border-color: #bebebe;
+    background-color: #bebebe;
 
 }
 
