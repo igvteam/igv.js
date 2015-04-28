@@ -38,7 +38,7 @@ var igv = (function (igv) {
 
         this.coverageTrackHeight = config.coverageTrackHeight || 50;
 
-        this.alignmentColor = config.alignmentColor || "rgb(185, 185, 185)";
+        this.color = config.color || "rgb(185, 185, 185)";
 
         this.negStrandColor = config.negStrandColor || "rgba(150, 150, 230, 0.75)";
         this.posStrandColor = config.posStrandColor || "rgba(230, 150, 150, 0.75)";
@@ -50,7 +50,7 @@ var igv = (function (igv) {
 
         this.skippedColor = config.skippedColor || "rgb(150, 170, 170)";
 
-        this.coverageColor = config.coverageColor || this.alignmentColor;
+        this.coverageColor = config.coverageColor || this.color;
 
         this.maxHeight = config.maxHeight || 500;
 
@@ -74,7 +74,7 @@ var igv = (function (igv) {
     igv.BAMTrack.alignmentShadingOptions = {
 
         none : function (bamTrack, alignment) {
-            return bamTrack.alignmentColor;
+            return bamTrack.color;
         },
 
         strand : function (bamTrack, alignment) {
@@ -96,7 +96,7 @@ var igv = (function (igv) {
                 }
 
             } else {
-                return bamTrack.alignmentColor;
+                return bamTrack.color;
             }
 
         }
@@ -603,7 +603,7 @@ var igv = (function (igv) {
             trackMenuItem = '<div class=\"igv-track-menu-item\">',
             trackMenuItemFirst = '<div class=\"igv-track-menu-item igv-track-menu-border-top\">';
 
-        //menuItems.push(igv.colorPickerMenuItem(popover, this.trackView, "Set feature color", this.color));
+        menuItems.push(igv.colorPickerMenuItem(popover, this.trackView, "Set alignment color", this.color));
 
         [ "none", "strand", "firstOfPairStrand" ].forEach(function(alignmentShading, index){
 
