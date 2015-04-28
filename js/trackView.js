@@ -116,7 +116,8 @@ var igv = (function (igv) {
                 target;
 
             self.igvTrackDragScrim = $('<div class="igv-track-drag-scrim">')[0];
-            $(self.trackDiv).append(self.igvTrackDragScrim);
+            //$(self.trackDiv).append(self.igvTrackDragScrim);
+            $(self.viewportDiv).append(self.igvTrackDragScrim);
             $(self.igvTrackDragScrim).hide();
 
             self.igvTrackManipulationHandle = $('<div class="igv-track-manipulation-handle">')[0];
