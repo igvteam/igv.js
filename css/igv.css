@@ -616,6 +616,7 @@ div.ui-dialog fieldset {
 }
 
 
+
 .igv-track-drag-scrim {
 
     position: absolute;
@@ -644,13 +645,15 @@ div.ui-dialog fieldset {
 
     font-size: medium;
 
-    border-color: #e3e3e3;
+    border-color: #a2a2a2;
     border-style: solid;
     border-width: thin;
+    border-top-left-radius: 4px;
+    border-bottom-left-radius: 4px;
 
     z-index: 512;
 
-    background-color: white;
+    background-color: #a2a2a2;
 
 }
 
@@ -658,12 +661,10 @@ div.ui-dialog fieldset {
 .igv-track-manipulation-handle:focus,
 .igv-track-manipulation-handle:active {
 
-    border-color: #a2a2a2;
-    background-color: #a2a2a2;
+    border-color: #797979;
+    background-color: #797979;
 
 }
-
-
 
 
 .igv-left-hand-gutter {
@@ -672,7 +673,6 @@ div.ui-dialog fieldset {
     width: 50px;
     height: 100%;
 }
-
 
 
 .igv-viewport-div {
