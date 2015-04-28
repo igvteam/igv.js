@@ -59,9 +59,11 @@ var igv = (function (igv) {
         }
 
         // Track Drag & Drop
-        if (0 === 1 && "CURSOR" !== browser.type && isTrackDraggable(this.track)) {
+        if ("CURSOR" !== browser.type && isTrackDraggable(this.track)) {
             makeTrackDraggable(this.track);
         }
+
+        //makeTrackDraggable(this.track);
 
         this.addLeftHandGutterToParentTrackDiv(this.trackDiv);
 
@@ -112,6 +114,9 @@ var igv = (function (igv) {
 
         function makeTrackDraggable(track) {
 
+            var dragged,
+                target;
+
             self.igvTrackDragScrim = $('<div class="igv-track-drag-scrim">')[0];
             $(self.trackDiv).append(self.igvTrackDragScrim);
             $(self.igvTrackDragScrim).hide();
@@ -120,104 +125,72 @@ var igv = (function (igv) {
             $(self.trackDiv).append(self.igvTrackManipulationHandle);
 
             $( document ).mousedown(function(e) {
-                lastScreenY = e.screenY;
-                self.isMouseIn = undefined;
-                self.isMouseDown = true;
+                igv.browser.isMouseDown = true;
+            });
+
+            $( document ).mouseup(function(e) {
+                igv.browser.isMouseDown = undefined;
+                igv.browser.dragTargetTrackView = igv.browser.dragTrackView = undefined;
+
             });
 
             $( self.igvTrackManipulationHandle ).mousedown(function(e) {
-                console.log("down " + self.track.id);
 
-                $(self.igvTrackDragScrim).show();
-
-                lastScreenY = e.screenY;
-                self.isMouseIn = true;
-
-                xy = igv.translateMouseCoordinates(e, igv.browser.trackContainerDiv);
-                console.log("screen " + e.screenY + " trackContainer " + xy.y);
-
+                self.isMouseDown = true;
+                igv.browser.dragTrackView = self;
             });
-
 
             $( self.igvTrackManipulationHandle ).mouseup(function(e) {
-                console.log("up " + self.track.id);
-
-                $(self.igvTrackDragScrim).hide();
-
-                xy = igv.translateMouseCoordinates(e, igv.browser.trackContainerDiv);
-                console.log("screen " + e.screenY + " trackContainer " + xy.y);
 
                 self.isMouseDown = undefined;
-                lastScreenY = undefined;
-                self.isMouseIn = undefined;
-            });
 
-            $( self.igvTrackManipulationHandle ).mouseenter(function(e) {
-                console.log("enter " + self.track.id);
-
-                if (true === self.isMouseDown) {
-                    $(self.igvTrackDragScrim).show();
+                if (igv.browser.dragTrackView) {
+                    $(igv.browser.dragTrackView.igvTrackDragScrim).hide();
                 }
 
             });
 
-            $( self.igvTrackManipulationHandle ).mouseleave(function(e) {
-                console.log("leave " + self.track.id);
+            $( self.igvTrackManipulationHandle ).mouseenter(function(e) {
 
-                self.isMouseIn = undefined;
+                self.isMouseIn = true;
 
-                $(self.igvTrackDragScrim).hide();
+                igv.browser.dragTargetTrackView = self;
+
+                if (igv.browser.dragTargetTrackView && igv.browser.dragTrackView) {
+
+                    if (igv.browser.dragTargetTrackView !== igv.browser.dragTrackView) {
+
+                        if (igv.browser.dragTargetTrackView.track.order < igv.browser.dragTrackView.track.order) {
+
+                            igv.browser.dragTrackView.track.order = igv.browser.dragTargetTrackView.track.order;
+                            igv.browser.dragTargetTrackView.track.order = 1 + igv.browser.dragTrackView.track.order;
+                        } else {
+
+                            igv.browser.dragTrackView.track.order = igv.browser.dragTargetTrackView.track.order;
+                            igv.browser.dragTargetTrackView.track.order = igv.browser.dragTrackView.track.order - 1;
+                        }
+
+                        igv.browser.reorderTracks();
+                    }
+
+                } else {
+                    $(self.igvTrackDragScrim).show();
+                }
+
 
             });
 
+            $( self.igvTrackManipulationHandle ).mouseleave(function(e) {
 
-
-            //
-            //$( self.igvTrackManipulationHandle ).mousedown(function(e) {
-            //    isMouseDown = true;
-            //
-            //    xy = igv.translateMouseCoordinates(e, igv.browser.trackContainerDiv);
-            //    console.log("screen " + e.screenY + " trackContainer " + xy.y);
-            //
-            //    $(self.igvTrackDragScrim).show();
-            //
-            //
-            //});
-            //
-            //$( document ).mousemove(function (e) {
-            //
-            //    var top;
-            //
-            //    if (isMouseDown && self.isMouseIn && undefined !== lastScreenY) {
-            //
-            //        xy = igv.translateMouseCoordinates(e, igv.browser.trackContainerDiv);
-            //        console.log("screen " + e.screenY + " trackContainer " + xy.y);
-            //
-            //        lastScreenY = e.screenY
-            //    } else if (isMouseDown && self.isMouseIn ) {
-            //
-            //    }
-            //
-            //});
-            //
-            //$( document ).mouseup(function(e) {
-            //    disableDrag();
-            //});
-
-            function disableDrag() {
-
-                isMouseDown = false;
-                lastScreenY = undefined;
                 self.isMouseIn = undefined;
 
-                // rely on default top value to set track "y" value.
-                //$(self.trackDiv).css('top', 'auto');
+                if (igv.browser.dragTrackView) {
 
-                //igv.browser.reorderTracks();
+                } else {
+                    $(self.igvTrackDragScrim).hide();
+                }
 
-                $(self.igvTrackDragScrim).hide();
-
-            }
+            });
 
         }
     };
