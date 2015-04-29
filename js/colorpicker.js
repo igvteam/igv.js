@@ -36,7 +36,7 @@ var igv = (function (igv) {
         this.rgb_re = /([012]\d\d|\d\d{0,1})(\s*?,\s*?)([012]\d\d|\d\d{0,1})(\s*?,\s*?)([012]\d\d|\d\d{0,1})/;
         this.hex_re = new RegExp('^#([0-9A-Fa-f]{2})([0-9A-Fa-f]{2})([0-9A-Fa-f]{2})$');
 
-        this.container = $('<div class="grid-container-colorpicker ui-widget-content">');
+        this.container = $('<div class="grid-container-colorpicker">');
         parentObject.append( this.container[ 0 ] );
 
         this.container.draggable();
