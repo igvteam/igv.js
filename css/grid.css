@@ -98,6 +98,10 @@
     height: 40px;
 }
 
+.grid-dialog {
+    height: 80px;
+}
+
 .grid-colorpicker:after {
     content: "";
     display: table;
@@ -113,11 +117,29 @@
     padding: 2px;
 }
 
-.user-color-input {
+.user-input-color {
 
     width: 100%;
 
     margin-top: 4px;
+
+    vertical-align: middle;
+    text-align: center;
+
+    font-family: 'PT Sans', sans-serif;
+    font-size: medium;
+    font-weight: 200;
+
+    color: #575757;
+
+}
+
+.user-input-track-name {
+
+    width: 100%;
+
+    margin-top: 16px;
+    margin-bottom: 32px;
 
     vertical-align: middle;
     text-align: center;

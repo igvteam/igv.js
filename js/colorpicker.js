@@ -121,7 +121,7 @@ var igv = (function (igv) {
 
             // column
             column = $('<div class="col col-4-4">');
-            userColorInput = $('<input class="user-color-input" type="text" value="#000000">');
+            userColorInput = $('<input class="user-input-color" type="text" value="#000000">');
             userColorInput.change(function () {
 
                 var color = parseColor($(this).val());

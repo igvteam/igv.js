@@ -61,10 +61,10 @@ var igv = (function (igv) {
                 row,
                 column;
 
-            row = $('<div class="grid-colorpicker">');
+            row = $('<div class="grid-dialog">');
 
             column = $('<div class="col col-4-4">');
-            self.trackNameInput = $('<input class="user-color-input" type="text" value="#000000">');
+            self.trackNameInput = $('<input class="user-input-track-name" type="text" value="#000000">');
             self.trackNameInput.change(function () {
 
                 var alphanumeric = parseAlphanumeric($(this).val());
