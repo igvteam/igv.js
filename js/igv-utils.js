@@ -126,7 +126,31 @@ var igv = (function (igv) {
         return {
             object: $('<div class="igv-track-menu-item">' + menuLabel + '</div>'),
             click: function () {
+
                 igv.dialog.trackView = trackView;
+
+                igv.dialog.dialogInput.change(function () {
+
+                    var alphanumeric = parseAlphanumeric($(this).val());
+
+                    if (undefined !== alphanumeric) {
+
+                        igv.setTrackLabel(igv.dialog.trackView.track, alphanumeric);
+                        igv.dialog.trackView.update();
+                        igv.dialog.hide();
+                    }
+
+                    function parseAlphanumeric(value) {
+
+                        var alphanumeric_re = /(?=.*[a-zA-Z].*)([a-zA-Z0-9 ]+)/,
+                            alphanumeric = alphanumeric_re.exec(value);
+
+                        return (null !== alphanumeric) ? alphanumeric[ 0 ] : "untitled";
+
+                    }
+
+                });
+
                 igv.dialog.show();
                 popover.hide();
             }
