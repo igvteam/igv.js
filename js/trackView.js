@@ -128,8 +128,14 @@ var igv = (function (igv) {
             });
 
             $( document ).mouseup(function(e) {
+                
                 igv.browser.isMouseDown = undefined;
-                igv.browser.dragTargetTrackView = igv.browser.dragTrackView = undefined;
+
+                if (igv.browser.dragTrackView) {
+                    $(igv.browser.dragTrackView.igvTrackDragScrim).hide();
+                }
+
+                igv.browser.dragTrackView = undefined;
 
             });
 
@@ -143,19 +149,18 @@ var igv = (function (igv) {
 
                 self.isMouseDown = undefined;
 
-                if (igv.browser.dragTrackView) {
-                    $(igv.browser.dragTrackView.igvTrackDragScrim).hide();
-                }
-
             });
 
             $( self.igvTrackManipulationHandle ).mouseenter(function(e) {
 
                 self.isMouseIn = true;
-
-                $(self.igvTrackDragScrim).show();
-
                 igv.browser.dragTargetTrackView = self;
+
+                if (undefined === igv.browser.dragTrackView) {
+                    $(self.igvTrackDragScrim).show();
+                } else if (self === igv.browser.dragTrackView) {
+                    $(self.igvTrackDragScrim).show();
+                }
 
                 if (igv.browser.dragTargetTrackView && igv.browser.dragTrackView) {
 
@@ -180,13 +185,11 @@ var igv = (function (igv) {
             $( self.igvTrackManipulationHandle ).mouseleave(function(e) {
 
                 self.isMouseIn = undefined;
+                igv.browser.dragTargetTrackView = undefined;
 
-
-                //if (igv.browser.dragTrackView) {
-                //
-                //} else {
+                if (self !== igv.browser.dragTrackView) {
                     $(self.igvTrackDragScrim).hide();
-                //}
+                }
 
             });
 
