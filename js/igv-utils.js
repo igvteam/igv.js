@@ -31,30 +31,7 @@ var igv = (function (igv) {
             trackHeight = trackView.trackDiv.clientHeight,
             trackItems,
             menuItems = [
-                {
-                    object: $('<div class="igv-track-menu-item">Set track name</div>'),
-                    click: function () {
-
-                        trackMenuPopupDialog = new igv.TrackMenuPopupDialog(popover, "Track name", trackView.track.name, function () {
-
-                            if (!trackMenuPopupDialog.name.val()) {
-
-                                trackMenuPopupDialog.name.addClass( "ui-state-error" );
-
-                                trackMenuPopupDialog.updateTips( "may not be blank" );
-                            }
-                            else {
-
-                                igv.setTrackLabel(trackView.track, trackMenuPopupDialog.name.val());
-                                //trackView.update();
-                                trackMenuPopupDialog.dialogForm.dialog("close");
-                            }
-
-                        });
-
-                        trackMenuPopupDialog.dialogForm.dialog("open");
-                    }
-                },
+                igv.dialogMenuItem(popover, trackView, "Set track name"),
                 {
                     object: $('<div class="igv-track-menu-item">Set track height</div>'),
                     click: function () {
@@ -142,6 +119,18 @@ var igv = (function (igv) {
 
         return menuItems;
 
+    };
+
+    igv.dialogMenuItem = function (popover, trackView, menuLabel) {
+
+        return {
+            object: $('<div class="igv-track-menu-item">' + menuLabel + '</div>'),
+            click: function () {
+                igv.dialog.trackView = trackView;
+                igv.dialog.show();
+                popover.hide();
+            }
+        }
     };
 
     igv.colorPickerMenuItem = function (popover, trackView, menuLabel) {
