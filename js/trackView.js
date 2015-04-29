@@ -153,6 +153,8 @@ var igv = (function (igv) {
 
                 self.isMouseIn = true;
 
+                $(self.igvTrackDragScrim).show();
+
                 igv.browser.dragTargetTrackView = self;
 
                 if (igv.browser.dragTargetTrackView && igv.browser.dragTrackView) {
@@ -171,11 +173,7 @@ var igv = (function (igv) {
 
                         igv.browser.reorderTracks();
                     }
-
-                } else {
-                    $(self.igvTrackDragScrim).show();
-                }
-
+                 }
 
             });
 
@@ -183,11 +181,12 @@ var igv = (function (igv) {
 
                 self.isMouseIn = undefined;
 
-                if (igv.browser.dragTrackView) {
 
-                } else {
+                //if (igv.browser.dragTrackView) {
+                //
+                //} else {
                     $(self.igvTrackDragScrim).hide();
-                }
+                //}
 
             });
 
