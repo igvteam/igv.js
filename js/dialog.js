@@ -28,11 +28,9 @@
  */
 var igv = (function (igv) {
 
-    igv.Dialog = function (parentObject, inputChange) {
+    igv.Dialog = function (parentObject) {
 
         var self = this;
-
-        this.alphanumeric_re = /(?=.*[a-zA-Z].*)([a-zA-Z0-9 ]+)/;
 
         this.container = $('<div class="grid-container-dialog">');
         parentObject.append( this.container[ 0 ] );
@@ -50,9 +48,6 @@ var igv = (function (igv) {
 
         this.container.append(this.header[ 0 ]);
 
-
-
-        // user colors
         self.container.append(rowOfTrackName()[ 0 ]);
 
         function rowOfTrackName() {
@@ -76,6 +71,15 @@ var igv = (function (igv) {
                     self.hide();
                 }
 
+                function parseAlphanumeric(value) {
+
+                    var alphanumeric_re = /(?=.*[a-zA-Z].*)([a-zA-Z0-9 ]+)/,
+                        alphanumeric = alphanumeric_re.exec(value);
+
+                    return (null !== alphanumeric) ? alphanumeric[ 0 ] : "untitled";
+
+                }
+
             });
 
             column.append( self.trackNameInput[ 0 ] );
@@ -83,14 +87,6 @@ var igv = (function (igv) {
 
             rowContainer = $('<div class="grid-rect">');
             rowContainer.append( row[ 0 ]);
-
-            function parseAlphanumeric(value) {
-
-                var alphanumeric = self.alphanumeric_re.exec(value);
-
-                return (null !== alphanumeric) ? alphanumeric[ 0 ] : "untitled";
-
-            }
 
             return rowContainer;
 
