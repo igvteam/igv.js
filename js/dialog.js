@@ -59,30 +59,30 @@ var igv = (function (igv) {
             row = $('<div class="grid-dialog">');
 
             column = $('<div class="col col-4-4">');
-            self.trackNameInput = $('<input class="user-input-track-name" type="text" value="#000000">');
-            self.trackNameInput.change(function () {
+            self.dialogInput = $('<input class="user-input-dialog" type="text" value="#000000">');
+            //self.dialogInput.change(function () {
+            //
+            //    var alphanumeric = parseAlphanumeric($(this).val());
+            //
+            //    if (undefined !== alphanumeric) {
+            //
+            //        igv.setTrackLabel(self.trackView.track, alphanumeric);
+            //        self.trackView.update();
+            //        self.hide();
+            //    }
+            //
+            //    function parseAlphanumeric(value) {
+            //
+            //        var alphanumeric_re = /(?=.*[a-zA-Z].*)([a-zA-Z0-9 ]+)/,
+            //            alphanumeric = alphanumeric_re.exec(value);
+            //
+            //        return (null !== alphanumeric) ? alphanumeric[ 0 ] : "untitled";
+            //
+            //    }
+            //
+            //});
 
-                var alphanumeric = parseAlphanumeric($(this).val());
-
-                if (undefined !== alphanumeric) {
-
-                    igv.setTrackLabel(self.trackView.track, alphanumeric);
-                    self.trackView.update();
-                    self.hide();
-                }
-
-                function parseAlphanumeric(value) {
-
-                    var alphanumeric_re = /(?=.*[a-zA-Z].*)([a-zA-Z0-9 ]+)/,
-                        alphanumeric = alphanumeric_re.exec(value);
-
-                    return (null !== alphanumeric) ? alphanumeric[ 0 ] : "untitled";
-
-                }
-
-            });
-
-            column.append( self.trackNameInput[ 0 ] );
+            column.append( self.dialogInput[ 0 ] );
             row.append( column[ 0 ] );
 
             rowContainer = $('<div class="grid-rect">');
@@ -108,7 +108,7 @@ var igv = (function (igv) {
         $(this.container).offset( { left: (track_size.width - size.width)/2, top: track_origin.top } );
 
         this.headerBlurb.text("Track Name");
-        this.trackNameInput.val(this.trackView.track.name);
+        this.dialogInput.val(this.trackView.track.name);
 
         this.container.show();
     };
