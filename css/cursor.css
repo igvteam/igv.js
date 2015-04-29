@@ -75,10 +75,14 @@
     display: inline-block;
 }
 
+.igv-right-hand-gutter {
+    width: 48px;
+}
+
 /* override */
 .igv-viewport-div {
     left: 100px;
-    right: 150px;
+    right: 148px;
 }
 
 .igv-cursor-track-container {
