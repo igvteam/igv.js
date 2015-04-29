@@ -129,7 +129,7 @@ var igv = (function (igv) {
                 if (undefined !== color) {
                     igv.setTrackColor(self.trackView.track, color);
                     self.trackView.update();
-                    addUserColor( color );
+                    addUserColor(color);
                 }
 
 
@@ -177,7 +177,7 @@ var igv = (function (igv) {
                 return undefined;
             }
 
-            function addUserColor(hex) {
+            function addUserColor(color) {
 
                 if (undefined === self.userColorsIndex) {
 
@@ -189,23 +189,23 @@ var igv = (function (igv) {
                     self.userColorsIndex = (1 + self.userColorsIndex) % self.userColors.length;
                 }
 
-                presentUserColor(hex, self.userColorsIndex, self.userColorsRowIndex);
+                presentUserColor(color, self.userColorsIndex, self.userColorsRowIndex);
 
                 ++(self.userColorsRowIndex);
 
             }
 
-            function presentUserColor(hex, c, r) {
+            function presentUserColor(color, c, r) {
 
                 var rowContainer,
                     filler;
 
                 rowContainer = self.userColors[ c ];
-                rowContainer.removeClass( "grid-rect-gone" );
+                rowContainer.removeClass( "grid-rect-hidden" );
                 rowContainer.addClass( "grid-rect" );
 
-                filler = rowContainer.find(".grid").find(".col").find(".col-filler").eq(r);
-                filler.css( { "background-color" : hex } );
+                filler = rowContainer.find(".grid-colorpicker").find(".col").find(".col-filler").eq(r);
+                filler.css( { "background-color" : color } );
 
             }
 
