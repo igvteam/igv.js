@@ -5,7 +5,7 @@ module.exports = function (grunt) {
         pkg: grunt.file.readJSON('package.json'),
 
         qunit: {
-            hello: [ 'test/helloQUnit.html' ],
+            hello: ['test/helloQUnit.html'],
             all: ['test/**/*.html']
         },
 
@@ -44,15 +44,19 @@ module.exports = function (grunt) {
         },
 
         md2html: {
-            options: {
-                layout: 'docs/api_layout.html'
-            },
-            igv: {
-                src: ['docs/api.md'],
-                dest: 'dist/api.html'
+            multiple_files: {
+                options: {
+                    layout: 'docs/api_layout.html'
+                },
+                    files: [{
+                        expand: true,
+                        src: ['docs/**/*.md'],
+                        dest: 'dist',
+                        ext: '.html'
+                    }]
+
             }
         }
-
     });
 
     // 3. Where we tell Grunt we plan to use this plug-in.
@@ -66,15 +70,17 @@ module.exports = function (grunt) {
     // 4. Where we tell Grunt what to do when we type "grunt" into the terminal.
     //grunt.registerTask('default', ['concat:igvexp', 'uglify:igvexp']);
     //grunt.registerTask('default', ['concat:igv', 'uglify:igv', 'md2html:igv']);
-    grunt.registerTask('default', ['concat:igv', 'uglify:igv', 'md2html:igv']);
+    grunt.registerTask('default', ['concat:igv', 'uglify:igv']);
 
-    grunt.task.registerTask('unittest', 'Run one unit test.', function(testname) {
+    grunt.task.registerTask('unittest', 'Run one unit test.', function (testname) {
 
-        if(!!testname)
+        if (!!testname)
             grunt.config('qunit.all', ['test/' + testname + '.html']);
 
         grunt.task.run('qunit:all');
 
     });
+
+    grunt.registerTask('doc', ['md2html']);
 };
 
