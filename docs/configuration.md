@@ -1,36 +1,6 @@
 <!--Note: This document is written in "markdown".  Please respect the arkdown conventions (http://daringfireball.net/projects/markdown/) when editig. -->
 
 
-#Browser Initialization#
-
-Client pages interact with IGV through the singleton "igv.browser" object.  The object is created and initialized with the function
-
-    igv.createBrowser(div, options)
-
-The first argument is the parent div. IGV  inserts itself into the dom here. The second argument is an object
-defining  configuration options, described.  The following example shows initialization with two tracks:  genomic sequence and gene annotations.
-
-        options = {
-            showKaryo: false,
-            showNavigation: true,
-            fastaURL: "//dn7ywbm9isq8j.cloudfront.net/genomes/seq/hg19/hg19.fasta",
-            cytobandURL: "//dn7ywbm9isq8j.cloudfront.net/genomes/seq/hg19/cytoBand.txt",
-            tracks: [
-                {
-                    type: "sequence"
-                    order: 9999
-                },
-                {
-                    url: "//dn7ywbm9isq8j.cloudfront.net/annotations/hg19/genes/gencode.v18.collapsed.bed",
-                    label: "Genes",
-                    order: 10000
-                }
-            ]
-        };
-
-        browser = igv.createBrowser(div, options);
-
-
 
 ##Browser Configuration Options##
 
