@@ -40,7 +40,7 @@ var igv = (function (igv) {
             browser,
             rootDiv,
             controlDiv,
-            colorPickerPalette;
+            bodyObject;
 
         if (igv.browser) {
             console.log("Attempt to create 2 browsers.");
@@ -94,10 +94,15 @@ var igv = (function (igv) {
         // Popover object -- singleton shared by all components
         igv.popover = new igv.Popover(contentDiv);
 
+        bodyObject = $("body");
+
         // ColorPicker object -- singleton shared by all components
-        igv.colorPicker = new igv.ColorPicker($("body"), options.palette);
-        //igv.colorPicker = new igv.ColorPicker($(trackContainerDiv), options.palette);
+        igv.colorPicker = new igv.ColorPicker(bodyObject, options.palette);
         igv.colorPicker.hide();
+
+        // Dialog object -- singleton shared by all components
+        igv.dialog = new igv.Dialog(bodyObject);
+        igv.dialog.hide();
 
         // extend jquery ui dialog widget to support enter key triggering "ok" button press.
         $.extend($.ui.dialog.prototype.options, {
@@ -197,12 +202,7 @@ var igv = (function (igv) {
 
         });
 
-
-
-
-
         return browser;
-
 
     };
 
