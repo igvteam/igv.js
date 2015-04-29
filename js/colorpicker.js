@@ -36,21 +36,21 @@ var igv = (function (igv) {
         this.rgb_re = /([012]\d\d|\d\d{0,1})(\s*?,\s*?)([012]\d\d|\d\d{0,1})(\s*?,\s*?)([012]\d\d|\d\d{0,1})/;
         this.hex_re = new RegExp('^#([0-9A-Fa-f]{2})([0-9A-Fa-f]{2})([0-9A-Fa-f]{2})$');
 
-        this.colorPickerContainer = $('<div class="grid-container-colorpicker ui-widget-content">');
-        parentObject.append( this.colorPickerContainer[ 0 ] );
+        this.container = $('<div class="grid-container-colorpicker ui-widget-content">');
+        parentObject.append( this.container[ 0 ] );
 
-        this.colorPickerContainer.draggable();
+        this.container.draggable();
 
-        this.colorPickerHeader = $('<div class="grid-header">');
-        this.colorPickerHeaderBlurb = $('<div class="grid-header-blurb">');
+        this.header = $('<div class="grid-header">');
+        this.headerBlurb = $('<div class="grid-header-blurb">');
 
-        this.colorPickerHeader.append(this.colorPickerHeaderBlurb[ 0 ]);
+        this.header.append(this.headerBlurb[ 0 ]);
 
-        igv.dialogCloseWithParentObject(this.colorPickerHeader, function () {
+        igv.dialogCloseWithParentObject(this.header, function () {
             self.hide();
         });
 
-        this.colorPickerContainer.append(this.colorPickerHeader[ 0 ]);
+        this.container.append(this.header[ 0 ]);
 
         // Color Picker Object -- singleton shared by all components
         palette = [
@@ -77,20 +77,20 @@ var igv = (function (igv) {
 
         // color palette
         count(palette.length).forEach(function(r){
-            self.colorPickerContainer.append(makeRow(r)[ 0 ]);
+            self.container.append(makeRow(r)[ 0 ]);
         });
 
         // dividing line
-        self.colorPickerContainer.append($('<hr class="grid-dividing-line">')[ 0 ]);
+        self.container.append($('<hr class="grid-dividing-line">')[ 0 ]);
 
         // user colors
-        self.colorPickerContainer.append(rowOfUserColors()[ 0 ]);
+        self.container.append(rowOfUserColors()[ 0 ]);
 
         // dividing line
-        self.colorPickerContainer.append($('<hr class="grid-dividing-line">')[ 0 ]);
+        self.container.append($('<hr class="grid-dividing-line">')[ 0 ]);
 
         // initial track color
-        self.colorPickerContainer.append(rowOfInitialColor()[ 0 ]);
+        self.container.append(rowOfInitialColor()[ 0 ]);
 
         function rowOfUserColors() {
 
@@ -104,7 +104,7 @@ var igv = (function (igv) {
 
             count(8).forEach(function(c){
                 self.userColors.push(hiddenRow());
-                self.colorPickerContainer.append(self.userColors[ c ][ 0 ]);
+                self.container.append(self.userColors[ c ][ 0 ]);
             });
 
             self.userColorsIndex = undefined;
@@ -304,23 +304,23 @@ var igv = (function (igv) {
     };
 
     igv.ColorPicker.prototype.hide = function () {
-        $(this.colorPickerContainer).offset( { left: 0, top: 0 } );
-        this.colorPickerContainer.hide();
+        $(this.container).offset( { left: 0, top: 0 } );
+        this.container.hide();
     };
 
     igv.ColorPicker.prototype.show = function () {
 
         var track_origin = $(this.trackView.trackDiv).offset(),
             track_size = { width: $(this.trackView.trackDiv).outerWidth(), height: $(this.trackView.trackDiv).outerHeight()},
-            size = { width: $(this.colorPickerContainer).outerWidth(), height: $(this.colorPickerContainer).outerHeight()};
+            size = { width: $(this.container).outerWidth(), height: $(this.container).outerHeight()};
 
-        $(this.colorPickerContainer).offset( { left: (track_size.width - size.width)/2, top: track_origin.top } );
+        $(this.container).offset( { left: (track_size.width - size.width)/2, top: track_origin.top } );
 
-        this.colorPickerHeaderBlurb.text(this.trackView.track.name);
+        this.headerBlurb.text(this.trackView.track.name);
 
         this.trackColorTile.css( { "background-color" : this.trackView.track.color } );
 
-        this.colorPickerContainer.show();
+        this.container.show();
     };
 
     return igv;

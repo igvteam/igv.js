@@ -28,47 +28,44 @@
  */
 var igv = (function (igv) {
 
-    igv.Dialog = function (parentObject, userPalette) {
+    igv.Dialog = function (parentObject) {
 
-        var self = this,
-            palette;
+        var self = this;
 
-        this.colorPickerContainer = $('<div class="grid-container-colorpicker ui-widget-content">');
-        parentObject.append( this.colorPickerContainer[ 0 ] );
+        this.container = $('<div class="grid-container-colorpicker ui-widget-content">');
+        parentObject.append( this.container[ 0 ] );
 
-        this.colorPickerContainer.draggable();
+        this.container.draggable();
 
-        this.colorPickerHeader = $('<div class="grid-header">');
-        this.colorPickerHeaderBlurb = $('<div class="grid-header-blurb">');
+        this.header = $('<div class="grid-header">');
+        this.headerBlurb = $('<div class="grid-header-blurb">');
 
-        this.colorPickerHeader.append(this.colorPickerHeaderBlurb[ 0 ]);
+        this.header.append(this.headerBlurb[ 0 ]);
 
-        igv.dialogCloseWithParentObject(this.colorPickerHeader, function () {
+        igv.dialogCloseWithParentObject(this.header, function () {
             self.hide();
         });
 
-        this.colorPickerContainer.append(this.colorPickerHeader[ 0 ]);
+        this.container.append(this.header[ 0 ]);
 
     };
 
     igv.Dialog.prototype.hide = function () {
-        $(this.colorPickerContainer).offset( { left: 0, top: 0 } );
-        this.colorPickerContainer.hide();
+        $(this.container).offset( { left: 0, top: 0 } );
+        this.container.hide();
     };
 
     igv.Dialog.prototype.show = function () {
 
         var track_origin = $(this.trackView.trackDiv).offset(),
             track_size = { width: $(this.trackView.trackDiv).outerWidth(), height: $(this.trackView.trackDiv).outerHeight()},
-            size = { width: $(this.colorPickerContainer).outerWidth(), height: $(this.colorPickerContainer).outerHeight()};
+            size = { width: $(this.container).outerWidth(), height: $(this.container).outerHeight()};
 
-        $(this.colorPickerContainer).offset( { left: (track_size.width - size.width)/2, top: track_origin.top } );
+        $(this.container).offset( { left: (track_size.width - size.width)/2, top: track_origin.top } );
 
-        this.colorPickerHeaderBlurb.text(this.trackView.track.name);
+        this.headerBlurb.text(this.trackView.track.name);
 
-        this.trackColorTile.css( { "background-color" : this.trackView.track.color } );
-
-        this.colorPickerContainer.show();
+        this.container.show();
     };
 
     return igv;
