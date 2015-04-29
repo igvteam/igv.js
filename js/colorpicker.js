@@ -33,11 +33,10 @@ var igv = (function (igv) {
         var self = this,
             palette;
 
-        //this.rgb_re = /rgb\((\d{1,3}),(\d{1,3}),(\d{1,3})\)/;
         this.rgb_re = /([012]\d\d|\d\d{0,1})(\s*?,\s*?)([012]\d\d|\d\d{0,1})(\s*?,\s*?)([012]\d\d|\d\d{0,1})/;
         this.hex_re = new RegExp('^#([0-9A-Fa-f]{2})([0-9A-Fa-f]{2})([0-9A-Fa-f]{2})$');
 
-        this.colorPickerContainer = $('<div class="grid-container ui-widget-content">');
+        this.colorPickerContainer = $('<div class="grid-container-colorpicker ui-widget-content">');
         parentObject.append( this.colorPickerContainer[ 0 ] );
 
         this.colorPickerContainer.draggable();
@@ -111,7 +110,7 @@ var igv = (function (igv) {
             self.userColorsIndex = undefined;
             self.userColorsRowIndex = 0;
 
-            row = $('<div class="grid">');
+            row = $('<div class="grid-colorpicker">');
 
             //// column
             //column = $('<div class="col col-1-4">');
@@ -220,7 +219,7 @@ var igv = (function (igv) {
                 row,
                 column;
 
-            row = $('<div class="grid">');
+            row = $('<div class="grid-colorpicker">');
 
             // initial color tile
             self.trackColorTile = $('<div class="col-filler">');
@@ -251,8 +250,8 @@ var igv = (function (igv) {
 
         function hiddenRow(r) {
 
-            var rowContainer = $('<div class="grid-rect-gone">'),
-                row = $('<div class="grid">');
+            var rowContainer = $('<div class="grid-rect-hidden">'),
+                row = $('<div class="grid-colorpicker">');
 
             count(4).forEach(function(c){
                 row.append( makeColumn(r, c, "#eeeeee")[ 0 ] );
@@ -265,7 +264,7 @@ var igv = (function (igv) {
         function makeRow(r) {
 
             var rowContainer = $('<div class="grid-rect">'),
-                row = $('<div class="grid">');
+                row = $('<div class="grid-colorpicker">');
 
             count(4).forEach(function(c){
                 row.append( makeColumn(r, c, palette[ r ][ c ])[ 0 ] );

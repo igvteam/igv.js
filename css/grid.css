@@ -1,5 +1,5 @@
 
-.grid-container {
+.grid-container-colorpicker {
 
     position: absolute;
     top: 0;
@@ -74,15 +74,15 @@
     background-color: rgb(255, 255, 255);
 }
 
-.grid-rect-gone {
+.grid-rect-hidden {
     display: none;
 }
 
-.grid {
+.grid-colorpicker {
     height: 40px;
 }
 
-.grid:after {
+.grid-colorpicker:after {
     content: "";
     display: table;
     clear: both;
