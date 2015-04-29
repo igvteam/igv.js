@@ -52,47 +52,25 @@ var igv = (function (igv) {
 
                 }),
 
-                {
-                    object: $('<div class="igv-track-menu-item">Set track height</div>'),
-                    click: function () {
+                igv.dialogMenuItem(popover, trackView, "Track height", trackHeight, function () {
 
-                        trackMenuPopupDialog = new igv.TrackMenuPopupDialog(popover, "Track height", trackHeight.toString(), function () {
+                    var number = parseNumber($(this).val());
 
-                            var str,
-                                numberString = trackMenuPopupDialog.name.val(),
-                                number = parseFloat(numberString, 10),
-                                minHeight = trackView.track.minHeight || 25,
-                                maxHeight = trackView.track.maxHeight || 1000;
-
-                            if (!$.isNumeric(numberString)) {
-
-                                trackMenuPopupDialog.name.addClass( "ui-state-error" );
-
-                                str = numberString + " is not a valid number";
-                                trackMenuPopupDialog.updateTips( str );
-                            }
-
-                            // If track specifies a minimum height use it
-
-
-                            else if (number < minHeight || number > maxHeight) {
-
-                                trackMenuPopupDialog.name.addClass( "ui-state-error" );
-
-                                str = "must be between " + minHeight + " and " + igv.numberFormatter(maxHeight);
-                                trackMenuPopupDialog.updateTips( str );
-                            }
-                            else {
-
-                                trackView.setTrackHeight( number );
-                                trackMenuPopupDialog.dialogForm.dialog("close");
-                            }
-
-                        }, 320, 256);
-
-                        trackMenuPopupDialog.dialogForm.dialog("open");
+                    if (undefined !== number) {
+                        trackView.setTrackHeight( number );
+                        //trackView.update();
+                        igv.dialog.hide();
                     }
-                }
+
+                    function parseNumber(value) {
+
+                        var number = parseFloat(value, 10);
+
+                        return number;
+                    }
+
+                })
+
             ];
 
         if (trackView.track.popupMenuItems) {
