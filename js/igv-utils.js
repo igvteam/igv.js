@@ -31,7 +31,27 @@ var igv = (function (igv) {
             trackHeight = trackView.trackDiv.clientHeight,
             trackItems,
             menuItems = [
-                igv.dialogMenuItem(popover, trackView, "Set track name"),
+
+                igv.dialogMenuItem(popover, trackView, "Set track name", trackView.track.name, function () {
+
+                    var alphanumeric = parseAlphanumeric($(this).val());
+
+                    if (undefined !== alphanumeric) {
+                        igv.setTrackLabel(trackView.track, alphanumeric);
+                        trackView.update();
+                        igv.dialog.hide();
+                    }
+
+                    function parseAlphanumeric(value) {
+
+                        var alphanumeric_re = /(?=.*[a-zA-Z].*)([a-zA-Z0-9 ]+)/,
+                            alphanumeric = alphanumeric_re.exec(value);
+
+                        return (null !== alphanumeric) ? alphanumeric[0] : "untitled";
+                    }
+
+                }),
+
                 {
                     object: $('<div class="igv-track-menu-item">Set track height</div>'),
                     click: function () {
@@ -121,35 +141,18 @@ var igv = (function (igv) {
 
     };
 
-    igv.dialogMenuItem = function (popover, trackView, menuLabel) {
+    igv.dialogMenuItem = function (popover, trackView, gearMenuLabel, dialogInputValue, dialogInputChange) {
 
         return {
-            object: $('<div class="igv-track-menu-item">' + menuLabel + '</div>'),
+            object: $('<div class="igv-track-menu-item">' + gearMenuLabel + '</div>'),
             click: function () {
 
                 igv.dialog.trackView = trackView;
 
-                igv.dialog.dialogInput.change(function () {
+                //igv.dialog.headerBlurb.text("Track Name");
+                igv.dialog.dialogInput.val(dialogInputValue);
 
-                    var alphanumeric = parseAlphanumeric($(this).val());
-
-                    if (undefined !== alphanumeric) {
-
-                        igv.setTrackLabel(igv.dialog.trackView.track, alphanumeric);
-                        igv.dialog.trackView.update();
-                        igv.dialog.hide();
-                    }
-
-                    function parseAlphanumeric(value) {
-
-                        var alphanumeric_re = /(?=.*[a-zA-Z].*)([a-zA-Z0-9 ]+)/,
-                            alphanumeric = alphanumeric_re.exec(value);
-
-                        return (null !== alphanumeric) ? alphanumeric[ 0 ] : "untitled";
-
-                    }
-
-                });
+                igv.dialog.dialogInput.change(dialogInputChange);
 
                 igv.dialog.show();
                 popover.hide();
