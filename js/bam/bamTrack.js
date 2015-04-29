@@ -38,11 +38,10 @@ var igv = (function (igv) {
 
         this.coverageTrackHeight = config.coverageTrackHeight || 50;
 
-        this.color = config.color || "rgb(185, 185, 185)";
-
+        this.defaultColor = config.defaultColor || "rgb(185, 185, 185)";
+        this.color = config.color || this.defaultColor;;
         this.negStrandColor = config.negStrandColor || "rgba(150, 150, 230, 0.75)";
         this.posStrandColor = config.posStrandColor || "rgba(230, 150, 150, 0.75)";
-
         this.firstInfPairColor = "rgba(150, 150, 230, 0.75)";
         this.secondInPairColor = "rgba(230, 150, 150, 0.75)";
 

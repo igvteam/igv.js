@@ -46,7 +46,8 @@ var igv = (function (igv) {
         else if ("FusionJuncSpan" === this.featureType) {
             this.render = renderFusionJuncSpan;
             this.height = config.height || 50;
-            this.autoHeight = false;        }
+            this.autoHeight = false;
+        }
         else {
             this.render = renderFeature;
         }

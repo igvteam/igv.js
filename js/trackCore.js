@@ -51,7 +51,7 @@ var igv = (function (igv) {
 
         track.id = config.id || track.name;
         track.order = config.order;
-        track.color = config.color || "rgb(150,150,150)";
+        track.color = config.color || igv.constants.defaultColor;
 
 
         track.height = config.height || ("bed" === config.type ? 100 : 50);
