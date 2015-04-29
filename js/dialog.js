@@ -32,8 +32,7 @@ var igv = (function (igv) {
 
         var self = this;
 
-        this.rgb_re = /([012]\d\d|\d\d{0,1})(\s*?,\s*?)([012]\d\d|\d\d{0,1})(\s*?,\s*?)([012]\d\d|\d\d{0,1})/;
-        this.hex_re = new RegExp('^#([0-9A-Fa-f]{2})([0-9A-Fa-f]{2})([0-9A-Fa-f]{2})$');
+        this.alphanumeric_re = /(?=.*[a-zA-Z].*)([a-zA-Z0-9 ]+)/;
 
         this.container = $('<div class="grid-container-dialog ui-widget-content">');
         parentObject.append( this.container[ 0 ] );
@@ -68,43 +67,16 @@ var igv = (function (igv) {
             self.trackNameInput = $('<input class="user-color-input" type="text" value="#000000">');
             self.trackNameInput.change(function () {
 
-                var raw = $(this).val(),
-                    cooked;
+                var alphanumeric = parseAlphanumeric($(this).val());
 
-                cooked = raw;
-                if ("" === raw) {
-                    cooked = "untitled";
+                if (undefined !== alphanumeric) {
+
+                    igv.setTrackLabel(self.trackView.track, alphanumeric);
+                    self.trackView.update();
+                    self.hide();
                 }
 
-                igv.setTrackLabel(self.trackView.track, cooked);
-                self.trackView.update();
-                self.hide();
-
-                //var color = parseColor($(this).val());
-                //
-                //if (undefined !== color) {
-                //    igv.setTrackColor(self.trackView.track, color);
-                //    self.trackView.update();
-                //}
-
             });
-
-            //self.trackNameInput.keyup(function() {
-            //
-            //    var value = $(this).val(),
-            //        color;
-            //
-            //    if ("" === value) {
-            //        $(this).css( { "color" : "#222222" } );
-            //        return;
-            //    }
-            //
-            //    color = parseColor($(this).val());
-            //    if (undefined !== color) {
-            //        $(this).css( { "color" : color } );
-            //    }
-            //
-            //});
 
             column.append( self.trackNameInput[ 0 ] );
             row.append( column[ 0 ] );
@@ -112,23 +84,12 @@ var igv = (function (igv) {
             rowContainer = $('<div class="grid-rect">');
             rowContainer.append( row[ 0 ]);
 
-            function parseColor(value) {
+            function parseAlphanumeric(value) {
 
-                var rgb,
-                    hex;
+                var alphanumeric = self.alphanumeric_re.exec(value);
 
-                rgb = self.rgb_re.exec(value);
+                return (null !== alphanumeric) ? alphanumeric[ 0 ] : "untitled";
 
-                if (null !== rgb) {
-                    return "rgb(" + rgb[ 0 ] + ")";
-                } else {
-                    hex = self.hex_re.exec(value);
-                    if (null !== hex) {
-                        return igv.hex2Color( hex[ 0 ] );
-                    }
-                }
-
-                return undefined;
             }
 
             return rowContainer;
