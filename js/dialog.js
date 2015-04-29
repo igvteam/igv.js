@@ -32,7 +32,7 @@ var igv = (function (igv) {
 
         var self = this;
 
-        this.container = $('<div class="grid-container-colorpicker ui-widget-content">');
+        this.container = $('<div class="grid-container-dialog ui-widget-content">');
         parentObject.append( this.container[ 0 ] );
 
         this.container.draggable();
@@ -63,7 +63,8 @@ var igv = (function (igv) {
 
         $(this.container).offset( { left: (track_size.width - size.width)/2, top: track_origin.top } );
 
-        this.headerBlurb.text(this.trackView.track.name);
+        this.headerBlurb.text("Track Name");
+        //this.headerBlurb.text(this.trackView.track.name);
 
         this.container.show();
     };

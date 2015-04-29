@@ -1,4 +1,20 @@
 
+.grid-container-dialog {
+
+    position: absolute;
+    top: 0;
+    left:0;
+
+    width:256px;
+
+    border-color: rgb(196, 196, 196);
+    border-radius: 4px;
+    border-style: solid;
+    border-width: thin;
+
+    z-index: 1999;
+}
+
 .grid-container-colorpicker {
 
     position: absolute;
