@@ -13,6 +13,8 @@
     border-width: thin;
 
     z-index: 1999;
+
+    background-color: white;
 }
 
 .grid-container-colorpicker {
@@ -29,6 +31,8 @@
     border-width: thin;
 
     z-index: 1999;
+
+    background-color: white;
 }
 
 .grid-header {
@@ -44,6 +48,8 @@
     left: 0;
 
     height: 24px;
+
+    background-color: white;
 }
 
 .grid-header:hover,

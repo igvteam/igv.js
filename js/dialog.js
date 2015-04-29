@@ -34,7 +34,7 @@ var igv = (function (igv) {
 
         this.alphanumeric_re = /(?=.*[a-zA-Z].*)([a-zA-Z0-9 ]+)/;
 
-        this.container = $('<div class="grid-container-dialog ui-widget-content">');
+        this.container = $('<div class="grid-container-dialog">');
         parentObject.append( this.container[ 0 ] );
 
         this.container.draggable();
