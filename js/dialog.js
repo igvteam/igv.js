@@ -60,27 +60,6 @@ var igv = (function (igv) {
 
             column = $('<div class="col col-4-4">');
             self.dialogInput = $('<input class="user-input-dialog" type="text" value="#000000">');
-            //self.dialogInput.change(function () {
-            //
-            //    var alphanumeric = parseAlphanumeric($(this).val());
-            //
-            //    if (undefined !== alphanumeric) {
-            //
-            //        igv.setTrackLabel(self.trackView.track, alphanumeric);
-            //        self.trackView.update();
-            //        self.hide();
-            //    }
-            //
-            //    function parseAlphanumeric(value) {
-            //
-            //        var alphanumeric_re = /(?=.*[a-zA-Z].*)([a-zA-Z0-9 ]+)/,
-            //            alphanumeric = alphanumeric_re.exec(value);
-            //
-            //        return (null !== alphanumeric) ? alphanumeric[ 0 ] : "untitled";
-            //
-            //    }
-            //
-            //});
 
             column.append( self.dialogInput[ 0 ] );
             row.append( column[ 0 ] );
@@ -106,9 +85,6 @@ var igv = (function (igv) {
             size = { width: $(this.container).outerWidth(), height: $(this.container).outerHeight()};
 
         $(this.container).offset( { left: (track_size.width - size.width)/2, top: track_origin.top } );
-
-        this.headerBlurb.text("Track Name");
-        this.dialogInput.val(this.trackView.track.name);
 
         this.container.show();
     };
