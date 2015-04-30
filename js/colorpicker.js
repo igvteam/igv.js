@@ -130,24 +130,30 @@ var igv = (function (igv) {
 
             row = $('<div class="grid-colorpicker">');
 
-            //// column
-            //column = $('<div class="col col-1-4">');
-            //filler = $('<div class="col-filler-user-color">');
-            //filler.css( { "background-color" : "#000000" } );
-            //column.append(filler[ 0 ]);
-            //row.append( column[ 0 ] );
+            // color feedback.
+            column = makeColumn(0, 0, null);
+            self.userColorFeeback = column.find("div").first();
+
+            row.append( column );
 
             // column
-            column = $('<div class="col col-8-8">');
+            column = $('<div class="col col-7-8">');
             userColorInput = $('<input class="user-input-color" type="text" placeholder="Ex: #ff0000 or 255,0,0">');
             userColorInput.change(function () {
 
                 var color = parseColor($(this).val());
 
                 if (undefined !== color) {
+
                     igv.setTrackColor(self.trackView.track, color);
                     self.trackView.update();
                     addUserColor(color);
+
+                    $(this).val("");
+                    $(this).attr("placeholder", "Ex: #ff0000 or 255,0,0");
+
+                    self.userColorFeeback.css("background-color", "white");
+
                 }
 
 
@@ -159,17 +165,10 @@ var igv = (function (igv) {
 
             userColorInput.keyup(function() {
 
-                var value = $(this).val(),
-                    color;
-
-                if ("" === value) {
-                    $(this).css( { "color" : "#222222" } );
-                    return;
-                }
-
-                color = parseColor($(this).val());
+                var color = parseColor($(this).val());
+                
                 if (undefined !== color) {
-                    $(this).css( { "color" : color } );
+                    self.userColorFeeback.css("background-color", color);
                 }
 
             });
@@ -230,7 +229,7 @@ var igv = (function (igv) {
                 filler.removeClass("col-filler-no-color");
                 filler.addClass("col-filler");
 
-                filler.css( { "background-color" : color } );
+                filler.css("background-color", color);
 
                 filler.click(function () {
 
@@ -255,7 +254,7 @@ var igv = (function (igv) {
 
             // initial color tile
             self.defaultTrackColorTile = $('<div class="col-filler">');
-            self.defaultTrackColorTile.css( { "background-color" : "#eee" } );
+            self.defaultTrackColorTile.css("background-color", "#eee");
 
             column = $('<div class="col col-1-8">');
             column.append( self.defaultTrackColorTile[ 0 ] );
@@ -290,7 +289,7 @@ var igv = (function (igv) {
 
             // initial color tile
             self.previousTrackColorTile = $('<div class="col-filler">');
-            self.previousTrackColorTile.css( { "background-color" : "#eee" } );
+            self.previousTrackColorTile.css("background-color", "#eee");
 
             column = $('<div class="col col-1-8">');
             column.append( self.previousTrackColorTile[ 0 ] );
@@ -352,7 +351,7 @@ var igv = (function (igv) {
             if (null !== colorOrNull) {
 
                 filler.addClass("col-filler");
-                filler.css( { "background-color" : colorOrNull } );
+                filler.css("background-color", colorOrNull);
 
                 filler.click(function () {
 
@@ -363,7 +362,7 @@ var igv = (function (igv) {
 
             } else {
                 filler.addClass("col-filler-no-color");
-                filler.css( { "background-color" : "white" } );
+                filler.css("background-color", "white");
             }
 
             return column;
@@ -393,9 +392,9 @@ var igv = (function (igv) {
 
         $(this.container).offset( { left: (track_size.width - size.width)/2, top: track_origin.top } );
 
-        this.previousTrackColorTile.css( { "background-color" : this.trackView.track.color } );
+        this.previousTrackColorTile.css("background-color", this.trackView.track.color);
 
-        this.defaultTrackColorTile.css( { "background-color" : (this.trackView.track.defaultColor || igv.constants.defaultColor) } );
+        this.defaultTrackColorTile.css("background-color", (this.trackView.track.defaultColor || igv.constants.defaultColor));
 
         this.container.show();
     };
