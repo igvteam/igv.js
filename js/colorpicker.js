@@ -101,14 +101,14 @@ var igv = (function (igv) {
         // dividing line
         self.container.append($('<hr class="grid-dividing-line">')[ 0 ]);
 
-        //// initial track color
-        //self.container.append(rowOfPreviousColor()[ 0 ]);
-        //
-        //// dividing line
-        //self.container.append($('<hr class="grid-dividing-line">')[ 0 ]);
-        //
-        //// initial track color
-        //self.container.append(rowOfDefaultColor()[ 0 ]);
+        // initial track color
+        self.container.append(rowOfPreviousColor()[ 0 ]);
+
+        // dividing line
+        self.container.append($('<hr class="grid-dividing-line">')[ 0 ]);
+
+        // initial track color
+        self.container.append(rowOfDefaultColor()[ 0 ]);
 
         function rowOfUserColors() {
 
@@ -257,7 +257,7 @@ var igv = (function (igv) {
             self.defaultTrackColorTile = $('<div class="col-filler">');
             self.defaultTrackColorTile.css( { "background-color" : "#eee" } );
 
-            column = $('<div class="col col-1-4">');
+            column = $('<div class="col col-1-8">');
             column.append( self.defaultTrackColorTile[ 0 ] );
 
             column.click(function(){
@@ -269,7 +269,7 @@ var igv = (function (igv) {
 
 
             // default color label
-            column = $('<div class="col col-3-4 col-label">');
+            column = $('<div class="col col-7-8 col-label">');
             column.text("Default Color");
             row.append( column[ 0 ] );
 
@@ -292,7 +292,7 @@ var igv = (function (igv) {
             self.previousTrackColorTile = $('<div class="col-filler">');
             self.previousTrackColorTile.css( { "background-color" : "#eee" } );
 
-            column = $('<div class="col col-1-4">');
+            column = $('<div class="col col-1-8">');
             column.append( self.previousTrackColorTile[ 0 ] );
 
             column.click(function(){
@@ -304,7 +304,7 @@ var igv = (function (igv) {
 
 
             // initial color label
-            column = $('<div class="col col-3-4 col-label">');
+            column = $('<div class="col col-7-8 col-label">');
             column.text("Previous Color");
             row.append( column[ 0 ] );
 
@@ -393,11 +393,9 @@ var igv = (function (igv) {
 
         $(this.container).offset( { left: (track_size.width - size.width)/2, top: track_origin.top } );
 
-        //this.headerBlurb.text(this.trackView.track.name);
+        this.previousTrackColorTile.css( { "background-color" : this.trackView.track.color } );
 
-        //this.previousTrackColorTile.css( { "background-color" : this.trackView.track.color } );
-
-        //this.defaultTrackColorTile.css( { "background-color" : (this.trackView.track.defaultColor || igv.constants.defaultColor) } );
+        this.defaultTrackColorTile.css( { "background-color" : (this.trackView.track.defaultColor || igv.constants.defaultColor) } );
 
         this.container.show();
     };
