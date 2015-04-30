@@ -85,7 +85,7 @@ div.ui-dialog fieldset {
 
     z-index:99999;
 
-    background-color: rgba(68, 134, 247, 0.5);
+    background-color: rgba(68, 134, 247, 0.25);
 }
 
 .validateTips {
@@ -646,7 +646,7 @@ div.ui-dialog fieldset {
 
     font-size: medium;
 
-    border-color: #e5e5e5;
+    border-color: #c4c4c4;
     border-style: solid;
     border-width: thin;
     border-top-right-radius: 6px;
@@ -654,7 +654,7 @@ div.ui-dialog fieldset {
 
     z-index: 512;
 
-    background-color: #e5e5e5;
+    background-color: #c4c4c4;
 
 }
 
@@ -662,8 +662,8 @@ div.ui-dialog fieldset {
 .igv-track-manipulation-handle:focus,
 .igv-track-manipulation-handle:active {
 
-    border-color: #bebebe;
-    background-color: #bebebe;
+    border-color: #7e7e7e;
+    background-color: #7e7e7e;
 
 }
 
