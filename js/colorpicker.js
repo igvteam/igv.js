@@ -65,11 +65,11 @@ var igv = (function (igv) {
             palette = [];
             userPalette.forEach(function() {
 
-                var white = [
-                    "#00ff00", "#00ff00", "#00ff00", "#00ff00",
-                    "#00ff00", "#00ff00", "#00ff00", "#00ff00" ];
+                var nuthin = [
+                    null, null, null, null,
+                    null, null, null, null ];
 
-                palette.push(white);
+                palette.push(nuthin);
 
             });
 
@@ -82,27 +82,25 @@ var igv = (function (igv) {
                         row[ c ] = userPalette[r][c];
                     }
 
-                    //row[ c ] = (c < userPalette[ r ].length) ? userPalette[ r ][ c ] : white[ c ];
-
                 });
 
             });
         }
 
         // color palette
-        count(palette.length).forEach(function(r){
-            self.container.append(makeRow(r)[ 0 ]);
+        count(palette.length).forEach(function(index){
+            self.container.append(makeRow(index)[ 0 ]);
         });
 
-        //// dividing line
-        //self.container.append($('<hr class="grid-dividing-line">')[ 0 ]);
-        //
-        //// user colors
-        //self.container.append(rowOfUserColors()[ 0 ]);
-        //
-        //// dividing line
-        //self.container.append($('<hr class="grid-dividing-line">')[ 0 ]);
-        //
+        // dividing line
+        self.container.append($('<hr class="grid-dividing-line">')[ 0 ]);
+
+        // user colors
+        self.container.append(rowOfUserColors()[ 0 ]);
+
+        // dividing line
+        self.container.append($('<hr class="grid-dividing-line">')[ 0 ]);
+
         //// initial track color
         //self.container.append(rowOfPreviousColor()[ 0 ]);
         //
@@ -122,9 +120,9 @@ var igv = (function (igv) {
 
             self.userColors = [];
 
-            count(8).forEach(function(c){
-                self.userColors.push(hiddenRow());
-                self.container.append(self.userColors[ c ][ 0 ]);
+            count(5).forEach(function(digit, index, digits){
+                self.userColors.push(rowHidden( digit ));
+                self.container.append(self.userColors[ digit ][ 0 ]);
             });
 
             self.userColorsIndex = undefined;
@@ -140,7 +138,7 @@ var igv = (function (igv) {
             //row.append( column[ 0 ] );
 
             // column
-            column = $('<div class="col col-4-4">');
+            column = $('<div class="col col-8-8">');
             userColorInput = $('<input class="user-input-color" type="text" placeholder="Ex: #ff0000 or 255,0,0">');
             userColorInput.change(function () {
 
@@ -207,7 +205,7 @@ var igv = (function (igv) {
 
                     self.userColorsIndex = 0;
                     self.userColorsRowIndex = 0;
-                } else if (4 === self.userColorsRowIndex) {
+                } else if (8 === self.userColorsRowIndex) {
 
                     self.userColorsRowIndex = 0;
                     self.userColorsIndex = (1 + self.userColorsIndex) % self.userColors.length;
@@ -228,8 +226,18 @@ var igv = (function (igv) {
                 rowContainer.removeClass( "grid-rect-hidden" );
                 rowContainer.addClass( "grid-rect" );
 
-                filler = rowContainer.find(".grid-colorpicker").find(".col").find(".col-filler").eq(r);
+                filler = rowContainer.find(".grid-colorpicker").find(".col").find("div").eq(r);
+                filler.removeClass("col-filler-no-color");
+                filler.addClass("col-filler");
+
                 filler.css( { "background-color" : color } );
+
+                filler.click(function () {
+
+                    igv.setTrackColor(self.trackView.track, $(this).css( "background-color" ));
+                    self.trackView.update();
+
+                });
 
             }
 
@@ -307,46 +315,56 @@ var igv = (function (igv) {
             return rowContainer;
         }
 
-        function hiddenRow(r) {
+        function rowHidden(rowIndex) {
 
             var rowContainer = $('<div class="grid-rect-hidden">'),
                 row = $('<div class="grid-colorpicker">');
 
-            count(4).forEach(function(c){
-                row.append( makeColumn(r, c, "#eeeeee")[ 0 ] );
+            count(8).forEach(function(columnIndex){
+                row.append( makeColumn(rowIndex, columnIndex, null)[ 0 ] );
             });
+
 
             rowContainer.append(row);
             return rowContainer;
         }
 
-        function makeRow(r) {
+        function makeRow(rowIndex) {
 
             var rowContainer = $('<div class="grid-rect">'),
                 row = $('<div class="grid-colorpicker">');
 
-            count(8).forEach(function(c){
-                row.append( makeColumn(r, c, palette[ r ][ c ])[ 0 ] );
+            count(8).forEach(function(columnIndex){
+                row.append( makeColumn(rowIndex, columnIndex, palette[rowIndex][columnIndex])[ 0 ] );
             });
 
             rowContainer.append(row);
             return rowContainer;
         }
 
-        function makeColumn(r, c, color) {
+        function makeColumn(rowIndex, columnIndex, colorOrNull) {
 
             var column = $('<div class="col col-1-8">'),
-                filler = $('<div class="col-filler">');
+                filler = $('<div>');
 
-            filler.css( { "background-color" : color } );
             column.append( filler[ 0 ] );
 
-            column.click(function () {
+            if (null !== colorOrNull) {
 
-                igv.setTrackColor(self.trackView.track, $(this).find(".col-filler").css( "background-color" ));
-                self.trackView.update();
+                filler.addClass("col-filler");
+                filler.css( { "background-color" : colorOrNull } );
 
-            });
+                filler.click(function () {
+
+                    igv.setTrackColor(self.trackView.track, $(this).css( "background-color" ));
+                    self.trackView.update();
+
+                });
+
+            } else {
+                filler.addClass("col-filler-no-color");
+                filler.css( { "background-color" : "white" } );
+            }
 
             return column;
         }

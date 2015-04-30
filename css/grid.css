@@ -193,6 +193,18 @@
 
 }
 
+.col-filler-no-color {
+
+    width: 100%;
+    height: 100%;
+
+    border-color: rgb(255, 255, 255);
+    border-style: solid;
+    border-width: thin;
+    border-radius: 4px;
+
+}
+
 .col-filler-user-color {
 
     width: 100%;
