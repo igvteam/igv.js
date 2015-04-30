@@ -127,7 +127,7 @@ var igv = (function (igv) {
 
             // column
             column = $('<div class="col col-4-4">');
-            userColorInput = $('<input class="user-input-color" type="text" value="#000000">');
+            userColorInput = $('<input class="user-input-color" type="text" placeholder="Ex: #ff0000 or 255,0,0">');
             userColorInput.change(function () {
 
                 var color = parseColor($(this).val());
@@ -139,6 +139,10 @@ var igv = (function (igv) {
                 }
 
 
+            });
+
+            userColorInput.mousedown(function() {
+                $(this).attr("placeholder", "");
             });
 
             userColorInput.keyup(function() {
