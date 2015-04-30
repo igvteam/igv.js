@@ -130,6 +130,7 @@ var igv = (function (igv) {
                 //igv.dialog.headerBlurb.text("Track Name");
                 igv.dialog.dialogInput.val(dialogInputValue);
 
+                igv.dialog.dialogInput.unbind();
                 igv.dialog.dialogInput.change(dialogInputChange);
 
                 igv.dialog.show();
