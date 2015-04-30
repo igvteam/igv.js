@@ -89,25 +89,11 @@ var igv = (function (igv) {
             addRulerTrackHandlers(this);
 
         } else {
-
             addTrackHandlers(this);
-
         }
 
         function isTrackDraggable (track) {
-
-
             return !(track instanceof igv.RulerTrack);
-
-            //if (track instanceof igv.RulerTrack) {
-            //
-            //    return false;
-            //} else if (track instanceof igv.SequenceTrack) {
-            //
-            //    return false;
-            //}
-            //
-            //return true;
         }
 
         function makeTrackDraggable(track) {
@@ -629,7 +615,7 @@ var igv = (function (igv) {
                     trackView.rulerSweeper.css({"left": left + "px"});
                 }
 
-                trackView.rulerSweeper.css({backgroundColor: 'rgba(68, 134, 247, 0.75)'});
+                //trackView.rulerSweeper.css({backgroundColor: 'rgba(68, 134, 247, 0.75)'});
             }
         });
 
