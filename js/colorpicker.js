@@ -54,25 +54,39 @@ var igv = (function (igv) {
 
         // Color Picker Object -- singleton shared by all components
         palette = [
-            [ "#666666", "#0000cc", "#009900", "#cc0000" ],
-            [ "#ffcc00", "#9900cc", "#00ccff", "#ff6600" ]
+            [
+                "#666666", "#0000cc", "#009900", "#cc0000",
+                "#ffcc00", "#9900cc", "#00ccff", "#ff6600"
+            ]
         ];
 
         if (userPalette) {
 
-            if ("replace" === userPalette.usage) {
+            palette = [];
+            userPalette.forEach(function() {
 
-                palette = userPalette.colors;
+                var white = [
+                    "#00ff00", "#00ff00", "#00ff00", "#00ff00",
+                    "#00ff00", "#00ff00", "#00ff00", "#00ff00" ];
 
-            } else if ("append" === userPalette.usage) {
+                palette.push(white);
 
-                userPalette.colors.forEach(function(row){
+            });
 
-                    palette.push(row);
+            palette.forEach(function(row, r, rows){
+
+                row.forEach(function(chip, c, chips){
+
+                    if (c < userPalette[ r ].length) {
+
+                        row[ c ] = userPalette[r][c];
+                    }
+
+                    //row[ c ] = (c < userPalette[ r ].length) ? userPalette[ r ][ c ] : white[ c ];
+
                 });
 
-            }
-
+            });
         }
 
         // color palette
@@ -80,23 +94,23 @@ var igv = (function (igv) {
             self.container.append(makeRow(r)[ 0 ]);
         });
 
-        // dividing line
-        self.container.append($('<hr class="grid-dividing-line">')[ 0 ]);
-
-        // user colors
-        self.container.append(rowOfUserColors()[ 0 ]);
-
-        // dividing line
-        self.container.append($('<hr class="grid-dividing-line">')[ 0 ]);
-
-        // initial track color
-        self.container.append(rowOfPreviousColor()[ 0 ]);
-
-        // dividing line
-        self.container.append($('<hr class="grid-dividing-line">')[ 0 ]);
-
-        // initial track color
-        self.container.append(rowOfDefaultColor()[ 0 ]);
+        //// dividing line
+        //self.container.append($('<hr class="grid-dividing-line">')[ 0 ]);
+        //
+        //// user colors
+        //self.container.append(rowOfUserColors()[ 0 ]);
+        //
+        //// dividing line
+        //self.container.append($('<hr class="grid-dividing-line">')[ 0 ]);
+        //
+        //// initial track color
+        //self.container.append(rowOfPreviousColor()[ 0 ]);
+        //
+        //// dividing line
+        //self.container.append($('<hr class="grid-dividing-line">')[ 0 ]);
+        //
+        //// initial track color
+        //self.container.append(rowOfDefaultColor()[ 0 ]);
 
         function rowOfUserColors() {
 
@@ -311,7 +325,7 @@ var igv = (function (igv) {
             var rowContainer = $('<div class="grid-rect">'),
                 row = $('<div class="grid-colorpicker">');
 
-            count(4).forEach(function(c){
+            count(8).forEach(function(c){
                 row.append( makeColumn(r, c, palette[ r ][ c ])[ 0 ] );
             });
 
@@ -321,7 +335,7 @@ var igv = (function (igv) {
 
         function makeColumn(r, c, color) {
 
-            var column = $('<div class="col col-1-4">'),
+            var column = $('<div class="col col-1-8">'),
                 filler = $('<div class="col-filler">');
 
             filler.css( { "background-color" : color } );
@@ -363,9 +377,9 @@ var igv = (function (igv) {
 
         //this.headerBlurb.text(this.trackView.track.name);
 
-        this.previousTrackColorTile.css( { "background-color" : this.trackView.track.color } );
+        //this.previousTrackColorTile.css( { "background-color" : this.trackView.track.color } );
 
-        this.defaultTrackColorTile.css( { "background-color" : (this.trackView.track.defaultColor || igv.constants.defaultColor) } );
+        //this.defaultTrackColorTile.css( { "background-color" : (this.trackView.track.defaultColor || igv.constants.defaultColor) } );
 
         this.container.show();
     };
