@@ -357,7 +357,7 @@ var igv = (function (igv) {
 
         $(this.container).offset( { left: (track_size.width - size.width)/2, top: track_origin.top } );
 
-        this.headerBlurb.text(this.trackView.track.name);
+        //this.headerBlurb.text(this.trackView.track.name);
 
         this.previousTrackColorTile.css( { "background-color" : this.trackView.track.color } );
 
