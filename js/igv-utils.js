@@ -52,7 +52,7 @@ var igv = (function (igv) {
 
                 }),
 
-                igv.dialogMenuItem(popover, trackView, "Track height", trackHeight, function () {
+                igv.dialogMenuItem(popover, trackView, "Set track height", trackHeight, function () {
 
                     var number = parseNumber($(this).val());
 

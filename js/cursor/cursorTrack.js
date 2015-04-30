@@ -63,7 +63,7 @@ var cursor = (function (cursor) {
 
     cursor.CursorTrack.prototype.popupMenuItems = function (popover) {
 
-        return [ igv.colorPickerMenuItem(popover, this.trackView, "Set feature color", this.color) ];
+        return [ igv.colorPickerMenuItem(popover, this.trackView, "Set color", this.color) ];
 
     };
 
