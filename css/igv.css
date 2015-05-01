@@ -431,6 +431,8 @@ div.ui-dialog fieldset {
 
 .igv-ideogram-chr-div {
 
+    cursor: default;
+
     font-family: 'PT Sans', sans-serif;
     font-size: small;
     font-weight: 400;
@@ -443,7 +445,6 @@ div.ui-dialog fieldset {
     width: 50px;
     transform: translateY(-50%);
 
-    /*padding-left: 12px;*/
 }
 
 .igv-ideogram-content-div {
@@ -491,7 +492,7 @@ div.ui-dialog fieldset {
     margin-left: 2px;
     margin-right: 2px;
     position: relative;
-    /*cursor: pointer;*/
+    cursor: default;
 }
 
 .igv-track-label-span-highlighted {
