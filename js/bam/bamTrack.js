@@ -594,7 +594,7 @@ var igv = (function (igv) {
 
         var myself = this,
             menuItems = [],
-            lut = { "none": "Color: None", "strand": "Color: Read Strand", "firstOfPairStrand": "Color: 1st of Pair Strand" },
+            lut = { "none": "Color: None", "strand": "Color: Read Strand" },
             checkMark     = '<i class="fa fa-check fa-check-shim"></i>',
             checkMarkNone = '<i class="fa fa-check fa-check-shim fa-check-hidden"></i>',
             trackMenuItem = '<div class=\"igv-track-menu-item\">',
@@ -602,7 +602,7 @@ var igv = (function (igv) {
 
         menuItems.push(igv.colorPickerMenuItem(popover, this.trackView, "Set color", this.color));
 
-        [ "none", "strand", "firstOfPairStrand" ].forEach(function(alignmentShading, index){
+        [ "none", "strand"].forEach(function(alignmentShading, index){
 
             var chosen,
                 str;
