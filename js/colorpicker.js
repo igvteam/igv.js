@@ -390,7 +390,9 @@ var igv = (function (igv) {
             track_size = { width: $(this.trackView.trackDiv).outerWidth(), height: $(this.trackView.trackDiv).outerHeight()},
             size = { width: $(this.container).outerWidth(), height: $(this.container).outerHeight()};
 
-        $(this.container).offset( { left: (track_size.width - size.width)/2, top: track_origin.top } );
+        //$(this.container).offset( { left: (track_size.width - size.width)/2, top: track_origin.top } );
+
+        $(this.container).offset( { left: (track_size.width - 300), top: track_origin.top } );
 
         this.previousTrackColorTile.css("background-color", this.trackView.track.color);
 
