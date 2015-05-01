@@ -81,8 +81,7 @@ var igv = (function (igv) {
 
     igv.Popover.prototype.presentTrackMenu = function (pageX, pageY, trackView) {
 
-        var self = this,
-            container = $('<div class="igv-track-menu-container">'),
+        var container = $('<div class="igv-track-menu-container">'),
             trackMenuItems = igv.trackMenuItems(this, trackView);
 
         trackMenuItems.forEach(function (trackMenuItem, index, tmi) {
