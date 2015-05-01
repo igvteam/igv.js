@@ -46,11 +46,11 @@ module.exports = function (grunt) {
         md2html: {
             multiple_files: {
                 options: {
-                    layout: 'docs/layout.html'
+                    layout: 'doc/layout.html'
                 },
                     files: [{
                         expand: true,
-                        src: ['docs/**/*.md'],
+                        src: ['doc/**/*.md'],
                         dest: 'dist',
                         ext: '.html'
                     }]
