@@ -48,14 +48,40 @@ var igv = (function (igv) {
 
         this.container.append(this.header[ 0 ]);
 
-        self.container.append(rowOfTrackName()[ 0 ]);
+        self.container.append(rowOfLabel()[ 0 ]);
 
-        function rowOfTrackName() {
+        self.container.append(rowOfInput()[ 0 ]);
+
+        function rowOfLabel() {
 
             var rowContainer,
                 row,
                 column;
 
+            // input
+            row = $('<div class="grid-dialog">');
+
+            column = $('<div class="col col-4-4">');
+            self.dialogLabel = $('<div class="user-input-label">');
+            //self.dialogLabel.text("hello world");
+
+            column.append( self.dialogLabel[ 0 ] );
+            row.append( column[ 0 ] );
+
+            rowContainer = $('<div class="grid-rect">');
+            rowContainer.append( row[ 0 ]);
+
+            return rowContainer;
+
+        }
+
+        function rowOfInput() {
+
+            var rowContainer,
+                row,
+                column;
+
+            // input
             row = $('<div class="grid-dialog">');
 
             column = $('<div class="col col-4-4">');

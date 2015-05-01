@@ -102,7 +102,7 @@
 }
 
 .grid-dialog {
-    height: 80px;
+    height: 40px;
 }
 
 .grid-colorpicker:after {
@@ -137,10 +137,23 @@
 
     width: 100%;
 
-    margin-top: 16px;
-    margin-bottom: 32px;
+    /*margin-top: 16px;*/
+    /*margin-bottom: 32px;*/
 
     vertical-align: middle;
+    text-align: center;
+
+    font-family: 'PT Sans', sans-serif;
+    font-size: medium;
+    font-weight: 200;
+
+    color: #575757;
+
+}
+
+.user-input-label {
+
+    padding-top: 8px;
     text-align: center;
 
     font-family: 'PT Sans', sans-serif;
