@@ -28,7 +28,6 @@
  */
 var igv = (function (igv) {
 
-
     igv.WIGTrack = function (config) {
 
         this.config = config;
@@ -58,12 +57,16 @@ var igv = (function (igv) {
 
     };
 
-
     igv.WIGTrack.prototype.getFeatures = function (chr, bpStart, bpEnd, continuation, task) {
 
         this.featureSource.getFeatures(chr, bpStart, bpEnd, continuation, task)
     };
 
+    igv.WIGTrack.prototype.popupMenuItems = function (popover) {
+
+        return [ igv.colorPickerMenuItem(popover, this.trackView, "Set color", this.color) ];
+
+    };
 
     igv.WIGTrack.prototype.draw = function (options) {
 
