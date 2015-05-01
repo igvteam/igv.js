@@ -32,7 +32,7 @@ var igv = (function (igv) {
             trackItems,
             menuItems = [
 
-                igv.dialogMenuItem(popover, trackView, "Set track name", trackView.track.name, function () {
+                igv.dialogMenuItem(popover, trackView, "Set track name", "Track Name", trackView.track.name, function () {
 
                     var alphanumeric = parseAlphanumeric($(this).val());
 
@@ -52,7 +52,7 @@ var igv = (function (igv) {
 
                 }),
 
-                igv.dialogMenuItem(popover, trackView, "Set track height", trackHeight, function () {
+                igv.dialogMenuItem(popover, trackView, "Set track height", "Track Height", trackHeight, function () {
 
                     var number = parseNumber($(this).val());
 
@@ -119,7 +119,7 @@ var igv = (function (igv) {
 
     };
 
-    igv.dialogMenuItem = function (popover, trackView, gearMenuLabel, dialogInputValue, dialogInputChange) {
+    igv.dialogMenuItem = function (popover, trackView, gearMenuLabel, dialogLabel, dialogInputValue, dialogInputChange) {
 
         return {
             object: $('<div class="igv-track-menu-item">' + gearMenuLabel + '</div>'),
@@ -127,7 +127,8 @@ var igv = (function (igv) {
 
                 igv.dialog.trackView = trackView;
 
-                //igv.dialog.headerBlurb.text("Track Name");
+                igv.dialog.dialogLabel.text(dialogLabel);
+
                 igv.dialog.dialogInput.val(dialogInputValue);
 
                 igv.dialog.dialogInput.unbind();
