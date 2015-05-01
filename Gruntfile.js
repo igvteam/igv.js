@@ -46,7 +46,7 @@ module.exports = function (grunt) {
         md2html: {
             multiple_files: {
                 options: {
-                    layout: 'docs/api_layout.html'
+                    layout: 'docs/layout.html'
                 },
                     files: [{
                         expand: true,

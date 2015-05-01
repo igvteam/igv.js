@@ -32,7 +32,6 @@ defining  configuration options, described.  The following example shows initial
 
 
 ##Dependancies##
-These are the external links IGV-Web is dependant on:
 
 ####jQuery####
 Javascript
