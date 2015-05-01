@@ -116,6 +116,8 @@ var igv = (function (igv) {
         $(this.container).offset( { left: (track_size.width - 300), top: track_origin.top } );
 
         this.container.show();
+
+
     };
 
     return igv;

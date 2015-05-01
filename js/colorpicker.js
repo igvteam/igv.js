@@ -98,14 +98,14 @@ var igv = (function (igv) {
         // user colors
         self.container.append(rowOfUserColors()[ 0 ]);
 
-        // dividing line
-        self.container.append($('<hr class="grid-dividing-line">')[ 0 ]);
+        //// dividing line
+        //self.container.append($('<hr class="grid-dividing-line">')[ 0 ]);
 
         // initial track color
         self.container.append(rowOfPreviousColor()[ 0 ]);
 
-        // dividing line
-        self.container.append($('<hr class="grid-dividing-line">')[ 0 ]);
+        //// dividing line
+        //self.container.append($('<hr class="grid-dividing-line">')[ 0 ]);
 
         // initial track color
         self.container.append(rowOfDefaultColor()[ 0 ]);
@@ -129,12 +129,6 @@ var igv = (function (igv) {
             self.userColorsRowIndex = 0;
 
             row = $('<div class="grid-colorpicker">');
-
-            // color feedback.
-            column = makeColumn(0, 0, null);
-            self.userColorFeeback = column.find("div").first();
-
-            row.append( column );
 
             // column
             column = $('<div class="col col-7-8">');
@@ -175,6 +169,14 @@ var igv = (function (igv) {
 
             column.append( userColorInput[ 0 ] );
             row.append( column[ 0 ] );
+
+
+            // color feedback.
+            column = makeColumn(0, 0, null);
+            self.userColorFeeback = column.find("div").first();
+
+            row.append( column );
+
 
             rowContainer = $('<div class="grid-rect">');
             rowContainer.append( row[ 0 ]);
