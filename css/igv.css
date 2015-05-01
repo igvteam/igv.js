@@ -128,7 +128,7 @@ div.ui-dialog fieldset {
     border-style: solid;
     border-radius: 4px;
     border-width: thin;
-    border-color: #a2a2a2;
+    border-color: rgb(127, 127, 127);
     height: 65%;
     width: 75%;
     padding-left: 8px;
@@ -270,7 +270,7 @@ div.ui-dialog fieldset {
     background: #fff;
 
     border-radius: 4px;
-    border-color: #a2a2a2;
+    border-color: rgb(127, 127, 127);
     border-style: solid;
     border-width: thin;
 
@@ -288,7 +288,7 @@ div.ui-dialog fieldset {
 
     border-top-left-radius: 4px;
     border-top-right-radius: 4px;
-    border-bottom-color: #a2a2a2;
+    border-bottom-color: rgb(127, 127, 127);
     border-bottom-style: solid;
     border-bottom-width: thin;
 
@@ -310,7 +310,6 @@ div.ui-dialog fieldset {
 
     color: #444;
 
-    /*background-color: greenyellow;*/
 }
 
 .igv-dialog-close-fa {
@@ -331,14 +330,13 @@ div.ui-dialog fieldset {
 }
 
 .igv-popoverBorderTop {
-    border-top-color: #a2a2a2;
-    /*border-top-color: #f00;*/
+    border-top-color: rgb(127, 127, 127);
     border-top-style: solid;
     border-top-width: thin;
 }
 
 .igv-popoverBorderBottom {
-    border-bottom-color: #eee;
+    border-bottom-color: rgb(127, 127, 127);
     border-bottom-style: solid;
     border-bottom-width: thin;
 }
@@ -349,8 +347,6 @@ div.ui-dialog fieldset {
     text-wrap: none;
     white-space:nowrap;
 
-    /*color: lightgreen;*/
-    /*background-color: #0d3349;*/
 }
 
 .igv-popoverName {
