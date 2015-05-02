@@ -408,14 +408,15 @@ var igv = (function (igv) {
 
     igv.ColorPicker.prototype.show = function () {
 
-        var track_origin = $(this.trackView.trackDiv).offset(),
+        var body_scrolltop = $("body").scrollTop(),
+            track_origin = $(this.trackView.trackDiv).offset(),
             track_size = { width: $(this.trackView.trackDiv).outerWidth(), height: $(this.trackView.trackDiv).outerHeight()},
             size = { width: $(this.container).outerWidth(), height: $(this.container).outerHeight()},
             obj;
 
         //$(this.container).offset( { left: (track_size.width - size.width)/2, top: track_origin.top } );
-
-        $(this.container).offset( { left: (track_size.width - 300), top: track_origin.top } );
+        
+        $(this.container).offset( { left: (track_size.width - 300), top: (track_origin.top + body_scrolltop) } );
 
         this.previousTrackColorTile.css("background-color", this.trackView.track.color);
 

@@ -141,14 +141,18 @@ var igv = (function (igv) {
 
     igv.Dialog.prototype.show = function () {
 
-        var track_origin = $(this.trackView.trackDiv).offset(),
+        var body_scrolltop = $("body").scrollTop(),
+            track_scrolltop = $(this.trackView.trackDiv).scrollTop(),
+            track_origin = $(this.trackView.trackDiv).offset(),
             track_size = { width: $(this.trackView.trackDiv).outerWidth(), height: $(this.trackView.trackDiv).outerHeight()},
             size = { width: $(this.container).outerWidth(), height: $(this.container).outerHeight()};
+
+        //console.log("scrollTop. body " + body_scrolltop + " track " + track_scrolltop);
 
         // centered left-right
         //$(this.container).offset( { left: (track_size.width - size.width)/2, top: track_origin.top } );
 
-        $(this.container).offset( { left: (track_size.width - 300), top: track_origin.top } );
+        $(this.container).offset( { left: (track_size.width - 300), top: (track_origin.top + body_scrolltop) } );
 
         this.container.show();
 
