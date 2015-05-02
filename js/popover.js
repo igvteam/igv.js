@@ -81,8 +81,16 @@ var igv = (function (igv) {
 
     igv.Popover.prototype.presentTrackMenu = function (pageX, pageY, trackView) {
 
-        var container = $('<div class="igv-track-menu-container">'),
+
+        var rootObject = $(igv.browser.trackContainerDiv),
+            root = rootObject.offset(),
+            topLeft,
+            bbox = {},
+            rootbbox = {},
+            container = $('<div class="igv-track-menu-container">'),
             trackMenuItems = igv.trackMenuItems(this, trackView);
+
+
 
         trackMenuItems.forEach(function (trackMenuItem, index, tmi) {
             if (trackMenuItem.object) {
@@ -117,7 +125,24 @@ var igv = (function (igv) {
 
         });
 
-        this.popover.css(popoverPosition(pageX, pageY, this)).show();
+        this.popover.css(popoverPosition(pageX, pageY, this));
+
+        this.popover.show();
+
+        rootbbox.left = rootbbox.top = 0;
+        rootbbox.right  = rootObject.outerWidth();
+        rootbbox.bottom = rootObject.outerHeight();
+
+        topLeft = this.popover.offset();
+        bbox.left = topLeft.left - root.left;
+        bbox.top  = topLeft.top - root.top;
+        bbox.right  = bbox.left + this.popover.outerWidth();
+        bbox.bottom = bbox.top  + this.popover.outerHeight();
+
+        if (bbox.bottom > rootbbox.bottom) {
+            topLeft.top -= (bbox.bottom - rootbbox.bottom);
+            this.popover.offset(topLeft);
+        }
 
     };
 

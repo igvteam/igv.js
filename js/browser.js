@@ -169,7 +169,6 @@ var igv = (function (igv) {
         }
     }
 
-
     igv.Browser.prototype.isDuplicateTrack = function (config) {
 
         var attemptedDuplicateTrackAddition = false;
