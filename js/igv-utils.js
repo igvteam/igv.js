@@ -27,8 +27,7 @@ var igv = (function (igv) {
 
     igv.trackMenuItems = function (popover, trackView) {
 
-        var trackMenuPopupDialog,
-            trackHeight = trackView.trackDiv.clientHeight,
+        var trackHeight = trackView.trackDiv.clientHeight,
             trackItems,
             menuItems = [
 
@@ -140,10 +139,10 @@ var igv = (function (igv) {
         }
     };
 
-    igv.colorPickerMenuItem = function (popover, trackView, menuLabel) {
+    igv.colorPickerMenuItem = function (popover, trackView) {
 
         return {
-            object: $('<div class="igv-track-menu-item">' + menuLabel + '</div>'),
+            object: $('<div class="igv-track-menu-item">' + "Set track color" + '</div>'),
             click: function () {
                 igv.colorPicker.trackView = trackView;
                 igv.colorPicker.show();

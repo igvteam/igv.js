@@ -148,8 +148,9 @@ var igv = (function (igv) {
 
                     self.userColorFeeback.css("background-color", "white");
 
+                } else {
+                    self.userError.show();
                 }
-
 
             });
 
@@ -159,9 +160,17 @@ var igv = (function (igv) {
 
             userColorInput.keyup(function() {
 
-                var parsed = parseColor($(this).val());
-                
+                var parsed;
+
+                if ("" === $(this).val()) {
+                    self.userError.hide();
+                    $(this).attr("placeholder", "Ex: #ff0000 or 255,0,0");
+                }
+
+                parsed = parseColor($(this).val());
+
                 if (undefined !== parsed) {
+                    self.userError.hide();
                     self.userColorFeeback.css("background-color", parsed);
                 } else {
                     self.userColorFeeback.css("background-color", "white");
@@ -172,16 +181,23 @@ var igv = (function (igv) {
             column.append( userColorInput[ 0 ] );
             row.append( column[ 0 ] );
 
-
             // color feedback.
             column = makeColumn(0, 0, null);
             self.userColorFeeback = column.find("div").first();
 
             row.append( column );
 
-
             rowContainer = $('<div class="grid-rect">');
             rowContainer.append( row[ 0 ]);
+
+            // user feedback
+            self.userError = $('<span>');
+            self.userError.text("ERROR.    Ex: #ff0000 or 255,0,0");
+            self.userError.hide();
+
+            row = $('<div class="grid-colorpicker-user-error">');
+            row.append(self.userError[ 0 ]);
+            rowContainer.append(row);
 
             function parseColor(value) {
 
@@ -410,6 +426,7 @@ var igv = (function (igv) {
         obj.attr("placeholder", "Ex: #ff0000 or 255,0,0");
 
         this.container.show();
+        this.userError.hide();
     };
 
     return igv;

@@ -33,7 +33,7 @@
 
     width:256px;
 
-    border-color: rgb(196, 196, 196);
+    border-color: rgb(127, 127, 127);
     border-radius: 4px;
     border-style: solid;
     border-width: thin;
@@ -109,6 +109,18 @@
     height: 32px;
 }
 
+.grid-colorpicker-user-error {
+
+    height: 16px;
+
+    color: #55aeff;
+    font-family: 'PT Sans', sans-serif;
+    font-size: small;
+    font-weight: 400;
+
+    background-color: white;
+}
+
 .grid-dialog {
     height: 40px;
 }
@@ -130,9 +142,16 @@
 
 .user-input-color {
 
+    outline: none;
+
+    border-style: solid;
+    border-radius: 4px;
+    border-width: thin;
+    border-color: rgb(127, 127, 127);
+
     width: 100%;
-    /*margin-top: 2px;*/
-    /*padding-left: 4px;*/
+    margin-top: 2px;
+
     font-family: 'PT Sans', sans-serif;
     font-size: medium;
     font-weight: 200;
@@ -145,11 +164,10 @@
 
     width: 100%;
 
-    /*margin-top: 16px;*/
-    /*margin-bottom: 32px;*/
+    padding-left: 8px;
 
     vertical-align: middle;
-    text-align: center;
+    text-align: left;
 
     font-family: 'PT Sans', sans-serif;
     font-size: medium;
@@ -162,7 +180,9 @@
 .user-input-label {
 
     padding-top: 8px;
-    text-align: center;
+    padding-left: 8px;
+
+    text-align: left;
 
     font-family: 'PT Sans', sans-serif;
     font-size: medium;
@@ -421,6 +441,8 @@ div.ui-dialog fieldset {
 
 .igvNavigationSearchInput {
 
+    outline: none;
+
     border-style: solid;
     border-radius: 4px;
     border-width: thin;
@@ -433,7 +455,6 @@ div.ui-dialog fieldset {
     font-size: small;
     font-weight: 400;
     color: #444;
-
 
 }
 
@@ -552,9 +573,7 @@ div.ui-dialog fieldset {
     top: 0;
     left: 0;
 
-    /*overflow-y: hidden;*/
-    /*width: 100%;*/
-    height: auto;
+    min-width: 96px;
 
     z-index: 1000;
 
