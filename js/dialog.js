@@ -52,6 +52,42 @@ var igv = (function (igv) {
 
         self.container.append(rowOfInput()[ 0 ]);
 
+        self.container.append(rowOfCancel()[ 0 ]);
+
+        function rowOfCancel() {
+
+            var rowContainer,
+                row,
+                column,
+                columnFiller;
+
+            row = $('<div class="grid-dialog">');
+
+            // shim
+            column = $('<div class="col col-5-8">');
+            row.append( column[ 0 ] );
+
+            // cancel button
+            column = $('<div class="col col-3-8">');
+
+            columnFiller = $('<div class="col-filler-cancel-button">');
+            columnFiller.text("Cancel");
+
+            columnFiller.click(function() {
+                self.hide();
+            });
+
+
+            column.append( columnFiller[ 0 ] );
+            row.append( column[ 0 ] );
+
+            rowContainer = $('<div class="grid-rect">');
+            rowContainer.append( row[ 0 ]);
+
+            return rowContainer;
+
+        }
+
         function rowOfLabel() {
 
             var rowContainer,
@@ -63,7 +99,6 @@ var igv = (function (igv) {
 
             column = $('<div class="col col-4-4">');
             self.dialogLabel = $('<div class="user-input-label">');
-            //self.dialogLabel.text("hello world");
 
             column.append( self.dialogLabel[ 0 ] );
             row.append( column[ 0 ] );
