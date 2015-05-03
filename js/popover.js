@@ -81,12 +81,11 @@ var igv = (function (igv) {
 
     igv.Popover.prototype.presentTrackMenu = function (pageX, pageY, trackView) {
 
-
-        var rootObject = $(igv.browser.trackContainerDiv),
-            root = rootObject.offset(),
+        var delta,
+            rootObject = $(igv.browser.trackContainerDiv),
             topLeft,
             bbox = {},
-            rootbbox = {},
+            bboxRoot = {},
             container = $('<div class="igv-track-menu-container">'),
             trackMenuItems = igv.trackMenuItems(this, trackView);
 
@@ -129,18 +128,31 @@ var igv = (function (igv) {
 
         this.popover.show();
 
-        rootbbox.left = rootbbox.top = 0;
-        rootbbox.right  = rootObject.outerWidth();
-        rootbbox.bottom = rootObject.outerHeight();
+        bboxRoot.left = bboxRoot.top = 0;
+        bboxRoot.right  = rootObject.outerWidth();
+        bboxRoot.bottom = rootObject.outerHeight();
 
         topLeft = this.popover.offset();
-        bbox.left = topLeft.left - root.left;
-        bbox.top  = topLeft.top - root.top;
+
+        bbox.left = topLeft.left - rootObject.offset().left;
+        bbox.top  = topLeft.top - rootObject.offset().top;
         bbox.right  = bbox.left + this.popover.outerWidth();
         bbox.bottom = bbox.top  + this.popover.outerHeight();
 
-        if (bbox.bottom > rootbbox.bottom) {
-            topLeft.top -= (bbox.bottom - rootbbox.bottom);
+        delta = bbox.bottom - bboxRoot.bottom;
+        if (delta > 0) {
+
+            // clamp to trackContainer bottom
+            topLeft.top -= delta;
+
+            bbox.top -= delta;
+            bbox.bottom -= delta;
+
+            delta = bbox.top - bboxRoot.top;
+            if (delta < 0) {
+                topLeft.top -= delta;
+            }
+
             this.popover.offset(topLeft);
         }
 
