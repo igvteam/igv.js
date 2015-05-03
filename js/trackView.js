@@ -98,9 +98,6 @@ var igv = (function (igv) {
 
         function makeTrackDraggable(track) {
 
-            var dragged,
-                target;
-
             self.igvTrackDragScrim = $('<div class="igv-track-drag-scrim">')[0];
             //$(self.trackDiv).append(self.igvTrackDragScrim);
             $(self.viewportDiv).append(self.igvTrackDragScrim);
@@ -109,21 +106,21 @@ var igv = (function (igv) {
             self.igvTrackManipulationHandle = $('<div class="igv-track-manipulation-handle">')[0];
             $(self.trackDiv).append(self.igvTrackManipulationHandle);
 
-            $( document ).mousedown(function(e) {
-                igv.browser.isMouseDown = true;
-            });
-
-            $( document ).mouseup(function(e) {
-                
-                igv.browser.isMouseDown = undefined;
-
-                if (igv.browser.dragTrackView) {
-                    $(igv.browser.dragTrackView.igvTrackDragScrim).hide();
-                }
-
-                igv.browser.dragTrackView = undefined;
-
-            });
+            //$( document ).mousedown(function(e) {
+            //    igv.browser.isMouseDown = true;
+            //});
+            //
+            //$( document ).mouseup(function(e) {
+            //
+            //    igv.browser.isMouseDown = undefined;
+            //
+            //    if (igv.browser.dragTrackView) {
+            //        $(igv.browser.dragTrackView.igvTrackDragScrim).hide();
+            //    }
+            //
+            //    igv.browser.dragTrackView = undefined;
+            //
+            //});
 
             $( self.igvTrackManipulationHandle ).mousedown(function(e) {
 
