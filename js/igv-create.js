@@ -67,13 +67,13 @@ var igv = (function (igv) {
         rootDiv = browser.div;
 
         $( document ).mousedown(function(e) {
-            console.log("browser.isMouseDown = true");
+            //console.log("browser.isMouseDown = true");
             browser.isMouseDown = true;
         });
 
         $( document ).mouseup(function(e) {
 
-            console.log("browser.isMouseDown = undefined");
+            //console.log("browser.isMouseDown = undefined");
             browser.isMouseDown = undefined;
 
             if (browser.dragTrackView) {
