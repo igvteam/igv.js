@@ -66,6 +66,24 @@ var igv = (function (igv) {
         browser = new igv.Browser(options, trackContainerDiv);
         rootDiv = browser.div;
 
+        $( document ).mousedown(function(e) {
+            console.log("browser.isMouseDown = true");
+            browser.isMouseDown = true;
+        });
+
+        $( document ).mouseup(function(e) {
+
+            console.log("browser.isMouseDown = undefined");
+            browser.isMouseDown = undefined;
+
+            if (browser.dragTrackView) {
+                $(browser.dragTrackView.igvTrackDragScrim).hide();
+            }
+
+            browser.dragTrackView = undefined;
+
+        });
+
 
         // DOM
         parentDiv.appendChild(rootDiv);
