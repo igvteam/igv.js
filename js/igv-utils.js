@@ -25,6 +25,44 @@
 
 var igv = (function (igv) {
 
+    igv.constrainBBox = function (child, parent) {
+
+        var delta,
+            topLeft,
+            bboxChild = {},
+            bboxParent = {};
+
+        bboxParent.left = bboxParent.top = 0;
+        bboxParent.right  = parent.outerWidth();
+        bboxParent.bottom = parent.outerHeight();
+
+        topLeft = child.offset();
+
+        bboxChild.left = topLeft.left - parent.offset().left;
+        bboxChild.top  = topLeft.top - parent.offset().top;
+        bboxChild.right  = bboxChild.left + child.outerWidth();
+        bboxChild.bottom = bboxChild.top  + child.outerHeight();
+
+        delta = bboxChild.bottom - bboxParent.bottom;
+        if (delta > 0) {
+
+            // clamp to trackContainer bottom
+            topLeft.top -= delta;
+
+            bboxChild.top -= delta;
+            bboxChild.bottom -= delta;
+
+            delta = bboxChild.top - bboxParent.top;
+            if (delta < 0) {
+                topLeft.top -= delta;
+            }
+
+        }
+
+        return topLeft;
+
+    }
+
     igv.trackMenuItems = function (popover, trackView) {
 
         var trackHeight = trackView.trackDiv.clientHeight,

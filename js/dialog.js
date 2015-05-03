@@ -152,10 +152,11 @@ var igv = (function (igv) {
         // centered left-right
         //$(this.container).offset( { left: (track_size.width - size.width)/2, top: track_origin.top } );
 
-        $(this.container).offset( { left: (track_size.width - 300), top: (track_origin.top + body_scrolltop) } );
-
         this.container.show();
 
+        $(this.container).offset( { left: (track_size.width - 300), top: (track_origin.top + body_scrolltop) } );
+
+        $(this.container).offset( igv.constrainBBox($(this.container), $(igv.browser.trackContainerDiv)) );
 
     };
 

@@ -162,6 +162,13 @@
 
 .user-input-dialog {
 
+    outline: none;
+
+    border-style: solid;
+    border-radius: 4px;
+    border-width: thin;
+    border-color: rgb(127, 127, 127);
+
     width: 100%;
 
     padding-left: 8px;

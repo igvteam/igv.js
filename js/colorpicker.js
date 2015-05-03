@@ -428,6 +428,9 @@ var igv = (function (igv) {
 
         this.container.show();
         this.userError.hide();
+
+        $(this.container).offset( igv.constrainBBox($(this.container), $(igv.browser.trackContainerDiv)) );
+
     };
 
     return igv;
