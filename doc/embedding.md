@@ -3,7 +3,7 @@
 
 #Browser Initialization#
 
-Client pages interact with IGV through the singleton "igv.browser" object.  The object is created and initialized with the function
+The igv-web browser is a javascript object easily embeddable in web pages.  The object is created and initialized with the function
 
     igv.createBrowser(div, options)
 
@@ -30,8 +30,15 @@ defining  configuration options, described.  The following example shows initial
 
         browser = igv.createBrowser(div, options);
 
+The complete set of configuration options is documented [here] (configuration.html).
 
-##Dependancies##
+Example web pages illustrating embedding are available [here] (//igv.org/web/examples).
+
+After creation, client pages interact with the browser through the singleton "igv.browser" object.  Typical interactions include
+creating of new tracks and navigation.  The complete api is documented [here] (api.html).
+
+
+##Dependencies##
 
 ####jQuery####
 Javascript
@@ -45,9 +52,12 @@ Javascript
 `<script type="text/javascript" src="//ajax.googleapis.com/ajax/libs/jqueryui/1.11.2/jquery-ui.min.js"></script>`
 
 ####Google Fonts####
-App typography relies on the following Google fonts PT Sans and Open Sans:
+
+The app is designed to work well with the following Google fonts PT Sans and Open Sans.  Inclusion of these fonts
+is recommended but not required.
+
 `<link rel="stylesheet" type="text/css" href='//fonts.googleapis.com/css?family=PT+Sans:400,700'>`
- `<link rel="stylesheet" type="text/css" href='//fonts.googleapis.com/css?family=Open+Sans'>`
+`<link rel="stylesheet" type="text/css" href='//fonts.googleapis.com/css?family=Open+Sans'>`
 
 ####Font Awesome####
 All icons are implemented using Font Awesome

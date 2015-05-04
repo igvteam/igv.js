@@ -2,8 +2,7 @@
 
 #Browser Control API#
 
-After initialization the browser can be controlled through the object "igv.browser" using the commands described below. Note:  to load tracks or specify a locus on initial startup use the the startup "options" object, not the commands below.
-
+After initialization the browser can be controlled through the object "igv.browser" using the commands described below. 
 
 The igv.browser api  (preface commands with igv.browser.) | 
 :-------- |

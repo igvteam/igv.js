@@ -60,7 +60,7 @@ sampleHeight | Height of individual sample row | 2
 posColorScale | Heat map scale for copy number gain | n/a
 negColorScale | Heat map scale for copy number loss | n/a
 
-TODO -- heatmap scale json description
+<!-- TODO -- heatmap scale json description -->
 
 
 
