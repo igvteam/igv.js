@@ -30,12 +30,12 @@ defining  configuration options, described.  The following example shows initial
 
         browser = igv.createBrowser(div, options);
 
-The complete set of configuration options is documented [here] (configuration.html).
+The complete set of configuration options is documented [here](configuration.html).
 
-Example web pages illustrating embedding are available [here] (//igv.org/web/examples).
+Example web pages illustrating embedding are available [here](//igv.org/web/examples).
 
 After creation, client pages interact with the browser through the singleton "igv.browser" object.  Typical interactions include
-creating of new tracks and navigation.  The complete api is documented [here] (api.html).
+creating of new tracks and navigation.  The complete api is documented [here](api.html).
 
 
 ##Dependencies##
