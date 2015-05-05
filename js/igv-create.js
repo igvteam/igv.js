@@ -225,7 +225,8 @@ var igv = (function (igv) {
 
     function createStandardControls(browser, options) {
 
-        var controlDiv = $('<div id="igvControlDiv" class="igv-control-div">')[0],
+        var igvLogo,
+            controlDiv = $('<div id="igvControlDiv" class="igv-control-div">')[0],
             contentKaryo,
             navigation,
             search,
@@ -256,6 +257,8 @@ var igv = (function (igv) {
             navigation = $('<div class="igvNavigation">');
             $(controlDiv).append(navigation[0]);
 
+            igvLogo = $('<div class="igv-logo">');
+            navigation.append(igvLogo[0]);
 
             // search
             search = $('<div class="igvNavigationSearch">');
@@ -265,7 +268,7 @@ var igv = (function (igv) {
             //browser.searchInput = $('<input type="search" placeholder="Locus Search">');
             search.append(browser.searchInput[0]);
 
-            searchButton = $('<i class="igv-app-icon fa fa-search fa-24px igvNavigationMarginLeft12">');
+            searchButton = $('<i class="igv-app-icon fa fa-search fa-18px shim-left-6">');
             search.append(searchButton[0]);
 
             browser.searchInput.change(function () {

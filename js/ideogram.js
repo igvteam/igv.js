@@ -40,8 +40,8 @@ var igv = (function (igv) {
         var chromosomeNameDiv = $('<div class="igv-ideogram-chr-div"></div>');
         this.div.append(chromosomeNameDiv[0]);
 
-        this.chromosomeNameLabel = $('<div>')[0];
-        $(chromosomeNameDiv).append(this.chromosomeNameLabel);
+        //this.chromosomeNameLabel = $('<div>')[0];
+        //$(chromosomeNameDiv).append(this.chromosomeNameLabel);
 
         // ideogram content
         this.contentDiv = $('<div class="igv-ideogram-content-div"></div>');
@@ -170,7 +170,8 @@ var igv = (function (igv) {
                 this.ctx.restore();
             }
 
-            this.chromosomeNameLabel.innerHTML = referenceFrame.chr;
+            //this.chromosomeNameLabel.innerHTML = referenceFrame.chr;
+
         } catch (e) {
             console.log("Error painting ideogram: " + e.message);
         }
