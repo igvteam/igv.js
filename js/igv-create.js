@@ -50,9 +50,8 @@ var igv = (function (igv) {
         if (!options) options = {};
         if (!options.type) options.type = "IGV";
 
-        if(options.oauthToken) {
-            oauth.google.access_token = options.oauthToken;
-        }
+        oauth.google.access_token = options.oauthToken;
+        oauth.google.apiKey = options.apiKey;
 
         if (!options.flanking && isT2D(options)) {  // TODO -- hack for demo, remove
             options.flanking = 100000;
@@ -66,12 +65,12 @@ var igv = (function (igv) {
         browser = new igv.Browser(options, trackContainerDiv);
         rootDiv = browser.div;
 
-        $( document ).mousedown(function(e) {
+        $(document).mousedown(function (e) {
             //console.log("browser.isMouseDown = true");
             browser.isMouseDown = true;
         });
 
-        $( document ).mouseup(function(e) {
+        $(document).mouseup(function (e) {
 
             //console.log("browser.isMouseDown = undefined");
             browser.isMouseDown = undefined;
@@ -106,7 +105,7 @@ var igv = (function (igv) {
 
 
         // user feedback
-        browser.userFeedback = new igv.UserFeedback( $(contentDiv) );
+        browser.userFeedback = new igv.UserFeedback($(contentDiv));
         browser.userFeedback.hide();
 
         // Popover object -- singleton shared by all components
@@ -125,16 +124,16 @@ var igv = (function (igv) {
         // extend jquery ui dialog widget to support enter key triggering "ok" button press.
         $.extend($.ui.dialog.prototype.options, {
 
-            create: function() {
+            create: function () {
 
                 var $this = $(this);
 
                 // focus first button and bind enter to it
                 $this.parent().find('.ui-dialog-buttonpane button:first').focus();
 
-                $this.keypress(function(e) {
+                $this.keypress(function (e) {
 
-                    if( e.keyCode == $.ui.keyCode.ENTER ) {
+                    if (e.keyCode == $.ui.keyCode.ENTER) {
                         $this.parent().find('.ui-dialog-buttonpane button:first').click();
                         return false;
                     }

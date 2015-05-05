@@ -32,10 +32,11 @@ var igv = (function (igv) {
             options,
             headers,
             acToken = oauth.google.access_token,
+            apiKey = oauth.google.apiKey,
             paramSeparator = "?";
 
-        if (requestJson.authKey) {
-            url = url + paramSeparator + "key=" + requestJson.authKey;
+        if (apiKey) {
+            url = url + paramSeparator + "key=" + apiKey;
             paramSeparator = "&";
         }
 
@@ -62,10 +63,11 @@ var igv = (function (igv) {
             success = requestJson.success,
             task = requestJson.task,
             acToken = oauth.google.access_token,
+            apiKey = oauth.google.apiKey,
             paramSeparator = "?";
 
-        if (requestJson.authKey) {
-            url = url + paramSeparator + "key=" + requestJson.authKey;
+        if (apiKey) {
+            url = url + paramSeparator + "key=" + apiKey;
             paramSeparator = "&";
         }
 
