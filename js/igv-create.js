@@ -57,7 +57,7 @@ var igv = (function (igv) {
             options.flanking = 100000;
         }
 
-        if (options.genome) {
+        if (options.genome || options.fastaURL === undefined) {
             mergeGenome(options);
         }
 
@@ -320,24 +320,34 @@ var igv = (function (igv) {
     // TODO -- move this to external json
     function mergeGenome(options) {
 
-        if (options.genome && options.genome === "hg19") {
-            options.fastaURL = "//dn7ywbm9isq8j.cloudfront.net/genomes/seq/hg19/hg19.fasta";
-            options.cytobandURL = "//dn7ywbm9isq8j.cloudfront.net/genomes/seq/hg19/cytoBand.txt";
+        switch (options.genome) {
 
-            if (!options.tracks) options.tracks = [];
+            case "hg18":
+                options.fastaURL = "//dn7ywbm9isq8j.cloudfront.net/genomes/seq/hg18/hg18.fasta";
+                options.cytobandURL = "//dn7ywbm9isq8j.cloudfront.net/genomes/seq/hg18/cytoBand.txt.gz";
+                break;
 
-            options.tracks.push(
-                {
-                    type: "sequence",
-                    order: -9999
-                });
-            options.tracks.push(
-                {
-                    url: "//dn7ywbm9isq8j.cloudfront.net/annotations/hg19/genes/gencode.v18.collapsed.bed.gz",
-                    indexed: false,
-                    name: "Genes",
-                    order: 10000
-                });
+            case "hg19":
+            default:
+            {
+                options.fastaURL = "//dn7ywbm9isq8j.cloudfront.net/genomes/seq/hg19/hg19.fasta";
+                options.cytobandURL = "//dn7ywbm9isq8j.cloudfront.net/genomes/seq/hg19/cytoBand.txt";
+
+                if (!options.tracks) options.tracks = [];
+
+                options.tracks.push(
+                    {
+                        type: "sequence",
+                        order: -9999
+                    });
+                options.tracks.push(
+                    {
+                        url: "//dn7ywbm9isq8j.cloudfront.net/annotations/hg19/genes/gencode.v18.collapsed.bed.gz",
+                        indexed: false,
+                        name: "Genes",
+                        order: 10000
+                    });
+            }
         }
     }
 
