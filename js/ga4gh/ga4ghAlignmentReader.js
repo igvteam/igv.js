@@ -26,6 +26,36 @@
 var igv = (function (igv) {
 
 
+    var BAM_MAGIC = 21840194;
+    var BAI_MAGIC = 21578050;
+    var SECRET_DECODER = ['=', 'A', 'C', 'x', 'G', 'x', 'x', 'x', 'T', 'x', 'x', 'x', 'x', 'x', 'x', 'N'];
+    var CIGAR_DECODER = ['M', 'I', 'D', 'N', 'S', 'H', 'P', '=', 'X', '?', '?', '?', '?', '?', '?', '?'];
+    var READ_PAIRED_FLAG = 0x1;
+    var PROPER_PAIR_FLAG = 0x2;
+    var READ_UNMAPPED_FLAG = 0x4;
+    var MATE_UNMAPPED_FLAG = 0x8;
+    var READ_STRAND_FLAG = 0x10;
+    var MATE_STRAND_FLAG = 0x20;
+    var FIRST_OF_PAIR_FLAG = 0x40;
+    var SECOND_OF_PAIR_FLAG = 0x80;
+    var NOT_PRIMARY_ALIGNMENT_FLAG = 0x100;
+    var READ_FAILS_VENDOR_QUALITY_CHECK_FLAG = 0x200;
+    var DUPLICATE_READ_FLAG = 0x400;
+    var SUPPLEMENTARY_ALIGNMENT_FLAG = 0x800;
+
+
+    var CigarOperationTable = {
+        ALIGNMENT_MATCH: "M",
+        INSERT: "I",
+        DELETE: "D",
+        SKIP: "N",
+        CLIP_SOFT: "S",
+        CLIP_HARD: "H",
+        PAD: "P",
+        SEQUENCE_MATCH: "=",
+        SEQUENCE_MISMATCH: "X"
+    }
+
     igv.Ga4ghAlignmentReader = function (config) {
 
         this.config = config;
@@ -44,11 +74,6 @@ var igv = (function (igv) {
             var queryChr = chrNameMap.hasOwnProperty(chr) ? chrNameMap[chr] : chr,
                 readURL = self.url + "/reads/search";
 
-            if (self.authKey) {
-                readURL = readURL + "?key=" + self.authKey;
-            }
-
-
             igv.ga4ghSearch({
                 url: readURL,
                 body: {
@@ -58,7 +83,7 @@ var igv = (function (igv) {
                     "end": bpEnd,
                     "pageSize": "10000"
                 },
-                decode: igv.decodeGa4ghReads,
+                decode: decodeGa4ghReads,
                 success: success,
                 task: task
             });
@@ -80,9 +105,6 @@ var igv = (function (igv) {
 
                         // Query for reference names to build an alias table (map of genome ref names -> dataset ref names)
                         var readURL = self.url + "/references/search";
-                        if (self.authKey) {
-                            readURL = readURL + "?key=" + self.authKey;
-                        }
 
                         igv.ga4ghSearch({
                             url: readURL,
@@ -122,12 +144,205 @@ var igv = (function (igv) {
             url: this.url,
             entity: "readgroupsets",
             entityId: this.readGroupSetIds,
-            authKey: this.authKey,
             success: success,
             task: task
         });
     }
 
+
+
+    /**
+     * Decode an array of ga4gh read records
+     *
+
+     */
+     function decodeGa4ghReads(json) {
+
+        var i,
+            jsonRecords = json.alignments,
+            len = jsonRecords.length,
+            json,
+            read,
+            alignment,
+            cigarDecoded,
+            alignments = [],
+            genome = igv.browser.genome,
+            mate;
+
+        for (i = 0; i < len; i++) {
+
+            json = jsonRecords[i];
+
+            read = new igv.BamAlignment();
+
+            read.readName = json.fragmentName;
+            read.properPlacement = json.properPlacement;
+            read.duplicateFragment = json.duplicateFragment;
+            read.numberReads = json.numberReads;
+            read.fragmentLength = json.fragmentLength;
+            read.readNumber = json.readNumber;
+            read.failedVendorQualityChecks = json.failedVendorQualityChecks;
+            read.secondaryAlignment = json.secondaryAlignment;
+            read.supplementaryAlignment = json.supplementaryAlignment;
+
+            read.seq = json.alignedSequence;
+            read.qual = json.alignedQuality;
+            read.matePos = json.nextMatePosition;
+            read.tagDict = json.info;
+
+            read.flags = encodeFlags(json);
+
+
+            alignment = json.alignment;
+            if (alignment) {
+                read.mapped = true;
+
+                read.chr = json.alignment.position.referenceName;
+                if (genome) read.chr = genome.getChromosomeName(read.chr);
+
+                read.start = parseInt(json.alignment.position.position);
+                read.strand = !(json.alignment.position.reverseStrand);
+                read.mq = json.alignment.mappingQuality;
+                read.cigar = encodeCigar(json.alignment.cigar);
+                cigarDecoded = translateCigar(json.alignment.cigar);
+
+                read.lengthOnRef = cigarDecoded.lengthOnRef;
+
+                read.blocks = makeBlocks(read, cigarDecoded.array);
+            }
+            else {
+                read.mapped = false;
+            }
+
+            mate = json.nextMatePosition;
+            if (mate) {
+                read.mate = {
+                    chr: mate.referenceFrame,
+                    position: parseInt(mate.position),
+                    strand: !mate.reverseStrand
+                };
+            }
+
+            alignments.push(read);
+
+        }
+
+        return alignments;
+
+    }
+
+
+    function encodeCigar(cigarArray) {
+        return "";
+    }
+
+    function encodeFlags(json) {
+        return 0;
+    }
+
+
+    function translateCigar(cigar) {
+
+        var cigarUnit, opLen, opLtr,
+            lengthOnRef = 0,
+            cigarArray = [];
+
+        for (i = 0; i < cigar.length; i++) {
+
+            cigarUnit = cigar[i];
+
+            opLtr = CigarOperationTable[cigarUnit.operation];
+            opLen = parseInt(cigarUnit.operationLength);    // TODO -- this should be a long by the spec
+
+            if (opLtr == 'M' || opLtr == 'EQ' || opLtr == 'X' || opLtr == 'D' || opLtr == 'N' || opLtr == '=')
+                lengthOnRef += opLen;
+
+            cigarArray.push({len: opLen, ltr: opLtr});
+
+        }
+
+        return {lengthOnRef: lengthOnRef, array: cigarArray};
+    }
+
+
+    /**
+     * Split the alignment record into blocks as specified in the cigarArray.  Each aligned block contains
+     * its portion of the read sequence and base quality strings.  A read sequence or base quality string
+     * of "*" indicates the value is not recorded.  In all other cases the length of the block sequence (block.seq)
+     * and quality string (block.qual) must == the block length.
+     *
+     * NOTE: Insertions are not yet treated // TODO
+     *
+     * @param record
+     * @param cigarArray
+     * @returns array of blocks
+     */
+    function makeBlocks(record, cigarArray) {
+
+
+        var blocks = [],
+            seqOffset = 0,
+            pos = record.start,
+            len = cigarArray.length,
+            blockSeq,
+            blockQuals;
+
+        for (var i = 0; i < len; i++) {
+
+            var c = cigarArray[i];
+
+            switch (c.ltr) {
+                case 'H' :
+                    break; // ignore hard clips
+                case 'P' :
+                    break; // ignore pads
+                case 'S' :
+                    seqOffset += c.len;
+                    break; // soft clip read bases
+                case 'N' :
+                    pos += c.len;
+                    break;  // reference skip
+                case 'D' :
+                    pos += c.len;
+                    break;
+                case 'I' :
+                    seqOffset += c.len;
+                    break;
+                case 'M' :
+                case 'EQ' :
+                case '=' :
+                case 'X' :
+                    blockSeq = record.seq === "*" ? "*" : record.seq.substr(seqOffset, c.len);
+                    blockQuals = record.qual === "*" ? "*" : record.qual.slice(seqOffset, c.len);
+                    blocks.push({start: pos, len: c.len, seq: blockSeq, qual: blockQuals});
+                    seqOffset += c.len;
+                    pos += c.len;
+                    break;
+                default :
+                    console.log("Error processing cigar element: " + c.len + c.ltr);
+            }
+        }
+
+        return blocks;
+
+    }
+
+    igv.decodeGa4ghReadset = function (json) {
+
+        var sequenceNames = [],
+            fileData = json["fileData"];
+
+        fileData.forEach(function (fileObject) {
+
+            var refSequences = fileObject["refSequences"];
+
+            refSequences.forEach(function (refSequence) {
+                sequenceNames.push(refSequence["name"]);
+            });
+        });
+
+        return sequenceNames;
+    }
 
     return igv;
 

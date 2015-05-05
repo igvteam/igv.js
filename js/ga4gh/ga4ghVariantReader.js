@@ -45,11 +45,6 @@ var igv = (function (igv) {
             var queryChr = chrNameMap.hasOwnProperty(chr) ? chrNameMap[chr] : chr,
                 readURL = myself.url + "/variants/search";
 
-            if (myself.authKey) {
-                readURL = readURL + "?key=" + myself.authKey;
-                readURL += "&fields=nextPageToken,variants(alternateBases,filter,info,names,quality,referenceBases,referenceName,start)";
-            }
-
             igv.ga4ghSearch({
                 url: readURL,
                 body: {
@@ -108,7 +103,6 @@ var igv = (function (igv) {
             url: this.url,
             entity: "variantsets",
             entityId: this.variantSetId,
-            authKey: this.authKey,
             success: success,
             task: task
         })
