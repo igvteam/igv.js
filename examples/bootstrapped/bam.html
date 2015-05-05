@@ -6,12 +6,10 @@
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <!-- The above 3 meta tags *must* come first in the head; any other head content must come *after* these tags -->
     <meta name="description" content="">
     <meta name="author" content="">
-    <link rel="icon" href="http://getbootstrap.com/favicon.ico">
-
-    <title>Starter Template for Bootstrap</title>
+    <link rel="shortcut icon" href="//www.broadinstitute.org/igv/projects/igv-web/img/favicon.ico">
+    <title>Integrative Genomics Viewer - BAM Example</title>
 
     <!-- Bootstrap CSS -->
     <link rel="stylesheet" type="text/css" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.4/css/bootstrap.min.css">
@@ -23,7 +21,8 @@
     <link rel="stylesheet" type="text/css" href="//maxcdn.bootstrapcdn.com/font-awesome/4.2.0/css/font-awesome.min.css">
 
     <!-- IGV CSS -->
-    <link rel="stylesheet" type="text/css" href="//igv.org/web/beta/igv.css">
+    <!--<link rel="stylesheet" type="text/css" href="//igv.org/web/beta/igv.css">-->
+    <link rel="stylesheet" type="text/css" href="../../css/igv.css">
 
     <!-- BAM CSS -->
     <link rel="stylesheet" type="text/css" href="css/bam.css">
@@ -36,47 +35,35 @@
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.4/js/bootstrap.min.js"></script>
 
     <!-- IGV JS-->
-    <script type="text/javascript" src="//igv.org/web/beta/igv-all.min.js"></script>
+    <!--<script type="text/javascript" src="//igv.org/web/beta/igv-all.min.js"></script>-->
+    <script type="text/javascript" src="../../dist/igv-all.min.js"></script>
 
 
 </head>
 
-<body data-pinterest-extension-installed="cr1.37">
+<body>
 
-<nav class="navbar navbar-fixed-top">
+<nav class="navbar navbar-default navbar-fixed-top">
     <div class="container">
         <div class="navbar-header">
-            <!--<button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar" aria-expanded="false" aria-controls="navbar">-->
-                <!--<span class="sr-only">Toggle navigation</span>-->
-                <!--<span class="icon-bar"></span>-->
-                <!--<span class="icon-bar"></span>-->
-                <!--<span class="icon-bar"></span>-->
-            <!--</button>-->
-            <a class="navbar-brand" href="#">BAM Example</a>
+            <a class="navbar-brand" href="#">IGV Web Examples - BAM</a>
         </div>
-        <!--<div id="navbar" class="navbar-collapse collapse">-->
-            <!--<form class="navbar-form navbar-right">-->
-                <!--<div class="form-group">-->
-                    <!--<input type="text" placeholder="Email" class="form-control">-->
-                <!--</div>-->
-                <!--<div class="form-group">-->
-                    <!--<input type="password" placeholder="Password" class="form-control">-->
-                <!--</div>-->
-                <!--<button type="submit" class="btn btn-success">Sign in</button>-->
-            <!--</form>-->
-        <!--</div>&lt;!&ndash;/.navbar-collapse &ndash;&gt;-->
     </div>
 </nav>
 
 <div class="jumbotron">
 
-    <div class="container-fluid" id="myDiv">
-        <h1>IGV Example - BAM</h1>
+    <div class="container">
+        <h2>IGV Web Examples - BAM</h2>
         <p>An example of the IGV Web component used to present a BAM file (above) and referene gene (below).</p>
     </div><!-- container -->
+
 </div><!-- jumbotron -->
 
-<div class="container">
+<div class="container-fluid" id="myDiv">
+</div><!-- container -->
+
+<div class="container-fluid">
 
     <footer>
         <p>© IGV Web Productions 2015</p>
