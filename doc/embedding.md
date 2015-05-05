@@ -41,26 +41,26 @@ creating of new tracks and navigation.  The complete api is documented [here](ap
 ##Dependencies##
 
 ####jQuery####
-Javascript
+
 `<script type="text/javascript" src="//ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>`
 
 ####jQuery UI####
-CSS
-`<link rel="stylesheet" type="text/css" href="//ajax.googleapis.com/ajax/libs/jqueryui/1.11.2/themes/smoothness/jquery-ui.css"/>`
 
-Javascript
+`<link rel="stylesheet" type="text/css" href="//ajax.googleapis.com/ajax/libs/jqueryui/1.11.2/themes/smoothness/jquery-ui.css"/>`
 `<script type="text/javascript" src="//ajax.googleapis.com/ajax/libs/jqueryui/1.11.2/jquery-ui.min.js"></script>`
 
 ####Google Fonts####
 
-The app is designed to work well with the following Google fonts PT Sans and Open Sans.  Inclusion of these fonts
+The app is designed to work well with the following Google fonts: PT Sans and Open Sans.  Inclusion of these fonts
 is recommended but not required.
 
 `<link rel="stylesheet" type="text/css" href='//fonts.googleapis.com/css?family=PT+Sans:400,700'>`
 `<link rel="stylesheet" type="text/css" href='//fonts.googleapis.com/css?family=Open+Sans'>`
 
 ####Font Awesome####
+
 All icons are implemented using Font Awesome
+
 `<link rel="stylesheet" type="text/css" href="//maxcdn.bootstrapcdn.com/font-awesome/4.2.0/css/font-awesome.min.css">`
 
 
