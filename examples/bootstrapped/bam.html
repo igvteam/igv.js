@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <!-- The above 3 meta tags *must* come first in the head; any other head content must come *after* these tags -->
+    <meta name="description" content="">
+    <meta name="author" content="">
+    <link rel="icon" href="http://getbootstrap.com/favicon.ico">
+
+    <title>Starter Template for Bootstrap</title>
+
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" type="text/css" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.4/css/bootstrap.min.css">
+
+    <!-- jQuery UI CSS -->
+    <link rel="stylesheet" type="text/css" href="//ajax.googleapis.com/ajax/libs/jqueryui/1.11.2/themes/smoothness/jquery-ui.css"/>
+
+    <!-- Font Awesome CSS -->
+    <link rel="stylesheet" type="text/css" href="//maxcdn.bootstrapcdn.com/font-awesome/4.2.0/css/font-awesome.min.css">
+
+    <!-- IGV CSS -->
+    <link rel="stylesheet" type="text/css" href="//igv.org/web/beta/igv.css">
+
+    <!-- BAM CSS -->
+    <link rel="stylesheet" type="text/css" href="css/bam.css">
+
+    <!-- jQuery JS -->
+    <script type="text/javascript" src="//ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
+    <script type="text/javascript" src="//ajax.googleapis.com/ajax/libs/jqueryui/1.11.2/jquery-ui.min.js"></script>
+
+    <!-- Bootstrap JS -->
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.4/js/bootstrap.min.js"></script>
+
+    <!-- IGV JS-->
+    <script type="text/javascript" src="//igv.org/web/beta/igv-all.min.js"></script>
+
+
+</head>
+
+<body data-pinterest-extension-installed="cr1.37">
+
+<nav class="navbar navbar-fixed-top">
+    <div class="container">
+        <div class="navbar-header">
+            <!--<button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar" aria-expanded="false" aria-controls="navbar">-->
+                <!--<span class="sr-only">Toggle navigation</span>-->
+                <!--<span class="icon-bar"></span>-->
+                <!--<span class="icon-bar"></span>-->
+                <!--<span class="icon-bar"></span>-->
+            <!--</button>-->
+            <a class="navbar-brand" href="#">BAM Example</a>
+        </div>
+        <!--<div id="navbar" class="navbar-collapse collapse">-->
+            <!--<form class="navbar-form navbar-right">-->
+                <!--<div class="form-group">-->
+                    <!--<input type="text" placeholder="Email" class="form-control">-->
+                <!--</div>-->
+                <!--<div class="form-group">-->
+                    <!--<input type="password" placeholder="Password" class="form-control">-->
+                <!--</div>-->
+                <!--<button type="submit" class="btn btn-success">Sign in</button>-->
+            <!--</form>-->
+        <!--</div>&lt;!&ndash;/.navbar-collapse &ndash;&gt;-->
+    </div>
+</nav>
+
+<div class="jumbotron">
+
+    <div class="container-fluid" id="myDiv">
+        <h1>IGV Example - BAM</h1>
+        <p>An example of the IGV Web component used to present a BAM file (above) and referene gene (below).</p>
+    </div><!-- container -->
+</div><!-- jumbotron -->
+
+<div class="container">
+
+    <footer>
+        <p>© IGV Web Productions 2015</p>
+    </footer>
+
+</div> <!-- container -->
+
+<script type="text/javascript">
+
+    $(document).ready(function () {
+
+        var div = $("#myDiv")[0],
+                options = {
+                    showNavigation: true,
+                    genome: "hg19",
+                    locus: "chr1:155,172,193-155,172,564",
+                    tracks: [
+                        {
+                            url: '//www.broadinstitute.org/igvdata/1KG/b37/data/NA06984/alignment/NA06984.mapped.ILLUMINA.bwa.CEU.low_coverage.20120522.bam',
+                            name: 'NA06984'
+                        }
+                    ]
+                };
+
+        igv.createBrowser(div, options);
+
+    });
+
+</script>
+
+</body>
+
+</html>
