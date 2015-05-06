@@ -31,7 +31,6 @@ var igv = (function (igv) {
         this.config = config;
         this.url = config.url;
         this.variantSetId = config.variantSetId;
-        this.authKey = config.authKey;
 
     }
 

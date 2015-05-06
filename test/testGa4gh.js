@@ -1,12 +1,15 @@
 function runGa4ghTests() {
 
+    oauth.google.apiKey = 'AIzaSyDUUAUFpQEN4mumeMNIRWXSiTh5cPtUAD0';
+
     asyncTest("variantSet metadata", function () {
 
         var reader = new igv.Ga4ghVariantReader({
-                type: "vcf",
-                url: "https://www.googleapis.com/genomics/v1beta2",
+            type: "vcf",
+            url: "https://www.googleapis.com/genomics/v1beta2",
             variantSetId: "10473108253681171589"
-            });
+        });
+
 
         reader.readMetadata(function (json) {
 
@@ -15,6 +18,23 @@ function runGa4ghTests() {
             start();
 
         })
+    });
+
+    asyncTest("readGroupSets ", function () {
+
+        var provider = igv.ga4gh.providers[0],
+            datasetId = provider.datasets[1].id;
+
+        igv.ga4ghSearchReadGroupSets({
+            url: "https://www.googleapis.com/genomics/v1beta2",
+            datasetId: datasetId,
+            success: function (results) {
+
+                equal(results.length, 16);
+
+                start();
+            }
+        });
     });
 
     //asyncTest("variant search", function () {

@@ -26,9 +26,9 @@
 var igv = (function (igv) {
 
 
-    igv.ga4ghGet = function (requestJson) {
+    igv.ga4ghGet = function (options) {
 
-        var url = requestJson.url + "/" + requestJson.entity + "/" + requestJson.entityId,
+        var url = options.url + "/" + options.entity + "/" + options.entityId,
             options,
             headers,
             acToken = oauth.google.access_token,
@@ -40,13 +40,13 @@ var igv = (function (igv) {
             paramSeparator = "&";
         }
 
-        if(acToken) {
+        if (acToken) {
             url = url + paramSeparator + "access_token=" + encodeURIComponent(acToken);
         }
 
         options = {
-            success: requestJson.success,
-            task: requestJson.task,
+            success: options.success,
+            task: options.task,
             headers: ga4ghHeaders()
         };
 
@@ -54,14 +54,14 @@ var igv = (function (igv) {
     }
 
 
-    igv.ga4ghSearch = function (requestJson) {
+    igv.ga4ghSearch = function (options) {
 
         var results = [],
-            url = requestJson.url,
-            body = requestJson.body,
-            decode = requestJson.decode,
-            success = requestJson.success,
-            task = requestJson.task,
+            url = options.url,
+            body = options.body,
+            decode = options.decode,
+            success = options.success,
+            task = options.task,
             acToken = oauth.google.access_token,
             apiKey = oauth.google.apiKey,
             paramSeparator = "?";
@@ -71,7 +71,7 @@ var igv = (function (igv) {
             paramSeparator = "&";
         }
 
-        if(acToken) {
+        if (acToken) {
             url = url + paramSeparator + "access_token=" + encodeURIComponent(acToken);
         }
 
@@ -140,6 +140,42 @@ var igv = (function (igv) {
         }
         return headers;
 
+    }
+
+    igv.ga4ghSearchReadGroupSets = function (options) {
+
+        igv.ga4ghSearch({
+            url: options.url + "/readgroupsets/search/", //https://www.googleapis.com/genomics/v1beta2/readgroupsets/search",
+            body: {
+                "datasetIds": [options.datasetId],
+
+                "pageSize": "10000"
+            },
+            decode: function (json) {
+                return json.readGroupSets;
+            },
+            success: function (results) {
+                options.success(results);
+            }
+        });
+    }
+
+
+    igv.ga4gh = {
+        providers: [
+            {
+                name: "Google",
+                url: "'https://www.googleapis.com/genomics/v1beta2/",
+                supportsPartialResponse: true,
+                datasets: [
+                    {name: "1000 Genomes", id: "10473108253681171589"},
+                    {name: "Platinum Genomes", id: "3049512673186936334"},
+                    {name: "DREAM SMC Challenge", id: "337315832689"},
+                    {name: "PGP", id: "383928317087"},
+                    {name: "Simons Foundation", id: "461916304629"}
+                ]
+            }
+        ]
     }
 
 
