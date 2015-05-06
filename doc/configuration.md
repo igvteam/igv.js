@@ -5,17 +5,17 @@
 ##Browser Configuration
 
 
-option | default | description
+option  | description | default
 ------ | ------- | ------------
-genome  | | Genome identifier. *Required if fastaURL not specified.*
-fastaURL  | | Indexed fasta file URL.  *Required if genome id is not specified.*
-cytobandURL | | Cytoband file URL, UCSC format.  Required if genome id not specified.
-showKaryo | false | If true, whole-genome karyotype view is displayed.
-showNavigation | true | If true, show basic navigation controls (search, zoom in, zoom out).
-tracks | |Array of track descriptors initially displayed when app launches.
-trackDefaults | | Default settings for specific track type (see example below).
-locus | | Initial genome location
-flanking | 1000 | Distance (in bp) to pad sides of gene when navigating.
+genome  | Genome identifier. *Required if fastaURL not specified.* |
+fastaURL  | Indexed fasta file URL.  *Required if genome id is not specified.* |
+cytobandURL | Cytoband file URL, UCSC format.  Required if genome id not specified. |
+showKaryo | If true, whole-genome karyotype view is displayed. | false 
+showNavigation | If true, show basic navigation controls (search, zoom in, zoom out). | true
+tracks | Array of track descriptors initially displayed when app launches. |
+trackDefaults |  Default settings for specific track type (see example below). |
+locus | Initial genome location |
+flanking  | Distance (in bp) to pad sides of gene when navigating. | 1000
 
 
 ##Track Configuration
@@ -26,11 +26,11 @@ With exception of "url" all parameters are optional.
 
 option | description
 --------|  ----------------
-url | Resource url.  A protocol-less url is recommended if the server supports both http and https (e.g. //www.broadinstitute.org/...)
+url | URL to the file or webservice
 indexURL | URL to associated index file (bai, idx, or tbi file)
 headURL | URL for "HEAD" requests.   Useful for Amazon signed urls, where head and get url can differ.
 type | String identifying type of file.  Recognized types include  "bed", "vcf", "bam", and "seg".
-label | User-visible name for the track
+name | User-visible name for the track
 color | Default color for features.  Can be overriden in certain file formats.
 height | Initial track height
 maxHeight | Maximum track height for track types that automatically expand.  Can be overriden by user via menu
