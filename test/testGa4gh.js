@@ -20,17 +20,59 @@ function runGa4ghTests() {
         })
     });
 
-    asyncTest("readGroupSets ", function () {
+    asyncTest("search readGroupSets ", function () {
 
         var provider = igv.ga4gh.providers[0],
-            datasetId = provider.datasets[1].id;
+            datasetId = provider.datasets[1].id,
+            url = provider.url;
 
         igv.ga4ghSearchReadGroupSets({
-            url: "https://www.googleapis.com/genomics/v1beta2",
+            url: url,
             datasetId: datasetId,
             success: function (results) {
 
                 equal(results.length, 16);
+
+                start();
+            }
+        });
+    });
+
+    asyncTest("search variantsets ", function () {
+
+        var provider = igv.ga4gh.providers[0],
+            datasetId = provider.datasets[1].id,
+            url = provider.url;
+
+        igv.ga4ghSearchVariantSets({
+            url: url,
+            datasetId: datasetId,
+            success: function (results) {
+
+                equal(results.length, 1);
+
+                start();
+            }
+        });
+    });
+
+
+    /**
+     * Search for callsets by a dataset id.  Must first get the variant sets,  then use these to search for
+     * call sets
+     */
+    asyncTest("search callsets ", function () {
+
+        var provider = igv.ga4gh.providers[0],
+            datasetId = provider.datasets[1].id,
+            url = provider.url;
+
+        igv.ga4ghSearchCallSets({
+            url: url,
+            datasetId: datasetId,
+            success: function (results) {
+
+                equal(results.length, 17);
 
                 start();
             }
