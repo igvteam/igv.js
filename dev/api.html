@@ -36,7 +36,7 @@
 
   <!-- IGV JS-->
   <!--<script type="text/javascript" src="//igv.org/web/beta/igv-all.min.js"></script>-->
-  <script type="text/javascript" src="../dist/igv-all.min.js"></script>
+  <script type="text/javascript" src="../dist/igv-all.js"></script>
   <script type="text/javascript" src="js/api.js"></script>
 
 
@@ -90,8 +90,7 @@
 
   $(document).ready(function () {
 
-    var thang,
-            div = $("#myDiv")[0],
+    var div = $("#myDiv")[0],
             options = {
               showNavigation: true,
               genome: "hg19",
@@ -106,13 +105,15 @@
 
     igv.createBrowser(div, options);
 
-    thang = $("ul.dropdown-menu");
-    thang.click(function () {
+    foo(23);
 
-      console.log("ul.dropdown");
+    function foo (value) {
+      var a;
 
-    });
+      a = value;
+      console.log("a " + a);
 
+    }
 
   });
 
