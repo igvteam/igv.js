@@ -2,7 +2,7 @@
 
 #Introduction
 
-IGV-web is an embeddable interactive genome visualization component written
+IGV.js is an embeddable interactive genome visualization component written
 in JavaScript and CSS.  It is based on the [Integrative Genomics Viewer
 (IGV)](http://www.broadinstitute.org/igv), and developed by the same team.
 

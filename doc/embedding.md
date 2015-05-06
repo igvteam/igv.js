@@ -3,7 +3,7 @@
 
 #Browser Initialization#
 
-The igv-web browser is a javascript object easily embeddable in web pages.  The object is created and initialized with the function
+The IGV.js browser is a javascript object easily embeddable in web pages.  The object is created and initialized with the function
 
     igv.createBrowser(div, options)
 
@@ -51,7 +51,7 @@ creating of new tracks and navigation.  The complete api is documented [here](ap
 
 ####Google Fonts####
 
-The app is designed to work well with the following Google fonts: PT Sans and Open Sans.  Inclusion of these fonts
+IGV.js is designed to work well with the following Google fonts: PT Sans and Open Sans.  Inclusion of these fonts
 is recommended but not required.
 
 `<link rel="stylesheet" type="text/css" href='//fonts.googleapis.com/css?family=PT+Sans:400,700'>`
