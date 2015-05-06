@@ -5,26 +5,24 @@
 ##Browser Configuration
 
 
-
-
-option | description
------- | ------------
-showKaryo | If true, whole-genome karyotype view is displayed.
-`showNavigation` | If true, show basic navigation controls (search, zoom in, zoom out).
-`fastaURL`  | Indexed fasta file URL.  Required if genome id is not specified.
-`cytobandURL`   | Cytoband file URL, UCSC format.  Required if genome id not specified.
-`genome`  | Genome identifier. Required if fastaURL not specified.
-`tracks` | Array of track descriptors initially displayed when app launches.
-`trackDefaults`  | Default settings for specific track type (see example below).
-`locus` | Initial genome location
-`flanking` | Distance (in bp) to pad sides of gene when navigating.
+option | default | description
+------ | ------- | ------------
+genome  | | Genome identifier. *Required if fastaURL not specified.*
+fastaURL  | | Indexed fasta file URL.  *Required if genome id is not specified.*
+cytobandURL | | Cytoband file URL, UCSC format.  Required if genome id not specified.
+showKaryo | false | If true, whole-genome karyotype view is displayed.
+showNavigation | true | If true, show basic navigation controls (search, zoom in, zoom out).
+tracks | |Array of track descriptors initially displayed when app launches.
+trackDefaults | | Default settings for specific track type (see example below).
+locus | | Initial genome location
+flanking | 1000 | Distance (in bp) to pad sides of gene when navigating.
 
 
 ##Track Configuration
 
 ###General options applicable to all track types
 
-Tracks configuration uses json-style objects.   With exception of "url" all parameters are optional.
+With exception of "url" all parameters are optional.
 
 option | description
 --------|  ----------------

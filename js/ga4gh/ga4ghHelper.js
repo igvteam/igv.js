@@ -145,7 +145,7 @@ var igv = (function (igv) {
     igv.ga4ghSearchReadGroupSets = function (options) {
 
         igv.ga4ghSearch({
-            url: options.url + "/readgroupsets/search/", //https://www.googleapis.com/genomics/v1beta2/readgroupsets/search",
+            url: options.url + "/readgroupsets/search",
             body: {
                 "datasetIds": [options.datasetId],
 
@@ -160,12 +160,75 @@ var igv = (function (igv) {
         });
     }
 
+    igv.ga4ghSearchVariantSets = function (options) {
+
+        igv.ga4ghSearch({
+            url: options.url + "/variantsets/search",
+            body: {
+                "datasetIds": [options.datasetId],
+                "pageSize": "10000"
+            },
+            decode: function (json) {
+                return json.variantSets;
+            },
+            success: function (results) {
+                options.success(results);
+            }
+        });
+    }
+
+    igv.ga4ghSearchCallSets = function (options) {
+
+        // When searching by dataset id, first must get variant sets.
+        if (options.datasetId) {
+
+            igv.ga4ghSearchVariantSets({
+
+                url: options.url,
+                datasetId: options.datasetId,
+                success: function (results) {
+
+                    var variantSetIds = [];
+                    results.forEach(function (vs) {
+                        variantSetIds.push(vs.id);
+                    });
+
+                    // Substitute variantSetIds for datasetId
+                    options.datasetId = undefined;
+                    options.variantSetIds = variantSetIds;
+
+                    igv.ga4ghSearchCallSets(options);
+
+
+                }
+            });
+
+        }
+
+        else {
+
+            igv.ga4ghSearch({
+                url: options.url + "/callsets/search",
+                body: {
+                    "variantSetIds": options.variantSetIds,
+                    "pageSize": "10000"
+                },
+                decode: function (json) {
+                    return json.callSets;
+                },
+                success: function (results) {
+                    options.success(results);
+                }
+            });
+        }
+    }
+
 
     igv.ga4gh = {
         providers: [
             {
                 name: "Google",
-                url: "'https://www.googleapis.com/genomics/v1beta2/",
+                url: "https://www.googleapis.com/genomics/v1beta2",
                 supportsPartialResponse: true,
                 datasets: [
                     {name: "1000 Genomes", id: "10473108253681171589"},
