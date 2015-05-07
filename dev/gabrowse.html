@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="">
+    <meta name="author" content="">
+    <link rel="shortcut icon" href="//www.broadinstitute.org/igv/projects/igv-web/img/favicon.ico">
+    <title>Integrative Genomics Viewer</title>
+
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" type="text/css" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.4/css/bootstrap.min.css">
+
+    <!-- jQuery UI CSS -->
+    <link rel="stylesheet" type="text/css" href="//ajax.googleapis.com/ajax/libs/jqueryui/1.11.2/themes/smoothness/jquery-ui.css"/>
+
+    <!-- Font Awesome CSS -->
+    <link rel="stylesheet" type="text/css" href="//maxcdn.bootstrapcdn.com/font-awesome/4.2.0/css/font-awesome.min.css">
+
+    <!-- IGV CSS -->
+    <!--<link rel="stylesheet" type="text/css" href="//igv.org/web/beta/igv.css">-->
+    <link rel="stylesheet" type="text/css" href="../css/igv.css">
+
+    <!-- BAM CSS -->
+    <link rel="stylesheet" type="text/css" href="css/gabrowse.css">
+
+    <!-- jQuery JS -->
+    <script type="text/javascript" src="//ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
+    <script type="text/javascript" src="//ajax.googleapis.com/ajax/libs/jqueryui/1.11.2/jquery-ui.min.js"></script>
+
+    <!-- Bootstrap JS -->
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.4/js/bootstrap.min.js"></script>
+
+    <!-- Vendor JS -->
+    <script type="text/javascript" src="../vendor/inflate.js"></script>
+    <script type="text/javascript" src="../vendor/zlib_and_gzip.min.js"></script>
+
+    <!-- IGV JS -->
+    <script type="text/javascript" src="../js/igv-create.js"></script>
+    <script type="text/javascript" src="../js/userFeedback.js"></script>
+    <script type="text/javascript" src="../js/popover.js"></script>
+    <script type="text/javascript" src="../js/browser.js"></script>
+    <script type="text/javascript" src="../js/ideogram.js"></script>
+    <script type="text/javascript" src="../js/referenceFrame.js"></script>
+    <script type="text/javascript" src="../js/igv-canvas.js"></script>
+    <script type="text/javascript" src="../js/genome.js"></script>
+    <script type="text/javascript" src="../js/trackView.js"></script>
+
+    <script type="text/javascript" src="../js/rulerTrack.js"></script>
+
+    <script type="text/javascript" src="../js/feature/featureTrack.js"></script>
+    <script type="text/javascript" src="../js/igv-color.js"></script>
+    <script type="text/javascript" src="../js/igv-utils.js"></script>
+    <script type="text/javascript" src="../js/parseUtils.js"></script>
+    <script type="text/javascript" src="../js/fasta.js"></script>
+    <script type="text/javascript" src="../js/sequenceTrack.js"></script>
+    <script type="text/javascript" src="../js/wigTrack.js"></script>
+    <script type="text/javascript" src="../js/dataloader.js"></script>
+    <script type="text/javascript" src="../js/igv-exts.js"></script>
+    <script type="text/javascript" src="../js/igvxhr.js"></script>
+    <script type="text/javascript" src="../js/binary.js"></script>
+
+    <script type="text/javascript" src="../js/gtex/eqtlTrack.js"></script>
+    <script type="text/javascript" src="../js/gtex/gtexReader.js"></script>
+    <script type="text/javascript" src="../js/gtex/gtex.js"></script>
+    <script type="text/javascript" src="../js/gtex/immvarReader.js"></script>
+
+    <script type="text/javascript" src="../js/bam/coverageMap.js"></script>
+    <script type="text/javascript" src="../js/bam/bamReader.js"></script>
+    <script type="text/javascript" src="../js/bam/bgzf.js"></script>
+    <script type="text/javascript" src="../js/bam/bamSource.js"></script>
+    <script type="text/javascript" src="../js/bam/bamTrack.js"></script>
+    <script type="text/javascript" src="../js/bam/bamAlignment.js"></script>
+    <script type="text/javascript" src="../js/bam/bamAlignmentRow.js"></script>
+    <script type="text/javascript" src="../js/bam/bamIndex.js"></script>
+
+    <script type="text/javascript" src="../js/ga4gh/ga4ghAlignmentReader.js"></script>
+    <script type="text/javascript" src="../js/ga4gh/ga4ghVariantReader.js"></script>
+    <script type="text/javascript" src="../js/ga4gh/ga4ghHelper.js"></script>
+
+    <script type="text/javascript" src="../js/intervalTree.js"></script>
+    <script type="text/javascript" src="../js/igv-constants.js"></script>
+
+    <script type="text/javascript" src="../js/feature/featureCache.js"></script>
+    <script type="text/javascript" src="../js/feature/featureSource.js"></script>
+    <script type="text/javascript" src="../js/feature/featureParsers.js"></script>
+    <script type="text/javascript" src="../js/feature/tribble.js"></script>
+    <script type="text/javascript" src="../js/feature/featureFileReader.js"></script>
+
+    <script type="text/javascript" src="../js/encode/encode.js"></script>
+    <script type="text/javascript" src="../js/cursor/cursorTrack.js"></script>
+    <script type="text/javascript" src="../js/cursor/cursorModel.js"></script>
+    <script type="text/javascript" src="../js/cursor/cursor-ideogram.js"></script>
+
+    <script type="text/javascript" src="../js/karyo/karyo.js"></script>
+    <script type="text/javascript" src="../js/gwas/t2dVariantSource.js"></script>
+    <script type="text/javascript" src="../js/gwas/gwasTrack.js"></script>
+
+    <script type="text/javascript" src="../js/feature/segParser.js"></script>
+    <script type="text/javascript" src="../js/feature/segTrack.js"></script>
+    <script type="text/javascript" src="../js/variant/vcfParser.js"></script>
+    <script type="text/javascript" src="../js/variant/variant.js"></script>
+
+    <script type="text/javascript" src="../js/bigwig/bufferedReader.js"></script>
+    <script type="text/javascript" src="../js/bigwig/bwBPTree.js"></script>
+    <script type="text/javascript" src="../js/bigwig/bwReader.js"></script>
+    <script type="text/javascript" src="../js/bigwig/bwRPTree.js"></script>
+    <script type="text/javascript" src="../js/bigwig/bwSource.js"></script>
+    <script type="text/javascript" src="../js/bigwig/bwTotalSummary.js"></script>
+
+    <script type="text/javascript" src="../js/trackCore.js"></script>
+
+    <script type="text/javascript" src="../js/trackMenuPopupDialog.js"></script>
+
+    <script type="text/javascript" src="../js/colorpicker.js"></script>
+    <script type="text/javascript" src="../js/dialog.js"></script>
+
+    <script type="text/javascript" src="../js/set.js"></script>
+
+    <script type="text/javascript" src="../js/oauth/google.js"></script>
+
+</head>
+
+<body>
+
+<nav class="navbar navbar-default navbar-fixed-top">
+    <div class="container">
+        <div class="navbar-header">
+            <a class="navbar-brand" href="#">IGV JS</a>
+        </div>
+    </div>
+</nav>
+
+<div class="jumbotron">
+
+    <div class="container">
+        <p>Oh baby, baby, baby!</p>
+
+        <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#setSearch">Add data</button>
+
+        <div class="modal" id="setSearch">
+
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                        <h4 class="modal-title">Select data to view</h4>
+                    </div>
+                    <div class="modal-body">
+
+                        <form class="form-inline" style="margin-bottom: 10px">
+
+                            <div class="form-group">
+
+                                <select class="form-control" id="backend">
+                                </select>
+
+                            </div>
+
+                            <div class="form-group">
+
+                                <!--{% for backend, data in backends.iteritems() %}-->
+                                <!-- TODO: Simplify this -->
+                                <!--<select class="form-control datasetSelector" id="datasetId{{ backend }}" supportsCallsets="{{ data.supportsCallsets }}">-->
+                                <select class="form-control datasetSelector" id="dataset" supportsCallsets="{{ data.supportsCallsets }}">
+                                    <!--{% for dataset, datasetId in data.datasets.iteritems() %}-->
+                                    <!--<option value="{{ datasetId }}"> {{ dataset }} </option>-->
+                                    <!--{% endfor %}-->
+
+                                </select>
+                                <!--{% endfor %}-->
+
+                            </div>
+
+                            <div class="form-group">
+                                <input type="text" class="form-control" placeholder="name" id="setName"/>
+                            </div>
+
+                            <button type="submit" class="btn btn-primary" onclick="searchSets(this); return false;">Search</button>
+
+                        </form>
+
+                        <div>
+                            <ul class="nav nav-tabs">
+                                <li class="active" id="READSETTab"><a>Read group sets</a></li>
+                                <li id="CALLSETTab"><a>Call sets</a></li>
+                            </ul>
+                            <div class="tab-content">
+                                <div class="tab-pane active" id="searchPaneREADSET">
+                                    <div class="list-group results">
+                                        <img src="img/spinner.gif"/>
+                                    </div>
+                                    <div class="paginationContainer"></div>
+                                </div>
+                                <div class="tab-pane" id="searchPaneCALLSET">
+                                    <div class="list-group results">
+                                        <img src="img/spinner.gif"/>
+                                    </div>
+                                    <div class="paginationContainer"></div>
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-default" data-dismiss="modal">Done</button>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+
+    </div><!-- container -->
+
+</div><!-- jumbotron -->
+
+<script type="text/javascript">
+
+    $(document).ready(function () {
+
+        oauth.google.apiKey = 'AIzaSyDUUAUFpQEN4mumeMNIRWXSiTh5cPtUAD0';
+
+        igv.ga4ghBackEndSelectOptions();
+
+    });
+
+</script>
+
+</body>
+
+</html>
