@@ -25,7 +25,6 @@
 
 var igv = (function (igv) {
 
-
     igv.ga4ghGet = function (options) {
 
         var url = options.url + "/" + options.entity + "/" + options.entityId,
@@ -52,7 +51,6 @@ var igv = (function (igv) {
 
         igvxhr.loadJson(url, options);
     }
-
 
     igv.ga4ghSearch = function (options) {
 
@@ -238,9 +236,102 @@ var igv = (function (igv) {
                     {name: "Simons Foundation", id: "461916304629"}
                 ]
             }
-        ]
-    }
+            ,
+            {
+                name: "Testing123",
+                url: "https://www.googleapis.com/genomics/v1beta2",
+                supportsPartialResponse: true,
+                datasets: [
+                    {name: "99 Genomes", id: "10473108253681171589"},
+                    {name: "Silver Genomes", id: "3049512673186936334"},
+                    {name: "Apocolypes", id: "337315832689"}
+                ]
+            },
+            {
+                name: "TotalBolix",
+                url: "https://www.googleapis.com/genomics/v1beta2",
+                supportsPartialResponse: true,
+                datasets: [
+                    {name: "2121 Magoo", id: "10473108253681171589"},
+                    {name: "Monkey Shines", id: "3049512673186936334"},
+                    {name: "Be The Woo", id: "337315832689"}
+                ]
+            }
 
+
+        ]
+    };
+
+    igv.ga4ghBackEndSelectOptions = function () {
+
+        var backend = $("#backend"),
+            dataset = $("#dataset"),
+            selected;
+
+        igv.ga4gh.providers.forEach(function(p, index, ps){
+            var option = $('<option>');
+
+            option.val(index);
+            option.text(p.name);
+            backend.append(option);
+        });
+
+        // At this point, the first option should be pre-selected without user interaction
+        selected = backend.val();
+
+        backend.change(function() {
+
+            $( "#backend option:selected" ).each(function() {
+
+                var provider,
+                    providerIndex,
+                    selectedOption = $(this);
+
+                providerIndex = parseInt( selectedOption.val() );
+                provider = igv.ga4gh.providers[ providerIndex ];
+
+                dataset.empty();
+                provider.datasets.forEach(function(d, index, ds){
+
+                    var option = $('<option>');
+                    option.val(index);
+                    option.text(d.name);
+                    dataset.append(option);
+
+                });
+
+
+
+            });
+
+
+        });
+
+        dataset.change(function() {
+
+            var providerIndex   = parseInt( $( "#backend option:selected").first().val() ),
+                datasetIndex    = parseInt( $( "#dataset option:selected").first().val() ),
+                provider,
+                dataset;
+
+            //provider = igv.ga4gh.providers[ providerIndex ];
+            //dataset = provider.datasets[ datasetIndex ];
+
+            provider = igv.ga4gh.providers[ 0 ];
+            dataset = provider.datasets[ 1 ];
+
+            igv.ga4ghSearchReadGroupSets({
+                url: provider.url,
+                datasetId: dataset.id,
+                success: function (results) {
+
+                    console.log("results " + results.length);
+                }
+            });
+
+        });
+
+    };
 
     return igv;
 
