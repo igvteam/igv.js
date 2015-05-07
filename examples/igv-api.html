@@ -89,18 +89,19 @@
 
     <h3>Example illustrating loading tracks through the browser API.  Click links below to load</h3>
 
+        <!--0-->
         <div onclick="igv.browser.loadTrack({
                                 url: 'http://www.broadinstitute.org/igvdata/1KG/b37/data/NA06984/alignment/NA06984.mapped.ILLUMINA.bwa.CEU.low_coverage.20120522.bam',
                                 label: 'NA06984'})">NA06984 (Broad server BAM file)</div>
 
-
+        <!--1-->
         <div onclick="igv.browser.loadTrack({
                                 sourceType: 'ga4gh',
                                 type: 'bam',
                                 url: 'https://www.googleapis.com/genomics/v1beta2',
                                 readGroupSetIds: 'CMvnhpKTFhCjz9_25e_lCw',
                                 label: 'Ga4gh Reads'})">GA4Gh Alignments (Global Alliance, Google server)</div>
-
+        <!--2-->
         <div onclick="igv.browser.loadTrack({
                                 sourceType: 'ga4gh',
                                 type: 'vcf',
@@ -109,28 +110,30 @@
                                 visibilityWindow: 100000,
                                 label: 'Ga4gh Variants'})">GA4Gh Variants (Global Alliance, Google server)</div>
 
+        <!--3-->
         <div onclick="igv.browser.loadTrack({
                                 url: '//www.broadinstitute.org/igvdata/test/igv-web/segmented_data_080520.seg.gz',
                                 label: 'GBM Copy # (TCGA Broad GDAC)'})">GBM Copy # (TCGA Broad GDAC))</div>
 
+        <!--4-->
         <div onclick="igv.browser.loadTrack({
                                 type: 'eqtl',
                                 url: '//www.gtexportal.org/igv/assets/eqtl/Skin_Sun_Exposed_Lower_leg.portal.eqtl.bin',
                                 label: 'Skin Sun Exposed Lower leg'})">EQTL Skin (GTEX))</div>
 
-
+        <!--5-->
         <div onclick="igv.browser.loadTrack( {
                                 url: '//www.broadinstitute.org/igvdata/t2d/recomb_decode.bedgraph',
                                 label: 'Recombination rate'})">Recombination Rate</div>
 
-
+        <!--6-->
         <div onclick="igv.browser.loadTrack(
                                 {
                                 type: 'vcf',
                                 url: '//www.broadinstitute.org/igvdata/test/igv-web/TSVC_variants_IonXpress_078.vcf.gz',
                                 label: 'TSVC Variants 078'
                                 })">TSVC Variants 078 (VCF tabix)</div>
-
+        <!--7-->
         <div onclick="igv.browser.loadTrack(
                                 {
                                 type: 'bed',
