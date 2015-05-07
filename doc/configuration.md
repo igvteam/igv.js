@@ -5,17 +5,31 @@
 ##Browser Configuration
 
 
+
+
 option  | description | default
 ------ | ------- | ------------
-genome  | Genome identifier. *Required if fastaURL not specified.* |
-fastaURL  | Indexed fasta file URL.  *Required if genome id is not specified.* |
-cytobandURL | Cytoband file URL, UCSC format.  Required if genome id not specified. |
+genome  | Embedded object defining reference genome.  See table below |
 showKaryo | If true, whole-genome karyotype view is displayed. | false 
 showNavigation | If true, show basic navigation controls (search, zoom in, zoom out). | true
 tracks | Array of track descriptors initially displayed when app launches. |
-trackDefaults |  Default settings for specific track type (see example below). |
+trackDefaults |  Embedded object defining default settings for specific track types (see table below). |
 locus | Initial genome location |
 flanking  | Distance (in bp) to pad sides of gene when navigating. | 1000
+
+
+###Genome
+
+option | description | default
+------ | ----------- | -------
+id | optional identifier.  Certain UCSC identifiers (see list below) are predefined with fasta, cytoband, and reference annotations | hg19
+fastaURL | URL to an indexed fasta file.  Optional if id is in predefined list.  If supplied overrides predefined url. |
+cytobandURL | URL to a cytoband ideogram file in UCSC format.  Optional.  |
+annotationURL | URL to a reference annotation file.  Optional.  If defined overrides predefined setting.  To suppress predefined annotations set to false. |
+
+###Track Defaults
+
+
 
 
 ##Track Configuration
@@ -26,7 +40,7 @@ With exception of "url" all parameters are optional.
 
 option | description
 --------|  ----------------
-url | URL to the file or webservice
+url | URL to the file or webservice.  Required.
 indexURL | URL to associated index file (bai, idx, or tbi file)
 headURL | URL for "HEAD" requests.   Useful for Amazon signed urls, where head and get url can differ.
 type | String identifying type of file.  Recognized types include  "bed", "vcf", "bam", and "seg".
