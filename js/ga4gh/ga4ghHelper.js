@@ -221,8 +221,9 @@ var igv = (function (igv) {
         }
     }
 
-
     igv.ga4gh = {
+        providerIndex: undefined,
+        datasetIndex: undefined,
         providers: [
             {
                 name: "Google",
@@ -262,63 +263,71 @@ var igv = (function (igv) {
         ]
     };
 
-    igv.ga4ghBackEndSelectOptions = function () {
+    igv.ga4ghInitialize = function () {
 
         var backend = $("#backend"),
-            dataset = $("#dataset"),
-            selected;
+            dataset = $("#dataset");
 
         igv.ga4gh.providers.forEach(function(p, index, ps){
-            var option = $('<option>');
 
+            var option = $('<option>');
             option.val(index);
             option.text(p.name);
             backend.append(option);
         });
 
-        // At this point, the first option should be pre-selected without user interaction
-        selected = backend.val();
-
         backend.change(function() {
 
-            $( "#backend option:selected" ).each(function() {
+            var provider,
+                backEndOption = $( "#backend option:selected").first();
 
-                var provider,
-                    providerIndex,
-                    selectedOption = $(this);
+            igv.ga4gh.providerIndex = parseInt( backEndOption.val() );
 
-                providerIndex = parseInt( selectedOption.val() );
-                provider = igv.ga4gh.providers[ providerIndex ];
+            provider = igv.ga4gh.providers[ igv.ga4gh.providerIndex ];
 
-                dataset.empty();
-                provider.datasets.forEach(function(d, index, ds){
+            dataset.empty();
+            provider.datasets.forEach(function(d, index, ds){
 
-                    var option = $('<option>');
-                    option.val(index);
-                    option.text(d.name);
-                    dataset.append(option);
-
-                });
-
-
+                var option = $('<option>');
+                option.val(index);
+                option.text(d.name);
+                dataset.append(option);
 
             });
 
+
+            //$( "#backend option:selected" ).each(function() {
+            //
+            //    var provider;
+            //
+            //    igv.ga4gh.providerIndex = parseInt( $(this).val() );
+            //
+            //    provider = igv.ga4gh.providers[ igv.ga4gh.providerIndex ];
+            //
+            //    dataset.empty();
+            //    provider.datasets.forEach(function(d, index, ds){
+            //
+            //        var option = $('<option>');
+            //        option.val(index);
+            //        option.text(d.name);
+            //        dataset.append(option);
+            //
+            //    });
+            //
+            //});
 
         });
 
         dataset.change(function() {
 
-            var providerIndex   = parseInt( $( "#backend option:selected").first().val() ),
-                datasetIndex    = parseInt( $( "#dataset option:selected").first().val() ),
+            var datasetOption = $( "#dataset option:selected").first(),
                 provider,
                 dataset;
 
-            //provider = igv.ga4gh.providers[ providerIndex ];
-            //dataset = provider.datasets[ datasetIndex ];
+            igv.ga4gh.datasetIndex = parseInt( datasetOption.val() );
 
-            provider = igv.ga4gh.providers[ 0 ];
-            dataset = provider.datasets[ 1 ];
+            provider = igv.ga4gh.providers[ igv.ga4gh.providerIndex ];
+            dataset = provider.datasets[ igv.ga4gh.datasetIndex ];
 
             igv.ga4ghSearchReadGroupSets({
                 url: provider.url,
@@ -326,6 +335,8 @@ var igv = (function (igv) {
                 success: function (results) {
 
                     console.log("results " + results.length);
+
+                    //<a href="https://gabrowse.appspot.com/#" class="list-group-item" page="1" style="display: block;">HG02573</a>
                 }
             });
 
