@@ -156,7 +156,7 @@
                     </div>
                     <div class="modal-body">
 
-                        <div class="form-inline" style="margin-bottom: 10px">
+                        <form class="form-inline" style="margin-bottom: 10px">
 
                             <div class="form-group">
 
@@ -176,29 +176,36 @@
                                 <input type="text" class="form-control" placeholder="name" id="setName"/>
                             </div>
 
-                        </div>
+                            <button type="submit" class="btn btn-primary" onclick="searchSets(this); return false;">
+                                Search
+                            </button>
+
+                        </form>
 
                         <div>
                             <ul class="nav nav-tabs">
                                 <li class="active" id="READSETTab"><a>Read group sets</a></li>
-                                <li                id="CALLSETTab"><a>Call sets</a></li>
+                                <li id="CALLSETTab"><a>Call sets</a></li>
                             </ul>
                             <div class="tab-content">
                                 <div class="tab-pane active" id="searchPaneREADSET">
                                     <div class="list-group results" id="searchResults">
                                         <!--<img src="img/spinner.gif"/>-->
                                     </div>
-                                    <!--<div class="paginationContainer"></div>-->
+                                    <div class="paginationContainer"></div>
                                 </div>
                                 <div class="tab-pane" id="searchPaneCALLSET">
                                     <div class="list-group results">
-                                        <!--<img src="img/spinner.gif"/>-->
+                                        <img src="img/spinner.gif"/>
                                     </div>
-                                    <!--<div class="paginationContainer"></div>-->
+                                    <div class="paginationContainer"></div>
                                 </div>
                             </div>
                         </div>
 
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-default" data-dismiss="modal" id="modalDoneButton" style="display: none">Done</button>
                     </div>
                 </div>
             </div>
@@ -207,12 +214,11 @@
 
     </div>
 
+
 </div>
-<!-- jumbotron -->
 
 <div id="myDiv">
 </div>
-<!-- container -->
 
 <script type="text/javascript">
 
