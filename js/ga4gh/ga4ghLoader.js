@@ -157,10 +157,10 @@ var igv = (function (igv) {
 
                 if ("" === $(this).val()) {
 
-                    igv.ga4gh.traverseDataset( "reset" );
+                    igv.ga4gh.filterTrackList( "reset" );
                 } else {
 
-                    igv.ga4gh.traverseDataset( $(this).val() );
+                    igv.ga4gh.filterTrackList( $(this).val() );
 
                 }
 
@@ -171,15 +171,29 @@ var igv = (function (igv) {
             igv.ga4gh.datasetChangeHandler();
         },
 
-        traverseDataset:function (searchTerm) {
+        filterTrackList:function (searchTerm) {
 
-            console.log("traverseDataset.begin " + searchTerm);
-            $("#searchResults").find("a").each(function(){
+            var st = searchTerm.toLowerCase(),
+                rows = $("#searchResults a");
 
-                // do stuff
+            rows.each(function(){
+
+                var term = $(this).text().toLowerCase();
+
+                if ("reset" === st) {
+
+                    $(this).show();
+                } else {
+
+                    if (term.indexOf(st) > -1) {
+                        $(this).show();
+                    } else {
+                        $(this).hide();
+                    }
+
+                }
 
             });
-            console.log("traverseDataset.end  " + searchTerm);
 
         }
 
