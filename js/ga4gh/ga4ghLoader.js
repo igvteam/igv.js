@@ -141,6 +141,8 @@ var igv = (function (igv) {
                                 );
 
                                 $("#setSearch").css('display', 'none');
+                                $("body").removeClass("modal-open");
+                                $(".modal-backdrop").remove();
 
                             });
 
