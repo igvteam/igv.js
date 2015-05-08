@@ -75,29 +75,29 @@ var igv = (function (igv) {
 
             igv.ga4gh.providers.forEach(function (p, index, ps) {
 
-                var option = $('<option>');
-                option.val(index);
-                option.text(p.name);
-                providerElement.append(option);
+                var optionElement = $('<option>');
+                optionElement.val(index);
+                optionElement.text(p.name);
+                providerElement.append(optionElement);
             });
 
             // provider
             igv.ga4gh.providerChangeHandler = function () {
 
-                var backEndOption = $("#provider option:selected").first(),
+                var optionElement = $("#provider option:selected").first(),
                     provider;
 
-                igv.ga4gh.providerIndex = parseInt(backEndOption.val());
+                igv.ga4gh.providerIndex = parseInt(optionElement.val());
 
                 provider = igv.ga4gh.providers[igv.ga4gh.providerIndex];
 
                 datasetElement.empty();
                 provider.datasets.forEach(function (d, index, ds) {
 
-                    var option = $('<option>');
-                    option.val(index);
-                    option.text(d.name);
-                    datasetElement.append(option);
+                    var optionElement = $('<option>');
+                    optionElement.val(index);
+                    optionElement.text(d.name);
+                    datasetElement.append(optionElement);
 
                 });
 
@@ -108,12 +108,12 @@ var igv = (function (igv) {
             // dataset
             igv.ga4gh.datasetChangeHandler = function () {
 
-                var option = $("#dataset option:selected").first(),
+                var optionElement = $("#dataset option:selected").first(),
                     provider,
                     dataset,
-                    searchResults = $("#searchResults");
+                    searchResultsElement = $("#searchResults");
 
-                igv.ga4gh.datasetIndex = parseInt(option.val());
+                igv.ga4gh.datasetIndex = parseInt(optionElement.val());
 
                 provider = igv.ga4gh.providers[igv.ga4gh.providerIndex];
                 dataset = provider.datasets[igv.ga4gh.datasetIndex];
@@ -121,25 +121,26 @@ var igv = (function (igv) {
                 igv.ga4ghSearchReadGroupSets({
                     url: provider.url,
                     datasetId: dataset.id,
-                    success: function (rows) {
+                    success: function (results) {
 
-                        searchResults.empty();
-                        rows.forEach(function (r) {
+                        searchResultsElement.empty();
 
-                            var row = $('<a href="#" class="list-group-item" style="display: block;">');
-                            row.text(r.name);
+                        results.forEach(function (result) {
 
-                            searchResults.append(row);
+                            var rowElement = $('<a href="#" class="list-group-item" style="display: block;">');
+                            rowElement.text(result.name);
 
-                            row.click(function () {
+                            searchResultsElement.append(rowElement);
+
+                            rowElement.click(function () {
 
                                 igv.browser.loadTrack(
                                     {
                                         sourceType: 'ga4gh',
                                         type: 'bam',
                                         url: provider.url,
-                                        readGroupSetIds: r.id,
-                                        label: r.name
+                                        readGroupSetIds: result.id,
+                                        label: result.name
                                     }
                                 );
 
@@ -160,9 +161,7 @@ var igv = (function (igv) {
             igv.ga4gh.datasetChangeHandler();
         }
 
-
     };
-
 
     return igv;
 
