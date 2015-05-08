@@ -155,23 +155,16 @@
 
                             <div class="form-group">
 
-                                <select class="form-control" id="backend">
+                                <select class="form-control" id="provider">
                                 </select>
 
                             </div>
 
                             <div class="form-group">
 
-                                <!--{% for backend, data in backends.iteritems() %}-->
-                                <!-- TODO: Simplify this -->
-                                <!--<select class="form-control datasetSelector" id="datasetId{{ backend }}" supportsCallsets="{{ data.supportsCallsets }}">-->
-                                <select class="form-control datasetSelector" id="dataset" supportsCallsets="{{ data.supportsCallsets }}">
-                                    <!--{% for dataset, datasetId in data.datasets.iteritems() %}-->
-                                    <!--<option value="{{ datasetId }}"> {{ dataset }} </option>-->
-                                    <!--{% endfor %}-->
+                                <select class="form-control datasetSelector" id="dataset">
 
                                 </select>
-                                <!--{% endfor %}-->
 
                             </div>
 
@@ -267,7 +260,7 @@
 
         browser = igv.createBrowser(div, options);
 
-        igv.ga4ghInitialize();
+        igv.ga4gh.initialize();
 
     });
 

@@ -64,94 +64,94 @@ var igv = (function (igv) {
             }
 
 
-        ]
-    };
+        ],
 
-    igv.ga4ghInitialize = function () {
+        initialize: function () {
 
-        var backend = $("#backend"),
-            dataset = $("#dataset"),
-            providerSelected,
-            datasetSelected;
+            var backend = $("#provider"),
+                dataset = $("#dataset"),
+                providerSelected,
+                datasetSelected;
 
-        // init markup
-        igv.ga4gh.providers.forEach(function(p, index, ps){
-
-            var option = $('<option>');
-            option.val(index);
-            option.text(p.name);
-            backend.append(option);
-        });
-
-        backend.change(function() {
-
-            var backEndOption = $( "#backend option:selected" ).first(),
-                provider;
-
-            igv.ga4gh.providerIndex = parseInt( backEndOption.val() );
-
-            provider = igv.ga4gh.providers[ igv.ga4gh.providerIndex ];
-
-            dataset.empty();
-            provider.datasets.forEach(function(d, index, ds){
+            // init markup
+            igv.ga4gh.providers.forEach(function (p, index, ps) {
 
                 var option = $('<option>');
                 option.val(index);
-                option.text(d.name);
-                dataset.append(option);
+                option.text(p.name);
+                backend.append(option);
+            });
+
+            backend.change(function () {
+
+                var backEndOption = $("#provider option:selected").first(),
+                    provider;
+
+                igv.ga4gh.providerIndex = parseInt(backEndOption.val());
+
+                provider = igv.ga4gh.providers[igv.ga4gh.providerIndex];
+
+                dataset.empty();
+                provider.datasets.forEach(function (d, index, ds) {
+
+                    var option = $('<option>');
+                    option.val(index);
+                    option.text(d.name);
+                    dataset.append(option);
+
+                });
 
             });
 
-        });
+            dataset.change(function () {
 
-        dataset.change(function() {
+                var datasetOption = $("#dataset option:selected").first(),
+                    provider,
+                    dataset,
+                    searchResults = $("#searchResults");
 
-            var datasetOption = $( "#dataset option:selected" ).first(),
-                provider,
-                dataset,
-                searchResults = $( "#searchResults" );
+                igv.ga4gh.datasetIndex = parseInt(datasetOption.val());
 
-            igv.ga4gh.datasetIndex = parseInt( datasetOption.val() );
+                provider = igv.ga4gh.providers[igv.ga4gh.providerIndex];
+                dataset = provider.datasets[igv.ga4gh.datasetIndex];
 
-            provider = igv.ga4gh.providers[ igv.ga4gh.providerIndex ];
-            dataset = provider.datasets[ igv.ga4gh.datasetIndex ];
+                igv.ga4ghSearchReadGroupSets({
+                    url: provider.url,
+                    datasetId: dataset.id,
+                    success: function (rows) {
 
-            igv.ga4ghSearchReadGroupSets({
-                url: provider.url,
-                datasetId: dataset.id,
-                success: function (rows) {
+                        console.log("rows " + rows.length);
 
-                    console.log("rows " + rows.length);
+                        searchResults.empty();
+                        rows.forEach(function (r) {
 
-                    searchResults.empty();
-                    rows.forEach(function(r){
+                            var row = $('<a href="#" class="list-group-item" style="display: block;">');
+                            row.text(r.name);
 
-                        var row = $('<a href="#" class="list-group-item" style="display: block;">');
-                        row.text(r.name);
+                            searchResults.append(row);
 
-                        searchResults.append(row);
+                            row.click(function () {
 
-                        row.click(function(){
+                                igv.browser.loadTrack(
+                                    {
+                                        sourceType: 'ga4gh',
+                                        type: 'bam',
+                                        url: provider.url,
+                                        readGroupSetIds: r.id,
+                                        label: r.name
+                                    }
+                                );
 
-                            igv.browser.loadTrack(
-                                {
-                                    sourceType: 'ga4gh',
-                                    type: 'bam',
-                                    url: provider.url,
-                                    readGroupSetIds: r.id,
-                                    label: r.name
-                                }
-                            );
+                            });
 
                         });
+                    }
+                });
 
-                    });
-                }
             });
-
-        });
-
+        }
     };
+
 
     return igv;
 
