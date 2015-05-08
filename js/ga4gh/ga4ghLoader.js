@@ -120,8 +120,6 @@ var igv = (function (igv) {
                     datasetId: dataset.id,
                     success: function (rows) {
 
-                        console.log("rows " + rows.length);
-
                         searchResults.empty();
                         rows.forEach(function (r) {
 
@@ -142,6 +140,8 @@ var igv = (function (igv) {
                                     }
                                 );
 
+                                $("#setSearch").css('display', 'none');
+
                             });
 
                         });
@@ -149,7 +149,9 @@ var igv = (function (igv) {
                 });
 
             });
-        }
+        },
+
+
     };
 
 
