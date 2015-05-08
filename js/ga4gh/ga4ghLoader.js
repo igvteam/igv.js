@@ -26,10 +26,13 @@
 var igv = (function (igv) {
 
     igv.ga4gh = {
-        providerIndex: undefined,
-        datasetIndex: undefined,
+
+        providerCurrent: undefined,
+        datasetCurrent: undefined,
+
         providerChangeHandler: undefined,
         datasetChangeHandler: undefined,
+
         providers: [
             {
                 name: "Google",
@@ -84,15 +87,12 @@ var igv = (function (igv) {
             // provider
             igv.ga4gh.providerChangeHandler = function () {
 
-                var optionElement = $("#provider option:selected").first(),
-                    provider;
+                var optionElement = $("#provider option:selected").first();
 
-                igv.ga4gh.providerIndex = parseInt(optionElement.val());
-
-                provider = igv.ga4gh.providers[igv.ga4gh.providerIndex];
+                igv.ga4gh.providerCurrent = igv.ga4gh.providers[ parseInt(optionElement.val()) ];
 
                 datasetElement.empty();
-                provider.datasets.forEach(function (d, index, ds) {
+                igv.ga4gh.providerCurrent.datasets.forEach(function (d, index, ds) {
 
                     var optionElement = $('<option>');
                     optionElement.val(index);
@@ -109,18 +109,13 @@ var igv = (function (igv) {
             igv.ga4gh.datasetChangeHandler = function () {
 
                 var optionElement = $("#dataset option:selected").first(),
-                    provider,
-                    dataset,
                     searchResultsElement = $("#searchResults");
 
-                igv.ga4gh.datasetIndex = parseInt(optionElement.val());
-
-                provider = igv.ga4gh.providers[igv.ga4gh.providerIndex];
-                dataset = provider.datasets[igv.ga4gh.datasetIndex];
+                igv.ga4gh.datasetCurrent = igv.ga4gh.providerCurrent.datasets[ parseInt(optionElement.val()) ];
 
                 igv.ga4ghSearchReadGroupSets({
-                    url: provider.url,
-                    datasetId: dataset.id,
+                    url: igv.ga4gh.providerCurrent.url,
+                    datasetId: igv.ga4gh.datasetCurrent.id,
                     success: function (results) {
 
                         searchResultsElement.empty();
@@ -138,7 +133,7 @@ var igv = (function (igv) {
                                     {
                                         sourceType: 'ga4gh',
                                         type: 'bam',
-                                        url: provider.url,
+                                        url: igv.ga4gh.providerCurrent.url,
                                         readGroupSetIds: result.id,
                                         label: result.name
                                     }
