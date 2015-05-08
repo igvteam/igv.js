@@ -15,7 +15,8 @@
     <link rel="stylesheet" type="text/css" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.4/css/bootstrap.min.css">
 
     <!-- jQuery UI CSS -->
-    <link rel="stylesheet" type="text/css" href="//ajax.googleapis.com/ajax/libs/jqueryui/1.11.2/themes/smoothness/jquery-ui.css"/>
+    <link rel="stylesheet" type="text/css"
+          href="//ajax.googleapis.com/ajax/libs/jqueryui/1.11.2/themes/smoothness/jquery-ui.css"/>
 
     <!-- Font Awesome CSS -->
     <link rel="stylesheet" type="text/css" href="//maxcdn.bootstrapcdn.com/font-awesome/4.2.0/css/font-awesome.min.css">
@@ -129,17 +130,21 @@
 
 <nav class="navbar navbar-default navbar-fixed-top">
     <div class="container">
+
         <div class="navbar-header">
             <a class="navbar-brand" href="#">IGV JS</a>
         </div>
+
     </div>
 </nav>
 
 <div class="jumbotron">
 
-    <div class="container">
+    <div>
 
-        <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#setSearch">Add data</button>
+        <div style="margin-left:56px;">
+            <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#setSearch">Add data</button>
+        </div>
 
         <div class="modal" id="setSearch">
 
@@ -172,7 +177,9 @@
                                 <input type="text" class="form-control" placeholder="name" id="setName"/>
                             </div>
 
-                            <button type="submit" class="btn btn-primary" onclick="searchSets(this); return false;">Search</button>
+                            <button type="submit" class="btn btn-primary" onclick="searchSets(this); return false;">
+                                Search
+                            </button>
 
                         </form>
 
@@ -207,12 +214,15 @@
         </div>
 
 
-    </div><!-- container -->
+    </div>
+    <!-- container -->
 
-</div><!-- jumbotron -->
+</div>
+<!-- jumbotron -->
 
-<div class="container-fluid" id="myDiv">
-</div><!-- container -->
+<div id="myDiv">
+</div>
+<!-- container -->
 
 <script type="text/javascript">
 
@@ -265,14 +275,13 @@
     });
 
 
-
-//    $(document).ready(function () {
-//
-//        oauth.google.apiKey = 'AIzaSyDUUAUFpQEN4mumeMNIRWXSiTh5cPtUAD0';
-//
-//        igv.ga4ghInitialize();
-//
-//    });
+    //    $(document).ready(function () {
+    //
+    //        oauth.google.apiKey = 'AIzaSyDUUAUFpQEN4mumeMNIRWXSiTh5cPtUAD0';
+    //
+    //        igv.ga4ghInitialize();
+    //
+    //    });
 
 
 </script>
