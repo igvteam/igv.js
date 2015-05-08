@@ -1,0 +1,30 @@
+
+.jumbotron {
+    padding-top: 64px;
+    background-color: white;
+    margin-bottom: 0;
+}
+
+#searchResults.list-group {
+
+    height: 512px;
+    overflow: auto;
+}
+
+.container-fluid footer {
+    margin-top: 32px;
+    color: white;
+    text-align: center;
+    background-color: #7c7c7c;
+
+    padding-top: 4px;
+    padding-bottom: 4px;
+}
+
+p {
+    margin:0 auto;
+}
+
+#myDiv {
+    color: #3e3e3e;
+}
