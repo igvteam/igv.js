@@ -28,17 +28,19 @@ var igv = (function (igv) {
     igv.ga4gh = {
         providerIndex: undefined,
         datasetIndex: undefined,
+        providerChangeHandler: undefined,
+        datasetChangeHandler: undefined,
         providers: [
             {
                 name: "Google",
                 url: "https://www.googleapis.com/genomics/v1beta2",
                 supportsPartialResponse: true,
                 datasets: [
+                    {name: "Simons Foundation", id: "461916304629"},
                     {name: "1000 Genomes", id: "10473108253681171589"},
                     {name: "Platinum Genomes", id: "3049512673186936334"},
                     {name: "DREAM SMC Challenge", id: "337315832689"},
-                    {name: "PGP", id: "383928317087"},
-                    {name: "Simons Foundation", id: "461916304629"}
+                    {name: "PGP", id: "383928317087"}
                 ]
             }
             ,
@@ -68,21 +70,19 @@ var igv = (function (igv) {
 
         initialize: function () {
 
-            var backend = $("#provider"),
-                dataset = $("#dataset"),
-                providerSelected,
-                datasetSelected;
+            var providerElement = $("#provider"),
+                datasetElement = $("#dataset");
 
-            // init markup
             igv.ga4gh.providers.forEach(function (p, index, ps) {
 
                 var option = $('<option>');
                 option.val(index);
                 option.text(p.name);
-                backend.append(option);
+                providerElement.append(option);
             });
 
-            backend.change(function () {
+            // provider
+            igv.ga4gh.providerChangeHandler = function () {
 
                 var backEndOption = $("#provider option:selected").first(),
                     provider;
@@ -91,26 +91,29 @@ var igv = (function (igv) {
 
                 provider = igv.ga4gh.providers[igv.ga4gh.providerIndex];
 
-                dataset.empty();
+                datasetElement.empty();
                 provider.datasets.forEach(function (d, index, ds) {
 
                     var option = $('<option>');
                     option.val(index);
                     option.text(d.name);
-                    dataset.append(option);
+                    datasetElement.append(option);
 
                 });
 
-            });
+            };
 
-            dataset.change(function () {
+            providerElement.change(igv.ga4gh.providerChangeHandler);
 
-                var datasetOption = $("#dataset option:selected").first(),
+            // dataset
+            igv.ga4gh.datasetChangeHandler = function () {
+
+                var option = $("#dataset option:selected").first(),
                     provider,
                     dataset,
                     searchResults = $("#searchResults");
 
-                igv.ga4gh.datasetIndex = parseInt(datasetOption.val());
+                igv.ga4gh.datasetIndex = parseInt(option.val());
 
                 provider = igv.ga4gh.providers[igv.ga4gh.providerIndex];
                 dataset = provider.datasets[igv.ga4gh.datasetIndex];
@@ -148,8 +151,14 @@ var igv = (function (igv) {
                     }
                 });
 
-            });
-        },
+            };
+
+            datasetElement.change(igv.ga4gh.datasetChangeHandler);
+
+            // trigger handlers to pre-populate selects
+            igv.ga4gh.providerChangeHandler();
+            igv.ga4gh.datasetChangeHandler();
+        }
 
 
     };
