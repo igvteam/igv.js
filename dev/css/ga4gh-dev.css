@@ -5,7 +5,7 @@
     margin-bottom: 0;
 }
 
-#searchResults.list-group {
+.list-group {
 
     height: 512px;
     overflow-y: scroll;

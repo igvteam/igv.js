@@ -174,7 +174,7 @@ var igv = (function (igv) {
         filterTrackList:function (searchTerm) {
 
             var st = searchTerm.toLowerCase(),
-                rows = $("#searchResults a");
+                rows = $("#searchPaneREADSET").find("div.list-group a");
 
             rows.each(function(){
 
