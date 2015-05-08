@@ -140,80 +140,72 @@
 
 <div class="jumbotron">
 
-        <div class="container-fluid">
+    <div class="container-fluid">
 
-            <div style="margin-left:56px;">
-                <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#setSearch">Add data</button>
-            </div>
+        <div style="margin-left:56px;">
+            <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#setSearch">Add data</button>
+        </div>
 
-            <div class="modal" id="setSearch">
+        <div class="modal" id="setSearch">
 
-                <div class="modal-dialog">
-                    <div class="modal-content">
-                        <div class="modal-header">
-                            <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
-                            <h4 class="modal-title">Select Track Data</h4>
-                        </div>
-                        <div class="modal-body">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                        <h4 class="modal-title">Select Track Data</h4>
+                    </div>
+                    <div class="modal-body">
 
-                            <form class="form-inline" style="margin-bottom: 10px">
+                        <div class="form-inline" style="margin-bottom: 10px">
 
-                                <div class="form-group">
+                            <div class="form-group">
 
-                                    <select class="form-control" id="provider">
-                                    </select>
+                                <select class="form-control" id="provider">
+                                </select>
 
-                                </div>
+                            </div>
 
-                                <div class="form-group">
+                            <div class="form-group">
 
-                                    <select class="form-control datasetSelector" id="dataset">
-                                    </select>
+                                <select class="form-control datasetSelector" id="dataset">
+                                </select>
 
-                                </div>
+                            </div>
 
-                                <div class="form-group">
-                                    <input type="text" class="form-control" placeholder="name" id="setName"/>
-                                </div>
-
-                                <button type="submit" class="btn btn-primary" onclick="searchSets(this); return false;">
-                                    Search
-                                </button>
-
-                            </form>
-
-                            <div>
-                                <ul class="nav nav-tabs">
-                                    <li class="active" id="READSETTab"><a>Read group sets</a></li>
-                                    <li id="CALLSETTab"><a>Call sets</a></li>
-                                </ul>
-                                <div class="tab-content">
-                                    <div class="tab-pane active" id="searchPaneREADSET">
-                                        <div class="list-group results" id="searchResults">
-                                            <!--<img src="img/spinner.gif"/>-->
-                                        </div>
-                                        <div class="paginationContainer"></div>
-                                    </div>
-                                    <div class="tab-pane" id="searchPaneCALLSET">
-                                        <div class="list-group results">
-                                            <img src="img/spinner.gif"/>
-                                        </div>
-                                        <div class="paginationContainer"></div>
-                                    </div>
-                                </div>
+                            <div class="form-group">
+                                <input type="text" class="form-control" placeholder="name" id="setName"/>
                             </div>
 
                         </div>
-                        <div class="modal-footer">
-                            <button type="button" class="btn btn-default" data-dismiss="modal" id="modalDoneButton" style="display: none">Done</button>
+
+                        <div>
+                            <ul class="nav nav-tabs">
+                                <li class="active" id="READSETTab"><a>Read group sets</a></li>
+                                <li                id="CALLSETTab"><a>Call sets</a></li>
+                            </ul>
+                            <div class="tab-content">
+                                <div class="tab-pane active" id="searchPaneREADSET">
+                                    <div class="list-group results" id="searchResults">
+                                        <!--<img src="img/spinner.gif"/>-->
+                                    </div>
+                                    <!--<div class="paginationContainer"></div>-->
+                                </div>
+                                <div class="tab-pane" id="searchPaneCALLSET">
+                                    <div class="list-group results">
+                                        <!--<img src="img/spinner.gif"/>-->
+                                    </div>
+                                    <!--<div class="paginationContainer"></div>-->
+                                </div>
+                            </div>
                         </div>
+
                     </div>
                 </div>
-
             </div>
 
         </div>
 
+    </div>
 
 </div>
 <!-- jumbotron -->
