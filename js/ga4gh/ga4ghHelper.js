@@ -326,6 +326,21 @@ var igv = (function (igv) {
                         row.text(r.name);
 
                         searchResults.append(row);
+
+                        row.click(function(){
+
+                            igv.browser.loadTrack(
+                                {
+                                    sourceType: 'ga4gh',
+                                    type: 'bam',
+                                    url: provider.url,
+                                    readGroupSetIds: r.id,
+                                    label: r.name
+                                }
+                            );
+
+                        });
+
                     });
                 }
             });
