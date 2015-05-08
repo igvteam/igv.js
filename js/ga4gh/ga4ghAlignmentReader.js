@@ -101,7 +101,7 @@ var igv = (function (igv) {
 
                     self.chrNameMap = {};
 
-                    if (igv.browser) {
+                    if (igv.browser && json.referenceSetId) {
 
                         // Query for reference names to build an alias table (map of genome ref names -> dataset ref names)
                         var readURL = self.url + "/references/search";
