@@ -39,10 +39,10 @@ var igv = (function (igv) {
                 url: "https://www.googleapis.com/genomics/v1beta2",
                 supportsPartialResponse: true,
                 datasets: [
-                    {name: "Simons Foundation", id: "461916304629"},
-                    {name: "1000 Genomes", id: "10473108253681171589"},
                     {name: "Platinum Genomes", id: "3049512673186936334"},
+                    {name: "Simons Foundation", id: "461916304629"},
                     {name: "DREAM SMC Challenge", id: "337315832689"},
+                    {name: "1000 Genomes", id: "10473108253681171589"},
                     {name: "PGP", id: "383928317087"}
                 ]
             }
@@ -52,7 +52,7 @@ var igv = (function (igv) {
                 url: "https://www.googleapis.com/genomics/v1beta2",
                 supportsPartialResponse: true,
                 datasets: [
-                    {name: "99 Genomes", id: "10473108253681171589"},
+                    {name: "PGP", id: "383928317087"},
                     {name: "Silver Genomes", id: "3049512673186936334"},
                     {name: "Apocolypes", id: "337315832689"}
                 ]
@@ -62,7 +62,7 @@ var igv = (function (igv) {
                 url: "https://www.googleapis.com/genomics/v1beta2",
                 supportsPartialResponse: true,
                 datasets: [
-                    {name: "2121 Magoo", id: "10473108253681171589"},
+                    {name: "Simons Foundation", id: "461916304629"},
                     {name: "Monkey Shines", id: "3049512673186936334"},
                     {name: "Be The Woo", id: "337315832689"}
                 ]
@@ -102,6 +102,7 @@ var igv = (function (igv) {
 
                 });
 
+                igv.ga4gh.datasetChangeHandler()
             };
 
             providerElement.change(igv.ga4gh.providerChangeHandler);
@@ -110,7 +111,7 @@ var igv = (function (igv) {
             igv.ga4gh.datasetChangeHandler = function () {
 
                 var optionElement = $("#dataset option:selected").first(),
-                    searchResultsElement = $("#searchResults");
+                    searchResultsElement = $("#searchPaneREADSET").find("div.list-group");
 
                 igv.ga4gh.datasetCurrent = igv.ga4gh.providerCurrent.datasets[ parseInt(optionElement.val()) ];
 
@@ -168,7 +169,7 @@ var igv = (function (igv) {
 
             // trigger handlers to pre-populate selects
             igv.ga4gh.providerChangeHandler();
-            igv.ga4gh.datasetChangeHandler();
+            //igv.ga4gh.datasetChangeHandler();
         },
 
         filterTrackList:function (searchTerm) {
