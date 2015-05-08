@@ -129,7 +129,7 @@
 <body>
 
 <nav class="navbar navbar-default navbar-fixed-top">
-    <div class="container">
+    <div class="container-fluid">
 
         <div class="navbar-header">
             <a class="navbar-brand" href="#">IGV JS</a>
@@ -152,7 +152,7 @@
                 <div class="modal-content">
                     <div class="modal-header">
                         <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
-                        <h4 class="modal-title">Select data to view</h4>
+                        <h4 class="modal-title">Select Track Data</h4>
                     </div>
                     <div class="modal-body">
 
@@ -168,7 +168,6 @@
                             <div class="form-group">
 
                                 <select class="form-control datasetSelector" id="dataset">
-
                                 </select>
 
                             </div>
@@ -206,7 +205,7 @@
 
                     </div>
                     <div class="modal-footer">
-                        <button type="button" class="btn btn-default" data-dismiss="modal">Done</button>
+                        <button type="button" class="btn btn-default" data-dismiss="modal" id="modalDoneButton" style="display: none">Done</button>
                     </div>
                 </div>
             </div>

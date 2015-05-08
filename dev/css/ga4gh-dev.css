@@ -8,7 +8,7 @@
 #searchResults.list-group {
 
     height: 512px;
-    overflow: auto;
+    overflow-y: scroll;
 }
 
 .container-fluid footer {
