@@ -266,8 +266,11 @@ var igv = (function (igv) {
     igv.ga4ghInitialize = function () {
 
         var backend = $("#backend"),
-            dataset = $("#dataset");
+            dataset = $("#dataset"),
+            providerSelected,
+            datasetSelected;
 
+        // init markup
         igv.ga4gh.providers.forEach(function(p, index, ps){
 
             var option = $('<option>');
@@ -278,8 +281,8 @@ var igv = (function (igv) {
 
         backend.change(function() {
 
-            var provider,
-                backEndOption = $( "#backend option:selected").first();
+            var backEndOption = $( "#backend option:selected" ).first(),
+                provider;
 
             igv.ga4gh.providerIndex = parseInt( backEndOption.val() );
 
@@ -295,34 +298,14 @@ var igv = (function (igv) {
 
             });
 
-
-            //$( "#backend option:selected" ).each(function() {
-            //
-            //    var provider;
-            //
-            //    igv.ga4gh.providerIndex = parseInt( $(this).val() );
-            //
-            //    provider = igv.ga4gh.providers[ igv.ga4gh.providerIndex ];
-            //
-            //    dataset.empty();
-            //    provider.datasets.forEach(function(d, index, ds){
-            //
-            //        var option = $('<option>');
-            //        option.val(index);
-            //        option.text(d.name);
-            //        dataset.append(option);
-            //
-            //    });
-            //
-            //});
-
         });
 
         dataset.change(function() {
 
-            var datasetOption = $( "#dataset option:selected").first(),
+            var datasetOption = $( "#dataset option:selected" ).first(),
                 provider,
-                dataset;
+                dataset,
+                searchResults = $( "#searchResults" );
 
             igv.ga4gh.datasetIndex = parseInt( datasetOption.val() );
 
@@ -332,11 +315,18 @@ var igv = (function (igv) {
             igv.ga4ghSearchReadGroupSets({
                 url: provider.url,
                 datasetId: dataset.id,
-                success: function (results) {
+                success: function (rows) {
 
-                    console.log("results " + results.length);
+                    console.log("rows " + rows.length);
 
-                    //<a href="https://gabrowse.appspot.com/#" class="list-group-item" page="1" style="display: block;">HG02573</a>
+                    searchResults.empty();
+                    rows.forEach(function(r){
+
+                        var row = $('<a href="#" class="list-group-item" style="display: block;">');
+                        row.text(r.name);
+
+                        searchResults.append(row);
+                    });
                 }
             });
 
