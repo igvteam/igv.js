@@ -74,7 +74,8 @@ var igv = (function (igv) {
         initialize: function () {
 
             var providerElement = $("#provider"),
-                datasetElement = $("#dataset");
+                datasetElement = $("#dataset"),
+                inputSearchElement = $("#setName");
 
             igv.ga4gh.providers.forEach(function (p, index, ps) {
 
@@ -144,6 +145,7 @@ var igv = (function (igv) {
                             });
 
                         });
+
                     }
                 });
 
@@ -151,9 +153,34 @@ var igv = (function (igv) {
 
             datasetElement.change(igv.ga4gh.datasetChangeHandler);
 
+            inputSearchElement.keyup(function() {
+
+                if ("" === $(this).val()) {
+
+                    igv.ga4gh.traverseDataset( "reset" );
+                } else {
+
+                    igv.ga4gh.traverseDataset( $(this).val() );
+
+                }
+
+            });
+
             // trigger handlers to pre-populate selects
             igv.ga4gh.providerChangeHandler();
             igv.ga4gh.datasetChangeHandler();
+        },
+
+        traverseDataset:function (searchTerm) {
+
+            console.log("traverseDataset.begin " + searchTerm);
+            $("#searchResults").find("a").each(function(){
+
+                // do stuff
+
+            });
+            console.log("traverseDataset.end  " + searchTerm);
+
         }
 
     };
