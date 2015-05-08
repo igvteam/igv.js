@@ -137,7 +137,6 @@
 <div class="jumbotron">
 
     <div class="container">
-        <p>Oh baby, baby, baby!</p>
 
         <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#setSearch">Add data</button>
 
@@ -218,15 +217,69 @@
 
 </div><!-- jumbotron -->
 
+<div class="container-fluid" id="myDiv">
+</div><!-- container -->
+
 <script type="text/javascript">
 
     $(document).ready(function () {
 
-        oauth.google.apiKey = 'AIzaSyDUUAUFpQEN4mumeMNIRWXSiTh5cPtUAD0';
+        var div,
+                options,
+                browser;
+
+        div = $("#myDiv")[0];
+        options = {
+
+            showKaryo: false,
+            showNavigation: true,
+            fastaURL: "//dn7ywbm9isq8j.cloudfront.net/genomes/seq/hg19/hg19.fasta",
+            cytobandURL: "//dn7ywbm9isq8j.cloudfront.net/genomes/seq/hg19/cytoBand.txt",
+            flanking: 1000,
+            apiKey: 'AIzaSyDUUAUFpQEN4mumeMNIRWXSiTh5cPtUAD0',
+            trackDefaults: {
+                bam: {
+                    coverageThreshold: 0.2,
+                    coverageQualityWeight: true
+                }
+            },
+            palette: [
+                ["#00A0B0", "#6A4A3C", "#CC333F", "#EB6841"]
+            ],
+            tracks: [
+                {
+                    type: "sequence",
+                    order: -9999
+                }
+                ,
+                {
+                    name: "Genes",
+                    url: "//dn7ywbm9isq8j.cloudfront.net/annotations/hg19/genes/gencode.v18.collapsed.bed",
+                    //indexed: false,
+                    order: 10000,
+
+                    displayMode: "EXPANDED"
+
+                }
+            ]
+        };
+
+        browser = igv.createBrowser(div, options);
 
         igv.ga4ghInitialize();
 
     });
+
+
+
+//    $(document).ready(function () {
+//
+//        oauth.google.apiKey = 'AIzaSyDUUAUFpQEN4mumeMNIRWXSiTh5cPtUAD0';
+//
+//        igv.ga4ghInitialize();
+//
+//    });
+
 
 </script>
 
