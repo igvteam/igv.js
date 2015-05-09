@@ -106,6 +106,31 @@ function runGa4ghTests() {
     });
 
 
+
+    /**
+     * Search for callsets by a dataset id.  Must first get the variant sets,  then use these to search for
+     * call sets
+     */
+    asyncTest("search callsets ", function () {
+
+        var provider = igv.ga4gh.providers[0],
+            datasetId = provider.datasets[0].id,
+            url = provider.url;
+
+        igv.ga4ghSearchReadAndCallSets({
+            url: url,
+            datasetId: datasetId,
+            success: function (results) {
+
+                equal(results.length, 16);
+
+                start();
+            }
+        });
+    });
+
+
+
     // Query over wide region -- this takes some time, mainly here as a performance test
 //    asyncTest("variant search muc1", function () {
 //

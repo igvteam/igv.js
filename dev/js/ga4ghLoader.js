@@ -115,7 +115,7 @@ var igv = (function (igv) {
 
                 igv.ga4gh.datasetCurrent = igv.ga4gh.providerCurrent.datasets[ parseInt(optionElement.val()) ];
 
-                igv.ga4ghSearchReadGroupSets({
+                igv.ga4ghSearchReadAndCallSets({
                     url: igv.ga4gh.providerCurrent.url,
                     datasetId: igv.ga4gh.datasetCurrent.id,
                     success: function (results) {
@@ -136,7 +136,7 @@ var igv = (function (igv) {
                                         sourceType: 'ga4gh',
                                         type: 'bam',
                                         url: igv.ga4gh.providerCurrent.url,
-                                        readGroupSetIds: result.id,
+                                        readGroupSetIds: result.readGroupSetId,
                                         label: result.name
                                     }
                                 );
