@@ -23,7 +23,7 @@ function runGa4ghTests() {
     asyncTest("search readGroupSets ", function () {
 
         var provider = igv.ga4gh.providers[0],
-            datasetId = provider.datasets[1].id,
+            datasetId = provider.datasets[0].id,
             url = provider.url;
 
         igv.ga4ghSearchReadGroupSets({
@@ -41,7 +41,7 @@ function runGa4ghTests() {
     asyncTest("search variantsets ", function () {
 
         var provider = igv.ga4gh.providers[0],
-            datasetId = provider.datasets[1].id,
+            datasetId = provider.datasets[0].id,
             url = provider.url;
 
         igv.ga4ghSearchVariantSets({
@@ -64,7 +64,7 @@ function runGa4ghTests() {
     asyncTest("search callsets ", function () {
 
         var provider = igv.ga4gh.providers[0],
-            datasetId = provider.datasets[1].id,
+            datasetId = provider.datasets[0].id,
             url = provider.url;
 
         igv.ga4ghSearchCallSets({
@@ -79,27 +79,31 @@ function runGa4ghTests() {
         });
     });
 
-    //asyncTest("variant search", function () {
-    //
-    //    var reader = new igv.Ga4ghVariantReader({
-    //            type: "vcf",
-    //            url: "https://www.googleapis.com/genomics/v1beta2",
-    //            variantSetId: "10473108253681171589"
-    //        }),
-    //        chr = "1",
-    //        bpStart = 155158585,
-    //        bpEnd = 155158624;
-    //
-    //    reader.readFeatures(chr, bpStart, bpEnd, function (variants) {
-    //
-    //        ok(variants);
-    //        equal(variants.length, 2);
-    //
-    //
-    //        start();
-    //
-    //    })
-    //});
+    //10473108253681171589-2
+
+    asyncTest("variant search with callset", function () {
+
+        var reader = new igv.Ga4ghVariantReader({
+                type: "vcf",
+                url: "https://www.googleapis.com/genomics/v1beta2",
+                variantSetId: "10473108253681171589",
+                callSetIds: ["10473108253681171589-2"]
+            }),
+
+            chr = "1",
+            bpStart = 155158585,
+            bpEnd = 155158624;
+
+        reader.readFeatures(chr, bpStart, bpEnd, function (variants) {
+
+            ok(variants);
+            equal(variants.length, 2);
+
+
+            start();
+
+        })
+    });
 
 
     // Query over wide region -- this takes some time, mainly here as a performance test

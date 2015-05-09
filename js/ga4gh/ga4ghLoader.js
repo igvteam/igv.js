@@ -40,9 +40,9 @@ var igv = (function (igv) {
                 supportsPartialResponse: true,
                 datasets: [
                     {name: "Platinum Genomes", id: "3049512673186936334"},
+                    {name: "1000 Genomes", id: "10473108253681171589"},
                     {name: "Simons Foundation", id: "461916304629"},
                     {name: "DREAM SMC Challenge", id: "337315832689"},
-                    {name: "1000 Genomes", id: "10473108253681171589"},
                     {name: "PGP", id: "383928317087"}
                 ]
             }

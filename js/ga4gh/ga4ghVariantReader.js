@@ -31,6 +31,7 @@ var igv = (function (igv) {
         this.config = config;
         this.url = config.url;
         this.variantSetId = config.variantSetId;
+        this.callSetIds = config.callSetIds;
 
     }
 
@@ -48,7 +49,7 @@ var igv = (function (igv) {
                 url: readURL,
                 body: {
                     "variantSetIds": [myself.variantSetId],
-                    "callSetIds": [],            // Empty for now, we don't use genotypes yet
+                    "callSetIds": myself.callSetIds,            // Empty for now, we don't use genotypes yet
                     "referenceName": queryChr,
                     "start": bpStart.toString(),
                     "end": bpEnd.toString(),

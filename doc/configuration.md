@@ -5,8 +5,6 @@
 ##Browser Configuration
 
 
-
-
 option  | description | default
 ------ | ------- | ------------
 genome  | Embedded object defining reference genome.  See table below |
