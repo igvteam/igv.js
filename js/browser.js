@@ -79,36 +79,6 @@ var igv = (function (igv) {
 
     igv.Browser.prototype.loadTrack = function (config) {
 
-        var myself = this;
-
-        if (config.url && !config.sourceType) {    // TODO The test for sourcetype is a crude check if this is a webservice.  Fix.
-
-            igvxhr.isReachable(config.url, function (success, requestStatus) {
-
-                var parts;
-
-                if (true === success) {
-
-                    myself.doLoadTrack(config);
-                } else {
-
-                    parts = igv.parseUri(config.url);
-
-                    myself.userFeedback.bodyCopy("<p>ERROR: Track file " + parts["file"] + " is unreachable<\p><p>HTTP request status: " + requestStatus + "<\p>");
-                    myself.userFeedback.show();
-                }
-
-            });
-
-        } else {
-
-            myself.doLoadTrack(config);
-
-        }
-    };
-
-    igv.Browser.prototype.doLoadTrack = function (config) {
-
         var browser = this;
 
         if (this.isDuplicateTrack(config)) {

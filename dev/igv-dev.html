@@ -219,6 +219,17 @@
                                 name: 'Ga4gh alignments'})">GA4Gh Alignments (Global Alliance, Google server)
         </div>
 
+
+        <div onclick="igv.browser.loadTrack( {
+                            sourceType: 'ga4gh',
+                            type: 'vcf',
+                            url: 'https://www.googleapis.com/genomics/v1beta2',
+                            variantSetId: '10473108253681171589',
+                            callSetIds: ['10473108253681171589-2'],
+                            name: 'Ga4gh variants'
+                            })">GA4Gh Variants (Global Alliance, Google server)
+        </div>
+
         <div onclick="igv.browser.loadTrack({
                                 url: '//www.broadinstitute.org/igvdata/test/igv-web/segmented_data_080520.seg.gz',
                                 indexed: false,

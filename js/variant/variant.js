@@ -147,13 +147,13 @@ var igv = (function (igv) {
             "<hr>"
         ];
 
-        infoFields = this.info.split(";");
-        infoFields.forEach(function (f) {
-            var tokens = f.split("=");
-            if (tokens.length > 1) {
-                fields.push({name: tokens[0], value: tokens[1]});   // TODO -- use header to add descriptive tooltip
-            }
-        });
+        //infoFields = this.info.split(";");
+        //infoFields.forEach(function (f) {
+        //    var tokens = f.split("=");
+        //    if (tokens.length > 1) {
+        //        fields.push({name: tokens[0], value: tokens[1]});   // TODO -- use header to add descriptive tooltip
+        //    }
+        //});
 
 
         return fields;
