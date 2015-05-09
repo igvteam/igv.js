@@ -222,6 +222,49 @@ var igv = (function (igv) {
     }
 
 
+    /**
+     * Method to support ga4gh application
+     *
+     * @param options
+     */
+    igv.ga4ghSearchReadAndCallSets = function (options) {
+
+        igv.ga4ghSearchReadGroupSets({
+            url: options.url,
+            datasetId: options.datasetId,
+            success: function (readGroupSets) {
+                igv.ga4ghSearchCallSets({
+                    url: options.url,
+                    datasetId: options.datasetId,
+                    success: function (callSets) {
+
+                        // Merge call sets and read group sets
+
+                        var csHash = {};
+                        callSets.forEach(function (cs) {
+                            csHash[cs.name] = cs;
+                        });
+
+                        var mergedResults = [];
+                        readGroupSets.forEach(function (rg) {
+                            var m = {readGroupSetId: rg.id, name: rg.name},
+                                cs = csHash[rg.name];
+                            if(cs) {
+                                m.callSetId = cs.id;
+                            }
+                            mergedResults.push(m);
+                        });
+
+                        options.success(mergedResults);
+
+                    }
+                });
+            }
+        });
+
+    }
+
+
     return igv;
 
 })(igv || {});
