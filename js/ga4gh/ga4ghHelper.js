@@ -212,6 +212,11 @@ var igv = (function (igv) {
                     "pageSize": "10000"
                 },
                 decode: function (json) {
+
+                    if (json.callSets) json.callSets.forEach(function (cs) {
+                        cs.variantSetIds = options.variantSetIds;
+                    });
+
                     return json.callSets;
                 },
                 success: function (results) {
@@ -249,8 +254,9 @@ var igv = (function (igv) {
                         readGroupSets.forEach(function (rg) {
                             var m = {readGroupSetId: rg.id, name: rg.name},
                                 cs = csHash[rg.name];
-                            if(cs) {
+                            if (cs) {
                                 m.callSetId = cs.id;
+                                m.variantSetIds = cs.variantSetIds;
                             }
                             mergedResults.push(m);
                         });

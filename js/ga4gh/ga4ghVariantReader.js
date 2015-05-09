@@ -53,17 +53,42 @@ var igv = (function (igv) {
                     "referenceName": queryChr,
                     "start": bpStart.toString(),
                     "end": bpEnd.toString(),
-                    "pageSize": "10000"},
+                    "pageSize": "10000"
+                },
                 decode: function (json) {
                     var variants = [];
+
+                    // If a single call set id is specified filter out hom-ref calls
+                    var filterHomeRef = myself.callSetIds && myself.callSetIds.length == 1;
+
                     json.variants.forEach(function (json) {
-                        variants.push(igv.createGAVariant(json));
+                        if (filterHomeRef && json.calls) {
+                            var allele1 = json.calls[0].genotype[0],
+                                allele2 = json.calls[0].genotype[1],
+                                variant;
+                            if (allele1 === 0 && allele2 === 0) {
+                                return;    // gt = HOMEREF
+                            }
+                            else if (allele1 === allele2) {
+                                gt = "HOMVAR"
+                            }
+                            else {
+                                gt = "HETVAR";
+                            }
+                            variant = igv.createGAVariant(json);
+                            variant.gt = gt;
+                            variants.push(variant);
+                        }
+                        else {
+                            variants.push(igv.createGAVariant(json));
+                        }
                     });
 
                     return variants;
                 },
                 success: success,
-                task: task});
+                task: task
+            });
         });
 
 
