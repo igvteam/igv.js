@@ -90,7 +90,7 @@ var igv = (function (igv) {
 
                 var optionElement = $("#provider option:selected").first();
 
-                igv.ga4gh.providerCurrent = igv.ga4gh.providers[ parseInt(optionElement.val()) ];
+                igv.ga4gh.providerCurrent = igv.ga4gh.providers[parseInt(optionElement.val())];
 
                 datasetElement.empty();
                 igv.ga4gh.providerCurrent.datasets.forEach(function (d, index, ds) {
@@ -113,7 +113,7 @@ var igv = (function (igv) {
                 var optionElement = $("#dataset option:selected").first(),
                     searchResultsElement = $("#searchPaneREADSET").find("div.list-group");
 
-                igv.ga4gh.datasetCurrent = igv.ga4gh.providerCurrent.datasets[ parseInt(optionElement.val()) ];
+                igv.ga4gh.datasetCurrent = igv.ga4gh.providerCurrent.datasets[parseInt(optionElement.val())];
 
                 igv.ga4ghSearchReadAndCallSets({
                     url: igv.ga4gh.providerCurrent.url,
@@ -131,15 +131,30 @@ var igv = (function (igv) {
 
                             rowElement.click(function () {
 
-                                igv.browser.loadTrack(
-                                    {
-                                        sourceType: 'ga4gh',
-                                        type: 'bam',
-                                        url: igv.ga4gh.providerCurrent.url,
-                                        readGroupSetIds: result.readGroupSetId,
-                                        label: result.name
-                                    }
-                                );
+                                if (result.callSetId && result.variantSetIds) {
+                                    result.variantSetIds.forEach(function (variantSetId) {
+                                        igv.browser.loadTrack({
+                                            sourceType: 'ga4gh',
+                                            type: 'vcf',
+                                            url: 'https://www.googleapis.com/genomics/v1beta2',
+                                            variantSetId: variantSetId,
+                                            callSetIds: [result.callSetId],
+                                            name: result.name + " variants"
+                                        })
+                                    })
+                                }
+
+                                if (result.readGroupSetId) {
+                                    igv.browser.loadTrack(
+                                        {
+                                            sourceType: 'ga4gh',
+                                            type: 'bam',
+                                            url: igv.ga4gh.providerCurrent.url,
+                                            readGroupSetIds: result.readGroupSetId,
+                                            label: result.name + " alignments"
+                                        }
+                                    );
+                                }
 
                                 $("#setSearch").modal("hide");
 
@@ -154,14 +169,14 @@ var igv = (function (igv) {
 
             datasetElement.change(igv.ga4gh.datasetChangeHandler);
 
-            inputSearchElement.keyup(function() {
+            inputSearchElement.keyup(function () {
 
                 if ("" === $(this).val()) {
 
-                    igv.ga4gh.filterTrackList( "reset" );
+                    igv.ga4gh.filterTrackList("reset");
                 } else {
 
-                    igv.ga4gh.filterTrackList( $(this).val() );
+                    igv.ga4gh.filterTrackList($(this).val());
 
                 }
 
@@ -172,12 +187,12 @@ var igv = (function (igv) {
             //igv.ga4gh.datasetChangeHandler();
         },
 
-        filterTrackList:function (searchTerm) {
+        filterTrackList: function (searchTerm) {
 
             var st = searchTerm.toLowerCase(),
                 rows = $("#searchPaneREADSET").find("div.list-group a");
 
-            rows.each(function(){
+            rows.each(function () {
 
                 var term = $(this).text().toLowerCase();
 
