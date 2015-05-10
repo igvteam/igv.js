@@ -46,29 +46,6 @@ var igv = (function (igv) {
                     {name: "PGP", id: "383928317087"}
                 ]
             }
-            ,
-            {
-                name: "Testing123",
-                url: "https://www.googleapis.com/genomics/v1beta2",
-                supportsPartialResponse: true,
-                datasets: [
-                    {name: "PGP", id: "383928317087"},
-                    {name: "Silver Genomes", id: "3049512673186936334"},
-                    {name: "Apocolypes", id: "337315832689"}
-                ]
-            },
-            {
-                name: "TotalBolix",
-                url: "https://www.googleapis.com/genomics/v1beta2",
-                supportsPartialResponse: true,
-                datasets: [
-                    {name: "Simons Foundation", id: "461916304629"},
-                    {name: "Monkey Shines", id: "3049512673186936334"},
-                    {name: "Be The Woo", id: "337315832689"}
-                ]
-            }
-
-
         ],
 
         initialize: function () {
@@ -139,7 +116,8 @@ var igv = (function (igv) {
                                             url: 'https://www.googleapis.com/genomics/v1beta2',
                                             variantSetId: variantSetId,
                                             callSetIds: [result.callSetId],
-                                            name: result.name + " variants"
+                                            name: result.name + " variants",
+                                            datasetId: result.datasetId
                                         })
                                     })
                                 }
@@ -151,7 +129,8 @@ var igv = (function (igv) {
                                             type: 'bam',
                                             url: igv.ga4gh.providerCurrent.url,
                                             readGroupSetIds: result.readGroupSetId,
-                                            label: result.name + " alignments"
+                                            label: result.name + " alignments",
+                                            datasetId: result.datasetId
                                         }
                                     );
                                 }

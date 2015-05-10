@@ -101,12 +101,15 @@ var igv = (function (igv) {
 
                             tmp = decode ? decode(json) : json;
 
-                            tmp.forEach(function (a) {
-                                var keep = true;           // TODO -- conditionally keep (downsample)
-                                if (keep) {
-                                    results.push(a);
-                                }
-                            });
+                            if (tmp) {
+
+                                tmp.forEach(function (a) {
+                                    var keep = true;           // TODO -- conditionally keep (downsample)
+                                    if (keep) {
+                                        results.push(a);
+                                    }
+                                });
+                            }
 
 
                             nextPageToken = json["nextPageToken"];
@@ -252,7 +255,7 @@ var igv = (function (igv) {
 
                         var mergedResults = [];
                         readGroupSets.forEach(function (rg) {
-                            var m = {readGroupSetId: rg.id, name: rg.name},
+                            var m = {readGroupSetId: rg.id, name: rg.name, datasetId: options.datasetId},
                                 cs = csHash[rg.name];
                             if (cs) {
                                 m.callSetId = cs.id;
