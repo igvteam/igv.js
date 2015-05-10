@@ -34,16 +34,17 @@ var igv = (function (igv) {
         this.collapsedHeight = config.collapsedHeight || this.height;
         this.expandedRowHeight = config.expandedRowHeight || 30;
         this.squishedRowHeight = config.squishedRowHeight || 15;
-
         this.featureSource = new igv.FeatureSource(this.config);
 
         // Set the render function.  This can optionally be passed in the config
         if (config.render) {
             this.render = config.render;
-        } else if ("variant" === this.featureType) {
+        } else if ("variant" === config.featureType) {
             this.render = renderVariant;
+            this.homvarColor = "rgb(17,248,254)";
+            this.hetvarColor = "rgb(34,12,253)";
         }
-        else if ("FusionJuncSpan" === this.featureType) {
+        else if ("FusionJuncSpan" === config.featureType) {
             this.render = renderFusionJuncSpan;
             this.height = config.height || 50;
             this.autoHeight = false;
@@ -349,7 +350,8 @@ var igv = (function (igv) {
 
         var px, px1, pw,
             py = 20,
-            h = 10;
+            h = 10,
+            style;
 
 
         px = Math.round((variant.start - bpStart) / xScale);
@@ -359,6 +361,19 @@ var igv = (function (igv) {
             pw = 3;
             px -= 1;
         }
+
+        switch (variant.genotype) {
+            case "HOMVAR":
+                style = this.homvarColor;
+                break;
+            case "HETVAR":
+                style = this.hetvarColor;
+                break;
+            default:
+                style = this.color;
+        }
+
+        ctx.fillStyle = style;
 
         ctx.fillRect(px, py, pw, h);
 

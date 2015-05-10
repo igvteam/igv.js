@@ -76,7 +76,7 @@ var igv = (function (igv) {
                                 gt = "HETVAR";
                             }
                             variant = igv.createGAVariant(json);
-                            variant.gt = gt;
+                            variant.genotype = gt;
                             variants.push(variant);
                         }
                         else {
