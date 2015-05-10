@@ -101,31 +101,44 @@ var igv = (function (igv) {
 
                     self.chrNameMap = {};
 
-                    if (igv.browser && json.referenceSetId) {
+                    if (igv.browser && json.readGroups && json.readGroups.length > 0) {
 
-                        // Query for reference names to build an alias table (map of genome ref names -> dataset ref names)
-                        var readURL = self.url + "/references/search";
+                        var referenceSetId = json.readGroups[0].referenceSetId;
 
-                        igv.ga4ghSearch({
-                            url: readURL,
-                            body: {
-                                "referenceSetId": json.referenceSetId
-                            },
-                            decode: function (j) {
-                                return j.references;
-                            },
-                            success: function (references) {
-                                references.forEach(function (ref) {
-                                    var refName = ref.name,
-                                        alias = igv.browser.genome.getChromosomeName(refName);
-                                    self.chrNameMap[alias] = refName;
-                                });
-                                continuation(self.chrNameMap);
+                        if(referenceSetId) {
 
-                            },
-                            task: task
-                        });
+                            // Query for reference names to build an alias table (map of genome ref names -> dataset ref names)
+                            var readURL = self.url + "/references/search";
+
+                            igv.ga4ghSearch({
+                                url: readURL,
+                                body: {
+                                    "referenceSetId": referenceSetId
+                                },
+                                decode: function (j) {
+                                    return j.references;
+                                },
+                                success: function (references) {
+                                    references.forEach(function (ref) {
+                                        var refName = ref.name,
+                                            alias = igv.browser.genome.getChromosomeName(refName);
+                                        self.chrNameMap[alias] = refName;
+                                    });
+                                    continuation(self.chrNameMap);
+
+                                },
+                                task: task
+                            });
+                        }
+                        else {
+
+                            // Try hardcoded constants -- workaround for non-compliant data at Google
+                            populateChrNameMap(self.chrNameMap, self.config.datasetId);
+
+                            continuation(self.chrNameMap);
+                        }
                     }
+
                     else {
                         // No browser object, can't build map.  This can occur when run from unit tests
                         continuation(self.chrNameMap);
@@ -150,13 +163,12 @@ var igv = (function (igv) {
     }
 
 
-
     /**
      * Decode an array of ga4gh read records
      *
 
      */
-     function decodeGa4ghReads(json) {
+    function decodeGa4ghReads(json) {
 
         var i,
             jsonRecords = json.alignments,
@@ -343,6 +355,26 @@ var igv = (function (igv) {
 
         return sequenceNames;
     }
+
+
+    /**
+     * Hardcoded hack to work around some non-compliant google datasets
+     *
+     * @param chrNameMap
+     * @param datasetId
+     */
+    function populateChrNameMap(chrNameMap, datasetId) {
+        var i;
+        if("461916304629" === datasetId || "337315832689" === datasetId) {
+            for(i=1; i<23; i++) {
+                chrNameMap["chr" + i] = i;
+            }
+            chrNameMap["chrX"] = "X";
+            chrNameMap["chrY"] = "Y";
+            chrNameMap["chrM"] = "MT";
+        }
+    }
+
 
     return igv;
 
