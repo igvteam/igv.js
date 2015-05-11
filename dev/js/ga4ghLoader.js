@@ -88,7 +88,7 @@ var igv = (function (igv) {
             igv.ga4gh.datasetChangeHandler = function () {
 
                 var optionElement = $("#dataset option:selected").first(),
-                    searchResultsElement = $("#searchPaneREADSET").find("div.list-group");
+                    searchResultsElement = $("#searchPaneREADSET").find("ul.list-group");
 
                 igv.ga4gh.datasetCurrent = igv.ga4gh.providerCurrent.datasets[parseInt(optionElement.val())];
 
@@ -101,7 +101,7 @@ var igv = (function (igv) {
 
                         results.forEach(function (result) {
 
-                            var rowElement = $('<a href="#" class="list-group-item" style="display: block;">');
+                            var rowElement = $('<li class="list-group-item" style="display: block;">');
                             rowElement.text(result.name);
 
                             searchResultsElement.append(rowElement);
@@ -169,7 +169,7 @@ var igv = (function (igv) {
         filterTrackList: function (searchTerm) {
 
             var st = searchTerm.toLowerCase(),
-                rows = $("#searchPaneREADSET").find("div.list-group a");
+                rows = $("#searchPaneREADSET").find("ul.list-group li");
 
             rows.each(function () {
 
