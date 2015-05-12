@@ -44,7 +44,7 @@
 
     <div class="container-fluid">
         <div class="navbar-header">
-            <a class="navbar-brand" href="#">IGV Web Example - API</a>
+            <a class="navbar-brand" href="#">IGV.js Example - API</a>
         </div>
         <div id="navbar">
             <ul class="nav navbar-nav">
@@ -62,10 +62,10 @@
                             <a href="#"
                                onclick="igv.browser.loadTrack({
                                  sourceType: 'ga4gh',
-                                 type: 'vcf',
+                                 type: 'bam',
                                  url: 'https://www.googleapis.com/genomics/v1beta2',
-                                 variantSetId: '10473108253681171589',
-                                 label: 'Ga4gh Variants'})">GA4Gh Alignments (Global Alliance, Google server)</a>
+                                 readGroupSetIds: 'CMvnhpKTFhCjz9_25e_lCw',
+                                 name: 'Ga4gh alignments'})">GA4Gh Alignments (Global Alliance, Google server)</a>
                         </li>
                         <li>
                             <a href="#"
@@ -92,9 +92,8 @@
 <div class="jumbotron">
 
     <div class="container">
-        <h2>IGV Web Example - API</h2>
-
-        <p>Use the dropdown menu to add additional tracks.</p>
+        <h2>IGV.js API Example - API</h2>
+        <p>IGV.js embedded in a Bootstrap page.  Use the dropdown menu to add additional tracks via the IGV.js API.</p>
     </div>
     <!-- container -->
 
@@ -122,12 +121,11 @@
                 options = {
                     showNavigation: true,
                     genome: "hg19",
-                    locus: "chr1:155,172,193-155,172,564"
+                    locus: "chr1:155,172,193-155,172,564",
+                    apiKey: 'AIzaSyDUUAUFpQEN4mumeMNIRWXSiTh5cPtUAD0'
                 };
 
         igv.createBrowser(div, options);
-
-        createTracksDropdown();
 
     });
 
