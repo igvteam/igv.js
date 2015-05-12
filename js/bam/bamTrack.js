@@ -97,8 +97,6 @@ var igv = (function (igv) {
 
     };
 
-    igv.BAMTrack.counter = 1;
-
     igv.BAMTrack.filters = {
 
         noop : function () {

@@ -43,10 +43,10 @@ indexURL | URL to associated index file (bai, idx, or tbi file)
 headURL | URL for "HEAD" requests.   Useful for Amazon signed urls, where head and get url can differ.
 type | String identifying type of file.  Recognized types include  "bed", "vcf", "bam", and "seg".
 name | User-visible name for the track
-color | Default color for features.  Can be overriden in certain file formats.
+color | Default color for features.
 height | Initial track height
-maxHeight | Maximum track height for track types that automatically expand.  Can be overriden by user via menu
-order | Integer specifying vertical track layout.  Use to pin track to top (large negative number) or bottom (large positive number).
+maxHeight | Maximum track height for track types that automatically expand.
+order | Integer specifying vertical track layout.  Generally used to pin track to top (large negative number) or bottom (large positive number).
 
 ####Alignment track (type = "bam")
 

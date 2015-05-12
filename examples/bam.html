@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="">
+    <meta name="author" content="">
+    <link rel="shortcut icon" href="//www.broadinstitute.org/igv/projects/igv-web/img/favicon.ico">
+    <title>Integrative Genomics Viewer - BAM Example</title>
+
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" type="text/css" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.4/css/bootstrap.min.css">
+
+    <!-- jQuery UI CSS -->
+    <link rel="stylesheet" type="text/css" href="//ajax.googleapis.com/ajax/libs/jqueryui/1.11.2/themes/smoothness/jquery-ui.css"/>
+
+    <!-- Font Awesome CSS -->
+    <link rel="stylesheet" type="text/css" href="//maxcdn.bootstrapcdn.com/font-awesome/4.2.0/css/font-awesome.min.css">
+
+    <!-- IGV CSS -->
+    <link rel="stylesheet" type="text/css" href="//igv.org/web/beta/igv.css">
+
+    <!-- BAM CSS -->
+    <link rel="stylesheet" type="text/css" href="css/bam.css">
+
+    <!-- jQuery JS -->
+    <script type="text/javascript" src="//ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
+    <script type="text/javascript" src="//ajax.googleapis.com/ajax/libs/jqueryui/1.11.2/jquery-ui.min.js"></script>
+
+    <!-- Bootstrap JS -->
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.4/js/bootstrap.min.js"></script>
+
+    <!-- IGV JS-->
+    <script type="text/javascript" src="//igv.org/web/beta/igv-all.min.js"></script>
+
+
+
+</head>
+
+<body>
+
+<nav class="navbar navbar-default navbar-fixed-top">
+    <div class="container">
+        <div class="navbar-header">
+            <a class="navbar-brand" href="#">IGV Web Examples - BAM</a>
+        </div>
+    </div>
+</nav>
+
+<div class="jumbotron">
+
+    <div class="container">
+        <h2>IGV.js examples - BAM</h2>
+        <p>An example IGV.js embedded in a Bootstrap page used to present a BAM file (above) and referene gene (below).</p>
+    </div><!-- container -->
+
+</div><!-- jumbotron -->
+
+<div class="container-fluid" id="myDiv">
+</div><!-- container -->
+
+<div class="container-fluid">
+
+    <footer>
+        <p>© IGV Web Productions 2015</p>
+    </footer>
+
+</div> <!-- container -->
+
+<script type="text/javascript">
+
+    $(document).ready(function () {
+
+        var div = $("#myDiv")[0],
+                options = {
+                    showNavigation: true,
+                    genome: "hg19",
+                    locus: "chr1:155,172,193-155,172,564",
+                    tracks: [
+                        {
+                            url: '//www.broadinstitute.org/igvdata/1KG/b37/data/NA06984/alignment/NA06984.mapped.ILLUMINA.bwa.CEU.low_coverage.20120522.bam',
+                            name: 'NA06984'
+                        }
+                    ]
+                };
+
+        igv.createBrowser(div, options);
+
+    });
+
+</script>
+
+</body>
+
+</html>
