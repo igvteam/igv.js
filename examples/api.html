@@ -8,10 +8,10 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="description" content="">
     <meta name="author" content="">
-    <link rel="shortcut icon" href="//www.broadinstitute.org/igv/projects/igv-web/img/favicon.ico">
+    <link rel="shortcut icon" href="//igv.org/web/img/favicon.ico">
     <title>Integrative Genomics Viewer</title>
 
-    <!-- Bootstrap CSS -->
+    <!-- Bootstrap CSS - NOT REQUIRED FOR IGV -->
     <link rel="stylesheet" type="text/css" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.4/css/bootstrap.min.css">
 
     <!-- jQuery UI CSS -->
@@ -28,7 +28,7 @@
     <script type="text/javascript" src="//ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
     <script type="text/javascript" src="//ajax.googleapis.com/ajax/libs/jqueryui/1.11.2/jquery-ui.min.js"></script>
 
-    <!-- Bootstrap JS -->
+    <!-- Bootstrap JS -  NOT REQUIRED FOR IGV -->
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.4/js/bootstrap.min.js"></script>
 
     <!-- IGV JS-->
@@ -92,7 +92,7 @@
 <div class="jumbotron">
 
     <div class="container">
-        <h2>IGV.js API Example - API</h2>
+        <h2>IGV.js API Example</h2>
         <p>IGV.js embedded in a Bootstrap page.  Use the dropdown menu to add additional tracks via the IGV.js API.</p>
     </div>
     <!-- container -->
@@ -100,7 +100,7 @@
 </div>
 <!-- jumbotron -->
 
-<div class="container-fluid" id="myDiv">
+<div class="container-fluid" id="igvDiv">
 </div>
 <!-- container -->
 
@@ -117,7 +117,7 @@
 
     $(document).ready(function () {
 
-        var div = $("#myDiv")[0],
+        var div = $("#igvDiv")[0],
                 options = {
                     showNavigation: true,
                     genome: "hg19",
