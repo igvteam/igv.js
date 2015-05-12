@@ -290,7 +290,7 @@ var igv = (function (igv) {
             if (coverageMap) {
 
                 // paint backdrop color for all coverage buckets
-                w = Math.max(1, 1.0 / bpPerPixel);
+                w = Math.max(1, Math.ceil(1.0 / bpPerPixel));
                 for (i = 0, len = coverageMap.coverage.length; i < len; i++) {
 
                     bp = (coverageMap.bpStart + i);
@@ -304,7 +304,7 @@ var igv = (function (igv) {
 
 
                     y = myself.coverageTrackHeight - h;
-                    x = (bp - bpStart) / bpPerPixel;
+                    x = Math.floor((bp - bpStart) / bpPerPixel);
 
                     igv.Canvas.setProperties.call(ctx, {fillStyle: myself.color, strokeStyle: myself.color });
                     igv.Canvas.fillRect.call(ctx, x, y, w, h);
