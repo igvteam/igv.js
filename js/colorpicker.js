@@ -36,13 +36,13 @@ var igv = (function (igv) {
         this.rgb_re = /^\s*(0|[1-9]\d?|1\d\d?|2[0-4]\d|25[0-5])\s*,\s*(0|[1-9]\d?|1\d\d?|2[0-4]\d|25[0-5])\s*,\s*(0|[1-9]\d?|1\d\d?|2[0-4]\d|25[0-5])\s*$/;
         this.hex_re = new RegExp('^#([0-9A-Fa-f]{2})([0-9A-Fa-f]{2})([0-9A-Fa-f]{2})$');
 
-        this.container = $('<div class="grid-container-colorpicker">');
+        this.container = $('<div class="igv-grid-container-colorpicker">');
         parentObject.append( this.container[ 0 ] );
 
         this.container.draggable();
 
-        this.header = $('<div class="grid-header">');
-        this.headerBlurb = $('<div class="grid-header-blurb">');
+        this.header = $('<div class="igv-grid-header">');
+        this.headerBlurb = $('<div class="igv-grid-header-blurb">');
 
         this.header.append(this.headerBlurb[ 0 ]);
 
@@ -93,19 +93,19 @@ var igv = (function (igv) {
         });
 
         // dividing line
-        self.container.append($('<hr class="grid-dividing-line">')[ 0 ]);
+        self.container.append($('<hr class="igv-grid-dividing-line">')[ 0 ]);
 
         // user colors
         self.container.append(rowOfUserColors()[ 0 ]);
 
         //// dividing line
-        //self.container.append($('<hr class="grid-dividing-line">')[ 0 ]);
+        //self.container.append($('<hr class="igv-grid-dividing-line">')[ 0 ]);
 
         // initial track color
         self.container.append(rowOfPreviousColor()[ 0 ]);
 
         //// dividing line
-        //self.container.append($('<hr class="grid-dividing-line">')[ 0 ]);
+        //self.container.append($('<hr class="igv-grid-dividing-line">')[ 0 ]);
 
         // initial track color
         self.container.append(rowOfDefaultColor()[ 0 ]);
@@ -128,11 +128,11 @@ var igv = (function (igv) {
             self.userColorsIndex = undefined;
             self.userColorsRowIndex = 0;
 
-            row = $('<div class="grid-colorpicker">');
+            row = $('<div class="igv-grid-colorpicker">');
 
             // column
-            column = $('<div class="col col-7-8">');
-            userColorInput = $('<input class="user-input-color" type="text" placeholder="Ex: #ff0000 or 255,0,0">');
+            column = $('<div class="igv-col igv-col-7-8">');
+            userColorInput = $('<input class="igv-user-input-colorpicker" type="text" placeholder="Ex: #ff0000 or 255,0,0">');
             userColorInput.change(function () {
 
                 var parsed = parseColor($(this).val());
@@ -187,7 +187,7 @@ var igv = (function (igv) {
 
             row.append( column );
 
-            rowContainer = $('<div class="grid-rect">');
+            rowContainer = $('<div class="igv-grid-rect">');
             rowContainer.append( row[ 0 ]);
 
             // user feedback
@@ -195,7 +195,7 @@ var igv = (function (igv) {
             self.userError.text("ERROR.    Ex: #ff0000 or 255,0,0");
             self.userError.hide();
 
-            row = $('<div class="grid-colorpicker-user-error">');
+            row = $('<div class="igv-grid-colorpicker-user-error">');
             row.append(self.userError[ 0 ]);
             rowContainer.append(row);
 
@@ -244,12 +244,12 @@ var igv = (function (igv) {
                     filler;
 
                 rowContainer = self.userColors[ c ];
-                rowContainer.removeClass( "grid-rect-hidden" );
-                rowContainer.addClass( "grid-rect" );
+                rowContainer.removeClass( "igv-grid-rect-hidden" );
+                rowContainer.addClass( "igv-grid-rect" );
 
-                filler = rowContainer.find(".grid-colorpicker").find(".col").find("div").eq(r);
-                filler.removeClass("col-filler-no-color");
-                filler.addClass("col-filler");
+                filler = rowContainer.find(".igv-grid-colorpicker").find(".igv-col").find("div").eq(r);
+                filler.removeClass("igv-col-filler-no-color");
+                filler.addClass("igv-col-filler");
 
                 filler.css("background-color", color);
 
@@ -272,17 +272,17 @@ var igv = (function (igv) {
                 row,
                 column;
 
-            row = $('<div class="grid-colorpicker">');
+            row = $('<div class="igv-grid-colorpicker">');
 
             // initial color tile
-            self.defaultTrackColorTile = $('<div class="col-filler">');
+            self.defaultTrackColorTile = $('<div class="igv-col-filler">');
             self.defaultTrackColorTile.css("background-color", "#eee");
 
-            column = $('<div class="col col-1-8">');
+            column = $('<div class="igv-col igv-col-1-8">');
             column.append( self.defaultTrackColorTile[ 0 ] );
 
             column.click(function(){
-                igv.setTrackColor(self.trackView.track, $(this).find(".col-filler").css( "background-color" ));
+                igv.setTrackColor(self.trackView.track, $(this).find(".igv-col-filler").css( "background-color" ));
                 self.trackView.update();
             });
 
@@ -290,12 +290,12 @@ var igv = (function (igv) {
 
 
             // default color label
-            column = $('<div class="col col-7-8 col-label">');
+            column = $('<div class="igv-col igv-col-7-8 igv-col-label">');
             column.text("Default Color");
             row.append( column[ 0 ] );
 
 
-            rowContainer = $('<div class="grid-rect">');
+            rowContainer = $('<div class="igv-grid-rect">');
             rowContainer.append(row[ 0 ]);
 
             return rowContainer;
@@ -307,17 +307,17 @@ var igv = (function (igv) {
                 row,
                 column;
 
-            row = $('<div class="grid-colorpicker">');
+            row = $('<div class="igv-grid-colorpicker">');
 
             // initial color tile
-            self.previousTrackColorTile = $('<div class="col-filler">');
+            self.previousTrackColorTile = $('<div class="igv-col-filler">');
             self.previousTrackColorTile.css("background-color", "#eee");
 
-            column = $('<div class="col col-1-8">');
+            column = $('<div class="igv-col igv-col-1-8">');
             column.append( self.previousTrackColorTile[ 0 ] );
 
             column.click(function(){
-                igv.setTrackColor(self.trackView.track, $(this).find(".col-filler").css( "background-color" ));
+                igv.setTrackColor(self.trackView.track, $(this).find(".igv-col-filler").css( "background-color" ));
                 self.trackView.update();
             });
 
@@ -325,12 +325,12 @@ var igv = (function (igv) {
 
 
             // initial color label
-            column = $('<div class="col col-7-8 col-label">');
+            column = $('<div class="igv-col igv-col-7-8 igv-col-label">');
             column.text("Previous Color");
             row.append( column[ 0 ] );
 
 
-            rowContainer = $('<div class="grid-rect">');
+            rowContainer = $('<div class="igv-grid-rect">');
             rowContainer.append(row[ 0 ]);
 
             return rowContainer;
@@ -338,8 +338,8 @@ var igv = (function (igv) {
 
         function rowHidden(rowIndex) {
 
-            var rowContainer = $('<div class="grid-rect-hidden">'),
-                row = $('<div class="grid-colorpicker">');
+            var rowContainer = $('<div class="igv-grid-rect-hidden">'),
+                row = $('<div class="igv-grid-colorpicker">');
 
             count(8).forEach(function(columnIndex){
                 row.append( makeColumn(rowIndex, columnIndex, null)[ 0 ] );
@@ -352,8 +352,8 @@ var igv = (function (igv) {
 
         function makeRow(rowIndex) {
 
-            var rowContainer = $('<div class="grid-rect">'),
-                row = $('<div class="grid-colorpicker">');
+            var rowContainer = $('<div class="igv-grid-rect">'),
+                row = $('<div class="igv-grid-colorpicker">');
 
             count(8).forEach(function(columnIndex){
                 row.append( makeColumn(rowIndex, columnIndex, palette[rowIndex][columnIndex])[ 0 ] );
@@ -365,14 +365,14 @@ var igv = (function (igv) {
 
         function makeColumn(rowIndex, columnIndex, colorOrNull) {
 
-            var column = $('<div class="col col-1-8">'),
+            var column = $('<div class="igv-col igv-col-1-8">'),
                 filler = $('<div>');
 
             column.append( filler[ 0 ] );
 
             if (null !== colorOrNull) {
 
-                filler.addClass("col-filler");
+                filler.addClass("igv-col-filler");
                 filler.css("background-color", colorOrNull);
 
                 filler.click(function () {
@@ -383,7 +383,7 @@ var igv = (function (igv) {
                 });
 
             } else {
-                filler.addClass("col-filler-no-color");
+                filler.addClass("igv-col-filler-no-color");
                 filler.css("background-color", "white");
             }
 
@@ -422,7 +422,7 @@ var igv = (function (igv) {
 
         this.defaultTrackColorTile.css("background-color", (this.trackView.track.defaultColor || igv.constants.defaultColor));
 
-        obj = $(".user-input-color");
+        obj = $(".igv-user-input-color");
         obj.val("");
         obj.attr("placeholder", "Ex: #ff0000 or 255,0,0");
 
