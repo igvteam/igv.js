@@ -224,18 +224,20 @@ var igv = (function (igv) {
 
     };
 
-    igv.spinner = function () {
+    igv.spinner = function (size) {
 
         // spinner
         var spinnerContainer,
-            spinner,
-            fontSize;
+            spinner;
 
         spinnerContainer = document.createElement("div");
         spinnerContainer.className = "igv-spinner-container";
 
         spinner = document.createElement("i");
-        spinner.className = "igv-fa-spinner fa fa-spinner fa-spin";
+        spinner.className = "fa fa-spinner fa-spin";
+        if (undefined !== size) {
+            $(spinner).css("font-size", size);
+        }
 
         spinnerContainer.appendChild(spinner);
 
