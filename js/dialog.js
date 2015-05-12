@@ -32,13 +32,13 @@ var igv = (function (igv) {
 
         var self = this;
 
-        this.container = $('<div class="grid-container-dialog">');
+        this.container = $('<div class="igv-grid-container-dialog">');
         parentObject.append( this.container[ 0 ] );
 
         this.container.draggable();
 
-        this.header = $('<div class="grid-header">');
-        this.headerBlurb = $('<div class="grid-header-blurb">');
+        this.header = $('<div class="igv-grid-header">');
+        this.headerBlurb = $('<div class="igv-grid-header-blurb">');
 
         this.header.append(this.headerBlurb[ 0 ]);
 
@@ -61,16 +61,16 @@ var igv = (function (igv) {
                 column,
                 columnFiller;
 
-            row = $('<div class="grid-dialog">');
+            row = $('<div class="igv-grid-dialog">');
 
             // shim
-            column = $('<div class="col col-5-8">');
+            column = $('<div class="igv-col igv-col-5-8">');
             row.append( column[ 0 ] );
 
             // cancel button
-            column = $('<div class="col col-3-8">');
+            column = $('<div class="igv-col igv-col-3-8">');
 
-            columnFiller = $('<div class="col-filler-cancel-button">');
+            columnFiller = $('<div class="igv-col-filler-cancel-button">');
             columnFiller.text("Cancel");
 
             columnFiller.click(function() {
@@ -81,7 +81,7 @@ var igv = (function (igv) {
             column.append( columnFiller[ 0 ] );
             row.append( column[ 0 ] );
 
-            rowContainer = $('<div class="grid-rect">');
+            rowContainer = $('<div class="igv-grid-rect">');
             rowContainer.append( row[ 0 ]);
 
             return rowContainer;
@@ -95,15 +95,15 @@ var igv = (function (igv) {
                 column;
 
             // input
-            row = $('<div class="grid-dialog">');
+            row = $('<div class="igv-grid-dialog">');
 
-            column = $('<div class="col col-4-4">');
-            self.dialogLabel = $('<div class="user-input-label">');
+            column = $('<div class="igv-col igv-col-4-4">');
+            self.dialogLabel = $('<div class="igv-user-input-label">');
 
             column.append( self.dialogLabel[ 0 ] );
             row.append( column[ 0 ] );
 
-            rowContainer = $('<div class="grid-rect">');
+            rowContainer = $('<div class="igv-grid-rect">');
             rowContainer.append( row[ 0 ]);
 
             return rowContainer;
@@ -117,15 +117,15 @@ var igv = (function (igv) {
                 column;
 
             // input
-            row = $('<div class="grid-dialog">');
+            row = $('<div class="igv-grid-dialog">');
 
-            column = $('<div class="col col-4-4">');
-            self.dialogInput = $('<input class="user-input-dialog" type="text" value="#000000">');
+            column = $('<div class="igv-col igv-col-4-4">');
+            self.dialogInput = $('<input class="igv-user-input-dialog" type="text" value="#000000">');
 
             column.append( self.dialogInput[ 0 ] );
             row.append( column[ 0 ] );
 
-            rowContainer = $('<div class="grid-rect">');
+            rowContainer = $('<div class="igv-grid-rect">');
             rowContainer.append( row[ 0 ]);
 
             return rowContainer;
