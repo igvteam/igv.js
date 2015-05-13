@@ -171,7 +171,7 @@ var igv = (function (igv) {
                     config.featureType = "variant";
                     break;
                 case "FusionJuncSpan":
-                    config.format = "bed";
+                    config.format = "FusionJuncSpan";
                     config.featureType = "FusionJuncSpan";
                     break;
                 case "wig":
