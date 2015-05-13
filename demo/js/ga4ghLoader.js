@@ -53,7 +53,8 @@ var igv = (function (igv) {
             var providerElement = $("#provider"),
                 datasetElement = $("#dataset"),
                 inputSearchElement = $("#setName"),
-                rootJumbo = $("#setSearch");
+            /*containerModal = $("#setSearch"),*/
+            containerModal = $("#setSearch").find(".modal-dialog");
 
             igv.ga4gh.providers.forEach(function (p, index, ps) {
 
@@ -93,14 +94,14 @@ var igv = (function (igv) {
 
                 igv.ga4gh.datasetCurrent = igv.ga4gh.providerCurrent.datasets[parseInt(optionElement.val())];
 
-                igv.startSpinnerAtParentElement(rootJumbo[ 0 ]);
+                igv.startSpinnerAtParentElement(containerModal[ 0 ]);
 
                 igv.ga4ghSearchReadAndCallSets({
                     url: igv.ga4gh.providerCurrent.url,
                     datasetId: igv.ga4gh.datasetCurrent.id,
                     success: function (results) {
 
-                        igv.stopSpinnerAtParentElement(rootJumbo[ 0 ]);
+                        igv.stopSpinnerAtParentElement(containerModal[ 0 ]);
 
                         searchResultsElement.empty();
 
@@ -166,11 +167,10 @@ var igv = (function (igv) {
 
             });
 
-            rootJumbo[ 0 ].appendChild( igv.spinner("48px") );
+            containerModal[ 0 ].appendChild( igv.spinner("64px") );
 
             // trigger handlers to pre-populate selects
             igv.ga4gh.providerChangeHandler();
-            //igv.ga4gh.datasetChangeHandler();
 
         },
 
