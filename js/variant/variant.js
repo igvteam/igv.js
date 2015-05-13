@@ -90,12 +90,16 @@ var igv = (function (igv) {
         if (altTokens.length > 0) {
 
             variant.alleles = [];
+            variant.alleles.push(variant.ref);
 
             variant.start = Number.MAX_VALUE;
             variant.end = 0;
 
             altTokens.forEach(function (alt) {
                 var a, s, e, diff;
+
+                variant.alleles.push(alt);
+
                 if (alt.length > 0) {
 
                     diff = variant.ref.length - alt.length;
@@ -135,17 +139,20 @@ var igv = (function (igv) {
 
     igv.Variant.prototype.popupData = function (genomicLocation) {
 
-        var fields, infoFields, nameString;
-
+        var fields, gt;
 
         fields = [
-            {name: "Names", value: this.names},
+            {name: "Names", value: this.names ? this.names : ""},
             {name: "Ref", value: this.ref},
             {name: "Alt", value: this.alt},
             {name: "Qual", value: this.qual},
             {name: "Filter", value: this.filter},
-            "<hr>"
-        ];
+         ];
+
+        if(this.calls && this.calls.length === 1) {
+            gt = this.alleles[this.calls[0].genotype[0]] + this.alleles[this.calls[0].genotype[1]];
+            fields.push({name: "Genotype", value: gt});
+        }
 
         //infoFields = this.info.split(";");
         //infoFields.forEach(function (f) {
