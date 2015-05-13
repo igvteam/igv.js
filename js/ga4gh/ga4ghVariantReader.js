@@ -59,15 +59,15 @@ var igv = (function (igv) {
                     var variants = [];
 
                     // If a single call set id is specified filter out hom-ref calls
-                    var filterHomeRef = myself.callSetIds && myself.callSetIds.length == 1;
+                    //var filterHomeRef = myself.callSetIds && myself.callSetIds.length == 1;
 
                     json.variants.forEach(function (json) {
-                        if (filterHomeRef && json.calls) {
+                        if (json.calls && json.calls.length === 1) {
                             var allele1 = json.calls[0].genotype[0],
                                 allele2 = json.calls[0].genotype[1],
                                 variant;
                             if (allele1 === 0 && allele2 === 0) {
-                                return;    // gt = HOMEREF
+                                return //gt = "HOMEREF"
                             }
                             else if (allele1 === allele2) {
                                 gt = "HOMVAR"
