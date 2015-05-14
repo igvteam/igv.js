@@ -37,8 +37,8 @@ var igv = (function (igv) {
         $(parentElement).append(this.div[0]);
 
         // ideogram label
-        var chromosomeNameDiv = $('<div class="igv-ideogram-chr-div"></div>');
-        this.div.append(chromosomeNameDiv[0]);
+        //var chromosomeNameDiv = $('<div class="igv-ideogram-chr-div"></div>');
+        //this.div.append(chromosomeNameDiv[0]);
 
         //this.chromosomeNameLabel = $('<div>')[0];
         //$(chromosomeNameDiv).append(this.chromosomeNameLabel);

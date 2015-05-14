@@ -34,7 +34,8 @@ var igv = (function (igv) {
      */
     igv.createBrowser = function (parentDiv, options) {
 
-        var contentDiv,
+        var igvLogo,
+            contentDiv,
             headerDiv,
             trackContainerDiv,
             browser,
@@ -143,8 +144,12 @@ var igv = (function (igv) {
 
         });
 
+        igvLogo = $('<div class="igv-logo">');
+        $(headerDiv).append(igvLogo[0]);
 
-        browser.ideoPanel = new igv.IdeoPanel(rootDiv);
+
+        //browser.ideoPanel = new igv.IdeoPanel(rootDiv);
+        browser.ideoPanel = new igv.IdeoPanel(headerDiv);
         $(headerDiv).append(browser.ideoPanel.div);
         browser.ideoPanel.resize();
 
@@ -257,8 +262,8 @@ var igv = (function (igv) {
             navigation = $('<div class="igvNavigation">');
             $(controlDiv).append(navigation[0]);
 
-            igvLogo = $('<div class="igv-logo">');
-            navigation.append(igvLogo[0]);
+            //igvLogo = $('<div class="igv-logo">');
+            //navigation.append(igvLogo[0]);
 
             // search
             search = $('<div class="igvNavigationSearch">');

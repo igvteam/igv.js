@@ -473,13 +473,11 @@ div.ui-dialog fieldset {
 
 .igv-logo {
 
-    float: left;
-
-    margin-right: 8px;
+    /*margin-right: 8px;*/
 
     position: relative;
-    top: 3px;
-    left: 0;
+    top: 30px;
+    left: 50px;
 
     width: 34px;
     height: 16px;
@@ -807,11 +805,12 @@ div.ui-dialog fieldset {
 
 /* ideogram */
 .igv-ideogram-div {
+
     position: relative;
     top: 0;
-    left: 0;
+    left: 100px;
+
     height: 40px;
-    width : 100%;
 }
 
 .igv-ideogram-chr-div {
@@ -836,8 +835,8 @@ div.ui-dialog fieldset {
 
     position: absolute;
     top: 0;
-    left:50px;
-    right: 50px;
+    left:0;
+    right: 200px;
 
     height: 100%;
 }
