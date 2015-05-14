@@ -315,20 +315,14 @@
             flanking: 1000,
             apiKey: 'AIzaSyDUUAUFpQEN4mumeMNIRWXSiTh5cPtUAD0',
             trackDefaults: {
+                palette: ["#00A0B0", "#6A4A3C", "#CC333F", "#EB6841"],
                 bam: {
                     coverageThreshold: 0.2,
                     coverageQualityWeight: true
                 }
             },
-            palette: [
-                ["#00A0B0", "#6A4A3C", "#CC333F", "#EB6841"]
-            ],
+
             tracks: [
-                {
-                    type: "sequence",
-                    order: -9999
-                }
-                ,
                 {
                     name: "Genes",
                     url: "//dn7ywbm9isq8j.cloudfront.net/annotations/hg19/genes/gencode.v18.collapsed.bed",

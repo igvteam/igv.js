@@ -4,29 +4,25 @@
 
 ##Browser Configuration
 
+----
+
 
 option  | description | default
 ------ | ------- | ------------
-genome  | Embedded object defining reference genome.  See table below |
-showKaryo | If true, whole-genome karyotype view is displayed. | false 
+genome  | UCSC genome identifier.  Either genome or fastaURL must be defined | hg19
+fastaURL | URL to an indexed fasta file.  Required if genome is not specified |
+cytobandURL | URL to a cytoband ideogram file in UCSC format.  Optional.  |
+showKaryo | If true, whole-genome karyotype view is displayed. | false
 showNavigation | If true, show basic navigation controls (search, zoom in, zoom out). | true
-tracks | Array of track descriptors initially displayed when app launches. |
+tracks | Array of configuration objects defining tracks initially displayed when app launches. |
 trackDefaults |  Embedded object defining default settings for specific track types (see table below). |
-locus | Initial genome location |
+locus | Initial genomic location |
 flanking  | Distance (in bp) to pad sides of gene when navigating. | 1000
 
 
-###Genome
-
-option | description | default
------- | ----------- | -------
-id | optional identifier.  Certain UCSC identifiers (see list below) are predefined with fasta, cytoband, and reference annotations | hg19
-fastaURL | URL to an indexed fasta file.  Optional if id is in predefined list.  If supplied overrides predefined url. |
-cytobandURL | URL to a cytoband ideogram file in UCSC format.  Optional.  |
-annotationURL | URL to a reference annotation file.  Optional.  If defined overrides predefined setting.  To suppress predefined annotations set to false. |
-
-###Track Defaults
-
+Predefined genomes
+* hg18
+* hg19
 
 
 
