@@ -338,33 +338,22 @@ var igv = (function (igv) {
                 config.fastaURL = "//dn7ywbm9isq8j.cloudfront.net/genomes/seq/hg18/hg18.fasta";
                 config.cytobandURL = "//dn7ywbm9isq8j.cloudfront.net/genomes/seq/hg18/cytoBand.txt.gz";
                 break;
-
             case "hg19":
             default:
             {
                 config.fastaURL = "//dn7ywbm9isq8j.cloudfront.net/genomes/seq/hg19/hg19.fasta";
                 config.cytobandURL = "//dn7ywbm9isq8j.cloudfront.net/genomes/seq/hg19/cytoBand.txt";
-
-                if (!config.tracks) config.tracks = [];
-
-                config.tracks.push(
-                    {
-                        type: "sequence",
-                        order: -9999
-                    });
-                config.tracks.push(
-                    {
-                        url: "//dn7ywbm9isq8j.cloudfront.net/annotations/hg19/genes/gencode.v18.collapsed.bed.gz",
-                        indexed: false,
-                        name: "Genes",
-                        order: 10000
-                    });
             }
         }
     }
 
 
     function setDefaults(config) {
+
+        if(!config.tracks) {
+            config.tracks = [];
+        }
+        config.tracks.push( {type: "sequence", order: -Number.MAX_VALUE});
 
         config.showKaryo = config.showKaryo || false;
         config.navigation = config.navigation || true;
