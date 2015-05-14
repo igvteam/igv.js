@@ -29,10 +29,10 @@ var igv = (function (igv) {
      * Create an igv.browser instance.  This object defines the public API for interacting with the genome browser.
      *
      * @param parentDiv - DOM tree root
-     * @param options - configuration options.
+     * @param config - configuration options.
      *
      */
-    igv.createBrowser = function (parentDiv, options) {
+    igv.createBrowser = function (parentDiv, config) {
 
         var igvLogo,
             contentDiv,
@@ -48,22 +48,24 @@ var igv = (function (igv) {
             return igv.browser;
         }
 
-        if (!options) options = {};
-        if (!options.type) options.type = "IGV";
+        if (!config) config = {};
 
-        oauth.google.access_token = options.oauthToken;
-        oauth.google.apiKey = options.apiKey;
+        setDefaults(config);
 
-        if (!options.flanking && isT2D(options)) {  // TODO -- hack for demo, remove
-            options.flanking = 100000;
+        if (!config.type) config.type = "IGV";
+
+        oauth.google.apiKey = config.apiKey;
+
+        if (!config.flanking && isT2D(config)) {  // TODO -- hack for demo, remove
+            config.flanking = 100000;
         }
 
-        if (options.genome || options.fastaURL === undefined) {
-            mergeGenome(options);
+        if (config.genome || config.fastaURL === undefined) {
+            mergeGenome(config);
         }
 
         trackContainerDiv = $('<div id="igvTrackContainerDiv" class="igv-track-container-div">')[0];
-        browser = new igv.Browser(options, trackContainerDiv);
+        browser = new igv.Browser(config, trackContainerDiv);
         rootDiv = browser.div;
 
         $(document).mousedown(function (e) {
@@ -90,9 +92,9 @@ var igv = (function (igv) {
 
         // Create controls.  This can be customized by passing in a function, which should return a div containing the
         // controls
-        controlDiv = options.createControls ?
-            options.createControls(browser, options) :
-            createStandardControls(browser, options);
+        controlDiv = config.createControls ?
+            config.createControls(browser, config) :
+            createStandardControls(browser, config);
 
         $(rootDiv).append($(controlDiv));
 
@@ -115,7 +117,7 @@ var igv = (function (igv) {
         bodyObject = $("body");
 
         // ColorPicker object -- singleton shared by all components
-        igv.colorPicker = new igv.ColorPicker(bodyObject, options.palette);
+        igv.colorPicker = new igv.ColorPicker(bodyObject, config.palette);
         igv.colorPicker.hide();
 
         // Dialog object -- singleton shared by all components
@@ -153,24 +155,25 @@ var igv = (function (igv) {
         $(headerDiv).append(browser.ideoPanel.div);
         browser.ideoPanel.resize();
 
-        if (options.trackDefaults) {
+        if (config.trackDefaults) {
 
-            if (undefined !== options.trackDefaults.bam) {
+            if (undefined !== config.trackDefaults.bam) {
 
-                if (undefined !== options.trackDefaults.bam.coverageThreshold) {
-                    igv.CoverageMap.threshold = options.trackDefaults.bam.coverageThreshold;
+                if (undefined !== config.trackDefaults.bam.coverageThreshold) {
+                    igv.CoverageMap.threshold = config.trackDefaults.bam.coverageThreshold;
                 }
 
-                if (undefined !== options.trackDefaults.bam.coverageQualityWeight) {
-                    igv.CoverageMap.qualityWeight = options.trackDefaults.bam.coverageQualityWeight;
+                if (undefined !== config.trackDefaults.bam.coverageQualityWeight) {
+                    igv.CoverageMap.qualityWeight = config.trackDefaults.bam.coverageQualityWeight;
                 }
             }
         }
 
-        igv.loadGenome(options.fastaURL, options.cytobandURL, function (genome) {
+        igv.loadGenome(config.fastaURL, config.cytobandURL, function (genome) {
 
             browser.genome = genome;
             browser.addTrack(new igv.RulerTrack());
+
 
             // Set inital locus
             var firstChrName = browser.genome.chromosomeNames[0],
@@ -186,26 +189,26 @@ var igv = (function (igv) {
 
             // If an initial locus is specified go there first, then load tracks.  This avoids loading track data at
             // a default location then moving
-            if (options.locus) {
+            if (config.locus) {
 
-                browser.search(options.locus, function () {
+                browser.search(config.locus, function () {
 
                     var refFrame = igv.browser.referenceFrame,
                         start = refFrame.start,
                         end = start + igv.browser.trackViewportWidth() * refFrame.bpPerPixel,
                         range = start - end;
 
-                    if (options.tracks) {
+                    if (config.tracks) {
 
                         if (range < 100000) {
                             genome.sequence.getSequence(refFrame.chr, start, end, function (refSeq) {
-                                options.tracks.forEach(function (track) {
+                                config.tracks.forEach(function (track) {
                                     browser.loadTrack(track);
                                 });
                             });
                         }
                         else {
-                            options.tracks.forEach(function (track) {
+                            config.tracks.forEach(function (track) {
                                 browser.loadTrack(track);
                             });
                         }
@@ -214,8 +217,8 @@ var igv = (function (igv) {
                 });
 
             }
-            else if (options.tracks) {
-                options.tracks.forEach(function (track) {
+            else if (config.tracks) {
+                config.tracks.forEach(function (track) {
                     browser.loadTrack(track);
                 });
 
@@ -228,7 +231,7 @@ var igv = (function (igv) {
 
     };
 
-    function createStandardControls(browser, options) {
+    function createStandardControls(browser, config) {
 
         var igvLogo,
             controlDiv = $('<div id="igvControlDiv" class="igv-control-div">')[0],
@@ -257,15 +260,16 @@ var igv = (function (igv) {
 
         }
 
-        if (options.showNavigation) {
 
-            navigation = $('<div class="igvNavigation">');
-            $(controlDiv).append(navigation[0]);
+        navigation = $('<div class="igvNavigation">');
+        $(controlDiv).append(navigation[0]);
 
             //igvLogo = $('<div class="igv-logo">');
             //navigation.append(igvLogo[0]);
 
-            // search
+        // search
+        if (config.showSearch) {
+
             search = $('<div class="igvNavigationSearch">');
             navigation.append(search[0]);
 
@@ -283,7 +287,9 @@ var igv = (function (igv) {
             searchButton.click(function () {
                 browser.search(browser.searchInput.val());
             });
+        }
 
+        if (config.showZoom) {
             // zoom
             zoom = $('<div class="igvNavigationZoom">');
             navigation.append(zoom[0]);
@@ -302,10 +308,9 @@ var igv = (function (igv) {
             zoomOutButton.click(function () {
                 igv.browser.zoomOut();
             });
-
         }
 
-        if (options.showKaryo) {
+        if (config.showKaryo) {
             contentKaryo = $('#igvKaryoDiv')[0];
             // if a karyo div already exists in the page, use that one.
             // this allows the placement of the karyo view on the side, for instance
@@ -322,29 +327,29 @@ var igv = (function (igv) {
 
     // Merge some standard genome tracks,  this is useful for demos
     // TODO -- move this to external json
-    function mergeGenome(options) {
+    function mergeGenome(config) {
 
-        switch (options.genome) {
+        switch (config.genome) {
 
             case "hg18":
-                options.fastaURL = "//dn7ywbm9isq8j.cloudfront.net/genomes/seq/hg18/hg18.fasta";
-                options.cytobandURL = "//dn7ywbm9isq8j.cloudfront.net/genomes/seq/hg18/cytoBand.txt.gz";
+                config.fastaURL = "//dn7ywbm9isq8j.cloudfront.net/genomes/seq/hg18/hg18.fasta";
+                config.cytobandURL = "//dn7ywbm9isq8j.cloudfront.net/genomes/seq/hg18/cytoBand.txt.gz";
                 break;
 
             case "hg19":
             default:
             {
-                options.fastaURL = "//dn7ywbm9isq8j.cloudfront.net/genomes/seq/hg19/hg19.fasta";
-                options.cytobandURL = "//dn7ywbm9isq8j.cloudfront.net/genomes/seq/hg19/cytoBand.txt";
+                config.fastaURL = "//dn7ywbm9isq8j.cloudfront.net/genomes/seq/hg19/hg19.fasta";
+                config.cytobandURL = "//dn7ywbm9isq8j.cloudfront.net/genomes/seq/hg19/cytoBand.txt";
 
-                if (!options.tracks) options.tracks = [];
+                if (!config.tracks) config.tracks = [];
 
-                options.tracks.push(
+                config.tracks.push(
                     {
                         type: "sequence",
                         order: -9999
                     });
-                options.tracks.push(
+                config.tracks.push(
                     {
                         url: "//dn7ywbm9isq8j.cloudfront.net/annotations/hg19/genes/gencode.v18.collapsed.bed.gz",
                         indexed: false,
@@ -354,6 +359,16 @@ var igv = (function (igv) {
             }
         }
     }
+
+
+    function setDefaults(config) {
+
+        config.showKaryo = config.showKaryo || false;
+        config.navigation = config.navigation || true;
+        config.flanking = config.flanking != undefined ? config.flanking : 1000;
+
+    }
+
 
     // TODO -- temporary hack for demo, remove ASAP
     function isT2D(options) {
