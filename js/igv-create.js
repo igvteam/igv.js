@@ -264,11 +264,11 @@ var igv = (function (igv) {
         navigation = $('<div class="igvNavigation">');
         $(controlDiv).append(navigation[0]);
 
-            //igvLogo = $('<div class="igv-logo">');
-            //navigation.append(igvLogo[0]);
+        //igvLogo = $('<div class="igv-logo">');
+        //navigation.append(igvLogo[0]);
 
         // search
-        if (config.showSearch) {
+        if (config.showNavigation) {
 
             search = $('<div class="igvNavigationSearch">');
             navigation.append(search[0]);
@@ -287,9 +287,8 @@ var igv = (function (igv) {
             searchButton.click(function () {
                 browser.search(browser.searchInput.val());
             });
-        }
 
-        if (config.showZoom) {
+
             // zoom
             zoom = $('<div class="igvNavigationZoom">');
             navigation.append(zoom[0]);
@@ -325,8 +324,8 @@ var igv = (function (igv) {
         return controlDiv;
     }
 
-    // Merge some standard genome tracks,  this is useful for demos
-    // TODO -- move this to external json
+// Merge some standard genome tracks,  this is useful for demos
+// TODO -- move this to external json
     function mergeGenome(config) {
 
         switch (config.genome) {
@@ -370,7 +369,7 @@ var igv = (function (igv) {
     }
 
 
-    // TODO -- temporary hack for demo, remove ASAP
+// TODO -- temporary hack for demo, remove ASAP
     function isT2D(options) {
         if (options.tracks && options.tracks.length > 0) {
             var t = options.tracks[0];
