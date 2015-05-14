@@ -74,7 +74,7 @@ var igv = (function (igv) {
 
     function createGtexControls(browser, options) {
 
-        var controlDiv = $('<div id="igvControlDiv" class="igv-control-div">')[0],
+        var controlDiv = $('<div id="igvControlDiv">')[0],
             tissueEqtlMappingURL = options.tissueEqtlMappingURL,
             selectionDiv = $('<div style="margin-bottom:20px">')[0],
             widgetDiv = $('<div style="height: 40px">')[0],
