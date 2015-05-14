@@ -238,7 +238,7 @@ var igv = (function (igv) {
     function createStandardControls(browser, config) {
 
         var igvLogo,
-            controlDiv = $('<div id="igvControlDiv" class="igv-control-div">')[0],
+            controlDiv = $('<div id="igvControlDiv">')[0],
             contentKaryo,
             navigation,
             search,

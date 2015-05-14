@@ -1,9 +1,3 @@
-/* use border box sizing through out */
-/**, *:after, *:before {*/
-    /*-webkit-box-sizing: border-box;*/
-    /*-moz-box-sizing: border-box;*/
-    /*box-sizing: border-box;*/
-/*}*/
 
 [class*='igv-'], [class*='igv-']:after, [class*='igv-']:before {
     -webkit-box-sizing: border-box;
@@ -473,11 +467,12 @@ div.ui-dialog fieldset {
 
 .igv-logo {
 
-    /*margin-right: 8px;*/
+    margin-left: 4px;
+    margin-top: 12px;
 
-    position: relative;
-    top: 30px;
-    left: 50px;
+    position: absolute;
+    top: 0;
+    left: 0;
 
     width: 34px;
     height: 16px;
@@ -799,44 +794,17 @@ div.ui-dialog fieldset {
 
 .igv-header-div {
     position: relative;
+    top:0;
     left: 0;
-    right: 0;
-}
-
-/* ideogram */
-.igv-ideogram-div {
-
-    position: relative;
-    top: 0;
-    left: 100px;
-
     height: 40px;
-}
-
-.igv-ideogram-chr-div {
-
-    cursor: default;
-
-    font-family: 'PT Sans', sans-serif;
-    font-size: small;
-    font-weight: 400;
-
-    color: #444;
-
-    position: absolute;
-    left: 0;
-    top: 50%;
-    width: 50px;
-    transform: translateY(-50%);
-
 }
 
 .igv-ideogram-content-div {
 
     position: absolute;
     top: 0;
-    left:0;
-    right: 200px;
+    left:50px;
+    right: 50px;
 
     height: 100%;
 }

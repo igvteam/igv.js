@@ -33,19 +33,12 @@ var igv = (function (igv) {
 
         this.ideograms = {};
 
-        this.div = $('<div class="igv-ideogram-div"></div>');
-        $(parentElement).append(this.div[0]);
-
-        // ideogram label
-        //var chromosomeNameDiv = $('<div class="igv-ideogram-chr-div"></div>');
-        //this.div.append(chromosomeNameDiv[0]);
-
-        //this.chromosomeNameLabel = $('<div>')[0];
-        //$(chromosomeNameDiv).append(this.chromosomeNameLabel);
+        //this.div = $('<div class="igv-ideogram-div"></div>');
+        //$(parentElement).append(this.div[0]);
 
         // ideogram content
         this.contentDiv = $('<div class="igv-ideogram-content-div"></div>');
-        $(this.div).append(this.contentDiv[0]);
+        $(parentElement).append(this.contentDiv[0]);
 
         var myself = this;
         this.contentDiv.click(function (e) {
@@ -83,8 +76,6 @@ var igv = (function (igv) {
 
         });
 
-        //this.contentDiv.css({"left": igv.browser.controlPanelWidth + "px"});
-
         this.canvas = $('<canvas class="igv-ideogram-canvas"></canvas>')[0];
         $(this.contentDiv).append(this.canvas);
         this.canvas.setAttribute('width', this.contentDiv.width());
@@ -95,8 +86,8 @@ var igv = (function (igv) {
 
     igv.IdeoPanel.prototype.resize = function () {
 
-        this.canvas.setAttribute('width', this.div.width());
-        this.canvas.setAttribute('height', this.div.height());
+        this.canvas.setAttribute('width', this.contentDiv.width());
+        this.canvas.setAttribute('height', this.contentDiv.height());
 
         this.ideograms = {};
         this.repaint();
