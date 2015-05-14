@@ -15,10 +15,12 @@
     <link rel="stylesheet" type="text/css" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.4/css/bootstrap.min.css">
 
     <!-- jQuery UI CSS -->
-    <link rel="stylesheet" type="text/css" href="//ajax.googleapis.com/ajax/libs/jqueryui/1.11.2/themes/smoothness/jquery-ui.css"/>
+    <link rel="stylesheet" type="text/css"
+          href="//ajax.googleapis.com/ajax/libs/jqueryui/1.11.2/themes/smoothness/jquery-ui.css"/>
 
     <!-- Font Awesome CSS -->
-    <link rel="stylesheet" type="text/css" href="//maxcdn.bootstrapcdn.com/font-awesome/4.2.0/css/font-awesome.min.css"/>
+    <link rel="stylesheet" type="text/css"
+          href="//maxcdn.bootstrapcdn.com/font-awesome/4.2.0/css/font-awesome.min.css"/>
 
     <!-- IGV CSS -->
     <link rel="stylesheet" type="text/css" href="//igv.org/web/beta/igv.css"/>
@@ -37,7 +39,6 @@
     <script type="text/javascript" src="//igv.org/web/beta/igv-all.min.js"></script>
 
 
-
 </head>
 
 <body>
@@ -46,12 +47,13 @@
 
     <div class="container">
         <h2>IGV.js embedded in a Bootstrap page opened on a BAM file.</h2>
-    </div><!-- container -->
+    </div>
+    <!-- container -->
 
-</div><!-- jumbotron -->
+</div>
+<!-- jumbotron -->
 
-<div class="container-fluid" id="igvDiv">
-</div><!-- container -->
+<div class="container-fluid" id="igvDiv" style="padding:5px; border:1px solid lightgray"></div>
 
 
 <script type="text/javascript">
@@ -67,6 +69,12 @@
                         {
                             url: '//www.broadinstitute.org/igvdata/1KG/b37/data/NA06984/alignment/NA06984.mapped.ILLUMINA.bwa.CEU.low_coverage.20120522.bam',
                             name: 'NA06984'
+                        },
+                        {
+                            url: "//dn7ywbm9isq8j.cloudfront.net/annotations/hg19/genes/gencode.v18.collapsed.bed.gz",
+                            indexed: false,
+                            name: "Genes",
+                            order: 10000
                         }
                     ]
                 };

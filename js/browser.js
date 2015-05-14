@@ -32,14 +32,9 @@ var igv = (function (igv) {
         this.div = $('<div id="igvRootDiv" class="igv-root-div">')[0];
 
         this.flanking = options.flanking;
-
-        this.controlPanelWidth = options.controlPanelWidth || 50;
-
         this.type = options.type || "IGV";
-
         this.searchURL = options.searchURL || "//www.broadinstitute.org/webservices/igv/locus?genome=hg19&name=";
-
-        this.crossDomainProxy = options.crossDomainProxy || "php/simpleProxy.php";
+        this.crossDomainProxy = options.crossDomainProxy;
 
 
         $("input[id='trackHeightInput']").val(this.trackHeight);

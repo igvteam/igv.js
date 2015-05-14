@@ -35,7 +35,6 @@
     <script type="text/javascript" src="//igv.org/web/beta/igv-all.min.js"></script>
 
 
-
 </head>
 
 <body role="document">
@@ -93,21 +92,22 @@
 
     <div class="container">
         <h2>IGV.js API Example</h2>
-        <p>IGV.js embedded in a Bootstrap page.  Use the dropdown menu to add additional tracks via the IGV.js API.</p>
+
+        <p>IGV.js embedded in a Bootstrap page. Use the dropdown menu to add additional tracks via the IGV.js API.</p>
     </div>
     <!-- container -->
 
 </div>
 <!-- jumbotron -->
 
-<div class="container-fluid" id="igvDiv">
+<div class="container-fluid" id="igvDiv" style="padding:5px; border:1px solid lightgray">
 </div>
 <!-- container -->
 
 <div class="container-fluid">
 
     <footer>
-        <p>blank</p>
+        <p></p>
     </footer>
 
 </div>
@@ -122,7 +122,15 @@
                     showNavigation: true,
                     genome: "hg19",
                     locus: "chr1:155,172,193-155,172,564",
-                    apiKey: 'AIzaSyDUUAUFpQEN4mumeMNIRWXSiTh5cPtUAD0'
+                    apiKey: 'AIzaSyDUUAUFpQEN4mumeMNIRWXSiTh5cPtUAD0',
+                    tracks: [
+                        {
+                            url: "//dn7ywbm9isq8j.cloudfront.net/annotations/hg19/genes/gencode.v18.collapsed.bed.gz",
+                            indexed: false,
+                            name: "Genes",
+                            order: 10000
+                        }
+                    ]
                 };
 
         igv.createBrowser(div, options);
