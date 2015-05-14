@@ -41,7 +41,8 @@ var igv = (function (igv) {
             browser,
             rootDiv,
             controlDiv,
-            bodyObject;
+            bodyObject,
+            palette;
 
         if (igv.browser) {
             console.log("Attempt to create 2 browsers.");
@@ -117,7 +118,10 @@ var igv = (function (igv) {
         bodyObject = $("body");
 
         // ColorPicker object -- singleton shared by all components
-        igv.colorPicker = new igv.ColorPicker(bodyObject, config.palette);
+        if(config.trackDefaults) {
+            palette = config.trackDefaults.palette;
+        }
+        igv.colorPicker = new igv.ColorPicker(bodyObject, palette);
         igv.colorPicker.hide();
 
         // Dialog object -- singleton shared by all components
