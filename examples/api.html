@@ -60,15 +60,6 @@
                         <li>
                             <a href="#"
                                onclick="igv.browser.loadTrack({
-                                 sourceType: 'ga4gh',
-                                 type: 'bam',
-                                 url: 'https://www.googleapis.com/genomics/v1beta2',
-                                 readGroupSetIds: 'CMvnhpKTFhCjz9_25e_lCw',
-                                 name: 'Ga4gh alignments'})">GA4Gh Alignments (Global Alliance, Google server)</a>
-                        </li>
-                        <li>
-                            <a href="#"
-                               onclick="igv.browser.loadTrack({
                                  url: '//www.broadinstitute.org/igvdata/test/igv-web/segmented_data_080520.seg.gz',
                                  label: 'GBM Copy # (TCGA Broad GDAC)'});">GBM Copy # (TCGA Broad GDAC))</a>
                         </li>
@@ -121,16 +112,8 @@
                 options = {
                     showNavigation: true,
                     genome: "hg19",
-                    locus: "chr1:155,172,193-155,172,564",
-                    apiKey: 'AIzaSyDUUAUFpQEN4mumeMNIRWXSiTh5cPtUAD0',
-                    tracks: [
-                        {
-                            url: "//dn7ywbm9isq8j.cloudfront.net/annotations/hg19/genes/gencode.v18.collapsed.bed.gz",
-                            indexed: false,
-                            name: "Genes",
-                            order: 10000
-                        }
-                    ]
+                    locus: "chr1:155,172,193-155,172,564"
+
                 };
 
         igv.createBrowser(div, options);
