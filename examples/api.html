@@ -35,7 +35,6 @@
     <script type="text/javascript" src="//igv.org/web/beta/igv-all.min.js"></script>
 
 
-
 </head>
 
 <body role="document">
@@ -57,15 +56,6 @@
                                onclick="igv.browser.loadTrack({
                                   url: 'http://www.broadinstitute.org/igvdata/1KG/b37/data/NA06984/alignment/NA06984.mapped.ILLUMINA.bwa.CEU.low_coverage.20120522.bam',
                                   label: 'NA06984'});">NA06984 (Broad server BAM file)</a>
-                        </li>
-                        <li>
-                            <a href="#"
-                               onclick="igv.browser.loadTrack({
-                                 sourceType: 'ga4gh',
-                                 type: 'bam',
-                                 url: 'https://www.googleapis.com/genomics/v1beta2',
-                                 readGroupSetIds: 'CMvnhpKTFhCjz9_25e_lCw',
-                                 name: 'Ga4gh alignments'})">GA4Gh Alignments (Global Alliance, Google server)</a>
                         </li>
                         <li>
                             <a href="#"
@@ -93,21 +83,22 @@
 
     <div class="container">
         <h2>IGV.js API Example</h2>
-        <p>IGV.js embedded in a Bootstrap page.  Use the dropdown menu to add additional tracks via the IGV.js API.</p>
+
+        <p>IGV.js embedded in a Bootstrap page. Use the dropdown menu to add additional tracks via the IGV.js API.</p>
     </div>
     <!-- container -->
 
 </div>
 <!-- jumbotron -->
 
-<div class="container-fluid" id="igvDiv">
+<div class="container-fluid" id="igvDiv" style="padding:5px; border:1px solid lightgray">
 </div>
 <!-- container -->
 
 <div class="container-fluid">
 
     <footer>
-        <p>blank</p>
+        <p></p>
     </footer>
 
 </div>
@@ -121,8 +112,8 @@
                 options = {
                     showNavigation: true,
                     genome: "hg19",
-                    locus: "chr1:155,172,193-155,172,564",
-                    apiKey: 'AIzaSyDUUAUFpQEN4mumeMNIRWXSiTh5cPtUAD0'
+                    locus: "chr1:155,172,193-155,172,564"
+
                 };
 
         igv.createBrowser(div, options);
