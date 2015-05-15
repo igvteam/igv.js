@@ -3,7 +3,7 @@
   <component name="ProjectModuleManager">
     <modules>
       <module fileurl="file://$PROJECT_DIR$/igv-web.iml" filepath="$PROJECT_DIR$/igv-web.iml" />
+      <module fileurl="file://$PROJECT_DIR$/igv.js.iml" filepath="$PROJECT_DIR$/igv.js.iml" />
     </modules>
   </component>
 </project>
-
