@@ -19,7 +19,8 @@
           href="//ajax.googleapis.com/ajax/libs/jqueryui/1.11.2/themes/smoothness/jquery-ui.css"/>
 
     <!-- Font Awesome CSS -->
-    <link rel="stylesheet" type="text/css" href="//maxcdn.bootstrapcdn.com/font-awesome/4.2.0/css/font-awesome.min.css"/>
+    <link rel="stylesheet" type="text/css"
+          href="//maxcdn.bootstrapcdn.com/font-awesome/4.2.0/css/font-awesome.min.css"/>
 
     <!-- IGV CSS -->
     <link rel="stylesheet" type="text/css" href="//igv.org/web/beta/igv.css"/>
@@ -74,7 +75,8 @@
     <div class="container-fluid">
 
         <div style="margin-left:56px;">
-            <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#setSearch">Add Tracks</button>
+            <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#setSearch">Add Tracks
+            </button>
         </div>
 
         <div class="modal" id="setSearch">
@@ -122,10 +124,10 @@
                                     <!--<div class="paginationContainer"></div>-->
                                 </div>
                                 <!--<div class="tab-pane" id="searchPaneCALLSET">-->
-                                    <!--<div class="list-group">-->
-                                        <!--&lt;!&ndash;<img src="img/spinner.gif"/>&ndash;&gt;-->
-                                    <!--</div>-->
-                                    <!--&lt;!&ndash;<div class="paginationContainer"></div>&ndash;&gt;-->
+                                <!--<div class="list-group">-->
+                                <!--&lt;!&ndash;<img src="img/spinner.gif"/>&ndash;&gt;-->
+                                <!--</div>-->
+                                <!--&lt;!&ndash;<div class="paginationContainer"></div>&ndash;&gt;-->
                                 <!--</div>-->
                             </div>
                         </div>
@@ -160,8 +162,10 @@
             locus: "myc",
             showKaryo: false,
             showNavigation: true,
-            fastaURL: "//dn7ywbm9isq8j.cloudfront.net/genomes/seq/hg19/hg19.fasta",
-            cytobandURL: "//dn7ywbm9isq8j.cloudfront.net/genomes/seq/hg19/cytoBand.txt",
+            reference: {
+                fastaURL: "//dn7ywbm9isq8j.cloudfront.net/genomes/seq/hg19/hg19.fasta",
+                cytobandURL: "//dn7ywbm9isq8j.cloudfront.net/genomes/seq/hg19/cytoBand.txt"
+            },
             flanking: 1000,
             apiKey: 'AIzaSyDUUAUFpQEN4mumeMNIRWXSiTh5cPtUAD0',
             trackDefaults: {
@@ -175,15 +179,9 @@
             ],
             tracks: [
                 {
-                    type: "sequence",
-                    order: -9999
-                }
-                ,
-                {
                     name: "Genes",
                     url: "//dn7ywbm9isq8j.cloudfront.net/annotations/hg19/genes/gencode.v18.collapsed.bed",
-                    //indexed: false,
-                    order: 10000,
+                    order: Number.MAX_VALUE,
                     displayMode: "EXPANDED"
 
                 }
