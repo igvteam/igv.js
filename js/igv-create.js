@@ -359,6 +359,11 @@ var igv = (function (igv) {
 
     function setDefaults(config) {
 
+        if(!config.tracks) {
+            config.tracks = [];
+        }
+        config.tracks.push( {type: "sequence", order: -Number.MAX_VALUE});
+
         config.showKaryo = config.showKaryo || false;
         config.navigation = config.navigation || true;
         config.flanking = config.flanking != undefined ? config.flanking : 1000;
