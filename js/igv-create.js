@@ -72,7 +72,7 @@ var igv = (function (igv) {
             }
         }
 
-        if (!config.reference) {
+        if (!(config.reference && config.reference.fastaURL)) {
             alert("Fatal error:  reference must be defined");
             return;
         }
@@ -362,6 +362,7 @@ var igv = (function (igv) {
                 reference.cytobandURL = "//dn7ywbm9isq8j.cloudfront.net/genomes/seq/hg18/cytoBand.txt.gz";
                 break;
             case "hg19":
+            case "GRCh37":
             default:
             {
                 reference.fastaURL = "//dn7ywbm9isq8j.cloudfront.net/genomes/seq/hg19/hg19.fasta";
@@ -380,7 +381,7 @@ var igv = (function (igv) {
 
         config.showKaryo = config.showKaryo || false;
         config.navigation = config.navigation || true;
-        config.flanking = config.flanking != undefined ? config.flanking : 1000;
+        config.flanking = config.flanking === undefined ? 1000 : config.flanking;
 
     }
 

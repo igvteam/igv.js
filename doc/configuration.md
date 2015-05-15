@@ -9,9 +9,8 @@
 
 option  | description | default
 ------ | ------- | ------------
-genome  | UCSC genome identifier.  Either genome or fastaURL must be defined | hg19
-fastaURL | URL to an indexed fasta file.  Required if genome is not specified |
-cytobandURL | URL to a cytoband ideogram file in UCSC format.  Optional.  |
+genome  | UCSC genome identifier.  Either genome or reference must be defined |
+reference | Object defining reference sequence.  See table below.  Required if genome property is not specified. |
 showKaryo | If true, whole-genome karyotype view is displayed. | false
 showNavigation | If true, show basic navigation controls (search, zoom in, zoom out). | true
 tracks | Array of configuration objects defining tracks initially displayed when app launches. |
@@ -23,6 +22,13 @@ flanking  | Distance (in bp) to pad sides of gene when navigating. | 1000
 Predefined genomes
 * hg18
 * hg19
+
+
+### Reference
+option  | description | default
+fastaURL | URL to an indexed fasta file. |
+cytobandURL | URL to a cytoband ideogram file in UCSC format.  Optional.  |
+id | UCSD identifier |
 
 
 
