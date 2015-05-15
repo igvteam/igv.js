@@ -34,7 +34,8 @@ var igv = (function (igv) {
      */
     igv.createBrowser = function (parentDiv, config) {
 
-        var contentDiv,
+        var igvLogo,
+            contentDiv,
             headerDiv,
             trackContainerDiv,
             browser,
@@ -149,8 +150,12 @@ var igv = (function (igv) {
 
         });
 
+        igvLogo = $('<div class="igv-logo">');
+        $(headerDiv).append(igvLogo[0]);
 
-        browser.ideoPanel = new igv.IdeoPanel(rootDiv);
+
+        //browser.ideoPanel = new igv.IdeoPanel(rootDiv);
+        browser.ideoPanel = new igv.IdeoPanel(headerDiv);
         $(headerDiv).append(browser.ideoPanel.div);
         browser.ideoPanel.resize();
 
@@ -268,8 +273,6 @@ var igv = (function (igv) {
 
         // search
         if (config.showNavigation) {
-            igvLogo = $('<div class="igv-logo">');
-            navigation.append(igvLogo[0]);
 
             search = $('<div class="igvNavigationSearch">');
             navigation.append(search[0]);
@@ -355,11 +358,6 @@ var igv = (function (igv) {
 
 
     function setDefaults(config) {
-
-        if (!config.tracks) {
-            config.tracks = [];
-        }
-        config.tracks.push({type: "sequence", order: -Number.MAX_VALUE});
 
         config.showKaryo = config.showKaryo || false;
         config.navigation = config.navigation || true;
