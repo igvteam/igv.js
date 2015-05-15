@@ -392,6 +392,8 @@ var igv = (function (igv) {
     function renderFusionJuncSpan(feature, bpStart, xScale, pixelHeight, ctx) {
 
 
+        //console.log("renderFusionJuncSpan");
+
         var px = Math.round((feature.start - bpStart) / xScale);
         var px1 = Math.round((feature.end - bpStart) / xScale);
         pw = px1 - px;
@@ -402,16 +404,21 @@ var igv = (function (igv) {
 
         var py = 5, h = 10; // defaults borrowed from renderFeature above
 
+
+        var rowHeight = (this.displayMode === "EXPANDED") ? this.expandedRowHeight : this.squishedRowHeight;
+
+        // console.log("row height = " + rowHeight);
+
         if (this.displayMode === "SQUISHED" && feature.row != undefined) {
-            py = this.squishedRowHeight * feature.row;
+            py = rowHeight * feature.row;
         }
         else if (this.displayMode === "EXPANDED" && feature.row != undefined) {
-            py = this.expandedRowHeight * feature.row;
+            py = rowHeight * feature.row;
         }
 
-        var cy = py + 5;
-        var top_y = cy - 5;
-        var bottom_y = cy + 5;
+        var cy = py + 0.5 * rowHeight;
+        var top_y = cy - 0.5 * rowHeight;
+        var bottom_y = cy + 0.5 * rowHeight;
 
         //igv.Canvas.strokeLine.call(ctx, px, cy, px1, cy); // center line for introns
 
@@ -424,7 +431,7 @@ var igv = (function (igv) {
         ctx.moveTo(junction_left_px, cy);
         ctx.bezierCurveTo(junction_left_px, top_y, junction_right_px, top_y, junction_right_px, cy);
 
-        ctx.lineWidth = 1;
+        ctx.lineWidth = 1 + Math.log(feature.num_junction_reads)/Math.log(2);
         ctx.strokeStyle = 'blue';
         ctx.stroke();
 
