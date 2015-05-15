@@ -48,6 +48,8 @@ var igv = (function (igv) {
         if (decode) {
             this.decode = decode;
         }
+
+
         switch (format) {
             case "narrowPeak":
             case "broadPeak":
@@ -410,6 +412,8 @@ var igv = (function (igv) {
 
          */
 
+
+        //console.log("decoding fusion junc spans");
 
         var chr = tokens[0];
         var fusion_name = tokens[1];
