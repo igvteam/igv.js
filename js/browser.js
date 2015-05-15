@@ -230,7 +230,11 @@ var igv = (function (igv) {
         // Reattach the divs to the dom in the correct order
         $(this.trackContainerDiv).children().detach();
 
+        //console.log(" ");
+        //console.log("reorder tracks");
         this.trackViews.forEach(function (trackView, index, trackViews) {
+
+            console.log(trackView.track.id + ".order " + trackView.track.order);
 
             if ("CURSOR" === myself.type) {
                 myself.trackContainerDiv.appendChild(trackView.cursorTrackContainer);
