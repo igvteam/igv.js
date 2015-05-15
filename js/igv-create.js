@@ -61,9 +61,22 @@ var igv = (function (igv) {
             config.flanking = 100000;
         }
 
-        if (config.genome || config.fastaURL === undefined) {
-            mergeGenome(config);
+
+        if (config.genome) {
+            config.reference = expandGenome(config.genome);
         }
+        else if(config.fastaURL) {   // legacy property
+            config.reference = {
+                fastaURL: config.fastaURL,
+                cytobandURL: config.cytobandURL
+            }
+        }
+
+        if(!config.reference) {
+            alert("Fatal error:  reference must be defined");
+            return;
+        }
+
 
         trackContainerDiv = $('<div id="igvTrackContainerDiv" class="igv-track-container-div">')[0];
         browser = new igv.Browser(config, trackContainerDiv);
@@ -173,8 +186,9 @@ var igv = (function (igv) {
             }
         }
 
-        igv.loadGenome(config.fastaURL, config.cytobandURL, function (genome) {
+        igv.loadGenome(config.reference.fastaURL, config.reference.cytobandURL, function (genome) {
 
+            genome.id = config.reference.genomeId;
             browser.genome = genome;
             browser.addTrack(new igv.RulerTrack());
 
@@ -328,34 +342,33 @@ var igv = (function (igv) {
         return controlDiv;
     }
 
-// Merge some standard genome tracks,  this is useful for demos
-// TODO -- move this to external json
-    function mergeGenome(config) {
 
-        switch (config.genome) {
+
+    /**
+     * Expands ucsc type genome identifiers to genome object.
+     *
+     * @param genomeId
+     * @returns {{}}
+     */
+    function expandGenome(genomeId) {
+
+        var reference = {id: genomeId};
+
+        switch (genomeId) {
 
             case "hg18":
-                config.fastaURL = "//dn7ywbm9isq8j.cloudfront.net/genomes/seq/hg18/hg18.fasta";
-                config.cytobandURL = "//dn7ywbm9isq8j.cloudfront.net/genomes/seq/hg18/cytoBand.txt.gz";
+                reference.fastaURL = "//dn7ywbm9isq8j.cloudfront.net/genomes/seq/hg18/hg18.fasta";
+                reference.cytobandURL = "//dn7ywbm9isq8j.cloudfront.net/genomes/seq/hg18/cytoBand.txt.gz";
                 break;
             case "hg19":
             default:
             {
-                config.fastaURL = "//dn7ywbm9isq8j.cloudfront.net/genomes/seq/hg19/hg19.fasta";
-                config.cytobandURL = "//dn7ywbm9isq8j.cloudfront.net/genomes/seq/hg19/cytoBand.txt";
-
-                if (!config.tracks) config.tracks = [];
-                config.tracks.push({
-                    name: "Genes",
-                    url: "//dn7ywbm9isq8j.cloudfront.net/annotations/hg19/genes/gencode.v18.collapsed.bed",
-                    order: Number.MAX_VALUE,
-                    displayMode: "EXPANDED"
-
-                });
+                reference.fastaURL = "//dn7ywbm9isq8j.cloudfront.net/genomes/seq/hg19/hg19.fasta";
+                reference.cytobandURL = "//dn7ywbm9isq8j.cloudfront.net/genomes/seq/hg19/cytoBand.txt";
             }
         }
+        return reference;
     }
-
 
     function setDefaults(config) {
 

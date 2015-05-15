@@ -112,8 +112,16 @@
                 options = {
                     showNavigation: true,
                     genome: "hg19",
-                    locus: "chr1:155,172,193-155,172,564"
+                    locus: "chr1:155,172,193-155,172,564",
+                    tracks: [
+                        {
+                            name: "Genes",
+                            url: "//dn7ywbm9isq8j.cloudfront.net/annotations/hg19/genes/gencode.v18.collapsed.bed",
+                            order: Number.MAX_VALUE,
+                            displayMode: "EXPANDED"
 
+                        }
+                    ]
                 };
 
         igv.createBrowser(div, options);

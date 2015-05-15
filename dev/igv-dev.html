@@ -310,8 +310,10 @@
 
             showKaryo: false,
             showNavigation: true,
-            fastaURL: "//dn7ywbm9isq8j.cloudfront.net/genomes/seq/hg19/hg19.fasta",
-            cytobandURL: "//dn7ywbm9isq8j.cloudfront.net/genomes/seq/hg19/cytoBand.txt",
+            reference: {
+                fastaURL: "//dn7ywbm9isq8j.cloudfront.net/genomes/seq/hg19/hg19.fasta",
+                cytobandURL: "//dn7ywbm9isq8j.cloudfront.net/genomes/seq/hg19/cytoBand.txt"
+            },
             flanking: 1000,
             apiKey: 'AIzaSyDUUAUFpQEN4mumeMNIRWXSiTh5cPtUAD0',
             trackDefaults: {
@@ -326,9 +328,7 @@
                 {
                     name: "Genes",
                     url: "//dn7ywbm9isq8j.cloudfront.net/annotations/hg19/genes/gencode.v18.collapsed.bed",
-                    //indexed: false,
-                    order: 10000,
-
+                    order: Number.MAX_VALUE,
                     displayMode: "EXPANDED"
 
                 }
