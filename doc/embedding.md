@@ -3,23 +3,22 @@
 
 #Browser Initialization#
 
-The IGV.js browser is a javascript object easily embeddable in web pages.  The object is created and initialized with the function
+The IGV.js browser is a javascript object designd to be embedded in web pages.  The object is created and initialized with the function
 
-    igv.createBrowser(div, options)
+    igv.createBrowser(div, config)
 
-The first argument is the parent div. IGV  inserts itself into the dom here. The second argument is an object
-defining  configuration options, described.  The following example shows initialization with two tracks:  genomic sequence and gene annotations.
+The first argument is the parent div, the browser object is inserted into the dom as a child of this object.
+The second argument is an object defining configuration options.  The example below initializes igv with a single
+annotation track:
 
-        options = {
+        config = {
             showKaryo: false,
             showNavigation: true,
-            fastaURL: "//dn7ywbm9isq8j.cloudfront.net/genomes/seq/hg19/hg19.fasta",
-            cytobandURL: "//dn7ywbm9isq8j.cloudfront.net/genomes/seq/hg19/cytoBand.txt",
+            reference: {
+              fastaURL: "//dn7ywbm9isq8j.cloudfront.net/genomes/seq/hg19/hg19.fasta",
+              cytobandURL: "//dn7ywbm9isq8j.cloudfront.net/genomes/seq/hg19/cytoBand.txt"
+            }
             tracks: [
-                {
-                    type: "sequence"
-                    order: 9999
-                },
                 {
                     url: "//dn7ywbm9isq8j.cloudfront.net/annotations/hg19/genes/gencode.v18.collapsed.bed",
                     label: "Genes",
