@@ -99,50 +99,32 @@ var igv = (function (igv) {
         function makeTrackDraggable(track) {
 
             self.igvTrackDragScrim = $('<div class="igv-track-drag-scrim">')[0];
-            //$(self.trackDiv).append(self.igvTrackDragScrim);
             $(self.viewportDiv).append(self.igvTrackDragScrim);
             $(self.igvTrackDragScrim).hide();
 
             self.igvTrackManipulationHandle = $('<div class="igv-track-manipulation-handle">')[0];
             $(self.trackDiv).append(self.igvTrackManipulationHandle);
 
-            //$( document ).mousedown(function(e) {
-            //    igv.browser.isMouseDown = true;
-            //});
-            //
-            //$( document ).mouseup(function(e) {
-            //
-            //    igv.browser.isMouseDown = undefined;
-            //
-            //    if (igv.browser.dragTrackView) {
-            //        $(igv.browser.dragTrackView.igvTrackDragScrim).hide();
-            //    }
-            //
-            //    igv.browser.dragTrackView = undefined;
-            //
-            //});
 
             $( self.igvTrackManipulationHandle ).mousedown(function(e) {
 
                 self.isMouseDown = true;
-                igv.browser.dragTrackView = self;
+                igv.browser.dragTrackView = (igv.isTrackLayoutPinned(self.track)) ? undefined : self;
             });
 
             $( self.igvTrackManipulationHandle ).mouseup(function(e) {
-
                 self.isMouseDown = undefined;
-
             });
 
             $( self.igvTrackManipulationHandle ).mouseenter(function(e) {
 
                 self.isMouseIn = true;
-                igv.browser.dragTargetTrackView = self;
+                igv.browser.dragTargetTrackView = (igv.isTrackLayoutPinned(self.track)) ? undefined : self;
 
-                if (undefined === igv.browser.dragTrackView) {
-                    $(self.igvTrackDragScrim).show();
-                } else if (self === igv.browser.dragTrackView) {
-                    $(self.igvTrackDragScrim).show();
+                if (undefined === igv.browser.dragTrackView || self === igv.browser.dragTrackView) {
+                    if (!igv.isTrackLayoutPinned(self.track)) {
+                        $(self.igvTrackDragScrim).show();
+                    }
                 }
 
                 if (igv.browser.dragTargetTrackView && igv.browser.dragTrackView) {
