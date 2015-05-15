@@ -465,13 +465,33 @@ div.ui-dialog fieldset {
     /*margin-bottom: 5px;*/
 }
 
-.igv-logo {
+.igv-logo-nonav {
 
     margin-left: 4px;
     margin-top: 12px;
 
     position: absolute;
     top: 0;
+    left: 0;
+
+    width: 34px;
+    height: 16px;
+
+    background: url(img/igv_logo_letters_paths.svg);
+    background-size: 34px 16px;
+    background-repeat:no-repeat;
+    background-position: 0 0;
+
+}
+
+.igv-logo {
+
+    float: left;
+
+    margin-right: 8px;
+
+    position: relative;
+    top: 3px;
     left: 0;
 
     width: 34px;

@@ -65,14 +65,14 @@ var igv = (function (igv) {
         if (config.genome) {
             config.reference = expandGenome(config.genome);
         }
-        else if(config.fastaURL) {   // legacy property
+        else if (config.fastaURL) {   // legacy property
             config.reference = {
                 fastaURL: config.fastaURL,
                 cytobandURL: config.cytobandURL
             }
         }
 
-        if(!config.reference) {
+        if (!config.reference) {
             alert("Fatal error:  reference must be defined");
             return;
         }
@@ -163,9 +163,10 @@ var igv = (function (igv) {
 
         });
 
-        igvLogo = $('<div class="igv-logo">');
-        $(headerDiv).append(igvLogo[0]);
-
+        if (!config.showNavigation) {
+            igvLogo = $('<div class="igv-logo-nonav">');
+            $(headerDiv).append(igvLogo[0]);
+        }
 
         //browser.ideoPanel = new igv.IdeoPanel(rootDiv);
         browser.ideoPanel = new igv.IdeoPanel(headerDiv);
@@ -282,11 +283,12 @@ var igv = (function (igv) {
         navigation = $('<div class="igvNavigation">');
         $(controlDiv).append(navigation[0]);
 
-        //igvLogo = $('<div class="igv-logo">');
-        //navigation.append(igvLogo[0]);
 
         // search
         if (config.showNavigation) {
+
+            igvLogo = $('<div class="igv-logo">');
+            navigation.append(igvLogo[0]);
 
             search = $('<div class="igvNavigationSearch">');
             navigation.append(search[0]);
@@ -343,7 +345,6 @@ var igv = (function (igv) {
     }
 
 
-
     /**
      * Expands ucsc type genome identifiers to genome object.
      *
@@ -372,10 +373,10 @@ var igv = (function (igv) {
 
     function setDefaults(config) {
 
-        if(!config.tracks) {
+        if (!config.tracks) {
             config.tracks = [];
         }
-        config.tracks.push( {type: "sequence", order: -Number.MAX_VALUE});
+        config.tracks.push({type: "sequence", order: -Number.MAX_VALUE});
 
         config.showKaryo = config.showKaryo || false;
         config.navigation = config.navigation || true;
