@@ -377,7 +377,7 @@ var igv = (function (igv) {
         if (!config.tracks) {
             config.tracks = [];
         }
-        config.tracks.push( { type: "sequence", order: -9999 } );
+        config.tracks.push( { type: "sequence", order: -Number.MAX_VALUE } );
 
         config.showKaryo = config.showKaryo || false;
         config.navigation = config.navigation || true;

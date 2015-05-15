@@ -264,6 +264,10 @@ var igv = (function (igv) {
 
     };
 
+    igv.isTrackLayoutPinned = function(track) {
+
+        return -Number.MAX_VALUE === track.order;
+    };
 
     return igv;
 })(igv || {});
