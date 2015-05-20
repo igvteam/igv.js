@@ -1106,16 +1106,29 @@ div.ui-dialog fieldset {
     right: 0;
     width: 10px;
     height: 100%;
-    backgroundColor:lightgray;
+    /*background-color:lightgray;*/
+
+    border-style: solid;
+    border-width: thin;
+    border-color: #cecece;
 
 }
 
 .igv-scrollbar-inner-div {
     position:absolute;
-    top:0;
-    left:2px;
+    /*top:0;*/
+    /*left:2px;*/
     width:8px;
-    background-color:darkcyan;
+    background-color: #a4a4a4;
+}
+
+.igv-scrollbar-inner-div:hover,
+.igv-scrollbar-inner-div:focus,
+.igv-scrollbar-inner-div:active {
+
+    cursor: pointer;
+    background-color: #808080;
+
 }
 
 .spacer5 {
