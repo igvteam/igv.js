@@ -798,17 +798,22 @@ var igv = (function (igv) {
         self = this;
 
         var mouseMove = function (event) {
-                var newTop = Math.min(Math.max(0, event.pageY - offY), self.outerScrollDiv.clientHeight - self.innerScrollDiv.clientHeight),
+                var newTop = Math.min(Math.max(0, event.pageY - self.offY), self.outerScrollDiv.clientHeight - self.innerScrollDiv.clientHeight),
                     contentTop = -Math.round(newTop * (contentDiv.clientHeight / viewportDiv.clientHeight));
                 self.innerScrollDiv.style.top = newTop + "px";
                 contentDiv.style.top = contentTop + "px";
-                event.stopPropagation();
+               // event.stopPropagation();
             },
             mouseUp = function (event) {
+                console.log("Removing " + mouseMove);
+
+                window.removeEventListener("mousemove", mouseMove);
+                window.removeEventListener("mouseup", mouseUp);
                 $(window).off("mousemove", mouseMove);
+                $(window).off("mouseup", mouseUp);
             },
             mouseDown = function (event) {
-                offY = event.pageY - self.innerScrollDiv.clientTop;
+                self.offY = event.pageY - self.innerScrollDiv.clientTop;
                 $(window).on("mousemove", mouseMove);
                 $(window).on('mouseup', mouseUp);
                 event.stopPropagation();     // <= prevents start of horizontal track panning
