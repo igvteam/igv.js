@@ -805,7 +805,7 @@ var igv = (function (igv) {
                // event.stopPropagation();
             },
             mouseUp = function (event) {
-                console.log("Removing " + mouseMove);
+                console.log("Removing mouseMove");
 
                 window.removeEventListener("mousemove", mouseMove);
                 window.removeEventListener("mouseup", mouseUp);
