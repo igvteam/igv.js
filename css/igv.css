@@ -1108,9 +1108,9 @@ div.ui-dialog fieldset {
     height: 100%;
     /*background-color:lightgray;*/
 
-    border-style: solid;
-    border-width: thin;
-    border-color: #cecece;
+    border-left-style: solid;
+    border-left-width: thin;
+    border-left-color: #cecece;
 
 }
 
