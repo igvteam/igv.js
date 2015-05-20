@@ -1100,6 +1100,24 @@ div.ui-dialog fieldset {
     height: 100%;
 }
 
+.igv-scrollbar-outer-div {
+    position: absolute;
+    top: 0;
+    right: 0;
+    width: 10px;
+    height: 100%;
+    backgroundColor:lightgray;
+
+}
+
+.igv-scrollbar-inner-div {
+    position:absolute;
+    top:0;
+    left:2px;
+    width:8px;
+    background-color:darkcyan;
+}
+
 .spacer5 {
     height: 5px;
     width: 100%;

@@ -146,12 +146,12 @@ var igvxhr = (function (igvxhr) {
             contentType = options.contentType,
             mimeType = options.mimeType,
             headers = options.headers,
-            isSafari = navigator.vendor.indexOf("Apple")==0 && /\sSafari\//.test(navigator.userAgent),
+            isSafari = navigator.vendor.indexOf("Apple") == 0 && /\sSafari\//.test(navigator.userAgent),
             header_keys, key, value, i;
 
         if (task) task.xhrRequest = xhr;
 
-        if(range && isSafari) {
+        if (range && isSafari) {
 
             console.log(isSafari);
             // Add random seed. For nasty safari bug https://bugs.webkit.org/show_bug.cgi?id=82672
@@ -180,7 +180,7 @@ var igvxhr = (function (igvxhr) {
             for (i = 0; i < header_keys.length; i++) {
                 key = header_keys[i];
                 value = headers[key];
-               // console.log("Adding to header: " + key + "=" + value);
+                // console.log("Adding to header: " + key + "=" + value);
                 xhr.setRequestHeader(key, value);
             }
         }
@@ -200,7 +200,7 @@ var igvxhr = (function (igvxhr) {
 
             if (isCrossDomain(url) && url) {
                 // Try the proxy, if it exists.  Presumably this is a php file
-                if (igv.browser.crossDomainProxy && url != igv.browser.crossDomainProxy && ! options.crossDomainRetried) {
+                if (igv.browser.crossDomainProxy && url != igv.browser.crossDomainProxy && !options.crossDomainRetried) {
 
                     options.sendData = "url=" + url;
                     options.crossDomainRetried = true;
@@ -209,18 +209,14 @@ var igvxhr = (function (igvxhr) {
                     return;
                 }
             }
-
-            if(xhr.status === 416 && options.range && !options.rangeRetried) {
-                // Unsatisfied range error, presumably because we tried to read off the end.  Try again leaving the
-                // end off
-                options.range.size = undefined;
-                options.rangeRetried = true;
-                igv.xhr.load(url, options);
+            //
+            if (xhr.status === 416) {
+                //  Tried to read off the end of the file.   This shouldn't happen, but if it does return an
+                //  empty array buffer
+                success(new ArrayBuffer(0), xhr);
                 return;
             }
-
-            error(null, xhr);
-        };
+        }
 
         xhr.ontimeout = function (event) {
             console.log("Aborted");
@@ -403,5 +399,6 @@ var igvxhr = (function (igvxhr) {
 
     return igvxhr;
 
-})(igvxhr || {});
+})
+(igvxhr || {});
 

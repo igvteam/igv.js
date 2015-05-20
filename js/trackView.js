@@ -92,7 +92,7 @@ var igv = (function (igv) {
             addTrackHandlers(this);
         }
 
-        function isTrackDraggable (track) {
+        function isTrackDraggable(track) {
             return !(track instanceof igv.RulerTrack);
         }
 
@@ -122,19 +122,19 @@ var igv = (function (igv) {
             //
             //});
 
-            $( self.igvTrackManipulationHandle ).mousedown(function(e) {
+            $(self.igvTrackManipulationHandle).mousedown(function (e) {
 
                 self.isMouseDown = true;
                 igv.browser.dragTrackView = self;
             });
 
-            $( self.igvTrackManipulationHandle ).mouseup(function(e) {
+            $(self.igvTrackManipulationHandle).mouseup(function (e) {
 
                 self.isMouseDown = undefined;
 
             });
 
-            $( self.igvTrackManipulationHandle ).mouseenter(function(e) {
+            $(self.igvTrackManipulationHandle).mouseenter(function (e) {
 
                 self.isMouseIn = true;
                 igv.browser.dragTargetTrackView = self;
@@ -161,11 +161,11 @@ var igv = (function (igv) {
 
                         igv.browser.reorderTracks();
                     }
-                 }
+                }
 
             });
 
-            $( self.igvTrackManipulationHandle ).mouseleave(function(e) {
+            $(self.igvTrackManipulationHandle).mouseleave(function (e) {
 
                 self.isMouseIn = undefined;
                 igv.browser.dragTargetTrackView = undefined;
@@ -195,6 +195,11 @@ var igv = (function (igv) {
         this.canvas.setAttribute('width', this.contentDiv.clientWidth);
         this.canvas.setAttribute('height', this.contentDiv.clientHeight);
         this.ctx = this.canvas.getContext("2d");
+
+        // scrollbar
+        this.scrollbar = new TrackScrollbar(this.viewportDiv, this.contentDiv);
+        this.scrollbar.update();
+        $(this.viewportDiv).append(this.scrollbar.outerScrollDiv);
 
         this.viewportCreationHelper(this.viewportDiv);
 
@@ -352,13 +357,13 @@ var igv = (function (igv) {
         this.update();
     };
 
-    function setTrackHeight_ (newHeight, update) {
+    function setTrackHeight_(newHeight, update) {
 
         var trackHeightStr;
 
-        if(this.track.minHeight) newHeight = Math.max(this.track.minHeight, newHeight);
-        if(this.track.maxHeight) newHeight = Math.min(this.track.maxHeight, newHeight);
-        if(newHeight === this.track.height) return;   // Nothing to do
+        if (this.track.minHeight) newHeight = Math.max(this.track.minHeight, newHeight);
+        if (this.track.maxHeight) newHeight = Math.min(this.track.maxHeight, newHeight);
+        if (newHeight === this.track.height) return;   // Nothing to do
 
         trackHeightStr = newHeight + "px";
 
@@ -380,7 +385,9 @@ var igv = (function (igv) {
             this.track.cursorHistogram.updateHeightAndInitializeHistogramWithTrack(this.track);
         }
 
-        if (update === undefined || update === true) this.update();
+        if (update === undefined || update === true) {
+            this.update();
+        }
 
     }
 
@@ -388,6 +395,7 @@ var igv = (function (igv) {
 
         //console.log("Update");
         this.tile = null;
+        this.scrollbar.update();
         this.repaint();
 
     };
@@ -776,6 +784,51 @@ var igv = (function (igv) {
         });
 
     }
+
+
+    TrackScrollbar = function (viewportDiv, contentDiv) {
+
+        this.viewportDiv = viewportDiv;
+        this.contentDiv = contentDiv;
+        this.offY = 0;
+        this.outerScrollDiv = $('<div class="igv-scrollbar-outer-div">')[0];
+        this.innerScrollDiv = $('<div class="igv-scrollbar-inner-div">')[0];
+        $(this.outerScrollDiv).append(this.innerScrollDiv);
+
+        self = this;
+
+        var mouseMove = function (event) {
+                var newTop = Math.min(Math.max(0, event.pageY - offY), self.outerScrollDiv.clientHeight - self.innerScrollDiv.clientHeight),
+                    contentTop = -Math.round(newTop * (contentDiv.clientHeight / viewportDiv.clientHeight));
+                self.innerScrollDiv.style.top = newTop + "px";
+                contentDiv.style.top = contentTop + "px";
+                event.stopPropagation();
+            },
+            mouseUp = function (event) {
+                $(window).off("mousemove", mouseMove);
+            },
+            mouseDown = function (event) {
+                offY = event.pageY - self.innerScrollDiv.clientTop;
+                $(window).on("mousemove", mouseMove);
+                $(window).on('mouseup', mouseUp);
+                event.stopPropagation();     // <= prevents start of horizontal track panning
+            };
+
+        $(this.innerScrollDiv).on("mousedown", mouseDown);
+    }
+
+
+    TrackScrollbar.prototype.update = function () {
+        if (this.contentDiv.clientHeight > this.viewportDiv.clientHeight) {
+            $(this.outerScrollDiv).show();
+            this.innerScrollDiv.style.height =
+                Math.round((this.viewportDiv.clientHeight / this.contentDiv.clientHeight) * this.viewportDiv.clientHeight) + "px";
+        }
+        else {
+            $(this.outerScrollDiv).hide();
+        }
+    }
+
 
     return igv;
 
