@@ -861,8 +861,8 @@ div.ui-dialog fieldset {
     font-weight: 400;
     color: #444;
 
-    margin-left: 2px;
-    margin-right: 2px;
+    margin-left: 4px;
+    margin-right: 4px;
     position: relative;
     cursor: default;
 }
@@ -1060,7 +1060,7 @@ div.ui-dialog fieldset {
 
 .igv-app-icon-container {
 
-    border-radius: 4px;
+    /*border-radius: 4px;*/
     border-color: #444;
     border-style: solid;
     border-width: thin;
