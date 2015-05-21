@@ -197,7 +197,7 @@ var igv = (function (igv) {
         this.ctx = this.canvas.getContext("2d");
 
         // scrollbar
-        this.scrollbar = new TrackScrollbar(this.viewportDiv, this.contentDiv, this.track.name);
+        this.scrollbar = new TrackScrollbar(this.viewportDiv, this.contentDiv);
         this.scrollbar.update();
         $(this.viewportDiv).append(this.scrollbar.outerScrollDiv);
 
@@ -786,36 +786,34 @@ var igv = (function (igv) {
     }
 
 
-    TrackScrollbar = function (viewportDiv, contentDiv, name) {
+    TrackScrollbar = function (viewportDiv, contentDiv) {
 
         var outerScrollDiv = $('<div class="igv-scrollbar-outer-div">')[0],
-            innerScrollDiv = $('<div class="igv-scrollbar-inner-div">')[0];
+            innerScrollDiv = $('<div class="igv-scrollbar-inner-div">')[0],
+            offY;
+
+        $(outerScrollDiv).append(innerScrollDiv);
 
         this.viewportDiv = viewportDiv;
         this.contentDiv = contentDiv;
-        this.offY = 0;
         this.outerScrollDiv = outerScrollDiv;
         this.innerScrollDiv = innerScrollDiv;
-        $(outerScrollDiv).append(innerScrollDiv);
-
-        self = this;
 
         var mouseMove = function (event) {
-                console.log("Moving " + name);
-                var newTop = Math.min(Math.max(0, event.pageY - self.offY), self.outerScrollDiv.clientHeight - self.innerScrollDiv.clientHeight),
-                    contentTop = -Math.round(newTop * (contentDiv.clientHeight / viewportDiv.clientHeight));
+                var H = $(outerScrollDiv).height(),
+                    h = $(innerScrollDiv).height(),
+                    newTop = Math.min(Math.max(0, event.pageY - offY), H - h),
+                    contentTop = -Math.round(newTop * ($(contentDiv).height() / $(viewportDiv).height()));
                 innerScrollDiv.style.top = newTop + "px";
                 contentDiv.style.top = contentTop + "px";
-                // event.stopPropagation();
+                event.stopPropagation();
             },
             mouseUp = function (event) {
-                console.log("Removing " + name);
-
                 $(window).off("mousemove .igv", null, mouseMove);
                 $(window).off("mouseup .igv", null, mouseUp);
             },
             mouseDown = function (event) {
-                self.offY = event.pageY - self.innerScrollDiv.clientTop;
+                offY = event.pageY - $(innerScrollDiv).position().top;;
                 $(window).on("mousemove .igv", null, null, mouseMove);
                 $(window).on('mouseup .igv', null, null, mouseUp);
                 event.stopPropagation();     // <= prevents start of horizontal track panning
