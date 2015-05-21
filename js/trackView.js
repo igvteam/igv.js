@@ -835,18 +835,20 @@ var igv = (function (igv) {
                 h = $(innerScrollDiv).height(),
                 newTop = Math.min(Math.max(0, y), H - h),
                 contentTop = -Math.round(newTop * ($(contentDiv).height() / $(viewportDiv).height()));
-            innerScrollDiv.style.top = newTop + "px";
-            contentDiv.style.top = contentTop + "px";
+            $(innerScrollDiv).css("top", newTop + "px");
+            $(contentDiv).css("top", contentTop + "px");
 
         }
     }
 
 
     TrackScrollbar.prototype.update = function () {
-        if (this.contentDiv.clientHeight > this.viewportDiv.clientHeight) {
+        var viewportHeight = $(this.viewportDiv).height(),
+            contentHeight = $(this.contentDiv).height(),
+            newInnerHeight = Math.round((viewportHeight / contentHeight) * viewportHeight);
+        if (contentHeight > viewportHeight) {
             $(this.outerScrollDiv).show();
-            this.innerScrollDiv.style.height =
-                Math.round((this.viewportDiv.clientHeight / this.contentDiv.clientHeight) * this.viewportDiv.clientHeight) + "px";
+            $(this.innerScrollDiv).height(newInnerHeight);
         }
         else {
             $(this.outerScrollDiv).hide();
