@@ -197,7 +197,7 @@ var igv = (function (igv) {
         this.ctx = this.canvas.getContext("2d");
 
         // scrollbar
-        this.scrollbar = new TrackScrollbar(this.viewportDiv, this.contentDiv);
+        this.scrollbar = new TrackScrollbar(this.viewportDiv, this.contentDiv, this.track.name);
         this.scrollbar.update();
         $(this.viewportDiv).append(this.scrollbar.outerScrollDiv);
 
@@ -786,40 +786,42 @@ var igv = (function (igv) {
     }
 
 
-    TrackScrollbar = function (viewportDiv, contentDiv) {
+    TrackScrollbar = function (viewportDiv, contentDiv, name) {
+
+        var outerScrollDiv = $('<div class="igv-scrollbar-outer-div">')[0],
+            innerScrollDiv = $('<div class="igv-scrollbar-inner-div">')[0];
 
         this.viewportDiv = viewportDiv;
         this.contentDiv = contentDiv;
         this.offY = 0;
-        this.outerScrollDiv = $('<div class="igv-scrollbar-outer-div">')[0];
-        this.innerScrollDiv = $('<div class="igv-scrollbar-inner-div">')[0];
-        $(this.outerScrollDiv).append(this.innerScrollDiv);
+        this.outerScrollDiv = outerScrollDiv;
+        this.innerScrollDiv = innerScrollDiv;
+        $(outerScrollDiv).append(innerScrollDiv);
 
         self = this;
 
         var mouseMove = function (event) {
+                console.log("Moving " + name);
                 var newTop = Math.min(Math.max(0, event.pageY - self.offY), self.outerScrollDiv.clientHeight - self.innerScrollDiv.clientHeight),
                     contentTop = -Math.round(newTop * (contentDiv.clientHeight / viewportDiv.clientHeight));
-                self.innerScrollDiv.style.top = newTop + "px";
+                innerScrollDiv.style.top = newTop + "px";
                 contentDiv.style.top = contentTop + "px";
-               // event.stopPropagation();
+                // event.stopPropagation();
             },
             mouseUp = function (event) {
-                console.log("Removing mouseMove");
+                console.log("Removing " + name);
 
-                window.removeEventListener("mousemove", mouseMove);
-                window.removeEventListener("mouseup", mouseUp);
-                $(window).off("mousemove", mouseMove);
-                $(window).off("mouseup", mouseUp);
+                $(window).off("mousemove .igv", null, mouseMove);
+                $(window).off("mouseup .igv", null, mouseUp);
             },
             mouseDown = function (event) {
                 self.offY = event.pageY - self.innerScrollDiv.clientTop;
-                $(window).on("mousemove", mouseMove);
-                $(window).on('mouseup', mouseUp);
+                $(window).on("mousemove .igv", null, null, mouseMove);
+                $(window).on('mouseup .igv', null, null, mouseUp);
                 event.stopPropagation();     // <= prevents start of horizontal track panning
             };
 
-        $(this.innerScrollDiv).on("mousedown", mouseDown);
+        $(this.innerScrollDiv).on("mousedown .igv", null, null, mouseDown);
     }
 
 
