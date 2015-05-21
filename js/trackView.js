@@ -785,7 +785,10 @@ var igv = (function (igv) {
 
     }
 
-
+    /**
+     * Creates a vertical scrollbar to slide an inner "contentDiv" with respect to an enclosing "viewportDiv"
+     *
+     */
     TrackScrollbar = function (viewportDiv, contentDiv) {
 
         var outerScrollDiv = $('<div class="igv-scrollbar-outer-div">')[0],
@@ -799,27 +802,43 @@ var igv = (function (igv) {
         this.outerScrollDiv = outerScrollDiv;
         this.innerScrollDiv = innerScrollDiv;
 
-        var mouseMove = function (event) {
-                var H = $(outerScrollDiv).height(),
-                    h = $(innerScrollDiv).height(),
-                    newTop = Math.min(Math.max(0, event.pageY - offY), H - h),
-                    contentTop = -Math.round(newTop * ($(contentDiv).height() / $(viewportDiv).height()));
-                innerScrollDiv.style.top = newTop + "px";
-                contentDiv.style.top = contentTop + "px";
-                event.stopPropagation();
-            },
-            mouseUp = function (event) {
-                $(window).off("mousemove .igv", null, mouseMove);
-                $(window).off("mouseup .igv", null, mouseUp);
-            },
-            mouseDown = function (event) {
-                offY = event.pageY - $(innerScrollDiv).position().top;;
-                $(window).on("mousemove .igv", null, null, mouseMove);
-                $(window).on('mouseup .igv', null, null, mouseUp);
-                event.stopPropagation();     // <= prevents start of horizontal track panning
-            };
 
-        $(this.innerScrollDiv).on("mousedown .igv", null, null, mouseDown);
+        $(this.innerScrollDiv).mousedown(function (event) {
+            offY = event.pageY - $(innerScrollDiv).position().top;
+            $(window).on("mousemove .igv", null, null, mouseMove);
+            $(window).on('mouseup .igv', null, null, mouseUp);
+            event.stopPropagation();     // <= prevents start of horizontal track panning);
+        });
+
+        $(this.innerScrollDiv).click(function (event) {
+            event.stopPropagation();  // "Eat" clicks on the inner div to prevent them bubbling up to outer
+        });
+
+        $(this.outerScrollDiv).click(function (event) {
+            moveScrollerTo(event.offsetY - $(innerScrollDiv).height() / 2);
+            event.stopPropagation();
+
+        });
+
+        function mouseMove(event) {
+            moveScrollerTo(event.pageY - offY);
+            event.stopPropagation();
+        }
+
+        function mouseUp(event) {
+            $(window).off("mousemove .igv", null, mouseMove);
+            $(window).off("mouseup .igv", null, mouseUp);
+        };
+
+        function moveScrollerTo(y) {
+            var H = $(outerScrollDiv).height(),
+                h = $(innerScrollDiv).height(),
+                newTop = Math.min(Math.max(0, y), H - h),
+                contentTop = -Math.round(newTop * ($(contentDiv).height() / $(viewportDiv).height()));
+            innerScrollDiv.style.top = newTop + "px";
+            contentDiv.style.top = contentTop + "px";
+
+        }
     }
 
 
