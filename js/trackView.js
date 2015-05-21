@@ -196,10 +196,12 @@ var igv = (function (igv) {
         this.canvas.setAttribute('height', this.contentDiv.clientHeight);
         this.ctx = this.canvas.getContext("2d");
 
-        // scrollbar
-        this.scrollbar = new TrackScrollbar(this.viewportDiv, this.contentDiv);
-        this.scrollbar.update();
-        $(this.viewportDiv).append(this.scrollbar.outerScrollDiv);
+        // scrollbar,  default is to set overflow ot hidden and use custom scrollbar, but this can be overriden so check
+        if ("hidden" === $(this.viewportDiv).css("overflow-y")) {
+            this.scrollbar = new TrackScrollbar(this.viewportDiv, this.contentDiv);
+            this.scrollbar.update();
+            $(this.viewportDiv).append(this.scrollbar.outerScrollDiv);
+        }
 
         this.viewportCreationHelper(this.viewportDiv);
 
@@ -395,7 +397,7 @@ var igv = (function (igv) {
 
         //console.log("Update");
         this.tile = null;
-        this.scrollbar.update();
+        if(this.scrollbar) this.scrollbar.update();
         this.repaint();
 
     };
@@ -806,7 +808,7 @@ var igv = (function (igv) {
         $(this.innerScrollDiv).mousedown(function (event) {
             offY = event.pageY - $(innerScrollDiv).position().top;
             $(window).on("mousemove .igv", null, null, mouseMove);
-            $(window).on('mouseup .igv', null, null, mouseUp);
+            $(window).on("mouseup .igv", null, null, mouseUp);
             event.stopPropagation();     // <= prevents start of horizontal track panning);
         });
 
