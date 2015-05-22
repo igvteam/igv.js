@@ -401,6 +401,7 @@ var igv = (function (igv) {
             end,
             chromosome;
 
+
         if (this.searchInput) {
 
             chr = referenceFrame.chr;
@@ -416,6 +417,8 @@ var igv = (function (igv) {
 
             str = chr + ":" + ss + "-" + ee;
             this.searchInput.val(str);
+
+            this.windowSizePanel.update( chr, Math.floor(end - referenceFrame.start) );
         }
 
     };
@@ -515,7 +518,8 @@ var igv = (function (igv) {
         this.referenceFrame.start = start;
 
         this.update();
-    };
+
+      };
 
 // Zoom in by a factor of 2, keeping the same center location
     igv.Browser.prototype.zoomIn = function () {

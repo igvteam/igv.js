@@ -30,13 +30,26 @@ var igv = (function (igv) {
 
     igv.WindowSizePanel = function (parentElement) {
 
+
         // ideogram content
         this.contentDiv = $('<div class="igv-windowsizepanel-content-div"></div>');
         $(parentElement).append(this.contentDiv[0]);
 
 
+    };
+
+    igv.WindowSizePanel.prototype.update = function (chr, size) {
+
+        var str = chr + " " + igv.numberFormatter( size );
+        this.contentDiv.text( str );
+
+        function prettyNumber(size) {
+
+            return size;
+        }
 
     };
+
 
     return igv;
 })

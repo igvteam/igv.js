@@ -174,8 +174,8 @@ var igv = (function (igv) {
         browser.ideoPanel = new igv.IdeoPanel(headerDiv);
         browser.ideoPanel.resize();
 
-        //// window size panel
-        //browser.windowSizePanel = new igv.WindowSizePanel(headerDiv);
+        // window size panel
+        browser.windowSizePanel = new igv.WindowSizePanel(headerDiv);
 
         if (config.trackDefaults) {
 
