@@ -51,9 +51,7 @@ var igv = (function (igv) {
             nTick,
             x;
 
-
-        //fontStyle = { textAlign: 'center', font: 'bold 12px Arial', fillStyle: "green", strokeStyle: "red"};
-        fontStyle = { textAlign: 'center', font: '14px PT Sans', fillStyle: "rgba(64, 64, 64, 1)", strokeStyle: "rgba(64, 64, 64, 1)" };
+        fontStyle = { textAlign: 'center', font: '10px PT Sans', fillStyle: "rgba(64, 64, 64, 1)", strokeStyle: "rgba(64, 64, 64, 1)" };
 
         range = Math.floor(1100 * options.bpPerPixel);
         ts = findSpacing(range);
