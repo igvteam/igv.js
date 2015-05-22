@@ -845,6 +845,7 @@ div.ui-dialog fieldset {
     color: #7f7f7f;
     background-color: #ffffff;
 
+    display: none;
 }
 
 .igv-track-container-div {
