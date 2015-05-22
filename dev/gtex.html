@@ -9,7 +9,6 @@
     <link rel="shortcut icon" href=../img/favicon.ico>
     <title>IGV - Integrative Genomics Viewer</title>
 
-
     <!-- jQuery UI CSS -->
     <link rel="stylesheet" type="text/css"
           href="//ajax.googleapis.com/ajax/libs/jqueryui/1.11.2/themes/redmond/jquery-ui.css"/>
@@ -111,8 +110,8 @@
 
     <script type="text/javascript" src="../js/trackMenuPopupDialog.js"></script>
 
-    <!-- IGV ColorPicker CSS -->
     <script type="text/javascript" src="../js/colorpicker.js"></script>
+    <script type="text/javascript" src="../js/dialog.js"></script>
 
     <script type="text/javascript" src="../js/set.js"></script>
 
@@ -134,12 +133,17 @@
 
         div = $("#myDiv")[0];
         options = {
-            dev: true,
-            showKaryo: false,
             fastaURL: "//dn7ywbm9isq8j.cloudfront.net/genomes/seq/hg19/hg19.fasta",
             cytobandURL: "//dn7ywbm9isq8j.cloudfront.net/genomes/seq/hg19/cytoBand.txt",
-            locus: "actn3",
+            locus: "chr11:122,618,671-135,006,516",
             tracks: [
+                {
+                    type: 'eqtl',
+                    sourceType: 'gtex',
+                    url: '//www.gtexportal.org/igv/assets/eqtl/Skin_Sun_Exposed_Lower_leg.portal.eqtl.bin',
+                    indexed: false,
+                    name: 'Skin Sun Exposed Lower leg'
+                },
                 {
                     type: "gtexGWAS",
                     url: "http://www.gtexportal.org/igv/gtexGWASTest.txt",
@@ -155,7 +159,7 @@
             ]
         };
 
-        browser = igv.createGtexBrowser(div, options);
+        browser = igv.createBrowser(div, options);
 
     });
 

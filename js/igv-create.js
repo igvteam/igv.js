@@ -378,9 +378,8 @@ var igv = (function (igv) {
             config.tracks = [];
         }
         config.tracks.push( { type: "sequence", order: -9999 } );
-
         config.showKaryo = config.showKaryo || false;
-        config.navigation = config.navigation || true;
+        config.showNavigation = config.showNavigation || true;
         config.flanking = config.flanking === undefined ? 1000 : config.flanking;
 
     }
