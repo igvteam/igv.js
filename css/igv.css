@@ -831,9 +831,20 @@ div.ui-dialog fieldset {
 
     height: 40px;
 
+    text-align: center;
+    vertical-align: middle;
+    line-height: 40px;
+
+    font-family: 'PT Sans', sans-serif;
+    font-size: medium;
+    font-weight: 200;
+
     margin-left: 50px;
     margin-right: 50px;
-    background-color: #008000;
+
+    color: #7f7f7f;
+    background-color: #ffffff;
+
 }
 
 .igv-track-container-div {
