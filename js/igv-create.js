@@ -42,7 +42,8 @@ var igv = (function (igv) {
             rootDiv,
             controlDiv,
             bodyObject,
-            palette;
+            palette,
+            element;
 
         if (igv.browser) {
             console.log("Attempt to create 2 browsers.");
@@ -115,7 +116,8 @@ var igv = (function (igv) {
         contentDiv = $('<div id="igvContentDiv" class="igv-content-div">')[0];
         $(rootDiv).append(contentDiv);
 
-        headerDiv = $('<div id="igvHeaderDiv" class="igv-header-div">')[0];
+        //headerDiv = $('<div id="igvHeaderDiv" class="igv-header-div">')[0];
+        headerDiv = $('<div>')[0];
         $(contentDiv).append(headerDiv);
 
         $(contentDiv).append(trackContainerDiv);
@@ -168,10 +170,12 @@ var igv = (function (igv) {
             $(headerDiv).append(igvLogo[0]);
         }
 
-        //browser.ideoPanel = new igv.IdeoPanel(rootDiv);
+        // ideogram
         browser.ideoPanel = new igv.IdeoPanel(headerDiv);
-        $(headerDiv).append(browser.ideoPanel.div);
         browser.ideoPanel.resize();
+
+        //// window size panel
+        //browser.windowSizePanel = new igv.WindowSizePanel(headerDiv);
 
         if (config.trackDefaults) {
 
