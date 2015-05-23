@@ -28,7 +28,7 @@ var igv = (function (igv) {
 
     igv.constants = {
         dragThreshold: 3,
-        defaultColor: "rgb(150,150,150)"
+        defaultColor: "rgb(0,0,150)"
     }
 
 
