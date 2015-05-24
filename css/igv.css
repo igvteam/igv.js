@@ -829,23 +829,23 @@ div.ui-dialog fieldset {
 
 .igv-windowsizepanel-content-div {
 
-    height: 40px;
+    position: relative;
+    top: 5px;
+
+    height: 100%;
+
+    float: left;
 
     text-align: center;
     vertical-align: middle;
-    line-height: 40px;
+    line-height: 100%;
 
-    font-family: 'PT Sans', sans-serif;
-    font-size: medium;
-    font-weight: 200;
+    font-family: 'Open Sans', sans-serif;
+    font-size: small;
+    font-weight: 400;
+    color: #444;
 
-    margin-left: 50px;
-    margin-right: 50px;
-
-    color: #7f7f7f;
-    background-color: #ffffff;
-
-    display: none;
+    /*display: none;*/
 }
 
 .igv-track-container-div {

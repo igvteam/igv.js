@@ -174,8 +174,8 @@ var igv = (function (igv) {
         browser.ideoPanel = new igv.IdeoPanel(headerDiv);
         browser.ideoPanel.resize();
 
-        // window size panel
-        browser.windowSizePanel = new igv.WindowSizePanel(headerDiv);
+        //// window size panel
+        //browser.windowSizePanel = new igv.WindowSizePanel(headerDiv);
 
         if (config.trackDefaults) {
 
@@ -283,10 +283,8 @@ var igv = (function (igv) {
 
         }
 
-
         navigation = $('<div class="igvNavigation">');
         $(controlDiv).append(navigation[0]);
-
 
         // search
         if (config.showNavigation) {
@@ -312,6 +310,8 @@ var igv = (function (igv) {
                 browser.search(browser.searchInput.val());
             });
 
+            // window size panel
+            browser.windowSizePanel = new igv.WindowSizePanel(navigation);
 
             // zoom
             zoom = $('<div class="igvNavigationZoom">');
