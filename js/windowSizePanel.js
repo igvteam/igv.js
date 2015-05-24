@@ -28,24 +28,38 @@
  */
 var igv = (function (igv) {
 
-    igv.WindowSizePanel = function (parentElement) {
+    igv.WindowSizePanel = function (parentObject) {
 
-
-        // ideogram content
         this.contentDiv = $('<div class="igv-windowsizepanel-content-div"></div>');
-        $(parentElement).append(this.contentDiv[0]);
-
+        parentObject.append(this.contentDiv[0]);
 
     };
 
-    igv.WindowSizePanel.prototype.update = function (chr, size) {
+    igv.WindowSizePanel.prototype.update = function (size) {
 
-        var str = chr + " " + igv.numberFormatter( size );
-        this.contentDiv.text( str );
+        var value,
+            floored,
+            denom,
+            units;
+
+        this.contentDiv.text( prettyNumber( size ) );
 
         function prettyNumber(size) {
 
-            return size;
+            if (size > 1e6) {
+                denom = 1e6;
+                units = "Mb";
+            } else if (size > 1e3) {
+                denom = 1e3;
+                units = "Kb";
+            } else {
+                return igv.numberFormatter(size) + "b";
+            }
+
+            value = size/denom;
+            floored = Math.floor(value);
+
+            return floored.toString() + units;
         }
 
     };
