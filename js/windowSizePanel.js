@@ -46,12 +46,17 @@ var igv = (function (igv) {
 
         function prettyNumber(size) {
 
-            if (size > 1e6) {
+            if (size > 1e7) {
                 denom = 1e6;
                 units = "Mb";
-            } else if (size > 1e3) {
+            } else if (size > 1e4) {
+
                 denom = 1e3;
-                units = "Kb";
+                units = "kb";
+
+                value = size/denom;
+                floored = Math.floor(value);
+                return igv.numberFormatter(floored) + units;
             } else {
                 return igv.numberFormatter(size) + "b";
             }
