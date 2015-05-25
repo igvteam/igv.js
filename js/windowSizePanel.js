@@ -48,17 +48,17 @@ var igv = (function (igv) {
 
             if (size > 1e7) {
                 denom = 1e6;
-                units = "Mb";
+                units = " mb";
             } else if (size > 1e4) {
 
                 denom = 1e3;
-                units = "kb";
+                units = " kb";
 
                 value = size/denom;
                 floored = Math.floor(value);
                 return igv.numberFormatter(floored) + units;
             } else {
-                return igv.numberFormatter(size) + "b";
+                return igv.numberFormatter(size) + " bp";
             }
 
             value = size/denom;
