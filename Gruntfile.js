@@ -27,7 +27,7 @@ module.exports = function (grunt) {
                     'vendor/colorpickers/vanderlee-github-io/parsers/jquery.ui.colorpicker-cmyk-parser.js',
                     'vendor/colorpickers/vanderlee-github-io/parsers/jquery.ui.colorpicker-cmyk-percentage-parser.js'
                 ],
-                dest: 'dist/igv-all.js'
+                dest: 'dist/igv.js'
             }
         },
 
@@ -38,8 +38,8 @@ module.exports = function (grunt) {
             },
 
             igv: {
-                src: 'dist/igv-all.js',
-                dest: 'dist/igv-all.min.js'
+                src: 'dist/igv.js',
+                dest: 'dist/igv.min.js'
             }
         },
 
