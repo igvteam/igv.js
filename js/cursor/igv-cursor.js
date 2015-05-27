@@ -170,19 +170,21 @@ var igv = (function (igv) {
 
         //igv.encodeSearch(function (json) {
         //
-        //    ok(json);
+        //    dataSource = new igv.EncodeDataSource( { jSON: json } );
         //
-        //    start();
+        //    dataSource.loadJSON(function () {
+        //        browser.encodeTable.loadWithDataSource(dataSource);
+        //    });
         //
         //});
-
-
 
         dataSource = new igv.EncodeDataSource( { filePath: options.encodeTable || "resources/peaks.hg19.txt" } );
 
         dataSource.loadJSON(function () {
             browser.encodeTable.loadWithDataSource(dataSource);
         });
+
+
 
         // Attach spinner to root div
         browser.div.appendChild(igv.spinner());
