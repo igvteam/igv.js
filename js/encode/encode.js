@@ -50,60 +50,111 @@ var igv = (function (igv) {
 
     };
 
-    /**
-     * @param file
-     * @param continuation
-     */
+    igv.EncodeTable.prototype.loadWithDataSource = function (dataSource) {
 
-    igv.EncodeTable.prototype.loadFile = function (file, continuation) {
+        this.dataSource = dataSource;
 
-        var self = this,
-            dataLoader = new igv.DataLoader(file);
+        var self = this;
 
-        dataLoader.loadBinaryString(function (data) {
+        var dataTablesObject = self.encodeModalTableObject.dataTable({
 
-            var lines = data.splitLines(),
-                dataSet = [ ],
-                path;
+            "data": dataSource.dataTablesData(),
+            "scrollX": true,
+            "scrollY": "400px",
+            "scrollCollapse": true,
+            "paging": false,
+            "columns": self.columnHeadings()
+        });
 
-            // Raw data items arrive in this order:
-            //
-            // path    cell    dataType        antibody        view    replicate       type    lab     hub
-            //
-            // Reorder to match desired DataTables order in encode.dataTableRowLabels. Discard hub item.
-            //
-            self.dataTableRowLabels = lines[0].split("\t");
+        self.encodeModalTableObject.DataTable().columns.adjust();
 
-            self.dataTableRowLabels.pop();
-            path = self.dataTableRowLabels.shift();
-            self.dataTableRowLabels.push(path);
+        self.encodeModalTableObject.find('tbody').on('click', 'tr', function () {
 
-            lines.slice(1, lines.length - 1).forEach(function (line) {
-
-                var tokens,
-                    row = [ ],
-                    record = { };
-
-                tokens = line.split("\t");
-                tokens.pop();
-                path = tokens.shift();
-                tokens.push(path);
-
-                tokens.forEach(function (token, index, tks) {
-
-                    row.push( (undefined === token || "" === token) ? "-" : token );
-
-                });
-
-                dataSet.push(row);
-
-            });
-
-            if (continuation) {
-                continuation(dataSet);
+            if ($(this).hasClass('selected')) {
+                $(this).removeClass('selected');
+            } else {
+                $(this).addClass('selected');
             }
 
         });
+
+        $('#igvEncodeModal').on('shown.bs.modal', function (e) {
+            self.encodeModalTableObject.DataTable().columns.adjust();
+        });
+
+        $('#encodeModalTopCloseButton').on('click', function () {
+            dataTablesObject.$('tr.selected').removeClass('selected');
+        });
+
+        $('#encodeModalBottomCloseButton').on('click', function () {
+            dataTablesObject.$('tr.selected').removeClass('selected');
+        });
+
+        $('#encodeModalGoButton').on('click', function () {
+
+            var tableRow,
+                tableRows,
+                tableCell,
+                tableCells,
+                record = {},
+                configurations = [];
+
+            tableRows = dataTablesObject.$('tr.selected');
+
+            if (0 < tableRows.length) {
+
+                tableRows.removeClass('selected');
+
+                for (var i = 0; i < tableRows.length; i++) {
+
+                    tableRow = tableRows[i];
+                    tableCells = $('td', tableRow);
+
+                    tableCells.each(function () {
+
+                        var key,
+                            val,
+                            index;
+
+                        tableCell = $(this)[0];
+
+                        index = tableCell.cellIndex;
+                        key = dataSource.dataSet.headings[ index ];
+                        val = tableCell.innerHTML;
+
+                        record[ key ] = val;
+
+                    });
+
+                    configurations.push({
+                        type: "bed",
+                        url: record.path,
+                        name: self.encodeTrackLabel(record),
+                        color: self.encodeAntibodyColor(record.antibody)
+                    });
+
+                } // for (tableRows)
+
+                configurations[0].designatedTrack = (0 === igv.browser.trackViews.length) ? true : undefined;
+                igv.browser.loadTrackWithConfigurations(configurations);
+
+
+            }
+
+        });
+
+    };
+
+    igv.EncodeTable.prototype.columnHeadings = function () {
+
+        var widths = [ 5, 5, 10, 10, 5, 10, 10, 45],
+            columnHeadings = [];
+
+        this.dataSource.dataSet.headings.forEach(function(heading, i, headings){
+            columnHeadings.push({ title: heading, width: (widths[ i ].toString() + "%") });
+        });
+
+        return columnHeadings;
 
     };
 
@@ -124,6 +175,86 @@ var igv = (function (igv) {
         key = antibody.toUpperCase();
         return (antibodyColors[ key ]) ? antibodyColors[ key ] : cursor.defaultColor();
 
+    };
+
+    igv.EncodeDataSource = function (config) {
+
+        this.config = config;
+
+    };
+
+    igv.EncodeDataSource.prototype.loadDataSet = function (continuation) {
+
+        this.dataSet = {};
+        if (this.config.filePath) {
+            this.loadFile(this.config.filePath, continuation);
+        }
+
+    };
+
+    igv.EncodeDataSource.prototype.loadFile = function (file, continuation) {
+
+        var self = this,
+            dataLoader = new igv.DataLoader(file);
+
+        dataLoader.loadBinaryString(function (data) {
+
+            var lines = data.splitLines(),
+                item;
+
+            // Raw data items order:
+            // path | cell | dataType | antibody | view | replicate | type | lab | hub
+            //
+            // Reorder to match desired order. Discard hub item.
+            //
+            self.dataSet.headings = lines[0].split("\t");
+            self.dataSet.headings.pop();
+            item = self.dataSet.headings.shift();
+            self.dataSet.headings.push(item);
+
+            self.dataSet.rows = [];
+
+            lines.slice(1, lines.length - 1).forEach(function (line) {
+
+                var tokens,
+                    row;
+
+                tokens = line.split("\t");
+                tokens.pop();
+                item = tokens.shift();
+                tokens.push(item);
+
+                row = {};
+                tokens.forEach(function (t, i, ts) {
+                    var key = self.dataSet.headings[ i ];
+                    row[ key ] = (undefined === t || "" === t) ? "-" : t;
+                });
+
+                self.dataSet.rows.push(row);
+
+            });
+
+            continuation();
+        });
+
+    };
+
+    igv.EncodeDataSource.prototype.dataTablesData = function () {
+
+        var self = this,
+            result = [];
+
+        self.dataSet.rows.forEach(function(row){
+
+            var rr = [];
+            self.dataSet.headings.forEach(function(heading){
+                rr.push( row[ heading ] );
+            });
+
+            result.push( rr );
+        });
+
+        return result;
     };
 
     return igv;

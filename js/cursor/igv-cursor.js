@@ -32,8 +32,7 @@ var igv = (function (igv) {
             trackContainerDiv,
             browser,
             utilityDiv,
-            encodeModalTableObject,
-            encodeFilePath = options.encodeTable || "resources/peaks.hg19.txt";
+            dataSource;
 
         // Append event handlers to Header DIV
         document.getElementById('zoomOut').onclick = function (e) {
@@ -168,120 +167,11 @@ var igv = (function (igv) {
         browser = new igv.Browser(options, trackContainerDiv);
 
         browser.encodeTable = new igv.EncodeTable($('#encodeModalBody'));
-        encodeModalTableObject = browser.encodeTable.encodeModalTableObject;
+        dataSource = new igv.EncodeDataSource( { filePath: options.encodeTable || "resources/peaks.hg19.txt" } );
 
-        browser.encodeTable.loadFile(encodeFilePath, function (dataSet) {
-
-            var dataTablesObject = encodeModalTableObject.dataTable({
-
-                "data": dataSet,
-                "scrollX": true,
-                "scrollY": "400px",
-                "scrollCollapse": true,
-                "paging": false,
-
-                "columns": [
-
-                    {"title": "cell", "width": "5%"},
-                    {"title": "dataType", "width": "5%"},
-
-                    {"title": "antibody", "width": "10%"},
-                    {"title": "view", "width": "10%"},
-
-                    {"title": "replicate", "width": "5%"},
-                    {"title": "type", "width": "10%"},
-
-                    {"title": "lab", "width": "10%"},
-                    {"title": "path", "width": "45%"}
-                ]
-
-            });
-
-            encodeModalTableObject.DataTable().columns.adjust();
-
-            encodeModalTableObject.find('tbody').on('click', 'tr', function () {
-
-                if ($(this).hasClass('selected')) {
-
-                    $(this).removeClass('selected');
-                }
-                else {
-
-                    // Commenting this out enables multi-selection
-//                    myDataTable.$('tr.selected').removeClass('selected');
-                    $(this).addClass('selected');
-                }
-
-            });
-
-            $('#igvEncodeModal').on('shown.bs.modal', function (e) {
-                encodeModalTableObject.DataTable().columns.adjust();
-            });
-
-            $('#encodeModalTopCloseButton').on('click', function () {
-                dataTablesObject.$('tr.selected').removeClass('selected');
-            });
-
-            $('#encodeModalBottomCloseButton').on('click', function () {
-                dataTablesObject.$('tr.selected').removeClass('selected');
-            });
-
-            $('#encodeModalGoButton').on('click', function () {
-
-                var tableRow,
-                    tableRows,
-                    tableCell,
-                    tableCells,
-                    record = {},
-                    configurations = [];
-
-                tableRows = dataTablesObject.$('tr.selected');
-
-                if (0 < tableRows.length) {
-
-                    tableRows.removeClass('selected');
-
-                    for (var i = 0; i < tableRows.length; i++) {
-
-                        tableRow = tableRows[i];
-                        tableCells = $('td', tableRow);
-
-                        tableCells.each(function () {
-
-                            var key,
-                                val,
-                                index;
-
-                            tableCell = $(this)[0];
-
-                            index = tableCell.cellIndex;
-                            key = browser.encodeTable.dataTableRowLabels[ index ];
-                            val = tableCell.innerHTML;
-
-                            record[key] = val;
-
-                        });
-
-                        configurations.push({
-                            type: "bed",
-                            url: record.path,
-                            name: browser.encodeTable.encodeTrackLabel(record),
-                            color: browser.encodeTable.encodeAntibodyColor(record.antibody)
-                        });
-
-                    } // for (tableRows)
-
-                    configurations[0].designatedTrack = (0 === browser.trackViews.length) ? true : undefined;
-                    browser.loadTrackWithConfigurations(configurations);
-
-
-                }
-
-            });
-
-
+        dataSource.loadDataSet(function() {
+            browser.encodeTable.loadWithDataSource(dataSource);
         });
-
 
         // Attach spinner to root div
         browser.div.appendChild(igv.spinner());
