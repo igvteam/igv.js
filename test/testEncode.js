@@ -27,9 +27,9 @@ function runEncodeTests() {
 
     asyncTest("Search ", function () {
 
-            igv.encodeSearch(function (rows) {
+            igv.encodeSearch(function (json) {
 
-                ok(rows);
+                ok(json);
 
                 start();
 
