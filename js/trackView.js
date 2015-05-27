@@ -822,6 +822,12 @@ var igv = (function (igv) {
 
         });
 
+        $(this.outerScrollDiv).mousewheel(function (event) {
+            var dist = Math.round(event.deltaY * event.deltaFactor),
+                newY = $(innerScrollDiv).position().top + dist;
+            moveScrollerTo(newY);
+        });
+
         function mouseMove(event) {
             moveScrollerTo(event.pageY - offY);
             event.stopPropagation();
@@ -839,7 +845,6 @@ var igv = (function (igv) {
                 contentTop = -Math.round(newTop * ($(contentDiv).height() / $(viewportDiv).height()));
             $(innerScrollDiv).css("top", newTop + "px");
             $(contentDiv).css("top", contentTop + "px");
-
         }
     }
 
