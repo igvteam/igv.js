@@ -52,19 +52,18 @@ var igv = (function (igv) {
 
     igv.EncodeTable.prototype.loadWithDataSource = function (dataSource) {
 
-        this.dataSource = dataSource;
-
-        var self = this;
-
-        var dataTablesObject = self.encodeModalTableObject.dataTable({
+        var self = this,
+            dataTablesObject = self.encodeModalTableObject.dataTable({
 
             "data": dataSource.dataTablesData(),
             "scrollX": true,
             "scrollY": "400px",
             "scrollCollapse": true,
             "paging": false,
-            "columns": self.columnHeadings()
+            "columns": dataSource.columnHeadings()
         });
+
+        this.dataSource = dataSource;
 
         self.encodeModalTableObject.DataTable().columns.adjust();
 
@@ -107,7 +106,7 @@ var igv = (function (igv) {
 
                 for (var i = 0; i < tableRows.length; i++) {
 
-                    tableRow = tableRows[i];
+                    tableRow = tableRows[ i ];
                     tableCells = $('td', tableRow);
 
                     tableCells.each(function () {
@@ -116,7 +115,7 @@ var igv = (function (igv) {
                             val,
                             index;
 
-                        tableCell = $(this)[0];
+                        tableCell = $(this)[ 0 ];
 
                         index = tableCell.cellIndex;
                         key = dataSource.dataSet.headings[ index ];
@@ -142,19 +141,6 @@ var igv = (function (igv) {
             }
 
         });
-
-    };
-
-    igv.EncodeTable.prototype.columnHeadings = function () {
-
-        var widths = [ 5, 5, 10, 10, 5, 10, 10, 45],
-            columnHeadings = [];
-
-        this.dataSource.dataSet.headings.forEach(function(heading, i, headings){
-            columnHeadings.push({ title: heading, width: (widths[ i ].toString() + "%") });
-        });
-
-        return columnHeadings;
 
     };
 
@@ -255,6 +241,19 @@ var igv = (function (igv) {
         });
 
         return result;
+    };
+
+    igv.EncodeDataSource.prototype.columnHeadings = function () {
+
+        var columnWidths = [ 5, 5, 10, 10, 5, 10, 10, 45],
+            columnHeadings = [];
+
+        this.dataSet.headings.forEach(function(heading, i, headings){
+            columnHeadings.push({ title: heading, width: (columnWidths[ i ].toString() + "%") });
+        });
+
+        return columnHeadings;
+
     };
 
     return igv;
