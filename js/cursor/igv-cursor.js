@@ -169,7 +169,7 @@ var igv = (function (igv) {
         encodeModalBodyObject.append(encodeModalTableObject[ 0 ]);
 
         // Load ENCODE DataTables data and build markup for modal dialog.
-        encode.createEncodeDataTablesDataSet(encodeFilePath, function (dataSet) {
+        igv.createEncodeDataTablesDataSet(encodeFilePath, function (dataSet) {
 
             var dataTablesObject = encodeModalTableObject.dataTable({
 
@@ -265,8 +265,8 @@ var igv = (function (igv) {
                         configurations.push({
                             type: "bed",
                             url: record.path,
-                            name: encode.encodeTrackLabel(record),
-                            color: encode.encodeAntibodyColor(record.antibody)
+                            name: igv.encodeTrackLabel(record),
+                            color: igv.encodeAntibodyColor(record.antibody)
                         });
 
                     } // for (tableRows)

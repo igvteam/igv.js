@@ -29,7 +29,7 @@
  * Created by jrobinso on 3/19/14.
  */
 
-var encode = (function (encode) {
+var igv = (function (igv) {
 
     var antibodyColors = {H3K27AC: "rgb(200, 0, 0)",
         H3K27ME3: "rgb(130, 0, 4)",
@@ -62,10 +62,10 @@ var encode = (function (encode) {
             //
             // Reorder to match desired DataTables order in encode.dataTableRowLabels. Discard hub item.
             //
-            encode.dataTableRowLabels = lines[0].split("\t");
-            encode.dataTableRowLabels.pop();
-            path = encode.dataTableRowLabels.shift();
-            encode.dataTableRowLabels.push(path);
+            igv.dataTableRowLabels = lines[0].split("\t");
+            igv.dataTableRowLabels.pop();
+            path = igv.dataTableRowLabels.shift();
+            igv.dataTableRowLabels.push(path);
 
             lines.slice(1, lines.length - 1).forEach(function (line) {
 
@@ -93,7 +93,7 @@ var encode = (function (encode) {
 
     };
 
-    encode.createEncodeDataTablesDataSet = function (file, continuation) {
+    igv.createEncodeDataTablesDataSet = function (file, continuation) {
 
         parseEncodeTableFile(file, function (dataSet) {
 
@@ -107,13 +107,13 @@ var encode = (function (encode) {
 
     };
 
-    encode.encodeTrackLabel = function (record) {
+    igv.encodeTrackLabel = function (record) {
 
         return (record.antibody) ? record.antibody + " " + record.cell + " " + record.replicate : record.cell + record.dataType + " " + record.view + " " + record.replicate;
 
     };
 
-    encode.encodeAntibodyColor = function (antibody) {
+    igv.encodeAntibodyColor = function (antibody) {
 
         var key;
 
@@ -126,6 +126,6 @@ var encode = (function (encode) {
 
     };
 
-    return encode;
+    return igv;
 
-})(encode || {});
+})(igv || {});
