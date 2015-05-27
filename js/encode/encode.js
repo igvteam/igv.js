@@ -31,24 +31,34 @@
 
 var igv = (function (igv) {
 
-    var antibodyColors = {H3K27AC: "rgb(200, 0, 0)",
+    var antibodyColors =
+    {
+        H3K27AC: "rgb(200, 0, 0)",
         H3K27ME3: "rgb(130, 0, 4)",
         H3K36ME3: "rgb(0, 0, 150)",
         H3K4ME1: "rgb(0, 150, 0)",
         H3K4ME2: "rgb(0, 150, 0)",
         H3K4ME3: "rgb(0, 150, 0)",
         H3K9AC: "rgb(100, 0, 0)",
-        H3K9ME1: "rgb(100, 0, 0)"};
+        H3K9ME1: "rgb(100, 0, 0)"
+    };
+
+    igv.EncodeTable = function (parentModalBodyObject) {
+
+        this.encodeModalTableObject = $('<table id="encodeModalTable" cellpadding="0" cellspacing="0" border="0" class="display"></table>');
+        parentModalBodyObject.append(this.encodeModalTableObject[ 0 ]);
+
+    };
 
     /**
-     *       path    cell    dataType        antibody        view    replicate       type    lab     hub
      * @param file
      * @param continuation
      */
 
-    parseEncodeTableFile = function (file, continuation) {
+    igv.EncodeTable.prototype.loadFile = function (file, continuation) {
 
-        var dataLoader = new igv.DataLoader(file);
+        var self = this,
+            dataLoader = new igv.DataLoader(file);
 
         dataLoader.loadBinaryString(function (data) {
 
@@ -62,10 +72,11 @@ var igv = (function (igv) {
             //
             // Reorder to match desired DataTables order in encode.dataTableRowLabels. Discard hub item.
             //
-            igv.dataTableRowLabels = lines[0].split("\t");
-            igv.dataTableRowLabels.pop();
-            path = igv.dataTableRowLabels.shift();
-            igv.dataTableRowLabels.push(path);
+            self.dataTableRowLabels = lines[0].split("\t");
+
+            self.dataTableRowLabels.pop();
+            path = self.dataTableRowLabels.shift();
+            self.dataTableRowLabels.push(path);
 
             lines.slice(1, lines.length - 1).forEach(function (line) {
 
@@ -88,32 +99,21 @@ var igv = (function (igv) {
 
             });
 
-            continuation(dataSet);
-        });
-
-    };
-
-    igv.createEncodeDataTablesDataSet = function (file, continuation) {
-
-        parseEncodeTableFile(file, function (dataSet) {
-
             if (continuation) {
-//                continuation(dataSet);
                 continuation(dataSet);
             }
 
-
         });
 
     };
 
-    igv.encodeTrackLabel = function (record) {
+    igv.EncodeTable.prototype.encodeTrackLabel = function (record) {
 
         return (record.antibody) ? record.antibody + " " + record.cell + " " + record.replicate : record.cell + record.dataType + " " + record.view + " " + record.replicate;
 
     };
 
-    igv.encodeAntibodyColor = function (antibody) {
+    igv.EncodeTable.prototype.encodeAntibodyColor = function (antibody) {
 
         var key;
 
