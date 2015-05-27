@@ -32,7 +32,6 @@ var igv = (function (igv) {
             trackContainerDiv,
             browser,
             utilityDiv,
-            encodeModalBodyObject = $('#encodeModalBody'),
             encodeModalTableObject,
             encodeFilePath = options.encodeTable || "resources/peaks.hg19.txt";
 
@@ -164,12 +163,14 @@ var igv = (function (igv) {
             igv.browser.loadTrackWithConfigurations([config]);
         }
 
-        // Append resultant ENCODE DataTables markup
-        encodeModalTableObject = $('<table id="encodeModalTable" cellpadding="0" cellspacing="0" border="0" class="display"></table>');
-        encodeModalBodyObject.append(encodeModalTableObject[ 0 ]);
+        // Construct DOM hierarchy
+        trackContainerDiv = $('<div id="igvTrackContainerDiv" class="igv-track-container-div">')[0];
+        browser = new igv.Browser(options, trackContainerDiv);
 
-        // Load ENCODE DataTables data and build markup for modal dialog.
-        igv.createEncodeDataTablesDataSet(encodeFilePath, function (dataSet) {
+        browser.encodeTable = new igv.EncodeTable($('#encodeModalBody'));
+        encodeModalTableObject = browser.encodeTable.encodeModalTableObject;
+
+        browser.encodeTable.loadFile(encodeFilePath, function (dataSet) {
 
             var dataTablesObject = encodeModalTableObject.dataTable({
 
@@ -181,17 +182,17 @@ var igv = (function (igv) {
 
                 "columns": [
 
-                    { "title": "cell", "width": "5%" },
-                    { "title": "dataType", "width": "5%" },
+                    {"title": "cell", "width": "5%"},
+                    {"title": "dataType", "width": "5%"},
 
-                    { "title": "antibody", "width": "10%"  },
-                    { "title": "view", "width": "10%"  },
+                    {"title": "antibody", "width": "10%"},
+                    {"title": "view", "width": "10%"},
 
-                    { "title": "replicate", "width": "5%"  },
-                    { "title": "type", "width": "10%"  },
+                    {"title": "replicate", "width": "5%"},
+                    {"title": "type", "width": "10%"},
 
-                    { "title": "lab", "width": "10%"  },
-                    { "title": "path", "width": "45%"  }
+                    {"title": "lab", "width": "10%"},
+                    {"title": "path", "width": "45%"}
                 ]
 
             });
@@ -242,7 +243,7 @@ var igv = (function (igv) {
 
                     for (var i = 0; i < tableRows.length; i++) {
 
-                        tableRow = tableRows[ i ];
+                        tableRow = tableRows[i];
                         tableCells = $('td', tableRow);
 
                         tableCells.each(function () {
@@ -254,25 +255,24 @@ var igv = (function (igv) {
                             tableCell = $(this)[0];
 
                             index = tableCell.cellIndex;
-                            key = encode.dataTableRowLabels[ index ];
-                            //val = tableCell.innerText;
+                            key = browser.encodeTable.dataTableRowLabels[ index ];
                             val = tableCell.innerHTML;
 
-                            record[ key ] = val;
+                            record[key] = val;
 
                         });
 
                         configurations.push({
                             type: "bed",
                             url: record.path,
-                            name: igv.encodeTrackLabel(record),
-                            color: igv.encodeAntibodyColor(record.antibody)
+                            name: browser.encodeTable.encodeTrackLabel(record),
+                            color: browser.encodeTable.encodeAntibodyColor(record.antibody)
                         });
 
                     } // for (tableRows)
 
-                    configurations[ 0 ].designatedTrack = (0 === igv.browser.trackViews.length) ? true : undefined;
-                    igv.browser.loadTrackWithConfigurations(configurations);
+                    configurations[0].designatedTrack = (0 === browser.trackViews.length) ? true : undefined;
+                    browser.loadTrackWithConfigurations(configurations);
 
 
                 }
@@ -282,9 +282,6 @@ var igv = (function (igv) {
 
         });
 
-        // Construct DOM hierarchy
-        trackContainerDiv = $('<div id="igvTrackContainerDiv" class="igv-track-container-div">')[0];
-        browser = new igv.Browser(options, trackContainerDiv);
 
         // Attach spinner to root div
         browser.div.appendChild(igv.spinner());
