@@ -32,8 +32,9 @@ var igv = (function (igv) {
             trackContainerDiv,
             browser,
             utilityDiv,
-            colorPickerPalette,
-            encodeTable = options.encodeTable || "resources/peaks.hg19.txt";
+            encodeModalBodyObject = $('#encodeModalBody'),
+            encodeModalTableObject,
+            encodeFilePath = options.encodeTable || "resources/peaks.hg19.txt";
 
         // Append event handlers to Header DIV
         document.getElementById('zoomOut').onclick = function (e) {
@@ -164,16 +165,13 @@ var igv = (function (igv) {
         }
 
         // Append resultant ENCODE DataTables markup
-        $('#encodeModalBody').html('<table id="encodeModalTable" cellpadding="0" cellspacing="0" border="0" class="display"></table>');
+        encodeModalTableObject = $('<table id="encodeModalTable" cellpadding="0" cellspacing="0" border="0" class="display"></table>');
+        encodeModalBodyObject.append(encodeModalTableObject[ 0 ]);
 
         // Load ENCODE DataTables data and build markup for modal dialog.
-        encode.createEncodeDataTablesDataSet(encodeTable, function (dataSet) {
+        encode.createEncodeDataTablesDataSet(encodeFilePath, function (dataSet) {
 
-            var encodeModalTable = $('#encodeModalTable'),
-                dataTableObject,
-                dataTableAPIInstance;
-
-            dataTableObject = encodeModalTable.dataTable({
+            var dataTablesObject = encodeModalTableObject.dataTable({
 
                 "data": dataSet,
                 "scrollX": true,
@@ -198,10 +196,9 @@ var igv = (function (igv) {
 
             });
 
-            dataTableAPIInstance = encodeModalTable.DataTable();
-            dataTableAPIInstance.columns.adjust();
+            encodeModalTableObject.DataTable().columns.adjust();
 
-            encodeModalTable.find('tbody').on('click', 'tr', function () {
+            encodeModalTableObject.find('tbody').on('click', 'tr', function () {
 
                 if ($(this).hasClass('selected')) {
 
@@ -217,23 +214,15 @@ var igv = (function (igv) {
             });
 
             $('#igvEncodeModal').on('shown.bs.modal', function (e) {
-
-                var encodeModalTable = $('#encodeModalTable'),
-                    dataTableAPIInstance;
-
-                //console.log("ENCODE Modal - Shown");
-
-                dataTableAPIInstance = encodeModalTable.DataTable();
-                dataTableAPIInstance.columns.adjust();
+                encodeModalTableObject.DataTable().columns.adjust();
             });
 
             $('#encodeModalTopCloseButton').on('click', function () {
-                dataTableObject.$('tr.selected').removeClass('selected');
-
+                dataTablesObject.$('tr.selected').removeClass('selected');
             });
 
             $('#encodeModalBottomCloseButton').on('click', function () {
-                dataTableObject.$('tr.selected').removeClass('selected');
+                dataTablesObject.$('tr.selected').removeClass('selected');
             });
 
             $('#encodeModalGoButton').on('click', function () {
@@ -245,7 +234,7 @@ var igv = (function (igv) {
                     record = {},
                     configurations = [];
 
-                tableRows = dataTableObject.$('tr.selected');
+                tableRows = dataTablesObject.$('tr.selected');
 
                 if (0 < tableRows.length) {
 
