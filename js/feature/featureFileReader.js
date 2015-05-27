@@ -271,7 +271,7 @@ var igv = (function (igv) {
 
                             if (index.tabix) {
 
-                                inflated = igv.arrayBufferToString(igv.unbgzf(data));
+                                inflated = igvxhr.arrayBufferToString(igv.unbgzf(data));
                                 // need to decompress data
                             }
                             else {

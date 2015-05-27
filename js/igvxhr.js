@@ -80,7 +80,8 @@ var igvxhr = (function (igvxhr) {
 
         var success = options.success;
 
-        options.contentType = "application/json";
+        //options.contentType = "application/json";  Setting content type causes errors with some servers => not allowed
+
         options.success = function (result) {
             if (result) {
                 success(JSON.parse(result));
@@ -121,7 +122,7 @@ var igvxhr = (function (igvxhr) {
         else {
             options.responseType = "arraybuffer";
             options.success = function (data) {
-                var result = igv.arrayBufferToString(data, compression);
+                var result = igvxhr.arrayBufferToString(data, compression);
                 success(result);
             };
             igvxhr.load(url, options);
@@ -352,7 +353,7 @@ var igvxhr = (function (igvxhr) {
                 compression = NONE;
             }
 
-            result = igv.arrayBufferToString(fileReader.result, compression);
+            result = igvxhr.arrayBufferToString(fileReader.result, compression);
 
             success(result, localfile);
 
@@ -375,7 +376,7 @@ var igvxhr = (function (igvxhr) {
 
     }
 
-    igv.arrayBufferToString = function (arraybuffer, compression) {
+    igvxhr.arrayBufferToString = function (arraybuffer, compression) {
 
         var plain, inflate;
 
