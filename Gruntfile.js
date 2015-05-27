@@ -19,6 +19,7 @@ module.exports = function (grunt) {
                     'js/**/*.js',
                     'vendor/inflate.js',
                     'vendor/zlib_and_gzip.min.js',
+                    'vendor/jquery.mousewheel.js',
                     'vendor/colorpickers/vanderlee-github-io/jquery.colorpicker.js',
                     'vendor/colorpickers/vanderlee-github-io/i18n/jquery.ui.colorpicker-nl.js',
                     'vendor/colorpickers/vanderlee-github-io/swatches/jquery.ui.colorpicker-pantone.js',
