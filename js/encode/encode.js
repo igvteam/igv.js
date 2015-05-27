@@ -63,8 +63,6 @@ var igv = (function (igv) {
             "columns": dataSource.columnHeadings()
         });
 
-        this.dataSource = dataSource;
-
         self.encodeModalTableObject.DataTable().columns.adjust();
 
         self.encodeModalTableObject.find('tbody').on('click', 'tr', function () {
@@ -118,7 +116,7 @@ var igv = (function (igv) {
                         tableCell = $(this)[ 0 ];
 
                         index = tableCell.cellIndex;
-                        key = dataSource.dataSet.headings[ index ];
+                        key = dataSource.jSON.columns[ index ];
                         val = tableCell.innerHTML;
 
                         record[ key ] = val;
@@ -164,16 +162,17 @@ var igv = (function (igv) {
     };
 
     igv.EncodeDataSource = function (config) {
-
         this.config = config;
-
     };
 
-    igv.EncodeDataSource.prototype.loadDataSet = function (continuation) {
+    igv.EncodeDataSource.prototype.loadJSON = function (continuation) {
 
-        this.dataSet = {};
         if (this.config.filePath) {
+            this.jSON = {};
             this.loadFile(this.config.filePath, continuation);
+        } else if (this.config.jSON) {
+            this.jSON = this.config.jSON;
+            continuation();
         }
 
     };
@@ -193,12 +192,12 @@ var igv = (function (igv) {
             //
             // Reorder to match desired order. Discard hub item.
             //
-            self.dataSet.headings = lines[0].split("\t");
-            self.dataSet.headings.pop();
-            item = self.dataSet.headings.shift();
-            self.dataSet.headings.push(item);
+            self.jSON.columns = lines[0].split("\t");
+            self.jSON.columns.pop();
+            item = self.jSON.columns.shift();
+            self.jSON.columns.push(item);
 
-            self.dataSet.rows = [];
+            self.jSON.rows = [];
 
             lines.slice(1, lines.length - 1).forEach(function (line) {
 
@@ -212,11 +211,11 @@ var igv = (function (igv) {
 
                 row = {};
                 tokens.forEach(function (t, i, ts) {
-                    var key = self.dataSet.headings[ i ];
+                    var key = self.jSON.columns[ i ];
                     row[ key ] = (undefined === t || "" === t) ? "-" : t;
                 });
 
-                self.dataSet.rows.push(row);
+                self.jSON.rows.push(row);
 
             });
 
@@ -230,10 +229,10 @@ var igv = (function (igv) {
         var self = this,
             result = [];
 
-        self.dataSet.rows.forEach(function(row){
+        self.jSON.rows.forEach(function(row){
 
             var rr = [];
-            self.dataSet.headings.forEach(function(heading){
+            self.jSON.columns.forEach(function(heading){
                 rr.push( row[ heading ] );
             });
 
@@ -248,7 +247,7 @@ var igv = (function (igv) {
         var columnWidths = [ 5, 5, 10, 10, 5, 10, 10, 45],
             columnHeadings = [];
 
-        this.dataSet.headings.forEach(function(heading, i, headings){
+        this.jSON.columns.forEach(function(heading, i, headings){
             columnHeadings.push({ title: heading, width: (columnWidths[ i ].toString() + "%") });
         });
 

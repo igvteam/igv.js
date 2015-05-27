@@ -167,9 +167,20 @@ var igv = (function (igv) {
         browser = new igv.Browser(options, trackContainerDiv);
 
         browser.encodeTable = new igv.EncodeTable($('#encodeModalBody'));
+
+        //igv.encodeSearch(function (json) {
+        //
+        //    ok(json);
+        //
+        //    start();
+        //
+        //});
+
+
+
         dataSource = new igv.EncodeDataSource( { filePath: options.encodeTable || "resources/peaks.hg19.txt" } );
 
-        dataSource.loadDataSet(function() {
+        dataSource.loadJSON(function () {
             browser.encodeTable.loadWithDataSource(dataSource);
         });
 
