@@ -10,7 +10,9 @@
     <script type="text/javascript" src="//ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
 
     <script type="text/javascript" src="testEncode.js"></script>
+    <script type="text/javascript" src="../js/igvxhr.js"></script>
     <script type="text/javascript" src="../js/encode/encode.js"></script>
+    <script type="text/javascript" src="../js/encode/encodeSearch.js"></script>
     <script type="text/javascript" src="../js/dataloader.js"></script>
     <script type="text/javascript" src="../js/igv-exts.js"></script>
 </head>
@@ -21,12 +23,7 @@
 <div id="tableContainer" class="table"></div>
 <script type="text/javascript">
     document.addEventListener('DOMContentLoaded', function () {
-        //runEncodeTests();
-
-        igv.createEncodeTable("../assets/hg19/gm12878.hg19.txt", function (table) {
-            var div = document.getElementById("tableContainer");
-            div.appendChild(table);
-        })
+        runEncodeTests();
 
     });
 </script>

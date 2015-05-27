@@ -4,20 +4,37 @@
 
 function runEncodeTests() {
 
+    igv = igv || {};
+
+    igv.browser = {};
+
     module("Encode");
+    //
+    //asyncTest("Parse records ", function () {
+    //
+    //    var url = "../assets/hg19/gm12878.hg19.txt";
+    //
+    //    igv.parseEncodeTableFile(url, function (records) {
+    //
+    //        ok(records);
+    //
+    //
+    //        start();
+    //
+    //    });
+    //
+    //});
 
-    asyncTest("Parse records ", function () {
+    asyncTest("Search ", function () {
 
-        var url = "../assets/hg19/gm12878.hg19.txt";
+            igv.encodeSearch(function (rows) {
 
-        igv.parseEncodeTableFile(url, function (records) {
+                ok(rows);
 
-            ok(records);
+                start();
 
+            });
 
-            start();
-
-        });
-
-    });
+        }
+    )
 }
