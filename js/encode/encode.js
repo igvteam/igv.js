@@ -167,17 +167,33 @@ var igv = (function (igv) {
 
     igv.EncodeDataSource.prototype.loadJSON = function (continuation) {
 
+        this.jSON = {};
         if (this.config.filePath) {
-            this.jSON = {};
-            this.loadFile(this.config.filePath, continuation);
+            this.ingestFile(this.config.filePath, continuation);
         } else if (this.config.jSON) {
-            this.jSON = this.config.jSON;
-            continuation();
+            this.ingestJSON(this.config.jSON, continuation);
         }
 
     };
+    igv.EncodeDataSource.prototype.ingestJSON = function (json, continuation) {
 
-    igv.EncodeDataSource.prototype.loadFile = function (file, continuation) {
+        var self = this;
+
+        self.jSON = json;
+        json.rows.forEach(function(row, i){
+
+            json.columns.forEach(function(column, j, columns){
+                var item = row[ column ];
+                self.jSON.rows[ i ][ column ] = (undefined === item || "" === item) ? "-" : item;
+            });
+
+        });
+
+        continuation();
+
+    };
+
+    igv.EncodeDataSource.prototype.ingestFile = function (file, continuation) {
 
         var self = this,
             dataLoader = new igv.DataLoader(file);
