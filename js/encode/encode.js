@@ -60,6 +60,7 @@ var igv = (function (igv) {
             "scrollY": "400px",
             "scrollCollapse": true,
             "paging": false,
+            "autoWidth": true,
             "columns": dataSource.columnHeadings()
         });
 
@@ -270,7 +271,7 @@ var igv = (function (igv) {
             columnHeadings = [];
 
         this.jSON.columns.forEach(function(heading, i){
-            columnHeadings.push({ title: heading, width: (columnWidths[ i ].toString() + "%") });
+            columnHeadings.push({ "title": heading /*, width: (columnWidths[ i ].toString() + "%")*/ });
         });
 
         return columnHeadings;
