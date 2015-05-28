@@ -93,6 +93,7 @@ var igv = (function (igv) {
                 tableRowsSelected,
                 tableCell,
                 tableCells,
+                dataSourceJSONRow,
                 record = {},
                 configurations = [];
 
@@ -104,30 +105,13 @@ var igv = (function (igv) {
 
                 for (var i = 0; i < tableRowsSelected.length; i++) {
 
-                    tableRow = tableRowsSelected[ i ];
-                    tableCells = $('td', tableRow);
-
-                    tableCells.each(function () {
-
-                        var key,
-                            val,
-                            index;
-
-                        tableCell = $(this)[ 0 ];
-
-                        index = tableCell.cellIndex;
-                        key = dataSource.jSON.columns[ index ];
-                        val = tableCell.innerHTML;
-
-                        record[ key ] = val;
-
-                    });
+                    dataSourceJSONRow = dataSource.jSON.rows[ i ];
 
                     configurations.push({
-                        type: "bed",
-                        url: record.path,
-                        name: self.encodeTrackLabel(record),
-                        color: self.encodeAntibodyColor(record.antibody)
+                        type: dataSourceJSONRow[ "Format" ],
+                        url: dataSourceJSONRow[ "url" ],
+                        name: dataSourceJSONRow[ "ExperimentID" ],
+                        color: /*self.encodeAntibodyColor(record.antibody)*/ "grey"
                     });
 
                 } // for (tableRows)
@@ -181,6 +165,7 @@ var igv = (function (igv) {
         var self = this;
 
         self.jSON = json;
+
         json.rows.forEach(function(row, i){
 
             Object.keys(row).forEach(function(key){
@@ -243,14 +228,33 @@ var igv = (function (igv) {
 
     igv.EncodeDataSource.prototype.dataTablesData = function () {
 
-        var self = this,
+        var columnKeysHash,
+            resultKeys = this.jSON.columns.slice(),
             result = [];
 
-        self.jSON.rows.forEach(function(row){
+        // Match result array order to column order.
+
+        // Add column names
+        columnKeysHash = {};
+        this.jSON.columns.forEach(function(column){
+            columnKeysHash[ column ] = true;
+        });
+
+        // Add row keys not present in column names
+        Object.keys( this.jSON.rows[ 0 ] ).forEach(function(key){
+
+            if (true === columnKeysHash[ key ]) {
+               // do nothing
+            } else {
+                resultKeys.push(key);
+            }
+        });
+
+        // result keys now match order of column names
+        this.jSON.rows.forEach(function(row){
 
             var rr = [];
-
-            Object.keys(row).forEach(function(key){
+            resultKeys.forEach(function(key){
                 rr.push( row[ key ] );
             });
 
@@ -262,10 +266,10 @@ var igv = (function (igv) {
 
     igv.EncodeDataSource.prototype.columnHeadings = function () {
 
-        var columnWidths = [ 5, 5, 10, 10, 5, 10, 10, 45],
+        var columnWidths = [ 20, 16, 16, 16, 16, 16],
             columnHeadings = [];
 
-        this.jSON.columns.forEach(function(heading, i, headings){
+        this.jSON.columns.forEach(function(heading, i){
             columnHeadings.push({ title: heading, width: (columnWidths[ i ].toString() + "%") });
         });
 
