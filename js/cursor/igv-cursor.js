@@ -168,21 +168,21 @@ var igv = (function (igv) {
 
         browser.encodeTable = new igv.EncodeTable($('#encodeModalBody'));
 
-        //igv.encodeSearch(function (json) {
-        //
-        //    dataSource = new igv.EncodeDataSource( { jSON: json } );
-        //
-        //    dataSource.loadJSON(function () {
-        //        browser.encodeTable.loadWithDataSource(dataSource);
-        //    });
-        //
-        //});
+        igv.encodeSearch(function (json) {
 
-        dataSource = new igv.EncodeDataSource( { filePath: options.encodeTable || "resources/peaks.hg19.txt" } );
+            dataSource = new igv.EncodeDataSource( { jSON: json } );
 
-        dataSource.loadJSON(function () {
-            browser.encodeTable.loadWithDataSource(dataSource);
+            dataSource.loadJSON(function () {
+                browser.encodeTable.loadWithDataSource(dataSource);
+            });
+
         });
+
+        //dataSource = new igv.EncodeDataSource( { filePath: options.encodeTable || "resources/peaks.hg19.txt" } );
+        //
+        //dataSource.loadJSON(function () {
+        //    browser.encodeTable.loadWithDataSource(dataSource);
+        //});
 
 
 

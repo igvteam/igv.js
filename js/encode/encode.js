@@ -90,21 +90,21 @@ var igv = (function (igv) {
         $('#encodeModalGoButton').on('click', function () {
 
             var tableRow,
-                tableRows,
+                tableRowsSelected,
                 tableCell,
                 tableCells,
                 record = {},
                 configurations = [];
 
-            tableRows = dataTablesObject.$('tr.selected');
+            tableRowsSelected = dataTablesObject.$('tr.selected');
 
-            if (0 < tableRows.length) {
+            if (0 < tableRowsSelected.length) {
 
-                tableRows.removeClass('selected');
+                tableRowsSelected.removeClass('selected');
 
-                for (var i = 0; i < tableRows.length; i++) {
+                for (var i = 0; i < tableRowsSelected.length; i++) {
 
-                    tableRow = tableRows[ i ];
+                    tableRow = tableRowsSelected[ i ];
                     tableCells = $('td', tableRow);
 
                     tableCells.each(function () {
@@ -175,6 +175,7 @@ var igv = (function (igv) {
         }
 
     };
+
     igv.EncodeDataSource.prototype.ingestJSON = function (json, continuation) {
 
         var self = this;
@@ -182,9 +183,9 @@ var igv = (function (igv) {
         self.jSON = json;
         json.rows.forEach(function(row, i){
 
-            json.columns.forEach(function(column, j, columns){
-                var item = row[ column ];
-                self.jSON.rows[ i ][ column ] = (undefined === item || "" === item) ? "-" : item;
+            Object.keys(row).forEach(function(key){
+                var item = row[ key ];
+                self.jSON.rows[ i ][ key ] = (undefined === item || "" === item) ? "-" : item;
             });
 
         });
@@ -248,8 +249,9 @@ var igv = (function (igv) {
         self.jSON.rows.forEach(function(row){
 
             var rr = [];
-            self.jSON.columns.forEach(function(heading){
-                rr.push( row[ heading ] );
+
+            Object.keys(row).forEach(function(key){
+                rr.push( row[ key ] );
             });
 
             result.push( rr );
