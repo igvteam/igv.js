@@ -184,6 +184,9 @@ var igv = (function (igv) {
             //dataSource = new igv.EncodeDataSource( { filePath: options.encodeTable || "resources/peaks.hg19.txt" } );
             //
             //dataSource.loadJSON(function () {
+            //
+            //    igv.stopSpinnerAtParentElement($('#encodeModalTable')[ 0 ]);
+            //
             //    browser.encodeTable.loadWithDataSource(dataSource);
             //});
 
