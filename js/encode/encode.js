@@ -45,30 +45,25 @@ var igv = (function (igv) {
 
     igv.EncodeTable = function (parentModalBodyObject, continuation) {
 
-        var obj,
-            self = this;
+        var self = this;
 
         this.encodeModalTableObject = $('<table id="encodeModalTable" cellpadding="0" cellspacing="0" border="0" class="display"></table>');
         parentModalBodyObject.append(this.encodeModalTableObject[ 0 ]);
 
-        this.continuation = continuation;
-
-        self.encodeModalTableObject.find('tbody').on('click', 'tr', function () {
-
-            if ($(this).hasClass('selected')) {
-                $(this).removeClass('selected');
-            } else {
-                $(this).addClass('selected');
-            }
-
-        });
+        this.initialized = false;
 
         $('#encodeModalTable').append(igv.spinner());
         $('#igvEncodeModal').on('shown.bs.modal', function (e) {
 
+            if (true === self.initialized) {
+                return;
+            }
+
+            self.initialized = true;
+
             igv.startSpinnerAtParentElement($('#encodeModalTable')[ 0 ]);
 
-            self.continuation();
+            continuation();
         });
 
         $('#encodeModalTopCloseButton').on('click', function () {
@@ -129,6 +124,16 @@ var igv = (function (igv) {
             "paging": false,
             //"autoWidth": true,
             "columns": this.dataSource.columnHeadings()
+        });
+
+        self.encodeModalTableObject.find('tbody').on('click', 'tr', function () {
+
+            if ($(this).hasClass('selected')) {
+                $(this).removeClass('selected');
+            } else {
+                $(this).addClass('selected');
+            }
+
         });
 
     };
