@@ -53,6 +53,7 @@ var igv = (function (igv) {
         switch (format) {
             case "narrowPeak":
             case "broadPeak":
+            case "peaks":
                 this.decode = decodePeak;
                 break;
             case "bedgraph":

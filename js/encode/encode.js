@@ -101,7 +101,7 @@ var igv = (function (igv) {
                         url: dataSourceJSONRow[ "url" ],
                         name: dataSourceJSONRow[ "ExperimentID" ],
                         color: self.encodeAntibodyColor(dataSourceJSONRow[ "Cell Type" ]),
-                        format: "broadPeak"
+                        format: dataSourceJSONRow["Format"]
                     });
 
                 });
