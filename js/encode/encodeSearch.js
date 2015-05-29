@@ -92,7 +92,7 @@ var igv = (function (igv) {
                                 "Lab": lab,
                                 "Format": file.file_format,
                                 "Type": file.output_type,
-                                "url": "https://www.encodeproject.org/" + file.href,
+                                "url": "https://www.encodeproject.org" + file.href,
                                 "Bio Rep": file.replicate ? file.replicate.bioligcal_replicate_number : undefined,
                                 "Tech Rep": file.replicate ? file.replicate.technical_replicate_number : undefined
                             });

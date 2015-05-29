@@ -310,6 +310,8 @@ var igv = (function (igv) {
         pValue = parseFloat(tokens[7]);
         qValue = parseFloat(tokens[8]);
 
+        if(score === 0) score = signal;
+
         return {
             chr: chr, start: start, end: end, name: name, score: score, strand: strand, signal: signal,
             pValue: pValue, qValue: qValue

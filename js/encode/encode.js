@@ -112,7 +112,8 @@ var igv = (function (igv) {
                         type: dataSourceJSONRow[ "Format" ],
                         url: dataSourceJSONRow[ "url" ],
                         name: dataSourceJSONRow[ "ExperimentID" ],
-                        color: /*self.encodeAntibodyColor(record.antibody)*/ "grey"
+                        color: self.encodeAntibodyColor(dataSourceJSONRow[ "Cell Type" ]),
+                        format: "broadPeak"
                     });
 
                 } // for (tableRows)
