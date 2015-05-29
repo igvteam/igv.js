@@ -5,7 +5,10 @@
     box-sizing: border-box;
 }
 
-/* begin grid.css */
+.igv-encode-spinner-container {
+    /*width: 256px;*/
+    /*margin: 0 auto 0 auto;*/
+}
 
 .igv-grid-container-dialog {
 
