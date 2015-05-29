@@ -418,7 +418,8 @@ var cursor = (function (cursor) {
             regionEnd   = this.location + regionWidth / 2,
             score,
             featureCacheQueryResults,
-            features;
+            features,
+            signalColumn = featureCache.signalColumn;
 
         featureCacheQueryResults = featureCache.queryFeatures(this.chr, regionStart, regionEnd);
 
@@ -445,14 +446,14 @@ var cursor = (function (cursor) {
         score = 0;
         featureCacheQueryResults.forEach(function (feature) {
 
-            if (undefined === feature.score) {
+            if (undefined === feature[signalColumn]) {
 
                 // Have a feature, but no defined score
                 score = 1000;
             } else {
 
                 // Take max score of all features in region
-                score = Math.max(feature.score, score);
+                score = Math.max(feature[signalColumn], score);
             }
 
         });

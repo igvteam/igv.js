@@ -148,8 +148,9 @@ var cursor = (function (cursor) {
 
                     allFeatures = featureCache.allFeatures();
 
+                    featureCache.signalColumn = findSignalColumn(allFeatures);
 
-                    myself.max = percentile(allFeatures, 98);
+                    myself.max = percentile(allFeatures, 98, featureCache.signalColumn);
 
                     myself.featureCache = featureCache;
 
@@ -186,18 +187,33 @@ var cursor = (function (cursor) {
     }
 
 
-    function percentile(featureList, per) {
+    /**
+     * Choose between "signal" and "score" columns, prefer signal
+     *
+     * @param allFeatures
+     */
+    function findSignalColumn(allFeatures) {
+
+        allFeatures.forEach(function (feature) {
+            if(feature.signal) return "signal";
+        })
+        return "score";
+
+    }
+
+
+    function percentile(featureList, per, signalColumn) {
 
         var idx = Math.floor(featureList.length * per / 100);
 
         featureList.sort(function (a, b) {
 
-            if (a.score > b.score) return 1;
-            else if (a.score < b.score) return -1;
+            if (a[signalColumn] > b[signalColumn]) return 1;
+            else if (a[signalColumn] < b[signalColumn]) return -1;
             else return 0;
         });
 
-        return featureList[idx].score
+        return featureList[idx][signalColumn]
 
     }
 
@@ -246,7 +262,8 @@ var cursor = (function (cursor) {
                 fh,
                 regionBpStart,
                 regionBpEnd,
-                top;
+                top,
+                signalColumn = featureCache.signalColumn;
 
             regions = this.cursorModel.regionsToRender();
 
@@ -298,7 +315,7 @@ var cursor = (function (cursor) {
 
                         feature = regionFeatures[i];
                         if (feature.end >= regionBpStart && feature.start < regionBpEnd) {
-                            score = feature.score;
+                            score = feature[signalColumn];
                             scale = regionWidth / (framePixelWidth - frameMargin);    // BP per pixel
                             pStart = Math.min(pxEnd, Math.max(pxStart, pxStart + (feature.start - regionBpStart) / scale));
                             pEnd = Math.min(pxEnd, pxStart + (feature.end - regionBpStart) / scale);
@@ -312,9 +329,6 @@ var cursor = (function (cursor) {
                             else {
                                 top = 0;
                                 fh = height;
-                            }
-                            if (score > this.max) {
-                                console.log(score);
                             }
 
                             igv.Canvas.fillRect.call(ctx, pStart, top, pw, fh);
