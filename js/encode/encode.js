@@ -43,28 +43,18 @@ var igv = (function (igv) {
         H3K9ME1: "rgb(100, 0, 0)"
     };
 
-    igv.EncodeTable = function (parentModalBodyObject) {
+    igv.EncodeTable = function (parentModalBodyObject, continuation) {
+
+        var obj,
+            self = this;
 
         this.encodeModalTableObject = $('<table id="encodeModalTable" cellpadding="0" cellspacing="0" border="0" class="display"></table>');
         parentModalBodyObject.append(this.encodeModalTableObject[ 0 ]);
 
-    };
+        obj = $('#encodeModalTable');
+        obj.append(igv.spinner());
 
-    igv.EncodeTable.prototype.loadWithDataSource = function (dataSource) {
-
-        var self = this,
-            dataTablesObject = self.encodeModalTableObject.dataTable({
-
-            "data": dataSource.dataTablesData(),
-            "scrollX": true,
-            "scrollY": "400px",
-            "scrollCollapse": true,
-            "paging": false,
-            "autoWidth": true,
-            "columns": dataSource.columnHeadings()
-        });
-
-        self.encodeModalTableObject.DataTable().columns.adjust();
+        this.continuation = continuation;
 
         self.encodeModalTableObject.find('tbody').on('click', 'tr', function () {
 
@@ -77,15 +67,19 @@ var igv = (function (igv) {
         });
 
         $('#igvEncodeModal').on('shown.bs.modal', function (e) {
-            self.encodeModalTableObject.DataTable().columns.adjust();
+
+            var parentObject = $('#encodeModalTable');
+            igv.startSpinnerAtParentElement(parentObject[ 0 ]);
+
+            self.continuation();
         });
 
         $('#encodeModalTopCloseButton').on('click', function () {
-            dataTablesObject.$('tr.selected').removeClass('selected');
+            self.dataTablesObject.$('tr.selected').removeClass('selected');
         });
 
         $('#encodeModalBottomCloseButton').on('click', function () {
-            dataTablesObject.$('tr.selected').removeClass('selected');
+            self.dataTablesObject.$('tr.selected').removeClass('selected');
         });
 
         $('#encodeModalGoButton').on('click', function () {
@@ -94,7 +88,7 @@ var igv = (function (igv) {
                 dataSourceJSONRow,
                 configurations = [];
 
-            tableRowsSelected = dataTablesObject.$('tr.selected');
+            tableRowsSelected = self.dataTablesObject.$('tr.selected');
 
             if (0 < tableRowsSelected.length) {
 
@@ -102,7 +96,7 @@ var igv = (function (igv) {
 
                 for (var i = 0; i < tableRowsSelected.length; i++) {
 
-                    dataSourceJSONRow = dataSource.jSON.rows[ i ];
+                    dataSourceJSONRow = self.dataSource.jSON.rows[ i ];
 
                     configurations.push({
                         type: dataSourceJSONRow[ "Format" ],
@@ -117,9 +111,27 @@ var igv = (function (igv) {
                 configurations[0].designatedTrack = (0 === igv.browser.trackViews.length) ? true : undefined;
                 igv.browser.loadTrackWithConfigurations(configurations);
 
-
             }
 
+        });
+
+    };
+
+    igv.EncodeTable.prototype.loadWithDataSource = function (dataSource) {
+
+        var self = this;
+
+        this.dataSource = dataSource;
+
+        this.dataTablesObject = self.encodeModalTableObject.dataTable({
+
+            "data": this.dataSource.dataTablesData(),
+            "scrollX": true,
+            "scrollY": "400px",
+            "scrollCollapse": true,
+            "paging": false,
+            "autoWidth": true,
+            "columns": this.dataSource.columnHeadings()
         });
 
     };
