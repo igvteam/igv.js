@@ -174,8 +174,7 @@ var igv = (function (igv) {
 
                 dataSource.loadJSON(function () {
 
-                    igv.stopSpinnerAtParentElement($('#encodeModalTable')[ 0 ]);
-
+                    browser.encodeTable.spinner.hide();
                     browser.encodeTable.loadWithDataSource(dataSource);
                 });
 

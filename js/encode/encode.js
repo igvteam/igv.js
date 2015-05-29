@@ -45,14 +45,19 @@ var igv = (function (igv) {
 
     igv.EncodeTable = function (parentModalBodyObject, continuation) {
 
-        var self = this;
+        var self = this,
+            spinnerFA;
 
         this.encodeModalTableObject = $('<table id="encodeModalTable" cellpadding="0" cellspacing="0" border="0" class="display"></table>');
         parentModalBodyObject.append(this.encodeModalTableObject[ 0 ]);
 
         this.initialized = false;
 
-        $('#encodeModalTable').append(igv.spinner());
+        spinnerFA = $('<i class="fa fa-lg fa-spinner fa-spin"></i>');
+        this.spinner = $('<div class="igv-encode-spinner-container"></div>');
+        this.spinner.append(spinnerFA[ 0 ]);
+
+        $('#encodeModalTable').append(this.spinner[ 0 ]);
         $('#igvEncodeModal').on('shown.bs.modal', function (e) {
 
             if (true === self.initialized) {
@@ -61,17 +66,15 @@ var igv = (function (igv) {
 
             self.initialized = true;
 
-            igv.startSpinnerAtParentElement($('#encodeModalTable')[ 0 ]);
-
             continuation();
         });
 
         $('#encodeModalTopCloseButton').on('click', function () {
-            self.dataTablesObject.$('tr.selected').removeClass('selected');
+            $('tr.selected').removeClass('selected');
         });
 
         $('#encodeModalBottomCloseButton').on('click', function () {
-            self.dataTablesObject.$('tr.selected').removeClass('selected');
+            $('tr.selected').removeClass('selected');
         });
 
         $('#encodeModalGoButton').on('click', function () {
