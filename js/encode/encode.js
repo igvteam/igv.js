@@ -90,12 +90,8 @@ var igv = (function (igv) {
 
         $('#encodeModalGoButton').on('click', function () {
 
-            var tableRow,
-                tableRowsSelected,
-                tableCell,
-                tableCells,
+            var tableRowsSelected,
                 dataSourceJSONRow,
-                record = {},
                 configurations = [];
 
             tableRowsSelected = dataTablesObject.$('tr.selected');
