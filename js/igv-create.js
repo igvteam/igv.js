@@ -214,8 +214,10 @@ var igv = (function (igv) {
             // a default location then moving
             if (config.locus) {
 
+                igv.startSpinnerAtParentElement(parentDiv);
                 browser.search(config.locus, function () {
 
+                    igv.stopSpinnerAtParentElement(parentDiv);
                     var refFrame = igv.browser.referenceFrame,
                         start = refFrame.start,
                         end = start + igv.browser.trackViewportWidth() * refFrame.bpPerPixel,
@@ -223,18 +225,10 @@ var igv = (function (igv) {
 
                     if (config.tracks) {
 
-                        if (range < 100000) {
-                            genome.sequence.getSequence(refFrame.chr, start, end, function (refSeq) {
-                                config.tracks.forEach(function (track) {
-                                    browser.loadTrack(track);
-                                });
-                            });
-                        }
-                        else {
-                            config.tracks.forEach(function (track) {
-                                browser.loadTrack(track);
-                            });
-                        }
+                        config.tracks.forEach(function (track) {
+                            browser.loadTrack(track);
+                        });
+
                     }
 
                 });
@@ -381,7 +375,7 @@ var igv = (function (igv) {
         if (!config.tracks) {
             config.tracks = [];
         }
-        config.tracks.push( { type: "sequence", order: -9999 } );
+        config.tracks.push({type: "sequence", order: -9999});
         config.showKaryo = config.showKaryo || false;
         config.showNavigation = config.showNavigation || true;
         config.flanking = config.flanking === undefined ? 1000 : config.flanking;
