@@ -75,6 +75,9 @@ var igv = (function (igv) {
                 this.skipRows = 1;
                 this.decode = decodeGtexGWAS;
                 break;
+            case "refflat":
+                this.decode=decodeRefflat;
+                break;
             default:
                 this.decode = decodeBed;
                 this.decode.splitPattern = /\s+/;
@@ -290,6 +293,57 @@ var igv = (function (igv) {
 
     }
 
+    /**
+     *
+     private int nameColumn = 0;
+     private int idColumn = 1;
+     private int chrColumn = 2;
+     private int strandColumn = 3;
+     private int startColumn = 4;
+     private int endColumn = 5;
+     private int cdStartColumn = 6;
+     private int cdEndColumn = 7;
+     private int exonCountColumn = 8;
+     private int startsBufferColumn = 9;
+     private int endsBufferColumn = 10;
+     private int frameBufferColumn = 15;
+
+     * @param tokens
+     * @param ignore
+     * @returns {*}
+     */
+    function decodeRefflat(tokens, ignore) {
+
+        if (tokens.length < 10) return null;
+
+        var feature = {
+                chr: tokens[2],
+                start: parseInt(tokens[4]),
+                end: parseInt(tokens[5]),
+                id: tokens[0],
+                name: tokens[1],
+                strand: tokens[3],
+                cdStart: parseInt(tokens[6]),
+                cdEnd: parseInt(tokens[7])
+            },
+            exonCount = parseInt(tokens[8]),
+            exonStarts = tokens[9].split(','),
+            exonEnds = tokens[10].split(','),
+            exons = [];
+
+        for (var i = 0; i < exonCount; i++) {
+            exons.push({start: parseInt(exonStarts[i]), end: parseInt(exonEnds[i])});
+        }
+
+        feature.exons = exons;
+
+        feature.popupData = function () {
+            return [{name: "Name", value: feature.name}];
+        };
+
+        return feature;
+
+    }
 
     function decodePeak(tokens, ignore) {
 
@@ -310,13 +364,14 @@ var igv = (function (igv) {
         pValue = parseFloat(tokens[7]);
         qValue = parseFloat(tokens[8]);
 
-        if(score === 0) score = signal;
+        if (score === 0) score = signal;
 
         return {
             chr: chr, start: start, end: end, name: name, score: score, strand: strand, signal: signal,
             pValue: pValue, qValue: qValue
         };
     }
+
 
     function decodeBedGraph(tokens, ignore) {
 
@@ -364,7 +419,7 @@ var igv = (function (igv) {
 
     function decodeAneu(tokens, ignore) {
 
-        var chr, start, end,  feature;
+        var chr, start, end, feature;
 
 
         if (tokens.length < 4) return null;

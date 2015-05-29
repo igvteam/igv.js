@@ -89,7 +89,7 @@ var igv = (function (igv) {
         }
         else {
             if ("file" === sourceType) {
-                if (config.format === undefined || config.featureType === undefined) {
+                if (config.format === undefined ) {
                     inferFileFormat(config);
                 }
                 inferFeatureType(config);
