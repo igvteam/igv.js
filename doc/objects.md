@@ -45,6 +45,9 @@ a file or webservice.
 Feature Types
 -------------
 
+Features composed of position + attributes. Attributes can be typed of non-typed (strings).   Attributes are displayed
+in popup text, anc may also be used to color.
+
 
 Required properties:
 
@@ -55,6 +58,20 @@ end
 Functions
 
 popupData(genomicLocation)   Optional.  Returns an array of {name value} objects to support popup text
+
+
+Generic bed format
+
+count of standard columns  (3 minimum)
+labels for additional columns
+types of additional columns
+
+{
+standardColumns: 3,
+labels: ["base call",	"Status", 	"Notes"],
+type: ["string", "string", "string"]
+}
+
 
 
 
@@ -79,6 +96,9 @@ Renderer
 Function to render a single annotation feature.  Signature is
 
 function(feature, bpStart, xScale, canvas)
+
+
+
 
 
 

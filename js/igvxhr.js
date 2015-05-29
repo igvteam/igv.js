@@ -78,9 +78,10 @@ var igvxhr = (function (igvxhr) {
 
     igvxhr.loadJson = function (url, options) {
 
-        var success = options.success;
+        var success = options.success,
+            method = options.method || (options.sendData ? "POST" : "GET");
 
-        //options.contentType = "application/json";  Setting content type causes errors with some servers => not allowed
+        if("POST" === method) options.contentType = "application/json";
 
         options.success = function (result) {
             if (result) {
