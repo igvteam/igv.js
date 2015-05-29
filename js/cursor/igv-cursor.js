@@ -166,25 +166,29 @@ var igv = (function (igv) {
         trackContainerDiv = $('<div id="igvTrackContainerDiv" class="igv-track-container-div">')[0];
         browser = new igv.Browser(options, trackContainerDiv);
 
-        browser.encodeTable = new igv.EncodeTable($('#encodeModalBody'));
+        browser.encodeTable = new igv.EncodeTable($('#encodeModalBody'), function() {
 
-        igv.encodeSearch(function (json) {
+            igv.encodeSearch(function (json) {
 
-            dataSource = new igv.EncodeDataSource( { jSON: json } );
+                dataSource = new igv.EncodeDataSource( { jSON: json } );
 
-            dataSource.loadJSON(function () {
-                browser.encodeTable.loadWithDataSource(dataSource);
+                dataSource.loadJSON(function () {
+
+                    var parentObject = $('#encodeModalTable');
+                    igv.stopSpinnerAtParentElement(parentObject[ 0 ]);
+
+                    browser.encodeTable.loadWithDataSource(dataSource);
+                });
+
             });
 
+            //dataSource = new igv.EncodeDataSource( { filePath: options.encodeTable || "resources/peaks.hg19.txt" } );
+            //
+            //dataSource.loadJSON(function () {
+            //    browser.encodeTable.loadWithDataSource(dataSource);
+            //});
+
         });
-
-        //dataSource = new igv.EncodeDataSource( { filePath: options.encodeTable || "resources/peaks.hg19.txt" } );
-        //
-        //dataSource.loadJSON(function () {
-        //    browser.encodeTable.loadWithDataSource(dataSource);
-        //});
-
-
 
         // Attach spinner to root div
         browser.div.appendChild(igv.spinner());
