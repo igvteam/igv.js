@@ -94,7 +94,7 @@ var igv = (function (igv) {
 
                     dataSourceJSONRow = self.dataSource.jSON.rows[ index ];
 
-                    console.log(index + " " + dataSourceJSONRow[ "url" ]);
+                    //console.log(index + " " + dataSourceJSONRow[ "url" ]);
 
                     configurations.push({
                         type: dataSourceJSONRow[ "Format" ],
