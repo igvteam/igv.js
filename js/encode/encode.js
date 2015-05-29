@@ -51,9 +51,6 @@ var igv = (function (igv) {
         this.encodeModalTableObject = $('<table id="encodeModalTable" cellpadding="0" cellspacing="0" border="0" class="display"></table>');
         parentModalBodyObject.append(this.encodeModalTableObject[ 0 ]);
 
-        obj = $('#encodeModalTable');
-        obj.append(igv.spinner());
-
         this.continuation = continuation;
 
         self.encodeModalTableObject.find('tbody').on('click', 'tr', function () {
@@ -66,10 +63,10 @@ var igv = (function (igv) {
 
         });
 
+        $('#encodeModalTable').append(igv.spinner());
         $('#igvEncodeModal').on('shown.bs.modal', function (e) {
 
-            var parentObject = $('#encodeModalTable');
-            igv.startSpinnerAtParentElement(parentObject[ 0 ]);
+            igv.startSpinnerAtParentElement($('#encodeModalTable')[ 0 ]);
 
             self.continuation();
         });
@@ -130,7 +127,7 @@ var igv = (function (igv) {
             "scrollY": "400px",
             "scrollCollapse": true,
             "paging": false,
-            "autoWidth": true,
+            //"autoWidth": true,
             "columns": this.dataSource.columnHeadings()
         });
 
@@ -276,11 +273,11 @@ var igv = (function (igv) {
 
     igv.EncodeDataSource.prototype.columnHeadings = function () {
 
-        var columnWidths = [ 20, 16, 16, 16, 16, 16],
-            columnHeadings = [];
+        var columnWidths = [ 20, 15, 15, 15, 10, 25 ],
+            columnHeadings = [ ];
 
         this.jSON.columns.forEach(function(heading, i){
-            columnHeadings.push({ "title": heading /*, width: (columnWidths[ i ].toString() + "%")*/ });
+            columnHeadings.push({ "title": heading, width: (columnWidths[ i ].toString() + "%") });
         });
 
         return columnHeadings;
