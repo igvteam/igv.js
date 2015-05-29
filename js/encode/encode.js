@@ -76,19 +76,22 @@ var igv = (function (igv) {
 
         $('#encodeModalGoButton').on('click', function () {
 
-            var tableRowsSelected,
+            var tableRows,
                 dataSourceJSONRow,
                 configurations = [];
 
-            tableRowsSelected = self.dataTablesObject.$('tr.selected');
+            tableRows = self.dataTablesObject.$('tr.selected');
+            if (tableRows) {
 
-            if (0 < tableRowsSelected.length) {
+                tableRows.removeClass('selected');
 
-                tableRowsSelected.removeClass('selected');
+                tableRows.each(function() {
 
-                for (var i = 0; i < tableRowsSelected.length; i++) {
+                    var index = $(this).index();
 
-                    dataSourceJSONRow = self.dataSource.jSON.rows[ i ];
+                    dataSourceJSONRow = self.dataSource.jSON.rows[ index ];
+
+                    console.log(index + " " + dataSourceJSONRow[ "url" ]);
 
                     configurations.push({
                         type: dataSourceJSONRow[ "Format" ],
@@ -98,12 +101,12 @@ var igv = (function (igv) {
                         format: "broadPeak"
                     });
 
-                } // for (tableRows)
+                });
 
                 configurations[0].designatedTrack = (0 === igv.browser.trackViews.length) ? true : undefined;
                 igv.browser.loadTrackWithConfigurations(configurations);
 
-            }
+            } // if (tableRows)
 
         });
 
