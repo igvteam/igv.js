@@ -31,11 +31,7 @@ var igv = (function (igv) {
 
         this.div = $('<div id="igvRootDiv" class="igv-root-div">')[0];
 
-        this.flanking = options.flanking;
-        this.type = options.type || "IGV";
-        this.searchURL = options.searchURL || "//www.broadinstitute.org/webservices/igv/locus?genome=hg19&name=";
-        this.crossDomainProxy = options.crossDomainProxy;
-
+        initialize.call(this, options);
 
         $("input[id='trackHeightInput']").val(this.trackHeight);
 
@@ -51,6 +47,45 @@ var igv = (function (igv) {
         }, 10);
 
     };
+
+    function initialize(options) {
+        this.flanking = options.flanking;
+        this.type = options.type || "IGV";
+        this.searchURL = options.searchURL || "//www.broadinstitute.org/webservices/igv/locus?genome=hg19&name=";
+        this.crossDomainProxy = options.crossDomainProxy;
+
+        if (options.formats) {
+            var formatDict = {};
+            options.formats.forEach(function (format) {
+                var name = format.name;
+                if (name === undefined) {
+                    console.log("Undefined format name: " + JSON.stringify(format));
+                    return;
+                }
+                formatDict[name] = format;      // TODO -- validate required fields
+            });
+            this.formats = formatDict;
+        }
+
+        if (options.trackSettings) {
+            var trackSettingDict = {};
+            options.trackSettings.forEach(function (settings) {
+
+                var type = settings.type;
+                if (type === undefined) {
+                    console.log("Undefined trackSetting name: " + JSON.stringify(settings));
+                    return;
+                }
+                trackSettingDict[type] = settings;
+            });
+            this.trackSettings = trackSettingDict;
+        }
+    }
+
+    igv.Browser.prototype.getFormat = function (name) {
+        if (this.formats === undefined) return undefined;
+        return this.formats[name];
+    }
 
     igv.Browser.prototype.trackLabelWithPath = function (path) {
 
@@ -74,10 +109,23 @@ var igv = (function (igv) {
 
     igv.Browser.prototype.loadTrack = function (config) {
 
-        var browser = this;
+        var self = this,
+            settings, property;
 
         if (this.isDuplicateTrack(config)) {
             return;
+        }
+
+        // Set defaults if specified
+        if(this.trackSettings && config.trackType) {
+            settings = this.trackSettings[config.trackType];
+            if (settings) {
+                for (property in settings) {
+                    if (settings.hasOwnProperty(property) && config[property] === undefined) {
+                        config[property] = settings[property];
+                    }
+                }
+            }
         }
 
         igv.inferTypes(config);
@@ -125,11 +173,11 @@ var igv = (function (igv) {
 
             if (track.getHeader) {
                 track.getHeader(function (header) {
-                    browser.addTrack(track);
+                    self.addTrack(track);
                 })
             }
             else {
-                browser.addTrack(newTrack);
+                self.addTrack(newTrack);
             }
         }
     }
@@ -418,7 +466,7 @@ var igv = (function (igv) {
             str = chr + ":" + ss + "-" + ee;
             this.searchInput.val(str);
 
-            this.windowSizePanel.update( Math.floor(end - referenceFrame.start) );
+            this.windowSizePanel.update(Math.floor(end - referenceFrame.start));
         }
 
     };
@@ -519,7 +567,7 @@ var igv = (function (igv) {
 
         this.update();
 
-      };
+    };
 
 // Zoom in by a factor of 2, keeping the same center location
     igv.Browser.prototype.zoomIn = function () {
