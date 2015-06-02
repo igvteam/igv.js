@@ -25,11 +25,12 @@
 
 var igv = (function (igv) {
 
-    igv.Genome = function (sequence, chromosomeNames, chromosomes) {
+    igv.Genome = function (sequence, chromosomeNames, chromosomes, ideograms, aliases) {
 
         this.sequence = sequence;
         this.chromosomeNames = chromosomeNames;
         this.chromosomes = chromosomes;  // An object (functions as a dictionary)
+        this.ideograms = ideograms;
 
         /**
          * Return the official chromosome name for the (possibly) alias.  Deals with
@@ -38,13 +39,37 @@ var igv = (function (igv) {
          */
         var chrAliasTable = {};
 
+        // The standard mappings
         chromosomeNames.forEach(function (name) {
-
             var alias = name.startsWith("chr") ? name.substring(3) : "chr" + name;
             chrAliasTable[alias] = name;
+            if(name === "chrM") chrAliasTable["MT"] = "chrM";
+            if(name === "MT") chrAliasTable["chrmM"] = "MT";
         });
-        chrAliasTable["chrM"] = "MT";
-        chrAliasTable["MT"] = "chrM";
+
+        // Custom mappings
+        if (aliases) {
+            aliases.forEach(function (array) {
+                // Find the official chr name
+                var defName;
+                for (i = 0; i < array.length; i++) {
+                    if (chromosomes[array[i]]) {
+                        defName = array[i];
+                        break;
+                    }
+                }
+
+                if (defName) {
+                    array.forEach(function (alias) {
+                        if (alias !== defName) {
+                            chrAliasTable[alias] = defName;
+                        }
+                    });
+                }
+
+            });
+        }
+
         this.chrAliasTable = chrAliasTable;
 
     }
@@ -55,7 +80,12 @@ var igv = (function (igv) {
     }
 
     igv.Genome.prototype.getChromosome = function (chr) {
+        chr = this.getChromosomeName(chr);
         return this.chromosomes[chr];
+    }
+
+    igv.Genome.prototype.getCytobands = function (chr) {
+        return this.ideograms ? this.ideograms[chr] : null;
     }
 
     igv.Genome.prototype.getChromosomes = function () {
@@ -104,72 +134,117 @@ var igv = (function (igv) {
             this.end >= range.end;
     }
 
-    igv.loadGenome = function (fastaUrl, cytobandUrl, continuation) {
+    igv.loadGenome = function (reference, continuation) {
 
-        var sequence = new igv.FastaSequence(fastaUrl);
+        var fastaUrl = reference.fastaURL,
+            cytobandUrl = reference.cytobandURL,
+            cytobands,
+            aliasURL = reference.aliasURL,
+            aliases,
+            chrNames,
+            chromosomes = {};
+        sequence = new igv.FastaSequence(fastaUrl);
 
         sequence.loadIndex(function (fastaIndex) {
 
-            var chrNames = sequence.chromosomeNames,
-                chromosomes = {},
-                order = 0;
+            var order = 0;
+
+            chrNames = sequence.chromosomeNames;
 
             chrNames.forEach(function (chrName) {
                 var bpLength = fastaIndex[chrName].size;
                 chromosomes[chrName] = new igv.Chromosome(chrName, order++, bpLength);
-            })
+            });
 
-            if(cytobandUrl) {
-                igvxhr.loadString(cytobandUrl, {
-
-                    success: function (data) {
-
-                        var chromosome,
-                            tmpCytoboands = {},
-                            bands = [],
-                            lastChr,
-                            n = 0,
-                            c = 1,
-                            lines = data.splitLines(),
-                            len = lines.length;
-
-                        for (var i = 0; i < len; i++) {
-                            var tokens = lines[i].split("\t");
-                            var chr = tokens[0];
-                            if (!lastChr) lastChr = chr;
-
-                            if (chr != lastChr) {
-
-                                chromosome = chromosomes[lastChr];
-
-                                if(chromosome) chromosome.cytobands = bands;
-
-                                tmpCytoboands[lastChr] = bands;
-                                bands = [];
-                                lastChr = chr;
-                                n = 0;
-                                c++;
-                            }
-
-                            if (tokens.length == 5) {
-                                //10	0	3000000	p15.3	gneg
-                                var chr = tokens[0];
-                                var start = parseInt(tokens[1]);
-                                var end = parseInt(tokens[2]);
-                                var name = tokens[3];
-                                var stain = tokens[4];
-                                bands[n++] = new igv.Cytoband(start, end, name, stain);
-                            }
-                        }
-
-                        continuation(new igv.Genome(sequence, chrNames, chromosomes));
-                    }
+            if (cytobandUrl) {
+                loadCytobands(cytobandUrl, function (result) {
+                    cytobands = result;
+                    checkReady();
                 });
             }
-            else {
-                continuation(new igv.Genome(sequence, chrNames, chromosomes));
+
+            if (aliasURL) {
+                loadAliases(aliasURL, function (result) {
+                    aliases = result;
+                    checkReady();
+                });
+            }
+
+            checkReady();
+
+        });
+
+        function checkReady() {
+
+            var isReady = (cytobandUrl === undefined || cytobands !== undefined) &&
+                (aliasURL === undefined || aliases !== undefined);
+            if (isReady) {
+                continuation(new igv.Genome(sequence, chrNames, chromosomes, cytobands, aliases));
+            }
+
+        }
+    }
+
+    function loadCytobands(cytobandUrl, continuation) {
+
+        igvxhr.loadString(cytobandUrl, {
+
+            success: function (data) {
+
+                var bands = [],
+                    lastChr,
+                    n = 0,
+                    c = 1,
+                    lines = data.splitLines(),
+                    len = lines.length,
+                    cytobands = {};
+
+                for (var i = 0; i < len; i++) {
+                    var tokens = lines[i].split("\t");
+                    var chr = tokens[0];
+                    if (!lastChr) lastChr = chr;
+
+                    if (chr != lastChr) {
+
+                        cytobands[lastChr] = bands;
+                        bands = [];
+                        lastChr = chr;
+                        n = 0;
+                        c++;
+                    }
+
+                    if (tokens.length == 5) {
+                        //10	0	3000000	p15.3	gneg
+                        var chr = tokens[0];
+                        var start = parseInt(tokens[1]);
+                        var end = parseInt(tokens[2]);
+                        var name = tokens[3];
+                        var stain = tokens[4];
+                        bands[n++] = new igv.Cytoband(start, end, name, stain);
+                    }
+                }
+
+                continuation(cytobands);
             }
         });
+    }
+
+    function loadAliases(aliasURL, continuation) {
+        igvxhr.loadString(aliasURL, {
+
+            success: function (data) {
+
+                var lines = data.splitLines(),
+                    aliases = [];
+
+                lines.forEach(function (line) {
+                    if (!line.startsWith("#") & line.length > 0) aliases.push(line.split("\t"));
+                });
+
+                continuation(aliases);
+            }
+        });
+
     }
 
     return igv;

@@ -191,7 +191,7 @@ var igv = (function (igv) {
             }
         }
 
-        igv.loadGenome(config.reference.fastaURL, config.reference.cytobandURL, function (genome) {
+        igv.loadGenome(config.reference, function (genome) {
 
             genome.id = config.reference.genomeId;
             browser.genome = genome;
