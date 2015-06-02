@@ -77,12 +77,20 @@ var igv = (function (igv) {
                     var assayType = record.assay_term_name,
                         experimentId = record["@id"],
                         cellType = record["biosample_term_name"],
-                        target = record.target ? record.target.label : undefined,
-                        lab = record.lab ? record.lab.title : undefined;
+                        target = record.target ? record.target.label : "",
+                        lab = record.lab ? record.lab.title : "";
 
                     record.files.forEach(function (file) {
 
                         if (file.file_format === "bed") {
+
+                            var format = file.file_format,
+                                type = file.output_type,
+                                bioRep = file.replicate ? file.replicate.bioligcal_replicate_number : undefined,
+                                techRep = file.replicate ? file.replicate.technical_replicate_number : undefined,
+                                name = cellType + " " + target;
+                            if (bioRep) name += " " + bioRep;
+                            if (techRep) name += (bioRep ? ":" : "0:") + techRep;
 
                             rows.push({
                                 "ExperimentID": experimentId,
@@ -90,11 +98,12 @@ var igv = (function (igv) {
                                 "Assay Type": assayType,
                                 "Target": target,
                                 "Lab": lab,
-                                "Format": file.file_format,
-                                "Type": file.output_type,
+                                "Format": format,
+                                "Type": type,
                                 "url": "https://www.encodeproject.org" + file.href,
-                                "Bio Rep": file.replicate ? file.replicate.bioligcal_replicate_number : undefined,
-                                "Tech Rep": file.replicate ? file.replicate.technical_replicate_number : undefined
+                                "Bio Rep": bioRep,
+                                "Tech Rep": techRep,
+                                "Name": name
                             });
                         }
                     });
