@@ -276,8 +276,8 @@ var igv = (function (igv) {
 
         columnHeadings.push({ "title": "index" });
         this.jSON.columns.forEach(function(heading, i){
-            //columnHeadings.push({ "title": heading, width: (columnWidths[ i ].toString() + "%") });
-            columnHeadings.push({ "title": heading });
+            columnHeadings.push({ "title": heading, width: (columnWidths[ i ].toString() + "%") });
+            //columnHeadings.push({ "title": heading });
         });
 
         return columnHeadings;
