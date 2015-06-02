@@ -97,9 +97,9 @@ var igv = (function (igv) {
                     configurations.push({
                         type: dataSourceJSONRow[ "Format" ],
                         url: dataSourceJSONRow[ "url" ],
-                        name: dataSourceJSONRow[ "ExperimentID" ],
-                        color: self.encodeAntibodyColor(dataSourceJSONRow[ "Cell Type" ]),
-                        format: dataSourceJSONRow["Format"]
+                        color: encodeAntibodyColor(dataSourceJSONRow[ "Cell Type" ]),
+                        format: dataSourceJSONRow["Format"],
+                        name: dataSourceJSONRow["Name"]
                     });
 
                 });
@@ -148,7 +148,8 @@ var igv = (function (igv) {
 
     };
 
-    igv.EncodeTable.prototype.encodeAntibodyColor = function (antibody) {
+
+    function encodeAntibodyColor (antibody) {
 
         var key;
 
