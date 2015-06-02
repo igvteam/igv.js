@@ -62,10 +62,10 @@ var igv = (function (igv) {
             config.flanking = 100000;
         }
 
-
         if (config.genome) {
             config.reference = expandGenome(config.genome);
         }
+
         else if (config.fastaURL) {   // legacy property
             config.reference = {
                 fastaURL: config.fastaURL,

@@ -42,6 +42,8 @@ var igv = (function (igv) {
      */
     igv.FeatureParser = function (format, decode) {
 
+        var customFormat;
+
         this.type = format;
         this.skipRows = 0;   // The number of fixed header rows to skip.  Override for specific types as needed
 
@@ -77,11 +79,21 @@ var igv = (function (igv) {
                 this.decode = decodeGtexGWAS;
                 break;
             case "refflat":
-                this.decode=decodeRefflat;
+                this.decode = decodeRefflat;
                 break;
             default:
-                this.decode = decodeBed;
-                this.decode.splitPattern = /\s+/;
+
+                customFormat = igv.browser.getFormat(format);
+                if (customFormat !== undefined) {
+                    this.decode = decodeCustom;
+                    this.format = customFormat;
+                    this.delimiter = customFormat.delimiter || "\t";
+                }
+
+                else {
+                    this.decode = decodeBed;
+                    this.delimiter = /\s+/;
+                }
 
         }
 
@@ -126,7 +138,7 @@ var igv = (function (igv) {
             j,
             decode = this.decode,
             type = this.type,
-            splitPattern = decode.splitPattern || "\t";
+            delimiter = this.delimiter || "\t";
 
 
         for (i = this.skipRows; i < len; i++) {
@@ -143,10 +155,10 @@ var igv = (function (igv) {
                 continue;
             }
 
-            tokens = lines[i].split(splitPattern);
+            tokens = lines[i].split(delimiter);
             if (tokens.length < 1) continue;
 
-            feature = decode(tokens, wig);
+            feature = decode.call(this, tokens, wig);
 
             if (feature) {
                 if (allFeatures.length < maxFeatureCount) {
@@ -365,7 +377,6 @@ var igv = (function (igv) {
             pValue: pValue, qValue: qValue
         };
     }
-
 
     function decodeBedGraph(tokens, ignore) {
 
@@ -606,6 +617,40 @@ var igv = (function (igv) {
 
         };
     }
+
+    /**
+     * Decode the "standard" UCSC bed format
+     * @param tokens
+     * @param ignore
+     * @returns decoded feature, or null if this is not a valid record
+     */
+    function decodeCustom(tokens, ignore) {
+
+        var feature,
+            chr, start, end,
+            format = this.format,         // "this" refers to FeatureParser instance
+            coords = format.coords || 0;
+
+        if (tokens.length < 3) return null;
+
+        chr = tokens[format.chr];
+        start = parseInt(tokens[format.start]) - coords;
+        end = format.end !== undefined ? parseInt(tokens[format.end]) : start + 1;
+
+        feature = {chr: chr, start: start, end: end};
+
+        if (format.fields) {
+            format.fields.forEach(function (field, index) {
+                if (index != format.chr && index != format.start && index != format.end) {
+                    feature[field] = tokens[index];
+                }
+            });
+        }
+
+        return feature;
+
+    }
+
 
     return igv;
 })

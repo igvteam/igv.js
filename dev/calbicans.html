@@ -172,7 +172,7 @@
             locus: "chr1",
             reference: {
                 fastaURL: "http://dn7ywbm9isq8j.cloudfront.net/genomes/seq/ca21/C_albicans_SC5314_A21.fasta",
-                aliasURL: "https://s3.amazonaws.com/igv.broadinstitute.org/genomes/seq/ca21/alias.tab"
+                aliasURL: "http://s3.amazonaws.com/igv.broadinstitute.org/genomes/seq/ca21/alias.tab"
             },
             flanking: 1000,
             apiKey: 'AIzaSyDUUAUFpQEN4mumeMNIRWXSiTh5cPtUAD0',
@@ -184,13 +184,43 @@
                 }
             },
 
+            formats: [
+                {
+                    name: "Calbportal",
+                    coords: 0,
+                    chr: 0,
+                    start: 1,
+                    end: 2,
+                    fields: ["chrom", "chromStart", "chromEnd", "Base", "Status", "Notes"]
+                }],
+
+            trackSettings: [
+                {
+                    type: "Calbportal",
+                    colorBy: {
+                        field: "Status",
+                        pallete: {
+                            pers: "0,0,142",
+                            background: "117,117,117",
+                            trans: "64,173,38"
+                        }
+                    }
+                }],
+
             tracks: [
+                {
+                    name: "Patient 1 Strain 1",
+                    trackType: "Calbportal",
+                    featureType: "annotation",
+                    format: "Calbportal",
+                    url: "http://localhost/igv-web/aviv/Bed_files/pt1_1.bed.txt",
+                    indexed: false
+                },
                 {
                     name: "Genes",
                     format: "refflat",
-                    url: "//dn7ywbm9isq8j.cloudfront.net/annotations/ca21/ca21_refFlat.txt",
+                    url: "http://dn7ywbm9isq8j.cloudfront.net/annotations/ca21/ca21_refFlat.txt",
                     indexed: false,
-//                    order: Number.MAX_VALUE,
                     order: 9999,
                     displayMode: "EXPANDED"
 

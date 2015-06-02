@@ -140,8 +140,6 @@ var igv = (function (igv) {
 
         if (featureList) {
 
-            igv.Canvas.setProperties.call(ctx, {fillStyle: track.color, strokeStyle: track.color});
-
             for (var gene, i = 0, len = featureList.length; i < len; i++) {
                 gene = featureList[i];
                 if (gene.end < bpStart) continue;
@@ -218,7 +216,7 @@ var igv = (function (igv) {
         var data = [];
         for (var property in feature) {
             if (feature.hasOwnProperty(property) &&
-                "chr" !== property && "start" !== property && "end" !== property &&
+                "chr" !== property && "start" !== property && "end" !== property && "row" !== property &&
                 igv.isStringOrNumber(feature[property])) {
                 data.push({name: property, value: feature[property]});
             }
@@ -286,7 +284,21 @@ var igv = (function (igv) {
             step = 8,
             h = 10,
             transform,
-            fontStyle;
+            fontStyle,
+            color = this.color;
+
+
+        if (this.config.colorBy) {
+            var colorByValue = feature[this.config.colorBy.field];
+            if (colorByValue) {
+                var tmp = this.config.colorBy.pallete[colorByValue];
+                if (tmp) {
+                    color = "rgb(" + tmp + ")";
+                }
+            }
+        }
+        igv.Canvas.setProperties.call(ctx, {fillStyle: color, strokeStyle: color});
+
 
         px = Math.round((feature.start - bpStart) / xScale);
         px1 = Math.round((feature.end - bpStart) / xScale);
@@ -338,11 +350,14 @@ var igv = (function (igv) {
         fontStyle = {font: '10px PT Sans', fillStyle: this.color, strokeStyle: this.color};
 
         var geneColor;
-        if (igv.browser.selection) {
-            geneColor = igv.browser.selection.colorForGene(feature.name);
-        } // TODO -- for gtex, figure out a better way to do this
 
-        if (((px1 - px) > 20 || geneColor) && this.displayMode != "SQUISHED") {
+        if (igv.browser.selection) {
+            // TODO -- for gtex, figure out a better way to do this
+            geneColor = igv.browser.selection.colorForGene(feature.name);
+        }
+
+
+        if (((px1 - px) > 20 || geneColor) && this.displayMode != "SQUISHED" && feature.name !== undefined) {
 
             var geneFontStyle;
             if (geneColor) {
