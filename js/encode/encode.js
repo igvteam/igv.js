@@ -90,8 +90,8 @@ var igv = (function (igv) {
 
                 tableRows.each(function() {
 
-                    var index = $(this).index();
-
+                    var index = parseInt( $(this).find("td:nth-child(1)").text() );
+                    
                     dataSourceJSONRow = self.dataSource.jSON.rows[ index ];
 
                     configurations.push({
@@ -115,19 +115,21 @@ var igv = (function (igv) {
 
     igv.EncodeTable.prototype.loadWithDataSource = function (dataSource) {
 
-        var self = this;
+        var self = this,
+            dataSet = dataSource.dataTablesData(),
+            columns = dataSource.columnHeadings();
 
         this.dataSource = dataSource;
 
         this.dataTablesObject = self.encodeModalTableObject.dataTable({
 
-            "data": this.dataSource.dataTablesData(),
+            "data": dataSet,
             "scrollX": true,
             "scrollY": "400px",
             "scrollCollapse": true,
             "paging": false,
-            //"autoWidth": true,
-            "columns": this.dataSource.columnHeadings()
+            //"columnDefs": [ { "targets": 0, "visible": false } ],
+            "columns": columns
         });
 
         self.encodeModalTableObject.find('tbody').on('click', 'tr', function () {
@@ -148,7 +150,6 @@ var igv = (function (igv) {
 
     };
 
-
     function encodeAntibodyColor (antibody) {
 
         var key;
@@ -160,7 +161,7 @@ var igv = (function (igv) {
         key = antibody.toUpperCase();
         return (antibodyColors[ key ]) ? antibodyColors[ key ] : cursor.defaultColor();
 
-    };
+    }
 
     igv.EncodeDataSource = function (config) {
         this.config = config;
@@ -245,33 +246,15 @@ var igv = (function (igv) {
 
     igv.EncodeDataSource.prototype.dataTablesData = function () {
 
-        var columnKeysHash,
-            resultKeys = this.jSON.columns.slice(),
+        var self = this,
             result = [];
 
-        // Match result array order to column order.
-
-        // Add column names
-        columnKeysHash = {};
-        this.jSON.columns.forEach(function(column){
-            columnKeysHash[ column ] = true;
-        });
-
-        // Add row keys not present in column names
-        Object.keys( this.jSON.rows[ 0 ] ).forEach(function(key){
-
-            if (true === columnKeysHash[ key ]) {
-               // do nothing
-            } else {
-                resultKeys.push(key);
-            }
-        });
-
-        // result keys now match order of column names
-        this.jSON.rows.forEach(function(row){
+        this.jSON.rows.forEach(function(row, index){
 
             var rr = [];
-            resultKeys.forEach(function(key){
+
+            rr.push( index );
+            self.jSON.columns.forEach(function(key){
                 rr.push( row[ key ] );
             });
 
@@ -286,8 +269,10 @@ var igv = (function (igv) {
         var columnWidths = [ 20, 15, 15, 15, 10, 25 ],
             columnHeadings = [ ];
 
+        columnHeadings.push({ "title": "index" });
         this.jSON.columns.forEach(function(heading, i){
-            columnHeadings.push({ "title": heading, width: (columnWidths[ i ].toString() + "%") });
+            //columnHeadings.push({ "title": heading, width: (columnWidths[ i ].toString() + "%") });
+            columnHeadings.push({ "title": heading });
         });
 
         return columnHeadings;
