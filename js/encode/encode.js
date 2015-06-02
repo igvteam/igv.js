@@ -81,7 +81,9 @@ var igv = (function (igv) {
 
             var tableRows,
                 dataSourceJSONRow,
-                configurations = [];
+                configurations = [],
+                encodeModalTable = $('#encodeModalTable'),
+                dataTableAPIInstance = encodeModalTable.DataTable();
 
             tableRows = self.dataTablesObject.$('tr.selected');
             if (tableRows) {
@@ -90,8 +92,11 @@ var igv = (function (igv) {
 
                 tableRows.each(function() {
 
-                    var index = parseInt( $(this).find("td:nth-child(1)").text() );
-                    
+                    var index,
+                        data = dataTableAPIInstance.row( this ).data();
+
+                    index = data[ 0 ];
+
                     dataSourceJSONRow = self.dataSource.jSON.rows[ index ];
 
                     configurations.push({
@@ -128,7 +133,7 @@ var igv = (function (igv) {
             "scrollY": "400px",
             "scrollCollapse": true,
             "paging": false,
-            //"columnDefs": [ { "targets": 0, "visible": false } ],
+            "columnDefs": [ { "targets": 0, "visible": false } ],
             "columns": columns
         });
 
