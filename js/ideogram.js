@@ -170,10 +170,7 @@ var igv = (function (igv) {
 
             if (!genome) return;
 
-            var chromosome = genome.getChromosome(referenceFrame.chr);
-            if (!chromosome) return;
-
-            var cytobands = chromosome.cytobands;
+            var cytobands = genome.getCytobands(referenceFrame.chr);
 
             if (cytobands) {
 

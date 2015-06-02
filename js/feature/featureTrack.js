@@ -178,18 +178,25 @@ var igv = (function (igv) {
 
                 var popupData = [];
                 featureList.forEach(function (feature) {
-                    if (feature.popupData &&
-                        feature.end >= genomicLocation - tolerance &&
+                    if (feature.end >= genomicLocation - tolerance &&
                         feature.start <= genomicLocation + tolerance) {
 
+                        // If row number is specified use it
                         if (row === undefined || feature.row === undefined || row === feature.row) {
-                            var featureData = feature.popupData(genomicLocation);
+                            var featureData
+                            if (feature.popupData) {
+                                featureData = feature.popupData(genomicLocation);
+                            }
+                            else {
+                                featureData = extractPopupData(feature);
+                            }
                             if (featureData) {
                                 if (popupData.length > 0) {
                                     popupData.push("<HR>");
                                 }
                                 Array.prototype.push.apply(popupData, featureData);
                             }
+
                         }
                     }
                 });
@@ -201,6 +208,23 @@ var igv = (function (igv) {
 
         return null;
     };
+
+    /**
+     * Default popup text function -- just extracts string and number properties in random order.
+     * @param feature
+     * @returns {Array}
+     */
+    function extractPopupData(feature) {
+        var data = [];
+        for (var property in feature) {
+            if (feature.hasOwnProperty(property) &&
+                "chr" !== property && "start" !== property && "end" !== property &&
+                igv.isStringOrNumber(feature[property])) {
+                data.push({name: property, value: feature[property]});
+            }
+        }
+        return data;
+    }
 
     igv.FeatureTrack.prototype.popupMenuItems = function (popover) {
 
@@ -431,7 +455,7 @@ var igv = (function (igv) {
         ctx.moveTo(junction_left_px, cy);
         ctx.bezierCurveTo(junction_left_px, top_y, junction_right_px, top_y, junction_right_px, cy);
 
-        ctx.lineWidth = 1 + Math.log(feature.num_junction_reads)/Math.log(2);
+        ctx.lineWidth = 1 + Math.log(feature.num_junction_reads) / Math.log(2);
         ctx.strokeStyle = 'blue';
         ctx.stroke();
 

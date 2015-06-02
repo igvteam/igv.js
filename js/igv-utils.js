@@ -33,15 +33,15 @@ var igv = (function (igv) {
             bboxParent = {};
 
         bboxParent.left = bboxParent.top = 0;
-        bboxParent.right  = parent.outerWidth();
+        bboxParent.right = parent.outerWidth();
         bboxParent.bottom = parent.outerHeight();
 
         topLeft = child.offset();
 
         bboxChild.left = topLeft.left - parent.offset().left;
-        bboxChild.top  = topLeft.top - parent.offset().top;
-        bboxChild.right  = bboxChild.left + child.outerWidth();
-        bboxChild.bottom = bboxChild.top  + child.outerHeight();
+        bboxChild.top = topLeft.top - parent.offset().top;
+        bboxChild.right = bboxChild.left + child.outerWidth();
+        bboxChild.bottom = bboxChild.top + child.outerHeight();
 
         delta = bboxChild.bottom - bboxParent.bottom;
         if (delta > 0) {
@@ -94,7 +94,7 @@ var igv = (function (igv) {
                     var number = parseNumber($(this).val());
 
                     if (undefined !== number) {
-                        trackView.setTrackHeight( number );
+                        trackView.setTrackHeight(number);
                         //trackView.update();
                         igv.dialog.hide();
                     }
@@ -125,7 +125,7 @@ var igv = (function (igv) {
                         str = (0 === i) ? '<div class=\"igv-track-menu-item igv-track-menu-border-top\">' : '<div class=\"igv-track-menu-item\">';
                         str = str + trackItem.name + '</div>';
 
-                        menuItems.push( { object: $(str), click: trackItem.click, init: trackItem.init } );
+                        menuItems.push({object: $(str), click: trackItem.click, init: trackItem.init});
                     } else {
 
                         if (0 === i) {
@@ -189,16 +189,15 @@ var igv = (function (igv) {
         }
     };
 
-    igv.dialogCloseWithParentObject = function(parentObject, closer) {
+    igv.dialogCloseWithParentObject = function (parentObject, closer) {
 
         var closeContainer = $('<div class="igv-dialog-close-container">'),
             close_fa = $('<i class="fa fa-times igv-dialog-close-fa">');
 
-        closeContainer.append(close_fa[ 0 ]);
-        parentObject.append(closeContainer[ 0 ]);
+        closeContainer.append(close_fa[0]);
+        parentObject.append(closeContainer[0]);
 
         close_fa.hover(
-
             function () {
                 close_fa.removeClass("fa-times");
                 close_fa.addClass("fa-times-circle");
@@ -269,7 +268,7 @@ var igv = (function (igv) {
      * @param parentElement
      */
     igv.stopSpinnerAtParentElement = function (parentElement) {
-        
+
         var spinnerObject = igv.getSpinnerObjectWithParentElement(parentElement);
 
         if (spinnerObject) {
@@ -278,12 +277,12 @@ var igv = (function (igv) {
 
     };
 
-    igv.parseUri = function(str) {
+    igv.parseUri = function (str) {
 
-        var	o   = igv.parseUri.options,
-            m   = o.parser[o.strictMode ? "strict" : "loose"].exec(str),
+        var o = igv.parseUri.options,
+            m = o.parser[o.strictMode ? "strict" : "loose"].exec(str),
             uri = {},
-            i   = 14;
+            i = 14;
 
         while (i--) uri[o.key[i]] = m[i] || "";
 
@@ -297,14 +296,14 @@ var igv = (function (igv) {
 
     igv.parseUri.options = {
         strictMode: false,
-        key: ["source","protocol","authority","userInfo","user","password","host","port","relative","path","directory","file","query","anchor"],
-        q:   {
-            name:   "queryKey",
+        key: ["source", "protocol", "authority", "userInfo", "user", "password", "host", "port", "relative", "path", "directory", "file", "query", "anchor"],
+        q: {
+            name: "queryKey",
             parser: /(?:^|&)([^&=]*)=?([^&]*)/g
         },
         parser: {
             strict: /^(?:([^:\/?#]+):)?(?:\/\/((?:(([^:@]*)(?::([^:@]*))?)?@)?([^:\/?#]*)(?::(\d*))?))?((((?:[^?#\/]*\/)*)([^?#]*))(?:\?([^#]*))?(?:#(.*))?)/,
-            loose:  /^(?:(?![^:@]+:[^:@\/]*@)([^:\/?#.]+):)?(?:\/\/)?((?:(([^:@]*)(?::([^:@]*))?)?@)?([^:\/?#]*)(?::(\d*))?)(((\/(?:[^?#](?![^?#\/]*\.[^?#\/.]+(?:[?#]|$)))*\/?)?([^?#\/]*))(?:\?([^#]*))?(?:#(.*))?)/
+            loose: /^(?:(?![^:@]+:[^:@\/]*@)([^:\/?#.]+):)?(?:\/\/)?((?:(([^:@]*)(?::([^:@]*))?)?@)?([^:\/?#]*)(?::(\d*))?)(((\/(?:[^?#](?![^?#\/]*\.[^?#\/.]+(?:[?#]|$)))*\/?)?([^?#\/]*))(?:\?([^#]*))?(?:#(.*))?)/
         }
     };
 
@@ -493,6 +492,16 @@ var igv = (function (igv) {
 
         });
     };
+
+    /**
+     * Test if the given value is a string or number.  Not using typeof as it fails on boxed primitives.
+     *
+     * @param value
+     * @returns boolean
+     */
+    igv.isStringOrNumber = function (value) {
+        return (value.substring || value.toFixed) ? true : false
+    }
 
     return igv;
 
