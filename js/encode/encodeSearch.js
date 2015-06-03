@@ -76,7 +76,7 @@ var igv = (function (igv) {
 
                     var assayType = record.assay_term_name,
                         experimentId = record["@id"],
-                        cellType = record["biosample_term_name"],
+                        cellType = record["biosample_term_name"] || "",
                         target = record.target ? record.target.label : "",
                         lab = record.lab ? record.lab.title : "";
 
@@ -108,6 +108,31 @@ var igv = (function (igv) {
                         }
                     });
 
+                });
+
+                rows.sort(function (a, b) {
+                    var ct1 = a["Cell Type"],
+                        ct2 = b["Cell Type"],
+                        t1 = a["Target"],
+                        t2 = b["Target"];
+
+                    if (ct1 === ct2) {
+                        if (t1 === t2) {
+                            return 0;
+                        }
+                        else if (t1 < t2) {
+                            return -1;
+                        }
+                        else {
+                            return 1;
+                        }
+                    }
+                    else if (ct1 < ct2) {
+                        return -1;
+                    }
+                    else {
+                        return 1;
+                    }
                 });
 
                 continuation({
