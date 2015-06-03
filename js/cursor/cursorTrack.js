@@ -125,6 +125,18 @@ var cursor = (function (cursor) {
         var myself = this;
 
         if (this.featureSource.featureCache) {
+            var featureCache = this.featureSource.featureCache;
+            if(this.max === undefined) {
+                var allFeatures;
+
+                allFeatures = featureCache.allFeatures();
+
+                featureCache.signalColumn = findSignalColumn(allFeatures);
+
+                myself.max = percentile(allFeatures, 98, featureCache.signalColumn);
+
+            }
+
             continuation(this.featureSource.featureCache);
         }
         else {
@@ -138,26 +150,7 @@ var cursor = (function (cursor) {
                     return;
                 });
             }
-            else {
 
-                this.featureSource.getFeatureCache(function (featureCache) {
-
-                    var allFeatures,
-                        name,
-                        color;
-
-                    allFeatures = featureCache.allFeatures();
-
-                    featureCache.signalColumn = findSignalColumn(allFeatures);
-
-                    myself.max = percentile(allFeatures, 98, featureCache.signalColumn);
-
-                    myself.featureCache = featureCache;
-
-                    continuation(featureCache);
-
-                });
-            }
 
             function setHeader(header) {
 
