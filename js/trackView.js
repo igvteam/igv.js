@@ -397,7 +397,7 @@ var igv = (function (igv) {
 
         //console.log("Update");
         this.tile = null;
-        if(this.scrollbar) this.scrollbar.update();
+        if (this.scrollbar) this.scrollbar.update();
         this.repaint();
 
     };
@@ -823,10 +823,14 @@ var igv = (function (igv) {
         });
 
         $(this.viewportDiv).mousewheel(function (event) {
-            var ratio =$(viewportDiv).height() /  $(contentDiv).height(),
-                dist = Math.round(ratio * event.deltaY * event.deltaFactor),
-                newY = $(innerScrollDiv).position().top + dist;
-            moveScrollerTo(newY);
+
+            var ratio = $(viewportDiv).height() / $(contentDiv).height();
+
+            if (ratio < 1) {
+                var dist = Math.round(ratio * event.deltaY * event.deltaFactor),
+                    newY = $(innerScrollDiv).position().top + dist;
+                moveScrollerTo(newY);
+            }
         });
 
         function mouseMove(event) {
@@ -841,7 +845,7 @@ var igv = (function (igv) {
 
         function moveScrollerTo(y) {
             var H = $(outerScrollDiv).height(),
-                h = $(innerScrollDiv).height(),
+                h = $(innerScrollDiv).height();
                 newTop = Math.min(Math.max(0, y), H - h),
                 contentTop = -Math.round(newTop * ($(contentDiv).height() / $(viewportDiv).height()));
             $(innerScrollDiv).css("top", newTop + "px");

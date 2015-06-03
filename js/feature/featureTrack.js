@@ -34,6 +34,7 @@ var igv = (function (igv) {
         this.collapsedHeight = config.collapsedHeight || this.height;
         this.expandedRowHeight = config.expandedRowHeight || 30;
         this.squishedRowHeight = config.squishedRowHeight || 15;
+        this.featureHeight = config.featureHeight || 10;
         this.featureSource = new igv.FeatureSource(this.config);
 
         // Set the render function.  This can optionally be passed in the config
@@ -282,7 +283,7 @@ var igv = (function (igv) {
             ePw,
             py = 5,
             step = 8,
-            h = 10,
+            h = this.featureHeight,
             transform,
             fontStyle,
             color = this.color;
@@ -291,14 +292,11 @@ var igv = (function (igv) {
         if (this.config.colorBy) {
             var colorByValue = feature[this.config.colorBy.field];
             if (colorByValue) {
-                var tmp = this.config.colorBy.pallete[colorByValue];
-                if (tmp) {
-                    color = "rgb(" + tmp + ")";
-                }
+                color = this.config.colorBy.pallete[colorByValue];
             }
         }
-        igv.Canvas.setProperties.call(ctx, {fillStyle: color, strokeStyle: color});
-
+        ctx.fillStyle = color;
+        ctx.strokeStyle = color;
 
         px = Math.round((feature.start - bpStart) / xScale);
         px1 = Math.round((feature.end - bpStart) / xScale);
