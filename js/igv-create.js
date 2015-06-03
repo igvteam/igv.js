@@ -174,22 +174,6 @@ var igv = (function (igv) {
         browser.ideoPanel = new igv.IdeoPanel(headerDiv);
         browser.ideoPanel.resize();
 
-        //// window size panel
-        //browser.windowSizePanel = new igv.WindowSizePanel(headerDiv);
-
-        if (config.trackDefaults) {
-
-            if (undefined !== config.trackDefaults.bam) {
-
-                if (undefined !== config.trackDefaults.bam.coverageThreshold) {
-                    igv.CoverageMap.threshold = config.trackDefaults.bam.coverageThreshold;
-                }
-
-                if (undefined !== config.trackDefaults.bam.coverageQualityWeight) {
-                    igv.CoverageMap.qualityWeight = config.trackDefaults.bam.coverageQualityWeight;
-                }
-            }
-        }
 
         igv.loadGenome(config.reference, function (genome) {
 

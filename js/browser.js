@@ -54,32 +54,10 @@ var igv = (function (igv) {
         this.searchURL = options.searchURL || "//www.broadinstitute.org/webservices/igv/locus?genome=hg19&name=";
         this.crossDomainProxy = options.crossDomainProxy;
 
-        if (options.formats) {
-            var formatDict = {};
-            options.formats.forEach(function (format) {
-                var name = format.name;
-                if (name === undefined) {
-                    console.log("Undefined format name: " + JSON.stringify(format));
-                    return;
-                }
-                formatDict[name] = format;      // TODO -- validate required fields
-            });
-            this.formats = formatDict;
-        }
 
-        if (options.trackSettings) {
-            var trackSettingDict = {};
-            options.trackSettings.forEach(function (settings) {
+        this.formats = options.formats;
+        this.trackDefaults = options.trackDefaults;
 
-                var type = settings.type;
-                if (type === undefined) {
-                    console.log("Undefined trackSetting name: " + JSON.stringify(settings));
-                    return;
-                }
-                trackSettingDict[type] = settings;
-            });
-            this.trackSettings = trackSettingDict;
-        }
     }
 
     igv.Browser.prototype.getFormat = function (name) {
@@ -107,6 +85,10 @@ var igv = (function (igv) {
 
     };
 
+    //// window size panel
+    //browser.windowSizePanel = new igv.WindowSizePanel(headerDiv);
+
+
     igv.Browser.prototype.loadTrack = function (config) {
 
         var self = this,
@@ -117,8 +99,8 @@ var igv = (function (igv) {
         }
 
         // Set defaults if specified
-        if(this.trackSettings && config.trackType) {
-            settings = this.trackSettings[config.trackType];
+        if (this.trackDefaults && config.trackType) {
+            settings = this.trackDefaults[config.trackType];
             if (settings) {
                 for (property in settings) {
                     if (settings.hasOwnProperty(property) && config[property] === undefined) {
