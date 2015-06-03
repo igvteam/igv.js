@@ -43,7 +43,8 @@ var igv = (function (igv) {
             controlDiv,
             bodyObject,
             palette,
-            element;
+            element,
+            trackOrder=1;
 
         if (igv.browser) {
             console.log("Attempt to create 2 browsers.");
@@ -78,6 +79,14 @@ var igv = (function (igv) {
             return;
         }
 
+        //Set order of tracks, otherwise they will be ordered randomly as each completes its async load
+        if (config.tracks) {
+            config.tracks.forEach(function (track) {
+                if (track.order === undefined) {
+                    track.order = trackOrder++;
+                }
+            });
+        }
 
         trackContainerDiv = $('<div id="igvTrackContainerDiv" class="igv-track-container-div">')[0];
         browser = new igv.Browser(config, trackContainerDiv);
@@ -219,6 +228,7 @@ var igv = (function (igv) {
 
             }
             else if (config.tracks) {
+
                 config.tracks.forEach(function (track) {
                     browser.loadTrack(track);
                 });
