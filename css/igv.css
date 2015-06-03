@@ -667,8 +667,6 @@ div.ui-dialog fieldset {
     top: 0;
     left: 0;
 
-    min-width: 96px;
-
     z-index: 1000;
 
     font-family: 'PT Sans', sans-serif;
@@ -733,9 +731,20 @@ div.ui-dialog fieldset {
 }
 
 .igv-popoverTrackPopupContent {
-    overflow: auto;
-    max-width: 384px;
+    position: relative;
+    top: 0;
+    left: 0;
+
+    width: 100%;
+    max-width: 100%;
+
     max-height: 384px;
+
+    overflow-x: hidden;
+    overflow-y: auto;
+
+    margin-right: 24px;
+
 }
 
 .igv-popoverBorderTop {
