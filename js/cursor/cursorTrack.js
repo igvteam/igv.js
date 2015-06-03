@@ -63,7 +63,7 @@ var cursor = (function (cursor) {
 
     cursor.CursorTrack.prototype.popupMenuItems = function (popover) {
 
-        return [ igv.colorPickerMenuItem(popover, this.trackView, "Set color", this.color) ];
+        return [igv.colorPickerMenuItem(popover, this.trackView, "Set color", this.color)];
 
     };
 
@@ -174,7 +174,7 @@ var cursor = (function (cursor) {
                         myself.color = "rgb(" + header.color + ")";
                         if (myself.cursorHistogram) myself.cursorHistogram.render(this);
                     }
-                    if(header.height && !myself.config.trackHeight) {
+                    if (header.height && !myself.config.trackHeight) {
                         myself.height = header.height;
                     }
                 }
@@ -195,7 +195,7 @@ var cursor = (function (cursor) {
     function findSignalColumn(allFeatures) {
 
         allFeatures.forEach(function (feature) {
-            if(feature.signal) return "signal";
+            if (feature.signal) return "signal";
         })
         return "score";
 
@@ -320,19 +320,6 @@ var cursor = (function (cursor) {
                             pStart = Math.min(pxEnd, Math.max(pxStart, pxStart + (feature.start - regionBpStart) / scale));
                             pEnd = Math.min(pxEnd, pxStart + (feature.end - regionBpStart) / scale);
                             pw = Math.max(1, pEnd - pStart);
-
-                            if (score) {
-                                // Height proportional to score
-                                fh = Math.round(((score / this.max) * maxFeatureHeight));
-                                top = height - fh;
-                            }
-                            else {
-                                top = 0;
-                                fh = height;
-                            }
-
-                            igv.Canvas.fillRect.call(ctx, pStart, top, pw, fh);
-
                         }
                     }
                 }
@@ -340,15 +327,20 @@ var cursor = (function (cursor) {
 
                     pw = pxEnd - pxStart;
                     score = region.getScore(featureCache, regionWidth);
-                    if (score > 0) {
-                        // Height proportional to score
-                        fh = Math.round(((score / myself.max) * maxFeatureHeight));
-                        top = height - fh;
-
-                        igv.Canvas.fillRect.call(ctx, pxStart, top, pw, fh);
-                    }
-
                 }
+                if (score !== undefined && this.max > 0) {
+                    // Height proportional to score
+                    fh = Math.round(((score / this.max) * maxFeatureHeight));
+                    top = height - fh;
+                }
+                else {
+                    top = 0;
+                    fh = height;
+                }
+
+                igv.Canvas.fillRect.call(ctx, pxStart, top, pw, fh);
+
+
             }
 
             continuation();
