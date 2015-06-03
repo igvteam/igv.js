@@ -102,7 +102,7 @@ var igv = (function (igv) {
                     configurations.push({
                         type: dataSourceJSONRow[ "Format" ],
                         url: dataSourceJSONRow[ "url" ],
-                        color: encodeAntibodyColor(dataSourceJSONRow[ "Cell Type" ]),
+                        color: encodeAntibodyColor(dataSourceJSONRow[ "Target" ]),
                         format: dataSourceJSONRow["Format"],
                         name: dataSourceJSONRow["Name"]
                     });
