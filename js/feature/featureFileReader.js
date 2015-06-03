@@ -138,8 +138,7 @@ var igv = (function (igv) {
         }
         else {
             loadFeaturesNoIndex.call(this, function (features) {
-                // Features are ignored, we are after the header (TODO -- fix this dependency on side effect)
-                continuation(myself.header);
+                continuation(myself.header, features);
             });
         }
 

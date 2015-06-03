@@ -124,8 +124,8 @@ var cursor = (function (cursor) {
 
         var myself = this;
 
-        if (this.featureCache) {
-            continuation(this.featureCache);
+        if (this.featureSource.featureCache) {
+            continuation(this.featureSource.featureCache);
         }
         else {
 

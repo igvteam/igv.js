@@ -61,8 +61,16 @@ var igv = (function (igv) {
 
     igv.FeatureSource.prototype.getHeader = function (continuation) {
 
+        var self = this;
+
         if(this.reader.readHeader) {
-            this.reader.readHeader(continuation);
+            this.reader.readHeader(function (header, features) {
+                // Non-indexed readers will return features as a side effect.  This is an important performance hack
+                if(features) {
+                    self.featureCache = new igv.FeatureCache(features);
+                }
+                continuation(header);
+            });
         }
         else {
             continuation(null);
