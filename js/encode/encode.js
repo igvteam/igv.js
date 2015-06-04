@@ -271,7 +271,7 @@ var igv = (function (igv) {
 
     igv.EncodeDataSource.prototype.columnHeadings = function () {
 
-        var columnWidths = [10, 20, 15, 15, 15, 10, 25 ],
+        var columnWidths = this.jSON.columnWidths,
             columnHeadings = [ ];
 
         columnHeadings.push({ "title": "index" });
