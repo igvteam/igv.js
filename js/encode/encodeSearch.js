@@ -72,8 +72,9 @@ var igv = (function (igv) {
 
             success: function (json) {
 
-                var columns = ["Assembly", "Cell Type", "Target", "Assay Type", "Bio Rep", "Tech Rep", "Lab"];
-                var rows = [];
+                var columns = ["Assembly", "Cell Type", "Target", "Assay Type", "Bio Rep", "Tech Rep", "Lab"],
+                    columnWidths = [8,      20,          10,       10,           8,        8,        40],
+                    rows = [];
 
                 json["@graph"].forEach(function (record) {
 
@@ -155,6 +156,7 @@ var igv = (function (igv) {
 
                 continuation({
                     columns: columns,
+                    columnWidths: columnWidths,
                     rows: rows
                 });
 
