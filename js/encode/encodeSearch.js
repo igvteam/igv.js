@@ -50,12 +50,14 @@ var igv = (function (igv) {
 
     var query2 = "https://www.encodeproject.org/search/?" +
         "type=experiment&" +
+        "assembly=hg19&" +
         "files.output_type=peaks&" +
         "files.file_format=bed&" +
         "format=json&" +
         "field=lab.title&" +
         "field=biosample_term_name&" +
-        "field=assay_term_name&field=target.label&" +
+        "field=assay_term_name&" +
+        "field=target.label&" +
         "field=files.file_format&" +
         "field=files.output_type&" +
         "field=files.href&" +
