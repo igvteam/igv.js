@@ -50,7 +50,7 @@ var igv = (function (igv) {
 
     var query2 = "https://www.encodeproject.org/search/?" +
         "type=experiment&" +
-        "assembly=hg19&" +
+            // "assembly=hg19&" +
         "files.output_type=peaks&" +
         "files.file_format=bed&" +
         "format=json&" +
@@ -63,6 +63,7 @@ var igv = (function (igv) {
         "field=files.href&" +
         "field=files.replicate.technical_replicate_number&" +
         "field=files.replicate.biological_replicate_number&" +
+        "field=files.assembly&" +
         "limit=all";
 
     igv.encodeSearch = function (continuation) {
@@ -71,7 +72,7 @@ var igv = (function (igv) {
 
             success: function (json) {
 
-                var columns = ["Cell Type", "Target", "Assay Type", "Bio Rep", "Tech Rep", "Lab"];
+                var columns = ["Assembly", "Cell Type", "Target", "Assay Type", "Bio Rep", "Tech Rep", "Lab"];
                 var rows = [];
 
                 json["@graph"].forEach(function (record) {
@@ -82,6 +83,7 @@ var igv = (function (igv) {
                         target = record.target ? record.target.label : "",
                         lab = record.lab ? record.lab.title : "";
 
+
                     record.files.forEach(function (file) {
 
                         if (file.file_format === "bed") {
@@ -90,11 +92,13 @@ var igv = (function (igv) {
                                 type = file.output_type,
                                 bioRep = file.replicate ? file.replicate.bioligcal_replicate_number : undefined,
                                 techRep = file.replicate ? file.replicate.technical_replicate_number : undefined,
-                                name = cellType + " " + target;
+                                name = cellType + " " + target,
+                                assembly = file.assembly;
                             if (bioRep) name += " " + bioRep;
                             if (techRep) name += (bioRep ? ":" : "0:") + techRep;
 
                             rows.push({
+                                "Assembly": assembly,
                                 "ExperimentID": experimentId,
                                 "Cell Type": cellType,
                                 "Assay Type": assayType,
@@ -113,27 +117,39 @@ var igv = (function (igv) {
                 });
 
                 rows.sort(function (a, b) {
-                    var ct1 = a["Cell Type"],
+                    var a1 = a["Assembly"],
+                        a2 = b["Assembly"],
+                        ct1 = a["Cell Type"],
                         ct2 = b["Cell Type"],
                         t1 = a["Target"],
                         t2 = b["Target"];
 
-                    if (ct1 === ct2) {
-                        if (t1 === t2) {
-                            return 0;
+                    if (a1 === a2) {
+                        if (ct1 === ct2) {
+                            if (t1 === t2) {
+                                return 0;
+                            }
+                            else if (t1 < t2) {
+                                return -1;
+                            }
+                            else {
+                                return 1;
+                            }
                         }
-                        else if (t1 < t2) {
+                        else if (ct1 < ct2) {
                             return -1;
                         }
                         else {
                             return 1;
                         }
                     }
-                    else if (ct1 < ct2) {
-                        return -1;
-                    }
                     else {
-                        return 1;
+                        if (a1 < a2) {
+                            return -1;
+                        }
+                        else {
+                            return 1;
+                        }
                     }
                 });
 
