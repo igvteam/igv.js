@@ -239,6 +239,12 @@ var igv = (function (igv) {
                     trackIconContainer = $('<div class="igv-app-icon-container">');
                     $(viewportDiv).append(trackIconContainer[0]);
 
+                    if (false === this.browser.trackLabelsVisible) {
+                        trackIconContainer.hide();
+                    } else {
+                        trackIconContainer.show();
+                    }
+
                     this.track.labelSpan = $('<span class="igv-track-label-span-base">')[0];
                     this.track.labelSpan.innerHTML = this.track.name;
                     $(trackIconContainer).append(this.track.labelSpan);
