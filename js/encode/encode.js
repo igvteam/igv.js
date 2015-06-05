@@ -81,7 +81,7 @@ var igv = (function (igv) {
 
             var tableRows,
                 dataSourceJSONRow,
-                configurations = [],
+                configList = [],
                 encodeModalTable = $('#encodeModalTable'),
                 dataTableAPIInstance = encodeModalTable.DataTable();
 
@@ -99,7 +99,7 @@ var igv = (function (igv) {
 
                     dataSourceJSONRow = self.dataSource.jSON.rows[ index ];
 
-                    configurations.push({
+                    configList.push({
                         type: dataSourceJSONRow[ "Format" ],
                         url: dataSourceJSONRow[ "url" ],
                         color: encodeAntibodyColor(dataSourceJSONRow[ "Target" ]),
@@ -109,8 +109,11 @@ var igv = (function (igv) {
 
                 });
 
-                configurations[0].designatedTrack = (0 === igv.browser.trackViews.length) ? true : undefined;
-                igv.browser.loadTrackWithConfigurations(configurations);
+                if (undefined === igv.browser.designatedTrack) {
+                    configList[ 0 ].designatedTrack = true;
+                }
+
+                igv.browser.loadTracksWithConfigList(configList);
 
             } // if (tableRows)
 
@@ -134,6 +137,7 @@ var igv = (function (igv) {
             "scrollCollapse": true,
             "paging": false,
             "columnDefs": [ { "targets": 0, "visible": false } ],
+            "autoWidth": true,
             "columns": columns
         });
 
@@ -276,8 +280,8 @@ var igv = (function (igv) {
 
         columnHeadings.push({ "title": "index" });
         this.jSON.columns.forEach(function(heading, i){
-            columnHeadings.push({ "title": heading, width: (columnWidths[ i ].toString() + "%") });
-            //columnHeadings.push({ "title": heading });
+            //columnHeadings.push({ "title": heading, width: (columnWidths[ i ].toString() + "%") });
+            columnHeadings.push({ "title": heading });
         });
 
         return columnHeadings;

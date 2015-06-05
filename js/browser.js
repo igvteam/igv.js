@@ -63,7 +63,7 @@ var igv = (function (igv) {
     igv.Browser.prototype.getFormat = function (name) {
         if (this.formats === undefined) return undefined;
         return this.formats[name];
-    }
+    };
 
     igv.Browser.prototype.trackLabelWithPath = function (path) {
 
@@ -85,9 +85,15 @@ var igv = (function (igv) {
 
     };
 
-    //// window size panel
-    //browser.windowSizePanel = new igv.WindowSizePanel(headerDiv);
+    igv.Browser.prototype.loadTracksWithConfigList = function (configList) {
 
+        var self = this;
+
+        configList.forEach(function (config) {
+            self.loadTrack(config);
+        });
+
+    };
 
     igv.Browser.prototype.loadTrack = function (config) {
 
@@ -162,7 +168,7 @@ var igv = (function (igv) {
                 self.addTrack(newTrack);
             }
         }
-    }
+    };
 
     igv.Browser.prototype.isDuplicateTrack = function (config) {
 

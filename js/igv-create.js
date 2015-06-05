@@ -218,20 +218,23 @@ var igv = (function (igv) {
 
                     if (config.tracks) {
 
-                        config.tracks.forEach(function (track) {
-                            browser.loadTrack(track);
-                        });
+                        igv.browser.loadTracksWithConfigList(config.tracks);
+
+                        //config.tracks.forEach(function (track) {
+                        //    browser.loadTrack(track);
+                        //});
 
                     }
 
                 });
 
-            }
-            else if (config.tracks) {
+            } else if (config.tracks) {
 
-                config.tracks.forEach(function (track) {
-                    browser.loadTrack(track);
-                });
+                igv.browser.loadTracksWithConfigList(config.tracks);
+
+                //config.tracks.forEach(function (track) {
+                //    browser.loadTrack(track);
+                //});
 
             }
 
