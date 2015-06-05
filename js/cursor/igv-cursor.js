@@ -159,7 +159,7 @@ var igv = (function (igv) {
         function configureTrackWithLocalFileOrPath(config) {
 
             config.designatedTrack = (0 === igv.browser.trackViews.length) ? true : undefined;
-            igv.browser.loadTrackWithConfigurations([config]);
+            igv.browser.loadTracksWithConfigList([config]);
         }
 
         // Construct DOM hierarchy
@@ -279,7 +279,7 @@ var igv = (function (igv) {
                 return;
             }
 
-            browser.loadTrackWithConfigurations(options.tracks);
+            browser.loadTracksWithConfigList(options.tracks);
 
         }
 
@@ -288,17 +288,23 @@ var igv = (function (igv) {
 
     function addCursorBrowserExtensions(browser) {
 
-        browser.loadTrackWithConfigurations = function (configurations) {
+        // Augment standard behavior of loadTracksWithConfigList
+        browser.loadTracksWithConfigList = function (configList) {
 
             var tracks = [],
                 doInitialize;
 
-            configurations.forEach(function(configuration){
+            configList.forEach(function(config){
 
-                var track = cursorTrackWithConfig(configuration, browser);
+                var track = cursorTrackWithConfig(config, browser);
 
                 if (undefined !== track) {
                     tracks.push(track);
+
+                    if (true === config.designatedTrack) {
+                        browser.designatedTrack = track;
+                    }
+
                 }
 
             });
