@@ -41,6 +41,8 @@ var igv = (function (igv) {
 
         this.trackViews = [];
 
+        this.trackLabelsVisible = true;
+
         window.onresize = igv.throttle(function () {
             igv.browser.resize();
         }, 10);

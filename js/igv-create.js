@@ -80,6 +80,7 @@ var igv = (function (igv) {
             return;
         }
 
+
         //Set order of tracks, otherwise they will be ordered randomly as each completes its async load
         if (config.tracks) {
             config.tracks.forEach(function (track) {
@@ -260,6 +261,7 @@ var igv = (function (igv) {
             navigation,
             search,
             searchButton,
+            $trackLabelToggle,
             zoom,
             zoomInButton,
             zoomOutButton,
@@ -329,6 +331,25 @@ var igv = (function (igv) {
             zoomOutButton.click(function () {
                 igv.browser.zoomOut();
             });
+
+            // toggle track labels
+            $trackLabelToggle = $('<div class="igvNavigationToggleTrackLabels">');
+            $trackLabelToggle.text("hide track labels");
+            navigation.append($trackLabelToggle[ 0 ]);
+
+            $trackLabelToggle.click(function () {
+
+                browser.trackLabelsVisible = !browser.trackLabelsVisible;
+                if (false === browser.trackLabelsVisible) {
+                    $(this).text("show track labels");
+                    $('.igv-app-icon-container').hide();
+                } else {
+                    $(this).text("hide track labels");
+                    $('.igv-app-icon-container').show();
+                }
+
+            });
+
         }
 
         if (config.showKaryo) {
