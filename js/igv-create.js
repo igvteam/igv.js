@@ -205,10 +205,12 @@ var igv = (function (igv) {
 
             // If an initial locus is specified go there first, then load tracks.  This avoids loading track data at
             // a default location then moving
-            if (config.locus) {
+            if (browser.initialLocus || config.locus) {
+
+                var locus = browser.initialLocus ? browser.initialLocus : config.locus;
 
                 igv.startSpinnerAtParentElement(parentDiv);
-                browser.search(config.locus, function () {
+                browser.search(locus, function () {
 
                     igv.stopSpinnerAtParentElement(parentDiv);
                     var refFrame = igv.browser.referenceFrame,

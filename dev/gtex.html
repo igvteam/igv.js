@@ -194,6 +194,8 @@
         };
 
         browser = igv.createBrowser(div, options);
+
+        igv.browser.search("egfr");   // Reproduce race condition
     });
 
 
