@@ -200,11 +200,15 @@
         $("#issue-122").click(function () {
                 console.log("Starting issue 122. Emptying div contents");
                 // This is how we empty the div with the igv browser in GTEX.
-                $("#myDiv").html(""); 
+               // $("#myDiv").html("");   <= ?? That's a weird way to remove a child
+
+                $("#myDiv").detach($(igv.browser.div));
+
                 console.log("Reappending browser div back in.");
                 // This is how we get the igv browser back into the
                 // div in GTEx.
-                $("#myDiv").append(browser.div); 
+                //$("#myDiv").append(browser.div);
+                $("#myDiv").append($(igv.browser.div));
                 console.log("Zooming buttons and panning by dragging stopped working.");
                 console.log("Zooming and searching a new locus by command line still working.");
         });
