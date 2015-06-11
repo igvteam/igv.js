@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+    <meta name="description" content="">
+    <meta name="author" content="">
+    <link rel="shortcut icon" href=../img/favicon.ico>
+    <title>IGV - Integrative Genomics Viewer</title>
+
+    <!-- jQuery UI CSS -->
+    <link rel="stylesheet" type="text/css"
+          href="//ajax.googleapis.com/ajax/libs/jqueryui/1.11.2/themes/redmond/jquery-ui.css"/>
+
+    <!-- Google fonts -->
+    <link rel="stylesheet" type="text/css" href='//fonts.googleapis.com/css?family=PT+Sans:400,700'>
+    <link rel="stylesheet" type="text/css" href='//fonts.googleapis.com/css?family=Open+Sans'>
+
+    <!-- Font Awesome CSS -->
+    <link rel="stylesheet" type="text/css" href="//maxcdn.bootstrapcdn.com/font-awesome/4.2.0/css/font-awesome.min.css">
+
+    <!-- IGV CSS -->
+    <link rel="stylesheet" type="text/css" href="../css/igv.css">
+
+    <!-- jQuery JS -->
+    <script type="text/javascript" src="//ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
+
+    <!-- jQuery UI JS -->
+    <script type="text/javascript" src="//ajax.googleapis.com/ajax/libs/jqueryui/1.11.2/jquery-ui.min.js"></script>
+
+    <!-- Vendor JS -->
+    <script type="text/javascript" src="../vendor/inflate.js"></script>
+    <script type="text/javascript" src="../vendor/zlib_and_gzip.min.js"></script>
+    <script type="text/javascript" src="../vendor/jquery.mousewheel.js"></script>
+
+    <!-- IGV JS -->
+    <script type="text/javascript" src="../js/igv-create.js"></script>
+    <script type="text/javascript" src="../js/userFeedback.js"></script>
+    <script type="text/javascript" src="../js/popover.js"></script>
+    <script type="text/javascript" src="../js/browser.js"></script>
+    <script type="text/javascript" src="../js/ideogram.js"></script>
+    <script type="text/javascript" src="../js/windowSizePanel.js"></script>
+    <script type="text/javascript" src="../js/referenceFrame.js"></script>
+    <script type="text/javascript" src="../js/igv-canvas.js"></script>
+    <script type="text/javascript" src="../js/genome.js"></script>
+    <script type="text/javascript" src="../js/trackView.js"></script>
+
+    <script type="text/javascript" src="../js/rulerTrack.js"></script>
+
+    <script type="text/javascript" src="../js/feature/featureTrack.js"></script>
+    <script type="text/javascript" src="../js/igv-color.js"></script>
+    <script type="text/javascript" src="../js/igv-utils.js"></script>
+    <script type="text/javascript" src="../js/parseUtils.js"></script>
+    <script type="text/javascript" src="../js/fasta.js"></script>
+    <script type="text/javascript" src="../js/sequenceTrack.js"></script>
+    <script type="text/javascript" src="../js/wigTrack.js"></script>
+    <script type="text/javascript" src="../js/dataloader.js"></script>
+    <script type="text/javascript" src="../js/igv-exts.js"></script>
+    <script type="text/javascript" src="../js/igvxhr.js"></script>
+    <script type="text/javascript" src="../js/binary.js"></script>
+
+    <script type="text/javascript" src="../js/gtex/eqtlTrack.js"></script>
+    <script type="text/javascript" src="../js/gtex/gtexReader.js"></script>
+    <script type="text/javascript" src="../js/gtex/gtex.js"></script>
+    <script type="text/javascript" src="../js/gtex/immvarReader.js"></script>
+
+    <script type="text/javascript" src="../js/bam/coverageMap.js"></script>
+    <script type="text/javascript" src="../js/bam/bamReader.js"></script>
+    <script type="text/javascript" src="../js/bam/bgzf.js"></script>
+    <script type="text/javascript" src="../js/bam/bamSource.js"></script>
+    <script type="text/javascript" src="../js/bam/bamTrack.js"></script>
+    <script type="text/javascript" src="../js/bam/bamAlignment.js"></script>
+    <script type="text/javascript" src="../js/bam/bamAlignmentRow.js"></script>
+    <script type="text/javascript" src="../js/bam/bamIndex.js"></script>
+
+    <script type="text/javascript" src="../js/ga4gh/ga4ghAlignmentReader.js"></script>
+    <script type="text/javascript" src="../js/ga4gh/ga4ghVariantReader.js"></script>
+    <script type="text/javascript" src="../js/ga4gh/ga4ghHelper.js"></script>
+
+    <script type="text/javascript" src="../js/intervalTree.js"></script>
+    <script type="text/javascript" src="../js/igv-constants.js"></script>
+
+    <script type="text/javascript" src="../js/feature/featureCache.js"></script>
+    <script type="text/javascript" src="../js/feature/featureSource.js"></script>
+    <script type="text/javascript" src="../js/feature/featureParsers.js"></script>
+    <script type="text/javascript" src="../js/feature/tribble.js"></script>
+    <script type="text/javascript" src="../js/feature/featureFileReader.js"></script>
+
+    <script type="text/javascript" src="../js/encode/encode.js"></script>
+    <script type="text/javascript" src="../js/cursor/cursorTrack.js"></script>
+    <script type="text/javascript" src="../js/cursor/cursorModel.js"></script>
+    <script type="text/javascript" src="../js/cursor/cursor-ideogram.js"></script>
+
+    <script type="text/javascript" src="../js/karyo/karyo.js"></script>
+    <script type="text/javascript" src="../js/gwas/t2dVariantSource.js"></script>
+    <script type="text/javascript" src="../js/gwas/gwasTrack.js"></script>
+
+    <script type="text/javascript" src="../js/feature/segParser.js"></script>
+    <script type="text/javascript" src="../js/feature/segTrack.js"></script>
+    <script type="text/javascript" src="../js/variant/vcfParser.js"></script>
+    <script type="text/javascript" src="../js/variant/variant.js"></script>
+
+    <script type="text/javascript" src="../js/bigwig/bufferedReader.js"></script>
+    <script type="text/javascript" src="../js/bigwig/bwBPTree.js"></script>
+    <script type="text/javascript" src="../js/bigwig/bwReader.js"></script>
+    <script type="text/javascript" src="../js/bigwig/bwRPTree.js"></script>
+    <script type="text/javascript" src="../js/bigwig/bwSource.js"></script>
+    <script type="text/javascript" src="../js/bigwig/bwTotalSummary.js"></script>
+
+    <script type="text/javascript" src="../js/trackCore.js"></script>
+
+    <script type="text/javascript" src="../js/trackMenuPopupDialog.js"></script>
+
+    <script type="text/javascript" src="../js/colorpicker.js"></script>
+    <script type="text/javascript" src="../js/dialog.js"></script>
+
+    <script type="text/javascript" src="../js/set.js"></script>
+
+    <script src="../js/oauth/google.js"></script>
+
+    <style type="text/css">
+
+        #trackList {
+
+            font-family: 'PT Sans', sans-serif;
+            font-size: small;
+            font-weight: 400;
+        }
+
+        div#trackList > div, div#trackList > h3 {
+
+            color: #444;
+            margin-left: 48px;
+            margin-top: 4px;
+            margin-bottom: 4px;
+
+            padding-left: 32px;
+
+            width: 300px;
+        }
+
+        div#trackList > div:hover,
+        div#trackList > div:focus,
+        div#trackList > div:active {
+            cursor: pointer;
+            color: white;
+            background-color: rgba(49, 106, 246, 1);
+        }
+
+    </style>
+
+</head>
+
+<body>
+
+<button id="issue-126">Reveal browser and look at console for "byteLength" error to see issue #126</button>
+<div id="myDiv" style="padding-top: 50px;padding-bottom: 20px; height: auto;display: none;"></div>
+
+<script type="text/javascript">
+
+    $(document).ready(function () {
+
+        $("button#issue-126").click(function () {
+                $("#myDiv").css("display", "");
+        });
+
+        var div,
+                options,
+                browser;
+
+        div = $("#myDiv")[0];
+        options = {
+            type: "GTEX",
+            fastaURL: "//dn7ywbm9isq8j.cloudfront.net/genomes/seq/hg19/hg19.fasta",
+            cytobandURL: "//dn7ywbm9isq8j.cloudfront.net/genomes/seq/hg19/cytoBand.txt",
+            locus: "chr11:122,618,671-135,006,516",
+            tracks: [
+                {
+                    type: 'eqtl',
+                    sourceType: 'gtex',
+                    url: '//www.gtexportal.org/igv/assets/eqtl/Skin_Sun_Exposed_Lower_leg.portal.eqtl.bin',
+                    indexed: false,
+                    name: 'Skin Sun Exposed Lower leg'
+                },
+                {
+                    type: "gtexGWAS",
+                    url: "http://www.gtexportal.org/igv/gtexGWASTest.txt",
+                    name: "GWAS Track"
+                },
+                {
+                    //url: "//dn7ywbm9isq8j.cloudfront.net/annotations/hg19/genes/gencode.v18.collapsed.bed",
+                    url: "//dn7ywbm9isq8j.cloudfront.net/annotations/hg19/genes/gencode.v18.collapsed.bed",
+                    name: "Genes",
+                    labelDisplayMode: "SLANT",
+                    order: 10000
+                }
+            ]
+        };
+
+        // Upon doing this the browser will repeatedly query for 
+        // gencode.v18.collapse.bed until you click the button and reveal
+        // the div where the browser will fail to draw the tracks from 
+        // having the second number in the range be NaN.
+        browser = igv.createBrowser(div, options);
+    });
+
+
+</script>
+
+</body>
+
+</html>
