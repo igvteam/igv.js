@@ -4,6 +4,6 @@
     <exclude-output />
     <content url="file://$MODULE_DIR$" />
     <orderEntry type="sourceFolder" forTests="false" />
+    <orderEntry type="library" name="igv-web node_modules" level="project" />
   </component>
 </module>
-
