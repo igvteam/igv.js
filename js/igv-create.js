@@ -112,7 +112,7 @@ var igv = (function (igv) {
 
 
         // DOM
-        parentDiv.appendChild(rootDiv);
+        $(parentDiv).append($(rootDiv));
 
         // Create controls.  This can be customized by passing in a function, which should return a div containing the
         // controls

@@ -28,7 +28,7 @@
 
 var igv = (function (igv) {
 
-    const POPOVER_WINDOW = 30000000;
+    const DEFAULT_POPOVER_WINDOW = 100000000;
 
     igv.GWASTrack = function (config) {
         this.config = config;
@@ -41,6 +41,7 @@ var igv = (function (igv) {
         this.background = config.background;    // No default
         this.divider = config.divider || "rgb(225,225,225)";
         this.dotSize = config.dotSize || 4;
+        this.popoverWindow = (config.popoverWindow === undefined ? DEFAULT_POPOVER_WINDOW : config.popoverWindow);
 
         this.description = config.description;  // might be null
         this.proxy = config.proxy;   // might be null
@@ -83,7 +84,7 @@ var igv = (function (igv) {
             pixelHeight = options.pixelHeight,
             bpEnd = bpStart + pixelWidth * bpPerPixel + 1,
             yScale = (track.maxLogP - track.minLogP) / pixelHeight,
-            enablePopover = (bpEnd - bpStart) < POPOVER_WINDOW;
+            enablePopover = (bpEnd - bpStart) < DEFAULT_POPOVER_WINDOW;
 
         if (enablePopover) {
             this.po = [];
