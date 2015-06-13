@@ -170,6 +170,18 @@
             fastaURL: "//dn7ywbm9isq8j.cloudfront.net/genomes/seq/hg19/hg19.fasta",
             cytobandURL: "//dn7ywbm9isq8j.cloudfront.net/genomes/seq/hg19/cytoBand.txt",
             locus: "chr11:122,618,671-135,006,516",
+
+            formats: {
+                gwasSNPS: {
+                    coords: 0,
+                    chr: 0,
+                    start: 1,
+                    end: 2,
+                    fields: ["chrom", "chromStart", "chromEnd", "Strongest SNP-risk allele", "Disease/Phenotype", "P-value", "Odds ratio or beta", "PUBMEDID"]
+                }
+            },
+
+
             tracks: [
                 {
                     type: 'eqtl',
@@ -179,12 +191,14 @@
                     name: 'Skin Sun Exposed Lower leg'
                 },
                 {
-                    type: "gtexGWAS",
-                    url: "http://www.gtexportal.org/igv/gtexGWASTest.txt",
+                    featureType: "annotation",
+                    format: "gwasSNPS",
+                    indexed: false,
+                    url: "//localhost/igv-web/v2_newest_converted_GWAS_catalog_SNPs_Pval5E08_hg19_040115.bed",
                     name: "GWAS Track"
                 },
                 {
-                    //url: "//dn7ywbm9isq8j.cloudfront.net/annotations/hg19/genes/gencode.v18.collapsed.bed",
+                    featureType: 'genes',
                     url: "//dn7ywbm9isq8j.cloudfront.net/annotations/hg19/genes/gencode.v18.collapsed.bed",
                     height: 100,
                     autoHeight: true,

@@ -128,6 +128,7 @@ var igv = (function (igv) {
                 newTrack = new igv.GWASTrack(config);
                 break;
             case "annotation":
+            case "genes":
             case "variant":
             case "FusionJuncSpan":
                 newTrack = new igv.FeatureTrack(config);
