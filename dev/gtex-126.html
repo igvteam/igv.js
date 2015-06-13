@@ -162,7 +162,8 @@
     $(document).ready(function () {
 
         $("button#issue-126").click(function () {
-                $("#myDiv").css("display", "");
+            $("#myDiv").css("display", "block");
+            igv.browser.resize();
         });
 
         var div,
@@ -182,11 +183,6 @@
                     url: '//www.gtexportal.org/igv/assets/eqtl/Skin_Sun_Exposed_Lower_leg.portal.eqtl.bin',
                     indexed: false,
                     name: 'Skin Sun Exposed Lower leg'
-                },
-                {
-                    type: "gtexGWAS",
-                    url: "http://www.gtexportal.org/igv/gtexGWASTest.txt",
-                    name: "GWAS Track"
                 },
                 {
                     //url: "//dn7ywbm9isq8j.cloudfront.net/annotations/hg19/genes/gencode.v18.collapsed.bed",

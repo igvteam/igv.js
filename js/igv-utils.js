@@ -142,15 +142,18 @@ var igv = (function (igv) {
             }
         }
 
-        menuItems.push(
-            {
-                object: $('<div class="igv-track-menu-item igv-track-menu-border-top">Remove track</div>'),
-                click: function () {
-                    popover.hide();
-                    trackView.browser.removeTrack(trackView.track);
+        if (trackView.track.removable !== false) {
+
+            menuItems.push(
+                {
+                    object: $('<div class="igv-track-menu-item igv-track-menu-border-top">Remove track</div>'),
+                    click: function () {
+                        popover.hide();
+                        trackView.browser.removeTrack(trackView.track);
+                    }
                 }
-            }
-        );
+            );
+        }
 
         return menuItems;
 
