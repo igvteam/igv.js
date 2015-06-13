@@ -315,14 +315,13 @@ var igv = (function (igv) {
         var canvas = this.canvas,
             contentDiv = this.contentDiv,
             contentWidth = this.viewportDiv.clientWidth;
-        //      contentHeight = this.canvas.getAttribute("height");  // Maintain the current height
 
-        contentDiv.style.width = contentWidth + "px";      // Not sure why css is not working for this
-        //  contentDiv.style.height = contentHeight + "px";
-
-        canvas.style.width = contentWidth + "px";
-        canvas.setAttribute('width', contentWidth);    //Must set the width & height of the canvas
-        this.update();
+        if (contentWidth > 0) {
+            contentDiv.style.width = contentWidth + "px";      // Not sure why css is not working for this
+            canvas.style.width = contentWidth + "px";
+            canvas.setAttribute('width', contentWidth);    //Must set the width & height of the canvas
+            this.update();
+        }
     };
 
     igv.TrackView.prototype.setTrackHeight = function (newHeight, update) {
@@ -341,14 +340,17 @@ var igv = (function (igv) {
      */
     igv.TrackView.prototype.setContentHeight = function (newHeight) {
 
-        contentHeightStr = newHeight + "px";
+        var contentHeightStr = newHeight + "px";
 
         this.contentDiv.style.height = contentHeightStr;
 
-        if (this.track.autoHeight) {
+        if (this.track.config.autoHeight) {
             setTrackHeight_.call(this, newHeight, false);
         }
         else {
+            if(this.trackDiv.clientHeight > newHeight) {
+                this.trackDiv.style.height = contentHeightStr;
+            }
             this.canvas.setAttribute("height", this.canvas.clientHeight);
             if (this.track.paintAxis) {
                 this.controlCanvas.style.height = contentHeightStr;
@@ -356,7 +358,7 @@ var igv = (function (igv) {
             }
         }
 
-        this.update();
+     //   this.update();
     };
 
     function setTrackHeight_(newHeight, update) {
@@ -846,7 +848,7 @@ var igv = (function (igv) {
         function moveScrollerTo(y) {
             var H = $(outerScrollDiv).height(),
                 h = $(innerScrollDiv).height();
-                newTop = Math.min(Math.max(0, y), H - h),
+            newTop = Math.min(Math.max(0, y), H - h),
                 contentTop = -Math.round(newTop * ($(contentDiv).height() / $(viewportDiv).height()));
             $(innerScrollDiv).css("top", newTop + "px");
             $(contentDiv).css("top", contentTop + "px");

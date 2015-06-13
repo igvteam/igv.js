@@ -186,16 +186,20 @@ var igv = (function (igv) {
 
         igv.loadGenome(config.reference, function (genome) {
 
+            var referenceWidth = browser.trackViewportWidth();
+            if(referenceWidth === 0) referenceWidth = 500;
+
             genome.id = config.reference.genomeId;
             browser.genome = genome;
             browser.addTrack(new igv.RulerTrack());
+
 
 
             // Set inital locus
             var firstChrName = browser.genome.chromosomeNames[0],
                 firstChr = browser.genome.chromosomes[firstChrName];
 
-            browser.referenceFrame = new igv.ReferenceFrame(firstChrName, 0, firstChr.bpLength / browser.trackViewportWidth());
+            browser.referenceFrame = new igv.ReferenceFrame(firstChrName, 0, firstChr.bpLength / referenceWidth);
             browser.controlPanelWidth = 50;
 
             browser.updateLocusSearch(browser.referenceFrame);

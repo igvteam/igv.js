@@ -63,10 +63,10 @@ var igv = (function (igv) {
 
         var self = this;
 
-        if(this.reader.readHeader) {
+        if (this.reader.readHeader) {
             this.reader.readHeader(function (header, features) {
                 // Non-indexed readers will return features as a side effect.  This is an important performance hack
-                if(features) {
+                if (features) {
                     self.featureCache = new igv.FeatureCache(features);
                 }
                 continuation(header);
@@ -77,7 +77,7 @@ var igv = (function (igv) {
         }
     }
 
-        /**
+    /**
      * Required function fo all data source objects.  Fetches features for the
      * range requested and passes them on to the success function.  Usually this is
      * a function that renders the features on the canvas
@@ -89,6 +89,7 @@ var igv = (function (igv) {
      * @param task
      */
     igv.FeatureSource.prototype.getFeatures = function (chr, bpStart, bpEnd, success, task) {
+
 
         var myself = this,
             genomicInterval = new igv.GenomicInterval(chr, bpStart, bpEnd),
@@ -103,24 +104,24 @@ var igv = (function (igv) {
             // TODO -- reuse cached features that overelap new region
             this.reader.readFeatures(function (featureList) {
 
-                    function isIndexed() {
-                        return  myself.reader.indexed ||
-                            myself.config.sourceType === "ga4gh" ||
-                            myself.config.sourceType === "immvar" ||
-                            myself.config.sourceType === "gtex";
-                    }
+                function isIndexed() {
+                    return myself.reader.indexed ||
+                        myself.config.sourceType === "ga4gh" ||
+                        myself.config.sourceType === "immvar" ||
+                        myself.config.sourceType === "gtex";
+                }
 
-                    myself.featureCache = isIndexed() ?
-                        new igv.FeatureCache(featureList, genomicInterval) :
-                        new igv.FeatureCache(featureList);   // Note - replacing previous cache with new one
+                myself.featureCache = isIndexed() ?
+                    new igv.FeatureCache(featureList, genomicInterval) :
+                    new igv.FeatureCache(featureList);   // Note - replacing previous cache with new one
 
-                    // Assign overlapping features to rows
-                    packFeatures(featureList, maxRows);
+                // Assign overlapping features to rows
+                packFeatures(featureList, maxRows);
 
-                    // Finally pass features for query interval to continuation
-                    success(myself.featureCache.queryFeatures(chr, bpStart, bpEnd));
+                // Finally pass features for query interval to continuation
+                success(myself.featureCache.queryFeatures(chr, bpStart, bpEnd));
 
-                }, task, genomicInterval);   // Currently loading at granularity of chromosome
+            }, task, genomicInterval);   // Currently loading at granularity of chromosome
         }
 
     };
@@ -160,7 +161,7 @@ var igv = (function (igv) {
 
         if (features == null || features.length === 0) {
             return;
-        }  
+        }
 
         // Segregate by chromosome
 
