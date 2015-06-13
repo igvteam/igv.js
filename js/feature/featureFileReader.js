@@ -144,71 +144,29 @@ var igv = (function (igv) {
 
         /**
          * Load the file header (not HTTP header) for an indexed file.
+         * TODO -- note this will fail if the file header is > 65kb in size
          *
          * @param index
          */
         function loadHeaderWithIndex(index, continuation) {
 
-
-            getContentLength(function (contentLength) {
-
-                // If the contentLength is unknown, and we have a tabix index, get an approximate value from the index
-                if (contentLength <= 0 && index.blockMax) {
-                    myself.contentLength = index.blockMax;
+            var options = {
+                headers: myself.config.headers,           // http headers, not file header
+                bgz: index.tabix,
+                range: {start: 0, size: 65000},
+                success: function (data) {
+                    myself.header = myself.parser.parseHeader(data);
+                    continuation(myself.header);
                 }
+            };
 
-                var options = {
-                    headers: myself.config.headers,           // http headers, not file header
-                    bgz: index.tabix,
-                    success: function (data) {
-                        myself.header = myself.parser.parseHeader(data);
-                        continuation(myself.header);
-                    }
-                };
-
-                // Get 65kb for the header (very generous).  If the content length is known or approximately known and
-                // < 65kb read the whole file  (omit range specifier)
-                if (contentLength <= 0 || contentLength > 65000) {
-                    options.range = {start: 0, size: 65000};
-                }
-
-
-                if (myself.localFile) {
-                    igvxhr.loadStringFromFile(myself.localFile, options);
-                }
-                else {
-                    igvxhr.loadString(myself.url, options);
-                }
-            });
-
-
-            function getContentLength(continuation) {
-                if (myself.contentLength) {
-                    continuation(myself.contentLength);
-                }
-                else {
-
-                    // Gen the content length first, so we don't try to read beyond the end of the file
-                    igvxhr.getContentLength(myself.headURL, {
-                        headers: myself.config.headers,
-                        success: function (contentLength) {
-
-                            //console.log("CL = " + contentLength);
-
-                            myself.contentLength = contentLength;
-                            continuation(contentLength);
-
-                        },
-                        error: function () {
-                            myself.contentLength = -1;
-                            continuation(myself.contentLength);
-                        }
-
-                    });
-                }
+            if (myself.localFile) {
+                igvxhr.loadStringFromFile(myself.localFile, options);
+            }
+            else {
+                igvxhr.loadString(myself.url, options);
             }
         }
-
     }
 
     /**
