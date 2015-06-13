@@ -351,7 +351,7 @@ var igv = (function (igv) {
 
         var geneColor;
 
-        if (igv.browser.selection && "genes" === this.featureType && feature.name !== undefined) {
+        if (igv.browser.selection && "genes" === this.config.featureType && feature.name !== undefined) {
             // TODO -- for gtex, figure out a better way to do this
             geneColor = igv.browser.selection.colorForGene(feature.name);
         }
