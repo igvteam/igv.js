@@ -166,7 +166,7 @@ var igv = (function (igv) {
         if (this.featureSource.featureCache) {
 
             var chr = igv.browser.referenceFrame.chr,  // TODO -- this should be passed in
-                tolerance = igv.browser.referenceFrame.bpPerPixel,  // We need some tolerance around genomicLocation, start with +/- 1 pixel
+                tolerance = 2*igv.browser.referenceFrame.bpPerPixel,  // We need some tolerance around genomicLocation, start with +/- 2 pixels
                 featureList = this.featureSource.featureCache.queryFeatures(chr, genomicLocation - tolerance, genomicLocation + tolerance),
                 row;
 
@@ -351,7 +351,7 @@ var igv = (function (igv) {
 
         var geneColor;
 
-        if (igv.browser.selection) {
+        if (igv.browser.selection && "genes" === this.featureType && feature.name !== undefined) {
             // TODO -- for gtex, figure out a better way to do this
             geneColor = igv.browser.selection.colorForGene(feature.name);
         }
