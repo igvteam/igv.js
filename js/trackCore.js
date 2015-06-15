@@ -53,10 +53,10 @@ var igv = (function (igv) {
         track.order = config.order;
         track.color = config.color || igv.constants.defaultColor;
 
-        track.removable = (config.removable === undefined ? true : false);      // Defaults to true
+        track.removable = (config.removable === undefined ? true : config.removable);      // Defaults to true
 
         track.height = config.height || ("bed" === config.type ? 100 : 50);
-        track.autoHeight = config.height === undefined;
+        track.autoHeight = (config.autoHeight === undefined ? true : config.autoHeight);
         track.minHeight = config.minHeight || Math.min(25, this.height);
         track.maxHeight = config.maxHeight || Math.max(500, this.height);
 
