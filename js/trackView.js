@@ -328,8 +328,6 @@ var igv = (function (igv) {
 
         setTrackHeight_.call(this, newHeight, update || true);
 
-        this.track.autoHeight = false;   // Explicitly setting track height turns off auto-scale
-
     };
 
     /**

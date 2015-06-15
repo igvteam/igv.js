@@ -95,6 +95,8 @@ var igv = (function (igv) {
 
                     if (undefined !== number) {
                         trackView.setTrackHeight(number);
+                        trackView.track.autoHeight = false;   // Explicitly setting track height turns off auto-scale
+
                         //trackView.update();
                         igv.dialog.hide();
                     }
