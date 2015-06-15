@@ -122,6 +122,7 @@ var igv = (function (igv) {
                                     references.forEach(function (ref) {
                                         var refName = ref.name,
                                             alias = igv.browser.genome.getChromosomeName(refName);
+                                        console.log(refName + "  " + alias);
                                         self.chrNameMap[alias] = refName;
                                     });
                                     continuation(self.chrNameMap);
