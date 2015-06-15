@@ -58,6 +58,7 @@ var igv = (function (igv) {
         if (!config.type) config.type = "IGV";
 
         oauth.google.apiKey = config.apiKey;
+        oauth.google.access_token = config.oauthToken;
 
         if (!config.flanking && isT2D(config)) {  // TODO -- hack for demo, remove
             config.flanking = 100000;
