@@ -344,7 +344,7 @@ var igv = (function (igv) {
 
         this.contentDiv.style.height = contentHeightStr;
 
-        if (this.track.config.autoHeight) {
+        if (this.track.autoHeight) {
             setTrackHeight_.call(this, newHeight, false);
         }
         else {
