@@ -105,8 +105,11 @@ var igv = (function (igv) {
 
                         var referenceSetId = json.readGroups[0].referenceSetId;
 
+                        console.log("No reference set specified");
+
                         if(referenceSetId) {
 
+                            consosle.log("referenceSetId=" + referenceSetId);
                             // Query for reference names to build an alias table (map of genome ref names -> dataset ref names)
                             var readURL = self.url + "/references/search";
 
