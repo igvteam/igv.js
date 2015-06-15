@@ -189,6 +189,47 @@ var igv = (function (igv) {
         igv.browser.update();
     }
 
+    /**
+     * Return "popup data" for feature @ genomic location.  Data is an array of key-value pairs
+     */
+    igv.EqtlTrack.prototype.popupData = function (genomicLocation, xOffset, yOffset) {
+
+        // We use the featureCache property rather than method to avoid async load.  If the
+        // feature is not already loaded this won't work,  but the user wouldn't be mousing over it either.
+        if (this.featureSource.featureCache) {
+
+            var chr = igv.browser.referenceFrame.chr,  // TODO -- this should be passed in
+                tolerance = 2 * this.dotSize * igv.browser.referenceFrame.bpPerPixel,
+                featureList = this.featureSource.featureCache.queryFeatures(chr, genomicLocation - tolerance, genomicLocation + tolerance),
+                dotSize = this.dotSize,
+                tissue = this.name;
+
+            if (featureList && featureList.length > 0) {
+
+
+                var popupData = [];
+                featureList.forEach(function (feature) {
+                    if (feature.end >= genomicLocation - tolerance &&
+                        feature.start <= genomicLocation + tolerance &&
+                        feature.py - yOffset < 2 * dotSize) {
+
+                        if(popupData.length > 0) {
+                            popupData.push("<hr>");
+                        }
+
+                        popupData.push(
+                            {name: "snp id", value: feature.snp},
+                            {name: "gene id", value: feature.geneId},
+                            {name: "gene name", value: feature.geneName},
+                            {name: "p value", value: feature.pValue},
+                            {name: "tissue", value: tissue});
+
+                    }
+                });
+                return popupData;
+            }
+        }
+    }
 
     GtexSelection = function (selection) {
 
