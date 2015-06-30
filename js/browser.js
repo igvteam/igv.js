@@ -40,7 +40,6 @@ var igv = (function (igv) {
         addTrackContainerHandlers(trackContainer);
 
         this.trackViews = [];
-        this.nextTrackOrder = 0;
 
         window.onresize = igv.throttle(function () {
             igv.browser.resize();
@@ -221,7 +220,7 @@ var igv = (function (igv) {
         track.trackView = trackView;
 
         if (undefined === track.order) {
-            track.order = (this.nextTrackOrder)++;
+            track.order = this.trackViews.length;
         }
 
         this.trackViews.push(trackView);
