@@ -47,6 +47,8 @@ var igv = (function (igv) {
         this.proxy = config.proxy;   // might be null
 
         this.portalURL = config.portalURL ? config.portalURL : window.location.origin;
+        this.variantURL = config.variantURL || "http://www.type2diabetesgenetics.org/variant/variantInfo/";
+        this.traitURL = config.traitURL || "http://www.type2diabetesgenetics.org/trait/traitInfo/";
 
         var cs = config.colorScale || {
             thresholds: [5e-8, 5e-4, 0.5],
@@ -186,7 +188,9 @@ var igv = (function (igv) {
                     pvalue = p.feature[this.pvalue] || p.feature.pvalue;
                     dbSnp = p.feature.DBSNP_ID;
 
+
                     if (dbSnp) {
+                        url = this.variantURL.startsWith("http") ? this.variantURL : this.portalURL + "/" + this.variantURL;
                         data.push("<a target='_blank' href='" + url + "' >" + dbSnp + "</a>");
                     }
                     data.push(chr + ":" + pos.toString());
@@ -197,7 +201,7 @@ var igv = (function (igv) {
                     }
 
                     if (dbSnp) {
-                        url = this.portalURL + "/trait/traitInfo/" + dbSnp;
+                        url = this.traitURL.startsWith("http") ? this.traitURL : this.portalURL + "/" + this.traitURL;
                         data.push("<a target='_blank' href='" + url + "'>" + "see all available statistics for this variant</a>");
                     }
 

@@ -25,6 +25,7 @@
 
 // Experimental class for fetching features from an mpg webservice.
 
+
 var igv = (function (igv) {
 
 
@@ -36,13 +37,17 @@ var igv = (function (igv) {
      */
     igv.T2DVariantSource = function (config) {
 
-        this.proxy = (config.proxy ? config.proxy : "//www.broadinstitute.org/igvdata/t2d/postJson.php");   // Always use a proxy for now
+        this.config = config;
+
+        if (config.url.startsWith("http://dig-dev.broadinstitute.org:8888/") && config.proxy === undefined) {
+            this.proxy = "//www.broadinstitute.org/igvdata/t2d/postJson.php";  // Hack for old service that is missing CORS headers
+        }
+
         this.url = config.url;
         this.trait = config.trait;
+        this.dataset = config.dataset;
+        this.pvalue = config.pvalue;
         this.valueThreshold = config.valueThreshold ? config.valueThreshold : 5E-2;
-
-        this.type = this.url.contains("variant") ? VARIANT : TRAIT;
-        this.pvalue = config.pvalue ? config.pvalue : "PVALUE";
 
     };
 
@@ -66,46 +71,63 @@ var igv = (function (igv) {
 
         else {
 
-            function loadFeatures() {
-
-                // Get a minimum 10mb window around the requested locus
-                var window = Math.max(bpEnd - bpStart, 10000000) / 2,
-                    center = (bpEnd + bpStart) / 2,
-                    queryChr = (chr.startsWith("chr") ? chr.substring(3) : chr), // Webservice uses "1,2,3..." convention
-                    queryStart = Math.max(0, center - window),
-                    queryEnd = center + window,
-                    queryURL = this.proxy ? this.proxy : this.url,
-                    filters =
-                        [
-                            {"operand": "CHROM", "operator": "EQ", "value": queryChr, "filter_type": "STRING" },
-                            {"operand": "POS", "operator": "GT", "value": queryStart, "filter_type": "FLOAT" },
-                            {"operand": "POS", "operator": "LT", "value": queryEnd, "filter_type": "FLOAT" },
-                            {"operand": source.pvalue, "operator": "LTE", "value": source.valueThreshold, "filter_type": "FLOAT"}
-                        ],
-                    columns = source.type === TRAIT ?
-                        ["CHROM", "POS", "DBSNP_ID", "PVALUE", "ZSCORE"] :
-                        ["CHROM", "POS", source.pvalue, "DBSNP_ID"],
-                    data = {
-                        "user_group": "ui",
-                        "filters": filters,
-                        "columns": columns
-                    },
-                    tmp;
+            if (this.dataset === undefined) {
+                loadFeaturesV1.call(this);
+            } else {
+                loadFeaturesV2.call(this);
+            }
+        }
 
 
-                if (source.type === TRAIT) data.trait = source.trait;
+        function loadFeaturesV1() {
 
-                tmp = this.proxy ?
-                    "url=" + this.url + "&data=" + JSON.stringify(data) :
-                    JSON.stringify(data);
+            // Get a minimum 10mb window around the requested locus
+            var window = Math.max(bpEnd - bpStart, 10000000) / 2,
+                center = (bpEnd + bpStart) / 2,
+                queryChr = (chr.startsWith("chr") ? chr.substring(3) : chr), // Webservice uses "1,2,3..." convention
+                queryStart = Math.max(0, center - window),
+                queryEnd = center + window,
+                queryURL = this.proxy ? this.proxy : this.url,
+                type = this.url.contains("variant") ? VARIANT : TRAIT,
+                pvalue = this.config.pvalue ? this.config.pvalue : "PVALUE",
 
-                igvxhr.loadJson(queryURL, {
-                    sendData: tmp,
-                    task: task,
-                    success: function (json) {
-                        var variants;
+                filters =
+                    [
+                        {"operand": "CHROM", "operator": "EQ", "value": queryChr, "filter_type": "STRING"},
+                        {"operand": "POS", "operator": "GT", "value": queryStart, "filter_type": "FLOAT"},
+                        {"operand": "POS", "operator": "LT", "value": queryEnd, "filter_type": "FLOAT"},
+                        {"operand": pvalue, "operator": "LTE", "value": source.valueThreshold, "filter_type": "FLOAT"}
+                    ],
+                columns = type === TRAIT ?
+                    ["CHROM", "POS", "DBSNP_ID", "PVALUE", "ZSCORE"] :
+                    ["CHROM", "POS", pvalue, "DBSNP_ID"],
+                data = {
+                    "user_group": "ui",
+                    "filters": filters,
+                    "columns": columns
+                },
+                tmp;
 
-                        if (json) {
+
+            if (type === TRAIT) data.trait = source.trait;
+
+            tmp = this.proxy ?
+            "url=" + this.url + "&data=" + JSON.stringify(data) :
+                JSON.stringify(data);
+
+            igvxhr.loadJson(queryURL, {
+                sendData: tmp,
+                task: task,
+                success: function (json) {
+                    var variants;
+
+                    if (json) {
+
+                        if (json.error_code) {
+                            alert("Error querying trait " + source.trait + "  (error_code=" + json.error_code + ")");
+                            success(null);
+                        }
+                        else {
                             variants = json.variants;
                             variants.sort(function (a, b) {
                                 return a.POS - b.POS;
@@ -114,19 +136,143 @@ var igv = (function (igv) {
 
                             success(variants);
                         }
-                        else {
+                    }
+                    else {
+                        success(null);
+                    }
+
+                }
+            });
+
+        }
+
+        function loadFeaturesV2() {
+
+            // Get a minimum 10mb window around the requested locus
+            var window = Math.max(bpEnd - bpStart, 10000000) / 2,
+                center = (bpEnd + bpStart) / 2,
+                queryChr = (chr.startsWith("chr") ? chr.substring(3) : chr), // Webservice uses "1,2,3..." convention
+                queryStart = Math.max(0, center - window),
+                queryEnd = center + window,
+                queryURL = this.proxy ? this.proxy : this.url,
+                phenotype = this.trait,
+                pvalue = this.pvalue,
+                dataset = this.dataset,
+                pproperty = JSON.parse('{"' + pvalue + '": {"' + dataset + '": ["' + phenotype + '"]}}'),
+                properties = {
+                    "cproperty": ["VAR_ID", "DBSNP_ID", "CHROM", "POS"],
+                    "orderBy": ["CHROM"],
+                    "dproperty": {},
+                    "pproperty": pproperty
+                },
+
+                filters =
+                    [
+                        {
+                            "dataset_id": "x",
+                            "phenotype": "x",
+                            "operand": "CHROM",
+                            "operator": "EQ",
+                            "value": queryChr,
+                            "operand_type": "STRING"
+                        },
+                        {
+                            "dataset_id": "x",
+                            "phenotype": "x",
+                            "operand": "POS",
+                            "operator": "GTE",
+                            "value": bpStart,
+                            "operand_type": "INTEGER"
+                        },
+                        {
+                            "dataset_id": "x",
+                            "phenotype": "x",
+                            "operand": "POS",
+                            "operator": "LTE",
+                            "value": bpEnd,
+                            "operand_type": "INTEGER"
+                        },
+                        {
+                            "dataset_id": dataset,
+                            "phenotype": phenotype,
+                            "operand": pvalue,
+                            "operator": "LT",
+                            "value": this.valueThreshold,
+                            "operand_type": "FLOAT"
+                        }
+                    ],
+                data = {
+                    "passback": "x",
+                    "entity": "variant",
+                    "properties": properties,
+                    "filters": filters
+                },
+                tmp;
+
+            console.log(JSON.stringify(data));
+
+            if (source.type === TRAIT) data.trait = source.trait;
+
+            tmp = this.proxy ?
+            "url=" + this.url + "&data=" + JSON.stringify(data) :
+                JSON.stringify(data);
+
+            igvxhr.loadJson(queryURL, {
+                sendData: tmp,
+                task: task,
+                success: function (json) {
+                    var variants;
+
+                    if (json) {
+
+                        if (json.error_code) {
+                            alert("Error querying trait " + source.trait + "  (error_code=" + json.error_code + ")");
                             success(null);
                         }
+                        else {
+                            variants = [];
+                            json.variants.forEach(function (varArray) {
+                                variants.push(convert(varArray));
+                            })
+
+                            variants.sort(function (a, b) {
+                                return a.POS - b.POS;
+                            });
+
+                            // TODO -- extract pvalue
+
+                            source.cache = new FeatureCache(chr, queryStart, queryEnd, variants);
+
+                            success(variants);
+                        }
+                    }
+                    else {
+                        success(null);
+                    }
+
+                    // Convert a variant as returned by the webservice into an object
+                    function convert(varArray) {
+                        var variant = {};
+                        varArray.forEach(function (object) {
+                            for (var property in object) {
+                                if (object.hasOwnProperty(property)) {
+                                    variant[property] = object[property];
+                                }
+                            }
+
+                        });
+
+                        // "unwind" the pvalue, then null the nested array to save memory
+                        variant.pvalue =  variant[pvalue][dataset][phenotype];
+                        variant[pvalue] = undefined;
+                        return variant;
 
                     }
-                });
 
-            }
-
-            loadFeatures.call(this);
+                }
+            });
         }
     }
-
 
     // Experimental linear index feature cache.
     var FeatureCache = function (chr, start, end, features) {
@@ -165,3 +311,4 @@ var igv = (function (igv) {
 
     return igv;
 })(igv || {});
+
