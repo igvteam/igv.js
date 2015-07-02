@@ -107,7 +107,7 @@ var igv = (function (igv) {
 
                 variant = featureList[i];
 
-                pos = variant.POS || variant.start;     // TODO fixme
+                pos = variant.start;     // TODO fixme
 
                 if (pos < bpStart) continue;
                 if (pos > bpEnd) break;
