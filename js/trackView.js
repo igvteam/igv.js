@@ -211,53 +211,31 @@ var igv = (function (igv) {
 
         var myself = this,
             labelButton,
-            trackIconContainer;
+            trackIconContainer,
+            description;
 
         if ("CURSOR" !== this.browser.type) {
 
+            if (this.track.name) {
 
-            if (this.track.description) {
 
-                labelButton = document.createElement("button");
-                viewportDiv.appendChild(labelButton);
-                this.track.labelButton = labelButton;
+                trackIconContainer = $('<div class="igv-app-icon-container">');
+                $(viewportDiv).append(trackIconContainer[0]);
 
-                labelButton.className = "btn btn-xs btn-cursor-deselected igv-track-label-span-base";
-                labelButton.style.position = "absolute";
-                labelButton.style.top = "10px";
-                labelButton.style.left = "10px";
-                labelButton.innerHTML = this.track.name;
+                this.track.labelSpan = $('<span class="igv-track-label-span-base">')[0];
+                this.track.labelSpan.innerHTML = this.track.name;
+                $(trackIconContainer).append(this.track.labelSpan);
 
-                labelButton.onclick = function (e) {
-                    igv.popover.presentTrackPopup(e.pageX, e.pageY, myself.track.description);
+                description = this.track.description || this.track.name;
+                this.track.labelSpan.onclick = function (e) {
+                    igv.popover.presentTrackPopup(e.pageX, e.pageY, description);
                 }
 
-            } else {
+                $(viewportDiv).scroll(function () {
+                    trackIconContainer.css({"top": $(viewportDiv).scrollTop() + "px"});
 
-                if (this.track.name) {
+                });
 
-                    trackIconContainer = $('<div class="igv-app-icon-container">');
-                    $(viewportDiv).append(trackIconContainer[0]);
-
-                    if (false === this.browser.trackLabelsVisible) {
-                        trackIconContainer.hide();
-                    } else {
-                        trackIconContainer.show();
-                    }
-
-                    this.track.labelSpan = $('<span class="igv-track-label-span-base">')[0];
-                    this.track.labelSpan.innerHTML = this.track.name;
-                    $(trackIconContainer).append(this.track.labelSpan);
-
-                    $(viewportDiv).scroll(function () {
-
-                        //console.log("viewportDiv scrolled " + $(viewportDiv).scrollTop());
-
-                        trackIconContainer.css({"top": $(viewportDiv).scrollTop() + "px"});
-
-                    });
-
-                }
 
             }
 
@@ -352,7 +330,7 @@ var igv = (function (igv) {
             setTrackHeight_.call(this, newHeight, false);
         }
         else {
-            if(this.trackDiv.clientHeight > newHeight) {
+            if (this.trackDiv.clientHeight > newHeight) {
                 this.trackDiv.style.height = contentHeightStr;
             }
             this.canvas.setAttribute("height", this.canvas.clientHeight);
@@ -362,7 +340,7 @@ var igv = (function (igv) {
             }
         }
 
-     //   this.update();
+        //   this.update();
     };
 
     function setTrackHeight_(newHeight, update) {
