@@ -118,11 +118,13 @@ var igv = (function (igv) {
 
         // Create controls.  This can be customized by passing in a function, which should return a div containing the
         // controls
-        controlDiv = config.createControls ?
-            config.createControls(browser, config) :
-            createStandardControls(browser, config);
 
-        $(rootDiv).append($(controlDiv));
+        if(config.showCommandBar !== false) {
+            controlDiv = config.createControls ?
+                config.createControls(browser, config) :
+                createStandardControls(browser, config);
+            $(rootDiv).append($(controlDiv));
+        }
 
         contentDiv = $('<div id="igvContentDiv" class="igv-content-div">')[0];
         $(rootDiv).append(contentDiv);

@@ -38,21 +38,21 @@ var igv = (function (igv) {
     igv.T2DVariantSource = function (config) {
 
         this.config = config;
-
-        if (config.url.startsWith("http://dig-dev.broadinstitute.org:8888/") && config.proxy === undefined) {
-            config.proxy = "//www.broadinstitute.org/igvdata/t2d/postJson.php";  // Hack for old service that is missing CORS headers
-        }
-
         this.url = config.url;
         this.trait = config.trait;
         this.dataset = config.dataset;
         this.pvalue = config.pvalue;
 
+        // Hack for old service that is missing CORS headers
+        if (config.dataset === undefined && config.proxy === undefined) {
+            config.proxy = "//www.broadinstitute.org/igvdata/t2d/postJson.php";
+        }
+
         if (config.valueThreshold === undefined) {
             config.valueThreshold = 5E-2;
         }
 
-        if (this.dataset === undefined) {
+        if (config.dataset === undefined) {
             this.queryJson = config.queryJson || queryJsonV1;
             this.jsonToVariants = config.jsonToVariants || jsonToVariantsV1;
         } else {
