@@ -475,6 +475,7 @@
         div = $("#myDiv")[0];
         options = {
             showKaryo: false,
+            showCommandBar: false,
             fastaURL: "//dn7ywbm9isq8j.cloudfront.net/genomes/seq/hg19/hg19.fasta",
             cytobandURL: "//dn7ywbm9isq8j.cloudfront.net/genomes/seq/hg19/cytoBand.txt",
             locus: 'slc30a8',
@@ -488,10 +489,9 @@
                     colorScale: {
                         thresholds: [5e-8, 5e-4, 0.05],
                         colors: ['rgb(0,102,51)', 'rgb(122,179,23)', 'rgb(158,213,76)', 'rgb(227,238,249)']
-                    }
-                   // ,
-                   // description: ('<strong>fasting glucose</strong><br/>' +
-                   // 'Results in this track are from a study of 79,854 people conducted by the GoT2D consortium.')
+                    },
+                    description: ('<strong>fasting glucose</strong><br/>' +
+                    'Results in this track are from a study of 79,854 people conducted by the GoT2D consortium.')
                 },
                 {
                     type: "t2d",
