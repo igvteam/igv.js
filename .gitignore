@@ -8,3 +8,5 @@ docs/api.html
 oauth.json
 files
 local
+.idea/jsLibraryMappings.xml
+.idea/libraries
