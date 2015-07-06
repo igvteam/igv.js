@@ -132,30 +132,33 @@ var igv = (function (igv) {
                 if (type == 'A') {
                     value = String.fromCharCode(ba[p + 3]);
                     p += 4;
-                } else if (type == 'i' || type == 'I') {
+                } else if (type === 'i' || type === 'I') {
                     value = readInt(ba, p + 3);
                     p += 7;
-                } else if (type == 'c' || type == 'C') {
+                } else if (type === 'c' || type === 'C') {
                     value = ba[p + 3];
                     p += 4;
-                } else if (type == 's' || type == 'S') {
+                } else if (type === 's' || type === 'S') {
                     value = readShort(ba, p + 3);
                     p += 5;
-                } else if (type == 'f') {
-                    throw 'FIXME need floats';
-                } else if (type == 'Z') {
+                } else if (type === 'f') {
+                    // TODO 'FIXME need floats';
+                    value = 'floats not yet supported';
+                } else if (type === 'Z') {
                     p += 3;
                     value = '';
                     for (; ;) {
                         var cc = ba[p++];
-                        if (cc == 0) {
+                        if (cc === 0) {
                             break;
                         } else {
                             value += String.fromCharCode(cc);
                         }
                     }
                 } else {
-                    //    throw 'Unknown type ' + type;
+                    //'Unknown type ' + type;
+                    value = 'Error unknown type: ' + type;
+
                 }
                 tags[tag] = value;
             }
@@ -227,6 +230,24 @@ var igv = (function (igv) {
         function yesNo(bool) {
             return bool ? 'Yes' : 'No';
         }
+    }
+
+
+    function readInt(ba, offset) {
+        return (ba[offset + 3] << 24) | (ba[offset + 2] << 16) | (ba[offset + 1] << 8) | (ba[offset]);
+    }
+
+    function readShort(ba, offset) {
+        return (ba[offset + 1] << 8) | (ba[offset]);
+    }
+
+    function readFloat(ba, offset) {
+
+        var dataView = new DataView(new ArrayBuffer()),
+            littleEndian = true;
+
+        return dataView.getFloat32(offset, littleEndian);
+
     }
 
     return igv;
