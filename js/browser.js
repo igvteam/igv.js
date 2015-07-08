@@ -612,9 +612,9 @@ var igv = (function (igv) {
     igv.Browser.prototype.search = function (feature, continuation) {
 
         // See if we're ready to respond to a search, if not just queue it up and return
-        if(igv.browser === undefined || igv.browser.genome === undefined) {
+        if (igv.browser === undefined || igv.browser.genome === undefined) {
             igv.browser.initialLocus = feature;
-            if(continuation) continuation();
+            if (continuation) continuation();
             return;
         }
 
@@ -684,7 +684,7 @@ var igv = (function (igv) {
                                 chr = igv.browser.genome.getChromosomeName(locusTokens[0].trim());
 
                                 if (igv.browser.type === "GTEX") {
-                                    igv.browser.selection = new igv.GtexSelection(type == 'gtex' ? {snp: feature} : {gene: feature});
+                                    igv.browser.selection = new igv.GtexSelection('gtex' === type || 'snp' === type ? {snp: feature} : {gene: feature});
                                 }
 
                                 rangeTokens = locusTokens[1].split("-");
