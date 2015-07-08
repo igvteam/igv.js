@@ -213,6 +213,13 @@
                                 name: 'MRT_A204 FaireSeq Alignments rep 1'})">MRT_A204 FaireSeq Alignments rep 1
         </div>
 
+
+        <div onclick="igv.browser.loadTrack({
+                                type: 'bam',
+                                url: '../IonDx-6_rawlib.bam',
+                                name: 'Ion BAM'})">Ion BAM
+        </div>
+
         <div onclick="igv.browser.loadTrack({
                                 sourceType: 'ga4gh',
                                 type: 'bam',
@@ -289,6 +296,15 @@
                                 description: ('<strong>GWAS</strong><br/>'+
                                 'Put description of track here')
                                 })">gtex GWAS test
+        </div>
+
+        <div onclick="igv.browser.loadTrack(
+        {
+            url: '../test/data/gff/eden.txt',
+            format: 'gff',
+            displayMode: 'SQUISHED',     // COLLAPSED | EXPANDED | SQUISHED
+            indexed: false
+        })">EDEN gff
         </div>
 
 

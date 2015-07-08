@@ -508,6 +508,14 @@ var igv = (function (igv) {
         return (value.substring || value.toFixed) ? true : false
     }
 
+
+    igv.log = function(message) {
+        if(igv.enableLogging && console && console.log) {
+            console.log(message);
+        }
+    }
+
+
     return igv;
 
 })(igv || {});
