@@ -336,14 +336,14 @@ var igv = (function (igv) {
 
             // toggle track labels
             $trackLabelToggle = $('<div class="igvNavigationToggleTrackLabels">');
-            $trackLabelToggle.text("hide track labels");
+            $trackLabelToggle.text("hide labels");
             navigation.append($trackLabelToggle[ 0 ]);
 
             $trackLabelToggle.click(function () {
 
                 browser.trackLabelsVisible = !browser.trackLabelsVisible;
                 if (false === browser.trackLabelsVisible) {
-                    $(this).text("show track labels");
+                    $(this).text("show labels");
                     $('.igv-app-icon-container').hide();
                 } else {
                     $(this).text("hide track labels");
