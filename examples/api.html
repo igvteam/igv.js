@@ -66,10 +66,20 @@
                         <li>
                             <a href="#"
                                onclick="igv.browser.loadTrack({
-                                 type: 'bed',
+                                 format: 'bed',
                                  url: '//www.broadinstitute.org/igvdata/annotations/hg19/dbSnp/snp137.hg19.bed.gz',
                                  visibilityWindow: 200000,
                                  label: 'dbSNP 137'})">dbSNP 137 (bed tabix)</a></li>
+
+                        <li>
+                            <a href="#"
+                               onclick="igv.browser.loadTrack(
+                                {
+                                url: 'http://hgdownload.cse.ucsc.edu/goldenPath/hg19/encodeDCC/wgEncodeBroadHistone/wgEncodeBroadHistoneGm12878H3k4me3StdSig.bigWig',
+                                name: 'Gm12878H3k4me3'
+                                })">Encode bigwig</a></li>
+
+
                     </ul>
                 </li>
             </ul>
