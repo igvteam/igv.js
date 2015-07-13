@@ -936,9 +936,12 @@ div.ui-dialog fieldset {
 .igv-track-label-span-base:hover,
 .igv-track-label-span-base:focus,
 .igv-track-label-span-base:active  {
-    color: white;
+    border-radius: 4px;
+    border-color: #444;
+    border-style: solid;
+    border-width: thin;
     cursor: pointer;
-    background-color: rgba(49, 106, 246, 1);
+    background-color: rgba(224, 224, 224, 1);
 }
 
 .igv-track-label-span-highlighted {
