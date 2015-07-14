@@ -152,6 +152,51 @@ div[id="igvEncodeModal"] {
     padding: 2px;
 }
 
+.igv-data-range-input-label {
+
+    /*padding-top: 8px;*/
+    padding-left: 8px;
+
+    text-align: right;
+
+    font-family: 'PT Sans', sans-serif;
+    font-size: medium;
+    font-weight: 200;
+
+    color: #575757;
+
+}
+
+.igv-data-range-input {
+
+    outline: none;
+
+    border-style: solid;
+    border-radius: 4px;
+    border-width: thin;
+    border-color: rgb(127, 127, 127);
+
+    width: 100%;
+
+    padding-left: 8px;
+
+    vertical-align: middle;
+    text-align: left;
+
+    font-family: 'PT Sans', sans-serif;
+    font-size: medium;
+    font-weight: 200;
+
+    color: #575757;
+
+}
+
+
+
+
+
+
+
 .igv-user-input-colorpicker {
 
     outline: none;
