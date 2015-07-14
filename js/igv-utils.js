@@ -208,7 +208,7 @@ var igv = (function (igv) {
 
                 igv.dataRangeDialog.ok.unbind();
                 igv.dataRangeDialog.ok.click(function() {
-                    console.log("ok");
+                    console.log("min " + igv.dataRangeDialog.minInput.val() + " max " + igv.dataRangeDialog.maxInput.val() + " log " + igv.dataRangeDialog.logInput.is(':checked') );
                 });
 
                 igv.dataRangeDialog.show();
