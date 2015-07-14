@@ -124,7 +124,6 @@ var igv = (function (igv) {
 
             rowContainer.append( row[ 0 ]);
 
-
             // maximum
             row = $('<div class="igv-grid-dialog">');
 
@@ -140,8 +139,6 @@ var igv = (function (igv) {
             row.append( column[ 0 ] );
 
             rowContainer.append( row[ 0 ]);
-
-
 
             // logaritmic
             row = $('<div class="igv-grid-dialog">');

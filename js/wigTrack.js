@@ -64,7 +64,11 @@ var igv = (function (igv) {
 
     igv.WIGTrack.prototype.popupMenuItems = function (popover) {
 
-        return [ igv.colorPickerMenuItem(popover, this.trackView) ];
+        var menuItems = [];
+        menuItems.push(igv.colorPickerMenuItem(popover, this.trackView));
+        menuItems.push(igv.dataRangeMenuItem(popover, this.trackView));
+
+        return menuItems;
 
     };
 
