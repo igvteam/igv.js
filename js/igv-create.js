@@ -156,6 +156,10 @@ var igv = (function (igv) {
         igv.dialog = new igv.Dialog(bodyObject);
         igv.dialog.hide();
 
+        // Data Range Dialog object -- singleton shared by all components
+        igv.dataRangeDialog = new igv.DataRangeDialog(bodyObject);
+        igv.dataRangeDialog.hide();
+
         // extend jquery ui dialog widget to support enter key triggering "ok" button press.
         $.extend($.ui.dialog.prototype.options, {
 

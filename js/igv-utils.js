@@ -61,7 +61,7 @@ var igv = (function (igv) {
 
         return topLeft;
 
-    }
+    };
 
     igv.trackMenuItems = function (popover, trackView) {
 
@@ -102,13 +102,12 @@ var igv = (function (igv) {
                     }
 
                     function parseNumber(value) {
-
-                        var number = parseFloat(value, 10);
-
-                        return number;
+                        return parseFloat(value, 10);
                     }
 
-                })
+                }),
+
+                igv.dataRangeMenuItem(popover, trackView)
 
             ];
 
@@ -177,6 +176,18 @@ var igv = (function (igv) {
                 igv.dialog.dialogInput.change(dialogInputChange);
 
                 igv.dialog.show();
+                popover.hide();
+            }
+        }
+    };
+
+    igv.dataRangeMenuItem = function (popover, trackView) {
+
+        return {
+            object: $('<div class="igv-track-menu-item">' + "Set data range" + '</div>'),
+            click: function () {
+                igv.dataRangeDialog.trackView = trackView;
+                igv.dataRangeDialog.show();
                 popover.hide();
             }
         }

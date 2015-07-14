@@ -179,6 +179,13 @@ var igv = (function (igv) {
         }
     };
 
+    igv.TrackView.prototype.setDataRange = function (min, max, logScale) {
+
+        console.log("set track data range min " + min + " max " + max + " logScale " + (true === logScale ? "yes" : "no"));
+        //setTrackHeight_.call(this, newHeight, update || true);
+
+    };
+
     igv.TrackView.prototype.addViewportToParentTrackDiv = function (trackDiv) {
 
         // viewport
