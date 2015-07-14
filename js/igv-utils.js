@@ -187,6 +187,27 @@ var igv = (function (igv) {
             object: $('<div class="igv-track-menu-item">' + "Set data range" + '</div>'),
             click: function () {
                 igv.dataRangeDialog.trackView = trackView;
+
+                // minimum
+                igv.dataRangeDialog.minLabel.text("Minimum");
+
+                igv.dataRangeDialog.minInput.val(24);
+
+                igv.dataRangeDialog.minInput.unbind();
+                igv.dataRangeDialog.minInput.change(function() {
+                    console.log("do change minimum");
+                });
+
+                // maximum
+                igv.dataRangeDialog.maxLabel.text("Maximum");
+
+                igv.dataRangeDialog.maxInput.val(48);
+
+                igv.dataRangeDialog.maxInput.unbind();
+                igv.dataRangeDialog.maxInput.change(function() {
+                    console.log("do change maximum");
+                });
+
                 igv.dataRangeDialog.show();
                 popover.hide();
             }

@@ -48,9 +48,11 @@ var igv = (function (igv) {
 
         this.container.append(this.header[ 0 ]);
 
-        self.container.append(rowOfLabel()[ 0 ]);
+        self.container.append(rowOfLabelAndInput()[ 0 ]);
 
-        self.container.append(rowOfInput()[ 0 ]);
+        //self.container.append(rowOfLabel()[ 0 ]);
+        //
+        //self.container.append(rowOfInput()[ 0 ]);
 
         self.container.append(rowOfCancel()[ 0 ]);
 
@@ -88,6 +90,52 @@ var igv = (function (igv) {
 
         }
 
+        function rowOfLabelAndInput() {
+
+            var rowContainer,
+                row,
+                column;
+
+            rowContainer = $('<div class="igv-grid-rect">');
+
+            // minimum
+            row = $('<div class="igv-grid-dialog">');
+
+            column = $('<div class="igv-col igv-col-2-4">');
+            self.minLabel = $('<div class="igv-user-input-label">');
+
+            column.append( self.minLabel[ 0 ] );
+            row.append( column[ 0 ] );
+
+            column = $('<div class="igv-col igv-col-2-4">');
+            self.minInput = $('<input class="igv-user-input-dialog" type="text" value="125">');
+
+            column.append( self.minInput[ 0 ] );
+            row.append( column[ 0 ] );
+
+            rowContainer.append( row[ 0 ]);
+
+            // maximum
+            row = $('<div class="igv-grid-dialog">');
+
+            column = $('<div class="igv-col igv-col-2-4">');
+            self.maxLabel = $('<div class="igv-user-input-label">');
+
+            column.append( self.maxLabel[ 0 ] );
+            row.append( column[ 0 ] );
+
+            column = $('<div class="igv-col igv-col-2-4">');
+            self.maxInput = $('<input class="igv-user-input-dialog" type="text" value="250">');
+
+            column.append( self.maxInput[ 0 ] );
+            row.append( column[ 0 ] );
+
+            rowContainer.append( row[ 0 ]);
+
+            return rowContainer;
+
+        }
+
         function rowOfLabel() {
 
             var rowContainer,
@@ -98,9 +146,9 @@ var igv = (function (igv) {
             row = $('<div class="igv-grid-dialog">');
 
             column = $('<div class="igv-col igv-col-4-4">');
-            self.dialogLabel = $('<div class="igv-user-input-label">');
+            self.minLabel = $('<div class="igv-user-input-label">');
 
-            column.append( self.dialogLabel[ 0 ] );
+            column.append( self.minLabel[ 0 ] );
             row.append( column[ 0 ] );
 
             rowContainer = $('<div class="igv-grid-rect">');
@@ -120,9 +168,9 @@ var igv = (function (igv) {
             row = $('<div class="igv-grid-dialog">');
 
             column = $('<div class="igv-col igv-col-4-4">');
-            self.dialogInput = $('<input class="igv-user-input-dialog" type="text" value="#000000">');
+            self.minInput = $('<input class="igv-user-input-dialog" type="text" value="#000000">');
 
-            column.append( self.dialogInput[ 0 ] );
+            column.append( self.minInput[ 0 ] );
             row.append( column[ 0 ] );
 
             rowContainer = $('<div class="igv-grid-rect">');
