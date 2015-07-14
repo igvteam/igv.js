@@ -102,9 +102,11 @@ var igv = (function (igv) {
 
             var rowContainer,
                 row,
-                column;
+                column,
+                columnFiller;
 
             rowContainer = $('<div class="igv-grid-rect">');
+
 
             // minimum
             row = $('<div class="igv-grid-dialog">');
@@ -112,18 +114,16 @@ var igv = (function (igv) {
             column = $('<div class="igv-col igv-col-3-8">');
             self.minLabel = $('<div class="igv-data-range-input-label">');
             self.minLabel.text("Minimum");
-
-
             column.append( self.minLabel[ 0 ] );
             row.append( column[ 0 ] );
 
             column = $('<div class="igv-col igv-col-3-8">');
             self.minInput = $('<input class="igv-data-range-input" type="text" value="125">');
-
             column.append( self.minInput[ 0 ] );
             row.append( column[ 0 ] );
 
             rowContainer.append( row[ 0 ]);
+
 
             // maximum
             row = $('<div class="igv-grid-dialog">');
@@ -131,15 +131,32 @@ var igv = (function (igv) {
             column = $('<div class="igv-col igv-col-3-8">');
             self.maxLabel = $('<div class="igv-data-range-input-label">');
             self.maxLabel.text("Maximum");
-
             column.append( self.maxLabel[ 0 ] );
             row.append( column[ 0 ] );
 
             column = $('<div class="igv-col igv-col-3-8">');
             self.maxInput = $('<input class="igv-data-range-input" type="text" value="250">');
-
             column.append( self.maxInput[ 0 ] );
             row.append( column[ 0 ] );
+
+            rowContainer.append( row[ 0 ]);
+
+
+
+            // logaritmic
+            row = $('<div class="igv-grid-dialog">');
+
+            column = $('<div class="igv-col igv-col-3-8">');
+            columnFiller = $('<div class="igv-data-range-input-label">');
+            columnFiller.text("Logarithmic");
+            column.append( columnFiller[ 0 ] );
+            row.append( column[ 0 ] );
+
+            column = $('<div class="igv-col igv-col-3-8">');
+            self.logInput = $('<input class="igv-data-range-input" type="checkbox">');
+            column.append( self.logInput[ 0 ] );
+            row.append( column[ 0 ] );
+
 
             rowContainer.append( row[ 0 ]);
 
