@@ -107,7 +107,7 @@ var igv = (function (igv) {
 
                 }),
 
-                igv.dataRangeMenuItem(popover, trackView)
+                //igv.dataRangeMenuItem(popover, trackView)
 
             ];
 
@@ -190,25 +190,15 @@ var igv = (function (igv) {
 
                 // minimum
                 igv.dataRangeDialog.minInput.val(24);
-
-                //igv.dataRangeDialog.minInput.unbind();
-                //igv.dataRangeDialog.minInput.change(function() {
-                //    console.log("do change minimum");
-                //});
-
-                // maximum
-                igv.dataRangeDialog.maxLabel.text("Maximum");
-
                 igv.dataRangeDialog.maxInput.val(48);
-
-                //igv.dataRangeDialog.maxInput.unbind();
-                //igv.dataRangeDialog.maxInput.change(function() {
-                //    console.log("do change maximum");
-                //});
+                igv.dataRangeDialog.logInput.prop('checked', false);
 
                 igv.dataRangeDialog.ok.unbind();
                 igv.dataRangeDialog.ok.click(function() {
+                    
                     console.log("min " + igv.dataRangeDialog.minInput.val() + " max " + igv.dataRangeDialog.maxInput.val() + " log " + igv.dataRangeDialog.logInput.is(':checked') );
+                    igv.dataRangeDialog.hide();
+
                 });
 
                 igv.dataRangeDialog.show();

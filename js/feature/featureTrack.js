@@ -238,8 +238,9 @@ var igv = (function (igv) {
             trackMenuItemFirst = '<div class=\"igv-track-menu-item igv-track-menu-border-top\">';
 
         menuItems.push(igv.colorPickerMenuItem(popover, this.trackView));
+        menuItems.push(igv.dataRangeMenuItem(popover, this.trackView));
 
-        ["COLLAPSED", "SQUISHED", "EXPANDED"].forEach(function (displayMode, index) {
+            ["COLLAPSED", "SQUISHED", "EXPANDED"].forEach(function (displayMode, index) {
 
             var chosen,
                 str;
