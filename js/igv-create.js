@@ -350,7 +350,7 @@ var igv = (function (igv) {
                     $(this).text("show labels");
                     $('.igv-app-icon-container').hide();
                 } else {
-                    $(this).text("hide track labels");
+                    $(this).text("hide labels");
                     $('.igv-app-icon-container').show();
                 }
 
