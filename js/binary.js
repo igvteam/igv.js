@@ -101,8 +101,22 @@ var igv = (function (igv) {
             if (len && s.length == len) break;
         }
         return s;
-
     }
+
+    igv.BinaryParser.prototype.getFixedLengthString = function (len) {
+
+        var s = "";
+        var i;
+        var c;
+        for (i=0; i<len; i++) {
+            c = this.view.getUint8(this.position++);
+            if(c > 0) {
+                s += String.fromCharCode(c);
+            }
+        }
+        return s;
+    }
+
 
     igv.BinaryParser.prototype.getFloat = function () {
 

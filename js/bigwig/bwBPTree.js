@@ -71,7 +71,7 @@ var igv = (function (igv) {
 
             if (type == 1) {
                 for (i = 0; i < count; i++) {
-                    key = byteBuffer.getString(keySize);
+                    key = byteBuffer.getFixedLengthString(keySize).trim();
 
                     if(genome) key = genome.getChromosomeName(key);  // Translate to canonical chr name
 
