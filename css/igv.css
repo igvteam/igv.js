@@ -25,7 +25,8 @@ div[id="igvEncodeModal"] {
     top: 0;
     left:0;
 
-    width:256px;
+    /*width:256px;*/
+    width:300px;
 
     border-color: rgb(127, 127, 127);
     border-radius: 4px;
@@ -190,12 +191,6 @@ div[id="igvEncodeModal"] {
     color: #575757;
 
 }
-
-
-
-
-
-
 
 .igv-user-input-colorpicker {
 
