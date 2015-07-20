@@ -17,6 +17,7 @@ tracks | Array of configuration objects defining tracks initially displayed when
 trackDefaults |  Embedded object defining default settings for specific track types (see table below). |
 locus | Initial genomic location |
 flanking  | Distance (in bp) to pad sides of gene when navigating. | 1000
+searchConfig | Object defining a web service for supporting search by gene or other annotation.  See table below.  Optional |
 
 
 Predefined genomes
@@ -26,9 +27,21 @@ Predefined genomes
 
 ### Reference
 option  | description | default
-fastaURL | URL to an indexed fasta file. |
-cytobandURL | URL to a cytoband ideogram file in UCSC format.  Optional.  |
-id | UCSD identifier |
+------ | ------- | ------------
+fastaURL | URL to an indexed fasta file. Required|
+cytobandURL | URL to a cytoband ideogram file in UCSC format.  Optional  |
+id | UCSD identifier. Optional |
+
+
+### Search
+
+option  | description | default
+------ | ------- | ------------
+url | url to search service.  The url should include the string $TOKEN$.  This string will be replaced by the symbol being searched for at runtime.  Required |
+coords | Indicates genomic coordinate convention used, possible values are "0" and "1" | 0
+chrField | json field name for the chromosome property | chromosome
+startField | json field name for the start position property | start
+endField | json field name for the end position property | end
 
 
 

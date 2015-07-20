@@ -715,17 +715,19 @@ var igv = (function (igv) {
             }
         }
 
-        function fireOnsearch(feature, type) {
-// Notify tracks (important for gtex).   TODO -- replace this with some sort of event model ?
-            this.trackViews.forEach(function (tp) {
-                var track = tp.track;
-                if (track.onsearch) {
-                    track.onsearch(feature, type);
-                }
-            });
-        }
+
 
     };
+
+    function fireOnsearch(feature, type) {
+    // Notify tracks (important for gtex).   TODO -- replace this with some sort of event model ?
+        this.trackViews.forEach(function (tp) {
+            var track = tp.track;
+            if (track.onsearch) {
+                track.onsearch(feature, type);
+            }
+        });
+    }
 
     function addTrackContainerHandlers(trackContainerDiv) {
 
