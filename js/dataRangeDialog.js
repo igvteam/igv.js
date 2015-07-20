@@ -59,39 +59,30 @@ var igv = (function (igv) {
                 column,
                 columnFiller;
 
+            rowContainer = $('<div class="igv-grid-rect">');
+
             row = $('<div class="igv-grid-dialog">');
 
-            //// shim
-            //column = $('<div class="igv-col igv-col-5-8">');
-            //row.append( column[ 0 ] );
-
-
-            // ok button
-            column = $('<div class="igv-col igv-col-3-8">');
-
-            self.ok = $('<div class="igv-col-filler-cancel-button">');
-            self.ok.text("OK");
-
-            column.append( self.ok[ 0 ] );
+            // shim
+            column = $('<div class="igv-col igv-col-1-3">');
             row.append( column[ 0 ] );
 
             // cancel button
-            column = $('<div class="igv-col igv-col-3-8">');
-
+            column = $('<div class="igv-col igv-col-1-3">');
             columnFiller = $('<div class="igv-col-filler-cancel-button">');
             columnFiller.text("Cancel");
-
-            columnFiller.click(function() {
-                self.hide();
-            });
-
+            columnFiller.click(function() { self.hide(); });
             column.append( columnFiller[ 0 ] );
             row.append( column[ 0 ] );
 
+            // ok button
+            column = $('<div class="igv-col igv-col-1-3">');
+            self.ok = $('<div class="igv-col-filler-cancel-button">');
+            self.ok.text("OK");
+            column.append( self.ok[ 0 ] );
+            row.append( column[ 0 ] );
 
 
-
-            rowContainer = $('<div class="igv-grid-rect">');
             rowContainer.append( row[ 0 ]);
 
             return rowContainer;
@@ -110,6 +101,11 @@ var igv = (function (igv) {
 
             // minimum
             row = $('<div class="igv-grid-dialog">');
+
+            // vertical spacer
+            column = $('<div class="spacer10">');
+            row.append( column[ 0 ] );
+
 
             column = $('<div class="igv-col igv-col-3-8">');
             self.minLabel = $('<div class="igv-data-range-input-label">');
@@ -145,7 +141,7 @@ var igv = (function (igv) {
 
             column = $('<div class="igv-col igv-col-3-8">');
             columnFiller = $('<div class="igv-data-range-input-label">');
-            columnFiller.text("Logarithmic");
+            columnFiller.text("Log scale");
             column.append( columnFiller[ 0 ] );
             row.append( column[ 0 ] );
 
