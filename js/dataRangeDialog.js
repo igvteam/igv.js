@@ -151,6 +151,10 @@ var igv = (function (igv) {
 
             column = $('<div class="igv-col igv-col-3-8">');
             self.logInput = $('<input class="igv-data-range-input" type="checkbox">');
+
+            // Disable until implemented in track
+            self.logInput[0].disabled = true;
+
             column.append( self.logInput[ 0 ] );
             row.append( column[ 0 ] );
 
