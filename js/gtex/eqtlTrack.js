@@ -166,7 +166,7 @@ var igv = (function (igv) {
                 var mLogP = -Math.log(eqtl[track.pValueField]) / Math.LN10;
                 if (mLogP < track.minLogP) continue;
 
-                py = Math.max(0, pixelHeight - Math.round((mLogP - track.minLogP) / yScale));
+                py = Math.max(0 + radius, pixelHeight - Math.round((mLogP - track.minLogP) / yScale));
                 eqtl.px = px;
                 eqtl.py = py;
 

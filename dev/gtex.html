@@ -170,7 +170,7 @@
             type: "GTEX",
             fastaURL: "//dn7ywbm9isq8j.cloudfront.net/genomes/seq/hg19/hg19.fasta",
             cytobandURL: "//dn7ywbm9isq8j.cloudfront.net/genomes/seq/hg19/cytoBand.txt",
-            locus: "chr11:122,618,671-135,006,516",
+            locus: "psphp1",
 
             search: {
                 url: "http://vgtxportaltest:9000/v1/features/$FEATURE$",
@@ -224,7 +224,7 @@
 
         browser = igv.createBrowser(div, options);
 
-        igv.browser.search("egfr");   // Reproduce race condition
+       // igv.browser.search("psphp1");
     });
 
 
