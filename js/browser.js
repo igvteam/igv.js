@@ -52,13 +52,33 @@ var igv = (function (igv) {
     function initialize(options) {
         this.flanking = options.flanking;
         this.type = options.type || "IGV";
-        this.searchURL = options.searchURL || "//www.broadinstitute.org/webservices/igv/locus?genome=hg19&name=";
         this.crossDomainProxy = options.crossDomainProxy;
-
-
         this.formats = options.formats;
         this.trackDefaults = options.trackDefaults;
 
+        if (options.search) {
+            this.searchConfig = {
+                type: "json",
+                url: options.search.url,
+                coords: options.search.coords === undefined ? 1 : options.search.coords,
+                chromosomeField: options.search.chromosomeField || "chromosome",
+                startField: options.search.startField || "start",
+                endField: options.search.endField || "end",
+                resultsField: options.search.resultsField
+            }
+        }
+        else {
+            this.searchConfig = {
+                // Legacy support -- deprecated
+                type: "plain",
+                url: "//www.broadinstitute.org/webservices/igv/locus?genome=hg19&name=$FEATURE$",
+                coords: 0,
+                chromosomeField: "chromosome",
+                startField: "start",
+                endField: "end"
+
+            }
+        }
     }
 
     igv.Browser.prototype.getFormat = function (name) {
@@ -624,8 +644,7 @@ var igv = (function (igv) {
             posTokens,
             start,
             end,
-            source,
-            f,
+            searchConfig,
             tokens,
             url,
             chromosome;
@@ -657,57 +676,46 @@ var igv = (function (igv) {
         }
         else {
 
-            if (this.searchURL) {
-                url = this.searchURL + feature;
+            if (this.searchConfig) {
+                url = this.searchConfig.url.replace("$FEATURE$", feature);
+                searchConfig = this.searchConfig;
                 igv.loadData(url, function (data) {
 
-                    var lines = data.splitLines(),
-                        len = lines.length,
-                        lineNo = 0,
-                        foundFeature = false,
-                        line, tokens, locusTokens, rangeTokens;
 
-                    while (lineNo < len) {
-                        // EGFR	chr7:55,086,724-55,275,031	refseq
-                        line = lines[lineNo++];
-                        //console.log(line);
-                        tokens = line.split("\t");
-                        //console.log("tokens lenght = " + tokens.length);
-                        if (tokens.length >= 3) {
-                            f = tokens[0];
-                            if (f.toUpperCase() === feature.toUpperCase()) {
+                    var chr, start, end, type, results, r;
 
-                                source = tokens[2].trim();
-                                type = source;
+                    results = "plain" === searchConfig.type ? parseSearchResults(data) :
+                        JSON.parse(data);
 
-                                locusTokens = tokens[1].split(":");
-                                chr = igv.browser.genome.getChromosomeName(locusTokens[0].trim());
+                    if(searchConfig.resultsField) results = results[searchConfig.resultsField];
 
-                                if (igv.browser.type === "GTEX") {
-                                    igv.browser.selection = new igv.GtexSelection('gtex' === type || 'snp' === type ? {snp: feature} : {gene: feature});
-                                }
+                    if (results.length > 0) {
 
-                                rangeTokens = locusTokens[1].split("-");
-                                start = parseInt(rangeTokens[0].replace(/,/g, ''));
-                                end = parseInt(rangeTokens[1].replace(/,/g, ''));
+                        // Just take the first result for now
+                        // TODO - merge results, or ask user to choose
 
-                                if (igv.browser.flanking) {
-                                    start -= igv.browser.flanking;
-                                    end += igv.browser.flanking;
-                                }
+                        r = results[0];
+                        chr = r[searchConfig.chromosomeField];
+                        start = r[searchConfig.startField] - searchConfig.coords;
+                        end = r[searchConfig.endField];
+                        type = r["featureType"];
 
 
-                                igv.browser.goto(chr, start, end);
+                        igv.browser.selection = new igv.GtexSelection('gtex' === type || 'snp' === type ? {snp: feature} : {gene: feature});
 
-                                foundFeature = true;
-                            }
+                        if (igv.browser.flanking) {
+                            start -= igv.browser.flanking;
+                            end += igv.browser.flanking;
                         }
-                    }
 
-                    if (foundFeature) {
+                        igv.browser.goto(chr, start, end);
+
+                        // Notify tracks (important for gtex).   TODO -- replace this with some sort of event model ?
                         fireOnsearch.call(igv.browser, feature, type);
                     }
+
                     else {
+
                         alert('No feature found with name "' + feature + '"');
                     }
                     if (continuation) continuation();
@@ -716,11 +724,47 @@ var igv = (function (igv) {
         }
 
 
-
     };
 
+    /**
+     * Parse the igv line-oriented (non json) search results.
+     * Example
+     *    EGFR    chr7:55,086,724-55,275,031    refseq
+     *
+     * @param data
+     */
+    function parseSearchResults(data) {
+        var lines = data.splitLines(),
+            len = lines.length,
+            lineNo = 0,
+            line, tokens, locusTokens, rangeTokens, source, chr, start, end,
+            results = [];
+
+        while (lineNo < len) {
+            line = lines[lineNo++];
+            tokens = line.split("\t");
+            if (tokens.length >= 3) {
+                source = tokens[2].trim();
+                locusTokens = tokens[1].split(":");
+                chr = igv.browser.genome.getChromosomeName(locusTokens[0].trim());
+                rangeTokens = locusTokens[1].split("-");
+                start = parseInt(rangeTokens[0].replace(/,/g, ''));
+                end = parseInt(rangeTokens[1].replace(/,/g, ''));
+
+                results.push({
+                    chromosome: chr,
+                    start: start,
+                    end: end,
+                    featureType: ("gtex" === source ? "snp" : "gene")
+                });
+
+            }
+        }
+        return results;
+    }
+
     function fireOnsearch(feature, type) {
-    // Notify tracks (important for gtex).   TODO -- replace this with some sort of event model ?
+        // Notify tracks (important for gtex).   TODO -- replace this with some sort of event model ?
         this.trackViews.forEach(function (tp) {
             var track = tp.track;
             if (track.onsearch) {

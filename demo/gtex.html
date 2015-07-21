@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+    <meta name="description" content="">
+    <meta name="author" content="">
+    <link rel="shortcut icon" href=../img/favicon.ico>
+    <title>IGV - Integrative Genomics Viewer</title>
+
+    <!-- jQuery UI CSS -->
+    <link rel="stylesheet" type="text/css"
+          href="//ajax.googleapis.com/ajax/libs/jqueryui/1.11.2/themes/redmond/jquery-ui.css"/>
+
+    <!-- Google fonts -->
+    <link rel="stylesheet" type="text/css" href='//fonts.googleapis.com/css?family=PT+Sans:400,700'>
+    <link rel="stylesheet" type="text/css" href='//fonts.googleapis.com/css?family=Open+Sans'>
+
+    <!-- Font Awesome CSS -->
+    <link rel="stylesheet" type="text/css" href="//maxcdn.bootstrapcdn.com/font-awesome/4.2.0/css/font-awesome.min.css">
+
+    <!-- IGV CSS -->
+    <link rel="stylesheet" type="text/css" href="//igv.org/web/beta/igv-beta.css">
+
+    <!-- jQuery JS -->
+    <script type="text/javascript" src="//ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
+
+    <!-- jQuery UI JS -->
+    <script type="text/javascript" src="//ajax.googleapis.com/ajax/libs/jqueryui/1.11.2/jquery-ui.min.js"></script>
+
+    <!-- IGV JS -->
+    <script type="text/javascript" src="//igv.org/web/beta/igv-beta.min.js"></script>
+
+    <style type="text/css">
+
+        #trackList {
+
+            font-family: 'PT Sans', sans-serif;
+            font-size: small;
+            font-weight: 400;
+        }
+
+        div#trackList > div, div#trackList > h3 {
+
+            color: #444;
+            margin-left: 48px;
+            margin-top: 4px;
+            margin-bottom: 4px;
+
+            padding-left: 32px;
+
+            width: 300px;
+        }
+
+        div#trackList > div:hover,
+        div#trackList > div:focus,
+        div#trackList > div:active {
+            cursor: pointer;
+            color: white;
+            background-color: rgba(49, 106, 246, 1);
+        }
+
+    </style>
+
+</head>
+
+<body>
+
+<div id="myDiv" style="padding-top: 50px;padding-bottom: 20px; height: auto"></div>
+
+<script type="text/javascript">
+
+    $(document).ready(function () {
+
+        var div,
+                options,
+                browser;
+
+        div = $("#myDiv")[0];
+        options = {
+            type: "GTEX",
+            fastaURL: "//dn7ywbm9isq8j.cloudfront.net/genomes/seq/hg19/hg19.fasta",
+            cytobandURL: "//dn7ywbm9isq8j.cloudfront.net/genomes/seq/hg19/cytoBand.txt",
+            locus: "chr11:122,618,671-135,006,516",
+
+            search: {
+                url: "http://vgtxportaltest:9000/v1/features/$FEATURE$",
+                //coords: 1,
+                //chromosomeField: "chromosome",
+                //startField: "start",
+                //endField: "end",
+                resultsField: "features"
+            },
+
+            formats: {
+                gwasSNPS: {
+                    coords: 0,
+                    chr: 0,
+                    start: 1,
+                    end: 2,
+                    fields: ["chrom", "chromStart", "chromEnd", "Strongest SNP-risk allele", "Disease/Phenotype", "P-value", "Odds ratio or beta", "PUBMEDID"]
+                }
+            },
+
+
+            tracks: [
+                {
+                    type: 'eqtl',
+                    sourceType: 'gtex',
+                    url: '//www.gtexportal.org/igv/assets/eqtl/Skin_Sun_Exposed_Lower_leg.portal.eqtl.bin',
+                    indexed: false,
+                    name: 'Skin Sun Exposed Lower leg'
+                },
+                {
+                    featureType: "annotation",
+                    format: "gwasSNPS",
+                    indexed: false,
+                    color: "rgb(100,200,200)",
+                    displayMode: 'EXPANDED',
+                    url: "//dn7ywbm9isq8j.cloudfront.net/annotations/hg19/gwas/v2_newest_converted_GWAS_catalog_SNPs_Pval5E08_hg19_040115.bed",
+                    name: "GWAS snps"
+                },
+                {
+                    featureType: 'genes',
+                    url: "//dn7ywbm9isq8j.cloudfront.net/annotations/hg19/genes/gencode.v18.collapsed.bed",
+                    height: 100,
+                    autoHeight: true,
+                    removable: false,
+                    name: "Genes",
+                    labelDisplayMode: "SLANT",
+                    order: 10000
+                }
+            ]
+        };
+
+        browser = igv.createBrowser(div, options);
+
+        igv.browser.search("egfr");   // Reproduce race condition
+    });
+
+
+</script>
+
+</body>
+
+</html>
