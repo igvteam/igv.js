@@ -186,22 +186,43 @@ var igv = (function (igv) {
         return {
             object: $('<div class="igv-track-menu-item">' + "Set data range" + '</div>'),
             click: function () {
-                igv.dataRangeDialog.trackView = trackView;
+
+                var min, max,
+                    dataRangeDialog = igv.dataRangeDialog;;
+
+                dataRangeDialog.trackView = trackView;
 
                 // minimum
-                igv.dataRangeDialog.minInput.val(24);
-                igv.dataRangeDialog.maxInput.val(48);
-                igv.dataRangeDialog.logInput.prop('checked', false);
+                if(trackView.track.dataRange) {
+                    min = trackView.track.dataRange.min;
+                    max = trackView.track.dataRange.max;
+                }
+                else {
+                    min = 0;
+                    max = 100;
+                }
+                dataRangeDialog.minInput.val(min);
+                dataRangeDialog.maxInput.val(max);
+                dataRangeDialog.logInput.prop('checked', false);
 
-                igv.dataRangeDialog.ok.unbind();
-                igv.dataRangeDialog.ok.click(function() {
-                    
-                    console.log("min " + igv.dataRangeDialog.minInput.val() + " max " + igv.dataRangeDialog.maxInput.val() + " log " + igv.dataRangeDialog.logInput.is(':checked') );
-                    igv.dataRangeDialog.hide();
+                dataRangeDialog.ok.unbind();
+                dataRangeDialog.ok.click(function() {
+                    min = parseFloat(dataRangeDialog.minInput.val());
+                    max = parseFloat(dataRangeDialog.maxInput.val());
+                    if(isNaN(min) || isNaN(max)) {
+                        alert("Must input numeric values");
+                    }
+                    else {
+                        trackView.track.min = min;
+                        trackView.track.max = max;
+                        console.log("min " + dataRangeDialog.minInput.val() + " max " + dataRangeDialog.maxInput.val() + " log " + dataRangeDialog.logInput.is(':checked'));
+                        dataRangeDialog.hide();
+                        trackView.update();
+                    }
 
                 });
 
-                igv.dataRangeDialog.show();
+                dataRangeDialog.show();
                 popover.hide();
             }
         }

@@ -87,14 +87,19 @@ var igv = (function (igv) {
             featureValueRange;
 
         if (features && features.length > 0) {
-            featureValueMinimum = track.min ? track.min : 0;
-            featureValueMaximum = track.max;
-            if (featureValueMaximum === undefined) {
+            if(track.max === undefined)  {
                 var s = autoscale(features);
                 featureValueMinimum = s.min;
                 featureValueMaximum = s.max;
             }
+            else {
+                featureValueMinimum = track.min ? track.min : 0;
+                featureValueMaximum = track.max;
+            }
+
             featureValueRange = featureValueMaximum - featureValueMinimum;
+
+            track.dataRange = {min: featureValueMinimum, max: featureValueMaximum};  // Record for disply, menu, etc
 
             features.forEach(renderFeature);
         }
@@ -150,7 +155,7 @@ var igv = (function (igv) {
     };
 
     function autoscale(features) {
-        var min = Number.MAX_VALUE,
+        var min = 0,
             max = -Number.MAX_VALUE;
 
         features.forEach(function (f) {
