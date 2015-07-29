@@ -295,7 +295,8 @@ var igv = (function (igv) {
             feature.cdEnd = parseInt(tokens[7]);
         }
         if (tokens.length > 8) {
-            feature.rgb = tokens[8];
+            if(tokens[8] !== "." && tokens[8] !== "0")
+            feature.rgb = "rgb(" + tokens[8] + ")";
         }
         if (tokens.length > 11) {
             exonCount = parseInt(tokens[9]);
@@ -313,7 +314,10 @@ var igv = (function (igv) {
         }
 
         feature.popupData = function () {
-            return [{name: "Name", value: feature.name}];
+            var data = [];
+            if(feature.name) data.push({name: "Name", value: feature.name});
+            if("+" === feature.strand || "-" === feature.strand) data.push({name: "Strand", value: feature.strand});
+            return data;
         };
 
         return feature;
