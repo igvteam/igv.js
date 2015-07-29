@@ -36,7 +36,7 @@ var igv = (function (igv) {
         this.expandedRowHeight = config.expandedRowHeight || 30;
         this.squishedRowHeight = config.squishedRowHeight || 15;
 
-        this.featureHeight = config.featureHeight || 10;
+        this.featureHeight = config.featureHeight || 14;
         this.featureSource = new igv.FeatureSource(this.config);
 
         // Set the render function.  This can optionally be passed in the config
@@ -54,6 +54,8 @@ var igv = (function (igv) {
         }
         else {
             this.render = renderFeature;
+            this.arrowSpacing = 30;
+
         }
 
     };
@@ -277,6 +279,8 @@ var igv = (function (igv) {
         var px,
             px1,
             pw,
+            x,
+            e,
             exonCount,
             cy,
             direction,
@@ -285,8 +289,8 @@ var igv = (function (igv) {
             ePx1,
             ePw,
             py = 5,
-            step = 8,
-            h = this.featureHeight,
+            step = this.arrowSpacing,
+            h =  this.featureHeight,
             transform,
             fontStyle,
             color = this.color;
@@ -310,6 +314,7 @@ var igv = (function (igv) {
         }
 
         if (this.displayMode === "SQUISHED" && feature.row != undefined) {
+            h /= 2;
             py = this.squishedRowHeight * feature.row;
         }
         else if (this.displayMode === "EXPANDED" && feature.row != undefined) {
@@ -328,18 +333,32 @@ var igv = (function (igv) {
             cy = py + 5;
             igv.Canvas.strokeLine.call(ctx, px, cy, px1, cy); // center line for introns
             direction = feature.strand == '+' ? 1 : -1;
-            for (var x = px + step / 2; x < px1; x += step) {
+            for (x = px + step / 2; x < px1; x += step) {
                 // draw arrowheads along central line indicating transcribed orientation
                 igv.Canvas.strokeLine.call(ctx, x - direction * 2, cy - 2, x, cy);
                 igv.Canvas.strokeLine.call(ctx, x - direction * 2, cy + 2, x, cy);
             }
-            for (var e = 0; e < exonCount; e++) {
+            for (e = 0; e < exonCount; e++) {
                 // draw the exons
                 exon = feature.exons[e];
                 ePx = Math.round((exon.start - bpStart) / xScale);
                 ePx1 = Math.round((exon.end - bpStart) / xScale);
                 ePw = Math.max(1, ePx1 - ePx);
                 ctx.fillRect(ePx, py, ePw, h);
+
+                // Arrows
+                if(ePw > step + 5) {
+                    ctx.fillStyle = "white";
+                    ctx.strokeStyle = "white";
+                    for (x = ePx + step / 2; x < ePx1; x += step) {
+                        // draw arrowheads along central line indicating transcribed orientation
+                        igv.Canvas.strokeLine.call(ctx, x - direction * 2, cy - 2, x, cy);
+                        igv.Canvas.strokeLine.call(ctx, x - direction * 2, cy + 2, x, cy);
+                    }
+                    ctx.fillStyle = color;
+                    ctx.strokeStyle = color;
+
+                }
 
             }
         }

@@ -57,29 +57,37 @@ var igv = (function (igv) {
             case "broadPeak":
             case "peaks":
                 this.decode = decodePeak;
+                this.delimiter = /\s+/;
                 break;
             case "bedgraph":
                 this.decode = decodeBedGraph;
+                this.delimiter = /\s+/;
                 break;
             case "wig":
                 this.decode = decodeWig;
+                this.delimiter = /\s+/;
                 break;
             case "gff" :
                 this.decode = decodeGFF;
+                this.delimiter = "\t";
                 break;
             case "aneu":
                 this.decode = decodeAneu;
+                this.delimiter = "\t";
                 break;
             case "FusionJuncSpan":
                 // bhaas, needed for FusionInspector view
                 this.decode = decodeFusionJuncSpan;
+                this.delimiter = /\s+/;
                 break;
             case "gtexGWAS":
                 this.skipRows = 1;
                 this.decode = decodeGtexGWAS;
+                this.delimiter = "\t";
                 break;
             case "refflat":
                 this.decode = decodeRefflat;
+                this.delimiter = "\t";
                 break;
             default:
 

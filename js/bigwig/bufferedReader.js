@@ -47,14 +47,14 @@ var igv = (function (igv) {
      */
     igv.BufferedReader.prototype.dataViewForRange = function (requestedRange, continutation, asUint8) {
 
-        var bufferedReader = this,
+        var self = this,
             hasData = (this.data && (this.range.start <= requestedRange.start) &&
             ((this.range.start + this.range.size) >= (requestedRange.start + requestedRange.size))),
             bufferSize,
             loadRange;
 
         if (hasData) {
-            subbuffer(bufferedReader, requestedRange, asUint8);
+            subbuffer(self, requestedRange, asUint8);
         }
         else {
             // Expand buffer size if needed, but not beyond content length
@@ -67,16 +67,16 @@ var igv = (function (igv) {
                 loadRange = {start: requestedRange.start, size: bufferSize};
             }
 
-            igvxhr.loadArrayBuffer(bufferedReader.path,
+            igvxhr.loadArrayBuffer(self.path,
                 {
                     headers: this.config.headers,
                     range: loadRange,
                     success: function (arrayBuffer) {
                         // TODO -- handle error
 
-                        bufferedReader.data = arrayBuffer;
-                        bufferedReader.range = loadRange;
-                        subbuffer(bufferedReader, requestedRange, asUint8);
+                        self.data = arrayBuffer;
+                        self.range = loadRange;
+                        subbuffer(self, requestedRange, asUint8);
                     }
                 });
 
