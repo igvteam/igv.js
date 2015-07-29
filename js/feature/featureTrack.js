@@ -302,6 +302,11 @@ var igv = (function (igv) {
                 color = this.config.colorBy.pallete[colorByValue];
             }
         }
+        else if(feature.rgb) {
+            color = feature.rgb;
+        }
+
+
         ctx.fillStyle = color;
         ctx.strokeStyle = color;
 
@@ -330,8 +335,10 @@ var igv = (function (igv) {
         }
         else {
             // multi-exon transcript
-            cy = py + 5;
-            igv.Canvas.strokeLine.call(ctx, px, cy, px1, cy); // center line for introns
+            cy = py + h/2;
+
+            igv.Canvas.strokeLine.call(ctx, px+1, cy, px1-1, cy); // center line for introns
+
             direction = feature.strand == '+' ? 1 : -1;
             for (x = px + step / 2; x < px1; x += step) {
                 // draw arrowheads along central line indicating transcribed orientation
