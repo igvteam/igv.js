@@ -92,7 +92,8 @@ var igv = (function (igv) {
                             endChrom: binaryParser.getInt(),
                             endBase: binaryParser.getInt(),
                             dataOffset: binaryParser.getLong(),
-                            dataSize: binaryParser.getLong()};
+                            dataSize: binaryParser.getLong()
+                        };
                         items[i] = item;
 
                     }
@@ -107,7 +108,8 @@ var igv = (function (igv) {
                             startBase: binaryParser.getInt(),
                             endChrom: binaryParser.getInt(),
                             endBase: binaryParser.getInt(),
-                            childOffset: binaryParser.getLong()};
+                            childOffset: binaryParser.getLong()
+                        };
                         items[i] = item;
 
                     }
@@ -123,8 +125,8 @@ var igv = (function (igv) {
 
         var rpTree = this,
             leafItems = [],
-            processing = new Set();
-        bufferedReader = new igv.BufferedReader(this.config, this.filesize, BUFFER_SIZE);
+            processing = new Set(),
+            bufferedReader = new igv.BufferedReader(this.config, this.filesize, BUFFER_SIZE);
 
         processing.add(0);  // Zero represents the root node
         findLeafItems(this.rootNode, 0);
@@ -160,7 +162,7 @@ var igv = (function (igv) {
 
             }
 
-            if(nodeId != undefined) processing.delete(nodeId);
+            if (nodeId != undefined) processing.delete(nodeId);
 
             // Wait until all nodes are processed
             if (processing.isEmpty()) {
@@ -205,7 +207,7 @@ var igv = (function (igv) {
 
         //  if (chrIdx > item.endChrom || chrIdx < item.startChrom) return false;
 
-        if(!item) {
+        if (!item) {
             console.log("null item");
             return false;
         }

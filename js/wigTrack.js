@@ -93,7 +93,7 @@ var igv = (function (igv) {
                 featureValueMaximum = s.max;
             }
             else {
-                featureValueMinimum = track.min ? track.min : 0;
+                featureValueMinimum = track.min === undefined ? 0 : track.min;
                 featureValueMaximum = track.max;
             }
 
@@ -138,7 +138,7 @@ var igv = (function (igv) {
                 }
 
             }
-            else if (featureValueMaximum < 0) {
+            else if (featureValueMinimum < 0) {
                 yUnitless = 0;
                 heightUnitLess = -feature.value/featureValueRange;
             }
