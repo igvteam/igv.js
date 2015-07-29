@@ -95,7 +95,7 @@ var igv = (function (igv) {
     igv.FeatureSource.prototype.getFeatures = function (chr, bpStart, bpEnd, success, task) {
 
 
-        var myself = this,
+        var self = this,
             genomicInterval = new igv.GenomicInterval(chr, bpStart, bpEnd),
             featureCache = this.featureCache,
             maxRows = this.config.maxRows || 500;
@@ -109,21 +109,31 @@ var igv = (function (igv) {
             this.reader.readFeatures(function (featureList) {
 
                 function isIndexed() {
-                    return myself.reader.indexed ||
-                        myself.config.sourceType === "ga4gh" ||
-                        myself.config.sourceType === "immvar" ||
-                        myself.config.sourceType === "gtex";
+                    return self.reader.indexed ||
+                        self.config.sourceType === "ga4gh" ||
+                        self.config.sourceType === "immvar" ||
+                        self.config.sourceType === "gtex";
                 }
 
-                myself.featureCache = isIndexed() ?
+                self.featureCache = isIndexed() ?
                     new igv.FeatureCache(featureList, genomicInterval) :
                     new igv.FeatureCache(featureList);   // Note - replacing previous cache with new one
+
+
+                // If track is marked "searchable"< cache features by name -- use this with caution, memory intensive
+                if (self.config.searchable) {
+                    featureList.forEach(function (feature) {
+                        if (feature.name) {
+                            igv.browser.featureDB[feature.name] = feature;
+                        }
+                    })
+                }
 
                 // Assign overlapping features to rows
                 packFeatures(featureList, maxRows);
 
                 // Finally pass features for query interval to continuation
-                success(myself.featureCache.queryFeatures(chr, bpStart, bpEnd));
+                success(self.featureCache.queryFeatures(chr, bpStart, bpEnd));
 
             }, task, genomicInterval);   // Currently loading at granularity of chromosome
         }

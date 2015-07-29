@@ -43,6 +43,8 @@ var igv = (function (igv) {
 
         this.trackLabelsVisible = true;
 
+        this.featureDB = {};   // Hash of name -> feature, used for search function.
+
         window.onresize = igv.throttle(function () {
             igv.browser.resize();
         }, 10);
@@ -71,7 +73,7 @@ var igv = (function (igv) {
             this.searchConfig = {
                 // Legacy support -- deprecated
                 type: "plain",
-                url: "//www.broadinstitute.org/webservices/igv/locus?genome=hg19&name=$FEATURE$",
+                url: "//www.broadinstitute.org/webservices/igv/locus?genome=S288c&name=$FEATURE$",
                 coords: 0,
                 chromosomeField: "chromosome",
                 startField: "start",
@@ -629,6 +631,7 @@ var igv = (function (igv) {
         this.update();
     };
 
+
     igv.Browser.prototype.search = function (feature, continuation) {
 
         // See if we're ready to respond to a search, if not just queue it up and return
@@ -647,7 +650,8 @@ var igv = (function (igv) {
             searchConfig,
             tokens,
             url,
-            chromosome;
+            chromosome,
+            result;
 
         if (feature.contains(":") && feature.contains("-") || this.genome.getChromosome(feature)) {
 
@@ -676,9 +680,21 @@ var igv = (function (igv) {
         }
         else {
 
-            if (this.searchConfig) {
+            // Try local featuer cache first
+            result = this.featureDB[feature];
+            if(result) {
+                handleSearchResult(result, result.chr, result.start, result.end, "");
+            }
+
+            else if (this.searchConfig) {
                 url = this.searchConfig.url.replace("$FEATURE$", feature);
                 searchConfig = this.searchConfig;
+
+                if(url.indexOf("$GENOME$") > -1) {
+                    var genomeId = this.genome.id ? this.genome.id : "hg19";
+                    url.replace("$GENOME$", genomeId);
+                }
+
                 igv.loadData(url, function (data) {
 
 
@@ -699,19 +715,7 @@ var igv = (function (igv) {
                         start = r[searchConfig.startField] - searchConfig.coords;
                         end = r[searchConfig.endField];
                         type = r["featureType"];
-
-
-                        igv.browser.selection = new igv.GtexSelection('gtex' === type || 'snp' === type ? {snp: feature} : {gene: feature});
-
-                        if (igv.browser.flanking) {
-                            start -= igv.browser.flanking;
-                            end += igv.browser.flanking;
-                        }
-
-                        igv.browser.goto(chr, start, end);
-
-                        // Notify tracks (important for gtex).   TODO -- replace this with some sort of event model ?
-                        fireOnsearch.call(igv.browser, feature, type);
+                        handleSearchResult(feature, start, end, chr, type);
                     }
 
                     else {
@@ -761,6 +765,21 @@ var igv = (function (igv) {
             }
         }
         return results;
+    }
+
+    function handleSearchResult(feature, start, end, chr, type) {
+
+        igv.browser.selection = new igv.GtexSelection('gtex' === type || 'snp' === type ? {snp: feature} : {gene: feature});
+
+        if (igv.browser.flanking) {
+            start -= igv.browser.flanking;
+            end += igv.browser.flanking;
+        }
+
+        igv.browser.goto(chr, start, end);
+
+        // Notify tracks (important for gtex).   TODO -- replace this with some sort of event model ?
+        fireOnsearch.call(igv.browser, feature, type);
     }
 
     function fireOnsearch(feature, type) {
