@@ -158,7 +158,7 @@ var igv = (function (igv) {
             mergedChunks;
 
         if (!ba) {
-            return null;
+            return [];
         }
         else {
 
