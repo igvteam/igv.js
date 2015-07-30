@@ -119,8 +119,8 @@ var igv = (function (igv) {
             if (feature.end < bpStart) return;
             if (feature.start > bpEnd) return;
 
-            x = (feature.start - bpStart) / bpPerPixel;
-            rectEnd = (feature.end - bpStart) / bpPerPixel;
+            x = Math.floor((feature.start - bpStart) / bpPerPixel);
+            rectEnd = Math.ceil((feature.end - bpStart) / bpPerPixel);
             width = Math.max(1, rectEnd - x);
 
             //height = ((feature.value - featureValueMinimum) / featureValueRange) * pixelHeight;

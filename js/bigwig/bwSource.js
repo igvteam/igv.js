@@ -153,7 +153,6 @@ var igv = (function (igv) {
                         chromStart = binaryParser.getInt();
                         chromEnd = binaryParser.getInt();
                         value = binaryParser.getFloat();
-                        chromEnd = chromStart + itemSpan;
                         break;
                     case 2:
 
