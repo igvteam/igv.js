@@ -72,6 +72,11 @@ var igv = (function (igv) {
                     // Assign overlapping features to rows
                     packFeatures(features, maxRows);
                     self.featureCache = new igv.FeatureCache(features);
+
+                    // If track is marked "searchable"< cache features by name -- use this with caution, memory intensive
+                    if (self.config.searchable) {
+                        addFeaturesToDB(features);
+                    }
                 }
                 continuation(header);
             });
@@ -79,6 +84,14 @@ var igv = (function (igv) {
         else {
             continuation(null);
         }
+    }
+
+    function addFeaturesToDB(featureList) {
+        featureList.forEach(function (feature) {
+            if (feature.name) {
+                igv.browser.featureDB[feature.name.toUpperCase()] = feature;
+            }
+        })
     }
 
     /**
@@ -122,11 +135,7 @@ var igv = (function (igv) {
 
                 // If track is marked "searchable"< cache features by name -- use this with caution, memory intensive
                 if (self.config.searchable) {
-                    featureList.forEach(function (feature) {
-                        if (feature.name) {
-                            igv.browser.featureDB[feature.name] = feature;
-                        }
-                    })
+                    addFeaturesToDB(featureList);
                 }
 
                 // Assign overlapping features to rows

@@ -681,9 +681,9 @@ var igv = (function (igv) {
         else {
 
             // Try local featuer cache first
-            result = this.featureDB[feature];
+            result = this.featureDB[feature.toUpperCase()];
             if(result) {
-                handleSearchResult(result, result.chr, result.start, result.end, "");
+                handleSearchResult(result.name, result.chr, result.start, result.end, "");
             }
 
             else if (this.searchConfig) {
@@ -715,7 +715,7 @@ var igv = (function (igv) {
                         start = r[searchConfig.startField] - searchConfig.coords;
                         end = r[searchConfig.endField];
                         type = r["featureType"];
-                        handleSearchResult(feature, start, end, chr, type);
+                        handleSearchResult(feature, chr, start, end, chr, type);
                     }
 
                     else {
@@ -767,9 +767,9 @@ var igv = (function (igv) {
         return results;
     }
 
-    function handleSearchResult(feature, start, end, chr, type) {
+    function handleSearchResult(name, chr, start, end, type) {
 
-        igv.browser.selection = new igv.GtexSelection('gtex' === type || 'snp' === type ? {snp: feature} : {gene: feature});
+        igv.browser.selection = new igv.GtexSelection('gtex' === type || 'snp' === type ? {snp: name} : {gene: name});
 
         if (igv.browser.flanking) {
             start -= igv.browser.flanking;
@@ -779,7 +779,7 @@ var igv = (function (igv) {
         igv.browser.goto(chr, start, end);
 
         // Notify tracks (important for gtex).   TODO -- replace this with some sort of event model ?
-        fireOnsearch.call(igv.browser, feature, type);
+        fireOnsearch.call(igv.browser, name, type);
     }
 
     function fireOnsearch(feature, type) {
