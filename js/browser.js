@@ -700,8 +700,7 @@ var igv = (function (igv) {
 
                     var chr, start, end, type, results, r;
 
-                    results = "plain" === searchConfig.type ? parseSearchResults(data) :
-                        JSON.parse(data);
+                    results = "plain" === searchConfig.type ? parseSearchResults(data) : JSON.parse(data);
 
                     if(searchConfig.resultsField) results = results[searchConfig.resultsField];
 
@@ -738,32 +737,43 @@ var igv = (function (igv) {
      * @param data
      */
     function parseSearchResults(data) {
+
         var lines = data.splitLines(),
-            len = lines.length,
-            lineNo = 0,
-            line, tokens, locusTokens, rangeTokens, source, chr, start, end,
+            linesTrimmed = [],
             results = [];
 
-        while (lineNo < len) {
-            line = lines[lineNo++];
-            tokens = line.split("\t");
+        lines.forEach(function (item) {
+            if ("" === item) {
+                // do nothing
+            } else {
+                linesTrimmed.push(item);
+            }
+        });
+
+        linesTrimmed.forEach(function(line){
+
+            var tokens = line.split("\t"),
+                source,
+                locusTokens,
+                rangeTokens;
+
             if (tokens.length >= 3) {
-                source = tokens[2].trim();
+
                 locusTokens = tokens[1].split(":");
-                chr = igv.browser.genome.getChromosomeName(locusTokens[0].trim());
                 rangeTokens = locusTokens[1].split("-");
-                start = parseInt(rangeTokens[0].replace(/,/g, ''));
-                end = parseInt(rangeTokens[1].replace(/,/g, ''));
+                source = tokens[2].trim();
 
                 results.push({
-                    chromosome: chr,
-                    start: start,
-                    end: end,
+                    chromosome: igv.browser.genome.getChromosomeName(locusTokens[0].trim()),
+                    start: parseInt(rangeTokens[0].replace(/,/g, '')),
+                    end: parseInt(rangeTokens[1].replace(/,/g, '')),
                     featureType: ("gtex" === source ? "snp" : "gene")
                 });
 
             }
-        }
+
+        });
+
         return results;
     }
 
