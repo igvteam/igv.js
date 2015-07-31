@@ -697,27 +697,15 @@ var igv = (function (igv) {
 
                 igv.loadData(url, function (data) {
 
+                    var results = ("plain" === searchConfig.type) ? parseSearchResults(data) : JSON.parse(data);
 
-                    var chr, start, end, type, results, r;
-
-                    results = "plain" === searchConfig.type ? parseSearchResults(data) : JSON.parse(data);
-
-                    if(searchConfig.resultsField) results = results[searchConfig.resultsField];
-
-                    if (results.length > 0) {
-
-                        // Just take the first result for now
-                        // TODO - merge results, or ask user to choose
-
-                        r = results[ 0 ];
-                        chr = r[searchConfig.chromosomeField];
-                        start = r[searchConfig.startField] - searchConfig.coords;
-                        end = r[searchConfig.endField];
-                        type = r["featureType"];
-                        handleSearchResult(feature, chr, start, end, chr, type);
+                    if(searchConfig.resultsField) {
+                        results = results[searchConfig.resultsField];
                     }
 
-                    else {
+                    if (results.length > 0) {
+                        presentSearchResults(results, searchConfig, feature);
+                    } else {
                         alert('No feature found with name "' + feature + '"');
                     }
 
@@ -728,6 +716,22 @@ var igv = (function (igv) {
 
 
     };
+
+    function presentSearchResults(loci, config, feature) {
+
+        // Just take the first result for now
+        // TODO - merge results, or ask user to choose
+        var locus = loci[ 0 ];
+
+        handleSearchResult(
+            feature,
+            locus[config.chromosomeField],
+            locus[config.startField] - config.coords,
+            locus[config.endField],
+            locus[config.chromosomeField],
+            locus["featureType"]);
+
+    }
 
     /**
      * Parse the igv line-oriented (non json) search results.
