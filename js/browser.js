@@ -709,7 +709,7 @@ var igv = (function (igv) {
                         // Just take the first result for now
                         // TODO - merge results, or ask user to choose
 
-                        r = results[0];
+                        r = results[ 0 ];
                         chr = r[searchConfig.chromosomeField];
                         start = r[searchConfig.startField] - searchConfig.coords;
                         end = r[searchConfig.endField];
@@ -718,9 +718,9 @@ var igv = (function (igv) {
                     }
 
                     else {
-
                         alert('No feature found with name "' + feature + '"');
                     }
+
                     if (continuation) continuation();
                 });
             }
@@ -774,7 +774,37 @@ var igv = (function (igv) {
 
         });
 
+        results = mockedData();
+
         return results;
+
+        function mockedData() {
+
+            var mocked = [],
+                loci =
+                [
+                    "chr1:185,771,548-216,927,875",
+                    "chr9:93,733,212-129,482,694",
+                    "chr5:67,843,223-113,072,037"
+                ];
+
+                loci.forEach(function(locus){
+                    var rangeTokens,
+                        obj = {};
+
+                    obj.chromosome = locus.split(":")[ 0 ];
+
+                    rangeTokens = locus.split(":")[ 1 ].split("-");
+                    obj.start = parseInt(rangeTokens[ 0 ].replace(/,/g, ''));
+                    obj.end   = parseInt(rangeTokens[ 1 ].replace(/,/g, ''));
+
+                    obj.featureType = "gene";
+
+                    mocked.push(obj);
+                });
+
+            return mocked;
+        }
     }
 
     function handleSearchResult(name, chr, start, end, type) {
