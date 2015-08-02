@@ -618,7 +618,18 @@ div.ui-dialog fieldset {
 }
 
 .igvNavigationSearchResultsTableRow {
+    font-family: 'Open Sans', sans-serif;
+    font-size: small;
+    font-weight: 400;
+    color: #444;
+}
 
+.igvNavigationSearchResultsTableRow:hover,
+.igvNavigationSearchResultsTableRow:focus,
+.igvNavigationSearchResultsTableRow:active  {
+    cursor: pointer;
+    font-weight: 700;
+    color: #141414;
 }
 
 .shim-left-6 {

@@ -330,6 +330,8 @@ var igv = (function (igv) {
 
             searchContainer.append(browser.$searchResults[ 0 ]);
 
+            browser.$searchResults.hide();
+
 
 
 

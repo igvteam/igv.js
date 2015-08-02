@@ -509,7 +509,6 @@ var igv = (function (igv) {
         return this.referenceFrame.bpPerPixel * this.trackViewportWidth();
     };
 
-
     igv.Browser.prototype.removeAllTracks = function () {
         var tracks = this.trackViews;
 
@@ -719,29 +718,30 @@ var igv = (function (igv) {
 
     function presentSearchResults(loci, config, feature) {
 
-        // TODO: Use this for insertion of table in container div
-        // TODO: Use this for insertion of table in container div
-        //for(i=0; i<3; i++){
-        //    var row = $('<tr class="igvNavigationSearchResultsTableRow">').text('result ' + i);
-        //    igv.browser.$searchResultsTable.append(row);
-        //}
-        // TODO: Use this for insertion of table in container div
-        // TODO: Use this for insertion of table in container div
+        igv.browser.$searchResultsTable.empty();
+        igv.browser.$searchResults.show();
 
+        loci.forEach(function (locus) {
 
+            var row = $('<tr class="igvNavigationSearchResultsTableRow">');
+            row.text(locus.locusString);
 
-        // Just take the first result for now
-        // TODO - merge results, or ask user to choose
-        var locus = loci[ 0 ];
+            row.click(function () {
 
-        handleSearchResult(
-            feature,
-            locus[config.chromosomeField],
-            locus[config.startField] - config.coords,
-            locus[config.endField],
-            locus[config.chromosomeField],
-            locus["featureType"]);
+                igv.browser.$searchResults.hide();
 
+                handleSearchResult(
+                    feature,
+                    locus[config.chromosomeField],
+                    locus[config.startField] - config.coords,
+                    locus[config.endField],
+                    locus["featureType"]);
+
+            });
+
+            igv.browser.$searchResultsTable.append(row);
+
+        });
 
     }
 
@@ -799,6 +799,42 @@ var igv = (function (igv) {
             var mocked = [],
                 loci =
                 [
+                    "chr5:67,843,223-113,072,037",
+                    "chr1:185,771,548-216,927,875",
+                    "chr9:93,733,212-129,482,694",
+                    "chr1:185,771,548-216,927,875",
+                    "chr9:93,733,212-129,482,694",
+                    "chr5:67,843,223-113,072,037",
+                    "chr1:185,771,548-216,927,875",
+                    "chr9:93,733,212-129,482,694",
+                    "chr1:185,771,548-216,927,875",
+                    "chr9:93,733,212-129,482,694",
+                    "chr5:67,843,223-113,072,037",
+                    "chr1:185,771,548-216,927,875",
+                    "chr9:93,733,212-129,482,694",
+                    "chr1:185,771,548-216,927,875",
+                    "chr9:93,733,212-129,482,694",
+                    "chr5:67,843,223-113,072,037",
+                    "chr1:185,771,548-216,927,875",
+                    "chr9:93,733,212-129,482,694",
+                    "chr1:185,771,548-216,927,875",
+                    "chr9:93,733,212-129,482,694",
+                    "chr5:67,843,223-113,072,037",
+                    "chr1:185,771,548-216,927,875",
+                    "chr9:93,733,212-129,482,694",
+                    "chr1:185,771,548-216,927,875",
+                    "chr9:93,733,212-129,482,694",
+                    "chr5:67,843,223-113,072,037",
+                    "chr1:185,771,548-216,927,875",
+                    "chr9:93,733,212-129,482,694",
+                    "chr1:185,771,548-216,927,875",
+                    "chr9:93,733,212-129,482,694",
+                    "chr5:67,843,223-113,072,037",
+                    "chr1:185,771,548-216,927,875",
+                    "chr9:93,733,212-129,482,694",
+                    "chr1:185,771,548-216,927,875",
+                    "chr9:93,733,212-129,482,694",
+                    "chr5:67,843,223-113,072,037",
                     "chr1:185,771,548-216,927,875",
                     "chr9:93,733,212-129,482,694",
                     "chr5:67,843,223-113,072,037"
@@ -815,6 +851,8 @@ var igv = (function (igv) {
                     obj.end   = parseInt(rangeTokens[ 1 ].replace(/,/g, ''));
 
                     obj.featureType = "gene";
+
+                    obj.locusString = locus;
 
                     mocked.push(obj);
                 });
