@@ -592,6 +592,35 @@ div.ui-dialog fieldset {
 
 }
 
+.igvNavigationSearchResults {
+
+    position: absolute;
+    top: 32px;
+    left: 2px;
+
+    height: 320px;
+    width: 213px;
+
+    background-color: white;
+
+    border-color: rgb(127, 127, 127);
+    border-style: solid;
+    border-width: thin;
+
+    overflow-x: hidden;
+    overflow-y: auto;
+
+    z-index: 9999;
+}
+
+.igvNavigationSearchResultsTable {
+
+}
+
+.igvNavigationSearchResultsTableRow {
+
+}
+
 .shim-left-6 {
     padding-left: 6px;
 }

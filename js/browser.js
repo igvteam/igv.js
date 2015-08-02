@@ -719,6 +719,17 @@ var igv = (function (igv) {
 
     function presentSearchResults(loci, config, feature) {
 
+        // TODO: Use this for insertion of table in container div
+        // TODO: Use this for insertion of table in container div
+        //for(i=0; i<3; i++){
+        //    var row = $('<tr class="igvNavigationSearchResultsTableRow">').text('result ' + i);
+        //    igv.browser.$searchResultsTable.append(row);
+        //}
+        // TODO: Use this for insertion of table in container div
+        // TODO: Use this for insertion of table in container div
+
+
+
         // Just take the first result for now
         // TODO - merge results, or ask user to choose
         var locus = loci[ 0 ];
@@ -730,6 +741,7 @@ var igv = (function (igv) {
             locus[config.endField],
             locus[config.chromosomeField],
             locus["featureType"]);
+
 
     }
 
