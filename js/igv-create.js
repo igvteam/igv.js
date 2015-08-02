@@ -265,7 +265,7 @@ var igv = (function (igv) {
             controlDiv = $('<div id="igvControlDiv">')[0],
             contentKaryo,
             navigation,
-            search,
+            searchContainer,
             searchButton,
             $trackLabelToggle,
             zoom,
@@ -298,14 +298,20 @@ var igv = (function (igv) {
             igvLogo = $('<div class="igv-logo">');
             navigation.append(igvLogo[0]);
 
-            search = $('<div class="igvNavigationSearch">');
-            navigation.append(search[0]);
+
+
+
+
+
+
+            searchContainer = $('<div class="igvNavigationSearch">');
+            navigation.append(searchContainer[0]);
 
             browser.searchInput = $('<input class="igvNavigationSearchInput" type="text" placeholder="Locus Search">');
-            search.append(browser.searchInput[0]);
+            searchContainer.append(browser.searchInput[0]);
 
             searchButton = $('<i class="igv-app-icon fa fa-search fa-18px shim-left-6">');
-            search.append(searchButton[0]);
+            searchContainer.append(searchButton[0]);
 
             browser.searchInput.change(function () {
 
@@ -315,6 +321,20 @@ var igv = (function (igv) {
             searchButton.click(function () {
                 browser.search(browser.searchInput.val());
             });
+
+            // search results presented in table
+            browser.$searchResults = $('<div class="igvNavigationSearchResults">');
+            browser.$searchResultsTable = $('<table class="igvNavigationSearchResultsTable">');
+
+            browser.$searchResults.append(browser.$searchResultsTable[0 ]);
+
+            searchContainer.append(browser.$searchResults[ 0 ]);
+
+
+
+
+
+
 
             // window size panel
             browser.windowSizePanel = new igv.WindowSizePanel(navigation);
