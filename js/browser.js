@@ -73,7 +73,8 @@ var igv = (function (igv) {
             this.searchConfig = {
                 // Legacy support -- deprecated
                 type: "plain",
-                url: "//www.broadinstitute.org/webservices/igv/locus?genome=S288c&name=$FEATURE$",
+                //url: "//www.broadinstitute.org/webservices/igv/locus?genome=S288c&name=$FEATURE$",
+                url: "//www.broadinstitute.org/webservices/igv/locus?genome=hg19&name=$FEATURE$",
                 coords: 0,
                 chromosomeField: "chromosome",
                 startField: "start",
