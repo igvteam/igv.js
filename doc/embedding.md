@@ -39,14 +39,6 @@ creating of new tracks and navigation.  The complete api is documented [here](ap
 
 ##Dependencies##
 
-####jQuery####
-
-`<script type="text/javascript" src="//ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>`
-
-####jQuery UI####
-
-`<link rel="stylesheet" type="text/css" href="//ajax.googleapis.com/ajax/libs/jqueryui/1.11.2/themes/smoothness/jquery-ui.css"/>`
-`<script type="text/javascript" src="//ajax.googleapis.com/ajax/libs/jqueryui/1.11.2/jquery-ui.min.js"></script>`
 
 ####Google Fonts####
 
@@ -56,10 +48,32 @@ is recommended but not required.
 `<link rel="stylesheet" type="text/css" href='//fonts.googleapis.com/css?family=PT+Sans:400,700'>`
 `<link rel="stylesheet" type="text/css" href='//fonts.googleapis.com/css?family=Open+Sans'>`
 
-####Font Awesome####
+####jQuery UI CSS####
 
-All icons are implemented using Font Awesome
+A jQuery UI theme is required, the example below uses the "smoothness" theme.
 
-`<link rel="stylesheet" type="text/css" href="//maxcdn.bootstrapcdn.com/font-awesome/4.2.0/css/font-awesome.min.css">`
+`<link rel="stylesheet" type="text/css" href="//ajax.googleapis.com/ajax/libs/jqueryui/1.11.2/themes/smoothness/jquery-ui.css"/>`
 
+####Font Awesome CSS####
+
+Icons are implemented using Font Awesome
+
+ <link rel="stylesheet" type="text/css" href="//maxcdn.bootstrapcdn.com/font-awesome/4.2.0/css/font-awesome.min.css">`
+
+####IGV CSS####
+
+ <link rel="stylesheet" type="text/css" href="//igv.org/web/beta/igv-beta.css">
+
+
+####jQuery JS####
+
+`<script type="text/javascript" src="//ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>`
+
+####jQuery UI JS####
+
+`<script type="text/javascript" src="//ajax.googleapis.com/ajax/libs/jqueryui/1.11.2/jquery-ui.min.js"></script>`
+
+
+####IGV JS####
+<script type="text/javascript" src="//igv.org/web/beta/igv-beta.js"></script>
 
