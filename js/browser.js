@@ -52,6 +52,8 @@ var igv = (function (igv) {
     };
 
     function initialize(options) {
+        var genomeId;
+
         this.flanking = options.flanking;
         this.type = options.type || "IGV";
         this.crossDomainProxy = options.crossDomainProxy;
@@ -70,10 +72,21 @@ var igv = (function (igv) {
             }
         }
         else {
+
+            if(options.reference && options.reference.id) {
+                genomeId = options.reference.id;
+            }
+            else if(options.genome) {
+                genomeId = options.genome;
+            }
+            else {
+                genomeId = "hg19";
+            }
+
             this.searchConfig = {
                 // Legacy support -- deprecated
                 type: "plain",
-                url: "//www.broadinstitute.org/webservices/igv/locus?genome=S288c&name=$FEATURE$",
+                url: "//www.broadinstitute.org/webservices/igv/locus?genome=" + genomeId + "&name=$FEATURE$",
                 coords: 0,
                 chromosomeField: "chromosome",
                 startField: "start",
