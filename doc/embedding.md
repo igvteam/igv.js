@@ -1,7 +1,7 @@
 <!-- Note: This document is written in "markdown".  Please respect the markdown conventions (http://daringfireball.net/projects/markdown/) when editig. -->
 
 
-#Browser Initialization#
+# Browser Initialization #
 
 The IGV.js browser is a javascript object designd to be embedded in web pages.  The object is created and initialized with the function
 
@@ -37,18 +37,10 @@ After creation, client pages interact with the browser through the singleton "ig
 creating of new tracks and navigation.  The complete api is documented [here](api.html).
 
 
-##Dependencies##
+## Dependencies ##
 
-####jQuery####
 
-`<script type="text/javascript" src="//ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>`
-
-####jQuery UI####
-
-`<link rel="stylesheet" type="text/css" href="//ajax.googleapis.com/ajax/libs/jqueryui/1.11.2/themes/smoothness/jquery-ui.css"/>`
-`<script type="text/javascript" src="//ajax.googleapis.com/ajax/libs/jqueryui/1.11.2/jquery-ui.min.js"></script>`
-
-####Google Fonts####
+#### Google Fonts ####
 
 IGV.js is designed to work well with the following Google fonts: PT Sans and Open Sans.  Inclusion of these fonts
 is recommended but not required.
@@ -56,10 +48,43 @@ is recommended but not required.
 `<link rel="stylesheet" type="text/css" href='//fonts.googleapis.com/css?family=PT+Sans:400,700'>`
 `<link rel="stylesheet" type="text/css" href='//fonts.googleapis.com/css?family=Open+Sans'>`
 
-####Font Awesome####
+#### jQuery UI CSS ####
 
-All icons are implemented using Font Awesome
+A jQuery UI theme is required, the example below uses the "smoothness" theme.
 
-`<link rel="stylesheet" type="text/css" href="//maxcdn.bootstrapcdn.com/font-awesome/4.2.0/css/font-awesome.min.css">`
+`<link rel="stylesheet" type="text/css" href="//ajax.googleapis.com/ajax/libs/jqueryui/1.11.2/themes/smoothness/jquery-ui.css"/>`
+
+#### Font Awesome CSS ####
+
+Icons are implemented using Font Awesome
+
+ `<link rel="stylesheet" type="text/css" href="//maxcdn.bootstrapcdn.com/font-awesome/4.2.0/css/font-awesome.min.css">`
+
+#### IGV CSS ####
+
+ `<link rel="stylesheet" type="text/css" href="//igv.org/web/beta/igv-beta.css">`
 
 
+####jQuery JS####
+
+`<script type="text/javascript" src="//ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>`
+
+####jQuery UI JS####
+
+`<script type="text/javascript" src="//ajax.googleapis.com/ajax/libs/jqueryui/1.11.2/jquery-ui.min.js"></script>`
+
+
+####IGV JS####
+
+ `<script type="text/javascript" src="//igv.org/web/beta/igv-beta.js"></script>`
+
+
+### The complete package -- cut and paste ###
+
+    <link rel="stylesheet" type="text/css" href="//ajax.googleapis.com/ajax/libs/jqueryui/1.11.2/themes/smoothness/jquery-ui.css"/>
+    <link rel="stylesheet" type="text/css" href="//maxcdn.bootstrapcdn.com/font-awesome/4.2.0/css/font-awesome.min.css">
+    <link rel="stylesheet" type="text/css" href="//igv.org/web/beta/igv-beta.css">
+    <script type="text/javascript" src="//ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
+    <script type="text/javascript" src="//ajax.googleapis.com/ajax/libs/jqueryui/1.11.2/jquery-ui.min.js"></script>
+    <script type="text/javascript" src="//igv.org/web/beta/igv-beta.js"></script>
+    
