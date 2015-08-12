@@ -73,10 +73,10 @@ var igv = (function (igv) {
         }
         else {
 
-            if(options.reference && options.reference.id) {
+            if (options.reference && options.reference.id) {
                 genomeId = options.reference.id;
             }
-            else if(options.genome) {
+            else if (options.genome) {
                 genomeId = options.genome;
             }
             else {
@@ -692,9 +692,9 @@ var igv = (function (igv) {
         }
         else {
 
-            // Try local featuer cache first
+            // Try local feature cache first
             result = this.featureDB[feature.toUpperCase()];
-            if(result) {
+            if (result) {
                 handleSearchResult(result.name, result.chr, result.start, result.end, "");
             }
 
@@ -702,7 +702,7 @@ var igv = (function (igv) {
                 url = this.searchConfig.url.replace("$FEATURE$", feature);
                 searchConfig = this.searchConfig;
 
-                if(url.indexOf("$GENOME$") > -1) {
+                if (url.indexOf("$GENOME$") > -1) {
                     var genomeId = this.genome.id ? this.genome.id : "hg19";
                     url.replace("$GENOME$", genomeId);
                 }
@@ -711,14 +711,27 @@ var igv = (function (igv) {
 
                     var results = ("plain" === searchConfig.type) ? parseSearchResults(data) : JSON.parse(data);
 
-                    if(searchConfig.resultsField) {
+                    if (searchConfig.resultsField) {
                         results = results[searchConfig.resultsField];
                     }
 
-                    if (results.length > 0) {
-                        presentSearchResults(results, searchConfig, feature);
-                    } else {
+                    if (results.length == 0) {
                         alert('No feature found with name "' + feature + '"');
+                    }
+                    else if (results.length == 1) {
+
+                        // Just take the first result for now
+                        // TODO - merge results, or ask user to choose
+
+                        r = results[0];
+                        chr = r[searchConfig.chromosomeField];
+                        start = r[searchConfig.startField] - searchConfig.coords;
+                        end = r[searchConfig.endField];
+                        type = r["featureType"];
+                        handleSearchResult(feature, chr, start, end, chr, type);
+                    }
+                    else {
+                        presentSearchResults(results, searchConfig, feature);
                     }
 
                     if (continuation) continuation();
@@ -779,7 +792,7 @@ var igv = (function (igv) {
             }
         });
 
-        linesTrimmed.forEach(function(line){
+        linesTrimmed.forEach(function (line) {
 
             var tokens = line.split("\t"),
                 source,
@@ -803,75 +816,8 @@ var igv = (function (igv) {
 
         });
 
-        results = mockedData();
-
         return results;
 
-        function mockedData() {
-
-            var mocked = [],
-                loci =
-                [
-                    "chr5:67,843,223-113,072,037",
-                    "chr1:185,771,548-216,927,875",
-                    "chr9:93,733,212-129,482,694",
-                    "chr1:185,771,548-216,927,875",
-                    "chr9:93,733,212-129,482,694",
-                    "chr5:67,843,223-113,072,037",
-                    "chr1:185,771,548-216,927,875",
-                    "chr9:93,733,212-129,482,694",
-                    "chr1:185,771,548-216,927,875",
-                    "chr9:93,733,212-129,482,694",
-                    "chr5:67,843,223-113,072,037",
-                    "chr1:185,771,548-216,927,875",
-                    "chr9:93,733,212-129,482,694",
-                    "chr1:185,771,548-216,927,875",
-                    "chr9:93,733,212-129,482,694",
-                    "chr5:67,843,223-113,072,037",
-                    "chr1:185,771,548-216,927,875",
-                    "chr9:93,733,212-129,482,694",
-                    "chr1:185,771,548-216,927,875",
-                    "chr9:93,733,212-129,482,694",
-                    "chr5:67,843,223-113,072,037",
-                    "chr1:185,771,548-216,927,875",
-                    "chr9:93,733,212-129,482,694",
-                    "chr1:185,771,548-216,927,875",
-                    "chr9:93,733,212-129,482,694",
-                    "chr5:67,843,223-113,072,037",
-                    "chr1:185,771,548-216,927,875",
-                    "chr9:93,733,212-129,482,694",
-                    "chr1:185,771,548-216,927,875",
-                    "chr9:93,733,212-129,482,694",
-                    "chr5:67,843,223-113,072,037",
-                    "chr1:185,771,548-216,927,875",
-                    "chr9:93,733,212-129,482,694",
-                    "chr1:185,771,548-216,927,875",
-                    "chr9:93,733,212-129,482,694",
-                    "chr5:67,843,223-113,072,037",
-                    "chr1:185,771,548-216,927,875",
-                    "chr9:93,733,212-129,482,694",
-                    "chr5:67,843,223-113,072,037"
-                ];
-
-                loci.forEach(function(locus){
-                    var rangeTokens,
-                        obj = {};
-
-                    obj.chromosome = locus.split(":")[ 0 ];
-
-                    rangeTokens = locus.split(":")[ 1 ].split("-");
-                    obj.start = parseInt(rangeTokens[ 0 ].replace(/,/g, ''));
-                    obj.end   = parseInt(rangeTokens[ 1 ].replace(/,/g, ''));
-
-                    obj.featureType = "gene";
-
-                    obj.locusString = locus;
-
-                    mocked.push(obj);
-                });
-
-            return mocked;
-        }
     }
 
     function handleSearchResult(name, chr, start, end, type) {
