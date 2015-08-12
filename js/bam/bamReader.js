@@ -32,8 +32,12 @@ var igv = (function (igv) {
     igv.BamReader = function (config) {
 
         this.config = config;
-        this.bamPath = config.url;
-        this.baiPath = config.indexURL || (this.bamPath + ".bai"); // Todo - deal with Picard convention.  WHY DOES THERE HAVE TO BE 2?
+        this.bamPath = 'gcs' === config.sourceType ?
+            igv.translateGoogleCloudURL(config.url) :
+            config.url;
+        this.baiPath = 'gcs' === config.sourceType ?
+            igv.translateGoogleCloudURL(config.url + ".bai") :
+            config.url + ".bai"; // Todo - deal with Picard convention.  WHY DOES THERE HAVE TO BE 2?
         this.headPath = config.headURL || this.bamPath;
 
     };
@@ -448,7 +452,7 @@ var igv = (function (igv) {
     function getIndex(bam, continuation) {
 
         var bamIndex = bam.index;
-        
+
         if (bam.index) {
             continuation(bam.index);
         }
