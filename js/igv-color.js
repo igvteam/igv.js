@@ -28,7 +28,7 @@
  */
 var igv = (function (igv) {
 
-    igv.hex2Color = function(hex) {
+    igv.hex2Color = function (hex) {
 
         var cooked = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
 
@@ -36,7 +36,7 @@ var igv = (function (igv) {
             return undefined;
         }
 
-        return "rgb(" + parseInt(cooked[ 1 ], 16) + "," + parseInt(cooked[ 2 ], 16) + "," + parseInt(cooked[ 3 ], 16) + ")";
+        return "rgb(" + parseInt(cooked[1], 16) + "," + parseInt(cooked[2], 16) + "," + parseInt(cooked[3], 16) + ")";
     };
 
     igv.rgbaColor = function (r, g, b, a) {
@@ -57,6 +57,17 @@ var igv = (function (igv) {
 
         return "rgb(" + r + "," + g + "," + b + ")";
     };
+
+    igv.addAlphaToRGB = function (rgbString, alpha) {
+
+        if (rgbString.startsWith("rgb")) {
+            return rgbString.replace("rgb", "rgba").replace(")", ", " + alpha + ")");
+        } else {
+            console.log(rgbString + " is not an rgb style string");
+            return rgbString;
+        }
+
+    }
 
     igv.greyScale = function (value) {
 
@@ -89,11 +100,11 @@ var igv = (function (igv) {
 
     igv.nucleotideColorComponents = {
         "A": [0, 200, 0],
-        "C": [  0, 0, 200],
+        "C": [0, 0, 200],
         "T": [255, 0, 0],
         "G": [209, 113, 5],
-        "a": [  0, 200, 0],
-        "c": [  0, 0, 200],
+        "a": [0, 200, 0],
+        "c": [0, 0, 200],
         "t": [255, 0, 0],
         "g": [209, 113, 5]
     }
@@ -172,7 +183,7 @@ var igv = (function (igv) {
      *
      * @constructor
      */
-    igv.GradientColorScale = function(scale) {
+    igv.GradientColorScale = function (scale) {
 
         this.scale = scale;
         this.lowColor = "rgb(" + scale.lowR + "," + scale.lowG + "," + scale.lowB + ")";
@@ -185,8 +196,8 @@ var igv = (function (igv) {
 
         var scale = this.scale, r, g, b, frac;
 
-        if(value <= scale.low) return this.lowColor;
-        else if(value >= scale.high) return this.highColor;
+        if (value <= scale.low) return this.lowColor;
+        else if (value >= scale.high) return this.highColor;
 
         frac = (value - scale.low) / this.diff;
         r = Math.floor(scale.lowR + frac * (scale.highR - scale.lowR));
