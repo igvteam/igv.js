@@ -508,10 +508,10 @@ var igv = (function (igv) {
                         if (alignment.insertions) {
                             alignment.insertions.forEach(function (block, indexBlocks) {
                                 var refOffset = block.start - bpStart,
-                                    xBlockStart = refOffset / bpPerPixel,
-                                    widthBlock = 2;
+                                    xBlockStart = refOffset / bpPerPixel - 1,
+                                    widthBlock = 3;
 
-                                igv.Canvas.fillRect.call(ctx, xBlockStart, yRect - 2, widthBlock, height + 4, {fillStyle: "rgb(138, 94, 161)"});
+                                igv.Canvas.fillRect.call(ctx, xBlockStart, yRect-1, widthBlock, height + 2, {fillStyle: "rgb(138, 94, 161)"});
 
 
                             });
