@@ -393,6 +393,10 @@ var igv = (function (igv) {
 
                         canvasColor = igv.BAMTrack.alignmentShadingOptions[ myself.alignmentShading ](myself, alignment);
 
+                        if(alignment.mq <= 0) {
+                            canvasColor = igv.addAlphaToRGB(canvasColor, "0.15");
+                        }
+
                         if (alignment.blocks.length > 0) {
 
                             for (var c = 0; c < alignment.cigar.length; c++) {
