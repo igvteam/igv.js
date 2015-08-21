@@ -39,7 +39,7 @@ var igv = (function (igv) {
         this.coverageTrackHeight = config.coverageTrackHeight || 50;
 
         this.defaultColor = config.defaultColor || "rgb(185, 185, 185)";
-        this.color = config.color || this.defaultColor;;
+        this.color = config.color || this.defaultColor;
         this.negStrandColor = config.negStrandColor || "rgba(150, 150, 230, 0.75)";
         this.posStrandColor = config.posStrandColor || "rgba(230, 150, 150, 0.75)";
         this.firstInfPairColor = "rgba(150, 150, 230, 0.75)";
@@ -57,25 +57,25 @@ var igv = (function (igv) {
         this.alignmentShading = "none";
 
         // sort alignment rows
-        this.sortOption = config.sortOption || { sort : "NUCLEOTIDE" };
+        this.sortOption = config.sortOption || {sort: "NUCLEOTIDE"};
 
         // filter alignments
-        this.filterOption = config.filterOption || { name : "mappingQuality", params : [ 30, undefined ] };
+        this.filterOption = config.filterOption || {name: "mappingQuality", params: [30, undefined]};
 
         this.featureSource = new igv.BamSource(config);
     };
 
     igv.BAMTrack.alignmentShadingOptions = {
 
-        none : function (bamTrack, alignment) {
+        none: function (bamTrack, alignment) {
             return bamTrack.color;
         },
 
-        strand : function (bamTrack, alignment) {
+        strand: function (bamTrack, alignment) {
             return alignment.strand ? bamTrack.posStrandColor : bamTrack.negStrandColor;
         },
 
-        firstOfPairStrand : function (bamTrack, alignment) {
+        firstOfPairStrand: function (bamTrack, alignment) {
 
             if (alignment.isPaired()) {
 
@@ -99,19 +99,19 @@ var igv = (function (igv) {
 
     igv.BAMTrack.filters = {
 
-        noop : function () {
+        noop: function () {
             return function (alignment) {
                 return false;
             };
         },
 
-        strand : function (strand) {
+        strand: function (strand) {
             return function (alignment) {
                 return alignment.strand === strand;
             };
         },
 
-        mappingQuality : function (lower, upper) {
+        mappingQuality: function (lower, upper) {
             return function (alignment) {
 
                 if (lower && alignment.mq < lower) {
@@ -133,18 +133,18 @@ var igv = (function (igv) {
             b;
 
         if ("mappingQuality" === filterOption.name) {
-            a = bamTrack.filterOption[ "params" ][ 0 ];
-            b = bamTrack.filterOption[ "params" ][ 1 ];
-            return igv.BAMTrack.filters[ filterOption.name ](a, b);
+            a = bamTrack.filterOption["params"][0];
+            b = bamTrack.filterOption["params"][1];
+            return igv.BAMTrack.filters[filterOption.name](a, b);
         }
 
         if ("strand" === filterOption.name) {
-            a = bamTrack.filterOption[ "params" ][ 0 ];
-            return igv.BAMTrack.filters[ filterOption.name ](a);
+            a = bamTrack.filterOption["params"][0];
+            return igv.BAMTrack.filters[filterOption.name](a);
         }
 
         if ("noop" === filterOption.name) {
-            return igv.BAMTrack.filters[ filterOption.name ]();
+            return igv.BAMTrack.filters[filterOption.name]();
         }
 
         return undefined;
@@ -167,8 +167,8 @@ var igv = (function (igv) {
 
         this.featureSource.getFeatures(igv.browser.referenceFrame.chr, bpStart, bpEnd, function (genomicInterval) {
 
-            genomicInterval.packedAlignmentRows.forEach(function(alignmentRow){
-                alignmentRow.alignments.forEach(function(alignment){
+            genomicInterval.packedAlignmentRows.forEach(function (alignmentRow) {
+                alignmentRow.alignments.forEach(function (alignment) {
                     alignment.hidden = filter(alignment);
                 });
             });
@@ -213,11 +213,11 @@ var igv = (function (igv) {
             return;
         }
 
-        alignmentRows.forEach(function(alignmentRow){
+        alignmentRows.forEach(function (alignmentRow) {
             alignmentRow.updateScore(genomicLocation, genomicInterval, sortOption);
         });
 
-        alignmentRows.sort(function(a, b) {
+        alignmentRows.sort(function (a, b) {
             return a.score - b.score;
         });
 
@@ -254,7 +254,11 @@ var igv = (function (igv) {
             deletionColor = this.deletionColor,
             bpEnd = bpStart + pixelWidth * bpPerPixel + 1,
             myself = this,
-            zoomInNoticeFontStyle = { font: '16px PT Sans', fillStyle: "rgba(64, 64, 64, 1)", strokeStyle: "rgba(64, 64, 64, 1)" };
+            zoomInNoticeFontStyle = {
+                font: '16px PT Sans',
+                fillStyle: "rgba(64, 64, 64, 1)",
+                strokeStyle: "rgba(64, 64, 64, 1)"
+            };
 
         if (genomicInterval.exceedsVisibilityWindow) {
 
@@ -306,7 +310,7 @@ var igv = (function (igv) {
                     y = myself.coverageTrackHeight - h;
                     x = Math.floor((bp - bpStart) / bpPerPixel);
 
-                    igv.Canvas.setProperties.call(ctx, {fillStyle: myself.color, strokeStyle: myself.color });
+                    igv.Canvas.setProperties.call(ctx, {fillStyle: myself.color, strokeStyle: myself.color});
                     igv.Canvas.fillRect.call(ctx, x, y, w, h);
 
                     // coverage mismatch coloring
@@ -319,16 +323,16 @@ var igv = (function (igv) {
                         refBase = sequence[i];
                         if (item.isMismatch(refBase)) {
 
-                            igv.Canvas.setProperties.call(ctx, { fillStyle: igv.nucleotideColors[ refBase ] });
+                            igv.Canvas.setProperties.call(ctx, {fillStyle: igv.nucleotideColors[refBase]});
                             igv.Canvas.fillRect.call(ctx, x, y, w, h);
 
                             accumulatedHeight = 0.0;
-                            [ "A", "C", "T", "G" ].forEach(function(nucleotide){
+                            ["A", "C", "T", "G"].forEach(function (nucleotide) {
 
                                 var count,
                                     hh;
 
-                                count = item[ "pos" + nucleotide] + item[ "neg" + nucleotide];
+                                count = item["pos" + nucleotide] + item["neg" + nucleotide];
 
 
                                 // non-logoritmic
@@ -337,7 +341,7 @@ var igv = (function (igv) {
                                 y = (myself.coverageTrackHeight - hh) - accumulatedHeight;
                                 accumulatedHeight += hh;
 
-                                igv.Canvas.setProperties.call(ctx, { fillStyle: igv.nucleotideColors[ nucleotide ] });
+                                igv.Canvas.setProperties.call(ctx, {fillStyle: igv.nucleotideColors[nucleotide]});
                                 igv.Canvas.fillRect.call(ctx, x, y, w, hh);
 
                             });
@@ -391,9 +395,9 @@ var igv = (function (igv) {
                         xStart = (alignment.start - bpStart) / bpPerPixel;
                         xEnd = ((alignment.start + alignment.lengthOnRef) - bpStart) / bpPerPixel;
 
-                        canvasColor = igv.BAMTrack.alignmentShadingOptions[ myself.alignmentShading ](myself, alignment);
+                        canvasColor = igv.BAMTrack.alignmentShadingOptions[myself.alignmentShading](myself, alignment);
 
-                        if(alignment.mq <= 0) {
+                        if (alignment.mq <= 0) {
                             canvasColor = igv.addAlphaToRGB(canvasColor, "0.15");
                         }
 
@@ -401,11 +405,11 @@ var igv = (function (igv) {
 
                             for (var c = 0; c < alignment.cigar.length; c++) {
 
-                                if      ("D" === alignment.cigar.charAt( c )) {
+                                if ("D" === alignment.cigar.charAt(c)) {
                                     igv.Canvas.strokeLine.call(ctx, xStart, yStrokedLine, xEnd, yStrokedLine, {strokeStyle: deletionColor});
                                     break;
                                 }
-                                else if ("N" === alignment.cigar.charAt( c )) {
+                                else if ("N" === alignment.cigar.charAt(c)) {
                                     igv.Canvas.strokeLine.call(ctx, xStart, yStrokedLine, xEnd, yStrokedLine, {strokeStyle: skippedColor});
                                     break;
                                 }
@@ -414,7 +418,7 @@ var igv = (function (igv) {
 
                         }
 
-                        igv.Canvas.setProperties.call(ctx, {   fillStyle: canvasColor , strokeStyle: canvasColor});
+                        igv.Canvas.setProperties.call(ctx, {fillStyle: canvasColor, strokeStyle: canvasColor});
 
                         alignment.blocks.forEach(function (block, indexBlocks) {
                             var refOffset = block.start - bpStart,
@@ -432,7 +436,7 @@ var igv = (function (igv) {
                                 x,
                                 y;
 
-                            if      ( true === alignment.strand && indexBlocks === alignment.blocks.length - 1) {
+                            if (true === alignment.strand && indexBlocks === alignment.blocks.length - 1) {
 
                                 x = [
                                     xEnd,
@@ -442,11 +446,11 @@ var igv = (function (igv) {
 
                                 y = [
                                     yRect,
-                                    yRect + (height/2.0),
+                                    yRect + (height / 2.0),
                                     yRect + height,
                                     yRect];
 
-                                igv.Canvas.fillPolygon.call(ctx, x, y, { fillStyle: canvasColor });
+                                igv.Canvas.fillPolygon.call(ctx, x, y, {fillStyle: canvasColor});
                             }
                             else if (false === alignment.strand && indexBlocks === 0) {
 
@@ -458,15 +462,15 @@ var igv = (function (igv) {
 
                                 y = [
                                     yRect,
-                                    yRect + (height/2.0),
+                                    yRect + (height / 2.0),
                                     yRect + height,
                                     yRect];
 
-                                igv.Canvas.fillPolygon.call(ctx, x, y, { fillStyle: canvasColor });
+                                igv.Canvas.fillPolygon.call(ctx, x, y, {fillStyle: canvasColor});
                             }
 
-                            igv.Canvas.fillRect.call(ctx, xBlockStart, yRect, widthBlock, height, { fillStyle: "white" });
-                            igv.Canvas.fillRect.call(ctx, xBlockStart, yRect, widthBlock, height, { fillStyle: canvasColor });
+                            igv.Canvas.fillRect.call(ctx, xBlockStart, yRect, widthBlock, height, {fillStyle: "white"});
+                            igv.Canvas.fillRect.call(ctx, xBlockStart, yRect, widthBlock, height, {fillStyle: canvasColor});
 
                             // Only do mismatch coloring if a refseq exists to do the comparison
                             if (sequence && blockSeq !== "*") {
@@ -481,7 +485,7 @@ var igv = (function (igv) {
 
                                     if (readChar === "X" || refChar !== readChar) {
                                         if (block.qual && block.qual.length > i) {
-                                            readQual = block.qual[ i ];
+                                            readQual = block.qual[i];
                                             colorBase = shadedBaseColor(readQual, readChar, i + block.start);
                                         }
                                         else {
@@ -492,13 +496,26 @@ var igv = (function (igv) {
 
                                             xBase = ((block.start + i) - bpStart) / bpPerPixel;
                                             widthBase = Math.max(1, 1 / bpPerPixel);
-                                            igv.Canvas.fillRect.call(ctx, xBase, yRect, widthBase, height, { fillStyle: colorBase });
+                                            igv.Canvas.fillRect.call(ctx, xBase, yRect, widthBase, height, {fillStyle: colorBase});
                                         }
                                     }
                                 }
                             }
 
                         });
+
+
+                        if (alignment.insertions) {
+                            alignment.insertions.forEach(function (block, indexBlocks) {
+                                var refOffset = block.start - bpStart,
+                                    xBlockStart = refOffset / bpPerPixel,
+                                    widthBlock = 2;
+
+                                igv.Canvas.fillRect.call(ctx, xBlockStart, yRect - 2, widthBlock, height + 4, {fillStyle: "rgb(138, 94, 161)"});
+
+
+                            });
+                        }
                     });
                 });
             }
@@ -522,7 +539,7 @@ var igv = (function (igv) {
         if (packedAlignmentsIndex < 0) {
 
             coverageMapIndex = genomicLocation - coverageMap.bpStart;
-            coverage = coverageMap.coverage[ coverageMapIndex ];
+            coverage = coverageMap.coverage[coverageMapIndex];
 
             if (coverage) {
 
@@ -563,13 +580,13 @@ var igv = (function (igv) {
 
         else if (packedAlignmentsIndex < packedAlignmentRows.length) {
 
-            alignmentRow = packedAlignmentRows[ packedAlignmentsIndex ];
+            alignmentRow = packedAlignmentRows[packedAlignmentsIndex];
 
             alignment = undefined;
 
             for (var i = 0, len = alignmentRow.alignments.length, tmp; i < len; i++) {
 
-                tmp = alignmentRow.alignments[ i ];
+                tmp = alignmentRow.alignments[i];
 
                 if (tmp.start <= genomicLocation && (tmp.start + tmp.lengthOnRef >= genomicLocation)) {
                     alignment = tmp;
@@ -593,21 +610,21 @@ var igv = (function (igv) {
 
         var myself = this,
             menuItems = [],
-            lut = { "none": "Color: None", "strand": "Color: Read Strand" },
-            checkMark     = '<i class="fa fa-check fa-check-shim"></i>',
+            lut = {"none": "Color: None", "strand": "Color: Read Strand"},
+            checkMark = '<i class="fa fa-check fa-check-shim"></i>',
             checkMarkNone = '<i class="fa fa-check fa-check-shim fa-check-hidden"></i>',
             trackMenuItem = '<div class=\"igv-track-menu-item\">',
             trackMenuItemFirst = '<div class=\"igv-track-menu-item igv-track-menu-border-top\">';
 
         menuItems.push(igv.colorPickerMenuItem(popover, this.trackView));
 
-        [ "none", "strand"].forEach(function(alignmentShading, index){
+        ["none", "strand"].forEach(function (alignmentShading, index) {
 
             var chosen,
                 str;
 
             chosen = (0 === index) ? trackMenuItemFirst : trackMenuItem;
-            str = (alignmentShading === myself.alignmentShading) ? chosen + checkMark + lut[ alignmentShading ] + '</div>' : chosen + checkMarkNone + lut[ alignmentShading ] + '</div>';
+            str = (alignmentShading === myself.alignmentShading) ? chosen + checkMark + lut[alignmentShading] + '</div>' : chosen + checkMarkNone + lut[alignmentShading] + '</div>';
 
             menuItems.push({
                 object: $(str),
