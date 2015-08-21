@@ -292,6 +292,7 @@ var igv = (function (igv) {
         function makeBlocks(record, cigarArray) {
 
             var blocks = [],
+                insertions,
                 seqOffset = 0,
                 pos = record.start,
                 len = cigarArray.length,
@@ -319,6 +320,10 @@ var igv = (function (igv) {
                         pos += c.len;
                         break;
                     case 'I' :
+                        blockSeq = record.seq === "*" ? "*" : record.seq.substr(seqOffset, c.len);
+                        blockQuals = record.qual ? record.qual.slice(seqOffset, c.len) : undefined;
+                        if(insertions === undefined) insertions = [];
+                        insertions.push({start: pos, len: c.len, seq: blockSeq, qual: blockQuals});
                         seqOffset += c.len;
                         break;
                     case 'M' :
@@ -327,13 +332,9 @@ var igv = (function (igv) {
                     case 'X' :
 
                         blockSeq = record.seq === "*" ? "*" : record.seq.substr(seqOffset, c.len);
-
                         blockQuals = record.qual ? record.qual.slice(seqOffset, c.len) : undefined;
-
                         blocks.push({start: pos, len: c.len, seq: blockSeq, qual: blockQuals});
-
                         seqOffset += c.len;
-
                         pos += c.len;
 
                         break;

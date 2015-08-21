@@ -223,7 +223,11 @@ var igv = (function (igv) {
 
                 read.lengthOnRef = cigarDecoded.lengthOnRef;
 
-                read.blocks = makeBlocks(read, cigarDecoded.array);
+                blocks = makeBlocks(read, cigarDecoded.array);
+                read.blocks = blocks.blocks;
+                if(blocks.insertions) {
+                    read.insertions = blocks.insertions;
+                }
             }
             else {
                 read.mapped = false;
@@ -296,6 +300,7 @@ var igv = (function (igv) {
 
 
         var blocks = [],
+            insertions,
             seqOffset = 0,
             pos = record.start,
             len = cigarArray.length,
@@ -321,6 +326,10 @@ var igv = (function (igv) {
                     pos += c.len;
                     break;
                 case 'I' :
+                    blockSeq = record.seq === "*" ? "*" : record.seq.substr(seqOffset, c.len);
+                    blockQuals = record.qual === "*" ? "*" : record.qual.slice(seqOffset, c.len);
+                    if(insertions === undefined) insertions = [];
+                    insertions.push({start: pos, len: c.len, seq: blockSeq, qual: blockQuals, insertion: true});
                     seqOffset += c.len;
                     break;
                 case 'M' :
@@ -338,7 +347,7 @@ var igv = (function (igv) {
             }
         }
 
-        return blocks;
+        return {blocks: blocks, insertions: insertions};
 
     }
 
