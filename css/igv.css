@@ -848,15 +848,16 @@ div.ui-dialog fieldset {
     top: 0;
     left: 0;
 
-    width: 100%;
-    max-width: 100%;
-
+    /*width: 100%;*/
+    /*max-width: 384px;*/
     max-height: 384px;
 
     overflow-x: hidden;
     overflow-y: auto;
 
-    margin-right: 24px;
+    /*text-overflow: ellipsis;*/
+
+    /*margin-right: 24px;*/
 
 }
 
@@ -877,6 +878,8 @@ div.ui-dialog fieldset {
     cursor: default;
     text-wrap: none;
     white-space:nowrap;
+
+    max-width: 384px;
 
 }
 
