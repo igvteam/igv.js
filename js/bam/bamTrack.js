@@ -264,7 +264,7 @@ var igv = (function (igv) {
         if (genomicInterval.exceedsVisibilityWindow) {
 
             for (var x = 200; x < pixelWidth; x += 400) {
-                igv.Canvas.fillText.call(ctx, "Zoom in to see alignments", x, 20, zoomInNoticeFontStyle);
+                igv.graphics.fillText(ctx, "Zoom in to see alignments", x, 20, zoomInNoticeFontStyle);
             }
 
             return;
@@ -311,8 +311,8 @@ var igv = (function (igv) {
                     y = self.coverageTrackHeight - h;
                     x = Math.floor((bp - bpStart) / bpPerPixel);
 
-                    igv.Canvas.setProperties.call(ctx, {fillStyle: self.color, strokeStyle: self.color});
-                    igv.Canvas.fillRect.call(ctx, x, y, w, h);
+                    igv.graphics.setProperties(ctx, {fillStyle: self.color, strokeStyle: self.color});
+                    igv.graphics.fillRect(ctx, x, y, w, h);
 
                     // coverage mismatch coloring
                     if (sequence) {
@@ -324,8 +324,8 @@ var igv = (function (igv) {
                         refBase = sequence[i];
                         if (item.isMismatch(refBase)) {
 
-                            igv.Canvas.setProperties.call(ctx, {fillStyle: igv.nucleotideColors[refBase]});
-                            igv.Canvas.fillRect.call(ctx, x, y, w, h);
+                            igv.graphics.setProperties(ctx, {fillStyle: igv.nucleotideColors[refBase]});
+                            igv.graphics.fillRect(ctx, x, y, w, h);
 
                             accumulatedHeight = 0.0;
                             ["A", "C", "T", "G"].forEach(function (nucleotide) {
@@ -342,8 +342,8 @@ var igv = (function (igv) {
                                 y = (self.coverageTrackHeight - hh) - accumulatedHeight;
                                 accumulatedHeight += hh;
 
-                                igv.Canvas.setProperties.call(ctx, {fillStyle: igv.nucleotideColors[nucleotide]});
-                                igv.Canvas.fillRect.call(ctx, x, y, w, hh);
+                                igv.graphics.setProperties(ctx, {fillStyle: igv.nucleotideColors[nucleotide]});
+                                igv.graphics.fillRect(ctx, x, y, w, hh);
 
                             });
 
@@ -409,11 +409,11 @@ var igv = (function (igv) {
                             for (var c = 0; c < alignment.cigar.length; c++) {
 
                                 if ("D" === alignment.cigar.charAt(c)) {
-                                    igv.Canvas.strokeLine.call(ctx, xStart, yStrokedLine, xEnd, yStrokedLine, {strokeStyle: deletionColor});
+                                    igv.graphics.strokeLine(ctx, xStart, yStrokedLine, xEnd, yStrokedLine, {strokeStyle: deletionColor});
                                     break;
                                 }
                                 else if ("N" === alignment.cigar.charAt(c)) {
-                                    igv.Canvas.strokeLine.call(ctx, xStart, yStrokedLine, xEnd, yStrokedLine, {strokeStyle: skippedColor});
+                                    igv.graphics.strokeLine(ctx, xStart, yStrokedLine, xEnd, yStrokedLine, {strokeStyle: skippedColor});
                                     break;
                                 }
 
@@ -421,7 +421,7 @@ var igv = (function (igv) {
 
                         }
 
-                        igv.Canvas.setProperties.call(ctx, {fillStyle: canvasColor, strokeStyle: canvasColor});
+                        igv.graphics.setProperties(ctx, {fillStyle: canvasColor, strokeStyle: canvasColor});
 
                         alignment.blocks.forEach(function (block, indexBlocks) {
                             var refOffset = block.start - bpStart,
@@ -457,9 +457,9 @@ var igv = (function (igv) {
                                     yRect + height,
                                     yRect];
 
-                                igv.Canvas.fillPolygon.call(ctx, x, y, {fillStyle: canvasColor});
+                                igv.graphics.fillPolygon(ctx, x, y, {fillStyle: canvasColor});
                                 if (alignment.mq <= 0) {
-                                    igv.Canvas.strokePolygon.call(ctx, x, y, {strokeStyle: outlineColor});
+                                    igv.graphics.strokePolygon(ctx, x, y, {strokeStyle: outlineColor});
                                 }
                             }
                             else if (false === alignment.strand && indexBlocks === 0) {
@@ -480,15 +480,15 @@ var igv = (function (igv) {
                                     yRect + height,
                                     yRect];
 
-                                igv.Canvas.fillPolygon.call(ctx, x, y, {fillStyle: canvasColor});
+                                igv.graphics.fillPolygon(ctx, x, y, {fillStyle: canvasColor});
                                 if (alignment.mq <= 0) {
-                                    igv.Canvas.strokePolygon.call(ctx, x, y, {strokeStyle: outlineColor});
+                                    igv.graphics.strokePolygon(ctx, x, y, {strokeStyle: outlineColor});
                                 }
                             }
 
                             else {
-                                igv.Canvas.fillRect.call(ctx, xBlockStart, yRect, widthBlock, height, {fillStyle: "white"});
-                                igv.Canvas.fillRect.call(ctx, xBlockStart, yRect, widthBlock, height, {fillStyle: canvasColor});
+                                igv.graphics.fillRect(ctx, xBlockStart, yRect, widthBlock, height, {fillStyle: "white"});
+                                igv.graphics.fillRect(ctx, xBlockStart, yRect, widthBlock, height, {fillStyle: canvasColor});
 
                                 if (alignment.mq <= 0) {
                                     ctx.save();
@@ -522,7 +522,7 @@ var igv = (function (igv) {
 
                                             xBase = ((block.start + i) - bpStart) / bpPerPixel;
                                             widthBase = Math.max(1, 1 / bpPerPixel);
-                                            igv.Canvas.fillRect.call(ctx, xBase, yRect, widthBase, height, {fillStyle: colorBase});
+                                            igv.graphics.fillRect(ctx, xBase, yRect, widthBase, height, {fillStyle: colorBase});
                                         }
                                     }
                                 }
@@ -537,7 +537,7 @@ var igv = (function (igv) {
                                     xBlockStart = refOffset / bpPerPixel - 1,
                                     widthBlock = 3;
 
-                                igv.Canvas.fillRect.call(ctx, xBlockStart, yRect - 1, widthBlock, height + 2, {fillStyle: self.insertionColor});
+                                igv.graphics.fillRect(ctx, xBlockStart, yRect - 1, widthBlock, height + 2, {fillStyle: self.insertionColor});
 
 
                             });

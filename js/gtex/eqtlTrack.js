@@ -65,20 +65,20 @@ var igv = (function (igv) {
             'strokeStyle': "black"
         };
 
-        igv.Canvas.fillRect.call(ctx, 0, 0, pixelWidth, pixelHeight, {'fillStyle': "rgb(255, 255, 255)"});
+        igv.graphics.fillRect(ctx, 0, 0, pixelWidth, pixelHeight, {'fillStyle': "rgb(255, 255, 255)"});
 
         for (var p = 4; p <= track.maxLogP; p += 2) {
             var yp = pixelHeight - Math.round((p - track.minLogP) / yScale);
             // TODO: Dashes may not actually line up with correct scale. Ask Jim about this
-            igv.Canvas.strokeLine.call(ctx, 45, yp - 2, 50, yp - 2, font); // Offset dashes up by 2 pixel
-            igv.Canvas.fillText.call(ctx, p, 44, yp + 2, font); // Offset numbers down by 2 pixels; TODO: error
+            igv.graphics.strokeLine(ctx, 45, yp - 2, 50, yp - 2, font); // Offset dashes up by 2 pixel
+            igv.graphics.fillText(ctx, p, 44, yp + 2, font); // Offset numbers down by 2 pixels; TODO: error
         }
 
 
         font['textAlign'] = 'center';
 
 
-        igv.Canvas.fillText.call(ctx, "-log10(pvalue)", pixelWidth / 2, pixelHeight / 2, font, {rotate: {angle: -90}});
+        igv.graphics.fillText(ctx, "-log10(pvalue)", pixelWidth / 2, pixelHeight / 2, font, {rotate: {angle: -90}});
 
 
     };
@@ -103,8 +103,8 @@ var igv = (function (igv) {
             yScale = (track.maxLogP - track.minLogP) / pixelHeight;
 
         // Background
-        if (this.background) igv.Canvas.fillRect.call(ctx, 0, 0, pixelWidth, pixelHeight, {'fillStyle': this.background});
-        igv.Canvas.strokeLine.call(ctx, 0, pixelHeight - 1, pixelWidth, pixelHeight - 1, {'strokeStyle': this.divider});
+        if (this.background) igv.graphics.fillRect(ctx, 0, 0, pixelWidth, pixelHeight, {'fillStyle': this.background});
+        igv.graphics.strokeLine(ctx, 0, pixelHeight - 1, pixelWidth, pixelHeight - 1, {'strokeStyle': this.divider});
 
         if (ctx) {
 
@@ -130,7 +130,7 @@ var igv = (function (igv) {
 
 
             //ctx.fillStyle = igv.selection.colorForGene(eqtl.geneName);
-            igv.Canvas.setProperties.call(ctx, {
+            igv.graphics.setProperties(ctx, {
                 fillStyle: "rgb(180, 180, 180)",
                 strokeStyle: "rgb(180, 180, 180)"
             });
@@ -170,9 +170,9 @@ var igv = (function (igv) {
                 eqtl.px = px;
                 eqtl.py = py;
 
-                if (color) igv.Canvas.setProperties.call(ctx, {fillStyle: color, strokeStyle: "black"});
-                igv.Canvas.fillCircle.call(ctx, px, py, radius);
-                igv.Canvas.strokeCircle.call(ctx, px, py, radius);
+                if (color) igv.graphics.setProperties(ctx, {fillStyle: color, strokeStyle: "black"});
+                igv.graphics.fillCircle(ctx, px, py, radius);
+                igv.graphics.strokeCircle(ctx, px, py, radius);
             }
         }
 

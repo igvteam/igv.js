@@ -96,13 +96,13 @@ var cursor = (function (cursor) {
         var renderMinimumOverlay = function (minimum) {
 
             var height = (minimum/track.max) * myself.bins.length;
-            igv.Canvas.fillRect.call(myself.ctx, 0, myself.bins.length - height, myself.canvasWidth, height, { fillStyle: myself.minMaxfillStyle });
+            igv.graphics.fillRect(myself.ctx, 0, myself.bins.length - height, myself.canvasWidth, height, { fillStyle: myself.minMaxfillStyle });
         };
 
         var renderMaximumOverlay = function (maximum) {
 
             var height = myself.bins.length - ((maximum/track.max) * myself.bins.length);
-            igv.Canvas.fillRect.call(myself.ctx, 0, 0, myself.canvasWidth, height, { fillStyle: myself.minMaxfillStyle });
+            igv.graphics.fillRect(myself.ctx, 0, 0, myself.canvasWidth, height, { fillStyle: myself.minMaxfillStyle });
         };
 
         // Clear canvas
@@ -135,7 +135,7 @@ var cursor = (function (cursor) {
 
                 color = (track.color) ? track.color : igv.rgbColor(128, 128, 128);
 
-                igv.Canvas.fillRect.call(myself.ctx, x, y, width, height, { fillStyle: color });
+                igv.graphics.fillRect(myself.ctx, x, y, width, height, { fillStyle: color });
             }
 
         }, this);
@@ -146,7 +146,7 @@ var cursor = (function (cursor) {
     };
 
     cursor.CursorHistogram.prototype.fillCanvasWithFillStyle = function (fillStyle) {
-        igv.Canvas.fillRect.call(this.ctx, this.canvasWidth, this.canvasHeight, { fillStyle:fillStyle } );
+        igv.graphics.fillRect(this.ctx, this.canvasWidth, this.canvasHeight, { fillStyle:fillStyle } );
     };
 
     function showX(count, index, counts) {
@@ -154,7 +154,7 @@ var cursor = (function (cursor) {
         var yPercent = index/(counts.length - 1),
             color = igv.rgbaColor(Math.floor(yPercent * 255), 0, 0, 0.75);
 
-        igv.Canvas.fillRect.call(this.ctx, index, 0, 1, counts.length, { fillStyle: color });
+        igv.graphics.fillRect(this.ctx, index, 0, 1, counts.length, { fillStyle: color });
 
     }
 
@@ -163,7 +163,7 @@ var cursor = (function (cursor) {
         var yPercent = index/(counts.length - 1),
             color = igv.rgbaColor(Math.floor(yPercent * 255), 0, 0, 0.75);
 
-        igv.Canvas.fillRect.call(this.ctx, 0, index, counts.length, 1, { fillStyle: color });
+        igv.graphics.fillRect(this.ctx, 0, index, counts.length, 1, { fillStyle: color });
 
     }
 

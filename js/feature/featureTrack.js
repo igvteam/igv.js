@@ -133,12 +133,12 @@ var igv = (function (igv) {
             };
 
 
-        igv.Canvas.fillRect.call(ctx, 0, 0, pixelWidth, pixelHeight, {'fillStyle': "rgb(255, 255, 255)"});
+        igv.graphics.fillRect(ctx, 0, 0, pixelWidth, pixelHeight, {'fillStyle': "rgb(255, 255, 255)"});
 
         if (options.features.exceedsVisibilityWindow) {
 
             for (var x = 200; x < pixelWidth; x += 400) {
-                igv.Canvas.fillText.call(ctx, "Zoom in to see features", x, 20, zoomInNoticeFontStyle);
+                igv.graphics.fillText(ctx, "Zoom in to see features", x, 20, zoomInNoticeFontStyle);
             }
             return;
         }
@@ -337,13 +337,13 @@ var igv = (function (igv) {
             // multi-exon transcript
             cy = py + h/2;
 
-            igv.Canvas.strokeLine.call(ctx, px+1, cy, px1-1, cy); // center line for introns
+            igv.graphics.strokeLine(ctx, px+1, cy, px1-1, cy); // center line for introns
 
             direction = feature.strand == '+' ? 1 : -1;
             for (x = px + step / 2; x < px1; x += step) {
                 // draw arrowheads along central line indicating transcribed orientation
-                igv.Canvas.strokeLine.call(ctx, x - direction * 2, cy - 2, x, cy);
-                igv.Canvas.strokeLine.call(ctx, x - direction * 2, cy + 2, x, cy);
+                igv.graphics.strokeLine(ctx, x - direction * 2, cy - 2, x, cy);
+                igv.graphics.strokeLine(ctx, x - direction * 2, cy + 2, x, cy);
             }
             for (e = 0; e < exonCount; e++) {
                 // draw the exons
@@ -359,8 +359,8 @@ var igv = (function (igv) {
                     ctx.strokeStyle = "white";
                     for (x = ePx + step / 2; x < ePx1; x += step) {
                         // draw arrowheads along central line indicating transcribed orientation
-                        igv.Canvas.strokeLine.call(ctx, x - direction * 2, cy - 2, x, cy);
-                        igv.Canvas.strokeLine.call(ctx, x - direction * 2, cy + 2, x, cy);
+                        igv.graphics.strokeLine(ctx, x - direction * 2, cy - 2, x, cy);
+                        igv.graphics.strokeLine(ctx, x - direction * 2, cy + 2, x, cy);
                     }
                     ctx.fillStyle = color;
                     ctx.strokeStyle = color;
@@ -400,7 +400,7 @@ var igv = (function (igv) {
             }
 
             var labelY = transform ? py + 20 : py + 25;
-            igv.Canvas.fillText.call(ctx, feature.name, px + ((px1 - px) / 2), labelY, geneFontStyle, transform);
+            igv.graphics.fillText(ctx, feature.name, px + ((px1 - px) / 2), labelY, geneFontStyle, transform);
         }
     }
 

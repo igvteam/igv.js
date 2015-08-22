@@ -95,8 +95,8 @@ var igv = (function (igv) {
             this.po = undefined;
         }
 
-        if (this.background) igv.Canvas.fillRect.call(ctx, 0, 0, pixelWidth, pixelHeight, {'fillStyle': this.background});
-        igv.Canvas.strokeLine.call(ctx, 0, pixelHeight - 1, pixelWidth, pixelHeight - 1, {'strokeStyle': this.divider});
+        if (this.background) igv.graphics.fillRect(ctx, 0, 0, pixelWidth, pixelHeight, {'fillStyle': this.background});
+        igv.graphics.strokeLine(ctx, 0, pixelHeight - 1, pixelWidth, pixelHeight - 1, {'strokeStyle': this.divider});
 
         var variant, pos, len, xScale, px, px1, pw, py, color, pvalue, val;
 
@@ -124,9 +124,9 @@ var igv = (function (igv) {
 
                 py = Math.max(track.dotSize, pixelHeight - Math.round((val - track.minLogP) / yScale));
 
-                if (color) igv.Canvas.setProperties.call(ctx, {fillStyle: color, strokeStyle: "black"});
+                if (color) igv.graphics.setProperties(ctx, {fillStyle: color, strokeStyle: "black"});
 
-                igv.Canvas.fillCircle.call(ctx, px, py, track.dotSize);
+                igv.graphics.fillCircle(ctx, px, py, track.dotSize);
                 //canvas.strokeCircle(px, py, radius);
 
                 if (enablePopover) track.po.push({x: px, y: py, feature: variant});
@@ -146,20 +146,20 @@ var igv = (function (igv) {
             'textAlign': 'right',
             'strokeStyle': "black"};
 
-        igv.Canvas.fillRect.call(ctx, 0, 0, pixelWidth, pixelHeight, {'fillStyle': "rgb(255, 255, 255)"});
+        igv.graphics.fillRect(ctx, 0, 0, pixelWidth, pixelHeight, {'fillStyle': "rgb(255, 255, 255)"});
 
         for (var p = 2; p < track.maxLogP; p += 2) {
             var yp = pixelHeight - Math.round((p - track.minLogP) / yScale);
             // TODO: Dashes may not actually line up with correct scale. Ask Jim about this
-            igv.Canvas.strokeLine.call(ctx, 45, yp - 2, 50, yp - 2, font); // Offset dashes up by 2 pixel
-            igv.Canvas.fillText.call(ctx, p, 44, yp + 2, font); // Offset numbers down by 2 pixels;
+            igv.graphics.strokeLine(ctx, 45, yp - 2, 50, yp - 2, font); // Offset dashes up by 2 pixel
+            igv.graphics.fillText(ctx, p, 44, yp + 2, font); // Offset numbers down by 2 pixels;
         }
 
 
         font['textAlign'] = 'center';
 
 
-        igv.Canvas.fillText.call(ctx, "-log10(pvalue)", pixelWidth / 2, pixelHeight / 2, font, {rotate: {angle: -90}});
+        igv.graphics.fillText(ctx, "-log10(pvalue)", pixelWidth / 2, pixelHeight / 2, font, {rotate: {angle: -90}});
 
 
     };

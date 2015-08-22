@@ -211,7 +211,7 @@ var igv = (function (igv) {
             'strokeStyle': "black"
         };
 
-        igv.Canvas.fillRect.call(ctx, 0, 0, pixelWidth, pixelHeight, {'fillStyle': "rgb(255, 255, 255)"});
+        igv.graphics.fillRect(ctx, 0, 0, pixelWidth, pixelHeight, {'fillStyle': "rgb(255, 255, 255)"});
 
         function computeH(min, max, value, maxpixels) {
             return maxpixels - Math.round((value - min) / max * maxpixels);
@@ -222,28 +222,42 @@ var igv = (function (igv) {
         var min = 0;
         var x = 49;
 
-        igv.Canvas.strokeLine.call(ctx, x, computeH(min, max, 0, track.maxheight), x, computeH(min, max, max, track.maxheight), font); // Offset
+        igv.graphics.strokeLine(ctx, x, computeH(min, max, 0, track.maxheight), x, computeH(min, max, max, track.maxheight), font); // Offset
 
         x = x - 5;
         for (var p = 0; p <= max; p += 1) {
             var h = computeH(min, max, p, track.maxheight);
-            igv.Canvas.strokeLine.call(ctx, x, h, x + 5, h, font); // Offset dashes up by 2							// pixel
-            if (p > 0 && p < max) igv.Canvas.fillText.call(ctx, p, x - 4, h + 3, font); // Offset
+            igv.graphics.strokeLine(ctx, x, h, x + 5, h, font); // Offset dashes up by 2							// pixel
+            if (p > 0 && p < max) igv.graphics.fillText(ctx, p, x - 4, h + 3, font); // Offset
         }
 
         font['textAlign'] = 'center';
-        igv.Canvas.fillText.call(ctx, "ploidy", x - 15, pixelHeight / 2, font, {rotate: {angle: -90}});
+        igv.graphics.fillText(ctx, "ploidy", x - 15, pixelHeight / 2, font, {rotate: {angle: -90}});
 
 
     };
 
     igv.AneuTrack.prototype.draw = function (options) {
 
-        var myself = this, featureList, canvas, bpPerPixel, bpStart, pixelWidth, pixelHeight, bpEnd, segment, len, sample, i, y, color, value, px, px1, pw, xScale;
+        var myself = this,
+            ctx,
+            bpPerPixel,
+            bpStart,
+            pixelWidth,
+            pixelHeight,
+            bpEnd,
+            segment,
+            len,
+            sample,
+            i,
+            y,
+            color,
+            value,
+            px,
+            px1,
+            pw,
+            xScale;
 
-        // console.log("Draw called. redline="+this.redlindata);
-
-        canvas = options.context;
         ctx = options.context;
         pixelWidth = options.pixelWidth;
         pixelHeight = options.pixelHeight;
@@ -253,7 +267,7 @@ var igv = (function (igv) {
 
         var PLOIDYMAX = 10;
         // deubugging
-        igv.Canvas.fillRect.call(ctx, 0, 0, pixelWidth, pixelHeight, {'fillStyle': "rgb(255, 255, 255)"});
+        igv.graphics.fillRect(ctx, 0, 0, pixelWidth, pixelHeight, {'fillStyle': "rgb(255, 255, 255)"});
 
         var track = this;
         window.track = track;
@@ -340,7 +354,7 @@ var igv = (function (igv) {
                         log("       Got value " + value + ", h=" + h + ", y+h=" + (y + h) + ", px=" + px
                         + ", px1=" + px1 + ", pw=" + pw + ", color=" + color + ", maxh=" + maxheight);
                     // use different plot types
-                    igv.Canvas.fillRect.call(ctx, px, y + h, pw, 2, {
+                    igv.graphics.fillRect(ctx, px, y + h, pw, 2, {
                         fillStyle: color
                     });
                 }
@@ -367,9 +381,9 @@ var igv = (function (igv) {
 
             var mid = computeH(min, max, 2.0, maxheight);
             console.log("drawing dashed line and solid line at " + mid + " to " + pixelWidth);
-            igv.Canvas.dashedLine.call(ctx, 20, mid, pixelWidth, mid, 4, font);
+            igv.graphics.dashedLine(ctx, 20, mid, pixelWidth, mid, 4, font);
             var zero = computeH(min, max, 0, maxheight);
-            igv.Canvas.strokeLine.call(ctx, 20, zero, pixelWidth, zero, font);
+            igv.graphics.strokeLine(ctx, 20, zero, pixelWidth, zero, font);
         }
         else log("NOT drawing line at 2");
         if (options.features) {
