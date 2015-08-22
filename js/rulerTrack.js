@@ -62,7 +62,7 @@ var igv = (function (igv) {
         x = 0;
 
         //canvas.setProperties({textAlign: 'center'});
-        igv.Canvas.setProperties.call(ctx, fontStyle );
+        igv.graphics.setProperties(ctx, fontStyle );
         while (x < options.pixelWidth) {
 
             var l = Math.floor(nTick * spacing);
@@ -70,14 +70,14 @@ var igv = (function (igv) {
             var chrPosition = formatNumber(l / ts.unitMultiplier, 0) + " " + ts.majorUnit;
 
             if (nTick % 1 == 0) {
-                igv.Canvas.fillText.call(ctx, chrPosition, x, this.height - 15);
+                igv.graphics.fillText(ctx, chrPosition, x, this.height - 15);
             }
 
-            igv.Canvas.strokeLine.call(ctx, x, this.height - 10, x, this.height - 2);
+            igv.graphics.strokeLine(ctx, x, this.height - 10, x, this.height - 2);
 
             nTick++;
         }
-        igv.Canvas.strokeLine.call(ctx, 0, this.height - 1, options.pixelWidth, this.height - 1);
+        igv.graphics.strokeLine(ctx, 0, this.height - 1, options.pixelWidth, this.height - 1);
 
 
         function formatNumber(anynum, decimal) {

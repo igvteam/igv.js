@@ -85,11 +85,11 @@ var igv = (function (igv) {
 
                     if (bpPerPixel > 1 / 10) {
 
-                        igv.Canvas.fillRect.call(ctx, p0, 0, p1 - p0, 10, {fillStyle: c});
+                        igv.graphics.fillRect(ctx, p0, 0, p1 - p0, 10, {fillStyle: c});
                     }
                     else {
 
-                        igv.Canvas.strokeText.call(ctx, b, pc, y, {
+                        igv.graphics.strokeText(ctx, b, pc, y, {
                             strokeStyle: c,
                             font: 'normal 10px Arial',
                             textAlign: 'center'

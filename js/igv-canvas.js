@@ -4,13 +4,13 @@
  * Copyright (c) 2014 Broad Institute
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
- * of this software and associated documentation files (the "Software"), to deal
+ * of ctx software and associated documentation files (the "Software"), to deal
  * in the Software without restriction, including without limitation the rights
  * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
  * copies of the Software, and to permit persons to whom the Software is
  * furnished to do so, subject to the following conditions:
  *
- * The above copyright notice and this permission notice shall be included in
+ * The above copyright notice and ctx permission notice shall be included in
  * all copies or substantial portions of the Software.
  *
  *
@@ -24,11 +24,11 @@
  */
 
 
-// Define singleton collection of helper functions.  The "this" paramter in these functions is a canvas 2d context.
+// Collection of helper functions for canvas rendering.  The "ctx" paramter in these functions is a canvas 2d context.
 //
 // Example usage
 //
-//    igv.Canvas.strokeLine.call(context, 0, 0, 10, 10);
+//    igv.graphics.strokeLine(context, 0, 0, 10, 10);
 //
 
 var igv = (function (igv) {
@@ -51,20 +51,20 @@ var igv = (function (igv) {
     };
 
 
-    igv.Canvas = {
+    igv.graphics = {
 
 
-        setProperties: function (properties) {
+        setProperties: function (ctx, properties) {
 
             for (var key in properties) {
                 if (properties.hasOwnProperty(key)) {
                     var value = properties[key];
-                    this[key] = value;
+                    ctx[key] = value;
                 }
             }
         },
 
-        strokeLine: function (x1, y1, x2, y2, properties) {
+        strokeLine: function (ctx, x1, y1, x2, y2, properties) {
 
             x1 = Math.floor(x1) + 0.5;
             y1 = Math.floor(y1) + 0.5;
@@ -73,17 +73,17 @@ var igv = (function (igv) {
 
             log("stroke line, prop: " + properties);
 
-            this.save();
-            if (properties) igv.Canvas.setProperties.call(this, properties);
+            ctx.save();
+            if (properties) igv.graphics.setProperties(ctx, properties);
 
-            this.beginPath();
-            this.moveTo(x1, y1);
-            this.lineTo(x2, y2);
-            this.stroke();
-            this.restore();
+            ctx.beginPath();
+            ctx.moveTo(x1, y1);
+            ctx.lineTo(x2, y2);
+            ctx.stroke();
+            ctx.restore();
         },
 
-        fillRect: function (x, y, w, h, properties) {
+        fillRect: function (ctx, x, y, w, h, properties) {
 
             var c;
             x = Math.round(x);
@@ -91,42 +91,42 @@ var igv = (function (igv) {
 
             log("fillRect");
             if (properties) {
-                this.save();
-                igv.Canvas.setProperties.call(this, properties);
+                ctx.save();
+                igv.graphics.setProperties(ctx, properties);
             }
 
-            this.fillRect(x, y, w, h);
+            ctx.fillRect(x, y, w, h);
 
-            if (properties) this.restore();
+            if (properties) ctx.restore();
         },
 
-        fillPolygon: function (x, y, properties) {
-            this.save();
-            if (properties)   igv.Canvas.setProperties.call(this, properties);
-            doPath(this, x, y);
-            this.fill();
-            this.restore();
+        fillPolygon: function (ctx, x, y, properties) {
+            ctx.save();
+            if (properties)   igv.graphics.setProperties(ctx, properties);
+            doPath(ctx, x, y);
+            ctx.fill();
+            ctx.restore();
         },
 
-        strokePolygon: function (x, y, properties) {
-            this.save();
-            if (properties)   igv.Canvas.setProperties.call(this, properties);
-            doPath(this, x, y);
-            this.stroke();
-            this.restore();
+        strokePolygon: function (ctx, x, y, properties) {
+            ctx.save();
+            if (properties)   igv.graphics.setProperties(ctx, properties);
+            doPath(ctx, x, y);
+            ctx.stroke();
+            ctx.restore();
         },
 
-        fillText: function (text, x, y, properties, transforms) {
+        fillText: function (ctx, text, x, y, properties, transforms) {
 
             if (properties) {
-                this.save();
-                igv.Canvas.setProperties.call(this, properties);
+                ctx.save();
+                igv.graphics.setProperties(ctx, properties);
             }
 
 
-            this.save();
+            ctx.save();
 
-            this.translate(x, y);
+            ctx.translate(x, y);
             if (transforms) {
 
                 for (var transform in transforms) {
@@ -134,32 +134,32 @@ var igv = (function (igv) {
 
                     // TODO: Add error checking for robustness
                     if (transform == 'translate') {
-                        this.translate(value['x'], value['y']);
+                        ctx.translate(value['x'], value['y']);
                     }
                     if (transform == 'rotate') {
-                        this.rotate(value['angle'] * Math.PI / 180);
+                        ctx.rotate(value['angle'] * Math.PI / 180);
                     }
                 }
 
             }
 
-            this.fillText(text, 0, 0);
-            this.restore();
+            ctx.fillText(text, 0, 0);
+            ctx.restore();
 
-            if (properties) this.restore();
+            if (properties) ctx.restore();
 
         },
 
-        strokeText: function (text, x, y, properties, transforms) {
+        strokeText: function (ctx, text, x, y, properties, transforms) {
 
 
-            this.save();
+            ctx.save();
             if (properties) {
-                igv.Canvas.setProperties.call(this, properties);
+                igv.graphics.setProperties(ctx, properties);
             }
 
 
-            this.translate(x, y);
+            ctx.translate(x, y);
             if (transforms) {
 
                 for (var transform in transforms) {
@@ -167,120 +167,65 @@ var igv = (function (igv) {
 
                     // TODO: Add error checking for robustness
                     if (transform == 'translate') {
-                        this.translate(value['x'], value['y']);
+                        ctx.translate(value['x'], value['y']);
                     }
                     if (transform == 'rotate') {
-                        this.rotate(value['angle'] * Math.PI / 180);
+                        ctx.rotate(value['angle'] * Math.PI / 180);
                     }
                 }
             }
 
 
-            this.strokeText(text, 0, 0);
-            this.restore();
+            ctx.strokeText(text, 0, 0);
+            ctx.restore();
 
         },
 
-        strokeCircle: function (x, y, radius) {
+        strokeCircle: function (ctx, x, y, radius) {
 
-            this.beginPath();
-            this.arc(x, y, radius, 0, 2 * Math.PI);
-            this.stroke();
+            ctx.beginPath();
+            ctx.arc(x, y, radius, 0, 2 * Math.PI);
+            ctx.stroke();
         },
 
-        fillCircle: function (x, y, radius) {
+        fillCircle: function (ctx, x, y, radius) {
 
-            this.beginPath();
-            this.arc(x, y, radius, 0, 2 * Math.PI);
-            this.fill();
+            ctx.beginPath();
+            ctx.arc(x, y, radius, 0, 2 * Math.PI);
+            ctx.fill();
         },
 
-        drawArrowhead: function (x, y, size, lineWidth) {
+        drawArrowhead: function (ctx, x, y, size, lineWidth) {
 
-            this.save();
+            ctx.save();
             if (!size) {
                 size = 5;
             }
             if (lineWidth) {
-                this.lineWidth = lineWidth;
+                ctx.lineWidth = lineWidth;
             }
-            this.beginPath();
-            this.moveTo(x, y - size / 2);
-            this.lineTo(x, y + size / 2);
-            this.lineTo(x + size, y);
-            this.lineTo(x, y - size / 2);
-            this.closePath();
-            this.fill();
-            this.restore();
+            ctx.beginPath();
+            ctx.moveTo(x, y - size / 2);
+            ctx.lineTo(x, y + size / 2);
+            ctx.lineTo(x + size, y);
+            ctx.lineTo(x, y - size / 2);
+            ctx.closePath();
+            ctx.fill();
+            ctx.restore();
         },
 
-        roundRect: function (x, y, width, height, radius, fill, stroke) {
-
-            this.save();
-            if (typeof stroke == "undefined") {
-                stroke = true;
-            }
-            if (typeof radius === "undefined") {
-                radius = 5;
-            }
-            this.beginPath();
-            this.moveTo(x + radius, y);
-            this.lineTo(x + width - radius, y);
-            this.quadraticCurveTo(x + width, y, x + width, y + radius);
-            this.lineTo(x + width, y + height - radius);
-            this.quadraticCurveTo(x + width, y + height, x + width - radius, y + height);
-            this.lineTo(x + radius, y + height);
-            this.quadraticCurveTo(x, y + height, x, y + height - radius);
-            this.lineTo(x, y + radius);
-            this.quadraticCurveTo(x, y, x + radius, y);
-            this.closePath();
-            if (stroke) {
-                this.stroke();
-            }
-            if (fill) {
-                this.fill();
-            }
-            this.restore();
-        },
-
-        // Legacy function
-        polygon: function (x, y, fill, stroke) {
-
-            this.save();
-            if (typeof stroke == "undefined") {
-                stroke = true;
-            }
-
-            this.beginPath();
-            var len = x.length;
-            this.moveTo(x[0], y[0]);
-            for (var i = 1; i < len; i++) {
-                this.lineTo(x[i], y[i]);
-                // this.moveTo(x[i], y[i]);
-            }
-
-            this.closePath();
-            if (stroke) {
-                this.stroke();
-            }
-            if (fill) {
-                this.fill();
-            }
-            this.restore();
-        },
-
-        dashedLine: function (x1, y1, x2, y2, dashLen, properties) {
-            this.save();
+        dashedLine: function (ctx, x1, y1, x2, y2, dashLen, properties) {
+            ctx.save();
             x1 = Math.round(x1);
             y1 = Math.round(y1);
             x2 = Math.round(x2);
             y2 = Math.round(y2);
             dashLen = Math.round(dashLen);
             log("dashedLine");
-            if (properties) igv.Canvas.setProperties.call(this, properties);
+            if (properties) igv.graphics.setProperties(ctx, properties);
 
             if (dashLen == undefined) dashLen = 2;
-            this.moveTo(x1, y1);
+            ctx.moveTo(x1, y1);
 
             var dX = x2 - x1;
             var dY = y2 - y1;
@@ -292,38 +237,13 @@ var igv = (function (igv) {
             while (q++ < dashes) {
                 x1 += dashX;
                 y1 += dashY;
-                this[q % 2 == 0 ? 'moveTo' : 'lineTo'](x1, y1);
+                ctx[q % 2 == 0 ? 'moveTo' : 'lineTo'](x1, y1);
             }
-            this[q % 2 == 0 ? 'moveTo' : 'lineTo'](x2, y2);
+            ctx[q % 2 == 0 ? 'moveTo' : 'lineTo'](x2, y2);
 
-            this.restore();
+            ctx.restore();
         },
 
-        lineTo: function (x, y, properties) {
-
-            log("lineTo");
-            this.save();
-            x = Math.round(x);
-            y = Math.round(y);
-
-            if (properties) igv.Canvas.setProperties.call(this, properties);
-            this.lineTo(x, y);
-
-            this.restore();
-        },
-
-        moveTo: function (x, y, properties) {
-            log("moveTo");
-            this.save();
-            x = Math.round(x);
-            y = Math.round(y);
-
-            if (properties) igv.Canvas.setProperties.call(this, properties);
-
-            this.moveTo(x, y);
-
-            this.restore();
-        }
 
     }
 

@@ -127,7 +127,7 @@ var igv = (function (igv) {
         ctx = options.context;
         pixelWidth = options.pixelWidth;
         pixelHeight = options.pixelHeight;
-        igv.Canvas.fillRect.call(ctx, 0, 0, pixelWidth, pixelHeight, {'fillStyle': "rgb(255, 255, 255)"});
+        igv.graphics.fillRect(ctx, 0, 0, pixelWidth, pixelHeight, {'fillStyle': "rgb(255, 255, 255)"});
 
         featureList = options.features;
         if (featureList) {
@@ -176,7 +176,7 @@ var igv = (function (igv) {
                 px1 = Math.round((segment.end - bpStart) / xScale);
                 pw = Math.max(1, px1 - px);
 
-                igv.Canvas.fillRect.call(ctx, px, y, pw, sampleHeight, {fillStyle: color});
+                igv.graphics.fillRect(ctx, px, y, pw, sampleHeight, {fillStyle: color});
 
             }
         }

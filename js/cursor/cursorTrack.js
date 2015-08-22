@@ -275,10 +275,10 @@ var cursor = (function (cursor) {
             sampleInterval = Math.max(1, Math.floor(1.0 / framePixelWidth));
 
             if (frameMargin > 0) {
-                igv.Canvas.fillRect.call(ctx, 0, 0, width, height, {fillStyle: 'rgb(255, 255, 255)'});
+                igv.graphics.fillRect(ctx, 0, 0, width, height, {fillStyle: 'rgb(255, 255, 255)'});
             }
 
-            igv.Canvas.setProperties.call(ctx, {fillStyle: this.color, strokeStyle: this.color});
+            igv.graphics.setProperties(ctx, {fillStyle: this.color, strokeStyle: this.color});
 
             for (regionNumber = Math.floor(start), len = regions.length;
                  regionNumber < len && regionNumber < end;
@@ -331,7 +331,7 @@ var cursor = (function (cursor) {
                     fh = height;
                 }
 
-                igv.Canvas.fillRect.call(ctx, pxStart, top, pw, fh);
+                igv.graphics.fillRect(ctx, pxStart, top, pw, fh);
 
 
             }
