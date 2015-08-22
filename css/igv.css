@@ -886,10 +886,17 @@ div.ui-dialog fieldset {
 .igv-popoverName {
     font-weight: bold;
     padding-right: 4px;
+    float: left;
 }
 
 .igv-popoverValue {
     padding-left: 4px;
+
+    overflow: hidden;
+    white-space:nowrap;
+    text-overflow:ellipsis;
+    max-width:256px;
+    display:inline-block;
 }
 
 .igv-spinner-container {
