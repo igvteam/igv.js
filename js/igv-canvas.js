@@ -36,21 +36,21 @@ var igv = (function (igv) {
 
     var debug = false;
 
-        var log = function(msg) {
-        	if (debug) {
-        	    var d = new Date();
-        	    var time = d.getHours() + ":" + d.getMinutes() + ":" + d.getSeconds();
-        	    if (typeof copy != "undefined") {
-                    copy(msg);
-        	    }
-        	    if (typeof console != "undefined") {
-        			console.log("igv-canvas: " + time + " " + msg);			    
-        	    }
-        	   
-        	}
-        };
+    var log = function (msg) {
+        if (debug) {
+            var d = new Date();
+            var time = d.getHours() + ":" + d.getMinutes() + ":" + d.getSeconds();
+            if (typeof copy != "undefined") {
+                copy(msg);
+            }
+            if (typeof console != "undefined") {
+                console.log("igv-canvas: " + time + " " + msg);
+            }
 
-        
+        }
+    };
+
+
     igv.Canvas = {
 
 
@@ -71,8 +71,8 @@ var igv = (function (igv) {
             x2 = Math.floor(x2) + 0.5;
             y2 = Math.floor(y2) + 0.5;
 
-            log("stroke line, prop: "+properties);
-            
+            log("stroke line, prop: " + properties);
+
             this.save();
             if (properties) igv.Canvas.setProperties.call(this, properties);
 
@@ -101,24 +101,18 @@ var igv = (function (igv) {
         },
 
         fillPolygon: function (x, y, properties) {
-
-            var i, len = x.length;
-            for (i = 0; i < len; i++) {
-                x[i] = Math.round(x[i]);
-                y[i] = Math.round(y[i]);
-            }
-
             this.save();
             if (properties)   igv.Canvas.setProperties.call(this, properties);
-
-            this.beginPath();
-            this.moveTo(x[0], y[0]);
-            for (i = 1; i < len; i++) {
-                this.lineTo(x[i], y[i]);
-            }
-            this.closePath();
+            doPath(this, x, y);
             this.fill();
+            this.restore();
+        },
 
+        strokePolygon: function (x, y, properties) {
+            this.save();
+            if (properties)   igv.Canvas.setProperties.call(this, properties);
+            doPath(this, x, y);
+            this.stroke();
             this.restore();
         },
 
@@ -160,7 +154,7 @@ var igv = (function (igv) {
 
 
             this.save();
-            if (properties) {                
+            if (properties) {
                 igv.Canvas.setProperties.call(this, properties);
             }
 
@@ -184,7 +178,7 @@ var igv = (function (igv) {
 
             this.strokeText(text, 0, 0);
             this.restore();
-           
+
         },
 
         strokeCircle: function (x, y, radius) {
@@ -249,6 +243,7 @@ var igv = (function (igv) {
             this.restore();
         },
 
+        // Legacy function
         polygon: function (x, y, fill, stroke) {
 
             this.save();
@@ -273,7 +268,8 @@ var igv = (function (igv) {
             }
             this.restore();
         },
-        dashedLine: function( x1, y1, x2, y2, dashLen, properties) {
+
+        dashedLine: function (x1, y1, x2, y2, dashLen, properties) {
             this.save();
             x1 = Math.round(x1);
             y1 = Math.round(y1);
@@ -291,7 +287,7 @@ var igv = (function (igv) {
             var dashes = Math.floor(Math.sqrt(dX * dX + dY * dY) / dashLen);
             var dashX = dX / dashes;
             var dashY = dY / dashes;
-            
+
             var q = 0;
             while (q++ < dashes) {
                 x1 += dashX;
@@ -301,12 +297,12 @@ var igv = (function (igv) {
             this[q % 2 == 0 ? 'moveTo' : 'lineTo'](x2, y2);
 
             this.restore();
-         },
-                        
-         lineTo: function(x, y, properties) {
-             
-             log("lineTo");
-             this.save();
+        },
+
+        lineTo: function (x, y, properties) {
+
+            log("lineTo");
+            this.save();
             x = Math.round(x);
             y = Math.round(y);
 
@@ -314,11 +310,11 @@ var igv = (function (igv) {
             this.lineTo(x, y);
 
             this.restore();
-         },
-            
-         moveTo:  function(x, y, properties) {
-             log("moveTo");
-             this.save();
+        },
+
+        moveTo: function (x, y, properties) {
+            log("moveTo");
+            this.save();
             x = Math.round(x);
             y = Math.round(y);
 
@@ -328,8 +324,26 @@ var igv = (function (igv) {
 
             this.restore();
         }
-            
+
     }
+
+    function doPath(ctx, x, y) {
+
+
+        var i, len = x.length;
+        for (i = 0; i < len; i++) {
+            x[i] = Math.round(x[i]);
+            y[i] = Math.round(y[i]);
+        }
+
+        ctx.beginPath();
+        ctx.moveTo(x[0], y[0]);
+        for (i = 1; i < len; i++) {
+            ctx.lineTo(x[i], y[i]);
+        }
+        ctx.closePath();
+    }
+
     return igv;
 })(igv || {});
 

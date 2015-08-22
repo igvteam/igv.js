@@ -44,6 +44,7 @@ var igv = (function (igv) {
         this.posStrandColor = config.posStrandColor || "rgba(230, 150, 150, 0.75)";
         this.firstInfPairColor = "rgba(150, 150, 230, 0.75)";
         this.secondInPairColor = "rgba(230, 150, 150, 0.75)";
+        this.insertionColor = config.insertionColor || "rgb(138, 94, 161)";
 
         this.deletionColor = config.deletionColor || "black";
 
@@ -244,7 +245,8 @@ var igv = (function (igv) {
 
     igv.BAMTrack.prototype.draw = function (options) {
 
-        var genomicInterval = options.features,
+        var self = this,
+            genomicInterval = options.features,
             ctx = options.context,
             bpPerPixel = options.bpPerPixel,
             bpStart = options.bpStart,
@@ -253,7 +255,6 @@ var igv = (function (igv) {
             skippedColor = this.skippedColor,
             deletionColor = this.deletionColor,
             bpEnd = bpStart + pixelWidth * bpPerPixel + 1,
-            myself = this,
             zoomInNoticeFontStyle = {
                 font: '16px PT Sans',
                 fillStyle: "rgba(64, 64, 64, 1)",
@@ -304,13 +305,13 @@ var igv = (function (igv) {
                     item = coverageMap.coverage[i];
                     if (!item) continue;
 
-                    h = (item.total / coverageMap.maximum) * myself.coverageTrackHeight;
+                    h = (item.total / coverageMap.maximum) * self.coverageTrackHeight;
 
 
-                    y = myself.coverageTrackHeight - h;
+                    y = self.coverageTrackHeight - h;
                     x = Math.floor((bp - bpStart) / bpPerPixel);
 
-                    igv.Canvas.setProperties.call(ctx, {fillStyle: myself.color, strokeStyle: myself.color});
+                    igv.Canvas.setProperties.call(ctx, {fillStyle: self.color, strokeStyle: self.color});
                     igv.Canvas.fillRect.call(ctx, x, y, w, h);
 
                     // coverage mismatch coloring
@@ -336,9 +337,9 @@ var igv = (function (igv) {
 
 
                                 // non-logoritmic
-                                hh = (count / coverageMap.maximum) * myself.coverageTrackHeight;
+                                hh = (count / coverageMap.maximum) * self.coverageTrackHeight;
 
-                                y = (myself.coverageTrackHeight - hh) - accumulatedHeight;
+                                y = (self.coverageTrackHeight - hh) - accumulatedHeight;
                                 accumulatedHeight += hh;
 
                                 igv.Canvas.setProperties.call(ctx, {fillStyle: igv.nucleotideColors[nucleotide]});
@@ -370,13 +371,14 @@ var igv = (function (igv) {
                 // alignment track
                 packedAlignmentRows.forEach(function renderAlignmentRow(alignmentRow, i) {
 
-                    var widthArrowHead = myself.alignmentRowHeight / 2.0,
+                    var widthArrowHead = self.alignmentRowHeight / 2.0,
                         yStrokedLine,
                         yRect,
-                        height;
+                        height,
+                        outlineColor;
 
-                    yRect = myself.alignmentRowYInset + myself.coverageTrackHeight + (myself.alignmentRowHeight * i) + 5;
-                    height = myself.alignmentRowHeight - (2 * myself.alignmentRowYInset);
+                    yRect = self.alignmentRowYInset + self.coverageTrackHeight + (self.alignmentRowHeight * i) + 5;
+                    height = self.alignmentRowHeight - (2 * self.alignmentRowYInset);
                     yStrokedLine = (height / 2.0) + yRect;
 
                     alignmentRow.alignments.forEach(function renderAlignment(alignment, indexAlignment) {
@@ -395,7 +397,8 @@ var igv = (function (igv) {
                         xStart = (alignment.start - bpStart) / bpPerPixel;
                         xEnd = ((alignment.start + alignment.lengthOnRef) - bpStart) / bpPerPixel;
 
-                        canvasColor = igv.BAMTrack.alignmentShadingOptions[myself.alignmentShading](myself, alignment);
+                        canvasColor = igv.BAMTrack.alignmentShadingOptions[self.alignmentShading](self, alignment);
+                        outlineColor = canvasColor;
 
                         if (alignment.mq <= 0) {
                             canvasColor = igv.addAlphaToRGB(canvasColor, "0.15");
@@ -439,38 +442,61 @@ var igv = (function (igv) {
                             if (true === alignment.strand && indexBlocks === alignment.blocks.length - 1) {
 
                                 x = [
+                                    xBlockStart,
                                     xEnd,
                                     xEnd + widthArrowHead,
                                     xEnd,
-                                    xEnd];
-
-                                y = [
-                                    yRect,
-                                    yRect + (height / 2.0),
-                                    yRect + height,
-                                    yRect];
-
-                                igv.Canvas.fillPolygon.call(ctx, x, y, {fillStyle: canvasColor});
-                            }
-                            else if (false === alignment.strand && indexBlocks === 0) {
-
-                                x = [
-                                    xBlockStart,
-                                    xBlockStart - widthArrowHead,
                                     xBlockStart,
                                     xBlockStart];
 
                                 y = [
                                     yRect,
+                                    yRect,
                                     yRect + (height / 2.0),
+                                    yRect + height,
                                     yRect + height,
                                     yRect];
 
                                 igv.Canvas.fillPolygon.call(ctx, x, y, {fillStyle: canvasColor});
+                                if (alignment.mq <= 0) {
+                                    igv.Canvas.strokePolygon.call(ctx, x, y, {strokeStyle: outlineColor});
+                                }
+                            }
+                            else if (false === alignment.strand && indexBlocks === 0) {
+
+                                x = [
+                                    xEnd,
+                                    xBlockStart,
+                                    xBlockStart - widthArrowHead,
+                                    xBlockStart,
+                                    xEnd,
+                                    xEnd];
+
+                                y = [
+                                    yRect,
+                                    yRect,
+                                    yRect + (height / 2.0),
+                                    yRect + height,
+                                    yRect + height,
+                                    yRect];
+
+                                igv.Canvas.fillPolygon.call(ctx, x, y, {fillStyle: canvasColor});
+                                if (alignment.mq <= 0) {
+                                    igv.Canvas.strokePolygon.call(ctx, x, y, {strokeStyle: outlineColor});
+                                }
                             }
 
-                            igv.Canvas.fillRect.call(ctx, xBlockStart, yRect, widthBlock, height, {fillStyle: "white"});
-                            igv.Canvas.fillRect.call(ctx, xBlockStart, yRect, widthBlock, height, {fillStyle: canvasColor});
+                            else {
+                                igv.Canvas.fillRect.call(ctx, xBlockStart, yRect, widthBlock, height, {fillStyle: "white"});
+                                igv.Canvas.fillRect.call(ctx, xBlockStart, yRect, widthBlock, height, {fillStyle: canvasColor});
+
+                                if (alignment.mq <= 0) {
+                                    ctx.save();
+                                    ctx.strokeStyle = outlineColor;
+                                    ctx.strokeRect(xBlockStart, yRect, widthBlock, height);
+                                    ctx.restore();
+                                }
+                            }
 
                             // Only do mismatch coloring if a refseq exists to do the comparison
                             if (sequence && blockSeq !== "*") {
@@ -511,7 +537,7 @@ var igv = (function (igv) {
                                     xBlockStart = refOffset / bpPerPixel - 1,
                                     widthBlock = 3;
 
-                                igv.Canvas.fillRect.call(ctx, xBlockStart, yRect-1, widthBlock, height + 2, {fillStyle: "rgb(138, 94, 161)"});
+                                igv.Canvas.fillRect.call(ctx, xBlockStart, yRect - 1, widthBlock, height + 2, {fillStyle: self.insertionColor});
 
 
                             });
