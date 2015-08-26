@@ -65,7 +65,6 @@ var igv = (function (igv) {
                         return;
                     }
                     if (chunks.length === 0) {
-                        console.log('No chunks for range ' + chrId + ":" + min + "-" + max);
                         continuation([]);
                         return;
                     }
@@ -130,6 +129,7 @@ var igv = (function (igv) {
             var blockSize,
                 blockEnd,
                 alignment,
+                blocks,
                 refID,
                 pos,
                 bmn,
@@ -268,7 +268,9 @@ var igv = (function (igv) {
 
                 if (!min || alignment.start <= max && alignment.start + alignment.lengthOnRef >= min) {
                     if (chrId === undefined || refID == chrId) {
-                        alignment.blocks = makeBlocks(alignment, cigarArray);
+                        blocks = makeBlocks(alignment, cigarArray);
+                        alignment.blocks = blocks.blocks;
+                        alignment.insertions = blocks.insertions;
                         alignments.push(alignment);
                     }
                 }
@@ -344,7 +346,7 @@ var igv = (function (igv) {
                 }
             }
 
-            return blocks;
+            return {blocks: blocks, insertions: insertions};
 
         }
 
