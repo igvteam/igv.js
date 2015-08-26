@@ -780,6 +780,8 @@ div.ui-dialog fieldset {
     top: 0;
     left: 0;
 
+    min-width: 128px;
+
     z-index: 1000;
 
     font-family: 'PT Sans', sans-serif;
