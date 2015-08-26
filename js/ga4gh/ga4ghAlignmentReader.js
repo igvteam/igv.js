@@ -107,7 +107,7 @@ var igv = (function (igv) {
 
                         console.log("No reference set specified");
 
-                        if(referenceSetId) {
+                        if (referenceSetId) {
 
                             // Query for reference names to build an alias table (map of genome ref names -> dataset ref names)
                             var readURL = self.url + "/references/search";
@@ -224,9 +224,8 @@ var igv = (function (igv) {
 
                 blocks = makeBlocks(read, cigarDecoded.array);
                 read.blocks = blocks.blocks;
-                if(blocks.insertions) {
-                    read.insertions = blocks.insertions;
-                }
+                read.insertions = blocks.insertions;
+
             }
             else {
                 read.mapped = false;
@@ -327,7 +326,7 @@ var igv = (function (igv) {
                 case 'I' :
                     blockSeq = record.seq === "*" ? "*" : record.seq.substr(seqOffset, c.len);
                     blockQuals = record.qual === "*" ? "*" : record.qual.slice(seqOffset, c.len);
-                    if(insertions === undefined) insertions = [];
+                    if (insertions === undefined) insertions = [];
                     insertions.push({start: pos, len: c.len, seq: blockSeq, qual: blockQuals, insertion: true});
                     seqOffset += c.len;
                     break;
@@ -376,8 +375,8 @@ var igv = (function (igv) {
      */
     function populateChrNameMap(chrNameMap, datasetId) {
         var i;
-        if("461916304629" === datasetId || "337315832689" === datasetId) {
-            for(i=1; i<23; i++) {
+        if ("461916304629" === datasetId || "337315832689" === datasetId) {
+            for (i = 1; i < 23; i++) {
                 chrNameMap["chr" + i] = i;
             }
             chrNameMap["chrX"] = "X";
