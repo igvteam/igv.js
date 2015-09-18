@@ -16,7 +16,7 @@ The igv.browser api  (preface commands with igv.browser.) |
 Load a bam track
 
     igv.browser.loadTrack({
-      url: 'http://www.broadinstitute.org/igvdata/1KG/b37/data/HG02450/alignment/HG02450.mapped.ILLUMINA.bwa.ACB.low_coverage.20120522.bam',
+      url: 'http://data.broadinstitute.org/igvdata/1KG/b37/data/HG02450/alignment/HG02450.mapped.ILLUMINA.bwa.ACB.low_coverage.20120522.bam',
       label: 'HG02450'
     }
  
