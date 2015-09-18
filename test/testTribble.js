@@ -10,7 +10,7 @@ function testTribble() {
 
         config = {
             type: 'bedgraph',
-            url: '//www.broadinstitute.org/igvdata/t2d/recomb_decode.bedgraph'
+            url: '//data.broadinstitute.org/igvdata/t2d/recomb_decode.bedgraph'
         };
 
         featureSource = new igv.FeatureSource(config);
@@ -36,7 +36,7 @@ function testTribble() {
 
     //asyncTest("Non-existent index", function () {
     //
-    //    var url = "http://www.broadinstitute.org/igvdata/public/test/data/tribble/noSuchFile.idx";
+    //    var url = "http://data.broadinstitute.org/igvdata/public/test/data/tribble/noSuchFile.idx";
     //
     //    igv.loadTribbleIndex(url, {},  function (index) {
     //

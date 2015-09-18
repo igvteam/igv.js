@@ -218,8 +218,8 @@
 
         <div onclick="igv.browser.loadTrack({
                                 type: 'bam',
-                                url: '../IonDx-6_rawlib.bam',
-                                name: 'Ion BAM'})">Ion BAM
+                                url: '../test/data/bam/sam_spec_example.bam',
+                                name: 'Ion BAM'})">SAM indel example bam
         </div>
 
         <div onclick="igv.browser.loadTrack({
@@ -227,6 +227,8 @@
                                 type: 'bam',
                                 url: 'https://www.googleapis.com/genomics/v1beta2',
                                 readGroupSetIds: 'CMvnhpKTFhCjz9_25e_lCw',
+                                height: 200,
+                                autoHeight: false,
                                 name: 'Ga4gh alignments'})">GA4Gh Alignments (Global Alliance, Google server)
         </div>
 
@@ -247,15 +249,6 @@
                                 name: 'NA12877'})">Google Cloud Storage - NA12877_S1.bam
         </div>
 
-        <div onclick="igv.browser.loadTrack( {
-                            sourceType: 'ga4gh',
-                            type: 'vcf',
-                            url: 'https://www.googleapis.com/genomics/v1beta2',
-                            variantSetId: '10473108253681171589',
-                            callSetIds: ['10473108253681171589-2'],
-                            name: 'Ga4gh variants'
-                            })">GA4Gh Variants (Global Alliance, Google server)
-        </div>
 
         <div onclick="igv.browser.loadTrack({
                                 url: '//www.broadinstitute.org/igvdata/test/igv-web/segmented_data_080520.seg.gz',

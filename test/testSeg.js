@@ -2,7 +2,7 @@ function runSegUnitTests() {
 
     asyncTest("SEG query", function () {
 
-        var url = "http://www.broadinstitute.org/igvdata/test/igv-web/segmented_data_080520.seg.gz",
+        var url = "http://data.broadinstitute.org/igvdata/test/igv-web/segmented_data_080520.seg.gz",
             featureSource = new igv.FeatureSource( { type: 'seg', url: url, indexed: false }),
             chr = "1",
             bpStart = 0,

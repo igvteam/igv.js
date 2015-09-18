@@ -2,7 +2,7 @@ function eqtlUnitTests() {
 
     asyncTest("EQTL binary file", function () {
 
-        var path = "http://www.broadinstitute.org/igvdata/test/data/eqtl/Heart_Left_Ventricle.portal.eqtl.bin",
+        var path = "http://data.broadinstitute.org/igvdata/test/data/eqtl/Heart_Left_Ventricle.portal.eqtl.bin",
             featureSource,
             chr = "chr1",
             bpStart = 0,
