@@ -34,7 +34,7 @@ function runBAMTests() {
     //    var bamPath = "data/bam/gstt1_sample.bam",
     //        bamFile = new igv.BamReader({
     //            type: 'bam',
-    //            //url: 'http://www.broadinstitute.org/igvdata/1KG/b37/data/NA06984/alignment/NA06984.mapped.ILLUMINA.bwa.CEU.low_coverage.20120522.bam',
+    //            //url: 'http://data.broadinstitute.org/igvdata/1KG/b37/data/NA06984/alignment/NA06984.mapped.ILLUMINA.bwa.CEU.low_coverage.20120522.bam',
     //            url: bamPath,
     //            label: 'NA06984'});
     //
@@ -50,7 +50,7 @@ function runBAMTests() {
 
     asyncTest("large header", function () {
 
-        var bamPath = "http://www.broadinstitute.org/igvdata/public/test/data/bam/IonXpress_078_rawlib.lgheader.bam",
+        var bamPath = "http://data.broadinstitute.org/igvdata/public/test/data/bam/IonXpress_078_rawlib.lgheader.bam",
             bamFile = new igv.BamReader( { type: 'bam', url: bamPath, label: 'bigBigBig'} );
 
         bamFile.readHeader(function () {
@@ -81,7 +81,7 @@ function runBAMTests() {
     //        blocks,
     //        options;
     //
-    //    bamReader = new igv.BamReader({url: "http://www.broadinstitute.org/igvdata/public/test/data/bam/brain_chr22sample.bam"});
+    //    bamReader = new igv.BamReader({url: "http://data.broadinstitute.org/igvdata/public/test/data/bam/brain_chr22sample.bam"});
     //    ok(bamReader, "bamReader");
     //
     //    options = {

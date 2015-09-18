@@ -37,7 +37,7 @@ function runBAMIndexTests() {
         var refID = 0,
             beg = 155168191,
             end = 155170311,
-            url = 'http://www.broadinstitute.org/igvdata/1KG/b37/data/HG02450/alignment/HG02450.mapped.ILLUMINA.bwa.ACB.low_coverage.20120522.bam',
+            url = 'http://data.broadinstitute.org/igvdata/1KG/b37/data/HG02450/alignment/HG02450.mapped.ILLUMINA.bwa.ACB.low_coverage.20120522.bam',
             indexPath = url + ".bai",
             config;
 

@@ -36,7 +36,7 @@ function runAlignmentCoverageTests() {
 
         bamSource = new igv.BamSource({
             type: 'bam',
-            url: 'http://www.broadinstitute.org/igvdata/1KG/b37/data/NA06984/alignment/NA06984.mapped.ILLUMINA.bwa.CEU.low_coverage.20120522.bam',
+            url: 'http://data.broadinstitute.org/igvdata/1KG/b37/data/NA06984/alignment/NA06984.mapped.ILLUMINA.bwa.CEU.low_coverage.20120522.bam',
             label: 'NA06984'
         });
         ok(bamSource, "bamSource");
@@ -72,7 +72,7 @@ function runAlignmentCoverageTests() {
 
         bamSource = new igv.BamSource({
             type: 'bam',
-            url: 'http://www.broadinstitute.org/igvdata/1KG/b37/data/NA06984/alignment/NA06984.mapped.ILLUMINA.bwa.CEU.low_coverage.20120522.bam',
+            url: 'http://data.broadinstitute.org/igvdata/1KG/b37/data/NA06984/alignment/NA06984.mapped.ILLUMINA.bwa.CEU.low_coverage.20120522.bam',
             label: 'NA06984'
         });
 

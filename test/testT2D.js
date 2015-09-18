@@ -4,7 +4,7 @@ function runT2DTests() {
 
     asyncTest("post", function () {
 
-        var proxy = "http://www.broadinstitute.org/igvdata/t2d/postJson.php";
+        var proxy = "http://data.broadinstitute.org/igvdata/t2d/postJson.php";
         var url = "http://69.173.71.179:8080/prod/rest/server/trait-search";
         var dataLoader = new igv.DataLoader(proxy);
 
