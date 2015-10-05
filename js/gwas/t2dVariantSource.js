@@ -44,9 +44,9 @@ var igv = (function (igv) {
         this.pvalue = config.pvalue;
 
         // Hack for old service that is missing CORS headers
-        if (config.dataset === undefined && config.proxy === undefined) {
-            config.proxy = "//data.broadinstitute.org/igvdata/t2d/postJson.php";
-        }
+       // if (config.dataset === undefined && config.proxy === undefined) {
+       //     config.proxy = "//data.broadinstitute.org/igvdata/t2d/postJson.php";
+       // }
 
         if (config.valueThreshold === undefined) {
             config.valueThreshold = 5E-2;
