@@ -51,16 +51,16 @@ var igv = (function (igv) {
         this.traitURL = config.traitURL || "http://www.type2diabetesgenetics.org/trait/traitInfo/";
 
         var cs = config.colorScale || {
-            thresholds: [5e-8, 5e-4, 0.5],
-            colors: ["rgb(255,50,50)", "rgb(251,100,100)", "rgb(251,170,170)", "rgb(227,238,249)"]
-        };
+                thresholds: [5e-8, 5e-4, 0.5],
+                colors: ["rgb(255,50,50)", "rgb(251,100,100)", "rgb(251,170,170)", "rgb(227,238,249)"]
+            };
 
         this.pvalue = config.pvalue ? config.pvalue : "PVALUE";
 
         this.colorScale = new igv.BinnedColorScale(cs);
 
         // An obvious hack -- the source should be passed in as an arbument
-        if(config.format && ("gtexGWAS" === config.format)) {
+        if (config.format && ("gtexGWAS" === config.format)) {
             this.featureSource = new igv.FeatureSource(config);
         } else {
             this.featureSource = new igv.T2DVariantSource(config);
@@ -142,9 +142,11 @@ var igv = (function (igv) {
         var track = this,
             yScale = (track.maxLogP - track.minLogP) / pixelHeight;
 
-        var font = {'font': 'normal 10px Arial',
+        var font = {
+            'font': 'normal 10px Arial',
             'textAlign': 'right',
-            'strokeStyle': "black"};
+            'strokeStyle': "black"
+        };
 
         igv.graphics.fillRect(ctx, 0, 0, pixelWidth, pixelHeight, {'fillStyle': "rgb(255, 255, 255)"});
 
@@ -191,7 +193,7 @@ var igv = (function (igv) {
 
                     if (dbSnp) {
                         url = this.variantURL.startsWith("http") ? this.variantURL : this.portalURL + "/" + this.variantURL;
-                        data.push("<a target='_blank' href='" + url + "/" + dbSnp + "' >" + dbSnp + "</a>");
+                        data.push("<a target='_blank' href='" + url + (url.endsWidth("/") ? "" : "/") + dbSnp + "' >" + dbSnp + "</a>");
                     }
                     data.push(chr + ":" + pos.toString());
                     data.push({name: 'p-value', value: pvalue});
@@ -201,8 +203,9 @@ var igv = (function (igv) {
                     }
 
                     if (dbSnp) {
-                        url = this.traitURL.startsWith("http") ? this.traitURL : this.portalURL + "/" + this.traitURL ;
-                        data.push("<a target='_blank' href='" + url + "/" + dbSnp + "'>" + "see all available statistics for this variant</a>");
+                        url = this.traitURL.startsWith("http") ? this.traitURL : this.portalURL + "/" + this.traitURL;
+                        data.push("<a target='_blank' href='" + url + (url.endsWidth("/") ? "" : "/") + dbSnp + "'>" +
+                        "see all available statistics for this variant</a>");
                     }
 
                     if (i < len - 1) {
