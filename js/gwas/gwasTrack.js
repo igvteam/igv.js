@@ -190,7 +190,7 @@ var igv = (function (igv) {
 
 
                     if (dbSnp) {
-                        url = this.variantURL.startsWith("http") ? this.variantURL : this.portalURL + "/" + this.variantURL;
+                        url = this.variantURL.startsWith("http") ? this.variantURL : this.portalURL + "/" + this.variantURL + "/" + dbSnp;
                         data.push("<a target='_blank' href='" + url + "' >" + dbSnp + "</a>");
                     }
                     data.push(chr + ":" + pos.toString());
@@ -201,7 +201,7 @@ var igv = (function (igv) {
                     }
 
                     if (dbSnp) {
-                        url = this.traitURL.startsWith("http") ? this.traitURL : this.portalURL + "/" + this.traitURL;
+                        url = this.traitURL.startsWith("http") ? this.traitURL : this.portalURL + "/" + this.traitURL + "/" + dbSnp;
                         data.push("<a target='_blank' href='" + url + "'>" + "see all available statistics for this variant</a>");
                     }
 
