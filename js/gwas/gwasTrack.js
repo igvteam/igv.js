@@ -193,7 +193,7 @@ var igv = (function (igv) {
 
                     if (dbSnp) {
                         url = this.variantURL.startsWith("http") ? this.variantURL : this.portalURL + "/" + this.variantURL;
-                        data.push("<a target='_blank' href='" + url + (url.endsWidth("/") ? "" : "/") + dbSnp + "' >" + dbSnp + "</a>");
+                        data.push("<a target='_blank' href='" + url + (url.endsWith("/") ? "" : "/") + dbSnp + "' >" + dbSnp + "</a>");
                     }
                     data.push(chr + ":" + pos.toString());
                     data.push({name: 'p-value', value: pvalue});
@@ -204,7 +204,7 @@ var igv = (function (igv) {
 
                     if (dbSnp) {
                         url = this.traitURL.startsWith("http") ? this.traitURL : this.portalURL + "/" + this.traitURL;
-                        data.push("<a target='_blank' href='" + url + (url.endsWidth("/") ? "" : "/") + dbSnp + "'>" +
+                        data.push("<a target='_blank' href='" + url + (url.endsWith("/") ? "" : "/") + dbSnp + "'>" +
                         "see all available statistics for this variant</a>");
                     }
 
