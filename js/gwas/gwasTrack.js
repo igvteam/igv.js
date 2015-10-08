@@ -190,8 +190,8 @@ var igv = (function (igv) {
 
 
                     if (dbSnp) {
-                        url = this.variantURL.startsWith("http") ? this.variantURL : this.portalURL + "/" + this.variantURL + "/" + dbSnp;
-                        data.push("<a target='_blank' href='" + url + "' >" + dbSnp + "</a>");
+                        url = this.variantURL.startsWith("http") ? this.variantURL : this.portalURL + "/" + this.variantURL;
+                        data.push("<a target='_blank' href='" + url + "/" + dbSnp + "' >" + dbSnp + "</a>");
                     }
                     data.push(chr + ":" + pos.toString());
                     data.push({name: 'p-value', value: pvalue});
@@ -201,8 +201,8 @@ var igv = (function (igv) {
                     }
 
                     if (dbSnp) {
-                        url = this.traitURL.startsWith("http") ? this.traitURL : this.portalURL + "/" + this.traitURL + "/" + dbSnp;
-                        data.push("<a target='_blank' href='" + url + "'>" + "see all available statistics for this variant</a>");
+                        url = this.traitURL.startsWith("http") ? this.traitURL : this.portalURL + "/" + this.traitURL ;
+                        data.push("<a target='_blank' href='" + url + "/" + dbSnp + "'>" + "see all available statistics for this variant</a>");
                     }
 
                     if (i < len - 1) {
