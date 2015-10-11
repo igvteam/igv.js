@@ -197,15 +197,6 @@ var igv = (function (igv) {
                 lengthOnRef = 0;
                 cigar = '';
 
-                /**
-                 * @param cigarette CIGAR element (operator + length) encoded as an unsigned int.
-                 * @return Object representation of the CIGAR element.
-                 */
-                    //private static CigarElement binaryCigarToCigarElement(final int cigarette) {
-                    //    final int binaryOp = cigarette & 0xf;
-                    //    final int length = cigarette >> 4;
-                    //    return new CigarElement(length, CigarOperator.binaryToEnum(binaryOp));
-                    //}
 
                 cigarArray = [];
                 for (c = 0; c < nc; ++c) {
@@ -300,6 +291,7 @@ var igv = (function (igv) {
                 len = cigarArray.length,
                 blockSeq,
                 blockQuals,
+                gapType,
                 minQ = 5,  //prefs.getAsInt(PreferenceManager.SAM_BASE_QUALITY_MIN)
                 maxQ = 20; //prefs.getAsInt(PreferenceManager.SAM_BASE_QUALITY_MAX)
 
@@ -314,12 +306,15 @@ var igv = (function (igv) {
                         break; // ignore pads
                     case 'S' :
                         seqOffset += c.len;
+                        gapType = 'S';
                         break; // soft clip read bases
                     case 'N' :
                         pos += c.len;
+                        gapType = 'N';
                         break;  // reference skip
                     case 'D' :
                         pos += c.len;
+                        gapType = 'D';
                         break;
                     case 'I' :
                         blockSeq = record.seq === "*" ? "*" : record.seq.substr(seqOffset, c.len);
@@ -335,7 +330,7 @@ var igv = (function (igv) {
 
                         blockSeq = record.seq === "*" ? "*" : record.seq.substr(seqOffset, c.len);
                         blockQuals = record.qual ? record.qual.slice(seqOffset, c.len) : undefined;
-                        blocks.push({start: pos, len: c.len, seq: blockSeq, qual: blockQuals});
+                        blocks.push({start: pos, len: c.len, seq: blockSeq, qual: blockQuals, gapType: gapType});
                         seqOffset += c.len;
                         pos += c.len;
 

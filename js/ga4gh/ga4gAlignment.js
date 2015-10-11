@@ -294,7 +294,8 @@ var igv = (function (igv) {
             pos = record.start,
             len = cigarArray.length,
             blockSeq,
-            blockQuals;
+            blockQuals,
+            gapType;
 
         for (var i = 0; i < len; i++) {
 
@@ -307,12 +308,15 @@ var igv = (function (igv) {
                     break; // ignore pads
                 case 'S' :
                     seqOffset += c.len;
+                    gapType = 'S';
                     break; // soft clip read bases
                 case 'N' :
                     pos += c.len;
+                    gapType = 'N';
                     break;  // reference skip
                 case 'D' :
                     pos += c.len;
+                    gapType = 'D';
                     break;
                 case 'I' :
                     seqOffset += c.len;
@@ -323,7 +327,7 @@ var igv = (function (igv) {
                 case 'X' :
                     blockSeq = record.seq === "*" ? "*" : record.seq.substr(seqOffset, c.len);
                     blockQuals = record.qual === "*" ? "*" : record.qual.slice(seqOffset, c.len);
-                    blocks.push({start: pos, len: c.len, seq: blockSeq, qual: blockQuals});
+                    blocks.push({start: pos, len: c.len, seq: blockSeq, qual: blockQuals, gapType: gapType});
                     seqOffset += c.len;
                     pos += c.len;
                     break;
