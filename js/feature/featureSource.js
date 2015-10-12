@@ -49,7 +49,12 @@ var igv = (function (igv) {
         } else if (config.sourceType === "immvar") {
             this.reader = new igv.ImmVarReader(config);
         } else if (config.type === "eqtl") {
-            this.reader = new igv.GtexReader(config);
+            if (config.sourceType === "gtex-ws") {
+                this.reader = new igv.GtexReader(config);
+            }
+            else {
+                this.reader = new igv.GtexFileReader(config);
+            }
         }
         else {
             // Default for all sorts of ascii tab-delimited file formts
@@ -121,14 +126,13 @@ var igv = (function (igv) {
             // TODO -- reuse cached features that overelap new region
             this.reader.readFeatures(function (featureList) {
 
-                function isIndexed() {
-                    return self.reader.indexed ||
-                        self.config.sourceType === "ga4gh" ||
-                        self.config.sourceType === "immvar" ||
-                        self.config.sourceType === "gtex";
-                }
+                var isIndexed =
+                    self.reader.indexed ||
+                    self.config.sourceType === "ga4gh" ||
+                    self.config.sourceType === "immvar" ||
+                    self.config.sourceType === "gtex";
 
-                self.featureCache = isIndexed() ?
+                self.featureCache = isIndexed ?
                     new igv.FeatureCache(featureList, genomicInterval) :
                     new igv.FeatureCache(featureList);   // Note - replacing previous cache with new one
 

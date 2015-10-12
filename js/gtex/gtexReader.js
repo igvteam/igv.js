@@ -1,7 +1,7 @@
 /*
  * The MIT License (MIT)
  *
- * Copyright (c) 2014 Broad Institute
+ * Copyright (c) 2015 UC San Diego
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -23,224 +23,84 @@
  * THE SOFTWARE.
  */
 
+/**
+ * Created by jrobinso on 10/8/15.
+ */
+
 var igv = (function (igv) {
 
+
+    /**
+     * @param url - url to the webservice
+     * @constructor
+     */
     igv.GtexReader = function (config) {
 
-        this.file = config.url;
-        this.codec = this.file.endsWith(".bin") ? createEqtlBinary : createEQTL,
-            this.cache = {};
-        this.binary = this.file.endsWith(".bin");
-        this.compressed = this.file.endsWith(".compressed.bin");
-
+        this.url = config.url;
+        this.tissueName = config.tissueName;
+        this.indexed = true;
     };
 
-    igv.GtexReader.prototype.readFeatures = function (continuation, task, genomicRange) {
+    //{
+    //    "release": "v6",
+    //    "singleTissueEqtl": [
+    //    {
+    //        "beta": -0.171944779728988,
+    //        "chromosome": "3",
+    //        "gencodeId": "ENSG00000168827.10",
+    //        "geneSymbol": "GFM1",
+    //        "pValue": 1.22963421134407e-09,
+    //        "snpId": "rs3765025",
+    //        "start": 158310846,
+    //        "tissueName": "Thyroid"
+    //    },
+    //
+    // http://vgtxportaltest.broadinstitute.org:9000/v6/singleTissueEqtlByLocation?tissueName=Thyroid&chromosome=3&start=158310650&end=158311650
 
-        var chr = genomicRange.chr,
-            self = this,
-            file = this.file,
-            index = self.index;
+        igv.GtexReader.prototype.readFeatures = function (success, task, range) {
 
-
-            if (index) {
-                loadWithIndex(index, chr, continuation)
-            }
-            else {
-                loadIndex(self.file, function (index) {
-                    self.index = index;
-                    loadWithIndex(index, chr, continuation);
-
-                });
-
-            }
-
-
-            function loadWithIndex(index, chr, continuation) {
-
-                var chrIdx = index[chr];
-                if (chrIdx) {
-                    var blocks = chrIdx.blocks,
-                        lastBlock = blocks[blocks.length - 1],
-                        endPos = lastBlock.startPos + lastBlock.size,
-                        len = endPos - blocks[0].startPos,
-                        range = { start: blocks[0].startPos, size: len};
+        var queryChr = range.chr.startsWith("chr") ? range.chr.substr(3) : range.chr,
+            queryStart = range.start,
+            queryEnd = range.end,
+            queryURL = this.url + "?chromosome=" + queryChr + "&start=" + queryStart + "&end=" + queryEnd +
+                "&tissueName=" + this.tissueName;
 
 
-                    igvxhr.loadArrayBuffer(file,
-                        {
-                            task: task,
-                            range: range,
-                            success: function (arrayBuffer) {
+        igvxhr.loadJson(queryURL, {
+            task: task,
+            success: function (json) {
 
-                                if (arrayBuffer) {
+                var variants;
 
-                                    var data = new DataView(arrayBuffer);
-                                    var parser = new igv.BinaryParser(data);
+                if (json && json.singleTissueEqtl) {
+                    //variants = json.variants;
+                    //variants.sort(function (a, b) {
+                    //    return a.POS - b.POS;
+                    //});
+                    //source.cache = new FeatureCache(chr, queryStart, queryEnd, variants);
 
-                                    var featureList = [];
-                                    var lastOffset = parser.offset;
-                                    while (parser.hasNext()) {
-                                        var feature = createEqtlBinary(parser);
-                                        featureList.push(feature);
-                                    }
+                    json.singleTissueEqtl.forEach(function (eqtl) {
+                        eqtl.chr = "chr" + eqtl.chromosome;
+                        eqtl.position = eqtl.start;
+                        eqtl.start = eqtl.start-1;
+                        eqtl.snp = eqtl.snpId;
+                        eqtl.geneName = eqtl.geneSymbol;
+                        eqtl.geneId = eqtl.gencodeId;
+                        eqtl.end = eqtl.start;
+                    });
 
-                                    continuation(featureList);
-                                }
-                                else {
-                                    continuation(null);
-                                }
-
-                            }
-                        });
-
-
+                    success(json.singleTissueEqtl);
                 }
                 else {
-                    continuation([]); // Mark with empy array, so we don't try again
-                }
-
-
-                var createEqtlBinary = function (parser) {
-                    var snp = parser.getString();
-                    var chr = parser.getString();
-                    var position = parser.getInt();
-                    var geneId = parser.getString();
-                    var geneName = parser.getString();
-                    //var genePosition = -1;
-                    //var fStat = parser.getFloat();
-                    var pValue = parser.getFloat();
-                    //var qValue = parser.getFloat();
-                    return new Eqtl(snp, chr, position, geneId, geneName, pValue);
+                    success(null);
                 }
 
             }
+        });
 
-
-
-        //function Eqtl(snp, chr, position, geneId, geneName, genePosition, fStat, pValue) {
-        function Eqtl(snp, chr, position, geneId, geneName, pValue) {
-
-            this.snp = snp;
-            this.chr = chr;
-            this.position = position;
-            this.start = position;
-            this.end = position + 1;
-            this.geneId = geneId;
-            this.geneName = geneName;
-            //this.genePosition = genePosition;
-            //this.fStat = fStat;
-            this.pValue = pValue;
-
-        }
-
-
-        Eqtl.prototype.description = function () {
-            return "<b>snp</b>:&nbsp" + this.snp +
-                "<br/><b>location</b>:&nbsp" + this.chr + ":" + formatNumber(this.position + 1) +
-                "<br/><b>gene</b>:&nbsp" + this.geneName +
-                //"<br/><b>fStat</b>:&nbsp" + this.fStat +
-                "<br/><b>pValue</b>:&nbsp" + this.pValue +
-                "<br/><b>mLogP</b>:&nbsp" + this.mLogP;
-        }
-
-
-        /**
-         * Load the index
-         *
-         * @param continuation function to receive the result
-         */
-        function loadIndex(url, continuation) {
-
-            var genome = igv.browser ? igv.browser.genome : null;
-
-            igvxhr.loadArrayBuffer(url,
-                {
-                    range: {start: 0, size: 200},
-                    success: function (arrayBuffer) {
-
-                        var data = new DataView(arrayBuffer),
-                            parser = new igv.BinaryParser(data),
-                            magicNumber = parser.getInt(),
-                            version = parser.getInt(),
-                            indexPosition = parser.getLong(),
-                            indexSize = parser.getInt();
-
-                        igvxhr.loadArrayBuffer(url, {
-
-                            range: {start: indexPosition, size: indexSize},
-                            success: function (arrayBuffer2) {
-
-                                var data2 = new DataView(arrayBuffer2);
-                                var index = null;
-
-
-                                var parser = new igv.BinaryParser(data2);
-                                var index = {};
-                                var nChrs = parser.getInt();
-                                while (nChrs-- > 0) {
-
-                                    var chr = parser.getString();
-                                    if (genome) chr = genome.getChromosomeName(chr);
-
-                                    var position = parser.getLong();
-                                    var size = parser.getInt();
-                                    var blocks = new Array();
-                                    blocks.push(new Block(position, size));
-                                    index[chr] = new ChrIdx(chr, blocks);
-                                }
-
-                                continuation(index)
-                            }
-
-                        });
-                    }
-
-                });
-
-        }
-
-
-        Block = function (startPos, size) {
-            this.startPos = startPos;
-            this.size = size;
-        }
-
-        ChrIdx = function (chr, blocks) {
-            this.chr = chr;
-            this.blocks = blocks;
-        }
-    };
-
-    var createEQTL = function (tokens) {
-        var snp = tokens[0];
-        var chr = tokens[1];
-        var position = parseInt(tokens[2]) - 1;
-        var geneId = tokens[3]
-        var geneName = tokens[4];
-        var genePosition = tokens[5];
-        var fStat = parseFloat(tokens[6]);
-        var pValue = parseFloat(tokens[7]);
-        return new Eqtl(snp, chr, position, geneId, geneName, genePosition, fStat, pValue);
-    };
-
-    var createEqtlBinary = function (parser) {
-
-        var snp = parser.getString();
-        var chr = parser.getString();
-        var position = parser.getInt();
-        var geneId = parser.getString();
-        var geneName = parser.getString();
-        //var genePosition = -1;
-        //var fStat = parser.getFloat();
-        var pValue = parser.getFloat();
-        //var qValue = parser.getFloat();
-        //return new Eqtl(snp, chr, position, geneId, geneName, genePosition, fStat, pValue);
-        return new Eqtl(snp, chr, position, geneId, geneName, pValue);
-    };
+    }
 
 
     return igv;
-
-})(igv || {});
-
+})
+(igv || {});
