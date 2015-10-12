@@ -61,6 +61,7 @@
     <script type="text/javascript" src="../js/binary.js"></script>
 
     <script type="text/javascript" src="../js/gtex/eqtlTrack.js"></script>
+    <script type="text/javascript" src="../js/gtex/gtexFileReader.js"></script>
     <script type="text/javascript" src="../js/gtex/gtexReader.js"></script>
     <script type="text/javascript" src="../js/gtex/gtex.js"></script>
     <script type="text/javascript" src="../js/gtex/immvarReader.js"></script>
@@ -199,6 +200,14 @@
                     url: '//www.gtexportal.org/igv/assets/eqtl/Skin_Sun_Exposed_Lower_leg.portal.eqtl.bin',
                     indexed: false,
                     name: 'Skin Sun Exposed Lower leg'
+                },
+                {
+                    type: 'eqtl',
+                    sourceType: 'gtex-ws',
+                    url: 'http://vgtxportaltest.broadinstitute.org:9000/v6/singleTissueEqtlByLocation',
+                    tissueName: 'Thyroid',
+                    name: 'Thyroid'
+
                 },
                 {
                     featureType: "annotation",

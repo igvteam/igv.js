@@ -159,7 +159,7 @@ var igv = (function (igv) {
                 if (drawSelected && color === undefined) continue;   // This should be impossible
 
 
-                px = (Math.round(eqtl.position - bpStart + 0.5)) / bpPerPixel;
+                px = (Math.round(eqtl.position  - bpStart + 0.5)) / bpPerPixel;
                 if (px < 0) continue;
                 else if (px > pixelWidth) break;
 
