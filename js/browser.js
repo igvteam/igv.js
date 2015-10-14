@@ -728,7 +728,7 @@ var igv = (function (igv) {
                         start = r[searchConfig.startField] - searchConfig.coords;
                         end = r[searchConfig.endField];
                         type = r["featureType"];
-                        handleSearchResult(feature, chr, start, end, chr, type);
+                        handleSearchResult(feature, chr, start, end, type);
                     }
                     else {
                         presentSearchResults(results, searchConfig, feature);
