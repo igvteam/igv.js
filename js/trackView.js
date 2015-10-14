@@ -347,7 +347,7 @@ var igv = (function (igv) {
             }
         }
 
-        //   this.update();
+        if (this.scrollbar) this.scrollbar.update();
     };
 
     function setTrackHeight_(newHeight, update) {
