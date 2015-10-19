@@ -302,8 +302,8 @@ var igv = (function (igv) {
                 color = this.config.colorBy.pallete[colorByValue];
             }
         }
-        else if(feature.rgb) {
-            color = feature.rgb;
+        else if(feature.color) {
+            color = feature.color;
         }
 
 

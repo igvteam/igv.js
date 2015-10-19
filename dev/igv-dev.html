@@ -327,12 +327,22 @@
         <div onclick="igv.browser.loadTrack(
         {
             url: '../test/data/gff/eden.txt',
+            name: 'eden gff',
             format: 'gff',
             displayMode: 'SQUISHED',     // COLLAPSED | EXPANDED | SQUISHED
             indexed: false
         })">EDEN gff
         </div>
 
+
+        <div onclick="igv.browser.loadTrack(
+        {
+            url: '../test/data/gff/color.gff',
+            name: 'color gff',
+            format: 'gff',
+            indexed: false
+        })">Color gff
+        </div>
 
         <div onclick="igv.browser.search('chr10');">GOTO</div>
 
