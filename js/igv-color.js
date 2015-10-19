@@ -142,6 +142,16 @@ var igv = (function (igv) {
     };
 
 
+    igv.createColorString = function(token) {
+        if(token.contains(",")) {
+            return token.startsWith("rgb") ? token : "rgb(" + token + ")";
+        }
+        else {
+            return token;
+        }
+    }
+
+
     // Color scale objects.  Implement a single method,  getColor(value)
 
     /**

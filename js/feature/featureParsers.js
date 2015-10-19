@@ -295,8 +295,8 @@ var igv = (function (igv) {
             feature.cdEnd = parseInt(tokens[7]);
         }
         if (tokens.length > 8) {
-            if(tokens[8] !== "." && tokens[8] !== "0")
-            feature.rgb = "rgb(" + tokens[8] + ")";
+            if (tokens[8] !== "." && tokens[8] !== "0")
+                feature.color = igv.createColorString(tokens[8]);
         }
         if (tokens.length > 11) {
             exonCount = parseInt(tokens[9]);
@@ -315,8 +315,8 @@ var igv = (function (igv) {
 
         feature.popupData = function () {
             var data = [];
-            if(feature.name) data.push({name: "Name", value: feature.name});
-            if("+" === feature.strand || "-" === feature.strand) data.push({name: "Strand", value: feature.strand});
+            if (feature.name) data.push({name: "Name", value: feature.name});
+            if ("+" === feature.strand || "-" === feature.strand) data.push({name: "Strand", value: feature.strand});
             return data;
         };
 
@@ -580,7 +580,7 @@ var igv = (function (igv) {
      */
     function decodeGFF(tokens, ignore) {
 
-        var tokenCount, chr, start, end, strand, type, score, phase, attributeString, id, parent;
+        var tokenCount, chr, start, end, strand, type, score, phase, attributeString, id, parent, color;
 
         tokenCount = tokens.length;
         if (tokenCount < 9) {
@@ -602,6 +602,7 @@ var igv = (function (igv) {
             if (t.length == 2) {
                 if ("ID" === t[0]) id = t[1];
                 else if ("Parent" === t[0]) parent = t[1];
+                else if ("color" === t[0].toLowerCase()) color = igv.createColorString(t[1]);
             }
 
         });
@@ -615,6 +616,7 @@ var igv = (function (igv) {
             end: end,
             score: score,
             strand: strand,
+            color: color,
             attributeString: attributeString,
             popupData: function () {
                 var kvs = this.attributeString.split(';'),
