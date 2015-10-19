@@ -580,7 +580,7 @@ var igv = (function (igv) {
      */
     function decodeGFF(tokens, ignore) {
 
-        var tokenCount, chr, start, end, strand, type, score, phase, attributeString, id, parent, color;
+        var tokenCount, chr, start, end, strand, type, score, phase, attributeString, id, parent, color, name;
 
         tokenCount = tokens.length;
         if (tokenCount < 9) {
@@ -602,6 +602,7 @@ var igv = (function (igv) {
             if (t.length == 2) {
                 if ("ID" === t[0]) id = t[1];
                 else if ("Parent" === t[0]) parent = t[1];
+                else if ("name" === t[0].toLowerCase()) name = t[1];
                 else if ("color" === t[0].toLowerCase()) color = igv.createColorString(t[1]);
             }
 
@@ -610,6 +611,7 @@ var igv = (function (igv) {
         return {
             id: id,
             parent: parent,
+            name: name,
             type: type,
             chr: chr,
             start: start,
