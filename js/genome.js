@@ -43,8 +43,8 @@ var igv = (function (igv) {
         chromosomeNames.forEach(function (name) {
             var alias = name.startsWith("chr") ? name.substring(3) : "chr" + name;
             chrAliasTable[alias] = name;
-            if(name === "chrM") chrAliasTable["MT"] = "chrM";
-            if(name === "MT") chrAliasTable["chrmM"] = "MT";
+            if (name === "chrM") chrAliasTable["MT"] = "chrM";
+            if (name === "MT") chrAliasTable["chrmM"] = "MT";
         });
 
         // Custom mappings
@@ -86,6 +86,22 @@ var igv = (function (igv) {
 
     igv.Genome.prototype.getCytobands = function (chr) {
         return this.ideograms ? this.ideograms[chr] : null;
+    }
+
+    igv.Genome.prototype.getLongestChromosome = function () {
+
+        var longestChr,
+            key,
+            chromosomes = this.chromosomes;
+        for (key in chromosomes) {
+            if (chromosomes.hasOwnProperty(key)) {
+                var chr = chromosomes[key];
+                if (longestChr === undefined || chr.bpLength > longestChr.bpLength) {
+                    longestChr = chr;
+                }
+            }
+            return longestChr;
+        }
     }
 
     igv.Genome.prototype.getChromosomes = function () {
@@ -249,5 +265,6 @@ var igv = (function (igv) {
 
     return igv;
 
-})(igv || {});
+})
+(igv || {});
 

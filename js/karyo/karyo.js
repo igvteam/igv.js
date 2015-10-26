@@ -159,7 +159,8 @@ var igv = (function (igv) {
         var top = 25;
         var chrheight = (h / nrrows) - top;
 
-        var cytobands = genome.getCytobands('chr1');      // Longest chr
+        var longestChr = genome.getLongestChromosome();
+        var cytobands = genome.getCytobands(longestChr.name);      // Longest chr
 
         var me = this;
         var maxLen = cytobands[cytobands.length - 1].end;
