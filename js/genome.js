@@ -159,7 +159,7 @@ var igv = (function (igv) {
             aliases,
             chrNames,
             chromosomes = {};
-        sequence = new igv.FastaSequence(fastaUrl);
+        sequence = new igv.FastaSequence(reference);
 
         sequence.loadIndex(function (fastaIndex) {
 

@@ -27,14 +27,14 @@
 
 var igv = (function (igv) {
 
-    igv.FastaSequence = function (file, indexFile) {
+    igv.FastaSequence = function (reference) {
 
-        if (!indexFile) {
-            indexFile = file + ".fai";
+        this.file = reference.fastaURL;
+        this.indexed = reference.indexed !== false;   // Indexed unless it explicitly is not
+        if(this.indexed) {
+            this.indexFile = reference.indexFile || file + ".fai";
         }
 
-        this.file = file;
-        this.indexFile = indexFile;
     };
 
     igv.FastaSequence.prototype.getSequence = function (chr, start, end, continuation, task) {
