@@ -53,7 +53,7 @@ if (!Array.isArray) {
     };
 }
 
-if(Set) {
+if(typeof Set !== "undefined") {
 
     Set.prototype.isEmpty = function () {
         return this.size === 0;
