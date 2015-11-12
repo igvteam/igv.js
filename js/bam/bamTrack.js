@@ -56,8 +56,7 @@ var igv = (function (igv) {
         this.alignmentRowYInset = 1;
 
         // alignment shading options
-        //this.alignmentShading = config.alignmentShading || "none";
-        this.alignmentShading = "none";
+        this.alignmentShading = config.alignmentShading || "none";
 
         // sort alignment rows
         this.sortOption = config.sortOption || {sort: "NUCLEOTIDE"};
