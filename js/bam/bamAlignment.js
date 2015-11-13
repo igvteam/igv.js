@@ -168,14 +168,27 @@ var igv = (function (igv) {
 
     igv.BamAlignment.prototype.popupData = function (genomicLocation) {
 
+        // if the user clicks on a base next to an insertion, show just the
+        // inserted bases in a popup (like in desktop IGV).
+        var nameValues = [];
+        if(this.insertions) {
+            for(var i = 0; i < this.insertions.length; i += 1) {
+                var ins_start = this.insertions[i].start;
+                if(genomicLocation == ins_start || genomicLocation == ins_start - 1) {
+                    nameValues.push({name: 'Insertion', value: this.insertions[i].seq });
+                    nameValues.push({name: 'Location', value: ins_start });
+                    return nameValues;
+                }
+            }
+        }
+
         var isFirst;
-
-        nameValues = [];
-
         nameValues.push({ name: 'Read Name', value: this.readName });
+
         // Sample
         // Read group
         nameValues.push("<hr>");
+
 
         // Add 1 to genomic location to map from 0-based computer units to user-based units
         nameValues.push({ name: 'Alignment Start', value: igv.numberFormatter(1 + this.start), borderTop: true });
@@ -188,7 +201,6 @@ var igv = (function (igv) {
         nameValues.push({ name: 'Supplementary', value: yesNo(this.isSupplementary()) });
         nameValues.push({ name: 'Duplicate', value: yesNo(this.isDuplicate()) });
         nameValues.push({ name: 'Failed QC', value: yesNo(this.isFailsVendorQualityCheck()) });
-
 
         if (this.isPaired()) {
             nameValues.push("<hr>");
