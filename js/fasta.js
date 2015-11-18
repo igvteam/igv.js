@@ -31,8 +31,8 @@ var igv = (function (igv) {
 
         this.file = reference.fastaURL;
         this.indexed = reference.indexed !== false;   // Indexed unless it explicitly is not
-        if(this.indexed) {
-            this.indexFile = reference.indexFile || file + ".fai";
+        if (this.indexed) {
+            this.indexFile = reference.indexFile || this.file + ".fai";
         }
 
     };
@@ -76,6 +76,27 @@ var igv = (function (igv) {
         }
 
     };
+
+    igv.FastaSequence.prototype.init = function (continuation) {
+
+        var self = this;
+
+        this.loadIndex(function (index) {
+
+            var order = 0;
+            self.chromosomes = {};
+            self.chromosomeNames.forEach(function (chrName) {
+                var bpLength = sequence.index[chrName].size;
+                self.chromosomes[chrName] = new igv.Chromosome(chrName, order++, bpLength);
+            });
+
+
+            // Ignore index, getting chr names as a side effect.  Really bad practice
+            continuation();
+        })
+
+
+    }
 
     igv.FastaSequence.prototype.loadIndex = function (continuation) {
 
