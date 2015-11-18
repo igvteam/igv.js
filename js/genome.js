@@ -25,11 +25,11 @@
 
 var igv = (function (igv) {
 
-    igv.Genome = function (sequence, chromosomeNames, chromosomes, ideograms, aliases) {
+    igv.Genome = function (sequence, ideograms, aliases) {
 
         this.sequence = sequence;
-        this.chromosomeNames = chromosomeNames;
-        this.chromosomes = chromosomes;  // An object (functions as a dictionary)
+        this.chromosomeNames = sequence.chromosomeNames;
+        this.chromosomes = sequence.chromosomes;  // An object (functions as a dictionary)
         this.ideograms = ideograms;
 
         /**
@@ -40,7 +40,7 @@ var igv = (function (igv) {
         var chrAliasTable = {};
 
         // The standard mappings
-        chromosomeNames.forEach(function (name) {
+        this.chromosomeNames.forEach(function (name) {
             var alias = name.startsWith("chr") ? name.substring(3) : "chr" + name;
             chrAliasTable[alias] = name;
             if (name === "chrM") chrAliasTable["MT"] = "chrM";
@@ -161,16 +161,12 @@ var igv = (function (igv) {
             chromosomes = {};
         sequence = new igv.FastaSequence(reference);
 
-        sequence.loadIndex(function (fastaIndex) {
+        sequence.init(function () {
 
             var order = 0;
 
             chrNames = sequence.chromosomeNames;
-
-            chrNames.forEach(function (chrName) {
-                var bpLength = fastaIndex[chrName].size;
-                chromosomes[chrName] = new igv.Chromosome(chrName, order++, bpLength);
-            });
+            chromosomes = sequence.chromosomes;
 
             if (cytobandUrl) {
                 loadCytobands(cytobandUrl, function (result) {
@@ -195,7 +191,7 @@ var igv = (function (igv) {
             var isReady = (cytobandUrl === undefined || cytobands !== undefined) &&
                 (aliasURL === undefined || aliases !== undefined);
             if (isReady) {
-                continuation(new igv.Genome(sequence, chrNames, chromosomes, cytobands, aliases));
+                continuation(new igv.Genome(sequence, cytobands, aliases));
             }
 
         }
