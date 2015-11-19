@@ -37,10 +37,50 @@ var igv = (function (igv) {
 
     };
 
+    igv.FastaSequence.prototype.init = function (continuation) {
+
+        var self = this;
+
+        if (this.indexed) {
+            this.loadIndex(function (index) {
+
+                var order = 0;
+                self.chromosomes = {};
+                self.chromosomeNames.forEach(function (chrName) {
+                    var bpLength = self.index[chrName].size;
+                    self.chromosomes[chrName] = new igv.Chromosome(chrName, order++, bpLength);
+                });
+
+
+                // Ignore index, getting chr names as a side effect.  Really bad practice
+                continuation();
+            });
+        }
+        else {
+            this.loadAll(function () {
+                continuation();
+            });
+        }
+
+
+    }
+
     igv.FastaSequence.prototype.getSequence = function (chr, start, end, continuation, task) {
 
-        var myself = this,
-            interval = myself.interval;
+        if (this.indexed) {
+            getSequenceIndexed.call(this, chr, start, end, continuation, task);
+        }
+        else {
+            getSequenceNonIndexed.call(this, chr, start, end, continuation, task);
+
+        }
+
+    };
+
+    function getSequenceIndexed(chr, start, end, continuation, task) {
+
+        var self = this,
+            interval = self.interval;
 
         if (interval && interval.contains(chr, start, end)) {
 
@@ -62,8 +102,8 @@ var igv = (function (igv) {
 
 
             this.readSequence(chr, qstart, qend, function (seqBytes) {
-                    myself.interval = new igv.GenomicInterval(chr, qstart, qend, seqBytes);
-                    continuation(getSequenceFromInterval(myself.interval, start, end));
+                    self.interval = new igv.GenomicInterval(chr, qstart, qend, seqBytes);
+                    continuation(getSequenceFromInterval(self.interval, start, end));
                 },
                 task);
         }
@@ -74,65 +114,113 @@ var igv = (function (igv) {
             var seq = interval.features ? interval.features.substr(offset, n) : null;
             return seq;
         }
-
-    };
-
-    igv.FastaSequence.prototype.init = function (continuation) {
-
-        var self = this;
-
-        this.loadIndex(function (index) {
-
-            var order = 0;
-            self.chromosomes = {};
-            self.chromosomeNames.forEach(function (chrName) {
-                var bpLength = sequence.index[chrName].size;
-                self.chromosomes[chrName] = new igv.Chromosome(chrName, order++, bpLength);
-            });
+    }
 
 
-            // Ignore index, getting chr names as a side effect.  Really bad practice
-            continuation();
-        })
+    function getSequenceNonIndexed(chr, start, end, continuation, task) {
 
+        var seq = this.sequences[chr];
+        if(seq && seq.length > end) {
+            continuation(seq.substring(start, end));
+        }
 
     }
 
     igv.FastaSequence.prototype.loadIndex = function (continuation) {
 
-        var sequence = this;
+        var self = this;
 
-        igv.loadData(this.indexFile, function (data) {
+        igvxhr.load(this.indexFile, {
+            success: function (data) {
 
-            var lines = data.splitLines();
-            var len = lines.length;
-            var lineNo = 0;
+                var lines = data.splitLines();
+                var len = lines.length;
+                var lineNo = 0;
 
-            sequence.chromosomeNames = [];
-            sequence.index = {};
-            while (lineNo < len) {
+                self.chromosomeNames = [];     // TODO -- eliminate this side effect !!!!
+                self.index = {};               // TODO -- ditto
+                while (lineNo < len) {
 
-                var tokens = lines[lineNo++].split("\t");
-                var nTokens = tokens.length;
-                if (nTokens == 5) {
-                    // Parse the index line.
-                    var chr = tokens[0];
-                    var size = parseInt(tokens[1]);
-                    var position = parseInt(tokens[2]);
-                    var basesPerLine = parseInt(tokens[3]);
-                    var bytesPerLine = parseInt(tokens[4]);
+                    var tokens = lines[lineNo++].split("\t");
+                    var nTokens = tokens.length;
+                    if (nTokens == 5) {
+                        // Parse the index line.
+                        var chr = tokens[0];
+                        var size = parseInt(tokens[1]);
+                        var position = parseInt(tokens[2]);
+                        var basesPerLine = parseInt(tokens[3]);
+                        var bytesPerLine = parseInt(tokens[4]);
 
-                    var indexEntry = {
-                        size: size, position: position, basesPerLine: basesPerLine, bytesPerLine: bytesPerLine
-                    };
+                        var indexEntry = {
+                            size: size, position: position, basesPerLine: basesPerLine, bytesPerLine: bytesPerLine
+                        };
 
-                    sequence.chromosomeNames.push(chr);
-                    sequence.index[chr] = indexEntry;
+                        self.chromosomeNames.push(chr);
+                        self.index[chr] = indexEntry;
+                    }
+                }
+
+                if (continuation) {
+                    continuation(self.index);
+                }
+            },
+            error: function (xhr) {
+                if (xhr.status === 404) {
+                    alert("Fasta index file not found: " + self.indexFile);
+                }
+                else {
+                    alert("Error loading fasta index " + self.indexFile + "  status=" + xhr.status);
                 }
             }
+        });
+    };
 
-            if (continuation) {
-                continuation(sequence.index);
+    igv.FastaSequence.prototype.loadAll = function (continuation) {
+
+        var self = this;
+        self.chromosomeNames = [];
+        self.chromosomes = {};
+        self.sequences = {};
+
+            igvxhr.load(this.file, {
+            success: function (data) {
+
+                var lines = data.splitLines(),
+                    len = lines.length,
+                    lineNo = 0,
+                    nextLine,
+                    currentSeq = "",
+                    currentChr,
+                    order = 0;
+
+
+                while (lineNo < len) {
+                    nextLine = lines[lineNo++].trim();
+                    if (nextLine.startsWith("#") || nextLine.length === 0) {
+                        continue;
+                    }
+                    else if (nextLine.startsWith(">")) {
+                        if(currentSeq) {
+                            self.chromosomeNames.push(currentChr);
+                            self.sequences[currentChr] = currentSeq;
+                            self.chromosomes[currentChr] = new igv.Chromosome(currentChr, order++, currentSeq.length);
+                        }
+                        currentChr = nextLine.substr(1).split("\\s+")[0];
+                        currentSeq = "";
+                    }
+                    else {
+                        currentSeq += nextLine;
+                    }
+                }
+
+                if (continuation) {
+                    continuation();
+                }
+            },
+            error: function (xhr) {
+
+                alert("Error loading fasta  " + self.file + "  status=" + xhr.status);
+
             }
         });
     };

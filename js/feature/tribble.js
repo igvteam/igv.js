@@ -60,7 +60,7 @@ var igv = (function (igv) {
 
                 },
 
-                error: function (ignore, xhr) {
+                error: function (xhr) {
                     continuation(null);
                 }
             });

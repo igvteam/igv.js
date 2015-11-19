@@ -165,7 +165,7 @@ var igv = (function (igv) {
                         success(features);   // <= PARSING DONE HERE
                     },
                     error: function(msg) {
-                       console.log("Error loading: "+msg);
+                       console.log("Error loading: " + xhr.status);
                     },
                     task: task
         };

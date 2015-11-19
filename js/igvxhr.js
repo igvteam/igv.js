@@ -193,7 +193,7 @@ var igvxhr = (function (igvxhr) {
                 success(xhr.response, xhr);
             }
             else {
-                error(null, xhr);
+                error(xhr);
             }
 
         };
