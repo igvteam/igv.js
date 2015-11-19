@@ -5,7 +5,6 @@ function runFastaTests() {
     module("Fasta");
 
 
-
 //    asyncTest("Fasta index", 5, function () {                         ©
 //
 //        var sequence = igv.FastaSequence.ance();
@@ -25,54 +24,85 @@ function runFastaTests() {
 //
 //    });
 
+    asyncTest("FastaSequence - Test fasata with no index", 1, function () {
+
+        var sequence = new igv.FastaSequence(
+            {
+                fastaURL: "data/fasta/test.fasta",
+                indexed: false
+            }
+        );
+
+        sequence.init(function () {
+
+            // Note -- coordinates are UCSC style
+            // chr22:29565177-29565216
+            var expectedSequence = "GCTGC";
+            sequence.getSequence("CACNG6--RPLP2", 60, 65, function (seq) {
+
+                equal(seq, expectedSequence);
+                start();
+            })
+        })
+    })
+
     asyncTest("FastaSequence - Test getSequence", 2, function () {
 
-        var sequence = new igv.FastaSequence("http://data.broadinstitute.org/igvdata/test/data/fasta/chr22.fa");
+        var sequence = new igv.FastaSequence({fastaURL: "http://data.broadinstitute.org/igvdata/test/data/fasta/chr22.fa"});
 
-        // Note -- coordinates are UCSC style
-        // chr22:29565177-29565216
-        sequence.getSequence("chr22", 29565176, 29565216, function (sequence) {
+        sequence.init(function () {
 
-            ok(sequence, "sequence");
+            // Note -- coordinates are UCSC style
+            // chr22:29565177-29565216
+            sequence.getSequence("chr22", 29565176, 29565216, function (sequence) {
 
-            var expectedSeqString = "CTTGTAAATCAACTTGCAATAAAAGCTTTTCTTTTCTCAA", seqString = sequence.toUpperCase();
+                ok(sequence, "sequence");
 
-            equal(seqString, expectedSeqString);
+                var expectedSeqString = "CTTGTAAATCAACTTGCAATAAAAGCTTTTCTTTTCTCAA", seqString = sequence.toUpperCase();
 
-            start();
-        });
-    });
+                equal(seqString, expectedSeqString);
+
+                start();
+            })
+        })
+    })
 
     asyncTest("FastaSequence - Test readSequence", 2, function () {
 
-        var sequence = new igv.FastaSequence("http://data.broadinstitute.org/igvdata/test/data/fasta/chr22.fa");
+        var sequence = new igv.FastaSequence({fastaURL: "http://data.broadinstitute.org/igvdata/test/data/fasta/chr22.fa"});
 
-        // Note -- coordinates are UCSC style
-        // chr22:29565177-29565216
-        sequence.readSequence("chr22", 29565176, 29565216, function (sequence) {
+        sequence.init(function () {
 
-            ok(sequence, "sequence");
+            // Note -- coordinates are UCSC style
+            // chr22:29565177-29565216
+            sequence.readSequence("chr22", 29565176, 29565216, function (sequence) {
 
-            var expectedSeqString = "CTTGTAAATCAACTTGCAATAAAAGCTTTTCTTTTCTCAA", seqString = sequence.toUpperCase();
+                ok(sequence, "sequence");
 
-            equal(seqString, expectedSeqString);
+                var expectedSeqString = "CTTGTAAATCAACTTGCAATAAAAGCTTTTCTTTTCTCAA", seqString = sequence.toUpperCase();
 
-            start();
-        });
-    });
+                equal(seqString, expectedSeqString);
+
+                start();
+            })
+        })
+    })
 
     asyncTest("FastaSequence - Test readSequence - with unknown sequence", 1, function () {
 
-        var sequence = new igv.FastaSequence("http://data.broadinstitute.org/igvdata/test/data/fasta/chr22.fa");
+        var sequence = new igv.FastaSequence({fastaURL: "http://data.broadinstitute.org/igvdata/test/data/fasta/chr22.fa"});
 
-        // Note -- coordinates are UCSC style
-        // chr22:29565177-29565216
-        sequence.readSequence("noSuchChromosome", 29565176, 29565216, function (nullSeq) {
+        sequence.init(function () {
 
-            ok(!nullSeq);
-            start();
-        });
-    });
+            // Note -- coordinates are UCSC style
+            // chr22:29565177-29565216
+            sequence.readSequence("noSuchChromosome", 29565176, 29565216, function (nullSeq) {
+
+                ok(!nullSeq);
+                start();
+            })
+        })
+    })
 
 }
 

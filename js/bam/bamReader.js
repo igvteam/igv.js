@@ -437,7 +437,7 @@ var igv = (function (igv) {
                     continuation(bam.contentLength);
 
                 },
-                error: function (unused, xhr) {
+                error: function (xhr) {
                     bam.contentLength = -1;
                     continuation(bam.contentLength);
                 }
