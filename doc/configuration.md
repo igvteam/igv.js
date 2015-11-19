@@ -30,7 +30,8 @@ option  | description | default
 ------ | ------- | ------------
 fastaURL | URL to an indexed fasta file. Required|
 cytobandURL | URL to a cytoband ideogram file in UCSC format.  Optional  |
-id | UCSD identifier. Optional |
+indexed | flag indicating if the fasta is indexed.  Optional | true
+id | UCSD or other identifier. Optional |
 
 
 ### Search
