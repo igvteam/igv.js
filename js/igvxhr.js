@@ -186,6 +186,9 @@ var igvxhr = (function (igvxhr) {
                 xhr.setRequestHeader(key, value);
             }
         }
+        // let cookies go along to get files from any website we are logged in to
+        xhr.withCredentials = true;
+
 
         xhr.onload = function (event) {
             // when the url points to a local file, the status is 0 but that is no error
