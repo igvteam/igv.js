@@ -2,7 +2,7 @@
 
 
 
-##Browser Configuration
+## Browser Configuration
 
 ----
 
