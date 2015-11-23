@@ -187,7 +187,8 @@ var igvxhr = (function (igvxhr) {
             }
         }
         // let cookies go along to get files from any website we are logged in to
-        xhr.withCredentials = true;
+        // TODO -- note, breaks GTEX portal
+        // xhr.withCredentials = true;
 
 
         xhr.onload = function (event) {
