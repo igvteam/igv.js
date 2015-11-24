@@ -152,8 +152,7 @@ var igv = (function (igv) {
 
     igv.loadGenome = function (reference, continuation) {
 
-        var fastaUrl = reference.fastaURL,
-            cytobandUrl = reference.cytobandURL,
+        var cytobandUrl = reference.cytobandURL,
             cytobands,
             aliasURL = reference.aliasURL,
             aliases,
@@ -169,14 +168,14 @@ var igv = (function (igv) {
             chromosomes = sequence.chromosomes;
 
             if (cytobandUrl) {
-                loadCytobands(cytobandUrl, function (result) {
+                loadCytobands(cytobandUrl, reference.withCredentials, function (result) {
                     cytobands = result;
                     checkReady();
                 });
             }
 
             if (aliasURL) {
-                loadAliases(aliasURL, function (result) {
+                loadAliases(aliasURL, reference.withCredentials, function (result) {
                     aliases = result;
                     checkReady();
                 });
@@ -197,7 +196,7 @@ var igv = (function (igv) {
         }
     }
 
-    function loadCytobands(cytobandUrl, continuation) {
+    function loadCytobands(cytobandUrl, withCredentials, continuation) {
 
         igvxhr.loadString(cytobandUrl, {
 
@@ -237,11 +236,12 @@ var igv = (function (igv) {
                 }
 
                 continuation(cytobands);
-            }
+            },
+            withCredentials: withCredentials
         });
     }
 
-    function loadAliases(aliasURL, continuation) {
+    function loadAliases(aliasURL, withCredentials, continuation) {
         igvxhr.loadString(aliasURL, {
 
             success: function (data) {
@@ -254,7 +254,8 @@ var igv = (function (igv) {
                 });
 
                 continuation(aliases);
-            }
+            },
+            withCredentials: withCredentials
         });
 
     }

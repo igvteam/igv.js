@@ -37,29 +37,29 @@ var igv = (function (igv) {
         // check if type is redline or diff
         //console.log("AneuFeatureSource:  filename="+thefilename+", config="+JSON.stringify(config));
         // need function to cut off last part of file and add redline or diff file
-     
-        var getPath = function(urlorfile) {            
+
+        var getPath = function (urlorfile) {
             var last = urlorfile.lastIndexOf("/");
-            var path = urlorfile.substring(0, last+1);
-           // console.log("Getting path of file or url "+urlorfile+"="+path);
+            var path = urlorfile.substring(0, last + 1);
+            // console.log("Getting path of file or url "+urlorfile+"="+path);
             return path;
         }
-     
+
         if (config.localFile) {
-            
+
             var path = getPath(config.localFile.name);
             this.localFile = config.localFile;
-            this.filename =path + thefilename;
-          //  console.log("Got localfile: "+JSON.stringify(config)+", this.filename="+this.filename);
+            this.filename = path + thefilename;
+            //  console.log("Got localfile: "+JSON.stringify(config)+", this.filename="+this.filename);
         }
         else {
-            
+
             var path = getPath(config.url);
-            
-            this.url =path + thefilename;         
+
+            this.url = path + thefilename;
             this.filename = thefilename;
             this.headURL = config.headURL || this.filename;
-         //   console.log("Got URL: "+config.url+"-> url="+this.url);
+            //   console.log("Got URL: "+config.url+"-> url="+this.url);
         }
 
 
@@ -90,20 +90,20 @@ var igv = (function (igv) {
 
         if (featureCache && (featureCache.range === undefined || featureCache.range.containsRange(range))) {//}   featureCache.range.contains(queryChr, bpStart, bpEnd))) {
             var features = this.featureCache.queryFeatures(chr, bpStart, bpEnd);
-           // console.log("getFeatures: got "+features.length+" cached features on chr "+chr);
+            // console.log("getFeatures: got "+features.length+" cached features on chr "+chr);
             success(features);
 
         }
         else {
-          //  console.log("getFeatures: calling loadFeatures");
+            //  console.log("getFeatures: calling loadFeatures");
             this.loadFeatures(function (featureList) {
-                  //  console.log("Creating featureCache with "+featureList.length+ " features");
+                    //  console.log("Creating featureCache with "+featureList.length+ " features");
                     myself.featureCache = new igv.FeatureCache(featureList);   // Note - replacing previous cache with new one                    
                     // Finally pass features for query interval to continuation
-                    
+
                     var features = myself.featureCache.queryFeatures(chr, bpStart, bpEnd);
-                  //  console.log("calling success "+success);
-                  //  console.log("features from queryCache "+features);
+                    //  console.log("calling success "+success);
+                    //  console.log("features from queryCache "+features);
                     success(features);
 
                 },
@@ -147,56 +147,58 @@ var igv = (function (igv) {
      *
      * @param success
      * @param task
-     * @param range -- genomic range to load. 
+     * @param range -- genomic range to load.
      */
     igv.AneuFeatureSource.prototype.loadFeatures = function (success, task, range) {
 
-        var myself = this   ;
-        var parser = myself.parser;
+        var self = this;
+        var parser = self.parser;
         var options = {
-                    headers: myself.config.headers,           // http headers, not file header
-                    tokens: myself.config.tokens,           // http headers, not file header
-                    success: function (data) {
-                       // console.log("Loaded data, calling parser.parseFeatures: parser="+parser);
-                        myself.header = parser.parseHeader(data);
-                        var features = parser.parseFeatures(data);
-                        //console.log("Calling success "+success);
-                        //console.log("nr features in argument "+features.length);
-                        success(features);   // <= PARSING DONE HERE
-                    },
-                    error: function(msg) {
-                       console.log("Error loading: " + xhr.status);
-                    },
-                    task: task
+            headers: self.config.headers,           // http headers, not file header
+            tokens: self.config.tokens,           // http headers, not file header
+            success: function (data) {
+                // console.log("Loaded data, calling parser.parseFeatures: parser="+parser);
+                self.header = parser.parseHeader(data);
+                var features = parser.parseFeatures(data);
+                //console.log("Calling success "+success);
+                //console.log("nr features in argument "+features.length);
+                success(features);   // <= PARSING DONE HERE
+            },
+            error: function (msg) {
+                console.log("Error loading: " + xhr.status);
+            },
+            withCredentials: self.config.withCredentials,
+            task: task
         };
-      //  console.log("=================== load features. File is: "+myself.localFile+"/"+myself.url);
-        if (myself.localFile) {
-        //    console.log("Loading local file: "+JSON.stringify(localFile));
-            igvxhr.loadStringFromFile(myself.localFile, options);
+        //  console.log("=================== load features. File is: "+myself.localFile+"/"+myself.url);
+        if (self.localFile) {
+            //    console.log("Loading local file: "+JSON.stringify(localFile));
+            igvxhr.loadStringFromFile(self.localFile, options);
         }
         else {
             //console.log("Loading URL "+myself.url);
-            igvxhr.loadString(myself.url, options);
-        }        
-        
-       
+            igvxhr.loadString(self.url, options);
+        }
+
+
         function getContentLength(continuation) {
-            if (myself.contentLength) {
-                continuation(myself.contentLength);
+            if (self.contentLength) {
+                continuation(self.contentLength);
             }
             else {
                 // Get the content length first, so we don't try to read beyond the end of the file
-                igvxhr.getContentLength(myself.headURL, {
-                    headers: myself.config.headers,
+                igvxhr.getContentLength(self.headURL, {
+                    headers: self.config.headers,
                     success: function (contentLength) {
-                        myself.contentLength = contentLength;
+                        self.contentLength = contentLength;
                         continuation(contentLength);
 
                     },
                     error: function () {
-                        myself.contentLength = -1;
+                        self.contentLength = -1;
                         continuation(-1);
-                    }
+                    },
+                    withCredentials: self.config.withCredentials
                 });
             }
         }

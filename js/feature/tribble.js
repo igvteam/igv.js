@@ -59,10 +59,10 @@ var igv = (function (igv) {
                     }
 
                 },
-
                 error: function (xhr) {
                     continuation(null);
-                }
+                },
+                withCredentials: config.withCredentials
             });
 
 

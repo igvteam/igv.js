@@ -149,6 +149,7 @@ var igvxhr = (function (igvxhr) {
             mimeType = options.mimeType,
             headers = options.headers,
             isSafari = navigator.vendor.indexOf("Apple") == 0 && /\sSafari\//.test(navigator.userAgent),
+            withCredentials = options.withCredentials,
             header_keys, key, value, i;
 
         if (task) task.xhrRequest = xhr;
@@ -187,8 +188,10 @@ var igvxhr = (function (igvxhr) {
             }
         }
         // let cookies go along to get files from any website we are logged in to
-        // TODO -- note, breaks GTEX portal
-        // xhr.withCredentials = true;
+        // NOTE: using withCredentials with servers that return "*" for access-allowed-origin will fail
+        if(withCredentials === true) {
+            xhr.withCredentials = true;
+        }
 
 
         xhr.onload = function (event) {

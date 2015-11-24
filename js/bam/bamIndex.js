@@ -117,7 +117,8 @@ var igv = (function (igv) {
                     }
 //console.log("Block max =" + blockMax);
                     continuation(new igv.BamIndex(indices, blockMin, blockMax, sequenceIndexMap, tabix));
-                }
+                },
+                withCredentials: config.withCredentials
             });
     }
 

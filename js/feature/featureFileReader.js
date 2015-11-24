@@ -98,10 +98,11 @@ var igv = (function (igv) {
             self = this,
             options = {
                 headers: this.config.headers,           // http headers, not file header
-                success: (function (data) {
+                success: function (data) {
                     self.header = parser.parseHeader(data);
                     continuation(parser.parseFeatures(data));   // <= PARSING DONE HERE
-                }),
+                },
+                withCredentials: self.config.withCredentials,
                 task: task
             };
 
@@ -115,20 +116,20 @@ var igv = (function (igv) {
 
     igv.FeatureFileReader.prototype.readHeader = function (continuation) {
 
-        var myself = this,
+        var self = this,
             isIndeedIndexible = isIndexable.call(this);
 
         if (this.indexed === undefined && isIndeedIndexible) {
 
             loadIndex.call(this, function (index) {
                 if (index) {
-                    myself.index = index;
-                    myself.indexed = true;
+                    self.index = index;
+                    self.indexed = true;
                 }
                 else {
-                    myself.indexed = false;
+                    self.indexed = false;
                 }
-                myself.readHeader(continuation);
+                self.readHeader(continuation);
             });
             return;
         }
@@ -138,7 +139,7 @@ var igv = (function (igv) {
         }
         else {
             loadFeaturesNoIndex.call(this, function (features) {
-                continuation(myself.header, features);
+                continuation(self.header, features);
             });
         }
 
@@ -151,20 +152,21 @@ var igv = (function (igv) {
         function loadHeaderWithIndex(index, continuation) {
 
             var options = {
-                headers: myself.config.headers,           // http headers, not file header
+                headers: self.config.headers,           // http headers, not file header
                 bgz: index.tabix,
                 range: {start: 0, size: 65000},
                 success: function (data) {
-                    myself.header = myself.parser.parseHeader(data);
-                    continuation(myself.header);
-                }
+                    self.header = self.parser.parseHeader(data);
+                    continuation(self.header);
+                },
+                withCredentials: self.config.withCredentials
             };
 
-            if (myself.localFile) {
-                igvxhr.loadStringFromFile(myself.localFile, options);
+            if (self.localFile) {
+                igvxhr.loadStringFromFile(self.localFile, options);
             }
             else {
-                igvxhr.loadString(myself.url, options);
+                igvxhr.loadString(self.url, options);
             }
         }
     }
@@ -177,7 +179,7 @@ var igv = (function (igv) {
      */
     igv.FeatureFileReader.prototype.readFeatures = function (success, task, range) {
 
-        var myself = this;
+        var self = this;
 
         if (this.index) {
             loadFeaturesWithIndex(this.index, packFeatures);
@@ -217,7 +219,7 @@ var igv = (function (igv) {
                         startOffset = block.minv.offset,
                         endPos = block.maxv.block + (index.tabix ? MAX_GZIP_BLOCK_SIZE + 100 : 0);
                     options = {
-                        headers: myself.config.headers,           // http headers, not file header
+                        headers: self.config.headers,           // http headers, not file header
                         range: {start: startPos, size: endPos - startPos + 1},
                         success: function (data) {
 
@@ -236,7 +238,7 @@ var igv = (function (igv) {
                             }
 
                             slicedData = startOffset ? inflated.slice(startOffset) : inflated;
-                            allFeatures = allFeatures.concat(myself.parser.parseFeatures(slicedData));
+                            allFeatures = allFeatures.concat(self.parser.parseFeatures(slicedData));
 
                             if (processed === blocks.length) {
                                 allFeatures.sort(function (a, b) {
@@ -245,20 +247,21 @@ var igv = (function (igv) {
                                 continuation(allFeatures);
                             }
                         },
+                        withCredentials: self.config.withCredentials,
                         task: task
                     };
 
 
                     // Async load
-                    if (myself.localFile) {
-                        igvxhr.loadStringFromFile(myself.localFile, options);
+                    if (self.localFile) {
+                        igvxhr.loadStringFromFile(self.localFile, options);
                     }
                     else {
                         if (index.tabix) {
-                            igvxhr.loadArrayBuffer(myself.url, options);
+                            igvxhr.loadArrayBuffer(self.url, options);
                         }
                         else {
-                            igvxhr.loadString(myself.url, options);
+                            igvxhr.loadString(self.url, options);
                         }
                     }
                 });

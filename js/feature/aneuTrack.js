@@ -116,7 +116,7 @@ var igv = (function (igv) {
         }
     };
     igv.AneuTrack.prototype.loadSummary = function (chr, bpStart, bpEnd, continuation, task) {
-        var me = this;
+        var self = this;
         if (this.featureSourceRed) {
             this.featureSourceRed.getFeatures(chr, bpStart, bpEnd, continuation, task);
         }
@@ -127,8 +127,8 @@ var igv = (function (igv) {
                 if (json) {
                     json = JSON.parse(json);
 //        		log("Got json: " + JSON.stringify(json));
-                    me.featureSourceRed = new igv.AneuFeatureSource(config, json.redline);
-                    me.getSummary(chr, bpStart, bpEnd, continuation, task);
+                    self.featureSourceRed = new igv.AneuFeatureSource(config, json.redline);
+                    self.getSummary(chr, bpStart, bpEnd, continuation, task);
                 }
                 else {
                     //log("afterJsonLoaded: got no json result for "+config.url);
@@ -136,11 +136,12 @@ var igv = (function (igv) {
             };
 
             afterload = {
-                headers: me.config.headers, // http headers, not file header
-                tokens: me.config.tokens, // http headers, not file header
-                success: afterJsonLoaded
+                headers: self.config.headers, // http headers, not file header
+                tokens: self.config.tokens, // http headers, not file header
+                success: afterJsonLoaded,
+                withCredentials: self.config.withCredentials
             };
-            var config = me.config;
+            var config = self.config;
             if (config.localFile) {
                 igvxhr.loadStringFromFile(config.localFile, afterload);
             } else {
@@ -151,17 +152,17 @@ var igv = (function (igv) {
     };
 
     igv.AneuTrack.prototype.getFeatures = function (chr, bpStart, bpEnd, continuation, task) {
-        var me = this;
+        var self = this;
         if (this.featureSourceRed) {
             // first load diff file, then load redline file, THEN call
             // continuation
             var loadsecondfile = function (redlinedata) {
                 // console.log("loadsecondfile: argument redlinedata:
                 // "+JSON.stringify(redlinedata));
-                me.redlinedata = redlinedata;
+                self.redlinedata = redlinedata;
                 // console.log("Now loading diff data, using original
                 // continuation");
-                me.featureSource.getFeatures(chr, bpStart, bpEnd, continuation, task);
+                self.featureSource.getFeatures(chr, bpStart, bpEnd, continuation, task);
             };
             // console.log("About to load redline file");
             this.featureSourceRed.getFeatures(chr, bpStart, bpEnd, loadsecondfile, task);
@@ -172,17 +173,18 @@ var igv = (function (igv) {
             var afterJsonLoaded = function (json) {
                 json = JSON.parse(json);
                 log("Got json: " + json + ", diff :" + json.diff);
-                me.featureSource = new igv.AneuFeatureSource(config, json.diff);
-                me.featureSourceRed = new igv.AneuFeatureSource(config, json.redline);
-                me.getFeatures(chr, bpStart, bpEnd, continuation, task);
+                self.featureSource = new igv.AneuFeatureSource(config, json.diff);
+                self.featureSourceRed = new igv.AneuFeatureSource(config, json.redline);
+                self.getFeatures(chr, bpStart, bpEnd, continuation, task);
             };
 
             afterload = {
-                headers: me.config.headers, // http headers, not file header
-                tokens: me.config.tokens, // http headers, not file header
-                success: afterJsonLoaded
+                headers: self.config.headers, // http headers, not file header
+                tokens: self.config.tokens, // http headers, not file header
+                success: afterJsonLoaded,
+                withCredentials: self.config.withCredentials
             };
-            var config = me.config;
+            var config = self.config;
             if (config.localFile) {
                 igvxhr.loadStringFromFile(config.localFile, afterload);
             } else {

@@ -77,7 +77,8 @@ var igv = (function (igv) {
                         self.data = arrayBuffer;
                         self.range = loadRange;
                         subbuffer(self, requestedRange, asUint8);
-                    }
+                    },
+                    withCredentials: self.config.withCredentials
                 });
 
         }

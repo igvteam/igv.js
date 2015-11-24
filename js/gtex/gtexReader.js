@@ -36,6 +36,7 @@ var igv = (function (igv) {
      */
     igv.GtexReader = function (config) {
 
+        this.config = config;
         this.url = config.url;
         this.tissueName = config.tissueName;
         this.indexed = true;
@@ -95,7 +96,8 @@ var igv = (function (igv) {
                     success(null);
                 }
 
-            }
+            },
+            withCredentials: this.config.withCredentials
         });
 
     }

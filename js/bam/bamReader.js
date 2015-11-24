@@ -44,7 +44,7 @@ var igv = (function (igv) {
 
     igv.BamReader.prototype.readFeatures = function (chr, min, max, continuation, task) {
 
-        var bam = this;
+        var self = this;
 
         getChrIndex(this, function (chrToIndex) {
 
@@ -55,7 +55,7 @@ var igv = (function (igv) {
                 continuation([]);
             } else {
 
-                getIndex(bam, function (bamIndex) {
+                getIndex(self, function (bamIndex) {
 
                     chunks = bamIndex.blocksForRange(chrId, min, max);
 
@@ -79,14 +79,14 @@ var igv = (function (igv) {
                             fetchMin = c.minv.block,
                             fetchMax = c.maxv.block + 65000,   // Make sure we get the whole block.
                             range =
-                                (bam.contentLength > 0 && fetchMax > bam.contentLength) ?
+                                (self.contentLength > 0 && fetchMax > self.contentLength) ?
                                 {start: fetchMin} :
                                 {start: fetchMin, size: fetchMax - fetchMin + 1};
 
-                        igvxhr.loadArrayBuffer(bam.bamPath,
+                        igvxhr.loadArrayBuffer(self.bamPath,
                             {
                                 task: task,
-                                headers: bam.config.headers,
+                                headers: self.config.headers,
                                 range: range,
                                 success: function (compressed) {
 
@@ -114,7 +114,8 @@ var igv = (function (igv) {
                                     else {
                                         loadNextChunk(chunkNumber);
                                     }
-                                }
+                                },
+                                withCredentials: self.config.withCredentials
                             });
 
 
@@ -244,11 +245,11 @@ var igv = (function (igv) {
                 alignment.start = pos;
                 alignment.mq = mq;
                 alignment.readName = readName;
-                alignment.chr = bam.indexToChr[refID];
+                alignment.chr = self.indexToChr[refID];
 
                 if (mateRefID >= 0) {
                     alignment.mate = {
-                        chr: bam.indexToChr[mateRefID],
+                        chr: self.indexToChr[mateRefID],
                         position: matePos
                     };
                 }
@@ -354,24 +355,24 @@ var igv = (function (igv) {
      */
     igv.BamReader.prototype.readHeader = function (continuation) {
 
-        var bam = this;
+        var self = this;
 
-        getContentLength(bam, function (contentLength) {
+        getContentLength(self, function (contentLength) {
 
-            getIndex(bam, function (index) {
+            getIndex(self, function (index) {
 
                 var contentLength = index.blockMax,
                     len = index.headerSize + MAX_GZIP_BLOCK_SIZE + 100;   // Insure we get the complete compressed block containing the header
 
                 if (contentLength <= 0) contentLength = index.blockMax;  // Approximate
 
-                bam.contentLength = contentLength;
+                self.contentLength = contentLength;
 
                 if (contentLength > 0) len = Math.min(contentLength, len);
 
-                igvxhr.loadArrayBuffer(bam.bamPath,
+                igvxhr.loadArrayBuffer(self.bamPath,
                     {
-                        headers: bam.config.headers,
+                        headers: self.config.headers,
 
                         range: {start: 0, size: len},
 
@@ -391,8 +392,8 @@ var igv = (function (igv) {
                             var nRef = readInt(uncba, samHeaderLen + 8);
                             var p = samHeaderLen + 12;
 
-                            bam.chrToIndex = {};
-                            bam.indexToChr = [];
+                            self.chrToIndex = {};
+                            self.indexToChr = [];
                             for (var i = 0; i < nRef; ++i) {
                                 var lName = readInt(uncba, p);
                                 var name = '';
@@ -406,15 +407,16 @@ var igv = (function (igv) {
                                     name = genome.getChromosomeName(name);
                                 }
 
-                                bam.chrToIndex[name] = i;
-                                bam.indexToChr.push(name);
+                                self.chrToIndex[name] = i;
+                                self.indexToChr.push(name);
 
                                 p = p + 8 + lName;
                             }
 
                             continuation();
 
-                        }
+                        },
+                        withCredentials: self.config.withCredentials
                     });
             });
         });

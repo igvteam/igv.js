@@ -34,6 +34,7 @@ var igv = (function (igv) {
         if (this.indexed) {
             this.indexFile = reference.indexFile || this.file + ".fai";
         }
+        this.withCredentials = reference.withCredentials;
 
     };
 
@@ -120,7 +121,7 @@ var igv = (function (igv) {
     function getSequenceNonIndexed(chr, start, end, continuation, task) {
 
         var seq = this.sequences[chr];
-        if(seq && seq.length > end) {
+        if (seq && seq.length > end) {
             continuation(seq.substring(start, end));
         }
 
@@ -171,7 +172,8 @@ var igv = (function (igv) {
                 else {
                     alert("Error loading fasta index " + self.indexFile + "  status=" + xhr.status);
                 }
-            }
+            },
+            withCredentials: this.withCredentials
         });
     };
 
@@ -182,7 +184,7 @@ var igv = (function (igv) {
         self.chromosomes = {};
         self.sequences = {};
 
-            igvxhr.load(this.file, {
+        igvxhr.load(this.file, {
             success: function (data) {
 
                 var lines = data.splitLines(),
@@ -200,7 +202,7 @@ var igv = (function (igv) {
                         continue;
                     }
                     else if (nextLine.startsWith(">")) {
-                        if(currentSeq) {
+                        if (currentSeq) {
                             self.chromosomeNames.push(currentChr);
                             self.sequences[currentChr] = currentSeq;
                             self.chromosomes[currentChr] = new igv.Chromosome(currentChr, order++, currentSeq.length);
@@ -221,7 +223,9 @@ var igv = (function (igv) {
 
                 alert("Error loading fasta  " + self.file + "  status=" + xhr.status);
 
-            }
+            },
+            withCredentials: this.withCredentials
+
         });
     };
 
@@ -266,11 +270,10 @@ var igv = (function (igv) {
                 var byteCount = endByte - startByte + 1;
                 if (byteCount <= 0) {
                     return;
-                }
+                };
 
-                var dataLoader = new igv.DataLoader(fasta.file);
-                dataLoader.range = {start: startByte, size: byteCount};
-                dataLoader.loadBinaryString(function (allBytes) {
+                igvxhr.load(fasta.file, {
+                    success: function (allBytes) {
 
                         var nBases,
                             seqBytes = "",
@@ -294,7 +297,9 @@ var igv = (function (igv) {
 
                         continuation(seqBytes);
                     },
-                    task);
+                    range: {start: startByte, size: byteCount},
+                    task: task
+                });
             }
         }
     };
