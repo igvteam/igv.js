@@ -34,6 +34,7 @@ var igv = (function (igv) {
      */
     igv.ImmVarReader = function (config) {
 
+        this.config = config;
         this.url = config.url;
         this.cellConditionId = config.cellConditionId;
         this.valueThreshold = config.valueThreshold ? config.valueThreshold : 5E-2;
@@ -73,7 +74,8 @@ var igv = (function (igv) {
                     success(null);
                 }
 
-            }
+            },
+            withCredentials: this.config.withCredentials
         });
 
     }

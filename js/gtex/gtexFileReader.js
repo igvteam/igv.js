@@ -27,6 +27,7 @@ var igv = (function (igv) {
 
     igv.GtexFileReader = function (config) {
 
+        this.config = config;
         this.file = config.url;
         this.codec = this.file.endsWith(".bin") ? createEqtlBinary : createEQTL,
             this.cache = {};
@@ -91,7 +92,8 @@ var igv = (function (igv) {
                                     continuation(null);
                                 }
 
-                            }
+                            },
+                            withCredentials: self.config.withCredentials
                         });
 
 
@@ -191,10 +193,12 @@ var igv = (function (igv) {
                                 }
 
                                 continuation(index)
-                            }
+                            },
+                            withCredentials: self.config.withCredentials
 
                         });
-                    }
+                    },
+                    withCredentials: self.config.withCredentials
 
                 });
 

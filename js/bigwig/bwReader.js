@@ -57,7 +57,7 @@ var igv = (function (igv) {
         }
     }
 
-    igv.BWReader.prototype.loadHeader = function(continuation) {
+    igv.BWReader.prototype.loadHeader = function (continuation) {
 
         var self = this;
 
@@ -67,7 +67,7 @@ var igv = (function (igv) {
 
                 range: {start: 0, size: BBFILE_HEADER_SIZE},
 
-                success: (function (data) {
+                success: function (data) {
 
                     if (!data) return;
 
@@ -117,15 +117,16 @@ var igv = (function (igv) {
                     self.header.uncompressBuffSize = binaryParser.getInt();
                     self.header.reserved = binaryParser.getLong();
 
-                   loadZoomHeadersAndChrTree.call(self, continuation);
-                })
+                    loadZoomHeadersAndChrTree.call(self, continuation);
+                },
 
+                withCredentials: self.config.withCredentials
             });
 
     }
 
 
-    function loadZoomHeadersAndChrTree (continutation) {
+    function loadZoomHeadersAndChrTree(continutation) {
 
 
         var startOffset = BBFILE_HEADER_SIZE,
@@ -180,7 +181,9 @@ var igv = (function (igv) {
                     self.dataCount = binaryParser.getInt();
 
                     continutation();
-                }
+                },
+
+                withCredentials: self.config.withCredentials
             });
 
     }
