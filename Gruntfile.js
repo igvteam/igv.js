@@ -19,7 +19,8 @@ module.exports = function (grunt) {
                     'js/**/*.js',
                     'vendor/inflate.js',
                     'vendor/zlib_and_gzip.min.js',
-                    'vendor/jquery.mousewheel.js'
+                    'vendor/jquery.mousewheel.js',
+                    'js/shim.js'
                 ],
                 dest: 'dist/igv.js'
             }
