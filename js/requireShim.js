@@ -49,12 +49,30 @@
  */
 
 /**
- * Self evalutating function that returns the global igv object, creating it if neccessary.  This file should be
- * concatenated last when building "igv.js".  Purpose is to support shims in require.js.
+ * Self evalutating function that returns the global igv object, creating it if neccessary.
+ * Purpose is to support shims in require.js and browserify.
  *
  */
-var igv = (function (igv) {
+(function igvForAMD() {
+
+
+    if ( typeof define === 'function' && define.amd ) {
+
+        // AMD. Register as an anonymous module.
+
+        define(['igv'], igv);
+
+    } else if (typeof exports === 'object') {
+
+        // Node/CommonJS style for Browserify
+
+        module.exports = igv;
+
+    }
+
+
+})(function (igv){
 
     return igv;
 
-})(igv || {});
+});
