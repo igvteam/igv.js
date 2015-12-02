@@ -28,19 +28,17 @@
  *
  */
 
-
-if ( typeof define === 'function' && define.amd ) {
-    // AMD. Register as an anonymous module.
-
-    define(['jquery'], igv);
-
-
-} else if (typeof exports === 'object') {
-    // Node/CommonJS style for Browserify
-
-    module.exports = igv;
-
-
-}
+(function (factory) {
+    if ( typeof define === 'function' && define.amd ) {
+        // AMD. Register as an anonymous module.
+        define(['jquery'], factory);
+    } else if (typeof exports === 'object') {
+        // Node/CommonJS style for Browserify
+        module.exports = factory;
+    }
+}(function (ignored) {
+    if(igv === undefined)  igv = {};  // Define global igv object
+    return igv;
+}));
 
 
