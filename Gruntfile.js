@@ -17,9 +17,11 @@ module.exports = function (grunt) {
             igv: {
                 src: [
                     'js/**/*.js',
+                    '!js/module.js',
                     'vendor/inflate.js',
                     'vendor/zlib_and_gzip.min.js',
-                    'vendor/jquery.mousewheel.js'
+                    'vendor/jquery.mousewheel.js',
+                    'js/module.js'
                 ],
                 dest: 'dist/igv.js'
             }
