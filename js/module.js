@@ -53,26 +53,34 @@
  * Purpose is to support shims in require.js and browserify.
  *
  */
-(function igvForAMD() {
-
+(function igvForAMD(factory) {
 
     if ( typeof define === 'function' && define.amd ) {
 
         // AMD. Register as an anonymous module.
 
-        define(['igv'], igv);
+
+
+        define(['jquery'], factory);
+
 
     } else if (typeof exports === 'object') {
 
+
+
         // Node/CommonJS style for Browserify
+
+
 
         module.exports = igv;
 
+
+
     }
 
+})(function (){
 
-})(function (igv){
-
+    if(igv === undefined) igv = {};
     return igv;
 
 });
