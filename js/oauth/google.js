@@ -1,3 +1,6 @@
+/**
+ * Legacy global "oauth" object.  -- phase this out
+ */
 var oauth = (function (oauth) {
 
     // Define singleton object for google oauth
@@ -12,7 +15,7 @@ var oauth = (function (oauth) {
         var LOGOUT = 'http://accounts.google.com/Logout';
         var TYPE = 'token';
         var _url = OAUTHURL +
-            "scope=https://www.googleapis.com/auth/genomics https://www.googleapis.com/auth/userinfo.profile&" +
+            "scope=https://www.googleapis.com/auth/genomics https://www.googleapis.com/auth/devstorage.read_only https://www.googleapis.com/auth/userinfo.profile&" +
             "state=%2Fprofile&" +
             "redirect_uri=http%3A%2F%2Flocalhost%2Figv-web%2FemptyPage.html&" +
             "response_type=token&" +
@@ -100,3 +103,15 @@ var oauth = (function (oauth) {
 
     return oauth;
 })(oauth || {});
+
+
+var igv = (function (igv) {
+
+    igv.oauth = oauth;
+
+
+    return igv;
+
+})(igv || {});
+
+

@@ -39,6 +39,8 @@ var igv = (function (igv) {
 
         return "https://www.googleapis.com/storage/v1/b/" + bucket + "/o/" + object + "?alt=media";
 
+
+
     }
 
 

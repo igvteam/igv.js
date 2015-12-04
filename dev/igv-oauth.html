@@ -151,6 +151,15 @@
                                 })">Click to load Ga4gh Variants
     </a>
 
+    <p></p>
+    <a href='#' onclick="igv.browser.loadTrack({
+                    sourceType: 'gcs',
+                    type: 'bam',
+                    url: 'gs://igv-bam-test/NA12878.bam',
+                    name: 'GCS NA12878 alignments'
+                })">Click to load gs:// bam
+    </a>
+    <p></p>
 </div>
 
 <script type="text/javascript">
@@ -173,12 +182,7 @@
                     type: "sequence",
                     order: -9999
                 },
-                {
-                    sourceType: 'gcs',
-                    type: 'bam',
-                    url: 'gs://igv-bam-test/NA12878.bam',
-                    name: 'GCS NA12878 alignments'
-                },
+                ,
                 {
                     //url: "//dn7ywbm9isq8j.cloudfront.net/annotations/hg19/genes/gencode.v18.collapsed.bed",
                     url: "//dn7ywbm9isq8j.cloudfront.net/annotations/hg19/genes/gencode.v18.collapsed.bed",
