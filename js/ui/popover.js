@@ -57,8 +57,8 @@ var igv = (function (igv) {
         });
 
         // popover content
-        this.popoverContent = $('<div>');
-        this.popover.append(this.popoverContent[ 0 ]);
+        this.$popoverContent = $('<div>');
+        this.popover.append(this.$popoverContent[ 0 ]);
 
     };
 
@@ -93,10 +93,10 @@ var igv = (function (igv) {
             }
         });
 
-        this.popoverContent.empty();
+        this.$popoverContent.empty();
 
-        this.popoverContent.removeClass("igv-popoverTrackPopupContent");
-        this.popoverContent.append(container[ 0 ]);
+        this.$popoverContent.removeClass("igv-popoverTrackPopupContent");
+        this.$popoverContent.append(container[ 0 ]);
 
         // Attach click handler AFTER inserting markup in DOM.
         // Insertion beforehand will cause it to have NO effect
@@ -125,16 +125,37 @@ var igv = (function (igv) {
 
     };
 
-    igv.Popover.prototype.presentTrackPopup = function (pageX, pageY, content) {
+    igv.Popover.prototype.presentTrackPopup = function (pageX, pageY, content, showOKButton) {
+
+        var self = this,
+            ok_button,
+            markup;
 
         if (!content) {
             return;
         }
 
-        this.popoverContent.addClass("igv-popoverTrackPopupContent");
-        this.popoverContent.html(content);
+        if (true === showOKButton) {
+            ok_button = '<button name="button" class="igv-popover-ok-button">OK</button>';
+            markup = ok_button + content;
+        } else {
+            markup = content;
+        }
+
+        this.$popoverContent.addClass("igv-popoverTrackPopupContent");
+
+        this.$popoverContent.html(markup);
 
         this.popover.css(popoverPosition(pageX, pageY, this)).show();
+
+        if (true === showOKButton) {
+            $('.igv-dialog-close-container').hide();
+            $('.igv-popover-ok-button').click(function(){
+                self.hide();
+            });
+        } else {
+            $('.igv-dialog-close-container').show();
+        }
 
     };
 
