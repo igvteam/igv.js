@@ -135,11 +135,10 @@ var igv = (function (igv) {
             return;
         }
 
+        markup = content;
         if (true === showOKButton) {
             ok_button = '<button name="button" class="igv-popover-ok-button">OK</button>';
-            markup = ok_button + content;
-        } else {
-            markup = content;
+            markup = content + ok_button;
         }
 
         this.$popoverContent.addClass("igv-popoverTrackPopupContent");
