@@ -67,7 +67,8 @@ var igv = (function (igv) {
         this.sampleCount = 0;
         this.samples = {};
         this.sampleNames = [];
-        this.featureSource = new igv.FeatureSource(this.config);
+
+        this.featureSource = config.sourceType === "bigquery" ? new igv.BigQueryFeatureSource(this.config) : new igv.FeatureSource(this.config);
 
     };
 

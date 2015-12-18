@@ -491,11 +491,11 @@ var igv = (function (igv) {
                 this.currentLoadTask = {
                     start: bpStart,
                     end: bpEnd,
-                    //error: function(unused, xhr) {
-                    //    igv.stopSpinnerObject(self.trackDiv);
-                    //    self.browser.removeTrack(self.track);
-                    //    window.alert("Unreachable track URL. Request status: " + xhr.status);
-                    //},
+                    error: function(unused, xhr) {
+                       // igv.stopSpinnerObject(self.trackDiv);
+                        self.browser.removeTrack(self.track);
+                        window.alert("Unreachable track URL. Request status: " + xhr.status);
+                    },
                     abort: function () {
                         this.canceled = true;
                         if (this.xhrRequest) {

@@ -37,7 +37,7 @@ var igv = (function (igv) {
             config.url;
         this.baiPath = 'gcs' === config.sourceType ?
             igv.translateGoogleCloudURL(config.url + ".bai") :
-            config.url + ".bai"; // Todo - deal with Picard convention.  WHY DOES THERE HAVE TO BE 2?
+        config.url + ".bai"; // Todo - deal with Picard convention.  WHY DOES THERE HAVE TO BE 2?
         this.headPath = config.headURL || this.bamPath;
 
     };
@@ -320,7 +320,7 @@ var igv = (function (igv) {
                     case 'I' :
                         blockSeq = record.seq === "*" ? "*" : record.seq.substr(seqOffset, c.len);
                         blockQuals = record.qual ? record.qual.slice(seqOffset, c.len) : undefined;
-                        if(insertions === undefined) insertions = [];
+                        if (insertions === undefined) insertions = [];
                         insertions.push({start: pos, len: c.len, seq: blockSeq, qual: blockQuals});
                         seqOffset += c.len;
                         break;
@@ -357,70 +357,66 @@ var igv = (function (igv) {
 
         var self = this;
 
-        getContentLength(self, function (contentLength) {
+        getIndex(self, function (index) {
 
-            getIndex(self, function (index) {
+            var contentLength = index.blockMax,
+                len = index.headerSize + MAX_GZIP_BLOCK_SIZE + 100;   // Insure we get the complete compressed block containing the header
 
-                var contentLength = index.blockMax,
-                    len = index.headerSize + MAX_GZIP_BLOCK_SIZE + 100;   // Insure we get the complete compressed block containing the header
+            if (contentLength <= 0) contentLength = index.blockMax;  // Approximate
 
-                if (contentLength <= 0) contentLength = index.blockMax;  // Approximate
+            self.contentLength = contentLength;
 
-                self.contentLength = contentLength;
+            if (contentLength > 0) len = Math.min(contentLength, len);
 
-                if (contentLength > 0) len = Math.min(contentLength, len);
+            igvxhr.loadArrayBuffer(self.bamPath,
+                {
+                    headers: self.config.headers,
 
-                igvxhr.loadArrayBuffer(self.bamPath,
-                    {
-                        headers: self.config.headers,
+                    range: {start: 0, size: len},
 
-                        range: {start: 0, size: len},
+                    success: function (compressedBuffer) {
 
-                        success: function (compressedBuffer) {
+                        var unc = igv.unbgzf(compressedBuffer, len),
+                            uncba = new Uint8Array(unc),
+                            magic = readInt(uncba, 0),
+                            samHeaderLen = readInt(uncba, 4),
+                            samHeader = '',
+                            genome = igv.browser ? igv.browser.genome : null;
 
-                            var unc = igv.unbgzf(compressedBuffer, len),
-                                uncba = new Uint8Array(unc),
-                                magic = readInt(uncba, 0),
-                                samHeaderLen = readInt(uncba, 4),
-                                samHeader = '',
-                                genome = igv.browser ? igv.browser.genome : null;
+                        for (var i = 0; i < samHeaderLen; ++i) {
+                            samHeader += String.fromCharCode(uncba[i + 8]);
+                        }
 
-                            for (var i = 0; i < samHeaderLen; ++i) {
-                                samHeader += String.fromCharCode(uncba[i + 8]);
+                        var nRef = readInt(uncba, samHeaderLen + 8);
+                        var p = samHeaderLen + 12;
+
+                        self.chrToIndex = {};
+                        self.indexToChr = [];
+                        for (var i = 0; i < nRef; ++i) {
+                            var lName = readInt(uncba, p);
+                            var name = '';
+                            for (var j = 0; j < lName - 1; ++j) {
+                                name += String.fromCharCode(uncba[p + 4 + j]);
+                            }
+                            var lRef = readInt(uncba, p + lName + 4);
+                            //dlog(name + ': ' + lRef);
+
+                            if (genome && genome.getChromosomeName) {
+                                name = genome.getChromosomeName(name);
                             }
 
-                            var nRef = readInt(uncba, samHeaderLen + 8);
-                            var p = samHeaderLen + 12;
+                            self.chrToIndex[name] = i;
+                            self.indexToChr.push(name);
 
-                            self.chrToIndex = {};
-                            self.indexToChr = [];
-                            for (var i = 0; i < nRef; ++i) {
-                                var lName = readInt(uncba, p);
-                                var name = '';
-                                for (var j = 0; j < lName - 1; ++j) {
-                                    name += String.fromCharCode(uncba[p + 4 + j]);
-                                }
-                                var lRef = readInt(uncba, p + lName + 4);
-                                //dlog(name + ': ' + lRef);
+                            p = p + 8 + lName;
+                        }
 
-                                if (genome && genome.getChromosomeName) {
-                                    name = genome.getChromosomeName(name);
-                                }
+                        continuation();
 
-                                self.chrToIndex[name] = i;
-                                self.indexToChr.push(name);
-
-                                p = p + 8 + lName;
-                            }
-
-                            continuation();
-
-                        },
-                        withCredentials: self.config.withCredentials
-                    });
-            });
+                    },
+                    withCredentials: self.config.withCredentials
+                });
         });
-
     };
 
 
