@@ -1,5 +1,5 @@
 /**
- * Legacy global "oauth" object.  -- phase this out
+ * OAuth object provided for example pages.
  */
 var oauth = (function (oauth) {
 
@@ -15,7 +15,7 @@ var oauth = (function (oauth) {
         var LOGOUT = 'http://accounts.google.com/Logout';
         var TYPE = 'token';
         var _url = OAUTHURL +
-            "scope=https://www.googleapis.com/auth/genomics https://www.googleapis.com/auth/devstorage.read_only https://www.googleapis.com/auth/userinfo.profile&" +
+            "scope=https://www.googleapis.com/auth/cloud-platform https://www.googleapis.com/auth/genomics https://www.googleapis.com/auth/devstorage.read_only https://www.googleapis.com/auth/userinfo.profile&" +
             "state=%2Fprofile&" +
             "redirect_uri=http%3A%2F%2Flocalhost%2Figv-web%2FemptyPage.html&" +
             "response_type=token&" +
@@ -28,7 +28,7 @@ var oauth = (function (oauth) {
 
         oauth.google = {
 
-            login: function () {
+            login: function (callback) {
                 var win = window.open(_url, "windowname1", 'width=800, height=600');
 
                 var pollTimer = window.setInterval(function () {
@@ -43,6 +43,10 @@ var oauth = (function (oauth) {
                             win.close();
 
                             oauth.google.validateToken(oauth.google.access_token);
+
+                            if(callback) {
+                                callback();
+                            }
                         }
                     } catch (e) {
                     }
@@ -88,17 +92,8 @@ var oauth = (function (oauth) {
                     return "";
                 else
                     return results[1];
-            },
-
-            startLogoutPolling: function () {
-                $('#loginText').show();
-                $('#logoutText').hide();
-                loggedIn = false;
-                $('#uName').text('Welcome ');
-                $('#imgHolder').attr('src', 'none.jpg');
             }
         }
-
     }
 
     return oauth;

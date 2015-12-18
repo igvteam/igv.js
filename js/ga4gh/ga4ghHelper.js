@@ -137,7 +137,7 @@ var igv = (function (igv) {
 
         headers["Cache-Control"] = "no-cache";
         if (acToken) {
-            headers["Authorization"] = "Bearer " + acToken;
+      //      headers["Authorization"] = "Bearer " + acToken;
         }
         return headers;
 
