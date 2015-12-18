@@ -81,7 +81,7 @@ var igvxhr = (function (igvxhr) {
         var success = options.success,
             method = options.method || (options.sendData ? "POST" : "GET");
 
-        if("POST" === method) options.contentType = "application/json";
+        if ("POST" === method) options.contentType = "application/json";
 
         options.success = function (result) {
             if (result) {
@@ -139,10 +139,10 @@ var igvxhr = (function (igvxhr) {
             sendData = options.sendData,
             method = options.method || (sendData ? "POST" : "GET"),
             success = options.success,
-            error = options.error || success,
             abort = options.abort || error,
             timeout = options.timeout || error,
             task = options.task,
+            error = options.error || success,
             range = options.range,
             responseType = options.responseType,
             contentType = options.contentType,
@@ -152,7 +152,10 @@ var igvxhr = (function (igvxhr) {
             withCredentials = options.withCredentials,
             header_keys, key, value, i;
 
-        if (task) task.xhrRequest = xhr;
+        if (task) {
+            task.xhrRequest = xhr;
+            if(options.error === undefined && task.error !== undefined) error = task.error;
+        }
 
         if (range && isSafari) {
 
@@ -189,11 +192,11 @@ var igvxhr = (function (igvxhr) {
         }
         // let cookies go along to get files from any website we are logged in to
         // NOTE: using withCredentials with servers that return "*" for access-allowed-origin will fail
-        if(withCredentials === true) {
+        if (withCredentials === true) {
             xhr.withCredentials = true;
         }
 
-        if(url.contains("www.googleapis.com") && igv.oauth.google.access_token !== undefined) {
+        if (url.contains("google") && igv.oauth.google.access_token !== undefined) {
             xhr.withCredentials = true;
             xhr.setRequestHeader("Authorization", "Bearer " + igv.oauth.google.access_token);
         }
@@ -205,7 +208,20 @@ var igvxhr = (function (igvxhr) {
                 success(xhr.response, xhr);
             }
             else {
-                error(xhr);
+
+                //
+                if (xhr.status === 416) {
+                    //  Tried to read off the end of the file.   This shouldn't happen, but if it does return an
+                    //  empty array buffer
+                    success(new ArrayBuffer(0), xhr);
+                    return;
+                }
+                else {// TODO -- better error handling
+                    alert("Error accessing resource: " + xhr.status);
+
+                    error(xhr);
+                }
+
             }
 
         };
@@ -222,13 +238,6 @@ var igvxhr = (function (igvxhr) {
                     igvxhr.load(igv.browser.crossDomainProxy, options);
                     return;
                 }
-            }
-            //
-            if (xhr.status === 416) {
-                //  Tried to read off the end of the file.   This shouldn't happen, but if it does return an
-                //  empty array buffer
-                success(new ArrayBuffer(0), xhr);
-                return;
             }
         }
 
@@ -274,11 +283,11 @@ var igvxhr = (function (igvxhr) {
 
         // let cookies go along to get files from any website we are logged in to
         // NOTE: using withCredentials with servers that return "*" for access-allowed-origin will fail
-        if(withCredentials === true) {
+        if (withCredentials === true) {
             xhr.withCredentials = true;
         }
 
-        if(url.contains("www.googleapis.com") && igv.oauth.google.access_token !== undefined) {
+        if (url.contains("www.googleapis.com") && igv.oauth.google.access_token !== undefined) {
             xhr.withCredentials = true;
             xhr.setRequestHeader("Authorization", "Bearer " + igv.oauth.google.access_token);
         }
@@ -293,11 +302,12 @@ var igvxhr = (function (igvxhr) {
                 success(headerDictionary);
             }
             else {
-                error(xhr);
+                error(null, xhr);
             }
         }
 
         xhr.onerror = function (event) {
+
             error(null, xhr);
         }
 
