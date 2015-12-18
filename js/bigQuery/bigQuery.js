@@ -33,12 +33,8 @@ var igv = (function (igv) {
             //todo throw error
         }
 
-        query(options);
-    }
-
-    function query(options) {
-
-        var url = "https://clients6.google.com/bigquery/v2/projects/" + options.projectId + "/queries",
+        var baseURL = options.baseURL || "https://www.googleapis.com/bigquery/v2/",
+            url = baseURL + "projects/" + options.projectId + "/queries",
             body = {
                 "kind": "bigquery#queryRequest",
                 "query": options.queryString,
@@ -119,7 +115,7 @@ var igv = (function (igv) {
                         if (results.length > 0) {
                             url = url + ("&startIndex=" + results.length);
                         }
-                        
+
                         igvxhr.loadJson(url,
                             {
                                 task: task,
@@ -156,19 +152,63 @@ var igv = (function (igv) {
 
                 }
             });
+
     }
 
+
+    igv.BigQueryFeatureSource = function (config) {
+
+        // Harcoded for seg features for now
+        this.projectId = 'isb-cgc-03-0001';
+        this.study = "LIHC";
+        this.decode = decodeSeg;
+
+
+    }
+
+
+    igv.BigQueryFeatureSource.prototype.getFeatures = function (chr, bpStart, bpEnd, success, task) {
+
+        var c = chr.startsWith("chr") ? chr.substring(3) : chr,
+            q = "SELECT * FROM [isb-cgc:tcga_201510_alpha.Copy_Number_segments]" +
+                " WHERE " +
+                " ParticipantBarcode IN (SELECT ParticipantBarcode FROM [isb-cgc:tcga_201510_alpha.Clinical_data] WHERE Study = \"" + this.study + "\") " +
+                " AND Chromosome = \"" + c + "\" " +
+                " AND Start >= " + bpStart + " AND End <= " + bpEnd;
+
+
+        igv.bigQuery(
+            {
+                projectId: this.projectId,
+                queryString: q,
+                decode: decodeSeg,
+                success: function (results) {
+                    console.log("done " + results.length);
+                    success(results);
+
+                }
+            });
+
+    }
+
+    /*
+     sample: tokens[sampleColumn],
+     chr: tokens[chrColumn],
+     start: parseInt(tokens[startColumn]),
+     end: parseInt(tokens[endColumn]),
+     value: parseFloat(tokens[dataColumn])
+     */
 
     function decodeSeg(row) {
 
         var seg = {};
-        seg["ParticipantBarcode"] = row.f[0].v;
+        seg["sample"] = row.f[0].v;
         seg["Study"] = row.f[4].v;
-        seg["Chromosome"] = row.f[6].v;
-        seg["Start"] = row.f[7].v;
-        seg["End"] = row.f[8].v;
+        seg["chr"] = row.f[6].v;
+        seg["start"] = row.f[7].v - 1;
+        seg["end"] = row.f[8].v;
         seg["Num_Probes"] = row.f[9].v;
-        seg["Segment_mean"] = row.f[10].v;
+        seg["value"] = row.f[10].v;
         return seg;
     }
 
