@@ -55,6 +55,16 @@ var igv = (function (igv) {
             else {
                 this.reader = new igv.GtexFileReader(config);
             }
+        } else if(config.sourceType === "bigquery") {
+            var wrappedReader = new igv.BigQueryFeatureReader(config);
+            this.reader = {
+                allSamples: function(continutation) {
+                    wrappedReader.allSamples(continutation);
+                },
+                readFeatures: function (success, task, range) {
+                     wrappedReader.readFeatures(range.chr, range.start, range.end, success, task);
+                }
+            }
         }
         else {
             // Default for all sorts of ascii tab-delimited file formts
@@ -130,7 +140,8 @@ var igv = (function (igv) {
                     self.reader.indexed ||
                     self.config.sourceType === "ga4gh" ||
                     self.config.sourceType === "immvar" ||
-                    self.config.sourceType === "gtex";
+                    self.config.sourceType === "gtex" ||
+                    self.config.sourceType === "bigquery";
 
                 self.featureCache = isIndexed ?
                     new igv.FeatureCache(featureList, genomicInterval) :

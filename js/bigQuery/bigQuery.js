@@ -27,6 +27,49 @@
 var igv = (function (igv) {
 
 
+    igv.BigQueryFeatureReader.prototype.allSamples = function (success) {
+
+        var q = "SELECT UNIQUE(SampleBarcode) FROM  [isb-cgc:tcga_201510_alpha.Copy_Number_segments] WHERE " +
+            " ParticipantBarcode IN (" + this.cohort + ")";
+
+        igv.bigQuery(
+            {
+                projectId: this.projectId,
+                queryString: q,
+                decode: decodeSample,
+                success: function (results) {
+                    console.log("done " + results.length);
+                    success(results);
+
+                }
+            });
+
+    }
+
+    igv.BigQueryFeatureReader.prototype.readFeatures = function (chr, bpStart, bpEnd, success, task) {
+
+        var c = chr.startsWith("chr") ? chr.substring(3) : chr,
+            q = "SELECT * FROM [isb-cgc:tcga_201510_alpha.Copy_Number_segments]" +
+                " WHERE " +
+                " ParticipantBarcode IN (" + this.cohort + ") " +
+                " AND Chromosome = \"" + c + "\" " +
+                " AND Start >= " + bpStart + " AND End <= " + bpEnd;
+
+        igv.bigQuery(
+            {
+                projectId: this.projectId,
+                queryString: q,
+                decode: decodeSeg,
+                success: function (results) {
+                    console.log("done " + results.length);
+                    success(results);
+
+                }
+            });
+
+    }
+
+
     igv.bigQuery = function (options) {
 
         if (!options.projectId) {
@@ -73,17 +116,23 @@ var igv = (function (igv) {
 
                     if (response.jobComplete === true) {
 
-                        totalRows = response.totalRows;
+                        totalRows = parseInt(response.totalRows);   // Google convention is to use strings for "long" types
 
-                        response.rows.forEach(function (row) {
-                            results.push(decode(row));
-                        });
-
-                        if (results.length < totalRows) {
-                            getQueryResults(options);
+                        if (totalRows === 0) {
+                            success(results);
                         }
                         else {
-                            success(results);
+
+                            response.rows.forEach(function (row) {
+                                results.push(decode(row));
+                            });
+
+                            if (results.length < totalRows) {
+                                getQueryResults(options);
+                            }
+                            else {
+                                success(results);
+                            }
                         }
                     }
                     else {
@@ -156,41 +205,6 @@ var igv = (function (igv) {
     }
 
 
-    igv.BigQueryFeatureSource = function (config) {
-
-        // Harcoded for seg features for now
-        this.projectId = 'isb-cgc-03-0001';
-        this.study = "LIHC";
-        this.decode = decodeSeg;
-
-
-    }
-
-
-    igv.BigQueryFeatureSource.prototype.getFeatures = function (chr, bpStart, bpEnd, success, task) {
-
-        var c = chr.startsWith("chr") ? chr.substring(3) : chr,
-            q = "SELECT * FROM [isb-cgc:tcga_201510_alpha.Copy_Number_segments]" +
-                " WHERE " +
-                " ParticipantBarcode IN (SELECT ParticipantBarcode FROM [isb-cgc:tcga_201510_alpha.Clinical_data] WHERE Study = \"" + this.study + "\") " +
-                " AND Chromosome = \"" + c + "\" " +
-                " AND Start >= " + bpStart + " AND End <= " + bpEnd;
-
-
-        igv.bigQuery(
-            {
-                projectId: this.projectId,
-                queryString: q,
-                decode: decodeSeg,
-                success: function (results) {
-                    console.log("done " + results.length);
-                    success(results);
-
-                }
-            });
-
-    }
-
     /*
      sample: tokens[sampleColumn],
      chr: tokens[chrColumn],
@@ -202,7 +216,7 @@ var igv = (function (igv) {
     function decodeSeg(row) {
 
         var seg = {};
-        seg["sample"] = row.f[0].v;
+        seg["sample"] = row.f[1].v;
         seg["Study"] = row.f[4].v;
         seg["chr"] = row.f[6].v;
         seg["start"] = row.f[7].v - 1;
@@ -210,6 +224,16 @@ var igv = (function (igv) {
         seg["Num_Probes"] = row.f[9].v;
         seg["value"] = row.f[10].v;
         return seg;
+    }
+
+
+    function decodeStudy(row) {
+
+        return row.f[0].v;
+    }
+
+    function decodeSample(row) {
+        return row.f[0].v;
     }
 
 
