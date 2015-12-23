@@ -36,10 +36,9 @@ var igv = (function (igv) {
 
     };
 
-    igv.GtexFileReader.prototype.readFeatures = function (continuation, task, genomicRange) {
+    igv.GtexFileReader.prototype.readFeatures = function (chr, bpStart, bpEnd, continuation, task) {
 
-        var chr = genomicRange.chr,
-            self = this,
+        var self = this,
             file = this.file,
             index = self.index;
 

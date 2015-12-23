@@ -58,11 +58,11 @@ var igv = (function (igv) {
     //
     // http://vgtxportaltest.broadinstitute.org:9000/v6/singleTissueEqtlByLocation?tissueName=Thyroid&chromosome=3&start=158310650&end=158311650
 
-        igv.GtexReader.prototype.readFeatures = function (success, task, range) {
+        igv.GtexReader.prototype.readFeatures = function (chr, bpStart, bpEnd, success, task) {
 
-        var queryChr = range.chr.startsWith("chr") ? range.chr.substr(3) : range.chr,
-            queryStart = range.start,
-            queryEnd = range.end,
+        var queryChr = chr.startsWith("chr") ? chr.substr(3) : chr,
+            queryStart = bpStart,
+            queryEnd = bpEnd,
             queryURL = this.url + "?chromosome=" + queryChr + "&start=" + queryStart + "&end=" + queryEnd +
                 "&tissueName=" + this.tissueName;
 

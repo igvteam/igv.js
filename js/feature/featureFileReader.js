@@ -177,7 +177,7 @@ var igv = (function (igv) {
      * @param task
      * @param range -- genomic range to load.  For use with indexed source (optional)
      */
-    igv.FeatureFileReader.prototype.readFeatures = function (success, task, range) {
+    igv.FeatureFileReader.prototype.readFeatures = function (chr, start, end, success, task) {
 
         var self = this;
 
@@ -201,9 +201,9 @@ var igv = (function (igv) {
                 processed,
                 allFeatures,
                 tabix = index && index.tabix,
-                refId = tabix ? index.sequenceIndexMap[range.chr] : range.chr;
+                refId = tabix ? index.sequenceIndexMap[chr] : chr;
 
-            blocks = index.blocksForRange(refId, range.start, range.end);
+            blocks = index.blocksForRange(refId, start, end);
 
             if (!blocks || blocks.length === 0) {
                 success(null);

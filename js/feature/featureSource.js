@@ -39,13 +39,7 @@ var igv = (function (igv) {
 
 
         if (config.sourceType === "ga4gh") {
-            // TODO -- using adapter until readFeatures interface is consistent
-            var wrappedReader = new igv.Ga4ghVariantReader(config);
-            this.reader = {
-                readFeatures: function (success, task, range) {
-                    return wrappedReader.readFeatures(range.chr, range.start, range.end, success, task);
-                }
-            }
+            this.reader = new igv.Ga4ghVariantReader(config);
         } else if (config.sourceType === "immvar") {
             this.reader = new igv.ImmVarReader(config);
         } else if (config.type === "eqtl") {
@@ -56,15 +50,7 @@ var igv = (function (igv) {
                 this.reader = new igv.GtexFileReader(config);
             }
         } else if(config.sourceType === "bigquery") {
-            var wrappedReader = new igv.BigQueryFeatureReader(config);
-            this.reader = {
-                allSamples: function(continutation) {
-                    wrappedReader.allSamples(continutation);
-                },
-                readFeatures: function (success, task, range) {
-                     wrappedReader.readFeatures(range.chr, range.start, range.end, success, task);
-                }
-            }
+            this.reader = new igv.BigQueryFeatureReader(config);
         }
         else {
             // Default for all sorts of ascii tab-delimited file formts
@@ -134,7 +120,8 @@ var igv = (function (igv) {
         }
         else {
             // TODO -- reuse cached features that overelap new region
-            this.reader.readFeatures(function (featureList) {
+            this.reader.readFeatures(chr, bpStart, bpEnd,
+                function (featureList) {
 
                 var isIndexed =
                     self.reader.indexed ||
@@ -159,7 +146,7 @@ var igv = (function (igv) {
                 // Finally pass features for query interval to continuation
                 success(self.featureCache.queryFeatures(chr, bpStart, bpEnd));
 
-            }, task, genomicInterval);   // Currently loading at granularity of chromosome
+            }, task);   // Currently loading at granularity of chromosome
         }
 
     };
