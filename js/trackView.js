@@ -331,20 +331,16 @@ var igv = (function (igv) {
 
         var contentHeightStr = newHeight + "px";
 
-        this.contentDiv.style.height = contentHeightStr;
-
+        // Optionally adjust the trackDiv and viewport height to fit the content height, within min/max bounds
         if (this.track.autoHeight) {
             setTrackHeight_.call(this, newHeight, false);
         }
-        else {
-            if (this.trackDiv.clientHeight > newHeight) {
-                this.trackDiv.style.height = contentHeightStr;
-            }
-            this.canvas.setAttribute("height", this.canvas.clientHeight);
-            if (this.track.paintAxis) {
-                this.controlCanvas.style.height = contentHeightStr;
-                this.controlCanvas.setAttribute("height", newHeight);
-            }
+
+        this.contentDiv.style.height = contentHeightStr;
+        this.canvas.setAttribute("height", this.canvas.clientHeight);
+        if (this.track.paintAxis) {
+            this.controlCanvas.style.height = contentHeightStr;
+            this.controlCanvas.setAttribute("height", newHeight);
         }
 
         if (this.scrollbar) this.scrollbar.update();
@@ -356,7 +352,7 @@ var igv = (function (igv) {
 
         if (this.track.minHeight) newHeight = Math.max(this.track.minHeight, newHeight);
         if (this.track.maxHeight) newHeight = Math.min(this.track.maxHeight, newHeight);
-        if (newHeight === this.track.height) return;   // Nothing to do
+       // if (newHeight === this.track.height) return;   // Nothing to do
 
         trackHeightStr = newHeight + "px";
 
@@ -371,8 +367,6 @@ var igv = (function (igv) {
 
         this.viewportDiv.style.height = trackHeightStr;
 
-        // Reset the canvas height attribute as its height might have changed
-        this.canvas.setAttribute("height", this.canvas.clientHeight);
 
         if ("CURSOR" === this.browser.type) {
             this.track.cursorHistogram.updateHeightAndInitializeHistogramWithTrack(this.track);
@@ -491,8 +485,8 @@ var igv = (function (igv) {
                 this.currentLoadTask = {
                     start: bpStart,
                     end: bpEnd,
-                    error: function(unused, xhr) {
-                       // igv.stopSpinnerObject(self.trackDiv);
+                    error: function (unused, xhr) {
+                        // igv.stopSpinnerObject(self.trackDiv);
                         self.browser.removeTrack(self.track);
                         window.alert("Unreachable track URL. Request status: " + xhr.status);
                     },
