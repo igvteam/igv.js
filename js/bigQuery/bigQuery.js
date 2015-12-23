@@ -27,9 +27,74 @@
 var igv = (function (igv) {
 
 
+    igv.BigQueryFeatureSource = function (config) {
+
+        // Harcoded for seg features for now
+        this.projectId = 'isb-cgc-03-0001';
+        this.decode = decodeSeg;
+        this.cohort = config.cohort
+
+    }
+
+    //SELECT ParticipantBarcode FROM [isb-cgc:tcga_201510_alpha.Clinical_data] WHERE Study = \"" + this.study + "\")
+
+    igv.BigQueryFeatureSource.prototype.allSamples = function (success) {
+
+        var q = "SELECT ParticipantBarcode FROM [isb-cgc:tcga_201510_alpha.Copy_Number_segments]" +
+            " WHERE " +
+            " ParticipantBarcode IN (" + this.cohort + ")";
+
+        igv.bigQuery(
+            {
+                projectId: this.projectId,
+                queryString: q,
+                decode: decodeSample,
+                success: function (results) {
+                    console.log("done " + results.length);
+                    success(results);
+
+                }
+            });
+
+    }
+
+    igv.BigQueryFeatureSource.prototype.getFeatures = function (chr, bpStart, bpEnd, success, task) {
+
+        var c = chr.startsWith("chr") ? chr.substring(3) : chr,
+            q = "SELECT * FROM [isb-cgc:tcga_201510_alpha.Copy_Number_segments]" +
+                " WHERE " +
+                " ParticipantBarcode IN (" + this.cohort + ") " +
+                " AND Chromosome = \"" + c + "\" " +
+                " AND Start >= " + bpStart + " AND End <= " + bpEnd;
+
+        igv.bigQuery(
+            {
+                projectId: this.projectId,
+                queryString: q,
+                decode: decodeSeg,
+                success: function (results) {
+                    console.log("done " + results.length);
+                    success(results);
+
+                }
+            });
+
+    }
+
+    igv.BigQueryFeatureReader = function (config) {
+
+        // Harcoded for seg features for now
+        this.projectId = 'isb-cgc-03-0001';
+        this.decode = decodeSeg;
+        this.cohort = config.cohort
+
+    }
+
+    //SELECT ParticipantBarcode FROM [isb-cgc:tcga_201510_alpha.Clinical_data] WHERE Study = \"" + this.study + "\")
+
     igv.BigQueryFeatureReader.prototype.allSamples = function (success) {
 
-        var q = "SELECT UNIQUE(SampleBarcode) FROM  [isb-cgc:tcga_201510_alpha.Copy_Number_segments] WHERE " +
+        var q = "SELECT UNIQUE(AliquotBarcode) FROM  [isb-cgc:tcga_201510_alpha.Copy_Number_segments] WHERE " +
             " ParticipantBarcode IN (" + this.cohort + ")";
 
         igv.bigQuery(
@@ -216,7 +281,7 @@ var igv = (function (igv) {
     function decodeSeg(row) {
 
         var seg = {};
-        seg["sample"] = row.f[1].v;
+        seg["sample"] = row.f[3].v;
         seg["Study"] = row.f[4].v;
         seg["chr"] = row.f[6].v;
         seg["start"] = row.f[7].v - 1;

@@ -141,9 +141,11 @@ var igv = (function (igv) {
             px1,
             pw,
             xScale,
-            sampleHeight;
+            sampleHeight,
+            border;
 
         sampleHeight = ("SQUISHED" === this.displayMode) ? this.sampleSquishHeight : this.sampleExpandHeight;
+        border =  ("SQUISHED" === this.displayMode) ? 0 : 1;
 
         ctx = options.context;
         pixelWidth = options.pixelWidth;
@@ -176,7 +178,7 @@ var igv = (function (igv) {
                 if (segment.end < bpStart) continue;
                 if (segment.start > bpEnd) break;
 
-                y = myself.samples[segment.sample] * sampleHeight;
+                y = myself.samples[segment.sample] * sampleHeight + border;
 
                 value = segment.value;
                 if (!myself.isLog) {
@@ -197,7 +199,7 @@ var igv = (function (igv) {
                 px1 = Math.round((segment.end - bpStart) / xScale);
                 pw = Math.max(1, px1 - px);
 
-                igv.graphics.fillRect(ctx, px, y, pw, sampleHeight, {fillStyle: color});
+                igv.graphics.fillRect(ctx, px, y, pw, sampleHeight - 2*border, {fillStyle: color});
 
             }
         }
@@ -230,15 +232,15 @@ var igv = (function (igv) {
     igv.SegTrack.prototype.computePixelHeight = function (features) {
 
         var sampleHeight = ("SQUISHED" === this.displayMode) ? this.sampleSquishHeight : this.sampleExpandHeight;
-
-        for (i = 0, len = features.length; i < len; i++) {
-            sample = features[i].sample;
-            if (!this.samples.hasOwnProperty(sample)) {
-                this.samples[sample] = this.sampleCount;
-                this.sampleNames.push(sample);
-                this.sampleCount++;
-            }
-        }
+        //
+        //for (i = 0, len = features.length; i < len; i++) {
+        //    sample = features[i].sample;
+        //    if (!this.samples.hasOwnProperty(sample)) {
+        //        this.samples[sample] = this.sampleCount;
+        //        this.sampleNames.push(sample);
+        //        this.sampleCount++;
+        //    }
+        //}
 
         return this.sampleCount * sampleHeight;
     };
