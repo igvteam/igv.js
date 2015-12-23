@@ -68,7 +68,10 @@ var igv = (function (igv) {
         this.samples = {};
         this.sampleNames = [];
 
-        this.featureSource = config.sourceType === "bigquery" ? new igv.BigQueryFeatureSource(this.config) : new igv.FeatureSource(this.config);
+     //   this.featureSource = config.sourceType === "bigquery" ?
+     //       new igv.BigQueryFeatureSource(this.config) :
+            this.featureSource =     new igv.FeatureSource(this.config);
+
 
     };
 
@@ -78,7 +81,7 @@ var igv = (function (igv) {
 
         return [
             {
-                name: ("SQUISHED" === this.displayMode) ? "Expand sample hgt" : "Squish sample hgt" ,
+                name: ("SQUISHED" === this.displayMode) ? "Expand sample hgt" : "Squish sample hgt",
                 click: function () {
                     popover.hide();
                     myself.toggleSampleHeight();
@@ -90,14 +93,31 @@ var igv = (function (igv) {
 
     igv.SegTrack.prototype.toggleSampleHeight = function () {
 
-        this.displayMode  = ("SQUISHED" === this.displayMode) ? "EXPANDED" : "SQUISHED";
+        this.displayMode = ("SQUISHED" === this.displayMode) ? "EXPANDED" : "SQUISHED";
 
         this.trackView.update();
     };
 
     igv.SegTrack.prototype.getFeatures = function (chr, bpStart, bpEnd, continuation, task) {
 
-        this.featureSource.getFeatures(chr, bpStart, bpEnd, continuation, task)
+        var self = this;
+
+        // If no samples are defined, optionally query feature source.  This step was added to support the TCGA BigQuery
+        // tables
+        if (self.sampleCount === 0 && self.featureSource.reader.allSamples) {    // TODO <=  fix this!
+            self.featureSource.reader.allSamples(function (samples) {
+                samples.forEach(function (sample) {
+                    self.samples[sample] = self.sampleCount;
+                    self.sampleNames.push(sample);
+                    self.sampleCount++;
+                })
+
+                self.featureSource.getFeatures(chr, bpStart, bpEnd, continuation, task)
+            });
+        }
+        else {
+            this.featureSource.getFeatures(chr, bpStart, bpEnd, continuation, task)
+        }
     };
 
     igv.SegTrack.prototype.draw = function (options) {
@@ -237,7 +257,7 @@ var igv = (function (igv) {
             s,
             sampleNames,
             len = bpEnd - bpStart,
-            scores = { };
+            scores = {};
 
         this.featureSource.getFeatures(chr, bpStart, bpEnd, function (featureList) {
 
@@ -303,7 +323,7 @@ var igv = (function (igv) {
 
         this.sortSamples(chr, bpStart, bpEnd, sortDirection, function () {
             myself.trackView.update();
-            $(myself.trackView.viewportDiv).scrollTop( 0 );
+            $(myself.trackView.viewportDiv).scrollTop(0);
         });
 
         sortDirection *= -1;
