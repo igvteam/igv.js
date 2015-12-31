@@ -144,6 +144,8 @@ var igv = (function (igv) {
                 } else if (type === 'f') {
                     // TODO 'FIXME need floats';
                     value = 'floats not yet supported';
+                    tags[tag] = value;
+                    break;
                 } else if (type === 'Z') {
                     p += 3;
                     value = '';
@@ -158,7 +160,8 @@ var igv = (function (igv) {
                 } else {
                     //'Unknown type ' + type;
                     value = 'Error unknown type: ' + type;
-
+                    tags[tag] = value;
+                    break;
                 }
                 tags[tag] = value;
             }
