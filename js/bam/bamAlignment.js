@@ -143,9 +143,8 @@ var igv = (function (igv) {
                     p += 5;
                 } else if (type === 'f') {
                     // TODO 'FIXME need floats';
-                    value = 'floats not yet supported';
-                    tags[tag] = value;
-                    break;
+                    value = readFloat(ba, p + 3);
+                    p += 7;
                 } else if (type === 'Z') {
                     p += 3;
                     value = '';
@@ -258,7 +257,7 @@ var igv = (function (igv) {
 
     function readFloat(ba, offset) {
 
-        var dataView = new DataView(new ArrayBuffer()),
+        var dataView = new DataView(ba.buffer),
             littleEndian = true;
 
         return dataView.getFloat32(offset, littleEndian);
