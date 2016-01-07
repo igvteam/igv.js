@@ -430,7 +430,7 @@ var igv = (function (igv) {
         }
         config.tracks.push({type: "sequence", order: -9999});
         config.showKaryo = config.showKaryo || false;
-        config.showNavigation = config.showNavigation || true;
+        config.showNavigation = config.showNavigation === undefined ? true : config.showNavigation;
         config.flanking = config.flanking === undefined ? 1000 : config.flanking;
 
     }
