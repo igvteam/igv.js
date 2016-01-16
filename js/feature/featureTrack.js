@@ -37,7 +37,14 @@ var igv = (function (igv) {
         this.squishedRowHeight = config.squishedRowHeight || 15;
 
         this.featureHeight = config.featureHeight || 14;
-        this.featureSource = new igv.FeatureSource(this.config);
+
+
+        if(config.url && config.url.toLowerCase().endsWith(".bigbed")) {
+            this.featureSource = new igv.BWSource(config);
+        }
+        else {
+            this.featureSource = new igv.FeatureSource(this.config);
+        }
 
         // Set the render function.  This can optionally be passed in the config
         if (config.render) {
@@ -61,22 +68,26 @@ var igv = (function (igv) {
     };
 
     igv.FeatureTrack.prototype.getHeader = function (continuation) {
-        var track = this;
-        this.featureSource.getHeader(function (header) {
+        var self = this;
+        if(this.featureSource.getHeader) {
+            this.featureSource.getHeader(function (header) {
 
-            if (header) {
-                // Header (from track line).  Set properties,unless set in the config (config takes precedence)
-                if (header.name && !track.config.name) {
-                    track.name = header.name;
+                if (header) {
+                    // Header (from track line).  Set properties,unless set in the config (config takes precedence)
+                    if (header.name && !self.config.name) {
+                        self.name = header.name;
+                    }
+                    if (header.color && !self.config.color) {
+                        self.color = "rgb(" + header.color + ")";
+                    }
                 }
-                if (header.color && !track.config.color) {
-                    track.color = "rgb(" + header.color + ")";
-                }
-            }
+                continuation(header);
 
-            continuation(header);
-
-        });
+            });
+        }
+        else {
+            continuation(null);
+        }
     }
 
     igv.FeatureTrack.prototype.getFeatures = function (chr, bpStart, bpEnd, continuation, task) {
