@@ -127,7 +127,7 @@ var igv = (function (igv) {
             level = zoomLevelHeaders[zoomLevelHeaders.length - 1];
         }
 
-        return (level.reductionLevel < 4 * bpPerPixel) ? level : null;
+        return (level && level.reductionLevel < 4 * bpPerPixel) ? level : null;
     }
 
 
