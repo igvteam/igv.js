@@ -64,19 +64,18 @@
                 options = {
                     showNavigation: true,
                     genome: "hg19",
-                    locus: "chr1:155,172,193-155,172,564",
+                    locus: "chr12:98,997,292-98,997,392",
                     tracks: [
-                        {
-                            url: 'http://hgdownload.cse.ucsc.edu/goldenPath/hg19/encodeDCC/wgEncodeOpenChromFaire/wgEncodeOpenChromFaireMrta2041AlnRep1.bam',
-                            name: 'MRT_A204 FaireSeq'
-                        },
                         {
                             name: "Genes",
                             url: "//igv.broadinstitute.org/annotations/hg19/genes/gencode.v18.collapsed.bed",
-                            order: Number.MAX_VALUE,
                             displayMode: "EXPANDED"
 
+                        },                        {
+                            url: 'https://data.broadinstitute.org/igvdata/BodyMap/hg19/IlluminaHiSeq2000_BodySites/brain_merged/accepted_hits.bam',
+                            name: 'Brain (BodyMap)'
                         }
+
                     ]
                 };
 
