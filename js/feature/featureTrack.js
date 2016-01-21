@@ -39,7 +39,7 @@ var igv = (function (igv) {
         this.featureHeight = config.featureHeight || 14;
 
 
-        if(config.url && config.url.toLowerCase().endsWith(".bigbed")) {
+        if(config.url && (config.url.toLowerCase().endsWith(".bigbed") || config.url.toLowerCase().endsWith(".bb"))) {
             this.featureSource = new igv.BWSource(config);
         }
         else {
