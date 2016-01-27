@@ -91,7 +91,7 @@ var igv = (function (igv) {
                                 success: function (compressed) {
 
                                     try {
-                                        var ba = new Uint8Array(igv.unbgzf(compressed)); //, c.maxv.block - c.minv.block + 1));
+                                        var ba = new Uint8Array(igv.unbgzf(compressed)); //new Uint8Array(igv.unbgzf(compressed)); //, c.maxv.block - c.minv.block + 1));
                                     } catch (e) {
                                         console.log(e);
                                         continuation(records);
