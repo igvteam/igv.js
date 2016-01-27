@@ -21,6 +21,7 @@ module.exports = function (grunt) {
                     'vendor/inflate.js',
                     'vendor/zlib_and_gzip.min.js',
                     'vendor/jquery.mousewheel.js',
+                    'vendor/promise-7.0.4.js',
                     'js/module.js'
                 ],
                 dest: 'dist/igv.js'
