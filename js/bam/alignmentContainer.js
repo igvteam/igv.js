@@ -27,69 +27,85 @@
 var igv = (function (igv) {
 
 
-    igv.AlignmentContainer = function (chr, start, end, refSeq) {
+    igv.AlignmentContainer = function (chr, start, end) {
 
         this.chr = chr;
         this.start = start;
         this.end = end;
-        this.refSeq = refSeq;
         this.length = (end - start);
 
-        this.coverageMap = new CoverageMap(chr, start, end, refSeq);
+        this.coverageMap = new CoverageMap(chr, start, end);
         this.alignments = [];
-
+        this.downsampledIntervals = [];
         this.downSample = true;
-        this.currentSamplingWindowStart = 0;
-        this.currentSamplingBucketEnd = 0;
+
         this.samplingWindowSize = 50;
         this.samplingDepth = 100;
 
     }
 
-    igv.AlignmentCounter.prototype.addAlignment(alignment)
-    {
+    igv.AlignmentContainer.prototype.addAlignment = function (alignment) {
         this.coverageMap.incCounts(alignment);
 
-        if(this.currentBucket === undefined) {
-            this.currentBucket = new DownampleBucket(alignment.start, alignment.start + this.samplingWindowSize, this.samplingDepth)
-        }
-        if(alignment.start > this.currentBucket.end) {
+        if (this.downSample) {
+            if (this.currentBucket === undefined) {
+                this.currentBucket = new DownsampleBucket(alignment.start, alignment.start + this.samplingWindowSize, this.samplingDepth)
+            }
+            if (alignment.start >= this.currentBucket.end) {
+                finishBucket.call(this);
+                this.currentBucket = new DownsampleBucket(alignment.start, alignment.start + this.samplingWindowSize, this.samplingDepth)
+            }
 
-            this.currentBucket.alignments.sort(function (a, b) {
-                return a.start - b.start
-            });
-            this.alignments = this.alignments.concat(this.currentBucket.alignments);
+            this.currentBucket.addAlignment(alignment);
 
-            this.currentBucket = new DownampleBucket(alignment.start, alignment.start + this.samplingWindowSize, this.samplingDepth)
         }
         else {
-            // TODO check read names for kept pair
-
+            this.alignments.push(alignment);
         }
-
     }
 
-    function DownampleBucket(start, end, samplingDepth) {
+    igv.AlignmentContainer.prototype.finish = function () {
+        if (this.currentBucket !== undefined) {
+            finishBucket.call(this);
+        }
+    }
+
+
+    function finishBucket() {
+        this.currentBucket.alignments.sort(function (a, b) {
+            return a.start - b.start
+        });
+        this.alignments = this.alignments.concat(this.currentBucket.alignments);
+        this.downsampledIntervals.push(
+            {
+                start: this.currentBucket.start,
+                end: this.currentBucket.end,
+                count: this.currentBucket.downsampledCount
+            });
+    }
+
+
+    function DownsampleBucket(start, end, samplingDepth) {
 
         this.start = start;
         this.end = end;
         this.samplingDepth = samplingDepth;
         this.alignments = [];
-        this.downsampledCount = 0.0;
+        this.downsampledCount = 0;
     }
 
-    DownampleBucket.prototype.addAlignment = function(alignment) {
+    DownsampleBucket.prototype.addAlignment = function (alignment) {
 
         var samplingProb, idx;
 
-        if(alignment.length < this.samplingDepth) {
+        if (this.alignments.length < this.samplingDepth) {
             this.alignments.push(alignment);
         }
         else {
-            samplingProb = this.samplingDepth / (this.samplingDepth + this.downsampledCount + 1);
+            samplingProb = this.samplingDepth / (this.samplingDepth + this.overageCount + 1);
 
-            if(Math.random() < samplingProb) {
-                idx = Math.floor(Math.random * this.alignments.length);
+            if (Math.random() < samplingProb) {
+                idx = Math.floor(Math.random() * (this.alignments.length - 1));
                 this.alignments[idx] = alignment;
             }
 
@@ -99,10 +115,8 @@ var igv = (function (igv) {
     }
 
 
+    function CoverageMap(chr, start, end) {
 
-    function CoverageMap (chr, start, end, refSeq) {
-
-        this.refSeq = refSeq;
         this.chr = chr;
         this.bpStart = start;
         this.length = (end - start);
@@ -119,7 +133,17 @@ var igv = (function (igv) {
 
         var self = this;
 
-        alignment.blocks.forEach(function (block) {
+        if (alignment.blocks === undefined) {
+
+            incBlockCount(alignment);
+        }
+        else {
+            alignment.blocks.forEach(function (block) {
+                incBlockCount(block);
+            });
+        }
+
+        function incBlockCount(block) {
 
             var key,
                 base,
@@ -146,7 +170,7 @@ var igv = (function (igv) {
                 self.maximum = Math.max(self.coverage[i].total, self.maximum);
 
             }
-        });
+        }
     }
 
     function Coverage() {
@@ -196,10 +220,6 @@ var igv = (function (igv) {
         return mismatchQualitySum >= threshold;
 
     };
-
-    function DownsampleInterval(chr, start, end) {
-        this.count = 0;
-    }
 
 
     return igv;
