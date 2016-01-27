@@ -372,7 +372,7 @@ var igv = (function (igv) {
                 {
                     headers: self.config.headers,
 
-                    contentType: 'image/jpeg',
+                    contentType: 'application/octet',
 
                     range: {start: 0, size: len},
 
