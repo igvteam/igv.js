@@ -372,6 +372,8 @@ var igv = (function (igv) {
                 {
                     headers: self.config.headers,
 
+                    contentType: 'image/jpeg',
+
                     range: {start: 0, size: len},
 
                     success: function (compressedBuffer) {

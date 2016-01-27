@@ -39,7 +39,7 @@ var igv = (function (igv) {
         this.featureHeight = config.featureHeight || 14;
 
 
-        if(config.url && (config.url.toLowerCase().endsWith(".bigbed") || config.url.toLowerCase().endsWith(".bb"))) {
+        if (config.url && (config.url.toLowerCase().endsWith(".bigbed") || config.url.toLowerCase().endsWith(".bb"))) {
             this.featureSource = new igv.BWSource(config);
         }
         else {
@@ -69,7 +69,7 @@ var igv = (function (igv) {
 
     igv.FeatureTrack.prototype.getHeader = function (continuation) {
         var self = this;
-        if(this.featureSource.getHeader) {
+        if (this.featureSource.getHeader) {
             this.featureSource.getHeader(function (header) {
 
                 if (header) {
@@ -89,6 +89,21 @@ var igv = (function (igv) {
             continuation(null);
         }
     }
+    //
+    //igv.FeatureTrack.prototype.getFeaturesPromise = function (chr, bpStart, bpEnd, task) {
+    //
+    //    return new Promise(function (fulfill, reject) {
+    //        // Don't try to draw alignments for windows > the visibility window
+    //        if (this.visibilityWindow && igv.browser.trackViewportWidthBP() > this.visibilityWindow) {
+    //            fulfill({exceedsVisibilityWindow: true});
+    //        }
+    //        else {
+    //            this.featureSource.getFeatures(chr, bpStart, bpEnd, fulfill, task)
+    //        }
+    //
+    //    });
+    //
+    //}
 
     igv.FeatureTrack.prototype.getFeatures = function (chr, bpStart, bpEnd, continuation, task) {
 
@@ -179,7 +194,7 @@ var igv = (function (igv) {
         if (this.featureSource.featureCache) {
 
             var chr = igv.browser.referenceFrame.chr,  // TODO -- this should be passed in
-                tolerance = 2*igv.browser.referenceFrame.bpPerPixel,  // We need some tolerance around genomicLocation, start with +/- 2 pixels
+                tolerance = 2 * igv.browser.referenceFrame.bpPerPixel,  // We need some tolerance around genomicLocation, start with +/- 2 pixels
                 featureList = this.featureSource.featureCache.queryFeatures(chr, genomicLocation - tolerance, genomicLocation + tolerance),
                 row;
 
@@ -253,7 +268,7 @@ var igv = (function (igv) {
         menuItems.push(igv.colorPickerMenuItem(popover, this.trackView));
         menuItems.push(igv.dataRangeMenuItem(popover, this.trackView));
 
-            ["COLLAPSED", "SQUISHED", "EXPANDED"].forEach(function (displayMode, index) {
+        ["COLLAPSED", "SQUISHED", "EXPANDED"].forEach(function (displayMode, index) {
 
             var chosen,
                 str;
@@ -301,7 +316,7 @@ var igv = (function (igv) {
             ePw,
             py = 5,
             step = this.arrowSpacing,
-            h =  this.featureHeight,
+            h = this.featureHeight,
             transform,
             fontStyle,
             color = this.color;
@@ -313,7 +328,7 @@ var igv = (function (igv) {
                 color = this.config.colorBy.pallete[colorByValue];
             }
         }
-        else if(feature.color) {
+        else if (feature.color) {
             color = feature.color;
         }
 
@@ -346,9 +361,9 @@ var igv = (function (igv) {
         }
         else {
             // multi-exon transcript
-            cy = py + h/2;
+            cy = py + h / 2;
 
-            igv.graphics.strokeLine(ctx, px+1, cy, px1-1, cy); // center line for introns
+            igv.graphics.strokeLine(ctx, px + 1, cy, px1 - 1, cy); // center line for introns
 
             direction = feature.strand == '+' ? 1 : -1;
             for (x = px + step / 2; x < px1; x += step) {
@@ -365,7 +380,7 @@ var igv = (function (igv) {
                 ctx.fillRect(ePx, py, ePw, h);
 
                 // Arrows
-                if(ePw > step + 5) {
+                if (ePw > step + 5) {
                     ctx.fillStyle = "white";
                     ctx.strokeStyle = "white";
                     for (x = ePx + step / 2; x < ePx1; x += step) {
