@@ -210,9 +210,9 @@
                 </div>-->
 
         <div onclick="igv.browser.loadTrack({
-                                type: 'bam',
-                                url: 'http://hgdownload.cse.ucsc.edu/goldenPath/hg19/encodeDCC/wgEncodeOpenChromFaire/wgEncodeOpenChromFaireMrta2041AlnRep1.bam',
-                                name: 'MRT_A204 FaireSeq Alignments rep 1'})">MRT_A204 FaireSeq Alignments rep 1 bam
+                            url: 'https://data.broadinstitute.org/igvdata/BodyMap/hg19/IlluminaHiSeq2000_BodySites/brain_merged/accepted_hits.bam',
+                            name: 'Brain (BodyMap)'
+                        })">Brain (BodyMap)
         </div>
 
 
@@ -279,6 +279,15 @@
                                 indexed: false,
                                 name: 'GBM Copy # (TCGA Broad GDAC)'})">GBM Copy # (TCGA Broad GDAC)) (SEG)
         </div>
+
+        <div onclick="igv.browser.loadTrack({
+                                type: 'seg',
+                                url: ' https://genomespace-dev.s3.amazonaws.com/users/ted/seg_data.seg?AWSAccessKeyId=AKIAIVEV5BSUERMTN5LA&Expires=1453939316&Signature=0iIHCEnOArTYCX3mi2C9Ait47Kc%3D',
+                                indexed: false,
+                                name: 'GS'})">GS
+        </div>
+
+
 
         <div onclick="igv.browser.loadTrack({
                                 type: 'eqtl',
