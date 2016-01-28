@@ -102,12 +102,18 @@ var igvxhr = (function (igvxhr) {
     igvxhr.loadString = function (url, options) {
 
         var success = options.success,
-            compression, result;
+            compression, result,
+            fn, idx;
+
+        // Strip parameters from url
+        // TODO -- handle local files with ?
+        idx = url.indexOf("?");
+        fn = idx > 0 ? url.substring(0, idx) : url;
 
         if (options.bgz) {
             compression = BGZF;
         }
-        else if (url.endsWith(".gz")) {
+        else if (fn.endsWith(".gz")) {
 
             compression = GZIP;
         }
