@@ -232,15 +232,15 @@ var igv = (function (igv) {
     igv.SegTrack.prototype.computePixelHeight = function (features) {
 
         var sampleHeight = ("SQUISHED" === this.displayMode) ? this.sampleSquishHeight : this.sampleExpandHeight;
-        //
-        //for (i = 0, len = features.length; i < len; i++) {
-        //    sample = features[i].sample;
-        //    if (!this.samples.hasOwnProperty(sample)) {
-        //        this.samples[sample] = this.sampleCount;
-        //        this.sampleNames.push(sample);
-        //        this.sampleCount++;
-        //    }
-        //}
+
+        for (i = 0, len = features.length; i < len; i++) {
+            sample = features[i].sample;
+            if (!this.samples.hasOwnProperty(sample)) {
+                this.samples[sample] = this.sampleCount;
+                this.sampleNames.push(sample);
+                this.sampleCount++;
+            }
+        }
 
         return this.sampleCount * sampleHeight;
     };
