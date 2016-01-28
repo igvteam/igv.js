@@ -89,21 +89,23 @@ var igv = (function (igv) {
             continuation(null);
         }
     }
-    //
-    //igv.FeatureTrack.prototype.getFeaturesPromise = function (chr, bpStart, bpEnd, task) {
-    //
-    //    return new Promise(function (fulfill, reject) {
-    //        // Don't try to draw alignments for windows > the visibility window
-    //        if (this.visibilityWindow && igv.browser.trackViewportWidthBP() > this.visibilityWindow) {
-    //            fulfill({exceedsVisibilityWindow: true});
-    //        }
-    //        else {
-    //            this.featureSource.getFeatures(chr, bpStart, bpEnd, fulfill, task)
-    //        }
-    //
-    //    });
-    //
-    //}
+
+    igv.FeatureTrack.prototype.getFeaturesPromise = function (chr, bpStart, bpEnd, task) {
+
+        var self = this;
+
+        return new Promise(function (fulfill, reject) {
+            // Don't try to draw alignments for windows > the visibility window
+            if (self.visibilityWindow && igv.browser.trackViewportWidthBP() > self.visibilityWindow) {
+                fulfill({exceedsVisibilityWindow: true});
+            }
+            else {
+                self.featureSource.getFeatures(chr, bpStart, bpEnd, fulfill, task)
+            }
+
+        });
+
+    }
 
     igv.FeatureTrack.prototype.getFeatures = function (chr, bpStart, bpEnd, continuation, task) {
 
