@@ -191,7 +191,7 @@ var igv = (function (igv) {
                     config.renderType = "wig";
                     break;
                 case "seg":
-                    config.format = "seq";
+                    config.format = "seg";
                     config.featureType = "seg";
                     break;
                 case "aneu":
