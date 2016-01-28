@@ -105,11 +105,20 @@ var igv = (function (igv) {
                 idx,
                 ext;
 
+            //Strip parameters -- handle local files later
+            idx = fn.indexOf("?");
+            if(idx > 0) {
+                fn = fn.substr(0, idx);
+            }
+
+            //Strip aux extensions .gz, .tab, and .txt
             if (fn.endsWith(".gz")) {
                 fn = fn.substr(0, fn.length - 3);
             } else if (fn.endsWith(".txt") || fn.endsWith(".tab")) {
                 fn = fn.substr(0, fn.length - 4);
             }
+
+
 
             idx = fn.lastIndexOf(".");
             ext = idx < 0 ? fn : fn.substr(idx);
