@@ -352,7 +352,7 @@ var igv = (function (igv) {
 
         if (this.track.minHeight) newHeight = Math.max(this.track.minHeight, newHeight);
         if (this.track.maxHeight) newHeight = Math.min(this.track.maxHeight, newHeight);
-       // if (newHeight === this.track.height) return;   // Nothing to do
+        // if (newHeight === this.track.height) return;   // Nothing to do
 
         trackHeightStr = newHeight + "px";
 
@@ -398,6 +398,7 @@ var igv = (function (igv) {
         if (!(viewIsReady.call(this))) {
             return;
         }
+
 
         var pixelWidth,
             bpWidth,
@@ -500,11 +501,26 @@ var igv = (function (igv) {
                     }
                 };
 
+
                 igv.startSpinnerAtParentElement(self.trackDiv);
 
-                this.track.getFeatures(referenceFrame.chr, bpStart, bpEnd, success, self.currentLoadTask);
-            }
 
+                // Promisify the getFeatures method
+                var getFeaturesPromise;
+                if (typeof this.track.getFeaturesPromise !== "undefined") {
+                    this.track.getFeaturesPromise(referenceFrame.chr, bpStart, bpEnd, self.currentLoadTask).then(success);
+                } else {
+                    getFeaturesPromise = function (chr, start, end, task) {
+                        return new Promise(function (fulfill, reject) {
+                            self.track.getFeatures(chr, start, end, function (features) {
+                                    fulfill(features);
+                                }
+                                , task);
+                        });
+                    }
+                    getFeaturesPromise(referenceFrame.chr, bpStart, bpEnd, self.currentLoadTask).then(success);
+                }
+            }
         }
 
         if (this.tile && this.tile.overlapsRange(referenceFrame.chr, refFrameStart, refFrameEnd)) {
