@@ -64,7 +64,7 @@ var igv = (function (igv) {
     igv.RPTree.prototype.readNode = function (filePosition, bufferedReader, continuation) {
 
 
-        bufferedReader.dataViewForRange({start: filePosition, size: 4}, function (dataView) {
+        bufferedReader.dataViewForRange({start: filePosition, size: 4}).then(function (dataView) {
             var binaryParser = new igv.BinaryParser(dataView, this.littleEndian);
 
             var type = binaryParser.getByte();
@@ -77,7 +77,7 @@ var igv = (function (igv) {
             var bytesRequired = count * (isLeaf ? RPTREE_NODE_LEAF_ITEM_SIZE : RPTREE_NODE_CHILD_ITEM_SIZE);
             var range2 = {start: filePosition, size: bytesRequired};
 
-            bufferedReader.dataViewForRange(range2, function (dataView) {
+            bufferedReader.dataViewForRange(range2).then(function (dataView) {
 
                 var i,
                     items = new Array(count),

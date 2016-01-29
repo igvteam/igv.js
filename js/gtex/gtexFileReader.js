@@ -36,42 +36,44 @@ var igv = (function (igv) {
 
     };
 
-    igv.GtexFileReader.prototype.readFeatures = function (chr, bpStart, bpEnd, continuation, task) {
+    igv.GtexFileReader.prototype.readFeatures = function (chr, bpStart, bpEnd, task) {
 
-        var self = this,
-            file = this.file,
-            index = self.index;
+        var self = this;
 
+        return new Promise(function (fulfill, reject) {
+            var file = self.file,
+                index = self.index;
 
             if (index) {
-                loadWithIndex(index, chr, continuation)
+                loadWithIndex(index, chr).then(fulfill);
             }
             else {
-                loadIndex(self.file, function (index) {
+                loadIndex(self.file).then(function (index) {
                     self.index = index;
-                    loadWithIndex(index, chr, continuation);
+                    loadWithIndex(index, chr).then(fulfill);
 
                 });
 
             }
 
+            function loadWithIndex(index, chr) {
+                return new Promise(function (fulfill, reject) {
 
-            function loadWithIndex(index, chr, continuation) {
-
-                var chrIdx = index[chr];
-                if (chrIdx) {
-                    var blocks = chrIdx.blocks,
-                        lastBlock = blocks[blocks.length - 1],
-                        endPos = lastBlock.startPos + lastBlock.size,
-                        len = endPos - blocks[0].startPos,
-                        range = { start: blocks[0].startPos, size: len};
+                    var chrIdx = index[chr];
+                    if (chrIdx) {
+                        var blocks = chrIdx.blocks,
+                            lastBlock = blocks[blocks.length - 1],
+                            endPos = lastBlock.startPos + lastBlock.size,
+                            len = endPos - blocks[0].startPos,
+                            range = {start: blocks[0].startPos, size: len};
 
 
-                    igvxhr.loadArrayBuffer(file,
-                        {
-                            task: task,
-                            range: range,
-                            success: function (arrayBuffer) {
+                        igvxhr.loadArrayBuffer(file,
+                            {
+                                task: task,
+                                range: range,
+                                withCredentials: self.config.withCredentials
+                            }).then(function (arrayBuffer) {
 
                                 if (arrayBuffer) {
 
@@ -85,135 +87,137 @@ var igv = (function (igv) {
                                         featureList.push(feature);
                                     }
 
-                                    continuation(featureList);
+                                    fulfill(featureList);
                                 }
                                 else {
-                                    continuation(null);
+                                    fulfill(null);
                                 }
 
-                            },
+                            });
+
+
+                    }
+                    else {
+                        fulfill([]); // Mark with empy array, so we don't try again
+                    }
+
+
+                    var createEqtlBinary = function (parser) {
+                        var snp = parser.getString();
+                        var chr = parser.getString();
+                        var position = parser.getInt();
+                        var geneId = parser.getString();
+                        var geneName = parser.getString();
+                        //var genePosition = -1;
+                        //var fStat = parser.getFloat();
+                        var pValue = parser.getFloat();
+                        //var qValue = parser.getFloat();
+                        return new Eqtl(snp, chr, position, geneId, geneName, pValue);
+                    }
+
+                });
+            }
+
+
+            /**
+             * Load the index
+             *
+             * @param fulfill function to receive the result
+             */
+            function loadIndex(url) {
+
+                return new Promise(function (fulfill, reject) {
+
+                    var genome = igv.browser ? igv.browser.genome : null;
+
+                    igvxhr.loadArrayBuffer(url,
+                        {
+                            range: {start: 0, size: 200},
                             withCredentials: self.config.withCredentials
+
+                        }).then(function (arrayBuffer) {
+
+                            var data = new DataView(arrayBuffer),
+                                parser = new igv.BinaryParser(data),
+                                magicNumber = parser.getInt(),
+                                version = parser.getInt(),
+                                indexPosition = parser.getLong(),
+                                indexSize = parser.getInt();
+
+                            igvxhr.loadArrayBuffer(url, {
+
+                                range: {start: indexPosition, size: indexSize},
+                                success: function (arrayBuffer2) {
+
+                                    var data2 = new DataView(arrayBuffer2);
+                                    var index = null;
+
+
+                                    var parser = new igv.BinaryParser(data2);
+                                    var index = {};
+                                    var nChrs = parser.getInt();
+                                    while (nChrs-- > 0) {
+
+                                        var chr = parser.getString();
+                                        if (genome) chr = genome.getChromosomeName(chr);
+
+                                        var position = parser.getLong();
+                                        var size = parser.getInt();
+                                        var blocks = new Array();
+                                        blocks.push(new Block(position, size));
+                                        index[chr] = new ChrIdx(chr, blocks);
+                                    }
+
+                                    fulfill(index)
+                                },
+                                withCredentials: self.config.withCredentials
+
+                            });
                         });
 
-
-                }
-                else {
-                    continuation([]); // Mark with empy array, so we don't try again
-                }
+                });
+            }
 
 
-                var createEqtlBinary = function (parser) {
-                    var snp = parser.getString();
-                    var chr = parser.getString();
-                    var position = parser.getInt();
-                    var geneId = parser.getString();
-                    var geneName = parser.getString();
-                    //var genePosition = -1;
-                    //var fStat = parser.getFloat();
-                    var pValue = parser.getFloat();
-                    //var qValue = parser.getFloat();
-                    return new Eqtl(snp, chr, position, geneId, geneName, pValue);
-                }
+            //function Eqtl(snp, chr, position, geneId, geneName, genePosition, fStat, pValue) {
+            function Eqtl(snp, chr, position, geneId, geneName, pValue) {
+
+                this.snp = snp;
+                this.chr = chr;
+                this.position = position;
+                this.start = position;
+                this.end = position + 1;
+                this.geneId = geneId;
+                this.geneName = geneName;
+                //this.genePosition = genePosition;
+                //this.fStat = fStat;
+                this.pValue = pValue;
 
             }
 
 
-
-        //function Eqtl(snp, chr, position, geneId, geneName, genePosition, fStat, pValue) {
-        function Eqtl(snp, chr, position, geneId, geneName, pValue) {
-
-            this.snp = snp;
-            this.chr = chr;
-            this.position = position;
-            this.start = position;
-            this.end = position + 1;
-            this.geneId = geneId;
-            this.geneName = geneName;
-            //this.genePosition = genePosition;
-            //this.fStat = fStat;
-            this.pValue = pValue;
-
-        }
+            Eqtl.prototype.description = function () {
+                return "<b>snp</b>:&nbsp" + this.snp +
+                    "<br/><b>location</b>:&nbsp" + this.chr + ":" + formatNumber(this.position + 1) +
+                    "<br/><b>gene</b>:&nbsp" + this.geneName +
+                        //"<br/><b>fStat</b>:&nbsp" + this.fStat +
+                    "<br/><b>pValue</b>:&nbsp" + this.pValue +
+                    "<br/><b>mLogP</b>:&nbsp" + this.mLogP;
+            }
 
 
-        Eqtl.prototype.description = function () {
-            return "<b>snp</b>:&nbsp" + this.snp +
-                "<br/><b>location</b>:&nbsp" + this.chr + ":" + formatNumber(this.position + 1) +
-                "<br/><b>gene</b>:&nbsp" + this.geneName +
-                //"<br/><b>fStat</b>:&nbsp" + this.fStat +
-                "<br/><b>pValue</b>:&nbsp" + this.pValue +
-                "<br/><b>mLogP</b>:&nbsp" + this.mLogP;
-        }
+            Block = function (startPos, size) {
+                this.startPos = startPos;
+                this.size = size;
+            }
 
+            ChrIdx = function (chr, blocks) {
+                this.chr = chr;
+                this.blocks = blocks;
+            }
 
-        /**
-         * Load the index
-         *
-         * @param continuation function to receive the result
-         */
-        function loadIndex(url, continuation) {
-
-            var genome = igv.browser ? igv.browser.genome : null;
-
-            igvxhr.loadArrayBuffer(url,
-                {
-                    range: {start: 0, size: 200},
-                    success: function (arrayBuffer) {
-
-                        var data = new DataView(arrayBuffer),
-                            parser = new igv.BinaryParser(data),
-                            magicNumber = parser.getInt(),
-                            version = parser.getInt(),
-                            indexPosition = parser.getLong(),
-                            indexSize = parser.getInt();
-
-                        igvxhr.loadArrayBuffer(url, {
-
-                            range: {start: indexPosition, size: indexSize},
-                            success: function (arrayBuffer2) {
-
-                                var data2 = new DataView(arrayBuffer2);
-                                var index = null;
-
-
-                                var parser = new igv.BinaryParser(data2);
-                                var index = {};
-                                var nChrs = parser.getInt();
-                                while (nChrs-- > 0) {
-
-                                    var chr = parser.getString();
-                                    if (genome) chr = genome.getChromosomeName(chr);
-
-                                    var position = parser.getLong();
-                                    var size = parser.getInt();
-                                    var blocks = new Array();
-                                    blocks.push(new Block(position, size));
-                                    index[chr] = new ChrIdx(chr, blocks);
-                                }
-
-                                continuation(index)
-                            },
-                            withCredentials: self.config.withCredentials
-
-                        });
-                    },
-                    withCredentials: self.config.withCredentials
-
-                });
-
-        }
-
-
-        Block = function (startPos, size) {
-            this.startPos = startPos;
-            this.size = size;
-        }
-
-        ChrIdx = function (chr, blocks) {
-            this.chr = chr;
-            this.blocks = blocks;
-        }
-    };
+        });
+    }
 
     var createEQTL = function (tokens) {
         var snp = tokens[0];

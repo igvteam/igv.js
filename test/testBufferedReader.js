@@ -6,7 +6,7 @@ function runBufferedReaderTests() {
         var range = {start: 25, size: 100};
         var bufferedReader = new igv.BufferedReader({url: url}, 256, 16);
 
-        bufferedReader.dataViewForRange(range, function (dataView) {
+        bufferedReader.dataViewForRange(range).then(function (dataView) {
 
             var i;
 

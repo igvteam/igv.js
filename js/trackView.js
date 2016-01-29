@@ -504,22 +504,8 @@ var igv = (function (igv) {
 
                 igv.startSpinnerAtParentElement(self.trackDiv);
 
+                this.track.getFeatures(referenceFrame.chr, bpStart, bpEnd, self.currentLoadTask).then(success);
 
-                // Promisify the getFeatures method
-                var getFeaturesPromise;
-                if (typeof this.track.getFeaturesPromise !== "undefined") {
-                    this.track.getFeaturesPromise(referenceFrame.chr, bpStart, bpEnd, self.currentLoadTask).then(success);
-                } else {
-                    getFeaturesPromise = function (chr, start, end, task) {
-                        return new Promise(function (fulfill, reject) {
-                            self.track.getFeatures(chr, start, end, function (features) {
-                                    fulfill(features);
-                                }
-                                , task);
-                        });
-                    }
-                    getFeaturesPromise(referenceFrame.chr, bpStart, bpEnd, self.currentLoadTask).then(success);
-                }
             }
         }
 

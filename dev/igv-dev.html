@@ -33,6 +33,7 @@
     <script type="text/javascript" src="../vendor/inflate.js"></script>
     <script type="text/javascript" src="../vendor/zlib_and_gzip.min.js"></script>
     <script type="text/javascript" src="../vendor/jquery.mousewheel.js"></script>
+    <script type="text/javascript" src="../vendor/promise-7.0.4.js"></script>
 
     <!-- IGV JS -->
     <script type="text/javascript" src="../js/igv-create.js"></script>
@@ -282,7 +283,7 @@
 
         <div onclick="igv.browser.loadTrack({
                                 type: 'seg',
-                                url: 'https://genomespace-dev.s3.amazonaws.com/users/ted/seg_data.seg?AWSAccessKeyId=AKIAIVEV5BSUERMTN5LA&Expires=1453959909&Signature=i5mE9Clb%2BTCVQayw6HqhHI0S8OM%3D',
+                                url: 'https://genomespace-dev.s3.amazonaws.com/users/ted/segmented_data_080520.seg.gz?AWSAccessKeyId=AKIAIVEV5BSUERMTN5LA&Expires=1454022310&Signature=PJBy7%2FJTehP%2FPGBNaCoCxMxr16w%3D',
                                 indexed: false,
                                 name: 'GS'})">GS
         </div>
@@ -317,6 +318,13 @@
                                 name: 'ENCFF002ADR',
                                 visibilityWindow: 200000
                                 })">Encode bigbed
+        </div>
+
+        <div onclick="igv.browser.loadTrack(
+                                {
+                                url: '../test/data/wig/variableStep-example.wig',
+                                name: 'variableStep',
+                                })">Variable step wig (chr 19)
         </div>
 
         <div onclick="igv.browser.loadTrack(

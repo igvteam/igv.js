@@ -64,63 +64,59 @@ var igv = (function (igv) {
         igvxhr.loadArrayBuffer(self.path,
             {
                 headers: self.config.headers,
-
                 range: {start: 0, size: BBFILE_HEADER_SIZE},
+                withCredentials: self.config.withCredentials
+            }).then(function (data) {
 
-                success: function (data) {
+                if (!data) return;
 
-                    if (!data) return;
+                // Assume low-to-high unless proven otherwise
+                self.littleEndian = true;
 
-                    // Assume low-to-high unless proven otherwise
-                    self.littleEndian = true;
+                var binaryParser = new igv.BinaryParser(new DataView(data));
 
-                    var binaryParser = new igv.BinaryParser(new DataView(data));
+                var magic = binaryParser.getUInt();
 
+                if (magic === BIGWIG_MAGIC_LTH) {
+                    self.type = "BigWig";
+                }
+                else if (magic == BIGBED_MAGIC_LTH) {
+                    self.type = "BigBed";
+                }
+                else {
+                    //Try big endian order
+                    self.littleEndian = false;
+
+                    binaryParser.littleEndian = false;
+                    binaryParser.position = 0;
                     var magic = binaryParser.getUInt();
 
-                    if (magic === BIGWIG_MAGIC_LTH) {
+                    if (magic === BIGWIG_MAGIC_HTL) {
                         self.type = "BigWig";
                     }
-                    else if (magic == BIGBED_MAGIC_LTH) {
+                    else if (magic == BIGBED_MAGIC_HTL) {
                         self.type = "BigBed";
                     }
                     else {
-                        //Try big endian order
-                        self.littleEndian = false;
-
-                        binaryParser.littleEndian = false;
-                        binaryParser.position = 0;
-                        var magic = binaryParser.getUInt();
-
-                        if (magic === BIGWIG_MAGIC_HTL) {
-                            self.type = "BigWig";
-                        }
-                        else if (magic == BIGBED_MAGIC_HTL) {
-                            self.type = "BigBed";
-                        }
-                        else {
-                            // TODO -- error, unknown file type  or BE
-                        }
-
+                        // TODO -- error, unknown file type  or BE
                     }
-                    // Table 5  "Common header for BigWig and BigBed files"
-                    self.header = {};
-                    self.header.bwVersion = binaryParser.getShort();
-                    self.header.nZoomLevels = binaryParser.getShort();
-                    self.header.chromTreeOffset = binaryParser.getLong();
-                    self.header.fullDataOffset = binaryParser.getLong();
-                    self.header.fullIndexOffset = binaryParser.getLong();
-                    self.header.fieldCount = binaryParser.getShort();
-                    self.header.definedFieldCount = binaryParser.getShort();
-                    self.header.autoSqlOffset = binaryParser.getLong();
-                    self.header.totalSummaryOffset = binaryParser.getLong();
-                    self.header.uncompressBuffSize = binaryParser.getInt();
-                    self.header.reserved = binaryParser.getLong();
 
-                    loadZoomHeadersAndChrTree.call(self, continuation);
-                },
+                }
+                // Table 5  "Common header for BigWig and BigBed files"
+                self.header = {};
+                self.header.bwVersion = binaryParser.getShort();
+                self.header.nZoomLevels = binaryParser.getShort();
+                self.header.chromTreeOffset = binaryParser.getLong();
+                self.header.fullDataOffset = binaryParser.getLong();
+                self.header.fullIndexOffset = binaryParser.getLong();
+                self.header.fieldCount = binaryParser.getShort();
+                self.header.definedFieldCount = binaryParser.getShort();
+                self.header.autoSqlOffset = binaryParser.getLong();
+                self.header.totalSummaryOffset = binaryParser.getLong();
+                self.header.uncompressBuffSize = binaryParser.getInt();
+                self.header.reserved = binaryParser.getLong();
 
-                withCredentials: self.config.withCredentials
+                loadZoomHeadersAndChrTree.call(self, continuation);
             });
 
     }
@@ -136,56 +132,53 @@ var igv = (function (igv) {
             {
                 headers: self.config.headers,
                 range: {start: startOffset, size: (this.header.fullDataOffset - startOffset + 5)},
-                success: function (data) {
-
-                    var nZooms = self.header.nZoomLevels,
-                        binaryParser = new igv.BinaryParser(new DataView(data)),
-                        i,
-                        len,
-                        zoomNumber,
-                        zlh;
-
-                    self.zoomLevelHeaders = [];
-
-                    self.firstZoomDataOffset = Number.MAX_VALUE;
-                    for (i = 0; i < nZooms; i++) {
-                        zoomNumber = nZooms - i;
-                        zlh = new ZoomLevelHeader(zoomNumber, binaryParser);
-                        self.firstZoomDataOffset = Math.min(zlh.dataOffset, self.firstZoomDataOffset);
-                        self.zoomLevelHeaders.push(zlh);
-                    }
-
-                    // Autosql
-                    if (self.header.autoSqlOffset > 0) {
-                        binaryParser.position = self.header.autoSqlOffset - startOffset;
-                        self.autoSql = binaryParser.getString();
-                    }
-
-                    // Total summary
-                    if (self.header.totalSummaryOffset > 0) {
-                        binaryParser.position = self.header.totalSummaryOffset - startOffset;
-                        self.totalSummary = new igv.BWTotalSummary(binaryParser);
-                    }
-
-                    // Chrom data index
-                    if (self.header.chromTreeOffset > 0) {
-                        binaryParser.position = self.header.chromTreeOffset - startOffset;
-                        self.chromTree = new igv.BPTree(binaryParser, 0);
-                    }
-                    else {
-                        // TODO -- this is an error, not expected
-                    }
-
-                    //Finally total data count
-                    binaryParser.position = self.header.fullDataOffset - startOffset;
-                    self.dataCount = binaryParser.getInt();
-
-                    continutation();
-                },
-
                 withCredentials: self.config.withCredentials
-            });
+            }).then(function (data) {
 
+            var nZooms = self.header.nZoomLevels,
+                binaryParser = new igv.BinaryParser(new DataView(data)),
+                i,
+                len,
+                zoomNumber,
+                zlh;
+
+            self.zoomLevelHeaders = [];
+
+            self.firstZoomDataOffset = Number.MAX_VALUE;
+            for (i = 0; i < nZooms; i++) {
+                zoomNumber = nZooms - i;
+                zlh = new ZoomLevelHeader(zoomNumber, binaryParser);
+                self.firstZoomDataOffset = Math.min(zlh.dataOffset, self.firstZoomDataOffset);
+                self.zoomLevelHeaders.push(zlh);
+            }
+
+            // Autosql
+            if (self.header.autoSqlOffset > 0) {
+                binaryParser.position = self.header.autoSqlOffset - startOffset;
+                self.autoSql = binaryParser.getString();
+            }
+
+            // Total summary
+            if (self.header.totalSummaryOffset > 0) {
+                binaryParser.position = self.header.totalSummaryOffset - startOffset;
+                self.totalSummary = new igv.BWTotalSummary(binaryParser);
+            }
+
+            // Chrom data index
+            if (self.header.chromTreeOffset > 0) {
+                binaryParser.position = self.header.chromTreeOffset - startOffset;
+                self.chromTree = new igv.BPTree(binaryParser, 0);
+            }
+            else {
+                // TODO -- this is an error, not expected
+            }
+
+            //Finally total data count
+            binaryParser.position = self.header.fullDataOffset - startOffset;
+            self.dataCount = binaryParser.getInt();
+
+            continutation();
+        });
     }
 
     igv.BWReader.prototype.loadRPTree = function (offset, continuation) {

@@ -42,59 +42,63 @@ var igv = (function (igv) {
 
     };
 
-    igv.BamReader.prototype.readFeatures = function (chr, min, max, continuation, task) {
+    igv.BamReader.prototype.readFeatures = function (chr, min, max, task) {
 
         var self = this;
 
-        getChrIndex(this, function (chrToIndex) {
-
-            var chrId = chrToIndex[chr],
-                chunks;
-
-            if (chrId === undefined) {
-                continuation([]);
-            } else {
-
-                getIndex(self, function (bamIndex) {
-
-                    chunks = bamIndex.blocksForRange(chrId, min, max);
+        return new Promise(function (fulfill, reject) {
 
 
-                    if (!chunks) {
-                        continuation(null, 'Error in index fetch');
-                        return;
-                    }
-                    if (chunks.length === 0) {
-                        continuation([]);
-                        return;
-                    }
+            getChrIndex(self).then(function (chrToIndex) {
+
+                var chrId = chrToIndex[chr],
+                    chunks;
+
+                if (chrId === undefined) {
+                    fulfill([]);
+                } else {
+
+                    getIndex(self).then(function (bamIndex) {
+
+                        chunks = bamIndex.blocksForRange(chrId, min, max);
 
 
-                    var records = [];
-                    loadNextChunk(0);
+                        if (!chunks) {
+                            fulfill(null, 'Error in index fetch');
+                            return;
+                        }
+                        if (chunks.length === 0) {
+                            fulfill([]);
+                            return;
+                        }
 
-                    function loadNextChunk(chunkNumber) {
 
-                        var c = chunks[chunkNumber],
-                            fetchMin = c.minv.block,
-                            fetchMax = c.maxv.block + 65000,   // Make sure we get the whole block.
-                            range =
-                                (self.contentLength > 0 && fetchMax > self.contentLength) ?
-                                {start: fetchMin} :
-                                {start: fetchMin, size: fetchMax - fetchMin + 1};
+                        var records = [];
+                        loadNextChunk(0);
 
-                        igvxhr.loadArrayBuffer(self.bamPath,
-                            {
-                                task: task,
-                                headers: self.config.headers,
-                                range: range,
-                                success: function (compressed) {
+                        function loadNextChunk(chunkNumber) {
+
+                            var c = chunks[chunkNumber],
+                                fetchMin = c.minv.block,
+                                fetchMax = c.maxv.block + 65000,   // Make sure we get the whole block.
+                                range =
+                                    (self.contentLength > 0 && fetchMax > self.contentLength) ?
+                                    {start: fetchMin} :
+                                    {start: fetchMin, size: fetchMax - fetchMin + 1};
+
+                            igvxhr.loadArrayBuffer(self.bamPath,
+                                {
+                                    task: task,
+                                    headers: self.config.headers,
+                                    range: range,
+                                    withCredentials: self.config.withCredentials
+                                }).then(function (compressed) {
 
                                     try {
                                         var ba = new Uint8Array(igv.unbgzf(compressed)); //new Uint8Array(igv.unbgzf(compressed)); //, c.maxv.block - c.minv.block + 1));
                                     } catch (e) {
                                         console.log(e);
-                                        continuation(records);
+                                        fulfill(records);
                                     }
 
                                     decodeBamRecords(ba, chunks[chunkNumber].minv.offset, records, min, max, chrId);
@@ -109,19 +113,16 @@ var igv = (function (igv) {
                                                 return a.start - b.start;
                                             });
                                         }
-                                        continuation(records);
+                                        fulfill(records);
                                     }
                                     else {
                                         loadNextChunk(chunkNumber);
                                     }
-                                },
-                                withCredentials: self.config.withCredentials
-                            });
-
-
-                    }
-                });
-            }
+                                });
+                        }
+                    });
+                }
+            });
         });
 
 
@@ -345,38 +346,35 @@ var igv = (function (igv) {
             return {blocks: blocks, insertions: insertions};
 
         }
+    }
 
-    };
-
-    /**
-     * Read the bam header.  This function is public to support unit testing
-     * @param continuation
-     * @param stopSpinner
-     */
-    igv.BamReader.prototype.readHeader = function (continuation) {
+    igv.BamReader.prototype.readHeader = function () {
 
         var self = this;
 
-        getIndex(self, function (index) {
+        return new Promise(function (fulfill, reject) {
 
-            var contentLength = index.blockMax,
-                len = index.headerSize + MAX_GZIP_BLOCK_SIZE + 100;   // Insure we get the complete compressed block containing the header
+            getIndex(self).then(function (index) {
 
-            if (contentLength <= 0) contentLength = index.blockMax;  // Approximate
+                var contentLength = index.blockMax,
+                    len = index.headerSize + MAX_GZIP_BLOCK_SIZE + 100;   // Insure we get the complete compressed block containing the header
 
-            self.contentLength = contentLength;
+                if (contentLength <= 0) contentLength = index.blockMax;  // Approximate
 
-            if (contentLength > 0) len = Math.min(contentLength, len);
+                self.contentLength = contentLength;
 
-            igvxhr.loadArrayBuffer(self.bamPath,
-                {
-                    headers: self.config.headers,
+                if (contentLength > 0) len = Math.min(contentLength, len);
 
-                    contentType: 'application/octet',
+                igvxhr.loadArrayBuffer(self.bamPath,
+                    {
+                        headers: self.config.headers,
 
-                    range: {start: 0, size: len},
+                        contentType: 'application/octet',
 
-                    success: function (compressedBuffer) {
+                        range: {start: 0, size: len},
+
+                        withCredentials: self.config.withCredentials
+                    }).then(function (compressedBuffer) {
 
                         var unc = igv.unbgzf(compressedBuffer, len),
                             uncba = new Uint8Array(unc),
@@ -413,72 +411,48 @@ var igv = (function (igv) {
                             p = p + 8 + lName;
                         }
 
-                        continuation();
+                        fulfill();
 
-                    },
-                    withCredentials: self.config.withCredentials
-                });
+                    });
+            });
         });
-    };
-
-
-    function getContentLength(bam, continuation) {
-
-        if (bam.contentLength) {
-            continuation(bam.contentLength);
-        }
-        else {
-
-            // Gen the content length first, so we don't try to read beyond the end of the file
-            igvxhr.getContentLength(bam.headPath, {
-                headers: bam.headers,
-                success: function (contentLength) {
-                    bam.contentLength = contentLength;
-                    continuation(bam.contentLength);
-
-                },
-                error: function (xhr) {
-                    bam.contentLength = -1;
-                    continuation(bam.contentLength);
-                }
-
-            });
-        }
     }
 
 
-    function getIndex(bam, continuation) {
+    function getIndex(bam) {
 
-        var bamIndex = bam.index;
+        return new Promise(function (fulfill, reject) {
 
-        if (bam.index) {
-            continuation(bam.index);
-        }
-        else {
-            igv.loadBamIndex(bam.baiPath, bam.config, function (index) {
-                bam.index = index;
+            if (bam.index) {
+                fulfill(bam.index);
+            }
+            else {
+                igv.loadBamIndex(bam.baiPath, bam.config).then(function (index) {
+                    bam.index = index;
 
-                // Override contentLength
-                bam.contentLength = index.blockMax;
+                    // Content length TODO -- is this exact or approximate?
+                    bam.contentLength = index.blockMax;
 
-
-                continuation(bam.index);
-            });
-        }
-
+                    fulfill(bam.index);
+                });
+            }
+        });
     }
 
 
-    function getChrIndex(bam, continuation) {
+    function getChrIndex(bam) {
 
-        if (bam.chrToIndex) {
-            continuation(bam.chrToIndex);
-        }
-        else {
-            bam.readHeader(function () {
-                continuation(bam.chrToIndex);
-            })
-        }
+        return new Promise(function (fulfill, reject) {
+
+            if (bam.chrToIndex) {
+                fulfill(bam.chrToIndex);
+            }
+            else {
+                bam.readHeader().then(function () {
+                    fulfill(bam.chrToIndex);
+                });
+            }
+        });
     }
 
     function readInt(ba, offset) {

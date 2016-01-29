@@ -45,52 +45,49 @@ var igv = (function (igv) {
 
     };
 
-    igv.BamSource.prototype.getFeatures = function (chr, bpStart, bpEnd, continuation, task) {
+    igv.BamSource.prototype.getFeatures = function (chr, bpStart, bpEnd, task) {
 
+        var self = this;
+        return new Promise(function (fulfill, reject) {
 
-        if (this.genomicInterval && this.genomicInterval.contains(chr, bpStart, bpEnd)) {
+            if (self.genomicInterval && self.genomicInterval.contains(chr, bpStart, bpEnd)) {
 
-            continuation(this.genomicInterval);
+                fulfill(self.genomicInterval);
 
-        } else {
+            } else {
 
-            var self = this;
+                self.bamReader.readFeatures(chr, bpStart, bpEnd, task)
+                    .then(
+                    function (alignments) {
 
-            this.bamReader.readFeatures(chr, bpStart, bpEnd,
+                        if (alignments) {  // Can be null on error or aborting
 
-                function (alignments) {
+                            self.genomicInterval = new igv.GenomicInterval(chr, bpStart, bpEnd);
 
-                    if (alignments) {  // Can be null on error or aborting
+                            igv.browser.genome.sequence.getSequence(self.genomicInterval.chr, self.genomicInterval.start, self.genomicInterval.end,
 
-                        self.genomicInterval = new igv.GenomicInterval(chr, bpStart, bpEnd);
+                                function (sequence) {
 
-                        igv.browser.genome.sequence.getSequence(self.genomicInterval.chr, self.genomicInterval.start, self.genomicInterval.end,
+                                    var maxRows = self.config.maxRows || 500;
 
-                            function (sequence) {
+                                    if (sequence) {
 
-                                var maxRows = self.config.maxRows || 500;
+                                        self.genomicInterval.coverageMap = new igv.CoverageMap(chr, bpStart, bpEnd, alignments, sequence);
 
-                                if (sequence) {
+                                        self.genomicInterval.packedAlignmentRows = packAlignmentRows(self.genomicInterval, alignments, maxRows);
 
-                                    self.genomicInterval.coverageMap = new igv.CoverageMap(chr, bpStart, bpEnd, alignments, sequence);
+                                        self.genomicInterval.features = undefined;
 
-                                    self.genomicInterval.packedAlignmentRows = packAlignmentRows(self.genomicInterval, alignments, maxRows);
+                                        self.genomicInterval.sequence = sequence;
 
-                                    self.genomicInterval.features = undefined;
-
-                                    self.genomicInterval.sequence = sequence;
-
-                                    continuation(self.genomicInterval);
-                                }
-
-                            },
-                            task);
-                    }
-
-                },
-                task);
-        }
-    };
+                                        fulfill(self.genomicInterval);
+                                    }
+                                });
+                        }
+                    });
+            }
+        });
+    }
 
 
     function packAlignmentRows(genomicInterval, alignments, maxRows) {

@@ -36,77 +36,82 @@ var igv = (function (igv) {
         this.bufferedReader = new igv.BufferedReader(config);
     };
 
+    igv.BWSource.prototype.getFeatures = function (chr, bpStart, bpEnd, task) {
 
-    igv.BWSource.prototype.getFeatures = function (chr, bpStart, bpEnd, continuation) {
+        var self = this;
+        return new Promise(function (fulfill, reject) {
 
-        var bwSource=this;
+                this.reader.getZoomHeaders(function (zoomLevelHeaders) {
 
-        this.reader.getZoomHeaders(function (zoomLevelHeaders) {
+                    // Select a biwig "zoom level" appropriate for the current resolution
+                    var bwReader = self.reader,
+                        bufferedReader = self.bufferedReader,
+                        bpPerPixel = igv.browser.referenceFrame.bpPerPixel,
+                        zoomLevelHeader = zoomLevelForScale(bpPerPixel, zoomLevelHeaders),
+                        treeOffset,
+                        decodeFunction,
+                        features = [];
 
-            // Select a biwig "zoom level" appropriate for the current resolution
-            var bwReader = bwSource.reader,
-                bufferedReader = bwSource.bufferedReader,
-                bpPerPixel = igv.browser.referenceFrame.bpPerPixel,
-                zoomLevelHeader = zoomLevelForScale(bpPerPixel, zoomLevelHeaders),
-                treeOffset,
-                decodeFunction,
-                features = [];
+                    if (zoomLevelHeader) {
+                        treeOffset = zoomLevelHeader.indexOffset;
+                        decodeFunction = decodeZoomData;
+                    } else {
+                        treeOffset = bwReader.header.fullIndexOffset;
+                        if (bwReader.type === "BigWig") {
+                            decodeFunction = decodeWigData;
+                        }
+                        else {
+                            decodeFunction = decodeBedData;
+                        }
+                    }
 
-            if (zoomLevelHeader) {
-                treeOffset = zoomLevelHeader.indexOffset;
-                decodeFunction = decodeZoomData;
-            } else {
-                treeOffset = bwReader.header.fullIndexOffset;
-                if (bwReader.type === "BigWig") {
-                    decodeFunction = decodeWigData;
-                }
-                else {
-                    decodeFunction = decodeBedData;
-                }
-            }
+                    bwReader.loadRPTree(treeOffset, function (rpTree) {
 
-            bwReader.loadRPTree(treeOffset, function (rpTree) {
+                        var chrIdx = self.reader.chromTree.dictionary[chr];
+                        if (chrIdx === undefined) {
+                            fulfill(null);
+                        }
+                        else {
 
-                var chrIdx = bwSource.reader.chromTree.dictionary[chr];
-                if (chrIdx === undefined) {
-                    continuation(null);
-                }
-                else {
+                            rpTree.findLeafItemsOverlapping(chrIdx, bpStart, bpEnd, function (leafItems) {
 
-                    rpTree.findLeafItemsOverlapping(chrIdx, bpStart, bpEnd, function (leafItems) {
+                                if (!leafItems || leafItems.length == 0) fulfill([]);
 
-                        if (!leafItems || leafItems.length == 0) continuation([]);
+                                var leafItemsCount = leafItems.length;
 
-                        var leafItemsCount = leafItems.length;
+                                leafItems.sort(function (i1, i2) {
+                                    return i1.startBase - i2.startBase;
+                                });
 
-                        leafItems.sort(function (i1, i2) {
-                            return i1.startBase - i2.startBase;
-                        });
+                                leafItems.forEach(function (item) {
 
-                        leafItems.forEach(function (item) {
+                                    bufferedReader.dataViewForRange({start: item.dataOffset, size: item.dataSize}).then(function (uint8Array) {
 
-                            bufferedReader.dataViewForRange({start: item.dataOffset, size: item.dataSize}, function (uint8Array) {
+                                        var inflate = new Zlib.Inflate(uint8Array);
+                                        var plain = inflate.decompress();
+                                        decodeFunction(new DataView(plain.buffer), chr, chrIdx, bpStart, bpEnd, features);
+                                        leafItemsCount--;
 
-                                var inflate = new Zlib.Inflate(uint8Array);
-                                var plain = inflate.decompress();
-                                decodeFunction(new DataView(plain.buffer), chr, chrIdx, bpStart, bpEnd, features);
-                                leafItemsCount--;
+                                        if (leafItemsCount == 0) {
+                                            fulfill(features);
+                                        }
 
-                                if (leafItemsCount == 0) {
-                                    continuation(features);
-                                }
-
-                            }, true);
-                        });
+                                    }, true);
+                                });
 
 
+                            });
+
+                        }
                     });
 
-                }
-            });
+                });
+
 
         });
     }
+
+
 
 
     function zoomLevelForScale(bpPerPixel, zoomLevelHeaders) {

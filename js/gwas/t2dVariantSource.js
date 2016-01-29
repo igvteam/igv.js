@@ -70,38 +70,42 @@ var igv = (function (igv) {
      * @param queryChr
      * @param bpStart
      * @param bpEnd
-     * @param success -- function that takes an array of features as an argument
      */
-    igv.T2DVariantSource.prototype.getFeatures = function (chr, bpStart, bpEnd, success, task) {
+
+    igv.T2DVariantSource.prototype.getFeatures = function (chr, bpStart, bpEnd, task) {
 
         var self = this;
+        return new Promise(function (fulfill, reject) {
+            var self = this;
 
-        if (this.cache && this.cache.chr === chr && this.cache.end > bpEnd && this.cache.start < bpStart) {
-            success(this.cache.featuresBetween(bpStart, bpEnd));
-        }
+            if (this.cache && this.cache.chr === chr && this.cache.end > bpEnd && this.cache.start < bpStart) {
+                fulfill(this.cache.featuresBetween(bpStart, bpEnd));
+            }
 
-        else {
+            else {
 
-            // Get a minimum 10mb window around the requested locus
-            var window = Math.max(bpEnd - bpStart, 10000000) / 2,
-                center = (bpEnd + bpStart) / 2,
-                queryChr = (chr.startsWith("chr") ? chr.substring(3) : chr), // Webservice uses "1,2,3..." convention
-                queryStart = Math.max(0, center - window),
-                queryEnd = center + window,
-                queryURL = this.config.proxy ? this.config.proxy : this.url,
-                body = this.queryJson(queryChr, queryStart, queryEnd, self.config);
+                // Get a minimum 10mb window around the requested locus
+                var window = Math.max(bpEnd - bpStart, 10000000) / 2,
+                    center = (bpEnd + bpStart) / 2,
+                    queryChr = (chr.startsWith("chr") ? chr.substring(3) : chr), // Webservice uses "1,2,3..." convention
+                    queryStart = Math.max(0, center - window),
+                    queryEnd = center + window,
+                    queryURL = this.config.proxy ? this.config.proxy : this.url,
+                    body = this.queryJson(queryChr, queryStart, queryEnd, self.config);
 
-            igvxhr.loadJson(queryURL, {
-                sendData: body,
-                task: task,
-                success: function (json) {
+                igvxhr.loadJson(queryURL, {
+                    sendData: body,
+                    task: task,
+                    withCredentials: this.config.withCredentials
+
+                }).then(function (json) {
                     var variants;
 
                     if (json) {
 
                         if (json.error_code) {
                             alert("Error querying trait " + self.trait + "  (error_code=" + json.error_code + ")");
-                            success(null);
+                            fulfill(null);
                         }
                         else {
                             variants = self.jsonToVariants(json, self.config);
@@ -114,20 +118,19 @@ var igv = (function (igv) {
 
                             self.cache = new FeatureCache(chr, queryStart, queryEnd, variants);
 
-                            success(variants);
+                            fulfill(variants);
                         }
                     }
                     else {
-                        success(null);
+                        fulfill(null);
                     }
-                },
-                withCredentials: this.config.withCredentials
+                });
 
-            });
+            }
 
-        }
-
+        });
     }
+
 
     // Experimental linear index feature cache.
     var FeatureCache = function (chr, start, end, features) {

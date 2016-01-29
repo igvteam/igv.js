@@ -90,7 +90,7 @@ var igv = (function (igv) {
         }
     }
 
-    igv.FeatureTrack.prototype.getFeaturesPromise = function (chr, bpStart, bpEnd, task) {
+    igv.FeatureTrack.prototype.getFeatures = function (chr, bpStart, bpEnd, task) {
 
         var self = this;
 
@@ -100,23 +100,11 @@ var igv = (function (igv) {
                 fulfill({exceedsVisibilityWindow: true});
             }
             else {
-                self.featureSource.getFeatures(chr, bpStart, bpEnd, fulfill, task)
+                self.featureSource.getFeatures(chr, bpStart, bpEnd, task).then(fulfill);
             }
-
         });
-
     }
 
-    igv.FeatureTrack.prototype.getFeatures = function (chr, bpStart, bpEnd, continuation, task) {
-
-        // Don't try to draw alignments for windows > the visibility window
-        if (this.visibilityWindow && igv.browser.trackViewportWidthBP() > this.visibilityWindow) {
-            continuation({exceedsVisibilityWindow: true});
-        }
-        else {
-            this.featureSource.getFeatures(chr, bpStart, bpEnd, continuation, task)
-        }
-    };
 
     /**
      * The required height in pixels required for the track content.   This is not the visible track height, which

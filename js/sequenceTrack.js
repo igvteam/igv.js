@@ -35,15 +35,19 @@ var igv = (function (igv) {
         this.ignoreTrackMenu = true;
     };
 
-    igv.SequenceTrack.prototype.getFeatures = function (chr, bpStart, bpEnd, continuation, task) {
+    igv.SequenceTrack.prototype.getFeatures = function (chr, bpStart, bpEnd, task) {
 
-        if (igv.browser.referenceFrame.bpPerPixel > 1/*igv.browser.trackViewportWidthBP() > 30000*/) {
-            continuation(null);
-        }
-        else {
-            igv.browser.genome.sequence.getSequence(chr, bpStart, bpEnd, continuation, task)
-        }
-    };
+        var self = this;
+        return new Promise(function (fulfill, reject) {
+            if (igv.browser.referenceFrame.bpPerPixel > 1/*igv.browser.trackViewportWidthBP() > 30000*/) {
+                fulfill(null);
+            }
+            else {
+                igv.browser.genome.sequence.getSequence(chr, bpStart, bpEnd, fulfill, task)
+            }
+        });
+    }
+
 
     igv.SequenceTrack.prototype.draw = function (options) {
 
@@ -75,7 +79,7 @@ var igv = (function (igv) {
                         c = this.color;
                     }
                     else if ("dna" === this.sequenceType) {
-                        c = igv.nucleotideColors[ b ];
+                        c = igv.nucleotideColors[b];
                     }
                     else {
                         c = "rgb(0, 0, 150)";

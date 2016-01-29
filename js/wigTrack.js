@@ -57,10 +57,14 @@ var igv = (function (igv) {
 
     };
 
-    igv.WIGTrack.prototype.getFeatures = function (chr, bpStart, bpEnd, continuation, task) {
+    igv.WIGTrack.prototype.getFeatures = function (chr, bpStart, bpEnd, task) {
 
-        this.featureSource.getFeatures(chr, bpStart, bpEnd, continuation, task)
-    };
+        var self = this;
+        return new Promise(function (fulfill, reject) {
+            self.featureSource.getFeatures(chr, bpStart, bpEnd, task).then(fulfill);
+        });
+    }
+
 
     igv.WIGTrack.prototype.popupMenuItems = function (popover) {
 

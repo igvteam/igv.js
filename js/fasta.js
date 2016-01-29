@@ -132,8 +132,8 @@ var igv = (function (igv) {
         var self = this;
 
         igvxhr.load(this.indexFile, {
-            success: function (data) {
-
+            withCredentials: this.withCredentials
+        }).then(function (data) {
                 var lines = data.splitLines();
                 var len = lines.length;
                 var lineNo = 0;
@@ -165,16 +165,14 @@ var igv = (function (igv) {
                     continuation(self.index);
                 }
             },
-            error: function (xhr) {
+            function (xhr) {
                 if (xhr.status === 404) {
                     alert("Fasta index file not found: " + self.indexFile);
                 }
                 else {
                     alert("Error loading fasta index " + self.indexFile + "  status=" + xhr.status);
                 }
-            },
-            withCredentials: this.withCredentials
-        });
+            });
     };
 
     igv.FastaSequence.prototype.loadAll = function (continuation) {
@@ -185,46 +183,44 @@ var igv = (function (igv) {
         self.sequences = {};
 
         igvxhr.load(this.file, {
-            success: function (data) {
-
-                var lines = data.splitLines(),
-                    len = lines.length,
-                    lineNo = 0,
-                    nextLine,
-                    currentSeq = "",
-                    currentChr,
-                    order = 0;
-
-
-                while (lineNo < len) {
-                    nextLine = lines[lineNo++].trim();
-                    if (nextLine.startsWith("#") || nextLine.length === 0) {
-                        continue;
-                    }
-                    else if (nextLine.startsWith(">")) {
-                        if (currentSeq) {
-                            self.chromosomeNames.push(currentChr);
-                            self.sequences[currentChr] = currentSeq;
-                            self.chromosomes[currentChr] = new igv.Chromosome(currentChr, order++, currentSeq.length);
-                        }
-                        currentChr = nextLine.substr(1).split("\\s+")[0];
-                        currentSeq = "";
-                    }
-                    else {
-                        currentSeq += nextLine;
-                    }
-                }
-
-                if (continuation) {
-                    continuation();
-                }
-            },
-            error: function (xhr) {
-
-                alert("Error loading fasta  " + self.file + "  status=" + xhr.status);
-
-            },
             withCredentials: this.withCredentials
+
+        }).then(function (data) {
+
+            var lines = data.splitLines(),
+                len = lines.length,
+                lineNo = 0,
+                nextLine,
+                currentSeq = "",
+                currentChr,
+                order = 0;
+
+
+            while (lineNo < len) {
+                nextLine = lines[lineNo++].trim();
+                if (nextLine.startsWith("#") || nextLine.length === 0) {
+                    continue;
+                }
+                else if (nextLine.startsWith(">")) {
+                    if (currentSeq) {
+                        self.chromosomeNames.push(currentChr);
+                        self.sequences[currentChr] = currentSeq;
+                        self.chromosomes[currentChr] = new igv.Chromosome(currentChr, order++, currentSeq.length);
+                    }
+                    currentChr = nextLine.substr(1).split("\\s+")[0];
+                    currentSeq = "";
+                }
+                else {
+                    currentSeq += nextLine;
+                }
+            }
+
+            if (continuation) {
+                continuation();
+            }
+        }, function (xhr) {
+
+            alert("Error loading fasta  " + self.file + "  status=" + xhr.status);
 
         });
     };
@@ -270,35 +266,35 @@ var igv = (function (igv) {
                 var byteCount = endByte - startByte + 1;
                 if (byteCount <= 0) {
                     return;
-                };
+                }
+                ;
 
                 igvxhr.load(fasta.file, {
-                    success: function (allBytes) {
-
-                        var nBases,
-                            seqBytes = "",
-                            srcPos = 0,
-                            desPos = 0,
-                            allBytesLength = allBytes.length;
-
-                        if (offset > 0) {
-                            nBases = Math.min(end - start, basesPerLine - offset);
-                            seqBytes += allBytes.substr(srcPos, nBases);
-                            srcPos += (nBases + nEndBytes);
-                            desPos += nBases;
-                        }
-
-                        while (srcPos < allBytesLength) {
-                            nBases = Math.min(basesPerLine, allBytesLength - srcPos);
-                            seqBytes += allBytes.substr(srcPos, nBases);
-                            srcPos += (nBases + nEndBytes);
-                            desPos += nBases;
-                        }
-
-                        continuation(seqBytes);
-                    },
                     range: {start: startByte, size: byteCount},
                     task: task
+                }).then(function (allBytes) {
+
+                    var nBases,
+                        seqBytes = "",
+                        srcPos = 0,
+                        desPos = 0,
+                        allBytesLength = allBytes.length;
+
+                    if (offset > 0) {
+                        nBases = Math.min(end - start, basesPerLine - offset);
+                        seqBytes += allBytes.substr(srcPos, nBases);
+                        srcPos += (nBases + nEndBytes);
+                        desPos += nBases;
+                    }
+
+                    while (srcPos < allBytesLength) {
+                        nBases = Math.min(basesPerLine, allBytesLength - srcPos);
+                        seqBytes += allBytes.substr(srcPos, nBases);
+                        srcPos += (nBases + nEndBytes);
+                        desPos += nBases;
+                    }
+
+                    continuation(seqBytes);
                 });
             }
         }
