@@ -16,7 +16,7 @@ function runBAMIndexTests() {
 
         };
 
-        igv.loadBamIndex(indexPath, config, function (bamIndex) {
+        igv.loadBamIndex(indexPath, config).done(function (bamIndex) {
 
             chunks = bamIndex.blocksForRange(refID, beg, end);
 
@@ -29,7 +29,7 @@ function runBAMIndexTests() {
 
             start();
 
-        }, undefined);
+        });
     });
 
     asyncTest("blocksForRange 1kg", function () {
@@ -37,7 +37,7 @@ function runBAMIndexTests() {
         var refID = 0,
             beg = 155168191,
             end = 155170311,
-            url = 'http://data.broadinstitute.org/igvdata/1KG/b37/data/HG02450/alignment/HG02450.mapped.ILLUMINA.bwa.ACB.low_coverage.20120522.bam',
+            url = 'https://data.broadinstitute.org/igvdata/1KG/b37/data/HG02450/alignment/HG02450.mapped.ILLUMINA.bwa.ACB.low_coverage.20120522.bam',
             indexPath = url + ".bai",
             config;
 
@@ -47,7 +47,7 @@ function runBAMIndexTests() {
 
         };
 
-        igv.loadBamIndex(indexPath, config, function (bamIndex) {
+        igv.loadBamIndex(indexPath, config).done(function (bamIndex) {
 
             var chunks = bamIndex.blocksForRange(refID, beg, end);
             ok(chunks, "chunks are non-null");
@@ -69,7 +69,7 @@ function runBAMIndexTests() {
 
             start();
 
-        }, undefined);
+        });
     });
 
 

@@ -83,12 +83,9 @@ var igv = (function (igv) {
 
     };
 
-
-    igv.EqtlTrack.prototype.getFeatures = function (chr, bpStart, bpEnd, continuation, task) {
-
-        this.featureSource.getFeatures(chr, bpStart, bpEnd, continuation, task)
+    igv.EqtlTrack.prototype.getFeatures = function (chr, bpStart, bpEnd, task) {
+        return this.featureSource.getFeatures(chr, bpStart, bpEnd, task);
     }
-
 
     igv.EqtlTrack.prototype.draw = function (options) {
 

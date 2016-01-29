@@ -58,27 +58,31 @@ var igv = (function (igv) {
 
     }
 
-    igv.BigQueryFeatureSource.prototype.getFeatures = function (chr, bpStart, bpEnd, success, task) {
+    igv.BigQueryFeatureSource.prototype.getFeatures = function (chr, bpStart, bpEnd, task) {
 
-        var c = chr.startsWith("chr") ? chr.substring(3) : chr,
-            q = "SELECT * FROM [isb-cgc:tcga_201510_alpha.Copy_Number_segments]" +
-                " WHERE " +
-                " ParticipantBarcode IN (" + this.cohort + ") " +
-                " AND Chromosome = \"" + c + "\" " +
-                " AND Start >= " + bpStart + " AND End <= " + bpEnd;
+        var self = this;
+        return new Promise(function (fulfill, reject) {
 
-        igv.bigQuery(
-            {
-                projectId: this.projectId,
-                queryString: q,
-                decode: decodeSeg,
-                success: function (results) {
-                    console.log("done " + results.length);
-                    success(results);
+            var c = chr.startsWith("chr") ? chr.substring(3) : chr,
+                q = "SELECT * FROM [isb-cgc:tcga_201510_alpha.Copy_Number_segments]" +
+                    " WHERE " +
+                    " ParticipantBarcode IN (" + this.cohort + ") " +
+                    " AND Chromosome = \"" + c + "\" " +
+                    " AND Start >= " + bpStart + " AND End <= " + bpEnd;
 
-                }
-            });
+            igv.bigQuery(
+                {
+                    projectId: self.projectId,
+                    queryString: q,
+                    decode: decodeSeg,
+                    success: function (results) {
+                        console.log("done " + results.length);
+                        fulfill(results);
 
+                    }
+                });
+
+        });
     }
 
     igv.BigQueryFeatureReader = function (config) {
@@ -111,7 +115,7 @@ var igv = (function (igv) {
 
     }
 
-    igv.BigQueryFeatureReader.prototype.readFeatures = function (chr, bpStart, bpEnd, success, task) {
+    igv.BigQueryFeatureReader.prototype.readFeatures = function (chr, bpStart, bpEnd, task) {
 
         var c = chr.startsWith("chr") ? chr.substring(3) : chr,
             q = "SELECT * FROM [isb-cgc:tcga_201510_alpha.Copy_Number_segments]" +
@@ -120,16 +124,11 @@ var igv = (function (igv) {
                 " AND Chromosome = \"" + c + "\" " +
                 " AND Start >= " + bpStart + " AND End <= " + bpEnd;
 
-        igv.bigQuery(
+        return igv.bigQuery(
             {
                 projectId: this.projectId,
                 queryString: q,
                 decode: decodeSeg,
-                success: function (results) {
-                    console.log("done " + results.length);
-                    success(results);
-
-                }
             });
 
     }
@@ -137,42 +136,45 @@ var igv = (function (igv) {
 
     igv.bigQuery = function (options) {
 
-        if (!options.projectId) {
-            //todo throw error
-        }
+        var self = this;
 
-        var baseURL = options.baseURL || "https://www.googleapis.com/bigquery/v2/",
-            url = baseURL + "projects/" + options.projectId + "/queries",
-            body = {
-                "kind": "bigquery#queryRequest",
-                "query": options.queryString,
-                "maxResults": 1000,
-                "timeoutMs": 5000,
-                "dryRun": false,
-                "preserveNulls": true,
-                "useQueryCache": true
-            },
-            decode = options.decode,
-            success = options.success,
-            task = options.task,
-            apiKey = oauth.google.apiKey,
-            jobId,
-            paramSeparator = "&";
+        return new Promise(function (fulfill, reject) {
 
-        url = url + "?alt=json"
+            if (!options.projectId) {
+                //todo throw error
+            }
 
-        if (apiKey) {
-            url = url + paramSeparator + "key=" + apiKey;
-        }
+            var baseURL = options.baseURL || "https://www.googleapis.com/bigquery/v2/",
+                url = baseURL + "projects/" + options.projectId + "/queries",
+                body = {
+                    "kind": "bigquery#queryRequest",
+                    "query": options.queryString,
+                    "maxResults": 1000,
+                    "timeoutMs": 5000,
+                    "dryRun": false,
+                    "preserveNulls": true,
+                    "useQueryCache": true
+                },
+                decode = options.decode,
+                task = options.task,
+                apiKey = oauth.google.apiKey,
+                jobId,
+                paramSeparator = "&";
 
-        var sendData = JSON.stringify(body);
+            url = url + "?alt=json"
 
-        igvxhr.loadJson(url,
-            {
-                sendData: sendData,
-                task: task,
-                contentType: "application/json",
-                success: function (response) {
+            if (apiKey) {
+                url = url + paramSeparator + "key=" + apiKey;
+            }
+
+            var sendData = JSON.stringify(body);
+
+            igvxhr.loadJson(url,
+                {
+                    sendData: sendData,
+                    task: task,
+                    contentType: "application/json",
+                }).then(function (response) {
 
                     var results = [],
                         totalRows,
@@ -184,7 +186,7 @@ var igv = (function (igv) {
                         totalRows = parseInt(response.totalRows);   // Google convention is to use strings for "long" types
 
                         if (totalRows === 0) {
-                            success(results);
+                            fulfill(results);
                         }
                         else {
 
@@ -196,7 +198,7 @@ var igv = (function (igv) {
                                 getQueryResults(options);
                             }
                             else {
-                                success(results);
+                                fulfill(results);
                             }
                         }
                     }
@@ -234,39 +236,36 @@ var igv = (function (igv) {
                             {
                                 task: task,
                                 contentType: "application/json",
-                                success: function (response) {
+                            }).then(function (response) {
 
-                                    if (response.jobComplete === true) {
+                                if (response.jobComplete === true) {
 
-                                        totalRows = response.totalRows;
+                                    totalRows = response.totalRows;
 
-                                        response.rows.forEach(function (row) {
-                                            results.push(decode(row));
-                                        });
+                                    response.rows.forEach(function (row) {
+                                        results.push(decode(row));
+                                    });
 
-                                        if (results.length < totalRows) {
-                                            getQueryResults(options);
-                                        }
-                                        else {
-                                            success(results);
-                                        }
-
+                                    if (results.length < totalRows) {
+                                        getQueryResults(options);
                                     }
                                     else {
-                                        setTimeout(function () {
-                                            getQueryResults(options);
-                                        }, 1000);
+                                        success(results);
                                     }
 
-
                                 }
+                                else {
+                                    setTimeout(function () {
+                                        getQueryResults(options);
+                                    }, 1000);
+                                }
+
                             });
 
                     }
 
-                }
-            });
-
+                });
+        });
     }
 
 

@@ -49,7 +49,7 @@ var igv = (function (igv) {
             else {
                 this.reader = new igv.GtexFileReader(config);
             }
-        } else if(config.sourceType === "bigquery") {
+        } else if (config.sourceType === "bigquery") {
             this.reader = new igv.BigQueryFeatureReader(config);
         }
         else {
@@ -67,7 +67,7 @@ var igv = (function (igv) {
 
 
         if (this.reader.readHeader) {
-            this.reader.readHeader(function (header, features) {
+            this.reader.readHeader().then(function (header, features) {
                 // Non-indexed readers will return features as a side effect.  This is an important performance hack
                 if (features) {
                     // Assign overlapping features to rows
@@ -95,6 +95,7 @@ var igv = (function (igv) {
         })
     }
 
+
     /**
      * Required function fo all data source objects.  Fetches features for the
      * range requested and passes them on to the success function.  Usually this is
@@ -103,53 +104,55 @@ var igv = (function (igv) {
      * @param chr
      * @param bpStart
      * @param bpEnd
-     * @param success -- function that takes an array of features as an argument
      * @param task
      */
-    igv.FeatureSource.prototype.getFeatures = function (chr, bpStart, bpEnd, success, task) {
+
+    igv.FeatureSource.prototype.getFeatures = function (chr, bpStart, bpEnd, task) {
+
+        var self = this;
+        return new Promise(function (fulfill, reject) {
+
+            var genomicInterval = new igv.GenomicInterval(chr, bpStart, bpEnd),
+                featureCache = self.featureCache,
+                maxRows = self.config.maxRows || 500;
+
+            if (featureCache && (featureCache.range === undefined || featureCache.range.containsRange(genomicInterval))) {
+                fulfill(self.featureCache.queryFeatures(chr, bpStart, bpEnd));
+
+            }
+            else {
+                // TODO -- reuse cached features that overelap new region
+                self.reader.readFeatures(chr, bpStart, bpEnd, task).then(
+                    function (featureList) {
+
+                        var isIndexed =
+                            self.reader.indexed ||
+                            self.config.sourceType === "ga4gh" ||
+                            self.config.sourceType === "immvar" ||
+                            self.config.sourceType === "gtex" ||
+                            self.config.sourceType === "bigquery";
+
+                        self.featureCache = isIndexed ?
+                            new igv.FeatureCache(featureList, genomicInterval) :
+                            new igv.FeatureCache(featureList);   // Note - replacing previous cache with new one
 
 
-        var self = this,
-            genomicInterval = new igv.GenomicInterval(chr, bpStart, bpEnd),
-            featureCache = this.featureCache,
-            maxRows = this.config.maxRows || 500;
+                        // If track is marked "searchable"< cache features by name -- use this with caution, memory intensive
+                        if (self.config.searchable) {
+                            addFeaturesToDB(featureList);
+                        }
 
-        if (featureCache && (featureCache.range === undefined || featureCache.range.containsRange(genomicInterval))) {
-            success(this.featureCache.queryFeatures(chr, bpStart, bpEnd));
+                        // Assign overlapping features to rows
+                        packFeatures(featureList, maxRows);
 
-        }
-        else {
-            // TODO -- reuse cached features that overelap new region
-            this.reader.readFeatures(chr, bpStart, bpEnd,
-                function (featureList) {
+                        // Finally pass features for query interval to continuation
+                        fulfill(self.featureCache.queryFeatures(chr, bpStart, bpEnd));
 
-                var isIndexed =
-                    self.reader.indexed ||
-                    self.config.sourceType === "ga4gh" ||
-                    self.config.sourceType === "immvar" ||
-                    self.config.sourceType === "gtex" ||
-                    self.config.sourceType === "bigquery";
+                    });   // Currently loading at granularity of chromosome
+            }
+        });
+    }
 
-                self.featureCache = isIndexed ?
-                    new igv.FeatureCache(featureList, genomicInterval) :
-                    new igv.FeatureCache(featureList);   // Note - replacing previous cache with new one
-
-
-                // If track is marked "searchable"< cache features by name -- use this with caution, memory intensive
-                if (self.config.searchable) {
-                    addFeaturesToDB(featureList);
-                }
-
-                // Assign overlapping features to rows
-                packFeatures(featureList, maxRows);
-
-                // Finally pass features for query interval to continuation
-                success(self.featureCache.queryFeatures(chr, bpStart, bpEnd));
-
-            }, task);   // Currently loading at granularity of chromosome
-        }
-
-    };
 
     igv.FeatureSource.prototype.allFeatures = function (success) {
 
@@ -165,17 +168,17 @@ var igv = (function (igv) {
      */
     igv.FeatureSource.prototype.getFeatureCache = function (success) {
 
-        var myself = this;
+        var self = this;
 
         if (this.featureCache) {
             success(this.featureCache);
         }
         else {
-            this.reader.readFeatures(function (featureList) {
+            this.reader.readFeatures().then(function (featureList) {
                 //myself.featureMap = featureMap;
-                myself.featureCache = new igv.FeatureCache(featureList);
+                self.featureCache = new igv.FeatureCache(featureList);
                 // Finally pass features for query interval to continuation
-                success(myself.featureCache);
+                success(self.featureCache);
 
             });
         }

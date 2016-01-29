@@ -281,7 +281,7 @@ var igv = (function (igv) {
                     featureFileReader;
 
                 featureFileReader = new igv.FeatureFileReader({localFile: localFile});
-                featureFileReader.readFeatures(function () {
+                featureFileReader.readFeatures().then(function () {
                     console.log("success reading " + localFile.name);
                 });
 

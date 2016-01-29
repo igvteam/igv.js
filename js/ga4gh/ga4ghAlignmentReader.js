@@ -65,101 +65,104 @@ var igv = (function (igv) {
     }
 
 
-    igv.Ga4ghAlignmentReader.prototype.readFeatures = function (chr, bpStart, bpEnd, success, task) {
+    igv.Ga4ghAlignmentReader.prototype.readFeatures = function (chr, bpStart, bpEnd, task) {
 
         var self = this;
 
-        getChrNameMap(function (chrNameMap) {
+        return new Promise(function (fulfill, reject) {
 
-            var queryChr = chrNameMap.hasOwnProperty(chr) ? chrNameMap[chr] : chr,
-                readURL = self.url + "/reads/search";
+            getChrNameMap().then(function (chrNameMap) {
 
-            igv.ga4ghSearch({
-                url: readURL,
-                body: {
-                    "readGroupSetIds": [self.readGroupSetIds],
-                    "referenceName": queryChr,
-                    "start": bpStart,
-                    "end": bpEnd,
-                    "pageSize": "10000"
-                },
-                decode: decodeGa4ghReads,
-                success: success,
-                task: task
+                var queryChr = chrNameMap.hasOwnProperty(chr) ? chrNameMap[chr] : chr,
+                    readURL = self.url + "/reads/search";
+
+                igv.ga4ghSearch({
+                    url: readURL,
+                    body: {
+                        "readGroupSetIds": [self.readGroupSetIds],
+                        "referenceName": queryChr,
+                        "start": bpStart,
+                        "end": bpEnd,
+                        "pageSize": "10000"
+                    },
+                    decode: decodeGa4ghReads,
+                    task: task
+                }).then(fulfill);
+
             });
 
-        });
+            function getChrNameMap() {
 
-        function getChrNameMap(continuation) {
 
-            if (self.chrNameMap) {
-                continuation(self.chrNameMap);
-            }
-
-            else {
-                self.readMetadata(function (json) {
-
-                    self.chrNameMap = {};
-
-                    if (igv.browser && json.readGroups && json.readGroups.length > 0) {
-
-                        var referenceSetId = json.readGroups[0].referenceSetId;
-
-                        console.log("No reference set specified");
-
-                        if (referenceSetId) {
-
-                            // Query for reference names to build an alias table (map of genome ref names -> dataset ref names)
-                            var readURL = self.url + "/references/search";
-
-                            igv.ga4ghSearch({
-                                url: readURL,
-                                body: {
-                                    "referenceSetId": referenceSetId
-                                },
-                                decode: function (j) {
-                                    return j.references;
-                                },
-                                success: function (references) {
-                                    references.forEach(function (ref) {
-                                        var refName = ref.name,
-                                            alias = igv.browser.genome.getChromosomeName(refName);
-                                        self.chrNameMap[alias] = refName;
-                                    });
-                                    continuation(self.chrNameMap);
-
-                                },
-                                task: task
-                            });
-                        }
-                        else {
-
-                            // Try hardcoded constants -- workaround for non-compliant data at Google
-                            populateChrNameMap(self.chrNameMap, self.config.datasetId);
-
-                            continuation(self.chrNameMap);
-                        }
+                return new Promise(function (fulfill, reject) {
+                    if (self.chrNameMap) {
+                        fulfill(self.chrNameMap);
                     }
 
                     else {
-                        // No browser object, can't build map.  This can occur when run from unit tests
-                        continuation(self.chrNameMap);
+                        self.readMetadata(task).then(function (json) {
+
+                            self.chrNameMap = {};
+
+                            if (igv.browser && json.readGroups && json.readGroups.length > 0) {
+
+                                var referenceSetId = json.readGroups[0].referenceSetId;
+
+                                console.log("No reference set specified");
+
+                                if (referenceSetId) {
+
+                                    // Query for reference names to build an alias table (map of genome ref names -> dataset ref names)
+                                    var readURL = self.url + "/references/search";
+
+                                    igv.ga4ghSearch({
+                                        url: readURL,
+                                        body: {
+                                            "referenceSetId": referenceSetId
+                                        },
+                                        decode: function (j) {
+                                            return j.references;
+                                        },
+                                        task: task
+                                    }).then(function (references) {
+                                        references.forEach(function (ref) {
+                                            var refName = ref.name,
+                                                alias = igv.browser.genome.getChromosomeName(refName);
+                                            self.chrNameMap[alias] = refName;
+                                        });
+                                        fulfill(self.chrNameMap);
+
+                                    });
+                                }
+                                else {
+
+                                    // Try hardcoded constants -- workaround for non-compliant data at Google
+                                    populateChrNameMap(self.chrNameMap, self.config.datasetId);
+
+                                    fulfill(self.chrNameMap);
+                                }
+                            }
+
+                            else {
+                                // No browser object, can't build map.  This can occur when run from unit tests
+                                fulfill(self.chrNameMap);
+                            }
+                        });
                     }
+
                 });
             }
 
-        }
-
+        });
     }
 
 
     igv.Ga4ghAlignmentReader.prototype.readMetadata = function (success, task) {
 
-        igv.ga4ghGet({
+        return igv.ga4ghGet({
             url: this.url,
             entity: "readgroupsets",
             entityId: this.readGroupSetIds,
-            success: success,
             task: task
         });
     }

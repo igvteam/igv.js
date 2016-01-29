@@ -41,7 +41,7 @@ var igv = (function (igv) {
 
     };
 
-    igv.ImmVarReader.prototype.readFeatures = function (success, task, range) {
+    igv.ImmVarReader.prototype.readFeatures = function (task, range) {
 
         var queryChr = range.chr,
             queryStart = range.start,
@@ -49,10 +49,11 @@ var igv = (function (igv) {
             queryURL = this.url + "?chromosome=" + queryChr + "&start=" + queryStart + "&end=" + queryEnd +
                 "&cell_condition_id=" + this.cellConditionId;
 
-
-        igvxhr.loadJson(queryURL, {
-            task: task,
-            success: function (json) {
+        return new Promise(function (fulfill, reject) {
+            igvxhr.loadJson(queryURL, {
+                task: task,
+                withCredentials: this.config.withCredentials
+            }).then(function (json) {
                 var variants;
 
                 if (json) {
@@ -68,16 +69,15 @@ var igv = (function (igv) {
                         eqtl.end = eqtl.position + 1;
                     });
 
-                    success(json.eqtls);
+                    fulfill(json.eqtls);
                 }
                 else {
-                    success(null);
+                    fulfill(null);
                 }
 
-            },
-            withCredentials: this.config.withCredentials
-        });
+            });
 
+        });
     }
 
 

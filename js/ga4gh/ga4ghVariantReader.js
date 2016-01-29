@@ -36,101 +36,105 @@ var igv = (function (igv) {
     }
 
 
-    igv.Ga4ghVariantReader.prototype.readFeatures = function (chr, bpStart, bpEnd, success, task) {
+    igv.Ga4ghVariantReader.prototype.readFeatures = function (chr, bpStart, bpEnd, task) {
 
-        var myself = this;
+        var self = this;
 
-        getChrNameMap(function (chrNameMap) {
+        return new Promise(function (fulfill, reject) {
 
-            var queryChr = chrNameMap.hasOwnProperty(chr) ? chrNameMap[chr] : chr,
-                readURL = myself.url + "/variants/search";
+            getChrNameMap().then(function (chrNameMap) {
 
-            igv.ga4ghSearch({
-                url: readURL,
-                body: {
-                    "variantSetIds": [myself.variantSetId],
-                    "callSetIds": myself.callSetIds,            // Empty for now, we don't use genotypes yet
-                    "referenceName": queryChr,
-                    "start": bpStart.toString(),
-                    "end": bpEnd.toString(),
-                    "pageSize": "10000"
-                },
-                decode: function (json) {
-                    var variants = [];
+                var queryChr = chrNameMap.hasOwnProperty(chr) ? chrNameMap[chr] : chr,
+                    readURL = self.url + "/variants/search";
 
-                    // If a single call set id is specified filter out hom-ref calls
-                    //var filterHomeRef = myself.callSetIds && myself.callSetIds.length == 1;
+                var p = igv.ga4ghSearch({
+                    url: readURL,
+                    body: {
+                        "variantSetIds": [self.variantSetId],
+                        "callSetIds": self.callSetIds,            // Empty for now, we don't use genotypes yet
+                        "referenceName": queryChr,
+                        "start": bpStart.toString(),
+                        "end": bpEnd.toString(),
+                        "pageSize": "10000"
+                    },
+                    decode: function (json) {
+                        var variants = [];
 
-                    json.variants.forEach(function (json) {
-                        if (json.calls && json.calls.length === 1) {
-                            var allele1 = json.calls[0].genotype[0],
-                                allele2 = json.calls[0].genotype[1],
-                                variant;
-                            if (allele1 === 0 && allele2 === 0) {
-                                return //gt = "HOMEREF"
-                            }
-                            else if (allele1 === allele2) {
-                                gt = "HOMVAR"
+                        // If a single call set id is specified filter out hom-ref calls
+                        //var filterHomeRef = myself.callSetIds && myself.callSetIds.length == 1;
+
+                        json.variants.forEach(function (json) {
+                            if (json.calls && json.calls.length === 1) {
+                                var allele1 = json.calls[0].genotype[0],
+                                    allele2 = json.calls[0].genotype[1],
+                                    variant;
+                                if (allele1 === 0 && allele2 === 0) {
+                                    return //gt = "HOMEREF"
+                                }
+                                else if (allele1 === allele2) {
+                                    gt = "HOMVAR"
+                                }
+                                else {
+                                    gt = "HETVAR";
+                                }
+                                variant = igv.createGAVariant(json);
+                                variant.genotype = gt;
+                                variants.push(variant);
                             }
                             else {
-                                gt = "HETVAR";
+                                variants.push(igv.createGAVariant(json));
                             }
-                            variant = igv.createGAVariant(json);
-                            variant.genotype = gt;
-                            variants.push(variant);
-                        }
-                        else {
-                            variants.push(igv.createGAVariant(json));
-                        }
-                    });
-
-                    return variants;
-                },
-                success: success,
-                task: task
-            });
-        });
-
-
-        function getChrNameMap(continuation) {
-
-            if (myself.chrNameMap) {
-                continuation(myself.chrNameMap);
-            }
-
-            else {
-                myself.readMetadata(function (json) {
-
-                    myself.metadata = json.metadata;
-                    myself.chrNameMap = {};
-                    if (json.referenceBounds && igv.browser) {
-                        json.referenceBounds.forEach(function (rb) {
-                            var refName = rb.referenceName,
-                                alias = igv.browser.genome.getChromosomeName(refName);
-                            myself.chrNameMap[alias] = refName;
-
                         });
-                    }
-                    continuation(myself.chrNameMap);
 
-                })
+                        return variants;
+                    },
+                    task: task
+                });
+                p.then(fulfill);
+            });
+
+
+            function getChrNameMap() {
+
+                return new Promise(function (fulfill, reject) {
+
+                    if (self.chrNameMap) {
+                        fulfill(self.chrNameMap);
+                    }
+
+                    else {
+                        self.readMetadata(task).then(function (json) {
+
+                            self.metadata = json.metadata;
+                            self.chrNameMap = {};
+                            if (json.referenceBounds && igv.browser) {
+                                json.referenceBounds.forEach(function (rb) {
+                                    var refName = rb.referenceName,
+                                        alias = igv.browser.genome.getChromosomeName(refName);
+                                    self.chrNameMap[alias] = refName;
+
+                                });
+                            }
+                            fulfill(self.chrNameMap);
+
+                        })
+                    }
+
+                });
             }
 
-        }
-
+        });
     }
 
 
-    igv.Ga4ghVariantReader.prototype.readMetadata = function (success, task) {
+    igv.Ga4ghVariantReader.prototype.readMetadata = function (task) {
 
-
-        igv.ga4ghGet({
+        return igv.ga4ghGet({
             url: this.url,
             entity: "variantsets",
             entityId: this.variantSetId,
-            success: success,
             task: task
-        })
+        });
 
     }
 

@@ -108,7 +108,7 @@ var igv = (function (igv) {
             continuation(summarydata);
         };
         if (this.featureSourceRed) {
-            this.featureSourceRed.getFeatures(chr, bpStart, bpEnd, filtersummary, task);
+            this.featureSourceRed.getFeatures(chr, bpStart, bpEnd, task).then(filtersummary);
         }
         else {
             log("Aneu track has no summary data yet");
@@ -118,7 +118,7 @@ var igv = (function (igv) {
     igv.AneuTrack.prototype.loadSummary = function (chr, bpStart, bpEnd, continuation, task) {
         var self = this;
         if (this.featureSourceRed) {
-            this.featureSourceRed.getFeatures(chr, bpStart, bpEnd, continuation, task);
+            this.featureSourceRed.getFeatures(chr, bpStart, bpEnd, task).then(continuation);
         }
         else {
             //log("Data is not loaded yet. Loading json first. tokens are "+me.config.tokens);
@@ -135,63 +135,68 @@ var igv = (function (igv) {
                 }
             };
 
-            afterload = {
+            var afterload = {
                 headers: self.config.headers, // http headers, not file header
                 tokens: self.config.tokens, // http headers, not file header
-                success: afterJsonLoaded,
                 withCredentials: self.config.withCredentials
             };
             var config = self.config;
             if (config.localFile) {
-                igvxhr.loadStringFromFile(config.localFile, afterload);
+                igvxhr.loadStringFromFile(config.localFile, afterload).then(afterJsonLoaded);
             } else {
-                igvxhr.loadString(config.url, afterload);
+                igvxhr.loadString(config.url, afterload).then(afterJsonLoaded);
             }
             return null;
         }
     };
 
-    igv.AneuTrack.prototype.getFeatures = function (chr, bpStart, bpEnd, continuation, task) {
+
+    igv.AneuTrack.prototype.getFeatures = function (chr, bpStart, bpEnd, task) {
+
         var self = this;
-        if (this.featureSourceRed) {
-            // first load diff file, then load redline file, THEN call
-            // continuation
-            var loadsecondfile = function (redlinedata) {
-                // console.log("loadsecondfile: argument redlinedata:
-                // "+JSON.stringify(redlinedata));
-                self.redlinedata = redlinedata;
-                // console.log("Now loading diff data, using original
-                // continuation");
-                self.featureSource.getFeatures(chr, bpStart, bpEnd, continuation, task);
-            };
-            // console.log("About to load redline file");
-            this.featureSourceRed.getFeatures(chr, bpStart, bpEnd, loadsecondfile, task);
+        return new Promise(function (fulfill, reject) {
 
-        } else {
-            log("Data is not loaded yet. Loading json first");
+            if (this.featureSourceRed) {
+                // first load diff file, then load redline file, THEN call
+                // continuation
+                var loadsecondfile = function (redlinedata) {
+                    // console.log("loadsecondfile: argument redlinedata:
+                    // "+JSON.stringify(redlinedata));
+                    self.redlinedata = redlinedata;
+                    // console.log("Now loading diff data, using original
+                    // continuation");
+                    self.featureSource.getFeatures(chr, bpStart, bpEnd, task).then(fulfill);
+                };
+                // console.log("About to load redline file");
+                this.featureSourceRed.getFeatures(chr, bpStart, bpEnd, task).then(loadsecondfile);
 
-            var afterJsonLoaded = function (json) {
-                json = JSON.parse(json);
-                log("Got json: " + json + ", diff :" + json.diff);
-                self.featureSource = new igv.AneuFeatureSource(config, json.diff);
-                self.featureSourceRed = new igv.AneuFeatureSource(config, json.redline);
-                self.getFeatures(chr, bpStart, bpEnd, continuation, task);
-            };
-
-            afterload = {
-                headers: self.config.headers, // http headers, not file header
-                tokens: self.config.tokens, // http headers, not file header
-                success: afterJsonLoaded,
-                withCredentials: self.config.withCredentials
-            };
-            var config = self.config;
-            if (config.localFile) {
-                igvxhr.loadStringFromFile(config.localFile, afterload);
             } else {
-                igvxhr.loadString(config.url, afterload);
+                log("Data is not loaded yet. Loading json first");
+
+                var afterJsonLoaded = function (json) {
+                    json = JSON.parse(json);
+                    log("Got json: " + json + ", diff :" + json.diff);
+                    self.featureSource = new igv.AneuFeatureSource(config, json.diff);
+                    self.featureSourceRed = new igv.AneuFeatureSource(config, json.redline);
+                    self.getFeatures(chr, bpStart, bpEnd, task).then(fulfill);
+                };
+
+                afterload = {
+                    headers: self.config.headers, // http headers, not file header
+                    tokens: self.config.tokens, // http headers, not file header
+                    withCredentials: self.config.withCredentials
+                };
+                var config = self.config;
+                if (config.localFile) {
+                    igvxhr.loadStringFromFile(config.localFile, afterload).then(afterJsonLoaded);
+                } else {
+                    igvxhr.loadString(config.url, afterload).then(afterJsonLoaded);
+                }
             }
-        }
-    };
+        });
+    }
+
+
     igv.AneuTrack.prototype.getColor = function (value) {
         var expected = 2;
         if (value < expected) {
@@ -457,7 +462,7 @@ var igv = (function (igv) {
 
         var myself = this, segment, min, max, f, i, s, sampleNames, len = bpEnd - bpStart, scores = {};
 
-        this.featureSource.getFeatures(chr, bpStart, bpEnd, function (featureList) {
+        this.featureSource.getFeatures(chr, bpStart, bpEnd).then(function (featureList) {
 
             // Compute weighted average score for each sample
             for (i = 0, len = featureList.length; i < len; i++) {

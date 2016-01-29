@@ -65,6 +65,8 @@ var igv = (function (igv) {
         this.filterOption = config.filterOption || {name: "mappingQuality", params: [30, undefined]};
 
         this.featureSource = new igv.BamSource(config);
+
+        this.sortDirection = true;
     };
 
     igv.BAMTrack.alignmentShadingOptions = {
@@ -152,39 +154,41 @@ var igv = (function (igv) {
         return undefined;
     };
 
-    igv.BAMTrack.prototype.filterAlignments = function (filterOption, callback) {
+    igv.BAMTrack.prototype.filterAlignments = function (filterOption) {
 
-        var pixelWidth,
-            bpWidth,
-            bpStart,
-            bpEnd,
-            filter;
+        return new Promise(function (fulfill, reject) {
 
-        filter = igv.BAMTrack.selectFilter(this, filterOption);
+            var pixelWidth,
+                bpWidth,
+                bpStart,
+                bpEnd,
+                filter;
 
-        pixelWidth = 3 * this.trackView.canvas.width;
-        bpWidth = Math.round(igv.browser.referenceFrame.toBP(pixelWidth));
-        bpStart = Math.max(0, Math.round(igv.browser.referenceFrame.start - bpWidth / 3));
-        bpEnd = bpStart + bpWidth;
+            filter = igv.BAMTrack.selectFilter(this, filterOption);
 
-        this.featureSource.getFeatures(igv.browser.referenceFrame.chr, bpStart, bpEnd, function (genomicInterval) {
+            pixelWidth = 3 * this.trackView.canvas.width;
+            bpWidth = Math.round(igv.browser.referenceFrame.toBP(pixelWidth));
+            bpStart = Math.max(0, Math.round(igv.browser.referenceFrame.start - bpWidth / 3));
+            bpEnd = bpStart + bpWidth;
 
-            genomicInterval.packedAlignmentRows.forEach(function (alignmentRow) {
-                alignmentRow.alignments.forEach(function (alignment) {
-                    alignment.hidden = filter(alignment);
+            this.featureSource.getFeatures(igv.browser.referenceFrame.chr, bpStart, bpEnd).then(function (genomicInterval) {
+
+                genomicInterval.packedAlignmentRows.forEach(function (alignmentRow) {
+                    alignmentRow.alignments.forEach(function (alignment) {
+                        alignment.hidden = filter(alignment);
+                    });
                 });
-            });
 
-            callback();
+            });
         });
-    };
+    }
 
     // Shift - Click to Filter alignments
     igv.BAMTrack.prototype.shiftClick = function (genomicLocation, event) {
 
-        var myself = this;
+        var self = this;
 
-        this.filterAlignments(this.filterOption, function () {
+        this.filterAlignments(this.filterOption).then(function () {
             myself.trackView.update();
             $(myself.trackView.viewportDiv).scrollTop(0);
         });
@@ -193,17 +197,18 @@ var igv = (function (igv) {
 
     igv.BAMTrack.prototype.sortAlignmentRows = function (genomicLocation, sortOption) {
 
-        var myself = this;
+        var self = this;
 
-        this.featureSource.getFeatures(igv.browser.referenceFrame.chr, genomicLocation, (1 + genomicLocation), function (genomicInterval) {
+        this.featureSource.getFeatures(igv.browser.referenceFrame.chr, genomicLocation, (1 + genomicLocation)).then(function (genomicInterval) {
+            doSortAlignmentRows(genomicLocation, genomicInterval, sortOption, self.sortDirection);
+            self.trackView.update();
+            $(self.trackView.viewportDiv).scrollTop(0);
 
-            doSortAlignmentRows(genomicLocation, genomicInterval, sortOption);
-            myself.trackView.update();
-            $(myself.trackView.viewportDiv).scrollTop(0);
+            self.sortDirection = !self.sortDirection;
         });
     };
 
-    function doSortAlignmentRows(genomicLocation, genomicInterval, sortOption) {
+    function doSortAlignmentRows(genomicLocation, genomicInterval, sortOption, sortDirection) {
 
         var alignmentRows = genomicInterval.packedAlignmentRows,
             sequence = genomicInterval.sequence;
@@ -220,7 +225,7 @@ var igv = (function (igv) {
         });
 
         alignmentRows.sort(function (a, b) {
-            return a.score - b.score;
+            return sortDirection ? a.score - b.score : b.score - a.score;
         });
 
     }
@@ -232,17 +237,23 @@ var igv = (function (igv) {
 
     };
 
-    igv.BAMTrack.prototype.getFeatures = function (chr, bpStart, bpEnd, continuation, task) {
+    igv.BAMTrack.prototype.getFeatures = function (chr, bpStart, bpEnd, task) {
 
-        // Don't try to draw alignments for windows > the visibility window
-        if (igv.browser.trackViewportWidthBP() > this.visibilityWindow) {
-            continuation({exceedsVisibilityWindow: true});
-            return;
-        }
+        var self = this;
 
-        this.featureSource.getFeatures(chr, bpStart, bpEnd, continuation, task);
+        return new Promise(function (fulfill, reject) {
+            // Don't try to draw alignments for windows > the visibility window
 
-    };
+            if (igv.browser.trackViewportWidthBP() > self.visibilityWindow) {
+                fulfill({exceedsVisibilityWindow: true});
+                return;
+            }
+
+            self.featureSource.getFeatures(chr, bpStart, bpEnd, task).then(fulfill);
+
+        });
+    }
+
 
     igv.BAMTrack.prototype.draw = function (options) {
 
@@ -416,11 +427,11 @@ var igv = (function (igv) {
                                 y;
 
 
-                            if(block.gapType != undefined && xBlockEnd != undefined) {
+                            if (block.gapType != undefined && xBlockEnd != undefined) {
                                 if ("D" === block.gapType) {
                                     igv.graphics.strokeLine(ctx, xBlockStart, yStrokedLine, xBlockEnd, yStrokedLine, {strokeStyle: deletionColor});
                                 }
-                                else  {
+                                else {
                                     igv.graphics.strokeLine(ctx, xBlockStart, yStrokedLine, xBlockEnd, yStrokedLine, {strokeStyle: skippedColor});
                                 }
                             }
@@ -476,7 +487,7 @@ var igv = (function (igv) {
                             }
 
                             else {
-                          //      igv.graphics.fillRect(ctx, xBlockStart, yRect, widthBlock, height, {fillStyle: "white"});
+                                //      igv.graphics.fillRect(ctx, xBlockStart, yRect, widthBlock, height, {fillStyle: "white"});
                                 igv.graphics.fillRect(ctx, xBlockStart, yRect, widthBlock, height, {fillStyle: canvasColor});
 
                                 if (alignment.mq <= 0) {
