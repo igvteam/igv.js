@@ -163,52 +163,7 @@
 
         <h3>Example tracks - click to load</h3>
 
-        <div><input type="file" id="fileInput"></div>
 
-        <!-- locus chr19:9917384-14917884 -->
-        <div onclick="igv.browser.loadTrack({
-                                 type : 'wig',
-                                  url : 'https://dl.nuthintoseehere.com/u/11270323/BroadInstitute/dataFormats/WIG/random_5000_lo_0dot1_hi_1.wig',
-                                label : 'Unreachable WIG (Bogus domain)'
-                                })">Unreachable WIG (Bogus domain)
-        </div>
-
-        <!-- locus chr19:9917384-14917884 -->
-        <div onclick="igv.browser.loadTrack({
-                                 type : 'wig',
-                                  url : 'https://dl.dropboxusercontent.com/u/11270323/BroadInstitute/dataFormats/WIG/nuthin_here.wig',
-                                label : 'Unreachable WIG (Bogus file name)'
-                                })">Unreachable WIG (Bogus file name)
-        </div>
-
-        <!-- locus chr19:9917384-14917884 -->
-        <div onclick="igv.browser.loadTrack({
-        type : 'wig',
-        url : 'https://dl.dropboxusercontent.com/u/11270323/BroadInstitute/dataFormats/WIG/random_5000_lo_0dot1_hi_1.wig',
-        name : 'Random 0.1 to 1.0'
-        })">Random 0.1 to 1.0
-        </div>
-
-        <!--<div onclick="igv.browser.loadTrack({-->
-        <!--type : 'wig',-->
-        <!--url : 'https://dl.dropboxusercontent.com/u/11270323/BroadInstitute/dataFormats/WIG/random_10000.wig',-->
-        <!--label : 'Random -1 to +1'-->
-        <!--})">Random -1 to +1-->
-        <!--</div>-->
-
-        <!--<div onclick="igv.browser.loadTrack({-->
-        <!--type : 'wig',-->
-        <!--url : 'https://dl.dropboxusercontent.com/u/11270323/BroadInstitute/dataFormats/WIG/random_5000_lo_neg_1_hi_0.wig',-->
-        <!--label : 'Random -1 to 0'-->
-        <!--})">Random Random -1 to 0-->
-        <!--</div>-->
-
-
-        <!--        <div onclick="igv.browser.loadTrack({
-                                        type: 'bam',
-                                        url: 'http://data.broadinstitute.org/igvdata/1KG/b37/data/NA06984/alignment/NA06984.mapped.ILLUMINA.bwa.CEU.low_coverage.20120522.bam',
-                                        name: 'NA06984'})">NA06984 (BAM - Broad Server)
-                </div>-->
 
         <div onclick="igv.browser.loadTrack({
                             url: 'https://data.broadinstitute.org/igvdata/BodyMap/hg19/IlluminaHiSeq2000_BodySites/brain_merged/accepted_hits.bam',
@@ -235,15 +190,6 @@
                                 url: '../test/data/bam/gstt1_sample.bam',
                                 name: 'Ion BAM'})">GSTT1 sample bam
         </div>
-
-
-        <div onclick="igv.browser.loadTrack({
-                                type: 'bam',
-                                url: 'https://data.broadinstitute.org/igvdata/BodyMap/hg19/IlluminaHiSeq2000_BodySites/brain_merged/accepted_hits.bam',
-                                name: 'Brain'
-        })">Body Map bam
-        </div>
-
 
 
 
@@ -282,15 +228,6 @@
         </div>
 
         <div onclick="igv.browser.loadTrack({
-                                type: 'seg',
-                                url: 'https://genomespace-dev.s3.amazonaws.com/users/ted/segmented_data_080520.seg.gz?AWSAccessKeyId=AKIAIVEV5BSUERMTN5LA&Expires=1454022310&Signature=PJBy7%2FJTehP%2FPGBNaCoCxMxr16w%3D',
-                                indexed: false,
-                                name: 'GS'})">GS
-        </div>
-
-
-
-        <div onclick="igv.browser.loadTrack({
                                 type: 'eqtl',
                                 sourceType: 'gtex',
                                 url: '//www.gtexportal.org/igv/assets/eqtl/Skin_Sun_Exposed_Lower_leg.portal.eqtl.bin',
@@ -316,7 +253,7 @@
                                 {
                                 url: 'https://www.encodeproject.org/files/ENCFF002ADR/@@download/ENCFF002ADR.bigBed',
                                 name: 'ENCFF002ADR',
-                                visibilityWindow: 200000
+                                visibilityWindow: 2000000
                                 })">Encode bigbed
         </div>
 
@@ -342,6 +279,12 @@
         })">DB Snp Tabix
         </div>
 
+        <div onclick="igv.browser.loadTrack({
+
+                                url: '../test/data/tabix/TSVC.vcf.gz',
+                                name: 'VCF (TSVC)'
+        })">VCF (TSVC)
+        </div>
 
 
 
