@@ -257,7 +257,7 @@ var igv = (function (igv) {
                     }
                 }
                 else {
-                    loadFeaturesNoIndex.call(self).then(function (features) {
+                    loadFeaturesNoIndex.call(self, undefined, function (features) {
                         fulfill(self.header, features);       // Unfortunate use of side affect here
                     });
                 }
