@@ -41,7 +41,7 @@ var igv = (function (igv) {
         var self = this;
         return new Promise(function (fulfill, reject) {
 
-                this.reader.getZoomHeaders(function (zoomLevelHeaders) {
+                self.reader.getZoomHeaders(function (zoomLevelHeaders) {
 
                     // Select a biwig "zoom level" appropriate for the current resolution
                     var bwReader = self.reader,
@@ -85,7 +85,7 @@ var igv = (function (igv) {
 
                                 leafItems.forEach(function (item) {
 
-                                    bufferedReader.dataViewForRange({start: item.dataOffset, size: item.dataSize}).then(function (uint8Array) {
+                                    bufferedReader.dataViewForRange({start: item.dataOffset, size: item.dataSize}, function (uint8Array) {
 
                                         var inflate = new Zlib.Inflate(uint8Array);
                                         var plain = inflate.decompress();

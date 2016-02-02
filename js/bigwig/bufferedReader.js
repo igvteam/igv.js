@@ -42,57 +42,56 @@ var igv = (function (igv) {
     /**
      *
      * @param requestedRange - byte rangeas {start, size}
+     * @param continutation - function to receive result
      * @param asUint8 - optional flag to return result as an UInt8Array
      */
-    igv.BufferedReader.prototype.dataViewForRange = function (requestedRange, asUint8) {
+    igv.BufferedReader.prototype.dataViewForRange = function (requestedRange, continutation, asUint8) {
 
-        var self = this;
+        var self = this,
+            hasData = (this.data && (this.range.start <= requestedRange.start) &&
+            ((this.range.start + this.range.size) >= (requestedRange.start + requestedRange.size))),
+            bufferSize,
+            loadRange;
 
-        return new Promise(function (fulfill, reject) {
-            var hasData = (this.data && (this.range.start <= requestedRange.start) &&
-                ((this.range.start + this.range.size) >= (requestedRange.start + requestedRange.size))),
-                bufferSize,
-                loadRange;
+        if (hasData) {
+            subbuffer(self, requestedRange, asUint8);
+        }
+        else {
+            // Expand buffer size if needed, but not beyond content length
+            bufferSize = Math.max(this.bufferSize, requestedRange.size);
 
-            if (hasData) {
-                subbuffer(self, requestedRange, asUint8);
+            if (this.contentLength > 0 && requestedRange.start + bufferSize > this.contentLength) {
+                loadRange = {start: requestedRange.start};
             }
             else {
-                // Expand buffer size if needed, but not beyond content length
-                bufferSize = Math.max(this.bufferSize, requestedRange.size);
-
-                if (this.contentLength > 0 && requestedRange.start + bufferSize > this.contentLength) {
-                    loadRange = {start: requestedRange.start};
-                }
-                else {
-                    loadRange = {start: requestedRange.start, size: bufferSize};
-                }
-
-                igvxhr.loadArrayBuffer(self.path,
-                    {
-                        headers: self.config.headers,
-                        range: loadRange,
-                        withCredentials: self.config.withCredentials
-                    }).then(function (arrayBuffer) {
-                        self.data = arrayBuffer;
-                        self.range = loadRange;
-                        subbuffer(self, requestedRange, asUint8);
-                    });
-
+                loadRange = {start: requestedRange.start, size: bufferSize};
             }
 
+            igvxhr.loadArrayBuffer(self.path,
+                {
+                    headers: this.config.headers,
+                    range: loadRange,
+                    withCredentials: self.config.withCredentials
+                }).then(function (arrayBuffer) {
+                    // TODO -- handle error
 
-            function subbuffer(bufferedReader, requestedRange, asUint8) {
+                    self.data = arrayBuffer;
+                    self.range = loadRange;
+                    subbuffer(self, requestedRange, asUint8);
+                });
 
-                var len = bufferedReader.data.byteLength,
-                    bufferStart = requestedRange.start - bufferedReader.range.start,
-                    result = asUint8 ?
-                        new Uint8Array(bufferedReader.data, bufferStart, len - bufferStart) :
-                        new DataView(bufferedReader.data, bufferStart, len - bufferStart);
-                fulfill(result);
-            }
-        });
+        }
 
+
+        function subbuffer(bufferedReader, requestedRange, asUint8) {
+
+            var len = bufferedReader.data.byteLength,
+                bufferStart = requestedRange.start - bufferedReader.range.start,
+                result = asUint8 ?
+                    new Uint8Array(bufferedReader.data, bufferStart, len - bufferStart) :
+                    new DataView(bufferedReader.data, bufferStart, len - bufferStart);
+            continutation(result);
+        }
 
 
     }
