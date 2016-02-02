@@ -63,6 +63,7 @@
 
     <script type="text/javascript" src="../js/gtex/eqtlTrack.js"></script>
     <script type="text/javascript" src="../js/gtex/gtexFileReader.js"></script>
+    <script type="text/javascript" src="../js/gtex/gtexReader.js"></script>
     <script type="text/javascript" src="../js/gtex/gtex.js"></script>
     <script type="text/javascript" src="../js/gtex/immvarReader.js"></script>
 
@@ -164,7 +165,6 @@
         <h3>Example tracks - click to load</h3>
 
 
-
         <div onclick="igv.browser.loadTrack({
                             url: 'https://data.broadinstitute.org/igvdata/BodyMap/hg19/IlluminaHiSeq2000_BodySites/brain_merged/accepted_hits.bam',
                             name: 'Brain (BodyMap)'
@@ -190,7 +190,6 @@
                                 url: '../test/data/bam/gstt1_sample.bam',
                                 name: 'Ion BAM'})">GSTT1 sample bam
         </div>
-
 
 
         <div onclick="igv.browser.loadTrack({
@@ -287,8 +286,6 @@
         </div>
 
 
-
-
         <div onclick="igv.browser.loadTrack(
                                 {
                                 url: '../test/data/misc/GWAS_catalog_SNPs_Pval5E08_hg19_040115_subset.txt',
@@ -324,7 +321,27 @@
         })">Color gff
         </div>
 
-        <div onclick="igv.browser.search('chr10');">GOTO</div>
+        <div onclick="igv.browser.loadTrack(
+        {
+           type: 'eqtl',
+           sourceType: 'gtex-ws',
+           url: 'http://gtexportal.org/api/v6/singleTissueEqtlByLocation',
+           tissueName: 'Adipose_Subcutaneous',
+           name: 'Adipose_Subcutaneous'
+           })">GTEX eqtl
+        </div>
+
+        <div onclick="igv.browser.loadTrack({ type: 't2d',
+                                    url: '//www.type2diabetesgenetics.org/trait/getData',
+                                    trait: '2hrI',
+                                    dataset: 'GWAS_MAGIC_mdv2',
+                                    pvalue: 'P_VALUE',
+                                    name: '2-hour insulin',
+                                    variantURL: 'http://www.type2diabetesgenetics.org/variantInfo/variantInfo/',
+                                    traitURL: 'http://www.type2diabetesgenetics.org/trait/traitInfo/'
+                                })">two-hour insulin
+        </div>
+
 
 
     </div>
