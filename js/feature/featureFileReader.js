@@ -94,13 +94,7 @@ var igv = (function (igv) {
         }
     }
 
-
-    /**
-     *
-     * @param task
-     * @returns a Promise for the features.
-     */
-    function loadFeaturesNoIndex(task) {
+    function loadFeaturesNoIndex(task, continuation) {
 
         var self = this
         parser = this.parser,
@@ -110,22 +104,100 @@ var igv = (function (igv) {
                 task: task
             };
 
-        return new Promise(function (fulfill, reject) {
+        if (self.localFile) {
+            igvxhr.loadStringFromFile(self.localFile, options).then(parseData);
+        }
+        else {
+            igvxhr.loadString(self.url, options).then(parseData);
+        }
 
-            var parseData = function (data) {
-                self.header = parser.parseHeader(data);
-                fulfill(parser.parseFeatures(data));   // <= PARSING DONE HERE
-            };
 
-
-            if (this.localFile) {
-                igvxhr.loadStringFromFile(this.localFile, options).then(parseData);
-            }
-            else {
-                igvxhr.loadString(this.url, options).then(parseData);
-            }
-        });
+        function parseData(data) {
+            self.header = parser.parseHeader(data);
+            continuation(parser.parseFeatures(data));   // <= PARSING DONE HERE
+        };
     }
+
+
+    function loadFeaturesWithIndex(chr, start, end, task, continuation) {
+
+        //console.log("Using index");
+
+        var self = this,
+            blocks,
+            processed,
+            allFeatures,
+            index = this.index,
+            tabix = index && index.tabix,
+            refId = tabix ? index.sequenceIndexMap[chr] : chr;
+
+        blocks = index.blocksForRange(refId, start, end);
+
+        if (!blocks || blocks.length === 0) {
+            continuation(null);
+        }
+        else {
+
+            allFeatures = [];
+            processed = 0;
+
+            blocks.forEach(function (block) {
+
+                var startPos = block.minv.block,
+                    startOffset = block.minv.offset,
+                    endPos = block.maxv.block + (index.tabix ? MAX_GZIP_BLOCK_SIZE + 100 : 0),
+                    options = {
+                        headers: self.config.headers,           // http headers, not file header
+                        range: {start: startPos, size: endPos - startPos + 1},
+                        withCredentials: self.config.withCredentials,
+                        task: task
+                    },
+                    success = function (data) {
+
+                        var inflated, slicedData,
+                            byteLength = data.byteLength;
+
+                        processed++;
+
+                        if (index.tabix) {
+
+                            inflated = igvxhr.arrayBufferToString(igv.unbgzf(data));
+                            // need to decompress data
+                        }
+                        else {
+                            inflated = data;
+                        }
+
+                        slicedData = startOffset ? inflated.slice(startOffset) : inflated;
+                        allFeatures = allFeatures.concat(self.parser.parseFeatures(slicedData));
+
+                        if (processed === blocks.length) {
+                            allFeatures.sort(function (a, b) {
+                                return a.start - b.start;
+                            });
+                            continuation(allFeatures);
+                        }
+                    };
+
+
+                // Async load
+                if (self.localFile) {
+                    igvxhr.loadStringFromFile(self.localFile, options).then(success);
+                }
+                else {
+                    if (index.tabix) {
+                        igvxhr.loadArrayBuffer(self.url, options).then(success);
+                    }
+                    else {
+                        igvxhr.loadString(self.url, options).then(success);
+                    }
+                }
+            });
+
+        }
+
+    }
+
 
     function getIndex() {
 
@@ -206,94 +278,16 @@ var igv = (function (igv) {
         return new Promise(function (fulfill, reject) {
 
             if (self.index) {
-                loadFeaturesWithIndex(self.index, packFeatures);
+                loadFeaturesWithIndex.call(self, chr, start, end, task, packFeatures);
             }
             else {
-                loadFeaturesNoIndex.call(self, packFeatures, task);
+                loadFeaturesNoIndex.call(self, task, packFeatures);
             }
 
             function packFeatures(features) {
                 // TODO pack
                 fulfill(features);
             }
-
-            function loadFeaturesWithIndex(index, continuation) {
-
-                //console.log("Using index");
-
-                var blocks,
-                    processed,
-                    allFeatures,
-                    tabix = index && index.tabix,
-                    refId = tabix ? index.sequenceIndexMap[chr] : chr;
-
-                blocks = index.blocksForRange(refId, start, end);
-
-                if (!blocks || blocks.length === 0) {
-                    fulfill(null);
-                }
-                else {
-
-                    allFeatures = [];
-                    processed = 0;
-
-                    blocks.forEach(function (block) {
-
-                        var startPos = block.minv.block,
-                            startOffset = block.minv.offset,
-                            endPos = block.maxv.block + (index.tabix ? MAX_GZIP_BLOCK_SIZE + 100 : 0),
-                            options = {
-                                headers: self.config.headers,           // http headers, not file header
-                                range: {start: startPos, size: endPos - startPos + 1},
-                                withCredentials: self.config.withCredentials,
-                                task: task
-                            },
-                            success = function (data) {
-
-                                var inflated, slicedData,
-                                    byteLength = data.byteLength;
-
-                                processed++;
-
-                                if (index.tabix) {
-
-                                    inflated = igvxhr.arrayBufferToString(igv.unbgzf(data));
-                                    // need to decompress data
-                                }
-                                else {
-                                    inflated = data;
-                                }
-
-                                slicedData = startOffset ? inflated.slice(startOffset) : inflated;
-                                allFeatures = allFeatures.concat(self.parser.parseFeatures(slicedData));
-
-                                if (processed === blocks.length) {
-                                    allFeatures.sort(function (a, b) {
-                                        return a.start - b.start;
-                                    });
-                                    continuation(allFeatures);
-                                }
-                            };
-
-
-                        // Async load
-                        if (self.localFile) {
-                            igvxhr.loadStringFromFile(self.localFile, options).then(success);
-                        }
-                        else {
-                            if (index.tabix) {
-                                igvxhr.loadArrayBuffer(self.url, options).then(success);
-                            }
-                            else {
-                                igvxhr.loadString(self.url, options).then(success);
-                            }
-                        }
-                    });
-
-                }
-
-            }
-
 
         });
     }
