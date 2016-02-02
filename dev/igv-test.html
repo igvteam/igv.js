@@ -1,0 +1,349 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+    <meta name="description" content="">
+    <meta name="author" content="">
+    <link rel="shortcut icon" href=../img/favicon.ico>
+    <title>IGV - Integrative Genomics Viewer</title>
+
+    <!-- jQuery UI CSS -->
+    <link rel="stylesheet" type="text/css"
+          href="//ajax.googleapis.com/ajax/libs/jqueryui/1.11.2/themes/redmond/jquery-ui.css"/>
+
+    <!-- Google fonts -->
+    <link rel="stylesheet" type="text/css" href='//fonts.googleapis.com/css?family=PT+Sans:400,700'>
+    <link rel="stylesheet" type="text/css" href='//fonts.googleapis.com/css?family=Open+Sans'>
+
+    <!-- Font Awesome CSS -->
+    <link rel="stylesheet" type="text/css" href="//maxcdn.bootstrapcdn.com/font-awesome/4.2.0/css/font-awesome.min.css">
+
+    <!-- IGV CSS -->
+    <link rel="stylesheet" type="text/css" href="//igv.org/web/test/igv-test.css">
+
+    <!-- jQuery JS -->
+    <script type="text/javascript" src="//ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
+
+    <!-- jQuery UI JS -->
+    <script type="text/javascript" src="//ajax.googleapis.com/ajax/libs/jqueryui/1.11.2/jquery-ui.min.js"></script>
+
+    <!-- IGV JS -->
+    <script type="text/javascript" src="//igv.org/web/test/igv-test.js"></script>
+
+    <style type="text/css">
+
+        #trackList {
+
+            font-family: 'PT Sans', sans-serif;
+            font-size: small;
+            font-weight: 400;
+        }
+
+        div#trackList > div, div#trackList > h3 {
+
+            color: #444;
+            margin-left: 48px;
+            margin-top: 4px;
+            margin-bottom: 4px;
+
+            padding-left: 32px;
+
+            width: 300px;
+        }
+
+        div#trackList > div:hover,
+        div#trackList > div:focus,
+        div#trackList > div:active {
+            cursor: pointer;
+            color: white;
+            background-color: rgba(49, 106, 246, 1);
+        }
+
+    </style>
+
+</head>
+
+<body>
+
+<div id="myDiv" style="padding-top: 50px;padding-bottom: 20px; height: auto">
+
+    <div id="trackList">
+
+        <h3>Example tracks - click to load</h3>
+
+        <div><input type="file" id="fileInput"></div>
+
+        <!-- locus chr19:9917384-14917884 -->
+        <div onclick="igv.browser.loadTrack({
+                                 type : 'wig',
+                                  url : 'https://dl.nuthintoseehere.com/u/11270323/BroadInstitute/dataFormats/WIG/random_5000_lo_0dot1_hi_1.wig',
+                                label : 'Unreachable WIG (Bogus domain)'
+                                })">Unreachable WIG (Bogus domain)
+        </div>
+
+        <!-- locus chr19:9917384-14917884 -->
+        <div onclick="igv.browser.loadTrack({
+                                 type : 'wig',
+                                  url : 'https://dl.dropboxusercontent.com/u/11270323/BroadInstitute/dataFormats/WIG/nuthin_here.wig',
+                                label : 'Unreachable WIG (Bogus file name)'
+                                })">Unreachable WIG (Bogus file name)
+        </div>
+
+        <!-- locus chr19:9917384-14917884 -->
+        <div onclick="igv.browser.loadTrack({
+        type : 'wig',
+        url : 'https://dl.dropboxusercontent.com/u/11270323/BroadInstitute/dataFormats/WIG/random_5000_lo_0dot1_hi_1.wig',
+        name : 'Random 0.1 to 1.0'
+        })">Random 0.1 to 1.0
+        </div>
+
+        <!--<div onclick="igv.browser.loadTrack({-->
+        <!--type : 'wig',-->
+        <!--url : 'https://dl.dropboxusercontent.com/u/11270323/BroadInstitute/dataFormats/WIG/random_10000.wig',-->
+        <!--label : 'Random -1 to +1'-->
+        <!--})">Random -1 to +1-->
+        <!--</div>-->
+
+        <!--<div onclick="igv.browser.loadTrack({-->
+        <!--type : 'wig',-->
+        <!--url : 'https://dl.dropboxusercontent.com/u/11270323/BroadInstitute/dataFormats/WIG/random_5000_lo_neg_1_hi_0.wig',-->
+        <!--label : 'Random -1 to 0'-->
+        <!--})">Random Random -1 to 0-->
+        <!--</div>-->
+
+
+        <!--        <div onclick="igv.browser.loadTrack({
+                                        type: 'bam',
+                                        url: 'http://data.broadinstitute.org/igvdata/1KG/b37/data/NA06984/alignment/NA06984.mapped.ILLUMINA.bwa.CEU.low_coverage.20120522.bam',
+                                        name: 'NA06984'})">NA06984 (BAM - Broad Server)
+                </div>-->
+
+        <div onclick="igv.browser.loadTrack({
+                            url: 'https://data.broadinstitute.org/igvdata/BodyMap/hg19/IlluminaHiSeq2000_BodySites/brain_merged/accepted_hits.bam',
+                            name: 'Brain (BodyMap)'
+                        })">Brain (BodyMap)
+        </div>
+
+
+        <div onclick="igv.browser.loadTrack({
+                                type: 'bam',
+                                url: '../test/data/bam/sam_spec_example.bam',
+                                name: 'Ion BAM'})">ION indel example bam
+        </div>
+
+
+        <div onclick="igv.browser.loadTrack({
+                                type: 'bam',
+                                url: '../test/data/bam/testDel.bam',
+                                name: 'indel'})">deletion bam
+        </div>
+
+        <div onclick="igv.browser.loadTrack({
+                                type: 'bam',
+                                url: '../test/data/bam/gstt1_sample.bam',
+                                name: 'Ion BAM'})">GSTT1 sample bam
+        </div>
+
+
+        <div onclick="igv.browser.loadTrack({
+                                type: 'bam',
+                                url: 'https://data.broadinstitute.org/igvdata/BodyMap/hg19/IlluminaHiSeq2000_BodySites/brain_merged/accepted_hits.bam',
+                                name: 'Brain'
+        })">Body Map bam
+        </div>
+
+
+
+
+        <div onclick="igv.browser.loadTrack({
+                                sourceType: 'ga4gh',
+                                type: 'bam',
+                                url: 'https://www.googleapis.com/genomics/v1beta2',
+                                readGroupSetIds: 'CMvnhpKTFhCjz9_25e_lCw',
+                                height: 200,
+                                autoHeight: false,
+                                name: 'Ga4gh alignments'})">GA4Gh Alignments (Global Alliance, Google server)
+        </div>
+
+        <div onclick="igv.browser.loadTrack( {
+                            sourceType: 'ga4gh',
+                            type: 'vcf',
+                            url: 'https://www.googleapis.com/genomics/v1beta2',
+                            variantSetId: '10473108253681171589',
+                            callSetIds: ['10473108253681171589-2'],
+                            name: 'Ga4gh variants'
+                            })">GA4Gh Variants (Global Alliance, Google server)
+        </div>
+
+        <div onclick="igv.browser.loadTrack({
+                                sourceType: 'gcs',
+                                type: 'bam',
+                                url: 'gs://genomics-public-data/platinum-genomes/bam/NA12877_S1.bam',
+                                name: 'NA12877'})">Google Cloud Storage - NA12877_S1.bam
+        </div>
+
+
+        <div onclick="igv.browser.loadTrack({
+                                url: '//data.broadinstitute.org/igvdata/test/igv-web/segmented_data_080520.seg.gz',
+                                indexed: false,
+                                name: 'GBM Copy # (TCGA Broad GDAC)'})">GBM Copy # (TCGA Broad GDAC)) (SEG)
+        </div>
+
+        <div onclick="igv.browser.loadTrack({
+                                type: 'seg',
+                                url: 'https://genomespace-dev.s3.amazonaws.com/users/ted/segmented_data_080520.seg.gz?AWSAccessKeyId=AKIAIVEV5BSUERMTN5LA&Expires=1454022310&Signature=PJBy7%2FJTehP%2FPGBNaCoCxMxr16w%3D',
+                                indexed: false,
+                                name: 'GS'})">GS
+        </div>
+
+
+
+        <div onclick="igv.browser.loadTrack({
+                                type: 'eqtl',
+                                sourceType: 'gtex',
+                                url: '//www.gtexportal.org/igv/assets/eqtl/Skin_Sun_Exposed_Lower_leg.portal.eqtl.bin',
+                                indexed: false,
+                                name: 'Skin Sun Exposed Lower leg'})">EQTL Skin (GTEX))
+        </div>
+
+        <div onclick="igv.browser.loadTrack( {
+                                url: '//data.broadinstitute.org/igvdata/t2d/recomb_decode.bedgraph',
+                                name: 'Recombination rate'})">Recombination Rate
+        </div>
+
+        <div onclick="igv.browser.loadTrack(
+                                {
+                                type: 'bed',
+                                url: '//data.broadinstitute.org/igvdata/annotations/hg19/dbSnp/snp137.hg19.bed.gz',
+                                name: 'dbSNP 137',
+                                visibilityWindow: 200000
+                                })">dbSNP 137 (bed tabix)
+        </div>
+
+        <div onclick="igv.browser.loadTrack(
+                                {
+                                url: 'https://www.encodeproject.org/files/ENCFF002ADR/@@download/ENCFF002ADR.bigBed',
+                                name: 'ENCFF002ADR',
+                                visibilityWindow: 200000
+                                })">Encode bigbed
+        </div>
+
+        <div onclick="igv.browser.loadTrack(
+                                {
+                                url: '../test/data/wig/variableStep-example.wig',
+                                name: 'variableStep',
+                                })">Variable step wig (chr 19)
+        </div>
+
+        <div onclick="igv.browser.loadTrack(
+                                {
+                                url: 'http://hgdownload.cse.ucsc.edu/goldenPath/hg19/encodeDCC/wgEncodeBroadHistone/wgEncodeBroadHistoneGm12878H3k4me3StdSig.bigWig',
+                                name: 'Gm12878H3k4me3'
+                                })">Encode bigwig
+        </div>
+
+
+        <div onclick="igv.browser.loadTrack({
+
+                                url: 'https://data.broadinstitute.org/igvdata/annotations/hg19/dbSnp/snp137.hg19.bed.gz',
+                                name: 'DB Snp'
+        })">DB Snp Tabix
+        </div>
+
+
+
+
+
+        <div onclick="igv.browser.loadTrack(
+                                {
+                                url: '../test/data/misc/GWAS_catalog_SNPs_Pval5E08_hg19_040115_subset.txt',
+                                name: 'gtex GWAS',
+                                format: 'gtexGWAS',
+                                featureType: 'gwas',
+                                colorScale:  {
+                                thresholds: [5e-8, 5e-4, 0.05],
+                                colors: ['rgb(0,102,51)', 'rgb(122,179,23)', 'rgb(158,213,76)', 'rgb(227,238,249)']
+                                },
+                                description: ('<strong>GWAS</strong><br/>'+
+                                'Put description of track here')
+                                })">gtex GWAS test
+        </div>
+
+        <div onclick="igv.browser.loadTrack(
+        {
+            url: '../test/data/gff/eden.txt',
+            name: 'eden gff',
+            format: 'gff',
+            displayMode: 'SQUISHED',     // COLLAPSED | EXPANDED | SQUISHED
+            indexed: false
+        })">EDEN gff
+        </div>
+
+
+        <div onclick="igv.browser.loadTrack(
+        {
+            url: '../test/data/gff/color.gff',
+            name: 'color gff',
+            format: 'gff',
+            indexed: false
+        })">Color gff
+        </div>
+
+        <div onclick="igv.browser.search('chr10');">GOTO</div>
+
+
+    </div>
+
+</div>
+
+<script type="text/javascript">
+
+    $(document).ready(function () {
+
+        var div,
+                options,
+                browser;
+
+        div = $("#myDiv")[0];
+        options = {
+
+            showKaryo: false,
+            showNavigation: true,
+            //genome: "hg19",
+            reference: {
+                fastaURL: "//dn7ywbm9isq8j.cloudfront.net/genomes/seq/1kg_v37/human_g1k_v37_decoy.fasta",
+                cytobandURL: "//dn7ywbm9isq8j.cloudfront.net/genomes/seq/b37/b37_cytoband.txt"
+            },
+            flanking: 1000,
+            apiKey: 'AIzaSyDUUAUFpQEN4mumeMNIRWXSiTh5cPtUAD0',
+            trackDefaults: {
+                palette: ["#00A0B0", "#6A4A3C", "#CC333F", "#EB6841"],
+                bam: {
+                    coverageThreshold: 0.2,
+                    coverageQualityWeight: true
+                }
+            },
+
+            tracks: [
+                {
+                    name: "Genes",
+                    url: "//igv.broadinstitute.org/annotations/hg19/genes/gencode.v18.collapsed.bed",
+//                    order: Number.MAX_VALUE,
+                    order: 9999,
+                    displayMode: "EXPANDED"
+
+                }
+            ]
+        };
+
+        browser = igv.createBrowser(div, options);
+    });
+
+
+</script>
+
+</body>
+
+</html>
