@@ -147,7 +147,15 @@
         })">DB Snp Tabix
         </div>
 
-
+        <div onclick="igv.browser.loadTrack(
+        {
+           type: 'eqtl',
+           sourceType: 'gtex-ws',
+           url: 'http://gtexportal.org/api/v6/singleTissueEqtlByLocation',
+           tissueName: 'Adipose_Subcutaneous',
+           name: 'Adipose_Subcutaneous'
+           })">GTEX eqtl
+        </div>
 
     </div>
 

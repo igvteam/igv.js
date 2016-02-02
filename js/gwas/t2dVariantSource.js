@@ -76,10 +76,9 @@ var igv = (function (igv) {
 
         var self = this;
         return new Promise(function (fulfill, reject) {
-            var self = this;
 
-            if (this.cache && this.cache.chr === chr && this.cache.end > bpEnd && this.cache.start < bpStart) {
-                fulfill(this.cache.featuresBetween(bpStart, bpEnd));
+            if (self.cache && self.cache.chr === chr && self.cache.end > bpEnd && self.cache.start < bpStart) {
+                fulfill(self.cache.featuresBetween(bpStart, bpEnd));
             }
 
             else {
@@ -90,13 +89,13 @@ var igv = (function (igv) {
                     queryChr = (chr.startsWith("chr") ? chr.substring(3) : chr), // Webservice uses "1,2,3..." convention
                     queryStart = Math.max(0, center - window),
                     queryEnd = center + window,
-                    queryURL = this.config.proxy ? this.config.proxy : this.url,
-                    body = this.queryJson(queryChr, queryStart, queryEnd, self.config);
+                    queryURL = self.config.proxy ? self.config.proxy : self.url,
+                    body = self.queryJson(queryChr, queryStart, queryEnd, self.config);
 
                 igvxhr.loadJson(queryURL, {
                     sendData: body,
                     task: task,
-                    withCredentials: this.config.withCredentials
+                    withCredentials: self.config.withCredentials
 
                 }).then(function (json) {
                     var variants;

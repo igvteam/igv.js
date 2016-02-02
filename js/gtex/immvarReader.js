@@ -43,7 +43,8 @@ var igv = (function (igv) {
 
     igv.ImmVarReader.prototype.readFeatures = function (task, range) {
 
-        var queryChr = range.chr,
+        var self = this,
+            queryChr = range.chr,
             queryStart = range.start,
             queryEnd = range.end,
             queryURL = this.url + "?chromosome=" + queryChr + "&start=" + queryStart + "&end=" + queryEnd +
@@ -52,9 +53,8 @@ var igv = (function (igv) {
         return new Promise(function (fulfill, reject) {
             igvxhr.loadJson(queryURL, {
                 task: task,
-                withCredentials: this.config.withCredentials
+                withCredentials: self.config.withCredentials
             }).then(function (json) {
-                var variants;
 
                 if (json) {
                     //variants = json.variants;

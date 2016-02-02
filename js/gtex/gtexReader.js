@@ -60,7 +60,8 @@ var igv = (function (igv) {
 
         igv.GtexReader.prototype.readFeatures = function (chr, bpStart, bpEnd, task) {
 
-            var queryChr = chr.startsWith("chr") ? chr.substr(3) : chr,
+            var self=this,
+                queryChr = chr.startsWith("chr") ? chr.substr(3) : chr,
                 queryStart = bpStart,
                 queryEnd = bpEnd,
                 queryURL = this.url + "?chromosome=" + queryChr + "&start=" + queryStart + "&end=" + queryEnd +
@@ -70,7 +71,7 @@ var igv = (function (igv) {
 
                 igvxhr.loadJson(queryURL, {
                     task: task,
-                    withCredentials: this.config.withCredentials
+                    withCredentials: self.config.withCredentials
                 }).then(function (json) {
 
                     var variants;
