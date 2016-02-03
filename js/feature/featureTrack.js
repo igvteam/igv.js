@@ -84,9 +84,7 @@ var igv = (function (igv) {
                     }
                     fulfill(header);
 
-                }).catch(function(error){
-                    reject(error);
-                });
+                }).catch(reject);
             }
             else {
                 fulfill(null);
