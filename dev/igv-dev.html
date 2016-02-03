@@ -90,7 +90,10 @@
     <script type="text/javascript" src="../js/feature/tribble.js"></script>
     <script type="text/javascript" src="../js/feature/featureFileReader.js"></script>
 
+    <script type="text/javascript" src="../js/feature/aneuSource.js"></script>
+    <script type="text/javascript" src="../js/feature/aneuTrack.js"></script>
     <script type="text/javascript" src="../js/encode/encode.js"></script>
+
     <script type="text/javascript" src="../js/cursor/cursorTrack.js"></script>
     <script type="text/javascript" src="../js/cursor/cursorModel.js"></script>
     <script type="text/javascript" src="../js/cursor/cursor-ideogram.js"></script>
@@ -342,7 +345,12 @@
                                 })">two-hour insulin
         </div>
 
-
+        <div onclick="igv.browser.loadTrack({
+                 url:  '../test/data/aneu/CNV.json'                        ,
+                 type: 'aneu',
+                 indexed: false,
+                 label: 'Aneuploidy'
+        })">Aneuploidy </div>
 
     </div>
 
