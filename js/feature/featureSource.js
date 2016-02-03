@@ -60,31 +60,33 @@ var igv = (function (igv) {
 
     };
 
-    igv.FeatureSource.prototype.getHeader = function (continuation) {
+    igv.FeatureSource.prototype.getFileHeader = function () {
 
         var self = this,
             maxRows = this.config.maxRows || 500;
 
+        return new Promise(function (fulfill, reject) {
 
-        if (this.reader.readHeader) {
-            this.reader.readHeader().then(function (header, features) {
-                // Non-indexed readers will return features as a side effect.  This is an important performance hack
-                if (features) {
-                    // Assign overlapping features to rows
-                    packFeatures(features, maxRows);
-                    self.featureCache = new igv.FeatureCache(features);
+            if (self.reader.readHeader) {
+                self.reader.readHeader().then(function (header, features) {
+                    // Non-indexed readers will return features as a side effect.  This is an important performance hack
+                    if (features) {
+                        // Assign overlapping features to rows
+                        packFeatures(features, maxRows);
+                        self.featureCache = new igv.FeatureCache(features);
 
-                    // If track is marked "searchable"< cache features by name -- use this with caution, memory intensive
-                    if (self.config.searchable) {
-                        addFeaturesToDB(features);
+                        // If track is marked "searchable"< cache features by name -- use this with caution, memory intensive
+                        if (self.config.searchable) {
+                            addFeaturesToDB(features);
+                        }
                     }
-                }
-                continuation(header);
-            });
-        }
-        else {
-            continuation(null);
-        }
+                    fulfill(header);
+                });
+            }
+            else {
+                fulfill(null);
+            }
+        });
     }
 
     function addFeaturesToDB(featureList) {

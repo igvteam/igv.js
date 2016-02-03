@@ -101,25 +101,6 @@ var igv = (function (igv) {
         return this.formats[name];
     };
 
-    igv.Browser.prototype.trackLabelWithPath = function (path) {
-
-        var parser = document.createElement('a'),
-            label;
-
-        parser.href = path;
-
-        //parser.protocol; // => "http:"
-        //parser.hostname; // => "example.com"
-        //parser.port;     // => "3000"
-        //parser.pathname; // => "/pathname/"
-        //parser.search;   // => "?search=test"
-        //parser.hash;     // => "#hash"
-        //parser.host;     // => "example.com:3000"
-
-        label = parser.pathname.split('/');
-        return label[label.length - 1].split('.')[0];
-
-    };
 
     igv.Browser.prototype.loadTracksWithConfigList = function (configList) {
 
@@ -129,16 +110,21 @@ var igv = (function (igv) {
             self.loadTrack(config);
         });
 
+        // Really we should just resize the new trackViews, but currently there is no way to get a handle on those
+        this.trackViews.forEach(function (trackView) {
+            trackView.resize();
+        })
+
     };
 
     igv.Browser.prototype.loadTrack = function (config) {
 
         var self = this,
-            settings, property;
+            settings,
+            property,
+            newTrack;
 
-        if (this.isDuplicateTrack(config)) {
-            return;
-        }
+        igv.inferTypes(config);
 
         // Set defaults if specified
         if (this.trackDefaults && config.trackType) {
@@ -152,14 +138,7 @@ var igv = (function (igv) {
             }
         }
 
-        igv.inferTypes(config);
-
-
-        var path = config.url,
-            type = config.featureType,
-            newTrack;
-
-        switch (type) {
+        switch (config.featureType) {
             case "gwas":
                 newTrack = new igv.GWASTrack(config);
                 break;
@@ -188,23 +167,20 @@ var igv = (function (igv) {
                 newTrack = new igv.AneuTrack(config);
                 break;
             default:
-                alert("Unknown file type: " + path);
+                alert("Unknown file type: " + config.url);
                 return null;
         }
 
-        loadHeader(newTrack);
-
-        function loadHeader(track) {
-
-            if (track.getHeader) {
-                track.getHeader(function (header) {
-                    self.addTrack(track);
-                })
-            }
-            else {
+        // If defined, attempt to load the file header before adding the track.  This will catch some errors early
+        if (typeof newTrack.getFileHeader === "function") {
+            newTrack.getFileHeader().then(function (header) {
                 self.addTrack(newTrack);
-            }
+            });
         }
+        else {
+            self.addTrack(newTrack);
+        }
+
     };
 
     igv.Browser.prototype.isDuplicateTrack = function (config) {
@@ -246,14 +222,13 @@ var igv = (function (igv) {
      */
     igv.Browser.prototype.addTrack = function (track) {
 
-        var myself = this,
-            trackView = new igv.TrackView(track, this);
+        var trackView = new igv.TrackView(track, this);
 
-        if (igv.popover) {
+        if (typeof igv.popover !== "undefined") {
             igv.popover.hide();
         }
 
-        // Register view with track.  This is unfortunate, but is needed to support "resize" events.
+        // Register view with track.  This backpointer is unfortunate, but is needed to support "resize" events.
         track.trackView = trackView;
 
         if (undefined === track.order) {
@@ -264,9 +239,7 @@ var igv = (function (igv) {
 
         this.reorderTracks();
 
-        this.resize();
-
-
+        trackView.resize();
     }
 
     igv.Browser.prototype.reorderTracks = function () {

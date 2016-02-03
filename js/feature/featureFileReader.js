@@ -94,7 +94,7 @@ var igv = (function (igv) {
         }
     }
 
-    function loadFeaturesNoIndex(task, continuation) {
+    function loadFeaturesNoIndex(task) {
 
         var self = this;
 
