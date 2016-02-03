@@ -355,6 +355,16 @@
         })">Aneuploidy
         </div>
 
+        <div onclick="igv.browser.loadTrack(
+        {
+            url: 'http://nowhere.org',
+            name: 'bad',
+            format: 'gff',
+            displayMode: 'SQUISHED',     // COLLAPSED | EXPANDED | SQUISHED
+            indexed: false
+        })">BAD url
+        </div>
+
     </div>
 
 </div>

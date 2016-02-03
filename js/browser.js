@@ -175,6 +175,8 @@ var igv = (function (igv) {
         if (typeof newTrack.getFileHeader === "function") {
             newTrack.getFileHeader().then(function (header) {
                 self.addTrack(newTrack);
+            }).catch(function(error) {
+                alert(error);
             });
         }
         else {
