@@ -35,48 +35,20 @@ var igv = (function (igv) {
         this.track = track;
         this.browser = browser;
 
-        if ("CURSOR" === browser.type) {
 
-            this.cursorTrackContainer = $('<div class="igv-cursor-track-container">')[0];
-            $(browser.trackContainerDiv).append(this.cursorTrackContainer);
-
-            this.trackDiv = $('<div class="igv-track-div">')[0];
-            $(this.cursorTrackContainer).append(this.trackDiv);
-        } else {
-
-            this.trackDiv = $('<div class="igv-track-div">')[0];
-            $(browser.trackContainerDiv).append(this.trackDiv);
-        }
+        this.trackDiv = $('<div class="igv-track-div">')[0];
+        $(browser.trackContainerDiv).append(this.trackDiv);
 
         // Optionally override CSS height
         if (track.height) {          // Explicit height set, perhaps track.config.height?
             this.trackDiv.style.height = track.height + "px";
         }
 
-        // one spinner per track - IGV only
-        if ("CURSOR" !== browser.type) {
-            this.trackDiv.appendChild(igv.spinner());
-        }
-
         this.addLeftHandGutterToParentTrackDiv(this.trackDiv);
 
         this.addViewportToParentTrackDiv(this.trackDiv);
 
-        // CURSOR - Histogram
-        if ("CURSOR" === browser.type) {
-
-            this.cursorHistogramContainer = $('<div class="igv-cursor-histogram-container">')[0];
-            $(this.trackDiv).append(this.cursorHistogramContainer);
-
-            this.track.cursorHistogram = new cursor.CursorHistogram(this.cursorHistogramContainer, this.track);
-        }
-
         this.addRightHandGutterToParentTrackDiv(this.trackDiv);
-
-        // Track Drag & Drop
-        if ("CURSOR" !== browser.type && isTrackDraggable(this.track)) {
-            makeTrackDraggable(this.track);
-        }
 
         if (this.track instanceof igv.RulerTrack) {
 
@@ -221,32 +193,29 @@ var igv = (function (igv) {
             trackIconContainer,
             description;
 
-        if ("CURSOR" !== this.browser.type) {
 
-            if (this.track.name) {
+        if (this.track.name) {
 
+            trackIconContainer = $('<div class="igv-app-icon-container">');
+            $(viewportDiv).append(trackIconContainer[0]);
 
-                trackIconContainer = $('<div class="igv-app-icon-container">');
-                $(viewportDiv).append(trackIconContainer[0]);
+            this.track.labelSpan = $('<span class="igv-track-label-span-base">')[0];
+            this.track.labelSpan.innerHTML = this.track.name;
+            $(trackIconContainer).append(this.track.labelSpan);
 
-                this.track.labelSpan = $('<span class="igv-track-label-span-base">')[0];
-                this.track.labelSpan.innerHTML = this.track.name;
-                $(trackIconContainer).append(this.track.labelSpan);
-
-                description = this.track.description || this.track.name;
-                this.track.labelSpan.onclick = function (e) {
-                    igv.popover.presentTrackPopup(e.pageX, e.pageY, description, false);
-                }
-
-                $(viewportDiv).scroll(function () {
-                    trackIconContainer.css({"top": $(viewportDiv).scrollTop() + "px"});
-
-                });
-
-
+            description = this.track.description || this.track.name;
+            this.track.labelSpan.onclick = function (e) {
+                igv.popover.presentTrackPopup(e.pageX, e.pageY, description, false);
             }
 
-        } // if ("CURSOR" !== this.browser.type)
+            $(viewportDiv).scroll(function () {
+                trackIconContainer.css({"top": $(viewportDiv).scrollTop() + "px"});
+
+            });
+
+
+        }
+
     };
 
     igv.TrackView.prototype.addLeftHandGutterToParentTrackDiv = function (trackDiv) {
@@ -368,10 +337,6 @@ var igv = (function (igv) {
         this.viewportDiv.style.height = trackHeightStr;
 
 
-        if ("CURSOR" === this.browser.type) {
-            this.track.cursorHistogram.updateHeightAndInitializeHistogramWithTrack(this.track);
-        }
-
         if (update === undefined || update === true) {
             this.update();
         }
@@ -391,7 +356,6 @@ var igv = (function (igv) {
      * Repaint the view, using a cached image if available.  If no image covering the view is available a new one
      * is created, delegating the draw details to the track object.
      *
-     * NOTE:  This method is overriden in the CURSOR initialization code.
      */
     igv.TrackView.prototype.repaint = function () {
 

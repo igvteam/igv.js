@@ -41,7 +41,9 @@ var igv = (function (igv) {
         H3K4ME3: "rgb(0, 150, 0)",
         H3K9AC: "rgb(100, 0, 0)",
         H3K9ME1: "rgb(100, 0, 0)"
-    };
+    },
+        defaultColor ="rgb(3, 116, 178)";
+
 
     igv.EncodeTable = function (parentModalBodyObject, continuation) {
 
@@ -164,11 +166,11 @@ var igv = (function (igv) {
         var key;
 
         if (!antibody || "" === antibody) {
-            return cursor.defaultColor();
+            return defaultColor;
         }
 
         key = antibody.toUpperCase();
-        return (antibodyColors[ key ]) ? antibodyColors[ key ] : cursor.defaultColor();
+        return (antibodyColors[ key ]) ? antibodyColors[ key ] : defaultColor;
 
     }
 
