@@ -90,7 +90,7 @@ var igv = (function (igv) {
         }
         else {
             if ("file" === sourceType) {
-                if (config.format === undefined ) {
+                if (config.format === undefined) {
                     inferFileFormat(config);
                 }
                 inferFeatureType(config);
@@ -107,7 +107,7 @@ var igv = (function (igv) {
 
             //Strip parameters -- handle local files later
             idx = fn.indexOf("?");
-            if(idx > 0) {
+            if (idx > 0) {
                 fn = fn.substr(0, idx);
             }
 
@@ -117,7 +117,6 @@ var igv = (function (igv) {
             } else if (fn.endsWith(".txt") || fn.endsWith(".tab")) {
                 fn = fn.substr(0, fn.length - 4);
             }
-
 
 
             idx = fn.lastIndexOf(".");
@@ -240,15 +239,7 @@ var igv = (function (igv) {
 
             track.labelButton.innerHTML = track.name;
         } else {
-
-            if ("CURSOR" !== this.browser.type) {
-                track.labelSpan.innerHTML = track.name;
-            }
-            else {
-
-                // handle CURSOR track label
-                track.trackLabelDiv.innerHTML = track.name
-            }
+            track.labelSpan.innerHTML = track.name;
         }
 
         if (track.trackView) {
@@ -263,12 +254,6 @@ var igv = (function (igv) {
         if (track.trackView) {
 
             track.trackView.repaint();
-
-            if ("CURSOR" === this.browser.type) {
-                if (track.cursorHistogram) {
-                    track.cursorHistogram.render(track);
-                }
-            }
 
         }
 

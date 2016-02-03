@@ -264,31 +264,10 @@ var igv = (function (igv) {
 
         this.reorderTracks();
 
-        if (this.cursorModel) {
-
-            this.cursorModel.initializeHistogram(trackView.track, function () {
-
-                if (myself.designatedTrack === track) {
-                    myself.selectDesignatedTrack(myself.designatedTrack.trackFilter.trackPanel);
-                }
-
-                if (track.config && track.config.trackFilter) {
-
-                    track.trackFilter.setWithJSON(track.config.trackFilter);
+        this.resize();
 
 
-                }
-
-                myself.resize();
-
-
-            });
-        }
-        else {
-            this.resize();
-        }
-
-    };
+    }
 
     igv.Browser.prototype.reorderTracks = function () {
 
@@ -305,17 +284,11 @@ var igv = (function (igv) {
 
         this.trackViews.forEach(function (trackView, index, trackViews) {
 
-            //console.log(trackView.track.id + ".order " + trackView.track.order);
-
-            if ("CURSOR" === myself.type) {
-                myself.trackContainerDiv.appendChild(trackView.cursorTrackContainer);
-            } else {
-                myself.trackContainerDiv.appendChild(trackView.trackDiv);
-            }
+            myself.trackContainerDiv.appendChild(trackView.trackDiv);
 
         });
 
-    };
+    }
 
     igv.Browser.prototype.removeTrack = function (track) {
 
@@ -332,11 +305,7 @@ var igv = (function (igv) {
 
             this.trackViews.splice(this.trackViews.indexOf(trackPanelRemoved), 1);
 
-            if ("CURSOR" === this.type) {
-                this.trackContainerDiv.removeChild(trackPanelRemoved.cursorTrackContainer);
-            } else {
-                this.trackContainerDiv.removeChild(trackPanelRemoved.trackDiv);
-            }
+            this.trackContainerDiv.removeChild(trackPanelRemoved.trackDiv);
 
         }
 
@@ -438,10 +407,6 @@ var igv = (function (igv) {
             trackView.repaint();
         });
 
-        if (this.cursorModel) {
-            this.horizontalScrollbar.update();
-        }
-
     };
 
     igv.Browser.prototype.update = function () {
@@ -460,9 +425,6 @@ var igv = (function (igv) {
             trackPanel.update();
         });
 
-        if (this.cursorModel) {
-            this.horizontalScrollbar.update();
-        }
     };
 
     igv.Browser.prototype.updateLocusSearch = function (referenceFrame) {
@@ -824,8 +786,8 @@ var igv = (function (igv) {
 
         igv.browser.selection = new igv.GtexSelection('gtex' === type || 'snp' === type ? {snp: name} : {gene: name});
 
-        if(end === undefined) {
-            end = start+1;
+        if (end === undefined) {
+            end = start + 1;
         }
         if (igv.browser.flanking) {
             start = Math.max(0, start - igv.browser.flanking);
@@ -875,8 +837,7 @@ var igv = (function (igv) {
             var coords = igv.translateMouseCoordinates(e, trackContainerDiv),
                 maxEnd,
                 maxStart,
-                referenceFrame = igv.browser.referenceFrame,
-                isCursor = igv.browser.cursorModel;
+                referenceFrame = igv.browser.referenceFrame;
 
             if (isRulerTrack) {
                 return;
@@ -899,15 +860,11 @@ var igv = (function (igv) {
                     referenceFrame.start = Math.max(0, referenceFrame.start);
 
                     // clamp right
-                    if (isCursor) {
-                        maxEnd = igv.browser.cursorModel.filteredRegions.length;
-                        maxStart = maxEnd - igv.browser.trackViewportWidth() / igv.browser.cursorModel.framePixelWidth;
-                    }
-                    else {
-                        var chromosome = igv.browser.genome.getChromosome(referenceFrame.chr);
-                        maxEnd = chromosome.bpLength;
-                        maxStart = maxEnd - igv.browser.trackViewportWidth() * referenceFrame.bpPerPixel;
-                    }
+
+                    var chromosome = igv.browser.genome.getChromosome(referenceFrame.chr);
+                    maxEnd = chromosome.bpLength;
+                    maxStart = maxEnd - igv.browser.trackViewportWidth() * referenceFrame.bpPerPixel;
+
 
                     if (referenceFrame.start > maxStart) referenceFrame.start = maxStart;
 
@@ -961,9 +918,6 @@ var igv = (function (igv) {
 
             var newCenter = Math.round(referenceFrame.start + canvasCoords.x * referenceFrame.bpPerPixel);
             referenceFrame.bpPerPixel /= 2;
-            if (igv.browser.cursorModel) {
-                igv.browser.cursorModel.framePixelWidth *= 2;
-            }
             igv.browser.goto(referenceFrame.chr, newCenter);
 
         });
