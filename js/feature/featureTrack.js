@@ -67,27 +67,29 @@ var igv = (function (igv) {
 
     };
 
-    igv.FeatureTrack.prototype.getHeader = function (continuation) {
+    igv.FeatureTrack.prototype.getFileHeader = function () {
         var self = this;
-        if (this.featureSource.getHeader) {
-            this.featureSource.getHeader(function (header) {
+        return new Promise(function(fulfill, reject) {
+            if (typeof self.featureSource.getFileHeader === "function") {
+                self.featureSource.getFileHeader().then(function (header) {
 
-                if (header) {
-                    // Header (from track line).  Set properties,unless set in the config (config takes precedence)
-                    if (header.name && !self.config.name) {
-                        self.name = header.name;
+                    if (header) {
+                        // Header (from track line).  Set properties,unless set in the config (config takes precedence)
+                        if (header.name && !self.config.name) {
+                            self.name = header.name;
+                        }
+                        if (header.color && !self.config.color) {
+                            self.color = "rgb(" + header.color + ")";
+                        }
                     }
-                    if (header.color && !self.config.color) {
-                        self.color = "rgb(" + header.color + ")";
-                    }
-                }
-                continuation(header);
+                    fulfill(header);
 
-            });
-        }
-        else {
-            continuation(null);
-        }
+                });
+            }
+            else {
+                fulfill(null);
+            }
+        });
     }
 
     igv.FeatureTrack.prototype.getFeatures = function (chr, bpStart, bpEnd, task) {

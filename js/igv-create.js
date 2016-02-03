@@ -43,7 +43,6 @@ var igv = (function (igv) {
             controlDiv,
             bodyObject,
             palette,
-            element,
             trackOrder=1;
 
         if (igv.browser) {
