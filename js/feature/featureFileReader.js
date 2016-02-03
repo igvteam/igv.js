@@ -96,105 +96,110 @@ var igv = (function (igv) {
 
     function loadFeaturesNoIndex(task, continuation) {
 
-        var self = this
-        parser = this.parser,
-            options = {
-                headers: this.config.headers,           // http headers, not file header
-                withCredentials: self.config.withCredentials,
-                task: task
+        var self = this;
+
+        return new Promise(function (fulfill, reject) {
+            parser = self.parser,
+                options = {
+                    headers: self.config.headers,           // http headers, not file header
+                    withCredentials: self.config.withCredentials,
+                    task: task
+                };
+
+            if (self.localFile) {
+                igvxhr.loadStringFromFile(self.localFile, options).then(parseData);
+            }
+            else {
+                igvxhr.loadString(self.url, options).then(parseData);
+            }
+
+
+            function parseData(data) {
+                self.header = parser.parseHeader(data);
+                fulfill(parser.parseFeatures(data));   // <= PARSING DONE HERE
             };
-
-        if (self.localFile) {
-            igvxhr.loadStringFromFile(self.localFile, options).then(parseData);
-        }
-        else {
-            igvxhr.loadString(self.url, options).then(parseData);
-        }
-
-
-        function parseData(data) {
-            self.header = parser.parseHeader(data);
-            continuation(parser.parseFeatures(data));   // <= PARSING DONE HERE
-        };
+        });
     }
 
 
-    function loadFeaturesWithIndex(chr, start, end, task, continuation) {
+    function loadFeaturesWithIndex(chr, start, end, task) {
 
         //console.log("Using index");
+        var self = this;
 
-        var self = this,
-            blocks,
-            processed,
-            allFeatures,
-            index = this.index,
-            tabix = index && index.tabix,
-            refId = tabix ? index.sequenceIndexMap[chr] : chr;
+        return new Promise(function (fulfill, reject) {
+                var blocks,
+                processed,
+                allFeatures,
+                index = self.index,
+                tabix = index && index.tabix,
+                refId = tabix ? index.sequenceIndexMap[chr] : chr;
 
-        blocks = index.blocksForRange(refId, start, end);
+            blocks = index.blocksForRange(refId, start, end);
 
-        if (!blocks || blocks.length === 0) {
-            continuation(null);
-        }
-        else {
+            if (!blocks || blocks.length === 0) {
+                fulfill(null);
+            }
+            else {
 
-            allFeatures = [];
-            processed = 0;
+                allFeatures = [];
+                processed = 0;
 
-            blocks.forEach(function (block) {
+                blocks.forEach(function (block) {
 
-                var startPos = block.minv.block,
-                    startOffset = block.minv.offset,
-                    endPos = block.maxv.block + (index.tabix ? MAX_GZIP_BLOCK_SIZE + 100 : 0),
-                    options = {
-                        headers: self.config.headers,           // http headers, not file header
-                        range: {start: startPos, size: endPos - startPos + 1},
-                        withCredentials: self.config.withCredentials,
-                        task: task
-                    },
-                    success = function (data) {
+                    var startPos = block.minv.block,
+                        startOffset = block.minv.offset,
+                        endPos = block.maxv.block + (index.tabix ? MAX_GZIP_BLOCK_SIZE + 100 : 0),
+                        options = {
+                            headers: self.config.headers,           // http headers, not file header
+                            range: {start: startPos, size: endPos - startPos + 1},
+                            withCredentials: self.config.withCredentials,
+                            task: task
+                        },
+                        success = function (data) {
 
-                        var inflated, slicedData,
-                            byteLength = data.byteLength;
+                            var inflated, slicedData,
+                                byteLength = data.byteLength;
 
-                        processed++;
+                            processed++;
 
-                        if (index.tabix) {
+                            if (index.tabix) {
 
-                            inflated = igvxhr.arrayBufferToString(igv.unbgzf(data));
-                            // need to decompress data
-                        }
-                        else {
-                            inflated = data;
-                        }
+                                inflated = igvxhr.arrayBufferToString(igv.unbgzf(data));
+                                // need to decompress data
+                            }
+                            else {
+                                inflated = data;
+                            }
 
-                        slicedData = startOffset ? inflated.slice(startOffset) : inflated;
-                        allFeatures = allFeatures.concat(self.parser.parseFeatures(slicedData));
+                            slicedData = startOffset ? inflated.slice(startOffset) : inflated;
+                            allFeatures = allFeatures.concat(self.parser.parseFeatures(slicedData));
 
-                        if (processed === blocks.length) {
-                            allFeatures.sort(function (a, b) {
-                                return a.start - b.start;
-                            });
-                            continuation(allFeatures);
-                        }
-                    };
+                            if (processed === blocks.length) {
+                                allFeatures.sort(function (a, b) {
+                                    return a.start - b.start;
+                                });
+                                fulfill(allFeatures);
+                            }
+                        };
 
 
-                // Async load
-                if (self.localFile) {
-                    igvxhr.loadStringFromFile(self.localFile, options).then(success);
-                }
-                else {
-                    if (index.tabix) {
-                        igvxhr.loadArrayBuffer(self.url, options).then(success);
+                    // Async load
+                    if (self.localFile) {
+                        igvxhr.loadStringFromFile(self.localFile, options).then(success);
                     }
                     else {
-                        igvxhr.loadString(self.url, options).then(success);
+                        if (index.tabix) {
+                            igvxhr.loadArrayBuffer(self.url, options).then(success);
+                        }
+                        else {
+                            igvxhr.loadString(self.url, options).then(success);
+                        }
                     }
-                }
-            });
+                });
 
-        }
+            }
+        });
 
     }
 
@@ -257,7 +262,7 @@ var igv = (function (igv) {
                     }
                 }
                 else {
-                    loadFeaturesNoIndex.call(self, undefined, function (features) {
+                    loadFeaturesNoIndex.call(self, undefined).then(function (features) {
                         fulfill(self.header, features);       // Unfortunate use of side affect here
                     });
                 }
@@ -278,10 +283,10 @@ var igv = (function (igv) {
         return new Promise(function (fulfill, reject) {
 
             if (self.index) {
-                loadFeaturesWithIndex.call(self, chr, start, end, task, packFeatures);
+                loadFeaturesWithIndex.call(self, chr, start, end, task).then(packFeatures);
             }
             else {
-                loadFeaturesNoIndex.call(self, task, packFeatures);
+                loadFeaturesNoIndex.call(self, task).then(packFeatures);
             }
 
             function packFeatures(features) {
