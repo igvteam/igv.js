@@ -110,10 +110,7 @@ var igv = (function (igv) {
                 igvxhr.loadStringFromFile(self.localFile, options).then(parseData).catch(reject);
             }
             else {
-                igvxhr.loadString(self.url, options).then(parseData).catch(function (error) {
-                    console.log(error);
-                    reject(error);
-                });
+                igvxhr.loadString(self.url, options).then(parseData).catch(reject);
             }
 
 
