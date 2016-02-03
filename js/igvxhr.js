@@ -78,11 +78,8 @@ var igvxhr = (function (igvxhr) {
             var xhr = new XMLHttpRequest(),
                 sendData = options.sendData,
                 method = options.method || (sendData ? "POST" : "GET"),
-                success = fulfill,
-                abort = options.abort || error,
-                timeout = options.timeout || error,
+                abort = options.abort || reject || fulfill,
                 task = options.task,
-                error = reject || success,
                 range = options.range,
                 responseType = options.responseType,
                 contentType = options.contentType,
@@ -94,7 +91,6 @@ var igvxhr = (function (igvxhr) {
 
             if (task) {
                 task.xhrRequest = xhr;
-                if (options.error === undefined && task.error !== undefined) error = task.error;
             }
 
             if (range && isSafari) {
@@ -145,21 +141,17 @@ var igvxhr = (function (igvxhr) {
             xhr.onload = function (event) {
                 // when the url points to a local file, the status is 0 but that is no error
                 if (xhr.status == 0 || (xhr.status >= 200 && xhr.status <= 300)) {
-                    success(xhr.response, xhr);
+                    fulfill(xhr.response, xhr);
                 }
                 else {
 
                     //
                     if (xhr.status === 416) {
                         //  Tried to read off the end of the file.   This shouldn't happen, but if it does return an
-                        //  empty array buffer
-                        success(new ArrayBuffer(0), xhr);
-                        return;
+                        handleError("Unsatisfiable range");
                     }
                     else {// TODO -- better error handling
-                        alert("Error accessing resource: " + xhr.status);
-
-                        error(xhr);
+                        handleError("Error accessing resource: " + xhr.status);
                     }
 
                 }
@@ -168,22 +160,22 @@ var igvxhr = (function (igvxhr) {
 
             xhr.onerror = function (event) {
 
-                if (isCrossDomain(url) && url) {
-                    // Try the proxy, if it exists.  Presumably this is a php file
-                    if (igv.browser.crossDomainProxy && url != igv.browser.crossDomainProxy && !options.crossDomainRetried) {
+                if (isCrossDomain(url) && url && !options.crossDomainRetried && igv.browser.crossDomainProxy &&
+                    url != igv.browser.crossDomainProxy) {
 
-                        options.sendData = "url=" + url;
-                        options.crossDomainRetried = true;
+                    options.sendData = "url=" + url;
+                    options.crossDomainRetried = true;
 
-                        igvxhr.load(igv.browser.crossDomainProxy, options);
-                        return;
-                    }
+                    igvxhr.load(igv.browser.crossDomainProxy, options).then(fulfill);
+                }
+                else {
+                    handleError("Error accessing resource: " + xhr.status);
                 }
             }
 
+
             xhr.ontimeout = function (event) {
-                console.log("Aborted");
-                timeout(null, xhr);
+                handleError("Timed out");
             };
 
             xhr.onabort = function (event) {
@@ -192,12 +184,22 @@ var igvxhr = (function (igvxhr) {
             };
 
             xhr.send(sendData);
+
+
+            function handleError(message) {
+                if (reject) {
+                    reject(message);
+                }
+                else {
+                    throw Error(message);
+                }
+            }
         });
     }
 
     igvxhr.loadArrayBuffer = function (url, options) {
 
-        if(options === undefined) options = {};
+        if (options === undefined) options = {};
         options.responseType = "arraybuffer";
         return igvxhr.load(url, options);
     };
@@ -229,7 +231,7 @@ var igvxhr = (function (igvxhr) {
 
         var compression, fn, idx;
 
-        if(options === undefined) options = {};
+        if (options === undefined) options = {};
 
         // Strip parameters from url
         // TODO -- handle local files with ?
@@ -333,6 +335,7 @@ var igvxhr = (function (igvxhr) {
         }
         return result;
     };
+
 
     return igvxhr;
 

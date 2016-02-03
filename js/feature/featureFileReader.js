@@ -107,10 +107,13 @@ var igv = (function (igv) {
                 };
 
             if (self.localFile) {
-                igvxhr.loadStringFromFile(self.localFile, options).then(parseData);
+                igvxhr.loadStringFromFile(self.localFile, options).then(parseData).catch(reject);
             }
             else {
-                igvxhr.loadString(self.url, options).then(parseData);
+                igvxhr.loadString(self.url, options).then(parseData).catch(function (error) {
+                    console.log(error);
+                    reject(error);
+                });
             }
 
 
@@ -128,7 +131,7 @@ var igv = (function (igv) {
         var self = this;
 
         return new Promise(function (fulfill, reject) {
-                var blocks,
+            var blocks,
                 processed,
                 allFeatures,
                 index = self.index,
@@ -263,8 +266,11 @@ var igv = (function (igv) {
                 }
                 else {
                     loadFeaturesNoIndex.call(self, undefined).then(function (features) {
-                        fulfill(self.header, features);       // Unfortunate use of side affect here
-                    });
+                        fulfill(self.header, features)
+                    }).catch(
+                        function (error) {
+                            reject(error)
+                        });       // Unfortunate use of side affect here
                 }
             });
         });

@@ -84,6 +84,8 @@ var igv = (function (igv) {
                     }
                     fulfill(header);
 
+                }).catch(function(error){
+                    reject(error);
                 });
             }
             else {
@@ -102,7 +104,7 @@ var igv = (function (igv) {
                 fulfill({exceedsVisibilityWindow: true});
             }
             else {
-                self.featureSource.getFeatures(chr, bpStart, bpEnd, task).then(fulfill);
+                self.featureSource.getFeatures(chr, bpStart, bpEnd, task).then(fulfill).catch(reject);
             }
         });
     }

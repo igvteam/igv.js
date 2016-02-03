@@ -345,7 +345,6 @@ var igv = (function (igv) {
 
     igv.TrackView.prototype.update = function () {
 
-        //console.log("Update");
         this.tile = null;
         if (this.scrollbar) this.scrollbar.update();
         this.repaint();
@@ -355,7 +354,6 @@ var igv = (function (igv) {
     /**
      * Repaint the view, using a cached image if available.  If no image covering the view is available a new one
      * is created, delegating the draw details to the track object.
-     *
      */
     igv.TrackView.prototype.repaint = function () {
 
@@ -450,11 +448,6 @@ var igv = (function (igv) {
                 this.currentLoadTask = {
                     start: bpStart,
                     end: bpEnd,
-                    error: function (unused, xhr) {
-                        // igv.stopSpinnerObject(self.trackDiv);
-                        self.browser.removeTrack(self.track);
-                        window.alert("Unreachable track URL. Request status: " + xhr.status);
-                    },
                     abort: function () {
                         this.canceled = true;
                         if (this.xhrRequest) {
@@ -468,7 +461,11 @@ var igv = (function (igv) {
 
                 igv.startSpinnerAtParentElement(self.trackDiv);
 
-                this.track.getFeatures(referenceFrame.chr, bpStart, bpEnd, self.currentLoadTask).then(success);
+                this.track.getFeatures(referenceFrame.chr, bpStart, bpEnd, self.currentLoadTask)
+                    .then(success)
+                    .catch(function (error) {
+                        alert(error);
+                    });
 
             }
         }

@@ -67,7 +67,7 @@ var igv = (function (igv) {
 
         return new Promise(function (fulfill, reject) {
 
-            if (self.reader.readHeader) {
+            if (typeof self.reader.readHeader === "function") {
                 self.reader.readHeader().then(function (header, features) {
                     // Non-indexed readers will return features as a side effect.  This is an important performance hack
                     if (features) {
@@ -81,6 +81,8 @@ var igv = (function (igv) {
                         }
                     }
                     fulfill(header);
+                }).catch(function (error) {
+                    reject(error);
                 });
             }
             else {
@@ -150,7 +152,7 @@ var igv = (function (igv) {
                         // Finally pass features for query interval to continuation
                         fulfill(self.featureCache.queryFeatures(chr, bpStart, bpEnd));
 
-                    });   // Currently loading at granularity of chromosome
+                    }).catch(reject);   // Currently loading at granularity of chromosome
             }
         });
     }
