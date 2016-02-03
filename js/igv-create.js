@@ -59,10 +59,6 @@ var igv = (function (igv) {
         oauth.google.apiKey = config.apiKey;
         oauth.google.access_token = config.oauthToken;
 
-        if (!config.flanking && isT2D(config)) {  // TODO -- hack for demo, remove
-            config.flanking = 100000;
-        }
-
         if (config.genome) {
             config.reference = expandGenome(config.genome);
         }
@@ -233,9 +229,6 @@ var igv = (function (igv) {
 
                         igv.browser.loadTracksWithConfigList(config.tracks);
 
-                        //config.tracks.forEach(function (track) {
-                        //    browser.loadTrack(track);
-                        //});
 
                     }
 
@@ -244,10 +237,6 @@ var igv = (function (igv) {
             } else if (config.tracks) {
 
                 igv.browser.loadTracksWithConfigList(config.tracks);
-
-                //config.tracks.forEach(function (track) {
-                //    browser.loadTrack(track);
-                //});
 
             }
 
@@ -297,12 +286,6 @@ var igv = (function (igv) {
             igvLogo = $('<div class="igv-logo">');
             navigation.append(igvLogo[0]);
 
-
-
-
-
-
-
             searchContainer = $('<div class="igvNavigationSearch">');
             navigation.append(searchContainer[0]);
 
@@ -330,12 +313,6 @@ var igv = (function (igv) {
             searchContainer.append(browser.$searchResults[ 0 ]);
 
             browser.$searchResults.hide();
-
-
-
-
-
-
 
             // window size panel
             browser.windowSizePanel = new igv.WindowSizePanel(navigation);
@@ -376,7 +353,6 @@ var igv = (function (igv) {
                 }
 
             });
-
         }
 
         if (config.showKaryo) {
@@ -432,19 +408,6 @@ var igv = (function (igv) {
         config.showNavigation = config.showNavigation === undefined ? true : config.showNavigation;
         config.flanking = config.flanking === undefined ? 1000 : config.flanking;
 
-    }
-
-
-// TODO -- temporary hack for demo, remove ASAP
-    function isT2D(options) {
-        if (options.tracks && options.tracks.length > 0) {
-            var t = options.tracks[0];
-            var b = t instanceof igv.GWASTrack;
-            return b;
-        }
-        else {
-            return false;
-        }
     }
 
     return igv;

@@ -210,10 +210,9 @@ var igv = (function (igv) {
 
     igv.EncodeDataSource.prototype.ingestFile = function (file, continuation) {
 
-        var self = this,
-            dataLoader = new igv.DataLoader(file);
+        var self = this;
 
-        dataLoader.loadBinaryString(function (data) {
+        igvxhr.loadString(file).then(function (data) {
 
             var lines = data.splitLines(),
                 item;
