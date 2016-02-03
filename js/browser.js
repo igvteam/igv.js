@@ -642,7 +642,11 @@ var igv = (function (igv) {
                     url.replace("$GENOME$", genomeId);
                 }
 
-                igv.loadData(url, function (data) {
+               // var loader = new igv.DataLoader(url);
+               // if (range)  loader.range = range;
+               // loader.loadBinaryString(callback);
+
+                igvxhr.loadString(url).then(function (data) {
 
                     var results = ("plain" === searchConfig.type) ? parseSearchResults(data) : JSON.parse(data);
 

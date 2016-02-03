@@ -196,6 +196,8 @@ var igvxhr = (function (igvxhr) {
     }
 
     igvxhr.loadArrayBuffer = function (url, options) {
+
+        if(options === undefined) options = {};
         options.responseType = "arraybuffer";
         return igvxhr.load(url, options);
     };
@@ -226,6 +228,8 @@ var igvxhr = (function (igvxhr) {
     igvxhr.loadString = function (url, options) {
 
         var compression, fn, idx;
+
+        if(options === undefined) options = {};
 
         // Strip parameters from url
         // TODO -- handle local files with ?
