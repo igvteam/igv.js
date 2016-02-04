@@ -56,35 +56,33 @@ var igv = (function (igv) {
 
             } else {
 
-                self.bamReader.readFeatures(chr, bpStart, bpEnd, task)
-                    .then(
-                    function (alignments) {
+                self.bamReader.readFeatures(chr, bpStart, bpEnd, task).then(function (alignments) {
 
-                        if (alignments) {  // Can be null on error or aborting
+                    if (alignments) {  // Can be null on error or aborting
 
-                            self.genomicInterval = new igv.GenomicInterval(chr, bpStart, bpEnd);
+                        self.genomicInterval = new igv.GenomicInterval(chr, bpStart, bpEnd);
 
-                            igv.browser.genome.sequence.getSequence(self.genomicInterval.chr, self.genomicInterval.start, self.genomicInterval.end,
+                        igv.browser.genome.sequence.getSequence(self.genomicInterval.chr, self.genomicInterval.start, self.genomicInterval.end,
 
-                                function (sequence) {
+                            function (sequence) {
 
-                                    var maxRows = self.config.maxRows || 500;
+                                var maxRows = self.config.maxRows || 500;
 
-                                    if (sequence) {
+                                if (sequence) {
 
-                                        self.genomicInterval.coverageMap = new igv.CoverageMap(chr, bpStart, bpEnd, alignments, sequence);
+                                    self.genomicInterval.coverageMap = new igv.CoverageMap(chr, bpStart, bpEnd, alignments, sequence);
 
-                                        self.genomicInterval.packedAlignmentRows = packAlignmentRows(self.genomicInterval, alignments, maxRows);
+                                    self.genomicInterval.packedAlignmentRows = packAlignmentRows(self.genomicInterval, alignments, maxRows);
 
-                                        self.genomicInterval.features = undefined;
+                                    self.genomicInterval.features = undefined;
 
-                                        self.genomicInterval.sequence = sequence;
+                                    self.genomicInterval.sequence = sequence;
 
-                                        fulfill(self.genomicInterval);
-                                    }
-                                });
-                        }
-                    });
+                                    fulfill(self.genomicInterval);
+                                }
+                            });
+                    }
+                }).catch(reject);
             }
         });
     }
