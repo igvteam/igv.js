@@ -13,14 +13,14 @@ function runAlignmentContainerTests() {
         }
         // Simulate alignments
         for (i = 0; i < 1000; i++) {
-            container.addAlignment({
+            container.push({
                 start: 0,
                 strand: "pos",
                 blocks: [{start: 0, len: 50, seq: seq, qual: qual}]
             });
         }
         for (i = 0; i < 500; i++) {
-            container.addAlignment({
+            container.push({
                 start: 50,
                 strand: "pos",
                 blocks: [{start: 50, len: 50, seq: seq, qual: qual}]

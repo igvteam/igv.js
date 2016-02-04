@@ -27,6 +27,14 @@
 var igv = (function (igv) {
 
 
+    /**
+     * Container for alignments that downsamples and computes coverage
+     *
+     * @param chr
+     * @param start
+     * @param end
+     * @constructor
+     */
     igv.AlignmentContainer = function (chr, start, end) {
 
         this.chr = chr;
@@ -44,7 +52,7 @@ var igv = (function (igv) {
 
     }
 
-    igv.AlignmentContainer.prototype.addAlignment = function (alignment) {
+    igv.AlignmentContainer.prototype.push = function (alignment) {
         this.coverageMap.incCounts(alignment);
 
         if (this.downSample) {

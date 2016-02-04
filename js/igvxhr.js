@@ -169,7 +169,7 @@ var igvxhr = (function (igvxhr) {
                     igvxhr.load(igv.browser.crossDomainProxy, options).then(fulfill);
                 }
                 else {
-                    handleError("Error accessing resource: " + xhr.status);
+                    handleError("Error accessing resource: " + url + " Status: " + xhr.status);
                 }
             }
 

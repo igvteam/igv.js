@@ -25,13 +25,7 @@
 
 var igv = (function (igv) {
 
-    /**
-     }
-     * A wrapper around a bam file that provides a simple cache
-     *
-     * @param config
-     * @constructor
-     */
+
     igv.BamSource = function (config) {
 
         this.config = config;
@@ -56,7 +50,7 @@ var igv = (function (igv) {
 
             } else {
 
-                self.bamReader.readFeatures(chr, bpStart, bpEnd, task).then(function (alignments) {
+                self.bamReader.readAlignments(chr, bpStart, bpEnd, task).then(function (alignments) {
 
                     if (alignments) {  // Can be null on error or aborting
 

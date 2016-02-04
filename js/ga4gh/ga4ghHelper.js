@@ -123,7 +123,7 @@ var igv = (function (igv) {
                             fulfill(results);
                         }
 
-                    });
+                    }).catch(reject);
             }
 
         });
