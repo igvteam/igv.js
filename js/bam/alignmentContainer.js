@@ -48,7 +48,7 @@ var igv = (function (igv) {
         this.downSample = true;
 
         this.samplingWindowSize = 100;
-        this.samplingDepth = 100;
+        this.samplingDepth = 5;
 
     }
 
@@ -78,6 +78,11 @@ var igv = (function (igv) {
         }
     }
 
+    igv.AlignmentContainer.prototype.contains = function (chr, start, end) {
+        return this.chr == chr &&
+            this.start <= start &&
+            this.end >= end;
+    }
 
     function finishBucket() {
         this.currentBucket.alignments.sort(function (a, b) {

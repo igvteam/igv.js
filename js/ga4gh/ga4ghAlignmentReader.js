@@ -232,7 +232,7 @@ var igv = (function (igv) {
 
                 }
 
-                return alignments.alignments;
+                return alignments;
 
                 // TODO -- implement me
                 function encodeCigar(cigarArray) {

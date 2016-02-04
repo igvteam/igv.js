@@ -248,7 +248,7 @@ var igv = (function (igv) {
             });
         }
         else {
-            return self.featureSource.getFeatures(chr, bpStart, bpEnd, task);
+            return self.featureSource.getAlignments(chr, bpStart, bpEnd, task);
         }
     }
 
@@ -566,10 +566,10 @@ var igv = (function (igv) {
 
     igv.BAMTrack.prototype.popupData = function (genomicLocation, xOffset, yOffset) {
 
-        var coverageMap = this.featureSource.genomicInterval.coverageMap,
+        var coverageMap = this.featureSource.alignmentContainer.coverageMap,
             coverageMapIndex,
             coverage,
-            packedAlignmentRows = this.featureSource.genomicInterval.packedAlignmentRows,
+            packedAlignmentRows = this.featureSource.alignmentContainer.packedAlignmentRows,
             packedAlignmentsIndex,
             alignmentRow,
             alignment,

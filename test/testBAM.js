@@ -107,12 +107,12 @@ function runBAMTests() {
     //                blockQuals1 = expectedQuals.substr(0, 69),
     //                blockQuals2 = expectedQuals.substr(69),
     //                refSeq,
-    //                genomicInterval;
+    //                alignmentContainer;
     //
     //            ok(alignments, "alignments");
     //
-    //            genomicInterval = new igv.GenomicInterval(chr, bpStart, bpEnd);
-    //            ok(genomicInterval, "genomicInterval");
+    //            alignmentContainer = new igv.GenomicInterval(chr, bpStart, bpEnd);
+    //            ok(alignmentContainer, "alignmentContainer");
     //
     //            for (i = 0, len = alignments.length; i < len; i++) {
     //
@@ -133,7 +133,7 @@ function runBAMTests() {
     //
     //                    // Compare refseq to block sequences,  logging mismatches.  This is not really part of the unit
     //                    // test, just put here as an example
-    //                    igv.browser.genome.sequence.getSequence(chr, genomicInterval.start, genomicInterval.end, function (refSeq) {
+    //                    igv.browser.genome.sequence.getSequence(chr, alignmentContainer.start, alignmentContainer.end, function (refSeq) {
     //
     //                        ok(refSeq, "refSeq");
     //

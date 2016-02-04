@@ -97,7 +97,7 @@ var igv = (function (igv) {
                                     var ba = new Uint8Array(igv.unbgzf(compressed)); //new Uint8Array(igv.unbgzf(compressed)); //, c.maxv.block - c.minv.block + 1));
                                 } catch (e) {
                                     console.log(e);
-                                    fulfill(alignmentContainer.alignments);
+                                    fulfill(alignmentContainer);
                                 }
 
                                 decodeBamRecords(ba, chunks[chunkNumber].minv.offset, alignmentContainer, bpStart, bpEnd, chrId);
@@ -112,7 +112,7 @@ var igv = (function (igv) {
                                             return a.start - b.start;
                                         });
                                     }
-                                    fulfill(alignmentContainer.alignments);
+                                    fulfill(alignmentContainer);
                                 }
                                 else {
                                     loadNextChunk(chunkNumber);
