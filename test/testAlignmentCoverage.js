@@ -43,10 +43,10 @@ function runAlignmentCoverageTests() {
 
         bamSource.getFeatures("chr22", 24379992, 24380390, function (genomicInterval) {
 
-            ok(genomicInterval, "genomicInterval");
-            ok(genomicInterval.chr, "genomicInterval.chr");
-            ok(genomicInterval.sequence, "genomicInterval.sequence");
-            ok(genomicInterval.coverageMap, "genomicInterval.coverageMap");
+            ok(genomicInterval, "alignmentContainer");
+            ok(genomicInterval.chr, "alignmentContainer.chr");
+            ok(genomicInterval.sequence, "alignmentContainer.sequence");
+            ok(genomicInterval.coverageMap, "alignmentContainer.coverageMap");
 
             igv.browser.genome.sequence.readSequence(genomicInterval.chr, genomicInterval.start, genomicInterval.end, function (sequence) {
 
@@ -78,10 +78,10 @@ function runAlignmentCoverageTests() {
 
         bamSource.getFeatures("chr22", 24379992, 24380390, function (genomicInterval) {
 
-            ok(genomicInterval, "genomicInterval");
-            //ok(genomicInterval.features, "genomicInterval.features");
+            ok(genomicInterval, "alignmentContainer");
+            //ok(alignmentContainer.features, "alignmentContainer.features");
 
-            //genomicInterval.features.forEach(function(alignment) {
+            //alignmentContainer.features.forEach(function(alignment) {
             //
             //    var lengths, seqs;
             //
