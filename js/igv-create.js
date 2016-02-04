@@ -258,24 +258,8 @@ var igv = (function (igv) {
             $trackLabelToggle,
             zoom,
             zoomInButton,
-            zoomOutButton,
-            fileInput = document.getElementById('fileInput');
+            zoomOutButton;
 
-        if (fileInput) {
-
-            fileInput.addEventListener('change', function (e) {
-
-                var localFile = fileInput.files[0],
-                    featureFileReader;
-
-                featureFileReader = new igv.FeatureFileReader({localFile: localFile});
-                featureFileReader.readFeatures().then(function () {
-                    console.log("success reading " + localFile.name);
-                });
-
-            });
-
-        }
 
         navigation = $('<div class="igvNavigation">');
         $(controlDiv).append(navigation[0]);

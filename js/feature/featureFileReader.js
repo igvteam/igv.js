@@ -263,11 +263,8 @@ var igv = (function (igv) {
                 }
                 else {
                     loadFeaturesNoIndex.call(self, undefined).then(function (features) {
-                        fulfill(self.header, features)
-                    }).catch(
-                        function (error) {
-                            reject(error)
-                        });       // Unfortunate use of side affect here
+                            fulfill(self.header, features) // Unfortunate use of side affect here
+                        }).catch(reject);
                 }
             });
         });

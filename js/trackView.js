@@ -44,11 +44,16 @@ var igv = (function (igv) {
             this.trackDiv.style.height = track.height + "px";
         }
 
+        this.trackDiv.appendChild(igv.spinner());
+
         this.addLeftHandGutterToParentTrackDiv(this.trackDiv);
 
         this.addViewportToParentTrackDiv(this.trackDiv);
 
         this.addRightHandGutterToParentTrackDiv(this.trackDiv);
+
+        // Track Drag & Drop
+        makeTrackDraggable(this.track);
 
         if (this.track instanceof igv.RulerTrack) {
 
@@ -397,54 +402,6 @@ var igv = (function (igv) {
                 bpStart = Math.max(0, Math.round(referenceFrame.start - bpWidth / 3));
                 bpEnd = bpStart + bpWidth;
 
-                success = function (features) {
-
-                    igv.stopSpinnerAtParentElement(self.trackDiv);
-                    self.currentLoadTask = undefined;
-
-                    if (features) {
-
-                        // TODO -- adjust track height here.
-                        if (self.track.computePixelHeight) {
-                            var requiredHeight = self.track.computePixelHeight(features);
-                            if (requiredHeight != self.contentDiv.clientHeight) {
-                                self.setContentHeight(requiredHeight);
-                            }
-                        }
-
-                        var buffer = document.createElement('canvas');
-                        buffer.width = pixelWidth;
-                        buffer.height = self.canvas.height;
-                        ctx = buffer.getContext('2d');
-
-                        self.track.draw({
-                            features: features,
-                            context: ctx,
-                            bpStart: bpStart,
-                            bpPerPixel: referenceFrame.bpPerPixel,
-                            pixelWidth: buffer.width,
-                            pixelHeight: buffer.height
-                        });
-
-                        if (self.track.paintAxis) {
-
-                            var buffer2 = document.createElement('canvas');
-                            buffer2.width = self.controlCanvas.width;
-                            buffer2.height = self.controlCanvas.height;
-
-                            var ctx2 = buffer2.getContext('2d');
-
-                            self.track.paintAxis(ctx2, buffer2.width, buffer2.height);
-
-                            self.controlCtx.drawImage(buffer2, 0, 0);
-                        }
-
-                        self.tile = new Tile(referenceFrame.chr, bpStart, bpEnd, referenceFrame.bpPerPixel, buffer);
-                        self.paintImage();
-                    }
-
-                };
-
                 this.currentLoadTask = {
                     start: bpStart,
                     end: bpEnd,
@@ -462,7 +419,54 @@ var igv = (function (igv) {
                 igv.startSpinnerAtParentElement(self.trackDiv);
 
                 this.track.getFeatures(referenceFrame.chr, bpStart, bpEnd, self.currentLoadTask)
-                    .then(success)
+
+                    .then(function (features) {
+
+                        igv.stopSpinnerAtParentElement(self.trackDiv);
+                        self.currentLoadTask = undefined;
+
+                        if (features) {
+
+                            // TODO -- adjust track height here.
+                            if (self.track.computePixelHeight) {
+                                var requiredHeight = self.track.computePixelHeight(features);
+                                if (requiredHeight != self.contentDiv.clientHeight) {
+                                    self.setContentHeight(requiredHeight);
+                                }
+                            }
+
+                            var buffer = document.createElement('canvas');
+                            buffer.width = pixelWidth;
+                            buffer.height = self.canvas.height;
+                            ctx = buffer.getContext('2d');
+
+                            self.track.draw({
+                                features: features,
+                                context: ctx,
+                                bpStart: bpStart,
+                                bpPerPixel: referenceFrame.bpPerPixel,
+                                pixelWidth: buffer.width,
+                                pixelHeight: buffer.height
+                            });
+
+                            if (self.track.paintAxis) {
+
+                                var buffer2 = document.createElement('canvas');
+                                buffer2.width = self.controlCanvas.width;
+                                buffer2.height = self.controlCanvas.height;
+
+                                var ctx2 = buffer2.getContext('2d');
+
+                                self.track.paintAxis(ctx2, buffer2.width, buffer2.height);
+
+                                self.controlCtx.drawImage(buffer2, 0, 0);
+                            }
+
+                            self.tile = new Tile(referenceFrame.chr, bpStart, bpEnd, referenceFrame.bpPerPixel, buffer);
+                            self.paintImage();
+                        }
+
+                    })
                     .catch(function (error) {
                         alert(error);
                     });

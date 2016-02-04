@@ -241,17 +241,15 @@ var igv = (function (igv) {
 
         var self = this;
 
-        return new Promise(function (fulfill, reject) {
+        if (igv.browser.trackViewportWidthBP() > self.visibilityWindow) {
             // Don't try to draw alignments for windows > the visibility window
-
-            if (igv.browser.trackViewportWidthBP() > self.visibilityWindow) {
+            return new Promise(function (fulfill, reject) {
                 fulfill({exceedsVisibilityWindow: true});
-                return;
-            }
-
-            self.featureSource.getFeatures(chr, bpStart, bpEnd, task).then(fulfill);
-
-        });
+            });
+        }
+        else {
+            return self.featureSource.getFeatures(chr, bpStart, bpEnd, task);
+        }
     }
 
 
