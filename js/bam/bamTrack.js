@@ -252,6 +252,23 @@ var igv = (function (igv) {
         }
     }
 
+    /**
+     * Optional method to compute pixel height to accomodate the list of features.  The implementation below
+     * has side effects (modifiying the samples hash).  This is unfortunate, but harmless.
+     *
+     * @param features
+     * @returns {number}
+     */
+    igv.BAMTrack.prototype.computePixelHeight = function (features) {
+
+        if (features.packedAlignmentRows) {
+            return this.alignmentRowYInset + this.coverageTrackHeight + (this.alignmentRowHeight * features.packedAlignmentRows.length) + 5;
+        }
+        else {
+            return this.height;
+        }
+
+    };
 
     igv.BAMTrack.prototype.draw = function (options) {
 
@@ -666,23 +683,6 @@ var igv = (function (igv) {
 
     };
 
-    /**
-     * Optional method to compute pixel height to accomodate the list of features.  The implementation below
-     * has side effects (modifiying the samples hash).  This is unfortunate, but harmless.
-     *
-     * @param features
-     * @returns {number}
-     */
-    igv.BAMTrack.prototype.computePixelHeight = function (features) {
-
-        if (features.packedAlignmentRows) {
-            return this.alignmentRowYInset + this.coverageTrackHeight + (this.alignmentRowHeight * features.packedAlignmentRows.length) + 5;
-        }
-        else {
-            return this.height;
-        }
-
-    };
 
     function shadedBaseColor(qual, nucleotide, genomicLocation) {
 
