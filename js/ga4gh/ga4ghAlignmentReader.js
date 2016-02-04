@@ -65,7 +65,7 @@ var igv = (function (igv) {
     }
 
 
-    igv.Ga4ghAlignmentReader.prototype.readFeatures = function (chr, bpStart, bpEnd, task) {
+    igv.Ga4ghAlignmentReader.prototype.readAlignments = function (chr, bpStart, bpEnd, task) {
 
         var self = this;
 
@@ -87,7 +87,8 @@ var igv = (function (igv) {
                     },
                     decode: decodeGa4ghReads,
                     task: task
-                }).then(fulfill);
+                }).then(fulfill)
+                    .catch(reject);
 
             });
 
@@ -153,6 +154,195 @@ var igv = (function (igv) {
                 });
             }
 
+
+            /**
+             * Decode an array of ga4gh read records
+             *
+
+             */
+            function decodeGa4ghReads(json) {
+
+                var i,
+                    jsonRecords = json.alignments,
+                    len = jsonRecords.length,
+                    json,
+                    read,
+                    alignment,
+                    cigarDecoded,
+                    alignments = new igv.AlignmentContainer(chr, bpStart, bpEnd),
+                    genome = igv.browser.genome,
+                    mate;
+
+                for (i = 0; i < len; i++) {
+
+                    json = jsonRecords[i];
+
+                    read = new igv.BamAlignment();
+
+                    read.readName = json.fragmentName;
+                    read.properPlacement = json.properPlacement;
+                    read.duplicateFragment = json.duplicateFragment;
+                    read.numberReads = json.numberReads;
+                    read.fragmentLength = json.fragmentLength;
+                    read.readNumber = json.readNumber;
+                    read.failedVendorQualityChecks = json.failedVendorQualityChecks;
+                    read.secondaryAlignment = json.secondaryAlignment;
+                    read.supplementaryAlignment = json.supplementaryAlignment;
+                    read.seq = json.alignedSequence;
+                    read.qual = json.alignedQuality;
+                    read.matePos = json.nextMatePosition;
+                    read.tagDict = json.info;
+                    read.flags = encodeFlags(json);
+
+
+                    alignment = json.alignment;
+                    if (alignment) {
+                        read.mapped = true;
+
+                        read.chr = json.alignment.position.referenceName;
+                        if (genome) read.chr = genome.getChromosomeName(read.chr);
+
+                        read.start = parseInt(json.alignment.position.position);
+                        read.strand = !(json.alignment.position.reverseStrand);
+                        read.mq = json.alignment.mappingQuality;
+                        read.cigar = encodeCigar(json.alignment.cigar);
+                        cigarDecoded = translateCigar(json.alignment.cigar);
+
+                        read.lengthOnRef = cigarDecoded.lengthOnRef;
+
+                        blocks = makeBlocks(read, cigarDecoded.array);
+                        read.blocks = blocks.blocks;
+                        read.insertions = blocks.insertions;
+
+                    }
+                    else {
+                        read.mapped = false;
+                    }
+
+                    mate = json.nextMatePosition;
+                    if (mate) {
+                        read.mate = {
+                            chr: mate.referenceFrame,
+                            position: parseInt(mate.position),
+                            strand: !mate.reverseStrand
+                        };
+                    }
+
+                    alignments.push(read);
+
+                }
+
+                return alignments.alignments;
+
+                // TODO -- implement me
+                function encodeCigar(cigarArray) {
+                    return "";
+                }
+
+                // TODO -- implement me
+                function encodeFlags(json) {
+                    return 0;
+                }
+
+                function translateCigar(cigar) {
+
+                    var cigarUnit, opLen, opLtr,
+                        lengthOnRef = 0,
+                        cigarArray = [],
+                        i;
+
+                    for (i = 0; i < cigar.length; i++) {
+
+                        cigarUnit = cigar[i];
+
+                        opLtr = CigarOperationTable[cigarUnit.operation];
+                        opLen = parseInt(cigarUnit.operationLength);    // TODO -- this should be a long by the spec
+
+                        if (opLtr == 'M' || opLtr == 'EQ' || opLtr == 'X' || opLtr == 'D' || opLtr == 'N' || opLtr == '=')
+                            lengthOnRef += opLen;
+
+                        cigarArray.push({len: opLen, ltr: opLtr});
+
+                    }
+
+                    return {lengthOnRef: lengthOnRef, array: cigarArray};
+                }
+
+
+                /**
+                 * Split the alignment record into blocks as specified in the cigarArray.  Each aligned block contains
+                 * its portion of the read sequence and base quality strings.  A read sequence or base quality string
+                 * of "*" indicates the value is not recorded.  In all other cases the length of the block sequence (block.seq)
+                 * and quality string (block.qual) must == the block length.
+                 *
+                 * NOTE: Insertions are not yet treated // TODO
+                 *
+                 * @param record
+                 * @param cigarArray
+                 * @returns array of blocks
+                 */
+                function makeBlocks(record, cigarArray) {
+
+
+                    var blocks = [],
+                        insertions,
+                        seqOffset = 0,
+                        pos = record.start,
+                        len = cigarArray.length,
+                        blockSeq,
+                        blockQuals;
+
+                    for (var i = 0; i < len; i++) {
+
+                        var c = cigarArray[i];
+
+                        switch (c.ltr) {
+                            case 'H' :
+                                break; // ignore hard clips
+                            case 'P' :
+                                break; // ignore pads
+                            case 'S' :
+                                seqOffset += c.len;
+                                break; // soft clip read bases
+                            case 'N' :
+                                pos += c.len;
+                                break;  // reference skip
+                            case 'D' :
+                                pos += c.len;
+                                break;
+                            case 'I' :
+                                blockSeq = record.seq === "*" ? "*" : record.seq.substr(seqOffset, c.len);
+                                blockQuals = record.qual === "*" ? "*" : record.qual.slice(seqOffset, c.len);
+                                if (insertions === undefined) insertions = [];
+                                insertions.push({
+                                    start: pos,
+                                    len: c.len,
+                                    seq: blockSeq,
+                                    qual: blockQuals,
+                                    insertion: true
+                                });
+                                seqOffset += c.len;
+                                break;
+                            case 'M' :
+                            case 'EQ' :
+                            case '=' :
+                            case 'X' :
+                                blockSeq = record.seq === "*" ? "*" : record.seq.substr(seqOffset, c.len);
+                                blockQuals = record.qual === "*" ? "*" : record.qual.slice(seqOffset, c.len);
+                                blocks.push({start: pos, len: c.len, seq: blockSeq, qual: blockQuals});
+                                seqOffset += c.len;
+                                pos += c.len;
+                                break;
+                            default :
+                                console.log("Error processing cigar element: " + c.len + c.ltr);
+                        }
+                    }
+
+                    return {blocks: blocks, insertions: insertions};
+                }
+            }
+
+
         });
     }
 
@@ -165,191 +355,6 @@ var igv = (function (igv) {
             entityId: this.readGroupSetIds,
             task: task
         });
-    }
-
-
-    /**
-     * Decode an array of ga4gh read records
-     *
-
-     */
-    function decodeGa4ghReads(json) {
-
-        var i,
-            jsonRecords = json.alignments,
-            len = jsonRecords.length,
-            json,
-            read,
-            alignment,
-            cigarDecoded,
-            alignments = [],
-            genome = igv.browser.genome,
-            mate;
-
-        for (i = 0; i < len; i++) {
-
-            json = jsonRecords[i];
-
-            read = new igv.BamAlignment();
-
-            read.readName = json.fragmentName;
-            read.properPlacement = json.properPlacement;
-            read.duplicateFragment = json.duplicateFragment;
-            read.numberReads = json.numberReads;
-            read.fragmentLength = json.fragmentLength;
-            read.readNumber = json.readNumber;
-            read.failedVendorQualityChecks = json.failedVendorQualityChecks;
-            read.secondaryAlignment = json.secondaryAlignment;
-            read.supplementaryAlignment = json.supplementaryAlignment;
-
-            read.seq = json.alignedSequence;
-            read.qual = json.alignedQuality;
-            read.matePos = json.nextMatePosition;
-            read.tagDict = json.info;
-
-            read.flags = encodeFlags(json);
-
-
-            alignment = json.alignment;
-            if (alignment) {
-                read.mapped = true;
-
-                read.chr = json.alignment.position.referenceName;
-                if (genome) read.chr = genome.getChromosomeName(read.chr);
-
-                read.start = parseInt(json.alignment.position.position);
-                read.strand = !(json.alignment.position.reverseStrand);
-                read.mq = json.alignment.mappingQuality;
-                read.cigar = encodeCigar(json.alignment.cigar);
-                cigarDecoded = translateCigar(json.alignment.cigar);
-
-                read.lengthOnRef = cigarDecoded.lengthOnRef;
-
-                blocks = makeBlocks(read, cigarDecoded.array);
-                read.blocks = blocks.blocks;
-                read.insertions = blocks.insertions;
-
-            }
-            else {
-                read.mapped = false;
-            }
-
-            mate = json.nextMatePosition;
-            if (mate) {
-                read.mate = {
-                    chr: mate.referenceFrame,
-                    position: parseInt(mate.position),
-                    strand: !mate.reverseStrand
-                };
-            }
-
-            alignments.push(read);
-
-        }
-
-        return alignments;
-
-    }
-
-
-    function encodeCigar(cigarArray) {
-        return "";
-    }
-
-    function encodeFlags(json) {
-        return 0;
-    }
-
-
-    function translateCigar(cigar) {
-
-        var cigarUnit, opLen, opLtr,
-            lengthOnRef = 0,
-            cigarArray = [];
-
-        for (i = 0; i < cigar.length; i++) {
-
-            cigarUnit = cigar[i];
-
-            opLtr = CigarOperationTable[cigarUnit.operation];
-            opLen = parseInt(cigarUnit.operationLength);    // TODO -- this should be a long by the spec
-
-            if (opLtr == 'M' || opLtr == 'EQ' || opLtr == 'X' || opLtr == 'D' || opLtr == 'N' || opLtr == '=')
-                lengthOnRef += opLen;
-
-            cigarArray.push({len: opLen, ltr: opLtr});
-
-        }
-
-        return {lengthOnRef: lengthOnRef, array: cigarArray};
-    }
-
-
-    /**
-     * Split the alignment record into blocks as specified in the cigarArray.  Each aligned block contains
-     * its portion of the read sequence and base quality strings.  A read sequence or base quality string
-     * of "*" indicates the value is not recorded.  In all other cases the length of the block sequence (block.seq)
-     * and quality string (block.qual) must == the block length.
-     *
-     * NOTE: Insertions are not yet treated // TODO
-     *
-     * @param record
-     * @param cigarArray
-     * @returns array of blocks
-     */
-    function makeBlocks(record, cigarArray) {
-
-
-        var blocks = [],
-            insertions,
-            seqOffset = 0,
-            pos = record.start,
-            len = cigarArray.length,
-            blockSeq,
-            blockQuals;
-
-        for (var i = 0; i < len; i++) {
-
-            var c = cigarArray[i];
-
-            switch (c.ltr) {
-                case 'H' :
-                    break; // ignore hard clips
-                case 'P' :
-                    break; // ignore pads
-                case 'S' :
-                    seqOffset += c.len;
-                    break; // soft clip read bases
-                case 'N' :
-                    pos += c.len;
-                    break;  // reference skip
-                case 'D' :
-                    pos += c.len;
-                    break;
-                case 'I' :
-                    blockSeq = record.seq === "*" ? "*" : record.seq.substr(seqOffset, c.len);
-                    blockQuals = record.qual === "*" ? "*" : record.qual.slice(seqOffset, c.len);
-                    if (insertions === undefined) insertions = [];
-                    insertions.push({start: pos, len: c.len, seq: blockSeq, qual: blockQuals, insertion: true});
-                    seqOffset += c.len;
-                    break;
-                case 'M' :
-                case 'EQ' :
-                case '=' :
-                case 'X' :
-                    blockSeq = record.seq === "*" ? "*" : record.seq.substr(seqOffset, c.len);
-                    blockQuals = record.qual === "*" ? "*" : record.qual.slice(seqOffset, c.len);
-                    blocks.push({start: pos, len: c.len, seq: blockSeq, qual: blockQuals});
-                    seqOffset += c.len;
-                    pos += c.len;
-                    break;
-                default :
-                    console.log("Error processing cigar element: " + c.len + c.ltr);
-            }
-        }
-
-        return {blocks: blocks, insertions: insertions};
-
     }
 
     igv.decodeGa4ghReadset = function (json) {

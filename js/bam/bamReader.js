@@ -42,7 +42,7 @@ var igv = (function (igv) {
 
     };
 
-    igv.BamReader.prototype.readFeatures = function (chr, min, max, task) {
+    igv.BamReader.prototype.readAlignments = function (chr, min, max, task) {
 
         var self = this;
 

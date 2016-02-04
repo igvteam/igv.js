@@ -19,7 +19,7 @@ function runBAMTests() {
             url: 'data/bam/gstt1_sample.bam',
             label: 'BAM unit test'});
 
-        bamReader.readFeatures(chr, beg, end).done(function (alignments) {
+        bamReader.readAlignments(chr, beg, end).done(function (alignments) {
 
             ok(alignments, "alignments");
             equal(alignments.length, 1660, "alignments.length");
