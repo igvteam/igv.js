@@ -72,6 +72,10 @@ var igv = (function (igv) {
         }
     }
 
+    igv.AlignmentContainer.prototype.forEach = function(callback) {
+        this.alignments.forEach(callback);
+    }
+
     igv.AlignmentContainer.prototype.finish = function () {
         if (this.currentBucket !== undefined) {
             finishBucket.call(this);
