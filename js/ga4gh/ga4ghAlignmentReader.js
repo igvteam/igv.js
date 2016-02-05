@@ -86,6 +86,7 @@ var igv = (function (igv) {
                         "pageSize": "10000"
                     },
                     decode: decodeGa4ghReads,
+                    results: new igv.AlignmentContainer(chr, bpStart, bpEnd),
                     task: task
                 }).then(fulfill)
                     .catch(reject);
@@ -169,7 +170,7 @@ var igv = (function (igv) {
                     read,
                     alignment,
                     cigarDecoded,
-                    alignments = new igv.AlignmentContainer(chr, bpStart, bpEnd),
+                    alignments = [],
                     genome = igv.browser.genome,
                     mate;
 

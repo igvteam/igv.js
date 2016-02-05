@@ -53,7 +53,7 @@ var igv = (function (igv) {
     igv.ga4ghSearch = function (options) {
 
         return new Promise(function (fulfill, reject) {
-            var results = [],
+            var results = options.results ? options.results : [],
                 url = options.url,
                 body = options.body,
                 decode = options.decode,
@@ -123,7 +123,9 @@ var igv = (function (igv) {
                             fulfill(results);
                         }
 
-                    }).catch(reject);
+                    }).catch(function () {
+                        reject
+                    });
             }
 
         });
