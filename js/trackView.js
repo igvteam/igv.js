@@ -367,8 +367,7 @@ var igv = (function (igv) {
         }
 
 
-        var repaintQueue = false,
-            pixelWidth,
+        var pixelWidth,
             bpWidth,
             bpStart,
             bpEnd,
@@ -383,99 +382,89 @@ var igv = (function (igv) {
 
         if (!hasCachedImaged.call(this, chr, refFrameStart, refFrameEnd, referenceFrame.bpPerPixel)) {
 
-            // First see if there is a load in progress that would satisfy the paint request
-            if (this.currentLoadTask && (isNotIndexed(this.track) ||
-                (this.currentLoadTask.end >= refFrameEnd && this.currentLoadTask.start <= refFrameStart))) {
-                // Nothing to do but wait for current load task to complete
-                 console.log("Skipping repaint");
+
+            // If there is a load in progress cancel it
+            if (this.currentLoadTask) {
+                console.log("Aborting current task");
+                this.currentLoadTask.abort();
             }
 
-            else {
+            // Expand the requested range so we can pan a bit without reloading
+            pixelWidth = 3 * this.canvas.width;
+            bpWidth = Math.round(referenceFrame.toBP(pixelWidth));
+            bpStart = Math.max(0, Math.round(referenceFrame.start - bpWidth / 3));
+            bpEnd = bpStart + bpWidth;
 
-                // If there is a load in progress cancel it
-                if (this.currentLoadTask) {
-                    console.log("Aborting current task");
-                    this.currentLoadTask.abort();
-                }
-
-                // Expand the requested range so we can pan a bit without reloading
-                pixelWidth = 3 * this.canvas.width;
-                bpWidth = Math.round(referenceFrame.toBP(pixelWidth));
-                bpStart = Math.max(0, Math.round(referenceFrame.start - bpWidth / 3));
-                bpEnd = bpStart + bpWidth;
-
-                self.currentLoadTask = {
-                    start: bpStart,
-                    end: bpEnd,
-                    abort: function () {
-                        this.canceled = true;
-                        if (this.xhrRequest) {
-                            console.log("Aborting xhr request");
-                            this.xhrRequest.abort();
-                        }
-                        //igv.stopSpinnerObject(self.trackDiv);
-                        self.currentLoadTask = undefined;
+            self.currentLoadTask = {
+                start: bpStart,
+                end: bpEnd,
+                abort: function () {
+                    this.canceled = true;
+                    if (this.xhrRequest) {
+                        console.log("Aborting xhr request");
+                        this.xhrRequest.abort();
                     }
-                };
+                    //igv.stopSpinnerObject(self.trackDiv);
+                    self.currentLoadTask = undefined;
+                }
+            };
 
 
-                igv.startSpinnerAtParentElement(self.trackDiv);
+            igv.startSpinnerAtParentElement(self.trackDiv);
 
-                this.track.getFeatures(referenceFrame.chr, bpStart, bpEnd, self.currentLoadTask)
+            this.track.getFeatures(referenceFrame.chr, bpStart, bpEnd, self.currentLoadTask)
 
-                    .then(function (features) {
+                .then(function (features) {
 
-                        igv.stopSpinnerAtParentElement(self.trackDiv);
-                        self.currentLoadTask = undefined;
+                    igv.stopSpinnerAtParentElement(self.trackDiv);
+                    self.currentLoadTask = undefined;
 
-                        if (features) {
+                    if (features) {
 
-                            // TODO -- adjust track height here.
-                            if (self.track.computePixelHeight) {
-                                var requiredHeight = self.track.computePixelHeight(features);
-                                if (requiredHeight != self.contentDiv.clientHeight) {
-                                    self.setContentHeight(requiredHeight);
-                                }
+                        // TODO -- adjust track height here.
+                        if (self.track.computePixelHeight) {
+                            var requiredHeight = self.track.computePixelHeight(features);
+                            if (requiredHeight != self.contentDiv.clientHeight) {
+                                self.setContentHeight(requiredHeight);
                             }
-
-                            var buffer = document.createElement('canvas');
-                            buffer.width = pixelWidth;
-                            buffer.height = self.canvas.height;
-                            ctx = buffer.getContext('2d');
-
-                            self.track.draw({
-                                features: features,
-                                context: ctx,
-                                bpStart: bpStart,
-                                bpPerPixel: referenceFrame.bpPerPixel,
-                                pixelWidth: buffer.width,
-                                pixelHeight: buffer.height
-                            });
-
-                            if (self.track.paintAxis) {
-
-                                var buffer2 = document.createElement('canvas');
-                                buffer2.width = self.controlCanvas.width;
-                                buffer2.height = self.controlCanvas.height;
-
-                                var ctx2 = buffer2.getContext('2d');
-
-                                self.track.paintAxis(ctx2, buffer2.width, buffer2.height);
-
-                                self.controlCtx.drawImage(buffer2, 0, 0);
-                            }
-
-                            self.tile = new Tile(referenceFrame.chr, bpStart, bpEnd, referenceFrame.bpPerPixel, buffer);
-                            self.paintImage();
                         }
 
-                    })
-                    .catch(function (error) {
-                        igv.stopSpinnerAtParentElement(self.trackDiv);
-                        alert(error);
-                    });
+                        var buffer = document.createElement('canvas');
+                        buffer.width = pixelWidth;
+                        buffer.height = self.canvas.height;
+                        ctx = buffer.getContext('2d');
 
-            }
+                        self.track.draw({
+                            features: features,
+                            context: ctx,
+                            bpStart: bpStart,
+                            bpPerPixel: referenceFrame.bpPerPixel,
+                            pixelWidth: buffer.width,
+                            pixelHeight: buffer.height
+                        });
+
+                        if (self.track.paintAxis) {
+
+                            var buffer2 = document.createElement('canvas');
+                            buffer2.width = self.controlCanvas.width;
+                            buffer2.height = self.controlCanvas.height;
+
+                            var ctx2 = buffer2.getContext('2d');
+
+                            self.track.paintAxis(ctx2, buffer2.width, buffer2.height);
+
+                            self.controlCtx.drawImage(buffer2, 0, 0);
+                        }
+
+                        self.tile = new Tile(referenceFrame.chr, bpStart, bpEnd, referenceFrame.bpPerPixel, buffer);
+                        self.paintImage();
+                    }
+
+                })
+                .catch(function (error) {
+                    igv.stopSpinnerAtParentElement(self.trackDiv);
+                    alert(error);
+                });
         }
 
         if (this.tile && this.tile.overlapsRange(referenceFrame.chr, refFrameStart, refFrameEnd)) {
