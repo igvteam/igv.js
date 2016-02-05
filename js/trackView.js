@@ -367,7 +367,8 @@ var igv = (function (igv) {
         }
 
 
-        var pixelWidth,
+        var repaintQueue = false,
+            pixelWidth,
             bpWidth,
             bpStart,
             bpEnd,
@@ -386,13 +387,14 @@ var igv = (function (igv) {
             if (this.currentLoadTask && (isNotIndexed(this.track) ||
                 (this.currentLoadTask.end >= refFrameEnd && this.currentLoadTask.start <= refFrameStart))) {
                 // Nothing to do but wait for current load task to complete
-                //console.log("Skipping load");
+                 console.log("Skipping repaint");
             }
 
             else {
 
                 // If there is a load in progress cancel it
                 if (this.currentLoadTask) {
+                    console.log("Aborting current task");
                     this.currentLoadTask.abort();
                 }
 
@@ -402,12 +404,13 @@ var igv = (function (igv) {
                 bpStart = Math.max(0, Math.round(referenceFrame.start - bpWidth / 3));
                 bpEnd = bpStart + bpWidth;
 
-                this.currentLoadTask = {
+                self.currentLoadTask = {
                     start: bpStart,
                     end: bpEnd,
                     abort: function () {
                         this.canceled = true;
                         if (this.xhrRequest) {
+                            console.log("Aborting xhr request");
                             this.xhrRequest.abort();
                         }
                         //igv.stopSpinnerObject(self.trackDiv);
