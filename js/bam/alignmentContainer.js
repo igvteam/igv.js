@@ -48,7 +48,7 @@ var igv = (function (igv) {
         this.downSample = true;
 
         this.samplingWindowSize = 100;
-        this.samplingDepth = 5;
+        this.samplingDepth = 100;
 
     }
 
