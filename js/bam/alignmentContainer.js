@@ -48,7 +48,7 @@ var igv = (function (igv) {
         this.downSample = true;
 
         this.samplingWindowSize = 100;
-        this.samplingDepth = 100000000;
+        this.samplingDepth = 100;
 
     }
 
@@ -80,6 +80,9 @@ var igv = (function (igv) {
         if (this.currentBucket !== undefined) {
             finishBucket.call(this);
         }
+        this.alignments.sort(function (a, b) {
+            return a.start - b.start
+        });
     }
 
     igv.AlignmentContainer.prototype.contains = function (chr, start, end) {
@@ -89,9 +92,6 @@ var igv = (function (igv) {
     }
 
     function finishBucket() {
-        this.currentBucket.alignments.sort(function (a, b) {
-            return a.start - b.start
-        });
         this.alignments = this.alignments.concat(this.currentBucket.alignments);
         this.downsampledIntervals.push(
             {
@@ -119,7 +119,7 @@ var igv = (function (igv) {
             this.alignments.push(alignment);
         }
         else {
-            samplingProb = this.samplingDepth / (this.samplingDepth + this.overageCount + 1);
+            samplingProb = this.samplingDepth / (this.samplingDepth + this.downsampledCount + 1);
 
             if (Math.random() < samplingProb) {
                 idx = Math.floor(Math.random() * (this.alignments.length - 1));
