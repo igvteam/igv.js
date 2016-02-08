@@ -204,14 +204,16 @@ var igv = (function (igv) {
             trackIconContainer = $('<div class="igv-app-icon-container">');
             $(viewportDiv).append(trackIconContainer[0]);
 
-            this.track.labelSpan = $('<span class="igv-track-label-span-base">')[0];
+            //this.track.labelSpan = $('<span class="igv-track-label-span-base">')[0];
+            this.track.labelSpan = $('<span>')[0];
+
             this.track.labelSpan.innerHTML = this.track.name;
             $(trackIconContainer).append(this.track.labelSpan);
 
             description = this.track.description || this.track.name;
             this.track.labelSpan.onclick = function (e) {
                 igv.popover.presentTrackPopup(e.pageX, e.pageY, description, false);
-            }
+            };
 
             $(viewportDiv).scroll(function () {
                 trackIconContainer.css({"top": $(viewportDiv).scrollTop() + "px"});
