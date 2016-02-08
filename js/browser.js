@@ -402,6 +402,16 @@ var igv = (function (igv) {
 
     };
 
+    igv.Browser.prototype.loadInProgress = function () {
+        var i;
+        for(i=0; i<this.trackViews.length; i++) {
+            if(this.trackViews.currentLoadTask) {
+                return true;
+            }
+        }
+        return false;
+    }
+
     igv.Browser.prototype.updateLocusSearch = function (referenceFrame) {
 
         var chr,
@@ -533,6 +543,11 @@ var igv = (function (igv) {
 // Zoom in by a factor of 2, keeping the same center location
     igv.Browser.prototype.zoomIn = function () {
 
+        if(this.loadInProgress()) {
+            // ignore
+            return;
+        }
+
         var newScale,
             center,
             viewportWidth;
@@ -554,6 +569,11 @@ var igv = (function (igv) {
 // Zoom out by a factor of 2, keeping the same center location if possible
     igv.Browser.prototype.zoomOut = function () {
 
+        if(this.loadInProgress()) {
+            // ignore
+            return;
+        }
+        
         var newScale, maxScale, center, chrLength, widthBP, viewportWidth;
         viewportWidth = this.trackViewportWidth();
 

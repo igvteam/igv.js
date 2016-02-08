@@ -380,8 +380,10 @@ var igv = (function (igv) {
             success;
 
 
-        if (!hasCachedImaged.call(this, chr, refFrameStart, refFrameEnd, referenceFrame.bpPerPixel)) {
-
+        if (this.tile && this.tile.containsRange(chr, refFrameStart, refFrameEnd, referenceFrame.bpPerPixel)) {
+            this.paintImage();
+        }
+        else {
 
             // If there is a load in progress cancel it
             if (this.currentLoadTask) {
@@ -465,20 +467,6 @@ var igv = (function (igv) {
                     igv.stopSpinnerAtParentElement(self.trackDiv);
                     alert(error);
                 });
-        }
-
-        if (this.tile && this.tile.overlapsRange(referenceFrame.chr, refFrameStart, refFrameEnd)) {
-            this.paintImage();
-        }
-        else {
-            this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
-        }
-
-        /**
-         * Return true if we have a cached image (the "tile") that covers the requested range at the requested resolution
-         */
-        function hasCachedImaged(chr, start, end, bpPerPixel) {
-            return this.tile && this.tile.containsRange(chr, start, end, bpPerPixel);
         }
 
 
