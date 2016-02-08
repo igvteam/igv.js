@@ -1229,26 +1229,37 @@ div.ui-dialog fieldset {
 
 .igv-app-icon-container {
 
-    border-radius: 4px;
+    position: absolute;
+    left: 0;
+    top: 0;
+
+    width: auto;
+    height:auto;
+    max-width: 200px;
+
+    padding-left: 4px;
+    padding-right: 4px;
+
     border-color: #444;
+    border-radius: 4px;
     border-style: solid;
     border-width: thin;
 
     background: rgb(255, 255, 255);
 
-    /*display: inline-block;*/
-
-    position: absolute;
-    left: 0;
-    top: 0;
-    width: auto;
-    height:auto;
-
-    max-width: 200px;
-
-    /*margin-top: 4px;*/
-
 }
+
+.igv-app-icon-container:hover,
+.igv-app-icon-container:focus,
+.igv-app-icon-container:active  {
+
+    cursor: pointer;
+
+    font-weight: bold;
+
+    background-color: rgba(224, 224, 224, 1);
+}
+
 
 .igv-track-control-canvas {
     position: absolute;
