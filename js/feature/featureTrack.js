@@ -69,7 +69,7 @@ var igv = (function (igv) {
 
     igv.FeatureTrack.prototype.getFileHeader = function () {
         var self = this;
-        return new Promise(function(fulfill, reject) {
+        return new Promise(function (fulfill, reject) {
             if (typeof self.featureSource.getFileHeader === "function") {
                 self.featureSource.getFileHeader().then(function (header) {
 
@@ -122,13 +122,14 @@ var igv = (function (igv) {
         }
         else {
             var maxRow = 0;
-            features.forEach(function (feature) {
+            if (features && (typeof features.forEach === "function")) {
+                features.forEach(function (feature) {
 
-                if (feature.row && feature.row > maxRow) maxRow = feature.row;
+                    if (feature.row && feature.row > maxRow) maxRow = feature.row;
 
-            });
-
-            return (maxRow + 1) * (this.displayMode === "SQUISHED" ? this.squishedRowHeight : this.expandedRowHeight);
+                });
+            }
+            return Math.max(this.collapsedHeight, (maxRow + 1) * (this.displayMode === "SQUISHED" ? this.squishedRowHeight : this.expandedRowHeight));
 
         }
 
