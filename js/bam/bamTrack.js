@@ -282,17 +282,21 @@ var igv = (function (igv) {
             skippedColor = this.skippedColor,
             deletionColor = this.deletionColor,
             bpEnd = bpStart + pixelWidth * bpPerPixel + 1,
+            $bamTrackZoomIn = $('.igv-bam-track-zoom-in-div'),
             zoomInNoticeFontStyle = {
                 font: '16px PT Sans',
                 fillStyle: "rgba(64, 64, 64, 1)",
                 strokeStyle: "rgba(64, 64, 64, 1)"
             };
 
+        $bamTrackZoomIn.hide();
         if (genomicInterval.exceedsVisibilityWindow) {
 
-            for (var x = 200; x < pixelWidth; x += 400) {
-                igv.graphics.fillText(ctx, "Zoom in to see alignments", x, 20, zoomInNoticeFontStyle);
-            }
+            //for (var x = 200; x < pixelWidth; x += 400) {
+            //    igv.graphics.fillText(ctx, "Zoom in to see alignments", x, 20, zoomInNoticeFontStyle);
+            //}
+
+            $bamTrackZoomIn.show();
 
             return;
         }
