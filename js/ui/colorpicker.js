@@ -100,14 +100,14 @@ var igv = (function (igv) {
 
             $row = $('<div class="igv-grid-colorpicker">');
 
-            // column
+            // color input
             $column = $('<div class="igv-col igv-col-7-8">');
             $userColorInput = $('<input class="igv-user-input-colorpicker" type="text" placeholder="Ex: #ff0000 or 255,0,0">');
             $userColorInput.change(function () {
 
                 var parsed = parseColor($(this).val());
 
-                if (undefined !== parsed) {
+                if (parsed) {
 
                     igv.setTrackColor(self.trackView.track, parsed);
                     self.trackView.update();
@@ -117,6 +117,7 @@ var igv = (function (igv) {
                     $(this).attr("placeholder", "Ex: #ff0000 or 255,0,0");
 
                     self.$userColorFeeback.css("background-color", "white");
+                    self.$userColorFeeback.hide();
 
                 } else {
                     self.$userError.show();
@@ -140,10 +141,11 @@ var igv = (function (igv) {
                 parsed = parseColor($(this).val());
 
                 if (undefined !== parsed) {
-                    self.$userError.hide();
                     self.$userColorFeeback.css("background-color", parsed);
+                    self.$userColorFeeback.show();
                 } else {
                     self.$userColorFeeback.css("background-color", "white");
+                    self.$userColorFeeback.hide();
                 }
 
             });
@@ -151,14 +153,17 @@ var igv = (function (igv) {
             $column.append($userColorInput[0]);
             $row.append($column[0]);
 
-            // color feedback.
+
+            // color feedback chip
             $column = makeColumn(0, 0, null);
             self.$userColorFeeback = $column.find("div").first();
-
             $row.append($column);
+            self.$userColorFeeback.hide();
 
             $rowContainer = $('<div class="igv-grid-rect">');
             $rowContainer.append($row[0]);
+
+
 
             // user feedback
             self.$userError = $('<span>');
