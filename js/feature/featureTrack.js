@@ -145,20 +145,13 @@ var igv = (function (igv) {
             pixelWidth = options.pixelWidth,
             pixelHeight = options.pixelHeight,
             bpEnd = bpStart + pixelWidth * bpPerPixel + 1,
-            zoomInNoticeFontStyle = {
-                font: '16px PT Sans',
-                fillStyle: "rgba(64, 64, 64, 1)",
-                strokeStyle: "rgba(64, 64, 64, 1)"
-            };
-
+            $zoomInNotice = $('.zoom-in-notice');
 
         igv.graphics.fillRect(ctx, 0, 0, pixelWidth, pixelHeight, {'fillStyle': "rgb(255, 255, 255)"});
 
+        $zoomInNotice.hide();
         if (options.features.exceedsVisibilityWindow) {
-
-            for (var x = 200; x < pixelWidth; x += 400) {
-                igv.graphics.fillText(ctx, "Zoom in to see features", x, 20, zoomInNoticeFontStyle);
-            }
+            $zoomInNotice.show();
             return;
         }
 

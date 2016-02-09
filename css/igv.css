@@ -1200,6 +1200,10 @@ div.ui-dialog fieldset {
 
 .igv-app-icon-container {
 
+    font-family: 'PT Sans', sans-serif;
+    font-size: small;
+    font-weight: 400;
+
     position: absolute;
     left: 0;
     top: 0;
@@ -1233,7 +1237,7 @@ div.ui-dialog fieldset {
     background-color: rgba(224, 224, 224, 1);
 }
 
-.igv-bam-track-zoom-in-div {
+.zoom-in-notice {
 
     position: absolute;
     top: 0;
