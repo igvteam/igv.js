@@ -28,12 +28,13 @@
  */
 var igv = (function (igv) {
 
-    var columnCount = 5;
+    var columnCount = 8;
 
     igv.ColorPicker = function ($parent, userPalette) {
 
         var self = this,
             palette = userPalette || ["#666666", "#0000cc", "#009900", "#cc0000", "#ffcc00", "#9900cc", "#00ccff", "#ff6600", "#ff6600"],
+            //palette = ["#666666", "#0000cc", "#009900", "#cc0000", "#ffcc00", "#9900cc", "#00ccff", "#ff6600", "#ff6600"],
             rowCount = Math.ceil(palette.length / columnCount),
             rowIndex;
 
