@@ -165,7 +165,7 @@ var igv = (function (igv) {
 
     igv.TrackView.prototype.addViewportToParentTrackDiv = function (trackDiv) {
 
-        var $bamTrackZoomIn;
+        var $zoomInNotice;
 
         // viewport
         this.viewportDiv = $('<div class="igv-viewport-div">')[0];
@@ -175,11 +175,11 @@ var igv = (function (igv) {
         this.contentDiv = $('<div class="igv-content-div">')[0];
         $(this.viewportDiv).append(this.contentDiv);
 
-        if (this.track instanceof igv.BAMTrack) {
-            $bamTrackZoomIn = $('<div class="igv-bam-track-zoom-in-div">');
-            $bamTrackZoomIn.text('Zoom in to see alignments');
-            $(this.contentDiv).append($bamTrackZoomIn[ 0 ]);
-            $bamTrackZoomIn.hide();
+        if (this.track instanceof igv.BAMTrack || this.track instanceof igv.FeatureTrack ) {
+            $zoomInNotice = $('<div class="zoom-in-notice">');
+            $zoomInNotice.text('Zoom in to see features');
+            $(this.contentDiv).append($zoomInNotice[ 0 ]);
+            $zoomInNotice.hide();
         }
 
         // track content canvas
