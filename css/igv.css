@@ -1012,35 +1012,6 @@ div.ui-dialog fieldset {
     vertical-align: middle;
 }
 
-.igv-track-label-span-base {
-
-    font-family: 'PT Sans', sans-serif;
-    font-size: small;
-    font-weight: 400;
-    color: #444;
-
-    margin-left: 4px;
-    margin-right: 4px;
-    position: relative;
-    cursor: default;
-}
-
-.igv-track-label-span-base:hover,
-.igv-track-label-span-base:focus,
-.igv-track-label-span-base:active  {
-    border-radius: 4px;
-    border-color: #444;
-    border-style: solid;
-    border-width: thin;
-    cursor: pointer;
-    background-color: rgba(224, 224, 224, 1);
-}
-
-.igv-track-label-span-highlighted {
-    font-weight: bold;
-    color: rgba(204, 51, 0, 1);
-}
-
 .igv-track-label {
     position: absolute;
     top: 10px;
@@ -1247,6 +1218,8 @@ div.ui-dialog fieldset {
 
     background: rgb(255, 255, 255);
 
+    z-index: 16;
+
 }
 
 .igv-app-icon-container:hover,
@@ -1260,6 +1233,18 @@ div.ui-dialog fieldset {
     background-color: rgba(224, 224, 224, 1);
 }
 
+.igv-bam-track-zoom-in-div {
+
+    position: absolute;
+    top: 0;
+    left: 0;
+
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 255, 79, 0.5);
+
+    z-index: 8;
+}
 
 .igv-track-control-canvas {
     position: absolute;

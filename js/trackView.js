@@ -173,6 +173,14 @@ var igv = (function (igv) {
         this.contentDiv = $('<div class="igv-content-div">')[0];
         $(this.viewportDiv).append(this.contentDiv);
 
+        // bam track "zoom in to see alignments"
+        this.$bamTrackZoomIn = $('<div class="igv-bam-track-zoom-in-div">');
+        $(this.contentDiv).append(this.$bamTrackZoomIn[ 0 ]);
+
+        this.$bamTrackZoomIn.hide();
+
+        this.$bamTrackZoomIn.show();
+
         // track content canvas
         this.canvas = $('<canvas class = "igv-content-canvas">')[0];
         $(this.contentDiv).append(this.canvas);
@@ -204,7 +212,6 @@ var igv = (function (igv) {
             trackIconContainer = $('<div class="igv-app-icon-container">');
             $(viewportDiv).append(trackIconContainer[0]);
 
-            //this.track.labelSpan = $('<span class="igv-track-label-span-base">')[0];
             this.track.labelSpan = $('<span>')[0];
 
             this.track.labelSpan.innerHTML = this.track.name;
