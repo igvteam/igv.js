@@ -308,6 +308,38 @@ div[id="igvEncodeModal"] {
 
 }
 
+/* ok button */
+.igv-col-filler-ok-button {
+
+    margin-left: 8px;
+    padding-left: 1px;
+    padding-top: 5px;
+    width: 90%;
+    height: 90%;
+
+    border-color: rgb(255, 255, 255);
+    border-style: solid;
+    border-width: thin;
+    border-radius: 4px;
+
+    color: white;
+    text-align: center;
+    vertical-align: middle;
+
+    font-family: 'PT Sans', sans-serif;
+    font-size: medium;
+    font-weight: 200;
+
+    background-color: #5ea4e0;
+}
+
+.igv-col-filler-ok-button:hover,
+.igv-col-filler-ok-button:focus,
+.igv-col-filler-ok-button:active  {
+    background-color: #5079a8;
+}
+
+/* cancel button */
 .igv-col-filler-cancel-button {
 
     margin-left: 8px;
@@ -337,6 +369,13 @@ div[id="igvEncodeModal"] {
 .igv-col-filler-cancel-button:active  {
     background-color: #7e7e7e;
 }
+
+
+
+
+
+
+
 
 .igv-col-fa {
 
