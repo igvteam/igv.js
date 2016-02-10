@@ -91,9 +91,16 @@ var igv = (function (igv) {
 
             self.userColors = [];
 
+            // Provide 5 rows of user color pallete real estate
             for (digit = 0; digit < 5; digit++) {
-                self.userColors.push(rowHidden(digit));
-                self.$container.append(self.userColors[digit][0]);
+
+                $row = rowHidden(digit);
+                self.userColors.push($row);
+                self.$container.append( $row[ 0 ] );
+
+                $row.find('.igv-col-filler-no-color').addClass("igv-grid-rect-hidden");
+
+                //self.$container.append(self.userColors[ digit ][0]);
             }
 
             self.userColorsIndex = undefined;
@@ -156,7 +163,7 @@ var igv = (function (igv) {
 
 
             // color feedback chip
-            $column = makeColumn(0, 0, null);
+            $column = makeColumn(null);
             self.$userColorFeeback = $column.find("div").first();
             $row.append($column);
             self.$userColorFeeback.hide();
@@ -202,7 +209,7 @@ var igv = (function (igv) {
 
                     self.userColorsIndex = 0;
                     self.userColorsRowIndex = 0;
-                } else if (8 === self.userColorsRowIndex) {
+                } else if (columnCount === self.userColorsRowIndex) {
 
                     self.userColorsRowIndex = 0;
                     self.userColorsIndex = (1 + self.userColorsIndex) % self.userColors.length;
@@ -219,12 +226,15 @@ var igv = (function (igv) {
                 var $rowContainer,
                     $filler;
 
-                $rowContainer = self.userColors[c];
+                $rowContainer = self.userColors[ c ];
                 $rowContainer.removeClass("igv-grid-rect-hidden");
                 $rowContainer.addClass("igv-grid-rect");
 
-                $filler = $rowContainer.find(".igv-grid-colorpicker").find(".igv-col").find("div").eq(r);
+                $filler = $rowContainer.find(".igv-grid-colorpicker").find(".igv-col").find("div").eq( r );
+
                 $filler.removeClass("igv-col-filler-no-color");
+                $filler.removeClass("igv-grid-rect-hidden");
+
                 $filler.addClass("igv-col-filler");
 
                 $filler.css("background-color", color);
@@ -319,7 +329,7 @@ var igv = (function (igv) {
                 columnIndex;
 
             for (columnIndex = 0; columnIndex < columnCount; columnIndex++) {
-                $row.append(makeColumn(rowIndex, columnIndex, null)[0]);
+                $row.append(makeColumn(null)[0]);
             }
 
             $rowContainer.append($row);
