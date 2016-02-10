@@ -52,7 +52,54 @@ var igv = (function (igv) {
 
         self.container.append(rowOfInput()[ 0 ]);
 
-        self.container.append(rowOfCancel()[ 0 ]);
+        self.container.append(rowOfOkCancel()[ 0 ]);
+        //self.container.append(rowOfCancel()[ 0 ]);
+
+        function rowOfOkCancel() {
+
+            var $rowContainer,
+                $row,
+                $column,
+                $columnFiller;
+
+            $row = $('<div class="igv-grid-dialog">');
+
+            // shim
+            $column = $('<div class="igv-col igv-col-1-8">');
+            //
+            $row.append( $column[ 0 ] );
+
+
+            // ok button
+            $column = $('<div class="igv-col igv-col-3-8">');
+            $columnFiller = $('<div class="igv-col-filler-ok-button">');
+            $columnFiller.text("OK");
+            $columnFiller.click(function() { self.hide(); });
+            $column.append( $columnFiller[ 0 ] );
+            //
+            $row.append( $column[ 0 ] );
+
+
+            // cancel button
+            $column = $('<div class="igv-col igv-col-3-8">');
+            $columnFiller = $('<div class="igv-col-filler-cancel-button">');
+            $columnFiller.text("Cancel");
+            $columnFiller.click(function() { self.hide(); });
+            $column.append( $columnFiller[ 0 ] );
+            //
+            $row.append( $column[ 0 ] );
+
+            // shim
+            $column = $('<div class="igv-col igv-col-1-8">');
+            //
+            $row.append( $column[ 0 ] );
+
+            $rowContainer = $('<div class="igv-grid-rect">');
+            $rowContainer.append( $row[ 0 ]);
+
+            return $rowContainer;
+
+        }
 
         function rowOfCancel() {
 
