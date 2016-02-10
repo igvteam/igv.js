@@ -60,11 +60,13 @@ var igv = (function (igv) {
                     getIndex(self).then(function (bamIndex) {
 
                         var chunks = bamIndex.blocksForRange(chrId, bpStart, bpEnd),
-                            alignmentContainer = new igv.AlignmentContainer(chr, bpStart, bpEnd);
+                            alignmentContainer = new igv.AlignmentContainer(chr, bpStart, bpEnd),
+                            promises = [];
 
 
                         if (!chunks) {
-                            fulfill(null, 'Error in index fetch');
+                            fulfill(null);
+                            console.log("Error reading bam index");
                             return;
                         }
                         if (chunks.length === 0) {
@@ -72,56 +74,53 @@ var igv = (function (igv) {
                             return;
                         }
 
+                        chunks.forEach(function (c) {
 
-                        loadNextChunk(0);
+                            promises.push(new Promise(function (fulfill, reject) {
 
-                        function loadNextChunk(chunkNumber) {
+                                var fetchMin = c.minv.block,
+                                    fetchMax = c.maxv.block + 65000,   // Make sure we get the whole block.
+                                    range =
+                                        (self.contentLength > 0 && fetchMax > self.contentLength) ?
+                                        {start: fetchMin} :
+                                        {start: fetchMin, size: fetchMax - fetchMin + 1};
 
-                            var c = chunks[chunkNumber],
-                                fetchMin = c.minv.block,
-                                fetchMax = c.maxv.block + 65000,   // Make sure we get the whole block.
-                                range =
-                                    (self.contentLength > 0 && fetchMax > self.contentLength) ?
-                                    {start: fetchMin} :
-                                    {start: fetchMin, size: fetchMax - fetchMin + 1};
+                                igvxhr.loadArrayBuffer(self.bamPath,
+                                    {
+                                        task: task,
+                                        headers: self.config.headers,
+                                        range: range,
+                                        withCredentials: self.config.withCredentials
+                                    }).then(function (compressed) {
 
-                            igvxhr.loadArrayBuffer(self.bamPath,
-                                {
-                                    task: task,
-                                    headers: self.config.headers,
-                                    range: range,
-                                    withCredentials: self.config.withCredentials
-                                }).then(function (compressed) {
-
-                                try {
-                                    var ba = new Uint8Array(igv.unbgzf(compressed)); //new Uint8Array(igv.unbgzf(compressed)); //, c.maxv.block - c.minv.block + 1));
-                                } catch (e) {
-                                    console.log(e);
-                                    fulfill(alignmentContainer);
-                                }
-
-                                decodeBamRecords(ba, chunks[chunkNumber].minv.offset, alignmentContainer, bpStart, bpEnd, chrId);
-
-                                chunkNumber++;
-
-                                if (chunkNumber >= chunks.length) {
-
-                                    // If we have combined multiple chunks. Sort records by start position.  I'm not sure this is neccessary
-                                    if (chunkNumber > 0 && alignmentContainer.alignments.length > 1) {
-                                        alignmentContainer.alignments.sort(function (a, b) {
-                                            return a.start - b.start;
-                                        });
+                                    try {
+                                        var ba = new Uint8Array(igv.unbgzf(compressed)); //new Uint8Array(igv.unbgzf(compressed)); //, c.maxv.block - c.minv.block + 1));
+                                        decodeBamRecords(ba, c.minv.offset, alignmentContainer, bpStart, bpEnd, chrId);
+                                    } catch (e) {
+                                        console.log(e);
+                                        //fulfill(alignmentContainer);
                                     }
-                                    fulfill(alignmentContainer);
-                                }
-                                else {
-                                    loadNextChunk(chunkNumber);
-                                }
-                            }).catch(reject);
-                        }
+
+                                    fulfill();
+
+                                }).catch(reject);
+
+                            }))
+                        })
+
+
+                        Promise.all(promises).then(function (ignored) {
+
+                            if (chunks.length > 1) {
+                                alignmentContainer.alignments.sort(function (a, b) {
+                                    return a.start - b.start;
+                                });
+                            }
+                            fulfill(alignmentContainer);
+                        }).catch(reject);
                     }).catch(reject);
                 }
-            });
+            }).catch(reject);
         });
 
 

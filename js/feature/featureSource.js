@@ -127,30 +127,36 @@ var igv = (function (igv) {
                 self.reader.readFeatures(chr, bpStart, bpEnd, task).then(
                     function (featureList) {
 
-                        var isIndexed =
-                            self.reader.indexed ||
-                            self.config.sourceType === "ga4gh" ||
-                            self.config.sourceType === "immvar" ||
-                            self.config.sourceType === "gtex" ||
-                            self.config.sourceType === "bigquery";
+                        if (featureList && typeof featureList.forEach === 'function') {  // Have result AND its an array type
 
-                        self.featureCache = isIndexed ?
-                            new igv.FeatureCache(featureList, genomicInterval) :
-                            new igv.FeatureCache(featureList);   // Note - replacing previous cache with new one
+                            var isIndexed =
+                                self.reader.indexed ||
+                                self.config.sourceType === "ga4gh" ||
+                                self.config.sourceType === "immvar" ||
+                                self.config.sourceType === "gtex" ||
+                                self.config.sourceType === "bigquery";
+
+                            self.featureCache = isIndexed ?
+                                new igv.FeatureCache(featureList, genomicInterval) :
+                                new igv.FeatureCache(featureList);   // Note - replacing previous cache with new one
 
 
-                        // If track is marked "searchable"< cache features by name -- use this with caution, memory intensive
-                        if (self.config.searchable) {
-                            addFeaturesToDB(featureList);
+                            // If track is marked "searchable"< cache features by name -- use this with caution, memory intensive
+                            if (self.config.searchable) {
+                                addFeaturesToDB(featureList);
+                            }
+
+                            // Assign overlapping features to rows
+                            packFeatures(featureList, maxRows);
+
+                            // Finally pass features for query interval to continuation
+                            fulfill(self.featureCache.queryFeatures(chr, bpStart, bpEnd));
+                        }
+                        else {
+                            fulfill(null);
                         }
 
-                        // Assign overlapping features to rows
-                        packFeatures(featureList, maxRows);
-
-                        // Finally pass features for query interval to continuation
-                        fulfill(self.featureCache.queryFeatures(chr, bpStart, bpEnd));
-
-                    }).catch(reject);   // Currently loading at granularity of chromosome
+                    }).catch(reject);
             }
         });
     }

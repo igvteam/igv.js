@@ -128,38 +128,39 @@ var igv = (function (igv) {
         var self = this;
 
         return new Promise(function (fulfill, reject) {
+
             var blocks,
                 processed,
-                allFeatures,
                 index = self.index,
                 tabix = index && index.tabix,
-                refId = tabix ? index.sequenceIndexMap[chr] : chr;
+                refId = tabix ? index.sequenceIndexMap[chr] : chr,
+                promises = [];
 
             blocks = index.blocksForRange(refId, start, end);
 
             if (!blocks || blocks.length === 0) {
-                fulfill(null);
+                fulfill(null);       // TODO -- is this correct?  Should it return an empty array?
             }
             else {
 
-                allFeatures = [];
-                processed = 0;
-
                 blocks.forEach(function (block) {
 
-                    var startPos = block.minv.block,
-                        startOffset = block.minv.offset,
-                        endPos = block.maxv.block + (index.tabix ? MAX_GZIP_BLOCK_SIZE + 100 : 0),
-                        options = {
-                            headers: self.config.headers,           // http headers, not file header
-                            range: {start: startPos, size: endPos - startPos + 1},
-                            withCredentials: self.config.withCredentials,
-                            task: task
-                        },
+                    promises.push(new Promise(function (fulfill, reject) {
+
+                        var startPos = block.minv.block,
+                            startOffset = block.minv.offset,
+                            endPos = block.maxv.block + (index.tabix ? MAX_GZIP_BLOCK_SIZE + 100 : 0),
+                            options = {
+                                headers: self.config.headers,           // http headers, not file header
+                                range: {start: startPos, size: endPos - startPos + 1},
+                                withCredentials: self.config.withCredentials,
+                                task: task
+                            },
+                            success;
+
                         success = function (data) {
 
-                            var inflated, slicedData,
-                                byteLength = data.byteLength;
+                            var inflated, slicedData;
 
                             processed++;
 
@@ -173,31 +174,46 @@ var igv = (function (igv) {
                             }
 
                             slicedData = startOffset ? inflated.slice(startOffset) : inflated;
-                            allFeatures = allFeatures.concat(self.parser.parseFeatures(slicedData));
-
-                            if (processed === blocks.length) {
-                                allFeatures.sort(function (a, b) {
-                                    return a.start - b.start;
-                                });
-                                fulfill(allFeatures);
-                            }
+                            var f = self.parser.parseFeatures(slicedData);
+                            fulfill(f);
                         };
 
 
-                    // Async load
-                    if (self.localFile) {
-                        igvxhr.loadStringFromFile(self.localFile, options).then(success);
-                    }
-                    else {
-                        if (index.tabix) {
-                            igvxhr.loadArrayBuffer(self.url, options).then(success);
+                        // Async load
+                        if (self.localFile) {
+                            igvxhr.loadStringFromFile(self.localFile, options).then(success).catch(reject);
                         }
                         else {
-                            igvxhr.loadString(self.url, options).then(success);
+                            if (index.tabix) {
+                                igvxhr.loadArrayBuffer(self.url, options).then(success).catch(reject);
+                            }
+                            else {
+                                igvxhr.loadString(self.url, options).then(success).catch(reject);
+                            }
                         }
-                    }
+                    }))
                 });
 
+                Promise.all(promises).then(function (featureArrays) {
+
+                    var i, allFeatures;
+
+                    if (featureArrays.length === 1) {
+                        allFeatures = featureArrays[0];
+                    } else {
+                        allFeatures = featureArrays[0];
+
+                        for (i = 1; i < allFeatures.length; i++) {
+                            allFeatures = allFeatures.concat(featureArrays[1]);
+                        }
+
+                        allFeatures.sort(function (a, b) {
+                            return a.start - b.start;
+                        });
+                    }
+
+                    fulfill(allFeatures)
+                }).catch(reject);
             }
         });
 
@@ -263,8 +279,8 @@ var igv = (function (igv) {
                 }
                 else {
                     loadFeaturesNoIndex.call(self, undefined).then(function (features) {
-                            fulfill(self.header, features) // Unfortunate use of side affect here
-                        }).catch(reject);
+                        fulfill(self.header, features) // Unfortunate use of side affect here
+                    }).catch(reject);
                 }
             });
         });
