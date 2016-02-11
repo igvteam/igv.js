@@ -57,11 +57,11 @@ var igv = (function (igv) {
 
     };
 
-    igv.WIGTrack.prototype.getFeatures = function (chr, bpStart, bpEnd, task) {
+    igv.WIGTrack.prototype.getFeatures = function (chr, bpStart, bpEnd) {
 
         var self = this;
         return new Promise(function (fulfill, reject) {
-            self.featureSource.getFeatures(chr, bpStart, bpEnd, task).then(fulfill);
+            self.featureSource.getFeatures(chr, bpStart, bpEnd).then(fulfill);
         });
     }
 

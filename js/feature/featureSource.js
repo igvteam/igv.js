@@ -106,10 +106,9 @@ var igv = (function (igv) {
      * @param chr
      * @param bpStart
      * @param bpEnd
-     * @param task
      */
 
-    igv.FeatureSource.prototype.getFeatures = function (chr, bpStart, bpEnd, task) {
+    igv.FeatureSource.prototype.getFeatures = function (chr, bpStart, bpEnd) {
 
         var self = this;
         return new Promise(function (fulfill, reject) {
@@ -124,7 +123,7 @@ var igv = (function (igv) {
             }
             else {
                 // TODO -- reuse cached features that overelap new region
-                self.reader.readFeatures(chr, bpStart, bpEnd, task).then(
+                self.reader.readFeatures(chr, bpStart, bpEnd).then(
                     function (featureList) {
 
                         if (featureList && typeof featureList.forEach === 'function') {  // Have result AND its an array type

@@ -36,7 +36,7 @@ var igv = (function (igv) {
 
     };
 
-    igv.GtexFileReader.prototype.readFeatures = function (chr, bpStart, bpEnd, task) {
+    igv.GtexFileReader.prototype.readFeatures = function (chr, bpStart, bpEnd) {
 
         var self = this;
 
@@ -69,7 +69,6 @@ var igv = (function (igv) {
 
                     igvxhr.loadArrayBuffer(file,
                         {
-                            task: task,
                             range: range,
                             withCredentials: self.config.withCredentials
                         }).then(function (arrayBuffer) {

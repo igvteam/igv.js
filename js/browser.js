@@ -405,7 +405,7 @@ var igv = (function (igv) {
     igv.Browser.prototype.loadInProgress = function () {
         var i;
         for(i=0; i<this.trackViews.length; i++) {
-            if(this.trackViews[i].currentLoadTask) {
+            if(this.trackViews[i].loading) {
                 return true;
             }
         }

@@ -66,19 +66,19 @@ var igv = (function (igv) {
 
     }
 
-    igv.FastaSequence.prototype.getSequence = function (chr, start, end, continuation, task) {
+    igv.FastaSequence.prototype.getSequence = function (chr, start, end, continuation) {
 
         if (this.indexed) {
-            getSequenceIndexed.call(this, chr, start, end, continuation, task);
+            getSequenceIndexed.call(this, chr, start, end, continuation);
         }
         else {
-            getSequenceNonIndexed.call(this, chr, start, end, continuation, task);
+            getSequenceNonIndexed.call(this, chr, start, end, continuation);
 
         }
 
     };
 
-    function getSequenceIndexed(chr, start, end, continuation, task) {
+    function getSequenceIndexed(chr, start, end, continuation) {
 
         var self = this,
             interval = self.interval;
@@ -105,8 +105,7 @@ var igv = (function (igv) {
             this.readSequence(chr, qstart, qend, function (seqBytes) {
                     self.interval = new igv.GenomicInterval(chr, qstart, qend, seqBytes);
                     continuation(getSequenceFromInterval(self.interval, start, end));
-                },
-                task);
+                });
         }
 
         function getSequenceFromInterval(interval, start, end) {
@@ -118,7 +117,7 @@ var igv = (function (igv) {
     }
 
 
-    function getSequenceNonIndexed(chr, start, end, continuation, task) {
+    function getSequenceNonIndexed(chr, start, end, continuation) {
 
         var seq = this.sequences[chr];
         if (seq && seq.length > end) {
@@ -225,14 +224,14 @@ var igv = (function (igv) {
         });
     };
 
-    igv.FastaSequence.prototype.readSequence = function (chr, qstart, qend, continuation, task) {
+    igv.FastaSequence.prototype.readSequence = function (chr, qstart, qend, continuation) {
 
         //console.log("Read sequence " + chr + ":" + qstart + "-" + qend);
         var fasta = this;
 
         if (!this.index) {
             this.loadIndex(function () {
-                fasta.readSequence(chr, qstart, qend, continuation, task);
+                fasta.readSequence(chr, qstart, qend, continuation);
             })
         } else {
             var idxEntry = this.index[chr];
@@ -270,8 +269,7 @@ var igv = (function (igv) {
                 ;
 
                 igvxhr.load(fasta.file, {
-                    range: {start: startByte, size: byteCount},
-                    task: task
+                    range: {start: startByte, size: byteCount}
                 }).then(function (allBytes) {
 
                     var nBases,

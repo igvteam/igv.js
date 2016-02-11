@@ -72,7 +72,7 @@ var igv = (function (igv) {
      * @param bpEnd
      */
 
-    igv.T2DVariantSource.prototype.getFeatures = function (chr, bpStart, bpEnd, task) {
+    igv.T2DVariantSource.prototype.getFeatures = function (chr, bpStart, bpEnd) {
 
         var self = this;
         return new Promise(function (fulfill, reject) {
@@ -94,7 +94,6 @@ var igv = (function (igv) {
 
                 igvxhr.loadJson(queryURL, {
                     sendData: body,
-                    task: task,
                     withCredentials: self.config.withCredentials
 
                 }).then(function (json) {

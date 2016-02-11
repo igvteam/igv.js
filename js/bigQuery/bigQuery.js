@@ -58,7 +58,7 @@ var igv = (function (igv) {
 
     }
 
-    igv.BigQueryFeatureSource.prototype.getFeatures = function (chr, bpStart, bpEnd, task) {
+    igv.BigQueryFeatureSource.prototype.getFeatures = function (chr, bpStart, bpEnd) {
 
         var self = this;
         return new Promise(function (fulfill, reject) {
@@ -115,7 +115,7 @@ var igv = (function (igv) {
 
     }
 
-    igv.BigQueryFeatureReader.prototype.readFeatures = function (chr, bpStart, bpEnd, task) {
+    igv.BigQueryFeatureReader.prototype.readFeatures = function (chr, bpStart, bpEnd) {
 
         var c = chr.startsWith("chr") ? chr.substring(3) : chr,
             q = "SELECT * FROM [isb-cgc:tcga_201510_alpha.Copy_Number_segments]" +
@@ -156,7 +156,6 @@ var igv = (function (igv) {
                     "useQueryCache": true
                 },
                 decode = options.decode,
-                task = options.task,
                 apiKey = oauth.google.apiKey,
                 jobId,
                 paramSeparator = "&";
@@ -172,7 +171,6 @@ var igv = (function (igv) {
             igvxhr.loadJson(url,
                 {
                     sendData: sendData,
-                    task: task,
                     contentType: "application/json",
                 }).then(function (response) {
 
@@ -214,7 +212,6 @@ var igv = (function (igv) {
                         var url = "https://clients6.google.com/bigquery/v2/projects/" + options.projectId + "/queries/" + jobId,
                             decode = options.decode,
                             success = options.success,
-                            task = options.task,
                             apiKey = oauth.google.apiKey,
                             paramSeparator = "&";
 
@@ -234,7 +231,6 @@ var igv = (function (igv) {
 
                         igvxhr.loadJson(url,
                             {
-                                task: task,
                                 contentType: "application/json",
                             }).then(function (response) {
 

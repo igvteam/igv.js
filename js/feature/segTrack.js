@@ -99,7 +99,7 @@ var igv = (function (igv) {
     };
 
 
-    igv.SegTrack.prototype.getFeatures = function (chr, bpStart, bpEnd, task) {
+    igv.SegTrack.prototype.getFeatures = function (chr, bpStart, bpEnd) {
 
         var self = this;
         return new Promise(function (fulfill, reject) {
@@ -113,11 +113,11 @@ var igv = (function (igv) {
                         self.sampleCount++;
                     })
 
-                    self.featureSource.getFeatures(chr, bpStart, bpEnd, task).then(fulfill);
+                    self.featureSource.getFeatures(chr, bpStart, bpEnd).then(fulfill);
                 });
             }
             else {
-                self.featureSource.getFeatures(chr, bpStart, bpEnd, task).then(fulfill);
+                self.featureSource.getFeatures(chr, bpStart, bpEnd).then(fulfill);
             }
         });
     }

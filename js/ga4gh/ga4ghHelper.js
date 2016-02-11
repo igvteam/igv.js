@@ -57,7 +57,6 @@ var igv = (function (igv) {
                 url = options.url,
                 body = options.body,
                 decode = options.decode,
-                task = options.task,
                 acToken = oauth.google.access_token,
                 apiKey = oauth.google.apiKey,
                 paramSeparator = "?";
@@ -89,7 +88,6 @@ var igv = (function (igv) {
                 igvxhr.loadJson(url,
                     {
                         sendData: sendData,
-                        task: task,
                         contentType: "application/json",
                         headers: ga4ghHeaders()
                     }).then(function (json) {

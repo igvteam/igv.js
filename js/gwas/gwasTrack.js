@@ -69,8 +69,8 @@ var igv = (function (igv) {
     }
 
 
-    igv.GWASTrack.prototype.getFeatures = function (chr, bpStart, bpEnd, task) {
-       return this.featureSource.getFeatures(chr, bpStart, bpEnd, task);
+    igv.GWASTrack.prototype.getFeatures = function (chr, bpStart, bpEnd) {
+       return this.featureSource.getFeatures(chr, bpStart, bpEnd);
     }
 
 

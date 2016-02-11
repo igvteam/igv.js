@@ -79,7 +79,6 @@ var igvxhr = (function (igvxhr) {
                 sendData = options.sendData,
                 method = options.method || (sendData ? "POST" : "GET"),
                 abort = options.abort || reject || fulfill,
-                task = options.task,
                 range = options.range,
                 responseType = options.responseType,
                 contentType = options.contentType,
@@ -88,10 +87,6 @@ var igvxhr = (function (igvxhr) {
                 isSafari = navigator.vendor.indexOf("Apple") == 0 && /\sSafari\//.test(navigator.userAgent),
                 withCredentials = options.withCredentials,
                 header_keys, key, value, i;
-
-            if (task) {
-                task.xhrRequest = xhr;
-            }
 
             if (range && isSafari) {
 

@@ -36,7 +36,7 @@ var igv = (function (igv) {
         this.bufferedReader = new igv.BufferedReader(config);
     };
 
-    igv.BWSource.prototype.getFeatures = function (chr, bpStart, bpEnd, task) {
+    igv.BWSource.prototype.getFeatures = function (chr, bpStart, bpEnd) {
 
         var self = this;
         return new Promise(function (fulfill, reject) {

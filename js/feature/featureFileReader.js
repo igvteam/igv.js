@@ -94,7 +94,7 @@ var igv = (function (igv) {
         }
     }
 
-    function loadFeaturesNoIndex(task) {
+    function loadFeaturesNoIndex() {
 
         var self = this;
 
@@ -102,8 +102,7 @@ var igv = (function (igv) {
             parser = self.parser,
                 options = {
                     headers: self.config.headers,           // http headers, not file header
-                    withCredentials: self.config.withCredentials,
-                    task: task
+                    withCredentials: self.config.withCredentials
                 };
 
             if (self.localFile) {
@@ -122,7 +121,7 @@ var igv = (function (igv) {
     }
 
 
-    function loadFeaturesWithIndex(chr, start, end, task) {
+    function loadFeaturesWithIndex(chr, start, end) {
 
         //console.log("Using index");
         var self = this;
@@ -153,8 +152,7 @@ var igv = (function (igv) {
                             options = {
                                 headers: self.config.headers,           // http headers, not file header
                                 range: {start: startPos, size: endPos - startPos + 1},
-                                withCredentials: self.config.withCredentials,
-                                task: task
+                                withCredentials: self.config.withCredentials
                             },
                             success;
 
@@ -289,20 +287,19 @@ var igv = (function (igv) {
     /**
      *
      * @param fulfill
-     * @param task
      * @param range -- genomic range to load.  For use with indexed source (optional)
      */
-    igv.FeatureFileReader.prototype.readFeatures = function (chr, start, end, task) {
+    igv.FeatureFileReader.prototype.readFeatures = function (chr, start, end) {
 
         var self = this;
 
         return new Promise(function (fulfill, reject) {
 
             if (self.index) {
-                loadFeaturesWithIndex.call(self, chr, start, end, task).then(packFeatures);
+                loadFeaturesWithIndex.call(self, chr, start, end).then(packFeatures);
             }
             else {
-                loadFeaturesNoIndex.call(self, task).then(packFeatures);
+                loadFeaturesNoIndex.call(self).then(packFeatures);
             }
 
             function packFeatures(features) {

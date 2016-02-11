@@ -93,7 +93,7 @@ var igv = (function (igv) {
 
     };
 
-    igv.AneuTrack.prototype.getSummary = function (chr, bpStart, bpEnd, continuation, task) {
+    igv.AneuTrack.prototype.getSummary = function (chr, bpStart, bpEnd, continuation) {
         var me = this;
         var filtersummary = function (redlinedata) {
             var summarydata = [];
@@ -108,7 +108,7 @@ var igv = (function (igv) {
             continuation(summarydata);
         };
         if (this.featureSourceRed) {
-            this.featureSourceRed.getFeatures(chr, bpStart, bpEnd, filtersummary, task);
+            this.featureSourceRed.getFeatures(chr, bpStart, bpEnd, filtersummary);
         }
         else {
             log("Aneu track has no summary data yet");
@@ -116,10 +116,10 @@ var igv = (function (igv) {
         }
     }
 
-    igv.AneuTrack.prototype.loadSummary = function (chr, bpStart, bpEnd, continuation, task) {
+    igv.AneuTrack.prototype.loadSummary = function (chr, bpStart, bpEnd, continuation) {
         var self = this;
         if (this.featureSourceRed) {
-            this.featureSourceRed.getFeatures(chr, bpStart, bpEnd, continuation, task);
+            this.featureSourceRed.getFeatures(chr, bpStart, bpEnd, continuation);
         }
         else {
             //log("Data is not loaded yet. Loading json first. tokens are "+me.config.tokens);
@@ -129,7 +129,7 @@ var igv = (function (igv) {
                     json = JSON.parse(json);
 //        		log("Got json: " + JSON.stringify(json));
                     self.featureSourceRed = new igv.AneuFeatureSource(config, json.redline);
-                    self.getSummary(chr, bpStart, bpEnd, continuation, task);
+                    self.getSummary(chr, bpStart, bpEnd, continuation);
                 }
                 else {
                     //log("afterJsonLoaded: got no json result for "+config.url);
@@ -152,7 +152,7 @@ var igv = (function (igv) {
         }
     }
 
-    igv.AneuTrack.prototype.getFeatures = function (chr, bpStart, bpEnd, task) {
+    igv.AneuTrack.prototype.getFeatures = function (chr, bpStart, bpEnd) {
 
         var self = this;
 
@@ -167,10 +167,10 @@ var igv = (function (igv) {
                     self.redlinedata = redlinedata;
                     // console.log("Now loading diff data, using original
                     // continuation");
-                    self.featureSource.getFeatures(chr, bpStart, bpEnd, fulfill, task);
+                    self.featureSource.getFeatures(chr, bpStart, bpEnd, fulfill);
                 };
                 // console.log("About to load redline file");
-                self.featureSourceRed.getFeatures(chr, bpStart, bpEnd, loadsecondfile, task);
+                self.featureSourceRed.getFeatures(chr, bpStart, bpEnd, loadsecondfile);
 
 
             });
