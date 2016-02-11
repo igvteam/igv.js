@@ -144,16 +144,20 @@ var igv = (function (igv) {
             bpStart = options.bpStart,
             pixelWidth = options.pixelWidth,
             pixelHeight = options.pixelHeight,
-            bpEnd = bpStart + pixelWidth * bpPerPixel + 1,
-            $zoomInNotice = $('.zoom-in-notice');
+            bpEnd = bpStart + pixelWidth * bpPerPixel + 1;
 
         igv.graphics.fillRect(ctx, 0, 0, pixelWidth, pixelHeight, {'fillStyle': "rgb(255, 255, 255)"});
 
-        $zoomInNotice.hide();
+
         if (options.features.exceedsVisibilityWindow) {
-            $zoomInNotice.show();
+            track.$zoomInNotice.show();
             return;
+        } else {
+            track.$zoomInNotice.hide();
         }
+
+
+
 
         if (featureList) {
 
