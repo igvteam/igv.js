@@ -74,7 +74,9 @@ var igv = (function (igv) {
             $column = $('<div class="igv-col igv-col-3-8">');
             $columnFiller = $('<div class="igv-col-filler-ok-button">');
             $columnFiller.text("OK");
-            $columnFiller.click(function() { self.hide(); });
+            $columnFiller.click(function() {
+                self.hide();
+            });
             $column.append( $columnFiller[ 0 ] );
             //
             $row.append( $column[ 0 ] );
@@ -84,7 +86,10 @@ var igv = (function (igv) {
             $column = $('<div class="igv-col igv-col-3-8">');
             $columnFiller = $('<div class="igv-col-filler-cancel-button">');
             $columnFiller.text("Cancel");
-            $columnFiller.click(function() { self.hide(); });
+            $columnFiller.click(function() {
+                self.$dialogInput.val(undefined);
+                self.hide();
+            });
             $column.append( $columnFiller[ 0 ] );
             //
             $row.append( $column[ 0 ] );
@@ -145,9 +150,9 @@ var igv = (function (igv) {
             row = $('<div class="igv-grid-dialog">');
 
             column = $('<div class="igv-col igv-col-4-4">');
-            self.dialogLabel = $('<div class="igv-user-input-label">');
+            self.$dialogLabel = $('<div class="igv-user-input-label">');
 
-            column.append( self.dialogLabel[ 0 ] );
+            column.append( self.$dialogLabel[ 0 ] );
             row.append( column[ 0 ] );
 
             rowContainer = $('<div class="igv-grid-rect">');
@@ -167,9 +172,9 @@ var igv = (function (igv) {
             row = $('<div class="igv-grid-dialog">');
 
             column = $('<div class="igv-col igv-col-4-4">');
-            self.dialogInput = $('<input class="igv-user-input-dialog" type="text" value="#000000">');
+            self.$dialogInput = $('<input class="igv-user-input-dialog" type="text" value="#000000">');
 
-            column.append( self.dialogInput[ 0 ] );
+            column.append( self.$dialogInput[ 0 ] );
             row.append( column[ 0 ] );
 
             rowContainer = $('<div class="igv-grid-rect">');
