@@ -180,7 +180,7 @@ var igvxhr = (function (igvxhr) {
 
             xhr.onabort = function (event) {
                 console.log("Aborted");
-                fulfill(null);
+                reject(new igv.AbortLoad());
             };
 
             xhr.send(sendData);
@@ -336,6 +336,10 @@ var igvxhr = (function (igvxhr) {
         return result;
     };
 
+
+    igv.AbortLoad = function () {
+
+    }
 
     return igvxhr;
 

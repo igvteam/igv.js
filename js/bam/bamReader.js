@@ -73,7 +73,7 @@ var igv = (function (igv) {
                             fulfill([]);
                             return;
                         }
-
+console.log("# chunks = " + chunks.length);
                         chunks.forEach(function (c) {
 
                             promises.push(new Promise(function (fulfill, reject) {
@@ -103,10 +103,12 @@ var igv = (function (igv) {
 
                                     fulfill();
 
-                                }).catch(reject);
+                                }).catch(function (obj) {
+                                    reject(obj);
+                                });
 
                             }))
-                        })
+                        });
 
 
                         Promise.all(promises).then(function (ignored) {
@@ -117,7 +119,9 @@ var igv = (function (igv) {
                                 });
                             }
                             fulfill(alignmentContainer);
-                        }).catch(reject);
+                        }).catch(function (obj) {
+                            reject(obj);
+                        });
                     }).catch(reject);
                 }
             }).catch(reject);
@@ -411,8 +415,8 @@ var igv = (function (igv) {
 
                     fulfill();
 
-                });
-            });
+                }).catch(reject);
+            }).catch(reject);
         });
     }
 
@@ -432,7 +436,7 @@ var igv = (function (igv) {
                     bam.contentLength = index.blockMax;
 
                     fulfill(bam.index);
-                });
+                }).catch(reject);
             }
         });
     }
@@ -448,7 +452,7 @@ var igv = (function (igv) {
             else {
                 bam.readHeader().then(function () {
                     fulfill(bam.chrToIndex);
-                });
+                }).catch(reject);
             }
         });
     }

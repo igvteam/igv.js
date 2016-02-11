@@ -405,7 +405,7 @@ var igv = (function (igv) {
     igv.Browser.prototype.loadInProgress = function () {
         var i;
         for(i=0; i<this.trackViews.length; i++) {
-            if(this.trackViews.currentLoadTask) {
+            if(this.trackViews[i].currentLoadTask) {
                 return true;
             }
         }
@@ -849,6 +849,11 @@ var igv = (function (igv) {
             if (isMouseDown) { // Possibly dragging
 
                 if (mouseDownX && Math.abs(coords.x - mouseDownX) > igv.constants.dragThreshold) {
+
+                    if(igv.browser.loadInProgress()) {
+                        // ignore
+                        return;
+                    }
 
                     referenceFrame.shiftPixels(lastMouseX - coords.x);
 
