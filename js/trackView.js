@@ -183,11 +183,11 @@ var igv = (function (igv) {
         this.ctx = this.canvas.getContext("2d");
 
         // zoom in to see features
-        if (this.track instanceof igv.BAMTrack || this.track instanceof igv.FeatureTrack ) {
-            self.track.$zoomInNotice = $('<div class="zoom-in-notice">');
-            self.track.$zoomInNotice.text('Zoom in to see features');
-            $(this.contentDiv).append(self.track.$zoomInNotice[ 0 ]);
-            self.track.$zoomInNotice.hide();
+        if (this.track.visibilityWindow !== undefined) {
+            self.$zoomInNotice = $('<div class="zoom-in-notice">');
+            self.$zoomInNotice.text('Zoom in to see features');
+            $(this.contentDiv).append(self.$zoomInNotice[0]);
+            self.$zoomInNotice.hide();
         }
 
 
@@ -378,6 +378,16 @@ var igv = (function (igv) {
             return;
         }
 
+        if (this.track.visibilityWindow !== undefined) {
+            if (igv.browser.trackViewportWidthBP() > this.track.visibilityWindow) {
+                igv.stopSpinnerAtParentElement(this.trackDiv);      // TODO -  WHY DO WE HAVE TO DO THIS ???
+                this.$zoomInNotice.show();
+                return;
+            } else {
+                this.$zoomInNotice.hide();
+            }
+        }
+
 
         var pixelWidth,
             bpWidth,
@@ -397,11 +407,6 @@ var igv = (function (igv) {
         }
         else {
 
-            if (this.tile && this.tile.overlapsRange(chr, refFrameStart, refFrameEnd, referenceFrame.bpPerPixel)) {
-                this.paintImage();
-            }
-
-
             // Expand the requested range so we can pan a bit without reloading
             pixelWidth = 3 * this.canvas.width;
             bpWidth = Math.round(referenceFrame.toBP(pixelWidth));
@@ -415,13 +420,13 @@ var igv = (function (igv) {
 
                 .then(function (features) {
 
-                    igv.stopSpinnerAtParentElement(self.trackDiv);
                     self.loading = false;
+                    igv.stopSpinnerAtParentElement(self.trackDiv);
 
                     if (features) {
 
                         // TODO -- adjust track height here.
-                        if (self.track.computePixelHeight) {
+                        if (typeof self.track.computePixelHeight === 'function') {
                             var requiredHeight = self.track.computePixelHeight(features);
                             if (requiredHeight != self.contentDiv.clientHeight) {
                                 self.setContentHeight(requiredHeight);
@@ -463,7 +468,7 @@ var igv = (function (igv) {
                 .catch(function (error) {
                     self.loading = false;
 
-                    if(error instanceof igv.AbortLoad) {
+                    if (error instanceof igv.AbortLoad) {
                         console.log("Aborted ---");
                     }
                     else {
@@ -614,7 +619,11 @@ var igv = (function (igv) {
                 }
 
                 locus = igv.browser.referenceFrame.chr + ":" + igv.numberFormatter(Math.floor(ss)) + "-" + igv.numberFormatter(Math.floor(ee));
-                igv.browser.search(locus, undefined);
+                igv.browser.search(locus).then(function () {
+                    // Nothing to do really
+                }).catch(function (error) {
+                    console.log(error);
+                });
 
 
             }
