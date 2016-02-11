@@ -35,15 +35,14 @@ var igv = (function (igv) {
         this.ignoreTrackMenu = true;
     };
 
-    igv.SequenceTrack.prototype.getFeatures = function (chr, bpStart, bpEnd, task) {
+    igv.SequenceTrack.prototype.getFeatures = function (chr, bpStart, bpEnd) {
 
-        var self = this;
         return new Promise(function (fulfill, reject) {
             if (igv.browser.referenceFrame.bpPerPixel > 1/*igv.browser.trackViewportWidthBP() > 30000*/) {
                 fulfill(null);
             }
             else {
-                igv.browser.genome.sequence.getSequence(chr, bpStart, bpEnd, fulfill, task)
+                igv.browser.genome.sequence.getSequence(chr, bpStart, bpEnd, fulfill)
             }
         });
     }

@@ -92,7 +92,7 @@ var igv = (function (igv) {
         });
     }
 
-    igv.FeatureTrack.prototype.getFeatures = function (chr, bpStart, bpEnd, task) {
+    igv.FeatureTrack.prototype.getFeatures = function (chr, bpStart, bpEnd) {
 
         var self = this;
 
@@ -102,7 +102,7 @@ var igv = (function (igv) {
                 fulfill({exceedsVisibilityWindow: true});
             }
             else {
-                self.featureSource.getFeatures(chr, bpStart, bpEnd, task).then(fulfill).catch(reject);
+                self.featureSource.getFeatures(chr, bpStart, bpEnd).then(fulfill).catch(reject);
             }
         });
     }

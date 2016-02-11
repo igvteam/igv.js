@@ -41,7 +41,7 @@ var igv = (function (igv) {
 
     };
 
-    igv.ImmVarReader.prototype.readFeatures = function (task, range) {
+    igv.ImmVarReader.prototype.readFeatures = function (range) {
 
         var self = this,
             queryChr = range.chr,
@@ -52,7 +52,6 @@ var igv = (function (igv) {
 
         return new Promise(function (fulfill, reject) {
             igvxhr.loadJson(queryURL, {
-                task: task,
                 withCredentials: self.config.withCredentials
             }).then(function (json) {
 

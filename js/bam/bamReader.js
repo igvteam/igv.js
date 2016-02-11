@@ -42,7 +42,7 @@ var igv = (function (igv) {
 
     };
 
-    igv.BamReader.prototype.readAlignments = function (chr, bpStart, bpEnd, task) {
+    igv.BamReader.prototype.readAlignments = function (chr, bpStart, bpEnd) {
 
         var self = this;
 
@@ -87,7 +87,6 @@ console.log("# chunks = " + chunks.length);
 
                                 igvxhr.loadArrayBuffer(self.bamPath,
                                     {
-                                        task: task,
                                         headers: self.config.headers,
                                         range: range,
                                         withCredentials: self.config.withCredentials

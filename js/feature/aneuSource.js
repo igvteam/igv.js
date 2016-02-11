@@ -80,9 +80,8 @@ var igv = (function (igv) {
      * @param bpStart
      * @param bpEnd
      * @param success -- function that takes an array of features as an argument
-     * @param task
      */
-    igv.AneuFeatureSource.prototype.getFeatures = function (chr, bpStart, bpEnd, success, task) {
+    igv.AneuFeatureSource.prototype.getFeatures = function (chr, bpStart, bpEnd, success) {
 
         var myself = this,
             range = new igv.GenomicInterval(chr, bpStart, bpEnd),
@@ -107,7 +106,6 @@ var igv = (function (igv) {
                     success(features);
 
                 },
-                task,
                 range);   // Currently loading at granularity of chromosome
         }
 
@@ -146,18 +144,16 @@ var igv = (function (igv) {
     /**
      *
      * @param success
-     * @param task
      * @param range -- genomic range to load.
      */
-    igv.AneuFeatureSource.prototype.loadFeatures = function (continuation, task, range) {
+    igv.AneuFeatureSource.prototype.loadFeatures = function (continuation, range) {
 
         var self = this;
         var parser = self.parser;
         var options = {
                 headers: self.config.headers,           // http headers, not file header
                 tokens: self.config.tokens,           // http headers, not file header
-                withCredentials: self.config.withCredentials,
-                task: task
+                withCredentials: self.config.withCredentials
             },
             success = function (data) {
                 // console.log("Loaded data, calling parser.parseFeatures: parser="+parser);

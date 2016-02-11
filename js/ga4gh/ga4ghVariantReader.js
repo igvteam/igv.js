@@ -36,7 +36,7 @@ var igv = (function (igv) {
     }
 
 
-    igv.Ga4ghVariantReader.prototype.readFeatures = function (chr, bpStart, bpEnd, task) {
+    igv.Ga4ghVariantReader.prototype.readFeatures = function (chr, bpStart, bpEnd) {
 
         var self = this;
 
@@ -87,8 +87,7 @@ var igv = (function (igv) {
                         });
 
                         return variants;
-                    },
-                    task: task
+                    }
                 });
                 p.then(fulfill);
             });
@@ -103,7 +102,7 @@ var igv = (function (igv) {
                     }
 
                     else {
-                        self.readMetadata(task).then(function (json) {
+                        self.readMetadata().then(function (json) {
 
                             self.metadata = json.metadata;
                             self.chrNameMap = {};
@@ -127,13 +126,12 @@ var igv = (function (igv) {
     }
 
 
-    igv.Ga4ghVariantReader.prototype.readMetadata = function (task) {
+    igv.Ga4ghVariantReader.prototype.readMetadata = function () {
 
         return igv.ga4ghGet({
             url: this.url,
             entity: "variantsets",
-            entityId: this.variantSetId,
-            task: task
+            entityId: this.variantSetId
         });
 
     }

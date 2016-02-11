@@ -40,7 +40,7 @@ var igv = (function (igv) {
 
     };
 
-    igv.BamSource.prototype.getAlignments = function (chr, bpStart, bpEnd, task) {
+    igv.BamSource.prototype.getAlignments = function (chr, bpStart, bpEnd) {
 
         var self = this;
         return new Promise(function (fulfill, reject) {
@@ -51,7 +51,7 @@ var igv = (function (igv) {
 
             } else {
 
-                self.bamReader.readAlignments(chr, bpStart, bpEnd, task).then(function (alignmentContainer) {
+                self.bamReader.readAlignments(chr, bpStart, bpEnd).then(function (alignmentContainer) {
 
 
                     self.alignmentContainer = alignmentContainer;

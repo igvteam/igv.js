@@ -65,7 +65,7 @@ var igv = (function (igv) {
     }
 
 
-    igv.Ga4ghAlignmentReader.prototype.readAlignments = function (chr, bpStart, bpEnd, task) {
+    igv.Ga4ghAlignmentReader.prototype.readAlignments = function (chr, bpStart, bpEnd) {
 
         var self = this;
 
@@ -86,8 +86,7 @@ var igv = (function (igv) {
                         "pageSize": "10000"
                     },
                     decode: decodeGa4ghReads,
-                    results: new igv.AlignmentContainer(chr, bpStart, bpEnd),
-                    task: task
+                    results: new igv.AlignmentContainer(chr, bpStart, bpEnd)
                 }).then(fulfill)
                     .catch(reject);
 
@@ -102,7 +101,7 @@ var igv = (function (igv) {
                     }
 
                     else {
-                        self.readMetadata(task).then(function (json) {
+                        self.readMetadata().then(function (json) {
 
                             self.chrNameMap = {};
 
@@ -124,8 +123,7 @@ var igv = (function (igv) {
                                         },
                                         decode: function (j) {
                                             return j.references;
-                                        },
-                                        task: task
+                                        }
                                     }).then(function (references) {
                                         references.forEach(function (ref) {
                                             var refName = ref.name,
@@ -348,13 +346,12 @@ var igv = (function (igv) {
     }
 
 
-    igv.Ga4ghAlignmentReader.prototype.readMetadata = function (success, task) {
+    igv.Ga4ghAlignmentReader.prototype.readMetadata = function () {
 
         return igv.ga4ghGet({
             url: this.url,
             entity: "readgroupsets",
-            entityId: this.readGroupSetIds,
-            task: task
+            entityId: this.readGroupSetIds
         });
     }
 

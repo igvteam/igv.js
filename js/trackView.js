@@ -401,11 +401,6 @@ var igv = (function (igv) {
                 this.paintImage();
             }
 
-            // If there is a load in progress cancel it
-            if (this.currentLoadTask) {
-                console.log("Aborting current task");
-                this.currentLoadTask.abort();
-            }
 
             // Expand the requested range so we can pan a bit without reloading
             pixelWidth = 3 * this.canvas.width;
@@ -413,29 +408,15 @@ var igv = (function (igv) {
             bpStart = Math.max(0, Math.round(referenceFrame.start - bpWidth / 3));
             bpEnd = bpStart + bpWidth;
 
-            self.currentLoadTask = {
-                start: bpStart,
-                end: bpEnd,
-                abort: function () {
-                    this.canceled = true;
-                    if (this.xhrRequest) {
-                        console.log("Aborting xhr request");
-                        this.xhrRequest.abort();
-                    }
-                    //igv.stopSpinnerObject(self.trackDiv);
-                    self.currentLoadTask = undefined;
-                }
-            };
-
-
+            self.loading = true;
             igv.startSpinnerAtParentElement(self.trackDiv);
 
-            this.track.getFeatures(referenceFrame.chr, bpStart, bpEnd, self.currentLoadTask)
+            this.track.getFeatures(referenceFrame.chr, bpStart, bpEnd)
 
                 .then(function (features) {
 
                     igv.stopSpinnerAtParentElement(self.trackDiv);
-                    self.currentLoadTask = undefined;
+                    self.loading = false;
 
                     if (features) {
 
@@ -480,6 +461,7 @@ var igv = (function (igv) {
 
                 })
                 .catch(function (error) {
+                    self.loading = false;
 
                     if(error instanceof igv.AbortLoad) {
                         console.log("Aborted ---");

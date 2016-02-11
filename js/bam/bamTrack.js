@@ -237,7 +237,7 @@ var igv = (function (igv) {
 
     };
 
-    igv.BAMTrack.prototype.getFeatures = function (chr, bpStart, bpEnd, task) {
+    igv.BAMTrack.prototype.getFeatures = function (chr, bpStart, bpEnd) {
 
         var self = this;
 
@@ -248,7 +248,7 @@ var igv = (function (igv) {
             });
         }
         else {
-            return self.featureSource.getAlignments(chr, bpStart, bpEnd, task);
+            return self.featureSource.getAlignments(chr, bpStart, bpEnd);
         }
     }
 
