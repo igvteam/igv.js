@@ -948,7 +948,7 @@ div.ui-dialog fieldset {
     position: absolute;
     top:50%;
     left:50%;
-    z-index: 256;
+    z-index: 512;
     /*display: inline;*/
 }
 
@@ -1261,7 +1261,7 @@ div.ui-dialog fieldset {
 
     background: rgb(255, 255, 255);
 
-    z-index: 16;
+    z-index: 128;
 
 }
 
@@ -1289,17 +1289,13 @@ div.ui-dialog fieldset {
     width: 100%;
     height: 100%;
 
-    padding-top: 8px;
-
     text-align: center;
-    /*vertical-align: middle;*/
-    /*display: table-cell;*/
 
     color: #3f3f3f;
     /*background-color: rgba(0, 255, 79, 0.5);*/
-    background-color: white;
+    background-color: rgba(255, 255, 255, 0.51);
 
-    z-index: 8;
+    z-index: 64;
 }
 
 .igv-track-control-canvas {

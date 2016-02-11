@@ -44,13 +44,13 @@ var igv = (function (igv) {
             this.trackDiv.style.height = track.height + "px";
         }
 
-        this.trackDiv.appendChild(igv.spinner());
-
         this.addLeftHandGutterToParentTrackDiv(this.trackDiv);
 
         this.addViewportToParentTrackDiv(this.trackDiv);
 
         this.addRightHandGutterToParentTrackDiv(this.trackDiv);
+
+        this.trackDiv.appendChild(igv.spinner());
 
         // Track Drag & Drop
         makeTrackDraggable(this.track);
@@ -165,7 +165,7 @@ var igv = (function (igv) {
 
     igv.TrackView.prototype.addViewportToParentTrackDiv = function (trackDiv) {
 
-        var $zoomInNotice;
+        var self = this;
 
         // viewport
         this.viewportDiv = $('<div class="igv-viewport-div">')[0];
@@ -175,19 +175,21 @@ var igv = (function (igv) {
         this.contentDiv = $('<div class="igv-content-div">')[0];
         $(this.viewportDiv).append(this.contentDiv);
 
-        if (this.track instanceof igv.BAMTrack || this.track instanceof igv.FeatureTrack ) {
-            $zoomInNotice = $('<div class="zoom-in-notice">');
-            $zoomInNotice.text('Zoom in to see features');
-            $(this.contentDiv).append($zoomInNotice[ 0 ]);
-            $zoomInNotice.hide();
-        }
-
         // track content canvas
         this.canvas = $('<canvas class = "igv-content-canvas">')[0];
         $(this.contentDiv).append(this.canvas);
         this.canvas.setAttribute('width', this.contentDiv.clientWidth);
         this.canvas.setAttribute('height', this.contentDiv.clientHeight);
         this.ctx = this.canvas.getContext("2d");
+
+        // zoom in to see features
+        if (this.track instanceof igv.BAMTrack || this.track instanceof igv.FeatureTrack ) {
+            self.track.$zoomInNotice = $('<div class="zoom-in-notice">');
+            self.track.$zoomInNotice.text('Zoom in to see features');
+            $(this.contentDiv).append(self.track.$zoomInNotice[ 0 ]);
+            self.track.$zoomInNotice.hide();
+        }
+
 
         // scrollbar,  default is to set overflow ot hidden and use custom scrollbar, but this can be overriden so check
         if ("hidden" === $(this.viewportDiv).css("overflow-y")) {

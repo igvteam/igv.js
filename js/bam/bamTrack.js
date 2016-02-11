@@ -281,13 +281,13 @@ var igv = (function (igv) {
             pixelHeight = options.pixelHeight,
             skippedColor = this.skippedColor,
             deletionColor = this.deletionColor,
-            bpEnd = bpStart + pixelWidth * bpPerPixel + 1,
-            $zoomInNotice = $('.zoom-in-notice');
+            bpEnd = bpStart + pixelWidth * bpPerPixel + 1;
 
-        $zoomInNotice.hide();
         if (genomicInterval.exceedsVisibilityWindow) {
-            $zoomInNotice.show();
+            self.$zoomInNotice.show();
             return;
+        } else {
+            self.$zoomInNotice.hide();
         }
 
         if (genomicInterval) {
