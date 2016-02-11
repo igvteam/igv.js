@@ -217,7 +217,7 @@ var igv = (function (igv) {
                     else {
                         trackView.track.min = min;
                         trackView.track.max = max;
-                        console.log("min " + dataRangeDialog.minInput.val() + " max " + dataRangeDialog.maxInput.val() + " log " + dataRangeDialog.logInput.is(':checked'));
+                        //console.log("min " + dataRangeDialog.minInput.val() + " max " + dataRangeDialog.maxInput.val() + " log " + dataRangeDialog.logInput.is(':checked'));
                         dataRangeDialog.hide();
                         trackView.update();
                     }

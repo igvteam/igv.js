@@ -59,44 +59,53 @@ var igv = (function (igv) {
                 column,
                 columnFiller;
 
-            rowContainer = $('<div class="igv-grid-rect">');
 
             row = $('<div class="igv-grid-dialog">');
 
+
             // shim
-            column = $('<div class="igv-col igv-col-1-3">');
+            column = $('<div class="igv-col igv-col-1-8">');
+            //
             row.append( column[ 0 ] );
 
+
+            // ok button
+            column = $('<div class="igv-col igv-col-3-8">');
+            self.ok = $('<div class="igv-col-filler-ok-button">');
+            self.ok.text("OK");
+            column.append( self.ok[ 0 ] );
+            //
+            row.append( column[ 0 ] );
+
+
             // cancel button
-            column = $('<div class="igv-col igv-col-1-3">');
+            column = $('<div class="igv-col igv-col-3-8">');
             columnFiller = $('<div class="igv-col-filler-cancel-button">');
             columnFiller.text("Cancel");
             columnFiller.click(function() { self.hide(); });
             column.append( columnFiller[ 0 ] );
-            row.append( column[ 0 ] );
-
-            // ok button
-            column = $('<div class="igv-col igv-col-1-3">');
-            self.ok = $('<div class="igv-col-filler-cancel-button">');
-            self.ok.text("OK");
-            column.append( self.ok[ 0 ] );
+            //
             row.append( column[ 0 ] );
 
 
+            // shim
+            column = $('<div class="igv-col igv-col-1-8">');
+            //
+            row.append( column[ 0 ] );
+
+
+            rowContainer = $('<div class="igv-grid-rect">');
             rowContainer.append( row[ 0 ]);
 
             return rowContainer;
-
         }
 
         function doLayout() {
 
-            var rowContainer,
+            var rowContainer = $('<div class="igv-grid-rect">'),
                 row,
                 column,
                 columnFiller;
-
-            rowContainer = $('<div class="igv-grid-rect">');
 
 
             // minimum
@@ -120,6 +129,8 @@ var igv = (function (igv) {
 
             rowContainer.append( row[ 0 ]);
 
+
+
             // maximum
             row = $('<div class="igv-grid-dialog">');
 
@@ -135,6 +146,8 @@ var igv = (function (igv) {
             row.append( column[ 0 ] );
 
             rowContainer.append( row[ 0 ]);
+
+
 
             // logaritmic
             row = $('<div class="igv-grid-dialog">');
