@@ -397,6 +397,10 @@ var igv = (function (igv) {
         }
         else {
 
+            if (this.tile && this.tile.overlapsRange(chr, refFrameStart, refFrameEnd, referenceFrame.bpPerPixel)) {
+                this.paintImage();
+            }
+
             // If there is a load in progress cancel it
             if (this.currentLoadTask) {
                 console.log("Aborting current task");
@@ -476,8 +480,14 @@ var igv = (function (igv) {
 
                 })
                 .catch(function (error) {
-                    igv.stopSpinnerAtParentElement(self.trackDiv);
-                    alert(error);
+
+                    if(error instanceof igv.AbortLoad) {
+                        console.log("Aborted ---");
+                    }
+                    else {
+                        igv.stopSpinnerAtParentElement(self.trackDiv);
+                        alert(error);
+                    }
                 });
         }
 

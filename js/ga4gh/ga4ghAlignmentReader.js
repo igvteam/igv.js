@@ -91,7 +91,7 @@ var igv = (function (igv) {
                 }).then(fulfill)
                     .catch(reject);
 
-            });
+            }).catch(reject);
 
             function getChrNameMap() {
 
@@ -134,7 +134,7 @@ var igv = (function (igv) {
                                         });
                                         fulfill(self.chrNameMap);
 
-                                    });
+                                    }).catch(reject);
                                 }
                                 else {
 
@@ -149,7 +149,7 @@ var igv = (function (igv) {
                                 // No browser object, can't build map.  This can occur when run from unit tests
                                 fulfill(self.chrNameMap);
                             }
-                        });
+                        }).catch(reject);
                     }
 
                 });
