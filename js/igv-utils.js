@@ -99,13 +99,15 @@ var igv = (function (igv) {
 
                         //trackView.update();
                         igv.dialog.hide();
+                    } else {
+                        igv.dialog.hide();
                     }
 
                     function parseNumber(value) {
                         return parseFloat(value, 10);
                     }
 
-                }),
+                })
 
                 //igv.dataRangeMenuItem(popover, trackView)
 
@@ -168,12 +170,12 @@ var igv = (function (igv) {
 
                 igv.dialog.trackView = trackView;
 
-                igv.dialog.dialogLabel.text(dialogLabel);
+                igv.dialog.$dialogLabel.text(dialogLabel);
 
-                igv.dialog.dialogInput.val(dialogInputValue);
+                igv.dialog.$dialogInput.val(dialogInputValue);
 
-                igv.dialog.dialogInput.unbind();
-                igv.dialog.dialogInput.change(dialogInputChange);
+                igv.dialog.$dialogInput.unbind();
+                igv.dialog.$dialogInput.change(dialogInputChange);
 
                 igv.dialog.show();
                 popover.hide();
@@ -188,7 +190,7 @@ var igv = (function (igv) {
             click: function () {
 
                 var min, max,
-                    dataRangeDialog = igv.dataRangeDialog;;
+                    dataRangeDialog = igv.dataRangeDialog;
 
                 dataRangeDialog.trackView = trackView;
 

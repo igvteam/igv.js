@@ -156,26 +156,27 @@ var igv = (function (igv) {
         igv.dataRangeDialog.hide();
 
         // extend jquery ui dialog widget to support enter key triggering "ok" button press.
-        $.extend($.ui.dialog.prototype.options, {
-
-            create: function () {
-
-                var $this = $(this);
-
-                // focus first button and bind enter to it
-                $this.parent().find('.ui-dialog-buttonpane button:first').focus();
-
-                $this.keypress(function (e) {
-
-                    if (e.keyCode == $.ui.keyCode.ENTER) {
-                        $this.parent().find('.ui-dialog-buttonpane button:first').click();
-                        return false;
-                    }
-
-                });
-            }
-
-        });
+        //$.extend($.ui.dialog.prototype.options, {
+        //
+        //    create: function () {
+        //
+        //        var $this = $(this),
+        //            $firstButton = $this.parent().find('.ui-dialog-buttonpane button:first');
+        //
+        //        // focus first button and bind enter to it
+        //        $firstButton.focus();
+        //
+        //        $this.keypress(function (e) {
+        //
+        //            if (e.keyCode == $.ui.keyCode.ENTER) {
+        //                $firstButton.click();
+        //                return false;
+        //            }
+        //
+        //        });
+        //    }
+        //
+        //});
 
         if (!config.showNavigation) {
             igvLogo = $('<div class="igv-logo-nonav">');
