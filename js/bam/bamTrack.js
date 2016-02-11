@@ -283,13 +283,6 @@ var igv = (function (igv) {
             deletionColor = this.deletionColor,
             bpEnd = bpStart + pixelWidth * bpPerPixel + 1;
 
-        if (genomicInterval.exceedsVisibilityWindow) {
-            self.$zoomInNotice.show();
-            return;
-        } else {
-            self.$zoomInNotice.hide();
-        }
-
         if (genomicInterval) {
             drawCoverage(genomicInterval.coverageMap);
             drawAlignments(genomicInterval);

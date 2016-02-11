@@ -97,13 +97,9 @@ var igv = (function (igv) {
         var self = this;
 
         return new Promise(function (fulfill, reject) {
-            // Don't try to draw alignments for windows > the visibility window
-            if (self.visibilityWindow && igv.browser.trackViewportWidthBP() > self.visibilityWindow) {
-                fulfill({exceedsVisibilityWindow: true});
-            }
-            else {
-                self.featureSource.getFeatures(chr, bpStart, bpEnd).then(fulfill).catch(reject);
-            }
+
+            self.featureSource.getFeatures(chr, bpStart, bpEnd).then(fulfill).catch(reject);
+
         });
     }
 
@@ -147,16 +143,6 @@ var igv = (function (igv) {
             bpEnd = bpStart + pixelWidth * bpPerPixel + 1;
 
         igv.graphics.fillRect(ctx, 0, 0, pixelWidth, pixelHeight, {'fillStyle': "rgb(255, 255, 255)"});
-
-
-        if (options.features.exceedsVisibilityWindow) {
-            track.$zoomInNotice.show();
-            return;
-        } else {
-            track.$zoomInNotice.hide();
-        }
-
-
 
 
         if (featureList) {
