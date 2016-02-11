@@ -56,7 +56,7 @@ var igv = (function (igv) {
             // Default for all sorts of ascii tab-delimited file formts
             this.reader = new igv.FeatureFileReader(config);
         }
-
+        this.visibilityWindow = config.visibilityWindow;
 
     };
 
@@ -123,7 +123,15 @@ var igv = (function (igv) {
             }
             else {
                 // TODO -- reuse cached features that overelap new region
-                self.reader.readFeatures(chr, bpStart, bpEnd).then(
+
+                if(self.visibilityWindow === undefined || self.visibilityWindow <= 0) {
+                    // Expand genomic interval to grab entire chromosome
+                    genomicInterval.start = 0;
+                    genomicInterval.end = Number.MAX_VALUE;
+                }
+
+                self.reader.readFeatures(chr, genomicInterval.start, genomicInterval.end).then(
+
                     function (featureList) {
 
                         if (featureList && typeof featureList.forEach === 'function') {  // Have result AND its an array type
