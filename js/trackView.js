@@ -619,7 +619,7 @@ var igv = (function (igv) {
                 }
 
                 locus = igv.browser.referenceFrame.chr + ":" + igv.numberFormatter(Math.floor(ss)) + "-" + igv.numberFormatter(Math.floor(ee));
-                igv.browser.search(locus).then(function () {
+                igv.browser.search(locus, function () {
                     // Nothing to do really
                 }).catch(function (error) {
                     console.log(error);
