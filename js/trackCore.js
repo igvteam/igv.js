@@ -228,7 +228,7 @@ var igv = (function (igv) {
                 default:
             }
         }
-    }
+    };
 
 
     igv.setTrackLabel = function (track, label) {

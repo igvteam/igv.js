@@ -1,3 +1,6 @@
+.igv-dialog-label-centered {
+    text-align: center;
+}
 
 /* prevent unwanted translucent blue overlay when user selects anywhere in ENCODE table */
 div[id="igvEncodeModal"] {

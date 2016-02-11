@@ -75,7 +75,9 @@ var igv = (function (igv) {
             $columnFiller = $('<div class="igv-col-filler-ok-button">');
             $columnFiller.text("OK");
             $columnFiller.click(function() {
+
                 self.hide();
+                self.clickOK();
             });
             $column.append( $columnFiller[ 0 ] );
             //
