@@ -43,7 +43,7 @@ var igv = (function (igv) {
             this.featureSource = new igv.BWSource(config);
         }
         else {
-            this.featureSource = new igv.FeatureSource(this.config);
+            this.featureSource = new igv.FeatureSource(config);
         }
 
         // Set the render function.  This can optionally be passed in the config
@@ -62,9 +62,7 @@ var igv = (function (igv) {
         else {
             this.render = renderFeature;
             this.arrowSpacing = 30;
-
         }
-
     };
 
     igv.FeatureTrack.prototype.getFileHeader = function () {

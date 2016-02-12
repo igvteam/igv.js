@@ -17,7 +17,7 @@ function runBigwigTests() {
         bwReader = new igv.BWReader({url: url});
         ok(bwReader);
 
-        bwReader.loadHeader(function () {
+        bwReader.loadHeader().then(function () {
 
             var header = bwReader.header;
 
@@ -64,11 +64,11 @@ function runBigwigTests() {
 
         var bwReader = new igv.BWReader({url: url});
 
-        bwReader.loadHeader(function () {
+        bwReader.loadHeader().then(function () {
 
             var offset = bwReader.header.fullIndexOffset;
 
-            bwReader.loadRPTree(offset, function (rpTree) {
+            bwReader.loadRPTree(offset).then(function (rpTree) {
 
                 ok(rpTree.rootNode);
 
