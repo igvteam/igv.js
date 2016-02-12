@@ -322,19 +322,32 @@ var igv = (function (igv) {
             });
 
             // toggle track labels
-            $trackLabelToggle = $('<div class="igvNavigationToggleTrackLabels">');
+            $trackLabelToggle = $('<div id="toggle-track-labels" class="igvNavigationToggleTrackLabels">');
             $trackLabelToggle.text("hide labels");
             navigation.append($trackLabelToggle[ 0 ]);
 
             $trackLabelToggle.click(function () {
 
+                var $leftHandGutters = $('.igv-left-hand-gutter'),
+                    $ideogram = $('.igv-ideogram-content-div'),
+                    $viewports = $('.igv-viewport-div');
+
                 browser.trackLabelsVisible = !browser.trackLabelsVisible;
+
                 if (false === browser.trackLabelsVisible) {
-                    $(this).text("show labels");
-                    $('.igv-app-icon-container').hide();
+                    // hide
+                    $ideogram.css( { 'margin-left' : '0' } );
+                    $leftHandGutters.hide();
+                    $viewports.removeClass("gutter-shim");
+                    $viewports.addClass("no-gutter-shim");
+                    igv.browser.resize();
                 } else {
-                    $(this).text("hide labels");
-                    $('.igv-app-icon-container').show();
+                    // show
+                    $ideogram.css( { 'margin-left' : '100px' } );
+                    $leftHandGutters.show();
+                    $viewports.removeClass("no-gutter-shim");
+                    $viewports.addClass("gutter-shim");
+                    igv.browser.resize();
                 }
 
             });

@@ -1226,11 +1226,21 @@ div.ui-dialog fieldset {
 
 .igv-viewport-div {
     position: absolute;
-    left:  100px;
+    /*left:  100px;*/
     right: 50px;
     height: 100%;
     overflow-x: hidden;
     overflow-y: hidden;
+}
+
+.gutter-shim {
+    position: absolute;
+    left:  100px;
+}
+
+.no-gutter-shim {
+    position: absolute;
+    left: 0;
 }
 
 .igv-app-icon-container {
