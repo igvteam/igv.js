@@ -77,7 +77,11 @@ var igv = (function (igv) {
             $columnFiller.click(function() {
 
                 self.hide();
-                self.clickOK();
+
+                if (self.clickOK) {
+                    self.clickOK();
+                }
+
             });
             $column.append( $columnFiller[ 0 ] );
             //

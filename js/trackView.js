@@ -28,13 +28,10 @@ var igv = (function (igv) {
     igv.TrackView = function (track, browser) {
 
         var self = this,
-            isMouseDown = undefined,
-            lastScreenY = undefined,
-            xy;
+            element;
 
         this.track = track;
         this.browser = browser;
-
 
         this.trackDiv = $('<div class="igv-track-div">')[0];
         $(browser.trackContainerDiv).append(this.trackDiv);
@@ -44,11 +41,14 @@ var igv = (function (igv) {
             this.trackDiv.style.height = track.height + "px";
         }
 
-        $(this.trackDiv).append (this.createLeftHandGutter() );
+        $(this.trackDiv).append( this.createLeftHandGutter() );
 
         this.addViewportToParentTrackDiv(this.trackDiv);
 
-        this.addRightHandGutterToParentTrackDiv(this.trackDiv);
+        element = this.createRightHandGutter();
+        if (element) {
+            $(this.trackDiv).append( element );
+        }
 
         this.trackDiv.appendChild(igv.spinner());
 
@@ -156,13 +156,6 @@ var igv = (function (igv) {
         }
     };
 
-    igv.TrackView.prototype.setDataRange = function (min, max, logScale) {
-
-        console.log("set track data range min " + min + " max " + max + " logScale " + (true === logScale ? "yes" : "no"));
-        //setTrackHeight_.call(this, newHeight, update || true);
-
-    };
-
     igv.TrackView.prototype.addViewportToParentTrackDiv = function (trackDiv) {
 
         var self = this;
@@ -189,7 +182,6 @@ var igv = (function (igv) {
             $(this.contentDiv).append(self.$zoomInNotice[0]);
             self.$zoomInNotice.hide();
         }
-
 
         // scrollbar,  default is to set overflow ot hidden and use custom scrollbar, but this can be overriden so check
         if ("hidden" === $(this.viewportDiv).css("overflow-y")) {
@@ -238,65 +230,25 @@ var igv = (function (igv) {
 
     };
 
-    igv.TrackView.prototype.leftHandGutterCreationHelper = function (gutterElement) {
+    igv.TrackView.prototype.createRightHandGutter = function () {
 
-        if (this.track.paintAxis) {
-
-            this.controlCanvas = $('<canvas class ="igv-track-control-canvas">')[0];
-            this.controlCanvas.setAttribute('width', gutterElement.clientWidth);
-            this.controlCanvas.setAttribute('height', gutterElement.clientHeight);
-            this.controlCtx = this.controlCanvas.getContext("2d");
-
-            $(gutterElement).append(this.controlCanvas);
-
-        }
-
-        if (this.track.name) {
-
-            this.track.labelSpan = $('<span>')[0];
-            this.track.labelSpan.innerHTML = this.track.name;
-
-            description = this.track.description || this.track.name;
-            this.track.labelSpan.onclick = function (e) {
-                igv.popover.presentTrackPopup(e.pageX, e.pageY, description, false);
-            };
-
-            $appIconContainer = $('<div class="igv-app-icon-container">');
-            $($appIconContainer).append(this.track.labelSpan);
-
-
-            $(gutterElement).append($appIconContainer[0]);
-
-        }
-
-    };
-
-    igv.TrackView.prototype.addRightHandGutterToParentTrackDiv = function (trackDiv) {
-
-        var trackManipulationIconBox;
-
-        this.rightHandGutter = $('<div class="igv-right-hand-gutter">')[0];
-        $(trackDiv).append(this.rightHandGutter);
-
-        this.rightHandGutterCreationHelper($(this.rightHandGutter));
-
-    };
-
-    igv.TrackView.prototype.rightHandGutterCreationHelper = function (parent) {
-
-        var myself = this,
+        var self = this,
             gearButton;
 
         if (this.track.ignoreTrackMenu) {
-            return;
+            return undefined;
         }
 
         gearButton = $('<i class="fa fa-gear fa-20px igv-track-menu-gear igv-app-icon">');
-        $(parent).append(gearButton[0]);
 
         $(gearButton).click(function (e) {
-            igv.popover.presentTrackMenu(e.pageX, e.pageY, myself);
+            igv.popover.presentTrackMenu(e.pageX, e.pageY, self);
         });
+
+        this.rightHandGutter = $('<div class="igv-right-hand-gutter">')[0];
+        $(this.rightHandGutter).append(gearButton[0]);
+
+        return this.rightHandGutter;
 
     };
 
