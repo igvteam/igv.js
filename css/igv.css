@@ -373,13 +373,6 @@ div[id="igvEncodeModal"] {
     background-color: #7e7e7e;
 }
 
-
-
-
-
-
-
-
 .igv-col-fa {
 
     color: white;
@@ -1004,7 +997,7 @@ div.ui-dialog fieldset {
 
     height: 40px;
 
-    margin-left: 50px;
+    margin-left: 100px;
     margin-right: 50px;
 }
 
@@ -1227,13 +1220,13 @@ div.ui-dialog fieldset {
 .igv-left-hand-gutter {
     position: absolute;
     left: 0;
-    width: 50px;
+    width: 100px;
     height: 100%;
 }
 
 .igv-viewport-div {
     position: absolute;
-    left:  50px;
+    left:  100px;
     right: 50px;
     height: 100%;
     overflow-x: hidden;

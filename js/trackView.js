@@ -198,41 +198,6 @@ var igv = (function (igv) {
             $(this.viewportDiv).append(this.scrollbar.outerScrollDiv);
         }
 
-        this.viewportCreationHelper(this.viewportDiv);
-
-    };
-
-    igv.TrackView.prototype.viewportCreationHelper = function (viewportDiv) {
-
-        var myself = this,
-            labelButton,
-            trackIconContainer,
-            description;
-
-
-        if (this.track.name) {
-
-            trackIconContainer = $('<div class="igv-app-icon-container">');
-            $(viewportDiv).append(trackIconContainer[0]);
-
-            this.track.labelSpan = $('<span>')[0];
-
-            this.track.labelSpan.innerHTML = this.track.name;
-            $(trackIconContainer).append(this.track.labelSpan);
-
-            description = this.track.description || this.track.name;
-            this.track.labelSpan.onclick = function (e) {
-                igv.popover.presentTrackPopup(e.pageX, e.pageY, description, false);
-            };
-
-            $(viewportDiv).scroll(function () {
-                trackIconContainer.css({"top": $(viewportDiv).scrollTop() + "px"});
-
-            });
-
-
-        }
-
     };
 
     igv.TrackView.prototype.addLeftHandGutterToParentTrackDiv = function (trackDiv) {
@@ -245,18 +210,40 @@ var igv = (function (igv) {
 
     };
 
-    igv.TrackView.prototype.leftHandGutterCreationHelper = function (leftHandGutter) {
+    igv.TrackView.prototype.leftHandGutterCreationHelper = function (gutterElement) {
+
+        var description,
+            $appIconContainer;
 
         if (this.track.paintAxis) {
 
             // control canvas.  Canvas width and height attributes must be set.  Its a canvas weirdness.
             this.controlCanvas = $('<canvas class ="igv-track-control-canvas">')[0];
-            $(leftHandGutter).append(this.controlCanvas);
+            $(gutterElement).append(this.controlCanvas);
 
-            this.controlCanvas.setAttribute('width', leftHandGutter.clientWidth);
-            this.controlCanvas.setAttribute('height', leftHandGutter.clientHeight);
+            this.controlCanvas.setAttribute('width', gutterElement.clientWidth);
+            this.controlCanvas.setAttribute('height', gutterElement.clientHeight);
             this.controlCtx = this.controlCanvas.getContext("2d");
+
         }
+
+        if (this.track.name) {
+
+            this.track.labelSpan = $('<span>')[0];
+            this.track.labelSpan.innerHTML = this.track.name;
+
+            $appIconContainer = $('<div class="igv-app-icon-container">');
+            $($appIconContainer).append(this.track.labelSpan);
+
+            $(gutterElement).append($appIconContainer[0]);
+
+            description = this.track.description || this.track.name;
+            this.track.labelSpan.onclick = function (e) {
+                igv.popover.presentTrackPopup(e.pageX, e.pageY, description, false);
+            };
+
+        }
+
     };
 
     igv.TrackView.prototype.addRightHandGutterToParentTrackDiv = function (trackDiv) {
