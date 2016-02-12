@@ -1249,6 +1249,12 @@ div.ui-dialog fieldset {
 
 }
 
+.igv-track-label-span {
+
+    text-overflow: ellipsis;
+
+}
+
 .igv-app-icon-container {
 
     font-family: 'PT Sans', sans-serif;
