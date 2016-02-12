@@ -336,7 +336,7 @@ var igv = (function (igv) {
 
                 if (false === browser.trackLabelsVisible) {
                     // hide
-                    $ideogram.css( { 'margin-left' : '0' } );
+                    $ideogram.css( { 'margin-left' : '50px' } );
                     $leftHandGutters.hide();
                     $viewports.removeClass("gutter-shim");
                     $viewports.addClass("no-gutter-shim");

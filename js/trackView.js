@@ -211,17 +211,13 @@ var igv = (function (igv) {
 
         if (this.track.name) {
 
-            this.track.labelSpan = $('<span>')[0];
-            this.track.labelSpan.innerHTML = this.track.name;
+            $appIconContainer = $('<div class="igv-app-icon-container">');
+            $appIconContainer.text(this.track.name);
 
             description = this.track.description || this.track.name;
-            this.track.labelSpan.onclick = function (e) {
+            $appIconContainer.click(function(e){
                 igv.popover.presentTrackPopup(e.pageX, e.pageY, description, false);
-            };
-
-            $appIconContainer = $('<div class="igv-app-icon-container">');
-            $($appIconContainer).append(this.track.labelSpan);
-
+            });
 
             $(this.leftHandGutter).append($appIconContainer[0]);
         }
