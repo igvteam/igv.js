@@ -150,7 +150,7 @@ var igv = (function (igv) {
             menuItems.push(
                 igv.dialogMenuItem(popover, trackView, "Remove track", function () {
 
-                    return '<div class="igv-dialog-label-centered">' +  'Remove Label' + '</div>';
+                    return '<div class="igv-dialog-label-centered">' +  'Remove Track' + '</div>';
 
                 }, undefined, undefined, function () {
 
@@ -300,21 +300,18 @@ var igv = (function (igv) {
     igv.spinner = function (size) {
 
         // spinner
-        var spinnerContainer,
-            spinner;
+        var $container,
+            $spinner;
 
-        spinnerContainer = document.createElement("div");
-        spinnerContainer.className = "igv-spinner-container";
-
-        spinner = document.createElement("i");
-        spinner.className = "fa fa-spinner fa-spin";
-        if (undefined !== size) {
-            $(spinner).css("font-size", size);
+        $spinner = $('<i class="fa fa-spinner fa-spin">');
+        if (size) {
+            $spinner.css("font-size", size);
         }
 
-        spinnerContainer.appendChild(spinner);
+        $container = $('<div class="igv-spinner-container">');
+        $container.append($spinner[ 0 ]);
 
-        return spinnerContainer;
+        return $container[ 0 ];
     };
 
     /**
