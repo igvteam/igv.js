@@ -47,128 +47,138 @@ var igv = (function (igv) {
     }
 
 
-    igv.RPTree.prototype.load = function (continuation) {
+    igv.RPTree.prototype.load = function () {
 
-        var tree = this,
-            rootNodeOffset = this.fileOffset + RPTREE_HEADER_SIZE,
-            bufferedReader = new igv.BufferedReader(this.config, this.filesize, BUFFER_SIZE);
+        var self = this;
 
-        this.readNode(rootNodeOffset, bufferedReader, function (node) {
-            tree.rootNode = node;
-            continuation(tree);
-        });
+        return new Promise(function (fulfill, reject) {
+            var rootNodeOffset = self.fileOffset + RPTREE_HEADER_SIZE,
+                bufferedReader = new igv.BufferedReader(self.config, self.filesize, BUFFER_SIZE);
 
-    }
-
-
-    igv.RPTree.prototype.readNode = function (filePosition, bufferedReader, continuation) {
-
-
-        bufferedReader.dataViewForRange({start: filePosition, size: 4}, function (dataView) {
-            var binaryParser = new igv.BinaryParser(dataView, this.littleEndian);
-
-            var type = binaryParser.getByte();
-            var isLeaf = (type === 1) ? true : false;
-            var reserved = binaryParser.getByte();
-            var count = binaryParser.getShort();
-
-            filePosition += 4;
-
-            var bytesRequired = count * (isLeaf ? RPTREE_NODE_LEAF_ITEM_SIZE : RPTREE_NODE_CHILD_ITEM_SIZE);
-            var range2 = {start: filePosition, size: bytesRequired};
-
-            bufferedReader.dataViewForRange(range2, function (dataView) {
-
-                var i,
-                    items = new Array(count),
-                    binaryParser = new igv.BinaryParser(dataView);
-
-                if (isLeaf) {
-                    for (i = 0; i < count; i++) {
-                        var item = {
-                            isLeaf: true,
-                            startChrom: binaryParser.getInt(),
-                            startBase: binaryParser.getInt(),
-                            endChrom: binaryParser.getInt(),
-                            endBase: binaryParser.getInt(),
-                            dataOffset: binaryParser.getLong(),
-                            dataSize: binaryParser.getLong()
-                        };
-                        items[i] = item;
-
-                    }
-                    continuation(new RPTreeNode(items));
-                }
-                else { // non-leaf
-                    for (i = 0; i < count; i++) {
-
-                        var item = {
-                            isLeaf: false,
-                            startChrom: binaryParser.getInt(),
-                            startBase: binaryParser.getInt(),
-                            endChrom: binaryParser.getInt(),
-                            endBase: binaryParser.getInt(),
-                            childOffset: binaryParser.getLong()
-                        };
-                        items[i] = item;
-
-                    }
-
-                    continuation(new RPTreeNode(items));
-                }
-            });
+            self.readNode(rootNodeOffset, bufferedReader).then(function (node) {
+                self.rootNode = node;
+                fulfill(self);
+            }).catch(reject);
         });
     }
 
 
-    igv.RPTree.prototype.findLeafItemsOverlapping = function (chrIdx, startBase, endBase, continuation) {
+    igv.RPTree.prototype.readNode = function (filePosition, bufferedReader) {
 
-        var rpTree = this,
-            leafItems = [],
-            processing = new Set(),
-            bufferedReader = new igv.BufferedReader(this.config, this.filesize, BUFFER_SIZE);
+        var self = this;
 
-        processing.add(0);  // Zero represents the root node
-        findLeafItems(this.rootNode, 0);
+        return new Promise(function (fulfill, reject) {
 
-        function findLeafItems(node, nodeId) {
+            bufferedReader.dataViewForRange({start: filePosition, size: 4}, false).then(function (dataView) {
+                var binaryParser = new igv.BinaryParser(dataView, self.littleEndian);
 
-            if (overlaps(node, chrIdx, startBase, endBase)) {
+                var type = binaryParser.getByte();
+                var isLeaf = (type === 1) ? true : false;
+                var reserved = binaryParser.getByte();
+                var count = binaryParser.getShort();
 
-                var items = node.items;
+                filePosition += 4;
 
-                items.forEach(function (item) {
+                var bytesRequired = count * (isLeaf ? RPTREE_NODE_LEAF_ITEM_SIZE : RPTREE_NODE_CHILD_ITEM_SIZE);
+                var range2 = {start: filePosition, size: bytesRequired};
 
-                    if (overlaps(item, chrIdx, startBase, endBase)) {
+                bufferedReader.dataViewForRange(range2, false).then(function (dataView) {
 
-                        if (item.isLeaf) {
-                            leafItems.push(item);
+                    var i,
+                        items = new Array(count),
+                        binaryParser = new igv.BinaryParser(dataView);
+
+                    if (isLeaf) {
+                        for (i = 0; i < count; i++) {
+                            var item = {
+                                isLeaf: true,
+                                startChrom: binaryParser.getInt(),
+                                startBase: binaryParser.getInt(),
+                                endChrom: binaryParser.getInt(),
+                                endBase: binaryParser.getInt(),
+                                dataOffset: binaryParser.getLong(),
+                                dataSize: binaryParser.getLong()
+                            };
+                            items[i] = item;
+
+                        }
+                        fulfill(new RPTreeNode(items));
+                    }
+                    else { // non-leaf
+                        for (i = 0; i < count; i++) {
+
+                            var item = {
+                                isLeaf: false,
+                                startChrom: binaryParser.getInt(),
+                                startBase: binaryParser.getInt(),
+                                endChrom: binaryParser.getInt(),
+                                endBase: binaryParser.getInt(),
+                                childOffset: binaryParser.getLong()
+                            };
+                            items[i] = item;
+
                         }
 
-                        else {
-                            if (item.childNode) {
-                                findLeafItems(item.childNode);
+                        fulfill(new RPTreeNode(items));
+                    }
+                }).catch(reject);
+            }).catch(reject);
+        });
+    }
+
+
+    igv.RPTree.prototype.findLeafItemsOverlapping = function (chrIdx, startBase, endBase) {
+
+        var self = this;
+
+        return new Promise(function (fulfill, reject) {
+
+            var leafItems = [],
+                processing = new Set(),
+                bufferedReader = new igv.BufferedReader(self.config, self.filesize, BUFFER_SIZE);
+
+            processing.add(0);  // Zero represents the root node
+            findLeafItems(self.rootNode, 0);
+
+            function findLeafItems(node, nodeId) {
+
+                if (overlaps(node, chrIdx, startBase, endBase)) {
+
+                    var items = node.items;
+
+                    items.forEach(function (item) {
+
+                        if (overlaps(item, chrIdx, startBase, endBase)) {
+
+                            if (item.isLeaf) {
+                                leafItems.push(item);
                             }
+
                             else {
-                                processing.add(item.childOffset);  // Represent node to-be-loaded by its file position
-                                rpTree.readNode(item.childOffset, bufferedReader, function (node) {
-                                    item.childNode = node;
-                                    findLeafItems(node, item.childOffset);
-                                });
+                                if (item.childNode) {
+                                    findLeafItems(item.childNode);
+                                }
+                                else {
+                                    processing.add(item.childOffset);  // Represent node to-be-loaded by its file position
+                                    self.readNode(item.childOffset, bufferedReader).then(function (node) {
+                                        item.childNode = node;
+                                        findLeafItems(node, item.childOffset);
+                                    }).catch(reject);
+                                }
                             }
                         }
-                    }
-                });
+                    });
 
+                }
+
+                if (nodeId != undefined) processing.delete(nodeId);
+
+                // Wait until all nodes are processed
+                if (processing.isEmpty()) {
+                    fulfill(leafItems);
+                }
             }
-
-            if (nodeId != undefined) processing.delete(nodeId);
-
-            // Wait until all nodes are processed
-            if (processing.isEmpty()) {
-                continuation(leafItems);
-            }
-        }
+        });
     }
 
 

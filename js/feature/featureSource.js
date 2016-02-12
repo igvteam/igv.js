@@ -37,6 +37,7 @@ var igv = (function (igv) {
 
         this.config = config || {};
 
+        this.sourceType = (config.sourceType === undefined ? "file" : config.sourceType);
 
         if (config.sourceType === "ga4gh") {
             this.reader = new igv.Ga4ghVariantReader(config);
@@ -124,7 +125,7 @@ var igv = (function (igv) {
             else {
                 // TODO -- reuse cached features that overelap new region
 
-                if(self.visibilityWindow === undefined || self.visibilityWindow <= 0) {
+                if(self.sourceType === 'file' && (self.visibilityWindow === undefined || self.visibilityWindow <= 0)) {
                     // Expand genomic interval to grab entire chromosome
                     genomicInterval.start = 0;
                     genomicInterval.end = Number.MAX_VALUE;
