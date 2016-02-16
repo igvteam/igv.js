@@ -106,18 +106,17 @@ var igv = (function (igv) {
             // If no samples are defined, optionally query feature source.  This step was added to support the TCGA BigQuery
             // tables
             if (self.sampleCount === 0 && self.featureSource.reader.allSamples) {    // TODO <=  fix this!
-                self.featureSource.reader.allSamples(function (samples) {
+                self.featureSource.reader.allSamples().then(function (samples) {
                     samples.forEach(function (sample) {
                         self.samples[sample] = self.sampleCount;
                         self.sampleNames.push(sample);
                         self.sampleCount++;
                     })
-
-                    self.featureSource.getFeatures(chr, bpStart, bpEnd).then(fulfill);
-                });
+                    self.featureSource.getFeatures(chr, bpStart, bpEnd).then(fulfill).catch(reject);
+                }).catch(reject);
             }
             else {
-                self.featureSource.getFeatures(chr, bpStart, bpEnd).then(fulfill);
+                self.featureSource.getFeatures(chr, bpStart, bpEnd).then(fulfill).catch(reject);
             }
         });
     }
