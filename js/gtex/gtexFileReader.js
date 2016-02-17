@@ -91,7 +91,7 @@ var igv = (function (igv) {
                                 fulfill(null);
                             }
 
-                        });
+                        }).catch(reject);
 
 
                 }

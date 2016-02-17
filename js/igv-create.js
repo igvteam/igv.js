@@ -188,7 +188,7 @@ var igv = (function (igv) {
         browser.ideoPanel.resize();
 
 
-        igv.loadGenome(config.reference, function (genome) {
+        igv.loadGenome(config.reference).then(function (genome) {
 
             var referenceWidth = browser.trackViewportWidth();
             if(referenceWidth === 0) referenceWidth = 500;
@@ -242,6 +242,8 @@ var igv = (function (igv) {
             }
 
 
+        }).catch(function (error) {
+            console.log(error);
         });
 
         return browser;

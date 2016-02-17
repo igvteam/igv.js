@@ -56,7 +56,7 @@ var igv = (function (igv) {
 
                     self.alignmentContainer = alignmentContainer;
 
-                    igv.browser.genome.sequence.getSequence(self.alignmentContainer.chr, self.alignmentContainer.start, self.alignmentContainer.end,
+                    igv.browser.genome.sequence.getSequence(self.alignmentContainer.chr, self.alignmentContainer.start, self.alignmentContainer.end).then(
 
                         function (sequence) {
 
@@ -72,7 +72,7 @@ var igv = (function (igv) {
 
                                 fulfill(self.alignmentContainer);
                             }
-                        });
+                        }).catch(reject);
 
                 }).catch(reject);
             }

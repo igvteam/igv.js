@@ -150,50 +150,55 @@ var igv = (function (igv) {
             this.end >= range.end;
     }
 
-    igv.loadGenome = function (reference, continuation) {
+    igv.loadGenome = function (reference) {
 
-        var cytobandUrl = reference.cytobandURL,
-            cytobands,
-            aliasURL = reference.aliasURL,
-            aliases,
-            chrNames,
-            chromosomes = {};
-        sequence = new igv.FastaSequence(reference);
+        return new Promise(function (fulfill, reject) {
 
-        sequence.init(function () {
+            var cytobandUrl = reference.cytobandURL,
+                cytobands,
+                aliasURL = reference.aliasURL,
+                aliases,
+                chrNames,
+                chromosomes = {},
+                sequence;
 
-            var order = 0;
+            sequence = new igv.FastaSequence(reference);
 
-            chrNames = sequence.chromosomeNames;
-            chromosomes = sequence.chromosomes;
+            sequence.init().then(function () {
 
-            if (cytobandUrl) {
-                loadCytobands(cytobandUrl, reference.withCredentials, function (result) {
-                    cytobands = result;
-                    checkReady();
-                });
+                var order = 0;
+
+                chrNames = sequence.chromosomeNames;
+                chromosomes = sequence.chromosomes;
+
+                if (cytobandUrl) {
+                    loadCytobands(cytobandUrl, reference.withCredentials, function (result) {
+                        cytobands = result;
+                        checkReady();
+                    });
+                }
+
+                if (aliasURL) {
+                    loadAliases(aliasURL, reference.withCredentials, function (result) {
+                        aliases = result;
+                        checkReady();
+                    });
+                }
+
+                checkReady();
+
+            }).catch(reject);
+
+            function checkReady() {
+
+                var isReady = (cytobandUrl === undefined || cytobands !== undefined) &&
+                    (aliasURL === undefined || aliases !== undefined);
+                if (isReady) {
+                    fulfill(new igv.Genome(sequence, cytobands, aliases));
+                }
+
             }
-
-            if (aliasURL) {
-                loadAliases(aliasURL, reference.withCredentials, function (result) {
-                    aliases = result;
-                    checkReady();
-                });
-            }
-
-            checkReady();
-
         });
-
-        function checkReady() {
-
-            var isReady = (cytobandUrl === undefined || cytobands !== undefined) &&
-                (aliasURL === undefined || aliases !== undefined);
-            if (isReady) {
-                continuation(new igv.Genome(sequence, cytobands, aliases));
-            }
-
-        }
     }
 
     function loadCytobands(cytobandUrl, withCredentials, continuation) {

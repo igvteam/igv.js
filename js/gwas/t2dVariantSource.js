@@ -122,7 +122,7 @@ var igv = (function (igv) {
                     else {
                         fulfill(null);
                     }
-                });
+                }).catch(reject);
 
             }
 
