@@ -601,12 +601,17 @@ var igv = (function (igv) {
     };
 
 
-    igv.Browser.prototype.search = function (feature, continuation) {
+    /**
+     *
+     * @param feature
+     * @param callback - function to call
+     */
+    igv.Browser.prototype.search = function (feature, callback) {
 
         // See if we're ready to respond to a search, if not just queue it up and return
         if (igv.browser === undefined || igv.browser.genome === undefined) {
             igv.browser.initialLocus = feature;
-            if (continuation) continuation();
+            if (callback) callback();
             return;
         }
 
@@ -644,7 +649,7 @@ var igv = (function (igv) {
                 fireOnsearch.call(igv.browser, feature, type);
             }
 
-            if (continuation) continuation();
+            if (callback) callback();
 
         }
         else {
@@ -695,7 +700,7 @@ var igv = (function (igv) {
                         presentSearchResults(results, searchConfig, feature);
                     }
 
-                    if (continuation) continuation();
+                    if (callback) callback();
                 });
             }
         }

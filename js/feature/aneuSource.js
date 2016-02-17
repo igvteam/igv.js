@@ -111,13 +111,6 @@ var igv = (function (igv) {
 
     };
 
-    igv.AneuFeatureSource.prototype.allFeatures = function (success) {
-
-        this.getFeatureCache(function (featureCache) {
-            success(featureCache.allFeatures());
-        });
-
-    };
 
     /**
      * Get the feature cache.  This method is exposed for use by cursor.  Loads all features (no index).

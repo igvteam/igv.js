@@ -42,7 +42,7 @@ var igv = (function (igv) {
                 fulfill(null);
             }
             else {
-                igv.browser.genome.sequence.getSequence(chr, bpStart, bpEnd, fulfill)
+                igv.browser.genome.sequence.getSequence(chr, bpStart, bpEnd).then(fulfill).catch(reject);
             }
         });
     }

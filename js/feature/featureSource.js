@@ -170,37 +170,6 @@ var igv = (function (igv) {
     }
 
 
-    igv.FeatureSource.prototype.allFeatures = function (success) {
-
-        this.getFeatureCache(function (featureCache) {
-            success(featureCache.allFeatures());
-        });
-
-    };
-
-    /**
-     * Get the feature cache.  This method is exposed for use by cursor.  Loads all features (index not used).
-     * @param success
-     */
-    igv.FeatureSource.prototype.getFeatureCache = function (success) {
-
-        var self = this;
-
-        if (this.featureCache) {
-            success(this.featureCache);
-        }
-        else {
-            this.reader.readFeatures().then(function (featureList) {
-                //myself.featureMap = featureMap;
-                self.featureCache = new igv.FeatureCache(featureList);
-                // Finally pass features for query interval to continuation
-                success(self.featureCache);
-
-            });
-        }
-    }
-
-
     function packFeatures(features, maxRows) {
 
         if (features == null || features.length === 0) {
