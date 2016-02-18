@@ -100,7 +100,7 @@ console.log("# chunks = " + chunks.length);
                                         //fulfill(alignmentContainer);
                                     }
 
-                                    fulfill();
+                                    fulfill(alignmentContainer);
 
                                 }).catch(function (obj) {
                                     reject(obj);
