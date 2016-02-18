@@ -306,13 +306,13 @@ var igv = (function (igv) {
             browser.windowSizePanel = new igv.WindowSizePanel($navigation);
 
             // zoom in/out
-            $faZoomOut = $('<i class="igv-app-icon fa fa-minus-square-o fa-24px" style="padding-right: 4px;">');
+            $faZoomOut = $('<i class="fa fa-minus-circle igv-app-icon fa-24px" style="padding-right: 4px;">');
 
             $faZoomOut.click(function () {
                 igv.browser.zoomOut();
             });
 
-            $faZoomIn = $('<i class="igv-app-icon fa fa-plus-square-o fa-24px">');
+            $faZoomIn = $('<i class="fa fa-plus-circle igv-app-icon fa-24px">');
 
             $faZoomIn.click(function () {
                 igv.browser.zoomIn();
@@ -325,7 +325,7 @@ var igv = (function (igv) {
 
 
             // hide/show track labels
-            $trackLabelToggle = $('<div id="toggle-track-labels" class="igvNavigationToggleTrackLabels">');
+            $trackLabelToggle = $('<div class="igv-toggle-track-labels">');
             $trackLabelToggle.text("hide labels");
 
             $trackLabelToggle.click(function () {
@@ -338,6 +338,7 @@ var igv = (function (igv) {
 
                 if (false === browser.trackLabelsVisible) {
                     // hide
+                    $trackLabelToggle.text("show labels");
                     $ideogram.css( { 'margin-left' : '50px' } );
                     $leftHandGutters.hide();
                     $viewports.removeClass("gutter-shim");
@@ -345,6 +346,7 @@ var igv = (function (igv) {
                     igv.browser.resize();
                 } else {
                     // show
+                    $trackLabelToggle.text("hide labels");
                     $ideogram.css( { 'margin-left' : '100px' } );
                     $leftHandGutters.show();
                     $viewports.removeClass("no-gutter-shim");

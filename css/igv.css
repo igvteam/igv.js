@@ -628,7 +628,7 @@ div.ui-dialog fieldset {
     outline: none;
 
     border-style: solid;
-    border-radius: 4px;
+    border-radius: 3px;
     border-width: thin;
     border-color: rgb(223, 223, 223);
 
@@ -689,37 +689,41 @@ div.ui-dialog fieldset {
     float: right;
 }
 
-.igvNavigationToggleTrackLabels {
+.igv-toggle-track-labels {
 
     position: relative;
     float: right;
 
-    border-style: solid;
-    border-radius: 4px;
-    border-width: thin;
-    border-color: rgb(127, 127, 127);
-
     margin-right: 64px;
 
-    padding-left: 4px;
-    padding-right: 4px;
+    padding-left: 8px;
+    padding-right: 8px;
     padding-top: 1px;
     padding-bottom: 2px;
+
+    border-style: solid;
+    border-radius: 3px;
+    border-width: thin;
+    border-color: rgb(223, 223, 223);
 
     font-family: 'Open Sans', sans-serif;
     font-size: small;
     font-weight: 400;
-    color: #444;
 
+    color: #444;
+    background-color: white;
 }
 
-.igvNavigationToggleTrackLabels:hover,
-.igvNavigationToggleTrackLabels:focus,
-.igvNavigationToggleTrackLabels:active  {
+.igv-toggle-track-labels:hover,
+.igv-toggle-track-labels:focus,
+.igv-toggle-track-labels:active  {
 
     cursor: pointer;
-    border-color: #444;
 
+    border-color: #afafaf;
+
+    color: white;
+    background-color: #afafaf;
 }
 
 .igvNavigationMarginLeft12 {
