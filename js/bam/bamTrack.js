@@ -30,15 +30,15 @@
  */
 var igv = (function (igv) {
 
-    igv.BAMTrack = function (config) {
+    igv.BAMTrack = function (config, featureSource) {
+
+        this.featureSource = featureSource;
 
         igv.configTrack(this, config);
 
         this.visibilityWindow = config.visibilityWindow || 30000;     // 30kb default
 
         this.alignmentRowHeight = config.alignmentRowHeight || 14;
-
-        this.coverageTrackHeight = config.coverageTrackHeight || 50;
 
         this.defaultColor = config.defaultColor || "rgb(185, 185, 185)";
         this.color = config.color || this.defaultColor;
@@ -63,8 +63,6 @@ var igv = (function (igv) {
 
         // filter alignments
         this.filterOption = config.filterOption || {name: "mappingQuality", params: [30, undefined]};
-
-        this.featureSource = new igv.BamSource(config);
 
         this.sortDirection = true;
     };
@@ -262,7 +260,7 @@ var igv = (function (igv) {
     igv.BAMTrack.prototype.computePixelHeight = function (features) {
 
         if (features.packedAlignmentRows) {
-            return this.alignmentRowYInset + this.coverageTrackHeight + (this.alignmentRowHeight * features.packedAlignmentRows.length) + 5;
+            return this.alignmentRowYInset + (this.alignmentRowHeight * features.packedAlignmentRows.length) + 5;
         }
         else {
             return this.height;
@@ -284,85 +282,7 @@ var igv = (function (igv) {
             bpEnd = bpStart + pixelWidth * bpPerPixel + 1;
 
         if (genomicInterval) {
-            drawCoverage(genomicInterval.coverageMap);
             drawAlignments(genomicInterval);
-        }
-
-        function drawCoverage(coverageMap) {
-            var bp,
-                x,
-                y,
-                w,
-                h,
-                refBase,
-                i,
-                len,
-                item,
-                accumulatedHeight,
-                sequence;
-
-
-            if (coverageMap.refSeq) sequence = coverageMap.refSeq.toUpperCase();
-
-            // TODO -- why is covereageMap sometimes undefined !?
-            if (coverageMap) {
-
-                // paint backdrop color for all coverage buckets
-                w = Math.max(1, Math.ceil(1.0 / bpPerPixel));
-                for (i = 0, len = coverageMap.coverage.length; i < len; i++) {
-
-                    bp = (coverageMap.bpStart + i);
-                    if (bp < bpStart) continue;
-                    if (bp > bpEnd) break;
-
-                    item = coverageMap.coverage[i];
-                    if (!item) continue;
-
-                    h = (item.total / coverageMap.maximum) * self.coverageTrackHeight;
-
-
-                    y = self.coverageTrackHeight - h;
-                    x = Math.floor((bp - bpStart) / bpPerPixel);
-
-                    igv.graphics.setProperties(ctx, {fillStyle: self.color, strokeStyle: self.color});
-                    igv.graphics.fillRect(ctx, x, y, w, h);
-
-                    // coverage mismatch coloring
-                    if (sequence) {
-
-                        refBase = sequence[i];
-                        if (item.isMismatch(refBase)) {
-
-                            igv.graphics.setProperties(ctx, {fillStyle: igv.nucleotideColors[refBase]});
-                            igv.graphics.fillRect(ctx, x, y, w, h);
-
-                            accumulatedHeight = 0.0;
-                            ["A", "C", "T", "G"].forEach(function (nucleotide) {
-
-                                var count,
-                                    hh;
-
-                                count = item["pos" + nucleotide] + item["neg" + nucleotide];
-
-
-                                // non-logoritmic
-                                hh = (count / coverageMap.maximum) * self.coverageTrackHeight;
-
-                                y = (self.coverageTrackHeight - hh) - accumulatedHeight;
-                                accumulatedHeight += hh;
-
-                                igv.graphics.setProperties(ctx, {fillStyle: igv.nucleotideColors[nucleotide]});
-                                igv.graphics.fillRect(ctx, x, y, w, hh);
-
-                            });
-
-                        }
-
-                    }
-
-                }
-
-            }
         }
 
         function drawAlignments(genomicInterval) {
@@ -386,7 +306,7 @@ var igv = (function (igv) {
                         height,
                         outlineColor;
 
-                    yRect = self.alignmentRowYInset + self.coverageTrackHeight + (self.alignmentRowHeight * i) + 5;
+                    yRect = self.alignmentRowYInset + (self.alignmentRowHeight * i) + 5;
                     height = self.alignmentRowHeight - (2 * self.alignmentRowYInset);
                     yStrokedLine = (height / 2.0) + yRect;
 
@@ -552,60 +472,15 @@ var igv = (function (igv) {
 
     igv.BAMTrack.prototype.popupData = function (genomicLocation, xOffset, yOffset) {
 
-        var coverageMap = this.featureSource.alignmentContainer.coverageMap,
-            coverageMapIndex,
-            coverage,
-            packedAlignmentRows = this.featureSource.alignmentContainer.packedAlignmentRows,
+        var packedAlignmentRows = this.featureSource.alignmentContainer.packedAlignmentRows,
             packedAlignmentsIndex,
             alignmentRow,
             alignment,
             nameValues = [];
 
-        packedAlignmentsIndex = Math.floor((yOffset - (this.alignmentRowYInset + this.coverageTrackHeight)) / this.alignmentRowHeight);
+        packedAlignmentsIndex = Math.floor((yOffset - (this.alignmentRowYInset)) / this.alignmentRowHeight);
 
-        if (packedAlignmentsIndex < 0) {
-
-            coverageMapIndex = genomicLocation - coverageMap.bpStart;
-            coverage = coverageMap.coverage[coverageMapIndex];
-
-            if (coverage) {
-
-
-                nameValues.push(igv.browser.referenceFrame.chr + ":" + igv.numberFormatter(1 + genomicLocation));
-
-                nameValues.push({name: 'Total Count', value: coverage.total});
-
-                // A
-                tmp = coverage.posA + coverage.negA;
-                if (tmp > 0)  tmp = tmp.toString() + " (" + Math.floor(((coverage.posA + coverage.negA) / coverage.total) * 100.0) + "%)";
-                nameValues.push({name: 'A', value: tmp});
-
-
-                // C
-                tmp = coverage.posC + coverage.negC;
-                if (tmp > 0)  tmp = tmp.toString() + " (" + Math.floor((tmp / coverage.total) * 100.0) + "%)";
-                nameValues.push({name: 'C', value: tmp});
-
-                // G
-                tmp = coverage.posG + coverage.negG;
-                if (tmp > 0)  tmp = tmp.toString() + " (" + Math.floor((tmp / coverage.total) * 100.0) + "%)";
-                nameValues.push({name: 'G', value: tmp});
-
-                // T
-                tmp = coverage.posT + coverage.negT;
-                if (tmp > 0)  tmp = tmp.toString() + " (" + Math.floor((tmp / coverage.total) * 100.0) + "%)";
-                nameValues.push({name: 'T', value: tmp});
-
-                // N
-                tmp = coverage.posN + coverage.negN;
-                if (tmp > 0)  tmp = tmp.toString() + " (" + Math.floor((tmp / coverage.total) * 100.0) + "%)";
-                nameValues.push({name: 'N', value: tmp});
-
-            }
-
-        }
-
-        else if (packedAlignmentsIndex < packedAlignmentRows.length) {
+        if (packedAlignmentsIndex >= 0 && packedAlignmentsIndex < packedAlignmentRows.length) {
 
             alignmentRow = packedAlignmentRows[packedAlignmentsIndex];
 
