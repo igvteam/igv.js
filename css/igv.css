@@ -544,12 +544,23 @@ div.ui-dialog fieldset {
     top: 0;
     left: 0;
 
+    padding-top: 2px;
+    padding-bottom: 2px;
+    padding-left: 4px;
+    padding-right: 4px;
+
     height: 24px;
     width: auto;
 
-    margin-left: 48px;
-    margin-right: 32px;
-    /*margin-bottom: 5px;*/
+    margin-left: 44px;
+    margin-right: 28px;
+
+    border-style: solid;
+    border-width: thin;
+    border-radius: 4px;
+    border-color: #7f7f7f;
+
+    background-color: #ffffff;
 }
 
 .igv-logo-nonav {
@@ -609,7 +620,7 @@ div.ui-dialog fieldset {
 
     position: relative;
 
-    height: 24px;
+    height: 20px;
     width: 80%;
     padding-left: 8px;
 
@@ -995,7 +1006,7 @@ div.ui-dialog fieldset {
 
 .igv-ideogram-content-div {
 
-    height: 40px;
+    height: 32px;
 
     margin-left: 100px;
     margin-right: 50px;
