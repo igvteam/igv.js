@@ -956,11 +956,20 @@ div.ui-dialog fieldset {
 .igv-spinner-container {
 
     color: #3f3f3f;
+    /*background-color: rgba(255, 0, 0, 0.5);*/
+
+    width: 100%;
+    height: 100%;
+
+    text-align: center;
+    padding-top: 8px;
+
     font-size: 24px;
 
-    position: absolute;
-    top:50%;
-    left:50%;
+    /*position: absolute;*/
+    /*top:50%;*/
+    /*left:50%;*/
+
     z-index: 512;
 
 }
