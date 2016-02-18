@@ -122,7 +122,7 @@ var igv = (function (igv) {
         var self = this,
             settings,
             property,
-            newTrack;
+            newTracks = [];
 
         igv.inferTypes(config);
 
@@ -140,50 +140,52 @@ var igv = (function (igv) {
 
         switch (config.featureType) {
             case "gwas":
-                newTrack = new igv.GWASTrack(config);
+                newTracks.push(new igv.GWASTrack(config));
                 break;
             case "annotation":
             case "genes":
             case "variant":
             case "FusionJuncSpan":
-                newTrack = new igv.FeatureTrack(config);
+                newTracks.push( new igv.FeatureTrack(config));
                 break;
             case "alignment":
-                newTrack = new igv.BAMTrack(config);
+                newTracks.push(new igv.BAMTrack(config));
+                //newTracks.push(new igv.CoverageTrack(config));
                 break;
             case "data":
-                newTrack = new igv.WIGTrack(config);
+                newTracks.push(new igv.WIGTrack(config));
                 break;
             case "sequence":
-                newTrack = new igv.SequenceTrack(config);
+                newTracks.push(new igv.SequenceTrack(config));
                 break;
             case "eqtl":
-                newTrack = new igv.EqtlTrack(config);
+                newTracks.push(new igv.EqtlTrack(config));
                 break;
             case "seg":
-                newTrack = new igv.SegTrack(config);
+                newTracks.push(new igv.SegTrack(config));
                 break;
             case "aneu":
-                newTrack = new igv.AneuTrack(config);
+                newTracks.push(new igv.AneuTrack(config));
                 break;
             default:
                 alert("Unknown file type: " + config.url);
                 return null;
         }
 
-        // If defined, attempt to load the file header before adding the track.  This will catch some errors early
-        if (typeof newTrack.getFileHeader === "function") {
-            newTrack.getFileHeader().then(function (header) {
+        newTracks.forEach(function (newTrack) {
+            // If defined, attempt to load the file header before adding the track.  This will catch some errors early
+            if (typeof newTrack.getFileHeader === "function") {
+                newTrack.getFileHeader().then(function (header) {
+                    self.addTrack(newTrack);
+                }).catch(function (error) {
+                    alert(error);
+                });
+            }
+            else {
                 self.addTrack(newTrack);
-            }).catch(function(error) {
-                alert(error);
-            });
-        }
-        else {
-            self.addTrack(newTrack);
-        }
-
-    };
+            }
+        });
+    }
 
     igv.Browser.prototype.isDuplicateTrack = function (config) {
 
