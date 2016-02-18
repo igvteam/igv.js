@@ -252,11 +252,11 @@ var igv = (function (igv) {
 
     function createStandardControls(browser, config) {
 
-        var igvLogo,
-            controlDiv = $('<div id="igvControlDiv">')[0],
+        var $igvLogo,
+            $controls = $('<div id="igvControlDiv">'),
             contentKaryo,
-            navigation,
-            searchContainer,
+            $navigation,
+            $searchContainer,
             searchButton,
             $trackLabelToggle,
             zoom,
@@ -264,31 +264,31 @@ var igv = (function (igv) {
             zoomOutButton;
 
 
-        navigation = $('<div class="igvNavigation">');
-        $(controlDiv).append(navigation[0]);
+        $navigation = $('<div class="igvNavigation">');
+        $controls.append($navigation[0]);
 
-        // search
         if (config.showNavigation) {
 
-            igvLogo = $('<div class="igv-logo">');
-            navigation.append(igvLogo[0]);
+            $igvLogo = $('<div class="igv-logo">');
+            $navigation.append($igvLogo[0]);
 
-            searchContainer = $('<div class="igvNavigationSearch">');
-            navigation.append(searchContainer[0]);
+            $searchContainer = $('<div class="igvNavigationSearch">');
 
-            browser.searchInput = $('<input class="igvNavigationSearchInput" type="text" placeholder="Locus Search">');
-            searchContainer.append(browser.searchInput[0]);
+            $navigation.append($searchContainer[0]);
+
+            browser.$searchInput = $('<input class="igvNavigationSearchInput" type="text" placeholder="Locus Search">');
+            $searchContainer.append(browser.$searchInput[0]);
 
             searchButton = $('<i class="igv-app-icon fa fa-search fa-18px shim-left-6">');
-            searchContainer.append(searchButton[0]);
+            $searchContainer.append(searchButton[0]);
 
-            browser.searchInput.change(function () {
+            browser.$searchInput.change(function () {
 
                 browser.search($(this).val());
             });
 
             searchButton.click(function () {
-                browser.search(browser.searchInput.val());
+                browser.search(browser.$searchInput.val());
             });
 
             // search results presented in table
@@ -297,16 +297,16 @@ var igv = (function (igv) {
 
             browser.$searchResults.append(browser.$searchResultsTable[0 ]);
 
-            searchContainer.append(browser.$searchResults[ 0 ]);
+            $searchContainer.append(browser.$searchResults[ 0 ]);
 
             browser.$searchResults.hide();
 
             // window size panel
-            browser.windowSizePanel = new igv.WindowSizePanel(navigation);
+            browser.windowSizePanel = new igv.WindowSizePanel($navigation);
 
             // zoom
             zoom = $('<div class="igvNavigationZoom">');
-            navigation.append(zoom[0]);
+            $navigation.append(zoom[0]);
 
             zoomOutButton = $('<i class="igv-app-icon fa fa-minus-square-o fa-24px" style="padding-right: 4px;">');
 
@@ -326,7 +326,7 @@ var igv = (function (igv) {
             // toggle track labels
             $trackLabelToggle = $('<div id="toggle-track-labels" class="igvNavigationToggleTrackLabels">');
             $trackLabelToggle.text("hide labels");
-            navigation.append($trackLabelToggle[ 0 ]);
+            $navigation.append($trackLabelToggle[ 0 ]);
 
             $trackLabelToggle.click(function () {
 
@@ -361,13 +361,13 @@ var igv = (function (igv) {
             // this allows the placement of the karyo view on the side, for instance
             if (!contentKaryo) {
                 contentKaryo = $('<div id="igvKaryoDiv" class="igv-karyo-div">')[0];
-                $(controlDiv).append(contentKaryo);
+                $controls.append(contentKaryo);
             }
             browser.karyoPanel = new igv.KaryoPanel(contentKaryo);
         }
 
 
-        return controlDiv;
+        return $controls[ 0 ];
     }
 
 
