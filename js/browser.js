@@ -122,7 +122,9 @@ var igv = (function (igv) {
         var self = this,
             settings,
             property,
-            newTracks = [];
+            newTracks = [],
+            featureSource,
+            nm;
 
         igv.inferTypes(config);
 
@@ -149,8 +151,9 @@ var igv = (function (igv) {
                 newTracks.push( new igv.FeatureTrack(config));
                 break;
             case "alignment":
-                newTracks.push(new igv.BAMTrack(config));
-                //newTracks.push(new igv.CoverageTrack(config));
+                featureSource = new igv.BamSource(config);
+                newTracks.push(new igv.CoverageTrack(config, featureSource));
+                newTracks.push(new igv.BAMTrack(config, featureSource));
                 break;
             case "data":
                 newTracks.push(new igv.WIGTrack(config));
