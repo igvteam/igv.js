@@ -150,7 +150,9 @@ var igv = (function (igv) {
             menuItems.push(
                 igv.dialogMenuItem(popover, trackView, "Remove track", function () {
 
-                    return '<div class="igv-dialog-label-centered">' +  'Remove Track' + '</div>';
+                    var label = "Remove " + trackView.track.name;
+
+                    return '<div class="igv-dialog-label-centered">' +  label + '</div>';
 
                 }, undefined, undefined, function () {
 
