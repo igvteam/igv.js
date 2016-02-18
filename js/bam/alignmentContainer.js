@@ -72,7 +72,7 @@ var igv = (function (igv) {
         }
     }
 
-    igv.AlignmentContainer.prototype.forEach = function(callback) {
+    igv.AlignmentContainer.prototype.forEach = function (callback) {
         this.alignments.forEach(callback);
     }
 
@@ -91,16 +91,19 @@ var igv = (function (igv) {
             this.end >= end;
     }
 
-    function finishBucket() {
-        this.alignments = this.alignments.concat(this.currentBucket.alignments);
-        this.downsampledIntervals.push(
-            {
-                start: this.currentBucket.start,
-                end: this.currentBucket.end,
-                count: this.currentBucket.downsampledCount
-            });
+    igv.AlignmentContainer.prototype.hasDownsampledIntervals = function () {
+        return this.downsampledIntervals && this.downsampledIntervals.length > 0;
     }
 
+    function finishBucket() {
+        this.alignments = this.alignments.concat(this.currentBucket.alignments);
+        if (this.currentBucket.downsampledCount > 0) {
+            this.downsampledIntervals.push(new DownsampledInterval(
+                this.currentBucket.start,
+                this.currentBucket.end,
+                this.currentBucket.downsampledCount));
+        }
+    }
 
     function DownsampleBucket(start, end, samplingDepth) {
 
@@ -237,6 +240,19 @@ var igv = (function (igv) {
         return mismatchQualitySum >= threshold;
 
     };
+
+    DownsampledInterval = function (start, end, counts) {
+        this.start = start;
+        this.end = end;
+        this.counts = counts;
+    }
+
+    DownsampledInterval.prototype.popupData = function (genomicLocation) {
+        return [
+            {name: "start", value: this.start + 1},
+            {name: "end", value: this.end},
+            {name: "# downsampled:", value: this.counts}]
+    }
 
 
     return igv;

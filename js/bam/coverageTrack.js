@@ -49,9 +49,6 @@ var igv = (function (igv) {
 
         this.skippedColor = config.skippedColor || "rgb(150, 170, 170)";
 
-        // divide the canvas into a coverage track region and an alignment track region
-        this.alignmentRowYInset = 1;
-
         // alignment shading options
         this.alignmentShading = config.alignmentShading || "none";
 
