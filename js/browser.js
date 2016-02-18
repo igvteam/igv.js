@@ -427,7 +427,7 @@ var igv = (function (igv) {
             chromosome;
 
 
-        if (this.searchInput) {
+        if (this.$searchInput) {
 
             chr = referenceFrame.chr;
             ss = igv.numberFormatter(Math.floor(referenceFrame.start + 1));
@@ -441,7 +441,7 @@ var igv = (function (igv) {
             ee = igv.numberFormatter(Math.floor(end));
 
             str = chr + ":" + ss + "-" + ee;
-            this.searchInput.val(str);
+            this.$searchInput.val(str);
 
             this.windowSizePanel.update(Math.floor(end - referenceFrame.start));
         }
