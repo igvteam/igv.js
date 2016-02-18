@@ -202,8 +202,8 @@ var igv = (function (igv) {
         if (this.track.paintAxis) {
 
             this.controlCanvas = $('<canvas class ="igv-track-control-canvas">')[0];
-            this.controlCanvas.setAttribute('width', gutterElement.clientWidth);
-            this.controlCanvas.setAttribute('height', gutterElement.clientHeight);
+            this.controlCanvas.setAttribute('width', this.leftHandGutter.clientWidth);
+            this.controlCanvas.setAttribute('height', this.leftHandGutter.clientHeight);
             this.controlCtx = this.controlCanvas.getContext("2d");
 
             $(this.leftHandGutter).append(this.controlCanvas);
