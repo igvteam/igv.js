@@ -84,6 +84,10 @@ var igv = (function (igv) {
 
         var alignments = alignmentContainer.alignments;
 
+        alignments.sort(function (a, b) {
+           return a.start - b.start;
+        });
+
         if (alignments.length === 0) {
 
             return [];
@@ -92,6 +96,7 @@ var igv = (function (igv) {
 
             var bucketList = [],
                 allocatedCount = 0,
+                lastAllocatedCount = 0,
                 nextStart = alignmentContainer.start,
                 alignmentRow,
                 index,
@@ -149,6 +154,10 @@ var igv = (function (igv) {
                 }
 
                 nextStart = bucketStart;
+
+                if(allocatedCount === lastAllocatedCount) break;   // Protect from infinite loops
+
+                lastAllocatedCount = allocatedCount;
 
             } // while (allocatedCount)
 
