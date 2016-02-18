@@ -339,7 +339,7 @@ var igv = (function (igv) {
                 if (false === browser.trackLabelsVisible) {
                     // hide
                     $trackLabelToggle.text("show labels");
-                    $ideogram.css( { 'margin-left' : '50px' } );
+                    $ideogram.css( { 'margin-left' : '0' } );
                     $leftHandGutters.hide();
                     $viewports.removeClass("gutter-shim");
                     $viewports.addClass("no-gutter-shim");

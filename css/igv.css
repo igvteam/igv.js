@@ -552,13 +552,13 @@ div.ui-dialog fieldset {
     height: 24px;
     width: auto;
 
-    margin-left: 44px;
-    margin-right: 28px;
+    /*margin-left: 44px;*/
+    /*margin-right: 28px;*/
 
     border-style: solid;
     border-width: thin;
     border-radius: 4px;
-    border-color: #7f7f7f;
+    border-color: #dfdfdf;
 
     background-color: #f3f3f3;
 }
@@ -721,9 +721,10 @@ div.ui-dialog fieldset {
     cursor: pointer;
 
     border-color: #afafaf;
+    /*border-width: 2px;*/
 
-    color: white;
-    background-color: #afafaf;
+    /*color: white;*/
+    /*background-color: #c4c4c4;*/
 }
 
 .igvNavigationMarginLeft12 {
@@ -1253,7 +1254,7 @@ div.ui-dialog fieldset {
 
 .no-gutter-shim {
     position: absolute;
-    left: 50px;
+    left: 0;
 }
 
 .igv-track-label-span {
