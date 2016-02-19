@@ -152,7 +152,7 @@ var igv = (function (igv) {
                 break;
             case "alignment":
                 featureSource = new igv.BamSource(config);
-                newTracks.push(new igv.CoverageTrack(config, featureSource));
+               // newTracks.push(new igv.CoverageTrack(config, featureSource));
                 newTracks.push(new igv.BAMTrack(config, featureSource));
                 break;
             case "data":
