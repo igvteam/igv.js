@@ -63,8 +63,7 @@ var igv = (function (igv) {
         return new Promise(function (fulfill, reject) {
             self.featureSource.getFeatures(chr, bpStart, bpEnd).then(fulfill);
         });
-    }
-
+    };
 
     igv.WIGTrack.prototype.popupMenuItems = function (popover) {
 

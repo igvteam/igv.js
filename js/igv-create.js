@@ -41,7 +41,7 @@ var igv = (function (igv) {
             browser,
             rootDiv,
             controlDiv,
-            bodyObject,
+            $body,
             palette,
             trackOrder = 1;
 
@@ -138,21 +138,21 @@ var igv = (function (igv) {
         // Popover object -- singleton shared by all components
         igv.popover = new igv.Popover(contentDiv);
 
-        bodyObject = $("body");
+        $body = $("body");
 
         // ColorPicker object -- singleton shared by all components
         if (config.trackDefaults) {
             palette = config.trackDefaults.palette;
         }
-        igv.colorPicker = new igv.ColorPicker(bodyObject, palette);
+        igv.colorPicker = new igv.ColorPicker($body, palette);
         igv.colorPicker.hide();
 
         // Dialog object -- singleton shared by all components
-        igv.dialog = new igv.Dialog(bodyObject);
+        igv.dialog = new igv.Dialog($body);
         igv.dialog.hide();
 
         // Data Range Dialog object -- singleton shared by all components
-        igv.dataRangeDialog = new igv.DataRangeDialog(bodyObject);
+        igv.dataRangeDialog = new igv.DataRangeDialog($body);
         igv.dataRangeDialog.hide();
 
         // extend jquery ui dialog widget to support enter key triggering "ok" button press.

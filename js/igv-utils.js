@@ -211,43 +211,8 @@ var igv = (function (igv) {
         return {
             object: $('<div class="igv-track-menu-item">' + "Set data range" + '</div>'),
             click: function () {
-
-                var min, max,
-                    dataRangeDialog = igv.dataRangeDialog;
-
-                dataRangeDialog.trackView = trackView;
-
-                // minimum
-                if(trackView.track.dataRange) {
-                    min = trackView.track.dataRange.min;
-                    max = trackView.track.dataRange.max;
-                }
-                else {
-                    min = 0;
-                    max = 100;
-                }
-                dataRangeDialog.minInput.val(min);
-                dataRangeDialog.maxInput.val(max);
-                dataRangeDialog.logInput.prop('checked', false);
-
-                dataRangeDialog.ok.unbind();
-                dataRangeDialog.ok.click(function() {
-                    min = parseFloat(dataRangeDialog.minInput.val());
-                    max = parseFloat(dataRangeDialog.maxInput.val());
-                    if(isNaN(min) || isNaN(max)) {
-                        alert("Must input numeric values");
-                    }
-                    else {
-                        trackView.track.min = min;
-                        trackView.track.max = max;
-                        //console.log("min " + dataRangeDialog.minInput.val() + " max " + dataRangeDialog.maxInput.val() + " log " + dataRangeDialog.logInput.is(':checked'));
-                        dataRangeDialog.hide();
-                        trackView.update();
-                    }
-
-                });
-
-                dataRangeDialog.show();
+                igv.dataRangeDialog.configureWithTrackView(trackView);
+                igv.dataRangeDialog.show();
                 popover.hide();
             }
         }
