@@ -343,7 +343,8 @@ var igv = (function (igv) {
 
     CoverageTrack.prototype.draw = function (options) {
 
-        var genomicInterval = options.features,
+        var self = this,
+            genomicInterval = options.features,
             ctx = options.context,
             bpPerPixel = options.bpPerPixel,
             bpStart = options.bpStart,
@@ -384,9 +385,23 @@ var igv = (function (igv) {
 
             igv.graphics.setProperties(ctx, {fillStyle: this.color, strokeStyle: this.color});
             igv.graphics.fillRect(ctx, x, y, w, h);
+        }
 
-            // coverage mismatch coloring
-            if (sequence) {
+        // coverage mismatch coloring -- don't try to do this in above loop, color bar will be overwritten when w<1
+        if (sequence) {
+            for (i = 0, len = coverageMap.coverage.length; i < len; i++) {
+
+                bp = (coverageMap.bpStart + i);
+                if (bp < bpStart) continue;
+                if (bp > bpEnd) break;
+
+                item = coverageMap.coverage[i];
+                if (!item) continue;
+
+                h = (item.total / coverageMap.maximum) * this.height;
+                y = this.height - h;
+                x = Math.floor((bp - bpStart) / bpPerPixel);
+
 
                 refBase = sequence[i];
                 if (item.isMismatch(refBase)) {
@@ -404,14 +419,13 @@ var igv = (function (igv) {
 
 
                         // non-logoritmic
-                        hh = (count / coverageMap.maximum) * this.height;
+                        hh = (count / coverageMap.maximum) * self.height;
 
-                        y = (this.height - hh) - accumulatedHeight;
+                        y = (self.height - hh) - accumulatedHeight;
                         accumulatedHeight += hh;
 
                         igv.graphics.setProperties(ctx, {fillStyle: igv.nucleotideColors[nucleotide]});
                         igv.graphics.fillRect(ctx, x, y, w, hh);
-
                     });
                 }
             }
