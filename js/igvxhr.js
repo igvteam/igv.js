@@ -87,12 +87,18 @@ var igvxhr = (function (igvxhr) {
                 isSafari = navigator.vendor.indexOf("Apple") == 0 && /\sSafari\//.test(navigator.userAgent),
                 withCredentials = options.withCredentials,
                 header_keys, key, value, i;
+            //
+            //if (range && isSafari) {
+            //
+            //    console.log(isSafari);
+            //    // Add random seed. For nasty safari bug https://bugs.webkit.org/show_bug.cgi?id=82672
+            //    // TODO -- add some "isSafari" test?
+            //    url += url.contains("?") ? "&" : "?";
+            //    url += "someRandomSeed=" + Math.random().toString(36);
+            //}
 
-            if (range && isSafari) {
-
-                console.log(isSafari);
-                // Add random seed. For nasty safari bug https://bugs.webkit.org/show_bug.cgi?id=82672
-                // TODO -- add some "isSafari" test?
+            // Hack to prevent caching for google storage files.  Get weird net:err-cache errors otherwise
+            if (range && url.contains("googleapis")) {
                 url += url.contains("?") ? "&" : "?";
                 url += "someRandomSeed=" + Math.random().toString(36);
             }
@@ -121,6 +127,7 @@ var igvxhr = (function (igvxhr) {
                     xhr.setRequestHeader(key, value);
                 }
             }
+
             // let cookies go along to get files from any website we are logged in to
             // NOTE: using withCredentials with servers that return "*" for access-allowed-origin will fail
             if (withCredentials === true) {
@@ -178,7 +185,11 @@ var igvxhr = (function (igvxhr) {
                 reject(new igv.AbortLoad());
             };
 
-            xhr.send(sendData);
+            try {
+                xhr.send(sendData);
+            } catch (e) {
+                console.log(e);
+            }
 
 
             function handleError(message) {

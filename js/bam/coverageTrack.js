@@ -35,7 +35,7 @@ var igv = (function (igv) {
 
         this.alignmentRowHeight = config.alignmentRowHeight || 14;
 
-        this.coverageTrackHeight = config.coverageTrackHeight || 50;
+        this.height = config.coverageTrackHeight || 50;
 
         this.defaultColor = config.defaultColor || "rgb(185, 185, 185)";
         this.color = config.color || this.defaultColor;
@@ -143,9 +143,9 @@ var igv = (function (igv) {
 
 
                         // non-logoritmic
-                        hh = (count / coverageMap.maximum) * self.coverageTrackHeight;
+                        hh = (count / coverageMap.maximum) * self.height;
 
-                        y = (self.coverageTrackHeight - hh) - accumulatedHeight;
+                        y = (self.height - hh) - accumulatedHeight;
                         accumulatedHeight += hh;
 
                         igv.graphics.setProperties(ctx, {fillStyle: igv.nucleotideColors[nucleotide]});

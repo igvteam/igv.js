@@ -23,6 +23,7 @@
  * THE SOFTWARE.
  */
 
+
 var igv = (function (igv) {
 
     igv.TrackView = function (track, browser) {
@@ -41,13 +42,13 @@ var igv = (function (igv) {
             this.trackDiv.style.height = track.height + "px";
         }
 
-        $(this.trackDiv).append( this.createLeftHandGutter() );
+        $(this.trackDiv).append(this.createLeftHandGutter());
 
         this.addViewportToParentTrackDiv(this.trackDiv);
 
         element = this.createRightHandGutter();
         if (element) {
-            $(this.trackDiv).append( element );
+            $(this.trackDiv).append(element);
         }
 
         this.trackDiv.appendChild(igv.spinner());
@@ -215,7 +216,7 @@ var igv = (function (igv) {
             $appIconContainer.text(this.track.name);
 
             description = this.track.description || this.track.name;
-            $appIconContainer.click(function(e){
+            $appIconContainer.click(function (e) {
                 igv.popover.presentTrackPopup(e.pageX, e.pageY, description, false);
             });
 
@@ -392,7 +393,6 @@ var igv = (function (igv) {
                                 self.setContentHeight(requiredHeight);
                             }
                         }
-
                         var buffer = document.createElement('canvas');
                         buffer.width = pixelWidth;
                         buffer.height = self.canvas.height;
@@ -635,7 +635,7 @@ var igv = (function (igv) {
 
             if (popupTimer) {
                 // Cancel previous timer
-                console.log("Cancel timer");
+                // console.log("Cancel timer");
                 window.clearTimeout(popupTimer);
                 popupTimer = undefined;
             }
@@ -767,6 +767,36 @@ var igv = (function (igv) {
         else {
             $(this.outerScrollDiv).hide();
         }
+    }
+
+
+    igv.TrackView.prototype.redrawTile = function (features) {
+
+        if (!this.tile) return;
+
+        var self = this,
+            chr = self.tile.chr,
+            bpStart = self.tile.startBP,
+            bpEnd = self.tile.endBP,
+            buffer = document.createElement('canvas'),
+            bpPerPixel = self.tile.scale;
+
+        buffer.width = self.tile.image.width;
+        buffer.height = self.tile.image.height;
+        var ctx = buffer.getContext('2d');
+
+        self.track.draw({
+            features: features,
+            context: ctx,
+            bpStart: bpStart,
+            bpPerPixel: bpPerPixel,
+            pixelWidth: buffer.width,
+            pixelHeight: buffer.height
+        });
+
+
+        self.tile = new Tile(chr, bpStart, bpEnd, bpPerPixel, buffer);
+        self.paintImage();
     }
 
 
