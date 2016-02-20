@@ -93,23 +93,18 @@ var igv = (function (igv) {
 
                     var number = parseNumber($(this).val());
 
-                    if (undefined !== number) {
+                    if (undefined !== number && number >= trackView.track.minHeight && number <= trackView.track.maxHeight) {
                         trackView.setTrackHeight(number);
                         trackView.track.autoHeight = false;   // Explicitly setting track height turns off auto-scale
-
-                        //trackView.update();
-                        igv.dialog.hide();
-                    } else {
-                        igv.dialog.hide();
                     }
+
+                    igv.dialog.hide();
 
                     function parseNumber(value) {
                         return parseFloat(value, 10);
                     }
 
                 }, undefined)
-
-                //igv.dataRangeMenuItem(popover, trackView)
 
             ];
 
