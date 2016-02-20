@@ -209,7 +209,7 @@ var igv = (function (igv) {
             browser.updateLocusSearch(browser.referenceFrame);
 
             if (browser.ideoPanel) browser.ideoPanel.repaint();
-            if (browser.karyoPanel) browser.karyoPanel.repaint();
+            if (browser.karyoPanel) browser.karyoPanel.resize();
 
             // If an initial locus is specified go there first, then load tracks.  This avoids loading track data at
             // a default location then moving

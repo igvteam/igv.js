@@ -157,7 +157,7 @@ var igv = (function (igv) {
         // allow for 2 rows!
 
         var top = 25;
-        var chrheight = (h / nrrows) - top;
+        var chrheight = ((h-25) / nrrows) - top;
 
         var longestChr = genome.getLongestChromosome();
         var cytobands = genome.getCytobands(longestChr.name);      // Longest chr
@@ -183,13 +183,13 @@ var igv = (function (igv) {
         if (chromosome) {
             var ideoScale = longestChr.bpLength / chrheight;   // Scale in bp per pixels
 
-            //var boxPY1 = top + Math.round(referenceFrame.start / ideoScale);
+            var boxPY1 = chromosome.y - 3 + Math.round(referenceFrame.start / ideoScale);
             var boxHeight = Math.max(3, (igv.browser.trackViewportWidth() * referenceFrame.bpPerPixel) / ideoScale);
 
             //var boxPY2 = Math.round((this.browser.referenceFrame.start+100) * ideoScale);
             this.ctx.strokeStyle = "rgb(150, 0, 0)";
             this.ctx.lineWidth = 2;
-            this.ctx.strokeRect(chromosome.x - 3, chromosome.y - 3, chrwidth + 6, boxHeight + 6);
+            this.ctx.strokeRect(chromosome.x - 3, boxPY1, chrwidth + 6, boxHeight + 6);
             this.ctx.restore();
         }
         else log("Could not find chromosome " + chr);
