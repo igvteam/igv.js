@@ -25,44 +25,6 @@
 
 var igv = (function (igv) {
 
-    igv.constrainBBox = function (child, parent) {
-
-        var delta,
-            topLeft,
-            bboxChild = {},
-            bboxParent = {};
-
-        bboxParent.left = bboxParent.top = 0;
-        bboxParent.right = parent.outerWidth();
-        bboxParent.bottom = parent.outerHeight();
-
-        topLeft = child.offset();
-
-        bboxChild.left = topLeft.left - parent.offset().left;
-        bboxChild.top = topLeft.top - parent.offset().top;
-        bboxChild.right = bboxChild.left + child.outerWidth();
-        bboxChild.bottom = bboxChild.top + child.outerHeight();
-
-        delta = bboxChild.bottom - bboxParent.bottom;
-        if (delta > 0) {
-
-            // clamp to trackContainer bottom
-            topLeft.top -= delta;
-
-            bboxChild.top -= delta;
-            bboxChild.bottom -= delta;
-
-            delta = bboxChild.top - bboxParent.top;
-            if (delta < 0) {
-                topLeft.top -= delta;
-            }
-
-        }
-
-        return topLeft;
-
-    };
-
     igv.trackMenuItems = function (popover, trackView) {
 
         var trackHeight = trackView.trackDiv.clientHeight,
@@ -71,7 +33,8 @@ var igv = (function (igv) {
 
                 igv.dialogMenuItem(popover, trackView, "Set track name", function () { return "Track Name" }, trackView.track.name, function () {
 
-                    var alphanumeric = parseAlphanumeric($(this).val());
+                    var foo = igv.dialog.$dialogInput.val(),
+                        alphanumeric = parseAlphanumeric($(this).val());
 
                     if (undefined !== alphanumeric) {
                         igv.setTrackLabel(trackView.track, alphanumeric);
@@ -192,10 +155,8 @@ var igv = (function (igv) {
                     igv.dialog.$dialogInput.hide();
                 }
 
-                igv.dialog.clickOK = undefined;
-                if (dialogClickOK) {
-                    igv.dialog.clickOK = dialogClickOK;
-                }
+                igv.dialog.clickOK = dialogClickOK || dialogInputChange;
+
                 igv.dialog.show();
                 popover.hide();
             }
@@ -537,6 +498,43 @@ var igv = (function (igv) {
         return (value.substring || value.toFixed) ? true : false
     }
 
+    igv.constrainBBox = function (child, parent) {
+
+        var delta,
+            topLeft,
+            bboxChild = {},
+            bboxParent = {};
+
+        bboxParent.left = bboxParent.top = 0;
+        bboxParent.right = parent.outerWidth();
+        bboxParent.bottom = parent.outerHeight();
+
+        topLeft = child.offset();
+
+        bboxChild.left = topLeft.left - parent.offset().left;
+        bboxChild.top = topLeft.top - parent.offset().top;
+        bboxChild.right = bboxChild.left + child.outerWidth();
+        bboxChild.bottom = bboxChild.top + child.outerHeight();
+
+        delta = bboxChild.bottom - bboxParent.bottom;
+        if (delta > 0) {
+
+            // clamp to trackContainer bottom
+            topLeft.top -= delta;
+
+            bboxChild.top -= delta;
+            bboxChild.bottom -= delta;
+
+            delta = bboxChild.top - bboxParent.top;
+            if (delta < 0) {
+                topLeft.top -= delta;
+            }
+
+        }
+
+        return topLeft;
+
+    };
 
     igv.log = function(message) {
         if(igv.enableLogging && console && console.log) {

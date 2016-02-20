@@ -41,7 +41,7 @@ var igv = (function (igv) {
             browser,
             rootDiv,
             controlDiv,
-            $body,
+            $parent = $(parentDiv),
             palette,
             trackOrder = 1;
 
@@ -130,7 +130,6 @@ var igv = (function (igv) {
 
         $(contentDiv).append(trackContainerDiv);
 
-
         // user feedback
         browser.userFeedback = new igv.UserFeedback($(contentDiv));
         browser.userFeedback.hide();
@@ -138,21 +137,19 @@ var igv = (function (igv) {
         // Popover object -- singleton shared by all components
         igv.popover = new igv.Popover(contentDiv);
 
-        $body = $("body");
-
         // ColorPicker object -- singleton shared by all components
         if (config.trackDefaults) {
             palette = config.trackDefaults.palette;
         }
-        igv.colorPicker = new igv.ColorPicker($body, palette);
+        igv.colorPicker = new igv.ColorPicker($parent, palette);
         igv.colorPicker.hide();
 
         // Dialog object -- singleton shared by all components
-        igv.dialog = new igv.Dialog($body);
+        igv.dialog = new igv.Dialog($parent);
         igv.dialog.hide();
 
         // Data Range Dialog object -- singleton shared by all components
-        igv.dataRangeDialog = new igv.DataRangeDialog($body);
+        igv.dataRangeDialog = new igv.DataRangeDialog($parent);
         igv.dataRangeDialog.hide();
 
         // extend jquery ui dialog widget to support enter key triggering "ok" button press.
@@ -373,7 +370,6 @@ var igv = (function (igv) {
 
         return $controls[0];
     }
-
 
     /**
      * Expands ucsc type genome identifiers to genome object.
