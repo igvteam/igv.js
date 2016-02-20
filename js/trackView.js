@@ -137,7 +137,10 @@ var igv = (function (igv) {
     igv.TrackView.prototype.addViewportToParentTrackDiv = function (trackDiv) {
 
         var self = this,
-            $dataRangeLabel;
+            $dataRangeLabel,
+            str,
+            min,
+            max;
 
         // viewport
         this.viewportDiv = $('<div class="igv-viewport-div gutter-shim">')[0];
@@ -169,17 +172,23 @@ var igv = (function (igv) {
             $(this.viewportDiv).append(this.scrollbar.outerScrollDiv);
         }
 
-        //if (this.track instanceof igv.WIGTrack) {
-        //
-        //    $dataRangeLabel = $('<div class="igv-data-range-track-label">');
-        //    $dataRangeLabel.text('[ min max ]');
-        //
-        //    $dataRangeLabel.click(function(e){
-        //        console.log('data range click');
-        //    });
-        //
-        //    $(this.viewportDiv).append($dataRangeLabel[ 0 ]);
-        //}
+        if (this.track instanceof igv.WIGTrack) {
+
+            $dataRangeLabel = $('<div class="igv-data-range-track-label">');
+
+            min = this.track.min || '-';
+            max = this.track.max || '-';
+
+            str = '[ ' + min + ' ' + max + ' ]';
+
+            $dataRangeLabel.text(str);
+
+            $dataRangeLabel.click(function(e){
+                console.log('data range click');
+            });
+
+            $(this.viewportDiv).append($dataRangeLabel[ 0 ]);
+        }
 
     };
 
