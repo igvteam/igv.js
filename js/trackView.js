@@ -176,21 +176,12 @@ var igv = (function (igv) {
 
             $dataRangeLabel = $('<div class="igv-data-range-track-label">');
 
-            min = this.track.min || '-';
-            max = this.track.max || '-';
-
-            str = '[ ' + min + ' ' + max + ' ]';
-
-            $dataRangeLabel.text(str);
-
             $dataRangeLabel.click(function(e){
                 console.log('data range click');
             });
 
             $(this.viewportDiv).append($dataRangeLabel[ 0 ]);
 
-            // !!!!!!!!!!!!!!!!!!!!!!!!
-            $dataRangeLabel.hide();
         }
 
     };
