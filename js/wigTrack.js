@@ -87,7 +87,12 @@ var igv = (function (igv) {
             bpEnd = bpStart + pixelWidth * bpPerPixel + 1,
             featureValueMinimum,
             featureValueMaximum,
-            featureValueRange;
+            featureValueRange,
+            $dataRangeTrackLabel,
+            str,
+            min,
+            max;
+
 
         if (features && features.length > 0) {
             if(track.max === undefined)  {
@@ -103,6 +108,14 @@ var igv = (function (igv) {
             featureValueRange = featureValueMaximum - featureValueMinimum;
 
             track.dataRange = {min: featureValueMinimum, max: featureValueMaximum};  // Record for disply, menu, etc
+
+            $dataRangeTrackLabel = $(this.trackView.trackDiv).find('.igv-data-range-track-label');
+
+            min = (Math.floor(track.dataRange.min) === track.dataRange.min) ? track.dataRange.min : track.dataRange.min.toFixed(2);
+            max = (Math.floor(track.dataRange.max) === track.dataRange.max) ? track.dataRange.max : track.dataRange.max.toFixed(2);
+            str = '[' + min + ' - ' + max + ']';
+
+            $dataRangeTrackLabel.text(str);
 
             features.forEach(renderFeature);
         }
