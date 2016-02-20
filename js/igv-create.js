@@ -43,11 +43,11 @@ var igv = (function (igv) {
             controlDiv,
             bodyObject,
             palette,
-            trackOrder=1;
+            trackOrder = 1;
 
         if (igv.browser) {
-            console.log("Attempt to create 2 browsers.");
-            return igv.browser;
+            //console.log("Attempt to create 2 browsers.");
+            igv.removeBrowser();
         }
 
         if (!config) config = {};
@@ -114,7 +114,7 @@ var igv = (function (igv) {
         // Create controls.  This can be customized by passing in a function, which should return a div containing the
         // controls
 
-        if(config.showCommandBar !== false) {
+        if (config.showCommandBar !== false) {
             controlDiv = config.createControls ?
                 config.createControls(browser, config) :
                 createStandardControls(browser, config);
@@ -191,12 +191,11 @@ var igv = (function (igv) {
         igv.loadGenome(config.reference).then(function (genome) {
 
             var referenceWidth = browser.trackViewportWidth();
-            if(referenceWidth === 0) referenceWidth = 500;
+            if (referenceWidth === 0) referenceWidth = 500;
 
             genome.id = config.reference.genomeId;
             browser.genome = genome;
             browser.addTrack(new igv.RulerTrack());
-
 
 
             // Set inital locus
@@ -221,14 +220,14 @@ var igv = (function (igv) {
                 browser.search(locus, function () {
 
                     igv.stopSpinnerAtParentElement(parentDiv);
-                    var refFrame = igv.browser.referenceFrame,
+                    var refFrame = browser.referenceFrame,
                         start = refFrame.start,
-                        end = start + igv.browser.trackViewportWidth() * refFrame.bpPerPixel,
+                        end = start + browser.trackViewportWidth() * refFrame.bpPerPixel,
                         range = start - end;
 
                     if (config.tracks) {
 
-                        igv.browser.loadTracksWithConfigList(config.tracks);
+                        browser.loadTracksWithConfigList(config.tracks);
 
 
                     }
@@ -237,7 +236,7 @@ var igv = (function (igv) {
 
             } else if (config.tracks) {
 
-                igv.browser.loadTracksWithConfigList(config.tracks);
+                browser.loadTracksWithConfigList(config.tracks);
 
             }
 
@@ -296,9 +295,9 @@ var igv = (function (igv) {
             browser.$searchResults = $('<div class="igvNavigationSearchResults">');
             browser.$searchResultsTable = $('<table class="igvNavigationSearchResultsTable">');
 
-            browser.$searchResults.append(browser.$searchResultsTable[ 0 ]);
+            browser.$searchResults.append(browser.$searchResultsTable[0]);
 
-            $searchContainer.append(browser.$searchResults[ 0 ]);
+            $searchContainer.append(browser.$searchResults[0]);
 
             browser.$searchResults.hide();
 
@@ -339,7 +338,7 @@ var igv = (function (igv) {
                 if (false === browser.trackLabelsVisible) {
                     // hide
                     $trackLabelToggle.text("show labels");
-                    $ideogram.css( { 'margin-left' : '0' } );
+                    $ideogram.css({'margin-left': '0'});
                     $leftHandGutters.hide();
                     $viewports.removeClass("gutter-shim");
                     $viewports.addClass("no-gutter-shim");
@@ -347,7 +346,7 @@ var igv = (function (igv) {
                 } else {
                     // show
                     $trackLabelToggle.text("hide labels");
-                    $ideogram.css( { 'margin-left' : '100px' } );
+                    $ideogram.css({'margin-left': '100px'});
                     $leftHandGutters.show();
                     $viewports.removeClass("no-gutter-shim");
                     $viewports.addClass("gutter-shim");
@@ -356,7 +355,7 @@ var igv = (function (igv) {
 
             });
 
-            $navigation.append($trackLabelToggle[ 0 ]);
+            $navigation.append($trackLabelToggle[0]);
 
         }
 
@@ -372,7 +371,7 @@ var igv = (function (igv) {
         }
 
 
-        return $controls[ 0 ];
+        return $controls[0];
     }
 
 
@@ -413,6 +412,13 @@ var igv = (function (igv) {
         config.showNavigation = config.showNavigation === undefined ? true : config.showNavigation;
         config.flanking = config.flanking === undefined ? 1000 : config.flanking;
 
+    }
+
+    igv.removeBrowser = function () {
+        $(igv.browser.div).remove();
+        $(".igv-grid-container-colorpicker").remove();
+        $(".igv-grid-container-dialog").remove();
+        $(".igv-grid-container-dialog").remove();
     }
 
     return igv;
