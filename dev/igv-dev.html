@@ -197,6 +197,15 @@
                                 name: 'Ion BAM'})">GSTT1 sample bam
         </div>
 
+        <div onclick="igv.browser.loadTrack({
+                                type: 'bam',
+                                url: '../test/data/bam/gstt1_sample.bam',
+                                name: 'Ion BAM',
+                                samplingWindowSize: 100,
+                                samplingDepth: 5})">GSTT1 sample bam downsampled
+        </div>
+
+
 
         <div onclick="igv.browser.loadTrack({
                                 sourceType: 'ga4gh',

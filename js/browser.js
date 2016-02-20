@@ -122,7 +122,7 @@ var igv = (function (igv) {
         var self = this,
             settings,
             property,
-            newTracks = [],
+            newTrack,
             featureSource,
             nm;
 
@@ -142,52 +142,49 @@ var igv = (function (igv) {
 
         switch (config.featureType) {
             case "gwas":
-                newTracks.push(new igv.GWASTrack(config));
+                newTrack = new igv.GWASTrack(config);
                 break;
             case "annotation":
             case "genes":
             case "variant":
             case "FusionJuncSpan":
-                newTracks.push( new igv.FeatureTrack(config));
+                newTrack = new igv.FeatureTrack(config);
                 break;
             case "alignment":
-                featureSource = new igv.BamSource(config);
-               // newTracks.push(new igv.CoverageTrack(config, featureSource));
-                newTracks.push(new igv.BAMTrack(config, featureSource));
+                newTrack = new igv.BAMTrack(config, featureSource);
                 break;
             case "data":
-                newTracks.push(new igv.WIGTrack(config));
+                newTrack = new igv.WIGTrack(config);
                 break;
             case "sequence":
-                newTracks.push(new igv.SequenceTrack(config));
+                newTrack = new igv.SequenceTrack(config);
                 break;
             case "eqtl":
-                newTracks.push(new igv.EqtlTrack(config));
+                newTrack = new igv.EqtlTrack(config);
                 break;
             case "seg":
-                newTracks.push(new igv.SegTrack(config));
+                newTrack = new igv.SegTrack(config);
                 break;
             case "aneu":
-                newTracks.push(new igv.AneuTrack(config));
+                newTrack = new igv.AneuTrack(config);
                 break;
             default:
                 alert("Unknown file type: " + config.url);
                 return null;
         }
 
-        newTracks.forEach(function (newTrack) {
-            // If defined, attempt to load the file header before adding the track.  This will catch some errors early
-            if (typeof newTrack.getFileHeader === "function") {
-                newTrack.getFileHeader().then(function (header) {
-                    self.addTrack(newTrack);
-                }).catch(function (error) {
-                    alert(error);
-                });
-            }
-            else {
+        // If defined, attempt to load the file header before adding the track.  This will catch some errors early
+        if (typeof newTrack.getFileHeader === "function") {
+            newTrack.getFileHeader().then(function (header) {
                 self.addTrack(newTrack);
-            }
-        });
+            }).catch(function (error) {
+                alert(error);
+            });
+        }
+        else {
+            self.addTrack(newTrack);
+        }
+
     }
 
     igv.Browser.prototype.isDuplicateTrack = function (config) {
@@ -409,8 +406,8 @@ var igv = (function (igv) {
 
     igv.Browser.prototype.loadInProgress = function () {
         var i;
-        for(i=0; i<this.trackViews.length; i++) {
-            if(this.trackViews[i].loading) {
+        for (i = 0; i < this.trackViews.length; i++) {
+            if (this.trackViews[i].loading) {
                 return true;
             }
         }
@@ -548,7 +545,7 @@ var igv = (function (igv) {
 // Zoom in by a factor of 2, keeping the same center location
     igv.Browser.prototype.zoomIn = function () {
 
-        if(this.loadInProgress()) {
+        if (this.loadInProgress()) {
             // ignore
             return;
         }
@@ -574,11 +571,11 @@ var igv = (function (igv) {
 // Zoom out by a factor of 2, keeping the same center location if possible
     igv.Browser.prototype.zoomOut = function () {
 
-        if(this.loadInProgress()) {
+        if (this.loadInProgress()) {
             // ignore
             return;
         }
-        
+
         var newScale, maxScale, center, chrLength, widthBP, viewportWidth;
         viewportWidth = this.trackViewportWidth();
 
@@ -674,9 +671,9 @@ var igv = (function (igv) {
                     url.replace("$GENOME$", genomeId);
                 }
 
-               // var loader = new igv.DataLoader(url);
-               // if (range)  loader.range = range;
-               // loader.loadBinaryString(callback);
+                // var loader = new igv.DataLoader(url);
+                // if (range)  loader.range = range;
+                // loader.loadBinaryString(callback);
 
                 igvxhr.loadString(url).then(function (data) {
 
@@ -860,7 +857,7 @@ var igv = (function (igv) {
 
                 if (mouseDownX && Math.abs(coords.x - mouseDownX) > igv.constants.dragThreshold) {
 
-                    if(igv.browser.loadInProgress()) {
+                    if (igv.browser.loadInProgress()) {
                         // ignore
                         return;
                     }
