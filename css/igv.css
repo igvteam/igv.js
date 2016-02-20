@@ -1353,10 +1353,11 @@ div.ui-dialog fieldset {
 
 .igv-content-div {
     position: relative;
-    /*margin-left: 10px;*/
-    /*margin-right: 10px;*/
-    left: 0;
-    right: 0;
+
+    /*left: 0;*/
+    /*right: 0;*/
+
+    width: 100%;
     height:100%;
 }
 
