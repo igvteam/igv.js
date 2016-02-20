@@ -87,7 +87,7 @@ var igv = (function (igv) {
                         return (null !== alphanumeric) ? alphanumeric[0] : "untitled";
                     }
 
-                }),
+                }, undefined),
 
                 igv.dialogMenuItem(popover, trackView, "Set track height", function () { return "Track Height" }, trackHeight, function () {
 
@@ -107,7 +107,7 @@ var igv = (function (igv) {
                         return parseFloat(value, 10);
                     }
 
-                })
+                }, undefined)
 
                 //igv.dataRangeMenuItem(popover, trackView)
 
@@ -197,6 +197,7 @@ var igv = (function (igv) {
                     igv.dialog.$dialogInput.hide();
                 }
 
+                igv.dialog.clickOK = undefined;
                 if (dialogClickOK) {
                     igv.dialog.clickOK = dialogClickOK;
                 }

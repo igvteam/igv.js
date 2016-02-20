@@ -169,17 +169,17 @@ var igv = (function (igv) {
             $(this.viewportDiv).append(this.scrollbar.outerScrollDiv);
         }
 
-        if (this.track instanceof igv.WIGTrack) {
-
-            $dataRangeLabel = $('<div class="igv-data-range-track-label">');
-            $dataRangeLabel.text('[ min max ]');
-
-            $dataRangeLabel.click(function(e){
-                console.log('data range click');
-            });
-
-            $(this.viewportDiv).append($dataRangeLabel[ 0 ]);
-        }
+        //if (this.track instanceof igv.WIGTrack) {
+        //
+        //    $dataRangeLabel = $('<div class="igv-data-range-track-label">');
+        //    $dataRangeLabel.text('[ min max ]');
+        //
+        //    $dataRangeLabel.click(function(e){
+        //        console.log('data range click');
+        //    });
+        //
+        //    $(this.viewportDiv).append($dataRangeLabel[ 0 ]);
+        //}
 
     };
 
