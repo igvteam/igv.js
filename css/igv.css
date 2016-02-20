@@ -708,7 +708,7 @@ div.ui-dialog fieldset {
 
     font-family: 'Open Sans', sans-serif;
     font-size: small;
-    font-weight: 400;
+    font-weight: 200;
 
     color: #444;
     background-color: white;
@@ -1098,21 +1098,6 @@ div.ui-dialog fieldset {
     text-align: center;
 }
 
-/*.igv-app-icon-box {*/
-
-    /*position: absolute;*/
-    /*left: 0;*/
-    /*right: 0;*/
-    /*top: 0;*/
-    /*bottom: 0;*/
-
-    /*width: 100%;*/
-    /*height: 30px;*/
-
-    /*margin: auto;*/
-    /**/
-/*}*/
-
 .igv-app-icon {
     cursor: pointer;
     color: grey;
@@ -1365,6 +1350,43 @@ div.ui-dialog fieldset {
     position: absolute;
     width: 100%;
     height: 100%;
+}
+
+.igv-data-range-track-label {
+
+    cursor: pointer;
+
+    position: absolute;
+
+    top:0;
+    left:0;
+
+    margin-top: 4px;
+    margin-left: 4px;
+
+    padding: 4px;
+
+    font-family: 'PT Sans', sans-serif;
+    font-size: medium;
+    font-weight: 200;
+
+    color: #373737;
+    /*background-color: rgb(255, 255, 255);*/
+
+    /*border-style: solid;*/
+    /*border-width: thin;*/
+    /*border-radius: 2px;*/
+    /*border-color: #dfdfdf;*/
+
+}
+
+.igv-data-range-track-label:hover,
+.igv-data-range-track-label:focus,
+.igv-data-range-track-label:active  {
+
+    font-weight: bold;
+    /*border-color: #9b9b9b;*/
+
 }
 
 .igv-scrollbar-outer-div {

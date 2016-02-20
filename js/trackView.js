@@ -70,35 +70,14 @@ var igv = (function (igv) {
             addTrackHandlers(this);
         }
 
-        function isTrackDraggable(track) {
-            return !(track instanceof igv.RulerTrack);
-        }
-
         function makeTrackDraggable(track) {
 
             self.igvTrackDragScrim = $('<div class="igv-track-drag-scrim">')[0];
-            //$(self.trackDiv).append(self.igvTrackDragScrim);
             $(self.viewportDiv).append(self.igvTrackDragScrim);
             $(self.igvTrackDragScrim).hide();
 
             self.igvTrackManipulationHandle = $('<div class="igv-track-manipulation-handle">')[0];
             $(self.trackDiv).append(self.igvTrackManipulationHandle);
-
-            //$( document ).mousedown(function(e) {
-            //    igv.browser.isMouseDown = true;
-            //});
-            //
-            //$( document ).mouseup(function(e) {
-            //
-            //    igv.browser.isMouseDown = undefined;
-            //
-            //    if (igv.browser.dragTrackView) {
-            //        $(igv.browser.dragTrackView.igvTrackDragScrim).hide();
-            //    }
-            //
-            //    igv.browser.dragTrackView = undefined;
-            //
-            //});
 
             $(self.igvTrackManipulationHandle).mousedown(function (e) {
 
@@ -107,9 +86,7 @@ var igv = (function (igv) {
             });
 
             $(self.igvTrackManipulationHandle).mouseup(function (e) {
-
                 self.isMouseDown = undefined;
-
             });
 
             $(self.igvTrackManipulationHandle).mouseenter(function (e) {
@@ -159,7 +136,8 @@ var igv = (function (igv) {
 
     igv.TrackView.prototype.addViewportToParentTrackDiv = function (trackDiv) {
 
-        var self = this;
+        var self = this,
+            $dataRangeLabel;
 
         // viewport
         this.viewportDiv = $('<div class="igv-viewport-div gutter-shim">')[0];
@@ -189,6 +167,18 @@ var igv = (function (igv) {
             this.scrollbar = new TrackScrollbar(this.viewportDiv, this.contentDiv);
             this.scrollbar.update();
             $(this.viewportDiv).append(this.scrollbar.outerScrollDiv);
+        }
+
+        if (this.track instanceof igv.WIGTrack) {
+
+            $dataRangeLabel = $('<div class="igv-data-range-track-label">');
+            $dataRangeLabel.text('[ min max ]');
+
+            $dataRangeLabel.click(function(e){
+                console.log('data range click');
+            });
+
+            $(this.viewportDiv).append($dataRangeLabel[ 0 ]);
         }
 
     };
