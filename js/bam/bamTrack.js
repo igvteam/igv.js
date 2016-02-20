@@ -26,9 +26,9 @@
 
 var igv = (function (igv) {
 
-    igv.BAMTrack = function (config, featureSource) {
+    igv.BAMTrack = function (config) {
 
-        this.featureSource = featureSource;
+        this.featureSource = new igv.BamSource(config);
 
         igv.configTrack(this, config);
 

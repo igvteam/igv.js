@@ -35,7 +35,7 @@ var igv = (function (igv) {
      * @param end
      * @constructor
      */
-    igv.AlignmentContainer = function (chr, start, end) {
+    igv.AlignmentContainer = function (chr, start, end, samplingWindowSize, samplingDepth) {
 
         this.chr = chr;
         this.start = start;
@@ -47,8 +47,8 @@ var igv = (function (igv) {
         this.downsampledIntervals = [];
         this.downSample = true;
 
-        this.samplingWindowSize = 100;
-        this.samplingDepth = 100;
+        this.samplingWindowSize = samplingWindowSize === undefined ? 100 : samplingWindowSize;
+        this.samplingDepth = samplingDepth === undefined ? 100 : samplingDepth;
 
     }
 

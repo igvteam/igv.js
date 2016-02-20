@@ -62,6 +62,9 @@ var igv = (function (igv) {
         this.url = config.url;
         this.readGroupSetIds = config.readGroupSetIds;
         this.authKey = config.authKey;   // Might be undefined or nill
+
+        this.samplingWindowSize = config.samplingWindowSize === undefined ? 100 : config.samplingWindowSize;
+        this.samplingDepth = config.samplingDepth === undefined ? 100 : config.samplingDepth;
     }
 
 
@@ -86,7 +89,7 @@ var igv = (function (igv) {
                         "pageSize": "10000"
                     },
                     decode: decodeGa4ghReads,
-                    results: new igv.AlignmentContainer(chr, bpStart, bpEnd)
+                    results: new igv.AlignmentContainer(chr, bpStart, bpEnd, self.samplingWindowSize, self.samplingDepth)
                 }).then(fulfill)
                     .catch(reject);
 

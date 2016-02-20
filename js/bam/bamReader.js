@@ -40,6 +40,10 @@ var igv = (function (igv) {
         config.url + ".bai"; // Todo - deal with Picard convention.  WHY DOES THERE HAVE TO BE 2?
         this.headPath = config.headURL || this.bamPath;
 
+        this.samplingWindowSize = config.samplingWindowSize === undefined ? 100 : config.samplingWindowSize;
+        this.samplingDepth = config.samplingDepth === undefined ? 100 : config.samplingDepth;
+
+
     };
 
     igv.BamReader.prototype.readAlignments = function (chr, bpStart, bpEnd) {
@@ -60,7 +64,7 @@ var igv = (function (igv) {
                     getIndex(self).then(function (bamIndex) {
 
                         var chunks = bamIndex.blocksForRange(chrId, bpStart, bpEnd),
-                            alignmentContainer = new igv.AlignmentContainer(chr, bpStart, bpEnd),
+                            alignmentContainer = new igv.AlignmentContainer(chr, bpStart, bpEnd, self.samplingWindowSize, self.samplingDepth),
                             promises = [];
 
 
