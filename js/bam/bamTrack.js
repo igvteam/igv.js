@@ -366,172 +366,188 @@ var igv = (function (igv) {
             // TODO -- how can packedAlignmentRows be undefined?
             if (packedAlignmentRows) {
                 // alignment track
-                packedAlignmentRows.forEach(function renderAlignmentRow(alignmentRow, i) {
+                packedAlignmentRows.forEach(function (alignmentRow, i) {
 
                     var widthArrowHead = self.alignmentRowHeight / 2.0,
                         yStrokedLine,
                         yRect,
                         height,
-                        outlineColor;
+                        outlineColor,
+                        i;
 
                     yRect = self.alignmentRowYInset + self.coverageTrackHeight + (self.alignmentRowHeight * i) + 5;
                     height = self.alignmentRowHeight - (2 * self.alignmentRowYInset);
                     yStrokedLine = (height / 2.0) + yRect;
 
-                    alignmentRow.alignments.forEach(function renderAlignment(alignment, indexAlignment) {
+                    for(i=0; i<alignmentRow.alignments.length; i++) {
 
-                        var canvasColor,
-                            xBlockEnd;
+                        var alignment = alignmentRow.alignments[i];
 
                         if (true === alignment.hidden) {
-                            return;
+                            continue;
                         }
 
-                        if ((alignment.start + alignment.lengthOnRef) < bpStart) return;
-                        if (alignment.start > bpEnd) return;
+                        if ((alignment.start + alignment.lengthOnRef) < bpStart) continue;
+                        if (alignment.start > bpEnd) break;
 
-                        canvasColor = igv.BAMTrack.alignmentShadingOptions[self.alignmentShading](self, alignment);
-                        outlineColor = canvasColor;
-
-                        if (alignment.mq <= 0) {
-                            canvasColor = igv.addAlphaToRGB(canvasColor, "0.15");
+                        if(alignment instanceof igv.PairedAlignment) {
+                            drawSingleAlignment(alignment.firstAlignment);
+                            if(alignment.secondAlignment) {
+                                drawSingleAlignment(alignment.secondAlignment);
+                                // TODO -- draw connecting line
+                            }
+                        }
+                        else {
+                            drawSingleAlignment(alignment);
                         }
 
-                        igv.graphics.setProperties(ctx, {fillStyle: canvasColor, strokeStyle: canvasColor});
+                        function drawSingleAlignment(alignment) {
 
-                        alignment.blocks.forEach(function (block, indexBlocks) {
+                            var canvasColor = igv.BAMTrack.alignmentShadingOptions[self.alignmentShading](self, alignment);
+                            outlineColor = canvasColor;
 
-                            var refOffset = block.start - bpStart,
-                                seqOffset = block.start - genomicInterval.start,
-                                xBlockStart = refOffset / bpPerPixel,
-                                widthBlock,
-                                blockSeq = block.seq.toUpperCase(),
-                                refChar,
-                                readChar,
-                                readQual,
-                                xBase,
-                                widthBase,
-                                colorBase,
-                                x,
-                                y;
+                            if ((alignment.start + alignment.lengthOnRef) < bpStart || alignment.start > bpEnd) return;
 
-
-                            if(block.gapType != undefined && xBlockEnd != undefined) {
-                                if ("D" === block.gapType) {
-                                    igv.graphics.strokeLine(ctx, xBlockStart, yStrokedLine, xBlockEnd, yStrokedLine, {strokeStyle: deletionColor});
-                                }
-                                else  {
-                                    igv.graphics.strokeLine(ctx, xBlockStart, yStrokedLine, xBlockEnd, yStrokedLine, {strokeStyle: skippedColor});
-                                }
+                            if (alignment.mq <= 0) {
+                                canvasColor = igv.addAlphaToRGB(canvasColor, "0.15");
                             }
 
-                            xBlockEnd = ((block.start + block.len) - bpStart) / bpPerPixel;
-                            widthBlock = Math.max(1, xBlockEnd - xBlockStart);
+                            igv.graphics.setProperties(ctx, {fillStyle: canvasColor, strokeStyle: canvasColor});
 
-                            if (true === alignment.strand && indexBlocks === alignment.blocks.length - 1) {
-                                // Last block on + strand
-                                x = [
-                                    xBlockStart,
-                                    xBlockEnd,
-                                    xBlockEnd + widthArrowHead,
-                                    xBlockEnd,
-                                    xBlockStart,
-                                    xBlockStart];
+                            alignment.blocks.forEach(function (block, indexBlocks) {
 
-                                y = [
-                                    yRect,
-                                    yRect,
-                                    yRect + (height / 2.0),
-                                    yRect + height,
-                                    yRect + height,
-                                    yRect];
-
-                                igv.graphics.fillPolygon(ctx, x, y, {fillStyle: canvasColor});
-                                if (alignment.mq <= 0) {
-                                    igv.graphics.strokePolygon(ctx, x, y, {strokeStyle: outlineColor});
-                                }
-                            }
-                            else if (false === alignment.strand && indexBlocks === 0) {
-                                // First block on - strand
-                                x = [
-                                    xBlockEnd,
-                                    xBlockStart,
-                                    xBlockStart - widthArrowHead,
-                                    xBlockStart,
-                                    xBlockEnd,
-                                    xBlockEnd];
-
-                                y = [
-                                    yRect,
-                                    yRect,
-                                    yRect + (height / 2.0),
-                                    yRect + height,
-                                    yRect + height,
-                                    yRect];
-
-                                igv.graphics.fillPolygon(ctx, x, y, {fillStyle: canvasColor});
-                                if (alignment.mq <= 0) {
-                                    igv.graphics.strokePolygon(ctx, x, y, {strokeStyle: outlineColor});
-                                }
-                            }
-
-                            else {
-                          //      igv.graphics.fillRect(ctx, xBlockStart, yRect, widthBlock, height, {fillStyle: "white"});
-                                igv.graphics.fillRect(ctx, xBlockStart, yRect, widthBlock, height, {fillStyle: canvasColor});
-
-                                if (alignment.mq <= 0) {
-                                    ctx.save();
-                                    ctx.strokeStyle = outlineColor;
-                                    ctx.strokeRect(xBlockStart, yRect, widthBlock, height);
-                                    ctx.restore();
-                                }
-                            }
-
-                            // Only do mismatch coloring if a refseq exists to do the comparison
-                            if (sequence && blockSeq !== "*") {
-
-                                for (var i = 0, len = blockSeq.length; i < len; i++) {
-
-                                    readChar = blockSeq.charAt(i);
-                                    refChar = sequence.charAt(seqOffset + i);
-                                    if (readChar === "=") {
-                                        readChar = refChar;
-                                    }
-
-                                    if (readChar === "X" || refChar !== readChar) {
-                                        if (block.qual && block.qual.length > i) {
-                                            readQual = block.qual[i];
-                                            colorBase = shadedBaseColor(readQual, readChar, i + block.start);
-                                        }
-                                        else {
-                                            colorBase = igv.nucleotideColors[readChar];
-                                        }
-
-                                        if (colorBase) {
-
-                                            xBase = ((block.start + i) - bpStart) / bpPerPixel;
-                                            widthBase = Math.max(1, 1 / bpPerPixel);
-                                            igv.graphics.fillRect(ctx, xBase, yRect, widthBase, height, {fillStyle: colorBase});
-                                        }
-                                    }
-                                }
-                            }
-
-                        });
-
-
-                        if (alignment.insertions) {
-                            alignment.insertions.forEach(function (block, indexBlocks) {
                                 var refOffset = block.start - bpStart,
-                                    xBlockStart = refOffset / bpPerPixel - 1,
-                                    widthBlock = 3;
+                                    seqOffset = block.start - genomicInterval.start,
+                                    xBlockStart = refOffset / bpPerPixel,
+                                    widthBlock,
+                                    blockSeq = block.seq.toUpperCase(),
+                                    refChar,
+                                    readChar,
+                                    readQual,
+                                    xBase,
+                                    widthBase,
+                                    colorBase,
+                                    x,
+                                    y;
 
-                                igv.graphics.fillRect(ctx, xBlockStart, yRect - 1, widthBlock, height + 2, {fillStyle: self.insertionColor});
 
+                                if (block.gapType != undefined && xBlockEnd != undefined) {
+                                    if ("D" === block.gapType) {
+                                        igv.graphics.strokeLine(ctx, xBlockStart, yStrokedLine, xBlockEnd, yStrokedLine, {strokeStyle: deletionColor});
+                                    }
+                                    else {
+                                        igv.graphics.strokeLine(ctx, xBlockStart, yStrokedLine, xBlockEnd, yStrokedLine, {strokeStyle: skippedColor});
+                                    }
+                                }
+
+                                xBlockEnd = ((block.start + block.len) - bpStart) / bpPerPixel;
+                                widthBlock = Math.max(1, xBlockEnd - xBlockStart);
+
+                                if (true === alignment.strand && indexBlocks === alignment.blocks.length - 1) {
+                                    // Last block on + strand
+                                    x = [
+                                        xBlockStart,
+                                        xBlockEnd,
+                                        xBlockEnd + widthArrowHead,
+                                        xBlockEnd,
+                                        xBlockStart,
+                                        xBlockStart];
+
+                                    y = [
+                                        yRect,
+                                        yRect,
+                                        yRect + (height / 2.0),
+                                        yRect + height,
+                                        yRect + height,
+                                        yRect];
+
+                                    igv.graphics.fillPolygon(ctx, x, y, {fillStyle: canvasColor});
+                                    if (alignment.mq <= 0) {
+                                        igv.graphics.strokePolygon(ctx, x, y, {strokeStyle: outlineColor});
+                                    }
+                                }
+                                else if (false === alignment.strand && indexBlocks === 0) {
+                                    // First block on - strand
+                                    x = [
+                                        xBlockEnd,
+                                        xBlockStart,
+                                        xBlockStart - widthArrowHead,
+                                        xBlockStart,
+                                        xBlockEnd,
+                                        xBlockEnd];
+
+                                    y = [
+                                        yRect,
+                                        yRect,
+                                        yRect + (height / 2.0),
+                                        yRect + height,
+                                        yRect + height,
+                                        yRect];
+
+                                    igv.graphics.fillPolygon(ctx, x, y, {fillStyle: canvasColor});
+                                    if (alignment.mq <= 0) {
+                                        igv.graphics.strokePolygon(ctx, x, y, {strokeStyle: outlineColor});
+                                    }
+                                }
+
+                                else {
+                                    //      igv.graphics.fillRect(ctx, xBlockStart, yRect, widthBlock, height, {fillStyle: "white"});
+                                    igv.graphics.fillRect(ctx, xBlockStart, yRect, widthBlock, height, {fillStyle: canvasColor});
+
+                                    if (alignment.mq <= 0) {
+                                        ctx.save();
+                                        ctx.strokeStyle = outlineColor;
+                                        ctx.strokeRect(xBlockStart, yRect, widthBlock, height);
+                                        ctx.restore();
+                                    }
+                                }
+
+                                // Only do mismatch coloring if a refseq exists to do the comparison
+                                if (sequence && blockSeq !== "*") {
+
+                                    for (var i = 0, len = blockSeq.length; i < len; i++) {
+
+                                        readChar = blockSeq.charAt(i);
+                                        refChar = sequence.charAt(seqOffset + i);
+                                        if (readChar === "=") {
+                                            readChar = refChar;
+                                        }
+
+                                        if (readChar === "X" || refChar !== readChar) {
+                                            if (block.qual && block.qual.length > i) {
+                                                readQual = block.qual[i];
+                                                colorBase = shadedBaseColor(readQual, readChar, i + block.start);
+                                            }
+                                            else {
+                                                colorBase = igv.nucleotideColors[readChar];
+                                            }
+
+                                            if (colorBase) {
+
+                                                xBase = ((block.start + i) - bpStart) / bpPerPixel;
+                                                widthBase = Math.max(1, 1 / bpPerPixel);
+                                                igv.graphics.fillRect(ctx, xBase, yRect, widthBase, height, {fillStyle: colorBase});
+                                            }
+                                        }
+                                    }
+                                }
 
                             });
+
+
+                            if (alignment.insertions) {
+                                alignment.insertions.forEach(function (block, indexBlocks) {
+                                    var refOffset = block.start - bpStart,
+                                        xBlockStart = refOffset / bpPerPixel - 1,
+                                        widthBlock = 3;
+
+                                    igv.graphics.fillRect(ctx, xBlockStart, yRect - 1, widthBlock, height + 2, {fillStyle: self.insertionColor});
+
+
+                                });
+                            }
                         }
-                    });
+                    }
                 });
             }
         }
