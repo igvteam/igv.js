@@ -188,6 +188,9 @@ var igv = (function (igv) {
             });
 
             $(this.viewportDiv).append($dataRangeLabel[ 0 ]);
+
+            // !!!!!!!!!!!!!!!!!!!!!!!!
+            $dataRangeLabel.hide();
         }
 
     };
