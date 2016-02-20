@@ -368,14 +368,16 @@
         })">BAD url
         </div>
 
+        <div onclick="create()">Re-create
+        </div>
+
     </div>
 
 </div>
 
 <script type="text/javascript">
 
-    $(document).ready(function () {
-
+    function create() {
         var div,
                 options,
                 browser;
@@ -414,6 +416,9 @@
         };
 
         browser = igv.createBrowser(div, options);
+    }
+    $(document).ready(function () {
+        create();
     });
 
 
