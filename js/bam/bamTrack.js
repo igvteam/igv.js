@@ -23,11 +23,7 @@
  * THE SOFTWARE.
  */
 
-// 1:55,505,519-55,505,819
 
-/**
- * Created by turner on 2/24/14.
- */
 var igv = (function (igv) {
 
     igv.BAMTrack = function (config, featureSource) {
@@ -344,13 +340,13 @@ var igv = (function (igv) {
     CoverageTrack.prototype.draw = function (options) {
 
         var self = this,
-            genomicInterval = options.features,
+            alignmentContainer = options.features,
             ctx = options.context,
             bpPerPixel = options.bpPerPixel,
             bpStart = options.bpStart,
             pixelWidth = options.pixelWidth,
             bpEnd = bpStart + pixelWidth * bpPerPixel + 1,
-            coverageMap = genomicInterval.coverageMap,
+            coverageMap = alignmentContainer.coverageMap,
             bp,
             x,
             y,
@@ -401,7 +397,6 @@ var igv = (function (igv) {
                 h = (item.total / coverageMap.maximum) * this.height;
                 y = this.height - h;
                 x = Math.floor((bp - bpStart) / bpPerPixel);
-
 
                 refBase = sequence[i];
                 if (item.isMismatch(refBase)) {
