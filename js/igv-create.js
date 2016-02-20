@@ -85,7 +85,7 @@ var igv = (function (igv) {
             });
         }
 
-        trackContainerDiv = $('<div id="igvTrackContainerDiv" class="igv-track-container-div">')[0];
+        trackContainerDiv = $('<div class="igv-track-container-div">')[0];
         browser = new igv.Browser(config, trackContainerDiv);
         rootDiv = browser.div;
 
@@ -121,7 +121,7 @@ var igv = (function (igv) {
             $(rootDiv).append($(controlDiv));
         }
 
-        contentDiv = $('<div id="igvContentDiv" class="igv-content-div">')[0];
+        contentDiv = $('<div class="igv-content-div">')[0];
         $(rootDiv).append(contentDiv);
 
         //headerDiv = $('<div id="igvHeaderDiv" class="igv-header-div">')[0];
