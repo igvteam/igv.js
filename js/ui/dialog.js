@@ -53,7 +53,6 @@ var igv = (function (igv) {
         self.container.append(rowOfInput()[ 0 ]);
 
         self.container.append(rowOfOkCancel()[ 0 ]);
-        //self.container.append(rowOfCancel()[ 0 ]);
 
         function rowOfOkCancel() {
 
@@ -74,15 +73,9 @@ var igv = (function (igv) {
             $column = $('<div class="igv-col igv-col-3-8">');
             $columnFiller = $('<div class="igv-col-filler-ok-button">');
             $columnFiller.text("OK");
-            $columnFiller.click(function() {
 
-                self.hide();
+            self.$ok = $columnFiller;
 
-                if (self.clickOK) {
-                    self.clickOK();
-                }
-
-            });
             $column.append( $columnFiller[ 0 ] );
             //
             $row.append( $column[ 0 ] );
@@ -109,40 +102,6 @@ var igv = (function (igv) {
             $rowContainer.append( $row[ 0 ]);
 
             return $rowContainer;
-
-        }
-
-        function rowOfCancel() {
-
-            var rowContainer,
-                row,
-                column,
-                columnFiller;
-
-            row = $('<div class="igv-grid-dialog">');
-
-            // shim
-            column = $('<div class="igv-col igv-col-5-8">');
-            row.append( column[ 0 ] );
-
-            // cancel button
-            column = $('<div class="igv-col igv-col-3-8">');
-
-            columnFiller = $('<div class="igv-col-filler-cancel-button">');
-            columnFiller.text("Cancel");
-
-            columnFiller.click(function() {
-                self.hide();
-            });
-
-
-            column.append( columnFiller[ 0 ] );
-            row.append( column[ 0 ] );
-
-            rowContainer = $('<div class="igv-grid-rect">');
-            rowContainer.append( row[ 0 ]);
-
-            return rowContainer;
 
         }
 
@@ -192,6 +151,46 @@ var igv = (function (igv) {
 
     };
 
+    igv.Dialog.prototype.configure = function (trackView, dialogLabelHTMLFunction, dialogInputValue, dialogInputChange, dialogClickOK) {
+
+        var clickOK,
+            self = this;
+
+        self.trackView = trackView;
+
+        if (dialogLabelHTMLFunction) {
+            self.$dialogLabel.html(dialogLabelHTMLFunction());
+            self.$dialogLabel.show();
+        } else {
+            self.$dialogLabel.hide();
+        }
+
+        if (dialogInputValue) {
+
+            self.$dialogInput.val(dialogInputValue);
+
+            self.$dialogInput.unbind();
+            self.$dialogInput.change(dialogInputChange);
+
+            self.$dialogInput.show();
+        } else {
+            self.$dialogInput.hide();
+        }
+
+        self.$ok.unbind();
+        clickOK = dialogClickOK || dialogInputChange;
+        self.$ok.click(function() {
+
+            if (clickOK) {
+                clickOK();
+            }
+
+            self.hide();
+        });
+
+
+    };
+
     igv.Dialog.prototype.hide = function () {
         $(this.container).offset( { left: 0, top: 0 } );
         this.container.hide();
@@ -204,11 +203,6 @@ var igv = (function (igv) {
             track_origin = $(this.trackView.trackDiv).offset(),
             track_size = { width: $(this.trackView.trackDiv).outerWidth(), height: $(this.trackView.trackDiv).outerHeight()},
             size = { width: $(this.container).outerWidth(), height: $(this.container).outerHeight()};
-
-        //console.log("scrollTop. body " + body_scrolltop + " track " + track_scrolltop);
-
-        // centered left-right
-        //$(this.container).offset( { left: (track_size.width - size.width)/2, top: track_origin.top } );
 
         this.container.show();
 
