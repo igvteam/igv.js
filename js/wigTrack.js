@@ -48,7 +48,12 @@ var igv = (function (igv) {
         this.name = config.name;
         this.id = config.id || this.name;
         this.color = config.color || "rgb(150,150,150)";
+
         this.height = 100;
+
+        this.minHeight = config.minHeight || Math.min( 25, this.height);
+        this.maxHeight = config.maxHeight || Math.max(500, this.height);
+
         this.order = config.order;
 
         // Min and max values.  No defaults for these, if they aren't set track will autoscale.
