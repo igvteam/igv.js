@@ -33,8 +33,7 @@ var igv = (function (igv) {
 
                 igv.dialogMenuItem(popover, trackView, "Set track name", function () { return "Track Name" }, trackView.track.name, function () {
 
-                    var foo = igv.dialog.$dialogInput.val(),
-                        alphanumeric = parseAlphanumeric($(this).val());
+                    var alphanumeric = parseAlphanumeric( igv.dialog.$dialogInput.val() );
 
                     if (undefined !== alphanumeric) {
                         igv.setTrackLabel(trackView.track, alphanumeric);
@@ -128,31 +127,7 @@ var igv = (function (igv) {
             object: $('<div class="igv-track-menu-item">' + gearMenuLabel + '</div>'),
             click: function () {
 
-                igv.dialog.trackView = trackView;
-
-                if (dialogLabelHTMLFunction) {
-
-                    igv.dialog.$dialogLabel.show();
-
-                    igv.dialog.$dialogLabel.html(dialogLabelHTMLFunction());
-                } else {
-                    igv.dialog.$dialogLabel.hide();
-                }
-
-                if (dialogInputValue) {
-
-                    igv.dialog.$dialogInput.show();
-
-                    igv.dialog.$dialogInput.val(dialogInputValue);
-
-                    igv.dialog.$dialogInput.unbind();
-                    igv.dialog.$dialogInput.change(dialogInputChange);
-                } else {
-                    igv.dialog.$dialogInput.hide();
-                }
-
-                igv.dialog.clickOK = dialogClickOK || dialogInputChange;
-
+                igv.dialog.configure(trackView, dialogLabelHTMLFunction, dialogInputValue, dialogInputChange, dialogClickOK);
                 igv.dialog.show();
                 popover.hide();
             }
