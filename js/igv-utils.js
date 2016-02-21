@@ -54,7 +54,7 @@ var igv = (function (igv) {
 
                 igv.dialogMenuItem(popover, trackView, "Set track height", function () { return "Track Height" }, trackHeight, function () {
 
-                    var number = parseNumber($(this).val());
+                    var number = parseFloat( igv.dialog.$dialogInput.val(), 10);
 
                     if (undefined !== number && number >= trackView.track.minHeight && number <= trackView.track.maxHeight) {
                         trackView.setTrackHeight(number);
@@ -62,10 +62,6 @@ var igv = (function (igv) {
                     }
 
                     igv.dialog.hide();
-
-                    function parseNumber(value) {
-                        return parseFloat(value, 10);
-                    }
 
                 }, undefined)
 

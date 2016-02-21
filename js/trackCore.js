@@ -57,8 +57,8 @@ var igv = (function (igv) {
 
         track.height = config.height || ("bed" === config.type ? 100 : 50);
         track.autoHeight = config.autoHeight === undefined ? (config.height === undefined) : config.autoHeight;
-        track.minHeight = config.minHeight || Math.min(25, this.height);
-        track.maxHeight = config.maxHeight || Math.max(500, this.height);
+        track.minHeight = config.minHeight || Math.min( 25, track.height);
+        track.maxHeight = config.maxHeight || Math.max(500, track.height);
 
         // Set maxRows -- protects against pathological feature and bam packing cases
         if (config.maxRows === undefined) config.maxRows = 500;
