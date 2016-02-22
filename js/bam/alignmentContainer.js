@@ -35,7 +35,7 @@ var igv = (function (igv) {
      * @param end
      * @constructor
      */
-    igv.AlignmentContainer = function (chr, start, end, samplingWindowSize, samplingDepth) {
+    igv.AlignmentContainer = function (chr, start, end, samplingWindowSize, samplingDepth, paired) {
 
         this.chr = chr;
         this.start = start;
@@ -46,22 +46,34 @@ var igv = (function (igv) {
         this.alignments = [];
         this.downsampledIntervals = [];
         this.downSample = true;
+        this.paired = paired;
 
         this.samplingWindowSize = samplingWindowSize === undefined ? 100 : samplingWindowSize;
         this.samplingDepth = samplingDepth === undefined ? 100 : samplingDepth;
 
+        this.readNames = new Set();     // Stash read names when downsampling to keep both ends of a paired alignment
+
+        this.pairs = {};
+
+        this.filter = function filter(alignment) {         // TODO -- pass this in
+            return alignment.isMapped() && !alignment.isFailsVendorQualityCheck();
+        }
+
     }
 
     igv.AlignmentContainer.prototype.push = function (alignment) {
+
+        if (filter(alignment) === false) return;
+
         this.coverageMap.incCounts(alignment);
 
         if (this.downSample) {
             if (this.currentBucket === undefined) {
-                this.currentBucket = new DownsampleBucket(alignment.start, alignment.start + this.samplingWindowSize, this.samplingDepth)
+                this.currentBucket = new DownsampleBucket(alignment.start, alignment.start + this.samplingWindowSize, this.samplingDepth, this.readNames, this.paired);
             }
             if (alignment.start >= this.currentBucket.end) {
                 finishBucket.call(this);
-                this.currentBucket = new DownsampleBucket(alignment.start, alignment.start + this.samplingWindowSize, this.samplingDepth)
+                this.currentBucket = new DownsampleBucket(alignment.start, alignment.start + this.samplingWindowSize, this.samplingDepth, this.readNames, this.paired);
             }
 
             this.currentBucket.addAlignment(alignment);
@@ -70,7 +82,43 @@ var igv = (function (igv) {
         else {
             this.alignments.push(alignment);
         }
+
+        function filter(alignment) {
+            return alignment.isMapped() && !alignment.isFailsVendorQualityCheck();
+        }
     }
+
+
+    function addAlignment(alignment) {
+
+        var pairedAlignment;
+
+        if (this.paired) {
+            if (alignment.isNotPrimary() || alignment.isSupplementary()) {
+                this.alignments.push(alignment);
+            }
+            else {
+                pairedAlignment = this.pairs[alignment.readName];
+                if (pairedAlignment) {
+                    if (alignment.isSecondOfPair()) {   // 0x80
+                        pairedAlignment.setSecondAlignment(alignment);
+                    }
+                }
+                else {
+                    if (alignment.isFistOfPair()) {
+                        pairedAlignment = new igv.PairedAlignment(alignment);
+                        this.pairs[alignment.readName] = pairedAlignment;
+                        this.alignments.push(pairedAlignment);
+                    }
+                }
+            }
+        }
+        else {
+            this.alignments.push(alignment);
+        }
+
+    }
+
 
     igv.AlignmentContainer.prototype.forEach = function (callback) {
         this.alignments.forEach(callback);
@@ -83,6 +131,7 @@ var igv = (function (igv) {
         this.alignments.sort(function (a, b) {
             return a.start - b.start
         });
+        this.readNames.clear();
     }
 
     igv.AlignmentContainer.prototype.contains = function (chr, start, end) {
@@ -105,13 +154,15 @@ var igv = (function (igv) {
         }
     }
 
-    function DownsampleBucket(start, end, samplingDepth) {
+    function DownsampleBucket(start, end, samplingDepth, readNames, paired) {
 
         this.start = start;
         this.end = end;
         this.samplingDepth = samplingDepth;
         this.alignments = [];
         this.downsampledCount = 0;
+        this.readNames = readNames;
+        this.paired = paired;
     }
 
     DownsampleBucket.prototype.addAlignment = function (alignment) {
@@ -120,6 +171,12 @@ var igv = (function (igv) {
 
         if (this.alignments.length < this.samplingDepth) {
             this.alignments.push(alignment);
+            if (this.paired && alignment.isPaired()) {
+                this.readNames.add(alignment.readName);
+            }
+        }
+        else if (this.paired && alignment.isPaired() && this.readNames.has(alignment.readName)) {
+            this.alignments.push(alignment);
         }
         else {
             samplingProb = this.samplingDepth / (this.samplingDepth + this.downsampledCount + 1);
@@ -127,6 +184,7 @@ var igv = (function (igv) {
             if (Math.random() < samplingProb) {
                 idx = Math.floor(Math.random() * (this.alignments.length - 1));
                 this.alignments[idx] = alignment;
+                if (alignment.isPaired()) this.readNames.add(alignment.readName);
             }
 
             this.downsampledCount++;
