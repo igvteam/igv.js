@@ -43,7 +43,7 @@ var igv = (function (igv) {
             this.featureSource = new igv.BWSource(config);
         }
         else {
-            this.featureSource = new igv.FeatureSource(this.config);
+            this.featureSource = new igv.FeatureSource(config);
         }
 
         // Set the render function.  This can optionally be passed in the config
@@ -62,61 +62,45 @@ var igv = (function (igv) {
         else {
             this.render = renderFeature;
             this.arrowSpacing = 30;
-
         }
-
     };
 
-    igv.FeatureTrack.prototype.getHeader = function (continuation) {
+    igv.FeatureTrack.prototype.getFileHeader = function () {
         var self = this;
-        if (this.featureSource.getHeader) {
-            this.featureSource.getHeader(function (header) {
+        return new Promise(function (fulfill, reject) {
+            if (typeof self.featureSource.getFileHeader === "function") {
+                self.featureSource.getFileHeader().then(function (header) {
 
-                if (header) {
-                    // Header (from track line).  Set properties,unless set in the config (config takes precedence)
-                    if (header.name && !self.config.name) {
-                        self.name = header.name;
+                    if (header) {
+                        // Header (from track line).  Set properties,unless set in the config (config takes precedence)
+                        if (header.name && !self.config.name) {
+                            self.name = header.name;
+                        }
+                        if (header.color && !self.config.color) {
+                            self.color = "rgb(" + header.color + ")";
+                        }
                     }
-                    if (header.color && !self.config.color) {
-                        self.color = "rgb(" + header.color + ")";
-                    }
-                }
-                continuation(header);
+                    fulfill(header);
 
-            });
-        }
-        else {
-            continuation(null);
-        }
+                }).catch(reject);
+            }
+            else {
+                fulfill(null);
+            }
+        });
     }
 
-    igv.FeatureTrack.prototype.getFeaturesPromise = function (chr, bpStart, bpEnd, task) {
+    igv.FeatureTrack.prototype.getFeatures = function (chr, bpStart, bpEnd) {
 
         var self = this;
 
         return new Promise(function (fulfill, reject) {
-            // Don't try to draw alignments for windows > the visibility window
-            if (self.visibilityWindow && igv.browser.trackViewportWidthBP() > self.visibilityWindow) {
-                fulfill({exceedsVisibilityWindow: true});
-            }
-            else {
-                self.featureSource.getFeatures(chr, bpStart, bpEnd, fulfill, task)
-            }
+
+            self.featureSource.getFeatures(chr, bpStart, bpEnd).then(fulfill).catch(reject);
 
         });
-
     }
 
-    igv.FeatureTrack.prototype.getFeatures = function (chr, bpStart, bpEnd, continuation, task) {
-
-        // Don't try to draw alignments for windows > the visibility window
-        if (this.visibilityWindow && igv.browser.trackViewportWidthBP() > this.visibilityWindow) {
-            continuation({exceedsVisibilityWindow: true});
-        }
-        else {
-            this.featureSource.getFeatures(chr, bpStart, bpEnd, continuation, task)
-        }
-    };
 
     /**
      * The required height in pixels required for the track content.   This is not the visible track height, which
@@ -132,13 +116,14 @@ var igv = (function (igv) {
         }
         else {
             var maxRow = 0;
-            features.forEach(function (feature) {
+            if (features && (typeof features.forEach === "function")) {
+                features.forEach(function (feature) {
 
-                if (feature.row && feature.row > maxRow) maxRow = feature.row;
+                    if (feature.row && feature.row > maxRow) maxRow = feature.row;
 
-            });
-
-            return (maxRow + 1) * (this.displayMode === "SQUISHED" ? this.squishedRowHeight : this.expandedRowHeight);
+                });
+            }
+            return Math.max(this.collapsedHeight, (maxRow + 1) * (this.displayMode === "SQUISHED" ? this.squishedRowHeight : this.expandedRowHeight));
 
         }
 
@@ -153,23 +138,10 @@ var igv = (function (igv) {
             bpStart = options.bpStart,
             pixelWidth = options.pixelWidth,
             pixelHeight = options.pixelHeight,
-            bpEnd = bpStart + pixelWidth * bpPerPixel + 1,
-            zoomInNoticeFontStyle = {
-                font: '16px PT Sans',
-                fillStyle: "rgba(64, 64, 64, 1)",
-                strokeStyle: "rgba(64, 64, 64, 1)"
-            };
-
+            bpEnd = bpStart + pixelWidth * bpPerPixel + 1;
 
         igv.graphics.fillRect(ctx, 0, 0, pixelWidth, pixelHeight, {'fillStyle': "rgb(255, 255, 255)"});
 
-        if (options.features.exceedsVisibilityWindow) {
-
-            for (var x = 200; x < pixelWidth; x += 400) {
-                igv.graphics.fillText(ctx, "Zoom in to see features", x, 20, zoomInNoticeFontStyle);
-            }
-            return;
-        }
 
         if (featureList) {
 

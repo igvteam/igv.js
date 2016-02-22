@@ -25,53 +25,15 @@
 
 var igv = (function (igv) {
 
-    igv.constrainBBox = function (child, parent) {
-
-        var delta,
-            topLeft,
-            bboxChild = {},
-            bboxParent = {};
-
-        bboxParent.left = bboxParent.top = 0;
-        bboxParent.right = parent.outerWidth();
-        bboxParent.bottom = parent.outerHeight();
-
-        topLeft = child.offset();
-
-        bboxChild.left = topLeft.left - parent.offset().left;
-        bboxChild.top = topLeft.top - parent.offset().top;
-        bboxChild.right = bboxChild.left + child.outerWidth();
-        bboxChild.bottom = bboxChild.top + child.outerHeight();
-
-        delta = bboxChild.bottom - bboxParent.bottom;
-        if (delta > 0) {
-
-            // clamp to trackContainer bottom
-            topLeft.top -= delta;
-
-            bboxChild.top -= delta;
-            bboxChild.bottom -= delta;
-
-            delta = bboxChild.top - bboxParent.top;
-            if (delta < 0) {
-                topLeft.top -= delta;
-            }
-
-        }
-
-        return topLeft;
-
-    };
-
     igv.trackMenuItems = function (popover, trackView) {
 
         var trackHeight = trackView.trackDiv.clientHeight,
             trackItems,
             menuItems = [
 
-                igv.dialogMenuItem(popover, trackView, "Set track name", "Track Name", trackView.track.name, function () {
+                igv.dialogMenuItem(popover, trackView, "Set track name", function () { return "Track Name" }, trackView.track.name, function () {
 
-                    var alphanumeric = parseAlphanumeric($(this).val());
+                    var alphanumeric = parseAlphanumeric( igv.dialog.$dialogInput.val() );
 
                     if (undefined !== alphanumeric) {
                         igv.setTrackLabel(trackView.track, alphanumeric);
@@ -87,27 +49,20 @@ var igv = (function (igv) {
                         return (null !== alphanumeric) ? alphanumeric[0] : "untitled";
                     }
 
-                }),
+                }, undefined),
 
-                igv.dialogMenuItem(popover, trackView, "Set track height", "Track Height", trackHeight, function () {
+                igv.dialogMenuItem(popover, trackView, "Set track height", function () { return "Track Height" }, trackHeight, function () {
 
-                    var number = parseNumber($(this).val());
+                    var number = parseFloat( igv.dialog.$dialogInput.val(), 10);
 
-                    if (undefined !== number) {
+                    if (undefined !== number && number >= trackView.track.minHeight && number <= trackView.track.maxHeight) {
                         trackView.setTrackHeight(number);
                         trackView.track.autoHeight = false;   // Explicitly setting track height turns off auto-scale
-
-                        //trackView.update();
-                        igv.dialog.hide();
                     }
 
-                    function parseNumber(value) {
-                        return parseFloat(value, 10);
-                    }
+                    igv.dialog.hide();
 
-                }),
-
-                //igv.dataRangeMenuItem(popover, trackView)
+                }, undefined)
 
             ];
 
@@ -146,35 +101,33 @@ var igv = (function (igv) {
         if (trackView.track.removable !== false) {
 
             menuItems.push(
-                {
-                    object: $('<div class="igv-track-menu-item igv-track-menu-border-top">Remove track</div>'),
-                    click: function () {
-                        popover.hide();
-                        trackView.browser.removeTrack(trackView.track);
-                    }
-                }
+                igv.dialogMenuItem(popover, trackView, "Remove track", function () {
+
+                    var label = "Remove " + trackView.track.name;
+
+                    return '<div class="igv-dialog-label-centered">' +  label + '</div>';
+
+                }, undefined, undefined, function () {
+
+                    popover.hide();
+                    trackView.browser.removeTrack(trackView.track);
+
+                })
             );
+
         }
 
         return menuItems;
 
     };
 
-    igv.dialogMenuItem = function (popover, trackView, gearMenuLabel, dialogLabel, dialogInputValue, dialogInputChange) {
+    igv.dialogMenuItem = function (popover, trackView, gearMenuLabel, dialogLabelHTMLFunction, dialogInputValue, dialogInputChange, dialogClickOK) {
 
         return {
             object: $('<div class="igv-track-menu-item">' + gearMenuLabel + '</div>'),
             click: function () {
 
-                igv.dialog.trackView = trackView;
-
-                igv.dialog.dialogLabel.text(dialogLabel);
-
-                igv.dialog.dialogInput.val(dialogInputValue);
-
-                igv.dialog.dialogInput.unbind();
-                igv.dialog.dialogInput.change(dialogInputChange);
-
+                igv.dialog.configure(trackView, dialogLabelHTMLFunction, dialogInputValue, dialogInputChange, dialogClickOK);
                 igv.dialog.show();
                 popover.hide();
             }
@@ -186,43 +139,8 @@ var igv = (function (igv) {
         return {
             object: $('<div class="igv-track-menu-item">' + "Set data range" + '</div>'),
             click: function () {
-
-                var min, max,
-                    dataRangeDialog = igv.dataRangeDialog;;
-
-                dataRangeDialog.trackView = trackView;
-
-                // minimum
-                if(trackView.track.dataRange) {
-                    min = trackView.track.dataRange.min;
-                    max = trackView.track.dataRange.max;
-                }
-                else {
-                    min = 0;
-                    max = 100;
-                }
-                dataRangeDialog.minInput.val(min);
-                dataRangeDialog.maxInput.val(max);
-                dataRangeDialog.logInput.prop('checked', false);
-
-                dataRangeDialog.ok.unbind();
-                dataRangeDialog.ok.click(function() {
-                    min = parseFloat(dataRangeDialog.minInput.val());
-                    max = parseFloat(dataRangeDialog.maxInput.val());
-                    if(isNaN(min) || isNaN(max)) {
-                        alert("Must input numeric values");
-                    }
-                    else {
-                        trackView.track.min = min;
-                        trackView.track.max = max;
-                        console.log("min " + dataRangeDialog.minInput.val() + " max " + dataRangeDialog.maxInput.val() + " log " + dataRangeDialog.logInput.is(':checked'));
-                        dataRangeDialog.hide();
-                        trackView.update();
-                    }
-
-                });
-
-                dataRangeDialog.show();
+                igv.dataRangeDialog.configureWithTrackView(trackView);
+                igv.dataRangeDialog.show();
                 popover.hide();
             }
         }
@@ -277,21 +195,18 @@ var igv = (function (igv) {
     igv.spinner = function (size) {
 
         // spinner
-        var spinnerContainer,
-            spinner;
+        var $container,
+            $spinner;
 
-        spinnerContainer = document.createElement("div");
-        spinnerContainer.className = "igv-spinner-container";
-
-        spinner = document.createElement("i");
-        spinner.className = "fa fa-spinner fa-spin";
-        if (undefined !== size) {
-            $(spinner).css("font-size", size);
+        $spinner = $('<i class="fa fa-spinner fa-spin">');
+        if (size) {
+            $spinner.css("font-size", size);
         }
 
-        spinnerContainer.appendChild(spinner);
+        $container = $('<div class="igv-spinner-container">');
+        $container.append($spinner[ 0 ]);
 
-        return spinnerContainer;
+        return $container[ 0 ];
     };
 
     /**
@@ -554,6 +469,43 @@ var igv = (function (igv) {
         return (value.substring || value.toFixed) ? true : false
     }
 
+    igv.constrainBBox = function (child, parent) {
+
+        var delta,
+            topLeft,
+            bboxChild = {},
+            bboxParent = {};
+
+        bboxParent.left = bboxParent.top = 0;
+        bboxParent.right = parent.outerWidth();
+        bboxParent.bottom = parent.outerHeight();
+
+        topLeft = child.offset();
+
+        bboxChild.left = topLeft.left - parent.offset().left;
+        bboxChild.top = topLeft.top - parent.offset().top;
+        bboxChild.right = bboxChild.left + child.outerWidth();
+        bboxChild.bottom = bboxChild.top + child.outerHeight();
+
+        delta = bboxChild.bottom - bboxParent.bottom;
+        if (delta > 0) {
+
+            // clamp to trackContainer bottom
+            topLeft.top -= delta;
+
+            bboxChild.top -= delta;
+            bboxChild.bottom -= delta;
+
+            delta = bboxChild.top - bboxParent.top;
+            if (delta < 0) {
+                topLeft.top -= delta;
+            }
+
+        }
+
+        return topLeft;
+
+    };
 
     igv.log = function(message) {
         if(igv.enableLogging && console && console.log) {

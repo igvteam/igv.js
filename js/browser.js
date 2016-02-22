@@ -101,25 +101,6 @@ var igv = (function (igv) {
         return this.formats[name];
     };
 
-    igv.Browser.prototype.trackLabelWithPath = function (path) {
-
-        var parser = document.createElement('a'),
-            label;
-
-        parser.href = path;
-
-        //parser.protocol; // => "http:"
-        //parser.hostname; // => "example.com"
-        //parser.port;     // => "3000"
-        //parser.pathname; // => "/pathname/"
-        //parser.search;   // => "?search=test"
-        //parser.hash;     // => "#hash"
-        //parser.host;     // => "example.com:3000"
-
-        label = parser.pathname.split('/');
-        return label[label.length - 1].split('.')[0];
-
-    };
 
     igv.Browser.prototype.loadTracksWithConfigList = function (configList) {
 
@@ -129,16 +110,23 @@ var igv = (function (igv) {
             self.loadTrack(config);
         });
 
+        // Really we should just resize the new trackViews, but currently there is no way to get a handle on those
+        this.trackViews.forEach(function (trackView) {
+            trackView.resize();
+        })
+
     };
 
     igv.Browser.prototype.loadTrack = function (config) {
 
         var self = this,
-            settings, property;
+            settings,
+            property,
+            newTrack,
+            featureSource,
+            nm;
 
-        if (this.isDuplicateTrack(config)) {
-            return;
-        }
+        igv.inferTypes(config);
 
         // Set defaults if specified
         if (this.trackDefaults && config.trackType) {
@@ -152,14 +140,7 @@ var igv = (function (igv) {
             }
         }
 
-        igv.inferTypes(config);
-
-
-        var path = config.url,
-            type = config.featureType,
-            newTrack;
-
-        switch (type) {
+        switch (config.featureType) {
             case "gwas":
                 newTrack = new igv.GWASTrack(config);
                 break;
@@ -170,7 +151,7 @@ var igv = (function (igv) {
                 newTrack = new igv.FeatureTrack(config);
                 break;
             case "alignment":
-                newTrack = new igv.BAMTrack(config);
+                newTrack = new igv.BAMTrack(config, featureSource);
                 break;
             case "data":
                 newTrack = new igv.WIGTrack(config);
@@ -188,24 +169,23 @@ var igv = (function (igv) {
                 newTrack = new igv.AneuTrack(config);
                 break;
             default:
-                alert("Unknown file type: " + path);
+                alert("Unknown file type: " + config.url);
                 return null;
         }
 
-        loadHeader(newTrack);
-
-        function loadHeader(track) {
-
-            if (track.getHeader) {
-                track.getHeader(function (header) {
-                    self.addTrack(track);
-                })
-            }
-            else {
+        // If defined, attempt to load the file header before adding the track.  This will catch some errors early
+        if (typeof newTrack.getFileHeader === "function") {
+            newTrack.getFileHeader().then(function (header) {
                 self.addTrack(newTrack);
-            }
+            }).catch(function (error) {
+                alert(error);
+            });
         }
-    };
+        else {
+            self.addTrack(newTrack);
+        }
+
+    }
 
     igv.Browser.prototype.isDuplicateTrack = function (config) {
 
@@ -246,14 +226,13 @@ var igv = (function (igv) {
      */
     igv.Browser.prototype.addTrack = function (track) {
 
-        var myself = this,
-            trackView = new igv.TrackView(track, this);
+        var trackView = new igv.TrackView(track, this);
 
-        if (igv.popover) {
+        if (typeof igv.popover !== "undefined") {
             igv.popover.hide();
         }
 
-        // Register view with track.  This is unfortunate, but is needed to support "resize" events.
+        // Register view with track.  This backpointer is unfortunate, but is needed to support "resize" events.
         track.trackView = trackView;
 
         if (undefined === track.order) {
@@ -264,31 +243,8 @@ var igv = (function (igv) {
 
         this.reorderTracks();
 
-        if (this.cursorModel) {
-
-            this.cursorModel.initializeHistogram(trackView.track, function () {
-
-                if (myself.designatedTrack === track) {
-                    myself.selectDesignatedTrack(myself.designatedTrack.trackFilter.trackPanel);
-                }
-
-                if (track.config && track.config.trackFilter) {
-
-                    track.trackFilter.setWithJSON(track.config.trackFilter);
-
-
-                }
-
-                myself.resize();
-
-
-            });
-        }
-        else {
-            this.resize();
-        }
-
-    };
+        trackView.resize();
+    }
 
     igv.Browser.prototype.reorderTracks = function () {
 
@@ -305,17 +261,11 @@ var igv = (function (igv) {
 
         this.trackViews.forEach(function (trackView, index, trackViews) {
 
-            //console.log(trackView.track.id + ".order " + trackView.track.order);
-
-            if ("CURSOR" === myself.type) {
-                myself.trackContainerDiv.appendChild(trackView.cursorTrackContainer);
-            } else {
-                myself.trackContainerDiv.appendChild(trackView.trackDiv);
-            }
+            myself.trackContainerDiv.appendChild(trackView.trackDiv);
 
         });
 
-    };
+    }
 
     igv.Browser.prototype.removeTrack = function (track) {
 
@@ -332,11 +282,7 @@ var igv = (function (igv) {
 
             this.trackViews.splice(this.trackViews.indexOf(trackPanelRemoved), 1);
 
-            if ("CURSOR" === this.type) {
-                this.trackContainerDiv.removeChild(trackPanelRemoved.cursorTrackContainer);
-            } else {
-                this.trackContainerDiv.removeChild(trackPanelRemoved.trackDiv);
-            }
+            this.trackContainerDiv.removeChild(trackPanelRemoved.trackDiv);
 
         }
 
@@ -438,10 +384,6 @@ var igv = (function (igv) {
             trackView.repaint();
         });
 
-        if (this.cursorModel) {
-            this.horizontalScrollbar.update();
-        }
-
     };
 
     igv.Browser.prototype.update = function () {
@@ -460,10 +402,17 @@ var igv = (function (igv) {
             trackPanel.update();
         });
 
-        if (this.cursorModel) {
-            this.horizontalScrollbar.update();
-        }
     };
+
+    igv.Browser.prototype.loadInProgress = function () {
+        var i;
+        for (i = 0; i < this.trackViews.length; i++) {
+            if (this.trackViews[i].loading) {
+                return true;
+            }
+        }
+        return false;
+    }
 
     igv.Browser.prototype.updateLocusSearch = function (referenceFrame) {
 
@@ -475,7 +424,7 @@ var igv = (function (igv) {
             chromosome;
 
 
-        if (this.searchInput) {
+        if (this.$searchInput) {
 
             chr = referenceFrame.chr;
             ss = igv.numberFormatter(Math.floor(referenceFrame.start + 1));
@@ -489,7 +438,7 @@ var igv = (function (igv) {
             ee = igv.numberFormatter(Math.floor(end));
 
             str = chr + ":" + ss + "-" + ee;
-            this.searchInput.val(str);
+            this.$searchInput.val(str);
 
             this.windowSizePanel.update(Math.floor(end - referenceFrame.start));
         }
@@ -596,6 +545,11 @@ var igv = (function (igv) {
 // Zoom in by a factor of 2, keeping the same center location
     igv.Browser.prototype.zoomIn = function () {
 
+        if (this.loadInProgress()) {
+            // ignore
+            return;
+        }
+
         var newScale,
             center,
             viewportWidth;
@@ -616,6 +570,11 @@ var igv = (function (igv) {
 
 // Zoom out by a factor of 2, keeping the same center location if possible
     igv.Browser.prototype.zoomOut = function () {
+
+        if (this.loadInProgress()) {
+            // ignore
+            return;
+        }
 
         var newScale, maxScale, center, chrLength, widthBP, viewportWidth;
         viewportWidth = this.trackViewportWidth();
@@ -644,12 +603,17 @@ var igv = (function (igv) {
     };
 
 
-    igv.Browser.prototype.search = function (feature, continuation) {
+    /**
+     *
+     * @param feature
+     * @param callback - function to call
+     */
+    igv.Browser.prototype.search = function (feature, callback) {
 
         // See if we're ready to respond to a search, if not just queue it up and return
         if (igv.browser === undefined || igv.browser.genome === undefined) {
             igv.browser.initialLocus = feature;
-            if (continuation) continuation();
+            if (callback) callback();
             return;
         }
 
@@ -687,7 +651,7 @@ var igv = (function (igv) {
                 fireOnsearch.call(igv.browser, feature, type);
             }
 
-            if (continuation) continuation();
+            if (callback) callback();
 
         }
         else {
@@ -707,7 +671,11 @@ var igv = (function (igv) {
                     url.replace("$GENOME$", genomeId);
                 }
 
-                igv.loadData(url, function (data) {
+                // var loader = new igv.DataLoader(url);
+                // if (range)  loader.range = range;
+                // loader.loadBinaryString(callback);
+
+                igvxhr.loadString(url).then(function (data) {
 
                     var results = ("plain" === searchConfig.type) ? parseSearchResults(data) : JSON.parse(data);
 
@@ -734,7 +702,7 @@ var igv = (function (igv) {
                         presentSearchResults(results, searchConfig, feature);
                     }
 
-                    if (continuation) continuation();
+                    if (callback) callback();
                 });
             }
         }
@@ -824,8 +792,8 @@ var igv = (function (igv) {
 
         igv.browser.selection = new igv.GtexSelection('gtex' === type || 'snp' === type ? {snp: name} : {gene: name});
 
-        if(end === undefined) {
-            end = start+1;
+        if (end === undefined) {
+            end = start + 1;
         }
         if (igv.browser.flanking) {
             start = Math.max(0, start - igv.browser.flanking);
@@ -875,8 +843,7 @@ var igv = (function (igv) {
             var coords = igv.translateMouseCoordinates(e, trackContainerDiv),
                 maxEnd,
                 maxStart,
-                referenceFrame = igv.browser.referenceFrame,
-                isCursor = igv.browser.cursorModel;
+                referenceFrame = igv.browser.referenceFrame;
 
             if (isRulerTrack) {
                 return;
@@ -890,6 +857,11 @@ var igv = (function (igv) {
 
                 if (mouseDownX && Math.abs(coords.x - mouseDownX) > igv.constants.dragThreshold) {
 
+                    if (igv.browser.loadInProgress()) {
+                        // ignore
+                        return;
+                    }
+
                     referenceFrame.shiftPixels(lastMouseX - coords.x);
 
                     // TODO -- clamping code below is broken for regular IGV => disabled for now, needs fixed
@@ -899,15 +871,11 @@ var igv = (function (igv) {
                     referenceFrame.start = Math.max(0, referenceFrame.start);
 
                     // clamp right
-                    if (isCursor) {
-                        maxEnd = igv.browser.cursorModel.filteredRegions.length;
-                        maxStart = maxEnd - igv.browser.trackViewportWidth() / igv.browser.cursorModel.framePixelWidth;
-                    }
-                    else {
-                        var chromosome = igv.browser.genome.getChromosome(referenceFrame.chr);
-                        maxEnd = chromosome.bpLength;
-                        maxStart = maxEnd - igv.browser.trackViewportWidth() * referenceFrame.bpPerPixel;
-                    }
+
+                    var chromosome = igv.browser.genome.getChromosome(referenceFrame.chr);
+                    maxEnd = chromosome.bpLength;
+                    maxStart = maxEnd - igv.browser.trackViewportWidth() * referenceFrame.bpPerPixel;
+
 
                     if (referenceFrame.start > maxStart) referenceFrame.start = maxStart;
 
@@ -961,9 +929,6 @@ var igv = (function (igv) {
 
             var newCenter = Math.round(referenceFrame.start + canvasCoords.x * referenceFrame.bpPerPixel);
             referenceFrame.bpPerPixel /= 2;
-            if (igv.browser.cursorModel) {
-                igv.browser.cursorModel.framePixelWidth *= 2;
-            }
             igv.browser.goto(referenceFrame.chr, newCenter);
 
         });

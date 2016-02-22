@@ -37,6 +37,7 @@ var igv = (function (igv) {
 
         this.config = config || {};
 
+        this.sourceType = (config.sourceType === undefined ? "file" : config.sourceType);
 
         if (config.sourceType === "ga4gh") {
             this.reader = new igv.Ga4ghVariantReader(config);
@@ -49,42 +50,44 @@ var igv = (function (igv) {
             else {
                 this.reader = new igv.GtexFileReader(config);
             }
-        } else if(config.sourceType === "bigquery") {
+        } else if (config.sourceType === "bigquery") {
             this.reader = new igv.BigQueryFeatureReader(config);
         }
         else {
             // Default for all sorts of ascii tab-delimited file formts
             this.reader = new igv.FeatureFileReader(config);
         }
-
+        this.visibilityWindow = config.visibilityWindow;
 
     };
 
-    igv.FeatureSource.prototype.getHeader = function (continuation) {
+    igv.FeatureSource.prototype.getFileHeader = function () {
 
         var self = this,
             maxRows = this.config.maxRows || 500;
 
+        return new Promise(function (fulfill, reject) {
 
-        if (this.reader.readHeader) {
-            this.reader.readHeader(function (header, features) {
-                // Non-indexed readers will return features as a side effect.  This is an important performance hack
-                if (features) {
-                    // Assign overlapping features to rows
-                    packFeatures(features, maxRows);
-                    self.featureCache = new igv.FeatureCache(features);
+            if (typeof self.reader.readHeader === "function") {
+                self.reader.readHeader().then(function (header, features) {
+                    // Non-indexed readers will return features as a side effect.  This is an important performance hack
+                    if (features) {
+                        // Assign overlapping features to rows
+                        packFeatures(features, maxRows);
+                        self.featureCache = new igv.FeatureCache(features);
 
-                    // If track is marked "searchable"< cache features by name -- use this with caution, memory intensive
-                    if (self.config.searchable) {
-                        addFeaturesToDB(features);
+                        // If track is marked "searchable"< cache features by name -- use this with caution, memory intensive
+                        if (self.config.searchable) {
+                            addFeaturesToDB(features);
+                        }
                     }
-                }
-                continuation(header);
-            });
-        }
-        else {
-            continuation(null);
-        }
+                    fulfill(header);
+                }).catch(reject);
+            }
+            else {
+                fulfill(null);
+            }
+        });
     }
 
     function addFeaturesToDB(featureList) {
@@ -95,6 +98,7 @@ var igv = (function (igv) {
         })
     }
 
+
     /**
      * Required function fo all data source objects.  Fetches features for the
      * range requested and passes them on to the success function.  Usually this is
@@ -103,82 +107,66 @@ var igv = (function (igv) {
      * @param chr
      * @param bpStart
      * @param bpEnd
-     * @param success -- function that takes an array of features as an argument
-     * @param task
      */
-    igv.FeatureSource.prototype.getFeatures = function (chr, bpStart, bpEnd, success, task) {
 
+    igv.FeatureSource.prototype.getFeatures = function (chr, bpStart, bpEnd) {
 
-        var self = this,
-            genomicInterval = new igv.GenomicInterval(chr, bpStart, bpEnd),
-            featureCache = this.featureCache,
-            maxRows = this.config.maxRows || 500;
+        var self = this;
+        return new Promise(function (fulfill, reject) {
 
-        if (featureCache && (featureCache.range === undefined || featureCache.range.containsRange(genomicInterval))) {
-            success(this.featureCache.queryFeatures(chr, bpStart, bpEnd));
+            var genomicInterval = new igv.GenomicInterval(chr, bpStart, bpEnd),
+                featureCache = self.featureCache,
+                maxRows = self.config.maxRows || 500;
 
-        }
-        else {
-            // TODO -- reuse cached features that overelap new region
-            this.reader.readFeatures(chr, bpStart, bpEnd,
-                function (featureList) {
+            if (featureCache && (featureCache.range === undefined || featureCache.range.containsRange(genomicInterval))) {
+                fulfill(self.featureCache.queryFeatures(chr, bpStart, bpEnd));
 
-                var isIndexed =
-                    self.reader.indexed ||
-                    self.config.sourceType === "ga4gh" ||
-                    self.config.sourceType === "immvar" ||
-                    self.config.sourceType === "gtex" ||
-                    self.config.sourceType === "bigquery";
+            }
+            else {
+                // TODO -- reuse cached features that overelap new region
 
-                self.featureCache = isIndexed ?
-                    new igv.FeatureCache(featureList, genomicInterval) :
-                    new igv.FeatureCache(featureList);   // Note - replacing previous cache with new one
-
-
-                // If track is marked "searchable"< cache features by name -- use this with caution, memory intensive
-                if (self.config.searchable) {
-                    addFeaturesToDB(featureList);
+                if(self.sourceType === 'file' && (self.visibilityWindow === undefined || self.visibilityWindow <= 0)) {
+                    // Expand genomic interval to grab entire chromosome
+                    genomicInterval.start = 0;
+                    genomicInterval.end = Number.MAX_VALUE;
                 }
 
-                // Assign overlapping features to rows
-                packFeatures(featureList, maxRows);
+                self.reader.readFeatures(chr, genomicInterval.start, genomicInterval.end).then(
 
-                // Finally pass features for query interval to continuation
-                success(self.featureCache.queryFeatures(chr, bpStart, bpEnd));
+                    function (featureList) {
 
-            }, task);   // Currently loading at granularity of chromosome
-        }
+                        if (featureList && typeof featureList.forEach === 'function') {  // Have result AND its an array type
 
-    };
+                            var isIndexed =
+                                self.reader.indexed ||
+                                self.config.sourceType === "ga4gh" ||
+                                self.config.sourceType === "immvar" ||
+                                self.config.sourceType === "gtex" ||
+                                self.config.sourceType === "bigquery";
 
-    igv.FeatureSource.prototype.allFeatures = function (success) {
+                            self.featureCache = isIndexed ?
+                                new igv.FeatureCache(featureList, genomicInterval) :
+                                new igv.FeatureCache(featureList);   // Note - replacing previous cache with new one
 
-        this.getFeatureCache(function (featureCache) {
-            success(featureCache.allFeatures());
+
+                            // If track is marked "searchable"< cache features by name -- use this with caution, memory intensive
+                            if (self.config.searchable) {
+                                addFeaturesToDB(featureList);
+                            }
+
+                            // Assign overlapping features to rows
+                            packFeatures(featureList, maxRows);
+
+                            // Finally pass features for query interval to continuation
+                            fulfill(self.featureCache.queryFeatures(chr, bpStart, bpEnd));
+                        }
+                        else {
+                            fulfill(null);
+                        }
+
+                    }).catch(reject);
+            }
         });
-
-    };
-
-    /**
-     * Get the feature cache.  This method is exposed for use by cursor.  Loads all features (index not used).
-     * @param success
-     */
-    igv.FeatureSource.prototype.getFeatureCache = function (success) {
-
-        var myself = this;
-
-        if (this.featureCache) {
-            success(this.featureCache);
-        }
-        else {
-            this.reader.readFeatures(function (featureList) {
-                //myself.featureMap = featureMap;
-                myself.featureCache = new igv.FeatureCache(featureList);
-                // Finally pass features for query interval to continuation
-                success(myself.featureCache);
-
-            });
-        }
     }
 
 

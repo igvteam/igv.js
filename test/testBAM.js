@@ -7,27 +7,26 @@ function runBAMTests() {
         }
     };
 
-    //asyncTest("alignments for range", function () {
-    //
-    //    var chr = "chr22",
-    //        beg = 24375199,
-    //        end = 24378544,
-    //        bamReader;
-    //
-    //    bamReader = new igv.BamReader({
-    //        type: 'bam',
-    //        url: 'data/bam/gstt1_sample.bam',
-    //        label: 'BAM unit test'});
-    //
-    //    bamReader.readFeatures(chr, beg, end, function (alignments) {
-    //
-    //        ok(alignments, "alignments");
-    //        equal(alignments.length, 1660, "alignments.length");
-    //
-    //
-    //        start();
-    //    }, undefined);
-    //});
+    asyncTest("alignments for range", function () {
+
+        var chr = "chr22",
+            beg = 24375199,
+            end = 24378544,
+            bamReader;
+
+        bamReader = new igv.BamReader({
+            type: 'bam',
+            url: 'data/bam/gstt1_sample.bam',
+            label: 'BAM unit test'});
+
+        bamReader.readAlignments(chr, beg, end).done(function (alignments) {
+
+            ok(alignments, "alignments");
+            equal(alignments.length, 1660, "alignments.length");
+
+            start();
+        });
+    });
 
     //asyncTest("header", function () {
     //
@@ -47,21 +46,21 @@ function runBAMTests() {
     //
     //    })
     //});
-
-    asyncTest("large header", function () {
-
-        var bamPath = "http://data.broadinstitute.org/igvdata/public/test/data/bam/IonXpress_078_rawlib.lgheader.bam",
-            bamFile = new igv.BamReader( { type: 'bam', url: bamPath, label: 'bigBigBig'} );
-
-        bamFile.readHeader(function () {
-
-            equal(bamFile.contentLength, 534453);
-
-            ok(!$.isEmptyObject(bamFile.chrToIndex));
-
-            start();
-        })
-    });
+    //
+    //asyncTest("large header", function () {
+    //
+    //    var bamPath = "https://data.broadinstitute.org/igvdata/public/test/data/bam/IonXpress_078_rawlib.lgheader.bam",
+    //        bamFile = new igv.BamReader( { type: 'bam', url: bamPath, label: 'bigBigBig'} );
+    //
+    //    bamFile.readHeader().done(function () {
+    //
+    //        equal(bamFile.contentLength, 534453);
+    //
+    //        ok(!$.isEmptyObject(bamFile.chrToIndex));
+    //
+    //        start();
+    //    });
+    //});
 
     /**
      * Look for a known alignment and check expected vs actual block sequence
@@ -108,12 +107,12 @@ function runBAMTests() {
     //                blockQuals1 = expectedQuals.substr(0, 69),
     //                blockQuals2 = expectedQuals.substr(69),
     //                refSeq,
-    //                genomicInterval;
+    //                alignmentContainer;
     //
     //            ok(alignments, "alignments");
     //
-    //            genomicInterval = new igv.GenomicInterval(chr, bpStart, bpEnd);
-    //            ok(genomicInterval, "genomicInterval");
+    //            alignmentContainer = new igv.GenomicInterval(chr, bpStart, bpEnd);
+    //            ok(alignmentContainer, "alignmentContainer");
     //
     //            for (i = 0, len = alignments.length; i < len; i++) {
     //
@@ -134,7 +133,7 @@ function runBAMTests() {
     //
     //                    // Compare refseq to block sequences,  logging mismatches.  This is not really part of the unit
     //                    // test, just put here as an example
-    //                    igv.browser.genome.sequence.getSequence(chr, genomicInterval.start, genomicInterval.end, function (refSeq) {
+    //                    igv.browser.genome.sequence.getSequence(chr, alignmentContainer.start, alignmentContainer.end, function (refSeq) {
     //
     //                        ok(refSeq, "refSeq");
     //

@@ -130,7 +130,7 @@ CanvasRenderingContext2D.prototype.eqTriangle = function (side, cx, cy) {
 }
 
 
-if (!String.prototype.startsWith) {
+if (typeof String.prototype.startsWith === "undefined") {
     String.prototype.startsWith = function (aString) {
         if (this.length < aString.length) {
             return false;
@@ -141,7 +141,7 @@ if (!String.prototype.startsWith) {
     }
 }
 
-if (!String.prototype.endsWith) {
+if (typeof String.prototype.endsWith === "undefined") {
     String.prototype.endsWith = function (aString) {
         if (this.length < aString.length) {
             return false;
@@ -152,19 +152,19 @@ if (!String.prototype.endsWith) {
     }
 }
 
-if (!String.prototype.contains) {
+if (typeof String.prototype.contains === "undefined") {
     String.prototype.contains = function (it) {
         return this.indexOf(it) != -1;
     };
 }
 
-if (!String.prototype.splitLines) {
+if (typeof String.prototype.splitLines === "undefined") {
     String.prototype.splitLines = function () {
         return this.split(/\r\n|\n|\r/gm);
     }
 }
 
-if (!Array.prototype.shuffle) {
+if (typeof Array.prototype.shuffle === "undefined") {
     // Randomly shuffle contents of an array
     Array.prototype.shuffle = function () {
         for (var j, x, i = this.length; i; j = parseInt(Math.random() * i), x = this[--i], this[i] = this[j], this[j] = x);
@@ -172,7 +172,7 @@ if (!Array.prototype.shuffle) {
     };
 }
 
-if (!Array.prototype.swap) {
+if (typeof Array.prototype.swap === "undefined") {
     Array.prototype.swap = function (a, b) {
         var tmp = this[a];
         this[a] = this[b];
@@ -181,7 +181,7 @@ if (!Array.prototype.swap) {
 }
 
 
-if (!Array.prototype.heapSort) {
+if (typeof Array.prototype.heapSort === "undefined") {
 
     Array.prototype.heapSort = function (compare) {
 
@@ -227,7 +227,7 @@ if (!Array.prototype.heapSort) {
     }
 }
 
-if (!Uint8Array.prototype.toText) {
+if (typeof Uint8Array.prototype.toText === "undefined") {
 
     Uint8Array.prototype.toText = function () {
 
@@ -245,7 +245,7 @@ if (!Uint8Array.prototype.toText) {
 
 var log2 = Math.log(2);
 
-if (!Math.log2) {
+if (typeof Math.log2 === "undefined") {
     Math.log2 = function (x) {
         return Math.log(x) / log2;
     }
@@ -254,7 +254,7 @@ if (!Math.log2) {
 // Implementation of bind().  This is included primarily for use with phantom.js, which does not implement it.
 // Attributed to John Resig
 
-if (!Function.prototype.bind) {
+if (typeof Function.prototype.bind === "undefined") {
     Function.prototype.bind = function () {
         var fn = this,
             args = Array.prototype.slice.call(arguments),

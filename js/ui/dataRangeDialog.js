@@ -28,12 +28,12 @@
  */
 var igv = (function (igv) {
 
-    igv.DataRangeDialog = function (parentObject) {
+    igv.DataRangeDialog = function ($parent) {
 
         var self = this;
 
         this.container = $('<div class="igv-grid-container-dialog">');
-        parentObject.append( this.container[ 0 ] );
+        $parent.append( this.container[ 0 ] );
 
         this.container.draggable();
 
@@ -59,44 +59,53 @@ var igv = (function (igv) {
                 column,
                 columnFiller;
 
-            rowContainer = $('<div class="igv-grid-rect">');
 
             row = $('<div class="igv-grid-dialog">');
 
+
             // shim
-            column = $('<div class="igv-col igv-col-1-3">');
+            column = $('<div class="igv-col igv-col-1-8">');
+            //
             row.append( column[ 0 ] );
 
+
+            // ok button
+            column = $('<div class="igv-col igv-col-3-8">');
+            self.ok = $('<div class="igv-col-filler-ok-button">');
+            self.ok.text("OK");
+            column.append( self.ok[ 0 ] );
+            //
+            row.append( column[ 0 ] );
+
+
             // cancel button
-            column = $('<div class="igv-col igv-col-1-3">');
+            column = $('<div class="igv-col igv-col-3-8">');
             columnFiller = $('<div class="igv-col-filler-cancel-button">');
             columnFiller.text("Cancel");
             columnFiller.click(function() { self.hide(); });
             column.append( columnFiller[ 0 ] );
-            row.append( column[ 0 ] );
-
-            // ok button
-            column = $('<div class="igv-col igv-col-1-3">');
-            self.ok = $('<div class="igv-col-filler-cancel-button">');
-            self.ok.text("OK");
-            column.append( self.ok[ 0 ] );
+            //
             row.append( column[ 0 ] );
 
 
+            // shim
+            column = $('<div class="igv-col igv-col-1-8">');
+            //
+            row.append( column[ 0 ] );
+
+
+            rowContainer = $('<div class="igv-grid-rect">');
             rowContainer.append( row[ 0 ]);
 
             return rowContainer;
-
         }
 
         function doLayout() {
 
-            var rowContainer,
+            var rowContainer = $('<div class="igv-grid-rect">'),
                 row,
                 column,
                 columnFiller;
-
-            rowContainer = $('<div class="igv-grid-rect">');
 
 
             // minimum
@@ -120,6 +129,8 @@ var igv = (function (igv) {
 
             rowContainer.append( row[ 0 ]);
 
+
+
             // maximum
             row = $('<div class="igv-grid-dialog">');
 
@@ -135,6 +146,8 @@ var igv = (function (igv) {
             row.append( column[ 0 ] );
 
             rowContainer.append( row[ 0 ]);
+
+
 
             // logaritmic
             row = $('<div class="igv-grid-dialog">');
@@ -163,8 +176,51 @@ var igv = (function (igv) {
 
     };
 
+    igv.DataRangeDialog.prototype.configureWithTrackView = function (trackView) {
+
+        var self = this,
+            min,
+            max;
+
+        this.trackView = trackView;
+
+        if(trackView.track.dataRange) {
+            min = trackView.track.dataRange.min;
+            max = trackView.track.dataRange.max;
+        } else {
+            min = 0;
+            max = 100;
+        }
+
+        this.minInput.val(min);
+        this.maxInput.val(max);
+
+        this.logInput.prop('checked', false);
+
+        this.ok.unbind();
+        this.ok.click(function() {
+
+            min = parseFloat(self.minInput.val());
+            max = parseFloat(self.maxInput.val());
+
+            if(isNaN(min) || isNaN(max)) {
+
+                alert("Must input numeric values");
+            } else {
+
+                trackView.track.min = min;
+                trackView.track.max = max;
+
+                self.hide();
+                trackView.update();
+            }
+
+        });
+
+    };
+
     igv.DataRangeDialog.prototype.hide = function () {
-        $(this.container).offset( { left: 0, top: 0 } );
+        this.container.offset( { left: 0, top: 0 } );
         this.container.hide();
     };
 
@@ -174,18 +230,18 @@ var igv = (function (igv) {
             track_scrolltop = $(this.trackView.trackDiv).scrollTop(),
             track_origin = $(this.trackView.trackDiv).offset(),
             track_size = { width: $(this.trackView.trackDiv).outerWidth(), height: $(this.trackView.trackDiv).outerHeight()},
-            size = { width: $(this.container).outerWidth(), height: $(this.container).outerHeight()};
+            size = { width: this.container.outerWidth(), height: this.container.outerHeight()};
 
         //console.log("scrollTop. body " + body_scrolltop + " track " + track_scrolltop);
 
         // centered left-right
-        //$(this.container).offset( { left: (track_size.width - size.width)/2, top: track_origin.top } );
+        //this.container.offset( { left: (track_size.width - size.width)/2, top: track_origin.top } );
 
         this.container.show();
 
-        $(this.container).offset( { left: (track_size.width - 300), top: (track_origin.top + body_scrolltop) } );
+        this.container.offset( { left: (track_size.width - 300), top: (track_origin.top + body_scrolltop) } );
 
-        $(this.container).offset( igv.constrainBBox($(this.container), $(igv.browser.trackContainerDiv)) );
+        this.container.offset( igv.constrainBBox(this.container, $(igv.browser.trackContainerDiv)) );
 
     };
 

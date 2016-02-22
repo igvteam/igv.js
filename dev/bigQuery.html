@@ -1,13 +1,8 @@
-<!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-    <meta charset="utf-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
-    <meta name="description" content="">
-    <meta name="author" content="">
-    <link rel="shortcut icon" href=../img/favicon.ico>
-    <title>IGV - Integrative Genomics Viewer</title>
+
+    <title>Integrative Genomics Viewer</title>
+
 
     <!-- jQuery UI CSS -->
     <link rel="stylesheet" type="text/css"
@@ -29,12 +24,18 @@
     <!-- jQuery UI JS -->
     <script type="text/javascript" src="//ajax.googleapis.com/ajax/libs/jqueryui/1.11.2/jquery-ui.min.js"></script>
 
+    <!-- Google API -- used for oAuth only -->
+    <script src="https://apis.google.com/js/auth.js"></script>
+
     <!-- Vendor JS -->
     <script type="text/javascript" src="../vendor/inflate.js"></script>
     <script type="text/javascript" src="../vendor/zlib_and_gzip.min.js"></script>
     <script type="text/javascript" src="../vendor/jquery.mousewheel.js"></script>
+    <script type="text/javascript" src="../vendor/promise-7.0.4.js"></script>
 
     <!-- IGV JS -->
+    <script type="text/javascript" src="../js/bigQuery/bigQuery.js"></script>
+    <script type="text/javascript" src="../js/bigQuery/ccp.js"></script>
     <script type="text/javascript" src="../js/igv-create.js"></script>
     <script type="text/javascript" src="../js/ui/userFeedback.js"></script>
     <script type="text/javascript" src="../js/ui/popover.js"></script>
@@ -55,13 +56,14 @@
     <script type="text/javascript" src="../js/fasta.js"></script>
     <script type="text/javascript" src="../js/sequenceTrack.js"></script>
     <script type="text/javascript" src="../js/wigTrack.js"></script>
-    <script type="text/javascript" src="../js/ui/dataloader.js"></script>
+
     <script type="text/javascript" src="../js/igv-exts.js"></script>
     <script type="text/javascript" src="../js/igvxhr.js"></script>
     <script type="text/javascript" src="../js/binary.js"></script>
 
     <script type="text/javascript" src="../js/gtex/eqtlTrack.js"></script>
     <script type="text/javascript" src="../js/gtex/gtexFileReader.js"></script>
+    <script type="text/javascript" src="../js/gtex/gtexReader.js"></script>
     <script type="text/javascript" src="../js/gtex/gtex.js"></script>
     <script type="text/javascript" src="../js/gtex/immvarReader.js"></script>
 
@@ -73,10 +75,13 @@
     <script type="text/javascript" src="../js/bam/bamAlignment.js"></script>
     <script type="text/javascript" src="../js/bam/bamAlignmentRow.js"></script>
     <script type="text/javascript" src="../js/bam/bamIndex.js"></script>
+    <script type="text/javascript" src="../js/bam/alignmentContainer.js"></script>
+    <script type="text/javascript" src="../js/bam/pairedAlignment.js"></script>
 
     <script type="text/javascript" src="../js/ga4gh/ga4ghAlignmentReader.js"></script>
     <script type="text/javascript" src="../js/ga4gh/ga4ghVariantReader.js"></script>
     <script type="text/javascript" src="../js/ga4gh/ga4ghHelper.js"></script>
+    <script type="text/javascript" src="../js/ga4gh/googleUtils.js"></script>
 
     <script type="text/javascript" src="../js/intervalTree.js"></script>
     <script type="text/javascript" src="../js/igv-constants.js"></script>
@@ -87,10 +92,10 @@
     <script type="text/javascript" src="../js/feature/tribble.js"></script>
     <script type="text/javascript" src="../js/feature/featureFileReader.js"></script>
 
+    <script type="text/javascript" src="../js/feature/aneuSource.js"></script>
+    <script type="text/javascript" src="../js/feature/aneuTrack.js"></script>
     <script type="text/javascript" src="../js/encode/encode.js"></script>
-    <script type="text/javascript" src="../js/cursor/cursorTrack.js"></script>
-    <script type="text/javascript" src="../js/cursor/cursorModel.js"></script>
-    <script type="text/javascript" src="../js/cursor/cursor-ideogram.js"></script>
+
 
     <script type="text/javascript" src="../js/karyo/karyo.js"></script>
     <script type="text/javascript" src="../js/gwas/t2dVariantSource.js"></script>
@@ -120,102 +125,106 @@
 
     <script src="../js/oauth/google.js"></script>
 
-    <style type="text/css">
+    <script>
 
-        #trackList {
 
-            font-family: 'PT Sans', sans-serif;
-            font-size: small;
-            font-weight: 400;
+        function auth() {
+            var clientId = '923665148151-ln03hiqt0223nsfc6a690k0thj0h1ikb.apps.googleusercontent.com';
+            var config = {
+                'client_id': clientId,
+                'scope': 'https://www.googleapis.com/auth/bigquery'
+            };
+
+            gapi.auth.authorize(config, function (tokenJson) {
+
+                $('#auth_button').prop('disabled', true);
+
+                oauth.google.apiKey = "AIzaSyCDrPmD9U584pZ_BixQ-SBJcY3_A7IFEa8";
+                igv.oauth.google.access_token = tokenJson.access_token;
+
+                populateStudies();
+
+            });
         }
 
-        div#trackList > div, div#trackList > h3 {
+        function populateStudies() {
 
-            color: #444;
-            margin-left: 48px;
-            margin-top: 4px;
-            margin-bottom: 4px;
+            var q = "SELECT  unique(Study) FROM [isb-cgc:tcga_201510_alpha.Clinical_data] LIMIT 1000";
+            igv.bigQuery(
+                    {
+                        projectId: 'isb-cgc-03-0001',
+                        queryString: q,
+                        decode: function (row) {
+                            return row.f[0].v
+                        }
+                    }).then(function (results) {
+                results.sort();
+                $('#study_select').append('<option value="---">---</option>');
+                results.forEach(function (study) {
+                    $('#study_select').append('<option value="' + study + '">' + study + '</option>');
+                })
 
-            padding-left: 32px;
-
-            width: 300px;
+            }).catch(function (error) {
+                console.log(error);
+            });
         }
 
-        div#trackList > div:hover,
-        div#trackList > div:focus,
-        div#trackList > div:active {
-            cursor: pointer;
-            color: white;
-            background-color: rgba(49, 106, 246, 1);
+        function studySelected(select) {
+            loadSegTrack(select.value);
         }
 
-    </style>
+        function loadSegTrack(study) {
+            igv.browser.loadTrack(
+                    {
+                        //autoHeight: false,
+                        sourceType: 'bigquery',
+                        featureType: 'seg',
+                        name: study,
+                        cohort: 'SELECT ParticipantBarcode FROM [isb-cgc:tcga_201510_alpha.Clinical_data] WHERE Study = "' + study + '"'
+                    })
+        }
 
+    </script>
 </head>
 
 <body>
+<h1>ISB BigQuery Demo</h1>
 
-<div id="myDiv" style="padding-top: 50px;padding-bottom: 20px; height: auto"></div>
+<ul>
+    <li><h2>Step 1:</h2>
+        <button id="auth_button" onclick="auth();">Authorize</button>
+    </li>
 
-<script type="text/javascript">
+    <li><h2>Step 2: Count to 3, then select study</h2><select id="study_select"
+                                                              onchange="studySelected($(this).find('option:selected')[0])"></select>
+    </li>
+</ul>
 
+<p></p>
+
+<div id="igvDiv" style="padding-top: 10px;padding-bottom: 10px; border:1px solid lightgray"></div>
+
+<script>
     $(document).ready(function () {
+        var div = $("#igvDiv")[0],
+                options = {
+                    genome: "hg19",
+                    tracks: [
 
-        var div,
-                options,
-                browser;
+                        {
+                            name: "Genes",
+                            url: "//igv.broadinstitute.org/annotations/hg19/genes/gencode.v18.collapsed.bed",
+                            order: Number.MAX_VALUE,
+                            displayMode: "EXPANDED"
 
-        div = $("#myDiv")[0];
-        options = {
+                        }
 
-            locus: "chr11:510,037-541,540",
-            reference: {
-                fastaURL: "../SDG/Saccharomyces_cerevisiae_S288c.fasta",
-                id: "S288c"
-            },
-            tracks: [
-                {
-                    url: "../SDG/dUTP.76.pairs.F.bw",
-                    name: "dUTP F",
-                    format: "bigwig",
-                    color: "rgb(56,117,215)",
-                    min: 0,
-                    max: 1.0e-6
-                },
-                {
-                    url: "../SDG/test.bedGraph",
-                    name: "test",
-                    color: "rgb(56,117,215)",
-                    min: 0,
-                    max: 1.0e-6
-                },
-                {
-                    url: "../SDG/dUTP.76.pairs.R.bw",
-                    name: "dUTP R",
-                    format: "bigwig",
-                    color: "rgb(3,3,178)",
-                    max: 0,
-                    min: -1.0e-6
-                },
-                {
-                    url: "../SDG/SGD_features.bed",
-                    name: "SGD",
-                    indexed: false,
-                    searchable: true,
-                    order: Number.MAX_VALUE,
-                    displayMode: "EXPANDED"
+                    ]
+                };
 
-                }
-            ]
-
-        };
-
-        browser = igv.createBrowser(div, options);
+        igv.createBrowser(div, options);
     });
-
-
 </script>
 
 </body>
-
 </html>

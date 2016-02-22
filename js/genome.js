@@ -150,112 +150,113 @@ var igv = (function (igv) {
             this.end >= range.end;
     }
 
-    igv.loadGenome = function (reference, continuation) {
+    igv.loadGenome = function (reference) {
 
-        var cytobandUrl = reference.cytobandURL,
-            cytobands,
-            aliasURL = reference.aliasURL,
-            aliases,
-            chrNames,
-            chromosomes = {};
-        sequence = new igv.FastaSequence(reference);
+        return new Promise(function (fulfill, reject) {
 
-        sequence.init(function () {
+            var cytobandUrl = reference.cytobandURL,
+                cytobands,
+                aliasURL = reference.aliasURL,
+                aliases,
+                chrNames,
+                chromosomes = {},
+                sequence;
 
-            var order = 0;
+            sequence = new igv.FastaSequence(reference);
 
-            chrNames = sequence.chromosomeNames;
-            chromosomes = sequence.chromosomes;
+            sequence.init().then(function () {
 
-            if (cytobandUrl) {
-                loadCytobands(cytobandUrl, reference.withCredentials, function (result) {
-                    cytobands = result;
-                    checkReady();
-                });
+                var order = 0;
+
+                chrNames = sequence.chromosomeNames;
+                chromosomes = sequence.chromosomes;
+
+                if (cytobandUrl) {
+                    loadCytobands(cytobandUrl, reference.withCredentials, function (result) {
+                        cytobands = result;
+                        checkReady();
+                    });
+                }
+
+                if (aliasURL) {
+                    loadAliases(aliasURL, reference.withCredentials, function (result) {
+                        aliases = result;
+                        checkReady();
+                    });
+                }
+
+                checkReady();
+
+            }).catch(reject);
+
+            function checkReady() {
+
+                var isReady = (cytobandUrl === undefined || cytobands !== undefined) &&
+                    (aliasURL === undefined || aliases !== undefined);
+                if (isReady) {
+                    fulfill(new igv.Genome(sequence, cytobands, aliases));
+                }
+
             }
-
-            if (aliasURL) {
-                loadAliases(aliasURL, reference.withCredentials, function (result) {
-                    aliases = result;
-                    checkReady();
-                });
-            }
-
-            checkReady();
-
         });
-
-        function checkReady() {
-
-            var isReady = (cytobandUrl === undefined || cytobands !== undefined) &&
-                (aliasURL === undefined || aliases !== undefined);
-            if (isReady) {
-                continuation(new igv.Genome(sequence, cytobands, aliases));
-            }
-
-        }
     }
 
     function loadCytobands(cytobandUrl, withCredentials, continuation) {
 
         igvxhr.loadString(cytobandUrl, {
+            withCredentials: withCredentials
+        }).then(function (data) {
 
-            success: function (data) {
+            var bands = [],
+                lastChr,
+                n = 0,
+                c = 1,
+                lines = data.splitLines(),
+                len = lines.length,
+                cytobands = {};
 
-                var bands = [],
-                    lastChr,
-                    n = 0,
-                    c = 1,
-                    lines = data.splitLines(),
-                    len = lines.length,
-                    cytobands = {};
+            for (var i = 0; i < len; i++) {
+                var tokens = lines[i].split("\t");
+                var chr = tokens[0];
+                if (!lastChr) lastChr = chr;
 
-                for (var i = 0; i < len; i++) {
-                    var tokens = lines[i].split("\t");
-                    var chr = tokens[0];
-                    if (!lastChr) lastChr = chr;
+                if (chr != lastChr) {
 
-                    if (chr != lastChr) {
-
-                        cytobands[lastChr] = bands;
-                        bands = [];
-                        lastChr = chr;
-                        n = 0;
-                        c++;
-                    }
-
-                    if (tokens.length == 5) {
-                        //10	0	3000000	p15.3	gneg
-                        var chr = tokens[0];
-                        var start = parseInt(tokens[1]);
-                        var end = parseInt(tokens[2]);
-                        var name = tokens[3];
-                        var stain = tokens[4];
-                        bands[n++] = new igv.Cytoband(start, end, name, stain);
-                    }
+                    cytobands[lastChr] = bands;
+                    bands = [];
+                    lastChr = chr;
+                    n = 0;
+                    c++;
                 }
 
-                continuation(cytobands);
-            },
-            withCredentials: withCredentials
+                if (tokens.length == 5) {
+                    //10	0	3000000	p15.3	gneg
+                    var chr = tokens[0];
+                    var start = parseInt(tokens[1]);
+                    var end = parseInt(tokens[2]);
+                    var name = tokens[3];
+                    var stain = tokens[4];
+                    bands[n++] = new igv.Cytoband(start, end, name, stain);
+                }
+            }
+
+            continuation(cytobands);
         });
     }
 
     function loadAliases(aliasURL, withCredentials, continuation) {
         igvxhr.loadString(aliasURL, {
-
-            success: function (data) {
-
-                var lines = data.splitLines(),
-                    aliases = [];
-
-                lines.forEach(function (line) {
-                    if (!line.startsWith("#") & line.length > 0) aliases.push(line.split("\t"));
-                });
-
-                continuation(aliases);
-            },
             withCredentials: withCredentials
+        }).then(function (data) {
+
+            var lines = data.splitLines(),
+                aliases = [];
+
+            lines.forEach(function (line) {
+                if (!line.startsWith("#") & line.length > 0) aliases.push(line.split("\t"));
+            });
+
+            continuation(aliases);
         });
 
     }

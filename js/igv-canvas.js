@@ -89,7 +89,6 @@ var igv = (function (igv) {
             x = Math.round(x);
             y = Math.round(y);
 
-            log("fillRect");
             if (properties) {
                 ctx.save();
                 igv.graphics.setProperties(ctx, properties);
