@@ -52,39 +52,56 @@ var igv = (function (igv) {
 
         self.container.append(rowOfInput()[ 0 ]);
 
-        self.container.append(rowOfCancel()[ 0 ]);
+        self.container.append(rowOfOkCancel()[ 0 ]);
 
-        function rowOfCancel() {
+        function rowOfOkCancel() {
 
-            var rowContainer,
-                row,
-                column,
-                columnFiller;
+            var $rowContainer,
+                $row,
+                $column,
+                $columnFiller;
 
-            row = $('<div class="igv-grid-dialog">');
+            $row = $('<div class="igv-grid-dialog">');
 
             // shim
-            column = $('<div class="igv-col igv-col-5-8">');
-            row.append( column[ 0 ] );
+            $column = $('<div class="igv-col igv-col-1-8">');
+            //
+            $row.append( $column[ 0 ] );
+
+
+            // ok button
+            $column = $('<div class="igv-col igv-col-3-8">');
+            $columnFiller = $('<div class="igv-col-filler-ok-button">');
+            $columnFiller.text("OK");
+
+            self.$ok = $columnFiller;
+
+            $column.append( $columnFiller[ 0 ] );
+            //
+            $row.append( $column[ 0 ] );
+
 
             // cancel button
-            column = $('<div class="igv-col igv-col-3-8">');
-
-            columnFiller = $('<div class="igv-col-filler-cancel-button">');
-            columnFiller.text("Cancel");
-
-            columnFiller.click(function() {
+            $column = $('<div class="igv-col igv-col-3-8">');
+            $columnFiller = $('<div class="igv-col-filler-cancel-button">');
+            $columnFiller.text("Cancel");
+            $columnFiller.click(function() {
+                self.$dialogInput.val(undefined);
                 self.hide();
             });
+            $column.append( $columnFiller[ 0 ] );
+            //
+            $row.append( $column[ 0 ] );
 
+            // shim
+            $column = $('<div class="igv-col igv-col-1-8">');
+            //
+            $row.append( $column[ 0 ] );
 
-            column.append( columnFiller[ 0 ] );
-            row.append( column[ 0 ] );
+            $rowContainer = $('<div class="igv-grid-rect">');
+            $rowContainer.append( $row[ 0 ]);
 
-            rowContainer = $('<div class="igv-grid-rect">');
-            rowContainer.append( row[ 0 ]);
-
-            return rowContainer;
+            return $rowContainer;
 
         }
 
@@ -98,9 +115,9 @@ var igv = (function (igv) {
             row = $('<div class="igv-grid-dialog">');
 
             column = $('<div class="igv-col igv-col-4-4">');
-            self.dialogLabel = $('<div class="igv-user-input-label">');
+            self.$dialogLabel = $('<div class="igv-user-input-label">');
 
-            column.append( self.dialogLabel[ 0 ] );
+            column.append( self.$dialogLabel[ 0 ] );
             row.append( column[ 0 ] );
 
             rowContainer = $('<div class="igv-grid-rect">');
@@ -120,9 +137,9 @@ var igv = (function (igv) {
             row = $('<div class="igv-grid-dialog">');
 
             column = $('<div class="igv-col igv-col-4-4">');
-            self.dialogInput = $('<input class="igv-user-input-dialog" type="text" value="#000000">');
+            self.$dialogInput = $('<input class="igv-user-input-dialog" type="text" value="#000000">');
 
-            column.append( self.dialogInput[ 0 ] );
+            column.append( self.$dialogInput[ 0 ] );
             row.append( column[ 0 ] );
 
             rowContainer = $('<div class="igv-grid-rect">');
@@ -131,6 +148,46 @@ var igv = (function (igv) {
             return rowContainer;
 
         }
+
+    };
+
+    igv.Dialog.prototype.configure = function (trackView, dialogLabelHTMLFunction, dialogInputValue, dialogInputChange, dialogClickOK) {
+
+        var clickOK,
+            self = this;
+
+        self.trackView = trackView;
+
+        if (dialogLabelHTMLFunction) {
+            self.$dialogLabel.html(dialogLabelHTMLFunction());
+            self.$dialogLabel.show();
+        } else {
+            self.$dialogLabel.hide();
+        }
+
+        if (dialogInputValue) {
+
+            self.$dialogInput.val(dialogInputValue);
+
+            self.$dialogInput.unbind();
+            self.$dialogInput.change(dialogInputChange);
+
+            self.$dialogInput.show();
+        } else {
+            self.$dialogInput.hide();
+        }
+
+        self.$ok.unbind();
+        clickOK = dialogClickOK || dialogInputChange;
+        self.$ok.click(function() {
+
+            if (clickOK) {
+                clickOK();
+            }
+
+            self.hide();
+        });
+
 
     };
 
@@ -146,11 +203,6 @@ var igv = (function (igv) {
             track_origin = $(this.trackView.trackDiv).offset(),
             track_size = { width: $(this.trackView.trackDiv).outerWidth(), height: $(this.trackView.trackDiv).outerHeight()},
             size = { width: $(this.container).outerWidth(), height: $(this.container).outerHeight()};
-
-        //console.log("scrollTop. body " + body_scrolltop + " track " + track_scrolltop);
-
-        // centered left-right
-        //$(this.container).offset( { left: (track_size.width - size.width)/2, top: track_origin.top } );
 
         this.container.show();
 

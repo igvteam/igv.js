@@ -80,9 +80,8 @@ var igv = (function (igv) {
      * @param bpStart
      * @param bpEnd
      * @param success -- function that takes an array of features as an argument
-     * @param task
      */
-    igv.AneuFeatureSource.prototype.getFeatures = function (chr, bpStart, bpEnd, success, task) {
+    igv.AneuFeatureSource.prototype.getFeatures = function (chr, bpStart, bpEnd, success) {
 
         var myself = this,
             range = new igv.GenomicInterval(chr, bpStart, bpEnd),
@@ -107,19 +106,11 @@ var igv = (function (igv) {
                     success(features);
 
                 },
-                task,
                 range);   // Currently loading at granularity of chromosome
         }
 
     };
 
-    igv.AneuFeatureSource.prototype.allFeatures = function (success) {
-
-        this.getFeatureCache(function (featureCache) {
-            success(featureCache.allFeatures());
-        });
-
-    };
 
     /**
      * Get the feature cache.  This method is exposed for use by cursor.  Loads all features (no index).
@@ -146,62 +137,37 @@ var igv = (function (igv) {
     /**
      *
      * @param success
-     * @param task
      * @param range -- genomic range to load.
      */
-    igv.AneuFeatureSource.prototype.loadFeatures = function (success, task, range) {
+    igv.AneuFeatureSource.prototype.loadFeatures = function (continuation, range) {
 
         var self = this;
         var parser = self.parser;
         var options = {
-            headers: self.config.headers,           // http headers, not file header
-            tokens: self.config.tokens,           // http headers, not file header
-            success: function (data) {
+                headers: self.config.headers,           // http headers, not file header
+                tokens: self.config.tokens,           // http headers, not file header
+                withCredentials: self.config.withCredentials
+            },
+            success = function (data) {
                 // console.log("Loaded data, calling parser.parseFeatures: parser="+parser);
                 self.header = parser.parseHeader(data);
                 var features = parser.parseFeatures(data);
                 //console.log("Calling success "+success);
                 //console.log("nr features in argument "+features.length);
-                success(features);   // <= PARSING DONE HERE
-            },
-            error: function (msg) {
-                console.log("Error loading: " + xhr.status);
-            },
-            withCredentials: self.config.withCredentials,
-            task: task
-        };
+                continuation(features);   // <= PARSING DONE HERE
+            };
+
         //  console.log("=================== load features. File is: "+myself.localFile+"/"+myself.url);
         if (self.localFile) {
             //    console.log("Loading local file: "+JSON.stringify(localFile));
-            igvxhr.loadStringFromFile(self.localFile, options);
+            igvxhr.loadStringFromFile(self.localFile, options).then(success);
         }
         else {
             //console.log("Loading URL "+myself.url);
-            igvxhr.loadString(self.url, options);
+            igvxhr.loadString(self.url, options).then(success);
         }
 
 
-        function getContentLength(continuation) {
-            if (self.contentLength) {
-                continuation(self.contentLength);
-            }
-            else {
-                // Get the content length first, so we don't try to read beyond the end of the file
-                igvxhr.getContentLength(self.headURL, {
-                    headers: self.config.headers,
-                    success: function (contentLength) {
-                        self.contentLength = contentLength;
-                        continuation(contentLength);
-
-                    },
-                    error: function () {
-                        self.contentLength = -1;
-                        continuation(-1);
-                    },
-                    withCredentials: self.config.withCredentials
-                });
-            }
-        }
     }
 
     return igv;

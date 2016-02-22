@@ -25,16 +25,11 @@
 
 var igv = (function (igv) {
 
-    /**
-     }
-     * A wrapper around a bam file that provides a simple cache
-     *
-     * @param config
-     * @constructor
-     */
+
     igv.BamSource = function (config) {
 
         this.config = config;
+        this.alignmentContainer = undefined;
 
         if (config.sourceType === "ga4gh") {
             this.bamReader = new igv.Ga4ghAlignmentReader(config);
@@ -45,55 +40,53 @@ var igv = (function (igv) {
 
     };
 
-    igv.BamSource.prototype.getFeatures = function (chr, bpStart, bpEnd, continuation, task) {
+    igv.BamSource.prototype.getAlignments = function (chr, bpStart, bpEnd) {
+
+        var self = this;
+        return new Promise(function (fulfill, reject) {
+
+            if (self.alignmentContainer && self.alignmentContainer.contains(chr, bpStart, bpEnd)) {
+
+                fulfill(self.alignmentContainer);
+
+            } else {
+
+                self.bamReader.readAlignments(chr, bpStart, bpEnd).then(function (alignmentContainer) {
 
 
-        if (this.genomicInterval && this.genomicInterval.contains(chr, bpStart, bpEnd)) {
+                    self.alignmentContainer = alignmentContainer;
 
-            continuation(this.genomicInterval);
+                    igv.browser.genome.sequence.getSequence(self.alignmentContainer.chr, self.alignmentContainer.start, self.alignmentContainer.end).then(
 
-        } else {
+                        function (sequence) {
 
-            var self = this;
+                            var maxRows = self.config.maxRows || 500;
 
-            this.bamReader.readFeatures(chr, bpStart, bpEnd,
+                            if (sequence) {
 
-                function (alignments) {
+                                self.alignmentContainer.coverageMap.refSeq = sequence;    // TODO -- fix this
+                                self.alignmentContainer.sequence = sequence;           // TODO -- fix this
 
-                    if (alignments) {  // Can be null on error or aborting
-
-                        self.genomicInterval = new igv.GenomicInterval(chr, bpStart, bpEnd);
-
-                        igv.browser.genome.sequence.getSequence(self.genomicInterval.chr, self.genomicInterval.start, self.genomicInterval.end,
-
-                            function (sequence) {
-
-                                var maxRows = self.config.maxRows || 500;
-
-                                if (sequence) {
-
-                                    self.genomicInterval.coverageMap = new igv.CoverageMap(chr, bpStart, bpEnd, alignments, sequence);
-
-                                    self.genomicInterval.packedAlignmentRows = packAlignmentRows(self.genomicInterval, alignments, maxRows);
-
-                                    self.genomicInterval.features = undefined;
-
-                                    self.genomicInterval.sequence = sequence;
-
-                                    continuation(self.genomicInterval);
-                                }
-
-                            },
-                            task);
-                    }
-
-                },
-                task);
-        }
-    };
+                                self.alignmentContainer.packedAlignmentRows = packAlignmentRows(self.alignmentContainer, maxRows);
 
 
-    function packAlignmentRows(genomicInterval, alignments, maxRows) {
+                                fulfill(self.alignmentContainer);
+                            }
+                        }).catch(reject);
+
+                }).catch(reject);
+            }
+        });
+    }
+
+
+    function packAlignmentRows(alignmentContainer, maxRows) {
+
+        var alignments = alignmentContainer.alignments;
+
+        alignments.sort(function (a, b) {
+           return a.start - b.start;
+        });
 
         if (alignments.length === 0) {
 
@@ -103,7 +96,8 @@ var igv = (function (igv) {
 
             var bucketList = [],
                 allocatedCount = 0,
-                nextStart = genomicInterval.start,
+                lastAllocatedCount = 0,
+                nextStart = alignmentContainer.start,
                 alignmentRow,
                 index,
                 bucket,
@@ -126,11 +120,11 @@ var igv = (function (igv) {
 
                 alignmentRow = new igv.BamAlignmentRow();
 
-                while (nextStart <= genomicInterval.end) {
+                while (nextStart <= alignmentContainer.end) {
 
                     bucket = undefined;
 
-                    while (!bucket && nextStart <= genomicInterval.end) {
+                    while (!bucket && nextStart <= alignmentContainer.end) {
 
                         index = nextStart - bucketStart;
                         if (bucketList[index] === undefined) {
@@ -160,6 +154,10 @@ var igv = (function (igv) {
                 }
 
                 nextStart = bucketStart;
+
+                if(allocatedCount === lastAllocatedCount) break;   // Protect from infinite loops
+
+                lastAllocatedCount = allocatedCount;
 
             } // while (allocatedCount)
 

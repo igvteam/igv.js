@@ -24,6 +24,11 @@ function runFastaTests() {
 //
 //    });
 
+    function handleError(error) {
+        console.log(error);
+        fail();
+    }
+
     asyncTest("FastaSequence - Test fasata with no index", 1, function () {
 
         var sequence = new igv.FastaSequence(
@@ -33,28 +38,30 @@ function runFastaTests() {
             }
         );
 
-        sequence.init(function () {
+        sequence.init().then(function () {
 
             // Note -- coordinates are UCSC style
             // chr22:29565177-29565216
             var expectedSequence = "GCTGC";
-            sequence.getSequence("CACNG6--RPLP2", 60, 65, function (seq) {
+            sequence.getSequence("CACNG6--RPLP2", 60, 65).then(function (seq) {
 
                 equal(seq, expectedSequence);
                 start();
+            }).catch(function (error) {
+                console.log(error);
             })
-        })
+        }).catch(handleError)
     })
 
     asyncTest("FastaSequence - Test getSequence", 2, function () {
 
         var sequence = new igv.FastaSequence({fastaURL: "http://data.broadinstitute.org/igvdata/test/data/fasta/chr22.fa"});
 
-        sequence.init(function () {
+        sequence.init().then(function () {
 
             // Note -- coordinates are UCSC style
             // chr22:29565177-29565216
-            sequence.getSequence("chr22", 29565176, 29565216, function (sequence) {
+            sequence.getSequence("chr22", 29565176, 29565216).then(function (sequence) {
 
                 ok(sequence, "sequence");
 
@@ -64,18 +71,18 @@ function runFastaTests() {
 
                 start();
             })
-        })
+        }).catch(handleError)
     })
 
     asyncTest("FastaSequence - Test readSequence", 2, function () {
 
         var sequence = new igv.FastaSequence({fastaURL: "http://data.broadinstitute.org/igvdata/test/data/fasta/chr22.fa"});
 
-        sequence.init(function () {
+        sequence.init().then(function () {
 
             // Note -- coordinates are UCSC style
             // chr22:29565177-29565216
-            sequence.readSequence("chr22", 29565176, 29565216, function (sequence) {
+            sequence.readSequence("chr22", 29565176, 29565216).then(function (sequence) {
 
                 ok(sequence, "sequence");
 
@@ -84,7 +91,7 @@ function runFastaTests() {
                 equal(seqString, expectedSeqString);
 
                 start();
-            })
+            }).catch(handleError)
         })
     })
 
@@ -92,16 +99,18 @@ function runFastaTests() {
 
         var sequence = new igv.FastaSequence({fastaURL: "http://data.broadinstitute.org/igvdata/test/data/fasta/chr22.fa"});
 
-        sequence.init(function () {
+        sequence.init().then(function () {
 
             // Note -- coordinates are UCSC style
             // chr22:29565177-29565216
-            sequence.readSequence("noSuchChromosome", 29565176, 29565216, function (nullSeq) {
+            sequence.readSequence("noSuchChromosome", 29565176, 29565216).then(function (nullSeq) {
 
                 ok(!nullSeq);
                 start();
+            }).catch(function (error) {
+                console.log(error);
             })
-        })
+        }).catch(handleError)
     })
 
 }

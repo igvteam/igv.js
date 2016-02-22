@@ -48,7 +48,12 @@ var igv = (function (igv) {
         this.name = config.name;
         this.id = config.id || this.name;
         this.color = config.color || "rgb(150,150,150)";
+
         this.height = 100;
+
+        this.minHeight = config.minHeight || Math.min( 25, this.height);
+        this.maxHeight = config.maxHeight || Math.max(500, this.height);
+
         this.order = config.order;
 
         // Min and max values.  No defaults for these, if they aren't set track will autoscale.
@@ -57,9 +62,12 @@ var igv = (function (igv) {
 
     };
 
-    igv.WIGTrack.prototype.getFeatures = function (chr, bpStart, bpEnd, continuation, task) {
+    igv.WIGTrack.prototype.getFeatures = function (chr, bpStart, bpEnd) {
 
-        this.featureSource.getFeatures(chr, bpStart, bpEnd, continuation, task)
+        var self = this;
+        return new Promise(function (fulfill, reject) {
+            self.featureSource.getFeatures(chr, bpStart, bpEnd).then(fulfill);
+        });
     };
 
     igv.WIGTrack.prototype.popupMenuItems = function (popover) {
@@ -84,7 +92,12 @@ var igv = (function (igv) {
             bpEnd = bpStart + pixelWidth * bpPerPixel + 1,
             featureValueMinimum,
             featureValueMaximum,
-            featureValueRange;
+            featureValueRange,
+            $dataRangeTrackLabel,
+            str,
+            min,
+            max;
+
 
         if (features && features.length > 0) {
             if(track.max === undefined)  {
@@ -100,6 +113,14 @@ var igv = (function (igv) {
             featureValueRange = featureValueMaximum - featureValueMinimum;
 
             track.dataRange = {min: featureValueMinimum, max: featureValueMaximum};  // Record for disply, menu, etc
+
+            $dataRangeTrackLabel = $(this.trackView.trackDiv).find('.igv-data-range-track-label');
+
+            min = (Math.floor(track.dataRange.min) === track.dataRange.min) ? track.dataRange.min : track.dataRange.min.toFixed(2);
+            max = (Math.floor(track.dataRange.max) === track.dataRange.max) ? track.dataRange.max : track.dataRange.max.toFixed(2);
+            str = '[' + min + ' - ' + max + ']';
+
+            $dataRangeTrackLabel.text(str);
 
             features.forEach(renderFeature);
         }

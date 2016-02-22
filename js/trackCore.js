@@ -57,8 +57,8 @@ var igv = (function (igv) {
 
         track.height = config.height || ("bed" === config.type ? 100 : 50);
         track.autoHeight = config.autoHeight === undefined ? (config.height === undefined) : config.autoHeight;
-        track.minHeight = config.minHeight || Math.min(25, this.height);
-        track.maxHeight = config.maxHeight || Math.max(500, this.height);
+        track.minHeight = config.minHeight || Math.min( 25, track.height);
+        track.maxHeight = config.maxHeight || Math.max(500, track.height);
 
         // Set maxRows -- protects against pathological feature and bam packing cases
         if (config.maxRows === undefined) config.maxRows = 500;
@@ -90,7 +90,7 @@ var igv = (function (igv) {
         }
         else {
             if ("file" === sourceType) {
-                if (config.format === undefined ) {
+                if (config.format === undefined) {
                     inferFileFormat(config);
                 }
                 inferFeatureType(config);
@@ -107,7 +107,7 @@ var igv = (function (igv) {
 
             //Strip parameters -- handle local files later
             idx = fn.indexOf("?");
-            if(idx > 0) {
+            if (idx > 0) {
                 fn = fn.substr(0, idx);
             }
 
@@ -117,7 +117,6 @@ var igv = (function (igv) {
             } else if (fn.endsWith(".txt") || fn.endsWith(".tab")) {
                 fn = fn.substr(0, fn.length - 4);
             }
-
 
 
             idx = fn.lastIndexOf(".");
@@ -229,27 +228,21 @@ var igv = (function (igv) {
                 default:
             }
         }
-    }
+    };
 
 
     igv.setTrackLabel = function (track, label) {
 
         track.name = label;
 
-        if (track.description) {
+        //if (track.description) {
+        //
+        //    track.labelButton.innerHTML = track.name;
+        //} else {
+        //    track.labelSpan.innerHTML = track.name;
+        //}
 
-            track.labelButton.innerHTML = track.name;
-        } else {
-
-            if ("CURSOR" !== this.browser.type) {
-                track.labelSpan.innerHTML = track.name;
-            }
-            else {
-
-                // handle CURSOR track label
-                track.trackLabelDiv.innerHTML = track.name
-            }
-        }
+        $(track.trackView.leftHandGutter).find('.igv-app-icon-container').text(track.name);
 
         if (track.trackView) {
             track.trackView.repaint();
@@ -263,12 +256,6 @@ var igv = (function (igv) {
         if (track.trackView) {
 
             track.trackView.repaint();
-
-            if ("CURSOR" === this.browser.type) {
-                if (track.cursorHistogram) {
-                    track.cursorHistogram.render(track);
-                }
-            }
 
         }
 

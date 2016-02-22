@@ -25,19 +25,26 @@
 
 var igv = (function (igv) {
 
-    igv.loadTribbleIndex = function (indexFile, config, continuation) {
+    /**
+     *
+     * @param indexFile
+     * @param config
+     * @returns a Promise for the tribble-style (.idx) index.  The fulfill function takes the index as an argument
+     */
+    igv.loadTribbleIndex = function (indexFile, config) {
 
         var genome = igv.browser ? igv.browser.genome : null;
 
         //console.log("Loading " + indexFile);
+        return new Promise(function (fulfill, reject) {
 
+            igvxhr.loadArrayBuffer(indexFile,
+                {
+                    headers: config.headers,
+                    withCredentials: config.withCredentials
+                }).then(function (arrayBuffer) {
 
-        igvxhr.loadArrayBuffer(indexFile,
-            {
-                headers: config.headers,
-                success: function (arrayBuffer) {
-
-                    if(arrayBuffer) {
+                    if (arrayBuffer) {
 
                         var index = {};
 
@@ -52,88 +59,87 @@ var igv = (function (igv) {
                             index[chrIdx.chr] = chrIdx;
                         }
 
-                        continuation(new igv.TribbleIndex(index));
+                        fulfill(new igv.TribbleIndex(index));
                     }
                     else {
-                        continuation(null);
+                        fulfill(null);
                     }
 
-                },
-                error: function (xhr) {
-                    continuation(null);
-                },
-                withCredentials: config.withCredentials
-            });
+                }).catch(function (error) {
+                    console.log(error);
+                    fulfill(null);
+                });
 
 
-        function readHeader(parser) {
+            function readHeader(parser) {
 
-            //var magicString = view.getString(4);
-            var magicNumber = parser.getInt();     //   view._getInt32(offset += 32, true);
-            var type = parser.getInt();
-            var version = parser.getInt();
+                //var magicString = view.getString(4);
+                var magicNumber = parser.getInt();     //   view._getInt32(offset += 32, true);
+                var type = parser.getInt();
+                var version = parser.getInt();
 
-            var indexedFile = parser.getString();
+                var indexedFile = parser.getString();
 
-            var indexedFileSize = parser.getLong();
+                var indexedFileSize = parser.getLong();
 
-            var indexedFileTS = parser.getLong();
-            var indexedFileMD5 = parser.getString();
-            flags = parser.getInt();
-            if (version < 3 && (flags & SEQUENCE_DICTIONARY_FLAG) == SEQUENCE_DICTIONARY_FLAG) {
-                // readSequenceDictionary(dis);
-            }
+                var indexedFileTS = parser.getLong();
+                var indexedFileMD5 = parser.getString();
+                flags = parser.getInt();
+                if (version < 3 && (flags & SEQUENCE_DICTIONARY_FLAG) == SEQUENCE_DICTIONARY_FLAG) {
+                    // readSequenceDictionary(dis);
+                }
 
-            if (version >= 3) {
-                var nProperties = parser.getInt();
-                while (nProperties-- > 0) {
-                    var key = parser.getString();
-                    var value = parser.getString();
+                if (version >= 3) {
+                    var nProperties = parser.getInt();
+                    while (nProperties-- > 0) {
+                        var key = parser.getString();
+                        var value = parser.getString();
+                    }
                 }
             }
-        }
 
-        function readLinear(parser) {
+            function readLinear(parser) {
 
-            var chr = parser.getString(),
-                blockMax = 0;
+                var chr = parser.getString(),
+                    blockMax = 0;
 
-            // Translate to canonical name
-            if(genome) chr = genome.getChromosomeName(chr);
+                // Translate to canonical name
+                if (genome) chr = genome.getChromosomeName(chr);
 
-            var binWidth = parser.getInt();
-            var nBins = parser.getInt();
-            var longestFeature = parser.getInt();
-            //largestBlockSize = parser.getInt();
-            // largestBlockSize and totalBlockSize are old V3 index values.  largest block size should be 0 for
-            // all newer V3 block.  This is a nasty hack that should be removed when we go to V4 (XML!) indices
-            var OLD_V3_INDEX = parser.getInt() > 0;
-            var nFeatures = parser.getInt();
+                var binWidth = parser.getInt();
+                var nBins = parser.getInt();
+                var longestFeature = parser.getInt();
+                //largestBlockSize = parser.getInt();
+                // largestBlockSize and totalBlockSize are old V3 index values.  largest block size should be 0 for
+                // all newer V3 block.  This is a nasty hack that should be removed when we go to V4 (XML!) indices
+                var OLD_V3_INDEX = parser.getInt() > 0;
+                var nFeatures = parser.getInt();
 
-            // note the code below accounts for > 60% of the total time to read an index
-            var blocks = new Array();
-            var pos = parser.getLong();
-            var chrBegPos = pos;
+                // note the code below accounts for > 60% of the total time to read an index
+                var blocks = new Array();
+                var pos = parser.getLong();
+                var chrBegPos = pos;
 
-            var blocks = new Array();
-            for (var binNumber = 0; binNumber < nBins; binNumber++) {
-                var nextPos = parser.getLong();
-                var size = nextPos - pos;
-                blocks.push({min:pos, max:nextPos}); //        {position: pos, size: size});
-                pos = nextPos;
+                var blocks = new Array();
+                for (var binNumber = 0; binNumber < nBins; binNumber++) {
+                    var nextPos = parser.getLong();
+                    var size = nextPos - pos;
+                    blocks.push({min: pos, max: nextPos}); //        {position: pos, size: size});
+                    pos = nextPos;
 
-                if(nextPos > blockMax) blockMax = nextPos;
+                    if (nextPos > blockMax) blockMax = nextPos;
+                }
+
+                return {chr: chr, blocks: blocks};
+
             }
 
-            return  {chr: chr, blocks: blocks};
 
-        }
-
-
+        });
     }
 
 
-    igv.TribbleIndex = function(chrIndexTable) {
+    igv.TribbleIndex = function (chrIndexTable) {
         this.chrIndex = chrIndexTable;      // Dictionary of chr -> tribble index
     }
 
@@ -152,7 +158,7 @@ var igv = (function (igv) {
         if (chrIdx) {
             var blocks = chrIdx.blocks,
                 lastBlock = blocks[blocks.length - 1],
-                mergedBlock = {minv: {block: blocks[0].min, offset: 0},  maxv: {block: lastBlock.max, offset: 0}};
+                mergedBlock = {minv: {block: blocks[0].min, offset: 0}, maxv: {block: lastBlock.max, offset: 0}};
 
             return [mergedBlock];
         }
@@ -161,9 +167,8 @@ var igv = (function (igv) {
         }
 
 
-
     }
 
 
-        return igv;
+    return igv;
 })(igv || {});

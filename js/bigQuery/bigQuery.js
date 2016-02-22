@@ -27,60 +27,6 @@
 var igv = (function (igv) {
 
 
-    igv.BigQueryFeatureSource = function (config) {
-
-        // Harcoded for seg features for now
-        this.projectId = 'isb-cgc-03-0001';
-        this.decode = decodeSeg;
-        this.cohort = config.cohort
-
-    }
-
-    //SELECT ParticipantBarcode FROM [isb-cgc:tcga_201510_alpha.Clinical_data] WHERE Study = \"" + this.study + "\")
-
-    igv.BigQueryFeatureSource.prototype.allSamples = function (success) {
-
-        var q = "SELECT ParticipantBarcode FROM [isb-cgc:tcga_201510_alpha.Copy_Number_segments]" +
-            " WHERE " +
-            " ParticipantBarcode IN (" + this.cohort + ")";
-
-        igv.bigQuery(
-            {
-                projectId: this.projectId,
-                queryString: q,
-                decode: decodeSample,
-                success: function (results) {
-                    console.log("done " + results.length);
-                    success(results);
-
-                }
-            });
-
-    }
-
-    igv.BigQueryFeatureSource.prototype.getFeatures = function (chr, bpStart, bpEnd, success, task) {
-
-        var c = chr.startsWith("chr") ? chr.substring(3) : chr,
-            q = "SELECT * FROM [isb-cgc:tcga_201510_alpha.Copy_Number_segments]" +
-                " WHERE " +
-                " ParticipantBarcode IN (" + this.cohort + ") " +
-                " AND Chromosome = \"" + c + "\" " +
-                " AND Start >= " + bpStart + " AND End <= " + bpEnd;
-
-        igv.bigQuery(
-            {
-                projectId: this.projectId,
-                queryString: q,
-                decode: decodeSeg,
-                success: function (results) {
-                    console.log("done " + results.length);
-                    success(results);
-
-                }
-            });
-
-    }
-
     igv.BigQueryFeatureReader = function (config) {
 
         // Harcoded for seg features for now
@@ -92,26 +38,21 @@ var igv = (function (igv) {
 
     //SELECT ParticipantBarcode FROM [isb-cgc:tcga_201510_alpha.Clinical_data] WHERE Study = \"" + this.study + "\")
 
-    igv.BigQueryFeatureReader.prototype.allSamples = function (success) {
+    igv.BigQueryFeatureReader.prototype.allSamples = function () {
 
         var q = "SELECT UNIQUE(AliquotBarcode) FROM  [isb-cgc:tcga_201510_alpha.Copy_Number_segments] WHERE " +
             " ParticipantBarcode IN (" + this.cohort + ")";
 
-        igv.bigQuery(
+        return igv.bigQuery(
             {
                 projectId: this.projectId,
                 queryString: q,
-                decode: decodeSample,
-                success: function (results) {
-                    console.log("done " + results.length);
-                    success(results);
-
-                }
+                decode: decodeSample
             });
 
     }
 
-    igv.BigQueryFeatureReader.prototype.readFeatures = function (chr, bpStart, bpEnd, success, task) {
+    igv.BigQueryFeatureReader.prototype.readFeatures = function (chr, bpStart, bpEnd) {
 
         var c = chr.startsWith("chr") ? chr.substring(3) : chr,
             q = "SELECT * FROM [isb-cgc:tcga_201510_alpha.Copy_Number_segments]" +
@@ -120,16 +61,11 @@ var igv = (function (igv) {
                 " AND Chromosome = \"" + c + "\" " +
                 " AND Start >= " + bpStart + " AND End <= " + bpEnd;
 
-        igv.bigQuery(
+        return igv.bigQuery(
             {
                 projectId: this.projectId,
                 queryString: q,
-                decode: decodeSeg,
-                success: function (results) {
-                    console.log("done " + results.length);
-                    success(results);
-
-                }
+                decode: decodeSeg
             });
 
     }
@@ -137,56 +73,105 @@ var igv = (function (igv) {
 
     igv.bigQuery = function (options) {
 
-        if (!options.projectId) {
-            //todo throw error
-        }
+        return new Promise(function (fulfill, reject) {
 
-        var baseURL = options.baseURL || "https://www.googleapis.com/bigquery/v2/",
-            url = baseURL + "projects/" + options.projectId + "/queries",
-            body = {
-                "kind": "bigquery#queryRequest",
-                "query": options.queryString,
-                "maxResults": 1000,
-                "timeoutMs": 5000,
-                "dryRun": false,
-                "preserveNulls": true,
-                "useQueryCache": true
-            },
-            decode = options.decode,
-            success = options.success,
-            task = options.task,
-            apiKey = oauth.google.apiKey,
-            jobId,
-            paramSeparator = "&";
+            if (!options.projectId) {
+                //todo throw error
+            }
 
-        url = url + "?alt=json"
+            var baseURL = options.baseURL || "https://www.googleapis.com/bigquery/v2/",
+                url = baseURL + "projects/" + options.projectId + "/queries",
+                body = {
+                    "kind": "bigquery#queryRequest",
+                    "query": options.queryString,
+                    "maxResults": 1000,
+                    "timeoutMs": 5000,
+                    "dryRun": false,
+                    "preserveNulls": true,
+                    "useQueryCache": true
+                },
+                decode = options.decode,
+                apiKey = oauth.google.apiKey,
+                jobId,
+                paramSeparator = "&";
 
-        if (apiKey) {
-            url = url + paramSeparator + "key=" + apiKey;
-        }
+            url = url + "?alt=json";
 
-        var sendData = JSON.stringify(body);
+            if (apiKey) {
+                url = url + paramSeparator + "key=" + apiKey;
+            }
 
-        igvxhr.loadJson(url,
-            {
-                sendData: sendData,
-                task: task,
-                contentType: "application/json",
-                success: function (response) {
+            var sendData = JSON.stringify(body);
 
-                    var results = [],
-                        totalRows,
-                        jobId = response.jobReference.jobId;
+            igvxhr.loadJson(url,
+                {
+                    sendData: sendData,
+                    contentType: "application/json"
+                }).then(function (response) {
+
+                var results = [],
+                    totalRows,
+                    jobId = response.jobReference.jobId;
 
 
-                    if (response.jobComplete === true) {
+                if (response.jobComplete === true) {
 
-                        totalRows = parseInt(response.totalRows);   // Google convention is to use strings for "long" types
+                    totalRows = parseInt(response.totalRows);   // Google convention is to use strings for "long" types
 
-                        if (totalRows === 0) {
-                            success(results);
+                    if (totalRows === 0) {
+                        fulfill(results);
+                    }
+                    else {
+
+                        response.rows.forEach(function (row) {
+                            results.push(decode(row));
+                        });
+
+                        if (results.length < totalRows) {
+                            getQueryResults(options);
                         }
                         else {
+                            fulfill(results);
+                        }
+                    }
+                }
+                else {
+                    setTimeout(function () {
+                        getQueryResults(options);
+                    }, 1000);
+                }
+
+
+                function getQueryResults(options) {
+
+                    var url = "https://clients6.google.com/bigquery/v2/projects/" + options.projectId + "/queries/" + jobId,
+                        decode = options.decode,
+                        success = options.success,
+                        apiKey = oauth.google.apiKey,
+                        paramSeparator = "&";
+
+                    url = url + "?alt=json"
+
+                    if (apiKey) {
+                        url = url + paramSeparator + "key=" + apiKey;
+                    }
+
+                    if (options.maxResults) {
+                        url = url + "&maxResults=" + options.maxResults;
+                    }
+
+                    if (results.length > 0) {
+                        url = url + ("&startIndex=" + results.length);
+                    }
+
+                    igvxhr.loadJson(url,
+                        {
+                            contentType: "application/json"
+                        }).then(function (response) {
+
+                        if (response.jobComplete === true) {
+
+                            totalRows = response.totalRows;
 
                             response.rows.forEach(function (row) {
                                 results.push(decode(row));
@@ -196,77 +181,22 @@ var igv = (function (igv) {
                                 getQueryResults(options);
                             }
                             else {
-                                success(results);
+                                fulfill(results);
                             }
+
                         }
-                    }
-                    else {
-                        setTimeout(function () {
-                            getQueryResults(options);
-                        }, 1000);
-                    }
-
-
-                    function getQueryResults(options) {
-
-                        var url = "https://clients6.google.com/bigquery/v2/projects/" + options.projectId + "/queries/" + jobId,
-                            decode = options.decode,
-                            success = options.success,
-                            task = options.task,
-                            apiKey = oauth.google.apiKey,
-                            paramSeparator = "&";
-
-                        url = url + "?alt=json"
-
-                        if (apiKey) {
-                            url = url + paramSeparator + "key=" + apiKey;
+                        else {
+                            setTimeout(function () {
+                                getQueryResults(options);
+                            }, 1000);
                         }
 
-                        if (options.maxResults) {
-                            url = url + "&maxResults=" + options.maxResults;
-                        }
-
-                        if (results.length > 0) {
-                            url = url + ("&startIndex=" + results.length);
-                        }
-
-                        igvxhr.loadJson(url,
-                            {
-                                task: task,
-                                contentType: "application/json",
-                                success: function (response) {
-
-                                    if (response.jobComplete === true) {
-
-                                        totalRows = response.totalRows;
-
-                                        response.rows.forEach(function (row) {
-                                            results.push(decode(row));
-                                        });
-
-                                        if (results.length < totalRows) {
-                                            getQueryResults(options);
-                                        }
-                                        else {
-                                            success(results);
-                                        }
-
-                                    }
-                                    else {
-                                        setTimeout(function () {
-                                            getQueryResults(options);
-                                        }, 1000);
-                                    }
-
-
-                                }
-                            });
-
-                    }
+                    });
 
                 }
-            });
 
+            }).catch(reject);
+        });
     }
 
 

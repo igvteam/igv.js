@@ -1,3 +1,6 @@
+.igv-dialog-label-centered {
+    text-align: center;
+}
 
 /* prevent unwanted translucent blue overlay when user selects anywhere in ENCODE table */
 div[id="igvEncodeModal"] {
@@ -308,6 +311,38 @@ div[id="igvEncodeModal"] {
 
 }
 
+/* ok button */
+.igv-col-filler-ok-button {
+
+    margin-left: 8px;
+    padding-left: 1px;
+    padding-top: 5px;
+    width: 90%;
+    height: 90%;
+
+    border-color: rgb(255, 255, 255);
+    border-style: solid;
+    border-width: thin;
+    border-radius: 4px;
+
+    color: white;
+    text-align: center;
+    vertical-align: middle;
+
+    font-family: 'PT Sans', sans-serif;
+    font-size: medium;
+    font-weight: 200;
+
+    background-color: #5ea4e0;
+}
+
+.igv-col-filler-ok-button:hover,
+.igv-col-filler-ok-button:focus,
+.igv-col-filler-ok-button:active  {
+    background-color: #5079a8;
+}
+
+/* cancel button */
 .igv-col-filler-cancel-button {
 
     margin-left: 8px;
@@ -509,12 +544,23 @@ div.ui-dialog fieldset {
     top: 0;
     left: 0;
 
+    padding-top: 2px;
+    padding-bottom: 2px;
+    padding-left: 4px;
+    padding-right: 4px;
+
     height: 24px;
     width: auto;
 
-    margin-left: 48px;
-    margin-right: 32px;
-    /*margin-bottom: 5px;*/
+    /*margin-left: 44px;*/
+    /*margin-right: 28px;*/
+
+    border-style: solid;
+    border-width: thin;
+    border-radius: 4px;
+    border-color: #dfdfdf;
+
+    background-color: #f3f3f3;
 }
 
 .igv-logo-nonav {
@@ -540,6 +586,7 @@ div.ui-dialog fieldset {
 
     float: left;
 
+    margin-left: 4px;
     margin-right: 8px;
 
     position: relative;
@@ -574,16 +621,16 @@ div.ui-dialog fieldset {
 
     position: relative;
 
-    height: 24px;
+    height: 20px;
     width: 80%;
     padding-left: 8px;
 
     outline: none;
 
     border-style: solid;
-    border-radius: 4px;
+    border-radius: 3px;
     border-width: thin;
-    border-color: rgb(127, 127, 127);
+    border-color: rgb(223, 223, 223);
 
     font-family: 'Open Sans', sans-serif;
     font-size: small;
@@ -642,37 +689,42 @@ div.ui-dialog fieldset {
     float: right;
 }
 
-.igvNavigationToggleTrackLabels {
+.igv-toggle-track-labels {
 
     position: relative;
     float: right;
 
-    border-style: solid;
-    border-radius: 4px;
-    border-width: thin;
-    border-color: rgb(127, 127, 127);
-
     margin-right: 64px;
 
-    padding-left: 4px;
-    padding-right: 4px;
+    padding-left: 8px;
+    padding-right: 8px;
     padding-top: 1px;
     padding-bottom: 2px;
 
+    border-style: solid;
+    border-radius: 3px;
+    border-width: thin;
+    border-color: rgb(223, 223, 223);
+
     font-family: 'Open Sans', sans-serif;
     font-size: small;
-    font-weight: 400;
-    color: #444;
+    font-weight: 200;
 
+    color: #444;
+    background-color: white;
 }
 
-.igvNavigationToggleTrackLabels:hover,
-.igvNavigationToggleTrackLabels:focus,
-.igvNavigationToggleTrackLabels:active  {
+.igv-toggle-track-labels:hover,
+.igv-toggle-track-labels:focus,
+.igv-toggle-track-labels:active  {
 
     cursor: pointer;
-    border-color: #444;
 
+    border-color: #afafaf;
+    /*border-width: 2px;*/
+
+    /*color: white;*/
+    /*background-color: #c4c4c4;*/
 }
 
 .igvNavigationMarginLeft12 {
@@ -903,14 +955,23 @@ div.ui-dialog fieldset {
 
 .igv-spinner-container {
 
-    color: grey;
+    color: #3f3f3f;
+    /*background-color: rgba(255, 0, 0, 0.5);*/
+
+    width: 100%;
+    height: 100%;
+
+    text-align: center;
+    padding-top: 8px;
+
     font-size: 24px;
 
-    position: absolute;
-    top:50%;
-    left:50%;
-    z-index: 256;
-    /*display: inline;*/
+    /*position: absolute;*/
+    /*top:50%;*/
+    /*left:50%;*/
+
+    z-index: 512;
+
 }
 
 .igv-root-div {
@@ -960,9 +1021,9 @@ div.ui-dialog fieldset {
 
 .igv-ideogram-content-div {
 
-    height: 40px;
+    height: 32px;
 
-    margin-left: 50px;
+    margin-left: 100px;
     margin-right: 50px;
 }
 
@@ -1012,35 +1073,6 @@ div.ui-dialog fieldset {
     vertical-align: middle;
 }
 
-.igv-track-label-span-base {
-
-    font-family: 'PT Sans', sans-serif;
-    font-size: small;
-    font-weight: 400;
-    color: #444;
-
-    margin-left: 4px;
-    margin-right: 4px;
-    position: relative;
-    cursor: default;
-}
-
-.igv-track-label-span-base:hover,
-.igv-track-label-span-base:focus,
-.igv-track-label-span-base:active  {
-    border-radius: 4px;
-    border-color: #444;
-    border-style: solid;
-    border-width: thin;
-    cursor: pointer;
-    background-color: rgba(224, 224, 224, 1);
-}
-
-.igv-track-label-span-highlighted {
-    font-weight: bold;
-    color: rgba(204, 51, 0, 1);
-}
-
 .igv-track-label {
     position: absolute;
     top: 10px;
@@ -1066,27 +1098,9 @@ div.ui-dialog fieldset {
     text-align: center;
 }
 
-.igv-app-icon-box {
-
-    position: absolute;
-    left: 0;
-    right: 0;
-    top: 0;
-    bottom: 0;
-
-    width: 100%;
-    height: 30px;
-
-    margin: auto;
-
-    background: white;
-
-}
-
 .igv-app-icon {
     cursor: pointer;
     color: grey;
-    background-color: white;
 }
 
 .igv-app-icon:hover,
@@ -1214,40 +1228,108 @@ div.ui-dialog fieldset {
 .igv-left-hand-gutter {
     position: absolute;
     left: 0;
-    width: 50px;
+    width: 100px;
     height: 100%;
 }
 
 .igv-viewport-div {
     position: absolute;
-    left:  50px;
+    /*left:  100px;*/
     right: 50px;
     height: 100%;
     overflow-x: hidden;
     overflow-y: hidden;
 }
 
+.gutter-shim {
+    position: absolute;
+    left:  100px;
+}
+
+.no-gutter-shim {
+    position: absolute;
+    left: 0;
+}
+
+.igv-track-label-span {
+
+    text-overflow: ellipsis;
+
+}
+
+.igv-track-label-span {
+
+    text-overflow: ellipsis;
+
+}
+
 .igv-app-icon-container {
 
-    border-radius: 4px;
-    border-color: #444;
-    border-style: solid;
-    border-width: thin;
+    font-family: 'PT Sans', sans-serif;
+    font-size: small;
+    font-weight: 400;
+
+    /*position: absolute;*/
+    /*left: 0;*/
+    /*top: 0;*/
+
+    width: 100%;
+    /*width: auto;*/
+    /*height:auto;*/
+    /*max-width: 200px;*/
+
+    /*padding-left: 4px;*/
+    /*padding-right: 4px;*/
+
+    /*border-color: #444;*/
+    /*border-radius: 4px;*/
+    /*border-style: solid;*/
+    /*border-width: thin;*/
+
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+
+    text-align: right;
+    padding-right: 8px;
 
     background: rgb(255, 255, 255);
 
-    /*display: inline-block;*/
+    z-index: 128;
+
+}
+
+.igv-app-icon-container:hover,
+.igv-app-icon-container:focus,
+.igv-app-icon-container:active  {
+
+    cursor: pointer;
+
+    font-weight: bold;
+
+    /*background-color: rgba(224, 224, 224, 1);*/
+}
+
+.zoom-in-notice {
 
     position: absolute;
-    left: 0;
     top: 0;
-    width: auto;
-    height:auto;
+    left: 0;
 
-    max-width: 200px;
+    font-family: 'PT Sans', sans-serif;
+    font-size: medium;
+    font-weight: 400;
 
-    /*margin-top: 4px;*/
+    width: 100%;
+    height: 100%;
 
+    text-align: center;
+
+    color: #3f3f3f;
+
+    background-color: rgba(255, 255, 255, 0.51);
+
+    z-index: 64;
 }
 
 .igv-track-control-canvas {
@@ -1256,10 +1338,11 @@ div.ui-dialog fieldset {
 
 .igv-content-div {
     position: relative;
-    /*margin-left: 10px;*/
-    /*margin-right: 10px;*/
-    left: 0;
-    right: 0;
+
+    /*left: 0;*/
+    /*right: 0;*/
+
+    width: 100%;
     height:100%;
 }
 
@@ -1267,6 +1350,43 @@ div.ui-dialog fieldset {
     position: absolute;
     width: 100%;
     height: 100%;
+}
+
+.igv-data-range-track-label {
+
+    cursor: pointer;
+
+    position: absolute;
+
+    top:0;
+    left:0;
+
+    margin-top: 4px;
+    margin-left: 4px;
+
+    padding: 4px;
+
+    font-family: 'PT Sans', sans-serif;
+    font-size: small;
+    font-weight: 200;
+
+    color: #373737;
+    /*background-color: rgb(255, 255, 255);*/
+
+    /*border-style: solid;*/
+    /*border-width: thin;*/
+    /*border-radius: 2px;*/
+    /*border-color: #dfdfdf;*/
+
+}
+
+.igv-data-range-track-label:hover,
+.igv-data-range-track-label:focus,
+.igv-data-range-track-label:active  {
+
+    font-weight: bold;
+    /*border-color: #9b9b9b;*/
+
 }
 
 .igv-scrollbar-outer-div {

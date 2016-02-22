@@ -11,7 +11,7 @@ function runGa4ghTests() {
         });
 
 
-        reader.readMetadata(function (json) {
+        reader.readMetadata().then(function (json) {
 
             ok(json);
 

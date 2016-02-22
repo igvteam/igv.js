@@ -71,39 +71,173 @@ var igvxhr = (function (igvxhr) {
 
     };
 
+    igvxhr.load = function (url, options) {
+
+        return new Promise(function (fulfill, reject) {
+
+            var xhr = new XMLHttpRequest(),
+                sendData = options.sendData,
+                method = options.method || (sendData ? "POST" : "GET"),
+                abort = options.abort || reject || fulfill,
+                range = options.range,
+                responseType = options.responseType,
+                contentType = options.contentType,
+                mimeType = options.mimeType,
+                headers = options.headers,
+                isSafari = navigator.vendor.indexOf("Apple") == 0 && /\sSafari\//.test(navigator.userAgent),
+                withCredentials = options.withCredentials,
+                header_keys, key, value, i;
+            //
+            //if (range && isSafari) {
+            //
+            //    console.log(isSafari);
+            //    // Add random seed. For nasty safari bug https://bugs.webkit.org/show_bug.cgi?id=82672
+            //    // TODO -- add some "isSafari" test?
+            //    url += url.contains("?") ? "&" : "?";
+            //    url += "someRandomSeed=" + Math.random().toString(36);
+            //}
+
+            // Hack to prevent caching for google storage files.  Get weird net:err-cache errors otherwise
+            if (range && url.contains("googleapis")) {
+                url += url.contains("?") ? "&" : "?";
+                url += "someRandomSeed=" + Math.random().toString(36);
+            }
+
+            xhr.open(method, url);
+
+            if (range) {
+                var rangeEnd = range.size ? range.start + range.size - 1 : "";
+                xhr.setRequestHeader("Range", "bytes=" + range.start + "-" + rangeEnd);
+            }
+            if (contentType) {
+                xhr.setRequestHeader("Content-Type", contentType);
+            }
+            if (mimeType) {
+                xhr.overrideMimeType(mimeType);
+            }
+            if (responseType) {
+                xhr.responseType = responseType;
+            }
+            if (headers) {
+                header_keys = Object.keys(headers);
+                for (i = 0; i < header_keys.length; i++) {
+                    key = header_keys[i];
+                    value = headers[key];
+                    // console.log("Adding to header: " + key + "=" + value);
+                    xhr.setRequestHeader(key, value);
+                }
+            }
+
+            // let cookies go along to get files from any website we are logged in to
+            // NOTE: using withCredentials with servers that return "*" for access-allowed-origin will fail
+            if (withCredentials === true) {
+                xhr.withCredentials = true;
+            }
+
+            if (url.contains("google") && igv.oauth.google.access_token !== undefined) {
+                xhr.withCredentials = true;
+                xhr.setRequestHeader("Authorization", "Bearer " + igv.oauth.google.access_token);
+            }
+
+
+            xhr.onload = function (event) {
+                // when the url points to a local file, the status is 0 but that is no error
+                if (xhr.status == 0 || (xhr.status >= 200 && xhr.status <= 300)) {
+                    fulfill(xhr.response, xhr);
+                }
+                else {
+
+                    //
+                    if (xhr.status === 416) {
+                        //  Tried to read off the end of the file.   This shouldn't happen, but if it does return an
+                        handleError("Unsatisfiable range");
+                    }
+                    else {// TODO -- better error handling
+                        handleError("Error accessing resource: " + xhr.status);
+                    }
+
+                }
+
+            };
+
+            xhr.onerror = function (event) {
+
+                if (isCrossDomain(url) && url && !options.crossDomainRetried && igv.browser.crossDomainProxy &&
+                    url != igv.browser.crossDomainProxy) {
+
+                    options.sendData = "url=" + url;
+                    options.crossDomainRetried = true;
+
+                    igvxhr.load(igv.browser.crossDomainProxy, options).then(fulfill);
+                }
+                else {
+                    handleError("Error accessing resource: " + url + " Status: " + xhr.status);
+                }
+            }
+
+
+            xhr.ontimeout = function (event) {
+                handleError("Timed out");
+            };
+
+            xhr.onabort = function (event) {
+                console.log("Aborted");
+                reject(new igv.AbortLoad());
+            };
+
+            try {
+                xhr.send(sendData);
+            } catch (e) {
+                console.log(e);
+            }
+
+
+            function handleError(message) {
+                if (reject) {
+                    reject(message);
+                }
+                else {
+                    throw Error(message);
+                }
+            }
+        });
+    }
+
     igvxhr.loadArrayBuffer = function (url, options) {
+
+        if (options === undefined) options = {};
         options.responseType = "arraybuffer";
-        igvxhr.load(url, options);
+        return igvxhr.load(url, options);
     };
 
     igvxhr.loadJson = function (url, options) {
 
-        var success = options.success,
-            method = options.method || (options.sendData ? "POST" : "GET");
+        var method = options.method || (options.sendData ? "POST" : "GET");
 
-        if ("POST" === method) options.contentType = "application/json";
+        if (method == "POST") options.contentType = "application/json";
 
-        options.success = function (result) {
-            if (result) {
-                success(JSON.parse(result));
-            }
-            else {
-                success(null);
-            }
-        };
+        return new Promise(function (fulfill, reject) {
 
-        igvxhr.load(url, options);
-
-    };
+            igvxhr.load(url, options).then(
+                function (result) {
+                    if (result) {
+                        fulfill(JSON.parse(result));
+                    }
+                    else {
+                        fulfill(result);
+                    }
+                });
+        })
+    }
 
     /**
      * Load a "raw" string.
      */
     igvxhr.loadString = function (url, options) {
 
-        var success = options.success,
-            compression, result,
-            fn, idx;
+        var compression, fn, idx;
+
+        if (options === undefined) options = {};
 
         // Strip parameters from url
         // TODO -- handle local files with ?
@@ -114,7 +248,6 @@ var igvxhr = (function (igvxhr) {
             compression = BGZF;
         }
         else if (fn.endsWith(".gz")) {
-
             compression = GZIP;
         }
         else {
@@ -122,299 +255,62 @@ var igvxhr = (function (igvxhr) {
         }
 
         if (compression === NONE) {
-
             options.mimeType = 'text/plain; charset=x-user-defined';
-            igvxhr.load(url, options);
+            return igvxhr.load(url, options);
         }
         else {
             options.responseType = "arraybuffer";
-            options.success = function (data) {
-                var result = igvxhr.arrayBufferToString(data, compression);
-                success(result);
-            };
-            igvxhr.load(url, options);
 
+            return new Promise(function (fulfill, reject) {
+
+                igvxhr.load(url, options).then(
+                    function (data) {
+                        var result = igvxhr.arrayBufferToString(data, compression);
+                        fulfill(result);
+                    })
+            })
         }
 
-
-    };
-
-    igvxhr.load = function (url, options) {
-
-        var xhr = new XMLHttpRequest(),
-            sendData = options.sendData,
-            method = options.method || (sendData ? "POST" : "GET"),
-            success = options.success,
-            abort = options.abort || error,
-            timeout = options.timeout || error,
-            task = options.task,
-            error = options.error || success,
-            range = options.range,
-            responseType = options.responseType,
-            contentType = options.contentType,
-            mimeType = options.mimeType,
-            headers = options.headers,
-            isSafari = navigator.vendor.indexOf("Apple") == 0 && /\sSafari\//.test(navigator.userAgent),
-            withCredentials = options.withCredentials,
-            header_keys, key, value, i;
-
-        if (task) {
-            task.xhrRequest = xhr;
-            if(options.error === undefined && task.error !== undefined) error = task.error;
-        }
-
-        if (range && isSafari) {
-
-            console.log(isSafari);
-            // Add random seed. For nasty safari bug https://bugs.webkit.org/show_bug.cgi?id=82672
-            // TODO -- add some "isSafari" test?
-            url += url.contains("?") ? "&" : "?";
-            url += "someRandomSeed=" + Math.random().toString(36);
-        }
-
-        xhr.open(method, url);
-
-        if (range) {
-            var rangeEnd = range.size ? range.start + range.size - 1 : "";
-            xhr.setRequestHeader("Range", "bytes=" + range.start + "-" + rangeEnd);
-        }
-        if (contentType) {
-            xhr.setRequestHeader("Content-Type", contentType);
-        }
-        if (mimeType) {
-            xhr.overrideMimeType(mimeType);
-        }
-        if (responseType) {
-            xhr.responseType = responseType;
-        }
-        if (headers) {
-            header_keys = Object.keys(headers);
-            for (i = 0; i < header_keys.length; i++) {
-                key = header_keys[i];
-                value = headers[key];
-                // console.log("Adding to header: " + key + "=" + value);
-                xhr.setRequestHeader(key, value);
-            }
-        }
-        // let cookies go along to get files from any website we are logged in to
-        // NOTE: using withCredentials with servers that return "*" for access-allowed-origin will fail
-        if (withCredentials === true) {
-            xhr.withCredentials = true;
-        }
-
-        if (url.contains("google") && igv.oauth.google.access_token !== undefined) {
-            xhr.withCredentials = true;
-            xhr.setRequestHeader("Authorization", "Bearer " + igv.oauth.google.access_token);
-        }
-
-
-        xhr.onload = function (event) {
-            // when the url points to a local file, the status is 0 but that is no error
-            if (xhr.status == 0 || (xhr.status >= 200 && xhr.status <= 300)) {
-                success(xhr.response, xhr);
-            }
-            else {
-
-                //
-                if (xhr.status === 416) {
-                    //  Tried to read off the end of the file.   This shouldn't happen, but if it does return an
-                    //  empty array buffer
-                    success(new ArrayBuffer(0), xhr);
-                    return;
-                }
-                else {// TODO -- better error handling
-                    alert("Error accessing resource: " + xhr.status);
-
-                    error(xhr);
-                }
-
-            }
-
-        };
-
-        xhr.onerror = function (event) {
-
-            if (isCrossDomain(url) && url) {
-                // Try the proxy, if it exists.  Presumably this is a php file
-                if (igv.browser.crossDomainProxy && url != igv.browser.crossDomainProxy && !options.crossDomainRetried) {
-
-                    options.sendData = "url=" + url;
-                    options.crossDomainRetried = true;
-
-                    igvxhr.load(igv.browser.crossDomainProxy, options);
-                    return;
-                }
-            }
-        }
-
-        xhr.ontimeout = function (event) {
-            console.log("Aborted");
-            timeout(null, xhr);
-        };
-
-        xhr.onabort = function (event) {
-            console.log("Aborted");
-            abort(null, xhr);
-        };
-
-        xhr.send(sendData);
-
-    };
-
-    igvxhr.loadHeader = function (url, options) {
-
-        var xhr = new XMLHttpRequest(),
-            method = "HEAD",
-            success = options.success,
-            error = options.error || success,
-            timeout = options.timeout || error,
-            headers = options.headers,
-            withCredentials = options.withCredentials,
-            header_keys,
-            key,
-            value,
-            i;
-
-        xhr.open(method, url);
-
-        if (headers) {
-            header_keys = Object.keys(headers);
-            for (i = 0; i < header_keys.length; i++) {
-                key = header_keys[i];
-                value = headers[key];
-                if (console && console.log) console.log("Adding to header: " + key + "=" + value);
-                xhr.setRequestHeader(key, value);
-            }
-        }
-
-        // let cookies go along to get files from any website we are logged in to
-        // NOTE: using withCredentials with servers that return "*" for access-allowed-origin will fail
-        if (withCredentials === true) {
-            xhr.withCredentials = true;
-        }
-
-        if (url.contains("www.googleapis.com") && igv.oauth.google.access_token !== undefined) {
-            xhr.withCredentials = true;
-            xhr.setRequestHeader("Authorization", "Bearer " + igv.oauth.google.access_token);
-        }
-
-        xhr.onload = function (event) {
-
-            // when the url points to a local file, the status is 0 but that is no error
-            if (xhr.status == 0 || (xhr.status >= 200 && xhr.status <= 300)) {
-                success(xhr.response, xhr);
-                var headerStr = xhr.getAllResponseHeaders();
-                var headerDictionary = parseResponseHeaders(headerStr);
-                success(headerDictionary);
-            }
-            else {
-                error(null, xhr);
-            }
-        }
-
-        xhr.onerror = function (event) {
-
-            error(null, xhr);
-        }
-
-
-        xhr.ontimeout = function (event) {
-            timeout(null);
-        }
-
-
-        xhr.send();
-
-        /**
-         * XmlHttpRequest's getAllResponseHeaders() method returns a string of response
-         * headers according to the format described here:
-         * http://www.w3.org/TR/XMLHttpRequest/#the-getallresponseheaders-method
-         * This method parses that string into a user-friendly key/value pair object.
-         */
-        function parseResponseHeaders(headerStr) {
-            var headers = {};
-            if (!headerStr) {
-                return headers;
-            }
-            var headerPairs = headerStr.split('\u000d\u000a');
-            for (var i = 0, len = headerPairs.length; i < len; i++) {
-                var headerPair = headerPairs[i];
-                var index = headerPair.indexOf('\u003a\u0020');
-                if (index > 0) {
-                    var key = headerPair.substring(0, index).toLowerCase();
-                    var val = headerPair.substring(index + 2);
-                    headers[key] = val;
-                }
-            }
-            return headers;
-        }
-
-    };
-
-    igvxhr.getContentLength = function (url, options) {
-
-        var continuation = options.success;
-
-        if (!options.error) {
-            options.error = function () {
-                continuation(-1);
-            }
-        }
-
-        options.success = function (header) {
-
-            var contentLengthString = header ? header["content-length"] : null;
-            if (contentLengthString) {
-                continuation(parseInt(contentLengthString));
-            }
-            else {
-                continuation(-1);    // Don't know the content length
-            }
-
-        }
-
-        igvxhr.loadHeader(url, options);
     };
 
     igvxhr.loadStringFromFile = function (localfile, options) {
 
-        var fileReader = new FileReader(),
-            success = options.success,
-            error = options.error || options.success,
-            abort = options.abort || options.error,
-            timeout = options.timeout || options.error,
-            range = options.range;
+        return new Promise(function (fulfill, reject) {
+
+            var fileReader = new FileReader(),
+                range = options.range;
 
 
-        fileReader.onload = function (e) {
+            fileReader.onload = function (e) {
 
-            var compression, result;
+                var compression, result;
 
-            if (options.bgz) {
-                compression = BGZF;
-            }
-            else if (localfile.name.endsWith(".gz")) {
+                if (options.bgz) {
+                    compression = BGZF;
+                }
+                else if (localfile.name.endsWith(".gz")) {
 
-                compression = GZIP;
-            }
-            else {
-                compression = NONE;
-            }
+                    compression = GZIP;
+                }
+                else {
+                    compression = NONE;
+                }
 
-            result = igvxhr.arrayBufferToString(fileReader.result, compression);
+                result = igvxhr.arrayBufferToString(fileReader.result, compression);
 
-            success(result, localfile);
+                fulfill(result, localfile);
 
-        };
+            };
 
-        fileReader.onerror = function (e) {
-            console.log("error uploading local file " + localfile.name);
-            error(null, fileReader);
-        };
+            fileReader.onerror = function (e) {
+                console.log("reject uploading local file " + localfile.name);
+                reject(null, fileReader);
+            };
 
-        fileReader.readAsArrayBuffer(localfile);
+            fileReader.readAsArrayBuffer(localfile);
 
-    };
+        });
+    }
 
     function isCrossDomain(url) {
 
@@ -445,6 +341,11 @@ var igvxhr = (function (igvxhr) {
         }
         return result;
     };
+
+
+    igv.AbortLoad = function () {
+
+    }
 
     return igvxhr;
 

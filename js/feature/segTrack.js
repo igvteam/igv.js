@@ -68,9 +68,9 @@ var igv = (function (igv) {
         this.samples = {};
         this.sampleNames = [];
 
-     //   this.featureSource = config.sourceType === "bigquery" ?
-     //       new igv.BigQueryFeatureSource(this.config) :
-            this.featureSource =     new igv.FeatureSource(this.config);
+        //   this.featureSource = config.sourceType === "bigquery" ?
+        //       new igv.BigQueryFeatureSource(this.config) :
+        this.featureSource = new igv.FeatureSource(this.config);
 
 
     };
@@ -98,27 +98,29 @@ var igv = (function (igv) {
         this.trackView.update();
     };
 
-    igv.SegTrack.prototype.getFeatures = function (chr, bpStart, bpEnd, continuation, task) {
+
+    igv.SegTrack.prototype.getFeatures = function (chr, bpStart, bpEnd) {
 
         var self = this;
+        return new Promise(function (fulfill, reject) {
+            // If no samples are defined, optionally query feature source.  This step was added to support the TCGA BigQuery
+            // tables
+            if (self.sampleCount === 0 && self.featureSource.reader.allSamples) {    // TODO <=  fix this!
+                self.featureSource.reader.allSamples().then(function (samples) {
+                    samples.forEach(function (sample) {
+                        self.samples[sample] = self.sampleCount;
+                        self.sampleNames.push(sample);
+                        self.sampleCount++;
+                    })
+                    self.featureSource.getFeatures(chr, bpStart, bpEnd).then(fulfill).catch(reject);
+                }).catch(reject);
+            }
+            else {
+                self.featureSource.getFeatures(chr, bpStart, bpEnd).then(fulfill).catch(reject);
+            }
+        });
+    }
 
-        // If no samples are defined, optionally query feature source.  This step was added to support the TCGA BigQuery
-        // tables
-        if (self.sampleCount === 0 && self.featureSource.reader.allSamples) {    // TODO <=  fix this!
-            self.featureSource.reader.allSamples(function (samples) {
-                samples.forEach(function (sample) {
-                    self.samples[sample] = self.sampleCount;
-                    self.sampleNames.push(sample);
-                    self.sampleCount++;
-                })
-
-                self.featureSource.getFeatures(chr, bpStart, bpEnd, continuation, task)
-            });
-        }
-        else {
-            this.featureSource.getFeatures(chr, bpStart, bpEnd, continuation, task)
-        }
-    };
 
     igv.SegTrack.prototype.draw = function (options) {
 
@@ -145,7 +147,7 @@ var igv = (function (igv) {
             border;
 
         sampleHeight = ("SQUISHED" === this.displayMode) ? this.sampleSquishHeight : this.sampleExpandHeight;
-        border =  ("SQUISHED" === this.displayMode) ? 0 : 1;
+        border = ("SQUISHED" === this.displayMode) ? 0 : 1;
 
         ctx = options.context;
         pixelWidth = options.pixelWidth;
@@ -199,7 +201,7 @@ var igv = (function (igv) {
                 px1 = Math.round((segment.end - bpStart) / xScale);
                 pw = Math.max(1, px1 - px);
 
-                igv.graphics.fillRect(ctx, px, y, pw, sampleHeight - 2*border, {fillStyle: color});
+                igv.graphics.fillRect(ctx, px, y, pw, sampleHeight - 2 * border, {fillStyle: color});
 
             }
         }
@@ -261,7 +263,7 @@ var igv = (function (igv) {
             len = bpEnd - bpStart,
             scores = {};
 
-        this.featureSource.getFeatures(chr, bpStart, bpEnd, function (featureList) {
+        this.featureSource.getFeatures(chr, bpStart, bpEnd).then(function (featureList) {
 
             // Compute weighted average score for each sample
             for (i = 0, len = featureList.length; i < len; i++) {
