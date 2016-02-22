@@ -43,6 +43,8 @@ var igv = (function (igv) {
         this.samplingWindowSize = config.samplingWindowSize === undefined ? 100 : config.samplingWindowSize;
         this.samplingDepth = config.samplingDepth === undefined ? 100 : config.samplingDepth;
 
+        this.paired = false; //config.paired;     //
+
 
     };
 
@@ -64,7 +66,8 @@ var igv = (function (igv) {
                     getIndex(self).then(function (bamIndex) {
 
                         var chunks = bamIndex.blocksForRange(chrId, bpStart, bpEnd),
-                            alignmentContainer = new igv.AlignmentContainer(chr, bpStart, bpEnd, self.samplingWindowSize, self.samplingDepth),
+
+                            alignmentContainer = new igv.AlignmentContainer(chr, bpStart, bpEnd, self.samplingWindowSize, self.samplingDepth, self.paired),
                             promises = [];
 
 
