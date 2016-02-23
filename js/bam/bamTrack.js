@@ -242,7 +242,7 @@ var igv = (function (igv) {
 
             this.coverageTrack.draw(options);
 
-            this.alignmentTrack.draw(options);
+          //  this.alignmentTrack.draw(options);
         };
 
         igv.BAMTrack.prototype.popupData = function (genomicLocation, xOffset, yOffset) {
@@ -377,7 +377,7 @@ var igv = (function (igv) {
                 item = coverageMap.coverage[i];
                 if (!item) continue;
 
-                h = (item.total / coverageMap.maximum) * this.height;
+                h = Math.round((item.total / coverageMap.maximum) * this.height);
                 y = this.height - h;
                 x = Math.floor((bp - bpStart) / bpPerPixel);
 
