@@ -426,6 +426,7 @@ var igv = (function (igv) {
                     }
                     else {
                         igv.stopSpinnerAtParentElement(self.trackDiv);
+                        console.log(error);
                         alert(error);
                     }
                 });

@@ -91,7 +91,7 @@ var igv = (function (igv) {
                         "pageSize": "10000"
                     },
                     decode: decodeGa4ghReads,
-                    results: new igv.AlignmentContainer(chr, bpStart, bpEnd, self.samplingWindowSize, self.samplingDepth, self.paired)
+                    results: new igv.AlignmentContainer(chr, bpStart, bpEnd, self.samplingWindowSize, self.samplingDepth)
                 }).then(fulfill)
                     .catch(reject);
 

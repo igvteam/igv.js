@@ -7,18 +7,8 @@ var igv = (function (igv) {
     var BAI_MAGIC = 21578050;
     var SECRET_DECODER = ['=', 'A', 'C', 'x', 'G', 'x', 'x', 'x', 'T', 'x', 'x', 'x', 'x', 'x', 'x', 'N'];
     var CIGAR_DECODER = ['M', 'I', 'D', 'N', 'S', 'H', 'P', '=', 'X', '?', '?', '?', '?', '?', '?', '?'];
-    var READ_PAIRED_FLAG = 0x1;
-    var PROPER_PAIR_FLAG = 0x2;
-    var READ_UNMAPPED_FLAG = 0x4;
-    var MATE_UNMAPPED_FLAG = 0x8;
     var READ_STRAND_FLAG = 0x10;
-    var MATE_STRAND_FLAG = 0x20;
-    var FIRST_OF_PAIR_FLAG = 0x40;
-    var SECOND_OF_PAIR_FLAG = 0x80;
-    var NOT_PRIMARY_ALIGNMENT_FLAG = 0x100;
-    var READ_FAILS_VENDOR_QUALITY_CHECK_FLAG = 0x200;
-    var DUPLICATE_READ_FLAG = 0x400;
-    var SUPPLEMENTARY_ALIGNMENT_FLAG = 0x800;
+
 
     const MAX_GZIP_BLOCK_SIZE = (1 << 16);   //  APPARENTLY.  Where is this documented???
 
@@ -67,7 +57,7 @@ var igv = (function (igv) {
 
                         var chunks = bamIndex.blocksForRange(chrId, bpStart, bpEnd),
 
-                            alignmentContainer = new igv.AlignmentContainer(chr, bpStart, bpEnd, self.samplingWindowSize, self.samplingDepth, self.paired),
+                            alignmentContainer = new igv.AlignmentContainer(chr, bpStart, bpEnd, self.samplingWindowSize, self.samplingDepth),
                             promises = [];
 
 
@@ -80,7 +70,7 @@ var igv = (function (igv) {
                             fulfill([]);
                             return;
                         }
-console.log("# chunks = " + chunks.length);
+                        console.log("# chunks = " + chunks.length);
                         chunks.forEach(function (c) {
 
                             promises.push(new Promise(function (fulfill, reject) {
@@ -99,19 +89,14 @@ console.log("# chunks = " + chunks.length);
                                         withCredentials: self.config.withCredentials
                                     }).then(function (compressed) {
 
-                                    try {
                                         var ba = new Uint8Array(igv.unbgzf(compressed)); //new Uint8Array(igv.unbgzf(compressed)); //, c.maxv.block - c.minv.block + 1));
                                         decodeBamRecords(ba, c.minv.offset, alignmentContainer, bpStart, bpEnd, chrId);
-                                    } catch (e) {
-                                        console.log(e);
-                                        //fulfill(alignmentContainer);
-                                    }
 
-                                    fulfill(alignmentContainer);
+                                        fulfill(alignmentContainer);
 
-                                }).catch(function (obj) {
-                                    reject(obj);
-                                });
+                                    }).catch(function (obj) {
+                                        reject(obj);
+                                    });
 
                             }))
                         });
@@ -384,44 +369,44 @@ console.log("# chunks = " + chunks.length);
                         withCredentials: self.config.withCredentials
                     }).then(function (compressedBuffer) {
 
-                    var unc = igv.unbgzf(compressedBuffer, len),
-                        uncba = new Uint8Array(unc),
-                        magic = readInt(uncba, 0),
-                        samHeaderLen = readInt(uncba, 4),
-                        samHeader = '',
-                        genome = igv.browser ? igv.browser.genome : null;
+                        var unc = igv.unbgzf(compressedBuffer, len),
+                            uncba = new Uint8Array(unc),
+                            magic = readInt(uncba, 0),
+                            samHeaderLen = readInt(uncba, 4),
+                            samHeader = '',
+                            genome = igv.browser ? igv.browser.genome : null;
 
-                    for (var i = 0; i < samHeaderLen; ++i) {
-                        samHeader += String.fromCharCode(uncba[i + 8]);
-                    }
-
-                    var nRef = readInt(uncba, samHeaderLen + 8);
-                    var p = samHeaderLen + 12;
-
-                    self.chrToIndex = {};
-                    self.indexToChr = [];
-                    for (var i = 0; i < nRef; ++i) {
-                        var lName = readInt(uncba, p);
-                        var name = '';
-                        for (var j = 0; j < lName - 1; ++j) {
-                            name += String.fromCharCode(uncba[p + 4 + j]);
-                        }
-                        var lRef = readInt(uncba, p + lName + 4);
-                        //dlog(name + ': ' + lRef);
-
-                        if (genome && genome.getChromosomeName) {
-                            name = genome.getChromosomeName(name);
+                        for (var i = 0; i < samHeaderLen; ++i) {
+                            samHeader += String.fromCharCode(uncba[i + 8]);
                         }
 
-                        self.chrToIndex[name] = i;
-                        self.indexToChr.push(name);
+                        var nRef = readInt(uncba, samHeaderLen + 8);
+                        var p = samHeaderLen + 12;
 
-                        p = p + 8 + lName;
-                    }
+                        self.chrToIndex = {};
+                        self.indexToChr = [];
+                        for (var i = 0; i < nRef; ++i) {
+                            var lName = readInt(uncba, p);
+                            var name = '';
+                            for (var j = 0; j < lName - 1; ++j) {
+                                name += String.fromCharCode(uncba[p + 4 + j]);
+                            }
+                            var lRef = readInt(uncba, p + lName + 4);
+                            //dlog(name + ': ' + lRef);
 
-                    fulfill();
+                            if (genome && genome.getChromosomeName) {
+                                name = genome.getChromosomeName(name);
+                            }
 
-                }).catch(reject);
+                            self.chrToIndex[name] = i;
+                            self.indexToChr.push(name);
+
+                            p = p + 8 + lName;
+                        }
+
+                        fulfill();
+
+                    }).catch(reject);
             }).catch(reject);
         });
     }

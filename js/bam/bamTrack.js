@@ -88,7 +88,7 @@ var igv = (function (igv) {
 
             if (alignment.isPaired()) {
 
-                if (alignment.isFistOfPair()) {
+                if (alignment.isFirstOfPair()) {
                     return alignment.strand ? bamTrack.posStrandColor : bamTrack.negStrandColor;
                 }
                 else if (alignment.isSecondOfPair()) {
@@ -483,7 +483,7 @@ var igv = (function (igv) {
     AlignmentTrack = function (config, featureSource) {
 
         this.featureSource = featureSource;
-        this.top = config.coverageTrackHeight || 50;
+        this.top = config.coverageTrackHeight + 5 || 55;
         this.alignmentRowHeight = config.alignmentRowHeight || 14;
         this.defaultColor = config.defaultColor || "rgb(185, 185, 185)";
         this.color = config.color || this.defaultColor;
@@ -583,15 +583,17 @@ var igv = (function (igv) {
                     continue;
                 }
 
-                if (alignment.paired) {
+                if (alignment instanceof igv.PairedAlignment) {
+
+                    drawPairConnector(alignment);
+
                     drawSingleAlignment(alignment.firstAlignment);
+
                     if (alignment.secondAlignment) {
                         drawSingleAlignment(alignment.secondAlignment);
-                        // TODO draw connectingn line
+
                     }
-                    else {
-                        // TODO second not loaded, draw connecting line using first's mate information
-                    }
+
                 }
                 else {
                     drawSingleAlignment(alignment);
@@ -628,7 +630,7 @@ var igv = (function (igv) {
                             x,
                             y,
                             i,
-                            yStrokedLine;
+                            yStrokedLine = yRect + alignmentHeight / 2;
                         if (block.gapType != undefined && xBlockEnd != undefined) {
                             if ("D" === block.gapType) {
                                 igv.graphics.strokeLine(ctx, xBlockStart, yStrokedLine, xBlockEnd, yStrokedLine, {strokeStyle: deletionColor});
@@ -723,7 +725,29 @@ var igv = (function (igv) {
                         });
                     }
                 }
+
+                // alignment is a PairedAlignment
+                function drawPairConnector(alignment) {
+
+                    var canvasColor = igv.BAMTrack.alignmentShadingOptions[self.alignmentShading](self, alignment),
+                        outlineColor = canvasColor,
+                        xBlockStart = (alignment.connectingStart - bpStart) / bpPerPixel,
+                        xBlockEnd = (alignment.connectingEnd - bpStart) / bpPerPixel,
+                        yStrokedLine = yRect + alignmentHeight / 2;
+
+                    if ((alignment.connectingEnd) < bpStart || alignment.connectingStart > bpEnd) return;
+
+                    if (alignment.mq <= 0) {
+                        canvasColor = igv.addAlphaToRGB(canvasColor, "0.15");
+                    }
+
+                    igv.graphics.setProperties(ctx, {fillStyle: canvasColor, strokeStyle: outlineColor});
+
+                    igv.graphics.strokeLine(ctx, xBlockStart, yStrokedLine, xBlockEnd, yStrokedLine);
+
+                }
             }
+
         });
 
     }

@@ -27,23 +27,62 @@
 
 var igv = (function (igv) {
 
+
     igv.PairedAlignment = function (firstAlignment) {
-        this.paired = true;
+
         this.firstAlignment = firstAlignment;
-        this.start = firstAlignment.start;
-        this.end = firstAlignment.end;
         this.chr = firstAlignment.chr;
+        this.readName = firstAlignment.readName;
+
+        if (firstAlignment.start < firstAlignment.mate.position) {
+            this.start = firstAlignment.start;
+            this.end = Math.max(firstAlignment.mate.position, firstAlignment.start + firstAlignment.lengthOnRef);  // Approximate
+            this.connectingStart = firstAlignment.start + firstAlignment.lengthOnRef;
+            this.connectingEnd = firstAlignment.mate.position;
+        }
+        else {
+            this.start = firstAlignment.mate.position;
+            this.end = firstAlignment.start + firstAlignment.lengthOnRef;
+            this.connectingStart = firstAlignment.mate.position;
+            this.connectingEnd = firstAlignment.start;
+        }
+        this.lengthOnRef = this.end - this.start;
+
     }
 
     igv.PairedAlignment.prototype.setSecondAlignment = function (alignment) {
 
-        this.secondAlignment = alignment;
-        this.end = secondAlignment.getEnd();
         // TODO -- check the chrs are equal,  error otherwise
+        this.secondAlignment = alignment;
+
+        if(alignment.start > this.firstAlignment.start) {
+            this.end = alignment.start + alignment.lengthOnRef;
+            this.connectingEnd = alignment.start;
+        }
+        else {
+            this.start = alignment.start;
+            this.connectingStart = alignment.start + alignment.lengthOnRef;
+        }
+        this.lengthOnRef = this.end - this.start;
+
 
     }
 
+    igv.PairedAlignment.prototype.popupData = function (genomicLocation) {
 
-    return igv;
+        var nameValues = [];
+
+        nameValues = nameValues.concat(this.firstAlignment.popupData(genomicLocation));
+
+        if(this.secondAlignment) {
+            nameValues.push("-------------------------------");
+            nameValues = nameValues.concat(this.secondAlignment.popupData(genomicLocation));
+        }
+        return nameValues;
+    }
+
+
+
+        return igv;
 
 })(igv || {});

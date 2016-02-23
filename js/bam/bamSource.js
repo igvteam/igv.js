@@ -53,6 +53,7 @@ var igv = (function (igv) {
 
                 self.bamReader.readAlignments(chr, bpStart, bpEnd).then(function (alignmentContainer) {
 
+                    alignmentContainer.finish();
 
                     self.alignmentContainer = alignmentContainer;
 
@@ -69,6 +70,7 @@ var igv = (function (igv) {
 
                                 self.alignmentContainer.packedAlignmentRows = packAlignmentRows(self.alignmentContainer, maxRows);
 
+                                self.alignmentContainer.alignments = undefined;  // Don't need to hold onto these anymore
 
                                 fulfill(self.alignmentContainer);
                             }

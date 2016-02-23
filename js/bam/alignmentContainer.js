@@ -26,6 +26,16 @@
 
 var igv = (function (igv) {
 
+    var pairsSupported = false,
+        downSample = true;
+
+    function canBePaired(alignment) {
+        return alignment.isPaired() &&
+            alignment.isMateMapped() &&
+            alignment.chr === alignment.mate.chr &&
+            (alignment.isFirstOfPair() || alignment.isSecondOfPair()) && !(alignment.isSecondary() || alignment.isSupplementary());
+    }
+
 
     /**
      * Container for alignments that downsamples and computes coverage
@@ -35,7 +45,7 @@ var igv = (function (igv) {
      * @param end
      * @constructor
      */
-    igv.AlignmentContainer = function (chr, start, end, samplingWindowSize, samplingDepth, paired) {
+    igv.AlignmentContainer = function (chr, start, end, samplingWindowSize, samplingDepth) {
 
         this.chr = chr;
         this.start = start;
@@ -45,13 +55,9 @@ var igv = (function (igv) {
         this.coverageMap = new CoverageMap(chr, start, end);
         this.alignments = [];
         this.downsampledIntervals = [];
-        this.downSample = true;
-        this.paired = paired;
 
         this.samplingWindowSize = samplingWindowSize === undefined ? 100 : samplingWindowSize;
         this.samplingDepth = samplingDepth === undefined ? 100 : samplingDepth;
-
-        this.readNames = new Set();     // Stash read names when downsampling to keep both ends of a paired alignment
 
         this.pairs = {};
 
@@ -63,62 +69,47 @@ var igv = (function (igv) {
 
     igv.AlignmentContainer.prototype.push = function (alignment) {
 
-        if (filter(alignment) === false) return;
+        var pairedAlignment;
+
+        if (this.filter(alignment) === false) return;
 
         this.coverageMap.incCounts(alignment);
 
-        if (this.downSample) {
-            if (this.currentBucket === undefined) {
-                this.currentBucket = new DownsampleBucket(alignment.start, alignment.start + this.samplingWindowSize, this.samplingDepth, this.readNames, this.paired);
-            }
-            if (alignment.start >= this.currentBucket.end) {
-                finishBucket.call(this);
-                this.currentBucket = new DownsampleBucket(alignment.start, alignment.start + this.samplingWindowSize, this.samplingDepth, this.readNames, this.paired);
-            }
+        pairedAlignment = pairsSupported ?
+            this.pairs[alignment.readName] :
+            undefined;
 
-            this.currentBucket.addAlignment(alignment);
+        if (pairsSupported && canBePaired(alignment) && pairedAlignment) {
 
+            //Not subject to downsampling, just updating an existing alignment
+            pairedAlignment.setSecondAlignment(alignment);
+            this.pairs[alignment.readName] = undefined;   // Don't need to track this anymore. NOTE: Don't "delete", causes runtime performance issues
         }
         else {
-            this.alignments.push(alignment);
-        }
 
-        function filter(alignment) {
-            return alignment.isMapped() && !alignment.isFailsVendorQualityCheck();
-        }
-    }
+            if (downSample) {
+                if (this.currentBucket === undefined) {
+                    this.currentBucket = new DownsampleBucket(alignment.start, alignment.start + this.samplingWindowSize, this);
+                }
+                if (alignment.start >= this.currentBucket.end) {
+                    finishBucket.call(this);
+                    this.currentBucket = new DownsampleBucket(alignment.start, alignment.start + this.samplingWindowSize, this);
+                }
 
+                this.currentBucket.addAlignment(alignment);
 
-    function addAlignment(alignment) {
-
-        var pairedAlignment;
-
-        if (this.paired) {
-            if (alignment.isNotPrimary() || alignment.isSupplementary()) {
-                this.alignments.push(alignment);
             }
             else {
-                pairedAlignment = this.pairs[alignment.readName];
-                if (pairedAlignment) {
-                    if (alignment.isSecondOfPair()) {   // 0x80
-                        pairedAlignment.setSecondAlignment(alignment);
-                    }
+                if (pairsSupported && canBePaired(alignment)) {
+                    alignment = new igv.PairedAlignment(alignment);
+                    this.pairs[alignment.readName] = alignment;
                 }
-                else {
-                    if (alignment.isFistOfPair()) {
-                        pairedAlignment = new igv.PairedAlignment(alignment);
-                        this.pairs[alignment.readName] = pairedAlignment;
-                        this.alignments.push(pairedAlignment);
-                    }
-                }
+                this.alignments.push(alignment);
+
             }
-        }
-        else {
-            this.alignments.push(alignment);
         }
 
     }
-
 
     igv.AlignmentContainer.prototype.forEach = function (callback) {
         this.alignments.forEach(callback);
@@ -131,7 +122,7 @@ var igv = (function (igv) {
         this.alignments.sort(function (a, b) {
             return a.start - b.start
         });
-        this.readNames.clear();
+        this.pairs = undefined;
     }
 
     igv.AlignmentContainer.prototype.contains = function (chr, start, end) {
@@ -154,37 +145,48 @@ var igv = (function (igv) {
         }
     }
 
-    function DownsampleBucket(start, end, samplingDepth, readNames, paired) {
+    function DownsampleBucket(start, end, alignmentContainer) {
 
         this.start = start;
         this.end = end;
-        this.samplingDepth = samplingDepth;
         this.alignments = [];
         this.downsampledCount = 0;
-        this.readNames = readNames;
-        this.paired = paired;
+        this.samplingDepth = alignmentContainer.samplingDepth;
+        this.pairs = alignmentContainer.pairs;
     }
 
     DownsampleBucket.prototype.addAlignment = function (alignment) {
 
-        var samplingProb, idx;
+        var samplingProb, idx, replacedAlignment;
 
         if (this.alignments.length < this.samplingDepth) {
-            this.alignments.push(alignment);
-            if (this.paired && alignment.isPaired()) {
-                this.readNames.add(alignment.readName);
+            if (pairsSupported && canBePaired(alignment)) {
+                // We'll never see the second mate of a pair here
+                alignment = new igv.PairedAlignment(alignment);
+                this.pairs[alignment.readName] = alignment;
             }
-        }
-        else if (this.paired && alignment.isPaired() && this.readNames.has(alignment.readName)) {
             this.alignments.push(alignment);
-        }
-        else {
+
+        } else {
             samplingProb = this.samplingDepth / (this.samplingDepth + this.downsampledCount + 1);
 
             if (Math.random() < samplingProb) {
+
                 idx = Math.floor(Math.random() * (this.alignments.length - 1));
+
+                if (pairsSupported && canBePaired(alignment)) {
+
+                    replacedAlignment = this.alignments[idx];
+                    if(this.pairs.hasOwnProperty(replacedAlignment.readName)) {
+                        this.pairs[replacedAlignment.readName] = undefined;
+                    }
+
+                    alignment = new igv.PairedAlignment(alignment);
+                    this.pairs[alignment.readName] = alignment;
+                }
+
                 this.alignments[idx] = alignment;
-                if (alignment.isPaired()) this.readNames.add(alignment.readName);
+
             }
 
             this.downsampledCount++;
