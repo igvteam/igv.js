@@ -242,7 +242,7 @@ var igv = (function (igv) {
 
             this.coverageTrack.draw(options);
 
-          //  this.alignmentTrack.draw(options);
+            this.alignmentTrack.draw(options);
         };
 
         igv.BAMTrack.prototype.popupData = function (genomicLocation, xOffset, yOffset) {
@@ -603,6 +603,28 @@ var igv = (function (igv) {
                     }
 
 
+                    // alignment is a PairedAlignment
+                    function drawPairConnector(alignment) {
+
+                        var canvasColor = igv.BAMTrack.alignmentShadingOptions[self.alignmentShading](self, alignment),
+                            outlineColor = canvasColor,
+                            xBlockStart = (alignment.connectingStart - bpStart) / bpPerPixel,
+                            xBlockEnd = (alignment.connectingEnd - bpStart) / bpPerPixel,
+                            yStrokedLine = yRect + alignmentHeight / 2;
+
+                        if ((alignment.connectingEnd) < bpStart || alignment.connectingStart > bpEnd) return;
+
+                        if (alignment.mq <= 0) {
+                            canvasColor = igv.addAlphaToRGB(canvasColor, "0.15");
+                        }
+
+                        igv.graphics.setProperties(ctx, {fillStyle: canvasColor, strokeStyle: outlineColor});
+
+                        igv.graphics.strokeLine(ctx, xBlockStart, yStrokedLine, xBlockEnd, yStrokedLine);
+
+                    }
+
+
                     function drawSingleAlignment(alignment) {
 
                         var canvasColor = igv.BAMTrack.alignmentShadingOptions[self.alignmentShading](self, alignment),
@@ -747,28 +769,7 @@ var igv = (function (igv) {
                                 }
                             }
                         }
-
-                        // alignment is a PairedAlignment
-                        function drawPairConnector(alignment) {
-
-                            var canvasColor = igv.BAMTrack.alignmentShadingOptions[self.alignmentShading](self, alignment),
-                                outlineColor = canvasColor,
-                                xBlockStart = (alignment.connectingStart - bpStart) / bpPerPixel,
-                                xBlockEnd = (alignment.connectingEnd - bpStart) / bpPerPixel,
-                                yStrokedLine = yRect + alignmentHeight / 2;
-
-                            if ((alignment.connectingEnd) < bpStart || alignment.connectingStart > bpEnd) return;
-
-                            if (alignment.mq <= 0) {
-                                canvasColor = igv.addAlphaToRGB(canvasColor, "0.15");
-                            }
-
-                            igv.graphics.setProperties(ctx, {fillStyle: canvasColor, strokeStyle: outlineColor});
-
-                            igv.graphics.strokeLine(ctx, xBlockStart, yStrokedLine, xBlockEnd, yStrokedLine);
-
-                        }
-                    }
+                   }
                 }
             });
 
