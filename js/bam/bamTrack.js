@@ -68,6 +68,8 @@ var igv = (function (igv) {
             this.filterOption = config.filterOption || {name: "mappingQuality", params: [30, undefined]};
 
             this.sortDirection = true;
+
+            this.viewAsPairs = config.viewAsPairs === undefined ? false : config.viewAsPairs;
         };
 
         igv.BAMTrack.prototype.getFeatures = function (chr, bpStart, bpEnd) {
