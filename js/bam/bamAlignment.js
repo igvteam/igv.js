@@ -37,7 +37,7 @@ var igv = (function (igv) {
     var MATE_STRAND_FLAG = 0x20;
     var FIRST_OF_PAIR_FLAG = 0x40;
     var SECOND_OF_PAIR_FLAG = 0x80;
-    var NOT_PRIMARY_ALIGNMENT_FLAG = 0x100;
+    var SECONDARY_ALIGNMNET_FLAG = 0x100;
     var READ_FAILS_VENDOR_QUALITY_CHECK_FLAG = 0x200;
     var DUPLICATE_READ_FLAG = 0x400;
     var SUPPLEMENTARY_ALIGNMENT_FLAG = 0x800;
@@ -71,7 +71,7 @@ var igv = (function (igv) {
         return (this.flags & PROPER_PAIR_FLAG) != 0;
     }
 
-    igv.BamAlignment.prototype.isFistOfPair = function () {
+    igv.BamAlignment.prototype.isFirstOfPair = function () {
         return (this.flags & FIRST_OF_PAIR_FLAG) != 0;
     }
 
@@ -79,8 +79,8 @@ var igv = (function (igv) {
         return (this.flags & SECOND_OF_PAIR_FLAG) != 0;
     }
 
-    igv.BamAlignment.prototype.isNotPrimary = function () {
-        return (this.flags & NOT_PRIMARY_ALIGNMENT_FLAG) != 0;
+    igv.BamAlignment.prototype.isSecondary = function () {
+        return (this.flags & SECONDARY_ALIGNMNET_FLAG) != 0;
     }
 
     igv.BamAlignment.prototype.isSupplementary = function () {
@@ -199,7 +199,7 @@ var igv = (function (igv) {
         nameValues.push({ name: 'Cigar', value: this.cigar });
         nameValues.push({ name: 'Mapped', value: yesNo(this.isMapped()) });
         nameValues.push({ name: 'Mapping Quality', value: this.mq });
-        nameValues.push({ name: 'Secondary', value: yesNo(this.isNotPrimary()) });
+        nameValues.push({ name: 'Secondary', value: yesNo(this.isSecondary()) });
         nameValues.push({ name: 'Supplementary', value: yesNo(this.isSupplementary()) });
         nameValues.push({ name: 'Duplicate', value: yesNo(this.isDuplicate()) });
         nameValues.push({ name: 'Failed QC', value: yesNo(this.isFailsVendorQualityCheck()) });
