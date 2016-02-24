@@ -53,12 +53,9 @@ var igv = (function (igv) {
 
                 self.bamReader.readAlignments(chr, bpStart, bpEnd).then(function (alignmentContainer) {
 
-                    alignmentContainer.finish();
-
                     self.alignmentContainer = alignmentContainer;
 
                     igv.browser.genome.sequence.getSequence(self.alignmentContainer.chr, self.alignmentContainer.start, self.alignmentContainer.end).then(
-
                         function (sequence) {
 
                             var maxRows = self.config.maxRows || 500;
@@ -87,7 +84,7 @@ var igv = (function (igv) {
         var alignments = alignmentContainer.alignments;
 
         alignments.sort(function (a, b) {
-           return a.start - b.start;
+            return a.start - b.start;
         });
 
         if (alignments.length === 0) {
@@ -157,7 +154,7 @@ var igv = (function (igv) {
 
                 nextStart = bucketStart;
 
-                if(allocatedCount === lastAllocatedCount) break;   // Protect from infinite loops
+                if (allocatedCount === lastAllocatedCount) break;   // Protect from infinite loops
 
                 lastAllocatedCount = allocatedCount;
 
