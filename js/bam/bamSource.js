@@ -106,11 +106,11 @@ var igv = (function (igv) {
                 alignment,
                 alignmentSpace = 4 * 2,
                 packedAlignmentRows = [],
-                bucketStart = alignments[0].start;
+                bucketStart = Math.max(alignmentContainer.start, alignments[0].start);
 
             alignments.forEach(function (alignment) {
 
-                var buckListIndex = alignment.start - bucketStart;
+                var buckListIndex = Math.max(0, alignment.start - bucketStart);
                 if (bucketList[buckListIndex] === undefined) {
                     bucketList[buckListIndex] = [];
                 }
