@@ -105,11 +105,16 @@ var igv = (function (igv) {
 
                         Promise.all(promises).then(function (ignored) {
 
-                            if (chunks.length > 1) {
-                                alignmentContainer.alignments.sort(function (a, b) {
-                                    return a.start - b.start;
-                                });
-                            }
+                            //if (chunks.length > 1) {
+                            //    alignments.sort(function (a, b) {
+                            //        return a.start - b.start;
+                            //    });
+                            //}
+                            //var alignmentContainer = new igv.AlignmentContainer(chr, bpStart, bpEnd, self.samplingWindowSize, self.samplingDepth);
+                            //alignments.forEach(function (a) {
+                            //    alignmentContainer.push(a);
+                            //})
+                            alignmentContainer.finish();
                             fulfill(alignmentContainer);
                         }).catch(function (obj) {
                             reject(obj);

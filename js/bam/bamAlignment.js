@@ -191,7 +191,6 @@ var igv = (function (igv) {
         // Read group
         nameValues.push("<hr>");
 
-
         // Add 1 to genomic location to map from 0-based computer units to user-based units
         nameValues.push({ name: 'Alignment Start', value: igv.numberFormatter(1 + this.start), borderTop: true });
 
