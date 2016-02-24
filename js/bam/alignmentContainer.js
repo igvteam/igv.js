@@ -26,7 +26,7 @@
 
 var igv = (function (igv) {
 
-    var pairsSupported = false,
+    var pairsSupported = true,
         downSample = true;
 
     function canBePaired(alignment) {
@@ -66,12 +66,15 @@ var igv = (function (igv) {
         }
 
     }
+var count=0;
 
     igv.AlignmentContainer.prototype.push = function (alignment) {
 
         var pairedAlignment;
 
         if (this.filter(alignment) === false) return;
+
+    //    if(Object.keys(this.pairs).length > 5000) return; // pairsSupported = false;
 
         this.coverageMap.incCounts(alignment);
 
@@ -83,7 +86,7 @@ var igv = (function (igv) {
 
             //Not subject to downsampling, just updating an existing alignment
             pairedAlignment.setSecondAlignment(alignment);
-            this.pairs[alignment.readName] = undefined;   // Don't need to track this anymore. NOTE: Don't "delete", causes runtime performance issues
+            //this.pairs[alignment.readName] = undefined;   // Don't need to track this anymore. NOTE: Don't "delete", causes runtime performance issues
         }
         else {
 
@@ -176,10 +179,10 @@ var igv = (function (igv) {
 
                 if (pairsSupported && canBePaired(alignment)) {
 
-                    replacedAlignment = this.alignments[idx];
-                    if(this.pairs.hasOwnProperty(replacedAlignment.readName)) {
-                        this.pairs[replacedAlignment.readName] = undefined;
-                    }
+                    //replacedAlignment = this.alignments[idx];
+                    //if(this.pairs.hasOwnProperty(replacedAlignment.readName)) {
+                    //    this.pairs[replacedAlignment.readName] = undefined;
+                    //}
 
                     alignment = new igv.PairedAlignment(alignment);
                     this.pairs[alignment.readName] = alignment;

@@ -209,8 +209,9 @@ var igv = (function (igv) {
             nameValues.push({ name: 'First in Pair', value: !this.isSecondOfPair(), borderTop: true });
             nameValues.push({ name: 'Mate is Mapped', value: yesNo(this.isMateMapped()) });
             if (this.isMapped()) {
-                nameValues.push({ name: 'Mate Start', value: this.matePos });
-                nameValues.push({ name: 'Mate Strand', value: (this.isMateNegativeStrand() ? '(-)' : '(+)') });
+                nameValues.push({ name: 'Mate Chromosome', value: this.mate.chr });
+                nameValues.push({ name: 'Mate Start', value: (this.mate.position + 1)});
+                nameValues.push({ name: 'Mate Strand', value: (true === this.mate.strand ? '(+)' : '(-)')});
                 nameValues.push({ name: 'Insert Size', value: this.fragmentLength });
                 // Mate Start
                 // Mate Strand

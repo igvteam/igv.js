@@ -8,6 +8,7 @@ var igv = (function (igv) {
     var SECRET_DECODER = ['=', 'A', 'C', 'x', 'G', 'x', 'x', 'x', 'T', 'x', 'x', 'x', 'x', 'x', 'x', 'N'];
     var CIGAR_DECODER = ['M', 'I', 'D', 'N', 'S', 'H', 'P', '=', 'X', '?', '?', '?', '?', '?', '?', '?'];
     var READ_STRAND_FLAG = 0x10;
+    var MATE_STRAND_FLAG = 0x20;
 
 
     const MAX_GZIP_BLOCK_SIZE = (1 << 16);   //  APPARENTLY.  Where is this documented???
@@ -244,7 +245,8 @@ var igv = (function (igv) {
                 if (mateRefID >= 0) {
                     alignment.mate = {
                         chr: self.indexToChr[mateRefID],
-                        position: matePos
+                        position: matePos,
+                        strand: !(flag & MATE_STRAND_FLAG)
                     };
                 }
 
