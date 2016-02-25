@@ -177,7 +177,8 @@ var igv = (function (igv) {
             $dataRangeLabel = $('<div class="igv-data-range-track-label">');
 
             $dataRangeLabel.click(function(e){
-                console.log('data range click');
+                igv.dataRangeDialog.configureWithTrackView(self);
+                igv.dataRangeDialog.show();
             });
 
             $(this.viewportDiv).append($dataRangeLabel[ 0 ]);
