@@ -30,7 +30,10 @@ var igv = (function (igv) {
 
     igv.Popover = function (parentDiv) {
 
-        this.markupWithParentDiv(parentDiv)
+        this.markupWithParentDiv(parentDiv);
+
+        this.$popoverContent.kinetic({});
+
     };
 
     igv.Popover.prototype.markupWithParentDiv = function (parentDiv) {
@@ -58,7 +61,9 @@ var igv = (function (igv) {
 
         // popover content
         this.$popoverContent = $('<div>');
+
         this.popover.append(this.$popoverContent[ 0 ]);
+
 
     };
 
@@ -81,22 +86,22 @@ var igv = (function (igv) {
 
     igv.Popover.prototype.presentTrackMenu = function (pageX, pageY, trackView) {
 
-        var container = $('<div class="igv-track-menu-container">'),
+        var $container = $('<div class="igv-track-menu-container">'),
             trackMenuItems = igv.trackMenuItems(this, trackView);
 
         trackMenuItems.forEach(function (trackMenuItem, index, tmi) {
             if (trackMenuItem.object) {
                 var ob = trackMenuItem.object;
-                container.append(ob[ 0 ]);
+                $container.append(ob[ 0 ]);
             } else {
-                container.append(trackMenuItem)
+                $container.append(trackMenuItem)
             }
         });
 
         this.$popoverContent.empty();
 
         this.$popoverContent.removeClass("igv-popoverTrackPopupContent");
-        this.$popoverContent.append(container[ 0 ]);
+        this.$popoverContent.append($container[ 0 ]);
 
         // Attach click handler AFTER inserting markup in DOM.
         // Insertion beforehand will cause it to have NO effect
