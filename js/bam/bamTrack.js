@@ -501,7 +501,7 @@ var igv = (function (igv) {
 
             this.alignmentRowYInset = 0;
             this.alignmentStartGap = 5;
-            this.downsampleRowHeight = 10;
+            this.downsampleRowHeight = config.downsampleRowHeight === undefined ? 5 : config.downsampleRowHeight;
 
 
             this.alignmentShading = config.alignmentShading || "none";

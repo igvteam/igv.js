@@ -49,27 +49,27 @@ var igv = (function (igv) {
 
             getChrIndex(self).then(function (chrToIndex) {
 
-                var chrId = chrToIndex[chr];
+                var chrId = chrToIndex[chr],
+
+                alignmentContainer = new igv.AlignmentContainer(chr, bpStart, bpEnd, self.samplingWindowSize, self.samplingDepth);
 
                 if (chrId === undefined) {
-                    fulfill([]);
+                    fulfill(alignmentContainer);
                 } else {
 
                     getIndex(self).then(function (bamIndex) {
 
                         var chunks = bamIndex.blocksForRange(chrId, bpStart, bpEnd),
-
-                            alignmentContainer = new igv.AlignmentContainer(chr, bpStart, bpEnd, self.samplingWindowSize, self.samplingDepth),
                             promises = [];
 
 
                         if (!chunks) {
                             fulfill(null);
-                            console.log("Error reading bam index");
+                            reject("Error reading bam index");
                             return;
                         }
                         if (chunks.length === 0) {
-                            fulfill([]);
+                            fulfill(alignmentContainer);
                             return;
                         }
                         console.log("# chunks = " + chunks.length);
