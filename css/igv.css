@@ -1241,12 +1241,12 @@ div.ui-dialog fieldset {
     overflow-y: hidden;
 }
 
-.gutter-shim {
+.igv-gutter-shim {
     position: absolute;
     left:  100px;
 }
 
-.no-gutter-shim {
+.igv-no-gutter-shim {
     position: absolute;
     left: 0;
 }
