@@ -33,6 +33,7 @@
     <script type="text/javascript" src="../vendor/inflate.js"></script>
     <script type="text/javascript" src="../vendor/zlib_and_gzip.min.js"></script>
     <script type="text/javascript" src="../vendor/jquery.mousewheel.js"></script>
+    <script type="text/javascript" src="../vendor/promise-7.0.4.js"></script>
 
     <!-- IGV JS -->
     <script type="text/javascript" src="../js/igv-create.js"></script>
@@ -152,6 +153,17 @@
 <body>
 
 <div id="myDiv" style="padding-top: 50px;padding-bottom: 20px; height: auto"></div>
+
+
+<!-- Override igv.css rule governing panel name width -->
+<style type="text/css">
+    .igv-left-hand-gutter {
+        width: 200px;
+    }
+    .igv-gutter-shim {
+        left: 200px;
+    }
+</style>
 
 <script type="text/javascript">
 

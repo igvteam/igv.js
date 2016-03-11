@@ -153,6 +153,40 @@
 
 <body>
 
+<!-- Override igv.css rule governing panel name width -->
+<style type="text/css">
+    .igv-left-hand-gutter {
+        width: 200px;
+    }
+
+    .igv-gutter-shim {
+        left: 200px;
+    }
+</style>
+
+
+<div id="trackList">
+    <div onclick="igv.browser.loadTrack({
+                            type: 'eqtl',
+                            source: {
+                              type: 'gtex-ws',
+                              url: 'http://gtexportal.org/api/v6/singleTissueEqtlByLocation',
+                              tissueName: 'Adipose_Subcutaneous'
+                            },
+                            name: 'Adipose - Subcutaneous'
+                            })">Adipose - Subcutaneous
+    </div>
+    <div onclick="igv.browser.loadTrack({
+                            type: 'eqtl',
+                            sourceType: 'gtex-ws',
+                            url: 'http://gtexportal.org/api/v6/singleTissueEqtlByLocation',
+                            tissueName: 'Adipose_Subcutaneous',
+                            name: 'Adipose - Subcutaneous'
+                            })">Adipose - Subcutaneous (old)
+    </div>
+</div>
+
+
 <div id="myDiv" style="padding-top: 50px;padding-bottom: 20px; height: auto"></div>
 
 <script type="text/javascript">
@@ -166,19 +200,15 @@
         div = $("#myDiv")[0];
         options = {
             type: "GTEX",
-            fastaURL: "//dn7ywbm9isq8j.cloudfront.net/genomes/seq/hg19/hg19.fasta",
-            cytobandURL: "//dn7ywbm9isq8j.cloudfront.net/genomes/seq/hg19/cytoBand.txt",
-            locus: "psphp1",
-
-            search: {
-                url: "http://vgtxportaltest:9000/v1/features/$FEATURE$",
-                //coords: 1,
-                //chromosomeField: "chromosome",
-                //startField: "start",
-                //endField: "end",
-                resultsField: "features"
-            },
-
+            showNavigation: true,
+            fastaURL: '//igv.broadinstitute.org/genomes/seq/hg19/hg19.fasta',
+            cytobandURL: '//igv.broadinstitute.org/genomes/seq/hg19/cytoBand.txt',
+            locus: 'chr8:125,080,563-126,993,457',
+            flanking: 75000,
+            //     search: {
+            //         url: "http://gtexportal.org/api/v6/features",
+            //         resultsField: "features"
+            //     },
             formats: {
                 gwasSNPS: {
                     coords: 0,
@@ -188,53 +218,34 @@
                     fields: ["chrom", "chromStart", "chromEnd", "Strongest SNP-risk allele", "Disease/Phenotype", "P-value", "Odds ratio or beta", "PUBMEDID"]
                 }
             },
-
-
             tracks: [
                 {
-                    type: 'eqtl',
-                    sourceType: 'gtex',
-                    url: '//www.gtexportal.org/igv/assets/eqtl/Skin_Sun_Exposed_Lower_leg.portal.eqtl.bin',
+                    featureType: 'annotation',
+                    format: 'gwasSNPS',
                     indexed: false,
-                    name: 'Skin Sun Exposed Lower leg'
-                },
-                {
-                    type: 'eqtl',
-                    sourceType: 'gtex-ws',
-                    url: 'http://vgtxportaltest.broadinstitute.org:9000/v6/singleTissueEqtlByLocation',
-                    tissueName: 'Thyroid',
-                    name: 'Thyroid'
-
-                },
-                {
-                    url: 'https://www.encodeproject.org/files/ENCFF786PWS/@@download/ENCFF786PWS.bigBed',
-                    name: 'Distal H3K27ac (ENCFF786PWS)',
-                    visibilityWindow: 10000000
-                },               {
-                    featureType: "annotation",
-                    format: "gwasSNPS",
-                    indexed: false,
-                    color: "rgb(100,200,200)",
+                    color: 'rgb(100,200,200)',
                     displayMode: 'EXPANDED',
-                    url: "//dn7ywbm9isq8j.cloudfront.net/annotations/hg19/gwas/v2_newest_converted_GWAS_catalog_SNPs_Pval5E08_hg19_040115.bed",
-                    name: "GWAS snps"
+                    url: '//igv.broadinstitute.org/annotations/hg19/gwas/v2_newest_converted_GWAS_catalog_SNPs_Pval5E08_hg19_040115.bed',
+                    name: 'GWAS Catalog',
+                    order: 9999
                 },
                 {
                     featureType: 'genes',
-                    url: "//igv.broadinstitute.org/annotations/hg19/genes/gencode.v18.collapsed.bed",
+                    url: '//igv.broadinstitute.org/annotations/hg19/genes/gencode.v18.collapsed.bed',
+                    name: 'Genes',
+                    order: 10000,
+                    displayMode: 'EXPANDED',
                     height: 100,
                     autoHeight: true,
                     removable: false,
-                    name: "Genes",
-                    labelDisplayMode: "SLANT",
-                    order: 10000
+                    labelDisplayMode: 'SLANT'
                 }
             ]
         };
 
         browser = igv.createBrowser(div, options);
 
-       // igv.browser.search("psphp1");
+        // igv.browser.search("psphp1");
     });
 
 

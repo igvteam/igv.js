@@ -55,7 +55,8 @@
                             <a href="#"
                                onclick="igv.browser.loadTrack({
                                   url: 'http://hgdownload.cse.ucsc.edu/goldenPath/hg19/encodeDCC/wgEncodeOpenChromFaire/wgEncodeOpenChromFaireMrta2041AlnRep1.bam',
-                                  name: 'MRT_A204 FaireSeq Alignments rep 1'})">MRT_A204 FaireSeq Alignments rep 1 bam</a>
+                                  name: 'MRT_A204 FaireSeq Alignments rep 1'})">MRT_A204 FaireSeq Alignments rep 1
+                                bam</a>
                         </li>
                         <li>
                             <a href="#"
@@ -122,12 +123,15 @@
         var div = $("#igvDiv")[0],
                 options = {
                     showNavigation: true,
-                    genome: "hg19",
                     locus: "chr1:155,160,475-155,184,282",
+                    reference: {
+                        id: "hg19"
+                    },
                     tracks: [
                         {
                             name: "Genes",
                             url: "//igv.broadinstitute.org/annotations/hg19/genes/gencode.v18.collapsed.bed",
+                            indexURL: "//igv.broadinstitute.org/annotations/hg19/genes/gencode.v18.collapsed.bed.idx",
                             order: Number.MAX_VALUE,
                             displayMode: "EXPANDED"
 
