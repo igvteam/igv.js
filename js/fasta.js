@@ -32,7 +32,7 @@ var igv = (function (igv) {
         this.file = reference.fastaURL;
         this.indexed = reference.indexed !== false;   // Indexed unless it explicitly is not
         if (this.indexed) {
-            this.indexFile = reference.indexFile || this.file + ".fai";
+            this.indexFile = reference.indexURL || reference.indexFile || this.file + ".fai";
         }
         this.withCredentials = reference.withCredentials;
 
