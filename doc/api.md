@@ -28,7 +28,7 @@ Search by gene symbol
 
 Go to explicit location
 
-`igv.browser.search('chr10:1000-2000;)`
+`igv.browser.search('chr10:1000-2000')`
 
 ###zoom###
 
