@@ -29,7 +29,7 @@ var igv = (function (igv) {
         this.baiPath = 'gcs' === config.sourceType ?
             igv.translateGoogleCloudURL(config.url + ".bai") :
         config.url + ".bai"; // Todo - deal with Picard convention.  WHY DOES THERE HAVE TO BE 2?
-		this.baiPath = config.indexURL || this.baiPath; // If there is an indexURL provided, use it!
+        this.baiPath = config.indexURL || this.baiPath; // If there is an indexURL provided, use it!
         this.headPath = config.headURL || this.bamPath;
 
         this.samplingWindowSize = config.samplingWindowSize === undefined ? 100 : config.samplingWindowSize;
@@ -51,7 +51,7 @@ var igv = (function (igv) {
 
                 var chrId = chrToIndex[chr],
 
-                alignmentContainer = new igv.AlignmentContainer(chr, bpStart, bpEnd, self.samplingWindowSize, self.samplingDepth);
+                    alignmentContainer = new igv.AlignmentContainer(chr, bpStart, bpEnd, self.samplingWindowSize, self.samplingDepth);
 
                 if (chrId === undefined) {
                     fulfill(alignmentContainer);
@@ -91,14 +91,14 @@ var igv = (function (igv) {
                                         withCredentials: self.config.withCredentials
                                     }).then(function (compressed) {
 
-                                        var ba = new Uint8Array(igv.unbgzf(compressed)); //new Uint8Array(igv.unbgzf(compressed)); //, c.maxv.block - c.minv.block + 1));
-                                        decodeBamRecords(ba, c.minv.offset, alignmentContainer, bpStart, bpEnd, chrId);
+                                    var ba = new Uint8Array(igv.unbgzf(compressed)); //new Uint8Array(igv.unbgzf(compressed)); //, c.maxv.block - c.minv.block + 1));
+                                    decodeBamRecords(ba, c.minv.offset, alignmentContainer, bpStart, bpEnd, chrId);
 
-                                        fulfill(alignmentContainer);
+                                    fulfill(alignmentContainer);
 
-                                    }).catch(function (obj) {
-                                        reject(obj);
-                                    });
+                                }).catch(function (obj) {
+                                    reject(obj);
+                                });
 
                             }))
                         });
@@ -370,51 +370,49 @@ var igv = (function (igv) {
                     {
                         headers: self.config.headers,
 
-                        contentType: 'application/octet',
-
                         range: {start: 0, size: len},
 
                         withCredentials: self.config.withCredentials
                     }).then(function (compressedBuffer) {
 
-                        var unc = igv.unbgzf(compressedBuffer, len),
-                            uncba = new Uint8Array(unc),
-                            magic = readInt(uncba, 0),
-                            samHeaderLen = readInt(uncba, 4),
-                            samHeader = '',
-                            genome = igv.browser ? igv.browser.genome : null;
+                    var unc = igv.unbgzf(compressedBuffer, len),
+                        uncba = new Uint8Array(unc),
+                        magic = readInt(uncba, 0),
+                        samHeaderLen = readInt(uncba, 4),
+                        samHeader = '',
+                        genome = igv.browser ? igv.browser.genome : null;
 
-                        for (var i = 0; i < samHeaderLen; ++i) {
-                            samHeader += String.fromCharCode(uncba[i + 8]);
+                    for (var i = 0; i < samHeaderLen; ++i) {
+                        samHeader += String.fromCharCode(uncba[i + 8]);
+                    }
+
+                    var nRef = readInt(uncba, samHeaderLen + 8);
+                    var p = samHeaderLen + 12;
+
+                    self.chrToIndex = {};
+                    self.indexToChr = [];
+                    for (var i = 0; i < nRef; ++i) {
+                        var lName = readInt(uncba, p);
+                        var name = '';
+                        for (var j = 0; j < lName - 1; ++j) {
+                            name += String.fromCharCode(uncba[p + 4 + j]);
+                        }
+                        var lRef = readInt(uncba, p + lName + 4);
+                        //dlog(name + ': ' + lRef);
+
+                        if (genome && genome.getChromosomeName) {
+                            name = genome.getChromosomeName(name);
                         }
 
-                        var nRef = readInt(uncba, samHeaderLen + 8);
-                        var p = samHeaderLen + 12;
+                        self.chrToIndex[name] = i;
+                        self.indexToChr.push(name);
 
-                        self.chrToIndex = {};
-                        self.indexToChr = [];
-                        for (var i = 0; i < nRef; ++i) {
-                            var lName = readInt(uncba, p);
-                            var name = '';
-                            for (var j = 0; j < lName - 1; ++j) {
-                                name += String.fromCharCode(uncba[p + 4 + j]);
-                            }
-                            var lRef = readInt(uncba, p + lName + 4);
-                            //dlog(name + ': ' + lRef);
+                        p = p + 8 + lName;
+                    }
 
-                            if (genome && genome.getChromosomeName) {
-                                name = genome.getChromosomeName(name);
-                            }
+                    fulfill();
 
-                            self.chrToIndex[name] = i;
-                            self.indexToChr.push(name);
-
-                            p = p + 8 + lName;
-                        }
-
-                        fulfill();
-
-                    }).catch(reject);
+                }).catch(reject);
             }).catch(reject);
         });
     }
