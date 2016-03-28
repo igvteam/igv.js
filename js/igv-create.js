@@ -391,7 +391,7 @@ var igv = (function (igv) {
             case "GRCh37":
             default:
             {
-                reference.fastaURL = "//s3.amazonaws.com/igv.broadinstitute.org/genomes/seq/hg19/hg19.fasta.fai";
+                reference.fastaURL = "//s3.amazonaws.com/igv.broadinstitute.org/genomes/seq/hg19/hg19.fasta";
                 reference.cytobandURL = "//s3.amazonaws.com/igv.broadinstitute.org/genomes/seq/hg19/cytoBand.txt";
             }
         }
