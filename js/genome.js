@@ -37,7 +37,8 @@ var igv = (function (igv) {
          * 1 <-> chr1,  chrM <-> MT,  IV <-> chr4, etc.
          * @param str
          */
-        var chrAliasTable = {};
+        var chrAliasTable = {},
+            self = this;
 
         // The standard mappings
         this.chromosomeNames.forEach(function (name) {
@@ -53,7 +54,7 @@ var igv = (function (igv) {
                 // Find the official chr name
                 var defName;
                 for (i = 0; i < array.length; i++) {
-                    if (chromosomes[array[i]]) {
+                    if (self.chromosomes[array[i]]) {
                         defName = array[i];
                         break;
                     }
@@ -187,7 +188,9 @@ var igv = (function (igv) {
 
                 checkReady();
 
-            }).catch(reject);
+            }).catch(function(err) {
+                reject(err);
+            });
 
             function checkReady() {
 

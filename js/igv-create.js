@@ -59,20 +59,23 @@ var igv = (function (igv) {
         oauth.google.apiKey = config.apiKey;
         oauth.google.access_token = config.oauthToken;
 
+        // Deal with several legacy genome definition options
         if (config.genome) {
             config.reference = expandGenome(config.genome);
         }
-
         else if (config.fastaURL) {   // legacy property
             config.reference = {
                 fastaURL: config.fastaURL,
                 cytobandURL: config.cytobandURL
             }
         }
+        else if(config.reference && config.reference.id !== undefined && config.reference.fastaURL === undefined) {
+            config.reference = expandGenome(config.reference.id);
+        }
 
         if (!(config.reference && config.reference.fastaURL)) {
             alert("Fatal error:  reference must be defined");
-            return;
+            throw new Error("Fatal error:  reference must be defined");
         }
 
 
@@ -238,6 +241,8 @@ var igv = (function (igv) {
             }
 
 
+        }, function foo(err) {
+            console.log(err);
         }).catch(function (error) {
             console.log(error);
         });
@@ -337,16 +342,16 @@ var igv = (function (igv) {
                     $trackLabelToggle.text("show labels");
                     $ideogram.css({'margin-left': '0'});
                     $leftHandGutters.hide();
-                    $viewports.removeClass("gutter-shim");
-                    $viewports.addClass("no-gutter-shim");
+                    $viewports.removeClass("igv-gutter-shim");
+                    $viewports.addClass("igv-no-gutter-shim");
                     igv.browser.resize();
                 } else {
                     // show
                     $trackLabelToggle.text("hide labels");
                     $ideogram.css({'margin-left': '100px'});
                     $leftHandGutters.show();
-                    $viewports.removeClass("no-gutter-shim");
-                    $viewports.addClass("gutter-shim");
+                    $viewports.removeClass("igv-no-gutter-shim");
+                    $viewports.addClass("igv-gutter-shim");
                     igv.browser.resize();
                 }
 

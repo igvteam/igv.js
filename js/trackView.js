@@ -143,7 +143,7 @@ var igv = (function (igv) {
             max;
 
         // viewport
-        this.viewportDiv = $('<div class="igv-viewport-div gutter-shim">')[0];
+        this.viewportDiv = $('<div class="igv-viewport-div igv-gutter-shim">')[0];
         $(trackDiv).append(this.viewportDiv);
 
         // content  -- purpose of this div is to allow vertical scrolling on individual tracks,
