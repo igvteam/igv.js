@@ -91,39 +91,39 @@ var igv = (function (igv) {
                         contentType: "application/json",
                         headers: ga4ghHeaders()
                     }).then(function (json) {
-                        var nextPageToken, tmp;
+                    var nextPageToken, tmp;
 
-                        if (json) {
+                    if (json) {
 
-                            tmp = decode ? decode(json) : json;
+                        tmp = decode ? decode(json) : json;
 
-                            if (tmp) {
+                        if (tmp) {
 
-                                tmp.forEach(function (a) {
-                                    var keep = true;           // TODO -- conditionally keep (downsample)
-                                    if (keep) {
-                                        results.push(a);
-                                    }
-                                });
-                            }
+                            tmp.forEach(function (a) {
+                                var keep = true;           // TODO -- conditionally keep (downsample)
+                                if (keep) {
+                                    results.push(a);
+                                }
+                            });
+                        }
 
 
-                            nextPageToken = json["nextPageToken"];
+                        nextPageToken = json["nextPageToken"];
 
-                            if (nextPageToken) {
-                                loadChunk(nextPageToken);
-                            }
-                            else {
-                                fulfill(results);
-                            }
+                        if (nextPageToken) {
+                            loadChunk(nextPageToken);
                         }
                         else {
                             fulfill(results);
                         }
+                    }
+                    else {
+                        fulfill(results);
+                    }
 
-                    }).catch(function () {
-                        reject
-                    });
+                }).catch(function () {
+                    reject
+                });
             }
 
         });
@@ -142,10 +142,11 @@ var igv = (function (igv) {
             },
             decode: function (json) {
                 return json.readGroupSets;
-            },
-            success: function (results) {
-                options.success(results);
             }
+        }).then(function (results) {
+            options.success(results);
+        }).catch(function (error) {
+            console.log(error);
         });
     }
 
@@ -159,10 +160,11 @@ var igv = (function (igv) {
             },
             decode: function (json) {
                 return json.variantSets;
-            },
-            success: function (results) {
-                options.success(results);
             }
+        }).then(function (results) {
+            options.success(results);
+        }).catch(function (error) {
+            console.log(error);
         });
     }
 
@@ -185,7 +187,6 @@ var igv = (function (igv) {
                     // Substitute variantSetIds for datasetId
                     options.datasetId = undefined;
                     options.variantSetIds = variantSetIds;
-
                     igv.ga4ghSearchCallSets(options);
 
 
@@ -209,10 +210,11 @@ var igv = (function (igv) {
                     });
 
                     return json.callSets;
-                },
-                success: function (results) {
-                    options.success(results);
                 }
+            }).then(function (results) {
+                options.success(results);
+            }).catch(function (error) {
+                console.log(error);
             });
         }
     }
