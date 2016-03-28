@@ -288,6 +288,17 @@ var igv = (function (igv) {
 
         });
 
+        // toggle view-as-pairs
+        menuItems.push(
+            {
+                name: (false === myself.viewAsPairs) ? "View As Pairs" : "Do Not View As Pairs",
+                click: function () {
+                    popover.hide();
+                    myself.viewAsPairs = !myself.viewAsPairs;
+                }
+            }
+        );
+
         return menuItems;
 
     };
