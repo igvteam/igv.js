@@ -123,6 +123,7 @@ var igv = (function (igv) {
             finishBucket.call(this);
         }
         this.alignments.sort(function (a, b) {
+            console.log("finish");
             return a.start - b.start
         });
         this.pairs = undefined;
