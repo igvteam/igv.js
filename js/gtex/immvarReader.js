@@ -41,12 +41,9 @@ var igv = (function (igv) {
 
     };
 
-    igv.ImmVarReader.prototype.readFeatures = function (range) {
+    igv.ImmVarReader.prototype.readFeatures = function (queryChr, queryStart, queryEnd) {
 
         var self = this,
-            queryChr = range.chr,
-            queryStart = range.start,
-            queryEnd = range.end,
             queryURL = this.url + "?chromosome=" + queryChr + "&start=" + queryStart + "&end=" + queryEnd +
                 "&cell_condition_id=" + this.cellConditionId;
 
