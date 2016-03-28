@@ -83,6 +83,8 @@ var igv = (function (igv) {
 
         var alignments = alignmentContainer.alignments;
 
+        console.log("pack");
+        
         alignments.sort(function (a, b) {
             return a.start - b.start;
         });
