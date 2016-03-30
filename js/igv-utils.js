@@ -127,7 +127,7 @@ var igv = (function (igv) {
             object: $('<div class="igv-track-menu-item">' + gearMenuLabel + '</div>'),
             click: function () {
 
-                igv.dialog.configure(trackView, dialogLabelHTMLFunction, dialogInputValue, dialogInputChange, dialogClickOK);
+                igv.dialog.configure($(trackView.trackDiv), dialogLabelHTMLFunction, dialogInputValue, dialogInputChange, dialogClickOK);
                 igv.dialog.show();
                 popover.hide();
             }
@@ -467,9 +467,9 @@ var igv = (function (igv) {
      */
     igv.isStringOrNumber = function (value) {
         return (value.substring || value.toFixed) ? true : false
-    }
+    };
 
-    igv.constrainBBox = function (child, parent) {
+    igv.constrainBBox = function ($child, $parent) {
 
         var delta,
             topLeft,
@@ -477,15 +477,15 @@ var igv = (function (igv) {
             bboxParent = {};
 
         bboxParent.left = bboxParent.top = 0;
-        bboxParent.right = parent.outerWidth();
-        bboxParent.bottom = parent.outerHeight();
+        bboxParent.right = $parent.outerWidth();
+        bboxParent.bottom = $parent.outerHeight();
 
-        topLeft = child.offset();
+        topLeft = $child.offset();
 
-        bboxChild.left = topLeft.left - parent.offset().left;
-        bboxChild.top = topLeft.top - parent.offset().top;
-        bboxChild.right = bboxChild.left + child.outerWidth();
-        bboxChild.bottom = bboxChild.top + child.outerHeight();
+        bboxChild.left = topLeft.left - $parent.offset().left;
+        bboxChild.top = topLeft.top - $parent.offset().top;
+        bboxChild.right = bboxChild.left + $child.outerWidth();
+        bboxChild.bottom = bboxChild.top + $child.outerHeight();
 
         delta = bboxChild.bottom - bboxParent.bottom;
         if (delta > 0) {
@@ -511,7 +511,7 @@ var igv = (function (igv) {
         if(igv.enableLogging && console && console.log) {
             console.log(message);
         }
-    }
+    };
 
 
     return igv;

@@ -169,7 +169,11 @@ var igv = (function (igv) {
                 newTrack = new igv.AneuTrack(config);
                 break;
             default:
+
                 alert("Unknown file type: " + config.url);
+
+
+
                 return null;
         }
 
