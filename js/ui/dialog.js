@@ -28,14 +28,14 @@
  */
 var igv = (function (igv) {
 
-    igv.Dialog = function (parentObject) {
+    igv.Dialog = function ($parent) {
 
         var self = this;
 
-        this.container = $('<div class="igv-grid-container-dialog">');
-        parentObject.append( this.container[ 0 ] );
+        this.$container = $('<div class="igv-grid-container-dialog">');
+        $parent.append( this.$container[ 0 ] );
 
-        this.container.draggable();
+        this.$container.draggable();
 
         this.header = $('<div class="igv-grid-header">');
         this.headerBlurb = $('<div class="igv-grid-header-blurb">');
@@ -46,13 +46,13 @@ var igv = (function (igv) {
             self.hide();
         });
 
-        this.container.append(this.header[ 0 ]);
+        this.$container.append(this.header[ 0 ]);
 
-        self.container.append(rowOfLabel()[ 0 ]);
+        self.$container.append(rowOfLabel()[ 0 ]);
 
-        self.container.append(rowOfInput()[ 0 ]);
+        self.$container.append(rowOfInput()[ 0 ]);
 
-        self.container.append(rowOfOkCancel()[ 0 ]);
+        self.$container.append(rowOfOkCancel()[ 0 ]);
 
         function rowOfOkCancel() {
 
@@ -151,12 +151,12 @@ var igv = (function (igv) {
 
     };
 
-    igv.Dialog.prototype.configure = function (trackView, dialogLabelHTMLFunction, dialogInputValue, dialogInputChange, dialogClickOK) {
+    igv.Dialog.prototype.configure = function ($host, dialogLabelHTMLFunction, dialogInputValue, dialogInputChange, dialogClickOK) {
 
         var clickOK,
             self = this;
 
-        self.trackView = trackView;
+        self.$host = $host;
 
         if (dialogLabelHTMLFunction) {
             self.$dialogLabel.html(dialogLabelHTMLFunction());
@@ -188,27 +188,28 @@ var igv = (function (igv) {
             self.hide();
         });
 
-
     };
 
     igv.Dialog.prototype.hide = function () {
-        $(this.container).offset( { left: 0, top: 0 } );
-        this.container.hide();
+        this.$container.offset( { left: 0, top: 0 } );
+        this.$container.hide();
     };
 
     igv.Dialog.prototype.show = function () {
 
         var body_scrolltop = $("body").scrollTop(),
-            track_scrolltop = $(this.trackView.trackDiv).scrollTop(),
-            track_origin = $(this.trackView.trackDiv).offset(),
-            track_size = { width: $(this.trackView.trackDiv).outerWidth(), height: $(this.trackView.trackDiv).outerHeight()},
-            size = { width: $(this.container).outerWidth(), height: $(this.container).outerHeight()};
+            track_origin = this.$host.offset(),
+            track_size =
+            {
+                width: this.$host.outerWidth(),
+                height: this.$host.outerHeight()
+            };
 
-        this.container.show();
+        this.$container.show();
 
-        $(this.container).offset( { left: (track_size.width - 300), top: (track_origin.top + body_scrolltop) } );
+        this.$container.offset( { left: (track_size.width - 300), top: (track_origin.top + body_scrolltop) } );
 
-        $(this.container).offset( igv.constrainBBox($(this.container), $(igv.browser.trackContainerDiv)) );
+        this.$container.offset( igv.constrainBBox(this.$container, $(igv.browser.trackContainerDiv)) );
 
     };
 
