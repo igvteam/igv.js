@@ -140,7 +140,7 @@ var igv = (function (igv) {
             }
         }
 
-        switch (config.featureType) {
+        switch (/* config.featureType */ 'birna') {
             case "gwas":
                 newTrack = new igv.GWASTrack(config);
                 break;
@@ -170,9 +170,8 @@ var igv = (function (igv) {
                 break;
             default:
 
-                alert("Unknown file type: " + config.url);
-
-
+                //alert("Unknown file type: " + config.url);
+                igv.presentAlertDialog( "Unknown file type: " + (config.url || '') );
 
                 return null;
         }
@@ -189,7 +188,7 @@ var igv = (function (igv) {
             self.addTrack(newTrack);
         }
 
-    }
+    };
 
     igv.Browser.prototype.isDuplicateTrack = function (config) {
 
