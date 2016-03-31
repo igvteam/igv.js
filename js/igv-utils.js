@@ -25,6 +25,14 @@
 
 var igv = (function (igv) {
 
+    igv.presentAlertDialog = function (string) {
+
+        igv.dialog.configure($('.igv-content-div'), function () { return string; }, undefined, undefined, undefined);
+        igv.dialog.show();
+        igv.popover.hide();
+
+    };
+
     igv.trackMenuItems = function (popover, trackView) {
 
         var trackHeight = trackView.trackDiv.clientHeight,
