@@ -41,6 +41,21 @@ div[id="igvEncodeModal"] {
     background-color: white;
 }
 
+.igv-grid-container-alert-dialog {
+
+    width:300px;
+    margin: 0 auto;
+
+    border-color: rgb(127, 127, 127);
+    border-radius: 4px;
+    border-style: solid;
+    border-width: thin;
+
+    z-index: 1999;
+
+    background-color: white;
+}
+
 .igv-grid-container-colorpicker {
 
     position: absolute;

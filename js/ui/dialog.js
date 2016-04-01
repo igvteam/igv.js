@@ -28,13 +28,16 @@
  */
 var igv = (function (igv) {
 
-    igv.Dialog = function ($parent, constructorHelper) {
+    igv.Dialog = function ($parent, constructorHelper, id) {
 
         var self = this,
             $header,
             $headerBlurb;
 
         this.$container = $('<div class="igv-grid-container-dialog">');
+        if (id) {
+            this.$container.attr("id", id);
+        }
         $parent.append( this.$container[ 0 ] );
 
         $header = $('<div class="igv-grid-header">');
@@ -45,15 +48,13 @@ var igv = (function (igv) {
 
         constructorHelper(this);
 
-        this.$container.draggable();
-
         igv.dialogCloseWithParentObject($header, function () {
             self.hide();
         });
 
     };
 
-    igv.Dialog.dialogContructor = function(dialog) {
+    igv.Dialog.dialogConstructor = function (dialog) {
 
         dialog.$container.append(dialog.rowOfLabel()[ 0 ]);
 
@@ -61,9 +62,14 @@ var igv = (function (igv) {
 
         dialog.$container.append(dialog.rowOfOkCancel()[ 0 ]);
 
+        dialog.$container.draggable();
+
     };
 
-    igv.Dialog.alertContructor = function(dialog) {
+    igv.Dialog.alertConstructor = function (dialog) {
+
+        dialog.$container.removeClass("igv-grid-container-dialog");
+        dialog.$container.addClass("igv-grid-container-alert-dialog");
 
         dialog.$container.append(dialog.rowOfLabel()[ 0 ]);
 
@@ -248,19 +254,25 @@ var igv = (function (igv) {
 
     igv.Dialog.prototype.show = function () {
 
-        var body_scrolltop = $("body").scrollTop(),
-            track_origin = this.$host.offset(),
+        var body_scrolltop,
+            track_origin,
+            track_size;
+
+        if (this.$host) {
+
+            body_scrolltop = $("body").scrollTop();
+            track_origin = this.$host.offset();
             track_size =
             {
                 width: this.$host.outerWidth(),
                 height: this.$host.outerHeight()
             };
 
+            this.$container.offset( { left: (track_size.width - 300), top: (track_origin.top + body_scrolltop) } );
+            this.$container.offset( igv.constrainBBox(this.$container, $(igv.browser.trackContainerDiv)) );
+        }
+
         this.$container.show();
-
-        this.$container.offset( { left: (track_size.width - 300), top: (track_origin.top + body_scrolltop) } );
-
-        this.$container.offset( igv.constrainBBox(this.$container, $(igv.browser.trackContainerDiv)) );
 
     };
 

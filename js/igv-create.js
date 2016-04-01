@@ -139,25 +139,25 @@ var igv = (function (igv) {
         browser.userFeedback.hide();
 
         // Popover object -- singleton shared by all components
-        igv.popover = new igv.Popover(contentDiv);
+        igv.popover = new igv.Popover($(contentDiv), "igv-popover");
 
         // ColorPicker object -- singleton shared by all components
         if (config.trackDefaults) {
             palette = config.trackDefaults.palette;
         }
-        igv.colorPicker = new igv.ColorPicker($parent, palette);
+        igv.colorPicker = new igv.ColorPicker($parent, palette, "igv-color-picker");
         igv.colorPicker.hide();
 
         // alert object -- singleton shared by all components
-        igv.alert = new igv.Dialog($parent, igv.Dialog.alertContructor);
+        igv.alert = new igv.Dialog($parent, igv.Dialog.alertConstructor, "igv-alert");
         igv.alert.hide();
 
         // Dialog object -- singleton shared by all components
-        igv.dialog = new igv.Dialog($parent, igv.Dialog.dialogContructor);
+        igv.dialog = new igv.Dialog($parent, igv.Dialog.dialogConstructor, "igv-dialog");
         igv.dialog.hide();
 
         // Data Range Dialog object -- singleton shared by all components
-        igv.dataRangeDialog = new igv.DataRangeDialog($parent);
+        igv.dataRangeDialog = new igv.DataRangeDialog($parent, "igv-data-range-dialog");
         igv.dataRangeDialog.hide();
 
         if (!config.showNavigation) {
