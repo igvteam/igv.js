@@ -170,7 +170,7 @@ var igv = (function (igv) {
             default:
 
                 //alert("Unknown file type: " + config.url);
-                igv.presentAlert("Unknown file type: " + (config.url || ''));
+                igv.presentAlert("Unknown file type: " + (config.featureType || ''));
 
                 return null;
         }
@@ -416,7 +416,7 @@ var igv = (function (igv) {
             }
         }
         return false;
-    }
+    };
 
     igv.Browser.prototype.updateLocusSearch = function (referenceFrame) {
 

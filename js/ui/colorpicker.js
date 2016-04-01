@@ -30,7 +30,7 @@ var igv = (function (igv) {
 
     var columnCount = 8;
 
-    igv.ColorPicker = function ($parent, userPalette) {
+    igv.ColorPicker = function ($parent, userPalette, id) {
 
         var self = this,
             palette = userPalette || ["#666666", "#0000cc", "#009900", "#cc0000", "#ffcc00", "#9900cc", "#00ccff", "#ff6600", "#ff6600"],
@@ -42,6 +42,9 @@ var igv = (function (igv) {
         this.hex_re = new RegExp('^#([0-9A-Fa-f]{2})([0-9A-Fa-f]{2})([0-9A-Fa-f]{2})$');
 
         this.$container = $('<div class="igv-grid-container-colorpicker">');
+        if (id) {
+            this.$container.attr("id", id);
+        }
         $parent.append(this.$container[0]);
 
         this.$container.draggable();

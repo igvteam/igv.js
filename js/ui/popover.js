@@ -28,28 +28,32 @@
  */
 var igv = (function (igv) {
 
-    igv.Popover = function (parentDiv) {
+    igv.Popover = function ($parent, id) {
 
-        this.markupWithParentDiv(parentDiv);
+        this.markupWith$Parent($parent, id);
 
         this.$popoverContent.kinetic({});
 
     };
 
-    igv.Popover.prototype.markupWithParentDiv = function (parentDiv) {
+    igv.Popover.prototype.markupWith$Parent = function ($parent, id) {
 
         var self = this,
             popoverHeader;
 
-        if (this.parentDiv) {
+        if (this.$parent) {
             return;
         }
 
-        this.parentDiv = parentDiv;
+        this.$parent = $parent;
 
         // popover container
         this.popover = $('<div class="igv-popover">');
-        $(this.parentDiv).append(this.popover[ 0 ]);
+        if (id) {
+            this.popover.attr("id", id);
+        }
+
+        this.$parent.append(this.popover[ 0 ]);
 
         // popover header
         popoverHeader = $('<div class="igv-popoverHeader">');
@@ -172,8 +176,8 @@ var igv = (function (igv) {
             popupX = pageX,
             popupY = pageY;
 
-        popupX -= $(popoverWidget.parentDiv).offset().left;
-        popupY -= $(popoverWidget.parentDiv).offset().top;
+        popupX -= popoverWidget.$parent.offset().left;
+        popupY -= popoverWidget.$parent.offset().top;
         popupRect = { x: popupX, y: popupY, width: popoverWidget.popover.outerWidth(), height: popoverWidget.popover.outerHeight() };
 
         left = popupX;

@@ -28,11 +28,14 @@
  */
 var igv = (function (igv) {
 
-    igv.DataRangeDialog = function ($parent) {
+    igv.DataRangeDialog = function ($parent, id) {
 
         var self = this;
 
         this.container = $('<div class="igv-grid-container-dialog">');
+        if (id) {
+            this.container.attr("id", id);
+        }
         $parent.append( this.container[ 0 ] );
 
         this.container.draggable();
