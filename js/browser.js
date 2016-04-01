@@ -101,7 +101,6 @@ var igv = (function (igv) {
         return this.formats[name];
     };
 
-
     igv.Browser.prototype.loadTracksWithConfigList = function (configList) {
 
         var self = this;
@@ -140,7 +139,7 @@ var igv = (function (igv) {
             }
         }
 
-        switch (/* config.featureType */ 'birna') {
+        switch (config.featureType /*'birna'*/) {
             case "gwas":
                 newTrack = new igv.GWASTrack(config);
                 break;
@@ -171,7 +170,7 @@ var igv = (function (igv) {
             default:
 
                 //alert("Unknown file type: " + config.url);
-                igv.presentAlertDialog( "Unknown file type: " + (config.url || '') );
+                igv.presentAlert("Unknown file type: " + (config.url || ''));
 
                 return null;
         }
@@ -181,7 +180,8 @@ var igv = (function (igv) {
             newTrack.getFileHeader().then(function (header) {
                 self.addTrack(newTrack);
             }).catch(function (error) {
-                alert(error);
+                //alert(error);
+                igv.presentAlert(error);
             });
         }
         else {
@@ -205,7 +205,8 @@ var igv = (function (igv) {
         });
 
         if (true === attemptedDuplicateTrackAddition) {
-            window.alert("Attempt to load duplicate track.");
+            //window.alert("Attempt to load duplicate track.");
+            igv.presentAlert("Attempt to load duplicate track.");
             return true;
         }
 
@@ -687,7 +688,8 @@ var igv = (function (igv) {
                     }
 
                     if (results.length == 0) {
-                        alert('No feature found with name "' + feature + '"');
+                        //alert('No feature found with name "' + feature + '"');
+                        igv.presentAlert('No feature found with name "' + feature + '"');
                     }
                     else if (results.length == 1) {
 

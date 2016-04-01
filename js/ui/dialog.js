@@ -28,149 +28,200 @@
  */
 var igv = (function (igv) {
 
-    igv.Dialog = function ($parent) {
+    igv.Dialog = function ($parent, constructorHelper) {
 
-        var self = this;
+        var self = this,
+            $header,
+            $headerBlurb;
 
         this.$container = $('<div class="igv-grid-container-dialog">');
         $parent.append( this.$container[ 0 ] );
 
+        $header = $('<div class="igv-grid-header">');
+        $headerBlurb = $('<div class="igv-grid-header-blurb">');
+        $header.append($headerBlurb[ 0 ]);
+
+        this.$container.append($header[ 0 ]);
+
+        constructorHelper(this);
+
         this.$container.draggable();
 
-        this.header = $('<div class="igv-grid-header">');
-        this.headerBlurb = $('<div class="igv-grid-header-blurb">');
-
-        this.header.append(this.headerBlurb[ 0 ]);
-
-        igv.dialogCloseWithParentObject(this.header, function () {
+        igv.dialogCloseWithParentObject($header, function () {
             self.hide();
         });
 
-        this.$container.append(this.header[ 0 ]);
+    };
 
-        self.$container.append(rowOfLabel()[ 0 ]);
+    igv.Dialog.dialogContructor = function(dialog) {
 
-        self.$container.append(rowOfInput()[ 0 ]);
+        dialog.$container.append(dialog.rowOfLabel()[ 0 ]);
 
-        self.$container.append(rowOfOkCancel()[ 0 ]);
+        dialog.$container.append(dialog.rowOfInput()[ 0 ]);
 
-        function rowOfOkCancel() {
-
-            var $rowContainer,
-                $row,
-                $column,
-                $columnFiller;
-
-            $row = $('<div class="igv-grid-dialog">');
-
-            // shim
-            $column = $('<div class="igv-col igv-col-1-8">');
-            //
-            $row.append( $column[ 0 ] );
-
-
-            // ok button
-            $column = $('<div class="igv-col igv-col-3-8">');
-            $columnFiller = $('<div class="igv-col-filler-ok-button">');
-            $columnFiller.text("OK");
-
-            self.$ok = $columnFiller;
-
-            $column.append( $columnFiller[ 0 ] );
-            //
-            $row.append( $column[ 0 ] );
-
-
-            // cancel button
-            $column = $('<div class="igv-col igv-col-3-8">');
-            $columnFiller = $('<div class="igv-col-filler-cancel-button">');
-            $columnFiller.text("Cancel");
-            $columnFiller.click(function() {
-                self.$dialogInput.val(undefined);
-                self.hide();
-            });
-            $column.append( $columnFiller[ 0 ] );
-            //
-            $row.append( $column[ 0 ] );
-
-            // shim
-            $column = $('<div class="igv-col igv-col-1-8">');
-            //
-            $row.append( $column[ 0 ] );
-
-            $rowContainer = $('<div class="igv-grid-rect">');
-            $rowContainer.append( $row[ 0 ]);
-
-            return $rowContainer;
-
-        }
-
-        function rowOfLabel() {
-
-            var rowContainer,
-                row,
-                column;
-
-            // input
-            row = $('<div class="igv-grid-dialog">');
-
-            column = $('<div class="igv-col igv-col-4-4">');
-            self.$dialogLabel = $('<div class="igv-user-input-label">');
-
-            column.append( self.$dialogLabel[ 0 ] );
-            row.append( column[ 0 ] );
-
-            rowContainer = $('<div class="igv-grid-rect">');
-            rowContainer.append( row[ 0 ]);
-
-            return rowContainer;
-
-        }
-
-        function rowOfInput() {
-
-            var rowContainer,
-                row,
-                column;
-
-            // input
-            row = $('<div class="igv-grid-dialog">');
-
-            column = $('<div class="igv-col igv-col-4-4">');
-            self.$dialogInput = $('<input class="igv-user-input-dialog" type="text" value="#000000">');
-
-            column.append( self.$dialogInput[ 0 ] );
-            row.append( column[ 0 ] );
-
-            rowContainer = $('<div class="igv-grid-rect">');
-            rowContainer.append( row[ 0 ]);
-
-            return rowContainer;
-
-        }
+        dialog.$container.append(dialog.rowOfOkCancel()[ 0 ]);
 
     };
 
-    igv.Dialog.prototype.configure = function ($host, dialogLabelHTMLFunction, dialogInputValue, dialogInputChange, dialogClickOK) {
+    igv.Dialog.alertContructor = function(dialog) {
+
+        dialog.$container.append(dialog.rowOfLabel()[ 0 ]);
+
+        dialog.$container.append(dialog.rowOfInput()[ 0 ]);
+
+        dialog.$container.append(dialog.rowOfOk()[ 0 ]);
+
+    };
+
+    igv.Dialog.prototype.rowOfOk = function() {
+
+        var $rowContainer,
+            $row,
+            $column,
+            $columnFiller;
+
+        $row = $('<div class="igv-grid-dialog">');
+
+        // shim
+        $column = $('<div class="igv-col igv-col-1-4">');
+        //
+        $row.append( $column[ 0 ] );
+
+
+        // ok button
+        $column = $('<div class="igv-col igv-col-2-4">');
+        $columnFiller = $('<div class="igv-col-filler-ok-button">');
+        $columnFiller.text("OK");
+
+        this.$ok = $columnFiller;
+
+        $column.append( $columnFiller[ 0 ] );
+        //
+        $row.append( $column[ 0 ] );
+
+        //
+        $rowContainer = $('<div class="igv-grid-rect">');
+        $rowContainer.append( $row[ 0 ]);
+
+        return $rowContainer;
+
+    };
+
+    igv.Dialog.prototype.rowOfOkCancel = function() {
+
+        var $rowContainer,
+            $row,
+            $column,
+            $columnFiller;
+
+        $row = $('<div class="igv-grid-dialog">');
+
+        // shim
+        $column = $('<div class="igv-col igv-col-1-8">');
+        //
+        $row.append( $column[ 0 ] );
+
+
+        // ok button
+        $column = $('<div class="igv-col igv-col-3-8">');
+        $columnFiller = $('<div class="igv-col-filler-ok-button">');
+        $columnFiller.text("OK");
+
+        this.$ok = $columnFiller;
+
+        $column.append( $columnFiller[ 0 ] );
+        //
+        $row.append( $column[ 0 ] );
+
+
+        // cancel button
+        $column = $('<div class="igv-col igv-col-3-8">');
+        $columnFiller = $('<div class="igv-col-filler-cancel-button">');
+        $columnFiller.text("Cancel");
+        $columnFiller.click(function() {
+            self.$dialogInput.val(undefined);
+            self.hide();
+        });
+        $column.append( $columnFiller[ 0 ] );
+        //
+        $row.append( $column[ 0 ] );
+
+        // shim
+        $column = $('<div class="igv-col igv-col-1-8">');
+        //
+        $row.append( $column[ 0 ] );
+
+        $rowContainer = $('<div class="igv-grid-rect">');
+        $rowContainer.append( $row[ 0 ]);
+
+        return $rowContainer;
+
+    };
+
+    igv.Dialog.prototype.rowOfLabel = function() {
+
+        var rowContainer,
+            row,
+            column;
+
+        // input
+        row = $('<div class="igv-grid-dialog">');
+
+        column = $('<div class="igv-col igv-col-4-4">');
+        this.$dialogLabel = $('<div class="igv-user-input-label">');
+
+        column.append( this.$dialogLabel[ 0 ] );
+        row.append( column[ 0 ] );
+
+        rowContainer = $('<div class="igv-grid-rect">');
+        rowContainer.append( row[ 0 ]);
+
+        return rowContainer;
+
+    };
+
+    igv.Dialog.prototype.rowOfInput = function() {
+
+        var rowContainer,
+            row,
+            column;
+
+        // input
+        row = $('<div class="igv-grid-dialog">');
+
+        column = $('<div class="igv-col igv-col-4-4">');
+        this.$dialogInput = $('<input class="igv-user-input-dialog" type="text" value="#000000">');
+
+        column.append( this.$dialogInput[ 0 ] );
+        row.append( column[ 0 ] );
+
+        rowContainer = $('<div class="igv-grid-rect">');
+        rowContainer.append( row[ 0 ]);
+
+        return rowContainer;
+
+    };
+
+    igv.Dialog.prototype.configure = function ($host, labelHTMLFunction, inputValue, changeFunction, clickFunction) {
 
         var clickOK,
             self = this;
 
         self.$host = $host;
 
-        if (dialogLabelHTMLFunction) {
-            self.$dialogLabel.html(dialogLabelHTMLFunction());
+        if (labelHTMLFunction) {
+            self.$dialogLabel.html(labelHTMLFunction());
             self.$dialogLabel.show();
         } else {
             self.$dialogLabel.hide();
         }
 
-        if (dialogInputValue) {
+        if (inputValue) {
 
-            self.$dialogInput.val(dialogInputValue);
+            self.$dialogInput.val(inputValue);
 
             self.$dialogInput.unbind();
-            self.$dialogInput.change(dialogInputChange);
+            self.$dialogInput.change(changeFunction);
 
             self.$dialogInput.show();
         } else {
@@ -178,7 +229,7 @@ var igv = (function (igv) {
         }
 
         self.$ok.unbind();
-        clickOK = dialogClickOK || dialogInputChange;
+        clickOK = clickFunction || changeFunction;
         self.$ok.click(function() {
 
             if (clickOK) {
