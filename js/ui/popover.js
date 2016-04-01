@@ -68,6 +68,7 @@ var igv = (function (igv) {
 
         this.popover.append(this.$popoverContent[ 0 ]);
 
+        this.popover.draggable();
 
     };
 
