@@ -542,6 +542,7 @@ var igv = (function (igv) {
     }
 
     AlignmentTrack.prototype.draw = function (options) {
+console.log("Draw");
         var self = this,
             alignmentContainer = options.features,
             ctx = options.context,
@@ -577,43 +578,46 @@ var igv = (function (igv) {
             self.alignmentRowYInset = 0;
         }
 
-        packedAlignmentRows.forEach(function renderAlignmentRow(alignmentRow, i) {
+        if (packedAlignmentRows) {
 
-            var yRect = self.alignmentRowYInset + (self.alignmentRowHeight * i),
-                alignmentHeight = self.alignmentRowHeight - 2,
-                i,
-                b,
-                alignment;
+            packedAlignmentRows.forEach(function renderAlignmentRow(alignmentRow, i) {
 
-            for (i = 0; i < alignmentRow.alignments.length; i++) {
+                var yRect = self.alignmentRowYInset + (self.alignmentRowHeight * i),
+                    alignmentHeight = self.alignmentRowHeight - 2,
+                    i,
+                    b,
+                    alignment;
 
-                alignment = alignmentRow.alignments[i];
+                for (i = 0; i < alignmentRow.alignments.length; i++) {
 
-                if ((alignment.start + alignment.lengthOnRef) < bpStart) continue;
-                if (alignment.start > bpEnd) break;
+                    alignment = alignmentRow.alignments[i];
+
+                    if ((alignment.start + alignment.lengthOnRef) < bpStart) continue;
+                    if (alignment.start > bpEnd) break;
 
 
-                if (true === alignment.hidden) {
-                    continue;
-                }
+                    if (true === alignment.hidden) {
+                        continue;
+                    }
 
-                if (alignment instanceof igv.PairedAlignment) {
+                    if (alignment instanceof igv.PairedAlignment) {
 
-                    drawPairConnector(alignment);
+                        drawPairConnector(alignment);
 
-                    drawSingleAlignment(alignment.firstAlignment, yRect, alignmentHeight);
+                        drawSingleAlignment(alignment.firstAlignment, yRect, alignmentHeight);
 
-                    if (alignment.secondAlignment) {
-                        drawSingleAlignment(alignment.secondAlignment, yRect, alignmentHeight);
+                        if (alignment.secondAlignment) {
+                            drawSingleAlignment(alignment.secondAlignment, yRect, alignmentHeight);
+                        }
+
+                    }
+                    else {
+                        drawSingleAlignment(alignment, yRect, alignmentHeight);
                     }
 
                 }
-                else {
-                    drawSingleAlignment(alignment, yRect, alignmentHeight);
-                }
-
-            }
-        });
+            });
+        }
 
 
         // alignment is a PairedAlignment

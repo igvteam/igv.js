@@ -53,23 +53,23 @@ var igv = (function (igv) {
 
                 self.bamReader.readAlignments(chr, bpStart, bpEnd).then(function (alignmentContainer) {
 
+                    var maxRows = self.config.maxRows || 500;
+                    alignmentContainer.packedAlignmentRows = packAlignmentRows(alignmentContainer, maxRows);
+                    alignmentContainer.alignments = undefined;  // Don't need to hold onto these anymore
                     self.alignmentContainer = alignmentContainer;
 
-                    igv.browser.genome.sequence.getSequence(self.alignmentContainer.chr, self.alignmentContainer.start, self.alignmentContainer.end).then(
+                    igv.browser.genome.sequence.getSequence(alignmentContainer.chr, alignmentContainer.start, alignmentContainer.end).then(
+
                         function (sequence) {
 
-                            var maxRows = self.config.maxRows || 500;
 
                             if (sequence) {
 
-                                self.alignmentContainer.coverageMap.refSeq = sequence;    // TODO -- fix this
-                                self.alignmentContainer.sequence = sequence;           // TODO -- fix this
+                                alignmentContainer.coverageMap.refSeq = sequence;    // TODO -- fix this
+                                alignmentContainer.sequence = sequence;           // TODO -- fix this
 
-                                self.alignmentContainer.packedAlignmentRows = packAlignmentRows(self.alignmentContainer, maxRows);
 
-                                self.alignmentContainer.alignments = undefined;  // Don't need to hold onto these anymore
-
-                                fulfill(self.alignmentContainer);
+                                fulfill(alignmentContainer);
                             }
                         }).catch(reject);
 
@@ -83,7 +83,7 @@ var igv = (function (igv) {
 
         var alignments = alignmentContainer.alignments;
 
-        if(!alignments) return;
+        if (!alignments) return;
 
         alignments.sort(function (a, b) {
             return a.start - b.start;

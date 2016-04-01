@@ -173,6 +173,15 @@
         <h3>Example tracks - click to load</h3>
 
         <div onclick="igv.browser.loadTrack({
+                            url: 'https://data.broadinstitute.org/igvdata/1KG/ALL.wgs.phase3_shapeit2_mvncall_integrated_v5b.20130502.sites.vcf.gz',
+                            indexURL: 'https://data.broadinstitute.org/igvdata/1KG/ALL.wgs.phase3_shapeit2_mvncall_integrated_v5b.20130502.sites.vcf.gz.tbi',
+                            visibilityWindow: 20000,
+                            name: '1KG Sites'
+                        })">1KG sites - Broad
+        </div>
+
+
+        <div onclick="igv.browser.loadTrack({
               type: 'bam',
               url: 'https://s3.amazonaws.com/igv-test1/test.bam?AWSAccessKeyId=AKIAJQYEF3LODEQN7LOA&Expires=1460148635&Signature=6FLcq6HI1BiqGt6wvWFdjdvVOVA%3D',
               indexURL: 'https://s3.amazonaws.com/igv-test1/test.bam.bai?AWSAccessKeyId=AKIAJQYEF3LODEQN7LOA&Expires=1460148657&Signature=Tve2KyefO%2BVFBBYw3MpIUh6Yn20%3D',

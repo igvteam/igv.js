@@ -176,12 +176,12 @@ var igv = (function (igv) {
 
             $dataRangeLabel = $('<div class="igv-data-range-track-label">');
 
-            $dataRangeLabel.click(function(e){
+            $dataRangeLabel.click(function (e) {
                 igv.dataRangeDialog.configureWithTrackView(self);
                 igv.dataRangeDialog.show();
             });
 
-            $(this.viewportDiv).append($dataRangeLabel[ 0 ]);
+            $(this.viewportDiv).append($dataRangeLabel[0]);
 
         }
 
@@ -329,6 +329,19 @@ var igv = (function (igv) {
      */
     igv.TrackView.prototype.repaint = function () {
 
+
+        var pixelWidth,
+            bpWidth,
+            bpStart,
+            bpEnd,
+            self = this,
+            ctx,
+            referenceFrame,
+            chr,
+            refFrameStart,
+            refFrameEnd,
+            success;
+
         if (!(viewIsReady.call(this))) {
             return;
         }
@@ -343,19 +356,10 @@ var igv = (function (igv) {
             }
         }
 
-
-        var pixelWidth,
-            bpWidth,
-            bpStart,
-            bpEnd,
-            self = this,
-            ctx,
-            referenceFrame = this.browser.referenceFrame,
-            chr = referenceFrame.chr,
-            refFrameStart = referenceFrame.start,
-            refFrameEnd = refFrameStart + referenceFrame.toBP(this.canvas.width),
-            success;
-
+        referenceFrame = this.browser.referenceFrame;
+        chr = referenceFrame.chr;
+        refFrameStart = referenceFrame.start;
+        refFrameEnd = refFrameStart + referenceFrame.toBP(this.canvas.width);
 
         if (this.tile && this.tile.containsRange(chr, refFrameStart, refFrameEnd, referenceFrame.bpPerPixel)) {
             this.paintImage();
@@ -368,7 +372,10 @@ var igv = (function (igv) {
             bpStart = Math.max(0, Math.round(referenceFrame.start - bpWidth / 3));
             bpEnd = bpStart + bpWidth;
 
-            self.loading = true;
+            if(self.loading && self.loading.start === bpStart && self.loading.end === bpEnd) return;
+
+            self.loading = {start: bpStart, end: bpEnd};
+
             igv.startSpinnerAtParentElement(self.trackDiv);
 
             this.track.getFeatures(referenceFrame.chr, bpStart, bpEnd)
