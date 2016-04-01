@@ -102,7 +102,8 @@ var igv = (function (igv) {
                     if (json) {
 
                         if (json.error_code) {
-                            alert("Error querying trait " + self.trait + "  (error_code=" + json.error_code + ")");
+                            //alert("Error querying trait " + self.trait + "  (error_code=" + json.error_code + ")");
+                            igv.presentAlert("Error querying trait " + self.trait + "  (error_code=" + json.error_code + ")");
                             fulfill(null);
                         }
                         else {

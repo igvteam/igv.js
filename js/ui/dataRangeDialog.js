@@ -205,7 +205,8 @@ var igv = (function (igv) {
 
             if(isNaN(min) || isNaN(max)) {
 
-                alert("Must input numeric values");
+                //alert("Must input numeric values");
+                igv.presentAlert("Must input numeric values");
             } else {
 
                 trackView.track.min = min;

@@ -25,10 +25,10 @@
 
 var igv = (function (igv) {
 
-    igv.presentAlertDialog = function (string) {
+    igv.presentAlert = function (string) {
 
-        igv.dialog.configure($('.igv-content-div'), function () { return string; }, undefined, undefined, undefined);
-        igv.dialog.show();
+        igv.alert.configure($('.igv-content-div'), function () { return string; }, undefined, undefined, undefined);
+        igv.alert.show();
         igv.popover.hide();
 
     };
@@ -129,13 +129,13 @@ var igv = (function (igv) {
 
     };
 
-    igv.dialogMenuItem = function (popover, trackView, gearMenuLabel, dialogLabelHTMLFunction, dialogInputValue, dialogInputChange, dialogClickOK) {
+    igv.dialogMenuItem = function (popover, trackView, gearMenuLabel, labelHTMLFunction, inputValue, changeFunction, clickFunction) {
 
         return {
             object: $('<div class="igv-track-menu-item">' + gearMenuLabel + '</div>'),
             click: function () {
 
-                igv.dialog.configure($(trackView.trackDiv), dialogLabelHTMLFunction, dialogInputValue, dialogInputChange, dialogClickOK);
+                igv.dialog.configure($(trackView.trackDiv), labelHTMLFunction, inputValue, changeFunction, clickFunction);
                 igv.dialog.show();
                 popover.hide();
             }

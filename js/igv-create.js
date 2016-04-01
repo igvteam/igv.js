@@ -74,7 +74,8 @@ var igv = (function (igv) {
         }
 
         if (!(config.reference && config.reference.fastaURL)) {
-            alert("Fatal error:  reference must be defined");
+            //alert("Fatal error:  reference must be defined");
+            igv.presentAlert("Fatal error:  reference must be defined");
             throw new Error("Fatal error:  reference must be defined");
         }
 
@@ -147,36 +148,17 @@ var igv = (function (igv) {
         igv.colorPicker = new igv.ColorPicker($parent, palette);
         igv.colorPicker.hide();
 
+        // alert object -- singleton shared by all components
+        igv.alert = new igv.Dialog($parent, igv.Dialog.alertContructor);
+        igv.alert.hide();
+
         // Dialog object -- singleton shared by all components
-        igv.dialog = new igv.Dialog($parent);
+        igv.dialog = new igv.Dialog($parent, igv.Dialog.dialogContructor);
         igv.dialog.hide();
 
         // Data Range Dialog object -- singleton shared by all components
         igv.dataRangeDialog = new igv.DataRangeDialog($parent);
         igv.dataRangeDialog.hide();
-
-        // extend jquery ui dialog widget to support enter key triggering "ok" button press.
-        //$.extend($.ui.dialog.prototype.options, {
-        //
-        //    create: function () {
-        //
-        //        var $this = $(this),
-        //            $firstButton = $this.parent().find('.ui-dialog-buttonpane button:first');
-        //
-        //        // focus first button and bind enter to it
-        //        $firstButton.focus();
-        //
-        //        $this.keypress(function (e) {
-        //
-        //            if (e.keyCode == $.ui.keyCode.ENTER) {
-        //                $firstButton.click();
-        //                return false;
-        //            }
-        //
-        //        });
-        //    }
-        //
-        //});
 
         if (!config.showNavigation) {
             igvLogo = $('<div class="igv-logo-nonav">');
