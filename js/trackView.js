@@ -426,6 +426,9 @@ var igv = (function (igv) {
                         self.tile = new Tile(referenceFrame.chr, bpStart, bpEnd, referenceFrame.bpPerPixel, buffer);
                         self.paintImage();
                     }
+                    else {
+                        self.ctx.clearRect(0, 0, self.canvas.width, self.canvas.height);
+                    }
 
                 })
                 .catch(function (error) {
