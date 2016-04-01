@@ -129,7 +129,6 @@ var igv = (function (igv) {
         return new Promise(function (fulfill, reject) {
 
             var blocks,
-                processed,
                 index = self.index,
                 tabix = index && index.tabix,
                 refId = tabix ? index.sequenceIndexMap[chr] : chr,
@@ -159,8 +158,6 @@ var igv = (function (igv) {
                         success = function (data) {
 
                             var inflated, slicedData;
-
-                            processed++;
 
                             if (index.tabix) {
 
@@ -201,8 +198,8 @@ var igv = (function (igv) {
                     } else {
                         allFeatures = featureArrays[0];
 
-                        for (i = 1; i < allFeatures.length; i++) {
-                            allFeatures = allFeatures.concat(featureArrays[1]);
+                        for (i = 1; i < featureArrays.length; i++) {
+                            allFeatures = allFeatures.concat(featureArrays[i]);
                         }
 
                         allFeatures.sort(function (a, b) {

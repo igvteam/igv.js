@@ -78,7 +78,6 @@ var igvxhr = (function (igvxhr) {
             var xhr = new XMLHttpRequest(),
                 sendData = options.sendData,
                 method = options.method || (sendData ? "POST" : "GET"),
-                abort = options.abort || reject || fulfill,
                 range = options.range,
                 responseType = options.responseType,
                 contentType = options.contentType,
