@@ -348,6 +348,8 @@ var igv = (function (igv) {
 
         if (this.track.visibilityWindow !== undefined) {
             if (igv.browser.trackViewportWidthBP() > this.track.visibilityWindow) {
+                this.tile = null;
+                this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
                 igv.stopSpinnerAtParentElement(this.trackDiv);      // TODO -  WHY DO WE HAVE TO DO THIS ???
                 this.$zoomInNotice.show();
                 return;
