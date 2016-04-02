@@ -230,16 +230,6 @@ var igv = (function (igv) {
 
     igv.BAMTrack.prototype.draw = function (options) {
 
-        var self = this,
-            alignmentContainer = options.features,
-            ctx = options.context,
-            bpPerPixel = options.bpPerPixel,
-            bpStart = options.bpStart,
-            pixelWidth = options.pixelWidth,
-            bpEnd = bpStart + pixelWidth * bpPerPixel + 1,
-            packedAlignmentRows = alignmentContainer.packedAlignmentRows,
-            sequence = alignmentContainer.sequence;
-
         this.coverageTrack.draw(options);
 
         this.alignmentTrack.draw(options);
@@ -258,7 +248,7 @@ var igv = (function (igv) {
 
     igv.BAMTrack.prototype.popupMenuItems = function (popover) {
 
-        var myself = this,
+        var self = this,
             menuItems = [],
             lut = {"none": "Color: None", "strand": "Color: Read Strand"},
             checkMark = '<i class="fa fa-check fa-check-shim"></i>',
@@ -274,15 +264,15 @@ var igv = (function (igv) {
                 str;
 
             chosen = (0 === index) ? trackMenuItemFirst : trackMenuItem;
-            str = (alignmentShading === myself.alignmentShading) ? chosen + checkMark + lut[alignmentShading] + '</div>' : chosen + checkMarkNone + lut[alignmentShading] + '</div>';
+            str = (alignmentShading === self.alignmentShading) ? chosen + checkMark + lut[alignmentShading] + '</div>' : chosen + checkMarkNone + lut[alignmentShading] + '</div>';
 
             menuItems.push({
                 object: $(str),
                 click: function () {
                     popover.hide();
 
-                    myself.alignmentShading = alignmentShading;
-                    myself.trackView.update();
+                    self.alignmentShading = alignmentShading;
+                    self.trackView.update();
                 }
             });
 
@@ -291,10 +281,13 @@ var igv = (function (igv) {
         // toggle view-as-pairs
         menuItems.push(
             {
-                name: (false === myself.viewAsPairs) ? "View As Pairs" : "Do Not View As Pairs",
+                name: (false === self.viewAsPairs) ? "View As Pairs" : "Do Not View As Pairs",
                 click: function () {
                     popover.hide();
-                    myself.viewAsPairs = !myself.viewAsPairs;
+                    self.viewAsPairs = !self.viewAsPairs;
+                    self.featureSource.setViewAsPairs(self.viewAsPairs);
+                    self.trackView.update();
+
                 }
             }
         );
@@ -542,7 +535,7 @@ var igv = (function (igv) {
     }
 
     AlignmentTrack.prototype.draw = function (options) {
-console.log("Draw");
+
         var self = this,
             alignmentContainer = options.features,
             ctx = options.context,
@@ -602,7 +595,7 @@ console.log("Draw");
 
                     if (alignment instanceof igv.PairedAlignment) {
 
-                        drawPairConnector(alignment);
+                        drawPairConnector(alignment, yRect, alignmentHeight);
 
                         drawSingleAlignment(alignment.firstAlignment, yRect, alignmentHeight);
 

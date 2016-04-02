@@ -40,6 +40,14 @@ var igv = (function (igv) {
 
     };
 
+    igv.BamSource.prototype.setViewAsPairs = function(bool) {
+        if(this.viewAsPairs !== bool) {
+            this.viewAsPairs = bool;
+            this.bamReader.viewAsPairs = bool;
+            this.alignmentContainer = undefined; // Clear cache
+        }
+    }
+
     igv.BamSource.prototype.getAlignments = function (chr, bpStart, bpEnd) {
 
         var self = this;

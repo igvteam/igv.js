@@ -35,7 +35,7 @@ var igv = (function (igv) {
         this.samplingWindowSize = config.samplingWindowSize === undefined ? 100 : config.samplingWindowSize;
         this.samplingDepth = config.samplingDepth === undefined ? 100 : config.samplingDepth;
 
-        this.paired = false; //config.paired;     //
+        this.viewAsPairs = config.viewAsPairs;     //
 
 
     };
@@ -51,7 +51,7 @@ var igv = (function (igv) {
 
                 var chrId = chrToIndex[chr],
 
-                    alignmentContainer = new igv.AlignmentContainer(chr, bpStart, bpEnd, self.samplingWindowSize, self.samplingDepth);
+                    alignmentContainer = new igv.AlignmentContainer(chr, bpStart, bpEnd, self.samplingWindowSize, self.samplingDepth, self.viewAsPairs);
 
                 if (chrId === undefined) {
                     fulfill(alignmentContainer);

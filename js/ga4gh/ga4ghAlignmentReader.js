@@ -65,7 +65,7 @@ var igv = (function (igv) {
 
         this.samplingWindowSize = config.samplingWindowSize === undefined ? 100 : config.samplingWindowSize;
         this.samplingDepth = config.samplingDepth === undefined ? 100 : config.samplingDepth;
-        this.paired = false; //config.paired;     //
+        this.viewAsPairs = config.viewAsPairs;
 
     }
 
@@ -91,7 +91,7 @@ var igv = (function (igv) {
                         "pageSize": "10000"
                     },
                     decode: decodeGa4ghReads,
-                    results: new igv.AlignmentContainer(chr, bpStart, bpEnd, self.samplingWindowSize, self.samplingDepth)
+                    results: new igv.AlignmentContainer(chr, bpStart, bpEnd, self.samplingWindowSize, self.samplingDepth, self.viewAsPairs)
                 }).then(fulfill)
                     .catch(reject);
 
