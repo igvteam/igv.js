@@ -280,9 +280,9 @@ var igv = (function (igv) {
         });
 
         html.push('<div class="igv-track-menu-item igv-track-menu-border-top">');
-        html.push(true === self.viewAsPairs ? '<i class="fa fa-check-circle-o">' : '<i class="fa fa-circle-o">');
+        html.push(true === self.viewAsPairs ? '<i class="fa fa-check fa-check-shim">' : '<i class="fa fa-check fa-check-shim fa-check-hidden">');
         html.push('</i>');
-        html.push('&nbsp;View As Pairs');
+        html.push('View As Pairs');
         html.push('</div>');
 
         menuItems.push(
@@ -296,11 +296,9 @@ var igv = (function (igv) {
                     self.viewAsPairs = !self.viewAsPairs;
 
                     if (true === self.viewAsPairs) {
-                        $fa.removeClass('fa-circle-o');
-                        $fa.addClass('fa-check-circle-o');
+                        $fa.removeClass('fa-check-hidden');
                     } else {
-                        $fa.removeClass('fa-check-circle-o');
-                        $fa.addClass('fa-circle-o');
+                        $fa.addClass('fa-check-hidden');
                     }
 
                     self.featureSource.setViewAsPairs(self.viewAsPairs);
