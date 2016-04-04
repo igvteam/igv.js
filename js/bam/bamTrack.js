@@ -249,19 +249,20 @@ var igv = (function (igv) {
     igv.BAMTrack.prototype.popupMenuItems = function (popover) {
 
         var self = this,
+            str,
             menuItems = [],
             lut = {"none": "Color: None", "strand": "Color: Read Strand"},
             checkMark = '<i class="fa fa-check fa-check-shim"></i>',
             checkMarkNone = '<i class="fa fa-check fa-check-shim fa-check-hidden"></i>',
             trackMenuItem = '<div class=\"igv-track-menu-item\">',
-            trackMenuItemFirst = '<div class=\"igv-track-menu-item igv-track-menu-border-top\">';
+            trackMenuItemFirst = '<div class=\"igv-track-menu-item igv-track-menu-border-top\">',
+            html = [];
 
         menuItems.push(igv.colorPickerMenuItem(popover, this.trackView));
 
         ["none", "strand"].forEach(function (alignmentShading, index) {
 
-            var chosen,
-                str;
+            var chosen;
 
             chosen = (0 === index) ? trackMenuItemFirst : trackMenuItem;
             str = (alignmentShading === self.alignmentShading) ? chosen + checkMark + lut[alignmentShading] + '</div>' : chosen + checkMarkNone + lut[alignmentShading] + '</div>';
@@ -278,16 +279,32 @@ var igv = (function (igv) {
 
         });
 
-        // toggle view-as-pairs
+        html.push('<div class="igv-track-menu-item igv-track-menu-border-top">');
+        html.push(true === self.viewAsPairs ? '<i class="fa fa-check-circle-o">' : '<i class="fa fa-circle-o">');
+        html.push('</i>');
+        html.push('&nbsp;View As Pairs');
+        html.push('</div>');
+
         menuItems.push(
             {
-                name: (false === self.viewAsPairs) ? "View As Pairs" : "Do Not View As Pairs",
+                object: $(html.join('')),
                 click: function () {
+                    var $fa = $(this).find('i');
+
                     popover.hide();
+
                     self.viewAsPairs = !self.viewAsPairs;
+
+                    if (true === self.viewAsPairs) {
+                        $fa.removeClass('fa-circle-o');
+                        $fa.addClass('fa-check-circle-o');
+                    } else {
+                        $fa.removeClass('fa-check-circle-o');
+                        $fa.addClass('fa-circle-o');
+                    }
+
                     self.featureSource.setViewAsPairs(self.viewAsPairs);
                     self.trackView.update();
-
                 }
             }
         );
