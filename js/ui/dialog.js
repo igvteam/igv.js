@@ -248,7 +248,10 @@ var igv = (function (igv) {
     };
 
     igv.Dialog.prototype.hide = function () {
-        this.$container.offset( { left: 0, top: 0 } );
+
+        if (this.$container.hasClass('igv-grid-container-dialog')) {
+            this.$container.offset( { left: 0, top: 0 } );
+        }
         this.$container.hide();
     };
 
@@ -258,7 +261,7 @@ var igv = (function (igv) {
             track_origin,
             track_size;
 
-        if (this.$host) {
+        if (this.$container.hasClass('igv-grid-container-dialog')) {
 
             body_scrolltop = $("body").scrollTop();
             track_origin = this.$host.offset();
