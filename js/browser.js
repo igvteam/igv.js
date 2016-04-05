@@ -29,6 +29,8 @@ var igv = (function (igv) {
 
         igv.browser = this;   // Make globally visible (for use in html markup).
 
+        this.config = options;
+
         this.div = $('<div id="igvRootDiv" class="igv-root-div">')[0];
 
         initialize.call(this, options);

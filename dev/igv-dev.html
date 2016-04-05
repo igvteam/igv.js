@@ -403,7 +403,7 @@
 
 <script type="text/javascript">
 
-    function create() {
+    $(document).ready(function () {
         var div,
                 options,
                 browser;
@@ -421,13 +421,13 @@
             },
             flanking: 1000,
             apiKey: 'AIzaSyDUUAUFpQEN4mumeMNIRWXSiTh5cPtUAD0',
-            trackDefaults: {
-                palette: ["#00A0B0", "#6A4A3C", "#CC333F", "#EB6841"],
-                bam: {
-                    coverageThreshold: 0.2,
-                    coverageQualityWeight: true
-                }
-            },
+            palette: ["#00A0B0", "#6A4A3C", "#CC333F", "#EB6841"],
+        //    bam: {
+        //        coverageThreshold: 0.2,
+        //        coverageQualityWeight: true,
+        //        pairsSupported: true
+        //    },
+
 
             tracks: [
                 {
@@ -439,13 +439,9 @@
 
                 }
             ]
-        };
-
+        }
         browser = igv.createBrowser(div, options);
-    }
-    $(document).ready(function () {
-        create();
-    });
+    })
 
 
 </script>

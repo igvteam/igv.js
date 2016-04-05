@@ -62,7 +62,7 @@ var igv = (function (igv) {
                 self.bamReader.readAlignments(chr, bpStart, bpEnd).then(function (alignmentContainer) {
 
                     var maxRows = self.config.maxRows || 500;
-                    alignmentContainer.packedAlignmentRows = packAlignmentRows(alignmentContainer, maxRows);
+                    alignmentContainer.packedAlignmentRows = packAlignmentRows(alignmentContainer.alignments, alignmentContainer.start, alignmentContainer.end,  maxRows);
                     alignmentContainer.alignments = undefined;  // Don't need to hold onto these anymore
                     self.alignmentContainer = alignmentContainer;
 
@@ -87,9 +87,7 @@ var igv = (function (igv) {
     }
 
 
-    function packAlignmentRows(alignmentContainer, maxRows) {
-
-        var alignments = alignmentContainer.alignments;
+    function packAlignmentRows(alignments, start, end,  maxRows) {
 
         if (!alignments) return;
 
@@ -106,14 +104,14 @@ var igv = (function (igv) {
             var bucketList = [],
                 allocatedCount = 0,
                 lastAllocatedCount = 0,
-                nextStart = alignmentContainer.start,
+                nextStart = start,
                 alignmentRow,
                 index,
                 bucket,
                 alignment,
                 alignmentSpace = 4 * 2,
                 packedAlignmentRows = [],
-                bucketStart = Math.max(alignmentContainer.start, alignments[0].start);
+                bucketStart = Math.max(start, alignments[0].start);
 
             alignments.forEach(function (alignment) {
 
@@ -129,11 +127,11 @@ var igv = (function (igv) {
 
                 alignmentRow = new igv.BamAlignmentRow();
 
-                while (nextStart <= alignmentContainer.end) {
+                while (nextStart <= end) {
 
                     bucket = undefined;
 
-                    while (!bucket && nextStart <= alignmentContainer.end) {
+                    while (!bucket && nextStart <= end) {
 
                         index = nextStart - bucketStart;
                         if (bucketList[index] === undefined) {

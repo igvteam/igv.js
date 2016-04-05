@@ -54,8 +54,6 @@ var igv = (function (igv) {
 
         setDefaults(config);
 
-        if (!config.type) config.type = "IGV";
-
         oauth.google.apiKey = config.apiKey;
         oauth.google.access_token = config.oauthToken;
 
@@ -69,7 +67,7 @@ var igv = (function (igv) {
                 cytobandURL: config.cytobandURL
             }
         }
-        else if(config.reference && config.reference.id !== undefined && config.reference.fastaURL === undefined) {
+        else if (config.reference && config.reference.id !== undefined && config.reference.fastaURL === undefined) {
             config.reference = expandGenome(config.reference.id);
         }
 
@@ -142,10 +140,7 @@ var igv = (function (igv) {
         igv.popover = new igv.Popover($(contentDiv), "igv-popover");
 
         // ColorPicker object -- singleton shared by all components
-        if (config.trackDefaults) {
-            palette = config.trackDefaults.palette;
-        }
-        igv.colorPicker = new igv.ColorPicker($parent, palette, "igv-color-picker");
+        igv.colorPicker = new igv.ColorPicker($parent, config.palette, "igv-color-picker");
         igv.colorPicker.hide();
 
         // alert object -- singleton shared by all components
@@ -390,10 +385,12 @@ var igv = (function (igv) {
         if (!config.tracks) {
             config.tracks = [];
         }
-        config.tracks.push({type: "sequence", order: -9999});
+        config.tracks.push({type: "sequence", order: -9999});  // Sequence track
         config.showKaryo = config.showKaryo || false;
-        config.showNavigation = config.showNavigation === undefined ? true : config.showNavigation;
-        config.flanking = config.flanking === undefined ? 1000 : config.flanking;
+        if (config.showNavigation === undefined) config.showNavigation = true;
+        if (config.flanking === undefined) config.flanking = 1000;
+        if (config.pairsSupported === undefined) config.pairsSupported = true;
+        if (config.type === undefined) config.type = "IGV";
 
     }
 

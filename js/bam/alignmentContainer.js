@@ -82,14 +82,14 @@ var igv = (function (igv) {
 
         this.coverageMap.incCounts(alignment);
 
-        if (this.viewAsPairs  && this.downsampledReads.has(alignment.readName)) {
+        if (this.pairsSupported  && this.downsampledReads.has(alignment.readName)) {
             // Already downsampled
             return;
         }
 
         pairedAlignment = this.pairs[alignment.readName];
 
-        if (this.viewAsPairs  && canBePaired(alignment) && pairedAlignment) {
+        if (this.pairsSupported  && canBePaired(alignment) && pairedAlignment) {
 
             //Not subject to downsampling, just update the existing alignment
             pairedAlignment.setSecondAlignment(alignment);
@@ -109,7 +109,7 @@ var igv = (function (igv) {
 
             }
             else {
-                if (this.viewAsPairs  && canBePaired(alignment)) {
+                if (this.pairsSupported  && canBePaired(alignment)) {
                     alignment = new igv.PairedAlignment(alignment);
                     this.pairs[alignment.readName] = alignment;
                 }
@@ -197,7 +197,7 @@ var igv = (function (igv) {
 
                 idx = Math.floor(Math.random() * (this.alignments.length - 1));
 
-                if (this.viewAsPairs && canBePaired(alignment)) {
+                if (this.pairsSupported && canBePaired(alignment)) {
 
                     replacedAlignment = this.alignments[idx];
                     if (this.pairs.hasOwnProperty(replacedAlignment.readName)) {
