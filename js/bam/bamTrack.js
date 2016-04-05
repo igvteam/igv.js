@@ -69,11 +69,11 @@ var igv = (function (igv) {
 
         this.sortDirection = true;
 
-        this.viewAsPairs = config.viewAsPairs === undefined ? false : config.viewAsPairs;
+        this.viewAsPairs = config.viewAsPairs;
     };
 
     igv.BAMTrack.prototype.getFeatures = function (chr, bpStart, bpEnd) {
-        return this.featureSource.getAlignments(chr, bpStart, bpEnd);
+        return this.featureSource.getAlignments(chr, bpStart, bpEnd, this.viewAsPairs);
     }
 
     igv.BAMTrack.alignmentShadingOptions = {

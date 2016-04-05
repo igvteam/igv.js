@@ -33,6 +33,7 @@
     <script type="text/javascript" src="../vendor/inflate.js"></script>
     <script type="text/javascript" src="../vendor/zlib_and_gzip.min.js"></script>
     <script type="text/javascript" src="../vendor/jquery.mousewheel.js"></script>
+    <script type="text/javascript" src="../vendor/jquery.kinetic.min.js"></script>
 
     <!-- IGV JS -->
     <script type="text/javascript" src="../js/igv-create.js"></script>
@@ -156,11 +157,11 @@
 <!-- Override igv.css rule governing panel name width -->
 <style type="text/css">
     .igv-left-hand-gutter {
-        width: 200px;
+        width: 100px;
     }
 
     .igv-gutter-shim {
-        left: 200px;
+        left: 100px;
     }
 </style>
 
@@ -168,21 +169,27 @@
 <div id="trackList">
     <div onclick="igv.browser.loadTrack({
                             type: 'eqtl',
-                            source: {
-                              type: 'gtex-ws',
-                              url: 'http://gtexportal.org/api/v6/singleTissueEqtlByLocation',
-                              tissueName: 'Adipose_Subcutaneous'
-                            },
-                            name: 'Adipose - Subcutaneous'
-                            })">Adipose - Subcutaneous
-    </div>
-    <div onclick="igv.browser.loadTrack({
-                            type: 'eqtl',
                             sourceType: 'gtex-ws',
                             url: 'http://gtexportal.org/api/v6/singleTissueEqtlByLocation',
                             tissueName: 'Adipose_Subcutaneous',
                             name: 'Adipose - Subcutaneous'
-                            })">Adipose - Subcutaneous (old)
+                            })">Adipose - Subcutaneous
+    </div>
+    <div onclick="igv.browser.loadTrack({
+                         type: 'eqtl',
+                         sourceType: 'gtex-ws',
+                         url: 'http://gtexportal.org/api/v6/singleTissueEqtlByLocation',
+                         tissueName: 'Brain_Cerebellar_Hemisphere',
+                         name: 'Brain - Cerebellar Hemisphere'
+                         })">Brain - Cerebellar Hemisphere
+    </div>
+    <div onclick="igv.browser.loadTrack({
+                         type: 'eqtl',
+                         sourceType: 'gtex-ws',
+                         url: 'http://gtexportal.org/api/v6/singleTissueEqtlByLocation',
+                         tissueName: 'Thyroid',
+                         name: 'Thyroid'
+                         })">Thyroid
     </div>
 </div>
 
@@ -201,14 +208,14 @@
         options = {
             type: "GTEX",
             showNavigation: true,
-            fastaURL: '//igv.broadinstitute.org/genomes/seq/hg19/hg19.fasta',
-            cytobandURL: '//igv.broadinstitute.org/genomes/seq/hg19/cytoBand.txt',
-            locus: 'chr8:125,080,563-126,993,457',
+            fastaURL: '//dn7ywbm9isq8j.cloudfront.net/genomes/seq/hg19/hg19.fasta',
+            cytobandURL: '//dn7ywbm9isq8j.cloudfront.net/genomes/seq/hg19/cytoBand.txt',
+            locus: "chr1:1-50,000,000",
             flanking: 75000,
-            //     search: {
-            //         url: "http://gtexportal.org/api/v6/features",
-            //         resultsField: "features"
-            //     },
+            search: {
+                url: "http://gtexportal.org/api/v6/features/$FEATURE$",
+                resultsField: "features"
+            },
             formats: {
                 gwasSNPS: {
                     coords: 0,
@@ -225,13 +232,13 @@
                     indexed: false,
                     color: 'rgb(100,200,200)',
                     displayMode: 'EXPANDED',
-                    url: '//igv.broadinstitute.org/annotations/hg19/gwas/v2_newest_converted_GWAS_catalog_SNPs_Pval5E08_hg19_040115.bed',
+                    url: '//dn7ywbm9isq8j.cloudfront.net/annotations/hg19/gwas/v2_newest_converted_GWAS_catalog_SNPs_Pval5E08_hg19_040115.bed',
                     name: 'GWAS Catalog',
                     order: 9999
                 },
                 {
                     featureType: 'genes',
-                    url: '//igv.broadinstitute.org/annotations/hg19/genes/gencode.v18.collapsed.bed',
+                    url: '//dn7ywbm9isq8j.cloudfront.net/annotations/hg19/genes/gencode.v18.collapsed.bed',
                     name: 'Genes',
                     order: 10000,
                     displayMode: 'EXPANDED',
