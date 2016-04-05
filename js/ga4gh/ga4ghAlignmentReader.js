@@ -65,8 +65,12 @@ var igv = (function (igv) {
 
         this.samplingWindowSize = config.samplingWindowSize === undefined ? 100 : config.samplingWindowSize;
         this.samplingDepth = config.samplingDepth === undefined ? 100 : config.samplingDepth;
-        this.viewAsPairs = config.viewAsPairs;
-
+        if (config.viewAsPairs) {
+            this.pairsSupported = true;
+        }
+        else {
+            this.pairsSupported = config.pairsSupported === undefined ? true : config.pairsSupported;
+        }
     }
 
 
@@ -91,7 +95,7 @@ var igv = (function (igv) {
                         "pageSize": "10000"
                     },
                     decode: decodeGa4ghReads,
-                    results: new igv.AlignmentContainer(chr, bpStart, bpEnd, self.samplingWindowSize, self.samplingDepth, self.viewAsPairs)
+                    results: new igv.AlignmentContainer(chr, bpStart, bpEnd, self.samplingWindowSize, self.samplingDepth, self.pairsSupported)
                 }).then(fulfill)
                     .catch(reject);
 

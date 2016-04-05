@@ -40,34 +40,60 @@ var igv = (function (igv) {
 
     };
 
-    igv.BamSource.prototype.setViewAsPairs = function(bool) {
-        if(this.viewAsPairs !== bool) {
+    igv.BamSource.prototype.setViewAsPairs = function (bool) {
+        var self = this;
+
+        if (this.viewAsPairs !== bool) {
             this.viewAsPairs = bool;
-            this.bamReader.viewAsPairs = bool;
-            this.alignmentContainer = undefined; // Clear cache
+            // TODO -- repair alignments
+            if (this.alignmentContainer) {
+                var maxRows = self.config.maxRows || 500,
+                    alignmentContainer = this.alignmentContainer,
+                    alignments, rows;
+
+                rows = this.alignmentContainer.packedAlignmentRows;
+                alignments = [];
+                rows.forEach(function (alignmentRow) {
+                    alignments = alignments.concat(alignmentRow.alignments);
+                })
+
+                if (bool) {
+                    alignmentContainer.packedAlignmentRows = packAlignmentRows(pairAlignments(alignments), alignmentContainer.start, alignmentContainer.end, maxRows);
+                }
+                else {
+                    alignmentContainer.packedAlignmentRows = packAlignmentRows(unpairAlignments(alignments), alignmentContainer.start, alignmentContainer.end, maxRows);
+                }
+
+
+            }
         }
     }
 
-    igv.BamSource.prototype.getAlignments = function (chr, bpStart, bpEnd) {
+    igv.BamSource.prototype.getAlignments = function (chr, bpStart, bpEnd, viewAsPairs) {
 
         var self = this;
         return new Promise(function (fulfill, reject) {
 
             if (self.alignmentContainer && self.alignmentContainer.contains(chr, bpStart, bpEnd)) {
-
                 fulfill(self.alignmentContainer);
-
             } else {
 
                 self.bamReader.readAlignments(chr, bpStart, bpEnd).then(function (alignmentContainer) {
 
-                    var maxRows = self.config.maxRows || 500;
-                    alignmentContainer.packedAlignmentRows = packAlignmentRows(alignmentContainer.alignments, alignmentContainer.start, alignmentContainer.end,  maxRows);
+                    var maxRows = self.config.maxRows || 500,
+                        alignments = alignmentContainer.alignments;
+
+                    if (!viewAsPairs) {
+                        alignments = unpairAlignments(alignments);
+                    }
+
+                    alignmentContainer.packedAlignmentRows = packAlignmentRows(alignments, alignmentContainer.start, alignmentContainer.end, maxRows);
+
+
                     alignmentContainer.alignments = undefined;  // Don't need to hold onto these anymore
                     self.alignmentContainer = alignmentContainer;
 
                     igv.browser.genome.sequence.getSequence(alignmentContainer.chr, alignmentContainer.start, alignmentContainer.end).then(
-
                         function (sequence) {
 
 
@@ -86,8 +112,60 @@ var igv = (function (igv) {
         });
     }
 
+    function pairAlignments(alignments) {
 
-    function packAlignmentRows(alignments, start, end,  maxRows) {
+        var pairCache = {},
+            result = [];
+
+        alignments.forEach(function (alignment) {
+
+            var pairedAlignment;
+
+            if (canBePaired(alignment)) {
+
+                pairedAlignment = pairCache[alignment.readName];
+                if (pairedAlignment) {
+                    pairedAlignment.setSecondAlignment(alignment);
+                    pairCache[alignment.readName] = undefined;   // Don't need to track this anymore.
+                }
+                else {
+                    pairedAlignment = new igv.PairedAlignment(alignment);
+                    pairCache[alignment.readName] = pairedAlignment;
+                    result.push(pairedAlignment);
+                }
+            }
+
+            else {
+                result.push(alignment);
+            }
+        });
+        return result;
+    }
+
+    function unpairAlignments(alignments) {
+        var result = [];
+        alignments.forEach(function (alignment) {
+            if (alignment instanceof igv.PairedAlignment) {
+                if (alignment.firstAlignment) result.push(alignment.firstAlignment);  // shouldn't need the null test
+                if (alignment.secondAlignment) result.push(alignment.secondAlignment);
+
+            }
+            else {
+                result.push(alignment);
+            }
+        });
+        return result;
+    }
+
+    function canBePaired(alignment) {
+        return alignment.isPaired() &&
+            alignment.isMateMapped() &&
+            alignment.chr === alignment.mate.chr &&
+            (alignment.isFirstOfPair() || alignment.isSecondOfPair()) && !(alignment.isSecondary() || alignment.isSupplementary());
+    }
+
+
+    function packAlignmentRows(alignments, start, end, maxRows) {
 
         if (!alignments) return;
 
