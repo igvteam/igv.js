@@ -71,7 +71,9 @@ var igv = (function (igv) {
                     fulfill(null);
                 }
 
-            }).catch(reject);
+            }).catch(function (error) {
+                reject(error);
+            });
 
         });
     }
