@@ -68,18 +68,30 @@ var igv = (function (igv) {
         igv.graphics.fillRect(ctx, 0, 0, pixelWidth, pixelHeight, {'fillStyle': "rgb(255, 255, 255)"});
 
         for (var p = 4; p <= track.maxLogP; p += 2) {
-            var yp = pixelHeight - Math.round((p - track.minLogP) / yScale);
+
+            var x1,
+                x2,
+                y1,
+                y2,
+                ref;
+
             // TODO: Dashes may not actually line up with correct scale. Ask Jim about this
-            igv.graphics.strokeLine(ctx, 45, yp - 2, 50, yp - 2, font); // Offset dashes up by 2 pixel
-            igv.graphics.fillText(ctx, p, 44, yp + 2, font); // Offset numbers down by 2 pixels; TODO: error
+
+            ref = 0.85 * pixelWidth;
+            x1 = ref - 5;
+            x2 = ref;
+
+            y1 = y2 = pixelHeight - Math.round((p - track.minLogP) / yScale);
+
+            igv.graphics.strokeLine(ctx, x1, y1, x2, y2, font); // Offset dashes up by 2 pixel
+
+            igv.graphics.fillText(ctx, p, x1 - 1, y1 + 2, font); // Offset numbers down by 2 pixels; TODO: error
         }
 
 
         font['textAlign'] = 'center';
 
-
         igv.graphics.fillText(ctx, "-log10(pvalue)", pixelWidth / 2, pixelHeight / 2, font, {rotate: {angle: -90}});
-
 
     };
 
