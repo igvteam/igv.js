@@ -136,7 +136,9 @@ var igv = (function (igv) {
     igv.TrackView.prototype.appendViewportDivToTrackDiv = function ($track) {
 
         var self = this,
-            $dataRangeLabel;
+            $dataRangeLabel,
+            description,
+            $trackLabel;
 
         // viewport
         this.viewportDiv = $('<div class="igv-viewport-div igv-gutter-shim">')[0];
@@ -183,16 +185,16 @@ var igv = (function (igv) {
 
         if (this.track.name) {
 
-            var description = this.track.description || this.track.name,
-                $appIconContainer = $('<div class="igv-app-icon-container">');
+            description = this.track.description || this.track.name;
+            $trackLabel = $('<div class="igv-track-label">');
 
-            $appIconContainer.text(this.track.name);
+            $trackLabel.text(this.track.name);
 
-            $appIconContainer.click(function (e) {
+            $trackLabel.click(function (e) {
                 igv.popover.presentTrackPopup(e.pageX, e.pageY, description, false);
             });
 
-            $(this.viewportDiv).append($appIconContainer[0]);
+            $(this.viewportDiv).append($trackLabel[0]);
         }
 
     };
