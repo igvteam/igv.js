@@ -73,7 +73,7 @@ var igv = (function (igv) {
     };
 
     igv.BAMTrack.prototype.getFeatures = function (chr, bpStart, bpEnd) {
-        return this.featureSource.getAlignments(chr, bpStart, bpEnd, this.viewAsPairs);
+        return this.featureSource.getAlignments(chr, bpStart, bpEnd);
     }
 
     igv.BAMTrack.alignmentShadingOptions = {
