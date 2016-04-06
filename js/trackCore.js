@@ -235,14 +235,7 @@ var igv = (function (igv) {
 
         track.name = label;
 
-        //if (track.description) {
-        //
-        //    track.labelButton.innerHTML = track.name;
-        //} else {
-        //    track.labelSpan.innerHTML = track.name;
-        //}
-
-        $(track.trackView.leftHandGutter).find('.igv-app-icon-container').text(track.name);
+        $(track.trackView.viewportDiv).find('.igv-track-label').text(track.name);
 
         if (track.trackView) {
             track.trackView.repaint();

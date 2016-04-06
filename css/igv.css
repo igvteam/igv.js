@@ -1266,19 +1266,7 @@ div.ui-dialog fieldset {
     left: 0;
 }
 
-.igv-track-label-span {
-
-    text-overflow: ellipsis;
-
-}
-
-.igv-track-label-span {
-
-    text-overflow: ellipsis;
-
-}
-
-.igv-app-icon-container {
+.igv-track-label {
 
     position: absolute;
 
@@ -1313,9 +1301,9 @@ div.ui-dialog fieldset {
 
 }
 
-.igv-app-icon-container:hover,
-.igv-app-icon-container:focus,
-.igv-app-icon-container:active  {
+.igv-track-label:hover,
+.igv-track-label:focus,
+.igv-track-label:active  {
 
     cursor: pointer;
 

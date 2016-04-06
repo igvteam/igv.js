@@ -313,24 +313,25 @@ var igv = (function (igv) {
                     $viewports = $('.igv-viewport-div');
 
                 browser.trackLabelsVisible = !browser.trackLabelsVisible;
+                $(browser.trackContainerDiv).find('.igv-track-label').toggle();
 
-                if (false === browser.trackLabelsVisible) {
-                    // hide
-                    $trackLabelToggle.text("show labels");
-                    $ideogram.css({'margin-left': '0'});
-                    $leftHandGutters.hide();
-                    $viewports.removeClass("igv-gutter-shim");
-                    $viewports.addClass("igv-no-gutter-shim");
-                    igv.browser.resize();
-                } else {
-                    // show
-                    $trackLabelToggle.text("hide labels");
-                    $ideogram.css({'margin-left': '100px'});
-                    $leftHandGutters.show();
-                    $viewports.removeClass("igv-no-gutter-shim");
-                    $viewports.addClass("igv-gutter-shim");
-                    igv.browser.resize();
-                }
+                //if (false === browser.trackLabelsVisible) {
+                //    // hide
+                //    $trackLabelToggle.text("show labels");
+                //    $ideogram.css({'margin-left': '0'});
+                //    $leftHandGutters.hide();
+                //    $viewports.removeClass("igv-gutter-shim");
+                //    $viewports.addClass("igv-no-gutter-shim");
+                //    igv.browser.resize();
+                //} else {
+                //    // show
+                //    $trackLabelToggle.text("hide labels");
+                //    $ideogram.css({'margin-left': '100px'});
+                //    $leftHandGutters.show();
+                //    $viewports.removeClass("igv-no-gutter-shim");
+                //    $viewports.addClass("igv-gutter-shim");
+                //    igv.browser.resize();
+                //}
 
             });
 
