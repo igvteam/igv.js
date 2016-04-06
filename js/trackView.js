@@ -42,9 +42,8 @@ var igv = (function (igv) {
             this.trackDiv.style.height = track.height + "px";
         }
 
-        $(this.trackDiv).append(this.createLeftHandGutter());
-
-        this.addViewportToParentTrackDiv(this.trackDiv);
+        this.appendLeftHandGutterDivToTrackDiv($(this.trackDiv));
+        this.appendViewportDivToTrackDiv($(this.trackDiv));
 
         element = this.createRightHandGutter();
         if (element) {
@@ -134,17 +133,14 @@ var igv = (function (igv) {
         }
     };
 
-    igv.TrackView.prototype.addViewportToParentTrackDiv = function (trackDiv) {
+    igv.TrackView.prototype.appendViewportDivToTrackDiv = function ($track) {
 
         var self = this,
-            $dataRangeLabel,
-            str,
-            min,
-            max;
+            $dataRangeLabel;
 
         // viewport
         this.viewportDiv = $('<div class="igv-viewport-div igv-gutter-shim">')[0];
-        $(trackDiv).append(this.viewportDiv);
+        $track.append(this.viewportDiv);
 
         // content  -- purpose of this div is to allow vertical scrolling on individual tracks,
         this.contentDiv = $('<div class="igv-content-div">')[0];
@@ -185,39 +181,48 @@ var igv = (function (igv) {
 
         }
 
-    };
-
-    igv.TrackView.prototype.createLeftHandGutter = function () {
-
-        var description,
-            $appIconContainer;
-
-        this.leftHandGutter = $('<div class="igv-left-hand-gutter">')[0];
-
-        if (this.track.paintAxis) {
-
-            this.controlCanvas = $('<canvas class ="igv-track-control-canvas">')[0];
-            this.controlCanvas.setAttribute('width', this.leftHandGutter.clientWidth);
-            this.controlCanvas.setAttribute('height', this.leftHandGutter.clientHeight);
-            this.controlCtx = this.controlCanvas.getContext("2d");
-
-            $(this.leftHandGutter).append(this.controlCanvas);
-        }
-
         if (this.track.name) {
 
-            $appIconContainer = $('<div class="igv-app-icon-container">');
+            var description = this.track.description || this.track.name,
+                $appIconContainer = $('<div class="igv-app-icon-container">');
+
             $appIconContainer.text(this.track.name);
 
-            description = this.track.description || this.track.name;
             $appIconContainer.click(function (e) {
                 igv.popover.presentTrackPopup(e.pageX, e.pageY, description, false);
             });
 
-            $(this.leftHandGutter).append($appIconContainer[0]);
+            $(this.viewportDiv).append($appIconContainer[0]);
         }
 
-        return this.leftHandGutter;
+    };
+
+    igv.TrackView.prototype.appendLeftHandGutterDivToTrackDiv = function ($track) {
+
+        var $leftHandGutter,
+            $canvas,
+            w,
+            h;
+
+        $leftHandGutter = $('<div class="igv-left-hand-gutter">');
+        $track.append($leftHandGutter[ 0 ]);
+
+        if (this.track.paintAxis) {
+
+            $canvas = $('<canvas class ="igv-track-control-canvas">');
+
+            w = $leftHandGutter.outerWidth();
+            h = $leftHandGutter.outerHeight();
+            $canvas.attr('width',  w);
+            $canvas.attr('height', h);
+
+            $leftHandGutter.append($canvas[ 0 ]);
+
+            this.controlCanvas = $canvas[ 0 ];
+            this.controlCtx = this.controlCanvas.getContext("2d");
+        }
+
+        this.leftHandGutter = $leftHandGutter[ 0 ];
 
     };
 
