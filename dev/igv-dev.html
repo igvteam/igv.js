@@ -357,6 +357,15 @@
 
         <div onclick="igv.browser.loadTrack(
         {
+            url: '../test/data/bed/egfr.bed',
+            name: 'egfr',
+            format: 'bed',
+            indexed: false
+        })">EGFR
+        </div>
+
+        <div onclick="igv.browser.loadTrack(
+        {
            type: 'eqtl',
            sourceType: 'gtex-ws',
            url: 'http://gtexportal.org/api/v6/singleTissueEqtlByLocation',
