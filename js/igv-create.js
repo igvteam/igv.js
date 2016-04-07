@@ -126,7 +126,6 @@ var igv = (function (igv) {
         contentDiv = $('<div class="igv-content-div">')[0];
         $(rootDiv).append(contentDiv);
 
-        //headerDiv = $('<div id="igvHeaderDiv" class="igv-header-div">')[0];
         headerDiv = $('<div>')[0];
         $(contentDiv).append(headerDiv);
 
@@ -301,7 +300,6 @@ var igv = (function (igv) {
             $zoomContainer.append($faZoomIn[0]);
             $navigation.append($zoomContainer[0]);
 
-
             // hide/show track labels
             $trackLabelToggle = $('<div class="igv-toggle-track-labels">');
             $trackLabelToggle.text("hide labels");
@@ -314,24 +312,6 @@ var igv = (function (igv) {
 
                 browser.trackLabelsVisible = !browser.trackLabelsVisible;
                 $(browser.trackContainerDiv).find('.igv-track-label').toggle();
-
-                //if (false === browser.trackLabelsVisible) {
-                //    // hide
-                //    $trackLabelToggle.text("show labels");
-                //    $ideogram.css({'margin-left': '0'});
-                //    $leftHandGutters.hide();
-                //    $viewports.removeClass("igv-gutter-shim");
-                //    $viewports.addClass("igv-no-gutter-shim");
-                //    igv.browser.resize();
-                //} else {
-                //    // show
-                //    $trackLabelToggle.text("hide labels");
-                //    $ideogram.css({'margin-left': '100px'});
-                //    $leftHandGutters.show();
-                //    $viewports.removeClass("igv-no-gutter-shim");
-                //    $viewports.addClass("igv-gutter-shim");
-                //    igv.browser.resize();
-                //}
 
             });
 
