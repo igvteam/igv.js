@@ -69,6 +69,12 @@ var igv = (function (igv) {
             addTrackHandlers(this);
         }
 
+        // add shims to ideogram and all tracks if at least one track uses left hand gutter
+        if (this.track.paintAxis) {
+            $('.igv-ideogram-content-div').addClass('igv-ideogram-gutter-shim');
+            $('.igv-viewport-div').addClass('igv-gutter-shim');
+        }
+
         function makeTrackDraggable(track) {
 
             self.igvTrackDragScrim = $('<div class="igv-track-drag-scrim">')[0];
@@ -141,7 +147,7 @@ var igv = (function (igv) {
             $trackLabel;
 
         // viewport
-        this.viewportDiv = $('<div class="igv-viewport-div igv-gutter-shim">')[0];
+        this.viewportDiv = $('<div class="igv-viewport-div">')[0];
         $track.append(this.viewportDiv);
 
         // content  -- purpose of this div is to allow vertical scrolling on individual tracks,
@@ -206,10 +212,17 @@ var igv = (function (igv) {
             w,
             h;
 
-        $leftHandGutter = $('<div class="igv-left-hand-gutter">');
-        $track.append($leftHandGutter[ 0 ]);
 
         if (this.track.paintAxis) {
+
+            // add shims to ideogram and all tracks
+            //$('.igv-ideogram-content-div').addClass('igv-ideogram-gutter-shim');
+            //$('.igv-viewport-div').addClass('igv-gutter-shim');
+
+
+
+            $leftHandGutter = $('<div class="igv-left-hand-gutter">');
+            $track.append($leftHandGutter[ 0 ]);
 
             $canvas = $('<canvas class ="igv-track-control-canvas">');
 
@@ -222,9 +235,10 @@ var igv = (function (igv) {
 
             this.controlCanvas = $canvas[ 0 ];
             this.controlCtx = this.controlCanvas.getContext("2d");
-        }
 
-        this.leftHandGutter = $leftHandGutter[ 0 ];
+            this.leftHandGutter = $leftHandGutter[ 0 ];
+
+        }
 
     };
 
