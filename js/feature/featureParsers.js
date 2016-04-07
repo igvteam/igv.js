@@ -254,7 +254,7 @@ var igv = (function (igv) {
      */
     function decodeBed(tokens, ignore) {
 
-        var chr, start, end, id, name, tmp, idName, exonCount, exonSizes, exonStarts, exons, feature,
+        var chr, start, end, id, name, tmp, idName, exonCount, exonSizes, exonStarts, exons, exon, feature,
             eStart, eEnd;
 
         if (tokens.length < 3) return null;
@@ -307,7 +307,13 @@ var igv = (function (igv) {
             for (var i = 0; i < exonCount; i++) {
                 eStart = start + parseInt(exonStarts[i]);
                 eEnd = eStart + parseInt(exonSizes[i]);
-                exons.push({start: eStart, end: eEnd});
+                var exon = {start: eStart, end: eEnd};
+
+                if(feature.cdStart > eEnd || feature.cdEnd < cdStart) exon.utr = true;   // Entire exon is UTR
+                if(feature.cdStart >= eStart && feature.cdStart <= eEnd) exon.cdStart = feature.cdStart;
+                if(feature.cdEnd >= eStart && feature.cdEnd <= eEnd) exon.cdEnd = feature.cdEnd;
+
+                exons.push(exon);
             }
 
             feature.exons = exons;

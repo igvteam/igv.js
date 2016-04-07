@@ -350,6 +350,18 @@ var igv = (function (igv) {
                 exon = feature.exons[e];
                 ePx = Math.round((exon.start - bpStart) / xScale);
                 ePx1 = Math.round((exon.end - bpStart) / xScale);
+
+                // Portion of exon a utr?
+                if(exon.cdStart) {
+
+                }
+                if(exon.cdEnd) {
+
+                }
+                if(exon.utr) {
+                    // Entire exon is UTR
+                }
+
                 ePw = Math.max(1, ePx1 - ePx);
                 ctx.fillRect(ePx, py, ePw, h);
 
