@@ -67,7 +67,9 @@ var igv = (function (igv) {
                 this.decode = decodeWig;
                 this.delimiter = /\s+/;
                 break;
+            case "gff3" :
             case "gff" :
+            case "gtf" :
                 this.decode = decodeGFF;
                 this.delimiter = "\t";
                 break;
