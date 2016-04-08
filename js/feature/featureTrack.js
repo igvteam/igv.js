@@ -276,23 +276,8 @@ var igv = (function (igv) {
 
     function renderFeature(feature, bpStart, xScale, pixelHeight, ctx) {
 
-        var px,
-            px1,
-            pw,
-            x,
-            e,
-            exonCount,
-            cy,
-            direction,
-            exon,
-            ePx,
-            ePx1,
-            ePw,
-            py = 5,
+        var px, px1, pw, x, e, exonCount, cy, direction, exon, ePx, ePx1, ePxU, ePw, py, py2, h, h2, transform, fontStyle,
             step = this.arrowSpacing,
-            h = this.featureHeight,
-            transform,
-            fontStyle,
             color = this.color;
 
 
@@ -318,13 +303,20 @@ var igv = (function (igv) {
             px -= 1;
         }
 
+        h = this.featureHeight;
         if (this.displayMode === "SQUISHED" && feature.row != undefined) {
-            h /= 2;
-            py = this.squishedRowHeight * feature.row;
+            h = this.featureHeight / 2;
+            py = this.squishedRowHeight * feature.row + 2;
         }
         else if (this.displayMode === "EXPANDED" && feature.row != undefined) {
-            py = this.expandedRowHeight * feature.row;
+            py = this.expandedRowHeight * feature.row + 5;
+        } else {  // collapsed
+            py = 5;
         }
+
+        cy = py + h / 2;
+        h2 = h / 2;
+        py2 = cy - h2 / 2;
 
         exonCount = feature.exons ? feature.exons.length : 0;
 
@@ -335,7 +327,6 @@ var igv = (function (igv) {
         }
         else {
             // multi-exon transcript
-            cy = py + h / 2;
 
             igv.graphics.strokeLine(ctx, px + 1, cy, px1 - 1, cy); // center line for introns
 
@@ -350,35 +341,42 @@ var igv = (function (igv) {
                 exon = feature.exons[e];
                 ePx = Math.round((exon.start - bpStart) / xScale);
                 ePx1 = Math.round((exon.end - bpStart) / xScale);
-
-                // Portion of exon a utr?
-                if(exon.cdStart) {
-
-                }
-                if(exon.cdEnd) {
-
-                }
-                if(exon.utr) {
-                    // Entire exon is UTR
-                }
-
                 ePw = Math.max(1, ePx1 - ePx);
-                ctx.fillRect(ePx, py, ePw, h);
 
-                // Arrows
-                if (ePw > step + 5) {
-                    ctx.fillStyle = "white";
-                    ctx.strokeStyle = "white";
-                    for (x = ePx + step / 2; x < ePx1; x += step) {
-                        // draw arrowheads along central line indicating transcribed orientation
-                        igv.graphics.strokeLine(ctx, x - direction * 2, cy - 2, x, cy);
-                        igv.graphics.strokeLine(ctx, x - direction * 2, cy + 2, x, cy);
-                    }
-                    ctx.fillStyle = color;
-                    ctx.strokeStyle = color;
-
+                if (exon.utr) {
+                    ctx.fillRect(ePx, py2, ePw, h2); // Entire exon is UTR
                 }
+                else {
+                    if (exon.cdStart) {
+                        ePxU = Math.round((exon.cdStart - bpStart) / xScale);
+                        ctx.fillRect(ePx, py2, ePxU - ePx, h2); // start is UTR
+                        ePw -= (ePxU - ePx);
+                        ePx = ePxU;
 
+                    }
+                    if (exon.cdEnd) {
+                        ePxU = Math.round((exon.cdEnd - bpStart) / xScale);
+                        ctx.fillRect(ePxU, py2, ePx1 - ePxU, h2); // start is UTR
+                        ePw -= (ePx1 - ePxU);
+                        ePx1 = ePxU;
+                    }
+
+                    ctx.fillRect(ePx, py, ePw, h);
+
+                    // Arrows
+                    if (ePw > step + 5) {
+                        ctx.fillStyle = "white";
+                        ctx.strokeStyle = "white";
+                        for (x = ePx + step / 2; x < ePx1; x += step) {
+                            // draw arrowheads along central line indicating transcribed orientation
+                            igv.graphics.strokeLine(ctx, x - direction * 2, cy - 2, x, cy);
+                            igv.graphics.strokeLine(ctx, x - direction * 2, cy + 2, x, cy);
+                        }
+                        ctx.fillStyle = color;
+                        ctx.strokeStyle = color;
+
+                    }
+                }
             }
         }
 

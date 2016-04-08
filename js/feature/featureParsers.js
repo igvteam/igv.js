@@ -309,7 +309,7 @@ var igv = (function (igv) {
                 eEnd = eStart + parseInt(exonSizes[i]);
                 var exon = {start: eStart, end: eEnd};
 
-                if(feature.cdStart > eEnd || feature.cdEnd < cdStart) exon.utr = true;   // Entire exon is UTR
+                if(feature.cdStart > eEnd || feature.cdEnd < feature.cdStart) exon.utr = true;   // Entire exon is UTR
                 if(feature.cdStart >= eStart && feature.cdStart <= eEnd) exon.cdStart = feature.cdStart;
                 if(feature.cdEnd >= eStart && feature.cdEnd <= eEnd) exon.cdEnd = feature.cdEnd;
 
