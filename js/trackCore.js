@@ -132,8 +132,10 @@ var igv = (function (igv) {
                 case ".bigbed":
                     config.format = config.format || "bigbed";
                 case ".gff3":
-                case ".gtf":
+                case ".gff":
                     config.format = config.format || "gff";
+                case ".gtf":
+                    config.format = config.format || "gtf";
                 default:
                     config.format = ext.substr(1);   // Strip leading "."
             }
