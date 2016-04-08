@@ -1050,7 +1050,8 @@ div.ui-dialog fieldset {
 }
 
 .igv-ideogram-gutter-shim {
-    margin-left: 100px;
+    /*margin-left: 100px;*/
+    margin-left: 50px;
 }
 
 .igv-viewport-div {
@@ -1062,8 +1063,17 @@ div.ui-dialog fieldset {
     overflow-y: hidden;
 }
 
+.igv-left-hand-gutter {
+    position: absolute;
+    left: 0;
+    /*width: 100px;*/
+    width: 50px;
+    height: 100%;
+}
+
 .igv-gutter-shim {
-    left:  100px;
+    /*left:  100px;*/
+    left:  50px;
 }
 
 /*.igv-no-gutter-shim {*/
@@ -1260,13 +1270,6 @@ div.ui-dialog fieldset {
     border-color: #7e7e7e;
     background-color: #7e7e7e;
 
-}
-
-.igv-left-hand-gutter {
-    position: absolute;
-    left: 0;
-    width: 100px;
-    height: 100%;
 }
 
 .igv-track-label {
