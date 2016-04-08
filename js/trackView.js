@@ -70,12 +70,12 @@ var igv = (function (igv) {
         }
 
         // add shims to ideogram and all tracks if at least one track uses left hand gutter
-        if (this.track.paintAxis || true === browser.useLeftHandGutter) {
+        //if (this.track.paintAxis || true === browser.useLeftHandGutter) {
 
-            browser.useLeftHandGutter = true;
+            //browser.useLeftHandGutter = true;
             $('.igv-ideogram-content-div').addClass('igv-ideogram-gutter-shim');
             $('.igv-viewport-div').addClass('igv-gutter-shim');
-        }
+        //}
 
         function makeTrackDraggable(track) {
 

@@ -91,7 +91,7 @@ var igv = (function (igv) {
 
         font['textAlign'] = 'center';
 
-        igv.graphics.fillText(ctx, "-log10(pvalue)", pixelWidth / 2, pixelHeight / 2, font, {rotate: {angle: -90}});
+        igv.graphics.fillText(ctx, "-log10(pvalue)", pixelWidth/4, pixelHeight/2, font, {rotate: {angle: -90}});
 
     };
 
