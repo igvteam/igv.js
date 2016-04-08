@@ -567,8 +567,7 @@ div.ui-dialog fieldset {
     height: 24px;
     width: auto;
 
-    /*margin-left: 44px;*/
-    /*margin-right: 28px;*/
+    box-sizing: content-box;
 
     border-style: solid;
     border-width: thin;
@@ -992,12 +991,16 @@ div.ui-dialog fieldset {
 .igv-root-div {
 
     position: relative;
-    margin-left: 10px;
-    margin-right: 10px;
-    /*padding-top:50px;*/
+
     left: 0;
     right: 0;
+
     height: auto;
+
+    margin-left: 10px;
+    margin-right: 10px;
+
+    padding-top:4px;
 
     -webkit-box-sizing: border-box;
     -moz-box-sizing: border-box;
