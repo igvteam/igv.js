@@ -52,10 +52,15 @@ var igv = (function (igv) {
 
         for (i = 0; i < len; i++) {
             line = lines[i];
-            if (line.startsWith("track") || line.startsWith("#") || line.startsWith("browser")) {
-
+            if (line.startsWith("track") || line.startsWith("#")) {
                 if (line.startsWith("track")) {
                     header = parseTrackLine(line);
+                }
+                else if (line.startsWith("##gff-version")) {
+                    header = line;
+                    if(line.startsWith("##gff-version 3")) {
+                        this.format = "gff3";
+                    }
                 }
             }
             else {

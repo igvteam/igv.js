@@ -38,13 +38,13 @@ var igv = (function (igv) {
     var maxFeatureCount = Number.MAX_VALUE;    // For future use,  controls downsampling
 
     /**
-     * A factory function.  Return a parser for the given file type.
+     * A factory function.  Return a parser for the given file format.
      */
     igv.FeatureParser = function (format, decode) {
 
         var customFormat;
 
-        this.type = format;
+        this.format = format;
         this.skipRows = 0;   // The number of fixed header rows to skip.  Override for specific types as needed
 
         if (decode) {
@@ -120,9 +120,11 @@ var igv = (function (igv) {
         for (i = 0; i < len; i++) {
             line = lines[i];
             if (line.startsWith("track") || line.startsWith("#") || line.startsWith("browser")) {
-
                 if (line.startsWith("track")) {
                     header = parseTrackLine(line);
+                }
+                else if (line.startsWith("##gff-version 3")) {
+                    this.format = "gff3";
                 }
             }
             else {
@@ -147,7 +149,7 @@ var igv = (function (igv) {
             cnt = 0,
             j,
             decode = this.decode,
-            type = this.type,
+            format = this.format,
             delimiter = this.delimiter || "\t";
 
 
@@ -156,11 +158,11 @@ var igv = (function (igv) {
             if (line.startsWith("track") || line.startsWith("#") || line.startsWith("browser")) {
                 continue;
             }
-            else if (type === "wig" && line.startsWith("fixedStep")) {
+            else if (format === "wig" && line.startsWith("fixedStep")) {
                 wig = parseFixedStep(line);
                 continue;
             }
-            else if (type === "wig" && line.startsWith("variableStep")) {
+            else if (format === "wig" && line.startsWith("variableStep")) {
                 wig = parseVariableStep(line);
                 continue;
             }
@@ -197,7 +199,7 @@ var igv = (function (igv) {
             step = parseInt(tokens[3].split("=")[1], 10),
             span = (tokens.length > 4) ? parseInt(tokens[4].split("=")[1], 10) : 1;
 
-        return {type: "fixedStep", chrom: cc, start: ss, step: step, span: span, index: 0};
+        return {format: "fixedStep", chrom: cc, start: ss, step: step, span: span, index: 0};
 
     }
 
@@ -206,7 +208,7 @@ var igv = (function (igv) {
         var tokens = line.split(/\s+/),
             cc = tokens[1].split("=")[1],
             span = tokens.length > 2 ? parseInt(tokens[2].split("=")[1], 10) : 1;
-        return {type: "variableStep", chrom: cc, span: span}
+        return {format: "variableStep", chrom: cc, span: span}
 
     }
 
@@ -311,9 +313,9 @@ var igv = (function (igv) {
                 eEnd = eStart + parseInt(exonSizes[i]);
                 var exon = {start: eStart, end: eEnd};
 
-                if(feature.cdStart > eEnd || feature.cdEnd < feature.cdStart) exon.utr = true;   // Entire exon is UTR
-                if(feature.cdStart >= eStart && feature.cdStart <= eEnd) exon.cdStart = feature.cdStart;
-                if(feature.cdEnd >= eStart && feature.cdEnd <= eEnd) exon.cdEnd = feature.cdEnd;
+                if (feature.cdStart > eEnd || feature.cdEnd < feature.cdStart) exon.utr = true;   // Entire exon is UTR
+                if (feature.cdStart >= eStart && feature.cdStart <= eEnd) exon.cdStart = feature.cdStart;
+                if (feature.cdEnd >= eStart && feature.cdEnd <= eEnd) exon.cdEnd = feature.cdEnd;
 
                 exons.push(exon);
             }
@@ -419,7 +421,7 @@ var igv = (function (igv) {
             ee,
             value;
 
-        if (wig.type === "fixedStep") {
+        if (wig.format === "fixedStep") {
 
             ss = (wig.index * wig.step) + wig.start;
             ee = ss + wig.span;
@@ -427,7 +429,7 @@ var igv = (function (igv) {
             ++(wig.index);
             return isNaN(value) ? null : {chr: wig.chrom, start: ss, end: ee, value: value};
         }
-        else if (wig.type === "variableStep") {
+        else if (wig.format === "variableStep") {
 
             if (tokens.length < 2) return null;
 
@@ -588,7 +590,8 @@ var igv = (function (igv) {
      */
     function decodeGFF(tokens, ignore) {
 
-        var tokenCount, chr, start, end, strand, type, score, phase, attributeString, id, parent, color, name;
+        var tokenCount, chr, start, end, strand, type, score, phase, attributeString, id, parent, color, name,
+            transcript_id, format = this.format;
 
         tokenCount = tokens.length;
         if (tokenCount < 9) {
@@ -604,17 +607,20 @@ var igv = (function (igv) {
         phase = "." === tokens[7] ? 0 : parseInt(tokens[7]);
         attributeString = tokens[8];
 
-        // Find ID and Parent
+        // Find ID and Parent, or transcript_id
+        var delim = ('gff3' === format) ? '=' : /\s+/;
         attributeString.split(';').forEach(function (kv) {
-            var t = kv.split('=', 2);
+            var t = kv.trim().split(delim, 2);
             if (t.length == 2) {
                 if ("ID" === t[0]) id = t[1];
                 else if ("Parent" === t[0]) parent = t[1];
                 else if ("name" === t[0].toLowerCase()) name = t[1];
                 else if ("color" === t[0].toLowerCase()) color = igv.createColorString(t[1]);
+                else if ("transcript_id" === t[0]) id = t[1];
             }
 
         });
+
 
         return {
             id: id,
@@ -632,7 +638,7 @@ var igv = (function (igv) {
                 var kvs = this.attributeString.split(';'),
                     pd = [];
                 kvs.forEach(function (kv) {
-                    var t = kv.split('=', 2);
+                    var t = kv.trim().split(delim, 2);
                     if (t.length === 2)
                         pd.push({name: t[0], value: t[1]});
                 });

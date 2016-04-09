@@ -88,6 +88,8 @@
     <script type="text/javascript" src="../js/igv-constants.js"></script>
 
     <script type="text/javascript" src="../js/feature/featureCache.js"></script>
+    <script type="text/javascript" src="../js/feature/gffHelper.js"></script>
+    <script type="text/javascript" src="../js/feature/gffParser.js"></script>
     <script type="text/javascript" src="../js/feature/featureSource.js"></script>
     <script type="text/javascript" src="../js/feature/featureParsers.js"></script>
     <script type="text/javascript" src="../js/feature/tribble.js"></script>
@@ -355,6 +357,34 @@
         })">Color gff
         </div>
 
+
+        <div onclick="igv.browser.loadTrack(
+        {
+            url: '../test/data/gff/ENST00000442752.gtf',
+            name: 'Gencode gtf',
+           // format: 'gtf',
+            indexed: false
+        })">Gencode gtf
+        </div>
+
+        <div onclick="igv.browser.loadTrack(
+        {
+            url: '../test/data/gff/ENST00000442752.gff3',
+            name: 'Gencode gtf',
+           // format: 'gtf',
+            indexed: false
+        })">Gencode gff
+        </div>
+
+        <div onclick="igv.browser.loadTrack(
+        {
+            url: '../test/data/gff/wustl.gtf',
+            name: 'WUSTL gtf',
+           // format: 'gtf',
+            indexed: false
+        })">wustl gtf
+        </div>
+
         <div onclick="igv.browser.loadTrack(
         {
             url: '../test/data/bed/egfr_hg38.bed',
@@ -419,7 +449,7 @@
 
         div = $("#myDiv")[0];
         options = {
-
+            locus: '22:30663971-30667353',
             showKaryo: false,
             showNavigation: true,
             //genome: "hg19",
