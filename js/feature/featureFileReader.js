@@ -57,12 +57,16 @@ var igv = (function (igv) {
 
 
     function getParser(format, decode) {
-
+        var parser;
         switch (format) {
             case "vcf":
                 return new igv.VcfParser();
             case "seg" :
                 return new igv.SegParser();
+            //case "gff" :
+            //case "gff3" :
+            //case "gtf" :
+            //    return new igv.GFFParser(format);
             default:
                 return new igv.FeatureParser(format, decode);
         }
@@ -115,6 +119,10 @@ var igv = (function (igv) {
 
             function parseData(data) {
                 self.header = parser.parseHeader(data);
+                if (self.header instanceof String && self.header.startsWith("##gff-version 30")) {
+                    self.format = 'gff3';
+
+                }
                 fulfill(parser.parseFeatures(data));   // <= PARSING DONE HERE
             };
         });
