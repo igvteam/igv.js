@@ -306,11 +306,9 @@ var igv = (function (igv) {
 
             $trackLabelToggle.click(function () {
 
-                var $leftHandGutters = $('.igv-left-hand-gutter'),
-                    $ideogram = $('.igv-ideogram-content-div'),
-                    $viewports = $('.igv-viewport-div');
-
                 browser.trackLabelsVisible = !browser.trackLabelsVisible;
+                $(this).text( true === browser.trackLabelsVisible ? "hide labels" : "show labels" );
+
                 $(browser.trackContainerDiv).find('.igv-track-label').toggle();
 
             });
