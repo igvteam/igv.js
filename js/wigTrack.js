@@ -81,20 +81,21 @@ var igv = (function (igv) {
         igv.graphics.fillRect(ctx, 0, 0, pixelWidth, pixelHeight, {'fillStyle': "rgb(255, 255, 255)"});
 
         reference = 0.95 * pixelWidth;
-        x1 = reference - 4;
+        x1 = reference - 16;
         x2 = reference;
 
-        shim = 0.5 * 0.125;
+        //shim = 0.5 * 0.125;
+        shim = .01;
         y1 = y2 = shim * pixelHeight;
         // tick
         igv.graphics.strokeLine(ctx, x1, y1, x2, y2, font);
-        igv.graphics.fillText(ctx, this.trackView.track.dataRange.max.toFixed(2), x1 - 3, y1 + 3, font);
+        igv.graphics.fillText(ctx, this.trackView.track.dataRange.max.toFixed(2), x1 + 16, y1 + 14, font);
 
-        shim = 0.25 * 0.125;
+        //shim = 0.25 * 0.125;
         y1 = y2 = (1.0 - shim) * pixelHeight;
         // tick
         igv.graphics.strokeLine(ctx, x1, y1, x2, y2, font);
-        igv.graphics.fillText(ctx, this.trackView.track.dataRange.min.toFixed(2), x1 - 3, y1 + 3, font);
+        igv.graphics.fillText(ctx, this.trackView.track.dataRange.min.toFixed(2), x1 + 16, y1 - 4, font);
 
     };
 
