@@ -1123,13 +1123,6 @@ div.ui-dialog fieldset {
     vertical-align: middle;
 }
 
-.igv-track-label {
-    position: absolute;
-    top: 10px;
-    left: 96px;
-    cursor: pointer;
-}
-
 .igv-track-disable-button-fa {
     position: absolute;
     top: 8px;
@@ -1279,8 +1272,8 @@ div.ui-dialog fieldset {
 
     position: absolute;
 
-    left: 0;
-    top: 0;
+    left: 8px;
+    top: 4px;
 
     width: auto;
     height:auto;
