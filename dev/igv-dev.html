@@ -339,7 +339,7 @@
 
         <div onclick="igv.browser.loadTrack(
         {
-            url: '../test/data/gff/eden.txt',
+            url: '../test/data/gff/eden.gff',
             name: 'eden gff',
             format: 'gff',
             displayMode: 'SQUISHED',     // COLLAPSED | EXPANDED | SQUISHED
@@ -370,7 +370,7 @@
         <div onclick="igv.browser.loadTrack(
         {
             url: '../test/data/gff/ENST00000442752.gff3',
-            name: 'Gencode gtf',
+            name: 'Gencode gff',
            // format: 'gtf',
             indexed: false
         })">Gencode gff
@@ -380,9 +380,20 @@
         {
             url: '../test/data/gff/wustl.gtf',
             name: 'WUSTL gtf',
-           // format: 'gtf',
+            format: 'gtf',
             indexed: false
         })">wustl gtf
+        </div>
+
+
+        <div onclick="igv.browser.loadTrack(
+        {
+            url: 'https://s3.amazonaws.com/igv.broadinstitute.org/annotations/hg19/genes/gencode.v24lift37.annotation.sorted.gtf.gz',
+            indexURL: 'https://s3.amazonaws.com/igv.broadinstitute.org/annotations/hg19/genes/gencode.v24lift37.annotation.sorted.gtf.gz.tbi',
+            name: 'Gencode v24',
+            format: 'gtf',
+            visibilityWindow: 10000000
+        })">Gencode v24
         </div>
 
         <div onclick="igv.browser.loadTrack(
@@ -449,7 +460,6 @@
 
         div = $("#myDiv")[0];
         options = {
-            locus: '22:30663971-30667353',
             showKaryo: false,
             showNavigation: true,
             //genome: "hg19",
@@ -461,11 +471,11 @@
             flanking: 1000,
             apiKey: 'AIzaSyDUUAUFpQEN4mumeMNIRWXSiTh5cPtUAD0',
             palette: ["#00A0B0", "#6A4A3C", "#CC333F", "#EB6841"],
-        //    bam: {
-        //        coverageThreshold: 0.2,
-        //        coverageQualityWeight: true,
-        //        pairsSupported: true
-        //    },
+            //    bam: {
+            //        coverageThreshold: 0.2,
+            //        coverageQualityWeight: true,
+            //        pairsSupported: true
+            //    },
 
 
             tracks: [

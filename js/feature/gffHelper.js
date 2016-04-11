@@ -54,16 +54,21 @@ var igv = (function (igv) {
 
     igv.GFFHelper.prototype.combineFeatures = function (features) {
 
-        return combineGTF(features);
+        if (transcriptTypes === undefined) setTypes();
 
+        if ("gff3" === this.format) {
+            return combineFeaturesGFF.call(this, features);
+        }
+        else {
+            return combineFeaturesGTF.call(this, features);
+        }
     }
 
-    function combineGTF(features) {
-
-        if (transcriptTypes === undefined) setTypes();
+    function combineFeaturesGTF(features) {
 
         var transcripts = {},
             combinedFeatures = [];
+
 
         // 1. Build dictionary of transcripts  -- transcript records are not required in gtf / gff v2
         features.forEach(function (f) {
@@ -86,7 +91,7 @@ var igv = (function (igv) {
         features.forEach(function (f) {
             var id, transcript;
             if (exonTypes.has(f.type)) {
-                id = f.id; //getAttribute(f.attributeString, "transcript_id", /\s+/);
+                id = f.id;
                 if (id) {
                     transcript = transcripts[id];
                     if (transcript === undefined) {
@@ -95,9 +100,7 @@ var igv = (function (igv) {
                         combinedFeatures.push(transcript);
                     }
                     transcript.addExon(f);
-                }
-                else {
-                    combinedFeatures.push(f);  // error?
+
                 }
             }
         });
@@ -107,7 +110,7 @@ var igv = (function (igv) {
         features.forEach(function (f) {
             var id, transcript;
             if (cdsTypes.has(f.type) || utrTypes.has(f.type)) {
-                id = f.id; //getAttribute(f.attributeString, "transcript_id", /\s+/);
+                id = f.id;
                 if (id) {
                     transcript = transcripts[id];
                     if (transcript === undefined) {
@@ -122,7 +125,100 @@ var igv = (function (igv) {
                     else {
                         transcript.addCDS(f);
                     }
+                }
+            }
+        });
 
+        // Finish transcripts
+        combinedFeatures.forEach(function (f) {
+            if (f instanceof GFFTranscript) f.finish();
+        })
+
+        combinedFeatures.sort(function (a, b) {
+            return a.start - b.start;
+        })
+
+        return combinedFeatures;
+
+    }
+
+    function combineFeaturesGFF(features) {
+
+
+        var transcripts = {},
+            combinedFeatures = [],
+            parents,
+            isoforms;
+
+        function getParents(f) {
+            if (f.parent && f.parent.trim() !== "") {
+                return f.parent.trim().split(",");
+            }
+            else {
+                return null;
+            }
+        }
+
+        // 1. Build dictionary of transcripts  -- transcript records are not required in gtf / gff v2
+        features.forEach(function (f) {
+            var transcriptId, gffTranscript;
+            if (transcriptTypes.has(f.type)) {
+                transcriptId = f.id; // getAttribute(f.attributeString, "transcript_id", /\s+/);
+                if (transcriptId) {
+                    gffTranscript = new GFFTranscript(f);
+                    transcripts[transcriptId] = gffTranscript;
+                    combinedFeatures.push(gffTranscript);
+                }
+                else {
+                    combinedFeatures.push(f);
+                }
+            }
+        });
+
+
+        // Add exons
+        features.forEach(function (f) {
+            var id, transcript;
+            if (exonTypes.has(f.type)) {
+                parents = getParents(f);
+                if (parents) {
+                    parents.forEach(function (id) {
+                        transcript = transcripts[id];
+                        if (transcript === undefined) {
+                            transcript = new GFFTranscript(f);
+                            transcripts[id] = transcript;
+                            combinedFeatures.push(transcript);
+                        }
+                        transcript.addExon(f);
+                    });
+                } else {
+                    combinedFeatures.push(f);   // parent-less exon
+                }
+            }
+        });
+
+        // Apply CDS and UTR
+        features.forEach(function (f) {
+            var id, transcript;
+            if (cdsTypes.has(f.type) || utrTypes.has(f.type)) {
+                parents = getParents(f);
+                if (parents) {
+                    parents.forEach(function (id) {
+                        transcript = transcripts[id];
+                        if (transcript === undefined) {
+                            transcript = new GFFTranscript(f);
+                            transcripts[id] = transcript;
+                            combinedFeatures.push(transcript);
+                        }
+
+                        if (utrTypes.has(f.type)) {
+                            transcript.addUTR(f);
+                        }
+                        else {
+                            transcript.addCDS(f);
+                        }
+
+                    });
                 }
                 else {
                     combinedFeatures.push(f);
@@ -141,28 +237,6 @@ var igv = (function (igv) {
 
         return combinedFeatures;
 
-    }
-
-    function parseAttributeString(attributeString) {
-
-        var kvs = attributeString.split(';'),
-            dict = {};
-        kvs.forEach(function (kv) {
-            var t = kv.split('=', 2);
-            if (t.length === 2)
-                dict[t[0]] = t[1];
-        });
-        return dict;
-    }
-
-    function getAttribute(attributeString, attribute, delim) {
-        var kvs = attributeString.split(';'), i;
-        for (i = 0; i < kvs.length; i++) {
-            var t = kvs[i].trim().split(delim, 2);
-            if (t.length === 2 && attribute === t[0])
-                return t[1];
-        }
-        return null;
     }
 
     GFFTranscript = function (feature) {
