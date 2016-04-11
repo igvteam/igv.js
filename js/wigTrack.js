@@ -96,7 +96,7 @@ var igv = (function (igv) {
 
         // tick
         igv.graphics.strokeLine(ctx, x1, y1, x2, y2, font);
-        igv.graphics.fillText(ctx, this.dataRange.max.toFixed(2), x1 + 4, y1 + 12, font);
+        igv.graphics.fillText(ctx, prettyPrint(this.dataRange.max), x1 + 4, y1 + 12, font);
 
         //shim = 0.25 * 0.125;
         y1 = y2 = (1.0 - shim) * pixelHeight;
@@ -105,9 +105,23 @@ var igv = (function (igv) {
 
         // tick
         igv.graphics.strokeLine(ctx, x1, y1, x2, y2, font);
-        igv.graphics.fillText(ctx, this.dataRange.min.toFixed(2), x1 + 4, y1 - 4, font);
+        igv.graphics.fillText(ctx, prettyPrint(this.dataRange.min), x1 + 4, y1 - 4, font);
 
         igv.graphics.strokeLine(ctx, a.x, a.y, b.x, b.y, font);
+
+        function prettyPrint(number) {
+            // if number >= 100, show whole number
+            // if >= 1 show 1 significant digits
+            // if <  1 show 2 significant digits
+
+            if (Math.abs(number) >= 100) {
+                return number.toFixed();
+            } else if (Math.abs(number) >= 1) {
+                return number.toFixed(1);
+            } else {
+                return number.toFixed(2);
+            }
+        }
 
     };
 
