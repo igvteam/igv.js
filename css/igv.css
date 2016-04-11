@@ -1069,20 +1069,19 @@ div.ui-dialog fieldset {
 .igv-left-hand-gutter {
     position: absolute;
     left: 0;
-    /*width: 100px;*/
     width: 50px;
     height: 100%;
+}
+
+.igv-clickable {
+    cursor: pointer;
+    background-color: white;
 }
 
 .igv-gutter-shim {
     /*left:  100px;*/
     left:  50px;
 }
-
-/*.igv-no-gutter-shim {*/
-/*position: absolute;*/
-/*left: 0;*/
-/*}*/
 
 .igv-windowsizepanel-content-div {
 
