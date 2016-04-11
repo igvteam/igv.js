@@ -52,23 +52,18 @@ var igv = (function (igv) {
         }
         this.format = config.format;
 
-        this.parser = getParser(this.format, config.decode);
+        this.parser = getParser.call(this, this.format, config.decode);
     };
 
 
     function getParser(format, decode) {
-        var parser;
         switch (format) {
             case "vcf":
                 return new igv.VcfParser();
             case "seg" :
                 return new igv.SegParser();
-            //case "gff" :
-            //case "gff3" :
-            //case "gtf" :
-            //    return new igv.GFFParser(format);
             default:
-                return new igv.FeatureParser(format, decode);
+                return new igv.FeatureParser(format, decode, this.config);
         }
 
     }

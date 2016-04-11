@@ -37,14 +37,17 @@ var igv = (function (igv) {
 
     var maxFeatureCount = Number.MAX_VALUE;    // For future use,  controls downsampling
 
+    var gffNameFields = ["Name", "gene_name", "gene", "gene_id", "alias", "locus"];
+
     /**
      * A factory function.  Return a parser for the given file format.
      */
-    igv.FeatureParser = function (format, decode) {
+    igv.FeatureParser = function (format, decode, config) {
 
         var customFormat;
 
         this.format = format;
+        this.nameField = config ? config.nameField : undefined;
         this.skipRows = 0;   // The number of fixed header rows to skip.  Override for specific types as needed
 
         if (decode) {
@@ -125,7 +128,7 @@ var igv = (function (igv) {
                 }
                 else if (line.startsWith("##gff-version 3")) {
                     this.format = "gff3";
-                    if(!header) header = {};
+                    if (!header) header = {};
                     header["format"] = "gff3";
                 }
             }
@@ -593,7 +596,8 @@ var igv = (function (igv) {
     function decodeGFF(tokens, ignore) {
 
         var tokenCount, chr, start, end, strand, type, score, phase, attributeString, id, parent, color, name,
-            transcript_id, format = this.format;
+            transcript_id, i,
+            format = this.format;
 
         tokenCount = tokens.length;
         if (tokenCount < 9) {
@@ -611,17 +615,39 @@ var igv = (function (igv) {
 
         // Find ID and Parent, or transcript_id
         var delim = ('gff3' === format) ? '=' : /\s+/;
+        var attributes = {};
         attributeString.split(';').forEach(function (kv) {
-            var t = kv.trim().split(delim, 2);
+            var t = kv.trim().split(delim, 2), key, value;
             if (t.length == 2) {
+                key = t[0].trim();
+                value = t[1].trim();
+                //Strip off quotes, if any
+                if (value.startsWith('"') && value.endsWith('"')) {
+                    value = value.substr(1, value.length - 2);
+                }
                 if ("ID" === t[0]) id = t[1];
                 else if ("Parent" === t[0]) parent = t[1];
-                else if ("name" === t[0].toLowerCase()) name = t[1];
                 else if ("color" === t[0].toLowerCase()) color = igv.createColorString(t[1]);
-                else if ("transcript_id" === t[0]) id = t[1];
+                else if ("transcript_id" === t[0]) id = t[1];     // gtf format
+                attributes[key] = value;
             }
-
         });
+
+        // Find name (label) property
+        if (this.nameField) {
+            name = attributes[this.nameField];
+        }
+        else {
+            for (i = 0; i < gffNameFields.length; i++) {
+                if (attributes.hasOwnProperty(gffNameFields[i])) {
+                    this.nameField = gffNameFields[i];
+                    name = attributes[this.nameField];
+
+
+                    break;
+                }
+            }
+        }
 
 
         return {
@@ -638,11 +664,19 @@ var igv = (function (igv) {
             attributeString: attributeString,
             popupData: function () {
                 var kvs = this.attributeString.split(';'),
-                    pd = [];
+                    pd = [],
+                    key, value;
                 kvs.forEach(function (kv) {
                     var t = kv.trim().split(delim, 2);
-                    if (t.length === 2)
-                        pd.push({name: t[0], value: t[1]});
+                    if (t.length === 2 && t[1] !== undefined) {
+                        key = t[0].trim();
+                        value = t[1].trim();
+                        //Strip off quotes, if any
+                        if (value.startsWith('"') && value.endsWith('"')) {
+                            value = value.substr(1, value.length - 2);
+                        }
+                        pd.push({name: key, value: value});
+                    }
                 });
                 return pd;
             }
