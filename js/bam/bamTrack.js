@@ -251,7 +251,7 @@ var igv = (function (igv) {
         var self = this,
             str,
             menuItems = [],
-            lut = {"none": "Color: None", "strand": "Color: Read Strand"},
+            lut = {"none": "Color by: Track color", "strand": "Color by: Read Strand"},
             checkMark = '<i class="fa fa-check fa-check-shim"></i>',
             checkMarkNone = '<i class="fa fa-check fa-check-shim fa-check-hidden"></i>',
             trackMenuItem = '<div class=\"igv-track-menu-item\">',
