@@ -178,18 +178,18 @@ var igv = (function (igv) {
             $(this.viewportDiv).append(this.scrollbar.outerScrollDiv);
         }
 
-        if (this.track instanceof igv.WIGTrack) {
-
-            $dataRangeLabel = $('<div class="igv-data-range-track-label">');
-
-            $dataRangeLabel.click(function (e) {
-                igv.dataRangeDialog.configureWithTrackView(self);
-                igv.dataRangeDialog.show();
-            });
-
-            $(this.viewportDiv).append($dataRangeLabel[0]);
-
-        }
+        //if (this.track instanceof igv.WIGTrack) {
+        //
+        //    $dataRangeLabel = $('<div class="igv-data-range-track-label">');
+        //
+        //    $dataRangeLabel.click(function (e) {
+        //        igv.dataRangeDialog.configureWithTrackView(self);
+        //        igv.dataRangeDialog.show();
+        //    });
+        //
+        //    $(this.viewportDiv).append($dataRangeLabel[0]);
+        //
+        //}
 
         if (this.track.name) {
 
@@ -216,12 +216,6 @@ var igv = (function (igv) {
 
 
         if (this.track.paintAxis) {
-
-            // add shims to ideogram and all tracks
-            //$('.igv-ideogram-content-div').addClass('igv-ideogram-gutter-shim');
-            //$('.igv-viewport-div').addClass('igv-gutter-shim');
-
-
 
             $leftHandGutter = $('<div class="igv-left-hand-gutter">');
             $track.append($leftHandGutter[ 0 ]);

@@ -62,6 +62,42 @@ var igv = (function (igv) {
 
     };
 
+    igv.WIGTrack.prototype.paintAxis = function (ctx, pixelWidth, pixelHeight) {
+
+        var x1,
+            x2,
+            y1,
+            y2,
+            reference,
+            shim,
+            xshim,
+            yshim,
+            font = {
+            'font': 'normal 10px Arial',
+            'textAlign': 'right',
+            'strokeStyle': "black"
+        };
+
+        igv.graphics.fillRect(ctx, 0, 0, pixelWidth, pixelHeight, {'fillStyle': "rgb(255, 255, 255)"});
+
+        reference = 0.95 * pixelWidth;
+        x1 = reference - 4;
+        x2 = reference;
+
+        shim = 0.5 * 0.125;
+        y1 = y2 = shim * pixelHeight;
+        // tick
+        igv.graphics.strokeLine(ctx, x1, y1, x2, y2, font);
+        igv.graphics.fillText(ctx, this.trackView.track.dataRange.max.toFixed(2), x1 - 3, y1 + 3, font);
+
+        shim = 0.25 * 0.125;
+        y1 = y2 = (1.0 - shim) * pixelHeight;
+        // tick
+        igv.graphics.strokeLine(ctx, x1, y1, x2, y2, font);
+        igv.graphics.fillText(ctx, this.trackView.track.dataRange.min.toFixed(2), x1 - 3, y1 + 3, font);
+
+    };
+
     igv.WIGTrack.prototype.getFeatures = function (chr, bpStart, bpEnd) {
 
         var self = this;

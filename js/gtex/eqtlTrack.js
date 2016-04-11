@@ -88,7 +88,6 @@ var igv = (function (igv) {
             igv.graphics.fillText(ctx, p, x1 - 1, y1 + 2, font); // Offset numbers down by 2 pixels; TODO: error
         }
 
-
         font['textAlign'] = 'center';
 
         igv.graphics.fillText(ctx, "-log10(pvalue)", pixelWidth/4, pixelHeight/2, font, {rotate: {angle: -90}});
@@ -186,7 +185,6 @@ var igv = (function (igv) {
         }
 
     }
-
 
     function selectedFeature(feature, source) {
         console.log(feature + " " + source);
@@ -303,7 +301,6 @@ var igv = (function (igv) {
     brewer.push("rgb(188, 128, 189");
     brewer.push("rgb(204, 235, 197");
     brewer.push("rgb(255, 237, 111");
-
 
     return igv;
 
