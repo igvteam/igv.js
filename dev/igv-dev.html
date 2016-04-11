@@ -89,7 +89,6 @@
 
     <script type="text/javascript" src="../js/feature/featureCache.js"></script>
     <script type="text/javascript" src="../js/feature/gffHelper.js"></script>
-    <script type="text/javascript" src="../js/feature/gffParser.js"></script>
     <script type="text/javascript" src="../js/feature/featureSource.js"></script>
     <script type="text/javascript" src="../js/feature/featureParsers.js"></script>
     <script type="text/javascript" src="../js/feature/tribble.js"></script>
@@ -381,6 +380,7 @@
             url: '../test/data/gff/wustl.gtf',
             name: 'WUSTL gtf',
             format: 'gtf',
+            nameField: 'gene_id',
             indexed: false
         })">wustl gtf
         </div>
