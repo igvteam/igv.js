@@ -227,7 +227,8 @@ var igv = (function (igv) {
             this.controlCanvas = $canvas[ 0 ];
             this.controlCtx = this.controlCanvas.getContext("2d");
 
-            if (this.track instanceof igv.WIGTrack) {
+
+            if (this.track.dataRange) {
 
                 $leftHandGutter.click(function (e) {
                     igv.dataRangeDialog.configureWithTrackView(self);
