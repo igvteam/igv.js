@@ -119,7 +119,7 @@ var igv = (function (igv) {
 
             function parseData(data) {
                 self.header = parser.parseHeader(data);
-                if (self.header instanceof String && self.header.startsWith("##gff-version 30")) {
+                if (self.header instanceof String && self.header.startsWith("##gff-version 3")) {
                     self.format = 'gff3';
 
                 }

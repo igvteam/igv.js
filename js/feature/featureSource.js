@@ -81,6 +81,11 @@ var igv = (function (igv) {
                             addFeaturesToDB(features);
                         }
                     }
+
+                    if(header && header.format) {
+                        self.config.format = header.format;
+                    }
+
                     fulfill(header);
                 }).catch(reject);
             }
@@ -146,7 +151,7 @@ var igv = (function (igv) {
 
                             // TODO -- COMBINE GFF FEATURES HERE
                             // if(self.isGFF) featureList = combineFeatures(featureList);
-                            if("gtf" === self.config.format) {
+                            if("gtf" === self.config.format || "gff3" === self.config.format || "gff" === self.config.format) {
                                 featureList = (new igv.GFFHelper(self.config.format)).combineFeatures(featureList);
                             }
 

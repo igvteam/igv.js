@@ -125,6 +125,8 @@ var igv = (function (igv) {
                 }
                 else if (line.startsWith("##gff-version 3")) {
                     this.format = "gff3";
+                    if(!header) header = {};
+                    header["format"] = "gff3";
                 }
             }
             else {
