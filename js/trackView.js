@@ -69,13 +69,8 @@ var igv = (function (igv) {
             addTrackHandlers(this);
         }
 
-        // add shims to ideogram and all tracks if at least one track uses left hand gutter
-        //if (this.track.paintAxis || true === browser.useLeftHandGutter) {
-
-            //browser.useLeftHandGutter = true;
-            $('.igv-ideogram-content-div').addClass('igv-ideogram-gutter-shim');
-            $('.igv-viewport-div').addClass('igv-gutter-shim');
-        //}
+        $('.igv-ideogram-content-div').addClass('igv-ideogram-gutter-shim');
+        $('.igv-viewport-div').addClass('igv-gutter-shim');
 
         function makeTrackDraggable(track) {
 
@@ -209,11 +204,11 @@ var igv = (function (igv) {
 
     igv.TrackView.prototype.appendLeftHandGutterDivToTrackDiv = function ($track) {
 
-        var $leftHandGutter,
+        var self = this,
+            $leftHandGutter,
             $canvas,
             w,
             h;
-
 
         if (this.track.paintAxis) {
 
@@ -231,6 +226,16 @@ var igv = (function (igv) {
 
             this.controlCanvas = $canvas[ 0 ];
             this.controlCtx = this.controlCanvas.getContext("2d");
+
+            if (this.track instanceof igv.WIGTrack) {
+
+                $leftHandGutter.click(function (e) {
+                    igv.dataRangeDialog.configureWithTrackView(self);
+                    igv.dataRangeDialog.show();
+                });
+
+                $leftHandGutter.addClass('igv-clickable');
+            }
 
             this.leftHandGutter = $leftHandGutter[ 0 ];
 
