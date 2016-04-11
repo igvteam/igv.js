@@ -251,7 +251,7 @@ var igv = (function (igv) {
         var self = this,
             str,
             menuItems = [],
-            lut = {"none": "Color by: Track color", "strand": "Color by: Read Strand"},
+            lut = {"none": "Color by: track color", "strand": "Color by: read strand"},
             checkMark = '<i class="fa fa-check fa-check-shim"></i>',
             checkMarkNone = '<i class="fa fa-check fa-check-shim fa-check-hidden"></i>',
             trackMenuItem = '<div class=\"igv-track-menu-item\">',
@@ -282,7 +282,7 @@ var igv = (function (igv) {
         html.push('<div class="igv-track-menu-item igv-track-menu-border-top">');
         html.push(true === self.viewAsPairs ? '<i class="fa fa-check fa-check-shim">' : '<i class="fa fa-check fa-check-shim fa-check-hidden">');
         html.push('</i>');
-        html.push('View As Pairs');
+        html.push('View as pairs');
         html.push('</div>');
 
         menuItems.push(
