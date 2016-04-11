@@ -78,6 +78,10 @@ var igv = (function (igv) {
             'strokeStyle': "black"
         };
 
+        if (undefined === this.dataRange) {
+            return;
+        }
+
         igv.graphics.fillRect(ctx, 0, 0, pixelWidth, pixelHeight, {'fillStyle': "rgb(255, 255, 255)"});
 
         reference = 0.95 * pixelWidth;
@@ -89,13 +93,13 @@ var igv = (function (igv) {
         y1 = y2 = shim * pixelHeight;
         // tick
         igv.graphics.strokeLine(ctx, x1, y1, x2, y2, font);
-        igv.graphics.fillText(ctx, this.trackView.track.dataRange.max.toFixed(2), x1 + 16, y1 + 14, font);
+        igv.graphics.fillText(ctx, this.dataRange.max.toFixed(2), x1 + 16, y1 + 14, font);
 
         //shim = 0.25 * 0.125;
         y1 = y2 = (1.0 - shim) * pixelHeight;
         // tick
         igv.graphics.strokeLine(ctx, x1, y1, x2, y2, font);
-        igv.graphics.fillText(ctx, this.trackView.track.dataRange.min.toFixed(2), x1 + 16, y1 - 4, font);
+        igv.graphics.fillText(ctx, this.dataRange.min.toFixed(2), x1 + 16, y1 - 4, font);
 
     };
 
