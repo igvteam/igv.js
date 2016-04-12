@@ -147,31 +147,28 @@ var igv = (function (igv) {
             self.maxInput = $('<input class="igv-data-range-input" type="text" value="250">');
             column.append( self.maxInput[ 0 ] );
             row.append( column[ 0 ] );
-
             rowContainer.append( row[ 0 ]);
 
 
 
             // logaritmic
-            row = $('<div class="igv-grid-dialog">');
-
-            column = $('<div class="igv-col igv-col-3-8">');
-            columnFiller = $('<div class="igv-data-range-input-label">');
-            columnFiller.text("Log scale");
-            column.append( columnFiller[ 0 ] );
-            row.append( column[ 0 ] );
-
-            column = $('<div class="igv-col igv-col-3-8">');
-            self.logInput = $('<input class="igv-data-range-input" type="checkbox">');
-
-            // Disable until implemented in track
-            self.logInput[0].disabled = true;
-
-            column.append( self.logInput[ 0 ] );
-            row.append( column[ 0 ] );
-
-
-            rowContainer.append( row[ 0 ]);
+            //row = $('<div class="igv-grid-dialog">');
+            //
+            //column = $('<div class="igv-col igv-col-3-8">');
+            //columnFiller = $('<div class="igv-data-range-input-label">');
+            //columnFiller.text("Log scale");
+            //column.append( columnFiller[ 0 ] );
+            //row.append( column[ 0 ] );
+            //
+            //column = $('<div class="igv-col igv-col-3-8">');
+            //self.logInput = $('<input class="igv-data-range-input" type="checkbox">');
+            //
+            //// Disable until implemented in track
+            //self.logInput[0].disabled = true;
+            //
+            //column.append( self.logInput[ 0 ] );
+            //row.append( column[ 0 ] );
+            //rowContainer.append( row[ 0 ]);
 
             return rowContainer;
 
@@ -198,7 +195,7 @@ var igv = (function (igv) {
         this.minInput.val(min);
         this.maxInput.val(max);
 
-        this.logInput.prop('checked', false);
+        //this.logInput.prop('checked', false);
 
         this.ok.unbind();
         this.ok.click(function() {
