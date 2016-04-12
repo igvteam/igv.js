@@ -433,6 +433,8 @@ var igv = (function (igv) {
                             pixelHeight: buffer.height
                         });
 
+                        // Paint the axis if defined.  NOTE: its important that this is called after "draw" as
+                        // autoscale for numeric tracks is called during the draw function
                         if (self.track.paintAxis && self.controlCanvas.width > 0 && self.controlCanvas.height > 0) {
 
                             var buffer2 = document.createElement('canvas');
