@@ -235,6 +235,12 @@ var igv = (function (igv) {
         this.alignmentTrack.draw(options);
     };
 
+    igv.BAMTrack.prototype.paintAxis = function (ctx, pixelWidth, pixelHeight) {
+
+        this.coverageTrack.paintAxis(ctx, pixelWidth, this.coverageTrackHeight);
+
+    }
+
     igv.BAMTrack.prototype.popupData = function (genomicLocation, xOffset, yOffset) {
 
         if (yOffset >= this.coverageTrack.top && yOffset < this.coverageTrack.height) {
@@ -352,6 +358,9 @@ var igv = (function (igv) {
         this.top = config.coverageTrackTop || 0;
         this.height = config.coverageTrackHeight || 50;
         this.color = config.color || config.defaultColor || "rgb(185, 185, 185)";
+        this.dataRange = {min: 0};   // Leav max undefined
+
+        this.paintAxis = igv.paintAxis;
     }
 
     CoverageTrack.prototype.computePixelHeight = function (alignmentContainer) {
@@ -384,6 +393,7 @@ var igv = (function (igv) {
 
         if (coverageMap.refSeq) sequence = coverageMap.refSeq.toUpperCase();
 
+        this.dataRange.max = coverageMap.maximum;
 
         // paint backdrop color for all coverage buckets
         w = Math.max(1, Math.ceil(1.0 / bpPerPixel));
@@ -396,7 +406,7 @@ var igv = (function (igv) {
             item = coverageMap.coverage[i];
             if (!item) continue;
 
-            h = Math.round((item.total / coverageMap.maximum) * this.height);
+            h = Math.round((item.total / this.dataRange.max) * this.height);
             y = this.height - h;
             x = Math.floor((bp - bpStart) / bpPerPixel);
 
@@ -415,7 +425,7 @@ var igv = (function (igv) {
                 item = coverageMap.coverage[i];
                 if (!item) continue;
 
-                h = (item.total / coverageMap.maximum) * this.height;
+                h = (item.total / this.dataRange.max) * this.height;
                 y = this.height - h;
                 x = Math.floor((bp - bpStart) / bpPerPixel);
 
@@ -435,7 +445,7 @@ var igv = (function (igv) {
 
 
                         // non-logoritmic
-                        hh = (count / coverageMap.maximum) * self.height;
+                        hh = (count / self.dataRange.max) * self.height;
 
                         y = (self.height - hh) - accumulatedHeight;
                         accumulatedHeight += hh;
@@ -448,6 +458,7 @@ var igv = (function (igv) {
         }
 
     }
+
 
     CoverageTrack.prototype.popupData = function (genomicLocation, xOffset, yOffset) {
 
