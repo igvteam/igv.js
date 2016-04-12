@@ -51,14 +51,16 @@ var igv = (function (igv) {
 
         this.height = 100;
 
-        this.minHeight = config.minHeight || Math.min( 25, this.height);
+        this.minHeight = config.minHeight || Math.min(25, this.height);
         this.maxHeight = config.maxHeight || Math.max(500, this.height);
 
         this.order = config.order;
 
         // Min and max values.  No defaults for these, if they aren't set track will autoscale.
-        this.min = config.min;
-        this.max = config.max;
+        this.dataRange = {
+            min: config.min,
+            max: config.max
+        };
 
     };
 
@@ -73,12 +75,12 @@ var igv = (function (igv) {
             reference,
             shim,
             font = {
-            'font': 'normal 10px Arial',
-            'textAlign': 'right',
-            'strokeStyle': "black"
-        };
+                'font': 'normal 10px Arial',
+                'textAlign': 'right',
+                'strokeStyle': "black"
+            };
 
-        if (undefined === this.dataRange) {
+        if (undefined === this.dataRange || undefined === this.dataRange.max || undefined === this.dataRange.min) {
             return;
         }
 
@@ -92,7 +94,7 @@ var igv = (function (igv) {
         shim = .01;
         y1 = y2 = shim * pixelHeight;
 
-        a = { x: x2, y: y1 };
+        a = {x: x2, y: y1};
 
         // tick
         igv.graphics.strokeLine(ctx, x1, y1, x2, y2, font);
@@ -101,7 +103,7 @@ var igv = (function (igv) {
         //shim = 0.25 * 0.125;
         y1 = y2 = (1.0 - shim) * pixelHeight;
 
-        b = { x: x2, y: y1 };
+        b = {x: x2, y: y1};
 
         // tick
         igv.graphics.strokeLine(ctx, x1, y1, x2, y2, font);
@@ -163,27 +165,27 @@ var igv = (function (igv) {
 
 
         if (features && features.length > 0) {
-            if(track.max === undefined)  {
+            if (track.dataRange.max === undefined) {
                 var s = autoscale(features);
                 featureValueMinimum = s.min;
                 featureValueMaximum = s.max;
             }
             else {
-                featureValueMinimum = track.min === undefined ? 0 : track.min;
-                featureValueMaximum = track.max;
+                featureValueMinimum = track.dataRange.min === undefined ? 0 : track.dataRange.min;
+                featureValueMaximum = track.dataRange.max;
             }
+            track.dataRange.min = featureValueMinimum;  // Record for disply, menu, etc
+            track.dataRange.max = featureValueMaximum;
 
             featureValueRange = featureValueMaximum - featureValueMinimum;
 
-            track.dataRange = {min: featureValueMinimum, max: featureValueMaximum};  // Record for disply, menu, etc
-
-            $dataRangeTrackLabel = $(this.trackView.trackDiv).find('.igv-data-range-track-label');
-
-            min = (Math.floor(track.dataRange.min) === track.dataRange.min) ? track.dataRange.min : track.dataRange.min.toFixed(2);
-            max = (Math.floor(track.dataRange.max) === track.dataRange.max) ? track.dataRange.max : track.dataRange.max.toFixed(2);
-            str = '[' + min + ' - ' + max + ']';
-
-            $dataRangeTrackLabel.text(str);
+            //$dataRangeTrackLabel = $(this.trackView.trackDiv).find('.igv-data-range-track-label');
+            //
+            //min = (Math.floor(track.dataRange.min) === track.dataRange.min) ? track.dataRange.min : track.dataRange.min.toFixed(2);
+            //max = (Math.floor(track.dataRange.max) === track.dataRange.max) ? track.dataRange.max : track.dataRange.max.toFixed(2);
+            //str = '[' + min + ' - ' + max + ']';
+            //
+            //$dataRangeTrackLabel.text(str);
 
             features.forEach(renderFeature);
         }
@@ -214,25 +216,25 @@ var igv = (function (igv) {
             if (signsDiffer(featureValueMinimum, featureValueMaximum)) {
 
                 if (feature.value < 0) {
-                    yUnitless = featureValueMaximum/featureValueRange;
-                    heightUnitLess = -feature.value/featureValueRange;
+                    yUnitless = featureValueMaximum / featureValueRange;
+                    heightUnitLess = -feature.value / featureValueRange;
                 } else {
-                    yUnitless = ((featureValueMaximum - feature.value)/featureValueRange);
-                    heightUnitLess = feature.value/featureValueRange;
+                    yUnitless = ((featureValueMaximum - feature.value) / featureValueRange);
+                    heightUnitLess = feature.value / featureValueRange;
                 }
 
             }
             else if (featureValueMinimum < 0) {
                 yUnitless = 0;
-                heightUnitLess = -feature.value/featureValueRange;
+                heightUnitLess = -feature.value / featureValueRange;
             }
             else {
-                yUnitless = 1.0 - feature.value/featureValueRange ;
-                heightUnitLess = feature.value/featureValueRange;
+                yUnitless = 1.0 - feature.value / featureValueRange;
+                heightUnitLess = feature.value / featureValueRange;
             }
 
             //canvas.fillRect(x, yUnitless * pixelHeight, width, heightUnitLess * pixelHeight, { fillStyle: igv.randomRGB(64, 255) });
-            igv.graphics.fillRect(ctx, x,  yUnitless * pixelHeight, width, heightUnitLess * pixelHeight, { fillStyle: track.color });
+            igv.graphics.fillRect(ctx, x, yUnitless * pixelHeight, width, heightUnitLess * pixelHeight, {fillStyle: track.color});
 
         }
 

@@ -209,8 +209,8 @@ var igv = (function (igv) {
                 igv.presentAlert("Must input numeric values");
             } else {
 
-                trackView.track.min = min;
-                trackView.track.max = max;
+                trackView.track.dataRange.min = min;
+                trackView.track.dataRange.max = max;
 
                 self.hide();
                 trackView.update();
