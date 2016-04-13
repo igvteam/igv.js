@@ -127,7 +127,7 @@ var igv = (function (igv) {
             featureSource,
             nm;
 
-        igv.inferTypes(config);
+        inferTypes(config);
 
         // Set defaults if specified
         if (this.trackDefaults && config.trackType) {
@@ -141,7 +141,7 @@ var igv = (function (igv) {
             }
         }
 
-        switch (config.featureType /*'birna'*/) {
+        switch (config.type) {
             case "gwas":
                 newTrack = new igv.GWASTrack(config);
                 break;
@@ -154,7 +154,8 @@ var igv = (function (igv) {
             case "alignment":
                 newTrack = new igv.BAMTrack(config, featureSource);
                 break;
-            case "data":
+            case "data":  // deprecated
+            case "wig":
                 newTrack = new igv.WIGTrack(config);
                 break;
             case "sequence":
@@ -172,7 +173,7 @@ var igv = (function (igv) {
             default:
 
                 //alert("Unknown file type: " + config.url);
-                igv.presentAlert("Unknown file type: " + (config.featureType || ''));
+                igv.presentAlert("Unknown file type: " + (config.type || ''));
 
                 return null;
         }
@@ -702,7 +703,7 @@ var igv = (function (igv) {
                         chr = r[searchConfig.chromosomeField];
                         start = r[searchConfig.startField] - searchConfig.coords;
                         end = r[searchConfig.endField];
-                        type = r["featureType"];
+                        type = r["featureType"] || r["type"];
                         handleSearchResult(feature, chr, start, end, type);
                     }
                     else {
@@ -736,7 +737,7 @@ var igv = (function (igv) {
                     locus[config.chromosomeField],
                     locus[config.startField] - config.coords,
                     locus[config.endField],
-                    locus["featureType"]);
+                    (locus["featureType"] || locus["type"]));
 
             });
 
@@ -784,7 +785,7 @@ var igv = (function (igv) {
                     chromosome: igv.browser.genome.getChromosomeName(locusTokens[0].trim()),
                     start: parseInt(rangeTokens[0].replace(/,/g, '')),
                     end: parseInt(rangeTokens[1].replace(/,/g, '')),
-                    featureType: ("gtex" === source ? "snp" : "gene")
+                    type: ("gtex" === source ? "snp" : "gene")
                 });
 
             }
@@ -941,6 +942,117 @@ var igv = (function (igv) {
         });
 
     }
+
+
+    /**
+     * Infer properties format and type
+     *
+     * @param config
+     */
+    function inferTypes(config) {
+
+        function translateDeprecatedTypes(config) {
+
+            if (config.featureType) {  // Translate deprecated "feature" type
+                config.type = config.type || config.featureType;
+                config.featureType = undefined;
+            }
+
+            if ("bed" === config.type) {
+                config.type = config.type || "annotation";
+                config.format = config.format || "bed";
+            }
+
+            if ("bam" === config.type) {
+                config.type = "alignment";
+                config.format = "bam"
+            }
+        }
+
+        function inferFileFormat(config) {
+
+            if(config.format) return;
+
+            var path = config.url || config.localFile.name,
+                fn = path.toLowerCase(),
+                idx,
+                ext;
+
+            //Strip parameters -- handle local files later
+            idx = fn.indexOf("?");
+            if (idx > 0) {
+                fn = fn.substr(0, idx);
+            }
+
+            //Strip aux extensions .gz, .tab, and .txt
+            if (fn.endsWith(".gz")) {
+                fn = fn.substr(0, fn.length - 3);
+            } else if (fn.endsWith(".txt") || fn.endsWith(".tab")) {
+                fn = fn.substr(0, fn.length - 4);
+            }
+
+
+            idx = fn.lastIndexOf(".");
+            ext = idx < 0 ? fn : fn.substr(idx);
+
+            switch (ext) {
+
+                case ".bw":
+                    config.format = "bigwig";
+                    break;
+                case ".bb":
+                    config.format = "bigbed";
+
+                default:
+                    config.format = ext.substr(1);   // Strip leading "."
+            }
+        }
+
+        function inferTrackType(config) {
+
+            if(config.format) return;
+
+            switch (config.format) {
+                case "bw":
+                case "bigwig":
+                case "wig":
+                case "bedgraph":
+                    config.type = "wig";
+                    break;
+                case "vcf":
+                    config.type = "variant";
+                    break;
+                case "seg":
+                    config.type = "seg";
+                    break;
+                case "bam":
+                    config.type = "alignment";
+                    break;
+                default:
+                    config.type = "annotation";
+
+            }
+        }
+
+
+        if(undefined === config.sourceType  && (config.url || config.localFile)) {
+            config.sourceType = "file";
+        }
+
+        if ("file" === config.sourceType) {
+            translateDeprecatedTypes(config);
+            if (undefined === config.format) {
+                inferFileFormat(config);
+            }
+        }
+
+        if (undefined === config.type) {
+            inferTrackType(config);
+        }
+
+
+    };
+
 
     return igv;
 })

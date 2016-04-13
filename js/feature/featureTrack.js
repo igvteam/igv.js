@@ -49,12 +49,12 @@ var igv = (function (igv) {
         // Set the render function.  This can optionally be passed in the config
         if (config.render) {
             this.render = config.render;
-        } else if ("variant" === config.featureType) {
+        } else if ("variant" === config.type) {
             this.render = renderVariant;
             this.homvarColor = "rgb(17,248,254)";
             this.hetvarColor = "rgb(34,12,253)";
         }
-        else if ("FusionJuncSpan" === config.featureType) {
+        else if ("FusionJuncSpan" === config.type) {
             this.render = renderFusionJuncSpan;
             this.height = config.height || 50;
             this.autoHeight = false;
@@ -388,7 +388,7 @@ var igv = (function (igv) {
 
         var geneColor;
 
-        if (igv.browser.selection && "genes" === this.config.featureType && feature.name !== undefined) {
+        if (igv.browser.selection && "genes" === this.config.type && feature.name !== undefined) {
             // TODO -- for gtex, figure out a better way to do this
             geneColor = igv.browser.selection.colorForGene(feature.name);
         }
