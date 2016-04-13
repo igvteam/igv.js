@@ -57,7 +57,7 @@ var igv = (function (igv) {
 
         track.height = config.height || ("bed" === config.type ? 100 : 50);
         track.autoHeight = config.autoHeight === undefined ? (config.height === undefined) : config.autoHeight;
-        track.minHeight = config.minHeight || Math.min( 25, track.height);
+        track.minHeight = config.minHeight || Math.min(25, track.height);
         track.maxHeight = config.maxHeight || Math.max(500, track.height);
 
         // Set maxRows -- protects against pathological feature and bam packing cases
@@ -256,7 +256,7 @@ var igv = (function (igv) {
 
     };
 
-    igv.paintAxis  = function (ctx, pixelWidth, pixelHeight) {
+    igv.paintAxis = function (ctx, pixelWidth, pixelHeight) {
 
         var x1,
             x2,
@@ -308,7 +308,9 @@ var igv = (function (igv) {
             // if >= 1 show 1 significant digits
             // if <  1 show 2 significant digits
 
-            if (Math.abs(number) >= 100) {
+            if (number === 0) {
+                return "0";
+            } else if (Math.abs(number) >= 10) {
                 return number.toFixed();
             } else if (Math.abs(number) >= 1) {
                 return number.toFixed(1);
