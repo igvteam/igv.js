@@ -36,6 +36,7 @@ var igv = (function (igv) {
     igv.FeatureFileReader = function (config) {
 
         this.config = config || {};
+
         if (config.localFile) {
             this.localFile = config.localFile;
             this.filename = config.localFile.name;
@@ -47,9 +48,6 @@ var igv = (function (igv) {
             this.headURL = config.headURL || this.filename;
         }
 
-        if (!config.format) {
-            igv.inferTypes(config);
-        }
         this.format = config.format;
 
         this.parser = getParser.call(this, this.format, config.decode);

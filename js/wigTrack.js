@@ -33,10 +33,6 @@ var igv = (function (igv) {
         this.config = config;
         this.url = config.url;
 
-        if (!config.format) {
-            igv.inferTypes(config);
-        }
-
         if ("bigwig" === config.format) {
             this.featureSource = new igv.BWSource(config);
         }
