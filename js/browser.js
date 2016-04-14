@@ -1010,7 +1010,7 @@ var igv = (function (igv) {
 
         function inferTrackType(config) {
 
-            if(config.format) return;
+            if(config.type) return;
 
             switch (config.format) {
                 case "bw":
