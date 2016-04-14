@@ -49,14 +49,15 @@ var igv = (function (igv) {
 
         }
 
-        track.id = config.id || track.name;
+        track.id = config.id || track.name;   // TODO -- remove this property, not used
+
         track.order = config.order;
         track.color = config.color || igv.constants.defaultColor;
 
-        track.removable = (config.removable === undefined ? true : config.removable);      // Defaults to true
+        track.removable = config.removable === undefined ? true : config.removable;      // Defaults to true
 
-        track.height = config.height || ("bed" === config.type ? 100 : 50);
-        track.autoHeight = config.autoHeight === undefined ? (config.height === undefined) : config.autoHeight;
+        track.height = config.height || ("annotation" === config.type ? 100 : 50);
+        track.autoHeight = config.autoHeight === undefined ? true : config.autoHeight;
         track.minHeight = config.minHeight || Math.min(25, track.height);
         track.maxHeight = config.maxHeight || Math.max(500, track.height);
 

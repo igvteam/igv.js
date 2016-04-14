@@ -130,8 +130,8 @@ var igv = (function (igv) {
         inferTypes(config);
 
         // Set defaults if specified
-        if (this.trackDefaults && config.trackType) {
-            settings = this.trackDefaults[config.trackType];
+        if (this.trackDefaults && config.type) {
+            settings = this.trackDefaults[config.type];
             if (settings) {
                 for (property in settings) {
                     if (settings.hasOwnProperty(property) && config[property] === undefined) {
