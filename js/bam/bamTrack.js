@@ -151,19 +151,7 @@ var igv = (function (igv) {
         menuItems.push(igv.colorPickerMenuItem(popover, this.trackView));
 
         ['none', 'strand', 'tag'].forEach(function (key, i) {
-
-            var markup = colorByMarkup(key, (key === self.alignmentTrack.colorBy), i);
-
-            menuItems.push({
-                object: $(markup),
-                click: function () {
-                    popover.hide();
-
-                    self.alignmentTrack.colorBy = key;
-                    self.trackView.update();
-                }
-            });
-
+            menuItems.push( colorByMarkup(key, (key === self.alignmentTrack.colorBy), i) );
         });
 
         html.push('<div class="igv-track-menu-item igv-track-menu-border-top">');
@@ -202,7 +190,8 @@ var igv = (function (igv) {
                 strand: 'read strand',
                 tag: 'tag value'
             },
-                parts = [];
+                parts = [],
+                item = {};
 
             parts.push((0 === index) ? '<div class=\"igv-track-menu-item igv-track-menu-border-top\">' : '<div class="igv-track-menu-item">');
 
@@ -222,8 +211,15 @@ var igv = (function (igv) {
 
             parts.push('</div>');
 
-            return parts.join('');
+            item.object = $(parts.join(''));
 
+            item.click = function() {
+                popover.hide();
+                self.alignmentTrack.colorBy = key;
+                self.trackView.update();
+            };
+
+            return item;
         }
     };
 
