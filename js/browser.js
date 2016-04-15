@@ -193,29 +193,6 @@ var igv = (function (igv) {
 
     };
 
-    igv.Browser.prototype.isDuplicateTrack = function (config) {
-
-        var attemptedDuplicateTrackAddition = false;
-
-        this.trackViews.forEach(function (tp) {
-
-            if (false === attemptedDuplicateTrackAddition) {
-
-                if (JSON.stringify(config) === JSON.stringify(tp.track.config)) {
-                    attemptedDuplicateTrackAddition = true;
-                }
-            }
-        });
-
-        if (true === attemptedDuplicateTrackAddition) {
-            //window.alert("Attempt to load duplicate track.");
-            igv.presentAlert("Attempt to load duplicate track.");
-            return true;
-        }
-
-        return false;
-
-    };
 
     /**
      * Add a new track.  Each track is associated with the following DOM elements
@@ -1034,13 +1011,13 @@ var igv = (function (igv) {
             }
         }
 
+        translateDeprecatedTypes(config);
 
         if(undefined === config.sourceType  && (config.url || config.localFile)) {
             config.sourceType = "file";
         }
 
         if ("file" === config.sourceType) {
-            translateDeprecatedTypes(config);
             if (undefined === config.format) {
                 inferFileFormat(config);
             }
