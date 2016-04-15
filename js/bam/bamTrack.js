@@ -208,7 +208,17 @@ var igv = (function (igv) {
 
             parts.push(showCheck ? '<i class="fa fa-check fa-check-shim"></i>' : '<i class="fa fa-check fa-check-shim fa-check-hidden"></i>');
 
-            parts.push('Color by: ' + lut[ key ]);
+            parts.push('<span>');
+            parts.push('Color by: ');
+            parts.push('</span>');
+
+            if (key === 'tag') {
+                parts.push('<span id="color-by-tag">');
+            } else {
+                parts.push('<span>');
+            }
+            parts.push( lut[ key ] );
+            parts.push('</span>');
 
             parts.push('</div>');
 
