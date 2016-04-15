@@ -145,30 +145,21 @@ var igv = (function (igv) {
     igv.BAMTrack.prototype.popupMenuItems = function (popover) {
 
         var self = this,
-            str,
             menuItems = [],
-            lut = {"none": "Color by: track color", "strand": "Color by: read strand"},
-            checkMark = '<i class="fa fa-check fa-check-shim"></i>',
-            checkMarkNone = '<i class="fa fa-check fa-check-shim fa-check-hidden"></i>',
-            trackMenuItem = '<div class=\"igv-track-menu-item\">',
-            trackMenuItemFirst = '<div class=\"igv-track-menu-item igv-track-menu-border-top\">',
             html = [];
 
         menuItems.push(igv.colorPickerMenuItem(popover, this.trackView));
 
-        ["none", "strand"].forEach(function (colorBy, index) {
+        ['none', 'strand', 'tag'].forEach(function (key, i) {
 
-            var chosen;
-
-            chosen = (0 === index) ? trackMenuItemFirst : trackMenuItem;
-            str = (colorBy === self.alignmentTrack.colorBy) ? chosen + checkMark + lut[colorBy] + '</div>' : chosen + checkMarkNone + lut[colorBy] + '</div>';
+            var markup = colorByMarkup(key, (key === self.alignmentTrack.colorBy), i);
 
             menuItems.push({
-                object: $(str),
+                object: $(markup),
                 click: function () {
                     popover.hide();
 
-                    self.alignmentTrack.colorBy = colorBy;
+                    self.alignmentTrack.colorBy = key;
                     self.trackView.update();
                 }
             });
@@ -181,30 +172,49 @@ var igv = (function (igv) {
         html.push('View as pairs');
         html.push('</div>');
 
-        menuItems.push(
-            {
-                object: $(html.join('')),
-                click: function () {
-                    var $fa = $(this).find('i');
+        menuItems.push({
+            object: $(html.join('')),
+            click: function () {
+                var $fa = $(this).find('i');
 
-                    popover.hide();
+                popover.hide();
 
-                    self.viewAsPairs = !self.viewAsPairs;
+                self.viewAsPairs = !self.viewAsPairs;
 
-                    if (true === self.viewAsPairs) {
-                        $fa.removeClass('fa-check-hidden');
-                    } else {
-                        $fa.addClass('fa-check-hidden');
-                    }
-
-                    self.featureSource.setViewAsPairs(self.viewAsPairs);
-                    self.trackView.update();
+                if (true === self.viewAsPairs) {
+                    $fa.removeClass('fa-check-hidden');
+                } else {
+                    $fa.addClass('fa-check-hidden');
                 }
+
+                self.featureSource.setViewAsPairs(self.viewAsPairs);
+                self.trackView.update();
             }
-        );
+        });
 
         return menuItems;
 
+        function colorByMarkup(key, showCheck, index) {
+
+            var lut =
+            {
+                none: 'track color',
+                strand: 'read strand',
+                tag: 'tag value'
+            },
+                parts = [];
+
+            parts.push((0 === index) ? '<div class=\"igv-track-menu-item igv-track-menu-border-top\">' : '<div class="igv-track-menu-item">');
+
+            parts.push(showCheck ? '<i class="fa fa-check fa-check-shim"></i>' : '<i class="fa fa-check fa-check-shim fa-check-hidden"></i>');
+
+            parts.push('Color by: ' + lut[ key ]);
+
+            parts.push('</div>');
+
+            return parts.join('');
+
+        }
     };
 
 
