@@ -756,16 +756,16 @@ var igv = (function (igv) {
 
         });
 
-        $(this.viewportDiv).mousewheel(function (event) {
-
-            var ratio = $(viewportDiv).height() / $(contentDiv).height();
-
-            if (ratio < 1) {
-                var dist = Math.round(ratio * event.deltaY * event.deltaFactor),
-                    newY = $(innerScrollDiv).position().top + dist;
-                moveScrollerTo(newY);
-            }
-        });
+        //$(this.viewportDiv).mousewheel(function (event) {
+        //
+        //    var ratio = $(viewportDiv).height() / $(contentDiv).height();
+        //
+        //    if (ratio < 1) {
+        //        var dist = Math.round(ratio * event.deltaY * event.deltaFactor),
+        //            newY = $(innerScrollDiv).position().top + dist;
+        //        moveScrollerTo(newY);
+        //    }
+        //});
 
         function mouseMove(event) {
             moveScrollerTo(event.pageY - offY);
