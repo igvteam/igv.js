@@ -26,87 +26,40 @@
 
 var igv = (function (igv) {
 
+    var alignmentRowYInset = 0;
+    var alignmentStartGap = 5;
+    var downsampleRowHeight = 5;
+
+
     igv.BAMTrack = function (config) {
 
         this.featureSource = new igv.BamSource(config);
 
         igv.configTrack(this, config);
 
-        this.coverageTrack = new CoverageTrack(config, this.featureSource);
+        this.coverageTrack = new CoverageTrack(config, this);
 
-        this.alignmentTrack = new AlignmentTrack(config, this.featureSource);
+        this.alignmentTrack = new AlignmentTrack(config, this);
 
         this.visibilityWindow = config.visibilityWindow || 30000;     // 30kb default
 
-        this.alignmentRowHeight = config.alignmentRowHeight || 14;
+        this.viewAsPairs = config.viewAsPairs;
 
-        this.coverageTrackHeight = config.coverageTrackHeight || 50;
-
-        this.defaultColor = config.defaultColor || "rgb(185, 185, 185)";
-        this.color = config.color || this.defaultColor;
-        this.negStrandColor = config.negStrandColor || "rgba(150, 150, 230, 0.75)";
-        this.posStrandColor = config.posStrandColor || "rgba(230, 150, 150, 0.75)";
-        this.firstInfPairColor = "rgba(150, 150, 230, 0.75)";
-        this.secondInPairColor = "rgba(230, 150, 150, 0.75)";
-        this.insertionColor = config.insertionColor || "rgb(138, 94, 161)";
-
-        this.deletionColor = config.deletionColor || "black";
-
-        this.skippedColor = config.skippedColor || "rgb(150, 170, 170)";
-
-        this.alignmentRowYInset = 0;
-        this.alignmentStartGap = 5;
-        this.downsampleRowHeight = 10;
-
-
-        this.alignmentShading = config.alignmentShading || "none";
+        this.color = config.color || "rgb(185, 185, 185)";
 
         // sort alignment rows
         this.sortOption = config.sortOption || {sort: "NUCLEOTIDE"};
+        this.sortDirection = true;
 
         // filter alignments
         this.filterOption = config.filterOption || {name: "mappingQuality", params: [30, undefined]};
 
-        this.sortDirection = true;
 
-        this.viewAsPairs = config.viewAsPairs;
     };
 
     igv.BAMTrack.prototype.getFeatures = function (chr, bpStart, bpEnd) {
         return this.featureSource.getAlignments(chr, bpStart, bpEnd);
     }
-
-    igv.BAMTrack.alignmentShadingOptions = {
-
-        none: function (bamTrack, alignment) {
-            return bamTrack.color;
-        },
-
-        strand: function (bamTrack, alignment) {
-            return alignment.strand ? bamTrack.posStrandColor : bamTrack.negStrandColor;
-        },
-
-        firstOfPairStrand: function (bamTrack, alignment) {
-
-            if (alignment.isPaired()) {
-
-                if (alignment.isFirstOfPair()) {
-                    return alignment.strand ? bamTrack.posStrandColor : bamTrack.negStrandColor;
-                }
-                else if (alignment.isSecondOfPair()) {
-                    return alignment.strand ? bamTrack.negStrandColor : bamTrack.posStrandColor;
-                }
-                else {
-                    console.log("ERROR. Paired alignments are either first or second.")
-                }
-
-            } else {
-                return bamTrack.color;
-            }
-
-        }
-
-    };
 
     igv.BAMTrack.filters = {
 
@@ -138,69 +91,6 @@ var igv = (function (igv) {
         }
     };
 
-    igv.BAMTrack.selectFilter = function (bamTrack, filterOption) {
-
-        var a,
-            b;
-
-        if ("mappingQuality" === filterOption.name) {
-            a = bamTrack.filterOption["params"][0];
-            b = bamTrack.filterOption["params"][1];
-            return igv.BAMTrack.filters[filterOption.name](a, b);
-        }
-
-        if ("strand" === filterOption.name) {
-            a = bamTrack.filterOption["params"][0];
-            return igv.BAMTrack.filters[filterOption.name](a);
-        }
-
-        if ("noop" === filterOption.name) {
-            return igv.BAMTrack.filters[filterOption.name]();
-        }
-
-        return undefined;
-    };
-
-    igv.BAMTrack.prototype.filterAlignments = function (filterOption) {
-
-        return new Promise(function (fulfill, reject) {
-
-            var pixelWidth,
-                bpWidth,
-                bpStart,
-                bpEnd,
-                filter;
-
-            filter = igv.BAMTrack.selectFilter(this, filterOption);
-
-            pixelWidth = 3 * this.trackView.canvas.width;
-            bpWidth = Math.round(igv.browser.referenceFrame.toBP(pixelWidth));
-            bpStart = Math.max(0, Math.round(igv.browser.referenceFrame.start - bpWidth / 3));
-            bpEnd = bpStart + bpWidth;
-
-            this.featureSource.getFeatures(igv.browser.referenceFrame.chr, bpStart, bpEnd).then(function (genomicInterval) {
-
-                genomicInterval.packedAlignmentRows.forEach(function (alignmentRow) {
-                    alignmentRow.alignments.forEach(function (alignment) {
-                        alignment.hidden = filter(alignment);
-                    });
-                });
-
-            });
-        });
-    }
-
-    // Shift - Click to Filter alignments
-    igv.BAMTrack.prototype.shiftClick = function (genomicLocation, event) {
-
-        var self = this;
-
-        this.filterAlignments(this.filterOption).then(function () {
-            myself.trackView.update();
-            $(myself.trackView.viewportDiv).scrollTop(0);
-        });
-
-    };
 
     // Alt - Click to Sort alignment rows
     igv.BAMTrack.prototype.altClick = function (genomicLocation, event) {
@@ -266,19 +156,19 @@ var igv = (function (igv) {
 
         menuItems.push(igv.colorPickerMenuItem(popover, this.trackView));
 
-        ["none", "strand"].forEach(function (alignmentShading, index) {
+        ["none", "strand"].forEach(function (colorBy, index) {
 
             var chosen;
 
             chosen = (0 === index) ? trackMenuItemFirst : trackMenuItem;
-            str = (alignmentShading === self.alignmentShading) ? chosen + checkMark + lut[alignmentShading] + '</div>' : chosen + checkMarkNone + lut[alignmentShading] + '</div>';
+            str = (colorBy === self.alignmentTrack.colorBy) ? chosen + checkMark + lut[colorBy] + '</div>' : chosen + checkMarkNone + lut[colorBy] + '</div>';
 
             menuItems.push({
                 object: $(str),
                 click: function () {
                     popover.hide();
 
-                    self.alignmentShading = alignmentShading;
+                    self.alignmentTrack.colorBy = colorBy;
                     self.trackView.update();
                 }
             });
@@ -353,13 +243,13 @@ var igv = (function (igv) {
     }
 
 
-    CoverageTrack = function (config, featureSource) {
-        this.featureSource = featureSource;
-        this.top = config.coverageTrackTop || 0;
-        this.height = config.coverageTrackHeight || 50;
-        this.color = config.color || config.defaultColor || "rgb(185, 185, 185)";
-        this.dataRange = {min: 0};   // Leav max undefined
+    CoverageTrack = function (config, parent) {
 
+        this.parent = parent;
+        this.featureSource = parent.featureSource;
+        this.top = 0;
+        this.height = 50;
+        this.dataRange = {min: 0};   // Leav max undefined
         this.paintAxis = igv.paintAxis;
     }
 
@@ -410,7 +300,7 @@ var igv = (function (igv) {
             y = this.height - h;
             x = Math.floor((bp - bpStart) / bpPerPixel);
 
-            igv.graphics.setProperties(ctx, {fillStyle: this.color, strokeStyle: this.color});
+            igv.graphics.setProperties(ctx, {fillStyle: this.parent.color, strokeStyle: this.color});
             igv.graphics.fillRect(ctx, x, y, w, h);
         }
 
@@ -512,35 +402,25 @@ var igv = (function (igv) {
     };
 
 
-    AlignmentTrack = function (config, featureSource) {
+    AlignmentTrack = function (config, parent) {
 
-        this.featureSource = featureSource;
+        this.parent = parent;
+        this.featureSource = parent.featureSource;
         this.top = config.coverageTrackHeight + 5 || 55;
         this.alignmentRowHeight = config.alignmentRowHeight || 14;
-        this.defaultColor = config.defaultColor || "rgb(185, 185, 185)";
-        this.color = config.color || this.defaultColor;
+
+        this.colorBy = config.colorBy || "none";
         this.negStrandColor = config.negStrandColor || "rgba(150, 150, 230, 0.75)";
         this.posStrandColor = config.posStrandColor || "rgba(230, 150, 150, 0.75)";
         this.firstInfPairColor = "rgba(150, 150, 230, 0.75)";
         this.secondInPairColor = "rgba(230, 150, 150, 0.75)";
         this.insertionColor = config.insertionColor || "rgb(138, 94, 161)";
-
         this.deletionColor = config.deletionColor || "black";
-
         this.skippedColor = config.skippedColor || "rgb(150, 170, 170)";
 
-        this.alignmentRowYInset = 0;
-        this.alignmentStartGap = 5;
-        this.downsampleRowHeight = config.downsampleRowHeight === undefined ? 5 : config.downsampleRowHeight;
-
-
-        this.alignmentShading = config.alignmentShading || "none";
 
         // sort alignment rows
         this.sortOption = config.sortOption || {sort: "NUCLEOTIDE"};
-
-        // filter alignments
-        this.filterOption = config.filterOption || {name: "mappingQuality", params: [30, undefined]};
 
         this.sortDirection = true;
     }
@@ -550,7 +430,7 @@ var igv = (function (igv) {
         if (alignmentContainer.packedAlignmentRows) {
             var h = 0;
             if (alignmentContainer.hasDownsampledIntervals()) {
-                h += this.downsampleRowHeight + this.alignmentStartGap;
+                h += downsampleRowHeight + alignmentStartGap;
             }
             return h + (this.alignmentRowHeight * alignmentContainer.packedAlignmentRows.length) + 5;
         }
@@ -579,7 +459,7 @@ var igv = (function (igv) {
         }
 
         if (alignmentContainer.hasDownsampledIntervals()) {
-            self.alignmentRowYInset = self.downsampleRowHeight + this.alignmentStartGap;
+            alignmentRowYInset = downsampleRowHeight + alignmentStartGap;
 
             alignmentContainer.downsampledIntervals.forEach(function (interval) {
                 var xBlockStart = (interval.start - bpStart) / bpPerPixel,
@@ -589,19 +469,19 @@ var igv = (function (igv) {
                     xBlockStart += 1;
                     xBlockEnd -= 1;
                 }
-                igv.graphics.fillRect(ctx, xBlockStart, 2, (xBlockEnd - xBlockStart), self.downsampleRowHeight - 2, {fillStyle: "black"});
+                igv.graphics.fillRect(ctx, xBlockStart, 2, (xBlockEnd - xBlockStart), downsampleRowHeight - 2, {fillStyle: "black"});
             })
 
         }
         else {
-            self.alignmentRowYInset = 0;
+            alignmentRowYInset = 0;
         }
 
         if (packedAlignmentRows) {
 
             packedAlignmentRows.forEach(function renderAlignmentRow(alignmentRow, i) {
 
-                var yRect = self.alignmentRowYInset + (self.alignmentRowHeight * i),
+                var yRect = alignmentRowYInset + (self.alignmentRowHeight * i),
                     alignmentHeight = self.alignmentRowHeight - 2,
                     i,
                     b,
@@ -642,7 +522,7 @@ var igv = (function (igv) {
         // alignment is a PairedAlignment
         function drawPairConnector(alignment, yRect, alignmentHeight) {
 
-            var canvasColor = igv.BAMTrack.alignmentShadingOptions[self.alignmentShading](self, alignment),
+            var canvasColor = getAlignmentColor(self, alignment),
                 outlineColor = canvasColor,
                 xBlockStart = (alignment.connectingStart - bpStart) / bpPerPixel,
                 xBlockEnd = (alignment.connectingEnd - bpStart) / bpPerPixel,
@@ -663,7 +543,7 @@ var igv = (function (igv) {
 
         function drawSingleAlignment(alignment, yRect, alignmentHeight) {
 
-            var canvasColor = igv.BAMTrack.alignmentShadingOptions[self.alignmentShading](self, alignment),
+            var canvasColor = getAlignmentColor(self, alignment),
                 outlineColor = canvasColor,
                 lastBlockEnd,
                 blocks = alignment.blocks,
@@ -858,7 +738,7 @@ var igv = (function (igv) {
             clickedObject,
             i, len, tmp;
 
-        packedAlignmentsIndex = Math.floor((yOffset - (this.alignmentRowYInset)) / this.alignmentRowHeight);
+        packedAlignmentsIndex = Math.floor((yOffset - (alignmentRowYInset)) / this.alignmentRowHeight);
 
         if (packedAlignmentsIndex < 0) {
 
@@ -898,6 +778,40 @@ var igv = (function (igv) {
         }
 
     };
+
+
+    function getAlignmentColor(alignmentTrack, alignment) {
+
+        var option = alignmentTrack.colorBy;
+
+        switch (option) {
+
+
+            case "strand":
+                return alignment.strand ? alignmentTrack.posStrandColor : alignmentTrack.negStrandColor;
+
+            case "firstOfPairStrand":
+
+                if (alignment.isPaired()) {
+
+                    if (alignment.isFirstOfPair()) {
+                        return alignment.strand ? alignmentTrack.posStrandColor : alignmentTrack.negStrandColor;
+                    }
+                    else if (alignment.isSecondOfPair()) {
+                        return alignment.strand ? alignmentTrack.negStrandColor : alignmentTrack.posStrandColor;
+                    }
+                    else {
+                        console.log("ERROR. Paired alignments are either first or second.")
+                    }
+                }
+
+            default:
+                return alignmentTrack.parent.color;
+        }
+
+    };
+
+
     return igv;
 
 })
