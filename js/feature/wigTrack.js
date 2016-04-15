@@ -40,18 +40,15 @@ var igv = (function (igv) {
             this.featureSource = new igv.FeatureSource(config);
         }
 
-
         this.name = config.name;
-        this.id = config.id || this.name;
         this.color = config.color || "rgb(150,150,150)";
+<<<<<<< 8a83652e7c7f3ba40f10e26b22f5e59ceee6479c:js/wigTrack.js
 
         this.autoScale = config.autoScale || false;
 
+=======
+>>>>>>> 3884d0397298a6aa6b32ba116fe15ae74d068a5b:js/feature/wigTrack.js
         this.height = 100;
-
-        this.minHeight = config.minHeight || Math.min(25, this.height);
-        this.maxHeight = config.maxHeight || Math.max(500, this.height);
-
         this.order = config.order;
 
         // Min and max values.  No defaults for these, if they aren't set track will autoscale.
@@ -223,6 +220,8 @@ var igv = (function (igv) {
     function signsDiffer(a, b) {
         return (a > 0 && b < 0 || a < 0 && b > 0);
     }
+
+
 
     return igv;
 
