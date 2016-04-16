@@ -150,7 +150,7 @@ var igv = (function (igv) {
 
         menuItems.push(igv.colorPickerMenuItem(popover, this.trackView));
 
-        ['none', 'strand'/*, 'tag'*/].forEach(function (key, i) {
+        ['none', 'strand', 'tag'].forEach(function (key, i) {
             menuItems.push( colorByMarkup(key, (key === self.alignmentTrack.colorBy), i) );
         });
 
@@ -185,11 +185,11 @@ var igv = (function (igv) {
         function colorByMarkup(key, showCheck, index) {
 
             var lut =
-            {
-                none: 'track color',
-                strand: 'read strand',
-                tag: 'tag value'
-            },
+                {
+                    none: 'track color',
+                    strand: 'read strand',
+                    tag: 'tag:' + (self.tag || 'none')
+                },
                 parts = [],
                 item = {};
 
@@ -215,15 +215,27 @@ var igv = (function (igv) {
 
             item.click = function() {
 
+                igv.popover.hide();
+                self.alignmentTrack.colorBy = key;
                 if (key === 'tag') {
 
-                    igv.dialog.configure($(self.trackDiv), undefined, undefined, undefined, undefined);
+                    igv.dialog.configure($(self.trackView.trackDiv),
+                        function () {
+                            return "Color By Tag"
+                        },
+                        ' ',
+                        function () {
+
+                            self.tag = igv.dialog.$dialogInput.val();
+                            $('#color-by-tag').text( self.tag );
+                            self.trackView.update();
+                            igv.dialog.hide();
+                        },
+                        undefined);
+
                     igv.dialog.show();
-                    igv.popover.hide();
 
                 } else {
-                    popover.hide();
-                    self.alignmentTrack.colorBy = key;
                     self.trackView.update();
                 }
             };
