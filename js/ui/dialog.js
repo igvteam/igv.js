@@ -115,7 +115,8 @@ var igv = (function (igv) {
 
     igv.Dialog.prototype.rowOfOkCancel = function() {
 
-        var $rowContainer,
+        var self = this,
+            $rowContainer,
             $row,
             $column,
             $columnFiller;
@@ -210,8 +211,8 @@ var igv = (function (igv) {
 
     igv.Dialog.prototype.configure = function ($host, labelHTMLFunction, inputValue, changeFunction, clickFunction) {
 
-        var clickOK,
-            self = this;
+        var self = this,
+            clickOK;
 
         self.$host = $host;
 
