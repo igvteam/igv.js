@@ -150,7 +150,7 @@ var igv = (function (igv) {
 
         menuItems.push(igv.colorPickerMenuItem(popover, this.trackView));
 
-        ['none', 'strand', 'tag'].forEach(function (key, i) {
+        ['none', 'strand'/*, 'tag'*/].forEach(function (key, i) {
             menuItems.push( colorByMarkup(key, (key === self.alignmentTrack.colorBy), i) );
         });
 
@@ -214,9 +214,18 @@ var igv = (function (igv) {
             item.object = $(parts.join(''));
 
             item.click = function() {
-                popover.hide();
-                self.alignmentTrack.colorBy = key;
-                self.trackView.update();
+
+                if (key === 'tag') {
+
+                    igv.dialog.configure($(self.trackDiv), undefined, undefined, undefined, undefined);
+                    igv.dialog.show();
+                    igv.popover.hide();
+
+                } else {
+                    popover.hide();
+                    self.alignmentTrack.colorBy = key;
+                    self.trackView.update();
+                }
             };
 
             return item;
