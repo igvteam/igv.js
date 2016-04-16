@@ -147,9 +147,11 @@ var igv = (function (igv) {
                 break;
             case "annotation":
             case "genes":
-            case "variant":
             case "FusionJuncSpan":
                 newTrack = new igv.FeatureTrack(config);
+                break;
+            case "variant":
+                newTrack = new igv.VariantTrack(config);
                 break;
             case "alignment":
                 newTrack = new igv.BAMTrack(config, featureSource);
@@ -944,11 +946,16 @@ var igv = (function (igv) {
                 config.type = "alignment";
                 config.format = "bam"
             }
+
+            if ("vcf" === config.type) {
+                config.type = "variant";
+                config.format = "vcf"
+            }
         }
 
         function inferFileFormat(config) {
 
-            if(config.format) return;
+            if (config.format) return;
 
             var path = config.url || config.localFile.name,
                 fn = path.toLowerCase(),
@@ -987,7 +994,7 @@ var igv = (function (igv) {
 
         function inferTrackType(config) {
 
-            if(config.type) return;
+            if (config.type) return;
 
             switch (config.format) {
                 case "bw":
@@ -1013,7 +1020,7 @@ var igv = (function (igv) {
 
         translateDeprecatedTypes(config);
 
-        if(undefined === config.sourceType  && (config.url || config.localFile)) {
+        if (undefined === config.sourceType && (config.url || config.localFile)) {
             config.sourceType = "file";
         }
 

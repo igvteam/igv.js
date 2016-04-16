@@ -1,7 +1,8 @@
 /*
  * The MIT License (MIT)
  *
- * Copyright (c) 2014 Broad Institute
+ * Copyright (c) 2016 University of California San Diego
+ * Author: Jim Robinson
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -23,9 +24,13 @@
  * THE SOFTWARE.
  */
 
+/**
+ * Created by jrobinson on 4/15/16.
+ */
+
 var igv = (function (igv) {
 
-    igv.FeatureTrack = function (config) {
+    igv.VariantTrack = function (config) {
 
         igv.configTrack(this, config);
 
@@ -38,34 +43,16 @@ var igv = (function (igv) {
 
         this.featureHeight = config.featureHeight || 14;
 
-
-        if (config.url && (config.url.toLowerCase().endsWith(".bigbed") || config.url.toLowerCase().endsWith(".bb"))) {
-            this.featureSource = new igv.BWSource(config);
-        }
-        else {
-            this.featureSource = new igv.FeatureSource(config);
-        }
+        this.featureSource = new igv.FeatureSource(config);
 
         // Set the render function.  This can optionally be passed in the config
-        if (config.render) {
-            this.render = config.render;
-        } else if ("variant" === config.type) {
-            this.render = renderVariant;
-            this.homvarColor = "rgb(17,248,254)";
-            this.hetvarColor = "rgb(34,12,253)";
-        }
-        else if ("FusionJuncSpan" === config.type) {
-            this.render = renderFusionJuncSpan;
-            this.height = config.height || 50;
-            this.autoHeight = false;
-        }
-        else {
-            this.render = renderFeature;
-            this.arrowSpacing = 30;
-        }
+        this.render = renderVariant;
+        this.homvarColor = "rgb(17,248,254)";
+        this.hetvarColor = "rgb(34,12,253)";
+
     };
 
-    igv.FeatureTrack.prototype.getFileHeader = function () {
+    igv.VariantTrack.prototype.getFileHeader = function () {
         var self = this;
         return new Promise(function (fulfill, reject) {
             if (typeof self.featureSource.getFileHeader === "function") {
@@ -90,7 +77,7 @@ var igv = (function (igv) {
         });
     }
 
-    igv.FeatureTrack.prototype.getFeatures = function (chr, bpStart, bpEnd) {
+    igv.VariantTrack.prototype.getFeatures = function (chr, bpStart, bpEnd) {
 
         var self = this;
 
@@ -109,7 +96,7 @@ var igv = (function (igv) {
      * @param features
      * @returns {*}
      */
-    igv.FeatureTrack.prototype.computePixelHeight = function (features) {
+    igv.VariantTrack.prototype.computePixelHeight = function (features) {
 
         if (this.displayMode === "COLLAPSED") {
             return this.collapsedHeight;
@@ -129,7 +116,7 @@ var igv = (function (igv) {
 
     };
 
-    igv.FeatureTrack.prototype.draw = function (options) {
+    igv.VariantTrack.prototype.draw = function (options) {
 
         var track = this,
             featureList = options.features,
@@ -161,7 +148,7 @@ var igv = (function (igv) {
     /**
      * Return "popup data" for feature @ genomic location.  Data is an array of key-value pairs
      */
-    igv.FeatureTrack.prototype.popupData = function (genomicLocation, xOffset, yOffset) {
+    igv.VariantTrack.prototype.popupData = function (genomicLocation, xOffset, yOffset) {
 
         // We use the featureCache property rather than method to avoid async load.  If the
         // feature is not already loaded this won't work,  but the user wouldn't be mousing over it either.
@@ -229,7 +216,7 @@ var igv = (function (igv) {
         return data;
     }
 
-    igv.FeatureTrack.prototype.popupMenuItems = function (popover) {
+    igv.VariantTrack.prototype.popupMenuItems = function (popover) {
 
         var myself = this,
             menuItems = [],
@@ -264,154 +251,7 @@ var igv = (function (igv) {
 
     };
 
-    /**
-     *
-     * @param feature
-     * @param bpStart  genomic location of the left edge of the current canvas
-     * @param xScale  scale in base-pairs per pixel
-     * @param pixelHeight  pixel height of the current canvas
-     * @param ctx  the canvas 2d context
-     */
 
-    function renderFeature(feature, bpStart, xScale, pixelHeight, ctx) {
-
-        var px, px1, pw, x, e, exonCount, cy, direction, exon, ePx, ePx1, ePxU, ePw, py, py2, h, h2, transform, fontStyle,
-            step = this.arrowSpacing,
-            color = this.color;
-
-
-        if (this.config.colorBy) {
-            var colorByValue = feature[this.config.colorBy.field];
-            if (colorByValue) {
-                color = this.config.colorBy.pallete[colorByValue];
-            }
-        }
-        else if (feature.color) {
-            color = feature.color;
-        }
-
-
-        ctx.fillStyle = color;
-        ctx.strokeStyle = color;
-
-        px = Math.round((feature.start - bpStart) / xScale);
-        px1 = Math.round((feature.end - bpStart) / xScale);
-        pw = px1 - px;
-        if (pw < 3) {
-            pw = 3;
-            px -= 1;
-        }
-
-        h = this.featureHeight;
-        if (this.displayMode === "SQUISHED" && feature.row != undefined) {
-            h = this.featureHeight / 2;
-            py = this.squishedRowHeight * feature.row + 2;
-        }
-        else if (this.displayMode === "EXPANDED" && feature.row != undefined) {
-            py = this.expandedRowHeight * feature.row + 5;
-        } else {  // collapsed
-            py = 5;
-        }
-
-        cy = py + h / 2;
-        h2 = h / 2;
-        py2 = cy - h2 / 2;
-
-        exonCount = feature.exons ? feature.exons.length : 0;
-
-        if (exonCount == 0) {
-            // single-exon transcript
-            ctx.fillRect(px, py, pw, h);
-
-        }
-        else {
-            // multi-exon transcript
-
-            igv.graphics.strokeLine(ctx, px + 1, cy, px1 - 1, cy); // center line for introns
-
-            direction = feature.strand == '+' ? 1 : -1;
-            for (x = px + step / 2; x < px1; x += step) {
-                // draw arrowheads along central line indicating transcribed orientation
-                igv.graphics.strokeLine(ctx, x - direction * 2, cy - 2, x, cy);
-                igv.graphics.strokeLine(ctx, x - direction * 2, cy + 2, x, cy);
-            }
-            for (e = 0; e < exonCount; e++) {
-                // draw the exons
-                exon = feature.exons[e];
-                ePx = Math.round((exon.start - bpStart) / xScale);
-                ePx1 = Math.round((exon.end - bpStart) / xScale);
-                ePw = Math.max(1, ePx1 - ePx);
-
-                if (exon.utr) {
-                    ctx.fillRect(ePx, py2, ePw, h2); // Entire exon is UTR
-                }
-                else {
-                    if (exon.cdStart) {
-                        ePxU = Math.round((exon.cdStart - bpStart) / xScale);
-                        ctx.fillRect(ePx, py2, ePxU - ePx, h2); // start is UTR
-                        ePw -= (ePxU - ePx);
-                        ePx = ePxU;
-
-                    }
-                    if (exon.cdEnd) {
-                        ePxU = Math.round((exon.cdEnd - bpStart) / xScale);
-                        ctx.fillRect(ePxU, py2, ePx1 - ePxU, h2); // start is UTR
-                        ePw -= (ePx1 - ePxU);
-                        ePx1 = ePxU;
-                    }
-
-                    ctx.fillRect(ePx, py, ePw, h);
-
-                    // Arrows
-                    if (ePw > step + 5) {
-                        ctx.fillStyle = "white";
-                        ctx.strokeStyle = "white";
-                        for (x = ePx + step / 2; x < ePx1; x += step) {
-                            // draw arrowheads along central line indicating transcribed orientation
-                            igv.graphics.strokeLine(ctx, x - direction * 2, cy - 2, x, cy);
-                            igv.graphics.strokeLine(ctx, x - direction * 2, cy + 2, x, cy);
-                        }
-                        ctx.fillStyle = color;
-                        ctx.strokeStyle = color;
-
-                    }
-                }
-            }
-        }
-
-        //////////////////////
-        // add feature labels
-        //////////////////////
-
-        fontStyle = {font: '10px PT Sans', fillStyle: this.color, strokeStyle: this.color};
-
-        var geneColor;
-
-        if (igv.browser.selection && "genes" === this.config.type && feature.name !== undefined) {
-            // TODO -- for gtex, figure out a better way to do this
-            geneColor = igv.browser.selection.colorForGene(feature.name);
-        }
-
-
-        if (((px1 - px) > 20 || geneColor) && this.displayMode != "SQUISHED" && feature.name !== undefined) {
-
-            var geneFontStyle;
-            if (geneColor) {
-                geneFontStyle = {font: '10px PT Sans', fillStyle: geneColor, strokeStyle: geneColor}
-            }
-            else {
-                geneFontStyle = fontStyle;
-            }
-
-
-            if (this.displayMode === "COLLAPSED" && this.labelDisplayMode === "SLANT") {
-                transform = {rotate: {angle: 45}};
-            }
-
-            var labelY = transform ? py + 20 : py + 25;
-            igv.graphics.fillText(ctx, feature.name, px + ((px1 - px) / 2), labelY, geneFontStyle, transform);
-        }
-    }
 
     /**
      *
@@ -451,82 +291,6 @@ var igv = (function (igv) {
         ctx.fillStyle = style;
 
         ctx.fillRect(px, py, pw, h);
-
-
-    }
-
-
-    /**
-     *
-     * @param feature
-     * @param bpStart  genomic location of the left edge of the current canvas
-     * @param xScale  scale in base-pairs per pixel
-     * @param pixelHeight  pixel height of the current canvas
-     * @param ctx  the canvas 2d context
-     */
-    function renderFusionJuncSpan(feature, bpStart, xScale, pixelHeight, ctx) {
-
-
-        //console.log("renderFusionJuncSpan");
-
-        var px = Math.round((feature.start - bpStart) / xScale);
-        var px1 = Math.round((feature.end - bpStart) / xScale);
-        pw = px1 - px;
-        if (pw < 3) {
-            pw = 3;
-            px -= 1;
-        }
-
-        var py = 5, h = 10; // defaults borrowed from renderFeature above
-
-
-        var rowHeight = (this.displayMode === "EXPANDED") ? this.expandedRowHeight : this.squishedRowHeight;
-
-        // console.log("row height = " + rowHeight);
-
-        if (this.displayMode === "SQUISHED" && feature.row != undefined) {
-            py = rowHeight * feature.row;
-        }
-        else if (this.displayMode === "EXPANDED" && feature.row != undefined) {
-            py = rowHeight * feature.row;
-        }
-
-        var cy = py + 0.5 * rowHeight;
-        var top_y = cy - 0.5 * rowHeight;
-        var bottom_y = cy + 0.5 * rowHeight;
-
-        //igv.Canvas.strokeLine.call(ctx, px, cy, px1, cy); // center line for introns
-
-        // draw the junction arc
-        var junction_left_px = Math.round((feature.junction_left - bpStart) / xScale);
-        var junction_right_px = Math.round((feature.junction_right - bpStart) / xScale);
-
-
-        ctx.beginPath();
-        ctx.moveTo(junction_left_px, cy);
-        ctx.bezierCurveTo(junction_left_px, top_y, junction_right_px, top_y, junction_right_px, cy);
-
-        ctx.lineWidth = 1 + Math.log(feature.num_junction_reads) / Math.log(2);
-        ctx.strokeStyle = 'blue';
-        ctx.stroke();
-
-        // draw the spanning arcs
-        var spanning_coords = feature.spanning_frag_coords;
-        for (var i = 0; i < spanning_coords.length; i++) {
-            var spanning_info = spanning_coords[i];
-
-            var span_left_px = Math.round((spanning_info.left - bpStart) / xScale);
-            var span_right_px = Math.round((spanning_info.right - bpStart) / xScale);
-
-
-            ctx.beginPath();
-            ctx.moveTo(span_left_px, cy);
-            ctx.bezierCurveTo(span_left_px, bottom_y, span_right_px, bottom_y, span_right_px, cy);
-
-            ctx.lineWidth = 1;
-            ctx.strokeStyle = 'purple';
-            ctx.stroke();
-        }
 
 
     }

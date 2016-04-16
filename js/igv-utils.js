@@ -27,7 +27,9 @@ var igv = (function (igv) {
 
     igv.presentAlert = function (string) {
 
-        igv.alert.configure(undefined, function () { return string; }, undefined, undefined, undefined);
+        igv.alert.configure(undefined, function () {
+            return string;
+        }, undefined, undefined, undefined);
         igv.alert.show();
         igv.popover.hide();
 
@@ -38,9 +40,11 @@ var igv = (function (igv) {
         var menuItems = [],
             trackItems;
 
-        menuItems.push(igv.dialogMenuItem(popover, trackView, "Set track name", function () { return "Track Name" }, trackView.track.name, function () {
+        menuItems.push(igv.dialogMenuItem(popover, trackView, "Set track name", function () {
+            return "Track Name"
+        }, trackView.track.name, function () {
 
-            var alphanumeric = parseAlphanumeric( igv.dialog.$dialogInput.val() );
+            var alphanumeric = parseAlphanumeric(igv.dialog.$dialogInput.val());
 
             if (undefined !== alphanumeric) {
                 igv.setTrackLabel(trackView.track, alphanumeric);
@@ -58,18 +62,20 @@ var igv = (function (igv) {
 
         }, undefined));
 
-        menuItems.push(igv.dialogMenuItem(popover, trackView, "Set track height", function () { return "Track Height" }, trackView.trackDiv.clientHeight, function () {
+        menuItems.push(igv.dialogMenuItem(popover, trackView, "Set track height", function () {
+            return "Track Height"
+        }, trackView.trackDiv.clientHeight, function () {
 
-                var number = parseFloat( igv.dialog.$dialogInput.val(), 10);
+            var number = parseFloat(igv.dialog.$dialogInput.val(), 10);
 
-                if (undefined !== number && number >= trackView.track.minHeight && number <= trackView.track.maxHeight) {
-                    trackView.setTrackHeight(number);
-                    trackView.track.autoHeight = false;   // Explicitly setting track height turns off auto-scale
-                }
+            if (undefined !== number && number >= trackView.track.minHeight && number <= trackView.track.maxHeight) {
+                trackView.setTrackHeight(number);
+                trackView.track.autoHeight = false;   // Explicitly setting track height turns off autoHeight
+            }
 
-                igv.dialog.hide();
+            igv.dialog.hide();
 
-            }, undefined));
+        }, undefined));
 
         if (trackView.track.popupMenuItems) {
 
@@ -108,7 +114,7 @@ var igv = (function (igv) {
             menuItems.push(
                 igv.dialogMenuItem(popover, trackView, "Remove track", function () {
                     var label = "Remove " + trackView.track.name;
-                    return '<div class="igv-dialog-label-centered">' +  label + '</div>';
+                    return '<div class="igv-dialog-label-centered">' + label + '</div>';
                 }, undefined, undefined, function () {
                     popover.hide();
                     trackView.browser.removeTrack(trackView.track);
@@ -206,9 +212,9 @@ var igv = (function (igv) {
         }
 
         $container = $('<div class="igv-spinner-container">');
-        $container.append($spinner[ 0 ]);
+        $container.append($spinner[0]);
 
-        return $container[ 0 ];
+        return $container[0];
     };
 
     /**
@@ -509,8 +515,8 @@ var igv = (function (igv) {
 
     };
 
-    igv.log = function(message) {
-        if(igv.enableLogging && console && console.log) {
+    igv.log = function (message) {
+        if (igv.enableLogging && console && console.log) {
             console.log(message);
         }
     };

@@ -47,15 +47,17 @@ var igv = (function (igv) {
                 var queryChr = chrNameMap.hasOwnProperty(chr) ? chrNameMap[chr] : chr,
                     readURL = self.url + "/variants/search";
 
+
                 var p = igv.ga4ghSearch({
                     url: readURL,
+                    fields: (self.callSetIds ? undefined : "nextPageToken,variants(id,variantSetId,names,referenceName,start,end,referenceBases,alternateBases,quality, filter, info)"),
                     body: {
                         "variantSetIds": [self.variantSetId],
-                        "callSetIds": self.callSetIds,            // Empty for now, we don't use genotypes yet
+                        "callSetIds": (self.callSetIds ? self.callSetIds : undefined),
                         "referenceName": queryChr,
                         "start": bpStart.toString(),
                         "end": bpEnd.toString(),
-                        "pageSize": "10000"
+                        "pageSize": "10000",
                     },
                     decode: function (json) {
                         var variants = [];
@@ -89,7 +91,9 @@ var igv = (function (igv) {
                         return variants;
                     }
                 });
-                p.then(fulfill);
+                p.then(fulfill).catch(function(error) {
+                    reject(error);
+                });
             });
 
 
