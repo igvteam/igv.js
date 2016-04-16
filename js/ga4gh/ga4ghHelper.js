@@ -59,7 +59,8 @@ var igv = (function (igv) {
                 decode = options.decode,
                 acToken = oauth.google.access_token,
                 apiKey = oauth.google.apiKey,
-                paramSeparator = "?";
+                paramSeparator = "?",
+                fields = options.fields;  // Partial response
 
             if (apiKey) {
                 url = url + paramSeparator + "key=" + apiKey;
@@ -68,6 +69,9 @@ var igv = (function (igv) {
 
             if (acToken) {
                 url = url + paramSeparator + "access_token=" + encodeURIComponent(acToken);
+            }
+            if (fields) {
+                url = url + paramSeparator + "fields=" + fields;
             }
 
 
@@ -91,39 +95,39 @@ var igv = (function (igv) {
                         contentType: "application/json",
                         headers: ga4ghHeaders()
                     }).then(function (json) {
-                    var nextPageToken, tmp;
+                        var nextPageToken, tmp;
 
-                    if (json) {
+                        if (json) {
 
-                        tmp = decode ? decode(json) : json;
+                            tmp = decode ? decode(json) : json;
 
-                        if (tmp) {
+                            if (tmp) {
 
-                            tmp.forEach(function (a) {
-                                var keep = true;           // TODO -- conditionally keep (downsample)
-                                if (keep) {
-                                    results.push(a);
-                                }
-                            });
-                        }
+                                tmp.forEach(function (a) {
+                                    var keep = true;           // TODO -- conditionally keep (downsample)
+                                    if (keep) {
+                                        results.push(a);
+                                    }
+                                });
+                            }
 
 
-                        nextPageToken = json["nextPageToken"];
+                            nextPageToken = json["nextPageToken"];
 
-                        if (nextPageToken) {
-                            loadChunk(nextPageToken);
+                            if (nextPageToken) {
+                                loadChunk(nextPageToken);
+                            }
+                            else {
+                                fulfill(results);
+                            }
                         }
                         else {
                             fulfill(results);
                         }
-                    }
-                    else {
-                        fulfill(results);
-                    }
 
-                }).catch(function () {
-                    reject
-                });
+                    }).catch(function(error) {
+                        reject(error);
+                    });
             }
 
         });

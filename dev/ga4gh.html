@@ -52,6 +52,7 @@
     <script type="text/javascript" src="../js/rulerTrack.js"></script>
 
     <script type="text/javascript" src="../js/feature/featureTrack.js"></script>
+    <script type="text/javascript" src="../js/variant/variantTrack.js"></script>
     <script type="text/javascript" src="../js/igv-color.js"></script>
     <script type="text/javascript" src="../js/igv-utils.js"></script>
     <script type="text/javascript" src="../js/parseUtils.js"></script>
@@ -153,7 +154,7 @@
                     tracks: [
                         {
                             sourceType: 'ga4gh',
-                            type: 'vcf',
+                            type: 'variant',
                             url: 'https://www.googleapis.com/genomics/v1beta2',
                             variantSetId: '10473108253681171589',
                             callSetIds: ["10473108253681171589-2"],
@@ -161,7 +162,7 @@
                         },
                         {
                             sourceType: 'ga4gh',
-                            type: 'bam',
+                            type: 'alignment',
                             url: 'https://www.googleapis.com/genomics/v1beta2',
                             readGroupSetIds: 'CMvnhpKTFhCjz9_25e_lCw',
                             name: 'Ga4gh alignments'

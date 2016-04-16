@@ -211,6 +211,7 @@ var igv = (function (igv) {
 
                 trackView.track.dataRange.min = min;
                 trackView.track.dataRange.max = max;
+                trackView.track.autoScale = false;
 
                 self.hide();
                 trackView.update();

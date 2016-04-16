@@ -225,7 +225,7 @@ var igvxhr = (function (igvxhr) {
                     else {
                         fulfill(result);
                     }
-                });
+                }).catch(reject);
         })
     }
 
@@ -266,7 +266,7 @@ var igvxhr = (function (igvxhr) {
                     function (data) {
                         var result = igvxhr.arrayBufferToString(data, compression);
                         fulfill(result);
-                    })
+                    }).catch(reject)
             })
         }
 

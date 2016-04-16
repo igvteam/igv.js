@@ -42,12 +42,9 @@ var igv = (function (igv) {
 
         this.name = config.name;
         this.color = config.color || "rgb(150,150,150)";
-<<<<<<< 8a83652e7c7f3ba40f10e26b22f5e59ceee6479c:js/wigTrack.js
+        this.autoScale = config.autoScale  !== undefined ? config.autoScale :
+            (config.max === undefined ? true : false);
 
-        this.autoScale = config.autoScale || false;
-
-=======
->>>>>>> 3884d0397298a6aa6b32ba116fe15ae74d068a5b:js/feature/wigTrack.js
         this.height = 100;
         this.order = config.order;
 
@@ -111,7 +108,7 @@ var igv = (function (igv) {
 
     igv.WIGTrack.prototype.draw = function (options) {
 
-        var track = this,
+        var self = this,
             features = options.features,
             ctx = options.context,
             bpPerPixel = options.bpPerPixel,
@@ -129,17 +126,17 @@ var igv = (function (igv) {
 
 
         if (features && features.length > 0) {
-            if (track.dataRange.max === undefined) {
+            if (self.autoScale || self.dataRange.max === undefined) {
                 var s = autoscale(features);
                 featureValueMinimum = s.min;
                 featureValueMaximum = s.max;
             }
             else {
-                featureValueMinimum = track.dataRange.min === undefined ? 0 : track.dataRange.min;
-                featureValueMaximum = track.dataRange.max;
+                featureValueMinimum = self.dataRange.min === undefined ? 0 : self.dataRange.min;
+                featureValueMaximum = self.dataRange.max;
             }
-            track.dataRange.min = featureValueMinimum;  // Record for disply, menu, etc
-            track.dataRange.max = featureValueMaximum;
+            self.dataRange.min = featureValueMinimum;  // Record for disply, menu, etc
+            self.dataRange.max = featureValueMaximum;
 
             featureValueRange = featureValueMaximum - featureValueMinimum;
 
@@ -198,7 +195,7 @@ var igv = (function (igv) {
             }
 
             //canvas.fillRect(x, yUnitless * pixelHeight, width, heightUnitLess * pixelHeight, { fillStyle: igv.randomRGB(64, 255) });
-            igv.graphics.fillRect(ctx, x, yUnitless * pixelHeight, width, heightUnitLess * pixelHeight, {fillStyle: track.color});
+            igv.graphics.fillRect(ctx, x, yUnitless * pixelHeight, width, heightUnitLess * pixelHeight, {fillStyle: self.color});
 
         }
 
