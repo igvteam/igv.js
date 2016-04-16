@@ -45,6 +45,8 @@ var igv = (function (igv) {
         this.id = config.id || this.name;
         this.color = config.color || "rgb(150,150,150)";
 
+        this.autoScale = config.autoScale || false;
+
         this.height = 100;
 
         this.minHeight = config.minHeight || Math.min(25, this.height);
@@ -72,9 +74,39 @@ var igv = (function (igv) {
 
     igv.WIGTrack.prototype.popupMenuItems = function (popover) {
 
-        var menuItems = [];
+        var self = this,
+            menuItems = [],
+            html = [];
+
         menuItems.push(igv.colorPickerMenuItem(popover, this.trackView));
         menuItems.push(igv.dataRangeMenuItem(popover, this.trackView));
+
+        html.push('<div class="igv-track-menu-item igv-track-menu-border-top">');
+        html.push(true === self.autoScale ? '<i class="fa fa-check fa-check-shim">' : '<i class="fa fa-check fa-check-shim fa-check-hidden">');
+        html.push('</i>');
+        html.push('Autoscale');
+        html.push('</div>');
+
+        menuItems.push({
+            object: $(html.join('')),
+            click: function () {
+                var $fa = $(this).find('i');
+
+                popover.hide();
+
+                self.autoScale = !self.autoScale;
+
+                if (true === self.autoScale) {
+                    $fa.removeClass('fa-check-hidden');
+                } else {
+                    $fa.addClass('fa-check-hidden');
+                }
+
+                // do stuff
+
+                self.trackView.update();
+            }
+        });
 
         return menuItems;
 
