@@ -44,6 +44,7 @@ var igv = (function (igv) {
         this.visibilityWindow = config.visibilityWindow || 30000;     // 30kb default
 
         this.viewAsPairs = config.viewAsPairs;
+        this.tag = ' ';
 
         this.color = config.color || "rgb(185, 185, 185)";
 
@@ -145,8 +146,7 @@ var igv = (function (igv) {
     igv.BAMTrack.prototype.popupMenuItems = function (popover) {
 
         var self = this,
-            menuItems = [],
-            html = [];
+            menuItems = [];
 
         menuItems.push(igv.colorPickerMenuItem(popover, this.trackView));
 
@@ -154,33 +154,67 @@ var igv = (function (igv) {
             menuItems.push( colorByMarkup(key, (key === self.alignmentTrack.colorBy), i) );
         });
 
-        html.push('<div class="igv-track-menu-item igv-track-menu-border-top">');
-        html.push(true === self.viewAsPairs ? '<i class="fa fa-check fa-check-shim">' : '<i class="fa fa-check fa-check-shim fa-check-hidden">');
-        html.push('</i>');
-        html.push('View as pairs');
-        html.push('</div>');
+        menuItems.push( viewAsPairsMarkup() );
 
-        menuItems.push({
-            object: $(html.join('')),
-            click: function () {
-                var $fa = $(this).find('i');
-
-                popover.hide();
-
-                self.viewAsPairs = !self.viewAsPairs;
-
-                if (true === self.viewAsPairs) {
-                    $fa.removeClass('fa-check-hidden');
-                } else {
-                    $fa.addClass('fa-check-hidden');
-                }
-
-                self.featureSource.setViewAsPairs(self.viewAsPairs);
-                self.trackView.update();
-            }
-        });
+        //html.push('<div class="igv-track-menu-item igv-track-menu-border-top">');
+        //html.push(true === self.viewAsPairs ? '<i class="fa fa-check fa-check-shim">' : '<i class="fa fa-check fa-check-shim fa-check-hidden">');
+        //html.push('</i>');
+        //html.push('View as pairs');
+        //html.push('</div>');
+        //
+        //menuItems.push({
+        //    object: $(html.join('')),
+        //    click: function () {
+        //        var $fa = $(this).find('i');
+        //
+        //        popover.hide();
+        //
+        //        self.viewAsPairs = !self.viewAsPairs;
+        //
+        //        if (true === self.viewAsPairs) {
+        //            $fa.removeClass('fa-check-hidden');
+        //        } else {
+        //            $fa.addClass('fa-check-hidden');
+        //        }
+        //
+        //        self.featureSource.setViewAsPairs(self.viewAsPairs);
+        //        self.trackView.update();
+        //    }
+        //});
 
         return menuItems;
+
+        function viewAsPairsMarkup() {
+
+            var html = [];
+
+            html.push('<div class="igv-track-menu-item igv-track-menu-border-top">');
+            html.push(true === self.viewAsPairs ? '<i class="fa fa-check fa-check-shim">' : '<i class="fa fa-check fa-check-shim fa-check-hidden">');
+            html.push('</i>');
+            html.push('View as pairs');
+            html.push('</div>');
+
+            return {
+                object: $(html.join('')),
+                click: function () {
+                    var $fa = $(this).find('i');
+
+                    popover.hide();
+
+                    self.viewAsPairs = !self.viewAsPairs;
+
+                    if (true === self.viewAsPairs) {
+                        $fa.removeClass('fa-check-hidden');
+                    } else {
+                        $fa.addClass('fa-check-hidden');
+                    }
+
+                    self.featureSource.setViewAsPairs(self.viewAsPairs);
+                    self.trackView.update();
+                }
+            };
+
+        }
 
         function colorByMarkup(key, showCheck, index) {
 
@@ -216,18 +250,20 @@ var igv = (function (igv) {
             item.click = function() {
 
                 igv.popover.hide();
-                self.alignmentTrack.colorBy = key;
                 if (key === 'tag') {
 
                     igv.dialog.configure($(self.trackView.trackDiv),
                         function () {
-                            return "Color By Tag"
+                            return 'Color By Tag Name'
                         },
-                        ' ',
+                        self.tag,
                         function () {
+
+                            self.alignmentTrack.colorBy = key;
 
                             self.tag = igv.dialog.$dialogInput.val();
                             $('#color-by-tag').text( self.tag );
+
                             self.trackView.update();
                             igv.dialog.hide();
                         },
@@ -236,6 +272,7 @@ var igv = (function (igv) {
                     igv.dialog.show();
 
                 } else {
+                    self.alignmentTrack.colorBy = key;
                     self.trackView.update();
                 }
             };
