@@ -156,32 +156,6 @@ var igv = (function (igv) {
 
         menuItems.push( viewAsPairsMarkup() );
 
-        //html.push('<div class="igv-track-menu-item igv-track-menu-border-top">');
-        //html.push(true === self.viewAsPairs ? '<i class="fa fa-check fa-check-shim">' : '<i class="fa fa-check fa-check-shim fa-check-hidden">');
-        //html.push('</i>');
-        //html.push('View as pairs');
-        //html.push('</div>');
-        //
-        //menuItems.push({
-        //    object: $(html.join('')),
-        //    click: function () {
-        //        var $fa = $(this).find('i');
-        //
-        //        popover.hide();
-        //
-        //        self.viewAsPairs = !self.viewAsPairs;
-        //
-        //        if (true === self.viewAsPairs) {
-        //            $fa.removeClass('fa-check-hidden');
-        //        } else {
-        //            $fa.addClass('fa-check-hidden');
-        //        }
-        //
-        //        self.featureSource.setViewAsPairs(self.viewAsPairs);
-        //        self.trackView.update();
-        //    }
-        //});
-
         return menuItems;
 
         function viewAsPairsMarkup() {
@@ -222,7 +196,7 @@ var igv = (function (igv) {
                 {
                     none: 'track color',
                     strand: 'read strand',
-                    tag: 'tag ' + (self.tag || ' ')
+                    tag: 'tag ' + self.tag
                 },
                 parts = [],
                 item = {};
@@ -235,7 +209,7 @@ var igv = (function (igv) {
             parts.push('Color by: ');
             parts.push('</span>');
 
-            if (key === 'tag') {
+            if (key === 'tag'){
                 parts.push('<span id="color-by-tag">');
             } else {
                 parts.push('<span>');
@@ -281,7 +255,6 @@ var igv = (function (igv) {
         }
     };
 
-
     function shadedBaseColor(qual, nucleotide, genomicLocation) {
 
         var color,
@@ -315,7 +288,6 @@ var igv = (function (igv) {
         }
         return color;
     }
-
 
     CoverageTrack = function (config, parent) {
 
@@ -423,7 +395,6 @@ var igv = (function (igv) {
 
     }
 
-
     CoverageTrack.prototype.popupData = function (genomicLocation, xOffset, yOffset) {
 
         var coverageMap = this.featureSource.alignmentContainer.coverageMap,
@@ -474,7 +445,6 @@ var igv = (function (igv) {
         return nameValues;
 
     };
-
 
     AlignmentTrack = function (config, parent) {
 
