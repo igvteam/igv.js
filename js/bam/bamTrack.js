@@ -188,7 +188,7 @@ var igv = (function (igv) {
                 {
                     none: 'track color',
                     strand: 'read strand',
-                    tag: 'tag:' + (self.tag || 'none')
+                    tag: 'tag ' + (self.tag || ' ')
                 },
                 parts = [],
                 item = {};
