@@ -75,7 +75,8 @@ var igv = (function (igv) {
         menuItems.push(igv.colorPickerMenuItem(popover, this.trackView));
         menuItems.push(igv.dataRangeMenuItem(popover, this.trackView));
 
-        html.push('<div class="igv-track-menu-item igv-track-menu-border-top">');
+        //html.push('<div class="igv-track-menu-item igv-track-menu-border-top">');
+        html.push('<div class="igv-track-menu-item">');
         html.push(true === self.autoScale ? '<i class="fa fa-check fa-check-shim">' : '<i class="fa fa-check fa-check-shim fa-check-hidden">');
         html.push('</i>');
         html.push('Autoscale');
