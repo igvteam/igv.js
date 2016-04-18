@@ -448,7 +448,6 @@ var igv = (function (igv) {
         this.top = config.coverageTrackHeight + 5 || 55;
         this.alignmentRowHeight = config.alignmentRowHeight || 14;
 
-        this.colorBy = config.colorBy || "none";
         this.negStrandColor = config.negStrandColor || "rgba(150, 150, 230, 0.75)";
         this.posStrandColor = config.posStrandColor || "rgba(230, 150, 150, 0.75)";
         this.firstInfPairColor = "rgba(150, 150, 230, 0.75)";
@@ -457,6 +456,9 @@ var igv = (function (igv) {
         this.deletionColor = config.deletionColor || "black";
         this.skippedColor = config.skippedColor || "rgb(150, 170, 170)";
 
+        this.colorBy = config.colorBy || "none";
+        this.colorByTag = config.colorByTag;
+        this.bamColorTag = config.bamColorTag === undefined ? "YC" : config.bamColorTag;
 
         // sort alignment rows
         this.sortOption = config.sortOption || {sort: "NUCLEOTIDE"};
@@ -561,8 +563,8 @@ var igv = (function (igv) {
         // alignment is a PairedAlignment
         function drawPairConnector(alignment, yRect, alignmentHeight) {
 
-            var canvasColor = getAlignmentColor(self, alignment),
-                outlineColor = canvasColor,
+            var alignmentColor = getAlignmentColor.call(self, alignment),
+                outlineColor = alignmentColor,
                 xBlockStart = (alignment.connectingStart - bpStart) / bpPerPixel,
                 xBlockEnd = (alignment.connectingEnd - bpStart) / bpPerPixel,
                 yStrokedLine = yRect + alignmentHeight / 2;
@@ -570,10 +572,10 @@ var igv = (function (igv) {
             if ((alignment.connectingEnd) < bpStart || alignment.connectingStart > bpEnd) return;
 
             if (alignment.mq <= 0) {
-                canvasColor = igv.addAlphaToRGB(canvasColor, "0.15");
+                alignmentColor = igv.addAlphaToRGB(alignmentColor, "0.15");
             }
 
-            igv.graphics.setProperties(ctx, {fillStyle: canvasColor, strokeStyle: outlineColor});
+            igv.graphics.setProperties(ctx, {fillStyle: alignmentColor, strokeStyle: outlineColor});
 
             igv.graphics.strokeLine(ctx, xBlockStart, yStrokedLine, xBlockEnd, yStrokedLine);
 
@@ -582,7 +584,7 @@ var igv = (function (igv) {
 
         function drawSingleAlignment(alignment, yRect, alignmentHeight) {
 
-            var alignmentColor = getAlignmentColor(self, alignment),
+            var alignmentColor = getAlignmentColor.call(self, alignment),
                 outlineColor = alignmentColor,
                 lastBlockEnd,
                 blocks = alignment.blocks,
@@ -819,9 +821,11 @@ var igv = (function (igv) {
     };
 
 
-    function getAlignmentColor(alignmentTrack, alignment) {
+    function getAlignmentColor(alignment) {
 
-        var option = alignmentTrack.colorBy, tagValue;
+        var alignmentTrack = this,
+            option = alignmentTrack.colorBy,
+            tagValue;
 
         switch (option) {
 
@@ -848,11 +852,14 @@ var igv = (function (igv) {
                     return alignmentTrack.parent.color;
                 }
                 else {
-                    //       if(typeof tagValue !== "string") {
-                    //           tagValue = String(tagValue);
-                    //       }
 
-                    return alignmentTrack.tagColors.getColor(tagValue);
+                    if (alignmentTrack.bamColorTag === alignmentTrack.colorByTag) {
+                        // UCSC style color option
+                        return "rgb(" + tagValue + ")";
+                    }
+                    else {
+                        return alignmentTrack.tagColors.getColor(tagValue);
+                    }
                 }
             default:
                 return alignmentTrack.parent.color;
