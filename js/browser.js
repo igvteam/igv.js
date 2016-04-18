@@ -153,9 +153,17 @@ var igv = (function (igv) {
             case "variant":
                 newTrack = new igv.VariantTrack(config);
                 break;
+
             case "alignment":
+
                 newTrack = new igv.BAMTrack(config, featureSource);
+
+                // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+                igv.presentAlert('testing 1 2 3 ...');
+                // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
                 break;
+
             case "data":  // deprecated
             case "wig":
                 newTrack = new igv.WIGTrack(config);
