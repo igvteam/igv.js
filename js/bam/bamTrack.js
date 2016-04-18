@@ -150,7 +150,7 @@ var igv = (function (igv) {
 
         menuItems.push(igv.colorPickerMenuItem(popover, this.trackView));
 
-        ['none', 'strand', 'tag'].forEach(function (key, i) {
+        ['none', 'strand', 'firstOfPairStrand', 'tag'].forEach(function (key, i) {
             menuItems.push(colorByMarkup(key, (key === self.alignmentTrack.colorBy), i));
         });
 
@@ -188,6 +188,7 @@ var igv = (function (igv) {
                 {
                     none: 'track color',
                     strand: 'read strand',
+                    firstOfPairStrand: 'first-of-pair strand',
                     tag: 'tag ' + (self.alignmentTrack.colorByTag ? '(' + self.alignmentTrack.colorByTag + ')' : ' ')
                 },
                 parts = [],
