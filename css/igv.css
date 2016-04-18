@@ -67,8 +67,15 @@ div[id="igvEncodeModal"] {
 
 .igv-grid-container-alert-dialog {
 
-    width:300px;
-    margin: 0 auto;
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: 45%;
+
+    margin-left: auto;
+    margin-right: auto;
+    /*max-width: 740px;*/
+    max-width: 300px;
 
     border-color: rgb(127, 127, 127);
     border-radius: 4px;
@@ -79,6 +86,21 @@ div[id="igvEncodeModal"] {
 
     background-color: white;
 }
+
+/*.igv-grid-container-alert-dialog {*/
+
+    /*width:300px;*/
+    /*margin: 0 auto;*/
+
+    /*border-color: rgb(127, 127, 127);*/
+    /*border-radius: 4px;*/
+    /*border-style: solid;*/
+    /*border-width: thin;*/
+
+    /*z-index: 1999;*/
+
+    /*background-color: white;*/
+/*}*/
 
 .igv-grid-container-colorpicker {
 
