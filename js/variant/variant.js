@@ -64,7 +64,22 @@ var igv = (function (igv) {
         variant.info = json.info;
 
         // Need to build a hash of calls for fast lookup
-        variant.calls = json.calls;
+        // Note from the GA4GH spec on call ID:
+        //
+        // The ID of the call set this variant call belongs to. If this field is not present,
+        // the ordering of the call sets from a SearchCallSetsRequest over this GAVariantSet
+        // is guaranteed to match the ordering of the calls on this GAVariant.
+        // The number of results will also be the same.
+        variant.calls = {};
+        var order = 0, id;
+        if(json.calls) {
+            json.calls.forEach(function (call) {
+                id = call.id || order;
+                variant.calls[id] = call;
+                order++;
+
+            })
+        }
 
         computeStart(variant);
 

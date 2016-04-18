@@ -100,6 +100,8 @@ var igv = (function (igv) {
      */
     igv.VariantTrack.prototype.computePixelHeight = function (features) {
 
+        var nCalls = this.featureSource.reader.callSets ? this.featureSource.reader.callSets.length : 0;
+
         if (this.displayMode === "COLLAPSED") {
             return this.collapsedHeight;
         }
@@ -112,7 +114,7 @@ var igv = (function (igv) {
 
                 });
             }
-            return Math.max(this.collapsedHeight, (maxRow + 1) * (this.displayMode === "SQUISHED" ? this.squishedRowHeight : this.expandedRowHeight));
+            return Math.max(this.collapsedHeight, (maxRow + 1) * (nCalls + 1) * (this.displayMode === "SQUISHED" ? this.squishedRowHeight : this.expandedRowHeight));
 
         }
 
