@@ -224,7 +224,7 @@ var igv = (function (igv) {
                         function () {
                             return "Color By Tag"
                         },
-                        ' ',
+                        self.alignmentTrack.colorByTag || ' ',
                         function () {
 
                             self.alignmentTrack.colorByTag = igv.dialog.$dialogInput.val().trim();
