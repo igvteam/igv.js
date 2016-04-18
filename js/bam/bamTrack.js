@@ -217,18 +217,21 @@ var igv = (function (igv) {
             item.click = function () {
 
                 igv.popover.hide();
-                self.alignmentTrack.colorBy = key;
                 if (key === 'tag') {
 
                     igv.dialog.configure($(self.trackView.trackDiv),
                         function () {
-                            return "Color By Tag"
+                            return "Tag Name"
                         },
                         self.alignmentTrack.colorByTag || ' ',
                         function () {
 
+                            self.alignmentTrack.colorBy = key;
+
                             self.alignmentTrack.colorByTag = igv.dialog.$dialogInput.val().trim();
+
                             self.alignmentTrack.tagColors = new igv.PaletteColorTable("Set1");
+
                             $('#color-by-tag').text(self.alignmentTrack.colorByTag);
                             self.trackView.update();
                             igv.dialog.hide();
@@ -238,6 +241,7 @@ var igv = (function (igv) {
                     igv.dialog.show();
 
                 } else {
+                    self.alignmentTrack.colorBy = key;
                     self.trackView.update();
                 }
             };
