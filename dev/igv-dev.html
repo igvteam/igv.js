@@ -243,6 +243,17 @@
                             type: 'vcf',
                             url: 'https://www.googleapis.com/genomics/v1beta2',
                             variantSetId: '10473108253681171589',
+                            includeCalls: false,
+                            name: 'Ga4gh variants'
+                            })">GA4Gh Variants (Global Alliance, Google server) - NO CALLS
+        </div>
+
+
+        <div onclick="igv.browser.loadTrack( {
+                            sourceType: 'ga4gh',
+                            type: 'vcf',
+                            url: 'https://www.googleapis.com/genomics/v1beta2',
+                            variantSetId: '10473108253681171589',
                             callSetIds: ['10473108253681171589-2'],
                             name: 'Ga4gh variants'
                             })">GA4Gh Variants (Global Alliance, Google server)

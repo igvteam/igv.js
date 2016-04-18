@@ -32,8 +32,10 @@ var igv = (function (igv) {
         this.url = config.url;
         this.variantSetId = config.variantSetId;
         this.callSetIds = config.callSetIds;
+        this.includeCalls = (config.includeCalls === undefined ? true : config.includeCalls);
 
     }
+
 
 
     igv.Ga4ghVariantReader.prototype.readFeatures = function (chr, bpStart, bpEnd) {
@@ -42,91 +44,98 @@ var igv = (function (igv) {
 
         return new Promise(function (fulfill, reject) {
 
-            getChrNameMap().then(function (chrNameMap) {
+            getCallSets().then(function (callSets) {
+                getChrNameMap().then(function (chrNameMap) {
 
-                var queryChr = chrNameMap.hasOwnProperty(chr) ? chrNameMap[chr] : chr,
-                    readURL = self.url + "/variants/search";
+                    var queryChr = chrNameMap.hasOwnProperty(chr) ? chrNameMap[chr] : chr,
+                        readURL = self.url + "/variants/search";
 
 
-                var p = igv.ga4ghSearch({
-                    url: readURL,
-                    fields: (self.callSetIds ? undefined : "nextPageToken,variants(id,variantSetId,names,referenceName,start,end,referenceBases,alternateBases,quality, filter, info)"),
-                    body: {
-                        "variantSetIds": [self.variantSetId],
-                        "callSetIds": (self.callSetIds ? self.callSetIds : undefined),
-                        "referenceName": queryChr,
-                        "start": bpStart.toString(),
-                        "end": bpEnd.toString(),
-                        "pageSize": "10000",
-                    },
-                    decode: function (json) {
-                        var variants = [];
+                    igv.ga4ghSearch({
+                        url: readURL,
+                        fields: (self.includeCalls ? undefined : "nextPageToken,variants(id,variantSetId,names,referenceName,start,end,referenceBases,alternateBases,quality, filter, info)"),
+                        body: {
+                            "variantSetIds": [self.variantSetId],
+                            "callSetIds": (self.callSetIds ? self.callSetIds : undefined),
+                            "referenceName": queryChr,
+                            "start": bpStart.toString(),
+                            "end": bpEnd.toString(),
+                            "pageSize": "10000"
+                        },
+                        decode: function (json) {
+                            var variants = [];
 
-                        // If a single call set id is specified filter out hom-ref calls
-                        //var filterHomeRef = myself.callSetIds && myself.callSetIds.length == 1;
-
-                        json.variants.forEach(function (json) {
-                            if (json.calls && json.calls.length === 1) {
-                                var allele1 = json.calls[0].genotype[0],
-                                    allele2 = json.calls[0].genotype[1],
-                                    variant;
-                                if (allele1 === 0 && allele2 === 0) {
-                                    return //gt = "HOMEREF"
-                                }
-                                else if (allele1 === allele2) {
-                                    gt = "HOMVAR"
-                                }
-                                else {
-                                    gt = "HETVAR";
-                                }
-                                variant = igv.createGAVariant(json);
-                                variant.genotype = gt;
-                                variants.push(variant);
-                            }
-                            else {
+                            json.variants.forEach(function (json) {
                                 variants.push(igv.createGAVariant(json));
-                            }
-                        });
+                            });
 
-                        return variants;
-                    }
-                });
-                p.then(fulfill).catch(function(error) {
-                    reject(error);
-                });
-            });
-
-
-            function getChrNameMap() {
-
-                return new Promise(function (fulfill, reject) {
-
-                    if (self.chrNameMap) {
-                        fulfill(self.chrNameMap);
-                    }
-
-                    else {
-                        self.readMetadata().then(function (json) {
-
-                            self.metadata = json.metadata;
-                            self.chrNameMap = {};
-                            if (json.referenceBounds && igv.browser) {
-                                json.referenceBounds.forEach(function (rb) {
-                                    var refName = rb.referenceName,
-                                        alias = igv.browser.genome.getChromosomeName(refName);
-                                    self.chrNameMap[alias] = refName;
-
-                                });
-                            }
-                            fulfill(self.chrNameMap);
-
-                        })
-                    }
-
-                });
-            }
-
+                            return variants;
+                        }
+                    }).then(fulfill).catch(reject);
+                }).catch(reject);  // chr name map
+            }).catch(reject);  // callsets
         });
+
+
+
+        function getCallSets() {
+
+            return new Promise(function (fulfill, reject) {
+                if (self.callSets) {
+                    fulfill(self.callSets);
+                }
+                else {
+
+                    var readURL = self.url + "/callsets/search";
+
+                    igv.ga4ghSearch({
+                        url: readURL,
+                        fields: "nextPageToken,callSets(id,name)",
+                        body: {
+                            "variantSetIds": [self.variantSetId],
+                            "pageSize": "10000"
+                        },
+                        decode: function (json) {
+                            return json.callSets;
+                        }
+                    }).then(function (callSets) {
+                        self.callSets = callSets;
+                        fulfill(callSets);
+                    }).catch(reject);
+                }
+            });
+        }
+
+
+        function getChrNameMap() {
+
+            return new Promise(function (fulfill, reject) {
+
+                if (self.chrNameMap) {
+                    fulfill(self.chrNameMap);
+                }
+
+                else {
+                    self.readMetadata().then(function (json) {
+
+                        self.metadata = json.metadata;
+                        self.chrNameMap = {};
+                        if (json.referenceBounds && igv.browser) {
+                            json.referenceBounds.forEach(function (rb) {
+                                var refName = rb.referenceName,
+                                    alias = igv.browser.genome.getChromosomeName(refName);
+                                self.chrNameMap[alias] = refName;
+
+                            });
+                        }
+                        fulfill(self.chrNameMap);
+
+                    })
+                }
+
+            });
+        }
+
     }
 
 
@@ -137,8 +146,9 @@ var igv = (function (igv) {
             entity: "variantsets",
             entityId: this.variantSetId
         });
-
     }
+
+
 
     return igv;
 

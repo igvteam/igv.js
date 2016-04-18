@@ -62,6 +62,8 @@ var igv = (function (igv) {
         variant.qual = json.quality;
         variant.filter = arrayToCommaString(json.filter);
         variant.info = json.info;
+
+        // Need to build a hash of calls for fast lookup
         variant.calls = json.calls;
 
         computeStart(variant);
