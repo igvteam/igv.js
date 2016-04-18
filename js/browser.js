@@ -157,11 +157,6 @@ var igv = (function (igv) {
             case "alignment":
 
                 newTrack = new igv.BAMTrack(config, featureSource);
-
-                // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-                igv.presentAlert('testing 1 2 3 ...');
-                // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-
                 break;
 
             case "data":  // deprecated
