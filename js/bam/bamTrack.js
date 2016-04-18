@@ -44,7 +44,6 @@ var igv = (function (igv) {
         this.visibilityWindow = config.visibilityWindow || 30000;     // 30kb default
 
         this.viewAsPairs = config.viewAsPairs;
-        this.tag = ' ';
 
         this.color = config.color || "rgb(185, 185, 185)";
 
@@ -146,49 +145,42 @@ var igv = (function (igv) {
     igv.BAMTrack.prototype.popupMenuItems = function (popover) {
 
         var self = this,
-            menuItems = [];
+            menuItems = [],
+            html = [];
 
         menuItems.push(igv.colorPickerMenuItem(popover, this.trackView));
 
         ['none', 'strand', 'tag'].forEach(function (key, i) {
-            menuItems.push( colorByMarkup(key, (key === self.alignmentTrack.colorBy), i) );
+            menuItems.push(colorByMarkup(key, (key === self.alignmentTrack.colorBy), i));
         });
 
-        menuItems.push( viewAsPairsMarkup() );
+        html.push('<div class="igv-track-menu-item igv-track-menu-border-top">');
+        html.push(true === self.viewAsPairs ? '<i class="fa fa-check fa-check-shim">' : '<i class="fa fa-check fa-check-shim fa-check-hidden">');
+        html.push('</i>');
+        html.push('View as pairs');
+        html.push('</div>');
+
+        menuItems.push({
+            object: $(html.join('')),
+            click: function () {
+                var $fa = $(this).find('i');
+
+                popover.hide();
+
+                self.viewAsPairs = !self.viewAsPairs;
+
+                if (true === self.viewAsPairs) {
+                    $fa.removeClass('fa-check-hidden');
+                } else {
+                    $fa.addClass('fa-check-hidden');
+                }
+
+                self.featureSource.setViewAsPairs(self.viewAsPairs);
+                self.trackView.update();
+            }
+        });
 
         return menuItems;
-
-        function viewAsPairsMarkup() {
-
-            var html = [];
-
-            html.push('<div class="igv-track-menu-item igv-track-menu-border-top">');
-            html.push(true === self.viewAsPairs ? '<i class="fa fa-check fa-check-shim">' : '<i class="fa fa-check fa-check-shim fa-check-hidden">');
-            html.push('</i>');
-            html.push('View as pairs');
-            html.push('</div>');
-
-            return {
-                object: $(html.join('')),
-                click: function () {
-                    var $fa = $(this).find('i');
-
-                    popover.hide();
-
-                    self.viewAsPairs = !self.viewAsPairs;
-
-                    if (true === self.viewAsPairs) {
-                        $fa.removeClass('fa-check-hidden');
-                    } else {
-                        $fa.addClass('fa-check-hidden');
-                    }
-
-                    self.featureSource.setViewAsPairs(self.viewAsPairs);
-                    self.trackView.update();
-                }
-            };
-
-        }
 
         function colorByMarkup(key, showCheck, index) {
 
@@ -196,7 +188,7 @@ var igv = (function (igv) {
                 {
                     none: 'track color',
                     strand: 'read strand',
-                    tag: 'tag ' + self.tag
+                    tag: 'tag ' + (self.alignmentTrack.colorByTag ? '(' + self.alignmentTrack.colorByTag + ')' : ' ')
                 },
                 parts = [],
                 item = {};
@@ -209,35 +201,34 @@ var igv = (function (igv) {
             parts.push('Color by: ');
             parts.push('</span>');
 
-            if (key === 'tag'){
+            if (key === 'tag') {
                 parts.push('<span id="color-by-tag">');
             } else {
                 parts.push('<span>');
             }
-            parts.push( lut[ key ] );
+            parts.push(lut[key]);
             parts.push('</span>');
 
             parts.push('</div>');
 
             item.object = $(parts.join(''));
 
-            item.click = function() {
+            item.click = function () {
 
                 igv.popover.hide();
+                self.alignmentTrack.colorBy = key;
                 if (key === 'tag') {
 
                     igv.dialog.configure($(self.trackView.trackDiv),
                         function () {
-                            return 'Color By Tag Name'
+                            return "Color By Tag"
                         },
-                        self.tag,
+                        ' ',
                         function () {
 
-                            self.alignmentTrack.colorBy = key;
-
-                            self.tag = igv.dialog.$dialogInput.val();
-                            $('#color-by-tag').text( self.tag );
-
+                            self.alignmentTrack.colorByTag = igv.dialog.$dialogInput.val().trim();
+                            self.alignmentTrack.tagColors = new igv.PaletteColorTable("Set1");
+                            $('#color-by-tag').text(self.alignmentTrack.colorByTag);
                             self.trackView.update();
                             igv.dialog.hide();
                         },
@@ -246,7 +237,6 @@ var igv = (function (igv) {
                     igv.dialog.show();
 
                 } else {
-                    self.alignmentTrack.colorBy = key;
                     self.trackView.update();
                 }
             };
@@ -254,6 +244,7 @@ var igv = (function (igv) {
             return item;
         }
     };
+
 
     function shadedBaseColor(qual, nucleotide, genomicLocation) {
 
@@ -288,6 +279,7 @@ var igv = (function (igv) {
         }
         return color;
     }
+
 
     CoverageTrack = function (config, parent) {
 
@@ -395,6 +387,7 @@ var igv = (function (igv) {
 
     }
 
+
     CoverageTrack.prototype.popupData = function (genomicLocation, xOffset, yOffset) {
 
         var coverageMap = this.featureSource.alignmentContainer.coverageMap,
@@ -445,6 +438,7 @@ var igv = (function (igv) {
         return nameValues;
 
     };
+
 
     AlignmentTrack = function (config, parent) {
 
@@ -587,8 +581,8 @@ var igv = (function (igv) {
 
         function drawSingleAlignment(alignment, yRect, alignmentHeight) {
 
-            var canvasColor = getAlignmentColor(self, alignment),
-                outlineColor = canvasColor,
+            var alignmentColor = getAlignmentColor(self, alignment),
+                outlineColor = alignmentColor,
                 lastBlockEnd,
                 blocks = alignment.blocks,
                 block,
@@ -597,10 +591,10 @@ var igv = (function (igv) {
             if ((alignment.start + alignment.lengthOnRef) < bpStart || alignment.start > bpEnd) return;
 
             if (alignment.mq <= 0) {
-                canvasColor = igv.addAlphaToRGB(canvasColor, "0.15");
+                alignmentColor = igv.addAlphaToRGB(alignmentColor, "0.15");
             }
 
-            igv.graphics.setProperties(ctx, {fillStyle: canvasColor, strokeStyle: outlineColor});
+            igv.graphics.setProperties(ctx, {fillStyle: alignmentColor, strokeStyle: outlineColor});
 
             for (b = 0; b < blocks.length; b++) {   // Can't use forEach here -- we need ability to break
 
@@ -670,7 +664,7 @@ var igv = (function (igv) {
                         yRect + alignmentHeight,
                         yRect + alignmentHeight,
                         yRect];
-                    igv.graphics.fillPolygon(ctx, x, y, {fillStyle: canvasColor});
+                    igv.graphics.fillPolygon(ctx, x, y, {fillStyle: alignmentColor});
                     if (alignment.mq <= 0) {
                         igv.graphics.strokePolygon(ctx, x, y, {strokeStyle: outlineColor});
                     }
@@ -691,14 +685,14 @@ var igv = (function (igv) {
                         yRect + alignmentHeight,
                         yRect + alignmentHeight,
                         yRect];
-                    igv.graphics.fillPolygon(ctx, x, y, {fillStyle: canvasColor});
+                    igv.graphics.fillPolygon(ctx, x, y, {fillStyle: alignmentColor});
                     if (alignment.mq <= 0) {
                         igv.graphics.strokePolygon(ctx, x, y, {strokeStyle: outlineColor});
                     }
                 }
                 else {
                     //      igv.graphics.fillRect(ctx, xBlockStart, yRect, widthBlock, height, {fillStyle: "white"});
-                    igv.graphics.fillRect(ctx, xBlockStart, yRect, widthBlock, alignmentHeight, {fillStyle: canvasColor});
+                    igv.graphics.fillRect(ctx, xBlockStart, yRect, widthBlock, alignmentHeight, {fillStyle: alignmentColor});
                     if (alignment.mq <= 0) {
                         ctx.save();
                         ctx.strokeStyle = outlineColor;
@@ -826,10 +820,9 @@ var igv = (function (igv) {
 
     function getAlignmentColor(alignmentTrack, alignment) {
 
-        var option = alignmentTrack.colorBy;
+        var option = alignmentTrack.colorBy, tagValue;
 
         switch (option) {
-
 
             case "strand":
                 return alignment.strand ? alignmentTrack.posStrandColor : alignmentTrack.negStrandColor;
@@ -848,7 +841,18 @@ var igv = (function (igv) {
                         console.log("ERROR. Paired alignments are either first or second.")
                     }
                 }
+            case "tag":
+                tagValue = alignment.tags()[alignmentTrack.colorByTag];
+                if (tagValue === undefined) {
+                    return alignmentTrack.parent.color;
+                }
+                else {
+                    //       if(typeof tagValue !== "string") {
+                    //           tagValue = String(tagValue);
+                    //       }
 
+                    return alignmentTrack.tagColors.getColor(tagValue);
+                }
             default:
                 return alignmentTrack.parent.color;
         }

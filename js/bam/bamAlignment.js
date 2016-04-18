@@ -109,15 +109,6 @@ var igv = (function (igv) {
 
     igv.BamAlignment.prototype.tags = function () {
 
-        if (!this.tagDict) {
-            if (this.tagBA) {
-                this.tagDict = decodeTags(this.tagBA);
-                this.tagBA = undefined;
-            } else {
-                this.tagDict = {};  // Mark so we don't try again.  The record has not tags
-            }
-        }
-
         function decodeTags(ba) {
 
             var p = 0,
@@ -166,13 +157,25 @@ var igv = (function (igv) {
             }
             return tags;
         }
+
+        if (!this.tagDict) {
+            if (this.tagBA) {
+                this.tagDict = decodeTags(this.tagBA);
+                this.tagBA = undefined;
+            } else {
+                this.tagDict = {};  // Mark so we don't try again.  The record has not tags
+            }
+        }
+        return this.tagDict;
+
     }
 
     igv.BamAlignment.prototype.popupData = function (genomicLocation) {
 
         // if the user clicks on a base next to an insertion, show just the
         // inserted bases in a popup (like in desktop IGV).
-        var nameValues = [];
+        var nameValues = [], isFirst, tagDict;
+
         if(this.insertions) {
             for(var i = 0; i < this.insertions.length; i += 1) {
                 var ins_start = this.insertions[i].start;
@@ -184,7 +187,6 @@ var igv = (function (igv) {
             }
         }
 
-        var isFirst;
         nameValues.push({ name: 'Read Name', value: this.readName });
 
         // Sample
@@ -222,17 +224,17 @@ var igv = (function (igv) {
         }
 
         nameValues.push("<hr>");
-        this.tags();
+        tagDict = this.tags();
         isFirst = true;
-        for (var key in this.tagDict) {
+        for (var key in tagDict) {
 
-            if (this.tagDict.hasOwnProperty(key)) {
+            if (tagDict.hasOwnProperty(key)) {
 
                 if (isFirst) {
-                    nameValues.push({ name: key, value: this.tagDict[key], borderTop: true });
+                    nameValues.push({ name: key, value: tagDict[key], borderTop: true });
                     isFirst = false;
                 } else {
-                    nameValues.push({ name: key, value: this.tagDict[key] });
+                    nameValues.push({ name: key, value: tagDict[key] });
                 }
 
             }
