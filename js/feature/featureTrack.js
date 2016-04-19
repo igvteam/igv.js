@@ -32,9 +32,9 @@ var igv = (function (igv) {
         this.displayMode = config.displayMode || "COLLAPSED";    // COLLAPSED | EXPANDED | SQUISHED
         this.labelDisplayMode = config.labelDisplayMode;
 
-        this.collapsedHeight = config.collapsedHeight || this.height;
-        this.expandedRowHeight = config.expandedRowHeight || 30;
-        this.squishedRowHeight = config.squishedRowHeight || 15;
+        this.variantHeight = config.variantHeight || this.height;
+        this.squishedSampleHeight = config.squishedSampleHeight || 30;
+        this.expandedSampleHeight = config.expandedSampleHeight || 15;
 
         this.featureHeight = config.featureHeight || 14;
 
@@ -112,7 +112,7 @@ var igv = (function (igv) {
     igv.FeatureTrack.prototype.computePixelHeight = function (features) {
 
         if (this.displayMode === "COLLAPSED") {
-            return this.collapsedHeight;
+            return this.variantHeight;
         }
         else {
             var maxRow = 0;
@@ -123,7 +123,7 @@ var igv = (function (igv) {
 
                 });
             }
-            return Math.max(this.collapsedHeight, (maxRow + 1) * (this.displayMode === "SQUISHED" ? this.squishedRowHeight : this.expandedRowHeight));
+            return Math.max(this.variantHeight, (maxRow + 1) * (this.displayMode === "SQUISHED" ? this.expandedSampleHeight : this.squishedSampleHeight));
 
         }
 
@@ -173,7 +173,7 @@ var igv = (function (igv) {
                 row;
 
             if (this.displayMode != "COLLAPSED") {
-                row = (Math.floor)(this.displayMode === "SQUISHED" ? yOffset / this.squishedRowHeight : yOffset / this.expandedRowHeight);
+                row = (Math.floor)(this.displayMode === "SQUISHED" ? yOffset / this.expandedSampleHeight : yOffset / this.squishedSampleHeight);
             }
 
             if (featureList && featureList.length > 0) {
@@ -305,10 +305,10 @@ var igv = (function (igv) {
         h = this.featureHeight;
         if (this.displayMode === "SQUISHED" && feature.row != undefined) {
             h = this.featureHeight / 2;
-            py = this.squishedRowHeight * feature.row + 2;
+            py = this.expandedSampleHeight * feature.row + 2;
         }
         else if (this.displayMode === "EXPANDED" && feature.row != undefined) {
-            py = this.expandedRowHeight * feature.row + 5;
+            py = this.squishedSampleHeight * feature.row + 5;
         } else {  // collapsed
             py = 5;
         }
@@ -480,7 +480,7 @@ var igv = (function (igv) {
         var py = 5, h = 10; // defaults borrowed from renderFeature above
 
 
-        var rowHeight = (this.displayMode === "EXPANDED") ? this.expandedRowHeight : this.squishedRowHeight;
+        var rowHeight = (this.displayMode === "EXPANDED") ? this.squishedSampleHeight : this.expandedSampleHeight;
 
         // console.log("row height = " + rowHeight);
 

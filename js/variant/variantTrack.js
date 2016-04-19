@@ -37,16 +37,14 @@ var igv = (function (igv) {
         this.displayMode = config.displayMode || "COLLAPSED";    // COLLAPSED | EXPANDED | SQUISHED
         this.labelDisplayMode = config.labelDisplayMode;
 
-        this.collapsedHeight = config.collapsedHeight || this.height;
-        this.expandedRowHeight = config.expandedRowHeight || 30;
-        this.squishedRowHeight = config.squishedRowHeight || 15;
+        this.variantHeight = config.variantHeight || 10;
+        this.squishedSampleHeight = config.squishedSampleHeight || 1;
+        this.expandedSampleHeight = config.expandedSampleHeight || 10;
 
         this.featureHeight = config.featureHeight || 14;
 
         this.featureSource = new igv.FeatureSource(config);
 
-        // Set the render function.  This can optionally be passed in the config
-        this.render = renderVariant;
         this.homvarColor = "rgb(17,248,254)";
         this.hetvarColor = "rgb(34,12,253)";
 
@@ -90,6 +88,11 @@ var igv = (function (igv) {
         });
     }
 
+    // TODO -- refactor this, its pretty awful
+    function getCallSets() {
+        return this.featureSource.reader.callSets;
+    }
+
 
     /**
      * The required height in pixels required for the track content.   This is not the visible track height, which
@@ -100,10 +103,13 @@ var igv = (function (igv) {
      */
     igv.VariantTrack.prototype.computePixelHeight = function (features) {
 
-        var nCalls = this.featureSource.reader.callSets ? this.featureSource.reader.callSets.length : 0;
+        var callSets = getCallSets.call(this),
+            nCalls = callSets ? callSets.length : 0,
+            nRows,
+            h;
 
         if (this.displayMode === "COLLAPSED") {
-            return this.collapsedHeight;
+            return 10 + this.variantHeight;
         }
         else {
             var maxRow = 0;
@@ -114,7 +120,16 @@ var igv = (function (igv) {
 
                 });
             }
-            return Math.max(this.collapsedHeight, (maxRow + 1) * (nCalls + 1) * (this.displayMode === "SQUISHED" ? this.squishedRowHeight : this.expandedRowHeight));
+            nRows = maxRow + 1;
+
+            h = 10 + nRows * this.variantHeight;
+
+            if((nCalls * nRows * this.expandedSampleHeight) > 2000) {
+                this.expandedSampleHeight = Math.max(1, 2000 / (nCalls * nRows));
+            }
+
+
+           return h +  nCalls * nRows * (this.displayMode === "EXPANDED" ? this.expandedSampleHeight : this.squishedSampleHeight);
 
         }
 
@@ -129,18 +144,22 @@ var igv = (function (igv) {
             bpStart = options.bpStart,
             pixelWidth = options.pixelWidth,
             pixelHeight = options.pixelHeight,
-            bpEnd = bpStart + pixelWidth * bpPerPixel + 1;
+            bpEnd = bpStart + pixelWidth * bpPerPixel + 1,
+            callSets = this.getCallSets();
 
         igv.graphics.fillRect(ctx, 0, 0, pixelWidth, pixelHeight, {'fillStyle': "rgb(255, 255, 255)"});
 
 
         if (featureList) {
+            for (var variant, i = 0, len = featureList.length; i < len; i++) {
+                variant = featureList[i];
+                if (variant.end < bpStart) continue;
+                if (variant.start > bpEnd) break;
+                renderVariant.call(this, variant, bpStart, bpPerPixel, pixelHeight, ctx);
 
-            for (var gene, i = 0, len = featureList.length; i < len; i++) {
-                gene = featureList[i];
-                if (gene.end < bpStart) continue;
-                if (gene.start > bpEnd) break;
-                track.render.call(this, gene, bpStart, bpPerPixel, pixelHeight, ctx);
+                if(callSets && variant.callSets) {
+                    // Render callsets
+                }
             }
         }
         else {
@@ -164,7 +183,7 @@ var igv = (function (igv) {
                 row;
 
             if (this.displayMode != "COLLAPSED") {
-                row = (Math.floor)(this.displayMode === "SQUISHED" ? yOffset / this.squishedRowHeight : yOffset / this.expandedRowHeight);
+                row = (Math.floor)(this.displayMode === "SQUISHED" ? yOffset / this.expandedSampleHeight : yOffset / this.squishedSampleHeight);
             }
 
             if (featureList && featureList.length > 0) {
@@ -268,8 +287,8 @@ var igv = (function (igv) {
     function renderVariant(variant, bpStart, xScale, pixelHeight, ctx) {
 
         var px, px1, pw,
-            py = 20,
-            h = 10,
+            py = 10 + ("COLLAPSED" === this.displayMode ? this.variantHeight : variant.row * this.variantHeight),
+            h = this.variantHeight,
             style;
 
 
