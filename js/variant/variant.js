@@ -74,7 +74,7 @@ var igv = (function (igv) {
         var order = 0, id;
         if(json.calls) {
             json.calls.forEach(function (call) {
-                id = call.id || order;
+                id = call.callSetId;
                 variant.calls[id] = call;
                 order++;
 

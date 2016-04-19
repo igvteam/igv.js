@@ -37,7 +37,6 @@ var igv = (function (igv) {
     }
 
 
-
     igv.Ga4ghVariantReader.prototype.readFeatures = function (chr, bpStart, bpEnd) {
 
         var self = this;
@@ -53,7 +52,6 @@ var igv = (function (igv) {
 
                     igv.ga4ghSearch({
                         url: readURL,
-                        fields: (self.includeCalls ? undefined : "nextPageToken,variants(id,variantSetId,names,referenceName,start,end,referenceBases,alternateBases,quality, filter, info)"),
                         body: {
                             "variantSetIds": [self.variantSetId],
                             "callSetIds": (self.callSetIds ? self.callSetIds : undefined),
@@ -77,7 +75,6 @@ var igv = (function (igv) {
         });
 
 
-
         function getCallSets() {
 
             return new Promise(function (fulfill, reject) {
@@ -96,7 +93,22 @@ var igv = (function (igv) {
                             "pageSize": "10000"
                         },
                         decode: function (json) {
-                            return json.callSets;
+                            // If specific callSetIds are specified filter to those
+                            if (self.callSetIds) {
+                                var filteredCallSets = [],
+                                    csIdSet = new Set();
+
+                                csIdSet.addAll(self.callSetIds);
+                                json.callSets.forEach(function (cs) {
+                                    if (csIdSet.has(cs.id)) {
+                                        filteredCallSets.push(cs);
+                                    }
+                                });
+                                return filteredCallSets;
+                            }
+                            else {
+                                return json.callSets;
+                            }
                         }
                     }).then(function (callSets) {
                         self.callSets = callSets;
@@ -147,7 +159,6 @@ var igv = (function (igv) {
             entityId: this.variantSetId
         });
     }
-
 
 
     return igv;

@@ -38,15 +38,19 @@ var igv = (function (igv) {
         this.labelDisplayMode = config.labelDisplayMode;
 
         this.variantHeight = config.variantHeight || 10;
-        this.squishedSampleHeight = config.squishedSampleHeight || 1;
-        this.expandedSampleHeight = config.expandedSampleHeight || 10;
+        this.squishedCallHeight = config.squishedCallHeight || 1;
+        this.expandedCallHeight = config.expandedCallHeight || 10;
 
         this.featureHeight = config.featureHeight || 14;
 
         this.featureSource = new igv.FeatureSource(config);
 
+        this.homrefColor = "rgb(200, 200, 200)"
         this.homvarColor = "rgb(17,248,254)";
-        this.hetvarColor = "rgb(34,12,253)";
+        this.hetColor = "rgb(34,12,253)";
+
+
+        this.nRows = 1;  // Computed dynamically
 
     };
 
@@ -109,13 +113,13 @@ var igv = (function (igv) {
             h;
 
         if (this.displayMode === "COLLAPSED") {
+            this.nRows = 1;
             return 10 + this.variantHeight;
         }
         else {
             var maxRow = 0;
             if (features && (typeof features.forEach === "function")) {
                 features.forEach(function (feature) {
-
                     if (feature.row && feature.row > maxRow) maxRow = feature.row;
 
                 });
@@ -123,13 +127,15 @@ var igv = (function (igv) {
             nRows = maxRow + 1;
 
             h = 10 + nRows * this.variantHeight;
+            this.nRows = nRows;  // Needed in draw function
 
-            if((nCalls * nRows * this.expandedSampleHeight) > 2000) {
-                this.expandedSampleHeight = Math.max(1, 2000 / (nCalls * nRows));
+
+            if ((nCalls * nRows * this.expandedCallHeight) > 2000) {
+                this.expandedCallHeight = Math.max(1, 2000 / (nCalls * nRows));
             }
 
 
-           return h +  nCalls * nRows * (this.displayMode === "EXPANDED" ? this.expandedSampleHeight : this.squishedSampleHeight);
+            return h + nCalls * nRows * (this.displayMode === "EXPANDED" ? this.expandedCallHeight : this.squishedCallHeight);
 
         }
 
@@ -145,20 +151,65 @@ var igv = (function (igv) {
             pixelWidth = options.pixelWidth,
             pixelHeight = options.pixelHeight,
             bpEnd = bpStart + pixelWidth * bpPerPixel + 1,
-            callSets = this.getCallSets();
+            variantBandHeight = 10 + (this.nRows * this.variantHeight),
+            callHeight = ("EXPANDED" === this.displayMode ? this.expandedCallHeight : this.squishedCallHeight),
+            px, px1, pw, py, h, style, i, variant, call, callSet, j, allRef, allVar;
+
+        callSets = getCallSets.call(this);
 
         igv.graphics.fillRect(ctx, 0, 0, pixelWidth, pixelHeight, {'fillStyle': "rgb(255, 255, 255)"});
 
+        if (callSets && callSets.length > 0 && "COLLAPSED" !== this.displayMode) {
+            igv.graphics.strokeLine(ctx, 0, variantBandHeight, pixelWidth, variantBandHeight, {strokeStyle: 'gray'});
+        }
 
         if (featureList) {
-            for (var variant, i = 0, len = featureList.length; i < len; i++) {
+            for (i = 0, len = featureList.length; i < len; i++) {
                 variant = featureList[i];
                 if (variant.end < bpStart) continue;
                 if (variant.start > bpEnd) break;
-                renderVariant.call(this, variant, bpStart, bpPerPixel, pixelHeight, ctx);
 
-                if(callSets && variant.callSets) {
-                    // Render callsets
+                py = 10 + ("COLLAPSED" === this.displayMode ? 0 : variant.row * this.variantHeight);
+                h = this.variantHeight;
+
+                px = Math.round((variant.start - bpStart) / bpPerPixel);
+                px1 = Math.round((variant.end - bpStart) / bpPerPixel);
+                pw = Math.max(1, px1 - px);
+                if (pw < 3) {
+                    pw = 3;
+                    px -= 1;
+                }
+
+                ctx.fillStyle = this.color;
+                ctx.fillRect(px, py, pw, h);
+
+
+                if (callSets && variant.calls && "COLLAPSED" !== this.displayMode) {
+
+                    for (j = 0; j < callSets.length; j++) {
+                        callSet = callSets[j];
+                        call = variant.calls[callSet.id];
+                        if (call) {
+
+                            // Determine genotype
+                            allVar = allRef = true;  // until proven otherwise
+                            call.genotype.forEach(function (g) {
+                                if (g != 0) allRef = false;
+                                if (g == 0) allVar = false;
+                            });
+
+                            if (allRef) {
+                                ctx.fillStyle = this.homrefColor;
+                            } else if (allVar) {
+                                ctx.fillStyle = this.homvarColor;
+                            } else {
+                                ctx.fillStyle = this.hetColor;
+                            }
+
+                            py = variantBandHeight + (j + variant.row) * callHeight;
+                            ctx.fillRect(px, py, pw, h);
+                        }
+                    }
                 }
             }
         }
@@ -183,7 +234,7 @@ var igv = (function (igv) {
                 row;
 
             if (this.displayMode != "COLLAPSED") {
-                row = (Math.floor)(this.displayMode === "SQUISHED" ? yOffset / this.expandedSampleHeight : yOffset / this.squishedSampleHeight);
+                row = (Math.floor)(this.displayMode === "SQUISHED" ? yOffset / this.expandedCallHeight : yOffset / this.squishedCallHeight);
             }
 
             if (featureList && featureList.length > 0) {
@@ -273,50 +324,6 @@ var igv = (function (igv) {
         return menuItems;
 
     };
-
-
-
-    /**
-     *
-     * @param variant
-     * @param bpStart  genomic location of the left edge of the current canvas
-     * @param xScale  scale in base-pairs per pixel
-     * @param pixelHeight  pixel height of the current canvas
-     * @param ctx  the canvas 2d context
-     */
-    function renderVariant(variant, bpStart, xScale, pixelHeight, ctx) {
-
-        var px, px1, pw,
-            py = 10 + ("COLLAPSED" === this.displayMode ? this.variantHeight : variant.row * this.variantHeight),
-            h = this.variantHeight,
-            style;
-
-
-        px = Math.round((variant.start - bpStart) / xScale);
-        px1 = Math.round((variant.end - bpStart) / xScale);
-        pw = Math.max(1, px1 - px);
-        if (pw < 3) {
-            pw = 3;
-            px -= 1;
-        }
-
-        switch (variant.genotype) {
-            case "HOMVAR":
-                style = this.homvarColor;
-                break;
-            case "HETVAR":
-                style = this.hetvarColor;
-                break;
-            default:
-                style = this.color;
-        }
-
-        ctx.fillStyle = style;
-
-        ctx.fillRect(px, py, pw, h);
-
-
-    }
 
 
     return igv;
