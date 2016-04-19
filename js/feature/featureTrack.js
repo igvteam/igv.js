@@ -33,8 +33,8 @@ var igv = (function (igv) {
         this.labelDisplayMode = config.labelDisplayMode;
 
         this.variantHeight = config.variantHeight || this.height;
-        this.squishedSampleHeight = config.squishedSampleHeight || 30;
-        this.expandedSampleHeight = config.expandedSampleHeight || 15;
+        this.squishedCallHeight = config.squishedCallHeight || 30;
+        this.expandedCallHeight = config.expandedCallHeight || 15;
 
         this.featureHeight = config.featureHeight || 14;
 
@@ -123,7 +123,7 @@ var igv = (function (igv) {
 
                 });
             }
-            return Math.max(this.variantHeight, (maxRow + 1) * (this.displayMode === "SQUISHED" ? this.expandedSampleHeight : this.squishedSampleHeight));
+            return Math.max(this.variantHeight, (maxRow + 1) * (this.displayMode === "SQUISHED" ? this.expandedCallHeight : this.squishedCallHeight));
 
         }
 
@@ -173,7 +173,7 @@ var igv = (function (igv) {
                 row;
 
             if (this.displayMode != "COLLAPSED") {
-                row = (Math.floor)(this.displayMode === "SQUISHED" ? yOffset / this.expandedSampleHeight : yOffset / this.squishedSampleHeight);
+                row = (Math.floor)(this.displayMode === "SQUISHED" ? yOffset / this.expandedCallHeight : yOffset / this.squishedCallHeight);
             }
 
             if (featureList && featureList.length > 0) {
@@ -305,10 +305,10 @@ var igv = (function (igv) {
         h = this.featureHeight;
         if (this.displayMode === "SQUISHED" && feature.row != undefined) {
             h = this.featureHeight / 2;
-            py = this.expandedSampleHeight * feature.row + 2;
+            py = this.expandedCallHeight * feature.row + 2;
         }
         else if (this.displayMode === "EXPANDED" && feature.row != undefined) {
-            py = this.squishedSampleHeight * feature.row + 5;
+            py = this.squishedCallHeight * feature.row + 5;
         } else {  // collapsed
             py = 5;
         }
@@ -480,7 +480,7 @@ var igv = (function (igv) {
         var py = 5, h = 10; // defaults borrowed from renderFeature above
 
 
-        var rowHeight = (this.displayMode === "EXPANDED") ? this.squishedSampleHeight : this.expandedSampleHeight;
+        var rowHeight = (this.displayMode === "EXPANDED") ? this.squishedCallHeight : this.expandedCallHeight;
 
         // console.log("row height = " + rowHeight);
 
