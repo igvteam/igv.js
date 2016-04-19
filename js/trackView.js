@@ -293,6 +293,8 @@ var igv = (function (igv) {
      */
     igv.TrackView.prototype.setContentHeight = function (newHeight) {
 
+        if (this.track.minHeight) newHeight = Math.max(this.track.minHeight, newHeight);
+
         var contentHeightStr = newHeight + "px";
 
         // Optionally adjust the trackDiv and viewport height to fit the content height, within min/max bounds
