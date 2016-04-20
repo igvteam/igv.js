@@ -30,6 +30,7 @@ var igv = (function (igv) {
 
     function canBePaired(alignment) {
         return alignment.isPaired() &&
+            alignment.mate &&
             alignment.isMateMapped() &&
             alignment.chr === alignment.mate.chr &&
             (alignment.isFirstOfPair() || alignment.isSecondOfPair()) && !(alignment.isSecondary() || alignment.isSupplementary());
