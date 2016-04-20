@@ -252,10 +252,20 @@
                             sourceType: 'ga4gh',
                             type: 'vcf',
                             url: 'https://www.googleapis.com/genomics/v1beta2',
-                            variantSetId: '10473108253681171589',
+                            variantSetId: ['10473108253681171589'],
                             callSetIds: ['10473108253681171589-2'],
                             name: 'Ga4gh variants'
                             })">GA4Gh Variants - 1 callset (Global Alliance, Google server)
+        </div>
+
+        <div onclick="igv.browser.loadTrack( {
+                            sourceType: 'ga4gh',
+                            type: 'vcf',
+                            url: 'https://www.googleapis.com/genomics/v1beta2',
+                            variantSetId: ['10473108253681171589'],
+                            includeCalls: false,
+                            name: 'Ga4gh variants'
+                            })">GA4Gh Variants - NO callsets (Global Alliance, Google server)
         </div>
 
         <div onclick="igv.browser.loadTrack({
@@ -473,7 +483,7 @@
 
         div = $("#myDiv")[0];
         options = {
-            showKaryo: false,
+            showKaryo: true,
             showNavigation: true,
             //genome: "hg19",
             reference: {

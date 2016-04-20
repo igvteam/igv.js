@@ -47,9 +47,10 @@ var igv = (function (igv) {
 
         this.featureSource = new igv.FeatureSource(config);
 
-        this.homrefColor = "rgb(200, 200, 200)"
-        this.homvarColor = "rgb(17,248,254)";
-        this.hetColor = "rgb(34,12,253)";
+        this.homrefColor = config.homrefColor || "rgb(200, 200, 200)"
+        this.homvarColor = config.homvarColor || "rgb(17,248,254)";
+        this.hetvarColor = config.hetvarColor || "rgb(34,12,253)";
+        this.includeCalls = (config.includeCalls === undefined ? true : config.includeCalls);
 
 
         this.nRows = 1;  // Computed dynamically
@@ -190,7 +191,7 @@ var igv = (function (igv) {
                 ctx.fillRect(px, py, pw, h);
 
 
-                if (callSets && variant.calls && "COLLAPSED" !== this.displayMode) {
+                if (callSets && self.includeCalls &&  variant.calls && "COLLAPSED" !== this.displayMode) {
                     h = callHeight;
                     for (j = 0; j < callSets.length; j++) {
                         callSet = callSets[j];
@@ -209,7 +210,7 @@ var igv = (function (igv) {
                             } else if (allVar) {
                                 ctx.fillStyle = this.homvarColor;
                             } else {
-                                ctx.fillStyle = this.hetColor;
+                                ctx.fillStyle = this.hetvarColor;
                             }
 
                             py = this.variantBandHeight + vGap + (j + variant.row) * callHeight;
@@ -265,7 +266,7 @@ var igv = (function (igv) {
                                     Array.prototype.push.apply(popupData, variant.popupData(genomicLocation));
                                 }
                             }
-                            else {
+                            else if(self.includeCalls) {
                                 // Call
                                 callSets = getCallSets.call(self);
                                 if (callSets && variant.calls) {

@@ -49,11 +49,11 @@ var igv = (function (igv) {
                     var queryChr = chrNameMap.hasOwnProperty(chr) ? chrNameMap[chr] : chr,
                         readURL = self.url + "/variants/search";
 
-
                     igv.ga4ghSearch({
                         url: readURL,
+                        fields: (self.includeCalls ? undefined : "nextPageToken,variants(id,variantSetId,names,referenceName,start,end,referenceBases,alternateBases,quality, filter, info)"),
                         body: {
-                            "variantSetIds": [self.variantSetId],
+                            "variantSetIds": (Array.isArray(self.variantSetId) ? self.variantSetId : [self.variantSetId]),
                             "callSetIds": (self.callSetIds ? self.callSetIds : undefined),
                             "referenceName": queryChr,
                             "start": bpStart.toString(),
@@ -78,7 +78,10 @@ var igv = (function (igv) {
         function getCallSets() {
 
             return new Promise(function (fulfill, reject) {
-                if (self.callSets) {
+                if(self.includeCalls === false) {
+                    fulfill([]);
+                }
+                else if (self.callSets) {
                     fulfill(self.callSets);
                 }
                 else {
@@ -89,7 +92,7 @@ var igv = (function (igv) {
                         url: readURL,
                         fields: "nextPageToken,callSets(id,name)",
                         body: {
-                            "variantSetIds": [self.variantSetId],
+                            "variantSetIds":  (Array.isArray(self.variantSetId) ? self.variantSetId : [self.variantSetId]),
                             "pageSize": "10000"
                         },
                         decode: function (json) {
