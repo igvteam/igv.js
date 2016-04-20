@@ -178,16 +178,16 @@ var igv = (function (igv) {
         this.chr = tokens[0]; // TODO -- use genome aliases
         this.pos = parseInt(tokens[1]);
         this.names = tokens[2];    // id in VCF
-        this.ref = tokens[3];
-        this.alt = tokens[4];
-        this.qual = parseInt(tokens[5]);
+        this.referenceBases = tokens[3];
+        this.alternateBases = tokens[4];
+        this.quality = parseInt(tokens[5]);
         this.filter = tokens[6];
         this.info = tokens[7];
 
         // "ids" ("names" in ga4gh)
 
         //Alleles
-        altTokens = this.alt.split(",");
+        altTokens = this.alternateBases.split(",");
 
         if (altTokens.length > 0) {
 
@@ -200,7 +200,7 @@ var igv = (function (igv) {
                 var a, s, e, diff;
                 if (alt.length > 0) {
 
-                    diff = self.ref.length - alt.length;
+                    diff = self.referenceBases.length - alt.length;
 
                     if (diff > 0) {
                         // deletion, assume left padded
@@ -208,7 +208,7 @@ var igv = (function (igv) {
                         e = s + diff;
                     } else if (diff < 0) {
                         // Insertion, assume left padded, insertion begins to "right" of last ref base
-                        s = self.pos - 1 + self.ref.length;
+                        s = self.pos - 1 + self.referenceBases.length;
                         e = s + 1;     // Insertion between s & 3
                     }
                     else {
@@ -239,9 +239,9 @@ var igv = (function (igv) {
 
         fields = [
             {name: "Names", value: this.names},
-            {name: "Ref", value: this.ref},
-            {name: "Alt", value: this.alt},
-            {name: "Qual", value: this.qual},
+            {name: "Ref", value: this.referenceBases},
+            {name: "Alt", value: this.alternateBases},
+            {name: "Qual", value: this.quality},
             {name: "Filter", value: this.filter},
             "<hr>"
         ];

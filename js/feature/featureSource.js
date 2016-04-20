@@ -234,7 +234,7 @@ var igv = (function (igv) {
                     start = feature.start;
 
                 for (r = 0; r < len; r++) {
-                    if (start > rows[r]) {
+                    if (start >= rows[r]) {
                         feature.row = r;
                         rows[r] = feature.end;
                         return;

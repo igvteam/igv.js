@@ -30,6 +30,8 @@
 
 var igv = (function (igv) {
 
+    var vGap = 2;
+
     igv.VariantTrack = function (config) {
 
         igv.configTrack(this, config);
@@ -126,7 +128,7 @@ var igv = (function (igv) {
             }
             nRows = maxRow + 1;
 
-            h = 10 + nRows * this.variantHeight;
+            h = 10 + nRows * (this.variantHeight + vGap);
             this.nRows = nRows;  // Needed in draw function
 
 
@@ -135,7 +137,7 @@ var igv = (function (igv) {
             }
 
 
-            return h + nCalls * nRows * (this.displayMode === "EXPANDED" ? this.expandedCallHeight : this.squishedCallHeight);
+            return h + vGap + nCalls * nRows * (this.displayMode === "EXPANDED" ? this.expandedCallHeight : this.squishedCallHeight);
 
         }
 
@@ -151,16 +153,17 @@ var igv = (function (igv) {
             pixelWidth = options.pixelWidth,
             pixelHeight = options.pixelHeight,
             bpEnd = bpStart + pixelWidth * bpPerPixel + 1,
-            variantBandHeight = 10 + (this.nRows * this.variantHeight),
             callHeight = ("EXPANDED" === this.displayMode ? this.expandedCallHeight : this.squishedCallHeight),
             px, px1, pw, py, h, style, i, variant, call, callSet, j, allRef, allVar;
 
-        callSets = getCallSets.call(this);
+        this.variantBandHeight = 10 + this.nRows * (this.variantHeight + vGap),
+
+            callSets = getCallSets.call(this);
 
         igv.graphics.fillRect(ctx, 0, 0, pixelWidth, pixelHeight, {'fillStyle': "rgb(255, 255, 255)"});
 
         if (callSets && callSets.length > 0 && "COLLAPSED" !== this.displayMode) {
-            igv.graphics.strokeLine(ctx, 0, variantBandHeight, pixelWidth, variantBandHeight, {strokeStyle: 'gray'});
+            igv.graphics.strokeLine(ctx, 0, this.variantBandHeight, pixelWidth, this.variantBandHeight, {strokeStyle: 'rgb(224,224,224) '});
         }
 
         if (featureList) {
@@ -169,7 +172,7 @@ var igv = (function (igv) {
                 if (variant.end < bpStart) continue;
                 if (variant.start > bpEnd) break;
 
-                py = 10 + ("COLLAPSED" === this.displayMode ? 0 : variant.row * this.variantHeight);
+                py = 10 + ("COLLAPSED" === this.displayMode ? 0 : variant.row * (this.variantHeight + vGap));
                 h = this.variantHeight;
 
                 px = Math.round((variant.start - bpStart) / bpPerPixel);
@@ -178,6 +181,9 @@ var igv = (function (igv) {
                 if (pw < 3) {
                     pw = 3;
                     px -= 1;
+                } else if (pw > 5) {
+                    px += 1;
+                    pw -= 2;
                 }
 
                 ctx.fillStyle = this.color;
@@ -185,7 +191,7 @@ var igv = (function (igv) {
 
 
                 if (callSets && variant.calls && "COLLAPSED" !== this.displayMode) {
-
+                    h = callHeight;
                     for (j = 0; j < callSets.length; j++) {
                         callSet = callSets[j];
                         call = variant.calls[callSet.id];
@@ -206,7 +212,7 @@ var igv = (function (igv) {
                                 ctx.fillStyle = this.hetColor;
                             }
 
-                            py = variantBandHeight + (j + variant.row) * callHeight;
+                            py = this.variantBandHeight + vGap + (j + variant.row) * callHeight;
                             ctx.fillRect(px, py, pw, h);
                         }
                     }
@@ -229,65 +235,84 @@ var igv = (function (igv) {
         if (this.featureSource.featureCache) {
 
             var chr = igv.browser.referenceFrame.chr,  // TODO -- this should be passed in
-                tolerance = 2 * igv.browser.referenceFrame.bpPerPixel,  // We need some tolerance around genomicLocation, start with +/- 2 pixels
+                tolerance = Math.floor(2 * igv.browser.referenceFrame.bpPerPixel),  // We need some tolerance around genomicLocation, start with +/- 2 pixels
                 featureList = this.featureSource.featureCache.queryFeatures(chr, genomicLocation - tolerance, genomicLocation + tolerance),
-                row;
+                popupData = [],
+                self = this;
 
-            if (this.displayMode != "COLLAPSED") {
-                row = (Math.floor)(this.displayMode === "SQUISHED" ? yOffset / this.expandedCallHeight : yOffset / this.squishedCallHeight);
-            }
 
             if (featureList && featureList.length > 0) {
 
+                featureList.forEach(function (variant) {
 
-                var popupData = [];
-                featureList.forEach(function (feature) {
-                    if (feature.end >= genomicLocation - tolerance &&
-                        feature.start <= genomicLocation + tolerance) {
+                    var row, callHeight, callSets, cs, call;
 
-                        // If row number is specified use it
-                        if (row === undefined || feature.row === undefined || row === feature.row) {
-                            var featureData
-                            if (feature.popupData) {
-                                featureData = feature.popupData(genomicLocation);
+                    if ((variant.start <= genomicLocation + tolerance) &&
+                        (variant.end > genomicLocation - tolerance)) {
+
+                        if (popupData.length > 0) {
+                            popupData.push('<HR>')
+                        }
+
+                        if ("COLLAPSED" == self.displayMode) {
+                            Array.prototype.push.apply(popupData, variant.popupData(genomicLocation));
+                        }
+                        else {
+                            if (yOffset <= self.variantBandHeight) {
+                                // Variant
+                                row = (Math.floor)((yOffset - 10 ) / (self.variantHeight + vGap));
+                                if (variant.row === row) {
+                                    Array.prototype.push.apply(popupData, variant.popupData(genomicLocation));
+                                }
                             }
                             else {
-                                featureData = extractPopupData(feature);
-                            }
-                            if (featureData) {
-                                if (popupData.length > 0) {
-                                    popupData.push("<HR>");
+                                // Call
+                                callSets = getCallSets.call(self);
+                                if (callSets && variant.calls) {
+                                    callHeight = self.nRows * ("SQUISHED" === self.displayMode ? self.squishedCallHeight : self.expandedCallHeight);
+                                    row = Math.floor((yOffset - self.variantBandHeight - vGap) / callHeight);
+                                    cs = callSets[row];
+                                    call = variant.calls[cs.id];
+                                    Array.prototype.push.apply(popupData, extractPopupData(call, variant));
                                 }
-                                Array.prototype.push.apply(popupData, featureData);
                             }
-
                         }
                     }
                 });
-
-                return popupData;
             }
-
+            return popupData;
         }
-
-        return null;
-    };
+    }
 
     /**
      * Default popup text function -- just extracts string and number properties in random order.
      * @param feature
      * @returns {Array}
      */
-    function extractPopupData(feature) {
-        var data = [];
-        for (var property in feature) {
-            if (feature.hasOwnProperty(property) &&
-                "chr" !== property && "start" !== property && "end" !== property && "row" !== property &&
-                igv.isStringOrNumber(feature[property])) {
-                data.push({name: property, value: feature[property]});
+    function extractPopupData(call, variant) {
+
+        var gt = '', popupData;
+        call.genotype.forEach(function (i) {
+            if (i === 0) {
+                gt += variant.referenceBases;
             }
-        }
-        return data;
+            else {
+                gt += variant.alternateBases[i - 1];
+            }
+        })
+
+        popupData = [
+            {name: 'Call set name', value: call.callSetName},
+            {name: 'Genotype', value: gt},
+            {name: 'Phase set', value: call.phaseset},
+            {name: 'genotypeLikelihood', value: call.genotypeLikelihood.toString()}
+        ];
+
+        Object.keys(call.info).forEach(function (key) {
+            popupData.push({name: key, value: call.info[key]});
+        });
+
+        return popupData;
     }
 
     igv.VariantTrack.prototype.popupMenuItems = function (popover) {
