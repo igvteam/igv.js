@@ -38,9 +38,9 @@ var igv = (function (igv) {
         variant.chr = tokens[0]; // TODO -- use genome aliases
         variant.pos = parseInt(tokens[1]) - 1;
         variant.names = tokens[2];    // id in VCF
-        variant.ref = tokens[3];
-        variant.alt = tokens[4];
-        variant.qual = parseInt(tokens[5]);
+        variant.referenceBases = tokens[3];
+        variant.alternateBases = tokens[4];
+        variant.quality = parseInt(tokens[5]);
         variant.filter = tokens[6];
         variant.info = tokens[7];
 
@@ -57,9 +57,9 @@ var igv = (function (igv) {
         variant.chr = json.referenceName;
         variant.pos = parseInt(json.start);
         variant.names = arrayToCommaString(json.names);
-        variant.ref = json.referenceBases + '';
-        variant.alt = json.alternateBases + '';
-        variant.qual = json.quality;
+        variant.referenceBases = json.referenceBases + '';
+        variant.alternateBases = json.alternateBases + '';
+        variant.quality = json.quality;
         variant.filter = arrayToCommaString(json.filter);
         variant.info = json.info;
 
@@ -102,12 +102,12 @@ var igv = (function (igv) {
 
     function computeStart(variant) {
         //Alleles
-        altTokens = variant.alt.split(",");
+        altTokens = variant.alternateBases.split(",");
 
         if (altTokens.length > 0) {
 
             variant.alleles = [];
-            variant.alleles.push(variant.ref);
+            variant.alleles.push(variant.referenceBases);
 
             variant.start = Number.MAX_VALUE;
             variant.end = 0;
@@ -119,7 +119,7 @@ var igv = (function (igv) {
 
                 if (alt.length > 0) {
 
-                    diff = variant.ref.length - alt.length;
+                    diff = variant.referenceBases.length - alt.length;
 
                     if (diff > 0) {
                         // deletion, assume left padded
@@ -127,7 +127,7 @@ var igv = (function (igv) {
                         e = s + diff;
                     } else if (diff < 0) {
                         // Insertion, assume left padded, insertion begins to "right" of last ref base
-                        s = variant.pos + variant.ref.length;
+                        s = variant.pos + variant.referenceBases.length;
                         e = s + 1;     // Insertion between s & 3
                     }
                     else {
@@ -160,9 +160,9 @@ var igv = (function (igv) {
 
         fields = [
             {name: "Names", value: this.names ? this.names : ""},
-            {name: "Ref", value: this.ref},
-            {name: "Alt", value: this.alt},
-            {name: "Qual", value: this.qual},
+            {name: "Ref", value: this.referenceBases},
+            {name: "Alt", value: this.alternateBases},
+            {name: "Qual", value: this.quality},
             {name: "Filter", value: this.filter},
          ];
 
