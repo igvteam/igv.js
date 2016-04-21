@@ -258,20 +258,30 @@ var igv = (function (igv) {
 
         var body_scrolltop,
             track_origin,
-            track_size;
+            track_size,
+            offset,
+            _top,
+            _left;
+
+        body_scrolltop = $('body').scrollTop();
 
         if (this.$container.hasClass('igv-grid-container-dialog')) {
 
-            body_scrolltop = $("body").scrollTop();
-            track_origin = $host.offset();
-            track_size =
-            {
-                width: $host.outerWidth(),
-                height: $host.outerHeight()
-            };
+            offset = $host.offset();
 
-            this.$container.offset( { left: (track_size.width - 300), top: (track_origin.top + body_scrolltop) } );
-            this.$container.offset( igv.constrainBBox(this.$container, $(igv.browser.trackContainerDiv)) );
+            _top = offset.top + body_scrolltop;
+            _left = $host.outerWidth() - 300;
+
+            this.$container.offset( { left: _left, top: _top } );
+
+            //track_origin = $host.offset();
+            //track_size =
+            //{
+            //    width: $host.outerWidth(),
+            //    height: $host.outerHeight()
+            //};
+            //this.$container.offset( { left: (track_size.width - 300), top: (track_origin.top + body_scrolltop) } );
+            //this.$container.offset( igv.constrainBBox(this.$container, $(igv.browser.trackContainerDiv)) );
         }
 
         this.$container.show();
