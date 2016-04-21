@@ -52,7 +52,7 @@ var igv = (function (igv) {
         track.id = config.id || track.name;   // TODO -- remove this property, not used
 
         track.order = config.order;
-        track.color = config.color || igv.constants.defaultColor;
+        track.color = config.color || igv.browser.constants.defaultColor;
 
         track.removable = config.removable === undefined ? true : config.removable;      // Defaults to true
 
@@ -60,10 +60,6 @@ var igv = (function (igv) {
         track.autoHeight = config.autoHeight === undefined ? true : config.autoHeight;
         track.minHeight = config.minHeight || Math.min(50, track.height);
         track.maxHeight = config.maxHeight || Math.max(500, track.height);
-
-        // Set maxRows -- protects against pathological feature and bam packing cases
-        if (config.maxRows === undefined) config.maxRows = 500;
-        track.maxRows = config.maxRows;
 
         if (config.visibilityWindow) {
             track.visibilityWindow = config.visibilityWindow;

@@ -30,6 +30,7 @@ var igv = (function (igv) {
 
         this.config = config;
         this.alignmentContainer = undefined;
+        this.maxRows = config.maxRows || 1000;
 
         if (config.sourceType === "ga4gh") {
             this.bamReader = new igv.Ga4ghAlignmentReader(config);
@@ -47,8 +48,7 @@ var igv = (function (igv) {
             this.viewAsPairs = bool;
             // TODO -- repair alignments
             if (this.alignmentContainer) {
-                var maxRows = self.config.maxRows || 500,
-                    alignmentContainer = this.alignmentContainer,
+                var alignmentContainer = this.alignmentContainer,
                     alignments;
 
                 if (bool) {
@@ -57,7 +57,7 @@ var igv = (function (igv) {
                 else {
                     alignments = unpairAlignments(alignmentContainer.packedAlignmentRows);
                 }
-                alignmentContainer.packedAlignmentRows = packAlignmentRows(alignments, alignmentContainer.start, alignmentContainer.end, maxRows);
+                alignmentContainer.packedAlignmentRows = packAlignmentRows(alignments, alignmentContainer.start, alignmentContainer.end, self.maxRows);
 
             }
         }

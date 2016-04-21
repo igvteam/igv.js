@@ -38,6 +38,12 @@ var igv = (function (igv) {
 
         this.featureHeight = config.featureHeight || 14;
 
+        // Set maxRows -- protects against pathological feature packing cases (# of rows of overlapping feaures)
+        if (config.maxRows === undefined) {
+            config.maxRows = 500;
+        }
+        this.maxRows = config.maxRows;
+
 
         if (config.url && (config.url.toLowerCase().endsWith(".bigbed") || config.url.toLowerCase().endsWith(".bb"))) {
             this.featureSource = new igv.BWSource(config);
