@@ -236,7 +236,7 @@ var igv = (function (igv) {
         }
 
         self.$ok.unbind();
-        clickOK = clickFunction || changeFunction;
+        clickOK = clickFunction;
         self.$ok.click(function() {
 
             if (clickOK) {
