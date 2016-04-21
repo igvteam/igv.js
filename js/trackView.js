@@ -556,12 +556,7 @@ var igv = (function (igv) {
 
             var locus,
                 ss,
-                ee,
-                trackHalfWidthBP,
-                trackWidthBP,
-                centroidZoom,
-                chromosome,
-                chromosomeLength;
+                ee;
 
             if (isMouseDown) {
 
@@ -575,7 +570,7 @@ var igv = (function (igv) {
                 ee = ss + rulerSweepWidth * igv.browser.referenceFrame.bpPerPixel;
 
                 if (rulerSweepWidth > rulerSweepThreshold) {
-                    
+
                     locus = igv.browser.referenceFrame.chr + ":" + igv.numberFormatter(Math.floor(ss)) + "-" + igv.numberFormatter(Math.floor(ee));
                     igv.browser.search(locus);
                 }
@@ -621,12 +616,10 @@ var igv = (function (igv) {
 
             var delta = time - lastClickTime;
             if (time - lastClickTime < doubleClickDelay) {
+                // This is a double-click
 
                 if (popupTimer) {
-                    // This is a double-click
-
                     // Cancel previous timer
-                    // console.log("Cancel timer");
                     window.clearTimeout(popupTimer);
                     popupTimer = undefined;
                 }
@@ -722,6 +715,7 @@ var igv = (function (igv) {
 
         });
 
+        // Mousewheel disabled -- it controls the outer (browser window) scrollbar
         //$(this.viewportDiv).mousewheel(function (event) {
         //
         //    var ratio = $(viewportDiv).height() / $(contentDiv).height();
