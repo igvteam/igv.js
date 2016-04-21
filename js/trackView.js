@@ -213,18 +213,18 @@ var igv = (function (igv) {
         if (this.track.paintAxis) {
 
             $leftHandGutter = $('<div class="igv-left-hand-gutter">');
-            $track.append($leftHandGutter[ 0 ]);
+            $track.append($leftHandGutter[0]);
 
             $canvas = $('<canvas class ="igv-track-control-canvas">');
 
             w = $leftHandGutter.outerWidth();
             h = $leftHandGutter.outerHeight();
-            $canvas.attr('width',  w);
+            $canvas.attr('width', w);
             $canvas.attr('height', h);
 
-            $leftHandGutter.append($canvas[ 0 ]);
+            $leftHandGutter.append($canvas[0]);
 
-            this.controlCanvas = $canvas[ 0 ];
+            this.controlCanvas = $canvas[0];
             this.controlCtx = this.controlCanvas.getContext("2d");
 
 
@@ -238,7 +238,7 @@ var igv = (function (igv) {
                 $leftHandGutter.addClass('igv-clickable');
             }
 
-            this.leftHandGutter = $leftHandGutter[ 0 ];
+            this.leftHandGutter = $leftHandGutter[0];
 
         }
 
@@ -399,7 +399,7 @@ var igv = (function (igv) {
             bpStart = Math.max(0, Math.round(referenceFrame.start - bpWidth / 3));
             bpEnd = bpStart + bpWidth;
 
-            if(self.loading && self.loading.start === bpStart && self.loading.end === bpEnd) return;
+            if (self.loading && self.loading.start === bpStart && self.loading.end === bpEnd) return;
 
             self.loading = {start: bpStart, end: bpEnd};
 
@@ -477,15 +477,6 @@ var igv = (function (igv) {
             return this.track && this.browser && this.browser.referenceFrame;
         }
 
-        /**
-         * Return true if the track is known to be not indexed.
-         * @param track
-         */
-        function isNotIndexed(track) {
-            return track.featureSource && track.featureSource.indexed === false;
-        }
-
-
     };
 
     function Tile(chr, tileStart, tileEnd, scale, image) {
@@ -524,7 +515,7 @@ var igv = (function (igv) {
             mouseMoveXY = undefined,
             left,
             rulerSweepWidth,
-            rulerWidth = $(trackView.contentDiv).width(),
+            rulerSweepThreshold = 1,
             dx;
 
         $(document).mousedown(function (e) {
@@ -550,15 +541,14 @@ var igv = (function (igv) {
                 dx = mouseMoveXY.x - mouseDownXY.x;
 
                 rulerSweepWidth = Math.abs(dx);
+                if (rulerSweepWidth > rulerSweepThreshold) {
+                    trackView.rulerSweeper.css({"width": rulerSweepWidth + "px"});
 
-                trackView.rulerSweeper.css({"width": rulerSweepWidth + "px"});
-
-                if (dx < 0) {
-                    left = mouseDownXY.x + dx;
-                    trackView.rulerSweeper.css({"left": left + "px"});
+                    if (dx < 0) {
+                        left = mouseDownXY.x + dx;
+                        trackView.rulerSweeper.css({"left": left + "px"});
+                    }
                 }
-
-                //trackView.rulerSweeper.css({backgroundColor: 'rgba(68, 134, 247, 0.75)'});
             }
         });
 
@@ -575,6 +565,7 @@ var igv = (function (igv) {
 
             if (isMouseDown) {
 
+                // End sweep
                 isMouseDown = false;
                 isMouseIn = false;
 
@@ -583,7 +574,7 @@ var igv = (function (igv) {
                 ss = igv.browser.referenceFrame.start + (left * igv.browser.referenceFrame.bpPerPixel);
                 ee = ss + rulerSweepWidth * igv.browser.referenceFrame.bpPerPixel;
 
-                if (sweepWidthThresholdUnmet(rulerSweepWidth)) {
+                if (rulerSweepWidth > rulerSweepThreshold) {
 
                     chromosome = igv.browser.genome.getChromosome(igv.browser.referenceFrame.chr);
                     chromosomeLength = chromosome.bpLength;
@@ -609,26 +600,12 @@ var igv = (function (igv) {
                         ss = 1 + centroidZoom - trackHalfWidthBP;
                         ee = centroidZoom + trackHalfWidthBP;
                     }
-
+                    locus = igv.browser.referenceFrame.chr + ":" + igv.numberFormatter(Math.floor(ss)) + "-" + igv.numberFormatter(Math.floor(ee));
+                    igv.browser.search(locus);
                 }
-
-                locus = igv.browser.referenceFrame.chr + ":" + igv.numberFormatter(Math.floor(ss)) + "-" + igv.numberFormatter(Math.floor(ee));
-                igv.browser.search(locus);
-
-
             }
 
         });
-
-        function sweepWidthThresholdUnmet(sweepWidth) {
-
-            if ((rulerWidth / (igv.browser.referenceFrame.bpPerPixel * sweepWidth) ) > igv.browser.pixelPerBasepairThreshold()) {
-                return true;
-            } else {
-                return false;
-            }
-
-        }
 
     }
 
@@ -640,16 +617,12 @@ var igv = (function (igv) {
         var isMouseDown = false,
             lastMouseX = undefined,
             mouseDownX = undefined,
+            lastClickTime = 0,
             popupTimer;
 
         $(trackView.canvas).mousedown(function (e) {
 
             var canvasCoords = igv.translateMouseCoordinates(e, trackView.canvas);
-
-            if (igv.popover) {
-                igv.popover.hide();
-            }
-
             isMouseDown = true;
             lastMouseX = canvasCoords.x;
             mouseDownX = lastMouseX;
@@ -657,7 +630,7 @@ var igv = (function (igv) {
 
         });
 
-        $(trackView.canvas).mouseup(function (e) {
+        $(trackView.canvas).click(function (e) {
 
             e = $.event.fix(e);   // Sets pageX and pageY for browsers that don't support them
 
@@ -668,10 +641,16 @@ var igv = (function (igv) {
             if (!referenceFrame) return;
 
             if (popupTimer) {
+                // This is a double-click
+
                 // Cancel previous timer
                 // console.log("Cancel timer");
                 window.clearTimeout(popupTimer);
                 popupTimer = undefined;
+
+                var newCenter = Math.round(referenceFrame.start + canvasCoords.x * referenceFrame.bpPerPixel);
+                referenceFrame.bpPerPixel /= 2;
+                igv.browser.goto(referenceFrame.chr, newCenter);
             }
 
             else {
@@ -681,6 +660,7 @@ var igv = (function (igv) {
                     if (trackView.track.shiftClick && trackView.tile) {
                         trackView.track.shiftClick(genomicLocation, e);
                     }
+                    e.stopPropagation();
 
                 }
                 else if (e.altKey) {
@@ -688,8 +668,10 @@ var igv = (function (igv) {
                     if (trackView.track.altClick && trackView.tile) {
                         trackView.track.altClick(genomicLocation, e);
                     }
+                    e.stopPropagation();
 
-                } else if (Math.abs(canvasCoords.x - mouseDownX) <= igv.constants.dragThreshold && trackView.track.popupData) {
+                } else if (Math.abs(canvasCoords.x - mouseDownX) <= igv.browser.constants.dragThreshold && trackView.track.popupData) {
+
                     const doubleClickDelay = 300;
 
                     popupTimer = window.setTimeout(function () {
@@ -720,6 +702,7 @@ var igv = (function (igv) {
             lastMouseX = undefined;
 
         });
+
 
     }
 
