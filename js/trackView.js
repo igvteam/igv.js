@@ -575,31 +575,7 @@ var igv = (function (igv) {
                 ee = ss + rulerSweepWidth * igv.browser.referenceFrame.bpPerPixel;
 
                 if (rulerSweepWidth > rulerSweepThreshold) {
-
-                    chromosome = igv.browser.genome.getChromosome(igv.browser.referenceFrame.chr);
-                    chromosomeLength = chromosome.bpLength;
-
-                    trackWidthBP = igv.browser.trackViewportWidth() / igv.browser.pixelPerBasepairThreshold();
-                    trackHalfWidthBP = 0.5 * trackWidthBP;
-
-                    centroidZoom = (ee + ss) / 2;
-
-                    if (centroidZoom - trackHalfWidthBP < 0) {
-
-                        ss = 1;
-                        //ee = igv.browser.trackViewportWidthBP();
-                        ee = trackWidthBP;
-                    }
-                    else if (centroidZoom + trackHalfWidthBP > chromosomeLength) {
-
-                        ee = chromosomeLength;
-                        //ss = 1 + ee - igv.browser.trackViewportWidthBP();
-                        ss = 1 + ee - trackWidthBP;
-                    }
-                    else {
-                        ss = 1 + centroidZoom - trackHalfWidthBP;
-                        ee = centroidZoom + trackHalfWidthBP;
-                    }
+                    
                     locus = igv.browser.referenceFrame.chr + ":" + igv.numberFormatter(Math.floor(ss)) + "-" + igv.numberFormatter(Math.floor(ee));
                     igv.browser.search(locus);
                 }
