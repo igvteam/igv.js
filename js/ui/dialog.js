@@ -209,12 +209,10 @@ var igv = (function (igv) {
 
     };
 
-    igv.Dialog.prototype.configure = function ($host, labelHTMLFunction, inputValue, changeFunction, clickFunction) {
+    igv.Dialog.prototype.configure = function (labelHTMLFunction, inputValue, changeFunction, clickFunction) {
 
         var self = this,
             clickOK;
-
-        self.$host = $host;
 
         if (labelHTMLFunction) {
             self.$dialogLabel.html(labelHTMLFunction());
@@ -256,7 +254,7 @@ var igv = (function (igv) {
         this.$container.hide();
     };
 
-    igv.Dialog.prototype.show = function () {
+    igv.Dialog.prototype.show = function ($host) {
 
         var body_scrolltop,
             track_origin,
@@ -265,11 +263,11 @@ var igv = (function (igv) {
         if (this.$container.hasClass('igv-grid-container-dialog')) {
 
             body_scrolltop = $("body").scrollTop();
-            track_origin = this.$host.offset();
+            track_origin = $host.offset();
             track_size =
             {
-                width: this.$host.outerWidth(),
-                height: this.$host.outerHeight()
+                width: $host.outerWidth(),
+                height: $host.outerHeight()
             };
 
             this.$container.offset( { left: (track_size.width - 300), top: (track_origin.top + body_scrolltop) } );

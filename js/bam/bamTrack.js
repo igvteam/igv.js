@@ -158,8 +158,8 @@ var igv = (function (igv) {
         this.colorByMenuItems.forEach(function (item, i) {
 
             var selected = item.key === 'tag' ?
-                item.key === self.alignmentTrack.colorBy && item.value === self.alignmentTrack.colorByTag :
-                item.key === self.alignmentTrack.colorBy;
+            item.key === self.alignmentTrack.colorBy && item.value === self.alignmentTrack.colorByTag :
+            item.key === self.alignmentTrack.colorBy;
 
             menuItems.push(colorByMarkup(item, selected, i));
         });
@@ -228,14 +228,12 @@ var igv = (function (igv) {
 
                     if (menuItem.value !== undefined) {
                         self.alignmentTrack.colorBy = 'tag';
-                        self.alignmentTrack.colorByTag = menuItem.value
+                        self.alignmentTrack.colorByTag = menuItem.value;
                         self.trackView.update();
                     }
                     else {
-                        igv.dialog.configure($(self.trackView.trackDiv),
-                            function () {
-                                return "Tag Name"
-                            },
+                        igv.dialog.configure(
+                            function () { return "Tag Name" },
                             ' ',
                             undefined,   // changeFunction
                             function () {
@@ -257,7 +255,7 @@ var igv = (function (igv) {
                             },
                             undefined);
 
-                        igv.dialog.show();
+                        igv.dialog.show($(self.trackView.trackDiv));
                     }
                 } else {
                     self.alignmentTrack.colorBy = menuItem.key;
