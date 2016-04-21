@@ -224,6 +224,7 @@ var igv = (function (igv) {
             item.click = function () {
 
                 igv.popover.hide();
+
                 if ('tag' === menuItem.key) {
 
                     if (menuItem.value !== undefined) {
@@ -235,7 +236,7 @@ var igv = (function (igv) {
                         igv.dialog.configure(
                             function () { return "Tag Name" },
                             ' ',
-                            undefined,   // changeFunction
+                            undefined,
                             function () {
 
                                 self.alignmentTrack.colorBy = 'tag';
@@ -252,8 +253,7 @@ var igv = (function (igv) {
                                 $('#color-by-tag').text(self.alignmentTrack.colorByTag);
                                 self.trackView.update();
                                 igv.dialog.hide();
-                            },
-                            undefined);
+                            });
 
                         igv.dialog.show($(self.trackView.trackDiv));
                     }
