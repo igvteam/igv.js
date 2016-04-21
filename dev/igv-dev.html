@@ -249,7 +249,7 @@
 
         <div onclick="igv.browser.loadTrack( {
                             sourceType: 'ga4gh',
-                            type: 'vcf',
+                            type: 'variant',
                             url: 'https://www.googleapis.com/genomics/v1beta2',
                             variantSetId: ['10473108253681171589'],
                             callSetIds: ['10473108253681171589-2'],
@@ -259,13 +259,22 @@
 
         <div onclick="igv.browser.loadTrack( {
                             sourceType: 'ga4gh',
-                            type: 'vcf',
+                            type: 'variant',
                             url: 'https://www.googleapis.com/genomics/v1beta2',
                             variantSetId: ['10473108253681171589'],
                             includeCalls: false,
                             name: 'Ga4gh variants'
                             })">GA4Gh Variants - NO callsets (Global Alliance, Google server)
         </div>
+
+        <div onclick="igv.browser.loadTrack( {
+                            type: 'variant',
+                            url: 'https://s3.amazonaws.com/igv.broadinstitute.org/data/hg19/1kg/ALL.chr22.phase3_shapeit2_mvncall_integrated_v5a.20130502.genotypes.vcf.gz',
+                            name: '1KG variants'
+                            })">1KG VCF - chr 22
+        </div>
+
+
 
         <div onclick="igv.browser.loadTrack({
                                 sourceType: 'gcs',
