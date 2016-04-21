@@ -47,6 +47,14 @@ var igv = (function (igv) {
 
         this.featureDB = {};   // Hash of name -> feature, used for search function.
 
+        this.constants = {
+            dragThreshold: 3,
+            defaultColor: "rgb(0,0,150)",
+            doubleClickDelay: options.doubleClickDelay || 500
+        }
+
+
+
         window.onresize = igv.throttle(function () {
             igv.browser.resize();
         }, 10);
@@ -817,6 +825,10 @@ var igv = (function (igv) {
 
             var coords = igv.translateMouseCoordinates(e, trackContainerDiv);
 
+            if (igv.popover) {
+                igv.popover.hide();
+            }
+
             isRulerTrack = ($(e.target).parent().parent().parent()[0].dataset.rulerTrack) ? true : false;
 
             if (isRulerTrack) {
@@ -845,7 +857,7 @@ var igv = (function (igv) {
 
             if (isMouseDown) { // Possibly dragging
 
-                if (mouseDownX && Math.abs(coords.x - mouseDownX) > igv.constants.dragThreshold) {
+                if (mouseDownX && Math.abs(coords.x - mouseDownX) > igv.browser.constants.dragThreshold) {
 
                     if (igv.browser.loadInProgress()) {
                         // ignore
@@ -900,27 +912,6 @@ var igv = (function (igv) {
             isMouseDown = false;
             lastMouseX = undefined;
             mouseDownX = undefined;
-        });
-
-        $(trackContainerDiv).dblclick(function (e) {
-
-            if (isRulerTrack) {
-                return;
-            }
-
-            if (e.altKey) return;  // Ignore if alt key is down
-
-            e = $.event.fix(e);   // Sets pageX and pageY for browsers that don't support them
-
-            var canvasCoords = igv.translateMouseCoordinates(e, trackContainerDiv),
-                referenceFrame = igv.browser.referenceFrame;
-
-            if (!referenceFrame) return;
-
-            var newCenter = Math.round(referenceFrame.start + canvasCoords.x * referenceFrame.bpPerPixel);
-            referenceFrame.bpPerPixel /= 2;
-            igv.browser.goto(referenceFrame.chr, newCenter);
-
         });
 
     }
