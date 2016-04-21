@@ -404,7 +404,7 @@ var igv = (function (igv) {
 
         this.previousTrackColorTile.css("background-color", this.trackView.track.color);
 
-        this.defaultTrackColorTile.css("background-color", (this.trackView.track.defaultColor || igv.constants.defaultColor));
+        this.defaultTrackColorTile.css("background-color", (this.trackView.track.defaultColor || igv.browser.constants.defaultColor));
 
         obj = $(".igv-user-input-color");
         obj.val("");

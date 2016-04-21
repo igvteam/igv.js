@@ -33,7 +33,7 @@ var igv = (function (igv) {
         this.headPath = config.headURL || this.bamPath;
 
         this.samplingWindowSize = config.samplingWindowSize === undefined ? 100 : config.samplingWindowSize;
-        this.samplingDepth = config.samplingDepth === undefined ? 100 : config.samplingDepth;
+        this.samplingDepth = config.samplingDepth === undefined ? 50 : config.samplingDepth;
 
         if (config.viewAsPairs) {
             this.pairsSupported = true;
