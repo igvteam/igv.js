@@ -166,19 +166,21 @@ var igv = (function (igv) {
 
         igv.loadGenome(config.reference).then(function (genome) {
 
-            var referenceWidth = browser.trackViewportWidth();
-            if (referenceWidth === 0) referenceWidth = 500;
 
             genome.id = config.reference.genomeId;
             browser.genome = genome;
             browser.addTrack(new igv.RulerTrack());
+
+            // viewport width -- must get this after adding ruler track
+            var viewportWidth = browser.trackViewportWidth();
+            if (viewportWidth === 0) viewportWidth = 500;
 
 
             // Set inital locus
             var firstChrName = browser.genome.chromosomeNames[0],
                 firstChr = browser.genome.chromosomes[firstChrName];
 
-            browser.referenceFrame = new igv.ReferenceFrame(firstChrName, 0, firstChr.bpLength / referenceWidth);
+            browser.referenceFrame = new igv.ReferenceFrame(firstChrName, 0, firstChr.bpLength / viewportWidth);
             browser.controlPanelWidth = 50;
 
             browser.updateLocusSearch(browser.referenceFrame);
@@ -217,9 +219,8 @@ var igv = (function (igv) {
             }
 
 
-        }, function foo(err) {
-            console.log(err);
         }).catch(function (error) {
+            igv.presentAlert(error);
             console.log(error);
         });
 

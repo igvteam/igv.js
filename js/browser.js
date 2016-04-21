@@ -453,7 +453,7 @@ var igv = (function (igv) {
             width = this.trackViews[0].viewportDiv.clientWidth;
         }
         else {
-            width = this.trackContainerDiv.clientWidth;
+            width = this.trackContainerDiv.clientWidth - 100;   // Should never get here
         }
 
         return width;
