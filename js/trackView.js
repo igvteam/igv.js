@@ -618,7 +618,8 @@ var igv = (function (igv) {
             lastMouseX = undefined,
             mouseDownX = undefined,
             lastClickTime = 0,
-            popupTimer;
+            popupTimer,
+            doubleClickDelay = igv.browser.constants.doubleClickDelay;
 
         $(trackView.canvas).mousedown(function (e) {
 
@@ -633,20 +634,26 @@ var igv = (function (igv) {
         $(trackView.canvas).click(function (e) {
 
             e = $.event.fix(e);   // Sets pageX and pageY for browsers that don't support them
+            e.stopPropagation();
 
             var canvasCoords = igv.translateMouseCoordinates(e, trackView.canvas),
                 referenceFrame = trackView.browser.referenceFrame,
-                genomicLocation = Math.floor((referenceFrame.start) + referenceFrame.toBP(canvasCoords.x));
+                genomicLocation = Math.floor((referenceFrame.start) + referenceFrame.toBP(canvasCoords.x)),
+                time = Date.now();
 
             if (!referenceFrame) return;
 
-            if (popupTimer) {
-                // This is a double-click
+            var delta = time - lastClickTime;
+            if (time - lastClickTime < doubleClickDelay) {
 
-                // Cancel previous timer
-                // console.log("Cancel timer");
-                window.clearTimeout(popupTimer);
-                popupTimer = undefined;
+                if (popupTimer) {
+                    // This is a double-click
+
+                    // Cancel previous timer
+                    // console.log("Cancel timer");
+                    window.clearTimeout(popupTimer);
+                    popupTimer = undefined;
+                }
 
                 var newCenter = Math.round(referenceFrame.start + canvasCoords.x * referenceFrame.bpPerPixel);
                 referenceFrame.bpPerPixel /= 2;
@@ -660,7 +667,6 @@ var igv = (function (igv) {
                     if (trackView.track.shiftClick && trackView.tile) {
                         trackView.track.shiftClick(genomicLocation, e);
                     }
-                    e.stopPropagation();
 
                 }
                 else if (e.altKey) {
@@ -668,11 +674,9 @@ var igv = (function (igv) {
                     if (trackView.track.altClick && trackView.tile) {
                         trackView.track.altClick(genomicLocation, e);
                     }
-                    e.stopPropagation();
+
 
                 } else if (Math.abs(canvasCoords.x - mouseDownX) <= igv.browser.constants.dragThreshold && trackView.track.popupData) {
-
-                    const doubleClickDelay = 300;
 
                     popupTimer = window.setTimeout(function () {
 
@@ -700,6 +704,7 @@ var igv = (function (igv) {
             mouseDownX = undefined;
             isMouseDown = false;
             lastMouseX = undefined;
+            lastClickTime = time;
 
         });
 
