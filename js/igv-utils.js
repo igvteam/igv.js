@@ -27,7 +27,7 @@ var igv = (function (igv) {
 
     igv.presentAlert = function (string) {
 
-        igv.alert.configure(undefined, function () {
+        igv.alert.configure(function () {
             return string;
         }, undefined, undefined, undefined);
         igv.alert.show();
@@ -135,8 +135,8 @@ var igv = (function (igv) {
             object: $(_div + gearMenuLabel + '</div>'),
             click: function () {
 
-                igv.dialog.configure($(trackView.trackDiv), labelHTMLFunction, inputValue, changeFunction, clickFunction);
-                igv.dialog.show();
+                igv.dialog.configure(labelHTMLFunction, inputValue, changeFunction, clickFunction);
+                igv.dialog.show($(trackView.trackDiv));
                 popover.hide();
             }
         }
