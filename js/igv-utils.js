@@ -27,10 +27,8 @@ var igv = (function (igv) {
 
     igv.presentAlert = function (string) {
 
-        igv.alert.configure(function () {
-            return string;
-        }, undefined, undefined, undefined);
-        igv.alert.show();
+        igv.alert.configure(function () { return string; }, undefined, undefined, undefined);
+        igv.alert.show(undefined);
         igv.popover.hide();
 
     };
