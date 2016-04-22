@@ -157,7 +157,7 @@ var igv = (function (igv) {
 
 
         html = [];
-        html.push('<div class="igv-track-menu-category">');
+        html.push('<div class="igv-track-menu-category igv-track-menu-border-top">');
         html.push('Color By');
         html.push('</div>');
         menuItems.push(html.join(''));
@@ -207,7 +207,8 @@ var igv = (function (igv) {
             var parts = [],
                 item = {};
 
-            parts.push((0 === index) ? '<div class=\"igv-track-menu-item igv-track-menu-border-top\">' : '<div class="igv-track-menu-item">');
+            //parts.push((0 === index) ? '<div class=\"igv-track-menu-item igv-track-menu-border-top\">' : '<div class="igv-track-menu-item">');
+            parts.push('<div class="igv-track-menu-item">');
 
             parts.push(showCheck ? '<i class="fa fa-check fa-check-shim"></i>' : '<i class="fa fa-check fa-check-shim fa-check-hidden"></i>');
 

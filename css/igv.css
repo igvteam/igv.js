@@ -1233,9 +1233,9 @@ div.ui-dialog fieldset {
     padding-left: 4px;
 
     font-weight: 400;
-    color: white;
 
-    background-color: #808080;
+    /*color: white;*/
+    /*background-color: #808080;*/
 
 }
 
