@@ -27,7 +27,9 @@ var igv = (function (igv) {
 
     igv.presentAlert = function (string) {
 
-        igv.alert.configure(function () { return string; }, undefined, undefined, undefined);
+        igv.alert.configure(function () {
+            return string;
+        }, undefined, undefined);
         igv.alert.show(undefined);
         igv.popover.hide();
 
@@ -38,9 +40,13 @@ var igv = (function (igv) {
         var menuItems = [],
             trackItems;
 
-        menuItems.push(igv.dialogMenuItem(popover, trackView, "Set track name", function () {
-            return "Track Name"
-        }, trackView.track.name, function () {
+        menuItems.push(igv.dialogMenuItem(
+            popover,
+            trackView,
+            "Set track name",
+            function () { return "Track Name"},
+            trackView.track.name,
+            function () {
 
             var alphanumeric = parseAlphanumeric(igv.dialog.$dialogInput.val());
 
@@ -60,9 +66,13 @@ var igv = (function (igv) {
 
         }, undefined));
 
-        menuItems.push(igv.dialogMenuItem(popover, trackView, "Set track height", function () {
-            return "Track Height"
-        }, trackView.trackDiv.clientHeight, function () {
+        menuItems.push(igv.dialogMenuItem(
+            popover,
+            trackView,
+            "Set track height",
+            function () { return "Track Height" },
+            trackView.trackDiv.clientHeight,
+            function () {
 
             var number = parseFloat(igv.dialog.$dialogInput.val(), 10);
 
@@ -110,13 +120,17 @@ var igv = (function (igv) {
         if (trackView.track.removable !== false) {
 
             menuItems.push(
-                igv.dialogMenuItem(popover, trackView, "Remove track", function () {
+                igv.dialogMenuItem(
+                    popover,
+                    trackView,
+                    "Remove track",
+                    function () {
                     var label = "Remove " + trackView.track.name;
                     return '<div class="igv-dialog-label-centered">' + label + '</div>';
-                }, undefined, undefined, function () {
-                    popover.hide();
-                    trackView.browser.removeTrack(trackView.track);
-                }, true)
+                },
+                    undefined,
+                    function () { popover.hide(); trackView.browser.removeTrack(trackView.track); },
+                    true)
             );
 
         }
@@ -125,7 +139,7 @@ var igv = (function (igv) {
 
     };
 
-    igv.dialogMenuItem = function (popover, trackView, gearMenuLabel, labelHTMLFunction, inputValue, changeFunction, clickFunction, doDrawBorderOrUndefined) {
+    igv.dialogMenuItem = function (popover, trackView, gearMenuLabel, labelHTMLFunction, inputValue, clickFunction, doDrawBorderOrUndefined) {
 
         var _div = (true === doDrawBorderOrUndefined) ? '<div class="igv-track-menu-item igv-track-menu-border-top">' : '<div class="igv-track-menu-item">';
 
@@ -133,7 +147,7 @@ var igv = (function (igv) {
             object: $(_div + gearMenuLabel + '</div>'),
             click: function () {
 
-                igv.dialog.configure(labelHTMLFunction, inputValue, changeFunction, clickFunction);
+                igv.dialog.configure(labelHTMLFunction, inputValue, clickFunction);
                 igv.dialog.show($(trackView.trackDiv));
                 popover.hide();
             }

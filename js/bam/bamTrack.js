@@ -240,27 +240,23 @@ var igv = (function (igv) {
                         self.trackView.update();
                     }
                     else {
-                        igv.dialog.configure(
-                            function () { return "Tag Name" },
-                            ' ',
-                            undefined,
-                            function () {
+                        igv.dialog.configure(function () { return "Tag Name" }, ' ', function () {
 
-                                self.alignmentTrack.colorBy = 'tag';
-                                self.alignmentTrack.colorByTag = igv.dialog.$dialogInput.val().trim();
+                            self.alignmentTrack.colorBy = 'tag';
+                            self.alignmentTrack.colorByTag = igv.dialog.$dialogInput.val().trim();
 
-                                self.colorByMenuItems.push({
-                                    key: 'tag',
-                                    value: self.alignmentTrack.colorByTag,
-                                    label: 'tag (' + self.alignmentTrack.colorByTag + ')'
-                                });
-
-                                self.alignmentTrack.tagColors = new igv.PaletteColorTable("Set1");
-
-                                $('#color-by-tag').text(self.alignmentTrack.colorByTag);
-                                self.trackView.update();
-                                igv.dialog.hide();
+                            self.colorByMenuItems.push({
+                                key: 'tag',
+                                value: self.alignmentTrack.colorByTag,
+                                label: 'tag (' + self.alignmentTrack.colorByTag + ')'
                             });
+
+                            self.alignmentTrack.tagColors = new igv.PaletteColorTable("Set1");
+
+                            $('#color-by-tag').text(self.alignmentTrack.colorByTag);
+                            self.trackView.update();
+                            igv.dialog.hide();
+                        });
 
                         igv.dialog.show($(self.trackView.trackDiv));
                     }

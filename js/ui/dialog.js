@@ -209,7 +209,7 @@ var igv = (function (igv) {
 
     };
 
-    igv.Dialog.prototype.configure = function (labelHTMLFunction, inputValue, changeFunction, clickFunction) {
+    igv.Dialog.prototype.configure = function (labelHTMLFunction, inputValue, clickFunction) {
 
         var self = this,
             clickOK;
@@ -226,7 +226,7 @@ var igv = (function (igv) {
             self.$dialogInput.val(inputValue);
 
             self.$dialogInput.unbind();
-            self.$dialogInput.change(changeFunction);
+            self.$dialogInput.change(clickFunction);
 
             self.$dialogInput.show();
         } else {
@@ -234,11 +234,10 @@ var igv = (function (igv) {
         }
 
         self.$ok.unbind();
-        clickOK = clickFunction;
         self.$ok.click(function() {
 
-            if (clickOK) {
-                clickOK();
+            if (clickFunction) {
+                clickFunction();
             }
 
             self.hide();
