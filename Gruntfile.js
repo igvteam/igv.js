@@ -41,27 +41,12 @@ module.exports = function (grunt) {
             }
         },
 
-        md2html: {
-            multiple_files: {
-                options: {
-                    layout: 'doc/layout.html'
-                },
-                    files: [{
-                        expand: true,
-                        src: ['doc/**/*.md'],
-                        dest: 'dist',
-                        ext: '.html'
-                    }]
-
-            }
-        }
     });
 
     // 3. Where we tell Grunt we plan to use this plug-in.
     grunt.loadNpmTasks('grunt-contrib-concat');
     grunt.loadNpmTasks('grunt-contrib-uglify');
     grunt.loadNpmTasks('grunt-contrib-cssmin');
-    grunt.loadNpmTasks('grunt-md2html');
     grunt.loadNpmTasks('grunt-contrib-qunit');
     grunt.loadNpmTasks('grunt-contrib-connect');
 
