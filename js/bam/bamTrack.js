@@ -158,7 +158,7 @@ var igv = (function (igv) {
 
         html = [];
         html.push('<div class="igv-track-menu-category igv-track-menu-border-top">');
-        html.push('Color By');
+        html.push('Color by');
         html.push('</div>');
         menuItems.push(html.join(''));
 
