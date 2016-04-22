@@ -150,10 +150,17 @@ var igv = (function (igv) {
     igv.BAMTrack.prototype.popupMenuItems = function (popover) {
 
         var self = this,
-            menuItems = [],
-            html = [];
+            html,
+            menuItems = [];
 
         menuItems.push(igv.colorPickerMenuItem(popover, this.trackView));
+
+
+        html = [];
+        html.push('<div class="igv-track-menu-category">');
+        html.push('Color By');
+        html.push('</div>');
+        menuItems.push(html.join(''));
 
         this.colorByMenuItems.forEach(function (item, i) {
 
@@ -167,13 +174,12 @@ var igv = (function (igv) {
         // tag item is always last, and never selected
         menuItems.push(colorByMarkup({key: 'tag', label: 'tag'}, false));
 
-
+        html = [];
         html.push('<div class="igv-track-menu-item igv-track-menu-border-top">');
         html.push(true === self.viewAsPairs ? '<i class="fa fa-check fa-check-shim">' : '<i class="fa fa-check fa-check-shim fa-check-hidden">');
         html.push('</i>');
         html.push('View as pairs');
         html.push('</div>');
-
         menuItems.push({
             object: $(html.join('')),
             click: function () {
@@ -205,9 +211,9 @@ var igv = (function (igv) {
 
             parts.push(showCheck ? '<i class="fa fa-check fa-check-shim"></i>' : '<i class="fa fa-check fa-check-shim fa-check-hidden"></i>');
 
-            parts.push('<span>');
-            parts.push('Color by: ');
-            parts.push('</span>');
+            //parts.push('<span>');
+            //parts.push('Color by: ');
+            //parts.push('</span>');
 
             if (menuItem.key === 'tag') {
                 parts.push('<span id="color-by-tag">');
