@@ -1228,6 +1228,17 @@ div.ui-dialog fieldset {
     border-top-width: thin;
 }
 
+.igv-track-menu-category {
+
+    padding-left: 4px;
+
+    font-weight: 400;
+    color: white;
+
+    background-color: #808080;
+
+}
+
 .igv-track-menu-item {
 
     padding-left: 4px;
