@@ -54,6 +54,8 @@
                         <li>
                             <a href="#"
                                onclick="igv.browser.loadTrack({
+                                  type: 'alignment', // Optional
+                                  format: 'bam',  // Optional
                                   url: 'http://hgdownload.cse.ucsc.edu/goldenPath/hg19/encodeDCC/wgEncodeOpenChromFaire/wgEncodeOpenChromFaireMrta2041AlnRep1.bam',
                                   name: 'MRT_A204 FaireSeq Alignments rep 1'})">MRT_A204 FaireSeq Alignments rep 1
                                 bam</a>
@@ -69,6 +71,7 @@
                                onclick="igv.browser.loadTrack({
                                  format: 'bed',
                                  url: '//data.broadinstitute.org/igvdata/annotations/hg19/dbSnp/snp137.hg19.bed.gz',
+                                 indexURL: '//data.broadinstitute.org/igvdata/annotations/hg19/dbSnp/snp137.hg19.bed.gz.tbi',
                                  visibilityWindow: 200000,
                                  label: 'dbSNP 137'})">dbSNP 137 (bed tabix)</a></li>
 

@@ -55,7 +55,7 @@ var igv = (function (igv) {
         // TODO -- check the chrs are equal,  error otherwise
         this.secondAlignment = alignment;
 
-        if(alignment.start > this.firstAlignment.start) {
+        if (alignment.start > this.firstAlignment.start) {
             this.end = alignment.start + alignment.lengthOnRef;
             this.connectingEnd = alignment.start;
         }
@@ -74,15 +74,30 @@ var igv = (function (igv) {
 
         nameValues = nameValues.concat(this.firstAlignment.popupData(genomicLocation));
 
-        if(this.secondAlignment) {
+        if (this.secondAlignment) {
             nameValues.push("-------------------------------");
             nameValues = nameValues.concat(this.secondAlignment.popupData(genomicLocation));
         }
         return nameValues;
     }
 
+    igv.PairedAlignment.prototype.isPaired = function () {
+        return true; // By definition
+    }
+
+    igv.PairedAlignment.prototype.firstOfPairStrand = function () {
+        if (this.firstAlignment.isFirstOfPair()) {
+            return this.firstAlignment.strand;
+        }
+        else if (this.secondAlignment) {
+            return this.secondAlignment.strand;
+        }
+        else {
+            return this.firstAlignment.strand;          // This assumes inward pointing pairs
+        }
+    }
 
 
-        return igv;
+    return igv;
 
 })(igv || {});

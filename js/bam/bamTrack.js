@@ -45,6 +45,8 @@ var igv = (function (igv) {
 
         this.viewAsPairs = config.viewAsPairs;
 
+        this.pairsSupported = config.pairsSupported === undefined ? true : false;
+
         this.color = config.color || "rgb(185, 185, 185)";
 
         // sort alignment rows
@@ -54,12 +56,6 @@ var igv = (function (igv) {
         // filter alignments
         this.filterOption = config.filterOption || {name: "mappingQuality", params: [30, undefined]};
 
-        // initial color-by menu items.  This list can grow dynamically
-        this.colorByMenuItems = [
-            {key: 'none', label: 'track color'},
-            {key: 'strand', label: 'read strand'},
-            {key: 'firstOfPairStrand', label: 'first-of-pair strand'}
-        ]
     }
 
     igv.BAMTrack.prototype.getFeatures = function (chr, bpStart, bpEnd) {
@@ -151,54 +147,59 @@ var igv = (function (igv) {
 
         var self = this,
             html,
-            menuItems = [];
+            menuItems = [],
+            colorByMenuItems = [],
+            tagLabel = 'tag' + (self.alignmentTrack.colorByTag ? ' (' + self.alignmentTrack.colorByTag + ')' : ''),
+            selected;
+
+
+        colorByMenuItems.push({key: 'none', label: 'track color'});
+
+        if(!self.viewAsPairs) {
+            colorByMenuItems.push({key: 'strand', label: 'read strand'});
+        }
+        if (self.pairsSupported && self.alignmentTrack.hasPairs) {
+            colorByMenuItems.push({key: 'firstOfPairStrand', label: 'first-of-pair strand'});
+        }
+        colorByMenuItems.push({key: 'tag', label: tagLabel});
 
         menuItems.push(igv.colorPickerMenuItem(popover, this.trackView));
 
+        menuItems.push('<div class="igv-track-menu-category igv-track-menu-border-top">Color by</div>');
 
-        html = [];
-        html.push('<div class="igv-track-menu-category igv-track-menu-border-top">');
-        html.push('Color by');
-        html.push('</div>');
-        menuItems.push(html.join(''));
-
-        this.colorByMenuItems.forEach(function (item, i) {
-
-            var selected = item.key === 'tag' ?
-            item.key === self.alignmentTrack.colorBy && item.value === self.alignmentTrack.colorByTag :
-            item.key === self.alignmentTrack.colorBy;
-
-            menuItems.push(colorByMarkup(item, selected, i));
+        colorByMenuItems.forEach(function (item) {
+            selected = self.alignmentTrack.colorBy === item.key;
+            menuItems.push(colorByMarkup(item, selected));
         });
 
-        // tag item is always last, and never selected
-        menuItems.push(colorByMarkup({key: 'tag', label: 'tag'}, false));
 
         html = [];
-        html.push('<div class="igv-track-menu-item igv-track-menu-border-top">');
-        html.push(true === self.viewAsPairs ? '<i class="fa fa-check fa-check-shim">' : '<i class="fa fa-check fa-check-shim fa-check-hidden">');
-        html.push('</i>');
-        html.push('View as pairs');
-        html.push('</div>');
-        menuItems.push({
-            object: $(html.join('')),
-            click: function () {
-                var $fa = $(this).find('i');
+        if (self.pairsSupported && self.alignmentTrack.hasPairs) {
+            html.push('<div class="igv-track-menu-item igv-track-menu-border-top">');
+            html.push(true === self.viewAsPairs ? '<i class="fa fa-check fa-check-shim">' : '<i class="fa fa-check fa-check-shim fa-check-hidden">');
+            html.push('</i>');
+            html.push('View as pairs');
+            html.push('</div>');
+            menuItems.push({
+                object: $(html.join('')),
+                click: function () {
+                    var $fa = $(this).find('i');
 
-                popover.hide();
+                    popover.hide();
 
-                self.viewAsPairs = !self.viewAsPairs;
+                    self.viewAsPairs = !self.viewAsPairs;
 
-                if (true === self.viewAsPairs) {
-                    $fa.removeClass('fa-check-hidden');
-                } else {
-                    $fa.addClass('fa-check-hidden');
+                    if (true === self.viewAsPairs) {
+                        $fa.removeClass('fa-check-hidden');
+                    } else {
+                        $fa.addClass('fa-check-hidden');
+                    }
+
+                    self.featureSource.setViewAsPairs(self.viewAsPairs);
+                    self.trackView.update();
                 }
-
-                self.featureSource.setViewAsPairs(self.viewAsPairs);
-                self.trackView.update();
-            }
-        });
+            });
+        }
 
         return menuItems;
 
@@ -206,6 +207,7 @@ var igv = (function (igv) {
 
             var parts = [],
                 item = {};
+
 
             //parts.push((0 === index) ? '<div class=\"igv-track-menu-item igv-track-menu-border-top\">' : '<div class="igv-track-menu-item">');
             parts.push('<div class="igv-track-menu-item">');
@@ -234,32 +236,28 @@ var igv = (function (igv) {
 
                 if ('tag' === menuItem.key) {
 
-                    if (menuItem.value !== undefined) {
-                        self.alignmentTrack.colorBy = 'tag';
-                        self.alignmentTrack.colorByTag = menuItem.value;
-                        self.trackView.update();
-                    }
-                    else {
-                        igv.dialog.configure(function () { return "Tag Name" }, ' ', function () {
+                    igv.dialog.configure(function () {
+                            return "Tag Name"
+                        },
 
+                        self.alignmentTrack.colorByTag ? self.alignmentTrack.colorByTag : '',
+
+                        function () {
+                            var tag = igv.dialog.$dialogInput.val().trim();
                             self.alignmentTrack.colorBy = 'tag';
-                            self.alignmentTrack.colorByTag = igv.dialog.$dialogInput.val().trim();
 
-                            self.colorByMenuItems.push({
-                                key: 'tag',
-                                value: self.alignmentTrack.colorByTag,
-                                label: 'tag (' + self.alignmentTrack.colorByTag + ')'
-                            });
+                            if(tag !== self.alignmentTrack.colorByTag) {
+                                self.alignmentTrack.colorByTag = igv.dialog.$dialogInput.val().trim();
+                                self.alignmentTrack.tagColors = new igv.PaletteColorTable("Set1");
+                                $('#color-by-tag').text(self.alignmentTrack.colorByTag);
+                            }
 
-                            self.alignmentTrack.tagColors = new igv.PaletteColorTable("Set1");
-
-                            $('#color-by-tag').text(self.alignmentTrack.colorByTag);
                             self.trackView.update();
                             igv.dialog.hide();
                         });
 
-                        igv.dialog.show($(self.trackView.trackDiv));
-                    }
+                    igv.dialog.show($(self.trackView.trackDiv));
+
                 } else {
                     self.alignmentTrack.colorBy = menuItem.key;
                     self.trackView.update();
@@ -474,8 +472,6 @@ var igv = (function (igv) {
 
         this.negStrandColor = config.negStrandColor || "rgba(150, 150, 230, 0.75)";
         this.posStrandColor = config.posStrandColor || "rgba(230, 150, 150, 0.75)";
-        this.firstInfPairColor = "rgba(150, 150, 230, 0.75)";
-        this.secondInPairColor = "rgba(230, 150, 150, 0.75)";
         this.insertionColor = config.insertionColor || "rgb(138, 94, 161)";
         this.deletionColor = config.deletionColor || "black";
         this.skippedColor = config.skippedColor || "rgb(150, 170, 170)";
@@ -488,6 +484,9 @@ var igv = (function (igv) {
         this.sortOption = config.sortOption || {sort: "NUCLEOTIDE"};
 
         this.sortDirection = true;
+
+        this.hasPairs = false;   // Until proven otherwise
+
     }
 
     AlignmentTrack.prototype.computePixelHeight = function (alignmentContainer) {
@@ -556,6 +555,8 @@ var igv = (function (igv) {
 
                     alignment = alignmentRow.alignments[i];
 
+                    self.hasPairs = self.hasPairs || alignment.isPaired();
+
                     if ((alignment.start + alignment.lengthOnRef) < bpStart) continue;
                     if (alignment.start > bpEnd) break;
 
@@ -587,7 +588,7 @@ var igv = (function (igv) {
         // alignment is a PairedAlignment
         function drawPairConnector(alignment, yRect, alignmentHeight) {
 
-            var alignmentColor = getAlignmentColor.call(self, alignment),
+            var alignmentColor = getAlignmentColor.call(self, alignment.firstAlignment),
                 outlineColor = alignmentColor,
                 xBlockStart = (alignment.connectingStart - bpStart) / bpPerPixel,
                 xBlockEnd = (alignment.connectingEnd - bpStart) / bpPerPixel,
@@ -849,7 +850,10 @@ var igv = (function (igv) {
 
         var alignmentTrack = this,
             option = alignmentTrack.colorBy,
-            tagValue, color;
+            tagValue, color,
+            strand;
+
+        color = alignmentTrack.parent.color; // default
 
         switch (option) {
 
@@ -858,7 +862,10 @@ var igv = (function (igv) {
                 break;
             case "firstOfPairStrand":
 
-                if (alignment.isPaired()) {
+                if(alignment instanceof igv.PairedAlignment) {
+                    color = alignment.firstOfPairStrand() ? alignmentTrack.posStrandColor : alignmentTrack.negStrandColor;
+                }
+                else if (alignment.isPaired()) {
 
                     if (alignment.isFirstOfPair()) {
                         color = alignment.strand ? alignmentTrack.posStrandColor : alignmentTrack.negStrandColor;
@@ -871,6 +878,7 @@ var igv = (function (igv) {
                     }
                 }
                 break;
+
             case "tag":
 
                 tagValue = alignment.tags()[alignmentTrack.colorByTag];

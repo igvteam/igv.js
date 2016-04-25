@@ -238,7 +238,7 @@ var igv = (function (igv) {
 
     igv.PaletteColorTable = function (palette) {
         this.colors = colorPalettes[palette];
-        if (typeof this.colors !== "array") this.colors = [];
+        if (!Array.isArray(this.colors)) this.colors = [];
         this.colorTable = {};
         this.nextIdx = 0;
         this.colorGenerator = new RColor();
