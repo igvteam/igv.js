@@ -221,7 +221,7 @@ var igv = (function (igv) {
             self.$dialogLabel.hide();
         }
 
-        if (inputValue) {
+        if (inputValue !== undefined) {
 
             self.$dialogInput.val(inputValue);
 

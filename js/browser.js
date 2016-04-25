@@ -945,6 +945,10 @@ var igv = (function (igv) {
                 config.type = "variant";
                 config.format = "vcf"
             }
+
+            if("t2d" === config.type) {
+                config.type = "gwas";
+            }
         }
 
         function inferFileFormat(config) {

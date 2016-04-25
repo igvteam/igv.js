@@ -198,11 +198,20 @@
 
 
         <div onclick="igv.browser.loadTrack({
-                                type: 'bam',
-                                url: '../test/data/bam/sam_spec_example.bam',
-                                name: 'Ion BAM'})">ION indel example bam
+                    url:  '../test/data/wig/test.bedgraph',
+                    name: 'chunk.chr3.am.bedgraph',
+                    format: 'bedgraph',
+                    height: 30
+                    });">Test bedgraph
         </div>
 
+        <div href="#"
+           onclick="igv.browser.loadTrack({
+                                  type: 'alignment', // Optional
+                                  format: 'bam',  // Optional
+                                  url: 'http://hgdownload.cse.ucsc.edu/goldenPath/hg19/encodeDCC/wgEncodeOpenChromFaire/wgEncodeOpenChromFaireMrta2041AlnRep1.bam',
+                                  name: 'MRT_A204 FaireSeq Alignments rep 1'})">MRT_A204 FaireSeq Alignments rep 1
+            bam</div>
 
         <div onclick="igv.browser.loadTrack({
                                 type: 'bam',
