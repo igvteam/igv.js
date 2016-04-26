@@ -56,6 +56,9 @@ var igv = (function (igv) {
 
     igv.Dialog.dialogConstructor = function (dialog) {
 
+        dialog.$container.removeClass("igv-grid-container-dialog");
+        dialog.$container.addClass("igv-grid-container-alert-dialog");
+
         dialog.$container.append(dialog.rowOfLabel()[ 0 ]);
 
         dialog.$container.append(dialog.rowOfInput()[ 0 ]);
