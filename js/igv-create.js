@@ -139,19 +139,19 @@ var igv = (function (igv) {
         igv.popover = new igv.Popover($(contentDiv), "igv-popover");
 
         // ColorPicker object -- singleton shared by all components
-        igv.colorPicker = new igv.ColorPicker($parent, config.palette, "igv-color-picker");
+        igv.colorPicker = new igv.ColorPicker($(rootDiv), config.palette, "igv-color-picker");
         igv.colorPicker.hide();
 
         // alert object -- singleton shared by all components
-        igv.alert = new igv.Dialog($parent, igv.Dialog.alertConstructor, "igv-alert");
+        igv.alert = new igv.Dialog($(rootDiv), igv.Dialog.alertConstructor, "igv-alert");
         igv.alert.hide();
 
         // Dialog object -- singleton shared by all components
-        igv.dialog = new igv.Dialog($parent, igv.Dialog.dialogConstructor, "igv-dialog");
+        igv.dialog = new igv.Dialog($(rootDiv), igv.Dialog.dialogConstructor, "igv-dialog");
         igv.dialog.hide();
 
         // Data Range Dialog object -- singleton shared by all components
-        igv.dataRangeDialog = new igv.DataRangeDialog($parent, "igv-data-range-dialog");
+        igv.dataRangeDialog = new igv.DataRangeDialog($(rootDiv), "igv-data-range-dialog");
         igv.dataRangeDialog.hide();
 
         if (!config.showNavigation) {
