@@ -118,7 +118,7 @@ var igv = (function (igv) {
                                     result.variantSetIds.forEach(function (variantSetId) {
                                         igv.browser.loadTrack({
                                             sourceType: 'ga4gh',
-                                            type: 'vcf',
+                                            type: 'variant',
                                             url: 'https://www.googleapis.com/genomics/v1beta2',
                                             variantSetId: variantSetId,
                                             callSetIds: [result.callSetId],
@@ -132,7 +132,7 @@ var igv = (function (igv) {
                                     igv.browser.loadTrack(
                                         {
                                             sourceType: 'ga4gh',
-                                            type: 'bam',
+                                            type: 'alignment',
                                             url: igv.ga4gh.providerCurrent.url,
                                             readGroupSetIds: result.readGroupSetId,
                                             label: result.name + " alignments",
