@@ -253,7 +253,6 @@ var igv = (function (igv) {
                             }
 
                             self.trackView.update();
-                            igv.dialog.hide();
                         });
 
                     igv.dialog.show($(self.trackView.trackDiv));

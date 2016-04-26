@@ -44,46 +44,48 @@ var igv = (function (igv) {
             popover,
             trackView,
             "Set track name",
-            function () { return "Track Name"},
+            function () {
+                return "Track Name"
+            },
             trackView.track.name,
             function () {
 
-            var alphanumeric = parseAlphanumeric(igv.dialog.$dialogInput.val());
+                var alphanumeric = parseAlphanumeric(igv.dialog.$dialogInput.val());
 
-            if (undefined !== alphanumeric) {
-                igv.setTrackLabel(trackView.track, alphanumeric);
-                trackView.update();
-                igv.dialog.hide();
-            }
+                if (undefined !== alphanumeric) {
+                    igv.setTrackLabel(trackView.track, alphanumeric);
+                    trackView.update();
+                }
 
-            function parseAlphanumeric(value) {
+                function parseAlphanumeric(value) {
 
-                var alphanumeric_re = /(?=.*[a-zA-Z].*)([a-zA-Z0-9 ]+)/,
-                    alphanumeric = alphanumeric_re.exec(value);
+                    var alphanumeric_re = /(?=.*[a-zA-Z].*)([a-zA-Z0-9 ]+)/,
+                        alphanumeric = alphanumeric_re.exec(value);
 
-                return (null !== alphanumeric) ? alphanumeric[0] : "untitled";
-            }
+                    return (null !== alphanumeric) ? alphanumeric[0] : "untitled";
+                }
 
-        }, undefined));
+            }, undefined));
 
         menuItems.push(igv.dialogMenuItem(
             popover,
             trackView,
             "Set track height",
-            function () { return "Track Height" },
+            function () {
+                return "Track Height"
+            },
             trackView.trackDiv.clientHeight,
             function () {
 
-            var number = parseFloat(igv.dialog.$dialogInput.val(), 10);
+                var number = parseFloat(igv.dialog.$dialogInput.val(), 10);
 
-            if (undefined !== number && number >= trackView.track.minHeight && number <= trackView.track.maxHeight) {
-                trackView.setTrackHeight(number);
-                trackView.track.autoHeight = false;   // Explicitly setting track height turns off autoHeight
-            }
+                if (undefined !== number && number >= trackView.track.minHeight && number <= trackView.track.maxHeight) {
+                    trackView.setTrackHeight(number);
+                    trackView.track.autoHeight = false;   // Explicitly setting track height turns off autoHeight
+                }
 
-            igv.dialog.hide();
 
-        }, undefined));
+            }, undefined));
 
         if (trackView.track.popupMenuItems) {
 
@@ -125,11 +127,14 @@ var igv = (function (igv) {
                     trackView,
                     "Remove track",
                     function () {
-                    var label = "Remove " + trackView.track.name;
-                    return '<div class="igv-dialog-label-centered">' + label + '</div>';
-                },
+                        var label = "Remove " + trackView.track.name;
+                        return '<div class="igv-dialog-label-centered">' + label + '</div>';
+                    },
                     undefined,
-                    function () { popover.hide(); trackView.browser.removeTrack(trackView.track); },
+                    function () {
+                        popover.hide();
+                        trackView.browser.removeTrack(trackView.track);
+                    },
                     true)
             );
 
