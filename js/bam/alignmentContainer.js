@@ -93,13 +93,29 @@ var igv = (function (igv) {
     }
 
     igv.AlignmentContainer.prototype.finish = function () {
+
         if (this.currentBucket !== undefined) {
             finishBucket.call(this);
         }
+
+        // Need to remove partial pairs whose mate was downsampled
+        if(this.pairsSupported) {
+            var tmp = [], ds = this.downsampledReads;
+
+            this.alignments.forEach(function (a) {
+                if (!ds.has(a.readName)) {
+                    tmp.push(a);
+                }
+            })
+            this.alignments = tmp;
+        }
+
         this.alignments.sort(function (a, b) {
             return a.start - b.start
         });
+
         this.pairsCache = undefined;
+        this.downsampledReads = undefined;
     }
 
     igv.AlignmentContainer.prototype.contains = function (chr, start, end) {
@@ -167,23 +183,24 @@ var igv = (function (igv) {
             if (Math.random() < samplingProb) {
 
                 idx = Math.floor(Math.random() * (this.alignments.length - 1));
+                replacedAlignment = this.alignments[idx];   // To be replaced
 
                 if (this.pairsSupported && canBePaired(alignment)) {
 
-                    replacedAlignment = this.alignments[idx];
-                    if (this.pairsCache.hasOwnProperty(replacedAlignment.readName)) {
+                    if(this.pairsCache[replacedAlignment.readName] !== undefined) {
                         this.pairsCache[replacedAlignment.readName] = undefined;
                     }
-                    this.downsampledReads.add(replacedAlignment.readName);
 
                     pairedAlignment = new igv.PairedAlignment(alignment);
                     this.paired = true;
                     this.pairsCache[alignment.readName] = pairedAlignment;
                     this.alignments[idx] = pairedAlignment;
+
                 }
                 else {
                     this.alignments[idx] = alignment;
                 }
+                this.downsampledReads.add(replacedAlignment.readName);
 
             }
             else {
