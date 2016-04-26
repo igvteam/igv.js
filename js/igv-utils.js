@@ -79,11 +79,18 @@ var igv = (function (igv) {
 
                 var number = parseFloat(igv.dialog.$dialogInput.val(), 10);
 
-                if (undefined !== number && number >= trackView.track.minHeight && number <= trackView.track.maxHeight) {
+                if (undefined !== number) {
+                    // If explicitly setting the height adust min or max, if neccessary.
+                    if (trackView.track.minHeight !== undefined && trackView.track.minHeight > number) {
+                        trackView.track.minHeight = number;
+                    }
+                    if (trackView.track.maxHeight !== undefined && trackView.track.maxHeight < number) {
+                        trackView.track.minHeight = number;
+                    }
                     trackView.setTrackHeight(number);
                     trackView.track.autoHeight = false;   // Explicitly setting track height turns off autoHeight
-                }
 
+                }
 
             }, undefined));
 
