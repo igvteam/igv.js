@@ -50,7 +50,6 @@ var igv = (function (igv) {
         this.homrefColor = config.homrefColor || "rgb(200, 200, 200)"
         this.homvarColor = config.homvarColor || "rgb(17,248,254)";
         this.hetvarColor = config.hetvarColor || "rgb(34,12,253)";
-        this.includeCalls = (config.includeCalls === undefined ? true : config.includeCalls);
 
 
         this.nRows = 1;  // Computed dynamically
@@ -155,11 +154,11 @@ var igv = (function (igv) {
             pixelHeight = options.pixelHeight,
             bpEnd = bpStart + pixelWidth * bpPerPixel + 1,
             callHeight = ("EXPANDED" === this.displayMode ? this.expandedCallHeight : this.squishedCallHeight),
-            px, px1, pw, py, h, style, i, variant, call, callSet, j, allRef, allVar;
+            px, px1, pw, py, h, style, i, variant, call, callSet, j, allRef, allVar, callSets;
 
-        this.variantBandHeight = 10 + this.nRows * (this.variantHeight + vGap),
+        this.variantBandHeight = 10 + this.nRows * (this.variantHeight + vGap);
 
-            callSets = getCallSets.call(this);
+        callSets = getCallSets.call(this);
 
         igv.graphics.fillRect(ctx, 0, 0, pixelWidth, pixelHeight, {'fillStyle': "rgb(255, 255, 255)"});
 
@@ -191,7 +190,7 @@ var igv = (function (igv) {
                 ctx.fillRect(px, py, pw, h);
 
 
-                if (callSets && self.includeCalls &&  variant.calls && "COLLAPSED" !== this.displayMode) {
+                if (callSets && variant.calls && "COLLAPSED" !== this.displayMode) {
                     h = callHeight;
                     for (j = 0; j < callSets.length; j++) {
                         callSet = callSets[j];
@@ -266,7 +265,7 @@ var igv = (function (igv) {
                                     Array.prototype.push.apply(popupData, variant.popupData(genomicLocation));
                                 }
                             }
-                            else if(self.includeCalls) {
+                            else {
                                 // Call
                                 callSets = getCallSets.call(self);
                                 if (callSets && variant.calls) {
