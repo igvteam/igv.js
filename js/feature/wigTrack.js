@@ -62,7 +62,7 @@ var igv = (function (igv) {
 
         var self = this;
         return new Promise(function (fulfill, reject) {
-            self.featureSource.getFeatures(chr, bpStart, bpEnd).then(fulfill);
+            self.featureSource.getFeatures(chr, bpStart, bpEnd).then(fulfill).catch(reject);
         });
     };
 

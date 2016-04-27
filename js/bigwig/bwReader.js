@@ -55,6 +55,8 @@ var igv = (function (igv) {
             else {
                 self.loadHeader().then(function () {
                     fulfill(self.zoomLevelHeaders);
+                }).catch(function (error) {
+                    reject(error);
                 });
             }
         });
@@ -121,7 +123,9 @@ var igv = (function (igv) {
                 self.header.reserved = binaryParser.getLong();
 
                 loadZoomHeadersAndChrTree.call(self).then(fulfill).catch(reject);
-            });
+            }).catch(function (error) {
+                    reject(error);
+                });
 
         });
     }
