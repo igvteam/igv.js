@@ -83,18 +83,6 @@ var igv = (function (igv) {
 
         computeStart(variant);
 
-        function arrayToCommaString(array) {
-            if (!array) return;
-            var str = '', i;
-            if (array.length > 0)
-                str = array[0];
-            for (i = 1; i < array.length; i++) {
-                str += ", " + array[1];
-            }
-            return str;
-
-        }
-
         return variant;
 
     }
@@ -156,7 +144,8 @@ var igv = (function (igv) {
 
     igv.Variant.prototype.popupData = function (genomicLocation) {
 
-        var fields, gt;
+        var fields, gt,
+            self = this;
 
         fields = [
             {name: "Names", value: this.names ? this.names : ""},
@@ -171,19 +160,29 @@ var igv = (function (igv) {
             fields.push({name: "Genotype", value: gt});
         }
 
-        //infoFields = this.info.split(";");
-        //infoFields.forEach(function (f) {
-        //    var tokens = f.split("=");
-        //    if (tokens.length > 1) {
-        //        fields.push({name: tokens[0], value: tokens[1]});   // TODO -- use header to add descriptive tooltip
-        //    }
-        //});
-
+        if(this.info) {
+            fields.push('<HR>');
+            Object.keys(this.info).forEach(function (key) {
+                fields.push({name: key, value: arrayToCommaString(self.info[key])});
+            });
+        }
 
         return fields;
 
     }
 
+
+    function arrayToCommaString(array) {
+        if (!array) return;
+        var str = '', i;
+        if (array.length > 0)
+            str = array[0];
+        for (i = 1; i < array.length; i++) {
+            str += ", " + array[1];
+        }
+        return str;
+
+    }
 
     return igv;
 })(igv || {});
