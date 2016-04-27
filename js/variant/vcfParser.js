@@ -41,13 +41,15 @@ var igv = (function (igv) {
             len = lines.length,
             line,
             i,
+            j,
             tokens,
             header = {},
             id,
             values,
             ltIdx,
             gtIdx,
-            type;
+            type,
+            self = this;
 
         this.header = header;
 
@@ -109,6 +111,13 @@ var igv = (function (igv) {
                 }
                 else if (line.startsWith("#CHROM")) {
                     // TODO -- parse this to get sample names
+                    tokens = line.split("\t");
+                    if(tokens.length > 9) {
+                        header.callSets = [];
+                        for(j = 9; j < tokens.length; j++) {
+                            header.callSets.push({id: j, name: tokens[j]});
+                        }
+                    }
                 }
 
             }
