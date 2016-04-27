@@ -68,7 +68,9 @@ var igv = (function (igv) {
         igv.graphics.setProperties(ctx, fontStyle );
         while (x < options.pixelWidth) {
 
-            var l = Math.floor(nTick * spacing);
+            var l = Math.floor(nTick * spacing),
+                shim = 2;
+
             x = Math.round(((l - 1) - options.bpStart + 0.5) / options.bpPerPixel);
             var chrPosition = formatNumber(l / ts.unitMultiplier, 0) + " " + ts.majorUnit;
 
@@ -76,11 +78,11 @@ var igv = (function (igv) {
                 igv.graphics.fillText(ctx, chrPosition, x, this.height - 15);
             }
 
-            igv.graphics.strokeLine(ctx, x, this.height - 10, x, this.height - 2);
+            igv.graphics.strokeLine(ctx, x, this.height - 10, x, this.height - shim);
 
             nTick++;
         }
-        igv.graphics.strokeLine(ctx, 0, this.height - 1, options.pixelWidth, this.height - 1);
+        igv.graphics.strokeLine(ctx, 0, this.height - shim, options.pixelWidth, this.height - shim);
 
 
         function formatNumber(anynum, decimal) {
