@@ -30,47 +30,6 @@ var igvxhr = (function (igvxhr) {
     const GZIP = 1;
     const BGZF = 2;
 
-    igvxhr.isReachable = function (url, continuation) {
-
-        continuation(true);
-
-        // Implementation is broken -- dependent on HEAD request which isn't allowed or doesn't work for most webservices
-        // and CORS accessed files  (method not allowed).   have to rethink this.
-
-        //var request = new XMLHttpRequest();
-        //
-        //request.open("HEAD", url, true);
-        //
-        //request.onload = function (event) {
-        //
-        //    if (0 === request.status) {
-        //        continuation(false, request.status);
-        //    }
-        //    else if (request.status >= 200 && request.status <= 300) {
-        //        continuation(true, request.status);
-        //    }
-        //    else {
-        //        continuation(false, request.status);
-        //    }
-        //
-        //};
-        //
-        //request.onerror = function (event) {
-        //    continuation(false, request.status);
-        //};
-        //
-        //request.ontimeout = function (event) {
-        //    continuation(false, request.status);
-        //};
-        //
-        //request.onabort = function (event) {
-        //    continuation(false, request.status);
-        //};
-        //
-        //request.send(null);
-
-    };
-
     igvxhr.load = function (url, options) {
 
         return new Promise(function (fulfill, reject) {
@@ -86,15 +45,7 @@ var igvxhr = (function (igvxhr) {
                 isSafari = navigator.vendor.indexOf("Apple") == 0 && /\sSafari\//.test(navigator.userAgent),
                 withCredentials = options.withCredentials,
                 header_keys, key, value, i;
-            //
-            //if (range && isSafari) {
-            //
-            //    console.log(isSafari);
-            //    // Add random seed. For nasty safari bug https://bugs.webkit.org/show_bug.cgi?id=82672
-            //    // TODO -- add some "isSafari" test?
-            //    url += url.contains("?") ? "&" : "?";
-            //    url += "someRandomSeed=" + Math.random().toString(36);
-            //}
+
 
             // Hack to prevent caching for google storage files.  Get weird net:err-cache errors otherwise
             if (range && url.contains("googleapis")) {
@@ -142,7 +93,13 @@ var igvxhr = (function (igvxhr) {
             xhr.onload = function (event) {
                 // when the url points to a local file, the status is 0 but that is no error
                 if (xhr.status == 0 || (xhr.status >= 200 && xhr.status <= 300)) {
-                    fulfill(xhr.response, xhr);
+
+                    if (range && xhr.status != 206) {
+                        handleError("ERROR: range-byte header was ignored for url: " + url);
+                    }
+                    else {
+                        fulfill(xhr.response, xhr);
+                    }
                 }
                 else {
 
