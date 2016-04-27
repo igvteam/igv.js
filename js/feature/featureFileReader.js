@@ -115,6 +115,8 @@ var igv = (function (igv) {
                 if (self.header instanceof String && self.header.startsWith("##gff-version 3")) {
                     self.format = 'gff3';
 
+                } else if ('vcf' === self.format) {
+                    self.callSets = self.header.callSets;
                 }
                 fulfill(parser.parseFeatures(data));   // <= PARSING DONE HERE
             };
