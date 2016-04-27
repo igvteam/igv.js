@@ -206,12 +206,13 @@
         </div>
 
         <div href="#"
-           onclick="igv.browser.loadTrack({
+             onclick="igv.browser.loadTrack({
                                   type: 'alignment', // Optional
                                   format: 'bam',  // Optional
                                   url: 'http://hgdownload.cse.ucsc.edu/goldenPath/hg19/encodeDCC/wgEncodeOpenChromFaire/wgEncodeOpenChromFaireMrta2041AlnRep1.bam',
                                   name: 'MRT_A204 FaireSeq Alignments rep 1'})">MRT_A204 FaireSeq Alignments rep 1
-            bam</div>
+            bam
+        </div>
 
         <div onclick="igv.browser.loadTrack({
                                 type: 'bam',
@@ -279,10 +280,10 @@
         <div onclick="igv.browser.loadTrack( {
                             type: 'variant',
                             url: 'https://s3.amazonaws.com/igv.broadinstitute.org/data/hg19/1kg/ALL.chr22.phase3_shapeit2_mvncall_integrated_v5a.20130502.genotypes.vcf.gz',
-                            name: '1KG variants'
+                            name: '1KG variants',
+                            visibilityWindow: 10000
                             })">1KG VCF - chr 22
         </div>
-
 
 
         <div onclick="igv.browser.loadTrack({
