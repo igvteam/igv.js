@@ -64,11 +64,6 @@ var igv = (function (igv) {
         if (config.visibilityWindow) {
             track.visibilityWindow = config.visibilityWindow;
         }
-        else if ("variant" === config.type) {
-            config.visibilityWindow = 1000000;
-            track.visibilityWindow = config.visibilityWindow;
-        }
-
     };
 
 

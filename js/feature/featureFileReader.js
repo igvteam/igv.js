@@ -114,9 +114,6 @@ var igv = (function (igv) {
                 self.header = parser.parseHeader(data);
                 if (self.header instanceof String && self.header.startsWith("##gff-version 3")) {
                     self.format = 'gff3';
-
-                } else if ('vcf' === self.format) {
-                    self.callSets = self.header.callSets;
                 }
                 fulfill(parser.parseFeatures(data));   // <= PARSING DONE HERE
             };
@@ -250,38 +247,46 @@ var igv = (function (igv) {
         return new Promise(function (fulfill, reject) {
 
 
-            // We force a load of the index first
+            if(self.header) {
+                fulfill(self.header);
+            }
 
-            getIndex.call(self).then(function (index) {
+            else {
 
-                if (index) {
-                    // Load the file header (not HTTP header) for an indexed file.
-                    // TODO -- note this will fail if the file header is > 65kb in size
-                    var options = {
-                            headers: self.config.headers,           // http headers, not file header
-                            bgz: index.tabix,
-                            range: {start: 0, size: 65000},
-                            withCredentials: self.config.withCredentials
-                        },
-                        success = function (data) {
-                            self.header = self.parser.parseHeader(data);
-                            fulfill(self.header);
-                        };
+                // We force a load of the index first
 
-                    if (self.localFile) {
-                        igvxhr.loadStringFromFile(self.localFile, options).then(success);
+                getIndex.call(self).then(function (index) {
+
+                    if (index) {
+                        // Load the file header (not HTTP header) for an indexed file.
+                        // TODO -- note this will fail if the file header is > 65kb in size
+                        var options = {
+                                headers: self.config.headers,           // http headers, not file header
+                                bgz: index.tabix,
+                                range: {start: 0, size: 65000},
+                                withCredentials: self.config.withCredentials
+                            },
+                            success = function (data) {
+                                self.header = self.parser.parseHeader(data);
+                                fulfill(self.header);
+                            };
+
+                        if (self.localFile) {
+                            igvxhr.loadStringFromFile(self.localFile, options).then(success);
+                        }
+                        else {
+                            igvxhr.loadString(self.url, options).then(success);
+                        }
                     }
                     else {
-                        igvxhr.loadString(self.url, options).then(success);
+                        loadFeaturesNoIndex.call(self, undefined).then(function (features) {
+                            fulfill(self.header, features) // Unfortunate use of side affect here
+                        }).catch(reject);
                     }
-                }
-                else {
-                    loadFeaturesNoIndex.call(self, undefined).then(function (features) {
-                        fulfill(self.header, features) // Unfortunate use of side affect here
-                    }).catch(reject);
-                }
-            });
+                });
+            }
         });
+
     }
 
     /**
