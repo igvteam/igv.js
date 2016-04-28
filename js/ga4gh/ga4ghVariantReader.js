@@ -36,6 +36,64 @@ var igv = (function (igv) {
 
     }
 
+    igv.Ga4ghVariantReader.prototype.readHeader = function () {
+
+        var self = this;
+
+        return new Promise(function (fulfill, reject) {
+
+
+            if (self.header) {
+                fulfill(self.header);
+            }
+
+            else {
+
+                self.header = {};
+
+                if (self.includeCalls === false) {
+                    fulfill(self.header);
+                }
+                else {
+
+                    var readURL = self.url + "/callsets/search";
+
+                    igv.ga4ghSearch({
+                        url: readURL,
+                        fields: "nextPageToken,callSets(id,name)",
+                        body: {
+                            "variantSetIds": (Array.isArray(self.variantSetId) ? self.variantSetId : [self.variantSetId]),
+                            "pageSize": "10000"
+                        },
+                        decode: function (json) {
+                            // If specific callSetIds are specified filter to those
+                            if (self.callSetIds) {
+                                var filteredCallSets = [],
+                                    csIdSet = new Set();
+
+                                csIdSet.addAll(self.callSetIds);
+                                json.callSets.forEach(function (cs) {
+                                    if (csIdSet.has(cs.id)) {
+                                        filteredCallSets.push(cs);
+                                    }
+                                });
+                                return filteredCallSets;
+                            }
+                            else {
+                                return json.callSets;
+                            }
+                        }
+                    }).then(function (callSets) {
+                        self.header.callSets = callSets;
+                        fulfill(self.header);
+                    }).catch(reject);
+                }
+            }
+
+        });
+
+    }
+
 
     igv.Ga4ghVariantReader.prototype.readFeatures = function (chr, bpStart, bpEnd) {
 
@@ -43,7 +101,8 @@ var igv = (function (igv) {
 
         return new Promise(function (fulfill, reject) {
 
-            getCallSets().then(function (callSets) {
+            self.readHeader().then(function (header) {
+
                 getChrNameMap().then(function (chrNameMap) {
 
                     var queryChr = chrNameMap.hasOwnProperty(chr) ? chrNameMap[chr] : chr,
@@ -73,53 +132,6 @@ var igv = (function (igv) {
                 }).catch(reject);  // chr name map
             }).catch(reject);  // callsets
         });
-
-
-        function getCallSets() {
-
-            return new Promise(function (fulfill, reject) {
-                if(self.includeCalls === false) {
-                    fulfill([]);
-                }
-                else if (self.callSets) {
-                    fulfill(self.callSets);
-                }
-                else {
-
-                    var readURL = self.url + "/callsets/search";
-
-                    igv.ga4ghSearch({
-                        url: readURL,
-                        fields: "nextPageToken,callSets(id,name)",
-                        body: {
-                            "variantSetIds":  (Array.isArray(self.variantSetId) ? self.variantSetId : [self.variantSetId]),
-                            "pageSize": "10000"
-                        },
-                        decode: function (json) {
-                            // If specific callSetIds are specified filter to those
-                            if (self.callSetIds) {
-                                var filteredCallSets = [],
-                                    csIdSet = new Set();
-
-                                csIdSet.addAll(self.callSetIds);
-                                json.callSets.forEach(function (cs) {
-                                    if (csIdSet.has(cs.id)) {
-                                        filteredCallSets.push(cs);
-                                    }
-                                });
-                                return filteredCallSets;
-                            }
-                            else {
-                                return json.callSets;
-                            }
-                        }
-                    }).then(function (callSets) {
-                        self.callSets = callSets;
-                        fulfill(callSets);
-                    }).catch(reject);
-                }
-            });
-        }
 
 
         function getChrNameMap() {
