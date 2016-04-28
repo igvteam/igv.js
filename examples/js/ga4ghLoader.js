@@ -25,6 +25,8 @@
 
 var igv = (function (igv) {
 
+    var trackOrder = 10;
+
     igv.ga4gh = {
 
         providerCurrent: undefined,
@@ -123,6 +125,7 @@ var igv = (function (igv) {
                                             variantSetId: variantSetId,
                                             callSetIds: [result.callSetId],
                                             name: result.name + " variants",
+                                            order: trackOrder++,
                                             datasetId: result.datasetId
                                         })
                                     })
@@ -136,6 +139,7 @@ var igv = (function (igv) {
                                             url: igv.ga4gh.providerCurrent.url,
                                             readGroupSetIds: result.readGroupSetId,
                                             label: result.name + " alignments",
+                                            order: trackOrder++,
                                             datasetId: result.datasetId
                                         }
                                     );
