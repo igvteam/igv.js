@@ -48,10 +48,7 @@ var igv = (function (igv) {
             values,
             ltIdx,
             gtIdx,
-            type,
-            self = this;
-
-        this.header = header;
+            type;
 
         // First line must be file format
         if (lines[0].startsWith("##fileformat")) {
@@ -112,9 +109,15 @@ var igv = (function (igv) {
                 else if (line.startsWith("#CHROM")) {
                     // TODO -- parse this to get sample names
                     tokens = line.split("\t");
-                    if(tokens.length > 9) {
+
+                    if (tokens.length > 8) {
+
+                        // Format field
+                        header.callKeys = tokens[8].split(":");
+
+                        // call set names
                         header.callSets = [];
-                        for(j = 9; j < tokens.length; j++) {
+                        for (j = 9; j < tokens.length; j++) {
                             header.callSets.push({id: j, name: tokens[j]});
                         }
                     }
@@ -126,6 +129,9 @@ var igv = (function (igv) {
             }
 
         }
+
+        this.header = header;  // Will need to intrepret genotypes and info field
+
         return header;
     }
 
@@ -143,7 +149,10 @@ var igv = (function (igv) {
             allFeatures,
             line,
             i,
-            variant;
+            j,
+            variant,
+            call,
+            callTokens;
 
 
         allFeatures = [];
@@ -154,30 +163,37 @@ var igv = (function (igv) {
             }
             else {
                 tokens = lines[i].split("\t");
-                variant = decode(tokens);
-                if (variant != null) {
+                if (tokens.length >= 8) {
+                    variant = new Variant(tokens);
                     variant.header = this.header;       // Keep a pointer to the header to interpret fields for popup text
                     allFeatures.push(variant);
-                }
 
+                    if (tokens.length > 9) {
+
+                        for (j = 0; j < tokens.length; j++) {
+                            callTokens = tokens[j].split(":");
+
+                            
+
+                        }
+
+                    }
+
+                }
             }
         }
 
         return allFeatures;
 
 
-        function decode(tokens) {
-
-            if (tokens.length < 8) {
-                return null;
-            }
-            else {
-                return new Variant(tokens);
-            }
-
-        }
     }
 
+
+    function Call(string) {
+
+        var tokens = string.split(":")
+
+    }
 
     function Variant(tokens) {
 
