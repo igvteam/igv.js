@@ -54,7 +54,6 @@ var igv = (function (igv) {
         }
 
 
-
         window.onresize = igv.throttle(function () {
             igv.browser.resize();
         }, 10);
@@ -191,6 +190,12 @@ var igv = (function (igv) {
                 return null;
         }
 
+        // Set order field of track here.  Otherwise track order might get shuffled during asynchronous load
+        if (undefined === newTrack.order) {
+            newTrack.order = this.trackViews.length;
+        }
+
+
         // If defined, attempt to load the file header before adding the track.  This will catch some errors early
         if (typeof newTrack.getFileHeader === "function") {
             newTrack.getFileHeader().then(function (header) {
@@ -232,9 +237,6 @@ var igv = (function (igv) {
         // Register view with track.  This backpointer is unfortunate, but is needed to support "resize" events.
         track.trackView = trackView;
 
-        if (undefined === track.order) {
-            track.order = this.trackViews.length;
-        }
 
         this.trackViews.push(trackView);
 
@@ -946,7 +948,7 @@ var igv = (function (igv) {
                 config.format = "vcf"
             }
 
-            if("t2d" === config.type) {
+            if ("t2d" === config.type) {
                 config.type = "gwas";
             }
         }
