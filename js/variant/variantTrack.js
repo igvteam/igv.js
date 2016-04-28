@@ -301,12 +301,19 @@ var igv = (function (igv) {
             }
         })
 
-        popupData = [
-            {name: 'Call set name', value: call.callSetName},
-            {name: 'Genotype', value: gt},
-            {name: 'Phase set', value: call.phaseset},
-            {name: 'genotypeLikelihood', value: call.genotypeLikelihood.toString()}
-        ];
+        popupData = [];
+
+        if (call.callSetName !== undefined) {
+            popupData.push({name: 'Call set name', value: call.callSetName});
+        }
+        popupData.push({name: 'Genotype', value: gt});
+        if (call.phaseset !== undefined) {
+            popupData.push({name: 'Phase set', value: call.phaseset});
+        }
+        if (call.genotypeLikelihood !== undefined) {
+            popupData.push({name: 'genotypeLikelihood', value: call.genotypeLikelihood.toString()});
+        }
+
 
         Object.keys(call.info).forEach(function (key) {
             popupData.push({name: key, value: call.info[key]});
