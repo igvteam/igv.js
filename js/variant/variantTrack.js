@@ -31,12 +31,16 @@
 var igv = (function (igv) {
 
     var vGap = 2;
+    var DEFAULT_VISIBILITY_WINDOW = 100000;
 
     igv.VariantTrack = function (config) {
 
+
+        this.visibilityWindow = config.visibilityWindow === undefined ? 'compute' : config.visibilityWindow;
+
         igv.configTrack(this, config);
 
-        this.displayMode = config.displayMode || "COLLAPSED";    // COLLAPSED | EXPANDED | SQUISHED
+        this.displayMode = config.displayMode || "EXPANDED";    // COLLAPSED | EXPANDED | SQUISHED
         this.labelDisplayMode = config.labelDisplayMode;
 
         this.variantHeight = config.variantHeight || 10;
@@ -51,17 +55,17 @@ var igv = (function (igv) {
         this.homvarColor = config.homvarColor || "rgb(17,248,254)";
         this.hetvarColor = config.hetvarColor || "rgb(34,12,253)";
 
-
         this.nRows = 1;  // Computed dynamically
 
     };
 
+
     igv.VariantTrack.prototype.getFileHeader = function () {
         var self = this;
+
         return new Promise(function (fulfill, reject) {
             if (typeof self.featureSource.getFileHeader === "function") {
                 self.featureSource.getFileHeader().then(function (header) {
-
                     if (header) {
                         // Header (from track line).  Set properties,unless set in the config (config takes precedence)
                         if (header.name && !self.config.name) {
@@ -69,6 +73,11 @@ var igv = (function (igv) {
                         }
                         if (header.color && !self.config.color) {
                             self.color = "rgb(" + header.color + ")";
+                        }
+                        self.callSets = header.callSets;
+
+                        if ('compute' === self.visibilityWindow) {
+                            computeVisibilityWindow.call(self);
                         }
                     }
                     fulfill(header);
@@ -79,6 +88,26 @@ var igv = (function (igv) {
                 fulfill(null);
             }
         });
+    }
+
+
+    function computeVisibilityWindow() {
+
+        if (this.callSets) {
+            if (this.callSets.length < 10) {
+                this.visibilityWindow = DEFAULT_VISIBILITY_WINDOW;
+            }
+            else {
+                this.visibilityWindow = 1000 + ((2500 / this.callSets.length) * 40);
+            }
+        }
+        else {
+            this.visibilityWindow = DEFAULT_VISIBILITY_WINDOW;
+        }
+
+        this.featureSource.visibilityWindow = this.visibilityWindow;
+
+
     }
 
     igv.VariantTrack.prototype.getFeatures = function (chr, bpStart, bpEnd) {
@@ -94,10 +123,6 @@ var igv = (function (igv) {
         });
     }
 
-    // TODO -- refactor this, its pretty awful
-    function getCallSets() {
-        return this.featureSource.reader.callSets;
-    }
 
 
     /**
@@ -109,7 +134,7 @@ var igv = (function (igv) {
      */
     igv.VariantTrack.prototype.computePixelHeight = function (features) {
 
-        var callSets = getCallSets.call(this),
+        var callSets = this.callSets,
             nCalls = callSets ? callSets.length : 0,
             nRows,
             h;
@@ -145,8 +170,7 @@ var igv = (function (igv) {
 
     igv.VariantTrack.prototype.draw = function (options) {
 
-        var track = this,
-            featureList = options.features,
+        var featureList = options.features,
             ctx = options.context,
             bpPerPixel = options.bpPerPixel,
             bpStart = options.bpStart,
@@ -158,7 +182,7 @@ var igv = (function (igv) {
 
         this.variantBandHeight = 10 + this.nRows * (this.variantHeight + vGap);
 
-        callSets = getCallSets.call(this);
+        callSets = this.callSets;
 
         igv.graphics.fillRect(ctx, 0, 0, pixelWidth, pixelHeight, {'fillStyle': "rgb(255, 255, 255)"});
 
@@ -267,7 +291,7 @@ var igv = (function (igv) {
                             }
                             else {
                                 // Call
-                                callSets = getCallSets.call(self);
+                                callSets = self.callSets;
                                 if (callSets && variant.calls) {
                                     callHeight = self.nRows * ("SQUISHED" === self.displayMode ? self.squishedCallHeight : self.expandedCallHeight);
                                     row = Math.floor((yOffset - self.variantBandHeight - vGap) / callHeight);
@@ -304,7 +328,7 @@ var igv = (function (igv) {
         popupData = [];
 
         if (call.callSetName !== undefined) {
-            popupData.push({name: 'Call set name', value: call.callSetName});
+            popupData.push({name: 'Name', value: call.callSetName});
         }
         popupData.push({name: 'Genotype', value: gt});
         if (call.phaseset !== undefined) {

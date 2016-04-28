@@ -209,6 +209,7 @@ var igv = (function (igv) {
 
                             var callSet = callSets[index - 9],
                                 call = {
+                                    callSetName: callSet.name,
                                     info: {}
                                 };
 
@@ -235,7 +236,7 @@ var igv = (function (igv) {
                                         break;
 
                                     default:
-                                        call.info[callFields[index]] = callToken;
+                                        call.info[callFields.fields[index]] = callToken;
                                 }
                             });
                         }
