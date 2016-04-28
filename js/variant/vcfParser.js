@@ -112,8 +112,6 @@ var igv = (function (igv) {
 
                     if (tokens.length > 8) {
 
-                        // Format field
-                        header.callKeys = tokens[8].split(":");
 
                         // call set names
                         header.callSets = [];
@@ -135,6 +133,32 @@ var igv = (function (igv) {
         return header;
     }
 
+    function extractCallFields(tokens) {
+
+        var callFields = {
+                genotypeIndex: -1,
+                genotypeLikelihoodIndex: -1,
+                phasesetIndex: -1,
+                fields: tokens
+            },
+            i;
+
+        for (i = 0; i < tokens.length; i++) {
+
+            if ("GT" === tokens[i]) {
+                callFields.genotypeIndex = i;
+            }
+            else if ("GL" === tokens[i]) {
+                callFields.genotypeLikelihoodIndex = i;
+            }
+            else if ("PS" === tokens[i]) {
+                callFields.phasesetIndex = i;
+            }
+        }
+        return callFields;
+
+    }
+
     /**
      * Parse data as a collection of Variant objects.
      *
@@ -144,25 +168,28 @@ var igv = (function (igv) {
     igv.VcfParser.prototype.parseFeatures = function (data) {
 
         var lines = data.split("\n"),
-            len = lines.length,
-            tokens,
             allFeatures,
-            line,
-            i,
-            j,
-            variant,
-            call,
-            callTokens;
+
+            callSets = this.header.callSets;
 
 
         allFeatures = [];
-        for (i = 0; i < len; i++) {
-            line = lines[i];
+
+        lines.forEach(function (line) {
+
+            var variant,
+                tokens,
+                callFields,
+                index,
+                token;
+
             if (line.startsWith("#")) {
-                continue;
+                //skip
             }
             else {
-                tokens = lines[i].split("\t");
+
+                tokens = line.split("\t");
+
                 if (tokens.length >= 8) {
                     variant = new Variant(tokens);
                     variant.header = this.header;       // Keep a pointer to the header to interpret fields for popup text
@@ -170,21 +197,56 @@ var igv = (function (igv) {
 
                     if (tokens.length > 9) {
 
-                        for (j = 0; j < tokens.length; j++) {
-                            callTokens = tokens[j].split(":");
+                        // Format
+                        callFields = extractCallFields(tokens[8].split(":"));
 
-                            
 
+                        variant.calls = {};
+
+                        for (index = 9; index < tokens.length; index++) {
+
+                            token = tokens[index];
+
+                            var callSet = callSets[index - 9],
+                                call = {
+                                    info: {}
+                                };
+
+                            variant.calls[callSet.id] = call;
+
+                            token.split(":").forEach(function (callToken, index) {
+                                switch (index) {
+                                    case callFields.genotypeIndex:
+                                        call.genotype = [];
+                                        callToken.split(/[\|\/]/).forEach(function (s) {
+                                            call.genotype.push(parseInt(s));
+                                        });
+                                        break;
+
+                                    case callFields.genotypeLikelihoodIndex:
+                                        call.genotypeLikelihood = [];
+                                        callToken.split(",").forEach(function (s) {
+                                            call.genotype.push(parseFloat(s));
+                                        });
+                                        break;
+
+                                    case callFields.phasesetIndex:
+                                        call.phaseset = callToken;
+                                        break;
+
+                                    default:
+                                        call.info[callFields[index]] = callToken;
+                                }
+                            });
                         }
 
                     }
 
                 }
             }
-        }
+        });
 
         return allFeatures;
-
 
     }
 
