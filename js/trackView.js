@@ -371,7 +371,7 @@ var igv = (function (igv) {
             return;
         }
 
-        if (this.track.visibilityWindow !== undefined) {
+        if (this.track.visibilityWindow !== undefined && this.track.visibilityWindow > 0) {
             if (igv.browser.trackViewportWidthBP() > this.track.visibilityWindow) {
                 this.tile = null;
                 this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
