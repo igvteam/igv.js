@@ -36,6 +36,7 @@ var igv = (function (igv) {
 
     }
 
+    // Simulate a VCF file header
     igv.Ga4ghVariantReader.prototype.readHeader = function () {
 
         var self = this;

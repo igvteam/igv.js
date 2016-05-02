@@ -68,29 +68,34 @@ var igv = (function (igv) {
 
         return new Promise(function (fulfill, reject) {
 
-            if (typeof self.reader.readHeader === "function") {
-                self.reader.readHeader().then(function (header, features) {
-                    // Non-indexed readers will return features as a side effect.  This is an important performance hack
-                    if (features) {
-                        // Assign overlapping features to rows
-                        packFeatures(features, maxRows);
-                        self.featureCache = new igv.FeatureCache(features);
+            if (self.header) {
+                fulfill(self.header);
+            } else {
+                if (typeof self.reader.readHeader === "function") {
 
-                        // If track is marked "searchable"< cache features by name -- use this with caution, memory intensive
-                        if (self.config.searchable) {
-                            addFeaturesToDB(features);
+                    self.reader.readHeader().then(function (header, features) {
+                        // Non-indexed readers will return features as a side effect.  This is an important performance hack
+                        if (features) {
+                            // Assign overlapping features to rows
+                            packFeatures(features, maxRows);
+                            self.featureCache = new igv.FeatureCache(features);
+
+                            // If track is marked "searchable"< cache features by name -- use this with caution, memory intensive
+                            if (self.config.searchable) {
+                                addFeaturesToDB(features);
+                            }
                         }
-                    }
 
-                    if(header && header.format) {
-                        self.config.format = header.format;
-                    }
+                        if (header && header.format) {
+                            self.config.format = header.format;
+                        }
 
-                    fulfill(header);
-                }).catch(reject);
-            }
-            else {
-                fulfill(null);
+                        fulfill(header);
+                    }).catch(reject);
+                }
+                else {
+                    fulfill(null);
+                }
             }
         });
     }
@@ -130,14 +135,13 @@ var igv = (function (igv) {
             else {
                 // TODO -- reuse cached features that overelap new region
 
-                if(self.sourceType === 'file' && (self.visibilityWindow === undefined || self.visibilityWindow <= 0)) {
+                if (self.sourceType === 'file' && (self.visibilityWindow === undefined || self.visibilityWindow <= 0)) {
                     // Expand genomic interval to grab entire chromosome
                     genomicInterval.start = 0;
                     genomicInterval.end = Number.MAX_VALUE;
                 }
 
                 self.reader.readFeatures(chr, genomicInterval.start, genomicInterval.end).then(
-
                     function (featureList) {
 
                         if (featureList && typeof featureList.forEach === 'function') {  // Have result AND its an array type
@@ -151,14 +155,13 @@ var igv = (function (igv) {
 
                             // TODO -- COMBINE GFF FEATURES HERE
                             // if(self.isGFF) featureList = combineFeatures(featureList);
-                            if("gtf" === self.config.format || "gff3" === self.config.format || "gff" === self.config.format) {
+                            if ("gtf" === self.config.format || "gff3" === self.config.format || "gff" === self.config.format) {
                                 featureList = (new igv.GFFHelper(self.config.format)).combineFeatures(featureList);
                             }
 
                             self.featureCache = isIndexed ?
                                 new igv.FeatureCache(featureList, genomicInterval) :
                                 new igv.FeatureCache(featureList);   // Note - replacing previous cache with new one
-
 
 
                             // Assign overlapping features to rows
