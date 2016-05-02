@@ -107,13 +107,11 @@ var igv = (function (igv) {
                     }
                 }
                 else if (line.startsWith("#CHROM")) {
-                    // TODO -- parse this to get sample names
                     tokens = line.split("\t");
 
                     if (tokens.length > 8) {
 
-
-                        // call set names
+                        // call set names -- use column index for id
                         header.callSets = [];
                         for (j = 9; j < tokens.length; j++) {
                             header.callSets.push({id: j, name: tokens[j]});
@@ -168,12 +166,8 @@ var igv = (function (igv) {
     igv.VcfParser.prototype.parseFeatures = function (data) {
 
         var lines = data.split("\n"),
-            allFeatures,
-
+            allFeatures = [],
             callSets = this.header.callSets;
-
-
-        allFeatures = [];
 
         lines.forEach(function (line) {
 
@@ -183,10 +177,7 @@ var igv = (function (igv) {
                 index,
                 token;
 
-            if (line.startsWith("#")) {
-                //skip
-            }
-            else {
+            if (!line.startsWith("#")) {
 
                 tokens = line.split("\t");
 
@@ -199,7 +190,6 @@ var igv = (function (igv) {
 
                         // Format
                         callFields = extractCallFields(tokens[8].split(":"));
-
 
                         variant.calls = {};
 
@@ -251,12 +241,6 @@ var igv = (function (igv) {
 
     }
 
-
-    function Call(string) {
-
-        var tokens = string.split(":")
-
-    }
 
     function Variant(tokens) {
 
