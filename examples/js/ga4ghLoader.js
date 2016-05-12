@@ -36,7 +36,7 @@ var igv = (function (igv) {
         providers: [
             {
                 name: "Google",
-                url: "https://www.googleapis.com/genomics/v1beta2",
+                url: "https://genomics.googleapis.com/v1",
                 supportsPartialResponse: true,
                 datasets: [
                     {name: "Platinum Genomes", id: "3049512673186936334"},
@@ -119,7 +119,7 @@ var igv = (function (igv) {
                                         igv.browser.loadTrack({
                                             sourceType: 'ga4gh',
                                             type: 'variant',
-                                            url: 'https://www.googleapis.com/genomics/v1beta2',
+                                            url: 'https://genomics.googleapis.com/v1',
                                             variantSetId: variantSetId,
                                             callSetIds: [result.callSetId],
                                             name: result.name + " variants",

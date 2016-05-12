@@ -6,7 +6,7 @@ function runGa4ghTests() {
 
         var reader = new igv.Ga4ghVariantReader({
             type: "vcf",
-            url: "https://www.googleapis.com/genomics/v1beta2",
+            url: "https://genomics.googleapis.com/v1",
             variantSetId: "10473108253681171589"
         });
 
@@ -85,7 +85,7 @@ function runGa4ghTests() {
 
         var reader = new igv.Ga4ghVariantReader({
                 type: "vcf",
-                url: "https://www.googleapis.com/genomics/v1beta2",
+                url: "https://genomics.googleapis.com/v1",
                 variantSetId: "10473108253681171589",
                 callSetIds: ["10473108253681171589-2"]
             }),
@@ -136,7 +136,7 @@ function runGa4ghTests() {
 //
 //        var reader = new igv.Ga4ghVariantReader({
 //                type: "vcf",
-//                url: "https://www.googleapis.com/genomics/v1beta2",
+//                url: "https://genomics.googleapis.com/v1",
 //                variantSetId: "10473108253681171589"
 //            }),
 //            chr = "1",
@@ -162,7 +162,7 @@ function runGa4ghTests() {
     //
     //    var reader = new igv.Ga4ghAlignmentReader({
     //        type: "bam",
-    //        url: "https://www.googleapis.com/genomics/v1beta2",
+    //        url: "https://genomics.googleapis.com/v1",
     //        readGroupSetIds: 'CMvnhpKTFhCjz9_25e_lCw'
     //    });
     //
