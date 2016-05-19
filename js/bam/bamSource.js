@@ -39,6 +39,7 @@ var igv = (function (igv) {
             this.bamReader = new igv.BamReader(config);
         }
 
+       this.viewAsPairs = config.viewAsPairs;
     };
 
     igv.BamSource.prototype.setViewAsPairs = function (bool) {
