@@ -78,7 +78,7 @@ var igv = (function (igv) {
                     var maxRows = self.config.maxRows || 500,
                         alignments = alignmentContainer.alignments;
 
-                    if (!this.viewAsPairs) {
+                    if (!self.viewAsPairs) {
                         alignments = unpairAlignments([{alignments: alignments}]);
                     }
 
