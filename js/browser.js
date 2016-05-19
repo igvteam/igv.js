@@ -920,7 +920,7 @@ var igv = (function (igv) {
 
 
     /**
-     * Infer properties format and type
+     * Infer properties format and track type from legacy "config.type" property
      *
      * @param config
      */
@@ -950,6 +950,10 @@ var igv = (function (igv) {
 
             if ("t2d" === config.type) {
                 config.type = "gwas";
+            }
+
+            if("FusionJuncSpan" === config.type) {
+                config.format = "FusionJuncSpan";
             }
         }
 
