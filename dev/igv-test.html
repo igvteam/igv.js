@@ -178,8 +178,8 @@
             showNavigation: true,
             //genome: "hg19",
             reference: {
-                fastaURL: "//dn7ywbm9isq8j.cloudfront.net/genomes/seq/1kg_v37/human_g1k_v37_decoy.fasta",
-                cytobandURL: "//dn7ywbm9isq8j.cloudfront.net/genomes/seq/b37/b37_cytoband.txt"
+                fastaURL: "//s3.amazonaws.com/igv.broadinstitute.org/genomes/seq/1kg_v37/human_g1k_v37_decoy.fasta",
+                cytobandURL: "//s3.amazonaws.com/igv.broadinstitute.org/genomes/seq/b37/b37_cytoband.txt"
             },
             flanking: 1000,
             apiKey: 'AIzaSyDUUAUFpQEN4mumeMNIRWXSiTh5cPtUAD0',
@@ -194,7 +194,7 @@
             tracks: [
                 {
                     name: "Genes",
-                    url: "//igv.broadinstitute.org/annotations/hg19/genes/gencode.v18.collapsed.bed",
+                    url: "//s3.amazonaws.com/igv.broadinstitute.org/annotations/hg19/genes/gencode.v18.collapsed.bed",
 //                    order: Number.MAX_VALUE,
                     order: 9999,
                     displayMode: "EXPANDED"

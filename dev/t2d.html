@@ -486,8 +486,8 @@
         options = {
             showKaryo: false,
             showCommandBar: false,
-            fastaURL: "http://dn7ywbm9isq8j.cloudfront.net/genomes/seq/hg19/hg19.fasta",
-            cytobandURL: "http://dn7ywbm9isq8j.cloudfront.net/genomes/seq/hg19/cytoBand.txt",
+            fastaURL: "http://s3.amazonaws.com/igv.broadinstitute.org/genomes/seq/hg19/hg19.fasta",
+            cytobandURL: "http://s3.amazonaws.com/igv.broadinstitute.org/genomes/seq/hg19/cytoBand.txt",
             locus: 'slc30a8',
             flanking: 100000,
             tracks: [
@@ -540,7 +540,7 @@
                     order: -9999
                 },
                 {
-                    url: "//igv.broadinstitute.org/annotations/hg19/genes/gencode.v18.collapsed.bed",
+                    url: "//s3.amazonaws.com/igv.broadinstitute.org/annotations/hg19/genes/gencode.v18.collapsed.bed",
                     name: "Genes",
                     order: 10000
                 }
