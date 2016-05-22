@@ -43,9 +43,12 @@ var igv = (function (igv) {
         }
         else {
             this.url = config.url;
-            this.filename = config.url;
             this.indexURL = config.indexURL;
             this.headURL = config.headURL || this.filename;
+
+            var uriParts = igv.parseUri(config.url);
+            this.filename = uriParts.file;
+            this.path = uriParts.path;
         }
 
         this.format = config.format;
@@ -81,7 +84,7 @@ var igv = (function (igv) {
      */
     function loadIndex() {
         var idxFile = this.indexURL;
-        if (this.url.endsWith(".gz")) {
+        if (this.filename.endsWith(".gz")) {
             if (!idxFile) idxFile = this.url + ".tbi";
             return igv.loadBamIndex(idxFile, this.config, true);
         }
@@ -275,7 +278,7 @@ var igv = (function (igv) {
                             igvxhr.loadStringFromFile(self.localFile, options).then(success);
                         }
                         else {
-                            igvxhr.loadString(self.url, options).then(success);
+                            igvxhr.loadString(self.url, options).then(success).catch(reject);
                         }
                     }
                     else {

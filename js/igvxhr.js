@@ -32,6 +32,8 @@ var igvxhr = (function (igvxhr) {
 
     igvxhr.load = function (url, options) {
 
+        if(!options) options = {};
+
         return new Promise(function (fulfill, reject) {
 
             var xhr = new XMLHttpRequest(),

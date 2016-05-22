@@ -163,6 +163,9 @@ var igv = (function (igv) {
         browser.ideoPanel = new igv.IdeoPanel(headerDiv);
         browser.ideoPanel.resize();
 
+        // phone home -- counts launches.  Count is anonymous, needed for our continued funding.  Please don't delete
+        phoneHome();
+
 
         igv.loadGenome(config.reference).then(function (genome) {
 
@@ -308,7 +311,7 @@ var igv = (function (igv) {
             $trackLabelToggle.click(function () {
 
                 browser.trackLabelsVisible = !browser.trackLabelsVisible;
-                $(this).text( true === browser.trackLabelsVisible ? "hide labels" : "show labels" );
+                $(this).text(true === browser.trackLabelsVisible ? "hide labels" : "show labels");
 
                 $(browser.trackContainerDiv).find('.igv-track-label').toggle();
 
@@ -379,6 +382,19 @@ var igv = (function (igv) {
         $(".igv-grid-container-colorpicker").remove();
         $(".igv-grid-container-dialog").remove();
         $(".igv-grid-container-dialog").remove();
+    }
+
+
+    // Performs an anonymous usage count.  Essential for continued funding of igv.js, please do not remove.
+
+    function phoneHome() {
+
+        var url = "https://data.broadinstitute.org/igv/projects/current/counter_igvjs.php";
+        igvxhr.load(url).then(function (ignore) {
+            console.log(ignore);
+        }).catch(function (error) {
+            console.log(error);
+        });
     }
 
     return igv;
