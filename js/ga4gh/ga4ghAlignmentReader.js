@@ -60,6 +60,7 @@ var igv = (function (igv) {
 
         this.config = config;
         this.url = config.url;
+        this.filter = config.filter || new igv.BamFilter();
         this.readGroupSetIds = config.readGroupSetIds;
         this.authKey = config.authKey;   // Might be undefined or nill
 
@@ -174,8 +175,8 @@ var igv = (function (igv) {
                     jsonRecords = json.alignments,
                     len = jsonRecords.length,
                     json,
-                    read,
                     alignment,
+                    jsonAlignment,
                     cigarDecoded,
                     alignments = [],
                     genome = igv.browser.genome,
@@ -185,58 +186,61 @@ var igv = (function (igv) {
 
                     json = jsonRecords[i];
 
-                    read = new igv.BamAlignment();
+                    alignment = new igv.BamAlignment();
 
-                    read.readName = json.fragmentName;
-                    read.properPlacement = json.properPlacement;
-                    read.duplicateFragment = json.duplicateFragment;
-                    read.numberReads = json.numberReads;
-                    read.fragmentLength = json.fragmentLength;
-                    read.readNumber = json.readNumber;
-                    read.failedVendorQualityChecks = json.failedVendorQualityChecks;
-                    read.secondaryAlignment = json.secondaryAlignment;
-                    read.supplementaryAlignment = json.supplementaryAlignment;
-                    read.seq = json.alignedSequence;
-                    read.qual = json.alignedQuality;
-                    read.matePos = json.nextMatePosition;
-                    read.tagDict = json.info;
-                    read.flags = encodeFlags(json);
+                    alignment.readName = json.fragmentName;
+                    alignment.properPlacement = json.properPlacement;
+                    alignment.duplicateFragment = json.duplicateFragment;
+                    alignment.numberReads = json.numberReads;
+                    alignment.fragmentLength = json.fragmentLength;
+                    alignment.readNumber = json.readNumber;
+                    alignment.failedVendorQualityChecks = json.failedVendorQualityChecks;
+                    alignment.secondaryAlignment = json.secondaryAlignment;
+                    alignment.supplementaryAlignment = json.supplementaryAlignment;
+                    alignment.seq = json.alignedSequence;
+                    alignment.qual = json.alignedQuality;
+                    alignment.matePos = json.nextMatePosition;
+                    alignment.tagDict = json.info;
+                    alignment.flags = encodeFlags(json);
 
 
-                    alignment = json.alignment;
-                    if (alignment) {
-                        read.mapped = true;
+                    jsonAlignment = json.alignment;
+                    if (jsonAlignment) {
+                        alignment.mapped = true;
 
-                        read.chr = json.alignment.position.referenceName;
-                        if (genome) read.chr = genome.getChromosomeName(read.chr);
+                        alignment.chr = json.alignment.position.referenceName;
+                        if (genome) alignment.chr = genome.getChromosomeName(alignment.chr);
 
-                        read.start = parseInt(json.alignment.position.position);
-                        read.strand = !(json.alignment.position.reverseStrand);
-                        read.mq = json.alignment.mappingQuality;
-                        read.cigar = encodeCigar(json.alignment.cigar);
+                        alignment.start = parseInt(json.alignment.position.position);
+                        alignment.strand = !(json.alignment.position.reverseStrand);
+                        alignment.mq = json.alignment.mappingQuality;
+                        alignment.cigar = encodeCigar(json.alignment.cigar);
                         cigarDecoded = translateCigar(json.alignment.cigar);
 
-                        read.lengthOnRef = cigarDecoded.lengthOnRef;
+                        alignment.lengthOnRef = cigarDecoded.lengthOnRef;
 
-                        blocks = makeBlocks(read, cigarDecoded.array);
-                        read.blocks = blocks.blocks;
-                        read.insertions = blocks.insertions;
+                        blocks = makeBlocks(alignment, cigarDecoded.array);
+                        alignment.blocks = blocks.blocks;
+                        alignment.insertions = blocks.insertions;
 
                     }
                     else {
-                        read.mapped = false;
+                        alignment.mapped = false;
                     }
 
                     mate = json.nextMatePosition;
                     if (mate) {
-                        read.mate = {
+                        alignment.mate = {
                             chr: mate.referenceFrame,
                             position: parseInt(mate.position),
                             strand: !mate.reverseStrand
                         };
                     }
 
-                    alignments.push(read);
+                    if (self.filter.pass(alignment)) {
+                        alignments.push(alignment);
+                    }
+
 
                 }
 

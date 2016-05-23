@@ -9,7 +9,18 @@ var igv = (function (igv) {
     var CIGAR_DECODER = ['M', 'I', 'D', 'N', 'S', 'H', 'P', '=', 'X', '?', '?', '?', '?', '?', '?', '?'];
     var READ_STRAND_FLAG = 0x10;
     var MATE_STRAND_FLAG = 0x20;
-
+    var READ_PAIRED_FLAG = 0x1;
+    var PROPER_PAIR_FLAG = 0x2;
+    var READ_UNMAPPED_FLAG = 0x4;
+    var MATE_UNMAPPED_FLAG = 0x8;
+    var READ_STRAND_FLAG = 0x10;
+    var MATE_STRAND_FLAG = 0x20;
+    var FIRST_OF_PAIR_FLAG = 0x40;
+    var SECOND_OF_PAIR_FLAG = 0x80;
+    var NOT_PRIMARY_ALIGNMENT_FLAG = 0x100;
+    var READ_FAILS_VENDOR_QUALITY_CHECK_FLAG = 0x200;
+    var DUPLICATE_READ_FLAG = 0x400;
+    var SUPPLEMENTARY_FLAG = 0x800;
 
     const MAX_GZIP_BLOCK_SIZE = (1 << 16);   //  APPARENTLY.  Where is this documented???
 
@@ -23,6 +34,9 @@ var igv = (function (igv) {
     igv.BamReader = function (config) {
 
         this.config = config;
+
+        this.filter = config.filter || new igv.BamFilter();
+
         this.bamPath = 'gcs' === config.sourceType ?
             igv.translateGoogleCloudURL(config.url) :
             config.url;
@@ -96,7 +110,7 @@ var igv = (function (igv) {
                                     }).then(function (compressed) {
 
                                         var ba = new Uint8Array(igv.unbgzf(compressed)); //new Uint8Array(igv.unbgzf(compressed)); //, c.maxv.block - c.minv.block + 1));
-                                        decodeBamRecords(ba, c.minv.offset, alignmentContainer, bpStart, bpEnd, chrId);
+                                        decodeBamRecords(ba, c.minv.offset, alignmentContainer, bpStart, bpEnd, chrId, self.filter);
 
                                         fulfill(alignmentContainer);
 
@@ -130,7 +144,7 @@ var igv = (function (igv) {
         });
 
 
-        function decodeBamRecords(ba, offset, alignments, min, max, chrId) {
+        function decodeBamRecords(ba, offset, alignments, min, max, chrId, filter) {
 
             var blockSize,
                 blockEnd,
@@ -264,7 +278,9 @@ var igv = (function (igv) {
                 alignment.tagBA = new Uint8Array(ba.buffer.slice(p, blockEnd));  // decode thiese on demand
                 p += blockEnd;
 
-                if (!min || alignment.start <= max && alignment.start + alignment.lengthOnRef >= min) {
+                if (!min || alignment.start <= max &&
+                    alignment.start + alignment.lengthOnRef >= min &&
+                    filter.pass(alignment)) {
                     if (chrId === undefined || refID == chrId) {
                         blocks = makeBlocks(alignment, cigarArray);
                         alignment.blocks = blocks.blocks;
