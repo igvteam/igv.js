@@ -80,8 +80,8 @@
         div = $("#myDiv")[0];
         options = {
             type: "GTEX",
-            fastaURL: "//dn7ywbm9isq8j.cloudfront.net/genomes/seq/hg19/hg19.fasta",
-            cytobandURL: "//dn7ywbm9isq8j.cloudfront.net/genomes/seq/hg19/cytoBand.txt",
+            fastaURL: "//s3.amazonaws.com/igv.broadinstitute.org/genomes/seq/hg19/hg19.fasta",
+            cytobandURL: "//s3.amazonaws.com/igv.broadinstitute.org/genomes/seq/hg19/cytoBand.txt",
             locus: "psphp1",
 
             search: {
@@ -118,12 +118,12 @@
                     indexed: false,
                     color: "rgb(100,200,200)",
                     displayMode: 'EXPANDED',
-                    url: "//dn7ywbm9isq8j.cloudfront.net/annotations/hg19/gwas/v2_newest_converted_GWAS_catalog_SNPs_Pval5E08_hg19_040115.bed",
+                    url: "//s3.amazonaws.com/igv.broadinstitute.org/annotations/hg19/gwas/v2_newest_converted_GWAS_catalog_SNPs_Pval5E08_hg19_040115.bed",
                     name: "GWAS snps"
                 },
                 {
                     featureType: 'genes',
-                    url: "//dn7ywbm9isq8j.cloudfront.net/annotations/hg19/genes/gencode.v18.collapsed.bed",
+                    url: "//s3.amazonaws.com/igv.broadinstitute.org/annotations/hg19/genes/gencode.v18.collapsed.bed",
                     height: 100,
                     autoHeight: true,
                     removable: false,

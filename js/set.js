@@ -53,14 +53,28 @@ if (!Array.isArray) {
     };
 }
 
-if(typeof Set !== "undefined") {
+if (typeof Set !== "undefined") {
 
     Set.prototype.isEmpty = function () {
         return this.size === 0;
     }
+
+    Set.prototype.addAll = function (arrayOrSet) {
+
+        if (Array.isArray(arrayOrSet) || this._isPseudoArray(arrayOrSet)) {
+            for (var j = 0; j < arrayOrSet.length; j++) {
+                this.add(arrayOrSet[j]);
+            }
+        } else if (arrayOrSet instanceof Set) {
+            var self = this;
+            arrayOrSet.each(function (val, key) {
+                self.add(key, val);
+            });
+        }
+    }
 }
 else {
-     Set = function(/*initialData*/) {
+    Set = function (/*initialData*/) {
         // Usage:
         // new Set()
         // new Set(1,2,3,4,5)
@@ -74,10 +88,6 @@ else {
     Set.prototype = {
         // usage:
         // add(key)
-        // add([key1, key2, key3])
-        // add(otherSet)
-        // add(key1, [key2, key3, key4], otherSet)
-        // add supports the EXACT same arguments as the constructor
         add: function () {
             var key;
             for (var i = 0; i < arguments.length; i++) {
@@ -96,6 +106,22 @@ else {
                     this._add(key);
                 }
             }
+            return this;
+        },
+
+        addAll: function (arrayOrSet) {
+
+            if (Array.isArray(arrayOrSet) || this._isPseudoArray(arrayOrSet)) {
+                for (var j = 0; j < arrayOrSet.length; j++) {
+                    this._add(arrayOrSet[j]);
+                }
+            } else if (arrayOrSet instanceof Set) {
+                var self = this;
+                arrayOrSet.each(function (val, key) {
+                    self._add(key, val);
+                });
+            }
+
             return this;
         },
         // private methods (used internally only)

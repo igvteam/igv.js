@@ -23,60 +23,37 @@
  * THE SOFTWARE.
  */
 
+
 var igv = (function (igv) {
 
     igv.TrackView = function (track, browser) {
 
         var self = this,
-            isMouseDown = undefined,
-            lastScreenY = undefined,
-            xy;
+            element;
 
         this.track = track;
         this.browser = browser;
 
-        if ("CURSOR" === browser.type) {
-
-            this.cursorTrackContainer = $('<div class="igv-cursor-track-container">')[0];
-            $(browser.trackContainerDiv).append(this.cursorTrackContainer);
-
-            this.trackDiv = $('<div class="igv-track-div">')[0];
-            $(this.cursorTrackContainer).append(this.trackDiv);
-        } else {
-
-            this.trackDiv = $('<div class="igv-track-div">')[0];
-            $(browser.trackContainerDiv).append(this.trackDiv);
-        }
+        this.trackDiv = $('<div class="igv-track-div">')[0];
+        $(browser.trackContainerDiv).append(this.trackDiv);
 
         // Optionally override CSS height
         if (track.height) {          // Explicit height set, perhaps track.config.height?
             this.trackDiv.style.height = track.height + "px";
         }
 
-        // one spinner per track - IGV only
-        if ("CURSOR" !== browser.type) {
-            this.trackDiv.appendChild(igv.spinner());
+        this.appendLeftHandGutterDivToTrackDiv($(this.trackDiv));
+        this.appendViewportDivToTrackDiv($(this.trackDiv));
+
+        element = this.createRightHandGutter();
+        if (element) {
+            $(this.trackDiv).append(element);
         }
 
-        this.addLeftHandGutterToParentTrackDiv(this.trackDiv);
-
-        this.addViewportToParentTrackDiv(this.trackDiv);
-
-        // CURSOR - Histogram
-        if ("CURSOR" === browser.type) {
-
-            this.cursorHistogramContainer = $('<div class="igv-cursor-histogram-container">')[0];
-            $(this.trackDiv).append(this.cursorHistogramContainer);
-
-            this.track.cursorHistogram = new cursor.CursorHistogram(this.cursorHistogramContainer, this.track);
-        }
-
-        this.addRightHandGutterToParentTrackDiv(this.trackDiv);
+        this.trackDiv.appendChild(igv.spinner());
 
         // Track Drag & Drop
-        if ("CURSOR" !== browser.type && isTrackDraggable(this.track)) {
-            makeTrackDraggable(this.track);
-        }
+        makeTrackDraggable(this.track);
 
         if (this.track instanceof igv.RulerTrack) {
 
@@ -92,35 +69,17 @@ var igv = (function (igv) {
             addTrackHandlers(this);
         }
 
-        function isTrackDraggable(track) {
-            return !(track instanceof igv.RulerTrack);
-        }
+        $('.igv-ideogram-content-div').addClass('igv-ideogram-gutter-shim');
+        $('.igv-viewport-div').addClass('igv-gutter-shim');
 
         function makeTrackDraggable(track) {
 
             self.igvTrackDragScrim = $('<div class="igv-track-drag-scrim">')[0];
-            //$(self.trackDiv).append(self.igvTrackDragScrim);
             $(self.viewportDiv).append(self.igvTrackDragScrim);
             $(self.igvTrackDragScrim).hide();
 
             self.igvTrackManipulationHandle = $('<div class="igv-track-manipulation-handle">')[0];
             $(self.trackDiv).append(self.igvTrackManipulationHandle);
-
-            //$( document ).mousedown(function(e) {
-            //    igv.browser.isMouseDown = true;
-            //});
-            //
-            //$( document ).mouseup(function(e) {
-            //
-            //    igv.browser.isMouseDown = undefined;
-            //
-            //    if (igv.browser.dragTrackView) {
-            //        $(igv.browser.dragTrackView.igvTrackDragScrim).hide();
-            //    }
-            //
-            //    igv.browser.dragTrackView = undefined;
-            //
-            //});
 
             $(self.igvTrackManipulationHandle).mousedown(function (e) {
 
@@ -129,9 +88,7 @@ var igv = (function (igv) {
             });
 
             $(self.igvTrackManipulationHandle).mouseup(function (e) {
-
                 self.isMouseDown = undefined;
-
             });
 
             $(self.igvTrackManipulationHandle).mouseenter(function (e) {
@@ -179,18 +136,16 @@ var igv = (function (igv) {
         }
     };
 
-    igv.TrackView.prototype.setDataRange = function (min, max, logScale) {
+    igv.TrackView.prototype.appendViewportDivToTrackDiv = function ($track) {
 
-        console.log("set track data range min " + min + " max " + max + " logScale " + (true === logScale ? "yes" : "no"));
-        //setTrackHeight_.call(this, newHeight, update || true);
-
-    };
-
-    igv.TrackView.prototype.addViewportToParentTrackDiv = function (trackDiv) {
+        var self = this,
+            $dataRangeLabel,
+            description,
+            $trackLabel;
 
         // viewport
         this.viewportDiv = $('<div class="igv-viewport-div">')[0];
-        $(trackDiv).append(this.viewportDiv);
+        $track.append(this.viewportDiv);
 
         // content  -- purpose of this div is to allow vertical scrolling on individual tracks,
         this.contentDiv = $('<div class="igv-content-div">')[0];
@@ -203,6 +158,14 @@ var igv = (function (igv) {
         this.canvas.setAttribute('height', this.contentDiv.clientHeight);
         this.ctx = this.canvas.getContext("2d");
 
+        // zoom in to see features
+        if (this.track.visibilityWindow !== undefined) {
+            self.$zoomInNotice = $('<div class="zoom-in-notice">');
+            self.$zoomInNotice.text('Zoom in to see features');
+            $(this.contentDiv).append(self.$zoomInNotice[0]);
+            self.$zoomInNotice.hide();
+        }
+
         // scrollbar,  default is to set overflow ot hidden and use custom scrollbar, but this can be overriden so check
         if ("hidden" === $(this.viewportDiv).css("overflow-y")) {
             this.scrollbar = new TrackScrollbar(this.viewportDiv, this.contentDiv);
@@ -210,95 +173,96 @@ var igv = (function (igv) {
             $(this.viewportDiv).append(this.scrollbar.outerScrollDiv);
         }
 
-        this.viewportCreationHelper(this.viewportDiv);
+        //if (this.track instanceof igv.WIGTrack) {
+        //
+        //    $dataRangeLabel = $('<div class="igv-data-range-track-label">');
+        //
+        //    $dataRangeLabel.click(function (e) {
+        //        igv.dataRangeDialog.configureWithTrackView(self);
+        //        igv.dataRangeDialog.show();
+        //    });
+        //
+        //    $(this.viewportDiv).append($dataRangeLabel[0]);
+        //
+        //}
+
+        if (this.track.name) {
+
+            description = this.track.description || this.track.name;
+            $trackLabel = $('<div class="igv-track-label">');
+
+            $trackLabel.text(this.track.name);
+
+            $trackLabel.click(function (e) {
+                igv.popover.presentTrackPopup(e.pageX, e.pageY, description, false);
+            });
+
+            $(this.viewportDiv).append($trackLabel[0]);
+        }
 
     };
 
-    igv.TrackView.prototype.viewportCreationHelper = function (viewportDiv) {
+    igv.TrackView.prototype.appendLeftHandGutterDivToTrackDiv = function ($track) {
 
-        var myself = this,
-            labelButton,
-            trackIconContainer,
-            description;
-
-        if ("CURSOR" !== this.browser.type) {
-
-            if (this.track.name) {
-
-
-                trackIconContainer = $('<div class="igv-app-icon-container">');
-                $(viewportDiv).append(trackIconContainer[0]);
-
-                this.track.labelSpan = $('<span class="igv-track-label-span-base">')[0];
-                this.track.labelSpan.innerHTML = this.track.name;
-                $(trackIconContainer).append(this.track.labelSpan);
-
-                description = this.track.description || this.track.name;
-                this.track.labelSpan.onclick = function (e) {
-                    igv.popover.presentTrackPopup(e.pageX, e.pageY, description, false);
-                }
-
-                $(viewportDiv).scroll(function () {
-                    trackIconContainer.css({"top": $(viewportDiv).scrollTop() + "px"});
-
-                });
-
-
-            }
-
-        } // if ("CURSOR" !== this.browser.type)
-    };
-
-    igv.TrackView.prototype.addLeftHandGutterToParentTrackDiv = function (trackDiv) {
-
-        // left hand gutter
-        this.leftHandGutter = $('<div class="igv-left-hand-gutter">')[0];
-        $(trackDiv).append(this.leftHandGutter);
-
-        this.leftHandGutterCreationHelper(this.leftHandGutter);
-
-    };
-
-    igv.TrackView.prototype.leftHandGutterCreationHelper = function (leftHandGutter) {
+        var self = this,
+            $leftHandGutter,
+            $canvas,
+            w,
+            h;
 
         if (this.track.paintAxis) {
 
-            // control canvas.  Canvas width and height attributes must be set.  Its a canvas weirdness.
-            this.controlCanvas = $('<canvas class ="igv-track-control-canvas">')[0];
-            $(leftHandGutter).append(this.controlCanvas);
+            $leftHandGutter = $('<div class="igv-left-hand-gutter">');
+            $track.append($leftHandGutter[0]);
 
-            this.controlCanvas.setAttribute('width', leftHandGutter.clientWidth);
-            this.controlCanvas.setAttribute('height', leftHandGutter.clientHeight);
+            $canvas = $('<canvas class ="igv-track-control-canvas">');
+
+            w = $leftHandGutter.outerWidth();
+            h = $leftHandGutter.outerHeight();
+            $canvas.attr('width', w);
+            $canvas.attr('height', h);
+
+            $leftHandGutter.append($canvas[0]);
+
+            this.controlCanvas = $canvas[0];
             this.controlCtx = this.controlCanvas.getContext("2d");
+
+
+            if (this.track.dataRange) {
+
+                $leftHandGutter.click(function (e) {
+                    igv.dataRangeDialog.configureWithTrackView(self);
+                    igv.dataRangeDialog.show();
+                });
+
+                $leftHandGutter.addClass('igv-clickable');
+            }
+
+            this.leftHandGutter = $leftHandGutter[0];
+
         }
-    };
-
-    igv.TrackView.prototype.addRightHandGutterToParentTrackDiv = function (trackDiv) {
-
-        var trackManipulationIconBox;
-
-        this.rightHandGutter = $('<div class="igv-right-hand-gutter">')[0];
-        $(trackDiv).append(this.rightHandGutter);
-
-        this.rightHandGutterCreationHelper($(this.rightHandGutter));
 
     };
 
-    igv.TrackView.prototype.rightHandGutterCreationHelper = function (parent) {
+    igv.TrackView.prototype.createRightHandGutter = function () {
 
-        var myself = this,
+        var self = this,
             gearButton;
 
         if (this.track.ignoreTrackMenu) {
-            return;
+            return undefined;
         }
 
         gearButton = $('<i class="fa fa-gear fa-20px igv-track-menu-gear igv-app-icon">');
-        $(parent).append(gearButton[0]);
 
         $(gearButton).click(function (e) {
-            igv.popover.presentTrackMenu(e.pageX, e.pageY, myself);
+            igv.popover.presentTrackMenu(e.pageX, e.pageY, self);
         });
+
+        this.rightHandGutter = $('<div class="igv-right-hand-gutter">')[0];
+        $(this.rightHandGutter).append(gearButton[0]);
+
+        return this.rightHandGutter;
 
     };
 
@@ -329,6 +293,8 @@ var igv = (function (igv) {
      */
     igv.TrackView.prototype.setContentHeight = function (newHeight) {
 
+        if (this.track.minHeight) newHeight = Math.max(this.track.minHeight, newHeight);
+
         var contentHeightStr = newHeight + "px";
 
         // Optionally adjust the trackDiv and viewport height to fit the content height, within min/max bounds
@@ -352,7 +318,7 @@ var igv = (function (igv) {
 
         if (this.track.minHeight) newHeight = Math.max(this.track.minHeight, newHeight);
         if (this.track.maxHeight) newHeight = Math.min(this.track.maxHeight, newHeight);
-       // if (newHeight === this.track.height) return;   // Nothing to do
+        // if (newHeight === this.track.height) return;   // Nothing to do
 
         trackHeightStr = newHeight + "px";
 
@@ -368,10 +334,6 @@ var igv = (function (igv) {
         this.viewportDiv.style.height = trackHeightStr;
 
 
-        if ("CURSOR" === this.browser.type) {
-            this.track.cursorHistogram.updateHeightAndInitializeHistogramWithTrack(this.track);
-        }
-
         if (update === undefined || update === true) {
             this.update();
         }
@@ -380,7 +342,6 @@ var igv = (function (igv) {
 
     igv.TrackView.prototype.update = function () {
 
-        //console.log("Update");
         this.tile = null;
         if (this.scrollbar) this.scrollbar.update();
         this.repaint();
@@ -390,14 +351,9 @@ var igv = (function (igv) {
     /**
      * Repaint the view, using a cached image if available.  If no image covering the view is available a new one
      * is created, delegating the draw details to the track object.
-     *
-     * NOTE:  This method is overriden in the CURSOR initialization code.
      */
     igv.TrackView.prototype.repaint = function () {
 
-        if (!(viewIsReady.call(this))) {
-            return;
-        }
 
         var pixelWidth,
             bpWidth,
@@ -405,50 +361,66 @@ var igv = (function (igv) {
             bpEnd,
             self = this,
             ctx,
-            referenceFrame = this.browser.referenceFrame,
-            chr = referenceFrame.chr,
-            refFrameStart = referenceFrame.start,
-            refFrameEnd = refFrameStart + referenceFrame.toBP(this.canvas.width),
+            referenceFrame,
+            chr,
+            refFrameStart,
+            refFrameEnd,
             success;
 
+        if (!(viewIsReady.call(this))) {
+            return;
+        }
 
-        if (!hasCachedImaged.call(this, chr, refFrameStart, refFrameEnd, referenceFrame.bpPerPixel)) {
-
-            // First see if there is a load in progress that would satisfy the paint request
-            if (this.currentLoadTask && (isNotIndexed(this.track) ||
-                (this.currentLoadTask.end >= refFrameEnd && this.currentLoadTask.start <= refFrameStart))) {
-                // Nothing to do but wait for current load task to complete
-                //console.log("Skipping load");
+        if (this.track.visibilityWindow !== undefined && this.track.visibilityWindow > 0) {
+            if (igv.browser.trackViewportWidthBP() > this.track.visibilityWindow) {
+                this.tile = null;
+                this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
+                igv.stopSpinnerAtParentElement(this.trackDiv);      // TODO -  WHY DO WE HAVE TO DO THIS ???
+                this.$zoomInNotice.show();
+                return;
+            } else {
+                this.$zoomInNotice.hide();
             }
+        }
 
-            else {
+        referenceFrame = this.browser.referenceFrame;
+        chr = referenceFrame.chr;
+        refFrameStart = referenceFrame.start;
+        refFrameEnd = refFrameStart + referenceFrame.toBP(this.canvas.width);
 
-                // If there is a load in progress cancel it
-                if (this.currentLoadTask) {
-                    this.currentLoadTask.abort();
-                }
+        if (this.tile && this.tile.containsRange(chr, refFrameStart, refFrameEnd, referenceFrame.bpPerPixel)) {
+            this.paintImage();
+        }
+        else {
 
-                // Expand the requested range so we can pan a bit without reloading
-                pixelWidth = 3 * this.canvas.width;
-                bpWidth = Math.round(referenceFrame.toBP(pixelWidth));
-                bpStart = Math.max(0, Math.round(referenceFrame.start - bpWidth / 3));
-                bpEnd = bpStart + bpWidth;
+            // Expand the requested range so we can pan a bit without reloading
+            pixelWidth = 3 * this.canvas.width;
+            bpWidth = Math.round(referenceFrame.toBP(pixelWidth));
+            bpStart = Math.max(0, Math.round(referenceFrame.start - bpWidth / 3));
+            bpEnd = bpStart + bpWidth;
 
-                success = function (features) {
+            if (self.loading && self.loading.start === bpStart && self.loading.end === bpEnd) return;
 
+            self.loading = {start: bpStart, end: bpEnd};
+
+            igv.startSpinnerAtParentElement(self.trackDiv);
+
+            this.track.getFeatures(referenceFrame.chr, bpStart, bpEnd)
+
+                .then(function (features) {
+
+                    self.loading = false;
                     igv.stopSpinnerAtParentElement(self.trackDiv);
-                    self.currentLoadTask = undefined;
 
                     if (features) {
 
                         // TODO -- adjust track height here.
-                        if (self.track.computePixelHeight) {
+                        if (typeof self.track.computePixelHeight === 'function') {
                             var requiredHeight = self.track.computePixelHeight(features);
                             if (requiredHeight != self.contentDiv.clientHeight) {
                                 self.setContentHeight(requiredHeight);
                             }
                         }
-
                         var buffer = document.createElement('canvas');
                         buffer.width = pixelWidth;
                         buffer.height = self.canvas.height;
@@ -463,7 +435,9 @@ var igv = (function (igv) {
                             pixelHeight: buffer.height
                         });
 
-                        if (self.track.paintAxis) {
+                        // Paint the axis if defined.  NOTE: its important that this is called after "draw" as
+                        // autoscale for numeric tracks is called during the draw function
+                        if (self.track.paintAxis && self.controlCanvas.width > 0 && self.controlCanvas.height > 0) {
 
                             var buffer2 = document.createElement('canvas');
                             buffer2.width = self.controlCanvas.width;
@@ -479,61 +453,29 @@ var igv = (function (igv) {
                         self.tile = new Tile(referenceFrame.chr, bpStart, bpEnd, referenceFrame.bpPerPixel, buffer);
                         self.paintImage();
                     }
-
-                };
-
-                this.currentLoadTask = {
-                    start: bpStart,
-                    end: bpEnd,
-                    error: function (unused, xhr) {
-                        // igv.stopSpinnerObject(self.trackDiv);
-                        self.browser.removeTrack(self.track);
-                        window.alert("Unreachable track URL. Request status: " + xhr.status);
-                    },
-                    abort: function () {
-                        this.canceled = true;
-                        if (this.xhrRequest) {
-                            this.xhrRequest.abort();
-                        }
-                        //igv.stopSpinnerObject(self.trackDiv);
-                        self.currentLoadTask = undefined;
+                    else {
+                        self.ctx.clearRect(0, 0, self.canvas.width, self.canvas.height);
                     }
-                };
 
-                igv.startSpinnerAtParentElement(self.trackDiv);
+                })
+                .catch(function (error) {
+                    self.loading = false;
 
-                this.track.getFeatures(referenceFrame.chr, bpStart, bpEnd, success, self.currentLoadTask);
-            }
-
-        }
-
-        if (this.tile && this.tile.overlapsRange(referenceFrame.chr, refFrameStart, refFrameEnd)) {
-            this.paintImage();
-        }
-        else {
-            this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
-        }
-
-        /**
-         * Return true if we have a cached image (the "tile") that covers the requested range at the requested resolution
-         */
-        function hasCachedImaged(chr, start, end, bpPerPixel) {
-            return this.tile && this.tile.containsRange(chr, start, end, bpPerPixel);
+                    if (error instanceof igv.AbortLoad) {
+                        console.log("Aborted ---");
+                    }
+                    else {
+                        igv.stopSpinnerAtParentElement(self.trackDiv);
+                        console.log(error);
+                        igv.presentAlert(error);
+                    }
+                });
         }
 
 
         function viewIsReady() {
             return this.track && this.browser && this.browser.referenceFrame;
         }
-
-        /**
-         * Return true if the track is known to be not indexed.
-         * @param track
-         */
-        function isNotIndexed(track) {
-            return track.featureSource && track.featureSource.indexed === false;
-        }
-
 
     };
 
@@ -573,7 +515,7 @@ var igv = (function (igv) {
             mouseMoveXY = undefined,
             left,
             rulerSweepWidth,
-            rulerWidth = $(trackView.contentDiv).width(),
+            rulerSweepThreshold = 1,
             dx;
 
         $(document).mousedown(function (e) {
@@ -599,15 +541,14 @@ var igv = (function (igv) {
                 dx = mouseMoveXY.x - mouseDownXY.x;
 
                 rulerSweepWidth = Math.abs(dx);
+                if (rulerSweepWidth > rulerSweepThreshold) {
+                    trackView.rulerSweeper.css({"width": rulerSweepWidth + "px"});
 
-                trackView.rulerSweeper.css({"width": rulerSweepWidth + "px"});
-
-                if (dx < 0) {
-                    left = mouseDownXY.x + dx;
-                    trackView.rulerSweeper.css({"left": left + "px"});
+                    if (dx < 0) {
+                        left = mouseDownXY.x + dx;
+                        trackView.rulerSweeper.css({"left": left + "px"});
+                    }
                 }
-
-                //trackView.rulerSweeper.css({backgroundColor: 'rgba(68, 134, 247, 0.75)'});
             }
         });
 
@@ -615,15 +556,11 @@ var igv = (function (igv) {
 
             var locus,
                 ss,
-                ee,
-                trackHalfWidthBP,
-                trackWidthBP,
-                centroidZoom,
-                chromosome,
-                chromosomeLength;
+                ee;
 
             if (isMouseDown) {
 
+                // End sweep
                 isMouseDown = false;
                 isMouseIn = false;
 
@@ -632,52 +569,14 @@ var igv = (function (igv) {
                 ss = igv.browser.referenceFrame.start + (left * igv.browser.referenceFrame.bpPerPixel);
                 ee = ss + rulerSweepWidth * igv.browser.referenceFrame.bpPerPixel;
 
-                if (sweepWidthThresholdUnmet(rulerSweepWidth)) {
+                if (rulerSweepWidth > rulerSweepThreshold) {
 
-                    chromosome = igv.browser.genome.getChromosome(igv.browser.referenceFrame.chr);
-                    chromosomeLength = chromosome.bpLength;
-
-                    trackWidthBP = igv.browser.trackViewportWidth() / igv.browser.pixelPerBasepairThreshold();
-                    trackHalfWidthBP = 0.5 * trackWidthBP;
-
-                    centroidZoom = (ee + ss) / 2;
-
-                    if (centroidZoom - trackHalfWidthBP < 0) {
-
-                        ss = 1;
-                        //ee = igv.browser.trackViewportWidthBP();
-                        ee = trackWidthBP;
-                    }
-                    else if (centroidZoom + trackHalfWidthBP > chromosomeLength) {
-
-                        ee = chromosomeLength;
-                        //ss = 1 + ee - igv.browser.trackViewportWidthBP();
-                        ss = 1 + ee - trackWidthBP;
-                    }
-                    else {
-                        ss = 1 + centroidZoom - trackHalfWidthBP;
-                        ee = centroidZoom + trackHalfWidthBP;
-                    }
-
+                    locus = igv.browser.referenceFrame.chr + ":" + igv.numberFormatter(Math.floor(ss)) + "-" + igv.numberFormatter(Math.floor(ee));
+                    igv.browser.search(locus);
                 }
-
-                locus = igv.browser.referenceFrame.chr + ":" + igv.numberFormatter(Math.floor(ss)) + "-" + igv.numberFormatter(Math.floor(ee));
-                igv.browser.search(locus, undefined);
-
-
             }
 
         });
-
-        function sweepWidthThresholdUnmet(sweepWidth) {
-
-            if ((rulerWidth / (igv.browser.referenceFrame.bpPerPixel * sweepWidth) ) > igv.browser.pixelPerBasepairThreshold()) {
-                return true;
-            } else {
-                return false;
-            }
-
-        }
 
     }
 
@@ -689,16 +588,13 @@ var igv = (function (igv) {
         var isMouseDown = false,
             lastMouseX = undefined,
             mouseDownX = undefined,
-            popupTimer;
+            lastClickTime = 0,
+            popupTimer,
+            doubleClickDelay = igv.browser.constants.doubleClickDelay;
 
         $(trackView.canvas).mousedown(function (e) {
 
             var canvasCoords = igv.translateMouseCoordinates(e, trackView.canvas);
-
-            if (igv.popover) {
-                igv.popover.hide();
-            }
-
             isMouseDown = true;
             lastMouseX = canvasCoords.x;
             mouseDownX = lastMouseX;
@@ -706,21 +602,31 @@ var igv = (function (igv) {
 
         });
 
-        $(trackView.canvas).mouseup(function (e) {
+        $(trackView.canvas).click(function (e) {
 
             e = $.event.fix(e);   // Sets pageX and pageY for browsers that don't support them
+            e.stopPropagation();
 
             var canvasCoords = igv.translateMouseCoordinates(e, trackView.canvas),
                 referenceFrame = trackView.browser.referenceFrame,
-                genomicLocation = Math.floor((referenceFrame.start) + referenceFrame.toBP(canvasCoords.x));
+                genomicLocation = Math.floor((referenceFrame.start) + referenceFrame.toBP(canvasCoords.x)),
+                time = Date.now();
 
             if (!referenceFrame) return;
 
-            if (popupTimer) {
-                // Cancel previous timer
-                console.log("Cancel timer");
-                window.clearTimeout(popupTimer);
-                popupTimer = undefined;
+            var delta = time - lastClickTime;
+            if (time - lastClickTime < doubleClickDelay) {
+                // This is a double-click
+
+                if (popupTimer) {
+                    // Cancel previous timer
+                    window.clearTimeout(popupTimer);
+                    popupTimer = undefined;
+                }
+
+                var newCenter = Math.round(referenceFrame.start + canvasCoords.x * referenceFrame.bpPerPixel);
+                referenceFrame.bpPerPixel /= 2;
+                igv.browser.goto(referenceFrame.chr, newCenter);
             }
 
             else {
@@ -738,8 +644,8 @@ var igv = (function (igv) {
                         trackView.track.altClick(genomicLocation, e);
                     }
 
-                } else if (Math.abs(canvasCoords.x - mouseDownX) <= igv.constants.dragThreshold && trackView.track.popupData) {
-                    const doubleClickDelay = 300;
+
+                } else if (Math.abs(canvasCoords.x - mouseDownX) <= igv.browser.constants.dragThreshold && trackView.track.popupData) {
 
                     popupTimer = window.setTimeout(function () {
 
@@ -767,8 +673,10 @@ var igv = (function (igv) {
             mouseDownX = undefined;
             isMouseDown = false;
             lastMouseX = undefined;
+            lastClickTime = time;
 
         });
+
 
     }
 
@@ -807,16 +715,17 @@ var igv = (function (igv) {
 
         });
 
-        $(this.viewportDiv).mousewheel(function (event) {
-
-            var ratio = $(viewportDiv).height() / $(contentDiv).height();
-
-            if (ratio < 1) {
-                var dist = Math.round(ratio * event.deltaY * event.deltaFactor),
-                    newY = $(innerScrollDiv).position().top + dist;
-                moveScrollerTo(newY);
-            }
-        });
+        // Mousewheel disabled -- it controls the outer (browser window) scrollbar
+        //$(this.viewportDiv).mousewheel(function (event) {
+        //
+        //    var ratio = $(viewportDiv).height() / $(contentDiv).height();
+        //
+        //    if (ratio < 1) {
+        //        var dist = Math.round(ratio * event.deltaY * event.deltaFactor),
+        //            newY = $(innerScrollDiv).position().top + dist;
+        //        moveScrollerTo(newY);
+        //    }
+        //});
 
         function mouseMove(event) {
             moveScrollerTo(event.pageY - offY);
@@ -850,6 +759,36 @@ var igv = (function (igv) {
         else {
             $(this.outerScrollDiv).hide();
         }
+    }
+
+
+    igv.TrackView.prototype.redrawTile = function (features) {
+
+        if (!this.tile) return;
+
+        var self = this,
+            chr = self.tile.chr,
+            bpStart = self.tile.startBP,
+            bpEnd = self.tile.endBP,
+            buffer = document.createElement('canvas'),
+            bpPerPixel = self.tile.scale;
+
+        buffer.width = self.tile.image.width;
+        buffer.height = self.tile.image.height;
+        var ctx = buffer.getContext('2d');
+
+        self.track.draw({
+            features: features,
+            context: ctx,
+            bpStart: bpStart,
+            bpPerPixel: bpPerPixel,
+            pixelWidth: buffer.width,
+            pixelHeight: buffer.height
+        });
+
+
+        self.tile = new Tile(chr, bpStart, bpEnd, bpPerPixel, buffer);
+        self.paintImage();
     }
 
 

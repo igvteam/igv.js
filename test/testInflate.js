@@ -2,16 +2,12 @@ function runInflateTests() {
 
 
     module("ZLib");
-    var numberOfAssertions = 5;
+    var numberOfAssertions = 3;
     asyncTest("Inflate", numberOfAssertions, function () {
         console.log("Inflate test");
         var url = "../test/data/misc/inflateTest.gz";
-        var dataLoader = new igv.DataLoader(url);
 
-        ok(dataLoader, "dataLoader should be non null");
-        ok(dataLoader.url, "dataLoader.url should be non null");
-
-        dataLoader.loadArrayBuffer(function (data) {
+        igvxhr.loadArrayBuffer(url).then(function (data) {
 
             var inflate = new Zlib.Gunzip(new Uint8Array(data));
             ok(inflate);

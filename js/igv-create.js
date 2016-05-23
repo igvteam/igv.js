@@ -41,43 +41,40 @@ var igv = (function (igv) {
             browser,
             rootDiv,
             controlDiv,
-            bodyObject,
+            $parent = $(parentDiv),
             palette,
-            element,
-            trackOrder=1;
+            trackOrder = 1;
 
         if (igv.browser) {
-            console.log("Attempt to create 2 browsers.");
-            return igv.browser;
+            //console.log("Attempt to create 2 browsers.");
+            igv.removeBrowser();
         }
 
         if (!config) config = {};
 
         setDefaults(config);
 
-        if (!config.type) config.type = "IGV";
-
         oauth.google.apiKey = config.apiKey;
         oauth.google.access_token = config.oauthToken;
 
-        if (!config.flanking && isT2D(config)) {  // TODO -- hack for demo, remove
-            config.flanking = 100000;
-        }
-
+        // Deal with several legacy genome definition options
         if (config.genome) {
             config.reference = expandGenome(config.genome);
         }
-
         else if (config.fastaURL) {   // legacy property
             config.reference = {
                 fastaURL: config.fastaURL,
                 cytobandURL: config.cytobandURL
             }
         }
+        else if (config.reference && config.reference.id !== undefined && config.reference.fastaURL === undefined) {
+            config.reference = expandGenome(config.reference.id);
+        }
 
         if (!(config.reference && config.reference.fastaURL)) {
-            alert("Fatal error:  reference must be defined");
-            return;
+            //alert("Fatal error:  reference must be defined");
+            igv.presentAlert("Fatal error:  reference must be defined");
+            throw new Error("Fatal error:  reference must be defined");
         }
 
 
@@ -90,7 +87,7 @@ var igv = (function (igv) {
             });
         }
 
-        trackContainerDiv = $('<div id="igvTrackContainerDiv" class="igv-track-container-div">')[0];
+        trackContainerDiv = $('<div class="igv-track-container-div">')[0];
         browser = new igv.Browser(config, trackContainerDiv);
         rootDiv = browser.div;
 
@@ -119,68 +116,43 @@ var igv = (function (igv) {
         // Create controls.  This can be customized by passing in a function, which should return a div containing the
         // controls
 
-        if(config.showCommandBar !== false) {
+        if (config.showCommandBar !== false) {
             controlDiv = config.createControls ?
                 config.createControls(browser, config) :
                 createStandardControls(browser, config);
             $(rootDiv).append($(controlDiv));
         }
 
-        contentDiv = $('<div id="igvContentDiv" class="igv-content-div">')[0];
+        contentDiv = $('<div class="igv-content-div">')[0];
         $(rootDiv).append(contentDiv);
 
-        //headerDiv = $('<div id="igvHeaderDiv" class="igv-header-div">')[0];
         headerDiv = $('<div>')[0];
         $(contentDiv).append(headerDiv);
 
         $(contentDiv).append(trackContainerDiv);
-
 
         // user feedback
         browser.userFeedback = new igv.UserFeedback($(contentDiv));
         browser.userFeedback.hide();
 
         // Popover object -- singleton shared by all components
-        igv.popover = new igv.Popover(contentDiv);
-
-        bodyObject = $("body");
+        igv.popover = new igv.Popover($(contentDiv), "igv-popover");
 
         // ColorPicker object -- singleton shared by all components
-        if (config.trackDefaults) {
-            palette = config.trackDefaults.palette;
-        }
-        igv.colorPicker = new igv.ColorPicker(bodyObject, palette);
+        igv.colorPicker = new igv.ColorPicker($(rootDiv), config.palette, "igv-color-picker");
         igv.colorPicker.hide();
 
+        // alert object -- singleton shared by all components
+        igv.alert = new igv.Dialog($(rootDiv), igv.Dialog.alertConstructor, "igv-alert");
+        igv.alert.hide();
+
         // Dialog object -- singleton shared by all components
-        igv.dialog = new igv.Dialog(bodyObject);
+        igv.dialog = new igv.Dialog($(rootDiv), igv.Dialog.dialogConstructor, "igv-dialog");
         igv.dialog.hide();
 
         // Data Range Dialog object -- singleton shared by all components
-        igv.dataRangeDialog = new igv.DataRangeDialog(bodyObject);
+        igv.dataRangeDialog = new igv.DataRangeDialog($(rootDiv), "igv-data-range-dialog");
         igv.dataRangeDialog.hide();
-
-        // extend jquery ui dialog widget to support enter key triggering "ok" button press.
-        $.extend($.ui.dialog.prototype.options, {
-
-            create: function () {
-
-                var $this = $(this);
-
-                // focus first button and bind enter to it
-                $this.parent().find('.ui-dialog-buttonpane button:first').focus();
-
-                $this.keypress(function (e) {
-
-                    if (e.keyCode == $.ui.keyCode.ENTER) {
-                        $this.parent().find('.ui-dialog-buttonpane button:first').click();
-                        return false;
-                    }
-
-                });
-            }
-
-        });
 
         if (!config.showNavigation) {
             igvLogo = $('<div class="igv-logo-nonav">');
@@ -191,29 +163,33 @@ var igv = (function (igv) {
         browser.ideoPanel = new igv.IdeoPanel(headerDiv);
         browser.ideoPanel.resize();
 
+        // phone home -- counts launches.  Count is anonymous, needed for our continued funding.  Please don't delete
+        phoneHome();
 
-        igv.loadGenome(config.reference, function (genome) {
 
-            var referenceWidth = browser.trackViewportWidth();
-            if(referenceWidth === 0) referenceWidth = 500;
+        igv.loadGenome(config.reference).then(function (genome) {
+
 
             genome.id = config.reference.genomeId;
             browser.genome = genome;
             browser.addTrack(new igv.RulerTrack());
 
+            // viewport width -- must get this after adding ruler track
+            var viewportWidth = browser.trackViewportWidth();
+            if (viewportWidth === 0) viewportWidth = 500;
 
 
             // Set inital locus
             var firstChrName = browser.genome.chromosomeNames[0],
                 firstChr = browser.genome.chromosomes[firstChrName];
 
-            browser.referenceFrame = new igv.ReferenceFrame(firstChrName, 0, firstChr.bpLength / referenceWidth);
+            browser.referenceFrame = new igv.ReferenceFrame(firstChrName, 0, firstChr.bpLength / viewportWidth);
             browser.controlPanelWidth = 50;
 
             browser.updateLocusSearch(browser.referenceFrame);
 
             if (browser.ideoPanel) browser.ideoPanel.repaint();
-            if (browser.karyoPanel) browser.karyoPanel.repaint();
+            if (browser.karyoPanel) browser.karyoPanel.resize();
 
             // If an initial locus is specified go there first, then load tracks.  This avoids loading track data at
             // a default location then moving
@@ -225,18 +201,15 @@ var igv = (function (igv) {
                 browser.search(locus, function () {
 
                     igv.stopSpinnerAtParentElement(parentDiv);
-                    var refFrame = igv.browser.referenceFrame,
+                    var refFrame = browser.referenceFrame,
                         start = refFrame.start,
-                        end = start + igv.browser.trackViewportWidth() * refFrame.bpPerPixel,
+                        end = start + browser.trackViewportWidth() * refFrame.bpPerPixel,
                         range = start - end;
 
                     if (config.tracks) {
 
-                        igv.browser.loadTracksWithConfigList(config.tracks);
+                        browser.loadTracksWithConfigList(config.tracks);
 
-                        //config.tracks.forEach(function (track) {
-                        //    browser.loadTrack(track);
-                        //});
 
                     }
 
@@ -244,15 +217,14 @@ var igv = (function (igv) {
 
             } else if (config.tracks) {
 
-                igv.browser.loadTracksWithConfigList(config.tracks);
-
-                //config.tracks.forEach(function (track) {
-                //    browser.loadTrack(track);
-                //});
+                browser.loadTracksWithConfigList(config.tracks);
 
             }
 
 
+        }).catch(function (error) {
+            igv.presentAlert(error);
+            console.log(error);
         });
 
         return browser;
@@ -261,122 +233,91 @@ var igv = (function (igv) {
 
     function createStandardControls(browser, config) {
 
-        var igvLogo,
-            controlDiv = $('<div id="igvControlDiv">')[0],
+        var $igvLogo,
+            $controls = $('<div id="igvControlDiv">'),
             contentKaryo,
-            navigation,
-            searchContainer,
-            searchButton,
+            $navigation,
+            $searchContainer,
+            $faZoom,
             $trackLabelToggle,
-            zoom,
-            zoomInButton,
-            zoomOutButton,
-            fileInput = document.getElementById('fileInput');
+            $zoomContainer,
+            $faZoomIn,
+            $faZoomOut;
 
-        if (fileInput) {
 
-            fileInput.addEventListener('change', function (e) {
+        $navigation = $('<div class="igvNavigation">');
+        $controls.append($navigation[0]);
 
-                var localFile = fileInput.files[0],
-                    featureFileReader;
-
-                featureFileReader = new igv.FeatureFileReader({localFile: localFile});
-                featureFileReader.readFeatures(function () {
-                    console.log("success reading " + localFile.name);
-                });
-
-            });
-
-        }
-
-        navigation = $('<div class="igvNavigation">');
-        $(controlDiv).append(navigation[0]);
-
-        // search
         if (config.showNavigation) {
 
-            igvLogo = $('<div class="igv-logo">');
-            navigation.append(igvLogo[0]);
+            $igvLogo = $('<div class="igv-logo">');
 
+            $searchContainer = $('<div class="igvNavigationSearch">');
 
+            browser.$searchInput = $('<input class="igvNavigationSearchInput" type="text" placeholder="Locus Search">');
 
-
-
-
-
-            searchContainer = $('<div class="igvNavigationSearch">');
-            navigation.append(searchContainer[0]);
-
-            browser.searchInput = $('<input class="igvNavigationSearchInput" type="text" placeholder="Locus Search">');
-            searchContainer.append(browser.searchInput[0]);
-
-            searchButton = $('<i class="igv-app-icon fa fa-search fa-18px shim-left-6">');
-            searchContainer.append(searchButton[0]);
-
-            browser.searchInput.change(function () {
+            browser.$searchInput.change(function () {
 
                 browser.search($(this).val());
             });
 
-            searchButton.click(function () {
-                browser.search(browser.searchInput.val());
+            $faZoom = $('<i class="igv-app-icon fa fa-search fa-18px shim-left-6">');
+
+            $faZoom.click(function () {
+                browser.search(browser.$searchInput.val());
             });
+
+            $searchContainer.append(browser.$searchInput[0]);
+            $searchContainer.append($faZoom[0]);
+
+            $navigation.append($igvLogo[0]);
+            $navigation.append($searchContainer[0]);
 
             // search results presented in table
             browser.$searchResults = $('<div class="igvNavigationSearchResults">');
             browser.$searchResultsTable = $('<table class="igvNavigationSearchResultsTable">');
 
-            browser.$searchResults.append(browser.$searchResultsTable[0 ]);
+            browser.$searchResults.append(browser.$searchResultsTable[0]);
 
-            searchContainer.append(browser.$searchResults[ 0 ]);
+            $searchContainer.append(browser.$searchResults[0]);
 
             browser.$searchResults.hide();
 
-
-
-
-
-
-
             // window size panel
-            browser.windowSizePanel = new igv.WindowSizePanel(navigation);
+            browser.windowSizePanel = new igv.WindowSizePanel($navigation);
 
-            // zoom
-            zoom = $('<div class="igvNavigationZoom">');
-            navigation.append(zoom[0]);
+            // zoom in/out
+            $faZoomOut = $('<i class="fa fa-minus-circle igv-app-icon fa-24px" style="padding-right: 4px;">');
 
-            zoomOutButton = $('<i class="igv-app-icon fa fa-minus-square-o fa-24px" style="padding-right: 4px;">');
-
-            zoom.append(zoomOutButton[0]);
-
-            zoomInButton = $('<i class="igv-app-icon fa fa-plus-square-o fa-24px">');
-            zoom.append(zoomInButton[0]);
-
-            zoomInButton.click(function () {
-                igv.browser.zoomIn();
-            });
-
-            zoomOutButton.click(function () {
+            $faZoomOut.click(function () {
                 igv.browser.zoomOut();
             });
 
-            // toggle track labels
-            $trackLabelToggle = $('<div class="igvNavigationToggleTrackLabels">');
+            $faZoomIn = $('<i class="fa fa-plus-circle igv-app-icon fa-24px">');
+
+            $faZoomIn.click(function () {
+                igv.browser.zoomIn();
+            });
+
+            $zoomContainer = $('<div class="igvNavigationZoom">');
+            $zoomContainer.append($faZoomOut[0]);
+            $zoomContainer.append($faZoomIn[0]);
+            $navigation.append($zoomContainer[0]);
+
+            // hide/show track labels
+            $trackLabelToggle = $('<div class="igv-toggle-track-labels">');
             $trackLabelToggle.text("hide labels");
-            navigation.append($trackLabelToggle[ 0 ]);
 
             $trackLabelToggle.click(function () {
 
                 browser.trackLabelsVisible = !browser.trackLabelsVisible;
-                if (false === browser.trackLabelsVisible) {
-                    $(this).text("show labels");
-                    $('.igv-app-icon-container').hide();
-                } else {
-                    $(this).text("hide labels");
-                    $('.igv-app-icon-container').show();
-                }
+                $(this).text(true === browser.trackLabelsVisible ? "hide labels" : "show labels");
+
+                $(browser.trackContainerDiv).find('.igv-track-label').toggle();
 
             });
+
+            $navigation.append($trackLabelToggle[0]);
 
         }
 
@@ -386,15 +327,14 @@ var igv = (function (igv) {
             // this allows the placement of the karyo view on the side, for instance
             if (!contentKaryo) {
                 contentKaryo = $('<div id="igvKaryoDiv" class="igv-karyo-div">')[0];
-                $(controlDiv).append(contentKaryo);
+                $controls.append(contentKaryo);
             }
             browser.karyoPanel = new igv.KaryoPanel(contentKaryo);
         }
 
 
-        return controlDiv;
+        return $controls[0];
     }
-
 
     /**
      * Expands ucsc type genome identifiers to genome object.
@@ -409,15 +349,15 @@ var igv = (function (igv) {
         switch (genomeId) {
 
             case "hg18":
-                reference.fastaURL = "//dn7ywbm9isq8j.cloudfront.net/genomes/seq/hg18/hg18.fasta";
-                reference.cytobandURL = "//dn7ywbm9isq8j.cloudfront.net/genomes/seq/hg18/cytoBand.txt.gz";
+                reference.fastaURL = "//s3.amazonaws.com/igv.broadinstitute.org/genomes/seq/hg18/hg18.fasta";
+                reference.cytobandURL = "//s3.amazonaws.com/igv.broadinstitute.org/genomes/seq/hg18/cytoBand.txt.gz";
                 break;
             case "hg19":
             case "GRCh37":
             default:
             {
-                reference.fastaURL = "//dn7ywbm9isq8j.cloudfront.net/genomes/seq/hg19/hg19.fasta";
-                reference.cytobandURL = "//dn7ywbm9isq8j.cloudfront.net/genomes/seq/hg19/cytoBand.txt";
+                reference.fastaURL = "//s3.amazonaws.com/igv.broadinstitute.org/genomes/seq/hg19/hg19.fasta";
+                reference.cytobandURL = "//s3.amazonaws.com/igv.broadinstitute.org/genomes/seq/hg19/cytoBand.txt";
             }
         }
         return reference;
@@ -428,24 +368,33 @@ var igv = (function (igv) {
         if (!config.tracks) {
             config.tracks = [];
         }
-        config.tracks.push({type: "sequence", order: -9999});
+        config.tracks.push({type: "sequence", order: -9999});  // Sequence track
         config.showKaryo = config.showKaryo || false;
-        config.showNavigation = config.showNavigation === undefined ? true : config.showNavigation;
-        config.flanking = config.flanking === undefined ? 1000 : config.flanking;
+        if (config.showNavigation === undefined) config.showNavigation = true;
+        if (config.flanking === undefined) config.flanking = 1000;
+        if (config.pairsSupported === undefined) config.pairsSupported = true;
+        if (config.type === undefined) config.type = "IGV";
 
     }
 
+    igv.removeBrowser = function () {
+        $(igv.browser.div).remove();
+        $(".igv-grid-container-colorpicker").remove();
+        $(".igv-grid-container-dialog").remove();
+        $(".igv-grid-container-dialog").remove();
+    }
 
-// TODO -- temporary hack for demo, remove ASAP
-    function isT2D(options) {
-        if (options.tracks && options.tracks.length > 0) {
-            var t = options.tracks[0];
-            var b = t instanceof igv.GWASTrack;
-            return b;
-        }
-        else {
-            return false;
-        }
+
+    // Performs an anonymous usage count.  Essential for continued funding of igv.js, please do not remove.
+
+    function phoneHome() {
+
+        var url = "https://data.broadinstitute.org/igv/projects/current/counter_igvjs.php";
+        igvxhr.load(url).then(function (ignore) {
+            console.log(ignore);
+        }).catch(function (error) {
+            console.log(error);
+        });
     }
 
     return igv;

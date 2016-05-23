@@ -122,7 +122,7 @@ var igv = (function (igv) {
         return this.properPlacement === undefined || this.properPlacement;       // Assume true
     }
 
-    igv.Ga4ghAlignment.prototype.isFistOfPair = function () {
+    igv.Ga4ghAlignment.prototype.isFirstOfPair = function () {
         return this.readNumber && this.readNumber === 0;
     }
 
@@ -130,7 +130,7 @@ var igv = (function (igv) {
         return this.readNumber && this.readNumber === 1;
     }
 
-    igv.Ga4ghAlignment.prototype.isNotPrimary = function () {
+    igv.Ga4ghAlignment.prototype.isSecondary = function () {
         return this.secondaryAlignment;
     }
 
@@ -176,7 +176,7 @@ var igv = (function (igv) {
         nameValues.push({name: 'Cigar', value: this.cigar});
         nameValues.push({name: 'Mapped', value: yesNo(this.isMapped())});
         nameValues.push({name: 'Mapping Quality', value: this.mq});
-        nameValues.push({name: 'Secondary', value: yesNo(this.isNotPrimary())});
+        nameValues.push({name: 'Secondary', value: yesNo(this.isSecondary())});
         nameValues.push({name: 'Supplementary', value: yesNo(this.isSupplementary())});
         nameValues.push({name: 'Duplicate', value: yesNo(this.isDuplicate())});
         nameValues.push({name: 'Failed QC', value: yesNo(this.isFailsVendorQualityCheck())});

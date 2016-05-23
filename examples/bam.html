@@ -23,7 +23,7 @@
           href="//maxcdn.bootstrapcdn.com/font-awesome/4.2.0/css/font-awesome.min.css"/>
 
     <!-- IGV CSS -->
-    <link rel="stylesheet" type="text/css" href="//igv.org/web/beta/igv-beta.css">
+    <link rel="stylesheet" type="text/css" href="//igv.org/web/release/1.0.0-rc1/igv-1.0.0-rc1.css">
 
     <!-- bam.css n - for demo only, NOT REQUIRED FOR IGV -->
     <link rel="stylesheet" type="text/css" href="css/bam.css">
@@ -36,7 +36,7 @@
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.4/js/bootstrap.min.js"></script>
 
     <!-- IGV JS-->
-    <script type="text/javascript" src="//igv.org/web/beta/igv-beta.js"></script>
+    <script type="text/javascript" src="//igv.org/web/release/1.0.0-rc1/igv-1.0.0-rc1.js"></script>
 
 
 </head>
@@ -64,19 +64,18 @@
                 options = {
                     showNavigation: true,
                     genome: "hg19",
-                    locus: "chr1:155,172,193-155,172,564",
+                    locus: "chr12:98,997,292-98,997,392",
                     tracks: [
                         {
-                            url: 'http://hgdownload.cse.ucsc.edu/goldenPath/hg19/encodeDCC/wgEncodeOpenChromFaire/wgEncodeOpenChromFaireMrta2041AlnRep1.bam',
-                            name: 'MRT_A204 FaireSeq'
-                        },
-                        {
                             name: "Genes",
-                            url: "//igv.broadinstitute.org/annotations/hg19/genes/gencode.v18.collapsed.bed",
-                            order: Number.MAX_VALUE,
+                            url: "//s3.amazonaws.com/igv.broadinstitute.org/annotations/hg19/genes/gencode.v18.collapsed.bed",
                             displayMode: "EXPANDED"
 
+                        },                        {
+                            url: 'https://data.broadinstitute.org/igvdata/BodyMap/hg19/IlluminaHiSeq2000_BodySites/brain_merged/accepted_hits.bam',
+                            name: 'Brain (BodyMap)'
                         }
+
                     ]
                 };
 

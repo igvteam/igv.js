@@ -32,160 +32,167 @@ var igv = (function (igv) {
         this.file = reference.fastaURL;
         this.indexed = reference.indexed !== false;   // Indexed unless it explicitly is not
         if (this.indexed) {
-            this.indexFile = reference.indexFile || this.file + ".fai";
+            this.indexFile = reference.indexURL || reference.indexFile || this.file + ".fai";
         }
         this.withCredentials = reference.withCredentials;
 
     };
 
-    igv.FastaSequence.prototype.init = function (continuation) {
+    igv.FastaSequence.prototype.init = function () {
 
         var self = this;
 
-        if (this.indexed) {
-            this.loadIndex(function (index) {
+        if (self.indexed) {
 
-                var order = 0;
-                self.chromosomes = {};
-                self.chromosomeNames.forEach(function (chrName) {
-                    var bpLength = self.index[chrName].size;
-                    self.chromosomes[chrName] = new igv.Chromosome(chrName, order++, bpLength);
-                });
+            return new Promise(function (fulfill, reject) {
+
+                self.getIndex().then(function (index) {
+                    var order = 0;
+                    self.chromosomes = {};
+                    self.chromosomeNames.forEach(function (chrName) {
+                        var bpLength = self.index[chrName].size;
+                        self.chromosomes[chrName] = new igv.Chromosome(chrName, order++, bpLength);
+                    });
 
 
-                // Ignore index, getting chr names as a side effect.  Really bad practice
-                continuation();
+                    // Ignore index, getting chr names as a side effect.  Really bad practice
+                    fulfill();
+                }).catch(reject);
             });
         }
         else {
-            this.loadAll(function () {
-                continuation();
-            });
+            return self.loadAll();
         }
-
 
     }
 
-    igv.FastaSequence.prototype.getSequence = function (chr, start, end, continuation, task) {
+    igv.FastaSequence.prototype.getSequence = function (chr, start, end) {
 
         if (this.indexed) {
-            getSequenceIndexed.call(this, chr, start, end, continuation, task);
+            return getSequenceIndexed.call(this, chr, start, end);
         }
         else {
-            getSequenceNonIndexed.call(this, chr, start, end, continuation, task);
+            return getSequenceNonIndexed.call(this, chr, start, end);
 
         }
 
-    };
+    }
 
-    function getSequenceIndexed(chr, start, end, continuation, task) {
+    function getSequenceIndexed(chr, start, end) {
 
-        var self = this,
-            interval = self.interval;
+        var self = this;
 
-        if (interval && interval.contains(chr, start, end)) {
+        return new Promise(function (fulfill, reject) {
+            var interval = self.interval;
 
-            continuation(getSequenceFromInterval(interval, start, end));
-        }
-        else {
+            if (interval && interval.contains(chr, start, end)) {
 
-            //console.log("Cache miss: " + (interval === undefined ? "nil" : interval.chr + ":" + interval.start + "-" + interval.end));
+                fulfill(getSequenceFromInterval(interval, start, end));
+            }
+            else {
 
-            // Expand query, to minimum of 100kb
-            var qstart = start;
-            var qend = end;
-            if ((end - start) < 100000) {
-                var w = (end - start);
-                var center = Math.round(start + w / 2);
-                qstart = Math.max(0, center - 50000);
-                qend = center + 50000;
+                //console.log("Cache miss: " + (interval === undefined ? "nil" : interval.chr + ":" + interval.start + "-" + interval.end));
+
+                // Expand query, to minimum of 100kb
+                var qstart = start;
+                var qend = end;
+                if ((end - start) < 100000) {
+                    var w = (end - start);
+                    var center = Math.round(start + w / 2);
+                    qstart = Math.max(0, center - 50000);
+                    qend = center + 50000;
+                }
+
+
+                self.readSequence(chr, qstart, qend).then(function (seqBytes) {
+                    self.interval = new igv.GenomicInterval(chr, qstart, qend, seqBytes);
+                    fulfill(getSequenceFromInterval(self.interval, start, end));
+                }).catch(reject);
             }
 
-
-            this.readSequence(chr, qstart, qend, function (seqBytes) {
-                    self.interval = new igv.GenomicInterval(chr, qstart, qend, seqBytes);
-                    continuation(getSequenceFromInterval(self.interval, start, end));
-                },
-                task);
-        }
-
-        function getSequenceFromInterval(interval, start, end) {
-            var offset = start - interval.start;
-            var n = end - start;
-            var seq = interval.features ? interval.features.substr(offset, n) : null;
-            return seq;
-        }
-    }
-
-
-    function getSequenceNonIndexed(chr, start, end, continuation, task) {
-
-        var seq = this.sequences[chr];
-        if (seq && seq.length > end) {
-            continuation(seq.substring(start, end));
-        }
-
-    }
-
-    igv.FastaSequence.prototype.loadIndex = function (continuation) {
-
-        var self = this;
-
-        igvxhr.load(this.indexFile, {
-            success: function (data) {
-
-                var lines = data.splitLines();
-                var len = lines.length;
-                var lineNo = 0;
-
-                self.chromosomeNames = [];     // TODO -- eliminate this side effect !!!!
-                self.index = {};               // TODO -- ditto
-                while (lineNo < len) {
-
-                    var tokens = lines[lineNo++].split("\t");
-                    var nTokens = tokens.length;
-                    if (nTokens == 5) {
-                        // Parse the index line.
-                        var chr = tokens[0];
-                        var size = parseInt(tokens[1]);
-                        var position = parseInt(tokens[2]);
-                        var basesPerLine = parseInt(tokens[3]);
-                        var bytesPerLine = parseInt(tokens[4]);
-
-                        var indexEntry = {
-                            size: size, position: position, basesPerLine: basesPerLine, bytesPerLine: bytesPerLine
-                        };
-
-                        self.chromosomeNames.push(chr);
-                        self.index[chr] = indexEntry;
-                    }
-                }
-
-                if (continuation) {
-                    continuation(self.index);
-                }
-            },
-            error: function (xhr) {
-                if (xhr.status === 404) {
-                    alert("Fasta index file not found: " + self.indexFile);
-                }
-                else {
-                    alert("Error loading fasta index " + self.indexFile + "  status=" + xhr.status);
-                }
-            },
-            withCredentials: this.withCredentials
+            function getSequenceFromInterval(interval, start, end) {
+                var offset = start - interval.start;
+                var n = end - start;
+                var seq = interval.features ? interval.features.substr(offset, n) : null;
+                return seq;
+            }
         });
-    };
+    }
 
-    igv.FastaSequence.prototype.loadAll = function (continuation) {
+
+    function getSequenceNonIndexed(chr, start, end) {
 
         var self = this;
-        self.chromosomeNames = [];
-        self.chromosomes = {};
-        self.sequences = {};
 
-        igvxhr.load(this.file, {
-            success: function (data) {
+        return new Promise(function (fulfill, reject) {
+            var seq = self.sequences[chr];
+            if (seq && seq.length > end) {
+                fulfill(seq.substring(start, end));
+            }
+        });
+
+    }
+
+    igv.FastaSequence.prototype.getIndex = function () {
+
+        var self = this;
+
+        return new Promise(function (fulfill, reject) {
+
+            if (self.index) {
+                fulfill(self.index);
+            } else {
+                igvxhr.load(self.indexFile, {
+                    withCredentials: self.withCredentials
+                }).then(function (data) {
+                    var lines = data.splitLines();
+                    var len = lines.length;
+                    var lineNo = 0;
+
+                    self.chromosomeNames = [];     // TODO -- eliminate this side effect !!!!
+                    self.index = {};               // TODO -- ditto
+                    while (lineNo < len) {
+
+                        var tokens = lines[lineNo++].split("\t");
+                        var nTokens = tokens.length;
+                        if (nTokens == 5) {
+                            // Parse the index line.
+                            var chr = tokens[0];
+                            var size = parseInt(tokens[1]);
+                            var position = parseInt(tokens[2]);
+                            var basesPerLine = parseInt(tokens[3]);
+                            var bytesPerLine = parseInt(tokens[4]);
+
+                            var indexEntry = {
+                                size: size, position: position, basesPerLine: basesPerLine, bytesPerLine: bytesPerLine
+                            };
+
+                            self.chromosomeNames.push(chr);
+                            self.index[chr] = indexEntry;
+                        }
+                    }
+
+                    if (fulfill) {
+                        fulfill(self.index);
+                    }
+                }).catch(reject);
+            }
+        });
+    }
+
+    igv.FastaSequence.prototype.loadAll = function () {
+
+        var self = this;
+
+        return new Promise(function (fulfill, reject) {
+            self.chromosomeNames = [];
+            self.chromosomes = {};
+            self.sequences = {};
+
+            igvxhr.load(self.file, {
+                withCredentials: self.withCredentials
+
+            }).then(function (data) {
 
                 var lines = data.splitLines(),
                     len = lines.length,
@@ -215,65 +222,57 @@ var igv = (function (igv) {
                     }
                 }
 
-                if (continuation) {
-                    continuation();
-                }
-            },
-            error: function (xhr) {
+                fulfill();
 
-                alert("Error loading fasta  " + self.file + "  status=" + xhr.status);
-
-            },
-            withCredentials: this.withCredentials
-
+            });
         });
-    };
+    }
 
-    igv.FastaSequence.prototype.readSequence = function (chr, qstart, qend, continuation, task) {
+    igv.FastaSequence.prototype.readSequence = function (chr, qstart, qend) {
 
         //console.log("Read sequence " + chr + ":" + qstart + "-" + qend);
-        var fasta = this;
+        var self = this;
 
-        if (!this.index) {
-            this.loadIndex(function () {
-                fasta.readSequence(chr, qstart, qend, continuation, task);
-            })
-        } else {
-            var idxEntry = this.index[chr];
-            if (!idxEntry) {
-                console.log("No index entry for chr: " + chr);
+        return new Promise(function (fulfill, reject) {
+            self.getIndex().then(function () {
 
-                // Tag interval with null so we don't try again
-                fasta.interval = new igv.GenomicInterval(chr, qstart, qend, null);
-                continuation(null);
-            } else {
+                var idxEntry = self.index[chr];
+                if (!idxEntry) {
+                    console.log("No index entry for chr: " + chr);
 
-                var start = Math.max(0, qstart);    // qstart should never be < 0
-                var end = Math.min(idxEntry.size, qend);
-                var bytesPerLine = idxEntry.bytesPerLine;
-                var basesPerLine = idxEntry.basesPerLine;
-                var position = idxEntry.position;
-                var nEndBytes = bytesPerLine - basesPerLine;
+                    // Tag interval with null so we don't try again
+                    self.interval = new igv.GenomicInterval(chr, qstart, qend, null);
+                    fulfill(null);
 
-                var startLine = Math.floor(start / basesPerLine);
-                var endLine = Math.floor(end / basesPerLine);
+                } else {
 
-                var base0 = startLine * basesPerLine;   // Base at beginning of start line
+                    var start = Math.max(0, qstart);    // qstart should never be < 0
+                    var end = Math.min(idxEntry.size, qend);
+                    var bytesPerLine = idxEntry.bytesPerLine;
+                    var basesPerLine = idxEntry.basesPerLine;
+                    var position = idxEntry.position;
+                    var nEndBytes = bytesPerLine - basesPerLine;
 
-                var offset = start - base0;
+                    var startLine = Math.floor(start / basesPerLine);
+                    var endLine = Math.floor(end / basesPerLine);
 
-                var startByte = position + startLine * bytesPerLine + offset;
+                    var base0 = startLine * basesPerLine;   // Base at beginning of start line
 
-                var base1 = endLine * basesPerLine;
-                var offset1 = end - base1;
-                var endByte = position + endLine * bytesPerLine + offset1 - 1;
-                var byteCount = endByte - startByte + 1;
-                if (byteCount <= 0) {
-                    return;
-                };
+                    var offset = start - base0;
 
-                igvxhr.load(fasta.file, {
-                    success: function (allBytes) {
+                    var startByte = position + startLine * bytesPerLine + offset;
+
+                    var base1 = endLine * basesPerLine;
+                    var offset1 = end - base1;
+                    var endByte = position + endLine * bytesPerLine + offset1 - 1;
+                    var byteCount = endByte - startByte + 1;
+                    if (byteCount <= 0) {
+                        fulfill(null);
+                    }
+
+                    igvxhr.load(self.file, {
+                        range: {start: startByte, size: byteCount}
+                    }).then(function (allBytes) {
 
                         var nBases,
                             seqBytes = "",
@@ -295,14 +294,12 @@ var igv = (function (igv) {
                             desPos += nBases;
                         }
 
-                        continuation(seqBytes);
-                    },
-                    range: {start: startByte, size: byteCount},
-                    task: task
-                });
-            }
-        }
-    };
+                        fulfill(seqBytes);
+                    }).catch(reject)
+                }
+            }).catch(reject)
+        });
+    }
 
 
     return igv;

@@ -313,7 +313,8 @@ var igv = (function (igv) {
         try {
             return (this.low <= other.high && other.low <= this.high);
         } catch (e) {
-            alert(e);
+            //alert(e);
+            igv.presentAlert(e);
         }
     }
 

@@ -38,9 +38,9 @@ var igv = (function (igv) {
         variant.chr = tokens[0]; // TODO -- use genome aliases
         variant.pos = parseInt(tokens[1]) - 1;
         variant.names = tokens[2];    // id in VCF
-        variant.ref = tokens[3];
-        variant.alt = tokens[4];
-        variant.qual = parseInt(tokens[5]);
+        variant.referenceBases = tokens[3];
+        variant.alternateBases = tokens[4];
+        variant.quality = parseInt(tokens[5]);
         variant.filter = tokens[6];
         variant.info = tokens[7];
 
@@ -57,26 +57,31 @@ var igv = (function (igv) {
         variant.chr = json.referenceName;
         variant.pos = parseInt(json.start);
         variant.names = arrayToCommaString(json.names);
-        variant.ref = json.referenceBases + '';
-        variant.alt = json.alternateBases + '';
-        variant.qual = json.quality;
+        variant.referenceBases = json.referenceBases + '';
+        variant.alternateBases = json.alternateBases + '';
+        variant.quality = json.quality;
         variant.filter = arrayToCommaString(json.filter);
         variant.info = json.info;
-        variant.calls = json.calls;
+
+        // Need to build a hash of calls for fast lookup
+        // Note from the GA4GH spec on call ID:
+        //
+        // The ID of the call set this variant call belongs to. If this field is not present,
+        // the ordering of the call sets from a SearchCallSetsRequest over this GAVariantSet
+        // is guaranteed to match the ordering of the calls on this GAVariant.
+        // The number of results will also be the same.
+        variant.calls = {};
+        var order = 0, id;
+        if(json.calls) {
+            json.calls.forEach(function (call) {
+                id = call.callSetId;
+                variant.calls[id] = call;
+                order++;
+
+            })
+        }
 
         computeStart(variant);
-
-        function arrayToCommaString(array) {
-            if (!array) return;
-            var str = '', i;
-            if (array.length > 0)
-                str = array[0];
-            for (i = 1; i < array.length; i++) {
-                str += ", " + array[1];
-            }
-            return str;
-
-        }
 
         return variant;
 
@@ -85,12 +90,12 @@ var igv = (function (igv) {
 
     function computeStart(variant) {
         //Alleles
-        altTokens = variant.alt.split(",");
+        altTokens = variant.alternateBases.split(",");
 
         if (altTokens.length > 0) {
 
             variant.alleles = [];
-            variant.alleles.push(variant.ref);
+            variant.alleles.push(variant.referenceBases);
 
             variant.start = Number.MAX_VALUE;
             variant.end = 0;
@@ -102,7 +107,7 @@ var igv = (function (igv) {
 
                 if (alt.length > 0) {
 
-                    diff = variant.ref.length - alt.length;
+                    diff = variant.referenceBases.length - alt.length;
 
                     if (diff > 0) {
                         // deletion, assume left padded
@@ -110,7 +115,7 @@ var igv = (function (igv) {
                         e = s + diff;
                     } else if (diff < 0) {
                         // Insertion, assume left padded, insertion begins to "right" of last ref base
-                        s = variant.pos + variant.ref.length;
+                        s = variant.pos + variant.referenceBases.length;
                         e = s + 1;     // Insertion between s & 3
                     }
                     else {
@@ -139,13 +144,14 @@ var igv = (function (igv) {
 
     igv.Variant.prototype.popupData = function (genomicLocation) {
 
-        var fields, gt;
+        var fields, gt,
+            self = this;
 
         fields = [
             {name: "Names", value: this.names ? this.names : ""},
-            {name: "Ref", value: this.ref},
-            {name: "Alt", value: this.alt},
-            {name: "Qual", value: this.qual},
+            {name: "Ref", value: this.referenceBases},
+            {name: "Alt", value: this.alternateBases},
+            {name: "Qual", value: this.quality},
             {name: "Filter", value: this.filter},
          ];
 
@@ -154,19 +160,29 @@ var igv = (function (igv) {
             fields.push({name: "Genotype", value: gt});
         }
 
-        //infoFields = this.info.split(";");
-        //infoFields.forEach(function (f) {
-        //    var tokens = f.split("=");
-        //    if (tokens.length > 1) {
-        //        fields.push({name: tokens[0], value: tokens[1]});   // TODO -- use header to add descriptive tooltip
-        //    }
-        //});
-
+        if(this.info) {
+            fields.push('<HR>');
+            Object.keys(this.info).forEach(function (key) {
+                fields.push({name: key, value: arrayToCommaString(self.info[key])});
+            });
+        }
 
         return fields;
 
     }
 
+
+    function arrayToCommaString(array) {
+        if (!array) return;
+        var str = '', i;
+        if (array.length > 0)
+            str = array[0];
+        for (i = 1; i < array.length; i++) {
+            str += ", " + array[1];
+        }
+        return str;
+
+    }
 
     return igv;
 })(igv || {});

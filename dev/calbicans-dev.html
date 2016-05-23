@@ -33,6 +33,7 @@
     <script type="text/javascript" src="../vendor/inflate.js"></script>
     <script type="text/javascript" src="../vendor/zlib_and_gzip.min.js"></script>
     <script type="text/javascript" src="../vendor/jquery.mousewheel.js"></script>
+    <script type="text/javascript" src="../vendor/promise-7.0.4.js"></script>
 
     <!-- IGV JS -->
     <script type="text/javascript" src="../js/igv-create.js"></script>
@@ -49,13 +50,13 @@
     <script type="text/javascript" src="../js/rulerTrack.js"></script>
 
     <script type="text/javascript" src="../js/feature/featureTrack.js"></script>
+    <script type="text/javascript" src="../js/variant/variantTrack.js"></script>
     <script type="text/javascript" src="../js/igv-color.js"></script>
     <script type="text/javascript" src="../js/igv-utils.js"></script>
     <script type="text/javascript" src="../js/parseUtils.js"></script>
     <script type="text/javascript" src="../js/fasta.js"></script>
     <script type="text/javascript" src="../js/sequenceTrack.js"></script>
-    <script type="text/javascript" src="../js/wigTrack.js"></script>
-    <script type="text/javascript" src="../js/ui/dataloader.js"></script>
+    <script type="text/javascript" src="../js/feature/wigTrack.js"></script>
     <script type="text/javascript" src="../js/igv-exts.js"></script>
     <script type="text/javascript" src="../js/igvxhr.js"></script>
     <script type="text/javascript" src="../js/binary.js"></script>
@@ -79,7 +80,6 @@
     <script type="text/javascript" src="../js/ga4gh/ga4ghHelper.js"></script>
 
     <script type="text/javascript" src="../js/intervalTree.js"></script>
-    <script type="text/javascript" src="../js/igv-constants.js"></script>
 
     <script type="text/javascript" src="../js/feature/featureCache.js"></script>
     <script type="text/javascript" src="../js/feature/featureSource.js"></script>
@@ -88,9 +88,6 @@
     <script type="text/javascript" src="../js/feature/featureFileReader.js"></script>
 
     <script type="text/javascript" src="../js/encode/encode.js"></script>
-    <script type="text/javascript" src="../js/cursor/cursorTrack.js"></script>
-    <script type="text/javascript" src="../js/cursor/cursorModel.js"></script>
-    <script type="text/javascript" src="../js/cursor/cursor-ideogram.js"></script>
 
     <script type="text/javascript" src="../js/karyo/karyo.js"></script>
     <script type="text/javascript" src="../js/gwas/t2dVariantSource.js"></script>
@@ -157,6 +154,17 @@
 
 <div id="myDiv" style="padding-top: 50px;padding-bottom: 20px; height: auto"></div>
 
+
+<!-- Override igv.css rule governing panel name width -->
+<style type="text/css">
+    .igv-left-hand-gutter {
+        width: 200px;
+    }
+    .igv-gutter-shim {
+        left: 200px;
+    }
+</style>
+
 <script type="text/javascript">
 
     $(document).ready(function () {
@@ -170,7 +178,7 @@
 
             locus: "chr1",
             reference: {
-                fastaURL: "http://dn7ywbm9isq8j.cloudfront.net/genomes/seq/ca21/C_albicans_SC5314_A21.fasta",
+                fastaURL: "http://s3.amazonaws.com/igv.broadinstitute.org/genomes/seq/ca21/C_albicans_SC5314_A21.fasta",
                 aliasURL: "http://s3.amazonaws.com/igv.broadinstitute.org/genomes/seq/ca21/alias.tab"
             },
 
@@ -433,7 +441,7 @@
                 {
                     name: "Genes",
                     format: "refflat",
-                    url: "http://dn7ywbm9isq8j.cloudfront.net/annotations/ca21/ca21_refFlat.txt",
+                    url: "http://s3.amazonaws.com/igv.broadinstitute.org/annotations/ca21/ca21_refFlat.txt",
                     indexed: false,
                     order: 9999,
                     displayMode: "EXPANDED"

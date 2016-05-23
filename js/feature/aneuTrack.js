@@ -56,25 +56,25 @@ var igv = (function (igv) {
         this.lowColor = config.lowColor || 'rgb(220,0,0)';
         this.midColor = config.midColor || 'rgb(150,150,150)';
         this.posColorScale = config.posColorScale || new igv.GradientColorScale({
-            low: 0.1,
-            lowR: 255,
-            lowG: 255,
-            lowB: 255,
-            high: 1.5,
-            highR: 255,
-            highG: 0,
-            highB: 0
-        });
+                low: 0.1,
+                lowR: 255,
+                lowG: 255,
+                lowB: 255,
+                high: 1.5,
+                highR: 255,
+                highG: 0,
+                highB: 0
+            });
         this.negColorScale = config.negColorScale || new igv.GradientColorScale({
-            low: -1.5,
-            lowR: 0,
-            lowG: 0,
-            lowB: 255,
-            high: -0.1,
-            highR: 255,
-            highG: 255,
-            highB: 255
-        });
+                low: -1.5,
+                lowR: 0,
+                lowG: 0,
+                lowB: 255,
+                high: -0.1,
+                highR: 255,
+                highG: 255,
+                highB: 255
+            });
 
         this.sampleCount = 0;
         this.samples = {};
@@ -93,7 +93,7 @@ var igv = (function (igv) {
 
     };
 
-    igv.AneuTrack.prototype.getSummary = function (chr, bpStart, bpEnd, continuation, task) {
+    igv.AneuTrack.prototype.getSummary = function (chr, bpStart, bpEnd, continuation) {
         var me = this;
         var filtersummary = function (redlinedata) {
             var summarydata = [];
@@ -108,17 +108,18 @@ var igv = (function (igv) {
             continuation(summarydata);
         };
         if (this.featureSourceRed) {
-            this.featureSourceRed.getFeatures(chr, bpStart, bpEnd, filtersummary, task);
+            this.featureSourceRed.getFeatures(chr, bpStart, bpEnd, filtersummary);
         }
         else {
             log("Aneu track has no summary data yet");
             continuation(null);
         }
-    };
-    igv.AneuTrack.prototype.loadSummary = function (chr, bpStart, bpEnd, continuation, task) {
+    }
+
+    igv.AneuTrack.prototype.loadSummary = function (chr, bpStart, bpEnd, continuation) {
         var self = this;
         if (this.featureSourceRed) {
-            this.featureSourceRed.getFeatures(chr, bpStart, bpEnd, continuation, task);
+            this.featureSourceRed.getFeatures(chr, bpStart, bpEnd, continuation);
         }
         else {
             //log("Data is not loaded yet. Loading json first. tokens are "+me.config.tokens);
@@ -128,7 +129,7 @@ var igv = (function (igv) {
                     json = JSON.parse(json);
 //        		log("Got json: " + JSON.stringify(json));
                     self.featureSourceRed = new igv.AneuFeatureSource(config, json.redline);
-                    self.getSummary(chr, bpStart, bpEnd, continuation, task);
+                    self.getSummary(chr, bpStart, bpEnd, continuation);
                 }
                 else {
                     //log("afterJsonLoaded: got no json result for "+config.url);
@@ -149,49 +150,68 @@ var igv = (function (igv) {
             }
             return null;
         }
-    };
+    }
 
-    igv.AneuTrack.prototype.getFeatures = function (chr, bpStart, bpEnd, continuation, task) {
+    igv.AneuTrack.prototype.getFeatures = function (chr, bpStart, bpEnd) {
+
         var self = this;
-        if (this.featureSourceRed) {
-            // first load diff file, then load redline file, THEN call
-            // continuation
-            var loadsecondfile = function (redlinedata) {
-                // console.log("loadsecondfile: argument redlinedata:
-                // "+JSON.stringify(redlinedata));
-                self.redlinedata = redlinedata;
-                // console.log("Now loading diff data, using original
-                // continuation");
-                self.featureSource.getFeatures(chr, bpStart, bpEnd, continuation, task);
-            };
-            // console.log("About to load redline file");
-            this.featureSourceRed.getFeatures(chr, bpStart, bpEnd, loadsecondfile, task);
 
-        } else {
-            log("Data is not loaded yet. Loading json first");
+        return new Promise(function (fulfill, reject) {
 
-            var afterJsonLoaded = function (json) {
-                json = JSON.parse(json);
-                log("Got json: " + json + ", diff :" + json.diff);
-                self.featureSource = new igv.AneuFeatureSource(config, json.diff);
-                self.featureSourceRed = new igv.AneuFeatureSource(config, json.redline);
-                self.getFeatures(chr, bpStart, bpEnd, continuation, task);
-            };
+            loadJson.call(self).then(function () {
+                // first load diff file, then load redline file, THEN call
+                // continuation
+                var loadsecondfile = function (redlinedata) {
+                    // console.log("loadsecondfile: argument redlinedata:
+                    // "+JSON.stringify(redlinedata));
+                    self.redlinedata = redlinedata;
+                    // console.log("Now loading diff data, using original
+                    // continuation");
+                    self.featureSource.getFeatures(chr, bpStart, bpEnd, fulfill);
+                };
+                // console.log("About to load redline file");
+                self.featureSourceRed.getFeatures(chr, bpStart, bpEnd, loadsecondfile);
 
-            afterload = {
-                headers: self.config.headers, // http headers, not file header
-                tokens: self.config.tokens, // http headers, not file header
-                success: afterJsonLoaded,
-                withCredentials: self.config.withCredentials
-            };
-            var config = self.config;
-            if (config.localFile) {
-                igvxhr.loadStringFromFile(config.localFile, afterload);
-            } else {
-                igvxhr.loadString(config.url, afterload);
+
+            });
+        });
+    }
+
+    function loadJson() {
+
+        var self = this;
+
+        return new Promise(function (fulfill, reject) {
+
+            if (self.featureSourceRed) {
+                fulfill();
             }
-        }
-    };
+            else {
+                var afterJsonLoaded = function (json) {
+                        json = JSON.parse(json);
+                        log("Got json: " + json + ", diff :" + json.diff);
+                        self.featureSource = new igv.AneuFeatureSource(config, json.diff);
+                        self.featureSourceRed = new igv.AneuFeatureSource(config, json.redline);
+                        fulfill();
+                    },
+
+                    afterload = {
+                        headers: self.config.headers, // http headers, not file header
+                        tokens: self.config.tokens, // http headers, not file header
+                        withCredentials: self.config.withCredentials
+                    };
+
+                var config = self.config;
+                if (config.localFile) {
+                    igvxhr.loadStringFromFile(config.localFile, afterload).then(afterJsonLoaded);
+                } else {
+                    igvxhr.loadString(config.url, afterload).then(afterJsonLoaded);
+                }
+            }
+        });
+    }
+
+
     igv.AneuTrack.prototype.getColor = function (value) {
         var expected = 2;
         if (value < expected) {
@@ -354,7 +374,7 @@ var igv = (function (igv) {
                     var h = computeH(min, max, value, maxheight);
                     if (debug == true)
                         log("       Got value " + value + ", h=" + h + ", y+h=" + (y + h) + ", px=" + px
-                        + ", px1=" + px1 + ", pw=" + pw + ", color=" + color + ", maxh=" + maxheight);
+                            + ", px1=" + px1 + ", pw=" + pw + ", color=" + color + ", maxh=" + maxheight);
                     // use different plot types
                     igv.graphics.fillRect(ctx, px, y + h, pw, 2, {
                         fillStyle: color

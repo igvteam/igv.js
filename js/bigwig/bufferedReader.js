@@ -42,58 +42,59 @@ var igv = (function (igv) {
     /**
      *
      * @param requestedRange - byte rangeas {start, size}
-     * @param continutation - function to receive result
+     * @param fulfill - function to receive result
      * @param asUint8 - optional flag to return result as an UInt8Array
      */
-    igv.BufferedReader.prototype.dataViewForRange = function (requestedRange, continutation, asUint8) {
+    igv.BufferedReader.prototype.dataViewForRange = function (requestedRange, asUint8) {
 
-        var self = this,
-            hasData = (this.data && (this.range.start <= requestedRange.start) &&
-            ((this.range.start + this.range.size) >= (requestedRange.start + requestedRange.size))),
-            bufferSize,
-            loadRange;
+        var self = this;
 
-        if (hasData) {
-            subbuffer(self, requestedRange, asUint8);
-        }
-        else {
-            // Expand buffer size if needed, but not beyond content length
-            bufferSize = Math.max(this.bufferSize, requestedRange.size);
+        return new Promise(function (fulfill, reject) {
+            var hasData = (self.data && (self.range.start <= requestedRange.start) &&
+                ((self.range.start + self.range.size) >= (requestedRange.start + requestedRange.size))),
+                bufferSize,
+                loadRange;
 
-            if (this.contentLength > 0 && requestedRange.start + bufferSize > this.contentLength) {
-                loadRange = {start: requestedRange.start};
+            if (hasData) {
+                subbuffer(self, requestedRange, asUint8);
             }
             else {
-                loadRange = {start: requestedRange.start, size: bufferSize};
+                // Expand buffer size if needed, but not beyond content length
+                bufferSize = Math.max(self.bufferSize, requestedRange.size);
+
+                if (self.contentLength > 0 && requestedRange.start + bufferSize > self.contentLength) {
+                    loadRange = {start: requestedRange.start};
+                }
+                else {
+                    loadRange = {start: requestedRange.start, size: bufferSize};
+                }
+
+                igvxhr.loadArrayBuffer(self.path,
+                    {
+                        headers: self.config.headers,
+                        range: loadRange,
+                        withCredentials: self.config.withCredentials
+                    }).then(function (arrayBuffer) {
+                    // TODO -- handle error
+
+                    self.data = arrayBuffer;
+                    self.range = loadRange;
+                    subbuffer(self, requestedRange, asUint8);
+                }).catch(reject);
+
             }
 
-            igvxhr.loadArrayBuffer(self.path,
-                {
-                    headers: this.config.headers,
-                    range: loadRange,
-                    success: function (arrayBuffer) {
-                        // TODO -- handle error
 
-                        self.data = arrayBuffer;
-                        self.range = loadRange;
-                        subbuffer(self, requestedRange, asUint8);
-                    },
-                    withCredentials: self.config.withCredentials
-                });
+            function subbuffer(bufferedReader, requestedRange, asUint8) {
 
-        }
-
-
-        function subbuffer(bufferedReader, requestedRange, asUint8) {
-
-            var len = bufferedReader.data.byteLength,
-                bufferStart = requestedRange.start - bufferedReader.range.start,
-                result = asUint8 ?
-                    new Uint8Array(bufferedReader.data, bufferStart, len - bufferStart) :
-                    new DataView(bufferedReader.data, bufferStart, len - bufferStart);
-            continutation(result);
-        }
-
+                var len = bufferedReader.data.byteLength,
+                    bufferStart = requestedRange.start - bufferedReader.range.start,
+                    result = asUint8 ?
+                        new Uint8Array(bufferedReader.data, bufferStart, len - bufferStart) :
+                        new DataView(bufferedReader.data, bufferStart, len - bufferStart);
+                fulfill(result);
+            }
+        });
 
     }
 

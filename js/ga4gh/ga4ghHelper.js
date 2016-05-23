@@ -25,11 +25,13 @@
 
 var igv = (function (igv) {
 
+    /**
+     *
+     * @param options
+     */
     igv.ga4ghGet = function (options) {
 
         var url = options.url + "/" + options.entity + "/" + options.entityId,
-            options,
-            headers,
             acToken = oauth.google.access_token,
             apiKey = oauth.google.apiKey,
             paramSeparator = "?";
@@ -43,58 +45,56 @@ var igv = (function (igv) {
             url = url + paramSeparator + "access_token=" + encodeURIComponent(acToken);
         }
 
-        options = {
-            success: options.success,
-            task: options.task,
-            headers: ga4ghHeaders()
-        };
+        options.headers = ga4ghHeaders();
 
-        igvxhr.loadJson(url, options);
+        return igvxhr.loadJson(url, options);      // Returns a promise
     }
 
     igv.ga4ghSearch = function (options) {
 
-        var results = [],
-            url = options.url,
-            body = options.body,
-            decode = options.decode,
-            success = options.success,
-            task = options.task,
-            acToken = oauth.google.access_token,
-            apiKey = oauth.google.apiKey,
-            paramSeparator = "?";
+        return new Promise(function (fulfill, reject) {
+            var results = options.results ? options.results : [],
+                url = options.url,
+                body = options.body,
+                decode = options.decode,
+                acToken = oauth.google.access_token,
+                apiKey = oauth.google.apiKey,
+                paramSeparator = "?",
+                fields = options.fields;  // Partial response
 
-        if (apiKey) {
-            url = url + paramSeparator + "key=" + apiKey;
-            paramSeparator = "&";
-        }
-
-        if (acToken) {
-            url = url + paramSeparator + "access_token=" + encodeURIComponent(acToken);
-        }
-
-
-        // Start the recursive load cycle.  Data is fetched in chunks, if more data is available a "nextPageToken" is returned.
-        loadChunk();
-
-        function loadChunk(pageToken) {
-
-            if (pageToken) {
-                body.pageToken = pageToken;
-            }
-            else {
-                if (body.pageToken != undefined) delete body.pageToken;    // Remove previous page token, if any
+            if (apiKey) {
+                url = url + paramSeparator + "key=" + apiKey;
+                paramSeparator = "&";
             }
 
-            var sendData = JSON.stringify(body);
+            if (acToken) {
+                url = url + paramSeparator + "access_token=" + encodeURIComponent(acToken);
+            }
+            if (fields) {
+                url = url + paramSeparator + "fields=" + fields;
+            }
 
-            igvxhr.loadJson(url,
-                {
-                    sendData: sendData,
-                    task: task,
-                    contentType: "application/json",
-                    headers: ga4ghHeaders(),
-                    success: function (json) {
+
+            // Start the recursive load cycle.  Data is fetched in chunks, if more data is available a "nextPageToken" is returned.
+            loadChunk();
+
+            function loadChunk(pageToken) {
+
+                if (pageToken) {
+                    body.pageToken = pageToken;
+                }
+                else {
+                    if (body.pageToken != undefined) delete body.pageToken;    // Remove previous page token, if any
+                }
+
+                var sendData = JSON.stringify(body);
+
+                igvxhr.loadJson(url,
+                    {
+                        sendData: sendData,
+                        contentType: "application/json",
+                        headers: ga4ghHeaders()
+                    }).then(function (json) {
                         var nextPageToken, tmp;
 
                         if (json) {
@@ -118,28 +118,20 @@ var igv = (function (igv) {
                                 loadChunk(nextPageToken);
                             }
                             else {
-                                success(results);
+                                fulfill(results);
                             }
                         }
                         else {
-                            success(results);
+                            fulfill(results);
                         }
 
-                    }
-                });
-        }
-    }
+                    }).catch(function(error) {
+                        reject(error);
+                    });
+            }
 
-    function ga4ghHeaders() {
+        });
 
-        var headers = {},
-            acToken = oauth.google.access_token;
-
-        headers["Cache-Control"] = "no-cache";
-        if (acToken) {
-      //      headers["Authorization"] = "Bearer " + acToken;
-        }
-        return headers;
 
     }
 
@@ -154,10 +146,11 @@ var igv = (function (igv) {
             },
             decode: function (json) {
                 return json.readGroupSets;
-            },
-            success: function (results) {
-                options.success(results);
             }
+        }).then(function (results) {
+            options.success(results);
+        }).catch(function (error) {
+            console.log(error);
         });
     }
 
@@ -171,10 +164,11 @@ var igv = (function (igv) {
             },
             decode: function (json) {
                 return json.variantSets;
-            },
-            success: function (results) {
-                options.success(results);
             }
+        }).then(function (results) {
+            options.success(results);
+        }).catch(function (error) {
+            console.log(error);
         });
     }
 
@@ -197,7 +191,6 @@ var igv = (function (igv) {
                     // Substitute variantSetIds for datasetId
                     options.datasetId = undefined;
                     options.variantSetIds = variantSetIds;
-
                     igv.ga4ghSearchCallSets(options);
 
 
@@ -221,10 +214,11 @@ var igv = (function (igv) {
                     });
 
                     return json.callSets;
-                },
-                success: function (results) {
-                    options.success(results);
                 }
+            }).then(function (results) {
+                options.success(results);
+            }).catch(function (error) {
+                console.log(error);
             });
         }
     }
@@ -273,6 +267,19 @@ var igv = (function (igv) {
 
     }
 
+
+    function ga4ghHeaders() {
+
+        var headers = {},
+            acToken = oauth.google.access_token;
+
+        headers["Cache-Control"] = "no-cache";
+        if (acToken) {
+            //      headers["Authorization"] = "Bearer " + acToken;
+        }
+        return headers;
+
+    }
 
     return igv;
 

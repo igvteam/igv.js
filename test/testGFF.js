@@ -6,7 +6,7 @@ function runGFFUnitTests() {
             bpStart = 1,
             bpEnd   = 10000,
             featureSource = new igv.FeatureSource({
-                url: 'data/gff/eden.txt',
+                url: 'data/gff/eden.gff',
                 format: 'gff'
             });
 
