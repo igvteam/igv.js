@@ -28,135 +28,262 @@
  */
 var igv = (function (igv) {
 
-    igv.Dialog = function (parentObject) {
+    igv.Dialog = function ($parent, constructorHelper, id) {
 
-        var self = this;
+        var self = this,
+            $header,
+            $headerBlurb;
 
-        this.container = $('<div class="igv-grid-container-dialog">');
-        parentObject.append( this.container[ 0 ] );
+        this.$container = $('<div class="igv-grid-container-dialog">');
+        if (id) {
+            this.$container.attr("id", id);
+        }
+        $parent.append( this.$container[ 0 ] );
 
-        this.container.draggable();
+        $header = $('<div class="igv-grid-header">');
+        $headerBlurb = $('<div class="igv-grid-header-blurb">');
+        $header.append($headerBlurb[ 0 ]);
 
-        this.header = $('<div class="igv-grid-header">');
-        this.headerBlurb = $('<div class="igv-grid-header-blurb">');
+        this.$container.append($header[ 0 ]);
 
-        this.header.append(this.headerBlurb[ 0 ]);
+        constructorHelper(this);
 
-        igv.dialogCloseWithParentObject(this.header, function () {
+        igv.dialogCloseWithParentObject($header, function () {
             self.hide();
         });
 
-        this.container.append(this.header[ 0 ]);
+    };
 
-        self.container.append(rowOfLabel()[ 0 ]);
+    igv.Dialog.dialogConstructor = function (dialog) {
 
-        self.container.append(rowOfInput()[ 0 ]);
+        dialog.$container.append(dialog.rowOfLabel()[ 0 ]);
 
-        self.container.append(rowOfCancel()[ 0 ]);
+        dialog.$container.append(dialog.rowOfInput()[ 0 ]);
 
-        function rowOfCancel() {
+        dialog.$container.append(dialog.rowOfOkCancel()[ 0 ]);
 
-            var rowContainer,
-                row,
-                column,
-                columnFiller;
+        dialog.$container.draggable();
 
-            row = $('<div class="igv-grid-dialog">');
+    };
 
-            // shim
-            column = $('<div class="igv-col igv-col-5-8">');
-            row.append( column[ 0 ] );
+    igv.Dialog.alertConstructor = function (dialog) {
 
-            // cancel button
-            column = $('<div class="igv-col igv-col-3-8">');
+        dialog.$container.removeClass("igv-grid-container-dialog");
+        dialog.$container.addClass("igv-grid-container-alert-dialog");
 
-            columnFiller = $('<div class="igv-col-filler-cancel-button">');
-            columnFiller.text("Cancel");
+        dialog.$container.append(dialog.rowOfLabel()[ 0 ]);
 
-            columnFiller.click(function() {
-                self.hide();
-            });
+        dialog.$container.append(dialog.rowOfInput()[ 0 ]);
+
+        dialog.$container.append(dialog.rowOfOk()[ 0 ]);
+
+    };
+
+    igv.Dialog.prototype.rowOfOk = function() {
+
+        var $rowContainer,
+            $row,
+            $column,
+            $columnFiller;
+
+        $row = $('<div class="igv-grid-dialog">');
+
+        // shim
+        $column = $('<div class="igv-col igv-col-1-4">');
+        //
+        $row.append( $column[ 0 ] );
 
 
-            column.append( columnFiller[ 0 ] );
-            row.append( column[ 0 ] );
+        // ok button
+        $column = $('<div class="igv-col igv-col-2-4">');
+        $columnFiller = $('<div class="igv-col-filler-ok-button">');
+        $columnFiller.text("OK");
 
-            rowContainer = $('<div class="igv-grid-rect">');
-            rowContainer.append( row[ 0 ]);
+        this.$ok = $columnFiller;
 
-            return rowContainer;
+        $column.append( $columnFiller[ 0 ] );
+        //
+        $row.append( $column[ 0 ] );
 
+        //
+        $rowContainer = $('<div class="igv-grid-rect">');
+        $rowContainer.append( $row[ 0 ]);
+
+        return $rowContainer;
+
+    };
+
+    igv.Dialog.prototype.rowOfOkCancel = function() {
+
+        var self = this,
+            $rowContainer,
+            $row,
+            $column,
+            $columnFiller;
+
+        $row = $('<div class="igv-grid-dialog">');
+
+        // shim
+        $column = $('<div class="igv-col igv-col-1-8">');
+        //
+        $row.append( $column[ 0 ] );
+
+
+        // ok button
+        $column = $('<div class="igv-col igv-col-3-8">');
+        $columnFiller = $('<div class="igv-col-filler-ok-button">');
+        $columnFiller.text("OK");
+
+        this.$ok = $columnFiller;
+
+        $column.append( $columnFiller[ 0 ] );
+        //
+        $row.append( $column[ 0 ] );
+
+
+        // cancel button
+        $column = $('<div class="igv-col igv-col-3-8">');
+        $columnFiller = $('<div class="igv-col-filler-cancel-button">');
+        $columnFiller.text("Cancel");
+        $columnFiller.click(function() {
+            self.$dialogInput.val(undefined);
+            self.hide();
+        });
+        $column.append( $columnFiller[ 0 ] );
+        //
+        $row.append( $column[ 0 ] );
+
+        // shim
+        $column = $('<div class="igv-col igv-col-1-8">');
+        //
+        $row.append( $column[ 0 ] );
+
+        $rowContainer = $('<div class="igv-grid-rect">');
+        $rowContainer.append( $row[ 0 ]);
+
+        return $rowContainer;
+
+    };
+
+    igv.Dialog.prototype.rowOfLabel = function() {
+
+        var rowContainer,
+            row,
+            column;
+
+        // input
+        row = $('<div class="igv-grid-dialog">');
+
+        column = $('<div class="igv-col igv-col-4-4">');
+        this.$dialogLabel = $('<div class="igv-user-input-label">');
+
+        column.append( this.$dialogLabel[ 0 ] );
+        row.append( column[ 0 ] );
+
+        rowContainer = $('<div class="igv-grid-rect">');
+        rowContainer.append( row[ 0 ]);
+
+        return rowContainer;
+
+    };
+
+    igv.Dialog.prototype.rowOfInput = function() {
+
+        var rowContainer,
+            row,
+            column;
+
+        // input
+        row = $('<div class="igv-grid-dialog">');
+
+        column = $('<div class="igv-col igv-col-4-4">');
+        this.$dialogInput = $('<input class="igv-user-input-dialog" type="text" value="#000000">');
+
+        column.append( this.$dialogInput[ 0 ] );
+        row.append( column[ 0 ] );
+
+        rowContainer = $('<div class="igv-grid-rect">');
+        rowContainer.append( row[ 0 ]);
+
+        return rowContainer;
+
+    };
+
+    igv.Dialog.prototype.configure = function (labelHTMLFunction, inputValue, clickFunction) {
+
+        var self = this,
+            clickOK;
+
+        if (labelHTMLFunction) {
+            self.$dialogLabel.html(labelHTMLFunction());
+            self.$dialogLabel.show();
+        } else {
+            self.$dialogLabel.hide();
         }
 
-        function rowOfLabel() {
+        if (inputValue !== undefined) {
 
-            var rowContainer,
-                row,
-                column;
+            self.$dialogInput.val(inputValue);
 
-            // input
-            row = $('<div class="igv-grid-dialog">');
+            self.$dialogInput.unbind();
+            self.$dialogInput.change(clickFunction);
 
-            column = $('<div class="igv-col igv-col-4-4">');
-            self.dialogLabel = $('<div class="igv-user-input-label">');
-
-            column.append( self.dialogLabel[ 0 ] );
-            row.append( column[ 0 ] );
-
-            rowContainer = $('<div class="igv-grid-rect">');
-            rowContainer.append( row[ 0 ]);
-
-            return rowContainer;
-
+            self.$dialogInput.show();
+        } else {
+            self.$dialogInput.hide();
         }
 
-        function rowOfInput() {
+        self.$ok.unbind();
+        self.$ok.click(function() {
 
-            var rowContainer,
-                row,
-                column;
+            if (clickFunction) {
+                clickFunction();
+            }
 
-            // input
-            row = $('<div class="igv-grid-dialog">');
-
-            column = $('<div class="igv-col igv-col-4-4">');
-            self.dialogInput = $('<input class="igv-user-input-dialog" type="text" value="#000000">');
-
-            column.append( self.dialogInput[ 0 ] );
-            row.append( column[ 0 ] );
-
-            rowContainer = $('<div class="igv-grid-rect">');
-            rowContainer.append( row[ 0 ]);
-
-            return rowContainer;
-
-        }
+            self.hide();
+        });
 
     };
 
     igv.Dialog.prototype.hide = function () {
-        $(this.container).offset( { left: 0, top: 0 } );
-        this.container.hide();
+
+        if (this.$container.hasClass('igv-grid-container-dialog')) {
+            this.$container.offset( { left: 0, top: 0 } );
+        }
+        this.$container.hide();
     };
 
-    igv.Dialog.prototype.show = function () {
+    igv.Dialog.prototype.show = function ($host) {
 
-        var body_scrolltop = $("body").scrollTop(),
-            track_scrolltop = $(this.trackView.trackDiv).scrollTop(),
-            track_origin = $(this.trackView.trackDiv).offset(),
-            track_size = { width: $(this.trackView.trackDiv).outerWidth(), height: $(this.trackView.trackDiv).outerHeight()},
-            size = { width: $(this.container).outerWidth(), height: $(this.container).outerHeight()};
+        var body_scrolltop,
+            track_origin,
+            track_size,
+            offset,
+            _top,
+            _left;
 
-        //console.log("scrollTop. body " + body_scrolltop + " track " + track_scrolltop);
+        body_scrolltop = $('body').scrollTop();
 
-        // centered left-right
-        //$(this.container).offset( { left: (track_size.width - size.width)/2, top: track_origin.top } );
+        if (this.$container.hasClass('igv-grid-container-dialog')) {
 
-        this.container.show();
+            offset = $host.offset();
 
-        $(this.container).offset( { left: (track_size.width - 300), top: (track_origin.top + body_scrolltop) } );
+            _top = offset.top + body_scrolltop;
+            _left = $host.outerWidth() - 300;
 
-        $(this.container).offset( igv.constrainBBox($(this.container), $(igv.browser.trackContainerDiv)) );
+            this.$container.offset( { left: _left, top: _top } );
+
+            //track_origin = $host.offset();
+            //track_size =
+            //{
+            //    width: $host.outerWidth(),
+            //    height: $host.outerHeight()
+            //};
+            //this.$container.offset( { left: (track_size.width - 300), top: (track_origin.top + body_scrolltop) } );
+            //this.$container.offset( igv.constrainBBox(this.$container, $(igv.browser.trackContainerDiv)) );
+        }
+
+        this.$container.show();
 
     };
 

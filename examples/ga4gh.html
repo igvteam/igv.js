@@ -18,14 +18,14 @@
     <link rel="stylesheet" type="text/css" href="//maxcdn.bootstrapcdn.com/font-awesome/4.2.0/css/font-awesome.min.css">
 
     <!-- IGV CSS -->
-    <link rel="stylesheet" type="text/css" href="//igv.org/web/beta/igv-beta.css">
+    <link rel="stylesheet" type="text/css" href="//igv.org/web/release/1.0.0-rc1/igv-1.0.0-rc1.css">
 
     <!-- jQuery JS -->
     <script type="text/javascript" src="//ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
     <script type="text/javascript" src="//ajax.googleapis.com/ajax/libs/jqueryui/1.11.2/jquery-ui.min.js"></script>
 
     <!-- IGV JS-->
-    <script type="text/javascript" src="//igv.org/web/beta/igv-beta.js"></script>
+    <script type="text/javascript" src="//igv.org/web/release/1.0.0-rc1/igv-1.0.0-rc1.js"></script>
 
 
 </head>
@@ -52,22 +52,29 @@
                     tracks: [
                         {
                             sourceType: 'ga4gh',
-                            type: 'vcf',
-                            url: 'https://www.googleapis.com/genomics/v1beta2',
+                            type: 'variant',
+                            url: 'https://genomics.googleapis.com/v1',
                             variantSetId: '10473108253681171589',
-                            callSetIds: ["10473108253681171589-2"],
-                            name: 'Ga4gh variants'
+                            callSetIds: ["10473108253681171589-0", "10473108253681171589-1", "10473108253681171589-2",
+                                "10473108253681171589-3", "10473108253681171589-4", "10473108253681171589-5",
+                                "10473108253681171589-6", "10473108253681171589-7", "10473108253681171589-8",
+                                "10473108253681171589-9", "10473108253681171589-10", "10473108253681171589-11",
+                                "10473108253681171589-12", "10473108253681171589-13", "10473108253681171589-14",
+                                "10473108253681171589-15", "10473108253681171589-16", "10473108253681171589-17",
+                                "10473108253681171589-18", "10473108253681171589-19"],
+                            name: 'Ga4gh variants',
+                            visibilityWindow: 100000
                         },
                         {
                             sourceType: 'ga4gh',
-                            type: 'bam',
-                            url: 'https://www.googleapis.com/genomics/v1beta2',
+                            type: 'alignment',
+                            url: 'https://genomics.googleapis.com/v1',
                             readGroupSetIds: 'CMvnhpKTFhCjz9_25e_lCw',
                             name: 'Ga4gh alignments'
                         },
                         {
                             name: "Genes",
-                            url: "//igv.broadinstitute.org/annotations/hg19/genes/gencode.v18.collapsed.bed",
+                            url: "//s3.amazonaws.com/igv.broadinstitute.org/annotations/hg19/genes/gencode.v18.collapsed.bed",
                             order: Number.MAX_VALUE,
                             displayMode: "EXPANDED"
 

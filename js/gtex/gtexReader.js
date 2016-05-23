@@ -58,49 +58,50 @@ var igv = (function (igv) {
     //
     // http://vgtxportaltest.broadinstitute.org:9000/v6/singleTissueEqtlByLocation?tissueName=Thyroid&chromosome=3&start=158310650&end=158311650
 
-        igv.GtexReader.prototype.readFeatures = function (chr, bpStart, bpEnd, success, task) {
+        igv.GtexReader.prototype.readFeatures = function (chr, bpStart, bpEnd) {
 
-        var queryChr = chr.startsWith("chr") ? chr.substr(3) : chr,
-            queryStart = bpStart,
-            queryEnd = bpEnd,
-            queryURL = this.url + "?chromosome=" + queryChr + "&start=" + queryStart + "&end=" + queryEnd +
-                "&tissueName=" + this.tissueName;
+            var self=this,
+                queryChr = chr.startsWith("chr") ? chr.substr(3) : chr,
+                queryStart = bpStart,
+                queryEnd = bpEnd,
+                queryURL = this.url + "?chromosome=" + queryChr + "&start=" + queryStart + "&end=" + queryEnd +
+                    "&tissueName=" + this.tissueName;
 
+            return new Promise(function (fulfill, reject) {
 
-        igvxhr.loadJson(queryURL, {
-            task: task,
-            success: function (json) {
+                igvxhr.loadJson(queryURL, {
+                    withCredentials: self.config.withCredentials
+                }).then(function (json) {
 
-                var variants;
+                    var variants;
 
-                if (json && json.singleTissueEqtl) {
-                    //variants = json.variants;
-                    //variants.sort(function (a, b) {
-                    //    return a.POS - b.POS;
-                    //});
-                    //source.cache = new FeatureCache(chr, queryStart, queryEnd, variants);
+                    if (json && json.singleTissueEqtl) {
+                        //variants = json.variants;
+                        //variants.sort(function (a, b) {
+                        //    return a.POS - b.POS;
+                        //});
+                        //source.cache = new FeatureCache(chr, queryStart, queryEnd, variants);
 
-                    json.singleTissueEqtl.forEach(function (eqtl) {
-                        eqtl.chr = "chr" + eqtl.chromosome;
-                        eqtl.position = eqtl.start;
-                        eqtl.start = eqtl.start-1;
-                        eqtl.snp = eqtl.snpId;
-                        eqtl.geneName = eqtl.geneSymbol;
-                        eqtl.geneId = eqtl.gencodeId;
-                        eqtl.end = eqtl.start;
-                    });
+                        json.singleTissueEqtl.forEach(function (eqtl) {
+                            eqtl.chr = "chr" + eqtl.chromosome;
+                            eqtl.position = eqtl.start;
+                            eqtl.start = eqtl.start - 1;
+                            eqtl.snp = eqtl.snpId;
+                            eqtl.geneName = eqtl.geneSymbol;
+                            eqtl.geneId = eqtl.gencodeId;
+                            eqtl.end = eqtl.start;
+                        });
 
-                    success(json.singleTissueEqtl);
-                }
-                else {
-                    success(null);
-                }
+                        fulfill(json.singleTissueEqtl);
+                    }
+                    else {
+                        fulfill(null);
+                    }
 
-            },
-            withCredentials: this.config.withCredentials
-        });
+                }).catch(reject);
 
-    }
+            });
+        }
 
 
     return igv;

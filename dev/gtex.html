@@ -33,6 +33,7 @@
     <script type="text/javascript" src="../vendor/inflate.js"></script>
     <script type="text/javascript" src="../vendor/zlib_and_gzip.min.js"></script>
     <script type="text/javascript" src="../vendor/jquery.mousewheel.js"></script>
+    <script type="text/javascript" src="../vendor/jquery.kinetic.min.js"></script>
 
     <!-- IGV JS -->
     <script type="text/javascript" src="../js/igv-create.js"></script>
@@ -49,13 +50,14 @@
     <script type="text/javascript" src="../js/rulerTrack.js"></script>
 
     <script type="text/javascript" src="../js/feature/featureTrack.js"></script>
+    <script type="text/javascript" src="../js/variant/variantTrack.js"></script>
     <script type="text/javascript" src="../js/igv-color.js"></script>
     <script type="text/javascript" src="../js/igv-utils.js"></script>
     <script type="text/javascript" src="../js/parseUtils.js"></script>
     <script type="text/javascript" src="../js/fasta.js"></script>
     <script type="text/javascript" src="../js/sequenceTrack.js"></script>
-    <script type="text/javascript" src="../js/wigTrack.js"></script>
-    <script type="text/javascript" src="../js/ui/dataloader.js"></script>
+    <script type="text/javascript" src="../js/feature/wigTrack.js"></script>
+
     <script type="text/javascript" src="../js/igv-exts.js"></script>
     <script type="text/javascript" src="../js/igvxhr.js"></script>
     <script type="text/javascript" src="../js/binary.js"></script>
@@ -80,7 +82,6 @@
     <script type="text/javascript" src="../js/ga4gh/ga4ghHelper.js"></script>
 
     <script type="text/javascript" src="../js/intervalTree.js"></script>
-    <script type="text/javascript" src="../js/igv-constants.js"></script>
 
     <script type="text/javascript" src="../js/feature/featureCache.js"></script>
     <script type="text/javascript" src="../js/feature/featureSource.js"></script>
@@ -89,9 +90,6 @@
     <script type="text/javascript" src="../js/feature/featureFileReader.js"></script>
 
     <script type="text/javascript" src="../js/encode/encode.js"></script>
-    <script type="text/javascript" src="../js/cursor/cursorTrack.js"></script>
-    <script type="text/javascript" src="../js/cursor/cursorModel.js"></script>
-    <script type="text/javascript" src="../js/cursor/cursor-ideogram.js"></script>
 
     <script type="text/javascript" src="../js/karyo/karyo.js"></script>
     <script type="text/javascript" src="../js/gwas/t2dVariantSource.js"></script>
@@ -156,6 +154,34 @@
 
 <body>
 
+<div id="trackList">
+    <div onclick="igv.browser.loadTrack({
+                            type: 'eqtl',
+                            sourceType: 'gtex-ws',
+                            url: 'http://gtexportal.org/api/v6/singleTissueEqtlByLocation',
+                            tissueName: 'Adipose_Subcutaneous',
+                            name: 'Adipose - Subcutaneous'
+                            })">Adipose - Subcutaneous
+    </div>
+    <div onclick="igv.browser.loadTrack({
+                         type: 'eqtl',
+                         sourceType: 'gtex-ws',
+                         url: 'http://gtexportal.org/api/v6/singleTissueEqtlByLocation',
+                         tissueName: 'Brain_Cerebellar_Hemisphere',
+                         name: 'Brain - Cerebellar Hemisphere'
+                         })">Brain - Cerebellar Hemisphere
+    </div>
+    <div onclick="igv.browser.loadTrack({
+                         type: 'eqtl',
+                         sourceType: 'gtex-ws',
+                         url: 'http://gtexportal.org/api/v6/singleTissueEqtlByLocation',
+                         tissueName: 'Thyroid',
+                         name: 'Thyroid'
+                         })">Thyroid
+    </div>
+</div>
+
+
 <div id="myDiv" style="padding-top: 50px;padding-bottom: 20px; height: auto"></div>
 
 <script type="text/javascript">
@@ -169,19 +195,15 @@
         div = $("#myDiv")[0];
         options = {
             type: "GTEX",
-            fastaURL: "//dn7ywbm9isq8j.cloudfront.net/genomes/seq/hg19/hg19.fasta",
-            cytobandURL: "//dn7ywbm9isq8j.cloudfront.net/genomes/seq/hg19/cytoBand.txt",
-            locus: "psphp1",
-
+            showNavigation: true,
+            fastaURL: '//s3.amazonaws.com/igv.broadinstitute.org/genomes/seq/hg19/hg19.fasta',
+            cytobandURL: '//s3.amazonaws.com/igv.broadinstitute.org/genomes/seq/hg19/cytoBand.txt',
+            locus: "chr1:1-50,000,000",
+            flanking: 75000,
             search: {
-                url: "http://vgtxportaltest:9000/v1/features/$FEATURE$",
-                //coords: 1,
-                //chromosomeField: "chromosome",
-                //startField: "start",
-                //endField: "end",
+                url: "http://gtexportal.org/api/v6/features/$FEATURE$",
                 resultsField: "features"
             },
-
             formats: {
                 gwasSNPS: {
                     coords: 0,
@@ -191,49 +213,34 @@
                     fields: ["chrom", "chromStart", "chromEnd", "Strongest SNP-risk allele", "Disease/Phenotype", "P-value", "Odds ratio or beta", "PUBMEDID"]
                 }
             },
-
-
             tracks: [
                 {
-                    type: 'eqtl',
-                    sourceType: 'gtex',
-                    url: '//www.gtexportal.org/igv/assets/eqtl/Skin_Sun_Exposed_Lower_leg.portal.eqtl.bin',
+                    featureType: 'annotation',
+                    format: 'gwasSNPS',
                     indexed: false,
-                    name: 'Skin Sun Exposed Lower leg'
-                },
-                {
-                    type: 'eqtl',
-                    sourceType: 'gtex-ws',
-                    url: 'http://vgtxportaltest.broadinstitute.org:9000/v6/singleTissueEqtlByLocation',
-                    tissueName: 'Thyroid',
-                    name: 'Thyroid'
-
-                },
-                {
-                    featureType: "annotation",
-                    format: "gwasSNPS",
-                    indexed: false,
-                    color: "rgb(100,200,200)",
+                    color: 'rgb(100,200,200)',
                     displayMode: 'EXPANDED',
-                    url: "//dn7ywbm9isq8j.cloudfront.net/annotations/hg19/gwas/v2_newest_converted_GWAS_catalog_SNPs_Pval5E08_hg19_040115.bed",
-                    name: "GWAS snps"
+                    url: '//s3.amazonaws.com/igv.broadinstitute.org/annotations/hg19/gwas/v2_newest_converted_GWAS_catalog_SNPs_Pval5E08_hg19_040115.bed',
+                    name: 'GWAS Catalog',
+                    order: 9999
                 },
                 {
                     featureType: 'genes',
-                    url: "//igv.broadinstitute.org/annotations/hg19/genes/gencode.v18.collapsed.bed",
+                    url: '//s3.amazonaws.com/igv.broadinstitute.org/annotations/hg19/genes/gencode.v18.collapsed.bed',
+                    name: 'Genes',
+                    order: 10000,
+                    displayMode: 'EXPANDED',
                     height: 100,
                     autoHeight: true,
                     removable: false,
-                    name: "Genes",
-                    labelDisplayMode: "SLANT",
-                    order: 10000
+                    labelDisplayMode: 'SLANT'
                 }
             ]
         };
 
         browser = igv.createBrowser(div, options);
 
-       // igv.browser.search("psphp1");
+        // igv.browser.search("psphp1");
     });
 
 

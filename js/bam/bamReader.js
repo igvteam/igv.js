@@ -7,6 +7,8 @@ var igv = (function (igv) {
     var BAI_MAGIC = 21578050;
     var SECRET_DECODER = ['=', 'A', 'C', 'x', 'G', 'x', 'x', 'x', 'T', 'x', 'x', 'x', 'x', 'x', 'x', 'N'];
     var CIGAR_DECODER = ['M', 'I', 'D', 'N', 'S', 'H', 'P', '=', 'X', '?', '?', '?', '?', '?', '?', '?'];
+    var READ_STRAND_FLAG = 0x10;
+    var MATE_STRAND_FLAG = 0x20;
     var READ_PAIRED_FLAG = 0x1;
     var PROPER_PAIR_FLAG = 0x2;
     var READ_UNMAPPED_FLAG = 0x4;
@@ -18,7 +20,7 @@ var igv = (function (igv) {
     var NOT_PRIMARY_ALIGNMENT_FLAG = 0x100;
     var READ_FAILS_VENDOR_QUALITY_CHECK_FLAG = 0x200;
     var DUPLICATE_READ_FLAG = 0x400;
-    var SUPPLEMENTARY_ALIGNMENT_FLAG = 0x800;
+    var SUPPLEMENTARY_FLAG = 0x800;
 
     const MAX_GZIP_BLOCK_SIZE = (1 << 16);   //  APPARENTLY.  Where is this documented???
 
@@ -32,100 +34,117 @@ var igv = (function (igv) {
     igv.BamReader = function (config) {
 
         this.config = config;
+
+        this.filter = config.filter || new igv.BamFilter();
+
         this.bamPath = 'gcs' === config.sourceType ?
             igv.translateGoogleCloudURL(config.url) :
             config.url;
         this.baiPath = 'gcs' === config.sourceType ?
             igv.translateGoogleCloudURL(config.url + ".bai") :
         config.url + ".bai"; // Todo - deal with Picard convention.  WHY DOES THERE HAVE TO BE 2?
+        this.baiPath = config.indexURL || this.baiPath; // If there is an indexURL provided, use it!
         this.headPath = config.headURL || this.bamPath;
+
+        this.samplingWindowSize = config.samplingWindowSize === undefined ? 100 : config.samplingWindowSize;
+        this.samplingDepth = config.samplingDepth === undefined ? 50 : config.samplingDepth;
+
+        if (config.viewAsPairs) {
+            this.pairsSupported = true;
+        }
+        else {
+            this.pairsSupported = config.pairsSupported === undefined ? true : config.pairsSupported;
+        }
 
     };
 
-    igv.BamReader.prototype.readFeatures = function (chr, min, max, continuation, task) {
+    igv.BamReader.prototype.readAlignments = function (chr, bpStart, bpEnd) {
 
         var self = this;
 
-        getChrIndex(this, function (chrToIndex) {
-
-            var chrId = chrToIndex[chr],
-                chunks;
-
-            if (chrId === undefined) {
-                continuation([]);
-            } else {
-
-                getIndex(self, function (bamIndex) {
-
-                    chunks = bamIndex.blocksForRange(chrId, min, max);
+        return new Promise(function (fulfill, reject) {
 
 
-                    if (!chunks) {
-                        continuation(null, 'Error in index fetch');
-                        return;
-                    }
-                    if (chunks.length === 0) {
-                        continuation([]);
-                        return;
-                    }
+            getChrIndex(self).then(function (chrToIndex) {
+
+                var chrId = chrToIndex[chr],
+
+                    alignmentContainer = new igv.AlignmentContainer(chr, bpStart, bpEnd, self.samplingWindowSize, self.samplingDepth, self.pairsSupported);
+
+                if (chrId === undefined) {
+                    fulfill(alignmentContainer);
+                } else {
+
+                    getIndex(self).then(function (bamIndex) {
+
+                        var chunks = bamIndex.blocksForRange(chrId, bpStart, bpEnd),
+                            promises = [];
 
 
-                    var records = [];
-                    loadNextChunk(0);
+                        if (!chunks) {
+                            fulfill(null);
+                            reject("Error reading bam index");
+                            return;
+                        }
+                        if (chunks.length === 0) {
+                            fulfill(alignmentContainer);
+                            return;
+                        }
+                        console.log("# chunks = " + chunks.length);
+                        chunks.forEach(function (c) {
 
-                    function loadNextChunk(chunkNumber) {
+                            promises.push(new Promise(function (fulfill, reject) {
 
-                        var c = chunks[chunkNumber],
-                            fetchMin = c.minv.block,
-                            fetchMax = c.maxv.block + 65000,   // Make sure we get the whole block.
-                            range =
-                                (self.contentLength > 0 && fetchMax > self.contentLength) ?
-                                {start: fetchMin} :
-                                {start: fetchMin, size: fetchMax - fetchMin + 1};
+                                var fetchMin = c.minv.block,
+                                    fetchMax = c.maxv.block + 65000,   // Make sure we get the whole block.
+                                    range =
+                                        (self.contentLength > 0 && fetchMax > self.contentLength) ?
+                                        {start: fetchMin} :
+                                        {start: fetchMin, size: fetchMax - fetchMin + 1};
 
-                        igvxhr.loadArrayBuffer(self.bamPath,
-                            {
-                                task: task,
-                                headers: self.config.headers,
-                                range: range,
-                                success: function (compressed) {
+                                igvxhr.loadArrayBuffer(self.bamPath,
+                                    {
+                                        headers: self.config.headers,
+                                        range: range,
+                                        withCredentials: self.config.withCredentials
+                                    }).then(function (compressed) {
 
-                                    try {
-                                        var ba = new Uint8Array(igv.unbgzf(compressed)); //, c.maxv.block - c.minv.block + 1));
-                                    } catch (e) {
-                                        console.log(e);
-                                        continuation(records);
-                                    }
+                                        var ba = new Uint8Array(igv.unbgzf(compressed)); //new Uint8Array(igv.unbgzf(compressed)); //, c.maxv.block - c.minv.block + 1));
+                                        decodeBamRecords(ba, c.minv.offset, alignmentContainer, bpStart, bpEnd, chrId, self.filter);
 
-                                    decodeBamRecords(ba, chunks[chunkNumber].minv.offset, records, min, max, chrId);
+                                        fulfill(alignmentContainer);
 
-                                    chunkNumber++;
+                                    }).catch(function (obj) {
+                                        reject(obj);
+                                    });
 
-                                    if (chunkNumber >= chunks.length) {
-
-                                        // If we have combined multiple chunks. Sort records by start position.  I'm not sure this is neccessary
-                                        if (chunkNumber > 0 && records.length > 1) {
-                                            records.sort(function (a, b) {
-                                                return a.start - b.start;
-                                            });
-                                        }
-                                        continuation(records);
-                                    }
-                                    else {
-                                        loadNextChunk(chunkNumber);
-                                    }
-                                },
-                                withCredentials: self.config.withCredentials
-                            });
+                            }))
+                        });
 
 
-                    }
-                });
-            }
+                        Promise.all(promises).then(function (ignored) {
+
+                            //if (chunks.length > 1) {
+                            //    alignments.sort(function (a, b) {
+                            //        return a.start - b.start;
+                            //    });
+                            //}
+                            //var alignmentContainer = new igv.AlignmentContainer(chr, bpStart, bpEnd, self.samplingWindowSize, self.samplingDepth);
+                            //alignments.forEach(function (a) {
+                            //    alignmentContainer.push(a);
+                            //})
+                            alignmentContainer.finish();
+                            fulfill(alignmentContainer);
+                        }).catch(function (obj) {
+                            reject(obj);
+                        });
+                    }).catch(reject);
+                }
+            }).catch(reject);
         });
 
 
-        function decodeBamRecords(ba, offset, alignments, min, max, chrId) {
+        function decodeBamRecords(ba, offset, alignments, min, max, chrId, filter) {
 
             var blockSize,
                 blockEnd,
@@ -250,7 +269,8 @@ var igv = (function (igv) {
                 if (mateRefID >= 0) {
                     alignment.mate = {
                         chr: self.indexToChr[mateRefID],
-                        position: matePos
+                        position: matePos,
+                        strand: !(flag & MATE_STRAND_FLAG)
                     };
                 }
 
@@ -258,7 +278,9 @@ var igv = (function (igv) {
                 alignment.tagBA = new Uint8Array(ba.buffer.slice(p, blockEnd));  // decode thiese on demand
                 p += blockEnd;
 
-                if (!min || alignment.start <= max && alignment.start + alignment.lengthOnRef >= min) {
+                if (!min || alignment.start <= max &&
+                    alignment.start + alignment.lengthOnRef >= min &&
+                    filter.pass(alignment)) {
                     if (chrId === undefined || refID == chrId) {
                         blocks = makeBlocks(alignment, cigarArray);
                         alignment.blocks = blocks.blocks;
@@ -345,36 +367,33 @@ var igv = (function (igv) {
             return {blocks: blocks, insertions: insertions};
 
         }
+    }
 
-    };
-
-    /**
-     * Read the bam header.  This function is public to support unit testing
-     * @param continuation
-     * @param stopSpinner
-     */
-    igv.BamReader.prototype.readHeader = function (continuation) {
+    igv.BamReader.prototype.readHeader = function () {
 
         var self = this;
 
-        getIndex(self, function (index) {
+        return new Promise(function (fulfill, reject) {
 
-            var contentLength = index.blockMax,
-                len = index.headerSize + MAX_GZIP_BLOCK_SIZE + 100;   // Insure we get the complete compressed block containing the header
+            getIndex(self).then(function (index) {
 
-            if (contentLength <= 0) contentLength = index.blockMax;  // Approximate
+                var contentLength = index.blockMax,
+                    len = index.headerSize + MAX_GZIP_BLOCK_SIZE + 100;   // Insure we get the complete compressed block containing the header
 
-            self.contentLength = contentLength;
+                if (contentLength <= 0) contentLength = index.blockMax;  // Approximate
 
-            if (contentLength > 0) len = Math.min(contentLength, len);
+                self.contentLength = contentLength;
 
-            igvxhr.loadArrayBuffer(self.bamPath,
-                {
-                    headers: self.config.headers,
+                if (contentLength > 0) len = Math.min(contentLength, len);
 
-                    range: {start: 0, size: len},
+                igvxhr.loadArrayBuffer(self.bamPath,
+                    {
+                        headers: self.config.headers,
 
-                    success: function (compressedBuffer) {
+                        range: {start: 0, size: len},
+
+                        withCredentials: self.config.withCredentials
+                    }).then(function (compressedBuffer) {
 
                         var unc = igv.unbgzf(compressedBuffer, len),
                             uncba = new Uint8Array(unc),
@@ -411,72 +430,48 @@ var igv = (function (igv) {
                             p = p + 8 + lName;
                         }
 
-                        continuation();
+                        fulfill();
 
-                    },
-                    withCredentials: self.config.withCredentials
-                });
+                    }).catch(reject);
+            }).catch(reject);
         });
-    };
-
-
-    function getContentLength(bam, continuation) {
-
-        if (bam.contentLength) {
-            continuation(bam.contentLength);
-        }
-        else {
-
-            // Gen the content length first, so we don't try to read beyond the end of the file
-            igvxhr.getContentLength(bam.headPath, {
-                headers: bam.headers,
-                success: function (contentLength) {
-                    bam.contentLength = contentLength;
-                    continuation(bam.contentLength);
-
-                },
-                error: function (xhr) {
-                    bam.contentLength = -1;
-                    continuation(bam.contentLength);
-                }
-
-            });
-        }
     }
 
 
-    function getIndex(bam, continuation) {
+    function getIndex(bam) {
 
-        var bamIndex = bam.index;
+        return new Promise(function (fulfill, reject) {
 
-        if (bam.index) {
-            continuation(bam.index);
-        }
-        else {
-            igv.loadBamIndex(bam.baiPath, bam.config, function (index) {
-                bam.index = index;
+            if (bam.index) {
+                fulfill(bam.index);
+            }
+            else {
+                igv.loadBamIndex(bam.baiPath, bam.config).then(function (index) {
+                    bam.index = index;
 
-                // Override contentLength
-                bam.contentLength = index.blockMax;
+                    // Content length TODO -- is this exact or approximate?
+                    bam.contentLength = index.blockMax;
 
-
-                continuation(bam.index);
-            });
-        }
-
+                    fulfill(bam.index);
+                }).catch(reject);
+            }
+        });
     }
 
 
-    function getChrIndex(bam, continuation) {
+    function getChrIndex(bam) {
 
-        if (bam.chrToIndex) {
-            continuation(bam.chrToIndex);
-        }
-        else {
-            bam.readHeader(function () {
-                continuation(bam.chrToIndex);
-            })
-        }
+        return new Promise(function (fulfill, reject) {
+
+            if (bam.chrToIndex) {
+                fulfill(bam.chrToIndex);
+            }
+            else {
+                bam.readHeader().then(function () {
+                    fulfill(bam.chrToIndex);
+                }).catch(reject);
+            }
+        });
     }
 
     function readInt(ba, offset) {

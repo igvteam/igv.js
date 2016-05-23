@@ -9,18 +9,25 @@ var igv = (function (igv) {
     const MAX_HEADER_SIZE = 100000000;   // IF the header is larger than this we can't read it !
     const MAX_GZIP_BLOCK_SIZE = (1 << 16);
 
+
     /**
-     * Read the index.  This method is public to support unit testing.
-     * @param continuation
+     * @param indexURL
+     * @param config
+     * @param tabix
+     *
+     * @returns a Promised for the bam or tabix index.  The fulfill function takes the index as an argument.
      */
-    igv.loadBamIndex = function (indexURL, config, continuation, tabix) {
+    igv.loadBamIndex = function (indexURL, config, tabix) {
 
-        var genome = igv.browser ? igv.browser.genome : null;
+        return new Promise(function (fulfill, reject) {
 
-        igvxhr.loadArrayBuffer(indexURL,
-            {
-                headers: config.headers,
-                success: function (arrayBuffer) {
+            var genome = igv.browser ? igv.browser.genome : null;
+
+            igvxhr.loadArrayBuffer(indexURL,
+                {
+                    headers: config.headers,
+                    withCredentials: config.withCredentials
+                }).then(function (arrayBuffer) {
 
                     var indices = [],
                         magic, nbin, nintv, nref, parser,
@@ -28,8 +35,8 @@ var igv = (function (igv) {
                         blockMax = 0,
                         binIndex, linearIndex, binNumber, cs, ce, b, i, ref, sequenceIndexMap;
 
-                    if(!arrayBuffer) {
-                        continuation(null);
+                    if (!arrayBuffer) {
+                        fulfill(null);
                         return;
                     }
 
@@ -62,7 +69,7 @@ var igv = (function (igv) {
                                 var seq_name = parser.getString();
 
                                 // Translate to "official" chr name.
-                                if(genome) seq_name = genome.getChromosomeName(seq_name);
+                                if (genome) seq_name = genome.getChromosomeName(seq_name);
 
                                 sequenceIndexMap[seq_name] = i;
                             }
@@ -89,7 +96,7 @@ var igv = (function (igv) {
                                         if (cs.block < blockMin) {
                                             blockMin = cs.block;    // Block containing first alignment
                                         }
-                                        if(ce.block > blockMax) {
+                                        if (ce.block > blockMax) {
                                             blockMax = ce.block;
                                         }
                                         binIndex[binNumber].push([cs, ce]);
@@ -115,11 +122,9 @@ var igv = (function (igv) {
                     } else {
                         throw new Error(indexURL + " is not a " + (tabix ? "tabix" : "bai") + " file");
                     }
-//console.log("Block max =" + blockMax);
-                    continuation(new igv.BamIndex(indices, blockMin, blockMax, sequenceIndexMap, tabix));
-                },
-                withCredentials: config.withCredentials
-            });
+                    fulfill(new igv.BamIndex(indices, blockMin, blockMax, sequenceIndexMap, tabix));
+                });
+        })
     }
 
 

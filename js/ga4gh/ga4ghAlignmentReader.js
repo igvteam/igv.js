@@ -60,293 +60,312 @@ var igv = (function (igv) {
 
         this.config = config;
         this.url = config.url;
+        this.filter = config.filter || new igv.BamFilter();
         this.readGroupSetIds = config.readGroupSetIds;
         this.authKey = config.authKey;   // Might be undefined or nill
+
+        this.samplingWindowSize = config.samplingWindowSize === undefined ? 100 : config.samplingWindowSize;
+        this.samplingDepth = config.samplingDepth === undefined ? 100 : config.samplingDepth;
+        if (config.viewAsPairs) {
+            this.pairsSupported = true;
+        }
+        else {
+            this.pairsSupported = config.pairsSupported === undefined ? true : config.pairsSupported;
+        }
     }
 
 
-    igv.Ga4ghAlignmentReader.prototype.readFeatures = function (chr, bpStart, bpEnd, success, task) {
+    igv.Ga4ghAlignmentReader.prototype.readAlignments = function (chr, bpStart, bpEnd) {
 
         var self = this;
 
-        getChrNameMap(function (chrNameMap) {
+        return new Promise(function (fulfill, reject) {
 
-            var queryChr = chrNameMap.hasOwnProperty(chr) ? chrNameMap[chr] : chr,
-                readURL = self.url + "/reads/search";
+            getChrNameMap().then(function (chrNameMap) {
 
-            igv.ga4ghSearch({
-                url: readURL,
-                body: {
-                    "readGroupSetIds": [self.readGroupSetIds],
-                    "referenceName": queryChr,
-                    "start": bpStart,
-                    "end": bpEnd,
-                    "pageSize": "10000"
-                },
-                decode: decodeGa4ghReads,
-                success: success,
-                task: task
-            });
+                var queryChr = chrNameMap.hasOwnProperty(chr) ? chrNameMap[chr] : chr,
+                    readURL = self.url + "/reads/search";
 
-        });
+                igv.ga4ghSearch({
+                    url: readURL,
+                    body: {
+                        "readGroupSetIds": [self.readGroupSetIds],
+                        "referenceName": queryChr,
+                        "start": bpStart,
+                        "end": bpEnd,
+                        "pageSize": "10000"
+                    },
+                    decode: decodeGa4ghReads,
+                    results: new igv.AlignmentContainer(chr, bpStart, bpEnd, self.samplingWindowSize, self.samplingDepth, self.pairsSupported)
+                }).then(fulfill)
+                    .catch(reject);
 
-        function getChrNameMap(continuation) {
+            }).catch(reject);
 
-            if (self.chrNameMap) {
-                continuation(self.chrNameMap);
-            }
+            function getChrNameMap() {
 
-            else {
-                self.readMetadata(function (json) {
 
-                    self.chrNameMap = {};
-
-                    if (igv.browser && json.readGroups && json.readGroups.length > 0) {
-
-                        var referenceSetId = json.readGroups[0].referenceSetId;
-
-                        console.log("No reference set specified");
-
-                        if (referenceSetId) {
-
-                            // Query for reference names to build an alias table (map of genome ref names -> dataset ref names)
-                            var readURL = self.url + "/references/search";
-
-                            igv.ga4ghSearch({
-                                url: readURL,
-                                body: {
-                                    "referenceSetId": referenceSetId
-                                },
-                                decode: function (j) {
-                                    return j.references;
-                                },
-                                success: function (references) {
-                                    references.forEach(function (ref) {
-                                        var refName = ref.name,
-                                            alias = igv.browser.genome.getChromosomeName(refName);
-                                        self.chrNameMap[alias] = refName;
-                                    });
-                                    continuation(self.chrNameMap);
-
-                                },
-                                task: task
-                            });
-                        }
-                        else {
-
-                            // Try hardcoded constants -- workaround for non-compliant data at Google
-                            populateChrNameMap(self.chrNameMap, self.config.datasetId);
-
-                            continuation(self.chrNameMap);
-                        }
+                return new Promise(function (fulfill, reject) {
+                    if (self.chrNameMap) {
+                        fulfill(self.chrNameMap);
                     }
 
                     else {
-                        // No browser object, can't build map.  This can occur when run from unit tests
-                        continuation(self.chrNameMap);
+                        self.readMetadata().then(function (json) {
+
+                            self.chrNameMap = {};
+
+                            if (igv.browser && json.readGroups && json.readGroups.length > 0) {
+
+                                var referenceSetId = json.readGroups[0].referenceSetId;
+
+                                console.log("No reference set specified");
+
+                                if (referenceSetId) {
+
+                                    // Query for reference names to build an alias table (map of genome ref names -> dataset ref names)
+                                    var readURL = self.url + "/references/search";
+
+                                    igv.ga4ghSearch({
+                                        url: readURL,
+                                        body: {
+                                            "referenceSetId": referenceSetId
+                                        },
+                                        decode: function (j) {
+                                            return j.references;
+                                        }
+                                    }).then(function (references) {
+                                        references.forEach(function (ref) {
+                                            var refName = ref.name,
+                                                alias = igv.browser.genome.getChromosomeName(refName);
+                                            self.chrNameMap[alias] = refName;
+                                        });
+                                        fulfill(self.chrNameMap);
+
+                                    }).catch(reject);
+                                }
+                                else {
+
+                                    // Try hardcoded constants -- workaround for non-compliant data at Google
+                                    populateChrNameMap(self.chrNameMap, self.config.datasetId);
+
+                                    fulfill(self.chrNameMap);
+                                }
+                            }
+
+                            else {
+                                // No browser object, can't build map.  This can occur when run from unit tests
+                                fulfill(self.chrNameMap);
+                            }
+                        }).catch(reject);
                     }
+
                 });
             }
 
-        }
 
-    }
+            /**
+             * Decode an array of ga4gh read records
+             *
+
+             */
+            function decodeGa4ghReads(json) {
+
+                var i,
+                    jsonRecords = json.alignments,
+                    len = jsonRecords.length,
+                    json,
+                    alignment,
+                    jsonAlignment,
+                    cigarDecoded,
+                    alignments = [],
+                    genome = igv.browser.genome,
+                    mate;
+
+                for (i = 0; i < len; i++) {
+
+                    json = jsonRecords[i];
+
+                    alignment = new igv.BamAlignment();
+
+                    alignment.readName = json.fragmentName;
+                    alignment.properPlacement = json.properPlacement;
+                    alignment.duplicateFragment = json.duplicateFragment;
+                    alignment.numberReads = json.numberReads;
+                    alignment.fragmentLength = json.fragmentLength;
+                    alignment.readNumber = json.readNumber;
+                    alignment.failedVendorQualityChecks = json.failedVendorQualityChecks;
+                    alignment.secondaryAlignment = json.secondaryAlignment;
+                    alignment.supplementaryAlignment = json.supplementaryAlignment;
+                    alignment.seq = json.alignedSequence;
+                    alignment.qual = json.alignedQuality;
+                    alignment.matePos = json.nextMatePosition;
+                    alignment.tagDict = json.info;
+                    alignment.flags = encodeFlags(json);
 
 
-    igv.Ga4ghAlignmentReader.prototype.readMetadata = function (success, task) {
+                    jsonAlignment = json.alignment;
+                    if (jsonAlignment) {
+                        alignment.mapped = true;
 
-        igv.ga4ghGet({
-            url: this.url,
-            entity: "readgroupsets",
-            entityId: this.readGroupSetIds,
-            success: success,
-            task: task
+                        alignment.chr = json.alignment.position.referenceName;
+                        if (genome) alignment.chr = genome.getChromosomeName(alignment.chr);
+
+                        alignment.start = parseInt(json.alignment.position.position);
+                        alignment.strand = !(json.alignment.position.reverseStrand);
+                        alignment.mq = json.alignment.mappingQuality;
+                        alignment.cigar = encodeCigar(json.alignment.cigar);
+                        cigarDecoded = translateCigar(json.alignment.cigar);
+
+                        alignment.lengthOnRef = cigarDecoded.lengthOnRef;
+
+                        blocks = makeBlocks(alignment, cigarDecoded.array);
+                        alignment.blocks = blocks.blocks;
+                        alignment.insertions = blocks.insertions;
+
+                    }
+                    else {
+                        alignment.mapped = false;
+                    }
+
+                    mate = json.nextMatePosition;
+                    if (mate) {
+                        alignment.mate = {
+                            chr: mate.referenceFrame,
+                            position: parseInt(mate.position),
+                            strand: !mate.reverseStrand
+                        };
+                    }
+
+                    if (self.filter.pass(alignment)) {
+                        alignments.push(alignment);
+                    }
+
+
+                }
+
+                return alignments;
+
+                // TODO -- implement me
+                function encodeCigar(cigarArray) {
+                    return "";
+                }
+
+                // TODO -- implement me
+                function encodeFlags(json) {
+                    return 0;
+                }
+
+                function translateCigar(cigar) {
+
+                    var cigarUnit, opLen, opLtr,
+                        lengthOnRef = 0,
+                        cigarArray = [],
+                        i;
+
+                    for (i = 0; i < cigar.length; i++) {
+
+                        cigarUnit = cigar[i];
+
+                        opLtr = CigarOperationTable[cigarUnit.operation];
+                        opLen = parseInt(cigarUnit.operationLength);    // TODO -- this should be a long by the spec
+
+                        if (opLtr == 'M' || opLtr == 'EQ' || opLtr == 'X' || opLtr == 'D' || opLtr == 'N' || opLtr == '=')
+                            lengthOnRef += opLen;
+
+                        cigarArray.push({len: opLen, ltr: opLtr});
+
+                    }
+
+                    return {lengthOnRef: lengthOnRef, array: cigarArray};
+                }
+
+
+                /**
+                 * Split the alignment record into blocks as specified in the cigarArray.  Each aligned block contains
+                 * its portion of the read sequence and base quality strings.  A read sequence or base quality string
+                 * of "*" indicates the value is not recorded.  In all other cases the length of the block sequence (block.seq)
+                 * and quality string (block.qual) must == the block length.
+                 *
+                 * NOTE: Insertions are not yet treated // TODO
+                 *
+                 * @param record
+                 * @param cigarArray
+                 * @returns array of blocks
+                 */
+                function makeBlocks(record, cigarArray) {
+
+
+                    var blocks = [],
+                        insertions,
+                        seqOffset = 0,
+                        pos = record.start,
+                        len = cigarArray.length,
+                        blockSeq,
+                        blockQuals;
+
+                    for (var i = 0; i < len; i++) {
+
+                        var c = cigarArray[i];
+
+                        switch (c.ltr) {
+                            case 'H' :
+                                break; // ignore hard clips
+                            case 'P' :
+                                break; // ignore pads
+                            case 'S' :
+                                seqOffset += c.len;
+                                break; // soft clip read bases
+                            case 'N' :
+                                pos += c.len;
+                                break;  // reference skip
+                            case 'D' :
+                                pos += c.len;
+                                break;
+                            case 'I' :
+                                blockSeq = record.seq === "*" ? "*" : record.seq.substr(seqOffset, c.len);
+                                blockQuals = record.qual === "*" ? "*" : record.qual.slice(seqOffset, c.len);
+                                if (insertions === undefined) insertions = [];
+                                insertions.push({
+                                    start: pos,
+                                    len: c.len,
+                                    seq: blockSeq,
+                                    qual: blockQuals,
+                                    insertion: true
+                                });
+                                seqOffset += c.len;
+                                break;
+                            case 'M' :
+                            case 'EQ' :
+                            case '=' :
+                            case 'X' :
+                                blockSeq = record.seq === "*" ? "*" : record.seq.substr(seqOffset, c.len);
+                                blockQuals = record.qual === "*" ? "*" : record.qual.slice(seqOffset, c.len);
+                                blocks.push({start: pos, len: c.len, seq: blockSeq, qual: blockQuals});
+                                seqOffset += c.len;
+                                pos += c.len;
+                                break;
+                            default :
+                                console.log("Error processing cigar element: " + c.len + c.ltr);
+                        }
+                    }
+
+                    return {blocks: blocks, insertions: insertions};
+                }
+            }
+
+
         });
     }
 
 
-    /**
-     * Decode an array of ga4gh read records
-     *
+    igv.Ga4ghAlignmentReader.prototype.readMetadata = function () {
 
-     */
-    function decodeGa4ghReads(json) {
-
-        var i,
-            jsonRecords = json.alignments,
-            len = jsonRecords.length,
-            json,
-            read,
-            alignment,
-            cigarDecoded,
-            alignments = [],
-            genome = igv.browser.genome,
-            mate;
-
-        for (i = 0; i < len; i++) {
-
-            json = jsonRecords[i];
-
-            read = new igv.BamAlignment();
-
-            read.readName = json.fragmentName;
-            read.properPlacement = json.properPlacement;
-            read.duplicateFragment = json.duplicateFragment;
-            read.numberReads = json.numberReads;
-            read.fragmentLength = json.fragmentLength;
-            read.readNumber = json.readNumber;
-            read.failedVendorQualityChecks = json.failedVendorQualityChecks;
-            read.secondaryAlignment = json.secondaryAlignment;
-            read.supplementaryAlignment = json.supplementaryAlignment;
-
-            read.seq = json.alignedSequence;
-            read.qual = json.alignedQuality;
-            read.matePos = json.nextMatePosition;
-            read.tagDict = json.info;
-
-            read.flags = encodeFlags(json);
-
-
-            alignment = json.alignment;
-            if (alignment) {
-                read.mapped = true;
-
-                read.chr = json.alignment.position.referenceName;
-                if (genome) read.chr = genome.getChromosomeName(read.chr);
-
-                read.start = parseInt(json.alignment.position.position);
-                read.strand = !(json.alignment.position.reverseStrand);
-                read.mq = json.alignment.mappingQuality;
-                read.cigar = encodeCigar(json.alignment.cigar);
-                cigarDecoded = translateCigar(json.alignment.cigar);
-
-                read.lengthOnRef = cigarDecoded.lengthOnRef;
-
-                blocks = makeBlocks(read, cigarDecoded.array);
-                read.blocks = blocks.blocks;
-                read.insertions = blocks.insertions;
-
-            }
-            else {
-                read.mapped = false;
-            }
-
-            mate = json.nextMatePosition;
-            if (mate) {
-                read.mate = {
-                    chr: mate.referenceFrame,
-                    position: parseInt(mate.position),
-                    strand: !mate.reverseStrand
-                };
-            }
-
-            alignments.push(read);
-
-        }
-
-        return alignments;
-
-    }
-
-
-    function encodeCigar(cigarArray) {
-        return "";
-    }
-
-    function encodeFlags(json) {
-        return 0;
-    }
-
-
-    function translateCigar(cigar) {
-
-        var cigarUnit, opLen, opLtr,
-            lengthOnRef = 0,
-            cigarArray = [];
-
-        for (i = 0; i < cigar.length; i++) {
-
-            cigarUnit = cigar[i];
-
-            opLtr = CigarOperationTable[cigarUnit.operation];
-            opLen = parseInt(cigarUnit.operationLength);    // TODO -- this should be a long by the spec
-
-            if (opLtr == 'M' || opLtr == 'EQ' || opLtr == 'X' || opLtr == 'D' || opLtr == 'N' || opLtr == '=')
-                lengthOnRef += opLen;
-
-            cigarArray.push({len: opLen, ltr: opLtr});
-
-        }
-
-        return {lengthOnRef: lengthOnRef, array: cigarArray};
-    }
-
-
-    /**
-     * Split the alignment record into blocks as specified in the cigarArray.  Each aligned block contains
-     * its portion of the read sequence and base quality strings.  A read sequence or base quality string
-     * of "*" indicates the value is not recorded.  In all other cases the length of the block sequence (block.seq)
-     * and quality string (block.qual) must == the block length.
-     *
-     * NOTE: Insertions are not yet treated // TODO
-     *
-     * @param record
-     * @param cigarArray
-     * @returns array of blocks
-     */
-    function makeBlocks(record, cigarArray) {
-
-
-        var blocks = [],
-            insertions,
-            seqOffset = 0,
-            pos = record.start,
-            len = cigarArray.length,
-            blockSeq,
-            blockQuals;
-
-        for (var i = 0; i < len; i++) {
-
-            var c = cigarArray[i];
-
-            switch (c.ltr) {
-                case 'H' :
-                    break; // ignore hard clips
-                case 'P' :
-                    break; // ignore pads
-                case 'S' :
-                    seqOffset += c.len;
-                    break; // soft clip read bases
-                case 'N' :
-                    pos += c.len;
-                    break;  // reference skip
-                case 'D' :
-                    pos += c.len;
-                    break;
-                case 'I' :
-                    blockSeq = record.seq === "*" ? "*" : record.seq.substr(seqOffset, c.len);
-                    blockQuals = record.qual === "*" ? "*" : record.qual.slice(seqOffset, c.len);
-                    if (insertions === undefined) insertions = [];
-                    insertions.push({start: pos, len: c.len, seq: blockSeq, qual: blockQuals, insertion: true});
-                    seqOffset += c.len;
-                    break;
-                case 'M' :
-                case 'EQ' :
-                case '=' :
-                case 'X' :
-                    blockSeq = record.seq === "*" ? "*" : record.seq.substr(seqOffset, c.len);
-                    blockQuals = record.qual === "*" ? "*" : record.qual.slice(seqOffset, c.len);
-                    blocks.push({start: pos, len: c.len, seq: blockSeq, qual: blockQuals});
-                    seqOffset += c.len;
-                    pos += c.len;
-                    break;
-                default :
-                    console.log("Error processing cigar element: " + c.len + c.ltr);
-            }
-        }
-
-        return {blocks: blocks, insertions: insertions};
-
+        return igv.ga4ghGet({
+            url: this.url,
+            entity: "readgroupsets",
+            entityId: this.readGroupSetIds
+        });
     }
 
     igv.decodeGa4ghReadset = function (json) {

@@ -34,6 +34,8 @@
     <script type="text/javascript" src="../vendor/inflate.js"></script>
     <script type="text/javascript" src="../vendor/zlib_and_gzip.min.js"></script>
     <script type="text/javascript" src="../vendor/jquery.mousewheel.js"></script>
+    <script type="text/javascript" src="../vendor/promise-7.0.4.js"></script>
+    <script type="text/javascript" src="../vendor/jquery.kinetic.min.js"></script>
 
     <!-- IGV JS -->
     <script type="text/javascript" src="../js/igv-create.js"></script>
@@ -50,13 +52,14 @@
     <script type="text/javascript" src="../js/rulerTrack.js"></script>
 
     <script type="text/javascript" src="../js/feature/featureTrack.js"></script>
+    <script type="text/javascript" src="../js/variant/variantTrack.js"></script>
     <script type="text/javascript" src="../js/igv-color.js"></script>
     <script type="text/javascript" src="../js/igv-utils.js"></script>
     <script type="text/javascript" src="../js/parseUtils.js"></script>
     <script type="text/javascript" src="../js/fasta.js"></script>
     <script type="text/javascript" src="../js/sequenceTrack.js"></script>
-    <script type="text/javascript" src="../js/wigTrack.js"></script>
-    <script type="text/javascript" src="../js/ui/dataloader.js"></script>
+    <script type="text/javascript" src="../js/feature/wigTrack.js"></script>
+
     <script type="text/javascript" src="../js/igv-exts.js"></script>
     <script type="text/javascript" src="../js/igvxhr.js"></script>
     <script type="text/javascript" src="../js/binary.js"></script>
@@ -75,13 +78,15 @@
     <script type="text/javascript" src="../js/bam/bamAlignment.js"></script>
     <script type="text/javascript" src="../js/bam/bamAlignmentRow.js"></script>
     <script type="text/javascript" src="../js/bam/bamIndex.js"></script>
+    <script type="text/javascript" src="../js/bam/alignmentContainer.js"></script>
+    <script type="text/javascript" src="../js/bam/pairedAlignment.js"></script>
 
     <script type="text/javascript" src="../js/ga4gh/ga4ghAlignmentReader.js"></script>
     <script type="text/javascript" src="../js/ga4gh/ga4ghVariantReader.js"></script>
     <script type="text/javascript" src="../js/ga4gh/ga4ghHelper.js"></script>
+    <script type="text/javascript" src="../js/ga4gh/googleUtils.js"></script>
 
     <script type="text/javascript" src="../js/intervalTree.js"></script>
-    <script type="text/javascript" src="../js/igv-constants.js"></script>
 
     <script type="text/javascript" src="../js/feature/featureCache.js"></script>
     <script type="text/javascript" src="../js/feature/featureSource.js"></script>
@@ -89,10 +94,10 @@
     <script type="text/javascript" src="../js/feature/tribble.js"></script>
     <script type="text/javascript" src="../js/feature/featureFileReader.js"></script>
 
+    <script type="text/javascript" src="../js/feature/aneuSource.js"></script>
+    <script type="text/javascript" src="../js/feature/aneuTrack.js"></script>
     <script type="text/javascript" src="../js/encode/encode.js"></script>
-    <script type="text/javascript" src="../js/cursor/cursorTrack.js"></script>
-    <script type="text/javascript" src="../js/cursor/cursorModel.js"></script>
-    <script type="text/javascript" src="../js/cursor/cursor-ideogram.js"></script>
+
 
     <script type="text/javascript" src="../js/karyo/karyo.js"></script>
     <script type="text/javascript" src="../js/gwas/t2dVariantSource.js"></script>
@@ -115,13 +120,12 @@
     <script type="text/javascript" src="../js/ui/trackMenuPopupDialog.js"></script>
 
     <script type="text/javascript" src="../js/ui/colorpicker.js"></script>
-    <script type="text/javascript" src="../js/ui/dialog.js"></script>
     <script type="text/javascript" src="../js/ui/dataRangeDialog.js"></script>
+    <script type="text/javascript" src="../js/ui/dialog.js"></script>
 
     <script type="text/javascript" src="../js/set.js"></script>
 
     <script src="../js/oauth/google.js"></script>
-
 
 </head>
 
@@ -140,29 +144,37 @@
 
         var div = $("#igvDiv")[0],
                 options = {
-                    genome: "hg19",
+                    reference: {
+                        id: "hg19"
+                    },
                     locus: "muc1",
                     // Insert your applications api key here,  or use OAuth
                     apiKey: 'AIzaSyDUUAUFpQEN4mumeMNIRWXSiTh5cPtUAD0',
                     tracks: [
                         {
                             sourceType: 'ga4gh',
-                            type: 'vcf',
-                            url: 'https://www.googleapis.com/genomics/v1beta2',
+                            type: 'variant',
+                            url: 'https://genomics.googleapis.com/v1',
                             variantSetId: '10473108253681171589',
-                            callSetIds: ["10473108253681171589-2"],
+                            callSetIds: ["10473108253681171589-0", "10473108253681171589-1", "10473108253681171589-2",
+                                "10473108253681171589-3", "10473108253681171589-4", "10473108253681171589-5",
+                                "10473108253681171589-6", "10473108253681171589-7", "10473108253681171589-8",
+                                "10473108253681171589-9", "10473108253681171589-10", "10473108253681171589-11",
+                                "10473108253681171589-12", "10473108253681171589-13", "10473108253681171589-14",
+                                "10473108253681171589-15", "10473108253681171589-16", "10473108253681171589-17",
+                                "10473108253681171589-18", "10473108253681171589-19"],
                             name: 'Ga4gh variants'
                         },
                         {
                             sourceType: 'ga4gh',
-                            type: 'bam',
-                            url: 'https://www.googleapis.com/genomics/v1beta2',
+                            type: 'alignment',
+                            url: 'https://genomics.googleapis.com/v1',
                             readGroupSetIds: 'CMvnhpKTFhCjz9_25e_lCw',
                             name: 'Ga4gh alignments'
                         },
                         {
                             name: "Genes",
-                            url: "//igv.broadinstitute.org/annotations/hg19/genes/gencode.v18.collapsed.bed",
+                            url: "//s3.amazonaws.com/igv.broadinstitute.org/annotations/hg19/genes/gencode.v18.collapsed.bed",
                             order: Number.MAX_VALUE,
                             displayMode: "EXPANDED"
 

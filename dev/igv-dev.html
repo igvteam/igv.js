@@ -14,9 +14,9 @@
           href="//ajax.googleapis.com/ajax/libs/jqueryui/1.11.2/themes/redmond/jquery-ui.css"/>
 
     <!-- Google fonts -->
-    <link rel="stylesheet" type="text/css" href='//fonts.googleapis.com/css?family=PT+Sans:400,700'>
+ <!--   <link rel="stylesheet" type="text/css" href='//fonts.googleapis.com/css?family=PT+Sans:400,700'>
     <link rel="stylesheet" type="text/css" href='//fonts.googleapis.com/css?family=Open+Sans'>
-
+-->
     <!-- Font Awesome CSS -->
     <link rel="stylesheet" type="text/css" href="//maxcdn.bootstrapcdn.com/font-awesome/4.2.0/css/font-awesome.min.css">
 
@@ -33,6 +33,8 @@
     <script type="text/javascript" src="../vendor/inflate.js"></script>
     <script type="text/javascript" src="../vendor/zlib_and_gzip.min.js"></script>
     <script type="text/javascript" src="../vendor/jquery.mousewheel.js"></script>
+    <script type="text/javascript" src="../vendor/promise-7.0.4.js"></script>
+    <script type="text/javascript" src="../vendor/jquery.kinetic.min.js"></script>
 
     <!-- IGV JS -->
     <script type="text/javascript" src="../js/igv-create.js"></script>
@@ -49,19 +51,21 @@
     <script type="text/javascript" src="../js/rulerTrack.js"></script>
 
     <script type="text/javascript" src="../js/feature/featureTrack.js"></script>
+    <script type="text/javascript" src="../js/variant/variantTrack.js"></script>
     <script type="text/javascript" src="../js/igv-color.js"></script>
     <script type="text/javascript" src="../js/igv-utils.js"></script>
     <script type="text/javascript" src="../js/parseUtils.js"></script>
     <script type="text/javascript" src="../js/fasta.js"></script>
     <script type="text/javascript" src="../js/sequenceTrack.js"></script>
-    <script type="text/javascript" src="../js/wigTrack.js"></script>
-    <script type="text/javascript" src="../js/ui/dataloader.js"></script>
+    <script type="text/javascript" src="../js/feature/wigTrack.js"></script>
+
     <script type="text/javascript" src="../js/igv-exts.js"></script>
     <script type="text/javascript" src="../js/igvxhr.js"></script>
     <script type="text/javascript" src="../js/binary.js"></script>
 
     <script type="text/javascript" src="../js/gtex/eqtlTrack.js"></script>
     <script type="text/javascript" src="../js/gtex/gtexFileReader.js"></script>
+    <script type="text/javascript" src="../js/gtex/gtexReader.js"></script>
     <script type="text/javascript" src="../js/gtex/gtex.js"></script>
     <script type="text/javascript" src="../js/gtex/immvarReader.js"></script>
 
@@ -73,6 +77,8 @@
     <script type="text/javascript" src="../js/bam/bamAlignment.js"></script>
     <script type="text/javascript" src="../js/bam/bamAlignmentRow.js"></script>
     <script type="text/javascript" src="../js/bam/bamIndex.js"></script>
+    <script type="text/javascript" src="../js/bam/alignmentContainer.js"></script>
+    <script type="text/javascript" src="../js/bam/pairedAlignment.js"></script>
 
     <script type="text/javascript" src="../js/ga4gh/ga4ghAlignmentReader.js"></script>
     <script type="text/javascript" src="../js/ga4gh/ga4ghVariantReader.js"></script>
@@ -80,18 +86,18 @@
     <script type="text/javascript" src="../js/ga4gh/googleUtils.js"></script>
 
     <script type="text/javascript" src="../js/intervalTree.js"></script>
-    <script type="text/javascript" src="../js/igv-constants.js"></script>
 
     <script type="text/javascript" src="../js/feature/featureCache.js"></script>
+    <script type="text/javascript" src="../js/feature/gffHelper.js"></script>
     <script type="text/javascript" src="../js/feature/featureSource.js"></script>
     <script type="text/javascript" src="../js/feature/featureParsers.js"></script>
     <script type="text/javascript" src="../js/feature/tribble.js"></script>
     <script type="text/javascript" src="../js/feature/featureFileReader.js"></script>
 
+    <script type="text/javascript" src="../js/feature/aneuSource.js"></script>
+    <script type="text/javascript" src="../js/feature/aneuTrack.js"></script>
     <script type="text/javascript" src="../js/encode/encode.js"></script>
-    <script type="text/javascript" src="../js/cursor/cursorTrack.js"></script>
-    <script type="text/javascript" src="../js/cursor/cursorModel.js"></script>
-    <script type="text/javascript" src="../js/cursor/cursor-ideogram.js"></script>
+
 
     <script type="text/javascript" src="../js/karyo/karyo.js"></script>
     <script type="text/javascript" src="../js/gwas/t2dVariantSource.js"></script>
@@ -158,70 +164,64 @@
 
 <div id="myDiv" style="padding-top: 50px;padding-bottom: 20px; height: auto">
 
+    <!--
+    <button type='button' onClick='oauth.google.login()' id="loginText"> Authorize (Google OAuth)</button>
+
+    <p></p>
+-->
     <div id="trackList">
 
         <h3>Example tracks - click to load</h3>
 
-        <div><input type="file" id="fileInput"></div>
-
-        <!-- locus chr19:9917384-14917884 -->
         <div onclick="igv.browser.loadTrack({
-                                 type : 'wig',
-                                  url : 'https://dl.nuthintoseehere.com/u/11270323/BroadInstitute/dataFormats/WIG/random_5000_lo_0dot1_hi_1.wig',
-                                label : 'Unreachable WIG (Bogus domain)'
-                                })">Unreachable WIG (Bogus domain)
-        </div>
-
-        <!-- locus chr19:9917384-14917884 -->
-        <div onclick="igv.browser.loadTrack({
-                                 type : 'wig',
-                                  url : 'https://dl.dropboxusercontent.com/u/11270323/BroadInstitute/dataFormats/WIG/nuthin_here.wig',
-                                label : 'Unreachable WIG (Bogus file name)'
-                                })">Unreachable WIG (Bogus file name)
-        </div>
-
-        <!-- locus chr19:9917384-14917884 -->
-        <div onclick="igv.browser.loadTrack({
-        type : 'wig',
-        url : 'https://dl.dropboxusercontent.com/u/11270323/BroadInstitute/dataFormats/WIG/random_5000_lo_0dot1_hi_1.wig',
-        name : 'Random 0.1 to 1.0'
-        })">Random 0.1 to 1.0
-        </div>
-
-        <!--<div onclick="igv.browser.loadTrack({-->
-        <!--type : 'wig',-->
-        <!--url : 'https://dl.dropboxusercontent.com/u/11270323/BroadInstitute/dataFormats/WIG/random_10000.wig',-->
-        <!--label : 'Random -1 to +1'-->
-        <!--})">Random -1 to +1-->
-        <!--</div>-->
-
-        <!--<div onclick="igv.browser.loadTrack({-->
-        <!--type : 'wig',-->
-        <!--url : 'https://dl.dropboxusercontent.com/u/11270323/BroadInstitute/dataFormats/WIG/random_5000_lo_neg_1_hi_0.wig',-->
-        <!--label : 'Random -1 to 0'-->
-        <!--})">Random Random -1 to 0-->
-        <!--</div>-->
-
-
-<!--        <div onclick="igv.browser.loadTrack({
-                                type: 'bam',
-                                url: 'http://data.broadinstitute.org/igvdata/1KG/b37/data/NA06984/alignment/NA06984.mapped.ILLUMINA.bwa.CEU.low_coverage.20120522.bam',
-                                name: 'NA06984'})">NA06984 (BAM - Broad Server)
-        </div>-->
-
-        <div onclick="igv.browser.loadTrack({
-                                type: 'bam',
-                                url: 'http://hgdownload.cse.ucsc.edu/goldenPath/hg19/encodeDCC/wgEncodeOpenChromFaire/wgEncodeOpenChromFaireMrta2041AlnRep1.bam',
-                                name: 'MRT_A204 FaireSeq Alignments rep 1'})">MRT_A204 FaireSeq Alignments rep 1 bam
+                                type: 'variant',
+                                url: '../test/data/vcf/example.vcf',
+                                indexed: false,
+                                visibilityWindow: 0,
+                                name: 'example'})">example vcf (chr 20)
         </div>
 
 
         <div onclick="igv.browser.loadTrack({
-                                type: 'bam',
-                                url: '../test/data/bam/sam_spec_example.bam',
-                                name: 'Ion BAM'})">ION indel example bam
+                            url: 'https://data.broadinstitute.org/igvdata/1KG/ALL.wgs.phase3_shapeit2_mvncall_integrated_v5b.20130502.sites.vcf.gz',
+                            indexURL: 'https://data.broadinstitute.org/igvdata/1KG/ALL.wgs.phase3_shapeit2_mvncall_integrated_v5b.20130502.sites.vcf.gz.tbi',
+                            visibilityWindow: 20000,
+                            name: '1KG Sites'
+                        })">1KG sites - Broad
         </div>
 
+
+        <div onclick="igv.browser.loadTrack({
+              type: 'bam',
+              url: 'https://s3.amazonaws.com/igv-test1/test.bam?AWSAccessKeyId=AKIAJQYEF3LODEQN7LOA&Expires=1460148635&Signature=6FLcq6HI1BiqGt6wvWFdjdvVOVA%3D',
+              indexURL: 'https://s3.amazonaws.com/igv-test1/test.bam.bai?AWSAccessKeyId=AKIAJQYEF3LODEQN7LOA&Expires=1460148657&Signature=Tve2KyefO%2BVFBBYw3MpIUh6Yn20%3D',
+              name: 'S3 Test'
+            })">S3 Test
+        </div>
+
+        <div onclick="igv.browser.loadTrack({
+                            url: 'https://data.broadinstitute.org/igvdata/BodyMap/hg19/IlluminaHiSeq2000_BodySites/brain_merged/accepted_hits.bam',
+                            name: 'Brain (BodyMap)'
+                        })">Brain (BodyMap)
+        </div>
+
+
+        <div onclick="igv.browser.loadTrack({
+                    url:  '../test/data/wig/test.bedgraph',
+                    name: 'chunk.chr3.am.bedgraph',
+                    format: 'bedgraph',
+                    height: 30
+                    });">Test bedgraph
+        </div>
+
+        <div href="#"
+             onclick="igv.browser.loadTrack({
+                                  type: 'alignment', // Optional
+                                  format: 'bam',  // Optional
+                                  url: 'http://hgdownload.cse.ucsc.edu/goldenPath/hg19/encodeDCC/wgEncodeOpenChromFaire/wgEncodeOpenChromFaireMrta2041AlnRep1.bam',
+                                  name: 'MRT_A204 FaireSeq Alignments rep 1'})">MRT_A204 FaireSeq Alignments rep 1
+            bam
+        </div>
 
         <div onclick="igv.browser.loadTrack({
                                 type: 'bam',
@@ -235,12 +235,21 @@
                                 name: 'Ion BAM'})">GSTT1 sample bam
         </div>
 
+        <div onclick="igv.browser.loadTrack({
+                                type: 'bam',
+                                url: '../test/data/bam/yc_tags.bam',
+                                name: 'YC Tag',
+                                colorBy: 'tag',
+                                colorByTag: 'YC',
+                                samplingWindowSize: 100,
+                                samplingDepth: 5})">YC tag bam
+        </div>
 
 
         <div onclick="igv.browser.loadTrack({
                                 sourceType: 'ga4gh',
                                 type: 'bam',
-                                url: 'https://www.googleapis.com/genomics/v1beta2',
+                                url: 'https://genomics.googleapis.com/v1',
                                 readGroupSetIds: 'CMvnhpKTFhCjz9_25e_lCw',
                                 height: 200,
                                 autoHeight: false,
@@ -250,17 +259,52 @@
         <div onclick="igv.browser.loadTrack( {
                             sourceType: 'ga4gh',
                             type: 'vcf',
-                            url: 'https://www.googleapis.com/genomics/v1beta2',
+                            url: 'https://genomics.googleapis.com/v1',
                             variantSetId: '10473108253681171589',
-                            callSetIds: ['10473108253681171589-2'],
+                            visibilityWindow: 10000,
                             name: 'Ga4gh variants'
                             })">GA4Gh Variants (Global Alliance, Google server)
         </div>
+
+
+        <div onclick="igv.browser.loadTrack( {
+                            sourceType: 'ga4gh',
+                            type: 'variant',
+                            url: 'https://genomics.googleapis.com/v1',
+                            variantSetId: ['10473108253681171589'],
+                            callSetIds: ['10473108253681171589-2'],
+                            visibilityWindow: 100000,
+                            name: 'Ga4gh variants'
+                            })">GA4Gh Variants - 1 callset (Global Alliance, Google server)
+        </div>
+
+        <div onclick="igv.browser.loadTrack( {
+                            sourceType: 'ga4gh',
+                            type: 'variant',
+                            url: 'https://genomics.googleapis.com/v1',
+                            variantSetId: ['10473108253681171589'],
+                            includeCalls: false,
+                            visibilityWindow: 100000,
+                            name: 'Ga4gh variants'
+                            })">GA4Gh Variants - NO callsets (Global Alliance, Google server)
+        </div>
+
+        <div onclick="igv.browser.loadTrack( {
+                            type: 'variant',
+                            url: 'https://s3.amazonaws.com/igv.broadinstitute.org/data/hg19/1kg/ALL.chr22.phase3_shapeit2_mvncall_integrated_v5a.20130502.genotypes.vcf.gz',
+                            name: '1KG variants',
+                            //visibilityWindow: 1000
+                            })">1KG VCF - chr 22
+        </div>
+
 
         <div onclick="igv.browser.loadTrack({
                                 sourceType: 'gcs',
                                 type: 'bam',
                                 url: 'gs://genomics-public-data/platinum-genomes/bam/NA12877_S1.bam',
+                                height: 500,
+                                autoHeight: false,
+                                viewAsPairs: true,
                                 name: 'NA12877'})">Google Cloud Storage - NA12877_S1.bam
         </div>
 
@@ -297,8 +341,15 @@
                                 {
                                 url: 'https://www.encodeproject.org/files/ENCFF002ADR/@@download/ENCFF002ADR.bigBed',
                                 name: 'ENCFF002ADR',
-                                visibilityWindow: 200000
+                                visibilityWindow: 2000000
                                 })">Encode bigbed
+        </div>
+
+        <div onclick="igv.browser.loadTrack(
+                                {
+                                url: '../test/data/wig/variableStep-example.wig',
+                                name: 'variableStep',
+                                })">Variable step wig (chr 19)
         </div>
 
         <div onclick="igv.browser.loadTrack(
@@ -306,6 +357,21 @@
                                 url: 'http://hgdownload.cse.ucsc.edu/goldenPath/hg19/encodeDCC/wgEncodeBroadHistone/wgEncodeBroadHistoneGm12878H3k4me3StdSig.bigWig',
                                 name: 'Gm12878H3k4me3'
                                 })">Encode bigwig
+        </div>
+
+
+        <div onclick="igv.browser.loadTrack({
+                                url: 'https://data.broadinstitute.org/igvdata/annotations/hg19/dbSnp/snp137.hg19.bed.gz',
+                                visibilityWindow: 2000000,
+                                name: 'DB Snp'
+        })">DB Snp Tabix
+        </div>
+
+        <div onclick="igv.browser.loadTrack({
+
+                                url: '../test/data/tabix/TSVC.vcf.gz',
+                                name: 'VCF (TSVC)'
+        })">VCF (TSVC)
         </div>
 
 
@@ -326,7 +392,7 @@
 
         <div onclick="igv.browser.loadTrack(
         {
-            url: '../test/data/gff/eden.txt',
+            url: '../test/data/gff/eden.gff',
             name: 'eden gff',
             format: 'gff',
             displayMode: 'SQUISHED',     // COLLAPSED | EXPANDED | SQUISHED
@@ -344,8 +410,96 @@
         })">Color gff
         </div>
 
-        <div onclick="igv.browser.search('chr10');">GOTO</div>
 
+        <div onclick="igv.browser.loadTrack(
+        {
+            url: '../test/data/gff/ENST00000442752.gtf',
+            name: 'Gencode gtf',
+           // format: 'gtf',
+            indexed: false
+        })">Gencode gtf
+        </div>
+
+        <div onclick="igv.browser.loadTrack(
+        {
+            url: '../test/data/gff/ENST00000442752.gff3',
+            name: 'Gencode gff',
+           // format: 'gtf',
+            indexed: false
+        })">Gencode gff
+        </div>
+
+        <div onclick="igv.browser.loadTrack(
+        {
+            url: '../test/data/gff/wustl.gtf',
+            name: 'WUSTL gtf',
+            format: 'gtf',
+            nameField: 'gene_id',
+            indexed: false
+        })">wustl gtf
+        </div>
+
+
+        <div onclick="igv.browser.loadTrack(
+        {
+            url: 'https://s3.amazonaws.com/igv.broadinstitute.org/annotations/hg19/genes/gencode.v24lift37.annotation.sorted.gtf.gz',
+            indexURL: 'https://s3.amazonaws.com/igv.broadinstitute.org/annotations/hg19/genes/gencode.v24lift37.annotation.sorted.gtf.gz.tbi',
+            name: 'Gencode v24',
+            format: 'gtf',
+            visibilityWindow: 10000000
+        })">Gencode v24
+        </div>
+
+        <div onclick="igv.browser.loadTrack(
+        {
+            url: '../test/data/bed/egfr_hg38.bed',
+            name: 'egfr',
+            format: 'bed',
+            indexed: false
+        })">EGFR bed
+        </div>
+
+        <div onclick="igv.browser.loadTrack(
+        {
+           type: 'eqtl',
+           sourceType: 'gtex-ws',
+           url: 'http://gtexportal.org/api/v6/singleTissueEqtlByLocation',
+           tissueName: 'Adipose_Subcutaneous',
+           name: 'Adipose_Subcutaneous'
+           })">GTEX eqtl
+        </div>
+
+        <div onclick="igv.browser.loadTrack({ type: 't2d',
+                                    url: '//www.type2diabetesgenetics.org/trait/getData',
+                                    trait: '2hrI',
+                                    dataset: 'GWAS_MAGIC_mdv2',
+                                    pvalue: 'P_VALUE',
+                                    name: '2-hour insulin',
+                                    variantURL: 'http://www.type2diabetesgenetics.org/variantInfo/variantInfo/',
+                                    traitURL: 'http://www.type2diabetesgenetics.org/trait/traitInfo/'
+                                })">two-hour insulin
+        </div>
+
+        <div onclick="igv.browser.loadTrack({
+                 url:  '../test/data/aneu/CNV.json'                        ,
+                 type: 'aneu',
+                 indexed: false,
+                 label: 'Aneuploidy'
+        })">Aneuploidy
+        </div>
+
+        <div onclick="igv.browser.loadTrack(
+        {
+            url: 'http://data.broadinstitute.org/missingFile',
+            name: 'bad',
+            format: 'gff',
+            displayMode: 'SQUISHED',     // COLLAPSED | EXPANDED | SQUISHED
+            indexed: false
+        })">BAD url
+        </div>
+
+        <div onclick="create()">Re-create
+        </div>
 
     </div>
 
@@ -354,45 +508,48 @@
 <script type="text/javascript">
 
     $(document).ready(function () {
-
         var div,
                 options,
                 browser;
 
         div = $("#myDiv")[0];
         options = {
-
             showKaryo: false,
             showNavigation: true,
             //genome: "hg19",
             reference: {
-                fastaURL: "//dn7ywbm9isq8j.cloudfront.net/genomes/seq/1kg_v37/human_g1k_v37_decoy.fasta",
-                cytobandURL: "//dn7ywbm9isq8j.cloudfront.net/genomes/seq/b37/b37_cytoband.txt"
+                id: "hg19",
+                fastaURL: "//s3.amazonaws.com/igv.broadinstitute.org/genomes/seq/1kg_v37/human_g1k_v37_decoy.fasta",
+                cytobandURL: "//s3.amazonaws.com/igv.broadinstitute.org/genomes/seq/b37/b37_cytoband.txt"
             },
             flanking: 1000,
             apiKey: 'AIzaSyDUUAUFpQEN4mumeMNIRWXSiTh5cPtUAD0',
-            trackDefaults: {
-                palette: ["#00A0B0", "#6A4A3C", "#CC333F", "#EB6841"],
-                bam: {
-                    coverageThreshold: 0.2,
-                    coverageQualityWeight: true
-                }
-            },
+            palette: ["#00A0B0", "#6A4A3C", "#CC333F", "#EB6841"],
+            //    bam: {
+            //        coverageThreshold: 0.2,
+            //        coverageQualityWeight: true,
+            //        pairsSupported: true
+            //    },
+
 
             tracks: [
                 {
                     name: "Genes",
-                    url: "//igv.broadinstitute.org/annotations/hg19/genes/gencode.v18.collapsed.bed",
-//                    order: Number.MAX_VALUE,
-                    order: 9999,
+                    type: "annotation",
+                    format: "bed",
+                    sourceType: "file",
+//                    color: "#ff0000",
+                    url: "//s3.amazonaws.com/igv.broadinstitute.org/annotations/hg19/genes/gencode.v18.collapsed.bed",
+                    indexURL: "//s3.amazonaws.com/igv.broadinstitute.org/annotations/hg19/genes/gencode.v18.collapsed.bed.idx",
+                    order: Number.MAX_VALUE,
                     displayMode: "EXPANDED"
 
                 }
-            ]
-        };
 
+            ]
+        }
         browser = igv.createBrowser(div, options);
-    });
+    })
 
 
 </script>

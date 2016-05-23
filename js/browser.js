@@ -29,6 +29,8 @@ var igv = (function (igv) {
 
         igv.browser = this;   // Make globally visible (for use in html markup).
 
+        this.config = options;
+
         this.div = $('<div id="igvRootDiv" class="igv-root-div">')[0];
 
         initialize.call(this, options);
@@ -44,6 +46,13 @@ var igv = (function (igv) {
         this.trackLabelsVisible = true;
 
         this.featureDB = {};   // Hash of name -> feature, used for search function.
+
+        this.constants = {
+            dragThreshold: 3,
+            defaultColor: "rgb(0,0,150)",
+            doubleClickDelay: options.doubleClickDelay || 500
+        }
+
 
         window.onresize = igv.throttle(function () {
             igv.browser.resize();
@@ -101,26 +110,6 @@ var igv = (function (igv) {
         return this.formats[name];
     };
 
-    igv.Browser.prototype.trackLabelWithPath = function (path) {
-
-        var parser = document.createElement('a'),
-            label;
-
-        parser.href = path;
-
-        //parser.protocol; // => "http:"
-        //parser.hostname; // => "example.com"
-        //parser.port;     // => "3000"
-        //parser.pathname; // => "/pathname/"
-        //parser.search;   // => "?search=test"
-        //parser.hash;     // => "#hash"
-        //parser.host;     // => "example.com:3000"
-
-        label = parser.pathname.split('/');
-        return label[label.length - 1].split('.')[0];
-
-    };
-
     igv.Browser.prototype.loadTracksWithConfigList = function (configList) {
 
         var self = this;
@@ -129,20 +118,27 @@ var igv = (function (igv) {
             self.loadTrack(config);
         });
 
+        // Really we should just resize the new trackViews, but currently there is no way to get a handle on those
+        this.trackViews.forEach(function (trackView) {
+            trackView.resize();
+        })
+
     };
 
     igv.Browser.prototype.loadTrack = function (config) {
 
         var self = this,
-            settings, property;
+            settings,
+            property,
+            newTrack,
+            featureSource,
+            nm;
 
-        if (this.isDuplicateTrack(config)) {
-            return;
-        }
+        inferTypes(config);
 
         // Set defaults if specified
-        if (this.trackDefaults && config.trackType) {
-            settings = this.trackDefaults[config.trackType];
+        if (this.trackDefaults && config.type) {
+            settings = this.trackDefaults[config.type];
             if (settings) {
                 for (property in settings) {
                     if (settings.hasOwnProperty(property) && config[property] === undefined) {
@@ -152,27 +148,26 @@ var igv = (function (igv) {
             }
         }
 
-        igv.inferTypes(config);
-
-
-        var path = config.url,
-            type = config.featureType,
-            newTrack;
-
-        switch (type) {
+        switch (config.type) {
             case "gwas":
                 newTrack = new igv.GWASTrack(config);
                 break;
             case "annotation":
             case "genes":
-            case "variant":
             case "FusionJuncSpan":
                 newTrack = new igv.FeatureTrack(config);
                 break;
-            case "alignment":
-                newTrack = new igv.BAMTrack(config);
+            case "variant":
+                newTrack = new igv.VariantTrack(config);
                 break;
-            case "data":
+
+            case "alignment":
+
+                newTrack = new igv.BAMTrack(config, featureSource);
+                break;
+
+            case "data":  // deprecated
+            case "wig":
                 newTrack = new igv.WIGTrack(config);
                 break;
             case "sequence":
@@ -188,47 +183,34 @@ var igv = (function (igv) {
                 newTrack = new igv.AneuTrack(config);
                 break;
             default:
-                alert("Unknown file type: " + path);
+
+                //alert("Unknown file type: " + config.url);
+                igv.presentAlert("Unknown file type: " + (config.type || ''));
+
                 return null;
         }
 
-        loadHeader(newTrack);
+        // Set order field of track here.  Otherwise track order might get shuffled during asynchronous load
+        if (undefined === newTrack.order) {
+            newTrack.order = this.trackViews.length;
+        }
 
-        function loadHeader(track) {
 
-            if (track.getHeader) {
-                track.getHeader(function (header) {
-                    self.addTrack(track);
-                })
-            }
-            else {
+        // If defined, attempt to load the file header before adding the track.  This will catch some errors early
+        if (typeof newTrack.getFileHeader === "function") {
+            newTrack.getFileHeader().then(function (header) {
                 self.addTrack(newTrack);
-            }
+            }).catch(function (error) {
+                //alert(error);
+                igv.presentAlert(error);
+            });
         }
-    };
-
-    igv.Browser.prototype.isDuplicateTrack = function (config) {
-
-        var attemptedDuplicateTrackAddition = false;
-
-        this.trackViews.forEach(function (tp) {
-
-            if (false === attemptedDuplicateTrackAddition) {
-
-                if (JSON.stringify(config) === JSON.stringify(tp.track.config)) {
-                    attemptedDuplicateTrackAddition = true;
-                }
-            }
-        });
-
-        if (true === attemptedDuplicateTrackAddition) {
-            window.alert("Attempt to load duplicate track.");
-            return true;
+        else {
+            self.addTrack(newTrack);
         }
 
-        return false;
-
     };
+
 
     /**
      * Add a new track.  Each track is associated with the following DOM elements
@@ -246,49 +228,22 @@ var igv = (function (igv) {
      */
     igv.Browser.prototype.addTrack = function (track) {
 
-        var myself = this,
-            trackView = new igv.TrackView(track, this);
+        var trackView = new igv.TrackView(track, this);
 
-        if (igv.popover) {
+        if (typeof igv.popover !== "undefined") {
             igv.popover.hide();
         }
 
-        // Register view with track.  This is unfortunate, but is needed to support "resize" events.
+        // Register view with track.  This backpointer is unfortunate, but is needed to support "resize" events.
         track.trackView = trackView;
 
-        if (undefined === track.order) {
-            track.order = this.trackViews.length;
-        }
 
         this.trackViews.push(trackView);
 
         this.reorderTracks();
 
-        if (this.cursorModel) {
-
-            this.cursorModel.initializeHistogram(trackView.track, function () {
-
-                if (myself.designatedTrack === track) {
-                    myself.selectDesignatedTrack(myself.designatedTrack.trackFilter.trackPanel);
-                }
-
-                if (track.config && track.config.trackFilter) {
-
-                    track.trackFilter.setWithJSON(track.config.trackFilter);
-
-
-                }
-
-                myself.resize();
-
-
-            });
-        }
-        else {
-            this.resize();
-        }
-
-    };
+        trackView.resize();
+    }
 
     igv.Browser.prototype.reorderTracks = function () {
 
@@ -305,17 +260,11 @@ var igv = (function (igv) {
 
         this.trackViews.forEach(function (trackView, index, trackViews) {
 
-            //console.log(trackView.track.id + ".order " + trackView.track.order);
-
-            if ("CURSOR" === myself.type) {
-                myself.trackContainerDiv.appendChild(trackView.cursorTrackContainer);
-            } else {
-                myself.trackContainerDiv.appendChild(trackView.trackDiv);
-            }
+            myself.trackContainerDiv.appendChild(trackView.trackDiv);
 
         });
 
-    };
+    }
 
     igv.Browser.prototype.removeTrack = function (track) {
 
@@ -332,11 +281,7 @@ var igv = (function (igv) {
 
             this.trackViews.splice(this.trackViews.indexOf(trackPanelRemoved), 1);
 
-            if ("CURSOR" === this.type) {
-                this.trackContainerDiv.removeChild(trackPanelRemoved.cursorTrackContainer);
-            } else {
-                this.trackContainerDiv.removeChild(trackPanelRemoved.trackDiv);
-            }
+            this.trackContainerDiv.removeChild(trackPanelRemoved.trackDiv);
 
         }
 
@@ -438,10 +383,6 @@ var igv = (function (igv) {
             trackView.repaint();
         });
 
-        if (this.cursorModel) {
-            this.horizontalScrollbar.update();
-        }
-
     };
 
     igv.Browser.prototype.update = function () {
@@ -460,9 +401,16 @@ var igv = (function (igv) {
             trackPanel.update();
         });
 
-        if (this.cursorModel) {
-            this.horizontalScrollbar.update();
+    };
+
+    igv.Browser.prototype.loadInProgress = function () {
+        var i;
+        for (i = 0; i < this.trackViews.length; i++) {
+            if (this.trackViews[i].loading) {
+                return true;
+            }
         }
+        return false;
     };
 
     igv.Browser.prototype.updateLocusSearch = function (referenceFrame) {
@@ -475,7 +423,7 @@ var igv = (function (igv) {
             chromosome;
 
 
-        if (this.searchInput) {
+        if (this.$searchInput) {
 
             chr = referenceFrame.chr;
             ss = igv.numberFormatter(Math.floor(referenceFrame.start + 1));
@@ -489,7 +437,7 @@ var igv = (function (igv) {
             ee = igv.numberFormatter(Math.floor(end));
 
             str = chr + ":" + ss + "-" + ee;
-            this.searchInput.val(str);
+            this.$searchInput.val(str);
 
             this.windowSizePanel.update(Math.floor(end - referenceFrame.start));
         }
@@ -507,7 +455,7 @@ var igv = (function (igv) {
             width = this.trackViews[0].viewportDiv.clientWidth;
         }
         else {
-            width = this.trackContainerDiv.clientWidth;
+            width = this.trackContainerDiv.clientWidth - 100;   // Should never get here
         }
 
         return width;
@@ -596,6 +544,11 @@ var igv = (function (igv) {
 // Zoom in by a factor of 2, keeping the same center location
     igv.Browser.prototype.zoomIn = function () {
 
+        if (this.loadInProgress()) {
+            // ignore
+            return;
+        }
+
         var newScale,
             center,
             viewportWidth;
@@ -616,6 +569,11 @@ var igv = (function (igv) {
 
 // Zoom out by a factor of 2, keeping the same center location if possible
     igv.Browser.prototype.zoomOut = function () {
+
+        if (this.loadInProgress()) {
+            // ignore
+            return;
+        }
 
         var newScale, maxScale, center, chrLength, widthBP, viewportWidth;
         viewportWidth = this.trackViewportWidth();
@@ -644,12 +602,17 @@ var igv = (function (igv) {
     };
 
 
-    igv.Browser.prototype.search = function (feature, continuation) {
+    /**
+     *
+     * @param feature
+     * @param callback - function to call
+     */
+    igv.Browser.prototype.search = function (feature, callback) {
 
         // See if we're ready to respond to a search, if not just queue it up and return
         if (igv.browser === undefined || igv.browser.genome === undefined) {
             igv.browser.initialLocus = feature;
-            if (continuation) continuation();
+            if (callback) callback();
             return;
         }
 
@@ -687,7 +650,7 @@ var igv = (function (igv) {
                 fireOnsearch.call(igv.browser, feature, type);
             }
 
-            if (continuation) continuation();
+            if (callback) callback();
 
         }
         else {
@@ -707,7 +670,11 @@ var igv = (function (igv) {
                     url.replace("$GENOME$", genomeId);
                 }
 
-                igv.loadData(url, function (data) {
+                // var loader = new igv.DataLoader(url);
+                // if (range)  loader.range = range;
+                // loader.loadBinaryString(callback);
+
+                igvxhr.loadString(url).then(function (data) {
 
                     var results = ("plain" === searchConfig.type) ? parseSearchResults(data) : JSON.parse(data);
 
@@ -716,7 +683,8 @@ var igv = (function (igv) {
                     }
 
                     if (results.length == 0) {
-                        alert('No feature found with name "' + feature + '"');
+                        //alert('No feature found with name "' + feature + '"');
+                        igv.presentAlert('No feature found with name "' + feature + '"');
                     }
                     else if (results.length == 1) {
 
@@ -727,14 +695,14 @@ var igv = (function (igv) {
                         chr = r[searchConfig.chromosomeField];
                         start = r[searchConfig.startField] - searchConfig.coords;
                         end = r[searchConfig.endField];
-                        type = r["featureType"];
+                        type = r["featureType"] || r["type"];
                         handleSearchResult(feature, chr, start, end, type);
                     }
                     else {
                         presentSearchResults(results, searchConfig, feature);
                     }
 
-                    if (continuation) continuation();
+                    if (callback) callback();
                 });
             }
         }
@@ -761,7 +729,7 @@ var igv = (function (igv) {
                     locus[config.chromosomeField],
                     locus[config.startField] - config.coords,
                     locus[config.endField],
-                    locus["featureType"]);
+                    (locus["featureType"] || locus["type"]));
 
             });
 
@@ -809,7 +777,7 @@ var igv = (function (igv) {
                     chromosome: igv.browser.genome.getChromosomeName(locusTokens[0].trim()),
                     start: parseInt(rangeTokens[0].replace(/,/g, '')),
                     end: parseInt(rangeTokens[1].replace(/,/g, '')),
-                    featureType: ("gtex" === source ? "snp" : "gene")
+                    type: ("gtex" === source ? "snp" : "gene")
                 });
 
             }
@@ -824,8 +792,8 @@ var igv = (function (igv) {
 
         igv.browser.selection = new igv.GtexSelection('gtex' === type || 'snp' === type ? {snp: name} : {gene: name});
 
-        if(end === undefined) {
-            end = start+1;
+        if (end === undefined) {
+            end = start + 1;
         }
         if (igv.browser.flanking) {
             start = Math.max(0, start - igv.browser.flanking);
@@ -859,6 +827,10 @@ var igv = (function (igv) {
 
             var coords = igv.translateMouseCoordinates(e, trackContainerDiv);
 
+            if (igv.popover) {
+                igv.popover.hide();
+            }
+
             isRulerTrack = ($(e.target).parent().parent().parent()[0].dataset.rulerTrack) ? true : false;
 
             if (isRulerTrack) {
@@ -875,8 +847,7 @@ var igv = (function (igv) {
             var coords = igv.translateMouseCoordinates(e, trackContainerDiv),
                 maxEnd,
                 maxStart,
-                referenceFrame = igv.browser.referenceFrame,
-                isCursor = igv.browser.cursorModel;
+                referenceFrame = igv.browser.referenceFrame;
 
             if (isRulerTrack) {
                 return;
@@ -888,7 +859,12 @@ var igv = (function (igv) {
 
             if (isMouseDown) { // Possibly dragging
 
-                if (mouseDownX && Math.abs(coords.x - mouseDownX) > igv.constants.dragThreshold) {
+                if (mouseDownX && Math.abs(coords.x - mouseDownX) > igv.browser.constants.dragThreshold) {
+
+                    if (igv.browser.loadInProgress()) {
+                        // ignore
+                        return;
+                    }
 
                     referenceFrame.shiftPixels(lastMouseX - coords.x);
 
@@ -899,15 +875,11 @@ var igv = (function (igv) {
                     referenceFrame.start = Math.max(0, referenceFrame.start);
 
                     // clamp right
-                    if (isCursor) {
-                        maxEnd = igv.browser.cursorModel.filteredRegions.length;
-                        maxStart = maxEnd - igv.browser.trackViewportWidth() / igv.browser.cursorModel.framePixelWidth;
-                    }
-                    else {
-                        var chromosome = igv.browser.genome.getChromosome(referenceFrame.chr);
-                        maxEnd = chromosome.bpLength;
-                        maxStart = maxEnd - igv.browser.trackViewportWidth() * referenceFrame.bpPerPixel;
-                    }
+
+                    var chromosome = igv.browser.genome.getChromosome(referenceFrame.chr);
+                    maxEnd = chromosome.bpLength;
+                    maxStart = maxEnd - igv.browser.trackViewportWidth() * referenceFrame.bpPerPixel;
+
 
                     if (referenceFrame.start > maxStart) referenceFrame.start = maxStart;
 
@@ -944,31 +916,131 @@ var igv = (function (igv) {
             mouseDownX = undefined;
         });
 
-        $(trackContainerDiv).dblclick(function (e) {
-
-            if (isRulerTrack) {
-                return;
-            }
-
-            if (e.altKey) return;  // Ignore if alt key is down
-
-            e = $.event.fix(e);   // Sets pageX and pageY for browsers that don't support them
-
-            var canvasCoords = igv.translateMouseCoordinates(e, trackContainerDiv),
-                referenceFrame = igv.browser.referenceFrame;
-
-            if (!referenceFrame) return;
-
-            var newCenter = Math.round(referenceFrame.start + canvasCoords.x * referenceFrame.bpPerPixel);
-            referenceFrame.bpPerPixel /= 2;
-            if (igv.browser.cursorModel) {
-                igv.browser.cursorModel.framePixelWidth *= 2;
-            }
-            igv.browser.goto(referenceFrame.chr, newCenter);
-
-        });
-
     }
+
+
+    /**
+     * Infer properties format and track type from legacy "config.type" property
+     *
+     * @param config
+     */
+    function inferTypes(config) {
+
+        function translateDeprecatedTypes(config) {
+
+            if (config.featureType) {  // Translate deprecated "feature" type
+                config.type = config.type || config.featureType;
+                config.featureType = undefined;
+            }
+
+            if ("bed" === config.type) {
+                config.type = config.type || "annotation";
+                config.format = config.format || "bed";
+            }
+
+            if ("bam" === config.type) {
+                config.type = "alignment";
+                config.format = "bam"
+            }
+
+            if ("vcf" === config.type) {
+                config.type = "variant";
+                config.format = "vcf"
+            }
+
+            if ("t2d" === config.type) {
+                config.type = "gwas";
+            }
+
+            if("FusionJuncSpan" === config.type) {
+                config.format = "FusionJuncSpan";
+            }
+        }
+
+        function inferFileFormat(config) {
+
+            if (config.format) return;
+
+            var path = config.url || config.localFile.name,
+                fn = path.toLowerCase(),
+                idx,
+                ext;
+
+            //Strip parameters -- handle local files later
+            idx = fn.indexOf("?");
+            if (idx > 0) {
+                fn = fn.substr(0, idx);
+            }
+
+            //Strip aux extensions .gz, .tab, and .txt
+            if (fn.endsWith(".gz")) {
+                fn = fn.substr(0, fn.length - 3);
+            } else if (fn.endsWith(".txt") || fn.endsWith(".tab")) {
+                fn = fn.substr(0, fn.length - 4);
+            }
+
+
+            idx = fn.lastIndexOf(".");
+            ext = idx < 0 ? fn : fn.substr(idx);
+
+            switch (ext) {
+
+                case ".bw":
+                    config.format = "bigwig";
+                    break;
+                case ".bb":
+                    config.format = "bigbed";
+
+                default:
+                    config.format = ext.substr(1);   // Strip leading "."
+            }
+        }
+
+        function inferTrackType(config) {
+
+            if (config.type) return;
+
+            switch (config.format) {
+                case "bw":
+                case "bigwig":
+                case "wig":
+                case "bedgraph":
+                    config.type = "wig";
+                    break;
+                case "vcf":
+                    config.type = "variant";
+                    break;
+                case "seg":
+                    config.type = "seg";
+                    break;
+                case "bam":
+                    config.type = "alignment";
+                    break;
+                default:
+                    config.type = "annotation";
+
+            }
+        }
+
+        translateDeprecatedTypes(config);
+
+        if (undefined === config.sourceType && (config.url || config.localFile)) {
+            config.sourceType = "file";
+        }
+
+        if ("file" === config.sourceType) {
+            if (undefined === config.format) {
+                inferFileFormat(config);
+            }
+        }
+
+        if (undefined === config.type) {
+            inferTrackType(config);
+        }
+
+
+    };
+
 
     return igv;
 })

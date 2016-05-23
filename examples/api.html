@@ -22,7 +22,7 @@
     <link rel="stylesheet" type="text/css" href="//maxcdn.bootstrapcdn.com/font-awesome/4.2.0/css/font-awesome.min.css">
 
     <!-- IGV CSS -->
-    <link rel="stylesheet" type="text/css" href="//igv.org/web/beta/igv-beta.css">
+    <link rel="stylesheet" type="text/css" href="//igv.org/web/release/1.0.0-rc1/igv-1.0.0-rc1.css">
 
     <!-- jQuery JS -->
     <script type="text/javascript" src="//ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
@@ -32,7 +32,7 @@
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.4/js/bootstrap.min.js"></script>
 
     <!-- IGV JS-->
-    <script type="text/javascript" src="//igv.org/web/beta/igv-beta.js"></script>
+    <script type="text/javascript" src="//igv.org/web/release/1.0.0-rc1/igv-1.0.0-rc1.js"></script>
 
 
 </head>
@@ -54,8 +54,11 @@
                         <li>
                             <a href="#"
                                onclick="igv.browser.loadTrack({
+                                  type: 'alignment', // Optional
+                                  format: 'bam',  // Optional
                                   url: 'http://hgdownload.cse.ucsc.edu/goldenPath/hg19/encodeDCC/wgEncodeOpenChromFaire/wgEncodeOpenChromFaireMrta2041AlnRep1.bam',
-                                  name: 'MRT_A204 FaireSeq Alignments rep 1'})">MRT_A204 FaireSeq Alignments rep 1 bam</a>
+                                  name: 'MRT_A204 FaireSeq Alignments rep 1'})">MRT_A204 FaireSeq Alignments rep 1
+                                bam</a>
                         </li>
                         <li>
                             <a href="#"
@@ -68,6 +71,7 @@
                                onclick="igv.browser.loadTrack({
                                  format: 'bed',
                                  url: '//data.broadinstitute.org/igvdata/annotations/hg19/dbSnp/snp137.hg19.bed.gz',
+                                 indexURL: '//data.broadinstitute.org/igvdata/annotations/hg19/dbSnp/snp137.hg19.bed.gz.tbi',
                                  visibilityWindow: 200000,
                                  label: 'dbSNP 137'})">dbSNP 137 (bed tabix)</a></li>
 
@@ -122,12 +126,15 @@
         var div = $("#igvDiv")[0],
                 options = {
                     showNavigation: true,
-                    genome: "hg19",
                     locus: "chr1:155,160,475-155,184,282",
+                    reference: {
+                        id: "hg19"
+                    },
                     tracks: [
                         {
                             name: "Genes",
-                            url: "//igv.broadinstitute.org/annotations/hg19/genes/gencode.v18.collapsed.bed",
+                            url: "//s3.amazonaws.com/igv.broadinstitute.org/annotations/hg19/genes/gencode.v18.collapsed.bed",
+                            indexURL: "//s3.amazonaws.com/igv.broadinstitute.org/annotations/hg19/genes/gencode.v18.collapsed.bed.idx",
                             order: Number.MAX_VALUE,
                             displayMode: "EXPANDED"
 

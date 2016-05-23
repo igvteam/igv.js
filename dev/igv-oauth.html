@@ -49,13 +49,14 @@
     <script type="text/javascript" src="../js/rulerTrack.js"></script>
 
     <script type="text/javascript" src="../js/feature/featureTrack.js"></script>
+    <script type="text/javascript" src="../js/variant/variantTrack.js"></script>
     <script type="text/javascript" src="../js/igv-color.js"></script>
     <script type="text/javascript" src="../js/igv-utils.js"></script>
     <script type="text/javascript" src="../js/parseUtils.js"></script>
     <script type="text/javascript" src="../js/fasta.js"></script>
     <script type="text/javascript" src="../js/sequenceTrack.js"></script>
-    <script type="text/javascript" src="../js/wigTrack.js"></script>
-    <script type="text/javascript" src="../js/ui/dataloader.js"></script>
+    <script type="text/javascript" src="../js/feature/wigTrack.js"></script>
+
     <script type="text/javascript" src="../js/igv-exts.js"></script>
     <script type="text/javascript" src="../js/igvxhr.js"></script>
     <script type="text/javascript" src="../js/binary.js"></script>
@@ -73,6 +74,8 @@
     <script type="text/javascript" src="../js/bam/bamAlignment.js"></script>
     <script type="text/javascript" src="../js/bam/bamAlignmentRow.js"></script>
     <script type="text/javascript" src="../js/bam/bamIndex.js"></script>
+    <script type="text/javascript" src="../js/bam/alignmentContainer.js"></script>
+    <script type="text/javascript" src="../js/bam/pairedAlignment.js"></script>
 
     <script type="text/javascript" src="../js/ga4gh/ga4ghAlignmentReader.js"></script>
     <script type="text/javascript" src="../js/ga4gh/ga4ghVariantReader.js"></script>
@@ -80,7 +83,6 @@
     <script type="text/javascript" src="../js/ga4gh/googleUtils.js"></script>
 
     <script type="text/javascript" src="../js/intervalTree.js"></script>
-    <script type="text/javascript" src="../js/igv-constants.js"></script>
 
     <script type="text/javascript" src="../js/feature/featureCache.js"></script>
     <script type="text/javascript" src="../js/feature/featureSource.js"></script>
@@ -89,9 +91,6 @@
     <script type="text/javascript" src="../js/feature/featureFileReader.js"></script>
 
     <script type="text/javascript" src="../js/encode/encode.js"></script>
-    <script type="text/javascript" src="../js/cursor/cursorTrack.js"></script>
-    <script type="text/javascript" src="../js/cursor/cursorModel.js"></script>
-    <script type="text/javascript" src="../js/cursor/cursor-ideogram.js"></script>
 
     <script type="text/javascript" src="../js/karyo/karyo.js"></script>
     <script type="text/javascript" src="../js/gwas/t2dVariantSource.js"></script>
@@ -133,7 +132,12 @@
     <a href='#' onclick="igv.browser.loadTrack({
                                 sourceType: 'ga4gh',
                                 type: 'bam',
-                                url: 'https://www.googleapis.com/genomics/v1beta2',
+                                source: {
+                                  type: 'ga4gh',
+                                  url: 'https://genomics.googleapis.com/v1',
+                                  readGroupSetIds: 'CMvnhpKTFhCjz9_25e_lCw',
+                                },
+                                url: 'https://genomics.googleapis.com/v1',
                                 readGroupSetIds: 'CMvnhpKTFhCjz9_25e_lCw',
                                 name: 'Ga4gh BAM'
                                 })">Click to load Ga4gh BAM
@@ -145,7 +149,12 @@
     <a href='#' onclick="igv.browser.loadTrack({
                                 sourceType: 'ga4gh',
                                 type: 'vcf',
-                                url: 'https://www.googleapis.com/genomics/v1beta2',
+                                source: {
+                                  type: 'ga4gh',
+                                   url: 'https://genomics.googleapis.com/v1',
+                                  variantSetId: '10473108253681171589',
+                                },
+                                url: 'https://genomics.googleapis.com/v1',
                                 variantSetId: '10473108253681171589',
                                 name: 'Ga4gh variants'
                                 })">Click to load Ga4gh Variants
@@ -164,8 +173,8 @@
 
             genome: "hg19",
 //            reference: {
-//                fastaURL: "//dn7ywbm9isq8j.cloudfront.net/genomes/seq/hg19/hg19.fasta",
-//                cytobandURL: "//dn7ywbm9isq8j.cloudfront.net/genomes/seq/hg19/cytoBand.txt"
+//                fastaURL: "//s3.amazonaws.com/igv.broadinstitute.org/genomes/seq/hg19/hg19.fasta",
+//                cytobandURL: "//s3.amazonaws.com/igv.broadinstitute.org/genomes/seq/hg19/cytoBand.txt"
 //            },
             locus: 'myc',
             tracks: [
@@ -175,8 +184,8 @@
                 },
                 ,
                 {
-                    //url: "//dn7ywbm9isq8j.cloudfront.net/annotations/hg19/genes/gencode.v18.collapsed.bed",
-                    url: "//igv.broadinstitute.org/annotations/hg19/genes/gencode.v18.collapsed.bed",
+                    //url: "//s3.amazonaws.com/igv.broadinstitute.org/annotations/hg19/genes/gencode.v18.collapsed.bed",
+                    url: "//s3.amazonaws.com/igv.broadinstitute.org/annotations/hg19/genes/gencode.v18.collapsed.bed",
                     name: "Genes",
                     order: 10000
                 }

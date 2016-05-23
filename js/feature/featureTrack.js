@@ -32,22 +32,35 @@ var igv = (function (igv) {
         this.displayMode = config.displayMode || "COLLAPSED";    // COLLAPSED | EXPANDED | SQUISHED
         this.labelDisplayMode = config.labelDisplayMode;
 
-        this.collapsedHeight = config.collapsedHeight || this.height;
-        this.expandedRowHeight = config.expandedRowHeight || 30;
-        this.squishedRowHeight = config.squishedRowHeight || 15;
+        this.variantHeight = config.variantHeight || this.height;
+        this.squishedCallHeight = config.squishedCallHeight || 30;
+        this.expandedCallHeight = config.expandedCallHeight || 15;
 
         this.featureHeight = config.featureHeight || 14;
-        this.featureSource = new igv.FeatureSource(this.config);
+
+        // Set maxRows -- protects against pathological feature packing cases (# of rows of overlapping feaures)
+        if (config.maxRows === undefined) {
+            config.maxRows = 500;
+        }
+        this.maxRows = config.maxRows;
+
+
+        if (config.url && (config.url.toLowerCase().endsWith(".bigbed") || config.url.toLowerCase().endsWith(".bb"))) {
+            this.featureSource = new igv.BWSource(config);
+        }
+        else {
+            this.featureSource = new igv.FeatureSource(config);
+        }
 
         // Set the render function.  This can optionally be passed in the config
         if (config.render) {
             this.render = config.render;
-        } else if ("variant" === config.featureType) {
+        } else if ("variant" === config.type) {
             this.render = renderVariant;
             this.homvarColor = "rgb(17,248,254)";
             this.hetvarColor = "rgb(34,12,253)";
         }
-        else if ("FusionJuncSpan" === config.featureType) {
+        else if ("FusionJuncSpan" === config.type) {
             this.render = renderFusionJuncSpan;
             this.height = config.height || 50;
             this.autoHeight = false;
@@ -55,40 +68,45 @@ var igv = (function (igv) {
         else {
             this.render = renderFeature;
             this.arrowSpacing = 30;
-
         }
-
     };
 
-    igv.FeatureTrack.prototype.getHeader = function (continuation) {
-        var track = this;
-        this.featureSource.getHeader(function (header) {
+    igv.FeatureTrack.prototype.getFileHeader = function () {
+        var self = this;
+        return new Promise(function (fulfill, reject) {
+            if (typeof self.featureSource.getFileHeader === "function") {
+                self.featureSource.getFileHeader().then(function (header) {
 
-            if (header) {
-                // Header (from track line).  Set properties,unless set in the config (config takes precedence)
-                if (header.name && !track.config.name) {
-                    track.name = header.name;
-                }
-                if (header.color && !track.config.color) {
-                    track.color = "rgb(" + header.color + ")";
-                }
+                    if (header) {
+                        // Header (from track line).  Set properties,unless set in the config (config takes precedence)
+                        if (header.name && !self.config.name) {
+                            self.name = header.name;
+                        }
+                        if (header.color && !self.config.color) {
+                            self.color = "rgb(" + header.color + ")";
+                        }
+                    }
+                    fulfill(header);
+
+                }).catch(reject);
             }
+            else {
+                fulfill(null);
+            }
+        });
+    }
 
-            continuation(header);
+    igv.FeatureTrack.prototype.getFeatures = function (chr, bpStart, bpEnd) {
+
+        var self = this;
+
+        return new Promise(function (fulfill, reject) {
+
+            self.featureSource.getFeatures(chr, bpStart, bpEnd).then(fulfill).catch(reject);
 
         });
     }
 
-    igv.FeatureTrack.prototype.getFeatures = function (chr, bpStart, bpEnd, continuation, task) {
-
-        // Don't try to draw alignments for windows > the visibility window
-        if (this.visibilityWindow && igv.browser.trackViewportWidthBP() > this.visibilityWindow) {
-            continuation({exceedsVisibilityWindow: true});
-        }
-        else {
-            this.featureSource.getFeatures(chr, bpStart, bpEnd, continuation, task)
-        }
-    };
 
     /**
      * The required height in pixels required for the track content.   This is not the visible track height, which
@@ -100,17 +118,18 @@ var igv = (function (igv) {
     igv.FeatureTrack.prototype.computePixelHeight = function (features) {
 
         if (this.displayMode === "COLLAPSED") {
-            return this.collapsedHeight;
+            return this.variantHeight;
         }
         else {
             var maxRow = 0;
-            features.forEach(function (feature) {
+            if (features && (typeof features.forEach === "function")) {
+                features.forEach(function (feature) {
 
-                if (feature.row && feature.row > maxRow) maxRow = feature.row;
+                    if (feature.row && feature.row > maxRow) maxRow = feature.row;
 
-            });
-
-            return (maxRow + 1) * (this.displayMode === "SQUISHED" ? this.squishedRowHeight : this.expandedRowHeight);
+                });
+            }
+            return Math.max(this.variantHeight, (maxRow + 1) * (this.displayMode === "SQUISHED" ? this.expandedCallHeight : this.squishedCallHeight));
 
         }
 
@@ -125,23 +144,10 @@ var igv = (function (igv) {
             bpStart = options.bpStart,
             pixelWidth = options.pixelWidth,
             pixelHeight = options.pixelHeight,
-            bpEnd = bpStart + pixelWidth * bpPerPixel + 1,
-            zoomInNoticeFontStyle = {
-                font: '16px PT Sans',
-                fillStyle: "rgba(64, 64, 64, 1)",
-                strokeStyle: "rgba(64, 64, 64, 1)"
-            };
-
+            bpEnd = bpStart + pixelWidth * bpPerPixel + 1;
 
         igv.graphics.fillRect(ctx, 0, 0, pixelWidth, pixelHeight, {'fillStyle': "rgb(255, 255, 255)"});
 
-        if (options.features.exceedsVisibilityWindow) {
-
-            for (var x = 200; x < pixelWidth; x += 400) {
-                igv.graphics.fillText(ctx, "Zoom in to see features", x, 20, zoomInNoticeFontStyle);
-            }
-            return;
-        }
 
         if (featureList) {
 
@@ -168,12 +174,12 @@ var igv = (function (igv) {
         if (this.featureSource.featureCache) {
 
             var chr = igv.browser.referenceFrame.chr,  // TODO -- this should be passed in
-                tolerance = 2*igv.browser.referenceFrame.bpPerPixel,  // We need some tolerance around genomicLocation, start with +/- 2 pixels
+                tolerance = 2 * igv.browser.referenceFrame.bpPerPixel,  // We need some tolerance around genomicLocation, start with +/- 2 pixels
                 featureList = this.featureSource.featureCache.queryFeatures(chr, genomicLocation - tolerance, genomicLocation + tolerance),
                 row;
 
             if (this.displayMode != "COLLAPSED") {
-                row = (Math.floor)(this.displayMode === "SQUISHED" ? yOffset / this.squishedRowHeight : yOffset / this.expandedRowHeight);
+                row = (Math.floor)(this.displayMode === "SQUISHED" ? yOffset / this.expandedCallHeight : yOffset / this.squishedCallHeight);
             }
 
             if (featureList && featureList.length > 0) {
@@ -240,9 +246,8 @@ var igv = (function (igv) {
             trackMenuItemFirst = '<div class=\"igv-track-menu-item igv-track-menu-border-top\">';
 
         menuItems.push(igv.colorPickerMenuItem(popover, this.trackView));
-        menuItems.push(igv.dataRangeMenuItem(popover, this.trackView));
 
-            ["COLLAPSED", "SQUISHED", "EXPANDED"].forEach(function (displayMode, index) {
+        ["COLLAPSED", "SQUISHED", "EXPANDED"].forEach(function (displayMode, index) {
 
             var chosen,
                 str;
@@ -276,23 +281,8 @@ var igv = (function (igv) {
 
     function renderFeature(feature, bpStart, xScale, pixelHeight, ctx) {
 
-        var px,
-            px1,
-            pw,
-            x,
-            e,
-            exonCount,
-            cy,
-            direction,
-            exon,
-            ePx,
-            ePx1,
-            ePw,
-            py = 5,
+        var px, px1, pw, x, e, exonCount, cy, direction, exon, ePx, ePx1, ePxU, ePw, py, py2, h, h2, transform, fontStyle,
             step = this.arrowSpacing,
-            h =  this.featureHeight,
-            transform,
-            fontStyle,
             color = this.color;
 
 
@@ -302,7 +292,7 @@ var igv = (function (igv) {
                 color = this.config.colorBy.pallete[colorByValue];
             }
         }
-        else if(feature.color) {
+        else if (feature.color) {
             color = feature.color;
         }
 
@@ -318,13 +308,20 @@ var igv = (function (igv) {
             px -= 1;
         }
 
+        h = this.featureHeight;
         if (this.displayMode === "SQUISHED" && feature.row != undefined) {
-            h /= 2;
-            py = this.squishedRowHeight * feature.row;
+            h = this.featureHeight / 2;
+            py = this.expandedCallHeight * feature.row + 2;
         }
         else if (this.displayMode === "EXPANDED" && feature.row != undefined) {
-            py = this.expandedRowHeight * feature.row;
+            py = this.squishedCallHeight * feature.row + 5;
+        } else {  // collapsed
+            py = 5;
         }
+
+        cy = py + h / 2;
+        h2 = h / 2;
+        py2 = cy - h2 / 2;
 
         exonCount = feature.exons ? feature.exons.length : 0;
 
@@ -335,9 +332,8 @@ var igv = (function (igv) {
         }
         else {
             // multi-exon transcript
-            cy = py + h/2;
 
-            igv.graphics.strokeLine(ctx, px+1, cy, px1-1, cy); // center line for introns
+            igv.graphics.strokeLine(ctx, px + 1, cy, px1 - 1, cy); // center line for introns
 
             direction = feature.strand == '+' ? 1 : -1;
             for (x = px + step / 2; x < px1; x += step) {
@@ -351,22 +347,41 @@ var igv = (function (igv) {
                 ePx = Math.round((exon.start - bpStart) / xScale);
                 ePx1 = Math.round((exon.end - bpStart) / xScale);
                 ePw = Math.max(1, ePx1 - ePx);
-                ctx.fillRect(ePx, py, ePw, h);
 
-                // Arrows
-                if(ePw > step + 5) {
-                    ctx.fillStyle = "white";
-                    ctx.strokeStyle = "white";
-                    for (x = ePx + step / 2; x < ePx1; x += step) {
-                        // draw arrowheads along central line indicating transcribed orientation
-                        igv.graphics.strokeLine(ctx, x - direction * 2, cy - 2, x, cy);
-                        igv.graphics.strokeLine(ctx, x - direction * 2, cy + 2, x, cy);
-                    }
-                    ctx.fillStyle = color;
-                    ctx.strokeStyle = color;
-
+                if (exon.utr) {
+                    ctx.fillRect(ePx, py2, ePw, h2); // Entire exon is UTR
                 }
+                else {
+                    if (exon.cdStart) {
+                        ePxU = Math.round((exon.cdStart - bpStart) / xScale);
+                        ctx.fillRect(ePx, py2, ePxU - ePx, h2); // start is UTR
+                        ePw -= (ePxU - ePx);
+                        ePx = ePxU;
 
+                    }
+                    if (exon.cdEnd) {
+                        ePxU = Math.round((exon.cdEnd - bpStart) / xScale);
+                        ctx.fillRect(ePxU, py2, ePx1 - ePxU, h2); // start is UTR
+                        ePw -= (ePx1 - ePxU);
+                        ePx1 = ePxU;
+                    }
+
+                    ctx.fillRect(ePx, py, ePw, h);
+
+                    // Arrows
+                    if (ePw > step + 5) {
+                        ctx.fillStyle = "white";
+                        ctx.strokeStyle = "white";
+                        for (x = ePx + step / 2; x < ePx1; x += step) {
+                            // draw arrowheads along central line indicating transcribed orientation
+                            igv.graphics.strokeLine(ctx, x - direction * 2, cy - 2, x, cy);
+                            igv.graphics.strokeLine(ctx, x - direction * 2, cy + 2, x, cy);
+                        }
+                        ctx.fillStyle = color;
+                        ctx.strokeStyle = color;
+
+                    }
+                }
             }
         }
 
@@ -378,7 +393,7 @@ var igv = (function (igv) {
 
         var geneColor;
 
-        if (igv.browser.selection && "genes" === this.config.featureType && feature.name !== undefined) {
+        if (igv.browser.selection && "genes" === this.config.type && feature.name !== undefined) {
             // TODO -- for gtex, figure out a better way to do this
             geneColor = igv.browser.selection.colorForGene(feature.name);
         }
@@ -471,7 +486,7 @@ var igv = (function (igv) {
         var py = 5, h = 10; // defaults borrowed from renderFeature above
 
 
-        var rowHeight = (this.displayMode === "EXPANDED") ? this.expandedRowHeight : this.squishedRowHeight;
+        var rowHeight = (this.displayMode === "EXPANDED") ? this.squishedCallHeight : this.expandedCallHeight;
 
         // console.log("row height = " + rowHeight);
 

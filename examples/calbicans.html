@@ -21,7 +21,7 @@
     <link rel="stylesheet" type="text/css" href="//maxcdn.bootstrapcdn.com/font-awesome/4.2.0/css/font-awesome.min.css">
 
     <!-- IGV CSS -->
-    <link rel="stylesheet" type="text/css" href="//igv.org/web/beta/igv-beta.css">
+    <link rel="stylesheet" type="text/css" href="//igv.org/web/release/1.0.0-rc1/igv-1.0.0-rc1.css">
 
     <!-- jQuery JS -->
     <script type="text/javascript" src="//ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
@@ -31,7 +31,7 @@
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.4/js/bootstrap.min.js"></script>
 
     <!-- IGV JS-->
-    <script type="text/javascript" src="//igv.org/web/beta/igv-beta.js"></script>
+    <script type="text/javascript" src="//igv.org/web/release/1.0.0-rc1/igv-1.0.0-rc1.js"></script>
 
 
 </head>
@@ -53,7 +53,7 @@
 
             locus: "chr1",
             reference: {
-                fastaURL: "http://dn7ywbm9isq8j.cloudfront.net/genomes/seq/ca21/C_albicans_SC5314_A21.fasta",
+                fastaURL: "http://s3.amazonaws.com/igv.broadinstitute.org/genomes/seq/ca21/C_albicans_SC5314_A21.fasta",
                 aliasURL: "http://s3.amazonaws.com/igv.broadinstitute.org/genomes/seq/ca21/alias.tab"
             },
 
@@ -321,7 +321,7 @@
                 {
                     name: "Genes",
                     format: "refflat",
-                    url: "http://dn7ywbm9isq8j.cloudfront.net/annotations/ca21/ca21_refFlat.txt",
+                    url: "http://s3.amazonaws.com/igv.broadinstitute.org/annotations/ca21/ca21_refFlat.txt",
                     indexed: false,
                     order: 9999,
                     displayMode: "EXPANDED"

@@ -41,6 +41,7 @@ var igv = (function (igv) {
             len = lines.length,
             line,
             i,
+            j,
             tokens,
             header = {},
             id,
@@ -48,8 +49,6 @@ var igv = (function (igv) {
             ltIdx,
             gtIdx,
             type;
-
-        this.header = header;
 
         // First line must be file format
         if (lines[0].startsWith("##fileformat")) {
@@ -108,7 +107,16 @@ var igv = (function (igv) {
                     }
                 }
                 else if (line.startsWith("#CHROM")) {
-                    // TODO -- parse this to get sample names
+                    tokens = line.split("\t");
+
+                    if (tokens.length > 8) {
+
+                        // call set names -- use column index for id
+                        header.callSets = [];
+                        for (j = 9; j < tokens.length; j++) {
+                            header.callSets.push({id: j, name: tokens[j]});
+                        }
+                    }
                 }
 
             }
@@ -117,7 +125,36 @@ var igv = (function (igv) {
             }
 
         }
+
+        this.header = header;  // Will need to intrepret genotypes and info field
+
         return header;
+    }
+
+    function extractCallFields(tokens) {
+
+        var callFields = {
+                genotypeIndex: -1,
+                genotypeLikelihoodIndex: -1,
+                phasesetIndex: -1,
+                fields: tokens
+            },
+            i;
+
+        for (i = 0; i < tokens.length; i++) {
+
+            if ("GT" === tokens[i]) {
+                callFields.genotypeIndex = i;
+            }
+            else if ("GL" === tokens[i]) {
+                callFields.genotypeLikelihoodIndex = i;
+            }
+            else if ("PS" === tokens[i]) {
+                callFields.phasesetIndex = i;
+            }
+        }
+        return callFields;
+
     }
 
     /**
@@ -129,44 +166,79 @@ var igv = (function (igv) {
     igv.VcfParser.prototype.parseFeatures = function (data) {
 
         var lines = data.split("\n"),
-            len = lines.length,
-            tokens,
-            allFeatures,
-            line,
-            i,
-            variant;
+            allFeatures = [],
+            callSets = this.header.callSets;
 
+        lines.forEach(function (line) {
 
-        allFeatures = [];
-        for (i = 0; i < len; i++) {
-            line = lines[i];
-            if (line.startsWith("#")) {
-                continue;
-            }
-            else {
-                tokens = lines[i].split("\t");
-                variant = decode(tokens);
-                if (variant != null) {
+            var variant,
+                tokens,
+                callFields,
+                index,
+                token;
+
+            if (!line.startsWith("#")) {
+
+                tokens = line.split("\t");
+
+                if (tokens.length >= 8) {
+                    variant = new Variant(tokens);
                     variant.header = this.header;       // Keep a pointer to the header to interpret fields for popup text
                     allFeatures.push(variant);
-                }
 
+                    if (tokens.length > 9) {
+
+                        // Format
+                        callFields = extractCallFields(tokens[8].split(":"));
+
+                        variant.calls = {};
+
+                        for (index = 9; index < tokens.length; index++) {
+
+                            token = tokens[index];
+
+                            var callSet = callSets[index - 9],
+                                call = {
+                                    callSetName: callSet.name,
+                                    info: {}
+                                };
+
+                            variant.calls[callSet.id] = call;
+
+                            token.split(":").forEach(function (callToken, index) {
+                                switch (index) {
+                                    case callFields.genotypeIndex:
+                                        call.genotype = [];
+                                        callToken.split(/[\|\/]/).forEach(function (s) {
+                                            call.genotype.push(parseInt(s));
+                                        });
+                                        break;
+
+                                    case callFields.genotypeLikelihoodIndex:
+                                        call.genotypeLikelihood = [];
+                                        callToken.split(",").forEach(function (s) {
+                                            call.genotype.push(parseFloat(s));
+                                        });
+                                        break;
+
+                                    case callFields.phasesetIndex:
+                                        call.phaseset = callToken;
+                                        break;
+
+                                    default:
+                                        call.info[callFields.fields[index]] = callToken;
+                                }
+                            });
+                        }
+
+                    }
+
+                }
             }
-        }
+        });
 
         return allFeatures;
 
-
-        function decode(tokens) {
-
-            if (tokens.length < 8) {
-                return null;
-            }
-            else {
-                return new Variant(tokens);
-            }
-
-        }
     }
 
 
@@ -178,16 +250,16 @@ var igv = (function (igv) {
         this.chr = tokens[0]; // TODO -- use genome aliases
         this.pos = parseInt(tokens[1]);
         this.names = tokens[2];    // id in VCF
-        this.ref = tokens[3];
-        this.alt = tokens[4];
-        this.qual = parseInt(tokens[5]);
+        this.referenceBases = tokens[3];
+        this.alternateBases = tokens[4];
+        this.quality = parseInt(tokens[5]);
         this.filter = tokens[6];
         this.info = tokens[7];
 
         // "ids" ("names" in ga4gh)
 
         //Alleles
-        altTokens = this.alt.split(",");
+        altTokens = this.alternateBases.split(",");
 
         if (altTokens.length > 0) {
 
@@ -200,7 +272,7 @@ var igv = (function (igv) {
                 var a, s, e, diff;
                 if (alt.length > 0) {
 
-                    diff = self.ref.length - alt.length;
+                    diff = self.referenceBases.length - alt.length;
 
                     if (diff > 0) {
                         // deletion, assume left padded
@@ -208,7 +280,7 @@ var igv = (function (igv) {
                         e = s + diff;
                     } else if (diff < 0) {
                         // Insertion, assume left padded, insertion begins to "right" of last ref base
-                        s = self.pos - 1 + self.ref.length;
+                        s = self.pos - 1 + self.referenceBases.length;
                         e = s + 1;     // Insertion between s & 3
                     }
                     else {
@@ -239,9 +311,9 @@ var igv = (function (igv) {
 
         fields = [
             {name: "Names", value: this.names},
-            {name: "Ref", value: this.ref},
-            {name: "Alt", value: this.alt},
-            {name: "Qual", value: this.qual},
+            {name: "Ref", value: this.referenceBases},
+            {name: "Alt", value: this.alternateBases},
+            {name: "Qual", value: this.quality},
             {name: "Filter", value: this.filter},
             "<hr>"
         ];
