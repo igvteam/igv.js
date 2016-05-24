@@ -116,7 +116,7 @@ var igv = (function (igv) {
         // Create controls.  This can be customized by passing in a function, which should return a div containing the
         // controls
 
-        if (config.showCommandBar !== false) {
+        if (config.showCommandBar !== false && config.showControls !== false) {
             controlDiv = config.createControls ?
                 config.createControls(browser, config) :
                 createStandardControls(browser, config);
@@ -172,7 +172,10 @@ var igv = (function (igv) {
 
             genome.id = config.reference.genomeId;
             browser.genome = genome;
-            browser.addTrack(new igv.RulerTrack());
+
+            if (config.showRuler) {
+                browser.addTrack(new igv.RulerTrack());
+            }
 
             // viewport width -- must get this after adding ruler track
             var viewportWidth = browser.trackViewportWidth();
@@ -234,7 +237,7 @@ var igv = (function (igv) {
     function createStandardControls(browser, config) {
 
         var $igvLogo,
-            $controls = $('<div id="igvControlDiv">'),
+            $controls,
             contentKaryo,
             $navigation,
             $searchContainer,
@@ -244,11 +247,12 @@ var igv = (function (igv) {
             $faZoomIn,
             $faZoomOut;
 
-
-        $navigation = $('<div class="igvNavigation">');
-        $controls.append($navigation[0]);
+        $controls = $('<div id="igvControlDiv">');
 
         if (config.showNavigation) {
+
+            $navigation = $('<div class="igvNavigation">');
+            $controls.append($navigation[0]);
 
             $igvLogo = $('<div class="igv-logo">');
 
@@ -365,15 +369,21 @@ var igv = (function (igv) {
 
     function setDefaults(config) {
 
-        if (!config.tracks) {
-            config.tracks = [];
-        }
-        config.tracks.push({type: "sequence", order: -9999});  // Sequence track
         config.showKaryo = config.showKaryo || false;
+        if (config.showControls === undefined) config.showControls = true;
         if (config.showNavigation === undefined) config.showNavigation = true;
+        if (config.showSequence === undefined) config.showSequence = true;
+        if (config.showIdeogram === undefined) config.showIdoegram = true;
         if (config.flanking === undefined) config.flanking = 1000;
         if (config.pairsSupported === undefined) config.pairsSupported = true;
         if (config.type === undefined) config.type = "IGV";
+
+        if (!config.tracks) {
+            config.tracks = [];
+        }
+        if (config.showSequence) {
+            config.tracks.push({type: "sequence", order: -9999});
+        }  // Sequence track
 
     }
 
