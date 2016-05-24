@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="">
+    <meta name="author" content="">
+    <link rel="shortcut icon" href="//igv.org/web/img/favicon.ico">
+    <title>Integrative Genomics Viewer: 'locuschange' Event Example</title>
+
+    <!-- Bootstrap CSS - NOT REQUIRED FOR IGV -->
+    <link rel="stylesheet" type="text/css" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.4/css/bootstrap.min.css">
+
+    <!-- jQuery UI CSS -->
+    <link rel="stylesheet" type="text/css"
+          href="//ajax.googleapis.com/ajax/libs/jqueryui/1.11.2/themes/smoothness/jquery-ui.css"/>
+
+    <!-- Font Awesome CSS -->
+    <link rel="stylesheet" type="text/css" href="//maxcdn.bootstrapcdn.com/font-awesome/4.2.0/css/font-awesome.min.css">
+
+    <!-- IGV CSS -->
+    <link rel="stylesheet" type="text/css" href="//igv.org/web/release/1.0.0-rc1/igv-1.0.0-rc1.css">
+
+    <!-- jQuery JS -->
+    <script type="text/javascript" src="//ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
+    <script type="text/javascript" src="//ajax.googleapis.com/ajax/libs/jqueryui/1.11.2/jquery-ui.min.js"></script>
+
+    <!-- Bootstrap JS -  NOT REQUIRED FOR IGV -->
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.4/js/bootstrap.min.js"></script>
+
+    <!-- IGV JS-->
+    <script type="text/javascript" src="../../dist/igv.js"></script>
+
+</head>
+
+<body role="document">
+
+<div class="jumbotron">
+    <div class="container">
+        <h2>IGV.js <code>locuschange</code> Event Example</h2>
+        <p>In this example we want to update the page URL whenever the IGV viewer locus changes. This allows us to
+            capture an exact location in the URL so that it can be shared. To do this, we subscribe to the <code>locuschange</code>
+            event and update the page URL to match the current locus.
+        </p>
+        <h3>Try it out:</h3>
+        <ol>
+            <li>Zoom or pan the canvas in the IGV viewer.</li>
+            <li>Notice that the page URL updated to match the new locus.</li>
+            <li>Copy-paste the URL into a different browser tab - now you can easily share it with collaborators.</li>
+        </ol>
+    </div>
+</div>
+
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-sm-12" id="igvDiv"></div>
+    </div>
+</div>
+
+<script type="text/javascript">
+
+    $(document).ready(function () {
+
+        var HASH_PREFIX = "#/locus/";
+
+        var currentHash = window.location.hash;
+        var locus = currentHash && currentHash.indexOf(HASH_PREFIX) === 0
+            ? currentHash.substr(HASH_PREFIX.length)
+            : "chr1:155,160,475-155,184,282";   // default location
+
+        var div = $("#igvDiv")[0],
+            options = {
+            showNavigation: true,
+            locus: locus,
+            reference: {
+                id: "hg19"
+            },
+            tracks: [
+                {
+                    name: "Genes",
+                    url: "//s3.amazonaws.com/igv.broadinstitute.org/annotations/hg19/genes/gencode.v18.collapsed.bed",
+                    indexURL: "//s3.amazonaws.com/igv.broadinstitute.org/annotations/hg19/genes/gencode.v18.collapsed.bed.idx",
+                    order: Number.MAX_VALUE,
+                    displayMode: "EXPANDED"
+
+                }
+            ]
+        };
+
+        var myIgvBrowser = igv.createBrowser(div, options);
+        myIgvBrowser.on('locuschange', function (referenceFrame, label) {
+            window.location.replace(HASH_PREFIX + label);
+        });
+
+    });
+
+</script>
+
+</body>
+
+</html>

@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="">
+    <meta name="author" content="">
+    <link rel="shortcut icon" href="//igv.org/web/img/favicon.ico">
+    <title>Integrative Genomics Viewer</title>
+
+    <!-- Bootstrap CSS - NOT REQUIRED FOR IGV -->
+    <link rel="stylesheet" type="text/css" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.4/css/bootstrap.min.css">
+
+    <!-- jQuery UI CSS -->
+    <link rel="stylesheet" type="text/css"
+          href="//ajax.googleapis.com/ajax/libs/jqueryui/1.11.2/themes/smoothness/jquery-ui.css"/>
+
+    <!-- Font Awesome CSS -->
+    <link rel="stylesheet" type="text/css" href="//maxcdn.bootstrapcdn.com/font-awesome/4.2.0/css/font-awesome.min.css">
+
+    <!-- IGV CSS -->
+    <link rel="stylesheet" type="text/css" href="//igv.org/web/release/1.0.0-rc1/igv-1.0.0-rc1.css">
+
+    <!-- jQuery JS -->
+    <script type="text/javascript" src="//ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
+    <script type="text/javascript" src="//ajax.googleapis.com/ajax/libs/jqueryui/1.11.2/jquery-ui.min.js"></script>
+
+    <!-- Bootstrap JS -  NOT REQUIRED FOR IGV -->
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.4/js/bootstrap.min.js"></script>
+
+    <!-- IGV JS-->
+    <script type="text/javascript" src="../../dist/igv.js"></script>
+
+</head>
+
+<body role="document">
+
+<div class="jumbotron">
+    <div class="container">
+        <h2>IGV.js <code>trackclick</code> Event Example</h2>
+        <p>In this example we show how to use the <code>trackclick</code> event to customize the contents of the gene
+            track pop-over. To do this, we subscribe to the <code>trackclick</code> event and return custom pop-over HTML to
+            override the default appearance.
+        </p>
+        <h3>Try it out:</h3>
+        <ol>
+            <li>Click on any feature on the gene track.</li>
+            <li>Notice that the pop-over text has been customized to include a link.</li>
+        </ol>
+    </div>
+</div>
+
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-sm-12" id="igvDiv"></div>
+    </div>
+</div>
+<!-- container -->
+
+<div class="container-fluid">
+
+    <footer>
+        <p></p>
+    </footer>
+
+</div>
+<!-- container -->
+
+<script type="text/javascript">
+
+    $(document).ready(function () {
+
+        var div = $("#igvDiv")[0],
+                options = {
+                    showNavigation: true,
+                    locus: "chr1:155,160,475-155,184,282",
+                    reference: {
+                        id: "hg19"
+                    },
+                    tracks: [
+                        {
+                            name: "Genes",
+                            url: "//s3.amazonaws.com/igv.broadinstitute.org/annotations/hg19/genes/gencode.v18.collapsed.bed",
+                            indexURL: "//s3.amazonaws.com/igv.broadinstitute.org/annotations/hg19/genes/gencode.v18.collapsed.bed.idx",
+                            order: Number.MAX_VALUE,
+                            displayMode: "EXPANDED"
+
+                        }
+                    ]
+                };
+
+        var myIgvBrowser = igv.createBrowser(div, options);
+
+        myIgvBrowser.on('trackclick', function (track, popoverData) {
+            var markup = "<table class=\"igv-popover-table\">";
+
+            // Don't show a pop-over when there's no data.
+            if (!popoverData || !popoverData.length) {
+                return false;
+            }
+
+            popoverData.forEach(function (nameValue) {
+                if (nameValue.name) {
+                    var value = nameValue.name === 'Name'
+                        ? '<a href="http://uswest.ensembl.org/Multi/Search/Results?q=' + nameValue.value + '">' + nameValue.value + '</a>'
+                        : nameValue.value;
+
+                    markup += "<tr><td class=\"igv-popover-td\">"
+                            + "<div class=\"igv-popoverNameValue\">"
+                            + "<span class=\"igv-popoverName\">" + nameValue.name + "</span>"
+                            + "<span class=\"igv-popoverValue\">" + value + "</span>"
+                            + "</div>" + "</td></tr>";
+                }
+                else {
+                    // not a name/value pair
+                    markup += "<tr><td>" + nameValue.toString() + "</td></tr>";
+                }
+            });
+
+            markup += "</table>";
+
+            // By returning a string from the trackclick handler we're asking IGV to use our custom HTML in its pop-over.
+            return markup;
+        });
+
+    });
+
+</script>
+
+</body>
+
+</html>

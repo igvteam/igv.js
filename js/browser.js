@@ -51,8 +51,10 @@ var igv = (function (igv) {
             dragThreshold: 3,
             defaultColor: "rgb(0,0,150)",
             doubleClickDelay: options.doubleClickDelay || 500
-        }
+        };
 
+        // Map of event name -> [ handlerFn, ... ]
+        this.eventHandlers = {};
 
         window.onresize = igv.throttle(function () {
             igv.browser.resize();
@@ -442,6 +444,7 @@ var igv = (function (igv) {
             this.windowSizePanel.update(Math.floor(end - referenceFrame.start));
         }
 
+        this.fireEvent('locuschange', [referenceFrame, str]);
     };
 
     /**
@@ -1041,6 +1044,40 @@ var igv = (function (igv) {
 
     };
 
+    igv.Browser.prototype.on = function(eventName, fn) {
+        if (!this.eventHandlers[eventName]) {
+            this.eventHandlers[eventName] = [];
+        }
+        this.eventHandlers[eventName].push(fn);
+    };
+
+    igv.Browser.prototype.un = function(eventName, fn) {
+        if (!this.eventHandlers[eventName]) {
+            return;
+        }
+
+        var callbackIndex = this.eventHandlers[eventName].indexOf(fn);
+        if (callbackIndex !== -1) {
+            this.eventHandlers[eventName].splice(callbackIndex, 1);
+        }
+    };
+
+    igv.Browser.prototype.fireEvent = function(eventName, args, thisObj) {
+        if (!this.eventHandlers[eventName]) {
+            return;
+        }
+
+        var scope = thisObj || window;
+        for (var i = 0, l = this.eventHandlers[eventName].length; i < l; i++) {
+            var item = this.eventHandlers[eventName][i];
+            var result = item.apply(scope, args);
+
+            // If any of the handlers return any value, then return it
+            if (result !== undefined) {
+                return result;
+            }
+        }
+    };
 
     return igv;
 })
