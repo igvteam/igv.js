@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="">
+    <meta name="author" content="">
+    <link rel="shortcut icon" href="//igv.org/web/img/favicon.ico">
+    <title>Integrative Genomics Viewer</title>
+
+    <!-- Bootstrap CSS - NOT REQUIRED FOR IGV -->
+    <link rel="stylesheet" type="text/css" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.4/css/bootstrap.min.css">
+
+    <!-- jQuery UI CSS -->
+    <link rel="stylesheet" type="text/css"
+          href="//ajax.googleapis.com/ajax/libs/jqueryui/1.11.2/themes/smoothness/jquery-ui.css"/>
+
+    <!-- Font Awesome CSS -->
+    <link rel="stylesheet" type="text/css" href="//maxcdn.bootstrapcdn.com/font-awesome/4.2.0/css/font-awesome.min.css">
+
+    <!-- IGV CSS -->
+    <link rel="stylesheet" type="text/css" href="//igv.org/web/release/1.0.0-rc1/igv-1.0.0-rc1.css">
+
+    <!-- jQuery JS -->
+    <script type="text/javascript" src="//ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
+    <script type="text/javascript" src="//ajax.googleapis.com/ajax/libs/jqueryui/1.11.2/jquery-ui.min.js"></script>
+
+    <!-- Bootstrap JS -  NOT REQUIRED FOR IGV -->
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.4/js/bootstrap.min.js"></script>
+
+    <!-- IGV JS-->
+    <script type="text/javascript" src="../../dist/igv.js"></script>
+
+</head>
+
+<body role="document">
+
+<div class="jumbotron">
+    <div class="container">
+        <h2>IGV.js <code>trackclick</code> Event Example 2</h2>
+        <p>In this example we show how to use the <code>trackclick</code> event to disable the default pop-over. Instead
+            we're going to use it as a hook to implement custom click behavior.
+        </p>
+        <h3>Try it out:</h3>
+        <ol>
+            <li>Click on any features on the gene track.</li>
+            <li>Notice the genes you've clicked get added to the list on the right.</li>
+        </ol>
+    </div>
+</div>
+
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-sm-9" id="igvDiv"></div>
+        <div class="col-sm-3 bg-info" style="min-height: 500px;">
+            <h4>Selected Genes</h4>
+            <ul id="geneList">
+
+            </ul>
+        </div>
+    </div>
+</div>
+<!-- container -->
+
+<div class="container-fluid">
+
+    <footer>
+        <p></p>
+    </footer>
+
+</div>
+<!-- container -->
+
+<script type="text/javascript">
+
+    $(document).ready(function () {
+
+        var div = $("#igvDiv")[0],
+                options = {
+                    showNavigation: true,
+                    locus: "chr1:155,160,475-155,184,282",
+                    reference: {
+                        id: "hg19"
+                    },
+                    tracks: [
+                        {
+                            name: "Genes",
+                            url: "//s3.amazonaws.com/igv.broadinstitute.org/annotations/hg19/genes/gencode.v18.collapsed.bed",
+                            indexURL: "//s3.amazonaws.com/igv.broadinstitute.org/annotations/hg19/genes/gencode.v18.collapsed.bed.idx",
+                            order: Number.MAX_VALUE,
+                            displayMode: "EXPANDED"
+
+                        }
+                    ]
+                };
+
+        var myIgvBrowser = igv.createBrowser(div, options);
+
+        var genesInList = {};
+
+        myIgvBrowser.on('trackclick', function (track, popoverData) {
+            var symbol = null;
+            popoverData.forEach(function (nameValue) {
+                if (nameValue.name && nameValue.name === 'Name') {
+                    symbol = nameValue.value;
+                }
+            });
+
+            if (symbol && !genesInList[symbol]) {
+                genesInList[symbol] = true;
+                $("#geneList").append('<li><a href="http://uswest.ensembl.org/Multi/Search/Results?q=' + symbol+ '">' + symbol + '</a></li>');
+            }
+
+            // Prevent default pop-over behavior
+            return false;
+        });
+
+    });
+
+</script>
+
+</body>
+
+</html>
