@@ -39,7 +39,7 @@ module.exports = function (grunt) {
                 src: 'dist/igv.js',
                 dest: 'dist/igv.min.js'
             }
-        },
+        }
 
     });
 

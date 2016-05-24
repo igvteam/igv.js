@@ -614,7 +614,6 @@ var igv = (function (igv) {
 
             if (!referenceFrame) return;
 
-            var delta = time - lastClickTime;
             if (time - lastClickTime < doubleClickDelay) {
                 // This is a double-click
 
@@ -660,9 +659,20 @@ var igv = (function (igv) {
                             }
                             xOrigin = Math.round(referenceFrame.toPixels((trackView.tile.startBP - referenceFrame.start)));
                             popupData = trackView.track.popupData(genomicLocation, canvasCoords.x - xOrigin, canvasCoords.y);
-                            if (popupData && popupData.length > 0) {
-                                igv.popover.presentTrackPopup(e.pageX, e.pageY, igv.formatPopoverText(popupData), false);
+
+                            var handlerResult = igv.browser.fireEvent('trackclick', [trackView.track, popupData]);
+
+                            // (Default) no external handlers or no input from handlers
+                            if (handlerResult === undefined) {
+                                if (popupData && popupData.length > 0) {
+                                    igv.popover.presentTrackPopup(e.pageX, e.pageY, igv.formatPopoverText(popupData), false);
+                                }
+                            // A handler returned custom popover HTML to override default format
+                            } else if (typeof handlerResult === 'string') {
+                                igv.popover.presentTrackPopup(e.pageX, e.pageY, handlerResult, false);
                             }
+                            // If handler returned false then we do nothing and let the handler manage the click
+
                             mouseDownX = undefined;
                             popupTimer = undefined;
                         },
