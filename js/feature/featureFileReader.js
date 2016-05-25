@@ -283,7 +283,9 @@ var igv = (function (igv) {
                     }
                     else {
                         loadFeaturesNoIndex.call(self, undefined).then(function (features) {
-                            fulfill(self.header, features) // Unfortunate use of side affect here
+                            var header = self.header || {};
+                            header.features = features;
+                            fulfill(header);
                         }).catch(reject);
                     }
                 });
