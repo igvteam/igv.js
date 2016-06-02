@@ -73,16 +73,20 @@ var igv = (function (igv) {
             } else {
                 if (typeof self.reader.readHeader === "function") {
 
-                    self.reader.readHeader().then(function (header, features) {
-                        // Non-indexed readers will return features as a side effect.  This is an important performance hack
-                        if (features) {
-                            // Assign overlapping features to rows
-                            packFeatures(features, maxRows);
-                            self.featureCache = new igv.FeatureCache(features);
+                    self.reader.readHeader().then(function (header) {
+                        // Non-indexed readers will return features as a side effect.  This is an important,
+                        // if unfortunate, performance hack
+                        if(header) {
+                            var features = header.features;
+                            if (features) {
+                                // Assign overlapping features to rows
+                                packFeatures(features, maxRows);
+                                self.featureCache = new igv.FeatureCache(features);
 
-                            // If track is marked "searchable"< cache features by name -- use this with caution, memory intensive
-                            if (self.config.searchable) {
-                                addFeaturesToDB(features);
+                                // If track is marked "searchable"< cache features by name -- use this with caution, memory intensive
+                                if (self.config.searchable) {
+                                    addFeaturesToDB(features);
+                                }
                             }
                         }
 
