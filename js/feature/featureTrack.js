@@ -70,9 +70,7 @@ var igv = (function (igv) {
             this.arrowSpacing = 30;
 
             // adjust label positions to make sure they're always visible
-            if (this.labelDisplayMode !== "SLANT") {
-                monitorTrackDrag(this);
-            }
+            monitorTrackDrag(this);
         }
     };
 
@@ -276,40 +274,25 @@ var igv = (function (igv) {
     };
 
     /**
-     *
-     * @param track
      * @param feature
      * @param bpStart  genomic location of the left edge of the current canvas
      * @param xScale  scale in base-pairs per pixel
      * @returns {{px: number, px1: number, pw: number, h: number, py: number}}
      */
-    function calculateFeatureCoordinates(track, feature, bpStart, xScale) {
+    function calculateFeatureCoordinates(feature, bpStart, xScale) {
         var px = Math.round((feature.start - bpStart) / xScale),
             px1 = Math.round((feature.end - bpStart) / xScale),
-            pw = px1 - px,
-            h = track.featureHeight,
-            py;
+            pw = px1 - px;
 
         if (pw < 3) {
             pw = 3;
             px -= 1;
         }
 
-        if (track.displayMode === "SQUISHED" && feature.row != undefined) {
-            h = track.featureHeight / 2;
-            py = track.expandedCallHeight * feature.row + 2;
-        } else if (track.displayMode === "EXPANDED" && feature.row != undefined) {
-            py = track.squishedCallHeight * feature.row + 5;
-        } else {  // collapsed
-            py = 5;
-        }
-
         return {
             px: px,
             px1: px1,
-            pw: pw,
-            h: h,
-            py: py
+            pw: pw
         };
     }
 
@@ -323,9 +306,10 @@ var igv = (function (igv) {
      */
     function renderFeature(feature, bpStart, xScale, pixelHeight, ctx) {
 
-        var x, e, exonCount, cy, direction, exon, ePx, ePx1, ePxU, ePw, py2, h2,
+        var x, e, exonCount, cy, direction, exon, ePx, ePx1, ePxU, ePw, py2, h2, py,
             windowX, windowX1,
-            coord = calculateFeatureCoordinates(this, feature, bpStart, xScale),
+            coord = calculateFeatureCoordinates(feature, bpStart, xScale),
+            h = this.featureHeight,
             step = this.arrowSpacing,
             color = this.color;
 
@@ -344,15 +328,24 @@ var igv = (function (igv) {
         ctx.fillStyle = color;
         ctx.strokeStyle = color;
 
-        cy = coord.py + coord.h / 2;
-        h2 = coord.h / 2;
+        if (this.displayMode === "SQUISHED" && feature.row != undefined) {
+            h = this.featureHeight / 2;
+            py = this.expandedCallHeight * feature.row + 2;
+        } else if (this.displayMode === "EXPANDED" && feature.row != undefined) {
+            py = this.squishedCallHeight * feature.row + 5;
+        } else {  // collapsed
+            py = 5;
+        }
+
+        cy = py + h / 2;
+        h2 = h / 2;
         py2 = cy - h2 / 2;
 
         exonCount = feature.exons ? feature.exons.length : 0;
 
         if (exonCount == 0) {
             // single-exon transcript
-            ctx.fillRect(coord.px, coord.py, coord.pw, coord.h);
+            ctx.fillRect(coord.px, py, coord.pw, h);
 
         }
         else {
@@ -390,7 +383,7 @@ var igv = (function (igv) {
                         ePx1 = ePxU;
                     }
 
-                    ctx.fillRect(ePx, coord.py, ePw, coord.h);
+                    ctx.fillRect(ePx, py, ePw, h);
 
                     // Arrows
                     if (ePw > step + 5) {
@@ -411,7 +404,7 @@ var igv = (function (igv) {
         windowX = Math.round(igv.browser.referenceFrame.toPixels(igv.browser.referenceFrame.start - bpStart));
         windowX1 = windowX + igv.browser.trackViewportWidth();
 
-        renderFeatureLabels.call(this, ctx, feature, coord.px, coord.px1, coord.py, windowX, windowX1);
+        renderFeatureLabels.call(this, ctx, feature, coord.px, coord.px1, py, windowX, windowX1);
     }
 
     /**
@@ -479,14 +472,7 @@ var igv = (function (igv) {
             if (!track.trackView || !track.trackView.tile || track.displayMode === "SQUISHED") {
                 return;
             }
-
-            var chr = track.trackView.tile.chr,
-                bpStart = track.trackView.tile.startBP,
-                bpEnd = track.trackView.tile.endBP,
-                xScale = track.trackView.tile.scale,
-                ctx = track.trackView.tile.image.getContext("2d");
-
-            updateFeatureLabels.call(track, ctx, chr, bpStart, bpEnd, xScale);
+            track.trackView.update();
         }, 500);
         
         var unSubscribe = function (removedTrack) {
@@ -501,55 +487,6 @@ var igv = (function (igv) {
     }
 
     /**
-     * @param ctx
-     * @param chr
-     * @param bpStart  genomic location of the left edge of the current canvas
-     * @param bpEnd     genomic location of the right edge of the current canvas
-     * @param xScale    scale in base-pairs per pixel
-     */
-    function updateFeatureLabels(ctx, chr, bpStart, bpEnd, xScale) {
-        var self = this,
-            windowWidth = igv.browser.trackViewportWidth(),
-            windowX = Math.round(igv.browser.referenceFrame.toPixels(igv.browser.referenceFrame.start - bpStart)),
-            windowX1 = windowX + windowWidth,
-            windowStart = igv.browser.referenceFrame.start,
-            windowEnd = windowStart + igv.browser.referenceFrame.toBP(windowWidth);
-
-        this.getFeatures(chr, bpStart, bpEnd)
-            .then(function (features) {
-                var feature, i, coord, repaintQueue = [];
-
-                // In order to avoid a mess with overlapping labels in collapsed scenario we do two passes:
-                // first pass just clears space for labels
-                for (i = 0; i < features.length; i++) {
-                    feature = features[i];
-
-                    if (feature.end < windowStart) continue;
-                    if (feature.start > windowEnd) break;
-
-                    coord = calculateFeatureCoordinates(self, feature, bpStart, xScale);
-                    repaintQueue.push({
-                        feature: feature,
-                        coord: coord
-                    });
-                    //TODO: should this be a igv.graphics method?
-                    ctx.clearRect(coord.px, getFeatureLabelY(coord.py) - 9, coord.px1 - coord.px, 9);
-                }
-
-                if (repaintQueue.length) {
-                    // Second pass repaints labels in appropriate locations
-                    for (i = 0; i < repaintQueue.length; i++) {
-                        feature = repaintQueue[i].feature;
-                        coord = repaintQueue[i].coord;
-                        renderFeatureLabels.call(self, ctx, feature, coord.px, coord.px1, coord.py, windowX, windowX1);
-                    }
-
-                    self.trackView.paintImage();
-                }
-            });
-    }
-
-    /**
      *
      * @param variant
      * @param bpStart  genomic location of the left edge of the current canvas
@@ -559,19 +496,10 @@ var igv = (function (igv) {
      */
     function renderVariant(variant, bpStart, xScale, pixelHeight, ctx) {
 
-        var px, px1, pw,
+        var coord = calculateFeatureCoordinates(variant, bpStart, xScale),
             py = 20,
             h = 10,
             style;
-
-
-        px = Math.round((variant.start - bpStart) / xScale);
-        px1 = Math.round((variant.end - bpStart) / xScale);
-        pw = Math.max(1, px1 - px);
-        if (pw < 3) {
-            pw = 3;
-            px -= 1;
-        }
 
         switch (variant.genotype) {
             case "HOMVAR":
@@ -585,10 +513,7 @@ var igv = (function (igv) {
         }
 
         ctx.fillStyle = style;
-
-        ctx.fillRect(px, py, pw, h);
-
-
+        ctx.fillRect(coord.px, py, coord.pw, h);
     }
 
 
@@ -602,19 +527,8 @@ var igv = (function (igv) {
      */
     function renderFusionJuncSpan(feature, bpStart, xScale, pixelHeight, ctx) {
 
-
-        //console.log("renderFusionJuncSpan");
-
-        var px = Math.round((feature.start - bpStart) / xScale);
-        var px1 = Math.round((feature.end - bpStart) / xScale);
-        pw = px1 - px;
-        if (pw < 3) {
-            pw = 3;
-            px -= 1;
-        }
-
-        var py = 5, h = 10; // defaults borrowed from renderFeature above
-
+        var coord = calculateFeatureCoordinates(variant, bpStart, xScale),
+            py = 5, h = 10; // defaults borrowed from renderFeature above
 
         var rowHeight = (this.displayMode === "EXPANDED") ? this.squishedCallHeight : this.expandedCallHeight;
 
@@ -631,7 +545,7 @@ var igv = (function (igv) {
         var top_y = cy - 0.5 * rowHeight;
         var bottom_y = cy + 0.5 * rowHeight;
 
-        //igv.Canvas.strokeLine.call(ctx, px, cy, px1, cy); // center line for introns
+        //igv.Canvas.strokeLine.call(ctx, coord.px, cy, coord.px1, cy); // center line for introns
 
         // draw the junction arc
         var junction_left_px = Math.round((feature.junction_left - bpStart) / xScale);
