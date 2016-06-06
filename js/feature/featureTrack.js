@@ -473,7 +473,7 @@ var igv = (function (igv) {
                 return;
             }
             track.trackView.update();
-        }, 500);
+        }, 100);
         
         var unSubscribe = function (removedTrack) {
             if (track === removedTrack) {
@@ -482,7 +482,7 @@ var igv = (function (igv) {
             }
         };
 
-        igv.browser.on('trackdrag', onDragEnd);
+        igv.browser.on('trackdragend', onDragEnd);
         igv.browser.on('trackremoved', unSubscribe);
     }
 
