@@ -68,6 +68,9 @@ var igv = (function (igv) {
         else {
             this.render = renderFeature;
             this.arrowSpacing = 30;
+
+            // adjust label positions to make sure they're always visible
+            monitorTrackDrag(this);
         }
     };
 
@@ -94,7 +97,7 @@ var igv = (function (igv) {
                 fulfill(null);
             }
         });
-    }
+    };
 
     igv.FeatureTrack.prototype.getFeatures = function (chr, bpStart, bpEnd) {
 
@@ -105,7 +108,7 @@ var igv = (function (igv) {
             self.featureSource.getFeatures(chr, bpStart, bpEnd).then(fulfill).catch(reject);
 
         });
-    }
+    };
 
 
     /**
@@ -271,6 +274,29 @@ var igv = (function (igv) {
     };
 
     /**
+     * @param feature
+     * @param bpStart  genomic location of the left edge of the current canvas
+     * @param xScale  scale in base-pairs per pixel
+     * @returns {{px: number, px1: number, pw: number, h: number, py: number}}
+     */
+    function calculateFeatureCoordinates(feature, bpStart, xScale) {
+        var px = Math.round((feature.start - bpStart) / xScale),
+            px1 = Math.round((feature.end - bpStart) / xScale),
+            pw = px1 - px;
+
+        if (pw < 3) {
+            pw = 3;
+            px -= 1;
+        }
+
+        return {
+            px: px,
+            px1: px1,
+            pw: pw
+        };
+    }
+
+    /**
      *
      * @param feature
      * @param bpStart  genomic location of the left edge of the current canvas
@@ -278,10 +304,12 @@ var igv = (function (igv) {
      * @param pixelHeight  pixel height of the current canvas
      * @param ctx  the canvas 2d context
      */
-
     function renderFeature(feature, bpStart, xScale, pixelHeight, ctx) {
 
-        var px, px1, pw, x, e, exonCount, cy, direction, exon, ePx, ePx1, ePxU, ePw, py, py2, h, h2, transform, fontStyle,
+        var x, e, exonCount, cy, direction, exon, ePx, ePx1, ePxU, ePw, py2, h2, py,
+            windowX, windowX1,
+            coord = calculateFeatureCoordinates(feature, bpStart, xScale),
+            h = this.featureHeight,
             step = this.arrowSpacing,
             color = this.color;
 
@@ -300,20 +328,10 @@ var igv = (function (igv) {
         ctx.fillStyle = color;
         ctx.strokeStyle = color;
 
-        px = Math.round((feature.start - bpStart) / xScale);
-        px1 = Math.round((feature.end - bpStart) / xScale);
-        pw = px1 - px;
-        if (pw < 3) {
-            pw = 3;
-            px -= 1;
-        }
-
-        h = this.featureHeight;
         if (this.displayMode === "SQUISHED" && feature.row != undefined) {
             h = this.featureHeight / 2;
             py = this.expandedCallHeight * feature.row + 2;
-        }
-        else if (this.displayMode === "EXPANDED" && feature.row != undefined) {
+        } else if (this.displayMode === "EXPANDED" && feature.row != undefined) {
             py = this.squishedCallHeight * feature.row + 5;
         } else {  // collapsed
             py = 5;
@@ -327,16 +345,15 @@ var igv = (function (igv) {
 
         if (exonCount == 0) {
             // single-exon transcript
-            ctx.fillRect(px, py, pw, h);
+            ctx.fillRect(coord.px, py, coord.pw, h);
 
         }
         else {
             // multi-exon transcript
-
-            igv.graphics.strokeLine(ctx, px + 1, cy, px1 - 1, cy); // center line for introns
+            igv.graphics.strokeLine(ctx, coord.px + 1, cy, coord.px1 - 1, cy); // center line for introns
 
             direction = feature.strand == '+' ? 1 : -1;
-            for (x = px + step / 2; x < px1; x += step) {
+            for (x = coord.px + step / 2; x < coord.px1; x += step) {
                 // draw arrowheads along central line indicating transcribed orientation
                 igv.graphics.strokeLine(ctx, x - direction * 2, cy - 2, x, cy);
                 igv.graphics.strokeLine(ctx, x - direction * 2, cy + 2, x, cy);
@@ -384,39 +401,89 @@ var igv = (function (igv) {
                 }
             }
         }
+        windowX = Math.round(igv.browser.referenceFrame.toPixels(igv.browser.referenceFrame.start - bpStart));
+        windowX1 = windowX + igv.browser.trackViewportWidth();
 
-        //////////////////////
-        // add feature labels
-        //////////////////////
+        renderFeatureLabels.call(this, ctx, feature, coord.px, coord.px1, py, windowX, windowX1);
+    }
 
-        fontStyle = {font: '10px PT Sans', fillStyle: this.color, strokeStyle: this.color};
+    /**
+     * @param ctx       the canvas 2d context
+     * @param feature
+     * @param featureX  feature start x-coordinate
+     * @param featureX1 feature end x-coordinate
+     * @param featureY  feature y-coordinate
+     * @param windowX   visible window start x-coordinate
+     * @param windowX1  visible window end x-coordinate
+     */
+    function renderFeatureLabels(ctx, feature, featureX, featureX1, featureY, windowX, windowX1) {
+        var geneColor, geneFontStyle, transform,
+            boxX, boxX1,    // label should be centered between these two x-coordinates
+            labelX, labelY,
+            textFitsInBox;
 
-        var geneColor;
+        // feature outside of viewable window
+        if (featureX1 < windowX || featureX > windowX1) {
+            boxX = featureX;
+            boxX1 = featureX1;
+        } else {
+            // center label within visible portion of the feature
+            boxX = Math.max(featureX, windowX);
+            boxX1 = Math.min(featureX1, windowX1);
+        }
 
         if (igv.browser.selection && "genes" === this.config.type && feature.name !== undefined) {
             // TODO -- for gtex, figure out a better way to do this
             geneColor = igv.browser.selection.colorForGene(feature.name);
         }
 
+        textFitsInBox = (boxX1 - boxX) > ctx.measureText(feature.name).width;
 
-        if (((px1 - px) > 20 || geneColor) && this.displayMode != "SQUISHED" && feature.name !== undefined) {
-
-            var geneFontStyle;
-            if (geneColor) {
-                geneFontStyle = {font: '10px PT Sans', fillStyle: geneColor, strokeStyle: geneColor}
-            }
-            else {
-                geneFontStyle = fontStyle;
-            }
-
+        if ((textFitsInBox || geneColor) && this.displayMode != "SQUISHED" && feature.name !== undefined) {
+            geneFontStyle = {
+                font: '10px PT Sans',
+                textAlign: 'center',
+                fillStyle: geneColor || this.color,
+                strokeStyle: geneColor || this.color
+            };
 
             if (this.displayMode === "COLLAPSED" && this.labelDisplayMode === "SLANT") {
                 transform = {rotate: {angle: 45}};
+                delete geneFontStyle.textAlign;
             }
 
-            var labelY = transform ? py + 20 : py + 25;
-            igv.graphics.fillText(ctx, feature.name, px + ((px1 - px) / 2), labelY, geneFontStyle, transform);
+            labelX = boxX + ((boxX1 - boxX) / 2);
+            labelY = getFeatureLabelY(featureY, transform);
+
+            igv.graphics.fillText(ctx, feature.name, labelX, labelY, geneFontStyle, transform);
         }
+    }
+
+    function getFeatureLabelY (featureY, transform) {
+        return transform ? featureY + 20 : featureY + 25;
+    }
+
+    /**
+     * Monitors track drag events, updates label position to ensure that they're always visible.
+     * @param track
+     */
+    function monitorTrackDrag(track) {
+        var onDragEnd = igv.throttle(function () {
+            if (!track.trackView || !track.trackView.tile || track.displayMode === "SQUISHED") {
+                return;
+            }
+            track.trackView.update();
+        }, 100);
+        
+        var unSubscribe = function (removedTrack) {
+            if (track === removedTrack) {
+                igv.browser.un('trackdrag', onDragEnd);
+                igv.browser.un('trackremoved', unSubscribe);
+            }
+        };
+
+        igv.browser.on('trackdragend', onDragEnd);
+        igv.browser.on('trackremoved', unSubscribe);
     }
 
     /**
@@ -429,19 +496,10 @@ var igv = (function (igv) {
      */
     function renderVariant(variant, bpStart, xScale, pixelHeight, ctx) {
 
-        var px, px1, pw,
+        var coord = calculateFeatureCoordinates(variant, bpStart, xScale),
             py = 20,
             h = 10,
             style;
-
-
-        px = Math.round((variant.start - bpStart) / xScale);
-        px1 = Math.round((variant.end - bpStart) / xScale);
-        pw = Math.max(1, px1 - px);
-        if (pw < 3) {
-            pw = 3;
-            px -= 1;
-        }
 
         switch (variant.genotype) {
             case "HOMVAR":
@@ -455,10 +513,7 @@ var igv = (function (igv) {
         }
 
         ctx.fillStyle = style;
-
-        ctx.fillRect(px, py, pw, h);
-
-
+        ctx.fillRect(coord.px, py, coord.pw, h);
     }
 
 
@@ -472,19 +527,8 @@ var igv = (function (igv) {
      */
     function renderFusionJuncSpan(feature, bpStart, xScale, pixelHeight, ctx) {
 
-
-        //console.log("renderFusionJuncSpan");
-
-        var px = Math.round((feature.start - bpStart) / xScale);
-        var px1 = Math.round((feature.end - bpStart) / xScale);
-        pw = px1 - px;
-        if (pw < 3) {
-            pw = 3;
-            px -= 1;
-        }
-
-        var py = 5, h = 10; // defaults borrowed from renderFeature above
-
+        var coord = calculateFeatureCoordinates(feature, bpStart, xScale),
+            py = 5, h = 10; // defaults borrowed from renderFeature above
 
         var rowHeight = (this.displayMode === "EXPANDED") ? this.squishedCallHeight : this.expandedCallHeight;
 
@@ -501,7 +545,7 @@ var igv = (function (igv) {
         var top_y = cy - 0.5 * rowHeight;
         var bottom_y = cy + 0.5 * rowHeight;
 
-        //igv.Canvas.strokeLine.call(ctx, px, cy, px1, cy); // center line for introns
+        //igv.Canvas.strokeLine.call(ctx, coord.px, cy, coord.px1, cy); // center line for introns
 
         // draw the junction arc
         var junction_left_px = Math.round((feature.junction_left - bpStart) / xScale);
