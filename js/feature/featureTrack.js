@@ -459,7 +459,7 @@ var igv = (function (igv) {
         }
     }
 
-    function getFeatureLabelY (featureY, transform) {
+    function getFeatureLabelY(featureY, transform) {
         return transform ? featureY + 20 : featureY + 25;
     }
 
@@ -468,13 +468,13 @@ var igv = (function (igv) {
      * @param track
      */
     function monitorTrackDrag(track) {
-        var onDragEnd = igv.throttle(function () {
+        var onDragEnd = function () {
             if (!track.trackView || !track.trackView.tile || track.displayMode === "SQUISHED") {
                 return;
             }
             track.trackView.update();
-        }, 100);
-        
+        }
+
         var unSubscribe = function (removedTrack) {
             if (track === removedTrack) {
                 igv.browser.un('trackdrag', onDragEnd);
