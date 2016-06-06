@@ -245,7 +245,7 @@ var igv = (function (igv) {
         this.reorderTracks();
 
         trackView.resize();
-    }
+    };
 
     igv.Browser.prototype.reorderTracks = function () {
 
@@ -266,7 +266,7 @@ var igv = (function (igv) {
 
         });
 
-    }
+    };
 
     igv.Browser.prototype.removeTrack = function (track) {
 
@@ -280,11 +280,9 @@ var igv = (function (igv) {
         }
 
         if (trackPanelRemoved) {
-
-            this.trackViews.splice(this.trackViews.indexOf(trackPanelRemoved), 1);
-
+            this.trackViews.splice(i, 1);
             this.trackContainerDiv.removeChild(trackPanelRemoved.trackDiv);
-
+            this.fireEvent('trackremoved', [trackPanelRemoved.track]);
         }
 
     };
@@ -823,6 +821,7 @@ var igv = (function (igv) {
 
         var isRulerTrack = false,
             isMouseDown = false,
+            isDragging = false,
             lastMouseX = undefined,
             mouseDownX = undefined;
 
@@ -869,6 +868,8 @@ var igv = (function (igv) {
                         return;
                     }
 
+                    isDragging = true;
+
                     referenceFrame.shiftPixels(lastMouseX - coords.x);
 
                     // TODO -- clamping code below is broken for regular IGV => disabled for now, needs fixed
@@ -890,6 +891,7 @@ var igv = (function (igv) {
 
 
                     igv.browser.repaint();
+                    igv.browser.fireEvent('trackdrag');
                 }
 
                 lastMouseX = coords.x;
@@ -898,26 +900,25 @@ var igv = (function (igv) {
 
         }, 10));
 
-        $(trackContainerDiv).mouseup(function (e) {
+        $(trackContainerDiv).mouseup(mouseUpOrOut);
+
+        $(trackContainerDiv).mouseleave(mouseUpOrOut);
+
+        function mouseUpOrOut() {
 
             if (isRulerTrack) {
                 return;
             }
 
-            mouseDownX = undefined;
-            isMouseDown = false;
-            lastMouseX = undefined;
-        });
-
-        $(trackContainerDiv).mouseleave(function (e) {
-
-            if (isRulerTrack) {
-                return;
+            if (isDragging) {
+                igv.browser.fireEvent('trackdragend');
+                isDragging = false;
             }
+
+            mouseDownX = undefined;
             isMouseDown = false;
             lastMouseX = undefined;
-            mouseDownX = undefined;
-        });
+        }
 
     }
 
@@ -955,7 +956,7 @@ var igv = (function (igv) {
                 config.type = "gwas";
             }
 
-            if("FusionJuncSpan" === config.type) {
+            if ("FusionJuncSpan" === config.type) {
                 config.format = "FusionJuncSpan";
             }
         }
@@ -1044,14 +1045,14 @@ var igv = (function (igv) {
 
     };
 
-    igv.Browser.prototype.on = function(eventName, fn) {
+    igv.Browser.prototype.on = function (eventName, fn) {
         if (!this.eventHandlers[eventName]) {
             this.eventHandlers[eventName] = [];
         }
         this.eventHandlers[eventName].push(fn);
     };
 
-    igv.Browser.prototype.un = function(eventName, fn) {
+    igv.Browser.prototype.un = function (eventName, fn) {
         if (!this.eventHandlers[eventName]) {
             return;
         }
@@ -1062,7 +1063,7 @@ var igv = (function (igv) {
         }
     };
 
-    igv.Browser.prototype.fireEvent = function(eventName, args, thisObj) {
+    igv.Browser.prototype.fireEvent = function (eventName, args, thisObj) {
         if (!this.eventHandlers[eventName]) {
             return;
         }
