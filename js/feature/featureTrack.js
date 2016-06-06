@@ -527,7 +527,7 @@ var igv = (function (igv) {
      */
     function renderFusionJuncSpan(feature, bpStart, xScale, pixelHeight, ctx) {
 
-        var coord = calculateFeatureCoordinates(variant, bpStart, xScale),
+        var coord = calculateFeatureCoordinates(feature, bpStart, xScale),
             py = 5, h = 10; // defaults borrowed from renderFeature above
 
         var rowHeight = (this.displayMode === "EXPANDED") ? this.squishedCallHeight : this.expandedCallHeight;
