@@ -245,7 +245,7 @@ var igv = (function (igv) {
         this.reorderTracks();
 
         trackView.resize();
-    }
+    };
 
     igv.Browser.prototype.reorderTracks = function () {
 
@@ -266,7 +266,7 @@ var igv = (function (igv) {
 
         });
 
-    }
+    };
 
     igv.Browser.prototype.removeTrack = function (track) {
 
@@ -280,11 +280,9 @@ var igv = (function (igv) {
         }
 
         if (trackPanelRemoved) {
-
-            this.trackViews.splice(this.trackViews.indexOf(trackPanelRemoved), 1);
-
+            this.trackViews.splice(i, 1);
             this.trackContainerDiv.removeChild(trackPanelRemoved.trackDiv);
-
+            this.fireEvent('trackremoved', [trackPanelRemoved.track]);
         }
 
     };
@@ -890,6 +888,7 @@ var igv = (function (igv) {
 
 
                     igv.browser.repaint();
+                    igv.browser.fireEvent('trackdrag');
                 }
 
                 lastMouseX = coords.x;
