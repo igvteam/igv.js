@@ -109,6 +109,14 @@ var igv = (function (igv) {
 
         });
 
+        $(document).click(function (e) {
+            var target = e.target;
+            if (!igv.browser.div.contains(target)) {
+                // We've clicked outside the IGV div.  Close any open popovers.
+                igv.popover.hide();
+            }
+        });
+
 
         // DOM
         $(parentDiv).append($(rootDiv));
