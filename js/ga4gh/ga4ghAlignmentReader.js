@@ -43,17 +43,16 @@ var igv = (function (igv) {
     var DUPLICATE_READ_FLAG = 0x400;
     var SUPPLEMENTARY_ALIGNMENT_FLAG = 0x800;
 
-
     var CigarOperationTable = {
-        ALIGNMENT_MATCH: "M",
-        INSERT: "I",
-        DELETE: "D",
-        SKIP: "N",
-        CLIP_SOFT: "S",
-        CLIP_HARD: "H",
-        PAD: "P",
-        SEQUENCE_MATCH: "=",
-        SEQUENCE_MISMATCH: "X"
+        "ALIGNMENT_MATCH": "M",
+        "INSERT": "I",
+        "DELETE": "D",
+        "SKIP": "N",
+        "CLIP_SOFT": "S",
+        "CLIP_HARD": "H",
+        "PAD": "P",
+        "SEQUENCE_MATCH": "=",
+        "SEQUENCE_MISMATCH": "X"
     }
 
     igv.Ga4ghAlignmentReader = function (config) {
@@ -77,7 +76,20 @@ var igv = (function (igv) {
 
     igv.Ga4ghAlignmentReader.prototype.readAlignments = function (chr, bpStart, bpEnd) {
 
-        var self = this;
+
+        //ALIGNMENT_MATCH, INSERT, DELETE, SKIP, CLIP_SOFT, CLIP_HARD, PAD, SEQUENCE_MATCH, SEQUENCE_MISMATCH
+        var self = this,
+            cigarMap = {
+                "ALIGNMENT_MATCH": "M",
+                "INSERT": "I",
+                "DELETE": "D",
+                "SKIP": "N",
+                "CLIP_SOFT": "S",
+                "CLIP_HARD": "H",
+                "PAD": "P",
+                "SEQUENCE_MATCH": "=",
+                "SEQUENCE_MISMATCH": "X"
+            };
 
         return new Promise(function (fulfill, reject) {
 
@@ -246,9 +258,17 @@ var igv = (function (igv) {
 
                 return alignments;
 
-                // TODO -- implement me
+                // Encode a cigar string -- used for popup text
                 function encodeCigar(cigarArray) {
-                    return "";
+
+                    var cigarString = "";
+                    cigarArray.forEach(function (cigarUnit) {
+                        var op = CigarOperationTable[cigarUnit.operation],
+                            len = cigarUnit.operationLength;
+                        cigarString = cigarString + (len + op);
+                    });
+
+                    return cigarString;
                 }
 
                 // TODO -- implement me
@@ -268,9 +288,9 @@ var igv = (function (igv) {
                         cigarUnit = cigar[i];
 
                         opLtr = CigarOperationTable[cigarUnit.operation];
-                        opLen = parseInt(cigarUnit.operationLength);    // TODO -- this should be a long by the spec
+                        opLen = parseInt(cigarUnit.operationLength);    // Google represents long as a String
 
-                        if (opLtr == 'M' || opLtr == 'EQ' || opLtr == 'X' || opLtr == 'D' || opLtr == 'N' || opLtr == '=')
+                        if (opLtr === 'M' || opLtr === 'EQ' || opLtr === 'X' || opLtr === 'D' || opLtr === 'N' || opLtr === '=')
                             lengthOnRef += opLen;
 
                         cigarArray.push({len: opLen, ltr: opLtr});
@@ -302,6 +322,7 @@ var igv = (function (igv) {
                         pos = record.start,
                         len = cigarArray.length,
                         blockSeq,
+                        gapType,
                         blockQuals;
 
                     for (var i = 0; i < len; i++) {
@@ -315,36 +336,36 @@ var igv = (function (igv) {
                                 break; // ignore pads
                             case 'S' :
                                 seqOffset += c.len;
+                                gapType = 'S';
                                 break; // soft clip read bases
                             case 'N' :
                                 pos += c.len;
+                                gapType = 'N';
                                 break;  // reference skip
                             case 'D' :
                                 pos += c.len;
+                                gapType = 'D';
                                 break;
                             case 'I' :
                                 blockSeq = record.seq === "*" ? "*" : record.seq.substr(seqOffset, c.len);
-                                blockQuals = record.qual === "*" ? "*" : record.qual.slice(seqOffset, c.len);
+                                blockQuals = record.qual ? record.qual.slice(seqOffset, c.len) : undefined;
                                 if (insertions === undefined) insertions = [];
-                                insertions.push({
-                                    start: pos,
-                                    len: c.len,
-                                    seq: blockSeq,
-                                    qual: blockQuals,
-                                    insertion: true
-                                });
+                                insertions.push({start: pos, len: c.len, seq: blockSeq, qual: blockQuals});
                                 seqOffset += c.len;
                                 break;
                             case 'M' :
                             case 'EQ' :
                             case '=' :
                             case 'X' :
+
                                 blockSeq = record.seq === "*" ? "*" : record.seq.substr(seqOffset, c.len);
-                                blockQuals = record.qual === "*" ? "*" : record.qual.slice(seqOffset, c.len);
-                                blocks.push({start: pos, len: c.len, seq: blockSeq, qual: blockQuals});
+                                blockQuals = record.qual ? record.qual.slice(seqOffset, c.len) : undefined;
+                                blocks.push({start: pos, len: c.len, seq: blockSeq, qual: blockQuals, gapType: gapType});
                                 seqOffset += c.len;
                                 pos += c.len;
+
                                 break;
+
                             default :
                                 console.log("Error processing cigar element: " + c.len + c.ltr);
                         }
