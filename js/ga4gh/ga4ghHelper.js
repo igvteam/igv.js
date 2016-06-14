@@ -32,7 +32,6 @@ var igv = (function (igv) {
     igv.ga4ghGet = function (options) {
 
         var url = options.url + "/" + options.entity + "/" + options.entityId,
-            acToken = oauth.google.access_token,
             apiKey = oauth.google.apiKey,
             paramSeparator = "?";
 
@@ -62,9 +61,6 @@ var igv = (function (igv) {
                 paramSeparator = "&";
             }
 
-            if (acToken) {
-                url = url + paramSeparator + "access_token=" + encodeURIComponent(acToken);
-            }
             if (fields) {
                 url = url + paramSeparator + "fields=" + fields;
             }
