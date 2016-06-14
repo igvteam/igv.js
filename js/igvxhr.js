@@ -86,10 +86,10 @@ var igvxhr = (function (igvxhr) {
                 xhr.withCredentials = true;
             }
 
-            if (url.contains("google") && igv.oauth.google.access_token !== undefined) {
-                xhr.withCredentials = true;
-                xhr.setRequestHeader("Authorization", "Bearer " + igv.oauth.google.access_token);
-            }
+            // if (url.contains("google") && igv.oauth.google.access_token !== undefined) {
+            //     xhr.withCredentials = true;
+            //     xhr.setRequestHeader("Authorization", "Bearer " + igv.oauth.google.access_token);
+            // }
 
 
             xhr.onload = function (event) {
