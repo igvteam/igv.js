@@ -25,6 +25,8 @@
 
 var igv = (function (igv) {
 
+    var igvjs_version = "beta";
+
     /**
      * Create an igv.browser instance.  This object defines the public API for interacting with the genome browser.
      *
@@ -403,11 +405,9 @@ var igv = (function (igv) {
     }
 
 
-    // Performs an anonymous usage count.  Essential for continued funding of igv.js, please do not remove.
-
+    // Increments an anonymous usage count.  Essential for continued funding of igv.js, please do not remove.
     function phoneHome() {
-
-        var url = "https://data.broadinstitute.org/igv/projects/current/counter_igvjs.php";
+        var url = "https://data.broadinstitute.org/igv/projects/current/counter_igvjs.php?version=" + igvjs_version;
         igvxhr.load(url).then(function (ignore) {
             console.log(ignore);
         }).catch(function (error) {
