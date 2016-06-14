@@ -382,6 +382,7 @@ var igv = (function (igv) {
         config.showKaryo = config.showKaryo || false;
         if (config.showControls === undefined) config.showControls = true;
         if (config.showNavigation === undefined) config.showNavigation = true;
+        if (config.showRuler === undefined) config.showRuler = true;
         if (config.showSequence === undefined) config.showSequence = true;
         if (config.showIdeogram === undefined) config.showIdoegram = true;
         if (config.flanking === undefined) config.flanking = 1000;
