@@ -170,19 +170,9 @@
         options = {
 
             genome: "hg19",
-//            reference: {
-//                fastaURL: "//s3.amazonaws.com/igv.broadinstitute.org/genomes/seq/hg19/hg19.fasta",
-//                cytobandURL: "//s3.amazonaws.com/igv.broadinstitute.org/genomes/seq/hg19/cytoBand.txt"
-//            },
             locus: 'myc',
             tracks: [
                 {
-                    type: "sequence",
-                    order: -9999
-                },
-                ,
-                {
-                    //url: "//s3.amazonaws.com/igv.broadinstitute.org/annotations/hg19/genes/gencode.v18.collapsed.bed",
                     url: "//s3.amazonaws.com/igv.broadinstitute.org/annotations/hg19/genes/gencode.v18.collapsed.bed",
                     name: "Genes",
                     order: 10000
