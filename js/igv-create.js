@@ -43,8 +43,6 @@ var igv = (function (igv) {
             browser,
             rootDiv,
             controlDiv,
-            $parent = $(parentDiv),
-            palette,
             trackOrder = 1;
 
         if (igv.browser) {
