@@ -40,6 +40,7 @@ var igv = (function (igv) {
             contentDiv,
             headerDiv,
             trackContainerDiv,
+            verticalLineDiv,
             browser,
             rootDiv,
             controlDiv,
@@ -135,6 +136,11 @@ var igv = (function (igv) {
 
         contentDiv = $('<div class="igv-content-div">')[0];
         $(rootDiv).append(contentDiv);
+
+        if (config.showVerticalLine) {
+            verticalLineDiv = $('<div class="igv-vertical-line-div">')[0];
+            $(contentDiv).append(verticalLineDiv);
+        }
 
         headerDiv = $('<div>')[0];
         $(contentDiv).append(headerDiv);

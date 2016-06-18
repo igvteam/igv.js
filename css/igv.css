@@ -1390,6 +1390,16 @@ div.ui-dialog fieldset {
     height:100%;
 }
 
+.igv-vertical-line-div {
+    position: absolute;
+    border-left: 1px dashed #999;
+    top: 0;
+    bottom: 0;
+    right: 50%;
+    width: 1px;
+    z-index: 1;
+}
+
 .igv-content-canvas {
     position: absolute;
     width: 100%;
