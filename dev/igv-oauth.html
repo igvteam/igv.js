@@ -9,14 +9,15 @@
     <link rel="shortcut icon" href=../img/favicon.ico>
     <title>IGV - Integrative Genomics Viewer</title>
 
+
     <!-- jQuery UI CSS -->
     <link rel="stylesheet" type="text/css"
           href="//ajax.googleapis.com/ajax/libs/jqueryui/1.11.2/themes/redmond/jquery-ui.css"/>
 
     <!-- Google fonts -->
-    <link rel="stylesheet" type="text/css" href='//fonts.googleapis.com/css?family=PT+Sans:400,700'>
-    <link rel="stylesheet" type="text/css" href='//fonts.googleapis.com/css?family=Open+Sans'>
-
+    <!--   <link rel="stylesheet" type="text/css" href='//fonts.googleapis.com/css?family=PT+Sans:400,700'>
+       <link rel="stylesheet" type="text/css" href='//fonts.googleapis.com/css?family=Open+Sans'>
+   -->
     <!-- Font Awesome CSS -->
     <link rel="stylesheet" type="text/css" href="//maxcdn.bootstrapcdn.com/font-awesome/4.2.0/css/font-awesome.min.css">
 
@@ -33,6 +34,8 @@
     <script type="text/javascript" src="../vendor/inflate.js"></script>
     <script type="text/javascript" src="../vendor/zlib_and_gzip.min.js"></script>
     <script type="text/javascript" src="../vendor/jquery.mousewheel.js"></script>
+    <script type="text/javascript" src="../vendor/promise-7.0.4.js"></script>
+    <script type="text/javascript" src="../vendor/jquery.kinetic.min.js"></script>
 
     <!-- IGV JS -->
     <script type="text/javascript" src="../js/igv-create.js"></script>
@@ -63,6 +66,7 @@
 
     <script type="text/javascript" src="../js/gtex/eqtlTrack.js"></script>
     <script type="text/javascript" src="../js/gtex/gtexFileReader.js"></script>
+    <script type="text/javascript" src="../js/gtex/gtexReader.js"></script>
     <script type="text/javascript" src="../js/gtex/gtex.js"></script>
     <script type="text/javascript" src="../js/gtex/immvarReader.js"></script>
 
@@ -85,12 +89,16 @@
     <script type="text/javascript" src="../js/intervalTree.js"></script>
 
     <script type="text/javascript" src="../js/feature/featureCache.js"></script>
+    <script type="text/javascript" src="../js/feature/gffHelper.js"></script>
     <script type="text/javascript" src="../js/feature/featureSource.js"></script>
     <script type="text/javascript" src="../js/feature/featureParsers.js"></script>
     <script type="text/javascript" src="../js/feature/tribble.js"></script>
     <script type="text/javascript" src="../js/feature/featureFileReader.js"></script>
 
+    <script type="text/javascript" src="../js/feature/aneuSource.js"></script>
+    <script type="text/javascript" src="../js/feature/aneuTrack.js"></script>
     <script type="text/javascript" src="../js/encode/encode.js"></script>
+
 
     <script type="text/javascript" src="../js/karyo/karyo.js"></script>
     <script type="text/javascript" src="../js/gwas/t2dVariantSource.js"></script>
@@ -132,13 +140,8 @@
     <a href='#' onclick="igv.browser.loadTrack({
                                 sourceType: 'ga4gh',
                                 type: 'bam',
-                                source: {
-                                  type: 'ga4gh',
-                                  url: 'https://genomics.googleapis.com/v1',
-                                  readGroupSetIds: 'CMvnhpKTFhCjz9_25e_lCw',
-                                },
                                 url: 'https://genomics.googleapis.com/v1',
-                                readGroupSetIds: 'CMvnhpKTFhCjz9_25e_lCw',
+                                readGroupSetIds: 'CMvnhpKTFhCqqcrDgqfqgyA',
                                 name: 'Ga4gh BAM'
                                 })">Click to load Ga4gh BAM
 
@@ -149,13 +152,8 @@
     <a href='#' onclick="igv.browser.loadTrack({
                                 sourceType: 'ga4gh',
                                 type: 'vcf',
-                                source: {
-                                  type: 'ga4gh',
-                                   url: 'https://genomics.googleapis.com/v1',
-                                  variantSetId: '10473108253681171589',
-                                },
                                 url: 'https://genomics.googleapis.com/v1',
-                                variantSetId: '10473108253681171589',
+                                variantSetId: '11847417162926684904',
                                 name: 'Ga4gh variants'
                                 })">Click to load Ga4gh Variants
     </a>

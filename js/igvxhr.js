@@ -86,12 +86,6 @@ var igvxhr = (function (igvxhr) {
                 xhr.withCredentials = true;
             }
 
-            if (url.contains("google") && igv.oauth.google.access_token !== undefined) {
-                xhr.withCredentials = true;
-                xhr.setRequestHeader("Authorization", "Bearer " + igv.oauth.google.access_token);
-            }
-
-
             xhr.onload = function (event) {
                 // when the url points to a local file, the status is 0 but that is no error
                 if (xhr.status == 0 || (xhr.status >= 200 && xhr.status <= 300)) {
