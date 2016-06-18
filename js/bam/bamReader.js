@@ -90,7 +90,7 @@ var igv = (function (igv) {
                             fulfill(alignmentContainer);
                             return;
                         }
-                        console.log("# chunks = " + chunks.length);
+                        //console.log("# chunks = " + chunks.length);
                         chunks.forEach(function (c) {
 
                             promises.push(new Promise(function (fulfill, reject) {

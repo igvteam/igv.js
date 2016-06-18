@@ -123,7 +123,7 @@ var igv = (function (igv) {
                         throw new Error(indexURL + " is not a " + (tabix ? "tabix" : "bai") + " file");
                     }
                     fulfill(new igv.BamIndex(indices, blockMin, blockMax, sequenceIndexMap, tabix));
-                });
+                }).catch(reject);
         })
     }
 

@@ -32,17 +32,11 @@ var igv = (function (igv) {
     igv.ga4ghGet = function (options) {
 
         var url = options.url + "/" + options.entity + "/" + options.entityId,
-            acToken = oauth.google.access_token,
             apiKey = oauth.google.apiKey,
             paramSeparator = "?";
 
         if (apiKey) {
             url = url + paramSeparator + "key=" + apiKey;
-            paramSeparator = "&";
-        }
-
-        if (acToken) {
-            url = url + paramSeparator + "access_token=" + encodeURIComponent(acToken);
         }
 
         options.headers = ga4ghHeaders();
@@ -67,9 +61,6 @@ var igv = (function (igv) {
                 paramSeparator = "&";
             }
 
-            if (acToken) {
-                url = url + paramSeparator + "access_token=" + encodeURIComponent(acToken);
-            }
             if (fields) {
                 url = url + paramSeparator + "fields=" + fields;
             }
@@ -95,39 +86,39 @@ var igv = (function (igv) {
                         contentType: "application/json",
                         headers: ga4ghHeaders()
                     }).then(function (json) {
-                        var nextPageToken, tmp;
+                    var nextPageToken, tmp;
 
-                        if (json) {
+                    if (json) {
 
-                            tmp = decode ? decode(json) : json;
+                        tmp = decode ? decode(json) : json;
 
-                            if (tmp) {
+                        if (tmp) {
 
-                                tmp.forEach(function (a) {
-                                    var keep = true;           // TODO -- conditionally keep (downsample)
-                                    if (keep) {
-                                        results.push(a);
-                                    }
-                                });
-                            }
+                            tmp.forEach(function (a) {
+                                var keep = true;           // TODO -- conditionally keep (downsample)
+                                if (keep) {
+                                    results.push(a);
+                                }
+                            });
+                        }
 
 
-                            nextPageToken = json["nextPageToken"];
+                        nextPageToken = json["nextPageToken"];
 
-                            if (nextPageToken) {
-                                loadChunk(nextPageToken);
-                            }
-                            else {
-                                fulfill(results);
-                            }
+                        if (nextPageToken) {
+                            loadChunk(nextPageToken);
                         }
                         else {
                             fulfill(results);
                         }
+                    }
+                    else {
+                        fulfill(results);
+                    }
 
-                    }).catch(function(error) {
-                        reject(error);
-                    });
+                }).catch(function (error) {
+                    reject(error);
+                });
             }
 
         });
@@ -275,7 +266,7 @@ var igv = (function (igv) {
 
         headers["Cache-Control"] = "no-cache";
         if (acToken) {
-            //      headers["Authorization"] = "Bearer " + acToken;
+            headers["Authorization"] = "Bearer " + acToken;
         }
         return headers;
 
