@@ -1395,9 +1395,14 @@ div.ui-dialog fieldset {
     border-left: 1px dashed #999;
     top: 0;
     bottom: 0;
-    right: 50%;
+    left: 50%;
     width: 1px;
     z-index: 1;
+    user-select: none;
+    -moz-user-select: none;
+    -khtml-user-select: none;
+    -webkit-user-select: none;
+    -o-user-select: none;
 }
 
 .igv-content-canvas {
