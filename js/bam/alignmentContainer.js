@@ -213,6 +213,7 @@ var igv = (function (igv) {
     }
 
 
+    // TODO -- refactor this to use an object, rather than an array,  if end-start is > some threshold
     function CoverageMap(chr, start, end) {
 
         this.chr = chr;
