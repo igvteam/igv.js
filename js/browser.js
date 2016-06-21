@@ -822,6 +822,7 @@ var igv = (function (igv) {
         var isRulerTrack = false,
             isMouseDown = false,
             isDragging = false,
+            stickyVerticalLine = igv.browser.config.showVerticalLine === 'sticky',
             lastMouseX = undefined,
             mouseDownX = undefined;
 
@@ -843,6 +844,17 @@ var igv = (function (igv) {
             lastMouseX = coords.x;
             mouseDownX = lastMouseX;
         });
+
+        // Vertical line should be bound within the track area and offset by 5 pixels so as
+        // not to interfere with mouse clicks.
+        if (stickyVerticalLine) {
+            $(trackContainerDiv).mousemove(function (e) {
+                var coords = igv.translateMouseCoordinates(e, trackContainerDiv),
+                    lineX = Math.max(50, coords.x - 5);
+                lineX = Math.min (igv.browser.trackContainerDiv.clientWidth - 65, lineX);
+                $(igv.browser.verticalLineDiv).css({left: lineX + 'px'});
+            });
+        }
 
         $(trackContainerDiv).mousemove(igv.throttle(function (e) {
 
@@ -904,9 +916,16 @@ var igv = (function (igv) {
 
         $(trackContainerDiv).mouseleave(mouseUpOrOut);
 
-        function mouseUpOrOut() {
+        function mouseUpOrOut(e) {
 
             if (isRulerTrack) {
+                return;
+            }
+
+            // Don't let vertical line interfere with dragging
+            if (igv.browser.verticalLineDiv
+                && e.toElement === igv.browser.verticalLineDiv
+                && e.type === 'mouseleave') {
                 return;
             }
 
