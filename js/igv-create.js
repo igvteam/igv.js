@@ -134,6 +134,11 @@ var igv = (function (igv) {
         contentDiv = $('<div class="igv-content-div">')[0];
         $(rootDiv).append(contentDiv);
 
+        if (config.showVerticalLine) {
+            igv.browser.verticalLineDiv = $('<div class="igv-vertical-line-div">')[0];
+            $(contentDiv).append(igv.browser.verticalLineDiv);
+        }
+
         headerDiv = $('<div>')[0];
         $(contentDiv).append(headerDiv);
 
