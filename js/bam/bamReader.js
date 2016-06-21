@@ -90,7 +90,7 @@ var igv = (function (igv) {
                             fulfill(alignmentContainer);
                             return;
                         }
-                        //console.log("# chunks = " + chunks.length);
+
                         chunks.forEach(function (c) {
 
                             promises.push(new Promise(function (fulfill, reject) {
@@ -123,16 +123,6 @@ var igv = (function (igv) {
 
 
                         Promise.all(promises).then(function (ignored) {
-
-                            //if (chunks.length > 1) {
-                            //    alignments.sort(function (a, b) {
-                            //        return a.start - b.start;
-                            //    });
-                            //}
-                            //var alignmentContainer = new igv.AlignmentContainer(chr, bpStart, bpEnd, self.samplingWindowSize, self.samplingDepth);
-                            //alignments.forEach(function (a) {
-                            //    alignmentContainer.push(a);
-                            //})
                             alignmentContainer.finish();
                             fulfill(alignmentContainer);
                         }).catch(function (obj) {
@@ -177,7 +167,7 @@ var igv = (function (igv) {
                 blockSize = readInt(ba, offset);
                 blockEnd = offset + blockSize + 4;
 
-                if (blockEnd >= ba.length) {
+                if (blockEnd > ba.length) {
                     return;
                 }
 
