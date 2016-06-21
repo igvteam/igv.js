@@ -258,7 +258,7 @@ var igv = (function (igv) {
         });
 
         // Reattach the divs to the dom in the correct order
-        $(this.trackContainerDiv).children().detach();
+        $(this.trackContainerDiv).children("igv-track-div").detach();
 
         this.trackViews.forEach(function (trackView, index, trackViews) {
 
