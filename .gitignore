@@ -10,3 +10,4 @@ files
 local
 .idea/jsLibraryMappings.xml
 .idea/libraries
+bower_components
