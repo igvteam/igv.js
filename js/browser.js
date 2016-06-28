@@ -641,16 +641,32 @@ var igv = (function (igv) {
                 end = chromosome.bpLength;
             }
             else {
-                posTokens = tokens[1].split("-");
-                start = parseInt(posTokens[0].replace(/,/g, "")) - 1;
-                end = parseInt(posTokens[1].replace(/,/g, ""));
-            }
+                chromosome = this.genome.getChromosome(chr);
+                if (!chromosome) {
+                    igv.presentAlert("Unknown chromosome: " + chr);
+                    this.updateLocusSearch(this.referenceFrame);
+                } else {
+                    posTokens = tokens[1].split("-");
+                    start = Math.max(0, parseInt(posTokens[0].replace(/,/g, "")) - 1);
+                    end = parseInt(posTokens[1].replace(/,/g, ""));
+                    if (end < 0) {
+                        // This can happen from integer overflow
+                        if (chromosome) end = chromosome.bpLength;
+                    }
+                    else {
+                        end = Math.min(end, chromosome.bpLength);
+                    }
 
-            if (end > start) {
-                this.goto(chr, start, end);
-                fireOnsearch.call(igv.browser, feature, type);
-            }
 
+                    if (isNaN(start) || isNaN(end) || (start > end)) {
+                        igv.presentAlert("Unrecognized feature or locus: " + feature);
+                        this.updateLocusSearch(this.referenceFrame);
+                    } else {
+                        this.goto(chr, start, end);
+                        fireOnsearch.call(igv.browser, feature, type);
+                    }
+                }
+            }
             if (callback) callback();
 
         }
@@ -847,7 +863,7 @@ var igv = (function (igv) {
 
         // Guide line should follow the mouse unless anchored to center, be bound within the track area, and offset
         // by 5 pixels so as not to interfere with mouse clicks.
-        if(!anchorVerticalLine) {
+        if (!anchorVerticalLine) {
             $(trackContainerDiv).mousemove(function (e) {
                 var coords = igv.translateMouseCoordinates(e, trackContainerDiv),
                     lineX = Math.max(50, coords.x - 5);
@@ -885,7 +901,7 @@ var igv = (function (igv) {
 
                     referenceFrame.shiftPixels(lastMouseX - coords.x);
 
-                     // clamp left
+                    // clamp left
                     referenceFrame.start = Math.max(0, referenceFrame.start);
 
                     // clamp right
