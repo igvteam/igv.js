@@ -629,7 +629,7 @@ var igv = (function (igv) {
             chromosome,
             result;
 
-        if (feature.contains(":") && feature.contains("-") || this.genome.getChromosome(feature)) {
+        if (feature.includes(":") && feature.includes("-") || this.genome.getChromosome(feature)) {
 
             type = "locus";
             tokens = feature.split(":");
