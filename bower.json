@@ -1,0 +1,29 @@
+{
+  "name": "igv.js",
+  "version": "v1.0.1",
+  "main": [
+    "./dist/igv.js",
+    "./css/igv.css"
+  ],
+  "description": "Lightweight html5 version of the Integrative Genomics Viewer",
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/emedgene/igv.js.git"
+  },
+  "dependencies": {
+    "jquery": "*",
+    "jquery.ui": "*",
+    "fontawesome": "*"
+  },
+  "ignore": [
+    "node_modules",
+    "components",
+    "lib",
+    ".idea",
+    ".git",
+    ".gitignore",
+    "examples",
+    "test",
+    "demo"
+  ]
+}
