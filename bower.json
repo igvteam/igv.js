@@ -1,6 +1,5 @@
 {
   "name": "igv.js",
-  "version": "v1.0.1",
   "main": [
     "./dist/igv.js",
     "./css/igv.css"
