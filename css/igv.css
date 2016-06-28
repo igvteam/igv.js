@@ -732,6 +732,7 @@ div.ui-dialog fieldset {
 
     position: relative;
     float: right;
+    margin-left: 40px;
 }
 
 .igv-toggle-track-labels {
@@ -739,7 +740,7 @@ div.ui-dialog fieldset {
     position: relative;
     float: right;
 
-    margin-right: 64px;
+    margin-right: 5px;
 
     padding-left: 8px;
     padding-right: 8px;
@@ -1390,7 +1391,7 @@ div.ui-dialog fieldset {
     height:100%;
 }
 
-.igv-vertical-line-div {
+.igv-guide-line-div {
     position: absolute;
     border-left: 1px dashed #999;
     top: 0;
@@ -1399,6 +1400,7 @@ div.ui-dialog fieldset {
     width: 1px;
     z-index: 1;
     user-select: none;
+    display: none;
     -moz-user-select: none;
     -khtml-user-select: none;
     -webkit-user-select: none;

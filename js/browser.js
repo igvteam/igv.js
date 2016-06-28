@@ -822,7 +822,7 @@ var igv = (function (igv) {
         var isRulerTrack = false,
             isMouseDown = false,
             isDragging = false,
-            stickyVerticalLine = igv.browser.config.showVerticalLine === 'sticky',
+            anchorVerticalLine = igv.browser.config.showGuideLine === 'center',
             lastMouseX = undefined,
             mouseDownX = undefined;
 
@@ -845,16 +845,17 @@ var igv = (function (igv) {
             mouseDownX = lastMouseX;
         });
 
-        // Vertical line should be bound within the track area and offset by 5 pixels so as
-        // not to interfere with mouse clicks.
-        if (stickyVerticalLine) {
+        // Guide line should follow the mouse unless anchored to center, be bound within the track area, and offset
+        // by 5 pixels so as not to interfere with mouse clicks.
+        if(!anchorVerticalLine) {
             $(trackContainerDiv).mousemove(function (e) {
                 var coords = igv.translateMouseCoordinates(e, trackContainerDiv),
                     lineX = Math.max(50, coords.x - 5);
-                lineX = Math.min (igv.browser.trackContainerDiv.clientWidth - 65, lineX);
-                $(igv.browser.verticalLineDiv).css({left: lineX + 'px'});
+                lineX = Math.min(igv.browser.trackContainerDiv.clientWidth - 65, lineX);
+                $(igv.browser.guideLineDiv).css({left: lineX + 'px'});
             });
         }
+
 
         $(trackContainerDiv).mousemove(igv.throttle(function (e) {
 
@@ -884,14 +885,10 @@ var igv = (function (igv) {
 
                     referenceFrame.shiftPixels(lastMouseX - coords.x);
 
-                    // TODO -- clamping code below is broken for regular IGV => disabled for now, needs fixed
-
-
-                    // clamp left
+                     // clamp left
                     referenceFrame.start = Math.max(0, referenceFrame.start);
 
                     // clamp right
-
                     var chromosome = igv.browser.genome.getChromosome(referenceFrame.chr);
                     maxEnd = chromosome.bpLength;
                     maxStart = maxEnd - igv.browser.trackViewportWidth() * referenceFrame.bpPerPixel;
@@ -923,8 +920,8 @@ var igv = (function (igv) {
             }
 
             // Don't let vertical line interfere with dragging
-            if (igv.browser.verticalLineDiv
-                && e.toElement === igv.browser.verticalLineDiv
+            if (igv.browser.guideLineDiv
+                && e.toElement === igv.browser.guideLineDiv
                 && e.type === 'mouseleave') {
                 return;
             }

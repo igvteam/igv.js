@@ -139,10 +139,10 @@ var igv = (function (igv) {
 
         $(contentDiv).append(trackContainerDiv);
 
-
-        if (config.showVerticalLine) {
-            igv.browser.verticalLineDiv = $('<div class="igv-vertical-line-div">')[0];
-            $(trackContainerDiv).append(igv.browser.verticalLineDiv);
+        igv.browser.guideLineDiv = $('<div class="igv-guide-line-div">')[0];
+        $(trackContainerDiv).append(igv.browser.guideLineDiv);
+        if (config.showGuideLine || config.showVerticalLine) {
+            $(igv.browser.guideLineDiv).css("display", "block");
         }
 
 
@@ -258,6 +258,7 @@ var igv = (function (igv) {
             $searchContainer,
             $faZoom,
             $trackLabelToggle,
+            $guideLineToggle,
             $zoomContainer,
             $faZoomIn,
             $faZoomOut;
@@ -328,14 +329,25 @@ var igv = (function (igv) {
             $trackLabelToggle.text("hide labels");
 
             $trackLabelToggle.click(function () {
-
                 browser.trackLabelsVisible = !browser.trackLabelsVisible;
                 $(this).text(true === browser.trackLabelsVisible ? "hide labels" : "show labels");
-
                 $(browser.trackContainerDiv).find('.igv-track-label').toggle();
+            });
+
+            $guideLineToggle = $('<div class="igv-toggle-track-labels">');
+            $guideLineToggle.click(function () {
+                var display = $(igv.browser.guideLineDiv).css("display");
+                $(igv.browser.guideLineDiv).css("display", display==="none" ? "block" : "none");
 
             });
 
+            $(igv.browser.guideLineDiv)
+
+
+            $guideLineToggle.text("guide line");
+
+
+            $navigation.append($guideLineToggle[0]);
             $navigation.append($trackLabelToggle[0]);
 
         }
