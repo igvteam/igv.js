@@ -50,8 +50,8 @@ var igvxhr = (function (igvxhr) {
 
 
             // Hack to prevent caching for google storage files.  Get weird net:err-cache errors otherwise
-            if (range && url.contains("googleapis")) {
-                url += url.contains("?") ? "&" : "?";
+            if (range && url.includes("googleapis")) {
+                url += url.includes("?") ? "&" : "?";
                 url += "someRandomSeed=" + Math.random().toString(36);
             }
 

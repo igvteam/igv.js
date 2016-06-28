@@ -158,6 +158,13 @@ if (typeof String.prototype.contains === "undefined") {
     };
 }
 
+if (typeof String.prototype.includes === "undefined") {
+    String.prototype.includes = function (it) {
+        return this.indexOf(it) != -1;
+    };
+}
+
+
 if (typeof String.prototype.splitLines === "undefined") {
     String.prototype.splitLines = function () {
         return this.split(/\r\n|\n|\r/gm);

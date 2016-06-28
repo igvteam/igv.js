@@ -143,7 +143,7 @@ var igv = (function (igv) {
 
 
     igv.createColorString = function (token) {
-        if (token.contains(",")) {
+        if (token.includes(",")) {
             return token.startsWith("rgb") ? token : "rgb(" + token + ")";
         }
         else {
