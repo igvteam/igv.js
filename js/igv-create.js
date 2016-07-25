@@ -361,8 +361,29 @@ var igv = (function (igv) {
                 $controls.append(contentKaryo);
             }
             browser.karyoPanel = new igv.KaryoPanel(contentKaryo);
-        }
 
+            $karyoPanelToggle = $('<div class="igv-toggle-track-labels">');
+
+						if (config.showKaryo === "hide") {
+              $karyoPanelToggle.text("Show Karyotype");
+						  $(contentKaryo).addClass("igv-karyo-hide");
+						} else {
+						  $karyoPanelToggle.text("Hide Karyotype");
+						}
+
+            $karyoPanelToggle.click(function () {
+              var hidden = $(".igv-karyo-div").hasClass("igv-karyo-hide");
+              if (hidden) {
+	              $karyoPanelToggle.text("Hide Karyotype");
+								$(".igv-karyo-div").removeClass("igv-karyo-hide");
+              } else {
+              	$karyoPanelToggle.text("Show Karyotype");
+								$(".igv-karyo-div").addClass("igv-karyo-hide");
+              }
+            });
+
+            $navigation.append($karyoPanelToggle[0]);
+        }
 
         return $controls[0];
     }

@@ -1055,6 +1055,11 @@ div.ui-dialog fieldset {
     height:200px;
 }
 
+.igv-karyo-hide {
+    height: 0;
+    overflow: hidden;
+}
+
 .igv-karyo-content-div {
     left:0;
     top:0;
