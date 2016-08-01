@@ -148,6 +148,8 @@ var igv = (function (igv) {
             self = this;
 
         fields = [
+            {name: "Chr", value: this.chr},
+            {name: "Pos", value: (this.pos + 1)},
             {name: "Names", value: this.names ? this.names : ""},
             {name: "Ref", value: this.referenceBases},
             {name: "Alt", value: this.alternateBases},
