@@ -26,6 +26,7 @@
 var igv = (function (igv) {
 
     var igvjs_version = "beta";
+    igv.version = igvjs_version;
 
     /**
      * Create an igv.browser instance.  This object defines the public API for interacting with the genome browser.
