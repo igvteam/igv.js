@@ -159,7 +159,7 @@ var igv = (function (igv) {
         igv.colorPicker.hide();
 
         // alert object -- singleton shared by all components
-        igv.alert = new igv.Dialog($(rootDiv), igv.Dialog.alertConstructor, "igv-alert");
+        igv.alert = new igv.AlertDialog($(rootDiv), "igv-alert");
         igv.alert.hide();
 
         // Dialog object -- singleton shared by all components

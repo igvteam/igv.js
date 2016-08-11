@@ -66,19 +66,6 @@ var igv = (function (igv) {
 
     };
 
-    igv.Dialog.alertConstructor = function (dialog) {
-
-        dialog.$container.removeClass("igv-grid-container-dialog");
-        dialog.$container.addClass("igv-grid-container-alert-dialog");
-
-        dialog.$container.append(dialog.rowOfLabel()[ 0 ]);
-
-        dialog.$container.append(dialog.rowOfInput()[ 0 ]);
-
-        dialog.$container.append(dialog.rowOfOk()[ 0 ]);
-
-    };
-
     igv.Dialog.prototype.rowOfOk = function() {
 
         var $rowContainer,
