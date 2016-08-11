@@ -27,10 +27,9 @@ var igv = (function (igv) {
 
     igv.presentAlert = function (string) {
 
-        igv.alert.configure(function () {
-            return string;
-        }, undefined, undefined);
+        igv.alert.$dialogLabel.text(string);
         igv.alert.show(undefined);
+
         igv.popover.hide();
 
     };

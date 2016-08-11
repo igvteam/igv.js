@@ -285,6 +285,23 @@ div[id="igvEncodeModal"] {
 
 }
 
+.igv-alert-dialog-text {
+
+    padding-top: 8px;
+    padding-left: 8px;
+
+    word-wrap: break-word;
+
+    text-align: center;
+
+    font-family: 'PT Sans', sans-serif;
+    font-size: medium;
+    font-weight: 200;
+
+    color: #575757;
+
+}
+
 .igv-user-input-label {
 
     padding-top: 8px;

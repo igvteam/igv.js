@@ -10,13 +10,8 @@
     <title>IGV - Integrative Genomics Viewer</title>
 
     <!-- jQuery UI CSS -->
-    <link rel="stylesheet" type="text/css"
-          href="https://ajax.googleapis.com/ajax/libs/jqueryui/1.11.2/themes/redmond/jquery-ui.css"/>
+    <link rel="stylesheet" type="text/css" href="https://ajax.googleapis.com/ajax/libs/jqueryui/1.11.2/themes/redmond/jquery-ui.css"/>
 
-    <!-- Google fonts -->
- <!--   <link rel="stylesheet" type="text/css" href='//fonts.googleapis.com/css?family=PT+Sans:400,700'>
-    <link rel="stylesheet" type="text/css" href='//fonts.googleapis.com/css?family=Open+Sans'>
--->
     <!-- Font Awesome CSS -->
     <link rel="stylesheet" type="text/css" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.2.0/css/font-awesome.min.css">
 
@@ -122,6 +117,7 @@
     <script type="text/javascript" src="../js/ui/colorpicker.js"></script>
     <script type="text/javascript" src="../js/ui/dataRangeDialog.js"></script>
     <script type="text/javascript" src="../js/ui/dialog.js"></script>
+    <script type="text/javascript" src="../js/ui/alertDialog.js"></script>
 
     <script type="text/javascript" src="../js/set.js"></script>
 
@@ -165,6 +161,13 @@
 <div id="trackList">
 
     <h3>Example tracks - click to load</h3>
+
+    <div onclick="igv.browser.loadTrack({
+            name: 'Bogus URL',
+            url: 'http://www.apple.com/goldenPath/hg19/encodeDCC/wgEncodeOpenChromFaire/wgEncodeOpenChromFaireMrta2041AlnRep1.bam',
+            format: 'bam',
+            type: 'alignment'})">Bogus URL
+    </div>
 
     <div onclick="igv.browser.loadTrack({
             name: 'MRT_A204 FaireSeq Alignments rep 1',
