@@ -174,61 +174,33 @@
 
         <h3>Example tracks - click to load</h3>
 
-        <div onclick="igv.browser.loadTrack({
-                                type: 'variant',
-                                url: '../test/data/vcf/example.vcf',
-                                indexed: false,
-                                visibilityWindow: 0,
-                                name: 'example'})">example vcf (chr 20)
-        </div>
-
 
         <div onclick="igv.browser.loadTrack({
                             url: 'https://data.broadinstitute.org/igvdata/1KG/ALL.wgs.phase3_shapeit2_mvncall_integrated_v5b.20130502.sites.vcf.gz',
                             indexURL: 'https://data.broadinstitute.org/igvdata/1KG/ALL.wgs.phase3_shapeit2_mvncall_integrated_v5b.20130502.sites.vcf.gz.tbi',
                             visibilityWindow: 20000,
                             name: '1KG Sites'
-                        })">1KG sites - Broad
+                        })">VCF file (1KG sites)
         </div>
 
 
-        <div onclick="igv.browser.loadTrack({
-              type: 'bam',
-              url: 'https://s3.amazonaws.com/igv-test1/test.bam?AWSAccessKeyId=AKIAJQYEF3LODEQN7LOA&Expires=1460148635&Signature=6FLcq6HI1BiqGt6wvWFdjdvVOVA%3D',
-              indexURL: 'https://s3.amazonaws.com/igv-test1/test.bam.bai?AWSAccessKeyId=AKIAJQYEF3LODEQN7LOA&Expires=1460148657&Signature=Tve2KyefO%2BVFBBYw3MpIUh6Yn20%3D',
-              name: 'S3 Test'
-            })">S3 Test
+        <div onclick="igv.browser.loadTrack( {
+                            type: 'variant',
+                            url: 'https://s3.amazonaws.com/igv.broadinstitute.org/data/hg19/1kg/ALL.chr22.phase3_shapeit2_mvncall_integrated_v5a.20130502.genotypes.vcf.gz',
+                            name: '1KG variants',
+                            visibilityWindow: 1000
+                            })">VCF file with genotypes (chr 22)
         </div>
+
 
         <div onclick="igv.browser.loadTrack({
                             url: 'https://data.broadinstitute.org/igvdata/BodyMap/hg19/IlluminaHiSeq2000_BodySites/brain_merged/accepted_hits.bam',
-                            name: 'Brain (BodyMap)'
-                        })">Brain (BodyMap)
+                            name: 'Brain (BodyMap)',
+                            maxRows: 3000,
+                            samplingDepth: 10000
+                        })">BAM File - deep coverage (Brain, BodyMap)
         </div>
 
-
-        <div onclick="igv.browser.loadTrack({
-                    url:  '../test/data/wig/test.bedgraph',
-                    name: 'chunk.chr3.am.bedgraph',
-                    format: 'bedgraph',
-                    height: 30
-                    });">Test bedgraph
-        </div>
-
-        <div href="#"
-             onclick="igv.browser.loadTrack({
-                                  type: 'alignment', // Optional
-                                  format: 'bam',  // Optional
-                                  url: 'http://hgdownload.cse.ucsc.edu/goldenPath/hg19/encodeDCC/wgEncodeOpenChromFaire/wgEncodeOpenChromFaireMrta2041AlnRep1.bam',
-                                  name: 'MRT_A204 FaireSeq Alignments rep 1'})">MRT_A204 FaireSeq Alignments rep 1
-            bam
-        </div>
-
-        <div onclick="igv.browser.loadTrack({
-                                type: 'bam',
-                                url: '../test/data/bam/testDel.bam',
-                                name: 'indel'})">deletion bam
-        </div>
 
         <div onclick="igv.browser.loadTrack({
                                 type: 'bam',
@@ -290,13 +262,6 @@
                             })">GA4Gh Variants - NO callsets (Global Alliance, Google server)
         </div>
 
-        <div onclick="igv.browser.loadTrack( {
-                            type: 'variant',
-                            url: 'https://s3.amazonaws.com/igv.broadinstitute.org/data/hg19/1kg/ALL.chr22.phase3_shapeit2_mvncall_integrated_v5a.20130502.genotypes.vcf.gz',
-                            name: '1KG variants',
-                            //visibilityWindow: 1000
-                            })">1KG VCF - chr 22
-        </div>
 
 
         <div onclick="igv.browser.loadTrack({
@@ -332,6 +297,17 @@
                                 })">dbSNP 137 (bed tabix)
         </div>
 
+
+
+        <div onclick="igv.browser.loadTrack({
+                    url:  '../test/data/wig/test.bedgraph',
+                    name: 'chunk.chr3.am.bedgraph',
+                    format: 'bedgraph',
+                    height: 30
+                    });">Test bedgraph
+        </div>
+
+
         <div onclick="igv.browser.loadTrack(
                                 {
                                 url: 'https://www.encodeproject.org/files/ENCFF002ADR/@@download/ENCFF002ADR.bigBed',
@@ -360,13 +336,6 @@
                                 visibilityWindow: 2000000,
                                 name: 'DB Snp'
         })">DB Snp Tabix
-        </div>
-
-        <div onclick="igv.browser.loadTrack({
-
-                                url: '../test/data/tabix/TSVC.vcf.gz',
-                                name: 'VCF (TSVC)'
-        })">VCF (TSVC)
         </div>
 
 
@@ -544,8 +513,9 @@
                     format: "bed",
                     sourceType: "file",
 //                    color: "#ff0000",
-                    url: "https://s3.amazonaws.com/igv.broadinstitute.org/annotations/hg19/genes/gencode.v18.collapsed.bed",
-                    indexURL: "https://s3.amazonaws.com/igv.broadinstitute.org/annotations/hg19/genes/gencode.v18.collapsed.bed.idx",
+                    url: "https://s3.amazonaws.com/igv.broadinstitute.org/annotations/hg19/genes/gencode.v18.annotation.sorted.gtf.gz",
+                    indexURL: "https://s3.amazonaws.com/igv.broadinstitute.org/annotations/hg19/genes/gencode.v18.annotation.sorted.gtf.gz.tbi",
+                    visibilityWindow: 10000000,
                     order: Number.MAX_VALUE,
                     displayMode: "EXPANDED"
 
