@@ -54,7 +54,7 @@ var igv = (function (igv) {
 
         this.$header.append(this.$headerBlurb[0]);
 
-        igv.dialogCloseWithParentObject(this.$header, function () {
+        igv.attachDialogCloseHandlerWithParent(this.$header, function () {
             self.hide();
         });
 
