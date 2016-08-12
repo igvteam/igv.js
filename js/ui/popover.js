@@ -59,7 +59,7 @@ var igv = (function (igv) {
         popoverHeader = $('<div class="igv-popoverHeader">');
         this.popover.append(popoverHeader[ 0 ]);
 
-        igv.dialogCloseWithParentObject(popoverHeader, function () {
+        igv.attachDialogCloseHandlerWithParent(popoverHeader, function () {
             self.hide();
         });
 

@@ -40,7 +40,9 @@ var igv = (function (igv) {
         $header = $('<div class="igv-grid-header">');
         $headerBlurb = $('<div class="igv-grid-header-blurb">');
         $header.append($headerBlurb);
-        igv.dialogCloseWithParentObject($header, function () { self.hide(); });
+        igv.attachDialogCloseHandlerWithParent($header, function () {
+            self.hide();
+        });
         this.$container.append($header);
 
         this.$container.append(this.alertTextContainer());
