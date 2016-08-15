@@ -191,7 +191,7 @@ var igv = (function (igv) {
             description = this.track.description || this.track.name;
             $trackLabel = $('<div class="igv-track-label">');
 
-            $trackLabel.text(this.track.name);
+            $trackLabel.html(this.track.name);
 
             $trackLabel.click(function (e) {
                 igv.popover.presentTrackPopup(e.pageX, e.pageY, description, false);
