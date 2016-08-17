@@ -39,6 +39,7 @@
     <!-- IGV JS -->
     <script type="text/javascript" src="../js/igv-create.js"></script>
     <script type="text/javascript" src="../js/ui/userFeedback.js"></script>
+    <script type="text/javascript" src="../js/ui/alertDialog.js"></script>
     <script type="text/javascript" src="../js/ui/popover.js"></script>
     <script type="text/javascript" src="../js/browser.js"></script>
     <script type="text/javascript" src="../js/ideogram.js"></script>
@@ -276,24 +277,23 @@
 
 
         <div onclick="igv.browser.loadTrack({
-                                url: '//data.broadinstitute.org/igvdata/test/igv-web/segmented_data_080520.seg.gz',
+                                url: 'https://data.broadinstitute.org/igvdata/test/igv-web/segmented_data_080520.seg.gz',
                                 indexed: false,
                                 name: 'GBM Copy # (TCGA Broad GDAC)'})">GBM Copy # (TCGA Broad GDAC)) (SEG)
         </div>
 
 
         <div onclick="igv.browser.loadTrack( {
-                                url: '//data.broadinstitute.org/igvdata/t2d/recomb_decode.bedgraph',
+                                url: 'https://data.broadinstitute.org/igvdata/t2d/recomb_decode.bedgraph',
                                 name: 'Recombination rate'})">Recombination Rate
         </div>
 
         <div onclick="igv.browser.loadTrack(
                                 {
                                 type: 'bed',
-                                url: '//data.broadinstitute.org/igvdata/annotations/hg19/dbSnp/snp137.hg19.bed.gz',
+                                url: 'https://data.broadinstitute.org/igvdata/annotations/hg19/dbSnp/snp137.hg19.bed.gz',
                                 name: 'dbSNP 137',
-                                visibilityWindow: 200000,
-                                withCredentials: true,
+                                visibilityWindow: 200000
                                 })">dbSNP 137 (bed tabix)
         </div>
 
