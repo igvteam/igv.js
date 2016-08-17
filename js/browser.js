@@ -810,11 +810,11 @@ var igv = (function (igv) {
         igv.browser.selection = new igv.GtexSelection('gtex' === type || 'snp' === type ? {snp: name} : {gene: name});
 
         if (end === undefined) {
-            end = start + 1;
+            end = parseInt(start) + 1;
         }
         if (igv.browser.flanking) {
             start = Math.max(0, start - igv.browser.flanking);
-            end += igv.browser.flanking;    // TODO -- set max to chromosome length
+            end = parseInt(end) + igv.browser.flanking;    // TODO -- set max to chromosome length
         }
 
         igv.browser.goto(chr, start, end);
