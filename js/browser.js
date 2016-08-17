@@ -25,6 +25,10 @@
 
 var igv = (function (igv) {
 
+
+    var knownFileTypes = new Set("narrowPeak", "broadPeak", "peaks", "bedgraph", "wig", "gff3", "gff",
+        "gtf", "aneu", "FusionJuncSpan", "refflat", "seg", "bed", "vcf", "bb", "bigBed", "bw", "bigWig", "bam");
+
     igv.Browser = function (options, trackContainer) {
 
         igv.browser = this;   // Make globally visible (for use in html markup).
@@ -187,7 +191,7 @@ var igv = (function (igv) {
             default:
 
                 //alert("Unknown file type: " + config.url);
-                igv.presentAlert("Unknown file type: " + (config.type || ''));
+                igv.presentAlert("Unknown file type: " + config.url);
 
                 return null;
         }
@@ -960,6 +964,8 @@ var igv = (function (igv) {
      *
      * @param config
      */
+
+
     function inferTypes(config) {
 
         function translateDeprecatedTypes(config) {
@@ -970,25 +976,26 @@ var igv = (function (igv) {
             }
 
             if ("bed" === config.type) {
-                config.type = config.type || "annotation";
+                config.type = "annotation";
                 config.format = config.format || "bed";
+
             }
 
-            if ("bam" === config.type) {
+            else if ("bam" === config.type) {
                 config.type = "alignment";
                 config.format = "bam"
             }
 
-            if ("vcf" === config.type) {
+            else if ("vcf" === config.type) {
                 config.type = "variant";
                 config.format = "vcf"
             }
 
-            if ("t2d" === config.type) {
+            else if ("t2d" === config.type) {
                 config.type = "gwas";
             }
 
-            if ("FusionJuncSpan" === config.type) {
+            else if ("FusionJuncSpan" === config.type) {
                 config.format = "FusionJuncSpan";
             }
         }
@@ -1017,18 +1024,20 @@ var igv = (function (igv) {
 
 
             idx = fn.lastIndexOf(".");
-            ext = idx < 0 ? fn : fn.substr(idx);
+            ext = idx < 0 ? fn : fn.substr(idx + 1);
 
             switch (ext) {
 
-                case ".bw":
+                case "bw":
                     config.format = "bigwig";
                     break;
-                case ".bb":
+                case "bb":
                     config.format = "bigbed";
 
                 default:
-                    config.format = ext.substr(1);   // Strip leading "."
+                    if (knownFileTypes.has(ext)) {
+                        config.format = ext;
+                    }
             }
         }
 
@@ -1036,25 +1045,26 @@ var igv = (function (igv) {
 
             if (config.type) return;
 
-            switch (config.format) {
-                case "bw":
-                case "bigwig":
-                case "wig":
-                case "bedgraph":
-                    config.type = "wig";
-                    break;
-                case "vcf":
-                    config.type = "variant";
-                    break;
-                case "seg":
-                    config.type = "seg";
-                    break;
-                case "bam":
-                    config.type = "alignment";
-                    break;
-                default:
-                    config.type = "annotation";
-
+            if (config.format !== undefined) {
+                switch (config.format) {
+                    case "bw":
+                    case "bigwig":
+                    case "wig":
+                    case "bedgraph":
+                        config.type = "wig";
+                        break;
+                    case "vcf":
+                        config.type = "variant";
+                        break;
+                    case "seg":
+                        config.type = "seg";
+                        break;
+                    case "bam":
+                        config.type = "alignment";
+                        break;
+                    default:
+                        config.type = "annotation";
+                }
             }
         }
 
