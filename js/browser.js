@@ -26,8 +26,8 @@
 var igv = (function (igv) {
 
 
-    var knownFileTypes = new Set("narrowPeak", "broadPeak", "peaks", "bedgraph", "wig", "gff3", "gff",
-        "gtf", "aneu", "FusionJuncSpan", "refflat", "seg", "bed", "vcf", "bb", "bigBed", "bw", "bigWig", "bam");
+    var knownFileTypes = new Set(["narrowPeak", "broadPeak", "peaks", "bedgraph", "wig", "gff3", "gff",
+        "gtf", "aneu", "FusionJuncSpan", "refflat", "seg", "bed", "vcf", "bb", "bigBed", "bw", "bigWig", "bam"]);
 
     igv.Browser = function (options, trackContainer) {
 
