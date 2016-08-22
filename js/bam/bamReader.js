@@ -91,10 +91,7 @@ var igv = (function (igv) {
 
                                 var fetchMin = c.minv.block,
                                     fetchMax = c.maxv.block + 65000,   // Make sure we get the whole block.
-                                    range =
-                                        (self.contentLength > 0 && fetchMax > self.contentLength) ?
-                                        {start: fetchMin} :
-                                        {start: fetchMin, size: fetchMax - fetchMin + 1};
+                                    range =  {start: fetchMin, size: fetchMax - fetchMin + 1};
 
                                 igvxhr.loadArrayBuffer(self.bamPath,
                                     {
@@ -361,14 +358,7 @@ var igv = (function (igv) {
 
             getIndex(self).then(function (index) {
 
-                var contentLength = index.blockMax,
-                    len = index.headerSize + MAX_GZIP_BLOCK_SIZE + 100;   // Insure we get the complete compressed block containing the header
-
-                if (contentLength <= 0) contentLength = index.blockMax;  // Approximate
-
-                self.contentLength = contentLength;
-
-                if (contentLength > 0) len = Math.min(contentLength, len);
+                var len = index.headerSize + MAX_GZIP_BLOCK_SIZE + 10000;   // Insure we get the complete compressed block containing the header
 
                 igvxhr.loadArrayBuffer(self.bamPath,
                     {
@@ -421,7 +411,7 @@ var igv = (function (igv) {
         });
     }
 
-
+//
     function getIndex(bam) {
 
         return new Promise(function (fulfill, reject) {
@@ -432,9 +422,6 @@ var igv = (function (igv) {
             else {
                 igv.loadBamIndex(bam.baiPath, bam.config).then(function (index) {
                     bam.index = index;
-
-                    // Content length TODO -- is this exact or approximate?
-                    bam.contentLength = index.blockMax;
 
                     fulfill(bam.index);
                 }).catch(reject);
