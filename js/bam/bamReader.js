@@ -16,7 +16,7 @@ var igv = (function (igv) {
     var DUPLICATE_READ_FLAG = 0x400;
     var SUPPLEMENTARY_FLAG = 0x800;
 
-    const MAX_GZIP_BLOCK_SIZE = (1 << 16);   //  APPARENTLY.  Where is this documented???
+    const MAX_GZIP_BLOCK_SIZE = 65536;   //  APPARENTLY.  Where is this documented???
 
 
     /**
@@ -91,7 +91,7 @@ var igv = (function (igv) {
 
                                 var fetchMin = c.minv.block,
                                     fetchMax = c.maxv.block + 65000,   // Make sure we get the whole block.
-                                    range =  {start: fetchMin, size: fetchMax - fetchMin + 1};
+                                    range = {start: fetchMin, size: fetchMax - fetchMin + 1};
 
                                 igvxhr.loadArrayBuffer(self.bamPath,
                                     {
@@ -100,14 +100,14 @@ var igv = (function (igv) {
                                         withCredentials: self.config.withCredentials
                                     }).then(function (compressed) {
 
-                                        var ba = new Uint8Array(igv.unbgzf(compressed)); //new Uint8Array(igv.unbgzf(compressed)); //, c.maxv.block - c.minv.block + 1));
-                                        decodeBamRecords(ba, c.minv.offset, alignmentContainer, bpStart, bpEnd, chrId, self.filter);
+                                    var ba = new Uint8Array(igv.unbgzf(compressed)); //new Uint8Array(igv.unbgzf(compressed)); //, c.maxv.block - c.minv.block + 1));
+                                    decodeBamRecords(ba, c.minv.offset, alignmentContainer, bpStart, bpEnd, chrId, self.filter);
 
-                                        fulfill(alignmentContainer);
+                                    fulfill(alignmentContainer);
 
-                                    }).catch(function (obj) {
-                                        reject(obj);
-                                    });
+                                }).catch(function (obj) {
+                                    reject(obj);
+                                });
 
                             }))
                         });
@@ -358,7 +358,7 @@ var igv = (function (igv) {
 
             getIndex(self).then(function (index) {
 
-                var len = index.headerSize + MAX_GZIP_BLOCK_SIZE + 10000;   // Insure we get the complete compressed block containing the header
+                var len = index.firstAlignmentBlock + MAX_GZIP_BLOCK_SIZE;   // Insure we get the complete compressed block containing the header
 
                 igvxhr.loadArrayBuffer(self.bamPath,
                     {
@@ -369,44 +369,44 @@ var igv = (function (igv) {
                         withCredentials: self.config.withCredentials
                     }).then(function (compressedBuffer) {
 
-                        var unc = igv.unbgzf(compressedBuffer, len),
-                            uncba = new Uint8Array(unc),
-                            magic = readInt(uncba, 0),
-                            samHeaderLen = readInt(uncba, 4),
-                            samHeader = '',
-                            genome = igv.browser ? igv.browser.genome : null;
+                    var unc = igv.unbgzf(compressedBuffer, len),
+                        uncba = new Uint8Array(unc),
+                        magic = readInt(uncba, 0),
+                        samHeaderLen = readInt(uncba, 4),
+                        samHeader = '',
+                        genome = igv.browser ? igv.browser.genome : null;
 
-                        for (var i = 0; i < samHeaderLen; ++i) {
-                            samHeader += String.fromCharCode(uncba[i + 8]);
+                    for (var i = 0; i < samHeaderLen; ++i) {
+                        samHeader += String.fromCharCode(uncba[i + 8]);
+                    }
+
+                    var nRef = readInt(uncba, samHeaderLen + 8);
+                    var p = samHeaderLen + 12;
+
+                    self.chrToIndex = {};
+                    self.indexToChr = [];
+                    for (var i = 0; i < nRef; ++i) {
+                        var lName = readInt(uncba, p);
+                        var name = '';
+                        for (var j = 0; j < lName - 1; ++j) {
+                            name += String.fromCharCode(uncba[p + 4 + j]);
+                        }
+                        var lRef = readInt(uncba, p + lName + 4);
+                        //dlog(name + ': ' + lRef);
+
+                        if (genome && genome.getChromosomeName) {
+                            name = genome.getChromosomeName(name);
                         }
 
-                        var nRef = readInt(uncba, samHeaderLen + 8);
-                        var p = samHeaderLen + 12;
+                        self.chrToIndex[name] = i;
+                        self.indexToChr.push(name);
 
-                        self.chrToIndex = {};
-                        self.indexToChr = [];
-                        for (var i = 0; i < nRef; ++i) {
-                            var lName = readInt(uncba, p);
-                            var name = '';
-                            for (var j = 0; j < lName - 1; ++j) {
-                                name += String.fromCharCode(uncba[p + 4 + j]);
-                            }
-                            var lRef = readInt(uncba, p + lName + 4);
-                            //dlog(name + ': ' + lRef);
+                        p = p + 8 + lName;
+                    }
 
-                            if (genome && genome.getChromosomeName) {
-                                name = genome.getChromosomeName(name);
-                            }
+                    fulfill();
 
-                            self.chrToIndex[name] = i;
-                            self.indexToChr.push(name);
-
-                            p = p + 8 + lName;
-                        }
-
-                        fulfill();
-
-                    }).catch(reject);
+                }).catch(reject);
             }).catch(reject);
         });
     }
