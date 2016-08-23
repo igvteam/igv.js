@@ -29,64 +29,75 @@ var igv = (function (igv) {
                     withCredentials: config.withCredentials
                 }).then(function (arrayBuffer) {
 
-                    var indices = [],
-                        magic, nbin, nintv, nref, parser,
-                        blockMin = Number.MAX_VALUE,
-                        blockMax = 0,
-                        binIndex, linearIndex, binNumber, cs, ce, b, i, ref, sequenceIndexMap;
+                var indices = [],
+                    magic, nbin, nintv, nref, parser,
+                    blockMin = Number.MAX_VALUE,
+                    blockMax = 0,
+                    binIndex, linearIndex, binNumber, cs, ce, b, i, ref, sequenceIndexMap;
 
-                    if (!arrayBuffer) {
-                        fulfill(null);
-                        return;
-                    }
+                if (!arrayBuffer) {
+                    fulfill(null);
+                    return;
+                }
+
+                if (tabix) {
+                    var inflate = new Zlib.Gunzip(new Uint8Array(arrayBuffer));
+                    arrayBuffer = inflate.decompress().buffer;
+                }
+
+                parser = new igv.BinaryParser(new DataView(arrayBuffer));
+
+                magic = parser.getInt();
+
+                if (magic === BAI_MAGIC || (tabix && magic === TABIX_MAGIC)) {
+
+                    nref = parser.getInt();
+
 
                     if (tabix) {
-                        var inflate = new Zlib.Gunzip(new Uint8Array(arrayBuffer));
-                        arrayBuffer = inflate.decompress().buffer;
+                        // Tabix header parameters aren't used, but they must be read to advance the pointer
+                        var format = parser.getInt();
+                        var col_seq = parser.getInt();
+                        var col_beg = parser.getInt();
+                        var col_end = parser.getInt();
+                        var meta = parser.getInt();
+                        var skip = parser.getInt();
+                        var l_nm = parser.getInt();
+
+                        sequenceIndexMap = {};
+                        for (i = 0; i < nref; i++) {
+                            var seq_name = parser.getString();
+
+                            // Translate to "official" chr name.
+                            if (genome) seq_name = genome.getChromosomeName(seq_name);
+
+                            sequenceIndexMap[seq_name] = i;
+                        }
                     }
 
-                    parser = new igv.BinaryParser(new DataView(arrayBuffer));
+                    for (ref = 0; ref < nref; ++ref) {
 
-                    magic = parser.getInt();
+                        binIndex = {};
+                        linearIndex = [];
 
-                    if (magic === BAI_MAGIC || (tabix && magic === TABIX_MAGIC)) {
+                        nbin = parser.getInt();
 
-                        nref = parser.getInt();
+                        for (b = 0; b < nbin; ++b) {
 
+                            binNumber = parser.getInt();
 
-                        if (tabix) {
-                            // Tabix header parameters aren't used, but they must be read to advance the pointer
-                            var format = parser.getInt();
-                            var col_seq = parser.getInt();
-                            var col_beg = parser.getInt();
-                            var col_end = parser.getInt();
-                            var meta = parser.getInt();
-                            var skip = parser.getInt();
-                            var l_nm = parser.getInt();
+                            if (binNumber == 37450) {
+                                // This is a psuedo bin, not used but we have to consume the bytes
+                                nchnk = parser.getInt(); // # of chunks for this bin
+                                cs = parser.getVPointer();   // unmapped beg
+                                ce = parser.getVPointer();   // unmapped end
+                                var n_maped = parser.getLong();
+                                var nUnmapped = parser.getLong();
 
-                            sequenceIndexMap = {};
-                            for (i = 0; i < nref; i++) {
-                                var seq_name = parser.getString();
-
-                                // Translate to "official" chr name.
-                                if (genome) seq_name = genome.getChromosomeName(seq_name);
-
-                                sequenceIndexMap[seq_name] = i;
                             }
-                        }
-
-                        for (ref = 0; ref < nref; ++ref) {
-
-                            binIndex = {};
-                            linearIndex = [];
-
-                            nbin = parser.getInt();
-
-                            for (b = 0; b < nbin; ++b) {
-
-                                binNumber = parser.getInt();
+                            else {
+                                
                                 binIndex[binNumber] = [];
-
                                 var nchnk = parser.getInt(); // # of chunks for this bin
 
                                 for (i = 0; i < nchnk; i++) {
@@ -103,37 +114,37 @@ var igv = (function (igv) {
                                     }
                                 }
                             }
-
-
-                            nintv = parser.getInt();
-                            for (i = 0; i < nintv; i++) {
-                                cs = parser.getVPointer();
-                                linearIndex.push(cs);   // Might be null
-                            }
-
-                            if (nbin > 0) {
-                                indices[ref] = {
-                                    binIndex: binIndex,
-                                    linearIndex: linearIndex
-                                }
-                            }
                         }
 
-                    } else {
-                        throw new Error(indexURL + " is not a " + (tabix ? "tabix" : "bai") + " file");
+
+                        nintv = parser.getInt();
+                        for (i = 0; i < nintv; i++) {
+                            cs = parser.getVPointer();
+                            linearIndex.push(cs);   // Might be null
+                        }
+
+                        if (nbin > 0) {
+                            indices[ref] = {
+                                binIndex: binIndex,
+                                linearIndex: linearIndex
+                            }
+                        }
                     }
-                    fulfill(new igv.BamIndex(indices, blockMin, blockMax, sequenceIndexMap, tabix));
-                }).catch(reject);
+
+                } else {
+                    throw new Error(indexURL + " is not a " + (tabix ? "tabix" : "bai") + " file");
+                }
+                fulfill(new igv.BamIndex(indices, blockMin, sequenceIndexMap, tabix));
+            }).catch(reject);
         })
     }
 
 
-    igv.BamIndex = function (indices, headerSize, blockMax, sequenceIndexMap, tabix) {
-        this.headerSize = headerSize;
+    igv.BamIndex = function (indices, blockMin, sequenceIndexMap, tabix) {
+        this.firstAlignmentBlock = blockMin;
         this.indices = indices;
         this.sequenceIndexMap = sequenceIndexMap;
         this.tabix = tabix;
-        this.blockMax = blockMax;
 
     }
 
