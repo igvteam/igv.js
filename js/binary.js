@@ -73,23 +73,11 @@ var igv = (function (igv) {
 
     igv.BinaryParser.prototype.getLong = function () {
 
-//        return this.view.getInt32(this.position += 8);
-        var byte1 = this.view.getUint8(this.position++) & 0xff;
-        var byte2 = this.view.getUint8(this.position++) & 0xff;
-        var byte3 = this.view.getUint8(this.position++) & 0xff;
-        var byte4 = this.view.getUint8(this.position++) & 0xff;
-        var byte5 = this.view.getUint8(this.position++) & 0xff;
-        var byte6 = this.view.getUint8(this.position++) & 0xff;
-        var byte7 = this.view.getUint8(this.position++) & 0xff;
-        var byte8 = this.view.getUint8(this.position++) & 0xff;
-        return (byte8 << 56)
-            + ((byte7 << 56) >>> 8)
-            + ((byte6 << 56) >>> 16)
-            + ((byte5 << 56) >>> 24)
-            + ((byte4 << 56) >>> 32)
-            + ((byte3 << 56) >>> 40)
-            + ((byte2 << 56) >>> 48)
-            + ((byte1 << 56) >>> 56);
+        // js doesn't support long.  Let's hope this fits an int, but advance the buffer 8 bytes
+
+        var integer = this.view.getInt32(this.position, this.littleEndian);
+        this.position += 8;
+        return integer;
     }
 
     igv.BinaryParser.prototype.getString = function (len) {
