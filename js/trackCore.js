@@ -57,7 +57,9 @@ var igv = (function (igv) {
         track.removable = config.removable === undefined ? true : config.removable;      // Defaults to true
 
         track.height = config.height || ("annotation" === config.type ? 100 : 50);
-        track.autoHeight = config.autoHeight === undefined ? true : config.autoHeight;
+        track.autoHeight = config.autoHeight === undefined ?
+            (config.height === undefined ? true : false) :
+            config.autoHeight;
         track.minHeight = config.minHeight || Math.min(50, track.height);
         track.maxHeight = config.maxHeight || Math.max(500, track.height);
 
