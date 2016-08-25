@@ -79,7 +79,13 @@ var igv = (function (igv) {
                         if(header) {
                             var features = header.features;
                             if (features) {
+
+                                if ("gtf" === self.config.format || "gff3" === self.config.format || "gff" === self.config.format) {
+                                    features = (new igv.GFFHelper(self.config.format)).combineFeatures(features);
+                                }
+
                                 // Assign overlapping features to rows
+
                                 packFeatures(features, maxRows);
                                 self.featureCache = new igv.FeatureCache(features);
 
