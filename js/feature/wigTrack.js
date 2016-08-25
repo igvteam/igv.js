@@ -33,20 +33,16 @@ var igv = (function (igv) {
         this.config = config;
         this.url = config.url;
 
+        if (config.color === undefined) config.color = "rgb(150,150,150)";   // Hack -- should set a default color per track type
+        
+        igv.configTrack(this, config);
+
         if ("bigwig" === config.format) {
             this.featureSource = new igv.BWSource(config);
         }
         else {
             this.featureSource = new igv.FeatureSource(config);
         }
-
-        this.name = config.name;
-        this.color = config.color || "rgb(150,150,150)";
-        this.autoScale = config.autoScale  !== undefined ? config.autoScale :
-            (config.max === undefined ? true : false);
-
-        this.height = 100;
-        this.order = config.order;
 
         // Min and max values.  No defaults for these, if they aren't set track will autoscale.
         this.dataRange = {
@@ -218,7 +214,6 @@ var igv = (function (igv) {
     function signsDiffer(a, b) {
         return (a > 0 && b < 0 || a < 0 && b > 0);
     }
-
 
 
     return igv;

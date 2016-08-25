@@ -56,7 +56,10 @@ var igv = (function (igv) {
 
         track.removable = config.removable === undefined ? true : config.removable;      // Defaults to true
 
-        track.height = config.height || ("annotation" === config.type ? 100 : 50);
+        track.height = config.height || ('wig' === config.type ? 50 : 100);
+
+        if(config.autoHeight === undefined)  config.autoHeight = config.autoheight; // Some case confusion in the initial releasae
+
         track.autoHeight = config.autoHeight === undefined ?
             (config.height === undefined ? true : false) :
             config.autoHeight;

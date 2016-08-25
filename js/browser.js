@@ -26,8 +26,8 @@
 var igv = (function (igv) {
 
 
-    var knownFileTypes = new Set(["narrowPeak", "broadPeak", "peaks", "bedgraph", "wig", "gff3", "gff",
-        "gtf", "aneu", "FusionJuncSpan", "refflat", "seg", "bed", "vcf", "bb", "bigBed", "bw", "bigWig", "bam"]);
+    var knownFileTypes = new Set(["narrowpeak", "broadpeak", "peaks", "bedgraph", "wig", "gff3", "gff",
+        "gtf", "aneu", "fusionjuncspan", "refflat", "seg", "bed", "vcf", "bb", "bigbed", "bw", "bigwig", "bam"]);
 
     igv.Browser = function (options, trackContainer) {
 
@@ -154,13 +154,13 @@ var igv = (function (igv) {
             }
         }
 
-        switch (config.type) {
+        switch (config.type.toLowerCase()) {
             case "gwas":
                 newTrack = new igv.GWASTrack(config);
                 break;
             case "annotation":
             case "genes":
-            case "FusionJuncSpan":
+            case "fusionjuncspan":
                 newTrack = new igv.FeatureTrack(config);
                 break;
             case "variant":
@@ -996,13 +996,16 @@ var igv = (function (igv) {
             }
 
             else if ("FusionJuncSpan" === config.type) {
-                config.format = "FusionJuncSpan";
+                config.format = "fusionjuncspan";
             }
         }
 
         function inferFileFormat(config) {
 
-            if (config.format) return;
+            if (config.format) {
+                config.format = config.format.toLowerCase();
+                return;
+            }
 
             var path = config.url || config.localFile.name,
                 fn = path.toLowerCase(),
@@ -1026,7 +1029,7 @@ var igv = (function (igv) {
             idx = fn.lastIndexOf(".");
             ext = idx < 0 ? fn : fn.substr(idx + 1);
 
-            switch (ext) {
+            switch (ext.toLowerCase()) {
 
                 case "bw":
                     config.format = "bigwig";
@@ -1046,7 +1049,7 @@ var igv = (function (igv) {
             if (config.type) return;
 
             if (config.format !== undefined) {
-                switch (config.format) {
+                switch (config.format.toLowerCase()) {
                     case "bw":
                     case "bigwig":
                     case "wig":
