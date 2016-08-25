@@ -75,8 +75,6 @@ var igv = (function (igv) {
                         range: loadRange,
                         withCredentials: self.config.withCredentials
                     }).then(function (arrayBuffer) {
-                    // TODO -- handle error
-
                     self.data = arrayBuffer;
                     self.range = loadRange;
                     subbuffer(self, requestedRange, asUint8);

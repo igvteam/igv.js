@@ -198,7 +198,8 @@
                             url: 'https://data.broadinstitute.org/igvdata/BodyMap/hg19/IlluminaHiSeq2000_BodySites/brain_merged/accepted_hits.bam',
                             name: 'Brain (BodyMap)',
                             maxRows: 3000,
-                            samplingDepth: 10000
+                            samplingDepth: 10000,
+                            height: 200
                         })">BAM File - deep coverage (Brain, BodyMap)
         </div>
 
@@ -312,7 +313,9 @@
                                 {
                                 url: 'https://www.encodeproject.org/files/ENCFF002ADR/@@download/ENCFF002ADR.bigBed',
                                 name: 'ENCFF002ADR',
-                                visibilityWindow: 2000000
+                                visibilityWindow: 2000000,
+                                height: 50,
+                                autoHeight: false
                                 })">Encode bigbed
         </div>
 
@@ -510,7 +513,7 @@
                 {
                     name: "Genes",
                     type: "annotation",
-                    format: "bed",
+                    format: "gtf",
                     sourceType: "file",
 //                    color: "#ff0000",
                     url: "https://s3.amazonaws.com/igv.broadinstitute.org/annotations/hg19/genes/gencode.v18.annotation.sorted.gtf.gz",
