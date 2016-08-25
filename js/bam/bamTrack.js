@@ -29,13 +29,15 @@ var igv = (function (igv) {
     var alignmentRowYInset = 0;
     var alignmentStartGap = 5;
     var downsampleRowHeight = 5;
-
+    const DEFAULT_COVERAGE_TRACK_HEIGHT = 50;
 
     igv.BAMTrack = function (config) {
 
         this.featureSource = new igv.BamSource(config);
 
         igv.configTrack(this, config);
+
+        if(config.coverageTrackHeight === undefined) config.coverageTrackHeight = DEFAULT_COVERAGE_TRACK_HEIGHT;
 
         this.coverageTrack = new CoverageTrack(config, this);
 
@@ -121,7 +123,9 @@ var igv = (function (igv) {
 
     igv.BAMTrack.prototype.draw = function (options) {
 
-        this.coverageTrack.draw(options);
+        if(this.coverageTrack.height > 0) {
+            this.coverageTrack.draw(options);
+        }
 
         this.alignmentTrack.draw(options);
     };
@@ -308,7 +312,9 @@ var igv = (function (igv) {
         this.parent = parent;
         this.featureSource = parent.featureSource;
         this.top = 0;
-        this.height = 50;
+
+
+        this.height = config.coverageTrackHeight;
         this.dataRange = {min: 0};   // Leav max undefined
         this.paintAxis = igv.paintAxis;
     }
@@ -466,7 +472,7 @@ var igv = (function (igv) {
 
         this.parent = parent;
         this.featureSource = parent.featureSource;
-        this.top = config.coverageTrackHeight + 5 || 55;
+        this.top = config.coverageTrackHeight == 0 ? 0 : config.coverageTrackHeight  + 5;
         this.alignmentRowHeight = config.alignmentRowHeight || 14;
 
         this.negStrandColor = config.negStrandColor || "rgba(150, 150, 230, 0.75)";

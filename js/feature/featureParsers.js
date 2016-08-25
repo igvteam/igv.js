@@ -56,8 +56,8 @@ var igv = (function (igv) {
 
 
         switch (format) {
-            case "narrowPeak":
-            case "broadPeak":
+            case "narrowpeak":
+            case "broadpeak":
             case "peaks":
                 this.decode = decodePeak;
                 this.delimiter = /\s+/;
@@ -80,12 +80,12 @@ var igv = (function (igv) {
                 this.decode = decodeAneu;
                 this.delimiter = "\t";
                 break;
-            case "FusionJuncSpan":
+            case "fusionjuncspan":
                 // bhaas, needed for FusionInspector view
                 this.decode = decodeFusionJuncSpan;
                 this.delimiter = /\s+/;
                 break;
-            case "gtexGWAS":
+            case "gtexgwas":
                 this.skipRows = 1;
                 this.decode = decodeGtexGWAS;
                 this.delimiter = "\t";
