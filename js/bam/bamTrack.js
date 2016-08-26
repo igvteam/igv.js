@@ -37,7 +37,9 @@ var igv = (function (igv) {
 
         igv.configTrack(this, config);
 
-        if(config.coverageTrackHeight === undefined) config.coverageTrackHeight = DEFAULT_COVERAGE_TRACK_HEIGHT;
+        if(config.coverageTrackHeight === undefined) {
+            config.coverageTrackHeight = DEFAULT_COVERAGE_TRACK_HEIGHT;
+        }
 
         this.coverageTrack = new CoverageTrack(config, this);
 
