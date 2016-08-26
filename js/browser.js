@@ -497,7 +497,9 @@ var igv = (function (igv) {
 
         var w,
             chromosome,
-            viewportWidth = this.trackViewportWidth();
+            viewportWidth = this.trackViewportWidth(),
+            delta,
+            center;
 
         if (igv.popover) {
             igv.popover.hide();
@@ -514,8 +516,17 @@ var igv = (function (igv) {
         if (!end) {
             w = Math.round(viewportWidth * this.referenceFrame.bpPerPixel / 2);
             start = Math.max(0, start - w);
-        }
-        else {
+        } else {
+
+            if (end - start < this.referenceFrame.bpPerPixel) {
+
+                delta = end - start;
+                center = start + delta / 2;
+
+                start = center - this.referenceFrame.bpPerPixel / 2;
+                  end = center + this.referenceFrame.bpPerPixel / 2;
+            }
+
             this.referenceFrame.bpPerPixel = (end - start) / (viewportWidth);
         }
 
@@ -613,76 +624,40 @@ var igv = (function (igv) {
      * @param callback - function to call
      */
     igv.Browser.prototype.search = function (feature, callback) {
+        var type,
+            chr,
+            start,
+            end,
+            searchConfig,
+            url,
+            result;
 
         // See if we're ready to respond to a search, if not just queue it up and return
         if (igv.browser === undefined || igv.browser.genome === undefined) {
             igv.browser.initialLocus = feature;
-            if (callback) callback();
+            if (callback) {
+                callback();
+            }
             return;
         }
 
+        if (isLocusFeature(feature, this.genome)) {
 
-        var type,
-            chr,
-            posTokens,
-            start,
-            end,
-            searchConfig,
-            tokens,
-            url,
-            chromosome,
-            result;
+            gotoLocusFeature(feature, this.genome, this);
 
-        if (feature.includes(":") && feature.includes("-") || this.genome.getChromosome(feature)) {
-
-            type = "locus";
-            tokens = feature.split(":");
-            chr = this.genome.getChromosomeName(tokens[0]);
-
-            if (tokens.length == 1) {
-                chromosome = this.genome.getChromosome(feature);
-                start = 0;
-                end = chromosome.bpLength;
+            if (callback) {
+                callback();
             }
-            else {
-                chromosome = this.genome.getChromosome(chr);
-                if (!chromosome) {
-                    igv.presentAlert("Unknown chromosome: " + chr);
-                    this.updateLocusSearch(this.referenceFrame);
-                } else {
-                    posTokens = tokens[1].split("-");
-                    start = Math.max(0, parseInt(posTokens[0].replace(/,/g, "")) - 1);
-                    end = parseInt(posTokens[1].replace(/,/g, ""));
-                    if (end < 0) {
-                        // This can happen from integer overflow
-                        if (chromosome) end = chromosome.bpLength;
-                    }
-                    else {
-                        end = Math.min(end, chromosome.bpLength);
-                    }
 
-
-                    if (isNaN(start) || isNaN(end) || (start > end)) {
-                        igv.presentAlert("Unrecognized feature or locus: " + feature);
-                        this.updateLocusSearch(this.referenceFrame);
-                    } else {
-                        this.goto(chr, start, end);
-                        fireOnsearch.call(igv.browser, feature, type);
-                    }
-                }
-            }
-            if (callback) callback();
-
-        }
-        else {
+        } else {
 
             // Try local feature cache first
             result = this.featureDB[feature.toUpperCase()];
             if (result) {
-                handleSearchResult(result.name, result.chr, result.start, result.end, "");
-            }
 
-            else if (this.searchConfig) {
+                handleSearchResult(result.name, result.chr, result.start, result.end, "");
+
+            } else if (this.searchConfig) {
                 url = this.searchConfig.url.replace("$FEATURE$", feature);
                 searchConfig = this.searchConfig;
 
@@ -728,8 +703,63 @@ var igv = (function (igv) {
             }
         }
 
+        function isLocusFeature(f, genome) {
 
+            if (2 === f.split(':').length) {
+                return true;
+            }
+
+            if (genome.getChromosome(f)) {
+                return true;
+            }
+
+            return false;
+        }
     };
+
+    function gotoLocusFeature(locusFeature, genome, browser) {
+        var type,
+            tokens,
+            chrom,
+            start,
+            end,
+            chr,
+            posTokens;
+
+        type = 'locus';
+        tokens = locusFeature.split(":");
+        chr = genome.getChromosomeName(tokens[ 0 ]);
+        chrom = genome.getChromosome(1 === tokens.length ? locusFeature : chr);
+
+        if (chrom) {
+
+            posTokens = (tokens.length > 1) ? tokens[ 1 ].split("-") : undefined;
+
+            start = undefined === posTokens ? 0 : Math.max(0, parseInt(posTokens[ 0 ].replace(/,/g, "")) - 1);
+
+            if (posTokens && 2 === posTokens.length) {
+                end = Math.min(chrom.bpLength, parseInt(posTokens[ 1 ].replace(/,/g, "")));
+                if (end < 0) {
+                    // This can happen from integer overflow
+                    end = chrom.bpLength;
+                }
+            } else if (posTokens && 1 === posTokens.length) {
+                end = undefined;
+            } else {
+                end = chrom.bpLength
+            }
+
+        }
+
+        if (undefined === chrom || isNaN(start) || (start > end)) {
+            igv.presentAlert("Unrecognized feature or locus: " + locusFeature);
+            browser.updateLocusSearch(browser.referenceFrame);
+        }
+
+        browser.goto(chr, start, end);
+        fireOnsearch.call(igv.browser, locusFeature, type);
+
+    }
 
     function presentSearchResults(loci, config, feature) {
 
