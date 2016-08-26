@@ -495,7 +495,7 @@ var igv = (function (igv) {
             this.gotocallback(chr, start, end);
         }
 
-        var basepairWindow,
+        var bpWindow,
             chromosome,
             viewportWidth = this.trackViewportWidth(),
             delta,
@@ -511,20 +511,20 @@ var igv = (function (igv) {
         }
 
         this.referenceFrame.chr = chr;
-        basepairWindow = Math.round(viewportWidth * this.referenceFrame.bpPerPixel / 2);
+        bpWindow = Math.round(viewportWidth * this.referenceFrame.bpPerPixel);
 
         // If end is undefined,  interpret start as the new center, otherwise compute scale.
-        if (!end) {
-            start = Math.max(0, start - basepairWindow/2);
+        if (undefined === end) {
+            start = Math.max(0, start - bpWindow/2);
         } else {
 
-            // if (end - start < basepairWindow) {
+            // if (end - start < bpWindow) {
             //
             //     delta = end - start;
             //     center = start + delta / 2;
             //
-            //     start = center - basepairWindow/2;
-            //       end = center + basepairWindow/2;
+            //     start = center - bpWindow/2;
+            //       end = center + bpWindow/2;
             // }
 
             this.referenceFrame.bpPerPixel = (end - start) / (viewportWidth);
@@ -541,7 +541,7 @@ var igv = (function (igv) {
                 var maxBpPerPixel = chromosome.bpLength / viewportWidth;
                 if (this.referenceFrame.bpPerPixel > maxBpPerPixel) this.referenceFrame.bpPerPixel = maxBpPerPixel;
 
-                if (!end) {
+                if (undefined === end) {
                     end = start + viewportWidth * this.referenceFrame.bpPerPixel;
                 }
 
