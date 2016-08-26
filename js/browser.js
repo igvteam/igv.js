@@ -714,26 +714,35 @@ var igv = (function (igv) {
 
         if (chrom) {
 
+            // returning undefined indicates locus is a chromosome name.
             startEnd = (tokens.length > 1) ? tokens[ 1 ].split("-") : undefined;
 
+            // if we have a chromosome name start is 0. Otherwise parse it out.
             start = (undefined === startEnd) ? 0 : Math.max(0, parseInt(startEnd[ 0 ].replace(/,/g, "")) - 1);
 
             if (startEnd && 2 === startEnd.length) {
 
-                // if start and end
+                // if we have a start AND end value
                 end = Math.min(chrom.bpLength, parseInt(startEnd[ 1 ].replace(/,/g, "")));
+
                 if (end < 0) {
                     // This can happen from integer overflow
                     end = chrom.bpLength;
                 }
+
             } else if (startEnd && 1 === startEnd.length) {
+                // if we have only a start value set end to undefined and deal with it later
                 end = undefined;
             } else {
+
+                // we have a chromosome name
                 end = chrom.bpLength
             }
 
             if (undefined === end) {
 
+                // set start and end and clamp for the case when locusFeature includes
+                // only a start value.
                 start -= bpMinimumWindow/2;
                 end = start + bpMinimumWindow;
 
@@ -741,7 +750,11 @@ var igv = (function (igv) {
                     end = chrom.bpLength;
                     start = end - bpMinimumWindow;
                 }
+
             } else if (end - start < bpMinimumWindow) {
+
+                // if the featurelocus range falls below the acceptable threshold (bpMinimumWindow) inflate an clamp
+                // appropriately
                 center = (end + start)/2;
                 if (center - bpMinimumWindow/2 < 0) {
                     start = 0;
