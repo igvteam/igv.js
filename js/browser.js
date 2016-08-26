@@ -490,16 +490,17 @@ var igv = (function (igv) {
 
     igv.Browser.prototype.goto = function (chr, start, end) {
 
-        if (typeof this.gotocallback != "undefined") {
-            //console.log("Got chr="+chr+", start="+start+", end="+end+", also using callback "+this.gotocallback);
-            this.gotocallback(chr, start, end);
-        }
-
         var bpWindow,
             chromosome,
             viewportWidth = this.trackViewportWidth(),
             delta,
-            center;
+            center,
+            maxBpPerPixel;
+
+        if (typeof this.gotocallback != "undefined") {
+            //console.log("Got chr="+chr+", start="+start+", end="+end+", also using callback "+this.gotocallback);
+            this.gotocallback(chr, start, end);
+        }
 
         if (igv.popover) {
             igv.popover.hide();
@@ -531,15 +532,23 @@ var igv = (function (igv) {
         }
 
         if (this.genome) {
+
             chromosome = this.genome.getChromosome(this.referenceFrame.chr);
             if (!chromosome) {
-                if (console && console.log) console.log("Could not find chromsome " + this.referenceFrame.chr);
-            }
-            else {
-                if (!chromosome.bpLength) chromosome.bpLength = 1;
 
-                var maxBpPerPixel = chromosome.bpLength / viewportWidth;
-                if (this.referenceFrame.bpPerPixel > maxBpPerPixel) this.referenceFrame.bpPerPixel = maxBpPerPixel;
+                if (console && console.log) {
+                    console.log("Could not find chromsome " + this.referenceFrame.chr);
+                }
+            } else {
+
+                if (!chromosome.bpLength) {
+                    chromosome.bpLength = 1;
+                }
+
+                maxBpPerPixel = chromosome.bpLength / viewportWidth;
+                if (this.referenceFrame.bpPerPixel > maxBpPerPixel) {
+                    this.referenceFrame.bpPerPixel = maxBpPerPixel;
+                }
 
                 if (undefined === end) {
                     end = start + viewportWidth * this.referenceFrame.bpPerPixel;
