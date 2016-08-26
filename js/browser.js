@@ -25,6 +25,8 @@
 
 var igv = (function (igv) {
 
+    // the mimimum extent of a chromosome locus
+    const bpMinimumWindow = 40;
 
     var knownFileTypes = new Set(["narrowpeak", "broadpeak", "peaks", "bedgraph", "wig", "gff3", "gff",
         "gtf", "aneu", "fusionjuncspan", "refflat", "seg", "bed", "vcf", "bb", "bigbed", "bw", "bigwig", "bam"]);
@@ -216,7 +218,6 @@ var igv = (function (igv) {
         }
 
     };
-
 
     /**
      * Add a new track.  Each track is associated with the following DOM elements
@@ -490,11 +491,8 @@ var igv = (function (igv) {
 
     igv.Browser.prototype.goto = function (chr, start, end) {
 
-        var bpWindow,
-            chromosome,
-            viewportWidth = this.trackViewportWidth(),
-            delta,
-            center,
+        var chromosome,
+            viewportWidthPixel = this.trackViewportWidth(),
             maxBpPerPixel;
 
         if (typeof this.gotocallback != "undefined") {
@@ -506,58 +504,32 @@ var igv = (function (igv) {
             igv.popover.hide();
         }
 
-        // Translate chr to official name
         if (this.genome) {
             chr = this.genome.getChromosomeName(chr);
         }
 
         this.referenceFrame.chr = chr;
-        bpWindow = Math.round(viewportWidth * this.referenceFrame.bpPerPixel);
-
-        // If end is undefined,  interpret start as the new center, otherwise compute scale.
-        if (undefined === end) {
-            start = Math.max(0, start - bpWindow/2);
-        } else {
-
-            // if (end - start < bpWindow) {
-            //
-            //     delta = end - start;
-            //     center = start + delta / 2;
-            //
-            //     start = center - bpWindow/2;
-            //       end = center + bpWindow/2;
-            // }
-
-            this.referenceFrame.bpPerPixel = (end - start) / (viewportWidth);
-        }
+        this.referenceFrame.bpPerPixel = (end - start) / (viewportWidthPixel);
 
         if (this.genome) {
 
             chromosome = this.genome.getChromosome(this.referenceFrame.chr);
             if (!chromosome) {
-
-                if (console && console.log) {
-                    console.log("Could not find chromsome " + this.referenceFrame.chr);
-                }
+                console.log("Could not find chromsome " + this.referenceFrame.chr);
             } else {
 
                 if (!chromosome.bpLength) {
                     chromosome.bpLength = 1;
                 }
 
-                maxBpPerPixel = chromosome.bpLength / viewportWidth;
+                maxBpPerPixel = chromosome.bpLength / viewportWidthPixel;
                 if (this.referenceFrame.bpPerPixel > maxBpPerPixel) {
                     this.referenceFrame.bpPerPixel = maxBpPerPixel;
                 }
-
-                if (undefined === end) {
-                    end = start + viewportWidth * this.referenceFrame.bpPerPixel;
-                }
-
-                if (chromosome && end > chromosome.bpLength) {
-                    start -= (end - chromosome.bpLength);
-                }
             }
+
+        } else {
+            console.log('browser. no genome.');
         }
 
         this.referenceFrame.start = start;
@@ -625,7 +597,6 @@ var igv = (function (igv) {
         this.referenceFrame.bpPerPixel = newScale;
         this.update();
     };
-
 
     /**
      *
@@ -733,7 +704,8 @@ var igv = (function (igv) {
             start,
             end,
             chr,
-            posTokens;
+            startEnd,
+            center;
 
         type = 'locus';
         tokens = locusFeature.split(":");
@@ -742,22 +714,46 @@ var igv = (function (igv) {
 
         if (chrom) {
 
-            posTokens = (tokens.length > 1) ? tokens[ 1 ].split("-") : undefined;
+            startEnd = (tokens.length > 1) ? tokens[ 1 ].split("-") : undefined;
 
-            start = undefined === posTokens ? 0 : Math.max(0, parseInt(posTokens[ 0 ].replace(/,/g, "")) - 1);
+            start = (undefined === startEnd) ? 0 : Math.max(0, parseInt(startEnd[ 0 ].replace(/,/g, "")) - 1);
 
-            if (posTokens && 2 === posTokens.length) {
-                end = Math.min(chrom.bpLength, parseInt(posTokens[ 1 ].replace(/,/g, "")));
+            if (startEnd && 2 === startEnd.length) {
+
+                // if start and end
+                end = Math.min(chrom.bpLength, parseInt(startEnd[ 1 ].replace(/,/g, "")));
                 if (end < 0) {
                     // This can happen from integer overflow
                     end = chrom.bpLength;
                 }
-            } else if (posTokens && 1 === posTokens.length) {
+            } else if (startEnd && 1 === startEnd.length) {
                 end = undefined;
             } else {
                 end = chrom.bpLength
             }
 
+            if (undefined === end) {
+
+                start -= bpMinimumWindow/2;
+                end = start + bpMinimumWindow;
+
+                if (end > chrom.bpLength) {
+                    end = chrom.bpLength;
+                    start = end - bpMinimumWindow;
+                }
+            } else if (end - start < bpMinimumWindow) {
+                center = (end + start)/2;
+                if (center - bpMinimumWindow/2 < 0) {
+                    start = 0;
+                    end = start + bpMinimumWindow;
+                } else if (center + bpMinimumWindow/2 > chrom.bpLength) {
+                    end = chrom.bpLength;
+                    start = end - bpMinimumWindow;
+                } else {
+                    start = center - bpMinimumWindow/2;
+                    end = start + bpMinimumWindow;
+                }
+            }
         }
 
         if (undefined === chrom || isNaN(start) || (start > end)) {
