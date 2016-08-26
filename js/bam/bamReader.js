@@ -17,7 +17,9 @@ var igv = (function (igv) {
     var SUPPLEMENTARY_FLAG = 0x800;
 
     const MAX_GZIP_BLOCK_SIZE = 65536;   //  APPARENTLY.  Where is this documented???
-
+    const DEFAULT_SAMPLING_WINDOW_SIZE = 100;
+    const DEFAULT_SAMPLING_DEPTH = 50;
+    const MAXIMUM_SAMPLING_DEPTH = 2500;
 
     /**
      * Class for reading a bam file
@@ -40,8 +42,13 @@ var igv = (function (igv) {
         this.baiPath = config.indexURL || this.baiPath; // If there is an indexURL provided, use it!
         this.headPath = config.headURL || this.bamPath;
 
-        this.samplingWindowSize = config.samplingWindowSize === undefined ? 100 : config.samplingWindowSize;
-        this.samplingDepth = config.samplingDepth === undefined ? 50 : config.samplingDepth;
+
+        this.samplingWindowSize = config.samplingWindowSize === undefined ? DEFAULT_SAMPLING_WINDOW_SIZE : config.samplingWindowSize;
+        this.samplingDepth = config.samplingDepth === undefined ? DEFAULT_SAMPLING_DEPTH : config.samplingDepth;
+        if(this.samplingDepth > MAXIMUM_SAMPLING_DEPTH) {
+            igv.log("Warning: attempt to set sampling depth > maximum value of 2500");
+            this.samplingDepth = MAXIMUM_SAMPLING_DEPTH;
+        }
 
         if (config.viewAsPairs) {
             this.pairsSupported = true;

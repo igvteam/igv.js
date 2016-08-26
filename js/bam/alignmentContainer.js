@@ -25,8 +25,7 @@
  */
 
 var igv = (function (igv) {
-
-    var downSample = true;
+    
 
     function canBePaired(alignment) {
         return alignment.isPaired() &&
@@ -49,9 +48,7 @@ var igv = (function (igv) {
         this.downsampledIntervals = [];
 
         this.samplingWindowSize = samplingWindowSize === undefined ? 100 : samplingWindowSize;
-        this.samplingDepth = downSample ?
-            samplingDepth === undefined ? 50 : samplingDepth :
-            Number.MAX_VALUE;
+        this.samplingDepth = samplingDepth === undefined ? 50 : samplingDepth;
 
         this.pairsSupported = pairsSupported;
         this.paired = false;  // false until proven otherwise
@@ -59,9 +56,7 @@ var igv = (function (igv) {
 
         this.downsampledReads = new Set();
 
-        this.currentBucket = downSample ?
-            new DownsampleBucket(this.start, this.start + this.samplingWindowSize, this) :
-            new DownsampleBucket(this.start, Number.MAX_VALUE, this);
+        this.currentBucket = new DownsampleBucket(this.start, this.start + this.samplingWindowSize, this);
 
         this.filter = function filter(alignment) {         // TODO -- pass this in
             return alignment.isMapped() && !alignment.isFailsVendorQualityCheck();
