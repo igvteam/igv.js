@@ -25,9 +25,6 @@
 
 var igv = (function (igv) {
 
-    // the mimimum extent of a chromosome locus
-    const bpMinimumWindow = 40;
-
     var knownFileTypes = new Set(["narrowpeak", "broadpeak", "peaks", "bedgraph", "wig", "gff3", "gff",
         "gtf", "aneu", "fusionjuncspan", "refflat", "seg", "bed", "vcf", "bb", "bigbed", "bw", "bigwig", "bam"]);
 
@@ -698,6 +695,11 @@ var igv = (function (igv) {
     };
 
     function gotoLocusFeature(locusFeature, genome, browser) {
+
+
+        // the mimimum extent of a chromosome locus
+        const bpMinimumWindow = 40;
+
         var type,
             tokens,
             chrom,
