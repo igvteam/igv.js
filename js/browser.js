@@ -623,9 +623,10 @@ var igv = (function (igv) {
 
         if (isLocusFeature(feature, this.genome)) {
 
+            var success = false;
             gotoLocusFeature(feature, this.genome, this);
 
-            if (callback) {
+            if (true === success && callback) {
                 callback();
             }
 
@@ -771,12 +772,14 @@ var igv = (function (igv) {
 
         if (undefined === chrom || isNaN(start) || (start > end)) {
             igv.presentAlert("Unrecognized feature or locus: " + locusFeature);
-            browser.updateLocusSearch(browser.referenceFrame);
+            return false;
+            // browser.updateLocusSearch(browser.referenceFrame);
         }
 
         browser.goto(chr, start, end);
         fireOnsearch.call(igv.browser, locusFeature, type);
 
+        return true;
     }
 
     function presentSearchResults(loci, config, feature) {
