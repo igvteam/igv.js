@@ -603,7 +603,7 @@ var igv = (function (igv) {
      * @param feature
      * @param callback - function to call
      */
-    igv.Browser.prototype.search = function (feature, callback) {
+    igv.Browser.prototype.search = function (feature, callback, force) {
         var type,
             chr,
             start,
@@ -621,11 +621,11 @@ var igv = (function (igv) {
             return;
         }
 
-        if (isLocusFeature(feature, this.genome)) {
+        if (isLocusFeature(feature, this.genome, force)) {
 
             var success =  gotoLocusFeature(feature, this.genome, this);
 
-            if (true === success && callback) {
+            if ((force || true === success) && callback) {
                 callback();
             }
 
