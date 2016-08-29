@@ -232,7 +232,7 @@ var igv = (function (igv) {
 
                     }
 
-                });
+                }, true);
 
             } else if (config.tracks) {
 
