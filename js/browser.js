@@ -623,8 +623,7 @@ var igv = (function (igv) {
 
         if (isLocusFeature(feature, this.genome)) {
 
-            var success = false;
-            gotoLocusFeature(feature, this.genome, this);
+            var success =  gotoLocusFeature(feature, this.genome, this);
 
             if (true === success && callback) {
                 callback();
