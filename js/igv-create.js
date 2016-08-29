@@ -336,16 +336,20 @@ var igv = (function (igv) {
             });
 
             $guideLineToggle = $('<div class="igv-toggle-track-labels">');
+            var display = $(igv.browser.guideLineDiv).css("display");
+            $guideLineToggle.text(display==="none" ? "hide guide" : "show guide");
+
             $guideLineToggle.click(function () {
                 var display = $(igv.browser.guideLineDiv).css("display");
                 $(igv.browser.guideLineDiv).css("display", display==="none" ? "block" : "none");
-
+                $guideLineToggle.text(display==="none" ? "hide guide" : "show guide");
             });
 
-            $(igv.browser.guideLineDiv)
+            // Hide toggle unless property is set (for now, prior to official release)
+            if(config.showGuideLine === undefined && config.showVerticalLine === undefined) {
+                $guideLineToggle.css("display", "none");
+            }
 
-
-            $guideLineToggle.text("guide line");
 
 
             $navigation.append($guideLineToggle[0]);
