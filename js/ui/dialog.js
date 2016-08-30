@@ -213,7 +213,14 @@ var igv = (function (igv) {
             self.$dialogInput.val(inputValue);
 
             self.$dialogInput.unbind();
-            self.$dialogInput.change(clickFunction);
+            self.$dialogInput.change(function(){
+
+                if (clickFunction) {
+                    clickFunction();
+                }
+
+                self.hide();
+            });
 
             self.$dialogInput.show();
         } else {
