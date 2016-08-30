@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+    <meta name="description" content="">
+    <meta name="author" content="">
+    <link rel="shortcut icon" href="//igv.org/web/img/favicon.ico">
+
+    <title>IGV - Integrative Genomics Viewer</title>
+
+    <!-- jQuery UI CSS -->
+    <link rel="stylesheet" type="text/css"
+          href="https://ajax.googleapis.com/ajax/libs/jqueryui/1.11.2/themes/smoothness/jquery-ui.css"/>
+
+    <!-- Font Awesome CSS -->
+    <link rel="stylesheet" type="text/css" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.2.0/css/font-awesome.min.css">
+
+    <!-- IGV CSS -->
+    <link rel="stylesheet" type="text/css" href="https://igv.org/web/release/1.0.2/igv-1.0.2.css">
+
+    <!-- jQuery JS -->
+    <script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
+    <script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jqueryui/1.11.2/jquery-ui.min.js"></script>
+
+    <!-- IGV JS-->
+    <script type="text/javascript" src="https://igv.org/web/release/1.0.2/igv-1.0.2.js"></script>
+
+
+
+</head>
+
+<body>
+
+<p>
+
+<h1>1000 Genomes VCF file</h1></p>
+
+<div id="igvDiv" style="padding-top: 10px;padding-bottom: 10px; border:1px solid lightgray"></div>
+
+<script type="text/javascript">
+
+    var div = document.getElementById('container');
+    var options = {
+        reference: {
+            id: "hg19",
+            fastaURL: "//igv.broadinstitute.org/genomes/seq/1kg_v37/human_g1k_v37_decoy.fasta",
+            cytobandURL: "//igv.broadinstitute.org/genomes/seq/b37/b37_cytoband.txt"
+        },
+
+        trackDefaults: {
+            palette: ["#00A0B0", "#6A4A3C", "#CC333F", "#EB6841"],
+            bam: {
+                coverageThreshold: 0.2,
+                coverageQualityWeight: true
+            }
+        },
+
+        tracks: [
+            {
+                name: "Genes",
+                url: "//igv.broadinstitute.org/annotations/hg19/genes/gencode.v18.collapsed.bed",
+                index: "//igv.broadinstitute.org/annotations/hg19/genes/gencode.v18.collapsed.bed.idx",
+                displayMode: "EXPANDED"
+            },
+
+            {
+                name: "Phase 3 variant sites",
+                format: "vcf",
+                url: "https://s3.amazonaws.com/1000genomes/release/20130502/ALL.wgs.phase3_shapeit2_mvncall_integrated_v5b.20130502.sites.vcf.gz",
+                indexURL:  "https://s3.amazonaws.com/1000genomes/release/20130502/ALL.wgs.phase3_shapeit2_mvncall_integrated_v5b.20130502.sites.vcf.gz.tbi",
+                type: "variant"
+            }
+        ]
+
+    };
+    var browser = igv.createBrowser(div, options);
+
+</script>
+
+</body>
+
+</html>
