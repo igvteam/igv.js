@@ -182,7 +182,7 @@ var igv = (function (igv) {
         return {
             object: $('<div class="igv-track-menu-item">' + "Set track color" + '</div>'),
             click: function () {
-                igv.colorPicker.trackView = trackView;
+                igv.colorPicker.configure(trackView);
                 igv.colorPicker.show();
                 popover.hide();
             }
