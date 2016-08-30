@@ -41,22 +41,14 @@
 
 <script type="text/javascript">
 
-    var div = document.getElementById('container');
+    var div = document.getElementById('igvDiv');
     var options = {
         reference: {
             id: "hg19",
             fastaURL: "//igv.broadinstitute.org/genomes/seq/1kg_v37/human_g1k_v37_decoy.fasta",
             cytobandURL: "//igv.broadinstitute.org/genomes/seq/b37/b37_cytoband.txt"
         },
-
-        trackDefaults: {
-            palette: ["#00A0B0", "#6A4A3C", "#CC333F", "#EB6841"],
-            bam: {
-                coverageThreshold: 0.2,
-                coverageQualityWeight: true
-            }
-        },
-
+        locus: "myc",
         tracks: [
             {
                 name: "Genes",
@@ -66,7 +58,7 @@
             },
 
             {
-                name: "Phase 3 variant sites",
+                name: "Phase 3 WGS variants",
                 format: "vcf",
                 url: "https://s3.amazonaws.com/1000genomes/release/20130502/ALL.wgs.phase3_shapeit2_mvncall_integrated_v5b.20130502.sites.vcf.gz",
                 indexURL:  "https://s3.amazonaws.com/1000genomes/release/20130502/ALL.wgs.phase3_shapeit2_mvncall_integrated_v5b.20130502.sites.vcf.gz.tbi",
