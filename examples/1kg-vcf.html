@@ -45,15 +45,15 @@
     var options = {
         reference: {
             id: "hg19",
-            fastaURL: "//igv.broadinstitute.org/genomes/seq/1kg_v37/human_g1k_v37_decoy.fasta",
-            cytobandURL: "//igv.broadinstitute.org/genomes/seq/b37/b37_cytoband.txt"
+            fastaURL: "https://s3.amazonaws.com/igv.broadinstitute.org/genomes/seq/1kg_v37/human_g1k_v37_decoy.fasta",
+            cytobandURL: "https://s3.amazonaws.com/igv.broadinstitute.org/genomes/seq/b37/b37_cytoband.txt"
         },
         locus: "myc",
         tracks: [
             {
                 name: "Genes",
-                url: "//igv.broadinstitute.org/annotations/hg19/genes/gencode.v18.collapsed.bed",
-                index: "//igv.broadinstitute.org/annotations/hg19/genes/gencode.v18.collapsed.bed.idx",
+                url: "https://s3.amazonaws.com/igv.broadinstitute.org/annotations/hg19/genes/gencode.v18.collapsed.bed",
+                index: "https://s3.amazonaws.com/igv.broadinstitute.org/annotations/hg19/genes/gencode.v18.collapsed.bed.idx",
                 displayMode: "EXPANDED"
             },
 
