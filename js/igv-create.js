@@ -176,8 +176,12 @@ var igv = (function (igv) {
         }
 
         // ideogram
-        browser.ideoPanel = new igv.IdeoPanel(headerDiv);
-        browser.ideoPanel.resize();
+        if (config.hideIdeogram && true === config.hideIdeogram) {
+            // do nothing
+        } else {
+            browser.ideoPanel = new igv.IdeoPanel(headerDiv);
+            browser.ideoPanel.resize();
+        }
 
         // phone home -- counts launches.  Count is anonymous, needed for our continued funding.  Please don't delete
         phoneHome();
