@@ -126,9 +126,9 @@ var igv = (function (igv) {
         // controls
 
         if (config.showCommandBar !== false && config.showControls !== false) {
-            controlDiv = config.createControls ?
-                config.createControls(browser, config) :
-                createStandardControls(browser, config);
+
+            controlDiv = config.createControls ? config.createControls(browser, config) : createStandardControls(browser, config);
+
             $(rootDiv).append($(controlDiv));
         }
 
@@ -140,12 +140,10 @@ var igv = (function (igv) {
 
         $(contentDiv).append(trackContainerDiv);
 
-        igv.browser.guideLineDiv = $('<div class="igv-guide-line-div">')[0];
-        $(trackContainerDiv).append(igv.browser.guideLineDiv);
-        if (config.showGuideLine || config.showVerticalLine) {
-            $(igv.browser.guideLineDiv).css("display", "block");
-        }
-
+        // a guide line that tracks the mouse cursor
+        // igv.browser.$guideLine = $('<div class="igv-guide-line-div">');
+        // $(trackContainerDiv).append(igv.browser.$guideLine);
+        // igv.browser.$guideLine.css("display", config.showGuideLine && true == config.showGuideLine ? "block" : "none");
 
         // user feedback
         browser.userFeedback = new igv.UserFeedback($(contentDiv));
@@ -266,7 +264,8 @@ var igv = (function (igv) {
             $guideLineToggle,
             $zoomContainer,
             $faZoomIn,
-            $faZoomOut;
+            $faZoomOut,
+            display;
 
         $controls = $('<div id="igvControlDiv">');
 
@@ -332,32 +331,62 @@ var igv = (function (igv) {
             // hide/show track labels
             $trackLabelToggle = $('<div class="igv-toggle-track-labels">');
             $trackLabelToggle.text("hide labels");
-
             $trackLabelToggle.click(function () {
                 browser.trackLabelsVisible = !browser.trackLabelsVisible;
                 $(this).text(true === browser.trackLabelsVisible ? "hide labels" : "show labels");
                 $(browser.trackContainerDiv).find('.igv-track-label').toggle();
             });
 
+
+
+
+
+
+
+            // one base wide center guide
+            browser.$centerGuide = $('<div class="igv-centered-one-base-guide-div">');
+            $(browser.trackContainerDiv).append(browser.$centerGuide);
+            browser.$centerGuide.css("display", config.showCenterGuide && true == config.showCenterGuide ? "block" : "none");
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+            // a guide line that tracks mouse cursor
+            browser.$guideLine = $('<div class="igv-guide-line-div">');
+            $(browser.trackContainerDiv).append(browser.$guideLine);
+            browser.$guideLine.css("display", config.showGuideLine && true == config.showGuideLine ? "block" : "none");
+
             $guideLineToggle = $('<div class="igv-toggle-track-labels">');
-            var display = $(igv.browser.guideLineDiv).css("display");
-            $guideLineToggle.text(display==="none" ? "hide guide" : "show guide");
+            $guideLineToggle.text("none" === browser.$guideLine.css("display") ? "hide guide" : "show guide");
 
             $guideLineToggle.click(function () {
-                var display = $(igv.browser.guideLineDiv).css("display");
-                $(igv.browser.guideLineDiv).css("display", display==="none" ? "block" : "none");
-                $guideLineToggle.text(display==="none" ? "hide guide" : "show guide");
+                display = browser.$guideLine.css("display");
+                browser.$guideLine.css("display", "none" === display ? "block" : "none");
+                $guideLineToggle.text("none" === display ? "hide guide" : "show guide");
             });
 
             // Hide toggle unless property is set (for now, prior to official release)
-            if(config.showGuideLine === undefined && config.showVerticalLine === undefined) {
+            if(undefined === config.showGuideLine || false == config.showGuideLine) {
                 $guideLineToggle.css("display", "none");
             }
 
-
-
-            $navigation.append($guideLineToggle[0]);
-            $navigation.append($trackLabelToggle[0]);
+            $navigation.append($guideLineToggle);
+            $navigation.append($trackLabelToggle);
 
         }
 

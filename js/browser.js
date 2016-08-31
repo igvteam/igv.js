@@ -919,7 +919,6 @@ var igv = (function (igv) {
         var isRulerTrack = false,
             isMouseDown = false,
             isDragging = false,
-            anchorVerticalLine = igv.browser.config.showGuideLine === 'center',
             lastMouseX = undefined,
             mouseDownX = undefined;
 
@@ -942,16 +941,18 @@ var igv = (function (igv) {
             mouseDownX = lastMouseX;
         });
 
-        // Guide line should follow the mouse unless anchored to center, be bound within the track area, and offset
-        // by 5 pixels so as not to interfere with mouse clicks.
-        if (!anchorVerticalLine) {
-            $(trackContainerDiv).mousemove(function (e) {
-                var coords = igv.translateMouseCoordinates(e, trackContainerDiv),
-                    lineX = Math.max(50, coords.x - 5);
-                lineX = Math.min(igv.browser.trackContainerDiv.clientWidth - 65, lineX);
-                $(igv.browser.guideLineDiv).css({left: lineX + 'px'});
-            });
-        }
+        // Guide line is bound within track area, and offset by 5 pixels so as not to interfere mouse clicks.
+        $(trackContainerDiv).mousemove(function (e) {
+            var xy,
+                _left,
+                $element = igv.browser.$guideLine;
+
+            xy = igv.translateMouseCoordinates(e, trackContainerDiv);
+            _left = Math.max(50, xy.x - 5);
+
+            _left = Math.min(igv.browser.trackContainerDiv.clientWidth - 65, _left);
+            $element.css({ left: _left + 'px' });
+        });
 
 
         $(trackContainerDiv).mousemove(igv.throttle(function (e) {
@@ -1012,14 +1013,14 @@ var igv = (function (igv) {
 
         function mouseUpOrOut(e) {
 
+            var element = igv.browser.$guideLine.get(0);
+
             if (isRulerTrack) {
                 return;
             }
 
             // Don't let vertical line interfere with dragging
-            if (igv.browser.guideLineDiv
-                && e.toElement === igv.browser.guideLineDiv
-                && e.type === 'mouseleave') {
+            if (igv.browser.$guideLine && e.toElement === igv.browser.$guideLine.get(0) && e.type === 'mouseleave') {
                 return;
             }
 

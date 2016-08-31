@@ -1413,20 +1413,50 @@ div.ui-dialog fieldset {
     height:100%;
 }
 
-.igv-guide-line-div {
+.igv-centered-one-base-guide-div {
+
     position: absolute;
-    border-left: 1px dashed #999;
+    top: 0;
+    bottom: 0;
+    left: 50%;
+    width: 8px;
+
+    border-left-style: dashed;
+    border-left-width: thin;
+    border-left-color: #27aae0;
+
+    border-right-style: dashed;
+    border-right-width: thin;
+    border-right-color: #ff0600;
+
+    z-index: 8;
+
+    display: none;
+
+    user-select: none;
+    -moz-user-select: none;
+    -webkit-user-select: none;
+}
+
+.igv-guide-line-div {
+
+    position: absolute;
     top: 0;
     bottom: 0;
     left: 50%;
     width: 1px;
+
     z-index: 1;
-    user-select: none;
+
+    border-left-style: dashed;
+    border-left-width: thin;
+    border-left-color: #999;
+
     display: none;
+
+    user-select: none;
     -moz-user-select: none;
-    -khtml-user-select: none;
     -webkit-user-select: none;
-    -o-user-select: none;
 }
 
 .igv-content-canvas {
