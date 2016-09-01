@@ -59,7 +59,8 @@ var igv = (function (igv) {
             this.$container.addClass('igv-center-guide-wide');
         } else {
 
-            ls = center.toString() + 'px';
+            // ls = center.toString() + 'px';
+            ls = '50%';
             ws = '1px';
             this.$container.css({ left:ls, width:ws });
 
@@ -67,7 +68,7 @@ var igv = (function (igv) {
             this.$container.addClass('igv-center-guide-thin');
         }
 
-        console.log('CenterGuide - repaint. PPB ' + ppb);
+        // console.log('CenterGuide - repaint. PPB ' + ppb);
     };
 
     return igv;
