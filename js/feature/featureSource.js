@@ -148,7 +148,8 @@ var igv = (function (igv) {
                 if (self.sourceType === 'file' && (self.visibilityWindow === undefined || self.visibilityWindow <= 0)) {
                     // Expand genomic interval to grab entire chromosome
                     genomicInterval.start = 0;
-                    genomicInterval.end = Number.MAX_VALUE;
+                    var chromosome = igv.browser.genome.getChromosome(chr);
+                    genomicInterval.end = (chromosome === undefined ?  Number.MAX_VALUE : chromosome.bpLength);
                 }
 
                 self.reader.readFeatures(chr, genomicInterval.start, genomicInterval.end).then(
