@@ -488,45 +488,54 @@ var igv = (function (igv) {
 
     igv.Browser.prototype.goto = function (chr, start, end) {
 
-        var chromosome,
-            viewportWidthPixel = this.trackViewportWidth(),
-            maxBpPerPixel;
-
         if (typeof this.gotocallback != "undefined") {
             //console.log("Got chr="+chr+", start="+start+", end="+end+", also using callback "+this.gotocallback);
             this.gotocallback(chr, start, end);
         }
 
+        var w,
+            chromosome,
+            viewportWidth = this.trackViewportWidth();
+
         if (igv.popover) {
             igv.popover.hide();
         }
 
+        // Translate chr to official name
         if (this.genome) {
             chr = this.genome.getChromosomeName(chr);
         }
 
         this.referenceFrame.chr = chr;
-        this.referenceFrame.bpPerPixel = (end - start) / (viewportWidthPixel);
+
+        // If end is undefined,  interpret start as the new center, otherwise compute scale.
+        if (!end) {
+            w = Math.round(viewportWidth * this.referenceFrame.bpPerPixel / 2);
+            start = Math.max(0, start - w);
+        }
+        else {
+            this.referenceFrame.bpPerPixel = (end - start) / (viewportWidth);
+        }
 
         if (this.genome) {
-
             chromosome = this.genome.getChromosome(this.referenceFrame.chr);
             if (!chromosome) {
-                console.log("Could not find chromsome " + this.referenceFrame.chr);
-            } else {
+                if (console && console.log) console.log("Could not find chromsome " + this.referenceFrame.chr);
+            }
+            else {
+                if (!chromosome.bpLength) chromosome.bpLength = 1;
 
-                if (!chromosome.bpLength) {
-                    chromosome.bpLength = 1;
+                var maxBpPerPixel = chromosome.bpLength / viewportWidth;
+                if (this.referenceFrame.bpPerPixel > maxBpPerPixel) this.referenceFrame.bpPerPixel = maxBpPerPixel;
+
+                if (!end) {
+                    end = start + viewportWidth * this.referenceFrame.bpPerPixel;
                 }
 
-                maxBpPerPixel = chromosome.bpLength / viewportWidthPixel;
-                if (this.referenceFrame.bpPerPixel > maxBpPerPixel) {
-                    this.referenceFrame.bpPerPixel = maxBpPerPixel;
+                if (chromosome && end > chromosome.bpLength) {
+                    start -= (end - chromosome.bpLength);
                 }
             }
-
-        } else {
-            console.log('browser. no genome.');
         }
 
         this.referenceFrame.start = start;
