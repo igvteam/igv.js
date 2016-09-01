@@ -560,7 +560,7 @@ var igv = (function (igv) {
 
         newScale = Math.max(1.0 / this.pixelPerBasepairThreshold(), this.referenceFrame.bpPerPixel / 2);
         if (newScale === this.referenceFrame.bpPerPixel) {
-            //console.log("zoom in bail bpp " + newScale + " width " + (viewportWidth/14.0));
+            console.log("browser.zoomIn PPB threshold exceeded. Bailng. Threshold: " + this.pixelPerBasepairThreshold() + " Attempted " + (2./this.referenceFrame.bpPerPixel));
             return;
         }
 
@@ -705,89 +705,97 @@ var igv = (function (igv) {
 
     function gotoLocusFeature(locusFeature, genome, browser) {
 
-
-        // the mimimum extent of a chromosome locus
-        const bpMinimumWindow = 40;
-
         var type,
             tokens,
-            chrom,
+            chr,
             start,
             end,
-            chr,
+            chrName,
             startEnd,
-            center;
+            center,
+            obj;
+
 
         type = 'locus';
         tokens = locusFeature.split(":");
-        chr = genome.getChromosomeName(tokens[ 0 ]);
-        chrom = genome.getChromosome(1 === tokens.length ? locusFeature : chr);
+        chrName = genome.getChromosomeName(tokens[ 0 ]);
+        if (chrName) {
+            chr = genome.getChromosome(chrName);
+        }
 
-        if (chrom) {
+        if (chr) {
 
             // returning undefined indicates locus is a chromosome name.
-            startEnd = (tokens.length > 1) ? tokens[ 1 ].split("-") : undefined;
-
-            // if we have a chromosome name start is 0. Otherwise parse it out.
-            start = (undefined === startEnd) ? 0 : Math.max(0, parseInt(startEnd[ 0 ].replace(/,/g, "")) - 1);
-
-            if (startEnd && 2 === startEnd.length) {
-
-                // if we have a start AND end value
-                end = Math.min(chrom.bpLength, parseInt(startEnd[ 1 ].replace(/,/g, "")));
-
-                if (end < 0) {
-                    // This can happen from integer overflow
-                    end = chrom.bpLength;
-                }
-
-            } else if (startEnd && 1 === startEnd.length) {
-                // if we have only a start value set end to undefined and deal with it later
-                end = undefined;
+            start = end = undefined;
+            if (1 === tokens.length) {
+                start = 0;
+                end = chr.bpLength;
             } else {
-
-                // we have a chromosome name
-                end = chrom.bpLength
-            }
-
-            if (undefined === end) {
-
-                // set start and end and clamp for the case when locusFeature includes
-                // only a start value.
-                start -= bpMinimumWindow/2;
-                end = start + bpMinimumWindow;
-
-                if (end > chrom.bpLength) {
-                    end = chrom.bpLength;
-                    start = end - bpMinimumWindow;
-                }
-
-            } else if (end - start < bpMinimumWindow) {
-
-                // if the featurelocus range falls below the acceptable threshold (bpMinimumWindow) inflate an clamp
-                // appropriately
-                center = (end + start)/2;
-                if (center - bpMinimumWindow/2 < 0) {
-                    start = 0;
-                    end = start + bpMinimumWindow;
-                } else if (center + bpMinimumWindow/2 > chrom.bpLength) {
-                    end = chrom.bpLength;
-                    start = end - bpMinimumWindow;
-                } else {
-                    start = center - bpMinimumWindow/2;
-                    end = start + bpMinimumWindow;
+                startEnd = tokens[ 1 ].split("-");
+                start = Math.max(0, parseInt(startEnd[ 0 ].replace(/,/g, "")) - 1);
+                if (2 === startEnd.length) {
+                    end = Math.min(chr.bpLength, parseInt(startEnd[ 1 ].replace(/,/g, "")));
+                    if (end < 0) {
+                        // This can happen from integer overflow
+                        end = chr.bpLength;
+                    }
                 }
             }
+
+            obj = { start: start, end: end };
+            validateLocusExtent(igv.browser, chr, obj);
+            start = obj.start;
+            end = obj.end;
+
         }
 
-        if (undefined === chrom || isNaN(start) || (start > end)) {
+        if (undefined === chr || isNaN(start) || (start > end)) {
             igv.presentAlert("Unrecognized feature or locus: " + locusFeature);
             return false;
-            // browser.updateLocusSearch(browser.referenceFrame);
         }
 
-        browser.goto(chr, start, end);
+        browser.goto(chrName, start, end);
         fireOnsearch.call(igv.browser, locusFeature, type);
+
+        function validateLocusExtent(browser, chromosome, extent) {
+
+            var basesExtentThreshold,
+                ss = extent.start,
+                ee = extent.end;
+
+            basesExtentThreshold = browser.trackViewportWidth() / browser.pixelPerBasepairThreshold();
+
+            if (undefined === ee) {
+
+                ss -= basesExtentThreshold/2;
+                ee = ss + basesExtentThreshold;
+
+                if (ee > chromosome.bpLength) {
+                    ee = chromosome.bpLength;
+                    ss = ee - basesExtentThreshold;
+                } else if (ss < 0) {
+                    ss = 0;
+                    ee = basesExtentThreshold;
+                }
+
+            } else if (ee - ss < basesExtentThreshold) {
+
+                center = (ee + ss)/2;
+                if (center - basesExtentThreshold/2 < 0) {
+                    ss = 0;
+                    ee = ss + basesExtentThreshold;
+                } else if (center + basesExtentThreshold/2 > chromosome.bpLength) {
+                    ee = chromosome.bpLength;
+                    ss = ee - basesExtentThreshold;
+                } else {
+                    ss = center - basesExtentThreshold/2;
+                    ee = ss + basesExtentThreshold;
+                }
+            }
+
+            extent.start = Math.ceil(ss);
+            extent.end = Math.floor(ee);
+        }
 
         return true;
     }
