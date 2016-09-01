@@ -150,9 +150,9 @@ var igv = (function (igv) {
 
                         var startPos = block.minv.block,
                             startOffset = block.minv.offset,
-                            endPos = block.maxv.block + (index.tabix ? MAX_GZIP_BLOCK_SIZE + 100 : 0),
+                            endPos = Math.min(index.lastAlignmentBlock,(block.maxv.block + (index.tabix ? MAX_GZIP_BLOCK_SIZE + 100 : 0))),
                             options = {
-                                headers: self.config.headers,           // http headers, not file header
+                                headers: self.config.headers, // http headers, not file header
                                 range: {start: startPos, size: endPos - startPos + 1},
                                 withCredentials: self.config.withCredentials
                             },
