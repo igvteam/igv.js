@@ -344,9 +344,8 @@ var igv = (function (igv) {
 
 
             // one base wide center guide
-            browser.$centerGuide = $('<div class="igv-centered-one-base-guide-div">');
-            $(browser.trackContainerDiv).append(browser.$centerGuide);
-            browser.$centerGuide.css("display", config.showCenterGuide && true == config.showCenterGuide ? "block" : "none");
+            browser.centerGuide = new igv.CenterGuide($(browser.trackContainerDiv), config);
+
 
 
 
