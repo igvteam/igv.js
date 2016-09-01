@@ -1413,21 +1413,13 @@ div.ui-dialog fieldset {
     height:100%;
 }
 
-.igv-centered-one-base-guide-div {
+.igv-center-guide {
 
     position: absolute;
     top: 0;
     bottom: 0;
     left: 50%;
     width: 8px;
-
-    border-left-style: dashed;
-    border-left-width: thin;
-    border-left-color: #27aae0;
-
-    border-right-style: dashed;
-    border-right-width: thin;
-    border-right-color: #ff0600;
 
     z-index: 8;
 
@@ -1436,6 +1428,28 @@ div.ui-dialog fieldset {
     user-select: none;
     -moz-user-select: none;
     -webkit-user-select: none;
+
+    border-left-style: dashed;
+    border-left-width: thin;
+    border-right-style: dashed;
+    border-right-width: thin;
+
+}
+
+.igv-center-guide-wide {
+    background-color: rgba(0,0,0,0);
+    border-left-color: rgba(127, 127, 127, 0.51);
+    border-right-color: rgba(127, 127, 127, 0.51);
+}
+
+.igv-center-guide-thin {
+
+    left: 50%;
+    width: 1px;
+
+    background-color: rgba(127, 127, 127, 0.51);
+    border-left-color: rgba(0,0,0,0);
+    border-right-color: rgba(0,0,0,0);
 }
 
 .igv-guide-line-div {

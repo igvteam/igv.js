@@ -391,6 +391,10 @@ var igv = (function (igv) {
 
         this.updateLocusSearch(this.referenceFrame);
 
+        if (this.centerGuide) {
+            this.centerGuide.repaint();
+        }
+
         if (this.ideoPanel) {
             this.ideoPanel.repaint();
         }
