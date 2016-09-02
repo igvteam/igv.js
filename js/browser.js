@@ -465,12 +465,12 @@ var igv = (function (igv) {
 
     };
 
-    igv.Browser.prototype.pixelPerBasepairThreshold = function () {
-        return 14.0;
-    };
-
     igv.Browser.prototype.trackViewportWidthBP = function () {
         return this.referenceFrame.bpPerPixel * this.trackViewportWidth();
+    };
+
+    igv.Browser.prototype.minimumBasesExtent = function () {
+        return 40;
     };
 
     igv.Browser.prototype.removeAllTracks = function () {
@@ -544,7 +544,7 @@ var igv = (function (igv) {
 
     };
 
-// Zoom in by a factor of 2, keeping the same center location
+    // Zoom in by a factor of 2, keeping the same center location
     igv.Browser.prototype.zoomIn = function () {
 
         if (this.loadInProgress()) {
@@ -552,25 +552,36 @@ var igv = (function (igv) {
             return;
         }
 
-        var newScale,
-            center,
-            viewportWidth;
+        var centerBP;
 
-        viewportWidth = this.trackViewportWidth();
+        console.log('browser.zoomIn - src extent ' + basesExtent(this.trackViewportWidth(), this.referenceFrame.bpPerPixel));
 
-        newScale = Math.max(1.0 / this.pixelPerBasepairThreshold(), this.referenceFrame.bpPerPixel / 2);
-        if (newScale === this.referenceFrame.bpPerPixel) {
-            console.log("browser.zoomIn PPB threshold exceeded. Bailng. Threshold: " + this.pixelPerBasepairThreshold() + " Attempted " + (2./this.referenceFrame.bpPerPixel));
+        // Have we reached the zoom-in threshold yet? If so, bail.
+        if (this.minimumBasesExtent() > basesExtent(this.trackViewportWidth(), this.referenceFrame.bpPerPixel/2.0)) {
+            console.log('browser.zoomIn - dst extent ' + basesExtent(this.trackViewportWidth(), this.referenceFrame.bpPerPixel/2.0) + ' bailing ...');
             return;
+        } else {
+            console.log('browser.zoomIn - dst extent ' + basesExtent(this.trackViewportWidth(), this.referenceFrame.bpPerPixel/2.0));
         }
 
-        center = this.referenceFrame.start + this.referenceFrame.bpPerPixel * viewportWidth / 2;
-        this.referenceFrame.start = center - newScale * viewportWidth / 2;
-        this.referenceFrame.bpPerPixel = newScale;
+        // window center (base-pair units)
+        centerBP = this.referenceFrame.start + this.referenceFrame.bpPerPixel * (this.trackViewportWidth()/2);
+
+        // derive scaled (zoomed in) start location (base-pair units) by multiplying half-width by halve'd bases-per-pixel
+        // which results in base-pair units
+        this.referenceFrame.start = centerBP - (this.trackViewportWidth()/2) * (this.referenceFrame.bpPerPixel/2.0);
+
+        // halve the bases-per-pixel
+        this.referenceFrame.bpPerPixel /= 2.0;
+
         this.update();
+
+        function basesExtent(width, bpp) {
+            return Math.floor(width * bpp);
+        }
     };
 
-// Zoom out by a factor of 2, keeping the same center location if possible
+    // Zoom out by a factor of 2, keeping the same center location if possible
     igv.Browser.prototype.zoomOut = function () {
 
         if (this.loadInProgress()) {
@@ -759,37 +770,34 @@ var igv = (function (igv) {
 
         function validateLocusExtent(browser, chromosome, extent) {
 
-            var basesExtentThreshold,
-                ss = extent.start,
+            var ss = extent.start,
                 ee = extent.end;
-
-            basesExtentThreshold = browser.trackViewportWidth() / browser.pixelPerBasepairThreshold();
 
             if (undefined === ee) {
 
-                ss -= basesExtentThreshold/2;
-                ee = ss + basesExtentThreshold;
+                ss -= igv.browser.minimumBasesExtent/2;
+                ee = ss + igv.browser.minimumBasesExtent;
 
                 if (ee > chromosome.bpLength) {
                     ee = chromosome.bpLength;
-                    ss = ee - basesExtentThreshold;
+                    ss = ee - igv.browser.minimumBasesExtent;
                 } else if (ss < 0) {
                     ss = 0;
-                    ee = basesExtentThreshold;
+                    ee = igv.browser.minimumBasesExtent;
                 }
 
-            } else if (ee - ss < basesExtentThreshold) {
+            } else if (ee - ss < igv.browser.minimumBasesExtent) {
 
                 center = (ee + ss)/2;
-                if (center - basesExtentThreshold/2 < 0) {
+                if (center - igv.browser.minimumBasesExtent/2 < 0) {
                     ss = 0;
-                    ee = ss + basesExtentThreshold;
-                } else if (center + basesExtentThreshold/2 > chromosome.bpLength) {
+                    ee = ss + igv.browser.minimumBasesExtent;
+                } else if (center + igv.browser.minimumBasesExtent/2 > chromosome.bpLength) {
                     ee = chromosome.bpLength;
-                    ss = ee - basesExtentThreshold;
+                    ss = ee - igv.browser.minimumBasesExtent;
                 } else {
-                    ss = center - basesExtentThreshold/2;
-                    ee = ss + basesExtentThreshold;
+                    ss = center - igv.browser.minimumBasesExtent/2;
+                    ee = ss + igv.browser.minimumBasesExtent;
                 }
             }
 
