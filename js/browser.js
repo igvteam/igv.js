@@ -771,33 +771,34 @@ var igv = (function (igv) {
         function validateLocusExtent(browser, chromosome, extent) {
 
             var ss = extent.start,
-                ee = extent.end;
+                ee = extent.end,
+                locusExtent = ee - ss;
 
             if (undefined === ee) {
 
-                ss -= igv.browser.minimumBasesExtent/2;
-                ee = ss + igv.browser.minimumBasesExtent;
+                ss -= igv.browser.minimumBasesExtent()/2;
+                ee = ss + igv.browser.minimumBasesExtent();
 
                 if (ee > chromosome.bpLength) {
                     ee = chromosome.bpLength;
-                    ss = ee - igv.browser.minimumBasesExtent;
+                    ss = ee - igv.browser.minimumBasesExtent();
                 } else if (ss < 0) {
                     ss = 0;
-                    ee = igv.browser.minimumBasesExtent;
+                    ee = igv.browser.minimumBasesExtent();
                 }
 
-            } else if (ee - ss < igv.browser.minimumBasesExtent) {
+            } else if (ee - ss < igv.browser.minimumBasesExtent()) {
 
                 center = (ee + ss)/2;
-                if (center - igv.browser.minimumBasesExtent/2 < 0) {
+                if (center - igv.browser.minimumBasesExtent()/2 < 0) {
                     ss = 0;
-                    ee = ss + igv.browser.minimumBasesExtent;
-                } else if (center + igv.browser.minimumBasesExtent/2 > chromosome.bpLength) {
+                    ee = ss + igv.browser.minimumBasesExtent();
+                } else if (center + igv.browser.minimumBasesExtent()/2 > chromosome.bpLength) {
                     ee = chromosome.bpLength;
-                    ss = ee - igv.browser.minimumBasesExtent;
+                    ss = ee - igv.browser.minimumBasesExtent();
                 } else {
-                    ss = center - igv.browser.minimumBasesExtent/2;
-                    ee = ss + igv.browser.minimumBasesExtent;
+                    ss = center - igv.browser.minimumBasesExtent()/2;
+                    ee = ss + igv.browser.minimumBasesExtent();
                 }
             }
 
