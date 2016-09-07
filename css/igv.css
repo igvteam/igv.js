@@ -1456,7 +1456,7 @@ div.ui-dialog fieldset {
     /*border-right-color: rgba(0,0,0,0);*/
 }
 
-.igv-guide-line-div {
+.igv-cursor-tracking-guide {
 
     position: absolute;
     top: 0;
@@ -1466,9 +1466,9 @@ div.ui-dialog fieldset {
 
     z-index: 1;
 
-    border-left-style: dashed;
+    border-left-style: dotted;
     border-left-width: thin;
-    border-left-color: #999;
+    border-left-color: rgba(127, 127, 127, 0.76);
 
     display: none;
 

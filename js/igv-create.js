@@ -366,7 +366,7 @@ var igv = (function (igv) {
 
 
             // a guide line that tracks mouse cursor
-            browser.$guideLine = $('<div class="igv-guide-line-div">');
+            browser.$guideLine = $('<div class="igv-cursor-tracking-guide">');
             $(browser.trackContainerDiv).append(browser.$guideLine);
             browser.$guideLine.css("display", config.showGuideLine && true == config.showGuideLine ? "block" : "none");
 
