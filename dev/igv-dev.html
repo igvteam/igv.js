@@ -467,21 +467,34 @@
         })">BAD url
         </div>
 
-        <div onclick="create()">Re-create
-        </div>
-
-        <div>
-            <input type="text" id="gotoInput"/>
-            <button type="button" onclick="igv.browser.search(document.getElementById('gotoInput').value)">Search (via API)</button>
-        </div>
-
-
 
     </div>
 
+
+    <div style="border-style: solid;border-color:grey;border-radius:5px;display:inline-block;margin:10px">
+        Search (via API)
+        <input type="text" id="gotoInput" style="border-style:solid;border-width:1px;border-color:grey"/>
+        <button type="button" onclick="igv.browser.search(document.getElementById('gotoInput').value)">Go</button>
+    </div>
+    <br/>
+    <div style="border-style: solid;border-color:grey;border-radius:5px;display:inline-block;margin:10px">
+        Find Tracks
+        property: <input type="text" id="findTracksProperty" style="border-style:solid;border-width:1px;border-color:grey"/> value: <input type="text" id="findTracksValue" style="border-style:solid;border-width:1px;border-color:grey"/>
+        <button type="button" onclick="findTracks(document.getElementById('findTracksProperty').value, document.getElementById('findTracksValue').value)">Go</button>
+    </div>
 </div>
 
 <script type="text/javascript">
+
+    function findTracks(property, value) {
+
+        var tracks = igv.browser.findTracks(property, value);
+
+        tracks.forEach(function (track) {
+            console.log(track.name);
+        })
+
+    };
 
     $(document).ready(function () {
         var div,
