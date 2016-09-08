@@ -289,6 +289,28 @@ var igv = (function (igv) {
 
     };
 
+<<<<<<< refs/remotes/origin/master
+=======
+
+    /**
+     *
+     * @param property
+     * @param value
+     * @returns {Array}  tracks with given property value.  e.g. findTracks("type", "annotations")
+     */
+    igv.Browser.prototype.findTracks = function (property, value) {
+        var tracks = [];
+        this.trackViews.forEach(function (trackView) {
+            if (value === trackView.track[property]) {
+                tracks.push(trackView.track)
+            }
+        })
+        return tracks;
+    }
+
+
+
+>>>>>>> HEAD~2
     igv.Browser.prototype.reduceTrackOrder = function (trackView) {
 
         var indices = [],

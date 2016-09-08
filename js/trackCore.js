@@ -69,6 +69,8 @@ var igv = (function (igv) {
         if (config.visibilityWindow) {
             track.visibilityWindow = config.visibilityWindow;
         }
+
+        if(track.type === undefined) track.type = config.type;
     };
 
 
