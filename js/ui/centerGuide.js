@@ -30,10 +30,26 @@
 var igv = (function (igv) {
 
     igv.CenterGuide = function ($parent, config) {
-
+        var self = this;
+        
         this.$container = $('<div class="igv-center-guide igv-center-guide-thin">');
         $parent.append(this.$container);
         this.$container.css("display", config.showCenterGuide && true == config.showCenterGuide ? "block" : "none");
+
+        this.$centerGuideToggle = $('<div class="igv-toggle-track-labels">');
+        this.$centerGuideToggle.text("none" === this.$container.css("display") ? "hide center guide" : "show center guide");
+
+        this.$centerGuideToggle.click(function () {
+            var display = self.$container.css("display");
+            self.$container.css("display", "none" === display ? "block" : "none");
+            self.$centerGuideToggle.text("none" === display ? "hide center guide" : "show center guide");
+        });
+
+        // Hide toggle unless property is set (for now, prior to official release)
+        if(undefined === config.showCenterGuide || false == config.showCenterGuide) {
+            this.$centerGuideToggle.css("display", "none");
+        }
+
 
     };
 

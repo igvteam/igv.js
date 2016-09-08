@@ -261,7 +261,7 @@ var igv = (function (igv) {
             $searchContainer,
             $faZoom,
             $trackLabelToggle,
-            $guideLineToggle,
+            $cursorTrackingGuideToggle,
             $zoomContainer,
             $faZoomIn,
             $faZoomOut,
@@ -370,21 +370,22 @@ var igv = (function (igv) {
             $(browser.trackContainerDiv).append(browser.$cursorTrackingGuide);
             browser.$cursorTrackingGuide.css("display", config.showCursorTrackingGuide && true == config.showCursorTrackingGuide ? "block" : "none");
 
-            $guideLineToggle = $('<div class="igv-toggle-track-labels">');
-            $guideLineToggle.text("none" === browser.$cursorTrackingGuide.css("display") ? "hide guide" : "show guide");
+            $cursorTrackingGuideToggle = $('<div class="igv-toggle-track-labels">');
+            $cursorTrackingGuideToggle.text("none" === browser.$cursorTrackingGuide.css("display") ? "hide guide" : "show guide");
 
-            $guideLineToggle.click(function () {
+            $cursorTrackingGuideToggle.click(function () {
                 display = browser.$cursorTrackingGuide.css("display");
                 browser.$cursorTrackingGuide.css("display", "none" === display ? "block" : "none");
-                $guideLineToggle.text("none" === display ? "hide guide" : "show guide");
+                $cursorTrackingGuideToggle.text("none" === display ? "hide guide" : "show guide");
             });
 
             // Hide toggle unless property is set (for now, prior to official release)
             if(undefined === config.showCursorTrackingGuide || false == config.showCursorTrackingGuide) {
-                $guideLineToggle.css("display", "none");
+                $cursorTrackingGuideToggle.css("display", "none");
             }
 
-            $navigation.append($guideLineToggle);
+            $navigation.append($cursorTrackingGuideToggle);
+            $navigation.append(browser.centerGuide.$centerGuideToggle);
             $navigation.append($trackLabelToggle);
 
         }
