@@ -30,19 +30,26 @@
 var igv = (function (igv) {
 
     igv.CenterGuide = function ($parent, config) {
-        var self = this;
+        var self = this,
+            cssDisplay;
         
         this.$container = $('<div class="igv-center-guide igv-center-guide-thin">');
         $parent.append(this.$container);
-        this.$container.css("display", config.showCenterGuide && true == config.showCenterGuide ? "block" : "none");
+        this.$container.css("display", (config.showCenterGuide && true == config.showCenterGuide) ? "block" : "none");
 
+        cssDisplay = this.$container.css("display");
         this.$centerGuideToggle = $('<div class="igv-toggle-track-labels">');
-        this.$centerGuideToggle.text("none" === this.$container.css("display") ? "hide center guide" : "show center guide");
+        this.$centerGuideToggle.text(("none" === cssDisplay) ? "show center guide" : "hide center guide");
 
         this.$centerGuideToggle.click(function () {
-            var display = self.$container.css("display");
-            self.$container.css("display", "none" === display ? "block" : "none");
-            self.$centerGuideToggle.text("none" === display ? "hide center guide" : "show center guide");
+            cssDisplay = self.$container.css("display");
+            if ("none" === cssDisplay) {
+                self.$container.css("display", "block");
+                self.$centerGuideToggle.text("hide center guide");
+            } else {
+                self.$container.css("display", "none");
+                self.$centerGuideToggle.text("show center guide");
+            }
         });
 
         // Hide toggle unless property is set (for now, prior to official release)

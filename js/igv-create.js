@@ -126,9 +126,7 @@ var igv = (function (igv) {
         // controls
 
         if (config.showCommandBar !== false && config.showControls !== false) {
-
             controlDiv = config.createControls ? config.createControls(browser, config) : createStandardControls(browser, config);
-
             $(rootDiv).append($(controlDiv));
         }
 
@@ -139,11 +137,6 @@ var igv = (function (igv) {
         $(contentDiv).append(headerDiv);
 
         $(contentDiv).append(trackContainerDiv);
-
-        // a guide line that tracks the mouse cursor
-        // igv.browser.$cursorTrackingGuide = $('<div class="igv-guide-line-div">');
-        // $(trackContainerDiv).append(igv.browser.$cursorTrackingGuide);
-        // igv.browser.$cursorTrackingGuide.css("display", config.showCursorTrackingGuide && true == config.showCursorTrackingGuide ? "block" : "none");
 
         // user feedback
         browser.userFeedback = new igv.UserFeedback($(contentDiv));
@@ -265,6 +258,7 @@ var igv = (function (igv) {
             $zoomContainer,
             $faZoomIn,
             $faZoomOut,
+            $karyoPanelToggle,
             display;
 
         $controls = $('<div id="igvControlDiv">');
@@ -328,7 +322,7 @@ var igv = (function (igv) {
             $zoomContainer.append($faZoomIn[0]);
             $navigation.append($zoomContainer[0]);
 
-            // hide/show track labels
+            // toggle track labels
             $trackLabelToggle = $('<div class="igv-toggle-track-labels">');
             $trackLabelToggle.text("hide labels");
             $trackLabelToggle.click(function () {
@@ -337,49 +331,29 @@ var igv = (function (igv) {
                 $(browser.trackContainerDiv).find('.igv-track-label').toggle();
             });
 
-
-
-
-
-
-
             // one base wide center guide
             browser.centerGuide = new igv.CenterGuide($(browser.trackContainerDiv), config);
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-            // a guide line that tracks mouse cursor
+            // cursor tracking guide
             browser.$cursorTrackingGuide = $('<div class="igv-cursor-tracking-guide">');
             $(browser.trackContainerDiv).append(browser.$cursorTrackingGuide);
-            browser.$cursorTrackingGuide.css("display", config.showCursorTrackingGuide && true == config.showCursorTrackingGuide ? "block" : "none");
+            browser.$cursorTrackingGuide.css("display", (config.showCursorTrackingGuide && true == config.showCursorTrackingGuide) ? "block" : "none");
 
             $cursorTrackingGuideToggle = $('<div class="igv-toggle-track-labels">');
-            $cursorTrackingGuideToggle.text("none" === browser.$cursorTrackingGuide.css("display") ? "hide guide" : "show guide");
+            display = browser.$cursorTrackingGuide.css("display");
+            $cursorTrackingGuideToggle.text("none" === display ? "show cursor guide" : "hide cursor guide");
 
             $cursorTrackingGuideToggle.click(function () {
                 display = browser.$cursorTrackingGuide.css("display");
-                browser.$cursorTrackingGuide.css("display", "none" === display ? "block" : "none");
-                $cursorTrackingGuideToggle.text("none" === display ? "hide guide" : "show guide");
+                if ("none" === display) {
+                    browser.$cursorTrackingGuide.css("display", "block");
+                    $cursorTrackingGuideToggle.text("hide cursor guide");
+                } else {
+                    browser.$cursorTrackingGuide.css("display", "none");
+                    $cursorTrackingGuideToggle.text("show cursor guide");
+                }
             });
 
-            // Hide toggle unless property is set (for now, prior to official release)
             if(undefined === config.showCursorTrackingGuide || false == config.showCursorTrackingGuide) {
                 $cursorTrackingGuideToggle.css("display", "none");
             }
@@ -402,22 +376,22 @@ var igv = (function (igv) {
 
             $karyoPanelToggle = $('<div class="igv-toggle-track-labels">');
 
-						if (config.showKaryo === "hide") {
-              $karyoPanelToggle.text("Show Karyotype");
-						  $(contentKaryo).addClass("igv-karyo-hide");
-						} else {
-						  $karyoPanelToggle.text("Hide Karyotype");
-						}
+            if (config.showKaryo === "hide") {
+                $karyoPanelToggle.text("Show Karyotype");
+                $(contentKaryo).addClass("igv-karyo-hide");
+            } else {
+                $karyoPanelToggle.text("Hide Karyotype");
+            }
 
             $karyoPanelToggle.click(function () {
-              var hidden = $(".igv-karyo-div").hasClass("igv-karyo-hide");
-              if (hidden) {
-	              $karyoPanelToggle.text("Hide Karyotype");
-								$(".igv-karyo-div").removeClass("igv-karyo-hide");
-              } else {
-              	$karyoPanelToggle.text("Show Karyotype");
-								$(".igv-karyo-div").addClass("igv-karyo-hide");
-              }
+                var hidden = $(".igv-karyo-div").hasClass("igv-karyo-hide");
+                if (hidden) {
+                    $karyoPanelToggle.text("Hide Karyotype");
+                    $(".igv-karyo-div").removeClass("igv-karyo-hide");
+                } else {
+                    $karyoPanelToggle.text("Show Karyotype");
+                    $(".igv-karyo-div").addClass("igv-karyo-hide");
+                }
             });
 
             $navigation.append($karyoPanelToggle[0]);
