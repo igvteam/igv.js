@@ -141,9 +141,9 @@ var igv = (function (igv) {
         $(contentDiv).append(trackContainerDiv);
 
         // a guide line that tracks the mouse cursor
-        // igv.browser.$guideLine = $('<div class="igv-guide-line-div">');
-        // $(trackContainerDiv).append(igv.browser.$guideLine);
-        // igv.browser.$guideLine.css("display", config.showGuideLine && true == config.showGuideLine ? "block" : "none");
+        // igv.browser.$cursorTrackingGuide = $('<div class="igv-guide-line-div">');
+        // $(trackContainerDiv).append(igv.browser.$cursorTrackingGuide);
+        // igv.browser.$cursorTrackingGuide.css("display", config.showCursorTrackingGuide && true == config.showCursorTrackingGuide ? "block" : "none");
 
         // user feedback
         browser.userFeedback = new igv.UserFeedback($(contentDiv));
@@ -366,21 +366,21 @@ var igv = (function (igv) {
 
 
             // a guide line that tracks mouse cursor
-            browser.$guideLine = $('<div class="igv-cursor-tracking-guide">');
-            $(browser.trackContainerDiv).append(browser.$guideLine);
-            browser.$guideLine.css("display", config.showGuideLine && true == config.showGuideLine ? "block" : "none");
+            browser.$cursorTrackingGuide = $('<div class="igv-cursor-tracking-guide">');
+            $(browser.trackContainerDiv).append(browser.$cursorTrackingGuide);
+            browser.$cursorTrackingGuide.css("display", config.showCursorTrackingGuide && true == config.showCursorTrackingGuide ? "block" : "none");
 
             $guideLineToggle = $('<div class="igv-toggle-track-labels">');
-            $guideLineToggle.text("none" === browser.$guideLine.css("display") ? "hide guide" : "show guide");
+            $guideLineToggle.text("none" === browser.$cursorTrackingGuide.css("display") ? "hide guide" : "show guide");
 
             $guideLineToggle.click(function () {
-                display = browser.$guideLine.css("display");
-                browser.$guideLine.css("display", "none" === display ? "block" : "none");
+                display = browser.$cursorTrackingGuide.css("display");
+                browser.$cursorTrackingGuide.css("display", "none" === display ? "block" : "none");
                 $guideLineToggle.text("none" === display ? "hide guide" : "show guide");
             });
 
             // Hide toggle unless property is set (for now, prior to official release)
-            if(undefined === config.showGuideLine || false == config.showGuideLine) {
+            if(undefined === config.showCursorTrackingGuide || false == config.showCursorTrackingGuide) {
                 $guideLineToggle.css("display", "none");
             }
 
