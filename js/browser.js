@@ -949,7 +949,7 @@ var igv = (function (igv) {
         $(trackContainerDiv).mousemove(function (e) {
             var xy,
                 _left,
-                $element = igv.browser.$guideLine;
+                $element = igv.browser.$cursorTrackingGuide;
 
             xy = igv.translateMouseCoordinates(e, trackContainerDiv);
             _left = Math.max(50, xy.x - 5);
@@ -1017,14 +1017,14 @@ var igv = (function (igv) {
 
         function mouseUpOrOut(e) {
 
-            var element = igv.browser.$guideLine.get(0);
+            var element = igv.browser.$cursorTrackingGuide.get(0);
 
             if (isRulerTrack) {
                 return;
             }
 
             // Don't let vertical line interfere with dragging
-            if (igv.browser.$guideLine && e.toElement === igv.browser.$guideLine.get(0) && e.type === 'mouseleave') {
+            if (igv.browser.$cursorTrackingGuide && e.toElement === igv.browser.$cursorTrackingGuide.get(0) && e.type === 'mouseleave') {
                 return;
             }
 
