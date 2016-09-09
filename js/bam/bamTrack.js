@@ -368,7 +368,9 @@ var igv = (function (igv) {
             y = this.height - h;
             x = Math.floor((bp - bpStart) / bpPerPixel);
 
-            igv.graphics.setProperties(ctx, {fillStyle: this.parent.color, strokeStyle: this.color});
+
+            // igv.graphics.setProperties(ctx, {fillStyle: this.parent.color, strokeStyle: this.color});
+            igv.graphics.setProperties(ctx, {fillStyle: "rgba(0, 200, 0, 0.25)", strokeStyle: "rgba(0, 200, 0, 0.25)" });
             igv.graphics.fillRect(ctx, x, y, w, h);
         }
 
@@ -766,38 +768,15 @@ var igv = (function (igv) {
 
     AlignmentTrack.prototype.sortAlignmentRows = function (genomicLocation, sortOption) {
 
-        var self = this,
-            alignmentContainer = this.featureSource.alignmentContainer,
-            alignmentRows = alignmentContainer.packedAlignmentRows;
+        var self = this;
 
-        alignmentRows.forEach(function (alignmentRow) {
-            alignmentRow.updateScore(genomicLocation, alignmentContainer, sortOption);
+        this.featureSource.alignmentContainer.packedAlignmentRows.forEach(function (row) {
+            row.updateScore(genomicLocation, self.featureSource.alignmentContainer, sortOption);
+            // console.log('score ' + row.score);
         });
 
-        alignmentRows.sort(function (a, b) {
-            return self.sortDirection ? a.score - b.score : b.score - a.score;
-        });
-
-    }
-
-    function doSortAlignmentRows(genomicLocation, genomicInterval, sortOption, sortDirection) {
-
-        var alignmentRows = genomicInterval.packedAlignmentRows,
-            sequence = genomicInterval.sequence;
-
-        if (sequence) {
-            sequence = sequence.toUpperCase();
-        } else {
-            console.log("No sequence, no traversal. No discussion!");
-            return;
-        }
-
-        alignmentRows.forEach(function (alignmentRow) {
-            alignmentRow.updateScore(genomicLocation, genomicInterval, sortOption);
-        });
-
-        alignmentRows.sort(function (a, b) {
-            return sortDirection ? a.score - b.score : b.score - a.score;
+        this.featureSource.alignmentContainer.packedAlignmentRows.sort(function (rowA, rowB) {
+            return self.sortDirection ? rowA.score - rowB.score : rowB.score - rowA.score;
         });
 
     }
