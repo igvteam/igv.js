@@ -155,9 +155,9 @@ var igv = (function (igv) {
             colorByMenuItems = [],
             tagLabel = 'tag' + (self.alignmentTrack.colorByTag ? ' (' + self.alignmentTrack.colorByTag + ')' : ''),
             selected;
-        
+
         menuItems.push(sortMenuItem(popover));
-        menuItems.push('<div class="igv-track-menu-category igv-track-menu-border-top">Color by</div>');
+        // menuItems.push('<div class="igv-track-menu-category igv-track-menu-border-top">Sort at center line</div>');
 
         colorByMenuItems.push({key: 'none', label: 'track color'});
 
@@ -274,10 +274,12 @@ var igv = (function (igv) {
         function sortMenuItem(popover) {
 
             return {
-                object: $('<div class="igv-track-menu-item">' + "Sort alignments" + '</div>'),
+                object: $('<div class="igv-track-menu-item">' + "Sort" + '</div>'),
                 click: function () {
-                    console.log('sort alignments');
+                    var centerBP = Math.round((igv.browser.referenceFrame.start + igv.browser.trackViewportWidthBP()/2)) - 1;
+                    // console.log('sort alignments. width ' + igv.numberFormatter(centerBP.toString()));
                     popover.hide();
+                    self.alignmentTrack.sortAlignmentRows(centerBP, {sort: "NUCLEOTIDE"})
                 }
             }
         }
