@@ -86,7 +86,7 @@ var igv = (function (igv) {
 
                             binNumber = parser.getInt();
 
-                            if (binNumber == 37450) {
+                            if (binNumber === 37450) {
                                 // This is a psuedo bin, not used but we have to consume the bytes
                                 nchnk = parser.getInt(); // # of chunks for this bin
                                 cs = parser.getVPointer();   // unmapped beg
@@ -101,8 +101,8 @@ var igv = (function (igv) {
                                 var nchnk = parser.getInt(); // # of chunks for this bin
 
                                 for (i = 0; i < nchnk; i++) {
-                                    cs = parser.getVPointer();
-                                    ce = parser.getVPointer();
+                                    cs = parser.getVPointer();    //chunk_beg
+                                    ce = parser.getVPointer();    //chunk_end
                                     if (cs && ce) {
                                         if (cs.block < blockMin) {
                                             blockMin = cs.block;    // Block containing first alignment
