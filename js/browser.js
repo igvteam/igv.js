@@ -289,9 +289,6 @@ var igv = (function (igv) {
 
     };
 
-<<<<<<< refs/remotes/origin/master
-=======
-
     /**
      *
      * @param property
@@ -309,8 +306,6 @@ var igv = (function (igv) {
     }
 
 
-
->>>>>>> HEAD~2
     igv.Browser.prototype.reduceTrackOrder = function (trackView) {
 
         var indices = [],
