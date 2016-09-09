@@ -62,28 +62,27 @@ var igv = (function (igv) {
 
     igv.CenterGuide.prototype.repaint = function () {
 
-        var trackWidth = igv.browser.trackViewportWidth(),
-            trackXY = $(igv.browser.trackViews[0].viewportDiv).position(),
-            ppb = 1.0/igv.browser.referenceFrame.bpPerPixel,
-            left,
+        var left,
             ls,
-            w,
-            ws;
+            ws,
+            center,
+            ppb = Math.floor(1.0/igv.browser.referenceFrame.bpPerPixel),
+            x = this.$container.position.x;
+
+        center = x + this.$container.outerWidth()/2;
 
         if (ppb > 1) {
 
-            left = Math.round(trackXY.left + trackWidth/2);
+            left = center - ppb/2;
             ls = left.toString() + 'px';
-
-            w = Math.round(igv.browser.referenceFrame.toPixels(1));
-            ws = w.toString() + 'px';
-
+            ws = ppb.toString() + 'px';
             this.$container.css({ left:ls, width:ws });
 
             this.$container.removeClass('igv-center-guide-thin');
             this.$container.addClass('igv-center-guide-wide');
         } else {
 
+            // ls = center.toString() + 'px';
             ls = '50%';
             ws = '1px';
             this.$container.css({ left:ls, width:ws });
@@ -92,6 +91,7 @@ var igv = (function (igv) {
             this.$container.addClass('igv-center-guide-thin');
         }
 
+        // console.log('CenterGuide - repaint. PPB ' + ppb);
     };
 
     return igv;
