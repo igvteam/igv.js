@@ -60,11 +60,11 @@ var igv = (function (igv) {
         // filter alignments
         this.filterOption = config.filterOption || {name: "mappingQuality", params: [30, undefined]};
 
-    }
+    };
 
     igv.BAMTrack.prototype.getFeatures = function (chr, bpStart, bpEnd) {
         return this.featureSource.getAlignments(chr, bpStart, bpEnd);
-    }
+    };
 
     igv.BAMTrack.filters = {
 
@@ -96,7 +96,6 @@ var igv = (function (igv) {
         }
     };
 
-
     // Alt - Click to Sort alignment rows
     igv.BAMTrack.prototype.altClick = function (genomicLocation, event) {
 
@@ -108,12 +107,11 @@ var igv = (function (igv) {
         this.sortDirection = !this.sortDirection;
     };
 
-
     /**
      * Optional method to compute pixel height to accomodate the list of features.  The implementation below
      * has side effects (modifiying the samples hash).  This is unfortunate, but harmless.
      *
-     * @param features
+     * @param alignmentContainer
      * @returns {number}
      */
     igv.BAMTrack.prototype.computePixelHeight = function (alignmentContainer) {
@@ -136,7 +134,7 @@ var igv = (function (igv) {
 
         this.coverageTrack.paintAxis(ctx, pixelWidth, this.coverageTrackHeight);
 
-    }
+    };
 
     igv.BAMTrack.prototype.popupData = function (genomicLocation, xOffset, yOffset) {
 
@@ -147,7 +145,7 @@ var igv = (function (igv) {
             return this.alignmentTrack.popupData(genomicLocation, xOffset, yOffset - this.alignmentTrack.top);
         }
 
-    }
+    };
 
     igv.BAMTrack.prototype.popupMenuItems = function (popover) {
 
@@ -157,7 +155,9 @@ var igv = (function (igv) {
             colorByMenuItems = [],
             tagLabel = 'tag' + (self.alignmentTrack.colorByTag ? ' (' + self.alignmentTrack.colorByTag + ')' : ''),
             selected;
-
+        
+        menuItems.push(sortMenuItem(popover));
+        menuItems.push('<div class="igv-track-menu-category igv-track-menu-border-top">Color by</div>');
 
         colorByMenuItems.push({key: 'none', label: 'track color'});
 
@@ -177,7 +177,6 @@ var igv = (function (igv) {
             selected = self.alignmentTrack.colorBy === item.key;
             menuItems.push(colorByMarkup(item, selected));
         });
-
 
         html = [];
         if (self.pairsSupported && self.alignmentTrack.hasPairs) {
@@ -271,8 +270,19 @@ var igv = (function (igv) {
 
             return item;
         }
-    };
 
+        function sortMenuItem(popover) {
+
+            return {
+                object: $('<div class="igv-track-menu-item">' + "Sort alignments" + '</div>'),
+                click: function () {
+                    console.log('sort alignments');
+                    popover.hide();
+                }
+            }
+        }
+
+    };
 
     function shadedBaseColor(qual, nucleotide, genomicLocation) {
 
@@ -308,7 +318,6 @@ var igv = (function (igv) {
         return color;
     }
 
-
     CoverageTrack = function (config, parent) {
 
         this.parent = parent;
@@ -319,11 +328,11 @@ var igv = (function (igv) {
         this.height = config.coverageTrackHeight;
         this.dataRange = {min: 0};   // Leav max undefined
         this.paintAxis = igv.paintAxis;
-    }
+    };
 
     CoverageTrack.prototype.computePixelHeight = function (alignmentContainer) {
         return this.height;
-    }
+    };
 
     CoverageTrack.prototype.draw = function (options) {
 
@@ -417,8 +426,7 @@ var igv = (function (igv) {
             }
         }
 
-    }
-
+    };
 
     CoverageTrack.prototype.popupData = function (genomicLocation, xOffset, yOffset) {
 
@@ -471,7 +479,6 @@ var igv = (function (igv) {
 
     };
 
-
     AlignmentTrack = function (config, parent) {
 
         this.parent = parent;
@@ -496,7 +503,7 @@ var igv = (function (igv) {
 
         this.hasPairs = false;   // Until proven otherwise
 
-    }
+    };
 
     AlignmentTrack.prototype.computePixelHeight = function (alignmentContainer) {
 
@@ -511,7 +518,7 @@ var igv = (function (igv) {
             return this.height;
         }
 
-    }
+    };
 
     AlignmentTrack.prototype.draw = function (options) {
 
@@ -764,7 +771,7 @@ var igv = (function (igv) {
             }
         }
 
-    }
+    };
 
     AlignmentTrack.prototype.sortAlignmentRows = function (genomicLocation, sortOption) {
 
@@ -779,7 +786,7 @@ var igv = (function (igv) {
             return self.sortDirection ? rowA.score - rowB.score : rowB.score - rowA.score;
         });
 
-    }
+    };
 
     AlignmentTrack.prototype.popupData = function (genomicLocation, xOffset, yOffset) {
 
@@ -830,7 +837,6 @@ var igv = (function (igv) {
         }
 
     };
-
 
     function getAlignmentColor(alignment) {
 
@@ -884,8 +890,7 @@ var igv = (function (igv) {
         }
         return color;
 
-    };
-
+    }
 
     return igv;
 
