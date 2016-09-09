@@ -369,8 +369,8 @@ var igv = (function (igv) {
             x = Math.floor((bp - bpStart) / bpPerPixel);
 
 
-            // igv.graphics.setProperties(ctx, {fillStyle: this.parent.color, strokeStyle: this.color});
-            igv.graphics.setProperties(ctx, {fillStyle: "rgba(0, 200, 0, 0.25)", strokeStyle: "rgba(0, 200, 0, 0.25)" });
+            igv.graphics.setProperties(ctx, {fillStyle: this.parent.color, strokeStyle: this.color});
+            // igv.graphics.setProperties(ctx, {fillStyle: "rgba(0, 200, 0, 0.25)", strokeStyle: "rgba(0, 200, 0, 0.25)" });
             igv.graphics.fillRect(ctx, x, y, w, h);
         }
 
