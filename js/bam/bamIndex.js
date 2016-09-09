@@ -96,7 +96,7 @@ var igv = (function (igv) {
 
                             }
                             else {
-
+                                
                                 binIndex[binNumber] = [];
                                 var nchnk = parser.getInt(); // # of chunks for this bin
 
@@ -134,15 +134,14 @@ var igv = (function (igv) {
                 } else {
                     throw new Error(indexURL + " is not a " + (tabix ? "tabix" : "bai") + " file");
                 }
-                fulfill(new igv.BamIndex(indices, blockMin, blockMax, sequenceIndexMap, tabix));
+                fulfill(new igv.BamIndex(indices, blockMin, sequenceIndexMap, tabix));
             }).catch(reject);
         })
     }
 
 
-    igv.BamIndex = function (indices, blockMin, blockMax, sequenceIndexMap, tabix) {
+    igv.BamIndex = function (indices, blockMin, sequenceIndexMap, tabix) {
         this.firstAlignmentBlock = blockMin;
-        this.lastAlignmentBlock = blockMax;
         this.indices = indices;
         this.sequenceIndexMap = sequenceIndexMap;
         this.tabix = tabix;

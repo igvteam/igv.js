@@ -97,7 +97,7 @@ var igv = (function (igv) {
                             promises.push(new Promise(function (fulfill, reject) {
 
                                 var fetchMin = c.minv.block,
-                                    fetchMax = c.maxv.block + 65000,   // Make sure we get the whole block.
+                                    fetchMax = c.maxv.block + MAX_GZIP_BLOCK_SIZE,   // Make sure we get the whole block.
                                     range = {start: fetchMin, size: fetchMax - fetchMin + 1};
 
                                 igvxhr.loadArrayBuffer(self.bamPath,
