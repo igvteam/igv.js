@@ -146,11 +146,11 @@ var igv = (function (igv) {
             block = byte6 + byte5 + byte4 + byte3 + byte2;
         this.position += 8;
 
-        if (block == 0 && offset == 0) {
-            return null;
-        } else {
+ //       if (block == 0 && offset == 0) {
+ //           return null;
+ //       } else {
             return new VPointer(block, offset);
-        }
+ //       }
     }
 
 
