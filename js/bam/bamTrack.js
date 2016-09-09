@@ -276,12 +276,16 @@ var igv = (function (igv) {
             return {
                 object: $('<div class="igv-track-menu-item">' + "Sort" + '</div>'),
                 click: function () {
-                    var xBP;
+                    var startBP = Math.floor(igv.browser.referenceFrame.start),
+                        centerGuideXY = igv.browser.centerGuide.$container.position(),
+                        centerGuideXBP = Math.floor(igv.browser.referenceFrame.toBP(centerGuideXY.left)),
+                        xBP;
 
                     popover.hide();
-                    
-                    xBP = Math.floor(igv.browser.referenceFrame.start + igv.browser.trackViewportWidthBP()/2.0);
-                    self.alignmentTrack.sortAlignmentRows(xBP, {sort: "NUCLEOTIDE"});
+
+                    xBP = startBP + centerGuideXBP;
+                    self.alignmentTrack.sortAlignmentRows(xBP - 1, self.sortOption);
+
                     igv.browser.update();
                 }
             }
@@ -781,6 +785,8 @@ var igv = (function (igv) {
     AlignmentTrack.prototype.sortAlignmentRows = function (genomicLocation, sortOption) {
 
         var self = this;
+
+        console.log('bamtrack - sortAlignmentRows - location ' + igv.numberFormatter(genomicLocation));
 
         this.featureSource.alignmentContainer.packedAlignmentRows.forEach(function (row) {
             row.updateScore(genomicLocation, self.featureSource.alignmentContainer, sortOption);
