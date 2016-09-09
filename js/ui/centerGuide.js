@@ -62,36 +62,38 @@ var igv = (function (igv) {
 
     igv.CenterGuide.prototype.repaint = function () {
 
-        var left,
+        var xBP,
+            leftBP,
+            centerLineBP,
+            widthBP,
+            left,
             ls,
+            width,
             ws,
-            center,
-            ppb = Math.floor(1.0/igv.browser.referenceFrame.bpPerPixel),
-            x = this.$container.position.x;
+            ppb;
 
-        center = x + this.$container.outerWidth()/2;
-
+        ppb = 1.0/igv.browser.referenceFrame.bpPerPixel;
         if (ppb > 1) {
 
-            left = center - ppb/2;
+            centerLineBP = igv.browser.trackViewportCenterLineBP();
+            leftBP = centerLineBP - 1;
+            xBP = leftBP + igv.browser.referenceFrame.start;
+
+            left = Math.floor(igv.browser.referenceFrame.toPixels(leftBP));
+            width = Math.round(igv.browser.referenceFrame.toPixels(1));
+
             ls = left.toString() + 'px';
-            ws = ppb.toString() + 'px';
+            ws = width.toString() + 'px';
             this.$container.css({ left:ls, width:ws });
 
             this.$container.removeClass('igv-center-guide-thin');
             this.$container.addClass('igv-center-guide-wide');
         } else {
 
-            // ls = center.toString() + 'px';
-            ls = '50%';
-            ws = '1px';
-            this.$container.css({ left:ls, width:ws });
-
+            this.$container.css({ left:'50%', width:'1px' });
             this.$container.removeClass('igv-center-guide-wide');
             this.$container.addClass('igv-center-guide-thin');
         }
-
-        // console.log('CenterGuide - repaint. PPB ' + ppb);
     };
 
     return igv;

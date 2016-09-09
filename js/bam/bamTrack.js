@@ -276,14 +276,15 @@ var igv = (function (igv) {
             return {
                 object: $('<div class="igv-track-menu-item">' + "Sort" + '</div>'),
                 click: function () {
-                    var startBP = Math.floor(igv.browser.referenceFrame.start),
-                        centerGuideXY = igv.browser.centerGuide.$container.position(),
-                        centerGuideXBP = Math.floor(igv.browser.referenceFrame.toBP(centerGuideXY.left)),
-                        xBP;
+                    var xBP,
+                        leftBP,
+                        centerLineBP;
 
                     popover.hide();
 
-                    xBP = startBP + centerGuideXBP;
+                    centerLineBP = igv.browser.trackViewportCenterLineBP();
+                    leftBP = centerLineBP - 1;
+                    xBP = leftBP + igv.browser.referenceFrame.start;
                     self.alignmentTrack.sortAlignmentRows(xBP - 1, self.sortOption);
 
                     igv.browser.update();

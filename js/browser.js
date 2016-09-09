@@ -303,8 +303,7 @@ var igv = (function (igv) {
             }
         })
         return tracks;
-    }
-
+    };
 
     igv.Browser.prototype.reduceTrackOrder = function (trackView) {
 
@@ -386,7 +385,7 @@ var igv = (function (igv) {
         if (this.karyoPanel) this.karyoPanel.resize();
         this.trackViews.forEach(function (panel) {
             panel.resize();
-        })
+        });
     };
 
     igv.Browser.prototype.repaint = function () {
@@ -488,6 +487,13 @@ var igv = (function (igv) {
 
     igv.Browser.prototype.trackViewportWidthBP = function () {
         return this.referenceFrame.bpPerPixel * this.trackViewportWidth();
+    };
+
+    igv.Browser.prototype.trackViewportCenterLineBP = function () {
+        var centerLineBP = (0.5 * this.referenceFrame.bpPerPixel * this.trackViewportWidth());
+
+        // return Math.floor(centerLineBP);
+        return centerLineBP;
     };
 
     igv.Browser.prototype.minimumBasesExtent = function () {
