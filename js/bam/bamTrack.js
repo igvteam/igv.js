@@ -276,10 +276,13 @@ var igv = (function (igv) {
             return {
                 object: $('<div class="igv-track-menu-item">' + "Sort" + '</div>'),
                 click: function () {
-                    var centerBP = Math.round((igv.browser.referenceFrame.start + igv.browser.trackViewportWidthBP()/2)) - 1;
-                    // console.log('sort alignments. width ' + igv.numberFormatter(centerBP.toString()));
+                    var xBP;
+
                     popover.hide();
-                    self.alignmentTrack.sortAlignmentRows(centerBP, {sort: "NUCLEOTIDE"})
+                    
+                    xBP = Math.floor(igv.browser.referenceFrame.start + igv.browser.trackViewportWidthBP()/2.0);
+                    self.alignmentTrack.sortAlignmentRows(xBP, {sort: "NUCLEOTIDE"});
+                    igv.browser.update();
                 }
             }
         }
@@ -781,7 +784,7 @@ var igv = (function (igv) {
 
         this.featureSource.alignmentContainer.packedAlignmentRows.forEach(function (row) {
             row.updateScore(genomicLocation, self.featureSource.alignmentContainer, sortOption);
-            // console.log('score ' + row.score);
+            console.log('score ' + row.score);
         });
 
         this.featureSource.alignmentContainer.packedAlignmentRows.sort(function (rowA, rowB) {

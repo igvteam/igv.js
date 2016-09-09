@@ -62,20 +62,28 @@ var igv = (function (igv) {
 
     igv.CenterGuide.prototype.repaint = function () {
 
-        var left,
+        var trackWidth = igv.browser.trackViewportWidth(),
+            trackXY = $(igv.browser.trackViews[0].viewportDiv).position(),
+            ppb = 1.0/igv.browser.referenceFrame.bpPerPixel,
+            ppbHalf = Math.round(ppb/2.0),
+            containerXY = this.$container.position(),
+            containerWidth = this.$container.outerWidth(),
+            left,
             ls,
             ws,
             center,
-            ppb = Math.floor(1.0/igv.browser.referenceFrame.bpPerPixel),
-            x = this.$container.position.x;
+            w;
 
-        center = x + this.$container.outerWidth()/2;
+        center = trackXY.left + trackWidth/2;
+
+
 
         if (ppb > 1) {
 
-            left = center - ppb/2;
+            left = Math.floor(center - ppb/2.0);
             ls = left.toString() + 'px';
-            ws = ppb.toString() + 'px';
+            w = 2 * ppbHalf;
+            ws = w.toString() + 'px';
             this.$container.css({ left:ls, width:ws });
 
             this.$container.removeClass('igv-center-guide-thin');
