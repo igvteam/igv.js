@@ -62,28 +62,29 @@ var igv = (function (igv) {
 
     igv.CenterGuide.prototype.repaint = function () {
 
-        var xBP,
-            leftBP,
-            centerLineBP,
-            widthBP,
+        var ppb,
+            trackViewXY,
+            trackViewHalfWidth,
+            width,
             left,
             ls,
-            width,
             ws,
-            ppb;
+            center,
+            xBP;
 
         ppb = 1.0/igv.browser.referenceFrame.bpPerPixel;
         if (ppb > 1) {
 
-            centerLineBP = igv.browser.trackViewportCenterLineBP();
-            leftBP = centerLineBP - 1;
-            xBP = leftBP + igv.browser.referenceFrame.start;
+            trackViewXY = $(igv.browser.trackViews[ 0 ].viewportDiv).position();
+            trackViewHalfWidth = 0.5 * $(igv.browser.trackViews[ 0 ].viewportDiv).width();
+            xBP = igv.browser.referenceFrame.toBP(trackViewHalfWidth) + igv.browser.referenceFrame.start;
 
-            left = Math.floor(igv.browser.referenceFrame.toPixels(leftBP));
-            width = Math.round(igv.browser.referenceFrame.toPixels(1));
+            center = trackViewXY.left + trackViewHalfWidth;
+            width = igv.browser.referenceFrame.toPixels(1);
+            left = center - 0.5 * width;
 
-            ls = left.toString() + 'px';
-            ws = width.toString() + 'px';
+            ls = Math.round(left).toString() + 'px';
+            ws = Math.round(width).toString() + 'px';
             this.$container.css({ left:ls, width:ws });
 
             this.$container.removeClass('igv-center-guide-thin');
@@ -91,9 +92,11 @@ var igv = (function (igv) {
         } else {
 
             this.$container.css({ left:'50%', width:'1px' });
+
             this.$container.removeClass('igv-center-guide-wide');
             this.$container.addClass('igv-center-guide-thin');
         }
+
     };
 
     return igv;
