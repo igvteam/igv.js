@@ -381,11 +381,16 @@ var igv = (function (igv) {
     };
 
     igv.Browser.prototype.resize = function () {
+
         if (this.ideoPanel) this.ideoPanel.resize();
         if (this.karyoPanel) this.karyoPanel.resize();
+
         this.trackViews.forEach(function (panel) {
             panel.resize();
         });
+
+        this.centerGuide.repaint();
+
     };
 
     igv.Browser.prototype.repaint = function () {

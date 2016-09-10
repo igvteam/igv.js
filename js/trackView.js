@@ -607,13 +607,27 @@ var igv = (function (igv) {
 
         $(trackView.canvas).click(function (e) {
 
-            e = $.event.fix(e);   // Sets pageX and pageY for browsers that don't support them
+            var canvasCoords,
+                referenceFrame,
+                genomicLocation,
+                trackViewportHalfWidth,
+                genomicLocationViaTrackViewportHalfWidth,
+                time;
+
+            // Sets pageX and pageY for browsers that don't support them
+            e = $.event.fix(e);
+
             e.stopPropagation();
 
-            var canvasCoords = igv.translateMouseCoordinates(e, trackView.canvas),
-                referenceFrame = trackView.browser.referenceFrame,
-                genomicLocation = Math.floor((referenceFrame.start) + referenceFrame.toBP(canvasCoords.x)),
-                time = Date.now();
+            canvasCoords = igv.translateMouseCoordinates(e, trackView.canvas);
+            trackViewportHalfWidth = Math.floor(trackView.browser.trackViewportWidth()/2);
+
+            referenceFrame = trackView.browser.referenceFrame;
+            genomicLocation = Math.floor((referenceFrame.start) + referenceFrame.toBP(canvasCoords.x));
+            genomicLocationViaTrackViewportHalfWidth = Math.floor((referenceFrame.start) + referenceFrame.toBP(trackViewportHalfWidth));
+
+            console.log('trackViewClick canvas ' + igv.numberFormatter(genomicLocation) + ' trackViewportHalfWidth ' + igv.numberFormatter(genomicLocationViaTrackViewportHalfWidth));
+            time = Date.now();
 
             if (!referenceFrame) return;
 
@@ -670,7 +684,7 @@ var igv = (function (igv) {
                                 if (popupData && popupData.length > 0) {
                                     igv.popover.presentTrackPopup(e.pageX, e.pageY, igv.formatPopoverText(popupData), false);
                                 }
-                            // A handler returned custom popover HTML to override default format
+                                // A handler returned custom popover HTML to override default format
                             } else if (typeof handlerResult === 'string') {
                                 igv.popover.presentTrackPopup(e.pageX, e.pageY, handlerResult, false);
                             }
