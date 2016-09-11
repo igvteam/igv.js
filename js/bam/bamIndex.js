@@ -199,7 +199,7 @@ var igv = (function (igv) {
                 }
             });
 
-            // Use the linear index to find the lowest block that could contain alignments in the region
+            // Use the linear index to find the lowest chunk that could contain alignments in the region
             nintv = ba.linearIndex.length;
             lowest = null;
             minLin = Math.min(min >> 14, nintv - 1), maxLin = Math.min(max >> 14, nintv - 1);
@@ -213,12 +213,12 @@ var igv = (function (igv) {
                 }
             }
 
-            // Prune chunks that end before the lowest block
+            // Prune chunks that end before the lowest chunk
             prunedOtherChunks = [];
             if (lowest != null) {
                 for (i = 0; i < otherChunks.length; ++i) {
                     chnk = otherChunks[i];
-                    if (chnk.maxv.block >= lowest.block && chnk.maxv.offset >= lowest.offset) {
+                    if (chnk.maxv.block > lowest.block || (chnk.maxv.block == lowest.block && chnk.maxv.offset >= lowest.offset)) {
                         prunedOtherChunks.push(chnk);
                     }
                 }
