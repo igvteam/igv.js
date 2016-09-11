@@ -178,23 +178,37 @@
 
 
         <div onclick="igv.browser.loadTrack({
-                            url: '../brokenbed/broken_bed.bed.gz',
-                            indexURL: '../brokenbed/broken_bed.bed.gz.tbi',
+                            url: '../test/data/bed/brokenbed/broken_bed.bed.gz',
+                            indexURL: '../test/data/bed/brokenbed/broken_bed.bed.gz.tbi',
+                            name: 'broken bed tabix'
+                        })">Broken bed tabix
+        </div>
+
+        <div onclick="igv.browser.loadTrack({
+                            url: '../test/data/bed/brokenbed/broken_bed.bed',
+                            indexed: false,
                             name: 'broken bed'
-                        })">Boken bed
+                        })">Broken bed
         </div>
 
         <div onclick="igv.browser.loadTrack({
-                            url: '../brokenbed/bb.bed.gz',
-                            indexURL: '../brokenbed/bb.bed.gz.tbi',
-                            name: 'bb'
-                        })">bb
+                            url: '../test/data/bed/badbed/badbed.bed.gz',
+                            indexURL: '../test/data/bed/badbed/badbed.bed.gz.tbi',
+                            name: 'bad bed tabix'
+                        })">Bad bed tabix
         </div>
 
         <div onclick="igv.browser.loadTrack({
-                            url: '../brokenbed/bed.bed',
-                            name: 'bed'
-                        })"> bed
+                            url: '../test/data/bed/badbed/badbed.bed',
+                            indexed: false,
+                            name: 'bad bed'
+                        })">Bad bed
+        </div>
+
+        <div onclick="igv.browser.loadTrack({
+                            url: 'https://s3.amazonaws.com/igv.broadinstitute.org/annotations/hg19/genes/gencode.v18.collapsed.bed.gz',
+                            name: 'gencode'
+                        })"> gencode collapsed (tabix)
         </div>
 
 
@@ -512,7 +526,6 @@
         div = $("#myDiv")[0];
         options = {
 //            hideIdeogram: true,
-            showKaryo: true,
             showNavigation: true,
 
             showCenterGuide: true,
