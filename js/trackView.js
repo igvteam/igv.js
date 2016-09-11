@@ -60,8 +60,8 @@ var igv = (function (igv) {
             this.trackDiv.dataset.rulerTrack = "rulerTrack";
 
             // ruler sweeper widget surface
-            this.rulerSweeper = $('<div class="igv-ruler-sweeper-div">');
-            $(this.contentDiv).append(this.rulerSweeper[0]);
+            this.$rulerSweeper = $('<div class="igv-ruler-sweeper-div">');
+            $(this.contentDiv).append(this.$rulerSweeper);
 
             addRulerTrackHandlers(this);
 
@@ -527,7 +527,7 @@ var igv = (function (igv) {
 
             left = mouseDownXY.x;
             rulerSweepWidth = 0;
-            trackView.rulerSweeper.css({"display": "inline", "left": left + "px", "width": rulerSweepWidth + "px"});
+            trackView.$rulerSweeper.css({"display": "inline", "left": left + "px", "width": rulerSweepWidth + "px"});
 
             isMouseIn = true;
         });
@@ -542,14 +542,22 @@ var igv = (function (igv) {
 
                 mouseMoveXY = igv.translateMouseCoordinates(e, trackView.contentDiv);
                 dx = mouseMoveXY.x - mouseDownXY.x;
-
                 rulerSweepWidth = Math.abs(dx);
+
                 if (rulerSweepWidth > rulerSweepThreshold) {
-                    trackView.rulerSweeper.css({"width": rulerSweepWidth + "px"});
+
+                    trackView.$rulerSweeper.css({"width": rulerSweepWidth + "px"});
 
                     if (dx < 0) {
-                        left = mouseDownXY.x + dx;
-                        trackView.rulerSweeper.css({"left": left + "px"});
+
+                        console.log('rulerSweep width ' + rulerSweepWidth + ' dx ' + dx + ' left ' + left);
+
+                        if (mouseDownXY.x + dx > -1) {
+                            left = mouseDownXY.x + dx;
+                            trackView.$rulerSweeper.css({"left": left + "px"});
+                        } else {
+                            isMouseIn = false;
+                        }
                     }
                 }
             }
@@ -567,7 +575,7 @@ var igv = (function (igv) {
                 isMouseDown = false;
                 isMouseIn = false;
 
-                trackView.rulerSweeper.css({"display": "none", "left": 0 + "px", "width": 0 + "px"});
+                trackView.$rulerSweeper.css({"display": "none", "left": 0 + "px", "width": 0 + "px"});
 
                 ss = igv.browser.referenceFrame.start + (left * igv.browser.referenceFrame.bpPerPixel);
                 ee = ss + rulerSweepWidth * igv.browser.referenceFrame.bpPerPixel;
