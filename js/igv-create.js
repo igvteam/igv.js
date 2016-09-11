@@ -452,7 +452,7 @@ var igv = (function (igv) {
         $(igv.browser.div).remove();
         $(".igv-grid-container-colorpicker").remove();
         $(".igv-grid-container-dialog").remove();
-        $(".igv-grid-container-dialog").remove();
+        // $(".igv-grid-container-dialog").remove();
     }
 
 
