@@ -553,11 +553,9 @@ var igv = (function (igv) {
                         if (mouseDownXY.x + dx < 0) {
                             isMouseIn = false;
                             left = 0;
-                            trackView.$rulerSweeper.css({"left": left + "px"});
-                            return;
+                        } else {
+                            left = mouseDownXY.x + dx;
                         }
-
-                        left = mouseDownXY.x + dx;
                         trackView.$rulerSweeper.css({"left": left + "px"});
                     }
                 }
