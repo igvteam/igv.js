@@ -40,7 +40,7 @@ var igv = (function (igv) {
 
         }
     };
-    var sortDirection = 1;
+    var sortDirection = "ASC";
 
     igv.AneuTrack = function (config) {
 
@@ -475,7 +475,7 @@ var igv = (function (igv) {
      */
     igv.AneuTrack.prototype.sortSamples = function (chr, bpStart, bpEnd, direction, callback) {
 
-        var myself = this, segment, min, max, f, i, s, sampleNames, len = bpEnd - bpStart, scores = {};
+        var self = this, segment, min, max, f, i, s, sampleNames, len = bpEnd - bpStart, scores = {};
 
         this.featureSource.getFeatures(chr, bpStart, bpEnd, function (featureList) {
 
@@ -498,7 +498,7 @@ var igv = (function (igv) {
             }
 
             // Now sort sample names by score
-            sampleNames = Object.keys(myself.samples);
+            sampleNames = Object.keys(self.samples);
             sampleNames.sort(function (a, b) {
 
                 var s1 = scores[a];
@@ -516,9 +516,11 @@ var igv = (function (igv) {
 
             // Finally update sample hash
             for (i = 0; i < sampleNames.length; i++) {
-                myself.samples[sampleNames[i]] = i;
+                self.samples[sampleNames[i]] = i;
             }
-            myself.sampleNames = sampleNames;
+            self.sampleNames = sampleNames;
+            
+            
 
             callback();
 
@@ -538,11 +540,9 @@ var igv = (function (igv) {
         var refFrame = igv.browser.referenceFrame, bpWidth = refFrame.toBP(2.5), bpStart = genomicLocation - bpWidth, bpEnd = genomicLocation
             + bpWidth, chr = refFrame.chr, track = this;
 
-        this.sortSamples(chr, bpStart, bpEnd, sortDirection, function () {
-            track.trackView.update();
-        });
+        this.sortSamples(chr, bpStart, bpEnd, sortDirection);
 
-        sortDirection *= -1;
+        sortDirection = (sortDirection === "ASC" ? "DESC" : "ASC");
     };
 
     igv.AneuTrack.prototype.popupData = function (genomicLocation, xOffset, yOffset) {
