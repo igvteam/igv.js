@@ -550,14 +550,15 @@ var igv = (function (igv) {
 
                     if (dx < 0) {
 
-                        console.log('rulerSweep width ' + rulerSweepWidth + ' dx ' + dx + ' left ' + left);
-
-                        if (mouseDownXY.x + dx > -1) {
-                            left = mouseDownXY.x + dx;
-                            trackView.$rulerSweeper.css({"left": left + "px"});
-                        } else {
+                        if (mouseDownXY.x + dx < 0) {
                             isMouseIn = false;
+                            left = 0;
+                            trackView.$rulerSweeper.css({"left": left + "px"});
+                            return;
                         }
+
+                        left = mouseDownXY.x + dx;
+                        trackView.$rulerSweeper.css({"left": left + "px"});
                     }
                 }
             }
