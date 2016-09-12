@@ -178,6 +178,41 @@
 
 
         <div onclick="igv.browser.loadTrack({
+                            url: '../test/data/bed/brokenbed/broken_bed.bed.gz',
+                            indexURL: '../test/data/bed/brokenbed/broken_bed.bed.gz.tbi',
+                            name: 'broken bed tabix'
+                        })">Broken bed tabix
+        </div>
+
+        <div onclick="igv.browser.loadTrack({
+                            url: '../test/data/bed/brokenbed/broken_bed.bed',
+                            indexed: false,
+                            name: 'broken bed'
+                        })">Broken bed
+        </div>
+
+        <div onclick="igv.browser.loadTrack({
+                            url: '../test/data/bed/badbed/badbed.bed.gz',
+                            indexURL: '../test/data/bed/badbed/badbed.bed.gz.tbi',
+                            name: 'bad bed tabix'
+                        })">Bad bed tabix
+        </div>
+
+        <div onclick="igv.browser.loadTrack({
+                            url: '../test/data/bed/badbed/badbed.bed',
+                            indexed: false,
+                            name: 'bad bed'
+                        })">Bad bed
+        </div>
+
+        <div onclick="igv.browser.loadTrack({
+                            url: 'https://s3.amazonaws.com/igv.broadinstitute.org/annotations/hg19/genes/gencode.v18.collapsed.bed.gz',
+                            name: 'gencode'
+                        })"> gencode collapsed (tabix)
+        </div>
+
+
+        <div onclick="igv.browser.loadTrack({
                             url: 'https://data.broadinstitute.org/igvdata/1KG/ALL.wgs.phase3_shapeit2_mvncall_integrated_v5b.20130502.sites.vcf.gz',
                             indexURL: 'https://data.broadinstitute.org/igvdata/1KG/ALL.wgs.phase3_shapeit2_mvncall_integrated_v5b.20130502.sites.vcf.gz.tbi',
                             visibilityWindow: 20000,
@@ -504,9 +539,6 @@
         div = $("#myDiv")[0];
         options = {
 //            hideIdeogram: true,
-//            showKaryo: true,
-            showNavigation: true,
-
             showCenterGuide: true,
             showCursorTrackingGuide: true,
 

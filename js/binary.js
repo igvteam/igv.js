@@ -159,6 +159,16 @@ var igv = (function (igv) {
         this.offset = offset;
     }
 
+    VPointer.prototype.lessThan = function (vp) {
+        return this.block < vp.block ||
+            (this.block === vp.block && this.offset < vp.offset);
+    }
+
+    VPointer.prototype.greaterThan = function (vp) {
+        return this.block > vp.block ||
+            (this.block === vp.block && this.offset > vp.offset);
+    }
+
     VPointer.prototype.print = function() {
         return "" + this.block + ":" + this.offset;
     }

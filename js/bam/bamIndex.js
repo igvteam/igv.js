@@ -167,7 +167,8 @@ var igv = (function (igv) {
             nintv,
             lowest,
             minLin,
-            lb,
+            maxLin,
+            vp,
             prunedOtherChunks,
             i,
             chnk,
@@ -180,37 +181,34 @@ var igv = (function (igv) {
         }
         else {
 
-            overlappingBins = reg2bins(min, max);        // List of bin #s that might overlap min, max
+            overlappingBins = reg2bins(min, max);        // List of bin #s that overlap min, max
             leafChunks = [];
             otherChunks = [];
 
-
+            // Find chunks in overlapping bins
             overlappingBins.forEach(function (bin) {
-
                 if (ba.binIndex[bin]) {
                     var chunks = ba.binIndex[bin],
                         nchnk = chunks.length;
-
                     for (var c = 0; c < nchnk; ++c) {
                         var cs = chunks[c][0];
                         var ce = chunks[c][1];
                         (bin < 4681 ? otherChunks : leafChunks).push({minv: cs, maxv: ce, bin: bin});
                     }
-
                 }
             });
 
             // Use the linear index to find the lowest chunk that could contain alignments in the region
             nintv = ba.linearIndex.length;
             lowest = null;
-            minLin = Math.min(min >> 14, nintv - 1), maxLin = Math.min(max >> 14, nintv - 1);
+            minLin = Math.min(min >> 14, nintv - 1);
+            maxLin = Math.min(max >> 14, nintv - 1);
             for (i = minLin; i <= maxLin; ++i) {
-                lb = ba.linearIndex[i];
-                if (!lb) {
-                    continue;
-                }
-                if (!lowest || lb.block < lowest.block || lb.offset < lowest.offset) {
-                    lowest = lb;
+                vp = ba.linearIndex[i];
+                if (vp) {
+                    if (!lowest || vp.lessThan(lowest)) {
+                        lowest = vp;
+                    }
                 }
             }
 
@@ -219,7 +217,7 @@ var igv = (function (igv) {
             if (lowest != null) {
                 for (i = 0; i < otherChunks.length; ++i) {
                     chnk = otherChunks[i];
-                    if (chnk.maxv.block > lowest.block || (chnk.maxv.block == lowest.block && chnk.maxv.offset >= lowest.offset)) {
+                    if (chnk.maxv.greaterThan(lowest)) {
                         prunedOtherChunks.push(chnk);
                     }
                 }
@@ -247,7 +245,7 @@ var igv = (function (igv) {
                 var cur = intChunks[0];
                 for (var i = 1; i < intChunks.length; ++i) {
                     var nc = intChunks[i];
-                    if ((nc.minv.block - cur.maxv.block) < 65000) { // Merge blocks that are withing 65k of each other
+                    if ((nc.minv.block - cur.maxv.block) < 65000) { // Merge chunks that are withing 65k of each other
                         cur = {minv: cur.minv, maxv: nc.maxv};
                     } else {
                         mergedChunks.push(cur);
@@ -263,7 +261,7 @@ var igv = (function (igv) {
 
 
     /**
-     * Calculate the list of bins that may overlap with region [beg, end]
+     * Calculate the list of bins that overlap with region [beg, end]
      *
      */
     function reg2bins(beg, end) {
