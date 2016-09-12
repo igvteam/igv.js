@@ -60,8 +60,8 @@ var igv = (function (igv) {
             this.trackDiv.dataset.rulerTrack = "rulerTrack";
 
             // ruler sweeper widget surface
-            this.rulerSweeper = $('<div class="igv-ruler-sweeper-div">');
-            $(this.contentDiv).append(this.rulerSweeper[0]);
+            this.$rulerSweeper = $('<div class="igv-ruler-sweeper-div">');
+            $(this.contentDiv).append(this.$rulerSweeper);
 
             addRulerTrackHandlers(this);
 
@@ -527,7 +527,7 @@ var igv = (function (igv) {
 
             left = mouseDownXY.x;
             rulerSweepWidth = 0;
-            trackView.rulerSweeper.css({"display": "inline", "left": left + "px", "width": rulerSweepWidth + "px"});
+            trackView.$rulerSweeper.css({"display": "inline", "left": left + "px", "width": rulerSweepWidth + "px"});
 
             isMouseIn = true;
         });
@@ -542,14 +542,21 @@ var igv = (function (igv) {
 
                 mouseMoveXY = igv.translateMouseCoordinates(e, trackView.contentDiv);
                 dx = mouseMoveXY.x - mouseDownXY.x;
-
                 rulerSweepWidth = Math.abs(dx);
+
                 if (rulerSweepWidth > rulerSweepThreshold) {
-                    trackView.rulerSweeper.css({"width": rulerSweepWidth + "px"});
+
+                    trackView.$rulerSweeper.css({"width": rulerSweepWidth + "px"});
 
                     if (dx < 0) {
-                        left = mouseDownXY.x + dx;
-                        trackView.rulerSweeper.css({"left": left + "px"});
+
+                        if (mouseDownXY.x + dx < 0) {
+                            isMouseIn = false;
+                            left = 0;
+                        } else {
+                            left = mouseDownXY.x + dx;
+                        }
+                        trackView.$rulerSweeper.css({"left": left + "px"});
                     }
                 }
             }
@@ -567,7 +574,7 @@ var igv = (function (igv) {
                 isMouseDown = false;
                 isMouseIn = false;
 
-                trackView.rulerSweeper.css({"display": "none", "left": 0 + "px", "width": 0 + "px"});
+                trackView.$rulerSweeper.css({"display": "none", "left": 0 + "px", "width": 0 + "px"});
 
                 ss = igv.browser.referenceFrame.start + (left * igv.browser.referenceFrame.bpPerPixel);
                 ee = ss + rulerSweepWidth * igv.browser.referenceFrame.bpPerPixel;
@@ -607,13 +614,27 @@ var igv = (function (igv) {
 
         $(trackView.canvas).click(function (e) {
 
-            e = $.event.fix(e);   // Sets pageX and pageY for browsers that don't support them
+            var canvasCoords,
+                referenceFrame,
+                genomicLocation,
+                trackViewportHalfWidth,
+                genomicLocationViaTrackViewportHalfWidth,
+                time;
+
+            // Sets pageX and pageY for browsers that don't support them
+            e = $.event.fix(e);
+
             e.stopPropagation();
 
-            var canvasCoords = igv.translateMouseCoordinates(e, trackView.canvas),
-                referenceFrame = trackView.browser.referenceFrame,
-                genomicLocation = Math.floor((referenceFrame.start) + referenceFrame.toBP(canvasCoords.x)),
-                time = Date.now();
+            canvasCoords = igv.translateMouseCoordinates(e, trackView.canvas);
+            trackViewportHalfWidth = Math.floor(trackView.browser.trackViewportWidth()/2);
+
+            referenceFrame = trackView.browser.referenceFrame;
+            genomicLocation = Math.floor((referenceFrame.start) + referenceFrame.toBP(canvasCoords.x));
+            genomicLocationViaTrackViewportHalfWidth = Math.floor((referenceFrame.start) + referenceFrame.toBP(trackViewportHalfWidth));
+
+            // console.log('trackViewClick canvas ' + igv.numberFormatter(genomicLocation) + ' trackViewportHalfWidth ' + igv.numberFormatter(genomicLocationViaTrackViewportHalfWidth));
+            time = Date.now();
 
             if (!referenceFrame) return;
 
@@ -670,7 +691,7 @@ var igv = (function (igv) {
                                 if (popupData && popupData.length > 0) {
                                     igv.popover.presentTrackPopup(e.pageX, e.pageY, igv.formatPopoverText(popupData), false);
                                 }
-                            // A handler returned custom popover HTML to override default format
+                                // A handler returned custom popover HTML to override default format
                             } else if (typeof handlerResult === 'string') {
                                 igv.popover.presentTrackPopup(e.pageX, e.pageY, handlerResult, false);
                             }

@@ -134,7 +134,7 @@ var igv = (function (igv) {
      * TODO -- why isn't 8th byte used ?
      * @returns {*}
      */
-    igv.BinaryParser.prototype. getVPointer = function() {
+    igv.BinaryParser.prototype.getVPointer = function() {
 
         var position = this.position,
             offset = (this.view.getUint8(position + 1) << 8) | (this.view.getUint8(position)),
@@ -146,17 +146,27 @@ var igv = (function (igv) {
             block = byte6 + byte5 + byte4 + byte3 + byte2;
         this.position += 8;
 
-        if (block == 0 && offset == 0) {
-            return null;
-        } else {
+ //       if (block == 0 && offset == 0) {
+ //           return null;
+ //       } else {
             return new VPointer(block, offset);
-        }
+ //       }
     }
 
 
     function VPointer(block, offset) {
         this.block = block;
         this.offset = offset;
+    }
+
+    VPointer.prototype.isLessThan = function (vp) {
+        return this.block < vp.block ||
+            (this.block === vp.block && this.offset < vp.offset);
+    }
+
+    VPointer.prototype.isGreaterThan = function (vp) {
+        return this.block > vp.block ||
+            (this.block === vp.block && this.offset > vp.offset);
     }
 
     VPointer.prototype.print = function() {

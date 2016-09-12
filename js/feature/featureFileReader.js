@@ -150,9 +150,9 @@ var igv = (function (igv) {
 
                         var startPos = block.minv.block,
                             startOffset = block.minv.offset,
-                            endPos = block.maxv.block + (index.tabix ? MAX_GZIP_BLOCK_SIZE + 100 : 0),
+                            endPos = endPos = block.maxv.block +  MAX_GZIP_BLOCK_SIZE,
                             options = {
-                                headers: self.config.headers,           // http headers, not file header
+                                headers: self.config.headers, // http headers, not file header
                                 range: {start: startPos, size: endPos - startPos + 1},
                                 withCredentials: self.config.withCredentials
                             },
@@ -306,10 +306,10 @@ var igv = (function (igv) {
         return new Promise(function (fulfill, reject) {
 
             if (self.index) {
-                loadFeaturesWithIndex.call(self, chr, start, end).then(packFeatures);
+                loadFeaturesWithIndex.call(self, chr, start, end).then(packFeatures).catch(reject);
             }
             else {
-                loadFeaturesNoIndex.call(self).then(packFeatures);
+                loadFeaturesNoIndex.call(self).then(packFeatures).catch(reject);
             }
 
             function packFeatures(features) {

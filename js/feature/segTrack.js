@@ -25,7 +25,7 @@
 
 var igv = (function (igv) {
 
-    var sortDirection = 1;
+    var sortDirection = "DESC";
 
     igv.SegTrack = function (config) {
 
@@ -104,8 +104,7 @@ var igv = (function (igv) {
         var self = this;
         return new Promise(function (fulfill, reject) {
             // If no samples are defined, optionally query feature source.  This step was added to support the TCGA BigQuery
-            // tables
-            if (self.sampleCount === 0 && self.featureSource.reader.allSamples) {    // TODO <=  fix this!
+            if (self.sampleCount === 0 && (typeof self.featureSource.reader.allSamples == "function")) {
                 self.featureSource.reader.allSamples().then(function (samples) {
                     samples.forEach(function (sample) {
                         self.samples[sample] = self.sampleCount;
@@ -250,23 +249,25 @@ var igv = (function (igv) {
     /**
      * Sort samples by the average value over the genomic range in the direction indicated (1 = ascending, -1 descending)
      */
-    igv.SegTrack.prototype.sortSamples = function (chr, bpStart, bpEnd, direction, callback) {
+    igv.SegTrack.prototype.sortSamples = function (chr, bpStart, bpEnd, direction) {
 
-        var myself = this,
-            segment,
-            min,
-            max,
-            f,
-            i,
-            s,
-            sampleNames,
-            len = bpEnd - bpStart,
-            scores = {};
+        var self = this,
+            d2 = (direction === "ASC" ? 1 : -1);
 
         this.featureSource.getFeatures(chr, bpStart, bpEnd).then(function (featureList) {
 
+            var segment,
+                min,
+                max,
+                f,
+                i,
+                s,
+                sampleNames,
+                scores = {},
+                bpLength = bpEnd - bpStart + 1;
+
             // Compute weighted average score for each sample
-            for (i = 0, len = featureList.length; i < len; i++) {
+            for (i = 0; i < featureList.length; i++) {
 
                 segment = featureList[i];
 
@@ -275,7 +276,7 @@ var igv = (function (igv) {
 
                 min = Math.max(bpStart, segment.start);
                 max = Math.min(bpEnd, segment.end);
-                f = (max - min) / len;
+                f = (max - min) / bpLength;
 
                 s = scores[segment.sample];
                 if (!s) s = 0;
@@ -284,7 +285,7 @@ var igv = (function (igv) {
             }
 
             // Now sort sample names by score
-            sampleNames = Object.keys(myself.samples);
+            sampleNames = Object.keys(self.samples);
             sampleNames.sort(function (a, b) {
 
                 var s1 = scores[a];
@@ -293,19 +294,23 @@ var igv = (function (igv) {
                 if (!s2) s2 = Number.MAX_VALUE;
 
                 if (s1 == s2) return 0;
-                else if (s1 > s2) return direction;
-                else return direction * -1;
+                else if (s1 > s2) return d2;
+                else return d2 * -1;
 
             });
 
             // Finally update sample hash
             for (i = 0; i < sampleNames.length; i++) {
-                myself.samples[sampleNames[i]] = i;
+                self.samples[sampleNames[i]] = i;
             }
-            myself.sampleNames = sampleNames;
+            self.sampleNames = sampleNames;
 
-            callback();
+            self.trackView.update();
+            $(self.trackView.viewportDiv).scrollTop(0);
 
+
+        }).catch(function(error) {
+            console.log(error);
         });
     };
 
@@ -325,12 +330,9 @@ var igv = (function (igv) {
             chr = refFrame.chr,
             myself = this;
 
-        this.sortSamples(chr, bpStart, bpEnd, sortDirection, function () {
-            myself.trackView.update();
-            $(myself.trackView.viewportDiv).scrollTop(0);
-        });
+        this.sortSamples(chr, bpStart, bpEnd, sortDirection);
 
-        sortDirection *= -1;
+        sortDirection = (sortDirection === "ASC" ? "DESC" : "ASC");
     };
 
     igv.SegTrack.prototype.popupData = function (genomicLocation, xOffset, yOffset) {

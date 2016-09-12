@@ -106,9 +106,12 @@ var igv = (function (igv) {
             var g = igv.guichromosomes[i];
             if (g.x < mouseX && g.right > mouseX && g.y < mouseY && g.bottom > mouseY) {
                 var dy = mouseY - g.y;
-                var bp = Math.round(g.size * dy / g.h);
-                log("Going to position " + bp);
-                igv.browser.goto(g.name, bp);
+                var center = Math.round(g.size * dy / g.h);
+                log("Going to position " + center);
+
+                // the goto() signature is chr, start, end. We leave end undefined changing
+                // the interpretation of start to the center of the locus extent.
+                igv.browser.goto(g.name, center, undefined);
                 break;
             }
         }
