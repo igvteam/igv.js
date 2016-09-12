@@ -539,10 +539,12 @@
 
         div = $("#myDiv")[0];
         options = {
+
 //            hideIdeogram: true,
 //            showCenterGuide: true,
 //            showCursorTrackingGuide: true,
 
+//            doubleClickDelay: 0.001,
             locus: "8:124,512,906-124,512,945",
             reference: {
                 id: "hg19",
@@ -552,20 +554,19 @@
             flanking: 1000,
             apiKey: 'AIzaSyDUUAUFpQEN4mumeMNIRWXSiTh5cPtUAD0',
             palette: ["#00A0B0", "#6A4A3C", "#CC333F", "#EB6841"],
-            //    bam: {
-            //        coverageThreshold: 0.2,
-            //        coverageQualityWeight: true,
-            //        pairsSupported: true
-            //    },
-
-
             tracks: [
+                {
+                    url: 'https://data.broadinstitute.org/igvdata/BodyMap/hg19/IlluminaHiSeq2000_BodySites/brain_merged/accepted_hits.bam',
+                    name: 'Brain (BodyMap)',
+                    maxRows: 3000,
+                    samplingDepth: 10000,
+                    height: 200
+                },
                 {
                     name: "Genes",
                     type: "annotation",
                     format: "gtf",
                     sourceType: "file",
-//                    color: "#ff0000",
                     url: "https://s3.amazonaws.com/igv.broadinstitute.org/annotations/hg19/genes/gencode.v18.annotation.sorted.gtf.gz",
                     indexURL: "https://s3.amazonaws.com/igv.broadinstitute.org/annotations/hg19/genes/gencode.v18.annotation.sorted.gtf.gz.tbi",
                     visibilityWindow: 10000000,
