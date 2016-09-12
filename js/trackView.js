@@ -633,7 +633,7 @@ var igv = (function (igv) {
             genomicLocation = Math.floor((referenceFrame.start) + referenceFrame.toBP(canvasCoords.x));
             genomicLocationViaTrackViewportHalfWidth = Math.floor((referenceFrame.start) + referenceFrame.toBP(trackViewportHalfWidth));
 
-            console.log('trackViewClick canvas ' + igv.numberFormatter(genomicLocation) + ' trackViewportHalfWidth ' + igv.numberFormatter(genomicLocationViaTrackViewportHalfWidth));
+            // console.log('trackViewClick canvas ' + igv.numberFormatter(genomicLocation) + ' trackViewportHalfWidth ' + igv.numberFormatter(genomicLocationViaTrackViewportHalfWidth));
             time = Date.now();
 
             if (!referenceFrame) return;
