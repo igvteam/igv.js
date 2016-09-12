@@ -527,6 +527,7 @@
 
         tracks.forEach(function (track) {
             console.log(track.name);
+            track.sortSamples("8", 124512906, 124512945, "DESC");
         })
 
     };
@@ -542,7 +543,6 @@
 //            showCenterGuide: true,
 //            showCursorTrackingGuide: true,
 
-            //genome: "hg19",
             locus: "8:124,512,906-124,512,945",
             reference: {
                 id: "hg19",
@@ -560,13 +560,6 @@
 
 
             tracks: [
-                {
-                    url: 'https://data.broadinstitute.org/igvdata/BodyMap/hg19/IlluminaHiSeq2000_BodySites/brain_merged/accepted_hits.bam',
-                    name: 'Brain (BodyMap)',
-                    maxRows: 3000,
-                    samplingDepth: 10000,
-                    height: 480
-                },
                 {
                     name: "Genes",
                     type: "annotation",

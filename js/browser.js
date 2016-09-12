@@ -293,7 +293,7 @@ var igv = (function (igv) {
      *
      * @param property
      * @param value
-     * @returns {Array}  tracks with given property value.  e.g. findTracks("type", "annotations")
+     * @returns {Array}  tracks with given property value.  e.g. findTracks("type", "annotation")
      */
     igv.Browser.prototype.findTracks = function (property, value) {
         var tracks = [];
