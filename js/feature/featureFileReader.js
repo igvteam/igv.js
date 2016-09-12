@@ -306,10 +306,10 @@ var igv = (function (igv) {
         return new Promise(function (fulfill, reject) {
 
             if (self.index) {
-                loadFeaturesWithIndex.call(self, chr, start, end).then(packFeatures);
+                loadFeaturesWithIndex.call(self, chr, start, end).then(packFeatures).catch(reject);
             }
             else {
-                loadFeaturesNoIndex.call(self).then(packFeatures);
+                loadFeaturesNoIndex.call(self).then(packFeatures).catch(reject);
             }
 
             function packFeatures(features) {
