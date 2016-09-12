@@ -7,7 +7,7 @@
     <meta name="description" content="">
     <meta name="author" content="">
     <link rel="shortcut icon" href=../img/favicon.ico>
-    <title>IGV - Integrative Genomics Viewer</title>
+    <title>IGV - Multi-Locus</title>
 
     <!-- jQuery UI CSS -->
     <link rel="stylesheet" type="text/css"
@@ -166,41 +166,7 @@
 <body>
 
 <div id="myDiv" style="padding-top: 50px;padding-bottom: 20px; height: auto">
-
-    <!--
-    <button type='button' onClick='oauth.google.login()' id="loginText"> Authorize (Google OAuth)</button>
-
-    <p></p>
--->
-    <div id="trackList">
-
-        <h3>Example tracks - click to load</h3>
-
-
-        <div onclick="igv.browser.loadTrack({
-                            url: '../test/data/bed/brokenbed/broken_bed.bed.gz',
-                            indexURL: '../test/data/bed/brokenbed/broken_bed.bed.gz.tbi',
-                            name: 'broken bed tabix'
-                        })">Broken bed tabix
-        </div>
-
-        <div onclick="igv.browser.loadTrack({
-                            url: 'https://data.broadinstitute.org/igvdata/BodyMap/hg19/IlluminaHiSeq2000_BodySites/brain_merged/accepted_hits.bam',
-                            name: 'Brain (BodyMap)',
-                            maxRows: 3000,
-                            samplingDepth: 10000,
-                            height: 200
-                        })">BAM File - deep coverage (Brain, BodyMap)
-        </div>
-
-        <div onclick="igv.browser.loadTrack({
-                                url: 'https://data.broadinstitute.org/igvdata/test/igv-web/segmented_data_080520.seg.gz',
-                                indexed: false,
-                                name: 'GBM Copy # (TCGA Broad GDAC)'})">GBM Copy # (TCGA Broad GDAC)) (SEG)
-        </div>
-
-    </div>
-
+    <!-- insert content here -->
 </div>
 
 <script type="text/javascript">
@@ -211,12 +177,10 @@
                 browser;
 
         div = $("#myDiv")[0];
-        options = {
-//            hideIdeogram: true,
-//            showCenterGuide: true,
-//            showCursorTrackingGuide: true,
 
-            //genome: "hg19",
+        options = {
+            hideIdeogram:true,
+            showRuler:true,
             locus: "8:124,512,906-124,512,945",
             reference: {
                 id: "hg19",
@@ -226,27 +190,13 @@
             flanking: 1000,
             apiKey: 'AIzaSyDUUAUFpQEN4mumeMNIRWXSiTh5cPtUAD0',
             palette: ["#00A0B0", "#6A4A3C", "#CC333F", "#EB6841"],
-            //    bam: {
-            //        coverageThreshold: 0.2,
-            //        coverageQualityWeight: true,
-            //        pairsSupported: true
-            //    },
-
 
             tracks: [
-//                {
-//                    url: 'https://data.broadinstitute.org/igvdata/BodyMap/hg19/IlluminaHiSeq2000_BodySites/brain_merged/accepted_hits.bam',
-//                    name: 'Brain (BodyMap)',
-//                    maxRows: 3000,
-//                    samplingDepth: 10000,
-//                    height: 480
-//                },
                 {
                     name: "Genes",
                     type: "annotation",
                     format: "gtf",
                     sourceType: "file",
-//                    color: "#ff0000",
                     url: "https://s3.amazonaws.com/igv.broadinstitute.org/annotations/hg19/genes/gencode.v18.annotation.sorted.gtf.gz",
                     indexURL: "https://s3.amazonaws.com/igv.broadinstitute.org/annotations/hg19/genes/gencode.v18.annotation.sorted.gtf.gz.tbi",
                     visibilityWindow: 10000000,
