@@ -64,8 +64,7 @@ var igv = (function (igv) {
             (config.height === undefined ? true : false) :
             config.autoHeight;
         track.minHeight = config.minHeight || Math.min(50, track.height);
-        // track.maxHeight = config.maxHeight || Math.max(500, track.height);
-        track.maxHeight = config.maxHeight || Math.max(800, track.height);
+        track.maxHeight = config.maxHeight || Math.max(500, track.height);
 
         if (config.visibilityWindow) {
             track.visibilityWindow = config.visibilityWindow;
