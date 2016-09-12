@@ -169,7 +169,7 @@ var igv = (function (igv) {
         }
         colorByMenuItems.push({key: 'tag', label: tagLabel});
 
-        menuItems.push(igv.colorPickerMenuItem(popover, this.sort));
+        menuItems.push(igv.colorPickerMenuItem(popover, this.trackView));
 
         menuItems.push('<div class="igv-track-menu-category igv-track-menu-border-top">Color by</div>');
 
