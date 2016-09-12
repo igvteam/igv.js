@@ -60,11 +60,11 @@ var igv = (function (igv) {
         // filter alignments
         this.filterOption = config.filterOption || {name: "mappingQuality", params: [30, undefined]};
 
-    }
+    };
 
     igv.BAMTrack.prototype.getFeatures = function (chr, bpStart, bpEnd) {
         return this.featureSource.getAlignments(chr, bpStart, bpEnd);
-    }
+    };
 
     igv.BAMTrack.filters = {
 
@@ -96,7 +96,6 @@ var igv = (function (igv) {
         }
     };
 
-
     // Alt - Click to Sort alignment rows
     igv.BAMTrack.prototype.altClick = function (genomicLocation, event) {
 
@@ -108,12 +107,11 @@ var igv = (function (igv) {
         this.sortDirection = !this.sortDirection;
     };
 
-
     /**
      * Optional method to compute pixel height to accomodate the list of features.  The implementation below
      * has side effects (modifiying the samples hash).  This is unfortunate, but harmless.
      *
-     * @param features
+     * @param alignmentContainer
      * @returns {number}
      */
     igv.BAMTrack.prototype.computePixelHeight = function (alignmentContainer) {
@@ -136,7 +134,7 @@ var igv = (function (igv) {
 
         this.coverageTrack.paintAxis(ctx, pixelWidth, this.coverageTrackHeight);
 
-    }
+    };
 
     igv.BAMTrack.prototype.popupData = function (genomicLocation, xOffset, yOffset) {
 
@@ -147,7 +145,7 @@ var igv = (function (igv) {
             return this.alignmentTrack.popupData(genomicLocation, xOffset, yOffset - this.alignmentTrack.top);
         }
 
-    }
+    };
 
     igv.BAMTrack.prototype.popupMenuItems = function (popover) {
 
@@ -158,6 +156,9 @@ var igv = (function (igv) {
             tagLabel = 'tag' + (self.alignmentTrack.colorByTag ? ' (' + self.alignmentTrack.colorByTag + ')' : ''),
             selected;
 
+        menuItems.push(igv.colorPickerMenuItem(popover, this.trackView));
+
+        menuItems.push(sortMenuItem(popover));
 
         colorByMenuItems.push({key: 'none', label: 'track color'});
 
@@ -169,15 +170,12 @@ var igv = (function (igv) {
         }
         colorByMenuItems.push({key: 'tag', label: tagLabel});
 
-        menuItems.push(igv.colorPickerMenuItem(popover, this.trackView));
-
         menuItems.push('<div class="igv-track-menu-category igv-track-menu-border-top">Color by</div>');
 
         colorByMenuItems.forEach(function (item) {
             selected = self.alignmentTrack.colorBy === item.key;
             menuItems.push(colorByMarkup(item, selected));
         });
-
 
         html = [];
         if (self.pairsSupported && self.alignmentTrack.hasPairs) {
@@ -271,8 +269,33 @@ var igv = (function (igv) {
 
             return item;
         }
-    };
 
+        function sortMenuItem(popover) {
+
+            return {
+                object: $('<div class="igv-track-menu-item">' + "Sort by base" + '</div>'),
+                click: function () {
+                    var genomicLocationViaTrackViewportHalfWidth,
+                        trackViewportHalfWidth;
+
+                    popover.hide();
+
+                    trackViewportHalfWidth = Math.floor(igv.browser.trackViewportWidth()/2);
+                    genomicLocationViaTrackViewportHalfWidth = Math.floor((igv.browser.referenceFrame.start) + igv.browser.referenceFrame.toBP(trackViewportHalfWidth));
+
+                    // console.log('bamTrack - sort - trackViewportHalfWidth ' + igv.numberFormatter(genomicLocationViaTrackViewportHalfWidth));
+
+                    self.altClick(genomicLocationViaTrackViewportHalfWidth, undefined);
+
+                    if ("show center guide" === igv.browser.centerGuide.$centerGuideToggle.text()) {
+                        igv.browser.centerGuide.$centerGuideToggle.trigger( "click" );
+                    }
+
+                }
+            }
+        }
+
+    };
 
     function shadedBaseColor(qual, nucleotide, genomicLocation) {
 
@@ -308,7 +331,6 @@ var igv = (function (igv) {
         return color;
     }
 
-
     CoverageTrack = function (config, parent) {
 
         this.parent = parent;
@@ -319,11 +341,11 @@ var igv = (function (igv) {
         this.height = config.coverageTrackHeight;
         this.dataRange = {min: 0};   // Leav max undefined
         this.paintAxis = igv.paintAxis;
-    }
+    };
 
     CoverageTrack.prototype.computePixelHeight = function (alignmentContainer) {
         return this.height;
-    }
+    };
 
     CoverageTrack.prototype.draw = function (options) {
 
@@ -368,7 +390,9 @@ var igv = (function (igv) {
             y = this.height - h;
             x = Math.floor((bp - bpStart) / bpPerPixel);
 
+
             igv.graphics.setProperties(ctx, {fillStyle: this.parent.color, strokeStyle: this.color});
+            // igv.graphics.setProperties(ctx, {fillStyle: "rgba(0, 200, 0, 0.25)", strokeStyle: "rgba(0, 200, 0, 0.25)" });
             igv.graphics.fillRect(ctx, x, y, w, h);
         }
 
@@ -415,8 +439,7 @@ var igv = (function (igv) {
             }
         }
 
-    }
-
+    };
 
     CoverageTrack.prototype.popupData = function (genomicLocation, xOffset, yOffset) {
 
@@ -469,7 +492,6 @@ var igv = (function (igv) {
 
     };
 
-
     AlignmentTrack = function (config, parent) {
 
         this.parent = parent;
@@ -494,7 +516,7 @@ var igv = (function (igv) {
 
         this.hasPairs = false;   // Until proven otherwise
 
-    }
+    };
 
     AlignmentTrack.prototype.computePixelHeight = function (alignmentContainer) {
 
@@ -509,7 +531,7 @@ var igv = (function (igv) {
             return this.height;
         }
 
-    }
+    };
 
     AlignmentTrack.prototype.draw = function (options) {
 
@@ -762,45 +784,28 @@ var igv = (function (igv) {
             }
         }
 
-    }
+    };
 
     AlignmentTrack.prototype.sortAlignmentRows = function (genomicLocation, sortOption) {
 
-        var self = this,
-            alignmentContainer = this.featureSource.alignmentContainer,
-            alignmentRows = alignmentContainer.packedAlignmentRows;
+        var self = this;
 
-        alignmentRows.forEach(function (alignmentRow) {
-            alignmentRow.updateScore(genomicLocation, alignmentContainer, sortOption);
+        // console.log('bamtrack - sortAlignmentRows - location ' + igv.numberFormatter(genomicLocation));
+
+        this.featureSource.alignmentContainer.packedAlignmentRows.forEach(function (row) {
+            row.updateScore(genomicLocation, self.featureSource.alignmentContainer, sortOption);
         });
 
-        alignmentRows.sort(function (a, b) {
-            return self.sortDirection ? a.score - b.score : b.score - a.score;
+        this.featureSource.alignmentContainer.packedAlignmentRows.sort(function (rowA, rowB) {
+            // return rowA.score - rowB.score;
+            return true === self.sortDirection ? rowA.score - rowB.score : rowB.score - rowA.score;
         });
 
-    }
+        // this.featureSource.alignmentContainer.packedAlignmentRows.forEach(function (row) {
+        //     console.log('score ' + row.score);
+        // });
 
-    function doSortAlignmentRows(genomicLocation, genomicInterval, sortOption, sortDirection) {
-
-        var alignmentRows = genomicInterval.packedAlignmentRows,
-            sequence = genomicInterval.sequence;
-
-        if (sequence) {
-            sequence = sequence.toUpperCase();
-        } else {
-            console.log("No sequence, no traversal. No discussion!");
-            return;
-        }
-
-        alignmentRows.forEach(function (alignmentRow) {
-            alignmentRow.updateScore(genomicLocation, genomicInterval, sortOption);
-        });
-
-        alignmentRows.sort(function (a, b) {
-            return sortDirection ? a.score - b.score : b.score - a.score;
-        });
-
-    }
+    };
 
     AlignmentTrack.prototype.popupData = function (genomicLocation, xOffset, yOffset) {
 
@@ -851,7 +856,6 @@ var igv = (function (igv) {
         }
 
     };
-
 
     function getAlignmentColor(alignment) {
 
@@ -905,8 +909,7 @@ var igv = (function (igv) {
         }
         return color;
 
-    };
-
+    }
 
     return igv;
 

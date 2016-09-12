@@ -289,6 +289,22 @@ var igv = (function (igv) {
 
     };
 
+    /**
+     *
+     * @param property
+     * @param value
+     * @returns {Array}  tracks with given property value.  e.g. findTracks("type", "annotation")
+     */
+    igv.Browser.prototype.findTracks = function (property, value) {
+        var tracks = [];
+        this.trackViews.forEach(function (trackView) {
+            if (value === trackView.track[property]) {
+                tracks.push(trackView.track)
+            }
+        })
+        return tracks;
+    };
+
     igv.Browser.prototype.reduceTrackOrder = function (trackView) {
 
         var indices = [],
@@ -365,11 +381,16 @@ var igv = (function (igv) {
     };
 
     igv.Browser.prototype.resize = function () {
+
         if (this.ideoPanel) this.ideoPanel.resize();
         if (this.karyoPanel) this.karyoPanel.resize();
+
         this.trackViews.forEach(function (panel) {
             panel.resize();
-        })
+        });
+
+        this.centerGuide.repaint();
+
     };
 
     igv.Browser.prototype.repaint = function () {
@@ -390,6 +411,10 @@ var igv = (function (igv) {
     igv.Browser.prototype.update = function () {
 
         this.updateLocusSearch(this.referenceFrame);
+
+        if (this.centerGuide) {
+            this.centerGuide.repaint();
+        }
 
         if (this.ideoPanel) {
             this.ideoPanel.repaint();
@@ -465,12 +490,19 @@ var igv = (function (igv) {
 
     };
 
-    igv.Browser.prototype.pixelPerBasepairThreshold = function () {
-        return 14.0;
-    };
-
     igv.Browser.prototype.trackViewportWidthBP = function () {
         return this.referenceFrame.bpPerPixel * this.trackViewportWidth();
+    };
+
+    igv.Browser.prototype.trackViewportCenterLineBP = function () {
+        var centerLineBP = (0.5 * this.referenceFrame.bpPerPixel * this.trackViewportWidth());
+
+        // return Math.floor(centerLineBP);
+        return centerLineBP;
+    };
+
+    igv.Browser.prototype.minimumBasesExtent = function () {
+        return 40;
     };
 
     igv.Browser.prototype.removeAllTracks = function () {
@@ -488,45 +520,54 @@ var igv = (function (igv) {
 
     igv.Browser.prototype.goto = function (chr, start, end) {
 
-        var chromosome,
-            viewportWidthPixel = this.trackViewportWidth(),
-            maxBpPerPixel;
-
         if (typeof this.gotocallback != "undefined") {
             //console.log("Got chr="+chr+", start="+start+", end="+end+", also using callback "+this.gotocallback);
             this.gotocallback(chr, start, end);
         }
 
+        var w,
+            chromosome,
+            viewportWidth = this.trackViewportWidth();
+
         if (igv.popover) {
             igv.popover.hide();
         }
 
+        // Translate chr to official name
         if (this.genome) {
             chr = this.genome.getChromosomeName(chr);
         }
 
         this.referenceFrame.chr = chr;
-        this.referenceFrame.bpPerPixel = (end - start) / (viewportWidthPixel);
+
+        // If end is undefined,  interpret start as the new center, otherwise compute scale.
+        if (!end) {
+            w = Math.round(viewportWidth * this.referenceFrame.bpPerPixel / 2);
+            start = Math.max(0, start - w);
+        }
+        else {
+            this.referenceFrame.bpPerPixel = (end - start) / (viewportWidth);
+        }
 
         if (this.genome) {
-
             chromosome = this.genome.getChromosome(this.referenceFrame.chr);
             if (!chromosome) {
-                console.log("Could not find chromsome " + this.referenceFrame.chr);
-            } else {
+                if (console && console.log) console.log("Could not find chromsome " + this.referenceFrame.chr);
+            }
+            else {
+                if (!chromosome.bpLength) chromosome.bpLength = 1;
 
-                if (!chromosome.bpLength) {
-                    chromosome.bpLength = 1;
+                var maxBpPerPixel = chromosome.bpLength / viewportWidth;
+                if (this.referenceFrame.bpPerPixel > maxBpPerPixel) this.referenceFrame.bpPerPixel = maxBpPerPixel;
+
+                if (!end) {
+                    end = start + viewportWidth * this.referenceFrame.bpPerPixel;
                 }
 
-                maxBpPerPixel = chromosome.bpLength / viewportWidthPixel;
-                if (this.referenceFrame.bpPerPixel > maxBpPerPixel) {
-                    this.referenceFrame.bpPerPixel = maxBpPerPixel;
+                if (chromosome && end > chromosome.bpLength) {
+                    start -= (end - chromosome.bpLength);
                 }
             }
-
-        } else {
-            console.log('browser. no genome.');
         }
 
         this.referenceFrame.start = start;
@@ -535,7 +576,7 @@ var igv = (function (igv) {
 
     };
 
-// Zoom in by a factor of 2, keeping the same center location
+    // Zoom in by a factor of 2, keeping the same center location
     igv.Browser.prototype.zoomIn = function () {
 
         if (this.loadInProgress()) {
@@ -543,25 +584,36 @@ var igv = (function (igv) {
             return;
         }
 
-        var newScale,
-            center,
-            viewportWidth;
+        var centerBP;
 
-        viewportWidth = this.trackViewportWidth();
+        console.log('browser.zoomIn - src extent ' + basesExtent(this.trackViewportWidth(), this.referenceFrame.bpPerPixel));
 
-        newScale = Math.max(1.0 / this.pixelPerBasepairThreshold(), this.referenceFrame.bpPerPixel / 2);
-        if (newScale === this.referenceFrame.bpPerPixel) {
-            //console.log("zoom in bail bpp " + newScale + " width " + (viewportWidth/14.0));
+        // Have we reached the zoom-in threshold yet? If so, bail.
+        if (this.minimumBasesExtent() > basesExtent(this.trackViewportWidth(), this.referenceFrame.bpPerPixel/2.0)) {
+            console.log('browser.zoomIn - dst extent ' + basesExtent(this.trackViewportWidth(), this.referenceFrame.bpPerPixel/2.0) + ' bailing ...');
             return;
+        } else {
+            console.log('browser.zoomIn - dst extent ' + basesExtent(this.trackViewportWidth(), this.referenceFrame.bpPerPixel/2.0));
         }
 
-        center = this.referenceFrame.start + this.referenceFrame.bpPerPixel * viewportWidth / 2;
-        this.referenceFrame.start = center - newScale * viewportWidth / 2;
-        this.referenceFrame.bpPerPixel = newScale;
+        // window center (base-pair units)
+        centerBP = this.referenceFrame.start + this.referenceFrame.bpPerPixel * (this.trackViewportWidth()/2);
+
+        // derive scaled (zoomed in) start location (base-pair units) by multiplying half-width by halve'd bases-per-pixel
+        // which results in base-pair units
+        this.referenceFrame.start = centerBP - (this.trackViewportWidth()/2) * (this.referenceFrame.bpPerPixel/2.0);
+
+        // halve the bases-per-pixel
+        this.referenceFrame.bpPerPixel /= 2.0;
+
         this.update();
+
+        function basesExtent(width, bpp) {
+            return Math.floor(width * bpp);
+        }
     };
 
-// Zoom out by a factor of 2, keeping the same center location if possible
+    // Zoom out by a factor of 2, keeping the same center location if possible
     igv.Browser.prototype.zoomOut = function () {
 
         if (this.loadInProgress()) {
@@ -696,89 +748,95 @@ var igv = (function (igv) {
 
     function gotoLocusFeature(locusFeature, genome, browser) {
 
-
-        // the mimimum extent of a chromosome locus
-        const bpMinimumWindow = 40;
-
         var type,
             tokens,
-            chrom,
+            chr,
             start,
             end,
-            chr,
+            chrName,
             startEnd,
-            center;
+            center,
+            obj;
+
 
         type = 'locus';
         tokens = locusFeature.split(":");
-        chr = genome.getChromosomeName(tokens[ 0 ]);
-        chrom = genome.getChromosome(1 === tokens.length ? locusFeature : chr);
+        chrName = genome.getChromosomeName(tokens[ 0 ]);
+        if (chrName) {
+            chr = genome.getChromosome(chrName);
+        }
 
-        if (chrom) {
+        if (chr) {
 
             // returning undefined indicates locus is a chromosome name.
-            startEnd = (tokens.length > 1) ? tokens[ 1 ].split("-") : undefined;
-
-            // if we have a chromosome name start is 0. Otherwise parse it out.
-            start = (undefined === startEnd) ? 0 : Math.max(0, parseInt(startEnd[ 0 ].replace(/,/g, "")) - 1);
-
-            if (startEnd && 2 === startEnd.length) {
-
-                // if we have a start AND end value
-                end = Math.min(chrom.bpLength, parseInt(startEnd[ 1 ].replace(/,/g, "")));
-
-                if (end < 0) {
-                    // This can happen from integer overflow
-                    end = chrom.bpLength;
-                }
-
-            } else if (startEnd && 1 === startEnd.length) {
-                // if we have only a start value set end to undefined and deal with it later
-                end = undefined;
+            start = end = undefined;
+            if (1 === tokens.length) {
+                start = 0;
+                end = chr.bpLength;
             } else {
-
-                // we have a chromosome name
-                end = chrom.bpLength
-            }
-
-            if (undefined === end) {
-
-                // set start and end and clamp for the case when locusFeature includes
-                // only a start value.
-                start -= bpMinimumWindow/2;
-                end = start + bpMinimumWindow;
-
-                if (end > chrom.bpLength) {
-                    end = chrom.bpLength;
-                    start = end - bpMinimumWindow;
-                }
-
-            } else if (end - start < bpMinimumWindow) {
-
-                // if the featurelocus range falls below the acceptable threshold (bpMinimumWindow) inflate an clamp
-                // appropriately
-                center = (end + start)/2;
-                if (center - bpMinimumWindow/2 < 0) {
-                    start = 0;
-                    end = start + bpMinimumWindow;
-                } else if (center + bpMinimumWindow/2 > chrom.bpLength) {
-                    end = chrom.bpLength;
-                    start = end - bpMinimumWindow;
-                } else {
-                    start = center - bpMinimumWindow/2;
-                    end = start + bpMinimumWindow;
+                startEnd = tokens[ 1 ].split("-");
+                start = Math.max(0, parseInt(startEnd[ 0 ].replace(/,/g, "")) - 1);
+                if (2 === startEnd.length) {
+                    end = Math.min(chr.bpLength, parseInt(startEnd[ 1 ].replace(/,/g, "")));
+                    if (end < 0) {
+                        // This can happen from integer overflow
+                        end = chr.bpLength;
+                    }
                 }
             }
+
+            obj = { start: start, end: end };
+            validateLocusExtent(igv.browser, chr, obj);
+            start = obj.start;
+            end = obj.end;
+
         }
 
-        if (undefined === chrom || isNaN(start) || (start > end)) {
+        if (undefined === chr || isNaN(start) || (start > end)) {
             igv.presentAlert("Unrecognized feature or locus: " + locusFeature);
             return false;
-            // browser.updateLocusSearch(browser.referenceFrame);
         }
 
-        browser.goto(chr, start, end);
+        browser.goto(chrName, start, end);
         fireOnsearch.call(igv.browser, locusFeature, type);
+
+        function validateLocusExtent(browser, chromosome, extent) {
+
+            var ss = extent.start,
+                ee = extent.end,
+                locusExtent = ee - ss;
+
+            if (undefined === ee) {
+
+                ss -= igv.browser.minimumBasesExtent()/2;
+                ee = ss + igv.browser.minimumBasesExtent();
+
+                if (ee > chromosome.bpLength) {
+                    ee = chromosome.bpLength;
+                    ss = ee - igv.browser.minimumBasesExtent();
+                } else if (ss < 0) {
+                    ss = 0;
+                    ee = igv.browser.minimumBasesExtent();
+                }
+
+            } else if (ee - ss < igv.browser.minimumBasesExtent()) {
+
+                center = (ee + ss)/2;
+                if (center - igv.browser.minimumBasesExtent()/2 < 0) {
+                    ss = 0;
+                    ee = ss + igv.browser.minimumBasesExtent();
+                } else if (center + igv.browser.minimumBasesExtent()/2 > chromosome.bpLength) {
+                    ee = chromosome.bpLength;
+                    ss = ee - igv.browser.minimumBasesExtent();
+                } else {
+                    ss = center - igv.browser.minimumBasesExtent()/2;
+                    ee = ss + igv.browser.minimumBasesExtent();
+                }
+            }
+
+            extent.start = Math.ceil(ss);
+            extent.end = Math.floor(ee);
+        }
 
         return true;
     }
@@ -894,7 +952,6 @@ var igv = (function (igv) {
         var isRulerTrack = false,
             isMouseDown = false,
             isDragging = false,
-            anchorVerticalLine = igv.browser.config.showGuideLine === 'center',
             lastMouseX = undefined,
             mouseDownX = undefined;
 
@@ -917,16 +974,18 @@ var igv = (function (igv) {
             mouseDownX = lastMouseX;
         });
 
-        // Guide line should follow the mouse unless anchored to center, be bound within the track area, and offset
-        // by 5 pixels so as not to interfere with mouse clicks.
-        if (!anchorVerticalLine) {
-            $(trackContainerDiv).mousemove(function (e) {
-                var coords = igv.translateMouseCoordinates(e, trackContainerDiv),
-                    lineX = Math.max(50, coords.x - 5);
-                lineX = Math.min(igv.browser.trackContainerDiv.clientWidth - 65, lineX);
-                $(igv.browser.guideLineDiv).css({left: lineX + 'px'});
-            });
-        }
+        // Guide line is bound within track area, and offset by 5 pixels so as not to interfere mouse clicks.
+        $(trackContainerDiv).mousemove(function (e) {
+            var xy,
+                _left,
+                $element = igv.browser.$cursorTrackingGuide;
+
+            xy = igv.translateMouseCoordinates(e, trackContainerDiv);
+            _left = Math.max(50, xy.x - 5);
+
+            _left = Math.min(igv.browser.trackContainerDiv.clientWidth - 65, _left);
+            $element.css({ left: _left + 'px' });
+        });
 
 
         $(trackContainerDiv).mousemove(igv.throttle(function (e) {
@@ -987,14 +1046,14 @@ var igv = (function (igv) {
 
         function mouseUpOrOut(e) {
 
+            var element = igv.browser.$cursorTrackingGuide.get(0);
+
             if (isRulerTrack) {
                 return;
             }
 
             // Don't let vertical line interfere with dragging
-            if (igv.browser.guideLineDiv
-                && e.toElement === igv.browser.guideLineDiv
-                && e.type === 'mouseleave') {
+            if (igv.browser.$cursorTrackingGuide && e.toElement === igv.browser.$cursorTrackingGuide.get(0) && e.type === 'mouseleave') {
                 return;
             }
 

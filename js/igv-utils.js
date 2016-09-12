@@ -362,7 +362,6 @@ var igv = (function (igv) {
             posy = eFixed.pageY - $(target).offset().top;
 
         return {x: posx, y: posy}
-
     };
 
     /**

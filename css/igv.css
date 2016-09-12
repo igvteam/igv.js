@@ -1413,20 +1413,72 @@ div.ui-dialog fieldset {
     height:100%;
 }
 
-.igv-guide-line-div {
+.igv-center-guide {
+
+    pointer-events:none;
+
     position: absolute;
-    border-left: 1px dashed #999;
+    top: 0;
+    bottom: 0;
+    left: 50%;
+    width: 8px;
+
+    z-index: 8;
+
+    display: none;
+
+    user-select: none;
+    -moz-user-select: none;
+    -webkit-user-select: none;
+
+    border-left-style: dashed;
+    border-left-width: thin;
+    border-right-style: dashed;
+    border-right-width: thin;
+
+
+
+}
+
+.igv-center-guide-wide {
+    background-color: rgba(0,0,0,0);
+    border-left-color: rgba(127, 127, 127, 0.51);
+    border-right-color: rgba(127, 127, 127, 0.51);
+}
+
+.igv-center-guide-thin {
+
+    left: 50%;
+    width: 1px;
+
+    background-color: rgba(0,0,0,0);
+    border-left-color: rgba(127, 127, 127, 0.51);
+    border-right-color: rgba(0,0,0,0);
+
+    /*background-color: rgba(127, 127, 127, 0.51);*/
+    /*border-left-color: rgba(0,0,0,0);*/
+    /*border-right-color: rgba(0,0,0,0);*/
+}
+
+.igv-cursor-tracking-guide {
+
+    position: absolute;
     top: 0;
     bottom: 0;
     left: 50%;
     width: 1px;
+
     z-index: 1;
-    user-select: none;
+
+    border-left-style: dotted;
+    border-left-width: thin;
+    border-left-color: rgba(127, 127, 127, 0.76);
+
     display: none;
+
+    user-select: none;
     -moz-user-select: none;
-    -khtml-user-select: none;
     -webkit-user-select: none;
-    -o-user-select: none;
 }
 
 .igv-content-canvas {

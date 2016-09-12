@@ -86,7 +86,7 @@ var igv = (function (igv) {
 
                             binNumber = parser.getInt();
 
-                            if (binNumber == 37450) {
+                            if (binNumber === 37450) {
                                 // This is a psuedo bin, not used but we have to consume the bytes
                                 nchnk = parser.getInt(); // # of chunks for this bin
                                 cs = parser.getVPointer();   // unmapped beg
@@ -96,13 +96,13 @@ var igv = (function (igv) {
 
                             }
                             else {
-                                
+
                                 binIndex[binNumber] = [];
                                 var nchnk = parser.getInt(); // # of chunks for this bin
 
                                 for (i = 0; i < nchnk; i++) {
-                                    cs = parser.getVPointer();
-                                    ce = parser.getVPointer();
+                                    cs = parser.getVPointer();    //chunk_beg
+                                    ce = parser.getVPointer();    //chunk_end
                                     if (cs && ce) {
                                         if (cs.block < blockMin) {
                                             blockMin = cs.block;    // Block containing first alignment
@@ -134,14 +134,15 @@ var igv = (function (igv) {
                 } else {
                     throw new Error(indexURL + " is not a " + (tabix ? "tabix" : "bai") + " file");
                 }
-                fulfill(new igv.BamIndex(indices, blockMin, sequenceIndexMap, tabix));
+                fulfill(new igv.BamIndex(indices, blockMin, blockMax, sequenceIndexMap, tabix));
             }).catch(reject);
         })
     }
 
 
-    igv.BamIndex = function (indices, blockMin, sequenceIndexMap, tabix) {
+    igv.BamIndex = function (indices, blockMin, blockMax, sequenceIndexMap, tabix) {
         this.firstAlignmentBlock = blockMin;
+        this.lastAlignmentBlock = blockMax;
         this.indices = indices;
         this.sequenceIndexMap = sequenceIndexMap;
         this.tabix = tabix;
@@ -161,108 +162,99 @@ var igv = (function (igv) {
         var bam = this,
             ba = bam.indices[refId],
             overlappingBins,
-            leafChunks,
-            otherChunks,
+            chunks,
             nintv,
             lowest,
             minLin,
-            lb,
-            prunedOtherChunks,
-            i,
-            chnk,
-            dif,
-            intChunks,
-            mergedChunks;
+            maxLin,
+            vp,
+            i;
+
 
         if (!ba) {
             return [];
         }
         else {
 
-            overlappingBins = reg2bins(min, max);        // List of bin #s that might overlap min, max
-            leafChunks = [];
-            otherChunks = [];
+            overlappingBins = reg2bins(min, max);        // List of bin #s that overlap min, max
+            chunks = [];
 
-
+            // Find chunks in overlapping bins.  Leaf bins (< 4681) are not pruned
             overlappingBins.forEach(function (bin) {
-
                 if (ba.binIndex[bin]) {
-                    var chunks = ba.binIndex[bin],
-                        nchnk = chunks.length;
-
+                    var binChunks = ba.binIndex[bin],
+                        nchnk = binChunks.length;
                     for (var c = 0; c < nchnk; ++c) {
-                        var cs = chunks[c][0];
-                        var ce = chunks[c][1];
-                        (bin < 4681 ? otherChunks : leafChunks).push({minv: cs, maxv: ce, bin: bin});
+                        var cs = binChunks[c][0];
+                        var ce = binChunks[c][1];
+                        chunks.push({minv: cs, maxv: ce, bin: bin});
                     }
-
                 }
             });
 
-            // Use the linear index to find the lowest block that could contain alignments in the region
+            // Use the linear index to find minimum file position of chunks that could contain alignments in the region
             nintv = ba.linearIndex.length;
             lowest = null;
-            minLin = Math.min(min >> 14, nintv - 1), maxLin = Math.min(max >> 14, nintv - 1);
+            minLin = Math.min(min >> 14, nintv - 1);
+            maxLin = Math.min(max >> 14, nintv - 1);
             for (i = minLin; i <= maxLin; ++i) {
-                lb = ba.linearIndex[i];
-                if (!lb) {
-                    continue;
-                }
-                if (!lowest || lb.block < lowest.block || lb.offset < lowest.offset) {
-                    lowest = lb;
-                }
-            }
-
-            // Prune chunks that end before the lowest block
-            prunedOtherChunks = [];
-            if (lowest != null) {
-                for (i = 0; i < otherChunks.length; ++i) {
-                    chnk = otherChunks[i];
-                    if (chnk.maxv.block >= lowest.block && chnk.maxv.offset >= lowest.offset) {
-                        prunedOtherChunks.push(chnk);
+                vp = ba.linearIndex[i];
+                if (vp) {
+                    // todo -- I think, but am not sure, that the values in the linear index have to be in increasing order.  So the first non-null should be minimum
+                    if (!lowest || vp.isLessThan(lowest)) {
+                        lowest = vp;
                     }
                 }
             }
-
-            intChunks = [];
-            for (i = 0; i < prunedOtherChunks.length; ++i) {
-                intChunks.push(prunedOtherChunks[i]);
-            }
-            for (i = 0; i < leafChunks.length; ++i) {
-                intChunks.push(leafChunks[i]);
-            }
-
-            intChunks.sort(function (c0, c1) {
-                dif = c0.minv.block - c1.minv.block;
-                if (dif != 0) {
-                    return dif;
-                } else {
-                    return c0.minv.offset - c1.minv.offset;
-                }
-            });
-
-            mergedChunks = [];
-            if (intChunks.length > 0) {
-                var cur = intChunks[0];
-                for (var i = 1; i < intChunks.length; ++i) {
-                    var nc = intChunks[i];
-                    if ((nc.minv.block - cur.maxv.block) < 65000) { // Merge blocks that are withing 65k of each other
-                        cur = {minv: cur.minv, maxv: nc.maxv};
-                    } else {
-                        mergedChunks.push(cur);
-                        cur = nc;
-                    }
-                }
-                mergedChunks.push(cur);
-            }
-            return mergedChunks;
+            
+            return optimizeChunks(chunks, lowest);
         }
 
     };
 
 
+    function optimizeChunks(chunks, lowest) {
+
+        var mergedChunks = [],
+            lastChunk = null;
+
+        if (chunks.length === 0) return chunks;
+
+        chunks.sort(function (c0, c1) {
+            var dif = c0.minv.block - c1.minv.block;
+            if (dif != 0) {
+                return dif;
+            } else {
+                return c0.minv.offset - c1.minv.offset;
+            }
+        });
+
+        chunks.forEach(function (chunk) {
+
+            if(chunk.maxv.isGreaterThan(lowest)) {
+                if (lastChunk === null) {
+                    mergedChunks.push(chunk);
+                    lastChunk = chunk;
+                }
+                else {
+                    if ((chunk.minv.block - lastChunk.maxv.block) < 65000) { // Merge chunks that are withing 65k of each other
+                        if (chunk.maxv.isGreaterThan(lastChunk.maxv)) {
+                            lastChunk.maxv = chunk.maxv;
+                        }
+                    }
+                    else {
+                        mergedChunks.push(chunk);
+                        lastChunk = chunk;
+                    }
+                }
+            }
+        });
+
+        return mergedChunks;
+    }
+
     /**
-     * Calculate the list of bins that may overlap with region [beg, end]
+     * Calculate the list of bins that overlap with region [beg, end]
      *
      */
     function reg2bins(beg, end) {
