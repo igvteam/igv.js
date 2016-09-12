@@ -156,8 +156,9 @@ var igv = (function (igv) {
             tagLabel = 'tag' + (self.alignmentTrack.colorByTag ? ' (' + self.alignmentTrack.colorByTag + ')' : ''),
             selected;
 
+        menuItems.push(igv.colorPickerMenuItem(popover, this.trackView));
+
         menuItems.push(sortMenuItem(popover));
-        // menuItems.push('<div class="igv-track-menu-category igv-track-menu-border-top">Sort at center line</div>');
 
         colorByMenuItems.push({key: 'none', label: 'track color'});
 
@@ -168,8 +169,6 @@ var igv = (function (igv) {
             colorByMenuItems.push({key: 'firstOfPairStrand', label: 'first-of-pair strand'});
         }
         colorByMenuItems.push({key: 'tag', label: tagLabel});
-
-        menuItems.push(igv.colorPickerMenuItem(popover, this.trackView));
 
         menuItems.push('<div class="igv-track-menu-category igv-track-menu-border-top">Color by</div>');
 
@@ -274,7 +273,7 @@ var igv = (function (igv) {
         function sortMenuItem(popover) {
 
             return {
-                object: $('<div class="igv-track-menu-item">' + "Sort" + '</div>'),
+                object: $('<div class="igv-track-menu-item">' + "Sort by base" + '</div>'),
                 click: function () {
                     var genomicLocationViaTrackViewportHalfWidth,
                         trackViewportHalfWidth;
@@ -284,9 +283,14 @@ var igv = (function (igv) {
                     trackViewportHalfWidth = Math.floor(igv.browser.trackViewportWidth()/2);
                     genomicLocationViaTrackViewportHalfWidth = Math.floor((igv.browser.referenceFrame.start) + igv.browser.referenceFrame.toBP(trackViewportHalfWidth));
 
-                    console.log('bamTrack - sort - trackViewportHalfWidth ' + igv.numberFormatter(genomicLocationViaTrackViewportHalfWidth));
+                    // console.log('bamTrack - sort - trackViewportHalfWidth ' + igv.numberFormatter(genomicLocationViaTrackViewportHalfWidth));
 
                     self.altClick(genomicLocationViaTrackViewportHalfWidth, undefined);
+
+                    if ("show center guide" === igv.browser.centerGuide.$centerGuideToggle.text()) {
+                        igv.browser.centerGuide.$centerGuideToggle.trigger( "click" );
+                    }
+
                 }
             }
         }
@@ -786,7 +790,7 @@ var igv = (function (igv) {
 
         var self = this;
 
-        console.log('bamtrack - sortAlignmentRows - location ' + igv.numberFormatter(genomicLocation));
+        // console.log('bamtrack - sortAlignmentRows - location ' + igv.numberFormatter(genomicLocation));
 
         this.featureSource.alignmentContainer.packedAlignmentRows.forEach(function (row) {
             row.updateScore(genomicLocation, self.featureSource.alignmentContainer, sortOption);
@@ -797,9 +801,9 @@ var igv = (function (igv) {
             return true === self.sortDirection ? rowA.score - rowB.score : rowB.score - rowA.score;
         });
 
-        this.featureSource.alignmentContainer.packedAlignmentRows.forEach(function (row) {
-            console.log('score ' + row.score);
-        });
+        // this.featureSource.alignmentContainer.packedAlignmentRows.forEach(function (row) {
+        //     console.log('score ' + row.score);
+        // });
 
     };
 

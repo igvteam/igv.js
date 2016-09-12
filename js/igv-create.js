@@ -343,7 +343,7 @@ var igv = (function (igv) {
             display = browser.$cursorTrackingGuide.css("display");
             $cursorTrackingGuideToggle.text("none" === display ? "show cursor guide" : "hide cursor guide");
 
-            $cursorTrackingGuideToggle.click(function () {
+            $cursorTrackingGuideToggle.on("click", function () {
                 display = browser.$cursorTrackingGuide.css("display");
                 if ("none" === display) {
                     browser.$cursorTrackingGuide.css("display", "block");
@@ -353,10 +353,6 @@ var igv = (function (igv) {
                     $cursorTrackingGuideToggle.text("show cursor guide");
                 }
             });
-
-            if(undefined === config.showCursorTrackingGuide || false == config.showCursorTrackingGuide) {
-                $cursorTrackingGuideToggle.css("display", "none");
-            }
 
             $navigation.append($cursorTrackingGuideToggle);
             $navigation.append(browser.centerGuide.$centerGuideToggle);

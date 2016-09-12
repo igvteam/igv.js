@@ -41,7 +41,7 @@ var igv = (function (igv) {
         this.$centerGuideToggle = $('<div class="igv-toggle-track-labels">');
         this.$centerGuideToggle.text(("none" === cssDisplay) ? "show center guide" : "hide center guide");
 
-        this.$centerGuideToggle.click(function () {
+        this.$centerGuideToggle.on("click", function () {
             cssDisplay = self.$container.css("display");
             if ("none" === cssDisplay) {
                 self.$container.css("display", "block");
@@ -51,12 +51,6 @@ var igv = (function (igv) {
                 self.$centerGuideToggle.text("show center guide");
             }
         });
-
-        // Hide toggle unless property is set (for now, prior to official release)
-        if(undefined === config.showCenterGuide || false == config.showCenterGuide) {
-            this.$centerGuideToggle.css("display", "none");
-        }
-
 
     };
 
