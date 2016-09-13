@@ -99,11 +99,19 @@ var igv = (function (igv) {
         var self = this;
 
         return new Promise(function (fulfill, reject) {
-            parser = self.parser,
-                options = {
-                    headers: self.config.headers,           // http headers, not file header
-                    withCredentials: self.config.withCredentials
-                };
+            var options = {
+                headers: self.config.headers,           // http headers, not file header
+                withCredentials: self.config.withCredentials
+            };
+ 
+            function parseData(data) {
+                self.header = self.parser.parseHeader(data);
+                if (self.header instanceof String && self.header.startsWith("##gff-version 3")) {
+                    self.format = 'gff3';
+                }
+                fulfill(self.parser.parseFeatures(data));   // <= PARSING DONE HERE
+            };
+
 
             if (self.localFile) {
                 igvxhr.loadStringFromFile(self.localFile, options).then(parseData).catch(reject);
@@ -113,14 +121,6 @@ var igv = (function (igv) {
             }
 
 
-            function parseData(data) {
-                parser = self.parser;
-                self.header = parser.parseHeader(data);
-                if (self.header instanceof String && self.header.startsWith("##gff-version 3")) {
-                    self.format = 'gff3';
-                }
-                fulfill(parser.parseFeatures(data));   // <= PARSING DONE HERE
-            };
         });
     }
 
@@ -151,7 +151,7 @@ var igv = (function (igv) {
 
                         var startPos = block.minv.block,
                             startOffset = block.minv.offset,
-                            endPos = endPos = block.maxv.block +  MAX_GZIP_BLOCK_SIZE,
+                            endPos = endPos = block.maxv.block + MAX_GZIP_BLOCK_SIZE,
                             options = {
                                 headers: self.config.headers, // http headers, not file header
                                 range: {start: startPos, size: endPos - startPos + 1},
@@ -251,7 +251,7 @@ var igv = (function (igv) {
         return new Promise(function (fulfill, reject) {
 
 
-            if(self.header) {
+            if (self.header) {
                 fulfill(self.header);
             }
 
