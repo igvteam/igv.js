@@ -99,7 +99,7 @@ var igv = (function (igv) {
         var self = this;
 
         return new Promise(function (fulfill, reject) {
-            parser = self.parser,
+            var parser = self.parser,
                 options = {
                     headers: self.config.headers,           // http headers, not file header
                     withCredentials: self.config.withCredentials
@@ -250,7 +250,7 @@ var igv = (function (igv) {
         return new Promise(function (fulfill, reject) {
 
 
-            if(self.header) {
+            if (self.header) {
                 fulfill(self.header);
             }
 
