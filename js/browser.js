@@ -28,7 +28,7 @@ var igv = (function (igv) {
     var knownFileTypes = new Set(["narrowpeak", "broadpeak", "peaks", "bedgraph", "wig", "gff3", "gff",
         "gtf", "aneu", "fusionjuncspan", "refflat", "seg", "bed", "vcf", "bb", "bigbed", "bw", "bigwig", "bam"]);
 
-    igv.Browser = function (options, trackContainer) {
+    igv.Browser = function (options, trackContainerDiv) {
 
         this.config = options;
 
@@ -40,9 +40,9 @@ var igv = (function (igv) {
 
         $("input[id='trackHeightInput']").val(this.trackHeight);
 
-        this.trackContainerDiv = trackContainer;
+        this.trackContainerDiv = trackContainerDiv;
 
-        addTrackContainerHandlers(this.trackContainerDiv);
+        attachTrackContainerMouseHandlers(this.trackContainerDiv);
 
         this.trackViews = [];
 
@@ -998,7 +998,7 @@ var igv = (function (igv) {
         });
     }
 
-    function addTrackContainerHandlers(trackContainerDiv) {
+    function attachTrackContainerMouseHandlers(trackContainerDiv) {
 
         var isRulerTrack = false,
             isMouseDown = false,
@@ -1037,7 +1037,6 @@ var igv = (function (igv) {
             _left = Math.min(igv.browser.trackContainerDiv.clientWidth - 65, _left);
             $element.css({left: _left + 'px'});
         });
-
 
         $(trackContainerDiv).mousemove(igv.throttle(function (e) {
 

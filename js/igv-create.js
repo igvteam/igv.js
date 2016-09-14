@@ -110,6 +110,10 @@ var igv = (function (igv) {
 
         igv.loadGenome(config.reference).then(function (genome) {
 
+            var viewportWidth,
+                firstChrName,
+                firstChr;
+
             genome.id = config.reference.genomeId;
             browser.genome = genome;
 
@@ -118,18 +122,16 @@ var igv = (function (igv) {
             }
 
             // viewport width -- must get this after adding ruler track
-            var viewportWidth = browser.trackViewportWidth();
+            viewportWidth = browser.trackViewportWidth();
             if (viewportWidth === 0) viewportWidth = 500;
 
 
             // Set inital locus
-            var firstChrName = browser.genome.chromosomeNames[0],
-                firstChr = browser.genome.chromosomes[firstChrName];
-
-            browser.referenceFrame = new igv.ReferenceFrame(firstChrName, 0, firstChr.bpLength / viewportWidth);
-            browser.controlPanelWidth = 50;
-
+            firstChr = browser.genome.chromosomes[ browser.genome.chromosomeNames[0] ];
+            browser.referenceFrame = new igv.ReferenceFrame(browser.genome.chromosomeNames[0], 0, firstChr.bpLength / viewportWidth);
             browser.updateLocusSearch(browser.referenceFrame);
+
+            // browser.controlPanelWidth = 50;
 
             if (browser.ideoPanel) browser.ideoPanel.repaint();
             if (browser.karyoPanel) browser.karyoPanel.resize();
@@ -141,19 +143,13 @@ var igv = (function (igv) {
                 var locus = browser.initialLocus ? browser.initialLocus : config.locus;
 
                 igv.startSpinnerAtParentElement(parentDiv);
+
                 browser.search(locus, function () {
 
                     igv.stopSpinnerAtParentElement(parentDiv);
-                    var refFrame = browser.referenceFrame,
-                        start = refFrame.start,
-                        end = start + browser.trackViewportWidth() * refFrame.bpPerPixel,
-                        range = start - end;
 
                     if (config.tracks) {
-
                         browser.loadTracksWithConfigList(config.tracks);
-
-
                     }
 
                 }, true);
