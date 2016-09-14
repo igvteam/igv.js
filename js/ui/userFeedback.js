@@ -28,12 +28,12 @@
  */
 var igv = (function (igv) {
 
-    igv.UserFeedback = function (parentObject) {
+    igv.UserFeedback = function ($parent) {
 
         var myself = this;
 
         this.userFeedback = $('<div class="igvUserFeedback">');
-        parentObject.append(this.userFeedback[0]);
+        $parent.append(this.userFeedback[0]);
 
         // header
         this.userFeedbackHeader = $('<div class="igvUserFeedbackHeader">');

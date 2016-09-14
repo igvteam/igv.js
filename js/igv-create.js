@@ -37,9 +37,8 @@ var igv = (function (igv) {
      */
     igv.createBrowser = function (parentDiv, config) {
 
-        var igvLogo,
-            contentDiv,
-            headerDiv,
+        var $content,
+            $header,
             browser;
 
         if (igv.browser) {
@@ -63,20 +62,20 @@ var igv = (function (igv) {
 
         setControls(browser, config);
 
-        contentDiv = $('<div class="igv-content-div">')[0];
-        $(browser.rootDiv).append(contentDiv);
+        $content = $('<div class="igv-content-div">');
+        $(browser.rootDiv).append($content);
 
-        headerDiv = $('<div>')[0];
-        $(contentDiv).append(headerDiv);
+        $header = $('<div>');
+        $content.append($header);
 
-        $(contentDiv).append(browser.trackContainerDiv);
+        $content.append(browser.trackContainerDiv);
 
         // user feedback
-        browser.userFeedback = new igv.UserFeedback($(contentDiv));
+        browser.userFeedback = new igv.UserFeedback($content);
         browser.userFeedback.hide();
 
         // Popover object -- singleton shared by all components
-        igv.popover = new igv.Popover($(contentDiv), "igv-popover");
+        igv.popover = new igv.Popover($content, "igv-popover");
 
         // ColorPicker object -- singleton shared by all components
         igv.colorPicker = new igv.ColorPicker($(browser.rootDiv), config.palette, "igv-color-picker");
@@ -95,15 +94,14 @@ var igv = (function (igv) {
         igv.dataRangeDialog.hide();
 
         if (!config.showNavigation) {
-            igvLogo = $('<div class="igv-logo-nonav">');
-            $(headerDiv).append(igvLogo[0]);
+            $header.append($('<div class="igv-logo-nonav">'));
         }
 
         // ideogram
         if (config.hideIdeogram && true === config.hideIdeogram) {
             // do nothing
         } else {
-            browser.ideoPanel = new igv.IdeoPanel(headerDiv);
+            browser.ideoPanel = new igv.IdeoPanel($header);
             browser.ideoPanel.resize();
         }
 
