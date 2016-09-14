@@ -110,31 +110,21 @@ var igv = (function (igv) {
 
         igv.loadGenome(config.reference).then(function (genome) {
 
-            var viewportWidth,
-                firstChrName,
-                firstChr;
-
             genome.id = config.reference.genomeId;
             browser.genome = genome;
 
-            if (config.showRuler) {
-                browser.addTrack(new igv.RulerTrack());
-            }
-
-            // viewport width -- must get this after adding ruler track
-            viewportWidth = browser.trackViewportWidth();
-            if (viewportWidth === 0) viewportWidth = 500;
-
-
             // Set inital locus
-            firstChr = browser.genome.chromosomes[ browser.genome.chromosomeNames[0] ];
-            browser.referenceFrame = new igv.ReferenceFrame(browser.genome.chromosomeNames[0], 0, firstChr.bpLength / viewportWidth);
+            browser.referenceFrame = new igv.ReferenceFrame(browser.firstChromosomeName(), 0, browser.firstChromosome().bpLength / browser.trackViewportWidth());
             browser.updateLocusSearch(browser.referenceFrame);
 
             // browser.controlPanelWidth = 50;
 
             if (browser.ideoPanel) browser.ideoPanel.repaint();
             if (browser.karyoPanel) browser.karyoPanel.resize();
+
+            if (config.showRuler) {
+                browser.addTrack(new igv.RulerTrack());
+            }
 
             // If an initial locus is specified go there first, then load tracks.  This avoids loading track data at
             // a default location then moving
@@ -155,6 +145,7 @@ var igv = (function (igv) {
                 }, true);
 
             } else if (config.tracks) {
+
 
                 browser.loadTracksWithConfigList(config.tracks);
 

@@ -136,6 +136,14 @@ var igv = (function (igv) {
         }
     }
 
+    igv.Browser.prototype.firstChromosomeName = function () {
+        return this.genome.chromosomeNames[ 0 ];
+    };
+
+    igv.Browser.prototype.firstChromosome = function () {
+        return this.genome.chromosomes[ this.firstChromosomeName() ];
+    };
+
     igv.Browser.prototype.getFormat = function (name) {
         if (this.formats === undefined) return undefined;
         return this.formats[name];
@@ -504,26 +512,26 @@ var igv = (function (igv) {
         this.fireEvent('locuschange', [referenceFrame, str]);
     };
 
-    igv.Browser.prototype.syntheticTrackViewportContainerBBox = function () {
+    igv.Browser.prototype.syntheticTrackViewportBBox = function () {
         var $trackContainer = $(this.trackContainerDiv),
             $track = $('<div class="igv-track-div">'),
-            $viewportContainer = $('<div class="igv-viewport-container igv-viewport-container-shim">'),
+            $viewport = $('<div class="igv-viewport-div igv-gutter-shim">'),
             rect = {};
 
         $trackContainer.append($track);
-        $track.append($viewportContainer);
+        $track.append($viewport);
 
-        rect.position = $viewportContainer.position();
-        rect.width = $viewportContainer.width();
-        rect.height = $viewportContainer.height();
+        rect.position = $viewport.position();
+        rect.width = $viewport.width();
+        rect.height = $viewport.height();
 
         $track.remove();
 
         return rect;
     };
 
-    igv.Browser.prototype.syntheticTrackViewportContainerWidth = function () {
-        var rect = this.syntheticTrackViewportContainerBBox();
+    igv.Browser.prototype.syntheticTrackViewportWidth = function () {
+        var rect = this.syntheticTrackViewportBBox();
 
         return rect.width;
     };
@@ -536,9 +544,10 @@ var igv = (function (igv) {
         var width;
 
         if (this.trackViews && this.trackViews.length > 0) {
-            width = this.trackViews[0].viewportDiv.clientWidth;
-        } else {
-            width = this.syntheticTrackViewportContainerWidth();
+            width = this.trackViews[ 0 ].viewportDiv.clientWidth;
+        }
+        else {
+            width = this.syntheticTrackViewportWidth();
         }
 
         return width;
