@@ -34,7 +34,7 @@ var igv = (function (igv) {
 
         igv.browser = this;   // Make globally visible (for use in html markup).
 
-        igv.browser.rootDiv = $('<div id="igvRootDiv" class="igv-root-div">')[0];
+        igv.browser.$root = $('<div id="igvRootDiv" class="igv-root-div">');
 
         initialize.call(this, options);
 
@@ -81,7 +81,7 @@ var igv = (function (igv) {
 
         $(document).click(function (e) {
             var target = e.target;
-            if (!igv.browser.rootDiv.contains(target)) {
+            if (!igv.browser.$root.get(0).contains(target)) {
                 // We've clicked outside the IGV div.  Close any open popovers.
                 igv.popover.hide();
             }
