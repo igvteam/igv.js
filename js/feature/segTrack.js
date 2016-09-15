@@ -306,7 +306,7 @@ var igv = (function (igv) {
             self.sampleNames = sampleNames;
 
             self.trackView.update();
-            $(self.trackView.viewportDiv).scrollTop(0);
+            self.trackView.$viewport.scrollTop(0);
 
 
         }).catch(function(error) {

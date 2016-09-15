@@ -50,8 +50,8 @@ var igv = (function (igv) {
     igv.CenterGuide.prototype.repaint = function () {
 
         var ppb,
-            trackViewXY,
-            trackViewHalfWidth,
+            trackXY,
+            trackHalfWidth,
             width,
             left,
             ls,
@@ -68,18 +68,18 @@ var igv = (function (igv) {
         if (ppb > 1) {
 
             if (this.trackViews && this.trackViews.length > 0) {
-                trackViewXY = $(igv.browser.trackViews[ 0 ].viewportDiv).position();
-                trackViewHalfWidth = 0.5 * $(igv.browser.trackViews[ 0 ].viewportDiv).width();
+                trackXY = igv.browser.trackViews[ 0 ].$viewportContainer.position();
+                trackHalfWidth = 0.5 * igv.browser.trackViews[ 0 ].$viewportContainer.width();
             } else {
-                rect = igv.browser.syntheticTrackViewportBBox();
-                trackViewXY = rect.position;
-                trackViewHalfWidth = 0.5 * rect.width;
+                rect = igv.browser.syntheticTrackViewportContainerBBox();
+                trackXY = rect.position;
+                trackHalfWidth = 0.5 * rect.width;
             }
 
 
-            xBP = igv.browser.referenceFrame.toBP(trackViewHalfWidth) + igv.browser.referenceFrame.start;
+            xBP = igv.browser.referenceFrame.toBP(trackHalfWidth) + igv.browser.referenceFrame.start;
 
-            center = trackViewXY.left + trackViewHalfWidth;
+            center = trackXY.left + trackHalfWidth;
             width = igv.browser.referenceFrame.toPixels(1);
             left = center - 0.5 * width;
 

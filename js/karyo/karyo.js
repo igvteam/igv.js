@@ -187,7 +187,7 @@ var igv = (function (igv) {
             var ideoScale = longestChr.bpLength / chrheight;   // Scale in bp per pixels
 
             var boxPY1 = chromosome.y - 3 + Math.round(referenceFrame.start / ideoScale);
-            var boxHeight = Math.max(3, (igv.browser.trackViewportWidth() * referenceFrame.bpPerPixel) / ideoScale);
+            var boxHeight = Math.max(3, (igv.browser.trackViewportContainerWidth() * referenceFrame.bpPerPixel) / ideoScale);
 
             //var boxPY2 = Math.round((this.browser.referenceFrame.start+100) * ideoScale);
             this.ctx.strokeStyle = "rgb(150, 0, 0)";
