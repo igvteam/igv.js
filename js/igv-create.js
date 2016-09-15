@@ -113,7 +113,7 @@ var igv = (function (igv) {
             browser.genome.id = config.reference.genomeId;
 
             // Set inital locus
-            browser.referenceFrame = new igv.ReferenceFrame(browser.firstChromosomeName(), 0, browser.firstChromosome().bpLength / browser.trackViewportWidth());
+            browser.referenceFrame = new igv.ReferenceFrame(browser.firstChromosomeName(), 0, browser.firstChromosome().bpLength / browser.trackViewportContainerWidth());
             browser.updateLocusSearch(browser.referenceFrame);
 
             // browser.controlPanelWidth = 50;

@@ -53,92 +53,91 @@ var igv = (function (igv) {
         this.trackDiv.appendChild(igv.spinner());
 
         // Track Drag & Drop
-        makeTrackDraggable(this.track);
+        makeTrackDraggable(this);
 
         addTrackHandlers(this);
-
-        function makeTrackDraggable(track) {
-
-            self.$trackDragScrim = $('<div class="igv-track-drag-scrim">');
-            $(self.viewportDiv).append(self.$trackDragScrim);
-            self.$trackDragScrim.hide();
-
-            self.$trackManipulationHandle = $('<div class="igv-track-manipulation-handle">');
-            $(self.trackDiv).append(self.$trackManipulationHandle);
-
-            self.$trackManipulationHandle.mousedown(function (e) {
-
-                self.isMouseDown = true;
-                igv.browser.dragTrackView = self;
-            });
-
-            self.$trackManipulationHandle.mouseup(function (e) {
-                self.isMouseDown = undefined;
-            });
-
-            self.$trackManipulationHandle.mouseenter(function (e) {
-
-                self.isMouseIn = true;
-                igv.browser.dragTargetTrackView = self;
-
-                if (undefined === igv.browser.dragTrackView) {
-                    self.$trackDragScrim.show();
-                } else if (self === igv.browser.dragTrackView) {
-                    self.$trackDragScrim.show();
-                }
-
-                if (igv.browser.dragTargetTrackView && igv.browser.dragTrackView) {
-
-                    if (igv.browser.dragTargetTrackView !== igv.browser.dragTrackView) {
-
-                        if (igv.browser.dragTargetTrackView.track.order < igv.browser.dragTrackView.track.order) {
-
-                            igv.browser.dragTrackView.track.order = igv.browser.dragTargetTrackView.track.order;
-                            igv.browser.dragTargetTrackView.track.order = 1 + igv.browser.dragTrackView.track.order;
-                        } else {
-
-                            igv.browser.dragTrackView.track.order = igv.browser.dragTargetTrackView.track.order;
-                            igv.browser.dragTargetTrackView.track.order = igv.browser.dragTrackView.track.order - 1;
-                        }
-
-                        igv.browser.reorderTracks();
-                    }
-                }
-
-            });
-
-            self.$trackManipulationHandle.mouseleave(function (e) {
-
-                self.isMouseIn = undefined;
-                igv.browser.dragTargetTrackView = undefined;
-
-                if (self !== igv.browser.dragTrackView) {
-                    self.$trackDragScrim.hide();
-                }
-
-            });
-
-        }
     };
+
+    function makeTrackDraggable(trackView) {
+
+        trackView.$trackDragScrim = $('<div class="igv-track-drag-scrim">');
+        trackView.$viewport.append(trackView.$trackDragScrim);
+        trackView.$trackDragScrim.hide();
+
+        trackView.$trackManipulationHandle = $('<div class="igv-track-manipulation-handle">');
+        $(trackView.trackDiv).append(trackView.$trackManipulationHandle);
+
+        trackView.$trackManipulationHandle.mousedown(function (e) {
+
+            trackView.isMouseDown = true;
+            igv.browser.dragTrackView = trackView;
+        });
+
+        trackView.$trackManipulationHandle.mouseup(function (e) {
+            trackView.isMouseDown = undefined;
+        });
+
+        trackView.$trackManipulationHandle.mouseenter(function (e) {
+
+            trackView.isMouseIn = true;
+            igv.browser.dragTargetTrackView = trackView;
+
+            if (undefined === igv.browser.dragTrackView) {
+                trackView.$trackDragScrim.show();
+            } else if (trackView === igv.browser.dragTrackView) {
+                trackView.$trackDragScrim.show();
+            }
+
+            if (igv.browser.dragTargetTrackView && igv.browser.dragTrackView) {
+
+                if (igv.browser.dragTargetTrackView !== igv.browser.dragTrackView) {
+
+                    if (igv.browser.dragTargetTrackView.track.order < igv.browser.dragTrackView.track.order) {
+
+                        igv.browser.dragTrackView.track.order = igv.browser.dragTargetTrackView.track.order;
+                        igv.browser.dragTargetTrackView.track.order = 1 + igv.browser.dragTrackView.track.order;
+                    } else {
+
+                        igv.browser.dragTrackView.track.order = igv.browser.dragTargetTrackView.track.order;
+                        igv.browser.dragTargetTrackView.track.order = igv.browser.dragTrackView.track.order - 1;
+                    }
+
+                    igv.browser.reorderTracks();
+                }
+            }
+
+        });
+
+        trackView.$trackManipulationHandle.mouseleave(function (e) {
+
+            trackView.isMouseIn = undefined;
+            igv.browser.dragTargetTrackView = undefined;
+
+            if (trackView !== igv.browser.dragTrackView) {
+                trackView.$trackDragScrim.hide();
+            }
+
+        });
+
+    }
 
     igv.TrackView.prototype.appendViewportDivToTrackDiv = function ($track) {
 
         var self = this,
-            $viewportContainer,
             description,
             $trackLabel;
 
         // viewport container
-        $viewportContainer = $('<div class="igv-viewport-container igv-viewport-container-shim">');
-        $track.append($viewportContainer);
+        this.$viewportContainer = $('<div class="igv-viewport-container igv-viewport-container-shim">');
+        $track.append(this.$viewportContainer);
 
         // viewport
-        this.viewportDiv = $('<div class="igv-viewport-div">')[0];
-        $viewportContainer.append(this.viewportDiv);
+        this.$viewport = $('<div class="igv-viewport-div">');
+        this.$viewportContainer.append(this.$viewport);
 
         // content  -- purpose of this div is to allow vertical scrolling on individual tracks,
         this.contentDiv = $('<div class="igv-content-div">')[0];
-        $(this.viewportDiv).append(this.contentDiv);
+        this.$viewport.append(this.contentDiv);
 
         // track content canvas
         this.canvas = $('<canvas class = "igv-content-canvas">')[0];
@@ -156,10 +155,10 @@ var igv = (function (igv) {
         }
 
         // scrollbar,  default is to set overflow ot hidden and use custom scrollbar, but this can be overriden so check
-        if ("hidden" === $(this.viewportDiv).css("overflow-y")) {
-            this.scrollbar = new TrackScrollbar(this.viewportDiv, this.contentDiv);
+        if ("hidden" === this.$viewport.css("overflow-y")) {
+            this.scrollbar = new TrackScrollbar(this.$viewport.get(0), this.contentDiv);
             this.scrollbar.update();
-            $(this.viewportDiv).append(this.scrollbar.outerScrollDiv);
+            this.$viewport.append(this.scrollbar.outerScrollDiv);
         }
 
         if (this.track.name) {
@@ -173,7 +172,7 @@ var igv = (function (igv) {
                 igv.popover.presentTrackPopup(e.pageX, e.pageY, description, false);
             });
 
-            $(this.viewportDiv).append($trackLabel[0]);
+            this.$viewport.append($trackLabel[0]);
         }
 
     };
@@ -245,7 +244,7 @@ var igv = (function (igv) {
     igv.TrackView.prototype.resize = function () {
         var canvas = this.canvas,
             contentDiv = this.contentDiv,
-            contentWidth = this.viewportDiv.clientWidth;
+            contentWidth = this.$viewport.width();
 
         if (contentWidth > 0) {
             contentDiv.style.width = contentWidth + "px";      // Not sure why css is not working for this
@@ -310,7 +309,7 @@ var igv = (function (igv) {
             this.controlCanvas.setAttribute("height", newHeight);
         }
 
-        this.viewportDiv.style.height = trackHeightStr;
+        // this.viewportDiv.style.height = trackHeightStr;
 
 
         if (update === undefined || update === true) {
@@ -351,7 +350,7 @@ var igv = (function (igv) {
         }
 
         if (this.track.visibilityWindow !== undefined && this.track.visibilityWindow > 0) {
-            if (igv.browser.trackViewportWidthBP() > this.track.visibilityWindow) {
+            if (igv.browser.trackViewportContainerWidthBP() > this.track.visibilityWindow) {
                 this.tile = null;
                 this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
                 igv.stopSpinnerAtParentElement(this.trackDiv);      // TODO -  WHY DO WE HAVE TO DO THIS ???
@@ -617,7 +616,7 @@ var igv = (function (igv) {
                 e.stopPropagation();
 
                 canvasCoords = igv.translateMouseCoordinates(e, trackView.canvas);
-                trackViewportHalfWidth = Math.floor(trackView.browser.trackViewportWidth()/2);
+                trackViewportHalfWidth = Math.floor(trackView.browser.trackViewportContainerWidth()/2);
 
                 referenceFrame = trackView.browser.referenceFrame;
                 genomicLocation = Math.floor((referenceFrame.start) + referenceFrame.toBP(canvasCoords.x));
@@ -712,7 +711,8 @@ var igv = (function (igv) {
      */
     TrackScrollbar = function (viewportDiv, contentDiv) {
 
-        var outerScrollDiv = $('<div class="igv-scrollbar-outer-div">')[0],
+        var self = this,
+            outerScrollDiv = $('<div class="igv-scrollbar-outer-div">')[0],
             innerScrollDiv = $('<div class="igv-scrollbar-inner-div">')[0],
             offY;
 
@@ -741,18 +741,6 @@ var igv = (function (igv) {
 
         });
 
-        // Mousewheel disabled -- it controls the outer (browser window) scrollbar
-        //$(this.viewportDiv).mousewheel(function (event) {
-        //
-        //    var ratio = $(viewportDiv).height() / $(contentDiv).height();
-        //
-        //    if (ratio < 1) {
-        //        var dist = Math.round(ratio * event.deltaY * event.deltaFactor),
-        //            newY = $(innerScrollDiv).position().top + dist;
-        //        moveScrollerTo(newY);
-        //    }
-        //});
-
         function mouseMove(event) {
             moveScrollerTo(event.pageY - offY);
             event.stopPropagation();
@@ -761,13 +749,14 @@ var igv = (function (igv) {
         function mouseUp(event) {
             $(window).off("mousemove .igv", null, mouseMove);
             $(window).off("mouseup .igv", null, mouseUp);
-        };
+        }
 
         function moveScrollerTo(y) {
             var H = $(outerScrollDiv).height(),
-                h = $(innerScrollDiv).height();
-            newTop = Math.min(Math.max(0, y), H - h),
-                contentTop = -Math.round(newTop * ($(contentDiv).height() / $(viewportDiv).height()));
+                h = $(innerScrollDiv).height(),
+                newTop = Math.min(Math.max(0, y), H - h),
+                contentTop = -Math.round(newTop * ($(contentDiv).height() / $(self.viewportDiv).height()));
+
             $(innerScrollDiv).css("top", newTop + "px");
             $(contentDiv).css("top", contentTop + "px");
         }

@@ -78,7 +78,7 @@ var igv = (function (igv) {
 
         track.name = label;
 
-        $(track.trackView.viewportDiv).find('.igv-track-label').html(track.name);
+        track.trackView.$viewport.find('.igv-track-label').html(track.name);
 
         if (track.trackView) {
             track.trackView.repaint();

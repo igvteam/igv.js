@@ -102,7 +102,7 @@ var igv = (function (igv) {
         this.alignmentTrack.sortAlignmentRows(genomicLocation, this.sortOption);
 
         this.trackView.redrawTile(this.featureSource.alignmentContainer);
-        $(this.trackView.viewportDiv).scrollTop(0);
+        this.trackView.$viewport.scrollTop(0);
 
         this.sortDirection = !this.sortDirection;
     };
@@ -280,7 +280,7 @@ var igv = (function (igv) {
 
                     popover.hide();
 
-                    trackViewportHalfWidth = Math.floor(igv.browser.trackViewportWidth()/2);
+                    trackViewportHalfWidth = Math.floor(igv.browser.trackViewportContainerWidth()/2);
                     genomicLocationViaTrackViewportHalfWidth = Math.floor((igv.browser.referenceFrame.start) + igv.browser.referenceFrame.toBP(trackViewportHalfWidth));
 
                     // console.log('bamTrack - sort - trackViewportHalfWidth ' + igv.numberFormatter(genomicLocationViaTrackViewportHalfWidth));
@@ -885,7 +885,7 @@ var igv = (function (igv) {
                         color = alignment.strand ? alignmentTrack.negStrandColor : alignmentTrack.posStrandColor;
                     }
                     else {
-                        // Secondary or supplemental alignment?
+                        console.log("ERROR. Paired alignments are either first or second.")
                     }
                 }
                 break;

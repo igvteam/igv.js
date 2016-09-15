@@ -402,7 +402,7 @@ var igv = (function (igv) {
             }
         }
         windowX = Math.round(igv.browser.referenceFrame.toPixels(igv.browser.referenceFrame.start - bpStart));
-        windowX1 = windowX + igv.browser.trackViewportWidth();
+        windowX1 = windowX + igv.browser.trackViewportContainerWidth();
 
         renderFeatureLabels.call(this, ctx, feature, coord.px, coord.px1, py, windowX, windowX1);
     }

@@ -308,10 +308,8 @@ var igv = (function (igv) {
         // Reattach the divs to the dom in the correct order
         $(this.trackContainerDiv).children("igv-track-div").detach();
 
-        this.trackViews.forEach(function (trackView, index, trackViews) {
-
+        this.trackViews.forEach(function (trackView) {
             myself.trackContainerDiv.appendChild(trackView.trackDiv);
-
         });
 
     };
@@ -420,8 +418,8 @@ var igv = (function (igv) {
 
         this.trackHeight = newHeight;
 
-        this.trackViews.forEach(function (panel) {
-            panel.setTrackHeight(newHeight);
+        this.trackViews.forEach(function (trackView) {
+            trackView.setTrackHeight(newHeight);
         });
 
     };
@@ -431,8 +429,8 @@ var igv = (function (igv) {
         if (this.ideoPanel) this.ideoPanel.resize();
         if (this.karyoPanel) this.karyoPanel.resize();
 
-        this.trackViews.forEach(function (panel) {
-            panel.resize();
+        this.trackViews.forEach(function (trackView) {
+            trackView.resize();
         });
 
         this.centerGuide.repaint();
@@ -470,8 +468,8 @@ var igv = (function (igv) {
             this.karyoPanel.repaint();
         }
 
-        this.trackViews.forEach(function (trackPanel) {
-            trackPanel.update();
+        this.trackViews.forEach(function (trackView) {
+            trackView.update();
         });
 
     };
@@ -501,7 +499,7 @@ var igv = (function (igv) {
             chr = referenceFrame.chr;
             ss = igv.numberFormatter(Math.floor(referenceFrame.start + 1));
 
-            end = referenceFrame.start + this.trackViewportWidthBP();
+            end = referenceFrame.start + this.trackViewportContainerWidthBP();
             if (this.genome) {
                 chromosome = this.genome.getChromosome(chr);
                 if (chromosome) end = Math.min(end, chromosome.bpLength);
@@ -518,28 +516,26 @@ var igv = (function (igv) {
         this.fireEvent('locuschange', [referenceFrame, str]);
     };
 
-    igv.Browser.prototype.syntheticTrackViewportBBox = function () {
+    igv.Browser.prototype.syntheticTrackViewportContainerBBox = function () {
         var $trackContainer = $(this.trackContainerDiv),
             $track = $('<div class="igv-track-div">'),
             $viewportContainer = $('<div class="igv-viewport-container igv-viewport-container-shim">'),
-            $viewport = $('<div class="igv-viewport-div">'),
             rect = {};
 
         $trackContainer.append($track);
         $track.append($viewportContainer);
-        $viewportContainer.append($viewport);
 
-        rect.position = $viewport.position();
-        rect.width = $viewport.width();
-        rect.height = $viewport.height();
+        rect.position = $viewportContainer.position();
+        rect.width = $viewportContainer.width();
+        rect.height = $viewportContainer.height();
 
         $track.remove();
 
         return rect;
     };
 
-    igv.Browser.prototype.syntheticTrackViewportWidth = function () {
-        var rect = this.syntheticTrackViewportBBox();
+    igv.Browser.prototype.syntheticTrackViewportContainerWidth = function () {
+        var rect = this.syntheticTrackViewportContainerBBox();
 
         return rect.width;
     };
@@ -547,23 +543,15 @@ var igv = (function (igv) {
     /**
      * Return the visible width of a track.  All tracks should have the same width.
      */
-    igv.Browser.prototype.trackViewportWidth = function () {
+    igv.Browser.prototype.trackViewportContainerWidth = function () {
 
-        var width;
-
-        if (this.trackViews && this.trackViews.length > 0) {
-            width = this.trackViews[ 0 ].viewportDiv.clientWidth;
-        }
-        else {
-            width = this.syntheticTrackViewportWidth();
-        }
+        var width = (this.trackViews && this.trackViews.length > 0) ? this.trackViews[ 0 ].$viewportContainer.width() : this.syntheticTrackViewportContainerWidth();
 
         return width;
-
     };
 
-    igv.Browser.prototype.trackViewportWidthBP = function () {
-        return this.referenceFrame.bpPerPixel * this.trackViewportWidth();
+    igv.Browser.prototype.trackViewportContainerWidthBP = function () {
+        return this.referenceFrame.bpPerPixel * this.trackViewportContainerWidth();
     };
 
     igv.Browser.prototype.minimumBasesExtent = function () {
@@ -592,7 +580,7 @@ var igv = (function (igv) {
 
         var w,
             chromosome,
-            viewportWidth = this.trackViewportWidth();
+            viewportWidth = this.trackViewportContainerWidth();
 
         if (igv.popover) {
             igv.popover.hide();
@@ -651,22 +639,22 @@ var igv = (function (igv) {
 
         var centerBP;
 
-        console.log('browser.zoomIn - src extent ' + basesExtent(this.trackViewportWidth(), this.referenceFrame.bpPerPixel));
+        console.log('browser.zoomIn - src extent ' + basesExtent(this.trackViewportContainerWidth(), this.referenceFrame.bpPerPixel));
 
         // Have we reached the zoom-in threshold yet? If so, bail.
-        if (this.minimumBasesExtent() > basesExtent(this.trackViewportWidth(), this.referenceFrame.bpPerPixel / 2.0)) {
-            console.log('browser.zoomIn - dst extent ' + basesExtent(this.trackViewportWidth(), this.referenceFrame.bpPerPixel / 2.0) + ' bailing ...');
+        if (this.minimumBasesExtent() > basesExtent(this.trackViewportContainerWidth(), this.referenceFrame.bpPerPixel/2.0)) {
+            console.log('browser.zoomIn - dst extent ' + basesExtent(this.trackViewportContainerWidth(), this.referenceFrame.bpPerPixel/2.0) + ' bailing ...');
             return;
         } else {
-            console.log('browser.zoomIn - dst extent ' + basesExtent(this.trackViewportWidth(), this.referenceFrame.bpPerPixel / 2.0));
+            console.log('browser.zoomIn - dst extent ' + basesExtent(this.trackViewportContainerWidth(), this.referenceFrame.bpPerPixel/2.0));
         }
 
         // window center (base-pair units)
-        centerBP = this.referenceFrame.start + this.referenceFrame.bpPerPixel * (this.trackViewportWidth() / 2);
+        centerBP = this.referenceFrame.start + this.referenceFrame.bpPerPixel * (this.trackViewportContainerWidth()/2);
 
         // derive scaled (zoomed in) start location (base-pair units) by multiplying half-width by halve'd bases-per-pixel
         // which results in base-pair units
-        this.referenceFrame.start = centerBP - (this.trackViewportWidth() / 2) * (this.referenceFrame.bpPerPixel / 2.0);
+        this.referenceFrame.start = centerBP - (this.trackViewportContainerWidth()/2) * (this.referenceFrame.bpPerPixel/2.0);
 
         // halve the bases-per-pixel
         this.referenceFrame.bpPerPixel /= 2.0;
@@ -687,7 +675,7 @@ var igv = (function (igv) {
         }
 
         var newScale, maxScale, center, chrLength, widthBP, viewportWidth;
-        viewportWidth = this.trackViewportWidth();
+        viewportWidth = this.trackViewportContainerWidth();
 
         newScale = this.referenceFrame.bpPerPixel * 2;
         chrLength = 250000000;
@@ -1089,7 +1077,7 @@ var igv = (function (igv) {
                     // clamp right
                     var chromosome = igv.browser.genome.getChromosome(referenceFrame.chr);
                     maxEnd = chromosome.bpLength;
-                    maxStart = maxEnd - igv.browser.trackViewportWidth() * referenceFrame.bpPerPixel;
+                    maxStart = maxEnd - igv.browser.trackViewportContainerWidth() * referenceFrame.bpPerPixel;
 
 
                     if (referenceFrame.start > maxStart) referenceFrame.start = maxStart;
