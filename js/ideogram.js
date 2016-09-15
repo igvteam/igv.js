@@ -34,7 +34,7 @@ var igv = (function (igv) {
         this.ideograms = {};
 
         // ideogram content
-        this.contentDiv = $('<div class="igv-ideogram-content-div"></div>');
+        this.contentDiv = $('<div class="igv-ideogram-content-div igv-ideogram-gutter-shim"></div>');
         $(parentElement).append(this.contentDiv[0]);
 
         var myself = this;
