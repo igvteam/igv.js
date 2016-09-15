@@ -72,7 +72,7 @@ var igv = (function (igv) {
             igv.browser.isMouseDown = undefined;
 
             if (igv.browser.dragTrackView) {
-                $(igv.browser.dragTrackView.igvTrackDragScrim).hide();
+                igv.browser.dragTrackView.$trackDragScrim.hide();
             }
 
             igv.browser.dragTrackView = undefined;
