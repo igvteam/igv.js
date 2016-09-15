@@ -521,11 +521,13 @@ var igv = (function (igv) {
     igv.Browser.prototype.syntheticTrackViewportBBox = function () {
         var $trackContainer = $(this.trackContainerDiv),
             $track = $('<div class="igv-track-div">'),
-            $viewport = $('<div class="igv-viewport-div igv-gutter-shim">'),
+            $viewportContainer = $('<div class="igv-viewport-container igv-viewport-container-shim">'),
+            $viewport = $('<div class="igv-viewport-div">'),
             rect = {};
 
         $trackContainer.append($track);
-        $track.append($viewport);
+        $track.append($viewportContainer);
+        $viewportContainer.append($viewport);
 
         rect.position = $viewport.position();
         rect.width = $viewport.width();
