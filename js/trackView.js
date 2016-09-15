@@ -28,8 +28,7 @@ var igv = (function (igv) {
 
     igv.TrackView = function (track, browser) {
 
-        var self = this,
-            element;
+        var element;
 
         this.track = track;
         this.browser = browser;
@@ -43,6 +42,7 @@ var igv = (function (igv) {
         }
 
         this.appendLeftHandGutterDivToTrackDiv($(this.trackDiv));
+
         this.appendViewportDivToTrackDiv($(this.trackDiv));
 
         element = this.createRightHandGutter();
@@ -242,6 +242,7 @@ var igv = (function (igv) {
     };
 
     igv.TrackView.prototype.resize = function () {
+
         var canvas = this.canvas,
             contentDiv = this.contentDiv,
             contentWidth = this.$viewportContainer.width();
@@ -280,8 +281,11 @@ var igv = (function (igv) {
             setTrackHeight_.call(this, newHeight, false);
         }
 
-        this.contentDiv.style.height = contentHeightStr;
-        this.canvas.setAttribute("height", this.canvas.clientHeight);
+        // this.contentDiv.style.height = contentHeightStr;
+        $(this.contentDiv).height(newHeight);
+        this.canvas.style.height = contentHeightStr;
+        this.canvas.setAttribute("height", newHeight);
+
         if (this.track.paintAxis) {
             this.controlCanvas.style.height = contentHeightStr;
             this.controlCanvas.setAttribute("height", newHeight);
@@ -302,15 +306,12 @@ var igv = (function (igv) {
 
         this.track.height = newHeight;    // Recorded on track for use when saving sessions
 
-        this.trackDiv.style.height = trackHeightStr;
+        $(this.trackDiv).height(newHeight);
 
         if (this.track.paintAxis) {
             this.controlCanvas.style.height = trackHeightStr;
-            this.controlCanvas.setAttribute("height", newHeight);
+            this.controlCanvas.setAttribute("height", $(this.trackDiv).height());
         }
-
-        // this.viewportDiv.style.height = trackHeightStr;
-
 
         if (update === undefined || update === true) {
             this.update();
