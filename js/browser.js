@@ -1013,13 +1013,14 @@ var igv = (function (igv) {
 
         $(trackContainerDiv).mousedown(function (e) {
 
-            var coords = igv.translateMouseCoordinates(e, trackContainerDiv);
+            var coords = igv.translateMouseCoordinates(e, trackContainerDiv),
+                $target = $(e.target);
 
             if (igv.popover) {
                 igv.popover.hide();
             }
 
-            isRulerTrack = ($(e.target).parent().parent().parent()[0].dataset.rulerTrack) ? true : false;
+            isRulerTrack = $target.parents("div[data-ruler-track='rulerTrack']").get(0) ? true : false;
 
             if (isRulerTrack) {
                 return;

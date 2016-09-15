@@ -172,7 +172,7 @@ var igv = (function (igv) {
                 igv.popover.presentTrackPopup(e.pageX, e.pageY, description, false);
             });
 
-            this.$viewport.append($trackLabel[0]);
+            this.$viewport.append($trackLabel);
         }
 
     };
@@ -244,7 +244,7 @@ var igv = (function (igv) {
     igv.TrackView.prototype.resize = function () {
         var canvas = this.canvas,
             contentDiv = this.contentDiv,
-            contentWidth = this.$viewport.width();
+            contentWidth = this.$viewportContainer.width();
 
         if (contentWidth > 0) {
             contentDiv.style.width = contentWidth + "px";      // Not sure why css is not working for this
@@ -452,7 +452,7 @@ var igv = (function (igv) {
 
 
         function viewIsReady() {
-            return this.track && this.browser && this.browser.referenceFrame;
+            return self.track && self.browser && self.browser.referenceFrame;
         }
 
     };
@@ -484,6 +484,139 @@ var igv = (function (igv) {
             this.ctx.restore();
         }
     };
+
+    function addTrackHandlers(trackView) {
+
+        // Register track handlers for popup.  Although we are not handling dragging here, we still need to check
+        // for dragging on a mouseup
+
+        var isMouseDown = false,
+            lastMouseX = undefined,
+            mouseDownX = undefined,
+            lastClickTime = 0,
+            popupTimer,
+            doubleClickDelay;
+
+        if (trackView.track instanceof igv.RulerTrack) {
+
+            trackView.trackDiv.dataset.rulerTrack = "rulerTrack";
+
+            // ruler sweeper widget surface
+            trackView.$rulerSweeper = $('<div class="igv-ruler-sweeper-div">');
+            $(trackView.contentDiv).append(trackView.$rulerSweeper);
+
+            addRulerTrackHandlers(trackView);
+
+        } else {
+
+            doubleClickDelay = igv.browser.constants.doubleClickDelay;
+
+            $(trackView.canvas).mousedown(function (e) {
+
+                var canvasCoords = igv.translateMouseCoordinates(e, trackView.canvas);
+                isMouseDown = true;
+                lastMouseX = canvasCoords.x;
+                mouseDownX = lastMouseX;
+
+
+            });
+
+            $(trackView.canvas).click(function (e) {
+
+                var canvasCoords,
+                    referenceFrame,
+                    genomicLocation,
+                    trackViewportHalfWidth,
+                    time;
+
+                // Sets pageX and pageY for browsers that don't support them
+                e = $.event.fix(e);
+
+                e.stopPropagation();
+
+                canvasCoords = igv.translateMouseCoordinates(e, trackView.canvas);
+                trackViewportHalfWidth = Math.floor(trackView.browser.trackViewportContainerWidth()/2);
+
+                referenceFrame = trackView.browser.referenceFrame;
+                genomicLocation = Math.floor((referenceFrame.start) + referenceFrame.toBP(canvasCoords.x));
+                time = Date.now();
+
+                if (!referenceFrame) return;
+
+                if (time - lastClickTime < doubleClickDelay) {
+                    // This is a double-click
+
+                    if (popupTimer) {
+                        // Cancel previous timer
+                        window.clearTimeout(popupTimer);
+                        popupTimer = undefined;
+                    }
+
+                    var newCenter = Math.round(referenceFrame.start + canvasCoords.x * referenceFrame.bpPerPixel);
+                    referenceFrame.bpPerPixel /= 2;
+                    igv.browser.goto(referenceFrame.chr, newCenter);
+                } else {
+
+                    if (e.shiftKey) {
+
+                        if (trackView.track.shiftClick && trackView.tile) {
+                            trackView.track.shiftClick(genomicLocation, e);
+                        }
+
+                    } else if (e.altKey) {
+
+                        if (trackView.track.altClick && trackView.tile) {
+                            trackView.track.altClick(genomicLocation, e);
+                        }
+
+
+                    } else if (Math.abs(canvasCoords.x - mouseDownX) <= igv.browser.constants.dragThreshold && trackView.track.popupData) {
+
+                        popupTimer = window.setTimeout(function () {
+
+                                var popupData,
+                                    xOrigin;
+
+                                if (undefined === genomicLocation) {
+                                    return;
+                                }
+                                if (null === trackView.tile) {
+                                    return;
+                                }
+                                xOrigin = Math.round(referenceFrame.toPixels((trackView.tile.startBP - referenceFrame.start)));
+                                popupData = trackView.track.popupData(genomicLocation, canvasCoords.x - xOrigin, canvasCoords.y);
+
+                                var handlerResult = igv.browser.fireEvent('trackclick', [trackView.track, popupData]);
+
+                                // (Default) no external handlers or no input from handlers
+                                if (handlerResult === undefined) {
+                                    if (popupData && popupData.length > 0) {
+                                        igv.popover.presentTrackPopup(e.pageX, e.pageY, igv.formatPopoverText(popupData), false);
+                                    }
+                                    // A handler returned custom popover HTML to override default format
+                                } else if (typeof handlerResult === 'string') {
+                                    igv.popover.presentTrackPopup(e.pageX, e.pageY, handlerResult, false);
+                                }
+                                // If handler returned false then we do nothing and let the handler manage the click
+
+                                mouseDownX = undefined;
+                                popupTimer = undefined;
+                            },
+                            doubleClickDelay);
+                    }
+                }
+
+                mouseDownX = undefined;
+                isMouseDown = false;
+                lastMouseX = undefined;
+                lastClickTime = time;
+
+            });
+
+        }
+
+
+    }
 
     function addRulerTrackHandlers(trackView) {
 
@@ -565,146 +698,6 @@ var igv = (function (igv) {
 
     }
 
-    function addTrackHandlers(trackView) {
-
-        // Register track handlers for popup.  Although we are not handling dragging here, we still need to check
-        // for dragging on a mouseup
-
-        var isMouseDown = false,
-            lastMouseX = undefined,
-            mouseDownX = undefined,
-            lastClickTime = 0,
-            popupTimer,
-            doubleClickDelay;
-
-        if (trackView.track instanceof igv.RulerTrack) {
-
-            trackView.trackDiv.dataset.rulerTrack = "rulerTrack";
-
-            // ruler sweeper widget surface
-            trackView.$rulerSweeper = $('<div class="igv-ruler-sweeper-div">');
-            $(trackView.contentDiv).append(trackView.$rulerSweeper);
-
-            addRulerTrackHandlers(trackView);
-
-        } else {
-
-            doubleClickDelay = igv.browser.constants.doubleClickDelay;
-
-            $(trackView.canvas).mousedown(function (e) {
-
-                var canvasCoords = igv.translateMouseCoordinates(e, trackView.canvas);
-                isMouseDown = true;
-                lastMouseX = canvasCoords.x;
-                mouseDownX = lastMouseX;
-
-
-            });
-
-            $(trackView.canvas).click(function (e) {
-
-                var canvasCoords,
-                    referenceFrame,
-                    genomicLocation,
-                    trackViewportHalfWidth,
-                    genomicLocationViaTrackViewportHalfWidth,
-                    time;
-
-                // Sets pageX and pageY for browsers that don't support them
-                e = $.event.fix(e);
-
-                e.stopPropagation();
-
-                canvasCoords = igv.translateMouseCoordinates(e, trackView.canvas);
-                trackViewportHalfWidth = Math.floor(trackView.browser.trackViewportContainerWidth()/2);
-
-                referenceFrame = trackView.browser.referenceFrame;
-                genomicLocation = Math.floor((referenceFrame.start) + referenceFrame.toBP(canvasCoords.x));
-                genomicLocationViaTrackViewportHalfWidth = Math.floor((referenceFrame.start) + referenceFrame.toBP(trackViewportHalfWidth));
-
-                // console.log('trackViewClick canvas ' + igv.numberFormatter(genomicLocation) + ' trackViewportHalfWidth ' + igv.numberFormatter(genomicLocationViaTrackViewportHalfWidth));
-                time = Date.now();
-
-                if (!referenceFrame) return;
-
-                if (time - lastClickTime < doubleClickDelay) {
-                    // This is a double-click
-
-                    if (popupTimer) {
-                        // Cancel previous timer
-                        window.clearTimeout(popupTimer);
-                        popupTimer = undefined;
-                    }
-
-                    var newCenter = Math.round(referenceFrame.start + canvasCoords.x * referenceFrame.bpPerPixel);
-                    referenceFrame.bpPerPixel /= 2;
-                    igv.browser.goto(referenceFrame.chr, newCenter);
-                }
-
-                else {
-
-                    if (e.shiftKey) {
-
-                        if (trackView.track.shiftClick && trackView.tile) {
-                            trackView.track.shiftClick(genomicLocation, e);
-                        }
-
-                    }
-                    else if (e.altKey) {
-
-                        if (trackView.track.altClick && trackView.tile) {
-                            trackView.track.altClick(genomicLocation, e);
-                        }
-
-
-                    } else if (Math.abs(canvasCoords.x - mouseDownX) <= igv.browser.constants.dragThreshold && trackView.track.popupData) {
-
-                        popupTimer = window.setTimeout(function () {
-
-                                var popupData,
-                                    xOrigin;
-
-                                if (undefined === genomicLocation) {
-                                    return;
-                                }
-                                if (null === trackView.tile) {
-                                    return;
-                                }
-                                xOrigin = Math.round(referenceFrame.toPixels((trackView.tile.startBP - referenceFrame.start)));
-                                popupData = trackView.track.popupData(genomicLocation, canvasCoords.x - xOrigin, canvasCoords.y);
-
-                                var handlerResult = igv.browser.fireEvent('trackclick', [trackView.track, popupData]);
-
-                                // (Default) no external handlers or no input from handlers
-                                if (handlerResult === undefined) {
-                                    if (popupData && popupData.length > 0) {
-                                        igv.popover.presentTrackPopup(e.pageX, e.pageY, igv.formatPopoverText(popupData), false);
-                                    }
-                                    // A handler returned custom popover HTML to override default format
-                                } else if (typeof handlerResult === 'string') {
-                                    igv.popover.presentTrackPopup(e.pageX, e.pageY, handlerResult, false);
-                                }
-                                // If handler returned false then we do nothing and let the handler manage the click
-
-                                mouseDownX = undefined;
-                                popupTimer = undefined;
-                            },
-                            doubleClickDelay);
-                    }
-                }
-
-                mouseDownX = undefined;
-                isMouseDown = false;
-                lastMouseX = undefined;
-                lastClickTime = time;
-
-            });
-
-        }
-
-
-    }
-
     /**
      * Creates a vertical scrollbar to slide an inner "contentDiv" with respect to an enclosing "viewportDiv"
      *
@@ -760,8 +753,7 @@ var igv = (function (igv) {
             $(innerScrollDiv).css("top", newTop + "px");
             $(contentDiv).css("top", contentTop + "px");
         }
-    }
-
+    };
 
     TrackScrollbar.prototype.update = function () {
         var viewportHeight = $(this.viewportDiv).height(),
@@ -774,8 +766,7 @@ var igv = (function (igv) {
         else {
             $(this.outerScrollDiv).hide();
         }
-    }
-
+    };
 
     igv.TrackView.prototype.redrawTile = function (features) {
 
@@ -804,8 +795,7 @@ var igv = (function (igv) {
 
         self.tile = new Tile(chr, bpStart, bpEnd, bpPerPixel, buffer);
         self.paintImage();
-    }
-
+    };
 
     return igv;
 
