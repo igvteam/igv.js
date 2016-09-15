@@ -58,12 +58,12 @@ var igv = (function (igv) {
 
         browser = new igv.Browser(config, $('<div class="igv-track-container-div">')[0]);
 
-        $(parentDiv).append($(browser.rootDiv));
+        $(parentDiv).append(browser.$root);
 
         setControls(browser, config);
 
         $content = $('<div class="igv-content-div">');
-        $(browser.rootDiv).append($content);
+        browser.$root.append($content);
 
         $header = $('<div>');
         $content.append($header);
@@ -78,26 +78,25 @@ var igv = (function (igv) {
         igv.popover = new igv.Popover($content, "igv-popover");
 
         // ColorPicker object -- singleton shared by all components
-        igv.colorPicker = new igv.ColorPicker($(browser.rootDiv), config.palette, "igv-color-picker");
+        igv.colorPicker = new igv.ColorPicker(browser.$root, config.palette, "igv-color-picker");
         igv.colorPicker.hide();
 
         // alert object -- singleton shared by all components
-        igv.alert = new igv.AlertDialog($(browser.rootDiv), "igv-alert");
+        igv.alert = new igv.AlertDialog(browser.$root, "igv-alert");
         igv.alert.hide();
 
         // Dialog object -- singleton shared by all components
-        igv.dialog = new igv.Dialog($(browser.rootDiv), igv.Dialog.dialogConstructor, "igv-dialog");
+        igv.dialog = new igv.Dialog(browser.$root, igv.Dialog.dialogConstructor, "igv-dialog");
         igv.dialog.hide();
 
         // Data Range Dialog object -- singleton shared by all components
-        igv.dataRangeDialog = new igv.DataRangeDialog($(browser.rootDiv), "igv-data-range-dialog");
+        igv.dataRangeDialog = new igv.DataRangeDialog(browser.$root, "igv-data-range-dialog");
         igv.dataRangeDialog.hide();
 
         if (!config.showNavigation) {
             $header.append($('<div class="igv-logo-nonav">'));
         }
 
-        // ideogram
         if (config.hideIdeogram && true === config.hideIdeogram) {
             // do nothing
         } else {
@@ -130,25 +129,18 @@ var igv = (function (igv) {
             // a default location then moving
             if (browser.initialLocus || config.locus) {
 
-                var locus = browser.initialLocus ? browser.initialLocus : config.locus;
-
                 igv.startSpinnerAtParentElement(parentDiv);
 
-                browser.search(locus, function () {
+                browser.search(browser.initialLocus ? browser.initialLocus : config.locus, function () {
 
                     igv.stopSpinnerAtParentElement(parentDiv);
-
-                    if (config.tracks) {
-                        browser.loadTracksWithConfigList(config.tracks);
-                    }
+                    if (config.tracks) browser.loadTracksWithConfigList(config.tracks);
 
                 }, true);
 
-            } else if (config.tracks) {
+            } else {
 
-
-                browser.loadTracksWithConfigList(config.tracks);
-
+                if (config.tracks) browser.loadTracksWithConfigList(config.tracks);
             }
 
         }).catch(function (error) {
@@ -239,7 +231,7 @@ var igv = (function (igv) {
 
         if (conf.showCommandBar !== false && conf.showControls !== false) {
             controlDiv = conf.createControls ? conf.createControls(browser, conf) : createStandardControls(browser, conf);
-            $(browser.rootDiv).append($(controlDiv));
+            browser.$root.append($(controlDiv));
         }
 
     }
@@ -424,7 +416,7 @@ var igv = (function (igv) {
     }
 
     igv.removeBrowser = function () {
-        $(igv.browser.rootDiv).remove();
+        igv.browser.$root.remove();
         $(".igv-grid-container-colorpicker").remove();
         $(".igv-grid-container-dialog").remove();
         // $(".igv-grid-container-dialog").remove();
