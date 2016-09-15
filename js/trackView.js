@@ -124,12 +124,17 @@ var igv = (function (igv) {
     igv.TrackView.prototype.appendViewportDivToTrackDiv = function ($track) {
 
         var self = this,
+            $viewportContainer,
             description,
             $trackLabel;
 
+        // viewport container
+        $viewportContainer = $('<div class="igv-viewport-container igv-viewport-container-shim">');
+        $track.append($viewportContainer);
+
         // viewport
-        this.viewportDiv = $('<div class="igv-viewport-div igv-gutter-shim">')[0];
-        $track.append(this.viewportDiv);
+        this.viewportDiv = $('<div class="igv-viewport-div">')[0];
+        $viewportContainer.append(this.viewportDiv);
 
         // content  -- purpose of this div is to allow vertical scrolling on individual tracks,
         this.contentDiv = $('<div class="igv-content-div">')[0];

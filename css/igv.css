@@ -1139,10 +1139,19 @@ div.ui-dialog fieldset {
     margin-left: 50px;
 }
 
-.igv-viewport-div {
+.igv-viewport-container {
     position: absolute;
-    left:  4px;
+    left:  0;
     right: 50px;
+    height: 100%;
+}
+
+.igv-viewport-container-shim {
+    left:  50px;
+}
+
+.igv-viewport-div {
+    position: relative;
     height: 100%;
     overflow-x: hidden;
     overflow-y: hidden;
@@ -1155,14 +1164,20 @@ div.ui-dialog fieldset {
     height: 100%;
 }
 
+.igv-right-hand-gutter {
+    position: absolute;
+    right: 0;
+    width: 36px;
+    height: 100%;
+
+    background: white;
+    text-align: center;
+}
+
+
 .igv-clickable {
     cursor: pointer;
     background-color: white;
-}
-
-.igv-gutter-shim {
-    /*left:  100px;*/
-    left:  50px;
 }
 
 .igv-windowsizepanel-content-div {
@@ -1207,16 +1222,6 @@ div.ui-dialog fieldset {
     right: 12px;
     cursor: pointer;
     color: #222;
-}
-
-.igv-right-hand-gutter {
-    position: absolute;
-    right: 0;
-    width: 36px;
-    height: 100%;
-
-    background: white;
-    text-align: center;
 }
 
 .igv-app-icon {
