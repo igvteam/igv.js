@@ -191,46 +191,9 @@ var igv = (function (igv) {
             }
         }
 
-        switch (config.type.toLowerCase()) {
-            case "gwas":
-                newTrack = new igv.GWASTrack(config);
-                break;
-            case "annotation":
-            case "genes":
-            case "fusionjuncspan":
-                newTrack = new igv.FeatureTrack(config);
-                break;
-            case "variant":
-                newTrack = new igv.VariantTrack(config);
-                break;
-
-            case "alignment":
-
-                newTrack = new igv.BAMTrack(config, featureSource);
-                break;
-
-            case "data":  // deprecated
-            case "wig":
-                newTrack = new igv.WIGTrack(config);
-                break;
-            case "sequence":
-                newTrack = new igv.SequenceTrack(config);
-                break;
-            case "eqtl":
-                newTrack = new igv.EqtlTrack(config);
-                break;
-            case "seg":
-                newTrack = new igv.SegTrack(config);
-                break;
-            case "aneu":
-                newTrack = new igv.AneuTrack(config);
-                break;
-            default:
-
-                //alert("Unknown file type: " + config.url);
-                igv.presentAlert("Unknown file type: " + config.url);
-
-                return null;
+        newTrack = createTrackWithConfiguration(config);
+        if (undefined === newTrack) {
+            igv.presentAlert("Unknown file type: " + config.url);
         }
 
         // Set order field of track here.  Otherwise track order might get shuffled during asynchronous load
@@ -238,21 +201,64 @@ var igv = (function (igv) {
             newTrack.order = this.trackViews.length;
         }
 
-
         // If defined, attempt to load the file header before adding the track.  This will catch some errors early
         if (typeof newTrack.getFileHeader === "function") {
             newTrack.getFileHeader().then(function (header) {
                 self.addTrack(newTrack);
             }).catch(function (error) {
-                //alert(error);
                 igv.presentAlert(error);
             });
-        }
-        else {
+        } else {
             self.addTrack(newTrack);
         }
 
-        return newTrack;
+        function createTrackWithConfiguration(conf) {
+
+            switch (conf.type.toLowerCase()) {
+                case "gwas":
+                    return new igv.GWASTrack(conf);
+                    break;
+
+                case "annotation":
+                case "genes":
+                case "fusionjuncspan":
+                    return new igv.FeatureTrack(conf);
+                    break;
+
+                case "variant":
+                    return new igv.VariantTrack(conf);
+                    break;
+
+                case "alignment":
+                    return new igv.BAMTrack(conf, featureSource);
+                    break;
+
+                case "data":  // deprecated
+                case "wig":
+                    return new igv.WIGTrack(conf);
+                    break;
+
+                case "sequence":
+                    return new igv.SequenceTrack(conf);
+                    break;
+
+                case "eqtl":
+                    return new igv.EqtlTrack(conf);
+                    break;
+
+                case "seg":
+                    return new igv.SegTrack(conf);
+                    break;
+
+                case "aneu":
+                    return new igv.AneuTrack(conf);
+                    break;
+
+                default:
+                    return undefined;
+            }
+
+        }
 
     };
 

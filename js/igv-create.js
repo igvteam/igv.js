@@ -109,8 +109,8 @@ var igv = (function (igv) {
 
         igv.loadGenome(config.reference).then(function (genome) {
 
-            genome.id = config.reference.genomeId;
             browser.genome = genome;
+            browser.genome.id = config.reference.genomeId;
 
             // Set inital locus
             browser.referenceFrame = new igv.ReferenceFrame(browser.firstChromosomeName(), 0, browser.firstChromosome().bpLength / browser.trackViewportWidth());
@@ -125,22 +125,24 @@ var igv = (function (igv) {
                 browser.addTrack(new igv.RulerTrack());
             }
 
-            // If an initial locus is specified go there first, then load tracks.  This avoids loading track data at
-            // a default location then moving
-            if (browser.initialLocus || config.locus) {
+            if (config.tracks) {
 
-                igv.startSpinnerAtParentElement(parentDiv);
+                // If initial locus is specified, go there first then load tracks. This avoids loading track data at
+                // default location then moving
+                if (browser.initialLocus || config.locus) {
 
-                browser.search(browser.initialLocus ? browser.initialLocus : config.locus, function () {
+                    igv.startSpinnerAtParentElement(parentDiv);
 
-                    igv.stopSpinnerAtParentElement(parentDiv);
-                    if (config.tracks) browser.loadTracksWithConfigList(config.tracks);
+                    browser.search(browser.initialLocus ? browser.initialLocus : config.locus, function () {
 
-                }, true);
+                        igv.stopSpinnerAtParentElement(parentDiv);
+                        browser.loadTracksWithConfigList(config.tracks);
+                    }, true);
 
-            } else {
+                } else {
+                    browser.loadTracksWithConfigList(config.tracks);
+                }
 
-                if (config.tracks) browser.loadTracksWithConfigList(config.tracks);
             }
 
         }).catch(function (error) {
