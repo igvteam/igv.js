@@ -43,7 +43,11 @@ var igv = (function (igv) {
 
         this.appendLeftHandGutterDivToTrackDiv($(this.trackDiv));
 
-        this.appendViewportDivToTrackDiv($(this.trackDiv));
+        // viewport container
+        this.$viewportContainer = $('<div class="igv-viewport-container igv-viewport-container-shim">');
+        $(this.trackDiv).append(this.$viewportContainer);
+
+        this.createViewport(this);
 
         element = this.createRightHandGutter();
         if (element) {
@@ -121,15 +125,53 @@ var igv = (function (igv) {
 
     }
 
-    igv.TrackView.prototype.appendViewportDivToTrackDiv = function ($track) {
+    igv.TrackView.prototype.appendLeftHandGutterDivToTrackDiv = function ($track) {
+
+        var self = this,
+            $leftHandGutter,
+            $canvas,
+            w,
+            h;
+
+        if (this.track.paintAxis) {
+
+            $leftHandGutter = $('<div class="igv-left-hand-gutter">');
+            $track.append($leftHandGutter[0]);
+
+            $canvas = $('<canvas class ="igv-track-control-canvas">');
+
+            w = $leftHandGutter.outerWidth();
+            h = $leftHandGutter.outerHeight();
+            $canvas.attr('width', w);
+            $canvas.attr('height', h);
+
+            $leftHandGutter.append($canvas[0]);
+
+            this.controlCanvas = $canvas[0];
+            this.controlCtx = this.controlCanvas.getContext("2d");
+
+
+            if (this.track.dataRange) {
+
+                $leftHandGutter.click(function (e) {
+                    igv.dataRangeDialog.configureWithTrackView(self);
+                    igv.dataRangeDialog.show();
+                });
+
+                $leftHandGutter.addClass('igv-clickable');
+            }
+
+            this.leftHandGutter = $leftHandGutter[0];
+
+        }
+
+    };
+
+    igv.TrackView.prototype.createViewport = function (trackView) {
 
         var self = this,
             description,
             $trackLabel;
-
-        // viewport container
-        this.$viewportContainer = $('<div class="igv-viewport-container igv-viewport-container-shim">');
-        $track.append(this.$viewportContainer);
 
         // viewport
         this.$viewport = $('<div class="igv-viewport-div">');
@@ -173,48 +215,6 @@ var igv = (function (igv) {
             });
 
             this.$viewport.append($trackLabel);
-        }
-
-    };
-
-    igv.TrackView.prototype.appendLeftHandGutterDivToTrackDiv = function ($track) {
-
-        var self = this,
-            $leftHandGutter,
-            $canvas,
-            w,
-            h;
-
-        if (this.track.paintAxis) {
-
-            $leftHandGutter = $('<div class="igv-left-hand-gutter">');
-            $track.append($leftHandGutter[0]);
-
-            $canvas = $('<canvas class ="igv-track-control-canvas">');
-
-            w = $leftHandGutter.outerWidth();
-            h = $leftHandGutter.outerHeight();
-            $canvas.attr('width', w);
-            $canvas.attr('height', h);
-
-            $leftHandGutter.append($canvas[0]);
-
-            this.controlCanvas = $canvas[0];
-            this.controlCtx = this.controlCanvas.getContext("2d");
-
-
-            if (this.track.dataRange) {
-
-                $leftHandGutter.click(function (e) {
-                    igv.dataRangeDialog.configureWithTrackView(self);
-                    igv.dataRangeDialog.show();
-                });
-
-                $leftHandGutter.addClass('igv-clickable');
-            }
-
-            this.leftHandGutter = $leftHandGutter[0];
-
         }
 
     };
@@ -458,22 +458,6 @@ var igv = (function (igv) {
 
     };
 
-    function Tile(chr, tileStart, tileEnd, scale, image) {
-        this.chr = chr;
-        this.startBP = tileStart;
-        this.endBP = tileEnd;
-        this.scale = scale;
-        this.image = image;
-    }
-
-    Tile.prototype.containsRange = function (chr, start, end, scale) {
-        return this.scale === scale && start >= this.startBP && end <= this.endBP && chr === this.chr;
-    };
-
-    Tile.prototype.overlapsRange = function (chr, start, end) {
-        return this.chr === chr && this.endBP >= start && this.startBP <= end;
-    };
-
     igv.TrackView.prototype.paintImage = function () {
 
         this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
@@ -483,6 +467,121 @@ var igv = (function (igv) {
             this.ctx.drawImage(this.tile.image, this.xOffset, 0);
             this.ctx.save();
             this.ctx.restore();
+        }
+    };
+
+    igv.TrackView.prototype.redrawTile = function (features) {
+
+        if (!this.tile) return;
+
+        var self = this,
+            chr = self.tile.chr,
+            bpStart = self.tile.startBP,
+            bpEnd = self.tile.endBP,
+            buffer = document.createElement('canvas'),
+            bpPerPixel = self.tile.scale;
+
+        buffer.width = self.tile.image.width;
+        buffer.height = self.tile.image.height;
+        var ctx = buffer.getContext('2d');
+
+        self.track.draw({
+            features: features,
+            context: ctx,
+            bpStart: bpStart,
+            bpPerPixel: bpPerPixel,
+            pixelWidth: buffer.width,
+            pixelHeight: buffer.height
+        });
+
+
+        self.tile = new Tile(chr, bpStart, bpEnd, bpPerPixel, buffer);
+        self.paintImage();
+    };
+
+    Tile = function (chr, tileStart, tileEnd, scale, image) {
+        this.chr = chr;
+        this.startBP = tileStart;
+        this.endBP = tileEnd;
+        this.scale = scale;
+        this.image = image;
+    };
+
+    Tile.prototype.containsRange = function (chr, start, end, scale) {
+        return this.scale === scale && start >= this.startBP && end <= this.endBP && chr === this.chr;
+    };
+
+    Tile.prototype.overlapsRange = function (chr, start, end) {
+        return this.chr === chr && this.endBP >= start && this.startBP <= end;
+    };
+
+    /**
+     * Creates a vertical scrollbar to slide an inner "contentDiv" with respect to an enclosing "viewportDiv"
+     *
+     */
+    TrackScrollbar = function (viewportDiv, contentDiv) {
+
+        var self = this,
+            outerScrollDiv = $('<div class="igv-scrollbar-outer-div">')[0],
+            innerScrollDiv = $('<div class="igv-scrollbar-inner-div">')[0],
+            offY;
+
+        $(outerScrollDiv).append(innerScrollDiv);
+
+        this.viewportDiv = viewportDiv;
+        this.contentDiv = contentDiv;
+        this.outerScrollDiv = outerScrollDiv;
+        this.innerScrollDiv = innerScrollDiv;
+
+
+        $(this.innerScrollDiv).mousedown(function (event) {
+            offY = event.pageY - $(innerScrollDiv).position().top;
+            $(window).on("mousemove .igv", null, null, mouseMove);
+            $(window).on("mouseup .igv", null, null, mouseUp);
+            event.stopPropagation();     // <= prevents start of horizontal track panning);
+        });
+
+        $(this.innerScrollDiv).click(function (event) {
+            event.stopPropagation();  // "Eat" clicks on the inner div to prevent them bubbling up to outer
+        });
+
+        $(this.outerScrollDiv).click(function (event) {
+            moveScrollerTo(event.offsetY - $(innerScrollDiv).height() / 2);
+            event.stopPropagation();
+
+        });
+
+        function mouseMove(event) {
+            moveScrollerTo(event.pageY - offY);
+            event.stopPropagation();
+        }
+
+        function mouseUp(event) {
+            $(window).off("mousemove .igv", null, mouseMove);
+            $(window).off("mouseup .igv", null, mouseUp);
+        }
+
+        function moveScrollerTo(y) {
+            var H = $(outerScrollDiv).height(),
+                h = $(innerScrollDiv).height(),
+                newTop = Math.min(Math.max(0, y), H - h),
+                contentTop = -Math.round(newTop * ($(contentDiv).height() / $(self.viewportDiv).height()));
+
+            $(innerScrollDiv).css("top", newTop + "px");
+            $(contentDiv).css("top", contentTop + "px");
+        }
+    };
+
+    TrackScrollbar.prototype.update = function () {
+        var viewportHeight = $(this.viewportDiv).height(),
+            contentHeight = $(this.contentDiv).height(),
+            newInnerHeight = Math.round((viewportHeight / contentHeight) * viewportHeight);
+        if (contentHeight > viewportHeight) {
+            $(this.outerScrollDiv).show();
+            $(this.innerScrollDiv).height(newInnerHeight);
+        }
+        else {
+            $(this.outerScrollDiv).hide();
         }
     };
 
@@ -698,105 +797,6 @@ var igv = (function (igv) {
         });
 
     }
-
-    /**
-     * Creates a vertical scrollbar to slide an inner "contentDiv" with respect to an enclosing "viewportDiv"
-     *
-     */
-    TrackScrollbar = function (viewportDiv, contentDiv) {
-
-        var self = this,
-            outerScrollDiv = $('<div class="igv-scrollbar-outer-div">')[0],
-            innerScrollDiv = $('<div class="igv-scrollbar-inner-div">')[0],
-            offY;
-
-        $(outerScrollDiv).append(innerScrollDiv);
-
-        this.viewportDiv = viewportDiv;
-        this.contentDiv = contentDiv;
-        this.outerScrollDiv = outerScrollDiv;
-        this.innerScrollDiv = innerScrollDiv;
-
-
-        $(this.innerScrollDiv).mousedown(function (event) {
-            offY = event.pageY - $(innerScrollDiv).position().top;
-            $(window).on("mousemove .igv", null, null, mouseMove);
-            $(window).on("mouseup .igv", null, null, mouseUp);
-            event.stopPropagation();     // <= prevents start of horizontal track panning);
-        });
-
-        $(this.innerScrollDiv).click(function (event) {
-            event.stopPropagation();  // "Eat" clicks on the inner div to prevent them bubbling up to outer
-        });
-
-        $(this.outerScrollDiv).click(function (event) {
-            moveScrollerTo(event.offsetY - $(innerScrollDiv).height() / 2);
-            event.stopPropagation();
-
-        });
-
-        function mouseMove(event) {
-            moveScrollerTo(event.pageY - offY);
-            event.stopPropagation();
-        }
-
-        function mouseUp(event) {
-            $(window).off("mousemove .igv", null, mouseMove);
-            $(window).off("mouseup .igv", null, mouseUp);
-        }
-
-        function moveScrollerTo(y) {
-            var H = $(outerScrollDiv).height(),
-                h = $(innerScrollDiv).height(),
-                newTop = Math.min(Math.max(0, y), H - h),
-                contentTop = -Math.round(newTop * ($(contentDiv).height() / $(self.viewportDiv).height()));
-
-            $(innerScrollDiv).css("top", newTop + "px");
-            $(contentDiv).css("top", contentTop + "px");
-        }
-    };
-
-    TrackScrollbar.prototype.update = function () {
-        var viewportHeight = $(this.viewportDiv).height(),
-            contentHeight = $(this.contentDiv).height(),
-            newInnerHeight = Math.round((viewportHeight / contentHeight) * viewportHeight);
-        if (contentHeight > viewportHeight) {
-            $(this.outerScrollDiv).show();
-            $(this.innerScrollDiv).height(newInnerHeight);
-        }
-        else {
-            $(this.outerScrollDiv).hide();
-        }
-    };
-
-    igv.TrackView.prototype.redrawTile = function (features) {
-
-        if (!this.tile) return;
-
-        var self = this,
-            chr = self.tile.chr,
-            bpStart = self.tile.startBP,
-            bpEnd = self.tile.endBP,
-            buffer = document.createElement('canvas'),
-            bpPerPixel = self.tile.scale;
-
-        buffer.width = self.tile.image.width;
-        buffer.height = self.tile.image.height;
-        var ctx = buffer.getContext('2d');
-
-        self.track.draw({
-            features: features,
-            context: ctx,
-            bpStart: bpStart,
-            bpPerPixel: bpPerPixel,
-            pixelWidth: buffer.width,
-            pixelHeight: buffer.height
-        });
-
-
-        self.tile = new Tile(chr, bpStart, bpEnd, bpPerPixel, buffer);
-        self.paintImage();
-    };
 
     return igv;
 
