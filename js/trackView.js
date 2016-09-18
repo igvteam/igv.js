@@ -65,14 +65,13 @@ var igv = (function (igv) {
     function makeTrackDraggable(trackView) {
 
         trackView.$trackDragScrim = $('<div class="igv-track-drag-scrim">');
-        trackView.$viewport.append(trackView.$trackDragScrim);
+        trackView.$viewportContainer.append(trackView.$trackDragScrim);
         trackView.$trackDragScrim.hide();
 
         trackView.$trackManipulationHandle = $('<div class="igv-track-manipulation-handle">');
         $(trackView.trackDiv).append(trackView.$trackManipulationHandle);
 
         trackView.$trackManipulationHandle.mousedown(function (e) {
-
             trackView.isMouseDown = true;
             igv.browser.dragTrackView = trackView;
         });
