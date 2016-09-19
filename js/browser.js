@@ -275,10 +275,16 @@ var igv = (function (igv) {
      * loaded.
      *
      * @param track
+     * @param loci - hack to stand up multi-locus
      */
     igv.Browser.prototype.addTrack = function (track) {
 
-        var trackView = new igv.TrackView(track, this);
+        var loci,
+            trackView;
+
+        // loci = ['chr8:22543174-22552815'];
+        loci = ['chr8:22543174-22552815', 'chr13:32887617-32975809'];
+        trackView = new igv.TrackView(track, this, loci);
 
         if (typeof igv.popover !== "undefined") {
             igv.popover.hide();

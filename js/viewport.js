@@ -3,21 +3,40 @@
  */
 var igv = (function (igv) {
 
-    igv.Viewport = function (trackView) {
-        this.initializationHelper(trackView);
+    igv.Viewport = function (trackView, loci, index) {
+        this.initializationHelper(trackView, loci, index);
     };
 
-    igv.Viewport.prototype.initializationHelper = function (trackView) {
+    igv.Viewport.prototype.initializationHelper = function (trackView, loci, index) {
 
         var self = this,
             description,
-            $trackLabel;
+            $trackLabel,
+            parts,
+            chr,
+            chrLength,
+            viewportContainerWidth = trackView.$viewportContainer.width(),
+            percent,
+            ss,
+            ee,
+            numer,
+            denom;
 
         this.trackView = trackView;
-        this.referenceFrame = trackView.browser.referenceFrame;
 
-        // viewport
+        parts = loci[ index ].split(':');
+        chr = igv.browser.genome.getChromosome( parts[ 0 ] );
+        ss = parseInt(parts[ 1 ].split('-')[ 0 ], 10);
+        ee = parseInt(parts[ 1 ].split('-')[ 1 ], 10);
+        percent = (ee - ss) / chr.bpLength;
+
+        numer = (percent * chr.bpLength);
+        denom = (trackView.$viewportContainer.width()/loci.length);
+
+        this.referenceFrame = new igv.ReferenceFrame(chr.name, ss, numer / denom);
+
         this.$viewport = $('<div class="igv-viewport-div">');
+        this.$viewport.width(viewportContainerWidth/loci.length);
 
         console.log('$viewportContainer ' + trackView.$viewportContainer.width());
         trackView.$viewportContainer.append(this.$viewport);
@@ -42,12 +61,13 @@ var igv = (function (igv) {
             self.$zoomInNotice.hide();
         }
 
+        // TODO: dat - move scrollbars to $viewportContainer
         // scrollbar,  default is to set overflow ot hidden and use custom scrollbar, but this can be overriden so check
-        if ("hidden" === this.$viewport.css("overflow-y")) {
-            this.scrollbar = new TrackScrollbar(this.$viewport.get(0), this.contentDiv);
-            this.scrollbar.update();
-            this.$viewport.append(this.scrollbar.outerScrollDiv);
-        }
+        // if ("hidden" === this.$viewport.css("overflow-y")) {
+        //     this.scrollbar = new TrackScrollbar(this.$viewport.get(0), this.contentDiv);
+        //     this.scrollbar.update();
+        //     this.$viewport.append(this.scrollbar.outerScrollDiv);
+        // }
 
         if (trackView.track.name) {
 
@@ -66,9 +86,6 @@ var igv = (function (igv) {
     };
 
     igv.Viewport.prototype.addTrackHandlers = function (trackView) {
-
-        // Register track handlers for popup.  Although we are not handling dragging here, we still need to check
-        // for dragging on a mouseup
 
         var self = this,
             isMouseDown = false,
@@ -267,8 +284,9 @@ var igv = (function (igv) {
 
                 if (rulerSweepWidth > rulerSweepThreshold) {
 
-                    locus = self.referenceFrame.chr + ":" + igv.numberFormatter(Math.floor(ss)) + "-" + igv.numberFormatter(Math.floor(ee));
-                    igv.browser.search(locus);
+                    // locus = self.referenceFrame.chr + ":" + igv.numberFormatter(Math.floor(ss)) + "-" + igv.numberFormatter(Math.floor(ee));
+                    // igv.browser.search(locus);
+                    self.goto(self.referenceFrame.chr, ss, ee);
                 }
             }
 
@@ -368,6 +386,8 @@ var igv = (function (igv) {
             this.trackView.track.getFeatures(referenceFrame.chr, bpStart, bpEnd)
 
                 .then(function (features) {
+                    var buffer,
+                        requiredHeight;
 
                     self.loading = false;
                     igv.stopSpinnerAtParentElement(self.trackView.trackDiv);
@@ -375,12 +395,13 @@ var igv = (function (igv) {
                     if (features) {
 
                         if (typeof self.trackView.track.computePixelHeight === 'function') {
-                            var requiredHeight = self.trackView.track.computePixelHeight(features);
+                            requiredHeight = self.trackView.track.computePixelHeight(features);
                             if (requiredHeight != self.contentDiv.clientHeight) {
                                 self.setContentHeight(requiredHeight);
                             }
                         }
-                        var buffer = document.createElement('canvas');
+
+                        buffer = document.createElement('canvas');
                         buffer.width = pixelWidth;
                         buffer.height = self.canvas.height;
                         ctx = buffer.getContext('2d');
@@ -394,6 +415,7 @@ var igv = (function (igv) {
                             pixelHeight: buffer.height
                         });
 
+                        // TODO: dat - implement this for viewport. Was in trackView .
                         // if (self.trackView.track.paintAxis && self.trackView.controlCanvas.width > 0 && self.trackView.controlCanvas.height > 0) {
                         //
                         //     var buffer2 = document.createElement('canvas');
