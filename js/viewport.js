@@ -14,8 +14,6 @@ var igv = (function (igv) {
             $trackLabel,
             parts,
             chr,
-            chrLength,
-            viewportContainerWidth = trackView.$viewportContainer.width(),
             percent,
             ss,
             ee,
@@ -32,11 +30,10 @@ var igv = (function (igv) {
 
         numer = (percent * chr.bpLength);
         denom = (trackView.$viewportContainer.width()/loci.length);
-
         this.referenceFrame = new igv.ReferenceFrame(chr.name, ss, numer / denom);
 
         this.$viewport = $('<div class="igv-viewport-div">');
-        this.$viewport.width(viewportContainerWidth/loci.length);
+        this.$viewport.width(trackView.$viewportContainer.width()/loci.length);
 
         console.log('$viewportContainer ' + trackView.$viewportContainer.width());
         trackView.$viewportContainer.append(this.$viewport);
