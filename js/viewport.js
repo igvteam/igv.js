@@ -98,7 +98,7 @@ var igv = (function (igv) {
 
             // ruler sweeper widget surface
             this.$rulerSweeper = $('<div class="igv-ruler-sweeper-div">');
-            $(trackView.contentDiv).append(this.$rulerSweeper);
+            $(self.contentDiv).append(this.$rulerSweeper);
 
             this.addRulerTrackHandlers(trackView);
 
@@ -232,7 +232,7 @@ var igv = (function (igv) {
             isMouseIn = true;
         });
 
-        $(trackView.contentDiv).mousedown(function (e) {
+        $(this.contentDiv).mousedown(function (e) {
             isMouseDown = true;
         });
 
@@ -264,8 +264,7 @@ var igv = (function (igv) {
 
         $(document).mouseup(function (e) {
 
-            var locus,
-                ss,
+            var ss,
                 ee;
 
             if (isMouseDown) {
