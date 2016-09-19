@@ -114,12 +114,15 @@ var igv = (function (igv) {
 
             // Set inital locus
             browser.referenceFrame = new igv.ReferenceFrame(browser.firstChromosomeName(), 0, browser.firstChromosome().bpLength / browser.trackViewportContainerWidth());
-            browser.updateLocusSearch(browser.referenceFrame);
+            // browser.updateLocusSearch(browser.referenceFrame);
 
-            // browser.controlPanelWidth = 50;
+            // TODO: dat - One ideogram per viewport column
+            // TODO: dat - Use (any) viewport width to instantiate
+            if (browser.ideoPanel) {
+                browser.ideoPanel.repaint();
+            }
 
-            if (browser.ideoPanel) browser.ideoPanel.repaint();
-            if (browser.karyoPanel) browser.karyoPanel.resize();
+            // if (browser.karyoPanel) browser.karyoPanel.resize();
 
             if (config.showRuler) {
                 browser.addTrack(new igv.RulerTrack());

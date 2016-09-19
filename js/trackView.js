@@ -26,9 +26,10 @@
 
 var igv = (function (igv) {
 
-    igv.TrackView = function (track, browser) {
+    igv.TrackView = function (track, browser, loci) {
 
-        var element;
+        var self = this,
+            element;
 
         this.track = track;
         this.browser = browser;
@@ -47,7 +48,10 @@ var igv = (function (igv) {
         this.$viewportContainer = $('<div class="igv-viewport-container igv-viewport-container-shim">');
         $(this.trackDiv).append(this.$viewportContainer);
 
-        this.viewport = new igv.Viewport(this);
+        this.viewports = [];
+        loci.forEach(function (locus, i, locusList) {
+            self.viewports.push(new igv.Viewport(self, locusList, i));
+        });
 
         element = this.createRightHandGutter();
         if (element) {
@@ -59,7 +63,10 @@ var igv = (function (igv) {
         // Track Drag & Drop
         makeTrackDraggable(this);
 
-        this.viewport.addTrackHandlers(this);
+        this.viewports.forEach(function(viewport) {
+            viewport.addTrackHandlers(self);
+        });
+
     };
 
     function makeTrackDraggable(trackView) {
@@ -224,15 +231,23 @@ var igv = (function (igv) {
     }
 
     igv.TrackView.prototype.resize = function () {
-        this.viewport.resize();
+        this.viewports.forEach(function(viewport) {
+            viewport.resize();
+        });
+
     };
 
     igv.TrackView.prototype.update = function () {
-        this.viewport.update();
+        this.viewports.forEach(function(viewport) {
+            viewport.update();
+        });
     };
 
     igv.TrackView.prototype.repaint = function () {
-        this.viewport.repaint();
+        this.viewports.forEach(function(viewport) {
+            viewport.repaint();
+        });
+
     };
 
     return igv;
