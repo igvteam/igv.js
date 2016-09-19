@@ -392,9 +392,15 @@ var igv = (function (igv) {
      */
     igv.translateMouseCoordinates = function (e, target) {
 
-        var eFixed = $.event.fix(e),   // Sets pageX and pageY for browsers that don't support them
-            posx = eFixed.pageX - $(target).offset().left,
-            posy = eFixed.pageY - $(target).offset().top;
+        var eFixed,
+            posx,
+            posy;
+
+        // Sets pageX and pageY for browsers that don't support them
+        eFixed = $.event.fix(e);
+
+        posx = eFixed.pageX - $(target).offset().left;
+        posy = eFixed.pageY - $(target).offset().top;
 
         return {x: posx, y: posy}
     };

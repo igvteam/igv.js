@@ -20,6 +20,8 @@ var igv = (function (igv) {
             numer,
             denom;
 
+        this.id = _.uniqueId('viewport_');
+
         this.trackView = trackView;
 
         parts = loci[ index ].split(':');
@@ -33,6 +35,9 @@ var igv = (function (igv) {
         this.referenceFrame = new igv.ReferenceFrame(chr.name, ss, numer / denom);
 
         this.$viewport = $('<div class="igv-viewport-div">');
+
+        this.$viewport.data( "viewport", this.id );
+
         this.$viewport.width(trackView.$viewportContainer.width()/loci.length);
 
         console.log('$viewportContainer ' + trackView.$viewportContainer.width());
