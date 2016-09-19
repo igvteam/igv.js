@@ -101,7 +101,9 @@ var igv = (function (igv) {
 
         this.alignmentTrack.sortAlignmentRows(genomicLocation, this.sortOption);
 
-        this.trackView.redrawTile(this.featureSource.alignmentContainer);
+        // TODO - dat. Temporary hack to stand up mult-locus implementation.
+        // TODO - dat. MUST identify viewport that was clicked in.
+        this.trackView.$viewport.redrawTile(this.featureSource.alignmentContainer);
         this.trackView.$viewport.scrollTop(0);
 
         this.sortDirection = !this.sortDirection;
@@ -915,3 +917,4 @@ var igv = (function (igv) {
 
 })
 (igv || {});
+
