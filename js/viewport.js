@@ -7,6 +7,40 @@ var igv = (function (igv) {
         this.initializationHelper(trackView, loci, index);
     };
 
+    igv.Viewport.viewportsWithLocusIndex = function (locusIndex) {
+
+        var list = [];
+        _.each(igv.browser.trackViews, function(tv){
+
+            _.each(tv.viewports, function(vp) {
+
+                if (locusIndex === vp.locusIndex) {
+                    list.push(vp);
+                }
+
+            });
+        });
+
+        return list;
+    };
+
+    igv.Viewport.viewportWithID = function (id) {
+
+        var result = undefined;
+
+        _.each(igv.browser.trackViews, function(tv){
+            if (undefined === result) {
+                _.each(tv.viewports, function(vp) {
+                    if (id === vp.id) {
+                        result = vp;
+                    }
+                });
+            }
+        });
+
+        return result;
+    };
+
     igv.Viewport.prototype.initializationHelper = function (trackView, loci, index) {
 
         var self = this,
