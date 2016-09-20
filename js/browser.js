@@ -481,21 +481,10 @@ var igv = (function (igv) {
     };
 
     igv.Browser.prototype.loadInProgress = function () {
-        var i,
-            success;
-        // for (i = 0; i < this.trackViews.length; i++) {
-        //     if (this.trackViews[i].loading) {
-        //         return true;
-        //     }
-        // }
-
-        success = false;
+        var success = false;
         _.each(this.trackViews, function(tv){
-
             if (false === success) {
-
                 _.each(tv.viewports, function(vp){
-
                     if (vp.loading) {
                         success = true;
                     }
@@ -1027,9 +1016,7 @@ var igv = (function (igv) {
 
     function attachTrackContainerMouseHandlers(trackContainerDiv) {
 
-        var locusindex,
-            $viewport,
-            viewport_id,
+        var $viewport,
             viewport,
             viewports,
             referenceFrame,
@@ -1045,43 +1032,32 @@ var igv = (function (igv) {
                 $target;
 
             $target = $(e.target);
-            if ($target.hasClass('igv-track-manipulation-handle')) {
-                return;
-            }
+
+            // if (0 === _.size($target.parents('.igv-viewport-div'))) {
+            //     return;
+            // }
 
             if (igv.popover) {
                 igv.popover.hide();
             }
 
             isRulerTrack = $target.parents("div[data-ruler-track='rulerTrack']").get(0) ? true : false;
-
             if (isRulerTrack) {
                 return;
             }
 
+            isMouseDown = true;
             $viewport = $target.parents('.igv-viewport-div');
-            locusindex = $viewport.data('locusindex');
-            viewport_id = $viewport.data('viewport');
-
-            viewports = [];
-            _.each(igv.browser.trackViews, function(tv){
-                _.each(tv.viewports, function(vp) {
-                    if (viewport_id === vp.id) {
-                        viewport = vp;
-                    }
-
-                    if (locusindex === vp.locusIndex) {
-                        viewports.push(vp);
-                    }
-
-                });
-            });
-
             coords = igv.translateMouseCoordinates(e, $viewport.get(0));
+            mouseDownX = lastMouseX = coords.x;
+
+            // viewport object we are panning
+            viewport = igv.Viewport.viewportWithID( $viewport.data('viewport') );
             referenceFrame = viewport.referenceFrame;
 
-            isMouseDown = true;
-            mouseDownX = lastMouseX = coords.x;
+            // list of all viewports in the locus 'column' containing the panning viewport
+            viewports = igv.Viewport.viewportsWithLocusIndex( $viewport.data('locusindex') );
+
         });
 
         // Guide line is bound within track area, and offset by 5 pixels so as not to interfere mouse clicks.
@@ -1163,8 +1139,6 @@ var igv = (function (igv) {
 
         function mouseUpOrOut(e) {
 
-            var element = igv.browser.$cursorTrackingGuide.get(0);
-
             if (isRulerTrack) {
                 return;
             }
@@ -1179,9 +1153,9 @@ var igv = (function (igv) {
                 isDragging = false;
             }
 
-            mouseDownX = lastMouseX = undefined;
             isMouseDown = false;
-            $viewport = viewport_id = viewport = undefined;
+            mouseDownX = lastMouseX = undefined;
+            $viewport = viewport = undefined;
             referenceFrame = undefined;
 
         }
@@ -1344,6 +1318,7 @@ var igv = (function (igv) {
     };
 
     igv.Browser.prototype.fireEvent = function (eventName, args, thisObj) {
+
         if (!this.eventHandlers[eventName]) {
             return;
         }
