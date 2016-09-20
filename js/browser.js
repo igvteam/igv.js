@@ -472,6 +472,30 @@ var igv = (function (igv) {
         this.fireEvent('locuschange', [referenceFrame, str]);
     };
 
+    igv.Browser.prototype.syntheticTrackViewportContainerBBox = function () {
+        var $trackContainer = $(this.trackContainerDiv),
+            $track = $('<div class="igv-track-div">'),
+            $viewportContainer = $('<div class="igv-viewport-container igv-viewport-container-shim">'),
+            rect = {};
+
+        $trackContainer.append($track);
+        $track.append($viewportContainer);
+
+        rect.position = $viewportContainer.position();
+        rect.width = $viewportContainer.width();
+        rect.height = $viewportContainer.height();
+
+        $track.remove();
+
+        return rect;
+    };
+
+    igv.Browser.prototype.syntheticTrackViewportContainerWidth = function () {
+        var rect = this.syntheticTrackViewportContainerBBox();
+
+        return rect.width;
+    };
+
     /**
      * Return the visible width of a track.  All tracks should have the same width.
      */
@@ -481,9 +505,8 @@ var igv = (function (igv) {
 
         if (this.trackViews && this.trackViews.length > 0) {
             width = this.trackViews[0].viewportDiv.clientWidth;
-        }
-        else {
-            width = this.trackContainerDiv.clientWidth - 100;   // Should never get here
+        } else {
+            width = this.syntheticTrackViewportContainerWidth();
         }
 
         return width;
@@ -492,13 +515,6 @@ var igv = (function (igv) {
 
     igv.Browser.prototype.trackViewportWidthBP = function () {
         return this.referenceFrame.bpPerPixel * this.trackViewportWidth();
-    };
-
-    igv.Browser.prototype.trackViewportCenterLineBP = function () {
-        var centerLineBP = (0.5 * this.referenceFrame.bpPerPixel * this.trackViewportWidth());
-
-        // return Math.floor(centerLineBP);
-        return centerLineBP;
     };
 
     igv.Browser.prototype.minimumBasesExtent = function () {

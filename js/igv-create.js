@@ -180,61 +180,51 @@ var igv = (function (igv) {
 
         igv.loadGenome(config.reference).then(function (genome) {
 
+            var firstChr,
+                locus,
+                ss,
+                ee,
+                range;
 
             genome.id = config.reference.genomeId;
             browser.genome = genome;
 
-            if (config.showRuler) {
+            if (true === config.showRuler) {
                 browser.addTrack(new igv.RulerTrack());
             }
 
-            // viewport width -- must get this after adding ruler track
-            var viewportWidth = browser.trackViewportWidth();
-            if (viewportWidth === 0) viewportWidth = 500;
-
-
             // Set inital locus
-            var firstChrName = browser.genome.chromosomeNames[0],
-                firstChr = browser.genome.chromosomes[firstChrName];
-
-            browser.referenceFrame = new igv.ReferenceFrame(firstChrName, 0, firstChr.bpLength / viewportWidth);
-            browser.controlPanelWidth = 50;
+            firstChr = browser.genome.chromosomes[ browser.genome.chromosomeNames[0] ];
+            browser.referenceFrame = new igv.ReferenceFrame(browser.genome.chromosomeNames[0], 0, firstChr.bpLength / browser.trackViewportWidth());
 
             browser.updateLocusSearch(browser.referenceFrame);
 
             if (browser.ideoPanel) browser.ideoPanel.repaint();
             if (browser.karyoPanel) browser.karyoPanel.resize();
 
-            // If an initial locus is specified go there first, then load tracks.  This avoids loading track data at
-            // a default location then moving
-            if (browser.initialLocus || config.locus) {
+            if (config.tracks) {
 
-                var locus = browser.initialLocus ? browser.initialLocus : config.locus;
+                // If an initial locus is specified go there first, then load tracks.  This avoids loading track data at
+                // a default location then moving
+                if (browser.initialLocus || config.locus) {
 
-                igv.startSpinnerAtParentElement(parentDiv);
-                browser.search(locus, function () {
+                    locus = browser.initialLocus ? browser.initialLocus : config.locus;
 
-                    igv.stopSpinnerAtParentElement(parentDiv);
-                    var refFrame = browser.referenceFrame,
-                        start = refFrame.start,
-                        end = start + browser.trackViewportWidth() * refFrame.bpPerPixel,
-                        range = start - end;
+                    igv.startSpinnerAtParentElement(parentDiv);
+                    browser.search(locus, function () {
 
-                    if (config.tracks) {
-
+                        igv.stopSpinnerAtParentElement(parentDiv);
+                        ss = browser.referenceFrame.start;
+                        ee = ss + browser.trackViewportWidth() * browser.referenceFrame.bpPerPixel;
+                        range = ss - ee;
                         browser.loadTracksWithConfigList(config.tracks);
+                    }, true);
 
+                } else {
+                    browser.loadTracksWithConfigList(config.tracks);
+                }
 
-                    }
-
-                }, true);
-
-            } else if (config.tracks) {
-
-                browser.loadTracksWithConfigList(config.tracks);
-
-            }
-
+            } // if (config.tracks)
 
         }).catch(function (error) {
             igv.presentAlert(error);
