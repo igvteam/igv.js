@@ -21,6 +21,7 @@ var igv = (function (igv) {
             denom;
 
         this.id = _.uniqueId('viewport_');
+        this.viewportContainerPercentage = 1/loci.length;
 
         this.trackView = trackView;
 
@@ -31,7 +32,8 @@ var igv = (function (igv) {
         percent = (ee - ss) / chr.bpLength;
 
         numer = (percent * chr.bpLength);
-        denom = (trackView.$viewportContainer.width()/loci.length);
+        denom = this.viewportContainerPercentage * trackView.$viewportContainer.width();
+
         this.referenceFrame = new igv.ReferenceFrame(chr.name, ss, numer / denom);
 
         this.$viewport = $('<div class="igv-viewport-div">');
@@ -40,9 +42,7 @@ var igv = (function (igv) {
 
         this.$viewport.width(trackView.$viewportContainer.width()/loci.length);
 
-        console.log('$viewportContainer ' + trackView.$viewportContainer.width());
         trackView.$viewportContainer.append(this.$viewport);
-        console.log('$viewport ' + this.$viewport.width());
 
         // content  -- purpose of this div is to allow vertical scrolling on individual tracks,
         this.contentDiv = $('<div class="igv-content-div">')[0];
@@ -302,23 +302,20 @@ var igv = (function (igv) {
         }
 
         this.referenceFrame.chr = igv.browser.genome.getChromosomeName(chr);
-        this.referenceFrame.bpPerPixel = (end - start) / this.$viewport.width();
-        this.referenceFrame.start = start;
+        this.referenceFrame.bpPerPixel = (Math.round(end) - Math.round(start)) / this.$viewport.width();
+        this.referenceFrame.start = Math.round(start);
 
-        this.update();
+        this.trackView.update();
 
     };
 
     igv.Viewport.prototype.resize = function () {
 
-        var canvas = this.canvas,
-            contentDiv = this.contentDiv,
-            contentWidth = this.$viewport.width();
-
+        var contentWidth  = this.viewportContainerPercentage * this.trackView.$viewportContainer.width();
         if (contentWidth > 0) {
-            contentDiv.style.width = contentWidth + "px";
-            canvas.style.width = contentWidth + "px";
-            canvas.setAttribute('width', contentWidth);
+            this.$viewport.width(contentWidth);
+            this.canvas.style.width = contentWidth + "px";
+            this.canvas.setAttribute('width', contentWidth);
             this.update();
         }
     };
