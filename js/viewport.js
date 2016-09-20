@@ -20,6 +20,9 @@ var igv = (function (igv) {
             numer,
             denom;
 
+        console.log('viewport index ' + index);
+
+        this.locusIndex = index;
         this.id = _.uniqueId('viewport_');
         this.viewportContainerPercentage = 1/loci.length;
 
@@ -297,16 +300,25 @@ var igv = (function (igv) {
 
     igv.Viewport.prototype.goto = function (chr, start, end) {
 
+        var self = this;
+
         if (igv.popover) {
             igv.popover.hide();
         }
 
-        this.referenceFrame.chr = igv.browser.genome.getChromosomeName(chr);
+        // this.referenceFrame.chr = igv.browser.genome.getChromosomeName(chr);
         this.referenceFrame.bpPerPixel = (Math.round(end) - Math.round(start)) / this.$viewport.width();
         this.referenceFrame.start = Math.round(start);
 
-        this.trackView.update();
-
+        _.each(igv.browser.trackViews, function(tv){
+            _.each(tv.viewports, function(vp){
+                if (vp.locusIndex === self.locusIndex) {
+                    vp.referenceFrame.bpPerPixel = self.referenceFrame.bpPerPixel;
+                    vp.referenceFrame.start = self.referenceFrame.start;
+                    vp.update();
+                }
+            });
+        });
     };
 
     igv.Viewport.prototype.resize = function () {
@@ -381,7 +393,7 @@ var igv = (function (igv) {
 
             igv.startSpinnerAtParentElement(this.trackView.trackDiv);
 
-            this.trackView.track.getFeatures(referenceFrame.chr, bpStart, bpEnd)
+            this.trackView.track.getFeatures(referenceFrame.chr, bpStart, bpEnd, referenceFrame.bpPerPixel)
 
                 .then(function (features) {
                     var buffer,

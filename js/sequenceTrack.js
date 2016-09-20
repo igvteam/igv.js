@@ -35,17 +35,16 @@ var igv = (function (igv) {
         this.ignoreTrackMenu = true;
     };
 
-    igv.SequenceTrack.prototype.getFeatures = function (chr, bpStart, bpEnd) {
+    igv.SequenceTrack.prototype.getFeatures = function (chr, bpStart, bpEnd, bpPerPixel) {
 
         return new Promise(function (fulfill, reject) {
-            if (igv.browser.referenceFrame.bpPerPixel > 1/*igv.browser.trackViewportWidthBP() > 30000*/) {
+            if (bpPerPixel &&  bpPerPixel > 1) {
                 fulfill(null);
-            }
-            else {
+            } else {
                 igv.browser.genome.sequence.getSequence(chr, bpStart, bpEnd).then(fulfill).catch(reject);
             }
         });
-    }
+    };
 
 
     igv.SequenceTrack.prototype.draw = function (options) {

@@ -282,8 +282,8 @@ var igv = (function (igv) {
         var loci,
             trackView;
 
-        loci = ['chr8:22543174-22552815'];
-        // loci = ['chr8:22543174-22552815', 'chr13:32887617-32975809'];
+        // loci = ['chr8:22543174-22552815'];
+        loci = ['chr8:22543174-22552815', 'chr13:32887617-32975809'];
         trackView = new igv.TrackView(track, this, loci);
 
         if (typeof igv.popover !== "undefined") {
