@@ -481,13 +481,29 @@ var igv = (function (igv) {
     };
 
     igv.Browser.prototype.loadInProgress = function () {
-        var i;
-        for (i = 0; i < this.trackViews.length; i++) {
-            if (this.trackViews[i].loading) {
-                return true;
+        var i,
+            success;
+        // for (i = 0; i < this.trackViews.length; i++) {
+        //     if (this.trackViews[i].loading) {
+        //         return true;
+        //     }
+        // }
+
+        success = false;
+        _.each(this.trackViews, function(tv){
+
+            if (false === success) {
+
+                _.each(tv.viewports, function(vp){
+
+                    if (vp.loading) {
+                        success = true;
+                    }
+                });
             }
-        }
-        return false;
+        });
+
+        return success;
     };
 
     igv.Browser.prototype.updateLocusSearch = function (referenceFrame) {
@@ -1011,9 +1027,11 @@ var igv = (function (igv) {
 
     function attachTrackContainerMouseHandlers(trackContainerDiv) {
 
-        var $viewport,
+        var locusindex,
+            $viewport,
             viewport_id,
             viewport,
+            viewports,
             referenceFrame,
             isRulerTrack = false,
             isMouseDown = false,
@@ -1042,13 +1060,20 @@ var igv = (function (igv) {
             }
 
             $viewport = $target.parents('.igv-viewport-div');
+            locusindex = $viewport.data('locusindex');
             viewport_id = $viewport.data('viewport');
 
+            viewports = [];
             _.each(igv.browser.trackViews, function(tv){
                 _.each(tv.viewports, function(vp) {
                     if (viewport_id === vp.id) {
                         viewport = vp;
                     }
+
+                    if (locusindex === vp.locusIndex) {
+                        viewports.push(vp);
+                    }
+
                 });
             });
 
@@ -1111,6 +1136,16 @@ var igv = (function (igv) {
                     }
 
                     // igv.browser.updateLocusSearch(referenceFrame);
+
+                    _.each(viewports, function(vp) {
+
+                        if (vp === viewport) {
+                            // skip
+                        } else {
+                            vp.referenceFrame.start = referenceFrame.start;
+                        }
+
+                    });
 
                     igv.browser.repaint();
                     igv.browser.fireEvent('trackdrag');
