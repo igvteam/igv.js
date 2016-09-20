@@ -432,7 +432,7 @@ var igv = (function (igv) {
     function phoneHome() {
         var url = "https://data.broadinstitute.org/igv/projects/current/counter_igvjs.php?version=" + igvjs_version;
         igvxhr.load(url).then(function (ignore) {
-            console.log(ignore);
+            // console.log(ignore);
         }).catch(function (error) {
             console.log(error);
         });
