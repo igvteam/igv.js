@@ -20,7 +20,7 @@ var igv = (function (igv) {
             numer,
             denom;
 
-        console.log('viewport index ' + index);
+        // console.log('viewport index ' + index);
 
         this.locusIndex = index;
         this.id = _.uniqueId('viewport_');
@@ -42,6 +42,7 @@ var igv = (function (igv) {
         this.$viewport = $('<div class="igv-viewport-div">');
 
         this.$viewport.data( "viewport", this.id );
+        this.$viewport.data( "locusindex", this.locusIndex );
 
         this.$viewport.width(trackView.$viewportContainer.width()/loci.length);
 
