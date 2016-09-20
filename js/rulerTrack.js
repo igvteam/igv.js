@@ -42,7 +42,7 @@ var igv = (function (igv) {
         return new Promise(function (fulfill, reject) {
             fulfill([]);
         });
-    }
+    };
 
     igv.RulerTrack.prototype.draw = function (options) {
 
