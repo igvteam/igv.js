@@ -1031,14 +1031,16 @@ var igv = (function (igv) {
             var coords,
                 $target;
 
-            $target = $(e.target);
-
-            // if (0 === _.size($target.parents('.igv-viewport-div'))) {
-            //     return;
-            // }
-
             if (igv.popover) {
                 igv.popover.hide();
+            }
+
+            $target = $(e.target);
+            $viewport = $target.parents('.igv-viewport-div');
+
+            if (0 === _.size($viewport)) {
+                $viewport = undefined;
+                return;
             }
 
             isRulerTrack = $target.parents("div[data-ruler-track='rulerTrack']").get(0) ? true : false;
@@ -1047,7 +1049,6 @@ var igv = (function (igv) {
             }
 
             isMouseDown = true;
-            $viewport = $target.parents('.igv-viewport-div');
             coords = igv.translateMouseCoordinates(e, $viewport.get(0));
             mouseDownX = lastMouseX = coords.x;
 
@@ -1079,7 +1080,7 @@ var igv = (function (igv) {
                 maxEnd,
                 maxStart;
 
-            if (isRulerTrack) {
+            if (true === isRulerTrack || undefined === $viewport) {
                 return;
             }
 
