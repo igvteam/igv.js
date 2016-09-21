@@ -242,21 +242,20 @@ var igv = (function (igv) {
             contentKaryo,
             $navigation,
             $searchContainer,
-            $faZoom,
+            $faSearch,
             $trackLabelToggle,
             $cursorTrackingGuideToggle,
             $zoomContainer,
             $faZoomIn,
             $faZoomOut,
-            $karyoPanelToggle,
-            display;
+            $karyoPanelToggle;
 
         $controls = $('<div id="igvControlDiv">');
 
         if (config.showNavigation) {
 
             $navigation = $('<div class="igvNavigation">');
-            $controls.append($navigation[0]);
+            $controls.append($navigation);
 
             $igvLogo = $('<div class="igv-logo">');
 
@@ -269,17 +268,17 @@ var igv = (function (igv) {
                 browser.search($(this).val());
             });
 
-            $faZoom = $('<i class="igv-app-icon fa fa-search fa-18px shim-left-6">');
+            $faSearch = $('<i class="igv-app-icon fa fa-search fa-18px shim-left-6">');
 
-            $faZoom.click(function () {
+            $faSearch.click(function () {
                 browser.search(browser.$searchInput.val());
             });
 
-            $searchContainer.append(browser.$searchInput[0]);
-            $searchContainer.append($faZoom[0]);
+            $searchContainer.append(browser.$searchInput);
+            $searchContainer.append($faSearch);
 
-            $navigation.append($igvLogo[0]);
-            $navigation.append($searchContainer[0]);
+            $navigation.append($igvLogo);
+            $navigation.append($searchContainer);
 
             // search results presented in table
             browser.$searchResults = $('<div class="igvNavigationSearchResults">');
@@ -293,6 +292,8 @@ var igv = (function (igv) {
 
             // window size panel
             browser.windowSizePanel = new igv.WindowSizePanel($navigation);
+
+
 
             // zoom in/out
             $faZoomOut = $('<i class="fa fa-minus-circle igv-app-icon fa-24px" style="padding-right: 4px;">');
@@ -312,40 +313,33 @@ var igv = (function (igv) {
             $zoomContainer.append($faZoomIn[0]);
             $navigation.append($zoomContainer[0]);
 
-            // toggle track labels
-            $trackLabelToggle = $('<div class="igv-toggle-track-labels">');
-            $trackLabelToggle.text("hide labels");
-            $trackLabelToggle.click(function () {
-                browser.trackLabelsVisible = !browser.trackLabelsVisible;
-                $(this).text(true === browser.trackLabelsVisible ? "hide labels" : "show labels");
-                $(browser.trackContainerDiv).find('.igv-track-label').toggle();
+
+
+            // cursor tracking guide
+            browser.$cursorTrackingGuide = $('<div class="igv-cursor-tracking-guide">');
+            if (true == config.showCursorTrackingGuide) {
+                browser.$cursorTrackingGuide.show();
+            } else {
+                browser.$cursorTrackingGuide.hide();
+            }
+            $(browser.trackContainerDiv).append(browser.$cursorTrackingGuide);
+
+            $cursorTrackingGuideToggle = igv.makeToggleButton('show cursor guide', 'hide cursor guide', 'showCursorTrackingGuide', function () {
+                return browser.$cursorTrackingGuide;
             });
+
+            $navigation.append($cursorTrackingGuideToggle);
 
             // one base wide center guide
             browser.centerGuide = new igv.CenterGuide($(browser.trackContainerDiv), config);
 
-            // cursor tracking guide
-            browser.$cursorTrackingGuide = $('<div class="igv-cursor-tracking-guide">');
-            $(browser.trackContainerDiv).append(browser.$cursorTrackingGuide);
-            browser.$cursorTrackingGuide.css("display", (config.showCursorTrackingGuide && true == config.showCursorTrackingGuide) ? "block" : "none");
+            $navigation.append(browser.centerGuide.$centerGuideToggle);
 
-            $cursorTrackingGuideToggle = $('<div class="igv-toggle-track-labels">');
-            display = browser.$cursorTrackingGuide.css("display");
-            $cursorTrackingGuideToggle.text("none" === display ? "show cursor guide" : "hide cursor guide");
-
-            $cursorTrackingGuideToggle.on("click", function () {
-                display = browser.$cursorTrackingGuide.css("display");
-                if ("none" === display) {
-                    browser.$cursorTrackingGuide.css("display", "block");
-                    $cursorTrackingGuideToggle.text("hide cursor guide");
-                } else {
-                    browser.$cursorTrackingGuide.css("display", "none");
-                    $cursorTrackingGuideToggle.text("show cursor guide");
-                }
+            // toggle track labels
+            $trackLabelToggle = igv.makeToggleButton('show labels', 'hide labels', 'trackLabelsVisible', function () {
+                return $(browser.trackContainerDiv).find('.igv-track-label');
             });
 
-            $navigation.append($cursorTrackingGuideToggle);
-            $navigation.append(browser.centerGuide.$centerGuideToggle);
             $navigation.append($trackLabelToggle);
 
         }
@@ -382,6 +376,7 @@ var igv = (function (igv) {
 
             $navigation.append($karyoPanelToggle[0]);
         }
+
 
         return $controls[0];
     }

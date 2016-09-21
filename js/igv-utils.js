@@ -25,6 +25,28 @@
 
 var igv = (function (igv) {
 
+
+    igv.makeToggleButton = function (buttonOnLabel, buttonOffLabel, configurationKey, get$Target) {
+
+        var $toggle = $('<div class="igv-toggle-track-labels">'),
+            configurationValue = igv.browser[ configurationKey ];
+
+        $toggle.text(true ===  configurationValue ? buttonOffLabel : buttonOnLabel);
+
+        $toggle.click(function () {
+
+            var $target = get$Target();
+
+            igv.browser[ configurationKey ] = !igv.browser[ configurationKey ];
+
+            $target.toggle();
+
+            $(this).text($target.is(":visible") ? buttonOffLabel : buttonOnLabel);
+        });
+
+        return $toggle;
+    };
+
     igv.presentAlert = function (string) {
 
         igv.alert.$dialogLabel.text(string);
