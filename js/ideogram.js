@@ -30,15 +30,14 @@
 var igv = (function (igv) {
 
     igv.IdeoPanel = function (parentElement) {
-
+        var myself = this;
         this.ideograms = {};
 
         // ideogram content
-        this.contentDiv = $('<div class="igv-ideogram-content-div igv-ideogram-gutter-shim"></div>');
-        $(parentElement).append(this.contentDiv[0]);
+        this.$ideogram = $('<div class="igv-ideogram-content-div igv-ideogram-gutter-shim"></div>');
+        $(parentElement).append(this.$ideogram);
 
-        var myself = this;
-        this.contentDiv.click(function (e) {
+        this.$ideogram.click(function (e) {
 
             var xy,
                 xPercentage,
@@ -48,8 +47,8 @@ var igv = (function (igv) {
                 chrCoveragePercentage,
                 locus;
 
-            xy = igv.translateMouseCoordinates(e, myself.contentDiv);
-            xPercentage = xy.x / myself.contentDiv.width();
+            xy = igv.translateMouseCoordinates(e, $(this).get(0));
+            xPercentage = xy.x / $(this).width();
 
             locusLength = igv.browser.trackViewportContainerWidthBP();
             chr = igv.browser.genome.getChromosome(igv.browser.referenceFrame.chr);
@@ -73,18 +72,18 @@ var igv = (function (igv) {
 
         });
 
-        this.canvas = $('<canvas class="igv-ideogram-canvas"></canvas>')[0];
-        $(this.contentDiv).append(this.canvas);
-        this.canvas.setAttribute('width', this.contentDiv.width());
-        this.canvas.setAttribute('height', this.contentDiv.height());
-        this.ctx = this.canvas.getContext("2d");
+        this.$canvas = $('<canvas class="igv-ideogram-canvas"></canvas>');
+        this.$ideogram.append(this.$canvas);
+        this.$canvas.attr('width', this.$ideogram.width());
+        this.$canvas.attr('height', this.$ideogram.height());
+        this.ctx = this.$canvas.get(0).getContext("2d");
 
     };
 
     igv.IdeoPanel.prototype.resize = function () {
 
-        this.canvas.setAttribute('width', this.contentDiv.width());
-        this.canvas.setAttribute('height', this.contentDiv.height());
+        this.$canvas.attr('width', this.$ideogram.width());
+        this.$canvas.attr('height', this.$ideogram.height());
 
         this.ideograms = {};
         this.repaint();
@@ -95,7 +94,6 @@ var igv = (function (igv) {
         try {
             var y,
                 image,
-                bufferCtx,
                 chromosome,
                 widthPercentage,
                 xPercentage,
@@ -103,13 +101,12 @@ var igv = (function (igv) {
                 widthBP,
                 x,
                 xBP,
-                genome = igv.browser.genome,
                 referenceFrame = igv.browser.referenceFrame,
                 stainColors = [];
 
-            this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
+            this.ctx.clearRect(0, 0, this.$canvas.width(), this.$canvas.height());
 
-            if (!(genome && referenceFrame && genome.getChromosome(referenceFrame.chr))) {
+            if (!(igv.browser.genome && referenceFrame && igv.browser.genome.getChromosome(referenceFrame.chr))) {
                 return;
             }
 
@@ -118,17 +115,15 @@ var igv = (function (igv) {
             if (!image) {
 
                 image = document.createElement('canvas');
-                image.width = this.canvas.width;
+                image.width = this.$canvas.width();
                 image.height = 13;
 
-                bufferCtx = image.getContext('2d');
-
-                drawIdeogram(bufferCtx, this.canvas.width, image.height);
+                drawIdeogram(image.getContext('2d'), this.$canvas.width(), image.height);
 
                 this.ideograms[igv.browser.referenceFrame.chr] = image;
             }
 
-            y = (this.canvas.height - image.height) / 2.0;
+            y = (this.$canvas.height() - image.height) / 2.0;
             this.ctx.drawImage(image, 0, y);
 
             // Draw red box
@@ -144,13 +139,11 @@ var igv = (function (igv) {
                 widthPercentage = widthBP/chromosome.bpLength;
                     xPercentage =     xBP/chromosome.bpLength;
 
-                x =     Math.floor(    xPercentage * this.canvas.width);
-                width = Math.floor(widthPercentage * this.canvas.width);
-
-                //console.log("canvas end " + this.canvas.width + " xEnd " + (x + width));
+                x =     Math.floor(    xPercentage * this.$canvas.width());
+                width = Math.floor(widthPercentage * this.$canvas.width());
 
                 x = Math.max(0, x);
-                x = Math.min(this.canvas.width - width, x);
+                x = Math.min(this.$canvas.width() - width, x);
 
                 this.ctx.strokeStyle = "red";
                 this.ctx.lineWidth = 2;
@@ -168,9 +161,11 @@ var igv = (function (igv) {
 
             var ideogramTop = 0;
 
-            if (!genome) return;
+            if (!igv.browser.genome) {
+                return;
+            }
 
-            var cytobands = genome.getCytobands(referenceFrame.chr);
+            var cytobands = igv.browser.genome.getCytobands(referenceFrame.chr);
 
             if (cytobands) {
 
