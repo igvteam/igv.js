@@ -752,9 +752,11 @@ div.ui-dialog fieldset {
     margin-left: 40px;
 }
 
-.igv-toggle-track-labels {
+.igv-nav-bar-toggle-button {
 
     position: relative;
+    width: 140px;
+
     float: right;
 
     margin-right: 5px;
@@ -773,22 +775,32 @@ div.ui-dialog fieldset {
     font-size: small;
     font-weight: 200;
 
+    text-align: center;
+    vertical-align: middle;
+}
+
+.igv-nav-bar-toggle-button-on {
     color: #444;
     background-color: white;
 }
 
-.igv-toggle-track-labels:hover,
-.igv-toggle-track-labels:focus,
-.igv-toggle-track-labels:active  {
-
-    cursor: pointer;
-
-    border-color: #afafaf;
-    /*border-width: 2px;*/
-
-    /*color: white;*/
-    /*background-color: #c4c4c4;*/
+.igv-nav-bar-toggle-button-off {
+    background-color: #444;
+    color: white;
 }
+
+/*.igv-toggle-track-labels:hover,*/
+/*.igv-toggle-track-labels:focus,*/
+/*.igv-toggle-track-labels:active  {*/
+
+    /*cursor: pointer;*/
+
+    /*border-color: #afafaf;*/
+    /*!*border-width: 2px;*!*/
+
+    /*!*color: white;*!*/
+    /*!*background-color: #c4c4c4;*!*/
+/*}*/
 
 .igvNavigationMarginLeft12 {
 

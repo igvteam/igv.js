@@ -28,12 +28,12 @@ var igv = (function (igv) {
 
     igv.makeToggleButton = function (buttonOnLabel, buttonOffLabel, configurationKey, get$Target) {
 
-        var $toggle = $('<div class="igv-toggle-track-labels">'),
+        var $button = $('<div class="igv-nav-bar-toggle-button">'),
             configurationValue = igv.browser[ configurationKey ];
 
-        $toggle.text(true ===  configurationValue ? buttonOffLabel : buttonOnLabel);
+        skin$ButtonWithTruthFunction($button, (true === configurationValue), buttonOnLabel, buttonOffLabel);
 
-        $toggle.click(function () {
+        $button.click(function () {
 
             var $target = get$Target();
 
@@ -41,10 +41,23 @@ var igv = (function (igv) {
 
             $target.toggle();
 
-            $(this).text($target.is(":visible") ? buttonOffLabel : buttonOnLabel);
+            skin$ButtonWithTruthFunction($(this), $target.is(":visible"), buttonOnLabel, buttonOffLabel);
         });
 
-        return $toggle;
+        function skin$ButtonWithTruthFunction($b, truth, onLabel, offLabel) {
+
+            $b.removeClass('igv-nav-bar-toggle-button-on');
+            $b.removeClass('igv-nav-bar-toggle-button-off');
+            if (true === truth) {
+                $b.addClass('igv-nav-bar-toggle-button-off');
+                $b.text(offLabel);
+            } else {
+                $b.addClass('igv-nav-bar-toggle-button-on');
+                $b.text(onLabel);
+            }
+        }
+
+        return $button;
     };
 
     igv.presentAlert = function (string) {

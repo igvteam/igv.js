@@ -245,9 +245,6 @@ var igv = (function (igv) {
             $faSearch,
             $trackLabelToggle,
             $cursorTrackingGuideToggle,
-            $zoomContainer,
-            $faZoomIn,
-            $faZoomOut,
             $karyoPanelToggle;
 
         $controls = $('<div id="igvControlDiv">');
@@ -293,26 +290,8 @@ var igv = (function (igv) {
             // window size panel
             browser.windowSizePanel = new igv.WindowSizePanel($navigation);
 
-
-
-            // zoom in/out
-            $faZoomOut = $('<i class="fa fa-minus-circle igv-app-icon fa-24px" style="padding-right: 4px;">');
-
-            $faZoomOut.click(function () {
-                igv.browser.zoomOut();
-            });
-
-            $faZoomIn = $('<i class="fa fa-plus-circle igv-app-icon fa-24px">');
-
-            $faZoomIn.click(function () {
-                igv.browser.zoomIn();
-            });
-
-            $zoomContainer = $('<div class="igvNavigationZoom">');
-            $zoomContainer.append($faZoomOut[0]);
-            $zoomContainer.append($faZoomIn[0]);
-            $navigation.append($zoomContainer[0]);
-
+            // $navigation.append($zoomContainer[0]);
+            $navigation.append(makeZoomWidget());
 
 
             // cursor tracking guide
@@ -354,7 +333,7 @@ var igv = (function (igv) {
             }
             browser.karyoPanel = new igv.KaryoPanel(contentKaryo);
 
-            $karyoPanelToggle = $('<div class="igv-toggle-track-labels">');
+            $karyoPanelToggle = $('<div class="igv-nav-bar-toggle-button">');
 
             if (config.showKaryo === "hide") {
                 $karyoPanelToggle.text("Show Karyotype");
@@ -379,6 +358,32 @@ var igv = (function (igv) {
 
 
         return $controls[0];
+    }
+
+    function makeZoomWidget() {
+
+        var $faZoomOut,
+            $faZoomIn,
+            $zoomContainer;
+
+        $faZoomOut = $('<i class="fa fa-minus-circle igv-app-icon fa-24px" style="padding-right: 4px;">');
+
+        $faZoomOut.click(function () {
+            igv.browser.zoomOut();
+        });
+
+        $faZoomIn = $('<i class="fa fa-plus-circle igv-app-icon fa-24px">');
+
+        $faZoomIn.click(function () {
+            igv.browser.zoomIn();
+        });
+
+        $zoomContainer = $('<div class="igvNavigationZoom">');
+        $zoomContainer.append($faZoomOut);
+        $zoomContainer.append($faZoomIn);
+
+        return $zoomContainer;
+
     }
 
     /**
