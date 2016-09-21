@@ -34,22 +34,15 @@ var igv = (function (igv) {
             cssDisplay;
         
         this.$container = $('<div class="igv-center-guide igv-center-guide-thin">');
+        if (true == config.showCenterGuide) {
+            this.$container.show();
+        } else {
+            this.$container.hide();
+        }
         $parent.append(this.$container);
-        this.$container.css("display", (config.showCenterGuide && true == config.showCenterGuide) ? "block" : "none");
 
-        cssDisplay = this.$container.css("display");
-        this.$centerGuideToggle = $('<div class="igv-toggle-track-labels">');
-        this.$centerGuideToggle.text(("none" === cssDisplay) ? "show center guide" : "hide center guide");
-
-        this.$centerGuideToggle.on("click", function () {
-            cssDisplay = self.$container.css("display");
-            if ("none" === cssDisplay) {
-                self.$container.css("display", "block");
-                self.$centerGuideToggle.text("hide center guide");
-            } else {
-                self.$container.css("display", "none");
-                self.$centerGuideToggle.text("show center guide");
-            }
+        this.$centerGuideToggle = igv.makeToggleButton('show center guide', 'hide center guide', 'showCenterGuide', function () {
+            return self.$container;
         });
 
     };
