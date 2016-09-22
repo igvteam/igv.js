@@ -97,54 +97,54 @@ var igv = (function (igv) {
             $header.append($('<div class="igv-logo-nonav">'));
         }
 
-        if (config.hideIdeogram && true === config.hideIdeogram) {
-            // do nothing
-        } else {
-            browser.ideoPanel = new igv.IdeoPanel($header);
-            browser.ideoPanel.resize();
-        }
-
         // phone home -- counts launches.  Count is anonymous, needed for our continued funding.  Please don't delete
         phoneHome();
 
         igv.loadGenome(config.reference).then(function (genome) {
 
+            var viewportWidth,
+                loci,
+                chr,
+                ss,
+                ee;
+
+            // if (browser.karyoPanel) {
+            //     browser.karyoPanel.resize();
+            // }
+
             browser.genome = genome;
             browser.genome.id = config.reference.genomeId;
 
-            // Set inital locus
-            browser.referenceFrame = new igv.ReferenceFrame(browser.firstChromosomeName(), 0, browser.firstChromosome().bpLength / browser.trackViewportContainerWidth());
+            browser.loci = [];
+            if (config.locus) {
+                browser.loci.push(config.locus);
+            } else if (config.loci) {
+                browser.loci = _.clone(config.loci);
+            } else {
+                browser.loci.push( browser.firstChromosomeName() );
+            }
+
+            viewportWidth = browser.syntheticTrackViewportContainerWidth() / _.size(browser.loci);
+
+            // browser.referenceFrame = new igv.ReferenceFrame(browser.firstChromosomeName(), 0, browser.firstChromosome().bpLength / browser.trackViewportContainerWidth());
             // browser.updateLocusSearch(browser.referenceFrame);
-
-            // TODO: dat - One ideogram per viewport column
-            // TODO: dat - Use (any) viewport width to instantiate
-            if (browser.ideoPanel) {
-                browser.ideoPanel.repaint();
-            }
-
-            // if (browser.karyoPanel) browser.karyoPanel.resize();
-
-            if (config.showRuler) {
-                browser.addTrack(new igv.RulerTrack());
-            }
 
             if (config.tracks) {
 
-                // If initial locus is specified, go there first then load tracks. This avoids loading track data at
-                // default location then moving
-                if (browser.initialLocus || config.locus) {
+                browser.getChromosomesWithLoci(browser.loci, function (chromosomeStartEndGtexSelection) {
 
-                    igv.startSpinnerAtParentElement(parentDiv);
+                    if (false === config.hideIdeogram) {
+                        browser.ideoPanel = new igv.IdeoPanel($header);
+                        browser.ideoPanel.resize();
+                    }
 
-                    browser.search(browser.initialLocus ? browser.initialLocus : config.locus, function () {
+                    if (config.showRuler) {
+                        browser.addTrack(new igv.RulerTrack());
+                    }
 
-                        igv.stopSpinnerAtParentElement(parentDiv);
-                        browser.loadTracksWithConfigList(config.tracks);
-                    }, true);
-
-                } else {
                     browser.loadTracksWithConfigList(config.tracks);
-                }
+
+                });
 
             }
 

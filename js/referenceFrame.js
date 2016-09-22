@@ -28,8 +28,8 @@
 var igv = (function (igv) {
 
 
-    igv.ReferenceFrame = function (chr, start, bpPerPixel) {
-        this.chr = chr;
+    igv.ReferenceFrame = function (chrName, start, bpPerPixel) {
+        this.chrName = chrName;
         this.start = start;
         this.bpPerPixel = bpPerPixel;
     }
@@ -48,7 +48,7 @@ var igv = (function (igv) {
     }
 
     igv.ReferenceFrame.prototype.description = function() {
-        return "ReferenceFrame " + this.chr + " " + igv.numberFormatter(Math.floor(this.start)) + " bpp " + this.bpPerPixel;
+        return "ReferenceFrame " + this.chrName + " " + igv.numberFormatter(Math.floor(this.start)) + " bpp " + this.bpPerPixel;
     }
 
 
