@@ -507,7 +507,7 @@ var igv = (function (igv) {
 
         if (this.$searchInput) {
 
-            chr = referenceFrame.chr;
+            chr = referenceFrame.chrName;
             ss = igv.numberFormatter(Math.floor(referenceFrame.start + 1));
 
             end = referenceFrame.start + this.trackViewportContainerWidthBP();
@@ -602,7 +602,7 @@ var igv = (function (igv) {
             chr = this.genome.getChromosomeName(chr);
         }
 
-        this.referenceFrame.chr = chr;
+        this.referenceFrame.chrName = chr;
 
         // If end is undefined,  interpret start as the new center, otherwise compute scale.
         if (!end) {
@@ -614,9 +614,9 @@ var igv = (function (igv) {
         }
 
         if (this.genome) {
-            chromosome = this.genome.getChromosome(this.referenceFrame.chr);
+            chromosome = this.genome.getChromosome(this.referenceFrame.chrName);
             if (!chromosome) {
-                if (console && console.log) console.log("Could not find chromsome " + this.referenceFrame.chr);
+                if (console && console.log) console.log("Could not find chromsome " + this.referenceFrame.chrName);
             }
             else {
                 if (!chromosome.bpLength) chromosome.bpLength = 1;
@@ -691,7 +691,7 @@ var igv = (function (igv) {
         newScale = this.referenceFrame.bpPerPixel * 2;
         chrLength = 250000000;
         if (this.genome) {
-            var chromosome = this.genome.getChromosome(this.referenceFrame.chr);
+            var chromosome = this.genome.getChromosome(this.referenceFrame.chrName);
             if (chromosome) {
                 chrLength = chromosome.bpLength;
             }
@@ -711,10 +711,77 @@ var igv = (function (igv) {
         this.update();
     };
 
+    igv.Browser.prototype.getChromosomesWithLoci = function (loci, continuation) {
+
+        var self = this,
+            lociClone,
+            geneNameLoci,
+            chromosomes = [];
+
+        lociClone = _.clone(loci);
+        _.each(loci, function(locus) {
+
+            var pieces = {};
+            if (igv.isChrNameStartEndFeature(locus, self.genome, pieces)) {
+                pieces.gtexSelection = undefined;
+                chromosomes.push(pieces);
+                lociClone.shift();
+            }
+        });
+
+        // TODO: Handle gene names
+        geneNameLoci = _.without(loci, lociClone);
+
+        continuation(chromosomes);
+    };
+
+    igv.isChrNameStartEndFeature = function (feature, genome, pieces) {
+
+        var a = feature.split(':'),
+            b,
+            ss,
+            ee,
+            n,
+            success;
+
+        if ( undefined === genome.getChromosome(_.first(a)) ) {
+            return false;
+        }
+
+        if (pieces) {
+            pieces.chr = genome.getChromosome(_.first(a));
+        }
+
+        if (1 === _.size(a)) {
+            return true;
+        } else {
+
+            b = _.last(a).split('-');
+            if (_.size(b) > 2) {
+                return false;
+            }
+
+            success = true;
+            _.each(b, function(bb, index) {
+
+                if (true === success) {
+                    n = bb.replace(/\,/g,'');
+                    success = !isNaN(n);
+                    if (true === success && pieces) {
+                        pieces[ 0 === index ? 'start' : 'end' ] = parseInt(n, 10);
+                    }
+                }
+            });
+
+            return success;
+        }
+    };
+
     /**
      *
      * @param feature
      * @param callback - function to call
+     * @param force - force callback
      */
     igv.Browser.prototype.search = function (feature, callback, force) {
         var type,
@@ -734,9 +801,9 @@ var igv = (function (igv) {
             return;
         }
 
-        if (isLocusFeature(feature, this.genome, force)) {
+        if (igv.isChrNameStartEndFeature(feature, this.genome, undefined)) {
 
-            var success = gotoLocusFeature(feature, this.genome, this);
+            var success =  igv.gotoLocusFeature(feature, this.genome, this);
 
             if ((force || true === success) && callback) {
                 callback();
@@ -749,7 +816,7 @@ var igv = (function (igv) {
 
             if (result) {
 
-                handleSearchResult(result.name, result.chr, result.start, result.end, "");
+                handleSearchResult(result.name, result.chrName, result.start, result.end, "");
 
             } else if (this.searchConfig) {
                 url = this.searchConfig.url.replace("$FEATURE$", feature);
@@ -798,22 +865,9 @@ var igv = (function (igv) {
                 });
             }
         }
-
-        function isLocusFeature(f, genome) {
-
-            if (2 === f.split(':').length) {
-                return true;
-            }
-
-            if (genome.getChromosome(f)) {
-                return true;
-            }
-
-            return false;
-        }
     };
 
-    function gotoLocusFeature(locusFeature, genome, browser) {
+    igv.gotoLocusFeature = function (locusFeature, genome, browser) {
 
         var type,
             tokens,
@@ -906,7 +960,7 @@ var igv = (function (igv) {
         }
 
         return true;
-    }
+    };
 
     function presentSearchResults(loci, config, feature) {
 
@@ -988,7 +1042,7 @@ var igv = (function (igv) {
 
     function handleSearchResult(name, chr, start, end, type) {
 
-        igv.browser.selection = new igv.GtexSelection('gtex' === type || 'snp' === type ? {snp: name} : {gene: name});
+        igv.browser.selection = new igv.GtexSelection('gtex' === type || 'snp' === type ? { snp: name } : { gene: name });
 
         if (end === undefined) {
             end = start + 1;
@@ -1104,7 +1158,7 @@ var igv = (function (igv) {
                     referenceFrame.start = Math.max(0, referenceFrame.start);
 
                     // clamp right
-                    var chromosome = igv.browser.genome.getChromosome(referenceFrame.chr);
+                    var chromosome = igv.browser.genome.getChromosome(referenceFrame.chrName);
                     maxEnd = chromosome.bpLength;
                     maxStart = maxEnd - viewport.$viewport.width() * referenceFrame.bpPerPixel;
 
