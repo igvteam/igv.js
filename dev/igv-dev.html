@@ -204,13 +204,6 @@
                         })">BAM File - deep coverage (Brain, BodyMap)
         </div>
 
-        <div onclick="igv.browser.loadTrack({
-                            url: 'https://data.broadinstitute.org/igvdata/test/1KG/CEUTrio.bam',
-                            indexURL: 'https://data.broadinstitute.org/igvdata/test/1KG/CEUTrio.bai',
-                            name: 'CEU Trio',
-                            height: 200
-                        })">BAM File - CEU Trio
-        </div>
 
         <div onclick="igv.browser.loadTrack({
                                 type: 'bam',
@@ -539,17 +532,22 @@
             track.sortSamples("8", 124512906, 124512945, "DESC");
         })
 
-    }
+    };
 
     $(document).ready(function () {
+        var div,
+                options,
+                browser,
+                $rulerSweeperTrack;
 
-        var options;
-
+        div = $("#myDiv")[0];
         options = {
 
 //            hideIdeogram: true,
 //            showCenterGuide: true,
 //            showCursorTrackingGuide: true,
+//            doubleClickDelay: 0.001,
+//            showRuler: false,
             locus: "8:124,512,906-124,512,945",
             reference: {
                 id: "hg19",
@@ -575,7 +573,8 @@
             ]
         };
 
-        igv.createBrowser($("#myDiv")[0], options);
+        browser = igv.createBrowser(div, options);
+
     })
 
 

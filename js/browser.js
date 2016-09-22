@@ -30,11 +30,11 @@ var igv = (function (igv) {
 
     igv.Browser = function (options, trackContainer) {
 
-        igv.browser = this;   // Make globally visible (for use in html markup).
-
         this.config = options;
 
-        this.div = $('<div id="igvRootDiv" class="igv-root-div">')[0];
+        igv.browser = this;   // Make globally visible (for use in html markup).
+
+        igv.browser.rootDiv = $('<div id="igvRootDiv" class="igv-root-div">')[0];
 
         initialize.call(this, options);
 
@@ -42,7 +42,7 @@ var igv = (function (igv) {
 
         this.trackContainerDiv = trackContainer;
 
-        addTrackContainerHandlers(trackContainer);
+        addTrackContainerHandlers(this.trackContainerDiv);
 
         this.trackViews = [];
 
@@ -62,6 +62,32 @@ var igv = (function (igv) {
         window.onresize = igv.throttle(function () {
             igv.browser.resize();
         }, 10);
+
+        $(document).mousedown(function (e) {
+            igv.browser.isMouseDown = true;
+        });
+
+        $(document).mouseup(function (e) {
+
+            igv.browser.isMouseDown = undefined;
+
+            if (igv.browser.dragTrackView) {
+                $(igv.browser.dragTrackView.igvTrackDragScrim).hide();
+            }
+
+            igv.browser.dragTrackView = undefined;
+
+        });
+
+        $(document).click(function (e) {
+            var target = e.target;
+            if (!igv.browser.rootDiv.contains(target)) {
+                // We've clicked outside the IGV div.  Close any open popovers.
+                igv.popover.hide();
+            }
+        });
+
+
 
     };
 

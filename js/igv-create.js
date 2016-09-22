@@ -40,103 +40,36 @@ var igv = (function (igv) {
         var igvLogo,
             contentDiv,
             headerDiv,
-            trackContainerDiv,
-            browser,
-            rootDiv,
-            controlDiv,
-            trackOrder = 1;
+            browser;
 
         if (igv.browser) {
             //console.log("Attempt to create 2 browsers.");
             igv.removeBrowser();
         }
 
-        if (!config) config = {};
-
         setDefaults(config);
 
-        oauth.google.apiKey = config.apiKey;
-        oauth.google.access_token = config.oauthToken;
+        setOAuth(config);
 
-        // Deal with several legacy genome definition options
-        if (config.genome) {
-            config.reference = expandGenome(config.genome);
-        }
-        else if (config.fastaURL) {   // legacy property
-            config.reference = {
-                fastaURL: config.fastaURL,
-                cytobandURL: config.cytobandURL
-            }
-        }
-        else if (config.reference && config.reference.id !== undefined && config.reference.fastaURL === undefined) {
-            config.reference = expandGenome(config.reference.id);
-        }
+        // Deal with legacy genome definition options
+        setReferenceConfiguration(config);
 
-        if (!(config.reference && config.reference.fastaURL)) {
-            //alert("Fatal error:  reference must be defined");
-            igv.presentAlert("Fatal error:  reference must be defined");
-            throw new Error("Fatal error:  reference must be defined");
-        }
+        // Set track order explicitly. Otherwise they will be ordered randomly as each completes its async load
+        setTrackOrder(config);
 
+        browser = new igv.Browser(config, $('<div class="igv-track-container-div">')[0]);
 
-        //Set order of tracks, otherwise they will be ordered randomly as each completes its async load
-        if (config.tracks) {
-            config.tracks.forEach(function (track) {
-                if (track.order === undefined) {
-                    track.order = trackOrder++;
-                }
-            });
-        }
+        $(parentDiv).append($(browser.rootDiv));
 
-        trackContainerDiv = $('<div class="igv-track-container-div">')[0];
-        browser = new igv.Browser(config, trackContainerDiv);
-        rootDiv = browser.div;
-
-        $(document).mousedown(function (e) {
-            //console.log("browser.isMouseDown = true");
-            browser.isMouseDown = true;
-        });
-
-        $(document).mouseup(function (e) {
-
-            //console.log("browser.isMouseDown = undefined");
-            browser.isMouseDown = undefined;
-
-            if (browser.dragTrackView) {
-                $(browser.dragTrackView.igvTrackDragScrim).hide();
-            }
-
-            browser.dragTrackView = undefined;
-
-        });
-
-        $(document).click(function (e) {
-            var target = e.target;
-            if (!igv.browser.div.contains(target)) {
-                // We've clicked outside the IGV div.  Close any open popovers.
-                igv.popover.hide();
-            }
-        });
-
-
-        // DOM
-        $(parentDiv).append($(rootDiv));
-
-        // Create controls.  This can be customized by passing in a function, which should return a div containing the
-        // controls
-
-        if (config.showCommandBar !== false && config.showControls !== false) {
-            controlDiv = config.createControls ? config.createControls(browser, config) : createStandardControls(browser, config);
-            $(rootDiv).append($(controlDiv));
-        }
+        setControls(browser, config);
 
         contentDiv = $('<div class="igv-content-div">')[0];
-        $(rootDiv).append(contentDiv);
+        $(browser.rootDiv).append(contentDiv);
 
         headerDiv = $('<div>')[0];
         $(contentDiv).append(headerDiv);
 
-        $(contentDiv).append(trackContainerDiv);
+        $(contentDiv).append(browser.trackContainerDiv);
 
         // user feedback
         browser.userFeedback = new igv.UserFeedback($(contentDiv));
@@ -146,19 +79,19 @@ var igv = (function (igv) {
         igv.popover = new igv.Popover($(contentDiv), "igv-popover");
 
         // ColorPicker object -- singleton shared by all components
-        igv.colorPicker = new igv.ColorPicker($(rootDiv), config.palette, "igv-color-picker");
+        igv.colorPicker = new igv.ColorPicker($(browser.rootDiv), config.palette, "igv-color-picker");
         igv.colorPicker.hide();
 
         // alert object -- singleton shared by all components
-        igv.alert = new igv.AlertDialog($(rootDiv), "igv-alert");
+        igv.alert = new igv.AlertDialog($(browser.rootDiv), "igv-alert");
         igv.alert.hide();
 
         // Dialog object -- singleton shared by all components
-        igv.dialog = new igv.Dialog($(rootDiv), igv.Dialog.dialogConstructor, "igv-dialog");
+        igv.dialog = new igv.Dialog($(browser.rootDiv), igv.Dialog.dialogConstructor, "igv-dialog");
         igv.dialog.hide();
 
         // Data Range Dialog object -- singleton shared by all components
-        igv.dataRangeDialog = new igv.DataRangeDialog($(rootDiv), "igv-data-range-dialog");
+        igv.dataRangeDialog = new igv.DataRangeDialog($(browser.rootDiv), "igv-data-range-dialog");
         igv.dataRangeDialog.hide();
 
         if (!config.showNavigation) {
@@ -177,54 +110,61 @@ var igv = (function (igv) {
         // phone home -- counts launches.  Count is anonymous, needed for our continued funding.  Please don't delete
         phoneHome();
 
-
         igv.loadGenome(config.reference).then(function (genome) {
-
-            var firstChr,
-                locus,
-                ss,
-                ee,
-                range;
 
             genome.id = config.reference.genomeId;
             browser.genome = genome;
 
-            if (true === config.showRuler) {
+            if (config.showRuler) {
                 browser.addTrack(new igv.RulerTrack());
             }
 
+            // viewport width -- must get this after adding ruler track
+            var viewportWidth = browser.trackViewportWidth();
+            if (viewportWidth === 0) viewportWidth = 500;
+
+
             // Set inital locus
-            firstChr = browser.genome.chromosomes[ browser.genome.chromosomeNames[0] ];
-            browser.referenceFrame = new igv.ReferenceFrame(browser.genome.chromosomeNames[0], 0, firstChr.bpLength / browser.trackViewportWidth());
+            var firstChrName = browser.genome.chromosomeNames[0],
+                firstChr = browser.genome.chromosomes[firstChrName];
+
+            browser.referenceFrame = new igv.ReferenceFrame(firstChrName, 0, firstChr.bpLength / viewportWidth);
+            browser.controlPanelWidth = 50;
 
             browser.updateLocusSearch(browser.referenceFrame);
 
             if (browser.ideoPanel) browser.ideoPanel.repaint();
             if (browser.karyoPanel) browser.karyoPanel.resize();
 
-            if (config.tracks) {
+            // If an initial locus is specified go there first, then load tracks.  This avoids loading track data at
+            // a default location then moving
+            if (browser.initialLocus || config.locus) {
 
-                // If an initial locus is specified go there first, then load tracks.  This avoids loading track data at
-                // a default location then moving
-                if (browser.initialLocus || config.locus) {
+                var locus = browser.initialLocus ? browser.initialLocus : config.locus;
 
-                    locus = browser.initialLocus ? browser.initialLocus : config.locus;
+                igv.startSpinnerAtParentElement(parentDiv);
+                browser.search(locus, function () {
 
-                    igv.startSpinnerAtParentElement(parentDiv);
-                    browser.search(locus, function () {
+                    igv.stopSpinnerAtParentElement(parentDiv);
+                    var refFrame = browser.referenceFrame,
+                        start = refFrame.start,
+                        end = start + browser.trackViewportWidth() * refFrame.bpPerPixel,
+                        range = start - end;
 
-                        igv.stopSpinnerAtParentElement(parentDiv);
-                        ss = browser.referenceFrame.start;
-                        ee = ss + browser.trackViewportWidth() * browser.referenceFrame.bpPerPixel;
-                        range = ss - ee;
+                    if (config.tracks) {
+
                         browser.loadTracksWithConfigList(config.tracks);
-                    }, true);
 
-                } else {
-                    browser.loadTracksWithConfigList(config.tracks);
-                }
 
-            } // if (config.tracks)
+                    }
+
+                }, true);
+
+            } else if (config.tracks) {
+
+                browser.loadTracksWithConfigList(config.tracks);
+
+            }
 
         }).catch(function (error) {
             igv.presentAlert(error);
@@ -234,6 +174,90 @@ var igv = (function (igv) {
         return browser;
 
     };
+
+    function setOAuth(conf) {
+        oauth.google.apiKey = conf.apiKey;
+        oauth.google.access_token = conf.oauthToken;
+    }
+
+    function setTrackOrder(conf) {
+
+        var trackOrder = 1;
+
+        if (conf.tracks) {
+            conf.tracks.forEach(function (track) {
+                if (track.order === undefined) {
+                    track.order = trackOrder++;
+                }
+            });
+        }
+
+    }
+
+    function setReferenceConfiguration(conf) {
+
+        if (conf.genome) {
+            conf.reference = expandGenome(conf.genome);
+        }
+        else if (conf.fastaURL) {   // legacy property
+            conf.reference = {
+                fastaURL: conf.fastaURL,
+                cytobandURL: conf.cytobandURL
+            }
+        }
+        else if (conf.reference && conf.reference.id !== undefined && conf.reference.fastaURL === undefined) {
+            conf.reference = expandGenome(conf.reference.id);
+        }
+
+        if (!(conf.reference && conf.reference.fastaURL)) {
+            //alert("Fatal error:  reference must be defined");
+            igv.presentAlert("Fatal error:  reference must be defined");
+            throw new Error("Fatal error:  reference must be defined");
+        }
+
+
+        /**
+         * Expands ucsc type genome identifiers to genome object.
+         *
+         * @param genomeId
+         * @returns {{}}
+         */
+        function expandGenome(genomeId) {
+
+            var reference = {id: genomeId};
+
+            switch (genomeId) {
+
+                case "hg18":
+                    reference.fastaURL = "https://s3.amazonaws.com/igv.broadinstitute.org/genomes/seq/hg18/hg18.fasta";
+                    reference.cytobandURL = "https://s3.amazonaws.com/igv.broadinstitute.org/genomes/seq/hg18/cytoBand.txt.gz";
+                    break;
+                case "hg19":
+                case "GRCh37":
+                default:
+                {
+                    reference.fastaURL = "https://s3.amazonaws.com/igv.broadinstitute.org/genomes/seq/hg19/hg19.fasta";
+                    reference.cytobandURL = "https://s3.amazonaws.com/igv.broadinstitute.org/genomes/seq/hg19/cytoBand.txt";
+                }
+            }
+            return reference;
+        }
+
+    }
+
+    function setControls(browser, conf) {
+
+        var controlDiv;
+
+        // Create controls.  This can be customized by passing in a function, which should return a div containing the
+        // controls
+
+        if (conf.showCommandBar !== false && conf.showControls !== false) {
+            controlDiv = conf.createControls ? conf.createControls(browser, conf) : createStandardControls(browser, conf);
+            $(browser.rootDiv).append($(controlDiv));
+        }
+
+    }
 
     function createStandardControls(browser, config) {
 
@@ -391,33 +415,6 @@ var igv = (function (igv) {
 
     }
 
-    /**
-     * Expands ucsc type genome identifiers to genome object.
-     *
-     * @param genomeId
-     * @returns {{}}
-     */
-    function expandGenome(genomeId) {
-
-        var reference = {id: genomeId};
-
-        switch (genomeId) {
-
-            case "hg18":
-                reference.fastaURL = "https://s3.amazonaws.com/igv.broadinstitute.org/genomes/seq/hg18/hg18.fasta";
-                reference.cytobandURL = "https://s3.amazonaws.com/igv.broadinstitute.org/genomes/seq/hg18/cytoBand.txt.gz";
-                break;
-            case "hg19":
-            case "GRCh37":
-            default:
-            {
-                reference.fastaURL = "https://s3.amazonaws.com/igv.broadinstitute.org/genomes/seq/hg19/hg19.fasta";
-                reference.cytobandURL = "https://s3.amazonaws.com/igv.broadinstitute.org/genomes/seq/hg19/cytoBand.txt";
-            }
-        }
-        return reference;
-    }
-
     function setDefaults(config) {
 
         config.showKaryo = config.showKaryo || false;
@@ -442,7 +439,7 @@ var igv = (function (igv) {
     }
 
     igv.removeBrowser = function () {
-        $(igv.browser.div).remove();
+        $(igv.browser.rootDiv).remove();
         $(".igv-grid-container-colorpicker").remove();
         $(".igv-grid-container-dialog").remove();
         // $(".igv-grid-container-dialog").remove();
