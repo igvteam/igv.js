@@ -140,7 +140,7 @@ var igv = (function (igv) {
 
         this.ctx.clearRect(0, 0, w, h);
 
-        if (!(genome && referenceFrame && genome.chromosomes && referenceFrame.chr)) return;
+        if (!(genome && referenceFrame && genome.chromosomes && referenceFrame.chrName)) return;
 
         var chromosomes = genome.getChromosomes();
         var image = this.ideograms;
@@ -178,7 +178,7 @@ var igv = (function (igv) {
         this.ctx.save();
 
         // Translate chr to official name
-        var chr = referenceFrame.chr;
+        var chr = referenceFrame.chrName;
         if (this.genome) {
             chr = this.genome.getChromosomeName(chr);
         }
