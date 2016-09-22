@@ -29,20 +29,42 @@
 
 var igv = (function (igv) {
 
-    igv.IdeoPanel = function (parentElement) {
-        var myself = this;
+    igv.IdeoPanel = function ($parent, kitchenSink) {
+
+        var self = this,
+            value;
+
+        this.viewportWidth = kitchenSink.viewportWidth;
+        this.referenceFrame = kitchenSink.referenceFrame;
+
         this.ideograms = {};
 
-        // ideogram content
-        this.$ideogram = $('<div class="igv-ideogram-content-div igv-ideogram-gutter-shim"></div>');
-        $(parentElement).append(this.$ideogram);
+        this.$ideogram = $('<div class="igv-ideogram-content-div"></div>');
+        $parent.append(this.$ideogram);
+
+        this.$ideogram.width(kitchenSink.viewportWidth);
+        // this.$ideogram = $('<div class="igv-ideogram-content-div igv-ideogram-gutter-shim"></div>');
+
+        value = this.$ideogram.height();
+        value = this.$ideogram.width();
+
+        this.$canvas = $('<canvas class="igv-ideogram-canvas"></canvas>');
+        this.$ideogram.append(this.$canvas);
+
+        this.$canvas.attr('width', this.$ideogram.width());
+        this.$canvas.attr('height', this.$ideogram.height());
+
+        value = this.$canvas.height();
+        value = this.$canvas.width();
+
+
+        this.ctx = this.$canvas.get(0).getContext("2d");
 
         this.$ideogram.click(function (e) {
 
             var xy,
                 xPercentage,
                 chr,
-                chrLength,
                 locusLength,
                 chrCoveragePercentage,
                 locus;
@@ -50,10 +72,10 @@ var igv = (function (igv) {
             xy = igv.translateMouseCoordinates(e, $(this).get(0));
             xPercentage = xy.x / $(this).width();
 
-            locusLength = igv.browser.trackViewportContainerWidthBP();
-            chr = igv.browser.genome.getChromosome(igv.browser.referenceFrame.chr);
-            chrLength = chr.bpLength;
-            chrCoveragePercentage = locusLength / chrLength;
+            locusLength = self.referenceFrame.bpPerPixel * self.viewportWidth;
+
+            chr = igv.browser.genome.getChromosome(self.referenceFrame.chrName);
+            chrCoveragePercentage = locusLength / chr.bpLength;
 
             if (xPercentage - (chrCoveragePercentage/2.0) < 0) {
                 xPercentage = chrCoveragePercentage/2.0;
@@ -65,18 +87,10 @@ var igv = (function (igv) {
                 //return;
             }
 
-            locus = igv.browser.referenceFrame.chr + ":" + igv.numberFormatter(1 + Math.floor((xPercentage - (chrCoveragePercentage/2.0)) * chrLength)) + "-" + igv.numberFormatter(Math.floor((xPercentage + (chrCoveragePercentage/2.0)) * chrLength));
-            //console.log("chr length " + igv.numberFormatter(chrLength) + " locus " + locus);
-
-            igv.browser.search(locus);
+            // locus = igv.browser.referenceFrame.chrName + ":" + igv.numberFormatter(1 + Math.floor((xPercentage - (chrCoveragePercentage/2.0)) * chr.bpLength)) + "-" + igv.numberFormatter(Math.floor((xPercentage + (chrCoveragePercentage/2.0)) * chr.bpLength));
+            // igv.browser.search(locus, undefined);
 
         });
-
-        this.$canvas = $('<canvas class="igv-ideogram-canvas"></canvas>');
-        this.$ideogram.append(this.$canvas);
-        this.$canvas.attr('width', this.$ideogram.width());
-        this.$canvas.attr('height', this.$ideogram.height());
-        this.ctx = this.$canvas.get(0).getContext("2d");
 
     };
 
@@ -91,6 +105,8 @@ var igv = (function (igv) {
 
     igv.IdeoPanel.prototype.repaint = function () {
 
+        var self = this;
+
         try {
             var y,
                 image,
@@ -101,16 +117,16 @@ var igv = (function (igv) {
                 widthBP,
                 x,
                 xBP,
-                referenceFrame = igv.browser.referenceFrame,
+                referenceFrame = self.referenceFrame,
                 stainColors = [];
 
             this.ctx.clearRect(0, 0, this.$canvas.width(), this.$canvas.height());
 
-            if (!(igv.browser.genome && referenceFrame && igv.browser.genome.getChromosome(referenceFrame.chr))) {
+            if (!(igv.browser.genome && referenceFrame && igv.browser.genome.getChromosome(referenceFrame.chrName))) {
                 return;
             }
 
-            image = this.ideograms[igv.browser.referenceFrame.chr];
+            image = this.ideograms[ self.referenceFrame.chrName ];
 
             if (!image) {
 
@@ -120,7 +136,7 @@ var igv = (function (igv) {
 
                 drawIdeogram(image.getContext('2d'), this.$canvas.width(), image.height);
 
-                this.ideograms[igv.browser.referenceFrame.chr] = image;
+                this.ideograms[ self.referenceFrame.chrName ] = image;
             }
 
             y = (this.$canvas.height() - image.height) / 2.0;
@@ -129,10 +145,10 @@ var igv = (function (igv) {
             // Draw red box
             this.ctx.save();
 
-            chromosome = igv.browser.genome.getChromosome(igv.browser.referenceFrame.chr);
+            chromosome = igv.browser.genome.getChromosome(self.referenceFrame.chrName);
 
-            widthBP = Math.floor(igv.browser.trackViewportContainerWidthBP());
-                xBP = igv.browser.referenceFrame.start;
+            widthBP = Math.round(self.referenceFrame.bpPerPixel * self.viewportWidth);
+                xBP = self.referenceFrame.start;
 
             if (widthBP < chromosome.bpLength) {
 
@@ -151,8 +167,6 @@ var igv = (function (igv) {
                 this.ctx.restore();
             }
 
-            //this.chromosomeNameLabel.innerHTML = referenceFrame.chr;
-
         } catch (e) {
             console.log("Error painting ideogram: " + e.message);
         }
@@ -165,7 +179,7 @@ var igv = (function (igv) {
                 return;
             }
 
-            var cytobands = igv.browser.genome.getCytobands(referenceFrame.chr);
+            var cytobands = igv.browser.genome.getCytobands(referenceFrame.chrName);
 
             if (cytobands) {
 

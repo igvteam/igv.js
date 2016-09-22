@@ -102,11 +102,7 @@ var igv = (function (igv) {
 
         igv.loadGenome(config.reference).then(function (genome) {
 
-            var viewportWidth,
-                loci,
-                chr,
-                ss,
-                ee;
+            var width;
 
             // if (browser.karyoPanel) {
             //     browser.karyoPanel.resize();
@@ -124,25 +120,31 @@ var igv = (function (igv) {
                 browser.loci.push( browser.firstChromosomeName() );
             }
 
-            viewportWidth = browser.syntheticTrackViewportContainerWidth() / _.size(browser.loci);
-
-            // browser.referenceFrame = new igv.ReferenceFrame(browser.firstChromosomeName(), 0, browser.firstChromosome().bpLength / browser.trackViewportContainerWidth());
             // browser.updateLocusSearch(browser.referenceFrame);
 
             if (config.tracks) {
 
-                browser.getChromosomesWithLoci(browser.loci, function (chromosomeStartEndGtexSelection) {
+                browser.getChromosomesWithLoci(browser.loci, function (kitchenSinkList) {
 
-                    if (false === config.hideIdeogram) {
-                        browser.ideoPanel = new igv.IdeoPanel($header);
-                        browser.ideoPanel.resize();
-                    }
+                    width = browser.syntheticTrackViewportContainerWidth();
+                    browser.ideoPanels = [];
+                    _.each(kitchenSinkList, function(kitchenSink, index){
 
-                    if (config.showRuler) {
-                        browser.addTrack(new igv.RulerTrack());
-                    }
+                        kitchenSink.viewportWidth = width / _.size(browser.loci);
+                        kitchenSink.referenceFrame = new igv.ReferenceFrame(kitchenSink.chromosome.name, kitchenSink.start, (kitchenSink.end - kitchenSink.start)/kitchenSink.viewportWidth);
 
-                    browser.loadTracksWithConfigList(config.tracks);
+                        if (false === config.hideIdeogram) {
+                            browser.ideoPanels.push( new igv.IdeoPanel($header, kitchenSink) );
+                            browser.ideoPanels[ index ].resize();
+                        }
+
+                    });
+
+                    // if (config.showRuler) {
+                    //     browser.addTrack(new igv.RulerTrack(), kitchenSinkList);
+                    // }
+
+                    // browser.loadTracksWithConfigList(config.tracks);
 
                 });
 
