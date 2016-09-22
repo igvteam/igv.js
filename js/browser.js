@@ -735,7 +735,7 @@ var igv = (function (igv) {
         continuation(chromosomes);
     };
 
-    igv.isChrNameStartEndFeature = function (feature, genome, pieces) {
+    igv.isChrNameStartEndFeature = function (feature, genome, locusObject) {
 
         var a = feature.split(':'),
             b,
@@ -748,8 +748,11 @@ var igv = (function (igv) {
             return false;
         }
 
-        if (pieces) {
-            pieces.chr = genome.getChromosome(_.first(a));
+        // start and end could get overridden if explicit start/end exits
+        if (locusObject) {
+            locusObject.chromosome = genome.getChromosome(_.first(a));
+            locusObject.start = 0;
+            locusObject.end = locusObject.chromosome.bpLength;
         }
 
         if (1 === _.size(a)) {
@@ -767,8 +770,8 @@ var igv = (function (igv) {
                 if (true === success) {
                     n = bb.replace(/\,/g,'');
                     success = !isNaN(n);
-                    if (true === success && pieces) {
-                        pieces[ 0 === index ? 'start' : 'end' ] = parseInt(n, 10);
+                    if (true === success && locusObject) {
+                        locusObject[ 0 === index ? 'start' : 'end' ] = parseInt(n, 10);
                     }
                 }
             });

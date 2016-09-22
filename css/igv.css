@@ -1120,16 +1120,16 @@ div.ui-dialog fieldset {
 }
 
 .igv-ideogram-content-div {
-
+    position: relative;
+    float: left;
     height: 32px;
 
-    margin-left: 4px;
-    margin-right: 50px;
+    /*margin-left: 4px;*/
+    /*margin-right: 50px;*/
+
 }
 
 .igv-ideogram-canvas {
-    /*left:0;*/
-    /*top:0;*/
     width:100%;
     height:100%;
 }
