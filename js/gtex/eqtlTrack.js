@@ -205,7 +205,7 @@ var igv = (function (igv) {
         // feature is not already loaded this won't work,  but the user wouldn't be mousing over it either.
         if (this.featureSource.featureCache) {
 
-            var chr = igv.browser.referenceFrame.chr,  // TODO -- this should be passed in
+            var chr = igv.browser.referenceFrame.chrName,  // TODO -- this should be passed in
                 tolerance = 2 * this.dotSize * igv.browser.referenceFrame.bpPerPixel,
                 featureList = this.featureSource.featureCache.queryFeatures(chr, genomicLocation - tolerance, genomicLocation + tolerance),
                 dotSize = this.dotSize,

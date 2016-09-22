@@ -568,7 +568,7 @@ var igv = (function (igv) {
             // feature is not already loaded this won't work, but the user
             // wouldn't be mousing over it either.
             if (this.featureSource.featureCache) {
-                var chr = igv.browser.referenceFrame.chr; // TODO -- this
+                var chr = igv.browser.referenceFrame.chrName; // TODO -- this
                 // should be passed
                 // in
                 var featureList = this.featureSource.featureCache.queryFeatures(chr, genomicLocation, genomicLocation);
@@ -590,7 +590,7 @@ var igv = (function (igv) {
                 });
             }
             if (this.featureSourceRed.featureCache) {
-                var chr = igv.browser.referenceFrame.chr; // TODO -- this
+                var chr = igv.browser.referenceFrame.chrName; // TODO -- this
                 // should be passed
                 // in
                 var featureList = this.featureSourceRed.featureCache.queryFeatures(chr, genomicLocation,

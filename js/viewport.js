@@ -190,7 +190,7 @@ var igv = (function (igv) {
 
                     var newCenter = Math.round(referenceFrame.start + canvasCoords.x * referenceFrame.bpPerPixel);
                     referenceFrame.bpPerPixel /= 2;
-                    igv.browser.goto(referenceFrame.chr, newCenter);
+                    igv.browser.goto(referenceFrame.chrName, newCenter);
                 } else {
 
                     if (e.shiftKey) {
@@ -323,9 +323,9 @@ var igv = (function (igv) {
 
                 if (rulerSweepWidth > rulerSweepThreshold) {
 
-                    // locus = self.referenceFrame.chr + ":" + igv.numberFormatter(Math.floor(ss)) + "-" + igv.numberFormatter(Math.floor(ee));
+                    // locus = self.referenceFrame.chrName + ":" + igv.numberFormatter(Math.floor(ss)) + "-" + igv.numberFormatter(Math.floor(ee));
                     // igv.browser.search(locus);
-                    self.goto(self.referenceFrame.chr, ss, ee);
+                    self.goto(self.referenceFrame.chrName, ss, ee);
                 }
             }
 
@@ -341,7 +341,7 @@ var igv = (function (igv) {
             igv.popover.hide();
         }
 
-        // this.referenceFrame.chr = igv.browser.genome.getChromosomeName(chr);
+        // this.referenceFrame.chrName = igv.browser.genome.getChromosomeName(chr);
         this.referenceFrame.bpPerPixel = (Math.round(end) - Math.round(start)) / this.$viewport.width();
         this.referenceFrame.start = Math.round(start);
 
@@ -406,7 +406,7 @@ var igv = (function (igv) {
         }
 
         referenceFrame = this.referenceFrame;
-        chr = referenceFrame.chr;
+        chr = referenceFrame.chrName;
         refFrameStart = referenceFrame.start;
         refFrameEnd = refFrameStart + referenceFrame.toBP(this.canvas.width);
 
@@ -428,7 +428,7 @@ var igv = (function (igv) {
 
             igv.startSpinnerAtParentElement(this.trackView.trackDiv);
 
-            this.trackView.track.getFeatures(referenceFrame.chr, bpStart, bpEnd, referenceFrame.bpPerPixel)
+            this.trackView.track.getFeatures(referenceFrame.chrName, bpStart, bpEnd, referenceFrame.bpPerPixel)
 
                 .then(function (features) {
                     var buffer,
@@ -474,7 +474,7 @@ var igv = (function (igv) {
                         //     self.controlCtx.drawImage(buffer2, 0, 0);
                         // }
 
-                        self.tile = new Tile(referenceFrame.chr, bpStart, bpEnd, referenceFrame.bpPerPixel, buffer);
+                        self.tile = new Tile(referenceFrame.chrName, bpStart, bpEnd, referenceFrame.bpPerPixel, buffer);
                         self.paintImage();
 
                     } else {

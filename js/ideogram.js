@@ -43,20 +43,12 @@ var igv = (function (igv) {
         $parent.append(this.$ideogram);
 
         this.$ideogram.width(kitchenSink.viewportWidth);
-        // this.$ideogram = $('<div class="igv-ideogram-content-div igv-ideogram-gutter-shim"></div>');
-
-        value = this.$ideogram.height();
-        value = this.$ideogram.width();
 
         this.$canvas = $('<canvas class="igv-ideogram-canvas"></canvas>');
         this.$ideogram.append(this.$canvas);
 
         this.$canvas.attr('width', this.$ideogram.width());
         this.$canvas.attr('height', this.$ideogram.height());
-
-        value = this.$canvas.height();
-        value = this.$canvas.width();
-
 
         this.ctx = this.$canvas.get(0).getContext("2d");
 
@@ -79,16 +71,14 @@ var igv = (function (igv) {
 
             if (xPercentage - (chrCoveragePercentage/2.0) < 0) {
                 xPercentage = chrCoveragePercentage/2.0;
-                //return;
             }
 
             if (xPercentage + (chrCoveragePercentage/2.0) > 1.0) {
                 xPercentage = 1.0 - chrCoveragePercentage/2.0;
-                //return;
             }
 
-            // locus = igv.browser.referenceFrame.chrName + ":" + igv.numberFormatter(1 + Math.floor((xPercentage - (chrCoveragePercentage/2.0)) * chr.bpLength)) + "-" + igv.numberFormatter(Math.floor((xPercentage + (chrCoveragePercentage/2.0)) * chr.bpLength));
-            // igv.browser.search(locus, undefined);
+            locus = self.referenceFrame.chrName + ":" + igv.numberFormatter(1 + Math.floor((xPercentage - (chrCoveragePercentage/2.0)) * chr.bpLength)) + "-" + igv.numberFormatter(Math.floor((xPercentage + (chrCoveragePercentage/2.0)) * chr.bpLength));
+            igv.browser.search(locus, undefined);
 
         });
 
@@ -126,7 +116,7 @@ var igv = (function (igv) {
                 return;
             }
 
-            image = this.ideograms[ self.referenceFrame.chrName ];
+            image = this.ideograms[ referenceFrame.chrName ];
 
             if (!image) {
 
@@ -136,7 +126,7 @@ var igv = (function (igv) {
 
                 drawIdeogram(image.getContext('2d'), this.$canvas.width(), image.height);
 
-                this.ideograms[ self.referenceFrame.chrName ] = image;
+                this.ideograms[ referenceFrame.chrName ] = image;
             }
 
             y = (this.$canvas.height() - image.height) / 2.0;
@@ -145,10 +135,10 @@ var igv = (function (igv) {
             // Draw red box
             this.ctx.save();
 
-            chromosome = igv.browser.genome.getChromosome(self.referenceFrame.chrName);
+            chromosome = igv.browser.genome.getChromosome(referenceFrame.chrName);
 
-            widthBP = Math.round(self.referenceFrame.bpPerPixel * self.viewportWidth);
-                xBP = self.referenceFrame.start;
+            widthBP = Math.round(referenceFrame.bpPerPixel * self.viewportWidth);
+                xBP = referenceFrame.start;
 
             if (widthBP < chromosome.bpLength) {
 
