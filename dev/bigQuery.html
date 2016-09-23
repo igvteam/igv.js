@@ -175,14 +175,13 @@
         }
 
         function loadSegTrack(study) {
-            igv.browser.loadTrack(
-                    {
-                        //autoHeight: false,
-                        sourceType: 'bigquery',
-                        featureType: 'seg',
-                        name: study,
-                        cohort: 'SELECT ParticipantBarcode FROM [isb-cgc:tcga_201510_alpha.Clinical_data] WHERE Study = "' + study + '"'
-                    })
+            igv.browser.loadTrack({
+                //autoHeight: false,
+                sourceType: 'bigquery',
+                featureType: 'seg',
+                name: study,
+                cohort: 'SELECT ParticipantBarcode FROM [isb-cgc:tcga_201510_alpha.Clinical_data] WHERE Study = "' + study + '"'
+            })
         }
 
     </script>

@@ -91,7 +91,7 @@
                                 name: 'Ga4gh alignments'})">GA4Gh Alignments (Global Alliance, Google server)
         </div>
 
-        <div onclick="igv.browser.loadTrack( {
+        <div onclick="igv.browser.loadTrack({
                             sourceType: 'ga4gh',
                             type: 'vcf',
                             url: 'https://genomics.googleapis.com/v1',
@@ -118,28 +118,25 @@
         </div>
 
 
-        <div onclick="igv.browser.loadTrack(
-                                {
-                                type: 'bed',
-                                url: '//data.broadinstitute.org/igvdata/annotations/hg19/dbSnp/snp137.hg19.bed.gz',
-                                name: 'dbSNP 137',
-                                visibilityWindow: 200000
-                                })">dbSNP 137 (bed tabix)
+        <div onclick="igv.browser.loadTrack({
+        type: 'bed',
+        url: '//data.broadinstitute.org/igvdata/annotations/hg19/dbSnp/snp137.hg19.bed.gz',
+        name: 'dbSNP 137',
+        visibilityWindow: 200000
+        })">dbSNP 137 (bed tabix)
         </div>
 
-        <div onclick="igv.browser.loadTrack(
-                                {
-                                url: 'https://www.encodeproject.org/files/ENCFF002ADR/@@download/ENCFF002ADR.bigBed',
-                                name: 'ENCFF002ADR',
-                                visibilityWindow: 2000000
-                                })">Encode bigbed
+        <div onclick="igv.browser.loadTrack({
+        url: 'https://www.encodeproject.org/files/ENCFF002ADR/@@download/ENCFF002ADR.bigBed',
+        name: 'ENCFF002ADR',
+        visibilityWindow: 2000000
+        })">Encode bigbed
         </div>
 
-        <div onclick="igv.browser.loadTrack(
-                                {
-                                url: 'http://hgdownload.cse.ucsc.edu/goldenPath/hg19/encodeDCC/wgEncodeBroadHistone/wgEncodeBroadHistoneGm12878H3k4me3StdSig.bigWig',
-                                name: 'Gm12878H3k4me3'
-                                })">Encode bigwig
+        <div onclick="igv.browser.loadTrack({
+        url: 'http://hgdownload.cse.ucsc.edu/goldenPath/hg19/encodeDCC/wgEncodeBroadHistone/wgEncodeBroadHistoneGm12878H3k4me3StdSig.bigWig',
+        name: 'Gm12878H3k4me3'
+        })">Encode bigwig
         </div>
 
         <div onclick="igv.browser.loadTrack({
@@ -149,8 +146,7 @@
         })">DB Snp Tabix
         </div>
 
-        <div onclick="igv.browser.loadTrack(
-        {
+        <div onclick="igv.browser.loadTrack({
            type: 'eqtl',
            sourceType: 'gtex-ws',
            url: 'http://gtexportal.org/api/v6/singleTissueEqtlByLocation',

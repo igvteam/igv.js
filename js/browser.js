@@ -275,7 +275,6 @@ var igv = (function (igv) {
      * loaded.
      *
      * @param track
-     * @param loci - hack to stand up multi-locus
      */
     igv.Browser.prototype.addTrack = function (track) {
 
@@ -531,9 +530,15 @@ var igv = (function (igv) {
         var $trackContainer = $(this.trackContainerDiv),
             $track = $('<div class="igv-track-div">'),
             $viewportContainer = $('<div class="igv-viewport-container igv-viewport-container-shim">'),
-            rect = {};
+            rect = {},
+            trackContainerWidth,
+            trackWidth;
+
+        trackContainerWidth = $trackContainer.width();
 
         $trackContainer.append($track);
+        trackWidth = $track.width();
+
         $track.append($viewportContainer);
 
         rect.position = $viewportContainer.position();
