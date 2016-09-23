@@ -199,14 +199,14 @@ var igv = (function (igv) {
     /**
      * Return "popup data" for feature @ genomic location.  Data is an array of key-value pairs
      */
-    igv.EqtlTrack.prototype.popupData = function (genomicLocation, xOffset, yOffset) {
+    igv.EqtlTrack.prototype.popupData = function (genomicLocation, xOffset, yOffset, referenceFrame) {
 
         // We use the featureCache property rather than method to avoid async load.  If the
         // feature is not already loaded this won't work,  but the user wouldn't be mousing over it either.
         if (this.featureSource.featureCache) {
 
-            var chr = igv.browser.referenceFrame.chrName,  // TODO -- this should be passed in
-                tolerance = 2 * this.dotSize * igv.browser.referenceFrame.bpPerPixel,
+            var chr = referenceFrame.chrName,
+                tolerance = 2 * this.dotSize * referenceFrame.bpPerPixel,
                 featureList = this.featureSource.featureCache.queryFeatures(chr, genomicLocation - tolerance, genomicLocation + tolerance),
                 dotSize = this.dotSize,
                 tissue = this.name;

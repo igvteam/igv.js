@@ -166,7 +166,7 @@ var igv = (function (igv) {
     };
 
 
-    igv.GWASTrack.prototype.popupData = function (genomicLocation, xOffset, yOffset) {
+    igv.GWASTrack.prototype.popupData = function (genomicLocation, xOffset, yOffset, referenceFrame) {
 
         var i,
             len,

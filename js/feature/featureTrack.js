@@ -158,7 +158,7 @@ var igv = (function (igv) {
                 gene = featureList[i];
                 if (gene.end < bpStart) continue;
                 if (gene.start > bpEnd) break;
-                track.render.call(this, gene, bpStart, bpPerPixel, pixelHeight, ctx);
+                track.render.call(this, gene, bpStart, bpPerPixel, pixelHeight, ctx, options.referenceFrame, options.viewportWidth);
             }
         }
         else {
@@ -170,14 +170,14 @@ var igv = (function (igv) {
     /**
      * Return "popup data" for feature @ genomic location.  Data is an array of key-value pairs
      */
-    igv.FeatureTrack.prototype.popupData = function (genomicLocation, xOffset, yOffset) {
+    igv.FeatureTrack.prototype.popupData = function (genomicLocation, xOffset, yOffset, referenceFrame) {
 
         // We use the featureCache property rather than method to avoid async load.  If the
         // feature is not already loaded this won't work,  but the user wouldn't be mousing over it either.
         if (this.featureSource.featureCache) {
 
-            var chr = igv.browser.referenceFrame.chrName,  // TODO -- this should be passed in
-                tolerance = 2 * igv.browser.referenceFrame.bpPerPixel,  // We need some tolerance around genomicLocation, start with +/- 2 pixels
+            var chr = referenceFrame.chrName,
+                tolerance = 2 * referenceFrame.bpPerPixel,  // We need some tolerance around genomicLocation, start with +/- 2 pixels
                 featureList = this.featureSource.featureCache.queryFeatures(chr, genomicLocation - tolerance, genomicLocation + tolerance),
                 row;
 
@@ -195,7 +195,7 @@ var igv = (function (igv) {
 
                         // If row number is specified use it
                         if (row === undefined || feature.row === undefined || row === feature.row) {
-                            var featureData
+                            var featureData;
                             if (feature.popupData) {
                                 featureData = feature.popupData(genomicLocation);
                             }
@@ -303,8 +303,10 @@ var igv = (function (igv) {
      * @param xScale  scale in base-pairs per pixel
      * @param pixelHeight  pixel height of the current canvas
      * @param ctx  the canvas 2d context
+     * @param referenceFrame  reference frame
+     * @param viewportWidth  viewport width
      */
-    function renderFeature(feature, bpStart, xScale, pixelHeight, ctx) {
+    function renderFeature(feature, bpStart, xScale, pixelHeight, ctx, referenceFrame, viewportWidth) {
 
         var x, e, exonCount, cy, direction, exon, ePx, ePx1, ePxU, ePw, py2, h2, py,
             windowX, windowX1,
@@ -401,8 +403,8 @@ var igv = (function (igv) {
                 }
             }
         }
-        windowX = Math.round(igv.browser.referenceFrame.toPixels(igv.browser.referenceFrame.start - bpStart));
-        windowX1 = windowX + igv.browser.trackViewportContainerWidth();
+        windowX = Math.round(referenceFrame.toPixels(referenceFrame.start - bpStart));
+        windowX1 = windowX + viewportWidth;
 
         renderFeatureLabels.call(this, ctx, feature, coord.px, coord.px1, py, windowX, windowX1);
     }

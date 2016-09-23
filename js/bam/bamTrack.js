@@ -138,13 +138,13 @@ var igv = (function (igv) {
 
     };
 
-    igv.BAMTrack.prototype.popupData = function (genomicLocation, xOffset, yOffset) {
+    igv.BAMTrack.prototype.popupData = function (genomicLocation, xOffset, yOffset, referenceFrame) {
 
         if (yOffset >= this.coverageTrack.top && yOffset < this.coverageTrack.height) {
-            return this.coverageTrack.popupData(genomicLocation, xOffset, this.coverageTrack.top);
+            return this.coverageTrack.popupData(genomicLocation, xOffset, this.coverageTrack.top, referenceFrame);
         }
         else {
-            return this.alignmentTrack.popupData(genomicLocation, xOffset, yOffset - this.alignmentTrack.top);
+            return this.alignmentTrack.popupData(genomicLocation, xOffset, yOffset - this.alignmentTrack.top, referenceFrame);
         }
 
     };
@@ -443,7 +443,7 @@ var igv = (function (igv) {
 
     };
 
-    CoverageTrack.prototype.popupData = function (genomicLocation, xOffset, yOffset) {
+    CoverageTrack.prototype.popupData = function (genomicLocation, xOffset, yOffset, referenceFrame) {
 
         var coverageMap = this.featureSource.alignmentContainer.coverageMap,
             coverageMapIndex,
@@ -457,7 +457,7 @@ var igv = (function (igv) {
         if (coverage) {
 
 
-            nameValues.push(igv.browser.referenceFrame.chrName + ":" + igv.numberFormatter(1 + genomicLocation));
+            nameValues.push(referenceFrame.chrName + ":" + igv.numberFormatter(1 + genomicLocation));
 
             nameValues.push({name: 'Total Count', value: coverage.total});
 
@@ -809,7 +809,7 @@ var igv = (function (igv) {
 
     };
 
-    AlignmentTrack.prototype.popupData = function (genomicLocation, xOffset, yOffset) {
+    AlignmentTrack.prototype.popupData = function (genomicLocation, xOffset, yOffset, referenceFrame) {
 
         var packedAlignmentRows = this.featureSource.alignmentContainer.packedAlignmentRows,
             downsampledIntervals = this.featureSource.alignmentContainer.downsampledIntervals,
