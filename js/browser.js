@@ -516,7 +516,7 @@ var igv = (function (igv) {
         this.fireEvent('locuschange', [referenceFrame, str]);
     };
 
-    igv.Browser.prototype.syntheticTrackViewportContainerBBox = function () {
+    igv.Browser.prototype.syntheticViewportContainerBBox = function () {
         var $trackContainer = $(this.trackContainerDiv),
             $track = $('<div class="igv-track-div">'),
             $viewportContainer = $('<div class="igv-viewport-container igv-viewport-container-shim">'),
@@ -540,8 +540,8 @@ var igv = (function (igv) {
         return rect;
     };
 
-    igv.Browser.prototype.syntheticTrackViewportContainerWidth = function () {
-        var rect = this.syntheticTrackViewportContainerBBox();
+    igv.Browser.prototype.syntheticViewportContainerWidth = function () {
+        var rect = this.syntheticViewportContainerBBox();
 
         return rect.width;
     };
@@ -551,7 +551,7 @@ var igv = (function (igv) {
      */
     igv.Browser.prototype.trackViewportContainerWidth = function () {
 
-        var width = (this.trackViews && this.trackViews.length > 0) ? this.trackViews[ 0 ].$viewportContainer.width() : this.syntheticTrackViewportContainerWidth();
+        var width = (this.trackViews && this.trackViews.length > 0) ? this.trackViews[ 0 ].$viewportContainer.width() : this.syntheticViewportContainerWidth();
 
         return width;
     };
