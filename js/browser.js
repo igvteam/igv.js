@@ -421,10 +421,15 @@ var igv = (function (igv) {
 
     igv.Browser.prototype.resize = function () {
 
-        if (this.ideoPanel) this.ideoPanel.resize();
-        if (this.karyoPanel) this.karyoPanel.resize();
+        if (this.ideoPanel) {
+            this.ideoPanel.resize();
+        }
 
-        this.trackViews.forEach(function (trackView) {
+        if (this.karyoPanel) {
+            this.karyoPanel.resize();
+        }
+
+        _.each(this.trackViews, function(trackView){
             trackView.resize();
         });
 
@@ -441,8 +446,21 @@ var igv = (function (igv) {
         if (this.karyoPanel) {
             this.karyoPanel.repaint();
         }
+
         this.trackViews.forEach(function (trackView) {
             trackView.repaint();
+        });
+
+    };
+
+    igv.Browser.prototype.repaintWithLocusIndex = function (locusIndex) {
+
+        if (this.ideoPanel) {
+            igv.IdeoPanel.repaintPanel( this.ideoPanel.panelWithLocusIndex(locusIndex) );
+        }
+
+        _.each(igv.Viewport.viewportsWithLocusIndex(locusIndex), function (viewport) {
+            viewport.repaint();
         });
 
     };
@@ -465,6 +483,18 @@ var igv = (function (igv) {
 
         this.trackViews.forEach(function (trackView) {
             trackView.update();
+        });
+
+    };
+
+    igv.Browser.prototype.updateWithLocusIndex = function (locusIndex) {
+
+        if (this.ideoPanel) {
+            igv.IdeoPanel.repaintPanel( this.ideoPanel.panelWithLocusIndex(locusIndex) );
+        }
+
+        _.each(igv.Viewport.viewportsWithLocusIndex(locusIndex), function (viewport) {
+            viewport.update();
         });
 
     };
@@ -1166,7 +1196,9 @@ var igv = (function (igv) {
 
                     // igv.browser.updateLocusSearch(referenceFrame);
 
-                    igv.browser.repaint();
+                    // igv.browser.repaint();
+                    igv.browser.repaintWithLocusIndex(viewport.locusIndex);
+
                     igv.browser.fireEvent('trackdrag');
                 }
 

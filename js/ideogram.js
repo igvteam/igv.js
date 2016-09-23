@@ -67,11 +67,24 @@ var igv = (function (igv) {
         console.log('oy');
     };
 
+    igv.IdeoPanel.prototype.panelWithLocusIndex = function (locusIndex) {
+
+        var panels = _.filter(this.panels, function(panel){
+            return locusIndex === panel.locusIndex;
+        });
+
+        return _.first(panels);
+    };
+
     igv.IdeoPanel.prototype.resize = function () {
 
         var viewportContainerWidth = igv.browser.syntheticViewportContainerWidth();
+
+        console.log('syntheticViewportContainerWidth ' + viewportContainerWidth);
+
         _.each(this.panels, function(panel) {
-            panel.$canvas.attr('width', panel.viewportContainerPercentage * viewportContainerWidth);
+            panel.$ideogram.width(panel.viewportContainerPercentage * viewportContainerWidth);
+            panel.$canvas.attr('width', panel.$ideogram.width());
             panel.ideograms = {};
         });
         
@@ -284,7 +297,7 @@ var igv = (function (igv) {
         // locus = referenceFrame.chrName + ":" + igv.numberFormatter(1 + Math.floor((xPercentage - (chrCoveragePercentage/2.0)) * chr.bpLength)) + "-" + igv.numberFormatter(Math.floor((xPercentage + (chrCoveragePercentage/2.0)) * chr.bpLength));
         // igv.browser.search(locus, undefined);
 
-        igv.IdeoPanel.repaintPanel(panel);
+        igv.browser.repaintWithLocusIndex( panel.locusIndex )
 
     };
     return igv;
