@@ -33,6 +33,8 @@ var igv = (function (igv) {
             element;
 
         this.track = track;
+        track.trackView = this;
+
         this.browser = browser;
 
         this.trackDiv = $('<div class="igv-track-div">')[0];
@@ -55,7 +57,7 @@ var igv = (function (igv) {
         });
 
         _.each(_.range(_.size(browser.kitchenSinkList)), function(i) {
-            self.viewports.push(new igv.Viewport(self, referenceFrames, i));
+            self.viewports.push(new igv.Viewport(self, browser.kitchenSinkList, i));
         });
 
         element = this.createRightHandGutter();

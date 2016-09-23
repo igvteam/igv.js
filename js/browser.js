@@ -278,23 +278,15 @@ var igv = (function (igv) {
      */
     igv.Browser.prototype.addTrack = function (track) {
 
-        var loci,
-            trackView;
-
-        trackView = new igv.TrackView(track, this);
+        var trackView;
 
         if (typeof igv.popover !== "undefined") {
             igv.popover.hide();
         }
 
-        // Register view with track.  This backpointer is unfortunate, but is needed to support "resize" events.
-        track.trackView = trackView;
-
-
+        trackView = new igv.TrackView(track, this);
         this.trackViews.push(trackView);
-
         this.reorderTracks();
-
         trackView.resize();
     };
 

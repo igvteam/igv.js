@@ -126,27 +126,27 @@ var igv = (function (igv) {
 
                 browser.getChromosomesWithLoci(browser.loci, function (kitchenSinkList) {
 
-                    browser.kitchenSinkList = kitchenSinkList;
-
                     width = browser.syntheticTrackViewportContainerWidth();
-                    browser.ideoPanels = [];
-                    _.each(browser.kitchenSinkList, function(kitchenSink, index){
 
+                    browser.kitchenSinkList = kitchenSinkList;
+                    _.each(browser.kitchenSinkList, function(kitchenSink, index){
                         kitchenSink.viewportWidth = width / _.size(browser.loci);
                         kitchenSink.referenceFrame = new igv.ReferenceFrame(kitchenSink.chromosome.name, kitchenSink.start, (kitchenSink.end - kitchenSink.start)/kitchenSink.viewportWidth);
-
-                        if (false === config.hideIdeogram) {
-                            browser.ideoPanels.push( new igv.IdeoPanel($header, kitchenSink) );
-                            browser.ideoPanels[ index ].repaint();
-                        }
-
+                        kitchenSink.viewportContainerPercentage = 1.0/_.size(browser.kitchenSinkList);
+                        kitchenSink.locusIndex = index;
+                        kitchenSink.locusCount = _.size(browser.kitchenSinkList);
                     });
+
+                    // if (false === config.hideIdeogram) {
+                    //     browser.ideoPanel = new igv.IdeoPanel($header, kitchenSinkList);
+                    //     browser.ideoPanel.repaint();
+                    // }
 
                     if (config.showRuler) {
                         browser.addTrack(new igv.RulerTrack());
                     }
 
-                    browser.loadTracksWithConfigList(config.tracks);
+                    // browser.loadTracksWithConfigList(config.tracks);
 
                 });
 
