@@ -29,13 +29,15 @@
 
 var igv = (function (igv) {
 
-    igv.IdeoPanel = function ($parent, kitchenSinkList) {
+    igv.IdeoPanel = function ($parent) {
 
-        this.panels = _.map(kitchenSinkList, function(kitchenSink, locusIndex) {
+        var $shim = $('<div class="igv-ideogram-left-shim"></div>');
+
+        $parent.append($shim);
+
+        this.panels = _.map(igv.browser.kitchenSinkList, function(kitchenSink, locusIndex) {
 
             var panel = {};
-
-            panel.referenceFrame = kitchenSink.referenceFrame;
 
             panel.locusIndex = locusIndex;
             panel.viewportContainerPercentage = kitchenSink.viewportContainerPercentage;
@@ -96,7 +98,7 @@ var igv = (function (igv) {
                 widthBP,
                 x,
                 xBP,
-                referenceFrame = panel.referenceFrame,
+                referenceFrame = igv.browser.kitchenSinkList[ panel.locusIndex ].referenceFrame,
                 stainColors = [];
 
             panel.ctx.clearRect(0, 0, panel.$canvas.width(), panel.$canvas.height());
@@ -249,6 +251,7 @@ var igv = (function (igv) {
 
         var xy,
             xPercentage,
+            referenceFrame = igv.browser.kitchenSinkList[ panel.locusIndex ].referenceFrame,
             chr,
             locusLength,
             chrCoveragePercentage,
@@ -259,9 +262,9 @@ var igv = (function (igv) {
         xy = igv.translateMouseCoordinates(e, panel.$ideogram.get(0));
         xPercentage = xy.x / panel.$ideogram.width();
 
-        locusLength = panel.referenceFrame.bpPerPixel * panel.$ideogram.width();
+        locusLength = referenceFrame.bpPerPixel * panel.$ideogram.width();
 
-        chr = igv.browser.genome.getChromosome(panel.referenceFrame.chrName);
+        chr = igv.browser.genome.getChromosome(referenceFrame.chrName);
         chrCoveragePercentage = locusLength / chr.bpLength;
 
         if (xPercentage - (chrCoveragePercentage/2.0) < 0) {
@@ -275,10 +278,10 @@ var igv = (function (igv) {
         ss = Math.round((xPercentage - (chrCoveragePercentage/2.0)) * chr.bpLength);
         ee = Math.round((xPercentage + (chrCoveragePercentage/2.0)) * chr.bpLength);
 
-        panel.referenceFrame.start = Math.round((xPercentage - (chrCoveragePercentage/2.0)) * chr.bpLength);
-        panel.referenceFrame.bpPerPixel = (ee - ss)/ panel.$ideogram.width();
+        referenceFrame.start = Math.round((xPercentage - (chrCoveragePercentage/2.0)) * chr.bpLength);
+        referenceFrame.bpPerPixel = (ee - ss)/ panel.$ideogram.width();
 
-        // locus = panel.referenceFrame.chrName + ":" + igv.numberFormatter(1 + Math.floor((xPercentage - (chrCoveragePercentage/2.0)) * chr.bpLength)) + "-" + igv.numberFormatter(Math.floor((xPercentage + (chrCoveragePercentage/2.0)) * chr.bpLength));
+        // locus = referenceFrame.chrName + ":" + igv.numberFormatter(1 + Math.floor((xPercentage - (chrCoveragePercentage/2.0)) * chr.bpLength)) + "-" + igv.numberFormatter(Math.floor((xPercentage + (chrCoveragePercentage/2.0)) * chr.bpLength));
         // igv.browser.search(locus, undefined);
 
         igv.IdeoPanel.repaintPanel(panel);

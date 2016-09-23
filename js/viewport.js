@@ -3,20 +3,19 @@
  */
 var igv = (function (igv) {
 
-    igv.Viewport = function (trackView, kitchenSinkList, locusIndex) {
-        this.initializationHelper(trackView, kitchenSinkList, locusIndex);
+    igv.Viewport = function (trackView, locusIndex) {
+        this.initializationHelper(trackView, locusIndex);
     };
 
-    igv.Viewport.prototype.initializationHelper = function (trackView, kitchenSinkList, locusIndex) {
+    igv.Viewport.prototype.initializationHelper = function (trackView, locusIndex) {
 
         var self = this,
             description,
             $trackLabel;
 
         this.trackView = trackView;
-        this.referenceFrame = kitchenSinkList[ locusIndex ].referenceFrame;
         this.locusIndex = locusIndex;
-        this.viewportContainerPercentage = kitchenSinkList[ locusIndex ].viewportContainerPercentage;
+        this.viewportContainerPercentage = igv.browser.kitchenSinkList[ this.locusIndex ].viewportContainerPercentage;
 
         this.$viewport = $('<div class="igv-viewport-div">');
 
@@ -28,7 +27,7 @@ var igv = (function (igv) {
 
         this.$viewport.data( "locusindex", this.locusIndex );
 
-        this.$viewport.width( kitchenSinkList[ locusIndex ].viewportWidth );
+        this.$viewport.width( igv.browser.kitchenSinkList[ this.locusIndex ].viewportWidth );
 
         trackView.$viewportContainer.append( this.$viewport );
 
@@ -111,7 +110,7 @@ var igv = (function (igv) {
             $(this.canvas).click(function (e) {
 
                 var canvasCoords,
-                    referenceFrame,
+                    referenceFrame = igv.browser.kitchenSinkList[ self.locusIndex ].referenceFrame,
                     genomicLocation,
                     time;
 
@@ -121,12 +120,12 @@ var igv = (function (igv) {
                 e.stopPropagation();
 
                 canvasCoords = igv.translateMouseCoordinates(e, self.canvas);
-
-                referenceFrame = self.referenceFrame;
                 genomicLocation = Math.floor((referenceFrame.start) + referenceFrame.toBP(canvasCoords.x));
                 time = Date.now();
 
-                if (!referenceFrame) return;
+                if (!referenceFrame) {
+                    return;
+                }
 
                 if (time - lastClickTime < doubleClickDelay) {
                     // This is a double-click
@@ -168,7 +167,7 @@ var igv = (function (igv) {
                                     return;
                                 }
                                 xOrigin = Math.round(referenceFrame.toPixels((self.tile.startBP - referenceFrame.start)));
-                                popupData = trackView.track.popupData(genomicLocation, canvasCoords.x - xOrigin, canvasCoords.y);
+                                popupData = trackView.track.popupData(genomicLocation, canvasCoords.x - xOrigin, canvasCoords.y, referenceFrame);
 
                                 var handlerResult = igv.browser.fireEvent('trackclick', [trackView.track, popupData]);
 
@@ -257,7 +256,8 @@ var igv = (function (igv) {
         $(document).mouseup(function (e) {
 
             var ss,
-                ee;
+                ee,
+                referenceFrame = igv.browser.kitchenSinkList[ self.locusIndex ].referenceFrame;
 
             if (isMouseDown) {
 
@@ -267,14 +267,14 @@ var igv = (function (igv) {
 
                 self.$rulerSweeper.css({"display": "none", "left": 0 + "px", "width": 0 + "px"});
 
-                ss = self.referenceFrame.start + (left * self.referenceFrame.bpPerPixel);
-                ee = ss + rulerSweepWidth * self.referenceFrame.bpPerPixel;
+                ss = referenceFrame.start + (left * referenceFrame.bpPerPixel);
+                ee = ss + rulerSweepWidth * referenceFrame.bpPerPixel;
 
                 if (rulerSweepWidth > rulerSweepThreshold) {
 
-                    // locus = self.referenceFrame.chrName + ":" + igv.numberFormatter(Math.floor(ss)) + "-" + igv.numberFormatter(Math.floor(ee));
+                    // locus = referenceFrame.chrName + ":" + igv.numberFormatter(Math.floor(ss)) + "-" + igv.numberFormatter(Math.floor(ee));
                     // igv.browser.search(locus);
-                    self.goto(self.referenceFrame.chrName, ss, ee);
+                    self.goto(referenceFrame.chrName, ss, ee);
                 }
             }
 
@@ -284,21 +284,19 @@ var igv = (function (igv) {
 
     igv.Viewport.prototype.goto = function (chr, start, end) {
 
-        var self = this;
+        var self = this,
+            referenceFrame = igv.browser.kitchenSinkList[ this.locusIndex ].referenceFrame;
 
         if (igv.popover) {
             igv.popover.hide();
         }
 
-        // this.referenceFrame.chrName = igv.browser.genome.getChromosomeName(chr);
-        this.referenceFrame.bpPerPixel = (Math.round(end) - Math.round(start)) / this.$viewport.width();
-        this.referenceFrame.start = Math.round(start);
+        referenceFrame.bpPerPixel = (Math.round(end) - Math.round(start)) / this.$viewport.width();
+        referenceFrame.start = Math.round(start);
 
         _.each(igv.browser.trackViews, function(tv){
             _.each(tv.viewports, function(vp){
                 if (vp.locusIndex === self.locusIndex) {
-                    vp.referenceFrame.bpPerPixel = self.referenceFrame.bpPerPixel;
-                    vp.referenceFrame.start = self.referenceFrame.start;
                     vp.update();
                 }
             });
@@ -332,7 +330,7 @@ var igv = (function (igv) {
             bpStart,
             bpEnd,
             ctx,
-            referenceFrame,
+            referenceFrame = igv.browser.kitchenSinkList[ self.locusIndex ].referenceFrame,
             chr,
             refFrameStart,
             refFrameEnd;
@@ -343,10 +341,12 @@ var igv = (function (igv) {
         // }
 
         if (this.trackView.track.visibilityWindow !== undefined && this.trackView.track.visibilityWindow > 0) {
-            if (this.referenceFrame.bpPerPixel * this.$viewport.width() > this.trackView.track.visibilityWindow) {
+            if (referenceFrame.bpPerPixel * this.$viewport.width() > this.trackView.track.visibilityWindow) {
                 this.tile = null;
                 this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
+
                 igv.stopSpinnerAtParentElement(this.trackView.trackDiv);
+
                 this.$zoomInNotice.show();
                 return;
             } else {
@@ -354,7 +354,6 @@ var igv = (function (igv) {
             }
         }
 
-        referenceFrame = this.referenceFrame;
         chr = referenceFrame.chrName;
         refFrameStart = referenceFrame.start;
         refFrameEnd = refFrameStart + referenceFrame.toBP(this.canvas.width);
@@ -375,7 +374,7 @@ var igv = (function (igv) {
 
             self.loading = { start: bpStart, end: bpEnd };
 
-            igv.startSpinnerAtParentElement(this.trackView.trackDiv);
+            // igv.startSpinnerAtParentElement(this.trackView.trackDiv);
 
             this.trackView.track.getFeatures(referenceFrame.chrName, bpStart, bpEnd, referenceFrame.bpPerPixel)
 
@@ -384,7 +383,7 @@ var igv = (function (igv) {
                         requiredHeight;
 
                     self.loading = false;
-                    igv.stopSpinnerAtParentElement(self.trackView.trackDiv);
+                    // igv.stopSpinnerAtParentElement(self.trackView.trackDiv);
 
                     if (features) {
 
@@ -406,7 +405,9 @@ var igv = (function (igv) {
                             bpStart: bpStart,
                             bpPerPixel: referenceFrame.bpPerPixel,
                             pixelWidth: buffer.width,
-                            pixelHeight: buffer.height
+                            pixelHeight: buffer.height,
+                            referenceFrame: referenceFrame,
+                            viewportWidth: self.$viewport.width()
                         });
 
                         // TODO: dat - implement this for viewport. Was in trackView .
@@ -484,10 +485,12 @@ var igv = (function (igv) {
 
     igv.Viewport.prototype.paintImage = function () {
 
+        var referenceFrame = igv.browser.kitchenSinkList[ this.locusIndex ].referenceFrame;
+
         this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
 
         if (this.tile) {
-            this.xOffset = Math.round(this.referenceFrame.toPixels(this.tile.startBP - this.referenceFrame.start));
+            this.xOffset = Math.round(referenceFrame.toPixels(this.tile.startBP - referenceFrame.start));
             this.ctx.drawImage(this.tile.image, this.xOffset, 0);
             this.ctx.save();
             this.ctx.restore();

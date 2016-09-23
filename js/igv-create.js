@@ -138,15 +138,15 @@ var igv = (function (igv) {
                     });
 
                     if (false === config.hideIdeogram) {
-                        browser.ideoPanel = new igv.IdeoPanel($header, kitchenSinkList);
+                        browser.ideoPanel = new igv.IdeoPanel($header);
                         browser.ideoPanel.repaint();
                     }
 
-                    // if (config.showRuler) {
-                    //     browser.addTrack(new igv.RulerTrack());
-                    // }
+                    if (config.showRuler) {
+                        browser.addTrack(new igv.RulerTrack());
+                    }
 
-                    // browser.loadTracksWithConfigList(config.tracks);
+                    browser.loadTracksWithConfigList(config.tracks);
 
                 });
 

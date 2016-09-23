@@ -1119,6 +1119,12 @@ div.ui-dialog fieldset {
     height:100%;
 }
 
+.igv-ideogram-left-shim {
+    position: relative;
+    float: left;
+    height: 32px;
+    width: 50px;
+}
 .igv-ideogram-content-div {
     position: relative;
     float: left;
@@ -1141,9 +1147,10 @@ div.ui-dialog fieldset {
 
 .igv-track-container-div {
     position: relative;
-    left: 0;
-    right: 0;
-    overflow: hidden;
+    clear: both;
+    /*left: 0;*/
+    /*right: 0;*/
+    /*overflow: hidden;*/
 }
 
 .igv-track-div {

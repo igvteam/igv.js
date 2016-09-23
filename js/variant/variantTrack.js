@@ -252,14 +252,14 @@ var igv = (function (igv) {
     /**
      * Return "popup data" for feature @ genomic location.  Data is an array of key-value pairs
      */
-    igv.VariantTrack.prototype.popupData = function (genomicLocation, xOffset, yOffset) {
+    igv.VariantTrack.prototype.popupData = function (genomicLocation, xOffset, yOffset, referenceFrame) {
 
         // We use the featureCache property rather than method to avoid async load.  If the
         // feature is not already loaded this won't work,  but the user wouldn't be mousing over it either.
         if (this.featureSource.featureCache) {
 
-            var chr = igv.browser.referenceFrame.chrName,  // TODO -- this should be passed in
-                tolerance = Math.floor(2 * igv.browser.referenceFrame.bpPerPixel),  // We need some tolerance around genomicLocation, start with +/- 2 pixels
+            var chr = referenceFrame.chrName,  // TODO -- this should be passed in
+                tolerance = Math.floor(2 * referenceFrame.bpPerPixel),  // We need some tolerance around genomicLocation, start with +/- 2 pixels
                 featureList = this.featureSource.featureCache.queryFeatures(chr, genomicLocation - tolerance, genomicLocation + tolerance),
                 popupData = [],
                 self = this;

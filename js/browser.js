@@ -1106,7 +1106,7 @@ var igv = (function (igv) {
 
             // viewport object we are panning
             viewport = igv.Viewport.viewportWithID( $viewport.data('viewport') );
-            referenceFrame = viewport.referenceFrame;
+            referenceFrame = igv.browser.kitchenSinkList[ viewport.locusIndex ].referenceFrame;
 
             // list of all viewports in the locus 'column' containing the panning viewport
             viewports = igv.Viewport.viewportsWithLocusIndex( $viewport.data('locusindex') );
@@ -1165,16 +1165,6 @@ var igv = (function (igv) {
                     }
 
                     // igv.browser.updateLocusSearch(referenceFrame);
-
-                    _.each(viewports, function(vp) {
-
-                        if (vp === viewport) {
-                            // skip
-                        } else {
-                            vp.referenceFrame.start = referenceFrame.start;
-                        }
-
-                    });
 
                     igv.browser.repaint();
                     igv.browser.fireEvent('trackdrag');

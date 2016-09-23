@@ -52,12 +52,8 @@ var igv = (function (igv) {
         $(this.trackDiv).append(this.$viewportContainer);
 
         this.viewports = [];
-        referenceFrames = _.map(browser.kitchenSinkList, function(kitchenSink) {
-            return kitchenSink.referenceFrame;
-        });
-
         _.each(_.range(_.size(browser.kitchenSinkList)), function(i) {
-            self.viewports.push(new igv.Viewport(self, browser.kitchenSinkList, i));
+            self.viewports.push(new igv.Viewport(self, i));
         });
 
         element = this.createRightHandGutter();
@@ -137,6 +133,15 @@ var igv = (function (igv) {
         });
 
     }
+
+    igv.TrackView.prototype.viewportWithLocusIndex = function (locusIndex) {
+
+        var vps = _.filter(this.viewports, function(vp){
+            return locusIndex === vp.locusIndex;
+        });
+
+        return _.first(vps);
+    };
 
     igv.TrackView.prototype.appendLeftHandGutterDivToTrackDiv = function ($track) {
 
