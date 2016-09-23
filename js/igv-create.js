@@ -126,7 +126,7 @@ var igv = (function (igv) {
 
                 browser.getChromosomesWithLoci(browser.loci, function (kitchenSinkList) {
 
-                    width = browser.syntheticTrackViewportContainerWidth();
+                    width = browser.syntheticViewportContainerWidth();
 
                     browser.kitchenSinkList = kitchenSinkList;
                     _.each(browser.kitchenSinkList, function(kitchenSink, index){
@@ -137,14 +137,14 @@ var igv = (function (igv) {
                         kitchenSink.locusCount = _.size(browser.kitchenSinkList);
                     });
 
-                    // if (false === config.hideIdeogram) {
-                    //     browser.ideoPanel = new igv.IdeoPanel($header, kitchenSinkList);
-                    //     browser.ideoPanel.repaint();
-                    // }
-
-                    if (config.showRuler) {
-                        browser.addTrack(new igv.RulerTrack());
+                    if (false === config.hideIdeogram) {
+                        browser.ideoPanel = new igv.IdeoPanel($header, kitchenSinkList);
+                        browser.ideoPanel.repaint();
                     }
+
+                    // if (config.showRuler) {
+                    //     browser.addTrack(new igv.RulerTrack());
+                    // }
 
                     // browser.loadTracksWithConfigList(config.tracks);
 

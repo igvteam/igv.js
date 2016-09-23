@@ -71,7 +71,7 @@ var igv = (function (igv) {
                 trackXY = igv.browser.trackViews[ 0 ].$viewportContainer.position();
                 trackHalfWidth = 0.5 * igv.browser.trackViews[ 0 ].$viewportContainer.width();
             } else {
-                rect = igv.browser.syntheticTrackViewportContainerBBox();
+                rect = igv.browser.syntheticViewportContainerBBox();
                 trackXY = rect.position;
                 trackHalfWidth = 0.5 * rect.width;
             }
