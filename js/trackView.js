@@ -29,7 +29,6 @@ var igv = (function (igv) {
     igv.TrackView = function (track, browser) {
 
         var self = this,
-            referenceFrames,
             element;
 
         this.track = track;
@@ -40,14 +39,12 @@ var igv = (function (igv) {
         this.trackDiv = $('<div class="igv-track-div">')[0];
         $(browser.trackContainerDiv).append(this.trackDiv);
 
-        // Optionally override CSS height
-        if (track.height) {          // Explicit height set, perhaps track.config.height?
+        if (track.height) {
             this.trackDiv.style.height = track.height + "px";
         }
 
         this.appendLeftHandGutterDivToTrackDiv($(this.trackDiv));
 
-        // viewport container
         this.$viewportContainer = $('<div class="igv-viewport-container igv-viewport-container-shim">');
         $(this.trackDiv).append(this.$viewportContainer);
 
@@ -61,44 +58,46 @@ var igv = (function (igv) {
             $(this.trackDiv).append(element);
         }
 
-        this.trackDiv.appendChild(igv.spinner());
+        // this.trackDiv.appendChild(igv.spinner());
 
-        // Track Drag & Drop
-        makeTrackDraggable(this);
+        // Track order repositioning widget
+        this.attachDragWidget();
 
-        this.viewports.forEach(function(viewport) {
-            viewport.addTrackHandlers(self);
+        _.each(this.viewports, function(viewport){
+            viewport.addMouseHandlers(self);
         });
 
     };
 
-    function makeTrackDraggable(trackView) {
+    igv.TrackView.prototype.attachDragWidget = function () {
 
-        trackView.$trackDragScrim = $('<div class="igv-track-drag-scrim">');
-        trackView.$viewportContainer.append(trackView.$trackDragScrim);
-        trackView.$trackDragScrim.hide();
+        var self = this;
 
-        trackView.$trackManipulationHandle = $('<div class="igv-track-manipulation-handle">');
-        $(trackView.trackDiv).append(trackView.$trackManipulationHandle);
+        self.$trackDragScrim = $('<div class="igv-track-drag-scrim">');
+        self.$viewportContainer.append(self.$trackDragScrim);
+        self.$trackDragScrim.hide();
 
-        trackView.$trackManipulationHandle.mousedown(function (e) {
-            trackView.isMouseDown = true;
-            igv.browser.dragTrackView = trackView;
+        self.$trackManipulationHandle = $('<div class="igv-track-manipulation-handle">');
+        $(self.trackDiv).append(self.$trackManipulationHandle);
+
+        self.$trackManipulationHandle.mousedown(function (e) {
+            self.isMouseDown = true;
+            igv.browser.dragTrackView = self;
         });
 
-        trackView.$trackManipulationHandle.mouseup(function (e) {
-            trackView.isMouseDown = undefined;
+        self.$trackManipulationHandle.mouseup(function (e) {
+            self.isMouseDown = undefined;
         });
 
-        trackView.$trackManipulationHandle.mouseenter(function (e) {
+        self.$trackManipulationHandle.mouseenter(function (e) {
 
-            trackView.isMouseIn = true;
-            igv.browser.dragTargetTrackView = trackView;
+            self.isMouseIn = true;
+            igv.browser.dragTargetTrackView = self;
 
             if (undefined === igv.browser.dragTrackView) {
-                trackView.$trackDragScrim.show();
-            } else if (trackView === igv.browser.dragTrackView) {
-                trackView.$trackDragScrim.show();
+                self.$trackDragScrim.show();
+            } else if (self === igv.browser.dragTrackView) {
+                self.$trackDragScrim.show();
             }
 
             if (igv.browser.dragTargetTrackView && igv.browser.dragTrackView) {
@@ -121,26 +120,18 @@ var igv = (function (igv) {
 
         });
 
-        trackView.$trackManipulationHandle.mouseleave(function (e) {
+        self.$trackManipulationHandle.mouseleave(function (e) {
 
-            trackView.isMouseIn = undefined;
+            self.isMouseIn = undefined;
             igv.browser.dragTargetTrackView = undefined;
 
-            if (trackView !== igv.browser.dragTrackView) {
-                trackView.$trackDragScrim.hide();
+            if (self !== igv.browser.dragTrackView) {
+                self.$trackDragScrim.hide();
             }
 
         });
 
-    }
 
-    igv.TrackView.prototype.viewportWithLocusIndex = function (locusIndex) {
-
-        var vps = _.filter(this.viewports, function(vp){
-            return locusIndex === vp.locusIndex;
-        });
-
-        return _.first(vps);
     };
 
     igv.TrackView.prototype.appendLeftHandGutterDivToTrackDiv = function ($track) {
@@ -259,7 +250,6 @@ var igv = (function (igv) {
         this.viewports.forEach(function(viewport) {
             viewport.repaint();
         });
-
     };
 
     return igv;

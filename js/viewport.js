@@ -73,7 +73,7 @@ var igv = (function (igv) {
 
     };
 
-    igv.Viewport.prototype.addTrackHandlers = function (trackView) {
+    igv.Viewport.prototype.addMouseHandlers = function (trackView) {
 
         var self = this,
             isMouseDown = false,
@@ -91,7 +91,7 @@ var igv = (function (igv) {
             this.$rulerSweeper = $('<div class="igv-ruler-sweeper-div">');
             $(self.contentDiv).append(this.$rulerSweeper);
 
-            this.addRulerTrackHandlers(trackView);
+            this.addRulerMouseHandlers(trackView);
 
         } else {
 
@@ -200,7 +200,7 @@ var igv = (function (igv) {
 
     };
 
-    igv.Viewport.prototype.addRulerTrackHandlers = function (trackView) {
+    igv.Viewport.prototype.addRulerMouseHandlers = function (trackView) {
 
         var self = this,
             isMouseDown = undefined,
@@ -294,13 +294,15 @@ var igv = (function (igv) {
         referenceFrame.bpPerPixel = (Math.round(end) - Math.round(start)) / this.$viewport.width();
         referenceFrame.start = Math.round(start);
 
-        _.each(igv.browser.trackViews, function(tv){
-            _.each(tv.viewports, function(vp){
-                if (vp.locusIndex === self.locusIndex) {
-                    vp.update();
-                }
-            });
-        });
+        igv.browser.updateWithLocusIndex(self.locusIndex);
+
+        // _.each(igv.browser.trackViews, function(tv){
+        //     _.each(tv.viewports, function(vp){
+        //         if (vp.locusIndex === self.locusIndex) {
+        //             vp.update();
+        //         }
+        //     });
+        // });
     };
 
     igv.Viewport.prototype.resize = function () {
