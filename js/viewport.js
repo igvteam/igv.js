@@ -3,68 +3,35 @@
  */
 var igv = (function (igv) {
 
-    igv.Viewport = function (trackView, referenceFrames, index) {
-        this.initializationHelper(trackView, referenceFrames, index);
+    igv.Viewport = function (trackView, kitchenSinkList, locusIndex) {
+        this.initializationHelper(trackView, kitchenSinkList, locusIndex);
     };
 
-    igv.Viewport.viewportsWithLocusIndex = function (locusIndex) {
-
-        var list = [];
-        _.each(igv.browser.trackViews, function(tv){
-
-            _.each(tv.viewports, function(vp) {
-
-                if (locusIndex === vp.locusIndex) {
-                    list.push(vp);
-                }
-
-            });
-        });
-
-        return list;
-    };
-
-    igv.Viewport.viewportWithID = function (id) {
-
-        var result = undefined;
-
-        _.each(igv.browser.trackViews, function(tv){
-            if (undefined === result) {
-                _.each(tv.viewports, function(vp) {
-                    if (id === vp.id) {
-                        result = vp;
-                    }
-                });
-            }
-        });
-
-        return result;
-    };
-
-    igv.Viewport.prototype.initializationHelper = function (trackView, referenceFrames, index) {
+    igv.Viewport.prototype.initializationHelper = function (trackView, kitchenSinkList, locusIndex) {
 
         var self = this,
             description,
             $trackLabel;
 
         this.trackView = trackView;
-        this.referenceFrame = referenceFrames[ index ];
-
-        this.viewportContainerPercentage = 1/_.size(referenceFrames);
+        this.referenceFrame = kitchenSinkList[ locusIndex ].referenceFrame;
+        this.locusIndex = locusIndex;
+        this.viewportContainerPercentage = kitchenSinkList[ locusIndex ].viewportContainerPercentage;
 
         this.$viewport = $('<div class="igv-viewport-div">');
+
+        // TODO diagnostic coloring
+        this.$viewport.css("background-color", igv.randomRGBConstantAlpha(200, 255, 0.5));
 
         this.id = _.uniqueId('viewport_');
         this.$viewport.data( "viewport", this.id );
 
-        this.locusIndex = index;
         this.$viewport.data( "locusindex", this.locusIndex );
 
-        this.$viewport.width(trackView.$viewportContainer.width()/referenceFrames.length);
+        this.$viewport.width( kitchenSinkList[ locusIndex ].viewportWidth );
 
-        trackView.$viewportContainer.append(this.$viewport);
+        trackView.$viewportContainer.append( this.$viewport );
 
-        // content  -- purpose of this div is to allow vertical scrolling on individual tracks,
         this.contentDiv = $('<div class="igv-content-div">')[0];
         this.$viewport.append(this.contentDiv);
 
@@ -525,6 +492,40 @@ var igv = (function (igv) {
             this.ctx.save();
             this.ctx.restore();
         }
+    };
+
+    igv.Viewport.viewportsWithLocusIndex = function (locusIndex) {
+
+        var list = [];
+        _.each(igv.browser.trackViews, function(tv){
+
+            _.each(tv.viewports, function(vp) {
+
+                if (locusIndex === vp.locusIndex) {
+                    list.push(vp);
+                }
+
+            });
+        });
+
+        return list;
+    };
+
+    igv.Viewport.viewportWithID = function (id) {
+
+        var result = undefined;
+
+        _.each(igv.browser.trackViews, function(tv){
+            if (undefined === result) {
+                _.each(tv.viewports, function(vp) {
+                    if (id === vp.id) {
+                        result = vp;
+                    }
+                });
+            }
+        });
+
+        return result;
     };
 
     TrackScrollbar = function (viewportDiv, contentDiv) {
