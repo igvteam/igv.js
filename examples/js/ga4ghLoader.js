@@ -129,16 +129,14 @@ var igv = (function (igv) {
                                 }
 
                                 if (result.readGroupSetId) {
-                                    igv.browser.loadTrack(
-                                        {
-                                            sourceType: 'ga4gh',
-                                            type: 'alignment',
-                                            url: igv.ga4gh.providerCurrent.url,
-                                            readGroupSetIds: result.readGroupSetId,
-                                            label: result.name + " alignments",
-                                            datasetId: result.datasetId
-                                        }
-                                    );
+                                    igv.browser.loadTrack({
+                                        sourceType: 'ga4gh',
+                                        type: 'alignment',
+                                        url: igv.ga4gh.providerCurrent.url,
+                                        readGroupSetIds: result.readGroupSetId,
+                                        label: result.name + " alignments",
+                                        datasetId: result.datasetId
+                                    });
                                 }
 
                                 $("#setSearch").modal("hide");

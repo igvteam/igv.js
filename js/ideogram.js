@@ -59,7 +59,9 @@ var igv = (function (igv) {
                 chr,
                 locusLength,
                 chrCoveragePercentage,
-                locus;
+                locus,
+                ss,
+                ee;
 
             xy = igv.translateMouseCoordinates(e, $(this).get(0));
             xPercentage = xy.x / $(this).width();
@@ -77,8 +79,16 @@ var igv = (function (igv) {
                 xPercentage = 1.0 - chrCoveragePercentage/2.0;
             }
 
-            locus = self.referenceFrame.chrName + ":" + igv.numberFormatter(1 + Math.floor((xPercentage - (chrCoveragePercentage/2.0)) * chr.bpLength)) + "-" + igv.numberFormatter(Math.floor((xPercentage + (chrCoveragePercentage/2.0)) * chr.bpLength));
-            igv.browser.search(locus, undefined);
+            ss = Math.round((xPercentage - (chrCoveragePercentage/2.0)) * chr.bpLength);
+            ee = Math.round((xPercentage + (chrCoveragePercentage/2.0)) * chr.bpLength);
+
+            self.referenceFrame.start = Math.round((xPercentage - (chrCoveragePercentage/2.0)) * chr.bpLength);
+            self.referenceFrame.bpPerPixel = (ee - ss)/ self.viewportWidth;
+
+            // locus = self.referenceFrame.chrName + ":" + igv.numberFormatter(1 + Math.floor((xPercentage - (chrCoveragePercentage/2.0)) * chr.bpLength)) + "-" + igv.numberFormatter(Math.floor((xPercentage + (chrCoveragePercentage/2.0)) * chr.bpLength));
+            // igv.browser.search(locus, undefined);
+
+            self.repaint();
 
         });
 

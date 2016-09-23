@@ -135,13 +135,13 @@ var igv = (function (igv) {
 
                         if (false === config.hideIdeogram) {
                             browser.ideoPanels.push( new igv.IdeoPanel($header, kitchenSink) );
-                            browser.ideoPanels[ index ].resize();
+                            browser.ideoPanels[ index ].repaint();
                         }
 
                     });
 
                     // if (config.showRuler) {
-                    //     browser.addTrack(new igv.RulerTrack(), kitchenSinkList);
+                    //     browser.addTrack(new igv.RulerTrack());
                     // }
 
                     // browser.loadTracksWithConfigList(config.tracks);
