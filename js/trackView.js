@@ -26,9 +26,10 @@
 
 var igv = (function (igv) {
 
-    igv.TrackView = function (track, browser, loci) {
+    igv.TrackView = function (track, browser) {
 
         var self = this,
+            referenceFrames,
             element;
 
         this.track = track;
@@ -49,8 +50,12 @@ var igv = (function (igv) {
         $(this.trackDiv).append(this.$viewportContainer);
 
         this.viewports = [];
-        loci.forEach(function (locus, i, locusList) {
-            self.viewports.push(new igv.Viewport(self, locusList, i));
+        referenceFrames = _.map(browser.kitchenSinkList, function(kitchenSink) {
+            return kitchenSink.referenceFrame;
+        });
+
+        _.each(_.range(_.size(browser.kitchenSinkList)), function(i) {
+            self.viewports.push(new igv.Viewport(self, referenceFrames, i));
         });
 
         element = this.createRightHandGutter();
