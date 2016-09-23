@@ -126,9 +126,11 @@ var igv = (function (igv) {
 
                 browser.getChromosomesWithLoci(browser.loci, function (kitchenSinkList) {
 
+                    browser.kitchenSinkList = kitchenSinkList;
+
                     width = browser.syntheticTrackViewportContainerWidth();
                     browser.ideoPanels = [];
-                    _.each(kitchenSinkList, function(kitchenSink, index){
+                    _.each(browser.kitchenSinkList, function(kitchenSink, index){
 
                         kitchenSink.viewportWidth = width / _.size(browser.loci);
                         kitchenSink.referenceFrame = new igv.ReferenceFrame(kitchenSink.chromosome.name, kitchenSink.start, (kitchenSink.end - kitchenSink.start)/kitchenSink.viewportWidth);
@@ -140,11 +142,11 @@ var igv = (function (igv) {
 
                     });
 
-                    // if (config.showRuler) {
-                    //     browser.addTrack(new igv.RulerTrack());
-                    // }
+                    if (config.showRuler) {
+                        browser.addTrack(new igv.RulerTrack());
+                    }
 
-                    // browser.loadTracksWithConfigList(config.tracks);
+                    browser.loadTracksWithConfigList(config.tracks);
 
                 });
 

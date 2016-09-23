@@ -3,8 +3,8 @@
  */
 var igv = (function (igv) {
 
-    igv.Viewport = function (trackView, loci, index) {
-        this.initializationHelper(trackView, loci, index);
+    igv.Viewport = function (trackView, referenceFrames, index) {
+        this.initializationHelper(trackView, referenceFrames, index);
     };
 
     igv.Viewport.viewportsWithLocusIndex = function (locusIndex) {
@@ -41,44 +41,26 @@ var igv = (function (igv) {
         return result;
     };
 
-    igv.Viewport.prototype.initializationHelper = function (trackView, loci, index) {
+    igv.Viewport.prototype.initializationHelper = function (trackView, referenceFrames, index) {
 
         var self = this,
             description,
-            $trackLabel,
-            parts,
-            chr,
-            percent,
-            ss,
-            ee,
-            numer,
-            denom;
-
-        // console.log('viewport index ' + index);
-
-        this.locusIndex = index;
-        this.id = _.uniqueId('viewport_');
-        this.viewportContainerPercentage = 1/loci.length;
+            $trackLabel;
 
         this.trackView = trackView;
+        this.referenceFrame = referenceFrames[ index ];
 
-        parts = loci[ index ].split(':');
-        chr = igv.browser.genome.getChromosome( parts[ 0 ] );
-        ss = parseInt(parts[ 1 ].split('-')[ 0 ], 10);
-        ee = parseInt(parts[ 1 ].split('-')[ 1 ], 10);
-        percent = (ee - ss) / chr.bpLength;
-
-        numer = (percent * chr.bpLength);
-        denom = this.viewportContainerPercentage * trackView.$viewportContainer.width();
-
-        this.referenceFrame = new igv.ReferenceFrame(chr.name, ss, numer / denom);
+        this.viewportContainerPercentage = 1/_.size(referenceFrames);
 
         this.$viewport = $('<div class="igv-viewport-div">');
 
+        this.id = _.uniqueId('viewport_');
         this.$viewport.data( "viewport", this.id );
+
+        this.locusIndex = index;
         this.$viewport.data( "locusindex", this.locusIndex );
 
-        this.$viewport.width(trackView.$viewportContainer.width()/loci.length);
+        this.$viewport.width(trackView.$viewportContainer.width()/referenceFrames.length);
 
         trackView.$viewportContainer.append(this.$viewport);
 
