@@ -80,7 +80,7 @@ var igv = (function (igv) {
 
         var viewportContainerWidth = igv.browser.syntheticViewportContainerWidth();
 
-        console.log('syntheticViewportContainerWidth ' + viewportContainerWidth);
+        // console.log('syntheticViewportContainerWidth ' + viewportContainerWidth);
 
         _.each(this.panels, function(panel) {
             panel.$ideogram.width(panel.viewportContainerPercentage * viewportContainerWidth);
