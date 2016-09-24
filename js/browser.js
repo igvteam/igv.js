@@ -668,34 +668,36 @@ var igv = (function (igv) {
     // Zoom in by a factor of 2, keeping the same center location
     igv.Browser.prototype.zoomIn = function () {
 
+        var kitchenSink = igv.browser.kitchenSinkList[ 0 ],
+            referenceFrame = kitchenSink.referenceFrame,
+            viewportWidth = kitchenSink.viewportContainerPercentage * this.trackViewportContainerWidth(),
+            centerBP;
+
         if (this.loadInProgress()) {
-            // ignore
             return;
         }
 
-        var centerBP;
-
-        console.log('browser.zoomIn - src extent ' + basesExtent(this.trackViewportContainerWidth(), this.referenceFrame.bpPerPixel));
+        // console.log('browser.zoomIn - src extent ' + basesExtent(viewportWidth, referenceFrame.bpPerPixel));
 
         // Have we reached the zoom-in threshold yet? If so, bail.
-        if (this.minimumBasesExtent() > basesExtent(this.trackViewportContainerWidth(), this.referenceFrame.bpPerPixel/2.0)) {
-            console.log('browser.zoomIn - dst extent ' + basesExtent(this.trackViewportContainerWidth(), this.referenceFrame.bpPerPixel/2.0) + ' bailing ...');
+        if (this.minimumBasesExtent() > basesExtent(viewportWidth, referenceFrame.bpPerPixel/2.0)) {
+            // console.log('browser.zoomIn - dst extent ' + basesExtent(viewportWidth, referenceFrame.bpPerPixel/2.0) + ' bailing ...');
             return;
         } else {
-            console.log('browser.zoomIn - dst extent ' + basesExtent(this.trackViewportContainerWidth(), this.referenceFrame.bpPerPixel/2.0));
+            // console.log('browser.zoomIn - dst extent ' + basesExtent(viewportWidth, referenceFrame.bpPerPixel/2.0));
         }
 
         // window center (base-pair units)
-        centerBP = this.referenceFrame.start + this.referenceFrame.bpPerPixel * (this.trackViewportContainerWidth()/2);
+        centerBP = referenceFrame.start + referenceFrame.bpPerPixel * (viewportWidth/2);
 
         // derive scaled (zoomed in) start location (base-pair units) by multiplying half-width by halve'd bases-per-pixel
         // which results in base-pair units
-        this.referenceFrame.start = centerBP - (this.trackViewportContainerWidth()/2) * (this.referenceFrame.bpPerPixel/2.0);
+        referenceFrame.start = centerBP - (viewportWidth/2) * (referenceFrame.bpPerPixel/2.0);
 
         // halve the bases-per-pixel
-        this.referenceFrame.bpPerPixel /= 2.0;
+        referenceFrame.bpPerPixel /= 2.0;
 
-        this.update();
+        this.updateWithLocusIndex( 0 );
 
         function basesExtent(width, bpp) {
             return Math.floor(width * bpp);
@@ -705,35 +707,47 @@ var igv = (function (igv) {
     // Zoom out by a factor of 2, keeping the same center location if possible
     igv.Browser.prototype.zoomOut = function () {
 
+        var kitchenSink = igv.browser.kitchenSinkList[ 0 ],
+            referenceFrame = kitchenSink.referenceFrame,
+            viewportWidth = kitchenSink.viewportContainerPercentage * this.trackViewportContainerWidth(),
+            newScale,
+            maxScale,
+            center,
+            chrLength,
+            widthBP;
+
         if (this.loadInProgress()) {
-            // ignore
             return;
         }
 
-        var newScale, maxScale, center, chrLength, widthBP, viewportWidth;
-        viewportWidth = this.trackViewportContainerWidth();
-
-        newScale = this.referenceFrame.bpPerPixel * 2;
+        newScale = referenceFrame.bpPerPixel * 2;
         chrLength = 250000000;
         if (this.genome) {
-            var chromosome = this.genome.getChromosome(this.referenceFrame.chrName);
+            var chromosome = this.genome.getChromosome(referenceFrame.chrName);
             if (chromosome) {
                 chrLength = chromosome.bpLength;
             }
         }
         maxScale = chrLength / viewportWidth;
-        if (newScale > maxScale) newScale = maxScale;
+        if (newScale > maxScale) {
+            newScale = maxScale;
+        }
 
-        center = this.referenceFrame.start + this.referenceFrame.bpPerPixel * viewportWidth / 2;
+        center = referenceFrame.start + referenceFrame.bpPerPixel * viewportWidth / 2;
         widthBP = newScale * viewportWidth;
 
-        this.referenceFrame.start = Math.round(center - widthBP / 2);
+        referenceFrame.start = Math.round(center - widthBP / 2);
 
-        if (this.referenceFrame.start < 0) this.referenceFrame.start = 0;
-        else if (this.referenceFrame.start > chrLength - widthBP) this.referenceFrame.start = chrLength - widthBP;
+        if (referenceFrame.start < 0) {
+            referenceFrame.start = 0;
+        } else if (referenceFrame.start > chrLength - widthBP) {
+            referenceFrame.start = chrLength - widthBP;
+        }
 
-        this.referenceFrame.bpPerPixel = newScale;
-        this.update();
+        referenceFrame.bpPerPixel = newScale;
+
+        this.updateWithLocusIndex( 0 );
+
     };
 
     igv.Browser.prototype.getChromosomesWithLoci = function (loci, continuation) {
