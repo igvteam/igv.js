@@ -49,7 +49,8 @@ var igv = (function (igv) {
 
     igv.SequenceTrack.prototype.draw = function (options) {
 
-        var sequence = options.features,
+        var self = this,
+            sequence = options.features,
             ctx = options.context,
             bpPerPixel = options.bpPerPixel,
             bpStart = options.bpStart,
@@ -87,7 +88,8 @@ var igv = (function (igv) {
 
                     if (bpPerPixel > 1 / 10) {
 
-                        igv.graphics.fillRect(ctx, p0, 0, p1 - p0, 10, {fillStyle: c});
+                        // igv.graphics.fillRect(ctx, p0, 0, p1 - p0, 10, {fillStyle: c});
+                        igv.graphics.fillRect(ctx, p0, 0, p1 - p0, self.height, {fillStyle: c});
                     }
                     else {
 
