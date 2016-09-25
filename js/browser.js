@@ -729,23 +729,40 @@ var igv = (function (igv) {
 
     };
 
+    igv.Browser.prototype.$emptyAllViewportContainers = function ( $trackContainer ) {
+        var $e = this;
+
+        $e = $trackContainer.find('.igv-viewport-div');
+        $e.remove();
+
+        _.each(this.trackViews, function(trackView){
+            trackView.viewports = [];
+        });
+    };
+
+    igv.Browser.prototype.buildViewportsWithKitchenSinkList = function (kitchenSinkList) {
+
+        _.each(this.trackViews, function(trackView){
+
+            trackView.viewports = [];
+            _.each(_.range(_.size(kitchenSinkList)), function(i) {
+                trackView.viewports.push(new igv.Viewport(trackView, i));
+            });
+
+        });
+
+    };
+
     igv.Browser.prototype.parseSearchInput = function(string) {
 
         var self = this,
-            loci = string.split(' '),
-            $b;
+            loci = string.split(' ');
 
         this.getKitchenSinkListWithLociAndViewportWidth(loci, this.viewportContainerWidth(), function (kitchenSinkList) {
-            var $content_header = $('#igv-content-header'),
-                $b;
+
+            var $content_header = $('#igv-content-header');
 
             if (_.size(kitchenSinkList) > 0) {
-                console.log('kitchenSinkList - ' + _.size(kitchenSinkList));
-
-                $b = $('.igv-track-container-div').find('.igv-viewport-div');
-                $b.remove();
-
-                self.kitchenSinkList = kitchenSinkList;
 
                 _.each(kitchenSinkList, function (kitchenSink, index) {
 
@@ -758,21 +775,24 @@ var igv = (function (igv) {
                     kitchenSink.locusCount = _.size(kitchenSinkList);
                 });
 
-                if (false === self.config.hideIdeogram) {
-                    self.ideogram.$empty($content_header);
-                    self.ideoPanel.buildPanels($content_header);
-                    self.ideoPanel.repaint();
+                if (_.size(kitchenSinkList) === _.size(self.kitchenSinkList)) {
+                    self.kitchenSinkList = kitchenSinkList;
+                } else {
+
+                    self.kitchenSinkList = kitchenSinkList;
+
+                    if (false === self.config.hideIdeogram) {
+                        igv.IdeoPanel.$empty($content_header);
+                        self.ideoPanel.buildPanels($content_header);
+                    }
+
+                    self.$emptyAllViewportContainers( $('.igv-track-container-div') );
+
+                    self.buildViewportsWithKitchenSinkList(kitchenSinkList);
                 }
 
-                if (self.config.showRuler) {
-                    self.addTrack(new igv.RulerTrack());
-                }
-
-                if (self.config.tracks) {
-                    self.loadTracksWithConfigList(self.config.tracks);
-                }
-
-            }
+                self.update();
+            } // if (_.size(kitchenSinkList) > 0)
 
         });
     };

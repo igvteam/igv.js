@@ -71,6 +71,7 @@ var igv = (function (igv) {
             this.$viewport.append($trackLabel);
         }
 
+        this.addMouseHandlers(trackView);
     };
 
     igv.Viewport.prototype.addMouseHandlers = function (trackView) {
@@ -91,7 +92,7 @@ var igv = (function (igv) {
             this.$rulerSweeper = $('<div class="igv-ruler-sweeper-div">');
             $(self.contentDiv).append(this.$rulerSweeper);
 
-            this.addRulerMouseHandlers(trackView);
+            this.addRulerMouseHandlers();
 
         } else {
 
@@ -200,7 +201,7 @@ var igv = (function (igv) {
 
     };
 
-    igv.Viewport.prototype.addRulerMouseHandlers = function (trackView) {
+    igv.Viewport.prototype.addRulerMouseHandlers = function () {
 
         var self = this,
             isMouseDown = undefined,
@@ -212,7 +213,7 @@ var igv = (function (igv) {
             rulerSweepThreshold = 1,
             dx;
 
-        $(document).mousedown(function (e) {
+        this.$viewport.mousedown(function (e) {
 
             mouseDownXY = igv.translateMouseCoordinates(e, self.contentDiv);
 
@@ -227,7 +228,7 @@ var igv = (function (igv) {
             isMouseDown = true;
         });
 
-        $(document).mousemove(function (e) {
+        this.$viewport.mousemove(function (e) {
 
             if (isMouseDown && isMouseIn) {
 
@@ -253,11 +254,13 @@ var igv = (function (igv) {
             }
         });
 
-        $(document).mouseup(function (e) {
+        this.$viewport.mouseup(function (e) {
 
             var ss,
                 ee,
-                referenceFrame = igv.browser.kitchenSinkList[ self.locusIndex ].referenceFrame;
+                referenceFrame;
+
+            referenceFrame = igv.browser.kitchenSinkList[ self.locusIndex ].referenceFrame;
 
             if (isMouseDown) {
 
@@ -271,9 +274,6 @@ var igv = (function (igv) {
                 ee = ss + rulerSweepWidth * referenceFrame.bpPerPixel;
 
                 if (rulerSweepWidth > rulerSweepThreshold) {
-
-                    // locus = referenceFrame.chrName + ":" + igv.numberFormatter(Math.floor(ss)) + "-" + igv.numberFormatter(Math.floor(ee));
-                    // igv.browser.search(locus);
                     self.goto(referenceFrame.chrName, ss, ee);
                 }
             }

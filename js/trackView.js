@@ -63,9 +63,9 @@ var igv = (function (igv) {
         // Track order repositioning widget
         this.attachDragWidget();
 
-        _.each(this.viewports, function(viewport){
-            viewport.addMouseHandlers(self);
-        });
+        // _.each(this.viewports, function(viewport){
+        //     viewport.addMouseHandlers(self);
+        // });
 
     };
 
