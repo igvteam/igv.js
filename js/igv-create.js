@@ -265,7 +265,7 @@ var igv = (function (igv) {
                 browser.search($(this).val());
             });
 
-            $faSearch = $('<i class="igv-app-icon fa fa-search fa-18px shim-left-6">');
+            $faSearch = $('<i class="igv-fa-search fa fa-search fa-18px shim-left-6">');
 
             $faSearch.click(function () {
                 browser.search(browser.$searchInput.val());
@@ -366,13 +366,13 @@ var igv = (function (igv) {
             $faZoomIn,
             $zoomContainer;
 
-        $faZoomOut = $('<i class="fa fa-minus-circle igv-app-icon fa-24px" style="padding-right: 4px;">');
+        $faZoomOut = $('<i class="fa fa-minus-circle igv-fa-search fa-24px" style="padding-right: 4px;">');
 
         $faZoomOut.click(function () {
             igv.browser.zoomOut();
         });
 
-        $faZoomIn = $('<i class="fa fa-plus-circle igv-app-icon fa-24px">');
+        $faZoomIn = $('<i class="fa fa-plus-circle igv-fa-search fa-24px">');
 
         $faZoomIn.click(function () {
             igv.browser.zoomIn();
