@@ -735,6 +735,17 @@ div.ui-dialog fieldset {
     color: #141414;
 }
 
+.igv-fa-search {
+    cursor: pointer;
+    color: #7f7f7f;
+}
+
+.igv-fa-search:hover,
+.igv-fa-search:focus,
+.igv-fa-search:active  {
+    color: #434343;
+}
+
 .shim-left-6 {
     padding-left: 6px;
 }
@@ -773,18 +784,37 @@ div.ui-dialog fieldset {
     border-width: thin;
 }
 
-/* version 1 */
+/* version 2 */
 .igv-nav-bar-toggle-button-off {
     color: white;
     border-color: #7f7f7f;
     background-color: #7f7f7f;
+
+    border-radius: 12px;
+
 }
 
 .igv-nav-bar-toggle-button-on {
     color: white;
     border-color: white;
     background-color: #bfbfbf;
+
+    border-radius: 12px;
+
 }
+
+/* version 1 */
+/*.igv-nav-bar-toggle-button-off {*/
+    /*color: white;*/
+    /*border-color: #7f7f7f;*/
+    /*background-color: #7f7f7f;*/
+/*}*/
+
+/*.igv-nav-bar-toggle-button-on {*/
+    /*color: white;*/
+    /*border-color: white;*/
+    /*background-color: #bfbfbf;*/
+/*}*/
 
 /* version 0 */
 /*.igv-nav-bar-toggle-button-on {*/
@@ -1149,22 +1179,19 @@ div.ui-dialog fieldset {
 .igv-windowsizepanel-content-div {
 
     position: relative;
-    top: 7px;
-
     height: 100%;
 
     float: left;
 
+    padding-top: 6px;
     text-align: center;
     vertical-align: middle;
     line-height: 100%;
 
     font-family: 'Open Sans', sans-serif;
-    font-size: small;
+    font-size: 14px;
     font-weight: 400;
-    color: #444;
-
-    /*display: none;*/
+    color: #7f7f7f;
 }
 
 .igv-track-container-div {
