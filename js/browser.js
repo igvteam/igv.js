@@ -807,40 +807,39 @@ var igv = (function (igv) {
         lociClone = _.clone(loci);
         _.each(loci, function(locus) {
 
-            var pieces = {};
-            if (igv.isChrNameStartEndFeature(locus, self.genome, pieces)) {
-                pieces.gtexSelection = undefined;
-                chromosomes.push(pieces);
+            var locusObject = {};
+            if (igv.isLocusChrNameStartEnd(locus, self.genome, locusObject)) {
+                locusObject.gtexSelection = undefined;
+                chromosomes.push(locusObject);
                 lociClone.shift();
             }
         });
 
-        // TODO: Handle gene names
+        // TODO: Handle gene names. This will involve dealing wiht gtexSelected
         geneNameLoci = _.without(loci, lociClone);
 
         continuation(chromosomes);
     };
 
-    igv.isChrNameStartEndFeature = function (feature, genome, locusObject) {
+    igv.isLocusChrNameStartEnd = function (locus, genome, locusObject) {
 
-        var a = feature.split(':'),
+        var a,
             b,
-            ss,
-            ee,
-            n,
+            numeric,
             success;
 
+        a = locus.split(':');
         if ( undefined === genome.getChromosome(_.first(a)) ) {
             return false;
-        }
+        } else if (locusObject) {
 
-        // start and end could get overridden if explicit start/end exits
-        if (locusObject) {
+            // start and end will get overridden if explicit start AND end exits
             locusObject.chromosome = genome.getChromosome(_.first(a));
             locusObject.start = 0;
             locusObject.end = locusObject.chromosome.bpLength;
         }
 
+        // if just a chromosome name we are done
         if (1 === _.size(a)) {
             return true;
         } else {
@@ -848,22 +847,76 @@ var igv = (function (igv) {
             b = _.last(a).split('-');
             if (_.size(b) > 2) {
                 return false;
+            } else if (1 === _.size(b)) {
+
+                numeric = _.first(b).replace(/\,/g,'');
+                success = !isNaN(numeric);
+                if (true === success && locusObject) {
+                    locusObject.start = parseInt(numeric, 10);
+                    locusObject.end = undefined;
+                }
+
+            } else if (2 === _.size(b)) {
+
+                success = true;
+                _.each(b, function(bb, index) {
+
+                    if (true === success) {
+                        numeric = bb.replace(/\,/g,'');
+                        success = !isNaN(numeric);
+                        if (true === success && locusObject) {
+                            locusObject[ 0 === index ? 'start' : 'end' ] = parseInt(numeric, 10);
+                        }
+                    }
+                });
+
             }
 
-            success = true;
-            _.each(b, function(bb, index) {
-
-                if (true === success) {
-                    n = bb.replace(/\,/g,'');
-                    success = !isNaN(n);
-                    if (true === success && locusObject) {
-                        locusObject[ 0 === index ? 'start' : 'end' ] = parseInt(n, 10);
-                    }
-                }
-            });
+            if (true === success && locusObject) {
+                igv.validateLocusExtent(locusObject.chromosome, locusObject);
+            }
 
             return success;
         }
+
+
+    };
+
+    igv.validateLocusExtent = function (chromosome, extent) {
+
+        var ss = extent.start,
+            ee = extent.end;
+
+        if (undefined === ee) {
+
+            ss -= igv.browser.minimumBasesExtent()/2;
+            ee = ss + igv.browser.minimumBasesExtent();
+
+            if (ee > chromosome.bpLength) {
+                ee = chromosome.bpLength;
+                ss = ee - igv.browser.minimumBasesExtent();
+            } else if (ss < 0) {
+                ss = 0;
+                ee = igv.browser.minimumBasesExtent();
+            }
+
+        } else if (ee - ss < igv.browser.minimumBasesExtent()) {
+
+            center = (ee + ss)/2;
+            if (center - igv.browser.minimumBasesExtent()/2 < 0) {
+                ss = 0;
+                ee = ss + igv.browser.minimumBasesExtent();
+            } else if (center + igv.browser.minimumBasesExtent()/2 > chromosome.bpLength) {
+                ee = chromosome.bpLength;
+                ss = ee - igv.browser.minimumBasesExtent();
+            } else {
+                ss = center - igv.browser.minimumBasesExtent()/2;
+                ee = ss + igv.browser.minimumBasesExtent();
+            }
+        }
+
+        extent.start = Math.ceil(ss);
+        extent.end = Math.floor(ee);
     };
 
     /**
@@ -890,7 +943,7 @@ var igv = (function (igv) {
             return;
         }
 
-        if (igv.isChrNameStartEndFeature(feature, this.genome, undefined)) {
+        if (igv.isLocusChrNameStartEnd(feature, this.genome, undefined)) {
 
             var success = igv.gotoLocusFeature(feature, this.genome, this);
 
@@ -994,7 +1047,7 @@ var igv = (function (igv) {
             }
 
             obj = { start: start, end: end };
-            validateLocusExtent(igv.browser, chr, obj);
+            igv.validateLocusExtent(chr, obj);
             start = obj.start;
             end = obj.end;
 
@@ -1007,44 +1060,6 @@ var igv = (function (igv) {
 
         browser.goto(chrName, start, end);
         fireOnsearch.call(igv.browser, locusFeature, type);
-
-        function validateLocusExtent(browser, chromosome, extent) {
-
-            var ss = extent.start,
-                ee = extent.end,
-                locusExtent = ee - ss;
-
-            if (undefined === ee) {
-
-                ss -= igv.browser.minimumBasesExtent()/2;
-                ee = ss + igv.browser.minimumBasesExtent();
-
-                if (ee > chromosome.bpLength) {
-                    ee = chromosome.bpLength;
-                    ss = ee - igv.browser.minimumBasesExtent();
-                } else if (ss < 0) {
-                    ss = 0;
-                    ee = igv.browser.minimumBasesExtent();
-                }
-
-            } else if (ee - ss < igv.browser.minimumBasesExtent()) {
-
-                center = (ee + ss)/2;
-                if (center - igv.browser.minimumBasesExtent()/2 < 0) {
-                    ss = 0;
-                    ee = ss + igv.browser.minimumBasesExtent();
-                } else if (center + igv.browser.minimumBasesExtent()/2 > chromosome.bpLength) {
-                    ee = chromosome.bpLength;
-                    ss = ee - igv.browser.minimumBasesExtent();
-                } else {
-                    ss = center - igv.browser.minimumBasesExtent()/2;
-                    ee = ss + igv.browser.minimumBasesExtent();
-                }
-            }
-
-            extent.start = Math.ceil(ss);
-            extent.end = Math.floor(ee);
-        }
 
         return true;
     };
