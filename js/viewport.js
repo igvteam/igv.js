@@ -615,31 +615,28 @@ var igv = (function (igv) {
     // TODO: dat - Called from BAMTrack.altClick. Change call to redrawTile(viewPort, features)
     igv.Viewport.prototype.redrawTile = function (features) {
 
-        if (!this.tile) return;
+        var buffer;
 
-        var self = this,
-            chr = self.tile.chr,
-            bpStart = self.tile.startBP,
-            bpEnd = self.tile.endBP,
-            buffer = document.createElement('canvas'),
-            bpPerPixel = self.tile.scale;
+        if (!this.tile) {
+            return;
+        }
 
-        buffer.width = self.tile.image.width;
-        buffer.height = self.tile.image.height;
-        var ctx = buffer.getContext('2d');
+        buffer = document.createElement('canvas');
+        buffer.width = this.tile.image.width;
+        buffer.height = this.tile.image.height;
 
-        self.track.draw({
+        this.trackView.track.draw({
             features: features,
-            context: ctx,
-            bpStart: bpStart,
-            bpPerPixel: bpPerPixel,
+            context: buffer.getContext('2d'),
+            bpStart: this.tile.startBP,
+            bpPerPixel: this.tile.scale,
             pixelWidth: buffer.width,
             pixelHeight: buffer.height
         });
 
 
-        self.tile = new Tile(chr, bpStart, bpEnd, bpPerPixel, buffer);
-        self.paintImage();
+        this.tile = new Tile(this.tile.chr, this.tile.startBP, this.tile.endBP, this.tile.scale, buffer);
+        this.paintImage();
     };
 
     return igv;
