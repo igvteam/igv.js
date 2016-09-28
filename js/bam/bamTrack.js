@@ -103,8 +103,8 @@ var igv = (function (igv) {
 
         // TODO - dat. Temporary hack to stand up mult-locus implementation.
         // TODO - dat. MUST identify viewport that was clicked in.
-        this.trackView.$viewport.redrawTile(this.featureSource.alignmentContainer);
-        this.trackView.$viewport.scrollTop(0);
+        this.trackView.viewports[ 0 ].redrawTile(this.featureSource.alignmentContainer);
+        this.trackView.viewports[ 0 ].$viewport.scrollTop(0);
 
         this.sortDirection = !this.sortDirection;
     };
@@ -278,13 +278,12 @@ var igv = (function (igv) {
                 object: $('<div class="igv-track-menu-item">' + "Sort by base" + '</div>'),
                 click: function () {
                     var genomicLocationViaTrackViewportHalfWidth,
-                        viewportHalfWidth,
-                        referenceFrame = igv.browser.kitchenSinkList[ 0 ].referenceFrame;
+                        viewportHalfWidth;
 
                     popover.hide();
 
                     viewportHalfWidth = Math.floor(0.5 * igv.browser.kitchenSinkList[ 0 ].viewportWidth);
-                    genomicLocationViaTrackViewportHalfWidth = Math.floor((referenceFrame.start) + referenceFrame.toBP(viewportHalfWidth));
+                    genomicLocationViaTrackViewportHalfWidth = Math.floor((igv.browser.kitchenSinkList[ 0 ].referenceFrame.start) + igv.browser.kitchenSinkList[ 0 ].referenceFrame.toBP(viewportHalfWidth));
 
                     // console.log('bamTrack - sort - viewportHalfWidth ' + igv.numberFormatter(genomicLocationViaTrackViewportHalfWidth));
 
