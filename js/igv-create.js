@@ -102,7 +102,8 @@ var igv = (function (igv) {
 
         igv.loadGenome(config.reference).then(function (genome) {
 
-            var width;
+            var width,
+                path = 'https://s3.amazonaws.com/igv.broadinstitute.org/genomes/seq/b37/b37_cytoband.txt';
 
             // if (browser.karyoPanel) {
             //     browser.karyoPanel.resize();
@@ -110,8 +111,8 @@ var igv = (function (igv) {
 
             browser.genome = genome;
             browser.genome.id = config.reference.genomeId;
-
             width = browser.syntheticViewportContainerWidth();
+
             browser.getKitchenSinkListWithLociAndViewportWidth(lociWithConfiguration(config), width, function (kitchenSinkList) {
 
                 if (_.size(kitchenSinkList) > 0) {
@@ -160,6 +161,7 @@ var igv = (function (igv) {
 
                 return loci;
             }
+
         }).catch(function (error) {
             igv.presentAlert(error);
             console.log(error);

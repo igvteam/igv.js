@@ -785,25 +785,90 @@ var igv = (function (igv) {
     igv.Browser.prototype.getKitchenSinkListWithLociAndViewportWidth = function (loci, viewportContainerWidth, continuation) {
 
         var self = this,
-            lociClone,
+            path,
+            searchConfig = igv.browser.searchConfig,
+            chrStartEndLoci,
             geneNameLoci,
-            chromosomes = [];
+            locusObject,
+            locusObjects = [];
 
-        lociClone = _.clone(loci);
+        chrStartEndLoci = [];
         _.each(loci, function(locus) {
 
-            var locusObject = {};
+            locusObject = {};
             if (igv.isLocusChrNameStartEnd(locus, self.genome, locusObject)) {
                 locusObject.gtexSelection = undefined;
-                chromosomes.push(locusObject);
-                lociClone.shift();
+                locusObjects.push(locusObject);
+
+                // consume properly parser locus
+                chrStartEndLoci.push(locus);
             }
         });
 
-        // TODO: Handle gene names. This will involve dealing wiht gtexSelected
-        geneNameLoci = _.without(loci, lociClone);
+        geneNameLoci = _.difference(loci, chrStartEndLoci);
 
-        continuation(chromosomes);
+        if (_.size(geneNameLoci) > 0) {
+
+            path = searchConfig.url.replace("$FEATURE$", _.first(geneNameLoci));
+
+            // igvxhr.loadString().then(function(geneNameLoci){
+            //    return Promise.all(geneNameLoci.map(igvxhr.loadString));
+            // });
+
+            igvxhr.loadString(path).then(function (response) {
+
+                var results,
+                    result,
+                    chr,
+                    start,
+                    end,
+                    type,
+                    string;
+
+                results = ("plain" === searchConfig.type) ? parseSearchResults(response) : JSON.parse(response);
+
+                if (searchConfig.resultsField) {
+                    results = results[searchConfig.resultsField];
+                }
+
+                if (0 === _.size(results)) {
+
+                    console.log('bogus results');
+                } else if (1 === _.size(results)) {
+
+
+                    result = _.first(results);
+
+                    chr = result[ searchConfig.chromosomeField ];
+                    start = result[ searchConfig.startField ] - searchConfig.coords;
+                    end = result[ searchConfig.endField ];
+
+                    if (igv.browser.flanking) {
+                        start = Math.max(0, start - igv.browser.flanking);
+                        end += igv.browser.flanking;
+                    }
+
+                    string = chr + ':' + start.toString() + '-' + end.toString();
+
+                    locusObject = {};
+                    if (igv.isLocusChrNameStartEnd(string, self.genome, locusObject)) {
+
+                        type = result["featureType"] || result["type"];
+                        locusObject.gtexSelection = new igv.GtexSelection('gtex' === type || 'snp' === type ? {snp: name} : {gene: name});
+                        locusObjects.push(locusObject);
+                    } // if (igv.isLocusChrNameStartEnd(...)
+
+                } // else if (1 === _.size(results))
+
+                continuation(locusObjects);
+
+            }); // igvxhr.loadString(path).then(function (data)
+
+        } else {
+
+            continuation(locusObjects);
+        }
+
     };
 
     /**
@@ -838,61 +903,59 @@ var igv = (function (igv) {
                 callback();
             }
 
-        }
+        } else {
 
-        // else {
-        //
-        //     // Try local feature cache first
-        //     result = this.featureDB[feature.toUpperCase()];
-        //     if (result) {
-        //
-        //         handleSearchResult(result.name, result.chrName, result.start, result.end, "");
-        //
-        //     } else if (this.searchConfig) {
-        //         url = this.searchConfig.url.replace("$FEATURE$", feature);
-        //         searchConfig = this.searchConfig;
-        //
-        //         if (url.indexOf("$GENOME$") > -1) {
-        //             var genomeId = this.genome.id ? this.genome.id : "hg19";
-        //             url.replace("$GENOME$", genomeId);
-        //         }
-        //
-        //         // var loader = new igv.DataLoader(url);
-        //         // if (range)  loader.range = range;
-        //         // loader.loadBinaryString(callback);
-        //
-        //         igvxhr.loadString(url).then(function (data) {
-        //
-        //             var results = ("plain" === searchConfig.type) ? parseSearchResults(data) : JSON.parse(data);
-        //
-        //             if (searchConfig.resultsField) {
-        //                 results = results[searchConfig.resultsField];
-        //             }
-        //
-        //             if (results.length == 0) {
-        //                 //alert('No feature found with name "' + feature + '"');
-        //                 igv.presentAlert('No feature found with name "' + feature + '"');
-        //             }
-        //             else if (results.length == 1) {
-        //
-        //                 // Just take the first result for now
-        //                 // TODO - merge results, or ask user to choose
-        //
-        //                 r = results[0];
-        //                 chr = r[searchConfig.chromosomeField];
-        //                 start = r[searchConfig.startField] - searchConfig.coords;
-        //                 end = r[searchConfig.endField];
-        //                 type = r["featureType"] || r["type"];
-        //                 handleSearchResult(feature, chr, start, end, type);
-        //             }
-        //             else {
-        //                 presentSearchResults(results, searchConfig, feature);
-        //             }
-        //
-        //             if (callback) callback();
-        //         });
-        //     }
-        // }
+            // Try local feature cache first
+            result = this.featureDB[feature.toUpperCase()];
+            if (result) {
+
+                handleSearchResult(result.name, result.chrName, result.start, result.end, "");
+
+            } else if (this.searchConfig) {
+                url = this.searchConfig.url.replace("$FEATURE$", feature);
+                searchConfig = this.searchConfig;
+
+                if (url.indexOf("$GENOME$") > -1) {
+                    var genomeId = this.genome.id ? this.genome.id : "hg19";
+                    url.replace("$GENOME$", genomeId);
+                }
+
+                // var loader = new igv.DataLoader(url);
+                // if (range)  loader.range = range;
+                // loader.loadBinaryString(callback);
+
+                igvxhr.loadString(url).then(function (data) {
+
+                    var results = ("plain" === searchConfig.type) ? parseSearchResults(data) : JSON.parse(data);
+
+                    if (searchConfig.resultsField) {
+                        results = results[searchConfig.resultsField];
+                    }
+
+                    if (results.length == 0) {
+                        //alert('No feature found with name "' + feature + '"');
+                        igv.presentAlert('No feature found with name "' + feature + '"');
+                    }
+                    else if (results.length == 1) {
+
+                        // Just take the first result for now
+                        // TODO - merge results, or ask user to choose
+
+                        r = results[0];
+                        chr = r[searchConfig.chromosomeField];
+                        start = r[searchConfig.startField] - searchConfig.coords;
+                        end = r[searchConfig.endField];
+                        type = r["featureType"] || r["type"];
+                        handleSearchResult(feature, chr, start, end, type);
+                    }
+                    else {
+                        presentSearchResults(results, searchConfig, feature);
+                    }
+
+                    if (callback) callback();
+                });
+            }
+        }
 
     };
 
