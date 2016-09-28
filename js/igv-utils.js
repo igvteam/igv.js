@@ -26,7 +26,7 @@
 var igv = (function (igv) {
 
 
-    igv.makeToggleButton = function (buttonOnLabel, buttonOffLabel, configurationKey, get$Target) {
+    igv.makeToggleButton = function (buttonOnLabel, buttonOffLabel, configurationKey, get$Target, continuation) {
 
         var $button = $('<div class="igv-nav-bar-toggle-button">'),
             configurationValue = igv.browser[ configurationKey ];
@@ -51,6 +51,10 @@ var igv = (function (igv) {
             if (true === truth) {
                 $b.addClass('igv-nav-bar-toggle-button-off');
                 $b.text(offLabel);
+
+                if (continuation) {
+                    continuation();
+                }
             } else {
                 $b.addClass('igv-nav-bar-toggle-button-on');
                 $b.text(onLabel);

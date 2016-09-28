@@ -326,7 +326,7 @@ var igv = (function (igv) {
 
             $cursorTrackingGuideToggle = igv.makeToggleButton('cursor guide', 'cursor guide', 'showCursorTrackingGuide', function () {
                 return browser.$cursorTrackingGuide;
-            });
+            }, undefined);
 
             $navigation.append($cursorTrackingGuideToggle);
 
@@ -338,7 +338,7 @@ var igv = (function (igv) {
             // toggle track labels
             $trackLabelToggle = igv.makeToggleButton('track labels', 'track labels', 'trackLabelsVisible', function () {
                 return $(browser.trackContainerDiv).find('.igv-track-label');
-            });
+            }, undefined);
 
             $navigation.append($trackLabelToggle);
 

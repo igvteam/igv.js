@@ -278,14 +278,15 @@ var igv = (function (igv) {
                 object: $('<div class="igv-track-menu-item">' + "Sort by base" + '</div>'),
                 click: function () {
                     var genomicLocationViaTrackViewportHalfWidth,
-                        trackViewportHalfWidth;
+                        viewportHalfWidth,
+                        referenceFrame = igv.browser.kitchenSinkList[ 0 ].referenceFrame;
 
                     popover.hide();
 
-                    trackViewportHalfWidth = Math.floor(igv.browser.viewportContainerWidth()/2);
-                    genomicLocationViaTrackViewportHalfWidth = Math.floor((igv.browser.referenceFrame.start) + igv.browser.referenceFrame.toBP(trackViewportHalfWidth));
+                    viewportHalfWidth = Math.floor(0.5 * igv.browser.kitchenSinkList[ 0 ].viewportWidth);
+                    genomicLocationViaTrackViewportHalfWidth = Math.floor((referenceFrame.start) + referenceFrame.toBP(viewportHalfWidth));
 
-                    // console.log('bamTrack - sort - trackViewportHalfWidth ' + igv.numberFormatter(genomicLocationViaTrackViewportHalfWidth));
+                    // console.log('bamTrack - sort - viewportHalfWidth ' + igv.numberFormatter(genomicLocationViaTrackViewportHalfWidth));
 
                     self.altClick(genomicLocationViaTrackViewportHalfWidth, undefined);
 

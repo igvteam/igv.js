@@ -43,6 +43,8 @@ var igv = (function (igv) {
 
         this.$centerGuideToggle = igv.makeToggleButton('center line', 'center line', 'showCenterGuide', function () {
             return self.$container;
+        }, function () {
+            self.repaint();
         });
 
     };
@@ -58,30 +60,23 @@ var igv = (function (igv) {
             ls,
             ws,
             center,
-            xBP,
-            rect;
+            rect,
+            referenceFrame;
 
-        if (undefined === igv.browser.referenceFrame) {
+        if (undefined === igv.browser.kitchenSinkList) {
             return;
         }
 
-        ppb = 1.0/igv.browser.referenceFrame.bpPerPixel;
+        referenceFrame = igv.browser.kitchenSinkList[ 0 ].referenceFrame;
+        ppb = 1.0/referenceFrame.bpPerPixel;
         if (ppb > 1) {
 
-            if (this.trackViews && this.trackViews.length > 0) {
-                trackXY = igv.browser.trackViews[ 0 ].$viewportContainer.position();
-                trackHalfWidth = 0.5 * igv.browser.trackViews[ 0 ].$viewportContainer.width();
-            } else {
-                rect = igv.browser.syntheticViewportContainerBBox();
-                trackXY = rect.position;
-                trackHalfWidth = 0.5 * rect.width;
-            }
-
-
-            xBP = igv.browser.referenceFrame.toBP(trackHalfWidth) + igv.browser.referenceFrame.start;
+            rect = igv.browser.syntheticViewportContainerBBox();
+            trackXY = rect.position;
+            trackHalfWidth = 0.5 * rect.width;
 
             center = trackXY.left + trackHalfWidth;
-            width = igv.browser.referenceFrame.toPixels(1);
+            width = referenceFrame.toPixels(1);
             left = center - 0.5 * width;
 
             ls = Math.round(left).toString() + 'px';

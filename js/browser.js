@@ -409,40 +409,38 @@ var igv = (function (igv) {
 
     igv.Browser.prototype.resize = function () {
 
-        if (this.ideoPanel) {
-            this.ideoPanel.resize();
-        }
-
-        if (this.karyoPanel) {
-            this.karyoPanel.resize();
-        }
-
-        _.each(this.trackViews, function(trackView){
-            trackView.resize();
+        _.each(_.union([this.ideoPanel, this.karyoPanel, this.centerGuide], this.trackViews), function(renderable){
+            if (renderable) {
+                renderable.resize();
+            }
         });
 
-        if (this.centerGuide) {
-            this.centerGuide.resize();
-        }
     };
 
     igv.Browser.prototype.repaint = function () {
 
-        if (this.ideoPanel) {
-            this.ideoPanel.repaint();
-        }
-
-        if (this.karyoPanel) {
-            this.karyoPanel.repaint();
-        }
-
-        this.trackViews.forEach(function (trackView) {
-            trackView.repaint();
+        _.each(_.union([this.ideoPanel, this.karyoPanel, this.centerGuide], this.trackViews), function(renderable){
+            if (renderable) {
+                renderable.repaint();
+            }
         });
 
-        if (this.centerGuide) {
-            this.centerGuide.repaint();
-        }
+    };
+
+    igv.Browser.prototype.update = function () {
+
+        // this.updateLocusSearch(this.referenceFrame);
+
+        _.each([this.ideoPanel, this.karyoPanel, this.centerGuide], function(renderable){
+            if (renderable) {
+                renderable.repaint();
+            }
+        });
+
+        _.each(this.trackViews, function(trackView){
+            trackView.update();
+        });
+
     };
 
     igv.Browser.prototype.repaintWithLocusIndex = function (locusIndex) {
@@ -457,28 +455,6 @@ var igv = (function (igv) {
 
     };
 
-    igv.Browser.prototype.update = function () {
-
-        // this.updateLocusSearch(this.referenceFrame);
-
-        if (this.ideoPanel) {
-            this.ideoPanel.repaint();
-        }
-
-        if (this.karyoPanel) {
-            this.karyoPanel.repaint();
-        }
-
-        this.trackViews.forEach(function (trackView) {
-            trackView.update();
-        });
-
-        if (this.centerGuide) {
-            this.centerGuide.repaint();
-        }
-
-    };
-
     igv.Browser.prototype.updateWithLocusIndex = function (locusIndex) {
 
         if (this.ideoPanel) {
@@ -488,6 +464,10 @@ var igv = (function (igv) {
         _.each(igv.Viewport.viewportsWithLocusIndex(locusIndex), function (viewport) {
             viewport.update();
         });
+
+        if (this.centerGuide) {
+            this.centerGuide.repaint();
+        }
 
     };
 
