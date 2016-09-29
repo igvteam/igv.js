@@ -683,7 +683,7 @@ var igv = (function (igv) {
                         //alert('No feature found with name "' + feature + '"');
                         igv.presentAlert('No feature found with name "' + feature + '"');
                     }
-                    else if (results.length == 1) {
+                    else{
 
                         // Just take the first result for now
                         // TODO - merge results, or ask user to choose
@@ -695,9 +695,9 @@ var igv = (function (igv) {
                         type = r["featureType"] || r["type"];
                         handleSearchResult(feature, chr, start, end, type);
                     }
-                    else {
-                        presentSearchResults(results, searchConfig, feature);
-                    }
+                    //else {
+                    //    presentSearchResults(results, searchConfig, feature);
+                    //}
 
                     if (callback) callback();
                 });
