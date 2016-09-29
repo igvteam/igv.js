@@ -48,6 +48,8 @@ var igvxhr = (function (igvxhr) {
                 withCredentials = options.withCredentials,
                 header_keys, key, value, i;
 
+            // Support for GCS paths.
+            url = url.startsWith("gs://") ? igv.translateGoogleCloudURL(url) : url;
 
             // Hack to prevent caching for google storage files.  Get weird net:err-cache errors otherwise
             if (range && url.includes("googleapis")) {
