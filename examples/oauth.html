@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+    <meta name="description" content="">
+    <meta name="author" content="">
+    <link rel="shortcut icon" href=../img/favicon.ico>
+    <title>IGV - Integrative Genomics Viewer</title>
+
+
+    <!-- jQuery UI CSS -->
+    <link rel="stylesheet" type="text/css"
+          href="https://ajax.googleapis.com/ajax/libs/jqueryui/1.11.2/themes/smoothness/jquery-ui.css"/>
+
+    <!-- Font Awesome CSS -->
+    <link rel="stylesheet" type="text/css"
+          href="https://maxcdn.bootstrapcdn.com/font-awesome/4.2.0/css/font-awesome.min.css"/>
+
+    <!-- IGV CSS -->
+    <link rel="stylesheet" type="text/css" href="//igv.org/web/release/1.0.4/igv-1.0.4.css">
+    <link rel="stylesheet" type="text/css" href="css/ga4gh.css"/>
+
+    <!-- jQuery JS -->
+    <script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
+    <script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jqueryui/1.11.2/jquery-ui.min.js"></script>
+
+    <!-- Bootstrap JS -  NOT REQUIRED FOR IGV -->
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.4/js/bootstrap.min.js"></script>
+
+    <!-- IGV JS-->
+    <script type="text/javascript" src="https://igv.org/web/release/1.0.4/igv-1.0.4.js"></script>
+    <script type="text/javascript" src="js/ga4ghLoader.js"></script>
+
+
+
+</head>
+
+<body>
+
+<div id="myDiv" style="padding-top: 50px;padding-bottom: 20px; height: auto">
+
+    <a href='#' onClick='oauth.google.login()' id="loginText"> Authorize </a>
+
+    <p></p>
+
+    <a href='#' onclick="igv.browser.loadTrack({
+                                sourceType: 'ga4gh',
+                                type: 'bam',
+                                url: 'https://genomics.googleapis.com/v1',
+                                readGroupSetIds: 'CMvnhpKTFhCqqcrDgqfqgyA',
+                                name: 'Ga4gh BAM'
+                                })">Click to load Ga4gh BAM
+
+    </a>
+
+    <p></p>
+
+    <a href='#' onclick="igv.browser.loadTrack({
+                                sourceType: 'ga4gh',
+                                type: 'vcf',
+                                url: 'https://genomics.googleapis.com/v1',
+                                variantSetId: '11847417162926684904',
+                                name: 'Ga4gh variants'
+                                })">Click to load Ga4gh Variants
+    </a>
+
+    <p></p>
+
+    <a href='#' onclick="igv.browser.loadTrack({
+                                type: 'bam',
+                                url: 'gs://igv-bam-test/NA12878.bam',
+                                indexURL: 'gs://igv-bam-test/NA12878.bam.bai',
+                                name: 'GCS bam'
+                                })">GCS bam
+    </a>
+
+
+
+</div>
+
+<script type="text/javascript">
+
+    $(document).ready(function () {
+
+        var div, options, browser;
+
+        div = $("#myDiv")[0];
+        options = {
+
+            genome: "hg19",
+            locus: 'myc',
+            apiKey: 'AIzaSyDUUAUFpQEN4mumeMNIRWXSiTh5cPtUAD0',
+            tracks: [
+                {
+                    url: "https://s3.amazonaws.com/igv.broadinstitute.org/annotations/hg19/genes/gencode.v18.collapsed.bed",
+                    name: "Genes",
+                    order: 10000
+                }
+            ]
+        };
+
+        browser = igv.createBrowser(div, options);
+    });
+
+</script>
+
+
+</body>
+
+</html>
