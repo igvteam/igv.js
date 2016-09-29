@@ -11,7 +11,9 @@ var igv = (function (igv) {
 
         var self = this,
             description,
-            $trackLabel;
+            $trackLabel,
+            $spinner,
+            dimen;
 
         this.trackView = trackView;
         this.locusIndex = locusIndex;
@@ -72,6 +74,23 @@ var igv = (function (igv) {
         }
 
         this.addMouseHandlers(trackView);
+
+        if (trackView.track instanceof igv.RulerTrack) {
+
+            // do nothing
+        } else {
+            dimen = this.$viewport.height();
+            if (dimen > 32) {
+                dimen = 32;
+            }
+            console.log('$viewport height ' + dimen);
+            $spinner = $('<div class="igv-viewport-spinner">');
+            $spinner.css({ 'font-size' : dimen + 'px'});
+
+            $spinner.append($('<i class="fa fa-cog fa-spin fa-fw">'));
+            // $spinner.append($('<i class="fa fa-spinner fa-pulse fa-fw">'));
+            this.$viewport.append($spinner);
+        }
     };
 
     igv.Viewport.prototype.addMouseHandlers = function (trackView) {

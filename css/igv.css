@@ -1204,6 +1204,24 @@ div.ui-dialog fieldset {
     height: 100%;
 }
 
+.igv-viewport-spinner {
+
+    pointer-events:none;
+
+    position: absolute;
+
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+
+    z-index: 1024;
+
+    /*font-size: 2vmin;*/
+
+    color: #7f7f7f;
+
+}
+
 .igv-left-hand-gutter {
     position: absolute;
     left: 0;
