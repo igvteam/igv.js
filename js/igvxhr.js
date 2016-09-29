@@ -32,7 +32,7 @@ var igvxhr = (function (igvxhr) {
 
     igvxhr.load = function (url, options) {
 
-        if(!options) options = {};
+        if (!options) options = {};
 
         return new Promise(function (fulfill, reject) {
 
@@ -49,12 +49,21 @@ var igvxhr = (function (igvxhr) {
                 header_keys, key, value, i;
 
             // Support for GCS paths.
-            url = url.startsWith("gs://") ? igv.translateGoogleCloudURL(url) : url;
+            url = url.startsWith("gs://") ? igv.Google.translateGoogleCloudURL(url) : url;
 
-            // Hack to prevent caching for google storage files.  Get weird net:err-cache errors otherwise
-            if (range && url.includes("googleapis")) {
-                url += url.includes("?") ? "&" : "?";
-                url += "someRandomSeed=" + Math.random().toString(36);
+            if (igv.Google.isGoogleURL(url)) {
+
+                url = igv.Google.addApiKey(url);
+
+                // Add google headers (e.g. oAuth)
+                headers = headers || {};
+                igv.Google.addGoogleHeaders(headers);
+
+                // Hack to prevent caching for google storage files.  Get weird net:err-cache errors otherwise
+                if (range) {
+                    url += url.includes("?") ? "&" : "?";
+                    url += "someRandomSeed=" + Math.random().toString(36);
+                }
             }
 
             xhr.open(method, url);
@@ -82,7 +91,6 @@ var igvxhr = (function (igvxhr) {
                 }
             }
 
-            // let cookies go along to get files from any website we are logged in to
             // NOTE: using withCredentials with servers that return "*" for access-allowed-origin will fail
             if (withCredentials === true) {
                 xhr.withCredentials = true;
