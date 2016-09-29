@@ -31,15 +31,7 @@ var igv = (function (igv) {
      */
     igv.ga4ghGet = function (options) {
 
-        var url = options.url + "/" + options.entity + "/" + options.entityId,
-            apiKey = oauth.google.apiKey,
-            paramSeparator = "?";
-
-        if (apiKey) {
-            url = url + paramSeparator + "key=" + apiKey;
-        }
-
-        options.headers = ga4ghHeaders();
+        var url = options.url + "/" + options.entity + "/" + options.entityId;
 
         return igvxhr.loadJson(url, options);      // Returns a promise
     }
