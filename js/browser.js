@@ -785,12 +785,12 @@ var igv = (function (igv) {
     igv.Browser.prototype.getKitchenSinkListWithLociAndViewportWidth = function (loci, viewportContainerWidth, continuation) {
 
         var self = this,
-            path,
             searchConfig = igv.browser.searchConfig,
             chrStartEndLoci,
             geneNameLoci,
             locusObject,
-            locusObjects = [];
+            locusObjects = [],
+            geneNameLookup;
 
         chrStartEndLoci = [];
         _.each(loci, function(locus) {
@@ -800,75 +800,92 @@ var igv = (function (igv) {
                 locusObject.gtexSelection = undefined;
                 locusObjects.push(locusObject);
 
-                // consume properly parser locus
+                // accumulate successfully parsed loci
                 chrStartEndLoci.push(locus);
             }
         });
 
+        // isolate gene name loci
         geneNameLoci = _.difference(loci, chrStartEndLoci);
 
+        // parse gene names
         if (_.size(geneNameLoci) > 0) {
 
-            path = searchConfig.url.replace("$FEATURE$", _.first(geneNameLoci));
+            geneNameLookup = new Promise(function(resolve) {
+                resolve( _.map(geneNameLoci, function(loci){ return searchConfig.url.replace("$FEATURE$", loci); }) );
+            });
 
-            // igvxhr.loadString().then(function(geneNameLoci){
-            //    return Promise.all(geneNameLoci.map(igvxhr.loadString));
-            // });
+            geneNameLookup.then(function(response) {
+                return Promise.all(response.map(igvxhr.loadString));
+            }).then(function (response) {
+                var filtered,
+                    geneNameLocusObjects;
 
-            igvxhr.loadString(path).then(function (response) {
+                filtered = _.filter(response, function(geneNameLookupResult){
+                    return geneNameLookupResult !== "";
+                });
 
-                var results,
-                    result,
-                    chr,
-                    start,
-                    end,
-                    type,
-                    string;
+                geneNameLocusObjects = _.filter(_.map(filtered, createGeneNameLocusObject), function(geneNameLocusObject){
+                    return undefined !== geneNameLocusObject;
+                });
 
-                results = ("plain" === searchConfig.type) ? parseSearchResults(response) : JSON.parse(response);
+                continuation(_.union(locusObjects, geneNameLocusObjects));
 
-                if (searchConfig.resultsField) {
-                    results = results[searchConfig.resultsField];
-                }
-
-                if (0 === _.size(results)) {
-
-                    console.log('bogus results');
-                } else if (1 === _.size(results)) {
-
-
-                    result = _.first(results);
-
-                    chr = result[ searchConfig.chromosomeField ];
-                    start = result[ searchConfig.startField ] - searchConfig.coords;
-                    end = result[ searchConfig.endField ];
-
-                    if (igv.browser.flanking) {
-                        start = Math.max(0, start - igv.browser.flanking);
-                        end += igv.browser.flanking;
-                    }
-
-                    string = chr + ':' + start.toString() + '-' + end.toString();
-
-                    locusObject = {};
-                    if (igv.isLocusChrNameStartEnd(string, self.genome, locusObject)) {
-
-                        type = result["featureType"] || result["type"];
-                        locusObject.gtexSelection = new igv.GtexSelection('gtex' === type || 'snp' === type ? {snp: name} : {gene: name});
-                        locusObjects.push(locusObject);
-                    } // if (igv.isLocusChrNameStartEnd(...)
-
-                } // else if (1 === _.size(results))
-
-                continuation(locusObjects);
-
-            }); // igvxhr.loadString(path).then(function (data)
+            });
 
         } else {
-
             continuation(locusObjects);
         }
 
+        function createGeneNameLocusObject(geneNameLookupResponse) {
+
+            var results,
+                result,
+                chr,
+                start,
+                end,
+                type,
+                string,
+                geneNameLocusObject;
+
+            results = ("plain" === searchConfig.type) ? parseSearchResults(geneNameLookupResponse) : JSON.parse(geneNameLookupResponse);
+
+            if (searchConfig.resultsField) {
+                results = results[searchConfig.resultsField];
+            }
+
+            if (0 === _.size(results)) {
+                return undefined;
+            } else if (1 === _.size(results)) {
+
+                result = _.first(results);
+
+                chr = result[ searchConfig.chromosomeField ];
+                start = result[ searchConfig.startField ] - searchConfig.coords;
+                end = result[ searchConfig.endField ];
+
+                if (igv.browser.flanking) {
+                    start = Math.max(0, start - igv.browser.flanking);
+                    end += igv.browser.flanking;
+                }
+
+                string = chr + ':' + start.toString() + '-' + end.toString();
+
+                geneNameLocusObject = {};
+                if (igv.isLocusChrNameStartEnd(string, self.genome, geneNameLocusObject)) {
+
+                    type = result["featureType"] || result["type"];
+                    geneNameLocusObject.gtexSelection = new igv.GtexSelection('gtex' === type || 'snp' === type ? {snp: name} : {gene: name});
+                    return geneNameLocusObject;
+                } else {
+                    return undefined;
+                }
+
+            } else {
+                return undefined;
+            }
+
+        }
     };
 
     /**
