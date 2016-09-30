@@ -25,24 +25,55 @@
 
 var igv = (function (igv) {
 
+    igv.Google = {
 
-    igv.translateGoogleCloudURL = function(gsUrl) {
+        // Crude test, this is conservative, nothing bad happens for a false positive
+        isGoogleURL: function (url) {
+            return url.contains("googleapis");
+        },
 
-        var i = gsUrl.indexOf('/', 5);
-        if (i < 0) {
-            console.log("Invalid gs url: " + gsUrl);
-            return gsUrl;
+        translateGoogleCloudURL: function (gsUrl) {
+
+            var i = gsUrl.indexOf('/', 5);
+            if (i < 0) {
+                console.log("Invalid gs url: " + gsUrl);
+                return gsUrl;
+            }
+
+            var bucket = gsUrl.substring(5, i);
+            var object = encodeURIComponent(gsUrl.substring(i + 1));
+
+            return "https://www.googleapis.com/storage/v1/b/" + bucket + "/o/" + object + "?alt=media";
+
+        },
+
+        addGoogleHeaders: function (headers) {
+            {
+                headers["Cache-Control"] = "no-cache";
+
+                var acToken = oauth.google.access_token;
+                if (acToken && !headers.hasOwnProperty("Authorization")) {
+                    headers["Authorization"] = "Bearer " + acToken;
+                }
+
+                return headers;
+
+            }
+        },
+
+        addApiKey: function (url) {
+
+            var apiKey = oauth.google.apiKey,
+                paramSeparator = url.contains("?") ? "&" : "?";
+            
+            if (apiKey !== undefined && !url.contains("key=")) {
+                if (apiKey) {
+                    url = url + paramSeparator + "key=" + apiKey;
+                }
+            }
+            return url;
         }
-
-        var bucket = gsUrl.substring(5, i);
-        var object = encodeURIComponent(gsUrl.substring(i + 1));
-
-        return "https://www.googleapis.com/storage/v1/b/" + bucket + "/o/" + object + "?alt=media";
-
-
-
     }
-
 
     return igv;
 

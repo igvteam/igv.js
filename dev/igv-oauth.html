@@ -30,6 +30,7 @@
     <!-- jQuery UI JS -->
     <script type="text/javascript" src="//ajax.googleapis.com/ajax/libs/jqueryui/1.11.2/jquery-ui.min.js"></script>
 
+
     <!-- Vendor JS -->
     <script type="text/javascript" src="../vendor/inflate.js"></script>
     <script type="text/javascript" src="../vendor/zlib_and_gzip.min.js"></script>
@@ -40,6 +41,7 @@
     <!-- IGV JS -->
     <script type="text/javascript" src="../js/igv-create.js"></script>
     <script type="text/javascript" src="../js/ui/userFeedback.js"></script>
+    <script type="text/javascript" src="../js/ui/alertDialog.js"></script>
     <script type="text/javascript" src="../js/ui/popover.js"></script>
     <script type="text/javascript" src="../js/browser.js"></script>
     <script type="text/javascript" src="../js/ideogram.js"></script>
@@ -124,10 +126,12 @@
     <script type="text/javascript" src="../js/ui/dataRangeDialog.js"></script>
     <script type="text/javascript" src="../js/ui/dialog.js"></script>
     <script type="text/javascript" src="../js/ui/alertDialog.js"></script>
+    <script type="text/javascript" src="../js/ui/centerGuide.js"></script>
 
     <script type="text/javascript" src="../js/set.js"></script>
 
     <script src="../js/oauth/google.js"></script>
+
 </head>
 
 <body>
@@ -159,6 +163,18 @@
                                 })">Click to load Ga4gh Variants
     </a>
 
+    <p></p>
+
+    <a href='#' onclick="igv.browser.loadTrack({
+                                type: 'bam',
+                                url: 'gs://igv-bam-test/NA12878.bam',
+                                indexURL: 'gs://igv-bam-test/NA12878.bam.bai',
+                                name: 'GCS bam'
+                                })">GCS bam
+    </a>
+
+
+
 </div>
 
 <script type="text/javascript">
@@ -172,6 +188,7 @@
 
             genome: "hg19",
             locus: 'myc',
+            apiKey: 'AIzaSyDUUAUFpQEN4mumeMNIRWXSiTh5cPtUAD0',
             tracks: [
                 {
                     url: "https://s3.amazonaws.com/igv.broadinstitute.org/annotations/hg19/genes/gencode.v18.collapsed.bed",
