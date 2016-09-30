@@ -63,11 +63,11 @@ var igv = (function (igv) {
             rect,
             referenceFrame;
 
-        if (undefined === igv.browser.kitchenSinkList) {
+        if (undefined === igv.browser.genomicStateList) {
             return;
         }
 
-        referenceFrame = igv.browser.kitchenSinkList[ 0 ].referenceFrame;
+        referenceFrame = igv.browser.genomicStateList[ 0 ].referenceFrame;
         ppb = 1.0/referenceFrame.bpPerPixel;
         if (ppb > 1) {
 

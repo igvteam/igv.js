@@ -37,7 +37,7 @@ var igv = (function (igv) {
 
     igv.IdeoPanel.prototype.buildPanels = function ($content_header) {
 
-        this.panels = _.map(igv.browser.kitchenSinkList, function(kitchenSink, locusIndex) {
+        this.panels = _.map(igv.browser.genomicStateList, function(kitchenSink, locusIndex) {
 
             var panel = {};
 
@@ -117,7 +117,7 @@ var igv = (function (igv) {
                 widthBP,
                 x,
                 xBP,
-                referenceFrame = igv.browser.kitchenSinkList[ panel.locusIndex ].referenceFrame,
+                referenceFrame = igv.browser.genomicStateList[ panel.locusIndex ].referenceFrame,
                 stainColors = [];
 
             panel.ctx.clearRect(0, 0, panel.$canvas.width(), panel.$canvas.height());
@@ -270,7 +270,7 @@ var igv = (function (igv) {
 
         var xy,
             xPercentage,
-            referenceFrame = igv.browser.kitchenSinkList[ panel.locusIndex ].referenceFrame,
+            referenceFrame = igv.browser.genomicStateList[ panel.locusIndex ].referenceFrame,
             chr,
             locusLength,
             chrCoveragePercentage,

@@ -49,7 +49,7 @@ var igv = (function (igv) {
         $(this.trackDiv).append(this.$viewportContainer);
 
         this.viewports = [];
-        _.each(_.range(_.size(browser.kitchenSinkList)), function(i) {
+        _.each(_.range(_.size(browser.genomicStateList)), function(i) {
             self.viewports.push(new igv.Viewport(self, i));
         });
 

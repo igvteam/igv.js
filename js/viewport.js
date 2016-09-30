@@ -17,7 +17,7 @@ var igv = (function (igv) {
 
         this.trackView = trackView;
         this.locusIndex = locusIndex;
-        this.viewportContainerPercentage = igv.browser.kitchenSinkList[ this.locusIndex ].viewportContainerPercentage;
+        this.viewportContainerPercentage = igv.browser.genomicStateList[ this.locusIndex ].viewportContainerPercentage;
 
         this.$viewport = $('<div class="igv-viewport-div">');
 
@@ -29,7 +29,7 @@ var igv = (function (igv) {
 
         this.$viewport.data( "locusindex", this.locusIndex );
 
-        this.$viewport.width( igv.browser.kitchenSinkList[ this.locusIndex ].viewportWidth );
+        this.$viewport.width( igv.browser.genomicStateList[ this.locusIndex ].viewportWidth );
 
         trackView.$viewportContainer.append( this.$viewport );
 
@@ -131,7 +131,7 @@ var igv = (function (igv) {
             $(this.canvas).click(function (e) {
 
                 var canvasCoords,
-                    referenceFrame = igv.browser.kitchenSinkList[ self.locusIndex ].referenceFrame,
+                    referenceFrame = igv.browser.genomicStateList[ self.locusIndex ].referenceFrame,
                     genomicLocation,
                     time;
 
@@ -287,7 +287,7 @@ var igv = (function (igv) {
 
                 self.$rulerSweeper.css({"display": "none", "left": 0 + "px", "width": 0 + "px"});
 
-                referenceFrame = igv.browser.kitchenSinkList[ self.locusIndex ].referenceFrame;
+                referenceFrame = igv.browser.genomicStateList[ self.locusIndex ].referenceFrame;
 
                 extent = {};
                 extent.start = referenceFrame.start + (left * referenceFrame.bpPerPixel);
@@ -306,7 +306,7 @@ var igv = (function (igv) {
     igv.Viewport.prototype.goto = function (chr, start, end) {
 
         var self = this,
-            referenceFrame = igv.browser.kitchenSinkList[ this.locusIndex ].referenceFrame;
+            referenceFrame = igv.browser.genomicStateList[ this.locusIndex ].referenceFrame;
 
         if (igv.popover) {
             igv.popover.hide();
@@ -365,7 +365,7 @@ var igv = (function (igv) {
             bpStart,
             bpEnd,
             ctx,
-            referenceFrame = igv.browser.kitchenSinkList[ self.locusIndex ].referenceFrame,
+            referenceFrame = igv.browser.genomicStateList[ self.locusIndex ].referenceFrame,
             chr,
             refFrameStart,
             refFrameEnd;
@@ -480,7 +480,7 @@ var igv = (function (igv) {
 
         function viewIsReady() {
             // return self.track && self.browser && self.browser.referenceFrame;
-            return igv.browser && igv.browser.kitchenSinkList && igv.browser.kitchenSinkList[ self.locusIndex ].referenceFrame;
+            return igv.browser && igv.browser.genomicStateList && igv.browser.genomicStateList[ self.locusIndex ].referenceFrame;
         }
 
     };
@@ -519,7 +519,7 @@ var igv = (function (igv) {
 
     igv.Viewport.prototype.paintImage = function () {
 
-        var referenceFrame = igv.browser.kitchenSinkList[ this.locusIndex ].referenceFrame;
+        var referenceFrame = igv.browser.genomicStateList[ this.locusIndex ].referenceFrame;
 
         this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
 
