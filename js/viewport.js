@@ -87,9 +87,10 @@ var igv = (function (igv) {
             $spinner = $('<div class="igv-viewport-spinner">');
             $spinner.css({ 'font-size' : dimen + 'px'});
 
-            $spinner.append($('<i class="fa fa-cog fa-spin fa-fw">'));
-            // $spinner.append($('<i class="fa fa-spinner fa-pulse fa-fw">'));
+            // $spinner.append($('<i class="fa fa-cog fa-spin fa-fw">'));
+            $spinner.append($('<i class="fa fa-spinner fa-spin fa-fw">'));
             this.$viewport.append($spinner);
+            this.stopSpinner();
         }
     };
 
@@ -325,6 +326,18 @@ var igv = (function (igv) {
         // });
     };
 
+    igv.Viewport.prototype.startSpinner = function () {
+        var $spinner = this.$viewport.find('.fa-spinner');
+        $spinner.addClass("fa-spin");
+        $spinner.show();
+    };
+
+    igv.Viewport.prototype.stopSpinner = function () {
+        var $spinner = this.$viewport.find('.fa-spinner');
+        $spinner.hide();
+        $spinner.removeClass("fa-spin");
+    };
+
     igv.Viewport.prototype.resize = function () {
 
         var contentWidth  = this.viewportContainerPercentage * this.trackView.$viewportContainer.width();
@@ -357,17 +370,16 @@ var igv = (function (igv) {
             refFrameStart,
             refFrameEnd;
 
-        // TODO: dat - implement this for viewport. Was in trackView.
-        // if (!(viewIsReady.call(this))) {
-        //     return;
-        // }
+        if (!(viewIsReady.call(this))) {
+            return;
+        }
 
         if (this.trackView.track.visibilityWindow !== undefined && this.trackView.track.visibilityWindow > 0) {
             if (referenceFrame.bpPerPixel * this.$viewport.width() > this.trackView.track.visibilityWindow) {
                 this.tile = null;
                 this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
 
-                igv.stopSpinnerAtParentElement(this.trackView.trackDiv);
+                self.stopSpinner();
 
                 this.$zoomInNotice.show();
                 return;
@@ -396,80 +408,80 @@ var igv = (function (igv) {
 
             self.loading = { start: bpStart, end: bpEnd };
 
-            // igv.startSpinnerAtParentElement(this.trackView.trackDiv);
+            self.startSpinner();
 
-            this.trackView.track.getFeatures(referenceFrame.chrName, bpStart, bpEnd, referenceFrame.bpPerPixel)
+            this.trackView.track.getFeatures(referenceFrame.chrName, bpStart, bpEnd, referenceFrame.bpPerPixel).then(function (features) {
 
-                .then(function (features) {
-                    var buffer,
-                        requiredHeight;
+                var buffer,
+                    requiredHeight;
 
-                    self.loading = false;
-                    // igv.stopSpinnerAtParentElement(self.trackView.trackDiv);
+                self.loading = false;
+                self.stopSpinner();
 
-                    if (features) {
+                if (features) {
 
-                        if (typeof self.trackView.track.computePixelHeight === 'function') {
-                            requiredHeight = self.trackView.track.computePixelHeight(features);
-                            if (requiredHeight != self.contentDiv.clientHeight) {
-                                self.setContentHeight(requiredHeight);
-                            }
+                    if (typeof self.trackView.track.computePixelHeight === 'function') {
+                        requiredHeight = self.trackView.track.computePixelHeight(features);
+                        if (requiredHeight != self.contentDiv.clientHeight) {
+                            self.setContentHeight(requiredHeight);
                         }
-
-                        buffer = document.createElement('canvas');
-                        buffer.width = pixelWidth;
-                        buffer.height = self.canvas.height;
-                        ctx = buffer.getContext('2d');
-
-                        self.trackView.track.draw({
-                            features: features,
-                            context: ctx,
-                            bpStart: bpStart,
-                            bpPerPixel: referenceFrame.bpPerPixel,
-                            pixelWidth: buffer.width,
-                            pixelHeight: buffer.height,
-                            referenceFrame: referenceFrame,
-                            viewportWidth: self.$viewport.width()
-                        });
-
-                        // TODO: dat - implement this for viewport. Was in trackView .
-                        // if (self.trackView.track.paintAxis && self.trackView.controlCanvas.width > 0 && self.trackView.controlCanvas.height > 0) {
-                        //
-                        //     var buffer2 = document.createElement('canvas');
-                        //     buffer2.width = self.trackView.controlCanvas.width;
-                        //     buffer2.height = self.trackView.controlCanvas.height;
-                        //
-                        //     var ctx2 = buffer2.getContext('2d');
-                        //
-                        //     self.trackView.track.paintAxis(ctx2, buffer2.width, buffer2.height);
-                        //
-                        //     self.controlCtx.drawImage(buffer2, 0, 0);
-                        // }
-
-                        self.tile = new Tile(referenceFrame.chrName, bpStart, bpEnd, referenceFrame.bpPerPixel, buffer);
-                        self.paintImage();
-
-                    } else {
-                        self.ctx.clearRect(0, 0, self.canvas.width, self.canvas.height);
                     }
 
-                })
-                .catch(function (error) {
-                    self.loading = false;
+                    buffer = document.createElement('canvas');
+                    buffer.width = pixelWidth;
+                    buffer.height = self.canvas.height;
+                    ctx = buffer.getContext('2d');
 
-                    if (error instanceof igv.AbortLoad) {
-                        console.log("Aborted ---");
-                    } else {
-                        igv.stopSpinnerAtParentElement(self.trackView.trackDiv);
-                        igv.presentAlert(error);
-                    }
-                });
+                    self.trackView.track.draw({
+                        features: features,
+                        context: ctx,
+                        bpStart: bpStart,
+                        bpPerPixel: referenceFrame.bpPerPixel,
+                        pixelWidth: buffer.width,
+                        pixelHeight: buffer.height,
+                        referenceFrame: referenceFrame,
+                        viewportWidth: self.$viewport.width()
+                    });
+
+                    // TODO: dat - implement this for viewport. Was in trackView .
+                    // if (self.trackView.track.paintAxis && self.trackView.controlCanvas.width > 0 && self.trackView.controlCanvas.height > 0) {
+                    //
+                    //     var buffer2 = document.createElement('canvas');
+                    //     buffer2.width = self.trackView.controlCanvas.width;
+                    //     buffer2.height = self.trackView.controlCanvas.height;
+                    //
+                    //     var ctx2 = buffer2.getContext('2d');
+                    //
+                    //     self.trackView.track.paintAxis(ctx2, buffer2.width, buffer2.height);
+                    //
+                    //     self.controlCtx.drawImage(buffer2, 0, 0);
+                    // }
+
+                    self.tile = new Tile(referenceFrame.chrName, bpStart, bpEnd, referenceFrame.bpPerPixel, buffer);
+                    self.paintImage();
+
+                } else {
+                    self.ctx.clearRect(0, 0, self.canvas.width, self.canvas.height);
+                }
+
+            }).catch(function (error) {
+
+                self.stopSpinner();
+
+                self.loading = false;
+
+                if (error instanceof igv.AbortLoad) {
+                    console.log("Aborted ---");
+                } else {
+                     igv.presentAlert(error);
+                }
+            });
         }
 
-        // TODO: dat - implement this for viewport. Was in trackView .
-        // function viewIsReady() {
-        //     return self.track && self.browser && self.browser.referenceFrame;
-        // }
+        function viewIsReady() {
+            // return self.track && self.browser && self.browser.referenceFrame;
+            return igv.browser && igv.browser.kitchenSinkList && igv.browser.kitchenSinkList[ self.locusIndex ].referenceFrame;
+        }
 
     };
 
