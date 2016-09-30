@@ -35,6 +35,7 @@
     <script type="text/javascript" src="../vendor/jquery.mousewheel.js"></script>
     <script type="text/javascript" src="../vendor/promise-7.0.4.js"></script>
     <script type="text/javascript" src="../vendor/jquery.kinetic.min.js"></script>
+    <script type="text/javascript" src="../vendor/underscore-min.js"></script>
 
     <!-- IGV JS -->
     <script type="text/javascript" src="../js/igv-create.js"></script>
@@ -48,6 +49,7 @@
     <script type="text/javascript" src="../js/igv-canvas.js"></script>
     <script type="text/javascript" src="../js/genome.js"></script>
     <script type="text/javascript" src="../js/trackView.js"></script>
+    <script type="text/javascript" src="../js/viewport.js"></script>
 
     <script type="text/javascript" src="../js/rulerTrack.js"></script>
 
@@ -528,11 +530,11 @@
         div = $("#myDiv")[0];
         options = {
 
-//            hideIdeogram: true,
+            hideIdeogram: false,
 //            showCenterGuide: true,
 //            showCursorTrackingGuide: true,
 //            doubleClickDelay: 0.001,
-//            showRuler: false,
+            showRuler: true,
             locus: "8:124,512,906-124,512,945",
             reference: {
                 id: "hg19",
