@@ -93,7 +93,7 @@ var igv = (function (igv) {
                     }
                     else {
 
-                        igv.graphics.strokeText(ctx, b, pc, y, {
+                        igv.graphics.strokeText(ctx, b, pc, 3 + y, {
                             strokeStyle: c,
                             font: 'normal 10px Arial',
                             textAlign: 'center'
