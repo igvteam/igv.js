@@ -256,11 +256,8 @@ var igv = (function (igv) {
 
         this.$viewport.mouseup(function (e) {
 
-            var ss,
-                ee,
+            var extent,
                 referenceFrame;
-
-            referenceFrame = igv.browser.kitchenSinkList[ self.locusIndex ].referenceFrame;
 
             if (isMouseDown) {
 
@@ -270,11 +267,15 @@ var igv = (function (igv) {
 
                 self.$rulerSweeper.css({"display": "none", "left": 0 + "px", "width": 0 + "px"});
 
-                ss = referenceFrame.start + (left * referenceFrame.bpPerPixel);
-                ee = ss + rulerSweepWidth * referenceFrame.bpPerPixel;
+                referenceFrame = igv.browser.kitchenSinkList[ self.locusIndex ].referenceFrame;
+
+                extent = {};
+                extent.start = referenceFrame.start + (left * referenceFrame.bpPerPixel);
+                extent.end = extent.start + rulerSweepWidth * referenceFrame.bpPerPixel;
 
                 if (rulerSweepWidth > rulerSweepThreshold) {
-                    self.goto(referenceFrame.chrName, ss, ee);
+                    igv.validateLocusExtent(igv.browser.genome.getChromosome(referenceFrame.chrName), extent);
+                    self.goto(referenceFrame.chrName, extent.start, extent.end);
                 }
             }
 

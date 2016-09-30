@@ -47,6 +47,7 @@ var igv = (function (igv) {
 
     };
 
+
     igv.CenterGuide.prototype.repaint = function () {
 
         var ppb,
@@ -97,6 +98,10 @@ var igv = (function (igv) {
             this.$container.addClass('igv-center-guide-thin');
         }
 
+    };
+
+    igv.CenterGuide.prototype.resize = function () {
+        this.repaint();
     };
 
     return igv;

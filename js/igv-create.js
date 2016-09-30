@@ -315,7 +315,6 @@ var igv = (function (igv) {
             // $navigation.append($zoomContainer[0]);
             $navigation.append(makeZoomWidget());
 
-
             // cursor tracking guide
             browser.$cursorTrackingGuide = $('<div class="igv-cursor-tracking-guide">');
             if (true == config.showCursorTrackingGuide) {
