@@ -136,14 +136,6 @@ var igv = (function (igv) {
         }
     }
 
-    igv.Browser.prototype.firstChromosomeName = function () {
-        return this.genome.chromosomeNames[ 0 ];
-    };
-
-    igv.Browser.prototype.firstChromosome = function () {
-        return this.genome.chromosomes[ this.firstChromosomeName() ];
-    };
-
     igv.Browser.prototype.getFormat = function (name) {
         if (this.formats === undefined) return undefined;
         return this.formats[name];
@@ -151,22 +143,18 @@ var igv = (function (igv) {
 
     igv.Browser.prototype.loadTracksWithConfigList = function (configList) {
 
-        var self = this,
-            loadedTracks = [];
-
+        var self = this;
 
         configList.forEach(function (config) {
-            loadedTracks.push(self.loadTrack(config));
+            self.loadTrack(config);
         });
 
         // Really we should just resize the new trackViews, but currently there is no way to get a handle on those
         this.trackViews.forEach(function (trackView) {
             trackView.resize();
-        });
+        })
 
-        return loadedTracks;
     };
-
 
     igv.Browser.prototype.loadTrack = function (config) {
 
@@ -529,7 +517,7 @@ var igv = (function (igv) {
             chr = referenceFrame.chrName;
             ss = igv.numberFormatter(Math.floor(referenceFrame.start + 1));
 
-            end = referenceFrame.start + this.trackViewportContainerWidthBP();
+            end = referenceFrame.start + this.viewportContainerWidthBP();
             if (this.genome) {
                 chromosome = this.genome.getChromosome(chr);
                 if (chromosome) end = Math.min(end, chromosome.bpLength);
@@ -579,15 +567,15 @@ var igv = (function (igv) {
     /**
      * Return the visible width of a track.  All tracks should have the same width.
      */
-    igv.Browser.prototype.trackViewportContainerWidth = function () {
+    igv.Browser.prototype.viewportContainerWidth = function () {
 
         var width = (this.trackViews && this.trackViews.length > 0) ? this.trackViews[ 0 ].$viewportContainer.width() : this.syntheticViewportContainerWidth();
 
         return width;
     };
 
-    igv.Browser.prototype.trackViewportContainerWidthBP = function () {
-        return this.referenceFrame.bpPerPixel * this.trackViewportContainerWidth();
+    igv.Browser.prototype.viewportContainerWidthBP = function () {
+        return this.referenceFrame.bpPerPixel * this.viewportContainerWidth();
     };
 
     igv.Browser.prototype.minimumBasesExtent = function () {
@@ -603,59 +591,50 @@ var igv = (function (igv) {
         }
     };
 
-    igv.Browser.prototype.setGotoCallback = function (gotocallback) {
-        this.gotocallback = gotocallback;
-    };
-
     igv.Browser.prototype.goto = function (chr, start, end) {
-
-        if (typeof this.gotocallback != "undefined") {
-            //console.log("Got chr="+chr+", start="+start+", end="+end+", also using callback "+this.gotocallback);
-            this.gotocallback(chr, start, end);
-        }
 
         var w,
             chromosome,
-            viewportWidth = this.trackViewportContainerWidth();
+            viewportWidth = this.viewportContainerWidth();
 
         if (igv.popover) {
             igv.popover.hide();
         }
 
         // Translate chr to official name
-        if (this.genome) {
-            chr = this.genome.getChromosomeName(chr);
+        if (undefined === this.genome) {
+            console.log('Missing genome - bailing ...');
+            return;
         }
+
+        chr = this.genome.getChromosomeName(chr);
 
         this.referenceFrame.chrName = chr;
 
         // If end is undefined,  interpret start as the new center, otherwise compute scale.
-        if (!end) {
+        if (undefined === end) {
             w = Math.round(viewportWidth * this.referenceFrame.bpPerPixel / 2);
             start = Math.max(0, start - w);
-        }
-        else {
+        } else {
             this.referenceFrame.bpPerPixel = (end - start) / (viewportWidth);
         }
 
-        if (this.genome) {
-            chromosome = this.genome.getChromosome(this.referenceFrame.chrName);
-            if (!chromosome) {
-                if (console && console.log) console.log("Could not find chromsome " + this.referenceFrame.chrName);
+        chromosome = this.genome.getChromosome(this.referenceFrame.chrName);
+        if (!chromosome) {
+            if (console && console.log) console.log("Could not find chromsome " + this.referenceFrame.chrName);
+        }
+        else {
+            if (!chromosome.bpLength) chromosome.bpLength = 1;
+
+            var maxBpPerPixel = chromosome.bpLength / viewportWidth;
+            if (this.referenceFrame.bpPerPixel > maxBpPerPixel) this.referenceFrame.bpPerPixel = maxBpPerPixel;
+
+            if (!end) {
+                end = start + viewportWidth * this.referenceFrame.bpPerPixel;
             }
-            else {
-                if (!chromosome.bpLength) chromosome.bpLength = 1;
 
-                var maxBpPerPixel = chromosome.bpLength / viewportWidth;
-                if (this.referenceFrame.bpPerPixel > maxBpPerPixel) this.referenceFrame.bpPerPixel = maxBpPerPixel;
-
-                if (!end) {
-                    end = start + viewportWidth * this.referenceFrame.bpPerPixel;
-                }
-
-                if (chromosome && end > chromosome.bpLength) {
-                    start -= (end - chromosome.bpLength);
-                }
+            if (chromosome && end > chromosome.bpLength) {
+                start -= (end - chromosome.bpLength);
             }
         }
 
@@ -670,7 +649,7 @@ var igv = (function (igv) {
 
         var kitchenSink = igv.browser.kitchenSinkList[ 0 ],
             referenceFrame = kitchenSink.referenceFrame,
-            viewportWidth = kitchenSink.viewportContainerPercentage * this.trackViewportContainerWidth(),
+            viewportWidth = kitchenSink.viewportContainerPercentage * this.viewportContainerWidth(),
             centerBP;
 
         if (this.loadInProgress()) {
@@ -709,7 +688,7 @@ var igv = (function (igv) {
 
         var kitchenSink = igv.browser.kitchenSinkList[ 0 ],
             referenceFrame = kitchenSink.referenceFrame,
-            viewportWidth = kitchenSink.viewportContainerPercentage * this.trackViewportContainerWidth(),
+            viewportWidth = kitchenSink.viewportContainerPercentage * this.viewportContainerWidth(),
             newScale,
             maxScale,
             center,
@@ -750,7 +729,55 @@ var igv = (function (igv) {
 
     };
 
-    igv.Browser.prototype.getChromosomesWithLoci = function (loci, continuation) {
+    igv.Browser.prototype.parseSearchInput = function(string) {
+
+        var self = this,
+            loci = string.split(' '),
+            $b;
+
+        this.getKitchenSinkListWithLociAndViewportWidth(loci, this.viewportContainerWidth(), function (kitchenSinkList) {
+            var $content_header = $('#igv-content-header'),
+                $b;
+
+            if (_.size(kitchenSinkList) > 0) {
+                console.log('kitchenSinkList - ' + _.size(kitchenSinkList));
+
+                $b = $('.igv-track-container-div').find('.igv-viewport-div');
+                $b.remove();
+
+                self.kitchenSinkList = kitchenSinkList;
+
+                _.each(kitchenSinkList, function (kitchenSink, index) {
+
+                    kitchenSink.viewportWidth = self.viewportContainerWidth() / _.size(kitchenSinkList);
+                    kitchenSink.viewportContainerPercentage = 1.0 / _.size(kitchenSinkList);
+
+                    kitchenSink.referenceFrame = new igv.ReferenceFrame(kitchenSink.chromosome.name, kitchenSink.start, (kitchenSink.end - kitchenSink.start) / kitchenSink.viewportWidth);
+
+                    kitchenSink.locusIndex = index;
+                    kitchenSink.locusCount = _.size(kitchenSinkList);
+                });
+
+                if (false === self.config.hideIdeogram) {
+                    self.ideogram.$empty($content_header);
+                    self.ideoPanel.buildPanels($content_header);
+                    self.ideoPanel.repaint();
+                }
+
+                if (self.config.showRuler) {
+                    self.addTrack(new igv.RulerTrack());
+                }
+
+                if (self.config.tracks) {
+                    self.loadTracksWithConfigList(self.config.tracks);
+                }
+
+            }
+
+        });
+    };
+
+    igv.Browser.prototype.getKitchenSinkListWithLociAndViewportWidth = function (loci, viewportContainerWidth, continuation) {
 
         var self = this,
             lociClone,
@@ -845,7 +872,7 @@ var igv = (function (igv) {
 
         if (igv.isChrNameStartEndFeature(feature, this.genome, undefined)) {
 
-            var success =  igv.gotoLocusFeature(feature, this.genome, this);
+            var success = igv.gotoLocusFeature(feature, this.genome, this);
 
             if ((force || true === success) && callback) {
                 callback();
@@ -855,7 +882,6 @@ var igv = (function (igv) {
 
             // Try local feature cache first
             result = this.featureDB[feature.toUpperCase()];
-
             if (result) {
 
                 handleSearchResult(result.name, result.chrName, result.start, result.end, "");
@@ -901,12 +927,11 @@ var igv = (function (igv) {
                     //    presentSearchResults(results, searchConfig, feature);
                     //}
 
-                    if (callback) callback();
-                }).catch(function (error) {
-                    igv.presentAlert(error);
                 });
             }
+
         }
+
     };
 
     igv.gotoLocusFeature = function (locusFeature, genome, browser) {
@@ -924,7 +949,7 @@ var igv = (function (igv) {
 
         type = 'locus';
         tokens = locusFeature.split(":");
-        chrName = genome.getChromosomeName(tokens[0]);
+        chrName = genome.getChromosomeName(tokens[ 0 ]);
         if (chrName) {
             chr = genome.getChromosome(chrName);
         }
@@ -937,10 +962,10 @@ var igv = (function (igv) {
                 start = 0;
                 end = chr.bpLength;
             } else {
-                startEnd = tokens[1].split("-");
-                start = Math.max(0, parseInt(startEnd[0].replace(/,/g, "")) - 1);
+                startEnd = tokens[ 1 ].split("-");
+                start = Math.max(0, parseInt(startEnd[ 0 ].replace(/,/g, "")) - 1);
                 if (2 === startEnd.length) {
-                    end = Math.min(chr.bpLength, parseInt(startEnd[1].replace(/,/g, "")));
+                    end = Math.min(chr.bpLength, parseInt(startEnd[ 1 ].replace(/,/g, "")));
                     if (end < 0) {
                         // This can happen from integer overflow
                         end = chr.bpLength;
@@ -948,7 +973,7 @@ var igv = (function (igv) {
                 }
             }
 
-            obj = {start: start, end: end};
+            obj = { start: start, end: end };
             validateLocusExtent(igv.browser, chr, obj);
             start = obj.start;
             end = obj.end;
@@ -971,7 +996,7 @@ var igv = (function (igv) {
 
             if (undefined === ee) {
 
-                ss -= igv.browser.minimumBasesExtent() / 2;
+                ss -= igv.browser.minimumBasesExtent()/2;
                 ee = ss + igv.browser.minimumBasesExtent();
 
                 if (ee > chromosome.bpLength) {
@@ -984,15 +1009,15 @@ var igv = (function (igv) {
 
             } else if (ee - ss < igv.browser.minimumBasesExtent()) {
 
-                center = (ee + ss) / 2;
-                if (center - igv.browser.minimumBasesExtent() / 2 < 0) {
+                center = (ee + ss)/2;
+                if (center - igv.browser.minimumBasesExtent()/2 < 0) {
                     ss = 0;
                     ee = ss + igv.browser.minimumBasesExtent();
-                } else if (center + igv.browser.minimumBasesExtent() / 2 > chromosome.bpLength) {
+                } else if (center + igv.browser.minimumBasesExtent()/2 > chromosome.bpLength) {
                     ee = chromosome.bpLength;
                     ss = ee - igv.browser.minimumBasesExtent();
                 } else {
-                    ss = center - igv.browser.minimumBasesExtent() / 2;
+                    ss = center - igv.browser.minimumBasesExtent()/2;
                     ee = ss + igv.browser.minimumBasesExtent();
                 }
             }
@@ -1167,7 +1192,7 @@ var igv = (function (igv) {
             _left = Math.max(50, xy.x - 5);
 
             _left = Math.min(igv.browser.trackContainerDiv.clientWidth - 65, _left);
-            $element.css({left: _left + 'px'});
+            $element.css({ left: _left + 'px' });
         });
 
         $(trackContainerDiv).mousemove(igv.throttle(function (e) {
@@ -1366,13 +1391,8 @@ var igv = (function (igv) {
 
         translateDeprecatedTypes(config);
 
-        if (undefined === config.sourceType) {
-            if(config.source !== undefined) {
-                config.sourceType = "custom";
-            }
-            else if(config.url !== undefined || config.localFile !== undefined) {
-                config.sourceType = "file";
-            }
+        if (undefined === config.sourceType && (config.url || config.localFile)) {
+            config.sourceType = "file";
         }
 
         if ("file" === config.sourceType) {

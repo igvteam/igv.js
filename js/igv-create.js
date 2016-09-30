@@ -65,7 +65,7 @@ var igv = (function (igv) {
         $content = $('<div class="igv-content-div">');
         browser.$root.append($content);
 
-        $header = $('<div>');
+        $header = $('<div id="igv-content-header">');
         $content.append($header);
 
         $content.append(browser.trackContainerDiv);
@@ -111,30 +111,22 @@ var igv = (function (igv) {
             browser.genome = genome;
             browser.genome.id = config.reference.genomeId;
 
-            browser.loci = [];
-            if (config.locus) {
-                browser.loci.push(config.locus);
-            } else if (config.loci) {
-                browser.loci = _.clone(config.loci);
-            } else {
-                browser.loci.push( browser.firstChromosomeName() );
-            }
+            width = browser.syntheticViewportContainerWidth();
+            browser.getKitchenSinkListWithLociAndViewportWidth(lociWithConfiguration(config), width, function (kitchenSinkList) {
 
-            // browser.updateLocusSearch(browser.referenceFrame);
-
-            if (config.tracks) {
-
-                browser.getChromosomesWithLoci(browser.loci, function (kitchenSinkList) {
-
-                    width = browser.syntheticViewportContainerWidth();
+                if (_.size(kitchenSinkList) > 0) {
 
                     browser.kitchenSinkList = kitchenSinkList;
-                    _.each(browser.kitchenSinkList, function(kitchenSink, index){
-                        kitchenSink.viewportWidth = width / _.size(browser.loci);
-                        kitchenSink.referenceFrame = new igv.ReferenceFrame(kitchenSink.chromosome.name, kitchenSink.start, (kitchenSink.end - kitchenSink.start)/kitchenSink.viewportWidth);
-                        kitchenSink.viewportContainerPercentage = 1.0/_.size(browser.kitchenSinkList);
+
+                    _.each(kitchenSinkList, function (kitchenSink, index) {
+
+                        kitchenSink.viewportWidth = width / _.size(kitchenSinkList);
+                        kitchenSink.viewportContainerPercentage = 1.0 / _.size(kitchenSinkList);
+
+                        kitchenSink.referenceFrame = new igv.ReferenceFrame(kitchenSink.chromosome.name, kitchenSink.start, (kitchenSink.end - kitchenSink.start) / kitchenSink.viewportWidth);
+
                         kitchenSink.locusIndex = index;
-                        kitchenSink.locusCount = _.size(browser.kitchenSinkList);
+                        kitchenSink.locusCount = _.size(kitchenSinkList);
                     });
 
                     if (false === config.hideIdeogram) {
@@ -143,15 +135,31 @@ var igv = (function (igv) {
                     }
 
                     if (config.showRuler) {
-                        browser.addTrack(new igv.RulerTrack());
+                        browser.rulerTrack = new igv.RulerTrack();
+                        browser.addTrack(browser.rulerTrack);
                     }
 
-                    browser.loadTracksWithConfigList(config.tracks);
+                    if (config.tracks) {
+                        browser.loadTracksWithConfigList(config.tracks);
+                    }
 
-                });
+                }
 
+            });
+
+            function lociWithConfiguration(configuration) {
+
+                var loci = [];
+                if (configuration.locus) {
+                    loci.push(configuration.locus);
+                } else if (configuration.loci) {
+                    loci = _.clone(configuration.loci);
+                } else {
+                    loci.push( _.first(browser.genome.chromosomeNames) );
+                }
+
+                return loci;
             }
-
         }).catch(function (error) {
             igv.presentAlert(error);
             console.log(error);
@@ -270,15 +278,16 @@ var igv = (function (igv) {
 
             browser.$searchInput = $('<input class="igvNavigationSearchInput" type="text" placeholder="Locus Search">');
 
-            browser.$searchInput.change(function () {
-
-                browser.search($(this).val());
+            browser.$searchInput.change(function (e) {
+                browser.parseSearchInput( $(e.target).val() );
+                // browser.search($(this).val());
             });
 
             $faSearch = $('<i class="igv-fa-search fa fa-search fa-18px shim-left-6">');
 
             $faSearch.click(function () {
-                browser.search(browser.$searchInput.val());
+                browser.parseSearchInput( browser.$searchInput.val() );
+                // browser.search(browser.$searchInput.val());
             });
 
             $searchContainer.append(browser.$searchInput);

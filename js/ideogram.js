@@ -29,11 +29,13 @@
 
 var igv = (function (igv) {
 
-    igv.IdeoPanel = function ($parent) {
+    igv.IdeoPanel = function ($content_header) {
 
-        var $shim = $('<div class="igv-ideogram-left-shim"></div>');
+        $content_header.append($('<div class="igv-ideogram-left-shim"></div>'));
+        this.buildPanels($content_header);
+    };
 
-        $parent.append($shim);
+    igv.IdeoPanel.prototype.buildPanels = function ($content_header) {
 
         this.panels = _.map(igv.browser.kitchenSinkList, function(kitchenSink, locusIndex) {
 
@@ -43,7 +45,7 @@ var igv = (function (igv) {
             panel.viewportContainerPercentage = kitchenSink.viewportContainerPercentage;
 
             panel.$ideogram = $('<div class="igv-ideogram-content-div"></div>');
-            $parent.append(panel.$ideogram);
+            $content_header.append(panel.$ideogram);
 
             panel.$ideogram.width(kitchenSink.viewportWidth);
 
@@ -64,7 +66,11 @@ var igv = (function (igv) {
             return panel;
         });
 
-        console.log('oy');
+    };
+
+    igv.IdeoPanel.$empty = function ($content_header) {
+        var $a = $content_header.find('.igv-ideogram-content-div');
+        $a.remove();
     };
 
     igv.IdeoPanel.prototype.panelWithLocusIndex = function (locusIndex) {

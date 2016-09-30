@@ -282,7 +282,7 @@ var igv = (function (igv) {
 
                     popover.hide();
 
-                    trackViewportHalfWidth = Math.floor(igv.browser.trackViewportContainerWidth()/2);
+                    trackViewportHalfWidth = Math.floor(igv.browser.viewportContainerWidth()/2);
                     genomicLocationViaTrackViewportHalfWidth = Math.floor((igv.browser.referenceFrame.start) + igv.browser.referenceFrame.toBP(trackViewportHalfWidth));
 
                     // console.log('bamTrack - sort - trackViewportHalfWidth ' + igv.numberFormatter(genomicLocationViaTrackViewportHalfWidth));
