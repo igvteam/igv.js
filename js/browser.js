@@ -421,8 +421,9 @@ var igv = (function (igv) {
             trackView.resize();
         });
 
-        this.centerGuide.repaint();
-
+        if (this.centerGuide) {
+            this.centerGuide.resize();
+        }
     };
 
     igv.Browser.prototype.repaint = function () {
@@ -439,6 +440,9 @@ var igv = (function (igv) {
             trackView.repaint();
         });
 
+        if (this.centerGuide) {
+            this.centerGuide.repaint();
+        }
     };
 
     igv.Browser.prototype.repaintWithLocusIndex = function (locusIndex) {
@@ -457,10 +461,6 @@ var igv = (function (igv) {
 
         // this.updateLocusSearch(this.referenceFrame);
 
-        if (this.centerGuide) {
-            this.centerGuide.repaint();
-        }
-
         if (this.ideoPanel) {
             this.ideoPanel.repaint();
         }
@@ -472,6 +472,10 @@ var igv = (function (igv) {
         this.trackViews.forEach(function (trackView) {
             trackView.update();
         });
+
+        if (this.centerGuide) {
+            this.centerGuide.repaint();
+        }
 
     };
 
@@ -689,10 +693,11 @@ var igv = (function (igv) {
         var kitchenSink = igv.browser.kitchenSinkList[ 0 ],
             referenceFrame = kitchenSink.referenceFrame,
             viewportWidth = kitchenSink.viewportContainerPercentage * this.viewportContainerWidth(),
+            chromosome,
             newScale,
             maxScale,
-            center,
-            chrLength,
+            centerBP,
+            chromosomeLengthBP,
             widthBP;
 
         if (this.loadInProgress()) {
@@ -700,27 +705,27 @@ var igv = (function (igv) {
         }
 
         newScale = referenceFrame.bpPerPixel * 2;
-        chrLength = 250000000;
+        chromosomeLengthBP = 250000000;
         if (this.genome) {
-            var chromosome = this.genome.getChromosome(referenceFrame.chrName);
+            chromosome = this.genome.getChromosome(referenceFrame.chrName);
             if (chromosome) {
-                chrLength = chromosome.bpLength;
+                chromosomeLengthBP = chromosome.bpLength;
             }
         }
-        maxScale = chrLength / viewportWidth;
+        maxScale = chromosomeLengthBP / viewportWidth;
         if (newScale > maxScale) {
             newScale = maxScale;
         }
 
-        center = referenceFrame.start + referenceFrame.bpPerPixel * viewportWidth / 2;
+        centerBP = referenceFrame.start + referenceFrame.bpPerPixel * viewportWidth/2;
         widthBP = newScale * viewportWidth;
 
-        referenceFrame.start = Math.round(center - widthBP / 2);
+        referenceFrame.start = Math.round(centerBP - widthBP/2);
 
         if (referenceFrame.start < 0) {
             referenceFrame.start = 0;
-        } else if (referenceFrame.start > chrLength - widthBP) {
-            referenceFrame.start = chrLength - widthBP;
+        } else if (referenceFrame.start > chromosomeLengthBP - widthBP) {
+            referenceFrame.start = chromosomeLengthBP - widthBP;
         }
 
         referenceFrame.bpPerPixel = newScale;
@@ -819,6 +824,96 @@ var igv = (function (igv) {
         geneNameLoci = _.without(loci, lociClone);
 
         continuation(chromosomes);
+    };
+
+    /**
+     *
+     * @param feature
+     * @param callback - function to call
+     * @param force - force callback
+     */
+    igv.Browser.prototype.search = function (feature, callback, force) {
+        var type,
+            chr,
+            start,
+            end,
+            searchConfig,
+            url,
+            result;
+
+        // See if we're ready to respond to a search, if not just queue it up and return
+        if (igv.browser === undefined || igv.browser.genome === undefined) {
+            igv.browser.initialLocus = feature;
+            if (callback) {
+                callback();
+            }
+            return;
+        }
+
+        if (igv.isLocusChrNameStartEnd(feature, this.genome, undefined)) {
+
+            var success =  igv.gotoLocusFeature(feature, this.genome, this);
+
+            if ((force || true === success) && callback) {
+                callback();
+            }
+
+        }
+
+        // else {
+        //
+        //     // Try local feature cache first
+        //     result = this.featureDB[feature.toUpperCase()];
+        //     if (result) {
+        //
+        //         handleSearchResult(result.name, result.chrName, result.start, result.end, "");
+        //
+        //     } else if (this.searchConfig) {
+        //         url = this.searchConfig.url.replace("$FEATURE$", feature);
+        //         searchConfig = this.searchConfig;
+        //
+        //         if (url.indexOf("$GENOME$") > -1) {
+        //             var genomeId = this.genome.id ? this.genome.id : "hg19";
+        //             url.replace("$GENOME$", genomeId);
+        //         }
+        //
+        //         // var loader = new igv.DataLoader(url);
+        //         // if (range)  loader.range = range;
+        //         // loader.loadBinaryString(callback);
+        //
+        //         igvxhr.loadString(url).then(function (data) {
+        //
+        //             var results = ("plain" === searchConfig.type) ? parseSearchResults(data) : JSON.parse(data);
+        //
+        //             if (searchConfig.resultsField) {
+        //                 results = results[searchConfig.resultsField];
+        //             }
+        //
+        //             if (results.length == 0) {
+        //                 //alert('No feature found with name "' + feature + '"');
+        //                 igv.presentAlert('No feature found with name "' + feature + '"');
+        //             }
+        //             else if (results.length == 1) {
+        //
+        //                 // Just take the first result for now
+        //                 // TODO - merge results, or ask user to choose
+        //
+        //                 r = results[0];
+        //                 chr = r[searchConfig.chromosomeField];
+        //                 start = r[searchConfig.startField] - searchConfig.coords;
+        //                 end = r[searchConfig.endField];
+        //                 type = r["featureType"] || r["type"];
+        //                 handleSearchResult(feature, chr, start, end, type);
+        //             }
+        //             else {
+        //                 presentSearchResults(results, searchConfig, feature);
+        //             }
+        //
+        //             if (callback) callback();
+        //         });
+        //     }
+        // }
+
     };
 
     igv.isLocusChrNameStartEnd = function (locus, genome, locusObject) {
@@ -1311,14 +1406,11 @@ var igv = (function (igv) {
 
     }
 
-
     /**
      * Infer properties format and track type from legacy "config.type" property
      *
      * @param config
      */
-
-
     function inferTypes(config) {
 
         function translateDeprecatedTypes(config) {
