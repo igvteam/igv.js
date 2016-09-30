@@ -113,21 +113,21 @@ var igv = (function (igv) {
             browser.genome.id = config.reference.genomeId;
             width = browser.syntheticViewportContainerWidth();
 
-            browser.getKitchenSinkListWithLociAndViewportWidth(lociWithConfiguration(config), width, function (kitchenSinkList) {
+            browser.getGenomicStateList(lociWithConfiguration(config), width, function (genomicStateList) {
 
-                if (_.size(kitchenSinkList) > 0) {
+                if (_.size(genomicStateList) > 0) {
 
-                    browser.kitchenSinkList = kitchenSinkList;
+                    browser.genomicStateList = genomicStateList;
 
-                    _.each(kitchenSinkList, function (kitchenSink, index) {
+                    _.each(genomicStateList, function (kitchenSink, index) {
 
-                        kitchenSink.viewportWidth = width / _.size(kitchenSinkList);
-                        kitchenSink.viewportContainerPercentage = 1.0 / _.size(kitchenSinkList);
+                        kitchenSink.viewportWidth = width / _.size(genomicStateList);
+                        kitchenSink.viewportContainerPercentage = 1.0 / _.size(genomicStateList);
 
                         kitchenSink.referenceFrame = new igv.ReferenceFrame(kitchenSink.chromosome.name, kitchenSink.start, (kitchenSink.end - kitchenSink.start) / kitchenSink.viewportWidth);
 
                         kitchenSink.locusIndex = index;
-                        kitchenSink.locusCount = _.size(kitchenSinkList);
+                        kitchenSink.locusCount = _.size(genomicStateList);
                     });
 
                     if (false === config.hideIdeogram) {

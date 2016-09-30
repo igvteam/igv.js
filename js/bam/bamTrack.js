@@ -282,8 +282,8 @@ var igv = (function (igv) {
 
                     popover.hide();
 
-                    viewportHalfWidth = Math.floor(0.5 * igv.browser.kitchenSinkList[ 0 ].viewportWidth);
-                    genomicLocationViaTrackViewportHalfWidth = Math.floor((igv.browser.kitchenSinkList[ 0 ].referenceFrame.start) + igv.browser.kitchenSinkList[ 0 ].referenceFrame.toBP(viewportHalfWidth));
+                    viewportHalfWidth = Math.floor(0.5 * igv.browser.genomicStateList[ 0 ].viewportWidth);
+                    genomicLocationViaTrackViewportHalfWidth = Math.floor((igv.browser.genomicStateList[ 0 ].referenceFrame.start) + igv.browser.genomicStateList[ 0 ].referenceFrame.toBP(viewportHalfWidth));
 
                     // console.log('bamTrack - sort - viewportHalfWidth ' + igv.numberFormatter(genomicLocationViaTrackViewportHalfWidth));
 

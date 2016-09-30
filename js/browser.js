@@ -631,7 +631,7 @@ var igv = (function (igv) {
     // Zoom in by a factor of 2, keeping the same center location
     igv.Browser.prototype.zoomIn = function () {
 
-        var kitchenSink = igv.browser.kitchenSinkList[ 0 ],
+        var kitchenSink = igv.browser.genomicStateList[ 0 ],
             referenceFrame = kitchenSink.referenceFrame,
             viewportWidth = kitchenSink.viewportContainerPercentage * this.viewportContainerWidth(),
             centerBP;
@@ -670,7 +670,7 @@ var igv = (function (igv) {
     // Zoom out by a factor of 2, keeping the same center location if possible
     igv.Browser.prototype.zoomOut = function () {
 
-        var kitchenSink = igv.browser.kitchenSinkList[ 0 ],
+        var kitchenSink = igv.browser.genomicStateList[ 0 ],
             referenceFrame = kitchenSink.referenceFrame,
             viewportWidth = kitchenSink.viewportContainerPercentage * this.viewportContainerWidth(),
             chromosome,
@@ -725,12 +725,12 @@ var igv = (function (igv) {
         });
     };
 
-    igv.Browser.prototype.buildViewportsWithKitchenSinkList = function (kitchenSinkList) {
+    igv.Browser.prototype.buildViewportsWithGenomicStateList = function (genomicStateList) {
 
         _.each(this.trackViews, function(trackView){
 
             trackView.viewports = [];
-            _.each(_.range(_.size(kitchenSinkList)), function(i) {
+            _.each(_.range(_.size(genomicStateList)), function(i) {
                 trackView.viewports.push(new igv.Viewport(trackView, i));
             });
 
@@ -743,46 +743,46 @@ var igv = (function (igv) {
         var self = this,
             loci = string.split(' ');
 
-        this.getKitchenSinkListWithLociAndViewportWidth(loci, this.viewportContainerWidth(), function (kitchenSinkList) {
+        this.getGenomicStateList(loci, this.viewportContainerWidth(), function (genomicStateList) {
 
             var $content_header = $('#igv-content-header');
 
-            if (_.size(kitchenSinkList) > 0) {
+            if (_.size(genomicStateList) > 0) {
 
-                _.each(kitchenSinkList, function (kitchenSink, index) {
+                _.each(genomicStateList, function (genomicState, index) {
 
-                    kitchenSink.viewportWidth = self.viewportContainerWidth() / _.size(kitchenSinkList);
-                    kitchenSink.viewportContainerPercentage = 1.0 / _.size(kitchenSinkList);
+                    genomicState.viewportWidth = self.viewportContainerWidth() / _.size(genomicStateList);
+                    genomicState.viewportContainerPercentage = 1.0 / _.size(genomicStateList);
 
-                    kitchenSink.referenceFrame = new igv.ReferenceFrame(kitchenSink.chromosome.name, kitchenSink.start, (kitchenSink.end - kitchenSink.start) / kitchenSink.viewportWidth);
+                    genomicState.referenceFrame = new igv.ReferenceFrame(genomicState.chromosome.name, genomicState.start, (genomicState.end - genomicState.start) / genomicState.viewportWidth);
 
-                    kitchenSink.locusIndex = index;
-                    kitchenSink.locusCount = _.size(kitchenSinkList);
+                    genomicState.locusIndex = index;
+                    genomicState.locusCount = _.size(genomicStateList);
                 });
 
-                if (_.size(kitchenSinkList) === _.size(self.kitchenSinkList)) {
-                    self.kitchenSinkList = kitchenSinkList;
+                if (_.size(genomicStateList) === _.size(self.genomicStateList)) {
+                    self.genomicStateList = genomicStateList;
                 } else {
 
-                    self.kitchenSinkList = kitchenSinkList;
+                    self.genomicStateList = genomicStateList;
 
                     if (false === self.config.hideIdeogram) {
                         igv.IdeoPanel.$empty($content_header);
                         self.ideoPanel.buildPanels($content_header);
                     }
 
-                    self.$emptyAllViewportContainers( $('.igv-track-container-div') );
+                    self.$emptyAllViewportContainers($('.igv-track-container-div'));
 
-                    self.buildViewportsWithKitchenSinkList(kitchenSinkList);
+                    self.buildViewportsWithGenomicStateList(genomicStateList);
                 }
 
                 self.update();
-            } // if (_.size(kitchenSinkList) > 0)
+            } // if (_.size(genomicStateList) > 0)
 
         });
     };
 
-    igv.Browser.prototype.getKitchenSinkListWithLociAndViewportWidth = function (loci, viewportContainerWidth, continuation) {
+    igv.Browser.prototype.getGenomicStateList = function (loci, viewportContainerWidth, continuation) {
 
         var self = this,
             searchConfig = igv.browser.searchConfig,
@@ -1365,7 +1365,7 @@ var igv = (function (igv) {
 
             // viewport object we are panning
             viewport = igv.Viewport.viewportWithID( $viewport.data('viewport') );
-            referenceFrame = igv.browser.kitchenSinkList[ viewport.locusIndex ].referenceFrame;
+            referenceFrame = igv.browser.genomicStateList[ viewport.locusIndex ].referenceFrame;
 
             // list of all viewports in the locus 'column' containing the panning viewport
             viewports = igv.Viewport.viewportsWithLocusIndex( $viewport.data('locusindex') );
