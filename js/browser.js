@@ -118,16 +118,17 @@ var igv = (function (igv) {
     igv.Browser.prototype.loadTracksWithConfigList = function (configList) {
 
         var self = this;
+        var loadedTracks = [];
 
         configList.forEach(function (config) {
-            self.loadTrack(config);
+            loadedTracks.push(self.loadTrack(config));
         });
 
         // Really we should just resize the new trackViews, but currently there is no way to get a handle on those
         this.trackViews.forEach(function (trackView) {
             trackView.resize();
         })
-
+        return loadedTracks;
     };
 
     igv.Browser.prototype.loadTrack = function (config) {
@@ -213,7 +214,7 @@ var igv = (function (igv) {
         else {
             self.addTrack(newTrack);
         }
-
+        return newTrack;
     };
 
     /**
