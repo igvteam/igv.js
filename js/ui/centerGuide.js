@@ -41,7 +41,7 @@ var igv = (function (igv) {
         }
         $parent.append(this.$container);
 
-        this.$centerGuideToggle = igv.makeToggleButton('show center guide', 'hide center guide', 'showCenterGuide', function () {
+        this.$centerGuideToggle = igv.makeToggleButton('center line', 'center line', 'showCenterGuide', function () {
             return self.$container;
         });
 

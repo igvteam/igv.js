@@ -303,7 +303,7 @@ var igv = (function (igv) {
             }
             $(browser.trackContainerDiv).append(browser.$cursorTrackingGuide);
 
-            $cursorTrackingGuideToggle = igv.makeToggleButton('show cursor guide', 'hide cursor guide', 'showCursorTrackingGuide', function () {
+            $cursorTrackingGuideToggle = igv.makeToggleButton('cursor guide', 'cursor guide', 'showCursorTrackingGuide', function () {
                 return browser.$cursorTrackingGuide;
             });
 
@@ -315,7 +315,7 @@ var igv = (function (igv) {
             $navigation.append(browser.centerGuide.$centerGuideToggle);
 
             // toggle track labels
-            $trackLabelToggle = igv.makeToggleButton('show labels', 'hide labels', 'trackLabelsVisible', function () {
+            $trackLabelToggle = igv.makeToggleButton('track labels', 'track labels', 'trackLabelsVisible', function () {
                 return $(browser.trackContainerDiv).find('.igv-track-label');
             });
 
@@ -343,13 +343,14 @@ var igv = (function (igv) {
             }
 
             $karyoPanelToggle.click(function () {
-                var hidden = $(".igv-karyo-div").hasClass("igv-karyo-hide");
+                var $karyo = $(".igv-karyo-div"),
+                    hidden = $karyo.hasClass("igv-karyo-hide");
                 if (hidden) {
                     $karyoPanelToggle.text("Hide Karyotype");
-                    $(".igv-karyo-div").removeClass("igv-karyo-hide");
+                    $karyo.removeClass("igv-karyo-hide");
                 } else {
                     $karyoPanelToggle.text("Show Karyotype");
-                    $(".igv-karyo-div").addClass("igv-karyo-hide");
+                    $karyo.addClass("igv-karyo-hide");
                 }
             });
 
