@@ -105,16 +105,24 @@ var igv = (function (igv) {
             };
  
             function parseData(data) {
-                self.header = self.parser.parseHeader(data);
-                if (self.header instanceof String && self.header.startsWith("##gff-version 3")) {
-                    self.format = 'gff3';
+                if(self.config.json){
+                    fulfill(data);
+                }else{
+                    self.header = self.parser.parseHeader(data);
+                    if (self.header instanceof String && self.header.startsWith("##gff-version 3")) {
+                        self.format = 'gff3';
+                    }
+                    fulfill(self.parser.parseFeatures(data));   // <= PARSING DONE HERE
                 }
-                fulfill(self.parser.parseFeatures(data));   // <= PARSING DONE HERE
             };
 
 
             if (self.localFile) {
                 igvxhr.loadStringFromFile(self.localFile, options).then(parseData).catch(reject);
+            }
+            else if(self.config.json){
+                //this is customized for cBioPortal use case
+                igvxhr.loadJson(self.config.url, self.config).then(parseData).catch(reject);
             }
             else {
                 igvxhr.loadString(self.url, options).then(parseData).catch(reject);
