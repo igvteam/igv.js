@@ -37,17 +37,17 @@ var igv = (function (igv) {
 
     igv.IdeoPanel.prototype.buildPanels = function ($content_header) {
 
-        this.panels = _.map(igv.browser.genomicStateList, function(kitchenSink, locusIndex) {
+        this.panels = _.map(igv.browser.genomicStateList, function(genomicState, locusIndex) {
 
             var panel = {};
 
             panel.locusIndex = locusIndex;
-            panel.viewportContainerPercentage = kitchenSink.viewportContainerPercentage;
+            panel.viewportContainerPercentage = genomicState.viewportContainerPercentage;
 
             panel.$ideogram = $('<div class="igv-ideogram-content-div"></div>');
             $content_header.append(panel.$ideogram);
 
-            panel.$ideogram.width(kitchenSink.viewportWidth);
+            panel.$ideogram.width(genomicState.viewportWidth);
 
             panel.$canvas = $('<canvas class="igv-ideogram-canvas"></canvas>');
             panel.$ideogram.append(panel.$canvas);

@@ -119,15 +119,15 @@ var igv = (function (igv) {
 
                     browser.genomicStateList = genomicStateList;
 
-                    _.each(genomicStateList, function (kitchenSink, index) {
+                    _.each(genomicStateList, function (genomicState, index) {
 
-                        kitchenSink.viewportWidth = width / _.size(genomicStateList);
-                        kitchenSink.viewportContainerPercentage = 1.0 / _.size(genomicStateList);
+                        genomicState.viewportWidth = width / _.size(genomicStateList);
+                        genomicState.viewportContainerPercentage = 1.0 / _.size(genomicStateList);
 
-                        kitchenSink.referenceFrame = new igv.ReferenceFrame(kitchenSink.chromosome.name, kitchenSink.start, (kitchenSink.end - kitchenSink.start) / kitchenSink.viewportWidth);
+                        genomicState.referenceFrame = new igv.ReferenceFrame(genomicState.chromosome.name, genomicState.start, (genomicState.end - genomicState.start) / genomicState.viewportWidth);
 
-                        kitchenSink.locusIndex = index;
-                        kitchenSink.locusCount = _.size(genomicStateList);
+                        genomicState.locusIndex = index;
+                        genomicState.locusCount = _.size(genomicStateList);
                     });
 
                     if (false === config.hideIdeogram) {
