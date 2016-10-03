@@ -117,18 +117,22 @@ var igv = (function (igv) {
 
     igv.Browser.prototype.loadTracksWithConfigList = function (configList) {
 
-        var self = this;
+        var self = this,
+            loadedTracks = [];
+
 
         configList.forEach(function (config) {
-            self.loadTrack(config);
+            loadedTracks.push(self.loadTrack(config));
         });
 
         // Really we should just resize the new trackViews, but currently there is no way to get a handle on those
         this.trackViews.forEach(function (trackView) {
             trackView.resize();
-        })
-
+        });
+        
+        return loadedTracks;
     };
+
 
     igv.Browser.prototype.loadTrack = function (config) {
 
@@ -213,6 +217,8 @@ var igv = (function (igv) {
         else {
             self.addTrack(newTrack);
         }
+
+        return newTrack;
 
     };
 
@@ -605,19 +611,19 @@ var igv = (function (igv) {
         console.log('browser.zoomIn - src extent ' + basesExtent(this.trackViewportWidth(), this.referenceFrame.bpPerPixel));
 
         // Have we reached the zoom-in threshold yet? If so, bail.
-        if (this.minimumBasesExtent() > basesExtent(this.trackViewportWidth(), this.referenceFrame.bpPerPixel/2.0)) {
-            console.log('browser.zoomIn - dst extent ' + basesExtent(this.trackViewportWidth(), this.referenceFrame.bpPerPixel/2.0) + ' bailing ...');
+        if (this.minimumBasesExtent() > basesExtent(this.trackViewportWidth(), this.referenceFrame.bpPerPixel / 2.0)) {
+            console.log('browser.zoomIn - dst extent ' + basesExtent(this.trackViewportWidth(), this.referenceFrame.bpPerPixel / 2.0) + ' bailing ...');
             return;
         } else {
-            console.log('browser.zoomIn - dst extent ' + basesExtent(this.trackViewportWidth(), this.referenceFrame.bpPerPixel/2.0));
+            console.log('browser.zoomIn - dst extent ' + basesExtent(this.trackViewportWidth(), this.referenceFrame.bpPerPixel / 2.0));
         }
 
         // window center (base-pair units)
-        centerBP = this.referenceFrame.start + this.referenceFrame.bpPerPixel * (this.trackViewportWidth()/2);
+        centerBP = this.referenceFrame.start + this.referenceFrame.bpPerPixel * (this.trackViewportWidth() / 2);
 
         // derive scaled (zoomed in) start location (base-pair units) by multiplying half-width by halve'd bases-per-pixel
         // which results in base-pair units
-        this.referenceFrame.start = centerBP - (this.trackViewportWidth()/2) * (this.referenceFrame.bpPerPixel/2.0);
+        this.referenceFrame.start = centerBP - (this.trackViewportWidth() / 2) * (this.referenceFrame.bpPerPixel / 2.0);
 
         // halve the bases-per-pixel
         this.referenceFrame.bpPerPixel /= 2.0;
@@ -688,7 +694,7 @@ var igv = (function (igv) {
 
         if (isLocusFeature(feature, this.genome, force)) {
 
-            var success =  gotoLocusFeature(feature, this.genome, this);
+            var success = gotoLocusFeature(feature, this.genome, this);
 
             if ((force || true === success) && callback) {
                 callback();
@@ -727,7 +733,7 @@ var igv = (function (igv) {
                         //alert('No feature found with name "' + feature + '"');
                         igv.presentAlert('No feature found with name "' + feature + '"');
                     }
-                    else{
+                    else {
 
                         // Just take the first result for now
                         // TODO - merge results, or ask user to choose
@@ -777,7 +783,7 @@ var igv = (function (igv) {
 
         type = 'locus';
         tokens = locusFeature.split(":");
-        chrName = genome.getChromosomeName(tokens[ 0 ]);
+        chrName = genome.getChromosomeName(tokens[0]);
         if (chrName) {
             chr = genome.getChromosome(chrName);
         }
@@ -790,10 +796,10 @@ var igv = (function (igv) {
                 start = 0;
                 end = chr.bpLength;
             } else {
-                startEnd = tokens[ 1 ].split("-");
-                start = Math.max(0, parseInt(startEnd[ 0 ].replace(/,/g, "")) - 1);
+                startEnd = tokens[1].split("-");
+                start = Math.max(0, parseInt(startEnd[0].replace(/,/g, "")) - 1);
                 if (2 === startEnd.length) {
-                    end = Math.min(chr.bpLength, parseInt(startEnd[ 1 ].replace(/,/g, "")));
+                    end = Math.min(chr.bpLength, parseInt(startEnd[1].replace(/,/g, "")));
                     if (end < 0) {
                         // This can happen from integer overflow
                         end = chr.bpLength;
@@ -801,7 +807,7 @@ var igv = (function (igv) {
                 }
             }
 
-            obj = { start: start, end: end };
+            obj = {start: start, end: end};
             validateLocusExtent(igv.browser, chr, obj);
             start = obj.start;
             end = obj.end;
@@ -824,7 +830,7 @@ var igv = (function (igv) {
 
             if (undefined === ee) {
 
-                ss -= igv.browser.minimumBasesExtent()/2;
+                ss -= igv.browser.minimumBasesExtent() / 2;
                 ee = ss + igv.browser.minimumBasesExtent();
 
                 if (ee > chromosome.bpLength) {
@@ -837,15 +843,15 @@ var igv = (function (igv) {
 
             } else if (ee - ss < igv.browser.minimumBasesExtent()) {
 
-                center = (ee + ss)/2;
-                if (center - igv.browser.minimumBasesExtent()/2 < 0) {
+                center = (ee + ss) / 2;
+                if (center - igv.browser.minimumBasesExtent() / 2 < 0) {
                     ss = 0;
                     ee = ss + igv.browser.minimumBasesExtent();
-                } else if (center + igv.browser.minimumBasesExtent()/2 > chromosome.bpLength) {
+                } else if (center + igv.browser.minimumBasesExtent() / 2 > chromosome.bpLength) {
                     ee = chromosome.bpLength;
                     ss = ee - igv.browser.minimumBasesExtent();
                 } else {
-                    ss = center - igv.browser.minimumBasesExtent()/2;
+                    ss = center - igv.browser.minimumBasesExtent() / 2;
                     ee = ss + igv.browser.minimumBasesExtent();
                 }
             }
@@ -1000,7 +1006,7 @@ var igv = (function (igv) {
             _left = Math.max(50, xy.x - 5);
 
             _left = Math.min(igv.browser.trackContainerDiv.clientWidth - 65, _left);
-            $element.css({ left: _left + 'px' });
+            $element.css({left: _left + 'px'});
         });
 
 
