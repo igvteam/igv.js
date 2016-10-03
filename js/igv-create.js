@@ -217,7 +217,13 @@ var igv = (function (igv) {
                         ss = browser.referenceFrame.start;
                         ee = ss + browser.trackViewportWidth() * browser.referenceFrame.bpPerPixel;
                         range = ss - ee;
-                        browser.loadTracksWithConfigList(config.tracks);
+                        var sortBy = [browser.referenceFrame.chr, ss, ee, "DESC"];
+                        if (config.tracks) {
+                            config.tracks.forEach(function(track){
+                                if(track.type === "seg")track.sortBy = sortBy;
+                            });
+                            browser.loadTracksWithConfigList(config.tracks);
+                        }
                     }, true);
 
                 } else {
