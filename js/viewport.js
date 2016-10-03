@@ -415,7 +415,9 @@ var igv = (function (igv) {
                 var buffer,
                     requiredHeight;
 
-                self.loading = false;
+                // self.loading = false;
+                self.loading = undefined;
+
                 self.stopSpinner();
 
                 if (features) {
@@ -529,6 +531,10 @@ var igv = (function (igv) {
             this.ctx.save();
             this.ctx.restore();
         }
+    };
+
+    igv.Viewport.prototype.isLoading = function () {
+        return !(undefined === this.loading);
     };
 
     igv.Viewport.viewportsWithLocusIndex = function (locusIndex) {

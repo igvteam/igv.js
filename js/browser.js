@@ -472,18 +472,17 @@ var igv = (function (igv) {
     };
 
     igv.Browser.prototype.loadInProgress = function () {
-        var success = false;
-        _.each(this.trackViews, function(tv){
-            if (false === success) {
-                _.each(tv.viewports, function(vp){
-                    if (vp.loading) {
-                        success = true;
-                    }
-                });
+
+        var anyTrackViewIsLoading;
+
+        anyTrackViewIsLoading = false;
+        _.each(this.trackViews, function(t) {
+            if (false === anyTrackViewIsLoading) {
+                anyTrackViewIsLoading = t.isLoading();
             }
         });
 
-        return success;
+        return anyTrackViewIsLoading;
     };
 
     igv.Browser.prototype.updateLocusSearch = function (referenceFrame) {
@@ -631,87 +630,113 @@ var igv = (function (igv) {
     // Zoom in by a factor of 2, keeping the same center location
     igv.Browser.prototype.zoomIn = function () {
 
-        var kitchenSink = igv.browser.genomicStateList[ 0 ],
-            referenceFrame = kitchenSink.referenceFrame,
-            viewportWidth = kitchenSink.viewportContainerPercentage * this.viewportContainerWidth(),
-            centerBP;
+        var self = this;
 
         if (this.loadInProgress()) {
             return;
         }
+        _.each(_.range(_.size(this.genomicStateList)), function(locusIndex){
+            zoomInWithLocusIndex(self, locusIndex);
+        });
 
-        // console.log('browser.zoomIn - src extent ' + basesExtent(viewportWidth, referenceFrame.bpPerPixel));
+        function zoomInWithLocusIndex(browser, locusIndex) {
 
-        // Have we reached the zoom-in threshold yet? If so, bail.
-        if (this.minimumBasesExtent() > basesExtent(viewportWidth, referenceFrame.bpPerPixel/2.0)) {
-            // console.log('browser.zoomIn - dst extent ' + basesExtent(viewportWidth, referenceFrame.bpPerPixel/2.0) + ' bailing ...');
-            return;
-        } else {
-            // console.log('browser.zoomIn - dst extent ' + basesExtent(viewportWidth, referenceFrame.bpPerPixel/2.0));
-        }
+            var busyViewports,
+                genomicState = browser.genomicStateList[ locusIndex ],
+                referenceFrame = genomicState.referenceFrame,
+                viewportWidth = genomicState.viewportContainerPercentage * browser.viewportContainerWidth(),
+                centerBP;
 
-        // window center (base-pair units)
-        centerBP = referenceFrame.start + referenceFrame.bpPerPixel * (viewportWidth/2);
+            // if (browser.loadInProgress()) {
+            //     return;
+            // }
 
-        // derive scaled (zoomed in) start location (base-pair units) by multiplying half-width by halve'd bases-per-pixel
-        // which results in base-pair units
-        referenceFrame.start = centerBP - (viewportWidth/2) * (referenceFrame.bpPerPixel/2.0);
+            busyViewports = _.filter(igv.Viewport.viewportsWithLocusIndex(locusIndex), function (viewport) {
+                return !(false === viewport.loading);
+            });
 
-        // halve the bases-per-pixel
-        referenceFrame.bpPerPixel /= 2.0;
+            // if (_.size(busyViewports) > 0) {
+            //     console.log('bail zoom - ' + locusIndex + ' viewports ' + _.size(busyViewports));
+            //     return;
+            // }
 
-        this.updateWithLocusIndex( 0 );
+            // Have we reached the zoom-in threshold yet? If so, bail.
+            if (browser.minimumBasesExtent() > basesExtent(viewportWidth, referenceFrame.bpPerPixel/2.0)) {
+                return;
+            }
 
-        function basesExtent(width, bpp) {
-            return Math.floor(width * bpp);
+            // window center (base-pair units)
+            centerBP = referenceFrame.start + referenceFrame.bpPerPixel * (viewportWidth/2);
+
+            // derive scaled (zoomed in) start location (base-pair units) by multiplying half-width by halve'd bases-per-pixel
+            // which results in base-pair units
+            referenceFrame.start = centerBP - (viewportWidth/2) * (referenceFrame.bpPerPixel/2.0);
+
+            // halve the bases-per-pixel
+            referenceFrame.bpPerPixel /= 2.0;
+
+            browser.updateWithLocusIndex( locusIndex );
+
+            function basesExtent(width, bpp) {
+                return Math.floor(width * bpp);
+            }
+
         }
     };
 
     // Zoom out by a factor of 2, keeping the same center location if possible
     igv.Browser.prototype.zoomOut = function () {
 
-        var kitchenSink = igv.browser.genomicStateList[ 0 ],
-            referenceFrame = kitchenSink.referenceFrame,
-            viewportWidth = kitchenSink.viewportContainerPercentage * this.viewportContainerWidth(),
-            chromosome,
-            newScale,
-            maxScale,
-            centerBP,
-            chromosomeLengthBP,
-            widthBP;
+        var self = this;
 
         if (this.loadInProgress()) {
             return;
         }
+        _.each(_.range(_.size(this.genomicStateList)), function(locusIndex){
+            zoomOutWithLocusIndex(self, locusIndex);
+        });
 
-        newScale = referenceFrame.bpPerPixel * 2;
-        chromosomeLengthBP = 250000000;
-        if (this.genome) {
-            chromosome = this.genome.getChromosome(referenceFrame.chrName);
-            if (chromosome) {
-                chromosomeLengthBP = chromosome.bpLength;
+        function zoomOutWithLocusIndex(browser, locusIndex) {
+
+            var genomicState = igv.browser.genomicStateList[ locusIndex ],
+                referenceFrame = genomicState.referenceFrame,
+                viewportWidth = genomicState.viewportContainerPercentage * browser.viewportContainerWidth(),
+                chromosome,
+                newScale,
+                maxScale,
+                centerBP,
+                chromosomeLengthBP,
+                widthBP;
+
+            newScale = referenceFrame.bpPerPixel * 2;
+            chromosomeLengthBP = 250000000;
+            if (browser.genome) {
+                chromosome = browser.genome.getChromosome(referenceFrame.chrName);
+                if (chromosome) {
+                    chromosomeLengthBP = chromosome.bpLength;
+                }
             }
+            maxScale = chromosomeLengthBP / viewportWidth;
+            if (newScale > maxScale) {
+                newScale = maxScale;
+            }
+
+            centerBP = referenceFrame.start + referenceFrame.bpPerPixel * viewportWidth/2;
+            widthBP = newScale * viewportWidth;
+
+            referenceFrame.start = Math.round(centerBP - widthBP/2);
+
+            if (referenceFrame.start < 0) {
+                referenceFrame.start = 0;
+            } else if (referenceFrame.start > chromosomeLengthBP - widthBP) {
+                referenceFrame.start = chromosomeLengthBP - widthBP;
+            }
+
+            referenceFrame.bpPerPixel = newScale;
+
+            browser.updateWithLocusIndex( locusIndex );
+
         }
-        maxScale = chromosomeLengthBP / viewportWidth;
-        if (newScale > maxScale) {
-            newScale = maxScale;
-        }
-
-        centerBP = referenceFrame.start + referenceFrame.bpPerPixel * viewportWidth/2;
-        widthBP = newScale * viewportWidth;
-
-        referenceFrame.start = Math.round(centerBP - widthBP/2);
-
-        if (referenceFrame.start < 0) {
-            referenceFrame.start = 0;
-        } else if (referenceFrame.start > chromosomeLengthBP - widthBP) {
-            referenceFrame.start = chromosomeLengthBP - widthBP;
-        }
-
-        referenceFrame.bpPerPixel = newScale;
-
-        this.updateWithLocusIndex( 0 );
-
     };
 
     igv.Browser.prototype.$emptyAllViewportContainers = function ( $trackContainer ) {

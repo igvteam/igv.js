@@ -233,6 +233,20 @@ var igv = (function (igv) {
 
     }
 
+    igv.TrackView.prototype.isLoading = function () {
+
+        var anyViewportIsLoading;
+
+        anyViewportIsLoading = false;
+        _.each(this.viewports, function(v) {
+            if (false === anyViewportIsLoading) {
+                anyViewportIsLoading = v.isLoading();
+            }
+        });
+
+        return anyViewportIsLoading;
+    };
+
     igv.TrackView.prototype.resize = function () {
         this.viewports.forEach(function(viewport) {
             viewport.resize();
