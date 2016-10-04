@@ -28,7 +28,8 @@ var igv = (function (igv) {
     //
     igv.RulerTrack = function () {
 
-        this.height = 50;
+        // this.height = 50;
+        this.height = 24;
         this.name = "";
         this.id = "ruler";
         this.disableButtons = true;
@@ -52,7 +53,10 @@ var igv = (function (igv) {
             ts,
             spacing,
             nTick,
-            x;
+            x,
+            l,
+            yShim,
+            tickHeight;
 
         fontStyle = { textAlign: 'center', font: '10px PT Sans', fillStyle: "rgba(64, 64, 64, 1)", strokeStyle: "rgba(64, 64, 64, 1)" };
 
@@ -68,21 +72,22 @@ var igv = (function (igv) {
         igv.graphics.setProperties(ctx, fontStyle );
         while (x < options.pixelWidth) {
 
-            var l = Math.floor(nTick * spacing),
-                shim = 2;
+            l = Math.floor(nTick * spacing);
+            yShim = 2;
+            tickHeight = 6;
 
             x = Math.round(((l - 1) - options.bpStart + 0.5) / options.bpPerPixel);
             var chrPosition = formatNumber(l / ts.unitMultiplier, 0) + " " + ts.majorUnit;
 
             if (nTick % 1 == 0) {
-                igv.graphics.fillText(ctx, chrPosition, x, this.height - 15);
+                igv.graphics.fillText(ctx, chrPosition, x, this.height - (tickHeight/0.75));
             }
 
-            igv.graphics.strokeLine(ctx, x, this.height - 10, x, this.height - shim);
+            igv.graphics.strokeLine(ctx, x, this.height - tickHeight, x, this.height - yShim);
 
             nTick++;
         }
-        igv.graphics.strokeLine(ctx, 0, this.height - shim, options.pixelWidth, this.height - shim);
+        igv.graphics.strokeLine(ctx, 0, this.height - yShim, options.pixelWidth, this.height - yShim);
 
 
         function formatNumber(anynum, decimal) {
