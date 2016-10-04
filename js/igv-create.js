@@ -102,12 +102,7 @@ var igv = (function (igv) {
 
         igv.loadGenome(config.reference).then(function (genome) {
 
-            var width,
-                path = 'https://s3.amazonaws.com/igv.broadinstitute.org/genomes/seq/b37/b37_cytoband.txt';
-
-            // if (browser.karyoPanel) {
-            //     browser.karyoPanel.resize();
-            // }
+            var width;
 
             browser.genome = genome;
             browser.genome.id = config.reference.genomeId;
@@ -151,11 +146,18 @@ var igv = (function (igv) {
             function lociWithConfiguration(configuration) {
 
                 var loci = [];
+
                 if (configuration.locus) {
                     loci.push(configuration.locus);
-                } else if (configuration.loci) {
-                    loci = _.clone(configuration.loci);
-                } else {
+                }
+
+                if (configuration.loci) {
+                    _.each(configuration.loci, function(locus){
+                        loci.push(locus);
+                    });
+                }
+
+                if (0 === _.size(loci)){
                     loci.push( _.first(browser.genome.chromosomeNames) );
                 }
 
