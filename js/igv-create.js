@@ -367,13 +367,13 @@ var igv = (function (igv) {
             $faZoomIn,
             $zoomContainer;
 
-        $faZoomOut = $('<i class="fa fa-minus-circle igv-fa-search fa-24px" style="padding-right: 4px;">');
+        $faZoomOut = $('<i class="fa fa-minus-circle igv-fa-search fa-20px shim-top-2 shim-right-4">');
 
         $faZoomOut.click(function () {
             igv.browser.zoomOut();
         });
 
-        $faZoomIn = $('<i class="fa fa-plus-circle igv-fa-search fa-24px">');
+        $faZoomIn = $('<i class="fa fa-plus-circle igv-fa-search fa-20px shim-top-2">');
 
         $faZoomIn.click(function () {
             igv.browser.zoomIn();
