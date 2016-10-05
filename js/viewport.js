@@ -33,11 +33,11 @@ var igv = (function (igv) {
 
         trackView.$viewportContainer.append( this.$viewport );
 
-        this.contentDiv = $('<div class="igv-content-div">')[0];
+        this.contentDiv = $('<div class="igv-viewport-content-div">')[0];
         this.$viewport.append(this.contentDiv);
 
         // track content canvas
-        this.canvas = $('<canvas class = "igv-content-canvas">')[0];
+        this.canvas = $('<canvas class = "igv-viewport-canvas">')[0];
         $(this.contentDiv).append(this.canvas);
         this.canvas.setAttribute('width', this.contentDiv.clientWidth);
         this.canvas.setAttribute('height', this.contentDiv.clientHeight);
