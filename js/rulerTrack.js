@@ -28,13 +28,36 @@ var igv = (function (igv) {
     //
     igv.RulerTrack = function () {
 
-        // this.height = 50;
-        this.height = 24;
+        this.height = 50;
+        // this.height = 24;
         this.name = "";
         this.id = "ruler";
         this.disableButtons = true;
         this.ignoreTrackMenu = true;
         this.order = -Number.MAX_VALUE;
+
+    };
+
+    igv.RulerTrack.prototype.lengthWidgetWithGenomeState = function (genomeState) {
+
+        var $lengthWidgetContainer = $('<div class = "igv-viewport-content-ruler-div">'),
+            $lengthWidget = $('<div class = "igv-ruler-length-widget">'),
+            $arrowLeft = $('<div class = "igv-ruler-length-widget-arrow-left">'),
+            $arrowRight = $('<div class = "igv-ruler-length-widget-arrow-right">'),
+            $lengthWidgetLabel = $('<span>'),
+            bp;
+
+        // $lengthWidgetContainer.css("background-color", igv.randomRGBConstantAlpha(200, 255, 0.75));
+
+        $lengthWidgetContainer.append($lengthWidget);
+        $lengthWidget.append($arrowLeft);
+        $lengthWidget.append($arrowRight);
+        $lengthWidget.append($lengthWidgetLabel);
+
+        bp = genomeState.viewportWidth * genomeState.referenceFrame.bpPerPixel;
+        $lengthWidgetLabel.text(igv.prettyBasePairNumber(Math.round(bp)));
+
+        return $lengthWidgetContainer;
 
     };
 
@@ -56,7 +79,23 @@ var igv = (function (igv) {
             x,
             l,
             yShim,
-            tickHeight;
+            tickHeight,
+            bp,
+            viewports,
+            $e;
+
+        if (igv.browser.rulerTrack) {
+            viewports = _.filter(igv.Viewport.viewportsWithLocusIndex(options.locusIndex), function(viewport){
+                return viewport.trackView.track instanceof igv.RulerTrack;
+            });
+
+            if (1 === _.size(viewports)) {
+                $e = _.first(viewports).$viewport.find('.igv-ruler-length-widget').find('span');
+                bp = options.bpPerPixel * options.viewportWidth;
+                $e.text(igv.prettyBasePairNumber(Math.round(bp)));
+            }
+
+        }
 
         fontStyle = { textAlign: 'center', font: '10px PT Sans', fillStyle: "rgba(64, 64, 64, 1)", strokeStyle: "rgba(64, 64, 64, 1)" };
 

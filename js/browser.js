@@ -511,7 +511,7 @@ var igv = (function (igv) {
             str = chr + ":" + ss + "-" + ee;
             this.$searchInput.val(str);
 
-            this.windowSizePanel.update(Math.floor(end - referenceFrame.start));
+            // this.windowSizePanel.update(Math.floor(end - referenceFrame.start));
         }
 
         this.fireEvent('locuschange', [referenceFrame, str]);

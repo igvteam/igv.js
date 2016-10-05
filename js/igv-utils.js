@@ -370,6 +370,34 @@ var igv = (function (igv) {
         return Math.random() * (max - min) + min;
     };
 
+    igv.prettyBasePairNumber = function (raw) {
+
+        var denom,
+            units,
+            value,
+            floored;
+
+        if (raw > 1e7) {
+            denom = 1e6;
+            units = " mb";
+        } else if (raw > 1e4) {
+
+            denom = 1e3;
+            units = " kb";
+
+            value = raw/denom;
+            floored = Math.floor(value);
+            return igv.numberFormatter(floored) + units;
+        } else {
+            return igv.numberFormatter(raw) + " bp";
+        }
+
+        value = raw/denom;
+        floored = Math.floor(value);
+
+        return floored.toString() + units;
+    };
+
     // StackOverflow: http://stackoverflow.com/a/10810674/116169
     igv.numberFormatter = function (rawNumber) {
 
