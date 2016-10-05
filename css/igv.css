@@ -578,23 +578,6 @@ div.ui-dialog fieldset {
     border: 0;
 }
 
-.igv-ruler-sweeper-div {
-
-    display: none;
-
-    pointer-events: none;
-
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 0;
-    height:100%;
-
-    z-index:99999;
-
-    background-color: rgba(68, 134, 247, 0.25);
-}
-
 .validateTips {
     border: 1px solid transparent;
     padding: 0.3em;
@@ -1210,6 +1193,88 @@ div.ui-dialog fieldset {
 
     color: #7f7f7f;
 
+}
+
+.igv-viewport-content-ruler-div {
+    position: absolute;
+    top: 0;
+    left: 0;
+
+    width: 100%;
+    height:50%;
+
+    z-index:64;
+
+    color: rgb(107, 107, 107);
+    background-color: white;
+}
+
+.igv-ruler-length-widget {
+    width:100%;
+    text-align:center;
+    border-bottom: 1px solid rgb(107, 107, 107);
+    line-height:0.1em;
+    margin:10px 0 20px;
+}
+
+.igv-ruler-length-widget span {
+
+    background-color: white;
+
+    font-family: 'PT Sans', sans-serif;
+    font-size: 12px;
+    font-weight: 200;
+
+    padding:0 6px;
+}
+
+.igv-ruler-length-widget-arrow-left {
+
+    position: relative;
+    top: -2px;
+    left: -1px;
+
+    float: left;
+
+    width: 0;
+    height: 0;
+    border-style: solid;
+    /*border-width: 4px 12px 4px 0;*/
+    border-width: 3px 10px 3px 0;
+    border-color: transparent rgb(107, 107, 107) transparent transparent;
+}
+
+.igv-ruler-length-widget-arrow-right {
+
+    position: relative;
+    top: -2px;
+    right: -1px;
+
+    float: right;
+
+    width: 0;
+    height: 0;
+    border-style: solid;
+    /*border-width: 4px 0 4px 12px;*/
+    border-width: 3px 0 3px 10px;
+    border-color: transparent transparent transparent rgb(107, 107, 107);
+}
+
+.igv-ruler-sweeper-div {
+
+    display: none;
+
+    pointer-events: none;
+
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 0;
+    height:100%;
+
+    z-index:99999;
+
+    background-color: rgba(68, 134, 247, 0.25);
 }
 
 .igv-left-hand-gutter {

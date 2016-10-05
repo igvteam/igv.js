@@ -13,7 +13,8 @@ var igv = (function (igv) {
             description,
             $trackLabel,
             $spinner,
-            dimen;
+            dimen,
+            $rulerContent;
 
         this.trackView = trackView;
         this.locusIndex = locusIndex;
@@ -42,6 +43,15 @@ var igv = (function (igv) {
         this.canvas.setAttribute('width', this.contentDiv.clientWidth);
         this.canvas.setAttribute('height', this.contentDiv.clientHeight);
         this.ctx = this.canvas.getContext("2d");
+
+        // additional content for ruler track
+        if (trackView.track instanceof igv.RulerTrack) {
+            // $rulerContent = $('<div class = "igv-viewport-content-ruler-div">');
+            // $rulerContent.css("background-color", igv.randomRGBConstantAlpha(200, 255, 0.75));
+            // $(this.contentDiv).append($rulerContent);
+
+            $(this.contentDiv).append(igv.browser.rulerTrack.lengthWidgetWithGenomeState(igv.browser.genomicStateList[ this.locusIndex ]));
+        }
 
         // zoom in to see features
         if (trackView.track.visibilityWindow !== undefined) {
@@ -365,7 +375,8 @@ var igv = (function (igv) {
             bpStart,
             bpEnd,
             ctx,
-            referenceFrame = igv.browser.genomicStateList[ self.locusIndex ].referenceFrame,
+            genomicState = igv.browser.genomicStateList[ self.locusIndex ],
+            referenceFrame = genomicState.referenceFrame,
             chr,
             refFrameStart,
             refFrameEnd;
@@ -435,13 +446,23 @@ var igv = (function (igv) {
                     ctx = buffer.getContext('2d');
 
                     self.trackView.track.draw({
+
                         features: features,
                         context: ctx,
-                        bpStart: bpStart,
-                        bpPerPixel: referenceFrame.bpPerPixel,
+
                         pixelWidth: buffer.width,
                         pixelHeight: buffer.height,
+
+                        bpStart: bpStart,   // bpStart = Math.max(0, Math.round(referenceFrame.start - bpWidth / 3))
+                                            // bpWidth = Math.round(referenceFrame.toBP(pixelWidth))
+                                            // buffer.width = pixelWidth = 3 * this.canvas.width
+
+                        bpPerPixel: referenceFrame.bpPerPixel,
                         referenceFrame: referenceFrame,
+
+                        genomeState: genomicState,
+
+                        locusIndex: self.locusIndex,
                         viewportWidth: self.$viewport.width()
                     });
 

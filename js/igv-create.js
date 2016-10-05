@@ -311,12 +311,8 @@ var igv = (function (igv) {
             browser.$searchResults.hide();
 
             // window size panel
-            browser.windowSizePanel = new igv.WindowSizePanel($navigation);
+            // browser.windowSizePanel = new igv.WindowSizePanel($navigation);
 
-            // TODO - hide until re-implementation as part of ruler is released.
-            browser.windowSizePanel.$content.hide();
-
-            // $navigation.append($zoomContainer[0]);
             $navigation.append(makeZoomWidget());
 
             // cursor tracking guide
@@ -328,7 +324,7 @@ var igv = (function (igv) {
             }
             $(browser.trackContainerDiv).append(browser.$cursorTrackingGuide);
 
-            $cursorTrackingGuideToggle = igv.makeToggleButton('cursor guide', 'cursor guide', 'showCursorTrackingGuide', function () {
+            $cursorTrackingGuideToggle = igv.makeToggleButton('show cursor guide', 'hide cursor guide', 'showCursorTrackingGuide', function () {
                 return browser.$cursorTrackingGuide;
             }, undefined);
 
@@ -340,7 +336,7 @@ var igv = (function (igv) {
             $navigation.append(browser.centerGuide.$centerGuideToggle);
 
             // toggle track labels
-            $trackLabelToggle = igv.makeToggleButton('track labels', 'track labels', 'trackLabelsVisible', function () {
+            $trackLabelToggle = igv.makeToggleButton('show labels', 'hide labels', 'trackLabelsVisible', function () {
                 return $(browser.trackContainerDiv).find('.igv-track-label');
             }, undefined);
 
@@ -359,24 +355,22 @@ var igv = (function (igv) {
             browser.karyoPanel = new igv.KaryoPanel(contentKaryo);
 
             $karyoPanelToggle = $('<div class="igv-nav-bar-toggle-button">');
-            $karyoPanelToggle.text("Karyotype");
 
             if (config.showKaryo === "hide") {
-                $karyoPanelToggle.toggleClass("igv-nav-bar-toggle-button-on")
+                $karyoPanelToggle.text("Show Karyotype");
                 $(contentKaryo).addClass("igv-karyo-hide");
             } else {
-                $karyoPanelToggle.toggleClass("igv-nav-bar-toggle-button-off")
+                $karyoPanelToggle.text("Hide Karyotype");
             }
 
             $karyoPanelToggle.click(function () {
-                var $karyo = $(".igv-karyo-div"),
-                    hidden = $karyo.hasClass("igv-karyo-hide");
-                $karyoPanelToggle.toggleClass("igv-nav-bar-toggle-button-on");
-                $karyoPanelToggle.toggleClass("igv-nav-bar-toggle-button-off");
+                var hidden = $(".igv-karyo-div").hasClass("igv-karyo-hide");
                 if (hidden) {
-                    $karyo.removeClass("igv-karyo-hide");
+                    $karyoPanelToggle.text("Hide Karyotype");
+                    $(".igv-karyo-div").removeClass("igv-karyo-hide");
                 } else {
-                    $karyo.addClass("igv-karyo-hide");
+                    $karyoPanelToggle.text("Show Karyotype");
+                    $(".igv-karyo-div").addClass("igv-karyo-hide");
                 }
             });
 
@@ -393,13 +387,13 @@ var igv = (function (igv) {
             $faZoomIn,
             $zoomContainer;
 
-        $faZoomOut = $('<i class="fa fa-minus-circle igv-fa-search fa-20px shim-top-2 shim-right-4">');
+        $faZoomOut = $('<i class="fa fa-minus-circle igv-fa-search fa-24px" style="padding-right: 4px;">');
 
         $faZoomOut.click(function () {
             igv.browser.zoomOut();
         });
 
-        $faZoomIn = $('<i class="fa fa-plus-circle igv-fa-search fa-20px shim-top-2">');
+        $faZoomIn = $('<i class="fa fa-plus-circle igv-fa-search fa-24px">');
 
         $faZoomIn.click(function () {
             igv.browser.zoomIn();
