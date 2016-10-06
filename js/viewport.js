@@ -443,12 +443,11 @@ var igv = (function (igv) {
                     buffer = document.createElement('canvas');
                     buffer.width = pixelWidth;
                     buffer.height = self.canvas.height;
-                    ctx = buffer.getContext('2d');
 
                     self.trackView.track.draw({
 
                         features: features,
-                        context: ctx,
+                        context: buffer.getContext('2d'),
 
                         pixelWidth: buffer.width,
                         pixelHeight: buffer.height,
@@ -462,7 +461,6 @@ var igv = (function (igv) {
 
                         genomeState: genomicState,
 
-                        locusIndex: self.locusIndex,
                         viewportWidth: self.$viewport.width()
                     });
 

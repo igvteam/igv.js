@@ -270,7 +270,8 @@ var igv = (function (igv) {
 
         var xy,
             xPercentage,
-            referenceFrame = igv.browser.genomicStateList[ panel.locusIndex ].referenceFrame,
+            genomicState = igv.browser.genomicStateList[ panel.locusIndex ],
+            referenceFrame = genomicState.referenceFrame,
             chr,
             locusLength,
             chrCoveragePercentage,
@@ -303,6 +304,7 @@ var igv = (function (igv) {
         // locus = referenceFrame.chrName + ":" + igv.numberFormatter(1 + Math.floor((xPercentage - (chrCoveragePercentage/2.0)) * chr.bpLength)) + "-" + igv.numberFormatter(Math.floor((xPercentage + (chrCoveragePercentage/2.0)) * chr.bpLength));
         // igv.browser.search(locus, undefined);
 
+        igv.browser.updateLocusSearchWithGenomicState(genomicState);
         igv.browser.repaintWithLocusIndex( panel.locusIndex )
 
     };

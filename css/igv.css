@@ -1231,7 +1231,7 @@ div.ui-dialog fieldset {
 .igv-ruler-length-widget-arrow-left {
 
     position: relative;
-    top: -2px;
+    top: -1px;
     left: -1px;
 
     float: left;
@@ -1247,7 +1247,7 @@ div.ui-dialog fieldset {
 .igv-ruler-length-widget-arrow-right {
 
     position: relative;
-    top: -2px;
+    top: -1px;
     right: -1px;
 
     float: right;

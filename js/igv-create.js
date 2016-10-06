@@ -125,6 +125,8 @@ var igv = (function (igv) {
                         genomicState.locusCount = _.size(genomicStateList);
                     });
 
+                    browser.updateLocusSearchWithGenomicState(_.first(browser.genomicStateList));
+
                     if (false === config.hideIdeogram) {
                         browser.ideoPanel = new igv.IdeoPanel($header);
                         browser.ideoPanel.repaint();

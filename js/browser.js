@@ -429,7 +429,7 @@ var igv = (function (igv) {
 
     igv.Browser.prototype.update = function () {
 
-        // this.updateLocusSearch(this.referenceFrame);
+        this.updateLocusSearchWithGenomicState(_.first(this.genomicStateList));
 
         _.each([this.ideoPanel, this.karyoPanel, this.centerGuide], function(renderable){
             if (renderable) {
@@ -485,36 +485,42 @@ var igv = (function (igv) {
         return anyTrackViewIsLoading;
     };
 
-    igv.Browser.prototype.updateLocusSearch = function (referenceFrame) {
+    igv.Browser.prototype.updateLocusSearchWithGenomicState = function (genomicState) {
 
-        var chr,
+        var referenceFrame,
             ss,
             ee,
             str,
             end,
             chromosome;
 
+        if (0 === genomicState.locusIndex) {
 
-        if (this.$searchInput) {
+            referenceFrame = genomicState.referenceFrame;
 
-            chr = referenceFrame.chrName;
-            ss = igv.numberFormatter(Math.floor(referenceFrame.start + 1));
+            if (this.$searchInput) {
 
-            end = referenceFrame.start + this.viewportContainerWidthBP();
-            if (this.genome) {
-                chromosome = this.genome.getChromosome(chr);
-                if (chromosome) end = Math.min(end, chromosome.bpLength);
+                end = referenceFrame.start + referenceFrame.bpPerPixel * genomicState.viewportWidth;
+
+                if (this.genome) {
+                    chromosome = this.genome.getChromosome( referenceFrame.chrName );
+                    if (chromosome) {
+                        end = Math.min(end, chromosome.bpLength);
+                    }
+                }
+
+                ss = igv.numberFormatter(Math.floor(referenceFrame.start + 1));
+                ee = igv.numberFormatter(Math.floor(end));
+                str = referenceFrame.chrName + ":" + ss + "-" + ee;
+                this.$searchInput.val(str);
+
+                // this.windowSizePanel.update(Math.floor(end - referenceFrame.start));
             }
 
-            ee = igv.numberFormatter(Math.floor(end));
+            this.fireEvent('locuschange', [referenceFrame, str]);
 
-            str = chr + ":" + ss + "-" + ee;
-            this.$searchInput.val(str);
-
-            // this.windowSizePanel.update(Math.floor(end - referenceFrame.start));
         }
 
-        this.fireEvent('locuschange', [referenceFrame, str]);
     };
 
     igv.Browser.prototype.syntheticViewportContainerBBox = function () {
@@ -1448,7 +1454,7 @@ var igv = (function (igv) {
                         referenceFrame.start = maxStart;
                     }
 
-                    // igv.browser.updateLocusSearch(referenceFrame);
+                    igv.browser.updateLocusSearchWithGenomicState(_.first(igv.browser.genomicStateList));
 
                     // igv.browser.repaint();
                     igv.browser.repaintWithLocusIndex(viewport.locusIndex);
