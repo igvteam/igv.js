@@ -71,7 +71,6 @@ var igv = (function (igv) {
     igv.RulerTrack.prototype.draw = function (options) {
 
         var fontStyle,
-            ctx = options.context,
             range,
             ts,
             spacing,
@@ -80,19 +79,17 @@ var igv = (function (igv) {
             l,
             yShim,
             tickHeight,
-            bp,
             viewports,
             $e;
 
         if (igv.browser.rulerTrack) {
-            viewports = _.filter(igv.Viewport.viewportsWithLocusIndex(options.locusIndex), function(viewport){
+            viewports = _.filter(igv.Viewport.viewportsWithLocusIndex(options.genomeState.locusIndex), function(viewport){
                 return viewport.trackView.track instanceof igv.RulerTrack;
             });
 
             if (1 === _.size(viewports)) {
                 $e = _.first(viewports).$viewport.find('.igv-ruler-length-widget').find('span');
-                bp = options.bpPerPixel * options.viewportWidth;
-                $e.text(igv.prettyBasePairNumber(Math.round(bp)));
+                $e.text(igv.prettyBasePairNumber(Math.round( options.bpPerPixel * options.viewportWidth )));
             }
 
         }
@@ -108,7 +105,7 @@ var igv = (function (igv) {
         x = 0;
 
         //canvas.setProperties({textAlign: 'center'});
-        igv.graphics.setProperties(ctx, fontStyle );
+        igv.graphics.setProperties(options.context, fontStyle );
         while (x < options.pixelWidth) {
 
             l = Math.floor(nTick * spacing);
@@ -119,14 +116,14 @@ var igv = (function (igv) {
             var chrPosition = formatNumber(l / ts.unitMultiplier, 0) + " " + ts.majorUnit;
 
             if (nTick % 1 == 0) {
-                igv.graphics.fillText(ctx, chrPosition, x, this.height - (tickHeight/0.75));
+                igv.graphics.fillText(options.context, chrPosition, x, this.height - (tickHeight/0.75));
             }
 
-            igv.graphics.strokeLine(ctx, x, this.height - tickHeight, x, this.height - yShim);
+            igv.graphics.strokeLine(options.context, x, this.height - tickHeight, x, this.height - yShim);
 
             nTick++;
         }
-        igv.graphics.strokeLine(ctx, 0, this.height - yShim, options.pixelWidth, this.height - yShim);
+        igv.graphics.strokeLine(options.context, 0, this.height - yShim, options.pixelWidth, this.height - yShim);
 
 
         function formatNumber(anynum, decimal) {
