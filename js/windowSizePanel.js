@@ -30,8 +30,8 @@ var igv = (function (igv) {
 
     igv.WindowSizePanel = function ($parent) {
 
-        this.contentDiv = $('<div class="igv-windowsizepanel-content-div"></div>');
-        $parent.append(this.contentDiv[0]);
+        this.$content = $('<div class="igv-windowsizepanel-content-div">');
+        $parent.append(this.$content);
 
     };
 
@@ -42,7 +42,7 @@ var igv = (function (igv) {
             denom,
             units;
 
-        this.contentDiv.text( prettyNumber( size ) );
+        this.$content.text( prettyNumber( size ) );
 
         function prettyNumber(size) {
 
