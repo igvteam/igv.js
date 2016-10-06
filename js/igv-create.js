@@ -290,6 +290,9 @@ var igv = (function (igv) {
             // window size panel
             browser.windowSizePanel = new igv.WindowSizePanel($navigation);
 
+            // TODO - hide until re-implementation as part of ruler is released.
+            browser.windowSizePanel.$content.hide();
+
             // $navigation.append($zoomContainer[0]);
             $navigation.append(makeZoomWidget());
 
