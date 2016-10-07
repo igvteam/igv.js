@@ -132,7 +132,7 @@ var igv = (function (igv) {
         log("Resize called: width=" + canvas.clientWidth + "/" + canvas.clientHeight);
         this.ideograms = undefined;
         this.repaint();
-    }
+    };
 
     igv.KaryoPanel.prototype.repaint = function () {
 
@@ -456,7 +456,7 @@ var igv = (function (igv) {
 
         }
 
-    }
+    };
 
     return igv;
 })
