@@ -773,7 +773,8 @@ div.ui-dialog fieldset {
 
     position: relative;
     height: 20px;
-    width: 100px;
+    min-width: 100px;
+    text-transform: capitalize;
 
     float: right;
 
