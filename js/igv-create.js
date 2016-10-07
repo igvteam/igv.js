@@ -337,22 +337,23 @@ var igv = (function (igv) {
             browser.karyoPanel = new igv.KaryoPanel(contentKaryo);
 
             $karyoPanelToggle = $('<div class="igv-nav-bar-toggle-button">');
+            $karyoPanelToggle.text("Karyotype");
 
             if (config.showKaryo === "hide") {
-                $karyoPanelToggle.text("Show Karyotype");
+                $karyoPanelToggle.toggleClass("igv-nav-bar-toggle-button-on")
                 $(contentKaryo).addClass("igv-karyo-hide");
             } else {
-                $karyoPanelToggle.text("Hide Karyotype");
+                $karyoPanelToggle.toggleClass("igv-nav-bar-toggle-button-off")
             }
 
             $karyoPanelToggle.click(function () {
                 var $karyo = $(".igv-karyo-div"),
                     hidden = $karyo.hasClass("igv-karyo-hide");
+                $karyoPanelToggle.toggleClass("igv-nav-bar-toggle-button-on");
+                $karyoPanelToggle.toggleClass("igv-nav-bar-toggle-button-off");
                 if (hidden) {
-                    $karyoPanelToggle.text("Hide Karyotype");
                     $karyo.removeClass("igv-karyo-hide");
                 } else {
-                    $karyoPanelToggle.text("Show Karyotype");
                     $karyo.addClass("igv-karyo-hide");
                 }
             });
