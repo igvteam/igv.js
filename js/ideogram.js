@@ -37,11 +37,11 @@ var igv = (function (igv) {
 
     igv.IdeoPanel.prototype.buildPanels = function ($content_header) {
 
-        this.panels = _.map(igv.browser.genomicStateList, function(genomicState, locusIndex) {
+        this.panels = _.map(igv.browser.genomicStateList, function(genomicState) {
 
             var panel = {};
 
-            panel.locusIndex = locusIndex;
+            panel.locusIndex = genomicState.locusIndex;
             panel.viewportContainerPercentage = genomicState.viewportContainerPercentage;
 
             panel.$ideogram = $('<div class="igv-ideogram-content-div"></div>');
@@ -85,8 +85,6 @@ var igv = (function (igv) {
     igv.IdeoPanel.prototype.resize = function () {
 
         var viewportContainerWidth = igv.browser.syntheticViewportContainerWidth();
-
-        // console.log('syntheticViewportContainerWidth ' + viewportContainerWidth);
 
         _.each(this.panels, function(panel) {
             panel.$ideogram.width(panel.viewportContainerPercentage * viewportContainerWidth);

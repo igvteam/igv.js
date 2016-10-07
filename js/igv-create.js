@@ -106,8 +106,8 @@ var igv = (function (igv) {
 
             browser.genome = genome;
             browser.genome.id = config.reference.genomeId;
-            width = browser.syntheticViewportContainerWidth();
 
+            width = browser.syntheticViewportContainerWidth();
             browser.getGenomicStateList(lociWithConfiguration(config), width, function (genomicStateList) {
 
                 if (_.size(genomicStateList) > 0) {
@@ -116,8 +116,8 @@ var igv = (function (igv) {
 
                     _.each(genomicStateList, function (genomicState, index) {
 
-                        genomicState.viewportWidth = width / _.size(genomicStateList);
                         genomicState.viewportContainerPercentage = 1.0 / _.size(genomicStateList);
+                        genomicState.viewportWidth = genomicState.viewportContainerPercentage * width;
 
                         genomicState.referenceFrame = new igv.ReferenceFrame(genomicState.chromosome.name, genomicState.start, (genomicState.end - genomicState.start) / genomicState.viewportWidth);
 

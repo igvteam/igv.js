@@ -427,6 +427,18 @@ var igv = (function (igv) {
 
     };
 
+    igv.Browser.prototype.repaintWithLocusIndex = function (locusIndex) {
+
+        if (this.ideoPanel) {
+            igv.IdeoPanel.repaintPanel( this.ideoPanel.panelWithLocusIndex(locusIndex) );
+        }
+
+        _.each(igv.Viewport.viewportsWithLocusIndex(locusIndex), function (viewport) {
+            viewport.repaint();
+        });
+
+    };
+
     igv.Browser.prototype.update = function () {
 
         this.updateLocusSearchWithGenomicState(_.first(this.genomicStateList));
@@ -439,18 +451,6 @@ var igv = (function (igv) {
 
         _.each(this.trackViews, function(trackView){
             trackView.update();
-        });
-
-    };
-
-    igv.Browser.prototype.repaintWithLocusIndex = function (locusIndex) {
-
-        if (this.ideoPanel) {
-            igv.IdeoPanel.repaintPanel( this.ideoPanel.panelWithLocusIndex(locusIndex) );
-        }
-
-        _.each(igv.Viewport.viewportsWithLocusIndex(locusIndex), function (viewport) {
-            viewport.repaint();
         });
 
     };
@@ -524,6 +524,7 @@ var igv = (function (igv) {
     };
 
     igv.Browser.prototype.syntheticViewportContainerBBox = function () {
+
         var $trackContainer = $(this.trackContainerDiv),
             $track = $('<div class="igv-track-div">'),
             $viewportContainer = $('<div class="igv-viewport-container igv-viewport-container-shim">'),
@@ -531,16 +532,19 @@ var igv = (function (igv) {
             trackContainerWidth,
             trackWidth;
 
-        trackContainerWidth = $trackContainer.width();
-
         $trackContainer.append($track);
-        trackWidth = $track.width();
-
         $track.append($viewportContainer);
 
-        rect.position = $viewportContainer.position();
-        rect.width = $viewportContainer.width();
-        rect.height = $viewportContainer.height();
+        rect =
+        {
+            position: $viewportContainer.position(),
+            width: $viewportContainer.width(),
+            height: $viewportContainer.height()
+        };
+
+        // rect.position = $viewportContainer.position();
+        // rect.width = $viewportContainer.width();
+        // rect.height = $viewportContainer.height();
 
         $track.remove();
 
@@ -548,19 +552,14 @@ var igv = (function (igv) {
     };
 
     igv.Browser.prototype.syntheticViewportContainerWidth = function () {
-        var rect = this.syntheticViewportContainerBBox();
-
-        return rect.width;
+        return this.syntheticViewportContainerBBox().width;
     };
 
     /**
      * Return the visible width of a track.  All tracks should have the same width.
      */
     igv.Browser.prototype.viewportContainerWidth = function () {
-
-        var width = (this.trackViews && this.trackViews.length > 0) ? this.trackViews[ 0 ].$viewportContainer.width() : this.syntheticViewportContainerWidth();
-
-        return width;
+        return (this.trackViews && this.trackViews.length > 0) ? this.trackViews[ 0 ].$viewportContainer.width() : this.syntheticViewportContainerWidth();
     };
 
     igv.Browser.prototype.viewportContainerWidthBP = function () {
@@ -641,30 +640,17 @@ var igv = (function (igv) {
         if (this.loadInProgress()) {
             return;
         }
+
         _.each(_.range(_.size(this.genomicStateList)), function(locusIndex){
             zoomInWithLocusIndex(self, locusIndex);
         });
 
         function zoomInWithLocusIndex(browser, locusIndex) {
 
-            var busyViewports,
-                genomicState = browser.genomicStateList[ locusIndex ],
+            var genomicState = browser.genomicStateList[ locusIndex ],
                 referenceFrame = genomicState.referenceFrame,
                 viewportWidth = genomicState.viewportContainerPercentage * browser.viewportContainerWidth(),
                 centerBP;
-
-            // if (browser.loadInProgress()) {
-            //     return;
-            // }
-
-            busyViewports = _.filter(igv.Viewport.viewportsWithLocusIndex(locusIndex), function (viewport) {
-                return !(false === viewport.loading);
-            });
-
-            // if (_.size(busyViewports) > 0) {
-            //     console.log('bail zoom - ' + locusIndex + ' viewports ' + _.size(busyViewports));
-            //     return;
-            // }
 
             // Have we reached the zoom-in threshold yet? If so, bail.
             if (browser.minimumBasesExtent() > basesExtent(viewportWidth, referenceFrame.bpPerPixel/2.0)) {
@@ -698,6 +684,7 @@ var igv = (function (igv) {
         if (this.loadInProgress()) {
             return;
         }
+
         _.each(_.range(_.size(this.genomicStateList)), function(locusIndex){
             zoomOutWithLocusIndex(self, locusIndex);
         });
