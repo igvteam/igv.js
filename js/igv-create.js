@@ -127,6 +127,10 @@ var igv = (function (igv) {
 
                     browser.updateLocusSearchWithGenomicState(_.first(browser.genomicStateList));
 
+                    if (browser.karyoPanel) {
+                        browser.karyoPanel.resize();
+                    }
+
                     if (false === config.hideIdeogram) {
                         browser.ideoPanel = new igv.IdeoPanel($header);
                         browser.ideoPanel.repaint();
