@@ -143,18 +143,22 @@ var igv = (function (igv) {
 
     igv.Browser.prototype.loadTracksWithConfigList = function (configList) {
 
-        var self = this;
+        var self = this,
+            loadedTracks = [];
+
 
         configList.forEach(function (config) {
-            self.loadTrack(config);
+            loadedTracks.push(self.loadTrack(config));
         });
 
         // Really we should just resize the new trackViews, but currently there is no way to get a handle on those
         this.trackViews.forEach(function (trackView) {
             trackView.resize();
-        })
-
+        });
+        
+        return loadedTracks;
     };
+
 
     igv.Browser.prototype.loadTrack = function (config) {
 
@@ -199,6 +203,8 @@ var igv = (function (igv) {
         } else {
             self.addTrack(newTrack);
         }
+
+        return newTrack;
 
         function createTrackWithConfiguration(conf) {
 
@@ -976,7 +982,6 @@ var igv = (function (igv) {
                         igv.presentAlert('No feature found with name "' + feature + '"');
                     }
                     else if (results.length == 1) {
-
                         // Just take the first result for now
                         // TODO - merge results, or ask user to choose
 
@@ -1111,7 +1116,7 @@ var igv = (function (igv) {
 
         type = 'locus';
         tokens = locusFeature.split(":");
-        chrName = genome.getChromosomeName(tokens[ 0 ]);
+        chrName = genome.getChromosomeName(tokens[0]);
         if (chrName) {
             chr = genome.getChromosome(chrName);
         }
@@ -1124,10 +1129,10 @@ var igv = (function (igv) {
                 start = 0;
                 end = chr.bpLength;
             } else {
-                startEnd = tokens[ 1 ].split("-");
-                start = Math.max(0, parseInt(startEnd[ 0 ].replace(/,/g, "")) - 1);
+                startEnd = tokens[1].split("-");
+                start = Math.max(0, parseInt(startEnd[0].replace(/,/g, "")) - 1);
                 if (2 === startEnd.length) {
-                    end = Math.min(chr.bpLength, parseInt(startEnd[ 1 ].replace(/,/g, "")));
+                    end = Math.min(chr.bpLength, parseInt(startEnd[1].replace(/,/g, "")));
                     if (end < 0) {
                         // This can happen from integer overflow
                         end = chr.bpLength;
@@ -1137,6 +1142,7 @@ var igv = (function (igv) {
 
             obj = { start: start, end: end };
             igv.validateLocusExtent(chr, obj);
+
             start = obj.start;
             end = obj.end;
 
@@ -1316,7 +1322,7 @@ var igv = (function (igv) {
             _left = Math.max(50, xy.x - 5);
 
             _left = Math.min(igv.browser.trackContainerDiv.clientWidth - 65, _left);
-            $element.css({ left: _left + 'px' });
+            $element.css({left: _left + 'px'});
         });
 
         $(trackContainerDiv).mousemove(igv.throttle(function (e) {

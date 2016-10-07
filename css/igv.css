@@ -584,29 +584,6 @@ div.ui-dialog fieldset {
 }
 
 /* navigation bar */
-.igvNavigation {
-
-    position: relative;
-    top: 0;
-    left: 0;
-
-    padding-top: 2px;
-    padding-bottom: 2px;
-    padding-left: 4px;
-    padding-right: 4px;
-
-    height: 24px;
-    width: auto;
-
-    box-sizing: content-box;
-
-    border-style: solid;
-    border-radius: 3px;
-    border-width: thin;
-
-    border-color: #7f7f7f;
-    background-color: #bfbfbf;
-}
 
 .igv-logo-nonav {
 
@@ -620,7 +597,7 @@ div.ui-dialog fieldset {
     width: 34px;
     height: 16px;
 
-    background: url(img/igv_logo_letters_paths.svg);
+    background: url(img/igv-logo.svg);
     background-size: 34px 16px;
     background-repeat:no-repeat;
     background-position: 0 0;
@@ -641,10 +618,35 @@ div.ui-dialog fieldset {
     width: 34px;
     height: 16px;
 
-    background: url(img/igv_logo_letters_paths.svg);
+    background: url(img/igv-logo.svg);
     background-size: 34px 16px;
     background-repeat:no-repeat;
     background-position: 0 0;
+
+}
+
+.igvNavigation {
+
+    position: relative;
+    top: 0;
+    left: 0;
+
+    padding-top: 2px;
+    padding-bottom: 2px;
+    padding-left: 4px;
+    padding-right: 4px;
+
+    height: 24px;
+    width: auto;
+
+    box-sizing: content-box;
+
+    border-style: solid;
+    border-radius: 3px;
+    border-width: thin;
+
+    border-color: #bfbfbf;
+    background-color: #f3f3f3;
 
 }
 
@@ -669,12 +671,12 @@ div.ui-dialog fieldset {
     border-style: solid;
     border-radius: 3px;
     border-width: thin;
-    border-color: #7f7f7f;
+    border-color: #bfbfbf;
 
     font-family: 'Open Sans', sans-serif;
     font-size: small;
     font-weight: 400;
-    color: #7f7f7f;
+    color: #737373;
 
 }
 
@@ -720,13 +722,21 @@ div.ui-dialog fieldset {
 
 .igv-fa-search {
     cursor: pointer;
-    color: #7f7f7f;
+    color: #737373;
 }
 
 .igv-fa-search:hover,
 .igv-fa-search:focus,
 .igv-fa-search:active  {
     color: #434343;
+}
+
+.shim-right-4 {
+    padding-right: 4px;
+}
+
+.shim-top-2 {
+    padding-top: 2px;
 }
 
 .shim-left-6 {
@@ -742,17 +752,21 @@ div.ui-dialog fieldset {
 
 .igv-nav-bar-toggle-button {
 
+    cursor: pointer;
+
     position: relative;
-    height: 24px;
-    width: 140px;
+    height: 20px;
+    min-width: 100px;
+    text-transform: capitalize;
 
     float: right;
 
+    margin-top: 2px;
     margin-right: 5px;
 
     padding-left: 8px;
     padding-right: 8px;
-    padding-top: 3px;
+    padding-top: 1px;
     padding-bottom: 2px;
 
     font-family: 'Open Sans', sans-serif;
@@ -763,26 +777,28 @@ div.ui-dialog fieldset {
     vertical-align: middle;
 
     border-style: solid;
-    border-radius: 3px;
     border-width: thin;
+    border-radius: 10px;
+}
+
+.igv-nav-bar-toggle-button-on {
+    color: #737373;
+    border-color: #737373;
+    background-color: #f3f3f3;
+    border-width: thin;
+}
+
+.igv-nav-bar-toggle-button-on:hover,
+.igv-nav-bar-toggle-button-on:focus,
+.igv-nav-bar-toggle-button-on:active  {
+    padding-top: 0;
+    border-width: 2px;
 }
 
 .igv-nav-bar-toggle-button-off {
     color: white;
-    border-color: #7f7f7f;
-    background-color: #7f7f7f;
-
-    border-radius: 12px;
-
-}
-
-.igv-nav-bar-toggle-button-on {
-    color: white;
-    border-color: white;
-    background-color: #bfbfbf;
-
-    border-radius: 12px;
-
+    border-color: #737373;
+    background-color: #737373;
 }
 
 .igvNavigationMarginLeft12 {
