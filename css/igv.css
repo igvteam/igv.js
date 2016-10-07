@@ -798,7 +798,6 @@ div.ui-dialog fieldset {
     border-radius: 10px;
 }
 
-/* version 3 */
 .igv-nav-bar-toggle-button-on {
     color: #737373;
     border-color: #737373;
@@ -818,51 +817,6 @@ div.ui-dialog fieldset {
     border-color: #737373;
     background-color: #737373;
 }
-
-/* version 2 */
-/*.igv-nav-bar-toggle-button-off {*/
-    /*color: white;*/
-    /*border-color: #7f7f7f;*/
-    /*background-color: #7f7f7f;*/
-
-    /*border-radius: 12px;*/
-
-/*}*/
-
-/*.igv-nav-bar-toggle-button-on {*/
-    /*color: white;*/
-    /*border-color: white;*/
-    /*background-color: #bfbfbf;*/
-
-    /*border-radius: 12px;*/
-
-/*}*/
-
-/* version 1 */
-/*.igv-nav-bar-toggle-button-off {*/
-    /*color: white;*/
-    /*border-color: #7f7f7f;*/
-    /*background-color: #7f7f7f;*/
-/*}*/
-
-/*.igv-nav-bar-toggle-button-on {*/
-    /*color: white;*/
-    /*border-color: white;*/
-    /*background-color: #bfbfbf;*/
-/*}*/
-
-/* version 0 */
-/*.igv-nav-bar-toggle-button-on {*/
-    /*border-color: rgb(223, 223, 223);*/
-    /*color: #444;*/
-    /*background-color: white;*/
-/*}*/
-
-/*.igv-nav-bar-toggle-button-off {*/
-    /*border-color: rgb(223, 223, 223);*/
-    /*background-color: #444;*/
-    /*color: white;*/
-/*}*/
 
 .igvNavigationMarginLeft12 {
 
