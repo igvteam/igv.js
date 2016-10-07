@@ -88,9 +88,6 @@ var igv = (function (igv) {
             });
 
             if (1 === _.size(viewports)) {
-
-                console.log('RulerTrack.draw: index ' + _.first(viewports).locusIndex);
-
                 $e = _.first(viewports).$viewport.find('.igv-ruler-length-widget').find('span');
                 $e.text(igv.prettyBasePairNumber(Math.round( options.bpPerPixel * options.viewportWidth )));
             }

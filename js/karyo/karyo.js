@@ -122,6 +122,11 @@ var igv = (function (igv) {
     igv.KaryoPanel.prototype.resize = function () {
 
         var canvas = this.canvas;
+
+        if (_.size(igv.browser.genomicStateList) > 1) {
+            return;
+        }
+
         canvas.setAttribute('width', canvas.clientWidth);    //Must set the width & height of the canvas
         canvas.setAttribute('height', canvas.clientHeight);
         log("Resize called: width=" + canvas.clientWidth + "/" + canvas.clientHeight);
@@ -131,16 +136,22 @@ var igv = (function (igv) {
 
     igv.KaryoPanel.prototype.repaint = function () {
 
-
         var genome = igv.browser.genome,
-            referenceFrame = igv.browser.referenceFrame,
+            genomicState = _.first(igv.browser.genomicStateList),
+            referenceFrame = genomicState.referenceFrame,
             stainColors = [],
             w = this.canvas.width,
             h = this.canvas.height;
 
+        if (_.size(igv.browser.genomicStateList) > 1) {
+            return;
+        }
+
         this.ctx.clearRect(0, 0, w, h);
 
-        if (!(genome && referenceFrame && genome.chromosomes && referenceFrame.chrName)) return;
+        if (!(genome && referenceFrame && genome.chromosomes && referenceFrame.chrName)) {
+            return;
+        }
 
         var chromosomes = genome.getChromosomes();
         var image = this.ideograms;
@@ -187,9 +198,9 @@ var igv = (function (igv) {
             var ideoScale = longestChr.bpLength / chrheight;   // Scale in bp per pixels
 
             var boxPY1 = chromosome.y - 3 + Math.round(referenceFrame.start / ideoScale);
-            var boxHeight = Math.max(3, (igv.browser.viewportContainerWidth() * referenceFrame.bpPerPixel) / ideoScale);
+            var boxHeight = Math.max(3, (genomicState.viewportWidth * referenceFrame.bpPerPixel) / ideoScale);
 
-            //var boxPY2 = Math.round((this.browser.referenceFrame.start+100) * ideoScale);
+            //var boxPY2 = Math.round((referenceFrame.start+100) * ideoScale);
             this.ctx.strokeStyle = "rgb(150, 0, 0)";
             this.ctx.lineWidth = 2;
             this.ctx.strokeRect(chromosome.x - 3, boxPY1, chrwidth + 6, boxHeight + 6);

@@ -93,7 +93,7 @@ var igv = (function (igv) {
             if (dimen > 32) {
                 dimen = 32;
             }
-            console.log('$viewport height ' + dimen);
+
             $spinner = $('<div class="igv-viewport-spinner">');
             $spinner.css({ 'font-size' : dimen + 'px'});
 
