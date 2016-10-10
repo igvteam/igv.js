@@ -455,6 +455,13 @@ var igv = (function (igv) {
 
                         self.tile = new Tile(referenceFrame.chr, bpStart, bpEnd, referenceFrame.bpPerPixel, buffer);
                         self.paintImage();
+                        //In cBioPortal we have both gene track and CN segment track. Here we sort segment track after gene track is painted to make sure everything is already initialized for segment track when we call the sort function
+                        if(self.track.name === "Genes"){
+                            var segTracks = igv.browser.findTracks("type", "seg");
+                            segTracks.forEach(function (track) {
+                                track.sortSamples(track.config.sortBy[0], track.config.sortBy[1], track.config.sortBy[2], track.config.sortBy[3]);
+                            })
+                        }
                     }
                     else {
                         self.ctx.clearRect(0, 0, self.canvas.width, self.canvas.height);
