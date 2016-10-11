@@ -1037,16 +1037,14 @@ var igv = (function (igv) {
                 locusString,
                 geneNameLocusObject;
 
-            if (undefined === featureDBLookupResult.end) {
-                end = featureDBLookupResult.start + 1;
-            }
+            end = (undefined === featureDBLookupResult.end) ? 1 + featureDBLookupResult.start : featureDBLookupResult.end;
 
             if (igv.browser.flanking) {
                 start = Math.max(0, featureDBLookupResult.start - igv.browser.flanking);
                 end += igv.browser.flanking;
             }
 
-            locusString = featureDBLookupResult.chrName + ':' + start.toString() + '-' + end.toString();
+            locusString = featureDBLookupResult.chr + ':' + start.toString() + '-' + end.toString();
 
             geneNameLocusObject = {};
             if (igv.isLocusChrNameStartEnd(locusString, self.genome, geneNameLocusObject)) {
