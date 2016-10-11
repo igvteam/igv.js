@@ -97,7 +97,7 @@ var igv = (function (igv) {
     };
 
     // Alt - Click to Sort alignment rows
-    igv.BAMTrack.prototype.altClick = function (genomicLocation, event) {
+    igv.BAMTrack.prototype.altClick = function (genomicLocation, referenceFrame, event) {
 
         this.alignmentTrack.sortAlignmentRows(genomicLocation, this.sortOption);
 
