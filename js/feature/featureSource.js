@@ -113,11 +113,16 @@ var igv = (function (igv) {
     }
 
     function addFeaturesToDB(featureList) {
+        var echo = [];
         featureList.forEach(function (feature) {
             if (feature.name) {
                 igv.browser.featureDB[feature.name.toUpperCase()] = feature;
             }
-        })
+        });
+        // _.each(igv.browser.featureDB, function(item){
+        //     console.log('name ' + item.name);
+        // });
+        // console.log('yo');
     }
 
 
