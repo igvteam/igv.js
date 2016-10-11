@@ -405,46 +405,38 @@ var igv = (function (igv) {
         windowX = Math.round(genomicState.referenceFrame.toPixels(genomicState.referenceFrame.start - bpStart));
         windowX1 = windowX + genomicState.viewportWidth;
 
-        renderFeatureLabels.call(this, ctx, feature, coord.px, coord.px1, py, windowX, windowX1);
+        renderFeatureLabels.call(this, ctx, feature, coord.px, coord.px1, py, windowX, windowX1, genomicState);
     }
-
-
-    var lastFeatureName;   // Hack to prevent multiple identical labels in collapsed mode
 
     /**
      * @param ctx       the canvas 2d context
      * @param feature
-     * @param startX  feature start x-coordinate
-     * @param endX feature end x-coordinate
-     * @param y  feature y-coordinate
+     * @param featureX  feature start x-coordinate
+     * @param featureX1 feature end x-coordinate
+     * @param featureY  feature y-coordinate
      * @param windowX   visible window start x-coordinate
      * @param windowX1  visible window end x-coordinate
+     * @param genomicState  genomic state
      */
-    function renderFeatureLabels(ctx, feature, startX, endX, y, windowX, windowX1) {
-
+    function renderFeatureLabels(ctx, feature, featureX, featureX1, featureY, windowX, windowX1, genomicState) {
         var geneColor, geneFontStyle, transform,
             boxX, boxX1,    // label should be centered between these two x-coordinates
             labelX, labelY,
             textFitsInBox;
 
-        if(feature.name === lastFeatureName && "COLLAPSED" === this.displayMode) {
-            return;
-        }
-        lastFeatureName = feature.name;
-
         // feature outside of viewable window
-        if (endX < windowX || startX > windowX1) {
-            boxX = startX;
-            boxX1 = endX;
+        if (featureX1 < windowX || featureX > windowX1) {
+            boxX = featureX;
+            boxX1 = featureX1;
         } else {
             // center label within visible portion of the feature
-            boxX = Math.max(startX, windowX);
-            boxX1 = Math.min(endX, windowX1);
+            boxX = Math.max(featureX, windowX);
+            boxX1 = Math.min(featureX1, windowX1);
         }
 
-        if (igv.browser.selection && "genes" === this.config.type && feature.name !== undefined) {
+        if (genomicState.selection && "genes" === this.config.type && feature.name !== undefined) {
             // TODO -- for gtex, figure out a better way to do this
-            geneColor = igv.browser.selection.colorForGene(feature.name);
+            geneColor = genomicState.selection.colorForGene(feature.name);
         }
 
         textFitsInBox = (boxX1 - boxX) > ctx.measureText(feature.name).width;
@@ -463,7 +455,7 @@ var igv = (function (igv) {
             }
 
             labelX = boxX + ((boxX1 - boxX) / 2);
-            labelY = getFeatureLabelY(y, transform);
+            labelY = getFeatureLabelY(featureY, transform);
 
             igv.graphics.fillText(ctx, feature.name, labelX, labelY, geneFontStyle, transform);
         }
@@ -480,7 +472,7 @@ var igv = (function (igv) {
     function monitorTrackDrag(track) {
         var onDragEnd = function () {
             if (!track.trackView || !track.trackView.tile || track.displayMode === "SQUISHED") {
-                return;    // No labels to update
+                return;
             }
             track.trackView.update();
         }

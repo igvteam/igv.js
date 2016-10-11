@@ -134,10 +134,16 @@ var igv = (function (igv) {
         function drawEqtls(drawSelected) {
 
             var radius = drawSelected ? 2 * track.dotSize : track.dotSize,
-                eqtl, i, px, py, color, isSelected, snp, geneName, selection;
+                eqtl,
+                i,
+                px,
+                py,
+                color,
+                isSelected,
+                snp,
+                geneName,
+                selection;
 
-
-            //ctx.fillStyle = igv.selection.colorForGene(eqtl.geneName);
             igv.graphics.setProperties(ctx, {
                 fillStyle: "rgb(180, 180, 180)",
                 strokeStyle: "rgb(180, 180, 180)"
@@ -148,7 +154,7 @@ var igv = (function (igv) {
                 eqtl = featureList[i];
                 snp = eqtl.snp.toUpperCase();
                 geneName = eqtl[track.geneField].toUpperCase();
-                selection = igv.browser.selection;
+                selection = options.genomicState.selection;
                 isSelected = selection &&
                 (selection.snp === snp || selection.gene === geneName);
 
