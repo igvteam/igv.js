@@ -181,7 +181,7 @@ var igv = (function (igv) {
                     } else if (e.altKey) {
 
                         if (trackView.track.altClick && self.tile) {
-                            trackView.track.altClick(genomicLocation, e);
+                            trackView.track.altClick(genomicLocation, referenceFrame, e);
                         }
 
                     } else if (Math.abs(canvasCoords.x - mouseDownX) <= igv.browser.constants.dragThreshold && trackView.track.popupData) {
@@ -501,7 +501,6 @@ var igv = (function (igv) {
         }
 
         function viewIsReady() {
-            // return self.track && self.browser && self.browser.referenceFrame;
             return igv.browser && igv.browser.genomicStateList && igv.browser.genomicStateList[ self.locusIndex ].referenceFrame;
         }
 

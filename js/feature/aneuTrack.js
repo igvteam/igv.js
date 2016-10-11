@@ -532,16 +532,15 @@ var igv = (function (igv) {
      * (optional).
      *
      * @param genomicLocation
+     * @param referenceFrame
      * @param event
      */
-    igv.AneuTrack.prototype.altClick = function (genomicLocation, event) {
+    igv.AneuTrack.prototype.altClick = function (genomicLocation, referenceFrame, event) {
 
         // Define a region 5 "pixels" wide in genomic coordinates
-        var refFrame = igv.browser.referenceFrame, bpWidth = refFrame.toBP(2.5), bpStart = genomicLocation - bpWidth, bpEnd = genomicLocation
-            + bpWidth, chr = refFrame.chr, track = this;
+        var bpWidth = referenceFrame.toBP(2.5);
 
-        this.sortSamples(chr, bpStart, bpEnd, sortDirection);
-
+        this.sortSamples(referenceFrame.chr, genomicLocation - bpWidth, genomicLocation + bpWidth, sortDirection);
         sortDirection = (sortDirection === "ASC" ? "DESC" : "ASC");
     };
 
