@@ -945,17 +945,19 @@ var igv = (function (igv) {
             searchConfig = igv.browser.searchConfig,
             chrStartEndLoci,
             geneNameLoci,
-            locusObject,
-            locusObjects = [],
+            locusGenomicState,
+            locusGenomicStates = [],
+            featureDBGenomicStates,
+            survivors,
             geneNameLookup;
 
         chrStartEndLoci = [];
         _.each(loci, function(locus) {
 
-            locusObject = {};
-            if (igv.isLocusChrNameStartEnd(locus, self.genome, locusObject)) {
-                locusObject.gtexSelection = undefined;
-                locusObjects.push(locusObject);
+            locusGenomicState = {};
+            if (igv.isLocusChrNameStartEnd(locus, self.genome, locusGenomicState)) {
+                locusGenomicState.gtexSelection = undefined;
+                locusGenomicStates.push(locusGenomicState);
 
                 // accumulate successfully parsed loci
                 chrStartEndLoci.push(locus);
@@ -968,33 +970,95 @@ var igv = (function (igv) {
         // parse gene names
         if (_.size(geneNameLoci) > 0) {
 
-            geneNameLookup = new Promise(function(resolve) {
-                resolve( _.map(geneNameLoci, function(loci){ return searchConfig.url.replace("$FEATURE$", loci); }) );
+            survivors = [];
+            featureDBGenomicStates = [];
+            _.each(geneNameLoci, function(locus){
+                var result,
+                    genomicState;
+
+                result = self.featureDB[ locus.toUpperCase() ];
+                if (result) {
+                    genomicState = createFeatureDBGenomicState(result);
+                    if (genomicState) {
+                        featureDBGenomicStates.push( genomicState );
+                    } else {
+                        survivors.push(locus);
+                    }
+                } else {
+                    survivors.push(locus);
+                }
             });
 
-            geneNameLookup.then(function(response) {
-                return Promise.all(response.map(igvxhr.loadString));
-            }).then(function (response) {
-                var filtered,
-                    geneNameLocusObjects;
+            if (_.size(survivors) > 0) {
 
-                filtered = _.filter(response, function(geneNameLookupResult){
-                    return geneNameLookupResult !== "";
+                geneNameLookup = new Promise(function(resolve) {
+                    resolve( _.map(survivors, function(locus){
+
+                        var path = searchConfig.url.replace("$FEATURE$", locus);
+
+                        if (path.indexOf("$GENOME$") > -1) {
+                            path.replace("$GENOME$", (self.genome.id ? self.genome.id : "hg19"));
+                        }
+
+                        return path;
+                    }) );
                 });
 
-                geneNameLocusObjects = _.filter(_.map(filtered, createGeneNameLocusObject), function(geneNameLocusObject){
-                    return undefined !== geneNameLocusObject;
+                geneNameLookup.then(function(response) {
+                    return Promise.all(response.map(igvxhr.loadString));
+                }).then(function (response) {
+                    var filtered,
+                        geneNameGenomicStates;
+
+                    filtered = _.filter(response, function(geneNameLookupResult){
+                        return geneNameLookupResult !== "";
+                    });
+
+                    geneNameGenomicStates = _.filter(_.map(filtered, createGeneNameGenomicState), function(genomicState){
+                        return undefined !== genomicState;
+                    });
+
+                    continuation(_.union(locusGenomicStates, featureDBGenomicStates, geneNameGenomicStates));
+
                 });
 
-                continuation(_.union(locusObjects, geneNameLocusObjects));
-
-            });
+            } else {
+                continuation(_.union(locusGenomicStates, featureDBGenomicStates));
+            }
 
         } else {
-            continuation(locusObjects);
+            continuation(locusGenomicStates);
         }
 
-        function createGeneNameLocusObject(geneNameLookupResponse) {
+        function createFeatureDBGenomicState(featureDBLookupResult) {
+
+            var start,
+                end,
+                locusString,
+                geneNameLocusObject;
+
+            if (undefined === featureDBLookupResult.end) {
+                end = featureDBLookupResult.start + 1;
+            }
+
+            if (igv.browser.flanking) {
+                start = Math.max(0, featureDBLookupResult.start - igv.browser.flanking);
+                end += igv.browser.flanking;
+            }
+
+            locusString = featureDBLookupResult.chrName + ':' + start.toString() + '-' + end.toString();
+
+            geneNameLocusObject = {};
+            if (igv.isLocusChrNameStartEnd(locusString, self.genome, geneNameLocusObject)) {
+                geneNameLocusObject.gtexSelection = new igv.GtexSelection({ gene: featureDBLookupResult.name });
+                return geneNameLocusObject;
+            } else {
+                return undefined;
+            }
+
+        }
+
+        function createGeneNameGenomicState(geneNameLookupResponse) {
 
             var results,
                 result,
@@ -1020,6 +1084,10 @@ var igv = (function (igv) {
                 chr = result[ searchConfig.chromosomeField ];
                 start = result[ searchConfig.startField ] - searchConfig.coords;
                 end = result[ searchConfig.endField ];
+
+                if (undefined === end) {
+                    end = start + 1;
+                }
 
                 if (igv.browser.flanking) {
                     start = Math.max(0, start - igv.browser.flanking);
@@ -1375,7 +1443,7 @@ var igv = (function (igv) {
 
 
 
-    
+
     ////////////////////////////////// legacy ///////////////////////////////////////////
 
     /**
