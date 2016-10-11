@@ -254,6 +254,135 @@ var igv = (function (igv) {
 
         }
 
+        /**
+         * Infer properties format and track type from legacy "config.type" property
+         *
+         * @param config
+         */
+        function inferTypes(config) {
+
+            function translateDeprecatedTypes(config) {
+
+                if (config.featureType) {  // Translate deprecated "feature" type
+                    config.type = config.type || config.featureType;
+                    config.featureType = undefined;
+                }
+
+                if ("bed" === config.type) {
+                    config.type = "annotation";
+                    config.format = config.format || "bed";
+
+                }
+
+                else if ("bam" === config.type) {
+                    config.type = "alignment";
+                    config.format = "bam"
+                }
+
+                else if ("vcf" === config.type) {
+                    config.type = "variant";
+                    config.format = "vcf"
+                }
+
+                else if ("t2d" === config.type) {
+                    config.type = "gwas";
+                }
+
+                else if ("FusionJuncSpan" === config.type) {
+                    config.format = "fusionjuncspan";
+                }
+            }
+
+            function inferFileFormat(config) {
+
+                if (config.format) {
+                    config.format = config.format.toLowerCase();
+                    return;
+                }
+
+                var path = config.url || config.localFile.name,
+                    fn = path.toLowerCase(),
+                    idx,
+                    ext;
+
+                //Strip parameters -- handle local files later
+                idx = fn.indexOf("?");
+                if (idx > 0) {
+                    fn = fn.substr(0, idx);
+                }
+
+                //Strip aux extensions .gz, .tab, and .txt
+                if (fn.endsWith(".gz")) {
+                    fn = fn.substr(0, fn.length - 3);
+                } else if (fn.endsWith(".txt") || fn.endsWith(".tab")) {
+                    fn = fn.substr(0, fn.length - 4);
+                }
+
+
+                idx = fn.lastIndexOf(".");
+                ext = idx < 0 ? fn : fn.substr(idx + 1);
+
+                switch (ext.toLowerCase()) {
+
+                    case "bw":
+                        config.format = "bigwig";
+                        break;
+                    case "bb":
+                        config.format = "bigbed";
+
+                    default:
+                        if (knownFileTypes.has(ext)) {
+                            config.format = ext;
+                        }
+                }
+            }
+
+            function inferTrackType(config) {
+
+                if (config.type) return;
+
+                if (config.format !== undefined) {
+                    switch (config.format.toLowerCase()) {
+                        case "bw":
+                        case "bigwig":
+                        case "wig":
+                        case "bedgraph":
+                            config.type = "wig";
+                            break;
+                        case "vcf":
+                            config.type = "variant";
+                            break;
+                        case "seg":
+                            config.type = "seg";
+                            break;
+                        case "bam":
+                            config.type = "alignment";
+                            break;
+                        default:
+                            config.type = "annotation";
+                    }
+                }
+            }
+
+            translateDeprecatedTypes(config);
+
+            if (undefined === config.sourceType && (config.url || config.localFile)) {
+                config.sourceType = "file";
+            }
+
+            if ("file" === config.sourceType) {
+                if (undefined === config.format) {
+                    inferFileFormat(config);
+                }
+            }
+
+            if (undefined === config.type) {
+                inferTrackType(config);
+            }
+
+
+        };
+
     };
 
     /**
@@ -916,91 +1045,40 @@ var igv = (function (igv) {
         }
     };
 
-    /**
-     *
-     * @param feature
-     * @param callback - function to call
-     * @param force - force callback
-     */
-    igv.Browser.prototype.search = function (feature, callback, force) {
-        var type,
-            chr,
-            start,
-            end,
-            searchConfig,
-            url,
-            result;
+    igv.Browser.prototype.on = function (eventName, fn) {
+        if (!this.eventHandlers[eventName]) {
+            this.eventHandlers[eventName] = [];
+        }
+        this.eventHandlers[eventName].push(fn);
+    };
 
-        // See if we're ready to respond to a search, if not just queue it up and return
-        if (igv.browser === undefined || igv.browser.genome === undefined) {
-            igv.browser.initialLocus = feature;
-            if (callback) {
-                callback();
-            }
+    igv.Browser.prototype.un = function (eventName, fn) {
+        if (!this.eventHandlers[eventName]) {
             return;
         }
 
-        if (igv.isLocusChrNameStartEnd(feature, this.genome, undefined)) {
+        var callbackIndex = this.eventHandlers[eventName].indexOf(fn);
+        if (callbackIndex !== -1) {
+            this.eventHandlers[eventName].splice(callbackIndex, 1);
+        }
+    };
 
-            var success =  igv.gotoLocusFeature(feature, this.genome, this);
+    igv.Browser.prototype.fireEvent = function (eventName, args, thisObj) {
 
-            if ((force || true === success) && callback) {
-                callback();
-            }
-
-        } else {
-
-            // Try local feature cache first
-            result = this.featureDB[feature.toUpperCase()];
-            if (result) {
-
-                handleSearchResult(result.name, result.chrName, result.start, result.end, "");
-
-            } else if (this.searchConfig) {
-                url = this.searchConfig.url.replace("$FEATURE$", feature);
-                searchConfig = this.searchConfig;
-
-                if (url.indexOf("$GENOME$") > -1) {
-                    var genomeId = this.genome.id ? this.genome.id : "hg19";
-                    url.replace("$GENOME$", genomeId);
-                }
-
-                // var loader = new igv.DataLoader(url);
-                // if (range)  loader.range = range;
-                // loader.loadBinaryString(callback);
-
-                igvxhr.loadString(url).then(function (data) {
-
-                    var results = ("plain" === searchConfig.type) ? parseSearchResults(data) : JSON.parse(data);
-
-                    if (searchConfig.resultsField) {
-                        results = results[searchConfig.resultsField];
-                    }
-
-                    if (results.length == 0) {
-                        //alert('No feature found with name "' + feature + '"');
-                        igv.presentAlert('No feature found with name "' + feature + '"');
-                    }
-                    else if (results.length == 1) {
-                        // Just take the first result for now
-                        // TODO - merge results, or ask user to choose
-
-                        r = results[0];
-                        chr = r[searchConfig.chromosomeField];
-                        start = r[searchConfig.startField] - searchConfig.coords;
-                        end = r[searchConfig.endField];
-                        type = r["featureType"] || r["type"];
-                        handleSearchResult(feature, chr, start, end, type);
-                    }
-                    else {
-                        presentSearchResults(results, searchConfig, feature);
-                    }
-
-                    if (callback) callback();
-                });
-            }
+        if (!this.eventHandlers[eventName]) {
+            return;
         }
 
+        var scope = thisObj || window;
+        for (var i = 0, l = this.eventHandlers[eventName].length; i < l; i++) {
+            var item = this.eventHandlers[eventName][i];
+            var result = item.apply(scope, args);
+
+            // If any of the handlers return any value, then return it
+            if (result !== undefined) {
+                return result;
+            }
+        }
     };
 
     igv.isLocusChrNameStartEnd = function (locus, genome, locusObject) {
@@ -1101,93 +1179,6 @@ var igv = (function (igv) {
         extent.end = Math.floor(ee);
     };
 
-    igv.gotoLocusFeature = function (locusFeature, genome, browser) {
-
-        var type,
-            tokens,
-            chr,
-            start,
-            end,
-            chrName,
-            startEnd,
-            center,
-            obj;
-
-
-        type = 'locus';
-        tokens = locusFeature.split(":");
-        chrName = genome.getChromosomeName(tokens[0]);
-        if (chrName) {
-            chr = genome.getChromosome(chrName);
-        }
-
-        if (chr) {
-
-            // returning undefined indicates locus is a chromosome name.
-            start = end = undefined;
-            if (1 === tokens.length) {
-                start = 0;
-                end = chr.bpLength;
-            } else {
-                startEnd = tokens[1].split("-");
-                start = Math.max(0, parseInt(startEnd[0].replace(/,/g, "")) - 1);
-                if (2 === startEnd.length) {
-                    end = Math.min(chr.bpLength, parseInt(startEnd[1].replace(/,/g, "")));
-                    if (end < 0) {
-                        // This can happen from integer overflow
-                        end = chr.bpLength;
-                    }
-                }
-            }
-
-            obj = { start: start, end: end };
-            igv.validateLocusExtent(chr, obj);
-
-            start = obj.start;
-            end = obj.end;
-
-        }
-
-        if (undefined === chr || isNaN(start) || (start > end)) {
-            igv.presentAlert("Unrecognized feature or locus: " + locusFeature);
-            return false;
-        }
-
-        browser.goto(chrName, start, end);
-        fireOnsearch.call(igv.browser, locusFeature, type);
-
-        return true;
-    };
-
-    function presentSearchResults(loci, config, feature) {
-
-        igv.browser.$searchResultsTable.empty();
-        igv.browser.$searchResults.show();
-
-        loci.forEach(function (locus) {
-
-            var row = $('<tr class="igvNavigationSearchResultsTableRow">');
-            row.text(locus.locusString);
-
-            row.click(function () {
-
-                igv.browser.$searchResults.hide();
-
-                handleSearchResult(
-                    feature,
-                    locus[config.chromosomeField],
-                    locus[config.startField] - config.coords,
-                    locus[config.endField],
-                    (locus["featureType"] || locus["type"]));
-
-            });
-
-            igv.browser.$searchResultsTable.append(row);
-
-        });
-
-    }
-
     /**
      * Parse the igv line-oriented (non json) search results.
      * Example
@@ -1235,34 +1226,6 @@ var igv = (function (igv) {
 
         return results;
 
-    }
-
-    function handleSearchResult(name, chr, start, end, type) {
-
-        igv.browser.selection = new igv.GtexSelection('gtex' === type || 'snp' === type ? { snp: name } : { gene: name });
-
-        if (end === undefined) {
-            end = start + 1;
-        }
-        if (igv.browser.flanking) {
-            start = Math.max(0, start - igv.browser.flanking);
-            end += igv.browser.flanking;    // TODO -- set max to chromosome length
-        }
-
-        igv.browser.goto(chr, start, end);
-
-        // Notify tracks (important for gtex).   TODO -- replace this with some sort of event model ?
-        fireOnsearch.call(igv.browser, name, type);
-    }
-
-    function fireOnsearch(feature, type) {
-        // Notify tracks (important for gtex).   TODO -- replace this with some sort of event model ?
-        this.trackViews.forEach(function (tp) {
-            var track = tp.track;
-            if (track.onsearch) {
-                track.onsearch(feature, type);
-            }
-        });
     }
 
     function attachTrackContainerMouseHandlers(trackContainerDiv) {
@@ -1406,170 +1369,216 @@ var igv = (function (igv) {
 
     }
 
+
+
+
+
+
+
+    
+    ////////////////////////////////// legacy ///////////////////////////////////////////
+
     /**
-     * Infer properties format and track type from legacy "config.type" property
      *
-     * @param config
+     * @param feature
+     * @param callback - function to call
+     * @param force - force callback
      */
-    function inferTypes(config) {
+    igv.Browser.prototype.search = function (feature, callback, force) {
+        var type,
+            chr,
+            start,
+            end,
+            searchConfig,
+            url,
+            result;
 
-        function translateDeprecatedTypes(config) {
-
-            if (config.featureType) {  // Translate deprecated "feature" type
-                config.type = config.type || config.featureType;
-                config.featureType = undefined;
+        // See if we're ready to respond to a search, if not just queue it up and return
+        if (igv.browser === undefined || igv.browser.genome === undefined) {
+            igv.browser.initialLocus = feature;
+            if (callback) {
+                callback();
             }
-
-            if ("bed" === config.type) {
-                config.type = "annotation";
-                config.format = config.format || "bed";
-
-            }
-
-            else if ("bam" === config.type) {
-                config.type = "alignment";
-                config.format = "bam"
-            }
-
-            else if ("vcf" === config.type) {
-                config.type = "variant";
-                config.format = "vcf"
-            }
-
-            else if ("t2d" === config.type) {
-                config.type = "gwas";
-            }
-
-            else if ("FusionJuncSpan" === config.type) {
-                config.format = "fusionjuncspan";
-            }
+            return;
         }
 
-        function inferFileFormat(config) {
+        if (igv.isLocusChrNameStartEnd(feature, this.genome, undefined)) {
 
-            if (config.format) {
-                config.format = config.format.toLowerCase();
-                return;
+            var success =  igv.gotoLocusFeature(feature, this.genome, this);
+
+            if ((force || true === success) && callback) {
+                callback();
             }
 
-            var path = config.url || config.localFile.name,
-                fn = path.toLowerCase(),
-                idx,
-                ext;
+        } else {
 
-            //Strip parameters -- handle local files later
-            idx = fn.indexOf("?");
-            if (idx > 0) {
-                fn = fn.substr(0, idx);
-            }
+            // Try local feature cache first
+            result = this.featureDB[feature.toUpperCase()];
+            if (result) {
 
-            //Strip aux extensions .gz, .tab, and .txt
-            if (fn.endsWith(".gz")) {
-                fn = fn.substr(0, fn.length - 3);
-            } else if (fn.endsWith(".txt") || fn.endsWith(".tab")) {
-                fn = fn.substr(0, fn.length - 4);
-            }
+                handleSearchResult(result.name, result.chrName, result.start, result.end, "");
 
+            } else if (this.searchConfig) {
+                url = this.searchConfig.url.replace("$FEATURE$", feature);
+                searchConfig = this.searchConfig;
 
-            idx = fn.lastIndexOf(".");
-            ext = idx < 0 ? fn : fn.substr(idx + 1);
+                if (url.indexOf("$GENOME$") > -1) {
+                    var genomeId = this.genome.id ? this.genome.id : "hg19";
+                    url.replace("$GENOME$", genomeId);
+                }
 
-            switch (ext.toLowerCase()) {
+                // var loader = new igv.DataLoader(url);
+                // if (range)  loader.range = range;
+                // loader.loadBinaryString(callback);
 
-                case "bw":
-                    config.format = "bigwig";
-                    break;
-                case "bb":
-                    config.format = "bigbed";
+                igvxhr.loadString(url).then(function (data) {
 
-                default:
-                    if (knownFileTypes.has(ext)) {
-                        config.format = ext;
+                    var results = ("plain" === searchConfig.type) ? parseSearchResults(data) : JSON.parse(data);
+
+                    if (searchConfig.resultsField) {
+                        results = results[searchConfig.resultsField];
                     }
+
+                    if (results.length == 0) {
+                        //alert('No feature found with name "' + feature + '"');
+                        igv.presentAlert('No feature found with name "' + feature + '"');
+                    }
+                    else if (results.length == 1) {
+                        // Just take the first result for now
+                        // TODO - merge results, or ask user to choose
+
+                        r = results[0];
+                        chr = r[searchConfig.chromosomeField];
+                        start = r[searchConfig.startField] - searchConfig.coords;
+                        end = r[searchConfig.endField];
+                        type = r["featureType"] || r["type"];
+                        handleSearchResult(feature, chr, start, end, type);
+                    }
+                    else {
+                        presentSearchResults(results, searchConfig, feature);
+                    }
+
+                    if (callback) callback();
+                });
             }
         }
 
-        function inferTrackType(config) {
+    };
 
-            if (config.type) return;
+    igv.gotoLocusFeature = function (locusFeature, genome, browser) {
 
-            if (config.format !== undefined) {
-                switch (config.format.toLowerCase()) {
-                    case "bw":
-                    case "bigwig":
-                    case "wig":
-                    case "bedgraph":
-                        config.type = "wig";
-                        break;
-                    case "vcf":
-                        config.type = "variant";
-                        break;
-                    case "seg":
-                        config.type = "seg";
-                        break;
-                    case "bam":
-                        config.type = "alignment";
-                        break;
-                    default:
-                        config.type = "annotation";
+        var type,
+            tokens,
+            chr,
+            start,
+            end,
+            chrName,
+            startEnd,
+            center,
+            obj;
+
+
+        type = 'locus';
+        tokens = locusFeature.split(":");
+        chrName = genome.getChromosomeName(tokens[0]);
+        if (chrName) {
+            chr = genome.getChromosome(chrName);
+        }
+
+        if (chr) {
+
+            // returning undefined indicates locus is a chromosome name.
+            start = end = undefined;
+            if (1 === tokens.length) {
+                start = 0;
+                end = chr.bpLength;
+            } else {
+                startEnd = tokens[1].split("-");
+                start = Math.max(0, parseInt(startEnd[0].replace(/,/g, "")) - 1);
+                if (2 === startEnd.length) {
+                    end = Math.min(chr.bpLength, parseInt(startEnd[1].replace(/,/g, "")));
+                    if (end < 0) {
+                        // This can happen from integer overflow
+                        end = chr.bpLength;
+                    }
                 }
             }
+
+            obj = { start: start, end: end };
+            igv.validateLocusExtent(chr, obj);
+
+            start = obj.start;
+            end = obj.end;
+
         }
 
-        translateDeprecatedTypes(config);
-
-        if (undefined === config.sourceType && (config.url || config.localFile)) {
-            config.sourceType = "file";
+        if (undefined === chr || isNaN(start) || (start > end)) {
+            igv.presentAlert("Unrecognized feature or locus: " + locusFeature);
+            return false;
         }
 
-        if ("file" === config.sourceType) {
-            if (undefined === config.format) {
-                inferFileFormat(config);
+        browser.goto(chrName, start, end);
+        fireOnsearch.call(igv.browser, locusFeature, type);
+
+        return true;
+    };
+
+    function presentSearchResults(loci, config, feature) {
+
+        igv.browser.$searchResultsTable.empty();
+        igv.browser.$searchResults.show();
+
+        loci.forEach(function (locus) {
+
+            var row = $('<tr class="igvNavigationSearchResultsTableRow">');
+            row.text(locus.locusString);
+
+            row.click(function () {
+
+                igv.browser.$searchResults.hide();
+
+                handleSearchResult(
+                    feature,
+                    locus[config.chromosomeField],
+                    locus[config.startField] - config.coords,
+                    locus[config.endField],
+                    (locus["featureType"] || locus["type"]));
+
+            });
+
+            igv.browser.$searchResultsTable.append(row);
+
+        });
+
+    }
+
+    function handleSearchResult(name, chr, start, end, type) {
+
+        igv.browser.selection = new igv.GtexSelection('gtex' === type || 'snp' === type ? { snp: name } : { gene: name });
+
+        if (end === undefined) {
+            end = start + 1;
+        }
+        if (igv.browser.flanking) {
+            start = Math.max(0, start - igv.browser.flanking);
+            end += igv.browser.flanking;    // TODO -- set max to chromosome length
+        }
+
+        igv.browser.goto(chr, start, end);
+
+        // Notify tracks (important for gtex).   TODO -- replace this with some sort of event model ?
+        fireOnsearch.call(igv.browser, name, type);
+    }
+
+    function fireOnsearch(feature, type) {
+        // Notify tracks (important for gtex).   TODO -- replace this with some sort of event model ?
+        this.trackViews.forEach(function (tp) {
+            var track = tp.track;
+            if (track.onsearch) {
+                track.onsearch(feature, type);
             }
-        }
-
-        if (undefined === config.type) {
-            inferTrackType(config);
-        }
-
-
-    };
-
-    igv.Browser.prototype.on = function (eventName, fn) {
-        if (!this.eventHandlers[eventName]) {
-            this.eventHandlers[eventName] = [];
-        }
-        this.eventHandlers[eventName].push(fn);
-    };
-
-    igv.Browser.prototype.un = function (eventName, fn) {
-        if (!this.eventHandlers[eventName]) {
-            return;
-        }
-
-        var callbackIndex = this.eventHandlers[eventName].indexOf(fn);
-        if (callbackIndex !== -1) {
-            this.eventHandlers[eventName].splice(callbackIndex, 1);
-        }
-    };
-
-    igv.Browser.prototype.fireEvent = function (eventName, args, thisObj) {
-
-        if (!this.eventHandlers[eventName]) {
-            return;
-        }
-
-        var scope = thisObj || window;
-        for (var i = 0, l = this.eventHandlers[eventName].length; i < l; i++) {
-            var item = this.eventHandlers[eventName][i];
-            var result = item.apply(scope, args);
-
-            // If any of the handlers return any value, then return it
-            if (result !== undefined) {
-                return result;
-            }
-        }
-    };
+        });
+    }
 
     return igv;
 })
