@@ -956,7 +956,7 @@ var igv = (function (igv) {
 
             locusGenomicState = {};
             if (igv.isLocusChrNameStartEnd(locus, self.genome, locusGenomicState)) {
-                locusGenomicState.gtexSelection = undefined;
+                locusGenomicState.selection = undefined;
                 locusGenomicStates.push(locusGenomicState);
 
                 // accumulate successfully parsed loci
@@ -1050,7 +1050,7 @@ var igv = (function (igv) {
 
             geneNameLocusObject = {};
             if (igv.isLocusChrNameStartEnd(locusString, self.genome, geneNameLocusObject)) {
-                geneNameLocusObject.gtexSelection = new igv.GtexSelection({ gene: featureDBLookupResult.name });
+                geneNameLocusObject.selection = new igv.GtexSelection({ gene: featureDBLookupResult.name });
                 return geneNameLocusObject;
             } else {
                 return undefined;
@@ -1100,7 +1100,7 @@ var igv = (function (igv) {
                 if (igv.isLocusChrNameStartEnd(string, self.genome, geneNameLocusObject)) {
 
                     type = result["featureType"] || result["type"];
-                    geneNameLocusObject.gtexSelection = new igv.GtexSelection('gtex' === type || 'snp' === type ? {snp: name} : {gene: name});
+                    geneNameLocusObject.selection = new igv.GtexSelection('gtex' === type || 'snp' === type ? { snp: result.gene } : { gene: result.gene });
                     return geneNameLocusObject;
                 } else {
                     return undefined;
@@ -1282,6 +1282,7 @@ var igv = (function (igv) {
                 source = tokens[2].trim();
 
                 results.push({
+                    gene: tokens[ 0 ],
                     chromosome: igv.browser.genome.getChromosomeName(locusTokens[0].trim()),
                     start: parseInt(rangeTokens[0].replace(/,/g, '')),
                     end: parseInt(rangeTokens[1].replace(/,/g, '')),
