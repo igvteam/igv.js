@@ -50,7 +50,7 @@ var igv = (function (igv) {
             // $rulerContent.css("background-color", igv.randomRGBConstantAlpha(200, 255, 0.75));
             // $(this.contentDiv).append($rulerContent);
 
-            $(this.contentDiv).append(igv.browser.rulerTrack.lengthWidgetWithGenomeState(igv.browser.genomicStateList[ this.locusIndex ]));
+            $(this.contentDiv).append(igv.browser.rulerTrack.lengthWidgetWithGenomicState(igv.browser.genomicStateList[this.locusIndex]));
         }
 
         // zoom in to see features
@@ -457,9 +457,10 @@ var igv = (function (igv) {
                                             // buffer.width = pixelWidth = 3 * this.canvas.width
 
                         bpPerPixel: referenceFrame.bpPerPixel,
+
                         referenceFrame: referenceFrame,
 
-                        genomeState: genomicState,
+                        genomicState: genomicState,
 
                         viewportWidth: self.$viewport.width()
                     });
