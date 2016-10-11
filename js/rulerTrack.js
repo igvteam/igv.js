@@ -38,7 +38,7 @@ var igv = (function (igv) {
 
     };
 
-    igv.RulerTrack.prototype.lengthWidgetWithGenomeState = function (genomeState) {
+    igv.RulerTrack.prototype.lengthWidgetWithGenomicState = function (genomicState) {
 
         var $lengthWidgetContainer = $('<div class = "igv-viewport-content-ruler-div">'),
             $lengthWidget = $('<div class = "igv-ruler-length-widget">'),
@@ -54,7 +54,7 @@ var igv = (function (igv) {
         $lengthWidget.append($arrowRight);
         $lengthWidget.append($lengthWidgetLabel);
 
-        bp = genomeState.viewportWidth * genomeState.referenceFrame.bpPerPixel;
+        bp = genomicState.viewportWidth * genomicState.referenceFrame.bpPerPixel;
         $lengthWidgetLabel.text(igv.prettyBasePairNumber(Math.round(bp)));
 
         return $lengthWidgetContainer;
@@ -83,7 +83,7 @@ var igv = (function (igv) {
             $e;
 
         if (igv.browser.rulerTrack) {
-            viewports = _.filter(igv.Viewport.viewportsWithLocusIndex(options.genomeState.locusIndex), function(viewport){
+            viewports = _.filter(igv.Viewport.viewportsWithLocusIndex(options.genomicState.locusIndex), function(viewport){
                 return viewport.trackView.track instanceof igv.RulerTrack;
             });
 
