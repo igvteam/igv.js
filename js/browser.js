@@ -1206,8 +1206,13 @@ var igv = (function (igv) {
 
         translateDeprecatedTypes(config);
 
-        if (undefined === config.sourceType && (config.url || config.localFile)) {
-            config.sourceType = "file";
+        if (undefined === config.sourceType) {
+            if(config.source !== undefined) {
+                config.sourceType = "custom";
+            }
+            else if(config.url !== undefined || config.localFile !== undefined) {
+                config.sourceType = "file";
+            }
         }
 
         if ("file" === config.sourceType) {

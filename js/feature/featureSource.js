@@ -52,6 +52,8 @@ var igv = (function (igv) {
             }
         } else if (config.sourceType === "bigquery") {
             this.reader = new igv.BigQueryFeatureReader(config);
+        } else if(config.source !== undefined) {
+            this.reader = new igv.CustomServiceReader(config.source);
         }
         else {
             // Default for all sorts of ascii tab-delimited file formts
@@ -157,20 +159,13 @@ var igv = (function (igv) {
 
                         if (featureList && typeof featureList.forEach === 'function') {  // Have result AND its an array type
 
-                            var isIndexed =
-                                self.reader.indexed ||
-                                self.config.sourceType === "ga4gh" ||
-                                self.config.sourceType === "immvar" ||
-                                self.config.sourceType === "gtex" ||
-                                self.config.sourceType === "bigquery";
+                            var isQueryable = self.reader.indexed || self.config.sourceType !== "file";
 
-                            // TODO -- COMBINE GFF FEATURES HERE
-                            // if(self.isGFF) featureList = combineFeatures(featureList);
                             if ("gtf" === self.config.format || "gff3" === self.config.format || "gff" === self.config.format) {
                                 featureList = (new igv.GFFHelper(self.config.format)).combineFeatures(featureList);
                             }
 
-                            self.featureCache = isIndexed ?
+                            self.featureCache = isQueryable ?
                                 new igv.FeatureCache(featureList, genomicInterval) :
                                 new igv.FeatureCache(featureList);   // Note - replacing previous cache with new one
 
