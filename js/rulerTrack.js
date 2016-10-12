@@ -45,7 +45,8 @@ var igv = (function (igv) {
             $arrowLeft = $('<div class = "igv-ruler-length-widget-arrow-left">'),
             $arrowRight = $('<div class = "igv-ruler-length-widget-arrow-right">'),
             $lengthWidgetLabel = $('<span>'),
-            bp;
+            bp,
+            str;
 
         // $lengthWidgetContainer.css("background-color", igv.randomRGBConstantAlpha(200, 255, 0.75));
 
@@ -55,7 +56,8 @@ var igv = (function (igv) {
         $lengthWidget.append($lengthWidgetLabel);
 
         bp = genomicState.viewportWidth * genomicState.referenceFrame.bpPerPixel;
-        $lengthWidgetLabel.text(igv.prettyBasePairNumber(Math.round(bp)));
+        str = '(' + genomicState.chromosome.name + ') ' + igv.prettyBasePairNumber(Math.round(bp));
+        $lengthWidgetLabel.text( str );
 
         return $lengthWidgetContainer;
 
@@ -80,7 +82,8 @@ var igv = (function (igv) {
             yShim,
             tickHeight,
             viewports,
-            $e;
+            $e,
+            str;
 
         if (igv.browser.rulerTrack) {
             viewports = _.filter(igv.Viewport.viewportsWithLocusIndex(options.genomicState.locusIndex), function(viewport){
@@ -89,7 +92,9 @@ var igv = (function (igv) {
 
             if (1 === _.size(viewports)) {
                 $e = _.first(viewports).$viewport.find('.igv-ruler-length-widget').find('span');
-                $e.text(igv.prettyBasePairNumber(Math.round( options.bpPerPixel * options.viewportWidth )));
+
+                str = '(' + options.genomicState.chromosome.name + ') ' + igv.prettyBasePairNumber(Math.round( options.bpPerPixel * options.viewportWidth ));
+                $e.text( str );
             }
 
         }
