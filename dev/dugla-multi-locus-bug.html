@@ -10,8 +10,13 @@
     <title>IGV - Integrative Genomics Viewer</title>
 
     <!-- jQuery UI CSS -->
-    <link rel="stylesheet" type="text/css" href="https://ajax.googleapis.com/ajax/libs/jqueryui/1.11.2/themes/redmond/jquery-ui.css"/>
+    <link rel="stylesheet" type="text/css"
+          href="https://ajax.googleapis.com/ajax/libs/jqueryui/1.11.2/themes/redmond/jquery-ui.css"/>
 
+    <!-- Google fonts -->
+ <!--   <link rel="stylesheet" type="text/css" href='//fonts.googleapis.com/css?family=PT+Sans:400,700'>
+    <link rel="stylesheet" type="text/css" href='//fonts.googleapis.com/css?family=Open+Sans'>
+-->
     <!-- Font Awesome CSS -->
     <link rel="stylesheet" type="text/css" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.2.0/css/font-awesome.min.css">
 
@@ -30,10 +35,12 @@
     <script type="text/javascript" src="../vendor/jquery.mousewheel.js"></script>
     <script type="text/javascript" src="../vendor/promise-7.0.4.js"></script>
     <script type="text/javascript" src="../vendor/jquery.kinetic.min.js"></script>
+    <script type="text/javascript" src="../vendor/underscore-min.js"></script>
 
     <!-- IGV JS -->
     <script type="text/javascript" src="../js/igv-create.js"></script>
     <script type="text/javascript" src="../js/ui/userFeedback.js"></script>
+    <script type="text/javascript" src="../js/ui/alertDialog.js"></script>
     <script type="text/javascript" src="../js/ui/popover.js"></script>
     <script type="text/javascript" src="../js/browser.js"></script>
     <script type="text/javascript" src="../js/ideogram.js"></script>
@@ -42,6 +49,7 @@
     <script type="text/javascript" src="../js/igv-canvas.js"></script>
     <script type="text/javascript" src="../js/genome.js"></script>
     <script type="text/javascript" src="../js/trackView.js"></script>
+    <script type="text/javascript" src="../js/viewport.js"></script>
 
     <script type="text/javascript" src="../js/rulerTrack.js"></script>
 
@@ -118,6 +126,7 @@
     <script type="text/javascript" src="../js/ui/dataRangeDialog.js"></script>
     <script type="text/javascript" src="../js/ui/dialog.js"></script>
     <script type="text/javascript" src="../js/ui/alertDialog.js"></script>
+    <script type="text/javascript" src="../js/ui/centerGuide.js"></script>
 
     <script type="text/javascript" src="../js/set.js"></script>
 
@@ -127,21 +136,31 @@
 
         #trackList {
 
+            border-color: rgb(127, 127, 127);
+            border-style: solid;
+            border-width: thin;
+
+            width: 480px;
+            height: 256px;
+            overflow-y: auto;
+        }
+
+        div#trackList > div, div#myDiv > h3 {
+
             font-family: 'PT Sans', sans-serif;
             font-size: small;
             font-weight: 400;
-        }
-
-        div#trackList > div, div#trackList > h3 {
 
             color: #444;
-            margin-left: 48px;
+            margin-left: 16px;
             margin-top: 4px;
             margin-bottom: 4px;
 
             padding-left: 32px;
+        }
 
-            width: 300px;
+        div#myDiv > h3 {
+            font-size: large;
         }
 
         div#trackList > div:hover,
@@ -158,43 +177,21 @@
 
 <body>
 
-<div id="trackList">
-
-    <h3>Example tracks - click to load</h3>
-
-    <div onclick="igv.browser.loadTrack({
-            name: 'Bogus URL',
-            url: 'http://www.apple.com/goldenPath/hg19/encodeDCC/wgEncodeOpenChromFaire/wgEncodeOpenChromFaireMrta2041AlnRep1.bam',
-            format: 'bam',
-            type: 'alignment'})">Bogus URL
-    </div>
-
-    <div onclick="igv.browser.loadTrack({
-            name: 'MRT_A204 FaireSeq Alignments rep 1',
-            url: 'http://hgdownload.cse.ucsc.edu/goldenPath/hg19/encodeDCC/wgEncodeOpenChromFaire/wgEncodeOpenChromFaireMrta2041AlnRep1.bam',
-            format: 'bam',
-            type: 'alignment'})">MRT_A204 FaireSeq Alignments rep 1
-    </div>
-
-    <div onclick="igv.browser.loadTrack({
-            name: 'Gm12878H3k4me3',
-            url: 'http://hgdownload.cse.ucsc.edu/goldenPath/hg19/encodeDCC/wgEncodeBroadHistone/wgEncodeBroadHistoneGm12878H3k4me3StdSig.bigWig'
-        })">Gm12878H3k4me3
-    </div>
-
-    <div>
-        <input type="text" id="gotoInput"/>
-        <button type="button" onclick="igv.browser.search(document.getElementById('gotoInput').value)">Search (via API)</button>
-    </div>
-
-
-</div>
-
 <div id="myDiv" style="padding-top: 50px;padding-bottom: 20px; height: auto">
-
 </div>
 
 <script type="text/javascript">
+
+    function findTracks(property, value) {
+
+        var tracks = igv.browser.findTracks(property, value);
+
+        tracks.forEach(function (track) {
+            console.log(track.name);
+            track.sortSamples("8", 124512906, 124512945, "DESC");
+        })
+
+    }
 
     $(document).ready(function () {
         var div,
@@ -202,13 +199,13 @@
                 browser;
 
         div = $("#myDiv")[0];
-
         options = {
-            showKaryo: false,
-            showNavigation: true,
-            //showCursorTrackingGuide: "center",
-            //genome: "hg19",
-            locus: "8:128,751,826-128,751,865",
+
+            showKaryo: true,
+            hideIdeogram: false,
+            showRuler: true,
+            locus: "8:124,512,906-124,512,945",
+//            loci: [ 'brca1', 'nptn', 'brca2', 'cd28', 'nptn' ],
             reference: {
                 id: "hg19",
                 fastaURL: "https://s3.amazonaws.com/igv.broadinstitute.org/genomes/seq/1kg_v37/human_g1k_v37_decoy.fasta",
@@ -217,30 +214,19 @@
             flanking: 1000,
             apiKey: 'AIzaSyDUUAUFpQEN4mumeMNIRWXSiTh5cPtUAD0',
             palette: ["#00A0B0", "#6A4A3C", "#CC333F", "#EB6841"],
-            //    bam: {
-            //        coverageThreshold: 0.2,
-            //        coverageQualityWeight: true,
-            //        pairsSupported: true
-            //    },
-
             tracks: [
                 {
-                    name: "Genes",
-                    type: "annotation",
-                    format: "bed",
-                    sourceType: "file",
-//                    color: "#ff0000",
-                    url: "https://s3.amazonaws.com/igv.broadinstitute.org/annotations/hg19/genes/gencode.v18.collapsed.bed",
-                    indexURL: "https://s3.amazonaws.com/igv.broadinstitute.org/annotations/hg19/genes/gencode.v18.collapsed.bed.idx",
-                    order: Number.MAX_VALUE,
-                    displayMode: "EXPANDED"
-
+                    url: 'https://www.encodeproject.org/files/ENCFF002ADR/@@download/ENCFF002ADR.bigBed',
+                    name: 'ENCFF002ADR',
+                    visibilityWindow: 2000000,
+                    height: 50,
+                    autoHeight: false
                 }
-
             ]
         };
 
         browser = igv.createBrowser(div, options);
+
     })
 
 
