@@ -104,15 +104,15 @@ var igv = (function (igv) {
 
             var width;
 
-            browser.genome = genome;
-            browser.genome.id = config.reference.genomeId;
+            igv.browser.genome = genome;
+            igv.browser.genome.id = config.reference.genomeId;
 
-            width = browser.syntheticViewportContainerWidth();
-            browser.getGenomicStateList(lociWithConfiguration(config), width, function (genomicStateList) {
+            width = igv.browser.syntheticViewportContainerWidth();
+            igv.browser.getGenomicStateList(lociWithConfiguration(config), width, function (genomicStateList) {
 
                 if (_.size(genomicStateList) > 0) {
 
-                    browser.genomicStateList = genomicStateList;
+                    igv.browser.genomicStateList = genomicStateList;
 
                     _.each(genomicStateList, function (genomicState, index) {
 
@@ -125,24 +125,24 @@ var igv = (function (igv) {
                         genomicState.locusCount = _.size(genomicStateList);
                     });
 
-                    browser.updateLocusSearchWithGenomicState(_.first(browser.genomicStateList));
+                    igv.browser.updateLocusSearchWithGenomicState(_.first(igv.browser.genomicStateList));
 
-                    if (browser.karyoPanel) {
-                        browser.karyoPanel.resize();
+                    if (igv.browser.karyoPanel) {
+                        igv.browser.karyoPanel.resize();
                     }
 
                     if (false === config.hideIdeogram) {
-                        browser.ideoPanel = new igv.IdeoPanel($header);
-                        browser.ideoPanel.repaint();
+                        igv.browser.ideoPanel = new igv.IdeoPanel($header);
+                        igv.browser.ideoPanel.repaint();
                     }
 
                     if (config.showRuler) {
-                        browser.rulerTrack = new igv.RulerTrack();
-                        browser.addTrack(browser.rulerTrack);
+                        igv.browser.rulerTrack = new igv.RulerTrack();
+                        igv.browser.addTrack(igv.browser.rulerTrack);
                     }
 
                     if (config.tracks) {
-                        browser.loadTracksWithConfigList(config.tracks);
+                        igv.browser.loadTracksWithConfigList(config.tracks);
                     }
 
                 }
@@ -164,7 +164,7 @@ var igv = (function (igv) {
                 }
 
                 if (0 === _.size(loci)){
-                    loci.push( _.first(browser.genome.chromosomeNames) );
+                    loci.push( _.first(igv.browser.genome.chromosomeNames) );
                 }
 
                 return loci;
