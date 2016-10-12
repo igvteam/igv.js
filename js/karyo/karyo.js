@@ -121,9 +121,10 @@ var igv = (function (igv) {
 
     igv.KaryoPanel.prototype.resize = function () {
 
-        var canvas = this.canvas;
+        var canvas = this.canvas,
+            genomicStateList = igv.browser.genomicStateList;
 
-        if (_.size(igv.browser.genomicStateList) > 1) {
+        if (_.size(genomicStateList) > 1) {
             return;
         }
 
@@ -136,12 +137,19 @@ var igv = (function (igv) {
 
     igv.KaryoPanel.prototype.repaint = function () {
 
-        var genome = igv.browser.genome,
-            genomicState = _.first(igv.browser.genomicStateList),
-            referenceFrame = genomicState.referenceFrame,
-            stainColors = [],
-            w = this.canvas.width,
-            h = this.canvas.height;
+        var genome,
+            genomicState,
+            referenceFrame,
+            stainColors,
+            w,
+            h;
+
+        genome = igv.browser.genome;
+        genomicState = _.first(igv.browser.genomicStateList);
+        referenceFrame = genomicState.referenceFrame;
+        stainColors = [];
+        w = this.canvas.width;
+        h = this.canvas.height;
 
         if (_.size(igv.browser.genomicStateList) > 1) {
             return;
