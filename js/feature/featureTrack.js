@@ -99,13 +99,13 @@ var igv = (function (igv) {
         });
     };
 
-    igv.FeatureTrack.prototype.getFeatures = function (chr, bpStart, bpEnd) {
+    igv.FeatureTrack.prototype.getFeatures = function (chr, bpStart, bpEnd, bpPerPixel) {
 
         var self = this;
 
         return new Promise(function (fulfill, reject) {
 
-            self.featureSource.getFeatures(chr, bpStart, bpEnd).then(fulfill).catch(reject);
+            self.featureSource.getFeatures(chr, bpStart, bpEnd, bpPerPixel).then(fulfill).catch(reject);
 
         });
     };

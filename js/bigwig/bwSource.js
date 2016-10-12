@@ -36,7 +36,7 @@ var igv = (function (igv) {
         this.bufferedReader = new igv.BufferedReader(config);
     };
 
-    igv.BWSource.prototype.getFeatures = function (chr, bpStart, bpEnd) {
+    igv.BWSource.prototype.getFeatures = function (chr, bpStart, bpEnd, bpPerPixel) {
 
         var self = this;
         return new Promise(function (fulfill, reject) {
@@ -46,7 +46,6 @@ var igv = (function (igv) {
                 // Select a biwig "zoom level" appropriate for the current resolution
                 var bwReader = self.reader,
                     bufferedReader = self.bufferedReader,
-                    bpPerPixel = igv.browser.referenceFrame.bpPerPixel,
                     zoomLevelHeader = zoomLevelForScale(bpPerPixel, zoomLevelHeaders),
                     treeOffset,
                     decodeFunction;
