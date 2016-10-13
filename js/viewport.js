@@ -14,14 +14,15 @@ var igv = (function (igv) {
             $trackLabel,
             $spinner,
             dimen,
+            genomicState = igv.browser.genomicStateList[ locusIndex ],
             $rulerContent;
 
         this.trackView = trackView;
         this.locusIndex = locusIndex;
-        this.viewportContainerPercentage = igv.browser.genomicStateList[ this.locusIndex ].viewportContainerPercentage;
+        this.viewportContainerPercentage = genomicState.viewportContainerPercentage;
 
         this.$viewport = $('<div class="igv-viewport-div">');
-        // addViewportBorders(this.$viewport, this.locusIndex, _.size(igv.browser.genomicStateList));
+        addViewportBorders(this.$viewport, this.locusIndex, _.size(igv.browser.genomicStateList));
 
         // TODO diagnostic coloring
         // this.$viewport.css("background-color", igv.randomRGBConstantAlpha(200, 255, 0.75));
@@ -31,7 +32,7 @@ var igv = (function (igv) {
 
         this.$viewport.data( "locusindex", this.locusIndex );
 
-        this.$viewport.width( igv.browser.genomicStateList[ this.locusIndex ].viewportWidth );
+        this.$viewport.width( genomicState.viewportWidth );
 
         trackView.$viewportContainer.append( this.$viewport );
 
@@ -51,7 +52,7 @@ var igv = (function (igv) {
             // $rulerContent.css("background-color", igv.randomRGBConstantAlpha(200, 255, 0.75));
             // $(this.contentDiv).append($rulerContent);
 
-            $(this.contentDiv).append(igv.browser.rulerTrack.lengthWidgetWithGenomicState(igv.browser.genomicStateList[this.locusIndex]));
+            $(this.contentDiv).append(igv.browser.rulerTrack.lengthWidgetWithGenomicState(genomicState));
         }
 
         // zoom in to see features
@@ -103,6 +104,14 @@ var igv = (function (igv) {
             this.$viewport.append($spinner);
             this.stopSpinner();
         }
+
+        this.viewportContainerPercentage = (this.$viewport.width()/this.$viewport.outerWidth()) * (1.0/_.size(igv.browser.genomicStateList));
+        genomicState.viewportContainerPercentage = this.viewportContainerPercentage;
+        genomicState.viewportWidth = Math.floor( genomicState.viewportContainerPercentage * igv.browser.syntheticViewportContainerWidth() );
+        this.$viewport.width( genomicState.viewportWidth );
+
+
+        // console.log('viewport width ' + this.$viewport.width() + ' outer width ' + this.$viewport.outerWidth());
 
         function addViewportBorders ($viewport, locusIndex, lociCount) {
 
