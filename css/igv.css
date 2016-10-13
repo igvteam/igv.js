@@ -1154,6 +1154,8 @@ div.ui-dialog fieldset {
     left:  0;
     right: 50px;
     height: 100%;
+
+    overflow: hidden;
 }
 
 .igv-viewport-container-shim {

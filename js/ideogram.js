@@ -87,7 +87,7 @@ var igv = (function (igv) {
         var viewportContainerWidth = igv.browser.syntheticViewportContainerWidth();
 
         _.each(this.panels, function(panel) {
-            panel.$ideogram.width(panel.viewportContainerPercentage * viewportContainerWidth);
+            panel.$ideogram.width(Math.floor(panel.viewportContainerPercentage * viewportContainerWidth));
             panel.$canvas.attr('width', panel.$ideogram.width());
             panel.ideograms = {};
         });

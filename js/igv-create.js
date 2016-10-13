@@ -117,7 +117,7 @@ var igv = (function (igv) {
                     _.each(genomicStateList, function (genomicState, index) {
 
                         genomicState.viewportContainerPercentage = 1.0 / _.size(genomicStateList);
-                        genomicState.viewportWidth = genomicState.viewportContainerPercentage * width;
+                        genomicState.viewportWidth = Math.floor( genomicState.viewportContainerPercentage * width );
 
                         genomicState.referenceFrame = new igv.ReferenceFrame(genomicState.chromosome.name, genomicState.start, (genomicState.end - genomicState.start) / genomicState.viewportWidth);
 

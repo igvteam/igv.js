@@ -21,7 +21,7 @@ var igv = (function (igv) {
         this.viewportContainerPercentage = igv.browser.genomicStateList[ this.locusIndex ].viewportContainerPercentage;
 
         this.$viewport = $('<div class="igv-viewport-div">');
-        addViewportBorders(this.$viewport, this.locusIndex, _.size(igv.browser.genomicStateList));
+        // addViewportBorders(this.$viewport, this.locusIndex, _.size(igv.browser.genomicStateList));
 
         // TODO diagnostic coloring
         // this.$viewport.css("background-color", igv.randomRGBConstantAlpha(200, 255, 0.75));
@@ -359,7 +359,7 @@ var igv = (function (igv) {
 
     igv.Viewport.prototype.resize = function () {
 
-        var contentWidth  = this.viewportContainerPercentage * this.trackView.$viewportContainer.width();
+        var contentWidth  = Math.floor(this.viewportContainerPercentage * this.trackView.$viewportContainer.width());
         if (contentWidth > 0) {
             this.$viewport.width(contentWidth);
             this.canvas.style.width = contentWidth + "px";

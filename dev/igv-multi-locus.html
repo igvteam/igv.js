@@ -184,11 +184,11 @@
             showKaryo: true,
             hideIdeogram:false,
             showRuler:true,
-            locus: "brca1",
+//            locus: "brca1",
 //            locus: "8:124,512,906-124,512,945",
 //            loci: [ 'chr8:22543174-22552815' ],
 //            loci: [ 'chr8:22543174-22552815', 'chr4' ],
-//            loci: [ 'chr8:22543174-22552815', 'brca1', 'nptn', 'cd28' ],
+            loci: [ 'brca1', 'nptn', 'cd28' ],
 //            loci: [ 'brca1', 'nptn' ],
             reference: {
                 id: "hg19",
@@ -198,28 +198,28 @@
             flanking: 1000,
             apiKey: 'AIzaSyDUUAUFpQEN4mumeMNIRWXSiTh5cPtUAD0',
             palette: ["#00A0B0", "#6A4A3C", "#CC333F", "#EB6841"]
-             ,
-            tracks: [
-                {
-                    url: 'https://data.broadinstitute.org/igvdata/BodyMap/hg19/IlluminaHiSeq2000_BodySites/brain_merged/accepted_hits.bam',
-                    name: 'Brain (BodyMap)',
-                    maxRows: 3000,
-                    samplingDepth: 10000,
-                    height: 200
-                },
-                {
-                    name: "Genes",
-                    type: "annotation",
-                    format: "gtf",
-                    sourceType: "file",
-                    url: "https://s3.amazonaws.com/igv.broadinstitute.org/annotations/hg19/genes/gencode.v18.annotation.sorted.gtf.gz",
-                    indexURL: "https://s3.amazonaws.com/igv.broadinstitute.org/annotations/hg19/genes/gencode.v18.annotation.sorted.gtf.gz.tbi",
-                    visibilityWindow: 10000000,
-                    order: Number.MAX_VALUE,
-                    displayMode: "EXPANDED"
-                }
-
-            ]
+//             ,
+//            tracks: [
+//                {
+//                    url: 'https://data.broadinstitute.org/igvdata/BodyMap/hg19/IlluminaHiSeq2000_BodySites/brain_merged/accepted_hits.bam',
+//                    name: 'Brain (BodyMap)',
+//                    maxRows: 3000,
+//                    samplingDepth: 10000,
+//                    height: 200
+//                },
+//                {
+//                    name: "Genes",
+//                    type: "annotation",
+//                    format: "gtf",
+//                    sourceType: "file",
+//                    url: "https://s3.amazonaws.com/igv.broadinstitute.org/annotations/hg19/genes/gencode.v18.annotation.sorted.gtf.gz",
+//                    indexURL: "https://s3.amazonaws.com/igv.broadinstitute.org/annotations/hg19/genes/gencode.v18.annotation.sorted.gtf.gz.tbi",
+//                    visibilityWindow: 10000000,
+//                    order: Number.MAX_VALUE,
+//                    displayMode: "EXPANDED"
+//                }
+//
+//            ]
         };
         browser = igv.createBrowser(div, options);
 
