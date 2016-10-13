@@ -277,17 +277,17 @@ var igv = (function (igv) {
             return {
                 object: $('<div class="igv-track-menu-item">' + "Sort by base" + '</div>'),
                 click: function () {
-                    var genomicLocationViaTrackViewportHalfWidth,
+                    var genomicState = _.first(igv.browser.genomicStateList),
+                        referenceFrame = genomicState.referenceFrame,
+                        genomicLocation,
                         viewportHalfWidth;
 
                     popover.hide();
 
-                    viewportHalfWidth = Math.floor(0.5 * igv.browser.genomicStateList[ 0 ].viewportWidth);
-                    genomicLocationViaTrackViewportHalfWidth = Math.floor((igv.browser.genomicStateList[ 0 ].referenceFrame.start) + igv.browser.genomicStateList[ 0 ].referenceFrame.toBP(viewportHalfWidth));
+                    viewportHalfWidth = Math.floor(0.5 * genomicState.viewportWidth);
+                    genomicLocation = Math.floor((referenceFrame.start) + referenceFrame.toBP(viewportHalfWidth));
 
-                    // console.log('bamTrack - sort - viewportHalfWidth ' + igv.numberFormatter(genomicLocationViaTrackViewportHalfWidth));
-
-                    self.altClick(genomicLocationViaTrackViewportHalfWidth, undefined);
+                    self.altClick(genomicLocation, undefined, undefined);
 
                     if ("show center guide" === igv.browser.centerGuide.$centerGuideToggle.text()) {
                         igv.browser.centerGuide.$centerGuideToggle.trigger( "click" );
@@ -791,8 +791,6 @@ var igv = (function (igv) {
     AlignmentTrack.prototype.sortAlignmentRows = function (genomicLocation, sortOption) {
 
         var self = this;
-
-        // console.log('bamtrack - sortAlignmentRows - location ' + igv.numberFormatter(genomicLocation));
 
         this.featureSource.alignmentContainer.packedAlignmentRows.forEach(function (row) {
             row.updateScore(genomicLocation, self.featureSource.alignmentContainer, sortOption);

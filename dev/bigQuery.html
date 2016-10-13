@@ -1,31 +1,32 @@
 <html>
 <head>
-
-    <title>Integrative Genomics Viewer</title>
-
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+    <meta name="description" content="">
+    <meta name="author" content="">
+    <link rel="shortcut icon" href=../img/favicon.ico>
+    <title>IGV - Integrative Genomics Viewer</title>
 
     <!-- jQuery UI CSS -->
     <link rel="stylesheet" type="text/css"
-          href="//ajax.googleapis.com/ajax/libs/jqueryui/1.11.2/themes/redmond/jquery-ui.css"/>
+          href="https://ajax.googleapis.com/ajax/libs/jqueryui/1.11.2/themes/redmond/jquery-ui.css"/>
 
     <!-- Google fonts -->
-    <link rel="stylesheet" type="text/css" href='//fonts.googleapis.com/css?family=PT+Sans:400,700'>
-    <link rel="stylesheet" type="text/css" href='//fonts.googleapis.com/css?family=Open+Sans'>
-
+    <!--   <link rel="stylesheet" type="text/css" href='//fonts.googleapis.com/css?family=PT+Sans:400,700'>
+       <link rel="stylesheet" type="text/css" href='//fonts.googleapis.com/css?family=Open+Sans'>
+   -->
     <!-- Font Awesome CSS -->
-    <link rel="stylesheet" type="text/css" href="//maxcdn.bootstrapcdn.com/font-awesome/4.2.0/css/font-awesome.min.css">
+    <link rel="stylesheet" type="text/css" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.2.0/css/font-awesome.min.css">
 
     <!-- IGV CSS -->
     <link rel="stylesheet" type="text/css" href="../css/igv.css">
 
     <!-- jQuery JS -->
-    <script type="text/javascript" src="//ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
+    <script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
 
     <!-- jQuery UI JS -->
-    <script type="text/javascript" src="//ajax.googleapis.com/ajax/libs/jqueryui/1.11.2/jquery-ui.min.js"></script>
-
-    <!-- Google API -- used for oAuth only -->
-    <script src="https://apis.google.com/js/auth.js"></script>
+    <script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jqueryui/1.11.2/jquery-ui.min.js"></script>
 
     <!-- Vendor JS -->
     <script type="text/javascript" src="../vendor/inflate.js"></script>
@@ -33,11 +34,12 @@
     <script type="text/javascript" src="../vendor/jquery.mousewheel.js"></script>
     <script type="text/javascript" src="../vendor/promise-7.0.4.js"></script>
     <script type="text/javascript" src="../vendor/jquery.kinetic.min.js"></script>
+    <script type="text/javascript" src="../vendor/underscore-min.js"></script>
+
     <!-- IGV JS -->
-    <script type="text/javascript" src="../js/bigQuery/bigQuery.js"></script>
-    <script type="text/javascript" src="../js/bigQuery/ccp.js"></script>
     <script type="text/javascript" src="../js/igv-create.js"></script>
     <script type="text/javascript" src="../js/ui/userFeedback.js"></script>
+    <script type="text/javascript" src="../js/ui/alertDialog.js"></script>
     <script type="text/javascript" src="../js/ui/popover.js"></script>
     <script type="text/javascript" src="../js/browser.js"></script>
     <script type="text/javascript" src="../js/ideogram.js"></script>
@@ -46,17 +48,18 @@
     <script type="text/javascript" src="../js/igv-canvas.js"></script>
     <script type="text/javascript" src="../js/genome.js"></script>
     <script type="text/javascript" src="../js/trackView.js"></script>
+    <script type="text/javascript" src="../js/viewport.js"></script>
 
     <script type="text/javascript" src="../js/rulerTrack.js"></script>
 
     <script type="text/javascript" src="../js/feature/featureTrack.js"></script>
+    <script type="text/javascript" src="../js/variant/variantTrack.js"></script>
     <script type="text/javascript" src="../js/igv-color.js"></script>
     <script type="text/javascript" src="../js/igv-utils.js"></script>
     <script type="text/javascript" src="../js/parseUtils.js"></script>
     <script type="text/javascript" src="../js/fasta.js"></script>
     <script type="text/javascript" src="../js/sequenceTrack.js"></script>
     <script type="text/javascript" src="../js/feature/wigTrack.js"></script>
-    <script type="text/javascript" src="../js/variant/variantTrack.js"></script>
 
     <script type="text/javascript" src="../js/igv-exts.js"></script>
     <script type="text/javascript" src="../js/igvxhr.js"></script>
@@ -87,6 +90,7 @@
     <script type="text/javascript" src="../js/intervalTree.js"></script>
 
     <script type="text/javascript" src="../js/feature/featureCache.js"></script>
+    <script type="text/javascript" src="../js/feature/gffHelper.js"></script>
     <script type="text/javascript" src="../js/feature/featureSource.js"></script>
     <script type="text/javascript" src="../js/feature/featureParsers.js"></script>
     <script type="text/javascript" src="../js/feature/tribble.js"></script>
@@ -121,70 +125,53 @@
     <script type="text/javascript" src="../js/ui/dataRangeDialog.js"></script>
     <script type="text/javascript" src="../js/ui/dialog.js"></script>
     <script type="text/javascript" src="../js/ui/alertDialog.js"></script>
+    <script type="text/javascript" src="../js/ui/centerGuide.js"></script>
 
     <script type="text/javascript" src="../js/set.js"></script>
 
     <script src="../js/oauth/google.js"></script>
 
-    <script>
+    <style type="text/css">
 
+        #trackList {
 
-        function auth() {
-            var clientId = '923665148151-ln03hiqt0223nsfc6a690k0thj0h1ikb.apps.googleusercontent.com';
-            var config = {
-                'client_id': clientId,
-                'scope': 'https://www.googleapis.com/auth/bigquery'
-            };
+            border-color: rgb(127, 127, 127);
+            border-style: solid;
+            border-width: thin;
 
-            gapi.auth.authorize(config, function (tokenJson) {
-
-                $('#auth_button').prop('disabled', true);
-
-                oauth.google.apiKey = "AIzaSyCDrPmD9U584pZ_BixQ-SBJcY3_A7IFEa8";
-                igv.oauth.google.access_token = tokenJson.access_token;
-
-                populateStudies();
-
-            });
+            width: 480px;
+            height: 256px;
+            overflow-y: auto;
         }
 
-        function populateStudies() {
+        div#trackList > div, div#myDiv > h3 {
 
-            var q = "SELECT  unique(Study) FROM [isb-cgc:tcga_201510_alpha.Clinical_data] LIMIT 1000";
-            igv.bigQuery(
-                    {
-                        projectId: 'isb-cgc-03-0001',
-                        queryString: q,
-                        decode: function (row) {
-                            return row.f[0].v
-                        }
-                    }).then(function (results) {
-                results.sort();
-                $('#study_select').append('<option value="---">---</option>');
-                results.forEach(function (study) {
-                    $('#study_select').append('<option value="' + study + '">' + study + '</option>');
-                })
+            font-family: 'PT Sans', sans-serif;
+            font-size: small;
+            font-weight: 400;
 
-            }).catch(function (error) {
-                console.log(error);
-            });
+            color: #444;
+            margin-left: 16px;
+            margin-top: 4px;
+            margin-bottom: 4px;
+
+            padding-left: 32px;
         }
 
-        function studySelected(select) {
-            loadSegTrack(select.value);
+        div#myDiv > h3 {
+            font-size: large;
         }
 
-        function loadSegTrack(study) {
-            igv.browser.loadTrack({
-                //autoHeight: false,
-                sourceType: 'bigquery',
-                featureType: 'seg',
-                name: study,
-                cohort: 'SELECT ParticipantBarcode FROM [isb-cgc:tcga_201510_alpha.Clinical_data] WHERE Study = "' + study + '"'
-            })
+        div#trackList > div:hover,
+        div#trackList > div:focus,
+        div#trackList > div:active {
+            cursor: pointer;
+            color: white;
+            background-color: rgba(49, 106, 246, 1);
         }
 
-    </script>
+    </style>
+
 </head>
 
 <body>

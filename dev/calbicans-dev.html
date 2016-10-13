@@ -11,33 +11,36 @@
 
     <!-- jQuery UI CSS -->
     <link rel="stylesheet" type="text/css"
-          href="//ajax.googleapis.com/ajax/libs/jqueryui/1.11.2/themes/redmond/jquery-ui.css"/>
+          href="https://ajax.googleapis.com/ajax/libs/jqueryui/1.11.2/themes/redmond/jquery-ui.css"/>
 
     <!-- Google fonts -->
-    <link rel="stylesheet" type="text/css" href='//fonts.googleapis.com/css?family=PT+Sans:400,700'>
-    <link rel="stylesheet" type="text/css" href='//fonts.googleapis.com/css?family=Open+Sans'>
-
+    <!--   <link rel="stylesheet" type="text/css" href='//fonts.googleapis.com/css?family=PT+Sans:400,700'>
+       <link rel="stylesheet" type="text/css" href='//fonts.googleapis.com/css?family=Open+Sans'>
+   -->
     <!-- Font Awesome CSS -->
-    <link rel="stylesheet" type="text/css" href="//maxcdn.bootstrapcdn.com/font-awesome/4.2.0/css/font-awesome.min.css">
+    <link rel="stylesheet" type="text/css" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.2.0/css/font-awesome.min.css">
 
     <!-- IGV CSS -->
     <link rel="stylesheet" type="text/css" href="../css/igv.css">
 
     <!-- jQuery JS -->
-    <script type="text/javascript" src="//ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
+    <script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
 
     <!-- jQuery UI JS -->
-    <script type="text/javascript" src="//ajax.googleapis.com/ajax/libs/jqueryui/1.11.2/jquery-ui.min.js"></script>
+    <script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jqueryui/1.11.2/jquery-ui.min.js"></script>
 
     <!-- Vendor JS -->
     <script type="text/javascript" src="../vendor/inflate.js"></script>
     <script type="text/javascript" src="../vendor/zlib_and_gzip.min.js"></script>
     <script type="text/javascript" src="../vendor/jquery.mousewheel.js"></script>
     <script type="text/javascript" src="../vendor/promise-7.0.4.js"></script>
+    <script type="text/javascript" src="../vendor/jquery.kinetic.min.js"></script>
+    <script type="text/javascript" src="../vendor/underscore-min.js"></script>
 
     <!-- IGV JS -->
     <script type="text/javascript" src="../js/igv-create.js"></script>
     <script type="text/javascript" src="../js/ui/userFeedback.js"></script>
+    <script type="text/javascript" src="../js/ui/alertDialog.js"></script>
     <script type="text/javascript" src="../js/ui/popover.js"></script>
     <script type="text/javascript" src="../js/browser.js"></script>
     <script type="text/javascript" src="../js/ideogram.js"></script>
@@ -46,6 +49,7 @@
     <script type="text/javascript" src="../js/igv-canvas.js"></script>
     <script type="text/javascript" src="../js/genome.js"></script>
     <script type="text/javascript" src="../js/trackView.js"></script>
+    <script type="text/javascript" src="../js/viewport.js"></script>
 
     <script type="text/javascript" src="../js/rulerTrack.js"></script>
 
@@ -57,12 +61,14 @@
     <script type="text/javascript" src="../js/fasta.js"></script>
     <script type="text/javascript" src="../js/sequenceTrack.js"></script>
     <script type="text/javascript" src="../js/feature/wigTrack.js"></script>
+
     <script type="text/javascript" src="../js/igv-exts.js"></script>
     <script type="text/javascript" src="../js/igvxhr.js"></script>
     <script type="text/javascript" src="../js/binary.js"></script>
 
     <script type="text/javascript" src="../js/gtex/eqtlTrack.js"></script>
     <script type="text/javascript" src="../js/gtex/gtexFileReader.js"></script>
+    <script type="text/javascript" src="../js/gtex/gtexReader.js"></script>
     <script type="text/javascript" src="../js/gtex/gtex.js"></script>
     <script type="text/javascript" src="../js/gtex/immvarReader.js"></script>
 
@@ -74,20 +80,27 @@
     <script type="text/javascript" src="../js/bam/bamAlignment.js"></script>
     <script type="text/javascript" src="../js/bam/bamAlignmentRow.js"></script>
     <script type="text/javascript" src="../js/bam/bamIndex.js"></script>
+    <script type="text/javascript" src="../js/bam/alignmentContainer.js"></script>
+    <script type="text/javascript" src="../js/bam/pairedAlignment.js"></script>
 
     <script type="text/javascript" src="../js/ga4gh/ga4ghAlignmentReader.js"></script>
     <script type="text/javascript" src="../js/ga4gh/ga4ghVariantReader.js"></script>
     <script type="text/javascript" src="../js/ga4gh/ga4ghHelper.js"></script>
+    <script type="text/javascript" src="../js/ga4gh/googleUtils.js"></script>
 
     <script type="text/javascript" src="../js/intervalTree.js"></script>
 
     <script type="text/javascript" src="../js/feature/featureCache.js"></script>
+    <script type="text/javascript" src="../js/feature/gffHelper.js"></script>
     <script type="text/javascript" src="../js/feature/featureSource.js"></script>
     <script type="text/javascript" src="../js/feature/featureParsers.js"></script>
     <script type="text/javascript" src="../js/feature/tribble.js"></script>
     <script type="text/javascript" src="../js/feature/featureFileReader.js"></script>
 
+    <script type="text/javascript" src="../js/feature/aneuSource.js"></script>
+    <script type="text/javascript" src="../js/feature/aneuTrack.js"></script>
     <script type="text/javascript" src="../js/encode/encode.js"></script>
+
 
     <script type="text/javascript" src="../js/karyo/karyo.js"></script>
     <script type="text/javascript" src="../js/gwas/t2dVariantSource.js"></script>
@@ -113,6 +126,8 @@
     <script type="text/javascript" src="../js/ui/dataRangeDialog.js"></script>
     <script type="text/javascript" src="../js/ui/dialog.js"></script>
     <script type="text/javascript" src="../js/ui/alertDialog.js"></script>
+    <script type="text/javascript" src="../js/ui/centerGuide.js"></script>
+
     <script type="text/javascript" src="../js/set.js"></script>
 
     <script src="../js/oauth/google.js"></script>
@@ -121,21 +136,31 @@
 
         #trackList {
 
+            border-color: rgb(127, 127, 127);
+            border-style: solid;
+            border-width: thin;
+
+            width: 480px;
+            height: 256px;
+            overflow-y: auto;
+        }
+
+        div#trackList > div, div#myDiv > h3 {
+
             font-family: 'PT Sans', sans-serif;
             font-size: small;
             font-weight: 400;
-        }
-
-        div#trackList > div, div#trackList > h3 {
 
             color: #444;
-            margin-left: 48px;
+            margin-left: 16px;
             margin-top: 4px;
             margin-bottom: 4px;
 
             padding-left: 32px;
+        }
 
-            width: 300px;
+        div#myDiv > h3 {
+            font-size: large;
         }
 
         div#trackList > div:hover,
