@@ -30,7 +30,8 @@
 
     <!-- jQuery JS -->
     <script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
-    <script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jqueryui/1.11.2/jquery-ui.min.js"></script>
+    <script type="text/javascript"
+            src="https://ajax.googleapis.com/ajax/libs/jqueryui/1.11.2/jquery-ui.min.js"></script>
 
     <!-- Bootstrap JS - for demo only, NOT REQUIRED FOR IGV -->
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.4/js/bootstrap.min.js"></script>
@@ -65,14 +66,19 @@
                     showNavigation: true,
                     showRuler: true,
                     genome: "hg19",
-                    locus: "chr12:98,997,292-98,997,392",
+                    locus: "chr8:128,747,267-128,754,546",
                     tracks: [
                         {
                             name: "Genes",
-                            url: "https://s3.amazonaws.com/igv.broadinstitute.org/annotations/hg19/genes/gencode.v18.collapsed.bed",
+                            type: "annotation",
+                            format: "gtf",
+                            sourceType: "file",
+                            url: "https://s3.amazonaws.com/igv.broadinstitute.org/annotations/hg19/genes/gencode.v18.annotation.sorted.gtf.gz",
+                            indexURL: "https://s3.amazonaws.com/igv.broadinstitute.org/annotations/hg19/genes/gencode.v18.annotation.sorted.gtf.gz.tbi",
+                            visibilityWindow: 10000000,
+                            order: Number.MAX_VALUE,
                             displayMode: "EXPANDED"
-
-                        },                        {
+                        }, {
                             url: 'https://data.broadinstitute.org/igvdata/BodyMap/hg19/IlluminaHiSeq2000_BodySites/brain_merged/accepted_hits.bam',
                             name: 'Brain (BodyMap)'
                         }
