@@ -42,8 +42,6 @@ var igv = (function (igv) {
 
         var self = this;
 
-        if(queryChr.startsWith("chr")) queryChr = queryChr.substr(3);
-
         return new Promise(function (fulfill, reject) {
 
             var url = self.config.url,

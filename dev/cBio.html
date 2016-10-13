@@ -177,32 +177,27 @@
             var div,
                     options,
                     browser,
-                    cancerStudyId = "coadread_tcga_pub",
+                    cancerStudyId = "coadread_tcga_pub";
 
-                    div = $("#myDiv")[0];
+            div = $("#myDiv")[0];
             options = {
 
                 genome: "hg19",
                 tracks: [
                     {
-                        name: "Alt click to sort",
+                        name: cancerStudyId,
                         type: "seg",
                         source: {
                             url: "http://www.cbioportal.org/beta/api-legacy/copynumbersegments",
                             method: "POST",
                             contentType: "application/x-www-form-urlencoded",
-                            body: "cancerStudyId=coadread_tcga_pub&chromosome=$CHR",
+                            body: "cancerStudyId=" + cancerStudyId + "&chromosome=$CHR",
                             parser: JSON.parse
                         }
                     },
                     {
                         name: "Genes",
-                        type: "annotation",
-                        format: "gtf",
-                        sourceType: "file",
-                        url: "https://s3.amazonaws.com/igv.broadinstitute.org/annotations/hg19/genes/gencode.v18.annotation.sorted.gtf.gz",
-                        indexURL: "https://s3.amazonaws.com/igv.broadinstitute.org/annotations/hg19/genes/gencode.v18.annotation.sorted.gtf.gz.tbi",
-                        visibilityWindow: 10000000,
+                        url: "https://s3.amazonaws.com/igv.broadinstitute.org/annotations/hg19/genes/gencode.v18.collapsed.bed",
                         order: Number.MAX_VALUE,
                         displayMode: "EXPANDED"
                     }
