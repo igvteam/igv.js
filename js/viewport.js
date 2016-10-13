@@ -21,6 +21,7 @@ var igv = (function (igv) {
         this.viewportContainerPercentage = igv.browser.genomicStateList[ this.locusIndex ].viewportContainerPercentage;
 
         this.$viewport = $('<div class="igv-viewport-div">');
+        addViewportBorders(this.$viewport, this.locusIndex, _.size(igv.browser.genomicStateList));
 
         // TODO diagnostic coloring
         // this.$viewport.css("background-color", igv.randomRGBConstantAlpha(200, 255, 0.75));
@@ -101,6 +102,14 @@ var igv = (function (igv) {
             $spinner.append($('<i class="fa fa-spinner fa-spin fa-fw">'));
             this.$viewport.append($spinner);
             this.stopSpinner();
+        }
+
+        function addViewportBorders ($viewport, locusIndex, lociCount) {
+
+            $viewport.addClass('igv-viewport-div-border-right');
+            if (1 === lociCount || 0 === locusIndex) {
+                $viewport.addClass('igv-viewport-div-border-left');
+            }
         }
     };
 
