@@ -1171,13 +1171,13 @@ div.ui-dialog fieldset {
     overflow-x: hidden;
     overflow-y: hidden;
 
-    /*border-left-color: rgba(0, 0, 0, 0.25);*/
-    /*border-left-style: solid;*/
-    /*border-left-width: thin;*/
+    border-left-color: rgba(0, 0, 0, 0.51);
+    border-left-style: solid;
+    border-left-width: thin;
 
-    /*border-right-color: rgba(0, 0, 0, 0.25);*/
-    /*border-right-style: solid;*/
-    /*border-right-width: thin;*/
+    border-right-color: rgba(0, 0, 0, 0.51);
+    border-right-style: solid;
+    border-right-width: thin;
 
 }
 

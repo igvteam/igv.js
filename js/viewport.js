@@ -23,7 +23,7 @@ var igv = (function (igv) {
         this.$viewport = $('<div class="igv-viewport-div">');
 
         // TODO diagnostic coloring
-        this.$viewport.css("background-color", igv.randomRGBConstantAlpha(200, 255, 0.75));
+        // this.$viewport.css("background-color", igv.randomRGBConstantAlpha(200, 255, 0.75));
 
         this.id = _.uniqueId('viewport_');
         this.$viewport.data( "viewport", this.id );
