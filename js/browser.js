@@ -788,7 +788,7 @@ var igv = (function (igv) {
 
             var genomicState = browser.genomicStateList[ locusIndex ],
                 referenceFrame = genomicState.referenceFrame,
-                viewportWidth = genomicState.viewportContainerPercentage * browser.viewportContainerWidth(),
+                viewportWidth = Math.floor( genomicState.viewportContainerPercentage * browser.viewportContainerWidth() ),
                 centerBP;
 
             // Have we reached the zoom-in threshold yet? If so, bail.
@@ -832,7 +832,7 @@ var igv = (function (igv) {
 
             var genomicState = igv.browser.genomicStateList[ locusIndex ],
                 referenceFrame = genomicState.referenceFrame,
-                viewportWidth = genomicState.viewportContainerPercentage * browser.viewportContainerWidth(),
+                viewportWidth = Math.floor(genomicState.viewportContainerPercentage * browser.viewportContainerWidth()),
                 chromosome,
                 newScale,
                 maxScale,
