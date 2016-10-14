@@ -14,25 +14,26 @@ var igv = (function (igv) {
             $trackLabel,
             $spinner,
             dimen,
-            genomicState = igv.browser.genomicStateList[ locusIndex ],
+            genomicState,
             $rulerContent;
 
         this.trackView = trackView;
         this.locusIndex = locusIndex;
-        this.viewportContainerPercentage = genomicState.viewportContainerPercentage;
+        this.id = _.uniqueId('viewport_');
+
+        genomicState = igv.browser.genomicStateList[ locusIndex ];
+        // this.viewportContainerPercentage = genomicState.viewportContainerPercentage;
 
         this.$viewport = $('<div class="igv-viewport-div">');
+        this.$viewport.data( "viewport", this.id );
+        this.$viewport.data( "locusindex", this.locusIndex );
+
         // addViewportBorders(this.$viewport, this.locusIndex, _.size(igv.browser.genomicStateList));
 
         // TODO diagnostic coloring
         this.$viewport.css("background-color", igv.randomRGBConstantAlpha(200, 255, 0.75));
 
-        this.id = _.uniqueId('viewport_');
-        this.$viewport.data( "viewport", this.id );
-
-        this.$viewport.data( "locusindex", this.locusIndex );
-
-        this.$viewport.width( genomicState.viewportWidth );
+        this.$viewport.width( Math.floor(igv.browser.viewportContainerWidth()/genomicState.locusCount) );
 
         trackView.$viewportContainer.append( this.$viewport );
 
@@ -360,7 +361,9 @@ var igv = (function (igv) {
 
     igv.Viewport.prototype.resize = function () {
 
-        var contentWidth  = Math.floor(this.viewportContainerPercentage * this.trackView.$viewportContainer.width());
+        var genomicState = igv.browser.genomicStateList[ this.locusIndex ],
+            contentWidth  = Math.floor(igv.browser.viewportContainerWidth()/genomicState.locusCount);
+
         if (contentWidth > 0) {
             this.$viewport.width(contentWidth);
             this.canvas.style.width = contentWidth + "px";
