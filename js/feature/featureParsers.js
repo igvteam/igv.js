@@ -353,8 +353,8 @@ var igv = (function (igv) {
                 chr: tokens[2],
                 start: parseInt(tokens[4]),
                 end: parseInt(tokens[5]),
-                id: tokens[0],
-                name: tokens[1],
+                id: tokens[1],
+                name: tokens[0],
                 strand: tokens[3],
                 cdStart: parseInt(tokens[6]),
                 cdEnd: parseInt(tokens[7])
