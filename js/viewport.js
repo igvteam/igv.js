@@ -22,7 +22,6 @@ var igv = (function (igv) {
         this.id = _.uniqueId('viewport_');
 
         genomicState = igv.browser.genomicStateList[ locusIndex ];
-        // this.viewportContainerPercentage = genomicState.viewportContainerPercentage;
 
         this.$viewport = $('<div class="igv-viewport-div">');
         this.$viewport.data( "viewport", this.id );

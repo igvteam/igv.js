@@ -39,15 +39,15 @@ var igv = (function (igv) {
 
         this.panels = _.map(igv.browser.genomicStateList, function(genomicState) {
 
-            var panel = {};
+            var viewportContainerWidth = igv.browser.viewportContainerWidth(),
+                panel = {};
 
             panel.locusIndex = genomicState.locusIndex;
-            panel.viewportContainerPercentage = genomicState.viewportContainerPercentage;
 
             panel.$ideogram = $('<div class="igv-ideogram-content-div"></div>');
             $content_header.append(panel.$ideogram);
 
-            panel.$ideogram.width(genomicState.viewportWidth);
+            panel.$ideogram.width(Math.floor(viewportContainerWidth/genomicState.locusCount));
 
             panel.$canvas = $('<canvas class="igv-ideogram-canvas"></canvas>');
             panel.$ideogram.append(panel.$canvas);
@@ -86,8 +86,9 @@ var igv = (function (igv) {
 
         var viewportContainerWidth = igv.browser.syntheticViewportContainerWidth();
 
-        _.each(this.panels, function(panel) {
-            panel.$ideogram.width(Math.floor(panel.viewportContainerPercentage * viewportContainerWidth));
+        _.each(this.panels, function(panel, index) {
+            var genomicState = igv.browser.genomicStateList[ index ];
+            panel.$ideogram.width(Math.floor(viewportContainerWidth/genomicState.locusCount));
             panel.$canvas.attr('width', panel.$ideogram.width());
             panel.ideograms = {};
         });
