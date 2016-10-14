@@ -7,6 +7,14 @@ var igv = (function (igv) {
         this.initializationHelper(trackView, locusIndex);
     };
 
+    igv.Viewport.prototype.setWidth = function (width) {
+        var percentage;
+
+        this.$viewport.width(width);
+        percentage = this.$viewport.width()/this.$viewport.outerWidth();
+        this.$viewport.width(Math.floor(percentage * width));
+    };
+
     igv.Viewport.prototype.initializationHelper = function (trackView, locusIndex) {
 
         var self = this,
@@ -27,12 +35,13 @@ var igv = (function (igv) {
         this.$viewport.data( "viewport", this.id );
         this.$viewport.data( "locusindex", this.locusIndex );
 
-        // addViewportBorders(this.$viewport, this.locusIndex, _.size(igv.browser.genomicStateList));
+        addViewportBorders(this.$viewport, this.locusIndex, _.size(igv.browser.genomicStateList));
 
         // TODO diagnostic coloring
         this.$viewport.css("background-color", igv.randomRGBConstantAlpha(200, 255, 0.75));
 
-        this.$viewport.width( Math.floor(igv.browser.viewportContainerWidth()/genomicState.locusCount) );
+        // this.$viewport.width( Math.floor(igv.browser.viewportContainerWidth()/genomicState.locusCount) );
+        this.setWidth(igv.browser.viewportContainerWidth()/genomicState.locusCount);
 
         trackView.$viewportContainer.append( this.$viewport );
 
@@ -361,12 +370,13 @@ var igv = (function (igv) {
     igv.Viewport.prototype.resize = function () {
 
         var genomicState = igv.browser.genomicStateList[ this.locusIndex ],
-            contentWidth  = Math.floor(igv.browser.viewportContainerWidth()/genomicState.locusCount);
+            contentWidth  = igv.browser.viewportContainerWidth()/genomicState.locusCount;
 
         if (contentWidth > 0) {
-            this.$viewport.width(contentWidth);
-            this.canvas.style.width = contentWidth + "px";
-            this.canvas.setAttribute('width', contentWidth);
+            this.setWidth(contentWidth);
+            // this.$viewport.width(contentWidth);
+            this.canvas.style.width = this.$viewport.width() + "px";
+            this.canvas.setAttribute('width', this.$viewport.width());
             this.update();
         }
     };

@@ -403,7 +403,7 @@ var igv = (function (igv) {
             }
         }
         windowX = Math.round(genomicState.referenceFrame.toPixels(genomicState.referenceFrame.start - bpStart));
-        windowX1 = windowX + genomicState.viewportWidth;
+        windowX1 = windowX + igv.browser.viewportContainerWidth()/genomicState.locusCount;
 
         renderFeatureLabels.call(this, ctx, feature, coord.px, coord.px1, py, windowX, windowX1, genomicState);
     }

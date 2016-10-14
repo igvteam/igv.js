@@ -284,7 +284,7 @@ var igv = (function (igv) {
 
                     popover.hide();
 
-                    viewportHalfWidth = Math.floor(0.5 * genomicState.viewportWidth);
+                    viewportHalfWidth = Math.floor(0.5 * (igv.browser.viewportContainerWidth()/genomicState.locusCount));
                     genomicLocation = Math.floor((referenceFrame.start) + referenceFrame.toBP(viewportHalfWidth));
 
                     self.altClick(genomicLocation, undefined, undefined);
