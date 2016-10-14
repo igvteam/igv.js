@@ -116,13 +116,13 @@ var igv = (function (igv) {
 
                     _.each(genomicStateList, function (genomicState, index) {
 
-                        genomicState.viewportContainerPercentage = 1.0 / _.size(genomicStateList);
-                        genomicState.viewportWidth = Math.floor( genomicState.viewportContainerPercentage * width );
-
-                        genomicState.referenceFrame = new igv.ReferenceFrame(genomicState.chromosome.name, genomicState.start, (genomicState.end - genomicState.start) / genomicState.viewportWidth);
-
                         genomicState.locusIndex = index;
                         genomicState.locusCount = _.size(genomicStateList);
+
+                        genomicState.viewportContainerPercentage = 1.0 / genomicState.locusCount;
+                        genomicState.viewportWidth = Math.floor( genomicState.viewportContainerPercentage * width );
+
+                        genomicState.referenceFrame = new igv.ReferenceFrame(genomicState.chromosome.name, genomicState.start, (genomicState.end - genomicState.start) / (width/genomicState.locusCount));
                     });
 
                     igv.browser.updateLocusSearchWithGenomicState(_.first(igv.browser.genomicStateList));

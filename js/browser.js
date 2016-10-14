@@ -908,13 +908,13 @@ var igv = (function (igv) {
 
                 _.each(genomicStateList, function (genomicState, index) {
 
-                    genomicState.viewportWidth = self.viewportContainerWidth() / _.size(genomicStateList);
-                    genomicState.viewportContainerPercentage = 1.0 / _.size(genomicStateList);
-
-                    genomicState.referenceFrame = new igv.ReferenceFrame(genomicState.chromosome.name, genomicState.start, (genomicState.end - genomicState.start) / genomicState.viewportWidth);
-
                     genomicState.locusIndex = index;
                     genomicState.locusCount = _.size(genomicStateList);
+
+                    genomicState.viewportWidth = self.viewportContainerWidth() / genomicState.locusCount;
+                    genomicState.viewportContainerPercentage = 1.0 / _.size(genomicStateList);
+
+                    genomicState.referenceFrame = new igv.ReferenceFrame(genomicState.chromosome.name, genomicState.start, (genomicState.end - genomicState.start) / (self.viewportContainerWidth()/genomicState.locusCount));
                 });
 
                 if (_.size(genomicStateList) === _.size(self.genomicStateList)) {
