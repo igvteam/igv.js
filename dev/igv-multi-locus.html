@@ -181,15 +181,14 @@
         div = $("#myDiv")[0];
 
         options = {
+
             showKaryo: true,
-            hideIdeogram:false,
-            showRuler:true,
-//            locus: "brca1",
-//            locus: "8:124,512,906-124,512,945",
-//            loci: [ 'chr8:22543174-22552815' ],
-//            loci: [ 'chr8:22543174-22552815', 'chr4' ],
-            loci: [ 'brca1', 'nptn', 'cd28' ],
-//            loci: [ 'brca1', 'nptn' ],
+            hideIdeogram: false,
+//            showCenterGuide: true,
+//            showCursorTrackingGuide: true,
+            showRuler: true,
+            locus: "8:124,512,906-124,512,945",
+//            loci: [ 'brca1', 'nptn', 'brca2', 'cd28', 'nptn' ],
             reference: {
                 id: "hg19",
                 fastaURL: "https://s3.amazonaws.com/igv.broadinstitute.org/genomes/seq/1kg_v37/human_g1k_v37_decoy.fasta",
@@ -197,8 +196,7 @@
             },
             flanking: 1000,
             apiKey: 'AIzaSyDUUAUFpQEN4mumeMNIRWXSiTh5cPtUAD0',
-            palette: ["#00A0B0", "#6A4A3C", "#CC333F", "#EB6841"]
-             ,
+            palette: ["#00A0B0", "#6A4A3C", "#CC333F", "#EB6841"],
             tracks: [
                 {
                     url: 'https://data.broadinstitute.org/igvdata/BodyMap/hg19/IlluminaHiSeq2000_BodySites/brain_merged/accepted_hits.bam',
