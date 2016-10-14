@@ -55,7 +55,7 @@ var igv = (function (igv) {
         $lengthWidget.append($arrowRight);
         $lengthWidget.append($lengthWidgetLabel);
 
-        bp = genomicState.viewportWidth * genomicState.referenceFrame.bpPerPixel;
+        bp = (igv.browser.viewportContainerWidth()/genomicState.locusCount) * genomicState.referenceFrame.bpPerPixel;
         str = '(' + genomicState.chromosome.name + ') ' + igv.prettyBasePairNumber(Math.round(bp));
         $lengthWidgetLabel.text( str );
 

@@ -630,7 +630,8 @@ var igv = (function (igv) {
 
     igv.Browser.prototype.updateLocusSearchWithGenomicState = function (genomicState) {
 
-        var referenceFrame,
+        var self = this,
+            referenceFrame,
             ss,
             ee,
             str,
@@ -643,7 +644,7 @@ var igv = (function (igv) {
 
             if (this.$searchInput) {
 
-                end = referenceFrame.start + referenceFrame.bpPerPixel * genomicState.viewportWidth;
+                end = referenceFrame.start + referenceFrame.bpPerPixel * (self.viewportContainerWidth()/genomicState.locusCount);
 
                 if (this.genome) {
                     chromosome = this.genome.getChromosome( referenceFrame.chrName );
@@ -712,6 +713,7 @@ var igv = (function (igv) {
     igv.Browser.prototype.goto = function (chrName, start, end) {
 
         var genomicState,
+            viewportWidth,
             referenceFrame,
             width,
             maxBpPerPixel;
@@ -728,16 +730,17 @@ var igv = (function (igv) {
 
         genomicState = _.first(this.genomicStateList);
         genomicState.chromosome = this.genome.getChromosome(chrName);
+        viewportWidth = igv.browser.viewportContainerWidth()/genomicState.locusCount;
 
         referenceFrame = genomicState.referenceFrame;
         referenceFrame.chrName = genomicState.chromosome.name;
 
         // If end is undefined,  interpret start as the new center, otherwise compute scale.
         if (undefined === end) {
-            width = Math.round(genomicState.viewportWidth * referenceFrame.bpPerPixel / 2);
+            width = Math.round(viewportWidth * referenceFrame.bpPerPixel / 2);
             start = Math.max(0, start - width);
         } else {
-            referenceFrame.bpPerPixel = (end - start)/genomicState.viewportWidth;
+            referenceFrame.bpPerPixel = (end - start)/viewportWidth;
         }
 
         if (!genomicState.chromosome) {
@@ -751,13 +754,13 @@ var igv = (function (igv) {
                 genomicState.chromosome.bpLength = 1;
             }
 
-            maxBpPerPixel = genomicState.chromosome.bpLength / genomicState.viewportWidth;
+            maxBpPerPixel = genomicState.chromosome.bpLength / viewportWidth;
             if (referenceFrame.bpPerPixel > maxBpPerPixel) {
                 referenceFrame.bpPerPixel = maxBpPerPixel;
             }
 
             if (undefined === end) {
-                end = start + genomicState.viewportWidth * referenceFrame.bpPerPixel;
+                end = start + viewportWidth * referenceFrame.bpPerPixel;
             }
 
             if (genomicState.chromosome && end > genomicState.chromosome.bpLength) {
@@ -788,7 +791,7 @@ var igv = (function (igv) {
 
             var genomicState = browser.genomicStateList[ locusIndex ],
                 referenceFrame = genomicState.referenceFrame,
-                viewportWidth = Math.floor( browser.viewportContainerWidth()/genomicState.locusCount ),
+                viewportWidth = Math.floor(browser.viewportContainerWidth()/genomicState.locusCount),
                 centerBP;
 
             // Have we reached the zoom-in threshold yet? If so, bail.
