@@ -124,6 +124,10 @@ var igv = (function (igv) {
         var canvas = this.canvas,
             genomicStateList = igv.browser.genomicStateList;
 
+        if (undefined === igv.browser.genomicStateList) {
+            console.log('karyo - resize: undefined === igv.browser.genomicStateList');
+        }
+
         if (_.size(genomicStateList) > 1) {
             return;
         }
@@ -143,6 +147,11 @@ var igv = (function (igv) {
             stainColors,
             w,
             h;
+
+
+        if (undefined === igv.browser.genomicStateList) {
+            console.log('karyo - repaint: undefined === igv.browser.genomicStateList');
+        }
 
         genome = igv.browser.genome;
         genomicState = _.first(igv.browser.genomicStateList);
