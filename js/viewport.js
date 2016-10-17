@@ -38,7 +38,7 @@ var igv = (function (igv) {
         addViewportBorders(this.$viewport, this.locusIndex, _.size(igv.browser.genomicStateList));
 
         // TODO diagnostic coloring
-        this.$viewport.css("background-color", igv.randomRGBConstantAlpha(200, 255, 0.75));
+        // this.$viewport.css("background-color", igv.randomRGBConstantAlpha(200, 255, 0.75));
 
         // this.$viewport.width( Math.floor(igv.browser.viewportContainerWidth()/genomicState.locusCount) );
         this.setWidth(igv.browser.viewportContainerWidth()/genomicState.locusCount);
