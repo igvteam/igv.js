@@ -914,9 +914,6 @@ var igv = (function (igv) {
                     genomicState.locusIndex = index;
                     genomicState.locusCount = _.size(genomicStateList);
 
-                    genomicState.viewportWidth = self.viewportContainerWidth() / genomicState.locusCount;
-                    genomicState.viewportContainerPercentage = 1.0 / _.size(genomicStateList);
-
                     genomicState.referenceFrame = new igv.ReferenceFrame(genomicState.chromosome.name, genomicState.start, (genomicState.end - genomicState.start) / (self.viewportContainerWidth()/genomicState.locusCount));
                 });
 
