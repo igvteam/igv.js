@@ -80,7 +80,7 @@ var igv = (function (igv) {
         //     this.$viewport.append(this.scrollbar.outerScrollDiv);
         // }
 
-        if (trackView.track.name) {
+        if (trackView.track.name && 0 === this.locusIndex) {
 
             description = trackView.track.description || trackView.track.name;
             $trackLabel = $('<div class="igv-track-label">');
