@@ -532,20 +532,18 @@
             track.sortSamples("8", 124512906, 124512945, "DESC");
         })
 
-    };
+    }
 
     $(document).ready(function () {
-        var div,
-                options,
-                browser;
+        
+        var options;
 
-        div = $("#myDiv")[0];
         options = {
 
 //            hideIdeogram: true,
 //            showCenterGuide: true,
 //            showCursorTrackingGuide: true,
-            showKaryo: true,
+//            showKaryo: true,
             locus: "8:124,512,906-124,512,945",
             reference: {
                 id: "hg19",
@@ -570,7 +568,8 @@
 
             ]
         };
-        browser = igv.createBrowser(div, options);
+
+        igv.createBrowser($("#myDiv")[0], options);
     })
 
 
