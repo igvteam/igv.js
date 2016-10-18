@@ -112,14 +112,13 @@ var igv = (function (igv) {
 
                 if (_.size(genomicStateList) > 0) {
 
-                    igv.browser.genomicStateList = genomicStateList;
+                    // igv.browser.genomicStateList = genomicStateList;
 
-                    _.each(genomicStateList, function (genomicState, index) {
-
+                    igv.browser.genomicStateList = _.map(genomicStateList, function (genomicState, index) {
                         genomicState.locusIndex = index;
                         genomicState.locusCount = _.size(genomicStateList);
-
                         genomicState.referenceFrame = new igv.ReferenceFrame(genomicState.chromosome.name, genomicState.start, (genomicState.end - genomicState.start) / (width/genomicState.locusCount));
+                        return genomicState;
                     });
 
                     igv.browser.updateLocusSearchWithGenomicState(_.first(igv.browser.genomicStateList));
