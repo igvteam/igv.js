@@ -107,7 +107,7 @@ var igv = (function (igv) {
             igv.browser.genome = genome;
             igv.browser.genome.id = config.reference.genomeId;
 
-            width = igv.browser.syntheticViewportContainerWidth();
+            width = igv.browser.viewportContainerWidth();
             igv.browser.getGenomicStateList(lociWithConfiguration(config), width, function (genomicStateList) {
 
                 if (_.size(genomicStateList) > 0) {
