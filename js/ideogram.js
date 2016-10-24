@@ -69,7 +69,7 @@ var igv = (function (igv) {
             locus = igv.browser.referenceFrame.chr + ":" + igv.numberFormatter(1 + Math.floor((xPercentage - (chrCoveragePercentage/2.0)) * chrLength)) + "-" + igv.numberFormatter(Math.floor((xPercentage + (chrCoveragePercentage/2.0)) * chrLength));
             //console.log("chr length " + igv.numberFormatter(chrLength) + " locus " + locus);
 
-            igv.browser.search(locus, undefined);
+            igv.browser.search(locus);
 
         });
 
