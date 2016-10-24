@@ -885,7 +885,7 @@ var igv = (function (igv) {
                         color = alignment.strand ? alignmentTrack.negStrandColor : alignmentTrack.posStrandColor;
                     }
                     else {
-                        console.log("ERROR. Paired alignments are either first or second.")
+                        // Secondary or supplemental alignment?
                     }
                 }
                 break;
