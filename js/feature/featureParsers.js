@@ -91,7 +91,7 @@ var igv = (function (igv) {
                 this.delimiter = "\t";
                 break;
             case "refflat":
-                this.decode = decodeRefflat;
+                this.decode = decodeUcscGene;
                 this.delimiter = "\t";
                 break;
             default:
@@ -340,21 +340,29 @@ var igv = (function (igv) {
     }
 
     /**
-     * Decode a UCSC "refflat" record
+     * Decode a UCSC "gene table" record
      * @param tokens
      * @param ignore
      * @returns {*}
      */
-    function decodeRefflat(tokens, ignore) {
+    function decodeUcscGene(tokens, ignore) {
 
-        if (tokens.length < 10) return null;
+        var nameField;
+        if (tokens.length < 11) {
+            return null;
+        } else if(tokens.length <= 13) {
+            nameField = 0;
+        }
+        else {
+            nameField = 12
+        }
 
         var feature = {
                 chr: tokens[2],
                 start: parseInt(tokens[4]),
                 end: parseInt(tokens[5]),
                 id: tokens[1],
-                name: tokens[0],
+                name: tokens[nameField],
                 strand: tokens[3],
                 cdStart: parseInt(tokens[6]),
                 cdEnd: parseInt(tokens[7])
