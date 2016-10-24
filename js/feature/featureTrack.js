@@ -407,29 +407,38 @@ var igv = (function (igv) {
         renderFeatureLabels.call(this, ctx, feature, coord.px, coord.px1, py, windowX, windowX1);
     }
 
+
+    var lastFeatureName;   // Hack to prevent multiple identical labels in collapsed mode
+
     /**
      * @param ctx       the canvas 2d context
      * @param feature
-     * @param featureX  feature start x-coordinate
-     * @param featureX1 feature end x-coordinate
-     * @param featureY  feature y-coordinate
+     * @param startX  feature start x-coordinate
+     * @param endX feature end x-coordinate
+     * @param y  feature y-coordinate
      * @param windowX   visible window start x-coordinate
      * @param windowX1  visible window end x-coordinate
      */
-    function renderFeatureLabels(ctx, feature, featureX, featureX1, featureY, windowX, windowX1) {
+    function renderFeatureLabels(ctx, feature, startX, endX, y, windowX, windowX1) {
+
         var geneColor, geneFontStyle, transform,
             boxX, boxX1,    // label should be centered between these two x-coordinates
             labelX, labelY,
             textFitsInBox;
 
+        if(feature.name === lastFeatureName && "COLLAPSED" === this.displayMode) {
+            return;
+        }
+        lastFeatureName = feature.name;
+
         // feature outside of viewable window
-        if (featureX1 < windowX || featureX > windowX1) {
-            boxX = featureX;
-            boxX1 = featureX1;
+        if (endX < windowX || startX > windowX1) {
+            boxX = startX;
+            boxX1 = endX;
         } else {
             // center label within visible portion of the feature
-            boxX = Math.max(featureX, windowX);
-            boxX1 = Math.min(featureX1, windowX1);
+            boxX = Math.max(startX, windowX);
+            boxX1 = Math.min(endX, windowX1);
         }
 
         if (igv.browser.selection && "genes" === this.config.type && feature.name !== undefined) {
@@ -453,7 +462,7 @@ var igv = (function (igv) {
             }
 
             labelX = boxX + ((boxX1 - boxX) / 2);
-            labelY = getFeatureLabelY(featureY, transform);
+            labelY = getFeatureLabelY(y, transform);
 
             igv.graphics.fillText(ctx, feature.name, labelX, labelY, geneFontStyle, transform);
         }
@@ -470,7 +479,7 @@ var igv = (function (igv) {
     function monitorTrackDrag(track) {
         var onDragEnd = function () {
             if (!track.trackView || !track.trackView.tile || track.displayMode === "SQUISHED") {
-                return;
+                return;    // No labels to update
             }
             track.trackView.update();
         }
