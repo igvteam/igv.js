@@ -129,7 +129,7 @@ var igv = (function (igv) {
         this.trackViews.forEach(function (trackView) {
             trackView.resize();
         });
-        
+
         return loadedTracks;
     };
 
@@ -704,6 +704,7 @@ var igv = (function (igv) {
 
             // Try local feature cache first
             result = this.featureDB[feature.toUpperCase()];
+
             if (result) {
 
                 handleSearchResult(result.name, result.chr, result.start, result.end, "");
@@ -750,6 +751,8 @@ var igv = (function (igv) {
                     //}
 
                     if (callback) callback();
+                }).catch(function (error) {
+                    igv.presentAlert(error);
                 });
             }
         }
