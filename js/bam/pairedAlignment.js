@@ -86,14 +86,15 @@ var igv = (function (igv) {
     }
 
     igv.PairedAlignment.prototype.firstOfPairStrand = function () {
+
         if (this.firstAlignment.isFirstOfPair()) {
             return this.firstAlignment.strand;
         }
-        else if (this.secondAlignment) {
+        else if (this.secondAlignment && this.secondAlignment.isFirstOfPair()) {
             return this.secondAlignment.strand;
         }
         else {
-            return this.firstAlignment.strand;          // This assumes inward pointing pairs
+            return this.firstAlignment.mate.strand;    // Assumption is mate is first-of-pair
         }
     }
 
