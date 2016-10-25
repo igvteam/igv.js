@@ -23,7 +23,8 @@ module.exports = function (grunt) {
                     'vendor/jquery.mousewheel.js',
                     'vendor/promise-7.0.4.js',
                     'js/module.js',
-                    'vendor/jquery.kinetic.min.js'
+                    'vendor/jquery.kinetic.min.js',
+                    'vendor/underscore-min.js'
                 ],
                 dest: 'dist/igv.js'
             }
