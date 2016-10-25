@@ -59,11 +59,12 @@ var igvxhr = (function (igvxhr) {
                 headers = headers || {};
                 igv.Google.addGoogleHeaders(headers);
 
-                // Hack to prevent caching for google storage files.  Get weird net:err-cache errors otherwise
-                if (range) {
-                    url += url.includes("?") ? "&" : "?";
-                    url += "someRandomSeed=" + Math.random().toString(36);
-                }
+            }
+
+            if (range) {
+                // Hack to prevent caching for byte-ranges. Attempt to fix net:err-cache errors in Chrome
+                url += url.includes("?") ? "&" : "?";
+                url += "someRandomSeed=" + Math.random().toString(36);
             }
 
             xhr.open(method, url);
@@ -71,6 +72,7 @@ var igvxhr = (function (igvxhr) {
             if (range) {
                 var rangeEnd = range.size ? range.start + range.size - 1 : "";
                 xhr.setRequestHeader("Range", "bytes=" + range.start + "-" + rangeEnd);
+                xhr.setRequestHeader("Cache-Control", "no-cache");
             }
             if (contentType) {
                 xhr.setRequestHeader("Content-Type", contentType);
