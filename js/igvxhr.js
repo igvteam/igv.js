@@ -72,7 +72,7 @@ var igvxhr = (function (igvxhr) {
             if (range) {
                 var rangeEnd = range.size ? range.start + range.size - 1 : "";
                 xhr.setRequestHeader("Range", "bytes=" + range.start + "-" + rangeEnd);
-                xhr.setRequestHeader("Cache-Control", "no-cache");
+          //      xhr.setRequestHeader("Cache-Control", "no-cache");
             }
             if (contentType) {
                 xhr.setRequestHeader("Content-Type", contentType);
