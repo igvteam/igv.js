@@ -30,7 +30,7 @@ var igv = (function (igv) {
 
     igv.Popover = function ($parent, id) {
 
-        this.markupWith$Parent($parent, id);
+        this.$parent = this.markupWith$Parent($parent, id);
 
         this.$popoverContent.kinetic({});
 
@@ -39,54 +39,44 @@ var igv = (function (igv) {
     igv.Popover.prototype.markupWith$Parent = function ($parent, id) {
 
         var self = this,
-            popoverHeader;
+            $popoverHeader;
 
-        if (this.$parent) {
-            return;
-        }
+        // if (this.$parent) {
+        //     return;
+        // }
 
-        this.$parent = $parent;
+        // this.$parent = $parent;
 
         // popover container
-        this.popover = $('<div class="igv-popover">');
+        this.$popover = $('<div class="igv-popover">');
+
         if (id) {
-            this.popover.attr("id", id);
+            this.$popover.attr("id", id);
         }
 
-        this.$parent.append(this.popover[ 0 ]);
+        $parent.append(this.$popover);
 
         // popover header
-        popoverHeader = $('<div class="igv-popoverHeader">');
-        this.popover.append(popoverHeader[ 0 ]);
+        $popoverHeader = $('<div class="igv-popoverHeader">');
+        this.$popover.append($popoverHeader);
 
-        igv.attachDialogCloseHandlerWithParent(popoverHeader, function () {
+        igv.attachDialogCloseHandlerWithParent($popoverHeader, function () {
             self.hide();
         });
 
         // popover content
         this.$popoverContent = $('<div>');
 
-        this.popover.append(this.$popoverContent[ 0 ]);
+        this.$popover.append(this.$popoverContent);
 
-        this.popover.draggable();
+        this.$popover.draggable( { handle: $popoverHeader } );
 
-    };
+        return $parent;
 
-    igv.Popover.prototype.testData = function (rows) {
-        var i,
-            name,
-            nameValues = [];
-
-        for (i = 0; i < rows; i++) {
-            name = "name " + i;
-            nameValues.push({ name: name, value: "verbsgohuman" });
-        }
-
-        return nameValues;
     };
 
     igv.Popover.prototype.hide = function () {
-        this.popover.hide();
+        this.$popover.hide();
     };
 
     igv.Popover.prototype.presentTrackMenu = function (pageX, pageY, trackView) {
@@ -118,11 +108,11 @@ var igv = (function (igv) {
 
         });
 
-        this.popover.css(popoverPosition(pageX, pageY, this));
+        this.$popover.css(popoverPosition(pageX, pageY, this));
 
-        this.popover.show();
+        this.$popover.show();
 
-        this.popover.offset( igv.constrainBBox(this.popover, $(igv.browser.trackContainerDiv)) );
+        this.$popover.offset( igv.constrainBBox(this.$popover, $(igv.browser.trackContainerDiv)) );
 
     };
 
@@ -146,7 +136,7 @@ var igv = (function (igv) {
 
         this.$popoverContent.html(markup);
 
-        this.popover.css(popoverPosition(pageX, pageY, this)).show();
+        this.$popover.css(popoverPosition(pageX, pageY, this)).show();
 
         if (true === showOKButton) {
             $('.igv-dialog-close-container').hide();
@@ -170,7 +160,7 @@ var igv = (function (igv) {
 
         popupX -= popoverWidget.$parent.offset().left;
         popupY -= popoverWidget.$parent.offset().top;
-        popupRect = { x: popupX, y: popupY, width: popoverWidget.popover.outerWidth(), height: popoverWidget.popover.outerHeight() };
+        popupRect = { x: popupX, y: popupY, width: popoverWidget.$popover.outerWidth(), height: popoverWidget.$popover.outerHeight() };
 
         left = popupX;
         if (containerCoordinates.x + popupRect.width > containerRect.width) {
