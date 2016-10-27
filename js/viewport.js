@@ -116,10 +116,16 @@ var igv = (function (igv) {
 
         function addViewportBorders ($viewport, locusIndex, lociCount) {
 
-            $viewport.addClass('igv-viewport-div-border-right');
-            if (1 === lociCount || 0 === locusIndex) {
-                $viewport.addClass('igv-viewport-div-border-left');
+            if (1 === lociCount || locusIndex === lociCount - 1) {
+                return;
             }
+
+            $viewport.addClass('igv-viewport-div-border-right');
+
+            // if (1 === lociCount || 0 === locusIndex) {
+            //     $viewport.addClass('igv-viewport-div-border-left');
+            // }
+
         }
     };
 
