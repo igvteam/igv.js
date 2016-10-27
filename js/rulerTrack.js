@@ -45,18 +45,20 @@ var igv = (function (igv) {
             $arrowLeft = $('<div class = "igv-ruler-length-widget-arrow-left">'),
             $arrowRight = $('<div class = "igv-ruler-length-widget-arrow-right">'),
             $lengthWidgetLabel = $('<span>'),
-            bp,
+            bp = (igv.browser.viewportContainerWidth()/genomicState.locusCount) * genomicState.referenceFrame.bpPerPixel,
             str;
 
         // $lengthWidgetContainer.css("background-color", igv.randomRGBConstantAlpha(200, 255, 0.75));
 
-        $lengthWidgetContainer.append($lengthWidget);
-        $lengthWidget.append($arrowLeft);
-        $lengthWidget.append($arrowRight);
-        $lengthWidget.append($lengthWidgetLabel);
+        // $lengthWidgetContainer.append($lengthWidget);
+        // $lengthWidget.append($arrowLeft);
+        // $lengthWidget.append($arrowRight);
+        // $lengthWidget.append($lengthWidgetLabel);
 
-        bp = (igv.browser.viewportContainerWidth()/genomicState.locusCount) * genomicState.referenceFrame.bpPerPixel;
-        str = '(' + genomicState.chromosome.name + ') ' + igv.prettyBasePairNumber(Math.round(bp));
+        $lengthWidgetContainer.append($lengthWidgetLabel);
+
+        // str = '(' + genomicState.chromosome.name + ') ' + igv.prettyBasePairNumber(Math.round(bp));
+        str = igv.prettyBasePairNumber(Math.round(bp));
         $lengthWidgetLabel.text( str );
 
         return $lengthWidgetContainer;
@@ -93,7 +95,8 @@ var igv = (function (igv) {
             if (1 === _.size(viewports)) {
                 $e = _.first(viewports).$viewport.find('.igv-ruler-length-widget').find('span');
 
-                str = '(' + options.genomicState.chromosome.name + ') ' + igv.prettyBasePairNumber(Math.round( options.bpPerPixel * options.viewportWidth ));
+                // str = '(' + options.genomicState.chromosome.name + ') ' + igv.prettyBasePairNumber(Math.round( options.bpPerPixel * options.viewportWidth ));
+                str = igv.prettyBasePairNumber(Math.round( options.bpPerPixel * options.viewportWidth ));
                 $e.text( str );
             }
 
