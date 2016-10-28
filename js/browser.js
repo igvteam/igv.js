@@ -582,6 +582,8 @@ var igv = (function (igv) {
 
         this.updateLocusSearchWithGenomicState(_.first(this.genomicStateList));
 
+        this.windowSizePanel.updateWithGenomicState(_.first(this.genomicStateList));
+
         _.each([this.ideoPanel, this.karyoPanel, this.centerGuide], function(renderable){
             if (renderable) {
                 renderable.repaint();
@@ -595,6 +597,10 @@ var igv = (function (igv) {
     };
 
     igv.Browser.prototype.updateWithLocusIndex = function (locusIndex) {
+
+        if (0 === locusIndex) {
+            this.windowSizePanel.updateWithGenomicState(this.genomicStateList[ locusIndex ]);
+        }
 
         if (this.ideoPanel) {
             igv.IdeoPanel.repaintPanel( this.ideoPanel.panelWithLocusIndex(locusIndex) );
