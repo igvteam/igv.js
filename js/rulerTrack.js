@@ -38,27 +38,18 @@ var igv = (function (igv) {
 
     };
 
-    igv.RulerTrack.prototype.lengthWidgetWithGenomicState = function (genomicState) {
+    igv.RulerTrack.prototype.lengthWidgetWithGenomicState = function (referenceFrame, viewportWidth) {
 
         var $lengthWidgetContainer = $('<div class = "igv-viewport-content-ruler-div">'),
-            $lengthWidget = $('<div class = "igv-ruler-length-widget">'),
-            $arrowLeft = $('<div class = "igv-ruler-length-widget-arrow-left">'),
-            $arrowRight = $('<div class = "igv-ruler-length-widget-arrow-right">'),
             $lengthWidgetLabel = $('<span>'),
-            bp = (igv.browser.viewportContainerWidth()/genomicState.locusCount) * genomicState.referenceFrame.bpPerPixel,
+            bp,
             str;
-
-        // $lengthWidgetContainer.css("background-color", igv.randomRGBConstantAlpha(200, 255, 0.75));
-
-        // $lengthWidgetContainer.append($lengthWidget);
-        // $lengthWidget.append($arrowLeft);
-        // $lengthWidget.append($arrowRight);
-        // $lengthWidget.append($lengthWidgetLabel);
 
         $lengthWidgetContainer.append($lengthWidgetLabel);
 
-        // str = '(' + genomicState.chromosome.name + ') ' + igv.prettyBasePairNumber(Math.round(bp));
+        bp = viewportWidth * referenceFrame.bpPerPixel;
         str = igv.prettyBasePairNumber(Math.round(bp));
+
         $lengthWidgetLabel.text( str );
 
         return $lengthWidgetContainer;
@@ -88,14 +79,14 @@ var igv = (function (igv) {
             str;
 
         if (igv.browser.rulerTrack) {
+
             viewports = _.filter(igv.Viewport.viewportsWithLocusIndex(options.genomicState.locusIndex), function(viewport){
                 return viewport.trackView.track instanceof igv.RulerTrack;
             });
 
             if (1 === _.size(viewports)) {
-                $e = _.first(viewports).$viewport.find('.igv-ruler-length-widget').find('span');
 
-                // str = '(' + options.genomicState.chromosome.name + ') ' + igv.prettyBasePairNumber(Math.round( options.bpPerPixel * options.viewportWidth ));
+                $e = _.first(viewports).$viewport.find('.igv-viewport-content-ruler-div').find('span');
                 str = igv.prettyBasePairNumber(Math.round( options.bpPerPixel * options.viewportWidth ));
                 $e.text( str );
             }

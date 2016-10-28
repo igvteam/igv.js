@@ -35,39 +35,61 @@ var igv = (function (igv) {
 
     };
 
-    igv.WindowSizePanel.prototype.update = function (size) {
-
-        var value,
-            floored,
-            denom,
-            units;
-
-        this.$content.text( prettyNumber( size ) );
-
-        function prettyNumber(size) {
-
-            if (size > 1e7) {
-                denom = 1e6;
-                units = " mb";
-            } else if (size > 1e4) {
-
-                denom = 1e3;
-                units = " kb";
-
-                value = size/denom;
-                floored = Math.floor(value);
-                return igv.numberFormatter(floored) + units;
-            } else {
-                return igv.numberFormatter(size) + " bp";
-            }
-
-            value = size/denom;
-            floored = Math.floor(value);
-
-            return floored.toString() + units;
-        }
-
+    igv.WindowSizePanel.prototype.show = function () {
+        this.$content.show();
     };
+
+    igv.WindowSizePanel.prototype.hide = function () {
+        this.$content.hide();
+    };
+
+    igv.WindowSizePanel.prototype.updateWithGenomicState = function (genomicState) {
+
+        var viewportWidth,
+            referenceFrame,
+            length;
+
+        viewportWidth = igv.Viewport.viewportWidthAtLocusIndex(genomicState.locusIndex);
+        referenceFrame = genomicState.referenceFrame;
+
+        length = viewportWidth * referenceFrame.bpPerPixel;
+
+        this.$content.text( igv.prettyBasePairNumber(Math.round(length)) );
+    };
+
+    // igv.WindowSizePanel.prototype.update = function (size) {
+    //
+    //     var value,
+    //         floored,
+    //         denom,
+    //         units;
+    //
+    //     this.$content.text( prettyNumber( size ) );
+    //
+    //     function prettyNumber(size) {
+    //
+    //         if (size > 1e7) {
+    //             denom = 1e6;
+    //             units = " mb";
+    //         } else if (size > 1e4) {
+    //
+    //             denom = 1e3;
+    //             units = " kb";
+    //
+    //             value = size/denom;
+    //             floored = Math.floor(value);
+    //             return igv.numberFormatter(floored) + units;
+    //         } else {
+    //             return igv.numberFormatter(size) + " bp";
+    //         }
+    //
+    //         value = size/denom;
+    //         floored = Math.floor(value);
+    //
+    //         return floored.toString() + units;
+    //     }
+    //
+    // };
 
 
     return igv;

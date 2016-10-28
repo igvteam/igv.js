@@ -61,7 +61,7 @@ var igv = (function (igv) {
             // $rulerContent.css("background-color", igv.randomRGBConstantAlpha(200, 255, 0.75));
             // $(this.contentDiv).append($rulerContent);
 
-            $(this.contentDiv).append(igv.browser.rulerTrack.lengthWidgetWithGenomicState(genomicState));
+            $(this.contentDiv).append(igv.browser.rulerTrack.lengthWidgetWithGenomicState(genomicState.referenceFrame, this.$viewport.width()));
         }
 
         // zoom in to see features
@@ -582,6 +582,15 @@ var igv = (function (igv) {
 
     igv.Viewport.prototype.isLoading = function () {
         return !(undefined === this.loading);
+    };
+
+    igv.Viewport.viewportWidthAtLocusIndex = function (locusIndex) {
+
+        var viewport;
+
+        viewport = _.first( igv.Viewport.viewportsWithLocusIndex(locusIndex) );
+
+        return viewport.$viewport.width();
     };
 
     igv.Viewport.viewportsWithLocusIndex = function (locusIndex) {
