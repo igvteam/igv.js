@@ -38,7 +38,7 @@ var igv = (function (igv) {
 
     };
 
-    igv.RulerTrack.prototype.lengthWidgetWithGenomicState = function (referenceFrame, viewportWidth) {
+    igv.RulerTrack.prototype.lengthWidgetWithGenomicState = function (genomicState, viewportWidth) {
 
         var $lengthWidgetContainer = $('<div class = "igv-viewport-content-ruler-div">'),
             $lengthWidgetLabel = $('<span>'),
@@ -47,9 +47,8 @@ var igv = (function (igv) {
 
         $lengthWidgetContainer.append($lengthWidgetLabel);
 
-        bp = viewportWidth * referenceFrame.bpPerPixel;
-        str = igv.prettyBasePairNumber(Math.round(bp));
-
+        bp = viewportWidth * genomicState.referenceFrame.bpPerPixel;
+        str = genomicState.referenceFrame.chrName + ' ' + igv.prettyBasePairNumber(Math.round(bp));
         $lengthWidgetLabel.text( str );
 
         return $lengthWidgetContainer;
@@ -87,7 +86,8 @@ var igv = (function (igv) {
             if (1 === _.size(viewports)) {
 
                 $e = _.first(viewports).$viewport.find('.igv-viewport-content-ruler-div').find('span');
-                str = igv.prettyBasePairNumber(Math.round( options.bpPerPixel * options.viewportWidth ));
+                str = options.genomicState.referenceFrame.chrName + ' ' + igv.prettyBasePairNumber(Math.round( options.bpPerPixel * options.viewportWidth ));
+
                 $e.text( str );
             }
 
