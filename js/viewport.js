@@ -57,11 +57,8 @@ var igv = (function (igv) {
 
         // additional content for ruler track
         if (trackView.track instanceof igv.RulerTrack) {
-            // $rulerContent = $('<div class = "igv-viewport-content-ruler-div">');
-            // $rulerContent.css("background-color", igv.randomRGBConstantAlpha(200, 255, 0.75));
-            // $(this.contentDiv).append($rulerContent);
-
             $(this.contentDiv).append(igv.browser.rulerTrack.lengthWidgetWithGenomicState(genomicState.referenceFrame, this.$viewport.width()));
+            $(this.contentDiv).find('.igv-viewport-content-ruler-div').find('span').hide();
         }
 
         // zoom in to see features

@@ -139,6 +139,8 @@ var igv = (function (igv) {
 
                     if (config.tracks) {
                         igv.browser.loadTracksWithConfigList(config.tracks);
+
+                        igv.browser.windowSizePanel.updateWithGenomicState(_.first(igv.browser.genomicStateList));
                     }
 
                 }
