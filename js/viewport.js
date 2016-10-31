@@ -57,8 +57,15 @@ var igv = (function (igv) {
 
         // additional content for ruler track
         if (trackView.track instanceof igv.RulerTrack) {
-            $(this.contentDiv).append(igv.browser.rulerTrack.lengthWidgetWithGenomicState(genomicState.referenceFrame, this.$viewport.width()));
-            $(this.contentDiv).find('.igv-viewport-content-ruler-div').find('span').hide();
+
+            $(this.contentDiv).append(igv.browser.rulerTrack.lengthWidgetWithGenomicState(genomicState, this.$viewport.width()));
+
+            if (1 === _.size(igv.browser.genomicStateList)) {
+                $(this.contentDiv).find('.igv-viewport-content-ruler-div').find('span').hide();
+            } else {
+                $(this.contentDiv).find('.igv-viewport-content-ruler-div').find('span').show();
+            }
+
         }
 
         // zoom in to see features

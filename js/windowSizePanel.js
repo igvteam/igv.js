@@ -23,9 +23,6 @@
  * THE SOFTWARE.
  */
 
-/**
- * Created by turner on 5/22/15.
- */
 var igv = (function (igv) {
 
     igv.WindowSizePanel = function ($parent) {
@@ -49,6 +46,12 @@ var igv = (function (igv) {
             referenceFrame,
             length;
 
+        if (1 === genomicState.locusCount) {
+            this.show();
+        } else {
+            this.hide();
+        }
+
         viewportWidth = igv.Viewport.viewportWidthAtLocusIndex(genomicState.locusIndex);
         referenceFrame = genomicState.referenceFrame;
 
@@ -56,41 +59,6 @@ var igv = (function (igv) {
 
         this.$content.text( igv.prettyBasePairNumber(Math.round(length)) );
     };
-
-    // igv.WindowSizePanel.prototype.update = function (size) {
-    //
-    //     var value,
-    //         floored,
-    //         denom,
-    //         units;
-    //
-    //     this.$content.text( prettyNumber( size ) );
-    //
-    //     function prettyNumber(size) {
-    //
-    //         if (size > 1e7) {
-    //             denom = 1e6;
-    //             units = " mb";
-    //         } else if (size > 1e4) {
-    //
-    //             denom = 1e3;
-    //             units = " kb";
-    //
-    //             value = size/denom;
-    //             floored = Math.floor(value);
-    //             return igv.numberFormatter(floored) + units;
-    //         } else {
-    //             return igv.numberFormatter(size) + " bp";
-    //         }
-    //
-    //         value = size/denom;
-    //         floored = Math.floor(value);
-    //
-    //         return floored.toString() + units;
-    //     }
-    //
-    // };
-
 
     return igv;
 })
