@@ -923,9 +923,9 @@ var igv = (function (igv) {
                     genomicState.referenceFrame = new igv.ReferenceFrame(genomicState.chromosome.name, genomicState.start, (genomicState.end - genomicState.start) / (self.viewportContainerWidth()/genomicState.locusCount));
                 });
 
-                if (_.size(genomicStateList) === _.size(self.genomicStateList)) {
-                    self.genomicStateList = genomicStateList;
-                } else {
+                self.genomicStateList = genomicStateList;
+
+                if (_.size(genomicStateList) !== _.size(self.genomicStateList)) {
 
                     self.genomicStateList = genomicStateList;
 
@@ -937,9 +937,11 @@ var igv = (function (igv) {
                     self.$emptyAllViewportContainers($('.igv-track-container-div'));
 
                     self.buildViewportsWithGenomicStateList(genomicStateList);
-                }
+
+                } // if (_.size(genomicStateList) !== _.size(self.genomicStateList))
 
                 self.update();
+
             } // if (_.size(genomicStateList) > 0)
 
         });
