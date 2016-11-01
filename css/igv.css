@@ -676,7 +676,7 @@ div.ui-dialog fieldset {
     font-family: 'Open Sans', sans-serif;
     font-size: small;
     font-weight: 400;
-    color: #737373;
+    color: #666666;
 
 }
 
@@ -722,7 +722,7 @@ div.ui-dialog fieldset {
 
 .igv-fa-search {
     cursor: pointer;
-    color: #737373;
+    color: #666666;
 }
 
 .igv-fa-search:hover,
@@ -1339,7 +1339,7 @@ div.ui-dialog fieldset {
     font-family: 'Open Sans', sans-serif;
     font-size: 14px;
     font-weight: 400;
-    color: #7f7f7f;
+    color: #666666;
 }
 
 .igv-fa-vertical-center-shim {
