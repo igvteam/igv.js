@@ -923,9 +923,10 @@ var igv = (function (igv) {
                     genomicState.referenceFrame = new igv.ReferenceFrame(genomicState.chromosome.name, genomicState.start, (genomicState.end - genomicState.start) / (self.viewportContainerWidth()/genomicState.locusCount));
                 });
 
-                self.genomicStateList = genomicStateList;
 
-                if (_.size(genomicStateList) !== _.size(self.genomicStateList)) {
+                if (_.size(genomicStateList) === _.size(self.genomicStateList)) {
+                    self.genomicStateList = genomicStateList;
+                } else {
 
                     self.genomicStateList = genomicStateList;
 
