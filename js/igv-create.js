@@ -288,14 +288,12 @@ var igv = (function (igv) {
 
             browser.$searchInput.change(function (e) {
                 browser.parseSearchInput( $(e.target).val() );
-                // browser.search($(this).val());
             });
 
             $faSearch = $('<i class="igv-fa-search fa fa-search fa-18px shim-left-6">');
 
             $faSearch.click(function () {
                 browser.parseSearchInput( browser.$searchInput.val() );
-                // browser.search(browser.$searchInput.val());
             });
 
             $searchContainer.append(browser.$searchInput);
