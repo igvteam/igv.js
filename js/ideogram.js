@@ -190,7 +190,6 @@ var igv = (function (igv) {
                 yy = y + (panel.ctx.lineWidth)/2;
                 hh = image.height - panel.ctx.lineWidth;
 
-                console.log('width ' + width);
                 panel.ctx.strokeRect(xx, yy, ww, hh);
 
                 // Pop current context
