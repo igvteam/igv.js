@@ -1111,7 +1111,9 @@ div.ui-dialog fieldset {
 .igv-ideogram-left-shim {
     position: relative;
     float: left;
-    height: 32px;
+    height: 14px;
+    margin-top: 2px;
+    margin-bottom: 2px;
     width: 50px;
 }
 
@@ -1119,6 +1121,7 @@ div.ui-dialog fieldset {
     position: relative;
     float: left;
     height: 14px;
+    margin-top: 2px;
     margin-bottom: 2px;
     background-color: white;
 }
