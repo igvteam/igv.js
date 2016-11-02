@@ -35,6 +35,14 @@ var igv = (function (igv) {
         this.buildPanels($content_header);
     };
 
+    igv.IdeoPanel.setWidth = function ($ideogram, width) {
+        var percentage;
+
+        $ideogram.width(width);
+        percentage = $ideogram.width()/$ideogram.outerWidth();
+        $ideogram.width(Math.floor(percentage * width));
+    };
+
     igv.IdeoPanel.prototype.buildPanels = function ($content_header) {
 
         this.panels = _.map(igv.browser.genomicStateList, function(genomicState) {
@@ -46,13 +54,11 @@ var igv = (function (igv) {
 
             panel.$ideogram = $('<div class="igv-ideogram-content-div"></div>');
 
-            // if (genomicState.locusCount > 1) {
-            //     panel.$ideogram.addClass('igv-ideogram-content-div-border-right igv-ideogram-content-div-border-left');
-            // }
+            addBorders(panel.$ideogram, genomicState.locusIndex, genomicState.locusCount);
+
+            igv.IdeoPanel.setWidth(panel.$ideogram, viewportContainerWidth/genomicState.locusCount);
 
             $content_header.append(panel.$ideogram);
-
-            panel.$ideogram.width(Math.floor(viewportContainerWidth/genomicState.locusCount));
 
             panel.$canvas = $('<canvas class="igv-ideogram-canvas"></canvas>');
             panel.$ideogram.append(panel.$canvas);
@@ -69,6 +75,17 @@ var igv = (function (igv) {
             });
 
             return panel;
+
+            function addBorders($ideogram, locusIndex, lociCount) {
+
+                if (1 === lociCount || locusIndex === lociCount - 1) {
+                    return;
+                }
+
+                $ideogram.addClass('igv-ideogram-content-div-border-right');
+
+            }
+
         });
 
     };
