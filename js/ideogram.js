@@ -354,10 +354,8 @@ var igv = (function (igv) {
         referenceFrame.start = Math.round((xPercentage - (chrCoveragePercentage/2.0)) * chr.bpLength);
         referenceFrame.bpPerPixel = (ee - ss)/ panel.$ideogram.width();
 
-        // locus = referenceFrame.chrName + ":" + igv.numberFormatter(1 + Math.floor((xPercentage - (chrCoveragePercentage/2.0)) * chr.bpLength)) + "-" + igv.numberFormatter(Math.floor((xPercentage + (chrCoveragePercentage/2.0)) * chr.bpLength));
-        // igv.browser.search(locus, undefined);
-
         igv.browser.updateLocusSearchWithGenomicState(genomicState);
+
         igv.browser.repaintWithLocusIndex( panel.locusIndex )
 
     };

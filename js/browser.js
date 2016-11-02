@@ -598,6 +598,8 @@ var igv = (function (igv) {
 
     igv.Browser.prototype.updateWithLocusIndex = function (locusIndex) {
 
+        igv.browser.updateLocusSearchWithGenomicState(_.first(this.genomicStateList));
+
         if (0 === locusIndex) {
             this.windowSizePanel.updateWithGenomicState(this.genomicStateList[ locusIndex ]);
         }
@@ -644,7 +646,7 @@ var igv = (function (igv) {
             end,
             chromosome;
 
-        if (0 === genomicState.locusIndex) {
+        if (0 === genomicState.locusIndex && 1 === genomicState.locusCount) {
 
             referenceFrame = genomicState.referenceFrame;
 
@@ -669,6 +671,8 @@ var igv = (function (igv) {
 
             this.fireEvent('locuschange', [referenceFrame, str]);
 
+        } else {
+            this.$searchInput.val('');
         }
 
     };
