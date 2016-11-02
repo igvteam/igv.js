@@ -665,8 +665,6 @@ var igv = (function (igv) {
                 ee = igv.numberFormatter(Math.floor(end));
                 str = referenceFrame.chrName + ":" + ss + "-" + ee;
                 this.$searchInput.val(str);
-
-                // this.windowSizePanel.update(Math.floor(end - referenceFrame.start));
             }
 
             this.fireEvent('locuschange', [referenceFrame, str]);
