@@ -290,11 +290,6 @@ var igv = (function (igv) {
                 browser.parseSearchInput( $(e.target).val() );
             });
 
-            browser.$searchInput.focus(function (e) {
-                // $(this).val('');
-                console.log('received focus');
-            });
-
             $faSearch = $('<i class="igv-fa-search fa fa-search fa-18px shim-left-6">');
 
             $faSearch.click(function () {
