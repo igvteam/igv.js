@@ -1129,7 +1129,9 @@ div.ui-dialog fieldset {
 .igv-ideogram-content-div-border-right {
     border-right-color: white;
     border-right-style: solid;
-    border-right-width: thin;
+    /*border-right-width: thin;*/
+    border-right-width: 4px;
+
 }
 
 .igv-ideogram-content-div-border-left {
@@ -1192,11 +1194,11 @@ div.ui-dialog fieldset {
 
 .igv-viewport-div-border-right {
 
-    border-right-color: rgba(0, 0, 0, 0.25);
-    /*border-right-color: rgba(1, 1, 1, 1);*/
+    /*border-right-color: rgba(0, 0, 0, 0.25);*/
+    border-right-color: white;
     border-right-style: solid;
-    border-right-width: thin;
-    /*border-right-width: 4px;*/
+    /*border-right-width: thin;*/
+    border-right-width: 4px;
 }
 
 .igv-viewport-div-border-left {
