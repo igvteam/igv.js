@@ -112,8 +112,6 @@ var igv = (function (igv) {
 
                 if (_.size(genomicStateList) > 0) {
 
-                    // igv.browser.genomicStateList = genomicStateList;
-
                     igv.browser.genomicStateList = _.map(genomicStateList, function (genomicState, index) {
                         genomicState.locusIndex = index;
                         genomicState.locusCount = _.size(genomicStateList);
@@ -122,6 +120,8 @@ var igv = (function (igv) {
                     });
 
                     igv.browser.updateLocusSearchWithGenomicState(_.first(igv.browser.genomicStateList));
+
+                    igv.browser.toggleCenterGuide(_.size(igv.browser.genomicStateList));
 
                     if (igv.browser.karyoPanel) {
                         igv.browser.karyoPanel.resize();
