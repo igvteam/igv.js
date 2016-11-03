@@ -121,17 +121,18 @@ var igv = (function (igv) {
 
     igv.KaryoPanel.prototype.resize = function () {
 
-        var canvas = this.canvas,
-            genomicStateList = igv.browser.genomicStateList;
+        var canvas;
 
         if (undefined === igv.browser.genomicStateList) {
-            console.log('karyo - resize: undefined === igv.browser.genomicStateList');
-        }
-
-        if (_.size(genomicStateList) > 1) {
+            console.log('karyo - resize: undefined === igv.browser.genomicStateList. Bail.');
             return;
         }
 
+        // if (_.size(igv.browser.genomicStateList) > 1) {
+        //     return;
+        // }
+
+        canvas = this.canvas;
         canvas.setAttribute('width', canvas.clientWidth);    //Must set the width & height of the canvas
         canvas.setAttribute('height', canvas.clientHeight);
         log("Resize called: width=" + canvas.clientWidth + "/" + canvas.clientHeight);
@@ -150,8 +151,13 @@ var igv = (function (igv) {
 
 
         if (undefined === igv.browser.genomicStateList) {
-            console.log('karyo - repaint: undefined === igv.browser.genomicStateList');
+            console.log('karyo - repaint: undefined === igv.browser.genomicStateList. Bail');
+            return;
         }
+
+        // if (_.size(igv.browser.genomicStateList) > 1) {
+        //     return;
+        // }
 
         genome = igv.browser.genome;
         genomicState = _.first(igv.browser.genomicStateList);
@@ -160,9 +166,6 @@ var igv = (function (igv) {
         w = this.canvas.width;
         h = this.canvas.height;
 
-        if (_.size(igv.browser.genomicStateList) > 1) {
-            return;
-        }
 
         this.ctx.clearRect(0, 0, w, h);
 
