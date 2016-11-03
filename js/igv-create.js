@@ -284,7 +284,7 @@ var igv = (function (igv) {
 
             $searchContainer = $('<div class="igvNavigationSearch">');
 
-            browser.$searchInput = $('<input class="igvNavigationSearchInput igv-navigation-search-input-show" type="text" placeholder="Locus Search">');
+            browser.$searchInput = $('<input class="igvNavigationSearchInput" type="text" placeholder="Locus Search">');
 
             browser.$searchInput.change(function (e) {
                 browser.parseSearchInput( $(e.target).val() );

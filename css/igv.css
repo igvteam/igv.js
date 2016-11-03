@@ -677,16 +677,9 @@ div.ui-dialog fieldset {
     font-size: small;
     font-weight: 400;
 
+    color: #444;
     background-color: white;
 
-}
-
-.igv-navigation-search-input-hide {
-    color: white;
-}
-
-.igv-navigation-search-input-show {
-    color: #666666;
 }
 
 .igvNavigationSearchResults {
@@ -1367,7 +1360,7 @@ div.ui-dialog fieldset {
     font-family: 'Open Sans', sans-serif;
     font-size: 14px;
     font-weight: 400;
-    color: #666666;
+    color: #444;
 }
 
 .igv-fa-vertical-center-shim {
