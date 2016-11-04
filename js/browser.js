@@ -982,6 +982,7 @@ var igv = (function (igv) {
             locusGenomicState = {};
             if (igv.isLocusChrNameStartEnd(locus, self.genome, locusGenomicState)) {
                 locusGenomicState.selection = undefined;
+                locusGenomicState.locusSearchString = locus;
                 locusGenomicStates.push(locusGenomicState);
 
                 // accumulate successfully parsed loci
@@ -1005,6 +1006,7 @@ var igv = (function (igv) {
                 if (result) {
                     genomicState = createFeatureDBGenomicState(result);
                     if (genomicState) {
+                        genomicState.locusSearchString = locus;
                         featureDBGenomicStates.push( genomicState );
                     } else {
                         survivors.push(locus);
@@ -1123,6 +1125,8 @@ var igv = (function (igv) {
                 if (igv.isLocusChrNameStartEnd(string, self.genome, geneNameLocusObject)) {
 
                     type = result["featureType"] || result["type"];
+
+                    geneNameLocusObject.locusSearchString = _.first(geneNameLookupResponse.split('\t'));
                     geneNameLocusObject.selection = new igv.GtexSelection('gtex' === type || 'snp' === type ? { snp: result.gene } : { gene: result.gene });
                     return geneNameLocusObject;
                 } else {

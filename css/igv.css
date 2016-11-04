@@ -1212,9 +1212,28 @@ div.ui-dialog fieldset {
 }
 
 .igv-viewport-content-div {
-    position: relative;
+    position: absolute;
     width: 100%;
     height:100%;
+}
+
+.igv-viewport-content-ruler-div {
+    position: absolute;
+
+    left:50%;
+    top:50%;
+    transform: translate(-50%, -50%);
+
+    padding-bottom: 12px;
+
+    font-family: 'PT Sans', sans-serif;
+    font-size: 12px;
+    font-weight: 200;
+
+    z-index:64;
+
+    color: rgb(107, 107, 107);
+    /*background-color: white;*/
 }
 
 .igv-viewport-canvas {
@@ -1239,71 +1258,6 @@ div.ui-dialog fieldset {
 
     color: #7f7f7f;
 
-}
-
-.igv-viewport-content-ruler-div {
-    position: absolute;
-    top: 0;
-    left: 0;
-
-    width: 100%;
-    height:50%;
-
-    z-index:64;
-
-    color: rgb(107, 107, 107);
-    background-color: white;
-}
-
-.igv-ruler-length-widget {
-    width:100%;
-    text-align:center;
-    border-bottom: 1px solid rgb(107, 107, 107);
-    line-height:0.1em;
-    margin:10px 0 20px;
-}
-
-.igv-viewport-content-ruler-div span {
-
-    background-color: white;
-
-    font-family: 'PT Sans', sans-serif;
-    font-size: 12px;
-    font-weight: 200;
-
-    padding:0 6px;
-}
-
-.igv-ruler-length-widget-arrow-left {
-
-    position: relative;
-    top: -1px;
-    left: -1px;
-
-    float: left;
-
-    width: 0;
-    height: 0;
-    border-style: solid;
-    /*border-width: 4px 12px 4px 0;*/
-    border-width: 3px 10px 3px 0;
-    border-color: transparent rgb(107, 107, 107) transparent transparent;
-}
-
-.igv-ruler-length-widget-arrow-right {
-
-    position: relative;
-    top: -1px;
-    right: -1px;
-
-    float: right;
-
-    width: 0;
-    height: 0;
-    border-style: solid;
-    /*border-width: 4px 0 4px 12px;*/
-    border-width: 3px 0 3px 10px;
-    border-color: transparent transparent transparent rgb(107, 107, 107);
 }
 
 .igv-ruler-sweeper-div {

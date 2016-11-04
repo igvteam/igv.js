@@ -40,16 +40,9 @@ var igv = (function (igv) {
 
     igv.RulerTrack.prototype.lengthWidgetWithGenomicState = function (genomicState, viewportWidth) {
 
-        var $lengthWidgetContainer = $('<div class = "igv-viewport-content-ruler-div">'),
-            $lengthWidgetLabel = $('<span>'),
-            bp,
-            str;
+        var $lengthWidgetContainer = $('<div class = "igv-viewport-content-ruler-div">');
 
-        $lengthWidgetContainer.append($lengthWidgetLabel);
-
-        bp = viewportWidth * genomicState.referenceFrame.bpPerPixel;
-        str = genomicState.referenceFrame.chrName + ' ' + igv.prettyBasePairNumber(Math.round(bp));
-        $lengthWidgetLabel.text( str );
+        $lengthWidgetContainer.text( genomicState.locusSearchString );
 
         return $lengthWidgetContainer;
 
@@ -74,8 +67,7 @@ var igv = (function (igv) {
             yShim,
             tickHeight,
             viewports,
-            $e,
-            str;
+            $e;
 
         if (igv.browser.rulerTrack) {
 
@@ -84,11 +76,8 @@ var igv = (function (igv) {
             });
 
             if (1 === _.size(viewports)) {
-
-                $e = _.first(viewports).$viewport.find('.igv-viewport-content-ruler-div').find('span');
-                str = options.genomicState.referenceFrame.chrName + ' ' + igv.prettyBasePairNumber(Math.round( options.bpPerPixel * options.viewportWidth ));
-
-                $e.text( str );
+                $e = _.first(viewports).$viewport.find('.igv-viewport-content-ruler-div');
+                $e.text( options.genomicState.locusSearchString );
             }
 
         }
