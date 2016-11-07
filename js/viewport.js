@@ -172,7 +172,8 @@ var igv = (function (igv) {
                 var canvasCoords,
                     referenceFrame = igv.browser.genomicStateList[ self.locusIndex ].referenceFrame,
                     genomicLocation,
-                    time;
+                    time,
+                    newCenter;
 
                 // Sets pageX and pageY for browsers that don't support them
                 e = $.event.fix(e);
@@ -190,15 +191,21 @@ var igv = (function (igv) {
                 if (time - lastClickTime < doubleClickDelay) {
                     // This is a double-click
 
-                    if (popupTimer) {
-                        // Cancel previous timer
-                        window.clearTimeout(popupTimer);
-                        popupTimer = undefined;
+                    if (_.size(igv.browser.genomicStateList) > 1) {
+                        // ignore
+                    } else {
+
+                        if (popupTimer) {
+                            // Cancel previous timer
+                            window.clearTimeout(popupTimer);
+                            popupTimer = undefined;
+                        }
+
+                        newCenter = Math.round(referenceFrame.start + canvasCoords.x * referenceFrame.bpPerPixel);
+                        referenceFrame.bpPerPixel /= 2;
+                        igv.browser.goto(referenceFrame.chrName, newCenter);
                     }
 
-                    var newCenter = Math.round(referenceFrame.start + canvasCoords.x * referenceFrame.bpPerPixel);
-                    referenceFrame.bpPerPixel /= 2;
-                    igv.browser.goto(referenceFrame.chrName, newCenter);
                 } else {
 
                     if (e.shiftKey) {
