@@ -50,7 +50,7 @@ var igv = (function (igv) {
             var viewportContainerWidth = igv.browser.viewportContainerWidth(),
                 panel = {};
 
-            panel.locusIndex = genomicState.locusIndex;
+            panel.genomicState = genomicState;
 
             panel.$ideogram = $('<div class="igv-ideogram-content-div"></div>');
 
@@ -98,7 +98,7 @@ var igv = (function (igv) {
     igv.IdeoPanel.prototype.panelWithLocusIndex = function (locusIndex) {
 
         var panels = _.filter(this.panels, function(panel){
-            return locusIndex === panel.locusIndex;
+            return locusIndex === panel.genomicState.locusIndex;
         });
 
         return _.first(panels);
@@ -147,7 +147,7 @@ var igv = (function (igv) {
                 ww,
                 hh;
 
-            referenceFrame = igv.browser.genomicStateList[ panel.locusIndex ].referenceFrame;
+            referenceFrame = panel.genomicState.referenceFrame;
             if (!(igv.browser.genome && referenceFrame && igv.browser.genome.getChromosome(referenceFrame.chrName))) {
                 return;
             }
@@ -323,7 +323,7 @@ var igv = (function (igv) {
 
         var xy,
             xPercentage,
-            genomicState = igv.browser.genomicStateList[ panel.locusIndex ],
+            genomicState = panel.genomicState,
             referenceFrame = genomicState.referenceFrame,
             chr,
             locusLength,
@@ -356,7 +356,7 @@ var igv = (function (igv) {
 
         igv.browser.updateLocusSearchWithGenomicState(genomicState);
 
-        igv.browser.repaintWithLocusIndex( panel.locusIndex )
+        igv.browser.repaintWithLocusIndex( panel.genomicState.locusIndex )
 
     };
     return igv;

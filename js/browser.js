@@ -1364,7 +1364,7 @@ var igv = (function (igv) {
 
             // viewport object we are panning
             viewport = igv.Viewport.viewportWithID( $viewport.data('viewport') );
-            referenceFrame = igv.browser.genomicStateList[ viewport.locusIndex ].referenceFrame;
+            referenceFrame = viewport.genomicState.referenceFrame;
 
             // list of all viewports in the locus 'column' containing the panning viewport
             viewports = igv.Viewport.viewportsWithLocusIndex( $viewport.data('locusindex') );
@@ -1425,7 +1425,7 @@ var igv = (function (igv) {
                     igv.browser.updateLocusSearchWithGenomicState(_.first(igv.browser.genomicStateList));
 
                     // igv.browser.repaint();
-                    igv.browser.repaintWithLocusIndex(viewport.locusIndex);
+                    igv.browser.repaintWithLocusIndex(viewport.genomicState.locusIndex);
 
                     igv.browser.fireEvent('trackdrag');
                 }
