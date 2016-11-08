@@ -1204,6 +1204,15 @@ div.ui-dialog fieldset {
     height:100%;
 }
 
+.igv-viewport-fa-close {
+
+    position: absolute;
+    top: 4px;
+    right: 4px;
+    z-index: 1000;
+    color: red;
+}
+
 .igv-viewport-content-ruler-div {
     position: absolute;
 

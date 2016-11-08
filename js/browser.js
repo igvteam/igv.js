@@ -896,6 +896,48 @@ var igv = (function (igv) {
         }
     };
 
+    igv.Browser.prototype.closeMultiLocusPanelWithGenomicState = function(genomicState) {
+
+        var self = this,
+            tmp;
+
+        _.each(igv.browser.trackViews, function(trackView){
+            var tmp;
+            trackView.viewports[ genomicState.locusIndex ].$viewport.remove();
+            trackView.viewports[ genomicState.locusIndex ] = undefined;
+
+            tmp = _.clone(trackView.viewports);
+            trackView.viewports = undefined;
+            trackView.viewports = _.filter(tmp, function(v) {
+                return undefined !== v;
+            });
+
+        });
+
+        this.ideoPanel.panels[ genomicState.locusIndex ].$ideogram.remove();
+        this.ideoPanel.panels[ genomicState.locusIndex ] = undefined;
+
+        tmp = _.clone(this.ideoPanel.panels);
+        this.ideoPanel.panels = undefined;
+        this.ideoPanel.panels = _.filter(tmp, function(p){
+            return undefined !== p;
+        });
+
+        tmp = _.clone(this.genomicStateList);
+        this.genomicStateList = undefined;
+        this.genomicStateList = _.map(_.filter(tmp, function(gs){
+            return gs.locusIndex !== genomicState.locusIndex;
+        }), function(m, index, list){
+            m.locusIndex = index;
+            m.locusCount = _.size(list);
+            m.referenceFrame.bpPerPixel = (m.end - m.start) / (self.viewportContainerWidth()/m.locusCount);
+            return m;
+        });
+
+        this.resize();
+
+    };
+
     igv.Browser.prototype.$emptyAllViewportContainers = function ( $trackContainer ) {
         var $e = this;
 
