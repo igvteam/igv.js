@@ -504,18 +504,8 @@ var igv = (function (igv) {
                         viewportWidth: self.$viewport.width()
                     });
 
-                    // TODO: dat - implement this for viewport. Was in trackView .
-                    if (self.trackView.track.paintAxis && self.trackView.controlCanvas.width > 0 && self.trackView.controlCanvas.height > 0) {
-
-                        var buffer2 = document.createElement('canvas');
-                        buffer2.width = self.trackView.controlCanvas.width;
-                        buffer2.height = self.trackView.controlCanvas.height;
-
-                        var ctx2 = buffer2.getContext('2d');
-
-                        self.trackView.track.paintAxis(ctx2, buffer2.width, buffer2.height);
-
-                        self.trackView.controlCtx.drawImage(buffer2, 0, 0);
+                    if (doRenderControlCanvas(genomicState, self.trackView)) {
+                        renderControlCanvasWithTrackView(self.trackView);
                     }
 
                     self.tile = new Tile(referenceFrame.chrName, bpStart, bpEnd, referenceFrame.bpPerPixel, buffer);
@@ -525,6 +515,22 @@ var igv = (function (igv) {
                     self.ctx.clearRect(0, 0, self.canvas.width, self.canvas.height);
                 }
 
+                function renderControlCanvasWithTrackView(trackView) {
+                    var buffer2;
+
+                    buffer2 = document.createElement('canvas');
+                    buffer2.width = trackView.controlCanvas.width;
+                    buffer2.height = trackView.controlCanvas.height;
+
+                    trackView.track.paintAxis(buffer2.getContext('2d'), buffer2.width, buffer2.height);
+
+                    trackView.controlCtx.drawImage(buffer2, 0, 0);
+
+                }
+
+                function doRenderControlCanvas(genomicState, trackView) {
+                    return (/*0 === genomicState.locusIndex &&*/ trackView.track.paintAxis && trackView.controlCanvas.width > 0 && trackView.controlCanvas.height > 0);
+                }
             }).catch(function (error) {
 
                 self.stopSpinner();

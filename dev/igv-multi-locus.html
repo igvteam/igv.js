@@ -200,6 +200,24 @@
             palette: ["#00A0B0", "#6A4A3C", "#CC333F", "#EB6841"],
             tracks: [
                 {
+                    url: 'http://hgdownload.cse.ucsc.edu/goldenPath/hg19/encodeDCC/wgEncodeBroadHistone/wgEncodeBroadHistoneGm12878H3k4me3StdSig.bigWig',
+                    name: 'Gm12878H3k4me3'
+                }
+                ,
+                {
+                    url: 'https://data.broadinstitute.org/igvdata/t2d/recomb_decode.bedgraph',
+                    name: 'Recombination rate'
+                }
+                ,
+                {
+                    type: 'eqtl',
+                    sourceType: 'gtex-ws',
+                    url: 'http://gtexportal.org/api/v6/singleTissueEqtlByLocation',
+                    tissueName: 'Adipose_Subcutaneous',
+                    name: 'Adipose_Subcutaneous'
+                }
+                ,
+                {
                     url: 'https://data.broadinstitute.org/igvdata/BodyMap/hg19/IlluminaHiSeq2000_BodySites/brain_merged/accepted_hits.bam',
                     name: 'Brain (BodyMap)',
                     maxRows: 3000,
