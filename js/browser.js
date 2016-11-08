@@ -899,43 +899,36 @@ var igv = (function (igv) {
     igv.Browser.prototype.closeMultiLocusPanelWithGenomicState = function(genomicState) {
 
         var self = this,
-            tmp;
+            $content_header = $('#igv-content-header'),
+            filtered,
+            row;
 
-        _.each(igv.browser.trackViews, function(trackView){
-            var tmp;
-            trackView.viewports[ genomicState.locusIndex ].$viewport.remove();
-            trackView.viewports[ genomicState.locusIndex ] = undefined;
+        if (false === this.config.hideIdeogram) {
+            igv.IdeoPanel.$empty($content_header);
+        }
 
-            tmp = _.clone(trackView.viewports);
-            trackView.viewports = undefined;
-            trackView.viewports = _.filter(tmp, function(v) {
-                return undefined !== v;
-            });
+        this.$emptyAllViewportContainers($('.igv-track-container-div'));
 
+        filtered = _.filter(_.clone(this.genomicStateList), function(gs){
+            return !_.isEqual(gs, genomicState);
         });
 
-        this.ideoPanel.panels[ genomicState.locusIndex ].$ideogram.remove();
-        this.ideoPanel.panels[ genomicState.locusIndex ] = undefined;
-
-        tmp = _.clone(this.ideoPanel.panels);
-        this.ideoPanel.panels = undefined;
-        this.ideoPanel.panels = _.filter(tmp, function(p){
-            return undefined !== p;
+        this.genomicStateList = _.map(filtered, function(f, i, list){
+            f.locusIndex = i;
+            f.locusCount = _.size(list);
+            f.referenceFrame.bpPerPixel = (f.end - f.start) / (self.viewportContainerWidth()/f.locusCount);
+            return f;
         });
 
-        tmp = _.clone(this.genomicStateList);
-        this.genomicStateList = undefined;
-        this.genomicStateList = _.map(_.filter(tmp, function(gs){
-            return gs.locusIndex !== genomicState.locusIndex;
-        }), function(m, index, list){
-            m.locusIndex = index;
-            m.locusCount = _.size(list);
-            m.referenceFrame.bpPerPixel = (m.end - m.start) / (self.viewportContainerWidth()/m.locusCount);
-            return m;
-        });
+        if (false === this.config.hideIdeogram) {
+            this.ideoPanel.buildPanels($content_header);
+        }
+
+        this.buildViewportsWithGenomicStateList(this.genomicStateList);
+
+        this.toggleCenterGuide(_.size(this.genomicStateList));
 
         this.resize();
-
     };
 
     igv.Browser.prototype.$emptyAllViewportContainers = function ( $trackContainer ) {
