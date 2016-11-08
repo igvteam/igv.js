@@ -83,7 +83,7 @@ var igv = (function (igv) {
             }
             else { // non-leaf
                 for (i = 0; i < count; i++) {
-                    childOffset = byteBuffer.nextLong();
+                    childOffset = byteBuffer.getLong();
                     bufferOffset = childOffset - self.treeOffset;
                     readTreeNode(byteBuffer, offset, keySize, dictionary);
                 }
