@@ -43,6 +43,20 @@ var igv = (function (igv) {
         this.contentDiv = $('<div class="igv-viewport-content-div">')[0];
         this.$viewport.append(this.contentDiv);
 
+        if (trackView.track instanceof igv.RulerTrack || trackView.track instanceof igv.SequenceTrack) {
+            // do nothing
+        } else if (this.genomicState.locusCount > 1) {
+            this.$close = $('<div class="igv-viewport-fa-close">');
+            this.$closeButton = $('<i class="fa fa-times-circle">');
+            this.$close.append(this.$closeButton);
+
+            this.$close.click(function (e) {
+                igv.browser.closeMultiLocusPanelWithGenomicState(self.genomicState);
+            });
+
+            this.$viewport.append(this.$close);
+        }
+
         // track content canvas
         this.canvas = $('<canvas class = "igv-viewport-canvas">')[0];
         $(this.contentDiv).append(this.canvas);
