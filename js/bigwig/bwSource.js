@@ -39,6 +39,7 @@ var igv = (function (igv) {
     igv.BWSource.prototype.getFeatures = function (chr, bpStart, bpEnd, bpPerPixel) {
 
         var self = this;
+
         return new Promise(function (fulfill, reject) {
 
             self.reader.getZoomHeaders().then(function (zoomLevelHeaders) {
