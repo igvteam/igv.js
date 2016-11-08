@@ -58,14 +58,8 @@ var igv = (function (igv) {
             $(this.trackDiv).append(element);
         }
 
-        // this.trackDiv.appendChild(igv.spinner());
-
         // Track order repositioning widget
         this.attachDragWidget();
-
-        // _.each(this.viewports, function(viewport){
-        //     viewport.addMouseHandlers(self);
-        // });
 
     };
 
