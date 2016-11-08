@@ -443,7 +443,7 @@ var igv = (function (igv) {
         refFrameEnd = refFrameStart + referenceFrame.toBP(this.canvas.width);
 
         if (this.tile && this.tile.containsRange(chr, refFrameStart, refFrameEnd, referenceFrame.bpPerPixel)) {
-            this.paintImage();
+            this.paintImageWithReferenceFrame(referenceFrame);
         } else {
 
             // Expand the requested range so we can pan a bit without reloading
@@ -505,21 +505,21 @@ var igv = (function (igv) {
                     });
 
                     // TODO: dat - implement this for viewport. Was in trackView .
-                    // if (self.trackView.track.paintAxis && self.trackView.controlCanvas.width > 0 && self.trackView.controlCanvas.height > 0) {
-                    //
-                    //     var buffer2 = document.createElement('canvas');
-                    //     buffer2.width = self.trackView.controlCanvas.width;
-                    //     buffer2.height = self.trackView.controlCanvas.height;
-                    //
-                    //     var ctx2 = buffer2.getContext('2d');
-                    //
-                    //     self.trackView.track.paintAxis(ctx2, buffer2.width, buffer2.height);
-                    //
-                    //     self.controlCtx.drawImage(buffer2, 0, 0);
-                    // }
+                    if (self.trackView.track.paintAxis && self.trackView.controlCanvas.width > 0 && self.trackView.controlCanvas.height > 0) {
+
+                        var buffer2 = document.createElement('canvas');
+                        buffer2.width = self.trackView.controlCanvas.width;
+                        buffer2.height = self.trackView.controlCanvas.height;
+
+                        var ctx2 = buffer2.getContext('2d');
+
+                        self.trackView.track.paintAxis(ctx2, buffer2.width, buffer2.height);
+
+                        self.trackView.controlCtx.drawImage(buffer2, 0, 0);
+                    }
 
                     self.tile = new Tile(referenceFrame.chrName, bpStart, bpEnd, referenceFrame.bpPerPixel, buffer);
-                    self.paintImage();
+                    self.paintImageWithReferenceFrame(referenceFrame);
 
                 } else {
                     self.ctx.clearRect(0, 0, self.canvas.width, self.canvas.height);
@@ -577,9 +577,7 @@ var igv = (function (igv) {
         }
     };
 
-    igv.Viewport.prototype.paintImage = function () {
-
-        var referenceFrame = igv.browser.genomicStateList[ this.locusIndex ].referenceFrame;
+    igv.Viewport.prototype.paintImageWithReferenceFrame = function (referenceFrame) {
 
         this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
 
@@ -740,7 +738,7 @@ var igv = (function (igv) {
 
 
         this.tile = new Tile(this.tile.chr, this.tile.startBP, this.tile.endBP, this.tile.scale, buffer);
-        this.paintImage();
+        this.paintImageWithReferenceFrame(this.genomicState.referenceFrame);
     };
 
     return igv;
