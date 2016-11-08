@@ -43,17 +43,21 @@ var igv = (function (igv) {
         this.contentDiv = $('<div class="igv-viewport-content-div">')[0];
         this.$viewport.append(this.contentDiv);
 
-        if (trackView.track instanceof igv.RulerTrack) {
+        if (this.genomicState.locusCount > 1) {
 
-            this.$close = $('<div class="igv-viewport-fa-close">');
-            this.$closeButton = $('<i class="fa fa-times-circle">');
-            this.$close.append(this.$closeButton);
+            if (trackView.track instanceof igv.RulerTrack) {
 
-            this.$close.click(function (e) {
-                igv.browser.closeMultiLocusPanelWithGenomicState(self.genomicState);
-            });
+                this.$close = $('<div class="igv-viewport-fa-close">');
+                this.$closeButton = $('<i class="fa fa-times-circle">');
+                this.$close.append(this.$closeButton);
 
-            this.$viewport.append(this.$close);
+                this.$close.click(function (e) {
+                    igv.browser.closeMultiLocusPanelWithGenomicState(self.genomicState);
+                });
+
+                this.$viewport.append(this.$close);
+
+            }
         }
 
         // track content canvas

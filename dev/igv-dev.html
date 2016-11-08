@@ -13,10 +13,6 @@
     <link rel="stylesheet" type="text/css"
           href="https://ajax.googleapis.com/ajax/libs/jqueryui/1.11.2/themes/redmond/jquery-ui.css"/>
 
-    <!-- Google fonts -->
- <!--   <link rel="stylesheet" type="text/css" href='//fonts.googleapis.com/css?family=PT+Sans:400,700'>
-    <link rel="stylesheet" type="text/css" href='//fonts.googleapis.com/css?family=Open+Sans'>
--->
     <!-- Font Awesome CSS -->
     <link rel="stylesheet" type="text/css" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.2.0/css/font-awesome.min.css">
 
@@ -341,13 +337,11 @@
                     });">UCSC bedgraph (chr19)
         </div>
 
-
         <div onclick="igv.browser.loadTrack({
         url: '../test/data/wig/fixedStep-example.wig',
         name: 'fixedStep'
         })">Fixed step wig (chr 19)
         </div>
-
 
         <div onclick="igv.browser.loadTrack({
         url: '../test/data/wig/variableStep-example.wig',
@@ -360,7 +354,6 @@
                                 name: 'Recombination rate'})">Recombination Rate (bedgraph)
         </div>
 
-
         <div onclick="igv.browser.loadTrack({
         url: 'https://www.encodeproject.org/files/ENCFF002ADR/@@download/ENCFF002ADR.bigBed',
         name: 'ENCFF002ADR',
@@ -370,13 +363,11 @@
         })">Encode bigbed
         </div>
 
-
         <div onclick="igv.browser.loadTrack({
         url: 'http://hgdownload.cse.ucsc.edu/goldenPath/hg19/encodeDCC/wgEncodeBroadHistone/wgEncodeBroadHistoneGm12878H3k4me3StdSig.bigWig',
         name: 'Gm12878H3k4me3'
         })">Encode bigwig
         </div>
-
 
         <div onclick="igv.browser.loadTrack({
         url: '../test/data/misc/GWAS_catalog_SNPs_Pval5E08_hg19_040115_subset.txt',
@@ -401,7 +392,6 @@
         })">EDEN gff
         </div>
 
-
         <div onclick="igv.browser.loadTrack({
             url: '../test/data/gff/color.gff',
             name: 'color gff',
@@ -409,7 +399,6 @@
             indexed: false
         })">Color gff
         </div>
-
 
         <div onclick="igv.browser.loadTrack({
             url: '../test/data/gff/ENST00000442752.gtf',
@@ -436,7 +425,6 @@
         })">wustl gtf
         </div>
 
-
         <div onclick="igv.browser.loadTrack({
             url: 'https://s3.amazonaws.com/igv.broadinstitute.org/annotations/hg19/genes/gencode.v24lift37.annotation.sorted.gtf.gz',
             indexURL: 'https://s3.amazonaws.com/igv.broadinstitute.org/annotations/hg19/genes/gencode.v24lift37.annotation.sorted.gtf.gz.tbi',
@@ -445,7 +433,6 @@
             visibilityWindow: 10000000
         })">Gencode v24
         </div>
-
 
         <div onclick="igv.browser.loadTrack({
            type: 'eqtl',
@@ -456,42 +443,7 @@
            })">GTEX eqtl
         </div>
 
-        <!--<div onclick="igv.browser.loadTrack({ type: 't2d',-->
-                                    <!--url: 'http://www.type2diabetesgenetics.org/trait/getData',-->
-                                    <!--trait: '2hrI',-->
-                                    <!--dataset: 'GWAS_MAGIC_mdv2',-->
-                                    <!--pvalue: 'P_VALUE',-->
-                                    <!--name: '2-hour insulin',-->
-                                    <!--variantURL: 'http://www.type2diabetesgenetics.org/variantInfo/variantInfo/',-->
-                                    <!--traitURL: 'http://www.type2diabetesgenetics.org/trait/traitInfo/'-->
-                                <!--})">two-hour insulin-->
-        <!--</div>-->
-
-        <!--<div onclick="igv.browser.loadTrack({-->
-            <!--url: 'http://data.broadinstitute.org/missingFile',-->
-            <!--name: 'bad',-->
-            <!--format: 'gff',-->
-            <!--displayMode: 'SQUISHED',     // COLLAPSED | EXPANDED | SQUISHED-->
-            <!--indexed: false-->
-        <!--})">BAD url-->
-        <!--</div>-->
-
-
     </div>
-
-<!--
-    <div style="border-style: solid;border-color:grey;border-radius:5px;display:inline-block;margin:10px">
-        Search (via API)
-        <input type="text" id="gotoInput" style="border-style:solid;border-width:1px;border-color:grey"/>
-        <button type="button" onclick="igv.browser.search(document.getElementById('gotoInput').value)">Go</button>
-    </div>
-    <br/>
-    <div style="border-style: solid;border-color:grey;border-radius:5px;display:inline-block;margin:10px">
-        Find Tracks
-        property: <input type="text" id="findTracksProperty" style="border-style:solid;border-width:1px;border-color:grey"/> value: <input type="text" id="findTracksValue" style="border-style:solid;border-width:1px;border-color:grey"/>
-        <button type="button" onclick="findTracks(document.getElementById('findTracksProperty').value, document.getElementById('findTracksValue').value)">Go</button>
-    </div>
--->
 
 </div>
 
