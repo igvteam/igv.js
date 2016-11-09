@@ -1,7 +1,7 @@
 function runBigwigTests() {
 
-    var dataURL = "https://data.broadinstitute.org/igvdata/test/data"
-        
+    var dataURL = "https://data.broadinstitute.org/igvdata/test/data/"
+
     function createMockObjects(bpPerPixel) {
 
         igv = igv || {};
@@ -68,7 +68,7 @@ function runBigwigTests() {
 
         createMockObjects();
 
-        var url = dataURL + "/bigwig/bigWigExample.bw",
+        var url = dataURL + "bigwig/bigWigExample.bw",
             bwReader = new igv.BWReader({url: url});
 
         bwReader.loadHeader().then(function () {
@@ -90,7 +90,7 @@ function runBigwigTests() {
     asyncTest("Wig features", function () {
 
         //chr21:19,146,376-19,193,466
-        var url = dataURL + "/bigwig/bigWigExample.bw",
+        var url = dataURL + "bigwig/bigWigExample.bw",
             chr = "chr21",
             bpStart = 19168957,
             bpEnd = 19170640,
@@ -116,7 +116,7 @@ function runBigwigTests() {
     asyncTest("Zoom data", function () {
 
         //chr21:19,146,376-19,193,466
-        var url = dataURL + "/bigwig/bigWigExample.bw",
+        var url = dataURL + "bigwig/bigWigExample.bw",
             chr = "chr21",
             bpStart = 18728264,
             bpEnd = 26996291,
@@ -139,28 +139,31 @@ function runBigwigTests() {
         })
     });
 
-    // asyncTest("Bed features", function () {
-    //
-    //     //chr21:19,146,376-19,193,466
-    //     var url = "http://data.broadinstitute.org/igvdata/test/data/bigwig/bigBedExample.bb",
-    //         chr = "chr21",
-    //         bpStart = 33031597,
-    //         bpEnd = 33041570,
-    //         bpPerPixel = 0.5;
-    //
-    //     createMockObjects(bpPerPixel);
-    //
-    //     var bWSource = new igv.BWSource({url: url});
-    //
-    //     bWSource.getFeatures(chr, bpStart, bpEnd, function (features) {
-    //
-    //         ok(features);
-    //
-    //         equal(features.length, 23);   // Verified in iPad app
-    //
-    //         start();
-    //     });
-    // });
+    asyncTest("Bed features", function () {
+
+        //chr21:19,146,376-19,193,466
+        var url = dataURL + "bigwig/bigBedExample.bb",
+            chr = "chr21",
+            bpStart = 33031597,
+            bpEnd = 33041570,
+            bpPerPixel = 0.5;
+
+        createMockObjects(bpPerPixel);
+
+        var bWSource = new igv.BWSource({url: url});
+
+        bWSource.getFeatures(chr, bpStart, bpEnd, bpPerPixel).then(function (features) {
+
+            ok(features);
+
+            equal(features.length, 23);   // Verified in iPad app
+
+            start();
+        }).catch(function (error) {
+            console.log(error);
+            ok(false);
+        });
+    });
 
 
 }

@@ -1,51 +1,59 @@
-function runBEDUnitTests() {
+function runBedTests() {
+
+
+    // mock object
+    if (igv === undefined) {
+        igv = {};
+    }
+
+    igv.browser = {
+        getFormat: function () {
+        },
+
+        genome: {
+            getChromosome: function (chr) {
+            },
+            getChromosomeName: function (chr) {
+                return chr
+            }
+        }
+    };
 
     asyncTest("BED query", function () {
 
         var chr = "chr1",
             bpStart = 67655271,
-            bpEnd   = 67684468,
+            bpEnd = 67684468,
             featureSource = new igv.FeatureSource({
-                type: 'bed',
+                format: 'bed',
+                indexed: false,
                 url: 'data/bed/basic_feature_3_columns.bed'
             });
 
-        featureSource.getFeatures(chr, bpStart, bpEnd, function (features) {
+        // Must get file header first
+        featureSource.getFileHeader().then(function (header) {
+            featureSource.getFeatures(chr, bpStart, bpEnd).then(function (features) {
 
-            ok(features);
-            equal(128, features.length);   // feature count. Determined by grepping file
-            equal(chr, features[ 0 ].chr); // ensure features chromosome is specified chromosome
+                ok(features);
+                equal(128, features.length);   // feature count. Determined by grepping file
+                equal(chr, features[0].chr); // ensure features chromosome is specified chromosome
 
-            start();
-        }, undefined);
-
-    });
-
-    asyncTest("BED all features", function () {
-
-        var featureSource = new igv.FeatureSource({
-                type: 'bed',
-                url: 'data/bed/basic_feature_3_columns.bed'
-            });
-
-        featureSource.allFeatures(function (features) {
-
-            ok(features);
-            equal(128, features.length);   // feature count. Determined by grepping file
-
-            start();
+                start();
+            }, undefined);
+        }).catch(function (error) {
+            console.log(error);
         });
-
     });
 
     asyncTest("BED track line", function () {
 
         var featureSource = new igv.FeatureSource({
-            type: 'bed',
+            format: 'bed',
+            indexed: false,
             url: 'data/bed/basic_feature_3_columns.bed'
         });
 
-        featureSource.getHeader(function (header) {
+        featureSource.getFileHeader().then(function (header) {
 
             ok(header);
             equal(header.name, "Basic Features");
@@ -59,17 +67,17 @@ function runBEDUnitTests() {
 
         var chr = "chr1",
             bpStart = 67655271,
-            bpEnd   = 67684468,
+            bpEnd = 67684468,
             featureSource = new igv.FeatureSource({
-                type: 'bed',
+                format: 'bed',
                 url: 'data/bed/basic_feature_3_columns.bed.gz'
             });
 
-        featureSource.getFeatures(chr, bpStart, bpEnd, function (features) {
+        featureSource.getFeatures(chr, bpStart, bpEnd).then(function (features) {
 
             ok(features);
             equal(128, features.length);   // feature count. Determined by grepping file
-            equal(chr, features[ 0 ].chr); // ensure features chromosome is specified chromosome
+            equal(chr, features[0].chr); // ensure features chromosome is specified chromosome
 
             start();
         }, undefined);
@@ -84,14 +92,14 @@ function runBEDUnitTests() {
             bpEnd;
 
         featureSource = new igv.FeatureSource({
-            type: 'broadPeak',
+            format: 'broadPeak',
             url: "data/peak/test.broadPeak"
         });
 
         chr = "chr22";
         bpStart = 16847690;
         bpEnd = 20009819;
-        featureSource.getFeatures(chr, bpStart, bpEnd, function (features) {
+        featureSource.getFeatures(chr, bpStart, bpEnd).then(function (features) {
 
             var feature;
 
@@ -110,7 +118,6 @@ function runBEDUnitTests() {
         }, undefined);
 
     });
-
 
 
 }
