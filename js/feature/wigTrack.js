@@ -34,7 +34,7 @@ var igv = (function (igv) {
         this.url = config.url;
 
         if (config.color === undefined) config.color = "rgb(150,150,150)";   // Hack -- should set a default color per track type
-        
+
         igv.configTrack(this, config);
 
         if ("bigwig" === config.format) {
@@ -45,6 +45,7 @@ var igv = (function (igv) {
         }
 
         // Min and max values.  No defaults for these, if they aren't set track will autoscale.
+        this.autoScale = (config.max === undefined);
         this.dataRange = {
             min: config.min,
             max: config.max
