@@ -55,7 +55,7 @@ var igv = (function (igv) {
         }
 
 
-        switch (format) {
+        switch (format.toLowerCase()) {
             case "narrowpeak":
             case "broadpeak":
             case "peaks":

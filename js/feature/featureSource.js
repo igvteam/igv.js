@@ -160,8 +160,9 @@ var igv = (function (igv) {
                 }
 
                 self.reader.readFeatures(chr, genomicInterval.start, genomicInterval.end).then(
+           
                     function (featureList) {
-
+                        
                         if (featureList && typeof featureList.forEach === 'function') {  // Have result AND its an array type
 
                             var isQueryable = self.reader.indexed || self.config.sourceType !== "file";

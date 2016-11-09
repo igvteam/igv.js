@@ -1,9 +1,11 @@
 function runBAMTests() {
 
+    var dataURL = "https://data.broadinstitute.org/igvdata/test/data/"
+
     // Mock object
     igv.browser = {
         genome: {
-            sequence: new igv.FastaSequence("//igvdata.broadinstitute.org/genomes/seq/hg19/hg19.fasta")
+            sequence: new igv.FastaSequence("https://igvdata.broadinstitute.org/genomes/seq/hg19/hg19.fasta")
         }
     };
 
@@ -16,7 +18,7 @@ function runBAMTests() {
 
         bamReader = new igv.BamReader({
             type: 'bam',
-            url: 'data/bam/four.reads.bam',
+            url: dataURL + 'bam/four.reads.bam',
             label: 'BAM unit test'
         });
 
@@ -41,7 +43,7 @@ function runBAMTests() {
 
         bamReader = new igv.BamReader({
             type: 'bam',
-            url: 'data/bam/gstt1_sample.bam',
+            url: dataURL + 'bam/gstt1_sample.bam',
             label: 'BAM unit test'
         });
 
@@ -58,7 +60,7 @@ function runBAMTests() {
 
     asyncTest("header", function () {
 
-        var bamPath = "data/bam/gstt1_sample.bam",
+        var bamPath = dataURL + "bam/gstt1_sample.bam",
             bamFile = new igv.BamReader({
                 type: 'bam',
                 url: bamPath,
@@ -66,8 +68,6 @@ function runBAMTests() {
             });
 
         bamFile.readHeader().then(function () {
-
-            equal(bamFile.contentLength, 60872, "bamFile.contentLength");
 
             ok(bamFile.chrToIndex["chr1"] === 0);
             start();
