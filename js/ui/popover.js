@@ -32,7 +32,7 @@ var igv = (function (igv) {
 
         this.$parent = this.markupWith$Parent($parent, id);
 
-        this.$popoverContent.kinetic({});
+        // this.$popoverContent.kinetic({});
 
     };
 
@@ -40,12 +40,6 @@ var igv = (function (igv) {
 
         var self = this,
             $popoverHeader;
-
-        // if (this.$parent) {
-        //     return;
-        // }
-
-        // this.$parent = $parent;
 
         // popover container
         this.$popover = $('<div class="igv-popover">');
