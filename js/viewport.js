@@ -56,7 +56,6 @@ var igv = (function (igv) {
                 });
 
                 this.$viewport.append(this.$close);
-
             }
         }
 
@@ -68,17 +67,8 @@ var igv = (function (igv) {
         this.ctx = this.canvas.getContext("2d");
 
         if (this.genomicState.locusCount > 1) {
-            
             if (trackView.track instanceof igv.RulerTrack) {
-
-                $(this.contentDiv).append(igv.browser.rulerTrack.lengthWidgetWithGenomicState(this.genomicState, this.$viewport.width()));
-
-                if (1 === _.size(igv.browser.genomicStateList)) {
-                    $(this.contentDiv).find('.igv-viewport-content-ruler-div').find('span').hide();
-                } else {
-                    $(this.contentDiv).find('.igv-viewport-content-ruler-div').find('span').show();
-                }
-
+                $(this.contentDiv).append(igv.browser.rulerTrack.locusLabelWithViewport(this));
             }
         }
 

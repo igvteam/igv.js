@@ -38,14 +38,22 @@ var igv = (function (igv) {
 
     };
 
-    igv.RulerTrack.prototype.lengthWidgetWithGenomicState = function (genomicState, viewportWidth) {
+    igv.RulerTrack.prototype.locusLabelWithViewport = function (viewport) {
 
-        var $lengthWidgetContainer = $('<div class = "igv-viewport-content-ruler-div">');
+        var locusLabel = $('<div class = "igv-viewport-content-ruler-div">');
 
-        $lengthWidgetContainer.text( genomicState.locusSearchString );
+        locusLabel.text( viewport.genomicState.locusSearchString );
 
-        return $lengthWidgetContainer;
+        locusLabel.click(function (e) {
 
+            var genomicState = viewport.genomicState;
+
+            genomicState.referenceFrame = _.clone(genomicState.initialReferenceFrame);
+            igv.browser.updateWithLocusIndex(genomicState.locusIndex);
+
+        });
+
+        return locusLabel;
     };
 
     igv.RulerTrack.prototype.getFeatures = function (chr, bpStart, bpEnd) {
@@ -65,22 +73,9 @@ var igv = (function (igv) {
             x,
             l,
             yShim,
-            tickHeight,
-            viewports,
-            $e;
+            tickHeight;
 
-        if (igv.browser.rulerTrack) {
-
-            viewports = _.filter(igv.Viewport.viewportsWithLocusIndex(options.genomicState.locusIndex), function(viewport){
-                return viewport.trackView.track instanceof igv.RulerTrack;
-            });
-
-            if (1 === _.size(viewports)) {
-                $e = _.first(viewports).$viewport.find('.igv-viewport-content-ruler-div');
-                $e.text( options.genomicState.locusSearchString );
-            }
-
-        }
+        updateLocusLabelWithGenomicState(options.genomicState);
 
         fontStyle = { textAlign: 'center', font: '10px PT Sans', fillStyle: "rgba(64, 64, 64, 1)", strokeStyle: "rgba(64, 64, 64, 1)" };
 
@@ -113,6 +108,20 @@ var igv = (function (igv) {
         }
         igv.graphics.strokeLine(options.context, 0, this.height - yShim, options.pixelWidth, this.height - yShim);
 
+        function updateLocusLabelWithGenomicState(genomicState) {
+            var $e,
+                viewports;
+
+            viewports = _.filter(igv.Viewport.viewportsWithLocusIndex(genomicState.locusIndex), function(viewport){
+                return (viewport.trackView.track instanceof igv.RulerTrack);
+            });
+
+            if (1 === _.size(viewports)) {
+                $e = _.first(viewports).$viewport.find('.igv-viewport-content-ruler-div');
+                $e.text( genomicState.locusSearchString );
+            }
+
+        }
 
         function formatNumber(anynum, decimal) {
             //decimal  - the number of decimals after the digit from 0 to 3
@@ -172,7 +181,6 @@ var igv = (function (igv) {
             //retval =  "$"+retval
             return retval;
         }
-
 
     };
 
