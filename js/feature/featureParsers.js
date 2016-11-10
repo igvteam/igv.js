@@ -46,7 +46,9 @@ var igv = (function (igv) {
 
         var customFormat;
 
-        this.format = format;
+        if(format !== undefined) {
+            this.format = format.toLowerCase();
+        }
         this.nameField = config ? config.nameField : undefined;
         this.skipRows = 0;   // The number of fixed header rows to skip.  Override for specific types as needed
 
@@ -54,8 +56,7 @@ var igv = (function (igv) {
             this.decode = decode;
         }
 
-
-        switch (format.toLowerCase()) {
+        switch (this.format) {
             case "narrowpeak":
             case "broadpeak":
             case "peaks":

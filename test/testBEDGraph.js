@@ -1,25 +1,54 @@
 /**
  * Created by turner on 2/13/14.
  */
-function runBEDGraphFeatureSourceTests() {
+function runBEDGraphTests() {
+
+
+    //mock object
+    if (igv === undefined) {
+        igv = {};
+    }
+
+    igv.browser = {
+        getFormat: function () {
+        },
+
+        genome: {
+            getChromosome: function (chr) {
+            },
+            getChromosomeName: function (chr) {
+                return chr
+            }
+        }
+    };
 
     asyncTest("BEDGraphFeatureSource getFeatures", function () {
 
         var chr = "chr19",
             bpStart = 49302001,
-            bpEnd   = 49304701,
+            bpEnd = 49304701,
             featureSource = new igv.FeatureSource({
-                type: 'bedgraph',
+                format: 'bedgraph',
                 url: 'data/wig/bedgraph-example-uscs.bedgraph'
             });
 
-        featureSource.getFeatures(chr, bpStart, bpEnd, function(features) {
+        featureSource.getFeatures(chr, bpStart, bpEnd).then(function (features) {
 
             ok(features);
             equal(features.length, 9);
 
+            //chr19	49302600	49302900	-0.50
+            var f = features[2];
+            equal(f.chr, "chr19", "chromosome");
+            equal(f.start, 49302600, "start");
+            equal(f.end, 49302900, "end");
+            equal(f.value, -0.50, "value");
+
             start();
-        }, undefined);
+        }).catch(function (error) {
+            console.log(error);
+            ok(false);
+        });
 
     });
 
