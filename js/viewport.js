@@ -47,7 +47,7 @@ var igv = (function (igv) {
 
             if (trackView.track instanceof igv.RulerTrack) {
 
-                this.$close = $('<div class="igv-viewport-fa-close">');
+                this.$close = $('<div class="igv-viewport-fa-close igv-fa-search">');
                 this.$closeButton = $('<i class="fa fa-times-circle">');
                 this.$close.append(this.$closeButton);
 
@@ -67,17 +67,19 @@ var igv = (function (igv) {
         this.canvas.setAttribute('height', this.contentDiv.clientHeight);
         this.ctx = this.canvas.getContext("2d");
 
-        // additional content for ruler track
-        if (trackView.track instanceof igv.RulerTrack) {
+        if (this.genomicState.locusCount > 1) {
+            
+            if (trackView.track instanceof igv.RulerTrack) {
 
-            $(this.contentDiv).append(igv.browser.rulerTrack.lengthWidgetWithGenomicState(this.genomicState, this.$viewport.width()));
+                $(this.contentDiv).append(igv.browser.rulerTrack.lengthWidgetWithGenomicState(this.genomicState, this.$viewport.width()));
 
-            if (1 === _.size(igv.browser.genomicStateList)) {
-                $(this.contentDiv).find('.igv-viewport-content-ruler-div').find('span').hide();
-            } else {
-                $(this.contentDiv).find('.igv-viewport-content-ruler-div').find('span').show();
+                if (1 === _.size(igv.browser.genomicStateList)) {
+                    $(this.contentDiv).find('.igv-viewport-content-ruler-div').find('span').hide();
+                } else {
+                    $(this.contentDiv).find('.igv-viewport-content-ruler-div').find('span').show();
+                }
+
             }
-
         }
 
         // zoom in to see features
