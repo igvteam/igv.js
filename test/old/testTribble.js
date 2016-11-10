@@ -2,6 +2,24 @@
 
 function testTribble() {
 
+    //mock object
+    if (igv === undefined) {
+        igv = {};
+    }
+
+    igv.browser = {
+        getFormat: function () {
+        },
+
+        genome: {
+            getChromosome: function (chr) {
+            },
+            getChromosomeName: function (chr) {
+                return chr
+            }
+        }
+    };
+    
     asyncTest("Tribble index", function () {
 
         var config,

@@ -2,6 +2,8 @@
 
 function runFastaTests() {
 
+    var dataURL = "https://data.broadinstitute.org/igvdata/test/data/";
+
     module("Fasta");
 
 
@@ -26,14 +28,14 @@ function runFastaTests() {
 
     function handleError(error) {
         console.log(error);
-        fail();
+        ok(false);
     }
 
     asyncTest("FastaSequence - Test fasata with no index", 1, function () {
 
         var sequence = new igv.FastaSequence(
             {
-                fastaURL: "data/fasta/test.fasta",
+                fastaURL: dataURL + "fasta/test.fasta",
                 indexed: false
             }
         );
@@ -55,7 +57,7 @@ function runFastaTests() {
 
     asyncTest("FastaSequence - Test getSequence", 2, function () {
 
-        var sequence = new igv.FastaSequence({fastaURL: "http://data.broadinstitute.org/igvdata/test/data/fasta/chr22.fa"});
+        var sequence = new igv.FastaSequence({fastaURL: dataURL + "fasta/chr22.fa"});
 
         sequence.init().then(function () {
 
@@ -76,7 +78,7 @@ function runFastaTests() {
 
     asyncTest("FastaSequence - Test readSequence", 2, function () {
 
-        var sequence = new igv.FastaSequence({fastaURL: "http://data.broadinstitute.org/igvdata/test/data/fasta/chr22.fa"});
+        var sequence = new igv.FastaSequence({fastaURL: dataURL + "fasta/chr22.fa"});
 
         sequence.init().then(function () {
 
@@ -97,7 +99,7 @@ function runFastaTests() {
 
     asyncTest("FastaSequence - Test readSequence - with unknown sequence", 1, function () {
 
-        var sequence = new igv.FastaSequence({fastaURL: "http://data.broadinstitute.org/igvdata/test/data/fasta/chr22.fa"});
+        var sequence = new igv.FastaSequence({fastaURL: dataURL + "fasta/chr22.fa"});
 
         sequence.init().then(function () {
 
