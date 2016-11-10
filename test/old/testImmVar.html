@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Test inflate</title>
+    <link rel="stylesheet" href="../vendor/qunit-1.12.0.css" type="text/css"/>
+    <script type="text/javascript" src="../vendor/qunit-1.12.0.js"></script>
+
+    <!-- jQuery JS -->
+    <script type="text/javascript" src="//ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
+
+    <script type="text/javascript" src="../../vendor/inflate.js"></script>
+    <script type="text/javascript" src="../../vendor/zlib_and_gzip.min.js"></script>
+
+    <!-- IGV JS -->
+    <script type="text/javascript" src="../../js/igv-create.js"></script>
+    <script type="text/javascript" src="../../js/ui/popover.js"></script>
+    <script type="text/javascript" src="../../js/browser.js"></script>
+    <script type="text/javascript" src="../../js/ideogram.js"></script>
+    <script type="text/javascript" src="../../js/referenceFrame.js"></script>
+    <script type="text/javascript" src="../../js/igv-canvas.js"></script>
+    <script type="text/javascript" src="../../js/genome.js"></script>
+    <script type="text/javascript" src="../../js/trackView.js"></script>
+
+    <script type="text/javascript" src="../../js/rulerTrack.js"></script>
+
+    <script type="text/javascript" src="../../js/feature/featureTrack.js"></script>
+    <script type="text/javascript" src="../../js/igv-color.js"></script>
+    <script type="text/javascript" src="../../js/igv-utils.js"></script>
+    <script type="text/javascript" src="../../js/parseUtils.js"></script>
+    <script type="text/javascript" src="../../js/fasta.js"></script>
+    <script type="text/javascript" src="../../js/sequenceTrack.js"></script>
+    <script type="text/javascript" src="../../js/feature/wigTrack.js"></script>
+
+    <script type="text/javascript" src="../../js/igv-exts.js"></script>
+    <script type="text/javascript" src="../../js/igvxhr.js"></script>
+    <script type="text/javascript" src="../../js/binary.js"></script>
+
+    <script type="text/javascript" src="../../js/gtex/eqtlTrack.js"></script>
+    <script type="text/javascript" src="../../js/gtex/gtexFileReader.js"></script>
+    <script type="text/javascript" src="../../js/gtex/gtex.js"></script>
+
+    <script type="text/javascript" src="../../js/bam/coverageMap.js"></script>
+    <script type="text/javascript" src="../../js/bam/bamReader.js"></script>
+    <script type="text/javascript" src="../../js/bam/bgzf.js"></script>
+    <script type="text/javascript" src="../../js/bam/bamSource.js"></script>
+    <script type="text/javascript" src="../../js/bam/bamTrack.js"></script>
+    <script type="text/javascript" src="../../js/bam/bamAlignment.js"></script>
+    <script type="text/javascript" src="../../js/bam/bamIndex.js"></script>
+
+    <script type="text/javascript" src="../../js/ga4gh/ga4ghAlignmentReader.js"></script>
+    <script type="text/javascript" src="../../js/ga4gh/ga4ghVariantReader.js"></script>
+    <script type="text/javascript" src="../../js/ga4gh/ga4ghHelper.js"></script>
+
+    <script type="text/javascript" src="../../js/intervalTree.js"></script>
+
+    <script type="text/javascript" src="../../js/feature/featureCache.js"></script>
+    <script type="text/javascript" src="../../js/feature/featureSource.js"></script>
+    <script type="text/javascript" src="../../js/feature/featureParsers.js"></script>
+    <script type="text/javascript" src="../../js/feature/tribble.js"></script>
+    <script type="text/javascript" src="../../js/feature/featureFileReader.js"></script>
+
+    <script type="text/javascript" src="../../js/encode/encode.js"></script>
+
+    <script type="text/javascript" src="../../js/karyo/karyo.js"></script>
+    <script type="text/javascript" src="../../js/gwas/t2dVariantSource.js"></script>
+    <script type="text/javascript" src="../../js/gwas/gwasTrack.js"></script>
+
+    <script type="text/javascript" src="../../js/feature/segParser.js"></script>
+    <script type="text/javascript" src="../../js/feature/segTrack.js"></script>
+    <script type="text/javascript" src="../../js/variant/vcfParser.js"></script>
+    <script type="text/javascript" src="../../js/variant/variant.js"></script>
+
+    <script type="text/javascript" src="../../js/trackCore.js"></script>
+
+    <script type="text/javascript" src="../../js/ui/trackMenuPopupDialog.js"></script>
+
+    <script type="text/javascript" src="../../js/gtex/immvarReader.js"></script>
+    <script type="text/javascript" src="testImmVar.js"></script>
+</head>
+<body>
+<div id="qunit"></div>
+<div id="qunit-fixture"></div>
+
+
+<script type="text/javascript">
+    document.addEventListener('DOMContentLoaded', function () {
+        runImmVarTests();
+    });
+</script>
+</body>
+</html>

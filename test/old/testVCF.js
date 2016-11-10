@@ -28,7 +28,7 @@ function vcfTests() {
             start();
 
         });
-    }
+    });
 
     asyncTest("VCF feature source", function () {
 

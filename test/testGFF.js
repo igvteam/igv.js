@@ -1,28 +1,43 @@
-function runGFFUnitTests() {
+function runGFFTests() {
+
+    // mock object
+    if (igv === undefined) {
+        igv = {};
+    }
+
+    igv.browser = {
+        getFormat: function () {
+        },
+
+        genome: {
+            getChromosome: function (chr) {
+            },
+            getChromosomeName: function (chr) {
+                return chr
+            }
+        }
+    };
 
     asyncTest("GFF query", function () {
 
-        var chr = "ctg123",
+        var chr = "chr1",
             bpStart = 1,
             bpEnd   = 10000,
             featureSource = new igv.FeatureSource({
                 url: 'data/gff/eden.gff',
-                format: 'gff'
+                format: 'gff3'
             });
 
-        featureSource.getFeatures(chr, bpStart, bpEnd, function (features) {
+        featureSource.getFeatures(chr, bpStart, bpEnd).then(function (features) {
 
             ok(features);
-            equal(23, features.length);   // feature count. Determined by grepping file
-            equal(chr, features[ 0 ].chr); // ensure features chromosome is specified chromosome
-
-            features.forEach(function (f){
-               var pd = f.popupData();
-            });
+            equal(3, features.length);
+            equal(chr, features[0].chr); // ensure features chromosome is specified chromosome
 
             start();
-        }, undefined);
-
+        }).catch(function (error) {
+            console.log(error);
+            ok(false);
+        });
     });
-
 }
