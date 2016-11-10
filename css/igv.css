@@ -1225,10 +1225,20 @@ div.ui-dialog fieldset {
     font-size: 12px;
     font-weight: 200;
 
+    text-align: center;
+    min-width: 32px;
+
     z-index:64;
 
     color: rgb(107, 107, 107);
-    /*background-color: white;*/
+
+}
+
+.igv-viewport-content-ruler-div:hover,
+.igv-viewport-content-ruler-div:focus,
+.igv-viewport-content-ruler-div:active  {
+    cursor: pointer;
+    color: #434343;
 }
 
 .igv-viewport-canvas {
