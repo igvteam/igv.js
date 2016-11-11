@@ -173,7 +173,7 @@ var igv = (function (igv) {
             return;
         }
 
-        var chromosomes = genome.getChromosomes();
+        var chromosomes = genome.chromosomes;
         var image = this.ideograms;
 
 
