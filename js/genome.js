@@ -109,6 +109,37 @@ var igv = (function (igv) {
         return this.chromosomes;
     }
 
+    /**
+     * Return the genome coordinate in kb for the give chromosome and position.
+     */
+    igv.Genome.prototype.getGenomeCoordinate = function (chr, bp) {
+        return this.getCumulativeOffset(chr) + Math.floor(bp / 1000);
+    }
+
+
+    /**
+     * Return the offset in genome coordinates (kb) of the start of the given chromosome
+     */
+    igv.Genome.prototype.getCumulativeOffset = function (chr) {
+
+        var self = this,
+            queryChr = this.getChromosomeName(chr);
+
+        if (this.cumulativeOffsets === undefined) {
+            var cumulativeOffsets = {};
+            var offset = 0;
+            this.chromosomeNames.forEach(function (name) {
+                cumulativeOffsets[name] = Math.floor(offset);
+                var chromosome = self.getChromosome(name);
+                offset += (chromosome.bpLength / 1000);   // Genome coordinates are in KB.  Beware 32-bit max value limit
+            });
+            this.cumulativeOffsets = cumulativeOffsets;
+        }
+
+        return this.cumulativeOffsets[queryChr];
+    }
+
+
     igv.Chromosome = function (name, order, bpLength) {
         this.name = name;
         this.order = order;
@@ -188,7 +219,7 @@ var igv = (function (igv) {
 
                 checkReady();
 
-            }).catch(function(err) {
+            }).catch(function (err) {
                 reject(err);
             });
 

@@ -52,7 +52,7 @@ var igv = (function (igv) {
             }
         } else if (config.sourceType === "bigquery") {
             this.reader = new igv.BigQueryFeatureReader(config);
-        } else if(config.source !== undefined) {
+        } else if (config.source !== undefined) {
             this.reader = new igv.CustomServiceReader(config.source);
         }
         else {
@@ -78,7 +78,7 @@ var igv = (function (igv) {
                     self.reader.readHeader().then(function (header) {
                         // Non-indexed readers will return features as a side effect.  This is an important,
                         // if unfortunate, performance hack
-                        if(header) {
+                        if (header) {
                             var features = header.features;
                             if (features) {
 
@@ -138,6 +138,10 @@ var igv = (function (igv) {
 
     igv.FeatureSource.prototype.getFeatures = function (chr, bpStart, bpEnd, bpPerPixel) {
 
+        if (chr.toLowerCase() === "all") {
+            return getWGFeatures.call(this);
+        }
+
         var self = this;
         return new Promise(function (fulfill, reject) {
 
@@ -147,7 +151,6 @@ var igv = (function (igv) {
 
             if (featureCache && (featureCache.range === undefined || featureCache.range.containsRange(genomicInterval))) {
                 fulfill(self.featureCache.queryFeatures(chr, bpStart, bpEnd));
-
             }
             else {
                 // TODO -- reuse cached features that overelap new region
@@ -156,13 +159,12 @@ var igv = (function (igv) {
                     // Expand genomic interval to grab entire chromosome
                     genomicInterval.start = 0;
                     var chromosome = igv.browser.genome.getChromosome(chr);
-                    genomicInterval.end = (chromosome === undefined ?  Number.MAX_VALUE : chromosome.bpLength);
+                    genomicInterval.end = (chromosome === undefined ? Number.MAX_VALUE : chromosome.bpLength);
                 }
 
                 self.reader.readFeatures(chr, genomicInterval.start, genomicInterval.end).then(
-           
                     function (featureList) {
-                        
+
                         if (featureList && typeof featureList.forEach === 'function') {  // Have result AND its an array type
 
                             var isQueryable = self.reader.indexed || self.config.sourceType !== "file";
@@ -193,6 +195,41 @@ var igv = (function (igv) {
 
                     }).catch(reject);
             }
+        });
+    }
+
+    function getWGFeatures() {
+
+        var self = this,
+            promises = [],
+            wgFeatures = [];
+
+        return new Promise(function (fulfill, reject) {
+
+            igv.browser.genome.chromosomeNames.forEach(function (chr) {
+                var chromosome = igv.browser.genome.getChromosome(chr),
+                    len = chromosome.bpLength;
+                if (chromosome != null) {
+                    promises.push(self.getFeatures(chr, 0, len));
+                }
+            });
+
+            Promise.all(promises).then(function (results) {
+                results.forEach(function (features) {
+                    features.forEach(function (f) {
+                        var wgStart = igv.browser.genome.getGenomeCoordinate(chr, f.start),
+                            wgEnd = igv.browser.genome.getGenomeCoordinate(chr, f.end),
+                            wgFeature = (JSON.parse(JSON.stringify(f)));  // clone feature
+
+                        wgFeature.start = wgStart;
+                        wgFeature.end = wgEnd;
+                        wgFeatures.push(wgFeature);
+                    });
+                });
+                fulfill(wgFeatures);
+            }).catch(function (error) {
+                reject(error);
+            });
         });
     }
 

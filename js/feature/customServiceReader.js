@@ -37,7 +37,7 @@ var igv = (function (igv) {
         this.config = config;
     }
 
-    igv.CustomServiceReader.prototype.readFeatures = function (queryChr, queryStart, queryEnd) {
+    igv.CustomServiceReader.prototype.readFeatures = function (chr, start, end) {
 
 
         var self = this;
@@ -48,7 +48,7 @@ var igv = (function (igv) {
                 body = self.config.body;
 
             if(body !== undefined) {
-                self.config.body = self.config.body.replace("$CHR", queryChr);
+                self.config.body = self.config.body.replace("$CHR", chr);
             }
 
             igvxhr.load(url, self.config).then(function (data) {
