@@ -1216,29 +1216,33 @@ div.ui-dialog fieldset {
     position: absolute;
 
     left:50%;
-    top:50%;
-    transform: translate(-50%, -50%);
+    top:25%;
+    transform: translate(-50%, -25%);
 
-    padding-bottom: 12px;
+    /*padding-bottom: 12px;*/
 
     font-family: 'PT Sans', sans-serif;
     font-size: 12px;
     font-weight: 200;
 
     text-align: center;
-    min-width: 32px;
+    min-width: 16px;
+
 
     z-index:64;
 
-    color: rgb(107, 107, 107);
+    color: rgb(0, 102, 255);
+    background-color: white;
 
+    padding: 1px;
 }
 
 .igv-viewport-content-ruler-div:hover,
 .igv-viewport-content-ruler-div:focus,
 .igv-viewport-content-ruler-div:active  {
     cursor: pointer;
-    color: #434343;
+    color: white;
+    background-color: rgb(0, 102, 255);;
 }
 
 .igv-viewport-canvas {
