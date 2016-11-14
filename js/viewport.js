@@ -378,6 +378,8 @@ var igv = (function (igv) {
 
         var contentWidth  = igv.browser.viewportContainerWidth()/this.genomicState.locusCount;
 
+        // console.log('viewport(' + this.id + ').resize - width: ' + contentWidth);
+
         if (contentWidth > 0) {
             this.setWidth(contentWidth);
             this.canvas.style.width = this.$viewport.width() + "px";
