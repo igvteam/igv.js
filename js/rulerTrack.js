@@ -46,9 +46,11 @@ var igv = (function (igv) {
 
         locusLabel.click(function (e) {
 
-            var genomicState = viewport.genomicState;
+            var genomicState = viewport.genomicState,
+                initialReferenceFrame = genomicState.initialReferenceFrame;
 
-            genomicState.referenceFrame = _.clone(genomicState.initialReferenceFrame);
+            genomicState.referenceFrame = new igv.ReferenceFrame(initialReferenceFrame.chrName, initialReferenceFrame.start, initialReferenceFrame.bpPerPixel);
+
             igv.browser.updateWithLocusIndex(genomicState.locusIndex);
 
         });
