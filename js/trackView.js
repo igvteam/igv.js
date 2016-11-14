@@ -242,10 +242,10 @@ var igv = (function (igv) {
     };
 
     igv.TrackView.prototype.resize = function () {
-        this.viewports.forEach(function(viewport) {
+
+        _.each(this.viewports, function(viewport){
             viewport.resize();
         });
-
     };
 
     igv.TrackView.prototype.update = function () {

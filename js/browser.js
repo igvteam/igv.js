@@ -558,6 +558,8 @@ var igv = (function (igv) {
 
     igv.Browser.prototype.resize = function () {
 
+        // console.log('browser.resize begin');
+
         _.each(_.union([this.ideoPanel, this.karyoPanel, this.centerGuide], this.trackViews), function(renderable){
             if (renderable) {
                 renderable.resize();
