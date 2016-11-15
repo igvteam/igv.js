@@ -51,8 +51,8 @@ var igv = (function (igv) {
 
             genomicState.referenceFrame = new igv.ReferenceFrame(initialReferenceFrame.chrName, initialReferenceFrame.start, initialReferenceFrame.bpPerPixel);
 
-            igv.browser.updateWithLocusIndex(genomicState.locusIndex);
-
+            // igv.browser.updateWithLocusIndex(genomicState.locusIndex);
+            igv.browser.selectMultiLocusPanelWithGenomicState(genomicState);
         });
 
         return locusLabel;
