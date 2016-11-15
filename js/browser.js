@@ -900,46 +900,25 @@ var igv = (function (igv) {
 
     igv.Browser.prototype.selectMultiLocusPanelWithGenomicState = function(genomicState) {
 
-        var self = this,
-            $content_header = $('#igv-content-header'),
-            filtered,
-            row;
-
-        if (false === this.config.hideIdeogram) {
-            igv.IdeoPanel.$empty($content_header);
-        }
-
-        this.$emptyAllViewportContainers($('.igv-track-container-div'));
-
-        filtered = _.filter(_.clone(this.genomicStateList), function(gs){
-            return _.isEqual(gs, genomicState);
+        this.multiLocusPanelLayoutWithTruthFunction(function (candidate) {
+            return _.isEqual(candidate, genomicState);
         });
 
-        this.genomicStateList = _.map(filtered, function(f, i, list){
-            f.locusIndex = i;
-            f.locusCount = _.size(list);
-            f.referenceFrame.bpPerPixel = (f.end - f.start) / (self.viewportContainerWidth()/f.locusCount);
-            // f.initialReferenceFrame.bpPerPixel = (f.end - f.start) / (self.viewportContainerWidth()/f.locusCount);
-            return f;
-        });
-
-        if (false === this.config.hideIdeogram) {
-            this.ideoPanel.buildPanels($content_header);
-        }
-
-        this.buildViewportsWithGenomicStateList(this.genomicStateList);
-
-        this.toggleCenterGuide(_.size(this.genomicStateList));
-
-        this.resize();
     };
 
     igv.Browser.prototype.closeMultiLocusPanelWithGenomicState = function(genomicState) {
 
+        this.multiLocusPanelLayoutWithTruthFunction(function (candidate) {
+            return !_.isEqual(candidate, genomicState);
+        });
+
+    };
+
+    igv.Browser.prototype.multiLocusPanelLayoutWithTruthFunction = function (filterFunction) {
+
         var self = this,
             $content_header = $('#igv-content-header'),
-            filtered,
-            row;
+            filtered;
 
         if (false === this.config.hideIdeogram) {
             igv.IdeoPanel.$empty($content_header);
@@ -947,8 +926,8 @@ var igv = (function (igv) {
 
         this.$emptyAllViewportContainers($('.igv-track-container-div'));
 
-        filtered = _.filter(_.clone(this.genomicStateList), function(gs){
-            return !_.isEqual(gs, genomicState);
+        filtered = _.filter(_.clone(this.genomicStateList), function(gs) {
+            return filterFunction(gs);
         });
 
         this.genomicStateList = _.map(filtered, function(f, i, list){
@@ -967,6 +946,7 @@ var igv = (function (igv) {
         this.toggleCenterGuide(_.size(this.genomicStateList));
 
         this.resize();
+
     };
 
     igv.Browser.prototype.$emptyAllViewportContainers = function ( $trackContainer ) {
