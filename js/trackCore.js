@@ -60,9 +60,7 @@ var igv = (function (igv) {
 
         if(config.autoHeight === undefined)  config.autoHeight = config.autoheight; // Some case confusion in the initial releasae
 
-        track.autoHeight = config.autoHeight === undefined ?
-            (config.height === undefined ? true : false) :
-            config.autoHeight;
+        track.autoHeight = config.autoHeight === undefined ? (config.height === undefined) : config.autoHeight;
         track.minHeight = config.minHeight || Math.min(50, track.height);
         track.maxHeight = config.maxHeight || Math.max(500, track.height);
 
@@ -76,9 +74,11 @@ var igv = (function (igv) {
 
     igv.setTrackLabel = function (track, label) {
 
+        var vp = _.first(track.trackView.viewports);
+
         track.name = label;
 
-        track.trackView.$viewport.find('.igv-track-label').html(track.name);
+        vp.$viewport.find('.igv-track-label').html(track.name);
 
         if (track.trackView) {
             track.trackView.repaint();
