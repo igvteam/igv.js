@@ -72,7 +72,7 @@ var igv = (function (igv) {
 
     };
 
-    igv.trackMenuItems = function (popover, trackView) {
+    igv.createTrackMenuItemList = function (popover, trackView) {
 
         var menuItems = [],
             trackItems;
@@ -102,7 +102,8 @@ var igv = (function (igv) {
                     return (null !== alphanumeric) ? alphanumeric[0] : "untitled";
                 }
 
-            }, undefined));
+            },
+            undefined));
 
         menuItems.push(igv.dialogMenuItem(
             popover,
@@ -129,7 +130,8 @@ var igv = (function (igv) {
 
                 }
 
-            }, undefined));
+            },
+            undefined));
 
         if (trackView.track.popupMenuItems) {
 
@@ -142,23 +144,18 @@ var igv = (function (igv) {
                     var str;
 
                     if (trackItem.name) {
-
                         str = (0 === i) ? '<div class=\"igv-track-menu-item igv-track-menu-border-top\">' : '<div class=\"igv-track-menu-item\">';
                         str = str + trackItem.name + '</div>';
-
                         menuItems.push({object: $(str), click: trackItem.click, init: trackItem.init});
                     } else {
 
                         if (0 === i) {
                             trackItem.object.addClass("igv-track-menu-border-top");
                             menuItems.push(trackItem);
-                        }
-                        else {
+                        } else {
                             menuItems.push(trackItem);
                         }
-
                     }
-
                 });
             }
         }
@@ -181,11 +178,9 @@ var igv = (function (igv) {
                     },
                     true)
             );
-
         }
 
         return menuItems;
-
     };
 
     igv.dialogMenuItem = function (popover, trackView, gearMenuLabel, labelHTMLFunction, inputValue, clickFunction, doDrawBorderOrUndefined) {
