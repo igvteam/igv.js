@@ -72,7 +72,7 @@ var igv = (function (igv) {
 
     };
 
-    igv.createTrackMenuItemList = function (popover, trackView) {
+    igv.trackMenuItemList = function (popover, trackView) {
 
         var menuItems = [],
             trackItems;
@@ -133,16 +133,14 @@ var igv = (function (igv) {
             },
             undefined));
 
-        if (trackView.track.popupMenuItems) {
+        if (trackView.track.menuItemList) {
 
-            trackItems = trackView.track.popupMenuItems(popover);
+            trackItems = trackView.track.menuItemList(popover);
 
-            if (trackItems && trackItems.length > 0) {
+            if (_.size(trackItems) > 0) {
 
                 trackItems.forEach(function (trackItem, i) {
-
                     var str;
-
                     if (trackItem.name) {
                         str = (0 === i) ? '<div class=\"igv-track-menu-item igv-track-menu-border-top\">' : '<div class=\"igv-track-menu-item\">';
                         str = str + trackItem.name + '</div>';

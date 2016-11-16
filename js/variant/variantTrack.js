@@ -346,7 +346,7 @@ var igv = (function (igv) {
         return popupData;
     }
 
-    igv.VariantTrack.prototype.popupMenuItems = function (popover) {
+    igv.VariantTrack.prototype.menuItemList = function (popover) {
 
         var myself = this,
             menuItems = [],

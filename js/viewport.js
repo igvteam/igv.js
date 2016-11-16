@@ -96,7 +96,7 @@ var igv = (function (igv) {
             $trackLabel.html(trackView.track.name);
 
             $trackLabel.click(function (e) {
-                igv.popover.presentTrackPopup(e.pageX, e.pageY, description, false);
+                igv.popover.presentTrackPopup(e.pageX, e.pageY, description);
             });
 
             this.$viewport.append($trackLabel);
@@ -224,29 +224,31 @@ var igv = (function (igv) {
 
                         popupTimer = window.setTimeout(function () {
 
-                                var popupData,
+                                var popupClickHandlerResult,
+                                    popupData,
                                     xOrigin;
 
-                                if (undefined === genomicLocation) {
+                                if (undefined === genomicLocation || null === self.tile) {
                                     return;
                                 }
-                                if (null === self.tile) {
-                                    return;
-                                }
+
                                 xOrigin = Math.round(referenceFrame.toPixels((self.tile.startBP - referenceFrame.start)));
                                 popupData = trackView.track.popupData(genomicLocation, canvasCoords.x - xOrigin, canvasCoords.y, referenceFrame);
 
-                                var handlerResult = igv.browser.fireEvent('trackclick', [trackView.track, popupData]);
+                                popupClickHandlerResult = igv.browser.fireEvent('trackclick', [trackView.track, popupData]);
 
                                 // (Default) no external handlers or no input from handlers
-                                if (handlerResult === undefined) {
-                                    if (popupData && popupData.length > 0) {
-                                        igv.popover.presentTrackPopup(e.pageX, e.pageY, igv.formatPopoverText(popupData), false);
+                                if (undefined === popupClickHandlerResult) {
+
+                                    if (_.size(popupData) > 0) {
+                                        igv.popover.presentTrackPopup(e.pageX, e.pageY, igv.formatPopoverText(popupData));
                                     }
+
                                     // A handler returned custom popover HTML to override default format
-                                } else if (typeof handlerResult === 'string') {
-                                    igv.popover.presentTrackPopup(e.pageX, e.pageY, handlerResult, false);
+                                } else if (typeof popupClickHandlerResult === 'string') {
+                                    igv.popover.presentTrackPopup(e.pageX, e.pageY, popupClickHandlerResult);
                                 }
+
                                 // If handler returned false then we do nothing and let the handler manage the click
 
                                 mouseDownX = undefined;

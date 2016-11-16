@@ -75,7 +75,7 @@ var igv = (function (igv) {
 
     };
 
-    igv.SegTrack.prototype.popupMenuItems = function (popover) {
+    igv.SegTrack.prototype.menuItemList = function (popover) {
 
         var myself = this;
 

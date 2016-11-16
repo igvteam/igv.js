@@ -85,7 +85,7 @@ var igv = (function (igv) {
 
     };
 
-    igv.AneuTrack.prototype.popupMenuItems = function (popover) {
+    igv.AneuTrack.prototype.menuItemList = function (popover) {
 
         var myself = this;
 
