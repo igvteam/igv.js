@@ -1211,21 +1211,20 @@ var igv = (function (igv) {
     };
 
     igv.Browser.prototype.fireEvent = function (eventName, args, thisObj) {
+        var scope,
+            results;
 
-        if (!this.eventHandlers[eventName]) {
-            return;
+        if (undefined === this.eventHandlers[ eventName ]) {
+            return undefined;
         }
 
-        var scope = thisObj || window;
-        for (var i = 0, l = this.eventHandlers[eventName].length; i < l; i++) {
-            var item = this.eventHandlers[eventName][i];
-            var result = item.apply(scope, args);
+        scope = thisObj || window;
+        results = _.map(this.eventHandlers[ eventName ], function(event){
+            return event.apply(scope, args);
+        });
 
-            // If any of the handlers return any value, then return it
-            if (result !== undefined) {
-                return result;
-            }
-        }
+        return _.first(results);
+
     };
 
     igv.isLocusChrNameStartEnd = function (locus, genome, locusObject) {

@@ -149,7 +149,7 @@ var igv = (function (igv) {
 
     };
 
-    igv.BAMTrack.prototype.popupMenuItems = function (popover) {
+    igv.BAMTrack.prototype.menuItemList = function (popover) {
 
         var self = this,
             html,

@@ -167,6 +167,10 @@ var igv = (function (igv) {
 
     };
 
+    igv.FeatureTrack.prototype.popupMenuItemList = function (genomicLocation, xOffset, yOffset, referenceFrame) {
+        console.log('featureTrack - popupMenuItemList');
+    };
+
     /**
      * Return "popup data" for feature @ genomic location.  Data is an array of key-value pairs
      */
@@ -238,7 +242,7 @@ var igv = (function (igv) {
         return data;
     }
 
-    igv.FeatureTrack.prototype.popupMenuItems = function (popover) {
+    igv.FeatureTrack.prototype.menuItemList = function (popover) {
 
         var myself = this,
             menuItems = [],

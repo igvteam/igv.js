@@ -63,7 +63,7 @@ var igv = (function (igv) {
         });
     };
 
-    igv.WIGTrack.prototype.popupMenuItems = function (popover) {
+    igv.WIGTrack.prototype.menuItemList = function (popover) {
 
         var self = this,
             menuItems = [],

@@ -84,7 +84,7 @@ var igv = (function (igv) {
         $container = $('<div class="igv-track-menu-container">');
         this.$popoverContent.append($container);
 
-        items = igv.createTrackMenuItemList(this, trackView);
+        items = igv.trackMenuItemList(this, trackView);
         _.each(items, function(item) {
             $container.append(item.object || item);
 
@@ -103,36 +103,19 @@ var igv = (function (igv) {
         this.$popover.offset( igv.constrainBBox(this.$popover, $(igv.browser.trackContainerDiv)) );
     };
 
-    igv.Popover.prototype.presentTrackPopup = function (pageX, pageY, content, showOKButton) {
+    igv.Popover.prototype.presentTrackPopup = function (pageX, pageY, content) {
 
-        var self = this,
-            ok_button,
-            markup;
-
-        if (!content) {
+        if (undefined === content) {
             return;
         }
 
-        markup = content;
-        if (true === showOKButton) {
-            ok_button = '<button name="button" class="igv-popover-ok-button">OK</button>';
-            markup = content + ok_button;
-        }
-
         this.$popoverContent.addClass("igv-popoverTrackPopupContent");
+        this.$popoverContent.html(content);
 
-        this.$popoverContent.html(markup);
+        this.$popover.css(popoverPosition(pageX, pageY, this));
+        this.$popover.show();
 
-        this.$popover.css(popoverPosition(pageX, pageY, this)).show();
-
-        if (true === showOKButton) {
-            $('.igv-dialog-close-container').hide();
-            $('.igv-popover-ok-button').click(function(){
-                self.hide();
-            });
-        } else {
-            $('.igv-dialog-close-container').show();
-        }
+        $('.igv-dialog-close-container').show();
 
     };
 
