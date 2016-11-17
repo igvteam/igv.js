@@ -152,41 +152,60 @@ var igv = (function (igv) {
             trackView.trackDiv.dataset.rulerTrack = "rulerTrack";
 
             // ruler sweeper widget surface
-            this.$rulerSweeper = $('<div class="igv-ruler-sweeper-div">');
-            $(self.contentDiv).append(this.$rulerSweeper);
+            self.$rulerSweeper = $('<div class="igv-ruler-sweeper-div">');
+            $(self.contentDiv).append(self.$rulerSweeper);
 
-            this.addRulerMouseHandlers();
+            self.addRulerMouseHandlers();
         } else {
 
             doubleClickDelay = igv.browser.constants.doubleClickDelay;
 
-            $(this.canvas).mousedown(function (e) {
+            // right-click
+            $(self.canvas).contextmenu(function(e) {
+
+                var referenceFrame,
+                    canvasCoords,
+                    genomicLocation;
+
+                e.preventDefault();
+
+                e = $.event.fix(e);
+
+                referenceFrame = self.genomicState.referenceFrame;
+                canvasCoords = igv.translateMouseCoordinates(e, self.canvas);
+                genomicLocation = Math.floor((referenceFrame.start) + referenceFrame.toBP(canvasCoords.x));
+
+                igv.popover.presentTrackPopupMenu(e.pageX, e.pageY);
+
+            });
+
+            $(self.canvas).mousedown(function (e) {
                 var canvasCoords = igv.translateMouseCoordinates(e, self.canvas);
                 isMouseDown = true;
                 lastMouseX = canvasCoords.x;
                 mouseDownX = lastMouseX;
             });
 
-            $(this.canvas).click(function (e) {
+            $(self.canvas).click(function (e) {
 
                 var canvasCoords,
-                    referenceFrame = self.genomicState.referenceFrame,
+                    referenceFrame,
                     genomicLocation,
                     time,
                     newCenter;
 
                 // Sets pageX and pageY for browsers that don't support them
                 e = $.event.fix(e);
-
                 e.stopPropagation();
+
+                referenceFrame = self.genomicState.referenceFrame;
+                if (undefined === referenceFrame) {
+                    return;
+                }
 
                 canvasCoords = igv.translateMouseCoordinates(e, self.canvas);
                 genomicLocation = Math.floor((referenceFrame.start) + referenceFrame.toBP(canvasCoords.x));
                 time = Date.now();
-
-                if (!referenceFrame) {
-                    return;
-                }
 
                 if (time - lastClickTime < doubleClickDelay) {
                     // This is a double-click
