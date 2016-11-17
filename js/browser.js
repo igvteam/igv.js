@@ -1046,7 +1046,7 @@ var igv = (function (igv) {
         _.each(loci, function(locus) {
 
             locusGenomicState = {};
-            if (igv.isLocusChrNameStartEnd(locus, self.genome, locusGenomicState)) {
+            if (igv.Browser.isLocusChrNameStartEnd(locus, self.genome, locusGenomicState)) {
                 locusGenomicState.selection = undefined;
                 locusGenomicState.locusSearchString = locus;
                 locusGenomicStates.push(locusGenomicState);
@@ -1144,7 +1144,7 @@ var igv = (function (igv) {
             locusString = featureDBLookupResult.chr + ':' + start.toString() + '-' + end.toString();
 
             geneNameLocusObject = {};
-            if (igv.isLocusChrNameStartEnd(locusString, self.genome, geneNameLocusObject)) {
+            if (igv.Browser.isLocusChrNameStartEnd(locusString, self.genome, geneNameLocusObject)) {
                 geneNameLocusObject.selection = new igv.GtexSelection({ gene: featureDBLookupResult.name });
                 return geneNameLocusObject;
             } else {
@@ -1192,7 +1192,7 @@ var igv = (function (igv) {
                 string = chr + ':' + start.toString() + '-' + end.toString();
 
                 geneNameLocusObject = {};
-                if (igv.isLocusChrNameStartEnd(string, self.genome, geneNameLocusObject)) {
+                if (igv.Browser.isLocusChrNameStartEnd(string, self.genome, geneNameLocusObject)) {
 
                     type = result["featureType"] || result["type"];
 
@@ -1245,7 +1245,7 @@ var igv = (function (igv) {
 
     };
 
-    igv.isLocusChrNameStartEnd = function (locus, genome, locusObject) {
+    igv.Browser.isLocusChrNameStartEnd = function (locus, genome, locusObject) {
 
         var a,
             b,
@@ -1297,7 +1297,7 @@ var igv = (function (igv) {
             }
 
             if (true === success && locusObject) {
-                igv.validateLocusExtent(locusObject.chromosome, locusObject);
+                igv.Browser.validateLocusExtent(locusObject.chromosome, locusObject);
             }
 
             return success;
@@ -1306,7 +1306,7 @@ var igv = (function (igv) {
 
     };
 
-    igv.validateLocusExtent = function (chromosome, extent) {
+    igv.Browser.validateLocusExtent = function (chromosome, extent) {
 
         var ss = extent.start,
             ee = extent.end;
@@ -1567,7 +1567,7 @@ var igv = (function (igv) {
             return;
         }
 
-        if (igv.isLocusChrNameStartEnd(feature, this.genome, undefined)) {
+        if (igv.Browser.isLocusChrNameStartEnd(feature, this.genome, undefined)) {
 
             var success =  igv.gotoLocusFeature(feature, this.genome, this);
 
@@ -1670,7 +1670,7 @@ var igv = (function (igv) {
             }
 
             obj = { start: start, end: end };
-            igv.validateLocusExtent(chr, obj);
+            igv.Browser.validateLocusExtent(chr, obj);
 
             start = obj.start;
             end = obj.end;
