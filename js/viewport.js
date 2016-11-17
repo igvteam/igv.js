@@ -180,8 +180,12 @@ var igv = (function (igv) {
             });
 
             $(self.canvas).mousedown(function (e) {
-                var canvasCoords = igv.translateMouseCoordinates(e, self.canvas);
+                var canvasCoords;
+
+                e.preventDefault();
+
                 isMouseDown = true;
+                canvasCoords = igv.translateMouseCoordinates(e, self.canvas);
                 lastMouseX = canvasCoords.x;
                 mouseDownX = lastMouseX;
             });
@@ -193,6 +197,8 @@ var igv = (function (igv) {
                     genomicLocation,
                     time,
                     newCenter;
+
+                e.preventDefault();
 
                 // Sets pageX and pageY for browsers that don't support them
                 e = $.event.fix(e);
