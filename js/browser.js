@@ -980,7 +980,8 @@ var igv = (function (igv) {
 
         this.getGenomicStateList(loci, this.viewportContainerWidth(), function (genomicStateList) {
 
-            var $content_header = $('#igv-content-header');
+            var errorString,
+                $content_header = $('#igv-content-header');
 
             if (_.size(genomicStateList) > 0) {
 
@@ -1011,6 +1012,9 @@ var igv = (function (igv) {
                 self.buildViewportsWithGenomicStateList(genomicStateList);
 
                 self.update();
+            } else {
+                errorString = 'Unrecognized locus ' + string;
+                igv.presentAlert(errorString);
             }
 
         });
