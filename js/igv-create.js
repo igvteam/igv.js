@@ -110,6 +110,8 @@ var igv = (function (igv) {
             width = igv.browser.viewportContainerWidth();
             igv.browser.getGenomicStateList(lociWithConfiguration(config), width, function (genomicStateList) {
 
+                var errorString;
+
                 if (_.size(genomicStateList) > 0) {
 
                     igv.browser.genomicStateList = _.map(genomicStateList, function (genomicState, index) {
@@ -144,6 +146,9 @@ var igv = (function (igv) {
                         igv.browser.windowSizePanel.updateWithGenomicState(_.first(igv.browser.genomicStateList));
                     }
 
+                } else {
+                    errorString = 'Unrecognized locus ' + lociWithConfiguration(config);
+                    igv.presentAlert(errorString);
                 }
 
             });
