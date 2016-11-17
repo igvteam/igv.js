@@ -28,25 +28,21 @@
  */
 var igv = (function (igv) {
 
-    igv.Popover = function ($parent, id) {
+    igv.Popover = function ($parent) {
 
-        this.$parent = this.markupWith$Parent($parent, id);
+        this.$parent = this.markupWith$Parent($parent);
 
         // this.$popoverContent.kinetic({});
 
     };
 
-    igv.Popover.prototype.markupWith$Parent = function ($parent, id) {
+    igv.Popover.prototype.markupWith$Parent = function ($parent) {
 
         var self = this,
             $popoverHeader;
 
         // popover container
         this.$popover = $('<div class="igv-popover">');
-
-        if (id) {
-            this.$popover.attr("id", id);
-        }
 
         $parent.append(this.$popover);
 
@@ -85,6 +81,7 @@ var igv = (function (igv) {
         this.$popoverContent.append($container);
 
         items = igv.trackMenuItemList(this, trackView);
+
         _.each(items, function(item) {
             $container.append(item.object || item);
 
@@ -111,6 +108,18 @@ var igv = (function (igv) {
 
         this.$popoverContent.addClass("igv-popoverTrackPopupContent");
         this.$popoverContent.html(content);
+
+        this.$popover.css(popoverPosition(pageX, pageY, this));
+        this.$popover.show();
+
+        $('.igv-dialog-close-container').show();
+
+    };
+
+    igv.Popover.prototype.presentTrackPopupMenu = function (pageX, pageY) {
+
+        this.$popoverContent.addClass("igv-popoverTrackPopupContent");
+        this.$popoverContent.html('hello world');
 
         this.$popover.css(popoverPosition(pageX, pageY, this));
         this.$popover.show();

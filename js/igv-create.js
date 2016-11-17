@@ -75,7 +75,7 @@ var igv = (function (igv) {
         browser.userFeedback.hide();
 
         // Popover object -- singleton shared by all components
-        igv.popover = new igv.Popover($content, "igv-popover");
+        igv.popover = new igv.Popover($content);
 
         // ColorPicker object -- singleton shared by all components
         igv.colorPicker = new igv.ColorPicker(browser.$root, config.palette, "igv-color-picker");
