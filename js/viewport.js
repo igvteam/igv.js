@@ -226,9 +226,16 @@ var igv = (function (igv) {
                             popupTimer = undefined;
                         }
 
-                        newCenter = Math.round(referenceFrame.start + canvasCoords.x * referenceFrame.bpPerPixel);
-                        referenceFrame.bpPerPixel /= 2;
-                        igv.browser.goto(referenceFrame.chrName, newCenter);
+                        if (igv.browser.minimumBasesExtent() > Math.floor(self.$viewport.width() * referenceFrame.bpPerPixel/2.0)) {
+                            // do nothing
+                        } else {
+
+                            newCenter = Math.round(referenceFrame.start + canvasCoords.x * referenceFrame.bpPerPixel);
+                            referenceFrame.bpPerPixel /= 2;
+                            igv.browser.goto(referenceFrame.chrName, newCenter);
+
+                        }
+
                     }
 
                 } else {
@@ -367,7 +374,7 @@ var igv = (function (igv) {
                 extent.end = extent.start + rulerSweepWidth * referenceFrame.bpPerPixel;
 
                 if (rulerSweepWidth > rulerSweepThreshold) {
-                    igv.validateLocusExtent(igv.browser.genome.getChromosome(referenceFrame.chrName), extent);
+                    igv.Browser.validateLocusExtent(igv.browser.genome.getChromosome(referenceFrame.chrName), extent);
                     self.goto(referenceFrame.chrName, extent.start, extent.end);
                 }
             }
