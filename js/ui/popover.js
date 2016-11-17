@@ -97,34 +97,72 @@ var igv = (function (igv) {
 
         this.$popover.css(popoverPosition(pageX, pageY, this));
         this.$popover.show();
+
         this.$popover.offset( igv.constrainBBox(this.$popover, $(igv.browser.trackContainerDiv)) );
     };
 
     igv.Popover.prototype.presentTrackPopup = function (pageX, pageY, content) {
+        var $container;
 
         if (undefined === content) {
             return;
         }
 
+        this.$popoverContent.empty();
         this.$popoverContent.addClass("igv-popover-track-popup-content");
+
+        $container = $('<div class="igv-track-menu-container">');
+        this.$popoverContent.append($container);
         this.$popoverContent.html(content);
 
         this.$popover.css(popoverPosition(pageX, pageY, this));
         this.$popover.show();
 
-        $('.igv-dialog-close-container').show();
+        // $('.igv-dialog-close-container').show();
 
     };
 
-    igv.Popover.prototype.presentTrackPopupMenu = function (pageX, pageY) {
+    igv.Popover.prototype.presentTrackPopupMenu = function (event, viewport) {
 
+        var track = viewport.trackView.track,
+            referenceFrame = viewport.genomicState.referenceFrame,
+            canvasCoords,
+            genomicLocation,
+            xBP,
+            x,
+            dataList,
+            $container,
+            menuItems = [];
+
+        canvasCoords = igv.translateMouseCoordinates(event, viewport.canvas);
+
+        genomicLocation = Math.floor((referenceFrame.start) + referenceFrame.toBP(canvasCoords.x));
+
+        xBP = viewport.tile.startBP - referenceFrame.start;
+        x = Math.round(referenceFrame.toPixels(xBP));
+
+        // dataList = viewport.trackView.track.popupData(genomicLocation, canvasCoords.x - x, canvasCoords.y, referenceFrame);
+        // if (_.size(dataList) > 0) {
+        //     igv.popover.presentTrackPopup(event.pageX, event.pageY, igv.formatPopoverText(dataList));
+        // }
+
+
+        this.$popoverContent.empty();
         this.$popoverContent.addClass("igv-popover-track-popup-content");
-        this.$popoverContent.html('hello world');
 
-        this.$popover.css(popoverPosition(pageX, pageY, this));
+        $container = $('<div class="igv-track-menu-container">');
+        this.$popoverContent.append($container);
+
+        menuItems.push(igv.trackPopupMenuItem(track, genomicLocation, xBP, x));
+        if (track.popupMenuItem) {
+            menuItems.push(track.popupMenuItem(genomicLocation, xBP, x));
+        }
+        _.each(menuItems, function($item){
+            $container.append($item);
+        });
+
+        this.$popover.css(popoverPosition(event.pageX, event.pageY, this));
         this.$popover.show();
-
-        $('.igv-dialog-close-container').show();
 
     };
 

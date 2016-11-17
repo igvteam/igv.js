@@ -71,7 +71,6 @@ var igv = (function (igv) {
         if(track.type === undefined) track.type = config.type;
     };
 
-
     igv.setTrackLabel = function (track, label) {
 
         var vp = _.first(track.trackView.viewports);
@@ -162,6 +161,146 @@ var igv = (function (igv) {
 
     };
 
+    igv.trackPopupMenuItem = function (track, genomicLocation, xBP, x) {
+
+        var $e = $('<div class="igv-track-menu-item">');
+
+        $e.text('Track - Core ' + igv.prettyBasePairNumber(xBP));
+        $e.click(function () {
+                console.log('click you very much');
+            }
+        );
+
+        return $e;
+
+    };
+
+    igv.trackMenuItemList = function (popover, trackView) {
+
+        var menuItems = [],
+            trackItems;
+
+        menuItems.push(igv.trackMenuItem(popover, trackView, "Set track name", function () {
+            return "Track Name"
+        }, trackView.track.name, function () {
+
+            var alphanumeric = parseAlphanumeric(igv.dialog.$dialogInput.val());
+
+            if (undefined !== alphanumeric) {
+                igv.setTrackLabel(trackView.track, alphanumeric);
+                trackView.update();
+            }
+
+            function parseAlphanumeric(value) {
+
+                var alphanumeric_re = /(?=.*[a-zA-Z].*)([a-zA-Z0-9 ]+)/,
+                    alphanumeric = alphanumeric_re.exec(value);
+
+                return (null !== alphanumeric) ? alphanumeric[0] : "untitled";
+            }
+
+        }, undefined));
+
+        menuItems.push(igv.trackMenuItem(popover, trackView, "Set track height", function () {
+            return "Track Height"
+        }, trackView.trackDiv.clientHeight, function () {
+
+            var number = parseFloat(igv.dialog.$dialogInput.val(), 10);
+
+            if (undefined !== number) {
+// If explicitly setting the height adust min or max, if neccessary.
+                if (trackView.track.minHeight !== undefined && trackView.track.minHeight > number) {
+                    trackView.track.minHeight = number;
+                }
+                if (trackView.track.maxHeight !== undefined && trackView.track.maxHeight < number) {
+                    trackView.track.minHeight = number;
+                }
+                trackView.setTrackHeight(number);
+                trackView.track.autoHeight = false;   // Explicitly setting track height turns off autoHeight
+
+            }
+
+        }, undefined));
+
+        if (trackView.track.menuItemList) {
+
+            trackItems = trackView.track.menuItemList(popover);
+
+            if (_.size(trackItems) > 0) {
+
+                trackItems.forEach(function (trackItem, i) {
+                    var str;
+                    if (trackItem.name) {
+                        str = (0 === i) ? '<div class=\"igv-track-menu-item igv-track-menu-border-top\">' : '<div class=\"igv-track-menu-item\">';
+                        str = str + trackItem.name + '</div>';
+                        menuItems.push({object: $(str), click: trackItem.click, init: trackItem.init});
+                    } else {
+
+                        if (0 === i) {
+                            trackItem.object.addClass("igv-track-menu-border-top");
+                            menuItems.push(trackItem);
+                        } else {
+                            menuItems.push(trackItem);
+                        }
+                    }
+                });
+            }
+        }
+
+        if (trackView.track.removable !== false) {
+
+            menuItems.push(
+                igv.trackMenuItem(popover, trackView, "Remove track", function () {
+                    var label = "Remove " + trackView.track.name;
+                    return '<div class="igv-dialog-label-centered">' + label + '</div>';
+                }, undefined, function () {
+                    popover.hide();
+                    trackView.browser.removeTrack(trackView.track);
+                }, true)
+            );
+        }
+
+        return menuItems;
+    };
+
+    igv.trackMenuItem = function (popover, trackView, gearMenuLabel, labelHTMLFunction, inputValue, clickFunction, doDrawBorderOrUndefined) {
+
+        var _div = (true === doDrawBorderOrUndefined) ? '<div class="igv-track-menu-item igv-track-menu-border-top">' : '<div class="igv-track-menu-item">';
+
+        return {
+            object: $(_div + gearMenuLabel + '</div>'),
+            click: function () {
+
+                igv.dialog.configure(labelHTMLFunction, inputValue, clickFunction);
+                igv.dialog.show($(trackView.trackDiv));
+                popover.hide();
+            }
+        }
+    };
+
+    igv.dataRangeMenuItem = function (popover, trackView) {
+
+        return {
+            object: $('<div class="igv-track-menu-item">' + "Set data range" + '</div>'),
+            click: function () {
+                igv.dataRangeDialog.configureWithTrackView(trackView);
+                igv.dataRangeDialog.show();
+                popover.hide();
+            }
+        }
+    };
+
+    igv.colorPickerMenuItem = function (popover, trackView) {
+
+        return {
+            object: $('<div class="igv-track-menu-item">' + "Set track color" + '</div>'),
+            click: function () {
+                igv.colorPicker.configure(trackView);
+                igv.colorPicker.show();
+                popover.hide();
+            }
+        }
+    };
 
     return igv;
 })(igv || {});

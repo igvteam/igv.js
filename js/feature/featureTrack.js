@@ -167,8 +167,18 @@ var igv = (function (igv) {
 
     };
 
-    igv.FeatureTrack.prototype.popupMenuItemList = function (genomicLocation, xOffset, yOffset, referenceFrame) {
-        console.log('featureTrack - popupMenuItemList');
+    igv.FeatureTrack.prototype.popupMenuItem = function (genomicLocation, xBP, x) {
+
+        var $e = $('<div class="igv-track-menu-item">');
+
+        $e.text('Track - Feature ' + igv.prettyBasePairNumber(xBP));
+        $e.click(function () {
+                console.log('click you very much');
+            }
+        );
+
+        return $e;
+
     };
 
     /**
