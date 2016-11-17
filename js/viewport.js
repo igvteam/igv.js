@@ -163,19 +163,11 @@ var igv = (function (igv) {
             // right-click
             $(self.canvas).contextmenu(function(e) {
 
-                var referenceFrame,
-                    canvasCoords,
-                    genomicLocation;
-
                 e.preventDefault();
-
                 e = $.event.fix(e);
+                e.stopPropagation();
 
-                referenceFrame = self.genomicState.referenceFrame;
-                canvasCoords = igv.translateMouseCoordinates(e, self.canvas);
-                genomicLocation = Math.floor((referenceFrame.start) + referenceFrame.toBP(canvasCoords.x));
-
-                igv.popover.presentTrackPopupMenu(e.pageX, e.pageY);
+                igv.popover.presentTrackPopupMenu(e, self);
 
             });
 
@@ -206,6 +198,7 @@ var igv = (function (igv) {
 
                 referenceFrame = self.genomicState.referenceFrame;
                 if (undefined === referenceFrame) {
+                    console.log('undefined === referenceFrame');
                     return;
                 }
 
@@ -257,7 +250,7 @@ var igv = (function (igv) {
                         popupTimer = window.setTimeout(function () {
 
                                 var popupClickHandlerResult,
-                                    popupData,
+                                    dataList,
                                     xOrigin;
 
                                 if (undefined === genomicLocation || null === self.tile) {
@@ -265,15 +258,15 @@ var igv = (function (igv) {
                                 }
 
                                 xOrigin = Math.round(referenceFrame.toPixels((self.tile.startBP - referenceFrame.start)));
-                                popupData = trackView.track.popupData(genomicLocation, canvasCoords.x - xOrigin, canvasCoords.y, referenceFrame);
+                                dataList = trackView.track.popupData(genomicLocation, canvasCoords.x - xOrigin, canvasCoords.y, referenceFrame);
 
-                                popupClickHandlerResult = igv.browser.fireEvent('trackclick', [trackView.track, popupData]);
+                                popupClickHandlerResult = igv.browser.fireEvent('trackclick', [trackView.track, dataList]);
 
                                 // (Default) no external handlers or no input from handlers
                                 if (undefined === popupClickHandlerResult) {
 
-                                    if (_.size(popupData) > 0) {
-                                        igv.popover.presentTrackPopup(e.pageX, e.pageY, igv.formatPopoverText(popupData));
+                                    if (_.size(dataList) > 0) {
+                                        igv.popover.presentTrackPopup(e.pageX, e.pageY, igv.formatPopoverText(dataList));
                                     }
 
                                     // A handler returned custom popover HTML to override default format
