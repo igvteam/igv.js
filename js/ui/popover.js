@@ -47,7 +47,7 @@ var igv = (function (igv) {
         $parent.append(this.$popover);
 
         // popover header
-        $popoverHeader = $('<div class="igv-popoverHeader">');
+        $popoverHeader = $('<div class="igv-popover-header">');
         this.$popover.append($popoverHeader);
 
         igv.attachDialogCloseHandlerWithParent($popoverHeader, function () {
@@ -75,7 +75,7 @@ var igv = (function (igv) {
             items;
 
         this.$popoverContent.empty();
-        this.$popoverContent.removeClass("igv-popoverTrackPopupContent");
+        this.$popoverContent.removeClass("igv-popover-track-popup-content");
 
         $container = $('<div class="igv-track-menu-container">');
         this.$popoverContent.append($container);
@@ -106,7 +106,7 @@ var igv = (function (igv) {
             return;
         }
 
-        this.$popoverContent.addClass("igv-popoverTrackPopupContent");
+        this.$popoverContent.addClass("igv-popover-track-popup-content");
         this.$popoverContent.html(content);
 
         this.$popover.css(popoverPosition(pageX, pageY, this));
@@ -118,7 +118,7 @@ var igv = (function (igv) {
 
     igv.Popover.prototype.presentTrackPopupMenu = function (pageX, pageY) {
 
-        this.$popoverContent.addClass("igv-popoverTrackPopupContent");
+        this.$popoverContent.addClass("igv-popover-track-popup-content");
         this.$popoverContent.html('hello world');
 
         this.$popover.css(popoverPosition(pageX, pageY, this));

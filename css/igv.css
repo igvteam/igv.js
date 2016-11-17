@@ -895,7 +895,7 @@ div.ui-dialog fieldset {
     display: none;
 }
 
-.igv-popoverHeader {
+.igv-popover-header {
 
     position: relative;
     top: 0;
@@ -912,6 +912,43 @@ div.ui-dialog fieldset {
 
     background-color: #eee;
 
+}
+
+.igv-popover-track-popup-content {
+    position: relative;
+    top: 0;
+    left: 0;
+
+    max-height: 384px;
+
+    overflow-x: hidden;
+    overflow-y: auto;
+}
+
+.igv-popover-name-value {
+
+    cursor: default;
+    text-wrap: none;
+    white-space:nowrap;
+
+    max-width: 384px;
+
+}
+
+.igv-popover-name {
+    font-weight: bold;
+    padding-right: 4px;
+    float: left;
+}
+
+.igv-popover-value {
+    padding-left: 4px;
+
+    overflow: hidden;
+    white-space:nowrap;
+    text-overflow:ellipsis;
+    max-width:256px;
+    display:inline-block;
 }
 
 .igv-dialog-close-container {
@@ -939,62 +976,6 @@ div.ui-dialog fieldset {
 
 .igv-dialog-close-container:hover {
     color: #fff;
-}
-
-.igv-popoverTrackPopupContent {
-    position: relative;
-    top: 0;
-    left: 0;
-
-    /*width: 100%;*/
-    /*max-width: 384px;*/
-    max-height: 384px;
-
-    overflow-x: hidden;
-    overflow-y: auto;
-
-    /*text-overflow: ellipsis;*/
-
-    /*margin-right: 24px;*/
-
-}
-
-.igv-popoverBorderTop {
-    border-top-color: rgb(127, 127, 127);
-    border-top-style: solid;
-    border-top-width: thin;
-}
-
-.igv-popoverBorderBottom {
-    border-bottom-color: rgb(127, 127, 127);
-    border-bottom-style: solid;
-    border-bottom-width: thin;
-}
-
-.igv-popoverNameValue {
-
-    cursor: default;
-    text-wrap: none;
-    white-space:nowrap;
-
-    max-width: 384px;
-
-}
-
-.igv-popoverName {
-    font-weight: bold;
-    padding-right: 4px;
-    float: left;
-}
-
-.igv-popoverValue {
-    padding-left: 4px;
-
-    overflow: hidden;
-    white-space:nowrap;
-    text-overflow:ellipsis;
-    max-width:256px;
-    display:inline-block;
 }
 
 .igv-spinner-container {
