@@ -98,7 +98,6 @@ var igv = (function (igv) {
         this.trackView.update();
     };
 
-
     igv.SegTrack.prototype.getFeatures = function (chr, bpStart, bpEnd) {
 
         var self = this;
@@ -118,8 +117,7 @@ var igv = (function (igv) {
                 self.featureSource.getFeatures(chr, bpStart, bpEnd).then(fulfill).catch(reject);
             }
         });
-    }
-
+    };
 
     igv.SegTrack.prototype.draw = function (options) {
 
@@ -366,6 +364,19 @@ var igv = (function (igv) {
         return null;
     };
 
+    igv.SegTrack.prototype.popupMenuItems = function (genomicLocation, xViewportTileBP, xViewportTile) {
+
+        var $e = $('<div class="igv-track-menu-item">');
+
+        $e.text('Track - SEG ' + igv.prettyBasePairNumber(xViewportTileBP));
+        $e.click(function () {
+                console.log('click you very much');
+            }
+        );
+
+        return $e;
+
+    };
 
     return igv;
 
