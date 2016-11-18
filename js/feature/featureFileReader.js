@@ -68,14 +68,9 @@ var igv = (function (igv) {
         }
 
     }
-
-    // seg files don't have an index
+    
     function isIndexable() {
-        var configIndexURL = this.config.indexURL,
-            type = this.type,
-            configIndexed = this.config.indexed;
-
-        return configIndexURL || (type != "wig" && configIndexed != false);
+        return this.config.indexURL || (this.type !== "wig" && this.type !== "seg" && this.config.indexed != false);
     }
 
 
@@ -103,7 +98,7 @@ var igv = (function (igv) {
                 headers: self.config.headers,           // http headers, not file header
                 withCredentials: self.config.withCredentials
             };
- 
+
             function parseData(data) {
                 self.header = self.parser.parseHeader(data);
                 if (self.header instanceof String && self.header.startsWith("##gff-version 3")) {
@@ -320,6 +315,9 @@ var igv = (function (igv) {
 
         });
     }
+
+
+
 
 
     return igv;

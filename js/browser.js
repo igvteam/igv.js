@@ -170,7 +170,7 @@ var igv = (function (igv) {
         this.trackViews.forEach(function (trackView) {
             trackView.resize();
         });
-        
+
         return loadedTracks;
     };
 
@@ -991,7 +991,7 @@ var igv = (function (igv) {
                     genomicState.locusCount = _.size(genomicStateList);
 
                     genomicState.referenceFrame = new igv.ReferenceFrame(genomicState.chromosome.name, genomicState.start, (genomicState.end - genomicState.start) / (self.viewportContainerWidth()/genomicState.locusCount));
-                    genomicState.initialReferenceFrame = new igv.ReferenceFrame(genomicState.chromosome.name, genomicState.start, (genomicState.end - genomicState.start) / (self.viewportContainerWidth()/genomicState.locusCount));
+                    genomicState.initialReferenceFrame = JSON.parse(JSON.stringify(genomicState.referenceFrame));
                 });
 
                 self.genomicStateList = genomicStateList;
@@ -1020,6 +1020,15 @@ var igv = (function (igv) {
         });
     };
 
+    /**
+     * getGenomicStateList takes loci (gene name or name:start:end) and maps them into a list of genomicStates.
+     * A genomicState is fundamentally a referenceFrame. Plus some panel managment state.
+     * Each mult-locus panel refers to a genomicState.
+     *
+     * @param loci - array of locus strings (e.g. chr1:1-100,  egfr)
+     * @param viewportContainerWidth - viewport width in pixels
+     * @param continuation - callback to received the list of genomic states
+     */
     igv.Browser.prototype.getGenomicStateList = function (loci, viewportContainerWidth, continuation) {
 
         var self = this,
@@ -1033,6 +1042,7 @@ var igv = (function (igv) {
             geneNameLookup;
 
         chrStartEndLoci = [];
+        
         _.each(loci, function(locus) {
 
             locusGenomicState = {};
@@ -1102,16 +1112,20 @@ var igv = (function (igv) {
                     });
 
                     continuation(_.union(locusGenomicStates, featureDBGenomicStates, geneNameGenomicStates));
-
+                    return;
                 });
 
             } else {
                 continuation(_.union(locusGenomicStates, featureDBGenomicStates));
+                return;
             }
 
         } else {
             continuation(locusGenomicStates);
+            return;
         }
+
+
 
         function createFeatureDBGenomicState(featureDBLookupResult) {
 
