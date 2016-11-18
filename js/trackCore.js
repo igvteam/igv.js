@@ -161,11 +161,11 @@ var igv = (function (igv) {
 
     };
 
-    igv.trackPopupMenuItem = function (track, genomicLocation, xBP, x) {
+    igv.trackPopupMenuItem = function (track, genomicLocation, xViewportTileBP, xViewportTile) {
 
         var $e = $('<div class="igv-track-menu-item">');
 
-        $e.text('Track - Core ' + igv.prettyBasePairNumber(xBP));
+        $e.text('Track - Core ' + igv.prettyBasePairNumber(xViewportTileBP));
         $e.click(function () {
                 console.log('click you very much');
             }

@@ -128,24 +128,18 @@ var igv = (function (igv) {
             referenceFrame = viewport.genomicState.referenceFrame,
             canvasCoords,
             genomicLocation,
-            xBP,
+            xTileBP,
             x,
-            dataList,
             $container,
-            menuItems = [];
+            menuItems = [],
+            addBorderTop;
 
         canvasCoords = igv.translateMouseCoordinates(event, viewport.canvas);
 
         genomicLocation = Math.floor((referenceFrame.start) + referenceFrame.toBP(canvasCoords.x));
 
-        xBP = viewport.tile.startBP - referenceFrame.start;
-        x = Math.round(referenceFrame.toPixels(xBP));
-
-        // dataList = viewport.trackView.track.popupData(genomicLocation, canvasCoords.x - x, canvasCoords.y, referenceFrame);
-        // if (_.size(dataList) > 0) {
-        //     igv.popover.presentTrackPopup(event.pageX, event.pageY, igv.formatPopoverText(dataList));
-        // }
-
+        xTileBP = referenceFrame.start - viewport.tile.startBP;
+        x = Math.round(referenceFrame.toPixels(xTileBP));
 
         this.$popoverContent.empty();
         this.$popoverContent.addClass("igv-popover-track-popup-content");
@@ -153,13 +147,23 @@ var igv = (function (igv) {
         $container = $('<div class="igv-track-menu-container">');
         this.$popoverContent.append($container);
 
-        menuItems.push(igv.trackPopupMenuItem(track, genomicLocation, xBP, x));
-        if (track.popupMenuItem) {
-            menuItems.push(track.popupMenuItem(genomicLocation, xBP, x));
+        menuItems.push(igv.trackPopupMenuItem(track, genomicLocation, xTileBP, x));
+        if (track.popupMenuItems) {
+            menuItems.push(track.popupMenuItems(genomicLocation, xTileBP, x));
         }
         _.each(menuItems, function($item){
             $container.append($item);
         });
+
+        addBorderTop = _.filter(menuItems, function($item, index) {
+            return (_.size(menuItems) > 1 && index > 0);
+        });
+
+        if (_.size(addBorderTop) > 0) {
+            _.each(addBorderTop, function($e){
+                $e.addClass('igv-track-menu-border-top');
+            });
+        }
 
         this.$popover.css(popoverPosition(event.pageX, event.pageY, this));
         this.$popover.show();

@@ -28,16 +28,14 @@
  */
 var igv = (function (igv) {
 
-    igv.Dialog = function ($parent, constructorHelper, id) {
+    igv.Dialog = function ($parent, constructorHelper) {
 
         var self = this,
             $header,
             $headerBlurb;
 
         this.$container = $('<div class="igv-grid-container-dialog">');
-        if (id) {
-            this.$container.attr("id", id);
-        }
+
         $parent.append( this.$container[ 0 ] );
 
         $header = $('<div class="igv-grid-header">');

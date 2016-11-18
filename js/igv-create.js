@@ -78,7 +78,7 @@ var igv = (function (igv) {
         igv.popover = new igv.Popover($content);
 
         // ColorPicker object -- singleton shared by all components
-        igv.colorPicker = new igv.ColorPicker(browser.$root, config.palette, "igv-color-picker");
+        igv.colorPicker = new igv.ColorPicker(browser.$root, config.palette);
         igv.colorPicker.hide();
 
         // alert object -- singleton shared by all components
@@ -86,11 +86,11 @@ var igv = (function (igv) {
         igv.alert.hide();
 
         // Dialog object -- singleton shared by all components
-        igv.dialog = new igv.Dialog(browser.$root, igv.Dialog.dialogConstructor, "igv-dialog");
+        igv.dialog = new igv.Dialog(browser.$root, igv.Dialog.dialogConstructor);
         igv.dialog.hide();
 
         // Data Range Dialog object -- singleton shared by all components
-        igv.dataRangeDialog = new igv.DataRangeDialog(browser.$root, "igv-data-range-dialog");
+        igv.dataRangeDialog = new igv.DataRangeDialog(browser.$root);
         igv.dataRangeDialog.hide();
 
         if (!config.showNavigation) {
