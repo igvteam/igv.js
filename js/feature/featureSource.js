@@ -138,10 +138,6 @@ var igv = (function (igv) {
 
     igv.FeatureSource.prototype.getFeatures = function (chr, bpStart, bpEnd, bpPerPixel) {
 
-        if (chr.toLowerCase() === "all") {
-            return getWGFeatures.call(this);
-        }
-
         var self = this;
         return new Promise(function (fulfill, reject) {
 
@@ -149,7 +145,32 @@ var igv = (function (igv) {
                 featureCache = self.featureCache,
                 maxRows = self.config.maxRows || 500;
 
-            if (featureCache && (featureCache.range === undefined || featureCache.range.containsRange(genomicInterval))) {
+            if ("all" === chr.toLowerCase()) {
+                if (self.reader.supportsWholeGenome) {
+                    if (featureCache && featureCache.range === undefined) {
+                        fulfill(getWGFeatures(featureCache.allFeatures()));
+                    }
+                    else {
+                        self.reader.readFeatures(chr).then(function (featureList) {
+                            if (featureList && typeof featureList.forEach === 'function') {  // Have result AND its an array type
+                                if ("gtf" === self.config.format || "gff3" === self.config.format || "gff" === self.config.format) {
+                                    featureList = (new igv.GFFHelper(self.config.format)).combineFeatures(featureList);
+                                }
+                                self.featureCache = new igv.FeatureCache(featureList);   // Note - replacing previous cache with new one
+
+                                // Assign overlapping features to rows
+                                packFeatures(featureList, maxRows);
+                            }
+                            fulfill(getWGFeatures(self.featureCache.allFeatures()));
+                        });
+                    }
+                }
+                else {
+                    fulfill(null);
+                }
+            }
+
+            else if (featureCache && (featureCache.range === undefined || featureCache.range.containsRange(genomicInterval))) {
                 fulfill(self.featureCache.queryFeatures(chr, bpStart, bpEnd));
             }
             else {
@@ -195,41 +216,6 @@ var igv = (function (igv) {
 
                     }).catch(reject);
             }
-        });
-    }
-
-    function getWGFeatures() {
-
-        var self = this,
-            promises = [],
-            wgFeatures = [];
-
-        return new Promise(function (fulfill, reject) {
-
-            igv.browser.genome.chromosomeNames.forEach(function (chr) {
-                var chromosome = igv.browser.genome.getChromosome(chr),
-                    len = chromosome.bpLength;
-                if (chromosome != null) {
-                    promises.push(self.getFeatures(chr, 0, len));
-                }
-            });
-
-            Promise.all(promises).then(function (results) {
-                results.forEach(function (features) {
-                    features.forEach(function (f) {
-                        var wgStart = igv.browser.genome.getGenomeCoordinate(chr, f.start),
-                            wgEnd = igv.browser.genome.getGenomeCoordinate(chr, f.end),
-                            wgFeature = (JSON.parse(JSON.stringify(f)));  // clone feature
-
-                        wgFeature.start = wgStart;
-                        wgFeature.end = wgEnd;
-                        wgFeatures.push(wgFeature);
-                    });
-                });
-                fulfill(wgFeatures);
-            }).catch(function (error) {
-                reject(error);
-            });
         });
     }
 
@@ -298,6 +284,25 @@ var igv = (function (igv) {
 
             });
         }
+    }
+
+
+    function getWGFeatures(features) {
+
+        var wgFeatures = [];
+
+        features.forEach(function (f) {
+            var chr = f.chr;
+                wgStart = igv.browser.genome.getGenomeCoordinate(chr, f.start),
+                wgEnd = igv.browser.genome.getGenomeCoordinate(chr, f.end),
+                wgFeature = (JSON.parse(JSON.stringify(f)));  // clone feature
+
+            wgFeature.start = wgStart;
+            wgFeature.end = wgEnd;
+            wgFeatures.push(wgFeature);
+        });
+
+        return wgFeatures;
     }
 
     return igv;

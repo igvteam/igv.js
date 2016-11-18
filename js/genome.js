@@ -192,7 +192,8 @@ var igv = (function (igv) {
                 aliases,
                 chrNames,
                 chromosomes = {},
-                sequence;
+                sequence,
+                l;
 
             sequence = new igv.FastaSequence(reference);
 
@@ -216,6 +217,16 @@ var igv = (function (igv) {
                         checkReady();
                     });
                 }
+
+                // Construct the whole-genome "chromosome"
+                l=0;
+                _.each(chromosomes, function(chromosome) {
+                    l += Math.floor((chromosome.bpLength / 1000));  // wg length is in kb.  bp would overflow maximum number limit
+                });
+                chromosomes["all"] = {
+                    name: "all",
+                    bpLength: l
+                };
 
                 checkReady();
 

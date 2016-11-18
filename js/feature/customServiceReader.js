@@ -33,8 +33,9 @@ var igv = (function (igv) {
 
 
     igv.CustomServiceReader = function (config) {
-
         this.config = config;
+        
+        this.supportsWholeGenome = true;
     }
 
     igv.CustomServiceReader.prototype.readFeatures = function (chr, start, end) {
@@ -47,7 +48,7 @@ var igv = (function (igv) {
             var url = self.config.url,
                 body = self.config.body;
 
-            if(body !== undefined) {
+            if(body !== undefined && chr !== "all") {
                 self.config.body = self.config.body.replace("$CHR", chr);
             }
 
