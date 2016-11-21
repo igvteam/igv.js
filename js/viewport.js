@@ -161,15 +161,15 @@ var igv = (function (igv) {
             doubleClickDelay = igv.browser.constants.doubleClickDelay;
 
             // right-click
-            $(self.canvas).contextmenu(function(e) {
-
-                e.preventDefault();
-                e = $.event.fix(e);
-                e.stopPropagation();
-
-                igv.popover.presentTrackPopupMenu(e, self);
-
-            });
+            // $(self.canvas).contextmenu(function(e) {
+            //
+            //     e.preventDefault();
+            //     e = $.event.fix(e);
+            //     e.stopPropagation();
+            //
+            //     igv.popover.presentTrackPopupMenu(e, self);
+            //
+            // });
 
             $(self.canvas).mousedown(function (e) {
                 var canvasCoords;
@@ -517,6 +517,8 @@ var igv = (function (igv) {
                         referenceFrame: referenceFrame,
 
                         genomicState: genomicState,
+
+                        viewport: self,
 
                         viewportWidth: self.$viewport.width()
                     });

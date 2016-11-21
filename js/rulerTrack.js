@@ -114,14 +114,17 @@ var igv = (function (igv) {
             var $e,
                 viewports;
 
-            viewports = _.filter(igv.Viewport.viewportsWithLocusIndex(genomicState.locusIndex), function(viewport){
-                return (viewport.trackView.track instanceof igv.RulerTrack);
-            });
+            $e = options.viewport.$viewport.find('.igv-viewport-content-ruler-div');
+            $e.text( genomicState.locusSearchString );
 
-            if (1 === _.size(viewports)) {
-                $e = _.first(viewports).$viewport.find('.igv-viewport-content-ruler-div');
-                $e.text( genomicState.locusSearchString );
-            }
+            // viewports = _.filter(igv.Viewport.viewportsWithLocusIndex(genomicState.locusIndex), function(viewport){
+            //     return (viewport.trackView.track instanceof igv.RulerTrack);
+            // });
+            //
+            // if (1 === _.size(viewports)) {
+            //     $e = _.first(viewports).$viewport.find('.igv-viewport-content-ruler-div');
+            //     $e.text( genomicState.locusSearchString );
+            // }
 
         }
 
