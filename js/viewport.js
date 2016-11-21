@@ -161,15 +161,15 @@ var igv = (function (igv) {
             doubleClickDelay = igv.browser.constants.doubleClickDelay;
 
             // right-click
-            // $(self.canvas).contextmenu(function(e) {
-            //
-            //     e.preventDefault();
-            //     e = $.event.fix(e);
-            //     e.stopPropagation();
-            //
-            //     igv.popover.presentTrackPopupMenu(e, self);
-            //
-            // });
+            $(self.canvas).contextmenu(function(e) {
+
+                e.preventDefault();
+                e = $.event.fix(e);
+                e.stopPropagation();
+
+                igv.popover.presentTrackPopupMenu(e, self);
+
+            });
 
             $(self.canvas).mousedown(function (e) {
                 var canvasCoords;
@@ -256,6 +256,7 @@ var igv = (function (igv) {
                                 if (undefined === genomicLocation || null === self.tile) {
                                     return;
                                 }
+
 
                                 xOrigin = Math.round(referenceFrame.toPixels((self.tile.startBP - referenceFrame.start)));
                                 dataList = trackView.track.popupData(genomicLocation, canvasCoords.x - xOrigin, canvasCoords.y, referenceFrame);
