@@ -167,15 +167,17 @@ var igv = (function (igv) {
 
     };
 
-    igv.FeatureTrack.prototype.popupMenuItems = function (genomicLocation, xViewportTileBP, xViewportTile) {
+    igv.FeatureTrack.prototype.popupMenuItems = function (genomicLocation, xOffset, yOffset, referenceFrame) {
 
         var $e = $('<div class="igv-track-menu-item">');
 
-        $e.text('Track - Feature ' + igv.prettyBasePairNumber(xViewportTileBP));
+        $e.text('Click Me');
+
         $e.click(function () {
-                console.log('click you very much');
-            }
-        );
+            var $t = $(this),
+                str = igv.numberFormatter(genomicLocation);
+            $t.text('featureTrack.popupMenuItems ' + str);
+        });
 
         return $e;
 

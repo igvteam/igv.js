@@ -129,17 +129,17 @@ var igv = (function (igv) {
             canvasCoords,
             genomicLocation,
             xTileBP,
-            x,
+            xOrigin,
             $container,
             menuItems = [],
             addBorderTop;
 
         canvasCoords = igv.translateMouseCoordinates(event, viewport.canvas);
-
         genomicLocation = Math.floor((referenceFrame.start) + referenceFrame.toBP(canvasCoords.x));
 
-        xTileBP = referenceFrame.start - viewport.tile.startBP;
-        x = Math.round(referenceFrame.toPixels(xTileBP));
+
+        xTileBP = viewport.tile.startBP - referenceFrame.start;
+        xOrigin = Math.round(referenceFrame.toPixels(xTileBP));
 
         this.$popoverContent.empty();
         this.$popoverContent.addClass("igv-popover-track-popup-content");
@@ -147,9 +147,9 @@ var igv = (function (igv) {
         $container = $('<div class="igv-track-menu-container">');
         this.$popoverContent.append($container);
 
-        menuItems.push(igv.trackPopupMenuItem(track, genomicLocation, xTileBP, x));
+        menuItems.push(igv.trackPopupMenuItem(track, genomicLocation, canvasCoords.x - xOrigin, canvasCoords.y, referenceFrame));
         if (track.popupMenuItems) {
-            menuItems.push(track.popupMenuItems(genomicLocation, xTileBP, x));
+            menuItems.push(track.popupMenuItems(genomicLocation, canvasCoords.x - xOrigin, canvasCoords.y, referenceFrame));
         }
         _.each(menuItems, function($item){
             $container.append($item);
