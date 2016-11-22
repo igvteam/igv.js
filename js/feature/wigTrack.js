@@ -66,21 +66,14 @@ var igv = (function (igv) {
     igv.WIGTrack.prototype.menuItemList = function (popover) {
 
         var self = this,
-            menuItems = [],
-            html = [];
+            menuItems = [];
 
         menuItems.push(igv.colorPickerMenuItem(popover, this.trackView));
+
         menuItems.push(igv.dataRangeMenuItem(popover, this.trackView));
 
-        //html.push('<div class="igv-track-menu-item igv-track-menu-border-top">');
-        html.push('<div class="igv-track-menu-item">');
-        html.push(true === self.autoScale ? '<i class="fa fa-check fa-check-shim">' : '<i class="fa fa-check fa-check-shim fa-check-hidden">');
-        html.push('</i>');
-        html.push('Autoscale');
-        html.push('</div>');
-
         menuItems.push({
-            object: $(html.join('')),
+            object: $(htmlStringified(self.autoScale)),
             click: function () {
                 var $fa = $(this).find('i');
 
@@ -94,11 +87,21 @@ var igv = (function (igv) {
                     $fa.addClass('fa-check-hidden');
                 }
 
-                // do stuff
-
                 self.trackView.update();
             }
         });
+
+        function htmlStringified (autoScale) {
+            var html = [];
+
+            html.push('<div class="igv-track-menu-item">');
+            html.push(true === autoScale ? '<i class="fa fa-check fa-check-shim">' : '<i class="fa fa-check fa-check-shim fa-check-hidden">');
+            html.push('</i>');
+            html.push('Autoscale');
+            html.push('</div>');
+
+            return html.join('');
+        }
 
         return menuItems;
 

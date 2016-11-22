@@ -182,7 +182,7 @@ var igv = (function (igv) {
         gearButton = $('<i class="fa fa-gear fa-20px igv-track-menu-gear igv-app-icon">');
 
         $(gearButton).click(function (e) {
-            igv.popover.presentTrackMenu(e.pageX, e.pageY, self);
+            igv.popover.presentTrackGearMenu(e.pageX, e.pageY, self);
         });
 
         this.rightHandGutter = $('<div class="igv-right-hand-gutter">')[0];
