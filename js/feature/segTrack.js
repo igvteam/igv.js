@@ -77,14 +77,14 @@ var igv = (function (igv) {
 
     igv.SegTrack.prototype.menuItemList = function (popover) {
 
-        var myself = this;
+        var self = this;
 
         return [
             {
                 name: ("SQUISHED" === this.displayMode) ? "Expand sample hgt" : "Squish sample hgt",
                 click: function () {
                     popover.hide();
-                    myself.toggleSampleHeight();
+                    self.toggleSampleHeight();
                 }
             }
         ];
@@ -364,20 +364,11 @@ var igv = (function (igv) {
         return null;
     };
 
-    igv.SegTrack.prototype.popupMenuItems = function (genomicLocation, xOffset, yOffset, referenceFrame) {
+    igv.SegTrack.prototype.popupMenuItemList = function (config) {
+        var item;
 
-        var $e = $('<div class="igv-track-menu-item">');
-
-        $e.text('Click Me');
-
-        $e.click(function () {
-            var $t = $(this),
-                str = igv.numberFormatter(genomicLocation);
-            $t.text('segTrack.popupMenuItems ' + str);
-        });
-
-        return $e;
-
+        // item = igv.trackMenuItem(popover, trackView, menuItemLabel, dialogLabelHandler, dialogInputValue, dialogClickHandler, doAddTopBorder);
+        return [];
     };
 
     return igv;

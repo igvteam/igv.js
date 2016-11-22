@@ -30,13 +30,13 @@ var igv = (function (igv) {
 
     igv.Popover = function ($parent) {
 
-        this.$parent = this.markupWith$Parent($parent);
+        this.$parent = this.initializationHelper($parent);
 
         // this.$popoverContent.kinetic({});
 
     };
 
-    igv.Popover.prototype.markupWith$Parent = function ($parent) {
+    igv.Popover.prototype.initializationHelper = function ($parent) {
 
         var self = this,
             $popoverHeader;
@@ -69,7 +69,7 @@ var igv = (function (igv) {
         this.$popover.hide();
     };
 
-    igv.Popover.prototype.presentTrackMenu = function (pageX, pageY, trackView) {
+    igv.Popover.prototype.presentTrackGearMenu = function (pageX, pageY, trackView) {
 
         var $container,
             items;
@@ -83,11 +83,8 @@ var igv = (function (igv) {
         items = igv.trackMenuItemList(this, trackView);
 
         _.each(items, function(item) {
-            $container.append(item.object || item);
 
-            if (item.object && item.click) {
-                item.object.click( item.click );
-            }
+            $container.append(item.object);
 
             if (item.init) {
                 item.init();
@@ -95,13 +92,118 @@ var igv = (function (igv) {
 
         });
 
-        this.$popover.css(popoverPosition(pageX, pageY, this));
+        this.$popover.css(clampPopoverLocation(pageX, pageY, this));
         this.$popover.show();
-
         this.$popover.offset( igv.constrainBBox(this.$popover, $(igv.browser.trackContainerDiv)) );
     };
 
-    igv.Popover.prototype.presentTrackPopup = function (pageX, pageY, content) {
+    igv.Popover.prototype.presentTrackPopup = function (e, viewport) {
+
+        var track = viewport.trackView.track,
+            referenceFrame = viewport.genomicState.referenceFrame,
+            trackLocationState,
+            dataList,
+            popupClickHandlerResult,
+            content;
+
+        trackLocationState = createTrackLocationState(e, viewport);
+        if (undefined === trackLocationState) {
+            return
+        }
+
+        dataList = track.popupData(trackLocationState.genomicLocation, trackLocationState.x, trackLocationState.y, referenceFrame);
+
+        popupClickHandlerResult = igv.browser.fireEvent('trackclick', [track, dataList]);
+
+        if (undefined === popupClickHandlerResult) {
+
+            if (_.size(dataList) > 0) {
+                content = igv.formatPopoverText(dataList);
+            }
+
+        } else if (typeof popupClickHandlerResult === 'string') {
+            content = popupClickHandlerResult;
+        }
+
+        this.presentContent(e.pageX, e.pageY, content);
+
+    };
+
+    igv.Popover.prototype.presentTrackPopupMenu = function (e, viewport) {
+
+        var track = viewport.trackView.track,
+            referenceFrame = viewport.genomicState.referenceFrame,
+            trackLocationState,
+            $container,
+            menuItems = [],
+            withBorder;
+
+
+
+
+
+
+        trackLocationState = createTrackLocationState(e, viewport);
+
+        if (undefined === trackLocationState) {
+            return
+        }
+
+        // :::::::::::::::::: CLONE of popover.presentTrackGearMenu(...) ::::::::::::::::::
+
+        this.$popoverContent.empty();
+        this.$popoverContent.removeClass("igv-popover-track-popup-content");
+
+        $container = $('<div class="igv-track-menu-container">');
+        this.$popoverContent.append($container);
+
+        menuItems = igv.trackPopupMenuItemList(this, viewport.trackView, trackLocationState.genomicLocation, trackLocationState.x, trackLocationState.y, referenceFrame);
+
+        _.each(menuItems, function($element) {
+            $container.append($element);
+        });
+
+        this.$popover.css(clampPopoverLocation(e.pageX, e.pageY, this));
+        this.$popover.show();
+        // this.$popover.offset( igv.constrainBBox(this.$popover, $(igv.browser.trackContainerDiv)) );
+
+        // ^^^^^^^^^^^^^^^^^^^ CLONE of popover.presentTrackGearMenu(...) ^^^^^^^^^^^^^^^^^^^
+
+
+
+
+        /*
+        this.$popoverContent.empty();
+        this.$popoverContent.addClass("igv-popover-track-popup-content");
+
+        $container = $('<div class="igv-track-menu-container">');
+        this.$popoverContent.append($container);
+
+        menuItems.push(igv.DEPRICATED_trackPopupMenuItem(track, trackLocationState.genomicLocation, trackLocationState.x, trackLocationState.y, referenceFrame));
+
+        if (track.popupMenuItems) {
+            menuItems.push(track.popupMenuItems(trackLocationState.genomicLocation, trackLocationState.x, trackLocationState.y, referenceFrame));
+        }
+        _.each(menuItems, function($item){
+            $container.append($item);
+        });
+
+        withBorder = _.filter(menuItems, function($item, index) {
+            return (_.size(menuItems) > 1 && index > 0);
+        });
+
+        if (_.size(withBorder) > 0) {
+            _.each(withBorder, function($e){
+                $e.addClass('igv-track-menu-border-top');
+            });
+        }
+
+        this.$popover.css(clampPopoverLocation(e.pageX, e.pageY, this));
+        this.$popover.show();
+        */
+    };
+
+    igv.Popover.prototype.presentContent = function (pageX, pageY, content) {
         var $container;
 
         if (undefined === content) {
@@ -115,62 +217,32 @@ var igv = (function (igv) {
         this.$popoverContent.append($container);
         this.$popoverContent.html(content);
 
-        this.$popover.css(popoverPosition(pageX, pageY, this));
+        this.$popover.css(clampPopoverLocation(pageX, pageY, this));
         this.$popover.show();
-
-        // $('.igv-dialog-close-container').show();
 
     };
 
-    igv.Popover.prototype.presentTrackPopupMenu = function (event, viewport) {
+    function createTrackLocationState(e, viewport) {
 
-        var track = viewport.trackView.track,
-            referenceFrame = viewport.genomicState.referenceFrame,
-            canvasCoords,
+        var referenceFrame = viewport.genomicState.referenceFrame,
             genomicLocation,
-            xTileBP,
-            xOrigin,
-            $container,
-            menuItems = [],
-            addBorderTop;
+            canvasCoords,
+            xOrigin;
 
-        canvasCoords = igv.translateMouseCoordinates(event, viewport.canvas);
+        canvasCoords = igv.translateMouseCoordinates(e, viewport.canvas);
         genomicLocation = Math.floor((referenceFrame.start) + referenceFrame.toBP(canvasCoords.x));
 
-
-        xTileBP = viewport.tile.startBP - referenceFrame.start;
-        xOrigin = Math.round(referenceFrame.toPixels(xTileBP));
-
-        this.$popoverContent.empty();
-        this.$popoverContent.addClass("igv-popover-track-popup-content");
-
-        $container = $('<div class="igv-track-menu-container">');
-        this.$popoverContent.append($container);
-
-        menuItems.push(igv.trackPopupMenuItem(track, genomicLocation, canvasCoords.x - xOrigin, canvasCoords.y, referenceFrame));
-        if (track.popupMenuItems) {
-            menuItems.push(track.popupMenuItems(genomicLocation, canvasCoords.x - xOrigin, canvasCoords.y, referenceFrame));
-        }
-        _.each(menuItems, function($item){
-            $container.append($item);
-        });
-
-        addBorderTop = _.filter(menuItems, function($item, index) {
-            return (_.size(menuItems) > 1 && index > 0);
-        });
-
-        if (_.size(addBorderTop) > 0) {
-            _.each(addBorderTop, function($e){
-                $e.addClass('igv-track-menu-border-top');
-            });
+        if (undefined === genomicLocation || null === viewport.tile) {
+            return undefined;
         }
 
-        this.$popover.css(popoverPosition(event.pageX, event.pageY, this));
-        this.$popover.show();
+        xOrigin = Math.round(referenceFrame.toPixels((viewport.tile.startBP - referenceFrame.start)));
 
-    };
+        return { genomicLocation: genomicLocation, x: canvasCoords.x - xOrigin, y: canvasCoords.y }
 
-    function popoverPosition(pageX, pageY, popoverWidget) {
+    }
+
+    function clampPopoverLocation(pageX, pageY, popover) {
 
         var left,
             containerCoordinates = { x: pageX, y: pageY },
@@ -179,9 +251,9 @@ var igv = (function (igv) {
             popupX = pageX,
             popupY = pageY;
 
-        popupX -= popoverWidget.$parent.offset().left;
-        popupY -= popoverWidget.$parent.offset().top;
-        popupRect = { x: popupX, y: popupY, width: popoverWidget.$popover.outerWidth(), height: popoverWidget.$popover.outerHeight() };
+        popupX -= popover.$parent.offset().left;
+        popupY -= popover.$parent.offset().top;
+        popupRect = { x: popupX, y: popupY, width: popover.$popover.outerWidth(), height: popover.$popover.outerHeight() };
 
         left = popupX;
         if (containerCoordinates.x + popupRect.width > containerRect.width) {

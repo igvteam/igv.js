@@ -96,7 +96,7 @@ var igv = (function (igv) {
             $trackLabel.html(trackView.track.name);
 
             $trackLabel.click(function (e) {
-                igv.popover.presentTrackPopup(e.pageX, e.pageY, description);
+                igv.popover.presentContent(e.pageX, e.pageY, description);
             });
 
             this.$viewport.append($trackLabel);
@@ -191,8 +191,6 @@ var igv = (function (igv) {
                     newCenter;
 
                 e.preventDefault();
-
-                // Sets pageX and pageY for browsers that don't support them
                 e = $.event.fix(e);
                 e.stopPropagation();
 
@@ -249,33 +247,7 @@ var igv = (function (igv) {
 
                         popupTimer = window.setTimeout(function () {
 
-                                var popupClickHandlerResult,
-                                    dataList,
-                                    xOrigin;
-
-                                if (undefined === genomicLocation || null === self.tile) {
-                                    return;
-                                }
-
-
-                                xOrigin = Math.round(referenceFrame.toPixels((self.tile.startBP - referenceFrame.start)));
-                                dataList = trackView.track.popupData(genomicLocation, canvasCoords.x - xOrigin, canvasCoords.y, referenceFrame);
-
-                                popupClickHandlerResult = igv.browser.fireEvent('trackclick', [trackView.track, dataList]);
-
-                                // (Default) no external handlers or no input from handlers
-                                if (undefined === popupClickHandlerResult) {
-
-                                    if (_.size(dataList) > 0) {
-                                        igv.popover.presentTrackPopup(e.pageX, e.pageY, igv.formatPopoverText(dataList));
-                                    }
-
-                                    // A handler returned custom popover HTML to override default format
-                                } else if (typeof popupClickHandlerResult === 'string') {
-                                    igv.popover.presentTrackPopup(e.pageX, e.pageY, popupClickHandlerResult);
-                                }
-
-                                // If handler returned false then we do nothing and let the handler manage the click
+                                igv.popover.presentTrackPopup(e, self);
 
                                 mouseDownX = undefined;
                                 popupTimer = undefined;

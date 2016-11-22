@@ -49,7 +49,7 @@ var igv = (function (igv) {
 
         this.viewAsPairs = config.viewAsPairs;
 
-        this.pairsSupported = config.pairsSupported === undefined ? true : false;
+        this.pairsSupported = (undefined === config.pairsSupported);
 
         this.color = config.color || "rgb(185, 185, 185)";
 

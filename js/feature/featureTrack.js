@@ -167,20 +167,11 @@ var igv = (function (igv) {
 
     };
 
-    igv.FeatureTrack.prototype.popupMenuItems = function (genomicLocation, xOffset, yOffset, referenceFrame) {
+    igv.FeatureTrack.prototype.popupMenuItemList = function (config) {
+        var item;
 
-        var $e = $('<div class="igv-track-menu-item">');
-
-        $e.text('Click Me');
-
-        $e.click(function () {
-            var $t = $(this),
-                str = igv.numberFormatter(genomicLocation);
-            $t.text('featureTrack.popupMenuItems ' + str);
-        });
-
-        return $e;
-
+        // item = igv.trackMenuItem(popover, trackView, menuItemLabel, dialogLabelHandler, dialogInputValue, dialogClickHandler, doAddTopBorder);
+        return [];
     };
 
     /**
@@ -256,34 +247,45 @@ var igv = (function (igv) {
 
     igv.FeatureTrack.prototype.menuItemList = function (popover) {
 
-        var myself = this,
+        var self = this,
             menuItems = [],
-            lut = {"COLLAPSED": "Collapse", "SQUISHED": "Squish", "EXPANDED": "Expand"},
-            checkMark = '<i class="fa fa-check fa-check-shim"></i>',
-            checkMarkNone = '<i class="fa fa-check fa-check-shim fa-check-hidden"></i>',
-            trackMenuItem = '<div class=\"igv-track-menu-item\">',
-            trackMenuItemFirst = '<div class=\"igv-track-menu-item igv-track-menu-border-top\">';
+            mapped;
 
         menuItems.push(igv.colorPickerMenuItem(popover, this.trackView));
 
-        ["COLLAPSED", "SQUISHED", "EXPANDED"].forEach(function (displayMode, index) {
-
-            var chosen,
-                str;
-
-            chosen = (0 === index) ? trackMenuItemFirst : trackMenuItem;
-            str = (displayMode === myself.displayMode) ? chosen + checkMark + lut[displayMode] + '</div>' : chosen + checkMarkNone + lut[displayMode] + '</div>';
-
-            menuItems.push({
-                object: $(str),
+        mapped = _.map(["COLLAPSED", "SQUISHED", "EXPANDED"], function(displayMode, index) {
+            return {
+                object: $(markupStringified(displayMode, index, self.displayMode)),
                 click: function () {
                     popover.hide();
-                    myself.displayMode = displayMode;
-                    myself.trackView.update();
+                    self.displayMode = displayMode;
+                    self.trackView.update();
                 }
-            });
-
+            };
         });
+
+        menuItems.concat(mapped);
+
+        function markupStringified(displayMode, index, selfDisplayMode) {
+
+            var lut,
+                chosen;
+
+            lut =
+            {
+                "COLLAPSED": "Collapse",
+                "SQUISHED": "Squish",
+                "EXPANDED": "Expand"
+            };
+
+            chosen = (0 === index) ? '<div class="igv-track-menu-item igv-track-menu-border-top">' : '<div class="igv-track-menu-item">';
+            if (displayMode === selfDisplayMode) {
+                return chosen + '<i class="fa fa-check fa-check-shim"></i>' + lut[ displayMode ] + '</div>'
+            } else {
+                return chosen + '<i class="fa fa-check fa-check-shim fa-check-hidden"></i>' + lut[ displayMode ] + '</div>';
+            }
+
+        }
 
         return menuItems;
 

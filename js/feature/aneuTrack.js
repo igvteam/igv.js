@@ -85,14 +85,6 @@ var igv = (function (igv) {
 
     };
 
-    igv.AneuTrack.prototype.menuItemList = function (popover) {
-
-        var myself = this;
-
-        return [];
-
-    };
-
     igv.AneuTrack.prototype.getSummary = function (chr, bpStart, bpEnd, continuation) {
         var me = this;
         var filtersummary = function (redlinedata) {
