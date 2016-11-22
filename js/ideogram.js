@@ -156,6 +156,10 @@ var igv = (function (igv) {
             canvasWidth = panel.$canvas.width();
             canvasHeight = panel.$canvas.height();
             panel.ctx.clearRect(0, 0, canvasWidth, canvasHeight);
+            
+            if(referenceFrame.chrName.toLowerCase() === "all") {
+                return;
+            }
 
             image = panel.ideograms[ referenceFrame.chrName ];
 

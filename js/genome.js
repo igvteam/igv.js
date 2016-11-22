@@ -25,12 +25,13 @@
 
 var igv = (function (igv) {
 
-    igv.Genome = function (sequence, ideograms, aliases) {
+    igv.Genome = function (sequence, ideograms, aliases, wgChromosomeNames) {
 
         this.sequence = sequence;
         this.chromosomeNames = sequence.chromosomeNames;
         this.chromosomes = sequence.chromosomes;  // An object (functions as a dictionary)
         this.ideograms = ideograms;
+        this.wgChromosomeNames = wgChromosomeNames;
 
         /**
          * Return the official chromosome name for the (possibly) alias.  Deals with
@@ -191,9 +192,12 @@ var igv = (function (igv) {
                 aliasURL = reference.aliasURL,
                 aliases,
                 chrNames,
+                chromosome,
                 chromosomes = {},
+                wgChromosomeNames = [],
                 sequence,
-                l;
+                l,
+                avgL;
 
             sequence = new igv.FastaSequence(reference);
 
@@ -223,6 +227,20 @@ var igv = (function (igv) {
                 _.each(chromosomes, function(chromosome) {
                     l += Math.floor((chromosome.bpLength / 1000));  // wg length is in kb.  bp would overflow maximum number limit
                 });
+                
+                // Now trim chromosomes < 1/10 average length
+                wgChromosomeNames = [];
+                avgL = (l / chrNames.length) * 200;   // i.e.  (divided by 5) times 1000 bp/kbp  TODO USE MEDIAN
+                l = 0;
+                _.each(chrNames, function(chrName) {
+                    chromosome = sequence.chromosomes[chrName];
+                    if(chromosome.bpLength > avgL) {
+                        l += Math.floor((chromosome.bpLength / 1000));  // wg length is in kb.  bp would overflow maximum number limit
+                        wgChromosomeNames.push(chromosome.name);
+                    }
+                });
+                
+                
                 chromosomes["all"] = {
                     name: "all",
                     bpLength: l
@@ -239,7 +257,7 @@ var igv = (function (igv) {
                 var isReady = (cytobandUrl === undefined || cytobands !== undefined) &&
                     (aliasURL === undefined || aliases !== undefined);
                 if (isReady) {
-                    fulfill(new igv.Genome(sequence, cytobands, aliases));
+                    fulfill(new igv.Genome(sequence, cytobands, aliases, wgChromosomeNames));
                 }
 
             }
