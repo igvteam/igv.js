@@ -42,7 +42,7 @@ var igv = (function (igv) {
 
         var locusLabel = $('<div class = "igv-viewport-content-ruler-div">');
 
-        locusLabel.text( viewport.genomicState.locusSearchString );
+        locusLabel.text(viewport.genomicState.locusSearchString);
 
         locusLabel.click(function (e) {
 
@@ -75,47 +75,59 @@ var igv = (function (igv) {
             x,
             l,
             yShim,
-            tickHeight;
+            tickHeight,
+            bpPerPixel = options.referenceFrame.bpPerPixel;
 
-        updateLocusLabelWithGenomicState(options.genomicState);
-
-        fontStyle = { textAlign: 'center', font: '10px PT Sans', fillStyle: "rgba(64, 64, 64, 1)", strokeStyle: "rgba(64, 64, 64, 1)" };
-
-        range = Math.floor(1100 * options.bpPerPixel);
-        ts = findSpacing(range);
-        spacing = ts.majorTick;
-
-        // Find starting point closest to the current origin
-        nTick = Math.floor(options.bpStart / spacing) - 1;
-        x = 0;
-
-        //canvas.setProperties({textAlign: 'center'});
-        igv.graphics.setProperties(options.context, fontStyle );
-        while (x < options.pixelWidth) {
-
-            l = Math.floor(nTick * spacing);
-            yShim = 2;
-            tickHeight = 6;
-
-            x = Math.round(((l - 1) - options.bpStart + 0.5) / options.bpPerPixel);
-            var chrPosition = formatNumber(l / ts.unitMultiplier, 0) + " " + ts.majorUnit;
-
-            if (nTick % 1 == 0) {
-                igv.graphics.fillText(options.context, chrPosition, x, this.height - (tickHeight/0.75));
-            }
-
-            igv.graphics.strokeLine(options.context, x, this.height - tickHeight, x, this.height - yShim);
-
-            nTick++;
+        if (options.referenceFrame.chrName === "all") {
+            drawAll.call(this);
         }
-        igv.graphics.strokeLine(options.context, 0, this.height - yShim, options.pixelWidth, this.height - yShim);
+        else {
+            updateLocusLabelWithGenomicState(options.genomicState);
+
+            fontStyle = {
+                textAlign: 'center',
+                font: '10px PT Sans',
+                fillStyle: "rgba(64, 64, 64, 1)",
+                strokeStyle: "rgba(64, 64, 64, 1)"
+            };
+
+            range = Math.floor(1100 * bpPerPixel);
+            ts = findSpacing(range);
+            spacing = ts.majorTick;
+
+            // Find starting point closest to the current origin
+            nTick = Math.floor(options.bpStart / spacing) - 1;
+            x = 0;
+
+            //canvas.setProperties({textAlign: 'center'});
+            igv.graphics.setProperties(options.context, fontStyle);
+            while (x < options.pixelWidth) {
+
+                l = Math.floor(nTick * spacing);
+                yShim = 2;
+                tickHeight = 6;
+
+                x = Math.round(((l - 1) - options.bpStart + 0.5) / bpPerPixel);
+                var chrPosition = formatNumber(l / ts.unitMultiplier, 0) + " " + ts.majorUnit;
+
+                if (nTick % 1 == 0) {
+                    igv.graphics.fillText(options.context, chrPosition, x, this.height - (tickHeight / 0.75));
+                }
+
+                igv.graphics.strokeLine(options.context, x, this.height - tickHeight, x, this.height - yShim);
+
+                nTick++;
+            }
+            igv.graphics.strokeLine(options.context, 0, this.height - yShim, options.pixelWidth, this.height - yShim);
+
+        }
 
         function updateLocusLabelWithGenomicState(genomicState) {
             var $e,
                 viewports;
 
             $e = options.viewport.$viewport.find('.igv-viewport-content-ruler-div');
-            $e.text( genomicState.locusSearchString );
+            $e.text(genomicState.locusSearchString);
 
             // viewports = _.filter(igv.Viewport.viewportsWithLocusIndex(genomicState.locusIndex), function(viewport){
             //     return (viewport.trackView.track instanceof igv.RulerTrack);
@@ -187,7 +199,33 @@ var igv = (function (igv) {
             return retval;
         }
 
+
+        function drawAll() {
+
+            var self = this,
+                lastX = 0;
+
+            _.each(igv.browser.genome.wgChromosomeNames, function (chrName) {
+
+                var chromosome = igv.browser.genome.getChromosome(chrName),
+                    bp = igv.browser.genome.getGenomeCoordinate(chrName, chromosome.bpLength),
+                    x = Math.round((bp - options.bpStart ) / bpPerPixel),
+                    yShim = 2,
+                    tickHeight = 10,
+                    chrLabel = chrName.startsWith("chr") ? chrName.substr(3) : chrName;
+
+                options.context.textAlign= 'center';
+                igv.graphics.strokeLine(options.context, x, self.height - tickHeight, x, self.height - yShim);
+                igv.graphics.fillText(options.context, chrLabel, (lastX + x) / 2, self.height - (tickHeight / 0.75));
+
+                lastX = x;
+
+            })
+
+        }
+
     };
+
 
     function TickSpacing(majorTick, majorUnit, unitMultiplier) {
         this.majorTick = majorTick;
