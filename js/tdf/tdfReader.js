@@ -89,60 +89,150 @@ var igv = (function (igv) {
 
                 self.compressed = (self.flags & GZIP_FLAG) != 0;
 
-                fulfill(self);
+                // Now read index
+                igvxhr.loadArrayBuffer(self.path,
+                    {
+                        headers: self.config.headers,
+                        range: {start: self.indexPos, size: self.indexSize},
+                        withCredentials: self.config.withCredentials
+                    }).then(function (data) {
 
+
+                    if (!data) {
+                        reject("no data");
+                        return;
+                    }
+
+                    binaryParser = new igv.BinaryParser(new DataView(data));
+
+                    self.datasetIndex = {};
+                    var nEntries = binaryParser.getInt();
+                    while (nEntries-- > 0) {
+                        var name = binaryParser.getString();
+                        var pos = binaryParser.getLong();
+                        var size = binaryParser.getInt();
+                        self.datasetIndex[name] = {position: pos, size: size};
+                    }
+
+                    self.groupIndex = {};
+                    nEntries = binaryParser.getInt();
+                    while (nEntries-- > 0) {
+                        name = binaryParser.getString();
+                        pos = binaryParser.getLong();
+                        size = binaryParser.getInt();
+                        self.groupIndex[name] = {position: pos, size: size};
+                    }
+
+                    fulfill(self);
+
+                }).catch(reject);
 
             }).catch(reject)
 
         });
     }
 
-    igv.TDFReader.prototype.readMasterIndex = function () {
 
-        var self = this;
+    igv.TDFReader.prototype.readDataset = function (chr, zoom, windowFunction) {
 
-        return new Promise(function (fulfill, reject) {
-            igvxhr.loadArrayBuffer(self.path,
-                {
-                    headers: self.config.headers,
-                    range: {start: self.indexPos, size: self.indexSize},
-                    withCredentials: self.config.withCredentials
-                }).then(function (data) {
+        var self = this,
+            wf = self.version < 2 ? "" : "/" + windowFunction,
+            zoomString = chr === "all" ? "0" : zoom.toString(),
+            dsName = "/" + chr + "/z" + zoomString + wf,
+            indexEntry = self.datasetIndex[dsName];
 
+        if (indexEntry === undefined) {
+            return Promise.resolve(null);
+        }
+        else {
 
-                if (!data) {
-                    reject("no data");
-                    return;
-                }
+            return new Promise(function (fulfill, reject) {
 
-                var binaryParser = new igv.BinaryParser(new DataView(data));
+                igvxhr.loadArrayBuffer(self.path,
+                    {
+                        headers: self.config.headers,
+                        range: {start: indexEntry.position, size: indexEntry.size},
+                        withCredentials: self.config.withCredentials
+                    }).then(function (data) {
 
-                self.datasetIndex = {};
-                var nEntries = binaryParser.getInt();
-                while (nEntries-- > 0) {
-                    var name = binaryParser.getString();
-                    var pos = binaryParser.getLong();
-                    var size = binaryParser.getInt();
-                    self.datasetIndex[name] = {start: pos, size: size};
-                }
+                    if (!data) {
+                        reject("no data");
+                        return;
+                    }
 
-                self.groupIndex = {};
-                nEntries = binaryParser.getInt();
-                while (nEntries-- > 0) {
-                    name = binaryParser.getString();
-                    pos = binaryParser.getLong();
-                    size = binaryParser.getInt();
-                    self.datasetIndex[name] = {start: pos, size: size};
-                }
+                    var binaryParser = new igv.BinaryParser(new DataView(data));
 
-                fulfill(self);
+                    var nAttributes = binaryParser.getInt();
+                    var attributes = {};
+                    while(nAttributes-- > 0) {
+                        attributes[binaryParser.getString()] = binaryParser.getString();
+                    }
 
-            }).catch(reject);
+                    var dataType = binaryParser.getString();
+                    var tileWidth = binaryParser.getFloat();
 
-        });
+                    var nTiles = binaryParser.getInt();
+                    var tiles = [];
+                    while(nTiles-- > 0) {
+                        tiles.push({position: binaryParser.getLong(), size: binaryParser.getInt()});
+                    }
 
+                    var dataset = {
+                        name: dsName,
+                        attributes: attributes,
+                        dataType: dataType,
+                        tileWidth: tileWidth,
+                        tiles: tiles
+                    };
+
+                    fulfill(dataset);
+
+                }).catch(reject);
+
+            });
+        }
     }
 
+
+    igv.TDFReader.prototype.readGroup = function (name) {
+
+        var self = this,
+            indexEntry = self.groupIndex[name];
+
+        if (indexEntry === undefined) {
+            return Promise.resolve(null);
+        }
+        else {
+
+            return new Promise(function (fulfill, reject) {
+
+                igvxhr.loadArrayBuffer(self.path,
+                    {
+                        headers: self.config.headers,
+                        range: {start: indexEntry.position, size: indexEntry.size},
+                        withCredentials: self.config.withCredentials
+                    }).then(function (data) {
+
+                    if (!data) {
+                        reject("no data");
+                        return;
+                    }
+
+                    var binaryParser = new igv.BinaryParser(new DataView(data));
+
+                    var nAttributes = binaryParser.getInt();
+                    var group = {name: name};
+                    while(nAttributes-- > 0) {
+                        group[binaryParser.getString()] = binaryParser.getString();
+                    }
+
+                    fulfill(group);
+
+                }).catch(reject);
+
+            });
+        }
+    }
 
     return igv;
 
