@@ -164,7 +164,7 @@ var igv = (function (igv) {
 
                     var nAttributes = binaryParser.getInt();
                     var attributes = {};
-                    while(nAttributes-- > 0) {
+                    while (nAttributes-- > 0) {
                         attributes[binaryParser.getString()] = binaryParser.getString();
                     }
 
@@ -173,7 +173,7 @@ var igv = (function (igv) {
 
                     var nTiles = binaryParser.getInt();
                     var tiles = [];
-                    while(nTiles-- > 0) {
+                    while (nTiles-- > 0) {
                         tiles.push({position: binaryParser.getLong(), size: binaryParser.getInt()});
                     }
 
@@ -222,7 +222,7 @@ var igv = (function (igv) {
 
                     var nAttributes = binaryParser.getInt();
                     var group = {name: name};
-                    while(nAttributes-- > 0) {
+                    while (nAttributes-- > 0) {
                         group[binaryParser.getString()] = binaryParser.getString();
                     }
 
@@ -232,6 +232,104 @@ var igv = (function (igv) {
 
             });
         }
+    }
+
+
+    function createFixedStep(binaryParser, nTracks) {
+
+    }
+
+    function createVariableStep(binaryParser, nTracks) {
+
+        var tileStart = binaryParser.getInt(),
+            span = binaryParser.getFloat(),
+            nPositions = binaryParser.getInt(),
+            np = nPositions,
+            nt = nTracks,
+            start = [],
+            data,
+            dtrack;
+
+        while (np-- > 0) {
+            start.push(binaryParser.getInt());
+        }
+
+        var nS = binaryParser.getInt();  // # of samples, ignored but should === nTracks
+
+        data = [];
+        while (nt-- > 0) {
+            np = nPositions;
+            dtrack = [];
+            while (np-- > 0) {
+                dtrack.push(binaryParser.getFloat());
+            }
+            data.push(dtrack);
+        }
+
+
+        return {
+            tileStart: tileStart,
+            span: span,
+            start: start,
+            data: data,
+            nTracks: nTracks,
+            nPositions: nPositions
+        }
+    }
+
+    function createBed(binaryParser, nTracks) {
+
+    }
+
+
+    igv.TDFReader.prototype.readTile = function (indexEntry, nTracks) {
+
+        var self = this;
+
+        return new Promise(function (fulfill, reject) {
+
+            igvxhr.loadArrayBuffer(self.path,
+                {
+                    headers: self.config.headers,
+                    range: {start: indexEntry.position, size: indexEntry.size},
+                    withCredentials: self.config.withCredentials
+                }).then(function (data) {
+
+                if (!data) {
+                    reject("no data");
+                    return;
+                }
+
+                if (self.compressed) {
+                    var inflate = new Zlib.Inflate(new Uint8Array(data));
+                    var plain = inflate.decompress();
+                    data = plain.buffer;
+                }
+
+                var binaryParser = new igv.BinaryParser(new DataView(data));
+
+                var type = binaryParser.getString();
+
+                switch (type) {
+                    case "fixedStep":
+                        fulfill(createFixedStep(binaryParser, nTracks));
+                        break;
+                    case "variableStep":
+                        fulfill(createVariableStep(binaryParser, nTracks));
+                        break;
+                    case "bed":
+                    case "bedWithName":
+                        fulfill(createBed(binaryParser, nTracks));
+                        break;
+                    default:
+                        reject("Unknown tile type: " + type);
+                }
+
+
+            }).catch(reject);
+
+        });
+
     }
 
     return igv;

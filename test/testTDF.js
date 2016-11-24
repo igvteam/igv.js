@@ -87,6 +87,28 @@ function runTDFTests() {
         }).catch(reject);
     });
 
-    //  /chr22/z6/mean
+
+    asyncTest("TDF tile", function () {
+
+        var url = dataURL + "tdf/gstt1_sample.bam.tdf",
+            tdfReader;
+
+        createMockObjects();
+
+        tdfReader = new igv.TDFReader({url: url});
+        ok(tdfReader);
+
+        tdfReader.readHeader().then(function () {
+
+            tdfReader.readTile({position: 1364, size: 43}, 1).then(function (tile) {
+
+                equal(24049020, tile.tileStart);
+                equal(24375399, tile.start[0]);
+                equal(321.75, tile.data[0][0]);
+                start();
+            }).catch(reject);
+        }).catch(reject);
+    });
+
 
 }
