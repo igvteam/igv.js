@@ -88,7 +88,38 @@ function runTDFTests() {
     });
 
 
-    asyncTest("TDF tile", function () {
+    asyncTest("TDF variable step tile", function () {
+
+        var url = dataURL + "tdf/gstt1_sample.bam.tdf",
+            tdfReader;
+
+        createMockObjects();
+
+        tdfReader = new igv.TDFReader({url: url});
+        ok(tdfReader);
+
+        tdfReader.readHeader().then(function () {
+            tdfReader.readDataset("chr22", 6, "mean").then(function (dataset) {
+
+                ok(dataset);
+
+                var tileNumber = 30;
+                var nTracks = 1;
+
+                tdfReader.readTile(dataset.tiles[tileNumber], nTracks).then(function (tile) {
+                    equal(24049020, tile.tileStart);
+                    equal(24375399, tile.start[0]);
+                    equal(321.75, tile.data[0][0]);
+
+                    start();
+
+                }).catch(reject);
+            }).catch(reject);
+        }).catch(reject);
+    });
+
+
+    asyncTest("TDF bed tile", function () {
 
         var url = dataURL + "tdf/gstt1_sample.bam.tdf",
             tdfReader;
@@ -100,15 +131,26 @@ function runTDFTests() {
 
         tdfReader.readHeader().then(function () {
 
-            tdfReader.readTile({position: 1364, size: 43}, 1).then(function (tile) {
+            tdfReader.readDataset("chr22", "raw").then(function (dataset) {
 
-                equal(24049020, tile.tileStart);
-                equal(24375399, tile.start[0]);
-                equal(321.75, tile.data[0][0]);
-                start();
+                ok(dataset);
+
+                var tileNumber = 243;
+                var nTracks = 1;
+
+                tdfReader.readTile(dataset.tiles[tileNumber], nTracks).then(function (tile) {
+                    ok(tile);
+                    equal(24376175, tile.start[0]);
+                    equal(24376200, tile.end[0]);
+                    equal(5.28000020980835, tile.data[0][0]);
+                    start();
+
+                }).catch(reject);
             }).catch(reject);
         }).catch(reject);
     });
 
+
+    // TODO -- NEED FIXED STEP TILE TEST
 
 }
