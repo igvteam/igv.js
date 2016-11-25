@@ -136,10 +136,18 @@ var igv = (function (igv) {
     igv.TDFReader.prototype.readDataset = function (chr, zoom, windowFunction) {
 
         var self = this,
-            wf = self.version < 2 ? "" : "/" + windowFunction,
+            wf = (self.version < 2) ? "" : "/" + windowFunction,
             zoomString = chr === "all" ? "0" : zoom.toString(),
-            dsName = "/" + chr + "/z" + zoomString + wf,
-            indexEntry = self.datasetIndex[dsName];
+            dsName,
+            indexEntry;
+
+        if (zoom === "raw") {
+            dsName = "/" + chr + "/raw";
+        }
+        else {
+            dsName = "/" + chr + "/z" + zoomString + wf;
+        }
+        indexEntry = self.datasetIndex[dsName];
 
         if (indexEntry === undefined) {
             return Promise.resolve(null);
@@ -236,7 +244,33 @@ var igv = (function (igv) {
 
 
     function createFixedStep(binaryParser, nTracks) {
+        var nPositions = binaryParser.getInt(),
+            start = binaryParser.getInt(),
+            span = binaryParser.getFloat(),
+            np = nPositions,
+            nt = nTracks,
+            data,
+            dtrack;
 
+
+        data = [];
+        while (nt-- > 0) {
+            np = nPositions;
+            dtrack = [];
+            while (np-- > 0) {
+                dtrack.push(binaryParser.getFloat());
+            }
+            data.push(dtrack);
+        }
+
+        return {
+            type: "fixedStep",
+            start: start,
+            span: span,
+            data: data,
+            nTracks: nTracks,
+            nPositions: nPositions
+        }
     }
 
     function createVariableStep(binaryParser, nTracks) {
@@ -266,8 +300,8 @@ var igv = (function (igv) {
             data.push(dtrack);
         }
 
-
         return {
+            type: "variableStep",
             tileStart: tileStart,
             span: span,
             start: start,
@@ -277,7 +311,53 @@ var igv = (function (igv) {
         }
     }
 
-    function createBed(binaryParser, nTracks) {
+    function createBed(binaryParser, nTracks, type) {
+        var nPositions, start, end, nS, data, name, n, nt;
+
+        nPositions = binaryParser.getInt();
+
+        n = nPositions;
+        start = [];
+        while (n-- > 0) {
+            start.push(binaryParser.getInt());
+        }
+
+        n = nPositions;
+        end = [];
+        while (n-- > 0) {
+            end.push(binaryParser.getInt());
+        }
+
+        var nS = binaryParser.getInt();  // # of samples, ignored but should === nTracks
+
+        data = [];
+        nt = nTracks;
+        while (nt-- > 0) {
+            np = nPositions;
+            dtrack = [];
+            while (np-- > 0) {
+                dtrack.push(binaryParser.getFloat());
+            }
+            data.push(dtrack);
+        }
+
+        if (type === "bedWithName") {
+            n = nPositions;
+            name = [];
+            while (n-- > 0) {
+                name.push(binaryParser.getString());
+            }
+        }
+
+        return {
+            type: type,
+            start: start,
+            end: end,
+            data: data,
+            name: name,
+            nTracks: nTracks,
+            nPositions: nPositions
+        }
 
     }
 
@@ -319,7 +399,7 @@ var igv = (function (igv) {
                         break;
                     case "bed":
                     case "bedWithName":
-                        fulfill(createBed(binaryParser, nTracks));
+                        fulfill(createBed(binaryParser, nTracks, type));
                         break;
                     default:
                         reject("Unknown tile type: " + type);
