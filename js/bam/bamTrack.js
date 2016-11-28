@@ -157,6 +157,8 @@ var igv = (function (igv) {
 
                 self.sortDirection = !(self.sortDirection);
 
+                config.popover.hide();
+
             }
         );
 
