@@ -365,10 +365,19 @@ var igv = (function (igv) {
     };
 
     igv.SegTrack.prototype.popupMenuItemList = function (config) {
-        var item;
 
-        // item = igv.trackMenuItem(popover, trackView, menuItemLabel, dialogLabelHandler, dialogInputValue, dialogClickHandler, doAddTopBorder);
-        return [];
+        var $e;
+
+        $e = $('<div class="igv-track-menu-item">');
+
+        $e.text('SEG Menu Item');
+
+        $e.click(function(){
+            var str = $(this).text() + ' bp ' + igv.numberFormatter(config.genomicLocation) + ' do stuff.';
+            console.log(str);
+        });
+
+        return [ { object: $e, init: undefined } ];
     };
 
     return igv;

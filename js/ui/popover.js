@@ -135,21 +135,13 @@ var igv = (function (igv) {
             referenceFrame = viewport.genomicState.referenceFrame,
             trackLocationState,
             $container,
-            menuItems = [],
-            withBorder;
-
-
-
-
-
+            menuItems;
 
         trackLocationState = createTrackLocationState(e, viewport);
 
         if (undefined === trackLocationState) {
             return
         }
-
-        // :::::::::::::::::: CLONE of popover.presentTrackGearMenu(...) ::::::::::::::::::
 
         this.$popoverContent.empty();
         this.$popoverContent.removeClass("igv-popover-track-popup-content");
@@ -159,15 +151,21 @@ var igv = (function (igv) {
 
         menuItems = igv.trackPopupMenuItemList(this, viewport.trackView, trackLocationState.genomicLocation, trackLocationState.x, trackLocationState.y, referenceFrame);
 
-        _.each(menuItems, function($element) {
-            $container.append($element);
-        });
+        if (_.size(menuItems) > 0) {
 
-        this.$popover.css(clampPopoverLocation(e.pageX, e.pageY, this));
-        this.$popover.show();
-        // this.$popover.offset( igv.constrainBBox(this.$popover, $(igv.browser.trackContainerDiv)) );
+            _.each(menuItems, function(item) {
+                $container.append(item.object);
+            });
 
-        // ^^^^^^^^^^^^^^^^^^^ CLONE of popover.presentTrackGearMenu(...) ^^^^^^^^^^^^^^^^^^^
+            this.$popover.css(clampPopoverLocation(e.pageX, e.pageY, this));
+            this.$popover.show();
+
+        }
+
+
+
+
+
 
 
 
