@@ -177,6 +177,8 @@ var igv = (function (igv) {
 
         $e.click(function(){
             var str = $(this).text() + ' bp ' + igv.numberFormatter(config.genomicLocation) + ' do stuff.';
+            config.popover.hide();
+
             console.log(str);
         });
 
