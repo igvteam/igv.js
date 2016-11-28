@@ -254,14 +254,12 @@ var igv = (function (igv) {
             if (_.size(trackItems) > 0) {
 
                 mapped = _.map(trackItems, function (item, i) {
-                    var $e;
+                    var $e,
+                        obj = {};
                     if (item.name) {
-
                         $e = (0 === i) ? $('<div class="igv-track-menu-item igv-track-menu-border-top">') : $('<div class="igv-track-menu-item">');
                         $e.text(item.name);
-
                         $e.click(item.click);
-
                     } else {
 
                         if (0 === i) {
@@ -272,7 +270,10 @@ var igv = (function (igv) {
                         $e.click(item.click);
                     }
 
-                    return { object: $e, init: item.init || undefined };
+                    obj.object = $e;
+                    obj.init = item.init || undefined;
+
+                    return obj;
 
                 }); // _.map(...)
 

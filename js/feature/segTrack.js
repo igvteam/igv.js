@@ -364,22 +364,6 @@ var igv = (function (igv) {
         return null;
     };
 
-    igv.SegTrack.prototype.popupMenuItemList = function (config) {
-
-        var $e;
-
-        $e = $('<div class="igv-track-menu-item">');
-
-        $e.text('SEG Menu Item');
-
-        $e.click(function(){
-            var str = $(this).text() + ' bp ' + igv.numberFormatter(config.genomicLocation) + ' do stuff.';
-            console.log(str);
-        });
-
-        return [ { object: $e, init: undefined } ];
-    };
-
     return igv;
 
 })(igv || {});
