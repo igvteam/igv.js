@@ -180,7 +180,7 @@ var igv = (function (igv) {
             console.log(str);
         });
 
-        return [ { object: $e, init: undefined } ];
+        return [ { name: undefined, object: $e, init: undefined } ];
     };
 
     /**

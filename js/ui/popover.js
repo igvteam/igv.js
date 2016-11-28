@@ -132,7 +132,6 @@ var igv = (function (igv) {
     igv.Popover.prototype.presentTrackPopupMenu = function (e, viewport) {
 
         var track = viewport.trackView.track,
-            referenceFrame = viewport.genomicState.referenceFrame,
             trackLocationState,
             $container,
             menuItems;
@@ -162,43 +161,6 @@ var igv = (function (igv) {
 
         }
 
-
-
-
-
-
-
-
-
-        /*
-        this.$popoverContent.empty();
-        this.$popoverContent.addClass("igv-popover-track-popup-content");
-
-        $container = $('<div class="igv-track-menu-container">');
-        this.$popoverContent.append($container);
-
-        menuItems.push(igv.DEPRICATED_trackPopupMenuItem(track, trackLocationState.genomicLocation, trackLocationState.x, trackLocationState.y, referenceFrame));
-
-        if (track.popupMenuItems) {
-            menuItems.push(track.popupMenuItems(trackLocationState.genomicLocation, trackLocationState.x, trackLocationState.y, referenceFrame));
-        }
-        _.each(menuItems, function($item){
-            $container.append($item);
-        });
-
-        withBorder = _.filter(menuItems, function($item, index) {
-            return (_.size(menuItems) > 1 && index > 0);
-        });
-
-        if (_.size(withBorder) > 0) {
-            _.each(withBorder, function($e){
-                $e.addClass('igv-track-menu-border-top');
-            });
-        }
-
-        this.$popover.css(clampPopoverLocation(e.pageX, e.pageY, this));
-        this.$popover.show();
-        */
     };
 
     igv.Popover.prototype.presentContent = function (pageX, pageY, content) {
