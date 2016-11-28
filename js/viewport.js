@@ -38,7 +38,7 @@ var igv = (function (igv) {
 
         this.setWidth(igv.browser.viewportContainerWidth()/this.genomicState.locusCount);
 
-        trackView.$viewportContainer.append( this.$viewport );
+        this.trackView.$viewportContainer.append( this.$viewport );
 
         this.contentDiv = $('<div class="igv-viewport-content-div">')[0];
         this.$viewport.append(this.contentDiv);
