@@ -149,7 +149,7 @@ var igv = (function (igv) {
         $container = $('<div class="igv-track-menu-container">');
         this.$popoverContent.append($container);
 
-        menuItems = igv.trackPopupMenuItemList(this, viewport.trackView, trackLocationState.genomicLocation, trackLocationState.x, trackLocationState.y, referenceFrame);
+        menuItems = igv.trackPopupMenuItemList(this, viewport, trackLocationState.genomicLocation, trackLocationState.x, trackLocationState.y);
 
         if (_.size(menuItems) > 0) {
 

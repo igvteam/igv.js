@@ -138,6 +138,32 @@ var igv = (function (igv) {
 
     };
 
+    igv.BAMTrack.prototype.popupMenuItemList = function (config) {
+
+        var self = this,
+            $e;
+
+        $e = $('<div class="igv-track-menu-item">');
+
+        $e.text('Sort by base');
+
+        $e.click(function () {
+
+                self.alignmentTrack.sortAlignmentRows(config.genomicLocation, self.sortOption);
+
+                config.viewport.redrawTile(self.featureSource.alignmentContainer);
+
+                config.viewport.$viewport.scrollTop(0);
+
+                self.sortDirection = !(self.sortDirection);
+
+            }
+        );
+
+        return [ { object: $e, init: undefined } ];
+
+    };
+
     igv.BAMTrack.prototype.popupData = function (genomicLocation, xOffset, yOffset, referenceFrame) {
 
         if (yOffset >= this.coverageTrack.top && yOffset < this.coverageTrack.height) {
@@ -800,10 +826,6 @@ var igv = (function (igv) {
             // return rowA.score - rowB.score;
             return true === self.sortDirection ? rowA.score - rowB.score : rowB.score - rowA.score;
         });
-
-        // this.featureSource.alignmentContainer.packedAlignmentRows.forEach(function (row) {
-        //     console.log('score ' + row.score);
-        // });
 
     };
 

@@ -164,29 +164,28 @@ var igv = (function (igv) {
     /**
      * Configure item list for contextual (right-click) track popup menu.
      * @param popover
-     * @param trackView
+     * @param viewport
      * @param genomicLocation - (bp)
      * @param xOffset - (pixels) within track extent
      * @param yOffset - (pixels) within track extent
-     * @param referenceFrame
      */
-    igv.trackPopupMenuItemList = function (popover, trackView, genomicLocation, xOffset, yOffset, referenceFrame) {
+    igv.trackPopupMenuItemList = function (popover, viewport, genomicLocation, xOffset, yOffset) {
 
         var config,
             menuItems;
 
-        if (trackView.track.popupMenuItemList) {
+        if (viewport.trackView.track.popupMenuItemList) {
 
             config =
                 {
                     popover: popover,
+                    viewport:viewport,
                     genomicLocation: genomicLocation,
                     x: xOffset,
-                    y: yOffset,
-                    referenceFrame: referenceFrame
+                    y: yOffset
                 };
 
-            menuItems = trackView.track.popupMenuItemList(config);
+            menuItems = viewport.trackView.track.popupMenuItemList(config);
         }
 
         return menuItems;
