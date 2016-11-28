@@ -162,16 +162,6 @@ var igv = (function (igv) {
     };
 
     /**
-     * Configure an item for track context (right-click) menu.
-     * @param config
-     */
-    igv.trackPopupMenuItem = function (config) {
-
-        console.log('igv.trackPopupMenuItem ' + _.keys(config).join(' '));
-
-    };
-
-    /**
      * Configure item list for contextual (right-click) track popup menu.
      * @param popover
      * @param trackView
@@ -182,27 +172,8 @@ var igv = (function (igv) {
      */
     igv.trackPopupMenuItemList = function (popover, trackView, genomicLocation, xOffset, yOffset, referenceFrame) {
 
-        var menuItems = [],
-            config;
-
-        config =
-            {
-                popover: popover,
-                trackView: trackView,
-                menuLabe: 'Menu Label',
-                clickHandler: function () { console.log('click handler'); },
-                dialog: {
-                    label: 'Dialog Label',
-                    inputValue: trackView.track.name,
-                    clickHandler: function () { console.log('dialog click handler'); }
-                },
-                genomicLocation: genomicLocation,
-                x: xOffset,
-                y: yOffset,
-                referenceFrame: referenceFrame
-            };
-
-        menuItems.push(igv.trackPopupMenuItem(config));
+        var config,
+            menuItems;
 
         if (trackView.track.popupMenuItemList) {
 
@@ -215,7 +186,7 @@ var igv = (function (igv) {
                     referenceFrame: referenceFrame
                 };
 
-            menuItems.concat(trackView.track.popupMenuItemList(config));
+            menuItems = trackView.track.popupMenuItemList(config);
         }
 
         return menuItems;
@@ -260,15 +231,19 @@ var igv = (function (igv) {
             var number = parseFloat(igv.dialog.$dialogInput.val(), 10);
 
             if (undefined !== number) {
+
 // If explicitly setting the height adust min or max, if neccessary.
                 if (trackView.track.minHeight !== undefined && trackView.track.minHeight > number) {
                     trackView.track.minHeight = number;
                 }
+
                 if (trackView.track.maxHeight !== undefined && trackView.track.maxHeight < number) {
                     trackView.track.minHeight = number;
                 }
+
+// Explicitly setting track height turns off autoHeight
                 trackView.setTrackHeight(number);
-                trackView.track.autoHeight = false;   // Explicitly setting track height turns off autoHeight
+                trackView.track.autoHeight = false;
 
             }
 
@@ -335,7 +310,7 @@ var igv = (function (igv) {
 
         var $e;
 
-        $e = $('<div class="igv-track-menu-item igv-track-menu-border-top">');
+        $e = $('<div class="igv-track-menu-item">');
         if (true === doAddTopBorder) {
             $e.addClass('igv-track-menu-border-top');
         }
