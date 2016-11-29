@@ -183,10 +183,12 @@ var igv = (function (igv) {
             html,
             menuItems = [],
             colorByMenuItems = [],
-            tagLabel = 'tag' + (self.alignmentTrack.colorByTag ? ' (' + self.alignmentTrack.colorByTag + ')' : ''),
+            tagLabel,
             selected;
 
         menuItems.push(igv.colorPickerMenuItem(popover, this.trackView));
+
+        return;
 
         menuItems.push(sortMenuItem(popover));
 
@@ -195,9 +197,12 @@ var igv = (function (igv) {
         if(!self.viewAsPairs) {
             colorByMenuItems.push({key: 'strand', label: 'read strand'});
         }
+
         if (self.pairsSupported && self.alignmentTrack.hasPairs) {
             colorByMenuItems.push({key: 'firstOfPairStrand', label: 'first-of-pair strand'});
         }
+
+        tagLabel = 'tag' + (self.alignmentTrack.colorByTag ? ' (' + self.alignmentTrack.colorByTag + ')' : '');
         colorByMenuItems.push({key: 'tag', label: tagLabel});
 
         menuItems.push('<div class="igv-track-menu-category igv-track-menu-border-top">Color by</div>');
@@ -209,11 +214,13 @@ var igv = (function (igv) {
 
         html = [];
         if (self.pairsSupported && self.alignmentTrack.hasPairs) {
+
             html.push('<div class="igv-track-menu-item igv-track-menu-border-top">');
             html.push(true === self.viewAsPairs ? '<i class="fa fa-check fa-check-shim">' : '<i class="fa fa-check fa-check-shim fa-check-hidden">');
             html.push('</i>');
             html.push('View as pairs');
             html.push('</div>');
+
             menuItems.push({
                 object: $(html.join('')),
                 click: function () {
@@ -242,15 +249,9 @@ var igv = (function (igv) {
             var parts = [],
                 item = {};
 
-
-            //parts.push((0 === index) ? '<div class=\"igv-track-menu-item igv-track-menu-border-top\">' : '<div class="igv-track-menu-item">');
             parts.push('<div class="igv-track-menu-item">');
 
             parts.push(showCheck ? '<i class="fa fa-check fa-check-shim"></i>' : '<i class="fa fa-check fa-check-shim fa-check-hidden"></i>');
-
-            //parts.push('<span>');
-            //parts.push('Color by: ');
-            //parts.push('</span>');
 
             if (menuItem.key === 'tag') {
                 parts.push('<span id="color-by-tag">');

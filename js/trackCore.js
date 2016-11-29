@@ -249,22 +249,46 @@ var igv = (function (igv) {
 
             if (_.size(trackItems) > 0) {
 
-                trackItems.forEach(function (trackItem, i) {
-                    var str;
-                    if (trackItem.name) {
-                        str = (0 === i) ? '<div class=\"igv-track-menu-item igv-track-menu-border-top\">' : '<div class=\"igv-track-menu-item\">';
-                        str = str + trackItem.name + '</div>';
-                        menuItems.push({object: $(str), click: trackItem.click, init: trackItem.init});
+                _.each(trackItems, function(obj, i){
+                    var $e;
+
+                    if (obj.name) {
+
+                        $e = $('<div class="igv-track-menu-item">');
+                        if (0 === i) {
+                            $e.addClass('igv-track-menu-border-top');
+                        }
+                        $e.text( obj.name );
+
+                        menuItems.push( { object: $e, click: obj.click, init: obj.init || undefined } );
                     } else {
 
                         if (0 === i) {
-                            trackItem.object.addClass("igv-track-menu-border-top");
-                            menuItems.push(trackItem);
-                        } else {
-                            menuItems.push(trackItem);
+                            obj.object.addClass('igv-track-menu-border-top');
                         }
+
+                        menuItems.push( { object: obj.object, click: obj.click, init: obj.init || undefined } );
                     }
+
                 });
+
+                // trackItems.forEach(function (trackItem, i) {
+                //     var str;
+                //     if (trackItem.name) {
+                //         str = (0 === i) ? '<div class=\"igv-track-menu-item igv-track-menu-border-top\">' : '<div class=\"igv-track-menu-item\">';
+                //         str = str + trackItem.name + '</div>';
+                //         menuItems.push({object: $(str), click: trackItem.click, init: trackItem.init});
+                //     } else {
+                //
+                //         if (0 === i) {
+                //             trackItem.object.addClass("igv-track-menu-border-top");
+                //             menuItems.push(trackItem);
+                //         } else {
+                //             menuItems.push(trackItem);
+                //         }
+                //     }
+                // });
+
             }
         }
 
@@ -396,49 +420,80 @@ var igv = (function (igv) {
      */
     igv.trackMenuItem = function (popover, trackView, menuItemLabel, dialogLabelHandler, dialogInputValue, dialogClickHandler, doAddTopBorder) {
 
-        var $e;
+        var $e,
+            clickHandler;
 
         $e = $('<div class="igv-track-menu-item">');
+
         if (true === doAddTopBorder) {
             $e.addClass('igv-track-menu-border-top');
         }
 
         $e.text(menuItemLabel);
 
-        $e.click(function(){
+        clickHandler = function(){
             var $element = $(trackView.trackDiv);
             igv.dialog.configure(dialogLabelHandler, dialogInputValue, dialogClickHandler);
             igv.dialog.show($element);
             popover.hide();
-        });
+        };
 
-        return { object: $e, init: undefined }
+        // $e.click(function(){
+        //     var $element = $(trackView.trackDiv);
+        //     igv.dialog.configure(dialogLabelHandler, dialogInputValue, dialogClickHandler);
+        //     igv.dialog.show($element);
+        //     popover.hide();
+        // });
+
+        // return { object: $e, init: undefined }
+
+        return { name: undefined, object: $e, click: clickHandler, init: undefined }
     };
 
     igv.dataRangeMenuItem = function (popover, trackView) {
 
-        var $e = $('<div class="igv-track-menu-item">');
+        var $e,
+            clickHandler;
+
+        $e = $('<div class="igv-track-menu-item">');
         $e.text('Set data range');
-        $e.click(function () {
+
+        clickHandler = function () {
             igv.dataRangeDialog.configureWithTrackView(trackView);
             igv.dataRangeDialog.show();
             popover.hide();
-        });
+        };
 
-        return { object: $e, init: undefined }
+
+        // $e.click(function () {
+        //     igv.dataRangeDialog.configureWithTrackView(trackView);
+        //     igv.dataRangeDialog.show();
+        //     popover.hide();
+        // });
+
+        return { name: undefined, object: $e, click: clickHandler, init: undefined }
     };
 
     igv.colorPickerMenuItem = function (popover, trackView) {
+        var $e,
+            clickHandler;
 
-        var $e = $('<div class="igv-track-menu-item">');
+        $e = $('<div class="igv-track-menu-item">');
         $e.text('Set track color');
-        $e.click(function () {
+
+        clickHandler = function () {
             igv.colorPicker.configure(trackView);
             igv.colorPicker.show();
             popover.hide();
-        });
+        };
 
-        return { object: $e, init: undefined }
+        // $e.click(function () {
+        //     igv.colorPicker.configure(trackView);
+        //     igv.colorPicker.show();
+        //     popover.hide();
+        // });
+
+        return { name: undefined, object:$e, click:clickHandler, init: undefined }
 
     };
 
