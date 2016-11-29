@@ -169,20 +169,22 @@ var igv = (function (igv) {
 
     igv.FeatureTrack.prototype.popupMenuItemList = function (config) {
 
-        var $e;
+        var $e,
+            clickHandler;
 
         $e = $('<div class="igv-track-menu-item">');
 
         $e.text('Feature Menu Item');
 
-        $e.click(function(){
+        clickHandler = function(){
             var str = $(this).text() + ' bp ' + igv.numberFormatter(config.genomicLocation) + ' do stuff.';
             config.popover.hide();
 
             console.log(str);
-        });
+        };
 
-        return [ { name: undefined, object: $e, init: undefined } ];
+        return [{ name: undefined, object: $e, click: clickHandler, init: undefined }];
+
     };
 
     /**

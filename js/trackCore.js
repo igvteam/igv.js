@@ -174,18 +174,18 @@ var igv = (function (igv) {
         var config,
             menuItems;
 
+        config =
+            {
+                popover: popover,
+                viewport:viewport,
+                genomicLocation: genomicLocation,
+                x: xOffset,
+                y: yOffset
+            };
+
+        menuItems = [];
         if (viewport.trackView.track.popupMenuItemList) {
-
-            config =
-                {
-                    popover: popover,
-                    viewport:viewport,
-                    genomicLocation: genomicLocation,
-                    x: xOffset,
-                    y: yOffset
-                };
-
-            menuItems = viewport.trackView.track.popupMenuItemList(config);
+            menuItems = trackMenuList(viewport.trackView.track.popupMenuItemList(config));
         }
 
         return menuItems;
@@ -199,7 +199,7 @@ var igv = (function (igv) {
     igv.trackMenuItemList = function (popover, trackView) {
 
         var menuItems = [],
-            trackItems;
+            all;
 
         menuItems.push(igv.trackMenuItem(popover, trackView, "Set track name", function () {
             return "Track Name"
@@ -243,41 +243,14 @@ var igv = (function (igv) {
 
         }, undefined));
 
+        all = [];
         if (trackView.track.menuItemList) {
-
-            trackItems = trackView.track.menuItemList(popover);
-
-            if (_.size(trackItems) > 0) {
-
-                _.each(trackItems, function(trackItem, i){
-                    var $e;
-
-                    if (trackItem.name) {
-
-                        $e = $('<div class="igv-track-menu-item">');
-                        if (0 === i) {
-                            $e.addClass('igv-track-menu-border-top');
-                        }
-                        $e.text( trackItem.name );
-
-                        menuItems.push( { name: (trackItem.name || undefined), object: $e, click: (trackItem.click || undefined), init: (trackItem.init || undefined) } );
-                    } else {
-
-                        if (0 === i) {
-                            trackItem.object.addClass('igv-track-menu-border-top');
-                        }
-
-                        menuItems.push( { name: (trackItem.name || undefined), object: trackItem.object, click: (trackItem.click || undefined), init: (trackItem.init || undefined) } );
-                    }
-
-                });
-
-            }
+            all = menuItems.concat( trackMenuList(trackView.track.menuItemList(popover)) );
         }
 
         if (trackView.track.removable !== false) {
 
-            menuItems.push(
+            all.push(
                 igv.trackMenuItem(popover, trackView, "Remove track", function () {
                     var label = "Remove " + trackView.track.name;
                     return '<div class="igv-dialog-label-centered">' + label + '</div>';
@@ -288,108 +261,39 @@ var igv = (function (igv) {
             );
         }
 
-        return menuItems;
+        return all;
     };
 
-    igv.BROKEN_trackMenuItemList = function (popover, trackView) {
+    function trackMenuList(itemList) {
 
-        var mapped,
-            menuItems = [],
-            trackItems;
+        var list = [];
 
-        menuItems.push(igv.trackMenuItem(popover, trackView, "Set track name", function () {
-            return "Track Name"
-        }, trackView.track.name, function () {
+        if (_.size(itemList) > 0) {
 
-            var alphanumeric = parseAlphanumeric(igv.dialog.$dialogInput.val());
+            list = _.map(itemList, function(item, i) {
+                var $e;
 
-            if (undefined !== alphanumeric) {
-                igv.setTrackLabel(trackView.track, alphanumeric);
-                trackView.update();
-            }
-
-            function parseAlphanumeric(value) {
-
-                var alphanumeric_re = /(?=.*[a-zA-Z].*)([a-zA-Z0-9 ]+)/,
-                    alphanumeric = alphanumeric_re.exec(value);
-
-                return (null !== alphanumeric) ? alphanumeric[0] : "untitled";
-            }
-
-        }, undefined));
-
-        menuItems.push(igv.trackMenuItem(popover, trackView, "Set track height", function () {
-            return "Track Height"
-        }, trackView.trackDiv.clientHeight, function () {
-
-            var number = parseFloat(igv.dialog.$dialogInput.val(), 10);
-
-            if (undefined !== number) {
-
-// If explicitly setting the height adust min or max, if neccessary.
-                if (trackView.track.minHeight !== undefined && trackView.track.minHeight > number) {
-                    trackView.track.minHeight = number;
+                if (item.name) {
+                    $e = $('<div class="igv-track-menu-item">');
+                    $e.text(item.name);
+                } else {
+                    $e = item.object
                 }
 
-                if (trackView.track.maxHeight !== undefined && trackView.track.maxHeight < number) {
-                    trackView.track.minHeight = number;
+                if (0 === i) {
+                    $e.addClass('igv-track-menu-border-top');
                 }
 
-// Explicitly setting track height turns off autoHeight
-                trackView.setTrackHeight(number);
-                trackView.track.autoHeight = false;
+                if (item.click) {
+                    $e.click(item.click);
+                }
 
-            }
-
-        }, undefined));
-
-        if (trackView.track.menuItemList) {
-
-            trackItems = trackView.track.menuItemList(popover);
-            if (_.size(trackItems) > 0) {
-
-                mapped = _.map(trackItems, function (item, i) {
-                    var $e,
-                        obj = {};
-                    if (item.name) {
-                        $e = (0 === i) ? $('<div class="igv-track-menu-item igv-track-menu-border-top">') : $('<div class="igv-track-menu-item">');
-                        $e.text(item.name);
-                        $e.click(item.click);
-                    } else {
-
-                        if (0 === i) {
-                            item.object.addClass('igv-track-menu-border-top');
-                        }
-
-                        $e = item.object;
-                        $e.click(item.click);
-                    }
-
-                    obj.object = $e;
-                    obj.init = item.init || undefined;
-
-                    return obj;
-
-                }); // _.map(...)
-
-                menuItems.concat(mapped);
-
-            } // if (_.size(trackItems) > 0)
-
-        } // if (trackView.track.menuItemList)
-
-        if (trackView.track.removable !== false) {
-            menuItems.push(igv.trackMenuItem(popover, trackView, "Remove track", function () {
-                var label = "Remove " + trackView.track.name;
-                return '<div class="igv-dialog-label-centered">' + label + '</div>';
-            }, undefined, function () {
-                popover.hide();
-                trackView.browser.removeTrack(trackView.track);
-            }, true));
+                return { object: $e, init: (item.init || undefined) };
+            });
         }
 
-        return menuItems;
-    };
+        return list;
+    }
 
     /**
      * Configure item for track "gear" menu.
@@ -414,6 +318,7 @@ var igv = (function (igv) {
 
         $e.text(menuItemLabel);
 
+
         clickHandler = function(){
             var $element = $(trackView.trackDiv);
             igv.dialog.configure(dialogLabelHandler, dialogInputValue, dialogClickHandler);
@@ -421,7 +326,9 @@ var igv = (function (igv) {
             popover.hide();
         };
 
-        return { name: undefined, object: $e, click: clickHandler, init: undefined }
+        $e.click(clickHandler);
+
+        return { object: $e, init: undefined };
     };
 
     igv.dataRangeMenuItem = function (popover, trackView) {
@@ -438,7 +345,9 @@ var igv = (function (igv) {
             popover.hide();
         };
 
-        return { name: undefined, object: $e, click: clickHandler, init: undefined }
+        $e.click(clickHandler);
+
+        return { object: $e, init: undefined };
     };
 
     igv.colorPickerMenuItem = function (popover, trackView) {
@@ -454,7 +363,9 @@ var igv = (function (igv) {
             popover.hide();
         };
 
-        return { name: undefined, object:$e, click:clickHandler, init: undefined }
+        $e.click(clickHandler);
+
+        return { object: $e, init: undefined };
 
     };
 
