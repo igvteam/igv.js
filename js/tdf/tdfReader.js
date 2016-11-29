@@ -37,12 +37,17 @@ var igv = (function (igv) {
     igv.TDFReader = function (config) {
         this.config = config;
         this.path = config.url;
+        this.groupCache = {};
     };
 
 
     igv.TDFReader.prototype.readHeader = function () {
 
         var self = this;
+
+        if (this.magic !== undefined) {
+            return Promise.resolve(this);   // Already read
+        }
 
         return new Promise(function (fulfill, reject) {
 
@@ -132,115 +137,171 @@ var igv = (function (igv) {
         });
     }
 
+    igv.TDFReader.prototype.readDataset = function (chr, windowFunction,  zoom) {
 
-    igv.TDFReader.prototype.readDataset = function (chr, zoom, windowFunction) {
+        var self = this;
 
-        var self = this,
-            wf = (self.version < 2) ? "" : "/" + windowFunction,
-            zoomString = chr === "all" ? "0" : zoom.toString(),
-            dsName,
-            indexEntry;
+        return new Promise(function (fulfill, reject) {
 
-        if (zoom === "raw") {
-            dsName = "/" + chr + "/raw";
-        }
-        else {
-            dsName = "/" + chr + "/z" + zoomString + wf;
-        }
-        indexEntry = self.datasetIndex[dsName];
 
-        if (indexEntry === undefined) {
-            return Promise.resolve(null);
-        }
-        else {
+            self.readHeader().then(function (reader) {
 
-            return new Promise(function (fulfill, reject) {
+                var wf = (self.version < 2) ? "" : "/" + windowFunction,
+                    zoomString = (chr === "all" || zoom === undefined) ? "0" : zoom.toString(),
+                    dsName,
+                    indexEntry;
 
-                igvxhr.loadArrayBuffer(self.path,
-                    {
-                        headers: self.config.headers,
-                        range: {start: indexEntry.position, size: indexEntry.size},
-                        withCredentials: self.config.withCredentials
-                    }).then(function (data) {
+                if (windowFunction === "raw") {
+                    dsName = "/" + chr + "/raw";
+                }
+                else {
+                    dsName = "/" + chr + "/z" + zoomString + wf;
+                }
+                indexEntry = self.datasetIndex[dsName];
 
-                    if (!data) {
-                        reject("no data");
-                        return;
-                    }
+                if (indexEntry === undefined) {
+                    fulfill(null);
+                }
+                else {
 
-                    var binaryParser = new igv.BinaryParser(new DataView(data));
 
-                    var nAttributes = binaryParser.getInt();
-                    var attributes = {};
-                    while (nAttributes-- > 0) {
-                        attributes[binaryParser.getString()] = binaryParser.getString();
-                    }
+                    igvxhr.loadArrayBuffer(self.path,
+                        {
+                            headers: self.config.headers,
+                            range: {start: indexEntry.position, size: indexEntry.size},
+                            withCredentials: self.config.withCredentials
+                        }).then(function (data) {
 
-                    var dataType = binaryParser.getString();
-                    var tileWidth = binaryParser.getFloat();
+                        if (!data) {
+                            reject("no data");
+                            return;
+                        }
 
-                    var nTiles = binaryParser.getInt();
-                    var tiles = [];
-                    while (nTiles-- > 0) {
-                        tiles.push({position: binaryParser.getLong(), size: binaryParser.getInt()});
-                    }
+                        var binaryParser = new igv.BinaryParser(new DataView(data));
 
-                    var dataset = {
-                        name: dsName,
-                        attributes: attributes,
-                        dataType: dataType,
-                        tileWidth: tileWidth,
-                        tiles: tiles
-                    };
+                        var nAttributes = binaryParser.getInt();
+                        var attributes = {};
+                        while (nAttributes-- > 0) {
+                            attributes[binaryParser.getString()] = binaryParser.getString();
+                        }
 
-                    fulfill(dataset);
+                        var dataType = binaryParser.getString();
+                        var tileWidth = binaryParser.getFloat();
 
-                }).catch(reject);
+                        var nTiles = binaryParser.getInt();
+                        var tiles = [];
+                        while (nTiles-- > 0) {
+                            tiles.push({position: binaryParser.getLong(), size: binaryParser.getInt()});
+                        }
 
-            });
-        }
+                        var dataset = {
+                            name: dsName,
+                            attributes: attributes,
+                            dataType: dataType,
+                            tileWidth: tileWidth,
+                            tiles: tiles
+                        };
+
+                        fulfill(dataset);
+
+                    }).catch(reject);
+                }
+            }).catch(reject);
+        });
     }
 
-
-    igv.TDFReader.prototype.readGroup = function (name) {
+    igv.TDFReader.prototype.readRootGroup = function () {
 
         var self = this,
-            indexEntry = self.groupIndex[name];
+            rootGroup = this.groupCache["/"];
 
-        if (indexEntry === undefined) {
-            return Promise.resolve(null);
+        if (rootGroup) {
+            return Promise.resolve(rootGroup);
         }
         else {
-
             return new Promise(function (fulfill, reject) {
 
-                igvxhr.loadArrayBuffer(self.path,
-                    {
-                        headers: self.config.headers,
-                        range: {start: indexEntry.position, size: indexEntry.size},
-                        withCredentials: self.config.withCredentials
-                    }).then(function (data) {
+                self.readGroup("/").then(function (group) {
 
-                    if (!data) {
-                        reject("no data");
-                        return;
+                    var genome = igv.browser.genome,
+                        names = group["chromosomes"],
+                        maxZoomString = group["maxZoom"];
+
+                    // Now parse out interesting attributes.  This is a side effect, and bad bad bad,  but the alternative is messy as well.
+                    if(maxZoomString) {
+                        self.maxZoom = Number(maxZoomString);
                     }
 
-                    var binaryParser = new igv.BinaryParser(new DataView(data));
-
-                    var nAttributes = binaryParser.getInt();
-                    var group = {name: name};
-                    while (nAttributes-- > 0) {
-                        group[binaryParser.getString()] = binaryParser.getString();
+                    // Chromosome names
+                    self.chrNameMap = {};
+                    if(names) {
+                        _.each(names.split(","), function (chr) {
+                            var canonicalName = genome.getChromosomeName(chr);
+                            self.chrNameMap[chr] = canonicalName;
+                        })
                     }
 
                     fulfill(group);
 
-                }).catch(reject);
 
+                }).catch(reject);
             });
+
         }
     }
+
+    igv.TDFReader.prototype.readGroup = function (name) {
+
+        var self = this;
+
+        return new Promise(function (fulfill, reject) {
+
+
+            self.readHeader().then(function (reader) {
+
+                var group = self.groupCache[name],
+                    indexEntry = self.groupIndex[name];
+
+                if (group) {
+                    fulfill(group);
+                }
+                else if (indexEntry === undefined) {
+                    return fulfill(null);
+                }
+                else {
+
+
+                    igvxhr.loadArrayBuffer(self.path,
+                        {
+                            headers: self.config.headers,
+                            range: {start: indexEntry.position, size: indexEntry.size},
+                            withCredentials: self.config.withCredentials
+                        }).then(function (data) {
+
+                        if (!data) {
+                            reject("no data");
+                            return;
+                        }
+
+                        var binaryParser = new igv.BinaryParser(new DataView(data));
+
+                        var nAttributes = binaryParser.getInt();
+                        var group = {name: name};
+                        while (nAttributes-- > 0) {
+                            group[binaryParser.getString()] = binaryParser.getString();
+                        }
+
+                        self.groupCache[name] = group;
+
+                        fulfill(group);
+
+                    }).catch(reject);
+                }
+            }).catch(reject);
+        });
+    }
+
+
 
 
     function createFixedStep(binaryParser, nTracks) {
