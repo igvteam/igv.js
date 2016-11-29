@@ -180,28 +180,18 @@ var igv = (function (igv) {
     igv.BAMTrack.prototype.menuItemList = function (popover) {
 
         var self = this,
+            $e,
             html,
             menuItems = [],
             colorByMenuItems = [],
             tagLabel,
             selected;
 
+        // color picker
         menuItems.push(igv.colorPickerMenuItem(popover, this.trackView));
 
+        // sort by genomic location
         menuItems.push(sortMenuItem(popover));
-
-        return menuItems;
-
-
-
-
-
-
-
-
-
-
-
 
         colorByMenuItems.push({key: 'none', label: 'track color'});
 
@@ -216,10 +206,13 @@ var igv = (function (igv) {
         tagLabel = 'tag' + (self.alignmentTrack.colorByTag ? ' (' + self.alignmentTrack.colorByTag + ')' : '');
         colorByMenuItems.push({key: 'tag', label: tagLabel});
 
-        menuItems.push('<div class="igv-track-menu-category igv-track-menu-border-top">Color by</div>');
+        $e = $('<div class="igv-track-menu-category igv-track-menu-border-top">');
+        $e.text('Color by');
+        menuItems.push({ name: undefined, object: $e, click: undefined, init: undefined });
+        // menuItems.push('<div class="igv-track-menu-category igv-track-menu-border-top">Color by</div>');
 
         colorByMenuItems.forEach(function (item) {
-            selected = self.alignmentTrack.colorBy === item.key;
+            selected = (self.alignmentTrack.colorBy === item.key);
             menuItems.push(colorByMarkup(item, selected));
         });
 
@@ -257,8 +250,9 @@ var igv = (function (igv) {
 
         function colorByMarkup(menuItem, showCheck, index) {
 
-            var parts = [],
-                item = {};
+            var $e,
+                clickHandler,
+                parts = [];
 
             parts.push('<div class="igv-track-menu-item">');
 
@@ -269,22 +263,23 @@ var igv = (function (igv) {
             } else {
                 parts.push('<span>');
             }
+
             parts.push(menuItem.label);
             parts.push('</span>');
 
             parts.push('</div>');
 
-            item.object = $(parts.join(''));
+            $e = $(parts.join(''));
 
-            item.click = function () {
+            clickHandler = function () {
 
                 igv.popover.hide();
 
                 if ('tag' === menuItem.key) {
 
-                    igv.dialog.configure(function () {
-                            return "Tag Name"
-                        },
+                    igv.dialog.configure(
+
+                        function () { return "Tag Name" },
 
                         self.alignmentTrack.colorByTag ? self.alignmentTrack.colorByTag : '',
 
@@ -309,7 +304,8 @@ var igv = (function (igv) {
                 }
             };
 
-            return item;
+            return { name: undefined, object: $e, click: clickHandler, init: undefined }
+
         }
 
         function sortMenuItem(popover) {
@@ -339,12 +335,7 @@ var igv = (function (igv) {
 
             };
 
-            return {
-                name: undefined,
-                object: $e,
-                click: clickHandler,
-                init: undefined
-            }
+            return { name: undefined, object: $e, click: clickHandler, init: undefined }
         }
 
     };

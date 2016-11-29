@@ -84,12 +84,15 @@ var igv = (function (igv) {
 
         _.each(items, function(item) {
 
-            item.object.click( item.click );
-            $container.append(item.object);
-
             if (item.init) {
                 item.init();
             }
+
+            if (item.click) {
+                item.object.click( item.click );
+            }
+
+            $container.append(item.object);
 
         });
 
