@@ -260,14 +260,14 @@ var igv = (function (igv) {
                         }
                         $e.text( trackItem.name );
 
-                        menuItems.push( { name: (trackItem.name || undefined), object: $e, click: trackItem.click, init: (trackItem.init || undefined) } );
+                        menuItems.push( { name: (trackItem.name || undefined), object: $e, click: (trackItem.click || undefined), init: (trackItem.init || undefined) } );
                     } else {
 
                         if (0 === i) {
                             trackItem.object.addClass('igv-track-menu-border-top');
                         }
 
-                        menuItems.push( { name: (trackItem.name || undefined), object: trackItem.object, click: trackItem.click, init: (trackItem.init || undefined) } );
+                        menuItems.push( { name: (trackItem.name || undefined), object: trackItem.object, click: (trackItem.click || undefined), init: (trackItem.init || undefined) } );
                     }
 
                 });
