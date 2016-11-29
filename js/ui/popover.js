@@ -88,10 +88,6 @@ var igv = (function (igv) {
                 item.init();
             }
 
-            if (item.click) {
-                item.object.click( item.click );
-            }
-
             $container.append(item.object);
 
         });

@@ -141,28 +141,27 @@ var igv = (function (igv) {
     igv.BAMTrack.prototype.popupMenuItemList = function (config) {
 
         var self = this,
-            $e;
+            $e,
+            clickHandler;
 
         $e = $('<div class="igv-track-menu-item">');
-
         $e.text('Sort by base');
 
-        $e.click(function () {
+        clickHandler = function () {
 
-                self.alignmentTrack.sortAlignmentRows(config.genomicLocation, self.sortOption);
+            self.alignmentTrack.sortAlignmentRows(config.genomicLocation, self.sortOption);
 
-                config.viewport.redrawTile(self.featureSource.alignmentContainer);
+            config.viewport.redrawTile(self.featureSource.alignmentContainer);
 
-                config.viewport.$viewport.scrollTop(0);
+            config.viewport.$viewport.scrollTop(0);
 
-                self.sortDirection = !(self.sortDirection);
+            self.sortDirection = !(self.sortDirection);
 
-                config.popover.hide();
+            config.popover.hide();
 
-            }
-        );
+        };
 
-        return [ { object: $e, init: undefined } ];
+        return [{ name: undefined, object: $e, click: clickHandler, init: undefined }];
 
     };
 
