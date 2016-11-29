@@ -188,9 +188,20 @@ var igv = (function (igv) {
 
         menuItems.push(igv.colorPickerMenuItem(popover, this.trackView));
 
-        return;
-
         menuItems.push(sortMenuItem(popover));
+
+        return menuItems;
+
+
+
+
+
+
+
+
+
+
+
 
         colorByMenuItems.push({key: 'none', label: 'track color'});
 
@@ -303,26 +314,36 @@ var igv = (function (igv) {
 
         function sortMenuItem(popover) {
 
-            return {
-                object: $('<div class="igv-track-menu-item">' + "Sort by base" + '</div>'),
-                click: function () {
-                    var genomicState = _.first(igv.browser.genomicStateList),
-                        referenceFrame = genomicState.referenceFrame,
-                        genomicLocation,
-                        viewportHalfWidth;
+            var $e,
+                clickHandler;
 
-                    popover.hide();
+            $e = $('<div class="igv-track-menu-item">');
+            $e.text('Sort by base');
 
-                    viewportHalfWidth = Math.floor(0.5 * (igv.browser.viewportContainerWidth()/genomicState.locusCount));
-                    genomicLocation = Math.floor((referenceFrame.start) + referenceFrame.toBP(viewportHalfWidth));
+            clickHandler = function () {
+                var genomicState = _.first(igv.browser.genomicStateList),
+                    referenceFrame = genomicState.referenceFrame,
+                    genomicLocation,
+                    viewportHalfWidth;
 
-                    self.altClick(genomicLocation, undefined, undefined);
+                popover.hide();
 
-                    if ("show center guide" === igv.browser.centerGuide.$centerGuideToggle.text()) {
-                        igv.browser.centerGuide.$centerGuideToggle.trigger( "click" );
-                    }
+                viewportHalfWidth = Math.floor(0.5 * (igv.browser.viewportContainerWidth()/genomicState.locusCount));
+                genomicLocation = Math.floor((referenceFrame.start) + referenceFrame.toBP(viewportHalfWidth));
 
+                self.altClick(genomicLocation, undefined, undefined);
+
+                if ("show center guide" === igv.browser.centerGuide.$centerGuideToggle.text()) {
+                    igv.browser.centerGuide.$centerGuideToggle.trigger( "click" );
                 }
+
+            };
+
+            return {
+                name: undefined,
+                object: $e,
+                click: clickHandler,
+                init: undefined
             }
         }
 

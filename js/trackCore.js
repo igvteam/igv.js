@@ -249,45 +249,28 @@ var igv = (function (igv) {
 
             if (_.size(trackItems) > 0) {
 
-                _.each(trackItems, function(obj, i){
+                _.each(trackItems, function(trackItem, i){
                     var $e;
 
-                    if (obj.name) {
+                    if (trackItem.name) {
 
                         $e = $('<div class="igv-track-menu-item">');
                         if (0 === i) {
                             $e.addClass('igv-track-menu-border-top');
                         }
-                        $e.text( obj.name );
+                        $e.text( trackItem.name );
 
-                        menuItems.push( { object: $e, click: obj.click, init: obj.init || undefined } );
+                        menuItems.push( { name: (trackItem.name || undefined), object: $e, click: trackItem.click, init: (trackItem.init || undefined) } );
                     } else {
 
                         if (0 === i) {
-                            obj.object.addClass('igv-track-menu-border-top');
+                            trackItem.object.addClass('igv-track-menu-border-top');
                         }
 
-                        menuItems.push( { object: obj.object, click: obj.click, init: obj.init || undefined } );
+                        menuItems.push( { name: (trackItem.name || undefined), object: trackItem.object, click: trackItem.click, init: (trackItem.init || undefined) } );
                     }
 
                 });
-
-                // trackItems.forEach(function (trackItem, i) {
-                //     var str;
-                //     if (trackItem.name) {
-                //         str = (0 === i) ? '<div class=\"igv-track-menu-item igv-track-menu-border-top\">' : '<div class=\"igv-track-menu-item\">';
-                //         str = str + trackItem.name + '</div>';
-                //         menuItems.push({object: $(str), click: trackItem.click, init: trackItem.init});
-                //     } else {
-                //
-                //         if (0 === i) {
-                //             trackItem.object.addClass("igv-track-menu-border-top");
-                //             menuItems.push(trackItem);
-                //         } else {
-                //             menuItems.push(trackItem);
-                //         }
-                //     }
-                // });
 
             }
         }
@@ -438,15 +421,6 @@ var igv = (function (igv) {
             popover.hide();
         };
 
-        // $e.click(function(){
-        //     var $element = $(trackView.trackDiv);
-        //     igv.dialog.configure(dialogLabelHandler, dialogInputValue, dialogClickHandler);
-        //     igv.dialog.show($element);
-        //     popover.hide();
-        // });
-
-        // return { object: $e, init: undefined }
-
         return { name: undefined, object: $e, click: clickHandler, init: undefined }
     };
 
@@ -464,13 +438,6 @@ var igv = (function (igv) {
             popover.hide();
         };
 
-
-        // $e.click(function () {
-        //     igv.dataRangeDialog.configureWithTrackView(trackView);
-        //     igv.dataRangeDialog.show();
-        //     popover.hide();
-        // });
-
         return { name: undefined, object: $e, click: clickHandler, init: undefined }
     };
 
@@ -486,12 +453,6 @@ var igv = (function (igv) {
             igv.colorPicker.show();
             popover.hide();
         };
-
-        // $e.click(function () {
-        //     igv.colorPicker.configure(trackView);
-        //     igv.colorPicker.show();
-        //     popover.hide();
-        // });
 
         return { name: undefined, object:$e, click:clickHandler, init: undefined }
 
