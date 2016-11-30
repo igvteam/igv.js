@@ -324,7 +324,7 @@ var igv = (function (igv) {
         // Define a region 5 "pixels" wide in genomic coordinates
         var bpWidth = referenceFrame.toBP(2.5);
 
-        this.sortSamples(referenceFrame.chr, genomicLocation - bpWidth, genomicLocation + bpWidth, sortDirection);
+        this.sortSamples(referenceFrame.chrName, genomicLocation - bpWidth, genomicLocation + bpWidth, sortDirection);
 
         sortDirection = (sortDirection === "ASC" ? "DESC" : "ASC");
     };
@@ -362,6 +362,27 @@ var igv = (function (igv) {
         }
 
         return null;
+    };
+
+    igv.SegTrack.prototype.popupMenuItemList = function (config) {
+
+        var self = this,
+            $e,
+            clickHandler;
+
+        $e = $('<div class="igv-track-menu-item">');
+        $e.text('Sort by base');
+
+        clickHandler = function () {
+
+            self.altClick(config.genomicLocation, config.viewport.genomicState.referenceFrame);
+
+            config.popover.hide();
+
+        };
+
+        return [{ name: undefined, object: $e, click: clickHandler, init: undefined }];
+
     };
 
     return igv;

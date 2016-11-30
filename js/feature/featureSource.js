@@ -134,6 +134,7 @@ var igv = (function (igv) {
      * @param chr
      * @param bpStart
      * @param bpEnd
+     * @param bpPerPixel
      */
 
     igv.FeatureSource.prototype.getFeatures = function (chr, bpStart, bpEnd, bpPerPixel) {
@@ -141,11 +142,17 @@ var igv = (function (igv) {
         var self = this;
         return new Promise(function (fulfill, reject) {
 
-            var genomicInterval = new igv.GenomicInterval(chr, bpStart, bpEnd),
-                featureCache = self.featureCache,
-                maxRows = self.config.maxRows || 500;
+            var genomicInterval,
+                featureCache,
+                maxRows,
+                str;
 
-            if ("all" === chr.toLowerCase()) {
+            genomicInterval = new igv.GenomicInterval(chr, bpStart, bpEnd);
+            featureCache = self.featureCache;
+            maxRows = self.config.maxRows || 500;
+            str = chr.toLowerCase();
+
+            if ("all" === str) {
                 if (self.reader.supportsWholeGenome) {
                     if (featureCache && featureCache.range === undefined) {
                         fulfill(getWGFeatures(featureCache.allFeatures()));
@@ -217,7 +224,7 @@ var igv = (function (igv) {
                     }).catch(reject);
             }
         });
-    }
+    };
 
 
     function packFeatures(features, maxRows) {
@@ -289,18 +296,35 @@ var igv = (function (igv) {
 
     function getWGFeatures(features) {
 
-        var wgFeatures = [];
+        var wgFeatures;
 
-        features.forEach(function (f) {
-            var chr = f.chr;
-                wgStart = igv.browser.genome.getGenomeCoordinate(chr, f.start),
-                wgEnd = igv.browser.genome.getGenomeCoordinate(chr, f.end),
-                wgFeature = (JSON.parse(JSON.stringify(f)));  // clone feature
+        wgFeatures = _.map(features, function(f) {
 
-            wgFeature.start = wgStart;
-            wgFeature.end = wgEnd;
-            wgFeatures.push(wgFeature);
+            var wg;
+
+            wg = (JSON.parse(JSON.stringify(f)));
+            wg.start = igv.browser.genome.getGenomeCoordinate(f.chr, f.start);
+            wg.end = igv.browser.genome.getGenomeCoordinate(f.chr, f.end);
+
+            return wg;
+
         });
+
+        // features.forEach(function (f) {
+        //     var wgStart,
+        //         wgEnd,
+        //         wgFeature;
+        //
+        //     wgStart = igv.browser.genome.getGenomeCoordinate(f.chr, f.start);
+        //     wgEnd = igv.browser.genome.getGenomeCoordinate(f.chr, f.end);
+        //
+        //     wgFeature = (JSON.parse(JSON.stringify(f)));
+        //
+        //     wgFeature.start = wgStart;
+        //     wgFeature.end = wgEnd;
+        //
+        //     wgFeatures.push(wgFeature);
+        // });
 
         return wgFeatures;
     }
