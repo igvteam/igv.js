@@ -167,25 +167,25 @@ var igv = (function (igv) {
 
     };
 
-    igv.FeatureTrack.prototype.popupMenuItemList = function (config) {
-
-        var $e,
-            clickHandler;
-
-        $e = $('<div class="igv-track-menu-item">');
-
-        $e.text('Feature Menu Item');
-
-        clickHandler = function(){
-            var str = $(this).text() + ' bp ' + igv.numberFormatter(config.genomicLocation) + ' do stuff.';
-            config.popover.hide();
-
-            console.log(str);
-        };
-
-        return [{ name: undefined, object: $e, click: clickHandler, init: undefined }];
-
-    };
+    // igv.FeatureTrack.prototype.popupMenuItemList = function (config) {
+    //
+    //     var $e,
+    //         clickHandler;
+    //
+    //     $e = $('<div class="igv-track-menu-item">');
+    //
+    //     $e.text('Feature Menu Item');
+    //
+    //     clickHandler = function(){
+    //         var str = $(this).text() + ' bp ' + igv.numberFormatter(config.genomicLocation) + ' do stuff.';
+    //         config.popover.hide();
+    //
+    //         console.log(str);
+    //     };
+    //
+    //     return [{ name: undefined, object: $e, click: clickHandler, init: undefined }];
+    //
+    // };
 
     /**
      * Return "popup data" for feature @ genomic location.  Data is an array of key-value pairs
