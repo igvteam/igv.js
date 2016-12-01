@@ -170,6 +170,8 @@
 
 <body>
 
+<!-- http://www.cbioportal.org/api-legacy/copynumbersegments?cancerStudyId=acc_tcga&sampleIds=TCGA-OR-A5J1-01%2CTCGA-OR-A5K3-01 -->
+
 <div id="myDiv" style="padding-top: 50px;padding-bottom: 20px; height: auto">
 
 
@@ -180,8 +182,8 @@
                     options,
                     browser,
                     //cancerStudyId = "coadread_tcga_pub",
-                    cancerStudyId = "ucec_tcga_pub",
-                    caseID = "TCGA-BK-A0CC";
+                    cancerStudyId = "acc_tcga",
+                    sampleIds = "TCGA-OR-A5J1-01,TCGA-OR-A5K3-01";
 
             div = $("#myDiv")[0];
             options = {
@@ -192,11 +194,12 @@
                     {
                         name: cancerStudyId,
                         type: "seg",
+                        displayMode: "EXPANDED",
                         source: {
                             url: "http://www.cbioportal.org/beta/api-legacy/copynumbersegments",
                             method: "POST",
                             contentType: "application/x-www-form-urlencoded",
-                            body: "cancerStudyId=" + cancerStudyId + "&chromosome=$CHR" + "&caseId=" + caseID,
+                            body: "cancerStudyId=" + cancerStudyId + "&chromosome=$CHR" + "&sampleIds=" + sampleIds,
                             parser: JSON.parse
                         }
                     },
