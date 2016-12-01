@@ -304,7 +304,7 @@ var igv = (function (igv) {
             self.sampleNames = sampleNames;
 
             self.trackView.update();
-            self.trackView.$viewport.scrollTop(0);
+            // self.trackView.$viewport.scrollTop(0);
 
 
         }).catch(function(error) {
@@ -371,7 +371,7 @@ var igv = (function (igv) {
             clickHandler;
 
         $e = $('<div class="igv-track-menu-item">');
-        $e.text('Sort by base');
+        $e.text('Sort by value');
 
         clickHandler = function () {
 
