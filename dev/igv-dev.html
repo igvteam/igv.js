@@ -14,7 +14,8 @@
           href="https://ajax.googleapis.com/ajax/libs/jqueryui/1.11.2/themes/redmond/jquery-ui.css"/>
 
     <!-- Font Awesome CSS -->
-    <link rel="stylesheet" type="text/css" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.2.0/css/font-awesome.min.css">
+    <link rel="stylesheet" type="text/css"
+          href="https://maxcdn.bootstrapcdn.com/font-awesome/4.2.0/css/font-awesome.min.css">
 
     <!-- IGV CSS -->
     <link rel="stylesheet" type="text/css" href="../css/igv.css">
@@ -23,7 +24,8 @@
     <script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
 
     <!-- jQuery UI JS -->
-    <script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jqueryui/1.11.2/jquery-ui.min.js"></script>
+    <script type="text/javascript"
+            src="https://ajax.googleapis.com/ajax/libs/jqueryui/1.11.2/jquery-ui.min.js"></script>
 
     <!-- Vendor JS -->
     <script type="text/javascript" src="../vendor/inflate.js"></script>
@@ -113,6 +115,9 @@
     <script type="text/javascript" src="../js/bigwig/bwRPTree.js"></script>
     <script type="text/javascript" src="../js/bigwig/bwSource.js"></script>
     <script type="text/javascript" src="../js/bigwig/bwTotalSummary.js"></script>
+
+    <script type="text/javascript" src="../js/tdf/tdfReader.js"></script>
+    <script type="text/javascript" src="../js/tdf/tdfSource.js"></script>
 
     <script type="text/javascript" src="../js/trackCore.js"></script>
 
@@ -367,6 +372,12 @@
         url: 'http://hgdownload.cse.ucsc.edu/goldenPath/hg19/encodeDCC/wgEncodeBroadHistone/wgEncodeBroadHistoneGm12878H3k4me3StdSig.bigWig',
         name: 'Gm12878H3k4me3'
         })">Encode bigwig
+        </div>
+
+        <div onclick="igv.browser.loadTrack({
+        url: 'https://data.broadinstitute.org/igvdata/encode/hg19/broadHistone/wgEncodeBroadHistoneGm12878H3k4me2StdSig.wig.tdf',
+        name: 'GM12878H3k4m3 (tdf)'
+        })">Broad tdf
         </div>
 
         <div onclick="igv.browser.loadTrack({

@@ -66,7 +66,9 @@ var igv = (function (igv) {
                         NTRACKS = 1;   // TODO read this
 
                     for (i = startTile; i <= endTile; i++) {
-                        p.push(self.reader.readTile(dataset.tiles[i], NTRACKS));
+                        if(dataset.tiles[i] !== undefined) {
+                            p.push(self.reader.readTile(dataset.tiles[i], NTRACKS));
+                        }
                     }
 
                     Promise.all(p).then(function (tiles) {
@@ -160,11 +162,13 @@ var igv = (function (igv) {
             if (e < bpStart) continue;
             if (s > bpEnd) break;
 
-            features.push({
-                start: s,
-                end: e,
-                value: data[i]
-            });
+            if(!Number.isNaN(data[i])) {
+                features.push({
+                    start: s,
+                    end: e,
+                    value: data[i]
+                });
+            }
 
             s = e;
         }

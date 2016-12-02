@@ -39,8 +39,9 @@ var igv = (function (igv) {
 
         if ("bigwig" === config.format) {
             this.featureSource = new igv.BWSource(config);
-        }
-        else {
+        } else if ("tdf" === config.format) {
+            this.featureSource = new igv.TDFSource(config);
+        } else {
             this.featureSource = new igv.FeatureSource(config);
         }
 
@@ -91,7 +92,7 @@ var igv = (function (igv) {
             }
         });
 
-        function htmlStringified (autoScale) {
+        function htmlStringified(autoScale) {
             var html = [];
 
             html.push('<div class="igv-track-menu-item">');
@@ -207,8 +208,10 @@ var igv = (function (igv) {
             max = -Number.MAX_VALUE;
 
         features.forEach(function (f) {
-            min = Math.min(min, f.value);
-            max = Math.max(max, f.value);
+            if(!Number.isNaN(f.value)) {
+                min = Math.min(min, f.value);
+                max = Math.max(max, f.value);
+            }
         });
 
         return {min: min, max: max};

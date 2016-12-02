@@ -237,7 +237,7 @@ var igv = (function (igv) {
                     if(names) {
                         _.each(names.split(","), function (chr) {
                             var canonicalName = genome.getChromosomeName(chr);
-                            self.chrNameMap[chr] = canonicalName;
+                            self.chrNameMap[canonicalName] = chr;
                         })
                     }
 
