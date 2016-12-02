@@ -117,6 +117,36 @@ var igv = (function (igv) {
         return this.getCumulativeOffset(chr) + Math.floor(bp / 1000);
     }
 
+    /**
+     * Return the chromosome and coordinate in bp for the given genome coordinate
+     */
+    igv.Genome.prototype.getChromosomeCoordinate = function (genomeCoordinate) {
+
+        var self = this,
+            lastChr,
+            lastCoord,
+            i,
+            name;
+
+        if(this.cumulativeOffsets === undefined) computeCumulativeOffsets.call(this);
+
+        // Use a for loop, not a forEach, so we can break (return)
+        for(i=0; i<this.chromosomeNames.length; i++) {
+            name = this.chromosomeNames[i];
+            var cumulativeOffset = self.cumulativeOffsets[name];
+            if(cumulativeOffset > genomeCoordinate) {
+                var position = Math.floor((genomeCoordinate - lastCoord) / 1000);
+                return {chr: lastChr, position: position};
+            }
+            lastChr = name;
+            lastCoord = cumulativeOffset;
+        }
+
+        // If we get here off the end
+        return {chr: _.last(this.chromosomeNames), position: 0};
+
+    }
+
 
     /**
      * Return the offset in genome coordinates (kb) of the start of the given chromosome
@@ -125,21 +155,25 @@ var igv = (function (igv) {
 
         var self = this,
             queryChr = this.getChromosomeName(chr);
-
         if (this.cumulativeOffsets === undefined) {
-            var cumulativeOffsets = {};
-            var offset = 0;
-            this.chromosomeNames.forEach(function (name) {
-                cumulativeOffsets[name] = Math.floor(offset);
-                var chromosome = self.getChromosome(name);
-                offset += (chromosome.bpLength / 1000);   // Genome coordinates are in KB.  Beware 32-bit max value limit
-            });
-            this.cumulativeOffsets = cumulativeOffsets;
+            computeCumulativeOffsets.call(this);
         }
-
         return this.cumulativeOffsets[queryChr];
     }
 
+    function computeCumulativeOffsets() {
+        var self = this,
+            cumulativeOffsets = {},
+            offset = 0;
+
+        self.chromosomeNames.forEach(function (name) {
+            cumulativeOffsets[name] = Math.floor(offset);
+            var chromosome = self.getChromosome(name);
+            offset += (chromosome.bpLength / 1000);   // Genome coordinates are in KB.  Beware 32-bit max value limit
+        });
+        self.cumulativeOffsets = cumulativeOffsets;
+
+    }
 
     igv.Chromosome = function (name, order, bpLength) {
         this.name = name;
@@ -223,24 +257,24 @@ var igv = (function (igv) {
                 }
 
                 // Construct the whole-genome "chromosome"
-                l=0;
-                _.each(chromosomes, function(chromosome) {
+                l = 0;
+                _.each(chromosomes, function (chromosome) {
                     l += Math.floor((chromosome.bpLength / 1000));  // wg length is in kb.  bp would overflow maximum number limit
                 });
-                
+
                 // Now trim chromosomes < 1/10 average length
                 wgChromosomeNames = [];
                 avgL = (l / chrNames.length) * 200;   // i.e.  (divided by 5) times 1000 bp/kbp  TODO USE MEDIAN
                 l = 0;
-                _.each(chrNames, function(chrName) {
+                _.each(chrNames, function (chrName) {
                     chromosome = sequence.chromosomes[chrName];
-                    if(chromosome.bpLength > avgL) {
+                    if (chromosome.bpLength > avgL) {
                         l += Math.floor((chromosome.bpLength / 1000));  // wg length is in kb.  bp would overflow maximum number limit
                         wgChromosomeNames.push(chromosome.name);
                     }
                 });
-                
-                
+
+
                 chromosomes["all"] = {
                     name: "all",
                     bpLength: l

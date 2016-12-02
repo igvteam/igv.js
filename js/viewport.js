@@ -188,7 +188,8 @@ var igv = (function (igv) {
                     referenceFrame,
                     genomicLocation,
                     time,
-                    newCenter;
+                    newCenter,
+                    chr;
 
                 e.preventDefault();
                 e = $.event.fix(e);
@@ -220,10 +221,17 @@ var igv = (function (igv) {
                         if (igv.browser.minimumBasesExtent() > Math.floor(self.$viewport.width() * referenceFrame.bpPerPixel/2.0)) {
                             // do nothing
                         } else {
-
                             newCenter = Math.round(referenceFrame.start + canvasCoords.x * referenceFrame.bpPerPixel);
-                            referenceFrame.bpPerPixel /= 2;
-                            igv.browser.goto(referenceFrame.chrName, newCenter);
+                            if(referenceFrame.chrName === "all") {
+
+                                chr = igv.browser.genome.getChromosomeCoordinate(newCenter).chr;
+                                igv.browser.search(chr);
+
+                            }
+                            else {
+                                referenceFrame.bpPerPixel /= 2;
+                                igv.browser.goto(referenceFrame.chrName, newCenter);
+                            }
 
                         }
 
