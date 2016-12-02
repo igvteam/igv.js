@@ -280,6 +280,11 @@ var igv = (function (igv) {
             rulerSweepThreshold = 1,
             dx;
 
+        this.removeRulerMouseHandlers();
+
+        if ('all' === this.genomicState.chromosome.name) {
+            return;
+        }
         self.trackView.trackDiv.dataset.rulerTrack = "rulerTrack";
 
         // ruler sweeper widget surface
