@@ -106,7 +106,7 @@ var igvxhr = (function (igvxhr) {
                         handleError("ERROR: range-byte header was ignored for url: " + url);
                     }
                     else {
-                        fulfill(xhr.response, xhr);
+                        fulfill(xhr.response);
                     }
                 }
                 else {
@@ -262,7 +262,7 @@ var igvxhr = (function (igvxhr) {
 
                 result = igvxhr.arrayBufferToString(fileReader.result, compression);
 
-                fulfill(result, localfile);
+                fulfill(result);
 
             };
 
