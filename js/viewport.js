@@ -102,7 +102,7 @@ var igv = (function (igv) {
             this.$viewport.append($trackLabel);
         }
 
-        this.addMouseHandlers(trackView);
+        this.addMouseHandlers();
 
         if (trackView.track instanceof igv.RulerTrack) {
 
@@ -137,7 +137,7 @@ var igv = (function (igv) {
         }
     };
 
-    igv.Viewport.prototype.addMouseHandlers = function (trackView) {
+    igv.Viewport.prototype.addMouseHandlers = function () {
 
         var self = this,
             isMouseDown = false,
@@ -147,14 +147,7 @@ var igv = (function (igv) {
             popupTimer,
             doubleClickDelay;
 
-        if (trackView.track instanceof igv.RulerTrack) {
-
-            trackView.trackDiv.dataset.rulerTrack = "rulerTrack";
-
-            // ruler sweeper widget surface
-            self.$rulerSweeper = $('<div class="igv-ruler-sweeper-div">');
-            $(self.contentDiv).append(self.$rulerSweeper);
-
+        if (self.trackView.track instanceof igv.RulerTrack) {
             self.addRulerMouseHandlers();
         } else {
 
@@ -241,17 +234,17 @@ var igv = (function (igv) {
 
                     if (e.shiftKey) {
 
-                        if (trackView.track.shiftClick && self.tile) {
-                            trackView.track.shiftClick(genomicLocation, e);
+                        if (self.trackView.track.shiftClick && self.tile) {
+                            self.trackView.track.shiftClick(genomicLocation, e);
                         }
 
                     } else if (e.altKey) {
 
-                        if (trackView.track.altClick && self.tile) {
-                            trackView.track.altClick(genomicLocation, referenceFrame, e);
+                        if (self.trackView.track.altClick && self.tile) {
+                            self.trackView.track.altClick(genomicLocation, referenceFrame, e);
                         }
 
-                    } else if (Math.abs(canvasCoords.x - mouseDownX) <= igv.browser.constants.dragThreshold && trackView.track.popupData) {
+                    } else if (Math.abs(canvasCoords.x - mouseDownX) <= igv.browser.constants.dragThreshold && self.trackView.track.popupData) {
 
                         popupTimer = window.setTimeout(function () {
 
@@ -287,74 +280,92 @@ var igv = (function (igv) {
             rulerSweepThreshold = 1,
             dx;
 
-        this.$viewport.mousedown(function (e) {
+        self.trackView.trackDiv.dataset.rulerTrack = "rulerTrack";
 
-            mouseDownXY = igv.translateMouseCoordinates(e, self.contentDiv);
+        // ruler sweeper widget surface
+        self.$rulerSweeper = $('<div class="igv-ruler-sweeper-div">');
+        $(self.contentDiv).append(self.$rulerSweeper);
 
-            left = mouseDownXY.x;
-            rulerSweepWidth = 0;
-            self.$rulerSweeper.css({"display": "inline", "left": left + "px", "width": rulerSweepWidth + "px"});
+        this.$viewport.on({
 
-            isMouseIn = true;
-        });
+            mousedown: function (e) {
 
-        $(this.contentDiv).mousedown(function (e) {
-            isMouseDown = true;
-        });
+                $(self.contentDiv).off();
 
-        this.$viewport.mousemove(function (e) {
+                $(self.contentDiv).on({
+                    mousedown: function (e) {
+                        isMouseDown = true;
+                    }
+                });
 
-            if (isMouseDown && isMouseIn) {
+                mouseDownXY = igv.translateMouseCoordinates(e, self.contentDiv);
 
-                mouseMoveXY = igv.translateMouseCoordinates(e, self.contentDiv);
-                dx = mouseMoveXY.x - mouseDownXY.x;
-                rulerSweepWidth = Math.abs(dx);
+                left = mouseDownXY.x;
+                rulerSweepWidth = 0;
+                self.$rulerSweeper.css({"display": "inline", "left": left + "px", "width": rulerSweepWidth + "px"});
 
-                if (rulerSweepWidth > rulerSweepThreshold) {
+                isMouseIn = true;
+            },
 
-                    self.$rulerSweeper.css({"width": rulerSweepWidth + "px"});
+            mousemove: function (e) {
 
-                    if (dx < 0) {
+                if (isMouseDown && isMouseIn) {
 
-                        if (mouseDownXY.x + dx < 0) {
-                            isMouseIn = false;
-                            left = 0;
-                        } else {
-                            left = mouseDownXY.x + dx;
+                    mouseMoveXY = igv.translateMouseCoordinates(e, self.contentDiv);
+                    dx = mouseMoveXY.x - mouseDownXY.x;
+                    rulerSweepWidth = Math.abs(dx);
+
+                    if (rulerSweepWidth > rulerSweepThreshold) {
+
+                        self.$rulerSweeper.css({"width": rulerSweepWidth + "px"});
+
+                        if (dx < 0) {
+
+                            if (mouseDownXY.x + dx < 0) {
+                                isMouseIn = false;
+                                left = 0;
+                            } else {
+                                left = mouseDownXY.x + dx;
+                            }
+                            self.$rulerSweeper.css({"left": left + "px"});
                         }
-                        self.$rulerSweeper.css({"left": left + "px"});
                     }
                 }
-            }
-        });
+            },
 
-        this.$viewport.mouseup(function (e) {
+            mouseup: function (e) {
 
-            var extent,
-                referenceFrame;
+                var extent,
+                    referenceFrame;
 
-            if (isMouseDown) {
+                if (isMouseDown) {
 
-                // End sweep
-                isMouseDown = false;
-                isMouseIn = false;
+                    // End sweep
+                    isMouseDown = false;
+                    isMouseIn = false;
 
-                self.$rulerSweeper.css({"display": "none", "left": 0 + "px", "width": 0 + "px"});
+                    self.$rulerSweeper.css({"display": "none", "left": 0 + "px", "width": 0 + "px"});
 
-                referenceFrame = self.genomicState.referenceFrame;
+                    referenceFrame = self.genomicState.referenceFrame;
 
-                extent = {};
-                extent.start = referenceFrame.start + (left * referenceFrame.bpPerPixel);
-                extent.end = extent.start + rulerSweepWidth * referenceFrame.bpPerPixel;
+                    extent = {};
+                    extent.start = referenceFrame.start + (left * referenceFrame.bpPerPixel);
+                    extent.end = extent.start + rulerSweepWidth * referenceFrame.bpPerPixel;
 
-                if (rulerSweepWidth > rulerSweepThreshold) {
-                    igv.Browser.validateLocusExtent(igv.browser.genome.getChromosome(referenceFrame.chrName), extent);
-                    self.goto(referenceFrame.chrName, extent.start, extent.end);
+                    if (rulerSweepWidth > rulerSweepThreshold) {
+                        igv.Browser.validateLocusExtent(igv.browser.genome.getChromosome(referenceFrame.chrName), extent);
+                        self.goto(referenceFrame.chrName, extent.start, extent.end);
+                    }
                 }
-            }
 
+            }
         });
 
+    };
+
+    igv.Viewport.prototype.removeRulerMouseHandlers = function () {
+        $(this.contentDiv).off();
+        this.$viewport.off();
     };
 
     igv.Viewport.prototype.goto = function (chr, start, end) {
@@ -540,7 +551,7 @@ var igv = (function (igv) {
                 if (error instanceof igv.AbortLoad) {
                     console.log("Aborted ---");
                 } else {
-                     igv.presentAlert(error);
+                    igv.presentAlert(error);
                 }
             });
         }
