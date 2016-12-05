@@ -185,7 +185,7 @@ var igv = (function (igv) {
 
         var chrSize = igv.browser.genome.getChromosome(chr).bpLength;
 
-        return Math.ceil(Math.log(Math.max(1, (chrSize / (bpPerPixel * 700)))) / log2);
+        return Math.ceil(Math.log(Math.max(0, (chrSize / (bpPerPixel * 700)))) / log2);
     }
 
 
