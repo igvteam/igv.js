@@ -1452,6 +1452,10 @@ div.ui-dialog fieldset {
 
     text-align: center;
 
+    user-select: none;
+    -moz-user-select: none;
+    -webkit-user-select: none;
+
     border-color: #444;
     border-radius: 2px;
     border-style: solid;
