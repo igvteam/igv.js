@@ -25,13 +25,14 @@
 
 var igv = (function (igv) {
 
-    igv.Genome = function (sequence, ideograms, aliases, wgChromosomeNames) {
+    igv.Genome = function (sequence, ideograms, aliases) {
 
         this.sequence = sequence;
         this.chromosomeNames = sequence.chromosomeNames;
         this.chromosomes = sequence.chromosomes;  // An object (functions as a dictionary)
         this.ideograms = ideograms;
-        this.wgChromosomeNames = wgChromosomeNames;
+
+        constructWG(this);
 
         /**
          * Return the official chromosome name for the (possibly) alias.  Deals with
@@ -128,13 +129,13 @@ var igv = (function (igv) {
             i,
             name;
 
-        if(this.cumulativeOffsets === undefined) computeCumulativeOffsets.call(this);
+        if (this.cumulativeOffsets === undefined) computeCumulativeOffsets.call(this);
 
         // Use a for loop, not a forEach, so we can break (return)
-        for(i=0; i<this.chromosomeNames.length; i++) {
+        for (i = 0; i < this.chromosomeNames.length; i++) {
             name = this.chromosomeNames[i];
             var cumulativeOffset = self.cumulativeOffsets[name];
-            if(cumulativeOffset > genomeCoordinate) {
+            if (cumulativeOffset > genomeCoordinate) {
                 var position = Math.floor((genomeCoordinate - lastCoord) / 1000);
                 return {chr: lastChr, position: position};
             }
@@ -228,7 +229,6 @@ var igv = (function (igv) {
                 chrNames,
                 chromosome,
                 chromosomes = {},
-                wgChromosomeNames = [],
                 sequence,
                 l,
                 avgL;
@@ -256,29 +256,6 @@ var igv = (function (igv) {
                     });
                 }
 
-                // Construct the whole-genome "chromosome"
-                l = 0;
-                _.each(chromosomes, function (chromosome) {
-                    l += Math.floor((chromosome.bpLength / 1000));  // wg length is in kb.  bp would overflow maximum number limit
-                });
-
-                // Now trim chromosomes < 1/10 average length
-                wgChromosomeNames = [];
-                avgL = (l / chrNames.length) * 200;   // i.e.  (divided by 5) times 1000 bp/kbp  TODO USE MEDIAN
-                l = 0;
-                _.each(chrNames, function (chrName) {
-                    chromosome = sequence.chromosomes[chrName];
-                    if (chromosome.bpLength > avgL) {
-                        l += Math.floor((chromosome.bpLength / 1000));  // wg length is in kb.  bp would overflow maximum number limit
-                        wgChromosomeNames.push(chromosome.name);
-                    }
-                });
-
-
-                chromosomes["all"] = {
-                    name: "all",
-                    bpLength: l
-                };
 
                 checkReady();
 
@@ -291,10 +268,10 @@ var igv = (function (igv) {
                 var isReady = (cytobandUrl === undefined || cytobands !== undefined) &&
                     (aliasURL === undefined || aliases !== undefined);
                 if (isReady) {
-                    fulfill(new igv.Genome(sequence, cytobands, aliases, wgChromosomeNames));
+                    fulfill(new igv.Genome(sequence, cytobands, aliases));
                 }
-
             }
+
         });
     }
 
@@ -356,6 +333,50 @@ var igv = (function (igv) {
             continuation(aliases);
         });
 
+    }
+
+    // this.sequence = sequence;
+    // this.chromosomeNames = sequence.chromosomeNames;
+    // this.chromosomes = sequence.chromosomes;  // An object (functions as a dictionary)
+    // this.ideograms = ideograms;
+    // this.wgChromosomeNames = wgChromosomeNames;
+
+    function constructWG(genome) {
+
+        var l, avgL;
+
+        // Construct the whole-genome "chromosome"
+        l = 0;
+        _.each(genome.chromosomes, function (chromosome) {
+            l += Math.floor((chromosome.bpLength / 1000));  // wg length is in kb.  bp would overflow maximum number limit
+        });
+
+        // Now trim chromosomes.  If ideograms are defined use those, otherwise trim chromosomes < 1/10 average length
+        genome.wgChromosomeNames = [];
+
+        if (genome.ideograms) {
+            _.each(genome.chromosomeNames, function (chrName) {
+                var ideo = genome.ideograms[chrName];
+                if(ideo && ideo.length > 0) {
+                    genome.wgChromosomeNames.push(chrName);
+                }
+            });
+        }
+        else {
+            avgL = (l / genome.chromosomeNames.length) * 200;   // i.e.  (divided by 5) times 1000 bp/kbp  TODO USE MEDIAN
+            l = 0;
+            _.each(genome.chromosomeNames, function (chrName) {
+                var chromosome = genome.chromosomes[chrName];
+                if (chromosome.bpLength > avgL) {
+                    genome.wgChromosomeNames.push(chrName);
+                }
+            });
+        }
+
+        genome.chromosomes["all"] = {
+            name: "all",
+            bpLength: l
+        };
     }
 
     return igv;
