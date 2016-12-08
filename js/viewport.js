@@ -80,14 +80,6 @@ var igv = (function (igv) {
             self.$zoomInNotice.hide();
         }
 
-        // TODO: dat - move scrollbars to $viewportContainer
-        // scrollbar,  default is to set overflow ot hidden and use custom scrollbar, but this can be overriden so check
-        // if ("hidden" === this.$viewport.css("overflow-y")) {
-        //     this.scrollbar = new TrackScrollbar(this.$viewport.get(0), this.contentDiv);
-        //     this.scrollbar.update();
-        //     this.$viewport.append(this.scrollbar.outerScrollDiv);
-        // }
-
         if (trackView.track.name && 0 === this.genomicState.locusIndex) {
 
             description = trackView.track.description || trackView.track.name;
@@ -415,7 +407,7 @@ var igv = (function (igv) {
     igv.Viewport.prototype.update = function () {
 
         this.tile = null;
-        if (this.scrollbar) this.scrollbar.update();
+
         this.repaint();
 
     };
@@ -594,9 +586,6 @@ var igv = (function (igv) {
         //     this.controlCanvas.setAttribute("height", newHeight);
         // }
 
-        if (this.scrollbar) {
-            this.scrollbar.update();
-        }
     };
 
     igv.Viewport.prototype.paintImageWithReferenceFrame = function (referenceFrame) {
@@ -653,72 +642,6 @@ var igv = (function (igv) {
         });
 
         return result;
-    };
-
-    TrackScrollbar = function (viewportDiv, contentDiv) {
-
-        var self = this,
-            outerScrollDiv = $('<div class="igv-scrollbar-outer-div">')[0],
-            innerScrollDiv = $('<div class="igv-scrollbar-inner-div">')[0],
-            offY;
-
-        $(outerScrollDiv).append(innerScrollDiv);
-
-        this.viewportDiv = viewportDiv;
-        this.contentDiv = contentDiv;
-        this.outerScrollDiv = outerScrollDiv;
-        this.innerScrollDiv = innerScrollDiv;
-
-
-        $(this.innerScrollDiv).mousedown(function (event) {
-            offY = event.pageY - $(innerScrollDiv).position().top;
-            $(window).on("mousemove .igv", null, null, mouseMove);
-            $(window).on("mouseup .igv", null, null, mouseUp);
-            event.stopPropagation();     // <= prevents start of horizontal track panning);
-        });
-
-        $(this.innerScrollDiv).click(function (event) {
-            event.stopPropagation();  // "Eat" clicks on the inner div to prevent them bubbling up to outer
-        });
-
-        $(this.outerScrollDiv).click(function (event) {
-            moveScrollerTo(event.offsetY - $(innerScrollDiv).height() / 2);
-            event.stopPropagation();
-
-        });
-
-        function mouseMove(event) {
-            moveScrollerTo(event.pageY - offY);
-            event.stopPropagation();
-        }
-
-        function mouseUp(event) {
-            $(window).off("mousemove .igv", null, mouseMove);
-            $(window).off("mouseup .igv", null, mouseUp);
-        }
-
-        function moveScrollerTo(y) {
-            var H = $(outerScrollDiv).height(),
-                h = $(innerScrollDiv).height(),
-                newTop = Math.min(Math.max(0, y), H - h),
-                contentTop = -Math.round(newTop * ($(contentDiv).height() / $(self.viewportDiv).height()));
-
-            $(innerScrollDiv).css("top", newTop + "px");
-            $(contentDiv).css("top", contentTop + "px");
-        }
-    };
-
-    TrackScrollbar.prototype.update = function () {
-        var viewportHeight = $(this.viewportDiv).height(),
-            contentHeight = $(this.contentDiv).height(),
-            newInnerHeight = Math.round((viewportHeight / contentHeight) * viewportHeight);
-        if (contentHeight > viewportHeight) {
-            $(this.outerScrollDiv).show();
-            $(this.innerScrollDiv).height(newInnerHeight);
-        }
-        else {
-            $(this.outerScrollDiv).hide();
-        }
     };
 
     Tile = function (chr, tileStart, tileEnd, scale, image) {

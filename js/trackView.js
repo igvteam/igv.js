@@ -53,6 +53,8 @@ var igv = (function (igv) {
             self.viewports.push(new igv.Viewport(self, i));
         });
 
+        this.configureViewportContainer(this.$viewportContainer, this.viewports);
+
         element = this.createRightHandGutter();
         if (element) {
             $(this.trackDiv).append(element);
@@ -62,6 +64,121 @@ var igv = (function (igv) {
         this.attachDragWidget();
 
     };
+
+    igv.TrackView.prototype.configureViewportContainer = function ($viewportContainer, viewports) {
+
+        if ("hidden" === $viewportContainer.css("overflow-y")) {
+
+            // TODO - Handle replacement for contentDiv. Use height calculating closure?
+            this.scrollbar = new igv.TrackScrollbar($viewportContainer, viewports);
+            this.scrollbar.update();
+            $viewportContainer.append(this.scrollbar.$outerScroll);
+        }
+
+        return $viewportContainer;
+    };
+
+    igv.TrackScrollbar = function ($viewportContainer, viewports) {
+
+        var self = this,
+            offY;
+
+        contentDivHeight = maxContentHeightWithViewports(viewports);
+
+        this.$outerScroll = $('<div class="igv-scrollbar-outer-div">');
+        this.$innerScroll = $('<div class="igv-scrollbar-inner-div">');
+
+        this.$outerScroll.append(this.$innerScroll);
+
+        this.$viewportContainer = $viewportContainer;
+        this.viewports = viewports;
+
+        this.$innerScroll.mousedown(function (event) {
+
+            offY = event.pageY - $(this).position().top;
+
+            $(window).on("mousemove .igv", null, null, mouseMove);
+
+            $(window).on("mouseup .igv", null, null, mouseUp);
+
+            // <= prevents start of horizontal track panning)
+            event.stopPropagation();
+        });
+
+        this.$innerScroll.click(function (event) {
+            event.stopPropagation();
+        });
+
+        this.$outerScroll.click(function (event) {
+            moveScrollerTo(event.offsetY - self.$innerScroll.height()/2);
+            event.stopPropagation();
+
+        });
+
+        function mouseMove(event) {
+            moveScrollerTo(event.pageY - offY);
+            event.stopPropagation();
+        }
+
+        function mouseUp(event) {
+            $(window).off("mousemove .igv", null, mouseMove);
+            $(window).off("mouseup .igv", null, mouseUp);
+        }
+
+        function moveScrollerTo(y) {
+
+            var newTop,
+                contentTop,
+                contentDivHeight,
+                outerScrollHeight,
+                innerScrollHeight;
+
+            outerScrollHeight = self.$outerScroll.height();
+            innerScrollHeight = self.$innerScroll.height();
+
+            newTop = Math.min(Math.max(0, y), outerScrollHeight - innerScrollHeight);
+
+            contentDivHeight = maxContentHeightWithViewports(viewports);
+
+            contentTop = -Math.round(newTop * ( contentDivHeight/self.$viewportContainer.height() ));
+
+            self.$innerScroll.css("top", newTop + "px");
+
+            _.each(viewports, function(viewport){
+                $(viewport.contentDiv).css("top", contentTop + "px");
+            });
+
+        }
+    };
+
+    igv.TrackScrollbar.prototype.update = function () {
+
+        var viewportContainerHeight,
+            contentHeight,
+            newInnerHeight;
+
+        viewportContainerHeight = this.$viewportContainer.height();
+
+        contentHeight = maxContentHeightWithViewports(this.viewports);
+
+        newInnerHeight = Math.round((viewportContainerHeight / contentHeight) * viewportContainerHeight);
+
+        if (contentHeight > viewportContainerHeight) {
+            this.$outerScroll.show();
+            this.$innerScroll.height(newInnerHeight);
+        } else {
+            this.$outerScroll.hide();
+        }
+    };
+
+    function maxContentHeightWithViewports(viewports) {
+        var height = 0;
+        _.each(viewports, function(viewport){
+            height = Math.max($(viewport.contentDiv).height(), height);
+        });
+
+        return height;
+    }
 
     igv.TrackView.prototype.attachDragWidget = function () {
 
@@ -249,9 +366,15 @@ var igv = (function (igv) {
     };
 
     igv.TrackView.prototype.update = function () {
+
         this.viewports.forEach(function(viewport) {
             viewport.update();
         });
+
+        if (this.scrollbar) {
+            this.scrollbar.update();
+        }
+
     };
 
     igv.TrackView.prototype.repaint = function () {

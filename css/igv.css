@@ -1110,7 +1110,11 @@ div.ui-dialog fieldset {
     right: 50px;
     height: 100%;
 
-    overflow: hidden;
+    /*overflow: hidden;*/
+
+    overflow-x: hidden;
+    overflow-y: hidden;
+
 }
 
 .igv-viewport-container-shim {
