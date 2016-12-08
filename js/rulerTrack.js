@@ -203,15 +203,15 @@ var igv = (function (igv) {
         function drawAll() {
 
             var self = this,
-                lastX = 0;
+                lastX = 0,
+                yShim = 2,
+                tickHeight = 10;
 
             _.each(igv.browser.genome.wgChromosomeNames, function (chrName) {
 
                 var chromosome = igv.browser.genome.getChromosome(chrName),
                     bp = igv.browser.genome.getGenomeCoordinate(chrName, chromosome.bpLength),
                     x = Math.round((bp - options.bpStart ) / bpPerPixel),
-                    yShim = 2,
-                    tickHeight = 10,
                     chrLabel = chrName.startsWith("chr") ? chrName.substr(3) : chrName;
 
                 options.context.textAlign= 'center';
@@ -221,7 +221,7 @@ var igv = (function (igv) {
                 lastX = x;
 
             })
-
+            igv.graphics.strokeLine(options.context, 0, self.height - yShim, options.pixelWidth, self.height - yShim);
         }
 
     };
