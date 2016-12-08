@@ -925,7 +925,7 @@ var igv = (function (igv) {
             igv.IdeoPanel.$empty($content_header);
         }
 
-        this.$emptyAllViewportContainers($('.igv-track-container-div'));
+        this.emptyViewportContainers($('.igv-track-container-div'));
 
         filtered = _.filter(_.clone(this.genomicStateList), function(gs) {
             return filterFunction(gs);
@@ -950,14 +950,18 @@ var igv = (function (igv) {
 
     };
 
-    igv.Browser.prototype.$emptyAllViewportContainers = function ( $trackContainer ) {
-        var $e = this;
+    igv.Browser.prototype.emptyViewportContainers = function ($trackContainer) {
+        var $e;
+
+        $e = $trackContainer.find('.igv-scrollbar-outer-div');
+        $e.remove();
 
         $e = $trackContainer.find('.igv-viewport-div');
         $e.remove();
 
         _.each(this.trackViews, function(trackView){
             trackView.viewports = [];
+            trackView.scrollbar = undefined;
         });
     };
 
@@ -965,9 +969,9 @@ var igv = (function (igv) {
 
         _.each(this.trackViews, function(trackView){
 
-            trackView.viewports = [];
             _.each(_.range(_.size(genomicStateList)), function(i) {
                 trackView.viewports.push(new igv.Viewport(trackView, i));
+                trackView.configureViewportContainer(trackView.$viewportContainer, trackView.viewports);
             });
 
         });
@@ -997,7 +1001,7 @@ var igv = (function (igv) {
 
                 self.genomicStateList = genomicStateList;
 
-                self.$emptyAllViewportContainers($('.igv-track-container-div'));
+                self.emptyViewportContainers($('.igv-track-container-div'));
 
                 // return;
 
