@@ -160,6 +160,13 @@ var igv = (function (igv) {
         // }
 
         genome = igv.browser.genome;
+        
+        if(!genome.ideograms) {
+            console.log('karyo - no ideograms defined')
+            return;
+        }
+        
+        
         genomicState = _.first(igv.browser.genomicStateList);
         referenceFrame = genomicState.referenceFrame;
         stainColors = [];
@@ -195,6 +202,8 @@ var igv = (function (igv) {
 
         var longestChr = genome.getLongestChromosome();
         var cytobands = genome.getCytobands(longestChr.name);      // Longest chr
+        
+        if(!cytobands) return;    // Cytobands not defined.
 
         var me = this;
         var maxLen = cytobands[cytobands.length - 1].end;
