@@ -138,8 +138,8 @@ var igv = (function (igv) {
 
     igv.Browser.prototype.disableZoomWidget = function () {
 
-        $zoomContainer.find('.fa-minus-circle').off();
-        $zoomContainer.find('.fa-plus-circle' ).off();
+        this.$zoomContainer.find('.fa-minus-circle').off();
+        this.$zoomContainer.find('.fa-plus-circle' ).off();
 
     };
 
