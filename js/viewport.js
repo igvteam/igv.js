@@ -482,7 +482,8 @@ var igv = (function (igv) {
                     if (typeof self.trackView.track.computePixelHeight === 'function') {
                         requiredHeight = self.trackView.track.computePixelHeight(features);
                         if (requiredHeight != self.contentDiv.clientHeight) {
-                            self.setContentHeight(requiredHeight);
+                            // self.setContentHeight(requiredHeight);
+                            self.trackView.setContentHeightForViewport(self, requiredHeight)
                         }
                     }
 
