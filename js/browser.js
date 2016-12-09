@@ -151,9 +151,9 @@ var igv = (function (igv) {
 
     };
 
-    igv.Browser.prototype.toggleCenterGuide = function (genomicStateListSize) {
+    igv.Browser.prototype.toggleCenterGuide = function (genomicStateList) {
 
-        if (genomicStateListSize > 1) {
+        if (_.size(genomicStateList) > 1 || 'all' === (_.first(genomicStateList)).locusSearchString) {
 
             if(this.centerGuide.$container.is(":visible")) {
                 this.centerGuide.$centerGuideToggle.click();
@@ -726,11 +726,11 @@ var igv = (function (igv) {
         $track.append($viewportContainer);
 
         rect =
-        {
-            position: $viewportContainer.position(),
-            width: $viewportContainer.width(),
-            height: $viewportContainer.height()
-        };
+            {
+                position: $viewportContainer.position(),
+                width: $viewportContainer.width(),
+                height: $viewportContainer.height()
+            };
 
         // rect.position = $viewportContainer.position();
         // rect.width = $viewportContainer.width();
@@ -965,7 +965,7 @@ var igv = (function (igv) {
 
         this.buildViewportsWithGenomicStateList(this.genomicStateList);
 
-        this.toggleCenterGuide(_.size(this.genomicStateList));
+        this.toggleCenterGuide(this.genomicStateList);
 
         this.resize();
 
@@ -1034,7 +1034,7 @@ var igv = (function (igv) {
                     self.enableZoomWidget(self.zoomHandlers);
                 }
 
-                self.toggleCenterGuide(_.size(self.genomicStateList));
+                self.toggleCenterGuide(self.genomicStateList);
 
                 if (false === self.config.hideIdeogram) {
                     igv.IdeoPanel.$empty($content_header);
