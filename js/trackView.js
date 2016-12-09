@@ -71,7 +71,7 @@ var igv = (function (igv) {
 
             // TODO - Handle replacement for contentDiv. Use height calculating closure?
             this.scrollbar = new igv.TrackScrollbar($viewportContainer, viewports);
-            this.scrollbar.update();
+            // this.scrollbar.update();
             $viewportContainer.append(this.scrollbar.$outerScroll);
         }
 
@@ -174,7 +174,9 @@ var igv = (function (igv) {
     function maxContentHeightWithViewports(viewports) {
         var height = 0;
         _.each(viewports, function(viewport){
-            height = Math.max($(viewport.contentDiv).height(), height);
+            var hgt = $(viewport.contentDiv).height();
+            console.log('height ' + hgt);
+            height = Math.max(hgt, height);
         });
 
         return height;
@@ -363,11 +365,16 @@ var igv = (function (igv) {
         _.each(this.viewports, function(viewport){
             viewport.resize();
         });
+
+        if (this.scrollbar) {
+            this.scrollbar.update();
+        }
+
     };
 
     igv.TrackView.prototype.update = function () {
 
-        this.viewports.forEach(function(viewport) {
+        _.each(this.viewports, function(viewport) {
             viewport.update();
         });
 
@@ -378,9 +385,11 @@ var igv = (function (igv) {
     };
 
     igv.TrackView.prototype.repaint = function () {
-        this.viewports.forEach(function(viewport) {
+
+        _.each(this.viewports, function(viewport) {
             viewport.repaint();
         });
+
     };
 
     return igv;
