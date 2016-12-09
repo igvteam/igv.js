@@ -73,7 +73,7 @@ var igv = (function (igv) {
         }
 
         // zoom in to see features
-        if (trackView.track.visibilityWindow !== undefined) {
+        if (trackView.track.visibilityWindow !== undefined || !trackView.track.supportsWholeGenome) {
             self.$zoomInNotice = $('<div class="zoom-in-notice">');
             self.$zoomInNotice.text('Zoom in to see features');
             $(this.contentDiv).append(self.$zoomInNotice);
@@ -430,8 +430,9 @@ var igv = (function (igv) {
             return;
         }
 
-        if (this.trackView.track.visibilityWindow !== undefined && this.trackView.track.visibilityWindow > 0) {
-            if (referenceFrame.bpPerPixel * this.$viewport.width() > this.trackView.track.visibilityWindow) {
+        if (this.$zoomInNotice && this.trackView.track.visibilityWindow !== undefined && this.trackView.track.visibilityWindow > 0) {
+            if ((referenceFrame.bpPerPixel * this.$viewport.width() > this.trackView.track.visibilityWindow) ||
+                (referenceFrame.chrName === "all" && !this.trackView.track.supportsWholeGenome)) {
                 this.tile = null;
                 this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
 

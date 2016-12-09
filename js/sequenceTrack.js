@@ -33,6 +33,7 @@ var igv = (function (igv) {
         this.disableButtons = true;
         this.order = config.order || 9999;
         this.ignoreTrackMenu = true;
+        this.supportsWholeGenome = false;
     };
 
     igv.SequenceTrack.prototype.getFeatures = function (chr, bpStart, bpEnd, bpPerPixel) {
