@@ -131,7 +131,7 @@ var igv = (function (igv) {
                         igv.browser.enableZoomWidget(igv.browser.zoomHandlers);
                     }
 
-                    igv.browser.toggleCenterGuide(_.size(igv.browser.genomicStateList));
+                    igv.browser.toggleCenterGuide(igv.browser.genomicStateList);
 
                     if (igv.browser.karyoPanel) {
                         igv.browser.karyoPanel.resize();
