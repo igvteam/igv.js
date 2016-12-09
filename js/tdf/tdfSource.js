@@ -58,6 +58,11 @@ var igv = (function (igv) {
 
                 self.reader.readDataset(queryChr, wf, zoom).then(function (dataset) {
 
+                    if(dataset == null) {
+                        fulfill(null);
+                        return;
+                    }
+
                     var tileWidth = dataset.tileWidth,
                         startTile = Math.floor(bpStart / tileWidth),
                         endTile = Math.floor(bpEnd / tileWidth),
