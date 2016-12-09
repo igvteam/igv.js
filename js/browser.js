@@ -64,7 +64,6 @@ var igv = (function (igv) {
         }, 10);
 
         $(document).mousedown(function (e) {
-            e.preventDefault();
             igv.browser.isMouseDown = true;
         });
 
