@@ -95,6 +95,8 @@ var igv = (function (igv) {
 
         this.$innerScroll.mousedown(function (event) {
 
+            event.preventDefault();
+
             offY = event.pageY - $(this).position().top;
 
             $(window).on("mousemove .igv", null, null, mouseMove);
@@ -116,6 +118,9 @@ var igv = (function (igv) {
         });
 
         function mouseMove(event) {
+
+            event.preventDefault();
+
             moveScrollerTo(event.pageY - offY);
             event.stopPropagation();
         }
@@ -193,6 +198,7 @@ var igv = (function (igv) {
         $(self.trackDiv).append(self.$trackManipulationHandle);
 
         self.$trackManipulationHandle.mousedown(function (e) {
+            e.preventDefault();
             self.isMouseDown = true;
             igv.browser.dragTrackView = self;
         });

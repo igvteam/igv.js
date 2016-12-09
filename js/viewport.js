@@ -287,6 +287,8 @@ var igv = (function (igv) {
 
             mousedown: function (e) {
 
+                e.preventDefault();
+
                 $(self.contentDiv).off();
 
                 $(self.contentDiv).on({
@@ -305,6 +307,8 @@ var igv = (function (igv) {
             },
 
             mousemove: function (e) {
+
+                e.preventDefault();
 
                 if (isMouseDown && isMouseIn) {
 
