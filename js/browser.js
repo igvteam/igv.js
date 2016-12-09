@@ -64,6 +64,7 @@ var igv = (function (igv) {
         }, 10);
 
         $(document).mousedown(function (e) {
+            e.preventDefault();
             igv.browser.isMouseDown = true;
         });
 
@@ -1441,6 +1442,8 @@ var igv = (function (igv) {
             var coords,
                 $target;
 
+            e.preventDefault();
+
             if (igv.popover) {
                 igv.popover.hide();
             }
@@ -1477,6 +1480,8 @@ var igv = (function (igv) {
                 _left,
                 $element = igv.browser.$cursorTrackingGuide;
 
+            e.preventDefault();
+
             xy = igv.translateMouseCoordinates(e, trackContainerDiv);
             _left = Math.max(50, xy.x - 5);
 
@@ -1489,6 +1494,8 @@ var igv = (function (igv) {
             var coords,
                 maxEnd,
                 maxStart;
+
+            e.preventDefault();
 
             if (true === isRulerTrack || undefined === $viewport) {
                 return;
