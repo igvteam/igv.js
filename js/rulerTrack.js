@@ -35,7 +35,8 @@ var igv = (function (igv) {
         this.disableButtons = true;
         this.ignoreTrackMenu = true;
         this.order = -Number.MAX_VALUE;
-
+        this.supportsWholeGenome = false;
+        
     };
 
     igv.RulerTrack.prototype.locusLabelWithViewport = function (viewport) {
@@ -214,7 +215,7 @@ var igv = (function (igv) {
                     x = Math.round((bp - options.bpStart ) / bpPerPixel),
                     chrLabel = chrName.startsWith("chr") ? chrName.substr(3) : chrName;
 
-                options.context.textAlign= 'center';
+                options.context.textAlign = 'center';
                 igv.graphics.strokeLine(options.context, x, self.height - tickHeight, x, self.height - yShim);
                 igv.graphics.fillText(options.context, chrLabel, (lastX + x) / 2, self.height - (tickHeight / 0.75));
 

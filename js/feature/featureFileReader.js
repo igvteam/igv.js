@@ -54,8 +54,8 @@ var igv = (function (igv) {
         this.format = config.format;
 
         this.parser = getParser.call(this, this.format, config.decode);
-
-        this.supportsWholeGenome = (this.format === "seg");   // Only seg supported for now
+        
+        this.supportsWholeGenome = (this.format === "seg");  // TODO -- move this up to track level
     };
 
 
@@ -70,7 +70,7 @@ var igv = (function (igv) {
         }
 
     }
-
+    
     function isIndexable() {
         return this.config.indexURL || (this.type !== "wig" && this.type !== "seg" && this.config.indexed != false);
     }

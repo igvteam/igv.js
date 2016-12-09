@@ -72,6 +72,8 @@ var igv = (function (igv) {
         //       new igv.BigQueryFeatureSource(this.config) :
         this.featureSource = new igv.FeatureSource(this.config);
 
+        this.supportsWholeGenome = true;
+
 
     };
 
