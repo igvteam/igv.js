@@ -665,26 +665,32 @@ var igv = (function (igv) {
 
         if (0 === genomicState.locusIndex && 1 === genomicState.locusCount) {
 
-            referenceFrame = genomicState.referenceFrame;
+            if ('all' === genomicState.locusSearchString) {
 
-            if (this.$searchInput) {
+                this.$searchInput.val(genomicState.locusSearchString);
+            } else {
 
-                end = referenceFrame.start + referenceFrame.bpPerPixel * (self.viewportContainerWidth()/genomicState.locusCount);
+                referenceFrame = genomicState.referenceFrame;
 
-                if (this.genome) {
-                    chromosome = this.genome.getChromosome( referenceFrame.chrName );
-                    if (chromosome) {
-                        end = Math.min(end, chromosome.bpLength);
+                if (this.$searchInput) {
+
+                    end = referenceFrame.start + referenceFrame.bpPerPixel * (self.viewportContainerWidth()/genomicState.locusCount);
+
+                    if (this.genome) {
+                        chromosome = this.genome.getChromosome( referenceFrame.chrName );
+                        if (chromosome) {
+                            end = Math.min(end, chromosome.bpLength);
+                        }
                     }
+
+                    ss = igv.numberFormatter(Math.floor(referenceFrame.start + 1));
+                    ee = igv.numberFormatter(Math.floor(end));
+                    str = referenceFrame.chrName + ":" + ss + "-" + ee;
+                    this.$searchInput.val(str);
                 }
 
-                ss = igv.numberFormatter(Math.floor(referenceFrame.start + 1));
-                ee = igv.numberFormatter(Math.floor(end));
-                str = referenceFrame.chrName + ":" + ss + "-" + ee;
-                this.$searchInput.val(str);
+                this.fireEvent('locuschange', [referenceFrame, str]);
             }
-
-            this.fireEvent('locuschange', [referenceFrame, str]);
 
         } else {
             this.$searchInput.val('');
