@@ -110,7 +110,8 @@ var igv = (function (igv) {
             width = igv.browser.viewportContainerWidth();
             igv.browser.getGenomicStateList(lociWithConfiguration(config), width, function (genomicStateList) {
 
-                var errorString;
+                var errorString,
+                    gs;
 
                 if (_.size(genomicStateList) > 0) {
 
@@ -123,6 +124,12 @@ var igv = (function (igv) {
                     });
 
                     igv.browser.updateLocusSearchWithGenomicState(_.first(igv.browser.genomicStateList));
+
+                    if (1 === _.size(igv.browser.genomicStateList) && 'all' === (_.first(igv.browser.genomicStateList)).locusSearchString) {
+                        igv.browser.disableZoomWidget();
+                    } else {
+                        igv.browser.enableZoomWidget(igv.browser.zoomHandlers);
+                    }
 
                     igv.browser.toggleCenterGuide(_.size(igv.browser.genomicStateList));
 
@@ -321,7 +328,21 @@ var igv = (function (igv) {
             // window size panel
             browser.windowSizePanel = new igv.WindowSizePanel($navigation);
 
-            $navigation.append(makeZoomWidget());
+            browser.zoomHandlers = {
+                in: {
+                    click: function (e) {
+                        browser.zoomIn();
+                    }
+                },
+                out:{
+                    click: function (e) {
+                        browser.zoomOut();
+                    }
+                }
+            };
+
+            browser.$zoomContainer = zoomWidget();
+            $navigation.append(browser.$zoomContainer);
 
             // cursor tracking guide
             browser.$cursorTrackingGuide = $('<div class="igv-cursor-tracking-guide">');
@@ -389,30 +410,13 @@ var igv = (function (igv) {
         return $controls[0];
     }
 
-    function makeZoomWidget() {
+    function zoomWidget() {
 
-        var $faZoomOut,
-            $faZoomIn,
-            $zoomContainer;
-
-        $faZoomOut = $('<i class="fa fa-minus-circle igv-fa-search fa-24px" style="padding-right: 4px;">');
-
-        $faZoomOut.click(function () {
-            igv.browser.zoomOut();
-        });
-
-        $faZoomIn = $('<i class="fa fa-plus-circle igv-fa-search fa-24px">');
-
-        $faZoomIn.click(function () {
-            igv.browser.zoomIn();
-        });
-
-        $zoomContainer = $('<div class="igvNavigationZoom">');
-        $zoomContainer.append($faZoomOut);
-        $zoomContainer.append($faZoomIn);
+        var $zoomContainer = $('<div class="igvNavigationZoom">');
+        $zoomContainer.append($('<i class="fa fa-minus-circle igv-fa-search fa-24px" style="padding-right: 4px;">'));
+        $zoomContainer.append($('<i class="fa fa-plus-circle igv-fa-search fa-24px">'));
 
         return $zoomContainer;
-
     }
 
     function setDefaults(config) {

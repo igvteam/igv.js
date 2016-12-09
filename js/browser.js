@@ -136,6 +136,20 @@ var igv = (function (igv) {
         }
     }
 
+    igv.Browser.prototype.disableZoomWidget = function () {
+
+        $zoomContainer.find('.fa-minus-circle').off();
+        $zoomContainer.find('.fa-plus-circle' ).off();
+
+    };
+
+    igv.Browser.prototype.enableZoomWidget = function (zoomHandlers) {
+
+        this.$zoomContainer.find('.fa-minus-circle').on(zoomHandlers.out);
+        this.$zoomContainer.find('.fa-plus-circle' ).on(zoomHandlers.in);
+
+    };
+
     igv.Browser.prototype.toggleCenterGuide = function (genomicStateListSize) {
 
         if (genomicStateListSize > 1) {
@@ -1012,6 +1026,12 @@ var igv = (function (igv) {
                 // return;
 
                 self.updateLocusSearchWithGenomicState(_.first(self.genomicStateList));
+
+                if (1 === _.size(self.genomicStateList) && 'all' === (_.first(self.genomicStateList)).locusSearchString) {
+                    self.disableZoomWidget();
+                } else {
+                    self.enableZoomWidget(self.zoomHandlers);
+                }
 
                 self.toggleCenterGuide(_.size(self.genomicStateList));
 
