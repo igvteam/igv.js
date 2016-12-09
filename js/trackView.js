@@ -175,7 +175,6 @@ var igv = (function (igv) {
         var height = 0;
         _.each(viewports, function(viewport){
             var hgt = $(viewport.contentDiv).height();
-            console.log('height ' + hgt);
             height = Math.max(hgt, height);
         });
 
@@ -308,6 +307,15 @@ var igv = (function (igv) {
         $(this.rightHandGutter).append(gearButton[0]);
 
         return this.rightHandGutter;
+
+    };
+
+    igv.TrackView.prototype.setContentHeightForViewport = function (viewport, height) {
+        viewport.setContentHeight(height);
+
+        if (this.scrollbar) {
+            this.scrollbar.update();
+        }
 
     };
 
