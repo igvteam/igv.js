@@ -74,10 +74,23 @@ var igv = (function (igv) {
 
         // zoom in to see features
         if (trackView.track.visibilityWindow !== undefined || !trackView.track.supportsWholeGenome) {
-            self.$zoomInNotice = $('<div class="zoom-in-notice">');
-            self.$zoomInNotice.text('Zoom in to see features');
+            self.$zoomInNotice = createZoomInNotice();
             $(this.contentDiv).append(self.$zoomInNotice);
-            self.$zoomInNotice.hide();
+        }
+
+        function createZoomInNotice () {
+            var $container,
+                $child;
+
+            $child = $('<div class="zoom-in-notice">');
+            $child.text('Zoom in to see features');
+
+            $container = $('<div class="zoom-in-notice-container">');
+            $container.append($child);
+
+            $container.hide();
+
+            return $container;
         }
 
         if (trackView.track.name && 0 === this.genomicState.locusIndex) {
