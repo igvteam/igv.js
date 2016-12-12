@@ -142,7 +142,8 @@ var igv = (function (igv) {
 
         var self = this,
             $e,
-            clickHandler;
+            clickHandler,
+            list = [];
 
         $e = $('<div class="igv-track-menu-item">');
         $e.text('Sort by base');
@@ -161,7 +162,21 @@ var igv = (function (igv) {
 
         };
 
-        return [{ name: undefined, object: $e, click: clickHandler, init: undefined }];
+        if (false === self.viewAsPairs) {
+            list.push({ name: undefined, object: $e, click: clickHandler, init: undefined });
+
+            $e = $('<div class="igv-track-menu-item">');
+            $e.text('View mate in split screen');
+
+            clickHandler = function () {
+                self.alignmentTrack.popupMenuItemList(config);
+            };
+
+            list.push({ name: undefined, object: $e, click: clickHandler, init: undefined });
+
+        }
+
+        return list;
 
     };
 
@@ -891,6 +906,76 @@ var igv = (function (igv) {
             return [];
         }
 
+    };
+
+    AlignmentTrack.prototype.popupMenuItemList = function (config) {
+
+        var list,
+            loci;
+
+        config.popover.hide();
+
+        list = this.getClickedAlignment(config.genomicLocation, config.y);
+
+        if (1 === _.size(list)) {
+
+            loci = locusPairWithAlignment(_.first(list));
+            igv.browser.parseSearchInput(loci);
+        }
+
+        function locusPairWithAlignment(alignment) {
+            var left,
+                right,
+                centroid;
+
+            centroid = (alignment.start + (alignment.start + alignment.lengthOnRef)) / 2;
+            left = alignment.chr + ':' + Math.round(centroid).toString();
+
+            centroid = (alignment.mate.position + (alignment.mate.position + alignment.lengthOnRef)) / 2;
+            right = alignment.chr + ':' + Math.round(centroid).toString();
+
+            return left + ' ' + right;
+        }
+    };
+
+    AlignmentTrack.prototype.getClickedAlignment = function (genomicLocation, yOffset) {
+
+        var packedAlignmentRows,
+            downsampledIntervals,
+            index,
+            clickedObject,
+            pairObject;
+
+        packedAlignmentRows = this.featureSource.alignmentContainer.packedAlignmentRows;
+        downsampledIntervals = this.featureSource.alignmentContainer.downsampledIntervals;
+
+        index = Math.floor((yOffset - (alignmentRowYInset)) / this.alignmentRowHeight);
+
+        clickedObject = [];
+        pairObject = [];
+        if (index < 0) {
+
+            clickedObject = _.filter(downsampledIntervals, function(interval) {
+                return interval.start <= genomicLocation && (interval.end >= genomicLocation);
+            });
+
+        } else if (index < _.size(packedAlignmentRows)) {
+
+            clickedObject = _.filter(packedAlignmentRows[ index ].alignments, function(alignment) {
+                return (alignment.isPaired() && alignment.isMateMapped() && alignment.start <= genomicLocation && (alignment.start + alignment.lengthOnRef >= genomicLocation));
+            });
+
+            // _.each(packedAlignmentRows, function(row){
+            //     _.each(row.alignments, function(alignment){
+            //         if (alignment !== clickedObject && alignment.readName === clickedObject.readName) {
+            //             pairObject.push(alignment);
+            //         }
+            //     });
+            // });
+
+        }
+
+        return clickedObject;
     };
 
     function getAlignmentColor(alignment) {

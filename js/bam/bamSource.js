@@ -62,7 +62,7 @@ var igv = (function (igv) {
 
             }
         }
-    }
+    };
 
     igv.BamSource.prototype.getAlignments = function (chr, bpStart, bpEnd) {
 
@@ -105,7 +105,7 @@ var igv = (function (igv) {
                 }).catch(reject);
             }
         });
-    }
+    };
 
     function pairAlignments(rows) {
 
@@ -161,9 +161,9 @@ var igv = (function (igv) {
         return alignment.isPaired() &&
             alignment.isMateMapped() &&
             alignment.chr === alignment.mate.chr &&
-            (alignment.isFirstOfPair() || alignment.isSecondOfPair()) && !(alignment.isSecondary() || alignment.isSupplementary());
+            (alignment.isFirstOfPair() || alignment.isSecondOfPair()) &&
+            !(alignment.isSecondary() || alignment.isSupplementary());
     }
-
 
     function packAlignmentRows(alignments, start, end, maxRows) {
 
@@ -249,7 +249,6 @@ var igv = (function (igv) {
             return packedAlignmentRows;
         }
     }
-
 
     return igv;
 
