@@ -174,7 +174,9 @@ var igv = (function (igv) {
 
         // if the user clicks on a base next to an insertion, show just the
         // inserted bases in a popup (like in desktop IGV).
-        var nameValues = [], isFirst, tagDict;
+        var nameValues = [],
+            isFirst,
+            tagDict;
 
         if(this.insertions) {
             for(var i = 0; i < this.insertions.length; i += 1) {

@@ -191,6 +191,16 @@ var igv = (function (igv) {
 
     };
 
+    igv.BAMTrack.prototype.popupDataWithConfiguration = function (config) {
+
+        if (config.y >= this.coverageTrack.top && config.y < this.coverageTrack.height) {
+            return this.coverageTrack.popupDataWithConfiguration(config);
+        } else {
+            return this.alignmentTrack.popupDataWithConfiguration(config);
+        }
+
+    };
+
     igv.BAMTrack.prototype.menuItemList = function (popover) {
 
         var self = this,
@@ -496,6 +506,10 @@ var igv = (function (igv) {
             }
         }
 
+    };
+
+    CoverageTrack.prototype.popupDataWithConfiguration = function (config) {
+        return this.popupData(config.genomicLocation, config.x, this.top, config.viewport.genomicState.referenceFrame);
     };
 
     CoverageTrack.prototype.popupData = function (genomicLocation, xOffset, yOffset, referenceFrame) {
@@ -872,6 +886,20 @@ var igv = (function (igv) {
 
     };
 
+    AlignmentTrack.prototype.popupDataWithConfiguration = function (config) {
+
+        var clickedObject,
+            list = [];
+
+        clickedObject = this.getClickedAlignment(config.viewport, config.genomicLocation, config.y);
+
+        if (1 === _.size(clickedObject)) {
+            list = _.first(clickedObject).popupData(config.genomicLocation);
+        }
+
+        return list;
+    };
+
     AlignmentTrack.prototype.popupData = function (genomicLocation, xOffset, yOffset, referenceFrame) {
 
         var packedAlignmentRows = this.featureSource.alignmentContainer.packedAlignmentRows,
@@ -915,8 +943,7 @@ var igv = (function (igv) {
 
         if (clickedObject) {
             return clickedObject.popupData(genomicLocation);
-        }
-        else {
+        } else {
             return [];
         }
 
@@ -937,20 +964,23 @@ var igv = (function (igv) {
 
             this.highlightedAlignmentReadNamed = _.first(list).readName;
 
-            loci = locusPairWithAlignment(_.first(list));
+            loci = locusPairWithAlignmentAndViewport(_.first(list), config.viewport);
             igv.browser.parseSearchInput(loci);
         }
 
-        function locusPairWithAlignment(alignment) {
+        function locusPairWithAlignmentAndViewport(alignment, viewport) {
             var left,
                 right,
-                centroid;
+                centroid,
+                widthBP;
+
+            widthBP = viewport.$viewport.width() * viewport.genomicState.referenceFrame.bpPerPixel;
 
             centroid = (alignment.start + (alignment.start + alignment.lengthOnRef)) / 2;
-            left = alignment.chr + ':' + Math.round(centroid).toString();
+            left = alignment.chr + ':' + Math.round(centroid - widthBP/2.0).toString() + '-' + Math.round(centroid + widthBP/2.0).toString();
 
             centroid = (alignment.mate.position + (alignment.mate.position + alignment.lengthOnRef)) / 2;
-            right = alignment.chr + ':' + Math.round(centroid).toString();
+            right = alignment.chr + ':' + Math.round(centroid - widthBP/2.0).toString() + '-' + Math.round(centroid + widthBP/2.0).toString();
 
             return left + ' ' + right;
         }
