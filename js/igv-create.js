@@ -165,13 +165,15 @@ var igv = (function (igv) {
                 var loci = [];
 
                 if (configuration.locus) {
-                    loci.push(configuration.locus);
-                }
 
-                if (configuration.loci) {
-                    _.each(configuration.loci, function(locus){
-                        loci.push(locus);
-                    });
+                    if (Array.isArray(configuration.locus)) {
+                        _.each(configuration.locus, function(l){
+                            loci.push(l);
+                        });
+
+                    } else {
+                        loci.push(configuration.locus);
+                    }
                 }
 
                 if (0 === _.size(loci)){
