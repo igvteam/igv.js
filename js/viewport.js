@@ -508,28 +508,33 @@ var igv = (function (igv) {
                     buffer.width = pixelWidth;
                     buffer.height = self.canvas.height;
 
-                    self.trackView.track.draw({
+                    self.drawConfiguration =
+                        {
 
-                        features: features,
-                        context: buffer.getContext('2d'),
+                            features: features,
+                            context: buffer.getContext('2d'),
 
-                        pixelWidth: buffer.width,
-                        pixelHeight: buffer.height,
+                            pixelWidth: buffer.width,
+                            pixelHeight: buffer.height,
 
-                        bpStart: bpStart,   // bpStart = Math.max(0, Math.round(referenceFrame.start - bpWidth / 3))
-                                            // bpWidth = Math.round(referenceFrame.toBP(pixelWidth))
-                                            // buffer.width = pixelWidth = 3 * this.canvas.width
+                            bpStart: bpStart,   // bpStart = Math.max(0, Math.round(referenceFrame.start - bpWidth / 3))
+                                                // bpWidth = Math.round(referenceFrame.toBP(pixelWidth))
+                                                // buffer.width = pixelWidth = 3 * this.canvas.width
 
-                        bpPerPixel: referenceFrame.bpPerPixel,
+                            bpEnd: bpEnd,
 
-                        referenceFrame: referenceFrame,
+                            bpPerPixel: referenceFrame.bpPerPixel,
 
-                        genomicState: genomicState,
+                            referenceFrame: referenceFrame,
 
-                        viewport: self,
+                            genomicState: genomicState,
 
-                        viewportWidth: self.$viewport.width()
-                    });
+                            viewport: self,
+
+                            viewportWidth: self.$viewport.width()
+                        };
+
+                    self.trackView.track.draw(self.drawConfiguration);
 
                     if (doRenderControlCanvas(genomicState, self.trackView)) {
                         renderControlCanvasWithTrackView(self.trackView);
