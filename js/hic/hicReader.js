@@ -31,6 +31,7 @@
 
 var igv = (function (igv) {
 
+    var Short_MIN_VALUE = -32768
 
     igv.HiCReader = function (config) {
         this.path = config.url;
@@ -38,7 +39,7 @@ var igv = (function (igv) {
         this.config = config;
 
         this.fragmentSitesCache = {};
-        this.blockIndexMap = {};
+
     };
 
 
@@ -55,8 +56,10 @@ var igv = (function (igv) {
                     withCredentials: self.config.withCredentials
                 }).then(function (data) {
 
-                if (!data) return;
-
+                if (!data) {
+                    fulfill(null);
+                    return;
+                }
 
                 var binaryParser = new igv.BinaryParser(new DataView(data));
 
@@ -123,7 +126,10 @@ var igv = (function (igv) {
 
                 var key, pos, size;
 
-                if (!data) return;
+                if (!data) {
+                    fulfill(null);
+                    return;
+                }
 
                 var binaryParser = new igv.BinaryParser(new DataView(data));
 
@@ -225,11 +231,14 @@ var igv = (function (igv) {
             igvxhr.loadArrayBuffer(self.path,
                 {
                     headers: self.config.headers,
-                    range: {start: position, size: idx.size},
+                    range: {start: idx.start, size: idx.size},
                     withCredentials: self.config.withCredentials
                 }).then(function (data) {
 
-                if (!data) return;
+                if (!data) {
+                    fulfill(null);
+                    return;
+                }
 
 
                 var dis = new igv.BinaryParser(new DataView(data));
@@ -254,18 +263,126 @@ var igv = (function (igv) {
                     var sites2 = results[1];
 
                     while (nResolutions-- > 0) {
-                        var zd = readMatrixZoomData(chr1, chr2, sites1, sites2, dis);
+                        var zd = parseMatixZoomData(chr1, chr2, sites1, sites2, dis);
                         zdList.push(zd);
                     }
 
-                    fulfill(new Matrix(c1, c2, zdList)); 
-                    
-                }).catch(reject);
+                    fulfill(new Matrix(c1, c2, zdList));
 
-
+                }).catch(function (err) {
+                    reject(err);
+                });
             }).catch(reject)
         });
     }
+
+    igv.HiCReader.prototype.readBlock = function (blockNumber, zd) {
+
+        var self = this,
+            idx = null,
+            i, j;
+
+        var blockIndex = zd.blockIndexMap;
+        if (blockIndex != null) {
+
+            var idx = blockIndex[blockNumber];
+        }
+        if (idx == null) {
+            return Promise.resolve(new Block());
+        }
+        else {
+
+            return new Promise(function (fulfill, reject) {
+
+                igvxhr.loadArrayBuffer(self.path,
+                    {
+                        headers: self.config.headers,
+                        range: {start: idx.filePosition, size: idx.size},
+                        withCredentials: self.config.withCredentials
+                    }).then(function (data) {
+
+                    if (!data) {
+                        fulfill(null);
+                        return;
+                    }
+
+                    var inflate = new Zlib.Inflate(new Uint8Array(data));
+                    var plain = inflate.decompress();
+                    data = plain.buffer;
+
+
+                    var parser = new igv.BinaryParser(new DataView(data));
+                    var nRecords = parser.getInt();
+                    var records = [];
+
+                    if (self.version < 7) {
+                        for (i = 0; i < nRecords; i++) {
+                            var binX = parser.getInt();
+                            var binY = parser.getInt();
+                            var counts = parser.getFloat();
+                            records.add(new ContactRecord(binX, binY, counts));
+                        }
+                    } else {
+
+                        var binXOffset = parser.getInt();
+                        var binYOffset = parser.getInt();
+
+                        var useShort = parser.getByte() == 0;
+                        var type = parser.getByte();
+
+                        if (type === 1) {
+                            // List-of-rows representation
+                            var rowCount = parser.getShort();
+
+                            for (i = 0; i < rowCount; i++) {
+
+                                binY = binYOffset + parser.getShort();
+                                var colCount = parser.getShort();
+
+                                for (j = 0; j < colCount; j++) {
+
+                                    binX = binXOffset + parser.getShort();
+                                    counts = useShort ? parser.getShort() : parser.getFloat();
+                                    records.push(new ContactRecord(binX, binY, counts));
+                                }
+                            }
+                        } else if (type == 2) {
+
+                            var nPts = parser.getInt();
+                            var w = parser.getShort();
+
+                            for (i = 0; i < nPts; i++) {
+                                //int idx = (p.y - binOffset2) * w + (p.x - binOffset1);
+                                var row = i / w;
+                                var col = i - row * w;
+                                var bin1 = binXOffset + col;
+                                var bin2 = binYOffset + row;
+
+                                if (useShort) {
+                                    counts = parser.getShort();
+                                    if (counts != Short_MIN_VALUE) {
+                                        records.push(new ContactRecord(bin1, bin2, counts));
+                                    }
+                                } else {
+                                    counts = parser.getFloat();
+                                    if (!isNaN(counts)) {
+                                        records.push(new ContactRecord(bin1, bin2, counts));
+                                    }
+                                }
+
+
+                            }
+
+                        } else {
+                            reject("Unknown block type: " + type);
+                        }
+                    }
+                    fulfill(new Block(blockNumber, records));
+                }).catch(reject);
+            });
+        }
+    }
+
 
     function getSites(chrName) {
 
@@ -292,14 +409,14 @@ var igv = (function (igv) {
             }
         });
     }
-    
-    function readMatrixZoomData(chr1, chr2, chr1Sites, chr2Sites, dis) {
-        
+
+    function parseMatixZoomData(chr1, chr2, chr1Sites, chr2Sites, dis) {
+
         var unit = dis.getString();
-        dis.readInt();                // Old "zoom" index -- not used
+        dis.getInt();                // Old "zoom" index -- not used
 
         // Stats.  Not used yet, but we need to read them anyway
-        var sumCounts = dis.getDouble();
+        var sumCounts = dis.getFloat();
         var occupiedCellCount = dis.getFloat();
         var stdDev = dis.getFloat();
         var percent95 = dis.getFloat();
@@ -310,7 +427,7 @@ var igv = (function (igv) {
         var blockBinCount = dis.getInt();
         var blockColumnCount = dis.getInt();
 
-        var zd = new MatrixZoomData(chr1, chr2, zoom, blockBinCount, blockColumnCount, chr1Sites, chr2Sites, this);
+        var zd = new MatrixZoomData(chr1, chr2, zoom, blockBinCount, blockColumnCount, chr1Sites, chr2Sites);
 
         var nBlocks = dis.getInt();
         var blockIndex = {};
@@ -321,10 +438,10 @@ var igv = (function (igv) {
             var blockSizeInBytes = dis.getInt();
             blockIndex[blockNumber] = {filePosition: filePosition, size: blockSizeInBytes};
         }
-        self.blockIndexMap.put(zd.getKey(), blockIndex);
+        zd.blockIndexMap = blockIndex;
 
-        var nBins1 = chr1.size / binSize;
-        var nBins2 = chr2.size / binSize;
+        var nBins1 = (chr1.size / binSize);
+        var nBins2 = (chr2.size / binSize);
         var avgCount = (sumCounts / nBins1) / nBins2;   // <= trying to avoid overflows
         zd.averageCount = avgCount;
 
@@ -347,15 +464,70 @@ var igv = (function (igv) {
         this.binSize = binSize;
         this.data = data;
     }
+
     NormalizationVector.getKey = function (type, chrIdx, unit, binSize) {
         return type + "_" + chrIdx + "_" + unit + "_" + binSize;
     }
-    
-    function MatrixZoomData(chr1, chr2, zoom, blockBinCount, blockColumnCount, chr1Sites, chr2Sites, reader) {
+
+    function MatrixZoomData(chr1, chr2, zoom, blockBinCount, blockColumnCount, chr1Sites, chr2Sites) {
         this.chr1 = chr1;
-        
+        this.chr2 = chr2;
+        this.zoom = zoom;
+        this.blockBinCount = blockBinCount;
+        this.blockColumnCount = blockColumnCount;
+        this.chr1Sites = chr1Sites;
+        this.chr2Sites = chr2Sites;
     }
-    
+
+
+    MatrixZoomData.prototype.getKey = function () {
+        return this.chr1.name + "_" + this.chr2.name + "_" + this.zoom.unit + "_" + this.zoom.binSize;
+    }
+
+    function Matrix(chr1, chr2, zoomDataList) {
+
+        var self = this;
+
+        this.chr1 = chr1;
+        this.chr2 = chr2;
+        this.bpZoomData = [];
+        this.fragZoomData = [];
+
+        _.each(zoomDataList, function (zd) {
+            if (zd.zoom.unit === "BP") {
+                self.bpZoomData.push(zd);
+            } else {
+                self.fragZoomData.push(zd);
+            }
+        });
+    }
+
+    Matrix.prototype.getZoomData = function (zoom) {
+
+        var zdArray = zoom.unit === "BP" ? this.bpZoomData : this.fragZoomData,
+            i;
+
+        for (i = 0; i < zdArray.length; i++) {
+            var zd = zdArray[i];
+            if (zoom.binSize === zd.zoom.binSize) {
+                return zd;
+            }
+        }
+
+        return undefined;
+    }
+
+    ContactRecord = function (bin1, bin2, counts) {
+        this.bin1 = bin1;
+        this.bin2 = bin2;
+        this.counts = counts;
+    }
+
+    Block = function (blockNumber, records) {
+        this.blockNumber = blockNumber;
+        this.records = records;
+    }
+
     return igv;
 
 })
