@@ -140,14 +140,25 @@ var igv = (function (igv) {
             trackLocationState,
             dataList,
             popupClickHandlerResult,
-            content;
+            content,
+            config;
 
         trackLocationState = createTrackLocationState(e, viewport);
         if (undefined === trackLocationState) {
             return
         }
 
-        dataList = track.popupData(trackLocationState.genomicLocation, trackLocationState.x, trackLocationState.y, referenceFrame);
+        // dataList = track.popupData(trackLocationState.genomicLocation, trackLocationState.x, trackLocationState.y, referenceFrame);
+
+        config =
+            {
+                popover: this,
+                viewport:viewport,
+                genomicLocation: trackLocationState.genomicLocation,
+                x: trackLocationState.x,
+                y: trackLocationState.y
+            };
+        dataList = track.popupDataWithConfiguration(config);
 
         popupClickHandlerResult = igv.browser.fireEvent('trackclick', [track, dataList]);
 
