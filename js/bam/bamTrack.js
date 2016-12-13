@@ -675,40 +675,43 @@ var igv = (function (igv) {
         function drawPairConnector(alignment, yRect, alignmentHeight) {
 
             var alignmentColor = getAlignmentColor.call(self, alignment.firstAlignment),
-                outlineColor = alignmentColor,
+                outlineColor = 'alignmentColor',
                 xBlockStart = (alignment.connectingStart - bpStart) / bpPerPixel,
                 xBlockEnd = (alignment.connectingEnd - bpStart) / bpPerPixel,
                 yStrokedLine = yRect + alignmentHeight / 2;
 
-            if ((alignment.connectingEnd) < bpStart || alignment.connectingStart > bpEnd) return;
+            if ((alignment.connectingEnd) < bpStart || alignment.connectingStart > bpEnd) {
+                return;
+            }
 
             if (alignment.mq <= 0) {
                 alignmentColor = igv.addAlphaToRGB(alignmentColor, "0.15");
             }
 
-            igv.graphics.setProperties(ctx, {fillStyle: alignmentColor, strokeStyle: outlineColor});
+            igv.graphics.setProperties(ctx, { fillStyle: alignmentColor, strokeStyle: outlineColor } );
 
             igv.graphics.strokeLine(ctx, xBlockStart, yStrokedLine, xBlockEnd, yStrokedLine);
 
         }
 
-
         function drawSingleAlignment(alignment, yRect, alignmentHeight) {
 
             var alignmentColor = getAlignmentColor.call(self, alignment),
-                outlineColor = alignmentColor,
+                outlineColor = 'alignmentColor',
                 lastBlockEnd,
                 blocks = alignment.blocks,
                 block,
                 b;
 
-            if ((alignment.start + alignment.lengthOnRef) < bpStart || alignment.start > bpEnd) return;
+            if ((alignment.start + alignment.lengthOnRef) < bpStart || alignment.start > bpEnd) {
+                return;
+            }
 
             if (alignment.mq <= 0) {
                 alignmentColor = igv.addAlphaToRGB(alignmentColor, "0.15");
             }
 
-            igv.graphics.setProperties(ctx, {fillStyle: alignmentColor, strokeStyle: outlineColor});
+            igv.graphics.setProperties(ctx, { fillStyle: alignmentColor, strokeStyle: outlineColor } );
 
             for (b = 0; b < blocks.length; b++) {   // Can't use forEach here -- we need ability to break
 
@@ -778,7 +781,13 @@ var igv = (function (igv) {
                         yRect + alignmentHeight,
                         yRect + alignmentHeight,
                         yRect];
-                    igv.graphics.fillPolygon(ctx, x, y, {fillStyle: alignmentColor});
+
+                    igv.graphics.fillPolygon(ctx, x, y, { fillStyle: alignmentColor });
+
+                    if (self.highlightedAlignmentReadNamed === alignment.readName) {
+                        igv.graphics.strokePolygon(ctx, x, y, { strokeStyle: 'red' });
+                    }
+
                     if (alignment.mq <= 0) {
                         igv.graphics.strokePolygon(ctx, x, y, {strokeStyle: outlineColor});
                     }
@@ -799,13 +808,18 @@ var igv = (function (igv) {
                         yRect + alignmentHeight,
                         yRect + alignmentHeight,
                         yRect];
+
                     igv.graphics.fillPolygon(ctx, x, y, {fillStyle: alignmentColor});
+
+                    if (self.highlightedAlignmentReadNamed === alignment.readName) {
+                        igv.graphics.strokePolygon(ctx, x, y, { strokeStyle: 'red' });
+                    }
+
                     if (alignment.mq <= 0) {
                         igv.graphics.strokePolygon(ctx, x, y, {strokeStyle: outlineColor});
                     }
                 }
                 else {
-                    //      igv.graphics.fillRect(ctx, xBlockStart, yRect, widthBlock, height, {fillStyle: "white"});
                     igv.graphics.fillRect(ctx, xBlockStart, yRect, widthBlock, alignmentHeight, {fillStyle: alignmentColor});
                     if (alignment.mq <= 0) {
                         ctx.save();
@@ -833,7 +847,7 @@ var igv = (function (igv) {
                             if (colorBase) {
                                 xBase = ((block.start + i) - bpStart) / bpPerPixel;
                                 widthBase = Math.max(1, 1 / bpPerPixel);
-                                igv.graphics.fillRect(ctx, xBase, yRect, widthBase, alignmentHeight, {fillStyle: colorBase});
+                                igv.graphics.fillRect(ctx, xBase, yRect, widthBase, alignmentHeight, { fillStyle: colorBase });
                             }
                         }
                     }
@@ -917,7 +931,11 @@ var igv = (function (igv) {
 
         list = this.getClickedAlignment(config.genomicLocation, config.y);
 
+
+
         if (1 === _.size(list)) {
+
+            this.highlightedAlignmentReadNamed = _.first(list).readName;
 
             loci = locusPairWithAlignment(_.first(list));
             igv.browser.parseSearchInput(loci);
@@ -954,25 +972,13 @@ var igv = (function (igv) {
         clickedObject = [];
         pairObject = [];
         if (index < 0) {
-
             clickedObject = _.filter(downsampledIntervals, function(interval) {
                 return interval.start <= genomicLocation && (interval.end >= genomicLocation);
             });
-
         } else if (index < _.size(packedAlignmentRows)) {
-
             clickedObject = _.filter(packedAlignmentRows[ index ].alignments, function(alignment) {
                 return (alignment.isPaired() && alignment.isMateMapped() && alignment.start <= genomicLocation && (alignment.start + alignment.lengthOnRef >= genomicLocation));
             });
-
-            // _.each(packedAlignmentRows, function(row){
-            //     _.each(row.alignments, function(alignment){
-            //         if (alignment !== clickedObject && alignment.readName === clickedObject.readName) {
-            //             pairObject.push(alignment);
-            //         }
-            //     });
-            // });
-
         }
 
         return clickedObject;
@@ -985,15 +991,15 @@ var igv = (function (igv) {
             tagValue, color,
             strand;
 
-        color = alignmentTrack.parent.color; // default
+        color = alignmentTrack.parent.color;
 
         switch (option) {
 
             case "strand":
                 color = alignment.strand ? alignmentTrack.posStrandColor : alignmentTrack.negStrandColor;
                 break;
-            case "firstOfPairStrand":
 
+            case "firstOfPairStrand":
                 if(alignment instanceof igv.PairedAlignment) {
                     color = alignment.firstOfPairStrand() ? alignmentTrack.posStrandColor : alignmentTrack.negStrandColor;
                 }
@@ -1012,7 +1018,6 @@ var igv = (function (igv) {
                 break;
 
             case "tag":
-
                 tagValue = alignment.tags()[alignmentTrack.colorByTag];
                 if (tagValue !== undefined) {
 
@@ -1025,9 +1030,11 @@ var igv = (function (igv) {
                     }
                 }
                 break;
+
             default:
                 color = alignmentTrack.parent.color;
         }
+
         return color;
 
     }
