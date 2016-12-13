@@ -162,8 +162,9 @@ var igv = (function (igv) {
 
         };
 
+        list.push({ name: undefined, object: $e, click: clickHandler, init: undefined });
+
         if (false === self.viewAsPairs) {
-            list.push({ name: undefined, object: $e, click: clickHandler, init: undefined });
 
             $e = $('<div class="igv-track-menu-item">');
             $e.text('View mate in split screen');
@@ -184,8 +185,7 @@ var igv = (function (igv) {
 
         if (yOffset >= this.coverageTrack.top && yOffset < this.coverageTrack.height) {
             return this.coverageTrack.popupData(genomicLocation, xOffset, this.coverageTrack.top, referenceFrame);
-        }
-        else {
+        } else {
             return this.alignmentTrack.popupData(genomicLocation, xOffset, yOffset - this.alignmentTrack.top, referenceFrame);
         }
 
@@ -927,11 +927,11 @@ var igv = (function (igv) {
         var list,
             loci;
 
+        this.highlightedAlignmentReadNamed = undefined;
+
         config.popover.hide();
 
-        list = this.getClickedAlignment(config.genomicLocation, config.y);
-
-
+        list = this.getClickedAlignment(config.viewport, config.genomicLocation, config.y);
 
         if (1 === _.size(list)) {
 
@@ -956,29 +956,24 @@ var igv = (function (igv) {
         }
     };
 
-    AlignmentTrack.prototype.getClickedAlignment = function (genomicLocation, yOffset) {
+    AlignmentTrack.prototype.getClickedAlignment = function (viewport, genomicLocation, yOffset) {
 
         var packedAlignmentRows,
-            downsampledIntervals,
+            row,
             index,
-            clickedObject,
-            pairObject;
-
-        packedAlignmentRows = this.featureSource.alignmentContainer.packedAlignmentRows;
-        downsampledIntervals = this.featureSource.alignmentContainer.downsampledIntervals;
-
-        index = Math.floor((yOffset - (alignmentRowYInset)) / this.alignmentRowHeight);
+            clickedObject;
 
         clickedObject = [];
-        pairObject = [];
-        if (index < 0) {
-            clickedObject = _.filter(downsampledIntervals, function(interval) {
-                return interval.start <= genomicLocation && (interval.end >= genomicLocation);
-            });
-        } else if (index < _.size(packedAlignmentRows)) {
-            clickedObject = _.filter(packedAlignmentRows[ index ].alignments, function(alignment) {
+
+        packedAlignmentRows = viewport.drawConfiguration.features.packedAlignmentRows;
+        index = Math.floor((yOffset - (alignmentRowYInset)) / this.alignmentRowHeight);
+
+        if (index < _.size(packedAlignmentRows)) {
+            row = packedAlignmentRows[ index ];
+            clickedObject = _.filter(row.alignments, function(alignment) {
                 return (alignment.isPaired() && alignment.isMateMapped() && alignment.start <= genomicLocation && (alignment.start + alignment.lengthOnRef >= genomicLocation));
             });
+
         }
 
         return clickedObject;
