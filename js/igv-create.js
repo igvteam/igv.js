@@ -280,7 +280,7 @@ var igv = (function (igv) {
 
         var $igvLogo,
             $controls,
-            contentKaryo,
+            $karyo,
             $navigation,
             $searchContainer,
             $faSearch,
@@ -376,36 +376,35 @@ var igv = (function (igv) {
         }
 
         if (config.showKaryo) {
-            contentKaryo = $('#igvKaryoDiv')[0];
+
+            $karyo = $('#igvKaryoDiv');
+
             // if a karyo div already exists in the page, use that one.
             // this allows the placement of the karyo view on the side, for instance
-            if (!contentKaryo) {
-                contentKaryo = $('<div id="igvKaryoDiv" class="igv-karyo-div">')[0];
-                $controls.append(contentKaryo);
+            if (undefined === $karyo.get(0)) {
+                $karyo = $('<div id="igvKaryoDiv" class="igv-karyo-div">');
+                $controls.append($karyo);
             }
-            browser.karyoPanel = new igv.KaryoPanel(contentKaryo);
+
+            browser.karyoPanel = new igv.KaryoPanel($karyo);
 
             $karyoPanelToggle = $('<div class="igv-nav-bar-toggle-button">');
+            $karyoPanelToggle.text('Karyotype Panel');
 
-            if (config.showKaryo === "hide") {
-                $karyoPanelToggle.text("Show Karyotype");
-                $(contentKaryo).addClass("igv-karyo-hide");
-            } else {
-                $karyoPanelToggle.text("Hide Karyotype");
+            if (false === config.showKaryo) {
+                $karyo.addClass('igv-karyo-hide');
             }
 
             $karyoPanelToggle.click(function () {
-                var hidden = $(".igv-karyo-div").hasClass("igv-karyo-hide");
-                if (hidden) {
-                    $karyoPanelToggle.text("Hide Karyotype");
-                    $(".igv-karyo-div").removeClass("igv-karyo-hide");
+
+                if ($karyo.hasClass('igv-karyo-hide')) {
+                    $karyo.removeClass('igv-karyo-hide');
                 } else {
-                    $karyoPanelToggle.text("Show Karyotype");
-                    $(".igv-karyo-div").addClass("igv-karyo-hide");
+                    $karyo.addClass("igv-karyo-hide");
                 }
             });
 
-            $navigation.append($karyoPanelToggle[0]);
+            $navigation.append($karyoPanelToggle);
         }
 
 

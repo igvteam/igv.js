@@ -29,13 +29,13 @@ var igv = (function (igv) {
         // if (console) console.log("karyo: " + txt);
     };
 
-    igv.KaryoPanel = function (parentElement) {
+    igv.KaryoPanel = function ($parent) {
 
         this.ideograms = null;
         igv.guichromosomes = [];
 
         this.div = $('<div class="igv-karyo-div"></div>')[0];
-        $(parentElement).append(this.div);
+        $parent.append(this.div);
 
         var contentDiv = $('<div class="igv-karyo-content-div"></div>')[0];
         $(this.div).append(contentDiv);
