@@ -891,7 +891,9 @@ var igv = (function (igv) {
         var clickedObject,
             list = [];
 
-        clickedObject = this.getClickedAlignment(config.viewport, config.genomicLocation, config.y);
+        clickedObject = this.getClickedAlignment(config.viewport, config.genomicLocation);
+
+        console.log('alignment track - popup Data With Configuration - clicked: ' + _.size(clickedObject));
 
         if (1 === _.size(clickedObject)) {
             list = _.first(clickedObject).popupData(config.genomicLocation);
@@ -958,7 +960,7 @@ var igv = (function (igv) {
 
         config.popover.hide();
 
-        list = this.getClickedAlignment(config.viewport, config.genomicLocation, config.y);
+        list = this.getClickedAlignment(config.viewport, config.genomicLocation);
 
         if (1 === _.size(list)) {
 
@@ -986,25 +988,25 @@ var igv = (function (igv) {
         }
     };
 
-    AlignmentTrack.prototype.getClickedAlignment = function (viewport, genomicLocation, yOffset) {
+    AlignmentTrack.prototype.getClickedAlignment = function (viewport, genomicLocation) {
 
         var packedAlignmentRows,
             row,
             index,
             clickedObject;
 
-        clickedObject = [];
-
         packedAlignmentRows = viewport.drawConfiguration.features.packedAlignmentRows;
-        index = Math.floor((yOffset - (alignmentRowYInset)) / this.alignmentRowHeight);
 
-        if (index < _.size(packedAlignmentRows)) {
-            row = packedAlignmentRows[ index ];
-            clickedObject = _.filter(row.alignments, function(alignment) {
-                return (alignment.isPaired() && alignment.isMateMapped() && alignment.start <= genomicLocation && (alignment.start + alignment.lengthOnRef >= genomicLocation));
-            });
+        clickedObject = undefined;
+        _.each(packedAlignmentRows, function (row) {
 
-        }
+            if (undefined === clickedObject) {
+                clickedObject = _.filter(row.alignments, function(alignment) {
+                    return (alignment.isPaired() && alignment.isMateMapped() && alignment.start <= genomicLocation && (alignment.start + alignment.lengthOnRef >= genomicLocation));
+                });
+            } // if (undefined === clickedObject)
+
+        });
 
         return clickedObject;
     };
