@@ -27,16 +27,15 @@ var igv = (function (igv) {
 
     igv.makeToggleButton = function (buttonOnLabel, buttonOffLabel, configurationKey, get$Target, continuation) {
 
-        var $button = $('<div class="igv-nav-bar-toggle-button">'),
-            configurationValue = igv.browser[ configurationKey ];
+        var $button = $('<div class="igv-nav-bar-toggle-button">');
 
-        skin$ButtonWithTruthFunction($button, (true === configurationValue), buttonOnLabel, buttonOffLabel);
+        skin$ButtonWithTruthFunction($button, (true === igv.browser.config[ configurationKey ]), buttonOnLabel, buttonOffLabel);
 
         $button.click(function () {
 
             var $target = get$Target();
 
-            igv.browser[ configurationKey ] = !igv.browser[ configurationKey ];
+            igv.browser.config[ configurationKey ] = !igv.browser.config[ configurationKey ];
 
             $target.toggle();
 

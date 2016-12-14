@@ -30,11 +30,10 @@
 var igv = (function (igv) {
 
     igv.CenterGuide = function ($parent, config) {
-        var self = this,
-            cssDisplay;
-        
+        var self = this;
+
         this.$container = $('<div class="igv-center-guide igv-center-guide-thin">');
-        if (true == config.showCenterGuide) {
+        if (true === config.showCenterGuide) {
             this.$container.show();
         } else {
             this.$container.hide();

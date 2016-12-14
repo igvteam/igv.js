@@ -29,32 +29,48 @@ var igv = (function (igv) {
         // if (console) console.log("karyo: " + txt);
     };
 
-    igv.KaryoPanel = function ($parent) {
+    igv.KaryoPanel = function ($parent, config) {
+        var self = this,
+            contentDiv,
+            canvas,
+            tipCtx,
+            tipCanvas;
+
+        this.$container = $('<div class="igv-karyo-div">');
+        if (true === config.showKaryo) {
+            this.$container.show();
+        } else {
+            this.$container.hide();
+        }
+        $parent.append(this.$container);
+
+        this.$karyoPanelToggle = igv.makeToggleButton('Karyotype', 'Karyotype', 'showKaryo', function () {
+            return self.$container;
+        }, undefined);
 
         this.ideograms = null;
         igv.guichromosomes = [];
 
-        this.div = $('<div class="igv-karyo-div"></div>')[0];
-        $parent.append(this.div);
+        contentDiv = $('<div class="igv-karyo-content-div"></div>')[0];
+        this.$container.append(contentDiv);
 
-        var contentDiv = $('<div class="igv-karyo-content-div"></div>')[0];
-        $(this.div).append(contentDiv);
-
-        var canvas = $('<canvas class="igv-karyo-canvas"></canvas>')[0];
+        canvas = $('<canvas class="igv-karyo-canvas"></canvas>')[0];
         $(contentDiv).append(canvas);
         canvas.setAttribute('width', contentDiv.offsetWidth);
         canvas.setAttribute('height', contentDiv.offsetHeight);
+
         this.canvas = canvas;
         this.ctx = canvas.getContext("2d");
 
-        var tipCanvas = document.createElement('canvas');
+        tipCanvas = document.createElement('canvas');
         tipCanvas.style.position = 'absolute';    // => relative to first positioned ancestor
         tipCanvas.style.width = "100px";
         tipCanvas.style.height = "20px";
         tipCanvas.style.left = "-2000px";
         tipCanvas.setAttribute('width', "100px");    //Must set the width & height of the canvas
         tipCanvas.setAttribute('height', "20px");
-        var tipCtx = tipCanvas.getContext("2d");
+
+        tipCtx = tipCanvas.getContext("2d");
         contentDiv.appendChild(tipCanvas);
 
         this.canvas.onmousemove = function (e) {
@@ -88,7 +104,8 @@ var igv = (function (igv) {
             if (!hit) {
                 tipCanvas.style.left = "-2000px";
             }
-        }
+        };
+
         this.canvas.onclick = function (e) {
 
             var mouseCoords = igv.translateMouseCoordinates(e, canvas);

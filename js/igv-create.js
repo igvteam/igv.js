@@ -375,38 +375,18 @@ var igv = (function (igv) {
 
         }
 
-        if (config.showKaryo) {
-
+        if (false === config.showKaryo) {
+            // do nothing
+        } else {
             $karyo = $('#igvKaryoDiv');
-
-            // if a karyo div already exists in the page, use that one.
-            // this allows the placement of the karyo view on the side, for instance
             if (undefined === $karyo.get(0)) {
                 $karyo = $('<div id="igvKaryoDiv" class="igv-karyo-div">');
                 $controls.append($karyo);
             }
+            browser.karyoPanel = new igv.KaryoPanel($karyo, config);
 
-            browser.karyoPanel = new igv.KaryoPanel($karyo);
-
-            $karyoPanelToggle = $('<div class="igv-nav-bar-toggle-button">');
-            $karyoPanelToggle.text('Karyotype Panel');
-
-            if (false === config.showKaryo) {
-                $karyo.addClass('igv-karyo-hide');
-            }
-
-            $karyoPanelToggle.click(function () {
-
-                if ($karyo.hasClass('igv-karyo-hide')) {
-                    $karyo.removeClass('igv-karyo-hide');
-                } else {
-                    $karyo.addClass("igv-karyo-hide");
-                }
-            });
-
-            $navigation.append($karyoPanelToggle);
+            $navigation.append(browser.karyoPanel.$karyoPanelToggle);
         }
-
 
         return $controls[0];
     }
@@ -422,11 +402,16 @@ var igv = (function (igv) {
 
     function setDefaults(config) {
 
+        config.hideIdeogram = config.hideIdeogram || false;
+
+        config.showCursorTrackingGuide = config.showCursorTrackingGuide || false;
+        config.showCenterGuide = config.showCenterGuide || false;
+
         config.showKaryo = config.showKaryo || false;
-        if (config.hideIdeogram === undefined) config.hideIdeogram = false;
-        if (config.showCursorTrackingGuide === undefined) config.showCursorTrackingGuide = false;
-        if (config.showCenterGuide === undefined) config.showCenterGuide = false;
+
+        if (config.trackLabelsVisible === undefined) config.trackLabelsVisible = true;
         if (config.showControls === undefined) config.showControls = true;
+
         if (config.showNavigation === undefined) config.showNavigation = true;
         if (config.showRuler === undefined) config.showRuler = true;
         if (config.showSequence === undefined) config.showSequence = true;
