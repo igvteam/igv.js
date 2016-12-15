@@ -187,6 +187,7 @@ var igv = (function (igv) {
                     genomicLocation,
                     time,
                     newCenter,
+                    widthBP,
                     chr;
 
                 e.preventDefault();
@@ -206,9 +207,9 @@ var igv = (function (igv) {
                 if (time - lastClickTime < doubleClickDelay) {
                     // This is a double-click
 
-                    if (_.size(igv.browser.genomicStateList) > 1) {
-                        // ignore
-                    } else {
+                    // if (_.size(igv.browser.genomicStateList) > 1) {
+                    //     // ignore
+                    // } else {
 
                         if (popupTimer) {
                             // Cancel previous timer
@@ -221,19 +222,19 @@ var igv = (function (igv) {
                         } else {
                             newCenter = Math.round(referenceFrame.start + canvasCoords.x * referenceFrame.bpPerPixel);
                             if(referenceFrame.chrName === "all") {
-
                                 chr = igv.browser.genome.getChromosomeCoordinate(newCenter).chr;
                                 igv.browser.search(chr);
 
-                            }
-                            else {
-                                referenceFrame.bpPerPixel /= 2;
-                                igv.browser.goto(referenceFrame.chrName, newCenter);
+                            } else {
+                                self.genomicState.referenceFrame.bpPerPixel /= 2;
+                                self.genomicState.referenceFrame.start = Math.round((newCenter + self.genomicState.referenceFrame.start)/2.0 );
+                                igv.browser.updateWithLocusIndex(self.genomicState.locusIndex);
+
                             }
 
                         }
 
-                    }
+                    // }
 
                 } else {
 
