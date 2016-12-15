@@ -888,18 +888,11 @@ var igv = (function (igv) {
 
     AlignmentTrack.prototype.popupDataWithConfiguration = function (config) {
 
-        var clickedObject,
-            list = [];
+        var clickedObject;
 
         clickedObject = this.getClickedAlignment(config.viewport, config.genomicLocation);
 
-        console.log('alignment track - popup Data With Configuration - clicked: ' + _.size(clickedObject));
-
-        if (1 === _.size(clickedObject)) {
-            list = _.first(clickedObject).popupData(config.genomicLocation);
-        }
-
-        return list;
+        return clickedObject ? clickedObject.popupData(config.genomicLocation) : undefined;
     };
 
     AlignmentTrack.prototype.popupData = function (genomicLocation, xOffset, yOffset, referenceFrame) {
@@ -953,21 +946,41 @@ var igv = (function (igv) {
 
     AlignmentTrack.prototype.popupMenuItemList = function (config) {
 
-        var list,
-            loci;
+        var alignment,
+            loci,
+            mateLoci,
+            index,
+            head,
+            tail;
 
         this.highlightedAlignmentReadNamed = undefined;
 
         config.popover.hide();
 
-        list = this.getClickedAlignment(config.viewport, config.genomicLocation);
+        alignment = this.getClickedAlignment(config.viewport, config.genomicLocation);
 
-        if (1 === _.size(list)) {
+        if (alignment) {
 
-            this.highlightedAlignmentReadNamed = _.first(list).readName;
+            this.highlightedAlignmentReadNamed = alignment.readName;
 
-            loci = locusPairWithAlignmentAndViewport(_.first(list), config.viewport);
-            igv.browser.parseSearchInput(loci);
+            loci = _.map(igv.browser.genomicStateList, function(gs) {
+                return gs.locusSearchString;
+            });
+
+            index = config.viewport.genomicState.locusIndex;
+            head = _.first(loci, 1 + index);
+            tail = _.size(loci) === 1 ? undefined : _.last(loci, _.size(loci) - (1 + index));
+
+            mateLoci = locusPairWithAlignmentAndViewport(alignment, config.viewport);
+
+            // discard last element of head and replace with mateLoci
+            head.splice(-1, 1);
+            Array.prototype.push.apply(head, mateLoci);
+            if (tail) {
+                Array.prototype.push.apply(head, tail);
+            }
+
+            igv.browser.parseSearchInput( head.join(' ') );
         }
 
         function locusPairWithAlignmentAndViewport(alignment, viewport) {
@@ -984,7 +997,7 @@ var igv = (function (igv) {
             centroid = (alignment.mate.position + (alignment.mate.position + alignment.lengthOnRef)) / 2;
             right = alignment.chr + ':' + Math.round(centroid - widthBP/2.0).toString() + '-' + Math.round(centroid + widthBP/2.0).toString();
 
-            return left + ' ' + right;
+            return [ left, right ];
         }
     };
 
@@ -993,22 +1006,22 @@ var igv = (function (igv) {
         var packedAlignmentRows,
             row,
             index,
-            clickedObject;
+            clicked;
 
         packedAlignmentRows = viewport.drawConfiguration.features.packedAlignmentRows;
 
-        clickedObject = undefined;
+        clicked = undefined;
         _.each(packedAlignmentRows, function (row) {
 
-            if (undefined === clickedObject) {
-                clickedObject = _.filter(row.alignments, function(alignment) {
+            if (undefined === clicked) {
+                clicked = _.filter(row.alignments, function(alignment) {
                     return (alignment.isPaired() && alignment.isMateMapped() && alignment.start <= genomicLocation && (alignment.start + alignment.lengthOnRef >= genomicLocation));
                 });
-            } // if (undefined === clickedObject)
+            } // if (undefined === clicked)
 
         });
 
-        return clickedObject;
+        return clicked ? _.first(clicked) : undefined;
     };
 
     function getAlignmentColor(alignment) {
