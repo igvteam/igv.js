@@ -33,12 +33,13 @@ var igv = (function (igv) {
         var self = this;
 
         this.$container = $('<div class="igv-center-guide igv-center-guide-thin">');
+        $parent.append(this.$container);
+
         if (true === config.showCenterGuide) {
             this.$container.show();
         } else {
             this.$container.hide();
         }
-        $parent.append(this.$container);
 
         this.$centerGuideToggle = igv.makeToggleButton('center line', 'center line', 'showCenterGuide', function () {
             return self.$container;

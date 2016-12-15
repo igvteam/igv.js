@@ -726,7 +726,7 @@ div.ui-dialog fieldset {
 
     position: relative;
     height: 20px;
-    min-width: 100px;
+    min-width: 110px;
     text-transform: capitalize;
 
     float: right;
@@ -736,11 +736,11 @@ div.ui-dialog fieldset {
 
     padding-left: 8px;
     padding-right: 8px;
-    padding-top: 1px;
+    padding-top: 2px;
     padding-bottom: 2px;
 
     font-family: 'Open Sans', sans-serif;
-    font-size: small;
+    font-size: 12px;
     font-weight: 200;
 
     text-align: center;
@@ -761,8 +761,8 @@ div.ui-dialog fieldset {
 .igv-nav-bar-toggle-button-on:hover,
 .igv-nav-bar-toggle-button-on:focus,
 .igv-nav-bar-toggle-button-on:active  {
-    padding-top: 0;
-    border-width: 2px;
+    /*padding-top: 0;*/
+    /*border-width: 2px;*/
 }
 
 .igv-nav-bar-toggle-button-off {

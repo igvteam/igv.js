@@ -131,6 +131,7 @@ var igv = (function (igv) {
                         igv.browser.enableZoomWidget(igv.browser.zoomHandlers);
                     }
 
+                    // igv.browser.toggleCursorGuide(igv.browser.genomicStateList);
                     igv.browser.toggleCenterGuide(igv.browser.genomicStateList);
 
                     if (igv.browser.karyoPanel) {
@@ -284,9 +285,7 @@ var igv = (function (igv) {
             $navigation,
             $searchContainer,
             $faSearch,
-            $trackLabelToggle,
-            $cursorTrackingGuideToggle,
-            $karyoPanelToggle;
+            $trackLabelToggle;
 
         $controls = $('<div id="igvControlDiv">');
 
@@ -348,18 +347,19 @@ var igv = (function (igv) {
 
             // cursor tracking guide
             browser.$cursorTrackingGuide = $('<div class="igv-cursor-tracking-guide">');
-            if (true == config.showCursorTrackingGuide) {
+            $(browser.trackContainerDiv).append(browser.$cursorTrackingGuide);
+
+            if (true === config.showCursorTrackingGuide) {
                 browser.$cursorTrackingGuide.show();
             } else {
                 browser.$cursorTrackingGuide.hide();
             }
-            $(browser.trackContainerDiv).append(browser.$cursorTrackingGuide);
 
-            $cursorTrackingGuideToggle = igv.makeToggleButton('cursor guide', 'cursor guide', 'showCursorTrackingGuide', function () {
+            browser.$cursorTrackingGuideToggle = igv.makeToggleButton('cursor guide', 'cursor guide', 'showCursorTrackingGuide', function () {
                 return browser.$cursorTrackingGuide;
             }, undefined);
 
-            $navigation.append($cursorTrackingGuideToggle);
+            $navigation.append(browser.$cursorTrackingGuideToggle);
 
             // one base wide center guide
             browser.centerGuide = new igv.CenterGuide($(browser.trackContainerDiv), config);
@@ -375,17 +375,18 @@ var igv = (function (igv) {
 
         }
 
-        if (false === config.showKaryo) {
-            // do nothing
-        } else {
-            $karyo = $('#igvKaryoDiv');
-            if (undefined === $karyo.get(0)) {
-                $karyo = $('<div id="igvKaryoDiv" class="igv-karyo-div">');
-                $controls.append($karyo);
-            }
-            browser.karyoPanel = new igv.KaryoPanel($karyo, config);
+        $karyo = $('#igvKaryoDiv');
+        if (undefined === $karyo.get(0)) {
+            $karyo = $('<div id="igvKaryoDiv" class="igv-karyo-div">');
+            $controls.append($karyo);
+        }
+        browser.karyoPanel = new igv.KaryoPanel($karyo, config);
 
-            $navigation.append(browser.karyoPanel.$karyoPanelToggle);
+        $navigation.append(browser.karyoPanel.$karyoPanelToggle);
+
+        if (false === config.showKaryo) {
+            browser.karyoPanel.$karyoPanelToggle.hide();
+            $karyo.hide();
         }
 
         return $controls[0];
