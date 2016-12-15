@@ -37,14 +37,15 @@ var igv = (function (igv) {
             tipCanvas;
 
         this.$container = $('<div class="igv-karyo-div">');
+        $parent.append(this.$container);
+
         if (true === config.showKaryo) {
             this.$container.show();
         } else {
             this.$container.hide();
         }
-        $parent.append(this.$container);
 
-        this.$karyoPanelToggle = igv.makeToggleButton('Karyotype', 'Karyotype', 'showKaryo', function () {
+        this.$karyoPanelToggle = igv.makeToggleButton('Karyotype Panel', 'Karyotype Panel', 'showKaryo', function () {
             return self.$container;
         }, undefined);
 

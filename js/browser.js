@@ -150,6 +150,21 @@ var igv = (function (igv) {
 
     };
 
+    igv.Browser.prototype.toggleCursorGuide = function (genomicStateList) {
+
+        if (_.size(genomicStateList) > 1 || 'all' === (_.first(genomicStateList)).locusSearchString) {
+
+            if(this.$cursorTrackingGuide.is(":visible")) {
+                this.$cursorTrackingGuideToggle.click();
+            }
+
+            this.$cursorTrackingGuideToggle.hide();
+
+        } else {
+            this.$cursorTrackingGuideToggle.show();
+        }
+    };
+
     igv.Browser.prototype.toggleCenterGuide = function (genomicStateList) {
 
         if (_.size(genomicStateList) > 1 || 'all' === (_.first(genomicStateList)).locusSearchString) {
@@ -965,6 +980,7 @@ var igv = (function (igv) {
         this.buildViewportsWithGenomicStateList(this.genomicStateList);
 
         this.toggleCenterGuide(this.genomicStateList);
+        this.toggleCursorGuide(this.genomicStateList);
 
         this.resize();
 
@@ -1034,6 +1050,7 @@ var igv = (function (igv) {
                 }
 
                 self.toggleCenterGuide(self.genomicStateList);
+                self.toggleCursorGuide(self.genomicStateList);
 
                 if (false === self.config.hideIdeogram) {
                     igv.IdeoPanel.$empty($content_header);
