@@ -956,7 +956,7 @@ var igv = (function (igv) {
             $content_header = $('#igv-content-header'),
             filtered;
 
-        if (false === this.config.hideIdeogram) {
+        if (true === this.config.showIdeogram) {
             igv.IdeoPanel.$empty($content_header);
         }
 
@@ -973,7 +973,7 @@ var igv = (function (igv) {
             return f;
         });
 
-        if (false === this.config.hideIdeogram) {
+        if (true === this.config.showIdeogram) {
             this.ideoPanel.buildPanels($content_header);
         }
 
@@ -1052,7 +1052,7 @@ var igv = (function (igv) {
                 self.toggleCenterGuide(self.genomicStateList);
                 self.toggleCursorGuide(self.genomicStateList);
 
-                if (false === self.config.hideIdeogram) {
+                if (true === self.config.showIdeogram) {
                     igv.IdeoPanel.$empty($content_header);
                     self.ideoPanel.buildPanels($content_header);
                 }

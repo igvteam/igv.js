@@ -138,7 +138,7 @@ var igv = (function (igv) {
                         igv.browser.karyoPanel.resize();
                     }
 
-                    if (false === config.hideIdeogram) {
+                    if (true === config.showIdeogram) {
                         igv.browser.ideoPanel = new igv.IdeoPanel($header);
                         igv.browser.ideoPanel.repaint();
                     }
@@ -403,29 +403,60 @@ var igv = (function (igv) {
 
     function setDefaults(config) {
 
-        config.hideIdeogram = config.hideIdeogram || false;
+        if (undefined === config.showIdeogram) {
+            config.showIdeogram = true;
+        }
 
-        config.showCursorTrackingGuide = config.showCursorTrackingGuide || false;
-        config.showCenterGuide = config.showCenterGuide || false;
+        if (undefined === config.showCursorTrackingGuide) {
+            config.showCursorTrackingGuide = false;
+        }
 
-        config.showKaryo = config.showKaryo || false;
+        if (undefined === config.showCenterGuide) {
+            config.showCenterGuide = false;
+        }
 
-        if (config.trackLabelsVisible === undefined) config.trackLabelsVisible = true;
-        if (config.showControls === undefined) config.showControls = true;
+        if (undefined === config.showKaryo) {
+            config.showKaryo = false;
+        }
 
-        if (config.showNavigation === undefined) config.showNavigation = true;
-        if (config.showRuler === undefined) config.showRuler = true;
-        if (config.showSequence === undefined) config.showSequence = true;
-        if (config.flanking === undefined) config.flanking = 1000;
-        if (config.pairsSupported === undefined) config.pairsSupported = true;
-        if (config.type === undefined) config.type = "IGV";
+        if (undefined === config.trackLabelsVisible) {
+            config.trackLabelsVisible = true;
+        }
+
+        if (config.showControls === undefined) {
+            config.showControls = true;
+        }
+
+        if (config.showNavigation === undefined) {
+            config.showNavigation = true;
+        }
+
+        if (config.showRuler === undefined) {
+            config.showRuler = true;
+        }
+
+        if (config.showSequence === undefined) {
+            config.showSequence = true;
+        }
+
+        if (config.flanking === undefined) {
+            config.flanking = 1000;
+        }
+        if (config.pairsSupported === undefined) {
+            config.pairsSupported = true;
+        }
+
+        if (config.type === undefined) {
+            config.type = "IGV";
+        }
 
         if (!config.tracks) {
             config.tracks = [];
         }
+
         if (config.showSequence) {
             config.tracks.push({type: "sequence", order: -9999});
-        }  // Sequence track
+        }
 
     }
 
