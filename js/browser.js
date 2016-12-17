@@ -25,7 +25,7 @@
 
 var igv = (function (igv) {
 
-    var knownFileTypes = new Set(["narrowpeak", "broadpeak", "peaks", "bedgraph", "wig", "gff3", "gff",
+    var knownFileExtensions = new Set(["narrowpeak", "broadpeak", "peaks", "bedgraph", "wig", "gff3", "gff",
         "gtf", "aneu", "fusionjuncspan", "refflat", "seg", "bed", "vcf", "bb", "bigbed", "bw", "bigwig", "bam", "tdf"]);
 
     igv.Browser = function (options, trackContainerDiv) {
@@ -374,7 +374,7 @@ var igv = (function (igv) {
                         config.format = "bigbed";
 
                     default:
-                        if (knownFileTypes.has(ext)) {
+                        if (knownFileExtensions.has(ext)) {
                             config.format = ext;
                         }
                 }
