@@ -128,7 +128,7 @@ var igv = (function (igv) {
         });
 
 
-        function decodeBamRecords(ba, offset, alignments, min, max, chrId, filter) {
+        function decodeBamRecords(ba, offset, alignmentContainer, min, max, chrId, filter) {
 
             var blockSize,
                 blockEnd,
@@ -170,8 +170,15 @@ var igv = (function (igv) {
                 refID = readInt(ba, offset + 4);
                 pos = readInt(ba, offset + 8);
 
-                if (refID > chrId || pos > max) return;  // We've gone off the right edge => we're done
-                else if (refID < chrId) continue;    // Not sure this is possible
+                if(refID < 0) {
+                    return;   // unmapped reads
+                }
+                else if (refID > chrId || pos > max) {
+                    return;    // off right edge, we're done
+                }
+                else if (refID < chrId) {
+                    continue;   // to left of start, not sure this is possible
+                }
 
                 bmn = readInt(ba, offset + 12);
                 bin = (bmn & 0xffff0000) >> 16;
@@ -269,7 +276,7 @@ var igv = (function (igv) {
                         blocks = makeBlocks(alignment, cigarArray);
                         alignment.blocks = blocks.blocks;
                         alignment.insertions = blocks.insertions;
-                        alignments.push(alignment);
+                        alignmentContainer.push(alignment);
                     }
                 }
                 offset = blockEnd;

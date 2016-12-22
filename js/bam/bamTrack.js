@@ -30,10 +30,14 @@ var igv = (function (igv) {
     var alignmentStartGap = 5;
     var downsampleRowHeight = 5;
     const DEFAULT_COVERAGE_TRACK_HEIGHT = 50;
+    const DEFAULT_TRACK_HEIGHT = 300;
 
     igv.BAMTrack = function (config) {
 
         this.featureSource = new igv.BamSource(config);
+
+        // Override default track height for bams
+        if(config.height === undefined) config.height = DEFAULT_TRACK_HEIGHT;
 
         igv.configTrack(this, config);
 
