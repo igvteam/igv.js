@@ -27,6 +27,10 @@ module.exports = function (grunt) {
                     'vendor/underscore-min.js'
                 ],
                 dest: 'dist/igv.js'
+            },
+            css: {
+                src: 'css/*.css',
+                dest: 'dist/igv.css'
             }
         },
 
@@ -40,6 +44,33 @@ module.exports = function (grunt) {
                 src: 'dist/igv.js',
                 dest: 'dist/igv.min.js'
             }
+        },
+
+        copy: {
+            img: {
+                expand: true,
+                cwd: 'css/img',
+                src: '**',
+                dest: 'dist/img/'
+            }
+        },
+
+        cssmin: {
+            igv: {
+                files: {
+                    'dist/igv.min.css': [ 'css/igv.css', 'css/igv-gtex.css', 'css/opentip.css' ]
+                }
+            },
+
+            'minify-separately': {
+                files: [{
+                    expand: true,
+                    cwd: 'dist',
+                    src: ['*.css', '!*.min.css'],
+                    dest: 'dist',
+                    ext: '.min.css'
+                }]
+            }
         }
 
     });
@@ -50,11 +81,13 @@ module.exports = function (grunt) {
     grunt.loadNpmTasks('grunt-contrib-cssmin');
     grunt.loadNpmTasks('grunt-contrib-qunit');
     grunt.loadNpmTasks('grunt-contrib-connect');
+    grunt.loadNpmTasks('grunt-contrib-copy');
 
     // 4. Where we tell Grunt what to do when we type "grunt" into the terminal.
     //grunt.registerTask('default', ['concat:igvexp', 'uglify:igvexp']);
     //grunt.registerTask('default', ['concat:igv', 'uglify:igv', 'md2html:igv']);
-    grunt.registerTask('default', ['concat:igv', 'uglify:igv']);
+    //grunt.registerTask('default', ['concat:igv', 'uglify:igv']);
+    grunt.registerTask('default', ['concat:igv', 'uglify:igv', 'concat:css', 'cssmin:igv', 'copy:img']);
 
     grunt.task.registerTask('unittest', 'Run one unit test.', function (testname) {
 
