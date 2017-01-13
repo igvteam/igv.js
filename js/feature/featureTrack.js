@@ -277,7 +277,7 @@ var igv = (function (igv) {
             };
         });
 
-        menuItems.concat(mapped);
+        menuItems = menuItems.concat(mapped);
 
         function markupStringified(displayMode, index, selfDisplayMode) {
 
