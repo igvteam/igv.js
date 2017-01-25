@@ -105,6 +105,11 @@ var igv = (function (igv) {
             });
 
             this.$viewport.append($trackLabel);
+
+            if (igv.browser.$trackLabelToggle.hasClass('igv-nav-bar-toggle-button-on')) {
+                $trackLabel.hide();
+            }
+
         }
 
         this.addMouseHandlers();

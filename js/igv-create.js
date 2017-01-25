@@ -284,8 +284,7 @@ var igv = (function (igv) {
             $karyo,
             $navigation,
             $searchContainer,
-            $faSearch,
-            $trackLabelToggle;
+            $faSearch;
 
         $controls = $('<div id="igvControlDiv">');
 
@@ -367,11 +366,11 @@ var igv = (function (igv) {
             $navigation.append(browser.centerGuide.$centerGuideToggle);
 
             // toggle track labels
-            $trackLabelToggle = igv.makeToggleButton('track labels', 'track labels', 'trackLabelsVisible', function () {
+            browser.$trackLabelToggle = igv.makeToggleButton('track labels', 'track labels', 'trackLabelsVisible', function () {
                 return $(browser.trackContainerDiv).find('.igv-track-label');
             }, undefined);
 
-            $navigation.append($trackLabelToggle);
+            $navigation.append(browser.$trackLabelToggle);
 
         }
 
