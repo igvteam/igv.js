@@ -331,7 +331,8 @@ var igv = (function (igv) {
             // window size panel
             browser.windowSizePanel = new igv.WindowSizePanel($navigation);
 
-            // file upload
+
+            // // file upload
             // browser.fileUpload = new igv.FileUpload();
             // $navigation.append(browser.fileUpload.$container);
 
