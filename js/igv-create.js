@@ -332,8 +332,8 @@ var igv = (function (igv) {
             browser.windowSizePanel = new igv.WindowSizePanel($navigation);
 
             // file upload
-            browser.fileUpload = new igv.FileUpload();
-            $navigation.append(browser.fileUpload.$container);
+            // browser.fileUpload = new igv.FileUpload();
+            // $navigation.append(browser.fileUpload.$container);
 
 
             // zoom
