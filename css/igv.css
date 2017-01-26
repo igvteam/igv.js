@@ -618,7 +618,7 @@ div.ui-dialog fieldset {
 
 }
 
-.igvNavigationSearch {
+.igv-search-container {
     position: relative;
     top: 0;
     width: 260px;
@@ -626,7 +626,7 @@ div.ui-dialog fieldset {
     float: left;
 }
 
-.igvNavigationSearchInput {
+.igv-search-input {
 
     position: relative;
 
@@ -650,7 +650,7 @@ div.ui-dialog fieldset {
 
 }
 
-.igvNavigationSearchResults {
+.igv-search-results {
 
     position: absolute;
     top: 32px;
@@ -671,20 +671,20 @@ div.ui-dialog fieldset {
     z-index: 9999;
 }
 
-.igvNavigationSearchResultsTable {
+.igv-search-results-table {
 
 }
 
-.igvNavigationSearchResultsTableRow {
+.igv-search-results-table-row {
     font-family: 'Open Sans', sans-serif;
     font-size: small;
     font-weight: 400;
     color: #444;
 }
 
-.igvNavigationSearchResultsTableRow:hover,
-.igvNavigationSearchResultsTableRow:focus,
-.igvNavigationSearchResultsTableRow:active  {
+.igv-search-results-table-row:hover,
+.igv-search-results-table-row:focus,
+.igv-search-results-table-row:active  {
     cursor: pointer;
     font-weight: 700;
     color: #141414;
@@ -700,6 +700,16 @@ div.ui-dialog fieldset {
 .igv-fa-search:active  {
     color: #434343;
 }
+
+.igv-file-upload-container {
+    position: relative;
+    padding-left: 32px;
+    padding-top: 4px;
+    top: 0;
+    float: left;
+    display: block;
+}
+
 
 .shim-right-4 {
     padding-right: 4px;
