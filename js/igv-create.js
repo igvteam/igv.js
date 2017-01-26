@@ -293,11 +293,14 @@ var igv = (function (igv) {
             $navigation = $('<div class="igvNavigation">');
             $controls.append($navigation);
 
+            // IGV logo
             $igvLogo = $('<div class="igv-logo">');
+            $navigation.append($igvLogo);
 
-            $searchContainer = $('<div class="igvNavigationSearch">');
+            // search container
+            $searchContainer = $('<div class="igv-search-container">');
 
-            browser.$searchInput = $('<input class="igvNavigationSearchInput" type="text" placeholder="Locus Search">');
+            browser.$searchInput = $('<input class="igv-search-input" type="text" placeholder="Locus Search">');
 
             browser.$searchInput.change(function (e) {
                 browser.parseSearchInput( $(e.target).val() );
@@ -312,22 +315,28 @@ var igv = (function (igv) {
             $searchContainer.append(browser.$searchInput);
             $searchContainer.append($faSearch);
 
-            $navigation.append($igvLogo);
-            $navigation.append($searchContainer);
-
             // search results presented in table
-            browser.$searchResults = $('<div class="igvNavigationSearchResults">');
-            browser.$searchResultsTable = $('<table class="igvNavigationSearchResultsTable">');
+            browser.$searchResults = $('<div class="igv-search-results">');
+            browser.$searchResultsTable = $('<table class="igv-search-results-table">');
 
-            browser.$searchResults.append(browser.$searchResultsTable[0]);
+            browser.$searchResults.append(browser.$searchResultsTable.get(0));
 
-            $searchContainer.append(browser.$searchResults[0]);
+            $searchContainer.append(browser.$searchResults.get(0));
 
             browser.$searchResults.hide();
+
+            $navigation.append($searchContainer);
+
 
             // window size panel
             browser.windowSizePanel = new igv.WindowSizePanel($navigation);
 
+            // file upload
+            browser.fileUpload = new igv.FileUpload();
+            $navigation.append(browser.fileUpload.$container);
+
+
+            // zoom
             browser.zoomHandlers = {
                 in: {
                     click: function (e) {
@@ -343,6 +352,9 @@ var igv = (function (igv) {
 
             browser.$zoomContainer = zoomWidget();
             $navigation.append(browser.$zoomContainer);
+
+
+
 
             // cursor tracking guide
             browser.$cursorTrackingGuide = $('<div class="igv-cursor-tracking-guide">');

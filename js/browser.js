@@ -1749,7 +1749,7 @@ var igv = (function (igv) {
 
         loci.forEach(function (locus) {
 
-            var row = $('<tr class="igvNavigationSearchResultsTableRow">');
+            var row = $('<tr class="igv-search-results-table-row">');
             row.text(locus.locusString);
 
             row.click(function () {
