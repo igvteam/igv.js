@@ -28,40 +28,35 @@
  * Created by dat on 1/25/17.
  */
 
-/*
-<span class="btn btn-success fileinput-button">
-    <i class="glyphicon glyphicon-plus">
-    </i>
-    <span>
-    Select files...
-</span>
-<!-- The file input field used as target for the file upload widget -->
-<input id="fileupload" type="file" name="files[]" multiple="">
-    </span>
-*/
-
 var igv = (function (igv) {
 
     igv.FileUpload = function () {
-        var $containerSpan,
-            $glyph,
-            $span,
-            $input;
+        var $container,
+            $input,
+            $label,
+            $fa,
+            $span;
 
-        this.$container = $('<div class="igv-file-upload-container">');
+        // container
+        $container = $('<div class="igv-file-upload-container">');
 
-        $containerSpan = $('<span class="btn btn-success fileinput-button">');
-        this.$container.append($containerSpan);
+        $input = $('<input type="file" name="file-1[]" class="inputfile inputfile-1" data-multiple-caption="{count} files selected" multiple />');
+        $input.attr('id', 'file-1');
 
-        $glyph = $('<span class="glyphicon glyphicon-plus">');
-        $containerSpan.append($glyph);
 
-        $span = $('<span class="glyphicon glyphicon-plus">');
-        $span.text('Select files...');
-        $containerSpan.append($span);
+        $label = $('<label for="file-1">');
+        $fa = $('<i class="fa fa-upload" aria-hidden="true">');
+        $span = $('<span>');
+        $span.html('Choose a file&hellip;');
 
-        $input = $('<input id="fileupload" type="file" name="files[]" multiple="">');
-        $containerSpan.append($input);
+        $label.append($fa);
+        $label.append($span);
+
+        $container.append($input);
+        $container.append($label);
+
+        this.$container = $container;
+
     };
 
     return igv;
