@@ -37,6 +37,21 @@ var igv = (function (igv) {
             $fa,
             $span;
 
+
+        // $('html').addClass('no-js');
+        //
+        // (function(e,t,n){
+        //     var r = e.querySelectorAll("html")[0];
+        //     r.className = r.className.replace(/(^|\s)no-js(\s|$)/,"$1js$2");
+        // })(document, window, 0);
+
+        $('#myDiv').addClass('no-js');
+
+        (function(e,t,n){
+            var r = e.querySelector('#myDiv');
+            r.className = r.className.replace(/(^|\s)no-js(\s|$)/,"$1js$2");
+        })(document, window, 0);
+
         // container
         $container = $('<div class="igv-file-upload-container">');
 
