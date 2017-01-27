@@ -62,6 +62,9 @@ var igv = (function (igv) {
 
         setControls(browser, config);
 
+
+        // HACK HACK HACK HACK HACK HACK HACK HACK HACK HACK HACK HACK
+
         $content = $('<div class="igv-content-div">');
         browser.$root.append($content);
 
@@ -401,7 +404,7 @@ var igv = (function (igv) {
             $karyo.hide();
         }
 
-        return $controls[0];
+        return $controls.get(0);
     }
 
     function zoomWidget() {
