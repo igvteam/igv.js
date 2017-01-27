@@ -39,7 +39,8 @@ var igv = (function (igv) {
 
         var $content,
             $header,
-            browser;
+            browser,
+            fileUpload;
 
         if (igv.browser) {
             //console.log("Attempt to create 2 browsers.");
@@ -63,7 +64,35 @@ var igv = (function (igv) {
         setControls(browser, config);
 
 
+
+
+
+
+
+
+
+
+
         // HACK HACK HACK HACK HACK HACK HACK HACK HACK HACK HACK HACK
+        // file upload
+        fileUpload = new igv.FileUpload();
+        browser.$root.append(fileUpload.$container);
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
         $content = $('<div class="igv-content-div">');
         browser.$root.append($content);
