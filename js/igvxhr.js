@@ -165,7 +165,7 @@ var igvxhr = (function (igvxhr) {
                 }
             }
         });
-    }
+    };
 
     igvxhr.loadArrayBuffer = function (url, options) {
 
@@ -192,7 +192,7 @@ var igvxhr = (function (igvxhr) {
                     }
                 }).catch(reject);
         })
-    }
+    };
 
     /**
      * Load a "raw" string.
@@ -274,7 +274,7 @@ var igvxhr = (function (igvxhr) {
             fileReader.readAsArrayBuffer(localfile);
 
         });
-    }
+    };
 
     function isCrossDomain(url) {
 
@@ -309,7 +309,7 @@ var igvxhr = (function (igvxhr) {
 
     igv.AbortLoad = function () {
 
-    }
+    };
 
     return igvxhr;
 

@@ -35,7 +35,10 @@ var igv = (function (igv) {
             $input,
             $label,
             $fa,
-            $span;
+            $span,
+            input,
+            label,
+            labelVal;
 
 
         // $('html').addClass('no-js');
@@ -69,6 +72,38 @@ var igv = (function (igv) {
 
         $container.append($input);
         $container.append($label);
+
+        input = $input.get(0);
+        label = $label.get(0);
+        labelVal = label.innerHTML;
+        input.addEventListener( 'change', function( e ) {
+            var fileName = '';
+            if( /*this.files && this.files.length > 1*/ _.size(this.files) > 1) {
+                fileName = ( this.getAttribute('data-multiple-caption') || '' ).replace('{count}', this.files.length);
+            } else {
+                fileName = e.target.value.split('\\').pop();
+            }
+
+            if( fileName ) {
+                label.querySelector('span').innerHTML = fileName;
+                igvxhr.loadStringFromFile(fileName, undefined).then(success);
+
+                function success (data) {
+                    console.log('igv.FileUpload. Data loaded');
+
+                    // self.header = parser.parseHeader(data);
+                    // var features = parser.parseFeatures(data);
+
+                    //console.log("Calling success "+success);
+                    //console.log("nr features in argument "+features.length);
+
+                    // continuation(features);   // <= PARSING DONE HERE
+                }
+
+            } else {
+                label.innerHTML = labelVal;
+            }
+        });
 
         this.$container = $container;
 
