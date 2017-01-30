@@ -77,32 +77,26 @@ var igv = (function (igv) {
         label = $label.get(0);
         labelVal = label.innerHTML;
         input.addEventListener( 'change', function( e ) {
-            var fileName = '';
-            if( /*this.files && this.files.length > 1*/ _.size(this.files) > 1) {
-                fileName = ( this.getAttribute('data-multiple-caption') || '' ).replace('{count}', this.files.length);
-            } else {
-                fileName = e.target.value.split('\\').pop();
-            }
+
+            var fileName,
+                localFile;
+
+            fileName = e.target.value.split('\\').pop();
 
             if( fileName ) {
                 label.querySelector('span').innerHTML = fileName;
-                igvxhr.loadStringFromFile(fileName, undefined).then(success);
-
-                function success (data) {
-                    console.log('igv.FileUpload. Data loaded');
-
-                    // self.header = parser.parseHeader(data);
-                    // var features = parser.parseFeatures(data);
-
-                    //console.log("Calling success "+success);
-                    //console.log("nr features in argument "+features.length);
-
-                    // continuation(features);   // <= PARSING DONE HERE
-                }
-
             } else {
                 label.innerHTML = labelVal;
             }
+
+            // localFile = $(this)[ 0 ].files[ 0 ];
+            localFile = _.first($(this).get(0).files);
+            configureTrackWithLocalFileOrPath( { type: "bed", localFile: localFile} );
+
+            function configureTrackWithLocalFileOrPath(config) {
+                igv.browser.loadTracksWithConfigList([config]);
+            }
+
         });
 
         this.$container = $container;

@@ -190,7 +190,6 @@ var igv = (function (igv) {
         var self = this,
             loadedTracks = [];
 
-
         _.each(configList, function (config) {
             loadedTracks.push(self.loadTrack(config));
         });

@@ -702,18 +702,10 @@ div.ui-dialog fieldset {
 }
 
 .igv-file-upload-container {
-
-    position: absolute;
-
-    top: 64px;
-    left: 256px;
-
-    width: 768px;
-    height: 512px;
-
-    z-index:1024;
-
-    background-color: greenyellow;
+    position: relative;
+    top: 0;
+    width: 160px;
+    float: left;
 }
 
 /* begin begin begin begin begin begin begin begin begin begin begin begin begin begin begin begin begin begin begin begin begin */
@@ -737,16 +729,11 @@ div.ui-dialog fieldset {
     display: inline-block;
     overflow: hidden;
     padding: 0.625rem 1.25rem;
-    /* 10px 20px */
 }
 
 .no-js .inputfile + label {
     display: none;
 }
-
-/*.no-js .inputfile + label {*/
-/*display: none;*/
-/*}*/
 
 .inputfile:focus + label,
 .inputfile.has-focus + label {
