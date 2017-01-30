@@ -75,8 +75,8 @@ var igv = (function (igv) {
 
         // HACK HACK HACK HACK HACK HACK HACK HACK HACK HACK HACK HACK
         // file upload
-        fileUpload = new igv.FileUpload();
-        browser.$root.append(fileUpload.$container);
+        // fileUpload = new igv.FileUpload();
+        // browser.$root.append(fileUpload.$container);
 
 
 
@@ -365,8 +365,8 @@ var igv = (function (igv) {
 
 
             // // file upload
-            // browser.fileUpload = new igv.FileUpload();
-            // $navigation.append(browser.fileUpload.$container);
+            browser.fileUpload = new igv.FileUpload();
+            $navigation.append(browser.fileUpload.$container);
 
 
             // zoom
