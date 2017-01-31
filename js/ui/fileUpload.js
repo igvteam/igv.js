@@ -58,7 +58,7 @@ var igv = (function (igv) {
         // container
         $container = $('<div class="igv-file-upload-container">');
 
-        $input = $('<input type="file" name="file-1[]" class="inputfile inputfile-1" data-multiple-caption="{count} files selected" multiple />');
+        $input = $('<input type="file" name="file-1[]" class="igv-file-upload-input" data-multiple-caption="{count} files selected" multiple />');
         $input.attr('id', 'file-1');
 
 
@@ -91,7 +91,7 @@ var igv = (function (igv) {
 
             // localFile = $(this)[ 0 ].files[ 0 ];
             localFile = _.first($(this).get(0).files);
-            configureTrackWithLocalFileOrPath( { type: "bed", localFile: localFile} );
+            configureTrackWithLocalFileOrPath( { /*type: "bed",*/ localFile: localFile} );
 
             function configureTrackWithLocalFileOrPath(config) {
                 igv.browser.loadTracksWithConfigList([config]);

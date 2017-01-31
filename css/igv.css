@@ -701,15 +701,35 @@ div.ui-dialog fieldset {
     color: #434343;
 }
 
+
+/* begin begin begin begin begin begin begin begin begin begin begin begin begin begin begin begin begin begin begin begin begin */
 .igv-file-upload-container {
     position: relative;
     top: 0;
     width: 160px;
     float: left;
+
+    cursor: pointer;
+
 }
 
-/* begin begin begin begin begin begin begin begin begin begin begin begin begin begin begin begin begin begin begin begin begin */
-.js .inputfile {
+.igv-file-upload-container i {
+    display: block;
+    float: left;
+    padding-left: 4px;
+    padding-right: 4px;
+    padding-top: 4px;
+}
+
+.igv-file-upload-container span {
+    display: block;
+    float: left;
+    padding-left: 4px;
+    padding-right: 4px;
+    padding-top: 4px;
+}
+
+.js .igv-file-upload-input {
     width: 0.1px;
     height: 0.1px;
     opacity: 0;
@@ -718,38 +738,47 @@ div.ui-dialog fieldset {
     z-index: -1;
 }
 
-.inputfile + label {
-    max-width: 80%;
-    font-size: 1.25rem;
-    /* 20px */
-    font-weight: 700;
+.igv-file-upload-input + label {
+
+    width: 100%;
+    height: 100%;
+
+    color: #ffffff;
+
+    /*margin-top: 2px;*/
+    /*margin-bottom: 2px;*/
+    margin-left: 5px;
+    margin-right: 5px;
+
+    padding-left: 8px;
+    padding-right: 8px;
+    padding-top: 2px;
+    padding-bottom: 2px;
+
+    font-family: 'Open Sans', sans-serif;
+    font-size: 14px;
+    font-weight: 200;
+
     text-overflow: ellipsis;
     white-space: nowrap;
-    cursor: pointer;
     display: inline-block;
     overflow: hidden;
-    padding: 0.625rem 1.25rem;
+
+    background-color: #27aae0;
+
 }
 
-.no-js .inputfile + label {
+.no-js .igv-file-upload-input + label {
     display: none;
 }
 
-.inputfile:focus + label,
-.inputfile.has-focus + label {
-    outline: 1px dotted #000;
-    outline: -webkit-focus-ring-color auto 5px;
+.igv-file-upload-input:focus     + label,
+.igv-file-upload-input.has-focus + label {
+    background-color: #006eb8;
 }
 
-.inputfile-1 + label {
-    color: #f1e5e6;
-    background-color: #d3394c;
-}
-
-.inputfile-1:focus + label,
-.inputfile-1.has-focus + label,
-.inputfile-1 + label:hover {
-    background-color: #722040;
+.igv-file-upload-input + label:hover {
+    background-color: #006eb8;
 }
 
 /* end end end end end end end end end end end end end end end end end end end end end */
