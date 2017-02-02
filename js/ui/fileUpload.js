@@ -40,19 +40,11 @@ var igv = (function (igv) {
             label,
             labelVal;
 
-
-        // $('html').addClass('no-js');
-        //
-        // (function(e,t,n){
-        //     var r = e.querySelectorAll("html")[0];
-        //     r.className = r.className.replace(/(^|\s)no-js(\s|$)/,"$1js$2");
-        // })(document, window, 0);
-
-        $('#myDiv').addClass('no-js');
+        $('#myDiv').addClass('igv-file-upload-no-js');
 
         (function(e,t,n){
             var r = e.querySelector('#myDiv');
-            r.className = r.className.replace(/(^|\s)no-js(\s|$)/,"$1js$2");
+            r.className = r.className.replace(/(^|\s)igv-file-upload-no-js(\s|$)/,"$1igv-file-upload-js$2");
         })(document, window, 0);
 
         // container
@@ -100,6 +92,12 @@ var igv = (function (igv) {
         });
 
         this.$container = $container;
+
+    };
+
+    igv.FileUpload.prototype.makeFileUploadDialog = function() {
+
+        return rowContainer;
 
     };
 

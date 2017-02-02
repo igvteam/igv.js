@@ -731,7 +731,7 @@ div.ui-dialog fieldset {
     cursor: pointer;
 }
 
-.js .igv-file-upload-input {
+.igv-file-upload-js .igv-file-upload-input {
     width: 0.1px;
     height: 0.1px;
     opacity: 0;
@@ -771,7 +771,7 @@ div.ui-dialog fieldset {
 
 }
 
-.no-js .igv-file-upload-input + label {
+.igv-file-upload-no-js .igv-file-upload-input + label {
     display: none;
 }
 
