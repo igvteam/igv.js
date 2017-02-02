@@ -65,7 +65,7 @@ var igv = (function (igv) {
         $label = $('<label for="file-1">');
         $fa = $('<i class="fa fa-upload" aria-hidden="true">');
         $span = $('<span>');
-        $span.html('Choose a file&hellip;');
+        $span.html('Upload a File &hellip;');
 
         $label.append($fa);
         $label.append($span);
