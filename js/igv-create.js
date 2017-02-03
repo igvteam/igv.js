@@ -78,6 +78,8 @@ var igv = (function (igv) {
         dragAndDrop = new igv.DragAndDrop();
         browser.$root.append(dragAndDrop.$container);
 
+        dragAndDrop.initializationHelper();
+
 
 
 
