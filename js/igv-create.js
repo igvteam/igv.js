@@ -40,7 +40,7 @@ var igv = (function (igv) {
         var $content,
             $header,
             browser,
-            fileUpload;
+            dragAndDrop;
 
         if (igv.browser) {
             //console.log("Attempt to create 2 browsers.");
@@ -73,10 +73,10 @@ var igv = (function (igv) {
 
 
 
-        // HACK HACK HACK HACK HACK HACK HACK HACK HACK HACK HACK HACK
-        // file upload
-        // fileUpload = new igv.FileUpload();
-        // browser.$root.append(fileUpload.$container);
+        // TEST TEST TEST TEST TEST TEST TEST TEST
+        // drag & drop
+        dragAndDrop = new igv.DragAndDrop();
+        browser.$root.append(dragAndDrop.$container);
 
 
 
@@ -365,8 +365,8 @@ var igv = (function (igv) {
 
 
             // // file upload
-            browser.fileUpload = new igv.FileUpload();
-            $navigation.append(browser.fileUpload.$container);
+            // browser.fileUpload = new igv.FileUpload();
+            // $navigation.append(browser.fileUpload.$container);
 
 
             // zoom
