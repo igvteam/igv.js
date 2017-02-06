@@ -6,93 +6,42 @@
 	text-align: center;
 	margin: 0 auto;
 
-	/* HACK */
 	z-index: 2000;
 }
 
-.igv-drag-and-drop-container h1 {
-	font-size: 42px;
-	font-weight: 300;
-	color: #0f3c4b;
-	margin-bottom: 40px;
-}
+.box {
+    position: relative;
 
-.igv-drag-and-drop-container h1 a:hover,
-.igv-drag-and-drop-container h1 a:focus
-{
-	color: #39bfd3;
-}
+    color: #36464b;
+    font-family: 'Open Sans', sans-serif;
+    font-size: 20px;
+    font-weight: 200;
 
-.igv-drag-and-drop-container nav
-{
-	margin-bottom: 40px;
-}
-.igv-drag-and-drop-container nav a
-{
-	border-bottom: 2px solid #c8dadf;
-	display: inline-block;
-	padding: 4px 8px;
-	margin: 0 5px;
-}
-.igv-drag-and-drop-container nav a.is-selected
-{
-	font-weight: 700;
-	color: #39bfd3;
-	border-bottom-color: currentColor;
-}
-.igv-drag-and-drop-container nav a:not( .is-selected ):hover,
-.igv-drag-and-drop-container nav a:not( .is-selected ):focus
-{
-	border-bottom-color: #0f3c4b;
-}
-
-.igv-drag-and-drop-container footer
-{
-	color: #92b0b3;
-	margin-top: 40px;
-}
-.igv-drag-and-drop-container footer p + p
-{
-	margin-top: 1em;
-}
-.igv-drag-and-drop-container footer a:hover,
-.igv-drag-and-drop-container footer a:focus
-{
-	color: #39bfd3;
-}
-
-.box
-{
-	font-size: 1.25rem; /* 20 */
-	background-color: #c8dadf;
-	position: relative;
 	padding: 100px 20px;
-}
-.box.has-advanced-upload
-{
+
 	outline: 2px dashed #92b0b3;
+
 	outline-offset: -10px;
 
-	-webkit-transition: outline-offset .15s ease-in-out, background-color .15s linear;
-	transition: outline-offset .15s ease-in-out, background-color .15s linear;
+    background-color: #c8dadf;
 }
-.box.is-dragover
-{
+
+.box.is-dragover {
 	outline-offset: -20px;
 	outline-color: #c8dadf;
 	background-color: #fff;
 }
+
 .box__dragndrop,
-.box__icon
-{
+.box__icon {
 	display: none;
 }
-.box.has-advanced-upload .box__dragndrop
-{
+
+.box .box__dragndrop {
 	display: inline;
 }
-.box.has-advanced-upload .box__icon
-{
+
+.box .box__icon {
 	width: 100%;
 	height: 80px;
 	fill: #92b0b3;
@@ -102,21 +51,19 @@
 
 .box.is-uploading .box__input,
 .box.is-success .box__input,
-.box.is-error .box__input
-{
+.box.is-error .box__input {
 	visibility: hidden;
 }
 
 .box__uploading,
 .box__success,
-.box__error
-{
+.box__error {
 	display: none;
 }
+
 .box.is-uploading .box__uploading,
 .box.is-success .box__success,
-.box.is-error .box__error
-{
+.box.is-error .box__error {
 	display: block;
 	position: absolute;
 	top: 50%;
@@ -126,40 +73,26 @@
 	-webkit-transform: translateY( -50% );
 	transform: translateY( -50% );
 }
-.box__uploading
-{
+
+.box__uploading {
 	font-style: italic;
 }
-.box__success
-{
+
+.box__success {
 	-webkit-animation: appear-from-inside .25s ease-in-out;
 	animation: appear-from-inside .25s ease-in-out;
 }
-@-webkit-keyframes appear-from-inside
-{
-	from	{ -webkit-transform: translateY( -50% ) scale( 0 ); }
-	75%		{ -webkit-transform: translateY( -50% ) scale( 1.1 ); }
-	to		{ -webkit-transform: translateY( -50% ) scale( 1 ); }
-}
-@keyframes appear-from-inside
-{
-	from	{ transform: translateY( -50% ) scale( 0 ); }
-	75%		{ transform: translateY( -50% ) scale( 1.1 ); }
-	to		{ transform: translateY( -50% ) scale( 1 ); }
-}
 
-.box__restart
-{
+.box__restart {
 	font-weight: 700;
 }
+
 .box__restart:focus,
-.box__restart:hover
-{
+.box__restart:hover {
 	color: #39bfd3;
 }
 
-.js .box__file
-{
+.js .box__file {
 	width: 0.1px;
 	height: 0.1px;
 	opacity: 0;
@@ -167,8 +100,8 @@
 	position: absolute;
 	z-index: -1;
 }
-.js .box__file + label
-{
+
+.js .box__file + label {
 	max-width: 80%;
 	text-overflow: ellipsis;
 	white-space: nowrap;
@@ -176,43 +109,51 @@
 	display: inline-block;
 	overflow: hidden;
 }
+
 .js .box__file + label:hover strong,
 .box__file:focus + label strong,
-.box__file.has-focus + label strong
-{
+.box__file.has-focus + label strong {
 	color: #39bfd3;
 }
+
 .js .box__file:focus + label,
-.js .box__file.has-focus + label
-{
+.js .box__file.has-focus + label {
 	outline: 1px dotted #000;
 	outline: -webkit-focus-ring-color auto 5px;
 }
-.js .box__file + label *
-{
-	/* pointer-events: none; */ /* in case of FastClick lib use */
-}
 
-.no-js .box__file + label
-{
+.no-js .box__file + label {
 	display: none;
 }
 
-.no-js .box__button
-{
+.no-js .box__button {
 	display: block;
 }
-.box__button
-{
-	font-weight: 700;
+
+.box__button {
+
+    border: none;
+
+    font-size: 16px;
+    font-weight: 700;
 	color: #e5edf1;
-	background-color: #39bfd3;
+
 	display: block;
+
 	padding: 8px 16px;
 	margin: 40px auto 0;
+
+    background-color: #39bfd3;
 }
+
 .box__button:hover,
-.box__button:focus
-{
+.box__button:focus {
 	background-color: #0f3c4b;
+}
+
+.fa-container {
+    position: relative;
+    color: #92b0b3;
+    padding-bottom: 2px;
+
 }
