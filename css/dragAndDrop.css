@@ -1,6 +1,8 @@
 .igv-drag-and-drop-container {
-	width: 100%;
-	max-width: 680px; /* 800 */
+    position: absolute;
+	top: 10%;
+	left: 25%;
+	width: 50%;
 	text-align: center;
 	margin: 0 auto;
 
