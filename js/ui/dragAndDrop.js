@@ -33,16 +33,22 @@ var igv = (function (igv) {
 
         var $box_input,
             $box,
+            $fa_container,
+            $fa,
             $input,
             $label,
             $button,
             $e;
 
+        $fa_container = $('<div class="fa-container">');
+        $fa = $('<i class="fa fa-upload fa-3x" aria-hidden="true">');
+        $fa_container.append($fa);
+
         $input = $('<input type="file" name="files[]" id="file" class="box__file" data-multiple-caption="{count} files selected" multiple="">');
 
         $label = $('<label for="file">');
         $e = $('<strong>');
-        $e.text('Choose a file');
+        $e.text('Choose a track file');
         $label.append($e);
 
         $e = $('<span class="box__dragndrop">');
@@ -50,14 +56,15 @@ var igv = (function (igv) {
         $label.append($e);
 
         $button = $('<button type="button" class="box__button">');
-        $button.text('Upload');
+        $button.text('Load Track');
 
         $box_input = $('<div class="box__input">');
+        $box_input.append($fa_container);
         $box_input.append($input);
         $box_input.append($label);
         $box_input.append($button);
 
-        $box = $('<div class="js box has-advanced-upload">');
+        $box = $('<div class="js box">');
         $box.append($box_input);
 
         this.$container = $('<div class="igv-drag-and-drop-container">');
@@ -70,19 +77,42 @@ var igv = (function (igv) {
         var $form,
             $input,
             $label,
-            $errorMsg,
-            $restart,
             droppedFiles,
-            showFiles;
+            $button;
 
         $form = this.$container.find('.box');
         $input		 = $form.find( 'input[type="file"]' );
         $label		 = $form.find( 'label' );
-        $errorMsg	 = $form.find( '.box__error span' );
-        $restart	 = $form.find( '.box__restart' );
-        droppedFiles = false;
+        $button = $form.find('.box__button');
 
-        showFiles = function( files ) {
+        // automatically submit the form on file select
+        $input.on( 'change', function( e ) {
+            showFiles( e.target.files );
+        });
+
+        $button.on( 'click', function( e ) {
+            console.log('dragAndDrop.initializationHelper - button click');
+        });
+
+        droppedFiles = false;
+        $form.on( 'drag dragstart dragend dragover dragenter dragleave drop', function( e ) {
+            e.preventDefault();
+            e.stopPropagation();
+        })
+            .on( 'dragover dragenter', function() {
+                $form.addClass( 'is-dragover' );
+            })
+            .on( 'dragleave dragend drop', function() {
+                $form.removeClass( 'is-dragover' );
+            // $form.trigger( 'submit' );
+            })
+            .on( 'drop', function( e ) {
+                droppedFiles = e.originalEvent.dataTransfer.files; // the files that were dropped
+                showFiles( droppedFiles );
+                // $form.trigger( 'submit' ); // automatically submit the form on file drop
+            });
+
+        function showFiles( files ) {
 
             var str;
 
@@ -92,92 +122,7 @@ var igv = (function (igv) {
                 str = _.first(files).name;
             }
             $label.text(str);
-        };
-
-        // automatically submit the form on file select
-        $input.on( 'change', function( e ) {
-            showFiles( e.target.files );
-            // $form.trigger( 'submit' );
-        });
-
-        // drag & drop files
-        $form.addClass( 'has-advanced-upload' )
-            .on( 'drag dragstart dragend dragover dragenter dragleave drop', function( e ) {
-                e.preventDefault();
-                e.stopPropagation();
-            })
-            .on( 'dragover dragenter', function() {
-                $form.addClass( 'is-dragover' );
-            })
-            .on( 'dragleave dragend drop', function() {
-                $form.removeClass( 'is-dragover' );
-            })
-            .on( 'drop', function( e ) {
-                droppedFiles = e.originalEvent.dataTransfer.files; // the files that were dropped
-                showFiles( droppedFiles );
-                // $form.trigger( 'submit' ); // automatically submit the form on file drop
-            });
-
-        $form.on( 'submit', function( e ) {
-
-            // preventing the duplicate submissions if the current one is in progress
-            if( $form.hasClass( 'is-uploading' ) ) return false;
-
-            $form.addClass( 'is-uploading' ).removeClass( 'is-error' );
-
-            e.preventDefault();
-
-            // gathering the form data
-            var ajaxData = new FormData( $form.get( 0 ) );
-
-            if( droppedFiles ){
-                $.each( droppedFiles, function( i, file )
-                {
-                    ajaxData.append( $input.attr( 'name' ), file );
-                });
-            }
-
-            // $.ajax({
-            // 			url: 			$form.attr( 'action' ),
-            // 			type:			$form.attr( 'method' ),
-            // 			data: 			ajaxData,
-            // 			dataType:		'json',
-            // 			cache:			false,
-            // 			contentType:	false,
-            // 			processData:	false,
-            // 			complete: function()
-            // 			{
-            // 				$form.removeClass( 'is-uploading' );
-            // 			},
-            // 			success: function( data )
-            // 			{
-            // 				$form.addClass( data.success == true ? 'is-success' : 'is-error' );
-            // 				if( !data.success ) $errorMsg.text( data.error );
-            // 			},
-            // 			error: function()
-            // 			{
-            // 				alert( 'Error. Please, contact the webmaster!' );
-            // 			}
-            // });
-
-        });
-
-
-        // restart the form if has a state of error/success
-
-        $restart.on( 'click', function( e )
-        {
-            e.preventDefault();
-            $form.removeClass( 'is-error is-success' );
-            $input.trigger( 'click' );
-        });
-
-        // Firefox focus bug fix for file input
-        $input
-            .on( 'focus', function(){ $input.addClass( 'has-focus' ); })
-            .on( 'blur', function(){ $input.removeClass( 'has-focus' ); });
-        ;
-
+        }
 
     };
 
