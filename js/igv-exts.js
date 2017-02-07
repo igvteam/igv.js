@@ -152,12 +152,6 @@ if (typeof String.prototype.endsWith === "undefined") {
     }
 }
 
-if (typeof String.prototype.contains === "undefined") {
-    String.prototype.contains = function (it) {
-        return this.indexOf(it) != -1;
-    };
-}
-
 if (typeof String.prototype.includes === "undefined") {
     String.prototype.includes = function (it) {
         return this.indexOf(it) != -1;
@@ -166,9 +160,9 @@ if (typeof String.prototype.includes === "undefined") {
 
 
 if (typeof String.prototype.splitLines === "undefined") {
-    String.prototype.splitLines = function () {
+    Object.defineProperty(String.prototype, 'splitLines', {value: function() {
         return this.split(/\r\n|\n|\r/gm);
-    }
+    }, enumerable: false, configurable: false})
 }
 
 
