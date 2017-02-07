@@ -25,6 +25,16 @@
 	background-color: #c8dadf;
 }
 
+.igv-drag-and-drop-container {
+    position: absolute;
+	top: 100px;
+	left: 25%;
+	width: 50%;
+	text-align: center;
+	margin: 0 auto;
+
+	z-index: 2000;
+}
 
 .igv-drag-and-drop-close-container {
 
@@ -51,17 +61,6 @@
 	cursor: pointer;
 	color: #92b0b3;
 	font-size: small;
-}
-
-.igv-drag-and-drop-container {
-    position: absolute;
-	top: 10%;
-	left: 25%;
-	width: 50%;
-	text-align: center;
-	margin: 0 auto;
-
-	z-index: 2000;
 }
 
 .igv-drag-and-drop-box {
