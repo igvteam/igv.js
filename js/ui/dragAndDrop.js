@@ -37,8 +37,6 @@ var igv = (function (igv) {
             $fa_container,
             $fa,
             $input,
-            $label,
-            $button,
             $e;
 
         $fa_container = $('<div class="fa-container">');
@@ -47,23 +45,30 @@ var igv = (function (igv) {
 
         $input = $('<input type="file" name="files[]" id="file" class="box__file" data-multiple-caption="{count} files selected" multiple="">');
 
-        $label = $('<label for="file">');
+        // affords selecting or drabbing track file
+        this.$label = $('<label for="file">');
         $e = $('<strong>');
         $e.text('Choose a track file');
-        $label.append($e);
+        this.$label.append($e);
 
         $e = $('<span class="box__dragndrop">');
         $e.text(' or drag it here');
-        $label.append($e);
+        this.$label.append($e);
 
-        $button = $('<button type="button" class="box__button">');
-        $button.text('Load Track');
+        // feedback when track is selected
+        this.$chosenTrackLabel = $('<label for="file">');
+        this.$chosenTrackLabel.hide();
+
+        this.$button = $('<button type="button" class="box__button">');
+        this.$button.text('Load Track');
+        this.$button.hide();
 
         $box_input = $('<div class="box__input">');
         $box_input.append($fa_container);
         $box_input.append($input);
-        $box_input.append($label);
-        $box_input.append($button);
+        $box_input.append(this.$label);
+        $box_input.append(this.$chosenTrackLabel);
+        $box_input.append(this.$button);
 
         $box = $('<div class="js igv-drag-and-drop-box">');
         $box.append($box_input);
@@ -101,7 +106,7 @@ var igv = (function (igv) {
             );
 
             $fa.on('click', function () {
-                self.$container.hide();
+                dismissDragAndDrop(self);
             });
 
             return $container;
@@ -114,28 +119,21 @@ var igv = (function (igv) {
         var self = this,
             $drag_and_drop,
             $input,
-            $label,
-            droppedFiles = undefined,
-            $button;
+            droppedFiles = undefined;
 
         $drag_and_drop = this.$container.find('.igv-drag-and-drop-box');
 
         $input = $drag_and_drop.find( 'input[type="file"]' );
-
-        $label = $drag_and_drop.find( 'label' );
-
-        $button = $drag_and_drop.find('.box__button');
-
         $input.on( 'change', function( e ) {
 
             droppedFiles = e.target.files;
             presentFileName( droppedFiles );
         });
 
-        $button.on( 'click', function( e ) {
+        this.$button.on( 'click', function( e ) {
             var file = _.first(droppedFiles);
 
-            dismissDragAndDrop();
+            dismissDragAndDrop(self);
             igv.browser.loadTracksWithConfigList( [ { localFile: file } ] );
 
         });
@@ -150,12 +148,10 @@ var igv = (function (igv) {
             })
             .on( 'dragleave dragend drop', function() {
                 $drag_and_drop.removeClass( 'is-dragover' );
-                // $drag_and_drop.trigger( 'submit' );
             })
             .on( 'drop', function( e ) {
                 droppedFiles = e.originalEvent.dataTransfer.files; // the files that were dropped
                 presentFileName( droppedFiles );
-                // $drag_and_drop.trigger( 'submit' ); // automatically submit the form on file drop
             });
 
 
@@ -163,9 +159,14 @@ var igv = (function (igv) {
         this.$dragAndDropPresentationButton.text('Load Track');
 
         this.$dragAndDropPresentationButton.on('click', function () {
-            presentDragAndDrop();
-        });
 
+            if (self.$container.is(':visible')) {
+                dismissDragAndDrop(self);
+            } else {
+                presentDragAndDrop(self);
+            }
+
+        });
 
         function presentFileName( files ) {
 
@@ -177,22 +178,34 @@ var igv = (function (igv) {
                 str = _.first(files).name;
             }
 
-            $label.text(str);
+            self.$label.hide();
+            self.$chosenTrackLabel.text(str);
+            self.$chosenTrackLabel.show();
 
             str = 'Load ' + str;
-            $button.text(str);
+            self.$button.text(str);
+            self.$button.show();
 
-        }
-
-        function dismissDragAndDrop () {
-            self.$container.hide();
-        }
-
-        function presentDragAndDrop () {
-            self.$container.show();
         }
 
     };
+
+    function dismissDragAndDrop (thang) {
+
+        thang.$button.text('Load Track');
+        thang.$button.hide();
+
+        thang.$chosenTrackLabel.hide();
+        thang.$chosenTrackLabel.text('');
+        thang.$label.show();
+
+        thang.$container.hide();
+
+    }
+
+    function presentDragAndDrop (thang) {
+        thang.$container.show();
+    }
 
     return igv;
 })(igv || {});
