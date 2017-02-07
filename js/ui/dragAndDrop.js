@@ -112,45 +112,50 @@ var igv = (function (igv) {
     igv.DragAndDrop.prototype.initializationHelper = function () {
 
         var self = this,
-            $form,
+            $drag_and_drop,
             $input,
             $label,
-            droppedFiles,
+            droppedFiles = undefined,
             $button;
 
-        $form = this.$container.find('.igv-drag-and-drop-box');
+        $drag_and_drop = this.$container.find('.igv-drag-and-drop-box');
 
-        $input		 = $form.find( 'input[type="file"]' );
+        $input = $drag_and_drop.find( 'input[type="file"]' );
 
-        $label		 = $form.find( 'label' );
+        $label = $drag_and_drop.find( 'label' );
 
-        $button = $form.find('.box__button');
-        $button.hide();
+        $button = $drag_and_drop.find('.box__button');
 
         $input.on( 'change', function( e ) {
-            showFiles( e.target.files );
+
+            droppedFiles = e.target.files;
+            presentFileName( droppedFiles );
         });
 
         $button.on( 'click', function( e ) {
-            console.log('dragAndDrop.initializationHelper - button click');
+            var file = _.first(droppedFiles);
+
+            dismissDragAndDrop();
+            igv.browser.loadTracksWithConfigList( [ { localFile: file } ] );
+
         });
 
-        droppedFiles = false;
-        $form.on( 'drag dragstart dragend dragover dragenter dragleave drop', function( e ) {
-            e.preventDefault();
-            e.stopPropagation();
-        })
+        $drag_and_drop
+            .on( 'drag dragstart dragend dragover dragenter dragleave drop', function( e ) {
+                e.preventDefault();
+                e.stopPropagation();
+            })
             .on( 'dragover dragenter', function() {
-                $form.addClass( 'is-dragover' );
+                $drag_and_drop.addClass( 'is-dragover' );
             })
             .on( 'dragleave dragend drop', function() {
-                $form.removeClass( 'is-dragover' );
-            // $form.trigger( 'submit' );
+                $drag_and_drop.removeClass( 'is-dragover' );
+                // $drag_and_drop.trigger( 'submit' );
             })
             .on( 'drop', function( e ) {
                 droppedFiles = e.originalEvent.dataTransfer.files; // the files that were dropped
-                showFiles( droppedFiles );
-                // $form.trigger( 'submit' ); // automatically submit the form on file drop
+                presentFileName( droppedFiles );
+                // $drag_and_drop.trigger( 'submit' ); // automatically submit the form on file drop
             });
 
 
@@ -158,12 +163,11 @@ var igv = (function (igv) {
         this.$dragAndDropPresentationButton.text('Load Track');
 
         this.$dragAndDropPresentationButton.on('click', function () {
-            console.log('dragAndDrop - click');
-            self.$container.show();
+            presentDragAndDrop();
         });
 
 
-        function showFiles( files ) {
+        function presentFileName( files ) {
 
             var str;
 
@@ -177,7 +181,15 @@ var igv = (function (igv) {
 
             str = 'Load ' + str;
             $button.text(str);
-            $button.show();
+
+        }
+
+        function dismissDragAndDrop () {
+            self.$container.hide();
+        }
+
+        function presentDragAndDrop () {
+            self.$container.show();
         }
 
     };
