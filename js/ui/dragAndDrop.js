@@ -31,7 +31,8 @@ var igv = (function (igv) {
 
     igv.DragAndDrop = function () {
 
-        var $box_input,
+        var self = this,
+            $box_input,
             $box,
             $fa_container,
             $fa,
@@ -64,28 +65,68 @@ var igv = (function (igv) {
         $box_input.append($label);
         $box_input.append($button);
 
-        $box = $('<div class="js box">');
+        $box = $('<div class="js igv-drag-and-drop-box">');
         $box.append($box_input);
 
         this.$container = $('<div class="igv-drag-and-drop-container">');
         this.$container.append($box);
+        this.$container.append( closeHandler() );
+
+        function closeHandler() {
+
+            var $container = $('<div class="igv-drag-and-drop-close-container">'),
+                $fa = $('<i class="fa fa-times igv-drag-and-drop-close-fa">');
+
+            $container.append($fa);
+
+            $fa.hover(
+                function () {
+                    $fa.removeClass("fa-times");
+                    $fa.addClass("fa-times-circle");
+
+                    $fa.css({
+                        "color": "#36464b"
+                    });
+                },
+
+                function () {
+                    $fa.removeClass("fa-times-circle");
+                    $fa.addClass("fa-times");
+
+                    $fa.css({
+                        "color": "#92b0b3"
+                    });
+
+                }
+            );
+
+            $fa.on('click', function () {
+                self.$container.hide();
+            });
+
+            return $container;
+        }
 
     };
 
     igv.DragAndDrop.prototype.initializationHelper = function () {
 
-        var $form,
+        var self = this,
+            $form,
             $input,
             $label,
             droppedFiles,
             $button;
 
-        $form = this.$container.find('.box');
-        $input		 = $form.find( 'input[type="file"]' );
-        $label		 = $form.find( 'label' );
-        $button = $form.find('.box__button');
+        $form = this.$container.find('.igv-drag-and-drop-box');
 
-        // automatically submit the form on file select
+        $input		 = $form.find( 'input[type="file"]' );
+
+        $label		 = $form.find( 'label' );
+
+        $button = $form.find('.box__button');
+        $button.hide();
+
         $input.on( 'change', function( e ) {
             showFiles( e.target.files );
         });
@@ -112,6 +153,16 @@ var igv = (function (igv) {
                 // $form.trigger( 'submit' ); // automatically submit the form on file drop
             });
 
+
+        this.$dragAndDropPresentationButton = $('<div class="igv-drag-and-drop-presentation-button">');
+        this.$dragAndDropPresentationButton.text('Load Track');
+
+        this.$dragAndDropPresentationButton.on('click', function () {
+            console.log('dragAndDrop - click');
+            self.$container.show();
+        });
+
+
         function showFiles( files ) {
 
             var str;
@@ -121,7 +172,12 @@ var igv = (function (igv) {
             } else {
                 str = _.first(files).name;
             }
+
             $label.text(str);
+
+            str = 'Load ' + str;
+            $button.text(str);
+            $button.show();
         }
 
     };
