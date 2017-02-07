@@ -39,8 +39,7 @@ var igv = (function (igv) {
 
         var $content,
             $header,
-            browser,
-            dragAndDrop;
+            browser;
 
         if (igv.browser) {
             //console.log("Attempt to create 2 browsers.");
@@ -61,40 +60,14 @@ var igv = (function (igv) {
 
         $(parentDiv).append(browser.$root);
 
-        setControls(browser, config);
 
-
-
-
-
-
-
-
-
-
-
-        // TEST TEST TEST TEST TEST TEST TEST TEST
         // drag & drop
-        dragAndDrop = new igv.DragAndDrop();
-        browser.$root.append(dragAndDrop.$container);
+        browser.dragAndDrop = new igv.DragAndDrop();
+        browser.$root.append(browser.dragAndDrop.$container);
+        browser.dragAndDrop.initializationHelper();
+        browser.dragAndDrop.$container.hide();
 
-        dragAndDrop.initializationHelper();
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+        setControls(browser, config);
 
         $content = $('<div class="igv-content-div">');
         browser.$root.append($content);
@@ -366,9 +339,8 @@ var igv = (function (igv) {
             browser.windowSizePanel = new igv.WindowSizePanel($navigation);
 
 
-            // // file upload
-            // browser.fileUpload = new igv.FileUpload();
-            // $navigation.append(browser.fileUpload.$container);
+            // drag & drop
+            $navigation.append(browser.dragAndDrop.$dragAndDropPresentationButton);
 
 
             // zoom
