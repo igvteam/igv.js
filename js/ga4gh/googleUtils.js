@@ -29,7 +29,7 @@ var igv = (function (igv) {
 
         // Crude test, this is conservative, nothing bad happens for a false positive
         isGoogleURL: function (url) {
-            return url.contains("googleapis");
+            return url.includes("googleapis");
         },
 
         translateGoogleCloudURL: function (gsUrl) {
@@ -64,9 +64,9 @@ var igv = (function (igv) {
         addApiKey: function (url) {
 
             var apiKey = oauth.google.apiKey,
-                paramSeparator = url.contains("?") ? "&" : "?";
+                paramSeparator = url.includes("?") ? "&" : "?";
             
-            if (apiKey !== undefined && !url.contains("key=")) {
+            if (apiKey !== undefined && !url.includes("key=")) {
                 if (apiKey) {
                     url = url + paramSeparator + "key=" + apiKey;
                 }

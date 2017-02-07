@@ -264,7 +264,7 @@ var igv = (function (igv) {
 
     function queryJsonV1(queryChr, queryStart, queryEnd, config) {
 
-        var type = config.url.contains("variant") ? VARIANT : TRAIT,
+        var type = config.url.includes("variant") ? VARIANT : TRAIT,
             pvalue = config.pvalue ? config.pvalue : "PVALUE",
 
             filters =
