@@ -340,7 +340,7 @@ var igv = (function (igv) {
 
 
             // drag & drop
-            $navigation.append(browser.dragAndDrop.$dragAndDropPresentationButton);
+            // $navigation.append(browser.dragAndDrop.$dragAndDropPresentationButton);
 
 
             // zoom
