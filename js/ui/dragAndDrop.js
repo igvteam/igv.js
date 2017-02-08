@@ -37,6 +37,7 @@ var igv = (function (igv) {
             $fa_container,
             $fa,
             $input,
+            $url_input_container,
             $e;
 
         $fa_container = $('<div class="fa-container">');
@@ -63,11 +64,23 @@ var igv = (function (igv) {
         this.$button.text('Load Track');
         this.$button.hide();
 
+        $url_input_container = $('<div class="igv-drag-and-drop-url-input-container">');
+        $e = $('<div>');
+        $e.text('or');
+        this.$url_input = $('<input class="igv-drag-and-drop-url-input" placeholder="enter track URL">');
+        $url_input_container.append($e);
+        $url_input_container.append(this.$url_input);
+
         $box_input = $('<div class="box__input">');
         $box_input.append($fa_container);
+
         $box_input.append($input);
+
         $box_input.append(this.$label);
         $box_input.append(this.$chosenTrackLabel);
+
+        $box_input.append($url_input_container);
+
         $box_input.append(this.$button);
 
         $box = $('<div class="js igv-drag-and-drop-box">');
@@ -138,6 +151,14 @@ var igv = (function (igv) {
 
         });
 
+        this.$url_input.on( 'change', function( e ) {
+            var value = $(this).val();
+
+            dismissDragAndDrop(self);
+            igv.browser.loadTracksWithConfigList( [ { url: value } ] );
+
+        });
+
         $drag_and_drop
             .on( 'drag dragstart dragend dragover dragenter dragleave drop', function( e ) {
                 e.preventDefault();
@@ -191,6 +212,8 @@ var igv = (function (igv) {
     };
 
     function dismissDragAndDrop (thang) {
+
+        thang.$url_input.val(undefined);
 
         thang.$button.text('Load Track');
         thang.$button.hide();

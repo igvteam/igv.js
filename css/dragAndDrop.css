@@ -40,10 +40,7 @@
 
 	position: absolute;
 	top: 16px;
-	right: 16px;
-
-	height: 100%;
-	width: 16px;
+	right: 18px;
 
 	text-align: center;
 	line-height: 100%;
@@ -60,7 +57,10 @@
 
 	cursor: pointer;
 	color: #92b0b3;
-	font-size: small;
+}
+
+.igv-drag-and-drop-url-input:hover {
+	border-bottom: 2px solid #36464b;
 }
 
 .igv-drag-and-drop-box {
@@ -78,6 +78,34 @@
 	outline-offset: -10px;
 
     background-color: #c8dadf;
+}
+
+.igv-drag-and-drop-url-input-container {
+	position: relative;
+	width: 100%;
+	margin-top: 1px;
+}
+
+.igv-drag-and-drop-url-input-container > div {
+	margin-top: 14px;
+	margin-bottom: 14px;
+}
+
+.igv-drag-and-drop-url-input {
+	width: 85%;
+
+	color: #36464b;
+	font-family: 'Open Sans', sans-serif;
+	font-size: 16px;
+	font-weight: 200;
+
+	padding-left: 4px;
+
+	border: 0;
+	outline: 0;
+	border-bottom: 2px solid #92b0b3;
+
+	background: transparent;
 }
 
 .igv-drag-and-drop-box.is-dragover {
