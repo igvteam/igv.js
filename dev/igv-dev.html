@@ -186,6 +186,14 @@
 
     <div id="trackList">
 
+
+
+        <div onclick="igv.browser.loadTrack({
+                            url: 'https://s3-us-west-2.amazonaws.com/ilmn.igv-test/test.bigWig',
+                            name: 'Big BigWig'
+                        })"> Big BigWig
+        </div>
+
         <div onclick="igv.browser.loadTrack({
                             url: 'https://data.broadinstitute.org/igvdata/1KG/ALL.wgs.phase3_shapeit2_mvncall_integrated_v5b.20130502.sites.vcf.gz',
                             indexURL: 'https://data.broadinstitute.org/igvdata/1KG/ALL.wgs.phase3_shapeit2_mvncall_integrated_v5b.20130502.sites.vcf.gz.tbi',

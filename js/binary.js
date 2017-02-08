@@ -74,7 +74,7 @@ var igv = (function (igv) {
     igv.BinaryParser.prototype.getLong = function () {
 
         // DataView doesn't support long. So we'll try manually
-        
+
         var b1 = this.view.getUint8(this.position),
             b2 = this.view.getUint8(this.position + 1),
             b3 = this.view.getUint8(this.position + 2),
@@ -83,15 +83,12 @@ var igv = (function (igv) {
             b6 = this.view.getUint8(this.position + 5),
             b7 = this.view.getUint8(this.position + 6),
             b8 = this.view.getUint8(this.position + 7);
-
-
+        
         var long = this.littleEndian ?
-        (b8 & 255) << 56 | (b7 & 255) << 48 | (b6 & 255) << 40 | (b5 & 255) << 32 | (b4 & 255) << 24 |
-        (b3 & 255) << 16 | (b2 & 255) << 8 | b1 & 255 :
-        (b1 & 255) << 56 | (b2 & 255) << 48 | (b3 & 255) << 40 | (b4 & 255) << 32 | (b5 & 255) << 24 |
-        (b6 & 255) << 16 | (b7 & 255) << 8 | b8 & 255;
+        (b8 << 56) + (b7 << 56 >>> 8) + (b6 << 56 >>> 16) + (b5 << 56 >>> 24) + (b4 << 56 >>> 32) + (b3 << 56 >>> 40) + (b2 << 56 >>> 48) + (b1 << 56 >>> 56) :
+        (b1 << 56) + (b2 << 56 >>> 8) + (b3 << 56 >>> 16) + (b4 << 56 >>> 24) + (b5 << 56 >>> 32) + (b6 << 56 >>> 40) + (b7 << 56 >>> 48) + (b8 << 56 >>> 56);
 
-        // var integer = this.view.getInt32(this.position, this.littleEndian);
+        var integer = this.view.getInt32(this.position, this.littleEndian);
         this.position += 8;
         return long;
     }
