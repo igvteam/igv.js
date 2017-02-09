@@ -250,7 +250,9 @@ var igv = (function (igv) {
 
         function createTrackWithConfiguration(conf) {
 
-            switch (conf.type.toLowerCase()) {
+            var type = (undefined === conf.type) ? 'unknown_type' : conf.type.toLowerCase();
+
+            switch (type) {
                 case "gwas":
                     return new igv.GWASTrack(conf);
                     break;
