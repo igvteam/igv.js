@@ -34,7 +34,7 @@ var igvxhr = (function (igvxhr) {
 
         if (!options) options = {};
 
-        return new Promise(function (fulfill, reject) {
+        return new Promise(function (fullfill, reject) {
 
             var xhr = new XMLHttpRequest(),
                 sendData = options.sendData || options.body,
@@ -72,7 +72,7 @@ var igvxhr = (function (igvxhr) {
             if (range) {
                 var rangeEnd = range.size ? range.start + range.size - 1 : "";
                 xhr.setRequestHeader("Range", "bytes=" + range.start + "-" + rangeEnd);
-          //      xhr.setRequestHeader("Cache-Control", "no-cache");    <= This can cause CORS issues, disabled for now
+                //      xhr.setRequestHeader("Cache-Control", "no-cache");    <= This can cause CORS issues, disabled for now
             }
             if (contentType) {
                 xhr.setRequestHeader("Content-Type", contentType);
@@ -106,7 +106,7 @@ var igvxhr = (function (igvxhr) {
                         handleError("ERROR: range-byte header was ignored for url: " + url);
                     }
                     else {
-                        fulfill(xhr.response);
+                        fullfill(xhr.response);
                     }
                 }
                 else {
@@ -132,7 +132,7 @@ var igvxhr = (function (igvxhr) {
                     options.sendData = "url=" + url;
                     options.crossDomainRetried = true;
 
-                    igvxhr.load(igv.browser.crossDomainProxy, options).then(fulfill);
+                    igvxhr.load(igv.browser.crossDomainProxy, options).then(fullfill);
                 }
                 else {
                     handleError("Error accessing resource: " + url + " Status: " + xhr.status);
@@ -180,29 +180,29 @@ var igvxhr = (function (igvxhr) {
 
         if (method == "POST") options.contentType = "application/json";
 
-        return new Promise(function (fulfill, reject) {
+        return new Promise(function (fullfill, reject) {
 
             igvxhr.load(url, options).then(
                 function (result) {
                     if (result) {
-                        fulfill(JSON.parse(result));
+                        fullfill(JSON.parse(result));
                     }
                     else {
-                        fulfill(result);
+                        fullfill(result);
                     }
                 }).catch(reject);
         })
     };
 
-    igvxhr.loadPathWithConfiguration = function (config, options, _then, _catch) {
+    igvxhr.loadPathWithConfiguration = function (config, options, thenHandler, catchHandler) {
 
         if (config.localFile) {
-            this.loadStringFromFile(config.localFile, options).then(_then).catch(_catch);
+            this.loadStringFromFile(config.localFile, options).then(thenHandler).catch(catchHandler);
         } else {
             if (config.index && config.index.tabix) {
-                this.loadArrayBuffer(     config.url, options).then(_then).catch(_catch);
+                this.loadArrayBuffer(     config.url, options).then(thenHandler).catch(catchHandler);
             } else {
-                this.loadString(          config.url, options).then(_then).catch(_catch);
+                this.loadString(          config.url, options).then(thenHandler).catch(catchHandler);
             }
         }
 
@@ -213,7 +213,9 @@ var igvxhr = (function (igvxhr) {
      */
     igvxhr.loadString = function (url, options) {
 
-        var compression, fn, idx;
+        var compression,
+            fn,
+            idx;
 
         if (options === undefined) options = {};
 
@@ -224,28 +226,28 @@ var igvxhr = (function (igvxhr) {
 
         if (options.bgz) {
             compression = BGZF;
-        }
-        else if (fn.endsWith(".gz")) {
+        } else if (fn.endsWith(".gz")) {
             compression = GZIP;
-        }
-        else {
+        } else {
             compression = NONE;
         }
 
         if (compression === NONE) {
             options.mimeType = 'text/plain; charset=x-user-defined';
             return igvxhr.load(url, options);
-        }
-        else {
+        } else {
             options.responseType = "arraybuffer";
 
-            return new Promise(function (fulfill, reject) {
+            return new Promise(function (fullfill, reject) {
 
-                igvxhr.load(url, options).then(
-                    function (data) {
-                        var result = igvxhr.arrayBufferToString(data, compression);
-                        fulfill(result);
-                    }).catch(reject)
+                igvxhr
+                    .load(url, options)
+                    .then(
+                        function (data) {
+                            var result = igvxhr.arrayBufferToString(data, compression);
+                            fullfill(result);
+                        })
+                    .catch(reject)
             })
         }
 
@@ -253,30 +255,26 @@ var igvxhr = (function (igvxhr) {
 
     igvxhr.loadStringFromFile = function (localfile, options) {
 
-        return new Promise(function (fulfill, reject) {
+        return new Promise(function (fullfill, reject) {
 
-            var fileReader = new FileReader(),
-                range = options.range;
-
+            var fileReader = new FileReader();
 
             fileReader.onload = function (e) {
 
-                var compression, result;
+                var compression,
+                    result;
 
                 if (options.bgz) {
                     compression = BGZF;
-                }
-                else if (localfile.name.endsWith(".gz")) {
-
+                } else if (localfile.name.endsWith(".gz")) {
                     compression = GZIP;
-                }
-                else {
+                } else {
                     compression = NONE;
                 }
 
                 result = igvxhr.arrayBufferToString(fileReader.result, compression);
 
-                fulfill(result);
+                fullfill(result);
 
             };
 
