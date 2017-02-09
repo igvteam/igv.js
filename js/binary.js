@@ -75,22 +75,30 @@ var igv = (function (igv) {
 
         // DataView doesn't support long. So we'll try manually
 
-        var b1 = this.view.getUint8(this.position),
-            b2 = this.view.getUint8(this.position + 1),
-            b3 = this.view.getUint8(this.position + 2),
-            b4 = this.view.getUint8(this.position + 3),
-            b5 = this.view.getUint8(this.position + 4),
-            b6 = this.view.getUint8(this.position + 5),
-            b7 = this.view.getUint8(this.position + 6),
-            b8 = this.view.getUint8(this.position + 7);
-        
-        var long = this.littleEndian ?
-        (b8 << 56) + (b7 << 56 >>> 8) + (b6 << 56 >>> 16) + (b5 << 56 >>> 24) + (b4 << 56 >>> 32) + (b3 << 56 >>> 40) + (b2 << 56 >>> 48) + (b1 << 56 >>> 56) :
-        (b1 << 56) + (b2 << 56 >>> 8) + (b3 << 56 >>> 16) + (b4 << 56 >>> 24) + (b5 << 56 >>> 32) + (b6 << 56 >>> 40) + (b7 << 56 >>> 48) + (b8 << 56 >>> 56);
+        var b = [];
+        b[0] = this.view.getUint8(this.position);
+        b[1] = this.view.getUint8(this.position + 1);
+        b[2] = this.view.getUint8(this.position + 2);
+        b[3] = this.view.getUint8(this.position + 3);
+        b[4] = this.view.getUint8(this.position + 4);
+        b[5] = this.view.getUint8(this.position + 5);
+        b[6] = this.view.getUint8(this.position + 6);
+        b[7] = this.view.getUint8(this.position + 7);
 
-        var integer = this.view.getInt32(this.position, this.littleEndian);
+        var value = 0;
+        if (this.littleEndian) {
+            for (var i = b.length - 1; i >= 0; i--) {
+                value = (value * 256) + b[i];
+            }
+        } else {
+            for (var i = 0; i < b.length; i++) {
+                value = (value * 256) + b[i];
+            }
+        }
+
+
         this.position += 8;
-        return long;
+        return value;
     }
 
     igv.BinaryParser.prototype.getString = function (len) {
