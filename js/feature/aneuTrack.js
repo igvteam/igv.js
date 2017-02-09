@@ -135,11 +135,10 @@ var igv = (function (igv) {
             };
 
             igvxhr.loadPathWithConfiguration(self.config, afterload, function () {
-                    // nuthin
-                },
-                function () {
-                    // nuthin
-                });
+                // nuthin
+            }, function () {
+// nuthin
+            });
 
             // if (self.config.localFile) {
             //     igvxhr.loadStringFromFile(self.config.localFile, afterload);

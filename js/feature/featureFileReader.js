@@ -175,7 +175,7 @@ var igv = (function (igv) {
 
 
                         // Async load
-                        igvxhr.loadPathWithConfiguration(_.extend(self.config, { index: self.index }), options, success, reject);
+                        igvxhr.loadPathWithConfiguration(_.extend(self.config, {index: self.index}), options, success, reject);
 
                         // if (self.config.localFile) {
                         //     igvxhr.loadStringFromFile(self.config.localFile, options).then(success).catch(reject);
