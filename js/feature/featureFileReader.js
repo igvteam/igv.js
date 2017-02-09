@@ -35,26 +35,23 @@ var igv = (function (igv) {
      */
     igv.FeatureFileReader = function (config) {
 
+        var self = this,
+            uriParts;
+
         this.config = config || {};
 
-        if (config.localFile) {
-            this.localFile = config.localFile;
-            this.filename = config.localFile.name;
-        }
-        else {
-            this.url = config.url;
-            this.indexURL = config.indexURL;
-            this.headURL = config.headURL || this.filename;
-
-            var uriParts = igv.parseUri(config.url);
+        if (this.config.localFile) {
+            this.filename = this.config.localFile.name;
+        } else {
+            uriParts = igv.parseUri(this.config.url);
             this.filename = uriParts.file;
             this.path = uriParts.path;
         }
 
-        this.format = config.format;
+        this.format = this.config.format;
 
-        this.parser = getParser.call(this, this.format, config.decode);
-        
+        this.parser = getParser.call(this, this.format, this.config.decode);
+
         this.supportsWholeGenome = (this.format === "seg");  // TODO -- move this up to track level
     };
 
@@ -70,7 +67,7 @@ var igv = (function (igv) {
         }
 
     }
-    
+
     function isIndexable() {
         return this.config.indexURL || (this.type !== "wig" && this.type !== "seg" && this.config.indexed != false);
     }
@@ -80,13 +77,12 @@ var igv = (function (igv) {
      * Return a Promise for the async loaded index
      */
     function loadIndex() {
-        var idxFile = this.indexURL;
+        var idxFile = this.config.indexURL;
         if (this.filename.endsWith(".gz")) {
-            if (!idxFile) idxFile = this.url + ".tbi";
+            if (!idxFile) idxFile = this.config.url + ".tbi";
             return igv.loadBamIndex(idxFile, this.config, true);
-        }
-        else {
-            if (!idxFile) idxFile = this.url + ".idx";
+        } else {
+            if (!idxFile) idxFile = this.config.url + ".idx";
             return igv.loadTribbleIndex(idxFile, this.config);
         }
     }
@@ -107,15 +103,15 @@ var igv = (function (igv) {
                     self.format = 'gff3';
                 }
                 fulfill(self.parser.parseFeatures(data));   // <= PARSING DONE HERE
-            };
-
-
-            if (self.localFile) {
-                igvxhr.loadStringFromFile(self.localFile, options).then(parseData).catch(reject);
             }
-            else {
-                igvxhr.loadString(self.url, options).then(parseData).catch(reject);
-            }
+
+            igvxhr.loadPathWithConfiguration(self.config, options, parseData, reject);
+
+            // if (self.config.localFile) {
+            //     igvxhr.loadStringFromFile(self.config.localFile, options).then(parseData).catch(reject);
+            // } else {
+            //     igvxhr.loadString(self.config.url, options).then(parseData).catch(reject);
+            // }
 
 
         });
@@ -130,12 +126,11 @@ var igv = (function (igv) {
         return new Promise(function (fulfill, reject) {
 
             var blocks,
-                index = self.index,
-                tabix = index && index.tabix,
-                refId = tabix ? index.sequenceIndexMap[chr] : chr,
+                tabix = self.index && self.index.tabix,
+                refId = tabix ? self.index.sequenceIndexMap[chr] : chr,
                 promises = [];
 
-            blocks = index.blocksForRange(refId, start, end);
+            blocks = self.index.blocksForRange(refId, start, end);
 
             if (!blocks || blocks.length === 0) {
                 fulfill(null);       // TODO -- is this correct?  Should it return an empty array?
@@ -148,24 +143,28 @@ var igv = (function (igv) {
 
                         var startPos = block.minv.block,
                             startOffset = block.minv.offset,
-                            endPos = endPos = block.maxv.block + MAX_GZIP_BLOCK_SIZE,
-                            options = {
-                                headers: self.config.headers, // http headers, not file header
-                                range: {start: startPos, size: endPos - startPos + 1},
-                                withCredentials: self.config.withCredentials
-                            },
+                            endPos,
+                            options,
                             success;
+
+                        endPos = endPos = block.maxv.block + MAX_GZIP_BLOCK_SIZE;
+
+                        options = {
+                            headers: self.config.headers, // http headers, not file header
+                            range: {start: startPos, size: endPos - startPos + 1},
+                            withCredentials: self.config.withCredentials
+                        };
 
                         success = function (data) {
 
-                            var inflated, slicedData;
+                            var inflated,
+                                slicedData;
 
-                            if (index.tabix) {
+                            if (self.index.tabix) {
 
                                 inflated = igvxhr.arrayBufferToString(igv.unbgzf(data));
                                 // need to decompress data
-                            }
-                            else {
+                            } else {
                                 inflated = data;
                             }
 
@@ -176,40 +175,44 @@ var igv = (function (igv) {
 
 
                         // Async load
-                        if (self.localFile) {
-                            igvxhr.loadStringFromFile(self.localFile, options).then(success).catch(reject);
-                        }
-                        else {
-                            if (index.tabix) {
-                                igvxhr.loadArrayBuffer(self.url, options).then(success).catch(reject);
-                            }
-                            else {
-                                igvxhr.loadString(self.url, options).then(success).catch(reject);
-                            }
-                        }
+                        igvxhr.loadPathWithConfiguration(_.extend(self.config, { index: self.index }), options, success, reject);
+
+                        // if (self.config.localFile) {
+                        //     igvxhr.loadStringFromFile(self.config.localFile, options).then(success).catch(reject);
+                        // } else {
+                        //     if (self.index.tabix) {
+                        //         igvxhr.loadArrayBuffer(self.config.url, options).then(success).catch(reject);
+                        //     } else {
+                        //         igvxhr.loadString(self.config.url, options).then(success).catch(reject);
+                        //     }
+                        // }
                     }))
                 });
 
-                Promise.all(promises).then(function (featureArrays) {
+                Promise
+                    .all(promises)
+                    .then(function (featureArrays) {
 
-                    var i, allFeatures;
+                        var i,
+                            allFeatures;
 
-                    if (featureArrays.length === 1) {
-                        allFeatures = featureArrays[0];
-                    } else {
-                        allFeatures = featureArrays[0];
+                        if (featureArrays.length === 1) {
+                            allFeatures = featureArrays[0];
+                        } else {
+                            allFeatures = featureArrays[0];
 
-                        for (i = 1; i < featureArrays.length; i++) {
-                            allFeatures = allFeatures.concat(featureArrays[i]);
+                            for (i = 1; i < featureArrays.length; i++) {
+                                allFeatures = allFeatures.concat(featureArrays[i]);
+                            }
+
+                            allFeatures.sort(function (a, b) {
+                                return a.start - b.start;
+                            });
                         }
 
-                        allFeatures.sort(function (a, b) {
-                            return a.start - b.start;
-                        });
-                    }
-
-                    fulfill(allFeatures)
-                }).catch(reject);
+                        fulfill(allFeatures)
+                    })
+                    .catch(reject);
             }
         });
 
@@ -258,33 +261,41 @@ var igv = (function (igv) {
 
                 getIndex.call(self).then(function (index) {
 
+                    var options,
+                        success;
+
                     if (index) {
+
                         // Load the file header (not HTTP header) for an indexed file.
                         // TODO -- note this will fail if the file header is > 65kb in size
-                        var options = {
-                                headers: self.config.headers,           // http headers, not file header
-                                bgz: index.tabix,
-                                range: {start: 0, size: 65000},
-                                withCredentials: self.config.withCredentials
-                            },
-                            success = function (data) {
-                                self.header = self.parser.parseHeader(data);
-                                fulfill(self.header);
-                            };
+                        options = {
+                            headers: self.config.headers,           // http headers, not file header
+                            bgz: index.tabix,
+                            range: {start: 0, size: 65000},
+                            withCredentials: self.config.withCredentials
+                        };
 
-                        if (self.localFile) {
-                            igvxhr.loadStringFromFile(self.localFile, options).then(success);
-                        }
-                        else {
-                            igvxhr.loadString(self.url, options).then(success).catch(reject);
-                        }
-                    }
-                    else {
-                        loadFeaturesNoIndex.call(self, undefined).then(function (features) {
+                        success = function (data) {
+                            self.header = self.parser.parseHeader(data);
+                            fulfill(self.header);
+                        };
+
+                        igvxhr.loadPathWithConfiguration(self.config, options, success, reject);
+
+                        // if (self.config.localFile) {
+                        //     igvxhr.loadStringFromFile(self.config.localFile, options).then(success);
+                        // } else {
+                        //     igvxhr.loadString(              self.config.url, options).then(success).catch(reject);
+                        // }
+
+                    } else {
+                        loadFeaturesNoIndex
+                            .call(self, undefined).then(function (features) {
                             var header = self.header || {};
                             header.features = features;
                             fulfill(header);
-                        }).catch(reject);
+                        })
+                            .catch(reject);
                     }
                 });
             }
