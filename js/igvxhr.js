@@ -194,6 +194,20 @@ var igvxhr = (function (igvxhr) {
         })
     };
 
+    igvxhr.loadPathWithConfiguration = function (config, options, _then, _catch) {
+
+        if (config.localFile) {
+            this.loadStringFromFile(config.localFile, options).then(_then).catch(_catch);
+        } else {
+            if (config.index && config.index.tabix) {
+                this.loadArrayBuffer(     config.url, options).then(_then).catch(_catch);
+            } else {
+                this.loadString(          config.url, options).then(_then).catch(_catch);
+            }
+        }
+
+    };
+
     /**
      * Load a "raw" string.
      */
@@ -276,14 +290,6 @@ var igvxhr = (function (igvxhr) {
         });
     };
 
-    function isCrossDomain(url) {
-
-        var origin = window.location.origin;
-
-        return !url.startsWith(origin);
-
-    }
-
     igvxhr.arrayBufferToString = function (arraybuffer, compression) {
 
         var plain, inflate;
@@ -306,10 +312,17 @@ var igvxhr = (function (igvxhr) {
         return result;
     };
 
-
     igv.AbortLoad = function () {
 
     };
+
+    function isCrossDomain(url) {
+
+        var origin = window.location.origin;
+
+        return !url.startsWith(origin);
+
+    }
 
     return igvxhr;
 

@@ -29,47 +29,38 @@ var igv = (function (igv) {
      * feature source for "bed like" files (tab delimited files with 1 feature per line: bed, gff, vcf, etc)
      *
      * @param config
+     * @param thefilename
      * @constructor
      */
     igv.AneuFeatureSource = function (config, thefilename) {
 
         this.config = config || {};
-        // check if type is redline or diff
-        //console.log("AneuFeatureSource:  filename="+thefilename+", config="+JSON.stringify(config));
-        // need function to cut off last part of file and add redline or diff file
 
-        var getPath = function (urlorfile) {
-            var last = urlorfile.lastIndexOf("/");
-            var path = urlorfile.substring(0, last + 1);
-            // console.log("Getting path of file or url "+urlorfile+"="+path);
+        if (this.config.localFile) {
+            this.filename = getPath(this.config.localFile.name) + thefilename;
+        } else {
+            this.config.url = getPath(this.config.url) + thefilename;
+            this.filename = thefilename;
+            this.headURL = this.config.headURL || thefilename;
+        }
+
+        this.parser = getParser("aneu");
+
+        function getPath(urlorfile) {
+            var last,
+                path;
+
+            last = urlorfile.lastIndexOf("/");
+            path = urlorfile.substring(0, last + 1);
+
             return path;
         }
 
-        if (config.localFile) {
-
-            var path = getPath(config.localFile.name);
-            this.localFile = config.localFile;
-            this.filename = path + thefilename;
-            //  console.log("Got localfile: "+JSON.stringify(config)+", this.filename="+this.filename);
-        }
-        else {
-
-            var path = getPath(config.url);
-
-            this.url = path + thefilename;
-            this.filename = thefilename;
-            this.headURL = config.headURL || this.filename;
-            //   console.log("Got URL: "+config.url+"-> url="+this.url);
+        function getParser(format) {
+            return new igv.FeatureParser(format);
         }
 
-
-        this.parser = getParser("aneu");
     };
-
-
-    function getParser(format) {
-        return new igv.FeatureParser(format);
-    }
 
     /**
      * Required function fo all data source objects.  Fetches features for the
@@ -83,7 +74,7 @@ var igv = (function (igv) {
      */
     igv.AneuFeatureSource.prototype.getFeatures = function (chr, bpStart, bpEnd, success) {
 
-        var myself = this,
+        var self = this,
             range = new igv.GenomicInterval(chr, bpStart, bpEnd),
             featureCache = this.featureCache;
 
@@ -97,10 +88,10 @@ var igv = (function (igv) {
             //  console.log("getFeatures: calling loadFeatures");
             this.loadFeatures(function (featureList) {
                     //  console.log("Creating featureCache with "+featureList.length+ " features");
-                    myself.featureCache = new igv.FeatureCache(featureList);   // Note - replacing previous cache with new one                    
+                    self.featureCache = new igv.FeatureCache(featureList);   // Note - replacing previous cache with new one
                     // Finally pass features for query interval to continuation
 
-                    var features = myself.featureCache.queryFeatures(chr, bpStart, bpEnd);
+                    var features = self.featureCache.queryFeatures(chr, bpStart, bpEnd);
                     //  console.log("calling success "+success);
                     //  console.log("features from queryCache "+features);
                     success(features);
@@ -118,17 +109,17 @@ var igv = (function (igv) {
      */
     igv.AneuFeatureSource.prototype.getFeatureCache = function (success) {
 
-        var myself = this;
+        var self = this;
 
         if (this.featureCache) {
             success(this.featureCache);
         }
         else {
             this.loadFeatures(function (featureList) {
-                //myself.featureMap = featureMap;
-                myself.featureCache = new igv.FeatureCache(featureList);
+                //self.featureMap = featureMap;
+                self.featureCache = new igv.FeatureCache(featureList);
                 // Finally pass features for query interval to continuation
-                success(myself.featureCache);
+                success(self.featureCache);
 
             });
         }
@@ -136,39 +127,37 @@ var igv = (function (igv) {
 
     /**
      *
-     * @param success
+     * @param continuation
      * @param range -- genomic range to load.
      */
     igv.AneuFeatureSource.prototype.loadFeatures = function (continuation, range) {
 
-        var self = this;
-        var parser = self.parser;
-        var options = {
-                headers: self.config.headers,           // http headers, not file header
-                tokens: self.config.tokens,           // http headers, not file header
-                withCredentials: self.config.withCredentials
-            },
-            success = function (data) {
-                // console.log("Loaded data, calling parser.parseFeatures: parser="+parser);
-                self.header = parser.parseHeader(data);
-                var features = parser.parseFeatures(data);
-                //console.log("Calling success "+success);
-                //console.log("nr features in argument "+features.length);
-                continuation(features);   // <= PARSING DONE HERE
-            };
+        var self = this,
+            options,
+            success,
+            features;
 
-        //  console.log("=================== load features. File is: "+myself.localFile+"/"+myself.url);
-        if (self.localFile) {
-            //    console.log("Loading local file: "+JSON.stringify(localFile));
-            igvxhr.loadStringFromFile(self.localFile, options).then(success);
-        }
-        else {
-            //console.log("Loading URL "+myself.url);
-            igvxhr.loadString(self.url, options).then(success);
-        }
+        options = {
+            headers: self.config.headers,           // http headers, not file header
+            tokens: self.config.tokens,           // http headers, not file header
+            withCredentials: self.config.withCredentials
+        };
 
+        success = function (data) {
+            self.header = self.parser.parseHeader(data);
+            features = self.parser.parseFeatures(data);
+            continuation(features);   // <= PARSING DONE HERE
+        };
 
-    }
+        igvxhr.loadPathWithConfiguration(self.config, options, success, function () { });
+
+        // if (self.config.localFile) {
+        //     igvxhr.loadStringFromFile(self.config.localFile, options).then(success);
+        // } else {
+        //     igvxhr.loadString(self.config.url, options).then(success);
+        // }
+
+    };
 
     return igv;
 })

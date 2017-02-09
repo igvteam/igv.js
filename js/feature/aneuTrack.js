@@ -106,7 +106,7 @@ var igv = (function (igv) {
             log("Aneu track has no summary data yet");
             continuation(null);
         }
-    }
+    };
 
     igv.AneuTrack.prototype.loadSummary = function (chr, bpStart, bpEnd, continuation) {
         var self = this;
@@ -122,8 +122,7 @@ var igv = (function (igv) {
 //        		log("Got json: " + JSON.stringify(json));
                     self.featureSourceRed = new igv.AneuFeatureSource(config, json.redline);
                     self.getSummary(chr, bpStart, bpEnd, continuation);
-                }
-                else {
+                } else {
                     //log("afterJsonLoaded: got no json result for "+config.url);
                 }
             };
@@ -134,15 +133,23 @@ var igv = (function (igv) {
                 success: afterJsonLoaded,
                 withCredentials: self.config.withCredentials
             };
-            var config = self.config;
-            if (config.localFile) {
-                igvxhr.loadStringFromFile(config.localFile, afterload);
-            } else {
-                igvxhr.loadString(config.url, afterload);
-            }
+
+            igvxhr.loadPathWithConfiguration(self.config, afterload, function () {
+                    // nuthin
+                },
+                function () {
+                    // nuthin
+                });
+
+            // if (self.config.localFile) {
+            //     igvxhr.loadStringFromFile(self.config.localFile, afterload);
+            // } else {
+            //     igvxhr.loadString(self.config.url, afterload);
+            // }
+
             return null;
         }
-    }
+    };
 
     igv.AneuTrack.prototype.getFeatures = function (chr, bpStart, bpEnd) {
 
@@ -167,7 +174,7 @@ var igv = (function (igv) {
 
             });
         });
-    }
+    };
 
     function loadJson() {
 
@@ -175,34 +182,41 @@ var igv = (function (igv) {
 
         return new Promise(function (fulfill, reject) {
 
+            var afterJsonLoaded,
+                afterload;
+
             if (self.featureSourceRed) {
                 fulfill();
-            }
-            else {
-                var afterJsonLoaded = function (json) {
-                        json = JSON.parse(json);
-                        log("Got json: " + json + ", diff :" + json.diff);
-                        self.featureSource = new igv.AneuFeatureSource(config, json.diff);
-                        self.featureSourceRed = new igv.AneuFeatureSource(config, json.redline);
-                        fulfill();
-                    },
+            } else {
+                afterJsonLoaded = function (json) {
+                    json = JSON.parse(json);
+                    log("Got json: " + json + ", diff :" + json.diff);
+                    self.featureSource = new igv.AneuFeatureSource(config, json.diff);
+                    self.featureSourceRed = new igv.AneuFeatureSource(config, json.redline);
+                    fulfill();
+                };
 
-                    afterload = {
-                        headers: self.config.headers, // http headers, not file header
-                        tokens: self.config.tokens, // http headers, not file header
-                        withCredentials: self.config.withCredentials
-                    };
+                afterload = {
+                    headers: self.config.headers, // http headers, not file header
+                    tokens: self.config.tokens, // http headers, not file header
+                    withCredentials: self.config.withCredentials
+                };
 
-                var config = self.config;
-                if (config.localFile) {
-                    igvxhr.loadStringFromFile(config.localFile, afterload).then(afterJsonLoaded);
-                } else {
-                    igvxhr.loadString(config.url, afterload).then(afterJsonLoaded);
-                }
+
+                igvxhr.loadPathWithConfiguration(self.config, afterload, afterJsonLoaded, function () {
+                    // nuthin
+                });
+
+
+                // if (self.config.localFile) {
+                //     igvxhr.loadStringFromFile(self.config.localFile, afterload).then(afterJsonLoaded);
+                // } else {
+                //     igvxhr.loadString(self.config.url, afterload).then(afterJsonLoaded);
+                // }
+
             }
         });
     }
-
 
     igv.AneuTrack.prototype.getColor = function (value) {
         var expected = 2;
@@ -511,8 +525,8 @@ var igv = (function (igv) {
                 self.samples[sampleNames[i]] = i;
             }
             self.sampleNames = sampleNames;
-            
-            
+
+
 
             callback();
 
@@ -603,7 +617,7 @@ var igv = (function (igv) {
         }
 
         return null;
-    }
+    };
 
     return igv;
 
