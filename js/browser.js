@@ -191,7 +191,10 @@ var igv = (function (igv) {
             loadedTracks = [];
 
         _.each(configList, function (config) {
-            loadedTracks.push(self.loadTrack(config));
+            var track = self.loadTrack(config);
+            if (track) {
+                loadedTracks.push( track );
+            }
         });
 
         // Really we should just resize the new trackViews, but currently there is no way to get a handle on those
@@ -226,8 +229,10 @@ var igv = (function (igv) {
         }
 
         newTrack = createTrackWithConfiguration(config);
+
         if (undefined === newTrack) {
             igv.presentAlert("Unknown file type: " + config.url);
+            return newTrack;
         }
 
         // Set order field of track here.  Otherwise track order might get shuffled during asynchronous load
@@ -426,7 +431,7 @@ var igv = (function (igv) {
             }
 
 
-        };
+        }
 
     };
 
