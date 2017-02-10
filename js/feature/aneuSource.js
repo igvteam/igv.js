@@ -149,11 +149,7 @@ var igv = (function (igv) {
             continuation(features);   // <= PARSING DONE HERE
         };
 
-        if (self.config.localFile) {
-            igvxhr.loadStringFromFile(self.config.localFile, options).then(success);
-        } else {
-            igvxhr.loadString(self.config.url, options).then(success);
-        }
+        igvxhr.loadString(self.config.localFile ? self.config.localFile : self.config.url, options).then(success);
 
     };
 
