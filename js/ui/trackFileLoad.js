@@ -29,7 +29,7 @@
  */
 var igv = (function (igv) {
 
-    igv.DragAndDrop = function () {
+    igv.TrackFileLoad = function () {
 
         var self = this,
             $box_input,
@@ -127,7 +127,7 @@ var igv = (function (igv) {
 
     };
 
-    igv.DragAndDrop.prototype.initializationHelper = function () {
+    igv.TrackFileLoad.prototype.initializationHelper = function () {
 
         var self = this,
             $drag_and_drop,
