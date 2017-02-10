@@ -134,17 +134,11 @@ var igv = (function (igv) {
                 withCredentials: self.config.withCredentials
             };
 
-            igvxhr.loadPathWithConfiguration(self.config, afterload, function () {
-                // nuthin
-            }, function () {
-// nuthin
-            });
-
-            // if (self.config.localFile) {
-            //     igvxhr.loadStringFromFile(self.config.localFile, afterload);
-            // } else {
-            //     igvxhr.loadString(self.config.url, afterload);
-            // }
+            if (self.config.localFile) {
+                igvxhr.loadStringFromFile(self.config.localFile, afterload);
+            } else {
+                igvxhr.loadString(self.config.url, afterload);
+            }
 
             return null;
         }
@@ -201,17 +195,11 @@ var igv = (function (igv) {
                     withCredentials: self.config.withCredentials
                 };
 
-
-                igvxhr.loadPathWithConfiguration(self.config, afterload, afterJsonLoaded, function () {
-                    // nuthin
-                });
-
-
-                // if (self.config.localFile) {
-                //     igvxhr.loadStringFromFile(self.config.localFile, afterload).then(afterJsonLoaded);
-                // } else {
-                //     igvxhr.loadString(self.config.url, afterload).then(afterJsonLoaded);
-                // }
+                if (self.config.localFile) {
+                    igvxhr.loadStringFromFile(self.config.localFile, afterload).then(afterJsonLoaded);
+                } else {
+                    igvxhr.loadString(self.config.url, afterload).then(afterJsonLoaded);
+                }
 
             }
         });
