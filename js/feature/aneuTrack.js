@@ -134,7 +134,7 @@ var igv = (function (igv) {
                 withCredentials: self.config.withCredentials
             };
 
-            igvxhr.loadString(self.config.localFile ? self.config.localFile : self.config.url, afterload);
+            igvxhr.loadString(self.config.url, afterload);
 
             return null;
         }
@@ -191,7 +191,7 @@ var igv = (function (igv) {
                     withCredentials: self.config.withCredentials
                 };
 
-                igvxhr.loadString(self.config.localFile ? self.config.localFile : self.config.url, afterload).then(afterJsonLoaded);
+                igvxhr.loadString(self.config.url, afterload).then(afterJsonLoaded);
 
             }
         });

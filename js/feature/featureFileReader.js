@@ -40,8 +40,8 @@ var igv = (function (igv) {
 
         this.config = config || {};
 
-        if (this.config.localFile) {
-            this.filename = this.config.localFile.name;
+        if (igv.isFilePath(this.config.url)) {
+            this.filename = this.config.url.name;
         } else {
             uriParts = igv.parseUri(this.config.url);
             this.filename = uriParts.file;
@@ -105,7 +105,7 @@ var igv = (function (igv) {
                 fullfill(self.parser.parseFeatures(data));   // <= PARSING DONE HERE
             }
 
-            igvxhr.loadString(self.config.localFile ? self.config.localFile : self.config.url, options).then(parseData).catch(reject);
+            igvxhr.loadString(self.config.url, options).then(parseData).catch(reject);
 
         });
     }
@@ -171,7 +171,7 @@ var igv = (function (igv) {
                         if (self.index.tabix) {
                             igvxhr.loadArrayBuffer(self.config.url, options).then(success).catch(reject);
                         } else {
-                            igvxhr.loadString(self.config.localFile ? self.config.localFile : self.config.url, options).then(success).catch(reject);
+                            igvxhr.loadString(self.config.url, options).then(success).catch(reject);
                         }
 
                     }))
@@ -268,7 +268,7 @@ var igv = (function (igv) {
                             fullfill(self.header);
                         };
 
-                        igvxhr.loadString(self.config.localFile ? self.config.localFile : self.config.url, options).then(success).catch(reject);
+                        igvxhr.loadString(self.config.url, options).then(success).catch(reject);
 
                     } else {
                         loadFeaturesNoIndex
