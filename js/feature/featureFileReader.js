@@ -91,7 +91,7 @@ var igv = (function (igv) {
 
         var self = this;
 
-        return new Promise(function (fulfill, reject) {
+        return new Promise(function (fullfill, reject) {
             var options = {
                 headers: self.config.headers,           // http headers, not file header
                 withCredentials: self.config.withCredentials
@@ -102,16 +102,14 @@ var igv = (function (igv) {
                 if (self.header instanceof String && self.header.startsWith("##gff-version 3")) {
                     self.format = 'gff3';
                 }
-                fulfill(self.parser.parseFeatures(data));   // <= PARSING DONE HERE
+                fullfill(self.parser.parseFeatures(data));   // <= PARSING DONE HERE
             }
-
-            igvxhr.loadPathWithConfiguration(self.config, options, parseData, reject);
-
-            // if (self.config.localFile) {
-            //     igvxhr.loadStringFromFile(self.config.localFile, options).then(parseData).catch(reject);
-            // } else {
-            //     igvxhr.loadString(self.config.url, options).then(parseData).catch(reject);
-            // }
+            
+            if (self.config.localFile) {
+                igvxhr.loadStringFromFile(self.config.localFile, options).then(parseData).catch(reject);
+            } else {
+                igvxhr.loadString(self.config.url, options).then(parseData).catch(reject);
+            }
 
 
         });
@@ -123,7 +121,7 @@ var igv = (function (igv) {
         //console.log("Using index");
         var self = this;
 
-        return new Promise(function (fulfill, reject) {
+        return new Promise(function (fullfill, reject) {
 
             var blocks,
                 tabix = self.index && self.index.tabix,
@@ -133,13 +131,13 @@ var igv = (function (igv) {
             blocks = self.index.blocksForRange(refId, start, end);
 
             if (!blocks || blocks.length === 0) {
-                fulfill(null);       // TODO -- is this correct?  Should it return an empty array?
+                fullfill(null);       // TODO -- is this correct?  Should it return an empty array?
             }
             else {
 
                 blocks.forEach(function (block) {
 
-                    promises.push(new Promise(function (fulfill, reject) {
+                    promises.push(new Promise(function (fullfill, reject) {
 
                         var startPos = block.minv.block,
                             startOffset = block.minv.offset,
@@ -170,22 +168,20 @@ var igv = (function (igv) {
 
                             slicedData = startOffset ? inflated.slice(startOffset) : inflated;
                             var f = self.parser.parseFeatures(slicedData);
-                            fulfill(f);
+                            fullfill(f);
                         };
 
 
                         // Async load
-                        igvxhr.loadPathWithConfiguration(_.extend(self.config, {index: self.index}), options, success, reject);
-
-                        // if (self.config.localFile) {
-                        //     igvxhr.loadStringFromFile(self.config.localFile, options).then(success).catch(reject);
-                        // } else {
-                        //     if (self.index.tabix) {
-                        //         igvxhr.loadArrayBuffer(self.config.url, options).then(success).catch(reject);
-                        //     } else {
-                        //         igvxhr.loadString(self.config.url, options).then(success).catch(reject);
-                        //     }
-                        // }
+                        if (self.config.localFile) {
+                            igvxhr.loadStringFromFile(self.config.localFile, options).then(success).catch(reject);
+                        } else {
+                            if (self.index.tabix) {
+                                igvxhr.loadArrayBuffer(self.config.url, options).then(success).catch(reject);
+                            } else {
+                                igvxhr.loadString(self.config.url, options).then(success).catch(reject);
+                            }
+                        }
                     }))
                 });
 
@@ -210,7 +206,7 @@ var igv = (function (igv) {
                             });
                         }
 
-                        fulfill(allFeatures)
+                        fullfill(allFeatures)
                     })
                     .catch(reject);
             }
@@ -223,7 +219,7 @@ var igv = (function (igv) {
 
         var self = this,
             isIndeedIndexible = isIndexable.call(this);
-        return new Promise(function (fulfill, reject) {
+        return new Promise(function (fullfill, reject) {
 
             if (self.indexed === undefined && isIndeedIndexible) {
                 loadIndex.call(self).then(function (index) {
@@ -234,11 +230,11 @@ var igv = (function (igv) {
                     else {
                         self.indexed = false;
                     }
-                    fulfill(self.index);
+                    fullfill(self.index);
                 });
             }
             else {
-                fulfill(self.index);   // Is either already loaded, or there isn't one
+                fullfill(self.index);   // Is either already loaded, or there isn't one
             }
 
         });
@@ -248,11 +244,11 @@ var igv = (function (igv) {
 
         var self = this;
 
-        return new Promise(function (fulfill, reject) {
+        return new Promise(function (fullfill, reject) {
 
 
             if (self.header) {
-                fulfill(self.header);
+                fullfill(self.header);
             }
 
             else {
@@ -277,23 +273,21 @@ var igv = (function (igv) {
 
                         success = function (data) {
                             self.header = self.parser.parseHeader(data);
-                            fulfill(self.header);
+                            fullfill(self.header);
                         };
-
-                        igvxhr.loadPathWithConfiguration(self.config, options, success, reject);
-
-                        // if (self.config.localFile) {
-                        //     igvxhr.loadStringFromFile(self.config.localFile, options).then(success);
-                        // } else {
-                        //     igvxhr.loadString(              self.config.url, options).then(success).catch(reject);
-                        // }
+                        
+                        if (self.config.localFile) {
+                            igvxhr.loadStringFromFile(self.config.localFile, options).then(success);
+                        } else {
+                            igvxhr.loadString(              self.config.url, options).then(success).catch(reject);
+                        }
 
                     } else {
                         loadFeaturesNoIndex
                             .call(self, undefined).then(function (features) {
                             var header = self.header || {};
                             header.features = features;
-                            fulfill(header);
+                            fullfill(header);
                         })
                             .catch(reject);
                     }
@@ -305,14 +299,14 @@ var igv = (function (igv) {
 
     /**
      *
-     * @param fulfill
+     * @param fullfill
      * @param range -- genomic range to load.  For use with indexed source (optional)
      */
     igv.FeatureFileReader.prototype.readFeatures = function (chr, start, end) {
 
         var self = this;
 
-        return new Promise(function (fulfill, reject) {
+        return new Promise(function (fullfill, reject) {
 
             if (self.index) {
                 loadFeaturesWithIndex.call(self, chr, start, end).then(packFeatures).catch(reject);
@@ -323,7 +317,7 @@ var igv = (function (igv) {
 
             function packFeatures(features) {
                 // TODO pack
-                fulfill(features);
+                fullfill(features);
             }
 
         });
