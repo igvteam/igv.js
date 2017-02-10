@@ -75,7 +75,7 @@ var igv = (function (igv) {
                 var type = binaryParser.getByte();
                 var isLeaf = (type === 1) ? true : false;
                 var reserved = binaryParser.getByte();
-                var count = binaryParser.getShort();
+                var count = binaryParser.getUShort();
 
                 filePosition += 4;
 
