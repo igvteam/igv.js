@@ -56,6 +56,19 @@ var igv = (function (igv) {
         return retValue;
     }
 
+    igv.BinaryParser.prototype.getUShort = function () {
+
+        // var byte1 = this.getByte(),
+        //     byte2 = this.getByte(),
+        //     retValue = ((byte2 << 24 >>> 16) + (byte1 << 24 >>> 24));
+        //     return retValue;
+
+       //
+        var retValue = this.view.getUint16 (this.position, this.littleEndian);
+        this.position += 2
+        return retValue;
+    }
+
 
     igv.BinaryParser.prototype.getInt = function () {
 

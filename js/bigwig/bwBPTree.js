@@ -60,7 +60,7 @@ var igv = (function (igv) {
 
             var type = byteBuffer.getByte(),
                 reserved = byteBuffer.getByte(),
-                count = byteBuffer.getShort(),
+                count = byteBuffer.getUShort(),
                 i,
                 key,
                 chromId,
