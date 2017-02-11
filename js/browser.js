@@ -344,15 +344,18 @@ var igv = (function (igv) {
 
             function inferFileFormat(config) {
 
+                var path,
+                    fn,
+                    idx,
+                    ext;
+
                 if (config.format) {
                     config.format = config.format.toLowerCase();
                     return;
                 }
 
-                var path = config.url || config.localFile.name,
-                    fn = path.toLowerCase(),
-                    idx,
-                    ext;
+                path = igv.isFilePath(config.url) ? config.url.name : config.url;
+                fn = path.toLowerCase();
 
                 //Strip parameters -- handle local files later
                 idx = fn.indexOf("?");
@@ -416,7 +419,7 @@ var igv = (function (igv) {
 
             translateDeprecatedTypes(config);
 
-            if (undefined === config.sourceType && (config.url || config.localFile)) {
+            if (undefined === config.sourceType && config.url) {
                 config.sourceType = "file";
             }
 
@@ -1651,10 +1654,6 @@ var igv = (function (igv) {
                     var genomeId = this.genome.id ? this.genome.id : "hg19";
                     url.replace("$GENOME$", genomeId);
                 }
-
-                // var loader = new igv.DataLoader(url);
-                // if (range)  loader.range = range;
-                // loader.loadBinaryString(callback);
 
                 igvxhr.loadString(url).then(function (data) {
 
