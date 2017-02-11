@@ -36,8 +36,8 @@ var igv = (function (igv) {
 
         this.config = config || {};
 
-        if (this.config.localFile) {
-            this.filename = getPath(this.config.localFile.name) + thefilename;
+        if (igv.isFilePath(this.config.url)) {
+            this.filename = getPath(this.config.url.name) + thefilename;
         } else {
             this.config.url = getPath(this.config.url) + thefilename;
             this.filename = thefilename;
@@ -149,11 +149,7 @@ var igv = (function (igv) {
             continuation(features);   // <= PARSING DONE HERE
         };
 
-        if (self.config.localFile) {
-            igvxhr.loadStringFromFile(self.config.localFile, options).then(success);
-        } else {
-            igvxhr.loadString(self.config.url, options).then(success);
-        }
+        igvxhr.loadString(self.config.url, options).then(success);
 
     };
 

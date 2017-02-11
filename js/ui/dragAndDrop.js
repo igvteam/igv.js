@@ -147,7 +147,7 @@ var igv = (function (igv) {
             var file = _.first(droppedFiles);
 
             dismissDragAndDrop(self);
-            igv.browser.loadTracksWithConfigList( [ { localFile: file } ] );
+            igv.browser.loadTracksWithConfigList( [ { url: file } ] );
 
         });
 

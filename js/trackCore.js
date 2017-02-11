@@ -44,7 +44,7 @@ var igv = (function (igv) {
             track.name = config.name;
         }
         else {
-            if (config.localFile) track.name = config.localFile.name;
+            if (igv.isFilePath(config.url)) track.name = config.url.name;
             else track.name = config.url;
 
         }

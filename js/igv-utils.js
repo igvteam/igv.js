@@ -25,6 +25,10 @@
 
 var igv = (function (igv) {
 
+    igv.isFilePath = function (path) {
+        return (path instanceof File);
+    };
+
     igv.makeToggleButton = function (buttonOnLabel, buttonOffLabel, configurationKey, get$Target, continuation) {
 
         var $button = $('<div class="igv-nav-bar-toggle-button">');

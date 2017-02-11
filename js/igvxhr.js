@@ -194,66 +194,37 @@ var igvxhr = (function (igvxhr) {
         })
     };
 
-    igvxhr.loadPathWithConfiguration = function (config, options, thenHandler, catchHandler) {
-
-        if (config.localFile) {
-            this.loadStringFromFile(config.localFile, options).then(thenHandler).catch(catchHandler);
+    igvxhr.loadString = function (path, options) {
+        if (path instanceof File) {
+            return loadFileHelper(path, options);
         } else {
-            if (config.index && config.index.tabix) {
-                this.loadArrayBuffer(     config.url, options).then(thenHandler).catch(catchHandler);
-            } else {
-                this.loadString(          config.url, options).then(thenHandler).catch(catchHandler);
-            }
+            return loadURLHelper(path, options);
         }
-
     };
 
-    /**
-     * Load a "raw" string.
-     */
-    igvxhr.loadString = function (url, options) {
+    igvxhr.arrayBufferToString = function (arraybuffer, compression) {
 
-        var compression,
-            fn,
-            idx;
+        var plain, inflate;
 
-        if (options === undefined) options = {};
-
-        // Strip parameters from url
-        // TODO -- handle local files with ?
-        idx = url.indexOf("?");
-        fn = idx > 0 ? url.substring(0, idx) : url;
-
-        if (options.bgz) {
-            compression = BGZF;
-        } else if (fn.endsWith(".gz")) {
-            compression = GZIP;
-        } else {
-            compression = NONE;
+        if (compression === GZIP) {
+            inflate = new Zlib.Gunzip(new Uint8Array(arraybuffer));
+            plain = inflate.decompress();
+        }
+        else if (compression === BGZF) {
+            plain = new Uint8Array(igv.unbgzf(arraybuffer));
+        }
+        else {
+            plain = new Uint8Array(arraybuffer);
         }
 
-        if (compression === NONE) {
-            options.mimeType = 'text/plain; charset=x-user-defined';
-            return igvxhr.load(url, options);
-        } else {
-            options.responseType = "arraybuffer";
-
-            return new Promise(function (fullfill, reject) {
-
-                igvxhr
-                    .load(url, options)
-                    .then(
-                        function (data) {
-                            var result = igvxhr.arrayBufferToString(data, compression);
-                            fullfill(result);
-                        })
-                    .catch(reject)
-            })
+        var result = "";
+        for (var i = 0, len = plain.length; i < len; i++) {
+            result = result + String.fromCharCode(plain[i]);
         }
-
+        return result;
     };
 
-    igvxhr.loadStringFromFile = function (localfile, options) {
+    function loadFileHelper (localfile, options) {
 
         return new Promise(function (fullfill, reject) {
 
@@ -286,33 +257,50 @@ var igvxhr = (function (igvxhr) {
             fileReader.readAsArrayBuffer(localfile);
 
         });
-    };
 
-    igvxhr.arrayBufferToString = function (arraybuffer, compression) {
+    }
 
-        var plain, inflate;
+    function loadURLHelper(url, options) {
 
-        if (compression === GZIP) {
-            inflate = new Zlib.Gunzip(new Uint8Array(arraybuffer));
-            plain = inflate.decompress();
+        var compression,
+            fn,
+            idx;
+
+        if (options === undefined) options = {};
+
+        // Strip parameters from path
+        // TODO -- handle local files with ?
+        idx = url.indexOf("?");
+        fn = idx > 0 ? url.substring(0, idx) : url;
+
+        if (options.bgz) {
+            compression = BGZF;
+        } else if (fn.endsWith(".gz")) {
+            compression = GZIP;
+        } else {
+            compression = NONE;
         }
-        else if (compression === BGZF) {
-            plain = new Uint8Array(igv.unbgzf(arraybuffer));
-        }
-        else {
-            plain = new Uint8Array(arraybuffer);
+
+        if (compression === NONE) {
+            options.mimeType = 'text/plain; charset=x-user-defined';
+            return igvxhr.load(url, options);
+        } else {
+            options.responseType = "arraybuffer";
+
+            return new Promise(function (fullfill, reject) {
+
+                igvxhr
+                    .load(url, options)
+                    .then(
+                        function (data) {
+                            var result = igvxhr.arrayBufferToString(data, compression);
+                            fullfill(result);
+                        })
+                    .catch(reject)
+            })
         }
 
-        var result = "";
-        for (var i = 0, len = plain.length; i < len; i++) {
-            result = result + String.fromCharCode(plain[i]);
-        }
-        return result;
-    };
-
-    igv.AbortLoad = function () {
-
-    };
+    }
 
     function isCrossDomain(url) {
 
@@ -321,6 +309,10 @@ var igvxhr = (function (igvxhr) {
         return !url.startsWith(origin);
 
     }
+
+    igv.AbortLoad = function () {
+
+    };
 
     return igvxhr;
 
