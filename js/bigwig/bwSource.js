@@ -103,13 +103,13 @@ var igv = (function (igv) {
 
                                 var i, allFeatures = featureArrays[0];
                                 if(featureArrays.length > 1) {
-                                   for(i=0; i<featureArrays.length; i++) {
+                                   for(i=1; i<featureArrays.length; i++) {
                                        allFeatures = allFeatures.concat(featureArrays[i]);
                                    }
-                                    allFeatures.sort(function (a, b) {
-                                        return a.start - b.start;
-                                    })
-                                }
+                                }  
+                                allFeatures.sort(function (a, b) {
+                                    return a.start - b.start;
+                                })
 
                                 fulfill(allFeatures)
                             }).catch(reject);
