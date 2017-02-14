@@ -186,8 +186,6 @@
 
     <div id="trackList">
 
-
-
         <div onclick="igv.browser.loadTrack({
                             url: 'https://s3-us-west-2.amazonaws.com/ilmn.igv-test/test2.bigWig',
                             name: 'Big BigWig'
@@ -294,6 +292,24 @@
         </div>
 
         <div onclick="igv.browser.loadTrack({
+                            url: 'http://hgdownload.cse.ucsc.edu/goldenPath/hg19/encodeDCC/wgEncodeUwRepliSeq/wgEncodeUwRepliSeqSknshValleysRep1.bed.gz',
+                            name: 'BED - Bad URL'
+                        })"> BED - Bad URL
+        </div>
+
+        <div onclick="igv.browser.loadTrack({
+                            url: '../test/data/bed/wgEncodeUwRepliSeqSknshValleysRep1.bed.gz',
+                            name: 'BED - Bad Local File - dot gz'
+                        })"> BED - Bad Local File (.gz)
+        </div>
+
+        <div onclick="igv.browser.loadTrack({
+                            url: '../test/data/bed/wgEncodeUwRepliSeqSknshValleysRep1.bed',
+                            name: 'BED - Bad Local File'
+                        })"> BED - Bad Local File
+        </div>
+
+        <div onclick="igv.browser.loadTrack({
                             url: '../test/data/bed/brokenbed/broken_bed.bed.gz',
                             indexURL: '../test/data/bed/brokenbed/broken_bed.bed.gz.tbi',
                             name: 'broken bed tabix'
@@ -328,6 +344,15 @@
             indexed: false,
             searchable: true
         })">EGFR bed (searchable: true)
+        </div>
+
+        <div onclick="igv.browser.loadTrack({
+            url: '../test/data/bed/basic_feature_3_columns.bed',
+            name: 'egfr',
+            format: 'bed',
+            indexed: false,
+            searchable: true
+        })">BEED - Basic Feature 3 Columns
         </div>
 
         <div onclick="igv.browser.loadTrack({
