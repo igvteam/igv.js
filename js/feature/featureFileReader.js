@@ -35,8 +35,7 @@ var igv = (function (igv) {
      */
     igv.FeatureFileReader = function (config) {
 
-        var self = this,
-            uriParts;
+        var uriParts;
 
         this.config = config || {};
 
@@ -50,13 +49,99 @@ var igv = (function (igv) {
 
         this.format = this.config.format;
 
-        this.parser = getParser.call(this, this.format, this.config.decode);
+        this.parser = this.getParser(this.format, this.config.decode);
 
         this.supportsWholeGenome = (this.format === "seg");  // TODO -- move this up to track level
     };
 
+    /**
+     *
+     * @param chr
+     * @param start
+     * @param end
+     */
+    igv.FeatureFileReader.prototype.readFeatures = function (chr, start, end) {
 
-    function getParser(format, decode) {
+        var self = this;
+
+        return new Promise(function (fullfill, reject) {
+
+            if (self.index) {
+                self
+                    .loadFeaturesWithIndex(chr, start, end)
+                    .then(packFeatures)
+                    .catch(reject);
+            }
+            else {
+                self
+                    .loadFeaturesNoIndex()
+                    .then(packFeatures)
+                    .catch(reject);
+            }
+
+            function packFeatures(features) {
+                // TODO pack
+                fullfill(features);
+            }
+
+        });
+    };
+
+    igv.FeatureFileReader.prototype.readHeader = function () {
+
+        var self = this;
+
+        return new Promise(function (fullfill, reject) {
+
+            if (self.header) {
+                fullfill(self.header);
+            } else {
+                self
+                    .getIndex()
+                    .then(function (index) {
+
+                        var options,
+                            success;
+
+                        if (index) {
+
+                            // Load the file header (not HTTP header) for an indexed file.
+                            // TODO -- note this will fail if the file header is > 65kb in size
+                            options = {
+                                headers: self.config.headers,           // http headers, not file header
+                                bgz: index.tabix,
+                                range: {start: 0, size: 65000},
+                                withCredentials: self.config.withCredentials
+                            };
+
+                            success = function (data) {
+                                self.header = self.parser.parseHeader(data);
+                                fullfill(self.header);
+                            };
+
+                            igvxhr
+                                .loadString(self.config.url, options)
+                                .then(success)
+                                .catch(reject);
+
+                        } else {
+                            self
+                                .loadFeaturesNoIndex()
+                                .then(function (features) {
+                                    var header = self.header || {};
+                                    header.features = features;
+                                    fullfill(header);
+                                })
+                                .catch(reject);
+                        }
+                    });
+            }
+        });
+
+    };
+
+    igv.FeatureFileReader.prototype.getParser = function (format, decode) {
+
         switch (format) {
             case "vcf":
                 return new igv.VcfParser();
@@ -66,17 +151,17 @@ var igv = (function (igv) {
                 return new igv.FeatureParser(format, decode, this.config);
         }
 
-    }
+    };
 
-    function isIndexable() {
-        return this.config.indexURL || (this.type !== "wig" && this.type !== "seg" && this.config.indexed != false);
-    }
+    igv.FeatureFileReader.prototype.isIndexable = function () {
 
+        return this.config.indexURL /*|| (this.type !== "wig" && this.type !== "seg" && this.config.indexed != false)*/;
+    };
 
     /**
      * Return a Promise for the async loaded index
      */
-    function loadIndex() {
+    igv.FeatureFileReader.prototype.loadIndex = function () {
         var idxFile = this.config.indexURL;
         if (this.filename.endsWith(".gz")) {
             if (!idxFile) idxFile = this.config.url + ".tbi";
@@ -85,9 +170,9 @@ var igv = (function (igv) {
             if (!idxFile) idxFile = this.config.url + ".idx";
             return igv.loadTribbleIndex(idxFile, this.config);
         }
-    }
+    };
 
-    function loadFeaturesNoIndex() {
+    igv.FeatureFileReader.prototype.loadFeaturesNoIndex = function () {
 
         var self = this;
 
@@ -105,13 +190,15 @@ var igv = (function (igv) {
                 fullfill(self.parser.parseFeatures(data));   // <= PARSING DONE HERE
             }
 
-            igvxhr.loadString(self.config.url, options).then(parseData).catch(reject);
+            igvxhr
+                .loadString(self.config.url, options)
+                .then(parseData)
+                .catch(reject);
 
         });
-    }
+    };
 
-
-    function loadFeaturesWithIndex(chr, start, end) {
+    igv.FeatureFileReader.prototype.loadFeaturesWithIndex = function (chr, start, end) {
 
         //console.log("Using index");
         var self = this;
@@ -127,8 +214,7 @@ var igv = (function (igv) {
 
             if (!blocks || blocks.length === 0) {
                 fullfill(null);       // TODO -- is this correct?  Should it return an empty array?
-            }
-            else {
+            } else {
 
                 blocks.forEach(function (block) {
 
@@ -169,9 +255,15 @@ var igv = (function (igv) {
 
                         // Async load
                         if (self.index.tabix) {
-                            igvxhr.loadArrayBuffer(self.config.url, options).then(success).catch(reject);
+                            igvxhr
+                                .loadArrayBuffer(self.config.url, options)
+                                .then(success)
+                                .catch(reject);
                         } else {
-                            igvxhr.loadString(self.config.url, options).then(success).catch(reject);
+                            igvxhr
+                                .loadString(self.config.url, options)
+                                .then(success)
+                                .catch(reject);
                         }
 
                     }))
@@ -204,116 +296,31 @@ var igv = (function (igv) {
             }
         });
 
-    }
+    };
 
+    igv.FeatureFileReader.prototype.getIndex = function () {
 
-    function getIndex() {
+        var self = this;
+        return new Promise(function (fullfill) {
 
-        var self = this,
-            isIndeedIndexible = isIndexable.call(this);
-        return new Promise(function (fullfill, reject) {
-
-            if (self.indexed === undefined && isIndeedIndexible) {
-                loadIndex.call(self).then(function (index) {
-                    if (index) {
-                        self.index = index;
-                        self.indexed = true;
-                    }
-                    else {
-                        self.indexed = false;
-                    }
-                    fullfill(self.index);
-                });
-            }
-            else {
+            if (self.indexed === undefined && self.isIndexable()) {
+                self
+                    .loadIndex()
+                    .then(function (index) {
+                        if (index) {
+                            self.index = index;
+                            self.indexed = true;
+                        } else {
+                            self.indexed = false;
+                        }
+                        fullfill(self.index);
+                    });
+            } else {
                 fullfill(self.index);   // Is either already loaded, or there isn't one
             }
 
         });
-    }
-
-    igv.FeatureFileReader.prototype.readHeader = function () {
-
-        var self = this;
-
-        return new Promise(function (fullfill, reject) {
-
-
-            if (self.header) {
-                fullfill(self.header);
-            }
-
-            else {
-
-                // We force a load of the index first
-
-                getIndex.call(self).then(function (index) {
-
-                    var options,
-                        success;
-
-                    if (index) {
-
-                        // Load the file header (not HTTP header) for an indexed file.
-                        // TODO -- note this will fail if the file header is > 65kb in size
-                        options = {
-                            headers: self.config.headers,           // http headers, not file header
-                            bgz: index.tabix,
-                            range: {start: 0, size: 65000},
-                            withCredentials: self.config.withCredentials
-                        };
-
-                        success = function (data) {
-                            self.header = self.parser.parseHeader(data);
-                            fullfill(self.header);
-                        };
-
-                        igvxhr.loadString(self.config.url, options).then(success).catch(reject);
-
-                    } else {
-                        loadFeaturesNoIndex
-                            .call(self, undefined).then(function (features) {
-                            var header = self.header || {};
-                            header.features = features;
-                            fullfill(header);
-                        })
-                            .catch(reject);
-                    }
-                });
-            }
-        });
-
-    }
-
-    /**
-     *
-     * @param fullfill
-     * @param range -- genomic range to load.  For use with indexed source (optional)
-     */
-    igv.FeatureFileReader.prototype.readFeatures = function (chr, start, end) {
-
-        var self = this;
-
-        return new Promise(function (fullfill, reject) {
-
-            if (self.index) {
-                loadFeaturesWithIndex.call(self, chr, start, end).then(packFeatures).catch(reject);
-            }
-            else {
-                loadFeaturesNoIndex.call(self).then(packFeatures).catch(reject);
-            }
-
-            function packFeatures(features) {
-                // TODO pack
-                fullfill(features);
-            }
-
-        });
-    }
-
-
-
-
+    };
 
     return igv;
 })
