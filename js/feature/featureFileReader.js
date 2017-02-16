@@ -155,7 +155,7 @@ var igv = (function (igv) {
 
     igv.FeatureFileReader.prototype.isIndexable = function () {
 
-        return this.config.indexURL /*|| (this.type !== "wig" && this.type !== "seg" && this.config.indexed != false)*/;
+        return this.config.indexURL /*|| (this.type !== "wig" && this.type !== "seg" && this.indexed != false)*/;
     };
 
     /**
@@ -163,11 +163,15 @@ var igv = (function (igv) {
      */
     igv.FeatureFileReader.prototype.loadIndex = function () {
         var idxFile = this.config.indexURL;
-        if (this.filename.endsWith(".gz")) {
-            if (!idxFile) idxFile = this.config.url + ".tbi";
+        if (this.filename.endsWith('.gz')) {
+            if (!idxFile) {
+                idxFile = this.config.url + '.tbi';
+            }
             return igv.loadBamIndex(idxFile, this.config, true);
         } else {
-            if (!idxFile) idxFile = this.config.url + ".idx";
+            if (!idxFile) {
+                idxFile = this.config.url + '.idx';
+            }
             return igv.loadTribbleIndex(idxFile, this.config);
         }
     };
@@ -303,12 +307,12 @@ var igv = (function (igv) {
         var self = this;
         return new Promise(function (fullfill) {
 
-            if (self.indexed === undefined && self.isIndexable()) {
+            if (/*self.indexed === undefined && */self.isIndexable()) {
                 self
                     .loadIndex()
-                    .then(function (index) {
-                        if (index) {
-                            self.index = index;
+                    .then(function (indexOrUndefined) {
+                        if (indexOrUndefined) {
+                            self.index = indexOrUndefined;
                             self.indexed = true;
                         } else {
                             self.indexed = false;
