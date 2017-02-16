@@ -61,70 +61,73 @@ var igv = (function (igv) {
 
         return new Promise(function (fulfill, reject) {
 
+            getChrIndex(self)
+                .then(function (chrToIndex) {
 
-            getChrIndex(self).then(function (chrToIndex) {
+                    var chrId = chrToIndex[chr],
 
-                var chrId = chrToIndex[chr],
+                        alignmentContainer = new igv.AlignmentContainer(chr, bpStart, bpEnd, self.samplingWindowSize, self.samplingDepth, self.pairsSupported);
 
-                    alignmentContainer = new igv.AlignmentContainer(chr, bpStart, bpEnd, self.samplingWindowSize, self.samplingDepth, self.pairsSupported);
+                    if (chrId === undefined) {
+                        fulfill(alignmentContainer);
+                    } else {
 
-                if (chrId === undefined) {
-                    fulfill(alignmentContainer);
-                } else {
+                        getIndex(self)
+                            .then(function (bamIndex) {
 
-                    getIndex(self).then(function (bamIndex) {
-
-                        var chunks = bamIndex.blocksForRange(chrId, bpStart, bpEnd),
-                            promises = [];
+                                var chunks = bamIndex.blocksForRange(chrId, bpStart, bpEnd),
+                                    promises = [];
 
 
-                        if (!chunks) {
-                            fulfill(null);
-                            reject("Error reading bam index");
-                            return;
-                        }
-                        if (chunks.length === 0) {
-                            fulfill(alignmentContainer);
-                            return;
-                        }
-
-                        chunks.forEach(function (c) {
-
-                            promises.push(new Promise(function (fulfill, reject) {
-
-                                var fetchMin = c.minv.block,
-                                    fetchMax = c.maxv.block + 65000,   // Make sure we get the whole block.
-                                    range = {start: fetchMin, size: fetchMax - fetchMin + 1};
-
-                                igvxhr.loadArrayBuffer(self.bamPath,
-                                    {
-                                        headers: self.config.headers,
-                                        range: range,
-                                        withCredentials: self.config.withCredentials
-                                    }).then(function (compressed) {
-
-                                    var ba = new Uint8Array(igv.unbgzf(compressed)); //new Uint8Array(igv.unbgzf(compressed)); //, c.maxv.block - c.minv.block + 1));
-                                    decodeBamRecords(ba, c.minv.offset, alignmentContainer, bpStart, bpEnd, chrId, self.filter);
-
+                                if (!chunks) {
+                                    fulfill(null);
+                                    reject("Error reading bam index");
+                                    return;
+                                }
+                                if (chunks.length === 0) {
                                     fulfill(alignmentContainer);
+                                    return;
+                                }
 
+                                chunks.forEach(function (c) {
+
+                                    promises.push(new Promise(function (fulfill, reject) {
+
+                                        var fetchMin = c.minv.block,
+                                            fetchMax = c.maxv.block + 65000,   // Make sure we get the whole block.
+                                            range = {start: fetchMin, size: fetchMax - fetchMin + 1};
+
+                                        igvxhr.loadArrayBuffer(self.bamPath,
+                                            {
+                                                headers: self.config.headers,
+                                                range: range,
+                                                withCredentials: self.config.withCredentials
+                                            }).then(function (compressed) {
+
+                                            var ba = new Uint8Array(igv.unbgzf(compressed)); //new Uint8Array(igv.unbgzf(compressed)); //, c.maxv.block - c.minv.block + 1));
+                                            decodeBamRecords(ba, c.minv.offset, alignmentContainer, bpStart, bpEnd, chrId, self.filter);
+
+                                            fulfill(alignmentContainer);
+
+                                        }).catch(function (obj) {
+                                            reject(obj);
+                                        });
+
+                                    }))
+                                });
+
+
+                                Promise.all(promises).then(function (ignored) {
+                                    alignmentContainer.finish();
+                                    fulfill(alignmentContainer);
                                 }).catch(function (obj) {
                                     reject(obj);
                                 });
-
-                            }))
-                        });
-
-
-                        Promise.all(promises).then(function (ignored) {
-                            alignmentContainer.finish();
-                            fulfill(alignmentContainer);
-                        }).catch(function (obj) {
-                            reject(obj);
-                        });
-                    }).catch(reject);
-                }
-            }).catch(reject);
+                            })
+                            .catch(reject);
+                    }
+                })
+                .catch(reject);
         });
 
 
@@ -428,13 +431,14 @@ var igv = (function (igv) {
 
             if (bam.index) {
                 fulfill(bam.index);
-            }
-            else {
-                igv.loadBamIndex(bam.baiPath, bam.config).then(function (index) {
-                    bam.index = index;
-
-                    fulfill(bam.index);
-                }).catch(reject);
+            } else {
+                igv
+                    .loadBamIndex(bam.baiPath, bam.config)
+                    .then(function (index) {
+                        bam.index = index;
+                        fulfill(bam.index);
+                    })
+                    .catch(reject);
             }
         });
     }
