@@ -158,7 +158,9 @@ var igv = (function (igv) {
                         fulfill(getWGFeatures(featureCache.allFeatures()));
                     }
                     else {
-                        self.reader.readFeatures(chr).then(function (featureList) {
+                        self.reader
+                            .readFeatures(chr)
+                            .then(function (featureList) {
                             if (featureList && typeof featureList.forEach === 'function') {  // Have result AND its an array type
                                 if ("gtf" === self.config.format || "gff3" === self.config.format || "gff" === self.config.format) {
                                     featureList = (new igv.GFFHelper(self.config.format)).combineFeatures(featureList);
@@ -171,8 +173,7 @@ var igv = (function (igv) {
                             fulfill(getWGFeatures(self.featureCache.allFeatures()));
                         });
                     }
-                }
-                else {
+                } else {
                     fulfill(null);
                 }
             }

@@ -71,8 +71,7 @@ var igv = (function (igv) {
                     .loadFeaturesWithIndex(chr, start, end)
                     .then(packFeatures)
                     .catch(reject);
-            }
-            else {
+            } else {
                 self
                     .loadFeaturesNoIndex()
                     .then(packFeatures)
@@ -155,7 +154,11 @@ var igv = (function (igv) {
 
     igv.FeatureFileReader.prototype.isIndexable = function () {
 
-        return this.config.indexURL /*|| (this.type !== "wig" && this.type !== "seg" && this.indexed != false)*/;
+        var hasIndexURL = !(undefined === this.config.indexURL),
+            isValidType = (this.type !== 'wig' && this.type !== 'seg'),
+            isIndexed = (this.indexed !== false);
+
+        return hasIndexURL || (isValidType && isIndexed);
     };
 
     /**

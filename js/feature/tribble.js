@@ -35,14 +35,15 @@ var igv = (function (igv) {
 
         var genome = igv.browser ? igv.browser.genome : null;
 
-        //console.log("Loading " + indexFile);
-        return new Promise(function (fulfill, reject) {
+        return new Promise(function (fullfill) {
 
-            igvxhr.loadArrayBuffer(indexFile,
-                {
-                    headers: config.headers,
-                    withCredentials: config.withCredentials
-                }).then(function (arrayBuffer) {
+            igvxhr
+                .loadArrayBuffer(indexFile,
+                    {
+                        headers: config.headers,
+                        withCredentials: config.withCredentials
+                    })
+                .then(function (arrayBuffer) {
 
                     if (arrayBuffer) {
 
@@ -50,7 +51,7 @@ var igv = (function (igv) {
 
                         var parser = new igv.BinaryParser(new DataView(arrayBuffer));
 
-                        readHeader(parser);  // <= nothing in the header is actually used
+                        readHeader(parser);
 
                         var nChrs = parser.getInt();
                         while (nChrs-- > 0) {
@@ -59,17 +60,16 @@ var igv = (function (igv) {
                             index[chrIdx.chr] = chrIdx;
                         }
 
-                        fulfill(new igv.TribbleIndex(index));
-                    }
-                    else {
-                        fulfill(null);
+                        fullfill(new igv.TribbleIndex(index));
+                    } else {
+                        fullfill(null);
                     }
 
-                }).catch(function (error) {
+                })
+                .catch(function (error) {
                     console.log(error);
-                    fulfill(null);
+                    fullfill(null);
                 });
-
 
             function readHeader(parser) {
 
@@ -134,22 +134,19 @@ var igv = (function (igv) {
 
             }
 
-
         });
-    }
-
+    };
 
     igv.TribbleIndex = function (chrIndexTable) {
         this.chrIndex = chrIndexTable;      // Dictionary of chr -> tribble index
-    }
+    };
 
     /**
      * Fetch blocks for a particular genomic range.
      *
-     * @param refId  the sequence dictionary index of the chromosome
+     * @param queryChr the sequence dictionary index of the chromosome
      * @param min  genomic start position
      * @param max  genomic end position
-     * @param return an array of {minv: {block: filePointer, offset: 0}, {maxv: {block: filePointer, offset: 0}}
      */
     igv.TribbleIndex.prototype.blocksForRange = function (queryChr, min, max) { //function (refId, min, max) {
 
@@ -161,14 +158,12 @@ var igv = (function (igv) {
                 mergedBlock = {minv: {block: blocks[0].min, offset: 0}, maxv: {block: lastBlock.max, offset: 0}};
 
             return [mergedBlock];
-        }
-        else {
+        } else {
             return null;
         }
 
 
-    }
-
+    };
 
     return igv;
 })(igv || {});
