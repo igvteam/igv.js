@@ -41,7 +41,7 @@ var igv = (function (igv) {
 
         this.samplingWindowSize = config.samplingWindowSize === undefined ? DEFAULT_SAMPLING_WINDOW_SIZE : config.samplingWindowSize;
         this.samplingDepth = config.samplingDepth === undefined ? DEFAULT_SAMPLING_DEPTH : config.samplingDepth;
-        if(this.samplingDepth > MAXIMUM_SAMPLING_DEPTH) {
+        if (this.samplingDepth > MAXIMUM_SAMPLING_DEPTH) {
             igv.log("Warning: attempt to set sampling depth > maximum value of 2500");
             this.samplingDepth = MAXIMUM_SAMPLING_DEPTH;
         }
@@ -123,11 +123,9 @@ var igv = (function (igv) {
                                 }).catch(function (obj) {
                                     reject(obj);
                                 });
-                            })
-                            .catch(reject);
+                            }).catch(reject);
                     }
-                })
-                .catch(reject);
+                }).catch(reject);
         });
 
 
@@ -173,7 +171,7 @@ var igv = (function (igv) {
                 refID = readInt(ba, offset + 4);
                 pos = readInt(ba, offset + 8);
 
-                if(refID < 0) {
+                if (refID < 0) {
                     return;   // unmapped reads
                 }
                 else if (refID > chrId || pos > max) {

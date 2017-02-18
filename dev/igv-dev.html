@@ -20,14 +20,10 @@
     <link rel="stylesheet" type="text/css" href="../css/igv.css">
 
     <!-- jQuery JS -->
-    <script src="//code.jquery.com/jquery-1.12.4.min.js"
-            integrity="sha256-ZosEbRLbNQzLpnKIkEdrPv7lOy9C27hHQ+Xp8a4MxAQ="
-            crossorigin="anonymous"></script>
+    <script src="https://code.jquery.com/jquery-1.12.4.min.js"></script>
 
     <!-- jQuery UI JS -->
-    <script src="//code.jquery.com/ui/1.12.1/jquery-ui.min.js"
-            integrity="sha256-VazP97ZCwtekAsvgPBSUwPFKdrwD3unUfSGVYrahUqU="
-            crossorigin="anonymous"></script>
+    <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.min.js"></script>
 
     <!-- Vendor JS -->
     <script type="text/javascript" src="../vendor/inflate.js"></script>
@@ -376,6 +372,18 @@
                     height: 30
                     });">UCSC bedgraph (chr19)
         </div>
+
+
+        <div onclick="igv.browser.loadTrack({
+                    type: 'wig',
+                    url:  '../test/data/wig/bedgraph-example-uscs.bedgraph.gz',
+                    indexURL:  '../test/data/wig/bedgraph-example-uscs.bedgraph.gz.tbi',
+                    name: 'bedgraph example',
+                    format: 'bedgraph',
+                    height: 30
+                    });">UCSC bedgraph tabix indexed (chr19)
+        </div>
+
 
         <div onclick="igv.browser.loadTrack({
         url: '../test/data/wig/fixedStep-example.wig',

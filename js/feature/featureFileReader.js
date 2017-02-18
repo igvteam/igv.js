@@ -124,6 +124,7 @@ var igv = (function (igv) {
                                 .catch(reject);
 
                         } else {
+                            // If this is a non-indexed file we will load all features in advance
                             self
                                 .loadFeaturesNoIndex()
                                 .then(function (features) {
@@ -154,11 +155,10 @@ var igv = (function (igv) {
 
     igv.FeatureFileReader.prototype.isIndexable = function () {
 
-        var hasIndexURL = !(undefined === this.config.indexURL),
-            isValidType = (this.type !== 'wig' && this.type !== 'seg'),
-            isIndexed = (this.indexed !== false);
+        var hasIndexURL = (undefined !== this.config.indexURL),
+            isValidType = (this.format !== 'wig' && this.format !== 'seg');
 
-        return hasIndexURL || (isValidType && isIndexed);
+        return this.config.indexed != false && (hasIndexURL || isValidType);
     };
 
     /**
@@ -308,9 +308,12 @@ var igv = (function (igv) {
     igv.FeatureFileReader.prototype.getIndex = function () {
 
         var self = this;
-        return new Promise(function (fullfill) {
+        if (self.index !== undefined || self.config.indexed === false) {
+            return Promise.resolve(self.index);
+        }
+        return new Promise(function (fullfill, reject) {
 
-            if (/*self.indexed === undefined && */self.isIndexable()) {
+            if (self.isIndexable()) {
                 self
                     .loadIndex()
                     .then(function (indexOrUndefined) {
@@ -321,9 +324,19 @@ var igv = (function (igv) {
                             self.indexed = false;
                         }
                         fullfill(self.index);
+                    })
+                    .catch(function (error) {
+                        self.indexed = false;
+                        if(error.message === '404' && self.config.indexURL === undefined) {
+                            // This is an expected condition
+                        }
+                        else {
+                            reject(error);
+                        }
                     });
             } else {
-                fullfill(self.index);   // Is either already loaded, or there isn't one
+                self.indexed = false;
+                fullfill(null);
             }
 
         });

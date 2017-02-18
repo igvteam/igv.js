@@ -108,6 +108,33 @@ var igv = (function (igv) {
 
     };
 
+    igv.WIGTrack.prototype.getFileHeader = function () {
+
+        var self = this;
+        return new Promise(function (fulfill, reject) {
+            if (typeof self.featureSource.getFileHeader === "function") {
+
+                self.featureSource.getFileHeader().then(function (header) {
+
+                    if (header) {
+                        // Header (from track line).  Set properties,unless set in the config (config takes precedence)
+                        if (header.name && !self.config.name) {
+                            self.name = header.name;
+                        }
+                        if (header.color && !self.config.color) {
+                            self.color = "rgb(" + header.color + ")";
+                        }
+                    }
+                    fulfill(header);
+
+                }).catch(reject);
+            }
+            else {
+                fulfill(null);
+            }
+        });
+    };
+
     igv.WIGTrack.prototype.draw = function (options) {
 
         var self = this,
