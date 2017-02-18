@@ -117,7 +117,7 @@ var igvxhr = (function (igvxhr) {
                         handleError("Unsatisfiable range");
                     }
                     else {// TODO -- better error handling
-                        handleError("Error accessing resource: " + xhr.status);
+                        handleError(xhr.status);
                     }
 
                 }
@@ -158,10 +158,10 @@ var igvxhr = (function (igvxhr) {
 
             function handleError(message) {
                 if (reject) {
-                    reject(message);
+                    reject(new Error(message));
                 }
                 else {
-                    throw Error(message);
+                    throw new Error(message);
                 }
             }
         });
