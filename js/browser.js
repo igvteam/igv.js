@@ -1459,7 +1459,7 @@ var igv = (function (igv) {
             isRulerTrack = false,
             isMouseDown = false,
             isDragging = false,
-            lastMouseX = unde
+            lastMouseX = undefined,
             mouseDownX = undefined;
 
         $(trackContainerDiv).mousedown(function (e) {
