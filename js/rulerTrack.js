@@ -69,7 +69,6 @@ var igv = (function (igv) {
     igv.RulerTrack.prototype.draw = function (options) {
 
         var fontStyle,
-            range,
             ts,
             spacing,
             nTick,
@@ -77,12 +76,11 @@ var igv = (function (igv) {
             l,
             yShim,
             tickHeight,
-            bpPerPixel = options.referenceFrame.bpPerPixel;
+            bpPerPixel;
 
         if (options.referenceFrame.chrName === "all") {
             drawAll.call(this);
-        }
-        else {
+        } else {
             updateLocusLabelWithGenomicState(options.genomicState);
 
             fontStyle = {
@@ -92,8 +90,8 @@ var igv = (function (igv) {
                 strokeStyle: "rgba(64, 64, 64, 1)"
             };
 
-            range = Math.floor(1100 * bpPerPixel);
-            ts = findSpacing(range);
+            bpPerPixel = options.referenceFrame.bpPerPixel;
+            ts = findSpacing( Math.floor(options.viewportWidth * bpPerPixel) );
             spacing = ts.majorTick;
 
             // Find starting point closest to the current origin
