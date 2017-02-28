@@ -156,7 +156,7 @@ var igv = (function (igv) {
             itemSpan = binaryParser.getInt(),
             type = binaryParser.getByte(),
             reserved = binaryParser.getByte(),
-            itemCount = binaryParser.getShort(),
+            itemCount = binaryParser.getUShort(),
             value;
 
         if (chromId === chrIdx) {
@@ -170,7 +170,6 @@ var igv = (function (igv) {
                         value = binaryParser.getFloat();
                         break;
                     case 2:
-
                         chromStart = binaryParser.getInt();
                         value = binaryParser.getFloat();
                         chromEnd = chromStart + itemSpan;
@@ -185,7 +184,7 @@ var igv = (function (igv) {
 
                 if (chromStart >= bpEnd) {
                     break; // Out of interval
-                } else if (chromEnd > bpStart) {
+                } else if (chromEnd > bpStart && Number.isFinite(value)) {
                     featureArray.push({chr: chr, start: chromStart, end: chromEnd, value: value});
                 }
 
@@ -225,7 +224,7 @@ var igv = (function (igv) {
                 if (chromStart >= bpEnd) {
                     break; // Out of interval
 
-                } else if (chromEnd > bpStart) {
+                } else if (chromEnd > bpStart && Number.isFinite(value)) {
                     featureArray.push({chr: chr, start: chromStart, end: chromEnd, value: value});
                 }
 
