@@ -35,7 +35,7 @@ var igv = (function (igv) {
         this.length = dataView.byteLength;
     }
 
-    igv.BinaryParser.prototype.remLength = function() {
+    igv.BinaryParser.prototype.remLength = function () {
         return this.length - this.position;
     }
 
@@ -73,11 +73,27 @@ var igv = (function (igv) {
 
     igv.BinaryParser.prototype.getLong = function () {
 
-        // js doesn't support long.  Let's hope this fits an int, but advance the buffer 8 bytes
+        // DataView doesn't support long. So we'll try manually
+        
+        var b1 = this.view.getUint8(this.position),
+            b2 = this.view.getUint8(this.position + 1),
+            b3 = this.view.getUint8(this.position + 2),
+            b4 = this.view.getUint8(this.position + 3),
+            b5 = this.view.getUint8(this.position + 4),
+            b6 = this.view.getUint8(this.position + 5),
+            b7 = this.view.getUint8(this.position + 6),
+            b8 = this.view.getUint8(this.position + 7);
 
-        var integer = this.view.getInt32(this.position, this.littleEndian);
+
+        var long = this.littleEndian ?
+        (b8 & 255) << 56 | (b7 & 255) << 48 | (b6 & 255) << 40 | (b5 & 255) << 32 | (b4 & 255) << 24 |
+        (b3 & 255) << 16 | (b2 & 255) << 8 | b1 & 255 :
+        (b1 & 255) << 56 | (b2 & 255) << 48 | (b3 & 255) << 40 | (b4 & 255) << 32 | (b5 & 255) << 24 |
+        (b6 & 255) << 16 | (b7 & 255) << 8 | b8 & 255;
+
+        // var integer = this.view.getInt32(this.position, this.littleEndian);
         this.position += 8;
-        return integer;
+        return long;
     }
 
     igv.BinaryParser.prototype.getString = function (len) {
@@ -96,9 +112,9 @@ var igv = (function (igv) {
         var s = "";
         var i;
         var c;
-        for (i=0; i<len; i++) {
+        for (i = 0; i < len; i++) {
             c = this.view.getUint8(this.position++);
-            if(c > 0) {
+            if (c > 0) {
                 s += String.fromCharCode(c);
             }
         }
@@ -134,7 +150,7 @@ var igv = (function (igv) {
      * TODO -- why isn't 8th byte used ?
      * @returns {*}
      */
-    igv.BinaryParser.prototype. getVPointer = function() {
+    igv.BinaryParser.prototype.getVPointer = function () {
 
         var position = this.position,
             offset = (this.view.getUint8(position + 1) << 8) | (this.view.getUint8(position)),
@@ -146,11 +162,11 @@ var igv = (function (igv) {
             block = byte6 + byte5 + byte4 + byte3 + byte2;
         this.position += 8;
 
- //       if (block == 0 && offset == 0) {
- //           return null;
- //       } else {
-            return new VPointer(block, offset);
- //       }
+        //       if (block == 0 && offset == 0) {
+        //           return null;
+        //       } else {
+        return new VPointer(block, offset);
+        //       }
     }
 
 
@@ -159,7 +175,17 @@ var igv = (function (igv) {
         this.offset = offset;
     }
 
-    VPointer.prototype.print = function() {
+    VPointer.prototype.isLessThan = function (vp) {
+        return this.block < vp.block ||
+            (this.block === vp.block && this.offset < vp.offset);
+    }
+
+    VPointer.prototype.isGreaterThan = function (vp) {
+        return this.block > vp.block ||
+            (this.block === vp.block && this.offset > vp.offset);
+    }
+
+    VPointer.prototype.print = function () {
         return "" + this.block + ":" + this.offset;
     }
 
