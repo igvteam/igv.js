@@ -60,12 +60,11 @@ var igv = (function (igv) {
 
         $(parentDiv).append(browser.$root);
 
-
         // drag & drop
-        browser.dragAndDrop = new igv.DragAndDrop();
-        browser.$root.append(browser.dragAndDrop.$container);
-        browser.dragAndDrop.initializationHelper();
-        browser.dragAndDrop.$container.hide();
+        // browser.dragAndDrop = new igv.DragAndDrop();
+        // browser.$root.append(browser.dragAndDrop.$container);
+        // browser.dragAndDrop.initializationHelper();
+        // browser.dragAndDrop.$container.hide();
 
         setControls(browser, config);
 
@@ -297,7 +296,7 @@ var igv = (function (igv) {
 
         if (config.showNavigation) {
 
-            $navigation = $('<div class="igvNavigation">');
+            $navigation = $('<div class="igv-navbar">');
             $controls.append($navigation);
 
             // IGV logo
@@ -307,13 +306,13 @@ var igv = (function (igv) {
             // search container
             $searchContainer = $('<div class="igv-search-container">');
 
-            browser.$searchInput = $('<input class="igv-search-input" type="text" placeholder="Locus Search">');
+            browser.$searchInput = $('<input type="text" placeholder="Locus Search">');
 
             browser.$searchInput.change(function (e) {
                 browser.parseSearchInput( $(e.target).val() );
             });
 
-            $faSearch = $('<i class="igv-fa-search fa fa-search fa-18px shim-left-6">');
+            $faSearch = $('<i class="fa fa-search fa-18px">');
 
             $faSearch.click(function () {
                 browser.parseSearchInput( browser.$searchInput.val() );
@@ -324,7 +323,7 @@ var igv = (function (igv) {
 
             // search results presented in table
             browser.$searchResults = $('<div class="igv-search-results">');
-            browser.$searchResultsTable = $('<table class="igv-search-results-table">');
+            browser.$searchResultsTable = $('<table>');
 
             browser.$searchResults.append(browser.$searchResultsTable.get(0));
 
@@ -413,8 +412,8 @@ var igv = (function (igv) {
     function zoomWidget() {
 
         var $zoomContainer = $('<div class="igvNavigationZoom">');
-        $zoomContainer.append($('<i class="fa fa-minus-circle igv-fa-search fa-24px" style="padding-right: 4px;">'));
-        $zoomContainer.append($('<i class="fa fa-plus-circle igv-fa-search fa-24px">'));
+        $zoomContainer.append($('<i class="fa fa-minus-circle fa-24px">'));
+        $zoomContainer.append($('<i class="fa fa-plus-circle fa-24px">'));
 
         return $zoomContainer;
     }

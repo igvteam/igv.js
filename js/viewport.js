@@ -47,7 +47,7 @@ var igv = (function (igv) {
 
             if (trackView.track instanceof igv.RulerTrack) {
 
-                this.$close = $('<div class="igv-viewport-fa-close igv-fa-search">');
+                this.$close = $('<div class="igv-viewport-fa-close igv-fa-navbar">');
                 this.$closeButton = $('<i class="fa fa-times-circle">');
                 this.$close.append(this.$closeButton);
 
