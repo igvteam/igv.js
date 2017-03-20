@@ -68,8 +68,7 @@ var igv = (function (igv) {
 
     igv.RulerTrack.prototype.draw = function (options) {
 
-        var fontStyle,
-            ts,
+        var ts,
             spacing,
             nTick,
             x,
@@ -83,13 +82,6 @@ var igv = (function (igv) {
         } else {
             updateLocusLabelWithGenomicState(options.genomicState);
 
-            fontStyle = {
-                textAlign: 'center',
-                font: '10px PT Sans',
-                fillStyle: "rgba(64, 64, 64, 1)",
-                strokeStyle: "rgba(64, 64, 64, 1)"
-            };
-
             bpPerPixel = options.referenceFrame.bpPerPixel;
             ts = findSpacing( Math.floor(options.viewportWidth * bpPerPixel) );
             spacing = ts.majorTick;
@@ -98,8 +90,6 @@ var igv = (function (igv) {
             nTick = Math.floor(options.bpStart / spacing) - 1;
             x = 0;
 
-            //canvas.setProperties({textAlign: 'center'});
-            igv.graphics.setProperties(options.context, fontStyle);
             while (x < options.pixelWidth) {
 
                 l = Math.floor(nTick * spacing);

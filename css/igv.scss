@@ -1,4 +1,8 @@
 
+$igv-default-font-face: 'Open Sans', sans-serif;
+$igv-navbar-toggle-light-color: #f3f3f3;
+$igv-navbar-toggle-dark-dark: #737373;
+
 // nav bar
 .igv-navbar {
 
@@ -91,7 +95,7 @@
         border-radius: 3px;
         border-width: thin;
         border-color: #bfbfbf;
-        font-family: 'Open Sans', sans-serif;
+        font-family: $igv-default-font-face;
         font-size: small;
         font-weight: 400;
         color: #444;
@@ -125,7 +129,7 @@
     z-index: 9999;
 
     tr {
-        font-family: 'Open Sans', sans-serif;
+        font-family: $igv-default-font-face;
         font-size: small;
         font-weight: 400;
         color: #444;
@@ -141,8 +145,52 @@
 
 }
 
+// nav bar - toggle buttons
+.igv-nav-bar-toggle-button {
+
+    cursor: pointer;
+
+    position: relative;
+    height: 20px;
+    min-width: 110px;
+    text-transform: capitalize;
+
+    float: right;
+
+    margin-top: 2px;
+    margin-right: 5px;
+
+    padding-left: 8px;
+    padding-right: 8px;
+    padding-top: 2px;
+    padding-bottom: 2px;
+
+    font-family: $igv-default-font-face;
+    font-size: 12px;
+    font-weight: 200;
+
+    text-align: center;
+    vertical-align: middle;
+
+    border-style: solid;
+    border-width: thin;
+    border-radius: 10px;
+}
+
+.igv-nav-bar-toggle-button-on {
+    color: $igv-navbar-toggle-dark-dark;
+    border-color: $igv-navbar-toggle-dark-dark;
+    background-color: $igv-navbar-toggle-light-color;
+}
+
+.igv-nav-bar-toggle-button-off {
+    color: white;
+    border-color: $igv-navbar-toggle-dark-dark;
+    background-color: $igv-navbar-toggle-dark-dark;
+}
+
 // nav bar - zoom
-.igvNavigationZoom {
+.igv-zoom-widget {
     position: relative;
     float: right;
     margin-left: 40px;
@@ -275,7 +323,7 @@
     text-align: center;
     vertical-align: middle;
 
-    font-family: 'PT Sans', sans-serif;
+    font-family: $igv-default-font-face;
     font-size: medium;
     font-weight: 200;
 
@@ -327,7 +375,7 @@
     height: 16px;
 
     color: #55aeff;
-    font-family: 'PT Sans', sans-serif;
+    font-family: $igv-default-font-face;
     font-size: small;
     font-weight: 400;
 
@@ -354,7 +402,7 @@
 
     text-align: right;
 
-    font-family: 'PT Sans', sans-serif;
+    font-family: $igv-default-font-face;
     font-size: medium;
     font-weight: 200;
 
@@ -378,7 +426,7 @@
     vertical-align: middle;
     text-align: left;
 
-    font-family: 'PT Sans', sans-serif;
+    font-family: $igv-default-font-face;
     font-size: medium;
     font-weight: 200;
 
@@ -398,7 +446,7 @@
     width: 100%;
     margin-top: 2px;
 
-    font-family: 'PT Sans', sans-serif;
+    font-family: $igv-default-font-face;
     font-size: medium;
     font-weight: 200;
 
@@ -422,7 +470,7 @@
     vertical-align: middle;
     text-align: left;
 
-    font-family: 'PT Sans', sans-serif;
+    font-family: $igv-default-font-face;
     font-size: medium;
     font-weight: 200;
 
@@ -439,7 +487,7 @@
 
     text-align: center;
 
-    font-family: 'PT Sans', sans-serif;
+    font-family: $igv-default-font-face;
     font-size: 14px;
     font-weight: 200;
 
@@ -454,7 +502,7 @@
 
     text-align: left;
 
-    font-family: 'PT Sans', sans-serif;
+    font-family: $igv-default-font-face;
     font-size: medium;
     font-weight: 200;
 
@@ -467,7 +515,7 @@
     padding-left: 8px;
     padding-top: 6px;
 
-    font-family: 'PT Sans', sans-serif;
+    font-family: $igv-default-font-face;
     font-size: medium;
     font-weight: 200;
 
@@ -537,7 +585,7 @@
     text-align: center;
     vertical-align: middle;
 
-    font-family: 'PT Sans', sans-serif;
+    font-family: $igv-default-font-face;
     font-size: medium;
     font-weight: 200;
 
@@ -568,7 +616,7 @@
     text-align: center;
     vertical-align: middle;
 
-    font-family: 'PT Sans', sans-serif;
+    font-family: $igv-default-font-face;
     font-size: medium;
     font-weight: 200;
 
@@ -690,57 +738,6 @@ div.ui-dialog fieldset {
     padding-top: 2px;
 }
 
-.igv-nav-bar-toggle-button {
-
-    cursor: pointer;
-
-    position: relative;
-    height: 20px;
-    min-width: 110px;
-    text-transform: capitalize;
-
-    float: right;
-
-    margin-top: 2px;
-    margin-right: 5px;
-
-    padding-left: 8px;
-    padding-right: 8px;
-    padding-top: 2px;
-    padding-bottom: 2px;
-
-    font-family: 'Open Sans', sans-serif;
-    font-size: 12px;
-    font-weight: 200;
-
-    text-align: center;
-    vertical-align: middle;
-
-    border-style: solid;
-    border-width: thin;
-    border-radius: 10px;
-}
-
-.igv-nav-bar-toggle-button-on {
-    color: #737373;
-    border-color: #737373;
-    background-color: #f3f3f3;
-    border-width: thin;
-}
-
-.igv-nav-bar-toggle-button-on:hover,
-.igv-nav-bar-toggle-button-on:focus,
-.igv-nav-bar-toggle-button-on:active  {
-    /*padding-top: 0;*/
-    /*border-width: 2px;*/
-}
-
-.igv-nav-bar-toggle-button-off {
-    color: white;
-    border-color: #737373;
-    background-color: #737373;
-}
-
 .igvNavigationMarginLeft12 {
 
     margin-left: 12px;
@@ -769,7 +766,7 @@ div.ui-dialog fieldset {
     border-style: solid;
     border-width: thin;
 
-    font-family: 'Open Sans', sans-serif;
+    font-family: $igv-default-font-face;
     font-size: medium;
     font-weight: 400;
     color: #444;
@@ -850,7 +847,7 @@ div.ui-dialog fieldset {
 
     z-index: 1000;
 
-    font-family: 'PT Sans', sans-serif;
+    font-family: $igv-default-font-face;
     font-size: small;
     font-weight: 400;
     color: #444;
@@ -1144,7 +1141,7 @@ div.ui-dialog fieldset {
 
     /*padding-bottom: 12px;*/
 
-    font-family: 'PT Sans', sans-serif;
+    font-family: $igv-default-font-face;
     font-size: 12px;
     font-weight: 200;
 
@@ -1166,6 +1163,13 @@ div.ui-dialog fieldset {
     cursor: pointer;
     color: white;
     background-color: rgb(0, 102, 255);;
+}
+
+.igv-viewport-ruler {
+    font-family: $igv-default-font-face;
+    font-size: 10px;
+    font-weight: 200;
+    text-align: center;
 }
 
 .igv-viewport-canvas {
@@ -1243,7 +1247,7 @@ div.ui-dialog fieldset {
     vertical-align: middle;
     line-height: 100%;
 
-    font-family: 'Open Sans', sans-serif;
+    font-family: $igv-default-font-face;
     font-size: 14px;
     font-weight: 400;
     color: #444;
@@ -1416,7 +1420,7 @@ div.ui-dialog fieldset {
     overflow: hidden;
     text-overflow: ellipsis;
 
-    font-family: 'PT Sans', sans-serif;
+    font-family: $igv-default-font-face;
     font-size: small;
     font-weight: 400;
 
@@ -1459,7 +1463,7 @@ div.ui-dialog fieldset {
     position: relative;
     left: -50%;
 
-    font-family: 'PT Sans', sans-serif;
+    font-family: $igv-default-font-face;
     font-size: medium;
     font-weight: 400;
 
@@ -1555,7 +1559,7 @@ div.ui-dialog fieldset {
     margin-top: 0;
     margin-right: 8px;
 
-    font-family: 'PT Sans', sans-serif;
+    font-family: $igv-default-font-face;
     font-size: small;
     font-weight: 200;
 

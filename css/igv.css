@@ -62,7 +62,7 @@
     border-radius: 3px;
     border-width: thin;
     border-color: #bfbfbf;
-    font-family: 'Open Sans', sans-serif;
+    font-family: "Open Sans", sans-serif;
     font-size: small;
     font-weight: 400;
     color: #444;
@@ -84,7 +84,7 @@
   overflow-y: auto;
   z-index: 9999; }
   .igv-search-results tr {
-    font-family: 'Open Sans', sans-serif;
+    font-family: "Open Sans", sans-serif;
     font-size: small;
     font-weight: 400;
     color: #444; }
@@ -95,11 +95,43 @@
     font-weight: 700;
     color: #141414; }
 
-.igvNavigationZoom {
+.igv-nav-bar-toggle-button {
+  cursor: pointer;
+  position: relative;
+  height: 20px;
+  min-width: 110px;
+  text-transform: capitalize;
+  float: right;
+  margin-top: 2px;
+  margin-right: 5px;
+  padding-left: 8px;
+  padding-right: 8px;
+  padding-top: 2px;
+  padding-bottom: 2px;
+  font-family: "Open Sans", sans-serif;
+  font-size: 12px;
+  font-weight: 200;
+  text-align: center;
+  vertical-align: middle;
+  border-style: solid;
+  border-width: thin;
+  border-radius: 10px; }
+
+.igv-nav-bar-toggle-button-on {
+  color: #737373;
+  border-color: #737373;
+  background-color: #f3f3f3; }
+
+.igv-nav-bar-toggle-button-off {
+  color: white;
+  border-color: #737373;
+  background-color: #737373; }
+
+.igv-zoom-widget {
   position: relative;
   float: right;
   margin-left: 40px; }
-  .igvNavigationZoom i:first-child {
+  .igv-zoom-widget i:first-child {
     padding-right: 4px; }
 
 #color-by-tag {
@@ -188,7 +220,7 @@
   margin-top: 4px;
   text-align: center;
   vertical-align: middle;
-  font-family: 'PT Sans', sans-serif;
+  font-family: "Open Sans", sans-serif;
   font-size: medium;
   font-weight: 200;
   /*color: #575757;*/ }
@@ -223,7 +255,7 @@
 .igv-grid-colorpicker-user-error {
   height: 16px;
   color: #55aeff;
-  font-family: 'PT Sans', sans-serif;
+  font-family: "Open Sans", sans-serif;
   font-size: small;
   font-weight: 400;
   background-color: white; }
@@ -242,7 +274,7 @@
   /*padding-top: 8px;*/
   padding-left: 8px;
   text-align: right;
-  font-family: 'PT Sans', sans-serif;
+  font-family: "Open Sans", sans-serif;
   font-size: medium;
   font-weight: 200;
   color: #575757; }
@@ -257,7 +289,7 @@
   padding-left: 8px;
   vertical-align: middle;
   text-align: left;
-  font-family: 'PT Sans', sans-serif;
+  font-family: "Open Sans", sans-serif;
   font-size: medium;
   font-weight: 200;
   color: #575757; }
@@ -270,7 +302,7 @@
   border-color: #7f7f7f;
   width: 100%;
   margin-top: 2px;
-  font-family: 'PT Sans', sans-serif;
+  font-family: "Open Sans", sans-serif;
   font-size: medium;
   font-weight: 200;
   color: #575757; }
@@ -285,7 +317,7 @@
   padding-left: 8px;
   vertical-align: middle;
   text-align: left;
-  font-family: 'PT Sans', sans-serif;
+  font-family: "Open Sans", sans-serif;
   font-size: medium;
   font-weight: 200;
   color: #575757; }
@@ -295,7 +327,7 @@
   padding-left: 8px;
   word-wrap: break-word;
   text-align: center;
-  font-family: 'PT Sans', sans-serif;
+  font-family: "Open Sans", sans-serif;
   font-size: 14px;
   font-weight: 200;
   color: #575757; }
@@ -304,7 +336,7 @@
   padding-top: 8px;
   padding-left: 8px;
   text-align: left;
-  font-family: 'PT Sans', sans-serif;
+  font-family: "Open Sans", sans-serif;
   font-size: medium;
   font-weight: 200;
   color: #575757; }
@@ -312,7 +344,7 @@
 .igv-col-label {
   padding-left: 8px;
   padding-top: 6px;
-  font-family: 'PT Sans', sans-serif;
+  font-family: "Open Sans", sans-serif;
   font-size: medium;
   font-weight: 200;
   color: #575757; }
@@ -361,7 +393,7 @@
   color: white;
   text-align: center;
   vertical-align: middle;
-  font-family: 'PT Sans', sans-serif;
+  font-family: "Open Sans", sans-serif;
   font-size: medium;
   font-weight: 200;
   background-color: #5ea4e0; }
@@ -385,7 +417,7 @@
   color: white;
   text-align: center;
   vertical-align: middle;
-  font-family: 'PT Sans', sans-serif;
+  font-family: "Open Sans", sans-serif;
   font-size: medium;
   font-weight: 200;
   background-color: #c4c4c4; }
@@ -476,45 +508,6 @@ div.ui-dialog fieldset {
 .shim-top-2 {
   padding-top: 2px; }
 
-.igv-nav-bar-toggle-button {
-  cursor: pointer;
-  position: relative;
-  height: 20px;
-  min-width: 110px;
-  text-transform: capitalize;
-  float: right;
-  margin-top: 2px;
-  margin-right: 5px;
-  padding-left: 8px;
-  padding-right: 8px;
-  padding-top: 2px;
-  padding-bottom: 2px;
-  font-family: 'Open Sans', sans-serif;
-  font-size: 12px;
-  font-weight: 200;
-  text-align: center;
-  vertical-align: middle;
-  border-style: solid;
-  border-width: thin;
-  border-radius: 10px; }
-
-.igv-nav-bar-toggle-button-on {
-  color: #737373;
-  border-color: #737373;
-  background-color: #f3f3f3;
-  border-width: thin; }
-
-.igv-nav-bar-toggle-button-on:hover,
-.igv-nav-bar-toggle-button-on:focus,
-.igv-nav-bar-toggle-button-on:active {
-  /*padding-top: 0;*/
-  /*border-width: 2px;*/ }
-
-.igv-nav-bar-toggle-button-off {
-  color: white;
-  border-color: #737373;
-  background-color: #737373; }
-
 .igvNavigationMarginLeft12 {
   margin-left: 12px; }
 
@@ -535,7 +528,7 @@ div.ui-dialog fieldset {
   border-color: #a2a2a2;
   border-style: solid;
   border-width: thin;
-  font-family: 'Open Sans', sans-serif;
+  font-family: "Open Sans", sans-serif;
   font-size: medium;
   font-weight: 400;
   color: #444; }
@@ -595,7 +588,7 @@ div.ui-dialog fieldset {
   left: 0;
   min-width: 128px;
   z-index: 1000;
-  font-family: 'PT Sans', sans-serif;
+  font-family: "Open Sans", sans-serif;
   font-size: small;
   font-weight: 400;
   color: #444;
@@ -813,7 +806,7 @@ div.ui-dialog fieldset {
   top: 25%;
   transform: translate(-50%, -25%);
   /*padding-bottom: 12px;*/
-  font-family: 'PT Sans', sans-serif;
+  font-family: "Open Sans", sans-serif;
   font-size: 12px;
   font-weight: 200;
   text-align: center;
@@ -829,6 +822,12 @@ div.ui-dialog fieldset {
   cursor: pointer;
   color: white;
   background-color: #0066ff; }
+
+.igv-viewport-ruler {
+  font-family: "Open Sans", sans-serif;
+  font-size: 10px;
+  font-weight: 200;
+  text-align: center; }
 
 .igv-viewport-canvas {
   /*position: absolute;*/
@@ -882,7 +881,7 @@ div.ui-dialog fieldset {
   text-align: center;
   vertical-align: middle;
   line-height: 100%;
-  font-family: 'Open Sans', sans-serif;
+  font-family: "Open Sans", sans-serif;
   font-size: 14px;
   font-weight: 400;
   color: #444; }
@@ -1003,7 +1002,7 @@ div.ui-dialog fieldset {
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-  font-family: 'PT Sans', sans-serif;
+  font-family: "Open Sans", sans-serif;
   font-size: small;
   font-weight: 400;
   text-align: center;
@@ -1032,7 +1031,7 @@ div.ui-dialog fieldset {
 .zoom-in-notice {
   position: relative;
   left: -50%;
-  font-family: 'PT Sans', sans-serif;
+  font-family: "Open Sans", sans-serif;
   font-size: medium;
   font-weight: 400;
   color: #3f3f3f;
@@ -1099,7 +1098,7 @@ div.ui-dialog fieldset {
   padding-right: 0;
   margin-top: 0;
   margin-right: 8px;
-  font-family: 'PT Sans', sans-serif;
+  font-family: "Open Sans", sans-serif;
   font-size: small;
   font-weight: 200;
   color: #373737;

@@ -411,7 +411,7 @@ var igv = (function (igv) {
 
     function zoomWidget() {
 
-        var $zoomContainer = $('<div class="igvNavigationZoom">');
+        var $zoomContainer = $('<div class="igv-zoom-widget">');
         $zoomContainer.append($('<i class="fa fa-minus-circle fa-24px">'));
         $zoomContainer.append($('<i class="fa fa-plus-circle fa-24px">'));
 
