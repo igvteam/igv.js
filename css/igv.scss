@@ -103,6 +103,7 @@ $igv-navbar-toggle-dark-dark: #737373;
     }
 
     i {
+        font-size: 18px;
         padding-left: 6px;
     }
 
@@ -195,9 +196,78 @@ $igv-navbar-toggle-dark-dark: #737373;
     float: right;
     margin-left: 40px;
 
+    i {
+        font-size: 24px;
+    }
+
     i:first-child {
         padding-right: 4px;
     }
+}
+
+// karyo
+.igv-karyo-div {
+    position: relative;
+    left: 0;
+    top: 0;
+    height:200px;
+}
+
+.igv-karyo-hide {
+    height: 0;
+    overflow: hidden;
+}
+
+.igv-karyo-content-div {
+    left:0;
+    top:0;
+    width:100%;
+    height:100%;
+}
+
+.igv-karyo-canvas {
+    left:0;
+    top:0;
+    width:100%;
+    height:100%;
+}
+
+.igv-ideogram-left-shim {
+    position: relative;
+    float: left;
+    height: 14px;
+    margin-top: 2px;
+    margin-bottom: 2px;
+    width: 50px;
+}
+
+.igv-ideogram-content-div {
+    position: relative;
+    float: left;
+    height: 14px;
+    margin-top: 2px;
+    margin-bottom: 2px;
+    background-color: white;
+
+    canvas {
+        width:100%;
+        height:100%;
+    }
+
+}
+
+.igv-ideogram-content-div-border-right {
+    border-right-color: white;
+    border-right-style: solid;
+    /*border-right-width: thin;*/
+    border-right-width: 4px;
+
+}
+
+.igv-ideogram-content-div-border-left {
+    border-left-color: white;
+    border-left-style: solid;
+    border-left-width: thin;
 }
 
 #color-by-tag {
@@ -701,16 +771,8 @@ $igv-navbar-toggle-dark-dark: #737373;
 
 /*   end grid.css */
 
-.fa-18px {
-    font-size: 18px;
-}
-
 .fa-20px {
     font-size: 20px;
-}
-
-.fa-24px {
-    font-size: 24px;
 }
 
 .fa-check-shim {
@@ -985,74 +1047,6 @@ div.ui-dialog fieldset {
     position: relative;
     width: 100%;
     height:100%;
-}
-
-.igv-karyo-div {
-    position: relative;
-    left: 0;
-    top: 0;
-    height:200px;
-}
-
-.igv-karyo-hide {
-    height: 0;
-    overflow: hidden;
-}
-
-.igv-karyo-content-div {
-    left:0;
-    top:0;
-    width:100%;
-    height:100%;
-}
-
-.igv-karyo-canvas {
-    left:0;
-    top:0;
-    width:100%;
-    height:100%;
-}
-
-.igv-ideogram-left-shim {
-    position: relative;
-    float: left;
-    height: 14px;
-    margin-top: 2px;
-    margin-bottom: 2px;
-    width: 50px;
-}
-
-.igv-ideogram-content-div {
-    position: relative;
-    float: left;
-    height: 14px;
-    margin-top: 2px;
-    margin-bottom: 2px;
-    background-color: white;
-}
-
-.igv-ideogram-content-div-border-right {
-    border-right-color: white;
-    border-right-style: solid;
-    /*border-right-width: thin;*/
-    border-right-width: 4px;
-
-}
-
-.igv-ideogram-content-div-border-left {
-    border-left-color: white;
-    border-left-style: solid;
-    border-left-width: thin;
-}
-
-.igv-ideogram-canvas {
-    width:100%;
-    height:100%;
-}
-
-.igv-ideogram-gutter-shim {
-    /*margin-left: 100px;*/
-    margin-left: 50px;
 }
 
 .igv-track-container-div {
