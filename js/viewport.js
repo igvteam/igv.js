@@ -7,14 +7,6 @@ var igv = (function (igv) {
         this.initializationHelper(trackView, locusIndex);
     };
 
-    igv.Viewport.prototype.setWidth = function (width) {
-        var percentage;
-
-        this.$viewport.width(width);
-        percentage = this.$viewport.width()/this.$viewport.outerWidth();
-        this.$viewport.width(Math.floor(percentage * width));
-    };
-
     igv.Viewport.prototype.initializationHelper = function (trackView, locusIndex) {
 
         var self = this,
@@ -43,11 +35,17 @@ var igv = (function (igv) {
         this.contentDiv = $('<div class="igv-viewport-content-div">')[0];
         this.$viewport.append(this.contentDiv);
 
+        if (trackView.track instanceof igv.SequenceTrack) {
+            this.$viewport.addClass('igv-viewport-sequence');
+        }
+
         if (this.genomicState.locusCount > 1) {
 
             if (trackView.track instanceof igv.RulerTrack) {
 
-                this.$close = $('<div class="igv-viewport-fa-close igv-fa-search">');
+                this.$viewport.addClass('igv-viewport-ruler');
+
+                this.$close = $('<div class="igv-viewport-fa-close">');
                 this.$closeButton = $('<i class="fa fa-times-circle">');
                 this.$close.append(this.$closeButton);
 
@@ -60,7 +58,7 @@ var igv = (function (igv) {
         }
 
         // track content canvas
-        this.canvas = $('<canvas class = "igv-viewport-canvas">')[0];
+        this.canvas = $('<canvas>')[0];
         $(this.contentDiv).append(this.canvas);
         this.canvas.setAttribute('width', this.contentDiv.clientWidth);
         this.canvas.setAttribute('height', this.contentDiv.clientHeight);
@@ -82,7 +80,7 @@ var igv = (function (igv) {
             var $container,
                 $child;
 
-            $child = $('<div class="zoom-in-notice">');
+            $child = $('<div">');
             $child.text('Zoom in to see features');
 
             $container = $('<div class="zoom-in-notice-container">');
@@ -145,6 +143,14 @@ var igv = (function (igv) {
             // }
 
         }
+    };
+
+    igv.Viewport.prototype.setWidth = function (width) {
+        var percentage;
+
+        this.$viewport.width(width);
+        percentage = this.$viewport.width()/this.$viewport.outerWidth();
+        this.$viewport.width(Math.floor(percentage * width));
     };
 
     igv.Viewport.prototype.addMouseHandlers = function () {
@@ -296,7 +302,7 @@ var igv = (function (igv) {
         if ('all' === this.genomicState.chromosome.name) {
             return;
         }
-        self.trackView.trackDiv.dataset.rulerTrack = "rulerTrack";
+        // self.trackView.trackDiv.dataset.rulerTrack = "rulerTrack";
 
         // ruler sweeper widget surface
         self.$rulerSweeper = $('<div class="igv-ruler-sweeper-div">');

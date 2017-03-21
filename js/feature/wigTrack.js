@@ -95,8 +95,8 @@ var igv = (function (igv) {
         function htmlStringified(autoScale) {
             var html = [];
 
-            html.push('<div class="igv-track-menu-item">');
-            html.push(true === autoScale ? '<i class="fa fa-check fa-check-shim">' : '<i class="fa fa-check fa-check-shim fa-check-hidden">');
+            html.push('<div>');
+            html.push(true === autoScale ? '<i class="fa fa-check">' : '<i class="fa fa-check fa-check-hidden">');
             html.push('</i>');
             html.push('Autoscale');
             html.push('</div>');
@@ -168,14 +168,6 @@ var igv = (function (igv) {
             self.dataRange.max = featureValueMaximum;
 
             featureValueRange = featureValueMaximum - featureValueMinimum;
-
-            //$dataRangeTrackLabel = $(this.trackView.trackDiv).find('.igv-data-range-track-label');
-            //
-            //min = (Math.floor(track.dataRange.min) === track.dataRange.min) ? track.dataRange.min : track.dataRange.min.toFixed(2);
-            //max = (Math.floor(track.dataRange.max) === track.dataRange.max) ? track.dataRange.max : track.dataRange.max.toFixed(2);
-            //str = '[' + min + ' - ' + max + ']';
-            //
-            //$dataRangeTrackLabel.text(str);
 
             features.forEach(renderFeature);
         }

@@ -37,6 +37,11 @@ var igv = (function (igv) {
         this.browser = browser;
 
         this.trackDiv = $('<div class="igv-track-div">')[0];
+
+        if (this.track instanceof igv.RulerTrack) {
+            this.trackDiv.dataset.rulerTrack = "rulerTrack";
+        }
+
         $(browser.trackContainerDiv).append(this.trackDiv);
 
         if (track.height) {
@@ -86,7 +91,7 @@ var igv = (function (igv) {
         contentDivHeight = maxContentHeightWithViewports(viewports);
 
         this.$outerScroll = $('<div class="igv-scrollbar-outer-div">');
-        this.$innerScroll = $('<div class="igv-scrollbar-inner-div">');
+        this.$innerScroll = $('<div>');
 
         this.$outerScroll.append(this.$innerScroll);
 
@@ -297,20 +302,20 @@ var igv = (function (igv) {
     igv.TrackView.prototype.createRightHandGutter = function () {
 
         var self = this,
-            gearButton;
+            $gearButton;
 
         if (this.track.ignoreTrackMenu) {
             return undefined;
         }
 
-        gearButton = $('<i class="fa fa-gear fa-20px igv-track-menu-gear igv-app-icon">');
+        $gearButton = $('<i class="fa fa-gear">');
 
-        $(gearButton).click(function (e) {
+        $gearButton.click(function (e) {
             igv.popover.presentTrackGearMenu(e.pageX, e.pageY, self);
         });
 
         this.rightHandGutter = $('<div class="igv-right-hand-gutter">')[0];
-        $(this.rightHandGutter).append(gearButton[0]);
+        $(this.rightHandGutter).append($gearButton);
 
         return this.rightHandGutter;
 
