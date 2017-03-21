@@ -43,6 +43,10 @@ var igv = (function (igv) {
         this.contentDiv = $('<div class="igv-viewport-content-div">')[0];
         this.$viewport.append(this.contentDiv);
 
+        if (trackView.track instanceof igv.SequenceTrack) {
+            this.$viewport.addClass('igv-viewport-sequence');
+        }
+
         if (this.genomicState.locusCount > 1) {
 
             if (trackView.track instanceof igv.RulerTrack) {
