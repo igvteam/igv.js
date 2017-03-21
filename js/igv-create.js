@@ -78,7 +78,7 @@ var igv = (function (igv) {
 
         // user feedback
         browser.userFeedback = new igv.UserFeedback($content);
-        browser.userFeedback.hide();
+        // browser.userFeedback.hide();
 
         // Popover object -- singleton shared by all components
         igv.popover = new igv.Popover($content);

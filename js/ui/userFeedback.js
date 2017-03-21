@@ -36,15 +36,15 @@ var igv = (function (igv) {
         $parent.append(this.userFeedback[0]);
 
         // header
-        this.userFeedbackHeader = $('<div class="igvUserFeedbackHeader">');
+        this.userFeedbackHeader = $('<div>');
         this.userFeedback.append(this.userFeedbackHeader[0]);
 
         // alert
-        this.userFeedbackAlert = $('<i class="fa fa-exclamation-triangle fa-20px igvUserFeedbackAlert">');
+        this.userFeedbackAlert = $('<i class="fa fa-exclamation-triangle">');
         this.userFeedbackHeader.append(this.userFeedbackAlert[0]);
 
         // dismiss
-        this.userFeedbackDismiss = $('<i class="fa fa-times-circle fa-20px igvUserFeedbackDismiss">');
+        this.userFeedbackDismiss = $('<i class="fa fa-times-circle">');
         this.userFeedbackHeader.append(this.userFeedbackDismiss[0]);
 
         this.userFeedbackDismiss.click(function () {
@@ -53,7 +53,7 @@ var igv = (function (igv) {
         });
 
         // copy
-        this.userFeedbackBodyCopy = $('<div class="igvUserFeedbackBodyCopy">');
+        this.userFeedbackBodyCopy = $('<div>');
         this.userFeedback.append(this.userFeedbackBodyCopy[0]);
 
     };
