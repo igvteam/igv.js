@@ -274,7 +274,7 @@ var igv = (function (igv) {
                 var $e;
 
                 if (item.name) {
-                    $e = $('<div class="igv-track-menu-item">');
+                    $e = $('<div>');
                     $e.text(item.name);
                 } else {
                     $e = item.object
@@ -310,7 +310,7 @@ var igv = (function (igv) {
         var $e,
             clickHandler;
 
-        $e = $('<div class="igv-track-menu-item">');
+        $e = $('<div>');
 
         if (true === doAddTopBorder) {
             $e.addClass('igv-track-menu-border-top');
@@ -336,7 +336,7 @@ var igv = (function (igv) {
         var $e,
             clickHandler;
 
-        $e = $('<div class="igv-track-menu-item">');
+        $e = $('<div>');
         $e.text('Set data range');
 
         clickHandler = function () {
@@ -354,7 +354,7 @@ var igv = (function (igv) {
         var $e,
             clickHandler;
 
-        $e = $('<div class="igv-track-menu-item">');
+        $e = $('<div>');
         $e.text('Set track color');
 
         clickHandler = function () {

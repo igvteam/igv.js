@@ -379,10 +379,22 @@
   background-color: white;
   border-bottom-left-radius: 4px;
   border-bottom-right-radius: 4px; }
-
-.igv-track-menu-container a {
-  color: inherit;
-  text-decoration: none; }
+  .igv-track-menu-container div {
+    padding-left: 4px;
+    padding-right: 4px;
+    padding-top: 2px;
+    padding-bottom: 2px;
+    background-color: white; }
+    .igv-track-menu-container div i {
+      padding-right: 2px; }
+  .igv-track-menu-container div:hover,
+  .igv-track-menu-container div:focus,
+  .igv-track-menu-container div:active {
+    cursor: pointer;
+    background-color: #efefef; }
+  .igv-track-menu-container a {
+    color: inherit;
+    text-decoration: none; }
 
 .igv-track-menu-border-top {
   border-top-color: #a2a2a2;
@@ -394,19 +406,6 @@
   font-weight: 400;
   /*color: white;*/
   /*background-color: #808080;*/ }
-
-.igv-track-menu-item {
-  padding-left: 4px;
-  padding-right: 4px;
-  padding-top: 2px;
-  padding-bottom: 2px;
-  background-color: white; }
-
-.igv-track-menu-item:hover,
-.igv-track-menu-item:focus,
-.igv-track-menu-item:active {
-  cursor: pointer;
-  background-color: #efefef; }
 
 .igv-track-menu-discard {
   position: absolute;
@@ -1025,9 +1024,6 @@
 .fa-20px {
   font-size: 20px; }
 
-.fa-check-shim {
-  padding-right: 2px; }
-
 .fa-check-hidden {
   color: rgba(255, 255, 255, 0); }
 
@@ -1074,6 +1070,20 @@ div.ui-dialog fieldset {
   border-bottom-style: solid;
   border-bottom-width: thin;
   background-color: #eee; }
+  .igv-popover-header div {
+    position: absolute;
+    top: 3px;
+    right: 3px;
+    height: 100%;
+    width: 16px;
+    text-align: center;
+    line-height: 100%; }
+    .igv-popover-header div i {
+      cursor: pointer;
+      color: #444;
+      font-size: small; }
+  .igv-popover-header div:hover {
+    color: #fff; }
 
 .igv-popover-track-popup-content {
   position: relative;
@@ -1102,35 +1112,13 @@ div.ui-dialog fieldset {
   max-width: 256px;
   display: inline-block; }
 
-.igv-dialog-close-container {
-  position: absolute;
-  top: 3px;
-  right: 3px;
-  height: 100%;
-  width: 16px;
-  text-align: center;
-  line-height: 100%;
-  color: #444; }
-
-.igv-dialog-close-fa {
-  cursor: pointer;
-  color: #888;
-  font-size: small; }
-
-.igv-dialog-close-container:hover {
-  color: #fff; }
-
 .igv-spinner-container {
   color: #3f3f3f;
-  /*background-color: rgba(255, 0, 0, 0.5);*/
   width: 100%;
   height: 100%;
   text-align: center;
   padding-top: 8px;
   font-size: 24px;
-  /*position: absolute;*/
-  /*top:50%;*/
-  /*left:50%;*/
   z-index: 512; }
 
 div[id="igvEncodeModal"] {

@@ -529,16 +529,38 @@ $igv-navbar-toggle-dark-dark: #737373;
 
 }
 
+// track menu
 .igv-track-menu-container {
 
   background-color: white;
   border-bottom-left-radius: 4px;
   border-bottom-right-radius: 4px;
-}
 
-.igv-track-menu-container a {
-  color: inherit;
-  text-decoration: none;
+  div {
+    padding-left: 4px;
+    padding-right: 4px;
+    padding-top: 2px;
+    padding-bottom: 2px;
+    background-color: rgb(255, 255, 255);
+
+    i {
+      padding-right: 2px;
+    }
+
+  }
+
+  div:hover,
+  div:focus,
+  div:active  {
+    cursor: pointer;
+    background-color: rgb(239, 239, 239);
+  }
+
+  a {
+    color: inherit;
+    text-decoration: none;
+  }
+
 }
 
 .igv-track-menu-border-top {
@@ -556,25 +578,6 @@ $igv-navbar-toggle-dark-dark: #737373;
   /*color: white;*/
   /*background-color: #808080;*/
 
-}
-
-.igv-track-menu-item {
-
-  padding-left: 4px;
-  padding-right: 4px;
-
-  padding-top: 2px;
-  padding-bottom: 2px;
-
-  background-color: rgb(255, 255, 255);
-}
-
-.igv-track-menu-item:hover,
-.igv-track-menu-item:focus,
-.igv-track-menu-item:active  {
-
-  cursor: pointer;
-  background-color: rgb(239, 239, 239);
 }
 
 .igv-track-menu-discard {
@@ -1464,10 +1467,6 @@ $igv-navbar-toggle-dark-dark: #737373;
   font-size: 20px;
 }
 
-.fa-check-shim {
-  padding-right: 2px;
-}
-
 .fa-check-hidden {
   color: rgba(255, 255, 255, 0);
 }
@@ -1532,6 +1531,30 @@ div.ui-dialog fieldset {
 
   background-color: #eee;
 
+  div {
+
+    position: absolute;
+    top: 3px;
+    right: 3px;
+
+    height: 100%;
+    width: 16px;
+
+    text-align: center;
+    line-height: 100%;
+
+    i {
+      cursor: pointer;
+      color: #444;
+      font-size: small;
+    }
+
+  }
+
+  div:hover {
+    color: #fff;
+  }
+
 }
 
 .igv-popover-track-popup-content {
@@ -1571,37 +1594,9 @@ div.ui-dialog fieldset {
   display:inline-block;
 }
 
-.igv-dialog-close-container {
-
-  position: absolute;
-  top: 3px;
-  right: 3px;
-
-  height: 100%;
-  width: 16px;
-
-  text-align: center;
-  line-height: 100%;
-
-  color: #444;
-
-}
-
-.igv-dialog-close-fa {
-
-  cursor: pointer;
-  color: #888;
-  font-size: small;
-}
-
-.igv-dialog-close-container:hover {
-  color: #fff;
-}
-
 .igv-spinner-container {
 
   color: #3f3f3f;
-  /*background-color: rgba(255, 0, 0, 0.5);*/
 
   width: 100%;
   height: 100%;
@@ -1610,10 +1605,6 @@ div.ui-dialog fieldset {
   padding-top: 8px;
 
   font-size: 24px;
-
-  /*position: absolute;*/
-  /*top:50%;*/
-  /*left:50%;*/
 
   z-index: 512;
 

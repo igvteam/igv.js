@@ -95,8 +95,8 @@ var igv = (function (igv) {
         function htmlStringified(autoScale) {
             var html = [];
 
-            html.push('<div class="igv-track-menu-item">');
-            html.push(true === autoScale ? '<i class="fa fa-check fa-check-shim">' : '<i class="fa fa-check fa-check-shim fa-check-hidden">');
+            html.push('<div>');
+            html.push(true === autoScale ? '<i class="fa fa-check">' : '<i class="fa fa-check fa-check-hidden">');
             html.push('</i>');
             html.push('Autoscale');
             html.push('</div>');
