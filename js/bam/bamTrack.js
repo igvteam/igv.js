@@ -149,7 +149,7 @@ var igv = (function (igv) {
             clickHandler,
             list = [];
 
-        $e = $('<div class="igv-track-menu-item">');
+        $e = $('<div>');
         $e.text('Sort by base');
 
         clickHandler = function () {
@@ -170,7 +170,7 @@ var igv = (function (igv) {
 
         if (false === self.viewAsPairs) {
 
-            $e = $('<div class="igv-track-menu-item">');
+            $e = $('<div>');
             $e.text('View mate in split screen');
 
             clickHandler = function () {
@@ -247,8 +247,8 @@ var igv = (function (igv) {
         html = [];
         if (self.pairsSupported && self.alignmentTrack.hasPairs) {
 
-            html.push('<div class="igv-track-menu-item igv-track-menu-border-top">');
-            html.push(true === self.viewAsPairs ? '<i class="fa fa-check fa-check-shim">' : '<i class="fa fa-check fa-check-shim fa-check-hidden">');
+            html.push('<div class="igv-track-menu-border-top">');
+            html.push(true === self.viewAsPairs ? '<i class="fa fa-check">' : '<i class="fa fa-check fa-check-hidden">');
             html.push('</i>');
             html.push('View as pairs');
             html.push('</div>');
@@ -282,9 +282,9 @@ var igv = (function (igv) {
                 clickHandler,
                 parts = [];
 
-            parts.push('<div class="igv-track-menu-item">');
+            parts.push('<div>');
 
-            parts.push(showCheck ? '<i class="fa fa-check fa-check-shim"></i>' : '<i class="fa fa-check fa-check-shim fa-check-hidden"></i>');
+            parts.push(showCheck ? '<i class="fa fa-check"></i>' : '<i class="fa fa-check fa-check-hidden"></i>');
 
             if (menuItem.key === 'tag') {
                 parts.push('<span id="color-by-tag">');
@@ -341,7 +341,7 @@ var igv = (function (igv) {
             var $e,
                 clickHandler;
 
-            $e = $('<div class="igv-track-menu-item">');
+            $e = $('<div>');
             $e.text('Sort by base');
 
             clickHandler = function () {

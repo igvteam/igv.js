@@ -372,7 +372,7 @@ var igv = (function (igv) {
             $e,
             clickHandler;
 
-        $e = $('<div class="igv-track-menu-item">');
+        $e = $('<div>');
         $e.text('Sort by value');
 
         clickHandler = function () {

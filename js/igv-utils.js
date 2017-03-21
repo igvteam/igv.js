@@ -77,11 +77,11 @@ var igv = (function (igv) {
 
     igv.attachDialogCloseHandlerWithParent = function ($parent, closeHandler) {
 
-        var $container = $('<div class="igv-dialog-close-container">'),
-            $fa = $('<i class="fa fa-times igv-dialog-close-fa">');
+        var $container = $('<div>'),
+            $fa = $('<i class="fa fa-times">');
 
-        $container.append($fa[0]);
-        $parent.append($container[0]);
+        $container.append($fa);
+        $parent.append($container);
 
         $fa.hover(
             function () {
@@ -89,17 +89,16 @@ var igv = (function (igv) {
                 $fa.addClass("fa-times-circle");
 
                 $fa.css({
-                    "color": "#222"
+                    color:"#222"
                 });
             },
 
             function () {
                 $fa.removeClass("fa-times-circle");
-                //$fa.removeClass("fa-times-circle fa-lg");
                 $fa.addClass("fa-times");
 
                 $fa.css({
-                    "color": "#444"
+                    color:"#444"
                 });
 
             }

@@ -88,17 +88,10 @@ var igv = (function (igv) {
                     if (!c) c = "gray";
 
                     if (bpPerPixel > 1 / 10) {
-
-                        // igv.graphics.fillRect(ctx, p0, 0, p1 - p0, 10, {fillStyle: c});
-                        igv.graphics.fillRect(ctx, p0, 0, p1 - p0, self.height, {fillStyle: c});
+                        igv.graphics.fillRect(ctx, p0, 0, p1 - p0, self.height, { fillStyle: c });
                     }
                     else {
-
-                        igv.graphics.strokeText(ctx, b, pc, 3 + y, {
-                            strokeStyle: c,
-                            font: 'normal 10px Arial',
-                            textAlign: 'center'
-                        });
+                        igv.graphics.strokeText(ctx, b, pc, 3 + y, { strokeStyle: c });
                     }
                 }
             }

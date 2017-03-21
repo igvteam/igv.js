@@ -60,7 +60,7 @@ var igv = (function (igv) {
 
             $content_header.append(panel.$ideogram);
 
-            panel.$canvas = $('<canvas class="igv-ideogram-canvas"></canvas>');
+            panel.$canvas = $('<canvas>');
             panel.$ideogram.append(panel.$canvas);
 
             panel.$canvas.attr('width', panel.$ideogram.width());
