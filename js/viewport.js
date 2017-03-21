@@ -45,7 +45,7 @@ var igv = (function (igv) {
 
                 this.$viewport.addClass('igv-viewport-ruler');
 
-                this.$close = $('<div class="igv-viewport-fa-close igv-fa-navbar">');
+                this.$close = $('<div class="igv-viewport-fa-close">');
                 this.$closeButton = $('<i class="fa fa-times-circle">');
                 this.$close.append(this.$closeButton);
 
