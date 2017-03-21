@@ -91,7 +91,7 @@ var igv = (function (igv) {
         contentDivHeight = maxContentHeightWithViewports(viewports);
 
         this.$outerScroll = $('<div class="igv-scrollbar-outer-div">');
-        this.$innerScroll = $('<div class="igv-scrollbar-inner-div">');
+        this.$innerScroll = $('<div>');
 
         this.$outerScroll.append(this.$innerScroll);
 

@@ -491,21 +491,45 @@
   font-weight: bold;
   /*background-color: rgba(224, 224, 224, 1);*/ }
 
+.igv-scrollbar-outer-div {
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: 14px;
+  height: 100%;
+  background-color: white; }
+  .igv-scrollbar-outer-div div {
+    position: absolute;
+    top: 0;
+    left: 3px;
+    width: 8px;
+    border-style: solid;
+    border-width: thin;
+    border-color: #c4c4c4;
+    border-top-left-radius: 4px;
+    border-top-right-radius: 4px;
+    border-bottom-left-radius: 4px;
+    border-bottom-right-radius: 4px;
+    background-color: white; }
+  .igv-scrollbar-outer-div div:hover,
+  .igv-scrollbar-outer-div div:focus,
+  .igv-scrollbar-outer-div div:active {
+    cursor: pointer;
+    background-color: #c4c4c4; }
+
 .zoom-in-notice-container {
   position: absolute;
   top: 25%;
   left: 50%; }
-
-.zoom-in-notice {
-  position: relative;
-  left: -50%;
-  font-family: "Open Sans", sans-serif;
-  font-size: medium;
-  font-weight: 400;
-  color: #3f3f3f;
-  background-color: rgba(255, 255, 255, 0.51);
-  /*background-color: rgba(255, 0, 0, 0.51);*/
-  z-index: 64; }
+  .zoom-in-notice-container div {
+    position: relative;
+    left: -50%;
+    font-family: "Open Sans", sans-serif;
+    font-size: medium;
+    font-weight: 400;
+    color: #3f3f3f;
+    background-color: rgba(255, 255, 255, 0.51);
+    z-index: 64; }
 
 .igv-track-control-canvas {
   position: absolute; }
@@ -581,41 +605,6 @@
 .igv-data-range-track-label:active {
   font-weight: bold;
   /*border-color: #9b9b9b;*/ }
-
-.igv-scrollbar-outer-div {
-  position: absolute;
-  top: 0;
-  right: 0;
-  width: 14px;
-  height: 100%;
-  /*background-color: rgba(223, 223, 223, 0.51);*/
-  background-color: white;
-  /*border-left-style: solid;*/
-  /*border-left-width: thin;*/
-  /*border-left-color: rgb(223, 223, 223);*/ }
-
-.igv-scrollbar-inner-div {
-  position: absolute;
-  top: 0;
-  left: 3px;
-  width: 8px;
-  border-style: solid;
-  border-width: thin;
-  border-color: #c4c4c4;
-  border-top-left-radius: 4px;
-  border-top-right-radius: 4px;
-  border-bottom-left-radius: 4px;
-  border-bottom-right-radius: 4px;
-  /*background-color: #c4c4c4;*/
-  background-color: #ffffff; }
-
-.igv-scrollbar-inner-div:hover,
-.igv-scrollbar-inner-div:focus,
-.igv-scrollbar-inner-div:active {
-  cursor: pointer;
-  background-color: #c4c4c4;
-  /*background-color: #7e7e7e;*/
-  /*border-color: #7e7e7e;*/ }
 
 .spacer10 {
   height: 10px;
