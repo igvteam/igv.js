@@ -33,7 +33,7 @@ var igv = (function (igv) {
         var self = this;
 
         this.container = $('<div class="igv-grid-container-dialog">');
-        $parent.append( this.container[ 0 ] );
+        $parent.append(this.container);
 
         this.container.draggable();
 

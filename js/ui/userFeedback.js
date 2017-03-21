@@ -32,7 +32,7 @@ var igv = (function (igv) {
 
         var myself = this;
 
-        this.userFeedback = $('<div class="igvUserFeedback">');
+        this.userFeedback = $('<div class="igv-user-feedback">');
         $parent.append(this.userFeedback[0]);
 
         // header

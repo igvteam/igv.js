@@ -169,14 +169,6 @@ var igv = (function (igv) {
 
             featureValueRange = featureValueMaximum - featureValueMinimum;
 
-            //$dataRangeTrackLabel = $(this.trackView.trackDiv).find('.igv-data-range-track-label');
-            //
-            //min = (Math.floor(track.dataRange.min) === track.dataRange.min) ? track.dataRange.min : track.dataRange.min.toFixed(2);
-            //max = (Math.floor(track.dataRange.max) === track.dataRange.max) ? track.dataRange.max : track.dataRange.max.toFixed(2);
-            //str = '[' + min + ' - ' + max + ']';
-            //
-            //$dataRangeTrackLabel.text(str);
-
             features.forEach(renderFeature);
         }
 

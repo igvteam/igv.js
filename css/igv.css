@@ -342,10 +342,8 @@
   left: 0;
   width: 50px;
   height: 100%; }
-
-.igv-clickable {
-  cursor: pointer;
-  background-color: white; }
+  .igv-left-hand-gutter canvas {
+    position: absolute; }
 
 .igv-windowsizepanel-content-div {
   position: relative;
@@ -359,16 +357,6 @@
   font-size: 14px;
   font-weight: 400;
   color: #444; }
-
-.igv-fa-vertical-center-shim {
-  vertical-align: middle; }
-
-.igv-track-disable-button-fa {
-  position: absolute;
-  top: 8px;
-  right: 12px;
-  cursor: pointer;
-  color: #222; }
 
 .igv-track-menu-container {
   background-color: white;
@@ -398,21 +386,7 @@
 
 .igv-track-menu-category {
   padding-left: 4px;
-  font-weight: 400;
-  /*color: white;*/
-  /*background-color: #808080;*/ }
-
-.igv-track-menu-discard {
-  position: absolute;
-  left: 20px;
-  top: 0;
-  color: grey;
-  background-color: white; }
-
-.igv-track-menu-discard:hover,
-.igv-track-menu-discard:focus,
-.igv-track-menu-discard:active {
-  color: #333333; }
+  font-weight: 400; }
 
 .igv-track-drag-scrim {
   position: absolute;
@@ -519,9 +493,6 @@
     background-color: rgba(255, 255, 255, 0.51);
     z-index: 64; }
 
-.igv-track-control-canvas {
-  position: absolute; }
-
 .igv-center-guide {
   pointer-events: none;
   position: absolute;
@@ -569,30 +540,9 @@
   -moz-user-select: none;
   -webkit-user-select: none; }
 
-.igv-data-range-track-label {
+.igv-clickable {
   cursor: pointer;
-  position: absolute;
-  top: 0;
-  right: 0;
-  padding-top: 0;
-  padding-right: 0;
-  margin-top: 0;
-  margin-right: 8px;
-  font-family: "Open Sans", sans-serif;
-  font-size: small;
-  font-weight: 200;
-  color: #373737;
-  /*background-color: white;*/
-  /*border-style: solid;*/
-  /*border-width: thin;*/
-  /*border-radius: 2px;*/
-  /*border-color: #dfdfdf;*/ }
-
-.igv-data-range-track-label:hover,
-.igv-data-range-track-label:focus,
-.igv-data-range-track-label:active {
-  font-weight: bold;
-  /*border-color: #9b9b9b;*/ }
+  background-color: white; }
 
 .spacer10 {
   height: 10px;
@@ -602,13 +552,6 @@
   padding: 0;
   border: 0;
   display: block; }
-
-#dropdown-list {
-  max-height: 200px;
-  overflow: auto;
-  top: 15px;
-  position: relative;
-  left: 50px; }
 
 #color-by-tag {
   color: #444; }
@@ -626,7 +569,7 @@
   border-width: thin;
   background-color: #7f7f7f; }
 
-.igvUserFeedback {
+.igv-user-feedback {
   position: fixed;
   top: 50%;
   left: 50%;
@@ -644,7 +587,7 @@
   font-size: medium;
   font-weight: 400;
   color: #444; }
-  .igvUserFeedback div:first-child {
+  .igv-user-feedback div:first-child {
     position: absolute;
     top: 0;
     left: 0;
@@ -655,26 +598,26 @@
     border-bottom-style: solid;
     border-bottom-width: thin;
     background-color: white; }
-    .igvUserFeedback div:first-child i {
+    .igv-user-feedback div:first-child i {
       font-size: 20px; }
-    .igvUserFeedback div:first-child i:first-child {
+    .igv-user-feedback div:first-child i:first-child {
       position: absolute;
       top: 0;
       left: 0;
       padding: 8px;
       color: red; }
-    .igvUserFeedback div:first-child i:last-child {
+    .igv-user-feedback div:first-child i:last-child {
       position: absolute;
       top: 0;
       right: 0;
       padding: 8px;
       cursor: pointer;
       color: grey; }
-    .igvUserFeedback div:first-child i:last-child:hover,
-    .igvUserFeedback div:first-child i:last-child:focus,
-    .igvUserFeedback div:first-child i:last-child:active {
+    .igv-user-feedback div:first-child i:last-child:hover,
+    .igv-user-feedback div:first-child i:last-child:focus,
+    .igv-user-feedback div:first-child i:last-child:active {
       color: #333333; }
-  .igvUserFeedback div:last-child {
+  .igv-user-feedback div:last-child {
     padding-left: 48px;
     padding-top: 8px;
     padding-right: 48px;
@@ -688,15 +631,6 @@
 
 .igv-dialog-label-centered {
   text-align: center; }
-
-[class*='igv-'], [class*='igv-']:after, [class*='igv-']:before {
-  -webkit-box-sizing: border-box;
-  -moz-box-sizing: border-box;
-  box-sizing: border-box; }
-
-.igv-encode-spinner-container {
-  /*width: 256px;*/
-  /*margin: 0 auto 0 auto;*/ }
 
 .igv-grid-container-dialog {
   position: absolute;
@@ -1112,6 +1046,15 @@ div.ui-dialog fieldset {
   padding-top: 8px;
   font-size: 24px;
   z-index: 512; }
+
+[class*='igv-'], [class*='igv-']:after, [class*='igv-']:before {
+  -webkit-box-sizing: border-box;
+  -moz-box-sizing: border-box;
+  box-sizing: border-box; }
+
+.igv-encode-spinner-container {
+  /*width: 256px;*/
+  /*margin: 0 auto 0 auto;*/ }
 
 div[id="igvEncodeModal"] {
   -webkit-touch-callout: none;
