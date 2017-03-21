@@ -189,66 +189,6 @@
   border-left-style: solid;
   border-left-width: thin; }
 
-.igvUserFeedback {
-  position: fixed;
-  top: 50%;
-  left: 50%;
-  width: 36em;
-  height: 27em;
-  margin-top: -9em;
-  /*set to a negative number 1/2 of your height*/
-  margin-left: -15em;
-  /*set to a negative number 1/2 of your width*/
-  background-color: white;
-  border-color: #a2a2a2;
-  border-style: solid;
-  border-width: thin;
-  font-family: "Open Sans", sans-serif;
-  font-size: medium;
-  font-weight: 400;
-  color: #444; }
-  .igvUserFeedback div:first-child {
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    width: 100%;
-    height: 32px;
-    border-bottom-color: #a2a2a2;
-    border-bottom-style: solid;
-    border-bottom-width: thin;
-    background-color: white; }
-    .igvUserFeedback div:first-child i {
-      font-size: 20px; }
-    .igvUserFeedback div:first-child i:first-child {
-      position: absolute;
-      top: 0;
-      left: 0;
-      padding: 8px;
-      color: red; }
-    .igvUserFeedback div:first-child i:last-child {
-      position: absolute;
-      top: 0;
-      right: 0;
-      padding: 8px;
-      cursor: pointer;
-      color: grey; }
-    .igvUserFeedback div:first-child i:last-child:hover,
-    .igvUserFeedback div:first-child i:last-child:focus,
-    .igvUserFeedback div:first-child i:last-child:active {
-      color: #333333; }
-  .igvUserFeedback div:last-child {
-    padding-left: 48px;
-    padding-top: 8px;
-    padding-right: 48px;
-    padding-bottom: 8px;
-    position: absolute;
-    top: 33px;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background-color: white; }
-
 .igv-root-div {
   position: relative;
   left: 0;
@@ -708,6 +648,66 @@
   border-style: solid;
   border-width: thin;
   background-color: #7f7f7f; }
+
+.igvUserFeedback {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  width: 36em;
+  height: 27em;
+  margin-top: -9em;
+  /*set to a negative number 1/2 of your height*/
+  margin-left: -15em;
+  /*set to a negative number 1/2 of your width*/
+  background-color: white;
+  border-color: #a2a2a2;
+  border-style: solid;
+  border-width: thin;
+  font-family: "Open Sans", sans-serif;
+  font-size: medium;
+  font-weight: 400;
+  color: #444; }
+  .igvUserFeedback div:first-child {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    width: 100%;
+    height: 32px;
+    border-bottom-color: #a2a2a2;
+    border-bottom-style: solid;
+    border-bottom-width: thin;
+    background-color: white; }
+    .igvUserFeedback div:first-child i {
+      font-size: 20px; }
+    .igvUserFeedback div:first-child i:first-child {
+      position: absolute;
+      top: 0;
+      left: 0;
+      padding: 8px;
+      color: red; }
+    .igvUserFeedback div:first-child i:last-child {
+      position: absolute;
+      top: 0;
+      right: 0;
+      padding: 8px;
+      cursor: pointer;
+      color: grey; }
+    .igvUserFeedback div:first-child i:last-child:hover,
+    .igvUserFeedback div:first-child i:last-child:focus,
+    .igvUserFeedback div:first-child i:last-child:active {
+      color: #333333; }
+  .igvUserFeedback div:last-child {
+    padding-left: 48px;
+    padding-top: 8px;
+    padding-right: 48px;
+    padding-bottom: 8px;
+    position: absolute;
+    top: 33px;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: white; }
 
 .igv-dialog-label-centered {
   text-align: center; }

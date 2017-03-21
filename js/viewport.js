@@ -7,14 +7,6 @@ var igv = (function (igv) {
         this.initializationHelper(trackView, locusIndex);
     };
 
-    igv.Viewport.prototype.setWidth = function (width) {
-        var percentage;
-
-        this.$viewport.width(width);
-        percentage = this.$viewport.width()/this.$viewport.outerWidth();
-        this.$viewport.width(Math.floor(percentage * width));
-    };
-
     igv.Viewport.prototype.initializationHelper = function (trackView, locusIndex) {
 
         var self = this,
@@ -151,6 +143,14 @@ var igv = (function (igv) {
             // }
 
         }
+    };
+
+    igv.Viewport.prototype.setWidth = function (width) {
+        var percentage;
+
+        this.$viewport.width(width);
+        percentage = this.$viewport.width()/this.$viewport.outerWidth();
+        this.$viewport.width(Math.floor(percentage * width));
     };
 
     igv.Viewport.prototype.addMouseHandlers = function () {
@@ -302,7 +302,7 @@ var igv = (function (igv) {
         if ('all' === this.genomicState.chromosome.name) {
             return;
         }
-        self.trackView.trackDiv.dataset.rulerTrack = "rulerTrack";
+        // self.trackView.trackDiv.dataset.rulerTrack = "rulerTrack";
 
         // ruler sweeper widget surface
         self.$rulerSweeper = $('<div class="igv-ruler-sweeper-div">');

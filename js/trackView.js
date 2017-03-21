@@ -37,6 +37,11 @@ var igv = (function (igv) {
         this.browser = browser;
 
         this.trackDiv = $('<div class="igv-track-div">')[0];
+
+        if (this.track instanceof igv.RulerTrack) {
+            this.trackDiv.dataset.rulerTrack = "rulerTrack";
+        }
+
         $(browser.trackContainerDiv).append(this.trackDiv);
 
         if (track.height) {
