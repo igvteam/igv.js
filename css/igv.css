@@ -205,16 +205,12 @@
 
 .igv-track-container-div {
   position: relative;
-  clear: both;
-  /*left: 0;*/
-  /*right: 0;*/
-  /*overflow: hidden;*/ }
+  clear: both; }
 
 .igv-track-div {
   position: relative;
   width: 100%;
   overflow: hidden;
-  /*margin-bottom:4px;*/
   margin-bottom: 2px; }
 
 .igv-viewport-container {
@@ -255,6 +251,9 @@
   position: absolute;
   width: 100%;
   height: 100%; }
+  .igv-viewport-content-div canvas {
+    width: 100%;
+    height: 100%; }
 
 .igv-viewport-fa-close {
   position: absolute;
@@ -296,11 +295,6 @@
   font-size: 8px;
   font-weight: 200;
   text-align: center; }
-
-.igv-viewport-canvas {
-  /*position: absolute;*/
-  width: 100%;
-  height: 100%; }
 
 .igv-viewport-spinner {
   pointer-events: none;

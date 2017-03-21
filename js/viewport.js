@@ -58,7 +58,7 @@ var igv = (function (igv) {
         }
 
         // track content canvas
-        this.canvas = $('<canvas class = "igv-viewport-canvas">')[0];
+        this.canvas = $('<canvas>')[0];
         $(this.contentDiv).append(this.canvas);
         this.canvas.setAttribute('width', this.contentDiv.clientWidth);
         this.canvas.setAttribute('height', this.contentDiv.clientHeight);
