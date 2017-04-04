@@ -71,13 +71,8 @@ var igv = (function (igv) {
 
         return new Promise(function (fulfill, reject) {
 
-            igvxhr.loadArrayBuffer(self.path,
-                {
-                    headers: self.config.headers,
-                    range: {start: self.filePosition, size: BLOCK_HEADER_LENGTH},
-                    withCredentials: self.config.withCredentials
-
-                }).then(function (arrayBuffer) {
+            igvxhr.loadArrayBuffer(self.path, igv.buildOptions(self.config, {range: {start: self.filePosition, size: BLOCK_HEADER_LENGTH}}))
+                .then(function (arrayBuffer) {
 
                 var ba = new Uint8Array(arrayBuffer);
                 var xlen = (ba[11] << 8) | (ba[10]);
@@ -88,12 +83,8 @@ var igv = (function (igv) {
 
                 self.filePosition += BLOCK_HEADER_LENGTH;
 
-                igvxhr.loadArrayBuffer(self.path, {
-                    headers: self.config.headers,
-                    range: {start: self.filePosition, size: bsize},
-                    withCredentials: self.config.withCredentials
-
-                }).then(function (arrayBuffer) {
+                igvxhr.loadArrayBuffer(self.path, igv.buildOptions(self.config, {range: {start: self.filePosition, size: bsize}}))
+                    .then(function (arrayBuffer) {
 
                     var unc = jszlib_inflate_buffer(arrayBuffer);
 

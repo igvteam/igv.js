@@ -127,12 +127,7 @@ var igv = (function (igv) {
                 }
             };
 
-            afterload = {
-                headers: self.config.headers, // http headers, not file header
-                tokens: self.config.tokens, // http headers, not file header
-                success: afterJsonLoaded,
-                withCredentials: self.config.withCredentials
-            };
+            afterload = igv.buildOptions(self.config, {tokens: self.config.tokens, success: afterJsonLoaded});
 
             igvxhr.loadString(self.config.url, afterload);
 
@@ -185,11 +180,7 @@ var igv = (function (igv) {
                     fulfill();
                 };
 
-                afterload = {
-                    headers: self.config.headers, // http headers, not file header
-                    tokens: self.config.tokens, // http headers, not file header
-                    withCredentials: self.config.withCredentials
-                };
+                afterload = igv.buildOptions(self.config, {tokens: self.config.tokens});
 
                 igvxhr.loadString(self.config.url, afterload).then(afterJsonLoaded);
 

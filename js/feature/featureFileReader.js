@@ -106,12 +106,7 @@ var igv = (function (igv) {
 
                             // Load the file header (not HTTP header) for an indexed file.
                             // TODO -- note this will fail if the file header is > 65kb in size
-                            options = {
-                                headers: self.config.headers,           // http headers, not file header
-                                bgz: index.tabix,
-                                range: {start: 0, size: 65000},
-                                withCredentials: self.config.withCredentials
-                            };
+                            options = igv.buildOptions(self.config, {bgz: index.tabix, range: {start: 0, size: 65000}});
 
                             success = function (data) {
                                 self.header = self.parser.parseHeader(data);
@@ -184,10 +179,7 @@ var igv = (function (igv) {
         var self = this;
 
         return new Promise(function (fullfill, reject) {
-            var options = {
-                headers: self.config.headers,           // http headers, not file header
-                withCredentials: self.config.withCredentials
-            };
+            var options = igv.buildOptions(self.config);
 
             function parseData(data) {
                 self.header = self.parser.parseHeader(data);
@@ -235,11 +227,12 @@ var igv = (function (igv) {
 
                         endPos = endPos = block.maxv.block + MAX_GZIP_BLOCK_SIZE;
 
-                        options = {
-                            headers: self.config.headers, // http headers, not file header
-                            range: {start: startPos, size: endPos - startPos + 1},
-                            withCredentials: self.config.withCredentials
-                        };
+                        options = igv.buildOptions(self.config, {
+                            range: {
+                                start: startPos,
+                                size: endPos - startPos + 1
+                            }
+                        });
 
                         success = function (data) {
 
