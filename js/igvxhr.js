@@ -176,10 +176,25 @@ var igvxhr = (function (igvxhr) {
         if (options === undefined) options = {};
         options.responseType = "arraybuffer";
 
-        return options.oauthToken ? options.oauthToken().then(applyOauthToken) : applyOauthToken();
+        if (!options.oauthToken) {
+            return applyOauthToken();
+        }
+
+        var token = _.isFunction(options.oauthToken) ? options.oauthToken() : options.oauthToken;
+
+        if (token.then && _.isFunction(token.then)) {
+            return token.then(applyOauthToken);
+        }
+
+        return applyOauthToken(token);
+
+        ////////////
 
         function applyOauthToken(token) {
-            options.token = token;
+            if (token) {
+                options.token = token;
+            }
+
             return igvxhr.load(url, options);
         }
     };
