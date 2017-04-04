@@ -38,11 +38,7 @@ var igv = (function (igv) {
         return new Promise(function (fullfill) {
 
             igvxhr
-                .loadArrayBuffer(indexFile,
-                    {
-                        headers: config.headers,
-                        withCredentials: config.withCredentials
-                    })
+                .loadArrayBuffer(indexFile, igv.buildOptions(config))
                 .then(function (arrayBuffer) {
 
                     if (arrayBuffer) {
