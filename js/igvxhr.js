@@ -43,13 +43,17 @@ var igvxhr = (function (igvxhr) {
                 responseType = options.responseType,
                 contentType = options.contentType,
                 mimeType = options.mimeType,
-                headers = options.headers,
+                headers = options.headers || {},
                 isSafari = navigator.vendor.indexOf("Apple") == 0 && /\sSafari\//.test(navigator.userAgent),
                 withCredentials = options.withCredentials,
                 header_keys, key, value, i;
 
             // Support for GCS paths.
             url = url.startsWith("gs://") ? igv.Google.translateGoogleCloudURL(url) : url;
+
+            if (options.token) {
+                headers["Authorization"] = 'Bearer ' + options.token;
+            }
 
             if (igv.Google.isGoogleURL(url)) {
 
@@ -171,7 +175,13 @@ var igvxhr = (function (igvxhr) {
 
         if (options === undefined) options = {};
         options.responseType = "arraybuffer";
-        return igvxhr.load(url, options);
+
+        return options.oauthToken ? options.oauthToken().then(applyOauthToken) : applyOauthToken();
+
+        function applyOauthToken(token) {
+            options.token = token;
+            return igvxhr.load(url, options);
+        }
     };
 
     igvxhr.loadJson = function (url, options) {

@@ -464,6 +464,15 @@ var igv = (function (igv) {
         }
     };
 
+    igv.buildOptions = function(config, options) {
+        var defaultOptions = {
+            oauthToken: config.oauthToken || undefined,
+            headers: config.headers,
+            withCredentials: config.withCredentials
+        };
+
+        return _.extend(defaultOptions, options);
+    };
 
     return igv;
 

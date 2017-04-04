@@ -49,12 +49,10 @@ var igv = (function (igv) {
 
         return new Promise(function (fulfill, reject) {
 
-            igvxhr.loadArrayBuffer(self.path,
-                {
-                    headers: self.config.headers,
-                    range: {start: 0, size: 64000},                     // TODO -- a guess, what if not enough ?
-                    withCredentials: self.config.withCredentials
-                }).then(function (data) {
+            igvxhr.loadArrayBuffer(self.path, igv.buildOptions(self.config, {
+                    range: {start: 0, size: 64000} // TODO -- a guess, what if not enough ?
+                }))
+                .then(function (data) {
 
                 if (!data) {
                     fulfill(null);
@@ -117,12 +115,8 @@ var igv = (function (igv) {
 
         return new Promise(function (fulfill, reject) {
 
-            igvxhr.loadArrayBuffer(self.path,
-                {
-                    headers: self.config.headers,
-                    range: range,
-                    withCredentials: self.config.withCredentials
-                }).then(function (data) {
+            igvxhr.loadArrayBuffer(self.path, igv.buildOptions(self.config, {range: range}))
+                .then(function (data) {
 
                 var key, pos, size;
 
@@ -228,12 +222,8 @@ var igv = (function (igv) {
 
         return new Promise(function (fulfill, reject) {
 
-            igvxhr.loadArrayBuffer(self.path,
-                {
-                    headers: self.config.headers,
-                    range: {start: idx.start, size: idx.size},
-                    withCredentials: self.config.withCredentials
-                }).then(function (data) {
+            igvxhr.loadArrayBuffer(self.path, igv.buildOptions(self.config, {range: {start: idx.start, size: idx.size}}))
+                .then(function (data) {
 
                 if (!data) {
                     fulfill(null);
@@ -294,12 +284,8 @@ var igv = (function (igv) {
 
             return new Promise(function (fulfill, reject) {
 
-                igvxhr.loadArrayBuffer(self.path,
-                    {
-                        headers: self.config.headers,
-                        range: {start: idx.filePosition, size: idx.size},
-                        withCredentials: self.config.withCredentials
-                    }).then(function (data) {
+                igvxhr.loadArrayBuffer(self.path, igv.buildOptions(self.config, {range: {start: idx.filePosition, size: idx.size}}))
+                    .then(function (data) {
 
                     if (!data) {
                         fulfill(null);

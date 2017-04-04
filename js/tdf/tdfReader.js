@@ -51,12 +51,8 @@ var igv = (function (igv) {
 
         return new Promise(function (fulfill, reject) {
 
-            igvxhr.loadArrayBuffer(self.path,
-                {
-                    headers: self.config.headers,
-                    range: {start: 0, size: 64000},
-                    withCredentials: self.config.withCredentials
-                }).then(function (data) {
+            igvxhr.loadArrayBuffer(self.path, igv.buildOptions(self.config, {range: {start: 0, size: 64000}}))
+                .then(function (data) {
 
                 if (!data) {
                     reject("no data");
@@ -95,12 +91,8 @@ var igv = (function (igv) {
                 self.compressed = (self.flags & GZIP_FLAG) != 0;
 
                 // Now read index
-                igvxhr.loadArrayBuffer(self.path,
-                    {
-                        headers: self.config.headers,
-                        range: {start: self.indexPos, size: self.indexSize},
-                        withCredentials: self.config.withCredentials
-                    }).then(function (data) {
+                igvxhr.loadArrayBuffer(self.path,igv.buildOptions(self.config, {range: {start: self.indexPos, size: self.indexSize}}))
+                    .then(function (data) {
 
 
                     if (!data) {
@@ -165,12 +157,8 @@ var igv = (function (igv) {
                 else {
 
 
-                    igvxhr.loadArrayBuffer(self.path,
-                        {
-                            headers: self.config.headers,
-                            range: {start: indexEntry.position, size: indexEntry.size},
-                            withCredentials: self.config.withCredentials
-                        }).then(function (data) {
+                    igvxhr.loadArrayBuffer(self.path, igv.buildOptions(self.config, {range: {start: indexEntry.position, size: indexEntry.size}}))
+                        .then(function (data) {
 
                         if (!data) {
                             reject("no data");
@@ -271,12 +259,8 @@ var igv = (function (igv) {
                 else {
 
 
-                    igvxhr.loadArrayBuffer(self.path,
-                        {
-                            headers: self.config.headers,
-                            range: {start: indexEntry.position, size: indexEntry.size},
-                            withCredentials: self.config.withCredentials
-                        }).then(function (data) {
+                    igvxhr.loadArrayBuffer(self.path, igv.buildOptions(self.config, {range: {start: indexEntry.position, size: indexEntry.size}}))
+                        .then(function (data) {
 
                         if (!data) {
                             reject("no data");
@@ -429,12 +413,8 @@ var igv = (function (igv) {
 
         return new Promise(function (fulfill, reject) {
 
-            igvxhr.loadArrayBuffer(self.path,
-                {
-                    headers: self.config.headers,
-                    range: {start: indexEntry.position, size: indexEntry.size},
-                    withCredentials: self.config.withCredentials
-                }).then(function (data) {
+            igvxhr.loadArrayBuffer(self.path, igv.buildOptions(self.config, {range: {start: indexEntry.position, size: indexEntry.size}}))
+                .then(function (data) {
 
                 if (!data) {
                     reject("no data");

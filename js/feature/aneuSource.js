@@ -137,11 +137,7 @@ var igv = (function (igv) {
             success,
             features;
 
-        options = {
-            headers: self.config.headers,           // http headers, not file header
-            tokens: self.config.tokens,           // http headers, not file header
-            withCredentials: self.config.withCredentials
-        };
+        options = igv.buildOptions(self.config, {tokens: self.config.tokensc});
 
         success = function (data) {
             self.header = self.parser.parseHeader(data);
