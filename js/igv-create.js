@@ -420,6 +420,10 @@ var igv = (function (igv) {
 
     function setDefaults(config) {
 
+        if (undefined === config.minimumBases) {
+            config.minimumBases = 40;
+        }
+
         if (undefined === config.showIdeogram) {
             config.showIdeogram = true;
         }

@@ -776,7 +776,7 @@ var igv = (function (igv) {
     };
 
     igv.Browser.prototype.minimumBasesExtent = function () {
-        return 40;
+        return this.config.minimumBases;
     };
 
     igv.Browser.prototype.goto = function (chrName, start, end) {
@@ -861,10 +861,14 @@ var igv = (function (igv) {
             var genomicState = browser.genomicStateList[ locusIndex ],
                 referenceFrame = genomicState.referenceFrame,
                 viewportWidth = Math.floor(browser.viewportContainerWidth()/genomicState.locusCount),
-                centerBP;
+                centerBP,
+                mbe,
+                be;
 
             // Have we reached the zoom-in threshold yet? If so, bail.
-            if (browser.minimumBasesExtent() > basesExtent(viewportWidth, referenceFrame.bpPerPixel/2.0)) {
+            mbe = browser.minimumBasesExtent();
+            be = basesExtent(viewportWidth, referenceFrame.bpPerPixel/2.0);
+            if (mbe > be) {
                 return;
             }
 
