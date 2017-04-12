@@ -132,7 +132,7 @@ var igv = (function (igv) {
 
                 });
             }
-            return Math.max(this.variantHeight, (maxRow + 1) * (this.displayMode === "SQUISHED" ? this.expandedCallHeight : this.squishedCallHeight));
+            return Math.max(this.variantHeight, (maxRow + 1) * (this.displayMode === "SQUISHED" ? this.squishedCallHeight : this.expandedCallHeight));
 
         }
 
@@ -202,7 +202,7 @@ var igv = (function (igv) {
                 row;
 
             if (this.displayMode != "COLLAPSED") {
-                row = (Math.floor)(this.displayMode === "SQUISHED" ? yOffset / this.expandedCallHeight : yOffset / this.squishedCallHeight);
+                row = (Math.floor)(this.displayMode === "SQUISHED" ? yOffset / this.squishedCallHeight : yOffset / this.expandedCallHeight);
             }
 
             if (featureList && featureList.length > 0) {
