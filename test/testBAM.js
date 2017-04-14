@@ -33,49 +33,49 @@ function runBAMTests() {
         });
     });
 
-
-    asyncTest("alignments for range", function () {
-
-        var chr = "chr22",
-            beg = 24375199,
-            end = 24378544,
-            bamReader;
-
-        bamReader = new igv.BamReader({
-            type: 'bam',
-            url: dataURL + 'bam/gstt1_sample.bam',
-            label: 'BAM unit test'
-        });
-
-        bamReader.readAlignments(chr, beg, end).then(function (alignments) {
-
-            ok(alignments, "alignments");
-            equal(3345, alignments.length, "alignments.length");
-
-            start();
-        }).catch(function (error) {
-            ok(false, error);  // failed
-        });
-    });
-
-    asyncTest("header", function () {
-
-        var bamPath = dataURL + "bam/gstt1_sample.bam",
-            bamFile = new igv.BamReader({
-                type: 'bam',
-                url: bamPath,
-                label: 'NA06984'
-            });
-
-        bamFile.readHeader().then(function () {
-
-            ok(bamFile.chrToIndex["chr1"] === 0);
-            start();
-
-        }).catch(function (error) {
-            ok(false, error);  // failed
-        })
-    });
+    //
+    // asyncTest("alignments for range", function () {
+    //
+    //     var chr = "chr22",
+    //         beg = 24375199,
+    //         end = 24378544,
+    //         bamReader;
+    //
+    //     bamReader = new igv.BamReader({
+    //         type: 'bam',
+    //         url: dataURL + 'bam/gstt1_sample.bam',
+    //         label: 'BAM unit test'
+    //     });
+    //
+    //     bamReader.readAlignments(chr, beg, end).then(function (alignments) {
+    //
+    //         ok(alignments, "alignments");
+    //         equal(3345, alignments.length, "alignments.length");
+    //
+    //         start();
+    //     }).catch(function (error) {
+    //         ok(false, error);  // failed
+    //     });
+    // });
+    //
+    // asyncTest("header", function () {
+    //
+    //     var bamPath = dataURL + "bam/gstt1_sample.bam",
+    //         bamFile = new igv.BamReader({
+    //             type: 'bam',
+    //             url: bamPath,
+    //             label: 'NA06984'
+    //         });
+    //
+    //     bamFile.readHeader().then(function () {
+    //
+    //         ok(bamFile.chrToIndex["chr1"] === 0);
+    //         start();
+    //
+    //     }).catch(function (error) {
+    //         ok(false, error);  // failed
+    //     })
+    // });
 
 
 }
