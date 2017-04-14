@@ -37,6 +37,8 @@ var igv = (function (igv) {
 
         igv.configTrack(this, config);
 
+        hic.configTrack(this, config);
+
         if ("bigwig" === config.format) {
             this.featureSource = new igv.BWSource(config);
         } else if ("tdf" === config.format) {
@@ -138,25 +140,23 @@ var igv = (function (igv) {
     igv.WIGTrack.prototype.draw = function (options) {
 
         var self = this,
-            features = options.features,
-            ctx = options.context,
-            bpPerPixel = options.bpPerPixel,
-            bpStart = options.bpStart,
-            pixelWidth = options.pixelWidth,
-            pixelHeight = options.pixelHeight,
-            bpEnd = bpStart + pixelWidth * bpPerPixel + 1,
             featureValueMinimum,
             featureValueMaximum,
             featureValueRange,
-            $dataRangeTrackLabel,
-            str,
-            min,
-            max;
+            canvasHeight,
+            survivors,
+            mapped;
 
+        this.config.canvasTransform(options.context);
 
-        if (features && features.length > 0) {
+        hic.clearTrackWithFillColor(this, options, igv.rgbColor(255, 255, 255));
+
+        // renderRamp(options.context, w, h, igv.randomRGB(100, 255));
+        // return;
+
+        if (options.features && _.size(options.features) > 0) {
             if (self.autoScale || self.dataRange.max === undefined) {
-                var s = autoscale(features);
+                var s = autoscale(options.features);
                 featureValueMinimum = s.min;
                 featureValueMaximum = s.max;
             }
@@ -169,54 +169,69 @@ var igv = (function (igv) {
 
             featureValueRange = featureValueMaximum - featureValueMinimum;
 
-            features.forEach(renderFeature);
+            survivors = _.filter(options.features, function(f){
+                return !(f.end < options.bpStart) || !(f.start > options.bpEnd);
+            });
+
+            mapped = _.map(survivors, function(s) {
+                var rectEnd,
+                    obj = {};
+
+                obj.x = Math.floor((s.start - options.bpStart) / options.bpPerPixel);
+
+                rectEnd = Math.ceil((s.end - options.bpStart) / options.bpPerPixel);
+                obj.width = Math.max(1, rectEnd - obj.x);
+                obj.value = s.value;
+                return obj;
+            });
+
+            canvasHeight = options[ ('x' === this.config.axis ? 'pixelHeight' : 'pixelWidth') ];
+
+            _.each(mapped, function(m) {
+                render(options.context, m, /*igv.randomRGB(120, 240)*/self.color, canvasHeight);
+            });
         }
 
+        function render(ctx, feature, fillStyle, height) {
 
-        function renderFeature(feature, index, featureList) {
-
-            var yUnitless,
-                heightUnitLess,
-                x,
-                y,
-                width,
-                height,
-                rectEnd,
-                rectBaseline;
-
-            if (feature.end < bpStart) return;
-            if (feature.start > bpEnd) return;
-
-            x = Math.floor((feature.start - bpStart) / bpPerPixel);
-            rectEnd = Math.ceil((feature.end - bpStart) / bpPerPixel);
-            width = Math.max(1, rectEnd - x);
-
-            //height = ((feature.value - featureValueMinimum) / featureValueRange) * pixelHeight;
-            //rectBaseline = pixelHeight - height;
-            //canvas.fillRect(rectOrigin, rectBaseline, rectWidth, rectHeight, {fillStyle: track.color});
+            var yPercentage,
+                heightPercentage;
 
             if (signsDiffer(featureValueMinimum, featureValueMaximum)) {
 
                 if (feature.value < 0) {
-                    yUnitless = featureValueMaximum / featureValueRange;
-                    heightUnitLess = -feature.value / featureValueRange;
+                    yPercentage = featureValueMaximum / featureValueRange;
+                    heightPercentage = -feature.value / featureValueRange;
                 } else {
-                    yUnitless = ((featureValueMaximum - feature.value) / featureValueRange);
-                    heightUnitLess = feature.value / featureValueRange;
+                    yPercentage = ((featureValueMaximum - feature.value) / featureValueRange);
+                    heightPercentage = feature.value / featureValueRange;
                 }
 
-            }
-            else if (featureValueMinimum < 0) {
-                yUnitless = 0;
-                heightUnitLess = -feature.value / featureValueRange;
-            }
-            else {
-                yUnitless = 1.0 - feature.value / featureValueRange;
-                heightUnitLess = feature.value / featureValueRange;
+            } else if (featureValueMinimum < 0) {
+                yPercentage = 0;
+                heightPercentage = -feature.value / featureValueRange;
+            } else {
+                yPercentage = 1.0 - feature.value / featureValueRange;
+                heightPercentage = feature.value / featureValueRange;
             }
 
-            //canvas.fillRect(x, yUnitless * pixelHeight, width, heightUnitLess * pixelHeight, { fillStyle: igv.randomRGB(64, 255) });
-            igv.graphics.fillRect(ctx, x, yUnitless * pixelHeight, width, heightUnitLess * pixelHeight, {fillStyle: self.color});
+            igv.graphics.fillRect(ctx, feature.x, yPercentage * height, feature.width, heightPercentage * height, { fillStyle: fillStyle });
+
+            // igv.graphics.fillRect(options.context, x, 0, w, h, { fillStyle: igv.randomRGB(100, 255) });
+
+        }
+
+        function renderRamp(ctx, width, height, fillStyle) {
+            _.each(_.range(width), function(x){
+                var percent = x/width,
+                    a,
+                    b;
+                // igv.graphics.fillRect(ctx, x, 0, 1, Math.round(percent * height), { fillStyle: igv.randomRGB(100, 255) });
+
+                a = (1.0 - percent) * height;
+                b = percent * height;
+                igv.graphics.fillRect(ctx, x, a, 1, b, { fillStyle: fillStyle });
+            });
 
         }
 
@@ -240,7 +255,6 @@ var igv = (function (igv) {
     function signsDiffer(a, b) {
         return (a > 0 && b < 0 || a < 0 && b > 0);
     }
-
 
     return igv;
 
