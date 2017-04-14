@@ -75,14 +75,14 @@ var igv = (function (igv) {
                             }
                         }
 
-                        for (ref = 0; ref < nref; ++ref) {
+                        for (ref = 0; ref < nref; ref++) {
 
                             binIndex = {};
                             linearIndex = [];
 
                             nbin = parser.getInt();
 
-                            for (b = 0; b < nbin; ++b) {
+                            for (b = 0; b < nbin; b++) {
 
                                 binNumber = parser.getInt();
 

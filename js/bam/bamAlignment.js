@@ -133,7 +133,6 @@ var igv = (function (igv) {
                     value = readShort(ba, p + 3);
                     p += 5;
                 } else if (type === 'f') {
-                    // TODO 'FIXME need floats';
                     value = readFloat(ba, p + 3);
                     p += 7;
                 } else if (type === 'Z') {

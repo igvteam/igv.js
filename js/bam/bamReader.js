@@ -158,6 +158,10 @@ var igv = (function (igv) {
                 seqBytes;
 
             while (true) {
+                
+                if(offset >= ba.length) {
+                    return;
+                }
 
                 blockSize = readInt(ba, offset);
                 blockEnd = offset + blockSize + 4;
@@ -170,6 +174,8 @@ var igv = (function (igv) {
 
                 refID = readInt(ba, offset + 4);
                 pos = readInt(ba, offset + 8);
+                alignment.chr = self.indexToChr[refID];
+                alignment.start = pos;
 
                 if (refID < 0) {
                     return;   // unmapped reads
@@ -185,6 +191,7 @@ var igv = (function (igv) {
                 bin = (bmn & 0xffff0000) >> 16;
                 mq = (bmn & 0xff00) >> 8;
                 nl = bmn & 0xff;
+                alignment.mq = mq;
 
                 flag_nc = readInt(ba, offset + 16);
                 flag = (flag_nc & 0xffff0000) >> 16;
@@ -203,6 +210,7 @@ var igv = (function (igv) {
                 for (j = 0; j < nl - 1; ++j) {
                     readName += String.fromCharCode(ba[offset + 36 + j]);
                 }
+                alignment.readName = readName;
 
                 p = offset + 36 + nl;
 
@@ -225,7 +233,10 @@ var igv = (function (igv) {
                 alignment.cigar = cigar;
                 alignment.lengthOnRef = lengthOnRef;
 
-                if (alignment.start + alignment.lengthOnRef < min) continue;  // Record out-of-range "to the left", skip to next one
+                if (alignment.start + alignment.lengthOnRef < min) {
+                    offset = blockEnd;
+                    continue;
+                }  // Record out-of-range "to the left", skip to next one
 
 
                 seq = '';
@@ -253,10 +264,7 @@ var igv = (function (igv) {
                 p += lseq;
 
 
-                alignment.start = pos;
-                alignment.mq = mq;
-                alignment.readName = readName;
-                alignment.chr = self.indexToChr[refID];
+
 
                 if (mateRefID >= 0) {
                     alignment.mate = {
