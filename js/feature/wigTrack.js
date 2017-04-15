@@ -37,8 +37,6 @@ var igv = (function (igv) {
 
         igv.configTrack(this, config);
 
-        hic.configTrack(this, config);
-
         if ("bigwig" === config.format) {
             this.featureSource = new igv.BWSource(config);
         } else if ("tdf" === config.format) {
@@ -147,12 +145,10 @@ var igv = (function (igv) {
             survivors,
             mapped;
 
-        this.config.canvasTransform(options.context);
+        igv.graphics.fillRect(options.context, 0, 0, options.pixelWidth, options.pixelHeight, { fillStyle: igv.rgbColor(255, 255, 255) });
 
-        hic.clearTrackWithFillColor(this, options, igv.rgbColor(255, 255, 255));
-
-        // renderRamp(options.context, w, h, igv.randomRGB(100, 255));
-        // return;
+        renderRamp(options.context, options.pixelWidth, options.pixelHeight, igv.randomRGB(100, 255));
+        return;
 
         if (options.features && _.size(options.features) > 0) {
             if (self.autoScale || self.dataRange.max === undefined) {

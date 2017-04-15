@@ -29,8 +29,6 @@ var igv = (function (igv) {
 
         igv.configTrack(this, config);
 
-        hic.configTrack(this, config);
-
         this.displayMode = config.displayMode || "COLLAPSED";    // COLLAPSED | EXPANDED | SQUISHED
         this.labelDisplayMode = config.labelDisplayMode;
 
@@ -142,16 +140,10 @@ var igv = (function (igv) {
     igv.FeatureTrack.prototype.draw = function (options) {
 
         var self = this,
-            canvasWidth,
-            canvasHeight,
             survivors;
 
-        this.config.canvasTransform(options.context);
+        igv.graphics.fillRect(options.context, 0, 0, options.pixelWidth, options.pixelHeight, { fillStyle: igv.rgbColor(255, 255, 255) });
 
-        hic.clearTrackWithFillColor(this, options, igv.rgbColor(255, 255, 255));
-
-        canvasWidth  = options[ ('x' === this.config.axis ? 'pixelWidth' : 'pixelHeight') ];
-        canvasHeight = options[ ('x' === this.config.axis ? 'pixelHeight' : 'pixelWidth') ];
         if (options.features) {
 
             survivors = _.filter(options.features, function(f){
@@ -159,7 +151,7 @@ var igv = (function (igv) {
             });
 
             _.each(survivors, function(s){
-                self.render.call(self, s, options.bpStart, options.bpPerPixel, canvasWidth, canvasHeight, options.context, options.genomicState);
+                self.render.call(self, s, options.bpStart, options.bpPerPixel, options.pixelWidth, options.pixelHeight, options.context, options.genomicState);
             });
 
             // for (var gene, i = 0, len = options.features.length; i < len; i++) {
@@ -168,6 +160,7 @@ var igv = (function (igv) {
             //     if (gene.start > options.bpEnd) break;
             //     self.render.call(self, gene, options.bpStart, options.bpPerPixel, canvasWidth, canvasHeight, options.context, options.genomicState);
             // }
+
         } else {
             console.log("No feature list");
         }
