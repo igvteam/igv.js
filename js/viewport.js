@@ -545,6 +545,8 @@ var igv = (function (igv) {
 
                             viewportWidth: self.$viewport.width(),
 
+                            viewportContainerX: genomicState.referenceFrame.toPixels(genomicState.referenceFrame.start - bpStart),
+
                             viewportContainerWidth: igv.browser.viewportContainerWidth()
                         };
 

@@ -432,7 +432,7 @@ var igv = (function (igv) {
                 }
             }
         }
-        windowX = Math.round(options.genomicState.referenceFrame.toPixels(options.genomicState.referenceFrame.start - bpStart));
+        windowX = Math.round(options.viewportContainerX);
         windowX1 = windowX + options.viewportContainerWidth / (options.genomicState.locusCount || 1);
 
         renderFeatureLabels.call(this, ctx, feature, coord.px, coord.px1, py, windowX, windowX1, options.genomicState);
@@ -508,14 +508,16 @@ var igv = (function (igv) {
         }
 
         var unSubscribe = function (removedTrack) {
-            if (track === removedTrack) {
+            if (igv.browser.un && track === removedTrack) {
                 igv.browser.un('trackdrag', onDragEnd);
                 igv.browser.un('trackremoved', unSubscribe);
             }
         };
 
-        igv.browser.on('trackdragend', onDragEnd);
-        igv.browser.on('trackremoved', unSubscribe);
+        if (igv.browser.on) {
+            igv.browser.on('trackdragend', onDragEnd);
+            igv.browser.on('trackremoved', unSubscribe);
+        }
     }
 
     /**
