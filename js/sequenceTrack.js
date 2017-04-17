@@ -26,6 +26,7 @@
 var igv = (function (igv) {
 
     igv.SequenceTrack = function (config) {
+        this.config = config;
         this.name = "";
         this.id = "sequence";
         this.sequenceType = config.sequenceType || "dna";             //   dna | rna | prot
