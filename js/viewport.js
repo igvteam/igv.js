@@ -543,7 +543,9 @@ var igv = (function (igv) {
 
                             viewport: self,
 
-                            viewportWidth: self.$viewport.width()
+                            viewportWidth: self.$viewport.width(),
+
+                            viewportContainerWidth: igv.browser.viewportContainerWidth()
                         };
 
                     self.trackView.track.draw(self.drawConfiguration);
