@@ -180,11 +180,6 @@ var igv = (function (igv) {
         }
     };
 
-    igv.Browser.prototype.getFormat = function (name) {
-        if (this.formats === undefined) return undefined;
-        return this.formats[name];
-    };
-
     igv.Browser.prototype.loadTracksWithConfigList = function (configList) {
 
         var self = this,

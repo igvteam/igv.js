@@ -31,6 +31,16 @@ var igv = (function (igv) {
     var knownFileExtensions = new Set(["narrowpeak", "broadpeak", "peaks", "bedgraph", "wig", "gff3", "gff",
         "gtf", "aneu", "fusionjuncspan", "refflat", "seg", "bed", "vcf", "bb", "bigbed", "bw", "bigwig", "bam", "tdf"]);
 
+    igv.getFormat = function (name) {
+
+        if (undefined === igv.browser.formats) {
+            return undefined;
+        } else {
+            return igv.browser.formats[ name ];
+        }
+
+    };
+
     igv.createTrackWithConfiguration = function(conf) {
 
         var type = (undefined === conf.type) ? 'unknown_type' : conf.type.toLowerCase();

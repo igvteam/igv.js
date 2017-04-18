@@ -110,7 +110,7 @@ var igv = (function (igv) {
                 break;
             default:
 
-                customFormat = igv.browser.getFormat(format);
+                customFormat = igv.getFormat(format);
                 if (customFormat !== undefined) {
                     this.decode = decodeCustom;
                     this.format = customFormat;
