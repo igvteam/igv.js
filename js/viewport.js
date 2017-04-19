@@ -543,7 +543,11 @@ var igv = (function (igv) {
 
                             viewport: self,
 
-                            viewportWidth: self.$viewport.width()
+                            viewportWidth: self.$viewport.width(),
+
+                            viewportContainerX: genomicState.referenceFrame.toPixels(genomicState.referenceFrame.start - bpStart),
+
+                            viewportContainerWidth: igv.browser.viewportContainerWidth()
                         };
 
                     self.trackView.track.draw(self.drawConfiguration);

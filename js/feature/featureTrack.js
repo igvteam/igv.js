@@ -151,14 +151,13 @@ var igv = (function (igv) {
 
         igv.graphics.fillRect(ctx, 0, 0, pixelWidth, pixelHeight, {'fillStyle': "rgb(255, 255, 255)"});
 
-
         if (featureList) {
 
             for (var gene, i = 0, len = featureList.length; i < len; i++) {
                 gene = featureList[i];
                 if (gene.end < bpStart) continue;
                 if (gene.start > bpEnd) break;
-                track.render.call(this, gene, bpStart, bpPerPixel, pixelHeight, ctx, options.genomicState);
+                track.render.call(this, gene, bpStart, bpPerPixel, pixelHeight, ctx, options);
             }
         }
         else {
@@ -334,9 +333,9 @@ var igv = (function (igv) {
      * @param xScale  scale in base-pairs per pixel
      * @param pixelHeight  pixel height of the current canvas
      * @param ctx  the canvas 2d context
-     * @param genomicState  genomic state
+     * @param options  genomic state
      */
-    function renderFeature(feature, bpStart, xScale, pixelHeight, ctx, genomicState) {
+    function renderFeature(feature, bpStart, xScale, pixelHeight, ctx, options) {
 
         var x, e, exonCount, cy, direction, exon, ePx, ePx1, ePxU, ePw, py2, h2, py,
             windowX, windowX1,
@@ -433,10 +432,10 @@ var igv = (function (igv) {
                 }
             }
         }
-        windowX = Math.round(genomicState.referenceFrame.toPixels(genomicState.referenceFrame.start - bpStart));
-        windowX1 = windowX + igv.browser.viewportContainerWidth()/genomicState.locusCount;
+        windowX = Math.round(options.viewportContainerX);
+        windowX1 = windowX + options.viewportContainerWidth / (options.genomicState.locusCount || 1);
 
-        renderFeatureLabels.call(this, ctx, feature, coord.px, coord.px1, py, windowX, windowX1, genomicState);
+        renderFeatureLabels.call(this, ctx, feature, coord.px, coord.px1, py, windowX, windowX1, options.genomicState);
     }
 
     /**
@@ -509,14 +508,16 @@ var igv = (function (igv) {
         }
 
         var unSubscribe = function (removedTrack) {
-            if (track === removedTrack) {
+            if (igv.browser.un && track === removedTrack) {
                 igv.browser.un('trackdrag', onDragEnd);
                 igv.browser.un('trackremoved', unSubscribe);
             }
         };
 
-        igv.browser.on('trackdragend', onDragEnd);
-        igv.browser.on('trackremoved', unSubscribe);
+        if (igv.browser.on) {
+            igv.browser.on('trackdragend', onDragEnd);
+            igv.browser.on('trackremoved', unSubscribe);
+        }
     }
 
     /**
