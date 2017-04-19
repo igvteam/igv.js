@@ -210,9 +210,7 @@ var igv = (function (igv) {
         var self = this,
             settings,
             property,
-            newTrack,
-            featureSource,
-            nm;
+            newTrack;
 
         inferTypes(config);
 
@@ -273,7 +271,7 @@ var igv = (function (igv) {
                     break;
 
                 case "alignment":
-                    return new igv.BAMTrack(conf, featureSource);
+                    return new igv.BAMTrack(conf);
                     break;
 
                 case "data":  // deprecated
