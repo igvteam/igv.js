@@ -526,7 +526,8 @@
 //            showCenterGuide: true,
 //            showCursorTrackingGuide: true,
             showRuler: true,
-            locus: '8:124,512,906-124,512,945',
+//            locus: '8:124,512,906-124,512,945',
+            locus: '1',
             reference: {
                 id: "hg19",
                 fastaURL: "https://s3.amazonaws.com/igv.broadinstitute.org/genomes/seq/1kg_v37/human_g1k_v37_decoy.fasta",
@@ -535,31 +536,37 @@
             flanking: 1000,
             apiKey: 'AIzaSyDUUAUFpQEN4mumeMNIRWXSiTh5cPtUAD0',
             palette: ["#00A0B0", "#6A4A3C", "#CC333F", "#EB6841"],
-            tracks: [
-                {
-                    sourceType: 'gcs',
-                    type: 'bam',
-//                    url: '../test/data/bam/four.reads.bam',,
-                    url: 'gs://genomics-public-data/platinum-genomes/bam/NA12877_S1.bam',
-                    height: 500,
-                    autoHeight: false,
-                    viewAsPairs: false,
-                    name: 'NA12877 - BAM Track'
-                },
-                {
-                    name: "Genes",
-                    searchable: false,
-                    type: "annotation",
-                    format: "gtf",
-                    sourceType: "file",
-                    url: "https://s3.amazonaws.com/igv.broadinstitute.org/annotations/hg19/genes/gencode.v18.annotation.sorted.gtf.gz",
-                    indexURL: "https://s3.amazonaws.com/igv.broadinstitute.org/annotations/hg19/genes/gencode.v18.annotation.sorted.gtf.gz.tbi",
-                    visibilityWindow: 10000000,
-                    order: Number.MAX_VALUE,
-                    displayMode: "EXPANDED"
-                }
+            tracks:
+                [
+                    {
+                        url: 'http://hgdownload.cse.ucsc.edu/goldenPath/hg19/encodeDCC/wgEncodeUwRepliSeq/wgEncodeUwRepliSeqSknshValleysRep1.bed.gz',
+                        type: 'bed',
+                        format: 'bed',
+                        indexed: false
+                    },
+                    {
+                        sourceType: 'gcs',
+                        type: 'bam',
+                        url: 'gs://genomics-public-data/platinum-genomes/bam/NA12877_S1.bam',
+                        height: 500,
+                        autoHeight: false,
+                        viewAsPairs: false,
+                        name: 'NA12877 - BAM Track'
+                    },
+                    {
+                        name: "Genes",
+                        searchable: false,
+                        type: "annotation",
+                        format: "gtf",
+                        sourceType: "file",
+                        url: "https://s3.amazonaws.com/igv.broadinstitute.org/annotations/hg19/genes/gencode.v18.annotation.sorted.gtf.gz",
+                        indexURL: "https://s3.amazonaws.com/igv.broadinstitute.org/annotations/hg19/genes/gencode.v18.annotation.sorted.gtf.gz.tbi",
+                        visibilityWindow: 10000000,
+                        order: Number.MAX_VALUE,
+                        displayMode: "EXPANDED"
+                    }
 
-            ]
+                ]
         };
 
         browser = igv.createBrowser(div, options);
