@@ -34,165 +34,137 @@ var igvxhr = (function (igvxhr) {
 
         if (!options) options = {};
 
-        if (!options.oauthToken) {
-            return applyOauthToken();
-        }
+        return new Promise(function (fullfill, reject) {
 
-        var token = _.isFunction(options.oauthToken) ? options.oauthToken() : options.oauthToken;
+            var xhr = new XMLHttpRequest(),
+                sendData = options.sendData || options.body,
+                method = options.method || (sendData ? "POST" : "GET"),
+                range = options.range,
+                responseType = options.responseType,
+                contentType = options.contentType,
+                mimeType = options.mimeType,
+                headers = options.headers,
+                isSafari = navigator.vendor.indexOf("Apple") == 0 && /\sSafari\//.test(navigator.userAgent),
+                withCredentials = options.withCredentials,
+                header_keys, key, value, i;
 
-        if (token.then && _.isFunction(token.then)) {
-            return token.then(applyOauthToken);
-        }
+            // Support for GCS paths.
+            url = url.startsWith("gs://") ? igv.Google.translateGoogleCloudURL(url) : url;
 
-        return applyOauthToken(token);
+            if (igv.Google.isGoogleURL(url)) {
 
-        ////////////
+                url = igv.Google.addApiKey(url);
 
-        function applyOauthToken(token) {
-            if (token) {
-                options.token = token;
+                // Add google headers (e.g. oAuth)
+                headers = headers || {};
+                igv.Google.addGoogleHeaders(headers);
+
             }
 
-            return getLoadPromise(url, options);
-        }
+            if (range) {
+                // Hack to prevent caching for byte-ranges. Attempt to fix net:err-cache errors in Chrome
+                url += url.includes("?") ? "&" : "?";
+                url += "someRandomSeed=" + Math.random().toString(36);
+            }
 
-        function getLoadPromise(url, options) {
-            return new Promise(function (fullfill, reject) {
+            xhr.open(method, url);
 
-                var xhr = new XMLHttpRequest(),
-                    sendData = options.sendData || options.body,
-                    method = options.method || (sendData ? "POST" : "GET"),
-                    range = options.range,
-                    responseType = options.responseType,
-                    contentType = options.contentType,
-                    mimeType = options.mimeType,
-                    headers = options.headers || {},
-                    isSafari = navigator.vendor.indexOf("Apple") == 0 && /\sSafari\//.test(navigator.userAgent),
-                    withCredentials = options.withCredentials,
-                    header_keys, key, value, i;
-
-                // Support for GCS paths.
-                url = url.startsWith("gs://") ? igv.Google.translateGoogleCloudURL(url) : url;
-
-                if (options.token) {
-                    headers["Authorization"] = 'Bearer ' + options.token;
+            if (range) {
+                var rangeEnd = range.size ? range.start + range.size - 1 : "";
+                xhr.setRequestHeader("Range", "bytes=" + range.start + "-" + rangeEnd);
+                //      xhr.setRequestHeader("Cache-Control", "no-cache");    <= This can cause CORS issues, disabled for now
+            }
+            if (contentType) {
+                xhr.setRequestHeader("Content-Type", contentType);
+            }
+            if (mimeType) {
+                xhr.overrideMimeType(mimeType);
+            }
+            if (responseType) {
+                xhr.responseType = responseType;
+            }
+            if (headers) {
+                header_keys = Object.keys(headers);
+                for (i = 0; i < header_keys.length; i++) {
+                    key = header_keys[i];
+                    value = headers[key];
+                    // console.log("Adding to header: " + key + "=" + value);
+                    xhr.setRequestHeader(key, value);
                 }
+            }
 
-                if (igv.Google.isGoogleURL(url)) {
+            // NOTE: using withCredentials with servers that return "*" for access-allowed-origin will fail
+            if (withCredentials === true) {
+                xhr.withCredentials = true;
+            }
 
-                    url = igv.Google.addApiKey(url);
+            xhr.onload = function (event) {
+                // when the url points to a local file, the status is 0 but that is no error
+                if (xhr.status == 0 || (xhr.status >= 200 && xhr.status <= 300)) {
 
-                    // Add google headers (e.g. oAuth)
-                    headers = headers || {};
-                    igv.Google.addGoogleHeaders(headers);
-
-                }
-
-                if (range) {
-                    // Hack to prevent caching for byte-ranges. Attempt to fix net:err-cache errors in Chrome
-                    url += url.includes("?") ? "&" : "?";
-                    url += "someRandomSeed=" + Math.random().toString(36);
-                }
-
-                xhr.open(method, url);
-
-                if (range) {
-                    var rangeEnd = range.size ? range.start + range.size - 1 : "";
-                    xhr.setRequestHeader("Range", "bytes=" + range.start + "-" + rangeEnd);
-                    //      xhr.setRequestHeader("Cache-Control", "no-cache");    <= This can cause CORS issues, disabled for now
-                }
-                if (contentType) {
-                    xhr.setRequestHeader("Content-Type", contentType);
-                }
-                if (mimeType) {
-                    xhr.overrideMimeType(mimeType);
-                }
-                if (responseType) {
-                    xhr.responseType = responseType;
-                }
-                if (headers) {
-                    header_keys = Object.keys(headers);
-                    for (i = 0; i < header_keys.length; i++) {
-                        key = header_keys[i];
-                        value = headers[key];
-                        // console.log("Adding to header: " + key + "=" + value);
-                        xhr.setRequestHeader(key, value);
-                    }
-                }
-
-                // NOTE: using withCredentials with servers that return "*" for access-allowed-origin will fail
-                if (withCredentials === true) {
-                    xhr.withCredentials = true;
-                }
-
-                xhr.onload = function (event) {
-                    // when the url points to a local file, the status is 0 but that is no error
-                    if (xhr.status == 0 || (xhr.status >= 200 && xhr.status <= 300)) {
-
-                        if (range && xhr.status != 206) {
-                            handleError("ERROR: range-byte header was ignored for url: " + url);
-                        }
-                        else {
-                            fullfill(xhr.response);
-                        }
+                    if (range && xhr.status != 206) {
+                        handleError("ERROR: range-byte header was ignored for url: " + url);
                     }
                     else {
-
-                        //
-                        if (xhr.status === 416) {
-                            //  Tried to read off the end of the file.   This shouldn't happen, but if it does return an
-                            handleError("Unsatisfiable range");
-                        }
-                        else {// TODO -- better error handling
-                            handleError(xhr.status);
-                        }
-
-                    }
-
-                };
-
-                xhr.onerror = function (event) {
-
-                    if (isCrossDomain(url) && url && !options.crossDomainRetried && igv.browser.crossDomainProxy &&
-                        url != igv.browser.crossDomainProxy) {
-
-                        options.sendData = "url=" + url;
-                        options.crossDomainRetried = true;
-
-                        igvxhr.load(igv.browser.crossDomainProxy, options).then(fullfill);
-                    }
-                    else {
-                        handleError("Error accessing resource: " + url + " Status: " + xhr.status);
+                        fullfill(xhr.response);
                     }
                 }
+                else {
 
+                    //
+                    if (xhr.status === 416) {
+                        //  Tried to read off the end of the file.   This shouldn't happen, but if it does return an
+                        handleError("Unsatisfiable range");
+                    }
+                    else {// TODO -- better error handling
+                        handleError(xhr.status);
+                    }
 
-                xhr.ontimeout = function (event) {
-                    handleError("Timed out");
-                };
-
-                xhr.onabort = function (event) {
-                    console.log("Aborted");
-                    reject(new igv.AbortLoad());
-                };
-
-                try {
-                    xhr.send(sendData);
-                } catch (e) {
-                    console.log(e);
                 }
 
+            };
 
-                function handleError(message) {
-                    if (reject) {
-                        reject(new Error(message));
-                    }
-                    else {
-                        throw new Error(message);
-                    }
+            xhr.onerror = function (event) {
+
+                if (isCrossDomain(url) && url && !options.crossDomainRetried && igv.browser.crossDomainProxy &&
+                    url != igv.browser.crossDomainProxy) {
+
+                    options.sendData = "url=" + url;
+                    options.crossDomainRetried = true;
+
+                    igvxhr.load(igv.browser.crossDomainProxy, options).then(fullfill);
                 }
-            });
-        }
+                else {
+                    handleError("Error accessing resource: " + url + " Status: " + xhr.status);
+                }
+            }
+
+
+            xhr.ontimeout = function (event) {
+                handleError("Timed out");
+            };
+
+            xhr.onabort = function (event) {
+                console.log("Aborted");
+                reject(new igv.AbortLoad());
+            };
+
+            try {
+                xhr.send(sendData);
+            } catch (e) {
+                console.log(e);
+            }
+
+
+            function handleError(message) {
+                if (reject) {
+                    reject(new Error(message));
+                }
+                else {
+                    throw new Error(message);
+                }
+            }
+        });
     };
 
     igvxhr.loadArrayBuffer = function (url, options) {
