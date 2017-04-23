@@ -25,9 +25,6 @@
 
 var igv = (function (igv) {
 
-    var knownFileExtensions = new Set(["narrowpeak", "broadpeak", "peaks", "bedgraph", "wig", "gff3", "gff",
-        "gtf", "aneu", "fusionjuncspan", "refflat", "seg", "bed", "vcf", "bb", "bigbed", "bw", "bigwig", "bam", "tdf"]);
-
     igv.Browser = function (options, trackContainerDiv) {
 
         this.config = options;
@@ -135,6 +132,45 @@ var igv = (function (igv) {
             }
         }
     }
+
+    igv.Browser.hasKnownFileExtension = function (config) {
+        var extension = igv.Browser.getExtension(config);
+
+        if (undefined === extension) {
+            return false;
+        }
+        return igv.Browser.knownFileExtensions.has(extension);
+    };
+
+    igv.Browser.getExtension = function (config) {
+        var path,
+            filename,
+            index;
+
+        if (undefined === config.url) {
+            return undefined;
+        }
+
+        path = igv.isFilePath(config.url) ? config.url.name : config.url;
+        filename = path.toLowerCase();
+
+        //Strip parameters -- handle local files later
+        index = filename.indexOf("?");
+        if (index > 0) {
+            filename = filename.substr(0, index);
+        }
+
+        //Strip aux extensions .gz, .tab, and .txt
+        if (filename.endsWith(".gz")) {
+            filename = filename.substr(0, filename.length - 3);
+        } else if (filename.endsWith(".txt") || filename.endsWith(".tab")) {
+            filename = filename.substr(0, filename.length - 4);
+        }
+
+        index = filename.lastIndexOf(".");
+
+        return index < 0 ? filename : filename.substr(1 + index);
+    };
 
     igv.Browser.prototype.disableZoomWidget = function () {
 
