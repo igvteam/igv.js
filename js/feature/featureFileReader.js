@@ -116,7 +116,9 @@ var igv = (function (igv) {
                             igvxhr
                                 .loadString(self.config.url, options)
                                 .then(success)
-                                .catch(reject);
+                                .catch(function (error) {
+                                    reject(error);
+                                });
 
                         } else {
                             // If this is a non-indexed file we will load all features in advance
@@ -127,8 +129,13 @@ var igv = (function (igv) {
                                     header.features = features;
                                     fullfill(header);
                                 })
-                                .catch(reject);
+                                .catch(function (error) {
+                                    reject(error);
+                                });
                         }
+                    })
+                    .catch(function (error) {
+                        reject(error);
                     });
             }
         });
@@ -322,14 +329,14 @@ var igv = (function (igv) {
                         self.indexed = false;
                         if(error.message === '404' && self.config.indexURL === undefined) {
                             // This is an expected condition
-                        }
-                        else {
+                            console.log('No index file. No problem.');
+                        } else {
                             reject(error);
                         }
                     });
             } else {
                 self.indexed = false;
-                fullfill(null);
+                fullfill(undefined);
             }
 
         });

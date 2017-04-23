@@ -539,8 +539,7 @@
                     {
                         url: 'http://hgdownload.cse.ucsc.edu/goldenPath/hg19/encodeDCC/wgEncodeUwRepliSeq/wgEncodeUwRepliSeqSknshValleysRep1.bed.gz',
                         type: 'bed',
-                        format: 'bed',
-                        indexed: false
+                        format: 'bed'
                     },
 //                    {
 //                        sourceType: 'gcs',
@@ -551,20 +550,20 @@
 //                        viewAsPairs: false,
 //                        name: 'NA12877 - BAM Track'
 //                    },
-                    {
-                        name: "Genes",
-                        searchable: false,
-                        type: "annotation",
-                        format: "gtf",
-                        sourceType: "file",
-                        url: "https://s3.amazonaws.com/igv.broadinstitute.org/annotations/hg19/genes/gencode.v18.annotation.sorted.gtf.gz",
-                        indexURL: "https://s3.amazonaws.com/igv.broadinstitute.org/annotations/hg19/genes/gencode.v18.annotation.sorted.gtf.gz.tbi",
-                        visibilityWindow: 10000000,
-                        order: Number.MAX_VALUE,
-                        displayMode: "EXPANDED"
-                    }
+//                    {
+//                        name: "Genes",
+//                        searchable: false,
+//                        type: "annotation",
+//                        format: "gtf",
+//                        sourceType: "file",
+//                        url: "https://s3.amazonaws.com/igv.broadinstitute.org/annotations/hg19/genes/gencode.v18.annotation.sorted.gtf.gz",
+//                        indexURL: "https://s3.amazonaws.com/igv.broadinstitute.org/annotations/hg19/genes/gencode.v18.annotation.sorted.gtf.gz.tbi",
+//                        visibilityWindow: 10000000,
+//                        order: Number.MAX_VALUE,
+//                        displayMode: "EXPANDED"
+//                    }
 
-                ]
+            ]
         };
 
         browser = igv.createBrowser(div, options);
