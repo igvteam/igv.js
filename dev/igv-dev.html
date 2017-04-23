@@ -116,6 +116,7 @@
     <script type="text/javascript" src="../js/tdf/tdfSource.js"></script>
 
     <script type="text/javascript" src="../js/trackCore.js"></script>
+    <script type="text/javascript" src="../js/trackFileLoad.js"></script>
 
     <script type="text/javascript" src="../js/ui/trackMenuPopupDialog.js"></script>
 
@@ -524,7 +525,6 @@
 //            showCenterGuide: true,
 //            showCursorTrackingGuide: true,
             showRuler: true,
-//            locus: '8:124,512,906-124,512,945',
             locus: '1',
             reference: {
                 id: "hg19",
@@ -542,15 +542,15 @@
                         format: 'bed',
                         indexed: false
                     },
-                    {
-                        sourceType: 'gcs',
-                        type: 'bam',
-                        url: 'gs://genomics-public-data/platinum-genomes/bam/NA12877_S1.bam',
-                        height: 500,
-                        autoHeight: false,
-                        viewAsPairs: false,
-                        name: 'NA12877 - BAM Track'
-                    },
+//                    {
+//                        sourceType: 'gcs',
+//                        type: 'bam',
+//                        url: 'gs://genomics-public-data/platinum-genomes/bam/NA12877_S1.bam',
+//                        height: 500,
+//                        autoHeight: false,
+//                        viewAsPairs: false,
+//                        name: 'NA12877 - BAM Track'
+//                    },
                     {
                         name: "Genes",
                         searchable: false,

@@ -61,10 +61,10 @@ var igv = (function (igv) {
         $(parentDiv).append(browser.$root);
 
         // drag & drop
-        // browser.dragAndDrop = new igv.DragAndDrop();
-        // browser.$root.append(browser.dragAndDrop.$container);
-        // browser.dragAndDrop.initializationHelper();
-        // browser.dragAndDrop.$container.hide();
+        browser.trackFileLoad = new igv.TrackFileLoad();
+        browser.$root.append(browser.trackFileLoad.$container);
+        browser.trackFileLoad.initializationHelper();
+        browser.trackFileLoad.$container.hide();
 
         setControls(browser, config);
 
@@ -342,10 +342,8 @@ var igv = (function (igv) {
             // window size panel
             browser.windowSizePanel = new igv.WindowSizePanel($navigation);
 
-
             // drag & drop
-            // $navigation.append(browser.dragAndDrop.$dragAndDropPresentationButton);
-
+            $navigation.append(browser.trackFileLoad.$dragAndDropPresentationButton);
 
             // zoom
             browser.zoomHandlers = {
