@@ -122,6 +122,18 @@ var igv = (function (igv) {
 
         });
     }
+    
+    
+    igv.BWSource.prototype.getDefaultRange = function () {
+        
+        if(this.reader.totalSummary != undefined) {
+            return this.reader.totalSummary.defaultRange;
+        }
+        else {
+            return undefined;
+        }
+        
+    }
 
 
     function zoomLevelForScale(bpPerPixel, zoomLevelHeaders) {
@@ -144,8 +156,7 @@ var igv = (function (igv) {
 
         return (level && level.reductionLevel < 4 * bpPerPixel) ? level : null;
     }
-
-
+    
     function decodeWigData(data, chr, chrIdx, bpStart, bpEnd, featureArray) {
 
         var binaryParser = new igv.BinaryParser(data),
@@ -232,8 +243,7 @@ var igv = (function (igv) {
         }
 
     }
-
-
+    
     function decodeBedData(data, chr, chrIdx, bpStart, bpEnd, featureArray) {
 
         var binaryParser = new igv.BinaryParser(data),
