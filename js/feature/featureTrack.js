@@ -44,7 +44,13 @@ var igv = (function (igv) {
         }
         this.maxRows = config.maxRows;
 
-        if ( config.url && filenameOrURLHasSuffix(config.url, '.bigbed') || filenameOrURLHasSuffix(config.url, '.bb') ) {
+        if ( config.url &&
+            (
+                igv.filenameOrURLHasSuffix(config.url, '.bigbed') || igv.filenameOrURLHasSuffix(config.url, '.bb')
+                ||
+                igv.filenameOrURLHasSuffix(config.url, '.bigwig') || igv.filenameOrURLHasSuffix(config.url, '.bw')
+            )
+        ) {
             this.featureSource = new igv.BWSource(config);
         } else {
             this.featureSource = new igv.FeatureSource(config);
@@ -71,31 +77,31 @@ var igv = (function (igv) {
             monitorTrackDrag(this);
         }
 
-        function filenameOrURLHasSuffix (fileOrURL, suffix) {
-            var str = (fileOrURL instanceof File) ? fileOrURL.name : fileOrURL;
-            return str.toLowerCase().endsWith( suffix )
-        }
-
     };
 
     igv.FeatureTrack.prototype.getFileHeader = function () {
         var self = this;
         return new Promise(function (fulfill, reject) {
             if (typeof self.featureSource.getFileHeader === "function") {
-                self.featureSource.getFileHeader().then(function (header) {
+                self.featureSource
+                    .getFileHeader()
+                    .then(function (header) {
 
-                    if (header) {
-                        // Header (from track line).  Set properties,unless set in the config (config takes precedence)
-                        if (header.name && !self.config.name) {
-                            self.name = header.name;
+                        if (header) {
+                            // Header (from track line).  Set properties,unless set in the config (config takes precedence)
+                            if (header.name && !self.config.name) {
+                                self.name = header.name;
+                            }
+                            if (header.color && !self.config.color) {
+                                self.color = "rgb(" + header.color + ")";
+                            }
                         }
-                        if (header.color && !self.config.color) {
-                            self.color = "rgb(" + header.color + ")";
-                        }
-                    }
-                    fulfill(header);
+                        fulfill(header);
 
-                }).catch(reject);
+                    })
+                    .catch(function (error) {
+                        reject(error);
+                    });
             }
             else {
                 fulfill(null);
@@ -292,11 +298,11 @@ var igv = (function (igv) {
                 chosen;
 
             lut =
-            {
-                "COLLAPSED": "Collapse",
-                "SQUISHED": "Squish",
-                "EXPANDED": "Expand"
-            };
+                {
+                    "COLLAPSED": "Collapse",
+                    "SQUISHED": "Squish",
+                    "EXPANDED": "Expand"
+                };
 
             chosen = (0 === index) ? '<div class="igv-track-menu-border-top">' : '<div">';
             if (displayMode === selfDisplayMode) {

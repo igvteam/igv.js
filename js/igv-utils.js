@@ -25,6 +25,11 @@
 
 var igv = (function (igv) {
 
+    igv.filenameOrURLHasSuffix = function  (fileOrURL, suffix) {
+        var str = (fileOrURL instanceof File) ? fileOrURL.name : fileOrURL;
+        return str.toLowerCase().endsWith( suffix )
+    };
+
     igv.isFilePath = function (path) {
         return (path instanceof File);
     };
