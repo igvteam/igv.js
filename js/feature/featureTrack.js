@@ -44,11 +44,9 @@ var igv = (function (igv) {
         }
         this.maxRows = config.maxRows;
 
-
-        if (config.url && (config.url.toLowerCase().endsWith(".bigbed") || config.url.toLowerCase().endsWith(".bb"))) {
+        if ( config.url && filenameOrURLHasSuffix(config.url, '.bigbed') || filenameOrURLHasSuffix(config.url, '.bb') ) {
             this.featureSource = new igv.BWSource(config);
-        }
-        else {
+        } else {
             this.featureSource = new igv.FeatureSource(config);
         }
 
@@ -72,6 +70,12 @@ var igv = (function (igv) {
             // adjust label positions to make sure they're always visible
             monitorTrackDrag(this);
         }
+
+        function filenameOrURLHasSuffix (fileOrURL, suffix) {
+            var str = (fileOrURL instanceof File) ? fileOrURL.name : fileOrURL;
+            return str.toLowerCase().endsWith( suffix )
+        }
+
     };
 
     igv.FeatureTrack.prototype.getFileHeader = function () {
