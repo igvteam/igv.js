@@ -179,7 +179,7 @@ var igv = (function (igv) {
             } else {
                 trackView.track.dataRange.min = min;
                 trackView.track.dataRange.max = max;
-                trackView.track.autoScale = false;
+                trackView.track.autoscale = false;
                 self.hide();
                 trackView.update();
             }

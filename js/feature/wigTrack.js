@@ -46,7 +46,7 @@ var igv = (function (igv) {
         }
 
         // Min and max values.  No defaults for these, if they aren't set track will autoscale.
-        this.autoScale = (config.max === undefined);
+        this.autoscale = (config.max === undefined);
         this.dataRange = {
             min: config.min,
             max: config.max
@@ -74,15 +74,15 @@ var igv = (function (igv) {
         menuItems.push(igv.dataRangeMenuItem(popover, this.trackView));
 
         menuItems.push({
-            object: $(htmlStringified(self.autoScale)),
+            object: $(htmlStringified(self.autoscale)),
             click: function () {
                 var $fa = $(this).find('i');
 
                 popover.hide();
 
-                self.autoScale = !self.autoScale;
+                self.autoscale = !self.autoscale;
 
-                if (true === self.autoScale) {
+                if (true === self.autoscale) {
                     $fa.removeClass('fa-check-hidden');
                 } else {
                     $fa.addClass('fa-check-hidden');
@@ -92,11 +92,11 @@ var igv = (function (igv) {
             }
         });
 
-        function htmlStringified(autoScale) {
+        function htmlStringified(autoscale) {
             var html = [];
 
             html.push('<div>');
-            html.push(true === autoScale ? '<i class="fa fa-check">' : '<i class="fa fa-check fa-check-hidden">');
+            html.push(true === autoscale ? '<i class="fa fa-check">' : '<i class="fa fa-check fa-check-hidden">');
             html.push('</i>');
             html.push('Autoscale');
             html.push('</div>');
@@ -155,7 +155,7 @@ var igv = (function (igv) {
 
 
         if (features && features.length > 0) {
-            if (self.autoScale || self.dataRange.max === undefined) {
+            if (self.autoscale || self.dataRange.max === undefined) {
                 var s = autoscale(features);
                 featureValueMinimum = s.min;
                 featureValueMaximum = s.max;
