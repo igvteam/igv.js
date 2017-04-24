@@ -222,28 +222,28 @@ var igv = (function (igv) {
                     //     // ignore
                     // } else {
 
-                        if (popupTimer) {
-                            // Cancel previous timer
-                            window.clearTimeout(popupTimer);
-                            popupTimer = undefined;
-                        }
+                    if (popupTimer) {
+                        // Cancel previous timer
+                        window.clearTimeout(popupTimer);
+                        popupTimer = undefined;
+                    }
 
-                        if (igv.browser.minimumBasesExtent() > Math.floor(self.$viewport.width() * referenceFrame.bpPerPixel/2.0)) {
-                            // do nothing
+                    if (igv.browser.minimumBasesExtent() > Math.floor(self.$viewport.width() * referenceFrame.bpPerPixel/2.0)) {
+                        // do nothing
+                    } else {
+                        newCenter = Math.round(referenceFrame.start + canvasCoords.x * referenceFrame.bpPerPixel);
+                        if(referenceFrame.chrName === "all") {
+                            chr = igv.browser.genome.getChromosomeCoordinate(newCenter).chr;
+                            igv.browser.search(chr);
+
                         } else {
-                            newCenter = Math.round(referenceFrame.start + canvasCoords.x * referenceFrame.bpPerPixel);
-                            if(referenceFrame.chrName === "all") {
-                                chr = igv.browser.genome.getChromosomeCoordinate(newCenter).chr;
-                                igv.browser.search(chr);
-
-                            } else {
-                                self.genomicState.referenceFrame.bpPerPixel /= 2;
-                                self.genomicState.referenceFrame.start = Math.round((newCenter + self.genomicState.referenceFrame.start)/2.0 );
-                                igv.browser.updateWithLocusIndex(self.genomicState.locusIndex);
-
-                            }
+                            self.genomicState.referenceFrame.bpPerPixel /= 2;
+                            self.genomicState.referenceFrame.start = Math.round((newCenter + self.genomicState.referenceFrame.start)/2.0 );
+                            igv.browser.updateWithLocusIndex(self.genomicState.locusIndex);
 
                         }
+
+                    }
 
                     // }
 
@@ -479,6 +479,7 @@ var igv = (function (igv) {
         refFrameEnd = refFrameStart + referenceFrame.toBP(this.canvas.width);
 
         if (this.tile && this.tile.containsRange(chr, refFrameStart, refFrameEnd, referenceFrame.bpPerPixel)) {
+            // console.log('paint pre-existing canvas');
             this.paintImageWithReferenceFrame(referenceFrame);
         } else {
 
@@ -496,101 +497,106 @@ var igv = (function (igv) {
 
             self.startSpinner();
 
-            this.trackView.track.getFeatures(referenceFrame.chrName, bpStart, bpEnd, referenceFrame.bpPerPixel).then(function (features) {
+            // console.log('get features');
+            this.trackView.track
+                .getFeatures(referenceFrame.chrName, bpStart, bpEnd, referenceFrame.bpPerPixel)
+                .then(function (features) {
 
-                var buffer,
-                    requiredHeight;
+                    var buffer,
+                        requiredHeight;
 
-                // self.loading = false;
-                self.loading = undefined;
+                    // self.loading = false;
+                    self.loading = undefined;
 
-                self.stopSpinner();
+                    self.stopSpinner();
 
-                if (features) {
+                    if (features) {
 
-                    if (typeof self.trackView.track.computePixelHeight === 'function') {
-                        requiredHeight = self.trackView.track.computePixelHeight(features);
-                        if (requiredHeight != self.contentDiv.clientHeight) {
-                            // self.setContentHeight(requiredHeight);
-                            self.trackView.setContentHeightForViewport(self, requiredHeight)
+                        if (typeof self.trackView.track.computePixelHeight === 'function') {
+                            requiredHeight = self.trackView.track.computePixelHeight(features);
+                            if (requiredHeight != self.contentDiv.clientHeight) {
+                                // self.setContentHeight(requiredHeight);
+                                self.trackView.setContentHeightForViewport(self, requiredHeight)
+                            }
                         }
+
+                        buffer = document.createElement('canvas');
+                        buffer.width = pixelWidth;
+                        buffer.height = self.canvas.height;
+
+                        self.drawConfiguration =
+                            {
+
+                                features: features,
+                                context: buffer.getContext('2d'),
+
+                                pixelWidth: buffer.width,
+                                pixelHeight: buffer.height,
+
+                                bpStart: bpStart,   // bpStart = Math.max(0, Math.round(referenceFrame.start - bpWidth / 3))
+                                                    // bpWidth = Math.round(referenceFrame.toBP(pixelWidth))
+                                                    // buffer.width = pixelWidth = 3 * this.canvas.width
+
+                                bpEnd: bpEnd,
+
+                                bpPerPixel: referenceFrame.bpPerPixel,
+
+                                referenceFrame: referenceFrame,
+
+                                genomicState: genomicState,
+
+                                viewport: self,
+
+                                viewportWidth: self.$viewport.width(),
+
+                                viewportContainerX: genomicState.referenceFrame.toPixels(genomicState.referenceFrame.start - bpStart),
+
+                                viewportContainerWidth: igv.browser.viewportContainerWidth()
+                            };
+
+                        // console.log('render features');
+                        self.trackView.track.draw(self.drawConfiguration);
+
+                        if (doRenderControlCanvas(genomicState, self.trackView)) {
+                            renderControlCanvasWithTrackView(self.trackView);
+                        }
+
+                        self.tile = new Tile(referenceFrame.chrName, bpStart, bpEnd, referenceFrame.bpPerPixel, buffer);
+                        self.paintImageWithReferenceFrame(referenceFrame);
+
+                    } else {
+                        self.ctx.clearRect(0, 0, self.canvas.width, self.canvas.height);
                     }
 
-                    buffer = document.createElement('canvas');
-                    buffer.width = pixelWidth;
-                    buffer.height = self.canvas.height;
+                    function renderControlCanvasWithTrackView(trackView) {
+                        var buffer2;
 
-                    self.drawConfiguration =
-                        {
+                        buffer2 = document.createElement('canvas');
+                        buffer2.width = trackView.controlCanvas.width;
+                        buffer2.height = trackView.controlCanvas.height;
 
-                            features: features,
-                            context: buffer.getContext('2d'),
+                        trackView.track.paintAxis(buffer2.getContext('2d'), buffer2.width, buffer2.height);
 
-                            pixelWidth: buffer.width,
-                            pixelHeight: buffer.height,
+                        trackView.controlCtx.drawImage(buffer2, 0, 0);
 
-                            bpStart: bpStart,   // bpStart = Math.max(0, Math.round(referenceFrame.start - bpWidth / 3))
-                                                // bpWidth = Math.round(referenceFrame.toBP(pixelWidth))
-                                                // buffer.width = pixelWidth = 3 * this.canvas.width
-
-                            bpEnd: bpEnd,
-
-                            bpPerPixel: referenceFrame.bpPerPixel,
-
-                            referenceFrame: referenceFrame,
-
-                            genomicState: genomicState,
-
-                            viewport: self,
-
-                            viewportWidth: self.$viewport.width(),
-
-                            viewportContainerX: genomicState.referenceFrame.toPixels(genomicState.referenceFrame.start - bpStart),
-
-                            viewportContainerWidth: igv.browser.viewportContainerWidth()
-                        };
-
-                    self.trackView.track.draw(self.drawConfiguration);
-
-                    if (doRenderControlCanvas(genomicState, self.trackView)) {
-                        renderControlCanvasWithTrackView(self.trackView);
                     }
 
-                    self.tile = new Tile(referenceFrame.chrName, bpStart, bpEnd, referenceFrame.bpPerPixel, buffer);
-                    self.paintImageWithReferenceFrame(referenceFrame);
+                    function doRenderControlCanvas(genomicState, trackView) {
+                        return (/*0 === genomicState.locusIndex &&*/ trackView.track.paintAxis && trackView.controlCanvas.width > 0 && trackView.controlCanvas.height > 0);
+                    }
+                })
+                .catch(function (error) {
 
-                } else {
-                    self.ctx.clearRect(0, 0, self.canvas.width, self.canvas.height);
-                }
+                    self.stopSpinner();
 
-                function renderControlCanvasWithTrackView(trackView) {
-                    var buffer2;
+                    self.loading = false;
 
-                    buffer2 = document.createElement('canvas');
-                    buffer2.width = trackView.controlCanvas.width;
-                    buffer2.height = trackView.controlCanvas.height;
-
-                    trackView.track.paintAxis(buffer2.getContext('2d'), buffer2.width, buffer2.height);
-
-                    trackView.controlCtx.drawImage(buffer2, 0, 0);
-
-                }
-
-                function doRenderControlCanvas(genomicState, trackView) {
-                    return (/*0 === genomicState.locusIndex &&*/ trackView.track.paintAxis && trackView.controlCanvas.width > 0 && trackView.controlCanvas.height > 0);
-                }
-            }).catch(function (error) {
-
-                self.stopSpinner();
-
-                self.loading = false;
-
-                if (error instanceof igv.AbortLoad) {
-                    console.log("Aborted ---");
-                } else {
-                    igv.presentAlert(error);
-                }
-            });
+                    if (error instanceof igv.AbortLoad) {
+                        console.log("Aborted ---");
+                    } else {
+                        igv.presentAlert(error);
+                    }
+                });
         }
 
         function viewIsReady() {
