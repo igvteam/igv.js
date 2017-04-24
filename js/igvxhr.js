@@ -298,8 +298,8 @@ var igvxhr = (function (igvxhr) {
                     compression = NONE;
                 }
 
-                // result = igvxhr.arrayBufferToString(fileReader.result, compression);
-                result = arrayBufferToBits(fileReader.result, compression);
+                result = igvxhr.arrayBufferToString(fileReader.result, compression);
+                // result = arrayBufferToBits(fileReader.result, compression);
 
                 fullfill(result);
 
@@ -312,7 +312,9 @@ var igvxhr = (function (igvxhr) {
 
             rangeEnd = options.range.start + options.range.size - 1;
             blob = localfile.slice(options.range.start, rangeEnd + 1);
-            fileReader.readAsBinaryString(blob);
+
+            fileReader.readAsArrayBuffer(blob);
+            // fileReader.readAsBinaryString(blob);
 
         });
 
