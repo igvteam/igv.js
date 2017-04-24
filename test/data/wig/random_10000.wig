@@ -1,5 +1,5 @@
 #
-#locus chr19:9917384-19917884
+#locus 19:9917384-19917884
 #
 fixedStep chrom=chr19 start=9917384 step=1000 span=500
 -0.927477692177335
