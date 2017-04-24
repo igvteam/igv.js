@@ -197,9 +197,14 @@ var igvxhr = (function (igvxhr) {
 
     igvxhr.loadArrayBuffer = function (url, options) {
 
-        if (options === undefined) options = {};
-        options.responseType = "arraybuffer";
-        return igvxhr.load(url, options);
+        if (url instanceof File) {
+            return loadFileSlice(url, options);
+        } else {
+            if (options === undefined) options = {};
+            options.responseType = "arraybuffer";
+            return igvxhr.load(url, options);
+        }
+
     };
 
     igvxhr.loadJson = function (url, options) {
@@ -251,6 +256,67 @@ var igvxhr = (function (igvxhr) {
         }
         return result;
     };
+
+
+    function arrayBufferToBits(arraybuffer, compression) {
+
+        var plain,
+            inflate;
+
+        if (compression === GZIP) {
+            inflate = new Zlib.Gunzip(new Uint8Array(arraybuffer));
+            plain = inflate.decompress();
+        } else if (compression === BGZF) {
+            plain = new Uint8Array(igv.unbgzf(arraybuffer));
+        } else {
+            plain = new Uint8Array(arraybuffer);
+        }
+
+        return plain;
+    }
+
+    function loadFileSlice (localfile, options) {
+
+        return new Promise(function (fullfill, reject) {
+
+            var fileReader,
+                blob,
+                rangeEnd;
+
+            fileReader = new FileReader();
+
+            fileReader.onload = function (e) {
+
+                var compression,
+                    result;
+
+                if (options.bgz) {
+                    compression = BGZF;
+                } else if (localfile.name.endsWith(".gz")) {
+                    compression = GZIP;
+                } else {
+                    compression = NONE;
+                }
+
+                // result = igvxhr.arrayBufferToString(fileReader.result, compression);
+                result = arrayBufferToBits(fileReader.result, compression);
+
+                fullfill(result);
+
+            };
+
+            fileReader.onerror = function (e) {
+                console.log("reject uploading local file " + localfile.name);
+                reject(null, fileReader);
+            };
+
+            rangeEnd = options.range.start + options.range.size - 1;
+            blob = localfile.slice(options.range.start, rangeEnd + 1);
+            fileReader.readAsBinaryString(blob);
+
+        });
+
+    }
 
     function loadFileHelper (localfile, options) {
 
