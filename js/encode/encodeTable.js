@@ -128,7 +128,8 @@ var encode = (function (encode) {
 
 
                 console.log('do something cool with ' + _.size(mapped) + ' tracks.');
-                // self.browser.loadTrackXY(mapped);
+                self.browser.loadTrack(_.first(mapped));
+
 
             }
 

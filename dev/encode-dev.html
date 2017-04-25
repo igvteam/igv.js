@@ -7,7 +7,7 @@
     <meta name="description" content="">
     <meta name="author" content="">
     <link rel="shortcut icon" href=../img/favicon.ico>
-    <title>CURSOR DEV</title>
+    <title>Encode - Dev</title>
 
     <!-- jQuery UI CSS -->
     <link rel="stylesheet" type="text/css" href="https://code.jquery.com/ui/1.12.1/themes/redmond/jquery-ui.css"/>
@@ -24,9 +24,6 @@
     <!-- IGV CSS -->
     <link href="../css/igv.css" rel="stylesheet" type="text/css">
 
-    <!-- CURSOR CSS -->
-    <link href="../css/cursor.css" rel="stylesheet" type="text/css">
-
     <!-- Google Fonts CSS-->
     <link href='http://fonts.googleapis.com/css?family=PT+Sans:400,700' rel='stylesheet' type='text/css'>
 
@@ -38,8 +35,6 @@
 
     <!-- Bootstrap JS -->
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
-
-
 
     <!-- DataTables JS -->
     <script type="text/javascript" src="https://cdn.datatables.net/v/dt/dt-1.10.15/sc-1.4.2/se-1.2.2/datatables.min.js"></script>
@@ -115,7 +110,6 @@
     <script type="text/javascript" src="../js/feature/aneuSource.js"></script>
     <script type="text/javascript" src="../js/feature/aneuTrack.js"></script>
 
-
     <script type="text/javascript" src="../js/karyo/karyo.js"></script>
     <script type="text/javascript" src="../js/gwas/t2dVariantSource.js"></script>
     <script type="text/javascript" src="../js/gwas/gwasTrack.js"></script>
@@ -152,254 +146,11 @@
     <script type="text/javascript" src="../js/encode/encodeTable.js"></script>
     <script type="text/javascript" src="../js/encode/encodeSearch.js"></script>
 
-    <!-- Cursor -->
-    <script type="text/javascript" src="../js/cursor/cursor.js"></script>
-    <script type="text/javascript" src="../js/cursor/cursorTrack.js"></script>
-    <script type="text/javascript" src="../js/cursor/cursorModel.js"></script>
-    <script type="text/javascript" src="../js/cursor/cursorHistogram.js"></script>
-    <script type="text/javascript" src="../js/cursor/cursor-ideogram.js"></script>
-    <script type="text/javascript" src="../js/cursor/horizontalScrollbar.js"></script>
-    <script type="text/javascript" src="../js/cursor/igv-cursor.js"></script>
-
-    <!-- Google Analytics -->
     <script src="../js/oauth/google.js"></script>
 
 </head>
 
 <body>
-
-<div class="igv-cursor-ui-header">
-
-    <a class="igv-about-link" href="//igv.org/cursor/about/index.html" target="_blank">About</a>
-
-    <div class="igv-cursor-ui-holder">
-        <div class="igv-cursor-ui">
-            <div class="igv-cursor-ui-item igv-cursor-ui-right-border">
-
-                <div class="dropdown">
-
-                    <button id="igvHeaderFileDropdown" class="btn btn-default dropdown-toggle" type="button" data-toggle="dropdown">
-                        File Open/Save
-                        <span class="caret"></span>
-                    </button><!-- File Open/Save -->
-
-                    <ul class="dropdown-menu" role="menu" aria-labelledby="igvHeaderFileDropdown">
-
-                        <li role="presentation" class="dropdown-header">Load data from</li>
-
-                        <li role="presentation">
-                            <a role="menuitem" tabindex="-1" href="#" data-toggle="modal" data-target="#hicEncodeModal">
-                                ENCODE
-                            </a>
-                        </li><!-- Select ENCODE -->
-
-                        <li role="presentation">
-
-                            <a role="menuitem" tabindex="-1" href="#" data-toggle="modal" data-target="#igvFileUploadModal">
-                                File
-                            </a>
-
-                        </li><!-- Upload File -->
-
-                        <li role="presentation">
-
-                            <a role="menuitem" tabindex="-1" href="#" data-toggle="modal" data-target="#igvLoadURLModal">
-                                URL
-                            </a>
-
-                        </li><!-- Load URL -->
-
-                        <li role="presentation" class="divider"></li>
-
-                        <li role="presentation">
-
-                            <a role="menuitem" tabindex="-1" href="#" data-toggle="modal" data-target="#igvSaveSessionModal">
-                                Save Session
-                            </a>
-
-                        </li><!-- Save Session -->
-
-                        <li role="presentation">
-
-                            <a role="menuitem" tabindex="-1" href="#" data-toggle="modal" data-target="#igvSessionLoadModal">
-                                Load Session
-                            </a>
-
-                        </li><!-- Load Session -->
-
-                        <li role="presentation" class="divider"></li>
-
-                        <li role="presentation">
-                            <a role="menuitem" tabindex="-1" href="#" data-toggle="modal" data-target="#igvExportRegionsModal">
-                                Export Regions
-                            </a>
-                        </li><!-- Export Regions -->
-
-                    </ul>
-
-                </div>
-
-            </div>
-            <div class="igv-cursor-ui-item">
-                <label style="font-weight:400">Region length
-                    <input id="regionSizeInput" type="text" class="igv-cursor-input-text" placeholder="bp" />
-                </label>
-            </div>
-            <div class="igv-cursor-ui-item igv-cursor-ui-right-border">
-                <label style="font-weight:400">Track height
-                    <input id="trackHeightInput" type="text" class="igv-cursor-input-text" placeholder="px" />
-                </label>
-            </div>
-            <div class="igv-cursor-ui-item">
-
-                <i id="fitToScreen" class="fa fa-lg fa-compress igv-cursor-ui-spacer4"></i>
-
-                <i id="zoomOut" class="fa fa-lg fa-search-minus igv-cursor-ui-spacer4"></i>
-
-                <i id="zoomIn" class="fa fa-lg fa-search-plus igv-cursor-ui-spacer4"></i>
-
-                <input id="frameWidthInput" type="text" class="igv-cursor-input-text" placeholder="px" />
-
-            </div>
-        </div>
-    </div>
-</div><!-- header -->
-
-<div class="igv-cursor-ui-header-blurb">
-    <span></span> regions based on <span></span> (<span></span> regions remain with filters applied)
-</div>
-
-<div id="igvSessionLoadModal" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="igvSessionLoadModalLabel" aria-hidden="true">
-    <div class="modal-dialog">
-        <div class="modal-content">
-
-            <div class="modal-header">
-                <button type="button" class="close" data-dismiss="modal">
-                    <span aria-hidden="true">&times;</span>
-                    <span class="sr-only">Close</span>
-                </button>
-                <h4 class="modal-title" id="igvSessionLoadModalLabel">Load Session</h4>
-            </div>
-
-            <div class="modal-body">
-
-                <div class="form-group">
-                    <!--<label for="igvSessionLoad">Load Session</label>-->
-                    <input id="igvSessionLoad" type="file" title="Session File" multiple/>
-                </div>
-
-            </div>
-
-        </div>
-    </div>
-</div><!-- Load Session Modal -->
-
-<div id="igvLoadURLModal" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="igvLoadURLModalLabel" aria-hidden="true">
-    <div class="modal-dialog">
-        <div class="modal-content">
-
-            <div class="modal-header">
-                <button type="button" class="close" data-dismiss="modal">
-                    <span aria-hidden="true">&times;</span>
-                    <span class="sr-only">Close</span>
-                </button>
-                <h4 class="modal-title" id="igvLoadURLModalLabel">Load URL</h4>
-            </div>
-
-            <div class="modal-body">
-
-                <div class="form-group">
-                    <!--<label for="igvLoadURL">Load URL</label>-->
-                    <input id="igvLoadURL" type="text" class="form-control" placeholder="BED URL">
-                </div>
-
-            </div>
-
-        </div>
-    </div>
-</div><!-- Load URL Modal -->
-
-<div id="igvFileUploadModal" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="igvFileUploadModalLabel" aria-hidden="true">
-    <div class="modal-dialog">
-        <div class="modal-content">
-
-            <div class="modal-header">
-                <button type="button" class="close" data-dismiss="modal">
-                    <span aria-hidden="true">&times;</span>
-                    <span class="sr-only">Close</span>
-                </button>
-                <h4 class="modal-title" id="igvFileUploadModalLabel">Upload File</h4>
-            </div>
-
-            <div class="modal-body">
-
-                <div class="form-group">
-                    <input id="igvFileUpload" type="file" title="BED file" multiple/>
-                </div>
-
-            </div>
-
-        </div>
-    </div>
-</div><!-- Upload File Modal -->
-
-<!-- Export Regions Modal -->
-<div class="modal fade" id="igvExportRegionsModal" tabindex="-1" role="dialog"
-     aria-labelledby="igvExportRegionsModalLabel" aria-hidden="true">
-    <div class="modal-dialog">
-        <div class="modal-content">
-
-            <div class="modal-header">
-                <button type="button" class="close" data-dismiss="modal">
-                    <span aria-hidden="true">&times;</span>
-                    <span class="sr-only">Close</span>
-                </button>
-                <h4 class="modal-title" id="igvExportRegionsModalLabel">Export Regions</h4>
-            </div>
-
-            <div class="modal-body">
-                <form id="igvExportRegionsModalForm" role="form" action="../php/igvdownload.php" method="post">
-                    <div class="form-group">
-                        <input class="form-control" type="text"   name="filename"        value="cursor-regions.bed" placeholder="Enter filename"/>
-                        <input class="form-control" type="hidden" name="downloadContent" value="this is the contents of the file"/>
-                    </div>
-
-                    <button class="btn btn-default" type="submit" name="download" value="download">Submit</button>
-                </form>
-            </div>
-
-        </div>
-    </div>
-</div>
-
-<!-- Save Session Modal -->
-<div class="modal fade" id="igvSaveSessionModal" tabindex="-1" role="dialog" aria-labelledby="igvSaveSessionModalLabel"
-     aria-hidden="true">
-    <div class="modal-dialog">
-        <div class="modal-content">
-
-            <div class="modal-header">
-                <button type="button" class="close" data-dismiss="modal">
-                    <span aria-hidden="true">&times;</span>
-                    <span class="sr-only">Close</span>
-                </button>
-                <h4 class="modal-title" id="igvSaveSessionModalLabel">Save Session</h4>
-            </div>
-
-            <div class="modal-body">
-                <form id="igvSaveSessionModalForm" role="form" action="../php/igvdownload.php" method="post">
-                    <div class="form-group">
-                        <input class="form-control" type="text"   name="filename"        value="cursor-session.txt" placeholder="Enter filename"/>
-                        <input class="form-control" type="hidden" name="downloadContent" value="this is the contents of the file"/>
-                    </div>
-
-                    <button class="btn btn-default" type="submit" name="download" value="download">Submit</button>
-                </form>
-            </div>
-
-        </div>
-    </div>
-</div>
 
 <!-- ENCODE Modal -->
 <div id="hicEncodeModal" class="modal fade bs-example-modal-lg" tabindex="-1" role="dialog" aria-labelledby="encodeModalLabel" aria-hidden="true">
@@ -441,37 +192,102 @@
 
 </div>
 
-<div id="igvContainerDiv" class="container-fluid">
+<div class="igv-cursor-ui-header">
+
+    <div class="igv-cursor-ui-holder">
+        <div class="igv-cursor-ui">
+            <div class="igv-cursor-ui-item">
+                <div class="dropdown">
+
+                    <button id="igvHeaderFileDropdown" class="btn btn-default dropdown-toggle" type="button" data-toggle="dropdown">
+                        File Open/Save
+                        <span class="caret"></span>
+                    </button>
+
+                    <ul class="dropdown-menu" role="menu" aria-labelledby="igvHeaderFileDropdown">
+
+                        <li role="presentation" class="dropdown-header">Load data from</li>
+
+                        <li role="presentation">
+                            <a role="menuitem" tabindex="-1" href="#" data-toggle="modal" data-target="#hicEncodeModal">
+                                ENCODE
+                            </a>
+                        </li><!-- Select ENCODE -->
+
+                    </ul>
+
+                </div>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+<div id="myDiv" style="padding-top: 50px;padding-bottom: 20px; height: auto">
 </div>
 
 <script type="text/javascript">
 
     $(document).ready(function () {
+        var div,
+            options,
+            browser;
 
-        var options;
-
-//        options = {
-//            trackHeight: 100,
-//            type: "CURSOR"
-//        };
-
+        div = $("#myDiv")[0];
         options = {
-            trackHeight: 100,
-            type: "CURSOR",
-            encodeTable: "../resources/peaks.hg19.txt",
-            crossDomainProxy: "../php/simpleProxy.php",
-//            tracks: [
-//                {
-//                    type: "bed",
-//                    url: "../test/data/bed/basic_feature_3_columns.bed.gz",
-//                    name: "3 Column BED"
-//                }
-//            ]
+            minimumBases: 6,
+            showIdeogram: true,
+//            showKaryo: true,
+//            showCenterGuide: true,
+//            showCursorTrackingGuide: true,
+            showRuler: true,
+//            locus: '8:124,512,906-124,512,945',
+            locus: '1',
+            reference: {
+                id: "hg19",
+                fastaURL: "https://s3.amazonaws.com/igv.broadinstitute.org/genomes/seq/1kg_v37/human_g1k_v37_decoy.fasta",
+                cytobandURL: "https://s3.amazonaws.com/igv.broadinstitute.org/genomes/seq/b37/b37_cytoband.txt"
+            },
+            flanking: 1000,
+            apiKey: 'AIzaSyDUUAUFpQEN4mumeMNIRWXSiTh5cPtUAD0',
+            palette: ["#00A0B0", "#6A4A3C", "#CC333F", "#EB6841"],
+            tracks:
+                [
+                    {
+                        url: 'http://hgdownload.cse.ucsc.edu/goldenPath/hg19/encodeDCC/wgEncodeUwRepliSeq/wgEncodeUwRepliSeqSknshValleysRep1.bed.gz',
+                        type: 'bed',
+                        format: 'bed',
+                        indexed: false
+                    },
+                    {
+                        sourceType: 'gcs',
+                        type: 'bam',
+                        url: 'gs://genomics-public-data/platinum-genomes/bam/NA12877_S1.bam',
+                        height: 500,
+                        autoHeight: false,
+                        viewAsPairs: false,
+                        name: 'NA12877 - BAM Track'
+                    },
+                    {
+                        name: "Genes",
+                        searchable: false,
+                        type: "annotation",
+                        format: "gtf",
+                        sourceType: "file",
+                        url: "https://s3.amazonaws.com/igv.broadinstitute.org/annotations/hg19/genes/gencode.v18.annotation.sorted.gtf.gz",
+                        indexURL: "https://s3.amazonaws.com/igv.broadinstitute.org/annotations/hg19/genes/gencode.v18.annotation.sorted.gtf.gz.tbi",
+                        visibilityWindow: 10000000,
+                        order: Number.MAX_VALUE,
+                        displayMode: "EXPANDED"
+                    }
+
+                ]
         };
 
-        igv.createCursorBrowser(options);
+        browser = igv.createBrowser(div, options);
 
-    });
+    })
+
 
 </script>
 
