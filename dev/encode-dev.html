@@ -254,21 +254,6 @@
             tracks:
                 [
                     {
-                        url: 'http://hgdownload.cse.ucsc.edu/goldenPath/hg19/encodeDCC/wgEncodeUwRepliSeq/wgEncodeUwRepliSeqSknshValleysRep1.bed.gz',
-                        type: 'bed',
-                        format: 'bed',
-                        indexed: false
-                    },
-                    {
-                        sourceType: 'gcs',
-                        type: 'bam',
-                        url: 'gs://genomics-public-data/platinum-genomes/bam/NA12877_S1.bam',
-                        height: 500,
-                        autoHeight: false,
-                        viewAsPairs: false,
-                        name: 'NA12877 - BAM Track'
-                    },
-                    {
                         name: "Genes",
                         searchable: false,
                         type: "annotation",
@@ -280,7 +265,6 @@
                         order: Number.MAX_VALUE,
                         displayMode: "EXPANDED"
                     }
-
                 ]
         };
 

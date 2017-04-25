@@ -127,8 +127,8 @@ var encode = (function (encode) {
                 });
 
 
-                console.log('do something cool with ' + _.size(mapped) + ' tracks.');
-                self.browser.loadTrack(_.first(mapped));
+                // console.log('do something cool with ' + _.size(mapped) + ' tracks.');
+                self.browser.loadTracksWithConfigList( mapped );
 
 
             }
