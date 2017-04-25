@@ -160,6 +160,8 @@ var igv = (function (igv) {
 
     igv.KaryoPanel.prototype.repaint = function () {
 
+        if(this.canvasWidth === undefined|| this.canvasHeight === undefined) return;
+
         var genome,
             genomicState,
             referenceFrame,
@@ -178,13 +180,13 @@ var igv = (function (igv) {
         // }
 
         genome = igv.browser.genome;
-        
+
         if(!genome.ideograms) {
             console.log('karyo - no ideograms defined')
             return;
         }
-        
-        
+
+
         genomicState = _.first(igv.browser.genomicStateList);
         referenceFrame = genomicState.referenceFrame;
         stainColors = [];
@@ -220,7 +222,7 @@ var igv = (function (igv) {
 
         var longestChr = genome.getLongestChromosome();
         var cytobands = genome.getCytobands(longestChr.name);      // Longest chr
-        
+
         if(!cytobands) return;    // Cytobands not defined.
 
         var me = this;
@@ -309,7 +311,7 @@ var igv = (function (igv) {
                             nr = 0;
                             for (chr in chromosomes) {
                                 var guichrom = igv.guichromosomes[nr];
-                                //if (nr > 1) break;                       
+                                //if (nr > 1) break;
                                 nr++;
                                 if (guichrom && guichrom.size) {
                                     loadfeatures(source, chr, 0, guichrom.size, guichrom, bufferCtx, tracknr);
@@ -487,7 +489,7 @@ var igv = (function (igv) {
         }
 
         function loadfeatures(source, chr, start, end, guichrom, bufferCtx, tracknr) {
-            //log("=== loadfeatures of chr " + chr + ", x=" + guichrom.x);            
+            //log("=== loadfeatures of chr " + chr + ", x=" + guichrom.x);
 
             source.getSummary(chr, start, end, function (featureList) {
                 if (featureList) {
