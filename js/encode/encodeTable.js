@@ -126,7 +126,10 @@ var encode = (function (encode) {
                     return obj;
                 });
 
-                self.browser.loadTrackXY(mapped);
+
+                // console.log('do something cool with ' + _.size(mapped) + ' tracks.');
+                self.browser.loadTracksWithConfigList( mapped );
+
 
             }
 
