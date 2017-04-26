@@ -44,11 +44,9 @@ var encode = (function (encode) {
         defaultColor ="rgb(3, 116, 178)";
 
 
-    encode.EncodeTable = function ($parent, browser) {
+    encode.EncodeTable = function ($parent, browser, trackLoader) {
 
         var self = this;
-
-        this.browser = browser;
 
         this.initialized = false;
 
@@ -126,10 +124,8 @@ var encode = (function (encode) {
                     return obj;
                 });
 
-
                 // console.log('do something cool with ' + _.size(mapped) + ' tracks.');
-                self.browser.loadTracksWithConfigList( mapped );
-
+                trackLoader.call(browser, mapped);
 
             }
 

@@ -60,7 +60,7 @@ var igv = (function (igv) {
 
         $(parentDiv).append(browser.$root);
 
-        browser.encodeTable = new encode.EncodeTable($('#encodeModalBody'), browser);
+        browser.encodeTable = new encode.EncodeTable($('#encodeModalBody'), browser, browser.loadTracksWithConfigList);
 
         // drag & drop
         // browser.dragAndDrop = new igv.DragAndDrop();
