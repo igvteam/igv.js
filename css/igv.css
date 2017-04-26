@@ -1037,14 +1037,12 @@
   margin-top: 4px;
   width: 100%;
   height: auto;
-  background: url(img/cursor_logo.svg);
   background-size: 100px 32px;
   background-repeat: no-repeat;
   background-position: 21px 9px; }
 
 .igv-cursor-ui-holder {
   width: 640px;
-  /*adjust this value as the number of ui items grow.*/
   margin: auto; }
 
 .igv-cursor-ui {
