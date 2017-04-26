@@ -1465,16 +1465,38 @@ $igv-grey-color: #7F7F7F;
   box-sizing: border-box;
 }
 
-.igv-encode-spinner-container {
-  /*width: 256px;*/
-  /*margin: 0 auto 0 auto;*/
+.igv-cursor-ui-header {
+
+  margin-top: 4px;
+
+  width: 100%;
+  height: auto;
+
+  background-size: 100px 32px;
+  background-repeat:no-repeat;
+  background-position: 21px 9px;
 }
 
-div[id="igvEncodeModal"] {
-  -webkit-touch-callout: none;
-  -webkit-user-select: none;
-  -moz-user-select: none;
-  -ms-user-select: none;
-  user-select: none;
+.igv-cursor-ui-holder {
+  width: 640px;
+  margin:auto;
 }
 
+.igv-cursor-ui {
+  margin:auto;
+  width: 100%;
+  display:inline-block;
+  border: solid 1px grey;
+  background-color: #fff;
+  border-top: none;
+  border-bottom-left-radius: 5px;
+  border-bottom-right-radius: 5px;
+  padding: 5px 5px 5px 5px;
+}
+
+.igv-cursor-ui-item {
+  float:left;
+  color: grey;
+  font-weight: 400;
+  padding: 5px 8px 5px 8px;
+}
