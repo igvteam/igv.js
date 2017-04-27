@@ -210,7 +210,7 @@ var igv = (function (igv) {
             nameValues.push("<hr>");
             nameValues.push({ name: 'First in Pair', value: !this.isSecondOfPair(), borderTop: true });
             nameValues.push({ name: 'Mate is Mapped', value: yesNo(this.isMateMapped()) });
-            if (this.isMapped()) {
+            if (this.isMateMapped()) {
                 nameValues.push({ name: 'Mate Chromosome', value: this.mate.chr });
                 nameValues.push({ name: 'Mate Start', value: (this.mate.position + 1)});
                 nameValues.push({ name: 'Mate Strand', value: (true === this.mate.strand ? '(+)' : '(-)')});
