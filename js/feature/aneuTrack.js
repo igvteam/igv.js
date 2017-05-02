@@ -520,6 +520,11 @@ var igv = (function (igv) {
         sortDirection = (sortDirection === "ASC" ? "DESC" : "ASC");
     };
 
+
+    igv.AneuTrack.prototype.popupDataWithConfiguration = function (config) {
+        return this.popupData(config.genomicLocation, config.x, config.y, config.viewport.genomicState.referenceFrame)
+    };
+
     igv.AneuTrack.prototype.popupData = function (genomicLocation, xOffset, yOffset, referenceFrame) {
 
         var sampleName, row = Math.floor(yOffset / this.sampleHeight), items;

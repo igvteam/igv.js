@@ -331,6 +331,10 @@ var igv = (function (igv) {
         sortDirection = (sortDirection === "ASC" ? "DESC" : "ASC");
     };
 
+    igv.SegTrack.prototype.popupDataWithConfiguration = function (config) {
+        return this.popupData(config.genomicLocation, config.x, config.y, config.viewport.genomicState.referenceFrame)
+    };
+
     igv.SegTrack.prototype.popupData = function (genomicLocation, xOffset, yOffset, referenceFrame) {
 
         var sampleHeight = ("SQUISHED" === this.displayMode) ? this.sampleSquishHeight : this.sampleExpandHeight,
