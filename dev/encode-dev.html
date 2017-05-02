@@ -270,7 +270,7 @@
 
         browser = igv.createBrowser(div, options);
 
-        browser.encodeTable = new encode.EncodeTable($('#encodeModalBody'), browser, browser.loadTracksWithConfigList);
+        browser.encodeTable = new encode.EncodeTable($('#encodeModalBody'), browser, "hg19", browser.loadTracksWithConfigList);
 
     })
 
