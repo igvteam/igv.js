@@ -249,6 +249,10 @@ var igv = (function (igv) {
 
     };
 
+    igv.VariantTrack.prototype.popupDataWithConfiguration = function (config) {
+        return this.popupData(config.genomicLocation, config.x, config.y, config.viewport.genomicState.referenceFrame)
+    };
+
     /**
      * Return "popup data" for feature @ genomic location.  Data is an array of key-value pairs
      */
