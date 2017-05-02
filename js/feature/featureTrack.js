@@ -186,6 +186,10 @@ var igv = (function (igv) {
     //
     // };
 
+    igv.FeatureTrack.prototype.popupDataWithConfiguration = function (config) {
+        return this.popupData(config.genomicLocation, config.x, config.y, config.viewport.genomicState.referenceFrame)
+    };
+
     /**
      * Return "popup data" for feature @ genomic location.  Data is an array of key-value pairs
      */
@@ -200,8 +204,8 @@ var igv = (function (igv) {
                 featureList = this.featureSource.featureCache.queryFeatures(chr, genomicLocation - tolerance, genomicLocation + tolerance),
                 row;
 
-            if (this.displayMode != "COLLAPSED") {
-                row = (Math.floor)(this.displayMode === "SQUISHED" ? yOffset / this.squishedCallHeight : yOffset / this.expandedCallHeight);
+            if ('COLLAPSED' !== this.displayMode) {
+                row = 'SQUISHED' === this.displayMode ? Math.floor(yOffset / this.squishedCallHeight) : Math.floor(yOffset / this.expandedCallHeight);
             }
 
             if (featureList && featureList.length > 0) {
