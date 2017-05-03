@@ -129,7 +129,7 @@ var igv = (function (igv) {
         this.trackViews.forEach(function (trackView) {
             trackView.resize();
         });
-        
+
         return loadedTracks;
     };
 
@@ -157,7 +157,8 @@ var igv = (function (igv) {
             }
         }
 
-        switch (config.type.toLowerCase()) {
+        var typeLowerCase = config.type === undefined ? "" : config.type.toLowerCase();
+        switch (typeLowerCase) {
             case "gwas":
                 newTrack = new igv.GWASTrack(config);
                 break;
