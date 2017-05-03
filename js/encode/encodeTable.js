@@ -118,7 +118,8 @@ var encode = (function (encode) {
                             url: r[ 'url' ],
                             color: encodeAntibodyColor(r[ 'Target' ]),
                            // format: r['Format'],
-                            name: r['Name']
+                            name: r['Name'],
+                            max: 50              // Hardcoded for now
                         };
 
                     return obj;
