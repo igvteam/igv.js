@@ -178,7 +178,7 @@ var igv = (function (igv) {
             pixelHeight = options.pixelHeight,
             bpEnd = bpStart + pixelWidth * bpPerPixel + 1,
             callHeight = ("EXPANDED" === this.displayMode ? this.expandedCallHeight : this.squishedCallHeight),
-            px, px1, pw, py, h, style, i, variant, call, callSet, j, allRef, allVar, callSets;
+            px, px1, pw, py, h, style, i, variant, call, callSet, j, allRef, allVar, callSets, cr, cg, cb;
 
         this.variantBandHeight = 10 + this.nRows * (this.variantHeight + vGap);
 
@@ -222,7 +222,7 @@ var igv = (function (igv) {
                         if (call) {
 
                             // Determine genotype
-                            allVar = allRef = true;  // until proven otherwise
+                            /*allVar = allRef = true;  // until proven otherwise
                             call.genotype.forEach(function (g) {
                                 if (g != 0) allRef = false;
                                 if (g == 0) allVar = false;
@@ -234,10 +234,42 @@ var igv = (function (igv) {
                                 ctx.fillStyle = this.homvarColor;
                             } else {
                                 ctx.fillStyle = this.hetvarColor;
+                            }*/
+
+                            py = this.variantBandHeight + vGap + (j + variant.row) * (callHeight + vGap);
+                            //console.log(py);
+                            if (call.genotype[0]) {
+                                //homozygous
+                                numCol = 255 / (variant.alleles.length + 1);
+                                if (call.genotype[0] === call.genotype[1]) {
+                                    cr = cg = cb = 255 - (Math.floor(numCol * (call.genotype[0] + 1)));
+                                } else { // heterozygous
+                                    cr = 0;
+                                    cg = Math.floor(numCol * (call.genotype[0] + 1));
+                                    cb = Math.floor(numCol * (call.genotype[1] + 1));
+                                }
+                                ctx.fillStyle = "rgb(" + cr + "," + cg + "," + cb + ")";
+                            } else {
+                                console.log("no call made, set fill to white");
+                                ctx.fillStyle = "#FFFFFF";
                             }
 
-                            py = this.variantBandHeight + vGap + (j + variant.row) * callHeight;
                             ctx.fillRect(px, py, pw, h);
+                            ctx.strokeStyle = "#A0A0A0";
+                            ctx.lineWidth = 0.5;
+                            ctx.strokeRect(px, py, pw, h);
+
+                            // add allele text
+                            if (call.genotype[0] > 0) {
+                                ctx.font = "8px serif";
+                                ctx.textAlign = "left";
+                                ctx.textBaseline = "middle";
+                                ctx.fillStyle = "#FF0000";
+                                console.log();
+                                var alleleObj = variant.alleles[call.genotype[0]-1];
+                                //if (allele) console.log(allele);
+                                if (alleleObj && ctx.measureText(alleleObj.allele).width < pw) ctx.fillText(alleleObj.allele, px + vGap, py + callHeight / 2);
+                            }
                         }
                     }
                 }
