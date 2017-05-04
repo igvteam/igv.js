@@ -66,7 +66,7 @@ var igv = (function (igv) {
 
             this.defaultRange = {
                 min: 0,
-                max: this.mean + 2 * this.stddev
+                max: this.mean + 3 * this.stddev
             }
         }
     }
