@@ -44,7 +44,7 @@ var encode = (function (encode) {
         defaultColor ="rgb(3, 116, 178)";
 
 
-    encode.EncodeTable = function ($parent, browser, trackLoader) {
+    encode.EncodeTable = function ($parent, browser, assembly, loadFunction) {
 
         var self = this;
 
@@ -64,7 +64,7 @@ var encode = (function (encode) {
 
                 self.initialized = true;
 
-                encode.encodeSearch(function (json) {
+                encode.encodeSearch(assembly, function (json) {
                     self.loadWithDataSource(json);
                 });
 
@@ -114,18 +114,19 @@ var encode = (function (encode) {
 
                     obj =
                         {
-                            type: r[ 'Format' ],
+                           // type: r[ 'Format' ],
                             url: r[ 'url' ],
                             color: encodeAntibodyColor(r[ 'Target' ]),
-                            format: r['Format'],
-                            name: r['Name']
+                           // format: r['Format'],
+                            name: r['Name'],
+                            max: 50              // Hardcoded for now
                         };
 
                     return obj;
                 });
 
                 // console.log('do something cool with ' + _.size(mapped) + ' tracks.');
-                trackLoader.call(browser, mapped);
+                loadFunction.call(browser, mapped);
 
             }
 

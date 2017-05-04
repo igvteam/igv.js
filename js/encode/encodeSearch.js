@@ -48,25 +48,40 @@ var encode = (function (encode) {
     //     "field=files.replicate.technical_replicate_number&" +
     //     "field=files.replicate.biological_replicate_number";
 
-    var query2 = "https://www.encodeproject.org/search/?" +
-        "type=experiment&" +
-        "assembly=hg19&" +
-        "files.output_type=peaks&" +
-        "files.file_format=bed&" +
-        "format=json&" +
-        "field=lab.title&" +
-        "field=biosample_term_name&" +
-        "field=assay_term_name&" +
-        "field=target.label&" +
-        "field=files.file_format&" +
-        "field=files.output_type&" +
-        "field=files.href&" +
-        "field=files.replicate.technical_replicate_number&" +
-        "field=files.replicate.biological_replicate_number&" +
-        "field=files.assembly&" +
-        "limit=all";
+    const fileFormat = "bigWig";
 
-    encode.encodeSearch = function (continuation) {
+    // var query3 = "https://www.encodeproject.org/search/?" +
+    //     "type=File" +
+    //     "&assembly=hg19" +
+    //     "&status=released" +
+    //     "&file_format=bigWig" +
+    //     "&output_type=signal+p-value" +
+    //     "&output_type=fold+change+over+control" +
+    //     "&award.project=ENCODE&" +
+    //     "format=json&" +
+    //     "limit=all";
+
+    encode.encodeSearch = function (assembly, continuation) {
+
+        var query2 = "https://www.encodeproject.org/search/?" +
+            "type=experiment&" +
+            "assembly=" + assembly + "&" +
+            //"assay_title=ChIP-seq&" +
+            //  "files.output_type=peaks&" +
+            "files.file_format=" + fileFormat + "&" +
+            "format=json&" +
+            "field=lab.title&" +
+            "field=biosample_term_name&" +
+            "field=assay_term_name&" +
+            "field=target.label&" +
+            "field=files.file_format&" +
+            "field=files.output_type&" +
+            "field=files.href&" +
+            "field=files.replicate.technical_replicate_number&" +
+            "field=files.replicate.biological_replicate_number&" +
+            "field=files.assembly&" +
+            "limit=all";
+
 
         console.log('encode search - load json ...');
         igvxhr
@@ -89,15 +104,16 @@ var encode = (function (encode) {
                         filtered,
                         mapped;
 
+
                     cellType = record["biosample_term_name"] || '';
 
                     target = record.target ? record.target.label : '';
 
-                    filtered = _.filter(record.files, function(file) {
-                        return 'bed' === file.file_format;
+                    filtered = _.filter(record.files, function (file) {
+                        return fileFormat === file.file_format && assembly === file.assembly;
                     });
 
-                    mapped = _.map(filtered, function(file) {
+                    mapped = _.map(filtered, function (file) {
 
                         var bioRep = file.replicate ? file.replicate.bioligcal_replicate_number : undefined,
                             techRep = file.replicate ? file.replicate.technical_replicate_number : undefined,
@@ -113,13 +129,13 @@ var encode = (function (encode) {
 
                         return {
                             "Assembly": file.assembly,
-                            "ExperimentID": record[ '@id' ],
+                            "ExperimentID": record['@id'],
                             "Cell Type": cellType,
                             "Assay Type": record.assay_term_name,
                             "Target": target,
                             "Lab": record.lab ? record.lab.title : "",
                             "Format": file.file_format,
-                            "Type": file.output_type,
+                            "Output Type": file.output_type,
                             "url": "https://www.encodeproject.org" + file.href,
                             "Bio Rep": bioRep,
                             "Tech Rep": techRep,
@@ -129,6 +145,7 @@ var encode = (function (encode) {
                     });
 
                     Array.prototype.push.apply(rows, mapped);
+
                 });
 
                 rows.sort(function (a, b) {
@@ -171,15 +188,16 @@ var encode = (function (encode) {
                 console.log('... done');
 
                 columnFormat =
-                    {
-                        'Assembly':8,
-                        'Cell Type':8,
-                        'Target':10,
-                        'Assay Type':10,
-                        'Bio Rep':8,
-                        'Tech Rep':8,
-                        'Lab':16
-                    };
+                {
+                    'Assembly': 8,
+                    'Cell Type': 8,
+                    'Target': 10,
+                    'Assay Type': 10,
+                    'Output Type': 10,
+                    // 'Bio Rep': 8,
+                    // 'Tech Rep': 8,
+                    'Lab': 16
+                };
 
                 continuation({
                     columns: _.keys(columnFormat),
