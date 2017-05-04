@@ -46,10 +46,13 @@ var igv = (function (igv) {
         }
 
         // Min and max values.  No defaults for these, if they aren't set track will autoscale.
-        this.autoscale = (config.max === undefined);
-        this.dataRange = {
-            min: config.min,
-            max: config.max
+        this.autoscale = config.autoscale;
+
+        if(config.max) {
+            this.dataRange = {
+                min: config.min || 0,
+                max: config.max
+            }
         };
 
         this.paintAxis = igv.paintAxis;
@@ -148,14 +151,18 @@ var igv = (function (igv) {
             featureValueMinimum,
             featureValueMaximum,
             featureValueRange,
-            $dataRangeTrackLabel,
-            str,
-            min,
-            max;
+            defaultRange;
 
 
         if (features && features.length > 0) {
-            if (self.autoscale || self.dataRange.max === undefined) {
+            if(self.autoscale === undefined && self.dataRange === undefined && (typeof self.featureSource.getDefaultRange === "function")) {
+                defaultRange = self.featureSource.getDefaultRange();
+                if(!isNaN(defaultRange.min) && !isNaN(defaultRange.max)) {
+                    self.dataRange = defaultRange;
+                    console.log("Range= " + defaultRange.min + " - " + defaultRange.max);
+                }
+            }
+            if (self.autoscale || self.dataRange === undefined) {
                 var s = autoscale(features);
                 featureValueMinimum = s.min;
                 featureValueMaximum = s.max;
