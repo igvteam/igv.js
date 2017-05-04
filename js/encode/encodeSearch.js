@@ -83,7 +83,7 @@ var encode = (function (encode) {
             "limit=all";
 
 
-        console.log('encode search - load json ...');
+        console.log('encode search - load json - assembly(' + assembly + ') ...');
         igvxhr
             .loadJson(query2, {})
             .then(function (json) {
