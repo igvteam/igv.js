@@ -134,6 +134,20 @@ var encode = (function (encode) {
 
     };
 
+    encode.EncodeTable.prototype.unbindAllMouseHandlers = function () {
+
+        this.$modalTable.find('tbody').unbind();
+
+        $('#hicEncodeModal').unbind();
+
+        $('#encodeModalTopCloseButton').unbind();
+
+        $('#encodeModalBottomCloseButton').unbind();
+
+        $('#encodeModalGoButton').unbind();
+
+    };
+
     encode.EncodeTable.prototype.loadWithDataSource = function (json) {
 
         var self = this;
