@@ -44,11 +44,12 @@ var encode = (function (encode) {
         defaultColor ="rgb(3, 116, 178)";
 
 
-    encode.EncodeTable = function ($parent, browser, assembly, loadFunction) {
+    encode.EncodeTable = function ($parent, browser, genomeID, loadFunction) {
 
         var self = this;
 
         this.initialized = false;
+        this.genomeID = genomeID;
 
         this.$modalTable = $('<table id="encodeModalTable" cellpadding="0" cellspacing="0" border="0" class="display"></table>');
         $parent.append(this.$modalTable);
@@ -64,7 +65,7 @@ var encode = (function (encode) {
 
                 self.initialized = true;
 
-                encode.encodeSearch(assembly, function (json) {
+                encode.encodeSearch(genomeID, function (json) {
                     self.loadWithDataSource(json);
                 });
 
