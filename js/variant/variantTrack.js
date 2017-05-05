@@ -57,6 +57,7 @@ var igv = (function (igv) {
 
         this.nRows = 1;  // Computed dynamically
 
+        this.colorScheme = "GRADIENT";
     };
 
 
@@ -266,30 +267,31 @@ var igv = (function (igv) {
                             py = this.variantBandHeight + vGap + (j + variant.row) * (h + vSpace);
                             //console.log(py);
                             if (call.genotype[0]) {
-                                // color scheme based on index of allele
-
-                                /*numCol = 255 / (variant.alleles.length + 1);
-                                if (call.genotype[0] === call.genotype[1]) { // homozygous
-                                    cr = cg = cb = 255 - (Math.floor(numCol * (call.genotype[0] + 1)));
-                                } else { // heterozygous
-                                    cr = 0;
-                                    cg = Math.floor(numCol * (call.genotype[0] + 1));
-                                    cb = Math.floor(numCol * (call.genotype[1] + 1));
-                                }
-                                ctx.fillStyle = "rgb(" + cr + "," + cg + "," + cb + ")";*/
-
-                                // gradient color scheme based on allele length
                                 firstAllele = getAlleleString(call, variant, 0);
                                 secondAllele = getAlleleString(call, variant, 1);
-                                ctx.fillStyle = colorScale.getColor(Math.max(firstAllele.length, secondAllele.length));
+                                if (this.colorScheme === "INDEX") {
+                                    // color scheme based on index of allele
+                                    numCol = 255 / (variant.alleles.length + 1);
+                                    if (call.genotype[0] === call.genotype[1]) { // homozygous
+                                        cr = cg = cb = 255 - (Math.floor(numCol * (call.genotype[0] + 1)));
+                                    } else { // heterozygous
+                                        cr = 0;
+                                        cg = Math.floor(numCol * (call.genotype[0] + 1));
+                                        cb = Math.floor(numCol * (call.genotype[1] + 1));
+                                    }
+                                    ctx.fillStyle = "rgb(" + cr + "," + cg + "," + cb + ")";
+                                } else {
+                                    // gradient color scheme based on allele length
+                                    ctx.fillStyle = colorScale.getColor(Math.max(firstAllele.length, secondAllele.length));
+                                }
                                 ctx.fillRect(px, py, pw, h);
 
                                 // allele text
                                 if (this.displayMode === "EXPANDED") {
                                     ctx.textAlign = "left";
                                     ctx.textBaseline = "middle";
-                                    //ctx.fillStyle = "rgb(" + 255 + "," + (255 - cg) + "," + (255 - cb) + ")";
-                                    ctx.fillStyle = "#000";
+                                    ctx.fillStyle = (this.colorScheme === "INDEX") ?
+                                        "rgb(" + 255 + "," + (255 - cg) + "," + (255 - cb) + ")" : "#000";
                                     ctx.font = "8px serif";
                                     if (firstAllele === secondAllele) {
                                         //ctx.font = "10px serif";
@@ -433,7 +435,7 @@ var igv = (function (igv) {
 
         var self = this,
             menuItems = [],
-            mapped;
+            mapped, $color, colorClickHandler;
 
         menuItems.push(igv.colorPickerMenuItem(popover, this.trackView));
 
@@ -470,6 +472,16 @@ var igv = (function (igv) {
             }
 
         }
+
+        $color = $('<div>');
+        $color.text("Color Scheme");
+        colorClickHandler = function() {
+            popover.hide();
+            self.colorScheme = (self.colorScheme === "GRADIENT") ? "INDEX" : "GRADIENT";
+            self.trackView.update();
+        };
+
+        menuItems.push({object: $color, click: colorClickHandler});
 
         return menuItems;
 
