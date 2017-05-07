@@ -379,7 +379,7 @@ var igv = (function (igv) {
 
         menuItems = [];
         if (viewport.trackView.track.popupMenuItemList) {
-            menuItems = trackMenuList(viewport.trackView.track.popupMenuItemList(config));
+            menuItems = igv.trackMenuItemListHelper(viewport.trackView.track.popupMenuItemList(config));
         }
 
         return menuItems;
@@ -439,7 +439,7 @@ var igv = (function (igv) {
 
         all = [];
         if (trackView.track.menuItemList) {
-            all = menuItems.concat( trackMenuList(trackView.track.menuItemList(popover)) );
+            all = menuItems.concat( igv.trackMenuItemListHelper(trackView.track.menuItemList(popover)) );
         }
 
         if (trackView.track.removable !== false) {
@@ -458,7 +458,8 @@ var igv = (function (igv) {
         return all;
     };
 
-    function trackMenuList(itemList) {
+
+    igv.trackMenuItemListHelper = function(itemList) {
 
         var list = [];
 
@@ -487,7 +488,7 @@ var igv = (function (igv) {
         }
 
         return list;
-    }
+    };
 
     /**
      * Configure item for track "gear" menu.
