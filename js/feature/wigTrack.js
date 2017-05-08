@@ -171,6 +171,11 @@ var igv = (function (igv) {
                 featureValueMinimum = self.dataRange.min === undefined ? 0 : self.dataRange.min;
                 featureValueMaximum = self.dataRange.max;
             }
+
+            if (undefined === self.dataRange) {
+                self.dataRange = {};
+            }
+
             self.dataRange.min = featureValueMinimum;  // Record for disply, menu, etc
             self.dataRange.max = featureValueMaximum;
 
