@@ -330,6 +330,17 @@ var igv = (function (igv) {
 
     };
 
+    igv.TrackView.prototype.dataRange = function () {
+        return this.track.dataRange ? this.track.dataRange : undefined;
+    };
+
+    igv.TrackView.prototype.setDataRange = function (min, max, autoscale) {
+        this.track.dataRange.min = min;
+        this.track.dataRange.max = max;
+        this.track.autoscale = autoscale;
+        this.update();
+    };
+
     igv.TrackView.prototype.setColor = function (color) {
         this.track.color = color;
         this.update();
