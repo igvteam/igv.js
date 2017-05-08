@@ -152,14 +152,17 @@ var igv = (function (igv) {
     igv.DataRangeDialog.prototype.configureWithTrackView = function (trackView) {
 
         var self = this,
+            dataRange,
             min,
             max;
 
         this.trackView = trackView;
 
-        if(trackView.track.dataRange) {
-            min = trackView.track.dataRange.min;
-            max = trackView.track.dataRange.max;
+        dataRange = this.trackView.dataRange();
+
+        if(dataRange) {
+            min = dataRange.min;
+            max = dataRange.max;
         } else {
             min = 0;
             max = 100;
@@ -173,16 +176,13 @@ var igv = (function (igv) {
 
             min = parseFloat(self.minInput.val());
             max = parseFloat(self.maxInput.val());
-
             if(isNaN(min) || isNaN(max)) {
                 igv.presentAlert("Must input numeric values");
             } else {
-                trackView.track.dataRange.min = min;
-                trackView.track.dataRange.max = max;
-                trackView.track.autoscale = false;
-                self.hide();
-                trackView.update();
+                trackView.setDataRange(min, max, false);
             }
+
+            self.hide();
 
         });
 
