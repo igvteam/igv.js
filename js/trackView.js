@@ -330,6 +330,11 @@ var igv = (function (igv) {
 
     };
 
+    igv.TrackView.prototype.setColor = function (color) {
+        this.track.color = color;
+        this.update();
+    };
+
     igv.TrackView.prototype.setTrackHeight = function (newHeight, update) {
 
         setTrackHeight_.call(this, newHeight, update || true);
