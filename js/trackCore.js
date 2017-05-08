@@ -278,17 +278,17 @@ var igv = (function (igv) {
         }
     };
 
-    igv.setTrackColor = function (track, color) {
-
-        track.color = color;
-
-        if (track.trackView) {
-
-            track.trackView.repaint();
-
-        }
-
-    };
+    // igv.setTrackColor = function (track, color) {
+    //
+    //     track.color = color;
+    //
+    //     if (track.trackView) {
+    //
+    //         track.trackView.repaint();
+    //
+    //     }
+    //
+    // };
 
     igv.paintAxis = function (ctx, pixelWidth, pixelHeight) {
 
