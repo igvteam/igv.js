@@ -115,12 +115,12 @@ var encode = (function (encode) {
 
                     obj =
                         {
-                           // type: r[ 'Format' ],
+                            // type: r[ 'Format' ],
                             url: r[ 'url' ],
                             color: encodeAntibodyColor(r[ 'Target' ]),
-                           // format: r['Format'],
+                            // format: r['Format'],
                             name: r['Name']
-                          //  max: 50              // Hardcoded for now
+                            //  max: 50              // Hardcoded for now
                         };
 
                     return obj;
@@ -165,13 +165,12 @@ var encode = (function (encode) {
                 data: self.dataSource.dataTablesData(),
                 // deferRender: true,
                 paging: true, /* must be true if scroller is enable */
-                scrollX: true,
+                scrollX: false,
                 scrollY: 400,
-                scrollCollapse: true,
+                scrollCollapse: false,
                 scroller: true,
-                autoWidth: true,
-                columnDefs: [ { targets:0, visible: false } ],
-                columns: self.dataSource.columnHeadings()
+                fixedColumns: true,
+                columns: self.dataSource.getColumns()
             });
 
             console.log('dataTable - end');
