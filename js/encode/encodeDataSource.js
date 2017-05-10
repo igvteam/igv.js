@@ -129,18 +129,28 @@ var encode = (function (encode) {
         return result;
     };
 
-    encode.EncodeDataSource.prototype.columnHeadings = function () {
+    encode.EncodeDataSource.prototype.getColumns = function () {
 
-        var columnWidths = this.jSON.columnWidths,
-            columnHeadings = [ ];
+        var widths,
+            columns;
 
-        columnHeadings.push({ "title": "index" });
-        this.jSON.columns.forEach(function(heading, i){
-            //columnHeadings.push({ "title": heading, width: (columnWidths[ i ].toString() + "%") });
-            columnHeadings.push({ "title": heading });
+        widths =
+            {
+                'Assembly': '10%',
+                'Cell Type': '10%',
+                'Target': '10%',
+                'Assay Type': '20%',
+                'Output Type': '20%',
+                'Lab': '20%'
+            };
+
+        columns = _.map(this.jSON.columns, function (heading, i) {
+            return { title:heading, width:widths[ heading ] }
         });
 
-        return columnHeadings;
+        columns.unshift({ title:'index', width:'10%' });
+
+        return columns;
 
     };
 

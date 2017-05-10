@@ -187,21 +187,8 @@ var encode = (function (encode) {
 
                 console.log('... done');
 
-                columnFormat =
-                {
-                    'Assembly': 8,
-                    'Cell Type': 8,
-                    'Target': 10,
-                    'Assay Type': 10,
-                    'Output Type': 10,
-                    // 'Bio Rep': 8,
-                    // 'Tech Rep': 8,
-                    'Lab': 16
-                };
-
                 continuation({
-                    columns: _.keys(columnFormat),
-                    columnWidths: _.values(columnFormat),
+                    columns: [ 'Assembly', 'Cell Type', 'Target', 'Assay Type', 'Output Type', 'Lab' ],
                     rows: rows
                 });
 
