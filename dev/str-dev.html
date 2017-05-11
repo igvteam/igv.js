@@ -29,7 +29,6 @@
     <script type="text/javascript" src="../vendor/inflate.js"></script>
     <script type="text/javascript" src="../vendor/zlib_and_gzip.min.js"></script>
     <script type="text/javascript" src="../vendor/jquery.mousewheel.js"></script>
-    <script type="text/javascript" src="../vendor/promise-7.0.4.js"></script>
     <script type="text/javascript" src="../vendor/jquery.kinetic.min.js"></script>
     <script type="text/javascript" src="../vendor/underscore-min.js"></script>
 
@@ -181,6 +180,15 @@
     <div id="trackList">
 
         <div onclick="igv.browser.loadTrack({
+                            url: '../test/data/vcf/example.vcf',
+                            indexed: false,
+                            name: 'Example VCF',
+                            visibilityWindow: 10000000,
+                            height: 500
+                        })"> Example VCF
+        </div>
+<!--
+        <div onclick="igv.browser.loadTrack({
                             url: 'https://data.broadinstitute.org/igvdata/test/data/vcf/HipSTR/str_calls_paired.vcf.gz',
                             name: 'STR call paired',
                             visibilityWindow: 10000000,
@@ -201,7 +209,7 @@
                             visibilityWindow: 10000000,
                             height: 500
                         })"> STR call unpaired
-        </div>
+        </div>-->
 
     </div>
 
@@ -222,7 +230,7 @@
                 fastaURL: "https://s3.amazonaws.com/igv.broadinstitute.org/genomes/seq/1kg_v37/human_g1k_v37_decoy.fasta",
                 cytobandURL: "https://s3.amazonaws.com/igv.broadinstitute.org/genomes/seq/b37/b37_cytoband.txt"
             },
-            locus: "chr13:82,722,043-82,722,343",
+            locus: "20:1,110,677-1,110,716",
             tracks:
                     [
                         {
