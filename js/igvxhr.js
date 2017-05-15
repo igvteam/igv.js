@@ -257,7 +257,6 @@ var igvxhr = (function (igvxhr) {
         return result;
     };
 
-
     function arrayBufferToBits(arraybuffer, compression) {
 
         var plain,
@@ -298,10 +297,10 @@ var igvxhr = (function (igvxhr) {
                     compression = NONE;
                 }
 
-                result = igvxhr.arrayBufferToString(fileReader.result, compression);
-                // result = arrayBufferToBits(fileReader.result, compression);
+                // result = igvxhr.arrayBufferToString(fileReader.result, compression);
+                console.log('loadFileSlice byte length ' + fileReader.result.byteLength);
 
-                fullfill(result);
+                fullfill( fileReader.result );
 
             };
 
@@ -314,7 +313,6 @@ var igvxhr = (function (igvxhr) {
             blob = localfile.slice(options.range.start, rangeEnd + 1);
 
             fileReader.readAsArrayBuffer(blob);
-            // fileReader.readAsBinaryString(blob);
 
         });
 
