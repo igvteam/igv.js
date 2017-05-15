@@ -525,7 +525,7 @@
 //            showCenterGuide: true,
 //            showCursorTrackingGuide: true,
             showRuler: true,
-            locus: '4',
+            locus: '1',
             reference: {
                 id: "hg19",
                 fastaURL: "https://s3.amazonaws.com/igv.broadinstitute.org/genomes/seq/1kg_v37/human_g1k_v37_decoy.fasta",
@@ -536,6 +536,12 @@
             palette: ["#00A0B0", "#6A4A3C", "#CC333F", "#EB6841"],
             tracks:
                 [
+                    {
+                        name: 'my big bed',
+//                        url: '../test/data/bb/bigBedExample.bb'
+                        url: 'https://data.broadinstitute.org/igvdata/test/data/bigwig/bigBedExample.bb'
+                    }
+
 //                    {
 //                        url: 'http://data.broadinstitute.org/igvdata/test/data/wig/test.wig'
 //                    }
