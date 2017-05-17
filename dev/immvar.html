@@ -10,24 +10,23 @@
     <title>IGV - Integrative Genomics Viewer</title>
 
     <!-- jQuery UI CSS -->
-    <link rel="stylesheet" type="text/css"
-          href="https://ajax.googleapis.com/ajax/libs/jqueryui/1.11.2/themes/redmond/jquery-ui.css"/>
+    <link rel="stylesheet" type="text/css" href="//code.jquery.com/ui/1.12.1/themes/redmond/jquery-ui.css"/>
 
-    <!-- Google fonts -->
-    <!--   <link rel="stylesheet" type="text/css" href='//fonts.googleapis.com/css?family=PT+Sans:400,700'>
-       <link rel="stylesheet" type="text/css" href='//fonts.googleapis.com/css?family=Open+Sans'>
-   -->
     <!-- Font Awesome CSS -->
-    <link rel="stylesheet" type="text/css" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.2.0/css/font-awesome.min.css">
+    <link rel="stylesheet" type="text/css"
+          href="https://maxcdn.bootstrapcdn.com/font-awesome/4.2.0/css/font-awesome.min.css">
 
     <!-- IGV CSS -->
     <link rel="stylesheet" type="text/css" href="../css/igv.css">
 
     <!-- jQuery JS -->
-    <script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
+    <script src="https://code.jquery.com/jquery-1.12.4.min.js"></script>
 
     <!-- jQuery UI JS -->
-    <script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jqueryui/1.11.2/jquery-ui.min.js"></script>
+    <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.min.js"></script>
+
+    <!-- Underscore JS -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/underscore.js/1.8.3/underscore-min.js"></script>
 
     <!-- Vendor JS -->
     <script type="text/javascript" src="../vendor/inflate.js"></script>
@@ -35,7 +34,6 @@
     <script type="text/javascript" src="../vendor/jquery.mousewheel.js"></script>
     <script type="text/javascript" src="../vendor/promise-7.0.4.js"></script>
     <script type="text/javascript" src="../vendor/jquery.kinetic.min.js"></script>
-    <script type="text/javascript" src="../vendor/underscore-min.js"></script>
 
     <!-- IGV JS -->
     <script type="text/javascript" src="../js/igv-create.js"></script>
@@ -99,8 +97,6 @@
 
     <script type="text/javascript" src="../js/feature/aneuSource.js"></script>
     <script type="text/javascript" src="../js/feature/aneuTrack.js"></script>
-    <script type="text/javascript" src="../js/encode/encode.js"></script>
-
 
     <script type="text/javascript" src="../js/karyo/karyo.js"></script>
     <script type="text/javascript" src="../js/gwas/t2dVariantSource.js"></script>
@@ -118,7 +114,11 @@
     <script type="text/javascript" src="../js/bigwig/bwSource.js"></script>
     <script type="text/javascript" src="../js/bigwig/bwTotalSummary.js"></script>
 
+    <script type="text/javascript" src="../js/tdf/tdfReader.js"></script>
+    <script type="text/javascript" src="../js/tdf/tdfSource.js"></script>
+
     <script type="text/javascript" src="../js/trackCore.js"></script>
+    <script type="text/javascript" src="../js/trackFileLoad.js"></script>
 
     <script type="text/javascript" src="../js/ui/trackMenuPopupDialog.js"></script>
 
@@ -127,10 +127,51 @@
     <script type="text/javascript" src="../js/ui/dialog.js"></script>
     <script type="text/javascript" src="../js/ui/alertDialog.js"></script>
     <script type="text/javascript" src="../js/ui/centerGuide.js"></script>
-
+    <script type="text/javascript" src="../js/ui/dragAndDrop.js"></script>
     <script type="text/javascript" src="../js/set.js"></script>
 
     <script src="../js/oauth/google.js"></script>
+
+    <style type="text/css">
+
+        #trackList {
+
+            border-color: rgb(127, 127, 127);
+            border-style: solid;
+            border-width: thin;
+
+            width: 480px;
+            height: 256px;
+            overflow-y: auto;
+        }
+
+        div#trackList > div, div#myDiv > h3 {
+
+            font-family: 'PT Sans', sans-serif;
+            font-size: small;
+            font-weight: 400;
+
+            color: #444;
+            margin-left: 16px;
+            margin-top: 4px;
+            margin-bottom: 4px;
+
+            padding-left: 32px;
+        }
+
+        div#myDiv > h3 {
+            font-size: large;
+        }
+
+        div#trackList > div:hover,
+        div#trackList > div:focus,
+        div#trackList > div:active {
+            cursor: pointer;
+            color: white;
+            background-color: rgba(49, 106, 246, 1);
+        }
+
+    </style>
 
 </head>
 
