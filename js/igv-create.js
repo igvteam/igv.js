@@ -344,6 +344,11 @@ var igv = (function (igv) {
 
             // drag & drop
             $navigation.append(browser.trackFileLoad.$dragAndDropPresentationButton);
+            if (true === config.showLoadFileWidget) {
+                browser.trackFileLoad.$dragAndDropPresentationButton.show();
+            } else {
+                browser.trackFileLoad.$dragAndDropPresentationButton.hide();
+            }
 
             // zoom
             browser.zoomHandlers = {
@@ -422,6 +427,10 @@ var igv = (function (igv) {
     }
 
     function setDefaults(config) {
+
+        if (undefined === config.showLoadFileWidget) {
+            config.showLoadFileWidget = false;
+        }
 
         if (undefined === config.minimumBases) {
             config.minimumBases = 40;

@@ -25,13 +25,15 @@
     <!-- jQuery UI JS -->
     <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.min.js"></script>
 
+    <!-- Underscore JS -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/underscore.js/1.8.3/underscore-min.js"></script>
+
     <!-- Vendor JS -->
     <script type="text/javascript" src="../vendor/inflate.js"></script>
     <script type="text/javascript" src="../vendor/zlib_and_gzip.min.js"></script>
     <script type="text/javascript" src="../vendor/jquery.mousewheel.js"></script>
     <script type="text/javascript" src="../vendor/promise-7.0.4.js"></script>
     <script type="text/javascript" src="../vendor/jquery.kinetic.min.js"></script>
-    <script type="text/javascript" src="../vendor/underscore-min.js"></script>
 
     <!-- IGV JS -->
     <script type="text/javascript" src="../js/igv-create.js"></script>
@@ -521,9 +523,10 @@
         options = {
             minimumBases: 6,
             showIdeogram: true,
-//            showKaryo: true,
-//            showCenterGuide: true,
-//            showCursorTrackingGuide: true,
+            showLoadFileWidget:false,
+            showKaryo: false,
+            showCenterGuide: false,
+            showCursorTrackingGuide: false,
             showRuler: true,
             locus: '4',
             reference: {
