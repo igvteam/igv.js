@@ -86,6 +86,8 @@ var igvxhr = (function (igvxhr) {
                     headers = headers || {};
                     igv.Google.addGoogleHeaders(headers);
 
+                } else if(options.oauth) {
+                    addOauthHeaders(headers)
                 }
 
                 if (range) {
@@ -341,6 +343,20 @@ var igvxhr = (function (igvxhr) {
     igv.AbortLoad = function () {
 
     };
+
+    function addOauthHeaders(headers) {
+        {
+            headers["Cache-Control"] = "no-cache";
+
+            var acToken = oauth.google.access_token;       // TODO -- generalize
+            if (acToken && !headers.hasOwnProperty("Authorization")) {
+                headers["Authorization"] = "Bearer " + acToken;
+            }
+
+            return headers;
+
+        }
+    }
 
     return igvxhr;
 
