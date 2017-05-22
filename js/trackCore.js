@@ -243,7 +243,7 @@ var igv = (function (igv) {
         track.id = config.id || track.name;   // TODO -- remove this property, not used
 
         track.order = config.order;
-        track.color = config.color || igv.browser.constants.defaultColor;
+        track.color = config.color || igv.browser.constants.defaultColor || "rgb(0,0,150)";
 
         track.removable = config.removable === undefined ? true : config.removable;      // Defaults to true
 
