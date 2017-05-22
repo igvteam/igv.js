@@ -298,7 +298,7 @@ var igvxhr = (function (igvxhr) {
                 }
 
                 // result = igvxhr.arrayBufferToString(fileReader.result, compression);
-                console.log('loadFileSlice byte length ' + fileReader.result.byteLength);
+                // console.log('loadFileSlice byte length ' + fileReader.result.byteLength);
 
                 fullfill( fileReader.result );
 
