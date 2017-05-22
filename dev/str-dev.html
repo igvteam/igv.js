@@ -175,6 +175,10 @@
 
 <div id="myDiv" style="padding-top: 50px;padding-bottom: 20px; height: auto">
 
+    <a href='#' onClick='oauth.google.login()' id="loginText"> Authorize </a>
+
+    <p></p>
+
     <h3>Example tracks - click to load</h3>
 
     <div id="trackList">
@@ -184,7 +188,8 @@
                             indexed: false,
                             name: 'Example VCF',
                             visibilityWindow: 10000000,
-                            height: 500
+                            height: 500,
+                            oauth: 'google'
                         })"> Example VCF
         </div>
 <!--
