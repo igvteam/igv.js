@@ -21,6 +21,8 @@
 
     <div id="trackList">
 
+
+
         <div onclick="igv.browser.loadTrack({
                             url: 'https://s3-us-west-2.amazonaws.com/ilmn.igv-test/test2.bigWig',
                             name: 'Big BigWig'
@@ -179,6 +181,11 @@
             indexed: false,
             searchable: true
         })">EGFR bed (searchable: true)
+        </div>
+
+        <div onclick="igv.browser.loadTrack({
+                                url: '../test/data/misc/refGene_hg38_collapsed.refgene.gz',
+                                name: 'Refgene'})">GZipped Refgene
         </div>
 
         <div onclick="igv.browser.loadTrack({
