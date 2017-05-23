@@ -205,7 +205,7 @@ var igv = (function (igv) {
                 self.$warning.show();
             } else {
                 dismissDragAndDrop(self);
-                igv.browser.loadTrack( { url: file } );
+                igv.browser.loadTrack( { url: file, isLocalFile: true } );
             }
 
         }
