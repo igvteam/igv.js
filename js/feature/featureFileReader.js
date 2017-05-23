@@ -160,7 +160,13 @@ var igv = (function (igv) {
         var hasIndexURL = (undefined !== this.config.indexURL),
             isValidType = (this.format !== 'wig' && this.format !== 'seg');
 
-        return this.config.indexed != false && (hasIndexURL || isValidType);
+        // Local files are currently not indexable
+        if (typeof this.config.isLocalFile) {
+            return false;
+        }
+        else {
+            return this.config.indexed != false && (hasIndexURL || isValidType);
+        }
     };
 
     /**
@@ -327,7 +333,7 @@ var igv = (function (igv) {
                     })
                     .catch(function (error) {
                         self.indexed = false;
-                        if(error.message === '404' && self.config.indexURL === undefined) {
+                        if (error.message === '404' && self.config.indexURL === undefined) {
                             // This is an expected condition -- ignore
                             fullfill(undefined);
                         } else {
