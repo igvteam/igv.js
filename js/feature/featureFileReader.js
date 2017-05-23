@@ -328,8 +328,8 @@ var igv = (function (igv) {
                     .catch(function (error) {
                         self.indexed = false;
                         if(error.message === '404' && self.config.indexURL === undefined) {
-                            // This is an expected condition
-                            console.log('No index file. No problem.');
+                            // This is an expected condition -- ignore
+                            fullfill(undefined);
                         } else {
                             reject(error);
                         }

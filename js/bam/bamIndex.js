@@ -132,12 +132,7 @@ var igv = (function (igv) {
                     }
                     fullfill(new igv.BamIndex(indices, blockMin, blockMax, sequenceIndexMap, tabix));
                 })
-                // .catch(reject);
-                .catch(function (error) {
-                    console.log(error);
-                    fullfill(null);
-                });
-
+                .catch(reject);
         })
     };
 
@@ -230,7 +225,7 @@ var igv = (function (igv) {
 
         chunks.forEach(function (chunk) {
 
-            if(chunk.maxv.isGreaterThan(lowest)) {
+            if (chunk.maxv.isGreaterThan(lowest)) {
                 if (lastChunk === null) {
                     mergedChunks.push(chunk);
                     lastChunk = chunk;
