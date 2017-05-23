@@ -12,3 +12,5 @@ local
 .idea/libraries
 /.idea/misc.xml
 
+/.idea/inspectionProfiles/profiles_settings.xml
+/igv-web.iml
