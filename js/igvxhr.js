@@ -179,7 +179,7 @@ var igvxhr = (function (igvxhr) {
                 try {
                     xhr.send(sendData);
                 } catch (e) {
-                    console.log(e);
+                    reject(e);
                 }
 
 
