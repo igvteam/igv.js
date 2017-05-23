@@ -373,10 +373,10 @@ var igv = (function (igv) {
         ctx.fillStyle = color;
         ctx.strokeStyle = color;
 
-        if (this.displayMode === "SQUISHED" && feature.row != undefined) {
+        if (this.displayMode === "SQUISHED" && feature.row !== undefined) {
             h = this.featureHeight / 2;
             py = this.expandedCallHeight * feature.row + 2;
-        } else if (this.displayMode === "EXPANDED" && feature.row != undefined) {
+        } else if (this.displayMode === "EXPANDED" && feature.row !== undefined) {
             py = this.squishedCallHeight * feature.row + 5;
         } else {  // collapsed
             py = 5;
@@ -388,7 +388,7 @@ var igv = (function (igv) {
 
         exonCount = feature.exons ? feature.exons.length : 0;
 
-        if (exonCount == 0) {
+        if (exonCount === 0) {
             // single-exon transcript
             ctx.fillRect(coord.px, py, coord.pw, h);
 
@@ -397,7 +397,7 @@ var igv = (function (igv) {
             // multi-exon transcript
             igv.graphics.strokeLine(ctx, coord.px + 1, cy, coord.px1 - 1, cy); // center line for introns
 
-            direction = feature.strand == '+' ? 1 : -1;
+            direction = feature.strand === '+' ? 1 : -1;
             for (x = coord.px + step / 2; x < coord.px1; x += step) {
                 // draw arrowheads along central line indicating transcribed orientation
                 igv.graphics.strokeLine(ctx, x - direction * 2, cy - 2, x, cy);
@@ -449,7 +449,7 @@ var igv = (function (igv) {
         windowX = Math.round(options.viewportContainerX);
         windowX1 = windowX + options.viewportContainerWidth / (options.genomicState.locusCount || 1);
 
-        renderFeatureLabels.call(this, ctx, feature, coord.px, coord.px1, py, windowX, windowX1, options.genomicState);
+        renderFeatureLabels.call(this, ctx, feature, coord.px, coord.px1, py, windowX, windowX1, options.genomicState, options);
     }
 
     /**
@@ -461,8 +461,9 @@ var igv = (function (igv) {
      * @param windowX   visible window start x-coordinate
      * @param windowX1  visible window end x-coordinate
      * @param genomicState  genomic state
+     * @param options  options
      */
-    function renderFeatureLabels(ctx, feature, featureX, featureX1, featureY, windowX, windowX1, genomicState) {
+    function renderFeatureLabels(ctx, feature, featureX, featureX1, featureY, windowX, windowX1, genomicState, options) {
         var geneColor, geneFontStyle, transform,
             boxX, boxX1,    // label should be centered between these two x-coordinates
             labelX, labelY,
@@ -485,7 +486,7 @@ var igv = (function (igv) {
 
         textFitsInBox = (boxX1 - boxX) > ctx.measureText(feature.name).width;
 
-        if ((textFitsInBox || geneColor) && this.displayMode != "SQUISHED" && feature.name !== undefined) {
+        if ((textFitsInBox || geneColor) && this.displayMode !== "SQUISHED" && feature.name !== undefined) {
             geneFontStyle = {
                 font: '10px PT Sans',
                 textAlign: 'center',
@@ -501,7 +502,19 @@ var igv = (function (igv) {
             labelX = boxX + ((boxX1 - boxX) / 2);
             labelY = getFeatureLabelY(featureY, transform);
 
-            igv.graphics.fillText(ctx, feature.name, labelX, labelY, geneFontStyle, transform);
+            // TODO: This is for compatibility with JuiceboxJS. The transform param is currently
+            // TODO: not supported.
+            if (options.labelTransform) {
+
+                ctx.save();
+                options.labelTransform(ctx, labelX);
+                igv.graphics.fillText(ctx, feature.name, labelX, labelY, geneFontStyle, undefined);
+                ctx.restore();
+
+            } else {
+                igv.graphics.fillText(ctx, feature.name, labelX, labelY, geneFontStyle, transform);
+            }
+
         }
     }
 
