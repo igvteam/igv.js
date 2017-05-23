@@ -21,7 +21,7 @@ module.exports = function (grunt) {
                     'vendor/inflate.js',
                     'vendor/zlib_and_gzip.min.js',
                     'vendor/jquery.mousewheel.js',
-                    'vendor/promise-7.0.4.js',
+                    'vendor/promise.js',
                     'js/module.js',
                     'vendor/jquery.kinetic.min.js'
                 ],
