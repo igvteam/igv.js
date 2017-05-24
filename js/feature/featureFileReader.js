@@ -161,7 +161,7 @@ var igv = (function (igv) {
             isValidType = (this.format !== 'wig' && this.format !== 'seg');
 
         // Local files are currently not indexable
-        if (typeof this.config.isLocalFile) {
+        if (this.config.isLocalFile) {
             return false;
         }
         else {
