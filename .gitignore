@@ -14,3 +14,16 @@ local
 
 /.idea/inspectionProfiles/profiles_settings.xml
 /igv-web.iml
+/.idea/.name
+/.idea/codeStyleSettings.xml
+/.idea/compiler.xml
+/.idea/copyright/js.xml
+/.idea/copyright/profiles_settings.xml
+/.idea/encodings.xml
+/.idea/modules.xml
+/.idea/scopes/js.xml
+/.idea/scopes/scope_settings.xml
+/.idea/uiDesigner.xml
+/.idea/vcs.xml
+/.idea/watcherTasks.xml
+/igv.js.iml
