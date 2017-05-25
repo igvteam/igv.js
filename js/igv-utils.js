@@ -25,6 +25,28 @@
 
 var igv = (function (igv) {
 
+    igv.geneNameLookupPathTemplate = function (genomeId) {
+
+        var path;
+
+        path = 'https://portals.broadinstitute.org/webservices/igv/locus?genome=' + genomeId + '&name=$FEATURE$';
+
+        return path;
+    };
+
+    igv.geneNameLookupServicePromise = function (name, genomeId) {
+
+        var pathTemplate,
+            path;
+
+        pathTemplate = igv.geneNameLookupPathTemplate(genomeId);
+
+        path = pathTemplate.replace("$FEATURE$", name);
+
+        return igvxhr.loadString(path);
+
+    };
+
     igv.filenameOrURLHasSuffix = function  (fileOrURL, suffix) {
         var str = (fileOrURL instanceof File) ? fileOrURL.name : fileOrURL;
         return str.toLowerCase().endsWith( suffix )
