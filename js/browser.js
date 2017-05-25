@@ -123,7 +123,7 @@ var igv = (function (igv) {
             this.searchConfig = {
                 // Legacy support -- deprecated
                 type: "plain",
-                url: "https://portals.broadinstitute.org/webservices/igv/locus?genome=" + genomeId + "&name=$FEATURE$",
+                url: igv.geneNameLookupPathTemplate(genomeId),
                 coords: 0,
                 chromosomeField: "chromosome",
                 startField: "start",
@@ -947,7 +947,8 @@ var igv = (function (igv) {
             locusGenomicStates = [],
             featureDBGenomicStates,
             survivors,
-            geneNameLookup;
+            paths,
+        promises;
 
         chrStartEndLoci = [];
 
@@ -992,36 +993,34 @@ var igv = (function (igv) {
 
             if (_.size(survivors) > 0) {
 
-                geneNameLookup = new Promise(function(resolve) {
-                    resolve( _.map(survivors, function(locus){
+                promises = _.map(survivors, function(locus){
 
-                        var path = searchConfig.url.replace("$FEATURE$", locus);
+                    var path = searchConfig.url.replace("$FEATURE$", locus);
 
-                        if (path.indexOf("$GENOME$") > -1) {
-                            path.replace("$GENOME$", (self.genome.id ? self.genome.id : "hg19"));
-                        }
+                    if (path.indexOf("$GENOME$") > -1) {
+                        path.replace("$GENOME$", (self.genome.id ? self.genome.id : "hg19"));
+                    }
 
-                        return path;
-                    }) );
+                    return igvxhr.loadString(path);
                 });
 
-                geneNameLookup.then(function(response) {
-                    return Promise.all(response.map(igvxhr.loadString));
-                }).then(function (response) {
-                    var filtered,
-                        geneNameGenomicStates;
+                Promise
+                    .all(promises)
+                    .then(function (response) {
+                        var filtered,
+                            geneNameGenomicStates;
 
-                    filtered = _.filter(response, function(geneNameLookupResult){
-                        return geneNameLookupResult !== "";
+                        filtered = _.filter(response, function(geneNameLookupResult){
+                            return geneNameLookupResult !== "";
+                        });
+
+                        geneNameGenomicStates = _.filter(_.map(filtered, createGeneNameGenomicState), function(genomicState){
+                            return undefined !== genomicState;
+                        });
+
+                        continuation(_.union(locusGenomicStates, featureDBGenomicStates, geneNameGenomicStates));
+                        return;
                     });
-
-                    geneNameGenomicStates = _.filter(_.map(filtered, createGeneNameGenomicState), function(genomicState){
-                        return undefined !== genomicState;
-                    });
-
-                    continuation(_.union(locusGenomicStates, featureDBGenomicStates, geneNameGenomicStates));
-                    return;
-                });
 
             } else {
                 continuation(_.union(locusGenomicStates, featureDBGenomicStates));
