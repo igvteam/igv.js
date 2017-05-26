@@ -483,14 +483,16 @@ var igv = (function (igv) {
             geneColor = genomicState.selection.colorForGene(feature.name);
         }
 
+
+
         textFitsInBox = (boxX1 - boxX) > ctx.measureText(feature.name).width;
 
         if ((textFitsInBox || geneColor) && this.displayMode !== "SQUISHED" && feature.name !== undefined) {
             geneFontStyle = {
                 font: '10px PT Sans',
                 textAlign: 'center',
-                fillStyle: geneColor || this.color,
-                strokeStyle: geneColor || this.color
+                fillStyle: geneColor || feature.color || this.color,
+                strokeStyle: geneColor || feature.color || this.color
             };
 
             if (this.displayMode === "COLLAPSED" && this.labelDisplayMode === "SLANT") {
