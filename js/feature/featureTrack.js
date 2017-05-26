@@ -157,17 +157,35 @@ var igv = (function (igv) {
             bpStart = options.bpStart,
             pixelWidth = options.pixelWidth,
             pixelHeight = options.pixelHeight,
-            bpEnd = bpStart + pixelWidth * bpPerPixel + 1;
+            bpEnd = bpStart + pixelWidth * bpPerPixel + 1,
+            selectedFeatureName,
+            selectedFeature,
+            c;
 
         igv.graphics.fillRect(ctx, 0, 0, pixelWidth, pixelHeight, {'fillStyle': "rgb(255, 255, 255)"});
 
         if (featureList) {
 
+            selectedFeatureName = igv.FeatureTrack.selectedGene ? igv.FeatureTrack.selectedGene.toUpperCase() : undefined;
+
             for (var gene, i = 0, len = featureList.length; i < len; i++) {
                 gene = featureList[i];
                 if (gene.end < bpStart) continue;
                 if (gene.start > bpEnd) break;
-                track.render.call(this, gene, bpStart, bpPerPixel, pixelHeight, ctx, options);
+
+                if(!selectedFeature && selectedFeatureName && selectedFeatureName === gene.name.toUpperCase()) {
+                    selectedFeature = gene;
+                }
+                else {
+                    track.render.call(this, gene, bpStart, bpPerPixel, pixelHeight, ctx, options);
+                }
+            }
+
+            if(selectedFeature) {
+                c = selectedFeature.color;
+                selectedFeature.color = "rgb(255,0,0)";
+                track.render.call(this, selectedFeature, bpStart, bpPerPixel, pixelHeight, ctx, options);
+                selectedFeature.color = c;
             }
         }
         else {
@@ -176,25 +194,6 @@ var igv = (function (igv) {
 
     };
 
-    // igv.FeatureTrack.prototype.popupMenuItemList = function (config) {
-    //
-    //     var $e,
-    //         clickHandler;
-    //
-    //     $e = $('<div class="igv-track-menu-item">');
-    //
-    //     $e.text('Feature Menu Item');
-    //
-    //     clickHandler = function(){
-    //         var str = $(this).text() + ' bp ' + igv.numberFormatter(config.genomicLocation) + ' do stuff.';
-    //         config.popover.hide();
-    //
-    //         console.log(str);
-    //     };
-    //
-    //     return [{ name: undefined, object: $e, click: clickHandler, init: undefined }];
-    //
-    // };
 
     igv.FeatureTrack.prototype.popupDataWithConfiguration = function (config) {
         return this.popupData(config.genomicLocation, config.x, config.y, config.viewport.genomicState.referenceFrame)
