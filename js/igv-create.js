@@ -25,6 +25,7 @@
 
 var igv = (function (igv) {
 
+    const href = window.document.location.href;
     var igvjs_version = "beta";
     igv.version = igvjs_version;
 
@@ -104,7 +105,11 @@ var igv = (function (igv) {
         }
 
         // phone home -- counts launches.  Count is anonymous, needed for our continued funding.  Please don't delete
-        phoneHome();
+
+
+        if(!(href.includes("localhost") || href.includes("127.0.0.1"))) {
+            phoneHome();
+        }
 
         igv.loadGenome(config.reference).then(function (genome) {
 
