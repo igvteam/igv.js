@@ -463,10 +463,12 @@ var igv = (function (igv) {
      * @param options  options
      */
     function renderFeatureLabels(ctx, feature, featureX, featureX1, featureY, windowX, windowX1, genomicState, options) {
+
         var geneColor, geneFontStyle, transform,
             boxX, boxX1,    // label should be centered between these two x-coordinates
             labelX, labelY,
-            textFitsInBox;
+            textFitsInBox,
+            selectedFeatureName = igv.FeatureTrack.selectedGene ? igv.FeatureTrack.selectedGene.toUpperCase() : undefined;
 
         // feature outside of viewable window
         if (featureX1 < windowX || featureX > windowX1) {
@@ -487,7 +489,8 @@ var igv = (function (igv) {
 
         textFitsInBox = (boxX1 - boxX) > ctx.measureText(feature.name).width;
 
-        if ((textFitsInBox || geneColor) && this.displayMode !== "SQUISHED" && feature.name !== undefined) {
+        if ( (feature.name !== undefined && feature.name.toUpperCase() === selectedFeatureName) ||
+            ((textFitsInBox || geneColor) && this.displayMode !== "SQUISHED" && feature.name !== undefined)) {
             geneFontStyle = {
                 font: '10px PT Sans',
                 textAlign: 'center',
