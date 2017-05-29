@@ -64,7 +64,6 @@ var igv = (function (igv) {
         // drag & drop
         browser.trackFileLoad = new igv.TrackFileLoad();
         browser.$root.append(browser.trackFileLoad.$container);
-        browser.trackFileLoad.initializationHelper();
         browser.trackFileLoad.$container.hide();
 
         setControls(browser, config);
@@ -314,11 +313,11 @@ var igv = (function (igv) {
             $navigation.append($igvLogo);
 
             // load local file
-            $navigation.append(browser.trackFileLoad.$dragAndDropPresentationButton);
+            $navigation.append(browser.trackFileLoad.$presentationButton);
             if (true === config.showLoadFileWidget) {
-                browser.trackFileLoad.$dragAndDropPresentationButton.show();
+                browser.trackFileLoad.$presentationButton.show();
             } else {
-                browser.trackFileLoad.$dragAndDropPresentationButton.hide();
+                browser.trackFileLoad.$presentationButton.hide();
             }
 
             // search container
