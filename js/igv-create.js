@@ -313,6 +313,14 @@ var igv = (function (igv) {
             $igvLogo = $('<div class="igv-logo">');
             $navigation.append($igvLogo);
 
+            // load local file
+            $navigation.append(browser.trackFileLoad.$dragAndDropPresentationButton);
+            if (true === config.showLoadFileWidget) {
+                browser.trackFileLoad.$dragAndDropPresentationButton.show();
+            } else {
+                browser.trackFileLoad.$dragAndDropPresentationButton.hide();
+            }
+
             // search container
             $searchContainer = $('<div class="igv-search-container">');
 
@@ -347,14 +355,6 @@ var igv = (function (igv) {
             // window size panel
             browser.windowSizePanel = new igv.WindowSizePanel($navigation);
 
-            // drag & drop
-            $navigation.append(browser.trackFileLoad.$dragAndDropPresentationButton);
-            if (true === config.showLoadFileWidget) {
-                browser.trackFileLoad.$dragAndDropPresentationButton.show();
-            } else {
-                browser.trackFileLoad.$dragAndDropPresentationButton.hide();
-            }
-
             // zoom
             browser.zoomHandlers = {
                 in: {
@@ -371,8 +371,6 @@ var igv = (function (igv) {
 
             browser.$zoomContainer = zoomWidget();
             $navigation.append(browser.$zoomContainer);
-
-
 
 
             // cursor tracking guide

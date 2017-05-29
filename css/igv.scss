@@ -1506,28 +1506,46 @@ $igv-grey-color: #7F7F7F;
 .igv-drag-and-drop-presentation-button {
 
   position: relative;
-  height: 100%;
+  height: 20px;
+  min-width: 110px;
+  text-transform: capitalize;
 
   float: left;
 
-  cursor: pointer;
+  margin-top: 2px;
+  margin-right: 5px;
+
+  padding-left: 8px;
+  padding-right: 8px;
+  padding-top: 2px;
+  padding-bottom: 2px;
+
+  font-family: $igv-default-font-face;
+  font-size: 12px;
+  font-weight: 200;
 
   text-align: center;
   vertical-align: middle;
-  line-height: 100%;
 
-  color: #36464b;
-  font-family: 'Open Sans', sans-serif;
-  font-size: 14px;
-  font-weight: 400;
+  color: $igv-navbar-toggle-dark-dark;
+  border-color: $igv-navbar-toggle-dark-dark;
+  background-color: $igv-navbar-toggle-light-color;
 
-  padding-top: 4px;
-  padding-left: 8px;
-  padding-right: 8px;
 
-  margin-left: 32px;
+  border-style: solid;
+  border-width: thin;
+  border-radius: 10px;
+}
 
-  background-color: #c8dadf;
+.igv-drag-and-drop-presentation-button:hover,
+.igv-drag-and-drop-presentation-button:focus,
+.igv-drag-and-drop-presentation-button:active  {
+
+  cursor: pointer;
+
+  color: white;
+  border-color: $igv-navbar-toggle-dark-dark;
+  background-color: $igv-navbar-toggle-dark-dark;
 }
 
 .igv-drag-and-drop-container {
