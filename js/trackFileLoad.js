@@ -90,23 +90,25 @@ var igv = (function (igv) {
 
 
         // url upload
-        $url_input_container = $('<div class="igv-drag-and-drop-url-input-container">');
-        this.$drag_and_drop.append($url_input_container);
+        url_input_container(this, this.$drag_and_drop);
 
-        $e = $('<div>');
-        $url_input_container.append($e);
-        $e.text('or');
-
-        this.$url_input = $('<input class="igv-drag-and-drop-url-input" placeholder="enter track URL">');
-
-        this.$url_input.on( 'change', function( e ) {
-            var _url = $(this).val();
-
-            dismissDragAndDrop(self);
-            igv.browser.loadTrack( { url: _url } );
-        });
-
-        $url_input_container.append(this.$url_input);
+        // $url_input_container = $('<div class="igv-drag-and-drop-url-input-container">');
+        // this.$drag_and_drop.append($url_input_container);
+        //
+        // $e = $('<div>');
+        // $url_input_container.append($e);
+        // $e.text('or');
+        //
+        // this.$url_input = $('<input class="igv-drag-and-drop-url-input" placeholder="enter track URL">');
+        //
+        // this.$url_input.on( 'change', function( e ) {
+        //     var _url = $(this).val();
+        //
+        //     dismissDragAndDrop(self);
+        //     igv.browser.loadTrack( { url: _url } );
+        // });
+        //
+        // $url_input_container.append(this.$url_input);
 
         // warn when bad file is loaded
         this.$warning = warningHandler();
@@ -162,27 +164,29 @@ var igv = (function (igv) {
 
         function warningHandler () {
             var $warning,
-                $e_fa,
-                $e_message,
+                $e,
                 $fa;
 
-            // message
-            $e_message = $('<div class="igv-drag-and-drop-warning-message">');
-            $e_message.text('ERROR: INDEXED FILE LOADING NOT SUPPORTED');
+            $warning = $('<div class="igv-drag-and-drop-warning-container">');
 
-            // font awesome close icon
-            $e_fa = $('<div class="igv-drag-and-drop-warning-close-container">');
+            // warning message
+            $e = $('<div class="igv-drag-and-drop-warning-message">');
+            $warning.append($e);
+
+            $e.text('ERROR: INDEXED FILE LOADING NOT SUPPORTED');
+
+            // dismiss container
+            $e = $('<div class="igv-drag-and-drop-warning-close-container">');
+            $warning.append($e);
+
+            // dismiss
             $fa = $('<i class="fa fa-times-circle">');
+            $e.append($fa);
+
             $fa.on('click', function () {
                 $warning.hide();
             });
-            $e_fa.append($fa);
 
-            $warning = $('<div class="igv-drag-and-drop-warning-container">');
-            $warning.append($e_message);
-            $warning.append($e_fa);
-
-            // hidden initially
             $warning.hide();
 
             return $warning;
@@ -205,6 +209,31 @@ var igv = (function (igv) {
         }
 
     };
+
+    function url_input_container(trackFileLoader, $parent) {
+
+        var $url_input_container,
+            $e;
+
+        // url upload
+        $url_input_container = $('<div class="igv-drag-and-drop-url-input-container">');
+        $parent.append($url_input_container);
+
+        $e = $('<div>');
+        $url_input_container.append($e);
+        $e.text('or');
+
+        trackFileLoader.$url_input = $('<input class="igv-drag-and-drop-url-input" placeholder="enter track URL">');
+        $url_input_container.append(trackFileLoader.$url_input);
+
+        trackFileLoader.$url_input.on( 'change', function( e ) {
+            var _url = $(this).val();
+
+            dismissDragAndDrop(trackFileLoader);
+            igv.browser.loadTrack( { url: _url } );
+        });
+
+    }
 
     function dismissDragAndDrop (thang) {
         thang.$url_input.val(undefined);
