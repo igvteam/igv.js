@@ -1672,7 +1672,7 @@ $igv-grey-color: #7F7F7F;
   display: inline;
 }
 
-.box__file {
+.track-file-input-css {
   width: 0.1px;
   height: 0.1px;
   opacity: 0;
@@ -1681,11 +1681,11 @@ $igv-grey-color: #7F7F7F;
   z-index: -1;
 }
 
-.box__file:hover + label strong {
+.track-file-input-css:hover + label strong {
   color: #39bfd3;
 }
 
-.box__input label {
+.track-file-input-container-css label {
   max-width: 80%;
   text-overflow: ellipsis;
   white-space: nowrap;
