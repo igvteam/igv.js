@@ -32,10 +32,9 @@ var igv = (function (igv) {
     igv.TrackFileLoad = function () {
 
         var self = this,
-            $box_input,
+            $file_input_container,
             $fa_container,
             $fa,
-            $url_input_container,
             $e;
 
         this.$container = $('<div class="igv-drag-and-drop-container">');
@@ -58,27 +57,27 @@ var igv = (function (igv) {
                 loadTrackWithFile(_.first(e.originalEvent.dataTransfer.files));
             });
 
-        $box_input = $('<div class="box__input">');
-        this.$drag_and_drop.append($box_input);
+        $file_input_container = $('<div class="track-file-input-container-css">');
+        this.$drag_and_drop.append($file_input_container);
 
         // file load icon
         $fa_container = $('<div class="fa-container">');
-        $box_input.append($fa_container);
+        $file_input_container.append($fa_container);
 
         $fa = $('<i class="fa fa-upload fa-3x" aria-hidden="true">');
         $fa_container.append($fa);
 
         // local file upload
-        this.$file_input = $('<input type="file" name="files[]" id="file" class="box__file" data-multiple-caption="{count} files selected" multiple="">');
-        $box_input.append(this.$file_input);
+        this.$file_input = $('<input id="track-file-input" class="track-file-input-css" type="file" name="files[]" data-multiple-caption="{count} files selected" multiple="">');
+        $file_input_container.append(this.$file_input);
 
         this.$file_input.on( 'change', function( e ) {
             loadTrackWithFile(_.first(e.target.files))
         });
 
         // afford selecting (via finder) or drag-dropping track file
-        this.$label = $('<label for="file">');
-        $box_input.append(this.$label);
+        this.$label = $('<label for="track-file-input">');
+        $file_input_container.append(this.$label);
 
         $e = $('<strong>');
         $e.text('Choose a track file');
@@ -92,30 +91,11 @@ var igv = (function (igv) {
         // url upload
         url_input_container(this, this.$drag_and_drop);
 
-        // $url_input_container = $('<div class="igv-drag-and-drop-url-input-container">');
-        // this.$drag_and_drop.append($url_input_container);
-        //
-        // $e = $('<div>');
-        // $url_input_container.append($e);
-        // $e.text('or');
-        //
-        // this.$url_input = $('<input class="igv-drag-and-drop-url-input" placeholder="enter track URL">');
-        //
-        // this.$url_input.on( 'change', function( e ) {
-        //     var _url = $(this).val();
-        //
-        //     dismissDragAndDrop(self);
-        //     igv.browser.loadTrack( { url: _url } );
-        // });
-        //
-        // $url_input_container.append(this.$url_input);
-
         // warn when bad file is loaded
         this.$warning = warningHandler();
         this.$drag_and_drop.append(this.$warning);
 
         this.$container.append( dismissButton() );
-
 
         this.$presentationButton = $('<div class="igv-drag-and-drop-presentation-button">');
         this.$presentationButton.text('Load Track');
