@@ -1157,6 +1157,15 @@
   margin-top: 14px;
   margin-bottom: 14px; }
 
+.igv-drag-and-drop-url-input-feedback {
+  width: 100%;
+  color: #36464b;
+  font-family: 'Open Sans', sans-serif;
+  font-size: 20px;
+  font-weight: 200;
+  text-align: center;
+  padding-left: 4px; }
+
 .igv-drag-and-drop-url-input {
   display: block;
   width: 100%;
