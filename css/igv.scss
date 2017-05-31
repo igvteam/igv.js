@@ -1548,7 +1548,7 @@ $igv-grey-color: #7F7F7F;
   background-color: $igv-navbar-toggle-dark-dark;
 }
 
-.igv-drag-and-drop-container {
+.igv-drag-drop-container {
   position: absolute;
   top: 100px;
   left: 25%;
@@ -1580,7 +1580,7 @@ $igv-grey-color: #7F7F7F;
   color: #36464b;
 }
 
-.igv-drag-and-drop-box {
+.igv-drag-drop-surface {
   position: relative;
 
   color: #36464b;
@@ -1660,19 +1660,16 @@ $igv-grey-color: #7F7F7F;
   border-bottom: 2px solid transparent;
 }
 
-.igv-drag-and-drop-box.is-dragover {
+// on drag over make surface translucent
+.igv-drag-drop-surface.is-dragover {
   background-color: rgba(200, 218, 223, 0.51);
 }
 
-.box__dragndrop {
-  display: none;
-}
-
-.igv-drag-and-drop-box .box__dragndrop {
+.igv-drag-drop-surface .igv-drag-drop-surface-blurb {
   display: inline;
 }
 
-.track-file-input-css {
+.igv-track-file-input-css {
   width: 0.1px;
   height: 0.1px;
   opacity: 0;
@@ -1681,11 +1678,11 @@ $igv-grey-color: #7F7F7F;
   z-index: -1;
 }
 
-.track-file-input-css:hover + label strong {
+.igv-track-file-input-css:hover + label strong {
   color: #39bfd3;
 }
 
-.track-file-input-container-css label {
+.igv-track-file-input-container-css label {
   max-width: 80%;
   text-overflow: ellipsis;
   white-space: nowrap;

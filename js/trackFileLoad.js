@@ -37,28 +37,28 @@ var igv = (function (igv) {
             $fa,
             $e;
 
-        this.$container = $('<div class="igv-drag-and-drop-container">');
+        this.$container = $('<div class="igv-drag-drop-container">');
 
-        this.$drag_and_drop = $('<div class="igv-drag-and-drop-box">');
-        this.$container.append(this.$drag_and_drop);
+        this.$drag_drop_surface = $('<div class="igv-drag-drop-surface">');
+        this.$container.append(this.$drag_drop_surface);
 
-        this.$drag_and_drop
+        this.$drag_drop_surface
             .on( 'drag dragstart dragend dragover dragenter dragleave drop', function( e ) {
                 e.preventDefault();
                 e.stopPropagation();
             })
             .on( 'dragover dragenter', function() {
-                self.$drag_and_drop.addClass( 'is-dragover' );
+                self.$drag_drop_surface.addClass( 'is-dragover' );
             })
             .on( 'dragleave dragend drop', function() {
-                self.$drag_and_drop.removeClass( 'is-dragover' );
+                self.$drag_drop_surface.removeClass( 'is-dragover' );
             })
             .on( 'drop', function( e ) {
                 loadTrackWithFile(_.first(e.originalEvent.dataTransfer.files));
             });
 
-        $file_input_container = $('<div class="track-file-input-container-css">');
-        this.$drag_and_drop.append($file_input_container);
+        $file_input_container = $('<div class="igv-track-file-input-container-css">');
+        this.$drag_drop_surface.append($file_input_container);
 
         // file load icon
         $fa_container = $('<div class="fa-container">');
@@ -68,7 +68,7 @@ var igv = (function (igv) {
         $fa_container.append($fa);
 
         // local file upload
-        this.$file_input = $('<input id="track-file-input" class="track-file-input-css" type="file" name="files[]" data-multiple-caption="{count} files selected" multiple="">');
+        this.$file_input = $('<input id="igv-track-file-input" class="igv-track-file-input-css" type="file" name="files[]" data-multiple-caption="{count} files selected" multiple="">');
         $file_input_container.append(this.$file_input);
 
         this.$file_input.on( 'change', function( e ) {
@@ -76,24 +76,24 @@ var igv = (function (igv) {
         });
 
         // afford selecting (via finder) or drag-dropping track file
-        this.$label = $('<label for="track-file-input">');
+        this.$label = $('<label for="igv-track-file-input">');
         $file_input_container.append(this.$label);
 
         $e = $('<strong>');
         $e.text('Choose a track file');
         this.$label.append($e);
 
-        $e = $('<span class="box__dragndrop">');
+        $e = $('<span class="igv-drag-drop-surface-blurb">');
         $e.text(' or drop it here');
         this.$label.append($e);
 
 
         // url upload
-        url_input_container(this, this.$drag_and_drop);
+        url_input_container(this, this.$drag_drop_surface);
 
         // warn when bad file is loaded
         this.$warning = warningHandler();
-        this.$drag_and_drop.append(this.$warning);
+        this.$drag_drop_surface.append(this.$warning);
 
         this.$container.append( dismissButton() );
 
