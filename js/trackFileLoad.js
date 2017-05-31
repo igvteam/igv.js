@@ -94,7 +94,6 @@ var igv = (function (igv) {
 
         var $fa_container,
             $fa,
-            $file_input_container,
             $e;
 
         trackFileLoader.$drag_drop_surface = $('<div class="igv-drag-drop-surface">');
@@ -106,40 +105,40 @@ var igv = (function (igv) {
                 e.stopPropagation();
             })
             .on( 'dragover dragenter', function() {
-                self.$drag_drop_surface.addClass( 'is-dragover' );
+                $(this).addClass( 'is-dragover' );
             })
             .on( 'dragleave dragend drop', function() {
-                self.$drag_drop_surface.removeClass( 'is-dragover' );
+                $(this).removeClass( 'is-dragover' );
             })
             .on( 'drop', function( e ) {
-                loadTrackWithFile(_.first(e.originalEvent.dataTransfer.files));
+                trackFileLoader.loadTrackWithFile(_.first(e.originalEvent.dataTransfer.files));
             });
 
         // load local file container
-        $file_input_container = $('<div class="igv-track-file-input-container-css">');
-        trackFileLoader.$drag_drop_surface.append($file_input_container);
+        trackFileLoader.$file_input_container = $('<div class="igv-track-file-input-container-css">');
+        trackFileLoader.$drag_drop_surface.append(trackFileLoader.$file_input_container);
 
         // icon
         $fa_container = $('<div class="fa-container">');
-        $file_input_container.append($fa_container);
+        trackFileLoader.$file_input_container.append($fa_container);
 
         $fa = $('<i class="fa fa-upload fa-3x" aria-hidden="true">');
         $fa_container.append($fa);
 
         // load local file
         trackFileLoader.$file_input = $('<input id="igv-track-file-input" class="igv-track-file-input-css" type="file" name="files[]" data-multiple-caption="{count} files selected" multiple="">');
-        $file_input_container.append(trackFileLoader.$file_input);
+        trackFileLoader.$file_input_container.append(trackFileLoader.$file_input);
 
         trackFileLoader.$file_input.on( 'change', function( e ) {
-            loadTrackWithFile(_.first(e.target.files))
+            trackFileLoader.loadTrackWithFile(_.first(e.target.files))
         });
 
         trackFileLoader.$label = $('<label for="igv-track-file-input">');
-        $file_input_container.append(trackFileLoader.$label);
+        trackFileLoader.$file_input_container.append(trackFileLoader.$label);
 
-        $e = $('<strong>');
-        $e.text('Choose a track file');
-        trackFileLoader.$label.append($e);
+        trackFileLoader.$choose_file = $('<strong>');
+        trackFileLoader.$choose_file.text('Choose file');
+        trackFileLoader.$label.append(trackFileLoader.$choose_file);
 
         $e = $('<span class="igv-drag-drop-surface-blurb">');
         $e.text(' or drop it here');
@@ -182,106 +181,133 @@ var igv = (function (igv) {
             return $warning;
         }
 
-        function loadTrackWithFile( file ) {
-            var filename,
-                extension;
 
-            filename = file.name;
-            extension = igv.getExtension({ url: file });
-
-            if ('bam' === extension) {
-                trackFileLoader.$warning.show();
-            } else {
-                doDismiss(trackFileLoader);
-                igv.browser.loadTrack( { url: file, isLocalFile: true } );
-            }
-
-        }
     }
+
+    igv.TrackFileLoad.prototype.loadTrackWithFile = function( file ) {
+
+        var filename,
+            extension;
+
+        filename = file.name;
+        extension = igv.getExtension({ url: file });
+
+        if ('bed' === igv.getExtension({ url: file })) {
+            this.$url_input_container.hide();
+            this.$choose_file.text('Choose BED index file');
+        } else {
+            igv.browser.loadTrack( { url: file, isLocalFile: true } );
+            doDismiss(this);
+        }
+
+
+        // igv.browser.loadTrack( { url: file, isLocalFile: true } );
+        // doDismiss(trackFileLoader);
+
+        // if ('bam' === extension) {
+        //     trackFileLoader.$warning.show();
+        // } else {
+        //     doDismiss(trackFileLoader);
+        //     igv.browser.loadTrack( { url: file, isLocalFile: true } );
+        // }
+
+    };
 
     function url_input_container(trackFileLoader, $parent) {
 
-        var $url_input_container,
-            $e;
+        var $ok;
 
         // url input container
-        $url_input_container = $('<div class="igv-drag-and-drop-url-input-container">');
-        $parent.append($url_input_container);
+        trackFileLoader.$url_input_container = $('<div class="igv-drag-and-drop-url-input-container">');
+        $parent.append(trackFileLoader.$url_input_container);
 
-        $e = $('<div>');
-        $url_input_container.append($e);
-        $e.text('or');
+        trackFileLoader.$or = $('<div>');
+        trackFileLoader.$url_input_container.append(trackFileLoader.$or);
+        trackFileLoader.$or.text('or');
 
         // url input
         trackFileLoader.$url_input = $('<input class="igv-drag-and-drop-url-input" placeholder="enter URL">');
-        $url_input_container.append(trackFileLoader.$url_input);
+        trackFileLoader.$url_input_container.append(trackFileLoader.$url_input);
 
         trackFileLoader.$url_input.on( 'change', function( e ) {
             var _url = $(this).val();
 
-            trackFileLoader.$url_input_feedback.text( ('.../' + _url.split("/").pop()) );
-            trackFileLoader.$url_input_feedback.toggle();
-
-            $(this).toggle();
-
             if ('bed' === igv.getExtension({ url: _url })) {
+
+                trackFileLoader.$file_input_container.toggle();
+                trackFileLoader.$or.toggle();
+
+                trackFileLoader.$url_input_feedback.text( ('.../' + _url.split("/").pop()) );
+                trackFileLoader.$url_input_feedback.toggle();
+
+                $(this).toggle();
+
                 trackFileLoader.$index_url_input.toggle();
             } else {
-                doDismiss(trackFileLoader);
                 igv.browser.loadTrack( { url: _url } );
+                $(this).val(undefined);
+                doDismiss(trackFileLoader);
             }
 
         });
 
         // visual feedback that url was successfully input
         trackFileLoader.$url_input_feedback = $('<div class="igv-drag-and-drop-url-input-feedback" >');
-        $url_input_container.append(trackFileLoader.$url_input_feedback);
+        trackFileLoader.$url_input_container.append(trackFileLoader.$url_input_feedback);
         trackFileLoader.$url_input_feedback.hide();
-
-
-
-
 
 
         // index url input
         trackFileLoader.$index_url_input = $('<input class="igv-drag-and-drop-url-input" placeholder="enter index URL">');
         trackFileLoader.$index_url_input.hide();
-        $url_input_container.append(trackFileLoader.$index_url_input);
+        trackFileLoader.$url_input_container.append(trackFileLoader.$index_url_input);
 
         trackFileLoader.$index_url_input.on( 'change', function( e ) {
             var _url = $(this).val();
-
             trackFileLoader.$index_url_input_feedback.text( ('.../' + _url.split("/").pop()) );
             trackFileLoader.$index_url_input_feedback.toggle();
             $(this).toggle();
 
-
-
-            // doDismiss(trackFileLoader);
-            //
-            // trackFileLoader.$url_input_feedback.toggle();
-            // trackFileLoader.$index_url_input_feedback.toggle();
-            //
-            // trackFileLoader.$url_input.toggle();
-            // trackFileLoader.$index_url_input.toggle();
-            //
-            // igv.browser.loadTrack( { url: trackFileLoader.$url_input.val(), indexURL: _url } );
-
-
+            $ok.toggle();
         });
 
         // visual feedback that index url was successfully input
         trackFileLoader.$index_url_input_feedback = $('<div class="igv-drag-and-drop-url-input-feedback" >');
-        $url_input_container.append(trackFileLoader.$index_url_input_feedback);
+        trackFileLoader.$url_input_container.append(trackFileLoader.$index_url_input_feedback);
         trackFileLoader.$index_url_input_feedback.hide();
 
+        //
+        $ok = $('<div class="igv-drag-and-drop-url-ok">');
+        trackFileLoader.$url_input_container.append($ok);
+        $ok.text('ok');
+        $ok.hide();
+
+        $ok.on('click', function (e) {
+
+            doDismiss(trackFileLoader);
+
+            trackFileLoader.$file_input_container.toggle();
+            trackFileLoader.$or.toggle();
+
+            trackFileLoader.$url_input.show();
+            trackFileLoader.$index_url_input.hide();
+
+            trackFileLoader.$url_input_feedback.hide();
+            trackFileLoader.$index_url_input_feedback.hide();
+
+            $(this).toggle();
+
+            igv.browser.loadTrack( { url: trackFileLoader.$url_input.val(), indexURL: trackFileLoader.$index_url_input.val() } );
+
+            trackFileLoader.$url_input.val(undefined);
+            trackFileLoader.$index_url_input.val(undefined);
+
+
+        });
     }
 
     function doDismiss(trackFileLoader) {
-        trackFileLoader.$url_input.val(undefined);
-        trackFileLoader.$label.show();
         trackFileLoader.$container.hide();
-        trackFileLoader.$warning.hide();
     }
 
     function doPresent(trackFileLoader) {
