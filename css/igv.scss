@@ -1586,7 +1586,7 @@ $igv-grey-color: #7F7F7F;
   color: #36464b;
 
   font-family: 'Open Sans', sans-serif;
-  font-size: 20px;
+  font-size: 18px;
   font-weight: 200;
 
   padding: 100px 20px;
@@ -1632,6 +1632,39 @@ $igv-grey-color: #7F7F7F;
   margin-bottom: 14px;
 }
 
+.igv-drag-and-drop-url-ok {
+
+  width: 100%;
+
+  color: #36464b;
+
+  font-family: 'Open Sans', sans-serif;
+  font-size: 18px;
+  font-weight: 200;
+
+  text-align: center;
+
+  padding-top: 4px;
+  padding-bottom: 4px;
+
+  border-style: solid;
+  border-radius: 3px;
+  border-width: thin;
+
+  border-color: #36464b;
+
+  background-color: #c8dadf;
+
+}
+
+.igv-drag-and-drop-url-ok:hover,
+.igv-drag-and-drop-url-ok:focus,
+.igv-drag-and-drop-url-ok:active  {
+  cursor: pointer;
+  color: white;
+  background-color: #36464b;
+}
+
 .igv-drag-and-drop-url-input-feedback {
 
   width: 100%;
@@ -1639,7 +1672,7 @@ $igv-grey-color: #7F7F7F;
   color: #36464b;
 
   font-family: 'Open Sans', sans-serif;
-  font-size: 20px;
+  font-size: 18px;
   font-weight: 200;
 
   text-align: center;
@@ -1654,9 +1687,10 @@ $igv-grey-color: #7F7F7F;
   width: 100%;
 
   color: #36464b;
+  background-color: transparent;
 
   font-family: 'Open Sans', sans-serif;
-  font-size: 20px;
+  font-size: 18px;
   font-weight: 200;
 
   text-align: center;
@@ -1666,13 +1700,12 @@ $igv-grey-color: #7F7F7F;
   border: 0;
   border-bottom: 2px solid #36464b;
 
-  background: transparent;
 }
 
-.igv-drag-and-drop-url-input:hover {
-  /*border-bottom: 2px solid #39bfd3;*/
+.igv-drag-and-drop-url-input:focus,
+.igv-drag-and-drop-url-input:active {
   background: white;
-  border-bottom: 2px solid transparent;
+  border-bottom: transparent;
 }
 
 // on drag over make surface translucent
