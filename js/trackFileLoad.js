@@ -92,9 +92,8 @@ var igv = (function (igv) {
 
     function drag_drop_surface(trackFileLoader, $parent) {
 
-        var $fa_container,
-            $fa,
-            $e;
+        var $e,
+            $ok;
 
         trackFileLoader.$drag_drop_surface = $('<div class="igv-drag-drop-surface">');
         $parent.append(trackFileLoader.$drag_drop_surface);
@@ -111,45 +110,95 @@ var igv = (function (igv) {
                 $(this).removeClass( 'is-dragover' );
             })
             .on( 'drop', function( e ) {
-                trackFileLoader.loadTrackWithFile(_.first(e.originalEvent.dataTransfer.files));
+                trackFileLoader.loadLocalFile(_.first(e.originalEvent.dataTransfer.files));
             });
 
         // load local file container
         trackFileLoader.$file_input_container = $('<div class="igv-track-file-input-container-css">');
         trackFileLoader.$drag_drop_surface.append(trackFileLoader.$file_input_container);
 
-        // icon
-        $fa_container = $('<div class="fa-container">');
-        trackFileLoader.$file_input_container.append($fa_container);
-
-        $fa = $('<i class="fa fa-upload fa-3x" aria-hidden="true">');
-        $fa_container.append($fa);
+        // file icon
+        // $fa_container = $('<div class="fa-container">');
+        // trackFileLoader.$file_input_container.append($fa_container);
+        //
+        // $fa = $('<i class="fa fa-upload fa-3x" aria-hidden="true">');
+        // $fa_container.append($fa);
 
         // load local file
         trackFileLoader.$file_input = $('<input id="igv-track-file-input" class="igv-track-file-input-css" type="file" name="files[]" data-multiple-caption="{count} files selected" multiple="">');
         trackFileLoader.$file_input_container.append(trackFileLoader.$file_input);
 
         trackFileLoader.$file_input.on( 'change', function( e ) {
-            trackFileLoader.loadTrackWithFile(_.first(e.target.files))
+            trackFileLoader.loadLocalFile(_.first(e.target.files))
         });
 
-        trackFileLoader.$label = $('<label for="igv-track-file-input">');
-        trackFileLoader.$file_input_container.append(trackFileLoader.$label);
+        blurb(trackFileLoader, trackFileLoader.$file_input_container, 'Choose file', 'igv-track-file-input', 'load-file-blurb');
+        trackFileLoader.$file_input_blurb = trackFileLoader.$file_input_container.find('#load-file-blurb');
 
-        trackFileLoader.$choose_file = $('<strong>');
-        trackFileLoader.$choose_file.text('Choose file');
-        trackFileLoader.$label.append(trackFileLoader.$choose_file);
+        // load local index file
+        trackFileLoader.$index_file_input = $('<input id="igv-track-index-file-input" class="igv-track-file-input-css" type="file" name="files[]" data-multiple-caption="{count} files selected" multiple="">');
+        trackFileLoader.$file_input_container.append(trackFileLoader.$index_file_input);
 
-        $e = $('<span class="igv-drag-drop-surface-blurb">');
-        $e.text(' or drop it here');
-        trackFileLoader.$label.append($e);
+        trackFileLoader.$index_file_input.on( 'change', function( e ) {
+            trackFileLoader.loadLocalFile(_.first(e.target.files));
+        });
+
+        blurb(trackFileLoader, trackFileLoader.$file_input_container, 'Choose index file', 'igv-track-index-file-input', 'load-local-file-blurb');
+        trackFileLoader.$index_file_input_blurb = trackFileLoader.$file_input_container.find('#load-local-file-blurb');
+
+        trackFileLoader.$index_file_input.hide();
+        trackFileLoader.$index_file_input_blurb.hide();
+
+        // ok
+        $ok = $('<div id="file_input_ok" class="igv-drag-and-drop-url-ok">');
+        trackFileLoader.$drag_drop_surface.append($ok);
+        $ok.text('ok');
+        $ok.hide();
+
+        $ok.on('click', function (e) {
+
+            doDismiss(trackFileLoader);
+
+            $('#file_input_ok').hide();
+
+            trackFileLoader.$url_input_container.show();
+
+            trackFileLoader.$file_input.show();
+            trackFileLoader.$file_input_blurb.show();
+
+            trackFileLoader.$index_file_input.hide();
+            trackFileLoader.$index_file_input_blurb.hide();
+
+            // igv.browser.loadTrack( { url: trackFileLoader.$url_input.val(), indexURL: trackFileLoader.$index_url_input.val() } );
+
+        });
+
+        // load URL
+        url_input_container(trackFileLoader, trackFileLoader.$drag_drop_surface);
 
         // warning
         trackFileLoader.$warning = warningHandler();
         trackFileLoader.$drag_drop_surface.append(this.$warning);
 
-        // load URL
-        url_input_container(trackFileLoader, trackFileLoader.$drag_drop_surface);
+        function blurb(trackFileLoader, $parent, phrase, input_id, label_id) {
+            var $label;
+
+            // load local file - blurb
+            $label = $('<label>');
+            $parent.append($label);
+
+            $label.attr('for', input_id);
+            $label.attr('id', label_id);
+
+            trackFileLoader.$choose_file = $('<strong>');
+            trackFileLoader.$choose_file.text(phrase);
+            $label.append(trackFileLoader.$choose_file);
+
+            $e = $('<span class="igv-drag-drop-surface-blurb">');
+            $e.text(' or drop it here');
+            $label.append($e);
+
+        }
 
         function warningHandler () {
             var $warning,
@@ -181,10 +230,9 @@ var igv = (function (igv) {
             return $warning;
         }
 
-
     }
 
-    igv.TrackFileLoad.prototype.loadTrackWithFile = function( file ) {
+    igv.TrackFileLoad.prototype.loadLocalFile = function (file) {
 
         var filename,
             extension;
@@ -193,13 +241,24 @@ var igv = (function (igv) {
         extension = igv.getExtension({ url: file });
 
         if ('bed' === igv.getExtension({ url: file })) {
-            this.$url_input_container.hide();
-            this.$choose_file.text('Choose BED index file');
-        } else {
-            igv.browser.loadTrack( { url: file, isLocalFile: true } );
-            doDismiss(this);
-        }
 
+            this.$url_input_container.hide();
+
+            this.$file_input.hide();
+            this.$file_input_blurb.hide();
+
+            this.$index_file_input.show();
+            this.$index_file_input_blurb.show();
+        } else {
+
+            this.$index_file_input.hide();
+            this.$index_file_input_blurb.hide();
+
+            $('#file_input_ok').show();
+
+            // igv.browser.loadTrack( { url: file, isLocalFile: true } );
+            // doDismiss(this);
+        }
 
         // igv.browser.loadTrack( { url: file, isLocalFile: true } );
         // doDismiss(trackFileLoader);
@@ -277,7 +336,7 @@ var igv = (function (igv) {
         trackFileLoader.$index_url_input_feedback.hide();
 
         //
-        $ok = $('<div class="igv-drag-and-drop-url-ok">');
+        $ok = $('<div  id="url_input_ok" class="igv-drag-and-drop-url-ok">');
         trackFileLoader.$url_input_container.append($ok);
         $ok.text('ok');
         $ok.hide();
