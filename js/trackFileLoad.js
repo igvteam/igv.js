@@ -159,6 +159,10 @@ var igv = (function (igv) {
         trackFileLoader.$index_file_input.hide();
         trackFileLoader.$index_file_input_blurb.hide();
 
+        $fa_index_file.on('click', function () {
+            trackFileLoader.$index_file_input.click();
+        });
+
         // ok
         $ok = $('<div id="file_input_ok" class="igv-drag-and-drop-url-ok">');
         trackFileLoader.$drag_drop_surface.append($ok);
