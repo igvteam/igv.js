@@ -94,8 +94,7 @@ var igv = (function (igv) {
 
         var $e,
             $ok,
-            $fa_file,
-            $fa_index_file;
+            $fa_file;
 
         trackFileLoader.$drag_drop_surface = $('<div class="igv-drag-drop-surface">');
         $parent.append(trackFileLoader.$drag_drop_surface);
@@ -124,8 +123,8 @@ var igv = (function (igv) {
         trackFileLoader.$file_icon_container.append($fa_file);
 
         //
-        $fa_index_file = $('<i id="igv-drag-drop-index-file-icon" class="fa fa-file-o fa-5x" aria-hidden="true">');
-        trackFileLoader.$file_icon_container.append($fa_index_file);
+        trackFileLoader.$fa_index_file = $('<i id="igv-drag-drop-index-file-icon" class="fa fa-file-o fa-5x" aria-hidden="true">');
+        trackFileLoader.$file_icon_container.append(trackFileLoader.$fa_index_file);
 
         trackFileLoader.$file_icon_container.hide();
 
@@ -159,7 +158,7 @@ var igv = (function (igv) {
         trackFileLoader.$index_file_input.hide();
         trackFileLoader.$index_file_input_blurb.hide();
 
-        $fa_index_file.on('click', function () {
+        trackFileLoader.$fa_index_file.on('click', function () {
             trackFileLoader.$index_file_input.click();
         });
 
@@ -172,16 +171,6 @@ var igv = (function (igv) {
         $ok.on('click', function (e) {
 
             doDismiss(trackFileLoader);
-
-            $('#file_input_ok').hide();
-
-            trackFileLoader.$url_input_container.show();
-
-            trackFileLoader.$file_input.show();
-            trackFileLoader.$file_input_blurb.show();
-
-            trackFileLoader.$index_file_input.hide();
-            trackFileLoader.$index_file_input_blurb.hide();
 
             // igv.browser.loadTrack( { url: trackFileLoader.$url_input.val(), indexURL: trackFileLoader.$index_url_input.val() } );
 
@@ -263,13 +252,16 @@ var igv = (function (igv) {
 
             this.$index_file_input.show();
             this.$index_file_input_blurb.show();
+
             this.$file_icon_container.show();
 
         } else {
 
             this.$index_file_input.hide();
             this.$index_file_input_blurb.hide();
-            this.$file_icon_container.hide();
+
+            this.$fa_index_file.removeClass('fa-file-o');
+            this.$fa_index_file.addClass('fa-file');
 
             $('#file_input_ok').show();
 
@@ -360,29 +352,48 @@ var igv = (function (igv) {
 
         $ok.on('click', function (e) {
 
-            doDismiss(trackFileLoader);
-
-            trackFileLoader.$file_input_container.toggle();
-            trackFileLoader.$or.toggle();
-
-            trackFileLoader.$url_input.show();
-            trackFileLoader.$index_url_input.hide();
-
-            trackFileLoader.$url_input_feedback.hide();
-            trackFileLoader.$index_url_input_feedback.hide();
-
-            $(this).toggle();
-
             igv.browser.loadTrack( { url: trackFileLoader.$url_input.val(), indexURL: trackFileLoader.$index_url_input.val() } );
 
-            trackFileLoader.$url_input.val(undefined);
-            trackFileLoader.$index_url_input.val(undefined);
-
+            doDismiss(trackFileLoader);
 
         });
     }
 
     function doDismiss(trackFileLoader) {
+
+        // file show/hide
+        $('#file_input_ok').hide();
+
+        trackFileLoader.$url_input_container.show();
+
+        trackFileLoader.$file_input.show();
+        trackFileLoader.$file_input_blurb.show();
+
+        trackFileLoader.$index_file_input.hide();
+        trackFileLoader.$index_file_input_blurb.hide();
+
+        trackFileLoader.$fa_index_file.addClass('fa-file-o');
+        trackFileLoader.$fa_index_file.removeClass('fa-file');
+
+        trackFileLoader.$file_icon_container.hide();
+
+
+        // url show/hide
+        $('#url_input_ok').hide();
+
+        trackFileLoader.$file_input_container.show();
+        trackFileLoader.$or.show();
+
+        trackFileLoader.$url_input.show();
+        trackFileLoader.$index_url_input.hide();
+
+        trackFileLoader.$url_input_feedback.hide();
+        trackFileLoader.$index_url_input_feedback.hide();
+
+        trackFileLoader.$url_input.val(undefined);
+        trackFileLoader.$index_url_input.val(undefined);
+
+        // container hide
         trackFileLoader.$container.hide();
     }
 
