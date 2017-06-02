@@ -93,7 +93,9 @@ var igv = (function (igv) {
     function drag_drop_surface(trackFileLoader, $parent) {
 
         var $e,
-            $ok;
+            $ok,
+            $fa_file,
+            $fa_index_file;
 
         trackFileLoader.$drag_drop_surface = $('<div class="igv-drag-drop-surface">');
         $parent.append(trackFileLoader.$drag_drop_surface);
@@ -113,16 +115,24 @@ var igv = (function (igv) {
                 trackFileLoader.loadLocalFile(_.first(e.originalEvent.dataTransfer.files));
             });
 
+
+        trackFileLoader.$file_icon_container = $('<div class="igv-drag-drop-file-icon-container">');
+        trackFileLoader.$drag_drop_surface.append(trackFileLoader.$file_icon_container);
+
+        //
+        $fa_file = $('<i id="igv-drag-drop-file-icon" class="fa fa-file fa-5x" aria-hidden="true">');
+        trackFileLoader.$file_icon_container.append($fa_file);
+
+        //
+        $fa_index_file = $('<i id="igv-drag-drop-index-file-icon" class="fa fa-file-o fa-5x" aria-hidden="true">');
+        trackFileLoader.$file_icon_container.append($fa_index_file);
+
+        trackFileLoader.$file_icon_container.hide();
+
+
         // load local file container
         trackFileLoader.$file_input_container = $('<div class="igv-track-file-input-container-css">');
         trackFileLoader.$drag_drop_surface.append(trackFileLoader.$file_input_container);
-
-        // file icon
-        // $fa_container = $('<div class="fa-container">');
-        // trackFileLoader.$file_input_container.append($fa_container);
-        //
-        // $fa = $('<i class="fa fa-upload fa-3x" aria-hidden="true">');
-        // $fa_container.append($fa);
 
         // load local file
         trackFileLoader.$file_input = $('<input id="igv-track-file-input" class="igv-track-file-input-css" type="file" name="files[]" data-multiple-caption="{count} files selected" multiple="">');
@@ -249,10 +259,13 @@ var igv = (function (igv) {
 
             this.$index_file_input.show();
             this.$index_file_input_blurb.show();
+            this.$file_icon_container.show();
+
         } else {
 
             this.$index_file_input.hide();
             this.$index_file_input_blurb.hide();
+            this.$file_icon_container.hide();
 
             $('#file_input_ok').show();
 
