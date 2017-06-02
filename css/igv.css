@@ -1126,6 +1126,32 @@
   padding: 100px 20px;
   background-color: #c8dadf; }
 
+.igv-drag-drop-surface.is-dragover {
+  background-color: rgba(200, 218, 223, 0.51); }
+
+.igv-drag-drop-surface .igv-drag-drop-surface-blurb {
+  display: inline; }
+
+.igv-drag-drop-file-icon-container {
+  display: flex;
+  flex-flow: row;
+  flex-wrap: nowrap;
+  justify-content: center;
+  width: 100%; }
+  .igv-drag-drop-file-icon-container .fa-file {
+    display: block;
+    color: #92b0b3;
+    margin: 8px; }
+  .igv-drag-drop-file-icon-container .fa-file-o {
+    display: block;
+    color: #36464b;
+    margin: 8px; }
+  .igv-drag-drop-file-icon-container .fa-file-o:hover,
+  .igv-drag-drop-file-icon-container .fa-file-o:focus,
+  .igv-drag-drop-file-icon-container .fa-file-o:active {
+    cursor: pointer;
+    color: #39bfd3; }
+
 .igv-drag-and-drop-warning-container {
   position: absolute;
   top: 272px;
@@ -1205,12 +1231,6 @@
 .igv-drag-and-drop-url-input:active {
   background: white;
   border-bottom: transparent; }
-
-.igv-drag-drop-surface.is-dragover {
-  background-color: rgba(200, 218, 223, 0.51); }
-
-.igv-drag-drop-surface .igv-drag-drop-surface-blurb {
-  display: inline; }
 
 .igv-track-file-input-css {
   width: 0.1px;
