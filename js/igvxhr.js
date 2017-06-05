@@ -309,10 +309,13 @@ var igvxhr = (function (igvxhr) {
                 reject(null, fileReader);
             };
 
-            rangeEnd = options.range.start + options.range.size - 1;
-            blob = localfile.slice(options.range.start, rangeEnd + 1);
-
-            fileReader.readAsArrayBuffer(blob);
+            if (options.range) {
+                rangeEnd = options.range.start + options.range.size - 1;
+                blob = localfile.slice(options.range.start, rangeEnd + 1);
+                fileReader.readAsArrayBuffer(blob);
+            } else {
+                fileReader.readAsArrayBuffer(localfile);
+            }
 
         });
 
