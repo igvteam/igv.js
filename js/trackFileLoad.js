@@ -254,7 +254,7 @@ var igv = (function (igv) {
         filename = file.name;
         extension = igv.getExtension({ url: file });
 
-        if ('bed' === igv.getExtension({ url: file })) {
+        if ('bed' === extension) {
 
             this.$url_input_container.hide();
 
@@ -277,8 +277,10 @@ var igv = (function (igv) {
             $('#file_input_ok').show();
             $('#file_input_cancel').show();
 
+            igv.browser.loadTrack( { url: file } );
             // igv.browser.loadTrack( { url: file, isLocalFile: true } );
-            // doDismiss(this);
+
+            doDismiss(this);
         }
 
         // igv.browser.loadTrack( { url: file, isLocalFile: true } );
@@ -365,6 +367,7 @@ var igv = (function (igv) {
         $ok.hide();
 
         $ok.on('click', function (e) {
+
             igv.browser.loadTrack( { url: trackFileLoader.$url_input.val(), indexURL: trackFileLoader.$index_url_input.val() } );
             doDismiss(trackFileLoader);
         });
