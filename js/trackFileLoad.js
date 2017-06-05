@@ -171,10 +171,8 @@ var igv = (function (igv) {
 
         $ok.on('click', function (e) {
 
+            igv.browser.loadTrack( { url: trackFileLoader.bedFile, indexURL: trackFileLoader.bedIndexFile } );
             doDismiss(trackFileLoader);
-
-            // igv.browser.loadTrack( { url: trackFileLoader.$url_input.val(), indexURL: trackFileLoader.$index_url_input.val() } );
-
         });
 
         // cancel
@@ -256,6 +254,8 @@ var igv = (function (igv) {
 
         if ('bed' === extension) {
 
+            this.bedFile = file;
+
             this.$url_input_container.hide();
 
             this.$file_input.hide();
@@ -265,8 +265,9 @@ var igv = (function (igv) {
             this.$index_file_input_blurb.show();
 
             this.$file_icon_container.show();
+        } else if ('idx' === extension) {
 
-        } else {
+            this.bedIndexFile = file;
 
             this.$index_file_input.hide();
             this.$index_file_input_blurb.hide();
@@ -276,22 +277,11 @@ var igv = (function (igv) {
 
             $('#file_input_ok').show();
             $('#file_input_cancel').show();
+        } else {
 
             igv.browser.loadTrack( { url: file } );
-            // igv.browser.loadTrack( { url: file, isLocalFile: true } );
-
             doDismiss(this);
         }
-
-        // igv.browser.loadTrack( { url: file, isLocalFile: true } );
-        // doDismiss(trackFileLoader);
-
-        // if ('bam' === extension) {
-        //     trackFileLoader.$warning.show();
-        // } else {
-        //     doDismiss(trackFileLoader);
-        //     igv.browser.loadTrack( { url: file, isLocalFile: true } );
-        // }
 
     };
 
