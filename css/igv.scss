@@ -11,6 +11,14 @@ $igv-ruler-blue-color: rgb(0, 102, 255);
 
 $igv-grey-color: #7F7F7F;
 
+// drag & drop
+$drag-drop-dark-color: #36464b;
+$drag-drop-medium-color: #92b0b3;
+$drag-drop-light-color: #c8dadf;
+
+$drag-drop-highlight-color: #39bfd3;
+
+
 // nav bar
 .igv-navbar {
 
@@ -1573,17 +1581,17 @@ $igv-grey-color: #7F7F7F;
 }
 
 .igv-drag-and-drop-close-fa-mouse-out {
-  color: #92b0b3;
+  color: $drag-drop-medium-color;
 }
 
 .igv-drag-and-drop-close-fa-mouse-in {
-  color: #36464b;
+  color: $drag-drop-dark-color;
 }
 
 .igv-drag-drop-surface {
   position: relative;
 
-  color: #36464b;
+  color: $drag-drop-dark-color;
 
   font-family: 'Open Sans', sans-serif;
   font-size: 18px;
@@ -1591,7 +1599,7 @@ $igv-grey-color: #7F7F7F;
 
   padding: 100px 20px;
 
-  background-color: #c8dadf;
+  background-color: $drag-drop-light-color;
 }
 
 .igv-drag-drop-surface.is-dragover {
@@ -1613,13 +1621,13 @@ $igv-grey-color: #7F7F7F;
 
   .fa-file {
     display: block;
-    color: #92b0b3;
+    color: $drag-drop-medium-color;
     margin: 8px;
   }
 
   .fa-file-o {
     display: block;
-    color: #36464b;
+    color: $drag-drop-dark-color;
     margin: 8px;
   }
 
@@ -1627,18 +1635,18 @@ $igv-grey-color: #7F7F7F;
   .fa-file-o:focus,
   .fa-file-o:active  {
     cursor: pointer;
-    color: #39bfd3;
+    color: $drag-drop-highlight-color;
   }
 
   //#igv-drag-drop-index-file-icon {
   //  display: block;
-  //  color: #36464b;
+  //  color: $drag-drop-dark-color;
   //  margin: 8px;
   //}
 
   //#igv-drag-drop-index-file-icon {
   //  display: block;
-  //  color: #36464b;
+  //  color: $drag-drop-dark-color;
   //  margin: 8px;
   //}
   //
@@ -1646,12 +1654,10 @@ $igv-grey-color: #7F7F7F;
   //#igv-drag-drop-index-file-icon:focus,
   //#igv-drag-drop-index-file-icon:active  {
   //  cursor: pointer;
-  //  color: #39bfd3;
+  //  color: $drag-drop-highlight-color;
   //}
 
 }
-
-
 
 .igv-drag-and-drop-warning-container {
   position: absolute;
@@ -1695,7 +1701,7 @@ $igv-grey-color: #7F7F7F;
 
   width: 100%;
 
-  color: #36464b;
+  color: $drag-drop-dark-color;
 
   font-family: 'Open Sans', sans-serif;
   font-size: 18px;
@@ -1703,16 +1709,15 @@ $igv-grey-color: #7F7F7F;
 
   text-align: center;
 
-  padding-top: 4px;
-  padding-bottom: 4px;
+  margin: 4px;
+  padding: 4px;
 
   border-style: solid;
   border-radius: 3px;
   border-width: thin;
+  border-color: $drag-drop-dark-color;
 
-  border-color: #36464b;
-
-  background-color: #c8dadf;
+  background-color: $drag-drop-light-color;
 
 }
 
@@ -1721,14 +1726,44 @@ $igv-grey-color: #7F7F7F;
 .igv-drag-and-drop-url-ok:active  {
   cursor: pointer;
   color: white;
-  background-color: #36464b;
+  background-color: $drag-drop-dark-color;
+}
+
+.igv-drag-and-drop-url-cancel {
+
+  width: 100%;
+
+  color: white;
+
+  font-family: 'Open Sans', sans-serif;
+  font-size: 18px;
+  font-weight: 200;
+
+  text-align: center;
+
+  margin: 4px;
+  padding: 4px;
+
+  border-style: solid;
+  border-radius: 3px;
+  border-width: thin;
+  border-color: $drag-drop-dark-color;
+
+  background-color: $drag-drop-dark-color;
+
+}
+
+.igv-drag-and-drop-url-cancel:hover,
+.igv-drag-and-drop-url-cancel:focus,
+.igv-drag-and-drop-url-cancel:active  {
+  cursor: pointer;
 }
 
 .igv-drag-and-drop-url-input-feedback {
 
   width: 100%;
 
-  color: #36464b;
+  color: $drag-drop-dark-color;
 
   font-family: 'Open Sans', sans-serif;
   font-size: 18px;
@@ -1745,7 +1780,7 @@ $igv-grey-color: #7F7F7F;
 
   width: 100%;
 
-  color: #36464b;
+  color: $drag-drop-dark-color;
   background-color: transparent;
 
   font-family: 'Open Sans', sans-serif;
@@ -1757,7 +1792,7 @@ $igv-grey-color: #7F7F7F;
   padding-left: 4px;
 
   border: 0;
-  border-bottom: 2px solid #36464b;
+  border-bottom: 2px solid $drag-drop-dark-color;
 
 }
 
@@ -1777,7 +1812,7 @@ $igv-grey-color: #7F7F7F;
 }
 
 .igv-track-file-input-css:hover + label strong {
-  color: #39bfd3;
+  color: $drag-drop-highlight-color;
 }
 
 .igv-track-file-input-container-css label {
@@ -1791,7 +1826,7 @@ $igv-grey-color: #7F7F7F;
 
 .fa-container {
   position: relative;
-  color: #92b0b3;
+  color: $drag-drop-medium-color;
   padding-bottom: 2px;
 
 }
