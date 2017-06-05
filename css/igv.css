@@ -1190,8 +1190,8 @@
   font-size: 18px;
   font-weight: 200;
   text-align: center;
-  padding-top: 4px;
-  padding-bottom: 4px;
+  margin: 4px;
+  padding: 4px;
   border-style: solid;
   border-radius: 3px;
   border-width: thin;
@@ -1204,6 +1204,26 @@
   cursor: pointer;
   color: white;
   background-color: #36464b; }
+
+.igv-drag-and-drop-url-cancel {
+  width: 100%;
+  color: white;
+  font-family: 'Open Sans', sans-serif;
+  font-size: 18px;
+  font-weight: 200;
+  text-align: center;
+  margin: 4px;
+  padding: 4px;
+  border-style: solid;
+  border-radius: 3px;
+  border-width: thin;
+  border-color: #36464b;
+  background-color: #36464b; }
+
+.igv-drag-and-drop-url-cancel:hover,
+.igv-drag-and-drop-url-cancel:focus,
+.igv-drag-and-drop-url-cancel:active {
+  cursor: pointer; }
 
 .igv-drag-and-drop-url-input-feedback {
   width: 100%;

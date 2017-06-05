@@ -94,6 +94,7 @@ var igv = (function (igv) {
 
         var $e,
             $ok,
+            $cancel,
             $fa_file;
 
         trackFileLoader.$drag_drop_surface = $('<div class="igv-drag-drop-surface">');
@@ -174,6 +175,16 @@ var igv = (function (igv) {
 
             // igv.browser.loadTrack( { url: trackFileLoader.$url_input.val(), indexURL: trackFileLoader.$index_url_input.val() } );
 
+        });
+
+        // cancel
+        $cancel = $('<div id="file_input_cancel" class="igv-drag-and-drop-url-cancel">');
+        trackFileLoader.$drag_drop_surface.append($cancel);
+        $cancel.text('cancel');
+        $cancel.hide();
+
+        $cancel.on('click', function (e) {
+            doDismiss(trackFileLoader);
         });
 
         // load URL
@@ -264,6 +275,7 @@ var igv = (function (igv) {
             this.$fa_index_file.addClass('fa-file');
 
             $('#file_input_ok').show();
+            $('#file_input_cancel').show();
 
             // igv.browser.loadTrack( { url: file, isLocalFile: true } );
             // doDismiss(this);
@@ -283,7 +295,8 @@ var igv = (function (igv) {
 
     function url_input_container(trackFileLoader, $parent) {
 
-        var $ok;
+        var $ok,
+            $cancel;
 
         // url input container
         trackFileLoader.$url_input_container = $('<div class="igv-drag-and-drop-url-input-container">');
@@ -336,7 +349,8 @@ var igv = (function (igv) {
             trackFileLoader.$index_url_input_feedback.toggle();
             $(this).toggle();
 
-            $ok.toggle();
+            $ok.show();
+            $cancel.show();
         });
 
         // visual feedback that index url was successfully input
@@ -344,18 +358,25 @@ var igv = (function (igv) {
         trackFileLoader.$url_input_container.append(trackFileLoader.$index_url_input_feedback);
         trackFileLoader.$index_url_input_feedback.hide();
 
-        //
+        // ok
         $ok = $('<div  id="url_input_ok" class="igv-drag-and-drop-url-ok">');
         trackFileLoader.$url_input_container.append($ok);
         $ok.text('ok');
         $ok.hide();
 
         $ok.on('click', function (e) {
-
             igv.browser.loadTrack( { url: trackFileLoader.$url_input.val(), indexURL: trackFileLoader.$index_url_input.val() } );
-
             doDismiss(trackFileLoader);
+        });
 
+        // cancel
+        $cancel = $('<div  id="url_input_cancel" class="igv-drag-and-drop-url-cancel">');
+        trackFileLoader.$url_input_container.append($cancel);
+        $cancel.text('cancel');
+        $cancel.hide();
+
+        $cancel.on('click', function (e) {
+            doDismiss(trackFileLoader);
         });
     }
 
@@ -363,6 +384,7 @@ var igv = (function (igv) {
 
         // file show/hide
         $('#file_input_ok').hide();
+        $('#file_input_cancel').hide();
 
         trackFileLoader.$url_input_container.show();
 
@@ -380,6 +402,7 @@ var igv = (function (igv) {
 
         // url show/hide
         $('#url_input_ok').hide();
+        $('#url_input_cancel').hide();
 
         trackFileLoader.$file_input_container.show();
         trackFileLoader.$or.show();
