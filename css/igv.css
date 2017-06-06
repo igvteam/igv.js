@@ -1099,11 +1099,14 @@
   top: 100px;
   left: 25%;
   width: 50%;
-  height: 300px;
   text-align: center;
   margin: 0 auto;
   z-index: 2000;
-  background-color: #c8dadf; }
+  background-color: #c8dadf;
+  display: flex;
+  flex-flow: column;
+  flex-wrap: nowrap;
+  justify-content: space-around; }
 
 .igv-drag-and-drop-close-container {
   position: absolute;
@@ -1125,7 +1128,6 @@
   font-family: 'Open Sans', sans-serif;
   font-size: 18px;
   font-weight: 200;
-  padding-top: 100px;
   background-color: #c8dadf; }
 
 .igv-drag-drop-surface.is-dragover {
@@ -1140,25 +1142,32 @@
   flex-wrap: nowrap;
   justify-content: center;
   width: 100%; }
-  .igv-drag-drop-file-icon-container .fa-file {
-    display: block;
-    color: #92b0b3;
-    margin: 8px; }
-  .igv-drag-drop-file-icon-container .fa-file-o {
-    display: block;
-    color: #36464b;
-    margin: 8px; }
-  .igv-drag-drop-file-icon-container .fa-file-o:hover,
-  .igv-drag-drop-file-icon-container .fa-file-o:focus,
-  .igv-drag-drop-file-icon-container .fa-file-o:active {
-    cursor: pointer;
-    color: #39bfd3; }
+
+.igv-drag-drop-fa-hidden {
+  display: block;
+  color: #c8dadf;
+  margin: 8px; }
+
+.igv-drag-drop-fa-file {
+  display: block;
+  color: #92b0b3;
+  margin: 8px; }
+
+.igv-drag-drop-fa-file-o {
+  display: block;
+  color: #36464b;
+  margin: 8px; }
+
+.igv-drag-drop-fa-file-o:hover,
+.igv-drag-drop-fa-file-o:focus,
+.igv-drag-drop-fa-file-o:active {
+  cursor: pointer;
+  color: #39bfd3; }
 
 .igv-drag-and-drop-url-input-container {
+  position: relative;
   width: 96%;
-  padding-left: 2%;
-  padding-right: 2%;
-  margin: 0 auto; }
+  margin: 8px auto; }
 
 .igv-drag-and-drop-url-input-container > div {
   margin-top: 14px;
@@ -1272,13 +1281,24 @@
 .igv-track-file-input-css:hover + label strong {
   color: #39bfd3; }
 
-.igv-track-file-input-container-css label {
+.igv-drag-drop-file-input {
+  position: relative; }
+
+.igv-drag-drop-file-input label {
   max-width: 80%;
   text-overflow: ellipsis;
   white-space: nowrap;
   cursor: pointer;
   display: inline-block;
   overflow: hidden; }
+
+.igv-drag-drop-shim {
+  position: relative;
+  width: 100%;
+  height: 8px;
+  margin: 0 auto;
+  color: transparent;
+  background-color: transparent; }
 
 .fa-container {
   position: relative;
