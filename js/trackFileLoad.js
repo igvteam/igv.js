@@ -90,21 +90,12 @@ var igv = (function (igv) {
 
     };
 
-    igv.TrackFileLoad.indexFileExtensions =
-        {
-            'bed': 'idx',
-            'bam': 'bai'
-        };
+    igv.TrackFileLoad.isIndexFile = function (fileOrURL) {
+        return _.contains([ 'idx', 'bai' ], igv.getExtension({ url: fileOrURL }));
+    };
 
     igv.TrackFileLoad.isIndexable = function (fileOrURL) {
-        var extension,
-            success;
-
-        extension = igv.getExtension({ url: fileOrURL });
-
-        success = !(undefined === igv.TrackFileLoad.indexFileExtensions[ extension ]);
-
-        return success;
+        return (igv.getExtension({ url: fileOrURL }) !== 'wig' && this.format !== 'seg');
     };
 
     function drag_drop_surface(trackFileLoader, $parent) {
@@ -188,7 +179,7 @@ var igv = (function (igv) {
 
         $ok.on('click', function (e) {
 
-            igv.browser.loadTrack( { url: trackFileLoader.bedFile, indexURL: trackFileLoader.bedIndexFile } );
+            igv.browser.loadTrack( { url: trackFileLoader.file, indexURL: trackFileLoader.indexFile } );
             doDismiss(trackFileLoader);
         });
 
@@ -263,16 +254,27 @@ var igv = (function (igv) {
 
     igv.TrackFileLoad.prototype.loadLocalFile = function (file) {
 
-        var filename,
-            extension,
-            success;
+        if (!igv.TrackFileLoad.isIndexFile(file) && !igv.TrackFileLoad.isIndexable(file) ) {
+            igv.browser.loadTrack( { url: file } );
+            doDismiss(this);
+            return;
+        }
 
-        filename = file.name;
-        extension = igv.getExtension({ url: file });
 
-        if ('bed' === extension) {
+        if (igv.TrackFileLoad.isIndexFile(file)) {
+            this.indexFile = file;
 
-            this.bedFile = file;
+            this.$index_file_input.hide();
+            this.$index_file_input_blurb.hide();
+
+            this.$fa_index_file.removeClass('fa-file-o');
+            this.$fa_index_file.addClass('fa-file');
+
+            $('#file_input_ok').show();
+            $('#file_input_cancel').show();
+
+        } else {
+            this.file = file;
 
             this.$url_input_container.hide();
 
@@ -283,22 +285,7 @@ var igv = (function (igv) {
             this.$index_file_input_blurb.show();
 
             this.$file_icon_container.show();
-        } else if ('idx' === extension) {
 
-            this.bedIndexFile = file;
-
-            this.$index_file_input.hide();
-            this.$index_file_input_blurb.hide();
-
-            this.$fa_index_file.removeClass('fa-file-o');
-            this.$fa_index_file.addClass('fa-file');
-
-            $('#file_input_ok').show();
-            $('#file_input_cancel').show();
-        } else {
-
-            igv.browser.loadTrack( { url: file } );
-            doDismiss(this);
         }
 
     };
@@ -321,10 +308,9 @@ var igv = (function (igv) {
         trackFileLoader.$url_input_container.append(trackFileLoader.$url_input);
 
         trackFileLoader.$url_input.on( 'change', function( e ) {
-            var _url = $(this).val(),
-                success;
+            var _url = $(this).val();
 
-            if ( !igv.TrackFileLoad.isIndexable(_url) ) {
+            if ( !igv.TrackFileLoad.isIndexFile(_url) && !igv.TrackFileLoad.isIndexable(_url) ) {
                 igv.browser.loadTrack( { url: _url } );
                 $(this).val(undefined);
                 doDismiss(trackFileLoader);
