@@ -1562,7 +1562,7 @@ $drag-drop-highlight-color: #39bfd3;
   top: 100px;
   left: 25%;
   width: 50%;
-  height: 300px;
+  //height: 360px;
 
   text-align: center;
   margin: 0 auto;
@@ -1570,6 +1570,12 @@ $drag-drop-highlight-color: #39bfd3;
   z-index: 2000;
 
   background-color: $drag-drop-light-color;
+
+  display:flex;
+  flex-flow: column;
+  flex-wrap: nowrap;
+  justify-content: space-around;
+
 
 }
 
@@ -1603,7 +1609,7 @@ $drag-drop-highlight-color: #39bfd3;
   font-size: 18px;
   font-weight: 200;
 
-  padding-top: 100px;
+  //padding-top: 100px;
 
   background-color: $drag-drop-light-color;
 }
@@ -1625,34 +1631,40 @@ $drag-drop-highlight-color: #39bfd3;
 
   width: 100%;
 
-  .fa-file {
-    display: block;
-    color: $drag-drop-medium-color;
-    margin: 8px;
-  }
+}
 
-  .fa-file-o {
-    display: block;
-    color: $drag-drop-dark-color;
-    margin: 8px;
-  }
+.igv-drag-drop-fa-hidden {
+  display: block;
+  color: $drag-drop-light-color;
+  margin: 8px;
+}
 
-  .fa-file-o:hover,
-  .fa-file-o:focus,
-  .fa-file-o:active  {
-    cursor: pointer;
-    color: $drag-drop-highlight-color;
-  }
+.igv-drag-drop-fa-file {
+  display: block;
+  color: $drag-drop-medium-color;
+  margin: 8px;
+}
 
+.igv-drag-drop-fa-file-o {
+  display: block;
+  color: $drag-drop-dark-color;
+  margin: 8px;
+}
+
+.igv-drag-drop-fa-file-o:hover,
+.igv-drag-drop-fa-file-o:focus,
+.igv-drag-drop-fa-file-o:active  {
+  cursor: pointer;
+  color: $drag-drop-highlight-color;
 }
 
 .igv-drag-and-drop-url-input-container {
-  //position: relative;
+  position: relative;
   width: 96%;
-  padding-left: 2%;
-  padding-right: 2%;
+  //padding-left: 2%;
+  //padding-right: 2%;
   //margin-top: 1px;
-  margin: 0 auto;
+  margin: 8px auto;
 }
 
 .igv-drag-and-drop-url-input-container > div {
@@ -1723,6 +1735,7 @@ $drag-drop-highlight-color: #39bfd3;
 
 .igv-drag-drop-warning {
   position: relative;
+
   width: 90%;
   height: 24px;
   margin: 0 auto;
@@ -1818,13 +1831,30 @@ $drag-drop-highlight-color: #39bfd3;
   color: $drag-drop-highlight-color;
 }
 
-.igv-track-file-input-container-css label {
+.igv-drag-drop-file-input {
+  position: relative;
+}
+
+.igv-drag-drop-file-input label {
   max-width: 80%;
   text-overflow: ellipsis;
   white-space: nowrap;
   cursor: pointer;
   display: inline-block;
   overflow: hidden;
+}
+
+.igv-drag-drop-shim {
+  position: relative;
+
+  width: 100%;
+  height: 8px;
+  margin: 0 auto;
+
+  color: transparent;
+
+  background-color: transparent;
+
 }
 
 .fa-container {

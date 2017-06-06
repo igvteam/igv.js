@@ -43,8 +43,13 @@ var igv = (function (igv) {
         this.$warning = createWarning();
         this.$container.append(this.$warning);
 
+        // shim
+        this.$container.append($('<div class="igv-drag-drop-shim">'));
+
         // dismiss drag & drop widget
         this.$container.append( dismissButton() );
+
+        this.hideFileIcons();
 
         // present drag & drop widget
         this.$presentationButton = $('<div class="igv-drag-and-drop-presentation-button">');
@@ -94,6 +99,24 @@ var igv = (function (igv) {
 
     };
 
+    igv.TrackFileLoad.prototype.hideFileIcons = function () {
+
+        this.$fa_file.removeClass('igv-drag-drop-fa-file');
+        this.$fa_file.addClass('igv-drag-drop-fa-hidden');
+
+        this.$fa_index_file.removeClass('igv-drag-drop-fa-file-o');
+        this.$fa_index_file.addClass('igv-drag-drop-fa-hidden');
+    };
+
+    igv.TrackFileLoad.prototype.showFileIcons = function () {
+
+        this.$fa_file.removeClass('igv-drag-drop-fa-hidden');
+        this.$fa_file.addClass('igv-drag-drop-fa-file');
+
+        this.$fa_index_file.removeClass('igv-drag-drop-fa-hidden');
+        this.$fa_index_file.addClass('igv-drag-drop-fa-file-o');
+    };
+
     igv.TrackFileLoad.prototype.warnWithMessage = function (message) {
         this.$warning.find('#warning-message').text(message);
         this.$warning.show();
@@ -131,8 +154,8 @@ var igv = (function (igv) {
             this.$index_file_input.show();
             this.$index_file_input_blurb.show();
 
-            this.$file_icon_container.show();
-
+            // this.$file_icon_container.show();
+            this.showFileIcons();
         }
 
     };
@@ -159,8 +182,7 @@ var igv = (function (igv) {
 
         var $e,
             $ok,
-            $cancel,
-            $fa_file;
+            $cancel;
 
         trackFileLoader.$drag_drop_surface = $('<div class="igv-drag-drop-surface">');
         $parent.append(trackFileLoader.$drag_drop_surface);
@@ -185,18 +207,19 @@ var igv = (function (igv) {
         trackFileLoader.$drag_drop_surface.append(trackFileLoader.$file_icon_container);
 
         //
-        $fa_file = $('<i id="igv-drag-drop-file-icon" class="fa fa-file fa-5x" aria-hidden="true">');
-        trackFileLoader.$file_icon_container.append($fa_file);
+        trackFileLoader.$fa_file = $('<i class="fa fa-5x fa-file igv-drag-drop-fa-file" aria-hidden="true">');
+        trackFileLoader.$file_icon_container.append(trackFileLoader.$fa_file);
 
         //
-        trackFileLoader.$fa_index_file = $('<i id="igv-drag-drop-index-file-icon" class="fa fa-file-o fa-5x" aria-hidden="true">');
+        trackFileLoader.$fa_index_file = $('<i class="fa fa-5x fa-file-o igv-drag-drop-fa-file-o" aria-hidden="true">');
         trackFileLoader.$file_icon_container.append(trackFileLoader.$fa_index_file);
 
-        trackFileLoader.$file_icon_container.hide();
+        trackFileLoader.hideFileIcons();
+        // trackFileLoader.$file_icon_container.hide();
 
 
         // load local file container
-        trackFileLoader.$file_input_container = $('<div class="igv-track-file-input-container-css">');
+        trackFileLoader.$file_input_container = $('<div class="igv-drag-drop-file-input">');
         trackFileLoader.$drag_drop_surface.append(trackFileLoader.$file_input_container);
 
         // load local file
@@ -416,11 +439,11 @@ var igv = (function (igv) {
         trackFileLoader.$index_file_input.hide();
         trackFileLoader.$index_file_input_blurb.hide();
 
-        trackFileLoader.$fa_index_file.addClass('fa-file-o');
         trackFileLoader.$fa_index_file.removeClass('fa-file');
+        trackFileLoader.$fa_index_file.addClass('fa-file-o');
 
-        trackFileLoader.$file_icon_container.hide();
-
+        // trackFileLoader.$file_icon_container.hide();
+        trackFileLoader.hideFileIcons();
 
         // url show/hide
         $('#url_input_ok').hide();
@@ -443,6 +466,10 @@ var igv = (function (igv) {
     }
 
     function doPresent(trackFileLoader) {
+
+        trackFileLoader.$fa_index_file.removeClass('fa-file-o');
+        trackFileLoader.$fa_index_file.addClass('fa-file');
+
         trackFileLoader.$container.show();
     }
 
