@@ -124,26 +124,13 @@ var igv = (function (igv) {
 
     igv.TrackFileLoad.prototype.loadLocalFile = function (file) {
 
-        if (!igv.TrackFileLoad.isIndexable(file)) {
+        if (undefined === this.file && igv.TrackFileLoad.isIndexFile(file)) {
+            this.warnWithMessage('ERROR: Must load data file.');
+        } else if (false === igv.TrackFileLoad.isIndexFile(file) && false === igv.TrackFileLoad.isIndexable(file)) {
             igv.browser.loadTrack( { url: file } );
             doDismiss(this);
-            return;
-        }
+        } else if (false === igv.TrackFileLoad.isIndexFile(file)) {
 
-
-        if (igv.TrackFileLoad.isIndexFile(file)) {
-            this.indexFile = file;
-
-            this.$index_file_input.hide();
-            this.$index_file_input_blurb.hide();
-
-            this.$fa_index_file.removeClass('fa-file-o');
-            this.$fa_index_file.addClass('fa-file');
-
-            $('#file_input_ok').show();
-            $('#file_input_cancel').show();
-
-        } else {
             this.file = file;
 
             this.$url_input_container.hide();
@@ -154,10 +141,20 @@ var igv = (function (igv) {
             this.$index_file_input.show();
             this.$index_file_input_blurb.show();
 
-            // this.$file_icon_container.show();
             this.showFileIcons();
-        }
 
+            $('#file_input_ok').show();
+            $('#file_input_cancel').show();
+
+        } else if (igv.TrackFileLoad.isIndexFile(file)) {
+            this.indexFile = file;
+
+            this.$index_file_input.hide();
+            this.$index_file_input_blurb.hide();
+
+            this.$fa_index_file.removeClass('fa-file-o');
+            this.$fa_index_file.addClass('fa-file');
+        }
     };
 
     igv.TrackFileLoad.isIndexFile = function (fileOrURL) {
@@ -230,7 +227,7 @@ var igv = (function (igv) {
             trackFileLoader.loadLocalFile(_.first(e.target.files))
         });
 
-        blurb(trackFileLoader, trackFileLoader.$file_input_container, 'Choose file', 'igv-track-file-input', 'load-file-blurb');
+        blurb(trackFileLoader, trackFileLoader.$file_input_container, 'Choose data file', 'igv-track-file-input', 'load-file-blurb');
         trackFileLoader.$file_input_blurb = trackFileLoader.$file_input_container.find('#load-file-blurb');
 
         // load local index file
@@ -241,7 +238,7 @@ var igv = (function (igv) {
             trackFileLoader.loadLocalFile(_.first(e.target.files));
         });
 
-        blurb(trackFileLoader, trackFileLoader.$file_input_container, 'Choose index file', 'igv-track-index-file-input', 'load-local-file-blurb');
+        blurb(trackFileLoader, trackFileLoader.$file_input_container, 'Choose optional index file', 'igv-track-index-file-input', 'load-local-file-blurb');
         trackFileLoader.$index_file_input_blurb = trackFileLoader.$file_input_container.find('#load-local-file-blurb');
 
         trackFileLoader.$index_file_input.hide();
@@ -321,7 +318,7 @@ var igv = (function (igv) {
             $warning.hide();
         });
 
-        // $warning.hide();
+        $warning.hide();
 
         return $warning;
     }
@@ -340,7 +337,7 @@ var igv = (function (igv) {
         trackFileLoader.$or.text('or');
 
         // url input
-        trackFileLoader.$url_input = $('<input class="igv-drag-and-drop-url-input" placeholder="enter URL">');
+        trackFileLoader.$url_input = $('<input class="igv-drag-and-drop-url-input" placeholder="enter data file URL">');
         trackFileLoader.$url_input_container.append(trackFileLoader.$url_input);
 
         trackFileLoader.$url_input.on( 'change', function( e ) {
@@ -348,7 +345,8 @@ var igv = (function (igv) {
 
             if (igv.TrackFileLoad.isIndexFile(_url)) {
 
-                trackFileLoader.warnWithMessage('Error. That url is an index file. Not cool.');
+                trackFileLoader.warnWithMessage('Error. Must enter data file URL.');
+                $(this).val(undefined);
             } else if (false === igv.TrackFileLoad.isIndexable(_url)) {
 
                 igv.browser.loadTrack( { url: _url } );
@@ -381,15 +379,21 @@ var igv = (function (igv) {
 
 
         // index url input
-        trackFileLoader.$index_url_input = $('<input class="igv-drag-and-drop-url-input" placeholder="enter optional index URL">');
+        trackFileLoader.$index_url_input = $('<input class="igv-drag-and-drop-url-input" placeholder="enter optional index file URL">');
         trackFileLoader.$index_url_input.hide();
         trackFileLoader.$url_input_container.append(trackFileLoader.$index_url_input);
 
         trackFileLoader.$index_url_input.on( 'change', function( e ) {
             var _url = $(this).val();
-            trackFileLoader.$index_url_input_feedback.text( ('.../' + _url.split("/").pop()) );
-            trackFileLoader.$index_url_input_feedback.toggle();
-            $(this).toggle();
+
+            if (false === igv.TrackFileLoad.isIndexFile(_url)) {
+                trackFileLoader.warnWithMessage('ERROR. Must enter index file URL.');
+                $(this).val(undefined);
+            } else {
+                trackFileLoader.$index_url_input_feedback.text( ('.../' + _url.split("/").pop()) );
+                trackFileLoader.$index_url_input_feedback.show();
+                $(this).hide();
+            }
         });
 
         // visual feedback that index url was successfully input
@@ -460,6 +464,9 @@ var igv = (function (igv) {
 
         trackFileLoader.$url_input.val(undefined);
         trackFileLoader.$index_url_input.val(undefined);
+
+        trackFileLoader.file = undefined;
+        trackFileLoader.indexFile = undefined;
 
         // container hide
         trackFileLoader.$container.hide();
