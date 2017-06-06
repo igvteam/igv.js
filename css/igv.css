@@ -1137,11 +1137,13 @@
   display: inline; }
 
 .igv-drag-drop-file-icon-container {
+  position: relative;
+  width: 100%;
+  margin: 16px auto;
   display: flex;
   flex-flow: row;
   flex-wrap: nowrap;
-  justify-content: center;
-  width: 100%; }
+  justify-content: center; }
 
 .igv-drag-drop-fa-hidden {
   display: block;
@@ -1175,7 +1177,7 @@
 
 .igv-drag-drop-ok {
   width: 90%;
-  margin: 0 auto;
+  margin: 4px auto;
   padding: 4px;
   color: #36464b;
   font-family: 'Open Sans', sans-serif;
@@ -1197,7 +1199,7 @@
 
 .igv-drag-drop-cancel {
   width: 90%;
-  margin: 0 auto;
+  margin: 4px auto;
   padding: 4px;
   color: white;
   font-family: 'Open Sans', sans-serif;
@@ -1219,7 +1221,7 @@
   position: relative;
   width: 90%;
   height: 24px;
-  margin: 0 auto;
+  margin: 4px auto;
   color: white;
   font-family: 'Open Sans', sans-serif;
   font-size: 16px;

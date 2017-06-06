@@ -1623,13 +1623,16 @@ $drag-drop-highlight-color: #39bfd3;
 }
 
 .igv-drag-drop-file-icon-container {
+  position: relative;
+  width: 100%;
+  margin: 16px auto;
 
   display:flex;
   flex-flow: row;
   flex-wrap: nowrap;
   justify-content: center;
 
-  width: 100%;
+
 
 }
 
@@ -1675,7 +1678,7 @@ $drag-drop-highlight-color: #39bfd3;
 .igv-drag-drop-ok {
 
   width: 90%;
-  margin: 0 auto;
+  margin: 4px auto;
   padding: 4px;
 
   color: $drag-drop-dark-color;
@@ -1707,7 +1710,7 @@ $drag-drop-highlight-color: #39bfd3;
 .igv-drag-drop-cancel {
 
   width: 90%;
-  margin: 0 auto;
+  margin: 4px auto;
   padding: 4px;
 
   color: white;
@@ -1738,7 +1741,7 @@ $drag-drop-highlight-color: #39bfd3;
 
   width: 90%;
   height: 24px;
-  margin: 0 auto;
+  margin: 4px auto;
 
   color: white;
 
