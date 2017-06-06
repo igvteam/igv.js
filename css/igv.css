@@ -1099,9 +1099,11 @@
   top: 100px;
   left: 25%;
   width: 50%;
+  height: 300px;
   text-align: center;
   margin: 0 auto;
-  z-index: 2000; }
+  z-index: 2000;
+  background-color: #c8dadf; }
 
 .igv-drag-and-drop-close-container {
   position: absolute;
@@ -1123,7 +1125,7 @@
   font-family: 'Open Sans', sans-serif;
   font-size: 18px;
   font-weight: 200;
-  padding: 100px 20px;
+  padding-top: 100px;
   background-color: #c8dadf; }
 
 .igv-drag-drop-surface.is-dragover {
@@ -1153,23 +1155,24 @@
     color: #39bfd3; }
 
 .igv-drag-and-drop-url-input-container {
-  position: relative;
-  width: 100%;
-  margin-top: 1px; }
+  width: 96%;
+  padding-left: 2%;
+  padding-right: 2%;
+  margin: 0 auto; }
 
 .igv-drag-and-drop-url-input-container > div {
   margin-top: 14px;
   margin-bottom: 14px; }
 
 .igv-drag-drop-ok {
-  width: 100%;
+  width: 90%;
+  margin: 0 auto;
+  padding: 4px;
   color: #36464b;
   font-family: 'Open Sans', sans-serif;
   font-size: 18px;
   font-weight: 200;
   text-align: center;
-  margin: 4px;
-  padding: 4px;
   border-style: solid;
   border-radius: 3px;
   border-width: thin;
@@ -1184,14 +1187,14 @@
   background-color: #36464b; }
 
 .igv-drag-drop-cancel {
-  width: 100%;
+  width: 90%;
+  margin: 0 auto;
+  padding: 4px;
   color: white;
   font-family: 'Open Sans', sans-serif;
   font-size: 18px;
   font-weight: 200;
   text-align: center;
-  margin: 4px;
-  padding: 4px;
   border-style: solid;
   border-radius: 3px;
   border-width: thin;
@@ -1204,28 +1207,32 @@
   cursor: pointer; }
 
 .igv-drag-drop-warning {
-  width: 100%;
+  position: relative;
+  width: 90%;
+  height: 24px;
+  margin: 0 auto;
   color: white;
   font-family: 'Open Sans', sans-serif;
-  font-size: 18px;
+  font-size: 16px;
   font-weight: 200;
   text-align: center;
-  margin: 4px;
-  padding: 4px;
+  vertical-align: middle;
+  line-height: 24px;
   border-style: solid;
   border-radius: 3px;
   border-width: thin;
   border-color: red;
   background-color: red; }
-
-.igv-drag-drop-warning-close {
-  color: red;
-  float: left;
-  padding-left: 2px; }
-
-.igv-drag-drop-warning-close:hover {
-  cursor: pointer;
-  color: #7f0000; }
+  .igv-drag-drop-warning #warning-message {
+    float: left;
+    width: 90%;
+    background-color: transparent; }
+  .igv-drag-drop-warning #warning-dismiss {
+    float: right;
+    color: white;
+    padding-right: 4px; }
+  .igv-drag-drop-warning #warning-dismiss:hover {
+    cursor: pointer; }
 
 .igv-drag-and-drop-url-input-feedback {
   width: 100%;
