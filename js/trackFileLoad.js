@@ -39,6 +39,10 @@ var igv = (function (igv) {
         // drag & drop surface
         drag_drop_surface(this, this.$container);
 
+        // warning
+        this.$warning = createWarning();
+        this.$container.append(this.$warning);
+
         // dismiss drag & drop widget
         this.$container.append( dismissButton() );
 
@@ -90,12 +94,65 @@ var igv = (function (igv) {
 
     };
 
+    igv.TrackFileLoad.prototype.warnWithMessage = function (message) {
+        this.$warning.text(message);
+        this.$warning.show();
+    };
+
+    igv.TrackFileLoad.prototype.loadLocalFile = function (file) {
+
+        if (!igv.TrackFileLoad.isIndexable(file)) {
+            igv.browser.loadTrack( { url: file } );
+            doDismiss(this);
+            return;
+        }
+
+
+        if (igv.TrackFileLoad.isIndexFile(file)) {
+            this.indexFile = file;
+
+            this.$index_file_input.hide();
+            this.$index_file_input_blurb.hide();
+
+            this.$fa_index_file.removeClass('fa-file-o');
+            this.$fa_index_file.addClass('fa-file');
+
+            $('#file_input_ok').show();
+            $('#file_input_cancel').show();
+
+        } else {
+            this.file = file;
+
+            this.$url_input_container.hide();
+
+            this.$file_input.hide();
+            this.$file_input_blurb.hide();
+
+            this.$index_file_input.show();
+            this.$index_file_input_blurb.show();
+
+            this.$file_icon_container.show();
+
+        }
+
+    };
+
     igv.TrackFileLoad.isIndexFile = function (fileOrURL) {
-        return _.contains([ 'idx', 'bai' ], igv.getExtension({ url: fileOrURL }));
+        var extension = igv.getExtension({ url: fileOrURL });
+        return _.contains([ 'idx', 'bai' ], extension);
     };
 
     igv.TrackFileLoad.isIndexable = function (fileOrURL) {
-        return (igv.getExtension({ url: fileOrURL }) !== 'wig' && this.format !== 'seg');
+
+        var extension;
+
+        if (igv.TrackFileLoad.isIndexFile(fileOrURL)) {
+            return false;
+        } else {
+            extension = igv.getExtension({ url: fileOrURL });
+            return (igv.getExtension({ url: fileOrURL }) !== 'wig' && this.format !== 'seg');
+        }
+
     };
 
     function drag_drop_surface(trackFileLoader, $parent) {
@@ -172,7 +229,7 @@ var igv = (function (igv) {
         });
 
         // ok
-        $ok = $('<div id="file_input_ok" class="igv-drag-and-drop-url-ok">');
+        $ok = $('<div id="file_input_ok" class="igv-drag-drop-ok">');
         trackFileLoader.$drag_drop_surface.append($ok);
         $ok.text('ok');
         $ok.hide();
@@ -184,7 +241,7 @@ var igv = (function (igv) {
         });
 
         // cancel
-        $cancel = $('<div id="file_input_cancel" class="igv-drag-and-drop-url-cancel">');
+        $cancel = $('<div id="file_input_cancel" class="igv-drag-drop-cancel">');
         trackFileLoader.$drag_drop_surface.append($cancel);
         $cancel.text('cancel');
         $cancel.hide();
@@ -195,10 +252,6 @@ var igv = (function (igv) {
 
         // load URL
         url_input_container(trackFileLoader, trackFileLoader.$drag_drop_surface);
-
-        // warning
-        trackFileLoader.$warning = warningHandler();
-        trackFileLoader.$drag_drop_surface.append(this.$warning);
 
         function blurb(trackFileLoader, $parent, phrase, input_id, label_id) {
             var $label;
@@ -220,75 +273,31 @@ var igv = (function (igv) {
 
         }
 
-        function warningHandler () {
-            var $warning,
-                $e,
-                $fa;
-
-            $warning = $('<div class="igv-drag-and-drop-warning-container">');
-
-            // warning message
-            $e = $('<div class="igv-drag-and-drop-warning-message">');
-            $warning.append($e);
-
-            $e.text('ERROR: INDEXED FILE LOADING NOT SUPPORTED');
-
-            // dismiss container
-            $e = $('<div class="igv-drag-and-drop-warning-close-container">');
-            $warning.append($e);
-
-            // dismiss
-            $fa = $('<i class="fa fa-times-circle">');
-            $e.append($fa);
-
-            $fa.on('click', function () {
-                $warning.hide();
-            });
-
-            $warning.hide();
-
-            return $warning;
-        }
-
     }
 
-    igv.TrackFileLoad.prototype.loadLocalFile = function (file) {
+    function createWarning() {
+        var $warning,
+            $e,
+            $fa;
 
-        if (!igv.TrackFileLoad.isIndexFile(file) && !igv.TrackFileLoad.isIndexable(file) ) {
-            igv.browser.loadTrack( { url: file } );
-            doDismiss(this);
-            return;
-        }
+        $warning = $('<div class="igv-drag-drop-warning">');
 
+        // dismiss warning container
+        $e = $('<div class="igv-drag-drop-warning-close">');
+        $warning.append($e);
 
-        if (igv.TrackFileLoad.isIndexFile(file)) {
-            this.indexFile = file;
+        // dismiss warning
+        $fa = $('<i class="fa fa-times-circle">');
+        $e.append($fa);
 
-            this.$index_file_input.hide();
-            this.$index_file_input_blurb.hide();
+        $fa.on('click', function () {
+            $warning.hide();
+        });
 
-            this.$fa_index_file.removeClass('fa-file-o');
-            this.$fa_index_file.addClass('fa-file');
+        // $warning.hide();
 
-            $('#file_input_ok').show();
-            $('#file_input_cancel').show();
-
-        } else {
-            this.file = file;
-
-            this.$url_input_container.hide();
-
-            this.$file_input.hide();
-            this.$file_input_blurb.hide();
-
-            this.$index_file_input.show();
-            this.$index_file_input_blurb.show();
-
-            this.$file_icon_container.show();
-
-        }
-
-    };
+        return $warning;
+    }
 
     function url_input_container(trackFileLoader, $parent) {
 
@@ -310,26 +319,31 @@ var igv = (function (igv) {
         trackFileLoader.$url_input.on( 'change', function( e ) {
             var _url = $(this).val();
 
-            if ( !igv.TrackFileLoad.isIndexFile(_url) && !igv.TrackFileLoad.isIndexable(_url) ) {
+            if (igv.TrackFileLoad.isIndexFile(_url)) {
+
+                trackFileLoader.warnWithMessage('Error. That url is an index file. Not cool.');
+            } else if (false === igv.TrackFileLoad.isIndexable(_url)) {
+
                 igv.browser.loadTrack( { url: _url } );
                 $(this).val(undefined);
                 doDismiss(trackFileLoader);
-                return;
+            } else {
+
+                trackFileLoader.$file_input_container.hide();
+                trackFileLoader.$or.hide();
+
+                trackFileLoader.$url_input_feedback.text( ('.../' + _url.split("/").pop()) );
+                trackFileLoader.$url_input_feedback.show();
+
+                $(this).hide();
+
+                trackFileLoader.$index_url_input.val(undefined);
+                trackFileLoader.$index_url_input.show();
+
+                $ok.show();
+                $cancel.show();
+
             }
-
-            trackFileLoader.$file_input_container.hide();
-            trackFileLoader.$or.hide();
-
-            trackFileLoader.$url_input_feedback.text( ('.../' + _url.split("/").pop()) );
-            trackFileLoader.$url_input_feedback.show();
-
-            $(this).hide();
-
-            trackFileLoader.$index_url_input.val(undefined);
-            trackFileLoader.$index_url_input.show();
-
-            $ok.show();
-            $cancel.show();
 
         });
 
@@ -357,7 +371,7 @@ var igv = (function (igv) {
         trackFileLoader.$index_url_input_feedback.hide();
 
         // ok
-        $ok = $('<div  id="url_input_ok" class="igv-drag-and-drop-url-ok">');
+        $ok = $('<div  id="url_input_ok" class="igv-drag-drop-ok">');
         trackFileLoader.$url_input_container.append($ok);
         $ok.text('ok');
         $ok.hide();
@@ -374,7 +388,7 @@ var igv = (function (igv) {
         });
 
         // cancel
-        $cancel = $('<div  id="url_input_cancel" class="igv-drag-and-drop-url-cancel">');
+        $cancel = $('<div  id="url_input_cancel" class="igv-drag-drop-cancel">');
         trackFileLoader.$url_input_container.append($cancel);
         $cancel.text('cancel');
         $cancel.hide();
