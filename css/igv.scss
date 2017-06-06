@@ -1557,14 +1557,20 @@ $drag-drop-highlight-color: #39bfd3;
 }
 
 .igv-drag-drop-container {
+
   position: absolute;
   top: 100px;
   left: 25%;
   width: 50%;
+  height: 300px;
+
   text-align: center;
   margin: 0 auto;
 
   z-index: 2000;
+
+  background-color: $drag-drop-light-color;
+
 }
 
 .igv-drag-and-drop-close-container {
@@ -1597,7 +1603,7 @@ $drag-drop-highlight-color: #39bfd3;
   font-size: 18px;
   font-weight: 200;
 
-  padding: 100px 20px;
+  padding-top: 100px;
 
   background-color: $drag-drop-light-color;
 }
@@ -1638,31 +1644,15 @@ $drag-drop-highlight-color: #39bfd3;
     color: $drag-drop-highlight-color;
   }
 
-  //#igv-drag-drop-index-file-icon {
-  //  display: block;
-  //  color: $drag-drop-dark-color;
-  //  margin: 8px;
-  //}
-
-  //#igv-drag-drop-index-file-icon {
-  //  display: block;
-  //  color: $drag-drop-dark-color;
-  //  margin: 8px;
-  //}
-  //
-  //#igv-drag-drop-index-file-icon:hover,
-  //#igv-drag-drop-index-file-icon:focus,
-  //#igv-drag-drop-index-file-icon:active  {
-  //  cursor: pointer;
-  //  color: $drag-drop-highlight-color;
-  //}
-
 }
 
 .igv-drag-and-drop-url-input-container {
-  position: relative;
-  width: 100%;
-  margin-top: 1px;
+  //position: relative;
+  width: 96%;
+  padding-left: 2%;
+  padding-right: 2%;
+  //margin-top: 1px;
+  margin: 0 auto;
 }
 
 .igv-drag-and-drop-url-input-container > div {
@@ -1672,7 +1662,9 @@ $drag-drop-highlight-color: #39bfd3;
 
 .igv-drag-drop-ok {
 
-  width: 100%;
+  width: 90%;
+  margin: 0 auto;
+  padding: 4px;
 
   color: $drag-drop-dark-color;
 
@@ -1682,8 +1674,6 @@ $drag-drop-highlight-color: #39bfd3;
 
   text-align: center;
 
-  margin: 4px;
-  padding: 4px;
 
   border-style: solid;
   border-radius: 3px;
@@ -1704,7 +1694,9 @@ $drag-drop-highlight-color: #39bfd3;
 
 .igv-drag-drop-cancel {
 
-  width: 100%;
+  width: 90%;
+  margin: 0 auto;
+  padding: 4px;
 
   color: white;
 
@@ -1713,9 +1705,6 @@ $drag-drop-highlight-color: #39bfd3;
   font-weight: 200;
 
   text-align: center;
-
-  margin: 4px;
-  padding: 4px;
 
   border-style: solid;
   border-radius: 3px;
@@ -1733,19 +1722,20 @@ $drag-drop-highlight-color: #39bfd3;
 }
 
 .igv-drag-drop-warning {
-
-  width: 100%;
+  position: relative;
+  width: 90%;
+  height: 24px;
+  margin: 0 auto;
 
   color: white;
 
   font-family: 'Open Sans', sans-serif;
-  font-size: 18px;
+  font-size: 16px;
   font-weight: 200;
 
   text-align: center;
-
-  margin: 4px;
-  padding: 4px;
+  vertical-align: middle;
+  line-height: 24px;
 
   border-style: solid;
   border-radius: 3px;
@@ -1754,17 +1744,22 @@ $drag-drop-highlight-color: #39bfd3;
 
   background-color: red;
 
-}
+  #warning-message {
+    float: left;
+    width: 90%;
+    background-color: transparent;
+  }
 
-.igv-drag-drop-warning-close {
-  color: red;
-  float: left;
-  padding-left: 2px;
-}
+  #warning-dismiss {
+    float: right;
+    color: white;
+    padding-right: 4px;
+  }
 
-.igv-drag-drop-warning-close:hover {
-  cursor: pointer;
-  color: #7f0000;
+  #warning-dismiss:hover {
+    cursor: pointer;
+  }
+
 }
 
 .igv-drag-and-drop-url-input-feedback {

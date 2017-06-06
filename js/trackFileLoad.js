@@ -95,7 +95,7 @@ var igv = (function (igv) {
     };
 
     igv.TrackFileLoad.prototype.warnWithMessage = function (message) {
-        this.$warning.text(message);
+        this.$warning.find('#warning-message').text(message);
         this.$warning.show();
     };
 
@@ -282,8 +282,12 @@ var igv = (function (igv) {
 
         $warning = $('<div class="igv-drag-drop-warning">');
 
+        // dismiss warning message
+        $e = $('<div id="warning-message">');
+        $warning.append($e);
+
         // dismiss warning container
-        $e = $('<div class="igv-drag-drop-warning-close">');
+        $e = $('<div id="warning-dismiss">');
         $warning.append($e);
 
         // dismiss warning
