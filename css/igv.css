@@ -1152,28 +1152,6 @@
     cursor: pointer;
     color: #39bfd3; }
 
-.igv-drag-and-drop-warning-container {
-  position: absolute;
-  top: 272px;
-  font-family: 'Open Sans', sans-serif;
-  font-size: 16px;
-  font-weight: 400;
-  margin-top: 32px; }
-
-.igv-drag-and-drop-warning-message {
-  color: red;
-  float: left;
-  padding-right: 2px; }
-
-.igv-drag-and-drop-warning-close-container {
-  color: red;
-  float: left;
-  padding-left: 2px; }
-
-.igv-drag-and-drop-warning-close-container:hover {
-  cursor: pointer;
-  color: #7f0000; }
-
 .igv-drag-and-drop-url-input-container {
   position: relative;
   width: 100%;
@@ -1183,7 +1161,7 @@
   margin-top: 14px;
   margin-bottom: 14px; }
 
-.igv-drag-and-drop-url-ok {
+.igv-drag-drop-ok {
   width: 100%;
   color: #36464b;
   font-family: 'Open Sans', sans-serif;
@@ -1198,14 +1176,14 @@
   border-color: #36464b;
   background-color: #c8dadf; }
 
-.igv-drag-and-drop-url-ok:hover,
-.igv-drag-and-drop-url-ok:focus,
-.igv-drag-and-drop-url-ok:active {
+.igv-drag-drop-ok:hover,
+.igv-drag-drop-ok:focus,
+.igv-drag-drop-ok:active {
   cursor: pointer;
   color: white;
   background-color: #36464b; }
 
-.igv-drag-and-drop-url-cancel {
+.igv-drag-drop-cancel {
   width: 100%;
   color: white;
   font-family: 'Open Sans', sans-serif;
@@ -1220,10 +1198,34 @@
   border-color: #36464b;
   background-color: #36464b; }
 
-.igv-drag-and-drop-url-cancel:hover,
-.igv-drag-and-drop-url-cancel:focus,
-.igv-drag-and-drop-url-cancel:active {
+.igv-drag-drop-cancel:hover,
+.igv-drag-drop-cancel:focus,
+.igv-drag-drop-cancel:active {
   cursor: pointer; }
+
+.igv-drag-drop-warning {
+  width: 100%;
+  color: white;
+  font-family: 'Open Sans', sans-serif;
+  font-size: 18px;
+  font-weight: 200;
+  text-align: center;
+  margin: 4px;
+  padding: 4px;
+  border-style: solid;
+  border-radius: 3px;
+  border-width: thin;
+  border-color: red;
+  background-color: red; }
+
+.igv-drag-drop-warning-close {
+  color: red;
+  float: left;
+  padding-left: 2px; }
+
+.igv-drag-drop-warning-close:hover {
+  cursor: pointer;
+  color: #7f0000; }
 
 .igv-drag-and-drop-url-input-feedback {
   width: 100%;
