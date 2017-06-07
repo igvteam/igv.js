@@ -18,6 +18,7 @@ $drag-drop-light-color: #c8dadf;
 
 $drag-drop-highlight-color: #39bfd3;
 
+$drag-drop-warning-color: red;
 
 // nav bar
 .igv-navbar {
@@ -1756,9 +1757,9 @@ $drag-drop-highlight-color: #39bfd3;
   border-style: solid;
   border-radius: 3px;
   border-width: thin;
-  border-color: red;
+  border-color: $drag-drop-warning-color;
 
-  background-color: red;
+  background-color: $drag-drop-warning-color;
 
   #warning-message {
     float: left;
@@ -1772,8 +1773,11 @@ $drag-drop-highlight-color: #39bfd3;
     padding-right: 4px;
   }
 
-  #warning-dismiss:hover {
+  #warning-dismiss:hover,
+  #warning-dismiss:focus,
+  #warning-dismiss:active {
     cursor: pointer;
+    color: #7f0000;
   }
 
 }
@@ -1860,9 +1864,4 @@ $drag-drop-highlight-color: #39bfd3;
 
 }
 
-.fa-container {
-  position: relative;
-  color: $drag-drop-medium-color;
-  padding-bottom: 2px;
 
-}
