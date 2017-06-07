@@ -1242,8 +1242,11 @@
     float: right;
     color: white;
     padding-right: 4px; }
-  .igv-drag-drop-warning #warning-dismiss:hover {
-    cursor: pointer; }
+  .igv-drag-drop-warning #warning-dismiss:hover,
+  .igv-drag-drop-warning #warning-dismiss:focus,
+  .igv-drag-drop-warning #warning-dismiss:active {
+    cursor: pointer;
+    color: #7f0000; }
 
 .igv-drag-and-drop-url-input-feedback {
   width: 100%;
@@ -1301,10 +1304,5 @@
   margin: 0 auto;
   color: transparent;
   background-color: transparent; }
-
-.fa-container {
-  position: relative;
-  color: #92b0b3;
-  padding-bottom: 2px; }
 
 /*# sourceMappingURL=igv.css.map */

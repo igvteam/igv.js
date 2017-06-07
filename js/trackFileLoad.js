@@ -379,7 +379,7 @@ var igv = (function (igv) {
 
 
         // index url input
-        trackFileLoader.$index_url_input = $('<input class="igv-drag-and-drop-url-input" placeholder="enter optional index file URL">');
+        trackFileLoader.$index_url_input = $('<input class="igv-drag-and-drop-url-input" placeholder="Optionally enter url to an associated index file">');
         trackFileLoader.$index_url_input.hide();
         trackFileLoader.$url_input_container.append(trackFileLoader.$index_url_input);
 
