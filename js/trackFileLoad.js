@@ -157,9 +157,24 @@ var igv = (function (igv) {
         }
     };
 
+    igv.TrackFileLoad.indexFileExtensions =
+        {
+            bam: { extension:'bai', optional:false },
+            bed: { extension:'idx', optional:true  },
+            vcf: { extension:'tbi', optional:true  }
+        };
+
     igv.TrackFileLoad.isIndexFile = function (fileOrURL) {
-        var extension = igv.getExtension({ url: fileOrURL });
-        return _.contains([ 'idx', 'bai' ], extension);
+        var extension,
+            list;
+
+        extension = igv.getExtension({ url: fileOrURL });
+
+        list = _.map(_.values(igv.TrackFileLoad.indexFileExtensions), function (v) {
+            return v.extension;
+        });
+
+        return _.contains(list, extension);
     };
 
     igv.TrackFileLoad.isIndexable = function (fileOrURL) {
@@ -256,8 +271,15 @@ var igv = (function (igv) {
 
         $ok.on('click', function (e) {
 
-            igv.browser.loadTrack( { url: trackFileLoader.file, indexURL: trackFileLoader.indexFile } );
-            doDismiss(trackFileLoader);
+            var extension;
+
+            extension = igv.getExtension({ url: trackFileLoader.file });
+            if (undefined === trackFileLoader.indexFile && false === igv.TrackFileLoad.indexFileExtensions[ extension ].optional) {
+                trackFileLoader.warnWithMessage('ERROR. ' + extension + ' files require an index file.');
+            } else {
+                igv.browser.loadTrack( { url: trackFileLoader.file, indexURL: trackFileLoader.indexFile } );
+                doDismiss(trackFileLoader);
+            }
         });
 
         // cancel
@@ -344,7 +366,6 @@ var igv = (function (igv) {
             var _url = $(this).val();
 
             if (igv.TrackFileLoad.isIndexFile(_url)) {
-
                 trackFileLoader.warnWithMessage('Error. Must enter data file URL.');
                 $(this).val(undefined);
             } else if (false === igv.TrackFileLoad.isIndexable(_url)) {
@@ -408,14 +429,21 @@ var igv = (function (igv) {
         $ok.hide();
 
         $ok.on('click', function (e) {
-            var _url,
+            var extension,
+                _url,
                 _indexURL;
 
             _url = ("" === trackFileLoader.$url_input.val()) ? undefined : trackFileLoader.$url_input.val();
             _indexURL = ("" === trackFileLoader.$index_url_input.val()) ? undefined : trackFileLoader.$index_url_input.val();
 
-            igv.browser.loadTrack( { url: _url, indexURL: _indexURL } );
-            doDismiss(trackFileLoader);
+            extension = igv.getExtension({ url: _url });
+            if (undefined === _indexURL && false === igv.TrackFileLoad.indexFileExtensions[ extension ].optional) {
+                trackFileLoader.warnWithMessage('ERROR. ' + extension + ' files require an index file URL.');
+            } else {
+                igv.browser.loadTrack( { url: _url, indexURL: _indexURL } );
+                doDismiss(trackFileLoader);
+            }
+
         });
 
         // cancel
