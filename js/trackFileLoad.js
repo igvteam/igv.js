@@ -366,7 +366,9 @@ var igv = (function (igv) {
         trackFileLoader.$url_input_container.append(trackFileLoader.$url_input);
 
         trackFileLoader.$url_input.on( 'change', function( e ) {
-            var _url = $(this).val();
+            var _url = $(this).val(),
+                extension,
+                str;
 
             if (igv.TrackFileLoad.isIndexFile(_url)) {
                 trackFileLoader.warnWithMessage('Error. Must enter data file URL.');
@@ -377,6 +379,11 @@ var igv = (function (igv) {
                 $(this).val(undefined);
                 doDismiss(trackFileLoader);
             } else {
+
+                extension = igv.getExtension({ url: _url });
+                str = ('bam' === extension) ? 'Enter url to an associated index file' : 'Optionally enter url to an associated index file';
+                trackFileLoader.$index_url_input.attr('placeholder', str);
+
 
                 trackFileLoader.$file_input_container.hide();
                 trackFileLoader.$or.hide();
@@ -389,8 +396,10 @@ var igv = (function (igv) {
                 trackFileLoader.$index_url_input.val(undefined);
                 trackFileLoader.$index_url_input.show();
 
-                $ok.show();
-                $cancel.show();
+                if ('bam' !== extension) {
+                    $ok.show();
+                    $cancel.show();
+                }
 
             }
 
@@ -403,12 +412,13 @@ var igv = (function (igv) {
 
 
         // index url input
-        trackFileLoader.$index_url_input = $('<input class="igv-drag-and-drop-url-input" placeholder="Optionally enter url to an associated index file">');
+        trackFileLoader.$index_url_input = $('<input class="igv-drag-and-drop-url-input">');
         trackFileLoader.$index_url_input.hide();
         trackFileLoader.$url_input_container.append(trackFileLoader.$index_url_input);
 
         trackFileLoader.$index_url_input.on( 'change', function( e ) {
-            var _url = $(this).val();
+            var _url = $(this).val(),
+                extension;
 
             if (false === igv.TrackFileLoad.isIndexFile(_url)) {
                 trackFileLoader.warnWithMessage('ERROR. Must enter index file URL.');
@@ -417,6 +427,12 @@ var igv = (function (igv) {
                 trackFileLoader.$index_url_input_feedback.text( ('.../' + _url.split("/").pop()) );
                 trackFileLoader.$index_url_input_feedback.show();
                 $(this).hide();
+
+                extension = igv.getExtension({ url: _url });
+                if ('bai' === extension) {
+                    $ok.show();
+                    $cancel.show();
+                }
             }
         });
 
