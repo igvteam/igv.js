@@ -276,6 +276,9 @@ var igv = (function (igv) {
             extension = igv.getExtension({ url: trackFileLoader.file });
             if (undefined === trackFileLoader.indexFile && false === igv.TrackFileLoad.indexFileExtensions[ extension ].optional) {
                 trackFileLoader.warnWithMessage('ERROR. ' + extension + ' files require an index file.');
+            } else if (undefined === trackFileLoader.indexFile && true === igv.TrackFileLoad.indexFileExtensions[ extension ].optional) {
+                igv.browser.loadTrack( { url: trackFileLoader.file, indexURL: undefined, indexed: false } );
+                doDismiss(trackFileLoader);
             } else {
                 igv.browser.loadTrack( { url: trackFileLoader.file, indexURL: trackFileLoader.indexFile } );
                 doDismiss(trackFileLoader);
@@ -439,6 +442,9 @@ var igv = (function (igv) {
             extension = igv.getExtension({ url: _url });
             if (undefined === _indexURL && false === igv.TrackFileLoad.indexFileExtensions[ extension ].optional) {
                 trackFileLoader.warnWithMessage('ERROR. ' + extension + ' files require an index file URL.');
+            } else if (undefined === _indexURL && true === igv.TrackFileLoad.indexFileExtensions[ extension ].optional) {
+                igv.browser.loadTrack( { url: _url, indexURL: undefined, indexed: false } );
+                doDismiss(trackFileLoader);
             } else {
                 igv.browser.loadTrack( { url: _url, indexURL: _indexURL } );
                 doDismiss(trackFileLoader);
