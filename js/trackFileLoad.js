@@ -122,6 +122,39 @@ var igv = (function (igv) {
         this.$warning.show();
     };
 
+    igv.TrackFileLoad.indexFileExtensions =
+        {
+            bam: { extension:'bai', optional:false },
+            bed: { extension:'idx', optional:true  },
+            vcf: { extension:'tbi', optional:true  }
+        };
+
+    igv.TrackFileLoad.isIndexFile = function (fileOrURL) {
+        var extension,
+            list;
+
+        extension = igv.getExtension({ url: fileOrURL });
+
+        list = _.map(_.values(igv.TrackFileLoad.indexFileExtensions), function (v) {
+            return v.extension;
+        });
+
+        return _.contains(list, extension);
+    };
+
+    igv.TrackFileLoad.isIndexable = function (fileOrURL) {
+
+        var extension;
+
+        if (igv.TrackFileLoad.isIndexFile(fileOrURL)) {
+            return false;
+        } else {
+            extension = igv.getExtension({ url: fileOrURL });
+            return (igv.getExtension({ url: fileOrURL }) !== 'wig' && this.format !== 'seg');
+        }
+
+    };
+
     igv.TrackFileLoad.prototype.loadLocalFile = function (file) {
 
         if (undefined === this.file && igv.TrackFileLoad.isIndexFile(file)) {
@@ -155,39 +188,6 @@ var igv = (function (igv) {
             this.$fa_index_file.removeClass('fa-file-o');
             this.$fa_index_file.addClass('fa-file');
         }
-    };
-
-    igv.TrackFileLoad.indexFileExtensions =
-        {
-            bam: { extension:'bai', optional:false },
-            bed: { extension:'idx', optional:true  },
-            vcf: { extension:'tbi', optional:true  }
-        };
-
-    igv.TrackFileLoad.isIndexFile = function (fileOrURL) {
-        var extension,
-            list;
-
-        extension = igv.getExtension({ url: fileOrURL });
-
-        list = _.map(_.values(igv.TrackFileLoad.indexFileExtensions), function (v) {
-            return v.extension;
-        });
-
-        return _.contains(list, extension);
-    };
-
-    igv.TrackFileLoad.isIndexable = function (fileOrURL) {
-
-        var extension;
-
-        if (igv.TrackFileLoad.isIndexFile(fileOrURL)) {
-            return false;
-        } else {
-            extension = igv.getExtension({ url: fileOrURL });
-            return (igv.getExtension({ url: fileOrURL }) !== 'wig' && this.format !== 'seg');
-        }
-
     };
 
     function drag_drop_surface(trackFileLoader, $parent) {
@@ -460,10 +460,10 @@ var igv = (function (igv) {
     function doDismiss(trackFileLoader) {
 
         // file show/hide
+        trackFileLoader.hideFileIcons();
+
         $('#file_input_ok').hide();
         $('#file_input_cancel').hide();
-
-        trackFileLoader.$url_input_container.show();
 
         trackFileLoader.$file_input.show();
         trackFileLoader.$file_input_blurb.show();
@@ -474,15 +474,21 @@ var igv = (function (igv) {
         trackFileLoader.$fa_index_file.removeClass('fa-file');
         trackFileLoader.$fa_index_file.addClass('fa-file-o');
 
-        // trackFileLoader.$file_icon_container.hide();
-        trackFileLoader.hideFileIcons();
-
-        // url show/hide
-        $('#url_input_ok').hide();
-        $('#url_input_cancel').hide();
+        trackFileLoader.$fa_index_file.removeClass('fa-file-o');
+        trackFileLoader.$fa_index_file.addClass('fa-file');
 
         trackFileLoader.$file_input_container.show();
+
+        trackFileLoader.file = undefined;
+        trackFileLoader.indexFile = undefined;
+
         trackFileLoader.$or.show();
+
+        // url show/hide
+        trackFileLoader.$url_input_container.show();
+
+        $('#url_input_ok').hide();
+        $('#url_input_cancel').hide();
 
         trackFileLoader.$url_input.show();
         trackFileLoader.$index_url_input.hide();
@@ -493,18 +499,11 @@ var igv = (function (igv) {
         trackFileLoader.$url_input.val(undefined);
         trackFileLoader.$index_url_input.val(undefined);
 
-        trackFileLoader.file = undefined;
-        trackFileLoader.indexFile = undefined;
-
         // container hide
         trackFileLoader.$container.hide();
     }
 
     function doPresent(trackFileLoader) {
-
-        trackFileLoader.$fa_index_file.removeClass('fa-file-o');
-        trackFileLoader.$fa_index_file.addClass('fa-file');
-
         trackFileLoader.$container.show();
     }
 
