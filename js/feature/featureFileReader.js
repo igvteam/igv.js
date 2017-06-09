@@ -156,17 +156,15 @@ var igv = (function (igv) {
     };
 
     igv.FeatureFileReader.prototype.isIndexable = function () {
+        var hasIndexURL,
+            isValidType,
+            isIndexed;
 
-        var hasIndexURL = (undefined !== this.config.indexURL),
-            isValidType = (this.format !== 'wig' && this.format !== 'seg');
+        hasIndexURL = (undefined !== this.config.indexURL);
+        isValidType = (this.format !== 'wig' && this.format !== 'seg');
+        isIndexed = (false !== this.config.indexed);
 
-        // Local files are currently not indexable
-        if (this.config.isLocalFile) {
-            return false;
-        }
-        else {
-            return this.config.indexed != false && (hasIndexURL || isValidType);
-        }
+        return isIndexed && (hasIndexURL || isValidType);
     };
 
     /**
