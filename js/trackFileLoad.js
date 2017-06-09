@@ -150,13 +150,15 @@ var igv = (function (igv) {
             return false;
         } else {
             extension = igv.getExtension({ url: fileOrURL });
-            return (igv.getExtension({ url: fileOrURL }) !== 'wig' && this.format !== 'seg');
+            return (extension !== 'wig' && extension !== 'seg');
         }
 
     };
 
     igv.TrackFileLoad.prototype.loadLocalFile = function (file) {
+        var extension;
 
+        extension = igv.getExtension({ url: file });
         if (undefined === this.file && igv.TrackFileLoad.isIndexFile(file)) {
             this.warnWithMessage('ERROR: Must load data file.');
         } else if (false === igv.TrackFileLoad.isIndexFile(file) && false === igv.TrackFileLoad.isIndexable(file)) {
@@ -176,8 +178,12 @@ var igv = (function (igv) {
 
             this.showFileIcons();
 
-            $('#file_input_ok').show();
-            $('#file_input_cancel').show();
+            if ('bam' !== extension) {
+                $('#file_input_ok').show();
+                $('#file_input_cancel').show();
+            } else {
+                this.$index_file_input_blurb.find('strong').text('Choose associated index file');
+            }
 
         } else if (igv.TrackFileLoad.isIndexFile(file)) {
             this.indexFile = file;
@@ -187,6 +193,11 @@ var igv = (function (igv) {
 
             this.$fa_index_file.removeClass('fa-file-o');
             this.$fa_index_file.addClass('fa-file');
+
+            if ('bai' === extension) {
+                $('#file_input_ok').show();
+                $('#file_input_cancel').show();
+            }
         }
     };
 
@@ -242,7 +253,7 @@ var igv = (function (igv) {
             trackFileLoader.loadLocalFile(_.first(e.target.files))
         });
 
-        blurb(trackFileLoader, trackFileLoader.$file_input_container, 'Choose data file', 'igv-track-file-input', 'load-file-blurb');
+        blurb(trackFileLoader.$file_input_container, 'Choose data file', 'igv-track-file-input', 'load-file-blurb');
         trackFileLoader.$file_input_blurb = trackFileLoader.$file_input_container.find('#load-file-blurb');
 
         // load local index file
@@ -253,8 +264,8 @@ var igv = (function (igv) {
             trackFileLoader.loadLocalFile(_.first(e.target.files));
         });
 
-        blurb(trackFileLoader, trackFileLoader.$file_input_container, 'Choose optional index file', 'igv-track-index-file-input', 'load-local-file-blurb');
-        trackFileLoader.$index_file_input_blurb = trackFileLoader.$file_input_container.find('#load-local-file-blurb');
+        blurb(trackFileLoader.$file_input_container, 'Choose optional associated index file', 'igv-track-index-file-input', 'load-local-index-file-blurb');
+        trackFileLoader.$index_file_input_blurb = trackFileLoader.$file_input_container.find('#load-local-index-file-blurb');
 
         trackFileLoader.$index_file_input.hide();
         trackFileLoader.$index_file_input_blurb.hide();
@@ -298,8 +309,9 @@ var igv = (function (igv) {
         // load URL
         url_input_container(trackFileLoader, trackFileLoader.$drag_drop_surface);
 
-        function blurb(trackFileLoader, $parent, phrase, input_id, label_id) {
-            var $label;
+        function blurb($parent, phrase, input_id, label_id) {
+            var $label,
+                $choose_file;
 
             // load local file - blurb
             $label = $('<label>');
@@ -308,9 +320,9 @@ var igv = (function (igv) {
             $label.attr('for', input_id);
             $label.attr('id', label_id);
 
-            trackFileLoader.$choose_file = $('<strong>');
-            trackFileLoader.$choose_file.text(phrase);
-            $label.append(trackFileLoader.$choose_file);
+            $choose_file = $('<strong>');
+            $choose_file.text(phrase);
+            $label.append($choose_file);
 
             $e = $('<span class="igv-drag-drop-surface-blurb">');
             $e.text(' or drop it here');
