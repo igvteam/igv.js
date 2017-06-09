@@ -1115,12 +1115,10 @@
   text-align: center;
   line-height: 100%;
   cursor: pointer; }
-
-.igv-drag-and-drop-close-fa-mouse-out {
-  color: #92b0b3; }
-
-.igv-drag-and-drop-close-fa-mouse-in {
-  color: #36464b; }
+  .igv-drag-and-drop-close-container i.fa-times {
+    color: #92b0b3; }
+  .igv-drag-and-drop-close-container i.fa-times-circle {
+    color: #36464b; }
 
 .igv-drag-drop-surface {
   position: relative;

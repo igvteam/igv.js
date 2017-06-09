@@ -1591,14 +1591,14 @@ $drag-drop-warning-color: red;
 
   cursor: pointer;
 
-}
+  i.fa-times {
+    color: $drag-drop-medium-color;
+  }
 
-.igv-drag-and-drop-close-fa-mouse-out {
-  color: $drag-drop-medium-color;
-}
+  i.fa-times-circle {
+    color: $drag-drop-dark-color;
+  }
 
-.igv-drag-and-drop-close-fa-mouse-in {
-  color: $drag-drop-dark-color;
 }
 
 .igv-drag-drop-surface {

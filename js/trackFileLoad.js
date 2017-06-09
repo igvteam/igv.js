@@ -71,7 +71,6 @@ var igv = (function (igv) {
                 $fa;
 
             $fa = $('<i class="fa">');
-            fa_mouseout();
 
             $fa.hover(fa_mousein, fa_mouseout);
 
@@ -83,14 +82,16 @@ var igv = (function (igv) {
             $container = $('<div class="igv-drag-and-drop-close-container">');
             $container.append($fa);
 
+            fa_mouseout();
+
             function fa_mousein () {
-                $fa.removeClass('fa-times igv-drag-and-drop-close-fa-mouse-out');
-                $fa.addClass('fa-times-circle igv-drag-and-drop-close-fa-mouse-in');
+                $fa.removeClass('fa-times');
+                $fa.addClass('fa-times-circle');
             }
 
             function fa_mouseout () {
-                $fa.removeClass('fa-times-circle igv-drag-and-drop-close-fa-mouse-in');
-                $fa.addClass('fa-times igv-drag-and-drop-close-fa-mouse-out');
+                $fa.removeClass('fa-times-circle');
+                $fa.addClass('fa-times');
             }
 
             return $container;
