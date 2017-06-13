@@ -1741,7 +1741,7 @@ $drag-drop-warning-color: red;
   position: relative;
 
   width: 90%;
-  height: 24px;
+  //height: 24px;
   margin: 4px auto;
 
   color: white;
@@ -1750,9 +1750,9 @@ $drag-drop-warning-color: red;
   font-size: 16px;
   font-weight: 200;
 
-  text-align: center;
-  vertical-align: middle;
-  line-height: 24px;
+  //text-align: center;
+  //vertical-align: middle;
+  //line-height: 24px;
 
   border-style: solid;
   border-radius: 3px;
@@ -1761,10 +1761,13 @@ $drag-drop-warning-color: red;
 
   background-color: $drag-drop-warning-color;
 
+  overflow: auto;
+
   #warning-message {
     float: left;
     width: 90%;
     background-color: transparent;
+    overflow: auto;
   }
 
   #warning-dismiss {

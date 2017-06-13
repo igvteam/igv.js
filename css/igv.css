@@ -1218,24 +1218,22 @@
 .igv-drag-drop-warning {
   position: relative;
   width: 90%;
-  height: 24px;
   margin: 4px auto;
   color: white;
   font-family: 'Open Sans', sans-serif;
   font-size: 16px;
   font-weight: 200;
-  text-align: center;
-  vertical-align: middle;
-  line-height: 24px;
   border-style: solid;
   border-radius: 3px;
   border-width: thin;
   border-color: red;
-  background-color: red; }
+  background-color: red;
+  overflow: auto; }
   .igv-drag-drop-warning #warning-message {
     float: left;
     width: 90%;
-    background-color: transparent; }
+    background-color: transparent;
+    overflow: auto; }
   .igv-drag-drop-warning #warning-dismiss {
     float: right;
     color: white;
