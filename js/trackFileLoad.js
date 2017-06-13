@@ -156,18 +156,65 @@ var igv = (function (igv) {
 
     };
 
-    igv.TrackFileLoad.prototype.loadLocalFile = function (file) {
-        var extension;
+    igv.TrackFileLoad.prototype.loadLocalFiles = function (files) {
 
-        extension = igv.getExtension({ url: file });
-        if (undefined === this.file && igv.TrackFileLoad.isIndexFile(file)) {
+        var result,
+            extension,
+            dataFiles,
+            indexFiles,
+            indexNone,
+            indexOptional,
+            indexRequired;
+
+        result = _.filter(files, function (f) { return igv.TrackFileLoad.isIndexFile(f); });
+        if (_.size(result) > 0) {
+            indexFiles = {};
+            _.each(result, function (f) {
+                var parts,
+                    str;
+
+                parts = f.name.slice(0, -4).split('.');
+                if (_.size(parts) > 1) {
+                    parts.pop();
+                    str = parts.join('.');
+                } else {
+                    str = parts;
+                }
+
+                indexFiles[ str ] = { file: f, extension: igv.getExtension({ url: f }) };
+            });
+        }
+
+        result = _.filter(files, function (f) { return !igv.TrackFileLoad.isIndexFile(f); });
+        if (_.size(result) > 0) {
+            dataFiles = {};
+            _.each(result, function (f) {
+                dataFiles[ f.name.slice(0, -4) ] = { file: f, extension: igv.getExtension({ url: f }) };
+            });
+        }
+
+        return;
+
+
+
+
+
+
+
+
+
+
+
+
+        extension = igv.getExtension({ url: files });
+        if (undefined === this.file && igv.TrackFileLoad.isIndexFile(files)) {
             this.warnWithMessage('ERROR: Must load data file.');
-        } else if (false === igv.TrackFileLoad.isIndexFile(file) && false === igv.TrackFileLoad.isIndexable(file)) {
-            igv.browser.loadTrack( { url: file } );
+        } else if (false === igv.TrackFileLoad.isIndexFile(files) && false === igv.TrackFileLoad.isIndexable(files)) {
+            igv.browser.loadTrack( { url: files } );
             doDismiss(this);
-        } else if (false === igv.TrackFileLoad.isIndexFile(file)) {
+        } else if (false === igv.TrackFileLoad.isIndexFile(files)) {
 
-            this.file = file;
+            this.file = files;
 
             this.$url_input_container.hide();
 
@@ -186,8 +233,8 @@ var igv = (function (igv) {
                 this.$index_file_input_blurb.find('strong').text('Choose associated index file');
             }
 
-        } else if (igv.TrackFileLoad.isIndexFile(file)) {
-            this.indexFile = file;
+        } else if (igv.TrackFileLoad.isIndexFile(files)) {
+            this.indexFile = files;
 
             this.$index_file_input.hide();
             this.$index_file_input_blurb.hide();
@@ -223,7 +270,7 @@ var igv = (function (igv) {
                 $(this).removeClass( 'is-dragover' );
             })
             .on( 'drop', function( e ) {
-                trackFileLoader.loadLocalFile(_.first(e.originalEvent.dataTransfer.files));
+                trackFileLoader.loadLocalFiles(e.originalEvent.dataTransfer.files);
             });
 
 
@@ -251,7 +298,7 @@ var igv = (function (igv) {
         trackFileLoader.$file_input_container.append(trackFileLoader.$file_input);
 
         trackFileLoader.$file_input.on( 'change', function( e ) {
-            trackFileLoader.loadLocalFile(_.first(e.target.files))
+            trackFileLoader.loadLocalFiles(e.target.files)
         });
 
         blurb(trackFileLoader.$file_input_container, 'Choose data file', 'igv-track-file-input', 'load-file-blurb');
@@ -262,7 +309,7 @@ var igv = (function (igv) {
         trackFileLoader.$file_input_container.append(trackFileLoader.$index_file_input);
 
         trackFileLoader.$index_file_input.on( 'change', function( e ) {
-            trackFileLoader.loadLocalFile(_.first(e.target.files));
+            trackFileLoader.loadLocalFiles(e.target.files);
         });
 
         blurb(trackFileLoader.$file_input_container, 'Choose optional associated index file', 'igv-track-index-file-input', 'load-local-index-file-blurb');
