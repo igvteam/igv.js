@@ -191,7 +191,7 @@ var igv = (function (igv) {
                     return dataFiles[ key ].file.name;
                 });
 
-                str = filenames.join(' ');
+                str = filenames.join(' and ');
                 this.warnWithMessage('ERROR: ' + str + ' require an associated index file.');
             } else {
                 doDismiss(this);
@@ -203,9 +203,9 @@ var igv = (function (igv) {
 
             blurb_0 = _.map(indexFiles, function (m) {
                     return m.name;
-                }).join(' ') + (_.size(missing) > 1 ? ' are' : ' is');
+                }).join(' and ');
 
-            blurb_0 += ' missing an associated data file.';
+            blurb_0 += ' require an associated data file.';
 
             this.warnWithMessage('ERROR: ' + blurb_0);
         }
@@ -275,8 +275,8 @@ var igv = (function (igv) {
             filenames = _.map(keysMissing, function (key) {
                 return indexFiles[ key ].name;
             });
-            blurb = filenames.join(' ') + (_.size(filenames) > 1 ? ' are' : ' is');
-            blurb += ' missing an associated data file.';
+            blurb = filenames.join(' and ');
+            blurb += ' require an associated data file.';
             return { missing: keysMissing, blurb: blurb };
         } else {
             return undefined;
@@ -309,8 +309,8 @@ var igv = (function (igv) {
                 return dataFiles[ key ].file.name;
             });
 
-            blurb = filenames.join(' ') + (_.size(filenames) > 1 ? ' are' : ' is');
-            blurb += ' missing an associated index file.';
+            blurb = filenames.join(' and ');
+            blurb += ' require an associated index file.';
             return { missing: keysMissing, blurb: blurb };
         } else {
             return undefined;

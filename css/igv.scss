@@ -9,7 +9,9 @@ $igv-default-border-color: #bfbfbf;
 $igv-ruler-sweeper-color: rgba(68, 134, 247, 0.25);
 $igv-ruler-blue-color: rgb(0, 102, 255);
 
+$igv-light-grey-color: #bfbfbf;
 $igv-grey-color: #7F7F7F;
+$igv-dark-grey-color: #373737;
 
 // drag & drop
 $drag-drop-dark-color: #36464b;
@@ -1710,26 +1712,30 @@ $drag-drop-warning-color: red;
   //height: 24px;
   margin: 4px auto;
 
-  color: white;
+  color: $igv-dark-grey-color;
 
   font-family: 'Open Sans', sans-serif;
-  font-size: 16px;
-  font-weight: 200;
+  font-size: 18px;
+  font-weight: 400;
 
-  //text-align: center;
+  text-align: left;
   //vertical-align: middle;
   //line-height: 24px;
 
   border-style: solid;
   border-radius: 3px;
   border-width: thin;
-  border-color: $drag-drop-warning-color;
+  border-color: $igv-dark-grey-color;
 
-  background-color: $drag-drop-warning-color;
+  background-color: white;
 
   overflow: auto;
 
   #warning-message {
+    padding-top:4px;
+    padding-bottom:4px;
+    padding-left:8px;
+
     float: left;
     width: 90%;
     background-color: transparent;
@@ -1738,7 +1744,8 @@ $drag-drop-warning-color: red;
 
   #warning-dismiss {
     float: right;
-    color: white;
+    color: $igv-light-grey-color;
+    padding-top: 2px;
     padding-right: 4px;
   }
 
@@ -1746,7 +1753,7 @@ $drag-drop-warning-color: red;
   #warning-dismiss:focus,
   #warning-dismiss:active {
     cursor: pointer;
-    color: #7f0000;
+    color: $igv-dark-grey-color;
   }
 
 }
