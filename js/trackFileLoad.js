@@ -164,10 +164,13 @@ var igv = (function (igv) {
             indexFiles,
             missing,
             configurations,
-            missingDataFilesAndBlurb,
-            missingIndexFilesAndBlurb,
+            ifMissingDf,
+            dfMissingIf,
             dataF,
             indexF,
+            keysMissing,
+            keysPresent,
+            filenames,
             str,
             blurb_0,
             blurb_1;
@@ -182,24 +185,36 @@ var igv = (function (igv) {
         // if there are no index files
         else if (undefined === indexFiles) {
 
-            // identify any data file that lack an associated index file
-            missing = _.filter(dataFiles, function (dataFile) {
-                return false === igv.TrackFileLoad.keyToIndexExtension[ dataFile.indexExtensionLookup ].optional;
+            keysMissing = [];
+            _.each(dataFiles, function (dataFile, key) {
+                // if data file requires an associated index file
+                if (false === igv.TrackFileLoad.keyToIndexExtension[ dataFile.indexExtensionLookup ].optional) {
+                    keysMissing.push(key);
+                }
             });
 
-            // notify user about missing index files
-            if (_.size(missing) > 0) {
-                str = _.map(missing, function (m) { return m.file.name; }).join(' ');
-                this.warnWithMessage('ERROR: ' + str + ' require an associated index file.');
-            }
+            // render files that don't require and index file
+            keysPresent = _.difference(_.keys(dataFiles), keysMissing);
+            dataF = (_.size(keysPresent) > 0) ? _.pick(dataFiles, keysPresent) : undefined;
 
-            // render and files that don't require and index file
-            dataF = _.difference(dataFiles, missing);
-            if (_.size(dataF) > 0) {
+            if (dataF) {
                 configurations = _.map(_.pluck(dataF, 'file'), function (f) {
                     return { url: f, indexed: false }
                 });
                 igv.browser.loadTracksWithConfigList(configurations);
+            }
+
+            // notify user about missing index files
+            if (_.size(keysMissing) > 0) {
+
+                filenames = _.map(keysMissing, function (key) {
+                    return dataFiles[ key ].file.name;
+                });
+
+                str = filenames.join(' ');
+                this.warnWithMessage('ERROR: ' + str + ' require an associated index file.');
+            } else {
+                doDismiss(this);
             }
 
         }
@@ -217,12 +232,12 @@ var igv = (function (igv) {
         // We have a mix of data and index files.
         else {
 
-            missingIndexFilesAndBlurb = missingIndexFilesAndWarningBlurb(dataFiles, indexFiles);
-            missingDataFilesAndBlurb = missingDataFilesAndWarningBlurb(dataFiles, indexFiles);
+            dfMissingIf = dataFilesMissingAssociatedIndexFilesAndWarningBlurb(dataFiles, indexFiles);
+            ifMissingDf = indexFilesMissingAssociatedDataFilesAndWarningBlurb(dataFiles, indexFiles);
 
             str = undefined;
-            blurb_0 = (missingIndexFilesAndBlurb) ? missingIndexFilesAndBlurb.blurb : undefined;
-            blurb_1 = ( missingDataFilesAndBlurb) ?  missingDataFilesAndBlurb.blurb : undefined;
+            blurb_0 = (dfMissingIf) ? dfMissingIf.blurb : undefined;
+            blurb_1 = ( ifMissingDf) ?  ifMissingDf.blurb : undefined;
             if (blurb_0 && blurb_1) {
                 str = blurb_0 + ' ' + blurb_1;
             } else if (blurb_0) {
@@ -231,17 +246,16 @@ var igv = (function (igv) {
                 str = blurb_1;
             }
 
-            indexF = (missingIndexFilesAndBlurb) ? _.difference(indexFiles, missingIndexFilesAndBlurb.missing) : indexFiles;
-             dataF = ( missingDataFilesAndBlurb) ? _.difference( dataFiles,  missingDataFilesAndBlurb.missing) : dataFiles;
+            keysPresent = (dfMissingIf) ? _.difference(_.keys(dataFiles), dfMissingIf.missing) : _.keys(dataFiles);
+            dataF = (_.size(keysPresent) > 0) ? _.pick(dataFiles, keysPresent) : undefined;
 
-            if (str) {
-                this.warnWithMessage('ERROR: ' + str);
-            }
+            keysPresent = (ifMissingDf) ? _.difference(_.keys(indexFiles), ifMissingDf.missing) : _.keys(indexFiles);
+            indexF = (_.size(keysPresent) > 0) ? _.pick(indexFiles, keysPresent) : undefined;
 
-            if (_.size(dataF) > 0 && _.size(indexF)) {
+            if (dataF) {
                 configurations = _.map(_.keys(dataF), function (key) {
 
-                    if (indexF[ key ]) {
+                    if (indexF && indexF[ key ]) {
                         return { url: dataF[ key ].file, indexURL: indexF[ key ] }
                     } else {
                         return { url: dataF[ key ].file, indexed: false }
@@ -250,6 +264,11 @@ var igv = (function (igv) {
                 });
 
                 igv.browser.loadTracksWithConfigList(configurations);
+            }
+
+            if (str) {
+                this.warnWithMessage('ERROR: ' + str);
+            } else {
                 doDismiss(this);
             }
 
@@ -257,57 +276,64 @@ var igv = (function (igv) {
 
     };
 
-    function missingDataFilesAndWarningBlurb(dataFiles, indexFiles) {
-        var filtered,
+    function indexFilesMissingAssociatedDataFilesAndWarningBlurb(dataFiles, indexFiles) {
+        var keysMissing,
+            filenames,
             blurb;
 
-        filtered = _.filter(indexFiles, function (indexFile, key) {
+        keysMissing = [];
+        _.each(indexFiles, function (indexFile, key) {
 
-            // return undefined === dataFiles[ key ] && false === igv.TrackFileLoad.keyToIndexExtension[ indexFile.indexExtensionLookup ].optional;
-
-            // if the data file associated with this index file is missing we have a missing index file
-            return undefined === dataFiles[ key ];
+            // if an associated data file is not found
+            if (undefined === dataFiles[ key ]) {
+                keysMissing.push(key);
+            }
         });
 
         blurb = '';
-        if (_.size(filtered) > 0) {
-            blurb = _.map(filtered, function (m) { return m.name; }).join(' ') + (_.size(filtered) > 1 ? ' are' : ' is');
+        if (_.size(keysMissing) > 0) {
+            filenames = _.map(keysMissing, function (key) {
+                return indexFiles[ key ].name;
+            });
+            blurb = filenames.join(' ') + (_.size(filenames) > 1 ? ' are' : ' is');
             blurb += ' missing an associated data file.';
-            return { missing: filtered, blurb: blurb };
+            return { missing: keysMissing, blurb: blurb };
         } else {
             return undefined;
         }
 
     }
 
-    function missingIndexFilesAndWarningBlurb(dataFiles, indexFiles) {
-        var filtered,
+    function dataFilesMissingAssociatedIndexFilesAndWarningBlurb(dataFiles, indexFiles) {
+        var keysMissing,
+            filenames,
+            missing,
             blurb;
 
-        filtered = _.filter(dataFiles, function (dataFile, key) {
-            var indexFileIsPresent;
 
-            indexFileIsPresent = (undefined !== indexFiles);
+        keysMissing = [];
+        _.each(dataFiles, function (dataFile, key) {
 
-            // if an index file is required and the associated index file is not present the index file is missing
+            var indexFileIsPresent = (undefined !== indexFiles);
+
+            // if this data file requires an associated index file and none is found
             if ((false === igv.TrackFileLoad.keyToIndexExtension[ dataFile.indexExtensionLookup ].optional) && indexFileIsPresent && (undefined === indexFiles[ key ])) {
-                return true;
-            } else {
-                return false;
+                keysMissing.push(key);
             }
 
         });
 
         blurb = '';
-        if (_.size(filtered) > 0) {
-            blurb = _.map(filtered, function (m) {
-                    return m.file.name;
-                }).join(' ') + (_.size(filtered) > 1 ? ' are' : ' is');
-            blurb += ' missing an associated index file.';
+        if (_.size(keysMissing) > 0) {
+            filenames = _.map(keysMissing, function (key) {
+                return dataFiles[ key ].file.name;
+            });
 
-            return { missing: filtered, blurb: blurb };
+            blurb = filenames.join(' ') + (_.size(filenames) > 1 ? ' are' : ' is');
+            blurb += ' missing an associated index file.';
+            return { missing: keysMissing, blurb: blurb };
         } else {
-            return undefined
+            return undefined;
         }
 
     }
