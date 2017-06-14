@@ -429,26 +429,8 @@ var igv = (function (igv) {
             trackFileLoader.loadLocalFiles(e.target.files)
         });
 
-        blurb(trackFileLoader.$file_input_container, 'Choose data file', 'igv-track-file-input', 'load-file-blurb');
+        blurb(trackFileLoader.$file_input_container, 'Choose file(s)', 'igv-track-file-input', 'load-file-blurb');
         trackFileLoader.$file_input_blurb = trackFileLoader.$file_input_container.find('#load-file-blurb');
-
-        // load local index file
-        trackFileLoader.$index_file_input = $('<input id="igv-track-index-file-input" class="igv-track-file-input-css" type="file" name="files[]" data-multiple-caption="{count} files selected" multiple="">');
-        trackFileLoader.$file_input_container.append(trackFileLoader.$index_file_input);
-
-        trackFileLoader.$index_file_input.on( 'change', function( e ) {
-            trackFileLoader.loadLocalFiles(e.target.files);
-        });
-
-        blurb(trackFileLoader.$file_input_container, 'Choose optional associated index file', 'igv-track-index-file-input', 'load-local-index-file-blurb');
-        trackFileLoader.$index_file_input_blurb = trackFileLoader.$file_input_container.find('#load-local-index-file-blurb');
-
-        trackFileLoader.$index_file_input.hide();
-        trackFileLoader.$index_file_input_blurb.hide();
-
-        // trackFileLoader.$fa_index_file.on('click', function () {
-        //     trackFileLoader.$index_file_input.click();
-        // });
 
         // ok
         $ok = $('<div id="file_input_ok" class="igv-drag-drop-ok">');
@@ -501,7 +483,7 @@ var igv = (function (igv) {
             $label.append($choose_file);
 
             $e = $('<span class="igv-drag-drop-surface-blurb">');
-            $e.text(' or drop it here');
+            $e.text(' or drop file(s) here');
             $label.append($e);
 
         }
@@ -660,15 +642,6 @@ var igv = (function (igv) {
 
         trackFileLoader.$file_input.show();
         trackFileLoader.$file_input_blurb.show();
-
-        trackFileLoader.$index_file_input.hide();
-        trackFileLoader.$index_file_input_blurb.hide();
-
-        // trackFileLoader.$fa_index_file.removeClass('fa-file');
-        // trackFileLoader.$fa_index_file.addClass('fa-file-o');
-        //
-        // trackFileLoader.$fa_index_file.removeClass('fa-file-o');
-        // trackFileLoader.$fa_index_file.addClass('fa-file');
 
         trackFileLoader.$file_input_container.show();
 

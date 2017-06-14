@@ -1138,36 +1138,6 @@
 .igv-drag-drop-surface .igv-drag-drop-surface-blurb {
   display: inline; }
 
-.igv-drag-drop-file-icon-container {
-  position: relative;
-  width: 100%;
-  margin: 16px auto;
-  display: flex;
-  flex-flow: row;
-  flex-wrap: nowrap;
-  justify-content: center; }
-
-.igv-drag-drop-fa-hidden {
-  display: block;
-  color: #c8dadf;
-  margin: 8px; }
-
-.igv-drag-drop-fa-file {
-  display: block;
-  color: #92b0b3;
-  margin: 8px; }
-
-.igv-drag-drop-fa-file-o {
-  display: block;
-  color: #36464b;
-  margin: 8px; }
-
-.igv-drag-drop-fa-file-o:hover,
-.igv-drag-drop-fa-file-o:focus,
-.igv-drag-drop-fa-file-o:active {
-  cursor: pointer;
-  color: #39bfd3; }
-
 .igv-drag-and-drop-url-input-container {
   position: relative;
   width: 96%;

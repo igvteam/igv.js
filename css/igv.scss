@@ -1628,45 +1628,6 @@ $drag-drop-warning-color: red;
   display: inline;
 }
 
-.igv-drag-drop-file-icon-container {
-  position: relative;
-  width: 100%;
-  margin: 16px auto;
-
-  display:flex;
-  flex-flow: row;
-  flex-wrap: nowrap;
-  justify-content: center;
-
-
-
-}
-
-.igv-drag-drop-fa-hidden {
-  display: block;
-  color: $drag-drop-light-color;
-  margin: 8px;
-}
-
-.igv-drag-drop-fa-file {
-  display: block;
-  color: $drag-drop-medium-color;
-  margin: 8px;
-}
-
-.igv-drag-drop-fa-file-o {
-  display: block;
-  color: $drag-drop-dark-color;
-  margin: 8px;
-}
-
-.igv-drag-drop-fa-file-o:hover,
-.igv-drag-drop-fa-file-o:focus,
-.igv-drag-drop-fa-file-o:active  {
-  cursor: pointer;
-  color: $drag-drop-highlight-color;
-}
-
 .igv-drag-and-drop-url-input-container {
   position: relative;
   width: 96%;
