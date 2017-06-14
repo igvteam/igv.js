@@ -49,8 +49,6 @@ var igv = (function (igv) {
         // dismiss drag & drop widget
         this.$container.append( dismissButton() );
 
-        this.hideFileIcons();
-
         // present drag & drop widget
         this.$presentationButton = $('<div class="igv-drag-and-drop-presentation-button">');
         this.$presentationButton.text('Load Track');
@@ -98,24 +96,6 @@ var igv = (function (igv) {
 
         }
 
-    };
-
-    igv.TrackFileLoad.prototype.hideFileIcons = function () {
-
-        this.$fa_file.removeClass('igv-drag-drop-fa-file');
-        this.$fa_file.addClass('igv-drag-drop-fa-hidden');
-
-        this.$fa_index_file.removeClass('igv-drag-drop-fa-file-o');
-        this.$fa_index_file.addClass('igv-drag-drop-fa-hidden');
-    };
-
-    igv.TrackFileLoad.prototype.showFileIcons = function () {
-
-        this.$fa_file.removeClass('igv-drag-drop-fa-hidden');
-        this.$fa_file.addClass('igv-drag-drop-fa-file');
-
-        this.$fa_index_file.removeClass('igv-drag-drop-fa-hidden');
-        this.$fa_index_file.addClass('igv-drag-drop-fa-file-o');
     };
 
     igv.TrackFileLoad.prototype.warnWithMessage = function (message) {
@@ -437,22 +417,6 @@ var igv = (function (igv) {
                 trackFileLoader.loadLocalFiles(e.originalEvent.dataTransfer.files);
             });
 
-
-        trackFileLoader.$file_icon_container = $('<div class="igv-drag-drop-file-icon-container">');
-        trackFileLoader.$drag_drop_surface.append(trackFileLoader.$file_icon_container);
-
-        //
-        trackFileLoader.$fa_file = $('<i class="fa fa-5x fa-file igv-drag-drop-fa-file" aria-hidden="true">');
-        trackFileLoader.$file_icon_container.append(trackFileLoader.$fa_file);
-
-        //
-        trackFileLoader.$fa_index_file = $('<i class="fa fa-5x fa-file-o igv-drag-drop-fa-file-o" aria-hidden="true">');
-        trackFileLoader.$file_icon_container.append(trackFileLoader.$fa_index_file);
-
-        trackFileLoader.hideFileIcons();
-        // trackFileLoader.$file_icon_container.hide();
-
-
         // load local file container
         trackFileLoader.$file_input_container = $('<div class="igv-drag-drop-file-input">');
         trackFileLoader.$drag_drop_surface.append(trackFileLoader.$file_input_container);
@@ -482,9 +446,9 @@ var igv = (function (igv) {
         trackFileLoader.$index_file_input.hide();
         trackFileLoader.$index_file_input_blurb.hide();
 
-        trackFileLoader.$fa_index_file.on('click', function () {
-            trackFileLoader.$index_file_input.click();
-        });
+        // trackFileLoader.$fa_index_file.on('click', function () {
+        //     trackFileLoader.$index_file_input.click();
+        // });
 
         // ok
         $ok = $('<div id="file_input_ok" class="igv-drag-drop-ok">');
@@ -691,9 +655,6 @@ var igv = (function (igv) {
 
     function doDismiss(trackFileLoader) {
 
-        // file show/hide
-        trackFileLoader.hideFileIcons();
-
         $('#file_input_ok').hide();
         $('#file_input_cancel').hide();
 
@@ -703,11 +664,11 @@ var igv = (function (igv) {
         trackFileLoader.$index_file_input.hide();
         trackFileLoader.$index_file_input_blurb.hide();
 
-        trackFileLoader.$fa_index_file.removeClass('fa-file');
-        trackFileLoader.$fa_index_file.addClass('fa-file-o');
-
-        trackFileLoader.$fa_index_file.removeClass('fa-file-o');
-        trackFileLoader.$fa_index_file.addClass('fa-file');
+        // trackFileLoader.$fa_index_file.removeClass('fa-file');
+        // trackFileLoader.$fa_index_file.addClass('fa-file-o');
+        //
+        // trackFileLoader.$fa_index_file.removeClass('fa-file-o');
+        // trackFileLoader.$fa_index_file.addClass('fa-file');
 
         trackFileLoader.$file_input_container.show();
 

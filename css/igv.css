@@ -1101,6 +1101,10 @@
   width: 50%;
   text-align: center;
   margin: 0 auto;
+  padding-top: 64px;
+  padding-bottom: 8px;
+  padding-left: 16px;
+  padding-right: 16px;
   z-index: 2000;
   background-color: #c8dadf;
   display: flex;
