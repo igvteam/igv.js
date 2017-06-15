@@ -557,9 +557,10 @@ var igv = (function (igv) {
                 trackFileLoader.$url_input_feedback.show();
                 $(this).hide();
 
-                extension = igv.getExtension({ url: _url });
-                str = ('bam' === extension) ? 'Enter url to an associated index file' : 'Optionally enter url to an associated index file';
-                trackFileLoader.$index_url_input.attr('placeholder', str);
+                // extension = igv.getExtension({ url: _url });
+                // str = ('bam' === extension) ? 'Enter url to an associated index file' : 'Optionally enter url to an associated index file';
+                // trackFileLoader.$index_url_input.attr('placeholder', str);
+
                 trackFileLoader.$index_url_input.val(undefined);
 
                 $ok.show();
@@ -575,7 +576,7 @@ var igv = (function (igv) {
 
 
         // index url input
-        trackFileLoader.$index_url_input = $('<input class="igv-drag-and-drop-url-input">');
+        trackFileLoader.$index_url_input = $('<input class="igv-drag-and-drop-url-input" placeholder="enter associated index file URL">');
         trackFileLoader.$url_input_container.append(trackFileLoader.$index_url_input);
 
         trackFileLoader.$index_url_input.on( 'change', function( e ) {
@@ -604,17 +605,21 @@ var igv = (function (igv) {
         $ok.hide();
 
         $ok.on('click', function (e) {
-            var extension,
-                _url,
-                _indexURL;
+            var _url,
+                _indexURL,
+                extension,
+                key;
 
-            _url = ("" === trackFileLoader.$url_input.val()) ? undefined : trackFileLoader.$url_input.val();
+                 _url = ("" === trackFileLoader.$url_input.val()      ) ? undefined : trackFileLoader.$url_input.val();
             _indexURL = ("" === trackFileLoader.$index_url_input.val()) ? undefined : trackFileLoader.$index_url_input.val();
 
             extension = igv.getExtension({ url: _url });
-            if (undefined === _indexURL && false === igv.TrackFileLoad.keyToIndexExtension[ extension ].optional) {
-                trackFileLoader.warnWithMessage('ERROR. ' + extension + ' files require an index file URL.');
-            } else if (undefined === _indexURL && true === igv.TrackFileLoad.keyToIndexExtension[ extension ].optional) {
+            key = (igv.TrackFileLoad.keyToIndexExtension[ extension ]) ? extension : 'any';
+            if (undefined === _indexURL && false === igv.TrackFileLoad.keyToIndexExtension[ key ].optional) {
+                trackFileLoader.warnWithMessage('ERROR. A ' + extension + ' data URL requires an associated index URL.');
+            } else if (undefined === _url ) {
+                trackFileLoader.warnWithMessage('ERROR. A data URL must be entered.');
+            } else if (undefined === _indexURL && true === igv.TrackFileLoad.keyToIndexExtension[ key ].optional) {
                 igv.browser.loadTrack( { url: _url, indexURL: undefined, indexed: false } );
                 doDismiss(trackFileLoader);
             } else {
