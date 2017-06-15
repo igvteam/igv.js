@@ -113,16 +113,10 @@ var igv = (function (igv) {
     igv.TrackFileLoad.indexExtensionToKey = _.invert(_.mapObject(igv.TrackFileLoad.keyToIndexExtension, function (val) { return val.extension; }));
 
     igv.TrackFileLoad.isIndexFile = function (fileOrURL) {
-        var extension,
-            list;
+        var extension;
 
         extension = igv.getExtension({ url: fileOrURL });
-
-        list = _.map(_.values(igv.TrackFileLoad.keyToIndexExtension), function (v) {
-            return v.extension;
-        });
-
-        return _.contains(list, extension);
+        return _.contains(_.keys(igv.TrackFileLoad.indexExtensionToKey), extension);
     };
 
     igv.TrackFileLoad.isIndexable = function (fileOrURL) {
@@ -542,7 +536,7 @@ var igv = (function (igv) {
 
             _url = $(this).val();
             if (igv.TrackFileLoad.isIndexFile(_url)) {
-                trackFileLoader.warnWithMessage('Error. Must enter data file URL.');
+                trackFileLoader.warnWithMessage('Error. Must enter data URL.');
                 $(this).val(undefined);
             } else if (false === igv.TrackFileLoad.isIndexable(_url)) {
                 igv.browser.loadTrack( { url: _url, indexed: false } );
@@ -556,12 +550,6 @@ var igv = (function (igv) {
                 trackFileLoader.$url_input_feedback.text( ('.../' + _url.split("/").pop()) );
                 trackFileLoader.$url_input_feedback.show();
                 $(this).hide();
-
-                // extension = igv.getExtension({ url: _url });
-                // str = ('bam' === extension) ? 'Enter url to an associated index file' : 'Optionally enter url to an associated index file';
-                // trackFileLoader.$index_url_input.attr('placeholder', str);
-
-                trackFileLoader.$index_url_input.val(undefined);
 
                 $ok.show();
                 $cancel.show();
@@ -584,7 +572,7 @@ var igv = (function (igv) {
 
             _url = $(this).val();
             if (false === igv.TrackFileLoad.isIndexFile(_url)) {
-                trackFileLoader.warnWithMessage('ERROR. Must enter index file URL.');
+                trackFileLoader.warnWithMessage('ERROR. Must enter index URL.');
                 $(this).val(undefined);
             } else {
                 trackFileLoader.$index_url_input_feedback.text( ('.../' + _url.split("/").pop()) );
