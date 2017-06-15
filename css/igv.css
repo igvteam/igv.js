@@ -1241,7 +1241,8 @@
   font-size: 18px;
   font-weight: 200;
   text-align: center;
-  padding-left: 4px;
+  padding: 4px;
+  margin: 8px;
   border: 0;
   border-bottom: 2px solid #36464b; }
 

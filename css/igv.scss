@@ -1788,7 +1788,9 @@ $drag-drop-warning-color: red;
 
   text-align: center;
 
-  padding-left: 4px;
+  //padding-left: 4px;
+  padding: 4px;
+  margin: 8px;
 
   border: 0;
   border-bottom: 2px solid $drag-drop-dark-color;
