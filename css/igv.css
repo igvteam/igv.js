@@ -1112,6 +1112,9 @@
   flex-wrap: nowrap;
   justify-content: space-around; }
 
+.igv-drag-drop-container.is-dragover {
+  background-color: rgba(200, 218, 223, 0.51); }
+
 .igv-drag-and-drop-close-container {
   position: absolute;
   top: 16px;
@@ -1129,11 +1132,7 @@
   color: #36464b;
   font-family: 'Open Sans', sans-serif;
   font-size: 18px;
-  font-weight: 200;
-  background-color: #c8dadf; }
-
-.igv-drag-drop-surface.is-dragover {
-  background-color: rgba(200, 218, 223, 0.51); }
+  font-weight: 200; }
 
 .igv-drag-drop-surface .igv-drag-drop-surface-blurb {
   display: inline; }

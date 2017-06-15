@@ -402,10 +402,10 @@ var igv = (function (igv) {
                 e.stopPropagation();
             })
             .on( 'dragover dragenter', function() {
-                $(this).addClass( 'is-dragover' );
+                $('.igv-drag-drop-container').addClass( 'is-dragover' );
             })
             .on( 'dragleave dragend drop', function() {
-                $(this).removeClass( 'is-dragover' );
+                $('.igv-drag-drop-container').removeClass( 'is-dragover' );
             })
             .on( 'drop', function( e ) {
                 trackFileLoader.loadLocalFiles(e.originalEvent.dataTransfer.files);
@@ -547,7 +547,7 @@ var igv = (function (igv) {
                 trackFileLoader.$file_input_container.hide();
                 trackFileLoader.$or.hide();
 
-                trackFileLoader.$url_input_feedback.text( ('.../' + _url.split("/").pop()) );
+                trackFileLoader.$url_input_feedback.text( (_url.split("/").pop()) );
                 trackFileLoader.$url_input_feedback.show();
                 $(this).hide();
 
@@ -575,7 +575,7 @@ var igv = (function (igv) {
                 trackFileLoader.warnWithMessage('ERROR. Must enter index URL.');
                 $(this).val(undefined);
             } else {
-                trackFileLoader.$index_url_input_feedback.text( ('.../' + _url.split("/").pop()) );
+                trackFileLoader.$index_url_input_feedback.text( (_url.split("/").pop()) );
                 trackFileLoader.$index_url_input_feedback.show();
                 $(this).hide();
             }

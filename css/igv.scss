@@ -17,6 +17,7 @@ $igv-dark-grey-color: #373737;
 $drag-drop-dark-color: #36464b;
 $drag-drop-medium-color: #92b0b3;
 $drag-drop-light-color: #c8dadf;
+$drag-drop-light-translucent-color: rgba(200, 218, 223, 0.51);
 
 $drag-drop-highlight-color: #39bfd3;
 
@@ -1587,6 +1588,10 @@ $drag-drop-warning-color: red;
 
 }
 
+.igv-drag-drop-container.is-dragover {
+  background-color: $drag-drop-light-translucent-color;
+}
+
 .igv-drag-and-drop-close-container {
 
   position: absolute;
@@ -1617,13 +1622,7 @@ $drag-drop-warning-color: red;
   font-size: 18px;
   font-weight: 200;
 
-  //padding-top: 100px;
-
-  background-color: $drag-drop-light-color;
-}
-
-.igv-drag-drop-surface.is-dragover {
-  background-color: rgba(200, 218, 223, 0.51);
+  //background-color: $drag-drop-light-color;
 }
 
 .igv-drag-drop-surface .igv-drag-drop-surface-blurb {
