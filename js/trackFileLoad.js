@@ -49,8 +49,6 @@ var igv = (function (igv) {
         // dismiss drag & drop widget
         this.$container.append( dismissButton() );
 
-        this.hideFileIcons();
-
         // present drag & drop widget
         this.$presentationButton = $('<div class="igv-drag-and-drop-presentation-button">');
         this.$presentationButton.text('Load Track');
@@ -71,7 +69,6 @@ var igv = (function (igv) {
                 $fa;
 
             $fa = $('<i class="fa">');
-            fa_mouseout();
 
             $fa.hover(fa_mousein, fa_mouseout);
 
@@ -83,14 +80,16 @@ var igv = (function (igv) {
             $container = $('<div class="igv-drag-and-drop-close-container">');
             $container.append($fa);
 
+            fa_mouseout();
+
             function fa_mousein () {
-                $fa.removeClass('fa-times igv-drag-and-drop-close-fa-mouse-out');
-                $fa.addClass('fa-times-circle igv-drag-and-drop-close-fa-mouse-in');
+                $fa.removeClass('fa-times');
+                $fa.addClass('fa-times-circle');
             }
 
             function fa_mouseout () {
-                $fa.removeClass('fa-times-circle igv-drag-and-drop-close-fa-mouse-in');
-                $fa.addClass('fa-times igv-drag-and-drop-close-fa-mouse-out');
+                $fa.removeClass('fa-times-circle');
+                $fa.addClass('fa-times');
             }
 
             return $container;
@@ -99,47 +98,25 @@ var igv = (function (igv) {
 
     };
 
-    igv.TrackFileLoad.prototype.hideFileIcons = function () {
-
-        this.$fa_file.removeClass('igv-drag-drop-fa-file');
-        this.$fa_file.addClass('igv-drag-drop-fa-hidden');
-
-        this.$fa_index_file.removeClass('igv-drag-drop-fa-file-o');
-        this.$fa_index_file.addClass('igv-drag-drop-fa-hidden');
-    };
-
-    igv.TrackFileLoad.prototype.showFileIcons = function () {
-
-        this.$fa_file.removeClass('igv-drag-drop-fa-hidden');
-        this.$fa_file.addClass('igv-drag-drop-fa-file');
-
-        this.$fa_index_file.removeClass('igv-drag-drop-fa-hidden');
-        this.$fa_index_file.addClass('igv-drag-drop-fa-file-o');
-    };
-
     igv.TrackFileLoad.prototype.warnWithMessage = function (message) {
         this.$warning.find('#warning-message').text(message);
         this.$warning.show();
     };
 
-    igv.TrackFileLoad.indexFileExtensions =
+    igv.TrackFileLoad.keyToIndexExtension =
         {
             bam: { extension:'bai', optional:false },
-            bed: { extension:'idx', optional:true  },
-            vcf: { extension:'tbi', optional:true  }
+            any: { extension:'idx', optional:true  },
+            gz:  { extension:'tbi', optional:true  }
         };
 
+    igv.TrackFileLoad.indexExtensionToKey = _.invert(_.mapObject(igv.TrackFileLoad.keyToIndexExtension, function (val) { return val.extension; }));
+
     igv.TrackFileLoad.isIndexFile = function (fileOrURL) {
-        var extension,
-            list;
+        var extension;
 
         extension = igv.getExtension({ url: fileOrURL });
-
-        list = _.map(_.values(igv.TrackFileLoad.indexFileExtensions), function (v) {
-            return v.extension;
-        });
-
-        return _.contains(list, extension);
+        return _.contains(_.keys(igv.TrackFileLoad.indexExtensionToKey), extension);
     };
 
     igv.TrackFileLoad.isIndexable = function (fileOrURL) {
@@ -155,51 +132,260 @@ var igv = (function (igv) {
 
     };
 
-    igv.TrackFileLoad.prototype.loadLocalFile = function (file) {
-        var extension;
+    igv.TrackFileLoad.prototype.loadLocalFiles = function (files) {
 
-        extension = igv.getExtension({ url: file });
-        if (undefined === this.file && igv.TrackFileLoad.isIndexFile(file)) {
-            this.warnWithMessage('ERROR: Must load data file.');
-        } else if (false === igv.TrackFileLoad.isIndexFile(file) && false === igv.TrackFileLoad.isIndexable(file)) {
-            igv.browser.loadTrack( { url: file } );
-            doDismiss(this);
-        } else if (false === igv.TrackFileLoad.isIndexFile(file)) {
+        var dataFiles,
+            indexFiles,
+            missing,
+            configurations,
+            ifMissingDf,
+            dfMissingIf,
+            dataF,
+            indexF,
+            keysMissing,
+            keysPresent,
+            filenames,
+            str,
+            blurb_0,
+            blurb_1;
 
-            this.file = file;
+        dataFiles = extractDataFiles(files);
 
-            this.$url_input_container.hide();
+        indexFiles = extractIndexFiles(files);
 
-            this.$file_input.hide();
-            this.$file_input_blurb.hide();
-
-            this.$index_file_input.show();
-            this.$index_file_input_blurb.show();
-
-            this.showFileIcons();
-
-            if ('bam' !== extension) {
-                $('#file_input_ok').show();
-                $('#file_input_cancel').show();
-            } else {
-                this.$index_file_input_blurb.find('strong').text('Choose associated index file');
-            }
-
-        } else if (igv.TrackFileLoad.isIndexFile(file)) {
-            this.indexFile = file;
-
-            this.$index_file_input.hide();
-            this.$index_file_input_blurb.hide();
-
-            this.$fa_index_file.removeClass('fa-file-o');
-            this.$fa_index_file.addClass('fa-file');
-
-            if ('bai' === extension) {
-                $('#file_input_ok').show();
-                $('#file_input_cancel').show();
-            }
+        if (undefined === dataFiles && undefined === indexFiles) {
+            this.warnWithMessage('ERROR: ' + 'No data or index file(s) provided.');
         }
+        // if there are no index files
+        else if (undefined === indexFiles) {
+
+            keysMissing = [];
+            _.each(dataFiles, function (dataFile, key) {
+                // if data file requires an associated index file
+                if (false === igv.TrackFileLoad.keyToIndexExtension[ dataFile.indexExtensionLookup ].optional) {
+                    keysMissing.push(key);
+                }
+            });
+
+            // render files that don't require and index file
+            keysPresent = _.difference(_.keys(dataFiles), keysMissing);
+            dataF = (_.size(keysPresent) > 0) ? _.pick(dataFiles, keysPresent) : undefined;
+
+            if (dataF) {
+                configurations = _.map(_.pluck(dataF, 'file'), function (f) {
+                    return { url: f, indexed: false }
+                });
+                igv.browser.loadTracksWithConfigList(configurations);
+            }
+
+            // notify user about missing index files
+            if (_.size(keysMissing) > 0) {
+
+                filenames = _.map(keysMissing, function (key) {
+                    return dataFiles[ key ].file.name;
+                });
+
+                str = filenames.join(' and ');
+                this.warnWithMessage('ERROR: ' + str + ' require an associated index file.');
+            } else {
+                doDismiss(this);
+            }
+
+        }
+        // No data files present. All index files are missing their associated data files
+        else if (undefined === dataFiles) {
+
+            blurb_0 = _.map(indexFiles, function (m) {
+                    return m.name;
+                }).join(' and ');
+
+            blurb_0 += ' require an associated data file.';
+
+            this.warnWithMessage('ERROR: ' + blurb_0);
+        }
+        // We have a mix of data and index files.
+        else {
+
+            dfMissingIf = dataFilesMissingAssociatedIndexFilesAndWarningBlurb(dataFiles, indexFiles);
+            ifMissingDf = indexFilesMissingAssociatedDataFilesAndWarningBlurb(dataFiles, indexFiles);
+
+            str = undefined;
+            blurb_0 = (dfMissingIf) ? dfMissingIf.blurb : undefined;
+            blurb_1 = ( ifMissingDf) ?  ifMissingDf.blurb : undefined;
+            if (blurb_0 && blurb_1) {
+                str = blurb_0 + ' ' + blurb_1;
+            } else if (blurb_0) {
+                str = blurb_0;
+            } else if (blurb_1) {
+                str = blurb_1;
+            }
+
+            keysPresent = (dfMissingIf) ? _.difference(_.keys(dataFiles), dfMissingIf.missing) : _.keys(dataFiles);
+            dataF = (_.size(keysPresent) > 0) ? _.pick(dataFiles, keysPresent) : undefined;
+
+            keysPresent = (ifMissingDf) ? _.difference(_.keys(indexFiles), ifMissingDf.missing) : _.keys(indexFiles);
+            indexF = (_.size(keysPresent) > 0) ? _.pick(indexFiles, keysPresent) : undefined;
+
+            if (dataF) {
+                configurations = _.map(_.keys(dataF), function (key) {
+
+                    if (indexF && indexF[ key ]) {
+                        return { url: dataF[ key ].file, indexURL: indexF[ key ] }
+                    } else {
+                        return { url: dataF[ key ].file, indexed: false }
+                    }
+
+                });
+
+                igv.browser.loadTracksWithConfigList(configurations);
+            }
+
+            if (str) {
+                this.warnWithMessage('ERROR: ' + str);
+            } else {
+                doDismiss(this);
+            }
+
+        }
+
     };
+
+    function indexFilesMissingAssociatedDataFilesAndWarningBlurb(dataFiles, indexFiles) {
+        var keysMissing,
+            filenames,
+            blurb;
+
+        keysMissing = [];
+        _.each(indexFiles, function (indexFile, key) {
+
+            // if an associated data file is not found
+            if (undefined === dataFiles[ key ]) {
+                keysMissing.push(key);
+            }
+        });
+
+        blurb = '';
+        if (_.size(keysMissing) > 0) {
+            filenames = _.map(keysMissing, function (key) {
+                return indexFiles[ key ].name;
+            });
+            blurb = filenames.join(' and ');
+            blurb += ' require an associated data file.';
+            return { missing: keysMissing, blurb: blurb };
+        } else {
+            return undefined;
+        }
+
+    }
+
+    function dataFilesMissingAssociatedIndexFilesAndWarningBlurb(dataFiles, indexFiles) {
+        var keysMissing,
+            filenames,
+            missing,
+            blurb;
+
+
+        keysMissing = [];
+        _.each(dataFiles, function (dataFile, key) {
+
+            var indexFileIsPresent = (undefined !== indexFiles);
+
+            // if this data file requires an associated index file and none is found
+            if ((false === igv.TrackFileLoad.keyToIndexExtension[ dataFile.indexExtensionLookup ].optional) && indexFileIsPresent && (undefined === indexFiles[ key ])) {
+                keysMissing.push(key);
+            }
+
+        });
+
+        blurb = '';
+        if (_.size(keysMissing) > 0) {
+            filenames = _.map(keysMissing, function (key) {
+                return dataFiles[ key ].file.name;
+            });
+
+            blurb = filenames.join(' and ');
+            blurb += ' require an associated index file.';
+            return { missing: keysMissing, blurb: blurb };
+        } else {
+            return undefined;
+        }
+
+    }
+
+    function extractIndexFiles (files) {
+        var result,
+            indexFiles;
+
+        result = _.filter(files, function (f) {
+            return igv.TrackFileLoad.isIndexFile(f);
+        });
+
+        if (_.size(result) > 0) {
+            indexFiles = {};
+            _.each(result, function (f) {
+                var parts,
+                    key;
+
+                parts = f.name.slice(0, -4).split('.');
+                if (_.size(parts) > 1) {
+                    parts.pop();
+                    key = parts.join('.');
+                } else {
+                    key = parts;
+                }
+
+                indexFiles[ key ] = f;
+            });
+
+            return indexFiles;
+        } else {
+            return undefined;
+        }
+
+    }
+
+    function extractDataFiles (files) {
+
+        var result,
+            dataFiles;
+
+        result = _.filter(files, function (f) {
+            return !igv.TrackFileLoad.isIndexFile(f);
+        });
+
+        if (_.size(result) > 0) {
+
+            dataFiles = {};
+            _.each(result, function (f) {
+                var parts,
+                    key,
+                    extension,
+                    lookupKey;
+
+                parts = f.name.split('.');
+                if ('gz' === _.last(parts)){
+                    parts.pop();
+                }
+                parts.pop();
+                key = parts.join('.');
+
+                extension = igv.getExtension({ url: f });
+                lookupKey = (_.contains(_.keys(igv.TrackFileLoad.keyToIndexExtension), extension)) ? extension: 'any';
+
+                dataFiles[ key ] =
+                    {
+                        file: f,
+                        extension: extension,
+                        indexExtensionLookup: lookupKey
+                    };
+            });
+
+            return dataFiles;
+        } else {
+            return undefined;
+        }
+
+    }
 
     function drag_drop_surface(trackFileLoader, $parent) {
 
@@ -216,30 +402,14 @@ var igv = (function (igv) {
                 e.stopPropagation();
             })
             .on( 'dragover dragenter', function() {
-                $(this).addClass( 'is-dragover' );
+                $('.igv-drag-drop-container').addClass( 'is-dragover' );
             })
             .on( 'dragleave dragend drop', function() {
-                $(this).removeClass( 'is-dragover' );
+                $('.igv-drag-drop-container').removeClass( 'is-dragover' );
             })
             .on( 'drop', function( e ) {
-                trackFileLoader.loadLocalFile(_.first(e.originalEvent.dataTransfer.files));
+                trackFileLoader.loadLocalFiles(e.originalEvent.dataTransfer.files);
             });
-
-
-        trackFileLoader.$file_icon_container = $('<div class="igv-drag-drop-file-icon-container">');
-        trackFileLoader.$drag_drop_surface.append(trackFileLoader.$file_icon_container);
-
-        //
-        trackFileLoader.$fa_file = $('<i class="fa fa-5x fa-file igv-drag-drop-fa-file" aria-hidden="true">');
-        trackFileLoader.$file_icon_container.append(trackFileLoader.$fa_file);
-
-        //
-        trackFileLoader.$fa_index_file = $('<i class="fa fa-5x fa-file-o igv-drag-drop-fa-file-o" aria-hidden="true">');
-        trackFileLoader.$file_icon_container.append(trackFileLoader.$fa_index_file);
-
-        trackFileLoader.hideFileIcons();
-        // trackFileLoader.$file_icon_container.hide();
-
 
         // load local file container
         trackFileLoader.$file_input_container = $('<div class="igv-drag-drop-file-input">');
@@ -250,29 +420,11 @@ var igv = (function (igv) {
         trackFileLoader.$file_input_container.append(trackFileLoader.$file_input);
 
         trackFileLoader.$file_input.on( 'change', function( e ) {
-            trackFileLoader.loadLocalFile(_.first(e.target.files))
+            trackFileLoader.loadLocalFiles(e.target.files)
         });
 
-        blurb(trackFileLoader.$file_input_container, 'Choose data file', 'igv-track-file-input', 'load-file-blurb');
+        blurb(trackFileLoader.$file_input_container, 'Choose file(s)', 'igv-track-file-input', 'load-file-blurb');
         trackFileLoader.$file_input_blurb = trackFileLoader.$file_input_container.find('#load-file-blurb');
-
-        // load local index file
-        trackFileLoader.$index_file_input = $('<input id="igv-track-index-file-input" class="igv-track-file-input-css" type="file" name="files[]" data-multiple-caption="{count} files selected" multiple="">');
-        trackFileLoader.$file_input_container.append(trackFileLoader.$index_file_input);
-
-        trackFileLoader.$index_file_input.on( 'change', function( e ) {
-            trackFileLoader.loadLocalFile(_.first(e.target.files));
-        });
-
-        blurb(trackFileLoader.$file_input_container, 'Choose optional associated index file', 'igv-track-index-file-input', 'load-local-index-file-blurb');
-        trackFileLoader.$index_file_input_blurb = trackFileLoader.$file_input_container.find('#load-local-index-file-blurb');
-
-        trackFileLoader.$index_file_input.hide();
-        trackFileLoader.$index_file_input_blurb.hide();
-
-        trackFileLoader.$fa_index_file.on('click', function () {
-            trackFileLoader.$index_file_input.click();
-        });
 
         // ok
         $ok = $('<div id="file_input_ok" class="igv-drag-drop-ok">');
@@ -285,9 +437,9 @@ var igv = (function (igv) {
             var extension;
 
             extension = igv.getExtension({ url: trackFileLoader.file });
-            if (undefined === trackFileLoader.indexFile && false === igv.TrackFileLoad.indexFileExtensions[ extension ].optional) {
+            if (undefined === trackFileLoader.indexFile && false === igv.TrackFileLoad.keyToIndexExtension[ extension ].optional) {
                 trackFileLoader.warnWithMessage('ERROR. ' + extension + ' files require an index file.');
-            } else if (undefined === trackFileLoader.indexFile && true === igv.TrackFileLoad.indexFileExtensions[ extension ].optional) {
+            } else if (undefined === trackFileLoader.indexFile && true === igv.TrackFileLoad.keyToIndexExtension[ extension ].optional) {
                 igv.browser.loadTrack( { url: trackFileLoader.file, indexURL: undefined, indexed: false } );
                 doDismiss(trackFileLoader);
             } else {
@@ -325,7 +477,7 @@ var igv = (function (igv) {
             $label.append($choose_file);
 
             $e = $('<span class="igv-drag-drop-surface-blurb">');
-            $e.text(' or drop it here');
+            $e.text(' or drop file(s) here');
             $label.append($e);
 
         }
@@ -378,41 +530,29 @@ var igv = (function (igv) {
         trackFileLoader.$url_input_container.append(trackFileLoader.$url_input);
 
         trackFileLoader.$url_input.on( 'change', function( e ) {
-            var _url = $(this).val(),
+            var _url,
                 extension,
                 str;
 
+            _url = $(this).val();
             if (igv.TrackFileLoad.isIndexFile(_url)) {
-                trackFileLoader.warnWithMessage('Error. Must enter data file URL.');
+                trackFileLoader.warnWithMessage('Error. Must enter data URL.');
                 $(this).val(undefined);
             } else if (false === igv.TrackFileLoad.isIndexable(_url)) {
-
-                igv.browser.loadTrack( { url: _url } );
+                igv.browser.loadTrack( { url: _url, indexed: false } );
                 $(this).val(undefined);
                 doDismiss(trackFileLoader);
             } else {
 
-                extension = igv.getExtension({ url: _url });
-                str = ('bam' === extension) ? 'Enter url to an associated index file' : 'Optionally enter url to an associated index file';
-                trackFileLoader.$index_url_input.attr('placeholder', str);
-
-
                 trackFileLoader.$file_input_container.hide();
                 trackFileLoader.$or.hide();
 
-                trackFileLoader.$url_input_feedback.text( ('.../' + _url.split("/").pop()) );
+                trackFileLoader.$url_input_feedback.text( (_url.split("/").pop()) );
                 trackFileLoader.$url_input_feedback.show();
-
                 $(this).hide();
 
-                trackFileLoader.$index_url_input.val(undefined);
-                trackFileLoader.$index_url_input.show();
-
-                if ('bam' !== extension) {
-                    $ok.show();
-                    $cancel.show();
-                }
-
+                $ok.show();
+                $cancel.show();
             }
 
         });
@@ -424,27 +564,20 @@ var igv = (function (igv) {
 
 
         // index url input
-        trackFileLoader.$index_url_input = $('<input class="igv-drag-and-drop-url-input">');
-        trackFileLoader.$index_url_input.hide();
+        trackFileLoader.$index_url_input = $('<input class="igv-drag-and-drop-url-input" placeholder="enter associated index file URL">');
         trackFileLoader.$url_input_container.append(trackFileLoader.$index_url_input);
 
         trackFileLoader.$index_url_input.on( 'change', function( e ) {
-            var _url = $(this).val(),
-                extension;
+            var _url;
 
+            _url = $(this).val();
             if (false === igv.TrackFileLoad.isIndexFile(_url)) {
-                trackFileLoader.warnWithMessage('ERROR. Must enter index file URL.');
+                trackFileLoader.warnWithMessage('ERROR. Must enter index URL.');
                 $(this).val(undefined);
             } else {
-                trackFileLoader.$index_url_input_feedback.text( ('.../' + _url.split("/").pop()) );
+                trackFileLoader.$index_url_input_feedback.text( (_url.split("/").pop()) );
                 trackFileLoader.$index_url_input_feedback.show();
                 $(this).hide();
-
-                extension = igv.getExtension({ url: _url });
-                if ('bai' === extension) {
-                    $ok.show();
-                    $cancel.show();
-                }
             }
         });
 
@@ -460,17 +593,21 @@ var igv = (function (igv) {
         $ok.hide();
 
         $ok.on('click', function (e) {
-            var extension,
-                _url,
-                _indexURL;
+            var _url,
+                _indexURL,
+                extension,
+                key;
 
-            _url = ("" === trackFileLoader.$url_input.val()) ? undefined : trackFileLoader.$url_input.val();
+                 _url = ("" === trackFileLoader.$url_input.val()      ) ? undefined : trackFileLoader.$url_input.val();
             _indexURL = ("" === trackFileLoader.$index_url_input.val()) ? undefined : trackFileLoader.$index_url_input.val();
 
             extension = igv.getExtension({ url: _url });
-            if (undefined === _indexURL && false === igv.TrackFileLoad.indexFileExtensions[ extension ].optional) {
-                trackFileLoader.warnWithMessage('ERROR. ' + extension + ' files require an index file URL.');
-            } else if (undefined === _indexURL && true === igv.TrackFileLoad.indexFileExtensions[ extension ].optional) {
+            key = (igv.TrackFileLoad.keyToIndexExtension[ extension ]) ? extension : 'any';
+            if (undefined === _indexURL && false === igv.TrackFileLoad.keyToIndexExtension[ key ].optional) {
+                trackFileLoader.warnWithMessage('ERROR. A ' + extension + ' data URL requires an associated index URL.');
+            } else if (undefined === _url ) {
+                trackFileLoader.warnWithMessage('ERROR. A data URL must be entered.');
+            } else if (undefined === _indexURL && true === igv.TrackFileLoad.keyToIndexExtension[ key ].optional) {
                 igv.browser.loadTrack( { url: _url, indexURL: undefined, indexed: false } );
                 doDismiss(trackFileLoader);
             } else {
@@ -493,23 +630,11 @@ var igv = (function (igv) {
 
     function doDismiss(trackFileLoader) {
 
-        // file show/hide
-        trackFileLoader.hideFileIcons();
-
         $('#file_input_ok').hide();
         $('#file_input_cancel').hide();
 
         trackFileLoader.$file_input.show();
         trackFileLoader.$file_input_blurb.show();
-
-        trackFileLoader.$index_file_input.hide();
-        trackFileLoader.$index_file_input_blurb.hide();
-
-        trackFileLoader.$fa_index_file.removeClass('fa-file');
-        trackFileLoader.$fa_index_file.addClass('fa-file-o');
-
-        trackFileLoader.$fa_index_file.removeClass('fa-file-o');
-        trackFileLoader.$fa_index_file.addClass('fa-file');
 
         trackFileLoader.$file_input_container.show();
 
@@ -525,15 +650,15 @@ var igv = (function (igv) {
         $('#url_input_cancel').hide();
 
         trackFileLoader.$url_input.show();
-        trackFileLoader.$index_url_input.hide();
-
+        trackFileLoader.$url_input.val(undefined);
         trackFileLoader.$url_input_feedback.hide();
+
+        trackFileLoader.$index_url_input.show();
+        trackFileLoader.$index_url_input.val(undefined);
         trackFileLoader.$index_url_input_feedback.hide();
 
-        trackFileLoader.$url_input.val(undefined);
-        trackFileLoader.$index_url_input.val(undefined);
+        trackFileLoader.$warning.hide();
 
-        // container hide
         trackFileLoader.$container.hide();
     }
 
