@@ -34,7 +34,7 @@ var igv = (function (igv) {
 
     igv.getFormat = function (name) {
 
-        if (undefined === igv.browser.formats) {
+        if (undefined === igv.browser || undefined === igv.browser.formats) {
             return undefined;
         } else {
             return igv.browser.formats[ name ];
