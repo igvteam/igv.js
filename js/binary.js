@@ -35,6 +35,10 @@ var igv = (function (igv) {
         this.length = dataView.byteLength;
     }
 
+    igv.BinaryParser.prototype.available = function() {
+        return this.length - this.position;
+    }
+    
     igv.BinaryParser.prototype.remLength = function () {
         return this.length - this.position;
     }
@@ -139,6 +143,19 @@ var igv = (function (igv) {
         return s;
     }
 
+    igv.BinaryParser.prototype.getFixedLengthTrimmedString = function (len) {
+
+        var s = "";
+        var i;
+        var c;
+        for (i = 0; i < len; i++) {
+            c = this.view.getUint8(this.position++);
+            if (c > 32) {
+                s += String.fromCharCode(c);
+            }
+        }
+        return s;
+    }
 
     igv.BinaryParser.prototype.getFloat = function () {
 

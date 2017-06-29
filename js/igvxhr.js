@@ -78,7 +78,7 @@ var igvxhr = (function (igvxhr) {
                     headers["Authorization"] = 'Bearer ' + options.token;
                 }
 
-                if (igv.Google.isGoogleURL(url)) {
+                if (isGoogleURL(url)) {
 
                     url = igv.Google.addApiKey(url);
 
@@ -153,7 +153,9 @@ var igvxhr = (function (igvxhr) {
 
                 xhr.onerror = function (event) {
 
-                    if (isCrossDomain(url) && url && !options.crossDomainRetried && igv.browser.crossDomainProxy &&
+                    if (isCrossDomain(url) && !options.crossDomainRetried &&
+                        igv.browser &&
+                        igv.browser.crossDomainProxy &&
                         url != igv.browser.crossDomainProxy) {
 
                         options.sendData = "url=" + url;
@@ -257,6 +259,13 @@ var igvxhr = (function (igvxhr) {
         return result;
     };
 
+    /**
+     * Crude test for google urls.  For optimization, nothing bad happens if this is wrong
+     */
+    function isGoogleURL(url) {
+        return url.includes("googleapis");
+    }
+
     function arrayBufferToBits(arraybuffer, compression) {
 
         var plain,
@@ -274,7 +283,7 @@ var igvxhr = (function (igvxhr) {
         return plain;
     }
 
-    function loadFileSlice (localfile, options) {
+    function loadFileSlice(localfile, options) {
 
         return new Promise(function (fullfill, reject) {
 
@@ -300,7 +309,7 @@ var igvxhr = (function (igvxhr) {
                 // result = igvxhr.arrayBufferToString(fileReader.result, compression);
                 // console.log('loadFileSlice byte length ' + fileReader.result.byteLength);
 
-                fullfill( fileReader.result );
+                fullfill(fileReader.result);
 
             };
 
@@ -321,7 +330,7 @@ var igvxhr = (function (igvxhr) {
 
     }
 
-    function loadFileHelper (localfile, options) {
+    function loadFileHelper(localfile, options) {
 
         return new Promise(function (fullfill, reject) {
 
@@ -410,6 +419,17 @@ var igvxhr = (function (igvxhr) {
     igv.AbortLoad = function () {
 
     };
+
+    // Increments an anonymous usage count.  Count is anonymous, needed for our continued funding.  Please don't delete
+    const href = window.document.location.href;
+    if (!(href.includes("localhost") || href.includes("127.0.0.1"))) {
+        var url = "https://data.broadinstitute.org/igv/projects/current/counter_igvjs.php?version=" + "0";
+        igvxhr.load(url).then(function (ignore) {
+            console.log(ignore);
+        }).catch(function (error) {
+            console.log(error);
+        });
+    }
 
     return igvxhr;
 

@@ -25,7 +25,7 @@
 
 var igv = (function (igv) {
 
-    const href = window.document.location.href;
+
     var igvjs_version = "beta";
     igv.version = igvjs_version;
 
@@ -103,12 +103,7 @@ var igv = (function (igv) {
             $header.append($('<div class="igv-logo-nonav">'));
         }
 
-        // phone home -- counts launches.  Count is anonymous, needed for our continued funding.  Please don't delete
 
-
-        if(!(href.includes("localhost") || href.includes("127.0.0.1"))) {
-            phoneHome();
-        }
 
         igv.loadGenome(config.reference).then(function (genome) {
 
@@ -503,15 +498,7 @@ var igv = (function (igv) {
     }
 
 
-    // Increments an anonymous usage count.  Essential for continued funding of igv.js, please do not remove.
-    function phoneHome() {
-        var url = "https://data.broadinstitute.org/igv/projects/current/counter_igvjs.php?version=" + igvjs_version;
-        igvxhr.load(url).then(function (ignore) {
-            // console.log(ignore);
-        }).catch(function (error) {
-            console.log(error);
-        });
-    }
+
 
     return igv;
 })

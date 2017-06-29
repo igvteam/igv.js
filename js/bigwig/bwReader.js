@@ -134,8 +134,10 @@ var igv = (function (igv) {
             self = this;
 
         return new Promise(function (fulfill, reject) {
+            
+            var range = {start: startOffset, size: (self.header.fullDataOffset - startOffset + 5)};
 
-            igvxhr.loadArrayBuffer(self.path, igv.buildOptions(self.config, {range: {start: startOffset, size: (self.header.fullDataOffset - startOffset + 5)}}))
+            igvxhr.loadArrayBuffer(self.path, igv.buildOptions(self.config, {range: range}))
                 .then(function (data) {
 
                 var nZooms = self.header.nZoomLevels,
@@ -170,7 +172,7 @@ var igv = (function (igv) {
                 // Chrom data index
                 if (self.header.chromTreeOffset > 0) {
                     binaryParser.position = self.header.chromTreeOffset - startOffset;
-                    self.chromTree = new igv.BPTree(binaryParser, 0);
+                    self.chromTree = new igv.BPTree(binaryParser, startOffset);
                 }
                 else {
                     // TODO -- this is an error, not expected
