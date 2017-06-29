@@ -35,9 +35,16 @@ function runTabixTests() {
         tb.readHeader()
             .then(function (header) {
 
-                    tb.readFeatures('chr7', 26733030, 27694134)
+                const start = 26733030;
+                const end = 27694134;
+                const chr = 'chr7';
+                tb.readFeatures(chr, start, end)
                         .then(function (features) {
                             ok(features.length > 0);
+                            features.forEach(function (f) {
+                                equal(chr, f.chr);
+                                ok(f.start <= end && f.end >= start);
+                            })
                         })
                         .catch(function (error) {
                             console.log(Error('query tabix error: ') + error);

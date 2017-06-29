@@ -248,7 +248,11 @@ var igv = (function (igv) {
                         success = function (data) {
 
                             var inflated,
-                                slicedData;
+                                slicedData,
+                                slicedFeatures,
+                                filteredFeatures,
+                                f,
+                                i;
 
                             if (self.index.tabix) {
 
@@ -259,8 +263,20 @@ var igv = (function (igv) {
                             }
 
                             slicedData = startOffset ? inflated.slice(startOffset) : inflated;
-                            var f = self.parser.parseFeatures(slicedData);
-                            fullfill(f);
+                            slicedFeatures = self.parser.parseFeatures(slicedData);
+
+                            // Filter features not in requested range.  Pity to waste these, but they weren't requested
+                            // We use an old-fashioned for loop to take advantage of known sort order (can break)
+                            filteredFeatures = [];
+                            for(i=0; i<slicedFeatures.length; i++) {
+                                f = slicedFeatures[i];
+                                if(f.start > end) break;
+                                if(f.end >= start && f.start <= end) {
+                                    filteredFeatures.push(f);
+                                }
+                            }
+
+                            fullfill(filteredFeatures);
                         };
 
 
