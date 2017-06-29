@@ -49,11 +49,6 @@ var igv = (function (igv) {
 
         setDefaults(config);
 
-        setOAuth(config);
-
-        // Deal with legacy genome definition options
-        setReferenceConfiguration(config);
-
         // Set track order explicitly. Otherwise they will be ordered randomly as each completes its async load
         setTrackOrder(config);
 
@@ -104,6 +99,10 @@ var igv = (function (igv) {
         }
 
 
+        setOAuth(config);
+
+        // Deal with legacy genome definition options
+        setReferenceConfiguration(config);
 
         igv.loadGenome(config.reference).then(function (genome) {
 
@@ -123,8 +122,8 @@ var igv = (function (igv) {
                     igv.browser.genomicStateList = _.map(genomicStateList, function (genomicState, index) {
                         genomicState.locusIndex = index;
                         genomicState.locusCount = _.size(genomicStateList);
-                        genomicState.referenceFrame = new igv.ReferenceFrame(genomicState.chromosome.name, genomicState.start, (genomicState.end - genomicState.start) / (width/genomicState.locusCount));
-                        genomicState.initialReferenceFrame = new igv.ReferenceFrame(genomicState.chromosome.name, genomicState.start, (genomicState.end - genomicState.start) / (width/genomicState.locusCount));
+                        genomicState.referenceFrame = new igv.ReferenceFrame(genomicState.chromosome.name, genomicState.start, (genomicState.end - genomicState.start) / (width / genomicState.locusCount));
+                        genomicState.initialReferenceFrame = new igv.ReferenceFrame(genomicState.chromosome.name, genomicState.start, (genomicState.end - genomicState.start) / (width / genomicState.locusCount));
                         return genomicState;
                     });
 
@@ -173,7 +172,7 @@ var igv = (function (igv) {
                 if (configuration.locus) {
 
                     if (Array.isArray(configuration.locus)) {
-                        _.each(configuration.locus, function(l){
+                        _.each(configuration.locus, function (l) {
                             loci.push(l);
                         });
 
@@ -182,8 +181,8 @@ var igv = (function (igv) {
                     }
                 }
 
-                if (0 === _.size(loci)){
-                    loci.push( _.first(igv.browser.genome.chromosomeNames) );
+                if (0 === _.size(loci)) {
+                    loci.push(_.first(igv.browser.genome.chromosomeNames));
                 }
 
                 return loci;
@@ -262,11 +261,17 @@ var igv = (function (igv) {
                     break;
                 case "hg19":
                 case "GRCh37":
-                default:
-                {
                     reference.fastaURL = "https://s3.amazonaws.com/igv.broadinstitute.org/genomes/seq/hg19/hg19.fasta";
                     reference.cytobandURL = "https://s3.amazonaws.com/igv.broadinstitute.org/genomes/seq/hg19/cytoBand.txt";
-                }
+                    break;
+                case "mm10":
+                case "GRCm38":
+                    reference.fastaURL = "https://s3.amazonaws.com/igv.broadinstitute.org/genomes/seq/mm10/mm10.fa";
+                    reference.indexURL = "https://s3.amazonaws.com/igv.broadinstitute.org/genomes/seq/mm10/mm10.fa.fai";
+                    reference.cytobandURL = "https://s3.amazonaws.com/igv.broadinstitute.org/annotations/mm10/cytoBandIdeo.txt.gz";
+                    break;
+                default:
+                    igv.presentAlert("Uknown genome id: " + genomeId);
             }
             return reference;
         }
@@ -321,13 +326,13 @@ var igv = (function (igv) {
             browser.$searchInput = $('<input type="text" placeholder="Locus Search">');
 
             browser.$searchInput.change(function (e) {
-                browser.parseSearchInput( $(e.target).val() );
+                browser.parseSearchInput($(e.target).val());
             });
 
             $faSearch = $('<i class="fa fa-search">');
 
             $faSearch.click(function () {
-                browser.parseSearchInput( browser.$searchInput.val() );
+                browser.parseSearchInput(browser.$searchInput.val());
             });
 
             $searchContainer.append(browser.$searchInput);
@@ -356,7 +361,7 @@ var igv = (function (igv) {
                         browser.zoomIn();
                     }
                 },
-                out:{
+                out: {
                     click: function (e) {
                         browser.zoomOut();
                     }
@@ -496,8 +501,6 @@ var igv = (function (igv) {
         $(".igv-grid-container-dialog").remove();
         // $(".igv-grid-container-dialog").remove();
     }
-
-
 
 
     return igv;
