@@ -187,7 +187,7 @@ var igv = (function (igv) {
                 if (self.sourceType === 'file' && (self.visibilityWindow === undefined || self.visibilityWindow <= 0)) {
                     // Expand genomic interval to grab entire chromosome
                     genomicInterval.start = 0;
-                    var chromosome = igv.browser ? igv.browser.genome.getChromosome(chr) : chr;
+                    var chromosome = igv.browser ? igv.browser.genome.getChromosome(chr) : undefined;
                     genomicInterval.end = (chromosome === undefined ? Number.MAX_VALUE : chromosome.bpLength);
                 }
 
