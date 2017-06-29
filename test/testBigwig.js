@@ -10,9 +10,33 @@ function runBigwigTests() {
 
     }
 
+    asyncTest("Many chromosomes", function () {
+
+        var bw = new igv.BWSource(
+            {url: dataURL + 'bigwig/manyChromosomes.bigWig'}
+        );
+
+        bw.getFeatures('AluJb', 0, 100)
+            .then(function (features) {
+                equal(99, features.length);
+                features.forEach(function (f) {
+                    equal("AluJb", f.chr);
+                });
+
+                start();
+            })
+
+            .catch(function (error) {
+                console.log(Error('query bigWig error: ') + error);
+                ok(false);
+            });
+    });
+
+
+
     asyncTest("Bigwig meta data", function () {
 
-        var url = dataURL + "/bigwig/bigWigExample.bw",
+        var url = dataURL + "bigwig/bigWigExample.bw",
             bwReader;
 
         createMockObjects();
