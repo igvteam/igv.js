@@ -31,13 +31,13 @@ function runTabixTests() {
             indexURL: 'http://vizhub.wustl.edu/hubSample/hg19/GSM429321.gz.tbi'
         }
 
-        var tb = new igv.FeatureSource(config);
-        tb.getFileHeader()
+        var tb = new igv.FeatureFileReader(config);
+        tb.readHeader()
             .then(function (header) {
-                    ok(header);
-                    tb.getFeatures('chr7', 0, 40694134)
+
+                    tb.readFeatures('chr7', 26733030, 27694134)
                         .then(function (features) {
-                            ok(features);
+                            ok(features.length > 0);
                         })
                         .catch(function (error) {
                             console.log(Error('query tabix error: ') + error);
