@@ -243,14 +243,14 @@ var igv = (function (igv) {
                 chromosomes = sequence.chromosomes;
 
                 if (cytobandUrl) {
-                    loadCytobands(cytobandUrl, reference.withCredentials, function (result) {
+                    loadCytobands(cytobandUrl, sequence.config, function (result) {
                         cytobands = result;
                         checkReady();
                     });
                 }
 
                 if (aliasURL) {
-                    loadAliases(aliasURL, reference.withCredentials, function (result) {
+                    loadAliases(aliasURL, sequence.config, function (result) {
                         aliases = result;
                         checkReady();
                     });
@@ -275,11 +275,10 @@ var igv = (function (igv) {
         });
     }
 
-    function loadCytobands(cytobandUrl, withCredentials, continuation) {
+    function loadCytobands(cytobandUrl, config, continuation) {
 
-        igvxhr.loadString(cytobandUrl, {
-            withCredentials: withCredentials
-        }).then(function (data) {
+        igvxhr.loadString(cytobandUrl, igv.buildOptions(config))
+            .then(function (data) {
 
             var bands = [],
                 lastChr,
@@ -318,10 +317,11 @@ var igv = (function (igv) {
         });
     }
 
-    function loadAliases(aliasURL, withCredentials, continuation) {
-        igvxhr.loadString(aliasURL, {
-            withCredentials: withCredentials
-        }).then(function (data) {
+    function loadAliases(aliasURL, config, continuation) {
+
+        igvxhr.loadString(aliasURL, igv.buildOptions(config))
+
+            .then(function (data) {
 
             var lines = data.splitLines(),
                 aliases = [];

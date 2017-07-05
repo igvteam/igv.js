@@ -27,6 +27,8 @@
 
 var igv = (function (igv) {
 
+    var reservedProperties = new Set(['fastaURL', 'indexURL', 'cytobandURL', 'indexed']);
+
     igv.FastaSequence = function (reference) {
 
         this.file = reference.fastaURL;
@@ -35,8 +37,20 @@ var igv = (function (igv) {
             this.indexFile = reference.indexURL || reference.indexFile || this.file + ".fai";
         }
         this.withCredentials = reference.withCredentials;
+        this.config = buildConfig(reference);
 
     };
+
+    // Build a track-like config object from the referenceObject
+    function buildConfig(reference) {
+        var key, config = {};
+        for (key in reference) {
+            if (reference.hasOwnProperty(key) && !reservedProperties.has(key)) {
+                config[key] = reference[key];
+            }
+        }
+        return config;
+    }
 
     igv.FastaSequence.prototype.init = function () {
 
@@ -142,40 +156,43 @@ var igv = (function (igv) {
             if (self.index) {
                 fulfill(self.index);
             } else {
-                igvxhr.load(self.indexFile, {
-                    withCredentials: self.withCredentials
-                }).then(function (data) {
-                    var lines = data.splitLines();
-                    var len = lines.length;
-                    var lineNo = 0;
+                igvxhr.load(self.indexFile, igv.buildOptions(self.config))
+                    .then(function (data) {
+                        var lines = data.splitLines();
+                        var len = lines.length;
+                        var lineNo = 0;
 
-                    self.chromosomeNames = [];     // TODO -- eliminate this side effect !!!!
-                    self.index = {};               // TODO -- ditto
-                    while (lineNo < len) {
+                        self.chromosomeNames = [];     // TODO -- eliminate this side effect !!!!
+                        self.index = {};               // TODO -- ditto
+                        while (lineNo < len) {
 
-                        var tokens = lines[lineNo++].split("\t");
-                        var nTokens = tokens.length;
-                        if (nTokens == 5) {
-                            // Parse the index line.
-                            var chr = tokens[0];
-                            var size = parseInt(tokens[1]);
-                            var position = parseInt(tokens[2]);
-                            var basesPerLine = parseInt(tokens[3]);
-                            var bytesPerLine = parseInt(tokens[4]);
+                            var tokens = lines[lineNo++].split("\t");
+                            var nTokens = tokens.length;
+                            if (nTokens == 5) {
+                                // Parse the index line.
+                                var chr = tokens[0];
+                                var size = parseInt(tokens[1]);
+                                var position = parseInt(tokens[2]);
+                                var basesPerLine = parseInt(tokens[3]);
+                                var bytesPerLine = parseInt(tokens[4]);
 
-                            var indexEntry = {
-                                size: size, position: position, basesPerLine: basesPerLine, bytesPerLine: bytesPerLine
-                            };
+                                var indexEntry = {
+                                    size: size,
+                                    position: position,
+                                    basesPerLine: basesPerLine,
+                                    bytesPerLine: bytesPerLine
+                                };
 
-                            self.chromosomeNames.push(chr);
-                            self.index[chr] = indexEntry;
+                                self.chromosomeNames.push(chr);
+                                self.index[chr] = indexEntry;
+                            }
                         }
-                    }
 
-                    if (fulfill) {
-                        fulfill(self.index);
-                    }
-                }).catch(reject);
+                        if (fulfill) {
+                            fulfill(self.index);
+                        }
+                    })
+                    .catch(reject);
             }
         });
     }
@@ -189,42 +206,41 @@ var igv = (function (igv) {
             self.chromosomes = {};
             self.sequences = {};
 
-            igvxhr.load(self.file, {
-                withCredentials: self.withCredentials
+            igvxhr.load(self.file, igv.buildOptions(self.config))
+                .then(function (data) {
 
-            }).then(function (data) {
-
-                var lines = data.splitLines(),
-                    len = lines.length,
-                    lineNo = 0,
-                    nextLine,
-                    currentSeq = "",
-                    currentChr,
-                    order = 0;
+                    var lines = data.splitLines(),
+                        len = lines.length,
+                        lineNo = 0,
+                        nextLine,
+                        currentSeq = "",
+                        currentChr,
+                        order = 0;
 
 
-                while (lineNo < len) {
-                    nextLine = lines[lineNo++].trim();
-                    if (nextLine.startsWith("#") || nextLine.length === 0) {
-                        continue;
-                    }
-                    else if (nextLine.startsWith(">")) {
-                        if (currentSeq) {
-                            self.chromosomeNames.push(currentChr);
-                            self.sequences[currentChr] = currentSeq;
-                            self.chromosomes[currentChr] = new igv.Chromosome(currentChr, order++, currentSeq.length);
+                    while (lineNo < len) {
+                        nextLine = lines[lineNo++].trim();
+                        if (nextLine.startsWith("#") || nextLine.length === 0) {
+                            continue;
                         }
-                        currentChr = nextLine.substr(1).split("\\s+")[0];
-                        currentSeq = "";
+                        else if (nextLine.startsWith(">")) {
+                            if (currentSeq) {
+                                self.chromosomeNames.push(currentChr);
+                                self.sequences[currentChr] = currentSeq;
+                                self.chromosomes[currentChr] = new igv.Chromosome(currentChr, order++, currentSeq.length);
+                            }
+                            currentChr = nextLine.substr(1).split("\\s+")[0];
+                            currentSeq = "";
+                        }
+                        else {
+                            currentSeq += nextLine;
+                        }
                     }
-                    else {
-                        currentSeq += nextLine;
-                    }
-                }
 
-                fulfill();
+                    fulfill();
 
-            });
+                })
+                .catch(reject);
         });
     }
 
@@ -270,32 +286,32 @@ var igv = (function (igv) {
                         fulfill(null);
                     }
 
-                    igvxhr.load(self.file, {
-                        range: {start: startByte, size: byteCount}
-                    }).then(function (allBytes) {
+                    igvxhr.load(self.file, igv.buildOptions(self.config, {range: {start: startByte, size: byteCount}}))
+                        .then(function (allBytes) {
 
-                        var nBases,
-                            seqBytes = "",
-                            srcPos = 0,
-                            desPos = 0,
-                            allBytesLength = allBytes.length;
+                            var nBases,
+                                seqBytes = "",
+                                srcPos = 0,
+                                desPos = 0,
+                                allBytesLength = allBytes.length;
 
-                        if (offset > 0) {
-                            nBases = Math.min(end - start, basesPerLine - offset);
-                            seqBytes += allBytes.substr(srcPos, nBases);
-                            srcPos += (nBases + nEndBytes);
-                            desPos += nBases;
-                        }
+                            if (offset > 0) {
+                                nBases = Math.min(end - start, basesPerLine - offset);
+                                seqBytes += allBytes.substr(srcPos, nBases);
+                                srcPos += (nBases + nEndBytes);
+                                desPos += nBases;
+                            }
 
-                        while (srcPos < allBytesLength) {
-                            nBases = Math.min(basesPerLine, allBytesLength - srcPos);
-                            seqBytes += allBytes.substr(srcPos, nBases);
-                            srcPos += (nBases + nEndBytes);
-                            desPos += nBases;
-                        }
+                            while (srcPos < allBytesLength) {
+                                nBases = Math.min(basesPerLine, allBytesLength - srcPos);
+                                seqBytes += allBytes.substr(srcPos, nBases);
+                                srcPos += (nBases + nEndBytes);
+                                desPos += nBases;
+                            }
 
-                        fulfill(seqBytes);
-                    }).catch(reject)
+                            fulfill(seqBytes);
+                        })
+                        .catch(reject)
                 }
             }).catch(reject)
         });
