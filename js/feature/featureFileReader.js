@@ -190,7 +190,8 @@ var igv = (function (igv) {
         var self = this;
 
         return new Promise(function (fullfill, reject) {
-            var options = igv.buildOptions(self.config);
+         
+            var options = igv.buildOptions(self.config);    // Add oauth token, if any
 
             function parseData(data) {
                 self.header = self.parser.parseHeader(data);
