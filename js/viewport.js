@@ -455,49 +455,49 @@ var igv = (function (igv) {
             refFrameStart,
             refFrameEnd;
 
-        if (!(viewIsReady.call(this))) {
-            return;
-        }
-
-        if (this.$zoomInNotice && this.trackView.track.visibilityWindow !== undefined && this.trackView.track.visibilityWindow > 0) {
-            if ((referenceFrame.bpPerPixel * this.$viewport.width() > this.trackView.track.visibilityWindow) ||
-                (referenceFrame.chrName === "all" && !this.trackView.track.supportsWholeGenome)) {
-                this.tile = null;
-                this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
-
-                self.stopSpinner();
-
-                this.$zoomInNotice.show();
+            if (!(viewIsReady.call(this))) {
                 return;
+            }
+
+            if (this.$zoomInNotice && this.trackView.track.visibilityWindow !== undefined && this.trackView.track.visibilityWindow > 0) {
+                if ((referenceFrame.bpPerPixel * this.$viewport.width() > this.trackView.track.visibilityWindow) ||
+                    (referenceFrame.chrName === "all" && !this.trackView.track.supportsWholeGenome)) {
+                    this.tile = null;
+                    this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
+
+                    self.stopSpinner();
+
+                    this.$zoomInNotice.show();
+                    return;
+                } else {
+                    this.$zoomInNotice.hide();
+                }
+            }
+
+            chr = referenceFrame.chrName;
+            refFrameStart = referenceFrame.start;
+            refFrameEnd = refFrameStart + referenceFrame.toBP(this.canvas.width);
+
+            if (this.tile && this.tile.containsRange(chr, refFrameStart, refFrameEnd, referenceFrame.bpPerPixel)) {
+                // console.log('paint pre-existing canvas');
+                this.paintImageWithReferenceFrame(referenceFrame);
             } else {
-                this.$zoomInNotice.hide();
-            }
-        }
 
-        chr = referenceFrame.chrName;
-        refFrameStart = referenceFrame.start;
-        refFrameEnd = refFrameStart + referenceFrame.toBP(this.canvas.width);
+                // Expand the requested range so we can pan a bit without reloading
+                pixelWidth = 3 * this.canvas.width;
+                bpWidth = Math.round(referenceFrame.toBP(pixelWidth));
+                bpStart = Math.max(0, Math.round(referenceFrame.start - bpWidth / 3));
+                bpEnd = bpStart + bpWidth;
 
-        if (this.tile && this.tile.containsRange(chr, refFrameStart, refFrameEnd, referenceFrame.bpPerPixel)) {
-            // console.log('paint pre-existing canvas');
-            this.paintImageWithReferenceFrame(referenceFrame);
-        } else {
+                if (self.loading && self.loading.start === bpStart && self.loading.end === bpEnd) {
+                    return;
+                }
 
-            // Expand the requested range so we can pan a bit without reloading
-            pixelWidth = 3 * this.canvas.width;
-            bpWidth = Math.round(referenceFrame.toBP(pixelWidth));
-            bpStart = Math.max(0, Math.round(referenceFrame.start - bpWidth / 3));
-            bpEnd = bpStart + bpWidth;
+                self.loading = { start: bpStart, end: bpEnd };
 
-            if (self.loading && self.loading.start === bpStart && self.loading.end === bpEnd) {
-                return;
-            }
+                self.startSpinner();
 
-            self.loading = { start: bpStart, end: bpEnd };
-
-            self.startSpinner();
-
-            // console.log('get features');
+                // console.log('get features');
             this.trackView.track
                 .getFeatures(referenceFrame.chrName, bpStart, bpEnd, referenceFrame.bpPerPixel)
                 .then(function (features) {
