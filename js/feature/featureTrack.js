@@ -303,7 +303,7 @@ var igv = (function (igv) {
                     "EXPANDED": "Expand"
                 };
 
-            chosen = (0 === index) ? '<div class="igv-track-menu-border-top">' : '<div">';
+            chosen = (0 === index) ? '<div class="igv-track-menu-border-top">' : '<div>';
             if (displayMode === selfDisplayMode) {
                 return chosen + '<i class="fa fa-check fa-check-shim"></i>' + lut[ displayMode ] + '</div>'
             } else {
