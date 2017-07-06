@@ -414,13 +414,53 @@ var igv = (function (igv) {
 
     igv.Browser.prototype.resize = function () {
 
-        // console.log('browser.resize begin');
+        var viewport;
 
-        _.each(_.union([this.ideoPanel, this.karyoPanel, this.centerGuide], this.trackViews), function(renderable){
-            if (renderable) {
-                renderable.resize();
+        if (true === resizeWillExceedChromosomeLength(this.trackViews)) {
+
+            viewport = _.first( (_.first(this.trackViews)).viewports );
+            this.parseSearchInput(viewport.genomicState.chromosome.name);
+        } else {
+
+            _.each(_.union([this.ideoPanel, this.karyoPanel, this.centerGuide], this.trackViews), function(renderable){
+                if (renderable) {
+                    renderable.resize();
+                }
+            });
+        }
+
+        function resizeWillExceedChromosomeLength(trackViews) {
+            var result,
+                trackView,
+                viewport,
+                pixel,
+                bpp,
+                bp;
+
+            if (_.size(trackViews) > 0) {
+
+                trackView = _.first(trackViews);
+                if (_.size(trackView.viewports) > 0) {
+
+                    viewport = _.first(trackView.viewports);
+                    pixel = viewport.$viewport.width();
+                    bpp = viewport.genomicState.referenceFrame.bpPerPixel;
+                    bp = pixel * bpp;
+
+                    result = (bp > viewport.genomicState.chromosome.bpLength);
+
+                } else {
+                    result = false;
+                }
+
+            } else {
+                result = false;
             }
-        });
+
+            // console.log('resize(' + igv.prettyBasePairNumber(bp) + ') will exceed chromosomeLength(' + igv.prettyBasePairNumber(viewport.genomicState.chromosome.bpLength) + ') ' + ((true === result) ? 'YES' : 'NO'));
+
+            return result;
+        }
 
     };
 
