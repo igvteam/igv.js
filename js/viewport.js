@@ -80,7 +80,7 @@ var igv = (function (igv) {
             var $container,
                 $child;
 
-            $child = $('<div">');
+            $child = $('<div>');
             $child.text('Zoom in to see features');
 
             $container = $('<div class="zoom-in-notice-container">');
