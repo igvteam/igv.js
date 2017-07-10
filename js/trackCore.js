@@ -452,6 +452,7 @@ var igv = (function (igv) {
                 }, undefined, function () {
                     popover.hide();
                     trackView.browser.removeTrack(trackView.track);
+                    // trackView.browser.removeTrackByName(trackView.track.name);
                 }, true)
             );
         }

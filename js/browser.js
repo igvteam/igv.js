@@ -302,6 +302,17 @@ var igv = (function (igv) {
 
     };
 
+    igv.Browser.prototype.removeTrackByName = function (name) {
+
+        var remove;
+        remove = _.first(_.filter(this.trackViews, function (trackView) {
+            return name === trackView.track.name;
+        }));
+
+        this.removeTrack(remove.track);
+
+    };
+
     igv.Browser.prototype.removeTrack = function (track) {
 
         // Find track panel
