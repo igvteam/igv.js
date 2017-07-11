@@ -39,6 +39,8 @@ var igv = (function (igv) {
 
         if ("bigwig" === config.format) {
             this.featureSource = new igv.BWSource(config);
+        } else if("tdf" === config.format) {
+            this.featureSource = new igv.TDFSource(config);
         }
         else {
             this.featureSource = new igv.FeatureSource(config);

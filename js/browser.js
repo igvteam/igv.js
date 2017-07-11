@@ -26,7 +26,7 @@
 var igv = (function (igv) {
 
     var knownFileTypes = new Set(["narrowpeak", "broadpeak", "peaks", "bedgraph", "wig", "gff3", "gff",
-        "gtf", "aneu", "fusionjuncspan", "refflat", "seg", "bed", "vcf", "bb", "bigbed", "bw", "bigwig", "bam"]);
+        "gtf", "aneu", "fusionjuncspan", "refflat", "seg", "bed", "vcf", "bb", "bigbed", "bw", "bigwig", "bam", "tdf"]);
 
     igv.Browser = function (options, trackContainer) {
 
@@ -1144,6 +1144,7 @@ var igv = (function (igv) {
                     case "bigwig":
                     case "wig":
                     case "bedgraph":
+                    case "tdf":
                         config.type = "wig";
                         break;
                     case "vcf":
