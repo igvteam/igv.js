@@ -67,12 +67,8 @@ var igv = (function (igv) {
         var self = this;
 
         return new Promise(function (fulfill, reject) {
-            igvxhr.loadArrayBuffer(self.path,
-                {
-                    headers: self.config.headers,
-                    range: {start: 0, size: BBFILE_HEADER_SIZE},
-                    withCredentials: self.config.withCredentials
-                }).then(function (data) {
+            igvxhr.loadArrayBuffer(self.path, Object.assign(self.config, {range: {start: 0, size: BBFILE_HEADER_SIZE}}))
+                .then(function (data) {
 
                 if (!data) return;
 
@@ -138,13 +134,11 @@ var igv = (function (igv) {
             self = this;
 
         return new Promise(function (fulfill, reject) {
+            
+            var range = {start: startOffset, size: (self.header.fullDataOffset - startOffset + 5)};
 
-            igvxhr.loadArrayBuffer(self.path,
-                {
-                    headers: self.config.headers,
-                    range: {start: startOffset, size: (self.header.fullDataOffset - startOffset + 5)},
-                    withCredentials: self.config.withCredentials
-                }).then(function (data) {
+            igvxhr.loadArrayBuffer(self.path, Object.assign(self.config, {range: range}))
+                .then(function (data) {
 
                 var nZooms = self.header.nZoomLevels,
                     binaryParser = new igv.BinaryParser(new DataView(data)),
@@ -178,7 +172,7 @@ var igv = (function (igv) {
                 // Chrom data index
                 if (self.header.chromTreeOffset > 0) {
                     binaryParser.position = self.header.chromTreeOffset - startOffset;
-                    self.chromTree = new igv.BPTree(binaryParser, 0);
+                    self.chromTree = new igv.BPTree(binaryParser, startOffset);
                 }
                 else {
                     // TODO -- this is an error, not expected

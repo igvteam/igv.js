@@ -122,6 +122,18 @@ var igv = (function (igv) {
 
         });
     }
+    
+    
+    igv.BWSource.prototype.getDefaultRange = function () {
+        
+        if(this.reader.totalSummary != undefined) {
+            return this.reader.totalSummary.defaultRange;
+        }
+        else {
+            return undefined;
+        }
+        
+    }
 
 
     function zoomLevelForScale(bpPerPixel, zoomLevelHeaders) {

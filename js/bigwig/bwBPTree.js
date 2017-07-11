@@ -35,11 +35,11 @@ var igv = (function (igv) {
     var BPTREE_HEADER_SIZE = 32;
 
 
-    igv.BPTree = function (binaryParser, treeOffset) {
+    igv.BPTree = function (binaryParser, startOffset) {
 
-        var genome = igv.browser ? igv.browser.genome : null;
+        var self = this,
+            genome = igv.browser ? igv.browser.genome : null;
 
-        this.treeOffset = treeOffset; // File offset to beginning of tree
         this.header = {};
         this.header.magic = binaryParser.getInt();
         this.header.blockSize = binaryParser.getInt();
@@ -53,6 +53,8 @@ var igv = (function (igv) {
         // Recursively walk tree to populate dictionary
         readTreeNode(binaryParser, -1, this.header.keySize, this.dictionary);
 
+        var itemSize = 8 + this.header.keySize;
+        var minSize = 4 + itemSize;   // Bytes for a node with 1 item
 
         function readTreeNode(byteBuffer, offset, keySize, dictionary) {
 
@@ -66,28 +68,36 @@ var igv = (function (igv) {
                 chromId,
                 chromSize,
                 childOffset,
-                bufferOffset;
+                bufferOffset,
+                currOffset;
 
 
             if (type == 1) {
+
                 for (i = 0; i < count; i++) {
-                    key = byteBuffer.getFixedLengthString(keySize).trim();
 
-                    if(genome) key = genome.getChromosomeName(key);  // Translate to canonical chr name
-
+                    key = byteBuffer.getFixedLengthTrimmedString(keySize);
                     chromId = byteBuffer.getInt();
                     chromSize = byteBuffer.getInt();
+
+                    if(genome) key = genome.getChromosomeName(key);  // Translate to canonical chr name
                     dictionary[key] = chromId;
 
                 }
             }
             else { // non-leaf
+
                 for (i = 0; i < count; i++) {
-                    childOffset = byteBuffer.nextLong();
-                    bufferOffset = childOffset - self.treeOffset;
-                    readTreeNode(byteBuffer, offset, keySize, dictionary);
+
+                    key = byteBuffer.getFixedLengthTrimmedString(keySize);
+                    childOffset = byteBuffer.getLong();
+                    bufferOffset = childOffset - startOffset;
+                    currOffset = byteBuffer.position;
+                    readTreeNode(byteBuffer, bufferOffset, keySize, dictionary);
+                    byteBuffer.position = currOffset;
                 }
             }
+
         }
     }
 
