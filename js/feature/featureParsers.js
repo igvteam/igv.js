@@ -110,7 +110,7 @@ var igv = (function (igv) {
                 break;
             case "bed":
                 this.decode = decodeBed;
-                this.delimiter = /\s+/;
+                this.delimiter = config.delimiter || /\s+/;
             default:
 
                 customFormat = igv.getFormat(format);
