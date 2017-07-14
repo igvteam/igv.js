@@ -155,7 +155,7 @@ var igvxhr = (function (igvxhr) {
 
                 xhr.onerror = function (event) {
 
-                    if (isCrossDomain(url) && url && !options.crossDomainRetried && igv.browser.crossDomainProxy &&
+                    if (isCrossDomain(url) && url && !options.crossDomainRetried && igv.browser && igv.browser.crossDomainProxy &&
                         url != igv.browser.crossDomainProxy) {
 
                         options.sendData = "url=" + url;

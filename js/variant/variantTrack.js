@@ -184,7 +184,13 @@ var igv = (function (igv) {
 
         this.variantBandHeight = 10 + this.nRows * (this.variantHeight + vGap);
 
+        // console.log("call height in draw: ", callHeight);
+
         callSets = this.callSets;
+
+        console.log("feature list: ", featureList);
+
+        console.log("callsets: ", callSets);
 
         igv.graphics.fillRect(ctx, 0, 0, pixelWidth, pixelHeight, {'fillStyle': "rgb(255, 255, 255)"});
 
@@ -266,7 +272,7 @@ var igv = (function (igv) {
 
                             py = this.variantBandHeight + vGap + (j + variant.row) * (h + vSpace);
                             //console.log(py);
-                            if (call.genotype[0]) {
+                            if (!isNaN(call.genotype[0])) {
                                 firstAllele = getAlleleString(call, variant, 0);
                                 secondAllele = getAlleleString(call, variant, 1);
                                 if (this.colorScheme === "INDEX") {
@@ -280,11 +286,14 @@ var igv = (function (igv) {
                                         cb = Math.floor(numCol * (call.genotype[1] + 1));
                                     }
                                     ctx.fillStyle = "rgb(" + cr + "," + cg + "," + cb + ")";
+                                    ctx.fillRect(px, py, pw, h);
                                 } else {
                                     // gradient color scheme based on allele length
-                                    ctx.fillStyle = colorScale.getColor(Math.max(firstAllele.length, secondAllele.length));
+                                    ctx.fillStyle = colorScale.getColor(firstAllele.length);
+                                    ctx.fillRect(px, py, pw, h/2);
+                                    ctx.fillStyle = colorScale.getColor(secondAllele.length);
+                                    ctx.fillRect(px, py+h/2, pw, h/2);
                                 }
-                                ctx.fillRect(px, py, pw, h);
 
                                 // allele text
                                 if (this.displayMode === "EXPANDED") {
@@ -348,7 +357,6 @@ var igv = (function (igv) {
                 popupData = [],
                 self = this;
 
-
             if (featureList && featureList.length > 0) {
 
                 featureList.forEach(function (variant) {
@@ -370,6 +378,7 @@ var igv = (function (igv) {
                                 // Variant
                                 row = (Math.floor)((yOffset - 10 ) / (self.variantHeight + vGap));
                                 if (variant.row === row) {
+                                    console.log('variant.popupData called');
                                     Array.prototype.push.apply(popupData, variant.popupData(genomicLocation));
                                 }
                             }
@@ -378,7 +387,9 @@ var igv = (function (igv) {
                                 callSets = self.callSets;
                                 if (callSets && variant.calls) {
                                     callHeight = self.nRows * ("SQUISHED" === self.displayMode ? self.squishedCallHeight : self.expandedCallHeight);
-                                    row = Math.floor((yOffset - self.variantBandHeight - vGap) / callHeight);
+                                    // console.log("call height: ", callHeight);
+                                    // console.log("nRows: ", self.nRows);
+                                    row = Math.floor((yOffset - self.variantBandHeight - vGap) / (callHeight+vGap<<1));
                                     cs = callSets[row];
                                     call = variant.calls[cs.id];
                                     Array.prototype.push.apply(popupData, extractPopupData(call, variant));
@@ -400,15 +411,40 @@ var igv = (function (igv) {
      */
     function extractPopupData(call, variant) {
 
-        var gt = '', popupData;
-        call.genotype.forEach(function (i) {
-            if (i === 0) {
-                gt += variant.referenceBases;
+        var gt = '', popupData, i, allele, numRepeats = '', alleleFrac='';
+        var info = {};
+        variant.info.split(';').forEach(function(elem) {
+            var element = elem.split('=');
+            info[element[0]] = element[1];
+        });
+        if (!isNaN(call.genotype[0])) {
+            for (i = 0; i < call.genotype.length; i++) {
+                if (call.genotype[i] === 0) {
+                    allele = variant.referenceBases;
+                    gt += allele;
+                    numRepeats += (allele.length / info.PERIOD).toString();
+                    alleleFrac += (parseInt(info.REFAC) / parseInt(info.AN)).toFixed(3);
+                } else {
+                    allele = variant.alleles[call.genotype[i] - 1].allele;
+                    gt += allele;
+                    numRepeats += (allele.length / info.PERIOD).toString();
+                    alleleFrac += (parseInt(info.AC.split(',')[call.genotype[i] - 1]) / parseInt(info.AN)).toFixed(3);
+                }
+                if (i < call.genotype.length - 1) {
+                    gt += " | ";
+                    numRepeats += " | ";
+                    alleleFrac += " | ";
+                }
             }
-            else {
-                gt += variant.alternateBases[i - 1];
-            }
-        })
+        }
+        // call.genotype.forEach(function (i) {
+        //     if (i === 0) {
+        //         gt += variant.referenceBases;
+        //     }
+        //     else {
+        //         gt += variant.alternateBases[i - 1];
+        //     }
+        // });
 
         popupData = [];
 
@@ -416,11 +452,20 @@ var igv = (function (igv) {
             popupData.push({name: 'Name', value: call.callSetName});
         }
         popupData.push({name: 'Genotype', value: gt});
+        if (numRepeats) {
+            popupData.push({name: 'Repeats', value: numRepeats});
+        }
+        if (alleleFrac) {
+            popupData.push({name: 'Allele Fraction', value: alleleFrac});
+        }
         if (call.phaseset !== undefined) {
             popupData.push({name: 'Phase set', value: call.phaseset});
         }
         if (call.genotypeLikelihood !== undefined) {
             popupData.push({name: 'genotypeLikelihood', value: call.genotypeLikelihood.toString()});
+        }
+        if (popupData.length > 2) {
+            popupData.push("<hr>");
         }
 
 
