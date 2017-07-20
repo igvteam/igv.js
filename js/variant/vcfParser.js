@@ -308,6 +308,8 @@ var igv = (function (igv) {
 
         var fields, infoFields, nameString;
 
+        //infoFields = this.info.split(";");
+        var info = this.getInfoObj(this.info);
 
         fields = [
             {name: "Names", value: this.names},
@@ -315,21 +317,45 @@ var igv = (function (igv) {
             {name: "Alt", value: this.alternateBases},
             {name: "Qual", value: this.quality},
             {name: "Filter", value: this.filter},
+            {name: "Heterozygosity", value: (info.AC && info.AN) ? this.calcHeterozygosity(info.AC, info.AN).toFixed(3) : 1},
             "<hr>"
         ];
 
-        infoFields = this.info.split(";");
-        infoFields.forEach(function (f) {
-            var tokens = f.split("=");
-            if (tokens.length > 1) {
-                fields.push({name: tokens[0], value: tokens[1]});   // TODO -- use header to add descriptive tooltip
-            }
+        // infoFields.forEach(function (f) {
+        //     var tokens = f.split("=");
+        //     if (tokens.length > 1) {
+        //         fields.push({name: tokens[0], value: tokens[1]});   // TODO -- use header to add descriptive tooltip
+        //     }
+        // });
+
+        Object.keys(info).forEach(function (key) {
+           fields.push({name: key, value: info[key]});
         });
 
 
         return fields;
 
-    }
+    };
+
+    Variant.prototype.getInfoObj = function(infoStr) {
+        var info = {};
+        infoStr.split(';').forEach(function(elem) {
+            var element = elem.split('=');
+            info[element[0]] = element[1];
+        });
+        return info;
+    };
+
+    Variant.prototype.calcHeterozygosity = function(ac, an){
+        var sum = 0;
+        an = parseInt(an);
+        var altFreqs = ac.split(',');
+        altFreqs.forEach(function (altFreq) {
+            var altFrac = parseInt(altFreq) / an;
+            sum += altFrac * altFrac;
+        });
+        return 1 - sum;
+    };
 
 
     return igv;

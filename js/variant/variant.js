@@ -155,6 +155,7 @@ var igv = (function (igv) {
             {name: "Alt", value: this.alternateBases},
             {name: "Qual", value: this.quality},
             {name: "Filter", value: this.filter},
+            "<hr>"
          ];
 
         if(this.calls && this.calls.length === 1) {
@@ -168,10 +169,9 @@ var igv = (function (igv) {
                 fields.push({name: key, value: arrayToCommaString(self.info[key])});
             });
         }
-
         return fields;
 
-    }
+    };
 
 
     function arrayToCommaString(array) {

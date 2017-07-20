@@ -56,8 +56,6 @@ var igv = (function (igv) {
         this.hetvarColor = config.hetvarColor || "rgb(34,12,253)";
 
         this.nRows = 1;  // Computed dynamically
-
-        this.colorScheme = "GRADIENT";
     };
 
 
@@ -158,19 +156,18 @@ var igv = (function (igv) {
             this.nRows = nRows;  // Needed in draw function
 
 
-            if ((nCalls * nRows * this.expandedCallHeight) > 2000) {
-                this.expandedCallHeight = Math.max(1, 2000 / (nCalls * nRows));
-            }
+            // if ((nCalls * nRows * this.expandedCallHeight) > 2000) {
+            //     this.expandedCallHeight = Math.max(1, 2000 / (nCalls * nRows));
+            // }
 
-
-            return h + vGap + nCalls * nRows * (this.displayMode === "EXPANDED" ? this.expandedCallHeight : this.squishedCallHeight);
+            return h + vGap + nCalls * ((this.displayMode === "EXPANDED" ? this.expandedCallHeight : this.squishedCallHeight)+vGap<<1);
+            //return h + vGap + nCalls * nRows * (this.displayMode === "EXPANDED" ? this.expandedCallHeight : this.squishedCallHeight);
 
         }
 
     };
 
     igv.VariantTrack.prototype.draw = function (options) {
-
         var featureList = options.features,
             ctx = options.context,
             bpPerPixel = options.bpPerPixel,
@@ -183,8 +180,6 @@ var igv = (function (igv) {
             cr, cg, cb, vSpace, firstAllele, secondAllele, maxLen, minLen, colorScale;
 
         this.variantBandHeight = 10 + this.nRows * (this.variantHeight + vGap);
-
-        // console.log("call height in draw: ", callHeight);
 
         callSets = this.callSets;
 
@@ -223,8 +218,8 @@ var igv = (function (igv) {
 
 
                 if (callSets && variant.calls && "COLLAPSED" !== this.displayMode) {
-                    h = callHeight*2;
-                    vSpace = vGap*2;
+                    h = callHeight<<1;
+                    vSpace = vGap<<1;
 
                     for (j = 0; j < callSets.length; j++) {
                         callSet = callSets[j];
@@ -260,13 +255,13 @@ var igv = (function (igv) {
                             colorScale = new igv.GradientColorScale(
                                 {
                                     low: minLen,
-                                    lowR: 135,
-                                    lowG: 206,
-                                    lowB: 250,
+                                    lowR: 225, //220, 96
+                                    lowG: 245, //237, 252
+                                    lowB: 254, //200, 254
                                     high: maxLen,
-                                    highR: 255,
-                                    highG: 69,
-                                    highB: 0
+                                    highR: 1, //26, 33
+                                    highG: 42, //35, 49
+                                    highB: 120 //126, 60
                                 }
                             );
 
@@ -275,50 +270,22 @@ var igv = (function (igv) {
                             if (!isNaN(call.genotype[0])) {
                                 firstAllele = getAlleleString(call, variant, 0);
                                 secondAllele = getAlleleString(call, variant, 1);
-                                if (this.colorScheme === "INDEX") {
-                                    // color scheme based on index of allele
-                                    numCol = 255 / (variant.alleles.length + 1);
-                                    if (call.genotype[0] === call.genotype[1]) { // homozygous
-                                        cr = cg = cb = 255 - (Math.floor(numCol * (call.genotype[0] + 1)));
-                                    } else { // heterozygous
-                                        cr = 0;
-                                        cg = Math.floor(numCol * (call.genotype[0] + 1));
-                                        cb = Math.floor(numCol * (call.genotype[1] + 1));
-                                    }
-                                    ctx.fillStyle = "rgb(" + cr + "," + cg + "," + cb + ")";
-                                    ctx.fillRect(px, py, pw, h);
-                                } else {
-                                    // gradient color scheme based on allele length
-                                    ctx.fillStyle = colorScale.getColor(firstAllele.length);
-                                    ctx.fillRect(px, py, pw, h/2);
-                                    ctx.fillStyle = colorScale.getColor(secondAllele.length);
-                                    ctx.fillRect(px, py+h/2, pw, h/2);
-                                }
 
-                                // allele text
-                                if (this.displayMode === "EXPANDED") {
-                                    ctx.textAlign = "left";
-                                    ctx.textBaseline = "middle";
-                                    ctx.fillStyle = (this.colorScheme === "INDEX") ?
-                                        "rgb(" + 255 + "," + (255 - cg) + "," + (255 - cb) + ")" : "#000";
-                                    ctx.font = "8px serif";
-                                    if (firstAllele === secondAllele) {
-                                        //ctx.font = "10px serif";
-                                        if (ctx.measureText(firstAllele).width < pw) {
-                                            ctx.fillText(firstAllele, px + vGap, py + h / 2);
-                                        }
-                                    } else {
-                                        if (ctx.measureText(firstAllele).width < pw && ctx.measureText(secondAllele).width < pw) {
-                                            ctx.fillText(firstAllele, px + vGap, py + h / 4);
-                                            ctx.fillText(secondAllele, px + vGap, py + h * 0.75);
-                                        }
-                                    }
-                                }
+                                // gradient color scheme based on allele length
+                                ctx.fillStyle = colorScale.getColor(firstAllele.length);
+                                ctx.fillRect(px, py, pw, h/2);
+                                ctx.fillStyle = colorScale.getColor(secondAllele.length);
+                                ctx.fillRect(px, py+h/2, pw, h/2);
+                                ctx.beginPath();
+                                ctx.moveTo(px, py+h/2);
+                                ctx.lineTo(px+pw, py+h/2);
+                                ctx.strokeStyle = '#000';
+                                ctx.stroke();
                             } else {
                                 // console.log("no call made, set fill to white");
                                 //ctx.fillStyle = "#FFFFFF";
                                 ctx.strokeStyle = "#B0B0B0";
-                                ctx.lineWidth = 0.8;
+                                //ctx.lineWidth = 0.8;
                                 ctx.strokeRect(px, py, pw, h);
                             }
                         }
@@ -412,11 +379,7 @@ var igv = (function (igv) {
     function extractPopupData(call, variant) {
 
         var gt = '', popupData, i, allele, numRepeats = '', alleleFrac='';
-        var info = {};
-        variant.info.split(';').forEach(function(elem) {
-            var element = elem.split('=');
-            info[element[0]] = element[1];
-        });
+        var info = variant.getInfoObj(variant.info);
         if (!isNaN(call.genotype[0])) {
             for (i = 0; i < call.genotype.length; i++) {
                 if (call.genotype[i] === 0) {
@@ -518,15 +481,15 @@ var igv = (function (igv) {
 
         }
 
-        $color = $('<div>');
-        $color.text("Color Scheme");
-        colorClickHandler = function() {
-            popover.hide();
-            self.colorScheme = (self.colorScheme === "GRADIENT") ? "INDEX" : "GRADIENT";
-            self.trackView.update();
-        };
-
-        menuItems.push({object: $color, click: colorClickHandler});
+        // $color = $('<div>');
+        // $color.text("Color Scheme");
+        // colorClickHandler = function() {
+        //     popover.hide();
+        //     self.colorScheme = (self.colorScheme === "GRADIENT") ? "INDEX" : "GRADIENT";
+        //     self.trackView.update();
+        // };
+        //
+        // menuItems.push({object: $color, click: colorClickHandler});
 
         return menuItems;
 

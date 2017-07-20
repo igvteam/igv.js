@@ -11,13 +11,13 @@ var oauth = (function (oauth) {
         var VALIDURL = 'https://www.googleapis.com/oauth2/v1/tokeninfo?access_token=';
         var SCOPE = 'https://www.googleapis.com/auth/genomics';
         var CLIENTID = '661332306814-8nt29308rppg325bkq372vli8nm3na14.apps.googleusercontent.com';
-        var REDIRECT = 'http://localhost:5000/static/emptyPage.html'/*http://snorlax.ucsd.edu:8659/static/emptyPage.html';*/
+        var REDIRECT = 'http://snorlax.ucsd.edu:8659/static/emptyPage.html'; //'http://localhost:5000/static/emptyPage.html'
         var LOGOUT = 'http://accounts.google.com/Logout';
         var TYPE = 'token';
         var _url = OAUTHURL +
             "scope=https://www.googleapis.com/auth/cloud-platform https://www.googleapis.com/auth/genomics https://www.googleapis.com/auth/devstorage.read_only https://www.googleapis.com/auth/userinfo.profile https://www.googleapis.com/auth/userinfo.email&" +
             "state=%2Fprofile&" +
-            "redirect_uri=http%3A%2F%2Flocalhost%3A5000%2Fstatic%2FemptyPage.html&" +
+            "redirect_uri=http%3A%2F%2Fsnorlax.ucsd.edu%3A8659%2Fstatic%2FemptyPage.html&" +
             "response_type=token&" +
             "client_id=661332306814-8nt29308rppg325bkq372vli8nm3na14.apps.googleusercontent.com";
 
