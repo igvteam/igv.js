@@ -47,12 +47,6 @@ var igv = (function (igv) {
             igv.removeBrowser();
         }
 
-        var url = '/data/static/data';
-        igv.VariantLoader.loadFromDir(url, {method: 'GET'}).then(function(data) {
-            console.log('data', data);
-            igv.currData = {data: data, url: url};
-        });
-
         setDefaults(config);
 
         setOAuth(config);

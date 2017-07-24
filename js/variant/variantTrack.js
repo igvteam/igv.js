@@ -30,7 +30,6 @@
 
 var igv = (function (igv) {
 
-    var vGap = 2;
     var DEFAULT_VISIBILITY_WINDOW = 100000;
 
     igv.VariantTrack = function (config) {
@@ -44,8 +43,10 @@ var igv = (function (igv) {
         this.labelDisplayMode = config.labelDisplayMode;
 
         this.variantHeight = config.variantHeight || 20;
-        this.squishedCallHeight = config.squishedCallHeight || 1;
-        this.expandedCallHeight = config.expandedCallHeight || 10;
+        this.squishedCallHeight = config.squishedCallHeight || 4;
+        this.expandedCallHeight = config.expandedCallHeight || 20;
+        this.expandedVGap = 4;
+        this.squishedVGap = 1;
 
         this.featureHeight = config.featureHeight || 14;
 
@@ -135,6 +136,7 @@ var igv = (function (igv) {
 
         var callSets = this.callSets,
             nCalls = callSets ? callSets.length : 0,
+            vGap = (this.displayMode === 'EXPANDED') ? this.expandedVGap : this.squishedVGap,
             nRows,
             h;
 
@@ -160,7 +162,7 @@ var igv = (function (igv) {
             //     this.expandedCallHeight = Math.max(1, 2000 / (nCalls * nRows));
             // }
 
-            return h + vGap + nCalls * ((this.displayMode === "EXPANDED" ? this.expandedCallHeight : this.squishedCallHeight)+vGap<<1);
+            return h + vGap + nCalls * ((this.displayMode === "EXPANDED" ? this.expandedCallHeight : this.squishedCallHeight)+vGap);
             //return h + vGap + nCalls * nRows * (this.displayMode === "EXPANDED" ? this.expandedCallHeight : this.squishedCallHeight);
 
         }
@@ -176,8 +178,9 @@ var igv = (function (igv) {
             pixelHeight = options.pixelHeight,
             bpEnd = bpStart + pixelWidth * bpPerPixel + 1,
             callHeight = ("EXPANDED" === this.displayMode ? this.expandedCallHeight : this.squishedCallHeight),
+            vGap = (this.displayMode === 'EXPANDED') ? this.expandedVGap : this.squishedVGap,
             px, px1, pw, py, h, style, i, variant, call, callSet, j, allRef, allVar, callSets,
-            cr, cg, cb, vSpace, firstAllele, secondAllele, maxLen, minLen, colorScale;
+            cr, cg, cb, firstAllele, secondAllele, maxLen, minLen, colorScale;
 
         this.variantBandHeight = 10 + this.nRows * (this.variantHeight + vGap);
 
@@ -218,8 +221,7 @@ var igv = (function (igv) {
 
 
                 if (callSets && variant.calls && "COLLAPSED" !== this.displayMode) {
-                    h = callHeight<<1;
-                    vSpace = vGap<<1;
+                    h = callHeight;
 
                     for (j = 0; j < callSets.length; j++) {
                         callSet = callSets[j];
@@ -255,17 +257,17 @@ var igv = (function (igv) {
                             colorScale = new igv.GradientColorScale(
                                 {
                                     low: minLen,
-                                    lowR: 225, //220, 96
-                                    lowG: 245, //237, 252
-                                    lowB: 254, //200, 254
+                                    lowR: 135,
+                                    lowG: 206,
+                                    lowB: 250,
                                     high: maxLen,
-                                    highR: 1, //26, 33
-                                    highG: 42, //35, 49
-                                    highB: 120 //126, 60
+                                    highR: 255,
+                                    highG: 69,
+                                    highB: 0
                                 }
                             );
 
-                            py = this.variantBandHeight + vGap + (j + variant.row) * (h + vSpace);
+                            py = this.variantBandHeight + vGap + (j + variant.row) * (h + vGap);
                             //console.log(py);
                             if (!isNaN(call.genotype[0])) {
                                 firstAllele = getAlleleString(call, variant, 0);
@@ -276,11 +278,14 @@ var igv = (function (igv) {
                                 ctx.fillRect(px, py, pw, h/2);
                                 ctx.fillStyle = colorScale.getColor(secondAllele.length);
                                 ctx.fillRect(px, py+h/2, pw, h/2);
-                                ctx.beginPath();
-                                ctx.moveTo(px, py+h/2);
-                                ctx.lineTo(px+pw, py+h/2);
-                                ctx.strokeStyle = '#000';
-                                ctx.stroke();
+                                if (this.displayMode === 'EXPANDED') {
+                                    ctx.beginPath();
+                                    ctx.moveTo(px, py+h/2);
+                                    ctx.lineTo(px+pw, py+h/2);
+                                    ctx.strokeStyle = '#000';
+                                    ctx.stroke();
+                                }
+
                             } else {
                                 // console.log("no call made, set fill to white");
                                 //ctx.fillStyle = "#FFFFFF";
@@ -321,6 +326,7 @@ var igv = (function (igv) {
             var chr = referenceFrame.chrName,
                 tolerance = Math.floor(2 * referenceFrame.bpPerPixel),  // We need some tolerance around genomicLocation, start with +/- 2 pixels
                 featureList = this.featureSource.featureCache.queryFeatures(chr, genomicLocation - tolerance, genomicLocation + tolerance),
+                vGap = (this.displayMode === 'EXPANDED') ? this.expandedVGap : this.squishedVGap,
                 popupData = [],
                 self = this;
 
@@ -356,7 +362,7 @@ var igv = (function (igv) {
                                     callHeight = self.nRows * ("SQUISHED" === self.displayMode ? self.squishedCallHeight : self.expandedCallHeight);
                                     // console.log("call height: ", callHeight);
                                     // console.log("nRows: ", self.nRows);
-                                    row = Math.floor((yOffset - self.variantBandHeight - vGap) / (callHeight+vGap<<1));
+                                    row = Math.floor((yOffset - self.variantBandHeight - vGap) / (callHeight+vGap));
                                     cs = callSets[row];
                                     call = variant.calls[cs.id];
                                     Array.prototype.push.apply(popupData, extractPopupData(call, variant));

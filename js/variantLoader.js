@@ -65,7 +65,7 @@ var igv = (function (igv) {
                 url: data.files[e.value].path,
                 indexed: true,
                 name: data.files[e.value].displayName,
-                visibilityWindow: 100000000, // 100 M
+                visibilityWindow: 100000, // 100 k
                 height: 500,
                 oauth: 'google'
             });
@@ -88,6 +88,14 @@ var igv = (function (igv) {
             });
         }
 
+    };
+
+    igv.setupFlaskBrowser = function() {
+        var url = '/data/static/data';
+        igv.VariantLoader.loadFromDir(url, {method: 'GET'}).then(function(data) {
+            console.log('data', data);
+            igv.currData = {data: data, url: url};
+        });
     };
 
     return igv;
