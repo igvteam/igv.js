@@ -31,6 +31,7 @@
 var igv = (function (igv) {
 
     var DEFAULT_VISIBILITY_WINDOW = 100000;
+    var sortDirection = "ASC";
 
     igv.VariantTrack = function (config) {
 
@@ -310,13 +311,28 @@ var igv = (function (igv) {
         return (call.genotype[alleleNum] > 0) ? variant.alleles[call.genotype[alleleNum]-1].allele : variant.referenceBases;
     }
 
-    igv.VariantTrack.prototype.sortCallsets = function(variant) {
+    igv.VariantTrack.prototype.sortCallsets = function(variant, direction) {
+        var d = (direction === "ASC") ? 1 : -1;
         this.callSets.sort(function(a, b) {
-            var callA = variant.calls[a.id];
-            var callB = variant.calls[b.id];
-            var aMax = Math.max(getAlleleString(callA, variant, 0).length, getAlleleString(callA, variant, 1).length);
-            var bMax = Math.max(getAlleleString(callB, variant, 0).length, getAlleleString(callB, variant, 1).length);
-            return bMax - aMax;
+            var aNan = isNaN(variant.calls[a.id].genotype[0]);
+            var bNan = isNaN(variant.calls[b.id].genotype[0]);
+            if (aNan && bNan) {
+                return 0;
+            } else if (aNan) {
+                return 1;
+            } else if (bNan) {
+                return -1;
+            } else {
+                var a0 = getAlleleString(variant.calls[a.id], variant, 0);
+                var a1 = getAlleleString(variant.calls[a.id], variant, 1);
+                var b0 = getAlleleString(variant.calls[b.id], variant, 0);
+                var b1 = getAlleleString(variant.calls[b.id], variant, 1);
+                var result = Math.max(b0.length, b1.length) - Math.max(a0.length, a1.length);
+                if (result === 0) {
+                    result = Math.min(b0.length, b1.length) - Math.min(a0.length, a1.length);
+                }
+                return d * result;
+            }
         });
     };
 
@@ -332,7 +348,10 @@ var igv = (function (igv) {
 
                 if ((variant.start <= genomicLocation + tolerance) &&
                     (variant.end > genomicLocation - tolerance)) {
-                    self.sortCallsets(variant);
+                    // var content = igv.formatPopoverText(['Ascending', 'Descending', 'Repeat Number']);
+                    // igv.popover.presentContent(event.pageX, event.pageY, content);
+                    self.sortCallsets(variant, sortDirection);
+                    sortDirection = (sortDirection === "ASC") ? "DESC" : "ASC";
                     self.trackView.update();
                 }
             });
@@ -403,7 +422,7 @@ var igv = (function (igv) {
             }
             return popupData;
         }
-    }
+    };
 
     /**
      * Default popup text function -- just extracts string and number properties in random order.
