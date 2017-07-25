@@ -186,9 +186,9 @@ var igv = (function (igv) {
 
         callSets = this.callSets;
 
-        console.log("feature list: ", featureList);
-
-        console.log("callsets: ", callSets);
+        // console.log("feature list: ", featureList);
+        //
+        // console.log("callsets: ", callSets);
 
         igv.graphics.fillRect(ctx, 0, 0, pixelWidth, pixelHeight, {'fillStyle': "rgb(255, 255, 255)"});
 
@@ -309,6 +309,35 @@ var igv = (function (igv) {
         else alleleNum = 1;
         return (call.genotype[alleleNum] > 0) ? variant.alleles[call.genotype[alleleNum]-1].allele : variant.referenceBases;
     }
+
+    igv.VariantTrack.prototype.sortCallsets = function(variant) {
+        this.callSets.sort(function(a, b) {
+            var callA = variant.calls[a.id];
+            var callB = variant.calls[b.id];
+            var aMax = Math.max(getAlleleString(callA, variant, 0).length, getAlleleString(callA, variant, 1).length);
+            var bMax = Math.max(getAlleleString(callB, variant, 0).length, getAlleleString(callB, variant, 1).length);
+            return bMax - aMax;
+        });
+    };
+
+    igv.VariantTrack.prototype.altClick = function(genomicLocation, referenceFrame, event) {
+        var chr = referenceFrame.chrName,
+            tolerance = Math.floor(2 * referenceFrame.bpPerPixel),  // We need some tolerance around genomicLocation, start with +/- 2 pixels
+            featureList = this.featureSource.featureCache.queryFeatures(chr, genomicLocation - tolerance, genomicLocation + tolerance),
+            self = this;
+
+        if (this.callSets && featureList && featureList.length > 0) {
+
+            featureList.forEach(function (variant) {
+
+                if ((variant.start <= genomicLocation + tolerance) &&
+                    (variant.end > genomicLocation - tolerance)) {
+                    self.sortCallsets(variant);
+                    self.trackView.update();
+                }
+            });
+        }
+    };
 
     igv.VariantTrack.prototype.popupDataWithConfiguration = function (config) {
         return this.popupData(config.genomicLocation, config.x, config.y, config.viewport.genomicState.referenceFrame)
