@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+    <meta name="description" content="">
+    <meta name="author" content="">
+    <link rel="shortcut icon" href=../img/favicon.ico>
+    <title>IGV - Dev</title>
+    <link rel="import" href="./shared-css.html">
+    <link rel="import" href="./shared-js.html">
+    <script src="https://apis.google.com/js/api.js"></script>
+</head>
+
+<body>
+
+<div id="myDiv" style="padding-top: 50px;padding-bottom: 20px; height: auto">
+
+    <script>
+
+        function handleSignInClick(event) {
+            // Ideally the button should only show up after gapi.client.init finishes, so that this
+            // handler won't be called before OAuth is initialized.
+            gapi.auth2.getAuthInstance().signIn();
+        }
+
+        function updateSigninStatus(isSignedIn) {
+
+            var user = gapi.auth2.getAuthInstance().currentUser.get();
+            oauth.google.access_token = user.getAuthResponse().access_token;
+
+            $("#signinbutton").
+
+        }
+
+    </script>
+    <button id="signinbutton" disabled='disabled' onclick="handleSignInClick()">Sign In</button>
+
+    <p></p>
+
+    <a href='#' onclick="igv.browser.loadTrack({
+                                sourceType: 'ga4gh',
+                                type: 'bam',
+                                url: 'https://genomics.googleapis.com/v1',
+                                readGroupSetIds: 'CMvnhpKTFhCqqcrDgqfqgyA',
+                                name: 'Ga4gh BAM'
+                                })">Click to load Ga4gh BAM
+
+    </a>
+
+    <p></p>
+
+    <a href='#' onclick="igv.browser.loadTrack({
+                                sourceType: 'ga4gh',
+                                type: 'vcf',
+                                url: 'https://genomics.googleapis.com/v1',
+                                variantSetId: '11847417162926684904',
+                                name: 'Ga4gh variants'
+                                })">Click to load Ga4gh Variants
+    </a>
+
+    <p></p>
+
+    <a href='#' onclick="igv.browser.loadTrack({
+                                type: 'bam',
+                                url: 'gs://igv-bam-test/NA12878.bam',
+                                indexURL: 'gs://igv-bam-test/NA12878.bam.bai',
+                                name: 'GCS bam'
+                                })">GCS bam
+    </a>
+
+
+</div>
+
+<script type="text/javascript">
+
+    $(document).ready(function () {
+
+        var scope = "https://www.googleapis.com/auth/cloud-platform https://www.googleapis.com/auth/genomics https://www.googleapis.com/auth/devstorage.read_only https://www.googleapis.com/auth/userinfo.profile",
+                client_id = "661332306814-8nt29308rppg325bkq372vli8nm3na14.apps.googleusercontent.com";
+
+        gapi.load('client:auth2', initClient);
+
+
+        function initClient() {
+            gapi.client.init({
+                'clientId': client_id,
+                'scope': scope
+
+            }).then(function () {
+
+                var $b = $("#signinbutton");
+                $b.removeAttr('disabled');
+
+                var div, options, browser;
+
+                div = $("#myDiv")[0];
+                options = {
+
+                    genome: "hg19",
+                    locus: 'myc',
+                    apiKey: 'AIzaSyDUUAUFpQEN4mumeMNIRWXSiTh5cPtUAD0',
+                    tracks: [
+                        {
+                            url: "https://s3.amazonaws.com/igv.broadinstitute.org/annotations/hg19/genes/gencode.v18.collapsed.bed",
+                            name: "Genes",
+                            order: 10000
+                        }
+                    ]
+                };
+
+                browser = igv.createBrowser(div, options);
+
+                gapi.auth2.getAuthInstance().isSignedIn.listen(updateSigninStatus);
+            })
+
+        }
+
+    });
+
+</script>
+
+
+</body>
+
+</html>
