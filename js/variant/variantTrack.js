@@ -346,10 +346,13 @@ var igv = (function (igv) {
 
             featureList.forEach(function (variant) {
 
+
                 if ((variant.start <= genomicLocation + tolerance) &&
                     (variant.end > genomicLocation - tolerance)) {
+                    console.log('alt-clicked');
                     // var content = igv.formatPopoverText(['Ascending', 'Descending', 'Repeat Number']);
-                    // igv.popover.presentContent(event.pageX, event.pageY, content);
+                    //igv.popover.presentContent(event.pageX, event.pageY, [$asc, $desc]);
+
                     self.sortCallsets(variant, sortDirection);
                     sortDirection = (sortDirection === "ASC") ? "DESC" : "ASC";
                     self.trackView.update();
