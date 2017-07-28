@@ -31,6 +31,8 @@ var igv = (function (igv) {
 
         igv.configTrack(this, config);
 
+        this.isLog = config.isLog === undefined ? false : config.isLog;
+
         this.displayMode = config.displayMode || "SQUISHED"; // EXPANDED | SQUISHED
 
         this.maxHeight = config.maxHeight || 500;
@@ -170,8 +172,6 @@ var igv = (function (igv) {
                 }
             }
 
-            checkForLog(featureList);
-
             for (i = 0, len = featureList.length; i < len; i++) {
 
                 segment = featureList[i];
@@ -208,19 +208,6 @@ var igv = (function (igv) {
             console.log("No feature list");
         }
 
-
-        function checkForLog(featureList) {
-            var i;
-            if (myself.isLog === undefined) {
-                myself.isLog = false;
-                for (i = 0; i < featureList.length; i++) {
-                    if (featureList[i].value < 0) {
-                        myself.isLog = true;
-                        return;
-                    }
-                }
-            }
-        }
     };
 
     /**
