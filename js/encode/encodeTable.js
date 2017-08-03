@@ -30,20 +30,6 @@
 
 var encode = (function (encode) {
 
-    var antibodyColors =
-            {
-                H3K27AC: "rgb(200, 0, 0)",
-                H3K27ME3: "rgb(130, 0, 4)",
-                H3K36ME3: "rgb(0, 0, 150)",
-                H3K4ME1: "rgb(0, 150, 0)",
-                H3K4ME2: "rgb(0, 150, 0)",
-                H3K4ME3: "rgb(0, 150, 0)",
-                H3K9AC: "rgb(100, 0, 0)",
-                H3K9ME1: "rgb(100, 0, 0)"
-            },
-        defaultColor ="rgb(3, 116, 178)";
-
-
     encode.EncodeTable = function ($parent, browser, genomeID, loadFunction) {
 
         var self = this;
@@ -191,14 +177,29 @@ var encode = (function (encode) {
 
     function encodeAntibodyColor (antibody) {
 
-        var key;
+        var colors,
+            key;
 
-        if (!antibody || "" === antibody) {
-            return defaultColor;
+        colors =
+            {
+                DEFAULT: "rgb(3, 116, 178)",
+                H3K27AC: "rgb(200, 0, 0)",
+                H3K27ME3: "rgb(130, 0, 4)",
+                H3K36ME3: "rgb(0, 0, 150)",
+                H3K4ME1: "rgb(0, 150, 0)",
+                H3K4ME2: "rgb(0, 150, 0)",
+                H3K4ME3: "rgb(0, 150, 0)",
+                H3K9AC: "rgb(100, 0, 0)",
+                H3K9ME1: "rgb(100, 0, 0)"
+            };
+
+        if (undefined === antibody || "" === antibody) {
+            key = 'DEFAULT';
+        } else {
+            key = antibody.toUpperCase();
         }
 
-        key = antibody.toUpperCase();
-        return (antibodyColors[ key ]) ? antibodyColors[ key ] : defaultColor;
+        return colors[ key ];
 
     }
 
