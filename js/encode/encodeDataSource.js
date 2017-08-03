@@ -33,7 +33,7 @@ var encode = (function (encode) {
         this.config = config;
     };
 
-    encode.EncodeDataSource.prototype.loadJSON = function (continuation) {
+    encode.EncodeDataSource.prototype.ingestData = function (continuation) {
 
         this.jSON = {};
         if (this.config.filePath) {
@@ -151,6 +151,143 @@ var encode = (function (encode) {
         columns.unshift({ title:'index', width:'10%' });
 
         return columns;
+
+    };
+
+    encode.EncodeDataSource.retrieveJSon = function (assembly, continuation) {
+
+        var fileFormat,
+            query;
+
+        fileFormat = "bigWig";
+
+        query = "https://www.encodeproject.org/search/?" +
+            "type=experiment&" +
+            "assembly=" + assembly + "&" +
+            "files.file_format=" + fileFormat + "&" +
+            "format=json&" +
+            "field=lab.title&" +
+            "field=biosample_term_name&" +
+            "field=assay_term_name&" +
+            "field=target.label&" +
+            "field=files.file_format&" +
+            "field=files.output_type&" +
+            "field=files.href&" +
+            "field=files.replicate.technical_replicate_number&" +
+            "field=files.replicate.biological_replicate_number&" +
+            "field=files.assembly&" +
+            "limit=all";
+
+
+        console.log('encode search - load json - assembly(' + assembly + ') ...');
+        igvxhr
+            .loadJson(query, {})
+            .then(function (json) {
+
+                var rows;
+
+                console.log('' +
+                    '... done');
+
+                console.log('parse/sort json ...');
+
+                rows = [];
+                _.each(json["@graph"], function (record) {
+
+                    var cellType,
+                        target,
+                        filtered,
+                        mapped;
+
+
+                    cellType = record["biosample_term_name"] || '';
+
+                    target = record.target ? record.target.label : '';
+
+                    filtered = _.filter(record.files, function (file) {
+                        return fileFormat === file.file_format && assembly === file.assembly;
+                    });
+
+                    mapped = _.map(filtered, function (file) {
+
+                        var bioRep = file.replicate ? file.replicate.bioligcal_replicate_number : undefined,
+                            techRep = file.replicate ? file.replicate.technical_replicate_number : undefined,
+                            name = cellType + " " + target;
+
+                        if (bioRep) {
+                            name += " " + bioRep;
+                        }
+
+                        if (techRep) {
+                            name += (bioRep ? ":" : "0:") + techRep;
+                        }
+
+                        return {
+                            "Assembly": file.assembly,
+                            "ExperimentID": record['@id'],
+                            "Cell Type": cellType,
+                            "Assay Type": record.assay_term_name,
+                            "Target": target,
+                            "Lab": record.lab ? record.lab.title : "",
+                            "Format": file.file_format,
+                            "Output Type": file.output_type,
+                            "url": "https://www.encodeproject.org" + file.href,
+                            "Bio Rep": bioRep,
+                            "Tech Rep": techRep,
+                            "Name": name
+                        };
+
+                    });
+
+                    Array.prototype.push.apply(rows, mapped);
+
+                });
+
+                rows.sort(function (a, b) {
+                    var a1 = a["Assembly"],
+                        a2 = b["Assembly"],
+                        ct1 = a["Cell Type"],
+                        ct2 = b["Cell Type"],
+                        t1 = a["Target"],
+                        t2 = b["Target"];
+
+                    if (a1 === a2) {
+                        if (ct1 === ct2) {
+                            if (t1 === t2) {
+                                return 0;
+                            }
+                            else if (t1 < t2) {
+                                return -1;
+                            }
+                            else {
+                                return 1;
+                            }
+                        }
+                        else if (ct1 < ct2) {
+                            return -1;
+                        }
+                        else {
+                            return 1;
+                        }
+                    }
+                    else {
+                        if (a1 < a2) {
+                            return -1;
+                        }
+                        else {
+                            return 1;
+                        }
+                    }
+                });
+
+                console.log('... done');
+
+                continuation({
+                    columns: [ 'Assembly', 'Cell Type', 'Target', 'Assay Type', 'Output Type', 'Lab' ],
+                    rows: rows
+                });
+
+            });
 
     };
 

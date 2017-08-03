@@ -51,8 +51,13 @@ var encode = (function (encode) {
 
                 self.initialized = true;
 
-                encode.encodeSearch(genomeID, function (json) {
-                    self.loadWithDataSource(json);
+                encode.EncodeDataSource.retrieveJSon(genomeID, function (json) {
+                    var ds;
+                    ds = new encode.EncodeDataSource({ jSON: json });
+                    ds.ingestData(function () {
+                        self.createTableWithDataSource(ds);
+                    });
+
                 });
 
             }
@@ -91,7 +96,7 @@ var encode = (function (encode) {
                     data = dataTableAPIInstance.row( this ).data();
                     index = data[ 0 ];
 
-                    raw.push( self.dataSource.jSON.rows[ index ] );
+                    raw.push( self.tableRows[ index ] );
 
                 });
 
@@ -135,41 +140,32 @@ var encode = (function (encode) {
 
     };
 
-    encode.EncodeTable.prototype.loadWithDataSource = function (json) {
+    encode.EncodeTable.prototype.createTableWithDataSource = function (dataSource) {
 
-        var self = this;
+        this.tableRows = dataSource.jSON.rows;
 
-        console.log('dataTable - begin');
+        this.$spinner.hide();
 
-        this.dataSource = new encode.EncodeDataSource({jSON: json});
+        this.$dataTables = this.$modalTable.dataTable({
 
-        this.dataSource.loadJSON(function () {
+            data: dataSource.dataTablesData(),
+            // deferRender: true,
+            paging: true, /* must be true if scroller is enable */
+            scrollX: false,
+            scrollY: 400,
+            scrollCollapse: false,
+            scroller: true,
+            fixedColumns: true,
+            columns: dataSource.getColumns()
+        });
 
-            self.$spinner.hide();
-            self.$dataTables = self.$modalTable.dataTable({
+        this.$modalTable.find('tbody').on('click', 'tr', function () {
 
-                data: self.dataSource.dataTablesData(),
-                // deferRender: true,
-                paging: true, /* must be true if scroller is enable */
-                scrollX: false,
-                scrollY: 400,
-                scrollCollapse: false,
-                scroller: true,
-                fixedColumns: true,
-                columns: self.dataSource.getColumns()
-            });
-
-            console.log('dataTable - end');
-
-            self.$modalTable.find('tbody').on('click', 'tr', function () {
-
-                if ($(this).hasClass('selected')) {
-                    $(this).removeClass('selected');
-                } else {
-                    $(this).addClass('selected');
-                }
-
-            });
+            if ($(this).hasClass('selected')) {
+                $(this).removeClass('selected');
+            } else {
+                $(this).addClass('selected');
+            }
 
         });
 
