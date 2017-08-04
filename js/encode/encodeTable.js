@@ -30,13 +30,11 @@
 
 var encode = (function (encode) {
 
-    encode.EncodeTable = function ($parent, browser, browserLoadFunction, columnWidths, dataSource) {
+    encode.EncodeTable = function ($parent, browser, browserLoadFunction, dataSource) {
 
         var self = this;
 
         this.initialized = false;
-
-        this.columnWidths = columnWidths;
 
         this.$modalTable = $('<table id="encodeModalTable" cellpadding="0" cellspacing="0" border="0" class="display"></table>');
         $parent.append(this.$modalTable);
@@ -82,55 +80,7 @@ var encode = (function (encode) {
                 dt = self.$modalTable.DataTable();
                 result = [];
                 $selectedTableRows.each(function() {
-
-                    var index,
-                        datum,
-                        obj;
-
-                    index = _.first(dt.row( this ).data());
-
-                    datum = dataSource.rowData()[ index ];
-
-                    obj =
-                        {
-                            // type: datum[ 'Format' ],
-                            url: datum[ 'url' ],
-                            color: encodeAntibodyColor(datum[ 'Target' ]),
-                            // format: datum['Format'],
-                            name: datum['Name']
-                            //  max: 50
-                        };
-
-                    result.push(obj);
-
-                    function encodeAntibodyColor (antibody) {
-
-                        var colors,
-                            key;
-
-                        colors =
-                            {
-                                DEFAULT: "rgb(3, 116, 178)",
-                                H3K27AC: "rgb(200, 0, 0)",
-                                H3K27ME3: "rgb(130, 0, 4)",
-                                H3K36ME3: "rgb(0, 0, 150)",
-                                H3K4ME1: "rgb(0, 150, 0)",
-                                H3K4ME2: "rgb(0, 150, 0)",
-                                H3K4ME3: "rgb(0, 150, 0)",
-                                H3K9AC: "rgb(100, 0, 0)",
-                                H3K9ME1: "rgb(100, 0, 0)"
-                            };
-
-                        if (undefined === antibody || '' === antibody || '-' === antibody) {
-                            key = 'DEFAULT';
-                        } else {
-                            key = antibody.toUpperCase();
-                        }
-
-                        return colors[ key ];
-
-                    }
-
+                    result.push( dataSource.rowData( _.first(dt.row( this ).data()) ) );
                 });
 
                 browserLoadFunction.call(browser, result);
@@ -157,8 +107,6 @@ var encode = (function (encode) {
 
     encode.EncodeTable.prototype.createTableWithDataSource = function (dataSource) {
 
-        var self = this;
-
         this.$spinner.hide();
 
         this.$dataTables = this.$modalTable.dataTable({
@@ -171,7 +119,7 @@ var encode = (function (encode) {
             scrollCollapse: false,
             scroller: true,
             fixedColumns: true,
-            columns: dataSource.tableColumns(self.columnWidths)
+            columns: dataSource.tableColumns()
         });
 
         this.$modalTable.find('tbody').on('click', 'tr', function () {

@@ -29,6 +29,7 @@
     <!-- Encode -->
     <script type="text/javascript" src="../js/encode/encodeDataSource.js"></script>
     <script type="text/javascript" src="../js/encode/encodeTable.js"></script>
+    <script type="text/javascript" src="../js/encode/encodeTableFormat.js"></script>
 
 </head>
 
@@ -114,7 +115,9 @@
         var div,
             options,
             browser,
-            columnWidths;
+            columnWidths,
+            encodeTableFormat,
+            encodeDataSource;
 
         div = $("#myDiv")[0];
         options = {
@@ -163,7 +166,11 @@
                 'Lab': '20%'
             };
 
-        browser.encodeTable = new encode.EncodeTable($('#encodeModalBody'), browser, browser.loadTracksWithConfigList, columnWidths, new encode.EncodeDataSource({genomeID: 'hg19'}));
+        encodeTableFormat = new encode.EncodeTableFormat({ columnWidths: columnWidths });
+
+        encodeDataSource = new encode.EncodeDataSource({genomeID: 'hg19'}, encodeTableFormat);
+
+        browser.encodeTable = new encode.EncodeTable($('#encodeModalBody'), browser, browser.loadTracksWithConfigList, encodeDataSource);
 
     })
 

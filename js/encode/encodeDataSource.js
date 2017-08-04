@@ -29,8 +29,9 @@
  */
 var encode = (function (encode) {
 
-    encode.EncodeDataSource = function (config) {
+    encode.EncodeDataSource = function (config, tableFormat) {
         this.config = config;
+        this.tableFormat = tableFormat;
     };
 
     encode.EncodeDataSource.prototype.retrieveData = function (continuation) {
@@ -254,44 +255,56 @@ var encode = (function (encode) {
 
     };
 
-    encode.EncodeDataSource.prototype.rowData = function () {
-        return this.jSON.rows;
+    encode.EncodeDataSource.prototype.rowData = function (index) {
+        var row,
+            obj;
+
+        row =  this.jSON.rows[ index ];
+
+        obj =
+            {
+                url: row[ 'url' ],
+                color: encodeAntibodyColor(row[ 'Target' ]),
+                name: row['Name']
+            };
+
+        function encodeAntibodyColor (antibody) {
+
+            var colors,
+                key;
+
+            colors =
+                {
+                    DEFAULT: "rgb(3, 116, 178)",
+                    H3K27AC: "rgb(200, 0, 0)",
+                    H3K27ME3: "rgb(130, 0, 4)",
+                    H3K36ME3: "rgb(0, 0, 150)",
+                    H3K4ME1: "rgb(0, 150, 0)",
+                    H3K4ME2: "rgb(0, 150, 0)",
+                    H3K4ME3: "rgb(0, 150, 0)",
+                    H3K9AC: "rgb(100, 0, 0)",
+                    H3K9ME1: "rgb(100, 0, 0)"
+                };
+
+            if (undefined === antibody || '' === antibody || '-' === antibody) {
+                key = 'DEFAULT';
+            } else {
+                key = antibody.toUpperCase();
+            }
+
+            return colors[ key ];
+
+        }
+
+        return obj;
     };
 
     encode.EncodeDataSource.prototype.tableData = function () {
-
-        var self = this,
-            result;
-
-        result = _.map(this.jSON.rows, function (row, index) {
-
-            var rr;
-
-            rr = _.map(self.jSON.columns, function (key) {
-                return row[ key ];
-            });
-
-            rr.unshift(index);
-
-            return rr;
-
-        });
-
-        return result;
+        return this.tableFormat.tableData(this.jSON);
     };
 
-    encode.EncodeDataSource.prototype.tableColumns = function (columnWidths) {
-
-        var columns;
-
-        columns = _.map(this.jSON.columns, function (heading) {
-            return { title:heading, width:columnWidths[ heading ] }
-        });
-
-        columns.unshift({ title:'index', width:'10%' });
-
-        return columns;
-
+    encode.EncodeDataSource.prototype.tableColumns = function () {
+        return this.tableFormat.tableColumns(this.jSON);
     };
 
     return encode;
