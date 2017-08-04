@@ -46,15 +46,15 @@ var encode = (function (encode) {
         this.$spinner.append($('<i class="fa fa-lg fa-spinner fa-spin"></i>'));
 
         $('#hicEncodeModal').on('shown.bs.modal', function (e) {
+            var ds;
 
             if (true !== self.initialized) {
 
                 self.initialized = true;
-
                 encode.EncodeDataSource.retrieveJSon(genomeID, function (json) {
-                    var ds;
-                    ds = new encode.EncodeDataSource({ jSON: json });
-                    ds.ingestData(function () {
+
+                    ds = new encode.EncodeDataSource();
+                    ds.ingestSource(json, function () {
                         self.createTableWithDataSource(ds);
                     });
 

@@ -29,17 +29,15 @@
  */
 var encode = (function (encode) {
 
-    encode.EncodeDataSource = function (config) {
-        this.config = config;
+    encode.EncodeDataSource = function () {
     };
 
-    encode.EncodeDataSource.prototype.ingestData = function (continuation) {
+    encode.EncodeDataSource.prototype.ingestSource = function (source, continuation) {
 
-        this.jSON = {};
-        if (this.config.filePath) {
-            this.ingestFile(this.config.filePath, continuation);
-        } else if (this.config.jSON) {
-            this.ingestJSON(this.config.jSON, continuation);
+        if (source instanceof File) {
+            this.ingestFile(source, continuation);
+        } else if (source instanceof Object) {
+            this.ingestJSON(source, continuation);
         }
 
     };
@@ -48,7 +46,7 @@ var encode = (function (encode) {
 
         var self = this;
 
-        self.jSON = json;
+        this.jSON = json;
 
         json.rows.forEach(function(row, i){
 
@@ -67,6 +65,7 @@ var encode = (function (encode) {
 
         var self = this;
 
+        this.jSON = {};
         igvxhr.loadString(file).then(function (data) {
 
             var lines = data.splitLines(),
