@@ -30,7 +30,7 @@
 
 var encode = (function (encode) {
 
-    encode.EncodeTable = function ($parent, browser, genomeID, loadFunction, columnWidths) {
+    encode.EncodeTable = function ($parent, browser, genomeID, browserLoadFunction, columnWidths, dataSource) {
 
         var self = this;
 
@@ -47,16 +47,13 @@ var encode = (function (encode) {
         this.$spinner.append($('<i class="fa fa-lg fa-spinner fa-spin"></i>'));
 
         $('#hicEncodeModal').on('shown.bs.modal', function (e) {
-            var ds;
 
             if (true !== self.initialized) {
 
                 self.initialized = true;
-                ds = new encode.EncodeDataSource();
-
                 console.log('encode dataSource - retrieveJSon - assembly(' + genomeID + ') ...');
-                ds.retrieveJSon(genomeID, function () {
-                    self.createTableWithDataSource(ds);
+                dataSource.retrieveJSon(genomeID, function () {
+                    self.createTableWithDataSource(dataSource);
                 });
 
             }
@@ -93,7 +90,7 @@ var encode = (function (encode) {
 
                     index = _.first(dt.row( this ).data());
 
-                    datum = self.dataSource.rowData()[ index ];
+                    datum = dataSource.rowData()[ index ];
 
                     obj =
                         {
@@ -137,7 +134,7 @@ var encode = (function (encode) {
 
                 });
 
-                loadFunction.call(browser, result);
+                browserLoadFunction.call(browser, result);
 
             }
 
@@ -162,10 +159,6 @@ var encode = (function (encode) {
     encode.EncodeTable.prototype.createTableWithDataSource = function (dataSource) {
 
         var self = this;
-
-        this.dataSource = dataSource;
-
-        this.tableRows = dataSource.rowData();
 
         this.$spinner.hide();
 

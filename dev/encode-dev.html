@@ -163,7 +163,7 @@
                 'Lab': '20%'
             };
 
-        browser.encodeTable = new encode.EncodeTable($('#encodeModalBody'), browser, "hg19", browser.loadTracksWithConfigList, columnWidths);
+        browser.encodeTable = new encode.EncodeTable($('#encodeModalBody'), browser, "hg19", browser.loadTracksWithConfigList, columnWidths, new encode.EncodeDataSource());
 
     })
 
