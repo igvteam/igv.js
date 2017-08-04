@@ -30,11 +30,13 @@
 
 var encode = (function (encode) {
 
-    encode.EncodeTable = function ($parent, browser, genomeID, loadFunction) {
+    encode.EncodeTable = function ($parent, browser, genomeID, loadFunction, columnWidths) {
 
         var self = this;
 
         this.initialized = false;
+
+        this.columnWidths = columnWidths;
 
         this.$modalTable = $('<table id="encodeModalTable" cellpadding="0" cellspacing="0" border="0" class="display"></table>');
         $parent.append(this.$modalTable);
@@ -54,7 +56,7 @@ var encode = (function (encode) {
 
                 console.log('encode dataSource - retrieveJSon - assembly(' + genomeID + ') ...');
                 ds.retrieveJSon(genomeID, function () {
-                    self.createTable(ds, ds.jSON.rows);
+                    self.createTableWithDataSource(ds);
                 });
 
             }
@@ -71,46 +73,39 @@ var encode = (function (encode) {
 
         $('#encodeModalGoButton').on('click', function () {
 
-            var tableRows,
-                dataTableAPIInstance,
-                index,
-                data,
-                raw,
-                mapped;
+            var dt,
+                $selectedTableRows,
+                result;
 
-            dataTableAPIInstance = self.$modalTable.DataTable();
+            $selectedTableRows = self.$dataTables.$('tr.selected');
 
-            tableRows = self.$dataTables.$('tr.selected');
+            if ($selectedTableRows.length > 0) {
 
+                $selectedTableRows.removeClass('selected');
 
-            if (tableRows) {
+                dt = self.$modalTable.DataTable();
+                result = [];
+                $selectedTableRows.each(function() {
 
-                tableRows.removeClass('selected');
+                    var index,
+                        datum,
+                        obj;
 
-                raw = [];
-                tableRows.each(function() {
+                    index = _.first(dt.row( this ).data());
 
-                    data = dataTableAPIInstance.row( this ).data();
-                    index = data[ 0 ];
-
-                    raw.push( self.tableRows[ index ] );
-
-                });
-
-                mapped = _.map(raw, function(r) {
-
-                    var obj;
+                    datum = self.dataSource.rowData()[ index ];
 
                     obj =
                         {
-                            // type: r[ 'Format' ],
-                            url: r[ 'url' ],
-                            color: encodeAntibodyColor(r[ 'Target' ]),
-                            // format: r['Format'],
-                            name: r['Name']
-                            //  max: 50              // Hardcoded for now
+                            // type: datum[ 'Format' ],
+                            url: datum[ 'url' ],
+                            color: encodeAntibodyColor(datum[ 'Target' ]),
+                            // format: datum['Format'],
+                            name: datum['Name']
+                            //  max: 50
                         };
 
+                    result.push(obj);
 
                     function encodeAntibodyColor (antibody) {
 
@@ -130,7 +125,7 @@ var encode = (function (encode) {
                                 H3K9ME1: "rgb(100, 0, 0)"
                             };
 
-                        if (undefined === antibody || "" === antibody) {
+                        if (undefined === antibody || '' === antibody || '-' === antibody) {
                             key = 'DEFAULT';
                         } else {
                             key = antibody.toUpperCase();
@@ -140,12 +135,9 @@ var encode = (function (encode) {
 
                     }
 
-                    return obj;
-
                 });
 
-                // console.log('do something cool with ' + _.size(mapped) + ' tracks.');
-                loadFunction.call(browser, mapped);
+                loadFunction.call(browser, result);
 
             }
 
@@ -167,15 +159,19 @@ var encode = (function (encode) {
     //
     // };
 
-    encode.EncodeTable.prototype.createTable = function (dataSource, rows) {
+    encode.EncodeTable.prototype.createTableWithDataSource = function (dataSource) {
 
-        this.tableRows = rows;
+        var self = this;
+
+        this.dataSource = dataSource;
+
+        this.tableRows = dataSource.rowData();
 
         this.$spinner.hide();
 
         this.$dataTables = this.$modalTable.dataTable({
 
-            data: dataSource.dataTablesData(),
+            data: dataSource.tableData(),
             // deferRender: true,
             paging: true, /* must be true if scroller is enable */
             scrollX: false,
@@ -183,7 +179,7 @@ var encode = (function (encode) {
             scrollCollapse: false,
             scroller: true,
             fixedColumns: true,
-            columns: dataSource.getColumns()
+            columns: dataSource.tableColumns(self.columnWidths)
         });
 
         this.$modalTable.find('tbody').on('click', 'tr', function () {

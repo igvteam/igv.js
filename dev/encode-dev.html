@@ -113,7 +113,8 @@
     $(document).ready(function () {
         var div,
             options,
-            browser;
+            browser,
+            columnWidths;
 
         div = $("#myDiv")[0];
         options = {
@@ -152,7 +153,17 @@
 
         browser = igv.createBrowser(div, options);
 
-        browser.encodeTable = new encode.EncodeTable($('#encodeModalBody'), browser, "hg19", browser.loadTracksWithConfigList);
+        columnWidths =
+            {
+                'Assembly': '10%',
+                'Cell Type': '10%',
+                'Target': '10%',
+                'Assay Type': '20%',
+                'Output Type': '20%',
+                'Lab': '20%'
+            };
+
+        browser.encodeTable = new encode.EncodeTable($('#encodeModalBody'), browser, "hg19", browser.loadTracksWithConfigList, columnWidths);
 
     })
 

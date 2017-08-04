@@ -178,82 +178,86 @@ var encode = (function (encode) {
     encode.EncodeDataSource.prototype.ingestData = function (data, continuation) {
 
         if (data instanceof File) {
-            this.ingestFile(data, continuation);
+            getFile.call(this, data, continuation);
         } else if (data instanceof Object) {
-            this.ingestJSON(data, continuation);
+            getJSON.call(this, data, continuation);
+        }
+
+        function getJSON(json, continuation) {
+
+            var self = this;
+
+            this.jSON = json;
+
+            json.rows.forEach(function(row, i){
+
+                Object.keys(row).forEach(function(key){
+                    var item = row[ key ];
+                    self.jSON.rows[ i ][ key ] = (undefined === item || "" === item) ? "-" : item;
+                });
+
+            });
+
+            console.log('ingestJSON - done');
+
+            continuation();
+
+        }
+
+        function getFile(file, continuation) {
+
+            var self = this;
+
+            this.jSON = {};
+            igvxhr.loadString(file).then(function (data) {
+
+                var lines = data.splitLines(),
+                    item;
+
+                // Raw data items order:
+                // path | cell | dataType | antibody | view | replicate | type | lab | hub
+                //
+                // Reorder to match desired order. Discard hub item.
+                //
+                self.jSON.columns = lines[0].split("\t");
+                self.jSON.columns.pop();
+                item = self.jSON.columns.shift();
+                self.jSON.columns.push(item);
+
+                self.jSON.rows = [];
+
+                lines.slice(1, lines.length - 1).forEach(function (line) {
+
+                    var tokens,
+                        row;
+
+                    tokens = line.split("\t");
+                    tokens.pop();
+                    item = tokens.shift();
+                    tokens.push(item);
+
+                    row = {};
+                    tokens.forEach(function (t, i, ts) {
+                        var key = self.jSON.columns[ i ];
+                        row[ key ] = (undefined === t || "" === t) ? "-" : t;
+                    });
+
+                    self.jSON.rows.push(row);
+
+                });
+
+                continuation();
+            });
+
         }
 
     };
 
-    encode.EncodeDataSource.prototype.ingestJSON = function (json, continuation) {
-
-        var self = this;
-
-        this.jSON = json;
-
-        json.rows.forEach(function(row, i){
-
-            Object.keys(row).forEach(function(key){
-                var item = row[ key ];
-                self.jSON.rows[ i ][ key ] = (undefined === item || "" === item) ? "-" : item;
-            });
-
-        });
-
-        console.log('ingestJSON - done');
-
-        continuation();
-
+    encode.EncodeDataSource.prototype.rowData = function () {
+        return this.jSON.rows;
     };
 
-    encode.EncodeDataSource.prototype.ingestFile = function (file, continuation) {
-
-        var self = this;
-
-        this.jSON = {};
-        igvxhr.loadString(file).then(function (data) {
-
-            var lines = data.splitLines(),
-                item;
-
-            // Raw data items order:
-            // path | cell | dataType | antibody | view | replicate | type | lab | hub
-            //
-            // Reorder to match desired order. Discard hub item.
-            //
-            self.jSON.columns = lines[0].split("\t");
-            self.jSON.columns.pop();
-            item = self.jSON.columns.shift();
-            self.jSON.columns.push(item);
-
-            self.jSON.rows = [];
-
-            lines.slice(1, lines.length - 1).forEach(function (line) {
-
-                var tokens,
-                    row;
-
-                tokens = line.split("\t");
-                tokens.pop();
-                item = tokens.shift();
-                tokens.push(item);
-
-                row = {};
-                tokens.forEach(function (t, i, ts) {
-                    var key = self.jSON.columns[ i ];
-                    row[ key ] = (undefined === t || "" === t) ? "-" : t;
-                });
-
-                self.jSON.rows.push(row);
-
-            });
-
-            continuation();
-        });
-
-    };
-
-    encode.EncodeDataSource.prototype.dataTablesData = function () {
+    encode.EncodeDataSource.prototype.tableData = function () {
 
         var self = this,
             result;
@@ -275,23 +279,12 @@ var encode = (function (encode) {
         return result;
     };
 
-    encode.EncodeDataSource.prototype.getColumns = function () {
+    encode.EncodeDataSource.prototype.tableColumns = function (columnWidths) {
 
-        var widths,
-            columns;
+        var columns;
 
-        widths =
-            {
-                'Assembly': '10%',
-                'Cell Type': '10%',
-                'Target': '10%',
-                'Assay Type': '20%',
-                'Output Type': '20%',
-                'Lab': '20%'
-            };
-
-        columns = _.map(this.jSON.columns, function (heading, i) {
-            return { title:heading, width:widths[ heading ] }
+        columns = _.map(this.jSON.columns, function (heading) {
+            return { title:heading, width:columnWidths[ heading ] }
         });
 
         columns.unshift({ title:'index', width:'10%' });
