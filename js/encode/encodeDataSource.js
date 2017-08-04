@@ -29,15 +29,18 @@
  */
 var encode = (function (encode) {
 
-    encode.EncodeDataSource = function () {
+    encode.EncodeDataSource = function (config) {
+        this.config = config;
     };
 
-    encode.EncodeDataSource.prototype.retrieveJSon = function (assembly, continuation) {
+    encode.EncodeDataSource.prototype.retrieveData = function (continuation) {
 
         var self = this,
             fileFormat,
+            assembly,
             query;
 
+        assembly = this.config.genomeID;
         fileFormat = "bigWig";
 
         query = "https://www.encodeproject.org/search/?" +
@@ -64,8 +67,6 @@ var encode = (function (encode) {
 
                 var rows,
                     obj;
-
-                console.log('then - done');
 
                 console.log('then - parse/sort json ...');
 

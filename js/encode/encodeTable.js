@@ -30,7 +30,7 @@
 
 var encode = (function (encode) {
 
-    encode.EncodeTable = function ($parent, browser, genomeID, browserLoadFunction, columnWidths, dataSource) {
+    encode.EncodeTable = function ($parent, browser, browserLoadFunction, columnWidths, dataSource) {
 
         var self = this;
 
@@ -51,8 +51,7 @@ var encode = (function (encode) {
             if (true !== self.initialized) {
 
                 self.initialized = true;
-                console.log('encode dataSource - retrieveJSon - assembly(' + genomeID + ') ...');
-                dataSource.retrieveJSon(genomeID, function () {
+                dataSource.retrieveData(function () {
                     self.createTableWithDataSource(dataSource);
                 });
 

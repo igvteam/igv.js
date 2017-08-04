@@ -163,7 +163,7 @@
                 'Lab': '20%'
             };
 
-        browser.encodeTable = new encode.EncodeTable($('#encodeModalBody'), browser, "hg19", browser.loadTracksWithConfigList, columnWidths, new encode.EncodeDataSource());
+        browser.encodeTable = new encode.EncodeTable($('#encodeModalBody'), browser, browser.loadTracksWithConfigList, columnWidths, new encode.EncodeDataSource({genomeID: 'hg19'}));
 
     })
 
