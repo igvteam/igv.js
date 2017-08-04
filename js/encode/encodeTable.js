@@ -35,7 +35,6 @@ var encode = (function (encode) {
         var self = this;
 
         this.initialized = false;
-        this.genomeID = genomeID;
 
         this.$modalTable = $('<table id="encodeModalTable" cellpadding="0" cellspacing="0" border="0" class="display"></table>');
         $parent.append(this.$modalTable);
@@ -51,13 +50,11 @@ var encode = (function (encode) {
             if (true !== self.initialized) {
 
                 self.initialized = true;
-                encode.EncodeDataSource.retrieveJSon(genomeID, function (json) {
+                ds = new encode.EncodeDataSource();
 
-                    ds = new encode.EncodeDataSource();
-                    ds.ingestSource(json, function () {
-                        self.createTableWithDataSource(ds);
-                    });
-
+                console.log('encode dataSource - retrieveJSon - assembly(' + genomeID + ') ...');
+                ds.retrieveJSon(genomeID, function () {
+                    self.createTable(ds, ds.jSON.rows);
                 });
 
             }
@@ -114,7 +111,37 @@ var encode = (function (encode) {
                             //  max: 50              // Hardcoded for now
                         };
 
+
+                    function encodeAntibodyColor (antibody) {
+
+                        var colors,
+                            key;
+
+                        colors =
+                            {
+                                DEFAULT: "rgb(3, 116, 178)",
+                                H3K27AC: "rgb(200, 0, 0)",
+                                H3K27ME3: "rgb(130, 0, 4)",
+                                H3K36ME3: "rgb(0, 0, 150)",
+                                H3K4ME1: "rgb(0, 150, 0)",
+                                H3K4ME2: "rgb(0, 150, 0)",
+                                H3K4ME3: "rgb(0, 150, 0)",
+                                H3K9AC: "rgb(100, 0, 0)",
+                                H3K9ME1: "rgb(100, 0, 0)"
+                            };
+
+                        if (undefined === antibody || "" === antibody) {
+                            key = 'DEFAULT';
+                        } else {
+                            key = antibody.toUpperCase();
+                        }
+
+                        return colors[ key ];
+
+                    }
+
                     return obj;
+
                 });
 
                 // console.log('do something cool with ' + _.size(mapped) + ' tracks.');
@@ -126,23 +153,23 @@ var encode = (function (encode) {
 
     };
 
-    encode.EncodeTable.prototype.unbindAllMouseHandlers = function () {
+    // encode.EncodeTable.prototype.unbindAllMouseHandlers = function () {
+    //
+    //     this.$modalTable.find('tbody').unbind();
+    //
+    //     $('#hicEncodeModal').unbind();
+    //
+    //     $('#encodeModalTopCloseButton').unbind();
+    //
+    //     $('#encodeModalBottomCloseButton').unbind();
+    //
+    //     $('#encodeModalGoButton').unbind();
+    //
+    // };
 
-        this.$modalTable.find('tbody').unbind();
+    encode.EncodeTable.prototype.createTable = function (dataSource, rows) {
 
-        $('#hicEncodeModal').unbind();
-
-        $('#encodeModalTopCloseButton').unbind();
-
-        $('#encodeModalBottomCloseButton').unbind();
-
-        $('#encodeModalGoButton').unbind();
-
-    };
-
-    encode.EncodeTable.prototype.createTableWithDataSource = function (dataSource) {
-
-        this.tableRows = dataSource.jSON.rows;
+        this.tableRows = rows;
 
         this.$spinner.hide();
 
@@ -170,34 +197,6 @@ var encode = (function (encode) {
         });
 
     };
-
-    function encodeAntibodyColor (antibody) {
-
-        var colors,
-            key;
-
-        colors =
-            {
-                DEFAULT: "rgb(3, 116, 178)",
-                H3K27AC: "rgb(200, 0, 0)",
-                H3K27ME3: "rgb(130, 0, 4)",
-                H3K36ME3: "rgb(0, 0, 150)",
-                H3K4ME1: "rgb(0, 150, 0)",
-                H3K4ME2: "rgb(0, 150, 0)",
-                H3K4ME3: "rgb(0, 150, 0)",
-                H3K9AC: "rgb(100, 0, 0)",
-                H3K9ME1: "rgb(100, 0, 0)"
-            };
-
-        if (undefined === antibody || "" === antibody) {
-            key = 'DEFAULT';
-        } else {
-            key = antibody.toUpperCase();
-        }
-
-        return colors[ key ];
-
-    }
 
     return encode;
 
