@@ -256,18 +256,20 @@ var encode = (function (encode) {
     encode.EncodeDataSource.prototype.dataTablesData = function () {
 
         var self = this,
-            result = [];
+            result;
 
-        this.jSON.rows.forEach(function(row, index){
+        result = _.map(this.jSON.rows, function (row, index) {
 
-            var rr = [];
+            var rr;
 
-            rr.push( index );
-            self.jSON.columns.forEach(function(key){
-                rr.push( row[ key ] );
+            rr = _.map(self.jSON.columns, function (key) {
+                return row[ key ];
             });
 
-            result.push( rr );
+            rr.unshift(index);
+
+            return rr;
+
         });
 
         return result;
