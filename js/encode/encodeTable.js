@@ -30,26 +30,11 @@
 
 var encode = (function (encode) {
 
-    var antibodyColors =
-            {
-                H3K27AC: "rgb(200, 0, 0)",
-                H3K27ME3: "rgb(130, 0, 4)",
-                H3K36ME3: "rgb(0, 0, 150)",
-                H3K4ME1: "rgb(0, 150, 0)",
-                H3K4ME2: "rgb(0, 150, 0)",
-                H3K4ME3: "rgb(0, 150, 0)",
-                H3K9AC: "rgb(100, 0, 0)",
-                H3K9ME1: "rgb(100, 0, 0)"
-            },
-        defaultColor ="rgb(3, 116, 178)";
-
-
-    encode.EncodeTable = function ($parent, browser, genomeID, loadFunction) {
+    encode.EncodeTable = function ($parent, browser, browserLoadFunction, dataSource) {
 
         var self = this;
 
         this.initialized = false;
-        this.genomeID = genomeID;
 
         this.$modalTable = $('<table id="encodeModalTable" cellpadding="0" cellspacing="0" border="0" class="display"></table>');
         $parent.append(this.$modalTable);
@@ -64,9 +49,8 @@ var encode = (function (encode) {
             if (true !== self.initialized) {
 
                 self.initialized = true;
-
-                encode.encodeSearch(genomeID, function (json) {
-                    self.loadWithDataSource(json);
+                dataSource.retrieveData(function () {
+                    self.createTableWithDataSource(dataSource);
                 });
 
             }
@@ -83,51 +67,23 @@ var encode = (function (encode) {
 
         $('#encodeModalGoButton').on('click', function () {
 
-            var tableRows,
-                dataTableAPIInstance,
-                index,
-                data,
-                raw,
-                mapped;
+            var dt,
+                $selectedTableRows,
+                result;
 
-            dataTableAPIInstance = self.$modalTable.DataTable();
+            $selectedTableRows = self.$dataTables.$('tr.selected');
 
-            tableRows = self.$dataTables.$('tr.selected');
+            if ($selectedTableRows.length > 0) {
 
+                $selectedTableRows.removeClass('selected');
 
-            if (tableRows) {
-
-                tableRows.removeClass('selected');
-
-                raw = [];
-                tableRows.each(function() {
-
-                    data = dataTableAPIInstance.row( this ).data();
-                    index = data[ 0 ];
-
-                    raw.push( self.dataSource.jSON.rows[ index ] );
-
+                dt = self.$modalTable.DataTable();
+                result = [];
+                $selectedTableRows.each(function() {
+                    result.push( dataSource.rowData( _.first(dt.row( this ).data()) ) );
                 });
 
-                mapped = _.map(raw, function(r) {
-
-                    var obj;
-
-                    obj =
-                        {
-                            // type: r[ 'Format' ],
-                            url: r[ 'url' ],
-                            color: encodeAntibodyColor(r[ 'Target' ]),
-                            // format: r['Format'],
-                            name: r['Name']
-                            //  max: 50              // Hardcoded for now
-                        };
-
-                    return obj;
-                });
-
-                // console.log('do something cool with ' + _.size(mapped) + ' tracks.');
-                loadFunction.call(browser, mapped);
+                browserLoadFunction.call(browser, result);
 
             }
 
@@ -149,58 +105,34 @@ var encode = (function (encode) {
 
     };
 
-    encode.EncodeTable.prototype.loadWithDataSource = function (json) {
+    encode.EncodeTable.prototype.createTableWithDataSource = function (dataSource) {
 
-        var self = this;
+        this.$spinner.hide();
 
-        console.log('dataTable - begin');
+        this.$dataTables = this.$modalTable.dataTable({
 
-        this.dataSource = new encode.EncodeDataSource({jSON: json});
+            data: dataSource.tableData(),
+            // deferRender: true,
+            paging: true, /* must be true if scroller is enable */
+            scrollX: false,
+            scrollY: 400,
+            scrollCollapse: false,
+            scroller: true,
+            fixedColumns: true,
+            columns: dataSource.tableColumns()
+        });
 
-        this.dataSource.loadJSON(function () {
+        this.$modalTable.find('tbody').on('click', 'tr', function () {
 
-            self.$spinner.hide();
-            self.$dataTables = self.$modalTable.dataTable({
-
-                data: self.dataSource.dataTablesData(),
-                // deferRender: true,
-                paging: true, /* must be true if scroller is enable */
-                scrollX: false,
-                scrollY: 400,
-                scrollCollapse: false,
-                scroller: true,
-                fixedColumns: true,
-                columns: self.dataSource.getColumns()
-            });
-
-            console.log('dataTable - end');
-
-            self.$modalTable.find('tbody').on('click', 'tr', function () {
-
-                if ($(this).hasClass('selected')) {
-                    $(this).removeClass('selected');
-                } else {
-                    $(this).addClass('selected');
-                }
-
-            });
+            if ($(this).hasClass('selected')) {
+                $(this).removeClass('selected');
+            } else {
+                $(this).addClass('selected');
+            }
 
         });
 
     };
-
-    function encodeAntibodyColor (antibody) {
-
-        var key;
-
-        if (!antibody || "" === antibody) {
-            return defaultColor;
-        }
-
-        key = antibody.toUpperCase();
-        return (antibodyColors[ key ]) ? antibodyColors[ key ] : defaultColor;
-
-    }
 
     return encode;
 
