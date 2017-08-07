@@ -29,7 +29,7 @@
     <!-- Encode -->
     <script type="text/javascript" src="../js/encode/encodeDataSource.js"></script>
     <script type="text/javascript" src="../js/encode/encodeTable.js"></script>
-    <script type="text/javascript" src="../js/encode/encodeSearch.js"></script>
+    <script type="text/javascript" src="../js/encode/encodeTableFormat.js"></script>
 
 </head>
 
@@ -114,7 +114,10 @@
     $(document).ready(function () {
         var div,
             options,
-            browser;
+            browser,
+            columnWidths,
+            encodeTableFormat,
+            encodeDataSource;
 
         div = $("#myDiv")[0];
         options = {
@@ -153,7 +156,21 @@
 
         browser = igv.createBrowser(div, options);
 
-        browser.encodeTable = new encode.EncodeTable($('#encodeModalBody'), browser, "hg19", browser.loadTracksWithConfigList);
+        columnWidths =
+            {
+                'Assembly': '10%',
+                'Cell Type': '10%',
+                'Target': '10%',
+                'Assay Type': '20%',
+                'Output Type': '20%',
+                'Lab': '20%'
+            };
+
+        encodeTableFormat = new encode.EncodeTableFormat({ columnWidths: columnWidths });
+
+        encodeDataSource = new encode.EncodeDataSource({genomeID: 'hg19'}, encodeTableFormat);
+
+        browser.encodeTable = new encode.EncodeTable($('#encodeModalBody'), browser, browser.loadTracksWithConfigList, encodeDataSource);
 
     })
 
