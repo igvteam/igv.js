@@ -22,10 +22,13 @@
 
         <div onclick="igv.browser.loadTrack({
                             url: '../str.vcf',
-                            name: 'STR',
                             indexed: false,
                             visibilityWindow: 10000000,
-                            height: 500
+                            height: 500,
+                            variantHeight: 20,
+                            squishedCallHeight: 4,
+                            expandedCallHeight: 20,
+                            expandedVGap: 4
                         })"> STR call paired
         </div>
 

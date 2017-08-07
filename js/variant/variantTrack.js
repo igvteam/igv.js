@@ -43,11 +43,11 @@ var igv = (function (igv) {
         this.displayMode = config.displayMode || "EXPANDED";    // COLLAPSED | EXPANDED | SQUISHED
         this.labelDisplayMode = config.labelDisplayMode;
 
-        this.variantHeight = config.variantHeight || (this.type === 'str' ? 20 : 10);
-        this.squishedCallHeight = config.squishedCallHeight || (this.type === 'str' ? 4 : 1);
-        this.expandedCallHeight = config.expandedCallHeight || (this.type === 'str' ? 20 : 10);
-        this.expandedVGap = this.type === 'str' ? 4 : 2;
-        this.squishedVGap = this.type === 'str' ? 1 : 1;
+        this.variantHeight = config.variantHeight || 10;
+        this.squishedCallHeight = config.squishedCallHeight || 1;
+        this.expandedCallHeight = config.expandedCallHeight || 10;
+        this.expandedVGap = config.expandedVGap !== undefined ? config.expandedVGap :  2;
+        this.squishedVGap = config.squishedVGap !== undefined ? config.squishedVGap :   1;
 
         this.featureHeight = config.featureHeight || 14;
 
