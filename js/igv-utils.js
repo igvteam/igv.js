@@ -525,7 +525,8 @@ var igv = (function (igv) {
         var defaultOptions = {
             oauthToken: config.oauthToken || undefined,
             headers: config.headers,
-            withCredentials: config.withCredentials
+            withCredentials: config.withCredentials,
+            oauth: config.oauth
         };
 
         return _.extend(defaultOptions, options);
