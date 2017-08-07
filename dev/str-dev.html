@@ -21,27 +21,14 @@
     <div id="trackList">
 
         <div onclick="igv.browser.loadTrack({
-                            url: 'https://data.broadinstitute.org/igvdata/test/data/vcf/HipSTR/str_calls_paired.vcf.gz',
-                            name: 'STR call paired',
+                            url: '../str.vcf',
+                            name: 'STR',
+                            indexed: false,
                             visibilityWindow: 10000000,
                             height: 500
                         })"> STR call paired
         </div>
 
-        <div onclick="igv.browser.loadTrack({
-                            url: 'https://data.broadinstitute.org/igvdata/test/data/vcf/HipSTR/str_calls_paired_v2.vcf.gz',
-                            name: 'STR call paired v2',
-                            visibilityWindow: 10000000,
-                            height: 500
-                        })"> STR call paired v2
-        </div>
-        <div onclick="igv.browser.loadTrack({
-                            url: 'https://data.broadinstitute.org/igvdata/test/data/vcf/HipSTR/str_calls_unpaired.vcf.gz',
-                            name: 'STR call unpaired',
-                            visibilityWindow: 10000000,
-                            height: 500
-                        })"> STR call unpaired
-        </div>
 
     </div>
 
@@ -62,23 +49,7 @@
                 fastaURL: "https://s3.amazonaws.com/igv.broadinstitute.org/genomes/seq/1kg_v37/human_g1k_v37_decoy.fasta",
                 cytobandURL: "https://s3.amazonaws.com/igv.broadinstitute.org/genomes/seq/b37/b37_cytoband.txt"
             },
-            locus: "chr13:82,722,043-82,722,343",
-            tracks:
-                    [
-                        {
-                            name: "Genes",
-                            searchable: false,
-                            type: "annotation",
-                            format: "gtf",
-                            sourceType: "file",
-                            url: "https://s3.amazonaws.com/igv.broadinstitute.org/annotations/hg19/genes/gencode.v18.annotation.sorted.gtf.gz",
-                            indexURL: "https://s3.amazonaws.com/igv.broadinstitute.org/annotations/hg19/genes/gencode.v18.annotation.sorted.gtf.gz.tbi",
-                            visibilityWindow: 10000000,
-                            order: Number.MAX_VALUE,
-                            displayMode: "EXPANDED"
-                        }
-
-                    ]
+            locus: "1:100,512,558-101,615,917"
         };
 
         browser = igv.createBrowser(div, options);

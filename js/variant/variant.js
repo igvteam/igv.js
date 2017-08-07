@@ -35,20 +35,41 @@ var igv = (function (igv) {
 
         var variant = new igv.Variant();
 
+
+        var self = this,
+            altTokens;
+
+
         variant.chr = tokens[0]; // TODO -- use genome aliases
-        variant.pos = parseInt(tokens[1]) - 1;
+        variant.pos = parseInt(tokens[1]);
         variant.names = tokens[2];    // id in VCF
         variant.referenceBases = tokens[3];
         variant.alternateBases = tokens[4];
         variant.quality = parseInt(tokens[5]);
         variant.filter = tokens[6];
-        variant.info = tokens[7];
+        variant.info = getInfoObject(tokens[7]);
 
-        computeStart(variant);
+        variant.str = variant.info["PERIOD"] !== undefined;
+
+        initAlleles(variant);
+
 
         return variant;
 
+        function getInfoObject(infoStr) {
+
+            if (!infoStr) return undefined;
+
+            var info = {};
+            infoStr.split(';').forEach(function (elem) {
+                var element = elem.split('=');
+                info[element[0]] = element[1];
+            });
+            return info;
+        };
+
     }
+
 
     igv.createGAVariant = function (json) {
 
@@ -63,6 +84,9 @@ var igv = (function (igv) {
         variant.filter = arrayToCommaString(json.filter);
         variant.info = json.info;
 
+        variant.str = variant.info["PERIOD"] !== undefined;
+
+
         // Need to build a hash of calls for fast lookup
         // Note from the GA4GH spec on call ID:
         //
@@ -72,7 +96,7 @@ var igv = (function (igv) {
         // The number of results will also be the same.
         variant.calls = {};
         var order = 0, id;
-        if(json.calls) {
+        if (json.calls) {
             json.calls.forEach(function (call) {
                 id = call.callSetId;
                 variant.calls[id] = call;
@@ -81,62 +105,95 @@ var igv = (function (igv) {
             })
         }
 
-        computeStart(variant);
+        initAlleles(variant);
 
         return variant;
 
     }
 
 
-    function computeStart(variant) {
+    function initAlleles(variant) {
+
         //Alleles
-        altTokens = variant.alternateBases.split(",");
+        var altTokens = variant.alternateBases.split(","),
+            minAltLength = variant.referenceBases.length,
+            maxAltLength = variant.referenceBases.length;
 
-        if (altTokens.length > 0) {
 
-            variant.alleles = [];
-            variant.alleles.push(variant.referenceBases);
+        variant.alleles = [];
 
-            variant.start = Number.MAX_VALUE;
-            variant.end = 0;
+        // If an STR define start and end based on reference allele.  Otherwise start and end computed below based
+        // on alternate allele type (snp, insertion, deletion)
 
+        if(variant.str) {
+            variant.start = variant.pos - 1;
+            variant.end = variant.start + variant.referenceBases.length;
+        }
+
+        if (variant.alternateBases === ".") {     // "." => no alternate alleles
+            variant.heterozygosity = 0;
+        } else {
             altTokens.forEach(function (alt) {
                 var a, s, e, diff;
 
                 variant.alleles.push(alt);
 
-                if (alt.length > 0) {
+                // Adjust for padding, used for insertions and deletions, unless variant is a short tandem repeat.
+
+                if (!variant.str && alt.length > 0) {
 
                     diff = variant.referenceBases.length - alt.length;
 
                     if (diff > 0) {
                         // deletion, assume left padded
-                        s = variant.pos + alt.length;
+                        s = variant.pos - 1 + alt.length;
                         e = s + diff;
                     } else if (diff < 0) {
                         // Insertion, assume left padded, insertion begins to "right" of last ref base
-                        s = variant.pos + variant.referenceBases.length;
+                        s = variant.pos - 1 + variant.referenceBases.length;
                         e = s + 1;     // Insertion between s & 3
+                    } else {
+                        s = variant.pos - 1;
+                        e = s + 1;
                     }
-                    else {
-                        // Substitution, SNP if seq.length == 1
-                        s = variant.pos;
-                        e = s + alt.length;
-                    }
-                    // variant.alleles.push({allele: alt, start: s, end: e});
-                    variant.start = Math.min(variant.start, s);
-                    variant.end = Math.max(variant.end, e);
+                    variant.start = variant.start === undefined ? s : Math.min(variant.start, s);
+                    variant.end = variant.end === undefined ? e : Math.max(variant.end, e);
                 }
 
-            });
-        }
-        else {
-            // Is this even legal VCF?  (NO alt alleles)
-            variant.start = variant.pos - 1;
-            variant.end = variant.pos;
-        }
-    }
+                minAltLength = Math.min(minAltLength, alt.length);
+                maxAltLength = Math.max(maxAltLength, alt.length);
 
+            });
+            if (variant.info.AC && variant.info.AN) {
+                variant.heterozygosity = calcHeterozygosity(variant.info.AC, variant.info.AN).toFixed(3);
+            }
+        }
+
+        // Alternate allele lengths used for STR color scale.
+        variant.minAltLength = minAltLength;
+        variant.maxAltLength = maxAltLength;
+
+
+        function calcHeterozygosity(ac, an) {
+            var sum = 0,
+                altFreqs = ac.split(','),
+                altCount = 0,
+                refFrac;
+
+            an = parseInt(an);
+            altFreqs.forEach(function (altFreq) {
+                var a = parseInt(altFreq),
+                    altFrac = a / an;
+                sum += altFrac * altFrac;
+                altCount += a;
+            });
+
+            refFrac = (an - altCount) / an;
+            sum += refFrac * refFrac;
+            return 1 - sum;
+        };
+
+    }
 
     igv.Variant = function () {
 
@@ -144,35 +201,40 @@ var igv = (function (igv) {
 
     igv.Variant.prototype.popupData = function (genomicLocation) {
 
-        var fields, gt,
-            self = this;
+        var self = this,
+            fields, gt;
 
         fields = [
             {name: "Chr", value: this.chr},
-            {name: "Pos", value: (this.pos + 1)},
+            {name: "Pos", value: this.pos},
             {name: "Names", value: this.names ? this.names : ""},
             {name: "Ref", value: this.referenceBases},
             {name: "Alt", value: this.alternateBases},
             {name: "Qual", value: this.quality},
-            {name: "Filter", value: this.filter},
-         ];
+            {name: "Filter", value: this.filter}
+        ];
 
-        if(this.calls && this.calls.length === 1) {
+        if (this.heterozygosity) {
+            fields.push({name: "Heterozygosity", value: this.heterozygosity});
+        }
+
+        // Special case of VCF with a single sample
+        if (this.calls && this.calls.length === 1) {
+            fields.push('<hr>');
             gt = this.alleles[this.calls[0].genotype[0]] + this.alleles[this.calls[0].genotype[1]];
             fields.push({name: "Genotype", value: gt});
         }
 
-        if(this.info) {
-            fields.push('<HR>');
+
+        if (this.info) {
+            fields.push('<hr>');
             Object.keys(this.info).forEach(function (key) {
                 fields.push({name: key, value: arrayToCommaString(self.info[key])});
             });
         }
-
         return fields;
 
-    }
-
+    };
 
     function arrayToCommaString(array) {
         if (!array) return;
