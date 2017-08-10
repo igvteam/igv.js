@@ -48,7 +48,7 @@ var encode = (function (encode) {
                 return row[ key ];
             });
 
-            rr.unshift(index);
+            // rr.unshift(index);
 
             return rr;
 
@@ -69,7 +69,7 @@ var encode = (function (encode) {
             return { title:heading, width:self.config.columnWidths[ heading ] }
         });
 
-        columns.unshift({ title:'index', width:'10%' });
+        // columns.unshift({ title:'index', width:'10%' });
 
         return columns;
 
