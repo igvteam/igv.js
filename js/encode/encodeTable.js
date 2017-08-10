@@ -86,7 +86,7 @@ var encode = (function (encode) {
                 dt = self.$modalTable.DataTable();
                 result = [];
                 $selectedTableRows.each(function() {
-                    result.push( dataSource.rowData( _.first(dt.row( this ).data()) ) );
+                    result.push( dataSource.dataAtRowIndex( dt.row(this).index() ) );
                 });
 
                 browserLoadFunction.call(browser, result);
