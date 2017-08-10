@@ -29,6 +29,10 @@
  */
 var encode = (function (encode) {
 
+    /**
+     * @param config      dataSource configuration
+     * @param tableFormat table formatting object (see for example EncodeTableFormat)
+     */
     encode.EncodeDataSource = function (config, tableFormat) {
         this.config = config;
         this.tableFormat = tableFormat;

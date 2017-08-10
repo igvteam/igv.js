@@ -26,10 +26,16 @@
 
 var encode = (function (encode) {
 
+    /**
+     * @param config tableFormat configuration
+     */
     encode.EncodeTableFormat = function (config) {
         this.config = config;
     };
 
+    /**
+     * @param jSON data object passed from EncodeDataSource instance
+     */
     encode.EncodeTableFormat.prototype.tableData = function (jSON) {
 
         var result;
@@ -51,6 +57,9 @@ var encode = (function (encode) {
         return result;
     };
 
+    /**
+     * @param jSON data object passed from EncodeDataSource instance
+     */
     encode.EncodeTableFormat.prototype.tableColumns = function (jSON) {
 
         var self = this,

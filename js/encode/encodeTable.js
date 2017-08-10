@@ -30,6 +30,12 @@
 
 var encode = (function (encode) {
 
+    /**
+     * @param $parent              containing jquery selection used to host the table
+     * @param browser              reference to the hicBrower object
+     * @param browserLoadFunction function that consumes items selected from the table
+     * @param dataSource          source of data fed to the table (see for example EncodeDataSource)
+     */
     encode.EncodeTable = function ($parent, browser, browserLoadFunction, dataSource) {
 
         var self = this;
@@ -105,6 +111,9 @@ var encode = (function (encode) {
 
     };
 
+    /**
+     * @param dataSource source of data fed to the table (see for example EncodeDataSource)
+     */
     encode.EncodeTable.prototype.createTableWithDataSource = function (dataSource) {
 
         this.$spinner.hide();
