@@ -119,7 +119,6 @@ var encode = (function (encode) {
         this.$spinner.hide();
 
         this.$dataTables = this.$modalTable.dataTable({
-
             data: dataSource.tableData(),
             // deferRender: true,
             paging: true, /* must be true if scroller is enable */
