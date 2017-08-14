@@ -28,7 +28,7 @@
  * Created by dat on 4/18/17.
  */
 
-var encode = (function (encode) {
+var igv = (function (igv) {
 
     /**
      * @param $parent              containing jquery selection used to host the table
@@ -36,7 +36,7 @@ var encode = (function (encode) {
      * @param browserLoadFunction function that consumes items selected from the table
      * @param dataSource          source of data fed to the table (see for example EncodeDataSource)
      */
-    encode.EncodeTable = function ($parent, browser, browserLoadFunction, dataSource) {
+    igv.IGVModalTable = function ($parent, browser, browserLoadFunction, dataSource) {
 
         var self = this;
 
@@ -97,7 +97,7 @@ var encode = (function (encode) {
 
     };
 
-    encode.EncodeTable.prototype.unbindAllMouseHandlers = function () {
+    igv.IGVModalTable.prototype.unbindAllMouseHandlers = function () {
 
         this.$modalTable.find('tbody').unbind();
 
@@ -114,7 +114,7 @@ var encode = (function (encode) {
     /**
      * @param dataSource source of data fed to the table (see for example EncodeDataSource)
      */
-    encode.EncodeTable.prototype.createTableWithDataSource = function (dataSource) {
+    igv.IGVModalTable.prototype.createTableWithDataSource = function (dataSource) {
 
         this.$spinner.hide();
 
@@ -142,6 +142,6 @@ var encode = (function (encode) {
 
     };
 
-    return encode;
+    return igv;
 
-})(encode || {});
+})(igv || {});

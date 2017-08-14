@@ -27,8 +27,8 @@
     <script type="text/javascript" src="https://cdn.datatables.net/v/dt/dt-1.10.15/sc-1.4.2/se-1.2.2/datatables.min.js"></script>
 
     <!-- Encode -->
+    <script type="text/javascript" src="../js/ui/igvModalTable.js"></script>
     <script type="text/javascript" src="../js/encode/encodeDataSource.js"></script>
-    <script type="text/javascript" src="../js/encode/encodeTable.js"></script>
     <script type="text/javascript" src="../js/encode/encodeTableFormat.js"></script>
 
 </head>
@@ -170,7 +170,7 @@
 
         encodeDataSource = new encode.EncodeDataSource({genomeID: 'hg19'}, encodeTableFormat);
 
-        browser.encodeTable = new encode.EncodeTable($('#encodeModalBody'), browser, browser.loadTracksWithConfigList, encodeDataSource);
+        browser.encodeTable = new igv.IGVModalTable($('#encodeModalBody'), browser, browser.loadTracksWithConfigList, encodeDataSource);
 
     })
 
