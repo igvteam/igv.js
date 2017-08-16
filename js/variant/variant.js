@@ -214,7 +214,7 @@ var igv = (function (igv) {
             {name: "Filter", value: this.filter}
         ];
 
-        if (this.heterozygosity) {
+        if (this.hasOwnProperty("heterozygosity")) {
             fields.push({name: "Heterozygosity", value: this.heterozygosity});
         }
 
