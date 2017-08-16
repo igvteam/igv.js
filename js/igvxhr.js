@@ -87,6 +87,7 @@ var igvxhr = (function (igvxhr) {
                     igv.Google.addGoogleHeaders(headers);
 
                 } else if(options.oauth) {
+                    // "Legacy" option -- do not use (use options.token)
                     addOauthHeaders(headers)
                 }
 
@@ -422,6 +423,11 @@ var igvxhr = (function (igvxhr) {
 
     };
 
+    /**
+     * Legacy method to add oauth tokens.  Kept for backward compatibility.  Do not use -- use config.token setting instead.
+     * @param headers
+     * @returns {*}
+     */
     function addOauthHeaders(headers) {
         {
             headers["Cache-Control"] = "no-cache";
