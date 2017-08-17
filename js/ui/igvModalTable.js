@@ -42,6 +42,8 @@ var igv = (function (igv) {
 
         this.browser = browser;
 
+        this.dataSource = dataSource;
+
         this.initialized = false;
 
         this.$modalTable = $('<table id="encodeModalTable" cellpadding="0" cellspacing="0" border="0" class="display"></table>');
@@ -97,6 +99,10 @@ var igv = (function (igv) {
 
         });
 
+    };
+
+    igv.IGVModalTable.prototype.genomeID = function () {
+        return this.dataSource.config.genomeID;
     };
 
     igv.IGVModalTable.prototype.unbindAllMouseHandlers = function () {
