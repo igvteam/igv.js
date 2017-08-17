@@ -40,6 +40,8 @@ var igv = (function (igv) {
 
         var self = this;
 
+        this.browser = browser;
+
         this.initialized = false;
 
         this.$modalTable = $('<table id="encodeModalTable" cellpadding="0" cellspacing="0" border="0" class="display"></table>');
@@ -89,7 +91,7 @@ var igv = (function (igv) {
                     result.push( dataSource.dataAtRowIndex( dt.row(this).index() ) );
                 });
 
-                browser[ browserLoadFunction ](result);
+                self.browser[ browserLoadFunction ](result);
 
             }
 
