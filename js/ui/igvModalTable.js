@@ -89,7 +89,7 @@ var igv = (function (igv) {
                     result.push( dataSource.dataAtRowIndex( dt.row(this).index() ) );
                 });
 
-                browserLoadFunction.call(browser, result);
+                browser[ browserLoadFunction ](result);
 
             }
 

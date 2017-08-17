@@ -170,7 +170,7 @@
 
         encodeDataSource = new encode.EncodeDataSource({genomeID: 'hg19'}, encodeTableFormat);
 
-        browser.encodeTable = new igv.IGVModalTable($('#encodeModalBody'), browser, browser.loadTracksWithConfigList, encodeDataSource);
+        browser.encodeTable = new igv.IGVModalTable($('#encodeModalBody'), browser, 'loadTracksWithConfigList', encodeDataSource);
 
     })
 
