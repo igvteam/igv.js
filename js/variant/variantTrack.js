@@ -181,7 +181,7 @@ var igv = (function (igv) {
             callHeight = ("EXPANDED" === this.displayMode ? this.expandedCallHeight : this.squishedCallHeight),
             vGap = (this.displayMode === 'EXPANDED') ? this.expandedVGap : this.squishedVGap,
             px, px1, pw, py, h, style, i, variant, call, callSet, j, allRef, allVar, callSets,
-            cr, cg, cb, firstAllele, secondAllele, maxLen, minLen, colorScale;
+            cr, cg, cb, firstAllele, secondAllele, lowColorScale, highColorScale;
 
         this.variantBandHeight = 10 + this.nRows * (this.variantHeight + vGap);
 
@@ -223,12 +223,24 @@ var igv = (function (igv) {
                     h = callHeight;
 
                     if(variant.str) {
-                        colorScale = new igv.GradientColorScale(
+                        lowColorScale = new igv.GradientColorScale(
                             {
                                 low: variant.minAltLength,
                                 lowR: 135,
                                 lowG: 206,
                                 lowB: 250,
+                                high: variant.referenceBases.length,
+                                highR: 150,
+                                highG: 150,
+                                highB: 150
+                            }
+                        );
+                        highColorScale = new igv.GradientColorScale(
+                            {
+                                low: variant.referenceBases.length,
+                                lowR: 150,
+                                lowG: 150,
+                                lowB: 150,
                                 high: variant.maxAltLength,
                                 highR: 255,
                                 highG: 69,
@@ -274,9 +286,9 @@ var igv = (function (igv) {
                                     secondAllele = getAlleleString(call, variant, 1);
 
                                     // gradient color scheme based on allele length
-                                    ctx.fillStyle = colorScale.getColor(firstAllele.length);
+                                    ctx.fillStyle = getFillColor(firstAllele);
                                     ctx.fillRect(px, py, pw, h / 2);
-                                    ctx.fillStyle = colorScale.getColor(secondAllele.length);
+                                    ctx.fillStyle = getFillColor(secondAllele);
                                     ctx.fillRect(px, py + h / 2, pw, h / 2);
                                     if (this.displayMode === 'EXPANDED') {
                                         ctx.beginPath();
@@ -292,6 +304,16 @@ var igv = (function (igv) {
                                     ctx.strokeStyle = "#B0B0B0";
                                     //ctx.lineWidth = 0.8;
                                     ctx.strokeRect(px, py, pw, h);
+                                }
+
+                                function getFillColor(allele) {
+                                    if (allele.length < variant.referenceBases.length) {
+                                        return lowColorScale.getColor(allele.length);
+                                    } else if (allele.length > variant.referenceBases.length) {
+                                        return highColorScale.getColor(allele.length);
+                                    } else {
+                                        return "rgb(150,150,150)"; // gray for reference length
+                                    }
                                 }
                             }
                         }
