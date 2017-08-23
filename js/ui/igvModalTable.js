@@ -38,7 +38,8 @@ var igv = (function (igv) {
      */
     igv.IGVModalTable = function ($parent, browser, browserLoadFunction, dataSource) {
 
-        var self = this;
+        var self = this,
+        $modal = $('#hicEncodeModal');
 
         this.browser = browser;
 
@@ -53,16 +54,27 @@ var igv = (function (igv) {
         this.$modalTable.append(this.$spinner);
 
         this.$spinner.append($('<i class="fa fa-lg fa-spinner fa-spin"></i>'));
+        this.$spinner.hide();
 
-        $('#hicEncodeModal').on('shown.bs.modal', function (e) {
+        $modal.on('show.bs.modal', function (e) {
 
-            if (true !== self.initialized) {
+            if (undefined === self.browser) {
+                igv.presentAlert('ERROR: browser undefined');
+            }
 
+        });
+
+        $modal.on('shown.bs.modal', function (e) {
+
+            if (undefined === self.browser) {
+                $modal.modal('hide');
+            } else if (true !== self.initialized) {
                 self.initialized = true;
+                self.$spinner.show();
                 dataSource.retrieveData(function () {
                     self.createTableWithDataSource(dataSource);
+                    self.$spinner.hide();
                 });
-
             }
 
         });
@@ -83,7 +95,9 @@ var igv = (function (igv) {
 
             $selectedTableRows = self.$dataTables.$('tr.selected');
 
-            if ($selectedTableRows.length > 0) {
+            if (undefined === self.browser) {
+                igv.presentAlert('ERROR: browser undefined');
+            } else if ($selectedTableRows.length > 0) {
 
                 $selectedTableRows.removeClass('selected');
 
@@ -94,7 +108,6 @@ var igv = (function (igv) {
                 });
 
                 self.browser[ browserLoadFunction ](result);
-
             }
 
         });
