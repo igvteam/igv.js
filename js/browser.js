@@ -277,7 +277,7 @@ var igv = (function (igv) {
             igv.popover.hide();
         }
 
-        trackView = new igv.TrackView(track, this);
+        trackView = new igv.TrackView(this, $(this.trackContainerDiv), track);
         this.trackViews.push(trackView);
         this.reorderTracks();
         trackView.resize();
@@ -887,10 +887,10 @@ var igv = (function (igv) {
         _.each(this.trackViews, function(trackView){
 
             _.each(_.range(_.size(genomicStateList)), function(i) {
-                trackView.viewports.push(new igv.Viewport(trackView, i));
-                trackView.configureViewportContainer(trackView.$viewportContainer, trackView.viewports);
+                trackView.viewports.push(new igv.Viewport(trackView, trackView.$viewportContainer, i));
             });
 
+            trackView.configureViewportContainer(trackView.$viewportContainer, trackView.viewports);
         });
 
     };
