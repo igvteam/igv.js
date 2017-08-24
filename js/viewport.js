@@ -20,15 +20,11 @@ var igv = (function (igv) {
         this.genomicState = igv.browser.genomicStateList[ locusIndex ];
 
         this.$viewport = $('<div class="igv-viewport-div">');
-        $container.append( this.$viewport );
-
+        $container.append(this.$viewport);
         this.$viewport.data( "viewport", this.id );
         this.$viewport.data( "locusindex", this.genomicState.locusIndex );
 
         addViewportBorders(this.$viewport, this.genomicState.locusIndex, _.size(igv.browser.genomicStateList));
-
-        // TODO diagnostic coloring
-        // this.$viewport.css("background-color", igv.randomRGBConstantAlpha(200, 255, 0.75));
 
         this.setWidth(igv.browser.viewportContainerWidth()/this.genomicState.locusCount);
 
@@ -39,22 +35,19 @@ var igv = (function (igv) {
             this.$viewport.addClass('igv-viewport-sequence');
         }
 
-        if (this.genomicState.locusCount > 1) {
+        if (this.genomicState.locusCount > 1 && trackView.track instanceof igv.RulerTrack) {
 
-            if (trackView.track instanceof igv.RulerTrack) {
+            this.$viewport.addClass('igv-viewport-ruler');
 
-                this.$viewport.addClass('igv-viewport-ruler');
+            this.$close = $('<div class="igv-viewport-fa-close">');
+            this.$closeButton = $('<i class="fa fa-times-circle">');
+            this.$close.append(this.$closeButton);
 
-                this.$close = $('<div class="igv-viewport-fa-close">');
-                this.$closeButton = $('<i class="fa fa-times-circle">');
-                this.$close.append(this.$closeButton);
+            this.$close.click(function (e) {
+                igv.browser.closeMultiLocusPanelWithGenomicState(self.genomicState);
+            });
 
-                this.$close.click(function (e) {
-                    igv.browser.closeMultiLocusPanelWithGenomicState(self.genomicState);
-                });
-
-                this.$viewport.append(this.$close);
-            }
+            this.$viewport.append(this.$close);
         }
 
         // track content canvas
@@ -64,10 +57,8 @@ var igv = (function (igv) {
         this.canvas.setAttribute('height', this.contentDiv.clientHeight);
         this.ctx = this.canvas.getContext("2d");
 
-        if (this.genomicState.locusCount > 1) {
-            if (trackView.track instanceof igv.RulerTrack) {
-                $(this.contentDiv).append(igv.browser.rulerTrack.locusLabelWithViewport(this));
-            }
+        if (this.genomicState.locusCount > 1 && trackView.track instanceof igv.RulerTrack) {
+            $(this.contentDiv).append(igv.browser.rulerTrack.locusLabelWithViewport(this));
         }
 
         // zoom in to see features
@@ -110,12 +101,11 @@ var igv = (function (igv) {
 
         }
 
-        this.addMouseHandlers();
-
         if (trackView.track instanceof igv.RulerTrack) {
-
             // do nothing
         } else {
+            this.addMouseHandlers();
+
             dimen = this.$viewport.height();
             if (dimen > 32) {
                 dimen = 32;
@@ -128,6 +118,7 @@ var igv = (function (igv) {
             $spinner.append($('<i class="fa fa-spinner fa-spin fa-fw">'));
             this.$viewport.append($spinner);
             this.stopSpinner();
+
         }
 
         function addViewportBorders ($viewport, locusIndex, lociCount) {
@@ -163,235 +154,120 @@ var igv = (function (igv) {
             popupTimer,
             doubleClickDelay;
 
-        if (self.trackView.track instanceof igv.RulerTrack) {
-            self.addRulerMouseHandlers();
-        } else {
+        doubleClickDelay = igv.browser.constants.doubleClickDelay;
 
-            doubleClickDelay = igv.browser.constants.doubleClickDelay;
+        // right-click
+        $(self.canvas).contextmenu(function(e) {
 
-            // right-click
-            $(self.canvas).contextmenu(function(e) {
+            e.preventDefault();
+            e = $.event.fix(e);
+            e.stopPropagation();
 
-                e.preventDefault();
-                e = $.event.fix(e);
-                e.stopPropagation();
+            igv.popover.presentTrackPopupMenu(e, self);
 
-                igv.popover.presentTrackPopupMenu(e, self);
-
-            });
-
-            $(self.canvas).mousedown(function (e) {
-                var canvasCoords;
-
-                e.preventDefault();
-
-                isMouseDown = true;
-                canvasCoords = igv.translateMouseCoordinates(e, self.canvas);
-                lastMouseX = canvasCoords.x;
-                mouseDownX = lastMouseX;
-            });
-
-            $(self.canvas).click(function (e) {
-
-                var canvasCoords,
-                    referenceFrame,
-                    genomicLocation,
-                    time,
-                    newCenter,
-                    widthBP,
-                    chr;
-
-                e.preventDefault();
-                e = $.event.fix(e);
-                e.stopPropagation();
-
-                referenceFrame = self.genomicState.referenceFrame;
-                if (undefined === referenceFrame) {
-                    console.log('undefined === referenceFrame');
-                    return;
-                }
-
-                canvasCoords = igv.translateMouseCoordinates(e, self.canvas);
-                genomicLocation = Math.floor((referenceFrame.start) + referenceFrame.toBP(canvasCoords.x));
-                time = Date.now();
-
-                if (time - lastClickTime < doubleClickDelay) {
-                    // This is a double-click
-
-                    // if (_.size(igv.browser.genomicStateList) > 1) {
-                    //     // ignore
-                    // } else {
-
-                    if (popupTimer) {
-                        // Cancel previous timer
-                        window.clearTimeout(popupTimer);
-                        popupTimer = undefined;
-                    }
-
-                    if (igv.browser.minimumBasesExtent() > Math.floor(self.$viewport.width() * referenceFrame.bpPerPixel/2.0)) {
-                        // do nothing
-                    } else {
-                        newCenter = Math.round(referenceFrame.start + canvasCoords.x * referenceFrame.bpPerPixel);
-                        if(referenceFrame.chrName === "all") {
-                            chr = igv.browser.genome.getChromosomeCoordinate(newCenter).chr;
-                            igv.browser.search(chr);
-
-                        } else {
-                            self.genomicState.referenceFrame.bpPerPixel /= 2;
-                            self.genomicState.referenceFrame.start = Math.round((newCenter + self.genomicState.referenceFrame.start)/2.0 );
-                            igv.browser.updateWithLocusIndex(self.genomicState.locusIndex);
-
-                        }
-
-                    }
-
-                    // }
-
-                } else {
-
-                    if (e.shiftKey) {
-
-                        if (self.trackView.track.shiftClick && self.tile) {
-                            self.trackView.track.shiftClick(genomicLocation, e);
-                        }
-
-                    } else if (e.altKey) {
-
-                        if (self.trackView.track.altClick && self.tile) {
-                            self.trackView.track.altClick(genomicLocation, referenceFrame, e);
-                        }
-
-                    } else if (Math.abs(canvasCoords.x - mouseDownX) <= igv.browser.constants.dragThreshold && self.trackView.track.popupDataWithConfiguration) {
-
-                        popupTimer = window.setTimeout(function () {
-
-                                igv.popover.presentTrackPopup(e, self);
-
-                                mouseDownX = undefined;
-                                popupTimer = undefined;
-                            },
-                            doubleClickDelay);
-                    }
-                }
-
-                mouseDownX = undefined;
-                isMouseDown = false;
-                lastMouseX = undefined;
-                lastClickTime = time;
-
-            });
-
-        }
-
-    };
-
-    igv.Viewport.prototype.addRulerMouseHandlers = function () {
-
-        var self = this,
-            isMouseDown = undefined,
-            isMouseIn = undefined,
-            mouseDownXY = undefined,
-            mouseMoveXY = undefined,
-            left,
-            rulerSweepWidth,
-            rulerSweepThreshold = 1,
-            dx;
-
-        this.removeRulerMouseHandlers();
-
-        if ('all' === this.genomicState.chromosome.name) {
-            return;
-        }
-        // self.trackView.trackDiv.dataset.rulerTrack = "rulerTrack";
-
-        // ruler sweeper widget surface
-        self.$rulerSweeper = $('<div class="igv-ruler-sweeper-div">');
-        $(self.contentDiv).append(self.$rulerSweeper);
-
-        this.$viewport.on({
-
-            mousedown: function (e) {
-
-                e.preventDefault();
-
-                $(self.contentDiv).off();
-
-                $(self.contentDiv).on({
-                    mousedown: function (e) {
-                        isMouseDown = true;
-                    }
-                });
-
-                mouseDownXY = igv.translateMouseCoordinates(e, self.contentDiv);
-
-                left = mouseDownXY.x;
-                rulerSweepWidth = 0;
-                self.$rulerSweeper.css({"display": "inline", "left": left + "px", "width": rulerSweepWidth + "px"});
-
-                isMouseIn = true;
-            },
-
-            mousemove: function (e) {
-
-                e.preventDefault();
-
-                if (isMouseDown && isMouseIn) {
-
-                    mouseMoveXY = igv.translateMouseCoordinates(e, self.contentDiv);
-                    dx = mouseMoveXY.x - mouseDownXY.x;
-                    rulerSweepWidth = Math.abs(dx);
-
-                    if (rulerSweepWidth > rulerSweepThreshold) {
-
-                        self.$rulerSweeper.css({"width": rulerSweepWidth + "px"});
-
-                        if (dx < 0) {
-
-                            if (mouseDownXY.x + dx < 0) {
-                                isMouseIn = false;
-                                left = 0;
-                            } else {
-                                left = mouseDownXY.x + dx;
-                            }
-                            self.$rulerSweeper.css({"left": left + "px"});
-                        }
-                    }
-                }
-            },
-
-            mouseup: function (e) {
-
-                var extent,
-                    referenceFrame;
-
-                if (isMouseDown) {
-
-                    // End sweep
-                    isMouseDown = false;
-                    isMouseIn = false;
-
-                    self.$rulerSweeper.css({"display": "none", "left": 0 + "px", "width": 0 + "px"});
-
-                    referenceFrame = self.genomicState.referenceFrame;
-
-                    extent = {};
-                    extent.start = referenceFrame.start + (left * referenceFrame.bpPerPixel);
-                    extent.end = extent.start + rulerSweepWidth * referenceFrame.bpPerPixel;
-
-                    if (rulerSweepWidth > rulerSweepThreshold) {
-                        igv.Browser.validateLocusExtent(igv.browser.genome.getChromosome(referenceFrame.chrName), extent);
-                        self.goto(referenceFrame.chrName, extent.start, extent.end);
-                    }
-                }
-
-            }
         });
 
-    };
+        $(self.canvas).mousedown(function (e) {
+            var canvasCoords;
 
-    igv.Viewport.prototype.removeRulerMouseHandlers = function () {
-        $(this.contentDiv).off();
-        this.$viewport.off();
+            e.preventDefault();
+
+            isMouseDown = true;
+            canvasCoords = igv.translateMouseCoordinates(e, self.canvas);
+            lastMouseX = canvasCoords.x;
+            mouseDownX = lastMouseX;
+        });
+
+        $(self.canvas).click(function (e) {
+
+            var canvasCoords,
+                referenceFrame,
+                genomicLocation,
+                time,
+                newCenter,
+                widthBP,
+                chr;
+
+            e.preventDefault();
+            e = $.event.fix(e);
+            e.stopPropagation();
+
+            referenceFrame = self.genomicState.referenceFrame;
+            if (undefined === referenceFrame) {
+                console.log('undefined === referenceFrame');
+                return;
+            }
+
+            canvasCoords = igv.translateMouseCoordinates(e, self.canvas);
+            genomicLocation = Math.floor((referenceFrame.start) + referenceFrame.toBP(canvasCoords.x));
+            time = Date.now();
+
+            if (time - lastClickTime < doubleClickDelay) {
+                // This is a double-click
+
+                // if (_.size(igv.browser.genomicStateList) > 1) {
+                //     // ignore
+                // } else {
+
+                if (popupTimer) {
+                    // Cancel previous timer
+                    window.clearTimeout(popupTimer);
+                    popupTimer = undefined;
+                }
+
+                if (igv.browser.minimumBasesExtent() > Math.floor(self.$viewport.width() * referenceFrame.bpPerPixel/2.0)) {
+                    // do nothing
+                } else {
+                    newCenter = Math.round(referenceFrame.start + canvasCoords.x * referenceFrame.bpPerPixel);
+                    if(referenceFrame.chrName === "all") {
+                        chr = igv.browser.genome.getChromosomeCoordinate(newCenter).chr;
+                        igv.browser.search(chr);
+
+                    } else {
+                        self.genomicState.referenceFrame.bpPerPixel /= 2;
+                        self.genomicState.referenceFrame.start = Math.round((newCenter + self.genomicState.referenceFrame.start)/2.0 );
+                        igv.browser.updateWithLocusIndex(self.genomicState.locusIndex);
+
+                    }
+
+                }
+
+                // }
+
+            } else {
+
+                if (e.shiftKey) {
+
+                    if (self.trackView.track.shiftClick && self.tile) {
+                        self.trackView.track.shiftClick(genomicLocation, e);
+                    }
+
+                } else if (e.altKey) {
+
+                    if (self.trackView.track.altClick && self.tile) {
+                        self.trackView.track.altClick(genomicLocation, referenceFrame, e);
+                    }
+
+                } else if (Math.abs(canvasCoords.x - mouseDownX) <= igv.browser.constants.dragThreshold && self.trackView.track.popupDataWithConfiguration) {
+
+                    popupTimer = window.setTimeout(function () {
+
+                            igv.popover.presentTrackPopup(e, self);
+
+                            mouseDownX = undefined;
+                            popupTimer = undefined;
+                        },
+                        doubleClickDelay);
+                }
+            }
+
+            mouseDownX = undefined;
+            isMouseDown = false;
+            lastMouseX = undefined;
+            lastClickTime = time;
+
+        });
+
     };
 
     igv.Viewport.prototype.goto = function (chr, start, end) {
