@@ -3,11 +3,11 @@
  */
 var igv = (function (igv) {
 
-    igv.Viewport = function (trackView, locusIndex) {
-        this.initializationHelper(trackView, locusIndex);
+    igv.Viewport = function (trackView, $container, locusIndex) {
+        this.initializationHelper(trackView, $container, locusIndex);
     };
 
-    igv.Viewport.prototype.initializationHelper = function (trackView, locusIndex) {
+    igv.Viewport.prototype.initializationHelper = function (trackView, $container, locusIndex) {
 
         var self = this,
             description,
@@ -20,6 +20,8 @@ var igv = (function (igv) {
         this.genomicState = igv.browser.genomicStateList[ locusIndex ];
 
         this.$viewport = $('<div class="igv-viewport-div">');
+        $container.append( this.$viewport );
+
         this.$viewport.data( "viewport", this.id );
         this.$viewport.data( "locusindex", this.genomicState.locusIndex );
 
@@ -29,8 +31,6 @@ var igv = (function (igv) {
         // this.$viewport.css("background-color", igv.randomRGBConstantAlpha(200, 255, 0.75));
 
         this.setWidth(igv.browser.viewportContainerWidth()/this.genomicState.locusCount);
-
-        this.trackView.$viewportContainer.append( this.$viewport );
 
         this.contentDiv = $('<div class="igv-viewport-content-div">')[0];
         this.$viewport.append(this.contentDiv);
