@@ -841,7 +841,7 @@ var igv = (function (igv) {
             igv.IdeoPanel.$empty($content_header);
         }
 
-        this.emptyViewportContainers($('.igv-track-container-div'));
+        this.emptyViewportContainers();
 
         filtered = _.filter(_.clone(this.genomicStateList), function(gs) {
             return filterFunction(gs);
@@ -867,27 +867,32 @@ var igv = (function (igv) {
 
     };
 
-    igv.Browser.prototype.emptyViewportContainers = function ($trackContainer) {
-        var $e;
+    igv.Browser.prototype.emptyViewportContainers = function () {
 
-        $e = $trackContainer.find('.igv-scrollbar-outer-div');
-        $e.remove();
-
-        $e = $trackContainer.find('.igv-viewport-div');
-        $e.remove();
+        $('.igv-scrollbar-outer-div').remove();
+        $('.igv-viewport-div').remove();
+        $('.igv-ruler-sweeper-div').remove();
 
         _.each(this.trackViews, function(trackView){
             trackView.viewports = [];
             trackView.scrollbar = undefined;
+            trackView.track.rulerSweepers = undefined;
         });
+
     };
 
     igv.Browser.prototype.buildViewportsWithGenomicStateList = function (genomicStateList) {
 
         _.each(this.trackViews, function(trackView){
 
-            _.each(_.range(_.size(genomicStateList)), function(i) {
+            _.each(genomicStateList, function(genomicState, i) {
+
                 trackView.viewports.push(new igv.Viewport(trackView, trackView.$viewportContainer, i));
+
+                if (trackView.track instanceof igv.RulerTrack) {
+                    trackView.track.createRulerSweeper(trackView.viewports[i], trackView.viewports[i].$viewport, $(trackView.viewports[i].contentDiv), genomicState);
+                }
+
             });
 
             trackView.configureViewportContainer(trackView.$viewportContainer, trackView.viewports);
@@ -918,7 +923,7 @@ var igv = (function (igv) {
 
                 self.genomicStateList = genomicStateList;
 
-                self.emptyViewportContainers($('.igv-track-container-div'));
+                self.emptyViewportContainers();
 
                 // return;
 

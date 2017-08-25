@@ -58,10 +58,7 @@ var igv = (function (igv) {
             self.viewports.push(new igv.Viewport(self, self.$viewportContainer, i));
 
             if (self.track instanceof igv.RulerTrack) {
-                if (undefined === self.track.rulerSweepers) {
-                    self.track.rulerSweepers = [];
-                }
-                self.track.rulerSweepers.push(new igv.RulerSweeper(self.viewports[i], self.viewports[i].$viewport, $(self.viewports[i].contentDiv), genomicState));
+                self.track.createRulerSweeper(self.viewports[i], self.viewports[i].$viewport, $(self.viewports[i].contentDiv), genomicState);
             }
 
         });

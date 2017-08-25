@@ -39,6 +39,16 @@ var igv = (function (igv) {
         
     };
 
+    igv.RulerTrack.prototype.createRulerSweeper = function (viewport, $viewport, $viewportContent, genomicState) {
+
+        if (undefined === this.rulerSweepers) {
+            this.rulerSweepers = [];
+        }
+
+        this.rulerSweepers.push(new igv.RulerSweeper(viewport, $viewport, $viewportContent, genomicState));
+
+    };
+
     igv.RulerTrack.prototype.locusLabelWithViewport = function (viewport) {
 
         var locusLabel = $('<div class = "igv-viewport-content-ruler-div">');
@@ -214,7 +224,6 @@ var igv = (function (igv) {
         }
 
     };
-
 
     function TickSpacing(majorTick, majorUnit, unitMultiplier) {
         this.majorTick = majorTick;
