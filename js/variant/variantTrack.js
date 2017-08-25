@@ -214,7 +214,20 @@ var igv = (function (igv) {
                     pw -= 2;
                 }
 
-                ctx.fillStyle = this.color;
+                if (variant.str) {
+                    var period = parseInt(variant.info["PERIOD"]),
+                        variantColors = ["rgb(150,150,150)", "rgb(255,0,0)", "rgb(255,255,0)",
+                            "rgb(0,0,255)", "rgb(0,255,0)", "rgb(128,0,128)"
+                        ];
+                    if (period < 1) {
+                        period = 1;
+                    } else if (period > 6) {
+                        period = 6;
+                    }
+                    ctx.fillStyle = variantColors[period-1];
+                } else {
+                    ctx.fillStyle = this.color;
+                }
                 ctx.fillRect(px, py, pw, h);
 
 
@@ -424,7 +437,6 @@ var igv = (function (igv) {
                                 // Variant
                                 row = (Math.floor)((yOffset - 10 ) / (self.variantHeight + vGap));
                                 if (variant.row === row) {
-                                    console.log('variant.popupData called');
                                     Array.prototype.push.apply(popupData, variant.popupData(genomicLocation), self.type);
                                 }
                             }
@@ -460,7 +472,7 @@ var igv = (function (igv) {
         var gt = '', popupData, i, allele, numRepeats = '', alleleFrac = '';
 
         if (this.type === 'str') {
-            var info = variant.getInfoObj(variant.info);
+            var info = variant.info;
             if (!isNaN(call.genotype[0])) {
                 for (i = 0; i < call.genotype.length; i++) {
                     if (call.genotype[i] === 0) {
