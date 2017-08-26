@@ -36,7 +36,7 @@ var igv = (function (igv) {
         this.ignoreTrackMenu = true;
         this.order = -Number.MAX_VALUE;
         this.supportsWholeGenome = false;
-        
+
     };
 
     igv.RulerTrack.prototype.createRulerSweeper = function (viewport, $viewport, $viewportContent, genomicState) {
@@ -88,7 +88,7 @@ var igv = (function (igv) {
             bpPerPixel;
 
         if (options.referenceFrame.chrName === "all") {
-            drawAll.call(this);
+            drawAll.call(this, options);
         } else {
             updateLocusLabelWithGenomicState(options.genomicState);
 
@@ -199,7 +199,7 @@ var igv = (function (igv) {
         }
 
 
-        function drawAll() {
+        function drawAll(options) {
 
             var self = this,
                 lastX = 0,
@@ -208,18 +208,29 @@ var igv = (function (igv) {
 
             _.each(igv.browser.genome.wgChromosomeNames, function (chrName) {
 
-                var chromosome = igv.browser.genome.getChromosome(chrName),
-                    bp = igv.browser.genome.getGenomeCoordinate(chrName, chromosome.bpLength),
-                    x = Math.round((bp - options.bpStart ) / bpPerPixel),
-                    chrLabel = chrName.startsWith("chr") ? chrName.substr(3) : chrName;
+                var chromosome,
+                    bp,
+                    x,
+                    chrLabel;
+
+
+                chromosome = igv.browser.genome.getChromosome(chrName);
+
+                bp = igv.browser.genome.getGenomeCoordinate(chrName, chromosome.bpLength);
+
+                x = Math.round((bp - options.bpStart ) / options.referenceFrame.bpPerPixel);
+
+                chrLabel = chrName.startsWith("chr") ? chrName.substr(3) : chrName;
 
                 options.context.textAlign = 'center';
+
                 igv.graphics.strokeLine(options.context, x, self.height - tickHeight, x, self.height - yShim);
+
                 igv.graphics.fillText(options.context, chrLabel, (lastX + x) / 2, self.height - (tickHeight / 0.75));
 
                 lastX = x;
 
-            })
+            });
             igv.graphics.strokeLine(options.context, 0, self.height - yShim, options.pixelWidth, self.height - yShim);
         }
 
