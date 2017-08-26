@@ -46,7 +46,6 @@ var igv = (function (igv) {
         }
 
         this.rulerSweepers[ genomicState.locusIndex.toString() ] = new igv.RulerSweeper(viewport, $viewport, $viewportContent, genomicState);
-
     };
 
     igv.RulerTrack.prototype.locusLabelWithViewport = function (viewport) {
@@ -85,13 +84,20 @@ var igv = (function (igv) {
             l,
             yShim,
             tickHeight,
-            bpPerPixel;
+            bpPerPixel,
+            rulerSweeper;
+
+        rulerSweeper = this.rulerSweepers[ options.genomicState.locusIndex.toString() ];
 
         if ('all' === options.referenceFrame.chrName) {
-            this.rulerSweepers[ options.genomicState.locusIndex.toString() ].disableMouseHandlers();
-            drawAll.call(this, options);
+            drawWholeGenome.call(this, options, rulerSweeper);
         } else {
-            this.rulerSweepers[ options.genomicState.locusIndex.toString() ].addMouseHandlers();
+
+            rulerSweeper.$viewportContent.find('.igv-whole-genome-container').hide();
+            rulerSweeper.$viewportContent.find('canvas').show();
+
+            rulerSweeper.addMouseHandlers();
+
             updateLocusLabelWithGenomicState(options.genomicState);
 
             bpPerPixel = options.referenceFrame.bpPerPixel;
@@ -124,21 +130,9 @@ var igv = (function (igv) {
         }
 
         function updateLocusLabelWithGenomicState(genomicState) {
-            var $e,
-                viewports;
-
+            var $e;
             $e = options.viewport.$viewport.find('.igv-viewport-content-ruler-div');
             $e.text(genomicState.locusSearchString);
-
-            // viewports = _.filter(igv.Viewport.viewportsWithLocusIndex(genomicState.locusIndex), function(viewport){
-            //     return (viewport.trackView.track instanceof igv.RulerTrack);
-            // });
-            //
-            // if (1 === _.size(viewports)) {
-            //     $e = _.first(viewports).$viewport.find('.igv-viewport-content-ruler-div');
-            //     $e.text( genomicState.locusSearchString );
-            // }
-
         }
 
         function formatNumber(anynum, decimal) {
@@ -200,40 +194,10 @@ var igv = (function (igv) {
             return retval;
         }
 
-
-        function drawAll(options) {
-
-            var self = this,
-                lastX = 0,
-                yShim = 2,
-                tickHeight = 10;
-
-            _.each(igv.browser.genome.wgChromosomeNames, function (chrName) {
-
-                var chromosome,
-                    bp,
-                    x,
-                    chrLabel;
-
-
-                chromosome = igv.browser.genome.getChromosome(chrName);
-
-                bp = igv.browser.genome.getGenomeCoordinate(chrName, chromosome.bpLength);
-
-                x = Math.round((bp - options.bpStart ) / options.referenceFrame.bpPerPixel);
-
-                chrLabel = chrName.startsWith("chr") ? chrName.substr(3) : chrName;
-
-                options.context.textAlign = 'center';
-
-                igv.graphics.strokeLine(options.context, x, self.height - tickHeight, x, self.height - yShim);
-
-                igv.graphics.fillText(options.context, chrLabel, (lastX + x) / 2, self.height - (tickHeight / 0.75));
-
-                lastX = x;
-
-            });
-            igv.graphics.strokeLine(options.context, 0, self.height - yShim, options.pixelWidth, self.height - yShim);
+        function drawWholeGenome(options, rulerSweeper) {
+            rulerSweeper.$viewportContent.find('canvas').hide();
+            rulerSweeper.$viewportContent.find('.igv-whole-genome-container').show();
+            rulerSweeper.disableMouseHandlers();
         }
 
     };

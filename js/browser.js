@@ -143,17 +143,11 @@ var igv = (function (igv) {
     };
 
     igv.Browser.prototype.disableZoomWidget = function () {
-
-        this.$zoomContainer.find('.fa-minus-circle').off();
-        this.$zoomContainer.find('.fa-plus-circle' ).off();
-
+        this.$zoomContainer.hide();
     };
 
-    igv.Browser.prototype.enableZoomWidget = function (zoomHandlers) {
-
-        this.$zoomContainer.find('.fa-minus-circle').on(zoomHandlers.out);
-        this.$zoomContainer.find('.fa-plus-circle' ).on(zoomHandlers.in);
-
+    igv.Browser.prototype.enableZoomWidget = function () {
+        this.$zoomContainer.show();
     };
 
     igv.Browser.prototype.toggleCursorGuide = function (genomicStateList) {
@@ -860,7 +854,10 @@ var igv = (function (igv) {
 
         this.buildViewportsWithGenomicStateList(this.genomicStateList);
 
+        this.zoomWidgetLayout();
+
         this.toggleCenterGuide(this.genomicStateList);
+
         this.toggleCursorGuide(this.genomicStateList);
 
         this.resize();
@@ -912,7 +909,8 @@ var igv = (function (igv) {
 
         this.getGenomicStateList(loci, this.viewportContainerWidth(), function (genomicStateList) {
 
-            var errorString,
+            var found,
+                errorString,
                 $content_header = $('#igv-content-header');
 
             if (_.size(genomicStateList) > 0) {
@@ -930,15 +928,9 @@ var igv = (function (igv) {
 
                 self.emptyViewportContainers();
 
-                // return;
-
                 self.updateLocusSearchWithGenomicState(_.first(self.genomicStateList));
 
-                if (1 === _.size(self.genomicStateList) && 'all' === (_.first(self.genomicStateList)).locusSearchString) {
-                    self.disableZoomWidget();
-                } else {
-                    self.enableZoomWidget(self.zoomHandlers);
-                }
+                self.zoomWidgetLayout();
 
                 self.toggleCenterGuide(self.genomicStateList);
                 self.toggleCursorGuide(self.genomicStateList);
@@ -957,6 +949,21 @@ var igv = (function (igv) {
             }
 
         });
+    };
+
+    igv.Browser.prototype.zoomWidgetLayout = function () {
+        var found;
+
+        found = _.filter(this.genomicStateList, function (g) {
+            return 'all' === g.locusSearchString;
+        });
+
+        if (_.size(found) > 0) {
+            this.disableZoomWidget();
+        } else {
+            this.enableZoomWidget();
+        }
+
     };
 
     /**

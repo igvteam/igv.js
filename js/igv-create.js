@@ -115,6 +115,7 @@ var igv = (function (igv) {
             igv.browser.getGenomicStateList(lociWithConfiguration(config), width, function (genomicStateList) {
 
                 var errorString,
+                    found,
                     gs;
 
                 if (_.size(genomicStateList) > 0) {
@@ -129,11 +130,7 @@ var igv = (function (igv) {
 
                     igv.browser.updateLocusSearchWithGenomicState(_.first(igv.browser.genomicStateList));
 
-                    if (1 === _.size(igv.browser.genomicStateList) && 'all' === (_.first(igv.browser.genomicStateList)).locusSearchString) {
-                        igv.browser.disableZoomWidget();
-                    } else {
-                        igv.browser.enableZoomWidget(igv.browser.zoomHandlers);
-                    }
+                    igv.browser.zoomWidgetLayout();
 
                     // igv.browser.toggleCursorGuide(igv.browser.genomicStateList);
                     igv.browser.toggleCenterGuide(igv.browser.genomicStateList);
@@ -326,7 +323,10 @@ var igv = (function (igv) {
             browser.$searchInput = $('<input type="text" placeholder="Locus Search">');
 
             browser.$searchInput.change(function (e) {
-                browser.parseSearchInput($(e.target).val());
+                var value;
+
+                value = $(e.target).val();
+                browser.parseSearchInput(value);
             });
 
             $faSearch = $('<i class="fa fa-search">');
