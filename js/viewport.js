@@ -13,7 +13,8 @@ var igv = (function (igv) {
             description,
             $trackLabel,
             $spinner,
-            dimen;
+            dimen,
+            $div;
 
         this.trackView = trackView;
         this.id = _.uniqueId('viewport_');
@@ -21,6 +22,7 @@ var igv = (function (igv) {
 
         this.$viewport = $('<div class="igv-viewport-div">');
         $container.append(this.$viewport);
+
         this.$viewport.data( "viewport", this.id );
         this.$viewport.data( "locusindex", this.genomicState.locusIndex );
 
@@ -33,6 +35,12 @@ var igv = (function (igv) {
 
         if (trackView.track instanceof igv.SequenceTrack) {
             this.$viewport.addClass('igv-viewport-sequence');
+        }
+
+        if (trackView.track instanceof igv.RulerTrack) {
+            $div = $('<div>', { class:'igv-whole-genome-container' });
+            $(this.contentDiv).append($div);
+            $div.hide();
         }
 
         if (this.genomicState.locusCount > 1 && trackView.track instanceof igv.RulerTrack) {
@@ -52,7 +60,9 @@ var igv = (function (igv) {
 
         // track content canvas
         this.canvas = $('<canvas>')[0];
+
         $(this.contentDiv).append(this.canvas);
+
         this.canvas.setAttribute('width', this.contentDiv.clientWidth);
         this.canvas.setAttribute('height', this.contentDiv.clientHeight);
         this.ctx = this.canvas.getContext("2d");

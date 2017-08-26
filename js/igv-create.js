@@ -326,7 +326,10 @@ var igv = (function (igv) {
             browser.$searchInput = $('<input type="text" placeholder="Locus Search">');
 
             browser.$searchInput.change(function (e) {
-                browser.parseSearchInput($(e.target).val());
+                var value;
+
+                value = $(e.target).val();
+                browser.parseSearchInput(value);
             });
 
             $faSearch = $('<i class="fa fa-search">');
