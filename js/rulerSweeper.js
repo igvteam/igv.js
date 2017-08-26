@@ -27,13 +27,23 @@ var igv = (function (igv) {
 
     igv.RulerSweeper = function (viewport, $viewport, $viewportContent, genomicState) {
 
-        this.$rulerSweeper = $('<div class="igv-ruler-sweeper-div">');
-        $viewportContent.append(this.$rulerSweeper);
+        this.viewport = viewport;
+        this.$viewport = $viewport;
+        this.$viewportContent = $viewportContent;
+        this.genomicState = genomicState;
 
-        this.addMouseHandlers(viewport, $viewport, $viewportContent, genomicState);
+        this.$rulerSweeper = $('<div class="igv-ruler-sweeper-div">');
+        this.$viewportContent.append(this.$rulerSweeper);
+
+        this.addMouseHandlers();
     };
 
-    igv.RulerSweeper.prototype.addMouseHandlers = function (viewport, $viewport, $viewportContent, genomicState) {
+    igv.RulerSweeper.prototype.disableMouseHandlers = function () {
+        this.$viewportContent.off();
+        this.$viewport.off();
+    };
+
+    igv.RulerSweeper.prototype.addMouseHandlers = function () {
 
         var self = this,
             isMouseDown = undefined,
@@ -45,20 +55,23 @@ var igv = (function (igv) {
             rulerSweepThreshold = 1,
             dx;
 
-        $viewportContent.off();
-        $viewport.off();
+        this.disableMouseHandlers();
 
-        $viewport.on({
+        this.$viewport.on({
 
             mousedown: function (e) {
 
                 e.preventDefault();
                 e.stopPropagation();
 
-                $viewportContent.off();
+                self.$viewportContent.off();
 
-                $viewportContent.on({
+                self.$viewportContent.on({
                     mousedown: function (e) {
+
+                        e.preventDefault();
+                        e.stopPropagation();
+
                         isMouseDown = true;
                     }
                 });
@@ -120,7 +133,7 @@ var igv = (function (igv) {
 
                     self.$rulerSweeper.css({ "display": "none", "left": 0 + "px", "width": 0 + "px" });
 
-                    referenceFrame = genomicState.referenceFrame;
+                    referenceFrame = self.genomicState.referenceFrame;
 
                     extent = {};
                     extent.start = referenceFrame.start + (left * referenceFrame.bpPerPixel);
@@ -128,7 +141,7 @@ var igv = (function (igv) {
 
                     if (rulerSweepWidth > rulerSweepThreshold) {
                         igv.Browser.validateLocusExtent(igv.browser.genome.getChromosome(referenceFrame.chrName), extent);
-                        viewport.goto(referenceFrame.chrName, extent.start, extent.end);
+                        self.viewport.goto(referenceFrame.chrName, extent.start, extent.end);
                     }
                 }
 

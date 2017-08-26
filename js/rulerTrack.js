@@ -42,10 +42,10 @@ var igv = (function (igv) {
     igv.RulerTrack.prototype.createRulerSweeper = function (viewport, $viewport, $viewportContent, genomicState) {
 
         if (undefined === this.rulerSweepers) {
-            this.rulerSweepers = [];
+            this.rulerSweepers = {};
         }
 
-        this.rulerSweepers.push(new igv.RulerSweeper(viewport, $viewport, $viewportContent, genomicState));
+        this.rulerSweepers[ genomicState.locusIndex.toString() ] = new igv.RulerSweeper(viewport, $viewport, $viewportContent, genomicState);
 
     };
 
@@ -87,9 +87,11 @@ var igv = (function (igv) {
             tickHeight,
             bpPerPixel;
 
-        if (options.referenceFrame.chrName === "all") {
+        if ('all' === options.referenceFrame.chrName) {
+            this.rulerSweepers[ options.genomicState.locusIndex.toString() ].disableMouseHandlers();
             drawAll.call(this, options);
         } else {
+            this.rulerSweepers[ options.genomicState.locusIndex.toString() ].addMouseHandlers();
             updateLocusLabelWithGenomicState(options.genomicState);
 
             bpPerPixel = options.referenceFrame.bpPerPixel;
@@ -109,7 +111,7 @@ var igv = (function (igv) {
                 x = Math.round(((l - 1) - options.bpStart + 0.5) / bpPerPixel);
                 var chrPosition = formatNumber(l / ts.unitMultiplier, 0) + " " + ts.majorUnit;
 
-                if (nTick % 1 == 0) {
+                if (nTick % 1 === 0) {
                     igv.graphics.fillText(options.context, chrPosition, x, this.height - (tickHeight / 0.75));
                 }
 
@@ -160,34 +162,34 @@ var igv = (function (igv) {
 
             var workNum = Math.abs((Math.round(anynum * divider) / divider));
 
-            var workStr = "" + workNum
+            var workStr = "" + workNum;
 
-            if (workStr.indexOf(".") == -1) {
+            if (workStr.indexOf(".") === -1) {
                 workStr += "."
             }
 
             var dStr = workStr.substr(0, workStr.indexOf("."));
-            var dNum = dStr - 0
-            var pStr = workStr.substr(workStr.indexOf("."))
+            var dNum = dStr - 0;
+            var pStr = workStr.substr(workStr.indexOf("."));
 
             while (pStr.length - 1 < decimal) {
                 pStr += "0"
             }
 
-            if (pStr == '.') pStr = '';
+            if (pStr === '.') pStr = '';
 
             //--- Adds a comma in the thousands place.
             if (dNum >= 1000) {
-                var dLen = dStr.length
+                var dLen = dStr.length;
                 dStr = parseInt("" + (dNum / 1000)) + "," + dStr.substring(dLen - 3, dLen)
             }
 
             //-- Adds a comma in the millions place.
             if (dNum >= 1000000) {
-                dLen = dStr.length
+                dLen = dStr.length;
                 dStr = parseInt("" + (dNum / 1000000)) + "," + dStr.substring(dLen - 7, dLen)
             }
-            var retval = dStr + pStr
+            var retval = dStr + pStr;
             //-- Put numbers in parentheses if negative.
             if (anynum < 0) {
                 retval = "(" + retval + ")";

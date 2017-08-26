@@ -876,6 +876,11 @@ var igv = (function (igv) {
         _.each(this.trackViews, function(trackView){
             trackView.viewports = [];
             trackView.scrollbar = undefined;
+
+            _.each(_.keys(trackView.track.rulerSweepers), function (key) {
+                trackView.track.rulerSweepers[ key ] = undefined;
+            });
+
             trackView.track.rulerSweepers = undefined;
         });
 
