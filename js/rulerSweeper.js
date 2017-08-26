@@ -35,7 +35,75 @@ var igv = (function (igv) {
         this.$rulerSweeper = $('<div class="igv-ruler-sweeper-div">');
         this.$viewportContent.append(this.$rulerSweeper);
 
+        this.wholeGenomeLayout(this.$viewportContent.find('.igv-whole-genome-container'));
+
         this.addMouseHandlers();
+    };
+
+    igv.RulerSweeper.prototype.wholeGenomeLayout = function ($container) {
+
+        var self = this,
+            lengths,
+            denom,
+            viewportWidth;
+
+        denom = 0;
+        _.each(igv.browser.genome.wgChromosomeNames, function (name) {
+            var chromosome,
+                pixel;
+
+            chromosome = igv.browser.genome.getChromosome(name);
+            pixel = chromosome.bpLength / self.genomicState.referenceFrame.bpPerPixel;
+
+            denom += pixel;
+
+        });
+
+        viewportWidth = this.$viewport.width();
+        _.each(igv.browser.genome.wgChromosomeNames, function (name) {
+            var chromosome,
+                numer,
+                length,
+                $div,
+                $e;
+
+            $div = $('<div>');
+            $container.append($div);
+
+            chromosome = igv.browser.genome.getChromosome(name);
+            numer = chromosome.bpLength / self.genomicState.referenceFrame.bpPerPixel;
+            length = Math.floor((numer/denom) * viewportWidth);
+            $div.width(length);
+
+            $e = $('<span>');
+            $div.append($e);
+            $e.text(name);
+
+            $div.on('click', function (e) {
+                var locusString,
+                    loci;
+
+                self.$viewportContent.find('.igv-whole-genome-container').hide();
+                self.$viewportContent.find('canvas').show();
+
+                if (1 === self.genomicState.locusCount) {
+                    locusString = name;
+                } else {
+                    loci = _.map(igv.browser.genomicStateList, function (g) {
+                        return g.locusSearchString;
+                    });
+
+                    loci[ self.genomicState.locusIndex ] = name;
+                    locusString = loci.join(' ');
+                }
+
+                igv.browser.parseSearchInput(locusString);
+            });
+
+            // console.log(name + ' ' + igv.numberFormatter(length));
+        });
+
+
     };
 
     igv.RulerSweeper.prototype.disableMouseHandlers = function () {
