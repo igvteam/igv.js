@@ -29,7 +29,7 @@ var igv = (function (igv) {
     igv.RulerTrack = function () {
 
         // this.height = 50;
-        this.height = 16;
+        this.height = 24;
         this.name = "";
         this.id = "ruler";
         this.disableButtons = true;

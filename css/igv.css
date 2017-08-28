@@ -256,7 +256,7 @@
       border-right-width: thin; }
       .igv-viewport-content-div .igv-whole-genome-container div span {
         display: block;
-        padding-top: 2px;
+        padding-top: 6px;
         text-overflow: ellipsis; }
     .igv-viewport-content-div .igv-whole-genome-container div:last-child {
       border-right-color: transparent; }
