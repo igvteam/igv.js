@@ -43,40 +43,35 @@ var igv = (function (igv) {
     igv.RulerSweeper.prototype.wholeGenomeLayout = function ($container) {
 
         var self = this,
-            lengths,
-            denom,
-            viewportWidth;
+            viewportWidth,
+            extent,
+            lastName,
+            offset,
+            chr;
 
-        denom = 0;
-        _.each(igv.browser.genome.wgChromosomeNames, function (name) {
-            var chromosome,
-                pixel;
-
-            chromosome = igv.browser.genome.getChromosome(name);
-            pixel = chromosome.bpLength / self.genomicState.referenceFrame.bpPerPixel;
-
-            denom += pixel;
-
-        });
+        lastName = _.last(igv.browser.genome.chromosomeNames);
+        chr = igv.browser.genome.getChromosome(lastName);
+        offset = igv.browser.genome.getCumulativeOffset(lastName);
+        extent = Math.floor(chr.bpLength/1000) + offset;
 
         viewportWidth = this.$viewport.width();
-        _.each(igv.browser.genome.wgChromosomeNames, function (name) {
-            var chromosome,
-                numer,
-                length,
+        _.each(igv.browser.genome.chromosomeNames, function (name) {
+            var w,
                 $div,
-                $e;
+                $e,
+                percentage;
 
             $div = $('<div>');
             $container.append($div);
 
-            chromosome = igv.browser.genome.getChromosome(name);
-            numer = chromosome.bpLength / self.genomicState.referenceFrame.bpPerPixel;
-            length = Math.floor((numer/denom) * viewportWidth);
-            $div.width(length);
+            percentage = (igv.browser.genome.getChromosome(name).bpLength/1000)/extent;
+
+            w = Math.max(1, Math.floor(percentage * viewportWidth));
+            $div.width(w);
 
             $e = $('<span>');
             $div.append($e);
+
             $e.text(name);
 
             $div.on('click', function (e) {
@@ -100,9 +95,7 @@ var igv = (function (igv) {
                 igv.browser.parseSearchInput(locusString);
             });
 
-            // console.log(name + ' ' + igv.numberFormatter(length));
         });
-
 
     };
 

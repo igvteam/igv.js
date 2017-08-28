@@ -365,6 +365,7 @@ $drag-drop-warning-color: red;
       span {
         display: block;
         padding-top: 2px;
+        text-overflow: ellipsis;
       }
 
       border-right-color: #bfbfbf;
