@@ -35,7 +35,7 @@ var igv = (function (igv) {
         this.disableButtons = true;
         this.ignoreTrackMenu = true;
         this.order = -Number.MAX_VALUE;
-        this.supportsWholeGenome = false;
+        this.supportsWholeGenome = true;
 
     };
 

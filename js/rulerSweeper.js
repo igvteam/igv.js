@@ -46,57 +46,75 @@ var igv = (function (igv) {
             viewportWidth,
             extent,
             nameLast,
-            chrLast;
+            chrLast,
+            scraps,
+            $div,
+            $e;
 
         nameLast = _.last(igv.browser.genome.chromosomeNames);
         chrLast = igv.browser.genome.getChromosome(nameLast);
         extent = Math.floor(chrLast.bpLength/1000) + igv.browser.genome.getCumulativeOffset(nameLast);
 
         viewportWidth = this.$viewport.width();
+        scraps = 0;
         _.each(igv.browser.genome.chromosomeNames, function (name) {
             var w,
-                $div,
-                $e,
                 percentage;
+
+            percentage = (igv.browser.genome.getChromosome(name).bpLength/1000)/extent;
+            if (percentage * viewportWidth < 1.0) {
+                scraps += percentage;
+            } else {
+                $div = $('<div>');
+                $container.append($div);
+
+                w = Math.floor(percentage * viewportWidth);
+                $div.width(w);
+
+                $e = $('<span>');
+                $div.append($e);
+
+                $e.text(name);
+
+                $div.on('click', function (e) {
+                    var locusString,
+                        loci;
+
+                    self.$viewportContent.find('.igv-whole-genome-container').hide();
+                    self.$viewportContent.find('canvas').show();
+
+                    if (1 === self.genomicState.locusCount) {
+                        locusString = name;
+                    } else {
+                        loci = _.map(igv.browser.genomicStateList, function (g) {
+                            return g.locusSearchString;
+                        });
+
+                        loci[ self.genomicState.locusIndex ] = name;
+                        locusString = loci.join(' ');
+                    }
+
+                    igv.browser.parseSearchInput(locusString);
+                });
+            }
+
+        });
+
+        scraps *= viewportWidth;
+        scraps = Math.floor(scraps);
+        if (scraps >= 1) {
 
             $div = $('<div>');
             $container.append($div);
 
-            percentage = (igv.browser.genome.getChromosome(name).bpLength/1000)/extent;
-            if (percentage * viewportWidth < 1.0) {
-                // console.log(name + ' is less than 1 pixel wide ' + (percentage * viewportWidth));
-            }
-
-            w = Math.max(1, Math.floor(percentage * viewportWidth));
-            $div.width(w);
+            $div.width(scraps);
 
             $e = $('<span>');
             $div.append($e);
 
-            $e.text(name);
+            $e.text('-');
 
-            $div.on('click', function (e) {
-                var locusString,
-                    loci;
-
-                self.$viewportContent.find('.igv-whole-genome-container').hide();
-                self.$viewportContent.find('canvas').show();
-
-                if (1 === self.genomicState.locusCount) {
-                    locusString = name;
-                } else {
-                    loci = _.map(igv.browser.genomicStateList, function (g) {
-                        return g.locusSearchString;
-                    });
-
-                    loci[ self.genomicState.locusIndex ] = name;
-                    locusString = loci.join(' ');
-                }
-
-                igv.browser.parseSearchInput(locusString);
-            });
-
-        });
+        }
 
     };
 
