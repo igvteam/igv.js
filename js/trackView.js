@@ -52,16 +52,12 @@ var igv = (function (igv) {
         this.$viewportContainer = $('<div class="igv-viewport-container igv-viewport-container-shim">');
         $(this.trackDiv).append(this.$viewportContainer);
 
-        this.viewports = [];
-        _.each(browser.genomicStateList, function(genomicState, i) {
+        this.viewports = this.createViewports(browser.genomicStateList);
 
-            self.viewports.push(new igv.Viewport(self, self.$viewportContainer, i));
+        if (this.track instanceof igv.RulerTrack) {
+            this.track.createRulerSweepers(this.viewports);
+        }
 
-            if (self.track instanceof igv.RulerTrack) {
-                self.track.createRulerSweeper(self.viewports[i], self.viewports[i].$viewport, $(self.viewports[i].contentDiv), genomicState);
-            }
-
-        });
 
         this.configureViewportContainer(this.$viewportContainer, this.viewports);
 
@@ -73,6 +69,18 @@ var igv = (function (igv) {
         // Track order repositioning widget
         this.attachDragWidget();
 
+    };
+
+    igv.TrackView.prototype.createViewports = function (genomicStates) {
+
+        var self = this,
+            viewports;
+
+        viewports = _.map(genomicStates, function (genomicState, i) {
+            return new igv.Viewport(self, self.$viewportContainer, i);
+        });
+
+        return viewports;
     };
 
     igv.TrackView.prototype.configureViewportContainer = function ($viewportContainer, viewports) {

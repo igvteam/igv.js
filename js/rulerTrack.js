@@ -39,13 +39,15 @@ var igv = (function (igv) {
 
     };
 
-    igv.RulerTrack.prototype.createRulerSweeper = function (viewport, $viewport, $viewportContent, genomicState) {
+    igv.RulerTrack.prototype.createRulerSweepers = function (viewports) {
 
-        if (undefined === this.rulerSweepers) {
-            this.rulerSweepers = {};
-        }
+        var self = this;
 
-        this.rulerSweepers[ genomicState.locusIndex.toString() ] = new igv.RulerSweeper(viewport, $viewport, $viewportContent, genomicState);
+        this.rulerSweepers = {};
+        _.each(viewports, function (viewport) {
+            self.rulerSweepers[ viewport.genomicState.locusIndex.toString() ] = new igv.RulerSweeper(viewport, viewport.$viewport, $(viewport.contentDiv), viewport.genomicState);
+        });
+
     };
 
     igv.RulerTrack.prototype.locusLabelWithViewport = function (viewport) {

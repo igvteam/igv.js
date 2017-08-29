@@ -142,14 +142,6 @@ var igv = (function (igv) {
         return igv.Browser.knownFileExtensions.has(extension);
     };
 
-    igv.Browser.prototype.disableZoomWidget = function () {
-        this.$zoomContainer.hide();
-    };
-
-    igv.Browser.prototype.enableZoomWidget = function () {
-        this.$zoomContainer.show();
-    };
-
     igv.Browser.prototype.toggleCursorGuide = function (genomicStateList) {
 
         if (_.size(genomicStateList) > 1 || 'all' === (_.first(genomicStateList)).locusSearchString) {
@@ -705,6 +697,14 @@ var igv = (function (igv) {
 
     };
 
+    igv.Browser.prototype.disableZoomWidget = function () {
+        this.$zoomContainer.hide();
+    };
+
+    igv.Browser.prototype.enableZoomWidget = function () {
+        this.$zoomContainer.show();
+    };
+
     // Zoom in by a factor of 2, keeping the same center location
     igv.Browser.prototype.zoomIn = function () {
 
@@ -887,15 +887,17 @@ var igv = (function (igv) {
 
         _.each(this.trackViews, function(trackView){
 
-            _.each(genomicStateList, function(genomicState, i) {
+            trackView.createViewports(genomicStateList);
 
-                trackView.viewports.push(new igv.Viewport(trackView, trackView.$viewportContainer, i));
-
-                if (trackView.track instanceof igv.RulerTrack) {
-                    trackView.track.createRulerSweeper(trackView.viewports[i], trackView.viewports[i].$viewport, $(trackView.viewports[i].contentDiv), genomicState);
-                }
-
-            });
+            // _.each(genomicStateList, function(genomicState, i) {
+            //
+            //     trackView.viewports.push(new igv.Viewport(trackView, trackView.$viewportContainer, i));
+            //
+            //     if (trackView.track instanceof igv.RulerTrack) {
+            //         trackView.track.createRulerSweeper(trackView.viewports[i], trackView.viewports[i].$viewport, $(trackView.viewports[i].contentDiv), genomicState);
+            //     }
+            //
+            // });
 
             trackView.configureViewportContainer(trackView.$viewportContainer, trackView.viewports);
         });
