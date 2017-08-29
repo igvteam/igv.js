@@ -354,23 +354,8 @@ var igv = (function (igv) {
             // window size panel
             browser.windowSizePanel = new igv.WindowSizePanel($navigation);
 
-            // zoom
-            browser.zoomHandlers = {
-                in: {
-                    click: function (e) {
-                        browser.zoomIn();
-                    }
-                },
-                out: {
-                    click: function (e) {
-                        browser.zoomOut();
-                    }
-                }
-            };
-
-            browser.$zoomContainer = zoomWidget();
-            $navigation.append(browser.$zoomContainer);
-
+            // zoom widget
+            zoomWidget(browser, $navigation);
 
             // cursor tracking guide
             browser.$cursorTrackingGuide = $('<div class="igv-cursor-tracking-guide">');
@@ -419,13 +404,26 @@ var igv = (function (igv) {
         return $controls.get(0);
     }
 
-    function zoomWidget() {
+    function zoomWidget(browser, $parent) {
 
-        var $zoomContainer = $('<div class="igv-zoom-widget">');
-        $zoomContainer.append($('<i class="fa fa-minus-circle">'));
-        $zoomContainer.append($('<i class="fa fa-plus-circle">'));
+        var $fa;
 
-        return $zoomContainer;
+        browser.$zoomContainer = $('<div class="igv-zoom-widget">');
+        $parent.append(browser.$zoomContainer);
+
+        $fa = $('<i class="fa fa-minus-circle">');
+        browser.$zoomContainer.append($fa);
+        $fa.on('click', function () {
+            browser.zoomOut();
+        });
+
+
+        $fa = $('<i class="fa fa-plus-circle">');
+        browser.$zoomContainer.append($fa);
+        $fa.on('click', function () {
+            browser.zoomIn();
+        });
+
     }
 
     function setDefaults(config) {

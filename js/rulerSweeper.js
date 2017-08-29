@@ -45,14 +45,12 @@ var igv = (function (igv) {
         var self = this,
             viewportWidth,
             extent,
-            lastName,
-            offset,
-            chr;
+            nameLast,
+            chrLast;
 
-        lastName = _.last(igv.browser.genome.chromosomeNames);
-        chr = igv.browser.genome.getChromosome(lastName);
-        offset = igv.browser.genome.getCumulativeOffset(lastName);
-        extent = Math.floor(chr.bpLength/1000) + offset;
+        nameLast = _.last(igv.browser.genome.chromosomeNames);
+        chrLast = igv.browser.genome.getChromosome(nameLast);
+        extent = Math.floor(chrLast.bpLength/1000) + igv.browser.genome.getCumulativeOffset(nameLast);
 
         viewportWidth = this.$viewport.width();
         _.each(igv.browser.genome.chromosomeNames, function (name) {
@@ -65,6 +63,9 @@ var igv = (function (igv) {
             $container.append($div);
 
             percentage = (igv.browser.genome.getChromosome(name).bpLength/1000)/extent;
+            if (percentage * viewportWidth < 1.0) {
+                // console.log(name + ' is less than 1 pixel wide ' + (percentage * viewportWidth));
+            }
 
             w = Math.max(1, Math.floor(percentage * viewportWidth));
             $div.width(w);
