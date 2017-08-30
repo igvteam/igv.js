@@ -139,7 +139,7 @@ var igv = (function (igv) {
             self.readHeader().then(function (reader) {
 
                 var wf = (self.version < 2) ? "" : "/" + windowFunction,
-                    zoomString = (chr === "all" || zoom === undefined) ? "0" : zoom.toString(),
+                    zoomString = (chr.toLowerCase() === "all" || zoom === undefined) ? "0" : zoom.toString(),
                     dsName,
                     indexEntry;
 

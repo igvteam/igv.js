@@ -152,7 +152,7 @@ var igv = (function (igv) {
 
     igv.Browser.prototype.toggleCursorGuide = function (genomicStateList) {
 
-        if (_.size(genomicStateList) > 1 || 'all' === (_.first(genomicStateList)).locusSearchString) {
+        if (_.size(genomicStateList) > 1 || 'all' === (_.first(genomicStateList)).locusSearchString.toLowerCase()) {
 
             if(this.$cursorTrackingGuide.is(":visible")) {
                 this.$cursorTrackingGuideToggle.click();
@@ -167,7 +167,7 @@ var igv = (function (igv) {
 
     igv.Browser.prototype.toggleCenterGuide = function (genomicStateList) {
 
-        if (_.size(genomicStateList) > 1 || 'all' === (_.first(genomicStateList)).locusSearchString) {
+        if (_.size(genomicStateList) > 1 || 'all' === (_.first(genomicStateList)).locusSearchString.toLowerCase()) {
 
             if(this.centerGuide.$container.is(":visible")) {
                 this.centerGuide.$centerGuideToggle.click();
@@ -565,7 +565,7 @@ var igv = (function (igv) {
 
         if (0 === genomicState.locusIndex && 1 === genomicState.locusCount) {
 
-            if ('all' === genomicState.locusSearchString) {
+            if ('all' === genomicState.locusSearchString.toLowerCase()) {
 
                 this.$searchInput.val(genomicState.locusSearchString);
             } else {
@@ -955,7 +955,7 @@ var igv = (function (igv) {
         var found;
 
         found = _.filter(this.genomicStateList, function (g) {
-            return 'all' === g.locusSearchString;
+            return 'all' === g.locusSearchString.toLowerCase();
         });
 
         if (_.size(found) > 0) {

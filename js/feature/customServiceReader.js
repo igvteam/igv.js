@@ -48,7 +48,7 @@ var igv = (function (igv) {
             var url = self.config.url,
                 body = self.config.body;
 
-            if(body !== undefined && chr !== "all") {
+            if(body !== undefined && chr.toLowerCase() !== "all") {
                 self.config.body = self.config.body.replace("$CHR", chr);
             }
 

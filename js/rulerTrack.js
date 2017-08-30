@@ -89,7 +89,7 @@ var igv = (function (igv) {
 
         rulerSweeper = this.rulerSweepers[ options.genomicState.locusIndex.toString() ];
 
-        if ('all' === options.referenceFrame.chrName) {
+        if ('all' === options.referenceFrame.chrName.toLowerCase()) {
             drawWholeGenome.call(this, options, rulerSweeper);
         } else {
 

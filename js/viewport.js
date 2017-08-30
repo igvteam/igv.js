@@ -226,7 +226,7 @@ var igv = (function (igv) {
                     // do nothing
                 } else {
                     newCenter = Math.round(referenceFrame.start + canvasCoords.x * referenceFrame.bpPerPixel);
-                    if('all' === referenceFrame.chrName) {
+                    if('all' === referenceFrame.chrName.toLowerCase()) {
 
                         chr = igv.browser.genome.getChromosomeCoordinate(newCenter).chr;
 
@@ -357,7 +357,7 @@ var igv = (function (igv) {
 
         if (this.$zoomInNotice && this.trackView.track.visibilityWindow !== undefined && this.trackView.track.visibilityWindow > 0) {
             if ((referenceFrame.bpPerPixel * this.$viewport.width() > this.trackView.track.visibilityWindow) ||
-                (referenceFrame.chrName === "all" && !this.trackView.track.supportsWholeGenome)) {
+                (referenceFrame.chrName.toLowerCase() === "all" && !this.trackView.track.supportsWholeGenome)) {
                 this.tile = null;
                 this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
 
