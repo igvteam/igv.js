@@ -97,8 +97,12 @@ var igvxhr = (function (igvxhr) {
                     url += "someRandomSeed=" + Math.random().toString(36);
                 }
 
-                xhr.open(method, url);
+                // TODO: 判断请求是否发向genedock
+                if(url.match('genedock')){
+                    headers = igv.GeneDock.addGeneDockHeaders(url, options);
+                }
 
+                xhr.open(method, url);
                 if (range) {
                     var rangeEnd = range.size ? range.start + range.size - 1 : "";
                     xhr.setRequestHeader("Range", "bytes=" + range.start + "-" + rangeEnd);
@@ -122,6 +126,7 @@ var igvxhr = (function (igvxhr) {
                         xhr.setRequestHeader(key, value);
                     }
                 }
+
 
                 // NOTE: using withCredentials with servers that return "*" for access-allowed-origin will fail
                 if (withCredentials === true) {
@@ -216,7 +221,8 @@ var igvxhr = (function (igvxhr) {
 
         var method = options.method || (options.sendData ? "POST" : "GET");
 
-        if (method == "POST") options.contentType = "application/json";
+        // if (method == "POST") options.contentType = 'application/json; charset=UTF-8';
+        options.contentType = 'application/json; charset=UTF-8';
 
         return new Promise(function (fullfill, reject) {
 
@@ -443,15 +449,15 @@ var igvxhr = (function (igvxhr) {
     }
 
     // Increments an anonymous usage count.  Count is anonymous, needed for our continued funding.  Please don't delete
-    const href = window.document.location.href;
-    if (!(href.includes("localhost") || href.includes("127.0.0.1"))) {
-        var url = "https://data.broadinstitute.org/igv/projects/current/counter_igvjs.php?version=" + "0";
-        igvxhr.load(url).then(function (ignore) {
-            console.log(ignore);
-        }).catch(function (error) {
-            console.log(error);
-        });
-    }
+    // const href = window.document.location.href;
+    // if (!(href.includes("localhost") || href.includes("127.0.0.1"))) {
+    //     var url = "https://data.broadinstitute.org/igv/projects/current/counter_igvjs.php?version=" + "0";
+    //     igvxhr.load(url).then(function (ignore) {
+    //         console.log(ignore);
+    //     }).catch(function (error) {
+    //         console.log(error);
+    //     });
+    // }
 
     return igvxhr;
 

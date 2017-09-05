@@ -75,16 +75,20 @@ var igv = (function (igv) {
 
         var variant = new igv.Variant();
 
-        variant.chr = json.referenceName;
+        variant.chr = json.reference_name;
         variant.pos = parseInt(json.start);
         variant.names = arrayToCommaString(json.names);
-        variant.referenceBases = json.referenceBases + '';
-        variant.alternateBases = json.alternateBases + '';
+        variant.referenceBases = json.reference_bases + '';
+        variant.alternateBases = json.alternate_bases + '';
         variant.quality = json.quality;
         variant.filter = arrayToCommaString(json.filter);
-        variant.info = json.info;
-
-        variant.str = variant.info["PERIOD"] !== undefined;
+        variant.info = json.info || {};
+        if(variant.info){
+            variant.str = variant.info["PERIOD"] !== undefined;
+        }
+        else {
+            variant.str = false;
+        }
 
 
         // Need to build a hash of calls for fast lookup

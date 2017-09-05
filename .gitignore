@@ -13,3 +13,5 @@ local
 /.idea/misc.xml
 
 /igv.js.iml
+create_variant_set.html
+ga4gh.html
