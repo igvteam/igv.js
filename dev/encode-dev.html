@@ -117,7 +117,8 @@
             browser,
             columnWidths,
             encodeTableFormat,
-            encodeDataSource;
+            encodeDataSource,
+            f;
 
         div = $("#myDiv")[0];
         options = {
@@ -170,7 +171,10 @@
 
         encodeDataSource = new encode.EncodeDataSource({genomeID: 'hg19'}, encodeTableFormat);
 
-        browser.encodeTable = new igv.IGVModalTable($('#encodeModalBody'), browser, 'loadTracksWithConfigList', encodeDataSource);
+        f = function () {
+          return browser;
+        };
+        browser.encodeTable = new igv.IGVModalTable($('#encodeModalBody'), f, 'loadTracksWithConfigList', encodeDataSource);
 
     })
 
