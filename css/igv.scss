@@ -920,9 +920,11 @@ $drag-drop-warning-color: red;
 
 .igv-grid-container-colorpicker {
 
-  position: absolute;
-  top: 0;
-  left:0;
+  //position: absolute;
+  //top: 0;
+  //left:0;
+
+  position: relative;
 
   width:256px;
 

@@ -460,7 +460,6 @@ var igv = (function (igv) {
         return all;
     };
 
-
     igv.trackMenuItemListHelper = function(itemList) {
 
         var list = [];
@@ -518,7 +517,7 @@ var igv = (function (igv) {
 
         clickHandler = function(){
             var $element = $(trackView.trackDiv);
-            igv.dialog.configure(dialogLabelHandler, dialogInputValue, dialogClickHandler);
+            igv.dialog.configure(dialogLabelHandler, dialogInputValue, dialogClickHandler, undefined, undefined);
             igv.dialog.show($element);
             popover.hide();
         };
@@ -551,12 +550,34 @@ var igv = (function (igv) {
         var $e,
             clickHandler;
 
+
         $e = $('<div>');
         $e.text('Set track color');
 
         clickHandler = function () {
-            igv.colorPicker.configure(trackView);
-            igv.colorPicker.show();
+            var defaultColor,
+                color,
+                offset,
+                colorUpdateHandler;
+
+            color = trackView.track.color;
+
+            defaultColor = trackView.track.config.color || igv.browser.constants.defaultColor;
+
+            offset =
+                {
+                    left: ($(trackView.trackDiv).offset().left + $(trackView.trackDiv).width()) - igv.colorPicker.$container.width(),
+                    top:  $(trackView.trackDiv).offset().top
+                };
+
+            colorUpdateHandler = function (color) {
+                trackView.setColor( color )
+            };
+
+            igv.colorPicker.configure(trackView, color, defaultColor, offset, colorUpdateHandler);
+
+            igv.colorPicker.presentAtOffset(offset);
+
             popover.hide();
         };
 

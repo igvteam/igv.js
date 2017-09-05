@@ -34,7 +34,6 @@ var igv = (function (igv) {
 
         var self = this,
             palette = userPalette || ["#666666", "#0000cc", "#009900", "#cc0000", "#ffcc00", "#9900cc", "#00ccff", "#ff6600", "#ff6600"],
-            //palette = ["#666666", "#0000cc", "#009900", "#cc0000", "#ffcc00", "#9900cc", "#00ccff", "#ff6600", "#ff6600"],
             rowCount = Math.ceil(palette.length / columnCount),
             rowIndex;
 
@@ -115,9 +114,8 @@ var igv = (function (igv) {
 
                 if (parsed) {
 
-                    // igv.setTrackColor(self.trackView.track, parsed);
-                    // self.trackView.update();
-                    self.trackView.setColor( parsed );
+                    // self.trackView.setColor( parsed );
+                    self.colorUpdateHandler(parsed);
 
                     addUserColor(parsed);
 
@@ -240,11 +238,8 @@ var igv = (function (igv) {
                 $filler.css("background-color", color);
 
                 $filler.click(function () {
-
-                    // igv.setTrackColor(self.trackView.track, $(this).css("background-color"));
-                    // self.trackView.update();
-                    self.trackView.setColor( $(this).css("background-color") );
-
+                    // self.trackView.setColor( $(this).css("background-color") );
+                    self.colorUpdateHandler($(this).css("background-color"));
                 });
 
             }
@@ -269,9 +264,8 @@ var igv = (function (igv) {
             $column.append(self.$defaultColor);
 
             $column.click(function () {
-                // igv.setTrackColor(self.trackView.track, $(this).find(".igv-col-filler").css("background-color"));
-                // self.trackView.update();
-                self.trackView.setColor( $(this).find(".igv-col-filler").css("background-color") );
+                // self.trackView.setColor( $(this).find(".igv-col-filler").css("background-color") );
+                self.colorUpdateHandler( $(this).find(".igv-col-filler").css("background-color") );
             });
 
             $row.append($column);
@@ -305,9 +299,8 @@ var igv = (function (igv) {
             $column.append(self.$previousColor);
 
             $column.click(function () {
-                // igv.setTrackColor(self.trackView.track, $(this).find(".igv-col-filler").css("background-color"));
-                // self.trackView.update();
-                self.trackView.setColor( $(this).find(".igv-col-filler").css("background-color") );
+                // self.trackView.setColor( $(this).find(".igv-col-filler").css("background-color") );
+                self.colorUpdateHandler( $(this).find(".igv-col-filler").css("background-color") );
             });
 
             $row.append($column);
@@ -366,11 +359,8 @@ var igv = (function (igv) {
                 $filler.css("background-color", colorOrNull);
 
                 $filler.click(function () {
-
-                    // igv.setTrackColor(self.trackView.track, $(this).css("background-color"));
-                    // self.trackView.update();
-                    self.trackView.setColor( $(this).css("background-color") )
-
+                    // self.trackView.setColor( $(this).css("background-color") );
+                    self.colorUpdateHandler( $(this).css("background-color") );
                 });
 
             } else {
@@ -383,13 +373,11 @@ var igv = (function (igv) {
 
     };
 
-    igv.ColorPicker.prototype.configure = function (trackView) {
-
-        this.trackView = trackView;
-
-        this.$defaultColor.css("background-color", trackView.track.config.color || igv.browser.constants.defaultColor);
-        this.$previousColor.css("background-color", trackView.track.color);
-
+    igv.ColorPicker.prototype.configure = function (trackView, trackColor, trackDefaultColor, offset, colorUpdateHandler) {
+        this.$previousColor.css("background-color", trackColor);
+        this.$defaultColor.css("background-color", trackDefaultColor);
+        $(this.$container).offset(offset);
+        this.colorUpdateHandler = colorUpdateHandler;
     };
 
     igv.ColorPicker.prototype.hide = function () {
@@ -397,29 +385,9 @@ var igv = (function (igv) {
         this.$container.hide();
     };
 
-    igv.ColorPicker.prototype.show = function () {
-
-        var body_scrolltop = $("body").scrollTop(),
-            track_origin = $(this.trackView.trackDiv).offset(),
-            track_size = {
-                width: $(this.trackView.trackDiv).outerWidth(),
-                height: $(this.trackView.trackDiv).outerHeight()
-            },
-            size = {width: $(this.$container).outerWidth(), height: $(this.$container).outerHeight()},
-            obj;
-
-        $(this.$container).offset({left: (track_size.width - 300), top: (track_origin.top + body_scrolltop)});
-
-
-        obj = $(".igv-user-input-color");
-        obj.val("");
-        obj.attr("placeholder", "Ex: #ff0000 or 255,0,0");
-
+    igv.ColorPicker.prototype.presentAtOffset = function (offset) {
         this.$container.show();
         this.$userError.hide();
-
-        $(this.$container).offset(igv.constrainBBox($(this.$container), $(igv.browser.trackContainerDiv)));
-
     };
 
     return igv;
