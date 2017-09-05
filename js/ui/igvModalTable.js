@@ -32,16 +32,14 @@ var igv = (function (igv) {
 
     /**
      * @param $parent              containing jquery selection used to host the table
-     * @param browser              reference to the hicBrower object
+     * @param browserRetrievalFunction              reference to the hicBrower object
      * @param browserLoadFunction function that consumes items selected from the table
      * @param dataSource          source of data fed to the table (see for example EncodeDataSource)
      */
-    igv.IGVModalTable = function ($parent, browser, browserLoadFunction, dataSource) {
+    igv.IGVModalTable = function ($parent, browserRetrievalFunction, browserLoadFunction, dataSource) {
 
         var self = this,
         $modal = $('#hicEncodeModal');
-
-        this.browser = browser;
 
         this.dataSource = dataSource;
 
@@ -58,15 +56,15 @@ var igv = (function (igv) {
 
         $modal.on('show.bs.modal', function (e) {
 
-            if (undefined === self.browser) {
-                igv.presentAlert('ERROR: browser undefined');
+            if (undefined === browserRetrievalFunction) {
+                igv.presentAlert('ERROR: must provide browser retrieval function');
             }
 
         });
 
         $modal.on('shown.bs.modal', function (e) {
 
-            if (undefined === self.browser) {
+            if (undefined === browserRetrievalFunction) {
                 $modal.modal('hide');
             } else if (true !== self.initialized) {
                 self.initialized = true;
@@ -91,12 +89,13 @@ var igv = (function (igv) {
 
             var dt,
                 $selectedTableRows,
-                result;
+                result,
+                browser;
 
             $selectedTableRows = self.$dataTables.$('tr.selected');
 
-            if (undefined === self.browser) {
-                igv.presentAlert('ERROR: browser undefined');
+            if (undefined === browserRetrievalFunction) {
+                igv.presentAlert('ERROR: must provide browser retrieval function');
             } else if ($selectedTableRows.length > 0) {
 
                 $selectedTableRows.removeClass('selected');
@@ -107,7 +106,8 @@ var igv = (function (igv) {
                     result.push( dataSource.dataAtRowIndex( dt.row(this).index() ) );
                 });
 
-                self.browser[ browserLoadFunction ](result);
+                browser = browserRetrievalFunction();
+                browser[ browserLoadFunction ](result);
             }
 
         });
