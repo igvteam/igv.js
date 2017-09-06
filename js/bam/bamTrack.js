@@ -305,24 +305,20 @@ var igv = (function (igv) {
 
                 if ('tag' === menuItem.key) {
 
-                    igv.dialog.configure(
+                    igv.dialog.configure(function () {
+                        return "Tag Name"
+                    }, self.alignmentTrack.colorByTag ? self.alignmentTrack.colorByTag : '', function () {
+                        var tag = igv.dialog.$dialogInput.val().trim();
+                        self.alignmentTrack.colorBy = 'tag';
 
-                        function () { return "Tag Name" },
+                        if (tag !== self.alignmentTrack.colorByTag) {
+                            self.alignmentTrack.colorByTag = igv.dialog.$dialogInput.val().trim();
+                            self.alignmentTrack.tagColors = new igv.PaletteColorTable("Set1");
+                            $('#color-by-tag').text(self.alignmentTrack.colorByTag);
+                        }
 
-                        self.alignmentTrack.colorByTag ? self.alignmentTrack.colorByTag : '',
-
-                        function () {
-                            var tag = igv.dialog.$dialogInput.val().trim();
-                            self.alignmentTrack.colorBy = 'tag';
-
-                            if(tag !== self.alignmentTrack.colorByTag) {
-                                self.alignmentTrack.colorByTag = igv.dialog.$dialogInput.val().trim();
-                                self.alignmentTrack.tagColors = new igv.PaletteColorTable("Set1");
-                                $('#color-by-tag').text(self.alignmentTrack.colorByTag);
-                            }
-
-                            self.trackView.update();
-                        });
+                        self.trackView.update();
+                    }, undefined, undefined);
 
                     igv.dialog.show($(self.trackView.trackDiv));
 
