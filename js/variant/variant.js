@@ -242,7 +242,7 @@ var igv = (function (igv) {
         if (array.length > 0)
             str = array[0];
         for (i = 1; i < array.length; i++) {
-            str += ", " + array[1];
+            str += ", " + array[i];
         }
         return str;
 
