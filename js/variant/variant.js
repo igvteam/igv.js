@@ -238,13 +238,7 @@ var igv = (function (igv) {
 
     function arrayToCommaString(array) {
         if (!array) return;
-        var str = '', i;
-        if (array.length > 0)
-            str = array[0];
-        for (i = 1; i < array.length; i++) {
-            str += ", " + array[i];
-        }
-        return str;
+        return array.join(',');
 
     }
 
