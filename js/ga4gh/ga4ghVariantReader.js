@@ -120,8 +120,25 @@ var igv = (function (igv) {
                         },
                         decode: function (json) {
                             var variants = [];
-
                             json.variants.forEach(function (json) {
+                                json.referenceName = json.reference_name;
+                                delete json.reference_name;
+                                json.referenceBases = json.reference_bases;
+                                delete json.reference_bases;
+                                json.alternateBases = json.alternate_bases;
+                                delete json.alternate_bases;
+                                
+                                json.info = {};
+                                for(info in json.attributes.attr) {
+                                    json.info[info] = [];
+                                    json.attributes.attr[info].values.forEach(function(value){
+                                        for(sv in value) {
+                                            json.info[info].push(value[sv]);
+                                        }
+                                    })
+                                }
+                               
+                                delete json.attributes;
                                 variants.push(igv.createGAVariant(json));
                             });
 
