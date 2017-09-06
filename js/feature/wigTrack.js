@@ -164,8 +164,9 @@ var igv = (function (igv) {
             }
             if (self.autoscale || self.dataRange === undefined) {
                 var s = autoscale(features);
-                featureValueMinimum = s.min;
+                featureValueMinimum = self.config.min || s.min;      // If min is explicitly set use it
                 featureValueMaximum = s.max;
+
             }
             else {
                 featureValueMinimum = self.dataRange.min === undefined ? 0 : self.dataRange.min;
@@ -179,9 +180,12 @@ var igv = (function (igv) {
             self.dataRange.min = featureValueMinimum;  // Record for disply, menu, etc
             self.dataRange.max = featureValueMaximum;
 
-            featureValueRange = featureValueMaximum - featureValueMinimum;
-
-            features.forEach(renderFeature);
+            // Max can be less than min if config.min is set but max left to autoscale.   If that's the case there is
+            // nothing to paint.
+            if(featureValueMaximum > featureValueMinimum) {
+                featureValueRange = featureValueMaximum - featureValueMinimum;
+                features.forEach(renderFeature);
+            }
         }
 
 
