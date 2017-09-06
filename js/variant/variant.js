@@ -39,7 +39,6 @@ var igv = (function (igv) {
         var self = this,
             altTokens;
 
-
         variant.chr = tokens[0]; // TODO -- use genome aliases
         variant.pos = parseInt(tokens[1]);
         variant.names = tokens[2];    // id in VCF
@@ -74,7 +73,6 @@ var igv = (function (igv) {
     igv.createGAVariant = function (json) {
 
         var variant = new igv.Variant();
-
         variant.chr = json.referenceName;
         variant.pos = parseInt(json.start);
         variant.names = arrayToCommaString(json.names);
@@ -83,9 +81,8 @@ var igv = (function (igv) {
         variant.quality = json.quality;
         variant.filter = arrayToCommaString(json.filter);
         variant.info = json.info;
-
+        
         variant.str = variant.info["PERIOD"] !== undefined;
-
 
         // Need to build a hash of calls for fast lookup
         // Note from the GA4GH spec on call ID:
@@ -176,7 +173,7 @@ var igv = (function (igv) {
 
         function calcHeterozygosity(ac, an) {
             var sum = 0,
-                altFreqs = ac.split(','),
+                altFreqs =  ac instanceof Array ? ac : ac.split(','),
                 altCount = 0,
                 refFrac;
 
@@ -237,15 +234,8 @@ var igv = (function (igv) {
     };
 
     function arrayToCommaString(array) {
-        if (!array) return;
-        var str = '', i;
-        if (array.length > 0)
-            str = array[0];
-        for (i = 1; i < array.length; i++) {
-            str += ", " + array[1];
-        }
-        return str;
-
+        if (!array instanceof Array) return;
+        return array.join(',');
     }
 
     return igv;

@@ -25,19 +25,14 @@
 
 var igv = (function (igv) {
 
-    /**
-     *
-     * @param options
-     */
-    igv.ga4ghGet = function (options) {
 
-        var url = options.url + "/" + options.entity + "/" + options.entityId;
+    igv.ga4ghGet = function (options) {
+        var url = options.url + "/" + options.entity + "/" + options.entityId + "/";
 
         return igvxhr.loadJson(url, options);      // Returns a promise
     }
 
     igv.ga4ghSearch = function (options) {
-
         return new Promise(function (fulfill, reject) {
             var results = options.results ? options.results : [],
                 url = options.url,
@@ -56,7 +51,6 @@ var igv = (function (igv) {
                 url = url + paramSeparator + "fields=" + fields;
             }
 
-
             // Start the recursive load cycle.  Data is fetched in chunks, if more data is available a "nextPageToken" is returned.
             loadChunk();
 
@@ -69,14 +63,9 @@ var igv = (function (igv) {
                     if (body.pageToken != undefined) delete body.pageToken;    // Remove previous page token, if any
                 }
 
-                var sendData = JSON.stringify(body);
+                options.sendData = JSON.stringify(body);
 
-                igvxhr.loadJson(url,
-                    {
-                        sendData: sendData,
-                        contentType: "application/json",
-                        headers: ga4ghHeaders()
-                    }).then(function (json) {
+                igvxhr.loadJson(url, options).then(function (json) {
                     var nextPageToken, tmp;
 
                     if (json) {
@@ -120,7 +109,7 @@ var igv = (function (igv) {
     igv.ga4ghSearchReadGroupSets = function (options) {
 
         igv.ga4ghSearch({
-            url: options.url + "/readgroupsets/search",
+            url: options.url + "/readgroupsets/search/",
             body: {
                 "datasetIds": [options.datasetId],
 
@@ -139,7 +128,7 @@ var igv = (function (igv) {
     igv.ga4ghSearchVariantSets = function (options) {
 
         igv.ga4ghSearch({
-            url: options.url + "/variantsets/search",
+            url: options.url + "/variantsets/search/",
             body: {
                 "datasetIds": [options.datasetId],
                 "pageSize": "10000"
@@ -174,8 +163,6 @@ var igv = (function (igv) {
                     options.datasetId = undefined;
                     options.variantSetIds = variantSetIds;
                     igv.ga4ghSearchCallSets(options);
-
-
                 }
             });
 
@@ -184,7 +171,7 @@ var igv = (function (igv) {
         else {
 
             igv.ga4ghSearch({
-                url: options.url + "/callsets/search",
+                url: options.url + "/callsets/search/",
                 body: {
                     "variantSetIds": options.variantSetIds,
                     "pageSize": "10000"
@@ -246,20 +233,6 @@ var igv = (function (igv) {
                 });
             }
         });
-
-    }
-
-
-    function ga4ghHeaders() {
-
-        var headers = {},
-            acToken = oauth.google.access_token;
-
-        headers["Cache-Control"] = "no-cache";
-        if (acToken) {
-            headers["Authorization"] = "Bearer " + acToken;
-        }
-        return headers;
 
     }
 

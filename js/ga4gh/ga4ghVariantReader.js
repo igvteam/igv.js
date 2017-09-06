@@ -57,14 +57,14 @@ var igv = (function (igv) {
                 }
                 else {
 
-                    var readURL = self.url + "/callsets/search";
+                    var readURL = self.url + "/callsets/search/";
 
                     igv.ga4ghSearch({
                         url: readURL,
                         fields: "nextPageToken,callSets(id,name)",
                         body: {
-                            "variantSetIds": (Array.isArray(self.variantSetId) ? self.variantSetId : [self.variantSetId]),
-                            "pageSize": "10000"
+                            "variant_set_id": (Array.isArray(self.variantSetId) ? self.variantSetId : [self.variantSetId]),
+                            "page_size": "10000"
                         },
                         decode: function (json) {
                             // If specific callSetIds are specified filter to those
@@ -73,7 +73,7 @@ var igv = (function (igv) {
                                     csIdSet = new Set();
 
                                 csIdSet.addAll(self.callSetIds);
-                                json.callSets.forEach(function (cs) {
+                                json.call_sets.forEach(function (cs) {
                                     if (csIdSet.has(cs.id)) {
                                         filteredCallSets.push(cs);
                                     }
@@ -81,11 +81,11 @@ var igv = (function (igv) {
                                 return filteredCallSets;
                             }
                             else {
-                                return json.callSets;
+                                return json.call_sets;
                             }
                         }
-                    }).then(function (callSets) {
-                        self.header.callSets = callSets;
+                    }).then(function (call_sets) {
+                        self.header.callSets = call_sets;
                         fulfill(self.header);
                     }).catch(reject);
                 }
@@ -103,27 +103,42 @@ var igv = (function (igv) {
         return new Promise(function (fulfill, reject) {
 
             self.readHeader().then(function (header) {
-
                 getChrNameMap().then(function (chrNameMap) {
-
                     var queryChr = chrNameMap.hasOwnProperty(chr) ? chrNameMap[chr] : chr,
-                        readURL = self.url + "/variants/search";
+                        readURL = self.url + "/variants/search/";
 
                     igv.ga4ghSearch({
                         url: readURL,
-                        fields: (self.includeCalls ? undefined : "nextPageToken,variants(id,variantSetId,names,referenceName,start,end,referenceBases,alternateBases,quality, filter, info)"),
+                        // fields: (self.includeCalls ? undefined : "nextPageToken,variants(id,variantSetId,names,referenceName,start,end,referenceBases,alternateBases,quality, filter, info)"),
                         body: {
-                            "variantSetIds": (Array.isArray(self.variantSetId) ? self.variantSetId : [self.variantSetId]),
-                            "callSetIds": (self.callSetIds ? self.callSetIds : undefined),
-                            "referenceName": queryChr,
+                            "variant_set_id": (Array.isArray(self.variantSetId) ? self.variantSetId : [self.variantSetId]),
+                            "call_set_ids": (self.callSetIds ? self.callSetIds : undefined),
+                            "reference_name": queryChr.replace('chr',''), //TODO: 根据参考基因组的ID判断是否需要chr
                             "start": bpStart.toString(),
                             "end": bpEnd.toString(),
-                            "pageSize": "10000"
+                            "page_size": "10000"
                         },
                         decode: function (json) {
                             var variants = [];
-
                             json.variants.forEach(function (json) {
+                                json.referenceName = json.reference_name;
+                                delete json.reference_name;
+                                json.referenceBases = json.reference_bases;
+                                delete json.reference_bases;
+                                json.alternateBases = json.alternate_bases;
+                                delete json.alternate_bases;
+                                
+                                json.info = {};
+                                for(info in json.attributes.attr) {
+                                    json.info[info] = [];
+                                    json.attributes.attr[info].values.forEach(function(value){
+                                        for(sv in value) {
+                                            json.info[info].push(value[sv]);
+                                        }
+                                    })
+                                }
+                               
+                                delete json.attributes;
                                 variants.push(igv.createGAVariant(json));
                             });
 
@@ -168,7 +183,6 @@ var igv = (function (igv) {
 
 
     igv.Ga4ghVariantReader.prototype.readMetadata = function () {
-
         return igv.ga4ghGet({
             url: this.url,
             entity: "variantsets",
