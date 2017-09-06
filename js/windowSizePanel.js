@@ -46,7 +46,7 @@ var igv = (function (igv) {
             referenceFrame,
             length;
 
-        if (1 === genomicState.locusCount && 'all' !== genomicState.locusSearchString) {
+        if (1 === genomicState.locusCount && 'all' !== genomicState.locusSearchString.toLowerCase()) {
             this.show();
         } else {
             this.hide();

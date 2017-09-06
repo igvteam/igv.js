@@ -143,22 +143,16 @@ var igv = (function (igv) {
     };
 
     igv.Browser.prototype.disableZoomWidget = function () {
-
-        this.$zoomContainer.find('.fa-minus-circle').off();
-        this.$zoomContainer.find('.fa-plus-circle' ).off();
-
+        this.$zoomContainer.hide();
     };
 
-    igv.Browser.prototype.enableZoomWidget = function (zoomHandlers) {
-
-        this.$zoomContainer.find('.fa-minus-circle').on(zoomHandlers.out);
-        this.$zoomContainer.find('.fa-plus-circle' ).on(zoomHandlers.in);
-
+    igv.Browser.prototype.enableZoomWidget = function () {
+        this.$zoomContainer.show();
     };
 
     igv.Browser.prototype.toggleCursorGuide = function (genomicStateList) {
 
-        if (_.size(genomicStateList) > 1 || 'all' === (_.first(genomicStateList)).locusSearchString) {
+        if (_.size(genomicStateList) > 1 || 'all' === (_.first(genomicStateList)).locusSearchString.toLowerCase()) {
 
             if(this.$cursorTrackingGuide.is(":visible")) {
                 this.$cursorTrackingGuideToggle.click();
@@ -173,7 +167,7 @@ var igv = (function (igv) {
 
     igv.Browser.prototype.toggleCenterGuide = function (genomicStateList) {
 
-        if (_.size(genomicStateList) > 1 || 'all' === (_.first(genomicStateList)).locusSearchString) {
+        if (_.size(genomicStateList) > 1 || 'all' === (_.first(genomicStateList)).locusSearchString.toLowerCase()) {
 
             if(this.centerGuide.$container.is(":visible")) {
                 this.centerGuide.$centerGuideToggle.click();
@@ -277,7 +271,7 @@ var igv = (function (igv) {
             igv.popover.hide();
         }
 
-        trackView = new igv.TrackView(track, this);
+        trackView = new igv.TrackView(this, $(this.trackContainerDiv), track);
         this.trackViews.push(trackView);
         this.reorderTracks();
         trackView.resize();
@@ -571,7 +565,7 @@ var igv = (function (igv) {
 
         if (0 === genomicState.locusIndex && 1 === genomicState.locusCount) {
 
-            if ('all' === genomicState.locusSearchString) {
+            if ('all' === genomicState.locusSearchString.toLowerCase()) {
 
                 this.$searchInput.val(genomicState.locusSearchString);
             } else {
@@ -841,7 +835,7 @@ var igv = (function (igv) {
             igv.IdeoPanel.$empty($content_header);
         }
 
-        this.emptyViewportContainers($('.igv-track-container-div'));
+        this.emptyViewportContainers();
 
         filtered = _.filter(_.clone(this.genomicStateList), function(gs) {
             return filterFunction(gs);
@@ -860,37 +854,50 @@ var igv = (function (igv) {
 
         this.buildViewportsWithGenomicStateList(this.genomicStateList);
 
+        this.zoomWidgetLayout();
+
         this.toggleCenterGuide(this.genomicStateList);
+
         this.toggleCursorGuide(this.genomicStateList);
 
         this.resize();
 
     };
 
-    igv.Browser.prototype.emptyViewportContainers = function ($trackContainer) {
-        var $e;
+    igv.Browser.prototype.emptyViewportContainers = function () {
 
-        $e = $trackContainer.find('.igv-scrollbar-outer-div');
-        $e.remove();
-
-        $e = $trackContainer.find('.igv-viewport-div');
-        $e.remove();
+        $('.igv-scrollbar-outer-div').remove();
+        $('.igv-viewport-div').remove();
+        $('.igv-ruler-sweeper-div').remove();
 
         _.each(this.trackViews, function(trackView){
             trackView.viewports = [];
             trackView.scrollbar = undefined;
+
+            _.each(_.keys(trackView.track.rulerSweepers), function (key) {
+                trackView.track.rulerSweepers[ key ] = undefined;
+            });
+
+            trackView.track.rulerSweepers = undefined;
         });
+
     };
 
     igv.Browser.prototype.buildViewportsWithGenomicStateList = function (genomicStateList) {
 
         _.each(this.trackViews, function(trackView){
 
-            _.each(_.range(_.size(genomicStateList)), function(i) {
-                trackView.viewports.push(new igv.Viewport(trackView, i));
-                trackView.configureViewportContainer(trackView.$viewportContainer, trackView.viewports);
+            _.each(genomicStateList, function(genomicState, i) {
+
+                trackView.viewports.push(new igv.Viewport(trackView, trackView.$viewportContainer, i));
+
+                if (trackView.track instanceof igv.RulerTrack) {
+                    trackView.track.createRulerSweeper(trackView.viewports[i], trackView.viewports[i].$viewport, $(trackView.viewports[i].contentDiv), genomicState);
+                }
+
             });
 
+            trackView.configureViewportContainer(trackView.$viewportContainer, trackView.viewports);
         });
 
     };
@@ -902,7 +909,8 @@ var igv = (function (igv) {
 
         this.getGenomicStateList(loci, this.viewportContainerWidth(), function (genomicStateList) {
 
-            var errorString,
+            var found,
+                errorString,
                 $content_header = $('#igv-content-header');
 
             if (_.size(genomicStateList) > 0) {
@@ -918,17 +926,11 @@ var igv = (function (igv) {
 
                 self.genomicStateList = genomicStateList;
 
-                self.emptyViewportContainers($('.igv-track-container-div'));
-
-                // return;
+                self.emptyViewportContainers();
 
                 self.updateLocusSearchWithGenomicState(_.first(self.genomicStateList));
 
-                if (1 === _.size(self.genomicStateList) && 'all' === (_.first(self.genomicStateList)).locusSearchString) {
-                    self.disableZoomWidget();
-                } else {
-                    self.enableZoomWidget(self.zoomHandlers);
-                }
+                self.zoomWidgetLayout();
 
                 self.toggleCenterGuide(self.genomicStateList);
                 self.toggleCursorGuide(self.genomicStateList);
@@ -947,6 +949,21 @@ var igv = (function (igv) {
             }
 
         });
+    };
+
+    igv.Browser.prototype.zoomWidgetLayout = function () {
+        var found;
+
+        found = _.filter(this.genomicStateList, function (g) {
+            return 'all' === g.locusSearchString.toLowerCase();
+        });
+
+        if (_.size(found) > 0) {
+            this.disableZoomWidget();
+        } else {
+            this.enableZoomWidget();
+        }
+
     };
 
     /**

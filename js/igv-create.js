@@ -115,6 +115,7 @@ var igv = (function (igv) {
             igv.browser.getGenomicStateList(lociWithConfiguration(config), width, function (genomicStateList) {
 
                 var errorString,
+                    found,
                     gs;
 
                 if (_.size(genomicStateList) > 0) {
@@ -129,11 +130,7 @@ var igv = (function (igv) {
 
                     igv.browser.updateLocusSearchWithGenomicState(_.first(igv.browser.genomicStateList));
 
-                    if (1 === _.size(igv.browser.genomicStateList) && 'all' === (_.first(igv.browser.genomicStateList)).locusSearchString) {
-                        igv.browser.disableZoomWidget();
-                    } else {
-                        igv.browser.enableZoomWidget(igv.browser.zoomHandlers);
-                    }
+                    igv.browser.zoomWidgetLayout();
 
                     // igv.browser.toggleCursorGuide(igv.browser.genomicStateList);
                     igv.browser.toggleCenterGuide(igv.browser.genomicStateList);
@@ -326,7 +323,10 @@ var igv = (function (igv) {
             browser.$searchInput = $('<input type="text" placeholder="Locus Search">');
 
             browser.$searchInput.change(function (e) {
-                browser.parseSearchInput($(e.target).val());
+                var value;
+
+                value = $(e.target).val();
+                browser.parseSearchInput(value);
             });
 
             $faSearch = $('<i class="fa fa-search">');
@@ -354,23 +354,8 @@ var igv = (function (igv) {
             // window size panel
             browser.windowSizePanel = new igv.WindowSizePanel($navigation);
 
-            // zoom
-            browser.zoomHandlers = {
-                in: {
-                    click: function (e) {
-                        browser.zoomIn();
-                    }
-                },
-                out: {
-                    click: function (e) {
-                        browser.zoomOut();
-                    }
-                }
-            };
-
-            browser.$zoomContainer = zoomWidget();
-            $navigation.append(browser.$zoomContainer);
-
+            // zoom widget
+            zoomWidget(browser, $navigation);
 
             // cursor tracking guide
             browser.$cursorTrackingGuide = $('<div class="igv-cursor-tracking-guide">');
@@ -419,13 +404,26 @@ var igv = (function (igv) {
         return $controls.get(0);
     }
 
-    function zoomWidget() {
+    function zoomWidget(browser, $parent) {
 
-        var $zoomContainer = $('<div class="igv-zoom-widget">');
-        $zoomContainer.append($('<i class="fa fa-minus-circle">'));
-        $zoomContainer.append($('<i class="fa fa-plus-circle">'));
+        var $fa;
 
-        return $zoomContainer;
+        browser.$zoomContainer = $('<div class="igv-zoom-widget">');
+        $parent.append(browser.$zoomContainer);
+
+        $fa = $('<i class="fa fa-minus-circle">');
+        browser.$zoomContainer.append($fa);
+        $fa.on('click', function () {
+            browser.zoomOut();
+        });
+
+
+        $fa = $('<i class="fa fa-plus-circle">');
+        browser.$zoomContainer.append($fa);
+        $fa.on('click', function () {
+            browser.zoomIn();
+        });
+
     }
 
     function setDefaults(config) {
