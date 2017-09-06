@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+    <meta name="description" content="">
+    <meta name="author" content="">
+    <link rel="shortcut icon" href=../img/favicon.ico>
+    <title>IGV - Whole Genome View</title>
+    <link rel="import" href="./shared-css.html">
+    <link rel="import" href="./shared-js.html">
+</head>
+
+<body>
+
+<div id="myDiv" style="padding-top: 50px;padding-bottom: 20px; height: auto">
+</div>
+
+<script type="text/javascript">
+
+    $(document).ready(function () {
+        var div,
+            options,
+            browser;
+
+        div = $("#myDiv")[0];
+        options = {
+            minimumBases: 6,
+            showIdeogram: true,
+            showKaryo: false,
+            showCenterGuide: false,
+            showCursorTrackingGuide: false,
+            showRuler: true,
+            locus: ['all'],
+            reference: {
+                id: "hg19",
+                fastaURL: "https://s3.amazonaws.com/igv.broadinstitute.org/genomes/seq/1kg_v37/human_g1k_v37_decoy.fasta",
+                cytobandURL: "https://s3.amazonaws.com/igv.broadinstitute.org/genomes/seq/b37/b37_cytoband.txt"
+            },
+            flanking: 1000,
+            apiKey: 'AIzaSyDUUAUFpQEN4mumeMNIRWXSiTh5cPtUAD0',
+            tracks:
+                [
+                    {
+                        url: 'https://data.broadinstitute.org/igvdata/test/igv-web/segmented_data_080520.seg.gz',
+                        indexed: false,
+                        isLog: true,
+                        name: 'GBM Copy # (TCGA Broad GDAC)'
+                    }
+                ]
+        };
+
+        browser = igv.createBrowser(div, options);
+
+    })
+
+</script>
+
+</body>
+
+</html>
