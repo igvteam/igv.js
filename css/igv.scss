@@ -336,6 +336,63 @@ $drag-drop-warning-color: red;
 
 }
 
+.igv-viewport-content-div {
+  position: absolute;
+  width: 100%;
+  height:100%;
+
+  .igv-whole-genome-container {
+    display:flex;
+    flex-flow: row;
+    flex-wrap: nowrap;
+    justify-content: space-between;
+
+    width: 100%;
+    height: 100%;
+
+    background-color: white;
+
+    div {
+
+      font-family: $igv-default-font-face;
+      font-size: 10px;
+      font-weight: 400;
+      color: #444;
+
+      height: 100%;
+      text-align: center;
+
+      span {
+        display: block;
+        padding-top: 6px;
+        text-overflow: ellipsis;
+      }
+
+      border-right-color: #bfbfbf;
+      border-right-style: solid;
+      border-right-width: thin;
+    }
+
+    div:last-child {
+      border-right-color: transparent;
+    }
+
+    div:hover,
+    div:focus,
+    div:active  {
+      cursor: pointer;
+      background-color: #efefef;
+    }
+
+  }
+
+  canvas {
+    width: 100%;
+    height: 100%;
+  }
+
+}
+
 .igv-viewport-div-border-right {
   border-right-color: white;
   border-right-style: solid;
@@ -346,18 +403,6 @@ $drag-drop-warning-color: red;
   border-left-color: rgba(0, 0, 0, 0.25);
   border-left-style: solid;
   border-left-width: thin;
-}
-
-.igv-viewport-content-div {
-  position: absolute;
-  width: 100%;
-  height:100%;
-
-  canvas {
-    width: 100%;
-    height: 100%;
-  }
-
 }
 
 .igv-viewport-fa-close {
@@ -395,7 +440,7 @@ $drag-drop-warning-color: red;
 .igv-viewport-content-ruler-div:active  {
   cursor: pointer;
   color: white;
-  background-color: $igv-ruler-blue-color;;
+  background-color: $igv-ruler-blue-color;
 }
 
 .igv-viewport-ruler {
@@ -920,9 +965,11 @@ $drag-drop-warning-color: red;
 
 .igv-grid-container-colorpicker {
 
-  position: absolute;
-  top: 0;
-  left:0;
+  //position: absolute;
+  //top: 0;
+  //left:0;
+
+  position: relative;
 
   width:256px;
 

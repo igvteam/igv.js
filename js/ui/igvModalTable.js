@@ -32,13 +32,16 @@ var igv = (function (igv) {
 
     /**
      * @param $parent              containing jquery selection used to host the table
-     * @param browser              reference to the hicBrower object
+     * @param browserRetrievalFunction              reference to the hicBrower object
      * @param browserLoadFunction function that consumes items selected from the table
      * @param dataSource          source of data fed to the table (see for example EncodeDataSource)
      */
-    igv.IGVModalTable = function ($parent, browser, browserLoadFunction, dataSource) {
+    igv.IGVModalTable = function ($parent, browserRetrievalFunction, browserLoadFunction, dataSource) {
 
-        var self = this;
+        var self = this,
+        $modal = $('#hicEncodeModal');
+
+        this.dataSource = dataSource;
 
         this.initialized = false;
 
@@ -49,16 +52,27 @@ var igv = (function (igv) {
         this.$modalTable.append(this.$spinner);
 
         this.$spinner.append($('<i class="fa fa-lg fa-spinner fa-spin"></i>'));
+        this.$spinner.hide();
 
-        $('#hicEncodeModal').on('shown.bs.modal', function (e) {
+        $modal.on('show.bs.modal', function (e) {
 
-            if (true !== self.initialized) {
+            if (undefined === browserRetrievalFunction) {
+                igv.presentAlert('ERROR: must provide browser retrieval function');
+            }
 
+        });
+
+        $modal.on('shown.bs.modal', function (e) {
+
+            if (undefined === browserRetrievalFunction) {
+                $modal.modal('hide');
+            } else if (true !== self.initialized) {
                 self.initialized = true;
+                self.$spinner.show();
                 dataSource.retrieveData(function () {
                     self.createTableWithDataSource(dataSource);
+                    self.$spinner.hide();
                 });
-
             }
 
         });
@@ -75,11 +89,14 @@ var igv = (function (igv) {
 
             var dt,
                 $selectedTableRows,
-                result;
+                result,
+                browser;
 
             $selectedTableRows = self.$dataTables.$('tr.selected');
 
-            if ($selectedTableRows.length > 0) {
+            if (undefined === browserRetrievalFunction) {
+                igv.presentAlert('ERROR: must provide browser retrieval function');
+            } else if ($selectedTableRows.length > 0) {
 
                 $selectedTableRows.removeClass('selected');
 
@@ -89,12 +106,16 @@ var igv = (function (igv) {
                     result.push( dataSource.dataAtRowIndex( dt.row(this).index() ) );
                 });
 
-                browserLoadFunction.call(browser, result);
-
+                browser = browserRetrievalFunction();
+                browser[ browserLoadFunction ](result);
             }
 
         });
 
+    };
+
+    igv.IGVModalTable.prototype.genomeID = function () {
+        return this.dataSource.config.genomeID;
     };
 
     igv.IGVModalTable.prototype.unbindAllMouseHandlers = function () {
