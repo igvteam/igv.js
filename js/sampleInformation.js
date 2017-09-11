@@ -35,46 +35,50 @@ var igv = (function (igv) {
         this.attributes = {};
     }
 
-    SampleInformation.prototype.loadPlinkFile = function (url) {
+    SampleInformation.prototype.loadPlinkFile = function (url, config) {
 
         var self = this;
 
-        return new Promise(function (fullfill, reject) {
+        if (!config) config = {}
 
-            var options = igv.buildOptions(self.config);    // Add oauth token, if any
+        return new Promise(function (fulfill, reject) {
+
+            var options = igv.buildOptions(config);    // Add oauth token, if any
 
             igvxhr
-                .loadString(self.config.url, options)
+                .loadString(url, options)
 
                 .then(function (data) {
 
                     var lines = data.splitLines();
 
                     lines.forEach(function (line) {
-                        // TODO - parse file
-
-
-                    })
-
+                        var line_arr = line.split(' ');
+                        self.attributes[line_arr[1]] = {
+                            familyId: line_arr[0],
+                            fatherId: line_arr[2],
+                            motherId: line_arr[3],
+                            sex: line_arr[4],
+                            phenotype: line_arr[5]
+                        }
+                    });
                     fulfill(self.attributes);
 
                 })
-
 
                 .catch(reject);
 
         });
 
-    }
+    };
 
     /**
      * Return the attributes for the given sample as a map-like object (key-value pairs)
      * @param sample
      */
-    SampleInformation.protototype.getAttributes = function (sample) {
-
-
-    }
+    SampleInformation.prototype.getAttributes = function (sample) {
+        return this.attributes[sample];
+    };
 
 
     /**
