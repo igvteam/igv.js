@@ -71,7 +71,7 @@ var igv = (function (igv) {
      * Return the attributes for the given sample as a map-like object (key-value pairs)
      * @param sample
      */
-    SampleInformation.protototype.getAttributes = function (sample) {
+    SampleInformation.prototype.getAttributes = function (sample) {
 
 
     }
