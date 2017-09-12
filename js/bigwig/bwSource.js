@@ -144,19 +144,15 @@ var igv = (function (igv) {
 
             zl = zoomLevelHeaders[i];
 
-            if (zl.reductionLevel > bpPerPixel) {
+            if (zl.reductionLevel < bpPerPixel) {
                 level = zl;
                 break;
             }
         }
 
-        if (null == level) {
-            level = zoomLevelHeaders[zoomLevelHeaders.length - 1];
-        }
-
-        return (level && level.reductionLevel < 4 * bpPerPixel) ? level : null;
+        return level;
     }
-    
+
     function decodeWigData(data, chr, chrIdx, bpStart, bpEnd, featureArray) {
 
         var binaryParser = new igv.BinaryParser(data),
