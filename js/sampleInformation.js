@@ -33,13 +33,14 @@ var igv = (function (igv) {
 
     var SampleInformation = function () {
         this.attributes = {};
+        this.plinkLoaded = false;
     }
 
     SampleInformation.prototype.loadPlinkFile = function (url, config) {
 
         var self = this;
 
-        if (!config) config = {}
+        if (!config) config = {};
 
         return new Promise(function (fulfill, reject) {
 
@@ -62,6 +63,7 @@ var igv = (function (igv) {
                             phenotype: line_arr[5]
                         }
                     });
+                    self.plinkLoaded = true;
                     fulfill(self.attributes);
 
                 })

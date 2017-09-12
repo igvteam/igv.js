@@ -347,7 +347,7 @@ var igv = (function (igv) {
     }
 
     igv.VariantTrack.prototype.sortCallsets = function (variant, direction) {
-        var d = (direction === "ASC") ? 1 : -1;
+        var d = (direction === "DESC") ? 1 : -1;
         this.callSets.sort(function (a, b) {
             var aNan = isNaN(variant.calls[a.id].genotype[0]);
             var bNan = isNaN(variant.calls[b.id].genotype[0]);
@@ -384,7 +384,6 @@ var igv = (function (igv) {
 
                 if ((variant.start <= genomicLocation + tolerance) &&
                     (variant.end > genomicLocation - tolerance)) {
-                    console.log('alt-clicked');
                     // var content = igv.formatPopoverText(['Ascending', 'Descending', 'Repeat Number']);
                     //igv.popover.presentContent(event.pageX, event.pageY, [$asc, $desc]);
 
@@ -470,22 +469,16 @@ var igv = (function (igv) {
     function extractPopupData(call, variant) {
 
         var gt = '', popupData, i, allele, numRepeats = '', alleleFrac = '';
-
-        if (this.type === 'str') {
+        if (variant.str) {
             var info = variant.info;
+            var alt_ac = info.AC.split(',');
             if (!isNaN(call.genotype[0])) {
                 for (i = 0; i < call.genotype.length; i++) {
-                    if (call.genotype[i] === 0) {
-                        allele = variant.referenceBases;
-                        gt += allele;
-                        numRepeats += (allele.length / info.PERIOD).toString();
-                        alleleFrac += (parseInt(info.REFAC) / parseInt(info.AN)).toFixed(3);
-                    } else {
-                        allele = variant.alleles[call.genotype[i] - 1].allele;
-                        gt += allele;
-                        numRepeats += (allele.length / info.PERIOD).toString();
-                        alleleFrac += (parseInt(info.AC.split(',')[call.genotype[i] - 1]) / parseInt(info.AN)).toFixed(3);
-                    }
+                    allele = getAlleleString(call, variant, i);
+                    gt += allele;
+                    numRepeats += (allele.length / info.PERIOD).toString();
+                    var ac = (call.genotype[i] === 0) ? info.REFAC : alt_ac[call.genotype[i]-1];
+                    alleleFrac += (parseInt(ac) / parseInt(info.AN)).toFixed(3);
                     if (i < call.genotype.length - 1) {
                         gt += " | ";
                         numRepeats += " | ";
@@ -522,6 +515,14 @@ var igv = (function (igv) {
         if (call.genotypeLikelihood !== undefined) {
             popupData.push({name: 'genotypeLikelihood', value: call.genotypeLikelihood.toString()});
         }
+
+        if (igv.sampleInformation.plinkLoaded) {
+            var attr = igv.sampleInformation.getAttributes(call.callSetName);
+            if (attr) {
+                popupData.push({name: 'Family Id', value: attr.familyId});
+                //popupData.push({name: 'Sex', value: attr.sex});
+            }
+        }
         if (popupData.length > 2) {
             popupData.push("<hr>");
         }
@@ -533,6 +534,74 @@ var igv = (function (igv) {
 
         return popupData;
     }
+
+    igv.VariantTrack.prototype.popupMenuItemList = function(config) {
+        var menuItems = [];
+        var self = this;
+
+        if (igv.sampleInformation.plinkLoaded) {
+            menuItems.push({
+               name: 'Sort by Family',
+               click: function() {
+                   self.callSets.sort(function (a, b) {
+                       var attrA = igv.sampleInformation.getAttributes(a.name);
+                       var attrB = igv.sampleInformation.getAttributes(b.name);
+                       if (!attrA && !attrB) {
+                           return 0;
+                       } else if (!attrA) {
+                           return 1;
+                       } else if (!attrB) {
+                           return -1;
+                       }
+                       return parseInt(attrA.familyId) - parseInt(attrB.familyId);
+                   });
+                   self.trackView.update();
+                   config.popover.hide();
+               }
+            });
+        }
+
+        var referenceFrame = config.viewport.genomicState.referenceFrame,
+            genomicLocation = config.genomicLocation,
+            chr = referenceFrame.chrName,
+            tolerance = Math.floor(2 * referenceFrame.bpPerPixel),  // We need some tolerance around genomicLocation, start with +/- 2 pixels
+            featureList = this.featureSource.featureCache.queryFeatures(chr, genomicLocation - tolerance, genomicLocation + tolerance);
+
+        if (this.callSets && featureList && featureList.length > 0) {
+
+            featureList.forEach(function (variant) {
+
+
+                if ((variant.start <= genomicLocation + tolerance) &&
+                    (variant.end > genomicLocation - tolerance)) {
+                    // var content = igv.formatPopoverText(['Ascending', 'Descending', 'Repeat Number']);
+                    //igv.popover.presentContent(event.pageX, event.pageY, [$asc, $desc]);
+
+                    if (variant.str) {
+                        menuItems.push({
+                            name: 'Sort by allele length (Desc)',
+                            click: function () {
+                                self.sortCallsets(variant, 'DESC');
+                                self.trackView.update();
+                                config.popover.hide();
+                            }
+                        });
+                        menuItems.push({
+                            name: 'Sort by allele length (Asc)',
+                            click: function () {
+                                self.sortCallsets(variant, 'ASC');
+                                self.trackView.update();
+                                config.popover.hide();
+                            }
+                        });
+                    }
+                }
+            });
+        }
+
+        return menuItems;
+
+    };
 
     igv.VariantTrack.prototype.menuItemList = function (popover) {
 

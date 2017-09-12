@@ -229,7 +229,7 @@ var igv = (function (igv) {
         if (this.info) {
             fields.push('<hr>');
             Object.keys(this.info).forEach(function (key) {
-                fields.push({name: key, value: arrayToCommaString(self.info[key])});
+                fields.push({name: key, value: self.info[key]});
             });
         }
         return fields;
@@ -237,9 +237,10 @@ var igv = (function (igv) {
     };
 
     function arrayToCommaString(array) {
-        if (!(array instanceof Array)) return '';
+        if (!(Array.isArray(array))) {
+            return '';
+        }
         return array.join(',');
-
     }
 
     return igv;
