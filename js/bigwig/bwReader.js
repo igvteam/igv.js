@@ -150,11 +150,11 @@ var igv = (function (igv) {
                 self.zoomLevelHeaders = [];
 
                 self.firstZoomDataOffset = Number.MAX_VALUE;
-                for (i = 0; i < nZooms; i++) {
+                for (i = 1; i <= nZooms; i++) {
                     zoomNumber = nZooms - i;
                     zlh = new ZoomLevelHeader(zoomNumber, binaryParser);
                     self.firstZoomDataOffset = Math.min(zlh.dataOffset, self.firstZoomDataOffset);
-                    self.zoomLevelHeaders.push(zlh);
+                    self.zoomLevelHeaders[zoomNumber] = zlh;
                 }
 
                 // Autosql
