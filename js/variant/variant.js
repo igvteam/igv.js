@@ -128,7 +128,7 @@ var igv = (function (igv) {
         // If an STR define start and end based on reference allele.  Otherwise start and end computed below based
         // on alternate allele type (snp, insertion, deletion)
 
-        if(variant.type === 'str') {
+        if('str' === variant.type) {
             variant.start = variant.pos - 1;
             variant.end = variant.start + variant.referenceBases.length;
         }
@@ -143,7 +143,7 @@ var igv = (function (igv) {
 
                 // Adjust for padding, used for insertions and deletions, unless variant is a short tandem repeat.
 
-                if (!variant.type === 'str' && alt.length > 0) {
+                if (!('str' === variant.type) && alt.length > 0) {
 
                     diff = variant.referenceBases.length - alt.length;
 

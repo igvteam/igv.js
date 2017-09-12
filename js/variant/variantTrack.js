@@ -214,7 +214,7 @@ var igv = (function (igv) {
                     pw -= 2;
                 }
 
-                if (variant.type === 'str') {
+                if ('str' === variant.type) {
                     var period = parseInt(variant.info["PERIOD"]),
                         variantColors = ["rgb(150,150,150)", "rgb(255,0,0)", "rgb(255,255,0)",
                             "rgb(0,0,255)", "rgb(0,255,0)", "rgb(128,0,128)"
@@ -235,7 +235,7 @@ var igv = (function (igv) {
 
                     h = callHeight;
 
-                    if(variant.type === 'str') {
+                    if('str' === variant.type) {
                         lowColorScale = new igv.GradientColorScale(
                             {
                                 low: variant.minAltLength,
@@ -270,7 +270,7 @@ var igv = (function (igv) {
 
                             py = this.variantBandHeight + vGap + (j + variant.row) * (h + vGap);
 
-                            if (!variant.type === 'str') {
+                            if (!('str' === variant.type)) {
 
                                 // Not STR -- color by zygosity
 
@@ -469,7 +469,7 @@ var igv = (function (igv) {
     function extractPopupData(call, variant) {
 
         var gt = '', popupData, i, allele, numRepeats = '', alleleFrac = '';
-        if (variant.type === 'str') {
+        if ('str' === variant.type) {
             var info = variant.info;
             var alt_ac = info.AC.split(',');
             if (!isNaN(call.genotype[0])) {
@@ -577,7 +577,7 @@ var igv = (function (igv) {
                     // var content = igv.formatPopoverText(['Ascending', 'Descending', 'Repeat Number']);
                     //igv.popover.presentContent(event.pageX, event.pageY, [$asc, $desc]);
 
-                    if (variant.type === 'str') {
+                    if ('str' === variant.type) {
                         menuItems.push({
                             name: 'Sort by allele length (Desc)',
                             click: function () {
