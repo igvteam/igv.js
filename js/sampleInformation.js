@@ -83,6 +83,7 @@ var igv = (function (igv) {
     };
 
 
+
     /**
      * Decleare a global singleton SampleInformation object.
      *
