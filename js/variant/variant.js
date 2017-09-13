@@ -49,7 +49,9 @@ var igv = (function (igv) {
         variant.filter = tokens[6];
         variant.info = getInfoObject(tokens[7]);
 
-        variant.str = variant.info["PERIOD"] !== undefined;
+        if (variant.info["PERIOD"]) {
+            variant.type = 'str';
+        }
 
         initAlleles(variant);
 
@@ -84,8 +86,9 @@ var igv = (function (igv) {
         variant.filter = arrayToCommaString(json.filter);
         variant.info = json.info;
 
-        variant.str = variant.info["PERIOD"] !== undefined;
-
+        if (variant.info["PERIOD"]) {
+            variant.type = 'str';
+        }
 
         // Need to build a hash of calls for fast lookup
         // Note from the GA4GH spec on call ID:
@@ -125,7 +128,7 @@ var igv = (function (igv) {
         // If an STR define start and end based on reference allele.  Otherwise start and end computed below based
         // on alternate allele type (snp, insertion, deletion)
 
-        if(variant.str) {
+        if('str' === variant.type) {
             variant.start = variant.pos - 1;
             variant.end = variant.start + variant.referenceBases.length;
         }
@@ -140,7 +143,7 @@ var igv = (function (igv) {
 
                 // Adjust for padding, used for insertions and deletions, unless variant is a short tandem repeat.
 
-                if (!variant.str && alt.length > 0) {
+                if (!('str' === variant.type) && alt.length > 0) {
 
                     diff = variant.referenceBases.length - alt.length;
 
@@ -236,10 +239,11 @@ var igv = (function (igv) {
 
     };
 
-    function arrayToCommaString(array) {
-        if (!(array instanceof Array)) return '';
-        return array.join(',');
-
+    function arrayToCommaString(value) {
+        if (!(Array.isArray(value))) {
+            return value;
+        }
+        return value.join(',');
     }
 
     return igv;
