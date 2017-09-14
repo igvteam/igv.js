@@ -16,14 +16,14 @@ module.exports = function (grunt) {
         concat: {
             igv: {
                 src: [
+                    'wrapper/header.js',
                     'js/**/*.js',
-                    '!js/module.js',
                     'vendor/inflate.js',
                     'vendor/zlib_and_gzip.min.js',
                     'vendor/jquery.mousewheel.js',
                     'vendor/promise.js',
-                    'js/module.js',
-                    'vendor/jquery.kinetic.min.js'
+                    'vendor/jquery.kinetic.min.js',
+                    'wrapper/footer.js'
                 ],
                 dest: 'dist/igv.js'
             }
