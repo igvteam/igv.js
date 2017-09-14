@@ -99,7 +99,9 @@ var igv = (function (igv) {
         var featureCache = {},
             chromosomes = [],
             treeMap = {},
-            genome = igv.browser ? igv.browser.genome : null;
+            genome = igv.browser ? igv.browser.genome : null,
+            i,
+            chr;
 
         if (featureList) {
 

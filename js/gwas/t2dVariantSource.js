@@ -178,7 +178,8 @@ var igv = (function (igv) {
      */
     function jsonToVariantsV2(json, config) {
 
-        variants = [];
+        var variants = [];
+        
         json.variants.forEach(function (record) {
 
             var variant = {};

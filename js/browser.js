@@ -1254,7 +1254,8 @@ var igv = (function (igv) {
     igv.Browser.validateLocusExtent = function (chromosome, extent) {
 
         var ss = extent.start,
-            ee = extent.end;
+            ee = extent.end,
+            center
 
         if (undefined === ee) {
 
@@ -1545,7 +1546,8 @@ var igv = (function (igv) {
 
                 igvxhr.loadString(url).then(function (data) {
 
-                    var results = ("plain" === searchConfig.type) ? parseSearchResults(data) : JSON.parse(data);
+                    var results = ("plain" === searchConfig.type) ? parseSearchResults(data) : JSON.parse(data),
+                        r;
 
                     if (searchConfig.resultsField) {
                         results = results[searchConfig.resultsField];
