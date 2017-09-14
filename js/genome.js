@@ -54,7 +54,8 @@ var igv = (function (igv) {
         if (aliases) {
             aliases.forEach(function (array) {
                 // Find the official chr name
-                var defName;
+                var defName, i;
+                
                 for (i = 0; i < array.length; i++) {
                     if (self.chromosomes[array[i]]) {
                         defName = array[i];

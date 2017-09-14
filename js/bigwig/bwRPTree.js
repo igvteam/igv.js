@@ -34,7 +34,7 @@ var igv = (function (igv) {
     var RPTREE_MAGIC_HTL = 0xE0AC6824;
     var RPTREE_HEADER_SIZE = 48;
     var RPTREE_NODE_LEAF_ITEM_SIZE = 32;   // leaf item size
-    RPTREE_NODE_CHILD_ITEM_SIZE = 24;  // child item size
+    var RPTREE_NODE_CHILD_ITEM_SIZE = 24;  // child item size
     var BUFFER_SIZE = 512000;     //  buffer
 
     igv.RPTree = function (fileOffset, contentLength, config, littleEndian) {

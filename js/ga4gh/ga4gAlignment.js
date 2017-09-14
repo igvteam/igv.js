@@ -59,6 +59,8 @@ var igv = (function (igv) {
 
     igv.Ga4ghAlignment = function (json, genome) {
 
+        var alignment, cigarDecoded;
+
         this.readName = json.fragmentName;
         this.properPlacement = json.properPlacement;
         this.duplicateFragment = json.duplicateFragment;
@@ -160,7 +162,8 @@ var igv = (function (igv) {
 
     igv.Ga4ghAlignment.prototype.popupData = function (genomicLocation) {
 
-        var isFirst;
+        var isFirst,
+            nameValues;
 
         nameValues = [];
 
@@ -229,7 +232,8 @@ var igv = (function (igv) {
 
         var cigarUnit, opLen, opLtr,
             lengthOnRef = 0,
-            cigarArray = [];
+            cigarArray = [],
+            i;
 
         for (i = 0; i < cigar.length; i++) {
 
@@ -247,7 +251,6 @@ var igv = (function (igv) {
 
         return {lengthOnRef: lengthOnRef, array: cigarArray};
     }
-
 
 
     function translateCigar(cigar) {
