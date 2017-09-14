@@ -159,7 +159,6 @@ var igv = (function (igv) {
                 defaultRange = self.featureSource.getDefaultRange();
                 if(!isNaN(defaultRange.min) && !isNaN(defaultRange.max)) {
                     self.dataRange = defaultRange;
-                    console.log("Range= " + defaultRange.min + " - " + defaultRange.max);
                 }
             }
             if (self.autoscale || self.dataRange === undefined) {
