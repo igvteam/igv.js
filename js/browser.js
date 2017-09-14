@@ -1039,7 +1039,7 @@ var igv = (function (igv) {
                         path.replace("$GENOME$", (self.genome.id ? self.genome.id : "hg19"));
                     }
 
-                    return igvxhr.loadString(path);
+                    return igv.xhr.loadString(path);
                 });
 
                 Promise
@@ -1551,7 +1551,7 @@ var igv = (function (igv) {
                     url.replace("$GENOME$", genomeId);
                 }
 
-                igvxhr.loadString(url).then(function (data) {
+                igv.xhr.loadString(url).then(function (data) {
 
                     var results = ("plain" === searchConfig.type) ? parseSearchResults(data) : JSON.parse(data),
                         r;

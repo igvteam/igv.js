@@ -24,19 +24,19 @@
  * THE SOFTWARE.
  */
 
-var encode = (function (encode) {
+var igv = (function (igv) {
 
     /**
      * @param config tableFormat configuration
      */
-    encode.EncodeTableFormat = function (config) {
+    igv.EncodeTableFormat = function (config) {
         this.config = config;
     };
 
     /**
      * @param jSON data object passed from EncodeDataSource instance
      */
-    encode.EncodeTableFormat.prototype.tableData = function (jSON) {
+    igv.EncodeTableFormat.prototype.tableData = function (jSON) {
 
         var result;
 
@@ -45,7 +45,7 @@ var encode = (function (encode) {
             var rr;
 
             rr = _.map(jSON.columns, function (key) {
-                return row[ key ];
+                return row[key];
             });
 
             // rr.unshift(index);
@@ -60,13 +60,13 @@ var encode = (function (encode) {
     /**
      * @param jSON data object passed from EncodeDataSource instance
      */
-    encode.EncodeTableFormat.prototype.tableColumns = function (jSON) {
+    igv.EncodeTableFormat.prototype.tableColumns = function (jSON) {
 
         var self = this,
             columns;
 
         columns = _.map(jSON.columns, function (heading) {
-            return { title:heading, width:self.config.columnWidths[ heading ] }
+            return {title: heading, width: self.config.columnWidths[heading]}
         });
 
         // columns.unshift({ title:'index', width:'10%' });
@@ -75,6 +75,7 @@ var encode = (function (encode) {
 
     };
 
-    return encode;
+    return igv;
 
-})(encode || {});
+
+})(igv || {});

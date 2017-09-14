@@ -97,7 +97,7 @@ var igv = (function (igv) {
                                             fetchMax = c.maxv.block + 65000,   // Make sure we get the whole block.
                                             range = {start: fetchMin, size: fetchMax - fetchMin + 1};
 
-                                        igvxhr.loadArrayBuffer(self.bamPath, igv.buildOptions(self.config, {range: range}))
+                                        igv.xhr.loadArrayBuffer(self.bamPath, igv.buildOptions(self.config, {range: range}))
                                             .then(function (compressed) {
 
                                             var ba = new Uint8Array(igv.unbgzf(compressed)); //new Uint8Array(igv.unbgzf(compressed)); //, c.maxv.block - c.minv.block + 1));
@@ -375,7 +375,7 @@ var igv = (function (igv) {
 
                 var len = index.firstAlignmentBlock + MAX_GZIP_BLOCK_SIZE;   // Insure we get the complete compressed block containing the header
 
-                igvxhr.loadArrayBuffer(self.bamPath, igv.buildOptions(self.config, {range: {start: 0, size: len}})
+                igv.xhr.loadArrayBuffer(self.bamPath, igv.buildOptions(self.config, {range: {start: 0, size: len}})
                     ).then(function (compressedBuffer) {
 
                     var unc = igv.unbgzf(compressedBuffer, len),

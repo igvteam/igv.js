@@ -156,7 +156,7 @@ var igv = (function (igv) {
             if (self.index) {
                 fulfill(self.index);
             } else {
-                igvxhr.load(self.indexFile, igv.buildOptions(self.config))
+                igv.xhr.load(self.indexFile, igv.buildOptions(self.config))
                     .then(function (data) {
                         var lines = data.splitLines();
                         var len = lines.length;
@@ -206,7 +206,7 @@ var igv = (function (igv) {
             self.chromosomes = {};
             self.sequences = {};
 
-            igvxhr.load(self.file, igv.buildOptions(self.config))
+            igv.xhr.load(self.file, igv.buildOptions(self.config))
                 .then(function (data) {
 
                     var lines = data.splitLines(),
@@ -286,7 +286,7 @@ var igv = (function (igv) {
                         fulfill(null);
                     }
 
-                    igvxhr.load(self.file, igv.buildOptions(self.config, {range: {start: startByte, size: byteCount}}))
+                    igv.xhr.load(self.file, igv.buildOptions(self.config, {range: {start: startByte, size: byteCount}}))
                         .then(function (allBytes) {
 
                             var nBases,

@@ -49,7 +49,7 @@ var igv = (function (igv) {
 
         return new Promise(function (fulfill, reject) {
 
-            igvxhr.loadArrayBuffer(self.path, igv.buildOptions(self.config, {
+            igv.xhr.loadArrayBuffer(self.path, igv.buildOptions(self.config, {
                     range: {start: 0, size: 64000} // TODO -- a guess, what if not enough ?
                 }))
                 .then(function (data) {
@@ -115,7 +115,7 @@ var igv = (function (igv) {
 
         return new Promise(function (fulfill, reject) {
 
-            igvxhr.loadArrayBuffer(self.path, igv.buildOptions(self.config, {range: range}))
+            igv.xhr.loadArrayBuffer(self.path, igv.buildOptions(self.config, {range: range}))
                 .then(function (data) {
 
                 var key, pos, size;
@@ -222,7 +222,7 @@ var igv = (function (igv) {
 
         return new Promise(function (fulfill, reject) {
 
-            igvxhr.loadArrayBuffer(self.path, igv.buildOptions(self.config, {range: {start: idx.start, size: idx.size}}))
+            igv.xhr.loadArrayBuffer(self.path, igv.buildOptions(self.config, {range: {start: idx.start, size: idx.size}}))
                 .then(function (data) {
 
                 if (!data) {
@@ -284,7 +284,7 @@ var igv = (function (igv) {
 
             return new Promise(function (fulfill, reject) {
 
-                igvxhr.loadArrayBuffer(self.path, igv.buildOptions(self.config, {range: {start: idx.filePosition, size: idx.size}}))
+                igv.xhr.loadArrayBuffer(self.path, igv.buildOptions(self.config, {range: {start: idx.filePosition, size: idx.size}}))
                     .then(function (data) {
 
                     if (!data) {

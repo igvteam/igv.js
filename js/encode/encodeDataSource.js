@@ -27,21 +27,18 @@
 /**
  * Created by dat on 4/18/17.
  */
-var encode = (function (encode) {
-
-    // TODO -- hack for juicebox,  refactor to eliminate this
-    window.encode = encode;
-
+var igv = (function (igv) {
+    
     /**
      * @param config      dataSource configuration
      * @param tableFormat table formatting object (see for example EncodeTableFormat)
      */
-    encode.EncodeDataSource = function (config, tableFormat) {
+    igv.EncodeDataSource = function (config, tableFormat) {
         this.config = config;
         this.tableFormat = tableFormat;
     };
 
-    encode.EncodeDataSource.prototype.retrieveData = function (continuation) {
+    igv.EncodeDataSource.prototype.retrieveData = function (continuation) {
 
         var self = this,
             fileFormat,
@@ -69,7 +66,7 @@ var encode = (function (encode) {
             "limit=all";
 
 
-        igvxhr
+        igv.xhr
             .loadJson(query, {})
             .then(function (json) {
 
@@ -184,7 +181,7 @@ var encode = (function (encode) {
 
     };
 
-    encode.EncodeDataSource.prototype.dataAtRowIndex = function (index) {
+    igv.EncodeDataSource.prototype.dataAtRowIndex = function (index) {
         var row,
             obj;
 
@@ -228,11 +225,11 @@ var encode = (function (encode) {
         return obj;
     };
 
-    encode.EncodeDataSource.prototype.tableData = function () {
+    igv.EncodeDataSource.prototype.tableData = function () {
         return this.tableFormat.tableData(this.jSON);
     };
 
-    encode.EncodeDataSource.prototype.tableColumns = function () {
+    igv.EncodeDataSource.prototype.tableColumns = function () {
         return this.tableFormat.tableColumns(this.jSON);
     };
 
@@ -270,7 +267,7 @@ var encode = (function (encode) {
             var self = this;
 
             this.jSON = {};
-            igvxhr.loadString(file).then(function (data) {
+            igv.xhr.loadString(file).then(function (data) {
 
                 var lines = data.splitLines(),
                     item;
@@ -314,6 +311,6 @@ var encode = (function (encode) {
 
     }
 
-    return encode;
+    return igv;
 
-})(encode || {});
+})(igv || {});

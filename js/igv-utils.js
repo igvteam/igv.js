@@ -73,7 +73,7 @@ var igv = (function (igv) {
 
         path = pathTemplate.replace("$FEATURE$", name);
 
-        return igvxhr.loadString(path);
+        return igv.xhr.loadString(path);
 
     };
 

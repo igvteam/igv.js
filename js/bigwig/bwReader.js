@@ -67,7 +67,7 @@ var igv = (function (igv) {
         var self = this;
 
         return new Promise(function (fulfill, reject) {
-            igvxhr.loadArrayBuffer(self.path, igv.buildOptions(self.config, {range: {start: 0, size: BBFILE_HEADER_SIZE}}))
+            igv.xhr.loadArrayBuffer(self.path, igv.buildOptions(self.config, {range: {start: 0, size: BBFILE_HEADER_SIZE}}))
                 .then(function (data) {
 
                 if (!data) return;
@@ -137,7 +137,7 @@ var igv = (function (igv) {
             
             var range = {start: startOffset, size: (self.header.fullDataOffset - startOffset + 5)};
 
-            igvxhr.loadArrayBuffer(self.path, igv.buildOptions(self.config, {range: range}))
+            igv.xhr.loadArrayBuffer(self.path, igv.buildOptions(self.config, {range: range}))
                 .then(function (data) {
 
                 var nZooms = self.header.nZoomLevels,
