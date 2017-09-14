@@ -17,6 +17,7 @@ module.exports = function (grunt) {
             igv: {
                 src: [
                     'wrapper/header.js',
+                    'vendor/underscore.js',
                     'js/**/*.js',
                     'vendor/inflate.js',
                     'vendor/zlib_and_gzip.min.js',
