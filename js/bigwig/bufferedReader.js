@@ -69,7 +69,7 @@ var igv = (function (igv) {
                     loadRange = {start: requestedRange.start, size: bufferSize};
                 }
 
-                igvxhr.loadArrayBuffer(self.path, igv.buildOptions(self.config, {range: loadRange}))
+                igv.xhr.loadArrayBuffer(self.path, igv.buildOptions(self.config, {range: loadRange}))
                     .then(function (arrayBuffer) {
                     self.data = arrayBuffer;
                     self.range = loadRange;

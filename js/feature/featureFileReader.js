@@ -113,7 +113,7 @@ var igv = (function (igv) {
                                 fullfill(self.header);
                             };
 
-                            igvxhr
+                            igv.xhr
                                 .loadString(self.config.url, options)
                                 .then(success)
                                 .catch(function (error) {
@@ -201,7 +201,7 @@ var igv = (function (igv) {
                 fullfill(self.parser.parseFeatures(data));   // <= PARSING DONE HERE
             }
 
-            igvxhr
+            igv.xhr
                 .loadString(self.config.url, options)
                 .then(parseData)
                 .catch(reject);
@@ -257,7 +257,7 @@ var igv = (function (igv) {
 
                             if (self.index.tabix) {
 
-                                inflated = igvxhr.arrayBufferToString(igv.unbgzf(data));
+                                inflated = igv.xhr.arrayBufferToString(igv.unbgzf(data));
                                 // need to decompress data
                             } else {
                                 inflated = data;
@@ -283,12 +283,12 @@ var igv = (function (igv) {
 
                         // Async load
                         if (self.index.tabix) {
-                            igvxhr
+                            igv.xhr
                                 .loadArrayBuffer(self.config.url, options)
                                 .then(success)
                                 .catch(reject);
                         } else {
-                            igvxhr
+                            igv.xhr
                                 .loadString(self.config.url, options)
                                 .then(success)
                                 .catch(reject);

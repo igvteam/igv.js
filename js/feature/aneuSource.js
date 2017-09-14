@@ -145,7 +145,7 @@ var igv = (function (igv) {
             continuation(features);   // <= PARSING DONE HERE
         };
 
-        igvxhr.loadString(self.config.url, options).then(success);
+        igv.xhr.loadString(self.config.url, options).then(success);
 
     };
 

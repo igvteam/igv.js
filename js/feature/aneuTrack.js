@@ -132,7 +132,7 @@ var igv = (function (igv) {
 
             afterload = igv.buildOptions(self.config, {tokens: self.config.tokens, success: afterJsonLoaded});
 
-            igvxhr.loadString(self.config.url, afterload);
+            igv.xhr.loadString(self.config.url, afterload);
 
             return null;
         }
@@ -185,7 +185,7 @@ var igv = (function (igv) {
 
                 afterload = igv.buildOptions(self.config, {tokens: self.config.tokens});
 
-                igvxhr.loadString(self.config.url, afterload).then(afterJsonLoaded);
+                igv.xhr.loadString(self.config.url, afterload).then(afterJsonLoaded);
 
             }
         });

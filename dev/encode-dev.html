@@ -26,10 +26,8 @@
     <!-- DataTables JS -->
     <script type="text/javascript" src="https://cdn.datatables.net/v/dt/dt-1.10.15/sc-1.4.2/se-1.2.2/datatables.min.js"></script>
 
-    <!-- Encode -->
-    <script type="text/javascript" src="../js/ui/igvModalTable.js"></script>
-    <script type="text/javascript" src="../js/encode/encodeDataSource.js"></script>
-    <script type="text/javascript" src="../js/encode/encodeTableFormat.js"></script>
+    <link rel="import" href="./shared-css.html">
+    <link rel="import" href="./shared-js.html">
 
 </head>
 
@@ -167,9 +165,9 @@
                 'Lab': '20%'
             };
 
-        encodeTableFormat = new encode.EncodeTableFormat({ columnWidths: columnWidths });
+        encodeTableFormat = new igv.EncodeTableFormat({ columnWidths: columnWidths });
 
-        encodeDataSource = new encode.EncodeDataSource({genomeID: 'hg19'}, encodeTableFormat);
+        encodeDataSource = new igv.EncodeDataSource({genomeID: 'hg19'}, encodeTableFormat);
 
         f = function () {
           return browser;

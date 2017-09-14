@@ -278,7 +278,7 @@ var igv = (function (igv) {
 
     function loadCytobands(cytobandUrl, config, continuation) {
 
-        igvxhr.loadString(cytobandUrl, igv.buildOptions(config))
+        igv.xhr.loadString(cytobandUrl, igv.buildOptions(config))
             .then(function (data) {
 
             var bands = [],
@@ -320,7 +320,7 @@ var igv = (function (igv) {
 
     function loadAliases(aliasURL, config, continuation) {
 
-        igvxhr.loadString(aliasURL, igv.buildOptions(config))
+        igv.xhr.loadString(aliasURL, igv.buildOptions(config))
 
             .then(function (data) {
 

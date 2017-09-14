@@ -67,7 +67,7 @@ var igv = (function (igv) {
                         range = {start: blocks[0].startPos, size: len};
 
 
-                    igvxhr.loadArrayBuffer(file,
+                    igv.xhr.loadArrayBuffer(file,
                         {
                             range: range,
                             withCredentials: self.config.withCredentials
@@ -125,7 +125,7 @@ var igv = (function (igv) {
 
                 var genome = igv.browser ? igv.browser.genome : null;
 
-                igvxhr.loadArrayBuffer(url,
+                igv.xhr.loadArrayBuffer(url,
                     {
                         range: {start: 0, size: 200},
                         withCredentials: self.config.withCredentials
@@ -139,7 +139,7 @@ var igv = (function (igv) {
                             indexPosition = parser.getLong(),
                             indexSize = parser.getInt();
 
-                        igvxhr.loadArrayBuffer(url, {
+                        igv.xhr.loadArrayBuffer(url, {
 
                             range: {start: indexPosition, size: indexSize},
                             withCredentials: self.config.withCredentials

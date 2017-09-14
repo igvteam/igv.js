@@ -52,7 +52,7 @@ var igv = (function (igv) {
                 self.config.body = self.config.body.replace("$CHR", chr);
             }
 
-            igvxhr.load(url, self.config).then(function (data) {
+            igv.xhr.load(url, self.config).then(function (data) {
 
                 if (data) {
 

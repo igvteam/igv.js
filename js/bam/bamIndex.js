@@ -22,7 +22,7 @@ var igv = (function (igv) {
 
             var genome = igv.browser ? igv.browser.genome : null;
 
-            igvxhr
+            igv.xhr
                 .loadArrayBuffer(indexURL, igv.buildOptions(config))
                 .then(function (arrayBuffer) {
 

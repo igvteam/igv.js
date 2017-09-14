@@ -33,7 +33,7 @@ var igv = (function (igv) {
 
         var url = options.url + "/" + options.entity + "/" + options.entityId;
 
-        return igvxhr.loadJson(url, options);      // Returns a promise
+        return igv.xhr.loadJson(url, options);      // Returns a promise
     }
 
     igv.ga4ghSearch = function (options) {
@@ -71,7 +71,7 @@ var igv = (function (igv) {
 
                 var sendData = JSON.stringify(body);
 
-                igvxhr.loadJson(url,
+                igv.xhr.loadJson(url,
                     {
                         sendData: sendData,
                         contentType: "application/json",

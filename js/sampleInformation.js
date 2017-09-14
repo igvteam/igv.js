@@ -46,7 +46,7 @@ var igv = (function (igv) {
 
             var options = igv.buildOptions(config);    // Add oauth token, if any
 
-            igvxhr
+            igv.xhr
                 .loadString(url, options)
 
                 .then(function (data) {

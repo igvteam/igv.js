@@ -37,7 +37,7 @@ var igv = (function (igv) {
 
         return new Promise(function (fullfill) {
 
-            igvxhr
+            igv.xhr
                 .loadArrayBuffer(indexFile, igv.buildOptions(config))
                 .then(function (arrayBuffer) {
 

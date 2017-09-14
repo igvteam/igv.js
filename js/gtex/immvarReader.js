@@ -48,7 +48,7 @@ var igv = (function (igv) {
                 "&cell_condition_id=" + this.cellConditionId;
 
         return new Promise(function (fulfill, reject) {
-            igvxhr.loadJson(queryURL, {
+            igv.xhr.loadJson(queryURL, {
                 withCredentials: self.config.withCredentials
             }).then(function (json) {
 
