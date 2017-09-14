@@ -53,27 +53,8 @@ if (!Array.isArray) {
     };
 }
 
-if (typeof Set !== "undefined") {
+if (typeof Set === "undefined") {
 
-    Set.prototype.isEmpty = function () {
-        return this.size === 0;
-    }
-
-    Set.prototype.addAll = function (arrayOrSet) {
-
-        if (Array.isArray(arrayOrSet) || this._isPseudoArray(arrayOrSet)) {
-            for (var j = 0; j < arrayOrSet.length; j++) {
-                this.add(arrayOrSet[j]);
-            }
-        } else if (arrayOrSet instanceof Set) {
-            var self = this;
-            arrayOrSet.each(function (val, key) {
-                self.add(key, val);
-            });
-        }
-    }
-}
-else {
     Set = function (/*initialData*/) {
         // Usage:
         // new Set()

@@ -40,12 +40,18 @@ var igv = (function (igv) {
         cdsTypes = new Set();
         utrTypes = new Set();
         exonTypes = new Set();
-        transcriptTypes.addAll(['transcript', 'primary_transcript', 'processed_transcript', 'mRNA', 'mrna']);
-        cdsTypes.addAll(['CDS', 'cds', 'start_codon', 'stop_codon']);
-        utrTypes.addAll(['5UTR', '3UTR', 'UTR', 'five_prime_UTR', 'three_prime_UTR', "3'-UTR", "5'-UTR"]);
-        exonTypes.addAll(['exon', 'coding-exon']);
-
-
+        ['transcript', 'primary_transcript', 'processed_transcript', 'mRNA', 'mrna'].forEach(function (m) {
+            transcriptTypes.add(m);
+        });
+        ['CDS', 'cds', 'start_codon', 'stop_codon'].forEach(function (m) {
+            cdsTypes.add(m);
+        });
+        ['5UTR', '3UTR', 'UTR', 'five_prime_UTR', 'three_prime_UTR', "3'-UTR", "5'-UTR"].forEach(function (m) {
+            utrTypes.add(m);
+        });
+        ['exon', 'coding-exon'].forEach(function (m) {
+            exonTypes.add(m);
+        });
     }
 
     igv.GFFHelper = function (format) {
