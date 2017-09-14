@@ -174,7 +174,7 @@ var igv = (function (igv) {
                 if (nodeId != undefined) processing.delete(nodeId);
 
                 // Wait until all nodes are processed
-                if (processing.isEmpty()) {
+                if (processing.size === 0) {
                     fulfill(leafItems);
                 }
             }

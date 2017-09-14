@@ -72,7 +72,9 @@ var igv = (function (igv) {
                                 var filteredCallSets = [],
                                     csIdSet = new Set();
 
-                                csIdSet.addAll(self.callSetIds);
+                                self.callSetIds.forEach(function (csid) {
+                                    csIdSet.add(m);
+                                })
                                 json.callSets.forEach(function (cs) {
                                     if (csIdSet.has(cs.id)) {
                                         filteredCallSets.push(cs);
