@@ -18,6 +18,7 @@ module.exports = function (grunt) {
                 src: [
                     'wrapper/header.js',
                     'js/**/*.js',
+                    "vendor/underscore.js",
                     'vendor/inflate.js',
                     'vendor/zlib_and_gzip.min.js',
                     'vendor/jquery.mousewheel.js',
