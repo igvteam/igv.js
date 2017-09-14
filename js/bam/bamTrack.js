@@ -517,7 +517,8 @@ var igv = (function (igv) {
         var coverageMap = this.featureSource.alignmentContainer.coverageMap,
             coverageMapIndex,
             coverage,
-            nameValues = [];
+            nameValues = [],
+            tmp;
 
 
         coverageMapIndex = genomicLocation - coverageMap.bpStart;
@@ -767,7 +768,8 @@ var igv = (function (igv) {
                     x,
                     y,
                     i,
-                    yStrokedLine = yRect + alignmentHeight / 2;
+                    yStrokedLine = yRect + alignmentHeight / 2,
+                    len;
 
                 if (block.gapType !== undefined && xBlockEnd !== undefined && lastBlockEnd !== undefined) {
                     if ("D" === block.gapType) {
