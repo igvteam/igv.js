@@ -29,6 +29,9 @@
  */
 var encode = (function (encode) {
 
+    // TODO -- hack for juicebox,  refactor to eliminate this
+    window.encode = encode;
+
     /**
      * @param config      dataSource configuration
      * @param tableFormat table formatting object (see for example EncodeTableFormat)
