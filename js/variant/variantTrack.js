@@ -520,7 +520,7 @@ var igv = (function (igv) {
             var attr = igv.sampleInformation.getAttributes(call.callSetName);
             if (attr) {
                 popupData.push({name: 'Family Id', value: attr.familyId});
-                //popupData.push({name: 'Sex', value: attr.sex});
+                popupData.push({name: 'Sex', value: attr.sex});
             }
         }
         if (popupData.length > 2) {
@@ -539,26 +539,41 @@ var igv = (function (igv) {
         var menuItems = [];
         var self = this;
 
+        function sortBySampleInformation(attribute, reverse) {
+            var dir = (reverse) ? -1 : 1;
+            self.callSets.sort(function(a, b) {
+                var attrA = igv.sampleInformation.getAttributes(a.name);
+                var attrB = igv.sampleInformation.getAttributes(b.name);
+                if (!attrA && !attrB) {
+                    return 0;
+                } else if (!attrA) {
+                    return 1;
+                } else if (!attrB) {
+                    return -1;
+                }
+                var result = parseInt(attrA[attribute]) - parseInt(attrB[attribute]);
+                return result * dir;
+            });
+
+            self.trackView.update();
+        }
+
         if (igv.sampleInformation.plinkLoaded) {
             menuItems.push({
                name: 'Sort by Family',
                click: function() {
-                   self.callSets.sort(function (a, b) {
-                       var attrA = igv.sampleInformation.getAttributes(a.name);
-                       var attrB = igv.sampleInformation.getAttributes(b.name);
-                       if (!attrA && !attrB) {
-                           return 0;
-                       } else if (!attrA) {
-                           return 1;
-                       } else if (!attrB) {
-                           return -1;
-                       }
-                       return parseInt(attrA.familyId) - parseInt(attrB.familyId);
-                   });
-                   self.trackView.update();
+                   sortBySampleInformation('familyId');
                    config.popover.hide();
                }
             });
+
+            menuItems.push({
+                name: 'Sort by Sex',
+                click: function() {
+                    sortBySampleInformation('sex', true);
+                    config.popover.hide();
+                }
+            })
         }
 
         var referenceFrame = config.viewport.genomicState.referenceFrame,
