@@ -82,6 +82,10 @@ var igv = (function (igv) {
         return this.attributes[sample];
     };
 
+    SampleInformation.prototype.getAttributeNames = function() {
+        return Object.keys(this.attributes[Object.keys(this.attributes)[0]]);
+    };
+
 
 
     /**
