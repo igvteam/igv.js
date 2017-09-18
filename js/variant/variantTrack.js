@@ -473,7 +473,7 @@ var igv = (function (igv) {
                                 // Call
                                 callSets = self.callSets;
                                 if (callSets && variant.calls) {
-                                    callHeight = self.nRows * ("SQUISHED" === self.displayMode ? self.squishedCallHeight : self.expandedCallHeight);
+                                    callHeight = ("SQUISHED" === self.displayMode ? self.squishedCallHeight : self.expandedCallHeight);
                                     // console.log("call height: ", callHeight);
                                     // console.log("nRows: ", self.nRows);
                                     var totalCalls = 0;
@@ -569,12 +569,11 @@ var igv = (function (igv) {
             });
         }
 
-        if (popupData.length > 2) {
+        var infoKeys = Object.keys(call.info);
+        if (infoKeys.length) {
             popupData.push("<hr>");
         }
-
-
-        Object.keys(call.info).forEach(function (key) {
+        infoKeys.forEach(function (key) {
             popupData.push({name: key, value: call.info[key]});
         });
 
