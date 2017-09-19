@@ -34,7 +34,7 @@ var igv = (function (igv) {
     var SampleInformation = function () {
         this.attributes = {};
         this.plinkLoaded = false;
-    }
+    };
 
     SampleInformation.prototype.loadPlinkFile = function (url, config) {
 
@@ -80,6 +80,14 @@ var igv = (function (igv) {
      */
     SampleInformation.prototype.getAttributes = function (sample) {
         return this.attributes[sample];
+    };
+
+    SampleInformation.prototype.getAttributeNames = function() {
+        return Object.keys(this.attributes[Object.keys(this.attributes)[0]]);
+    };
+
+    SampleInformation.prototype.hasAttributes = function() {
+        return Object.keys(this.attributes).length > 0;
     };
 
 
