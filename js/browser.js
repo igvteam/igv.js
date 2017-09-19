@@ -1191,7 +1191,11 @@ var igv = (function (igv) {
     };
 
     igv.Browser.prototype.loadSampleInformation = function(url) {
-        var ext = url.substr(url.lastIndexOf('.')+1);
+        var name = url;
+        if (url instanceof File) {
+            name = url.name;
+        }
+        var ext = name.substr(name.lastIndexOf('.')+1);
         if (ext === 'fam') {
             igv.sampleInformation.loadPlinkFile(url);
         }
