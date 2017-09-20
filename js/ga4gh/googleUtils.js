@@ -34,16 +34,27 @@ var igv = (function (igv) {
 
         translateGoogleCloudURL: function (gsUrl) {
 
-            var i = gsUrl.indexOf('/', 5);
+            var i, bucket, object, qIdx, objectString, paramString;
+
+            i = gsUrl.indexOf('/', 5);
+            qIdx = gsUrl.indexOf('?');
+
             if (i < 0) {
                 console.log("Invalid gs url: " + gsUrl);
                 return gsUrl;
             }
 
-            var bucket = gsUrl.substring(5, i);
-            var object = encodeURIComponent(gsUrl.substring(i + 1));
+            bucket = gsUrl.substring(5, i);
 
-            return "https://www.googleapis.com/storage/v1/b/" + bucket + "/o/" + object + "?alt=media";
+            objectString = (qIdx < 0) ? gsUrl.substring(i + 1) : gsUrl.substring(i + 1, qIdx);
+            object = encodeURIComponent(objectString);
+
+            if (qIdx > 0) {
+                paramString = gsUrl.substring(qIdx);
+            }
+
+            return "https://www.googleapis.com/storage/v1/b/" + bucket + "/o/" + object +
+                (paramString ? paramString + "&alt=media" : "?alt=media");
 
         },
 
@@ -65,7 +76,7 @@ var igv = (function (igv) {
 
             var apiKey = oauth.google.apiKey,
                 paramSeparator = url.includes("?") ? "&" : "?";
-            
+
             if (apiKey !== undefined && !url.includes("key=")) {
                 if (apiKey) {
                     url = url + paramSeparator + "key=" + apiKey;
