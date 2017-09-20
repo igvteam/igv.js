@@ -34,8 +34,9 @@ var igv = (function (igv) {
         this.filter = config.filter || new igv.BamFilter();
 
         this.bamPath = config.url;
+
         // Todo - deal with Picard convention.  WHY DOES THERE HAVE TO BE 2?
-        this.baiPath = config.indexURL || this.bamPath + ".bai"; // If there is an indexURL provided, use it!
+        this.baiPath = config.indexURL || igv.inferIndexPath(this.bamPath, "bai"); // If there is an indexURL provided, use it!
         this.headPath = config.headURL || this.bamPath;
 
 
@@ -154,7 +155,7 @@ var igv = (function (igv) {
                 seqBytes;
 
             while (true) {
-                
+
                 if(offset >= ba.length) {
                     return;
                 }

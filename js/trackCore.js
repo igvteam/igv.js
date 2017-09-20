@@ -279,17 +279,23 @@ var igv = (function (igv) {
         }
     };
 
-    // igv.setTrackColor = function (track, color) {
-    //
-    //     track.color = color;
-    //
-    //     if (track.trackView) {
-    //
-    //         track.trackView.repaint();
-    //
-    //     }
-    //
-    // };
+    igv.inferIndexPath = function(url, extension) {
+
+        var path, idx;
+
+        if (url instanceof File) {
+            throw new Error("Cannot infer an index path for a local File.  Please select explicitly")
+        }
+
+        if(url.includes("?")) {
+            idx = url.indexOf("?");
+            return url.substring(0, idx) + "." + extension + url.substring(idx);
+        } else {
+            return url + "." + extension;
+        }
+
+
+    }
 
     igv.paintAxis = function (ctx, pixelWidth, pixelHeight) {
 
