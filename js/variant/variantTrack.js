@@ -505,7 +505,7 @@ var igv = (function (igv) {
     };
 
     /**
-     * Default popup text function -- just extracts string and number properties in random order.
+     * Default popup text function
      * @param call
      * @param variant
      * @returns {Array}

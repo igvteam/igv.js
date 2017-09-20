@@ -197,10 +197,6 @@ var igv = (function (igv) {
 
                             variant.calls[callSet.id] = call;
 
-                            if(callSet.name === "SS0012979") {
-                                console.log("");
-                            }
-
                             token.split(":").forEach(function (callToken, idx) {
 
                                 switch (idx) {
