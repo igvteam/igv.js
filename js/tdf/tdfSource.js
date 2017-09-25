@@ -46,7 +46,7 @@ var igv = (function (igv) {
             self.reader.readRootGroup().then(function (group) {
 
                 var zoom = zoomLevelForScale(chr, bpPerPixel),
-                    queryChr = self.reader.chrNameMap[chr],
+                    queryChr = self.reader.chrAliasTable[chr],
                     maxZoom = self.reader.maxZoom,
                     wf,
                     dataset;

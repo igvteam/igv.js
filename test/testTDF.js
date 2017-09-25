@@ -168,7 +168,7 @@ function runTDFTests() {
         tdfReader.readRootGroup().then(function (group) {
 
             ok(group);
-            ok(tdfReader.chrNameMap);
+            ok(tdfReader.chrAliasTable);
             equal(7, tdfReader.maxZoom);
 
             start();

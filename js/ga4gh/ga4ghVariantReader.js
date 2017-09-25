@@ -108,7 +108,7 @@ var igv = (function (igv) {
 
                 getChrNameMap().then(function (chrNameMap) {
 
-                    var queryChr = chrNameMap.hasOwnProperty(chr) ? chrNameMap[chr] : chr,
+                    var queryChr = chrAliasTable.hasOwnProperty(chr) ? chrAliasTable[chr] : chr,
                         readURL = self.url + "/variants/search";
 
                     igv.ga4ghSearch({
@@ -141,24 +141,24 @@ var igv = (function (igv) {
 
             return new Promise(function (fulfill, reject) {
 
-                if (self.chrNameMap) {
-                    fulfill(self.chrNameMap);
+                if (self.chrAliasTable) {
+                    fulfill(self.chrAliasTable);
                 }
 
                 else {
                     self.readMetadata().then(function (json) {
 
                         self.metadata = json.metadata;
-                        self.chrNameMap = {};
+                        self.chrAliasTable = {};
                         if (json.referenceBounds && igv.browser) {
                             json.referenceBounds.forEach(function (rb) {
                                 var refName = rb.referenceName,
                                     alias = igv.browser.genome.getChromosomeName(refName);
-                                self.chrNameMap[alias] = refName;
+                                self.chrAliasTable[alias] = refName;
 
                             });
                         }
-                        fulfill(self.chrNameMap);
+                        fulfill(self.chrAliasTable);
 
                     })
                 }

@@ -221,11 +221,11 @@ var igv = (function (igv) {
                     }
 
                     // Chromosome names
-                    self.chrNameMap = {};
+                    self.chrAliasTable = {};
                     if(names) {
                         _.each(names.split(","), function (chr) {
                             var canonicalName = genome.getChromosomeName(chr);
-                            self.chrNameMap[canonicalName] = chr;
+                            self.chrAliasTable[canonicalName] = chr;
                         })
                     }
 
