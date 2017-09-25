@@ -230,20 +230,20 @@ var igv = (function (igv) {
             featureList = this.featureSource.featureCache.queryFeatures(referenceFrame.chrName, ss, ee);
 
             if ('COLLAPSED' !== this.displayMode) {
-                row = 'SQUISHED' === this.displayMode ? Math.floor(yOffset / this.squishedCallHeight) : Math.floor(yOffset / this.expandedCallHeight);
+                row = 'SQUISHED' === this.displayMode ? Math.floor((yOffset - 2)/this.expandedCallHeight) : Math.floor((yOffset - 5)/this.squishedCallHeight);
             }
 
             if (featureList && featureList.length > 0) {
 
-                filtered = _.filter(featureList, function (ff) {
-                    return ff.end >= ss && ff.start <= ee;
-                });
-
-                mapped = _.map(filtered, function (f) {
-                    return f.row;
-                });
-
-                str = mapped.join(' ');
+                // filtered = _.filter(featureList, function (ff) {
+                //     return ff.end >= ss && ff.start <= ee;
+                // });
+                //
+                // mapped = _.map(filtered, function (f) {
+                //     return f.row;
+                // });
+                //
+                // str = mapped.join(' ');
 
                 popupData = [];
                 featureList.forEach(function (feature) {
@@ -251,7 +251,7 @@ var igv = (function (igv) {
 
                     if (feature.end >= ss && feature.start <= ee) {
 
-                        console.log('row ' + row + ' feature-rows ' + str + ' features ' + _.size(featureList));
+                        // console.log('row ' + row + ' feature-rows ' + str + ' features ' + _.size(featureList));
 
                         if (row === undefined || feature.row === undefined || row === feature.row) {
 
