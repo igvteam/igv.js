@@ -106,7 +106,7 @@ var igv = (function (igv) {
 
             self.readHeader().then(function (header) {
 
-                getChrNameMap().then(function (chrNameMap) {
+                getChrAliasTable().then(function (chrAliasTable) {
 
                     var queryChr = chrAliasTable.hasOwnProperty(chr) ? chrAliasTable[chr] : chr,
                         readURL = self.url + "/variants/search";
@@ -137,7 +137,7 @@ var igv = (function (igv) {
         });
 
 
-        function getChrNameMap() {
+        function getChrAliasTable() {
 
             return new Promise(function (fulfill, reject) {
 
