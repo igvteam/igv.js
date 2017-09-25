@@ -1,5 +1,28 @@
-// Represents a BAM file.
-// Code is based heavily on bam.js, part of the Dalliance Genome Explorer,  (c) Thomas Down 2006-2001.
+/*
+ * The MIT License (MIT)
+ *
+ * Copyright (c) 2016-2017 The Regents of the University of California
+ * Author: Jim Robinson
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in
+ * all copies or substantial portions of the Software.
+ *
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+ * THE SOFTWARE.
+ */
 
 var igv = (function (igv) {
 
@@ -51,11 +74,16 @@ var igv = (function (igv) {
         return new Promise(function (fulfill, reject) {
 
             getChrIndex(self)
+
                 .then(function (chrToIndex) {
 
-                    var chrId = chrToIndex[chr],
+                    var chrId, queryChr, alignmentContainer;
+                    
+                    queryChr = self.chrAliasTable.hasOwnProperty(chr) ? self.chrAliasTable[chr] : chr;
 
-                        alignmentContainer = new igv.AlignmentContainer(chr, bpStart, bpEnd, self.samplingWindowSize, self.samplingDepth, self.pairsSupported);
+                    chrId = chrToIndex[queryChr];
+
+                    alignmentContainer = new igv.AlignmentContainer(chr, bpStart, bpEnd, self.samplingWindowSize, self.samplingDepth, self.pairsSupported);
 
                     if (chrId === undefined) {
                         fulfill(alignmentContainer);
@@ -89,12 +117,12 @@ var igv = (function (igv) {
                                         igv.xhr.loadArrayBuffer(self.bamPath, igv.buildOptions(self.config, {range: range}))
                                             .then(function (compressed) {
 
-                                            var ba = new Uint8Array(igv.unbgzf(compressed)); //new Uint8Array(igv.unbgzf(compressed)); //, c.maxv.block - c.minv.block + 1));
-                                            igv.BamUtils.decodeBamRecords(ba, c.minv.offset, alignmentContainer, bpStart, bpEnd, chrId, self.indexToChr[chrId], self.filter);
+                                                var ba = new Uint8Array(igv.unbgzf(compressed)); //new Uint8Array(igv.unbgzf(compressed)); //, c.maxv.block - c.minv.block + 1));
+                                                igv.BamUtils.decodeBamRecords(ba, c.minv.offset, alignmentContainer, bpStart, bpEnd, chrId, self.indexToChr[chrId], self.filter);
 
-                                            fulfill(alignmentContainer);
+                                                fulfill(alignmentContainer);
 
-                                        }).catch(function (obj) {
+                                            }).catch(function (obj) {
                                             reject(obj);
                                         });
 
@@ -121,63 +149,35 @@ var igv = (function (igv) {
 
         return new Promise(function (fulfill, reject) {
 
-            getIndex(self).then(function (index) {
+            getIndex(self)
 
-                var len = index.firstAlignmentBlock + MAX_GZIP_BLOCK_SIZE;   // Insure we get the complete compressed block containing the header
+                .then(function (index) {
 
-                igv.xhr.loadArrayBuffer(self.bamPath, igv.buildOptions(self.config, {range: {start: 0, size: len}})
-                    ).then(function (compressedBuffer) {
+                    var len = index.firstAlignmentBlock + MAX_GZIP_BLOCK_SIZE,   // Insure we get the complete compressed block containing the header
+                        options = igv.buildOptions(self.config, {range: {start: 0, size: len}}),
+                        genome = igv.browser ? igv.browser.genome : null,
+                        header;
 
-                    var unc = igv.unbgzf(compressedBuffer, len),
-                        uncba = new Uint8Array(unc),
-                        magic = readInt(uncba, 0),
-                        samHeaderLen = readInt(uncba, 4),
-                        samHeader = '',
-                        genome = igv.browser ? igv.browser.genome : null;
+                    igv.BamUtils.readHeader(self.bamPath, options, genome)
+                        .then(function (header) {
+                            fulfill(header);
+                        })
+                        .catch(reject);
 
-                    for (var i = 0; i < samHeaderLen; ++i) {
-                        samHeader += String.fromCharCode(uncba[i + 8]);
-                    }
-
-                    var nRef = readInt(uncba, samHeaderLen + 8);
-                    var p = samHeaderLen + 12;
-
-                    self.chrToIndex = {};
-                    self.indexToChr = [];
-                    for (var i = 0; i < nRef; ++i) {
-                        var lName = readInt(uncba, p);
-                        var name = '';
-                        for (var j = 0; j < lName - 1; ++j) {
-                            name += String.fromCharCode(uncba[p + 4 + j]);
-                        }
-                        var lRef = readInt(uncba, p + lName + 4);
-                        //dlog(name + ': ' + lRef);
-
-                        if (genome && genome.getChromosomeName) {
-                            name = genome.getChromosomeName(name);
-                        }
-
-                        self.chrToIndex[name] = i;
-                        self.indexToChr.push(name);
-
-                        p = p + 8 + lName;
-                    }
-
-                    fulfill();
-
-                }).catch(reject);
-            }).catch(reject);
+                })
+                .catch(reject);
         });
     }
 
-//
     function getIndex(bam) {
 
-        return new Promise(function (fulfill, reject) {
+        if (bam.index) {
+            return Promise.resolve(bam.index);
+        }
+        else {
 
-            if (bam.index) {
-                fulfill(bam.index);
-            } else {
+            return new Promise(function (fulfill, reject) {
+
                 igv
                     .loadBamIndex(bam.baiPath, bam.config)
                     .then(function (index) {
@@ -185,28 +185,28 @@ var igv = (function (igv) {
                         fulfill(bam.index);
                     })
                     .catch(reject);
-            }
-        });
-    }
 
+            });
+        }
+    }
 
     function getChrIndex(bam) {
 
-        return new Promise(function (fulfill, reject) {
+        if (bam.chrToIndex) {
+            return Promise.resolve(bam.chrToIndex);
+        }
+        else {
+            return new Promise(function (fulfill, reject) {
 
-            if (bam.chrToIndex) {
-                fulfill(bam.chrToIndex);
-            }
-            else {
-                bam.readHeader().then(function () {
+                bam.readHeader().then(function (header) {
+                    bam.chrToIndex = header.chrToIndex;
+                    bam.indexToChr = header.chrNames;
+                    bam.chrAliasTable = header.chrAliasTable;
                     fulfill(bam.chrToIndex);
                 }).catch(reject);
-            }
-        });
-    }
 
-    function readInt(ba, offset) {
-        return (ba[offset + 3] << 24) | (ba[offset + 2] << 16) | (ba[offset + 1] << 8) | (ba[offset]);
+            });
+        }
     }
 
     return igv;

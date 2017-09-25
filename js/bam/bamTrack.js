@@ -643,6 +643,9 @@ var igv = (function (igv) {
             alignmentRowYInset = 0;
         }
 
+        // Transient variable -- rewritten on every draw, used for click object selection
+        this.alignmentsYOffset = alignmentRowYInset;
+
         if (packedAlignmentRows) {
 
             packedAlignmentRows.forEach(function renderAlignmentRow(alignmentRow, i) {
@@ -855,7 +858,7 @@ var igv = (function (igv) {
                         }
                         if (readChar === "X" || refChar !== readChar) {
                             if (block.qual && block.qual.length > i) {
-                                readQual = block.qual.charAt(i);
+                                readQual = block.qual[i];
                                 colorBase = shadedBaseColor(readQual, readChar, i + block.start);
                             }
                             else {
@@ -966,7 +969,7 @@ var igv = (function (igv) {
         packedAlignmentRows = viewport.drawConfiguration.features.packedAlignmentRows;
         downsampledIntervals = viewport.drawConfiguration.features.downsampledIntervals;
 
-        packedAlignmentsIndex = Math.floor((y - this.top) / this.alignmentRowHeight);
+        packedAlignmentsIndex = Math.floor((y - this.top - this.alignmentsYOffset) / this.alignmentRowHeight);
 
         if (packedAlignmentsIndex < 0) {
             for (i = 0; i < downsampledIntervals.length; i++) {

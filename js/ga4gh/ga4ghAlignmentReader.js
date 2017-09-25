@@ -93,9 +93,9 @@ var igv = (function (igv) {
 
         return new Promise(function (fulfill, reject) {
 
-            getChrNameMap().then(function (chrNameMap) {
+            getChrNameMap().then(function (chrAliasTable) {
 
-                var queryChr = chrNameMap.hasOwnProperty(chr) ? chrNameMap[chr] : chr,
+                var queryChr = chrAliasTable.hasOwnProperty(chr) ? chrAliasTable[chr] : chr,
                     readURL = self.url + "/reads/search";
 
                 igv.ga4ghSearch({
@@ -116,65 +116,67 @@ var igv = (function (igv) {
 
             function getChrNameMap() {
 
+                if (self.chrAliasTable) {
+                    return Promise.resolve(self.chrAliasTable);
+                } else {
+                    return new Promise(function (fulfill, reject) {
 
-                return new Promise(function (fulfill, reject) {
-                    if (self.chrNameMap) {
-                        fulfill(self.chrNameMap);
-                    }
+                        self.readMetadata()
+                            .then(function (json) {
 
-                    else {
-                        self.readMetadata().then(function (json) {
+                                self.chrAliasTable = {};
 
-                            self.chrNameMap = {};
+                                if (igv.browser && json.readGroups && json.readGroups.length > 0) {
 
-                            if (igv.browser && json.readGroups && json.readGroups.length > 0) {
+                                    var referenceSetId = json.readGroups[0].referenceSetId;
 
-                                var referenceSetId = json.readGroups[0].referenceSetId;
+                                    console.log("No reference set specified");
 
-                                console.log("No reference set specified");
+                                    if (referenceSetId) {
 
-                                if (referenceSetId) {
+                                        // Query for reference names to build an alias table (map of genome ref names -> dataset ref names)
+                                        var readURL = self.url + "/references/search";
 
-                                    // Query for reference names to build an alias table (map of genome ref names -> dataset ref names)
-                                    var readURL = self.url + "/references/search";
+                                        igv.ga4ghSearch({
+                                            url: readURL,
+                                            body: {
+                                                "referenceSetId": referenceSetId
+                                            },
+                                            decode: function (j) {
+                                                return j.references;
+                                            }
+                                        })
+                                            .then(function (references) {
+                                                references.forEach(function (ref) {
+                                                    var refName = ref.name,
+                                                        alias = igv.browser.genome.getChromosomeName(refName);
+                                                    self.chrAliasTable[alias] = refName;
+                                                });
+                                                fulfill(self.chrAliasTable);
 
-                                    igv.ga4ghSearch({
-                                        url: readURL,
-                                        body: {
-                                            "referenceSetId": referenceSetId
-                                        },
-                                        decode: function (j) {
-                                            return j.references;
-                                        }
-                                    }).then(function (references) {
-                                        references.forEach(function (ref) {
-                                            var refName = ref.name,
-                                                alias = igv.browser.genome.getChromosomeName(refName);
-                                            self.chrNameMap[alias] = refName;
-                                        });
-                                        fulfill(self.chrNameMap);
+                                            })
+                                            .catch(reject);
+                                    }
+                                    else {
 
-                                    }).catch(reject);
+                                        // Try hardcoded constants -- workaround for non-compliant data at Google
+                                        populateChrNameMap(self.chrAliasTable, self.config.datasetId);
+
+                                        fulfill(self.chrAliasTable);
+                                    }
                                 }
+
                                 else {
-
-                                    // Try hardcoded constants -- workaround for non-compliant data at Google
-                                    populateChrNameMap(self.chrNameMap, self.config.datasetId);
-
-                                    fulfill(self.chrNameMap);
+                                    // No browser object, can't build map.  This can occur when run from unit tests
+                                    fulfill(self.chrAliasTable);
                                 }
-                            }
+                            })
+                            .catch(reject);
 
-                            else {
-                                // No browser object, can't build map.  This can occur when run from unit tests
-                                fulfill(self.chrNameMap);
-                            }
-                        }).catch(reject);
-                    }
 
-                });
+                    });
+                }
             }
-
 
             /**
              * Decode an array of ga4gh read records
@@ -360,7 +362,13 @@ var igv = (function (igv) {
 
                                 blockSeq = record.seq === "*" ? "*" : record.seq.substr(seqOffset, c.len);
                                 blockQuals = record.qual ? record.qual.slice(seqOffset, c.len) : undefined;
-                                blocks.push({start: pos, len: c.len, seq: blockSeq, qual: blockQuals, gapType: gapType});
+                                blocks.push({
+                                    start: pos,
+                                    len: c.len,
+                                    seq: blockSeq,
+                                    qual: blockQuals,
+                                    gapType: gapType
+                                });
                                 seqOffset += c.len;
                                 pos += c.len;
 
@@ -417,11 +425,11 @@ var igv = (function (igv) {
         var i;
         if ("461916304629" === datasetId || "337315832689" === datasetId) {
             for (i = 1; i < 23; i++) {
-                chrNameMap["chr" + i] = i;
+                chrAliasTable["chr" + i] = i;
             }
-            chrNameMap["chrX"] = "X";
-            chrNameMap["chrY"] = "Y";
-            chrNameMap["chrM"] = "MT";
+            chrAliasTable["chrX"] = "X";
+            chrAliasTable["chrY"] = "Y";
+            chrAliasTable["chrM"] = "MT";
         }
     }
 
