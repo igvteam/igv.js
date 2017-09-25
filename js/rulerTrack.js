@@ -28,8 +28,10 @@ var igv = (function (igv) {
     //
     igv.RulerTrack = function () {
 
+        this.height = 40;
         // this.height = 50;
-        this.height = 24;
+        // this.height = 24;
+
         this.name = "";
         this.id = "ruler";
         this.disableButtons = true;
@@ -201,6 +203,87 @@ var igv = (function (igv) {
         }
 
     };
+
+    // Implementation of Paul Heckbert's classing "Nice Numbers for Graph Labels"
+    // Graphics Gems. Code: pp. 657-659. Discussion: p. 61
+    var NTICKS = 5;
+
+    function heckbert_labels (min, max) {
+        var range,
+            d,
+            graphmin,
+            graphmax,
+            nfrac;
+
+        range = nicenum(max - min, false);
+        d = nicenum(range / (NTICKS - 1), true);
+
+        graphmin = d * Math.floor(min / d);
+        graphmax = d * Math.ceil(max / d);
+
+        nfrac = Math.max(0, -Math.floor( Math.log10(d)));
+        console.log('min ' + igv.numberFormatter(graphmin) + ' max' + igv.numberFormatter(graphmax) + ' increment ' + d);
+
+        for (var x = graphmin; x < (graphmax + 0.5 * d); x += d) {
+            console.log( 'label ' + igv.numberFormatter(x));
+        }
+
+    }
+
+    function nicenum(x, doRound) {
+        var exp,
+            f,
+            nf;
+
+        exp = Math.floor( Math.log10(x));
+        f = x / expt(10, exp);
+
+        if (doRound) {
+
+            if (f < 1.5) {
+                nf = 1;
+            } else if (f < 3) {
+                nf = 2;
+            } else if (f < 7) {
+                nf = 5;
+            } else {
+                nf = 10;
+            }
+
+        } else {
+
+            if (f <= 1.5) {
+                nf = 1;
+            } else if (f <= 2) {
+                nf = 2;
+            } else if (f <= 5) {
+                nf = 5;
+            } else {
+                nf = 10;
+            }
+
+        }
+
+        return nf * expt(10, exp);
+
+        function expt(a, n) {
+            return Math.pow(a, n);
+        }
+    }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
     function TickSpacing(majorTick, majorUnit, unitMultiplier) {
         this.majorTick = majorTick;
