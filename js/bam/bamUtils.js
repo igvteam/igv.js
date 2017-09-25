@@ -216,7 +216,7 @@ var igv = (function (igv) {
                 } else {
                     qualArray = [];
                     for (j = 0; j < lseq; ++j) {
-                        qualArray.push(ba[p + j] - 33);
+                        qualArray.push(ba[p + j]);
                     }
                 }
                 p += lseq;
