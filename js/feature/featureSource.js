@@ -52,6 +52,8 @@ var igv = (function (igv) {
             }
         } else if (config.sourceType === "bigquery") {
             this.reader = new igv.BigQueryFeatureReader(config);
+        } else if (config.sourceType === 'ucscservice') {
+            this.reader = new igv.UCSCServiceReader(config.source);
         } else if (config.source !== undefined) {
             this.reader = new igv.CustomServiceReader(config.source);
         }
