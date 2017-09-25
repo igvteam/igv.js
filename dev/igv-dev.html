@@ -373,7 +373,7 @@
             showCenterGuide: false,
             showCursorTrackingGuide: false,
             showRuler: true,
-            locus: '1',
+            locus: '1:182,350,517-182,361,320',
             reference: {
                 id: "hg19",
                 fastaURL: "https://s3.amazonaws.com/igv.broadinstitute.org/genomes/seq/1kg_v37/human_g1k_v37_decoy.fasta",
@@ -384,12 +384,13 @@
             palette: ["#00A0B0", "#6A4A3C", "#CC333F", "#EB6841"],
             tracks:
                 [
-                    {
-                        url: 'https://data.broadinstitute.org/igvdata/encode/hg19/broadHistone/wgEncodeBroadHistoneGm12878H3k4me2StdSig.wig.tdf',
-                        name: 'GM12878H3k4m3 (tdf)'
-                    },
+//                    {
+//                        url: 'https://data.broadinstitute.org/igvdata/encode/hg19/broadHistone/wgEncodeBroadHistoneGm12878H3k4me2StdSig.wig.tdf',
+//                        name: 'GM12878H3k4m3 (tdf)'
+//                    },
                     {
                         name: "Genes",
+                        height: 300,
                         searchable: false,
                         type: "annotation",
                         format: "gtf",

@@ -129,6 +129,7 @@ var igv = (function (igv) {
      * @returns {*}
      */
     igv.FeatureTrack.prototype.computePixelHeight = function (features) {
+        var height;
 
         if (this.displayMode === "COLLAPSED") {
             return this.variantHeight;
@@ -138,11 +139,15 @@ var igv = (function (igv) {
             if (features && (typeof features.forEach === "function")) {
                 features.forEach(function (feature) {
 
-                    if (feature.row && feature.row > maxRow) maxRow = feature.row;
+                    if (feature.row && feature.row > maxRow) {
+                        maxRow = feature.row;
+                    }
 
                 });
             }
-            return Math.max(this.variantHeight, (maxRow + 1) * (this.displayMode === "SQUISHED" ? this.squishedCallHeight : this.expandedCallHeight));
+
+            height = Math.max(this.variantHeight, (maxRow + 1) * ("SQUISHED" === this.displayMode ? this.squishedCallHeight : this.expandedCallHeight));
+            return height;
 
         }
 
@@ -208,10 +213,21 @@ var igv = (function (igv) {
         // feature is not already loaded this won't work,  but the user wouldn't be mousing over it either.
         if (this.featureSource.featureCache) {
 
-            var chr = referenceFrame.chrName,
-                tolerance = 2 * referenceFrame.bpPerPixel,  // We need some tolerance around genomicLocation, start with +/- 2 pixels
-                featureList = this.featureSource.featureCache.queryFeatures(chr, genomicLocation - tolerance, genomicLocation + tolerance),
-                row;
+            var tolerance,
+                featureList,
+                row,
+                popupData,
+                ss,
+                ee,
+                str,
+                filtered,
+                mapped;
+
+            // We need some tolerance around genomicLocation, start with +/- 2 pixels
+            tolerance = 2 * referenceFrame.bpPerPixel;
+            ss = genomicLocation - tolerance;
+            ee = genomicLocation + tolerance;
+            featureList = this.featureSource.featureCache.queryFeatures(referenceFrame.chrName, ss, ee);
 
             if ('COLLAPSED' !== this.displayMode) {
                 row = 'SQUISHED' === this.displayMode ? Math.floor(yOffset / this.squishedCallHeight) : Math.floor(yOffset / this.expandedCallHeight);
@@ -219,19 +235,29 @@ var igv = (function (igv) {
 
             if (featureList && featureList.length > 0) {
 
+                filtered = _.filter(featureList, function (ff) {
+                    return ff.end >= ss && ff.start <= ee;
+                });
 
-                var popupData = [];
+                mapped = _.map(filtered, function (f) {
+                    return f.row;
+                });
+
+                str = mapped.join(' ');
+
+                popupData = [];
                 featureList.forEach(function (feature) {
-                    if (feature.end >= genomicLocation - tolerance &&
-                        feature.start <= genomicLocation + tolerance) {
+                    var featureData;
 
-                        // If row number is specified use it
+                    if (feature.end >= ss && feature.start <= ee) {
+
+                        console.log('row ' + row + ' feature-rows ' + str + ' features ' + _.size(featureList));
+
                         if (row === undefined || feature.row === undefined || row === feature.row) {
-                            var featureData;
+
                             if (feature.popupData) {
                                 featureData = feature.popupData(genomicLocation);
-                            }
-                            else {
+                            } else {
                                 featureData = extractPopupData(feature);
                             }
                             if (featureData) {
