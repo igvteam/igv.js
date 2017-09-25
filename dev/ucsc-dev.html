@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+    <meta name="description" content="">
+    <meta name="author" content="">
+    <link rel="shortcut icon" href=../img/favicon.ico>
+    <title>IGV - Dev</title>
+    <link rel="import" href="./shared-css.html">
+    <link rel="import" href="./shared-js.html">
+    <script src="../js/feature/ucscServiceReader.js"></script>
+</head>
+
+<body>
+
+<!-- http://www.cbioportal.org/api-legacy/copynumbersegments?cancerStudyId=acc_tcga&sampleIds=TCGA-OR-A5J1-01%2CTCGA-OR-A5K3-01 -->
+
+<div id="myDiv" style="padding-top: 50px;padding-bottom: 20px; height: auto">
+
+
+    <script type="text/javascript">
+
+        $(document).ready(function () {
+            var div,
+                options,
+                browser;
+
+            div = $("#myDiv")[0];
+            options = {
+
+                genome: "hg19",
+                // locus: "all",
+                tracks: [
+                    {
+                        name: "Known Genes",
+                        type: "annotation",
+                        displayMode: "EXPANDED",
+                        sourceType: "ucscservice",
+                        source: {
+                            url: "http://localhost:5000/ucsc?db=hg19",
+                            method: "GET",
+                            tableName: 'knownGene'
+                        }
+                    },
+                    {
+                        name: "Genes",
+                        url: "https://s3.amazonaws.com/igv.broadinstitute.org/annotations/hg19/genes/gencode.v18.collapsed.bed",
+                        order: Number.MAX_VALUE,
+                        displayMode: "EXPANDED"
+                    }
+
+                ]
+            };
+            browser = igv.createBrowser(div, options);
+        })
+
+
+    </script>
+</div>
+
+</body>
+
+</html>
