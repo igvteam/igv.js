@@ -44,7 +44,7 @@ var igv = (function (igv) {
         }
         this.maxRows = config.maxRows;
 
-        if ( config.url &&
+        if (config.url &&
             (
                 igv.filenameOrURLHasSuffix(config.url, '.bigbed') || igv.filenameOrURLHasSuffix(config.url, '.bb')
                 ||
@@ -63,13 +63,14 @@ var igv = (function (igv) {
             this.render = renderVariant;
             this.homvarColor = "rgb(17,248,254)";
             this.hetvarColor = "rgb(34,12,253)";
-        }
-        else if ("FusionJuncSpan" === config.type) {
+        } else if ("FusionJuncSpan" === config.type) {
             this.render = renderFusionJuncSpan;
             this.height = config.height || 50;
             this.autoHeight = false;
-        }
-        else {
+        } else if ("snp" === config.type) {
+            // TODO -- snp specific render function
+            this.render = renderFeature;
+        } else {
             this.render = renderFeature;
             this.arrowSpacing = 30;
 
@@ -173,7 +174,7 @@ var igv = (function (igv) {
                 if (gene.end < bpStart) continue;
                 if (gene.start > bpEnd) break;
 
-                if(!selectedFeature && selectedFeatureName && selectedFeatureName === gene.name.toUpperCase()) {
+                if (!selectedFeature && selectedFeatureName && selectedFeatureName === gene.name.toUpperCase()) {
                     selectedFeature = gene;
                 }
                 else {
@@ -181,7 +182,7 @@ var igv = (function (igv) {
                 }
             }
 
-            if(selectedFeature) {
+            if (selectedFeature) {
                 c = selectedFeature.color;
                 selectedFeature.color = "rgb(255,0,0)";
                 track.render.call(this, selectedFeature, bpStart, bpPerPixel, pixelHeight, ctx, options);
@@ -278,7 +279,7 @@ var igv = (function (igv) {
 
         menuItems.push(igv.colorPickerMenuItem(popover, this.trackView));
 
-        mapped = _.map(["COLLAPSED", "SQUISHED", "EXPANDED"], function(displayMode, index) {
+        mapped = _.map(["COLLAPSED", "SQUISHED", "EXPANDED"], function (displayMode, index) {
             return {
                 object: $(markupStringified(displayMode, index, self.displayMode)),
                 click: function () {
@@ -297,17 +298,17 @@ var igv = (function (igv) {
                 chosen;
 
             lut =
-                {
-                    "COLLAPSED": "Collapse",
-                    "SQUISHED": "Squish",
-                    "EXPANDED": "Expand"
-                };
+            {
+                "COLLAPSED": "Collapse",
+                "SQUISHED": "Squish",
+                "EXPANDED": "Expand"
+            };
 
             chosen = (0 === index) ? '<div class="igv-track-menu-border-top">' : '<div>';
             if (displayMode === selfDisplayMode) {
-                return chosen + '<i class="fa fa-check fa-check-shim"></i>' + lut[ displayMode ] + '</div>'
+                return chosen + '<i class="fa fa-check fa-check-shim"></i>' + lut[displayMode] + '</div>'
             } else {
-                return chosen + '<i class="fa fa-check fa-check-shim fa-check-hidden"></i>' + lut[ displayMode ] + '</div>';
+                return chosen + '<i class="fa fa-check fa-check-shim fa-check-hidden"></i>' + lut[displayMode] + '</div>';
             }
 
         }
@@ -486,10 +487,9 @@ var igv = (function (igv) {
         }
 
 
-
         textFitsInBox = (boxX1 - boxX) > ctx.measureText(feature.name).width;
 
-        if ( (feature.name !== undefined && feature.name.toUpperCase() === selectedFeatureName) ||
+        if ((feature.name !== undefined && feature.name.toUpperCase() === selectedFeatureName) ||
             ((textFitsInBox || geneColor) && this.displayMode !== "SQUISHED" && feature.name !== undefined)) {
             geneFontStyle = {
                 font: '10px PT Sans',
