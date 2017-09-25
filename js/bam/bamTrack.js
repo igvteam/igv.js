@@ -26,7 +26,6 @@
 
 var igv = (function (igv) {
 
-    var alignmentRowYInset = 0;
     var alignmentStartGap = 5;
     var downsampleRowHeight = 5;
     const DEFAULT_COVERAGE_TRACK_HEIGHT = 50;
@@ -617,6 +616,8 @@ var igv = (function (igv) {
             packedAlignmentRows = alignmentContainer.packedAlignmentRows,
             sequence = alignmentContainer.sequence;
 
+        var alignmentRowYInset = 0;
+
         if (this.top) ctx.translate(0, this.top);
 
         if (sequence) {
@@ -892,59 +893,11 @@ var igv = (function (igv) {
 
         var clickedObject;
 
-        clickedObject = this.getClickedAlignment(config.viewport, config.genomicLocation);
+        clickedObject = this.getClickedObject(config.viewport, config.y, config.genomicLocation);
 
         return clickedObject ? clickedObject.popupData(config.genomicLocation) : undefined;
     };
 
-    AlignmentTrack.prototype.popupData = function (genomicLocation, xOffset, yOffset, referenceFrame) {
-
-        var packedAlignmentRows = this.featureSource.alignmentContainer.packedAlignmentRows,
-            downsampledIntervals = this.featureSource.alignmentContainer.downsampledIntervals,
-            packedAlignmentsIndex,
-            alignmentRow,
-            clickedObject,
-            i, len, tmp;
-
-        packedAlignmentsIndex = Math.floor((yOffset - (alignmentRowYInset)) / this.alignmentRowHeight);
-
-        if (packedAlignmentsIndex < 0) {
-
-            for (i = 0, len = downsampledIntervals.length; i < len; i++) {
-
-
-                if (downsampledIntervals[i].start <= genomicLocation && (downsampledIntervals[i].end >= genomicLocation)) {
-                    clickedObject = downsampledIntervals[i];
-                    break;
-                }
-
-            }
-        }
-        else if (packedAlignmentsIndex < packedAlignmentRows.length) {
-
-            alignmentRow = packedAlignmentRows[packedAlignmentsIndex];
-
-            clickedObject = undefined;
-
-            for (i = 0, len = alignmentRow.alignments.length, tmp; i < len; i++) {
-
-                tmp = alignmentRow.alignments[i];
-
-                if (tmp.start <= genomicLocation && (tmp.start + tmp.lengthOnRef >= genomicLocation)) {
-                    clickedObject = tmp;
-                    break;
-                }
-
-            }
-        }
-
-        if (clickedObject) {
-            return clickedObject.popupData(genomicLocation);
-        } else {
-            return [];
-        }
-
-    };
 
     AlignmentTrack.prototype.popupMenuItemList = function (config) {
 
@@ -959,7 +912,7 @@ var igv = (function (igv) {
 
         config.popover.hide();
 
-        alignment = this.getClickedAlignment(config.viewport, config.genomicLocation);
+        alignment = this.getClickedObject(config.viewport, config.y, config.genomicLocation);
 
         if (alignment) {
 
@@ -1003,25 +956,36 @@ var igv = (function (igv) {
         }
     };
 
-    AlignmentTrack.prototype.getClickedAlignment = function (viewport, genomicLocation) {
+    AlignmentTrack.prototype.getClickedObject = function (viewport, y, genomicLocation) {
 
         var packedAlignmentRows,
-            row,
-            index,
-            clicked;
+            downsampledIntervals,
+            packedAlignmentsIndex,
+            alignmentRow, clicked, i;
 
         packedAlignmentRows = viewport.drawConfiguration.features.packedAlignmentRows;
+        downsampledIntervals = viewport.drawConfiguration.features.downsampledIntervals;
 
-        for (index = 0; index < packedAlignmentRows.length; index++) {
-            row = packedAlignmentRows[index];
+        packedAlignmentsIndex = Math.floor((y - this.top) / this.alignmentRowHeight);
 
-            clicked = _.filter(row.alignments, function (alignment) {
+        if (packedAlignmentsIndex < 0) {
+            for (i = 0; i < downsampledIntervals.length; i++) {
+                if (downsampledIntervals[i].start <= genomicLocation && (downsampledIntervals[i].end >= genomicLocation)) {
+                    return downsampledIntervals[i];
+                }
+            }
+        } else if (packedAlignmentsIndex < packedAlignmentRows.length) {
+
+            alignmentRow = packedAlignmentRows[packedAlignmentsIndex];
+            clicked = _.filter(alignmentRow.alignments, function (alignment) {
                 return (genomicLocation >= alignment.start && genomicLocation <= (alignment.start + alignment.lengthOnRef));
             });
 
             if (clicked.length > 0) return clicked[0];
-
         }
+
+        return undefined;
+
     }
 
     function getAlignmentColor(alignment) {
