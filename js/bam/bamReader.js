@@ -78,7 +78,7 @@ var igv = (function (igv) {
                 .then(function (chrToIndex) {
 
                     var chrId, queryChr, alignmentContainer;
-                    
+
                     queryChr = self.chrAliasTable.hasOwnProperty(chr) ? self.chrAliasTable[chr] : chr;
 
                     chrId = chrToIndex[queryChr];
@@ -118,7 +118,7 @@ var igv = (function (igv) {
                                             .then(function (compressed) {
 
                                                 var ba = new Uint8Array(igv.unbgzf(compressed)); //new Uint8Array(igv.unbgzf(compressed)); //, c.maxv.block - c.minv.block + 1));
-                                                igv.BamUtils.decodeBamRecords(ba, c.minv.offset, alignmentContainer, bpStart, bpEnd, chrId, self.indexToChr[chrId], self.filter);
+                                                igv.BamUtils.decodeBamRecords(ba, c.minv.offset, alignmentContainer, bpStart, bpEnd, chrId, self.indexToChr, self.filter);
 
                                                 fulfill(alignmentContainer);
 
