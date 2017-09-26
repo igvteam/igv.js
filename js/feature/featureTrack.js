@@ -748,9 +748,9 @@ var igv = (function (igv) {
 
     igv.FeatureTrack.prototype.popupMenuItemList = function(config) {
         if (this.render === renderSnp) {
-            self = this;
 
-            menuItems = [];
+            var menuItems = [], self = this;
+
             menuItems.push({
                 name: 'Color by function',
                 click: function() {
@@ -763,8 +763,8 @@ var igv = (function (igv) {
                     setColorBy('class');
                 }
             });
-            return menuItems;
 
+            return menuItems;
 
             function setColorBy(value) {
                 self.colorBy = value;
