@@ -386,30 +386,29 @@
             palette: ["#00A0B0", "#6A4A3C", "#CC333F", "#EB6841"],
             tracks:
                 [
-//                    {
-//                        url: 'https://data.broadinstitute.org/igvdata/encode/hg19/broadHistone/wgEncodeBroadHistoneGm12878H3k4me2StdSig.wig.tdf',
-//                        name: 'GM12878H3k4m3 (tdf)'
-//                    },
-                {
-                    url: 'https://data.broadinstitute.org/igvdata/test/igv-web/segmented_data_080520.seg.gz',
-                    indexed: false,
-                    isLog: true,
-                    name: 'GBM Copy # (TCGA Broad GDAC)'
-                },
-                {
-                    name: "Genes",
-                    height: 300,
-                    searchable: false,
-                    type: "annotation",
-                    format: "gtf",
-                    sourceType: "file",
-                    url: "https://s3.amazonaws.com/igv.broadinstitute.org/annotations/hg19/genes/gencode.v18.annotation.sorted.gtf.gz",
-                    indexURL: "https://s3.amazonaws.com/igv.broadinstitute.org/annotations/hg19/genes/gencode.v18.annotation.sorted.gtf.gz.tbi",
-                    visibilityWindow: 10000000,
-                    order: Number.MAX_VALUE,
-                    displayMode: "EXPANDED"
-                }
-            ]
+                    {
+                        sourceType: 'gcs',
+                        type: 'bam',
+                        url: 'gs://genomics-public-data/platinum-genomes/bam/NA12877_S1.bam',
+                        height: 500,
+                        autoHeight: false,
+                        viewAsPairs: true,
+                        name: 'NA12877'
+                    },
+                    {
+                        name: "Genes",
+                        height: 100,
+                        searchable: false,
+                        type: "annotation",
+                        format: "gtf",
+                        sourceType: "file",
+                        url: "https://s3.amazonaws.com/igv.broadinstitute.org/annotations/hg19/genes/gencode.v18.annotation.sorted.gtf.gz",
+                        indexURL: "https://s3.amazonaws.com/igv.broadinstitute.org/annotations/hg19/genes/gencode.v18.annotation.sorted.gtf.gz.tbi",
+                        visibilityWindow: 10000000,
+                        order: Number.MAX_VALUE,
+                        displayMode: "EXPANDED"
+                    }
+                ]
         };
 
         browser = igv.createBrowser(div, options);
