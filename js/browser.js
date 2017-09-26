@@ -274,7 +274,7 @@ var igv = (function (igv) {
         trackView = new igv.TrackView(this, $(this.trackContainerDiv), track);
         this.trackViews.push(trackView);
         this.reorderTracks();
-        trackView.resize();
+        trackView.repaint();
     };
 
     igv.Browser.prototype.reorderTracks = function () {
