@@ -31,6 +31,7 @@ var igv = (function (igv) {
     };
 
     igv.UCSCServiceReader.prototype.readFeatures = function(chr, start, end) {
+        console.log(chr, start, end);
         var self = this,
             url = this.config.url + '&table=' + this.config.tableName + '&chr='+chr+'&start='+start+'&end='+end;
 

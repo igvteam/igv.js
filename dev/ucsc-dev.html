@@ -45,6 +45,17 @@
                         }
                     },
                     {
+                        name: "SNP 141",
+                        type: "snp",
+                        displayMode: "EXPANDED",
+                        sourceType: "ucscservice",
+                        source: {
+                            url: "http://localhost:5000/ucsc?db=hg19",
+                            method: "GET",
+                            tableName: 'snp141'
+                        }
+                    },
+                    {
                         name: "Genes",
                         url: "https://s3.amazonaws.com/igv.broadinstitute.org/annotations/hg19/genes/gencode.v18.collapsed.bed",
                         order: Number.MAX_VALUE,
