@@ -26,26 +26,37 @@
 
 var igv = (function (igv) {
 
-    igv.UCSCServiceReader = function(config) {
+    igv.UCSCServiceReader = function (config) {
         this.config = config;
     };
 
-    igv.UCSCServiceReader.prototype.readFeatures = function(chr, start, end) {
+    igv.UCSCServiceReader.prototype.readFeatures = function (chr, start, end) {
         var self = this,
-            url = this.config.url + '&table=' + this.config.tableName + '&chr='+chr+'&start='+start+'&end='+end;
+            url = this.config.url + '&table=' + this.config.tableName + '&chr=' + chr + '&start=' + start + '&end=' + end;
 
-        return new Promise(function(fulfill, reject) {
-            igv.xhr.loadJson(url, self.config).then(function(data) {
-                if (data) {
-                    fulfill(data);
-                } else {
-                    fulfill(null);
-                }
-            }).catch(function(error) {
-                reject(error);
-            });
+        return new Promise(function (fulfill, reject) {
+            igv.xhr.loadJson(url, self.config)
+                .then(function (data) {
+                    if (data) {
+                        data.forEach(function (json) {
+                            decodeJson(json);
+                        });
+                        fulfill(data);
+                    } else {
+                        fulfill(null);
+                    }
+                })
+                .catch(function (error) {
+                    reject(error);
+                });
         });
     };
+
+    // TODO -- generalize
+    function decodeJson(feature) {
+        if(feature.start) feature.start = Number.parseInt(feature.start);
+        if(feature.end)  feature.end = Number.parseInt(feature.end);
+    }
 
     return igv;
 })(igv || {});
