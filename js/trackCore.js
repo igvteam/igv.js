@@ -55,6 +55,7 @@ var igv = (function (igv) {
             case "snp":
             case "genes":
             case "fusionjuncspan":
+            case "snp":
                 return new igv.FeatureTrack(conf);
                 break;
 
