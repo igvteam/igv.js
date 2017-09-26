@@ -86,7 +86,7 @@ var igv = (function (igv) {
             l,
             yShim,
             tickHeight,
-            bpPerPixel,
+            bpp,
             rulerSweeper;
 
         rulerSweeper = this.rulerSweepers[ options.genomicState.locusIndex.toString() ];
@@ -95,6 +95,8 @@ var igv = (function (igv) {
             drawWholeGenome.call(this, options, rulerSweeper);
         } else {
 
+            heckbert_labels(options.referenceFrame.start, options.referenceFrame.start + options.referenceFrame.toBP( options.viewportWidth ));
+
             rulerSweeper.$viewportContent.find('.igv-whole-genome-container').hide();
             rulerSweeper.$viewportContent.find('canvas').show();
 
@@ -102,8 +104,8 @@ var igv = (function (igv) {
 
             updateLocusLabelWithGenomicState(options.genomicState);
 
-            bpPerPixel = options.referenceFrame.bpPerPixel;
-            ts = findSpacing( Math.floor(options.viewportWidth * bpPerPixel) );
+            bpp = options.referenceFrame.bpPerPixel;
+            ts = findSpacing( Math.floor(options.viewportWidth * bpp) );
             spacing = ts.majorTick;
 
             // Find starting point closest to the current origin
@@ -116,7 +118,7 @@ var igv = (function (igv) {
                 yShim = 2;
                 tickHeight = 6;
 
-                x = Math.round(((l - 1) - options.bpStart + 0.5) / bpPerPixel);
+                x = Math.round(((l - 1) - options.bpStart + 0.5) / bpp);
                 var chrPosition = formatNumber(l / ts.unitMultiplier, 0) + " " + ts.majorUnit;
 
                 if (nTick % 1 === 0) {
@@ -206,25 +208,24 @@ var igv = (function (igv) {
 
     // Implementation of Paul Heckbert's classing "Nice Numbers for Graph Labels"
     // Graphics Gems. Code: pp. 657-659. Discussion: p. 61
-    var NTICKS = 5;
-
     function heckbert_labels (min, max) {
         var range,
-            d,
+            increment,
             graphmin,
             graphmax,
-            nfrac;
+            nfrac,
+            NTICKS = 8;
 
         range = nicenum(max - min, false);
-        d = nicenum(range / (NTICKS - 1), true);
+        increment = nicenum(range / (NTICKS - 1), true);
 
-        graphmin = d * Math.floor(min / d);
-        graphmax = d * Math.ceil(max / d);
+        graphmin = increment * Math.floor(min / increment);
+        graphmax = increment * Math.ceil(max / increment);
 
-        nfrac = Math.max(0, -Math.floor( Math.log10(d)));
-        console.log('min ' + igv.numberFormatter(graphmin) + ' max' + igv.numberFormatter(graphmax) + ' increment ' + d);
+        nfrac = Math.max(0, -Math.floor( Math.log10(increment)));
+        console.log('ticks ' + NTICKS + ' min ' + igv.numberFormatter(graphmin) + ' max ' + igv.numberFormatter(graphmax) + ' increment ' + igv.numberFormatter(increment));
 
-        for (var x = graphmin; x < (graphmax + 0.5 * d); x += d) {
+        for (var x = graphmin; x < (graphmax + 0.5 * increment); x += increment) {
             console.log( 'label ' + igv.numberFormatter(x));
         }
 
@@ -272,19 +273,6 @@ var igv = (function (igv) {
     }
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
     function TickSpacing(majorTick, majorUnit, unitMultiplier) {
         this.majorTick = majorTick;
         this.majorUnit = majorUnit;
@@ -298,7 +286,7 @@ var igv = (function (igv) {
         }
 
 
-        // Now man zeroes?
+        // How many zeroes?
         var nZeroes = Math.floor(log10(maxValue));
         var majorUnit = "";
         var unitMultiplier = 1;
