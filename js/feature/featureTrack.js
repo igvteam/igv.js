@@ -71,7 +71,8 @@ var igv = (function (igv) {
         else if ('snp' === config.type) {
             this.render = renderSnp;
             // colors ordered based on priority least to greatest
-            this.snpColors = ['rgb(0,0,0)', 'rgb(0,0,255)', 'rgb(0,255,0)', 'rgb(255,0,0)']
+            this.snpColors = ['rgb(0,0,0)', 'rgb(0,0,255)', 'rgb(0,255,0)', 'rgb(255,0,0)'];
+            this.colorBy = 'function';
         }
         else {
             this.render = renderFeature;
@@ -689,11 +690,20 @@ var igv = (function (igv) {
             py = 20,
             h = 10,
             colorArrLength = this.snpColors.length,
-            colorPriority = colorByfunc(snp.func);
-            // colorPriority = colorByClass(snp.class)
+            colorPriority;
+
+            switch(this.colorBy) {
+                case 'function':
+                    colorPriority = colorByFunc(snp.func);
+                    break;
+                case 'class':
+                    colorPriority = colorByClass(snp['class']);
+            }
 
         ctx.fillStyle = this.snpColors[colorPriority];
         ctx.fillRect(coord.px, py, coord.pw, h);
+
+        // Coloring functions, convert a value to a priority
 
         function colorByFunc(theFunc) {
             var funcArray = theFunc.split(',');
@@ -717,8 +727,10 @@ var igv = (function (igv) {
                     return 0;
                 }
             });
-            return Math.max(priorities)
 
+            return priorities.reduce(function(a,b) {
+                return Math.max(a,b);
+            });
         }
 
         function colorByClass(cls) {
@@ -733,6 +745,34 @@ var igv = (function (igv) {
             }
         }
     }
+
+    igv.FeatureTrack.prototype.popupMenuItemList = function(config) {
+        if (this.render === renderSnp) {
+            self = this;
+
+            menuItems = [];
+            menuItems.push({
+                name: 'Color by function',
+                click: function() {
+                    setColorBy('function');
+                }
+            });
+            menuItems.push({
+                name: 'Color by class',
+                click: function() {
+                    setColorBy('class');
+                }
+            });
+            return menuItems;
+
+
+            function setColorBy(value) {
+                self.colorBy = value;
+                self.trackView.update();
+                config.popover.hide();
+            }
+        }
+    };
 
 
     return igv;
