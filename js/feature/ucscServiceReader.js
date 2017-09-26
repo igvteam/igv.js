@@ -38,9 +38,6 @@ var igv = (function (igv) {
             igv.xhr.loadJson(url, self.config)
                 .then(function (data) {
                     if (data) {
-                        data.forEach(function (json) {
-                            decodeJson(json);
-                        });
                         fulfill(data);
                     } else {
                         fulfill(null);
@@ -52,11 +49,6 @@ var igv = (function (igv) {
         });
     };
 
-    // TODO -- generalize
-    function decodeJson(feature) {
-        if(feature.start) feature.start = Number.parseInt(feature.start);
-        if(feature.end)  feature.end = Number.parseInt(feature.end);
-    }
 
     return igv;
 })(igv || {});
