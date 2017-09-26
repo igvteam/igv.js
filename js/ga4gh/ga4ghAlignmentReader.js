@@ -93,7 +93,7 @@ var igv = (function (igv) {
 
         return new Promise(function (fulfill, reject) {
 
-            getChrNameMap().then(function (chrAliasTable) {
+            getChrAliasTable().then(function (chrAliasTable) {
 
                 var queryChr = chrAliasTable.hasOwnProperty(chr) ? chrAliasTable[chr] : chr,
                     readURL = self.url + "/reads/search";
@@ -114,7 +114,7 @@ var igv = (function (igv) {
 
             }).catch(reject);
 
-            function getChrNameMap() {
+            function getChrAliasTable() {
 
                 if (self.chrAliasTable) {
                     return Promise.resolve(self.chrAliasTable);
@@ -160,7 +160,7 @@ var igv = (function (igv) {
                                     else {
 
                                         // Try hardcoded constants -- workaround for non-compliant data at Google
-                                        populateChrNameMap(self.chrAliasTable, self.config.datasetId);
+                                        populateChrAliasTable(self.chrAliasTable, self.config.datasetId);
 
                                         fulfill(self.chrAliasTable);
                                     }
@@ -418,10 +418,10 @@ var igv = (function (igv) {
     /**
      * Hardcoded hack to work around some non-compliant google datasets
      *
-     * @param chrNameMap
+     * @param chrAliasTable
      * @param datasetId
      */
-    function populateChrNameMap(chrNameMap, datasetId) {
+    function populateChrAliasTable(chrAliasTable, datasetId) {
         var i;
         if ("461916304629" === datasetId || "337315832689" === datasetId) {
             for (i = 1; i < 23; i++) {

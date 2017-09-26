@@ -184,16 +184,6 @@ var igv = (function (igv) {
 
     };
 
-    igv.BAMTrack.prototype.popupData = function (genomicLocation, xOffset, yOffset, referenceFrame) {
-
-        if (yOffset >= this.coverageTrack.top && yOffset < this.coverageTrack.height) {
-            return this.coverageTrack.popupData(genomicLocation, xOffset, this.coverageTrack.top, referenceFrame);
-        } else {
-            return this.alignmentTrack.popupData(genomicLocation, xOffset, yOffset - this.alignmentTrack.top, referenceFrame);
-        }
-
-    };
-
     igv.BAMTrack.prototype.popupDataWithConfiguration = function (config) {
 
         if (config.y >= this.coverageTrack.top && config.y < this.coverageTrack.height) {
@@ -694,7 +684,6 @@ var igv = (function (igv) {
         function drawPairConnector(alignment, yRect, alignmentHeight) {
 
             var alignmentColor = getAlignmentColor.call(self, alignment.firstAlignment),
-                outlineColor = 'alignmentColor',
                 xBlockStart = (alignment.connectingStart - bpStart) / bpPerPixel,
                 xBlockEnd = (alignment.connectingEnd - bpStart) / bpPerPixel,
                 yStrokedLine = yRect + alignmentHeight / 2;
@@ -707,7 +696,7 @@ var igv = (function (igv) {
                 alignmentColor = igv.addAlphaToRGB(alignmentColor, "0.15");
             }
 
-            igv.graphics.setProperties(ctx, {fillStyle: alignmentColor, strokeStyle: outlineColor});
+            igv.graphics.setProperties(ctx, {fillStyle: alignmentColor, strokeStyle: alignmentColor});
 
             igv.graphics.strokeLine(ctx, xBlockStart, yStrokedLine, xBlockEnd, yStrokedLine);
 

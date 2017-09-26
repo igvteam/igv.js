@@ -37,12 +37,12 @@ var igv = (function (igv) {
         if (undefined === igv.browser || undefined === igv.browser.formats) {
             return undefined;
         } else {
-            return igv.browser.formats[ name ];
+            return igv.browser.formats[name];
         }
 
     };
 
-    igv.createTrackWithConfiguration = function(conf) {
+    igv.createTrackWithConfiguration = function (conf) {
 
         var type = (undefined === conf.type) ? 'unknown_type' : conf.type.toLowerCase();
 
@@ -52,6 +52,7 @@ var igv = (function (igv) {
                 break;
 
             case "annotation":
+            case "snp":
             case "genes":
             case "fusionjuncspan":
                 return new igv.FeatureTrack(conf);
@@ -92,7 +93,7 @@ var igv = (function (igv) {
 
     };
 
-    igv.inferTrackTypes = function(config) {
+    igv.inferTrackTypes = function (config) {
 
         function translateDeprecatedTypes(config) {
 
@@ -250,7 +251,7 @@ var igv = (function (igv) {
 
         track.height = config.height || ('wig' === config.type ? 50 : 100);
 
-        if(config.autoHeight === undefined)  config.autoHeight = config.autoheight; // Some case confusion in the initial releasae
+        if (config.autoHeight === undefined)  config.autoHeight = config.autoheight; // Some case confusion in the initial releasae
 
         track.autoHeight = config.autoHeight === undefined ? (config.height === undefined) : config.autoHeight;
         track.minHeight = config.minHeight || Math.min(50, track.height);
@@ -260,7 +261,7 @@ var igv = (function (igv) {
             track.visibilityWindow = config.visibilityWindow;
         }
 
-        if(track.type === undefined) {
+        if (track.type === undefined) {
             track.type = config.type;
         }
 
@@ -279,7 +280,7 @@ var igv = (function (igv) {
         }
     };
 
-    igv.inferIndexPath = function(url, extension) {
+    igv.inferIndexPath = function (url, extension) {
 
         var path, idx;
 
@@ -287,7 +288,7 @@ var igv = (function (igv) {
             throw new Error("Cannot infer an index path for a local File.  Please select explicitly")
         }
 
-        if(url.includes("?")) {
+        if (url.includes("?")) {
             idx = url.indexOf("?");
             return url.substring(0, idx) + "." + extension + url.substring(idx);
         } else {
@@ -376,13 +377,13 @@ var igv = (function (igv) {
             menuItems;
 
         config =
-            {
-                popover: popover,
-                viewport:viewport,
-                genomicLocation: genomicLocation,
-                x: xOffset,
-                y: yOffset
-            };
+        {
+            popover: popover,
+            viewport: viewport,
+            genomicLocation: genomicLocation,
+            x: xOffset,
+            y: yOffset
+        };
 
         menuItems = [];
         if (viewport.trackView.track.popupMenuItemList) {
@@ -446,7 +447,7 @@ var igv = (function (igv) {
 
         all = [];
         if (trackView.track.menuItemList) {
-            all = menuItems.concat( igv.trackMenuItemListHelper(trackView.track.menuItemList(popover)) );
+            all = menuItems.concat(igv.trackMenuItemListHelper(trackView.track.menuItemList(popover)));
         }
 
         if (trackView.track.removable !== false) {
@@ -466,13 +467,13 @@ var igv = (function (igv) {
         return all;
     };
 
-    igv.trackMenuItemListHelper = function(itemList) {
+    igv.trackMenuItemListHelper = function (itemList) {
 
         var list = [];
 
         if (_.size(itemList) > 0) {
 
-            list = _.map(itemList, function(item, i) {
+            list = _.map(itemList, function (item, i) {
                 var $e;
 
                 if (item.name) {
@@ -490,7 +491,7 @@ var igv = (function (igv) {
                     $e.click(item.click);
                 }
 
-                return { object: $e, init: (item.init || undefined) };
+                return {object: $e, init: (item.init || undefined)};
             });
         }
 
@@ -521,7 +522,7 @@ var igv = (function (igv) {
         $e.text(menuItemLabel);
 
 
-        clickHandler = function(){
+        clickHandler = function () {
             var $element = $(trackView.trackDiv);
             igv.dialog.configure(dialogLabelHandler, dialogInputValue, dialogClickHandler, undefined, undefined);
             igv.dialog.show($element);
@@ -530,7 +531,7 @@ var igv = (function (igv) {
 
         $e.click(clickHandler);
 
-        return { object: $e, init: undefined };
+        return {object: $e, init: undefined};
     };
 
     igv.dataRangeMenuItem = function (popover, trackView) {
@@ -549,7 +550,7 @@ var igv = (function (igv) {
 
         $e.click(clickHandler);
 
-        return { object: $e, init: undefined };
+        return {object: $e, init: undefined};
     };
 
     igv.colorPickerMenuItem = function (popover, trackView) {
@@ -571,13 +572,13 @@ var igv = (function (igv) {
             defaultColor = trackView.track.config.color || igv.browser.constants.defaultColor;
 
             offset =
-                {
-                    left: ($(trackView.trackDiv).offset().left + $(trackView.trackDiv).width()) - igv.colorPicker.$container.width(),
-                    top:  $(trackView.trackDiv).offset().top
-                };
+            {
+                left: ($(trackView.trackDiv).offset().left + $(trackView.trackDiv).width()) - igv.colorPicker.$container.width(),
+                top: $(trackView.trackDiv).offset().top
+            };
 
             colorUpdateHandler = function (color) {
-                trackView.setColor( color )
+                trackView.setColor(color)
             };
 
             igv.colorPicker.configure(trackView, color, defaultColor, offset, colorUpdateHandler);
@@ -589,7 +590,7 @@ var igv = (function (igv) {
 
         $e.click(clickHandler);
 
-        return { object: $e, init: undefined };
+        return {object: $e, init: undefined};
 
     };
 

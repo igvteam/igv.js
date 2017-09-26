@@ -373,7 +373,9 @@
             showCenterGuide: false,
             showCursorTrackingGuide: false,
             showRuler: true,
-            locus: '1',
+
+            locus: '1:182,350,517-182,361,320', // "Genes" track popup debug
+//            locus: '1', // Seg track debug
             reference: {
                 id: "hg19",
                 fastaURL: "https://s3.amazonaws.com/igv.broadinstitute.org/genomes/seq/1kg_v37/human_g1k_v37_decoy.fasta",
@@ -385,11 +387,17 @@
             tracks:
                 [
                     {
-                        url: 'https://data.broadinstitute.org/igvdata/encode/hg19/broadHistone/wgEncodeBroadHistoneGm12878H3k4me2StdSig.wig.tdf',
-                        name: 'GM12878H3k4m3 (tdf)'
+                        sourceType: 'gcs',
+                        type: 'bam',
+                        url: 'gs://genomics-public-data/platinum-genomes/bam/NA12877_S1.bam',
+                        height: 500,
+                        autoHeight: false,
+                        viewAsPairs: true,
+                        name: 'NA12877'
                     },
                     {
                         name: "Genes",
+                        height: 100,
                         searchable: false,
                         type: "annotation",
                         format: "gtf",
