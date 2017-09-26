@@ -79,7 +79,8 @@ var igv = (function (igv) {
 
     igv.RulerTrack.prototype.draw = function (options) {
 
-        var ts,
+        var self = this,
+            ts,
             spacing,
             nTick,
             x,
@@ -87,7 +88,9 @@ var igv = (function (igv) {
             yShim,
             tickHeight,
             bpp,
-            rulerSweeper;
+            rulerSweeper,
+            label,
+            ticks;
 
         rulerSweeper = this.rulerSweepers[ options.genomicState.locusIndex.toString() ];
 
@@ -95,7 +98,9 @@ var igv = (function (igv) {
             drawWholeGenome.call(this, options, rulerSweeper);
         } else {
 
-            heckbert_labels(options.referenceFrame.start, options.referenceFrame.start + options.referenceFrame.toBP( options.viewportWidth ));
+            // heckbert_labels(options.referenceFrame.start, options.referenceFrame.start + options.referenceFrame.toBP(options.viewportWidth), options.viewportWidth, options.context, options.referenceFrame.bpPerPixel);
+
+            ticks = heckbert_labels(options.bpStart, options.bpStart + options.referenceFrame.toBP(options.pixelWidth), options.pixelWidth, options.context, options.referenceFrame.bpPerPixel);
 
             rulerSweeper.$viewportContent.find('.igv-whole-genome-container').hide();
             rulerSweeper.$viewportContent.find('canvas').show();
@@ -103,6 +108,14 @@ var igv = (function (igv) {
             rulerSweeper.addMouseHandlers();
 
             updateLocusLabelWithGenomicState(options.genomicState);
+
+            yShim = 2;
+            tickHeight = 6;
+            _.each(ticks, function (tick) {
+                igv.graphics.fillText(options.context, tick.pretty, tick.pixel, self.height - (tickHeight / 0.75));
+                igv.graphics.strokeLine(options.context, tick.pretty, self.height - tickHeight, tick.pretty, self.height - yShim);
+            });
+
 
             bpp = options.referenceFrame.bpPerPixel;
             ts = findSpacing( Math.floor(options.viewportWidth * bpp) );
@@ -112,23 +125,22 @@ var igv = (function (igv) {
             nTick = Math.floor(options.bpStart / spacing) - 1;
             x = 0;
 
-            while (x < options.pixelWidth) {
+            // while (x < options.pixelWidth) {
+            //
+            //     l = Math.floor(nTick * spacing);
+            //
+            //     x = Math.round(((l - 1) - options.bpStart + 0.5) / bpp);
+            //     label = formatNumber(l / ts.unitMultiplier, 0) + " " + ts.majorUnit;
+            //
+            //     if (nTick % 1 === 0) {
+            //         igv.graphics.fillText(options.context, label, x, this.height - (tickHeight / 0.75));
+            //     }
+            //
+            //     igv.graphics.strokeLine(options.context, x, this.height - tickHeight, x, this.height - yShim);
+            //
+            //     nTick++;
+            // }
 
-                l = Math.floor(nTick * spacing);
-                yShim = 2;
-                tickHeight = 6;
-
-                x = Math.round(((l - 1) - options.bpStart + 0.5) / bpp);
-                var chrPosition = formatNumber(l / ts.unitMultiplier, 0) + " " + ts.majorUnit;
-
-                if (nTick % 1 === 0) {
-                    igv.graphics.fillText(options.context, chrPosition, x, this.height - (tickHeight / 0.75));
-                }
-
-                igv.graphics.strokeLine(options.context, x, this.height - tickHeight, x, this.height - yShim);
-
-                nTick++;
-            }
             igv.graphics.strokeLine(options.context, 0, this.height - yShim, options.pixelWidth, this.height - yShim);
 
         }
@@ -208,70 +220,78 @@ var igv = (function (igv) {
 
     // Implementation of Paul Heckbert's classing "Nice Numbers for Graph Labels"
     // Graphics Gems. Code: pp. 657-659. Discussion: p. 61
-    function heckbert_labels (min, max) {
+    function heckbert_labels(min, max, canvasWidth, context, bpp) {
         var range,
             increment,
             graphmin,
             graphmax,
             nfrac,
-            NTICKS = 8;
+            tickCount,
+            ticks,
+            labelWidth;
+
+        labelWidth = context.measureText(max.toString()).width;
+        tickCount = Math.floor(canvasWidth / labelWidth);
 
         range = nicenum(max - min, false);
-        increment = nicenum(range / (NTICKS - 1), true);
+        increment = nicenum(range / (tickCount - 1), true);
 
         graphmin = increment * Math.floor(min / increment);
         graphmax = increment * Math.ceil(max / increment);
 
         nfrac = Math.max(0, -Math.floor( Math.log10(increment)));
-        console.log('ticks ' + NTICKS + ' min ' + igv.numberFormatter(graphmin) + ' max ' + igv.numberFormatter(graphmax) + ' increment ' + igv.numberFormatter(increment));
+        // console.log('ticks ' + tickCount + ' min ' + igv.numberFormatter(graphmin) + ' max ' + igv.numberFormatter(graphmax) + ' increment ' + igv.numberFormatter(increment));
 
-        for (var x = graphmin; x < (graphmax + 0.5 * increment); x += increment) {
-            console.log( 'label ' + igv.numberFormatter(x));
+        ticks = [];
+        for (var x = graphmin, i = 0, w = 0; x < (graphmax + 0.5 * increment); x += increment, i++) {
+            w += Math.round(context.measureText(x.toString()).width);
+            console.log('index ' + i + ' label ' + igv.numberFormatter(x) + ' acc-width ' + w + ' canvas-width ' + canvasWidth);
+            ticks.push({ bp:x, pretty:igv.numberFormatter(x), pixel: Math.round((x - graphmin)/bpp) });
         }
 
-    }
+        function nicenum(x, doRound) {
+            var exp,
+                f,
+                nf;
 
-    function nicenum(x, doRound) {
-        var exp,
-            f,
-            nf;
+            exp = Math.floor( Math.log10(x));
+            f = x / expt(10, exp);
 
-        exp = Math.floor( Math.log10(x));
-        f = x / expt(10, exp);
+            if (doRound) {
 
-        if (doRound) {
+                if (f < 1.5) {
+                    nf = 1;
+                } else if (f < 3) {
+                    nf = 2;
+                } else if (f < 7) {
+                    nf = 5;
+                } else {
+                    nf = 10;
+                }
 
-            if (f < 1.5) {
-                nf = 1;
-            } else if (f < 3) {
-                nf = 2;
-            } else if (f < 7) {
-                nf = 5;
             } else {
-                nf = 10;
+
+                if (f <= 1.5) {
+                    nf = 1;
+                } else if (f <= 2) {
+                    nf = 2;
+                } else if (f <= 5) {
+                    nf = 5;
+                } else {
+                    nf = 10;
+                }
+
             }
 
-        } else {
+            return nf * expt(10, exp);
 
-            if (f <= 1.5) {
-                nf = 1;
-            } else if (f <= 2) {
-                nf = 2;
-            } else if (f <= 5) {
-                nf = 5;
-            } else {
-                nf = 10;
+            function expt(a, n) {
+                return Math.pow(a, n);
             }
-
         }
 
-        return nf * expt(10, exp);
-
-        function expt(a, n) {
-            return Math.pow(a, n);
-        }
+        return ticks;
     }
-
 
     function TickSpacing(majorTick, majorUnit, unitMultiplier) {
         this.majorTick = majorTick;
