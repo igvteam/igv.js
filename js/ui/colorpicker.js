@@ -43,7 +43,6 @@ var igv = (function (igv) {
         this.$container = $('<div class="igv-grid-container-colorpicker">');
         $parent.append(this.$container);
 
-        this.$container.draggable();
 
         this.$header = $('<div class="igv-grid-header">');
         this.$headerBlurb = $('<div class="igv-grid-header-blurb">');
@@ -56,6 +55,7 @@ var igv = (function (igv) {
 
         this.$container.append(this.$header);
 
+        this.makeDraggable(this.$container, this.$header);
 
         // color palette
         for (rowIndex = 0; rowIndex < rowCount; rowIndex++) {
@@ -371,6 +371,34 @@ var igv = (function (igv) {
             return $column;
         }
 
+    };
+
+    igv.ColorPicker.prototype.makeDraggable = function ($target, $handle) {
+        var self = this;
+
+        $handle.on('mousedown', function (event) {
+
+            self.initX = $target.position().left;
+            self.initY = $target.position().top;
+
+            self.mousePressX = event.clientX;
+            self.mousePressY = event.clientY;
+
+            $handle.on('mousemove', move);
+
+            window.addEventListener('mouseup', function() {
+                $handle.off('mousemove');
+            }, false);
+
+            function move(event) {
+                var left,
+                    top;
+
+                left = self.initX + event.clientX - self.mousePressX + 'px';
+                top  = self.initY + event.clientY - self.mousePressY + 'px';
+                $target.css({ left:left, top:top });
+            }
+        });
     };
 
     igv.ColorPicker.prototype.configure = function (trackView, trackColor, trackDefaultColor, offset, colorUpdateHandler) {

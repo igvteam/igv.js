@@ -46,6 +46,8 @@ var igv = (function (igv) {
 
         constructorHelper(this);
 
+        this.makeDraggable(this.$container, $header);
+
         igv.attachDialogCloseHandlerWithParent($header, function () {
             self.hide();
         });
@@ -60,8 +62,35 @@ var igv = (function (igv) {
 
         dialog.$container.append(dialog.rowOfOkCancel()[ 0 ]);
 
-        dialog.$container.draggable();
 
+    };
+
+    igv.Dialog.prototype.makeDraggable = function ($target, $handle) {
+        var self = this;
+
+        $handle.on('mousedown', function (event) {
+
+            self.initX = $target.position().left;
+            self.initY = $target.position().top;
+
+            self.mousePressX = event.clientX;
+            self.mousePressY = event.clientY;
+
+            $handle.on('mousemove', move);
+
+            window.addEventListener('mouseup', function() {
+                $handle.off('mousemove');
+            }, false);
+
+            function move(event) {
+                var left,
+                    top;
+
+                left = self.initX + event.clientX - self.mousePressX + 'px';
+                top  = self.initY + event.clientY - self.mousePressY + 'px';
+                $target.css({ left:left, top:top });
+            }
+        });
     };
 
     igv.Dialog.prototype.rowOfOk = function() {

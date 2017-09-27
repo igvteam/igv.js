@@ -55,7 +55,6 @@ var igv = (function (igv) {
 
         this.$popover.append(this.$popoverContent);
 
-        // this.$popover.draggable( { handle: $popoverHeader } );
         this.makeDraggable(this.$popover, $popoverHeader);
 
         return $parent;

@@ -673,7 +673,9 @@
   background-color: white; }
 
 .igv-grid-container-colorpicker {
-  position: relative;
+  position: absolute;
+  top: 0;
+  left: 0;
   width: 256px;
   border-color: #7F7F7F;
   border-radius: 4px;
