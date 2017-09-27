@@ -29,11 +29,7 @@
 var igv = (function (igv) {
 
     igv.Popover = function ($parent) {
-
         this.$parent = this.initializationHelper($parent);
-
-        // this.$popoverContent.kinetic({});
-
     };
 
     igv.Popover.prototype.initializationHelper = function ($parent) {
@@ -59,10 +55,39 @@ var igv = (function (igv) {
 
         this.$popover.append(this.$popoverContent);
 
-        this.$popover.draggable( { handle: $popoverHeader } );
+        // this.$popover.draggable( { handle: $popoverHeader } );
+        this.makeDraggable(this.$popover, $popoverHeader);
 
         return $parent;
 
+    };
+
+    igv.Popover.prototype.makeDraggable = function ($target, $handle) {
+        var self = this;
+
+        $handle.on('mousedown', function (event) {
+
+            self.initX = $target.position().left;
+            self.initY = $target.position().top;
+
+            self.mousePressX = event.clientX;
+            self.mousePressY = event.clientY;
+
+            $handle.on('mousemove', move);
+
+            window.addEventListener('mouseup', function() {
+                $handle.off('mousemove');
+            }, false);
+
+            function move(event) {
+                var left,
+                    top;
+
+                left = self.initX + event.clientX - self.mousePressX + 'px';
+                top  = self.initY + event.clientY - self.mousePressY + 'px';
+                $target.css({ left:left, top:top });
+            }
+        });
     };
 
     igv.Popover.prototype.hide = function () {
