@@ -50,7 +50,7 @@ var igv = (function (igv) {
 
         self.container.append(doOKCancel());
 
-        this.makeDraggable(this.container, this.header);
+        igv.makeDraggable(this.container, this.header);
 
 
         function doOKCancel() {

@@ -55,7 +55,7 @@ var igv = (function (igv) {
 
         this.$container.append(this.$header);
 
-        this.makeDraggable(this.$container, this.$header);
+        igv.makeDraggable(this.$container, this.$header);
 
         // color palette
         for (rowIndex = 0; rowIndex < rowCount; rowIndex++) {
