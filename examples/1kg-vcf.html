@@ -15,7 +15,8 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/es6-shim/0.35.3/es6-shim.js"></script>
 
     <!-- Font Awesome CSS -->
-    <link rel="stylesheet" type="text/css" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.2.0/css/font-awesome.min.css">
+    <link rel="stylesheet" type="text/css"
+          href="https://maxcdn.bootstrapcdn.com/font-awesome/4.2.0/css/font-awesome.min.css">
 
     <!-- IGV CSS -->
     <link rel="stylesheet" type="text/css" href="https://igv.org/web/beta/igv.css">
@@ -36,38 +37,42 @@
 
 <script type="text/javascript">
 
-    var div = document.getElementById('igvDiv');
-    var options = {
-        reference: {
-            id: "hg19",
-            fastaURL: "https://s3.amazonaws.com/igv.broadinstitute.org/genomes/seq/1kg_v37/human_g1k_v37_decoy.fasta",
-            cytobandURL: "https://s3.amazonaws.com/igv.broadinstitute.org/genomes/seq/b37/b37_cytoband.txt"
-        },
-        locus: "myc",
-        tracks: [
-            {
-                name: "Genes",
-                type: "annotation",
-                format: "bed",
-                sourceType: "file",
-                url: "https://s3.amazonaws.com/igv.broadinstitute.org/annotations/hg19/genes/refGene.hg19.bed.gz",
-                indexURL: "https://s3.amazonaws.com/igv.broadinstitute.org/annotations/hg19/genes/refGene.hg19.bed.gz.tbi",
-                order: Number.MAX_VALUE,
-                visibilityWindow: 300000000,
-                displayMode: "EXPANDED"
-            },
+    document.addEventListener("DOMContentLoaded", function () {
 
-            {
-                name: "Phase 3 WGS variants",
-                format: "vcf",
-                url: "https://s3.amazonaws.com/1000genomes/release/20130502/ALL.wgs.phase3_shapeit2_mvncall_integrated_v5b.20130502.sites.vcf.gz",
-                indexURL:  "https://s3.amazonaws.com/1000genomes/release/20130502/ALL.wgs.phase3_shapeit2_mvncall_integrated_v5b.20130502.sites.vcf.gz.tbi",
-                type: "variant"
-            }
-        ]
+        var div = document.getElementById("igvDiv"),
+                options = {
+                    reference: {
+                        id: "hg19",
+                        fastaURL: "https://s3.amazonaws.com/igv.broadinstitute.org/genomes/seq/1kg_v37/human_g1k_v37_decoy.fasta",
+                        cytobandURL: "https://s3.amazonaws.com/igv.broadinstitute.org/genomes/seq/b37/b37_cytoband.txt"
+                    },
+                    locus: "myc",
+                    tracks: [
+                        {
+                            name: "Genes",
+                            type: "annotation",
+                            format: "bed",
+                            sourceType: "file",
+                            url: "https://s3.amazonaws.com/igv.broadinstitute.org/annotations/hg19/genes/refGene.hg19.bed.gz",
+                            indexURL: "https://s3.amazonaws.com/igv.broadinstitute.org/annotations/hg19/genes/refGene.hg19.bed.gz.tbi",
+                            order: Number.MAX_VALUE,
+                            visibilityWindow: 300000000,
+                            displayMode: "EXPANDED"
+                        },
 
-    };
-    var browser = igv.createBrowser(div, options);
+                        {
+                            name: "Phase 3 WGS variants",
+                            format: "vcf",
+                            url: "https://s3.amazonaws.com/1000genomes/release/20130502/ALL.wgs.phase3_shapeit2_mvncall_integrated_v5b.20130502.sites.vcf.gz",
+                            indexURL: "https://s3.amazonaws.com/1000genomes/release/20130502/ALL.wgs.phase3_shapeit2_mvncall_integrated_v5b.20130502.sites.vcf.gz.tbi",
+                            type: "variant"
+                        }
+                    ]
+
+                };
+        var browser = igv.createBrowser(div, options);
+
+    })
 
 </script>
 
