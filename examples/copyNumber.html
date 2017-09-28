@@ -15,17 +15,16 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/es6-shim/0.35.3/es6-shim.js"></script>
 
     <!-- Font Awesome CSS -->
-    <link rel="stylesheet" type="text/css" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.2.0/css/font-awesome.min.css">
+    <link rel="stylesheet" type="text/css"
+          href="https://maxcdn.bootstrapcdn.com/font-awesome/4.2.0/css/font-awesome.min.css">
 
     <!-- IGV CSS -->
-    <link rel="stylesheet" type="text/css" href="https://igv.org/web/beta/igv.css">
-
-    <!-- jQuery JS -->
-    <script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
-
+    <!-- <link rel="stylesheet" type="text/css" href="https://igv.org/web/beta/igv.css">  -->
+    <link rel="stylesheet" type="text/css" href="../dist/css/igv.css">
+    
     <!-- IGV JS-->
-    <script type="text/javascript" src="https://igv.org/web/beta/igv-beta.min.js"></script>
-
+    <!-- <script type="text/javascript" src="https://igv.org/web/beta/igv-beta.min.js"></script> -->
+    <script type="text/javascript" src="../dist/igv.js"></script>
 
 </head>
 
@@ -39,14 +38,14 @@
 
 <script type="text/javascript">
 
-    $(document).ready(function () {
+    document.addEventListener("DOMContentLoaded", function () {
 
-        var div = $("#igvDiv")[0],
+        var div = document.getElementById("igvDiv"),
                 options = {
                     showNavigation: true,
                     showRuler: true,
                     genome: "hg19",
-                    locus: "egfr",
+                    locus: 'chr7',
                     tracks: [
                         {
                             url: 'https://data.broadinstitute.org/igvdata/test/igv-web/segmented_data_080520.seg.gz',
