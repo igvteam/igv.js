@@ -33,19 +33,23 @@ var igv = (function (igv) {
 
     igv.xhr.load = function (url, options) {
 
+        url = mapUrl(url);
+
         if (!options) options = {};
 
         if (!options.oauthToken) {
-            return applyOauthToken();
+            return getLoadPromise(url, options);
+        } else {
+
+            var token = _.isFunction(options.oauthToken) ? options.oauthToken() : options.oauthToken;
+
+            if (token.then && _.isFunction(token.then)) {
+                return token.then(applyOauthToken);
+            }
+            else {
+                return applyOauthToken(token);
+            }
         }
-
-        var token = _.isFunction(options.oauthToken) ? options.oauthToken() : options.oauthToken;
-
-        if (token.then && _.isFunction(token.then)) {
-            return token.then(applyOauthToken);
-        }
-
-        return applyOauthToken(token);
 
         ////////////
 
@@ -441,6 +445,17 @@ var igv = (function (igv) {
             return headers;
 
         }
+    }
+
+    /**
+     * Perform some well-known url mappings.  For now just handles dropbox urls
+     * @param url
+     */
+    function mapUrl(url) {
+
+        return url.includes("//www.dropbox.com") ?
+            url.replace("//www.dropbox.com", "//dl.dropboxusercontent.com") :
+            url;
     }
 
 // Increments an anonymous usage count.  Count is anonymous, needed for our continued funding.  Please don't delete
