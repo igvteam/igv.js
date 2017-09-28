@@ -25,6 +25,36 @@
 
 var igv = (function (igv) {
 
+    var self = this;
+
+    igv.makeDraggable = function ($target, $handle) {
+        $handle.on('mousedown', function (event) {
+
+            event.preventDefault();
+            event.stopPropagation();
+
+            self.initX = $target.position().left;
+            self.initY = $target.position().top;
+
+            self.mousePressX = event.clientX;
+            self.mousePressY = event.clientY;
+
+            $handle.on('mousemove', move);
+
+            window.addEventListener('mouseup', function() {
+                $handle.off('mousemove');
+            }, false);
+
+            function move(e) {
+
+                e.preventDefault();
+                e.stopPropagation();
+
+                $target.css({ left:(self.initX + e.clientX - self.mousePressX), top:(self.initY + e.clientY - self.mousePressY) });
+            }
+        });
+    };
+
     igv.getExtension = function (config) {
         var path,
             filename,
