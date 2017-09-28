@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+    <meta name="description" content="">
+    <meta name="author" content="">
+    <link rel="shortcut icon" href=../img/favicon.ico>
+    <title>BAM - Dev</title>
+    <link rel="import" href="./shared-css.html">
+    <link rel="import" href="./shared-js.html">
+</head>
+
+<body>
+
+<div id="myDiv" style="padding-top: 50px;padding-bottom: 20px; height: auto">
+</div>
+
+<script type="text/javascript">
+
+    $(document).ready(function () {
+        var options;
+
+        options = {
+            showKaryo: false,
+            showIdeogram: true,
+            showNavigation: true,
+            showRuler: true,
+            genome: "hg19",
+            locus: "chr22:24,376,148-24,376,519",
+            tracks: [
+                {
+                    type: 'bam',
+                    url: 'https://www.dropbox.com/s/7k5oylv5of8w5f8/gstt1_sample.bam',
+                    indexURL: 'https://www.dropbox.com/s/ub1n3mvubz87wu9/gstt1_sample.bam.bai',
+                    label: 'Dopbox BAM'
+                },
+                {
+                    name: "Genes",
+                    url: "https://s3.amazonaws.com/igv.broadinstitute.org/annotations/hg19/genes/gencode.v18.collapsed.bed",
+                    order: Number.MAX_VALUE,
+                    displayMode: "EXPANDED"
+
+                }
+
+            ]
+        };
+
+        igv.createBrowser($("#myDiv")[0], options);
+
+    })
+
+
+</script>
+
+</body>
+
+</html>
