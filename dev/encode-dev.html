@@ -34,7 +34,7 @@
 <body>
 
 <!-- ENCODE Modal -->
-<div id="hicEncodeModal" class="modal fade bs-example-modal-lg" tabindex="-1" role="dialog" aria-labelledby="encodeModalLabel" aria-hidden="true">
+<div id="encodeModal" class="modal fade bs-example-modal-lg" tabindex="-1" role="dialog" aria-labelledby="encodeModalLabel" aria-hidden="true">
 
     <div class="modal-dialog modal-lg"><!-- modal dialog -->
 
@@ -51,19 +51,13 @@
 
             </div>
 
-            <div id="encodeModalBody" class="modal-body"><!-- modal body -->
+            <div id="encodeModalBody" class="modal-body">
             </div>
-            <!-- modal body -->
 
             <div class="modal-footer"><!-- modal footer -->
-                <button id="encodeModalBottomCloseButton" type="button" class="btn btn-default" data-dismiss="modal">
-                    Close
-                </button>
-                <!-- close -->
+                <button id="encodeModalBottomCloseButton" type="button" class="btn btn-default" data-dismiss="modal">Close</button>
                 <button id="encodeModalGoButton" type="button" class="btn btn-primary" data-dismiss="modal">Go</button>
-                <!-- Go -->
             </div>
-            <!-- modal footer -->
 
         </div>
         <!-- modal content -->
@@ -90,7 +84,7 @@
                         <li role="presentation" class="dropdown-header">Load data from</li>
 
                         <li role="presentation">
-                            <a role="menuitem" tabindex="-1" href="#" data-toggle="modal" data-target="#hicEncodeModal">
+                            <a role="menuitem" tabindex="-1" href="#" data-toggle="modal" data-target="#encodeModal">
                                 ENCODE
                             </a>
                         </li><!-- Select ENCODE -->
@@ -110,21 +104,15 @@
 <script type="text/javascript">
 
     $(document).ready(function () {
-        var div,
-            options,
+        var options,
+            config,
             browser,
             columnWidths,
-            encodeTableFormat,
-            encodeDataSource,
-            f;
+            encodeTableFormat;
 
-        div = $("#myDiv")[0];
         options = {
             minimumBases: 6,
             showIdeogram: true,
-//            showKaryo: true,
-//            showCenterGuide: true,
-//            showCursorTrackingGuide: true,
             showRuler: true,
 //            locus: '8:124,512,906-124,512,945',
             locus: '1',
@@ -153,7 +141,7 @@
                 ]
         };
 
-        browser = igv.createBrowser(div, options);
+        browser = igv.createBrowser($('#myDiv').get(0), options);
 
         columnWidths =
             {
@@ -167,15 +155,20 @@
 
         encodeTableFormat = new igv.EncodeTableFormat({ columnWidths: columnWidths });
 
-        encodeDataSource = new igv.EncodeDataSource({genomeID: 'hg19'}, encodeTableFormat);
-
-        f = function () {
-          return browser;
-        };
-        browser.encodeTable = new igv.IGVModalTable($('#encodeModalBody'), f, 'loadTracksWithConfigList', encodeDataSource);
+        config =
+            {
+                $modal:$('#encodeModal'),
+                $modalBody:$('#encodeModalBody'),
+                $modalTopCloseButton: $('#encodeModalTopCloseButton'),
+                $modalBottomCloseButton: $('#encodeModalBottomCloseButton'),
+                $modalGoButton: $('#encodeModalGoButton'),
+                browserRetrievalFunction:function () { return browser; },
+                browserLoadFunction:'loadTracksWithConfigList',
+                dataSource:new igv.EncodeDataSource({ genomeID: 'hg19' }, encodeTableFormat)
+            };
+        browser.encodeTable = new igv.IGVModalTable(config);
 
     })
-
 
 </script>
 
