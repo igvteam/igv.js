@@ -30,6 +30,9 @@ var igv = (function (igv) {
     igv.makeDraggable = function ($target, $handle) {
         $handle.on('mousedown', function (event) {
 
+            event.preventDefault();
+            event.stopPropagation();
+
             self.initX = $target.position().left;
             self.initY = $target.position().top;
 
@@ -42,13 +45,12 @@ var igv = (function (igv) {
                 $handle.off('mousemove');
             }, false);
 
-            function move(event) {
-                var left,
-                    top;
+            function move(e) {
 
-                left = self.initX + event.clientX - self.mousePressX + 'px';
-                top  = self.initY + event.clientY - self.mousePressY + 'px';
-                $target.css({ left:left, top:top });
+                e.preventDefault();
+                e.stopPropagation();
+
+                $target.css({ left:(self.initX + e.clientX - self.mousePressX), top:(self.initY + e.clientY - self.mousePressY) });
             }
         });
     };
