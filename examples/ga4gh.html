@@ -34,9 +34,9 @@
 
 <script type="text/javascript">
 
-    $(document).ready(function () {
+    document.addEventListener("DOMContentLoaded", function () {
 
-        var div = $("#igvDiv")[0],
+        var div = document.getElementById("igvDiv"),
                 options = {
                     genome: "hg19",
                     showRuler: true,
