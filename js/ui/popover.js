@@ -29,11 +29,7 @@
 var igv = (function (igv) {
 
     igv.Popover = function ($parent) {
-
         this.$parent = this.initializationHelper($parent);
-
-        // this.$popoverContent.kinetic({});
-
     };
 
     igv.Popover.prototype.initializationHelper = function ($parent) {
@@ -59,7 +55,7 @@ var igv = (function (igv) {
 
         this.$popover.append(this.$popoverContent);
 
-        this.$popover.draggable( { handle: $popoverHeader } );
+        igv.makeDraggable(this.$popover, $popoverHeader);
 
         return $parent;
 

@@ -35,8 +35,6 @@ var igv = (function (igv) {
         this.container = $('<div class="igv-grid-container-dialog">');
         $parent.append(this.container);
 
-        this.container.draggable();
-
         this.header = $('<div class="igv-grid-header">');
         this.headerBlurb = $('<div class="igv-grid-header-blurb">');
 
@@ -51,6 +49,9 @@ var igv = (function (igv) {
         self.container.append(doLayout());
 
         self.container.append(doOKCancel());
+
+        igv.makeDraggable(this.container, this.header);
+
 
         function doOKCancel() {
 

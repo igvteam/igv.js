@@ -43,7 +43,6 @@ var igv = (function (igv) {
         this.$container = $('<div class="igv-grid-container-colorpicker">');
         $parent.append(this.$container);
 
-        this.$container.draggable();
 
         this.$header = $('<div class="igv-grid-header">');
         this.$headerBlurb = $('<div class="igv-grid-header-blurb">');
@@ -56,6 +55,7 @@ var igv = (function (igv) {
 
         this.$container.append(this.$header);
 
+        igv.makeDraggable(this.$container, this.$header);
 
         // color palette
         for (rowIndex = 0; rowIndex < rowCount; rowIndex++) {
