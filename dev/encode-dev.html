@@ -104,22 +104,15 @@
 <script type="text/javascript">
 
     $(document).ready(function () {
-        var div,
-            options,
+        var options,
             config,
             browser,
             columnWidths,
-            encodeTableFormat,
-            encodeDataSource,
-            f;
+            encodeTableFormat;
 
-        div = $("#myDiv")[0];
         options = {
             minimumBases: 6,
             showIdeogram: true,
-//            showKaryo: true,
-//            showCenterGuide: true,
-//            showCursorTrackingGuide: true,
             showRuler: true,
 //            locus: '8:124,512,906-124,512,945',
             locus: '1',
@@ -148,7 +141,7 @@
                 ]
         };
 
-        browser = igv.createBrowser(div, options);
+        browser = igv.createBrowser($('#myDiv').get(0), options);
 
         columnWidths =
             {
@@ -162,12 +155,6 @@
 
         encodeTableFormat = new igv.EncodeTableFormat({ columnWidths: columnWidths });
 
-        encodeDataSource = new igv.EncodeDataSource({genomeID: 'hg19'}, encodeTableFormat);
-
-        f = function () {
-            return browser;
-        };
-
         config =
             {
                 $modal:$('#encodeModal'),
@@ -175,9 +162,9 @@
                 $modalTopCloseButton: $('#encodeModalTopCloseButton'),
                 $modalBottomCloseButton: $('#encodeModalBottomCloseButton'),
                 $modalGoButton: $('#encodeModalGoButton'),
-                browserRetrievalFunction:f,
+                browserRetrievalFunction:function () { return browser; },
                 browserLoadFunction:'loadTracksWithConfigList',
-                dataSource:encodeDataSource
+                dataSource:new igv.EncodeDataSource({ genomeID: 'hg19' }, encodeTableFormat)
             };
         browser.encodeTable = new igv.IGVModalTable(config);
 
