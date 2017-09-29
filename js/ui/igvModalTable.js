@@ -37,6 +37,8 @@ var igv = (function (igv) {
 
         this.initialized = false;
 
+        this.config = config;
+
         $modal = config.$modal;
 
         this.dataSource = config.dataSource;
@@ -115,17 +117,41 @@ var igv = (function (igv) {
         return this.dataSource.config.genomeID;
     };
 
+    igv.IGVModalTable.teardown = function () {
+
+        var list;
+
+        list =
+            [
+                this.$modalTable.find('tbody'),
+                this.config.$modal,
+                this.config.$modalTopCloseButton,
+                this.config.$modalBottomCloseButton,
+                this.config.$modalGoButton
+            ];
+
+        _.each(list, function ($e) {
+            $e.unbind();
+        });
+
+        this.config.$modalBody.empty();
+    };
+
     igv.IGVModalTable.prototype.unbindAllMouseHandlers = function () {
+        var list;
 
-        this.$modalTable.find('tbody').unbind();
+        list =
+            [
+                this.$modalTable.find('tbody'),
+                this.config.$modal,
+                this.config.$modalTopCloseButton,
+                this.config.$modalBottomCloseButton,
+                this.config.$modalGoButton
+            ];
 
-        $('#hicEncodeModal').unbind();
-
-        $('#encodeModalTopCloseButton').unbind();
-
-        $('#encodeModalBottomCloseButton').unbind();
-
-        $('#encodeModalGoButton').unbind();
+        _.each(list, function ($e) {
+            $e.unbind();
+        });
 
     };
 
