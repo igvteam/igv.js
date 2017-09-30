@@ -164,10 +164,9 @@ var igv = (function (igv) {
 
         this.$dataTables = this.$modalTable.dataTable({
             data: dataSource.tableData(),
-            // deferRender: true,
-            paging: true, /* must be true if scroller is enable */
+            paging: true,
             scrollX: false,
-            scrollY: 400,
+            scrollY: '400px',
             scrollCollapse: false,
             scroller: true,
             fixedColumns: true,
