@@ -19,6 +19,7 @@ module.exports = function (grunt) {
                     'wrapper/header.js',
                     'vendor/jquery-1.12.4.js',
                     'vendor/underscore.js',
+                    'vendor/datatables.min.js',
                     'js/**/*.js',
                     'vendor/inflate.js',
                     'vendor/zlib_and_gzip.min.js',
