@@ -347,6 +347,51 @@ var igv = (function (igv) {
 
     };
 
+
+    igv.FeatureTrack.prototype.popupMenuItemList = function(config) {
+        if (this.render === renderSnp) {
+
+            var menuItems = [], self = this;
+
+            menuItems.push({
+                name: 'Color by function',
+                click: function() {
+                    setColorBy('function');
+                }
+            });
+            menuItems.push({
+                name: 'Color by class',
+                click: function() {
+                    setColorBy('class');
+                }
+            });
+
+            return menuItems;
+
+            function setColorBy(value) {
+                self.colorBy = value;
+                self.trackView.update();
+                config.popover.hide();
+            }
+        }
+    };
+
+    igv.FeatureTrack.prototype.description = function() {
+
+        var desc;
+
+        if('snp' === this.type) {
+            desc = "<html>" + this.name + "<hr>";
+            // TODO -- fill in color legened
+            desc += "</html>"
+            return desc;
+        }
+        else {
+            return this.name;
+        }
+
+    }
+
     /**
      * @param feature
      * @param bpStart  genomic location of the left edge of the current canvas
@@ -745,34 +790,6 @@ var igv = (function (igv) {
             }
         }
     }
-
-    igv.FeatureTrack.prototype.popupMenuItemList = function(config) {
-        if (this.render === renderSnp) {
-
-            var menuItems = [], self = this;
-
-            menuItems.push({
-                name: 'Color by function',
-                click: function() {
-                    setColorBy('function');
-                }
-            });
-            menuItems.push({
-                name: 'Color by class',
-                click: function() {
-                    setColorBy('class');
-                }
-            });
-
-            return menuItems;
-
-            function setColorBy(value) {
-                self.colorBy = value;
-                self.trackView.update();
-                config.popover.hide();
-            }
-        }
-    };
 
 
     return igv;

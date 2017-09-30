@@ -94,7 +94,12 @@ var igv = (function (igv) {
 
         if (trackView.track.name && 0 === this.genomicState.locusIndex) {
 
-            description = trackView.track.description || trackView.track.name;
+            if(typeof trackView.track.description === 'function') {
+                description = trackView.track.description();
+            } else {
+                description = trackView.track.description || trackView.track.name;
+            }
+
             $trackLabel = $('<div class="igv-track-label">');
 
             $trackLabel.html(trackView.track.name);
