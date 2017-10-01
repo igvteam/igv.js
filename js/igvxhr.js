@@ -453,9 +453,15 @@ var igv = (function (igv) {
      */
     function mapUrl(url) {
 
-        return url.includes("//www.dropbox.com") ?
-            url.replace("//www.dropbox.com", "//dl.dropboxusercontent.com") :
-            url;
+        if (url.includes("//www.dropbox.com")) {
+            return url.replace("//www.dropbox.com", "//dl.dropboxusercontent.com");
+        }
+        else if (url.includes("//drive.google.com")) {
+            return igv.Google.driveDownloadURL(url);
+        }
+        else {
+            return url;
+        }
     }
 
 // Increments an anonymous usage count.  Count is anonymous, needed for our continued funding.  Please don't delete
