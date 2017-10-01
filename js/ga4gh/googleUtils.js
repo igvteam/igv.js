@@ -83,6 +83,36 @@ var igv = (function (igv) {
                 }
             }
             return url;
+        },
+
+        driveDownloadURL: function (link) {
+            var i1, i2, id;
+            // Return a google drive download url for the sharable link
+            //https://drive.google.com/open?id=0B-lleX9c2pZFbDJ4VVRxakJzVGM
+            //https://drive.google.com/file/d/0B-lleX9c2pZFZVZyVTdkSFZ2cm8/view?usp=sharing
+            //https://drive.google.com/file/d/0B-lleX9c2pZFbDJ4VVRxakJzVGM/view?usp=sharing
+            // url: 'https://www.googleapis.com/drive/v3/files/0B-lleX9c2pZFZVZyVTdkSFZ2cm8/?alt=media',
+
+            if (link.includes("/open?id=")) {
+                i1 = link.indexOf("/open?id=") + 9;
+                i2 = link.indexOf("&");
+                if (i1 > 0 && i2 > i1) {
+                    id = link.substring(i1, i2)
+                }
+                else if (i1 > 0) {
+                    id = link.substring(i1);
+                }
+
+            }
+            else if (link.includes("/file/d/")) {
+                i1 = link.indexOf("/file/d/") + 8;
+                i2 = link.lastIndexOf("/");
+                id = link.substring(i1, i2);
+
+            }
+
+            return id ? "https://www.googleapis.com/drive/v3/files/" + id + "?alt=media" : link;
+
         }
     }
 
