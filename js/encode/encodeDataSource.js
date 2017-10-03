@@ -28,7 +28,7 @@
  * Created by dat on 4/18/17.
  */
 var igv = (function (igv) {
-    
+
     /**
      * @param config      dataSource configuration
      * @param tableFormat table formatting object (see for example EncodeTableFormat)
@@ -72,8 +72,6 @@ var igv = (function (igv) {
 
                 var rows,
                     obj;
-
-                console.log('then - parse/sort json ...');
 
                 rows = [];
                 _.each(json["@graph"], function (record) {

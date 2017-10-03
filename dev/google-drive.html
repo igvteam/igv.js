@@ -28,15 +28,22 @@
             showNavigation: true,
             showRuler: true,
             genome: "hg19",
-            locus: "1:1-2000",
+            locus: "chr22:24,376,148-24,376,519",
+            apiKey: 'AIzaSyDUUAUFpQEN4mumeMNIRWXSiTh5cPtUAD0',
             tracks: [
                 {
+                    // Public google drive share links.  Different forms used for url and indexURL to test both
                     type: 'bam',
-                    sourceType: 'pysam',
-                    url: 'http://igv-load-balancer-25126049.us-east-1.elb.amazonaws.com/alignments',
-                    alignmentFile: '/home/ec2-user/test/data/cram_with_crai_index.cram',
-                    referenceFile: '/home/ec2-user/test/data/hg19mini.fa',
-                    label: 'CRAM file'
+                    url: 'https://drive.google.com/open?id=0B-lleX9c2pZFZVZyVTdkSFZ2cm8',
+                    indexURL: 'https://drive.google.com/file/d/0B-lleX9c2pZFbDJ4VVRxakJzVGM/view?usp=sharing',
+                    label: 'Dopbox BAM'
+                },
+                {
+                    name: "Genes",
+                    url: "https://s3.amazonaws.com/igv.broadinstitute.org/annotations/hg19/genes/gencode.v18.collapsed.bed",
+                    order: Number.MAX_VALUE,
+                    displayMode: "EXPANDED"
+
                 }
 
             ]
