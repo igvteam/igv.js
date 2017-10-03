@@ -307,7 +307,21 @@ var igv = (function (igv) {
             menuItems = [],
             mapped;
 
-        menuItems.push(igv.colorPickerMenuItem(popover, this.trackView));
+        if (this.render === renderSnp) {
+            var colorByItems = _.map(["function", "class"], function(colorScheme, index) {
+                return {
+                    object: $(colorSchemeMarkup(colorScheme, index, self.colorBy)),
+                    click: function() {
+                        popover.hide();
+                        self.colorBy = colorScheme;
+                        self.trackView.update();
+                    }
+                }
+            });
+            menuItems = menuItems.concat(colorByItems);
+        } else {
+            menuItems.push(igv.colorPickerMenuItem(popover, this.trackView));
+        }
 
         mapped = _.map(["COLLAPSED", "SQUISHED", "EXPANDED"], function (displayMode, index) {
             return {
@@ -341,6 +355,15 @@ var igv = (function (igv) {
                 return chosen + '<i class="fa fa-check fa-check-shim fa-check-hidden"></i>' + lut[displayMode] + '</div>';
             }
 
+        }
+
+        function colorSchemeMarkup(colorScheme, index, selfColorScheme) {
+            var chosen = (0 === index) ? '<div class="igv-track-menu-border-top">' : '<div>';
+            if (colorScheme === selfColorScheme) {
+                return chosen + '<i class="fa fa-check fa-check-shim"></i>' + 'Color by ' + colorScheme + '</div>'
+            } else {
+                return chosen + '<i class="fa fa-check fa-check-shim fa-check-hidden"></i>' + 'Color by ' + colorScheme + '</div>';
+            }
         }
 
         return menuItems;
@@ -380,17 +403,27 @@ var igv = (function (igv) {
 
         var desc;
 
-        if('snp' === this.type) {
+        // if('snp' === this.type) {
+        if (renderSnp === this.render) {
             desc = "<html>" + this.name + "<hr>";
-            // TODO -- fill in color legened
-            desc += "</html>"
+            desc += '<em>Color By Function:</em><br>';
+            desc += '<span style="color:red">Red</span>: Coding-Non-Synonymous, Splice Site<br>';
+            desc += '<span style="color:green">Green</span>: Coding-Synonymous<br>';
+            desc += '<span style="color:blue">Blue</span>: Untranslated<br>';
+            desc += '<span style="color:black">Black</span>: Intron, Locus, Unknown<br><br>';
+            desc += '<em>Color By Class:</em><br>';
+            desc += '<span style="color:red">Red</span>: Deletion<br>';
+            desc += '<span style="color:green">Green</span>: MNP<br>';
+            desc += '<span style="color:blue">Blue</span>: Microsatellite, Named<br>';
+            desc += '<span style="color:black">Black</span>: Indel, Insertion, SNP';
+            desc += "</html>";
             return desc;
         }
         else {
             return this.name;
         }
 
-    }
+    };
 
     /**
      * @param feature
