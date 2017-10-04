@@ -60,7 +60,7 @@ var igv = (function (igv) {
             1e1
         ].reverse();
 
-    tickKeys = _.map(tickNumbers, function (number) { number.toString(); });
+    tickKeys = _.map(tickNumbers, function (number) { return number.toString() });
     tickDivisors = createTickDivisiors();
     tickUnits = createTickUnits();
     tickValues = createTickValues();
@@ -120,30 +120,22 @@ var igv = (function (igv) {
     igv.RulerTrack.prototype.draw = function (options) {
 
         var self = this,
-            ts,
-            spacing,
-            nTick,
-            x,
-            l,
-            yShim,
+            pixel,
+            shim,
             tickHeight,
-            bpp,
             rulerSweeper,
-            label,
-            ticks,
             index,
             incrementPixel,
-            tickValue;
+            tickValue,
+            tickLabelNumber,
+            tickLabelText,
+            toggle;
 
         rulerSweeper = this.rulerSweepers[ options.genomicState.locusIndex.toString() ];
 
         if ('all' === options.referenceFrame.chrName.toLowerCase()) {
             drawWholeGenome.call(this, options, rulerSweeper);
         } else {
-
-            // heckbert_labels(options.referenceFrame.start, options.referenceFrame.start + options.referenceFrame.toBP(options.viewportWidth), options.viewportWidth, options.context, options.referenceFrame.bpPerPixel);
-
-            ticks = heckbert_labels(options.bpStart, options.bpStart + options.referenceFrame.toBP(options.pixelWidth), options.pixelWidth, options.context, options.referenceFrame.bpPerPixel);
 
             rulerSweeper.$viewportContent.find('.igv-whole-genome-container').hide();
             rulerSweeper.$viewportContent.find('canvas').show();
@@ -152,6 +144,10 @@ var igv = (function (igv) {
 
             updateLocusLabelWithGenomicState(options.genomicState);
 
+            shim = 2;
+            tickHeight = 6;
+
+            // port of iOS ruler scheme
             index = 0;
             for (var i = 0; i < _.size(tickKeys); i++) {
                 incrementPixel = options.referenceFrame.toPixels( tickValues[ tickKeys[ i ] ] );
@@ -161,40 +157,21 @@ var igv = (function (igv) {
                 }
             }
 
+            tickValue = tickValues[ tickKeys[ index ] ];
+            tickLabelNumber = options.bpStart;
+            tickLabelText = tickLabelString(tickLabelNumber, index, options.referenceFrame.toBP(options.pixelWidth));
+            for (pixel = 0, toggle = 0; pixel < options.pixelWidth; pixel += incrementPixel, toggle++) {
 
-            yShim = 2;
-            tickHeight = 6;
-            _.each(ticks, function (tick) {
-                igv.graphics.fillText(options.context, tick.pretty, tick.pixel, self.height - (tickHeight / 0.75));
-                igv.graphics.strokeLine(options.context, tick.pretty, self.height - tickHeight, tick.pretty, self.height - yShim);
-            });
+                console.log('label ' + tickLabelText);
 
+                igv.graphics.fillText(options.context, tickLabelText, Math.round(pixel), self.height - (tickHeight / 0.75));
+                igv.graphics.strokeLine(options.context, Math.round(pixel), this.height - tickHeight, Math.round(pixel), this.height - shim);
 
-            bpp = options.referenceFrame.bpPerPixel;
-            ts = findSpacing( Math.floor(options.viewportWidth * bpp) );
-            spacing = ts.majorTick;
+                tickLabelNumber += tickValue;
+                tickLabelText = tickLabelString(tickLabelNumber, index, options.referenceFrame.toBP(options.pixelWidth));
+            }
 
-            // Find starting point closest to the current origin
-            nTick = Math.floor(options.bpStart / spacing) - 1;
-            x = 0;
-
-            // while (x < options.pixelWidth) {
-            //
-            //     l = Math.floor(nTick * spacing);
-            //
-            //     x = Math.round(((l - 1) - options.bpStart + 0.5) / bpp);
-            //     label = formatNumber(l / ts.unitMultiplier, 0) + " " + ts.majorUnit;
-            //
-            //     if (nTick % 1 === 0) {
-            //         igv.graphics.fillText(options.context, label, x, this.height - (tickHeight / 0.75));
-            //     }
-            //
-            //     igv.graphics.strokeLine(options.context, x, this.height - tickHeight, x, this.height - yShim);
-            //
-            //     nTick++;
-            // }
-
-            igv.graphics.strokeLine(options.context, 0, this.height - yShim, options.pixelWidth, this.height - yShim);
+            igv.graphics.strokeLine(options.context, 0, this.height - shim, options.pixelWidth, this.height - shim);
 
         }
 
@@ -271,6 +248,30 @@ var igv = (function (igv) {
 
     };
 
+    function tickLabelString (tickLabelNumber, index, lengthBP) {
+        var tickUnit,
+            tickDivisor,
+            string,
+            number;
+
+
+        // if (lengthBP > 1e3) {
+        //     tickUnit = 'kb';
+        //     tickDivisor = 1e3;
+        // } else if (lengthBP > 4e7) {
+        //     tickUnit = 'mb';
+        //     tickDivisor = 1e6;
+        // } else {
+            tickUnit = tickUnits[ tickKeys[ index ] ];
+            tickDivisor = tickDivisors[ tickKeys[ index ] ];
+        // }
+
+        number = Math.round(tickLabelNumber / tickDivisor);
+        string = number + tickUnit;
+
+        return string;
+    }
+
     function createTickDivisiors () {
         var tickDivisiors = {};
         tickDivisiors[ 1e8.toString() ] = 1e6;
@@ -294,168 +295,37 @@ var igv = (function (igv) {
         return tickDivisiors;
     }
 
-    function createTickUnits () {
-        var tickUnits = {};
+    function createTickValues  () {
+        var tickValues = {};
 
         _.each(tickNumbers, function (number) {
-            tickUnits[ number.toString() ] = number;
+            tickValues[ number.toString() ] = number;
         });
-
-        return tickUnits;
-    }
-
-    function createTickValues () {
-        var tickValues = {};
-        tickValues[ 1e8.toString() ] = 'mb';
-        tickValues[ 5e7.toString() ] = 'mb';
-        tickValues[ 1e7.toString() ] = 'mb';
-        tickValues[ 5e6.toString() ] = 'mb';
-        tickValues[ 1e6.toString() ] = 'mb';
-
-        tickValues[ 5e5.toString() ] = 'kb';
-        tickValues[ 1e5.toString() ] = 'kb';
-        tickValues[ 5e4.toString() ] = 'kb';
-        tickValues[ 1e4.toString() ] = 'kb';
-        tickValues[ 5e3.toString() ] = 'kb';
-        tickValues[ 1e3.toString() ] = 'kb';
-
-        tickValues[ 5e2.toString() ] = 'b';
-        tickValues[ 1e2.toString() ] = 'b';
-        tickValues[ 5e1.toString() ] = 'b';
-        tickValues[ 1e1.toString() ] = 'b';
 
         return tickValues;
     }
 
+    function createTickUnits () {
+        var tickUnits = {};
+        tickUnits[ 1e8.toString() ] = 'mb';
+        tickUnits[ 5e7.toString() ] = 'mb';
+        tickUnits[ 1e7.toString() ] = 'mb';
+        tickUnits[ 5e6.toString() ] = 'mb';
+        tickUnits[ 1e6.toString() ] = 'mb';
 
+        tickUnits[ 5e5.toString() ] = 'kb';
+        tickUnits[ 1e5.toString() ] = 'kb';
+        tickUnits[ 5e4.toString() ] = 'kb';
+        tickUnits[ 1e4.toString() ] = 'kb';
+        tickUnits[ 5e3.toString() ] = 'kb';
+        tickUnits[ 1e3.toString() ] = 'kb';
 
+        tickUnits[ 5e2.toString() ] = 'b';
+        tickUnits[ 1e2.toString() ] = 'b';
+        tickUnits[ 5e1.toString() ] = 'b';
+        tickUnits[ 1e1.toString() ] = 'b';
 
-
-
-
-
-
-
-
-
-
-
-
-    // Implementation of Paul Heckbert's classing "Nice Numbers for Graph Labels"
-    // Graphics Gems. Code: pp. 657-659. Discussion: p. 61
-    function heckbert_labels(min, max, canvasWidth, context, bpp) {
-        var range,
-            increment,
-            graphmin,
-            graphmax,
-            nfrac,
-            tickCount,
-            ticks,
-            labelWidth;
-
-        labelWidth = context.measureText(max.toString()).width;
-        tickCount = Math.floor(canvasWidth / labelWidth);
-
-        range = nicenum(max - min, false);
-        increment = nicenum(range / (tickCount - 1), true);
-
-        graphmin = increment * Math.floor(min / increment);
-        graphmax = increment * Math.ceil(max / increment);
-
-        nfrac = Math.max(0, -Math.floor( Math.log10(increment)));
-        // console.log('ticks ' + tickCount + ' min ' + igv.numberFormatter(graphmin) + ' max ' + igv.numberFormatter(graphmax) + ' increment ' + igv.numberFormatter(increment));
-
-        ticks = [];
-        for (var x = graphmin, i = 0, w = 0; x < (graphmax + 0.5 * increment); x += increment, i++) {
-            w += Math.round(context.measureText(x.toString()).width);
-            console.log('index ' + i + ' label ' + igv.numberFormatter(x) + ' acc-width ' + w + ' canvas-width ' + canvasWidth);
-            ticks.push({ bp:x, pretty:igv.numberFormatter(x), pixel: Math.round((x - graphmin)/bpp) });
-        }
-
-        function nicenum(x, doRound) {
-            var exp,
-                f,
-                nf;
-
-            exp = Math.floor( Math.log10(x));
-            f = x / expt(10, exp);
-
-            if (doRound) {
-
-                if (f < 1.5) {
-                    nf = 1;
-                } else if (f < 3) {
-                    nf = 2;
-                } else if (f < 7) {
-                    nf = 5;
-                } else {
-                    nf = 10;
-                }
-
-            } else {
-
-                if (f <= 1.5) {
-                    nf = 1;
-                } else if (f <= 2) {
-                    nf = 2;
-                } else if (f <= 5) {
-                    nf = 5;
-                } else {
-                    nf = 10;
-                }
-
-            }
-
-            return nf * expt(10, exp);
-
-            function expt(a, n) {
-                return Math.pow(a, n);
-            }
-        }
-
-        return ticks;
-    }
-
-    function TickSpacing(majorTick, majorUnit, unitMultiplier) {
-        this.majorTick = majorTick;
-        this.majorUnit = majorUnit;
-        this.unitMultiplier = unitMultiplier;
-    }
-
-    function findSpacing(maxValue) {
-
-        if (maxValue < 10) {
-            return new TickSpacing(1, "", 1);
-        }
-
-
-        // How many zeroes?
-        var nZeroes = Math.floor(log10(maxValue));
-        var majorUnit = "";
-        var unitMultiplier = 1;
-        if (nZeroes > 9) {
-            majorUnit = "gb";
-            unitMultiplier = 1000000000;
-        }
-        if (nZeroes > 6) {
-            majorUnit = "mb";
-            unitMultiplier = 1000000;
-        } else if (nZeroes > 3) {
-            majorUnit = "kb";
-            unitMultiplier = 1000;
-        }
-
-        var nMajorTicks = maxValue / Math.pow(10, nZeroes - 1);
-        if (nMajorTicks < 25) {
-            return new TickSpacing(Math.pow(10, nZeroes - 1), majorUnit, unitMultiplier);
-        } else {
-            return new TickSpacing(Math.pow(10, nZeroes) / 2, majorUnit, unitMultiplier);
-        }
-
-        function log10(x) {
-            var dn = Math.log(10);
-            return Math.log(x) / dn;
-        }
+        return tickUnits;
     }
 
     return igv;
