@@ -119,8 +119,7 @@ var igv = (function (igv) {
     };
 
     igv.RulerSweeper.prototype.disableMouseHandlers = function () {
-        this.$viewportContent.off();
-        this.$viewport.off();
+         this.$viewport.off();
     };
 
     igv.RulerSweeper.prototype.addMouseHandlers = function () {
@@ -144,19 +143,8 @@ var igv = (function (igv) {
                 e.preventDefault();
                 e.stopPropagation();
 
-                self.$viewportContent.off();
+                isMouseDown = true;
 
-                self.$viewportContent.on({
-                    mousedown: function (e) {
-
-                        e.preventDefault();
-                        e.stopPropagation();
-
-                        isMouseDown = true;
-                    }
-                });
-
-                // mouseDownXY = igv.translateMouseCoordinates(e, self.contentDiv);
                 mouseDownXY = { x:e.offsetX, y:e.offsetY };
 
                 left = mouseDownXY.x;
@@ -173,7 +161,6 @@ var igv = (function (igv) {
 
                 if (isMouseDown && isMouseIn) {
 
-                    // mouseMoveXY = igv.translateMouseCoordinates(e, self.contentDiv);
                     mouseMoveXY = { x:e.offsetX, y:e.offsetY };
 
                     dx = mouseMoveXY.x - mouseDownXY.x;
