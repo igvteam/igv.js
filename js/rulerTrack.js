@@ -128,7 +128,10 @@ var igv = (function (igv) {
             incrementPixel,
             tickLabelNumber,
             tickLabelText,
-            toggle;
+            toggle,
+            rect,
+            center,
+            size;
 
         rulerSweeper = this.rulerSweepers[ options.genomicState.locusIndex.toString() ];
 
@@ -157,7 +160,13 @@ var igv = (function (igv) {
             for (pixel = 0, toggle = 0, tickLabelNumber = options.bpStart; pixel < options.pixelWidth; pixel += incrementPixel, toggle++, tickLabelNumber += tickValues[ tickKeys[ index ] ]) {
 
                 tickLabelText = tickLabelString(tickLabelNumber, index);
-                igv.graphics.fillText(options.context, tickLabelText, Math.round(pixel), self.height - (tickHeight / 0.75));
+
+                center = { x:Math.round(pixel), y:self.height - (tickHeight / 0.75) };
+                size = { width:options.context.measureText(tickLabelText).width, height:2 };
+
+                rect = igv.rectWithCenterAndSize(center, size);
+
+                igv.graphics.fillText(options.context, tickLabelText, Math.round(pixel - rect.size.width/2), self.height - (tickHeight / 0.75));
                 igv.graphics.strokeLine(options.context, Math.round(pixel), this.height - tickHeight, Math.round(pixel), this.height - shim);
             }
 
