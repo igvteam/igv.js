@@ -126,7 +126,6 @@ var igv = (function (igv) {
             rulerSweeper,
             index,
             incrementPixel,
-            tickValue,
             tickLabelNumber,
             tickLabelText,
             toggle;
@@ -142,12 +141,8 @@ var igv = (function (igv) {
 
             rulerSweeper.addMouseHandlers();
 
-            updateLocusLabelWithGenomicState(options.genomicState);
+            updateLocusLabelWithGenomicState(options.viewport.$viewport.find('.igv-viewport-content-ruler-div'), options.genomicState);
 
-            shim = 2;
-            tickHeight = 6;
-
-            // port of iOS ruler scheme
             index = 0;
             for (var i = 0; i < _.size(tickKeys); i++) {
                 incrementPixel = options.referenceFrame.toPixels( tickValues[ tickKeys[ i ] ] );
@@ -157,114 +152,29 @@ var igv = (function (igv) {
                 }
             }
 
-            tickValue = tickValues[ tickKeys[ index ] ];
-            tickLabelNumber = options.bpStart;
-            tickLabelText = tickLabelString(tickLabelNumber, index, options.referenceFrame.toBP(options.pixelWidth));
-            for (pixel = 0, toggle = 0; pixel < options.pixelWidth; pixel += incrementPixel, toggle++) {
+            shim = 2;
+            tickHeight = 6;
+            for (pixel = 0, toggle = 0, tickLabelNumber = options.bpStart; pixel < options.pixelWidth; pixel += incrementPixel, toggle++, tickLabelNumber += tickValues[ tickKeys[ index ] ]) {
 
-                console.log('label ' + tickLabelText);
-
+                tickLabelText = tickLabelString(tickLabelNumber, index);
                 igv.graphics.fillText(options.context, tickLabelText, Math.round(pixel), self.height - (tickHeight / 0.75));
                 igv.graphics.strokeLine(options.context, Math.round(pixel), this.height - tickHeight, Math.round(pixel), this.height - shim);
-
-                tickLabelNumber += tickValue;
-                tickLabelText = tickLabelString(tickLabelNumber, index, options.referenceFrame.toBP(options.pixelWidth));
             }
 
             igv.graphics.strokeLine(options.context, 0, this.height - shim, options.pixelWidth, this.height - shim);
 
         }
 
-        function updateLocusLabelWithGenomicState(genomicState) {
-            var $e;
-            $e = options.viewport.$viewport.find('.igv-viewport-content-ruler-div');
-            $e.text(genomicState.locusSearchString);
-        }
-
-        function formatNumber(anynum, decimal) {
-            //decimal  - the number of decimals after the digit from 0 to 3
-            //-- Returns the passed number as a string in the xxx,xxx.xx format.
-            //anynum = eval(obj.value);
-            var divider = 10;
-            switch (decimal) {
-                case 0:
-                    divider = 1;
-                    break;
-                case 1:
-                    divider = 10;
-                    break;
-                case 2:
-                    divider = 100;
-                    break;
-                default:       //for 3 decimal places
-                    divider = 1000;
-            }
-
-            var workNum = Math.abs((Math.round(anynum * divider) / divider));
-
-            var workStr = "" + workNum;
-
-            if (workStr.indexOf(".") === -1) {
-                workStr += "."
-            }
-
-            var dStr = workStr.substr(0, workStr.indexOf("."));
-            var dNum = dStr - 0;
-            var pStr = workStr.substr(workStr.indexOf("."));
-
-            while (pStr.length - 1 < decimal) {
-                pStr += "0"
-            }
-
-            if (pStr === '.') pStr = '';
-
-            //--- Adds a comma in the thousands place.
-            if (dNum >= 1000) {
-                var dLen = dStr.length;
-                dStr = parseInt("" + (dNum / 1000)) + "," + dStr.substring(dLen - 3, dLen)
-            }
-
-            //-- Adds a comma in the millions place.
-            if (dNum >= 1000000) {
-                dLen = dStr.length;
-                dStr = parseInt("" + (dNum / 1000000)) + "," + dStr.substring(dLen - 7, dLen)
-            }
-            var retval = dStr + pStr;
-            //-- Put numbers in parentheses if negative.
-            if (anynum < 0) {
-                retval = "(" + retval + ")";
-            }
-
-            //You could include a dollar sign in the return value.
-            //retval =  "$"+retval
-            return retval;
-        }
-
-        function drawWholeGenome(options, rulerSweeper) {
-            rulerSweeper.$viewportContent.find('canvas').hide();
-            rulerSweeper.$viewportContent.find('.igv-whole-genome-container').show();
-            rulerSweeper.disableMouseHandlers();
-        }
-
     };
 
-    function tickLabelString (tickLabelNumber, index, lengthBP) {
+    function tickLabelString(tickLabelNumber, index) {
         var tickUnit,
             tickDivisor,
             string,
             number;
 
-
-        // if (lengthBP > 1e3) {
-        //     tickUnit = 'kb';
-        //     tickDivisor = 1e3;
-        // } else if (lengthBP > 4e7) {
-        //     tickUnit = 'mb';
-        //     tickDivisor = 1e6;
-        // } else {
-            tickUnit = tickUnits[ tickKeys[ index ] ];
-            tickDivisor = tickDivisors[ tickKeys[ index ] ];
-        // }
+        tickUnit = tickUnits[ tickKeys[ index ] ];
+        tickDivisor = tickDivisors[ tickKeys[ index ] ];
 
         number = Math.round(tickLabelNumber / tickDivisor);
         string = number + tickUnit;
@@ -326,6 +236,16 @@ var igv = (function (igv) {
         tickUnits[ 1e1.toString() ] = 'b';
 
         return tickUnits;
+    }
+
+    function updateLocusLabelWithGenomicState($label, state) {
+        $label.text(state.locusSearchString);
+    }
+
+    function drawWholeGenome(rulerSweeper) {
+        rulerSweeper.$viewportContent.find('canvas').hide();
+        rulerSweeper.$viewportContent.find('.igv-whole-genome-container').show();
+        rulerSweeper.disableMouseHandlers();
     }
 
     return igv;
