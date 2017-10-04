@@ -137,24 +137,6 @@ var igv = (function (igv) {
         this.config.$modalBody.empty();
     };
 
-    igv.IGVModalTable.prototype.unbindAllMouseHandlers = function () {
-        var list;
-
-        list =
-            [
-                this.$modalTable.find('tbody'),
-                this.config.$modal,
-                this.config.$modalTopCloseButton,
-                this.config.$modalBottomCloseButton,
-                this.config.$modalGoButton
-            ];
-
-        _.each(list, function ($e) {
-            $e.unbind();
-        });
-
-    };
-
     /**
      * @param dataSource source of data fed to the table (see for example EncodeDataSource)
      */
