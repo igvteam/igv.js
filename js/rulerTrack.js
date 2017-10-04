@@ -25,6 +25,46 @@
 
 var igv = (function (igv) {
 
+    var TickSeparationThreshold,
+        tickNumbers,
+        tickKeys,
+        tickDivisors,
+        tickUnits,
+        tickValues;
+
+    TickSeparationThreshold = 50;
+
+    tickNumbers =
+        [
+            1e8,
+
+            5e7,
+            1e7,
+
+            5e6,
+            1e6,
+
+            5e5,
+            1e5,
+
+            5e4,
+            1e4,
+
+            5e3,
+            1e3,
+
+            5e2,
+            1e2,
+
+            5e1,
+            1e1
+        ].reverse();
+
+    tickKeys = _.map(tickNumbers, function (number) { number.toString(); });
+    tickDivisors = createTickDivisiors();
+    tickUnits = createTickUnits();
+    tickValues = createTickValues();
+
     //
     igv.RulerTrack = function () {
 
@@ -90,7 +130,10 @@ var igv = (function (igv) {
             bpp,
             rulerSweeper,
             label,
-            ticks;
+            ticks,
+            index,
+            incrementPixel,
+            tickValue;
 
         rulerSweeper = this.rulerSweepers[ options.genomicState.locusIndex.toString() ];
 
@@ -108,6 +151,16 @@ var igv = (function (igv) {
             rulerSweeper.addMouseHandlers();
 
             updateLocusLabelWithGenomicState(options.genomicState);
+
+            index = 0;
+            for (var i = 0; i < _.size(tickKeys); i++) {
+                incrementPixel = options.referenceFrame.toPixels( tickValues[ tickKeys[ i ] ] );
+                if (incrementPixel > TickSeparationThreshold) {
+                    index = i;
+                    break;
+                }
+            }
+
 
             yShim = 2;
             tickHeight = 6;
@@ -217,6 +270,76 @@ var igv = (function (igv) {
         }
 
     };
+
+    function createTickDivisiors () {
+        var tickDivisiors = {};
+        tickDivisiors[ 1e8.toString() ] = 1e6;
+        tickDivisiors[ 5e7.toString() ] = 1e6;
+        tickDivisiors[ 1e7.toString() ] = 1e6;
+        tickDivisiors[ 5e6.toString() ] = 1e6;
+        tickDivisiors[ 1e6.toString() ] = 1e6;
+
+        tickDivisiors[ 5e5.toString() ] = 1e3;
+        tickDivisiors[ 1e5.toString() ] = 1e3;
+        tickDivisiors[ 5e4.toString() ] = 1e3;
+        tickDivisiors[ 1e4.toString() ] = 1e3;
+        tickDivisiors[ 5e3.toString() ] = 1e3;
+        tickDivisiors[ 1e3.toString() ] = 1e3;
+
+        tickDivisiors[ 5e2.toString() ] = 1;
+        tickDivisiors[ 1e2.toString() ] = 1;
+        tickDivisiors[ 5e1.toString() ] = 1;
+        tickDivisiors[ 1e1.toString() ] = 1;
+
+        return tickDivisiors;
+    }
+
+    function createTickUnits () {
+        var tickUnits = {};
+
+        _.each(tickNumbers, function (number) {
+            tickUnits[ number.toString() ] = number;
+        });
+
+        return tickUnits;
+    }
+
+    function createTickValues () {
+        var tickValues = {};
+        tickValues[ 1e8.toString() ] = 'mb';
+        tickValues[ 5e7.toString() ] = 'mb';
+        tickValues[ 1e7.toString() ] = 'mb';
+        tickValues[ 5e6.toString() ] = 'mb';
+        tickValues[ 1e6.toString() ] = 'mb';
+
+        tickValues[ 5e5.toString() ] = 'kb';
+        tickValues[ 1e5.toString() ] = 'kb';
+        tickValues[ 5e4.toString() ] = 'kb';
+        tickValues[ 1e4.toString() ] = 'kb';
+        tickValues[ 5e3.toString() ] = 'kb';
+        tickValues[ 1e3.toString() ] = 'kb';
+
+        tickValues[ 5e2.toString() ] = 'b';
+        tickValues[ 1e2.toString() ] = 'b';
+        tickValues[ 5e1.toString() ] = 'b';
+        tickValues[ 1e1.toString() ] = 'b';
+
+        return tickValues;
+    }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
     // Implementation of Paul Heckbert's classing "Nice Numbers for Graph Labels"
     // Graphics Gems. Code: pp. 657-659. Discussion: p. 61
