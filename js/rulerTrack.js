@@ -125,31 +125,36 @@ var igv = (function (igv) {
             tickHeight,
             rulerSweeper,
             index,
-            incrementPixel,
+            tickSeparationPixel,
             tickLabelNumber,
             tickLabelText,
             toggle,
             rect,
             center,
-            size;
+            size,
+            maximumLabelWidthPixel,
+            bp;
+
 
         rulerSweeper = this.rulerSweepers[ options.genomicState.locusIndex.toString() ];
 
         if ('all' === options.referenceFrame.chrName.toLowerCase()) {
-            drawWholeGenome.call(this, options, rulerSweeper);
+
+            rulerSweeper.$viewportContent.find('canvas').hide();
+            rulerSweeper.$viewportContent.find('.igv-whole-genome-container').show();
+            rulerSweeper.disableMouseHandlers();
         } else {
 
             rulerSweeper.$viewportContent.find('.igv-whole-genome-container').hide();
             rulerSweeper.$viewportContent.find('canvas').show();
-
             rulerSweeper.addMouseHandlers();
 
             updateLocusLabelWithGenomicState(options.viewport.$viewport.find('.igv-viewport-content-ruler-div'), options.genomicState);
 
             index = 0;
             for (var i = 0; i < _.size(tickKeys); i++) {
-                incrementPixel = options.referenceFrame.toPixels( tickValues[ tickKeys[ i ] ] );
-                if (incrementPixel > TickSeparationThreshold) {
+                tickSeparationPixel = options.referenceFrame.toPixels( tickValues[ tickKeys[ i ] ] );
+                if (tickSeparationPixel > TickSeparationThreshold) {
                     index = i;
                     break;
                 }
@@ -157,16 +162,24 @@ var igv = (function (igv) {
 
             shim = 2;
             tickHeight = 6;
-            for (pixel = 0, toggle = 0, tickLabelNumber = options.bpStart; pixel < options.pixelWidth; pixel += incrementPixel, toggle++, tickLabelNumber += tickValues[ tickKeys[ index ] ]) {
+            bp = options.bpStart + options.referenceFrame.toBP(options.pixelWidth);
+            bp = Math.min(options.genomicState.chromosome.bpLength, bp);
+            maximumLabelWidthPixel = options.context.measureText( tickLabelString(bp, index) ).width;
+            console.log('width metric ' + Math.round(maximumLabelWidthPixel) + ' width ' + Math.round(tickSeparationPixel));
+            for (pixel = 0, toggle = 0, tickLabelNumber = options.bpStart; pixel < options.pixelWidth; pixel += tickSeparationPixel, toggle++, tickLabelNumber += tickValues[ tickKeys[ index ] ]) {
 
-                tickLabelText = tickLabelString(tickLabelNumber, index);
+                if (0 === toggle % 2 || maximumLabelWidthPixel < tickSeparationPixel) {
 
-                center = { x:Math.round(pixel), y:self.height - (tickHeight / 0.75) };
-                size = { width:options.context.measureText(tickLabelText).width, height:2 };
+                    tickLabelText = tickLabelString(tickLabelNumber, index);
 
-                rect = igv.rectWithCenterAndSize(center, size);
+                    center = { x:Math.round(pixel), y:self.height - (tickHeight / 0.75) };
+                    size = { width:options.context.measureText(tickLabelText).width, height:2 };
 
-                igv.graphics.fillText(options.context, tickLabelText, Math.round(pixel - rect.size.width/2), self.height - (tickHeight / 0.75));
+                    rect = igv.rectWithCenterAndSize(center, size);
+
+                    igv.graphics.fillText(options.context, tickLabelText, Math.round(pixel - rect.size.width/2), self.height - (tickHeight / 0.75));
+                }
+
                 igv.graphics.strokeLine(options.context, Math.round(pixel), this.height - tickHeight, Math.round(pixel), this.height - shim);
             }
 
@@ -249,12 +262,6 @@ var igv = (function (igv) {
 
     function updateLocusLabelWithGenomicState($label, state) {
         $label.text(state.locusSearchString);
-    }
-
-    function drawWholeGenome(rulerSweeper) {
-        rulerSweeper.$viewportContent.find('canvas').hide();
-        rulerSweeper.$viewportContent.find('.igv-whole-genome-container').show();
-        rulerSweeper.disableMouseHandlers();
     }
 
     return igv;
