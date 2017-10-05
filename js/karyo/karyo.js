@@ -142,7 +142,7 @@ var igv = (function (igv) {
         var canvas;
 
         if (undefined === igv.browser.genomicStateList) {
-            console.log('karyo - resize: undefined === igv.browser.genomicStateList. Bail.');
+            // console.log('karyo - resize: undefined === igv.browser.genomicStateList. Bail.');
             return;
         }
 
@@ -171,7 +171,7 @@ var igv = (function (igv) {
 
 
         if (undefined === igv.browser.genomicStateList) {
-            console.log('karyo - repaint: undefined === igv.browser.genomicStateList. Bail');
+            // console.log('karyo - repaint: undefined === igv.browser.genomicStateList. Bail');
             return;
         }
 
@@ -182,7 +182,7 @@ var igv = (function (igv) {
         genome = igv.browser.genome;
 
         if(!genome.ideograms) {
-            console.log('karyo - no ideograms defined')
+            // console.log('karyo - no ideograms defined');
             return;
         }
 
