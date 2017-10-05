@@ -186,7 +186,7 @@ var igv = (function (igv) {
         tickDivisor = tickDivisors[ tickKeys[ index ] ];
 
         number = Math.round(tickLabelNumber / tickDivisor);
-        string = number + tickUnit;
+        string = igv.numberFormatter(number) + tickUnit;
 
         return string;
     }
