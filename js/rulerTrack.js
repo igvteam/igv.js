@@ -25,11 +25,53 @@
 
 var igv = (function (igv) {
 
+    var TickSeparationThreshold,
+        tickNumbers,
+        tickKeys,
+        tickDivisors,
+        tickUnits,
+        tickValues;
+
+    TickSeparationThreshold = 50;
+
+    tickNumbers =
+        [
+            1e8,
+
+            5e7,
+            1e7,
+
+            5e6,
+            1e6,
+
+            5e5,
+            1e5,
+
+            5e4,
+            1e4,
+
+            5e3,
+            1e3,
+
+            5e2,
+            1e2,
+
+            5e1,
+            1e1
+        ].reverse();
+
+    tickKeys = _.map(tickNumbers, function (number) { return number.toString() });
+    tickDivisors = createTickDivisiors();
+    tickUnits = createTickUnits();
+    tickValues = createTickValues();
+
     //
     igv.RulerTrack = function () {
 
+        this.height = 40;
         // this.height = 50;
-        this.height = 24;
+        // this.height = 24;
+
         this.name = "";
         this.id = "ruler";
         this.disableButtons = true;
@@ -77,171 +119,149 @@ var igv = (function (igv) {
 
     igv.RulerTrack.prototype.draw = function (options) {
 
-        var ts,
-            spacing,
-            nTick,
-            x,
-            l,
-            yShim,
+        var self = this,
+            pixel,
+            shim,
             tickHeight,
-            bpPerPixel,
-            rulerSweeper;
+            rulerSweeper,
+            index,
+            tickSeparationPixel,
+            tickLabelNumber,
+            tickLabelText,
+            toggle,
+            rect,
+            center,
+            size,
+            maximumLabelWidthPixel,
+            bp;
+
 
         rulerSweeper = this.rulerSweepers[ options.genomicState.locusIndex.toString() ];
 
         if ('all' === options.referenceFrame.chrName.toLowerCase()) {
-            drawWholeGenome.call(this, options, rulerSweeper);
+
+            rulerSweeper.$viewportContent.find('canvas').hide();
+            rulerSweeper.$viewportContent.find('.igv-whole-genome-container').show();
+            rulerSweeper.disableMouseHandlers();
         } else {
 
             rulerSweeper.$viewportContent.find('.igv-whole-genome-container').hide();
             rulerSweeper.$viewportContent.find('canvas').show();
-
             rulerSweeper.addMouseHandlers();
 
-            updateLocusLabelWithGenomicState(options.genomicState);
+            updateLocusLabelWithGenomicState(options.viewport.$viewport.find('.igv-viewport-content-ruler-div'), options.genomicState);
 
-            bpPerPixel = options.referenceFrame.bpPerPixel;
-            ts = findSpacing( Math.floor(options.viewportWidth * bpPerPixel) );
-            spacing = ts.majorTick;
+            index = 0;
+            for (var i = 0; i < _.size(tickKeys); i++) {
+                tickSeparationPixel = options.referenceFrame.toPixels( tickValues[ tickKeys[ i ] ] );
+                if (tickSeparationPixel > TickSeparationThreshold) {
+                    index = i;
+                    break;
+                }
+            }
 
-            // Find starting point closest to the current origin
-            nTick = Math.floor(options.bpStart / spacing) - 1;
-            x = 0;
+            shim = 2;
+            tickHeight = 6;
+            bp = options.bpStart + options.referenceFrame.toBP(options.pixelWidth);
+            bp = Math.min(options.genomicState.chromosome.bpLength, bp);
+            maximumLabelWidthPixel = options.context.measureText( tickLabelString(bp, index) ).width;
+            console.log('width metric ' + Math.round(maximumLabelWidthPixel) + ' width ' + Math.round(tickSeparationPixel));
+            for (pixel = 0, toggle = 0, tickLabelNumber = options.bpStart; pixel < options.pixelWidth; pixel += tickSeparationPixel, toggle++, tickLabelNumber += tickValues[ tickKeys[ index ] ]) {
 
-            while (x < options.pixelWidth) {
+                if (0 === toggle % 2 || maximumLabelWidthPixel < tickSeparationPixel) {
 
-                l = Math.floor(nTick * spacing);
-                yShim = 2;
-                tickHeight = 6;
+                    tickLabelText = tickLabelString(tickLabelNumber, index);
 
-                x = Math.round(((l - 1) - options.bpStart + 0.5) / bpPerPixel);
-                var chrPosition = formatNumber(l / ts.unitMultiplier, 0) + " " + ts.majorUnit;
+                    center = { x:Math.round(pixel), y:self.height - (tickHeight / 0.75) };
+                    size = { width:options.context.measureText(tickLabelText).width, height:2 };
 
-                if (nTick % 1 === 0) {
-                    igv.graphics.fillText(options.context, chrPosition, x, this.height - (tickHeight / 0.75));
+                    rect = igv.rectWithCenterAndSize(center, size);
+
+                    igv.graphics.fillText(options.context, tickLabelText, Math.round(pixel - rect.size.width/2), self.height - (tickHeight / 0.75));
                 }
 
-                igv.graphics.strokeLine(options.context, x, this.height - tickHeight, x, this.height - yShim);
-
-                nTick++;
-            }
-            igv.graphics.strokeLine(options.context, 0, this.height - yShim, options.pixelWidth, this.height - yShim);
-
-        }
-
-        function updateLocusLabelWithGenomicState(genomicState) {
-            var $e;
-            $e = options.viewport.$viewport.find('.igv-viewport-content-ruler-div');
-            $e.text(genomicState.locusSearchString);
-        }
-
-        function formatNumber(anynum, decimal) {
-            //decimal  - the number of decimals after the digit from 0 to 3
-            //-- Returns the passed number as a string in the xxx,xxx.xx format.
-            //anynum = eval(obj.value);
-            var divider = 10;
-            switch (decimal) {
-                case 0:
-                    divider = 1;
-                    break;
-                case 1:
-                    divider = 10;
-                    break;
-                case 2:
-                    divider = 100;
-                    break;
-                default:       //for 3 decimal places
-                    divider = 1000;
+                igv.graphics.strokeLine(options.context, Math.round(pixel), this.height - tickHeight, Math.round(pixel), this.height - shim);
             }
 
-            var workNum = Math.abs((Math.round(anynum * divider) / divider));
+            igv.graphics.strokeLine(options.context, 0, this.height - shim, options.pixelWidth, this.height - shim);
 
-            var workStr = "" + workNum;
-
-            if (workStr.indexOf(".") === -1) {
-                workStr += "."
-            }
-
-            var dStr = workStr.substr(0, workStr.indexOf("."));
-            var dNum = dStr - 0;
-            var pStr = workStr.substr(workStr.indexOf("."));
-
-            while (pStr.length - 1 < decimal) {
-                pStr += "0"
-            }
-
-            if (pStr === '.') pStr = '';
-
-            //--- Adds a comma in the thousands place.
-            if (dNum >= 1000) {
-                var dLen = dStr.length;
-                dStr = parseInt("" + (dNum / 1000)) + "," + dStr.substring(dLen - 3, dLen)
-            }
-
-            //-- Adds a comma in the millions place.
-            if (dNum >= 1000000) {
-                dLen = dStr.length;
-                dStr = parseInt("" + (dNum / 1000000)) + "," + dStr.substring(dLen - 7, dLen)
-            }
-            var retval = dStr + pStr;
-            //-- Put numbers in parentheses if negative.
-            if (anynum < 0) {
-                retval = "(" + retval + ")";
-            }
-
-            //You could include a dollar sign in the return value.
-            //retval =  "$"+retval
-            return retval;
-        }
-
-        function drawWholeGenome(options, rulerSweeper) {
-            rulerSweeper.$viewportContent.find('canvas').hide();
-            rulerSweeper.$viewportContent.find('.igv-whole-genome-container').show();
-            rulerSweeper.disableMouseHandlers();
         }
 
     };
 
-    function TickSpacing(majorTick, majorUnit, unitMultiplier) {
-        this.majorTick = majorTick;
-        this.majorUnit = majorUnit;
-        this.unitMultiplier = unitMultiplier;
+    function tickLabelString(tickLabelNumber, index) {
+        var tickUnit,
+            tickDivisor,
+            string,
+            number;
+
+        tickUnit = tickUnits[ tickKeys[ index ] ];
+        tickDivisor = tickDivisors[ tickKeys[ index ] ];
+
+        number = Math.round(tickLabelNumber / tickDivisor);
+        string = igv.numberFormatter(number) + tickUnit;
+
+        return string;
     }
 
-    function findSpacing(maxValue) {
+    function createTickDivisiors () {
+        var tickDivisiors = {};
+        tickDivisiors[ 1e8.toString() ] = 1e6;
+        tickDivisiors[ 5e7.toString() ] = 1e6;
+        tickDivisiors[ 1e7.toString() ] = 1e6;
+        tickDivisiors[ 5e6.toString() ] = 1e6;
+        tickDivisiors[ 1e6.toString() ] = 1e6;
 
-        if (maxValue < 10) {
-            return new TickSpacing(1, "", 1);
-        }
+        tickDivisiors[ 5e5.toString() ] = 1e3;
+        tickDivisiors[ 1e5.toString() ] = 1e3;
+        tickDivisiors[ 5e4.toString() ] = 1e3;
+        tickDivisiors[ 1e4.toString() ] = 1e3;
+        tickDivisiors[ 5e3.toString() ] = 1e3;
+        tickDivisiors[ 1e3.toString() ] = 1e3;
 
+        tickDivisiors[ 5e2.toString() ] = 1;
+        tickDivisiors[ 1e2.toString() ] = 1;
+        tickDivisiors[ 5e1.toString() ] = 1;
+        tickDivisiors[ 1e1.toString() ] = 1;
 
-        // Now man zeroes?
-        var nZeroes = Math.floor(log10(maxValue));
-        var majorUnit = "";
-        var unitMultiplier = 1;
-        if (nZeroes > 9) {
-            majorUnit = "gb";
-            unitMultiplier = 1000000000;
-        }
-        if (nZeroes > 6) {
-            majorUnit = "mb";
-            unitMultiplier = 1000000;
-        } else if (nZeroes > 3) {
-            majorUnit = "kb";
-            unitMultiplier = 1000;
-        }
+        return tickDivisiors;
+    }
 
-        var nMajorTicks = maxValue / Math.pow(10, nZeroes - 1);
-        if (nMajorTicks < 25) {
-            return new TickSpacing(Math.pow(10, nZeroes - 1), majorUnit, unitMultiplier);
-        } else {
-            return new TickSpacing(Math.pow(10, nZeroes) / 2, majorUnit, unitMultiplier);
-        }
+    function createTickValues  () {
+        var tickValues = {};
 
-        function log10(x) {
-            var dn = Math.log(10);
-            return Math.log(x) / dn;
-        }
+        _.each(tickNumbers, function (number) {
+            tickValues[ number.toString() ] = number;
+        });
+
+        return tickValues;
+    }
+
+    function createTickUnits () {
+        var tickUnits = {};
+        tickUnits[ 1e8.toString() ] = 'mb';
+        tickUnits[ 5e7.toString() ] = 'mb';
+        tickUnits[ 1e7.toString() ] = 'mb';
+        tickUnits[ 5e6.toString() ] = 'mb';
+        tickUnits[ 1e6.toString() ] = 'mb';
+
+        tickUnits[ 5e5.toString() ] = 'kb';
+        tickUnits[ 1e5.toString() ] = 'kb';
+        tickUnits[ 5e4.toString() ] = 'kb';
+        tickUnits[ 1e4.toString() ] = 'kb';
+        tickUnits[ 5e3.toString() ] = 'kb';
+        tickUnits[ 1e3.toString() ] = 'kb';
+
+        tickUnits[ 5e2.toString() ] = 'b';
+        tickUnits[ 1e2.toString() ] = 'b';
+        tickUnits[ 5e1.toString() ] = 'b';
+        tickUnits[ 1e1.toString() ] = 'b';
+
+        return tickUnits;
+    }
+
+    function updateLocusLabelWithGenomicState($label, state) {
+        $label.text(state.locusSearchString);
     }
 
     return igv;
