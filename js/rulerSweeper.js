@@ -154,7 +154,7 @@ var igv = (function (igv) {
                 isMouseIn = true;
             },
 
-            mousemove: function (e) {
+            mousemove: igv.throttle(function (e) {
 
                 e.preventDefault();
                 e.stopPropagation();
@@ -182,7 +182,7 @@ var igv = (function (igv) {
                         }
                     }
                 }
-            },
+            }, 10),
 
             mouseup: function (e) {
 
