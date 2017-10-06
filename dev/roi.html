@@ -32,9 +32,6 @@
             showIdeogram: true,
             showRuler: true,
 
-            // load local file: test/data/bw/chr1.bw
-            // or
-            // load url: https://data.broadinstitute.org/igvdata/test/data/bigwig/chr1.bw
             locus: '1:67,655,272-67,684,468',
 
             reference: {
@@ -48,16 +45,8 @@
             tracks:
                 [
                     {
-                        name: "Genes",
-                        searchable: false,
-                        type: "annotation",
-                        format: "gtf",
-                        sourceType: "file",
-                        url: "https://s3.amazonaws.com/igv.broadinstitute.org/annotations/hg19/genes/gencode.v18.annotation.sorted.gtf.gz",
-                        indexURL: "https://s3.amazonaws.com/igv.broadinstitute.org/annotations/hg19/genes/gencode.v18.annotation.sorted.gtf.gz.tbi",
-                        visibilityWindow: 10000000,
-                        order: Number.MAX_VALUE,
-                        displayMode: "EXPANDED"
+                        name: '3 Column BED File',
+                        url: '../roi/roi.bed'
                     }
                 ]
         };
