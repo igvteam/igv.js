@@ -21,37 +21,39 @@
 <script type="text/javascript">
 
     $(document).ready(function () {
-        var div,
-            options,
-            browser;
+        var options;
 
-        div = $("#myDiv")[0];
         options = {
-            showLoadFileWidget:true,
-            minimumBases: 6,
-            showIdeogram: true,
-            showRuler: true,
-
+//            roi:'../roi/roi.bed',
+            roi:'https://s3.amazonaws.com/igvjs-dugla/data/roi.bed',
             locus: '1:67,655,272-67,684,468',
-
-            reference: {
-                id: "hg19",
-                fastaURL: "https://s3.amazonaws.com/igv.broadinstitute.org/genomes/seq/1kg_v37/human_g1k_v37_decoy.fasta",
-                cytobandURL: "https://s3.amazonaws.com/igv.broadinstitute.org/genomes/seq/b37/b37_cytoband.txt"
-            },
+            minimumBases: 6,
             flanking: 1000,
             apiKey: 'AIzaSyDUUAUFpQEN4mumeMNIRWXSiTh5cPtUAD0',
-            palette: ["#00A0B0", "#6A4A3C", "#CC333F", "#EB6841"],
+            palette:
+                [
+                    "#00A0B0",
+                    "#6A4A3C",
+                    "#CC333F",
+                    "#EB6841"
+                ],
+            reference:
+                {
+                    id: "hg19",
+                    fastaURL: "https://s3.amazonaws.com/igv.broadinstitute.org/genomes/seq/1kg_v37/human_g1k_v37_decoy.fasta",
+                    cytobandURL: "https://s3.amazonaws.com/igv.broadinstitute.org/genomes/seq/b37/b37_cytoband.txt"
+                },
             tracks:
                 [
                     {
                         name: '3 Column BED File',
-                        url: '../roi/roi.bed'
+//                        url: '../roi/roi.bed'
+                        url: 'https://s3.amazonaws.com/igvjs-dugla/data/roi.bed'
                     }
                 ]
         };
 
-        browser = igv.createBrowser(div, options);
+        igv.createBrowser($("#myDiv").get(0), options);
 
     })
 

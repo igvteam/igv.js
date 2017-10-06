@@ -28,26 +28,25 @@ var igv = (function (igv) {
 
     igv.ROI = function (config) {
 
-        igv.configTrack(this, config);
-
-        this.featureSource = new igv.FeatureSource(config);
-
-        this.render = renderRegion;
-
+        this.isLoaded = false;
+        this.config = config;
+        this.roiSource = new igv.ROISource(config);
     };
 
-    igv.ROI.prototype.getFeatures = function (chr, bpStart, bpEnd, bpPerPixel) {
+    igv.ROI.prototype.getRegions = function () {
 
         var self = this;
 
-        return new Promise(function (fulfill, reject) {
-
-            self.featureSource
-                .getFeatures(chr, bpStart, bpEnd, bpPerPixel)
-                .then(fulfill)
-                .catch(reject);
-
-        });
+        this.roiSource
+            .getRegions('all')
+            .then(function (regions) {
+                console.log('roi - features ' + _.size(regions));
+                self.regions = regions;
+                self.isLoaded = true;
+            })
+            .catch(function (error) {
+                igv.presentAlert(error);
+            });
     };
 
     igv.ROI.prototype.draw = function (options) {
@@ -93,25 +92,6 @@ var igv = (function (igv) {
         }
 
     };
-
-    function renderRegion(region, startBP, bpp, pixelHeight, ctx, options) {
-
-        var coord,
-            color;
-
-        coord = coordinates(region, startBP, bpp);
-        color = this.color;
-
-        if (region.color) {
-            color = region.color;
-        }
-
-        ctx.fillStyle = color;
-        ctx.strokeStyle = color;
-
-        ctx.fillRect(coord.x, 0, coord.width, this.featureHeight);
-
-    }
 
     function coordinates(region, startBP, bpp) {
 

@@ -149,6 +149,14 @@ var igv = (function (igv) {
                         igv.browser.addTrack(igv.browser.rulerTrack);
                     }
 
+                    if (config.roi) {
+                        config.type = 'roi';
+                        config.url = config.roi;
+                        igv.browser.roi = igv.createTrackWithConfiguration(config);
+                        igv.browser.roi.getRegions();
+
+                    }
+
                     if (config.tracks) {
                         igv.browser.loadTracksWithConfigList(config.tracks);
 
