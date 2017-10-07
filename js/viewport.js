@@ -455,8 +455,13 @@ var igv = (function (igv) {
                                 viewportContainerWidth: igv.browser.viewportContainerWidth()
                             };
 
-                        // console.log('render features');
                         self.trackView.track.draw(self.drawConfiguration);
+
+                        // paint highlighted regions over track
+                        if (igv.browser.roi) {
+                            igv.browser.roi.draw(self.drawConfiguration);
+                        }
+
 
                         if (doRenderControlCanvas(genomicState, self.trackView)) {
                             renderControlCanvasWithTrackView(self.trackView);

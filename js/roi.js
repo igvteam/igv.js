@@ -26,6 +26,8 @@
 
 var igv = (function (igv) {
 
+    var highlightColor = igv.rgbaColor(68, 134, 247, 0.25);
+
     igv.ROI = function (config) {
 
         this.isLoaded = false;
@@ -49,47 +51,32 @@ var igv = (function (igv) {
             });
     };
 
-    igv.ROI.prototype.draw = function (options) {
+    igv.ROI.prototype.draw = function (drawConfiguration) {
 
-        var self = this,
-            regions,
-            bpEnd,
-            coord,
-            color,
-            region;
+        var endBP,
+            region,
+            coord;
 
-        igv.graphics.fillRect(options.context, 0, 0, options.pixelWidth, options.pixelHeight, { fillStyle:'rgb(255, 255, 255)' });
+        if (undefined === this.regions || false === this.isLoaded) {
+            return;
+        }
 
-        if (options.features) {
+        endBP = drawConfiguration.bpStart + (drawConfiguration.pixelWidth * drawConfiguration.bpPerPixel + 1);
+        for (var i = 0; i < this.regions.length; i++) {
 
-            regions = options.features;
-            bpEnd = options.bpStart + (options.pixelWidth * options.bpPerPixel + 1);
-            for (var i = 0, len = regions.length; i < len; i++) {
-
-                region = regions[ i ];
-                if (region.end < options.bpStart) {
-                    continue;
-                }
-
-                if (region.start > bpEnd) {
-                    break;
-                }
-
-                color = this.color;
-
-                if (feature.color) {
-                    color = region.color;
-                }
-
-                options.context.fillStyle = color;
-                options.context.strokeStyle = color;
-
-                coord = coordinates(region, options.bpStart, options.bpPerPixel);
-                options.context.fillRect(coord.x, 0, coord.width, this.featureHeight);
-
+            region = this.regions[ i ];
+            if (region.end < drawConfiguration.bpStart) {
+                continue;
             }
 
+            if (region.start > endBP) {
+                break;
+            }
+
+            coord = coordinates(region, drawConfiguration.bpStart, drawConfiguration.bpPerPixel);
+            igv.graphics.fillRect(drawConfiguration.context, coord.x, 0, coord.width, drawConfiguration.pixelHeight, { fillStyle:highlightColor });
         }
+
 
     };
 

@@ -49,7 +49,24 @@
                         name: '3 Column BED File',
 //                        url: '../roi/roi.bed'
                         url: 'https://s3.amazonaws.com/igvjs-dugla/data/roi.bed'
+                    },
+                    {
+                        url: 'https://data.broadinstitute.org/igvdata/encode/hg19/broadHistone/wgEncodeBroadHistoneGm12878H3k4me2StdSig.wig.tdf',
+                        name: 'GM12878H3k4m3 (tdf)'
+                    },
+                    {
+                        name: "Genes",
+                        searchable: false,
+                        type: "annotation",
+                        format: "gtf",
+                        sourceType: "file",
+                        url: "https://s3.amazonaws.com/igv.broadinstitute.org/annotations/hg19/genes/gencode.v18.annotation.sorted.gtf.gz",
+                        indexURL: "https://s3.amazonaws.com/igv.broadinstitute.org/annotations/hg19/genes/gencode.v18.annotation.sorted.gtf.gz.tbi",
+                        visibilityWindow: 10000000,
+                        order: Number.MAX_VALUE,
+                        displayMode: "EXPANDED"
                     }
+
                 ]
         };
 
