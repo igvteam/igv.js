@@ -26,7 +26,7 @@
 
 var igv = (function (igv) {
 
-    var highlightColor = igv.rgbaColor(68, 134, 247, 0.25);
+    var defaultHighlightColor = igv.rgbaColor(68, 134, 247, 0.25);
 
     igv.ROI = function (config) {
 
@@ -74,7 +74,7 @@ var igv = (function (igv) {
             }
 
             coord = coordinates(region, drawConfiguration.bpStart, drawConfiguration.bpPerPixel);
-            igv.graphics.fillRect(drawConfiguration.context, coord.x, 0, coord.width, drawConfiguration.pixelHeight, { fillStyle:highlightColor });
+            igv.graphics.fillRect(drawConfiguration.context, coord.x, 0, coord.width, drawConfiguration.pixelHeight, { fillStyle:defaultHighlightColor });
         }
 
 
