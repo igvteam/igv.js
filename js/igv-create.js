@@ -98,8 +98,8 @@ var igv = (function (igv) {
             $header.append($('<div class="igv-logo-nonav">'));
         }
 
-
-        setOAuth(config);
+        if(config.apiKey) igv.setApiKey(config.apiKey);
+        if(config.oauthToken) igv.setOauthToken(config.oauthToken);
 
         // Deal with legacy genome definition options
         setReferenceConfiguration(config);
@@ -202,9 +202,12 @@ var igv = (function (igv) {
 
     };
 
-    function setOAuth(conf) {
-        oauth.google.apiKey = conf.apiKey;
-        oauth.google.access_token = conf.oauthToken;
+    igv.setApiKey = function(key) {
+        oauth.google.apiKey = key;
+    }
+
+    igv.setOauthToken = function(token) {
+        oauth.google.access_token = token;
     }
 
     function setTrackOrder(conf) {
