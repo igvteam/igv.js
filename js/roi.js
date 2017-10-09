@@ -31,6 +31,7 @@ var igv = (function (igv) {
     igv.ROI = function (config) {
         this.config = config;
         this.roiSource = new igv.FeatureSource(config);
+        this.color = config.color || defaultHighlightColor;
     };
 
     igv.ROI.prototype.getFeatures = function (chr, start, end) {
@@ -64,7 +65,7 @@ var igv = (function (igv) {
             }
 
             coord = coordinates(region, drawConfiguration.bpStart, drawConfiguration.bpPerPixel);
-            igv.graphics.fillRect(drawConfiguration.context, coord.x, 0, coord.width, drawConfiguration.pixelHeight, { fillStyle:defaultHighlightColor });
+            igv.graphics.fillRect(drawConfiguration.context, coord.x, 0, coord.width, drawConfiguration.pixelHeight, { fillStyle: this.color });
         }
 
 
