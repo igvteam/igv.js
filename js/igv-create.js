@@ -149,6 +149,10 @@ var igv = (function (igv) {
                         igv.browser.addTrack(igv.browser.rulerTrack);
                     }
 
+                    if (config.roi) {
+                        igv.browser.roi = new igv.ROI(config.roi);
+                    }
+
                     if (config.tracks) {
                         igv.browser.loadTracksWithConfigList(config.tracks);
 

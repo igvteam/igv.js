@@ -18,17 +18,17 @@ var igv = (function (igv) {
 
         this.trackView = trackView;
         this.id = _.uniqueId('viewport_');
-        this.genomicState = igv.browser.genomicStateList[ locusIndex ];
+        this.genomicState = igv.browser.genomicStateList[locusIndex];
 
         this.$viewport = $('<div class="igv-viewport-div">');
         $container.append(this.$viewport);
 
-        this.$viewport.data( "viewport", this.id );
-        this.$viewport.data( "locusindex", this.genomicState.locusIndex );
+        this.$viewport.data("viewport", this.id);
+        this.$viewport.data("locusindex", this.genomicState.locusIndex);
 
         addViewportBorders(this.$viewport, this.genomicState.locusIndex, _.size(igv.browser.genomicStateList));
 
-        this.setWidth(igv.browser.viewportContainerWidth()/this.genomicState.locusCount);
+        this.setWidth(igv.browser.viewportContainerWidth() / this.genomicState.locusCount);
 
         this.contentDiv = $('<div class="igv-viewport-content-div">')[0];
         this.$viewport.append(this.contentDiv);
@@ -38,7 +38,7 @@ var igv = (function (igv) {
         }
 
         if (trackView.track instanceof igv.RulerTrack) {
-            $div = $('<div>', { class:'igv-whole-genome-container' });
+            $div = $('<div>', {class: 'igv-whole-genome-container'});
             $(this.contentDiv).append($div);
             $div.hide();
         }
@@ -77,7 +77,7 @@ var igv = (function (igv) {
             $(this.contentDiv).append(self.$zoomInNotice);
         }
 
-        function createZoomInNotice () {
+        function createZoomInNotice() {
             var $container,
                 $child;
 
@@ -94,7 +94,7 @@ var igv = (function (igv) {
 
         if (trackView.track.name && 0 === this.genomicState.locusIndex) {
 
-            if(typeof trackView.track.description === 'function') {
+            if (typeof trackView.track.description === 'function') {
                 description = trackView.track.description();
             } else {
                 description = trackView.track.description || trackView.track.name;
@@ -127,7 +127,7 @@ var igv = (function (igv) {
             }
 
             $spinner = $('<div class="igv-viewport-spinner">');
-            $spinner.css({ 'font-size' : dimen + 'px'});
+            $spinner.css({'font-size': dimen + 'px'});
 
             // $spinner.append($('<i class="fa fa-cog fa-spin fa-fw">'));
             $spinner.append($('<i class="fa fa-spinner fa-spin fa-fw">'));
@@ -136,7 +136,7 @@ var igv = (function (igv) {
 
         }
 
-        function addViewportBorders ($viewport, locusIndex, lociCount) {
+        function addViewportBorders($viewport, locusIndex, lociCount) {
 
             if (1 === lociCount || locusIndex === lociCount - 1) {
                 return;
@@ -155,7 +155,7 @@ var igv = (function (igv) {
         var percentage;
 
         this.$viewport.width(width);
-        percentage = this.$viewport.width()/this.$viewport.outerWidth();
+        percentage = this.$viewport.width() / this.$viewport.outerWidth();
         this.$viewport.width(Math.floor(percentage * width));
     };
 
@@ -172,7 +172,7 @@ var igv = (function (igv) {
         doubleClickDelay = igv.browser.constants.doubleClickDelay;
 
         // right-click
-        $(self.canvas).contextmenu(function(e) {
+        $(self.canvas).contextmenu(function (e) {
 
             e.preventDefault();
             e = $.event.fix(e);
@@ -227,11 +227,11 @@ var igv = (function (igv) {
                     popupTimer = undefined;
                 }
 
-                if (igv.browser.minimumBasesExtent() > Math.floor(self.$viewport.width() * referenceFrame.bpPerPixel/2.0)) {
+                if (igv.browser.minimumBasesExtent() > Math.floor(self.$viewport.width() * referenceFrame.bpPerPixel / 2.0)) {
                     // do nothing
                 } else {
                     newCenter = Math.round(referenceFrame.start + canvasCoords.x * referenceFrame.bpPerPixel);
-                    if('all' === referenceFrame.chrName.toLowerCase()) {
+                    if ('all' === referenceFrame.chrName.toLowerCase()) {
 
                         chr = igv.browser.genome.getChromosomeCoordinate(newCenter).chr;
 
@@ -242,7 +242,7 @@ var igv = (function (igv) {
                                 return g.locusSearchString;
                             });
 
-                            loci[ self.genomicState.locusIndex ] = chr;
+                            loci[self.genomicState.locusIndex] = chr;
                             locusString = loci.join(' ');
                         }
 
@@ -250,7 +250,7 @@ var igv = (function (igv) {
 
                     } else {
                         self.genomicState.referenceFrame.bpPerPixel /= 2;
-                        self.genomicState.referenceFrame.start = Math.round((newCenter + self.genomicState.referenceFrame.start)/2.0 );
+                        self.genomicState.referenceFrame.start = Math.round((newCenter + self.genomicState.referenceFrame.start) / 2.0);
                         igv.browser.updateWithLocusIndex(self.genomicState.locusIndex);
 
                     }
@@ -322,7 +322,7 @@ var igv = (function (igv) {
 
     igv.Viewport.prototype.resize = function () {
 
-        var contentWidth  = igv.browser.viewportContainerWidth()/this.genomicState.locusCount;
+        var contentWidth = igv.browser.viewportContainerWidth() / this.genomicState.locusCount;
 
         // console.log('viewport(' + this.id + ').resize - width: ' + contentWidth);
 
@@ -354,7 +354,8 @@ var igv = (function (igv) {
             referenceFrame = genomicState.referenceFrame,
             chr,
             refFrameStart,
-            refFrameEnd;
+            refFrameEnd,
+            drawConfiguration;
 
         if (!(viewIsReady.call(this))) {
             return;
@@ -394,7 +395,7 @@ var igv = (function (igv) {
                 return;
             }
 
-            self.loading = { start: bpStart, end: bpEnd };
+            self.loading = {start: bpStart, end: bpEnd};
 
             self.startSpinner();
 
@@ -411,6 +412,28 @@ var igv = (function (igv) {
 
                     self.stopSpinner();
 
+                    buffer = document.createElement('canvas');
+                    buffer.width = pixelWidth;
+                    buffer.height = self.canvas.height;
+                    drawConfiguration =
+                    {
+                        features: features,
+                        context: buffer.getContext('2d'),
+                        pixelWidth: buffer.width,
+                        pixelHeight: buffer.height,
+                        bpStart: bpStart,
+                        bpEnd: bpEnd,
+                        bpPerPixel: referenceFrame.bpPerPixel,
+                        referenceFrame: referenceFrame,
+                        genomicState: genomicState,
+                        viewport: self,
+                        viewportWidth: self.$viewport.width(),
+                        viewportContainerX: genomicState.referenceFrame.toPixels(genomicState.referenceFrame.start - bpStart),
+                        viewportContainerWidth: igv.browser.viewportContainerWidth()
+                    };
+
+                    self.drawConfiguration = drawConfiguration;  //TODO -- only needed for bam track.  Very ugly backpointer, get rid of this.
+
                     if (features) {
 
                         if (typeof self.trackView.track.computePixelHeight === 'function') {
@@ -421,52 +444,30 @@ var igv = (function (igv) {
                             }
                         }
 
-                        buffer = document.createElement('canvas');
-                        buffer.width = pixelWidth;
-                        buffer.height = self.canvas.height;
+                        drawConfiguration.features = features;
 
-                        self.drawConfiguration =
-                            {
-
-                                features: features,
-                                context: buffer.getContext('2d'),
-
-                                pixelWidth: buffer.width,
-                                pixelHeight: buffer.height,
-
-                                bpStart: bpStart,   // bpStart = Math.max(0, Math.round(referenceFrame.start - bpWidth / 3))
-                                                    // bpWidth = Math.round(referenceFrame.toBP(pixelWidth))
-                                                    // buffer.width = pixelWidth = 3 * this.canvas.width
-
-                                bpEnd: bpEnd,
-
-                                bpPerPixel: referenceFrame.bpPerPixel,
-
-                                referenceFrame: referenceFrame,
-
-                                genomicState: genomicState,
-
-                                viewport: self,
-
-                                viewportWidth: self.$viewport.width(),
-
-                                viewportContainerX: genomicState.referenceFrame.toPixels(genomicState.referenceFrame.start - bpStart),
-
-                                viewportContainerWidth: igv.browser.viewportContainerWidth()
-                            };
-
-                        // console.log('render features');
-                        self.trackView.track.draw(self.drawConfiguration);
+                        self.trackView.track.draw(drawConfiguration);
 
                         if (doRenderControlCanvas(genomicState, self.trackView)) {
                             renderControlCanvasWithTrackView(self.trackView);
                         }
 
+                    }
+
+                    if (igv.browser.roi) {
+
+                        // Defer tile creation and image paint until ROI features are loaded and drawn
+                        igv.browser.roi.getFeatures(referenceFrame.chrName, bpStart, bpEnd)
+                            .then(function (features) {
+                                drawConfiguration.features = features;
+                                igv.browser.roi.draw(drawConfiguration);
+                                self.tile = new Tile(referenceFrame.chrName, bpStart, bpEnd, referenceFrame.bpPerPixel, buffer);
+                                self.paintImageWithReferenceFrame(referenceFrame);
+                            });
+                    } else {
+                        
                         self.tile = new Tile(referenceFrame.chrName, bpStart, bpEnd, referenceFrame.bpPerPixel, buffer);
                         self.paintImageWithReferenceFrame(referenceFrame);
-
-                    } else {
-                        self.ctx.clearRect(0, 0, self.canvas.width, self.canvas.height);
                     }
 
                     function renderControlCanvasWithTrackView(trackView) {
@@ -501,7 +502,7 @@ var igv = (function (igv) {
         }
 
         function viewIsReady() {
-            return igv.browser && igv.browser.genomicStateList && igv.browser.genomicStateList[ self.genomicState.locusIndex ].referenceFrame;
+            return igv.browser && igv.browser.genomicStateList && igv.browser.genomicStateList[self.genomicState.locusIndex].referenceFrame;
         }
 
     };
@@ -553,16 +554,16 @@ var igv = (function (igv) {
 
     igv.Viewport.viewportWidthAtLocusIndex = function (locusIndex) {
 
-        var viewport = _.first( igv.Viewport.viewportsWithLocusIndex(locusIndex) );
+        var viewport = _.first(igv.Viewport.viewportsWithLocusIndex(locusIndex));
         return viewport.$viewport.width();
     };
 
     igv.Viewport.viewportsWithLocusIndex = function (locusIndex) {
 
         var list = [];
-        _.each(igv.browser.trackViews, function(tv){
+        _.each(igv.browser.trackViews, function (tv) {
 
-            _.each(tv.viewports, function(vp) {
+            _.each(tv.viewports, function (vp) {
 
                 if (locusIndex === vp.genomicState.locusIndex) {
                     list.push(vp);
@@ -578,9 +579,9 @@ var igv = (function (igv) {
 
         var result = undefined;
 
-        _.each(igv.browser.trackViews, function(tv){
+        _.each(igv.browser.trackViews, function (tv) {
             if (undefined === result) {
-                _.each(tv.viewports, function(vp) {
+                _.each(tv.viewports, function (vp) {
                     if (id === vp.id) {
                         result = vp;
                     }
@@ -632,4 +633,4 @@ var igv = (function (igv) {
 
     return igv;
 
-}) (igv || {});
+})(igv || {});
