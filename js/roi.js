@@ -32,7 +32,8 @@ var igv = (function (igv) {
 
         this.isLoaded = false;
         this.config = config;
-        this.roiSource = new igv.ROISource(config);
+        this.roiSource = new igv.FeatureSource(config);
+        this.roiSource.reader.supportsWholeGenome = true;
     };
 
     igv.ROI.prototype.getRegions = function () {
@@ -40,7 +41,7 @@ var igv = (function (igv) {
         var self = this;
 
         this.roiSource
-            .getRegions('all')
+            .getFeatures('all')
             .then(function (regions) {
                 console.log('roi - features ' + _.size(regions));
                 self.regions = regions;
