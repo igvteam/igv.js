@@ -153,8 +153,6 @@ var igv = (function (igv) {
                         config.type = 'roi';
                         config.url = config.roi;
                         igv.browser.roi = igv.createTrackWithConfiguration(config);
-                        igv.browser.roi.getRegions();
-
                     }
 
                     if (config.tracks) {

@@ -29,43 +29,32 @@ var igv = (function (igv) {
     var defaultHighlightColor = igv.rgbaColor(68, 134, 247, 0.25);
 
     igv.ROI = function (config) {
-
-        this.isLoaded = false;
         this.config = config;
         this.roiSource = new igv.FeatureSource(config);
-        this.roiSource.reader.supportsWholeGenome = true;
     };
 
-    igv.ROI.prototype.getRegions = function () {
+    igv.ROI.prototype.getFeatures = function (chr, start, end) {
 
-        var self = this;
-
-        this.roiSource
-            .getFeatures('all')
-            .then(function (regions) {
-                console.log('roi - features ' + _.size(regions));
-                self.regions = regions;
-                self.isLoaded = true;
-            })
-            .catch(function (error) {
-                igv.presentAlert(error);
-            });
+        return this.roiSource.getFeatures(chr, start, end);
     };
 
     igv.ROI.prototype.draw = function (drawConfiguration) {
 
         var endBP,
             region,
-            coord;
+            coord,
+            regions,
+            len;
 
-        if (undefined === this.regions || false === this.isLoaded) {
+        regions = drawConfiguration.features;
+        if (!regions) {
             return;
         }
 
         endBP = drawConfiguration.bpStart + (drawConfiguration.pixelWidth * drawConfiguration.bpPerPixel + 1);
-        for (var i = 0; i < this.regions.length; i++) {
+        for (var i = 0, len = regions.length; i < len; i++) {
 
-            region = this.regions[ i ];
+            region = regions[ i ];
             if (region.end < drawConfiguration.bpStart) {
                 continue;
             }
