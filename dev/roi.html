@@ -25,7 +25,11 @@
 
         options = {
 //            roi:'../roi/roi.bed',
-            roi:'https://s3.amazonaws.com/igvjs-dugla/data/roi.bed',
+            roi:
+            {
+                url: 'https://s3.amazonaws.com/igvjs-dugla/data/roi.bed',
+                indexed: false
+            },
             locus: '1:67,655,272-67,684,468',
             minimumBases: 6,
             flanking: 1000,
@@ -48,7 +52,8 @@
                     {
                         name: '3 Column BED File',
 //                        url: '../roi/roi.bed'
-                        url: 'https://s3.amazonaws.com/igvjs-dugla/data/roi.bed'
+                        url: 'https://s3.amazonaws.com/igvjs-dugla/data/roi.bed',
+                        indexed: false
                     },
                     {
                         url: 'https://data.broadinstitute.org/igvdata/encode/hg19/broadHistone/wgEncodeBroadHistoneGm12878H3k4me2StdSig.wig.tdf',

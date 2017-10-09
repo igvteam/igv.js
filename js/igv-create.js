@@ -150,9 +150,7 @@ var igv = (function (igv) {
                     }
 
                     if (config.roi) {
-                        config.type = 'roi';
-                        config.url = config.roi;
-                        igv.browser.roi = igv.createTrackWithConfiguration(config);
+                        igv.browser.roi = new igv.ROI(config.roi);
                     }
 
                     if (config.tracks) {

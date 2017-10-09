@@ -87,12 +87,7 @@ var igv = (function (igv) {
             case "aneu":
                 return new igv.AneuTrack(conf);
                 break;
-
-            case 'roi':
-                return new igv.ROI(conf);
-                break;
-
-
+            
             default:
                 return undefined;
         }
