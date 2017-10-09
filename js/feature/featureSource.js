@@ -112,7 +112,7 @@ var igv = (function (igv) {
                 }
             }
         });
-    }
+    };
 
     function addFeaturesToDB(featureList) {
         var echo = [];

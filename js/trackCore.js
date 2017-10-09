@@ -47,12 +47,12 @@ var igv = (function (igv) {
         var type = (undefined === conf.type) ? 'unknown_type' : conf.type.toLowerCase();
 
         switch (type) {
+
             case "gwas":
                 return new igv.GWASTrack(conf);
                 break;
 
             case "annotation":
-            case "snp":
             case "genes":
             case "fusionjuncspan":
             case "snp":
@@ -87,7 +87,7 @@ var igv = (function (igv) {
             case "aneu":
                 return new igv.AneuTrack(conf);
                 break;
-
+            
             default:
                 return undefined;
         }

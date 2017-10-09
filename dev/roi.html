@@ -21,32 +21,45 @@
 <script type="text/javascript">
 
     $(document).ready(function () {
-        var div,
-            options,
-            browser;
+        var options;
 
-        div = $("#myDiv")[0];
         options = {
-            showLoadFileWidget:true,
-            minimumBases: 6,
-            showIdeogram: true,
-            showRuler: true,
-
-            // load local file: test/data/bw/chr1.bw
-            // or
-            // load url: https://data.broadinstitute.org/igvdata/test/data/bigwig/chr1.bw
-            locus: '1:67,655,272-67,684,468',
-
-            reference: {
-                id: "hg19",
-                fastaURL: "https://s3.amazonaws.com/igv.broadinstitute.org/genomes/seq/1kg_v37/human_g1k_v37_decoy.fasta",
-                cytobandURL: "https://s3.amazonaws.com/igv.broadinstitute.org/genomes/seq/b37/b37_cytoband.txt"
+//            roi:'../roi/roi.bed',
+            roi:
+            {
+                url: 'https://s3.amazonaws.com/igvjs-dugla/data/roi.bed',
+                indexed: false,
+                color: "rgba(68, 134, 247, 0.25)"
             },
+            locus: '1:67,655,272-67,684,468',
+            minimumBases: 6,
             flanking: 1000,
             apiKey: 'AIzaSyDUUAUFpQEN4mumeMNIRWXSiTh5cPtUAD0',
-            palette: ["#00A0B0", "#6A4A3C", "#CC333F", "#EB6841"],
+            palette:
+                [
+                    "#00A0B0",
+                    "#6A4A3C",
+                    "#CC333F",
+                    "#EB6841"
+                ],
+            reference:
+                {
+                    id: "hg19",
+                    fastaURL: "https://s3.amazonaws.com/igv.broadinstitute.org/genomes/seq/1kg_v37/human_g1k_v37_decoy.fasta",
+                    cytobandURL: "https://s3.amazonaws.com/igv.broadinstitute.org/genomes/seq/b37/b37_cytoband.txt"
+                },
             tracks:
                 [
+                    {
+                        name: '3 Column BED File',
+//                        url: '../roi/roi.bed'
+                        url: 'https://s3.amazonaws.com/igvjs-dugla/data/roi.bed',
+                        indexed: false
+                    },
+                    {
+                        url: 'https://data.broadinstitute.org/igvdata/encode/hg19/broadHistone/wgEncodeBroadHistoneGm12878H3k4me2StdSig.wig.tdf',
+                        name: 'GM12878H3k4m3 (tdf)'
+                    },
                     {
                         name: "Genes",
                         searchable: false,
@@ -59,10 +72,11 @@
                         order: Number.MAX_VALUE,
                         displayMode: "EXPANDED"
                     }
+
                 ]
         };
 
-        browser = igv.createBrowser(div, options);
+        igv.createBrowser($("#myDiv").get(0), options);
 
     })
 
