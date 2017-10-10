@@ -473,6 +473,9 @@ var igv = (function (igv) {
                                 self.tile = new Tile(referenceFrame.chrName, bpStart, bpEnd, referenceFrame.bpPerPixel, buffer);
                                 self.paintImageWithReferenceFrame(referenceFrame);
                             })
+                            .catch(function (error) {
+                                console.log("Error drawing ROIs " + error);
+                            })
 
 
                     } else {
