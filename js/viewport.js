@@ -405,7 +405,8 @@ var igv = (function (igv) {
                 .then(function (features) {
 
                     var buffer,
-                        requiredHeight;
+                        requiredHeight,
+                        roiPromises;
 
                     // self.loading = false;
                     self.loading = undefined;
@@ -457,15 +458,26 @@ var igv = (function (igv) {
                     if (igv.browser.roi) {
 
                         // Defer tile creation and image paint until ROI features are loaded and drawn
-                        igv.browser.roi.getFeatures(referenceFrame.chrName, bpStart, bpEnd)
-                            .then(function (features) {
-                                drawConfiguration.features = features;
-                                igv.browser.roi.draw(drawConfiguration);
+                        roiPromises = [];
+                        igv.browser.roi.forEach(function (r) {
+                            roiPromises.push(r.getFeatures(referenceFrame.chrName, bpStart, bpEnd))
+                        });
+
+                        Promise.all(roiPromises)
+                            .then(function (featureArray) {
+                                var i, len;
+                                for (i = 0, len = igv.browser.roi.length; i < len; i++) {
+                                    drawConfiguration.features = featureArray[i];
+                                    igv.browser.roi[i].draw(drawConfiguration);
+                                }
                                 self.tile = new Tile(referenceFrame.chrName, bpStart, bpEnd, referenceFrame.bpPerPixel, buffer);
                                 self.paintImageWithReferenceFrame(referenceFrame);
-                            });
+                            })
+
+
                     } else {
-                        
+                        // No ROI overlays
+
                         self.tile = new Tile(referenceFrame.chrName, bpStart, bpEnd, referenceFrame.bpPerPixel, buffer);
                         self.paintImageWithReferenceFrame(referenceFrame);
                     }
