@@ -30,6 +30,7 @@ var igv = (function (igv) {
 
     igv.ROI = function (config) {
         this.config = config;
+        this.name = config.name;
         this.roiSource = new igv.FeatureSource(config);
         this.color = config.color || defaultHighlightColor;
     };
