@@ -209,8 +209,7 @@
 .igv-track-div {
   position: relative;
   width: 100%;
-  overflow: hidden;
-  margin-bottom: 2px; }
+  overflow: hidden; }
 
 .igv-viewport-container {
   position: absolute;
@@ -425,6 +424,8 @@
   right: 36px;
   width: 12px;
   margin-left: 2px;
+  margin-top: 1px;
+  margin-bottom: 1px;
   height: 100%;
   box-sizing: border-box;
   font-size: medium;

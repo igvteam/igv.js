@@ -150,7 +150,10 @@ var igv = (function (igv) {
                     }
 
                     if (config.roi) {
-                        igv.browser.roi = new igv.ROI(config.roi);
+                        igv.browser.roi = [];
+                        config.roi.forEach(function (r) {
+                            igv.browser.roi.push(new igv.ROI(r));
+                        });
                     }
 
                     if (config.tracks) {
