@@ -20,9 +20,9 @@
  * THE SOFTWARE.
  *
  */
-var encode_dev = (function (encode_dev) {
+var modal_table_example = (function (modal_table_example) {
 
-    encode_dev.init = function () {
+    modal_table_example.init = function ($container) {
 
         $(document).ready(function () {
             var options,
@@ -35,16 +35,22 @@ var encode_dev = (function (encode_dev) {
                 minimumBases: 6,
                 showIdeogram: true,
                 showRuler: true,
-//            locus: '8:124,512,906-124,512,945',
                 locus: '1',
-                reference: {
-                    id: "hg19",
-                    fastaURL: "https://s3.amazonaws.com/igv.broadinstitute.org/genomes/seq/1kg_v37/human_g1k_v37_decoy.fasta",
-                    cytobandURL: "https://s3.amazonaws.com/igv.broadinstitute.org/genomes/seq/b37/b37_cytoband.txt"
-                },
+                reference:
+                    {
+                        id: "hg19",
+                        fastaURL: "https://s3.amazonaws.com/igv.broadinstitute.org/genomes/seq/1kg_v37/human_g1k_v37_decoy.fasta",
+                        cytobandURL: "https://s3.amazonaws.com/igv.broadinstitute.org/genomes/seq/b37/b37_cytoband.txt"
+                    },
                 flanking: 1000,
                 apiKey: 'AIzaSyDUUAUFpQEN4mumeMNIRWXSiTh5cPtUAD0',
-                palette: ["#00A0B0", "#6A4A3C", "#CC333F", "#EB6841"],
+                palette:
+                    [
+                        "#00A0B0",
+                        "#6A4A3C",
+                        "#CC333F",
+                        "#EB6841"
+                    ],
                 tracks:
                     [
                         {
@@ -62,7 +68,7 @@ var encode_dev = (function (encode_dev) {
                     ]
             };
 
-            browser = igv.createBrowser($('#myDiv').get(0), options);
+            browser = igv.createBrowser($container.get(0), options);
 
             columnWidths =
                 {
@@ -93,6 +99,6 @@ var encode_dev = (function (encode_dev) {
 
     };
 
-    return encode_dev;
+    return modal_table_example;
 
-})(encode_dev || {});
+})(modal_table_example || {});
