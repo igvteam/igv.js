@@ -7,13 +7,13 @@
     <meta name="description" content="">
     <meta name="author" content="">
     <link rel="shortcut icon" href=../img/favicon.ico>
-    <title>Dev - ENCODE</title>
+    <title>IGV Modal Table Example</title>
 
     <!-- Font Awesome CSS -->
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.2.0/css/font-awesome.min.css">
 
-    <!-- Bootstrap 3 CSS -->
-    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.4/css/bootstrap.min.css">
+    <!-- Bootstrap 4 CSS -->
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-beta/css/bootstrap.min.css">
 
     <!-- Bootstrap-Select Plugin CSS -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-select/1.12.2/css/bootstrap-select.min.css">
@@ -27,32 +27,34 @@
     <!-- JQuery JS -->
     <script src="https://code.jquery.com/jquery-1.12.4.min.js"></script>
 
-    <!-- Bootstrap 3 JS -->
-    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.4/js/bootstrap.min.js"></script>
+    <!-- Popper - Bootstrap 4 pre-requisite -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.11.0/umd/popper.min.js"></script>
+
+    <!-- Bootstrap 4 JS -->
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-beta/js/bootstrap.min.js"></script>
 
     <!-- IGV JS -->
     <script src="../dist/igv.js"></script>
-    <script src="js/encode-dev.js"></script>
+
+    <!-- Example Modal Table JS -->
+    <script src="js/igv-modal-table.js"></script>
 
 </head>
 
 <body>
 
-<!-- ENCODE Modal -->
 <div id="encodeModal" class="modal fade bs-example-modal-lg" tabindex="-1" role="dialog" aria-labelledby="encodeModalLabel" aria-hidden="true">
 
-    <div class="modal-dialog modal-lg"><!-- modal dialog -->
+    <div class="modal-dialog modal-lg" role="document">
 
-        <div class="modal-content"><!-- modal content -->
+        <div class="modal-content">
 
-            <div class="modal-header"><!-- modal header -->
+            <div class="modal-header">
+                <h4 class="modal-title" id="encodeModalLabel">ENCODE</h4>
 
-                <button id="encodeModalTopCloseButton" type="button" class="close" data-dismiss="modal"><!-- close -->
-                    <span aria-hidden="true">×</span>
-                    <span class="sr-only">Close</span>
+                <button id="encodeModalTopCloseButton" type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
                 </button>
-
-                <h4 class="modal-title" id="encodeModalLabel">ENCODE</h4><!-- modal title -->
 
             </div>
 
@@ -61,14 +63,12 @@
 
             <div class="modal-footer"><!-- modal footer -->
                 <button id="encodeModalBottomCloseButton" type="button" class="btn btn-default" data-dismiss="modal">Close</button>
-                <button id="encodeModalGoButton" type="button" class="btn btn-primary" data-dismiss="modal">Go</button>
+                <button id="encodeModalGoButton"          type="button" class="btn btn-primary" data-dismiss="modal">Go</button>
             </div>
 
         </div>
-        <!-- modal content -->
 
     </div>
-    <!-- modal dialog -->
 
 </div>
 
@@ -86,13 +86,11 @@
 
                     <ul class="dropdown-menu" role="menu" aria-labelledby="igvHeaderFileDropdown">
 
-                        <li role="presentation" class="dropdown-header">Load data from</li>
-
                         <li role="presentation">
                             <a role="menuitem" tabindex="-1" href="#" data-toggle="modal" data-target="#encodeModal">
                                 ENCODE
                             </a>
-                        </li><!-- Select ENCODE -->
+                        </li>
 
                     </ul>
 
@@ -108,7 +106,7 @@
 
 <script type="text/javascript">
 
-    encode_dev.init();
+    modal_table_example.init($('#myDiv'));
 
 </script>
 
