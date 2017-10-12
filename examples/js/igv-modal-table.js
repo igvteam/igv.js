@@ -20,9 +20,9 @@
  * THE SOFTWARE.
  *
  */
-var encode_dev = (function (encode_dev) {
+var modal_table_example = (function (modal_table_example) {
 
-    encode_dev.init = function () {
+    modal_table_example.init = function () {
 
         $(document).ready(function () {
             var options,
@@ -93,6 +93,6 @@ var encode_dev = (function (encode_dev) {
 
     };
 
-    return encode_dev;
+    return modal_table_example;
 
-})(encode_dev || {});
+})(modal_table_example || {});
