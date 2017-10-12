@@ -81,7 +81,6 @@ var igv = (function (igv) {
                         filtered,
                         mapped;
 
-
                     cellType = record["biosample_term_name"] || '';
 
                     target = record.target ? record.target.label : '';
@@ -162,14 +161,11 @@ var igv = (function (igv) {
                     }
                 });
 
-                console.log('then - done');
-
                 obj = {
                     columns: [ 'Assembly', 'Cell Type', 'Target', 'Assay Type', 'Output Type', 'Lab' ],
                     rows: rows
                 };
 
-                console.log('then - ingestData() ...');
                 ingestData.call(self, obj, function () {
                     continuation();
                 });
@@ -253,8 +249,6 @@ var igv = (function (igv) {
                 });
 
             });
-
-            console.log('ingestJSON - done');
 
             continuation();
 
