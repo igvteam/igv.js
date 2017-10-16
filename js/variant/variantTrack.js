@@ -668,7 +668,9 @@ var igv = (function (igv) {
             menuItems = [],
             mapped, $color, colorClickHandler;
 
-        menuItems.push(igv.colorPickerMenuItem(popover, this.trackView));
+        if (igv.colorPicker) {
+            menuItems.push(igv.colorPickerMenuItem(popover, this.trackView));
+        }
 
         mapped = _.map(["COLLAPSED", "SQUISHED", "EXPANDED"], function (displayMode, index) {
             return {

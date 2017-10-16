@@ -72,7 +72,9 @@ var igv = (function (igv) {
         var self = this,
             menuItems = [];
 
-        menuItems.push(igv.colorPickerMenuItem(popover, this.trackView));
+        if (igv.colorPicker) {
+            menuItems.push(igv.colorPickerMenuItem(popover, this.trackView));
+        }
 
         menuItems.push(igv.dataRangeMenuItem(popover, this.trackView));
 
