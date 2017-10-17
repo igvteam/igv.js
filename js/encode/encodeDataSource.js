@@ -72,8 +72,7 @@ var igv = (function (igv) {
             .loadJson(query, {})
             .then(function (json) {
 
-                var rows,
-                    obj;
+                var rows;
 
                 rows = [];
                 _.each(json["@graph"], function (record) {
@@ -163,15 +162,9 @@ var igv = (function (igv) {
                     }
                 });
 
-                obj = {
-                    columns: [ 'Assembly', 'Cell Type', 'Target', 'Assay Type', 'Output Type', 'Lab' ],
-                    rows: rows
-                };
-
-                ingestData(obj, function (json) {
-                    continuation(json);
+                getFancyData.call(self, rows, [ 'Assembly', 'Cell Type', 'Target', 'Assay Type', 'Output Type', 'Lab' ], function (fancyData) {
+                    continuation(self.tableFormat.fancyColumnFormat, fancyData);
                 });
-
 
             })
             .catch(function (e) {
@@ -179,6 +172,36 @@ var igv = (function (igv) {
             });
 
     };
+
+    function getFancyData(rows, columns, continuation) {
+
+        var self = this,
+            mapped_and_fancied;
+
+        mapped_and_fancied = _.map(rows, function (row) {
+            var picked,
+                fancied;
+
+            picked = _.pick(row, columns);
+
+            fancied = {};
+            _.each(_.keys(picked), function (key) {
+                var kk;
+                kk = self.tableFormat.indices[ key ];
+                fancied[ kk ] = picked[ key ];
+            });
+
+            _.each(_.keys(fancied), function (key) {
+                if (undefined === fancied[ key ] || '' === fancied[ key ]) {
+                    fancied[ key ] = '-';
+                }
+            });
+
+            return fancied;
+        });
+
+        continuation(mapped_and_fancied);
+    }
 
     igv.EncodeDataSource.prototype.dataAtRowIndex = function (index) {
         var row,
@@ -231,77 +254,6 @@ var igv = (function (igv) {
     igv.EncodeDataSource.prototype.tableColumns = function () {
         return this.tableFormat.tableColumns(this.jSON);
     };
-
-    function ingestData(data, continuation) {
-
-        if (data instanceof File) {
-            getFile.call(this, data, continuation);
-        } else if (data instanceof Object) {
-            getJSON.call(this, data, continuation);
-        }
-
-        function getJSON(json, continuation) {
-
-            json.rows.forEach(function(row, i){
-
-                Object.keys(row).forEach(function(key){
-                    var item = row[ key ];
-                    json.rows[ i ][ key ] = (undefined === item || "" === item) ? "-" : item;
-                });
-
-            });
-
-            continuation(json);
-        }
-
-        function getFile(file, continuation) {
-
-            var json;
-
-            json = {};
-            igv.xhr.loadString(file).then(function (data) {
-
-                var lines = data.splitLines(),
-                    item;
-
-                // Raw data items order:
-                // path | cell | dataType | antibody | view | replicate | type | lab | hub
-                //
-                // Reorder to match desired order. Discard hub item.
-                //
-                json.columns = lines[0].split("\t");
-                json.columns.pop();
-                item = json.columns.shift();
-                json.columns.push(item);
-
-                json.rows = [];
-
-                lines.slice(1, lines.length - 1).forEach(function (line) {
-
-                    var tokens,
-                        row;
-
-                    tokens = line.split("\t");
-                    tokens.pop();
-                    item = tokens.shift();
-                    tokens.push(item);
-
-                    row = {};
-                    tokens.forEach(function (t, i, ts) {
-                        var key = json.columns[ i ];
-                        row[ key ] = (undefined === t || "" === t) ? "-" : t;
-                    });
-
-                    json.rows.push(row);
-
-                });
-
-                continuation(json);
-            });
-
-        }
-
-    }
 
     return igv;
 

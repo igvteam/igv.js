@@ -72,12 +72,12 @@ var modal_table_example = (function (modal_table_example) {
 
             columnWidths =
                 {
-                    'Assembly': '10%',
-                    'Cell Type': '10%',
-                    'Target': '10%',
-                    'Assay Type': '20%',
-                    'Output Type': '20%',
-                    'Lab': '20%'
+                    'Assembly': 75,
+                    'Cell Type': 75,
+                    'Target': 75,
+                    'Assay Type': 150,
+                    'Output Type': 150,
+                    'Lab': 150
                 };
 
             encodeTableFormat = new igv.EncodeTableFormat({ columnWidths: columnWidths });

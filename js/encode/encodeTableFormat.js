@@ -30,7 +30,53 @@ var igv = (function (igv) {
      * @param config tableFormat configuration
      */
     igv.EncodeTableFormat = function (config) {
+        var self = this,
+            keys;
+
         this.config = config;
+
+        keys = _.keys(config.columnWidths);
+
+        this.indices = {};
+        _.each(keys, function (key) {
+            var a,
+                b;
+
+            a = key.split(' ');
+            b = _.map(a, function (aa) {
+                return aa.toLowerCase();
+            });
+
+            self.indices[ key ] = b.join('_');
+        });
+
+        this.fancyColumnFormat = _.map(keys, function (key) {
+            return { index: self.indices[ key ], title: key, type:'string', width: config.columnWidths[ key ] };
+        });
+
+    };
+
+    igv.EncodeTableFormat.prototype.fancyColumns = function () {
+        return this.fancyColumnFormat;
+    };
+
+    igv.EncodeTableFormat.prototype.fancyData = function () {
+
+        var result;
+
+        result = _.map(jSON.rows, function (row, index) {
+
+            var rr;
+
+            rr = _.map(jSON.columns, function (key) {
+                return row[key];
+            });
+
+            return rr;
+
+        });
+
+        return result;
     };
 
     /**
@@ -47,8 +93,6 @@ var igv = (function (igv) {
             rr = _.map(jSON.columns, function (key) {
                 return row[key];
             });
-
-            // rr.unshift(index);
 
             return rr;
 

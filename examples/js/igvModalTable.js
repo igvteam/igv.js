@@ -43,15 +43,14 @@ var igv = (function (igv) {
 
         this.dataSource = config.dataSource;
 
-        this.$modalTable = $('<table cellpadding="0" cellspacing="0" border="0" class="display"></table>');
+        // this.$modalTable = $('<table cellpadding="0" cellspacing="0" border="0" class="display"></table>');
+        // config.$modalBody.append(this.$modalTable);
 
-        config.$modalBody.append(this.$modalTable);
+        // this.$spinner = $('<div>');
+        // this.$modalTable.append(this.$spinner);
 
-        this.$spinner = $('<div>');
-        this.$modalTable.append(this.$spinner);
-
-        this.$spinner.append($('<i class="fa fa-lg fa-spinner fa-spin"></i>'));
-        this.$spinner.hide();
+        // this.$spinner.append($('<i class="fa fa-lg fa-spinner fa-spin"></i>'));
+        // this.$spinner.hide();
 
         $modal.on('show.bs.modal', function (e) {
 
@@ -67,16 +66,18 @@ var igv = (function (igv) {
                 $modal.modal('hide');
             } else if (true !== self.initialized) {
                 self.initialized = true;
-                self.$spinner.show();
-                self.dataSource.retrieveData(function (json) {
-                    if (json) {
-                        self.dataSource.jSON = json;
-                        self.createTableWithDataSource(self.dataSource);
-                    } else {
-                        igv.presentAlert('ERROR: cannot retrieve data from datasource');
-                        $modal.modal('hide');
-                    }
-                    self.$spinner.hide();
+                // self.$spinner.show();
+                self.dataSource.retrieveData(function (fancyColumns, fancyData) {
+
+                    self.createTable(fancyColumns, fancyData);
+
+                    // if (fancyColumns && fancyData) {
+                    //     self.createTable(fancyColumns, fancyData);
+                    // } else {
+                    //     igv.presentAlert('ERROR: cannot retrieve data from datasource');
+                    //     $modal.modal('hide');
+                    // }
+                    // self.$spinner.hide();
                 });
             }
 
@@ -143,33 +144,21 @@ var igv = (function (igv) {
         this.config.$modalBody.empty();
     };
 
-    /**
-     * @param dataSource source of data fed to the table (see for example EncodeDataSource)
-     */
-    igv.IGVModalTable.prototype.createTableWithDataSource = function (dataSource) {
+    igv.IGVModalTable.prototype.createTable = function (fancyColumns, fancyData) {
 
-        this.$spinner.hide();
+        var fancyConfiguration;
+        // this.$spinner.hide();
 
-        this.$dataTables = this.$modalTable.dataTable({
-            data: dataSource.tableData(),
-            paging: true,
-            scrollX: false,
-            scrollY: '400px',
-            scrollCollapse: false,
-            scroller: true,
-            fixedColumns: true,
-            columns: dataSource.tableColumns()
-        });
-
-        this.$modalTable.find('tbody').on('click', 'tr', function () {
-
-            if ($(this).hasClass('selected')) {
-                $(this).removeClass('selected');
-            } else {
-                $(this).addClass('selected');
-            }
-
-        });
+        fancyConfiguration =
+            {
+                paging: true,
+                width:'fit',
+                height:'fit',
+                // data:_.first(fancyData, 100),
+                data:fancyData,
+                columns:fancyColumns
+            };
+        this.config.$modalBody.FancyGrid(fancyConfiguration);
 
     };
 

@@ -1,0 +1,7 @@
+{
+"version": 3,
+"mappings": "AAAA,gBAAiB;EACf,MAAM,EAAE,KAAK;EACb,UAAU,EAAE,MAAM",
+"sources": ["modal-table-example.scss"],
+"names": [],
+"file": "modal-table-example.css"
+}

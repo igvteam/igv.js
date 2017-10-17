@@ -21,17 +21,28 @@
     <!-- DataTables CSS -->
     <link rel="stylesheet" href="https://cdn.datatables.net/v/dt/dt-1.10.16/sc-1.4.3/datatables.min.css"/>
 
+    <!-- Fancy Grid CSS -->
+    <link rel="stylesheet" href="http://code.fancygrid.com/fancy.min.css">
+
+    <!-- Modal Table Example CSS -->
+    <link rel="stylesheet" type="text/css" href="css/modal-table-example.css">
     <!-- IGV CSS -->
-    <link rel="stylesheet" href="https://igv.org/web/beta/igv.css">
-    <!--<link rel="stylesheet" href="../css/igv.css">-->
+    <link rel="stylesheet" type="text/css" href="https://igv.org/web/beta/igv.css">
 
 
+
+
+    <!-- Underscore JS -->
+    <script src="../vendor/underscore.js"></script>
 
     <!-- JQuery JS -->
     <script src="https://code.jquery.com/jquery-1.12.4.min.js"></script>
 
     <!-- Datatables JS -->
     <script src="https://cdn.datatables.net/v/dt/dt-1.10.16/sc-1.4.3/datatables.min.js"></script>
+
+    <!-- Fancy Grid JS -->
+    <script src="http://code.fancygrid.com/fancy.min.js"></script>
 
     <!-- Popper - Bootstrap 4 pre-requisite -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.11.0/umd/popper.min.js"></script>
@@ -40,10 +51,10 @@
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-beta/js/bootstrap.min.js"></script>
 
     <!-- IGV JS-->
-    <script src="https://igv.org/web/beta/igv-beta.min.js"></script>
-    <!--<script src="../dist/igv.js"></script>-->
+    <!--<script src="https://igv.org/web/beta/igv-beta.min.js"></script>-->
+    <script src="../dist/igv.js"></script>
 
-    <!-- Example Modal Table JS -->
+    <!-- Modal Table Example JS -->
     <script src="js/igvModalTable.js"></script>
     <script src="js/modal-table-example.js"></script>
 
@@ -51,7 +62,7 @@
 
 <body>
 
-<div id="encodeModal" class="modal fade bs-example-modal-lg" tabindex="-1" role="dialog" aria-labelledby="encodeModalLabel" aria-hidden="true">
+<div id="encodeModal" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="encodeModalLabel" aria-hidden="true">
 
     <div class="modal-dialog modal-lg" role="document">
 
@@ -69,7 +80,7 @@
             <div id="encodeModalBody" class="modal-body">
             </div>
 
-            <div class="modal-footer"><!-- modal footer -->
+            <div class="modal-footer">
                 <button id="encodeModalBottomCloseButton" type="button" class="btn btn-default" data-dismiss="modal">Close</button>
                 <button id="encodeModalGoButton"          type="button" class="btn btn-primary" data-dismiss="modal">Go</button>
             </div>
