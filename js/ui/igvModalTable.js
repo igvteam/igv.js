@@ -123,7 +123,7 @@ var igv = (function (igv) {
         return this.dataSource.config.genomeID;
     };
 
-    igv.IGVModalTable.teardown = function () {
+    igv.IGVModalTable.prototype.teardown = function () {
 
         var list;
 
