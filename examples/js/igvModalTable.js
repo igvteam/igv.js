@@ -68,8 +68,14 @@ var igv = (function (igv) {
             } else if (true !== self.initialized) {
                 self.initialized = true;
                 self.$spinner.show();
-                self.dataSource.retrieveData(function () {
-                    self.createTableWithDataSource(self.dataSource);
+                self.dataSource.retrieveData(function (json) {
+                    if (json) {
+                        self.dataSource.jSON = json;
+                        self.createTableWithDataSource(self.dataSource);
+                    } else {
+                        igv.presentAlert('ERROR: cannot retrieve data from datasource');
+                        $modal.modal('hide');
+                    }
                     self.$spinner.hide();
                 });
             }
@@ -117,7 +123,7 @@ var igv = (function (igv) {
         return this.dataSource.config.genomeID;
     };
 
-    igv.IGVModalTable.teardown = function () {
+    igv.IGVModalTable.prototype.teardown = function () {
 
         var list;
 
