@@ -38,6 +38,13 @@ var igv = (function (igv) {
             igv.xhr.loadJson(url, self.config)
                 .then(function (data) {
                     if (data) {
+                        data.forEach(function(sample) {
+                            if (sample.hasOwnProperty('exonStarts') && sample.hasOwnProperty('exonEnds') && sample.hasOwnProperty('exonCount')
+                                && sample.hasOwnProperty('cdsStart') && sample.hasOwnProperty('cdsEnd')) {
+
+                                addExons(sample);
+                            }
+                        });
                         fulfill(data);
                     } else {
                         fulfill(null);
@@ -48,6 +55,28 @@ var igv = (function (igv) {
                 });
         });
     };
+
+    function addExons(sample) {
+        var exonCount, exonStarts, exonEnds, exons, eStart, eEnd;
+        exonCount = sample['exonCount'];
+        exonStarts = sample['exonStarts'].split(',');
+        exonEnds = sample['exonEnds'].split(',');
+        exons = [];
+
+        for (var i = 0; i < exonCount; i++) {
+            eStart = parseInt(exonStarts[i]);
+            eEnd = parseInt(exonEnds[i]);
+            var exon = {start: eStart, end: eEnd};
+
+            if (sample.cdsStart > eEnd || sample.cdsEnd < sample.cdsStart) exon.utr = true;   // Entire exon is UTR
+            if (sample.cdsStart >= eStart && sample.cdsStart <= eEnd) exon.cdStart = sample.cdsStart;
+            if (sample.cdsEnd >= eStart && sample.cdsEnd <= eEnd) exon.cdEnd = sample.cdsEnd;
+
+            exons.push(exon);
+        }
+
+        sample.exons = exons;
+    }
 
 
     return igv;

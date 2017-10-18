@@ -8,22 +8,23 @@
     <meta name="author" content="">
     <link rel="shortcut icon" href="//igv.org/web/img/favicon.ico">
 
-    <title>IGV - Integrative Genomics Viewer</title>
+    <title>IGV Example - Dropbox</title>
+
+    <!-- Font Awesome CSS -->
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.2.0/css/font-awesome.min.css"/>
+
+    <!-- IGV CSS -->
+    <link rel="stylesheet" href="https://igv.org/web/beta/igv.css">
 
     <!-- Shims for legacy browsers -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/es5-shim/4.5.7/es5-shim.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/es6-shim/0.35.3/es6-shim.js"></script>
 
-    <!-- Font Awesome CSS -->
-    <link rel="stylesheet" type="text/css"
-          href="https://maxcdn.bootstrapcdn.com/font-awesome/4.2.0/css/font-awesome.min.css">
-
-    <!-- IGV CSS -->
-    <link rel="stylesheet" type="text/css" href="https://igv.org/web/beta/igv.css">
+    <!-- JQuery JS -->
+    <script src="https://code.jquery.com/jquery-1.12.4.min.js"></script>
 
     <!-- IGV JS-->
-    <script type="text/javascript" src="https://igv.org/web/beta/igv-beta.min.js"></script>
-
+    <script src="https://igv.org/web/beta/igv-beta.min.js"></script>
 
 </head>
 
@@ -49,8 +50,8 @@
             tracks: [
                 {
                     type: 'bam',
-                    url: 'https://www.dropbox.com/s/7k5oylv5of8w5f8/gstt1_sample.bam',
-                    indexURL: 'https://www.dropbox.com/s/ub1n3mvubz87wu9/gstt1_sample.bam.bai',
+                    url: 'https://www.dropbox.com/s/avt88fdsdnk1w0v/gstt1_sample.bam',
+                    indexURL: 'https://www.dropbox.com/s/5xd7goqiir1xzdr/gstt1_sample.bam.bai',
                     label: 'Dopbox BAM'
                 },
                 {

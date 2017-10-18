@@ -319,9 +319,10 @@ var igv = (function (igv) {
                 }
             });
             menuItems = menuItems.concat(colorByItems);
-        } else {
+        } if (igv.colorPicker) {
             menuItems.push(igv.colorPickerMenuItem(popover, this.trackView));
         }
+
 
         mapped = _.map(["COLLAPSED", "SQUISHED", "EXPANDED"], function (displayMode, index) {
             return {

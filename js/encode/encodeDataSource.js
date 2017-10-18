@@ -65,6 +65,8 @@ var igv = (function (igv) {
             "field=files.assembly&" +
             "limit=all";
 
+        // TODO - Test Error Handling with this URL.
+        // query = "https://www.encodeproject.org/search/?type=experiment&assembly=/work/ea14/juicer/references/genome_collection/Hs2-HiC.chrom.sizes&files.file_format=bigWig&format=json&field=lab.title&field=biosample_term_name&field=assay_term_name&field=target.label&field=files.file_format&field=files.output_type&field=files.href&field=files.replicate.technical_replicate_number&field=files.replicate.biological_replicate_number&field=files.assembly&limit=all";
 
         igv.xhr
             .loadJson(query, {})
@@ -80,7 +82,6 @@ var igv = (function (igv) {
                         target,
                         filtered,
                         mapped;
-
 
                     cellType = record["biosample_term_name"] || '';
 
@@ -162,19 +163,19 @@ var igv = (function (igv) {
                     }
                 });
 
-                console.log('then - done');
-
                 obj = {
                     columns: [ 'Assembly', 'Cell Type', 'Target', 'Assay Type', 'Output Type', 'Lab' ],
                     rows: rows
                 };
 
-                console.log('then - ingestData() ...');
-                ingestData.call(self, obj, function () {
-                    continuation();
+                ingestData(obj, function (json) {
+                    continuation(json);
                 });
 
 
+            })
+            .catch(function (e) {
+                continuation(undefined);
             });
 
     };
@@ -241,30 +242,23 @@ var igv = (function (igv) {
 
         function getJSON(json, continuation) {
 
-            var self = this;
-
-            this.jSON = json;
-
             json.rows.forEach(function(row, i){
 
                 Object.keys(row).forEach(function(key){
                     var item = row[ key ];
-                    self.jSON.rows[ i ][ key ] = (undefined === item || "" === item) ? "-" : item;
+                    json.rows[ i ][ key ] = (undefined === item || "" === item) ? "-" : item;
                 });
 
             });
 
-            console.log('ingestJSON - done');
-
-            continuation();
-
+            continuation(json);
         }
 
         function getFile(file, continuation) {
 
-            var self = this;
+            var json;
 
-            this.jSON = {};
+            json = {};
             igv.xhr.loadString(file).then(function (data) {
 
                 var lines = data.splitLines(),
@@ -275,12 +269,12 @@ var igv = (function (igv) {
                 //
                 // Reorder to match desired order. Discard hub item.
                 //
-                self.jSON.columns = lines[0].split("\t");
-                self.jSON.columns.pop();
-                item = self.jSON.columns.shift();
-                self.jSON.columns.push(item);
+                json.columns = lines[0].split("\t");
+                json.columns.pop();
+                item = json.columns.shift();
+                json.columns.push(item);
 
-                self.jSON.rows = [];
+                json.rows = [];
 
                 lines.slice(1, lines.length - 1).forEach(function (line) {
 
@@ -294,15 +288,15 @@ var igv = (function (igv) {
 
                     row = {};
                     tokens.forEach(function (t, i, ts) {
-                        var key = self.jSON.columns[ i ];
+                        var key = json.columns[ i ];
                         row[ key ] = (undefined === t || "" === t) ? "-" : t;
                     });
 
-                    self.jSON.rows.push(row);
+                    json.rows.push(row);
 
                 });
 
-                continuation();
+                continuation(json);
             });
 
         }
