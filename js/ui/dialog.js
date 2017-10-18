@@ -46,7 +46,9 @@ var igv = (function (igv) {
 
         constructorHelper(this);
 
-        igv.makeDraggable(this.$container, $header);
+        if (igv.colorPicker) {
+            igv.makeDraggable(this.$container, $header);
+        }
 
         igv.attachDialogCloseHandlerWithParent($header, function () {
             self.hide();
