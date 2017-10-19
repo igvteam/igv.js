@@ -250,7 +250,7 @@ var igv = (function (igv) {
                 alignment.fragmentLength = tlen;
                 alignment.mq = mq;
 
-                bam_tag2cigar(ba, BlockEnd, p, lseq, alignment, cigarArray);
+                igv.BamUtils.bam_tag2cigar(ba, BlockEnd, p, lseq, alignment, cigarArray);
 
                 if (alignment.start + alignment.lengthOnRef < min) {
                     offset = blockEnd;
