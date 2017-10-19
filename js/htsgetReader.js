@@ -72,7 +72,7 @@ var igv = (function (igv) {
         urls.forEach(function(urlData) {
             if (urlData.url.startsWith('data:')) {
                 // this is a data-uri
-                promiseArray.push(Promise.resolve(dataUriToBlob(urlData.url)));
+                promiseArray.push(Promise.resolve(dataUriToBytes(urlData.url)));
             } else {
                 var options = {};
 
@@ -86,7 +86,7 @@ var igv = (function (igv) {
         return Promise.all(promiseArray);
     }
 
-    function dataUriToBlob(dataUri) {
+    function dataUriToBytes(dataUri) {
         var bytes,
             split = dataUri.split(','),
             info = split[0].split(':')[1],
@@ -103,7 +103,9 @@ var igv = (function (igv) {
             bytes[i] = dataString.charCodeAt(i);
         }
 
-        return new Blob([bytes], {type: 'application/octet-stream'});
+        return bytes;
+
+        // return new Blob([bytes], {type: 'application/octet-stream'});
     }
 
 
