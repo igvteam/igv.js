@@ -8,6 +8,7 @@
     <meta name="author" content="">
     <link rel="shortcut icon" href=../img/favicon.ico>
     <title>IGV Modal Table Example</title>
+    <link rel="import" href="../dev/shared-js.html">
 
     <!-- Font Awesome CSS -->
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.2.0/css/font-awesome.min.css">
@@ -18,31 +19,26 @@
     <!-- Bootstrap-Select Plugin CSS -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-select/1.12.2/css/bootstrap-select.min.css">
 
-    <!-- DataTables CSS -->
-    <link rel="stylesheet" href="https://cdn.datatables.net/v/dt/dt-1.10.16/sc-1.4.3/datatables.min.css"/>
-
-    <!-- Fancy Grid CSS -->
-    <link rel="stylesheet" href="http://code.fancygrid.com/fancy.min.css">
+    <!-- Clusterize CSS -->
+    <link rel="stylesheet" href="css/clusterize.css">
 
     <!-- Modal Table Example CSS -->
     <link rel="stylesheet" type="text/css" href="css/modal-table-example.css">
+
     <!-- IGV CSS -->
     <link rel="stylesheet" type="text/css" href="https://igv.org/web/beta/igv.css">
 
 
-
-
-    <!-- Underscore JS -->
+    <!-- Vendor JS -->
+    <script src="../vendor/jquery-1.12.4.js"></script>
     <script src="../vendor/underscore.js"></script>
+    <script src="../vendor/inflate.js"></script>
+    <script src="../vendor/zlib_and_gzip.min.js"></script>
+    <script src="../vendor/jquery.mousewheel.js"></script>
+    <script src="../vendor/promise.js"></script>
 
-    <!-- JQuery JS -->
-    <script src="https://code.jquery.com/jquery-1.12.4.min.js"></script>
-
-    <!-- Datatables JS -->
-    <script src="https://cdn.datatables.net/v/dt/dt-1.10.16/sc-1.4.3/datatables.min.js"></script>
-
-    <!-- Fancy Grid JS -->
-    <script src="http://code.fancygrid.com/fancy.min.js"></script>
+    <!-- Clusterize JS -->
+    <script src="js/clusterize.js"></script>
 
     <!-- Popper - Bootstrap 4 pre-requisite -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.11.0/umd/popper.min.js"></script>
@@ -51,8 +47,58 @@
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-beta/js/bootstrap.min.js"></script>
 
     <!-- IGV JS-->
-    <!--<script src="https://igv.org/web/beta/igv-beta.min.js"></script>-->
-    <script src="../dist/igv.js"></script>
+    <script src="../js/feature/featureCache.js"></script>
+    <script src="../js/feature/gffHelper.js"></script>
+    <script src="../js/feature/featureSource.js"></script>
+    <script src="../js/feature/featureParsers.js"></script>
+    <script src="../js/feature/tribble.js"></script>
+    <script src="../js/feature/featureFileReader.js"></script>
+    <script src="../js/feature/customServiceReader.js"></script>
+
+    <script src="../js/feature/aneuSource.js"></script>
+    <script src="../js/feature/aneuTrack.js"></script>
+
+    <script src="../js/karyo/karyo.js"></script>
+    <script src="../js/gwas/t2dVariantSource.js"></script>
+    <script src="../js/gwas/gwasTrack.js"></script>
+
+    <script src="../js/feature/segParser.js"></script>
+    <script src="../js/feature/segTrack.js"></script>
+    <script src="../js/variant/vcfParser.js"></script>
+    <script src="../js/variant/variant.js"></script>
+
+    <script src="../js/bigwig/bufferedReader.js"></script>
+    <script src="../js/bigwig/bwBPTree.js"></script>
+    <script src="../js/bigwig/bwReader.js"></script>
+    <script src="../js/bigwig/bwRPTree.js"></script>
+    <script src="../js/bigwig/bwSource.js"></script>
+    <script src="../js/bigwig/bwTotalSummary.js"></script>
+
+    <script src="../js/tdf/tdfReader.js"></script>
+    <script src="../js/tdf/tdfSource.js"></script>
+
+    <script src="../js/trackCore.js"></script>
+    <script src="../js/trackFileLoad.js"></script>
+
+    <script src="../js/set.js"></script>
+
+    <script src="../js/ui/trackMenuPopupDialog.js"></script>
+    <script src="../js/ui/colorpicker.js"></script>
+    <script src="../js/ui/dataRangeDialog.js"></script>
+    <script src="../js/ui/dialog.js"></script>
+    <script src="../js/ui/alertDialog.js"></script>
+    <script src="../js/ui/centerGuide.js"></script>
+    <script src="../js/ui/userFeedback.js"></script>
+    <script src="../js/ui/alertDialog.js"></script>
+    <script src="../js/ui/popover.js"></script>
+
+    <script src="../js/encode/encodeDataSource.js"></script>
+    <script src="../js/encode/encodeTableFormat.js"></script>
+
+    <script src="../js/roi.js"></script>
+    <script src="../js/roiSource.js"></script>
+    
+    <script src="../js/oauth/google.js"></script>
 
     <!-- Modal Table Example JS -->
     <script src="js/igvModalTable.js"></script>
@@ -77,7 +123,7 @@
 
             </div>
 
-            <div id="encodeModalBody" class="modal-body">
+            <div id="mte-modal-body" class="modal-body">
             </div>
 
             <div class="modal-footer">

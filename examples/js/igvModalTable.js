@@ -43,14 +43,14 @@ var igv = (function (igv) {
 
         this.dataSource = config.dataSource;
 
-        // this.$modalTable = $('<table cellpadding="0" cellspacing="0" border="0" class="display"></table>');
-        // config.$modalBody.append(this.$modalTable);
+        this.$clusterizeContentArea = $('<div>', { id:'mte-clusterize-content-area', class:'clusterize-content' });
+        this.config.$modalBody.append(this.$clusterizeContentArea);
 
-        // this.$spinner = $('<div>');
-        // this.$modalTable.append(this.$spinner);
+        this.$spinner = $('<div>');
+        this.$clusterizeContentArea.append(this.$spinner);
 
-        // this.$spinner.append($('<i class="fa fa-lg fa-spinner fa-spin"></i>'));
-        // this.$spinner.hide();
+        this.$spinner.append($('<i class="fa fa-lg fa-spinner fa-spin"></i>'));
+        this.$spinner.hide();
 
         $modal.on('show.bs.modal', function (e) {
 
@@ -67,17 +67,8 @@ var igv = (function (igv) {
             } else if (true !== self.initialized) {
                 self.initialized = true;
                 // self.$spinner.show();
-                self.dataSource.retrieveData(function (fancyColumns, fancyData) {
-
-                    self.createTable(fancyColumns, fancyData);
-
-                    // if (fancyColumns && fancyData) {
-                    //     self.createTable(fancyColumns, fancyData);
-                    // } else {
-                    //     igv.presentAlert('ERROR: cannot retrieve data from datasource');
-                    //     $modal.modal('hide');
-                    // }
-                    // self.$spinner.hide();
+                self.dataSource.retrieveData(function (clusterizeData) {
+                    self.createTable(clusterizeData);
                 });
             }
 
@@ -128,38 +119,36 @@ var igv = (function (igv) {
 
         var list;
 
-        list =
-            [
-                this.$modalTable.find('tbody'),
-                this.config.$modal,
-                this.config.$modalTopCloseButton,
-                this.config.$modalBottomCloseButton,
-                this.config.$modalGoButton
-            ];
-
-        _.each(list, function ($e) {
-            $e.unbind();
-        });
+        // list =
+        //     [
+        //         this.$modalTable.find('tbody'),
+        //         this.config.$modal,
+        //         this.config.$modalTopCloseButton,
+        //         this.config.$modalBottomCloseButton,
+        //         this.config.$modalGoButton
+        //     ];
+        //
+        // _.each(list, function ($e) {
+        //     $e.unbind();
+        // });
 
         this.config.$modalBody.empty();
     };
 
-    igv.IGVModalTable.prototype.createTable = function (fancyColumns, fancyData) {
+    igv.IGVModalTable.prototype.createTable = function (clusterizeData) {
 
-        var fancyConfiguration;
+        var config;
+
         // this.$spinner.hide();
 
-        fancyConfiguration =
+        config =
             {
-                paging: true,
-                width:'fit',
-                height:'fit',
-                // data:_.first(fancyData, 100),
-                data:fancyData,
-                columns:fancyColumns
+                rows: clusterizeData,
+                scrollId:this.config.$modalBody.attr('id'),
+                contentId:this.$clusterizeContentArea.attr('id')
             };
-        this.config.$modalBody.FancyGrid(fancyConfiguration);
 
+        this.clusterize = new Clusterize(config);
     };
 
     return igv;

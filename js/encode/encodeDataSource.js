@@ -125,45 +125,8 @@ var igv = (function (igv) {
 
                 });
 
-                rows.sort(function (a, b) {
-                    var a1 = a["Assembly"],
-                        a2 = b["Assembly"],
-                        ct1 = a["Cell Type"],
-                        ct2 = b["Cell Type"],
-                        t1 = a["Target"],
-                        t2 = b["Target"];
-
-                    if (a1 === a2) {
-                        if (ct1 === ct2) {
-                            if (t1 === t2) {
-                                return 0;
-                            }
-                            else if (t1 < t2) {
-                                return -1;
-                            }
-                            else {
-                                return 1;
-                            }
-                        }
-                        else if (ct1 < ct2) {
-                            return -1;
-                        }
-                        else {
-                            return 1;
-                        }
-                    }
-                    else {
-                        if (a1 < a2) {
-                            return -1;
-                        }
-                        else {
-                            return 1;
-                        }
-                    }
-                });
-
-                getFancyData.call(self, rows, [ 'Assembly', 'Cell Type', 'Target', 'Assay Type', 'Output Type', 'Lab' ], function (fancyData) {
-                    continuation(self.tableFormat.fancyColumnFormat, fancyData);
+                getClusterizeData.call(self, rows, [ 'Assembly', 'Cell Type', 'Target', 'Assay Type', 'Output Type', 'Lab' ], function (fancyData) {
+                    continuation(fancyData);
                 });
 
             })
@@ -172,6 +135,61 @@ var igv = (function (igv) {
             });
 
     };
+
+    function getClusterizeData(rows, columns, continuation) {
+
+        var self = this,
+            picked;
+
+        rows.sort(function (a, b) {
+            var aa1,
+                aa2,
+                cc1,
+                cc2,
+                tt1,
+                tt2;
+
+            aa1 = a['Assembly' ]; aa2 = b['Assembly' ];
+            cc1 = a['Cell Type']; cc2 = b['Cell Type'];
+            tt1 = a['Target'   ]; tt2 = b['Target'   ];
+
+            if (aa1 === aa2) {
+                if (cc1 === cc2) {
+                    if (tt1 === tt2) {
+                        return 0;
+                    } else if (tt1 < tt2) {
+                        return -1;
+                    } else {
+                        return 1;
+                    }
+                } else if (cc1 < cc2) {
+                    return -1;
+                } else {
+                    return 1;
+                }
+            } else {
+                if (aa1 < aa2) {
+                    return -1;
+                } else {
+                    return 1;
+                }
+            }
+        });
+
+        picked = _.map(rows, function (row, index) {
+            var mapped;
+
+            mapped = _.map(_.values(_.pick(row, columns)), function (value, index) {
+                return '<div>' + value + '</div>';
+            });
+
+            // mapped.unshift('<div>' + index + '</div>');
+
+            return '<div>' + mapped.join('') + '</div>';
+        });
+
+        continuation(picked);
+    }
 
     function getFancyData(rows, columns, continuation) {
 

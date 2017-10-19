@@ -85,7 +85,7 @@ var modal_table_example = (function (modal_table_example) {
             config =
                 {
                     $modal:$('#encodeModal'),
-                    $modalBody:$('#encodeModalBody'),
+                    $modalBody:$('#mte-modal-body'),
                     $modalTopCloseButton: $('#encodeModalTopCloseButton'),
                     $modalBottomCloseButton: $('#encodeModalBottomCloseButton'),
                     $modalGoButton: $('#encodeModalGoButton'),
