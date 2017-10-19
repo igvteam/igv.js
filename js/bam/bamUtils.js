@@ -107,6 +107,62 @@ var igv = (function (igv) {
 
         },
 
+        bam_tag2cigar: function(ba, block_end, seq_offset, lseq, al, cigarArray) {
+
+            function type2size(x) {
+                if (x == 'C' || x == 'c' || x == 'A') return 1;
+                else if (x == 'S' || x == 's') return 2;
+                else if (x == 'I' || x == 'i' || x == 'f') return 4;
+                else return 0;
+            }
+
+            // test if the real CIGAR is encoded in a CG:B,I tag
+            if (cigarArray.length != 1 || al.start < 0) return false;
+            var p = seq_offset + ((lseq + 1) >> 1) + lseq;
+            while (p + 4 < block_end) {
+                var tag = String.fromCharCode(ba[p]) + String.fromCharCode(ba[p+1]);
+                if (tag == "CG") break;
+                var type = String.fromCharCode(ba[p+2]);
+                if (type == 'B') { // the binary array type
+                    type = String.fromCharCode(ba[p+3]);
+                    var size = type2size(type);
+                    var len = readInt(ba, p+4);
+                    p += 8 + size * len;
+                } else if (type == 'Z' || type == 'H') { // 0-terminated string
+                    p += 3;
+                    while (ba[p++] != 0) {}
+                } else { // other atomic types
+                    p += 3 + type2size(type);
+                }
+            }
+            if (p >= block_end) return false; // no CG tag
+            if (String.fromCharCode(ba[p+2]) != 'B' || String.fromCharCode(ba[p+3]) != 'I') return false; // not of type B,I
+
+            // now we know the real CIGAR length and its offset in the binary array
+            var cigar_len = readInt(ba, p+4);
+            var cigar_offset = p + 8; // 4 for "CGBI" and 4 for length
+            if (cigar_offset + cigar_len * 4 > block_end) return false; // out of bound
+
+            // decode CIGAR
+            var cigar = "";
+            var lengthOnRef = 0;
+            cigarArray.length = 0; // empty the old array
+            p = cigar_offset;
+            for (var k = 0; k < cigar_len; ++k, p += 4) {
+                var cigop = readInt(ba, p);
+                var opLen = (cigop >> 4);
+                var opLtr = CIGAR_DECODER[cigop & 0xf];
+                if (opLtr == 'M' || opLtr == 'EQ' || opLtr == 'X' || opLtr == 'D' || opLtr == 'N' || opLtr == '=')
+                    lengthOnRef += opLen;
+                cigar = cigar + opLen + opLtr;
+                cigarArray.push({len: opLen, ltr: opLtr});
+            }
+
+            // update alignment record. We are not updating bin, as apparently it is not used.
+            al.cigar = cigar;
+            al.lengthOnRef = lengthOnRef;
+            return true;
+        },
 
         /**
          *
@@ -188,10 +244,13 @@ var igv = (function (igv) {
                 alignment.start = pos;
                 alignment.flags = flag;
                 alignment.strand = !(flag & READ_STRAND_FLAG);
-                alignment.readName = readName;               alignment.cigar = cigar;
+                alignment.readName = readName;
+                alignment.cigar = cigar;
                 alignment.lengthOnRef = lengthOnRef;
                 alignment.fragmentLength = tlen;
                 alignment.mq = mq;
+
+                bam_tag2cigar(ba, BlockEnd, p, lseq, alignment, cigarArray);
 
                 if (alignment.start + alignment.lengthOnRef < min) {
                     offset = blockEnd;
@@ -291,6 +350,7 @@ var igv = (function (igv) {
                         lengthOnRef += opLen;
                 });
                 alignment.lengthOnRef = lengthOnRef;
+                // TODO for lh3: parse the CG:B,I tag in SAM here
 
                 if (alignment.start + lengthOnRef < min) {
                     continue;    // To the left, skip and continue
