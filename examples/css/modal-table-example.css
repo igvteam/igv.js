@@ -13,10 +13,14 @@
   background-color: white;
   font-family: "Open Sans", sans-serif;
   font-size: 12px;
-  font-weight: 400; }
+  font-weight: 400;
+  margin-top: 4px;
+  margin-bottom: 4px; }
   #mte-clusterize-content-area .mte-clusterize-content-row .mte-clusterize-content-row-cell {
     margin-left: 0;
     margin-right: 4px;
+    padding-top: 4px;
+    padding-bottom: 4px;
     overflow: hidden;
     white-space: nowrap;
     text-overflow: ellipsis;
