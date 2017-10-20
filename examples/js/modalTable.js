@@ -30,7 +30,7 @@
 
 var igv = (function (igv) {
 
-    igv.IGVModalTable = function (config) {
+    igv.ModatTable = function (config) {
 
         var self = this,
             $modal;
@@ -111,11 +111,11 @@ var igv = (function (igv) {
 
     };
 
-    igv.IGVModalTable.prototype.genomeID = function () {
+    igv.ModatTable.prototype.genomeID = function () {
         return this.dataSource.config.genomeID;
     };
 
-    igv.IGVModalTable.prototype.teardown = function () {
+    igv.ModatTable.prototype.teardown = function () {
 
         var list;
 
@@ -135,7 +135,7 @@ var igv = (function (igv) {
         this.config.$modalBody.empty();
     };
 
-    igv.IGVModalTable.prototype.createTable = function (clusterizeData) {
+    igv.ModatTable.prototype.createTable = function (clusterizeData) {
 
         var config;
 
@@ -149,6 +149,11 @@ var igv = (function (igv) {
             };
 
         this.clusterize = new Clusterize(config);
+
+        this.$clusterizeContentArea.on('click', '.mte-clusterize-content-row', function() {
+            var index = $(this).data('row-index');
+            console.log('row ' + index + ' clicked');
+        });
     };
 
     return igv;

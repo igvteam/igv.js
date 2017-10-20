@@ -139,9 +139,16 @@ var igv = (function (igv) {
     function getClusterizeData(rows, columns, continuation) {
 
         var self = this,
+            cooked,
             picked;
 
-        rows.sort(function (a, b) {
+        cooked = _.map(rows, function (row) {
+            return _.mapObject(row, function (val) {
+                return (undefined === val || '' === val) ? '-' : val;
+            });
+        });
+
+        cooked.sort(function (a, b) {
             var aa1,
                 aa2,
                 cc1,
@@ -176,49 +183,17 @@ var igv = (function (igv) {
             }
         });
 
-        picked = _.map(rows, function (row, index) {
+        picked = _.map(cooked, function (row, index) {
             var mapped;
 
-            mapped = _.map(_.values(_.pick(row, columns)), function (value, index) {
-                return '<div>' + value + '</div>';
+            mapped = _.map(_.values(_.pick(row, columns)), function (value) {
+                return '<div class="mte-clusterize-content-row-cell">' + value + '</div>';
             });
 
-            // mapped.unshift('<div>' + index + '</div>');
-
-            return '<div>' + mapped.join('') + '</div>';
+            return '<div class="mte-clusterize-content-row" data-row-index=' + index.toString() + '>' + mapped.join('') + '</div>';
         });
 
         continuation(picked);
-    }
-
-    function getFancyData(rows, columns, continuation) {
-
-        var self = this,
-            mapped_and_fancied;
-
-        mapped_and_fancied = _.map(rows, function (row) {
-            var picked,
-                fancied;
-
-            picked = _.pick(row, columns);
-
-            fancied = {};
-            _.each(_.keys(picked), function (key) {
-                var kk;
-                kk = self.tableFormat.indices[ key ];
-                fancied[ kk ] = picked[ key ];
-            });
-
-            _.each(_.keys(fancied), function (key) {
-                if (undefined === fancied[ key ] || '' === fancied[ key ]) {
-                    fancied[ key ] = '-';
-                }
-            });
-
-            return fancied;
-        });
-
-        continuation(mapped_and_fancied);
     }
 
     igv.EncodeDataSource.prototype.dataAtRowIndex = function (index) {

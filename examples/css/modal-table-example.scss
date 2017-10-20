@@ -1,3 +1,7 @@
+$mte-clusterize-font-family: 'Open Sans', sans-serif;
+$mte-clusterize-font-color:#636363;
+$mte-clusterize-row-highlight-color: #efefef;
+
 #mte-modal-body {
   height: 400px;
   overflow-y: scroll;
@@ -5,7 +9,8 @@
 
 #mte-clusterize-content-area {
 
-  div {
+  // one row of table
+  .mte-clusterize-content-row {
     display: flex;
     flex-direction: row;
     flex-wrap: nowrap;
@@ -13,7 +18,15 @@
     align-items: center;
     align-content: center;
 
-    div {
+    color: $mte-clusterize-font-color;
+    background-color: white;
+
+    font-family: $mte-clusterize-font-family;
+    font-size: 12px;
+    font-weight: 400;
+
+    // table cell
+    .mte-clusterize-content-row-cell {
       margin-left: 0;
       margin-right: 4px;
 
@@ -23,17 +36,28 @@
       width: 128px;
     }
 
-    div:first-child {
+    // first table cell
+    .mte-clusterize-content-row-cell:first-child {
       margin-left: 4px;
       margin-right: 4px;
       width: 64px;
-      background-color: rgba(255, 0, 0, 0.26);
+      background-color: rgba(173, 255, 47, 0.51);
     }
 
-    div:last-child {
+    // last table cell
+    .mte-clusterize-content-row-cell:last-child {
       margin-left: 4px;
       margin-right: 4px;
-      background-color: rgba(88, 192, 251, 0.26);
+      background-color: rgba(0, 191, 255, 0.51);
     }
+
   }
+
+  .mte-clusterize-content-row:hover,
+  .mte-clusterize-content-row:focus,
+  .mte-clusterize-content-row:active {
+    cursor: pointer;
+    background-color: $mte-clusterize-row-highlight-color;
+  }
+
 }
