@@ -30,7 +30,7 @@
 
 var igv = (function (igv) {
 
-    igv.ModatTable = function (config) {
+    igv.ModalTable = function (config) {
 
         var self = this,
             $modal;
@@ -56,6 +56,8 @@ var igv = (function (igv) {
 
             if (undefined === config.browserRetrievalFunction) {
                 igv.presentAlert('ERROR: must provide browser retrieval function');
+            } else if (true === self.initialized) {
+                self.updateTableView();
             }
 
         });
@@ -64,58 +66,66 @@ var igv = (function (igv) {
 
             if (undefined === config.browserRetrievalFunction) {
                 $modal.modal('hide');
-            } else if (true !== self.initialized) {
+            } else if (false === self.initialized) {
                 self.initialized = true;
                 // self.$spinner.show();
                 self.dataSource.retrieveData(function (data) {
-                    self.createTable(data);
+
+                    if (data) {
+                        self.createTable(data);
+                    } else {
+                        igv.presentAlert('ERROR: unable to retrieve data from data source.');
+                    }
+
                 });
             }
 
         });
 
         config.$modalTopCloseButton.on('click', function () {
-            $('tr.selected').removeClass('selected');
+            self.unselectAllRows();
         });
 
         config.$modalBottomCloseButton.on('click', function () {
-            $('tr.selected').removeClass('selected');
+            self.unselectAllRows();
         });
 
         config.$modalGoButton.on('click', function () {
+            var browser,
+                selected;
 
-            var dt,
-                $selectedTableRows,
-                result,
-                browser;
-
-            $selectedTableRows = self.$dataTables.$('tr.selected');
-
+            selected = self.retrieveSelectedRows();
+            self.unselectAllRows();
             if (undefined === config.browserRetrievalFunction) {
                 igv.presentAlert('ERROR: must provide browser retrieval function');
-            } else if ($selectedTableRows.length > 0) {
-
-                $selectedTableRows.removeClass('selected');
-
-                dt = self.$modalTable.DataTable();
-                result = [];
-                $selectedTableRows.each(function() {
-                    result.push( self.dataSource.dataAtRowIndex( dt.row(this).index() ) );
-                });
-
+            } else if (selected) {
                 browser = config.browserRetrievalFunction();
-                browser[ config.browserLoadFunction ](result);
+                browser[ config.browserLoadFunction ](_.values(selected));
             }
 
         });
 
     };
 
-    igv.ModatTable.prototype.genomeID = function () {
+    igv.ModalTable.prototype.retrieveSelectedRows = function () {
+        var s;
+
+        s = _.filter(this.selectedRows, function (value, key) {
+            return !(undefined === value);
+        });
+
+        return 0 === _.size(s) ? undefined : s;
+    };
+
+    igv.ModalTable.prototype.unselectAllRows = function () {
+        this.selectedRows = undefined;
+    };
+
+    igv.ModalTable.prototype.genomeID = function () {
         return this.dataSource.config.genomeID;
     };
 
-    igv.ModatTable.prototype.teardown = function () {
+    igv.ModalTable.prototype.teardown = function () {
 
         var list;
 
@@ -135,49 +145,134 @@ var igv = (function (igv) {
         this.config.$modalBody.empty();
     };
 
-    igv.ModatTable.prototype.createTable = function (data) {
+    igv.ModalTable.prototype.createTable = function (data) {
 
         var self = this;
 
         // this.$spinner.hide();
 
-        this.createHTMLMarkup(data, [ 'Assembly', 'Cell Type', 'Target', 'Assay Type', 'Output Type', 'Lab' ], function (markup) {
+        this.createHTML(data, ['Assembly', 'Cell Type', 'Target', 'Assay Type', 'Output Type', 'Lab'], function (markup) {
 
             var config;
 
             config =
                 {
                     rows: markup,
-                    scrollId:self.config.$modalBody.attr('id'),
-                    contentId:self.$clusterizeContentArea.attr('id')
+                    rows_in_block: 64,
+                    scrollId: self.config.$modalBody.attr('id'),
+                    contentId: self.$clusterizeContentArea.attr('id'),
+                    callbacks:
+                        {
+                            clusterChanged: function () {
+                                console.log('cluster changed');
+                                self.updateTableView();
+                            }
+                        }
                 };
 
             self.clusterize = new Clusterize(config);
 
-            self.$clusterizeContentArea.on('click', '.mte-clusterize-content-row', function() {
-                var index = $(this).data('row-index');
-                console.log('row ' + index + ' clicked');
+            self.$clusterizeContentArea.on('click', '.mte-clusterize-content-row', function () {
+                var key;
+
+                key = $(this).data('row-index');
+
+                console.log('row ' + key + ' clicked');
+
+                if ($(this).hasClass('mte-clusterize-selected-row')) {
+
+                    unselectRowWithKey.call(self, key);
+                    $(this).removeClass('mte-clusterize-selected-row');
+                    $(this).addClass('mte-clusterize-unselected-row');
+                } else {
+                    selectRowWithKey.call(self, key);
+                    $(this).removeClass('mte-clusterize-unselected-row');
+                    $(this).addClass('mte-clusterize-selected-row');
+                }
+
             });
+
+            function selectRowWithKey(key) {
+                var index;
+
+                if (undefined === this.selectedRows) {
+                    this.selectedRows = {};
+                }
+                index = this.dataSource.dataAtRowIndex( parseInt(key, 10) );
+                this.selectedRows[ key ] = index;
+            }
+
+            function unselectRowWithKey(key) {
+                if (this.selectedRows && this.selectedRows[ key ]) {
+                    this.selectedRows[ key ] = undefined;
+                }
+            }
 
         });
 
+        function clusterChangedCallback() {
+            var self = this;
+
+            console.log('cluster changed');
+
+            this.$clusterizeContentArea.find('.mte-clusterize-content-row').each(function (index, value) {
+                var key,
+                    isSelected;
+
+                key = $(this).data('row-index');
+                isSelected = self.selectedRows && self.selectedRows[ key ];
+
+                if (isSelected) {
+                    $(this).removeClass('mte-clusterize-unselected-row');
+                    $(this).addClass('mte-clusterize-selected-row');
+                } else {
+                    $(this).removeClass('mte-clusterize-selected-row');
+                    $(this).addClass('mte-clusterize-unselected-row');
+                }
+
+            });
+        }
+
     };
 
-    igv.ModatTable.prototype.createHTMLMarkup = function(rows, columns, continuation) {
+    igv.ModalTable.prototype.createHTML = function (data, columns, continuation) {
 
         var html;
 
-        html = _.map(rows, function (row, index) {
+        html = _.map(data, function (row, index) {
             var mapped;
 
             mapped = _.map(_.values(_.pick(row, columns)), function (value) {
                 return '<div class="mte-clusterize-content-row-cell">' + value + '</div>';
             });
 
-            return '<div class="mte-clusterize-content-row" data-row-index=' + index.toString() + '>' + mapped.join('') + '</div>';
+            return '<div class="mte-clusterize-content-row mte-clusterize-unselected-row" data-row-index=' + index.toString() + '>' + mapped.join('') + '</div>';
         });
 
         continuation(html);
+    };
+
+    igv.ModalTable.prototype.updateTableView = function () {
+
+        var self = this;
+
+        this.$clusterizeContentArea.find('.mte-clusterize-content-row').each(function (index, value) {
+            var key,
+                isSelected;
+
+            key = $(this).data('row-index');
+            isSelected = self.selectedRows && self.selectedRows[ key ];
+
+            if (isSelected) {
+                $(this).removeClass('mte-clusterize-unselected-row');
+                $(this).addClass('mte-clusterize-selected-row');
+            } else {
+                $(this).removeClass('mte-clusterize-selected-row');
+                $(this).addClass('mte-clusterize-unselected-row');
+            }
+
+        });
+
     };
 
     return igv;

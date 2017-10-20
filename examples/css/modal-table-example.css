@@ -10,7 +10,6 @@
   align-items: center;
   align-content: center;
   color: #636363;
-  background-color: white;
   font-family: "Open Sans", sans-serif;
   font-size: 12px;
   font-weight: 400;
@@ -28,16 +27,15 @@
   #mte-clusterize-content-area .mte-clusterize-content-row .mte-clusterize-content-row-cell:first-child {
     margin-left: 4px;
     margin-right: 4px;
-    width: 64px;
-    background-color: rgba(173, 255, 47, 0.51); }
+    width: 64px; }
   #mte-clusterize-content-area .mte-clusterize-content-row .mte-clusterize-content-row-cell:last-child {
     margin-left: 4px;
-    margin-right: 4px;
-    background-color: rgba(0, 191, 255, 0.51); }
-#mte-clusterize-content-area .mte-clusterize-content-row:hover,
-#mte-clusterize-content-area .mte-clusterize-content-row:focus,
-#mte-clusterize-content-area .mte-clusterize-content-row:active {
-  cursor: pointer;
+    margin-right: 4px; }
+#mte-clusterize-content-area .mte-clusterize-content-row:hover {
+  cursor: pointer; }
+#mte-clusterize-content-area .mte-clusterize-selected-row {
   background-color: #efefef; }
+#mte-clusterize-content-area .mte-clusterize-unselected-row {
+  background-color: white; }
 
 /*# sourceMappingURL=modal-table-example.css.map */

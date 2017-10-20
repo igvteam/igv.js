@@ -93,7 +93,7 @@ var modal_table_example = (function (modal_table_example) {
                     browserLoadFunction:'loadTracksWithConfigList',
                     dataSource:new igv.EncodeDataSource({ genomeID: 'hg19' }, encodeTableFormat)
                 };
-            browser.encodeTable = new igv.ModatTable(config);
+            browser.encodeTable = new igv.ModalTable(config);
 
         })
 

@@ -179,7 +179,7 @@ var igv = (function (igv) {
         var row,
             obj;
 
-        row =  this.jSON.rows[ index ];
+        row =  this.data[ index ];
 
         obj =
             {
@@ -188,36 +188,37 @@ var igv = (function (igv) {
                 name: row['Name']
             };
 
-        function encodeAntibodyColor (antibody) {
+        return obj;
 
-            var colors,
-                key;
+    };
 
-            colors =
-                {
-                    DEFAULT: "rgb(3, 116, 178)",
-                    H3K27AC: "rgb(200, 0, 0)",
-                    H3K27ME3: "rgb(130, 0, 4)",
-                    H3K36ME3: "rgb(0, 0, 150)",
-                    H3K4ME1: "rgb(0, 150, 0)",
-                    H3K4ME2: "rgb(0, 150, 0)",
-                    H3K4ME3: "rgb(0, 150, 0)",
-                    H3K9AC: "rgb(100, 0, 0)",
-                    H3K9ME1: "rgb(100, 0, 0)"
-                };
+    function encodeAntibodyColor (antibody) {
 
-            if (undefined === antibody || '' === antibody || '-' === antibody) {
-                key = 'DEFAULT';
-            } else {
-                key = antibody.toUpperCase();
-            }
+        var colors,
+            key;
 
-            return colors[ key ];
+        colors =
+            {
+                DEFAULT: "rgb(3, 116, 178)",
+                H3K27AC: "rgb(200, 0, 0)",
+                H3K27ME3: "rgb(130, 0, 4)",
+                H3K36ME3: "rgb(0, 0, 150)",
+                H3K4ME1: "rgb(0, 150, 0)",
+                H3K4ME2: "rgb(0, 150, 0)",
+                H3K4ME3: "rgb(0, 150, 0)",
+                H3K9AC: "rgb(100, 0, 0)",
+                H3K9ME1: "rgb(100, 0, 0)"
+            };
 
+        if (undefined === antibody || '' === antibody || '-' === antibody) {
+            key = 'DEFAULT';
+        } else {
+            key = antibody.toUpperCase();
         }
 
-        return obj;
-    };
+        return colors[ key ];
+
+    }
 
     igv.EncodeDataSource.prototype.tableData = function () {
         return this.tableFormat.tableData(this.jSON);

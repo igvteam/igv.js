@@ -19,7 +19,7 @@ $mte-clusterize-row-highlight-color: #efefef;
     align-content: center;
 
     color: $mte-clusterize-font-color;
-    background-color: white;
+    //background-color: white;
 
     font-family: $mte-clusterize-font-family;
     font-size: 12px;
@@ -48,23 +48,28 @@ $mte-clusterize-row-highlight-color: #efefef;
       margin-left: 4px;
       margin-right: 4px;
       width: 64px;
-      background-color: rgba(173, 255, 47, 0.51);
+      //background-color: rgba(173, 255, 47, 0.51);
     }
 
     // last table cell
     .mte-clusterize-content-row-cell:last-child {
       margin-left: 4px;
       margin-right: 4px;
-      background-color: rgba(0, 191, 255, 0.51);
+      //background-color: rgba(0, 191, 255, 0.51);
     }
-
   }
 
-  .mte-clusterize-content-row:hover,
-  .mte-clusterize-content-row:focus,
-  .mte-clusterize-content-row:active {
+  .mte-clusterize-content-row:hover {
     cursor: pointer;
+    //background-color: $mte-clusterize-row-highlight-color;
+  }
+
+  .mte-clusterize-selected-row {
     background-color: $mte-clusterize-row-highlight-color;
+  }
+
+  .mte-clusterize-unselected-row {
+    background-color: white;
   }
 
 }
