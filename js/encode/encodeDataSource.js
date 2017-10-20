@@ -125,9 +125,48 @@ var igv = (function (igv) {
 
                 });
 
-                getClusterizeData.call(self, rows, [ 'Assembly', 'Cell Type', 'Target', 'Assay Type', 'Output Type', 'Lab' ], function (fancyData) {
-                    continuation(fancyData);
+                self.data = _.map(rows, function (row) {
+                    return _.mapObject(row, function (val) {
+                        return (undefined === val || '' === val) ? '-' : val;
+                    });
                 });
+
+                self.data.sort(function (a, b) {
+                    var aa1,
+                        aa2,
+                        cc1,
+                        cc2,
+                        tt1,
+                        tt2;
+
+                    aa1 = a['Assembly' ]; aa2 = b['Assembly' ];
+                    cc1 = a['Cell Type']; cc2 = b['Cell Type'];
+                    tt1 = a['Target'   ]; tt2 = b['Target'   ];
+
+                    if (aa1 === aa2) {
+                        if (cc1 === cc2) {
+                            if (tt1 === tt2) {
+                                return 0;
+                            } else if (tt1 < tt2) {
+                                return -1;
+                            } else {
+                                return 1;
+                            }
+                        } else if (cc1 < cc2) {
+                            return -1;
+                        } else {
+                            return 1;
+                        }
+                    } else {
+                        if (aa1 < aa2) {
+                            return -1;
+                        } else {
+                            return 1;
+                        }
+                    }
+                });
+
+                continuation(self.data);
 
             })
             .catch(function (e) {
@@ -135,66 +174,6 @@ var igv = (function (igv) {
             });
 
     };
-
-    function getClusterizeData(rows, columns, continuation) {
-
-        var self = this,
-            cooked,
-            picked;
-
-        cooked = _.map(rows, function (row) {
-            return _.mapObject(row, function (val) {
-                return (undefined === val || '' === val) ? '-' : val;
-            });
-        });
-
-        cooked.sort(function (a, b) {
-            var aa1,
-                aa2,
-                cc1,
-                cc2,
-                tt1,
-                tt2;
-
-            aa1 = a['Assembly' ]; aa2 = b['Assembly' ];
-            cc1 = a['Cell Type']; cc2 = b['Cell Type'];
-            tt1 = a['Target'   ]; tt2 = b['Target'   ];
-
-            if (aa1 === aa2) {
-                if (cc1 === cc2) {
-                    if (tt1 === tt2) {
-                        return 0;
-                    } else if (tt1 < tt2) {
-                        return -1;
-                    } else {
-                        return 1;
-                    }
-                } else if (cc1 < cc2) {
-                    return -1;
-                } else {
-                    return 1;
-                }
-            } else {
-                if (aa1 < aa2) {
-                    return -1;
-                } else {
-                    return 1;
-                }
-            }
-        });
-
-        picked = _.map(cooked, function (row, index) {
-            var mapped;
-
-            mapped = _.map(_.values(_.pick(row, columns)), function (value) {
-                return '<div class="mte-clusterize-content-row-cell">' + value + '</div>';
-            });
-
-            return '<div class="mte-clusterize-content-row" data-row-index=' + index.toString() + '>' + mapped.join('') + '</div>';
-        });
-
-        continuation(picked);
-    }
 
     igv.EncodeDataSource.prototype.dataAtRowIndex = function (index) {
         var row,

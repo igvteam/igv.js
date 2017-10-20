@@ -67,8 +67,8 @@ var igv = (function (igv) {
             } else if (true !== self.initialized) {
                 self.initialized = true;
                 // self.$spinner.show();
-                self.dataSource.retrieveData(function (clusterizeData) {
-                    self.createTable(clusterizeData);
+                self.dataSource.retrieveData(function (data) {
+                    self.createTable(data);
                 });
             }
 
@@ -135,25 +135,49 @@ var igv = (function (igv) {
         this.config.$modalBody.empty();
     };
 
-    igv.ModatTable.prototype.createTable = function (clusterizeData) {
+    igv.ModatTable.prototype.createTable = function (data) {
 
-        var config;
+        var self = this;
 
         // this.$spinner.hide();
 
-        config =
-            {
-                rows: clusterizeData,
-                scrollId:this.config.$modalBody.attr('id'),
-                contentId:this.$clusterizeContentArea.attr('id')
-            };
+        this.createHTMLMarkup(data, [ 'Assembly', 'Cell Type', 'Target', 'Assay Type', 'Output Type', 'Lab' ], function (markup) {
 
-        this.clusterize = new Clusterize(config);
+            var config;
 
-        this.$clusterizeContentArea.on('click', '.mte-clusterize-content-row', function() {
-            var index = $(this).data('row-index');
-            console.log('row ' + index + ' clicked');
+            config =
+                {
+                    rows: markup,
+                    scrollId:self.config.$modalBody.attr('id'),
+                    contentId:self.$clusterizeContentArea.attr('id')
+                };
+
+            self.clusterize = new Clusterize(config);
+
+            self.$clusterizeContentArea.on('click', '.mte-clusterize-content-row', function() {
+                var index = $(this).data('row-index');
+                console.log('row ' + index + ' clicked');
+            });
+
         });
+
+    };
+
+    igv.ModatTable.prototype.createHTMLMarkup = function(rows, columns, continuation) {
+
+        var html;
+
+        html = _.map(rows, function (row, index) {
+            var mapped;
+
+            mapped = _.map(_.values(_.pick(row, columns)), function (value) {
+                return '<div class="mte-clusterize-content-row-cell">' + value + '</div>';
+            });
+
+            return '<div class="mte-clusterize-content-row" data-row-index=' + index.toString() + '>' + mapped.join('') + '</div>';
+        });
+
+        continuation(html);
     };
 
     return igv;
