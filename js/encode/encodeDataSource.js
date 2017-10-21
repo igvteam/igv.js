@@ -31,11 +31,9 @@ var igv = (function (igv) {
 
     /**
      * @param config      dataSource configuration
-     * @param tableFormat table formatting object (see for example EncodeTableFormat)
      */
-    igv.EncodeDataSource = function (config, tableFormat) {
+    igv.EncodeDataSource = function (config) {
         this.config = config;
-        this.tableFormat = tableFormat;
     };
 
     igv.EncodeDataSource.prototype.retrieveData = function (continuation) {
@@ -219,14 +217,6 @@ var igv = (function (igv) {
         return colors[ key ];
 
     }
-
-    igv.EncodeDataSource.prototype.tableData = function () {
-        return this.tableFormat.tableData(this.jSON);
-    };
-
-    igv.EncodeDataSource.prototype.tableColumns = function () {
-        return this.tableFormat.tableColumns(this.jSON);
-    };
 
     return igv;
 

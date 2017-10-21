@@ -28,8 +28,9 @@ var modal_table_example = (function (modal_table_example) {
             var options,
                 config,
                 browser,
-                columnWidths,
-                encodeTableFormat;
+                columnFormat,
+                encodeTableFormat,
+                encodeDatasource;
 
             options = {
                 minimumBases: 6,
@@ -70,7 +71,7 @@ var modal_table_example = (function (modal_table_example) {
 
             browser = igv.createBrowser($container.get(0), options);
 
-            columnWidths =
+            columnFormat =
                 {
                     'Assembly': 75,
                     'Cell Type': 75,
@@ -80,7 +81,20 @@ var modal_table_example = (function (modal_table_example) {
                     'Lab': 150
                 };
 
-            encodeTableFormat = new igv.EncodeTableFormat({ columnWidths: columnWidths });
+            columnFormat =
+                [
+                    {    'Assembly': 75 },
+                    {   'Cell Type': 75 },
+                    {      'Target': 75 },
+                    {  'Assay Type': 150 },
+                    { 'Output Type': 150 },
+                    {         'Lab': 150 }
+
+                ];
+
+            encodeTableFormat = new igv.EncodeTableFormat(columnFormat);
+
+            encodeDatasource = new igv.EncodeDataSource({genomeID: 'hg19'});
 
             config =
                 {
@@ -90,10 +104,9 @@ var modal_table_example = (function (modal_table_example) {
                     $modalBottomCloseButton: $('#encodeModalBottomCloseButton'),
                     $modalGoButton: $('#encodeModalGoButton'),
                     browserRetrievalFunction:function () { return browser; },
-                    browserLoadFunction:'loadTracksWithConfigList',
-                    dataSource:new igv.EncodeDataSource({ genomeID: 'hg19' }, encodeTableFormat)
+                    browserLoadFunction:'loadTracksWithConfigList'
                 };
-            browser.encodeTable = new igv.ModalTable(config);
+            browser.encodeTable = new igv.ModalTable(config, encodeDatasource, encodeTableFormat);
 
         })
 
