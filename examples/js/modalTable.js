@@ -69,13 +69,9 @@ var igv = (function (igv) {
                 self.initialized = true;
                 self.$spinner.show();
                 self.datasource.retrieveData(function (status) {
-                    var tableData,
-                        tableColumns;
 
                     if (true === status) {
-                        tableData = self.datasource.tableData();
-                        tableColumns = self.datasource.tableColumns();
-                        self.tableWithDataAndColumns(tableData, tableColumns);
+                        self.tableWithDataAndColumns(self.datasource.tableData(), self.datasource.tableColumns());
                     } else {
                         igv.presentAlert('ERROR: cannot retrieve data from datasource');
                         $modal.modal('hide');

@@ -121,13 +121,13 @@ var igv = (function (igv) {
 
                 });
 
-                self.rawData = _.map(rows, function (row) {
+                self.data = _.map(rows, function (row) {
                     return _.mapObject(row, function (val) {
                         return (undefined === val || '' === val) ? '-' : val;
                     });
                 });
 
-                self.rawData.sort(function (a, b) {
+                self.data.sort(function (a, b) {
                     var aa1,
                         aa2,
                         cc1,
@@ -175,7 +175,7 @@ var igv = (function (igv) {
         var self = this,
             mapped;
 
-        mapped = _.map(this.rawData, function (row) {
+        mapped = _.map(this.data, function (row) {
 
             return _.values(_.pick(row, _.map(self.columnFormat, function (column) {
                 return _.first(_.keys(column));
@@ -205,7 +205,7 @@ var igv = (function (igv) {
         var row,
             obj;
 
-        row =  this.rawData[ index ];
+        row =  this.data[ index ];
 
         obj =
             {
