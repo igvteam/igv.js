@@ -72,29 +72,17 @@ var modal_table_example = (function (modal_table_example) {
             browser = igv.createBrowser($container.get(0), options);
 
             columnFormat =
-                {
-                    'Assembly': 75,
-                    'Cell Type': 75,
-                    'Target': 75,
-                    'Assay Type': 150,
-                    'Output Type': 150,
-                    'Lab': 150
-                };
-
-            columnFormat =
                 [
-                    {    'Assembly': 75 },
-                    {   'Cell Type': 75 },
-                    {      'Target': 75 },
-                    {  'Assay Type': 150 },
-                    { 'Output Type': 150 },
-                    {         'Lab': 150 }
+                    {    'Assembly': '10%' },
+                    {   'Cell Type': '10%' },
+                    {      'Target': '10%' },
+                    {  'Assay Type': '20%' },
+                    { 'Output Type': '20%' },
+                    {         'Lab': '20%' }
 
                 ];
 
-            encodeTableFormat = new igv.EncodeTableFormat(columnFormat);
-
-            encodeDatasource = new igv.EncodeDataSource({genomeID: 'hg19'});
+            encodeDatasource = new igv.EncodeDataSource({genomeID: 'hg19'}, columnFormat);
 
             config =
                 {
@@ -106,7 +94,7 @@ var modal_table_example = (function (modal_table_example) {
                     browserRetrievalFunction:function () { return browser; },
                     browserLoadFunction:'loadTracksWithConfigList'
                 };
-            browser.encodeTable = new igv.ModalTable(config, encodeDatasource, encodeTableFormat);
+            browser.encodeTable = new igv.ModalTable(config, encodeDatasource);
 
         })
 

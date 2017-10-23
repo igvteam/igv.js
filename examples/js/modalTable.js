@@ -30,7 +30,7 @@
 
 var igv = (function (igv) {
 
-    igv.ModalTable = function (config, datasource, tableFormat) {
+    igv.ModalTable = function (config, datasource) {
 
         var self = this,
             $modal;
@@ -43,13 +43,12 @@ var igv = (function (igv) {
 
         this.datasource = datasource;
 
-        this.tableFormat = tableFormat;
+        this.$modalTable = $('<table cellpadding="0" cellspacing="0" border="0" class="display"></table>');
 
-        this.$clusterizeContentArea = $('<div>', { id:'mte-clusterize-content-area', class:'clusterize-content' });
-        this.config.$modalBody.append(this.$clusterizeContentArea);
+        config.$modalBody.append(this.$modalTable);
 
         this.$spinner = $('<div>');
-        this.$clusterizeContentArea.append(this.$spinner);
+        this.$modalTable.append(this.$spinner);
 
         this.$spinner.append($('<i class="fa fa-lg fa-spinner fa-spin"></i>'));
         this.$spinner.hide();
@@ -58,8 +57,6 @@ var igv = (function (igv) {
 
             if (undefined === config.browserRetrievalFunction) {
                 igv.presentAlert('ERROR: must provide browser retrieval function');
-            } else if (true === self.initialized) {
-                self.updateTableView();
             }
 
         });
@@ -68,59 +65,62 @@ var igv = (function (igv) {
 
             if (undefined === config.browserRetrievalFunction) {
                 $modal.modal('hide');
-            } else if (false === self.initialized) {
+            } else if (true !== self.initialized) {
                 self.initialized = true;
-                // self.$spinner.show();
-                self.datasource.retrieveData(function (data) {
+                self.$spinner.show();
+                self.datasource.retrieveData(function (status) {
+                    var tableData,
+                        tableColumns;
 
-                    if (data) {
-                        self.createTable(data);
+                    if (true === status) {
+                        tableData = self.datasource.tableData();
+                        tableColumns = self.datasource.tableColumns();
+                        self.tableWithDataAndColumns(tableData, tableColumns);
                     } else {
-                        igv.presentAlert('ERROR: unable to retrieve data from data source.');
+                        igv.presentAlert('ERROR: cannot retrieve data from datasource');
+                        $modal.modal('hide');
                     }
-
+                    self.$spinner.hide();
                 });
             }
 
         });
 
         config.$modalTopCloseButton.on('click', function () {
-            self.unselectAllRows();
+            $('tr.selected').removeClass('selected');
         });
 
         config.$modalBottomCloseButton.on('click', function () {
-            self.unselectAllRows();
+            $('tr.selected').removeClass('selected');
         });
 
         config.$modalGoButton.on('click', function () {
-            var browser,
-                trackLoadConfigurations;
 
-            trackLoadConfigurations = self.retrieveTrackLoadConfigurations();
-            self.unselectAllRows();
+            var dt,
+                $selectedTableRows,
+                result,
+                browser;
+
+            $selectedTableRows = self.$dataTables.$('tr.selected');
+
             if (undefined === config.browserRetrievalFunction) {
                 igv.presentAlert('ERROR: must provide browser retrieval function');
-            } else if (trackLoadConfigurations) {
+            } else if ($selectedTableRows.length > 0) {
+
+                $selectedTableRows.removeClass('selected');
+
+                dt = self.$modalTable.DataTable();
+                result = [];
+                $selectedTableRows.each(function() {
+                    result.push( self.datasource.dataAtRowIndex( dt.row(this).index() ) );
+                });
+
                 browser = config.browserRetrievalFunction();
-                browser[ config.browserLoadFunction ](trackLoadConfigurations);
+                browser[ config.browserLoadFunction ](result);
             }
 
         });
 
-    };
-
-    igv.ModalTable.prototype.retrieveTrackLoadConfigurations = function () {
-        var s;
-
-        s = _.filter(this.trackLoadConfigurations, function (value, key) {
-            return !(undefined === value);
-        });
-
-        return 0 === _.size(s) ? undefined : _.values(s);
-    };
-
-    igv.ModalTable.prototype.unselectAllRows = function () {
-        this.trackLoadConfigurations = undefined;
     };
 
     igv.ModalTable.prototype.genomeID = function () {
@@ -146,133 +146,27 @@ var igv = (function (igv) {
         this.config.$modalBody.empty();
     };
 
-    igv.ModalTable.prototype.createTable = function (data) {
+    igv.ModalTable.prototype.tableWithDataAndColumns = function (tableData, tableColumns) {
 
-        var self = this,
-        columnNames;
+        this.$spinner.hide();
 
-        // this.$spinner.hide();
-
-        columnNames = _.map(this.tableFormat.columnFormat, function (column) {
-            return _.first(_.keys(column));
+        this.$dataTables = this.$modalTable.dataTable({
+            data: tableData,
+            paging: true,
+            scrollX: false,
+            scrollY: '400px',
+            scrollCollapse: false,
+            scroller: true,
+            fixedColumns: true,
+            columns: tableColumns
         });
 
-        // ['Assembly', 'Cell Type', 'Target', 'Assay Type', 'Output Type', 'Lab']
-        this.createHTML(data, columnNames, function (markup) {
+        this.$modalTable.find('tbody').on('click', 'tr', function () {
 
-            var config;
-
-            config =
-                {
-                    rows: markup,
-                    rows_in_block: 64,
-                    scrollId: self.config.$modalBody.attr('id'),
-                    contentId: self.$clusterizeContentArea.attr('id'),
-                    callbacks:
-                        {
-                            clusterChanged: function () {
-                                console.log('cluster changed');
-                                self.updateTableView();
-                            }
-                        }
-                };
-
-            self.clusterize = new Clusterize(config);
-
-            self.$clusterizeContentArea.on('click', '.mte-clusterize-content-row', function () {
-                var key;
-
-                key = $(this).data('row-index');
-
-                console.log('row ' + key + ' clicked');
-
-                if ($(this).hasClass('mte-clusterize-selected-row')) {
-
-                    deleteTrackLoadConfiguration.call(self, key);
-                    $(this).removeClass('mte-clusterize-selected-row');
-                    $(this).addClass('mte-clusterize-unselected-row');
-                } else {
-                    addTrackLoadConfiguration.call(self, key);
-                    $(this).removeClass('mte-clusterize-unselected-row');
-                    $(this).addClass('mte-clusterize-selected-row');
-                }
-
-            });
-
-            function addTrackLoadConfiguration(key) {
-                if (undefined === this.trackLoadConfigurations) {
-                    this.trackLoadConfigurations = {};
-                }
-                this.trackLoadConfigurations[ key ] = this.datasource.dataAtRowIndex( parseInt(key, 10) );
-            }
-
-            function deleteTrackLoadConfiguration(key) {
-                if (this.trackLoadConfigurations && this.trackLoadConfigurations[ key ]) {
-                    this.trackLoadConfigurations[ key ] = undefined;
-                }
-            }
-
-        });
-
-        function clusterChangedCallback() {
-            var self = this;
-
-            console.log('cluster changed');
-
-            this.$clusterizeContentArea.find('.mte-clusterize-content-row').each(function (index, value) {
-                var key,
-                    isPresent;
-
-                key = $(this).data('row-index');
-                isPresent = self.trackLoadConfigurations && self.trackLoadConfigurations[ key ];
-
-                if (isPresent) {
-                    $(this).removeClass('mte-clusterize-unselected-row');
-                    $(this).addClass('mte-clusterize-selected-row');
-                } else {
-                    $(this).removeClass('mte-clusterize-selected-row');
-                    $(this).addClass('mte-clusterize-unselected-row');
-                }
-
-            });
-        }
-
-    };
-
-    igv.ModalTable.prototype.createHTML = function (data, columns, continuation) {
-
-        var html;
-
-        html = _.map(data, function (row, index) {
-            var mapped;
-
-            mapped = _.map(_.values(_.pick(row, columns)), function (value) {
-                return '<div class="mte-clusterize-content-row-cell">' + value + '</div>';
-            });
-
-            return '<div class="mte-clusterize-content-row mte-clusterize-unselected-row" data-row-index=' + index.toString() + '>' + mapped.join('') + '</div>';
-        });
-
-        continuation(html);
-    };
-
-    igv.ModalTable.prototype.updateTableView = function () {
-
-        var self = this;
-
-        this.$clusterizeContentArea.find('.mte-clusterize-content-row').each(function (index, value) {
-            var key,
-                isSelected;
-
-            key = $(this).data('row-index');
-            isSelected = self.trackLoadConfigurations && self.trackLoadConfigurations[ key ];
-
-            if (isSelected) {
-                $(this).removeClass('mte-clusterize-unselected-row');
-                $(this).addClass('mte-clusterize-selected-row');
+            if ($(this).hasClass('selected')) {
+                $(this).removeClass('selected');
             } else {
-                $(this).removeClass('mte-clusterize-selected-row');
-                $(this).addClass('mte-clusterize-unselected-row');
+                $(this).addClass('selected');
             }
 
         });

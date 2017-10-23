@@ -29,11 +29,9 @@
  */
 var igv = (function (igv) {
 
-    /**
-     * @param config      dataSource configuration
-     */
-    igv.EncodeDataSource = function (config) {
+    igv.EncodeDataSource = function (config, columnFormat) {
         this.config = config;
+        this.columnFormat = columnFormat;
     };
 
     igv.EncodeDataSource.prototype.retrieveData = function (continuation) {
@@ -123,13 +121,13 @@ var igv = (function (igv) {
 
                 });
 
-                self.data = _.map(rows, function (row) {
+                self.rawData = _.map(rows, function (row) {
                     return _.mapObject(row, function (val) {
                         return (undefined === val || '' === val) ? '-' : val;
                     });
                 });
 
-                self.data.sort(function (a, b) {
+                self.rawData.sort(function (a, b) {
                     var aa1,
                         aa2,
                         cc1,
@@ -164,20 +162,50 @@ var igv = (function (igv) {
                     }
                 });
 
-                continuation(self.data);
+                continuation(true);
 
             })
             .catch(function (e) {
-                continuation(undefined);
+                continuation(false);
             });
 
+    };
+
+    igv.EncodeDataSource.prototype.tableData = function () {
+        var self = this,
+            mapped;
+
+        mapped = _.map(this.rawData, function (row) {
+
+            return _.values(_.pick(row, _.map(self.columnFormat, function (column) {
+                return _.first(_.keys(column));
+            })));
+        });
+
+        return mapped;
+    };
+
+    igv.EncodeDataSource.prototype.tableColumns = function () {
+
+        var columns;
+
+        columns = _.map(this.columnFormat, function (obj) {
+            var key,
+                val;
+
+            key = _.first(_.keys(obj));
+            val = _.first(_.values(obj));
+            return { title: key, width: val }
+        });
+
+        return columns;
     };
 
     igv.EncodeDataSource.prototype.dataAtRowIndex = function (index) {
         var row,
             obj;
 
-        row =  this.data[ index ];
+        row =  this.rawData[ index ];
 
         obj =
             {
