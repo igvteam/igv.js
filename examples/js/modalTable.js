@@ -144,18 +144,23 @@ var igv = (function (igv) {
 
     igv.ModalTable.prototype.tableWithDataAndColumns = function (tableData, tableColumns) {
 
+        var config;
+
         this.$spinner.hide();
 
-        this.$dataTables = this.$modalTable.dataTable({
-            data: tableData,
-            paging: true,
-            scrollX: false,
-            scrollY: '400px',
-            scrollCollapse: false,
-            scroller: true,
-            fixedColumns: true,
-            columns: tableColumns
-        });
+        config =
+            {
+                data: tableData,
+                columns: tableColumns,
+                paging: true,
+                scrollX: false,
+                scrollY: '400px',
+                scrollCollapse: false,
+                scroller: true,
+                fixedColumns: true
+            };
+
+        this.$dataTables = this.$modalTable.dataTable(config);
 
         this.$modalTable.find('tbody').on('click', 'tr', function () {
 

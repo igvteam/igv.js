@@ -121,6 +121,7 @@ var igv = (function (igv) {
 
                 });
 
+                // insert placeholders for missing data
                 self.data = _.map(rows, function (row) {
                     return _.mapObject(row, function (val) {
                         return (undefined === val || '' === val) ? '-' : val;
@@ -177,6 +178,7 @@ var igv = (function (igv) {
 
         mapped = _.map(this.data, function (row) {
 
+            // Isolate the subset of the data for display in the table
             return _.values(_.pick(row, _.map(self.columnFormat, function (column) {
                 return _.first(_.keys(column));
             })));
@@ -216,35 +218,34 @@ var igv = (function (igv) {
 
         return obj;
 
-    };
+        function encodeAntibodyColor (antibody) {
 
-    function encodeAntibodyColor (antibody) {
+            var colors,
+                key;
 
-        var colors,
-            key;
+            colors =
+                {
+                    DEFAULT: "rgb(3, 116, 178)",
+                    H3K27AC: "rgb(200, 0, 0)",
+                    H3K27ME3: "rgb(130, 0, 4)",
+                    H3K36ME3: "rgb(0, 0, 150)",
+                    H3K4ME1: "rgb(0, 150, 0)",
+                    H3K4ME2: "rgb(0, 150, 0)",
+                    H3K4ME3: "rgb(0, 150, 0)",
+                    H3K9AC: "rgb(100, 0, 0)",
+                    H3K9ME1: "rgb(100, 0, 0)"
+                };
 
-        colors =
-            {
-                DEFAULT: "rgb(3, 116, 178)",
-                H3K27AC: "rgb(200, 0, 0)",
-                H3K27ME3: "rgb(130, 0, 4)",
-                H3K36ME3: "rgb(0, 0, 150)",
-                H3K4ME1: "rgb(0, 150, 0)",
-                H3K4ME2: "rgb(0, 150, 0)",
-                H3K4ME3: "rgb(0, 150, 0)",
-                H3K9AC: "rgb(100, 0, 0)",
-                H3K9ME1: "rgb(100, 0, 0)"
-            };
+            if (undefined === antibody || '' === antibody || '-' === antibody) {
+                key = 'DEFAULT';
+            } else {
+                key = antibody.toUpperCase();
+            }
 
-        if (undefined === antibody || '' === antibody || '-' === antibody) {
-            key = 'DEFAULT';
-        } else {
-            key = antibody.toUpperCase();
+            return colors[ key ];
+
         }
-
-        return colors[ key ];
-
-    }
+    };
 
     return igv;
 
