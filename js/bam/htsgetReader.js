@@ -36,101 +36,91 @@ var igv = (function (igv) {
 
         return new Promise(function (fulfill, reject) {
 
-            getHeader()
+                getHeader()
 
-                .then(function (header) {
+                    .then(function (header) {
 
-                    var queryChr, url;
+                        var queryChr, url;
 
-                    queryChr = header.chrAliasTable.hasOwnProperty(chr) ? header.chrAliasTable[chr] : chr;
+                        queryChr = header.chrAliasTable.hasOwnProperty(chr) ? header.chrAliasTable[chr] : chr;
 
-                    url = self.config.url + self.config.id +
-                        '?referenceName=' + queryChr +
-                        '&start=' + start +
-                        '&end=' + end;
+                        url = self.config.url + self.config.id +
+                            '?referenceName=' + queryChr +
+                            '&start=' + start +
+                            '&end=' + end;
 
-
-                    igv.xhr.loadJson(url, self.config)
-
-                        .then(function (data) {
-
-                            if (data && data.htsget && data.htsget.urls) {
-
-                                loadUrls(data.htsget.urls)
-
-                                    .then(function (dataArr) {
-
-                                        var compressedData, unc, ba, alignmentContainer, chrIdx;
-
-                                        compressedData = concatArrays(dataArr);  // In essence a complete bam file
-                                        unc = igv.unbgzf(compressedData.buffer);
-                                        ba = new Uint8Array(unc);
-
-
-                                        chrIdx = self.header.chrToIndex[chr];
-                                        alignmentContainer = new igv.AlignmentContainer(chr, start, end);
-                                        igv.BamUtils.decodeBamRecords(ba, header.size, alignmentContainer, start, end, chrIdx, header.chrNames);
-                                        alignmentContainer.finish()
-                                        fulfill(alignmentContainer);
-                                    })
-                                    .catch(function (error) {
-                                        reject(error);
-                                    });
-                            } else {
-                                fulfill(null);
-                            }
-                        })
-                        .catch(function (error) {
-                            reject(error);
-                        });
-                });
-
-            function getHeader() {
-
-                if (self.header) {
-                    return Promise.resolve(self.header);
-                }
-                else {
-                    return new Promise(function (fulfill, reject) {
-
-                        // htsget does not specify a method to get the header alone.  specify a non-sensical range
-                        // to return just the header
-
-                        var url = self.config.url + self.config.id + '?referenceName=noSuchReference';
-
-                        igv.xhr.loadJson(url, self.config)
-
-                            .then(function (data) {
-
-                                var genome = igv.browser ? igv.browser.genome : undefined;
-
-                                if (data && data.htsget && data.htsget.urls) {
-
-                                    loadUrls(data.htsget.urls)
-
-                                        .then(function (dataArr) {
-
-                                            var compressedData, unc, ba, alignmentContainer, chrIdx;
-
-                                            compressedData = concatArrays(dataArr);  // In essence a complete bam file
-                                            unc = igv.unbgzf(compressedData.buffer);
-                                            ba = new Uint8Array(unc);
-
-                                            self.header = igv.BamUtils.decodeBamHeader(ba, genome);
-
-                                            fulfill(self.header);
-                                        });
-                                }
-                                else {
-                                    reject("Error querying htsget: " + headerUrl);
-                                }
-                            });
-
+                        return igv.xhr.loadJson(url, self.config)
                     })
-                }
+                    .then(function (data) {
+                        return loadUrls(data.htsget.urls)
+                    })
+                    .then(function (dataArr) {
 
+                        var compressedData, unc, ba, alignmentContainer, chrIdx;
+
+                        compressedData = concatArrays(dataArr);  // In essence a complete bam file
+                        unc = igv.unbgzf(compressedData.buffer);
+                        ba = new Uint8Array(unc);
+
+
+                        chrIdx = self.header.chrToIndex[chr];
+                        alignmentContainer = new igv.AlignmentContainer(chr, start, end);
+                        igv.BamUtils.decodeBamRecords(ba, self.header.size, alignmentContainer, start, end, chrIdx, self.header.chrNames);
+                        alignmentContainer.finish()
+                        fulfill(alignmentContainer);
+                    })
+                    .catch(function (error) {
+                        reject(error);
+                    });
+
+
+                function getHeader() {
+
+                    if (self.header) {
+                        return Promise.resolve(self.header);
+                    }
+                    else {
+                        return new Promise(function (fulfill, reject) {
+
+                            // htsget does not specify a method to get the header alone.  specify a non-sensical range
+                            // to return just the header
+
+                            var url = self.config.url + self.config.id + '?referenceName=noSuchReference';
+
+                            igv.xhr.loadJson(url, self.config)
+
+                                .then(function (data) {
+
+                                    var genome = igv.browser ? igv.browser.genome : undefined;
+
+                                    if (data && data.htsget && data.htsget.urls) {
+
+                                        loadUrls(data.htsget.urls)
+
+                                            .then(function (dataArr) {
+
+                                                var compressedData, unc, ba, alignmentContainer, chrIdx;
+
+                                                compressedData = concatArrays(dataArr);  // In essence a complete bam file
+                                                unc = igv.unbgzf(compressedData.buffer);
+                                                ba = new Uint8Array(unc);
+
+                                                self.header = igv.BamUtils.decodeBamHeader(ba, genome);
+
+                                                fulfill(self.header);
+                                            });
+                                    }
+                                    else {
+                                        reject("Error querying htsget: " + headerUrl);
+                                    }
+                                });
+
+                        })
+                    }
+
+                }
             }
-        });
+        );
     }
 
 
@@ -145,7 +135,7 @@ var igv = (function (igv) {
 
                 if (urlData.headers) {
                     options.headers = urlData.headers;
-                    if(options.headers.hasOwnProperty("referer")) {
+                    if (options.headers.hasOwnProperty("referer")) {
                         delete options.headers["referer"];
                     }
                 }
@@ -207,4 +197,5 @@ var igv = (function (igv) {
 
 
     return igv;
-})(igv || {});
+})
+(igv || {});

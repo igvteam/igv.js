@@ -155,15 +155,12 @@ var igv = (function (igv) {
 
                     var len = index.firstAlignmentBlock + MAX_GZIP_BLOCK_SIZE,   // Insure we get the complete compressed block containing the header
                         options = igv.buildOptions(self.config, {range: {start: 0, size: len}}),
-                        genome = igv.browser ? igv.browser.genome : null,
-                        header;
+                        genome = igv.browser ? igv.browser.genome : null;
 
-                    igv.BamUtils.readHeader(self.bamPath, options, genome)
-                        .then(function (header) {
-                            fulfill(header);
-                        })
-                        .catch(reject);
-
+                    return igv.BamUtils.readHeader(self.bamPath, options, genome)
+                })
+                .then(function (header) {
+                    fulfill(header);
                 })
                 .catch(reject);
         });
