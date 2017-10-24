@@ -30,30 +30,25 @@
 
 var igv = (function (igv) {
 
-    igv.IGVModalTable = function (config) {
+    igv.ModalTable = function (config, datasource) {
 
-        var self = this,
-            $modal;
+        var self = this;
 
         this.initialized = false;
-
         this.config = config;
+        this.datasource = datasource;
 
-        $modal = config.$modal;
+        this.$table = $('<table cellpadding="0" cellspacing="0" border="0" class="display"></table>');
 
-        this.dataSource = config.dataSource;
-
-        this.$modalTable = $('<table cellpadding="0" cellspacing="0" border="0" class="display"></table>');
-
-        config.$modalBody.append(this.$modalTable);
+        config.$modalBody.append(this.$table);
 
         this.$spinner = $('<div>');
-        this.$modalTable.append(this.$spinner);
+        this.$table.append(this.$spinner);
 
         this.$spinner.append($('<i class="fa fa-lg fa-spinner fa-spin"></i>'));
         this.$spinner.hide();
 
-        $modal.on('show.bs.modal', function (e) {
+        config.$modal.on('show.bs.modal', function (e) {
 
             if (undefined === config.browserRetrievalFunction) {
                 igv.presentAlert('ERROR: must provide browser retrieval function');
@@ -61,20 +56,20 @@ var igv = (function (igv) {
 
         });
 
-        $modal.on('shown.bs.modal', function (e) {
+        config.$modal.on('shown.bs.modal', function (e) {
 
             if (undefined === config.browserRetrievalFunction) {
-                $modal.modal('hide');
+                config.$modal.modal('hide');
             } else if (true !== self.initialized) {
                 self.initialized = true;
                 self.$spinner.show();
-                self.dataSource.retrieveData(function (json) {
-                    if (json) {
-                        self.dataSource.jSON = json;
-                        self.createTableWithDataSource(self.dataSource);
+                self.datasource.retrieveData(function (status) {
+
+                    if (true === status) {
+                        self.tableWithDataAndColumns(self.datasource.tableData(), self.datasource.tableColumns());
                     } else {
                         igv.presentAlert('ERROR: cannot retrieve data from datasource');
-                        $modal.modal('hide');
+                        config.$modal.modal('hide');
                     }
                     self.$spinner.hide();
                 });
@@ -105,10 +100,10 @@ var igv = (function (igv) {
 
                 $selectedTableRows.removeClass('selected');
 
-                dt = self.$modalTable.DataTable();
+                dt = self.$table.DataTable();
                 result = [];
                 $selectedTableRows.each(function() {
-                    result.push( self.dataSource.dataAtRowIndex( dt.row(this).index() ) );
+                    result.push( self.datasource.dataAtRowIndex( dt.row(this).index() ) );
                 });
 
                 browser = config.browserRetrievalFunction();
@@ -119,17 +114,16 @@ var igv = (function (igv) {
 
     };
 
-    igv.IGVModalTable.prototype.genomeID = function () {
-        return this.dataSource.config.genomeID;
-    };
+    // igv.ModalTable.prototype.genomeID = function () {
+    //     return this.datasource.config.genomeID;
+    // };
 
-    igv.IGVModalTable.prototype.teardown = function () {
+    igv.ModalTable.prototype.teardown = function () {
 
         var list;
 
         list =
             [
-                this.$modalTable.find('tbody'),
                 this.config.$modal,
                 this.config.$modalTopCloseButton,
                 this.config.$modalBottomCloseButton,
@@ -143,25 +137,27 @@ var igv = (function (igv) {
         this.config.$modalBody.empty();
     };
 
-    /**
-     * @param dataSource source of data fed to the table (see for example EncodeDataSource)
-     */
-    igv.IGVModalTable.prototype.createTableWithDataSource = function (dataSource) {
+    igv.ModalTable.prototype.tableWithDataAndColumns = function (tableData, tableColumns) {
+
+        var config;
 
         this.$spinner.hide();
 
-        this.$dataTables = this.$modalTable.dataTable({
-            data: dataSource.tableData(),
-            paging: true,
-            scrollX: false,
-            scrollY: '400px',
-            scrollCollapse: false,
-            scroller: true,
-            fixedColumns: true,
-            columns: dataSource.tableColumns()
-        });
+        config =
+            {
+                data: tableData,
+                columns: tableColumns,
+                paging: true,
+                scrollX: false,
+                scrollY: '400px',
+                scrollCollapse: false,
+                scroller: true,
+                fixedColumns: true
+            };
 
-        this.$modalTable.find('tbody').on('click', 'tr', function () {
+        this.$dataTables = this.$table.dataTable(config);
+
+        this.$table.find('tbody').on('click', 'tr', function () {
 
             if ($(this).hasClass('selected')) {
                 $(this).removeClass('selected');
