@@ -50,7 +50,7 @@ var igv = (function (igv) {
         this.samplingWindowSize = samplingWindowSize === undefined ? 100 : samplingWindowSize;
         this.samplingDepth = samplingDepth === undefined ? 50 : samplingDepth;
 
-        this.pairsSupported = pairsSupported;
+        this.pairsSupported = pairsSupported === undefined ? true : pairsSupported;
         this.paired = false;  // false until proven otherwise
         this.pairsCache = {};  // working cache of paired alignments by read name
 

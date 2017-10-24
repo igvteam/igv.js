@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+    <meta name="description" content="">
+    <meta name="author" content="">
+    <link rel="shortcut icon" href=../img/favicon.ico>
+    <title>htsget example</title>
+    <link rel="import" href="./shared-css.html">
+    <link rel="import" href="./shared-js.html">
+</head>
+
+<body>
+
+<div id="myDiv" style="padding-top: 50px;padding-bottom: 20px; height: auto">
+</div>
+
+<script type="text/javascript">
+
+    $(document).ready(function () {
+        var options;
+
+        options = {
+            showKaryo: false,
+            showIdeogram: true,
+            showNavigation: true,
+            showRuler: true,
+            genome: "hg19",
+            locus: "chr8:128,747,267-128,754,546",
+            tracks: [
+                {
+                    name: "Genes",
+                    type: "annotation",
+                    format: "gtf",
+                    sourceType: "file",
+                    url: "https://s3.amazonaws.com/igv.broadinstitute.org/annotations/hg19/genes/gencode.v18.annotation.sorted.gtf.gz",
+                    indexURL: "https://s3.amazonaws.com/igv.broadinstitute.org/annotations/hg19/genes/gencode.v18.annotation.sorted.gtf.gz.tbi",
+                    visibilityWindow: 10000000,
+                    order: Number.MAX_VALUE,
+                    displayMode: "EXPANDED"
+                },
+                {
+                    type: 'alignment',
+                    sourceType: 'htsget',
+                    url: 'http://htsnexus.rnd.dnanex.us/v1/reads/',
+                    id: 'BroadHiSeqX_b37/NA12878',
+                    name: 'NA12878'
+                }
+
+            ]
+        };
+
+        igv.createBrowser($("#myDiv")[0], options);
+
+
+    })
+
+
+</script>
+
+</body>
+
+</html>

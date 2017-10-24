@@ -33,7 +33,6 @@ var igv = (function (igv) {
     var MATE_STRAND_FLAG = 0x20;
 
 
-
     igv.BamUtils = {
 
         readHeader: function (url, options, genome) {
@@ -44,9 +43,12 @@ var igv = (function (igv) {
 
                     .then(function (compressedBuffer) {
 
-                        var header;
+                        var header, unc, uncba;
 
-                        header = igv.BamUtils.decodeBamHeader(compressedBuffer, genome);
+                        unc = igv.unbgzf(compressedBuffer);
+                        uncba = new Uint8Array(unc);
+
+                        header = igv.BamUtils.decodeBamHeader(uncba, genome);
 
                         fulfill(header);
 
@@ -58,21 +60,25 @@ var igv = (function (igv) {
             });
         },
 
-        decodeBamHeader: function (compressedBuffer, genome) {
+        /**
+         *
+         * @param ba  bytes to decode as a UInt8Array
+         * @param genome  optional igv genome object
+         * @returns {{chrNames: Array, chrToIndex: ({}|*), chrAliasTable: ({}|*)}}
+         */
+        decodeBamHeader: function (ba, genome) {
 
-            var unc, uncba, magic, samHeaderLen, samHeader, chrToIndex, chrNames, chrAliasTable, alias;
+            var magic, samHeaderLen, samHeader, chrToIndex, chrNames, chrAliasTable, alias;
 
-            unc = igv.unbgzf(compressedBuffer);
-            uncba = new Uint8Array(unc);
-            magic = readInt(uncba, 0);
-            samHeaderLen = readInt(uncba, 4);
+            magic = readInt(ba, 0);
+            samHeaderLen = readInt(ba, 4);
             samHeader = '';
 
             for (var i = 0; i < samHeaderLen; ++i) {
-                samHeader += String.fromCharCode(uncba[i + 8]);
+                samHeader += String.fromCharCode(ba[i + 8]);
             }
 
-            var nRef = readInt(uncba, samHeaderLen + 8);
+            var nRef = readInt(ba, samHeaderLen + 8);
             var p = samHeaderLen + 12;
 
             chrToIndex = {};
@@ -80,12 +86,12 @@ var igv = (function (igv) {
             chrAliasTable = {};
 
             for (var i = 0; i < nRef; ++i) {
-                var lName = readInt(uncba, p);
+                var lName = readInt(ba, p);
                 var name = '';
                 for (var j = 0; j < lName - 1; ++j) {
-                    name += String.fromCharCode(uncba[p + 4 + j]);
+                    name += String.fromCharCode(ba[p + 4 + j]);
                 }
-                var lRef = readInt(uncba, p + lName + 4);
+                var lRef = readInt(ba, p + lName + 4);
                 //dlog(name + ': ' + lRef);
 
                 chrToIndex[name] = i;
@@ -100,6 +106,7 @@ var igv = (function (igv) {
             }
 
             return {
+                size: p,
                 chrNames: chrNames,
                 chrToIndex: chrToIndex,
                 chrAliasTable: chrAliasTable
@@ -250,7 +257,7 @@ var igv = (function (igv) {
                 alignment.fragmentLength = tlen;
                 alignment.mq = mq;
 
-                igv.BamUtils.bam_tag2cigar(ba, BlockEnd, p, lseq, alignment, cigarArray);
+                igv.BamUtils.bam_tag2cigar(ba, blockEnd, p, lseq, alignment, cigarArray);
 
                 if (alignment.start + alignment.lengthOnRef < min) {
                     offset = blockEnd;
@@ -267,7 +274,6 @@ var igv = (function (igv) {
                 }
                 seq = seq.slice(0, lseq).join('');  // seq might have one extra character (if lseq is an odd number)
                 p += seqBytes;
-
 
 
                 if (lseq === 1 && String.fromCharCode(ba[p + j] + 33) === "*") {
@@ -359,7 +365,7 @@ var igv = (function (igv) {
 
                 qualString = tokens[10];
                 alignment.qual = [];
-                for(j=0; j < qualString.length; j++) {
+                for (j = 0; j < qualString.length; j++) {
                     alignment.qual[j] = qualString.charCodeAt(j) - 33;
                 }
                 alignment.tagDict = tokens.length < 11 ? {} : decodeSamTags(tokens.slice(11));
