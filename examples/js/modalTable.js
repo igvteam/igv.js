@@ -32,28 +32,23 @@ var igv = (function (igv) {
 
     igv.ModalTable = function (config, datasource) {
 
-        var self = this,
-            $modal;
+        var self = this;
 
         this.initialized = false;
-
         this.config = config;
-
-        $modal = config.$modal;
-
         this.datasource = datasource;
 
-        this.$modalTable = $('<table cellpadding="0" cellspacing="0" border="0" class="display"></table>');
+        this.$table = $('<table cellpadding="0" cellspacing="0" border="0" class="display"></table>');
 
-        config.$modalBody.append(this.$modalTable);
+        config.$modalBody.append(this.$table);
 
         this.$spinner = $('<div>');
-        this.$modalTable.append(this.$spinner);
+        this.$table.append(this.$spinner);
 
         this.$spinner.append($('<i class="fa fa-lg fa-spinner fa-spin"></i>'));
         this.$spinner.hide();
 
-        $modal.on('show.bs.modal', function (e) {
+        config.$modal.on('show.bs.modal', function (e) {
 
             if (undefined === config.browserRetrievalFunction) {
                 igv.presentAlert('ERROR: must provide browser retrieval function');
@@ -61,10 +56,10 @@ var igv = (function (igv) {
 
         });
 
-        $modal.on('shown.bs.modal', function (e) {
+        config.$modal.on('shown.bs.modal', function (e) {
 
             if (undefined === config.browserRetrievalFunction) {
-                $modal.modal('hide');
+                config.$modal.modal('hide');
             } else if (true !== self.initialized) {
                 self.initialized = true;
                 self.$spinner.show();
@@ -74,7 +69,7 @@ var igv = (function (igv) {
                         self.tableWithDataAndColumns(self.datasource.tableData(), self.datasource.tableColumns());
                     } else {
                         igv.presentAlert('ERROR: cannot retrieve data from datasource');
-                        $modal.modal('hide');
+                        config.$modal.modal('hide');
                     }
                     self.$spinner.hide();
                 });
@@ -105,7 +100,7 @@ var igv = (function (igv) {
 
                 $selectedTableRows.removeClass('selected');
 
-                dt = self.$modalTable.DataTable();
+                dt = self.$table.DataTable();
                 result = [];
                 $selectedTableRows.each(function() {
                     result.push( self.datasource.dataAtRowIndex( dt.row(this).index() ) );
@@ -119,9 +114,9 @@ var igv = (function (igv) {
 
     };
 
-    igv.ModalTable.prototype.genomeID = function () {
-        return this.datasource.config.genomeID;
-    };
+    // igv.ModalTable.prototype.genomeID = function () {
+    //     return this.datasource.config.genomeID;
+    // };
 
     igv.ModalTable.prototype.teardown = function () {
 
@@ -160,9 +155,9 @@ var igv = (function (igv) {
                 fixedColumns: true
             };
 
-        this.$dataTables = this.$modalTable.dataTable(config);
+        this.$dataTables = this.$table.dataTable(config);
 
-        this.$modalTable.find('tbody').on('click', 'tr', function () {
+        this.$table.find('tbody').on('click', 'tr', function () {
 
             if ($(this).hasClass('selected')) {
                 $(this).removeClass('selected');
