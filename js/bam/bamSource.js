@@ -36,6 +36,8 @@ var igv = (function (igv) {
             this.bamReader = new igv.Ga4ghAlignmentReader(config);
         } else if ("pysam" === config.sourceType) {
             this.bamReader = new igv.BamWebserviceReader(config)
+        } else if("htsget" === config.sourceType) {
+            this.bamReader = new igv.HtsgetReader(config);
         } else {
             this.bamReader = new igv.BamReader(config);
         }
