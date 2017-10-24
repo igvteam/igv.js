@@ -87,6 +87,22 @@ $drag-drop-warning-color: red;
   background-position: 0 0;
 }
 
+// chromosome select widget
+.igv-chromosome-select-widget-container {
+  position: relative;
+  float: left;
+  height: 90%;
+  width: 96px;
+  margin-right: 4px;
+  //background-color: rgba(0, 191, 255, 0.51);
+
+  select {
+    position: relative;
+    width: 100%;
+    height: 100%;
+  }
+}
+
 // nav bar - search
 .igv-search-container {
   position: relative;
