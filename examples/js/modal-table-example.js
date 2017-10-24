@@ -28,8 +28,9 @@ var modal_table_example = (function (modal_table_example) {
             var options,
                 config,
                 browser,
-                columnWidths,
-                encodeTableFormat;
+                columnFormat,
+                encodeTableFormat,
+                encodeDatasource;
 
             options = {
                 minimumBases: 6,
@@ -70,30 +71,30 @@ var modal_table_example = (function (modal_table_example) {
 
             browser = igv.createBrowser($container.get(0), options);
 
-            columnWidths =
-                {
-                    'Assembly': '10%',
-                    'Cell Type': '10%',
-                    'Target': '10%',
-                    'Assay Type': '20%',
-                    'Output Type': '20%',
-                    'Lab': '20%'
-                };
+            columnFormat =
+                [
+                    {    'Assembly': '10%' },
+                    {   'Cell Type': '10%' },
+                    {      'Target': '10%' },
+                    {  'Assay Type': '20%' },
+                    { 'Output Type': '20%' },
+                    {         'Lab': '20%' }
 
-            encodeTableFormat = new igv.EncodeTableFormat({ columnWidths: columnWidths });
+                ];
+
+            encodeDatasource = new igv.EncodeDataSource({genomeID: 'hg19'}, columnFormat);
 
             config =
                 {
                     $modal:$('#encodeModal'),
-                    $modalBody:$('#encodeModalBody'),
+                    $modalBody:$('#mte-modal-body'),
                     $modalTopCloseButton: $('#encodeModalTopCloseButton'),
                     $modalBottomCloseButton: $('#encodeModalBottomCloseButton'),
                     $modalGoButton: $('#encodeModalGoButton'),
                     browserRetrievalFunction:function () { return browser; },
-                    browserLoadFunction:'loadTracksWithConfigList',
-                    dataSource:new igv.EncodeDataSource({ genomeID: 'hg19' }, encodeTableFormat)
+                    browserLoadFunction:'loadTracksWithConfigList'
                 };
-            browser.encodeTable = new igv.IGVModalTable(config);
+            browser.encodeTable = new igv.ModalTable(config, encodeDatasource);
 
         })
 

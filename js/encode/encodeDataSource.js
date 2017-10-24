@@ -29,13 +29,9 @@
  */
 var igv = (function (igv) {
 
-    /**
-     * @param config      dataSource configuration
-     * @param tableFormat table formatting object (see for example EncodeTableFormat)
-     */
-    igv.EncodeDataSource = function (config, tableFormat) {
+    igv.EncodeDataSource = function (config, columnFormat) {
         this.config = config;
-        this.tableFormat = tableFormat;
+        this.columnFormat = columnFormat;
     };
 
     igv.EncodeDataSource.prototype.retrieveData = function (continuation) {
@@ -72,8 +68,7 @@ var igv = (function (igv) {
             .loadJson(query, {})
             .then(function (json) {
 
-                var rows,
-                    obj;
+                var rows;
 
                 rows = [];
                 _.each(json["@graph"], function (record) {
@@ -126,65 +121,93 @@ var igv = (function (igv) {
 
                 });
 
-                rows.sort(function (a, b) {
-                    var a1 = a["Assembly"],
-                        a2 = b["Assembly"],
-                        ct1 = a["Cell Type"],
-                        ct2 = b["Cell Type"],
-                        t1 = a["Target"],
-                        t2 = b["Target"];
+                // insert placeholders for missing data
+                self.data = _.map(rows, function (row) {
+                    return _.mapObject(row, function (val) {
+                        return (undefined === val || '' === val) ? '-' : val;
+                    });
+                });
 
-                    if (a1 === a2) {
-                        if (ct1 === ct2) {
-                            if (t1 === t2) {
+                self.data.sort(function (a, b) {
+                    var aa1,
+                        aa2,
+                        cc1,
+                        cc2,
+                        tt1,
+                        tt2;
+
+                    aa1 = a['Assembly' ]; aa2 = b['Assembly' ];
+                    cc1 = a['Cell Type']; cc2 = b['Cell Type'];
+                    tt1 = a['Target'   ]; tt2 = b['Target'   ];
+
+                    if (aa1 === aa2) {
+                        if (cc1 === cc2) {
+                            if (tt1 === tt2) {
                                 return 0;
-                            }
-                            else if (t1 < t2) {
+                            } else if (tt1 < tt2) {
                                 return -1;
-                            }
-                            else {
+                            } else {
                                 return 1;
                             }
-                        }
-                        else if (ct1 < ct2) {
+                        } else if (cc1 < cc2) {
                             return -1;
-                        }
-                        else {
+                        } else {
                             return 1;
                         }
-                    }
-                    else {
-                        if (a1 < a2) {
+                    } else {
+                        if (aa1 < aa2) {
                             return -1;
-                        }
-                        else {
+                        } else {
                             return 1;
                         }
                     }
                 });
 
-                obj = {
-                    columns: [ 'Assembly', 'Cell Type', 'Target', 'Assay Type', 'Output Type', 'Lab' ],
-                    rows: rows
-                };
-
-                ingestData(obj, function (json) {
-                    continuation(json);
-                });
-
+                continuation(true);
 
             })
             .catch(function (e) {
-                continuation(undefined);
+                continuation(false);
             });
 
+    };
+
+    igv.EncodeDataSource.prototype.tableData = function () {
+        var self = this,
+            mapped;
+
+        mapped = _.map(this.data, function (row) {
+
+            // Isolate the subset of the data for display in the table
+            return _.values(_.pick(row, _.map(self.columnFormat, function (column) {
+                return _.first(_.keys(column));
+            })));
+        });
+
+        return mapped;
+    };
+
+    igv.EncodeDataSource.prototype.tableColumns = function () {
+
+        var columns;
+
+        columns = _.map(this.columnFormat, function (obj) {
+            var key,
+                val;
+
+            key = _.first(_.keys(obj));
+            val = _.first(_.values(obj));
+            return { title: key, width: val }
+        });
+
+        return columns;
     };
 
     igv.EncodeDataSource.prototype.dataAtRowIndex = function (index) {
         var row,
             obj;
 
-        row =  this.jSON.rows[ index ];
+        row =  this.data[ index ];
 
         obj =
             {
@@ -192,6 +215,8 @@ var igv = (function (igv) {
                 color: encodeAntibodyColor(row[ 'Target' ]),
                 name: row['Name']
             };
+
+        return obj;
 
         function encodeAntibodyColor (antibody) {
 
@@ -220,88 +245,7 @@ var igv = (function (igv) {
             return colors[ key ];
 
         }
-
-        return obj;
     };
-
-    igv.EncodeDataSource.prototype.tableData = function () {
-        return this.tableFormat.tableData(this.jSON);
-    };
-
-    igv.EncodeDataSource.prototype.tableColumns = function () {
-        return this.tableFormat.tableColumns(this.jSON);
-    };
-
-    function ingestData(data, continuation) {
-
-        if (data instanceof File) {
-            getFile.call(this, data, continuation);
-        } else if (data instanceof Object) {
-            getJSON.call(this, data, continuation);
-        }
-
-        function getJSON(json, continuation) {
-
-            json.rows.forEach(function(row, i){
-
-                Object.keys(row).forEach(function(key){
-                    var item = row[ key ];
-                    json.rows[ i ][ key ] = (undefined === item || "" === item) ? "-" : item;
-                });
-
-            });
-
-            continuation(json);
-        }
-
-        function getFile(file, continuation) {
-
-            var json;
-
-            json = {};
-            igv.xhr.loadString(file).then(function (data) {
-
-                var lines = data.splitLines(),
-                    item;
-
-                // Raw data items order:
-                // path | cell | dataType | antibody | view | replicate | type | lab | hub
-                //
-                // Reorder to match desired order. Discard hub item.
-                //
-                json.columns = lines[0].split("\t");
-                json.columns.pop();
-                item = json.columns.shift();
-                json.columns.push(item);
-
-                json.rows = [];
-
-                lines.slice(1, lines.length - 1).forEach(function (line) {
-
-                    var tokens,
-                        row;
-
-                    tokens = line.split("\t");
-                    tokens.pop();
-                    item = tokens.shift();
-                    tokens.push(item);
-
-                    row = {};
-                    tokens.forEach(function (t, i, ts) {
-                        var key = json.columns[ i ];
-                        row[ key ] = (undefined === t || "" === t) ? "-" : t;
-                    });
-
-                    json.rows.push(row);
-
-                });
-
-                continuation(json);
-            });
-
-        }
-
-    }
 
     return igv;
 

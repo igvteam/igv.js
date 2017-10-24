@@ -8,6 +8,7 @@
     <meta name="author" content="">
     <link rel="shortcut icon" href=../img/favicon.ico>
     <title>IGV Modal Table Example</title>
+    <link rel="import" href="../dev/shared-js.html">
 
     <!-- Font Awesome CSS -->
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.2.0/css/font-awesome.min.css">
@@ -22,15 +23,19 @@
     <link rel="stylesheet" href="https://cdn.datatables.net/v/dt/dt-1.10.16/sc-1.4.3/datatables.min.css"/>
 
     <!-- IGV CSS -->
-    <link rel="stylesheet" href="https://igv.org/web/beta/igv.css">
-    <!--<link rel="stylesheet" href="../css/igv.css">-->
+    <link rel="stylesheet" type="text/css" href="https://igv.org/web/beta/igv.css">
 
 
+    <!-- Vendor JS -->
+    <script src="../vendor/jquery-1.12.4.js"></script>
+    <script src="../vendor/jquery.mousewheel.js"></script>
+    <script src="../vendor/underscore.js"></script>
+    <script src="../vendor/inflate.js"></script>
+    <script src="../vendor/zlib_and_gzip.min.js"></script>
 
-    <!-- JQuery JS -->
-    <script src="https://code.jquery.com/jquery-1.12.4.min.js"></script>
+    <script src="../vendor/promise.js"></script>
 
-    <!-- Datatables JS -->
+    <!-- DataTables JS -->
     <script src="https://cdn.datatables.net/v/dt/dt-1.10.16/sc-1.4.3/datatables.min.js"></script>
 
     <!-- Popper - Bootstrap 4 pre-requisite -->
@@ -40,18 +45,67 @@
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-beta/js/bootstrap.min.js"></script>
 
     <!-- IGV JS-->
-    <script src="https://igv.org/web/beta/igv-beta.min.js"></script>
-    <!--<script src="../dist/igv.js"></script>-->
+    <script src="../js/feature/featureCache.js"></script>
+    <script src="../js/feature/gffHelper.js"></script>
+    <script src="../js/feature/featureSource.js"></script>
+    <script src="../js/feature/featureParsers.js"></script>
+    <script src="../js/feature/tribble.js"></script>
+    <script src="../js/feature/featureFileReader.js"></script>
+    <script src="../js/feature/customServiceReader.js"></script>
 
-    <!-- Example Modal Table JS -->
-    <script src="js/igvModalTable.js"></script>
+    <script src="../js/feature/aneuSource.js"></script>
+    <script src="../js/feature/aneuTrack.js"></script>
+
+    <script src="../js/karyo/karyo.js"></script>
+    <script src="../js/gwas/t2dVariantSource.js"></script>
+    <script src="../js/gwas/gwasTrack.js"></script>
+
+    <script src="../js/feature/segParser.js"></script>
+    <script src="../js/feature/segTrack.js"></script>
+    <script src="../js/variant/vcfParser.js"></script>
+    <script src="../js/variant/variant.js"></script>
+
+    <script src="../js/bigwig/bufferedReader.js"></script>
+    <script src="../js/bigwig/bwBPTree.js"></script>
+    <script src="../js/bigwig/bwReader.js"></script>
+    <script src="../js/bigwig/bwRPTree.js"></script>
+    <script src="../js/bigwig/bwSource.js"></script>
+    <script src="../js/bigwig/bwTotalSummary.js"></script>
+
+    <script src="../js/tdf/tdfReader.js"></script>
+    <script src="../js/tdf/tdfSource.js"></script>
+
+    <script src="../js/trackCore.js"></script>
+    <script src="../js/trackFileLoad.js"></script>
+
+    <script src="../js/set.js"></script>
+
+    <script src="../js/ui/trackMenuPopupDialog.js"></script>
+    <script src="../js/ui/colorpicker.js"></script>
+    <script src="../js/ui/dataRangeDialog.js"></script>
+    <script src="../js/ui/dialog.js"></script>
+    <script src="../js/ui/alertDialog.js"></script>
+    <script src="../js/ui/centerGuide.js"></script>
+    <script src="../js/ui/userFeedback.js"></script>
+    <script src="../js/ui/alertDialog.js"></script>
+    <script src="../js/ui/popover.js"></script>
+
+    <script src="../js/encode/encodeDataSource.js"></script>
+
+    <script src="../js/roi.js"></script>
+    <script src="../js/roiSource.js"></script>
+    
+    <script src="../js/oauth/google.js"></script>
+
+    <!-- Modal Table Example JS -->
+    <script src="js/modalTable.js"></script>
     <script src="js/modal-table-example.js"></script>
 
 </head>
 
 <body>
 
-<div id="encodeModal" class="modal fade bs-example-modal-lg" tabindex="-1" role="dialog" aria-labelledby="encodeModalLabel" aria-hidden="true">
+<div id="encodeModal" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="encodeModalLabel" aria-hidden="true">
 
     <div class="modal-dialog modal-lg" role="document">
 
@@ -66,10 +120,10 @@
 
             </div>
 
-            <div id="encodeModalBody" class="modal-body">
+            <div id="mte-modal-body" class="modal-body">
             </div>
 
-            <div class="modal-footer"><!-- modal footer -->
+            <div class="modal-footer">
                 <button id="encodeModalBottomCloseButton" type="button" class="btn btn-default" data-dismiss="modal">Close</button>
                 <button id="encodeModalGoButton"          type="button" class="btn btn-primary" data-dismiss="modal">Go</button>
             </div>
