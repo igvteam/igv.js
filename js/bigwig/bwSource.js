@@ -38,95 +38,118 @@ var igv = (function (igv) {
 
     igv.BWSource.prototype.getFeatures = function (chr, bpStart, bpEnd, bpPerPixel) {
 
-        var self = this;
+        var self = this,
+            chrIdx;
 
-        return new Promise(function (fulfill, reject) {
+        return new Promise(function (resolve, reject) {
 
-            self.getZoomHeaders().then(function (zoomLevelHeaders) {
+            var decodeFunction;
 
-                // Select a biwig "zoom level" appropriate for the current resolution
-                var bwReader = self.reader,
-                    bufferedReader = self.bufferedReader,
-                    zoomLevelHeader = zoomLevelForScale(bpPerPixel, zoomLevelHeaders),
-                    treeOffset,
-                    decodeFunction;
+            self.getZoomHeaders()
 
-                if (zoomLevelHeader) {
-                    treeOffset = zoomLevelHeader.indexOffset;
-                    decodeFunction = decodeZoomData;
-                } else {
-                    treeOffset = bwReader.header.fullIndexOffset;
-                    if (bwReader.type === "BigWig") {
-                        decodeFunction = decodeWigData;
+                .then(function (zoomLevelHeaders) {
+
+                    // Select a biwig "zoom level" appropriate for the current resolution
+                    var bwReader = self.reader,
+                        zoomLevelHeader = zoomLevelForScale(bpPerPixel, zoomLevelHeaders),
+                        treeOffset;
+
+                    if (zoomLevelHeader) {
+                        treeOffset = zoomLevelHeader.indexOffset;
+                        decodeFunction = decodeZoomData;
+                    } else {
+                        treeOffset = bwReader.header.fullIndexOffset;
+                        if (bwReader.type === "BigWig") {
+                            decodeFunction = decodeWigData;
+                        }
+                        else {
+                            decodeFunction = decodeBedData;
+                        }
                     }
-                    else {
-                        decodeFunction = decodeBedData;
-                    }
-                }
 
-                bwReader.loadRPTree(treeOffset).then(function (rpTree) {
+                    return bwReader.loadRPTree(treeOffset)
+                })
 
-                    var chrIdx = self.reader.chromTree.dictionary[chr];
+                .then(function (rpTree) {
+
+                    chrIdx = self.reader.chromTree.dictionary[chr];
+
                     if (chrIdx === undefined) {
-                        fulfill(null);
+                        return [];
                     }
                     else {
-
-                        rpTree.findLeafItemsOverlapping(chrIdx, bpStart, bpEnd).then(function (leafItems) {
-
-                            var promises = [];
-
-                            if (!leafItems || leafItems.length == 0) fulfill([]);
-
-                            leafItems.forEach(function (item) {
-
-                                promises.push(new Promise(function (fulfill, reject) {
-                                    var features = [];
-
-                                    bufferedReader.dataViewForRange({
-                                        start: item.dataOffset,
-                                        size: item.dataSize
-                                    }, true).then(function (uint8Array) {
-
-                                        var inflate = new Zlib.Inflate(uint8Array);
-                                        var plain = inflate.decompress();
-                                        decodeFunction(new DataView(plain.buffer), chr, chrIdx, bpStart, bpEnd, features);
-
-                                        fulfill(features);
-
-                                    }).catch(reject);
-                                }));
-                            });
-
-
-                            Promise.all(promises).then(function (featureArrays) {
-
-                                var i, allFeatures = featureArrays[0];
-                                if(featureArrays.length > 1) {
-                                   for(i=1; i<featureArrays.length; i++) {
-                                       allFeatures = allFeatures.concat(featureArrays[i]);
-                                   }
-                                }
-                                allFeatures.sort(function (a, b) {
-                                    return a.start - b.start;
-                                })
-
-                                fulfill(allFeatures)
-                            }).catch(reject);
-
-                        }).catch(reject);
+                        return rpTree.findLeafItemsOverlapping(chrIdx, bpStart, bpEnd)
                     }
-                }).catch(reject);
-            }).catch(reject);
+
+                })
+
+                .then(function (leafItems) {
+
+                    var promises = [],
+                        bufferedReader = self.bufferedReader;
+
+                    if (!leafItems || leafItems.length == 0) {
+                        return [];
+                    }
+
+                    else {
+                        leafItems.forEach(function (item) {
+
+                            promises.push(new Promise(function (fulfill, reject) {
+                                var features = [];
+
+                                bufferedReader.dataViewForRange({
+                                    start: item.dataOffset,
+                                    size: item.dataSize
+                                }, true).then(function (uint8Array) {
+
+                                    var inflate = new Zlib.Inflate(uint8Array);
+                                    var plain = inflate.decompress();
+                                    decodeFunction(new DataView(plain.buffer), chr, chrIdx, bpStart, bpEnd, features);
+
+                                    fulfill(features);
+
+                                })
+                            }));
+                        });
+                        return Promise.all(promises);
+                    }
+                })
+
+                .then(function (featureArrays) {
+
+                    var i, allFeatures;
+
+                    if (featureArrays.length == 0) {
+                        resolve([]);
+                    }
+                    else {
+                        allFeatures = featureArrays[0];
+
+
+                        if (featureArrays.length > 1) {
+                            for (i = 1; i < featureArrays.length; i++) {
+                                allFeatures = allFeatures.concat(featureArrays[i]);
+                            }
+                        }
+                        allFeatures.sort(function (a, b) {
+                            return a.start - b.start;
+                        });
+
+                        resolve(allFeatures);
+                    }
+                })
+                .catch(reject);
 
 
         });
+
     }
 
 
     igv.BWSource.prototype.getDefaultRange = function () {
 
-        if(this.reader.totalSummary != undefined) {
+        if (this.reader.totalSummary != undefined) {
             return this.reader.totalSummary.defaultRange;
         }
         else {
@@ -140,7 +163,7 @@ var igv = (function (igv) {
 
         var self = this;
 
-        if(self.reader.zoomLevelHeaders) {
+        if (self.reader.zoomLevelHeaders) {
             return Promise.resolve(self.reader.zoomLevelHeaders)
         }
         else {
