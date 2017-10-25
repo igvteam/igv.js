@@ -42,7 +42,7 @@ var igv = (function (igv) {
 
         return new Promise(function (fulfill, reject) {
 
-            self.reader.getZoomHeaders().then(function (zoomLevelHeaders) {
+            self.getZoomHeaders().then(function (zoomLevelHeaders) {
 
                 // Select a biwig "zoom level" appropriate for the current resolution
                 var bwReader = self.reader,
@@ -106,7 +106,7 @@ var igv = (function (igv) {
                                    for(i=1; i<featureArrays.length; i++) {
                                        allFeatures = allFeatures.concat(featureArrays[i]);
                                    }
-                                }  
+                                }
                                 allFeatures.sort(function (a, b) {
                                     return a.start - b.start;
                                 })
@@ -122,17 +122,37 @@ var igv = (function (igv) {
 
         });
     }
-    
-    
+
+
     igv.BWSource.prototype.getDefaultRange = function () {
-        
+
         if(this.reader.totalSummary != undefined) {
             return this.reader.totalSummary.defaultRange;
         }
         else {
             return undefined;
         }
-        
+
+    }
+
+
+    igv.BWSource.prototype.getZoomHeaders = function () {
+
+        var self = this;
+
+        if(self.reader.zoomLevelHeaders) {
+            return Promise.resolve(self.reader.zoomLevelHeaders)
+        }
+        else {
+            return new Promise(function (fulfill, reject) {
+
+                self.reader.loadHeader().then(function () {
+                    fulfill(self.reader.zoomLevelHeaders);
+                }).catch(function (error) {
+                    reject(error);
+                });
+            });
+        }
     }
 
 
@@ -239,7 +259,7 @@ var igv = (function (igv) {
         }
 
     }
-    
+
     function decodeBedData(data, chr, chrIdx, bpStart, bpEnd, featureArray) {
 
         var binaryParser = new igv.BinaryParser(data),
