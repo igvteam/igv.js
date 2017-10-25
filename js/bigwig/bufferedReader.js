@@ -71,10 +71,11 @@ var igv = (function (igv) {
 
                 igv.xhr.loadArrayBuffer(self.path, igv.buildOptions(self.config, {range: loadRange}))
                     .then(function (arrayBuffer) {
-                    self.data = arrayBuffer;
-                    self.range = loadRange;
-                    subbuffer(self, requestedRange, asUint8);
-                }).catch(reject);
+                        self.data = arrayBuffer;
+                        self.range = loadRange;
+                        subbuffer(self, requestedRange, asUint8);
+                    })
+                    .catch(reject);
 
             }
 

@@ -55,10 +55,13 @@ var igv = (function (igv) {
             var rootNodeOffset = self.fileOffset + RPTREE_HEADER_SIZE,
                 bufferedReader = new igv.BufferedReader(self.config, self.filesize, BUFFER_SIZE);
 
-            self.readNode(rootNodeOffset, bufferedReader).then(function (node) {
-                self.rootNode = node;
-                fulfill(self);
-            }).catch(reject);
+            self.readNode(rootNodeOffset, bufferedReader)
+
+                .then(function (node) {
+                    self.rootNode = node;
+                    fulfill(self);
+                })
+                .catch(reject);
         });
     }
 
@@ -67,22 +70,30 @@ var igv = (function (igv) {
 
         var self = this;
 
-        return new Promise(function (fulfill, reject) {
+        return new Promise(function (resolve, reject) {
 
-            bufferedReader.dataViewForRange({start: filePosition, size: 4}, false).then(function (dataView) {
-                var binaryParser = new igv.BinaryParser(dataView, self.littleEndian);
+            var count, isLeaf;
 
-                var type = binaryParser.getByte();
-                var isLeaf = (type === 1) ? true : false;
-                var reserved = binaryParser.getByte();
-                var count = binaryParser.getUShort();
+            bufferedReader.dataViewForRange({start: filePosition, size: 4}, false)
 
-                filePosition += 4;
+                .then(function (dataView) {
+                    var binaryParser, type, reserved;
 
-                var bytesRequired = count * (isLeaf ? RPTREE_NODE_LEAF_ITEM_SIZE : RPTREE_NODE_CHILD_ITEM_SIZE);
-                var range2 = {start: filePosition, size: bytesRequired};
+                    binaryParser = new igv.BinaryParser(dataView, self.littleEndian);
+                    type = binaryParser.getByte();
+                    isLeaf = (type === 1) ? true : false;
+                    reserved = binaryParser.getByte();
+                    count = binaryParser.getUShort();
 
-                bufferedReader.dataViewForRange(range2, false).then(function (dataView) {
+                    filePosition += 4;
+
+                    var bytesRequired = count * (isLeaf ? RPTREE_NODE_LEAF_ITEM_SIZE : RPTREE_NODE_CHILD_ITEM_SIZE);
+                    var range2 = {start: filePosition, size: bytesRequired};
+
+                    return bufferedReader.dataViewForRange(range2, false);
+                })
+
+                .then(function (dataView) {
 
                     var i,
                         items = new Array(count),
@@ -102,7 +113,7 @@ var igv = (function (igv) {
                             items[i] = item;
 
                         }
-                        fulfill(new RPTreeNode(items));
+                        resolve(new RPTreeNode(items));
                     }
                     else { // non-leaf
                         for (i = 0; i < count; i++) {
@@ -119,10 +130,11 @@ var igv = (function (igv) {
 
                         }
 
-                        fulfill(new RPTreeNode(items));
+                        resolve(new RPTreeNode(items));
                     }
-                }).catch(reject);
-            }).catch(reject);
+                })
+                .catch(reject);
+
         });
     }
 
@@ -160,10 +172,13 @@ var igv = (function (igv) {
                                 }
                                 else {
                                     processing.add(item.childOffset);  // Represent node to-be-loaded by its file position
-                                    self.readNode(item.childOffset, bufferedReader).then(function (node) {
-                                        item.childNode = node;
-                                        findLeafItems(node, item.childOffset);
-                                    }).catch(reject);
+                                    
+                                    self.readNode(item.childOffset, bufferedReader)
+                                        .then(function (node) {
+                                            item.childNode = node;
+                                            findLeafItems(node, item.childOffset);
+                                        })
+                                        .catch(reject);
                                 }
                             }
                         }
