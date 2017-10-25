@@ -47,6 +47,17 @@
   background-repeat: no-repeat;
   background-position: 0 0; }
 
+.igv-chromosome-select-widget-container {
+  position: relative;
+  float: left;
+  height: 90%;
+  width: 96px;
+  margin-right: 4px; }
+  .igv-chromosome-select-widget-container select {
+    position: relative;
+    width: 100%;
+    height: 100%; }
+
 .igv-search-container {
   position: relative;
   top: 0;

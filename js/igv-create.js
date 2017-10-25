@@ -111,6 +111,8 @@ var igv = (function (igv) {
             igv.browser.genome = genome;
             igv.browser.genome.id = config.reference.genomeId;
 
+            igv.browser.chromosomeSelectWidget.update(igv.browser.genome);
+
             width = igv.browser.viewportContainerWidth();
             igv.browser.getGenomicStateList(lociWithConfiguration(config), width, function (genomicStateList) {
 
@@ -327,6 +329,14 @@ var igv = (function (igv) {
                 browser.trackFileLoad.$presentationButton.hide();
             }
 
+            // chromosome select widget
+            browser.chromosomeSelectWidget = new igv.ChromosomeSelectWidget(browser, $navigation);
+            if (true === config.showChromosomeWidget) {
+                browser.chromosomeSelectWidget.$container.show();
+            } else {
+                browser.chromosomeSelectWidget.$container.hide();
+            }
+
             // search container
             $searchContainer = $('<div class="igv-search-container">');
 
@@ -437,6 +447,10 @@ var igv = (function (igv) {
     }
 
     function setDefaults(config) {
+
+        if (undefined === config.showChromosomeWidget) {
+            config.showChromosomeWidget = false;
+        }
 
         if (undefined === config.showLoadFileWidget) {
             config.showLoadFileWidget = false;

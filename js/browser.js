@@ -568,9 +568,11 @@ var igv = (function (igv) {
             if ('all' === genomicState.locusSearchString.toLowerCase()) {
 
                 this.$searchInput.val(genomicState.locusSearchString);
+                this.chromosomeSelectWidget.$select.val('all');
             } else {
 
                 referenceFrame = genomicState.referenceFrame;
+                this.chromosomeSelectWidget.$select.val(referenceFrame.chrName);
 
                 if (this.$searchInput) {
 
