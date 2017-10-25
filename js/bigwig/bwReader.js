@@ -44,24 +44,6 @@ var igv = (function (igv) {
         this.config = config;
     };
 
-    igv.BWReader.prototype.getZoomHeaders = function () {
-
-        var self = this;
-
-        return new Promise(function (fulfill, reject) {
-            if (self.zoomLevelHeaders) {
-                fulfill(self.zoomLevelHeaders);
-            }
-            else {
-                self.loadHeader().then(function () {
-                    fulfill(self.zoomLevelHeaders);
-                }).catch(function (error) {
-                    reject(error);
-                });
-            }
-        });
-    }
-
     igv.BWReader.prototype.loadHeader = function () {
 
         var self = this;
@@ -118,10 +100,11 @@ var igv = (function (igv) {
                 self.header.uncompressBuffSize = binaryParser.getInt();
                 self.header.reserved = binaryParser.getLong();
 
-                loadZoomHeadersAndChrTree.call(self).then(fulfill).catch(reject);
-            }).catch(function (error) {
-                    reject(error);
-                });
+                loadZoomHeadersAndChrTree.call(self)
+                    .then(fulfill)
+                    .catch(reject);
+                    
+            }).catch(reject);
 
         });
     }
@@ -134,7 +117,7 @@ var igv = (function (igv) {
             self = this;
 
         return new Promise(function (fulfill, reject) {
-            
+
             var range = {start: startOffset, size: (self.header.fullDataOffset - startOffset + 5)};
 
             igv.xhr.loadArrayBuffer(self.path, igv.buildOptions(self.config, {range: range}))
