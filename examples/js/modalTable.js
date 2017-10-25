@@ -118,6 +118,10 @@ var igv = (function (igv) {
     //     return this.datasource.config.genomeID;
     // };
 
+    igv.ModalTable.prototype.genomeID = function () {
+       return this.datasource.config.genomeID;
+    };
+
     igv.ModalTable.prototype.teardown = function () {
 
         var list;
