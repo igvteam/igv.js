@@ -32,6 +32,8 @@ var igv = (function (igv) {
     var READ_STRAND_FLAG = 0x10;
     var MATE_STRAND_FLAG = 0x20;
 
+    var BAM1_MAGIC_BYTES = new Uint8Array([0x42, 0x41, 0x4d, 0x01]); // BAM\1
+    var BAM1_MAGIC_NUMBER = readInt(BAM1_MAGIC_BYTES, 0);
 
     igv.BamUtils = {
 
@@ -64,13 +66,17 @@ var igv = (function (igv) {
          *
          * @param ba  bytes to decode as a UInt8Array
          * @param genome  optional igv genome object
-         * @returns {{chrNames: Array, chrToIndex: ({}|*), chrAliasTable: ({}|*)}}
+         * @returns {{ magicNumer: number, size: number, chrNames: Array, chrToIndex: ({}|*), chrAliasTable: ({}|*) }}
          */
         decodeBamHeader: function (ba, genome) {
 
             var magic, samHeaderLen, samHeader, chrToIndex, chrNames, chrAliasTable, alias;
 
             magic = readInt(ba, 0);
+            if (magic !== BAM1_MAGIC_NUMBER) {
+                throw new Error("BAM header contains an invalid BAM magic");
+            }
+
             samHeaderLen = readInt(ba, 4);
             samHeader = '';
 
@@ -106,6 +112,7 @@ var igv = (function (igv) {
             }
 
             return {
+                magicNumber: magic,
                 size: p,
                 chrNames: chrNames,
                 chrToIndex: chrToIndex,
