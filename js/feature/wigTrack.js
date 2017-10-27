@@ -48,12 +48,13 @@ var igv = (function (igv) {
         // Min and max values.  No defaults for these, if they aren't set track will autoscale.
         this.autoscale = config.autoscale;
 
-        if(config.max) {
+        if (config.max !== undefined) {
             this.dataRange = {
                 min: config.min || 0,
                 max: config.max
             }
-        };
+        }
+        ;
 
         this.paintAxis = igv.paintAxis;
 
@@ -61,10 +62,7 @@ var igv = (function (igv) {
 
     igv.WIGTrack.prototype.getFeatures = function (chr, bpStart, bpEnd, bpPerPixel) {
 
-        var self = this;
-        return new Promise(function (fulfill, reject) {
-            self.featureSource.getFeatures(chr, bpStart, bpEnd, bpPerPixel).then(fulfill).catch(reject);
-        });
+        return this.featureSource.getFeatures(chr, bpStart, bpEnd, bpPerPixel);
     };
 
     igv.WIGTrack.prototype.menuItemList = function (popover) {
@@ -116,28 +114,29 @@ var igv = (function (igv) {
     igv.WIGTrack.prototype.getFileHeader = function () {
 
         var self = this;
-        return new Promise(function (fulfill, reject) {
-            if (typeof self.featureSource.getFileHeader === "function") {
 
-                self.featureSource.getFileHeader().then(function (header) {
+        if (typeof self.featureSource.getFileHeader === "function") {
 
-                    if (header) {
-                        // Header (from track line).  Set properties,unless set in the config (config takes precedence)
-                        if (header.name && !self.config.name) {
-                            self.name = header.name;
-                        }
-                        if (header.color && !self.config.color) {
-                            self.color = "rgb(" + header.color + ")";
-                        }
+            return self.featureSource.getFileHeader()
+                .then(function (header) {
+
+                if (header) {
+                    // Header (from track line).  Set properties,unless set in the config (config takes precedence)
+                    if (header.name && !self.config.name) {
+                        self.name = header.name;
                     }
-                    fulfill(header);
+                    if (header.color && !self.config.color) {
+                        self.color = "rgb(" + header.color + ")";
+                    }
+                }
+                return header;
 
-                }).catch(reject);
-            }
-            else {
-                fulfill(null);
-            }
-        });
+            })
+        }
+        else {
+            return Promise.resolve(null);
+        }
+
     };
 
     igv.WIGTrack.prototype.draw = function (options) {
@@ -157,9 +156,9 @@ var igv = (function (igv) {
 
 
         if (features && features.length > 0) {
-            if(self.autoscale === undefined && self.dataRange === undefined && (typeof self.featureSource.getDefaultRange === "function")) {
+            if (self.autoscale === undefined && self.dataRange === undefined && (typeof self.featureSource.getDefaultRange === "function")) {
                 defaultRange = self.featureSource.getDefaultRange();
-                if(!isNaN(defaultRange.min) && !isNaN(defaultRange.max)) {
+                if (!isNaN(defaultRange.min) && !isNaN(defaultRange.max)) {
                     self.dataRange = defaultRange;
                 }
             }
@@ -183,7 +182,7 @@ var igv = (function (igv) {
 
             // Max can be less than min if config.min is set but max left to autoscale.   If that's the case there is
             // nothing to paint.
-            if(featureValueMaximum > featureValueMinimum) {
+            if (featureValueMaximum > featureValueMinimum) {
                 featureValueRange = featureValueMaximum - featureValueMinimum;
                 features.forEach(renderFeature);
             }
@@ -244,7 +243,7 @@ var igv = (function (igv) {
             max = -Number.MAX_VALUE;
 
         features.forEach(function (f) {
-            if(!Number.isNaN(f.value)) {
+            if (!Number.isNaN(f.value)) {
                 min = Math.min(min, f.value);
                 max = Math.max(max, f.value);
             }

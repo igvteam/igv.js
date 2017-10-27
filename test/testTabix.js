@@ -18,6 +18,7 @@ function runTabixTests() {
         }).catch(function (error) {
             ok(false);
             console.log(error);
+            start();
         });
 
     });
@@ -42,9 +43,11 @@ function runTabixTests() {
                         .then(function (features) {
                             ok(features.length > 0);
                             features.forEach(function (f) {
-                                equal(chr, f.chr);
-                                ok(f.start <= end && f.end >= start);
+                                if(chr !== f.chr && !(f.start <= end && f.end >= start)) {
+                                    ok(false);
+                                }
                             })
+                            start();
                         })
                         .catch(function (error) {
                             console.log(Error('query tabix error: ') + error);
@@ -54,6 +57,7 @@ function runTabixTests() {
             )
             .catch(function (error) {
                 console.log(Error('load tabix index error: ') + error);
+                start();
             });
     });
 

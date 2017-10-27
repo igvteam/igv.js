@@ -44,6 +44,22 @@ var igv = (function (igv) {
         this.config = config;
     };
 
+    igv.BWReader.prototype.getZoomHeaders = function () {
+
+        var self = this;
+
+        if (self.zoomLevelHeaders) {
+            return Promise.resolve(self.zoomLevelHeaders);
+        }
+        else {
+            return self.loadHeader()
+                .then(function () {
+                    return self.zoomLevelHeaders;
+                })
+        }
+
+    }
+
     igv.BWReader.prototype.loadHeader = function () {
 
         var self = this;
@@ -56,7 +72,7 @@ var igv = (function (igv) {
         }))
             .then(function (data) {
 
-                var header = {};
+                var header;
 
                 // Assume low-to-high unless proven otherwise
                 self.littleEndian = true;

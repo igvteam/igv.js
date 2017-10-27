@@ -39,106 +39,103 @@ var igv = (function (igv) {
     igv.BWSource.prototype.getFeatures = function (chr, bpStart, bpEnd, bpPerPixel) {
 
         var self = this,
-            chrIdx;
+            decodeFunction,
+            bufferedReader,
+            chrIdx,
+            featureCache = self.featureCache,
+            genomicInterval = new igv.GenomicInterval(chr, bpStart, bpEnd);
 
+        genomicInterval.bpPerPixel = bpPerPixel;
 
-        var decodeFunction;
+        if (featureCache && featureCache.range.bpPerPixel === bpPerPixel && featureCache.range.containsRange(genomicInterval)) {
+            return Promise.resolve(self.featureCache.queryFeatures(chr, bpStart, bpEnd));
+        }
+        else {
+            bufferedReader = self.bufferedReader;
 
-        return self.getZoomHeaders()
+            return self.reader.getZoomHeaders()
 
-            .then(function (zoomLevelHeaders) {
+                .then(function (zoomLevelHeaders) {
 
-                // Select a biwig "zoom level" appropriate for the current resolution
-                var bwReader = self.reader,
-                    zoomLevelHeader = zoomLevelForScale(bpPerPixel, zoomLevelHeaders),
-                    treeOffset;
+                    // Select a biwig "zoom level" appropriate for the current resolution
+                    var bwReader = self.reader,
+                        zoomLevelHeader = zoomLevelForScale(bpPerPixel, zoomLevelHeaders),
+                        treeOffset;
 
-                if (zoomLevelHeader) {
-                    treeOffset = zoomLevelHeader.indexOffset;
-                    decodeFunction = decodeZoomData;
-                } else {
-                    treeOffset = bwReader.header.fullIndexOffset;
-                    if (bwReader.type === "BigWig") {
-                        decodeFunction = decodeWigData;
-                    }
-                    else {
-                        decodeFunction = decodeBedData;
-                    }
-                }
-
-                return bwReader.loadRPTree(treeOffset)
-            })
-
-            .then(function (rpTree) {
-
-                chrIdx = self.reader.chromTree.dictionary[chr];
-
-                if (chrIdx === undefined) {
-                    return [];
-                }
-                else {
-                    return rpTree.findLeafItemsOverlapping(chrIdx, bpStart, bpEnd)
-                }
-
-            })
-
-            .then(function (leafItems) {
-
-                var promises = [],
-                    bufferedReader = self.bufferedReader;
-
-                if (!leafItems || leafItems.length == 0) {
-                    return [];
-                }
-
-                else {
-                    leafItems.forEach(function (item) {
-
-                        promises.push(new Promise(function (fulfill, reject) {
-                            var features = [];
-
-                            bufferedReader.dataViewForRange({
-                                start: item.dataOffset,
-                                size: item.dataSize
-                            }, true).then(function (uint8Array) {
-
-                                var inflate = new Zlib.Inflate(uint8Array);
-                                var plain = inflate.decompress();
-                                decodeFunction(new DataView(plain.buffer), chr, chrIdx, bpStart, bpEnd, features);
-
-                                fulfill(features);
-
-                            })
-                        }));
-                    });
-                    return Promise.all(promises);
-                }
-            })
-
-            .then(function (featureArrays) {
-
-                var i, allFeatures;
-
-                if (featureArrays.length == 0) {
-                    return [];
-                }
-                else {
-                    allFeatures = featureArrays[0];
-
-
-                    if (featureArrays.length > 1) {
-                        for (i = 1; i < featureArrays.length; i++) {
-                            allFeatures = allFeatures.concat(featureArrays[i]);
+                    if (zoomLevelHeader) {
+                        treeOffset = zoomLevelHeader.indexOffset;
+                        decodeFunction = decodeZoomData;
+                    } else {
+                        treeOffset = bwReader.header.fullIndexOffset;
+                        if (bwReader.type === "BigWig") {
+                            decodeFunction = decodeWigData;
+                        }
+                        else {
+                            decodeFunction = decodeBedData;
                         }
                     }
+
+                    return self.reader.loadRPTree(treeOffset);
+                })
+
+                .then(function (rpTree) {
+
+                    chrIdx = self.reader.chromTree.dictionary[chr];
+                    if (chrIdx === undefined) {
+                        return undefined;
+                    }
+                    else {
+                        return rpTree.findLeafItemsOverlapping(chrIdx, bpStart, bpEnd)
+                    }
+                })
+
+                .then(function (leafItems) {
+
+                    var promises = [];
+
+                    if (!leafItems || leafItems.length == 0) {
+                        return [];
+                    }
+                    else {
+                        leafItems.forEach(function (item) {
+
+                            promises.push(
+                                bufferedReader.dataViewForRange({
+                                    start: item.dataOffset,
+                                    size: item.dataSize
+                                }, true)
+                                    .then(function (uint8Array) {
+                                        var features = [];
+                                        var inflate = new Zlib.Inflate(uint8Array);
+                                        var plain = inflate.decompress();
+                                        decodeFunction(new DataView(plain.buffer), chr, chrIdx, bpStart, bpEnd, features);
+                                        return features;
+                                    })
+                            )
+                        });
+
+                        return Promise.all(promises);
+                    }
+                })
+
+                .then(function (featureArrays) {
+
+                    var i, allFeatures = [];
+
+                    for (i = 0; i < featureArrays.length; i++) {
+                        allFeatures = allFeatures.concat(featureArrays[i]);
+                    }
+
                     allFeatures.sort(function (a, b) {
                         return a.start - b.start;
-                    });
+                    })
+                    
+                    // Note -- replacing feature cache
+                    self.featureCache = new igv.FeatureCache(allFeatures, genomicInterval);
 
                     return allFeatures;
-                }
-            })
-
+                })
+        }
     }
 
 
@@ -151,22 +148,6 @@ var igv = (function (igv) {
             return undefined;
         }
 
-    }
-
-
-    igv.BWSource.prototype.getZoomHeaders = function () {
-
-        var self = this;
-
-        if (self.reader.zoomLevelHeaders) {
-            return Promise.resolve(self.reader.zoomLevelHeaders)
-        }
-        else {
-            return self.reader.loadHeader()
-                .then(function () {
-                    return self.reader.zoomLevelHeaders;
-                })
-        }
     }
 
 

@@ -85,44 +85,39 @@ var igv = (function (igv) {
     };
 
     igv.FeatureTrack.prototype.getFileHeader = function () {
+
         var self = this;
-        return new Promise(function (fulfill, reject) {
-            if (typeof self.featureSource.getFileHeader === "function") {
-                self.featureSource
-                    .getFileHeader()
-                    .then(function (header) {
 
-                        if (header) {
-                            // Header (from track line).  Set properties,unless set in the config (config takes precedence)
-                            if (header.name && !self.config.name) {
-                                self.name = header.name;
-                            }
-                            if (header.color && !self.config.color) {
-                                self.color = "rgb(" + header.color + ")";
-                            }
+        if (typeof self.featureSource.getFileHeader === "function") {
+
+            return self.featureSource.getFileHeader()
+
+                .then(function (header) {
+
+                    if (header) {
+                        // Header (from track line).  Set properties,unless set in the config (config takes precedence)
+                        if (header.name && !self.config.name) {
+                            self.name = header.name;
                         }
-                        fulfill(header);
+                        if (header.color && !self.config.color) {
+                            self.color = "rgb(" + header.color + ")";
+                        }
+                    }
+                    return header;
 
-                    })
-                    .catch(function (error) {
-                        reject(error);
-                    });
-            }
-            else {
-                fulfill(null);
-            }
-        });
+                })
+        }
+        else {
+            return null;
+        }
+
+
     };
 
     igv.FeatureTrack.prototype.getFeatures = function (chr, bpStart, bpEnd, bpPerPixel) {
 
-        var self = this;
+        return this.featureSource.getFeatures(chr, bpStart, bpEnd, bpPerPixel);
 
-        return new Promise(function (fulfill, reject) {
-
-            self.featureSource.getFeatures(chr, bpStart, bpEnd, bpPerPixel).then(fulfill).catch(reject);
-
-        });
     };
 
 
@@ -235,7 +230,7 @@ var igv = (function (igv) {
             featureList = this.featureSource.featureCache.queryFeatures(referenceFrame.chrName, ss, ee);
 
             if ('COLLAPSED' !== this.displayMode) {
-                row = 'SQUISHED' === this.displayMode ? Math.floor((yOffset - 2)/this.expandedCallHeight) : Math.floor((yOffset - 5)/this.squishedCallHeight);
+                row = 'SQUISHED' === this.displayMode ? Math.floor((yOffset - 2) / this.expandedCallHeight) : Math.floor((yOffset - 5) / this.squishedCallHeight);
             }
 
             if (featureList && featureList.length > 0) {
@@ -308,10 +303,10 @@ var igv = (function (igv) {
             mapped;
 
         if (this.render === renderSnp) {
-            var colorByItems = _.map(["function", "class"], function(colorScheme, index) {
+            var colorByItems = (["function", "class"]).map( function (colorScheme, index) {
                 return {
                     object: $(colorSchemeMarkup(colorScheme, index, self.colorBy)),
-                    click: function() {
+                    click: function () {
                         popover.hide();
                         self.colorBy = colorScheme;
                         self.trackView.update();
@@ -319,12 +314,13 @@ var igv = (function (igv) {
                 }
             });
             menuItems = menuItems.concat(colorByItems);
-        } if (igv.colorPicker) {
+        }
+        if (igv.colorPicker) {
             menuItems.push(igv.colorPickerMenuItem(popover, this.trackView));
         }
 
 
-        mapped = _.map(["COLLAPSED", "SQUISHED", "EXPANDED"], function (displayMode, index) {
+        mapped = (["COLLAPSED", "SQUISHED", "EXPANDED"]).map(function (displayMode, index) {
             return {
                 object: $(markupStringified(displayMode, index, self.displayMode)),
                 click: function () {
@@ -343,11 +339,11 @@ var igv = (function (igv) {
                 chosen;
 
             lut =
-                {
-                    "COLLAPSED": "Collapse",
-                    "SQUISHED": "Squish",
-                    "EXPANDED": "Expand"
-                };
+            {
+                "COLLAPSED": "Collapse",
+                "SQUISHED": "Squish",
+                "EXPANDED": "Expand"
+            };
 
             chosen = (0 === index) ? '<div class="igv-track-menu-border-top">' : '<div>';
             if (displayMode === selfDisplayMode) {
@@ -372,20 +368,20 @@ var igv = (function (igv) {
     };
 
 
-    igv.FeatureTrack.prototype.popupMenuItemList = function(config) {
+    igv.FeatureTrack.prototype.popupMenuItemList = function (config) {
         if (this.render === renderSnp) {
 
             var menuItems = [], self = this;
 
             menuItems.push({
                 name: 'Color by function',
-                click: function() {
+                click: function () {
                     setColorBy('function');
                 }
             });
             menuItems.push({
                 name: 'Color by class',
-                click: function() {
+                click: function () {
                     setColorBy('class');
                 }
             });
@@ -400,7 +396,7 @@ var igv = (function (igv) {
         }
     };
 
-    igv.FeatureTrack.prototype.description = function() {
+    igv.FeatureTrack.prototype.description = function () {
 
         var desc;
 
@@ -771,7 +767,7 @@ var igv = (function (igv) {
             colorArrLength = this.snpColors.length,
             colorPriority;
 
-        switch(this.colorBy) {
+        switch (this.colorBy) {
             case 'function':
                 colorPriority = colorByFunc(snp.func);
                 break;
@@ -795,7 +791,7 @@ var igv = (function (igv) {
             // locusSet = new Set(['near-gene-3', 'near-gene-5']);
             // intronSet = new Set(['intron']);
 
-            priorities = funcArray.map(function(func) {
+            priorities = funcArray.map(function (func) {
                 if (codingNonSynonSet.has(func) || spliceSiteSet.has(func)) {
                     return colorArrLength - 1;
                 } else if (codingSynonSet.has(func)) {
@@ -807,8 +803,8 @@ var igv = (function (igv) {
                 }
             });
 
-            return priorities.reduce(function(a,b) {
-                return Math.max(a,b);
+            return priorities.reduce(function (a, b) {
+                return Math.max(a, b);
             });
         }
 
@@ -825,20 +821,20 @@ var igv = (function (igv) {
         }
     }
 
-    igv.FeatureTrack.prototype.popupMenuItemList = function(config) {
+    igv.FeatureTrack.prototype.popupMenuItemList = function (config) {
         if (this.render === renderSnp) {
 
             var menuItems = [], self = this;
 
             menuItems.push({
                 name: 'Color by function',
-                click: function() {
+                click: function () {
                     setColorBy('function');
                 }
             });
             menuItems.push({
                 name: 'Color by class',
-                click: function() {
+                click: function () {
                     setColorBy('class');
                 }
             });
