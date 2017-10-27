@@ -71,99 +71,90 @@ var igv = (function (igv) {
 
         var self = this;
 
-        return new Promise(function (fulfill, reject) {
 
-            getChrIndex(self)
+        return getChrIndex(self)
 
-                .then(function (chrToIndex) {
+            .then(function (chrToIndex) {
 
-                    var chrId, queryChr, alignmentContainer;
+                var chrId, queryChr, alignmentContainer;
 
-                    queryChr = self.chrAliasTable.hasOwnProperty(chr) ? self.chrAliasTable[chr] : chr;
+                queryChr = self.chrAliasTable.hasOwnProperty(chr) ? self.chrAliasTable[chr] : chr;
 
-                    chrId = chrToIndex[queryChr];
+                chrId = chrToIndex[queryChr];
 
-                    alignmentContainer = new igv.AlignmentContainer(chr, bpStart, bpEnd, self.samplingWindowSize, self.samplingDepth, self.pairsSupported);
+                alignmentContainer = new igv.AlignmentContainer(chr, bpStart, bpEnd, self.samplingWindowSize, self.samplingDepth, self.pairsSupported);
 
-                    if (chrId === undefined) {
-                        fulfill(alignmentContainer);
-                    } else {
+                if (chrId === undefined) {
+                    return Promise.resolve(alignmentContainer);
 
-                        getIndex(self)
-                            .then(function (bamIndex) {
+                } else {
 
-                                var chunks = bamIndex.blocksForRange(chrId, bpStart, bpEnd),
-                                    promises = [];
+                    return getIndex(self)
+                        .then(function (bamIndex) {
 
-
-                                if (!chunks) {
-                                    fulfill(null);
-                                    reject("Error reading bam index");
-                                    return;
-                                }
-                                if (chunks.length === 0) {
-                                    fulfill(alignmentContainer);
-                                    return;
-                                }
-
-                                chunks.forEach(function (c) {
-
-                                    promises.push(new Promise(function (fulfill, reject) {
-
-                                        var fetchMin = c.minv.block,
-                                            fetchMax = c.maxv.block + 65000,   // Make sure we get the whole block.
-                                            range = {start: fetchMin, size: fetchMax - fetchMin + 1};
-
-                                        igv.xhr.loadArrayBuffer(self.bamPath, igv.buildOptions(self.config, {range: range}))
-                                            .then(function (compressed) {
-
-                                                var ba = new Uint8Array(igv.unbgzf(compressed)); //new Uint8Array(igv.unbgzf(compressed)); //, c.maxv.block - c.minv.block + 1));
-                                                igv.BamUtils.decodeBamRecords(ba, c.minv.offset, alignmentContainer, bpStart, bpEnd, chrId, self.indexToChr, self.filter);
-
-                                                fulfill(alignmentContainer);
-
-                                            }).catch(function (obj) {
-                                            reject(obj);
-                                        });
-
-                                    }))
-                                });
+                            var chunks = bamIndex.blocksForRange(chrId, bpStart, bpEnd),
+                                promises = [];
 
 
-                                Promise.all(promises).then(function (ignored) {
-                                    alignmentContainer.finish();
-                                    fulfill(alignmentContainer);
-                                }).catch(function (obj) {
-                                    reject(obj);
-                                });
-                            }).catch(reject);
-                    }
-                }).catch(reject);
-        });
+                            if (!chunks) {
+                                fulfill(null);
+                                reject("Error reading bam index");
+                                return;
+                            }
+                            if (chunks.length === 0) {
+                                fulfill(alignmentContainer);
+                                return;
+                            }
 
+                            chunks.forEach(function (c) {
+
+                                promises.push(new Promise(function (fulfill, reject) {
+
+                                    var fetchMin = c.minv.block,
+                                        fetchMax = c.maxv.block + 65000,   // Make sure we get the whole block.
+                                        range = {start: fetchMin, size: fetchMax - fetchMin + 1};
+
+                                    igv.xhr.loadArrayBuffer(self.bamPath, igv.buildOptions(self.config, {range: range}))
+                                        .then(function (compressed) {
+
+                                            var ba = new Uint8Array(igv.unbgzf(compressed)); //new Uint8Array(igv.unbgzf(compressed)); //, c.maxv.block - c.minv.block + 1));
+                                            igv.BamUtils.decodeBamRecords(ba, c.minv.offset, alignmentContainer, bpStart, bpEnd, chrId, self.indexToChr, self.filter);
+
+                                            fulfill(alignmentContainer);
+
+                                        })
+                                        .catch(reject);
+
+                                }))
+                            });
+
+                            return Promise.all(promises);
+                        })
+                        .then(function (ignored) {
+                            alignmentContainer.finish();
+                            return alignmentContainer;
+                        })
+                }
+            })
     }
 
     igv.BamReader.prototype.readHeader = function () {
 
         var self = this;
 
-        return new Promise(function (fulfill, reject) {
+        return getIndex(self)
 
-            getIndex(self)
+            .then(function (index) {
 
-                .then(function (index) {
+                var len = index.firstAlignmentBlock + MAX_GZIP_BLOCK_SIZE,   // Insure we get the complete compressed block containing the header
+                    options = igv.buildOptions(self.config, {range: {start: 0, size: len}}),
+                    genome = igv.browser ? igv.browser.genome : null;
 
-                    var len = index.firstAlignmentBlock + MAX_GZIP_BLOCK_SIZE,   // Insure we get the complete compressed block containing the header
-                        options = igv.buildOptions(self.config, {range: {start: 0, size: len}}),
-                        genome = igv.browser ? igv.browser.genome : null;
-
-                    return igv.BamUtils.readHeader(self.bamPath, options, genome)
-                })
-                .then(function (header) {
-                    fulfill(header);
-                })
-                .catch(reject);
-        });
+                return igv.BamUtils.readHeader(self.bamPath, options, genome)
+            })
+            .then(function (header) {
+                return header;
+            })
     }
 
     function getIndex(bam) {
@@ -172,18 +163,11 @@ var igv = (function (igv) {
             return Promise.resolve(bam.index);
         }
         else {
-
-            return new Promise(function (fulfill, reject) {
-
-                igv
-                    .loadBamIndex(bam.baiPath, bam.config)
-                    .then(function (index) {
-                        bam.index = index;
-                        fulfill(bam.index);
-                    })
-                    .catch(reject);
-
-            });
+            return igv.loadBamIndex(bam.baiPath, bam.config)
+                .then(function (index) {
+                    bam.index = index;
+                    return bam.index;
+                })
         }
     }
 
@@ -193,16 +177,12 @@ var igv = (function (igv) {
             return Promise.resolve(bam.chrToIndex);
         }
         else {
-            return new Promise(function (fulfill, reject) {
-
-                bam.readHeader().then(function (header) {
-                    bam.chrToIndex = header.chrToIndex;
-                    bam.indexToChr = header.chrNames;
-                    bam.chrAliasTable = header.chrAliasTable;
-                    fulfill(bam.chrToIndex);
-                }).catch(reject);
-
-            });
+            return bam.readHeader().then(function (header) {
+                bam.chrToIndex = header.chrToIndex;
+                bam.indexToChr = header.chrNames;
+                bam.chrAliasTable = header.chrAliasTable;
+                return bam.chrToIndex;
+            })
         }
     }
 

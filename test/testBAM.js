@@ -5,7 +5,8 @@ function runBAMTests() {
     // Mock object
     igv.browser = {
         genome: {
-            sequence: new igv.FastaSequence("https://igvdata.broadinstitute.org/genomes/seq/hg19/hg19.fasta")
+            sequence: new igv.FastaSequence("https://igvdata.broadinstitute.org/genomes/seq/hg19/hg19.fasta"),
+            getChromosomeName: function(chr) {return chr}
         }
     };
 
