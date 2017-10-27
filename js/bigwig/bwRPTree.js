@@ -51,18 +51,15 @@ var igv = (function (igv) {
 
         var self = this;
 
-        return new Promise(function (fulfill, reject) {
-            var rootNodeOffset = self.fileOffset + RPTREE_HEADER_SIZE,
-                bufferedReader = new igv.BufferedReader(self.config, self.filesize, BUFFER_SIZE);
+        var rootNodeOffset = self.fileOffset + RPTREE_HEADER_SIZE,
+            bufferedReader = new igv.BufferedReader(self.config, self.filesize, BUFFER_SIZE);
 
-            self.readNode(rootNodeOffset, bufferedReader)
+        return self.readNode(rootNodeOffset, bufferedReader)
 
-                .then(function (node) {
-                    self.rootNode = node;
-                    fulfill(self);
-                })
-                .catch(reject);
-        });
+            .then(function (node) {
+                self.rootNode = node;
+                return self;
+            })
     }
 
 
@@ -70,72 +67,68 @@ var igv = (function (igv) {
 
         var self = this;
 
-        return new Promise(function (resolve, reject) {
 
-            var count, isLeaf;
+        var count, isLeaf;
 
-            bufferedReader.dataViewForRange({start: filePosition, size: 4}, false)
+        return bufferedReader.dataViewForRange({start: filePosition, size: 4}, false)
 
-                .then(function (dataView) {
-                    var binaryParser, type, reserved;
+            .then(function (dataView) {
+                var binaryParser, type, reserved;
 
-                    binaryParser = new igv.BinaryParser(dataView, self.littleEndian);
-                    type = binaryParser.getByte();
-                    isLeaf = (type === 1) ? true : false;
-                    reserved = binaryParser.getByte();
-                    count = binaryParser.getUShort();
+                binaryParser = new igv.BinaryParser(dataView, self.littleEndian);
+                type = binaryParser.getByte();
+                isLeaf = (type === 1) ? true : false;
+                reserved = binaryParser.getByte();
+                count = binaryParser.getUShort();
 
-                    filePosition += 4;
+                filePosition += 4;
 
-                    var bytesRequired = count * (isLeaf ? RPTREE_NODE_LEAF_ITEM_SIZE : RPTREE_NODE_CHILD_ITEM_SIZE);
-                    var range2 = {start: filePosition, size: bytesRequired};
+                var bytesRequired = count * (isLeaf ? RPTREE_NODE_LEAF_ITEM_SIZE : RPTREE_NODE_CHILD_ITEM_SIZE);
+                var range2 = {start: filePosition, size: bytesRequired};
 
-                    return bufferedReader.dataViewForRange(range2, false);
-                })
+                return bufferedReader.dataViewForRange(range2, false);
+            })
 
-                .then(function (dataView) {
+            .then(function (dataView) {
 
-                    var i,
-                        items = new Array(count),
-                        binaryParser = new igv.BinaryParser(dataView);
+                var i,
+                    items = new Array(count),
+                    binaryParser = new igv.BinaryParser(dataView);
 
-                    if (isLeaf) {
-                        for (i = 0; i < count; i++) {
-                            var item = {
-                                isLeaf: true,
-                                startChrom: binaryParser.getInt(),
-                                startBase: binaryParser.getInt(),
-                                endChrom: binaryParser.getInt(),
-                                endBase: binaryParser.getInt(),
-                                dataOffset: binaryParser.getLong(),
-                                dataSize: binaryParser.getLong()
-                            };
-                            items[i] = item;
+                if (isLeaf) {
+                    for (i = 0; i < count; i++) {
+                        var item = {
+                            isLeaf: true,
+                            startChrom: binaryParser.getInt(),
+                            startBase: binaryParser.getInt(),
+                            endChrom: binaryParser.getInt(),
+                            endBase: binaryParser.getInt(),
+                            dataOffset: binaryParser.getLong(),
+                            dataSize: binaryParser.getLong()
+                        };
+                        items[i] = item;
 
-                        }
-                        resolve(new RPTreeNode(items));
                     }
-                    else { // non-leaf
-                        for (i = 0; i < count; i++) {
+                    return new RPTreeNode(items);
+                }
+                else { // non-leaf
+                    for (i = 0; i < count; i++) {
 
-                            var item = {
-                                isLeaf: false,
-                                startChrom: binaryParser.getInt(),
-                                startBase: binaryParser.getInt(),
-                                endChrom: binaryParser.getInt(),
-                                endBase: binaryParser.getInt(),
-                                childOffset: binaryParser.getLong()
-                            };
-                            items[i] = item;
+                        var item = {
+                            isLeaf: false,
+                            startChrom: binaryParser.getInt(),
+                            startBase: binaryParser.getInt(),
+                            endChrom: binaryParser.getInt(),
+                            endBase: binaryParser.getInt(),
+                            childOffset: binaryParser.getLong()
+                        };
+                        items[i] = item;
 
-                        }
-
-                        resolve(new RPTreeNode(items));
                     }
-                })
-                .catch(reject);
 
-        });
+                    return new RPTreeNode(items);
+                }
+            })
     }
 
 
@@ -172,7 +165,7 @@ var igv = (function (igv) {
                                 }
                                 else {
                                     processing.add(item.childOffset);  // Represent node to-be-loaded by its file position
-                                    
+
                                     self.readNode(item.childOffset, bufferedReader)
                                         .then(function (node) {
                                             item.childNode = node;
