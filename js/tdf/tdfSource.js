@@ -39,7 +39,15 @@ var igv = (function (igv) {
 
     igv.TDFSource.prototype.getFeatures = function (chr, bpStart, bpEnd, bpPerPixel) {
 
-        var self = this;
+        var self = this,
+            featureCache = self.featureCache,
+            genomicInterval = new igv.GenomicInterval(chr, bpStart, bpEnd);
+
+        genomicInterval.bpPerPixel = bpPerPixel;
+
+        if (featureCache && featureCache.range.bpPerPixel === bpPerPixel && featureCache.range.containsRange(genomicInterval)) {
+            return Promise.resolve(self.featureCache.queryFeatures(chr, bpStart, bpEnd));
+        }
 
         return self.reader.readRootGroup()
 
@@ -48,21 +56,20 @@ var igv = (function (igv) {
                 var zoom = zoomLevelForScale(chr, bpPerPixel),
                     queryChr = self.reader.chrAliasTable[chr],
                     maxZoom = self.reader.maxZoom,
-                    wf,
-                    dataset;
+                    wf;
 
                 if (queryChr === undefined) queryChr = chr;
                 if (maxZoom === undefined) maxZoom = -1;
 
                 wf = zoom > maxZoom ? "raw" : self.windowFunction;
 
-                return self.reader.readDataset(queryChr, wf, zoom)
+                return self.reader.readDataset(queryChr, wf, zoom);
             })
+
             .then(function (dataset) {
 
                 if (dataset == null) {
-                    fulfill([]);
-                    return;
+                    return [];
                 }
 
                 var tileWidth = dataset.tileWidth,
@@ -77,13 +84,15 @@ var igv = (function (igv) {
                         p.push(self.reader.readTile(dataset.tiles[i], NTRACKS));
                     }
                 }
-                return Promise.all(p)
+
+                return Promise.all(p);
             })
 
             .then(function (tiles) {
 
                 var features = [];
-                tiles.forEach(function (tile) {
+
+                tiles.forEach( function (tile) {
                     switch (tile.type) {
                         case "bed":
                             decodeBedTile(tile, chr, bpStart, bpEnd, bpPerPixel, features);
@@ -98,8 +107,13 @@ var igv = (function (igv) {
                             reject("Unknown tile type: " + tile.type);
                             return;
                     }
-                });
+                })
+
+                // Note -- replacing feature cache
+                self.featureCache = new igv.FeatureCache(features, genomicInterval);
+
                 return features;
+
             })
     }
 

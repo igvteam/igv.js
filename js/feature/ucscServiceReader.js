@@ -34,26 +34,21 @@ var igv = (function (igv) {
         var self = this,
             url = this.config.url + '&table=' + this.config.tableName + '&chr=' + chr + '&start=' + start + '&end=' + end;
 
-        return new Promise(function (fulfill, reject) {
-            igv.xhr.loadJson(url, self.config)
-                .then(function (data) {
-                    if (data) {
-                        data.forEach(function(sample) {
-                            if (sample.hasOwnProperty('exonStarts') && sample.hasOwnProperty('exonEnds') && sample.hasOwnProperty('exonCount')
-                                && sample.hasOwnProperty('cdsStart') && sample.hasOwnProperty('cdsEnd')) {
+        return igv.xhr.loadJson(url, self.config)
+            .then(function (data) {
+                if (data) {
+                    data.forEach(function (sample) {
+                        if (sample.hasOwnProperty('exonStarts') && sample.hasOwnProperty('exonEnds') && sample.hasOwnProperty('exonCount')
+                            && sample.hasOwnProperty('cdsStart') && sample.hasOwnProperty('cdsEnd')) {
 
-                                addExons(sample);
-                            }
-                        });
-                        fulfill(data);
-                    } else {
-                        fulfill(null);
-                    }
-                })
-                .catch(function (error) {
-                    reject(error);
-                });
-        });
+                            addExons(sample);
+                        }
+                    });
+                    return data;
+                } else {
+                    return null;
+                }
+            })
     };
 
     function addExons(sample) {

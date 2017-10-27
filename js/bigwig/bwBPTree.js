@@ -80,7 +80,7 @@ var igv = (function (igv) {
                     chromId = byteBuffer.getInt();
                     chromSize = byteBuffer.getInt();
 
-                    if(genome) key = genome.getChromosomeName(key);  // Translate to canonical chr name
+                    if (genome) key = genome.getChromosomeName(key);  // Translate to canonical chr name
                     dictionary[key] = chromId;
 
                 }

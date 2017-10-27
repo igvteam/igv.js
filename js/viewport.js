@@ -355,7 +355,8 @@ var igv = (function (igv) {
             chr,
             refFrameStart,
             refFrameEnd,
-            drawConfiguration;
+            drawConfiguration,
+            buffer;
 
         if (!(viewIsReady.call(this))) {
             return;
@@ -383,13 +384,19 @@ var igv = (function (igv) {
         if (this.tile && this.tile.containsRange(chr, refFrameStart, refFrameEnd, referenceFrame.bpPerPixel)) {
             // console.log('paint pre-existing canvas');
             this.paintImageWithReferenceFrame(referenceFrame);
+
         } else {
 
-            // Expand the requested range so we can pan a bit without reloading
+            // Expand the requested range so we can pan a bit without reloading.  But not beyond chromosome bounds
+            var chrLength = igv.browser.genome.getChromosome(chr).bpLength;
+
             pixelWidth = 3 * this.canvas.width;
             bpWidth = Math.round(referenceFrame.toBP(pixelWidth));
             bpStart = Math.max(0, Math.round(referenceFrame.start - bpWidth / 3));
-            bpEnd = bpStart + bpWidth;
+            bpEnd = Math.min(chrLength, bpStart + bpWidth);
+
+            // Adjust pixel width in case bounds were clamped
+            pixelWidth = (bpEnd - bpStart) / referenceFrame.bpPerPixel;
 
             if (self.loading && self.loading.start === bpStart && self.loading.end === bpEnd) {
                 return;
@@ -400,12 +407,11 @@ var igv = (function (igv) {
             self.startSpinner();
 
             // console.log('get features');
-            this.trackView.track
-                .getFeatures(referenceFrame.chrName, bpStart, bpEnd, referenceFrame.bpPerPixel)
+            this.trackView.track.getFeatures(referenceFrame.chrName, bpStart, bpEnd, referenceFrame.bpPerPixel)
+
                 .then(function (features) {
 
-                    var buffer,
-                        requiredHeight,
+                    var requiredHeight,
                         roiPromises;
 
                     // self.loading = false;
@@ -452,56 +458,38 @@ var igv = (function (igv) {
                         if (doRenderControlCanvas(genomicState, self.trackView)) {
                             renderControlCanvasWithTrackView(self.trackView);
                         }
-
                     }
 
                     if (igv.browser.roi) {
-
-                        // Defer tile creation and image paint until ROI features are loaded and drawn
                         roiPromises = [];
                         igv.browser.roi.forEach(function (r) {
                             roiPromises.push(r.getFeatures(referenceFrame.chrName, bpStart, bpEnd))
                         });
 
-                        Promise.all(roiPromises)
-                            .then(function (featureArray) {
-                                var i, len;
-                                for (i = 0, len = igv.browser.roi.length; i < len; i++) {
-                                    drawConfiguration.features = featureArray[i];
-                                    igv.browser.roi[i].draw(drawConfiguration);
-                                }
-                                self.tile = new Tile(referenceFrame.chrName, bpStart, bpEnd, referenceFrame.bpPerPixel, buffer);
-                                self.paintImageWithReferenceFrame(referenceFrame);
-                            })
-                            .catch(function (error) {
-                                console.log("Error drawing ROIs " + error);
-                            })
-
-
-                    } else {
-                        // No ROI overlays
-
-                        self.tile = new Tile(referenceFrame.chrName, bpStart, bpEnd, referenceFrame.bpPerPixel, buffer);
-                        self.paintImageWithReferenceFrame(referenceFrame);
+                        return Promise.all(roiPromises)
                     }
-
-                    function renderControlCanvasWithTrackView(trackView) {
-                        var buffer2;
-
-                        buffer2 = document.createElement('canvas');
-                        buffer2.width = trackView.controlCanvas.width;
-                        buffer2.height = trackView.controlCanvas.height;
-
-                        trackView.track.paintAxis(buffer2.getContext('2d'), buffer2.width, buffer2.height);
-
-                        trackView.controlCtx.drawImage(buffer2, 0, 0);
-
-                    }
-
-                    function doRenderControlCanvas(genomicState, trackView) {
-                        return (/*0 === genomicState.locusIndex &&*/ trackView.track.paintAxis && trackView.controlCanvas.width > 0 && trackView.controlCanvas.height > 0);
+                    else {
+                        return undefined;   // No regions of interest
                     }
                 })
+
+                .then(function (roiArray) {
+
+                    if(roiArray) {
+                        var i, len;
+                        for (i = 0, len = roiArray.length; i < len; i++) {
+                            drawConfiguration.features = roiArray[i];
+                            igv.browser.roi[i].draw(drawConfiguration);
+                        }
+                    }
+                })
+
+                .then(function (ignore) {
+
+                    self.tile = new Tile(referenceFrame.chrName, bpStart, bpEnd, referenceFrame.bpPerPixel, buffer);
+                    self.paintImageWithReferenceFrame(referenceFrame);
+                })
+                
                 .catch(function (error) {
 
                     self.stopSpinner();
@@ -514,6 +502,25 @@ var igv = (function (igv) {
                         igv.presentAlert(error);
                     }
                 });
+
+            function renderControlCanvasWithTrackView(trackView) {
+                var buffer2;
+
+                buffer2 = document.createElement('canvas');
+                buffer2.width = trackView.controlCanvas.width;
+                buffer2.height = trackView.controlCanvas.height;
+
+                trackView.track.paintAxis(buffer2.getContext('2d'), buffer2.width, buffer2.height);
+
+                trackView.controlCtx.drawImage(buffer2, 0, 0);
+
+            }
+
+            function doRenderControlCanvas(genomicState, trackView) {
+                return (/*0 === genomicState.locusIndex &&*/ trackView.track.paintAxis && trackView.controlCanvas.width > 0 && trackView.controlCanvas.height > 0);
+            }
+
+
         }
 
         function viewIsReady() {
