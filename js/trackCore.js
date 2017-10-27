@@ -446,6 +446,10 @@ var igv = (function (igv) {
 
         }, undefined));
 
+        if (igv.colorPicker && isValidTrack(trackView.track)) {
+            menuItems.push(igv.colorPickerMenuItem(popover, trackView))
+        }
+
         all = [];
         if (trackView.track.menuItemList) {
             all = menuItems.concat(igv.trackMenuItemListHelper(trackView.track.menuItemList(popover)));
@@ -463,6 +467,10 @@ var igv = (function (igv) {
                     // trackView.browser.removeTrackByName(trackView.track.name);
                 }, true)
             );
+        }
+
+        function isValidTrack(track) {
+            return track instanceof igv.BAMTrack || track instanceof igv.FeatureTrack || track instanceof igv.VariantTrack || track instanceof igv.WIGTrack;
         }
 
         return all;
