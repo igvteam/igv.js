@@ -24,79 +24,75 @@ var modal_table_example = (function (modal_table_example) {
 
     modal_table_example.init = function ($container) {
 
-        $(document).ready(function () {
-            var options,
-                config,
-                browser,
-                columnFormat,
-                encodeTableFormat,
-                encodeDatasource;
+        var options,
+            config,
+            browser,
+            columnFormat,
+            encodeDatasource;
 
-            options = {
-                minimumBases: 6,
-                showIdeogram: true,
-                showRuler: true,
-                locus: '1',
-                reference:
-                    {
-                        id: "hg19",
-                        fastaURL: "https://s3.amazonaws.com/igv.broadinstitute.org/genomes/seq/1kg_v37/human_g1k_v37_decoy.fasta",
-                        cytobandURL: "https://s3.amazonaws.com/igv.broadinstitute.org/genomes/seq/b37/b37_cytoband.txt"
-                    },
-                flanking: 1000,
-                apiKey: 'AIzaSyDUUAUFpQEN4mumeMNIRWXSiTh5cPtUAD0',
-                palette:
-                    [
-                        "#00A0B0",
-                        "#6A4A3C",
-                        "#CC333F",
-                        "#EB6841"
-                    ],
-                tracks:
-                    [
-                        {
-                            name: "Genes",
-                            searchable: false,
-                            type: "annotation",
-                            format: "gtf",
-                            sourceType: "file",
-                            url: "https://s3.amazonaws.com/igv.broadinstitute.org/annotations/hg19/genes/gencode.v18.annotation.sorted.gtf.gz",
-                            indexURL: "https://s3.amazonaws.com/igv.broadinstitute.org/annotations/hg19/genes/gencode.v18.annotation.sorted.gtf.gz.tbi",
-                            visibilityWindow: 10000000,
-                            order: Number.MAX_VALUE,
-                            displayMode: "EXPANDED"
-                        }
-                    ]
-            };
-
-            browser = igv.createBrowser($container.get(0), options);
-
-            columnFormat =
-                [
-                    {    'Assembly': '10%' },
-                    {   'Cell Type': '10%' },
-                    {      'Target': '10%' },
-                    {  'Assay Type': '20%' },
-                    { 'Output Type': '20%' },
-                    {         'Lab': '20%' }
-
-                ];
-
-            encodeDatasource = new igv.EncodeDataSource({genomeID: 'hg19'}, columnFormat);
-
-            config =
+        options = {
+            minimumBases: 6,
+            showIdeogram: true,
+            showRuler: true,
+            locus: '1',
+            reference:
                 {
-                    $modal:$('#encodeModal'),
-                    $modalBody:$('#mte-modal-body'),
-                    $modalTopCloseButton: $('#encodeModalTopCloseButton'),
-                    $modalBottomCloseButton: $('#encodeModalBottomCloseButton'),
-                    $modalGoButton: $('#encodeModalGoButton'),
-                    browserRetrievalFunction:function () { return browser; },
-                    browserLoadFunction:'loadTracksWithConfigList'
-                };
-            browser.encodeTable = new igv.ModalTable(config, encodeDatasource);
+                    id: "hg19",
+                    fastaURL: "https://s3.amazonaws.com/igv.broadinstitute.org/genomes/seq/1kg_v37/human_g1k_v37_decoy.fasta",
+                    cytobandURL: "https://s3.amazonaws.com/igv.broadinstitute.org/genomes/seq/b37/b37_cytoband.txt"
+                },
+            flanking: 1000,
+            apiKey: 'AIzaSyDUUAUFpQEN4mumeMNIRWXSiTh5cPtUAD0',
+            palette:
+                [
+                    "#00A0B0",
+                    "#6A4A3C",
+                    "#CC333F",
+                    "#EB6841"
+                ],
+            tracks:
+                [
+                    {
+                        name: "Genes",
+                        searchable: false,
+                        type: "annotation",
+                        format: "gtf",
+                        sourceType: "file",
+                        url: "https://s3.amazonaws.com/igv.broadinstitute.org/annotations/hg19/genes/gencode.v18.annotation.sorted.gtf.gz",
+                        indexURL: "https://s3.amazonaws.com/igv.broadinstitute.org/annotations/hg19/genes/gencode.v18.annotation.sorted.gtf.gz.tbi",
+                        visibilityWindow: 10000000,
+                        order: Number.MAX_VALUE,
+                        displayMode: "EXPANDED"
+                    }
+                ]
+        };
 
-        })
+        browser = igv.createBrowser($container.get(0), options);
+
+        columnFormat =
+            [
+                {    'Assembly': '10%' },
+                {   'Cell Type': '10%' },
+                {      'Target': '10%' },
+                {  'Assay Type': '20%' },
+                { 'Output Type': '20%' },
+                {         'Lab': '20%' }
+
+            ];
+
+        encodeDatasource = new igv.EncodeDataSource({genomeID: 'hg19'}, columnFormat);
+
+        config =
+            {
+                $modal:$('#encodeModal'),
+                $modalBody:$('#mte-modal-body'),
+                $modalTopCloseButton: $('#encodeModalTopCloseButton'),
+                $modalBottomCloseButton: $('#encodeModalBottomCloseButton'),
+                $modalGoButton: $('#encodeModalGoButton'),
+                browserRetrievalFunction:function () { return browser; },
+                browserLoadFunction:'loadTracksWithConfigList'
+            };
+        browser.encodeTable = new igv.ModalTable(config, encodeDatasource);
 
     };
 
