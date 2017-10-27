@@ -125,7 +125,7 @@ var igv = (function (igv) {
                                         })
                                         .catch(reject);
 
-                                }))
+                                }));
                             });
 
                             return Promise.all(promises);
@@ -133,10 +133,10 @@ var igv = (function (igv) {
                         .then(function (ignored) {
                             alignmentContainer.finish();
                             return alignmentContainer;
-                        })
+                        });
                 }
-            })
-    }
+            });
+    };
 
     igv.BamReader.prototype.readHeader = function () {
 
@@ -150,12 +150,12 @@ var igv = (function (igv) {
                     options = igv.buildOptions(self.config, {range: {start: 0, size: len}}),
                     genome = igv.browser ? igv.browser.genome : null;
 
-                return igv.BamUtils.readHeader(self.bamPath, options, genome)
+                return igv.BamUtils.readHeader(self.bamPath, options, genome);
             })
             .then(function (header) {
                 return header;
-            })
-    }
+            });
+    };
 
     function getIndex(bam) {
 
@@ -167,7 +167,7 @@ var igv = (function (igv) {
                 .then(function (index) {
                     bam.index = index;
                     return bam.index;
-                })
+                });
         }
     }
 
@@ -182,7 +182,7 @@ var igv = (function (igv) {
                 bam.indexToChr = header.chrNames;
                 bam.chrAliasTable = header.chrAliasTable;
                 return bam.chrToIndex;
-            })
+            });
         }
     }
 
