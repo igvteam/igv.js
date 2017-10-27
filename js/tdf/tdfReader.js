@@ -49,15 +49,9 @@ var igv = (function (igv) {
             return Promise.resolve(this);   // Already read
         }
 
-        return new Promise(function (fulfill, reject) {
+        return igv.xhr.loadArrayBuffer(self.path, igv.buildOptions(self.config, {range: {start: 0, size: 64000}}))
 
-            igv.xhr.loadArrayBuffer(self.path, igv.buildOptions(self.config, {range: {start: 0, size: 64000}}))
-                .then(function (data) {
-
-                if (!data) {
-                    reject("no data");
-                    return;
-                }
+            .then(function (data) {
 
                 var binaryParser = new igv.BinaryParser(new DataView(data));
 
@@ -91,56 +85,52 @@ var igv = (function (igv) {
                 self.compressed = (self.flags & GZIP_FLAG) != 0;
 
                 // Now read index
-                igv.xhr.loadArrayBuffer(self.path,igv.buildOptions(self.config, {range: {start: self.indexPos, size: self.indexSize}}))
-                    .then(function (data) {
-
-
-                    if (!data) {
-                        reject("no data");
-                        return;
+                return igv.xhr.loadArrayBuffer(self.path, igv.buildOptions(self.config, {
+                    range: {
+                        start: self.indexPos,
+                        size: self.indexSize
                     }
+                }))
+            })
+            .then(function (data) {
 
-                    binaryParser = new igv.BinaryParser(new DataView(data));
+                binaryParser = new igv.BinaryParser(new DataView(data));
 
-                    self.datasetIndex = {};
-                    var nEntries = binaryParser.getInt();
-                    while (nEntries-- > 0) {
-                        var name = binaryParser.getString();
-                        var pos = binaryParser.getLong();
-                        var size = binaryParser.getInt();
-                        self.datasetIndex[name] = {position: pos, size: size};
-                    }
+                self.datasetIndex = {};
+                var nEntries = binaryParser.getInt();
+                while (nEntries-- > 0) {
+                    var name = binaryParser.getString();
+                    var pos = binaryParser.getLong();
+                    var size = binaryParser.getInt();
+                    self.datasetIndex[name] = {position: pos, size: size};
+                }
 
-                    self.groupIndex = {};
-                    nEntries = binaryParser.getInt();
-                    while (nEntries-- > 0) {
-                        name = binaryParser.getString();
-                        pos = binaryParser.getLong();
-                        size = binaryParser.getInt();
-                        self.groupIndex[name] = {position: pos, size: size};
-                    }
+                self.groupIndex = {};
+                nEntries = binaryParser.getInt();
+                while (nEntries-- > 0) {
+                    name = binaryParser.getString();
+                    pos = binaryParser.getLong();
+                    size = binaryParser.getInt();
+                    self.groupIndex[name] = {position: pos, size: size};
+                }
 
-                    fulfill(self);
+                return self;   // The header data is stored in "self"
 
-                }).catch(reject);
+            })
 
-            }).catch(reject)
-
-        });
     }
 
-    igv.TDFReader.prototype.readDataset = function (chr, windowFunction,  zoom) {
+    igv.TDFReader.prototype.readDataset = function (chr, windowFunction, zoom) {
 
-        var self = this;
+        var self = this,
+            dsName;
 
-        return new Promise(function (fulfill, reject) {
+        return self.readHeader()
 
-
-            self.readHeader().then(function (reader) {
+            .then(function (ignore) {
 
                 var wf = (self.version < 2) ? "" : "/" + windowFunction,
                     zoomString = (chr.toLowerCase() === "all" || zoom === undefined) ? "0" : zoom.toString(),
-                    dsName,
                     indexEntry;
 
                 if (windowFunction === "raw") {
@@ -152,50 +142,53 @@ var igv = (function (igv) {
                 indexEntry = self.datasetIndex[dsName];
 
                 if (indexEntry === undefined) {
-                    fulfill(null);
+                    return undefined;
                 }
                 else {
 
-
-                    igv.xhr.loadArrayBuffer(self.path, igv.buildOptions(self.config, {range: {start: indexEntry.position, size: indexEntry.size}}))
-                        .then(function (data) {
-
-                        if (!data) {
-                            reject("no data");
-                            return;
+                    return igv.xhr.loadArrayBuffer(self.path, igv.buildOptions(self.config, {
+                        range: {
+                            start: indexEntry.position,
+                            size: indexEntry.size
                         }
-
-                        var binaryParser = new igv.BinaryParser(new DataView(data));
-
-                        var nAttributes = binaryParser.getInt();
-                        var attributes = {};
-                        while (nAttributes-- > 0) {
-                            attributes[binaryParser.getString()] = binaryParser.getString();
-                        }
-
-                        var dataType = binaryParser.getString();
-                        var tileWidth = binaryParser.getFloat();
-
-                        var nTiles = binaryParser.getInt();
-                        var tiles = [];
-                        while (nTiles-- > 0) {
-                            tiles.push({position: binaryParser.getLong(), size: binaryParser.getInt()});
-                        }
-
-                        var dataset = {
-                            name: dsName,
-                            attributes: attributes,
-                            dataType: dataType,
-                            tileWidth: tileWidth,
-                            tiles: tiles
-                        };
-
-                        fulfill(dataset);
-
-                    }).catch(reject);
+                    }))
                 }
-            }).catch(reject);
-        });
+            })
+            .then(function (data) {
+
+                if (!data) {
+                    return undefined;
+                }
+
+                var binaryParser = new igv.BinaryParser(new DataView(data));
+
+                var nAttributes = binaryParser.getInt();
+                var attributes = {};
+                while (nAttributes-- > 0) {
+                    attributes[binaryParser.getString()] = binaryParser.getString();
+                }
+
+                var dataType = binaryParser.getString();
+                var tileWidth = binaryParser.getFloat();
+
+                var nTiles = binaryParser.getInt();
+                var tiles = [];
+                while (nTiles-- > 0) {
+                    tiles.push({position: binaryParser.getLong(), size: binaryParser.getInt()});
+                }
+
+                var dataset = {
+                    name: dsName,
+                    attributes: attributes,
+                    dataType: dataType,
+                    tileWidth: tileWidth,
+                    tiles: tiles
+                };
+
+                return dataset;
+
+            })
+
     }
 
     igv.TDFReader.prototype.readRootGroup = function () {
@@ -207,85 +200,78 @@ var igv = (function (igv) {
             return Promise.resolve(rootGroup);
         }
         else {
-            return new Promise(function (fulfill, reject) {
+            return self.readGroup("/").then(function (group) {
 
-                self.readGroup("/").then(function (group) {
+                var genome = igv.browser.genome,
+                    names = group["chromosomes"],
+                    maxZoomString = group["maxZoom"];
 
-                    var genome = igv.browser.genome,
-                        names = group["chromosomes"],
-                        maxZoomString = group["maxZoom"];
+                // Now parse out interesting attributes.  This is a side effect, and bad bad bad,  but the alternative is messy as well.
+                if (maxZoomString) {
+                    self.maxZoom = Number(maxZoomString);
+                }
 
-                    // Now parse out interesting attributes.  This is a side effect, and bad bad bad,  but the alternative is messy as well.
-                    if(maxZoomString) {
-                        self.maxZoom = Number(maxZoomString);
-                    }
-
-                    // Chromosome names
-                    self.chrAliasTable = {};
-                    if(names) {
-                        _.each(names.split(","), function (chr) {
-                            var canonicalName = genome.getChromosomeName(chr);
-                            self.chrAliasTable[canonicalName] = chr;
-                        })
-                    }
-
-                    fulfill(group);
-
-
-                }).catch(reject);
-            });
-
+                // Chromosome names
+                self.chrAliasTable = {};
+                if (names) {
+                    names.split(",").forEach(function (chr) {
+                        var canonicalName = genome.getChromosomeName(chr);
+                        self.chrAliasTable[canonicalName] = chr;
+                    })
+                }
+                return group;
+            })
         }
     }
 
     igv.TDFReader.prototype.readGroup = function (name) {
 
-        var self = this;
+        var self = this, group;
 
-        return new Promise(function (fulfill, reject) {
+        var group = self.groupCache[name];
+        if (group) {
+            return Promise.resolve(group);
+        }
+        else {
 
+            return self.readHeader()
+                .then(function (reader) {
 
-            self.readHeader().then(function (reader) {
+                    var indexEntry = self.groupIndex[name];
 
-                var group = self.groupCache[name],
-                    indexEntry = self.groupIndex[name];
+                    if (indexEntry === undefined) {
+                        return undefined;
+                    }
+                    else {
 
-                if (group) {
-                    fulfill(group);
-                }
-                else if (indexEntry === undefined) {
-                    return fulfill(null);
-                }
-                else {
+                        return igv.xhr.loadArrayBuffer(self.path, igv.buildOptions(self.config, {
+                            range: {
+                                start: indexEntry.position,
+                                size: indexEntry.size
+                            }
+                        }))
+                    }
+                })
+                .then(function (data) {
 
+                    if (!data) {
+                        return undefined;
+                    }
 
-                    igv.xhr.loadArrayBuffer(self.path, igv.buildOptions(self.config, {range: {start: indexEntry.position, size: indexEntry.size}}))
-                        .then(function (data) {
+                    var binaryParser = new igv.BinaryParser(new DataView(data));
 
-                        if (!data) {
-                            reject("no data");
-                            return;
-                        }
+                    var nAttributes = binaryParser.getInt();
+                    var group = {name: name};
+                    while (nAttributes-- > 0) {
+                        group[binaryParser.getString()] = binaryParser.getString();
+                    }
 
-                        var binaryParser = new igv.BinaryParser(new DataView(data));
+                    self.groupCache[name] = group;
 
-                        var nAttributes = binaryParser.getInt();
-                        var group = {name: name};
-                        while (nAttributes-- > 0) {
-                            group[binaryParser.getString()] = binaryParser.getString();
-                        }
-
-                        self.groupCache[name] = group;
-
-                        fulfill(group);
-
-                    }).catch(reject);
-                }
-            }).catch(reject);
-        });
+                    return group;
+                })
+        }
     }
-
-
 
 
     function createFixedStep(binaryParser, nTracks) {
@@ -411,15 +397,13 @@ var igv = (function (igv) {
 
         var self = this;
 
-        return new Promise(function (fulfill, reject) {
-
-            igv.xhr.loadArrayBuffer(self.path, igv.buildOptions(self.config, {range: {start: indexEntry.position, size: indexEntry.size}}))
-                .then(function (data) {
-
-                if (!data) {
-                    reject("no data");
-                    return;
-                }
+        return igv.xhr.loadArrayBuffer(self.path, igv.buildOptions(self.config, {
+            range: {
+                start: indexEntry.position,
+                size: indexEntry.size
+            }
+        }))
+            .then(function (data) {
 
                 if (self.compressed) {
                     var inflate = new Zlib.Inflate(new Uint8Array(data));
@@ -433,23 +417,19 @@ var igv = (function (igv) {
 
                 switch (type) {
                     case "fixedStep":
-                        fulfill(createFixedStep(binaryParser, nTracks));
+                        return createFixedStep(binaryParser, nTracks);
                         break;
                     case "variableStep":
-                        fulfill(createVariableStep(binaryParser, nTracks));
+                        return createVariableStep(binaryParser, nTracks);
                         break;
                     case "bed":
                     case "bedWithName":
-                        fulfill(createBed(binaryParser, nTracks, type));
+                        return createBed(binaryParser, nTracks, type);
                         break;
                     default:
-                        reject("Unknown tile type: " + type);
+                        throw "Unknown tile type: " + type;
                 }
-
-
-            }).catch(reject);
-
-        });
+            });
 
     }
 
