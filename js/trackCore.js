@@ -297,7 +297,7 @@ var igv = (function (igv) {
         }
 
 
-    }
+    };
 
     igv.paintAxis = function (ctx, pixelWidth, pixelHeight) {
 
@@ -446,7 +446,7 @@ var igv = (function (igv) {
 
         }, undefined));
 
-        if (igv.colorPicker && isValidTrack(trackView.track)) {
+        if (igv.doProvideColoSwatchWidget(trackView.track)) {
             menuItems.push(igv.colorPickerMenuItem(popover, trackView))
         }
 
@@ -469,11 +469,11 @@ var igv = (function (igv) {
             );
         }
 
-        function isValidTrack(track) {
-            return track instanceof igv.BAMTrack || track instanceof igv.FeatureTrack || track instanceof igv.VariantTrack || track instanceof igv.WIGTrack;
-        }
-
         return all;
+    };
+
+    igv.doProvideColoSwatchWidget = function (track) {
+        return igv.colorPicker && (track instanceof igv.BAMTrack || track instanceof igv.FeatureTrack || track instanceof igv.VariantTrack || track instanceof igv.WIGTrack);
     };
 
     igv.trackMenuItemListHelper = function (itemList) {
@@ -563,43 +563,17 @@ var igv = (function (igv) {
     };
 
     igv.colorPickerMenuItem = function (popover, trackView) {
-        var $e,
-            clickHandler;
-
+        var $e;
 
         $e = $('<div>');
         $e.text('Set track color');
 
-        clickHandler = function () {
-            var defaultColor,
-                color,
-                offset,
-                colorUpdateHandler;
-
-            color = trackView.track.color;
-
-            defaultColor = trackView.track.config.color || igv.browser.constants.defaultColor;
-
-            offset =
-            {
-                left: ($(trackView.trackDiv).offset().left + $(trackView.trackDiv).width()) - igv.colorPicker.$container.width(),
-                top: $(trackView.trackDiv).offset().top
-            };
-
-            colorUpdateHandler = function (color) {
-                trackView.setColor(color)
-            };
-
-            igv.colorPicker.configure(trackView, color, defaultColor, offset, colorUpdateHandler);
-
-            igv.colorPicker.presentAtOffset(offset);
-
+        $e.click(function () {
+            trackView.$colorpicker_container.toggle();
             popover.hide();
-        };
+        });
 
-        $e.click(clickHandler);
-
-        return {object: $e, init: undefined};
+        return { object: $e };
 
     };
 
