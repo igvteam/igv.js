@@ -315,10 +315,6 @@ var igv = (function (igv) {
             });
             menuItems = menuItems.concat(colorByItems);
         }
-        if (igv.colorPicker) {
-            menuItems.push(igv.colorPickerMenuItem(popover, this.trackView));
-        }
-
 
         mapped = (["COLLAPSED", "SQUISHED", "EXPANDED"]).map(function (displayMode, index) {
             return {
