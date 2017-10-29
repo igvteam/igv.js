@@ -45,16 +45,16 @@ var igv = (function (igv) {
             this.featureSource = new igv.FeatureSource(config);
         }
 
+        //this.autoscale = config.autoscale;
         // Min and max values.  No defaults for these, if they aren't set track will autoscale.
-        this.autoscale = config.autoscale;
-
         if (config.max !== undefined) {
             this.dataRange = {
                 min: config.min || 0,
                 max: config.max
             }
+        } else {
+            this.autoscale = true;
         }
-        ;
 
         this.paintAxis = igv.paintAxis;
 
@@ -156,12 +156,12 @@ var igv = (function (igv) {
 
 
         if (features && features.length > 0) {
-            if (self.autoscale === undefined && self.dataRange === undefined && (typeof self.featureSource.getDefaultRange === "function")) {
-                defaultRange = self.featureSource.getDefaultRange();
-                if (!isNaN(defaultRange.min) && !isNaN(defaultRange.max)) {
-                    self.dataRange = defaultRange;
-                }
-            }
+            // if (self.autoscale === undefined && self.dataRange === undefined && (typeof self.featureSource.getDefaultRange === "function")) {
+            //     defaultRange = self.featureSource.getDefaultRange();
+            //     if (!isNaN(defaultRange.min) && !isNaN(defaultRange.max)) {
+            //         self.dataRange = defaultRange;
+            //     }
+            // }
             if (self.autoscale || self.dataRange === undefined) {
                 var s = autoscale(features);
                 featureValueMinimum = self.config.min || s.min;      // If min is explicitly set use it

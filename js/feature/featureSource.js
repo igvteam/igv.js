@@ -303,37 +303,35 @@ var igv = (function (igv) {
     }
 
 
+    // TODO -- filter by pixel size
     function getWGFeatures(features) {
 
-        var wgFeatures;
+        var wgFeatures,
+            wgChromosomeNames,
+            genome;
 
-        wgFeatures = _.map(features, function (f) {
+        genome = igv.browser.genome;
 
-            var wg;
+        wgChromosomeNames = new Set(genome.wgChromosomeNames);
 
-            wg = (JSON.parse(JSON.stringify(f)));
-            wg.start = igv.browser.genome.getGenomeCoordinate(f.chr, f.start);
-            wg.end = igv.browser.genome.getGenomeCoordinate(f.chr, f.end);
+        wgFeatures = [];
 
-            return wg;
+        features.forEach(function (f) {
 
+            var wg,
+                queryChr;
+
+            queryChr = genome.getChromosomeName(f.chr);
+            if (wgChromosomeNames.has(queryChr)) {
+
+                wg = Object.assign({}, f);
+                wg.start = igv.browser.genome.getGenomeCoordinate(f.chr, f.start);
+                wg.end = igv.browser.genome.getGenomeCoordinate(f.chr, f.end);
+
+                wgFeatures.push(wg);
+            }
         });
 
-        // features.forEach(function (f) {
-        //     var wgStart,
-        //         wgEnd,
-        //         wgFeature;
-        //
-        //     wgStart = igv.browser.genome.getGenomeCoordinate(f.chr, f.start);
-        //     wgEnd = igv.browser.genome.getGenomeCoordinate(f.chr, f.end);
-        //
-        //     wgFeature = (JSON.parse(JSON.stringify(f)));
-        //
-        //     wgFeature.start = wgStart;
-        //     wgFeature.end = wgEnd;
-        //
-        //     wgFeatures.push(wgFeature);
-        // });
 
         return wgFeatures;
     }

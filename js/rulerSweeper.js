@@ -51,17 +51,19 @@ var igv = (function (igv) {
             $div,
             $e;
 
-        nameLast = _.last(igv.browser.genome.chromosomeNames);
+        nameLast = _.last(igv.browser.genome.wgChromosomeNames);
+
         chrLast = igv.browser.genome.getChromosome(nameLast);
+
         extent = Math.floor(chrLast.bpLength/1000) + igv.browser.genome.getCumulativeOffset(nameLast);
 
         viewportWidth = this.$viewport.width();
         scraps = 0;
-        _.each(igv.browser.genome.chromosomeNames, function (name) {
+        _.each(igv.browser.genome.wgChromosomeNames, function (name) {
             var w,
                 percentage;
 
-            percentage = (igv.browser.genome.getChromosome(name).bpLength/1000)/extent;
+            percentage = (igv.browser.genome.getChromosome(name).bpLength)/extent;
             if (percentage * viewportWidth < 1.0) {
                 scraps += percentage;
             } else {

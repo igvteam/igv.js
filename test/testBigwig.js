@@ -90,7 +90,7 @@ function runBigwigTests() {
 
             // chrom lookup  == there's only 1 chromosome in this test file
             var chrName = "chr21";
-            var chrIdx = bwReader.chromTree.dictionary[chrName];
+            var chrIdx = bwReader.chromTree.chromToID[chrName];
             equal(0, chrIdx);
 
 

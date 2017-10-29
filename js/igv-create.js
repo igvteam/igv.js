@@ -515,17 +515,19 @@ var igv = (function (igv) {
         if (configuration.locus) {
 
             if (Array.isArray(configuration.locus)) {
-                _.each(configuration.locus, function (l) {
-                    loci.push(l);
-                });
+                loci = configuration.locus;
 
             } else {
                 loci.push(configuration.locus);
             }
         }
-
-        if (0 === _.size(loci)) {
-            loci.push(_.first(igv.browser.genome.chromosomeNames));
+        else {
+            if(igv.browser.genome.hasOwnProperty("all")) {
+                loci.push("all");
+            }
+            else {
+                loci.push(igv.browser.genome.chromosomeNames[0]);
+            }
         }
 
         return loci;
