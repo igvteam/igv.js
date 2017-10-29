@@ -25,27 +25,82 @@
  */
 var igv = (function (igv) {
 
-    igv.rectWithCenterAndSize = function (center, size) {
-        var halfSize = igv.sizeMake(size.width/2.0, size.height/2.0);
+    igv.Math = {
 
-        return igv.rectMake(center.x - halfSize.width, center.y - halfSize.height, size.width, size.height);
+        mean: function (array) {
+
+            var t = 0, n = 0,
+                i;
+            for (i = 0; i < array.length; i++) {
+                if (!isNaN(array[i])) {
+                    t += array[i];
+                    n++;
+                }
+            }
+            return n > 0 ? t / n : 0;
+        },
+
+        meanAndStdev: function (array) {
+
+            var v, t = 0, t2 = 0, n = 0, i;
+
+            for (i = 0; i < array.length; i++) {
+
+                v = array[i];
+
+                if (!isNaN(v)) {
+                    t += v;
+                    t2 += v*v;
+                    n++;
+                }
+            }
+
+            return n > 0 ? {mean: t / n, stdev: Math.sqrt(t2 - t*t / n)} : {mean: 0, stdev: 0};
+        },
+
+        // Fast percentile function
+        percentile: function (array, p) {
+
+            if (array.length === 0) return undefined;
+
+            var k = Math.floor(array.length * ((100 - p) / 100));
+            if (k === 0) {
+                array.sort(function (a, b) {
+                    return b - a
+                });
+                return array[k];
+            }
+
+            return selectElement(array, k);
+
+        }
     };
 
-    igv.rectMake = function(x, y, width, height) {
-        var rect = { origin:{}, size:{} };
 
-        rect.origin.x = x;
-        rect.origin.y = y;
+    function selectElement(array, k) {
 
-        rect.size.width = width;
-        rect.size.height = height;
+        // Credit Steve Hanov http://stevehanov.ca/blog/index.php?id=122
+        var heap = new BinaryHeap(),
+            i;
 
-        return rect;
-    };
+        for (i = 0; i < array.length; i++) {
 
-    igv.sizeMake = function(width, height) {
-        return { width:width, height:height };
-    };
+            var item = array[i];
+
+            // If we have not yet found k items, or the current item is larger than
+            // the smallest item on the heap, add current item
+            if (heap.content.length < k || item > heap.content[0]) {
+                // If the heap is full, remove the smallest element on the heap.
+                if (heap.content.length === k) {
+                    var r = heap.pop();
+                }
+                heap.push(item)
+            }
+        }
+
+        return heap.content[0];
+    }
 
     return igv;
+
 })(igv || {});

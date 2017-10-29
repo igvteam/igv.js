@@ -25,6 +25,48 @@
 
 var igv = (function (igv) {
 
+
+    igv.loadGenome = function (reference) {
+
+        var cytobandUrl = reference.cytobandURL,
+            cytobands,
+            aliasURL = reference.aliasURL,
+            chrNames,
+            chromosomes = {},
+            sequence;
+
+        sequence = new igv.FastaSequence(reference);
+
+        return sequence.init().then(function () {
+
+            var order = 0;
+
+            chrNames = sequence.chromosomeNames;
+            chromosomes = sequence.chromosomes;
+
+        }).then(function (ignore) {
+            if (cytobandUrl) {
+                return loadCytobands(cytobandUrl, sequence.config);
+            } else {
+                return undefined
+            }
+        }).then(function (c) {
+
+            cytobands = c;
+
+            if (aliasURL) {
+                return loadAliases(aliasURL, sequence.config);
+            }
+            else {
+                return undefined;
+            }
+        }).then(function (aliases) {
+            return new igv.Genome(sequence, cytobands, aliases);
+
+        })
+    }
+
+
     igv.Genome = function (sequence, ideograms, aliases) {
 
         this.sequence = sequence;
@@ -55,7 +97,7 @@ var igv = (function (igv) {
             aliases.forEach(function (array) {
                 // Find the official chr name
                 var defName, i;
-                
+
                 for (i = 0; i < array.length; i++) {
                     if (self.chromosomes[array[i]]) {
                         defName = array[i];
@@ -114,9 +156,14 @@ var igv = (function (igv) {
 
     /**
      * Return the genome coordinate in kb for the give chromosome and position.
+     * NOTE: This might return undefined if the chr is filtered from whole genome view.
      */
     igv.Genome.prototype.getGenomeCoordinate = function (chr, bp) {
-        return this.getCumulativeOffset(chr) + Math.floor(bp / 1000);
+
+        var offset = this.getCumulativeOffset(chr);
+        if (offset === undefined) return undefined;
+
+        return offset + bp;
     }
 
     /**
@@ -128,16 +175,18 @@ var igv = (function (igv) {
             lastChr,
             lastCoord,
             i,
-            name;
+            name,
+            cumulativeOffset;
 
         if (this.cumulativeOffsets === undefined) computeCumulativeOffsets.call(this);
 
         // Use a for loop, not a forEach, so we can break (return)
-        for (i = 0; i < this.chromosomeNames.length; i++) {
-            name = this.chromosomeNames[i];
-            var cumulativeOffset = self.cumulativeOffsets[name];
+        for (i = 0; i < this.wgChromosomeNames.length; i++) {
+            name = this.wgChromosomeNames[i];
+            cumulativeOffset = self.cumulativeOffsets[name];
+
             if (cumulativeOffset > genomeCoordinate) {
-                var position = Math.floor((genomeCoordinate - lastCoord) / 1000);
+                var position = genomeCoordinate - lastCoord;
                 return {chr: lastChr, position: position};
             }
             lastChr = name;
@@ -152,29 +201,38 @@ var igv = (function (igv) {
 
     /**
      * Return the offset in genome coordinates (kb) of the start of the given chromosome
+     * NOTE:  This might return undefined if the chromosome is filtered from whole genome view.
      */
     igv.Genome.prototype.getCumulativeOffset = function (chr) {
 
         var self = this,
             queryChr = this.getChromosomeName(chr);
+
         if (this.cumulativeOffsets === undefined) {
             computeCumulativeOffsets.call(this);
         }
         return this.cumulativeOffsets[queryChr];
+
+        function computeCumulativeOffsets() {
+            var cumulativeOffsets = {},
+                offset = 0;
+
+            self.wgChromosomeNames.forEach(function (name) {
+                cumulativeOffsets[name] = Math.floor(offset);
+                var chromosome = self.getChromosome(name);
+                offset += chromosome.bpLength;
+            });
+            self.cumulativeOffsets = cumulativeOffsets;
+        }
     }
 
-    function computeCumulativeOffsets() {
-        var self = this,
-            cumulativeOffsets = {},
-            offset = 0;
-
-        self.chromosomeNames.forEach(function (name) {
-            cumulativeOffsets[name] = Math.floor(offset);
-            var chromosome = self.getChromosome(name);
-            offset += (chromosome.bpLength / 1000);   // Genome coordinates are in KB.  Beware 32-bit max value limit
-        });
-        self.cumulativeOffsets = cumulativeOffsets;
-
+    /**
+     * Return the genome length in kb
+     */
+    igv.Genome.prototype.getGenomeLength = function () {
+        var lastChr, offset;
+        lastChr = _.last(this.wgChromosomeNames);
+        return this.getCumulativeOffset(lastChr) + this.getChromosome(lastChr).bpLength;
     }
 
     igv.Chromosome = function (name, order, bpLength) {
@@ -219,165 +277,107 @@ var igv = (function (igv) {
             this.end >= range.end;
     }
 
-    igv.loadGenome = function (reference) {
+    function loadCytobands(cytobandUrl, config) {
 
-        return new Promise(function (fulfill, reject) {
-
-            var cytobandUrl = reference.cytobandURL,
-                cytobands,
-                aliasURL = reference.aliasURL,
-                aliases,
-                chrNames,
-                chromosome,
-                chromosomes = {},
-                sequence,
-                l,
-                avgL;
-
-            sequence = new igv.FastaSequence(reference);
-
-            sequence.init().then(function () {
-
-                var order = 0;
-
-                chrNames = sequence.chromosomeNames;
-                chromosomes = sequence.chromosomes;
-
-                if (cytobandUrl) {
-                    loadCytobands(cytobandUrl, sequence.config, function (result) {
-                        cytobands = result;
-                        checkReady();
-                    });
-                }
-
-                if (aliasURL) {
-                    loadAliases(aliasURL, sequence.config, function (result) {
-                        aliases = result;
-                        checkReady();
-                    });
-                }
-
-
-                checkReady();
-
-            }).catch(function (err) {
-                reject(err);
-            });
-
-            function checkReady() {
-
-                var isReady = (cytobandUrl === undefined || cytobands !== undefined) &&
-                    (aliasURL === undefined || aliases !== undefined);
-                if (isReady) {
-                    fulfill(new igv.Genome(sequence, cytobands, aliases));
-                }
-            }
-
-        });
-    }
-
-    function loadCytobands(cytobandUrl, config, continuation) {
-
-        igv.xhr.loadString(cytobandUrl, igv.buildOptions(config))
+        return igv.xhr.loadString(cytobandUrl, igv.buildOptions(config))
             .then(function (data) {
 
-            var bands = [],
-                lastChr,
-                n = 0,
-                c = 1,
-                lines = data.splitLines(),
-                len = lines.length,
-                cytobands = {};
+                var bands = [],
+                    lastChr,
+                    n = 0,
+                    c = 1,
+                    lines = data.splitLines(),
+                    len = lines.length,
+                    cytobands = {};
 
-            for (var i = 0; i < len; i++) {
-                var tokens = lines[i].split("\t");
-                var chr = tokens[0];
-                if (!lastChr) lastChr = chr;
-
-                if (chr != lastChr) {
-
-                    cytobands[lastChr] = bands;
-                    bands = [];
-                    lastChr = chr;
-                    n = 0;
-                    c++;
-                }
-
-                if (tokens.length == 5) {
-                    //10	0	3000000	p15.3	gneg
+                for (var i = 0; i < len; i++) {
+                    var tokens = lines[i].split("\t");
                     var chr = tokens[0];
-                    var start = parseInt(tokens[1]);
-                    var end = parseInt(tokens[2]);
-                    var name = tokens[3];
-                    var stain = tokens[4];
-                    bands[n++] = new igv.Cytoband(start, end, name, stain);
-                }
-            }
+                    if (!lastChr) lastChr = chr;
 
-            continuation(cytobands);
-        });
+                    if (chr != lastChr) {
+
+                        cytobands[lastChr] = bands;
+                        bands = [];
+                        lastChr = chr;
+                        n = 0;
+                        c++;
+                    }
+
+                    if (tokens.length == 5) {
+                        //10	0	3000000	p15.3	gneg
+                        var chr = tokens[0];
+                        var start = parseInt(tokens[1]);
+                        var end = parseInt(tokens[2]);
+                        var name = tokens[3];
+                        var stain = tokens[4];
+                        bands[n++] = new igv.Cytoband(start, end, name, stain);
+                    }
+                }
+
+                return cytobands;
+            });
     }
 
-    function loadAliases(aliasURL, config, continuation) {
+    function loadAliases(aliasURL, config) {
 
         igv.xhr.loadString(aliasURL, igv.buildOptions(config))
 
             .then(function (data) {
 
-            var lines = data.splitLines(),
-                aliases = [];
+                var lines = data.splitLines(),
+                    aliases = [];
 
-            lines.forEach(function (line) {
-                if (!line.startsWith("#") & line.length > 0) aliases.push(line.split("\t"));
+                lines.forEach(function (line) {
+                    if (!line.startsWith("#") & line.length > 0) aliases.push(line.split("\t"));
+                });
+
+                return aliases;
             });
-
-            continuation(aliases);
-        });
 
     }
 
-    // this.sequence = sequence;
-    // this.chromosomeNames = sequence.chromosomeNames;
-    // this.chromosomes = sequence.chromosomes;  // An object (functions as a dictionary)
-    // this.ideograms = ideograms;
-    // this.wgChromosomeNames = wgChromosomeNames;
 
     function constructWG(genome) {
 
-        var l, avgL;
+        var l, lengths, mean, threshold;
 
-        // Construct the whole-genome "chromosome"
-        l = 0;
-        _.each(genome.chromosomes, function (chromosome) {
-            l += Math.floor((chromosome.bpLength / 1000));  // wg length is in kb.  bp would overflow maximum number limit
-        });
 
-        // Now trim chromosomes.  If ideograms are defined use those, otherwise trim chromosomes < 1/10 average length
+        // Now trim chromosomes.  If ideograms are defined use those, otherwise trim chromosomes < 1/50 average length
         genome.wgChromosomeNames = [];
 
         if (genome.ideograms) {
-            _.each(genome.chromosomeNames, function (chrName) {
+            genome.chromosomeNames.forEach(function (chrName) {
                 var ideo = genome.ideograms[chrName];
-                if(ideo && ideo.length > 0) {
+                if (ideo && ideo.length > 0) {
                     genome.wgChromosomeNames.push(chrName);
                 }
             });
         }
         else {
-            avgL = (l / genome.chromosomeNames.length) * 200;   // i.e.  (divided by 5) times 1000 bp/kbp  TODO USE MEDIAN
-            l = 0;
-            _.each(genome.chromosomeNames, function (chrName) {
-                var chromosome = genome.chromosomes[chrName];
-                if (chromosome.bpLength > avgL) {
-                    genome.wgChromosomeNames.push(chrName);
-                }
+
+            lengths = Object.keys(genome.chromosomes).map(function (key) {
+                return genome.chromosomes[key].bpLength;
+            });
+
+            mean = igv.Math.mean(lengths);
+            threshold = mean / 50;
+
+            genome.wgChromosomeNames = genome.chromosomeNames.filter(function (key) {
+                return genome.chromosomes[key].bpLength > threshold;
             });
         }
+
+        l = 0;
+        genome.wgChromosomeNames.forEach(function (key) {
+            l += genome.chromosomes[key].bpLength;
+        });
 
         genome.chromosomes["all"] = {
             name: "all",
             bpLength: l
         };
+
     }
 
     return igv;

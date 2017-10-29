@@ -60,7 +60,9 @@ var igv = (function (igv) {
             1e1
         ].reverse();
 
-    tickKeys = _.map(tickNumbers, function (number) { return number.toString() });
+    tickKeys = _.map(tickNumbers, function (number) {
+        return number.toString()
+    });
     tickDivisors = createTickDivisiors();
     tickUnits = createTickUnits();
     tickValues = createTickValues();
@@ -87,7 +89,7 @@ var igv = (function (igv) {
             this.rulerSweepers = {};
         }
 
-        this.rulerSweepers[ genomicState.locusIndex.toString() ] = new igv.RulerSweeper(viewport, $viewport, $viewportContent, genomicState);
+        this.rulerSweepers[genomicState.locusIndex.toString()] = new igv.RulerSweeper(viewport, $viewport, $viewportContent, genomicState);
     };
 
     igv.RulerTrack.prototype.locusLabelWithViewport = function (viewport) {
@@ -136,7 +138,7 @@ var igv = (function (igv) {
             bp;
 
 
-        rulerSweeper = this.rulerSweepers[ options.genomicState.locusIndex.toString() ];
+        rulerSweeper = this.rulerSweepers[options.genomicState.locusIndex.toString()];
 
         if ('all' === options.referenceFrame.chrName.toLowerCase()) {
 
@@ -153,7 +155,7 @@ var igv = (function (igv) {
 
             index = 0;
             for (var i = 0; i < _.size(tickKeys); i++) {
-                tickSeparationPixel = options.referenceFrame.toPixels( tickValues[ tickKeys[ i ] ] );
+                tickSeparationPixel = options.referenceFrame.toPixels(tickValues[tickKeys[i]]);
                 if (tickSeparationPixel > TickSeparationThreshold) {
                     index = i;
                     break;
@@ -164,20 +166,20 @@ var igv = (function (igv) {
             tickHeight = 6;
             bp = options.bpStart + options.referenceFrame.toBP(options.pixelWidth);
             bp = Math.min(options.genomicState.chromosome.bpLength, bp);
-            maximumLabelWidthPixel = options.context.measureText( tickLabelString(bp, index) ).width;
+            maximumLabelWidthPixel = options.context.measureText(tickLabelString(bp, index)).width;
             // console.log('width metric ' + Math.round(maximumLabelWidthPixel) + ' width ' + Math.round(tickSeparationPixel));
-            for (pixel = 0, toggle = 0, tickLabelNumber = options.bpStart; pixel < options.pixelWidth; pixel += tickSeparationPixel, toggle++, tickLabelNumber += tickValues[ tickKeys[ index ] ]) {
+            for (pixel = 0, toggle = 0, tickLabelNumber = options.bpStart; pixel < options.pixelWidth; pixel += tickSeparationPixel, toggle++, tickLabelNumber += tickValues[tickKeys[index]]) {
 
                 if (0 === toggle % 2 || maximumLabelWidthPixel < tickSeparationPixel) {
 
                     tickLabelText = tickLabelString(tickLabelNumber, index);
 
-                    center = { x:Math.round(pixel), y:self.height - (tickHeight / 0.75) };
-                    size = { width:options.context.measureText(tickLabelText).width, height:2 };
+                    center = {x: Math.round(pixel), y: self.height - (tickHeight / 0.75)};
+                    size = {width: options.context.measureText(tickLabelText).width, height: 2};
 
-                    rect = igv.rectWithCenterAndSize(center, size);
+                    rect = rectWithCenterAndSize(center, size);
 
-                    igv.graphics.fillText(options.context, tickLabelText, Math.round(pixel - rect.size.width/2), self.height - (tickHeight / 0.75));
+                    igv.graphics.fillText(options.context, tickLabelText, Math.round(pixel - rect.size.width / 2), self.height - (tickHeight / 0.75));
                 }
 
                 igv.graphics.strokeLine(options.context, Math.round(pixel), this.height - tickHeight, Math.round(pixel), this.height - shim);
@@ -195,8 +197,8 @@ var igv = (function (igv) {
             string,
             number;
 
-        tickUnit = tickUnits[ tickKeys[ index ] ];
-        tickDivisor = tickDivisors[ tickKeys[ index ] ];
+        tickUnit = tickUnits[tickKeys[index]];
+        tickDivisor = tickDivisors[tickKeys[index]];
 
         number = Math.round(tickLabelNumber / tickDivisor);
         string = igv.numberFormatter(number) + tickUnit;
@@ -204,58 +206,58 @@ var igv = (function (igv) {
         return string;
     }
 
-    function createTickDivisiors () {
+    function createTickDivisiors() {
         var tickDivisiors = {};
-        tickDivisiors[ 1e8.toString() ] = 1e6;
-        tickDivisiors[ 5e7.toString() ] = 1e6;
-        tickDivisiors[ 1e7.toString() ] = 1e6;
-        tickDivisiors[ 5e6.toString() ] = 1e6;
-        tickDivisiors[ 1e6.toString() ] = 1e6;
+        tickDivisiors[1e8.toString()] = 1e6;
+        tickDivisiors[5e7.toString()] = 1e6;
+        tickDivisiors[1e7.toString()] = 1e6;
+        tickDivisiors[5e6.toString()] = 1e6;
+        tickDivisiors[1e6.toString()] = 1e6;
 
-        tickDivisiors[ 5e5.toString() ] = 1e3;
-        tickDivisiors[ 1e5.toString() ] = 1e3;
-        tickDivisiors[ 5e4.toString() ] = 1e3;
-        tickDivisiors[ 1e4.toString() ] = 1e3;
-        tickDivisiors[ 5e3.toString() ] = 1e3;
-        tickDivisiors[ 1e3.toString() ] = 1e3;
+        tickDivisiors[5e5.toString()] = 1e3;
+        tickDivisiors[1e5.toString()] = 1e3;
+        tickDivisiors[5e4.toString()] = 1e3;
+        tickDivisiors[1e4.toString()] = 1e3;
+        tickDivisiors[5e3.toString()] = 1e3;
+        tickDivisiors[1e3.toString()] = 1e3;
 
-        tickDivisiors[ 5e2.toString() ] = 1;
-        tickDivisiors[ 1e2.toString() ] = 1;
-        tickDivisiors[ 5e1.toString() ] = 1;
-        tickDivisiors[ 1e1.toString() ] = 1;
+        tickDivisiors[5e2.toString()] = 1;
+        tickDivisiors[1e2.toString()] = 1;
+        tickDivisiors[5e1.toString()] = 1;
+        tickDivisiors[1e1.toString()] = 1;
 
         return tickDivisiors;
     }
 
-    function createTickValues  () {
+    function createTickValues() {
         var tickValues = {};
 
         _.each(tickNumbers, function (number) {
-            tickValues[ number.toString() ] = number;
+            tickValues[number.toString()] = number;
         });
 
         return tickValues;
     }
 
-    function createTickUnits () {
+    function createTickUnits() {
         var tickUnits = {};
-        tickUnits[ 1e8.toString() ] = 'mb';
-        tickUnits[ 5e7.toString() ] = 'mb';
-        tickUnits[ 1e7.toString() ] = 'mb';
-        tickUnits[ 5e6.toString() ] = 'mb';
-        tickUnits[ 1e6.toString() ] = 'mb';
+        tickUnits[1e8.toString()] = 'mb';
+        tickUnits[5e7.toString()] = 'mb';
+        tickUnits[1e7.toString()] = 'mb';
+        tickUnits[5e6.toString()] = 'mb';
+        tickUnits[1e6.toString()] = 'mb';
 
-        tickUnits[ 5e5.toString() ] = 'kb';
-        tickUnits[ 1e5.toString() ] = 'kb';
-        tickUnits[ 5e4.toString() ] = 'kb';
-        tickUnits[ 1e4.toString() ] = 'kb';
-        tickUnits[ 5e3.toString() ] = 'kb';
-        tickUnits[ 1e3.toString() ] = 'kb';
+        tickUnits[5e5.toString()] = 'kb';
+        tickUnits[1e5.toString()] = 'kb';
+        tickUnits[5e4.toString()] = 'kb';
+        tickUnits[1e4.toString()] = 'kb';
+        tickUnits[5e3.toString()] = 'kb';
+        tickUnits[1e3.toString()] = 'kb';
 
-        tickUnits[ 5e2.toString() ] = 'b';
-        tickUnits[ 1e2.toString() ] = 'b';
-        tickUnits[ 5e1.toString() ] = 'b';
-        tickUnits[ 1e1.toString() ] = 'b';
+        tickUnits[5e2.toString()] = 'b';
+        tickUnits[1e2.toString()] = 'b';
+        tickUnits[5e1.toString()] = 'b';
+        tickUnits[1e1.toString()] = 'b';
 
         return tickUnits;
     }
@@ -263,6 +265,29 @@ var igv = (function (igv) {
     function updateLocusLabelWithGenomicState($label, state) {
         $label.text(state.locusSearchString);
     }
+
+    function rectWithCenterAndSize(center, size) {
+        var halfSize = sizeMake(size.width / 2.0, size.height / 2.0);
+        return rectMake(center.x - halfSize.width, center.y - halfSize.height, size.width, size.height);
+    };
+
+    function rectMake(x, y, width, height) {
+        var rect = {origin: {}, size: {}};
+
+        rect.origin.x = x;
+        rect.origin.y = y;
+
+        rect.size.width = width;
+        rect.size.height = height;
+
+        return rect;
+    };
+
+
+    function sizeMake(width, height) {
+        return {width: width, height: height};
+    };
+
 
     return igv;
 })(igv || {});
