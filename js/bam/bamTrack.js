@@ -204,10 +204,6 @@ var igv = (function (igv) {
             tagLabel,
             selected;
 
-        if (igv.colorPicker) {
-            menuItems.push(igv.colorPickerMenuItem(popover, this.trackView));
-        }
-
         // sort by genomic location
         menuItems.push(sortMenuItem(popover));
 

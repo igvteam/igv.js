@@ -29,12 +29,14 @@ var igv = (function (igv) {
     igv.TrackView = function (browser, $container, track) {
 
         var self = this,
-            element;
+            element,
+            $track;
 
         this.browser = browser;
 
-        this.trackDiv = $('<div class="igv-track-div">')[0];
-        $container.append(this.trackDiv);
+        $track = $('<div class="igv-track-div">');
+        this.trackDiv = $track.get(0);
+        $container.append($track);
 
         this.track = track;
         track.trackView = this;
@@ -72,6 +74,21 @@ var igv = (function (igv) {
 
         // Track order repositioning widget
         this.attachDragWidget();
+
+        if (igv.doProvideColoSwatchWidget(this.track)) {
+
+            this.$colorpicker_container = $('<div>', { class:'igv-colorpicker-container' });
+            $track.append(this.$colorpicker_container);
+
+            igv.createColorSwatchSelector(this.$colorpicker_container, function (rgbString) {
+                self.setColor(rgbString);
+            }, function () {
+                self.$colorpicker_container.toggle();
+            });
+
+            igv.makeDraggable(this.$colorpicker_container, this.$colorpicker_container);
+            this.$colorpicker_container.hide();
+        }
 
     };
 
