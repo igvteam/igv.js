@@ -74,7 +74,7 @@ var igv = (function (igv) {
 
             magic = readInt(ba, 0);
             if (magic !== BAM1_MAGIC_NUMBER) {
-                throw new Error("BAM header contains an invalid BAM magic");
+                throw new Error('BAM header contains an invalid BAM magic');
             }
 
             samHeaderLen = readInt(ba, 4);
@@ -91,7 +91,7 @@ var igv = (function (igv) {
             chrNames = [];
             chrAliasTable = {};
 
-            for (var i = 0; i < nRef; ++i) {
+            for (i = 0; i < nRef; ++i) {
                 var lName = readInt(ba, p);
                 var name = '';
                 for (var j = 0; j < lName - 1; ++j) {
@@ -117,7 +117,7 @@ var igv = (function (igv) {
                 chrNames: chrNames,
                 chrToIndex: chrToIndex,
                 chrAliasTable: chrAliasTable
-            }
+            };
 
         },
 
@@ -135,7 +135,7 @@ var igv = (function (igv) {
             var p = seq_offset + ((lseq + 1) >> 1) + lseq;
             while (p + 4 < block_end) {
                 var tag = String.fromCharCode(ba[p]) + String.fromCharCode(ba[p+1]);
-                if (tag == "CG") break;
+                if (tag == 'CG') break;
                 var type = String.fromCharCode(ba[p+2]);
                 if (type == 'B') { // the binary array type
                     type = String.fromCharCode(ba[p+3]);
@@ -158,7 +158,7 @@ var igv = (function (igv) {
             if (cigar_offset + cigar_len * 4 > block_end) return false; // out of bound
 
             // decode CIGAR
-            var cigar = "";
+            var cigar = '';
             var lengthOnRef = 0;
             cigarArray.length = 0; // empty the old array
             p = cigar_offset;
@@ -283,7 +283,7 @@ var igv = (function (igv) {
                 p += seqBytes;
 
 
-                if (lseq === 1 && String.fromCharCode(ba[p + j] + 33) === "*") {
+                if (lseq === 1 && String.fromCharCode(ba[p + j] + 33) === '*') {
                     // TODO == how to represent this?
                 } else {
                     qualArray = [];
@@ -304,7 +304,7 @@ var igv = (function (igv) {
 
                 alignment.seq = seq;
                 alignment.qual = qualArray;
-                alignment.tagBA = new Uint8Array(ba.buffer.slice(p, blockEnd));  // decode thiese on demand
+                alignment.tagBA = new Uint8Array(ba.buffer.slice(p, blockEnd));  // decode these on demand
 
                 if (!min || alignment.start <= max &&
                     alignment.start + alignment.lengthOnRef >= min &&
@@ -339,13 +339,13 @@ var igv = (function (igv) {
                 alignment.start = Number.parseInt(tokens[3]) - 1;
                 alignment.flags = Number.parseInt(tokens[1]);
                 alignment.readName = tokens[0];
-                alignment.strand = !(alignment.flags & READ_STRAND_FLAG)
+                alignment.strand = !(alignment.flags & READ_STRAND_FLAG);
                 alignment.mq = Number.parseInt(tokens[4]);
                 alignment.cigar = tokens[5];
                 alignment.fragmentLength = Number.parseInt(tokens[8]);
                 alignment.seq = tokens[9];
 
-                if (alignment.chr === "*" || !alignment.isMapped()) continue;  // Unmapped
+                if (alignment.chr === '*' || !alignment.isMapped()) continue;  // Unmapped
 
                 if (alignment.chr !== chr) {
                     if (started) break; // Off the right edge, we're done
@@ -380,7 +380,7 @@ var igv = (function (igv) {
                 if (alignment.isMateMapped()) {
                     rnext = tokens[6];
                     alignment.mate = {
-                        chr: (rnext === "=") ? alignment.chr : rnext,
+                        chr: (rnext === '=') ? alignment.chr : rnext,
                         position: Number.parseInt(tokens[7]),
                         strand: !(alignment.flags & MATE_STRAND_FLAG)
                     };
@@ -394,7 +394,7 @@ var igv = (function (igv) {
                 }
             }
         }
-    }
+    };
 
 
     /**
@@ -444,7 +444,7 @@ var igv = (function (igv) {
                     gapType = 'D';
                     break;
                 case 'I' :
-                    blockSeq = record.seq === "*" ? "*" : record.seq.substr(seqOffset, c.len);
+                    blockSeq = record.seq === '*' ? '*' : record.seq.substr(seqOffset, c.len);
                     blockQuals = record.qual ? record.qual.slice(seqOffset, c.len) : undefined;
                     if (insertions === undefined) insertions = [];
                     insertions.push({start: pos, len: c.len, seq: blockSeq, qual: blockQuals});
@@ -455,7 +455,7 @@ var igv = (function (igv) {
                 case '=' :
                 case 'X' :
 
-                    blockSeq = record.seq === "*" ? "*" : record.seq.substr(seqOffset, c.len);
+                    blockSeq = record.seq === '*' ? '*' : record.seq.substr(seqOffset, c.len);
                     blockQuals = record.qual ? record.qual.slice(seqOffset, c.len) : undefined;
                     blocks.push({start: pos, len: c.len, seq: blockSeq, qual: blockQuals, gapType: gapType});
                     seqOffset += c.len;
@@ -464,7 +464,7 @@ var igv = (function (igv) {
                     break;
 
                 default :
-                    console.log("Error processing cigar element: " + c.len + c.ltr);
+                    console.log('Error processing cigar element: ' + c.len + c.ltr);
             }
         }
 
@@ -527,7 +527,7 @@ var igv = (function (igv) {
 
         var tagDict = {};
         tags.forEach(function (tag) {
-            var tokens = tag.split(":");
+            var tokens = tag.split(':');
             tagDict[tokens[0]] = tokens[2];
         });
 
