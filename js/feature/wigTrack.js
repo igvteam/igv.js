@@ -70,10 +70,6 @@ var igv = (function (igv) {
         var self = this,
             menuItems = [];
 
-        if (igv.colorPicker) {
-            menuItems.push(igv.colorPickerMenuItem(popover, this.trackView));
-        }
-
         menuItems.push(igv.dataRangeMenuItem(popover, this.trackView));
 
         menuItems.push({

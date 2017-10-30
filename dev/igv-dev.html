@@ -13,7 +13,7 @@
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.2.0/css/font-awesome.min.css">
 
     <!-- IGV CSS -->
-    <link rel="stylesheet" type="text/css" href="https://igv.org/web/beta/igv.css">
+    <link rel="stylesheet" type="text/css" href="../css/igv.css">
 
     <!-- Dev CSS -->
     <link rel="stylesheet" type="text/css" href="../css/dev.css">
@@ -487,8 +487,7 @@
 
     $(document).ready(function () {
         var div,
-            options,
-            browser;
+            options;
 
         div = $("#myDiv")[0];
         options = {
@@ -533,7 +532,7 @@
                 ]
         };
 
-        browser = igv.createBrowser(div, options);
+        igv.createBrowser(div, options);
 
     })
 
