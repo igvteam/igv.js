@@ -134,6 +134,7 @@ var igv = (function (igv) {
             if (s > bpEnd) break;
 
             features.push({
+                chr: chr,
                 start: s,
                 end: e,
                 value: data[i]
@@ -158,6 +159,7 @@ var igv = (function (igv) {
             if (s > bpEnd) break;
 
             features.push({
+                chr: chr,
                 start: s,
                 end: e,
                 value: data[i]
@@ -182,6 +184,7 @@ var igv = (function (igv) {
 
             if (!Number.isNaN(data[i])) {
                 features.push({
+                    chr: chr,
                     start: s,
                     end: e,
                     value: data[i]
