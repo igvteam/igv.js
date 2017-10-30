@@ -326,37 +326,31 @@ var igv = (function (igv) {
 
             // search container
             $searchContainer = $('<div class="igv-search-container">');
+            $navigation.append($searchContainer);
 
             browser.$searchInput = $('<input type="text" placeholder="Locus Search">');
+            $searchContainer.append(browser.$searchInput);
 
             browser.$searchInput.change(function (e) {
-                var value;
-
-                value = $(e.target).val();
-                browser.parseSearchInput(value);
+                browser.parseSearchInput($(this).val());
             });
 
             $faSearch = $('<i class="fa fa-search">');
+            $searchContainer.append($faSearch);
 
             $faSearch.click(function () {
                 browser.parseSearchInput(browser.$searchInput.val());
             });
 
-            $searchContainer.append(browser.$searchInput);
-            $searchContainer.append($faSearch);
 
             // search results presented in table
             browser.$searchResults = $('<div class="igv-search-results">');
-            browser.$searchResultsTable = $('<table>');
-
-            browser.$searchResults.append(browser.$searchResultsTable.get(0));
-
             $searchContainer.append(browser.$searchResults.get(0));
 
+            browser.$searchResultsTable = $('<table>');
+            browser.$searchResults.append(browser.$searchResultsTable.get(0));
+
             browser.$searchResults.hide();
-
-            $navigation.append($searchContainer);
-
 
             // window size panel
             browser.windowSizePanel = new igv.WindowSizePanel($navigation);
