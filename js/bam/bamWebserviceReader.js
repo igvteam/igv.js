@@ -27,7 +27,7 @@
 var igv = (function (igv) {
 
 
-    const MAX_GZIP_BLOCK_SIZE = 65536;   //  APPARENTLY.  Where is this documented???
+    const MAX_GZIP_BLOCK_SIZE = 65536; // See BGZF compression format in SAM format specification
     const DEFAULT_SAMPLING_WINDOW_SIZE = 100;
     const DEFAULT_SAMPLING_DEPTH = 50;
     const MAXIMUM_SAMPLING_DEPTH = 2500;
