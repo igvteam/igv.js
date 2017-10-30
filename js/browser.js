@@ -1231,6 +1231,8 @@ var igv = (function (igv) {
                 success = !isNaN(numeric);
                 if (true === success && locusObject) {
                     locusObject.start = parseInt(numeric, 10);
+                    locusObject.start -= 1;
+
                     locusObject.end = undefined;
                 }
 
@@ -1243,7 +1245,12 @@ var igv = (function (igv) {
                         numeric = bb.replace(/\,/g, '');
                         success = !isNaN(numeric);
                         if (true === success && locusObject) {
-                            locusObject[0 === index ? 'start' : 'end'] = parseInt(numeric, 10);
+                            if (0 === index) {
+                                locusObject.start = parseInt(numeric, 10) - 1;
+                            } else {
+                                locusObject.end = parseInt(numeric, 10);
+                            }
+
                         }
                     }
                 });
