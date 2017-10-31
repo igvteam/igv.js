@@ -31,34 +31,33 @@
 var igv = (function (igv) {
 
     igv.BWSource = function (config) {
-
         this.reader = new igv.BWReader(config);
+        this.cache = true;
+        this.wgValues = {};
     };
 
-    igv.BWSource.prototype.getFeatures = function (chr, bpStart, bpEnd, bpPerPixel, cache) {
+    igv.BWSource.prototype.getFeatures = function (chr, bpStart, bpEnd, bpPerPixel, windowFunction) {
 
         var self = this,
             featureCache = self.featureCache,
             genomicInterval = new igv.GenomicInterval(chr, bpStart, bpEnd);
 
-        if (undefined === cache) cache = true;
-
         genomicInterval.bpPerPixel = bpPerPixel;
 
         if (chr.toLowerCase() === "all") {
-            return self.getWGValues();
+            return self.getWGValues(windowFunction);
         }
         else if (featureCache && featureCache.range.bpPerPixel === bpPerPixel && featureCache.range.containsRange(genomicInterval)) {
             return Promise.resolve(self.featureCache.queryFeatures(chr, bpStart, bpEnd));
         }
         else {
 
-            return self.reader.readFeatures(chr, bpStart, chr, bpEnd, bpPerPixel)
+            return self.reader.readFeatures(chr, bpStart, chr, bpEnd, bpPerPixel, windowFunction)
 
                 .then(function (features) {
 
                     // Note -- replacing feature cache
-                    if (cache) self.featureCache = new igv.FeatureCache(features, genomicInterval);
+                    if (self.cache) self.featureCache = new igv.FeatureCache(features, genomicInterval);
 
                     return features;
                 })
@@ -77,19 +76,19 @@ var igv = (function (igv) {
 
     }
 
-    igv.BWSource.prototype.getWGValues = function () {
+    igv.BWSource.prototype.getWGValues = function (windowFunction) {
         var self = this,
             bpPerPixel,
             nominalScreenWidth = 500;      // This doesn't need to be precise
 
-        if (self.wgValues) {
-            return Promise.resolve(self.wgValues);
+        if (self.wgValues[windowFunction]) {
+            return Promise.resolve(self.wgValues[windowFunction]);
         }
         else {
 
             bpPerPixel = igv.browser.genome.getGenomeLength() / nominalScreenWidth;
 
-            return self.reader.readWGFeatures(igv.browser.genome, bpPerPixel)
+            return self.reader.readWGFeatures(igv.browser.genome, bpPerPixel, windowFunction)
 
                 .then(function (features) {
 
@@ -109,7 +108,7 @@ var igv = (function (igv) {
                         wgValues.push(wgFeature);
                     })
 
-                    self.wgValues = wgValues;
+                    self.wgValues[windowFunction] = wgValues;
 
                     return wgValues;
 

@@ -27,6 +27,14 @@ var igv = (function (igv) {
 
     igv.FeatureTrack = function (config) {
 
+        if(config.height === undefined) {
+            config.height = 50;
+        }
+        // Set maxRows -- protects against pathological feature packing cases (# of rows of overlapping feaures)
+        if (config.maxRows === undefined) {
+            config.maxRows = 500;
+        }
+
         igv.configTrack(this, config);
 
         this.displayMode = config.displayMode || "COLLAPSED";    // COLLAPSED | EXPANDED | SQUISHED
@@ -38,10 +46,7 @@ var igv = (function (igv) {
 
         this.featureHeight = config.featureHeight || 14;
 
-        // Set maxRows -- protects against pathological feature packing cases (# of rows of overlapping feaures)
-        if (config.maxRows === undefined) {
-            config.maxRows = 500;
-        }
+
         this.maxRows = config.maxRows;
 
         if (config.url &&

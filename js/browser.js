@@ -221,7 +221,7 @@ var igv = (function (igv) {
             }
         }
 
-        newTrack = igv.createTrackWithConfiguration(config);
+        newTrack = igv.createTrack(config);
 
         if (undefined === newTrack) {
             igv.presentAlert("Unknown file type: " + config.url);

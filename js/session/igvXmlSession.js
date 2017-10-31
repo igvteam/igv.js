@@ -38,18 +38,18 @@ var igv = (function (igv) {
 
     igv.XMLSession = function (xmlString) {
 
-        var self = this,
-            parser = new DOMParser(),
-            xmlDoc = parser.parseFromString(xmlString, "text/xml"),
-            elements = xmlDoc.getElementsByTagName("Resource");
+        var self = this, parser, xmlDoc, elements;
+
+
+        parser = new DOMParser();
+        xmlDoc = parser.parseFromString(xmlString, "text/xml");
+        elements = xmlDoc.getElementsByTagName("Resource");
 
         self.tracks = [];
 
         var resourceMap = {};
 
-
         Array.from(elements).forEach(function (res, idx) {
-
             var res = {
                 url: res.getAttribute("path"),
                 order: idx
@@ -58,48 +58,98 @@ var igv = (function (igv) {
             resourceMap[res.url] = res;
         });
 
+        // Check for optional Track section
+
         elements = xmlDoc.getElementsByTagName("Track");
-        Array.from(elements).forEach(function (track) {
+        if (elements && elements.length > 0) {
 
-            var id, res, color, height, autoScale, altColor, dataRange, dataRangeCltn;
+            // Track order is defined by elements, reset
+            self.tracks = [];
 
-            id = track.getAttribute("id"),
-                res = resourceMap[id];
+            Array.from(elements).forEach(function (track) {
 
-            if (res) {
+                var id, res, claszz, subtracks, mergedTrack;
 
-                res.name = track.getAttribute("name");
-                color = track.getAttribute("color");
-                if(color) {
-                    res.color = "rgb(" + color + ")";
+                claszz = track.getAttribute("clazz");
+
+                if (claszz && claszz.includes("MergedTracks")) {
+
+                    mergedTrack = {
+                        type: 'merged',
+                        tracks: []};
+                    extractTrackAttributes(track, mergedTrack);
+
+                    self.tracks.push(mergedTrack);
+
+                    subtracks = track.getElementsByTagName("Track");
+
+                    Array.from(subtracks).forEach(function (t) {
+
+                        t.processed = true;
+
+                        var id, res;
+
+                        id = t.getAttribute("id");
+                        res = resourceMap[id];
+
+                        if (res) {
+                            mergedTrack.tracks.push(res);
+                            extractTrackAttributes(t, res);
+                            res.autoscale = false;
+                            mergedTrack.height = res.height;      //
+                        }
+                    })
                 }
-                altColor = track.getAttribute("altColor");
-                if(color) {
-                    res.altColor = "rgb(" + altColor + ")";
-                }
-                height = track.getAttribute("height");
-                if(height) {
-                    res.height = parseInt(height);
-                }
-                autoScale = track.getAttribute("autoScale");
-                if(autoScale) {
-                    res.autoScale = (autoScale === "true");
-                }
-
-                dataRangeCltn = track.getElementsByTagName("DataRange");
-                if(dataRangeCltn.length > 0) {
-                    dataRange = dataRangeCltn.item(0);
-                    if(!autoScale) {
-                        res.min = parseInt(dataRange.getAttribute("minimum"));
-                        res.max = parseInt(dataRange.getAttribute("maximum"));
+                else {
+                    if(!track.processed) {
+                        id = track.getAttribute("id");
+                        res = resourceMap[id];
+                        if (res) {
+                            self.tracks.push(res);
+                            extractTrackAttributes(track, res);
+                        }
                     }
-                    res.logScale = dataRange.getAttribute("type") === "LOG";
                 }
+            })
+        }
 
+        function extractTrackAttributes(track, config) {
 
+            var color, height, autoScale, altColor, dataRange, dataRangeCltn, windowFunction;
+
+            config.name = track.getAttribute("name");
+            color = track.getAttribute("color");
+            if (color) {
+                config.color = "rgb(" + color + ")";
             }
-        })
+            altColor = track.getAttribute("altColor");
+            if (color) {
+                config.altColor = "rgb(" + altColor + ")";
+            }
+            height = track.getAttribute("height");
+            if (height) {
+                config.height = parseInt(height);
+            }
+            autoScale = track.getAttribute("autoScale");
+            if (autoScale) {
+                config.autoScale = (autoScale === "true");
+            }
+            windowFunction = track.getAttribute("windowFunction");
+            if(windowFunction) {
+                config.windowFunction = windowFunction;
+            }
+            
+            dataRangeCltn = track.getElementsByTagName("DataRange");
+            if (dataRangeCltn.length > 0) {
+                dataRange = dataRangeCltn.item(0);
+                if (!autoScale) {
+                    config.min = parseInt(dataRange.getAttribute("minimum"));
+                    config.max = parseInt(dataRange.getAttribute("maximum"));
+                }
+                config.logScale = dataRange.getAttribute("type") === "LOG";
+            }
 
+        }
 
     };
 
