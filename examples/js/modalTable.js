@@ -46,7 +46,16 @@ var igv = (function (igv) {
         this.$table.append(this.$spinner);
 
         this.$spinner.append($('<i class="fa fa-lg fa-spinner fa-spin"></i>'));
-        this.$spinner.hide();
+        // this.$spinner.hide();
+
+        this.datasource.retrieveData(function (data) {
+
+            self.$spinner.hide();
+
+            self.tableWithDataAndColumns(self.datasource.tableData(), self.datasource.tableColumns());
+
+            console.log('loaded data');
+        });
 
         config.$modal.on('show.bs.modal', function (e) {
 
@@ -60,19 +69,6 @@ var igv = (function (igv) {
 
             if (undefined === config.browserRetrievalFunction) {
                 config.$modal.modal('hide');
-            } else if (true !== self.initialized) {
-                self.initialized = true;
-                self.$spinner.show();
-                self.datasource.retrieveData(function (status) {
-
-                    if (true === status) {
-                        self.tableWithDataAndColumns(self.datasource.tableData(), self.datasource.tableColumns());
-                    } else {
-                        igv.presentAlert('ERROR: cannot retrieve data from datasource');
-                        config.$modal.modal('hide');
-                    }
-                    self.$spinner.hide();
-                });
             }
 
         });
@@ -119,7 +115,7 @@ var igv = (function (igv) {
     // };
 
     igv.ModalTable.prototype.genomeID = function () {
-       return this.datasource.config.genomeID;
+        return this.datasource.config.genomeID;
     };
 
     igv.ModalTable.prototype.teardown = function () {
