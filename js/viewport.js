@@ -336,6 +336,8 @@ var igv = (function (igv) {
 
     igv.Viewport.prototype.update = function () {
 
+        console.trace();
+        
         this.tile = null;
 
         this.repaint();
@@ -362,9 +364,11 @@ var igv = (function (igv) {
             return;
         }
 
+        // TODO -- show whole genome zoom in notice here
         if (this.$zoomInNotice && this.trackView.track.visibilityWindow !== undefined && this.trackView.track.visibilityWindow > 0) {
             if ((referenceFrame.bpPerPixel * this.$viewport.width() > this.trackView.track.visibilityWindow) ||
                 (referenceFrame.chrName.toLowerCase() === "all" && !this.trackView.track.supportsWholeGenome)) {
+                
                 this.tile = null;
                 this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
 
@@ -489,7 +493,7 @@ var igv = (function (igv) {
                     self.tile = new Tile(referenceFrame.chrName, bpStart, bpEnd, referenceFrame.bpPerPixel, buffer);
                     self.paintImageWithReferenceFrame(referenceFrame);
                 })
-                
+
                 .catch(function (error) {
 
                     self.stopSpinner();

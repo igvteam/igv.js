@@ -33,7 +33,12 @@ var igv = (function (igv) {
         this.config = config;
         this.url = config.url;
 
-        if (config.color === undefined) config.color = "rgb(150,150,150)";   // Hack -- should set a default color per track type
+        if (config.color === undefined) {
+            config.color = "rgb(150,150,150)";
+        }
+        if(config.height === undefined) {
+            config.height = 50;
+        }
 
         igv.configTrack(this, config);
 
@@ -55,14 +60,14 @@ var igv = (function (igv) {
         } else {
             this.autoscale = true;
         }
+        this.windowFunction = config.windowFunction || "mean";
 
         this.paintAxis = igv.paintAxis;
 
     };
 
     igv.WIGTrack.prototype.getFeatures = function (chr, bpStart, bpEnd, bpPerPixel) {
-
-        return this.featureSource.getFeatures(chr, bpStart, bpEnd, bpPerPixel);
+        return this.featureSource.getFeatures(chr, bpStart, bpEnd, bpPerPixel, this.windowFunction);
     };
 
     igv.WIGTrack.prototype.menuItemList = function (popover) {
@@ -246,7 +251,6 @@ var igv = (function (igv) {
         });
 
         return {min: min, max: max};
-
     }
 
     function signsDiffer(a, b) {

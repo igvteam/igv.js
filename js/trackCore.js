@@ -42,7 +42,7 @@ var igv = (function (igv) {
 
     };
 
-    igv.createTrackWithConfiguration = function (conf) {
+    igv.createTrack = function (conf) {
 
         var type = (undefined === conf.type) ? 'unknown_type' : conf.type.toLowerCase();
 
@@ -87,7 +87,10 @@ var igv = (function (igv) {
             case "aneu":
                 return new igv.AneuTrack(conf);
                 break;
-            
+
+            case "merged":
+                return new igv.MergedTrack(conf);
+
             default:
                 return undefined;
         }
@@ -250,7 +253,7 @@ var igv = (function (igv) {
 
         track.removable = config.removable === undefined ? true : config.removable;      // Defaults to true
 
-        track.height = config.height || ('wig' === config.type ? 50 : 100);
+        track.height = config.height || 100;
 
         if (config.autoHeight === undefined)  config.autoHeight = config.autoheight; // Some case confusion in the initial releasae
 

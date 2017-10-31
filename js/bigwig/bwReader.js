@@ -48,7 +48,7 @@ var igv = (function (igv) {
         this.config = config;
     };
 
-    igv.BWReader.prototype.readWGFeatures = function (genome, bpPerPixel) {
+    igv.BWReader.prototype.readWGFeatures = function (genome, bpPerPixel, windowFunction) {
 
         var self = this;
         return self.getZoomHeaders()
@@ -60,12 +60,12 @@ var igv = (function (igv) {
                 chr1 = self.chromTree.idToChrom[chrIdx1];
                 chr2 = self.chromTree.idToChrom[chrIdx2];
 
-                return self.readFeatures(chr1, 0, chr2, Number.MAX_VALUE, bpPerPixel);
+                return self.readFeatures(chr1, 0, chr2, Number.MAX_VALUE, bpPerPixel, windowFunction);
             });
 
     }
 
-    igv.BWReader.prototype.readFeatures = function (chr1, bpStart, chr2, bpEnd, bpPerPixel) {
+    igv.BWReader.prototype.readFeatures = function (chr1, bpStart, chr2, bpEnd, bpPerPixel, windowFunction) {
 
         var self = this,
             decodeFunction,
@@ -128,7 +128,7 @@ var igv = (function (igv) {
                                     var features = [];
                                     var inflate = new Zlib.Inflate(uint8Array);
                                     var plain = inflate.decompress();
-                                    decodeFunction(new DataView(plain.buffer), chrIdx1, bpStart, chrIdx2, bpEnd, features, self.chromTree.idToChrom);
+                                    decodeFunction(new DataView(plain.buffer), chrIdx1, bpStart, chrIdx2, bpEnd, features, self.chromTree.idToChrom, windowFunction);
                                     return features;
                                 })
                         )
@@ -779,7 +779,7 @@ var igv = (function (igv) {
     }
 
 
-    function decodeZoomData(data, chrIdx1, bpStart, chrIdx2, bpEnd, featureArray, chrDict) {
+    function decodeZoomData(data, chrIdx1, bpStart, chrIdx2, bpEnd, featureArray, chrDict, windowFunction) {
 
         var binaryParser = new igv.BinaryParser(data),
             minSize = 8 * 4,   // Minimum # of bytes required for a zoom record
@@ -810,7 +810,17 @@ var igv = (function (igv) {
             maxVal = binaryParser.getFloat();
             sumData = binaryParser.getFloat();
             sumSquares = binaryParser.getFloat();
-            value = validCount == 0 ? 0 : sumData / validCount;
+            switch (windowFunction) {
+                case "min":
+                    value = minVal;
+                    break;
+                case "max":
+                    value = maxVal;
+                    break;
+                default:
+                    value = validCount == 0 ? 0 : sumData / validCount;
+            }
+
 
             if (Number.isFinite(value)) {
                 featureArray.push({chr: chr, start: chromStart, end: chromEnd, value: value});
