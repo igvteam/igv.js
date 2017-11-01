@@ -225,15 +225,17 @@ var igv = (function (igv) {
 
         return new Promise(function (fullfill, reject) {
 
-            igv.xhr.load(url, options).then(
-                function (result) {
+            igv.xhr
+                .load(url, options)
+                .then(function (result) {
                     if (result) {
                         fullfill(JSON.parse(result));
                     }
                     else {
                         fullfill(result);
                     }
-                }).catch(reject);
+                })
+                .catch(reject);
         })
     };
 
