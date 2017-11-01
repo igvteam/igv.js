@@ -57,11 +57,7 @@ var igv = (function (igv) {
                 self.datasource.data = data;
                 self.tableWithDataAndColumns(self.datasource.tableData(data), self.datasource.tableColumns());
 
-                return '... done building table';
-
-            })
-            .then(function (string) {
-                console.log(string);
+                console.log('... done building table');
 
                 config.$modal.on('show.bs.modal', function (e) {
 
