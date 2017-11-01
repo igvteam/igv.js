@@ -47,6 +47,8 @@ var igv = (function (igv) {
             igv.removeBrowser();
         }
 
+        if(undefined === config) config = {};
+
         setDefaults(config);
 
 
@@ -102,16 +104,27 @@ var igv = (function (igv) {
         if (config.apiKey) igv.setApiKey(config.apiKey);
         if (config.oauthToken) igv.setOauthToken(config.oauthToken);
 
-        // Deal with legacy genome definition options
-        setReferenceConfiguration(config);
-
 
         // Potentially load a session file
         var width;
-        loadSessionFile(config)
+        loadSessionFile()
 
-            .then(function (ignore) {
+            .then(function (session) {
+
+                if (session) {
+                    config = Object.assign(config, session);
+                }
+
+                // Deal with legacy genome definition options
+                setReferenceConfiguration(config);
+
+                return config;
+            })
+
+            .then(function (config) {
+
                 return igv.loadGenome(config.reference);
+
             })
 
             .then(function (genome) {
@@ -124,7 +137,7 @@ var igv = (function (igv) {
 
                 width = igv.browser.viewportContainerWidth();
 
-                return igv.browser.getGenomicStateList(lociWithConfiguration(config), width)
+                return igv.browser.getGenomicStateList(getInitialLocus(config), width)
             })
 
             .then(function (genomicStateList) {
@@ -176,7 +189,7 @@ var igv = (function (igv) {
                     igv.browser.windowSizePanel.updateWithGenomicState(_.first(igv.browser.genomicStateList));
 
                 } else {
-                    errorString = 'Unrecognized locus ' + configuration.locus;
+                    errorString = 'Unrecognized locus ' + config.locus;
                     igv.presentAlert(errorString);
                 }
 
@@ -242,33 +255,10 @@ var igv = (function (igv) {
          */
         function expandGenome(genomeId) {
 
-            var reference = {id: genomeId};
+            var reference = igv.Genome.KnownGenomes[genomeId];
 
-            switch (genomeId) {
+            if (!reference)igv.presentAlert("Uknown genome id: " + genomeId);
 
-                case "hg18":
-                    reference.fastaURL = "https://s3.amazonaws.com/igv.broadinstitute.org/genomes/seq/hg18/hg18.fasta";
-                    reference.cytobandURL = "https://s3.amazonaws.com/igv.broadinstitute.org/genomes/seq/hg18/cytoBand.txt.gz";
-                    break;
-                case "GRCh38":
-                case "hg38":
-                    reference.fastaURL = "https://s3.amazonaws.com/igv.broadinstitute.org/genomes/seq/hg38/hg38.fa";
-                    reference.cytobandURL = "https://s3.amazonaws.com/igv.broadinstitute.org/annotations/hg38/cytoBandIdeo.txt";
-                    break;
-                case "hg19":
-                case "GRCh37":
-                    reference.fastaURL = "https://s3.amazonaws.com/igv.broadinstitute.org/genomes/seq/hg19/hg19.fasta";
-                    reference.cytobandURL = "https://s3.amazonaws.com/igv.broadinstitute.org/genomes/seq/hg19/cytoBand.txt";
-                    break;
-                case "mm10":
-                case "GRCm38":
-                    reference.fastaURL = "https://s3.amazonaws.com/igv.broadinstitute.org/genomes/seq/mm10/mm10.fa";
-                    reference.indexURL = "https://s3.amazonaws.com/igv.broadinstitute.org/genomes/seq/mm10/mm10.fa.fai";
-                    reference.cytobandURL = "https://s3.amazonaws.com/igv.broadinstitute.org/annotations/mm10/cytoBandIdeo.txt.gz";
-                    break;
-                default:
-                    igv.presentAlert("Uknown genome id: " + genomeId);
-            }
             return reference;
         }
 
@@ -502,21 +492,20 @@ var igv = (function (igv) {
     }
 
 
-    function lociWithConfiguration(configuration) {
+    function getInitialLocus(config) {
 
         var loci = [];
 
-        if (configuration.locus) {
-
-            if (Array.isArray(configuration.locus)) {
-                loci = configuration.locus;
+        if (config.locus) {
+            if (Array.isArray(config.locus)) {
+                loci = config.locus;
 
             } else {
-                loci.push(configuration.locus);
+                loci.push(config.locus);
             }
         }
         else {
-            if(igv.browser.genome.hasOwnProperty("all")) {
+            if (igv.browser.genome.hasOwnProperty("all")) {
                 loci.push("all");
             }
             else {
@@ -555,7 +544,7 @@ var igv = (function (igv) {
         return query;
     }
 
-    function loadSessionFile(config) {
+    function loadSessionFile() {
 
 
         var query = extractQuery(window.location.href);
@@ -564,20 +553,13 @@ var igv = (function (igv) {
             var igvSession = decodeURIComponent(query["igvSessionXML"]);
 
             return igv.xhr.loadString(igvSession)
-
                 .then(function (string) {
-
-                    var session = new igv.XMLSession(string);
-
-                    config.tracks = session.tracks;    // TODO -- replace or append?
-
-                    return config;
-
+                    return new igv.XMLSession(string);
                 })
 
         }
         else {
-            return Promise.resolve(config);
+            return Promise.resolve(undefined);
         }
 
     }
