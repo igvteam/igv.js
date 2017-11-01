@@ -34,111 +34,112 @@ var igv = (function (igv) {
 
         var self = this;
 
-        this.initialized = false;
         this.config = config;
         this.datasource = datasource;
 
+        teardownModalDOM(config);
         this.$table = $('<table cellpadding="0" cellspacing="0" border="0" class="display"></table>');
-
         config.$modalBody.append(this.$table);
 
         this.$spinner = $('<div>');
         this.$table.append(this.$spinner);
 
         this.$spinner.append($('<i class="fa fa-lg fa-spinner fa-spin"></i>'));
-        this.$spinner.hide();
 
-        config.$modal.on('show.bs.modal', function (e) {
+        this.datasource
+            .retrieveData()
+            .then(function (data) {
 
-            if (undefined === config.browserRetrievalFunction) {
-                igv.presentAlert('ERROR: must provide browser retrieval function');
-            }
+                self.$spinner.hide();
 
-        });
+                console.log('modaltable. then. received data ' + _.size(data) + '. begin building table ...');
 
-        config.$modal.on('shown.bs.modal', function (e) {
+                self.datasource.data = data;
+                self.tableWithDataAndColumns(self.datasource.tableData(data), self.datasource.tableColumns());
 
-            if (undefined === config.browserRetrievalFunction) {
-                config.$modal.modal('hide');
-            } else if (true !== self.initialized) {
-                self.initialized = true;
-                self.$spinner.show();
-                self.datasource.retrieveData(function (status) {
+                console.log('... done building table');
 
-                    if (true === status) {
-                        self.tableWithDataAndColumns(self.datasource.tableData(), self.datasource.tableColumns());
-                    } else {
-                        igv.presentAlert('ERROR: cannot retrieve data from datasource');
+                config.$modal.on('show.bs.modal', function (e) {
+
+                    if (undefined === config.browserRetrievalFunction) {
+                        igv.presentAlert('ERROR: must provide browser retrieval function');
+                    }
+
+                });
+
+                config.$modal.on('shown.bs.modal', function (e) {
+
+                    if (undefined === config.browserRetrievalFunction) {
                         config.$modal.modal('hide');
                     }
-                    self.$spinner.hide();
-                });
-            }
 
-        });
-
-        config.$modalTopCloseButton.on('click', function () {
-            $('tr.selected').removeClass('selected');
-        });
-
-        config.$modalBottomCloseButton.on('click', function () {
-            $('tr.selected').removeClass('selected');
-        });
-
-        config.$modalGoButton.on('click', function () {
-
-            var dt,
-                $selectedTableRows,
-                result,
-                browser;
-
-            $selectedTableRows = self.$dataTables.$('tr.selected');
-
-            if (undefined === config.browserRetrievalFunction) {
-                igv.presentAlert('ERROR: must provide browser retrieval function');
-            } else if ($selectedTableRows.length > 0) {
-
-                $selectedTableRows.removeClass('selected');
-
-                dt = self.$table.DataTable();
-                result = [];
-                $selectedTableRows.each(function() {
-                    result.push( self.datasource.dataAtRowIndex( dt.row(this).index() ) );
                 });
 
-                browser = config.browserRetrievalFunction();
-                browser[ config.browserLoadFunction ](result);
-            }
+                config.$modalTopCloseButton.on('click', function () {
+                    $('tr.selected').removeClass('selected');
+                });
 
-        });
+                config.$modalBottomCloseButton.on('click', function () {
+                    $('tr.selected').removeClass('selected');
+                });
 
+                config.$modalGoButton.on('click', function () {
+                    var browser,
+                        selected;
+
+                    selected = getSelectedTableRowsData.call(self, self.$dataTables.$('tr.selected'));
+
+                    if (selected) {
+                        browser = config.browserRetrievalFunction();
+                        browser[ config.browserLoadFunction ](selected);
+                    }
+
+                });
+
+            });
     };
 
-    // igv.ModalTable.prototype.genomeID = function () {
-    //     return this.datasource.config.genomeID;
-    // };
-
-    igv.ModalTable.prototype.genomeID = function () {
-       return this.datasource.config.genomeID;
-    };
-
-    igv.ModalTable.prototype.teardown = function () {
+    function teardownModalDOM(configuration) {
 
         var list;
 
         list =
             [
-                this.config.$modal,
-                this.config.$modalTopCloseButton,
-                this.config.$modalBottomCloseButton,
-                this.config.$modalGoButton
+                configuration.$modal,
+                configuration.$modalTopCloseButton,
+                configuration.$modalBottomCloseButton,
+                configuration.$modalGoButton
             ];
 
         _.each(list, function ($e) {
             $e.unbind();
         });
 
-        this.config.$modalBody.empty();
+        configuration.$modalBody.empty();
+    }
+
+    function getSelectedTableRowsData($rows) {
+
+        var self = this,
+            dt,
+            result;
+
+        result = [];
+        if ($rows.length > 0) {
+
+            $rows.removeClass('selected');
+
+            dt = self.$table.DataTable();
+            $rows.each(function() {
+                result.push( self.datasource.dataAtRowIndex(self.datasource.data, dt.row(this).index()) );
+            });
+        }
+
+        return result.length > 0 ? result : undefined;
+    }
+
+    igv.ModalTable.prototype.genomeID = function () {
+        return this.datasource.config.genomeID;
     };
 
     igv.ModalTable.prototype.tableWithDataAndColumns = function (tableData, tableColumns) {
