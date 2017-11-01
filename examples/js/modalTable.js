@@ -49,20 +49,16 @@ var igv = (function (igv) {
         this.datasource
             .retrieveData()
             .then(function (data) {
-                var promiseToBuildTable;
 
                 self.$spinner.hide();
 
-                promiseToBuildTable = new Promise(function(resolve){
-                    console.log('modaltable. then. received data ' + _.size(data) + '. begin building table ...');
+                console.log('modaltable. then. received data ' + _.size(data) + '. begin building table ...');
 
-                    self.datasource.data = data;
-                    self.tableWithDataAndColumns(self.datasource.tableData(data), self.datasource.tableColumns());
+                self.datasource.data = data;
+                self.tableWithDataAndColumns(self.datasource.tableData(data), self.datasource.tableColumns());
 
-                    resolve('... done building table');
-                });
+                return '... done building table';
 
-                return promiseToBuildTable
             })
             .then(function (string) {
                 console.log(string);
