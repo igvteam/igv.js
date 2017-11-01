@@ -48,14 +48,27 @@ var igv = (function (igv) {
         this.$spinner.append($('<i class="fa fa-lg fa-spinner fa-spin"></i>'));
         // this.$spinner.hide();
 
-        this.datasource.retrieveData(function (data) {
+        this.datasource
+            .retrieveData()
+            .then(function (data) {
+                var promiseToBuildTable;
 
-            self.$spinner.hide();
+                self.$spinner.hide();
 
-            self.tableWithDataAndColumns(self.datasource.tableData(), self.datasource.tableColumns());
+                promiseToBuildTable = new Promise(function(resolve){
+                    console.log('modaltable. then. received data ' + _.size(data) + '. begin building table ...');
 
-            console.log('loaded data');
-        });
+                    self.datasource.data = data;
+                    self.tableWithDataAndColumns(self.datasource.tableData(data), self.datasource.tableColumns());
+
+                    resolve('... done building table');
+                });
+
+                return promiseToBuildTable
+            })
+            .then(function (string) {
+                console.log(string);
+            });
 
         config.$modal.on('show.bs.modal', function (e) {
 
@@ -99,7 +112,7 @@ var igv = (function (igv) {
                 dt = self.$table.DataTable();
                 result = [];
                 $selectedTableRows.each(function() {
-                    result.push( self.datasource.dataAtRowIndex( dt.row(this).index() ) );
+                    result.push( self.datasource.dataAtRowIndex(self.datasource.data, dt.row(this).index()) );
                 });
 
                 browser = config.browserRetrievalFunction();

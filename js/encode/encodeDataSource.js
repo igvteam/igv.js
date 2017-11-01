@@ -34,7 +34,7 @@ var igv = (function (igv) {
         this.columnFormat = columnFormat;
     };
 
-    igv.EncodeDataSource.prototype.retrieveData = function (continuation) {
+    igv.EncodeDataSource.prototype.retrieveData = function () {
 
         var self = this,
             fileFormat,
@@ -43,18 +43,14 @@ var igv = (function (igv) {
         fileFormat = 'bigWig';
         assembly = this.config.genomeID;
 
-        igv.xhr
+        return igv.xhr
             .loadJson(urlString(assembly, fileFormat), {})
             .then(function(json){
                 return parseJSONData(json, assembly, fileFormat);
             })
             .then(function (data) {
-
-                self.data = data;
-
-                self.data.sort(encodeSort);
-
-                continuation(self.data);
+                data.sort(encodeSort);
+                return Promise.resolve(data);
             })
             .catch(function (e) {
                 var str;
@@ -63,7 +59,6 @@ var igv = (function (igv) {
                 continuation(undefined);
 
             });
-
     };
 
     function urlString (assembly, fileFormat) {
@@ -190,11 +185,11 @@ var igv = (function (igv) {
         }
     }
 
-    igv.EncodeDataSource.prototype.tableData = function () {
+    igv.EncodeDataSource.prototype.tableData = function (data) {
         var self = this,
             mapped;
 
-        mapped = _.map(this.data, function (row) {
+        mapped = _.map(data, function (row) {
 
             // Isolate the subset of the data for display in the table
             return _.values(_.pick(row, _.map(self.columnFormat, function (column) {
@@ -221,11 +216,11 @@ var igv = (function (igv) {
         return columns;
     };
 
-    igv.EncodeDataSource.prototype.dataAtRowIndex = function (index) {
+    igv.EncodeDataSource.prototype.dataAtRowIndex = function (data, index) {
         var row,
             obj;
 
-        row =  this.data[ index ];
+        row =  data[ index ];
 
         obj =
             {
