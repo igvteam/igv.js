@@ -177,7 +177,6 @@ var igv = (function (igv) {
         });
     };
 
-
     igv.SequenceTrack.prototype.draw = function (options) {
 
         var self = this,
@@ -188,19 +187,24 @@ var igv = (function (igv) {
             pixelWidth = options.pixelWidth,
             bpEnd = bpStart + pixelWidth * bpPerPixel + 1,
             len, w, y, pos, offset, b, p0, p1, pc, c;
+        var transSeq, aaS;
 
         if (sequence) {
 
             len = sequence.length;
             w = 1 / bpPerPixel;
 
-            y = this.height / 2;
+            y = 15; //Separate sequence height from view height.
             for (pos = bpStart; pos <= bpEnd; pos++) {
 
                 offset = pos - bpStart;
                 if (offset < len) {
-//                            var b = sequence.charAt(offset);
                     b = sequence[offset];
+
+                   if (this.reversed) {
+                        b = this.complement[b.toUpperCase()];
+                    }
+
                     p0 = Math.floor(offset * w);
                     p1 = Math.floor((offset + 1) * w);
                     pc = Math.round((p0 + p1) / 2);
@@ -218,12 +222,55 @@ var igv = (function (igv) {
                     if (!c) c = "gray";
 
                     if (bpPerPixel > 1 / 10) {
-                        igv.graphics.fillRect(ctx, p0, 0, p1 - p0, self.height, { fillStyle: c });
+                        igv.graphics.fillRect(ctx, p0, 0, p1 - p0, y * 2, { fillStyle: c });
                     }
                     else {
-                        igv.graphics.strokeText(ctx, b, pc, 3 + y, { strokeStyle: c });
+                        igv.graphics.strokeText(ctx, b, pc - (ctx.measureText(b).width / 2), 3 + y, { strokeStyle: c });
                     }
                 }
+            }
+            if (this.frameTranslate) {
+
+                if (this.reversed) {
+                    transSeq = sequence.split('').map(function(cv){
+                        return self.complement[cv];
+                    });
+                    transSeq = transSeq.join('');
+                } else {
+                    transSeq = sequence;
+                }
+
+                this.translateSequence(transSeq).forEach(function(arr, i){
+                    var fNum = i;
+                    var h = 25;
+                    y = (i === 0) ? y + 10 : y + 30; //Little less room at first.
+                    arr.forEach(function(cv, idx){
+                        var xSeed = (idx + fNum) + (2 * idx);
+                        if (idx % 2 === 0) {
+                            c = 'rgb(160,160,160)';
+                        } else {
+                            c = 'rgb(224,224,224)';
+                        }
+                        p0 = Math.floor(xSeed * w);
+                        p1 = Math.floor((xSeed + 3) * w);
+                        pc = Math.round((p0+p1)/2);
+                        if (cv.aminoA.indexOf('STOP') > -1 ) {
+                            c = 'rgb(255, 0, 0)';
+                            aaS = 'STOP'; //Color blind accessible
+                        } else {
+                            aaS = cv.aminoA;
+                        }
+                        if (cv.aminoA === 'M'){
+                            c = 'rgb(0, 153, 0)';
+                            aaS = 'START'; //Color blind accessible
+                        }
+                        igv.graphics.fillRect(ctx, p0, y, p1 - p0, h, {fillStyle: c});
+                        if (bpPerPixel <= 1 / 10) {
+                            igv.graphics.strokeText(ctx, aaS, pc - (ctx.measureText(aaS).width / 2), y + 15); //centers text in rect
+                        }
+
+                    });
+                });
             }
         }
 
