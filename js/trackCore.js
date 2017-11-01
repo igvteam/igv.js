@@ -407,57 +407,59 @@ var igv = (function (igv) {
         var menuItems = [],
             all;
 
-        menuItems.push(igv.trackMenuItem(popover, trackView, "Set track name", function () {
-            return "Track Name"
-        }, trackView.track.name, function () {
+        if (trackView.track.config.type != 'sequence') {
 
-            var alphanumeric = parseAlphanumeric(igv.dialog.$dialogInput.val());
+            menuItems.push(igv.trackMenuItem(popover, trackView, "Set track name", function () {
+                return "Track Name"
+            }, trackView.track.name, function () {
 
-            if (undefined !== alphanumeric) {
-                igv.setTrackLabel(trackView.track, alphanumeric);
-                trackView.update();
-            }
+                var alphanumeric = parseAlphanumeric(igv.dialog.$dialogInput.val());
 
-            function parseAlphanumeric(value) {
+                if (undefined !== alphanumeric) {
+                    igv.setTrackLabel(trackView.track, alphanumeric);
+                    trackView.update();
+                }
 
-                var alphanumeric_re = /(?=.*[a-zA-Z].*)([a-zA-Z0-9 ]+)/,
-                    alphanumeric = alphanumeric_re.exec(value);
+                function parseAlphanumeric(value) {
 
-                return (null !== alphanumeric) ? alphanumeric[0] : "untitled";
-            }
+                    var alphanumeric_re = /(?=.*[a-zA-Z].*)([a-zA-Z0-9 ]+)/,
+                        alphanumeric = alphanumeric_re.exec(value);
 
-        }, undefined));
+                    return (null !== alphanumeric) ? alphanumeric[0] : "untitled";
+                }
 
-        menuItems.push(igv.trackMenuItem(popover, trackView, "Set track height", function () {
-            return "Track Height"
-        }, trackView.trackDiv.clientHeight, function () {
+            }, undefined));
 
-            var number = parseFloat(igv.dialog.$dialogInput.val(), 10);
+            menuItems.push(igv.trackMenuItem(popover, trackView, "Set track height", function () {
+                return "Track Height"
+            }, trackView.trackDiv.clientHeight, function () {
 
-            if (undefined !== number) {
+                var number = parseFloat(igv.dialog.$dialogInput.val(), 10);
+
+                if (undefined !== number) {
 // If explicitly setting the height adust min or max, if neccessary.
-                if (trackView.track.minHeight !== undefined && trackView.track.minHeight > number) {
-                    trackView.track.minHeight = number;
-                }
-                if (trackView.track.maxHeight !== undefined && trackView.track.maxHeight < number) {
-                    trackView.track.minHeight = number;
-                }
-                trackView.setTrackHeight(number);
-                trackView.track.autoHeight = false;   // Explicitly setting track height turns off autoHeight
+                    if (trackView.track.minHeight !== undefined && trackView.track.minHeight > number) {
+                        trackView.track.minHeight = number;
+                    }
+                    if (trackView.track.maxHeight !== undefined && trackView.track.maxHeight < number) {
+                        trackView.track.minHeight = number;
+                    }
+                    trackView.setTrackHeight(number);
+                    trackView.track.autoHeight = false;   // Explicitly setting track height turns off autoHeight
 
+                }
+
+            }, undefined));
+
+            if (igv.doProvideColoSwatchWidget(trackView.track)) {
+                menuItems.push(igv.colorPickerMenuItem(popover, trackView))
             }
 
-        }, undefined));
-
-        if (igv.doProvideColoSwatchWidget(trackView.track)) {
-            menuItems.push(igv.colorPickerMenuItem(popover, trackView))
+            all = [];
+            if (trackView.track.menuItemList) {
+                all = menuItems.concat(igv.trackMenuItemListHelper(trackView.track.menuItemList(popover)));
+            }
         }
-
-        all = [];
-        if (trackView.track.menuItemList) {
-            all = menuItems.concat(igv.trackMenuItemListHelper(trackView.track.menuItemList(popover)));
-        }
-
         if (trackView.track.removable !== false) {
 
             all.push(
