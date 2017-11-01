@@ -1045,7 +1045,7 @@ var igv = (function (igv) {
                 });
 
                 return Promise .all(promises)
-                    
+
                     .then(function (response) {
                         var filtered,
                             geneNameGenomicStates;
@@ -1204,21 +1204,26 @@ var igv = (function (igv) {
         var a,
             b,
             numeric,
-            success;
+            success,
+            chr;
 
         a = locus.split(':');
-        if (undefined === genome.getChromosome(_.first(a))) {
+
+        chr = a[0];
+        if(chr.toLowerCase() === 'all') chr = 'all';
+
+        if (undefined === genome.getChromosome(chr)) {
             return false;
         } else if (locusObject) {
 
             // start and end will get overridden if explicit start AND end exits
-            locusObject.chromosome = genome.getChromosome(_.first(a));
+            locusObject.chromosome = genome.getChromosome(chr);
             locusObject.start = 0;
             locusObject.end = locusObject.chromosome.bpLength;
         }
 
         // if just a chromosome name we are done
-        if (1 === _.size(a)) {
+        if (1 === a.length) {
             return true;
         } else {
 

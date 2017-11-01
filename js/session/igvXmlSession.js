@@ -40,15 +40,16 @@ var igv = (function (igv) {
 
         var self = this, parser, xmlDoc, elements;
 
-
         parser = new DOMParser();
         xmlDoc = parser.parseFromString(xmlString, "text/xml");
+
+        processRootNode();
+
         elements = xmlDoc.getElementsByTagName("Resource");
 
         self.tracks = [];
 
         var resourceMap = {};
-
         Array.from(elements).forEach(function (res, idx) {
             var res = {
                 url: res.getAttribute("path"),
@@ -59,7 +60,6 @@ var igv = (function (igv) {
         });
 
         // Check for optional Track section
-
         elements = xmlDoc.getElementsByTagName("Track");
         if (elements && elements.length > 0) {
 
@@ -70,18 +70,17 @@ var igv = (function (igv) {
 
                 var id, res, claszz, subtracks, mergedTrack;
 
-                claszz = track.getAttribute("clazz");
+                subtracks = track.getElementsByTagName("Track");
 
-                if (claszz && claszz.includes("MergedTracks")) {
+                if (subtracks && subtracks.length > 0) {
 
                     mergedTrack = {
                         type: 'merged',
-                        tracks: []};
+                        tracks: []
+                    };
                     extractTrackAttributes(track, mergedTrack);
 
                     self.tracks.push(mergedTrack);
-
-                    subtracks = track.getElementsByTagName("Track");
 
                     Array.from(subtracks).forEach(function (t) {
 
@@ -100,15 +99,14 @@ var igv = (function (igv) {
                         }
                     })
                 }
-                else {
-                    if(!track.processed) {
-                        id = track.getAttribute("id");
-                        res = resourceMap[id];
-                        if (res) {
-                            self.tracks.push(res);
-                            extractTrackAttributes(track, res);
-                        }
+                else if (!track.processed) {
+                    id = track.getAttribute("id");
+                    res = resourceMap[id];
+                    if (res) {
+                        self.tracks.push(res);
+                        extractTrackAttributes(track, res);
                     }
+
                 }
             })
         }
@@ -135,10 +133,10 @@ var igv = (function (igv) {
                 config.autoScale = (autoScale === "true");
             }
             windowFunction = track.getAttribute("windowFunction");
-            if(windowFunction) {
+            if (windowFunction) {
                 config.windowFunction = windowFunction;
             }
-            
+
             dataRangeCltn = track.getElementsByTagName("DataRange");
             if (dataRangeCltn.length > 0) {
                 dataRange = dataRangeCltn.item(0);
@@ -150,6 +148,32 @@ var igv = (function (igv) {
             }
 
         }
+
+        function processRootNode() {
+            var elements, session, genome, locus;
+
+            elements = xmlDoc.getElementsByTagName("Session");
+            if (!elements || elements.length === 0) {
+                //TODO throw error
+            }
+            session = elements.item(0);
+            genome = session.getAttribute("genome");
+            locus = session.getAttribute("locus");
+
+            if (igv.Genome.KnownGenomes.hasOwnProperty(genome)) {
+                self.reference = {
+                    id: genome
+                }
+            } else {
+                self.reference = {
+                    fastaURL: genome
+                }
+            }
+            if (locus) {
+                self.locus = locus;
+            }
+        }
+
 
     };
 
