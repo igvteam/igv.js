@@ -77,7 +77,8 @@ var igv = (function (igv) {
         var i, len, mergedFeatures, trackOptions, dataRange;
 
         mergedFeatures = options.features;    // Array of feature arrays, 1 for each track
-        dataRange = autoscale(mergedFeatures);
+
+        dataRange = autoscale(options.genomicState.chromosome.name, mergedFeatures);
 
         for (i = 0, len = this.tracks.length; i < len; i++) {
 
@@ -89,18 +90,37 @@ var igv = (function (igv) {
 
     }
 
-    function autoscale(featureArrays) {
-        var min = 0,
-            max = -Number.MAX_VALUE;
+    function autoscale(chr, featureArrays) {
 
-        featureArrays.forEach(function (features) {
-            features.forEach(function (f) {
-                if (!Number.isNaN(f.value)) {
-                    min = Math.min(min, f.value);
-                    max = Math.max(max, f.value);
-                }
+
+        var min = 0,
+            max = -Number.MAX_VALUE,
+            allValues;
+
+        // if (chr === 'all') {
+        //     allValues = [];
+        //     featureArrays.forEach(function (features) {
+        //         features.forEach(function (f) {
+        //             if (!Number.isNaN(f.value)) {
+        //                 allValues.push(f.value);
+        //             }
+        //         });
+        //     });
+        //
+        //     min = Math.min(0, igv.Math.percentile(allValues, .1));
+        //     max = igv.Math.percentile(allValues, 99.9);
+        //
+        // }
+        // else {
+            featureArrays.forEach(function (features) {
+                features.forEach(function (f) {
+                    if (!Number.isNaN(f.value)) {
+                        min = Math.min(min, f.value);
+                        max = Math.max(max, f.value);
+                    }
+                });
             });
-        });
+      //  }
 
         return {min: min, max: max};
     }
