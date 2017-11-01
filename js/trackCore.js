@@ -450,7 +450,7 @@ var igv = (function (igv) {
                 }
 
             }, undefined));
-
+        }
             if (igv.doProvideColoSwatchWidget(trackView.track)) {
                 menuItems.push(igv.colorPickerMenuItem(popover, trackView))
             }
@@ -459,7 +459,6 @@ var igv = (function (igv) {
             if (trackView.track.menuItemList) {
                 all = menuItems.concat(igv.trackMenuItemListHelper(trackView.track.menuItemList(popover)));
             }
-        }
         if (trackView.track.removable !== false) {
 
             all.push(
