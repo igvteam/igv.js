@@ -982,25 +982,6 @@ $drag-drop-warning-color: red;
   background-color: white;
 }
 
-.igv-grid-container-colorpicker {
-
-  position: absolute;
-  top: 0;
-  left:0;
-
-
-  width:256px;
-
-  border-color: $igv-grey-color;
-  border-radius: 4px;
-  border-style: solid;
-  border-width: thin;
-
-  z-index: 1999;
-
-  background-color: white;
-}
-
 .igv-grid-header {
   position: relative;
   top: 0;

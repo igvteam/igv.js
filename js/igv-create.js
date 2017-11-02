@@ -485,10 +485,9 @@ var igv = (function (igv) {
 
     igv.removeBrowser = function () {
         igv.browser.$root.remove();
-        $(".igv-grid-container-colorpicker").remove();
         $(".igv-grid-container-dialog").remove();
         // $(".igv-grid-container-dialog").remove();
-    }
+    };
 
 
     function getInitialLocus(config) {
