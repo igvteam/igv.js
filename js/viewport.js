@@ -337,9 +337,7 @@ var igv = (function (igv) {
     igv.Viewport.prototype.update = function () {
 
         //console.trace();
-
-        this.tile = null;
-
+        if (this.tile) this.tile.invalidate = true;
         this.repaint();
 
     };
@@ -385,18 +383,19 @@ var igv = (function (igv) {
         refFrameStart = referenceFrame.start;
         refFrameEnd = refFrameStart + referenceFrame.toBP(this.canvas.width);
 
-        if (this.tile && this.tile.containsRange(chr, refFrameStart, refFrameEnd, referenceFrame.bpPerPixel)) {
-            // console.log('paint pre-existing canvas');
-            this.paintImageWithReferenceFrame(referenceFrame);
+        //  if (this.tile && this.tile.containsRange(chr, refFrameStart, refFrameEnd, referenceFrame.bpPerPixel)) {
+        // console.log('paint pre-existing canvas');
+        this.paintImage(chr, refFrameStart, refFrameEnd, referenceFrame.bpPerPixel);
 
-        } else {
+        if (!this.tile ||
+            this.tile.invalidate || !this.tile.containsRange(chr, refFrameStart, refFrameEnd, referenceFrame.bpPerPixel)) {
 
             // Expand the requested range so we can pan a bit without reloading.  But not beyond chromosome bounds
             var chrLength = igv.browser.genome.getChromosome(chr).bpLength;
 
             pixelWidth = 3 * this.canvas.width;
-            bpWidth = Math.round(referenceFrame.toBP(pixelWidth));
-            bpStart = Math.max(0, Math.round(referenceFrame.start - bpWidth / 3));
+            bpWidth = referenceFrame.toBP(pixelWidth);
+            bpStart = Math.max(0, referenceFrame.start - bpWidth / 3);
             bpEnd = Math.min(chrLength, bpStart + bpWidth);
 
             // Adjust pixel width in case bounds were clamped
@@ -479,7 +478,7 @@ var igv = (function (igv) {
 
                 .then(function (roiArray) {
 
-                    if(roiArray) {
+                    if (roiArray) {
                         var i, len;
                         for (i = 0, len = roiArray.length; i < len; i++) {
                             drawConfiguration.features = roiArray[i];
@@ -491,7 +490,7 @@ var igv = (function (igv) {
                 .then(function (ignore) {
 
                     self.tile = new Tile(referenceFrame.chrName, bpStart, bpEnd, referenceFrame.bpPerPixel, buffer);
-                    self.paintImageWithReferenceFrame(referenceFrame);
+                    self.paintImage(chr, refFrameStart, refFrameEnd, referenceFrame.bpPerPixel);
                 })
 
                 .catch(function (error) {
@@ -562,17 +561,45 @@ var igv = (function (igv) {
 
     };
 
-    igv.Viewport.prototype.paintImageWithReferenceFrame = function (referenceFrame) {
+    igv.Viewport.prototype.paintImage = function (chr, start, end, bpPerPixel) {
+
+        var offset, sx, dx, scale, sWidth, dWidth, iHeight,
+            tile = this.tile;
 
         this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
 
-        if (this.tile) {
-            this.xOffset = Math.round(this.genomicState.referenceFrame.toPixels(this.tile.startBP - this.genomicState.referenceFrame.start));
-            this.ctx.drawImage(this.tile.image, this.xOffset, 0);
+        if (tile && tile.containsRange(chr, start, end, bpPerPixel)) {
+            this.xOffset = Math.round((tile.startBP - start) / tile.bpPerPixel);
+            this.ctx.drawImage(tile.image, this.xOffset, 0);
+            this.ctx.save();
+            this.ctx.restore();
+        } else if (tile && tile.overlapsRange(chr, start, end)) {
+
+            var offset = Math.round((start - tile.startBP) / tile.bpPerPixel);
+            if (offset > 0) {
+                sx = offset;
+                dx = 0;
+            } else {
+                sx = 0;
+                dx = -offset;
+            }
+
+            dWidth = tile.image.width;
+            if (bpPerPixel === tile.bpPerPixel) {
+                sWidth = dWidth;
+            } else {
+                scale = bpPerPixel / tile.bpPerPixel;
+                sWidth = Math.round(scale * dWidth);
+
+            }
+
+            iHeight = tile.image.height;
+
+            this.ctx.drawImage(tile.image, sx, 0, sWidth, iHeight, dx, 0, dWidth, iHeight);
             this.ctx.save();
             this.ctx.restore();
         }
-    };
+    }
 
     igv.Viewport.prototype.isLoading = function () {
         return !(undefined === this.loading);
@@ -618,17 +645,21 @@ var igv = (function (igv) {
         return result;
     };
 
-    Tile = function (chr, tileStart, tileEnd, scale, image) {
+    Tile = function (chr, tileStart, tileEnd, bpPerPixel, image) {
         this.chr = chr;
         this.startBP = tileStart;
         this.endBP = tileEnd;
-        this.scale = scale;
+        this.bpPerPixel = bpPerPixel;
         this.image = image;
     };
 
-    Tile.prototype.containsRange = function (chr, start, end, scale) {
-        return this.scale === scale && start >= this.startBP && end <= this.endBP && chr === this.chr;
+    Tile.prototype.containsRange = function (chr, start, end, bpPerPixel) {
+        return this.bpPerPixel === bpPerPixel && start >= this.startBP && end <= this.endBP && chr === this.chr;
     };
+
+    Tile.prototype.overlapsRange = function (chr, start, end) {
+        return this.chr === chr && end >= this.startBP && start <= this.endBP;
+    }
 
     // TODO: dat - Called from BAMTrack.altClick. Change call to redrawTile(viewPort, features)
     igv.Viewport.prototype.redrawTile = function (features) {
@@ -647,14 +678,14 @@ var igv = (function (igv) {
             features: features,
             context: buffer.getContext('2d'),
             bpStart: this.tile.startBP,
-            bpPerPixel: this.tile.scale,
+            bpPerPixel: this.tile.bpPerPixel,
             pixelWidth: buffer.width,
             pixelHeight: buffer.height
         });
 
 
-        this.tile = new Tile(this.tile.chr, this.tile.startBP, this.tile.endBP, this.tile.scale, buffer);
-        this.paintImageWithReferenceFrame(this.genomicState.referenceFrame);
+        this.tile = new Tile(this.tile.chr, this.tile.startBP, this.tile.endBP, this.tile.bpPerPixel, buffer);
+        this.paintImage(this.genomicState.referenceFrame);
     };
 
     return igv;
