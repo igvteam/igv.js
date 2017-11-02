@@ -81,9 +81,8 @@ var igv = (function (igv) {
         // Popover object -- singleton shared by all components
         igv.popover = new igv.Popover($content);
 
-        // ColorPicker object -- singleton shared by all components
-        igv.colorPicker = new igv.ColorPicker(browser.$root, config.palette);
-        igv.colorPicker.hide();
+        // ColorPicker dummy object
+        igv.colorPicker = {};
 
         // alert object -- singleton shared by all components
         igv.alert = new igv.AlertDialog(browser.$root, "igv-alert");
