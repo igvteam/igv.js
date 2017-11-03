@@ -44,10 +44,12 @@
     cursor: pointer;
     color: #0f0f0f; }
 
-.igv-generic-container {
+.igv-position-absolute {
   position: absolute;
-  top: 25%;
-  left: 15%;
+  top: 0;
+  left: 0; }
+
+.igv-generic-container {
   width: 256px;
   z-index: 5000;
   background-color: white;

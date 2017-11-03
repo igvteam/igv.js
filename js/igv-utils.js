@@ -46,6 +46,11 @@ var igv = (function (igv) {
             $generic_container.height(config.height);
         }
 
+        // height
+        if (config && config.classes) {
+            $generic_container.addClass( config.classes.join(' ') );
+        }
+
         // header
         $header = $('<div>');
         $generic_container.append($header);

@@ -30,7 +30,8 @@ var igv = (function (igv) {
 
         var self = this,
             element,
-            $track;
+            $track,
+            config;
 
         this.browser = browser;
 
@@ -77,8 +78,15 @@ var igv = (function (igv) {
 
         if (igv.doProvideColoSwatchWidget(this.track)) {
 
-            // width = (29 * swatch-width) + border-width + border-width
-            this.$colorpicker_container = igv.genericContainer($track, { width: ((29 * 24) + 1 + 1) }, function () {
+            config =
+                {
+                    // width = (29 * swatch-width) + border-width + border-width
+                    width: ((29 * 24) + 1 + 1),
+                    classes: [ 'igv-position-absolute' ]
+                };
+
+
+            this.$colorpicker_container = igv.genericContainer($track, config, function () {
                 self.$colorpicker_container.toggle();
             });
 

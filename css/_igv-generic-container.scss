@@ -1,8 +1,10 @@
-.igv-generic-container {
-
+.igv-position-absolute {
   position: absolute;
-  top: 25%;
-  left: 15%;
+  top: 0;
+  left: 0;
+}
+
+.igv-generic-container {
 
   width: 256px;
 
