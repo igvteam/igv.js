@@ -1,62 +1,6 @@
 $igv-color-swatch-size: 24px;
 $igv-color-swatch-border-width: 1px;
 
-.igv-colorpicker-container {
-
-  position: absolute;
-  top: 25%;
-  left: 15%;
-  //width: 75%;
-  //width: calc(29 * (#{$igv-color-swatch-size} + (2 * #{$igv-color-swatch-border-width})));
-  width: (29 * $igv-color-swatch-size) + ( 2 * $igv-color-swatch-border-width);
-  z-index: 5000;
-
-  background-color: white;
-
-  border-style: solid;
-  border-width: thin;
-  border-color: #dddddd;
-
-  cursor: pointer;
-
-  display: flex;
-  flex-direction: row;
-  flex-wrap: wrap;
-  justify-content: flex-start;
-  align-items: center;
-
-  div:first-child {
-    display: flex;
-    flex-flow: row;
-    flex-wrap: nowrap;
-    justify-content: flex-end;
-    align-items: center;
-
-    width: 100%;
-    height: $igv-color-swatch-size;
-
-    border-bottom-style: solid;
-    border-bottom-width: thin;
-    border-bottom-color: #dddddd;
-
-    background-color: #dddddd;
-
-    i.fa {
-      display: block;
-      margin-right: 4px;
-      color: #5f5f5f;
-    }
-
-    i.fa:hover,
-    i.fa:focus,
-    i.fa:active {
-      cursor: pointer;
-      color: #5f5f5f;
-    }
-  }
-
-}
-
 .igv-color-swatch {
 
   display: flex;

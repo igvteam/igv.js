@@ -1,5 +1,6 @@
 
 @import "igv-colorpicker";
+@import "igv-generic-container";
 
 $igv-default-font-face: 'Open Sans', sans-serif;
 
@@ -971,25 +972,6 @@ $drag-drop-warning-color: red;
   margin-right: auto;
   /*max-width: 740px;*/
   max-width: 300px;
-
-  border-color: $igv-grey-color;
-  border-radius: 4px;
-  border-style: solid;
-  border-width: thin;
-
-  z-index: 1999;
-
-  background-color: white;
-}
-
-.igv-grid-container-colorpicker {
-
-  position: absolute;
-  top: 0;
-  left:0;
-
-
-  width:256px;
 
   border-color: $igv-grey-color;
   border-radius: 4px;

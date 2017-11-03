@@ -77,13 +77,13 @@ var igv = (function (igv) {
 
         if (igv.doProvideColoSwatchWidget(this.track)) {
 
-            this.$colorpicker_container = $('<div>', { class:'igv-colorpicker-container' });
-            $track.append(this.$colorpicker_container);
-
-            igv.createColorSwatchSelector(this.$colorpicker_container, function (rgbString) {
-                self.setColor(rgbString);
-            }, function () {
+            // width = (29 * swatch-width) + border-width + border-width
+            this.$colorpicker_container = igv.genericContainer($track, { width: ((29 * 24) + 1 + 1) }, function () {
                 self.$colorpicker_container.toggle();
+            });
+
+            igv.createColorSwatchSelector(this.$colorpicker_container, function (rgb) {
+                self.setColor(rgb);
             });
 
             igv.makeDraggable(this.$colorpicker_container, this.$colorpicker_container);
