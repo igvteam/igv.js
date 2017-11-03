@@ -201,47 +201,43 @@ var igv = (function (igv) {
 
         var self = this;
 
-        return new Promise(function (fulfill, reject) {
+
+        return igv.xhr.load(self.file, igv.buildOptions(self.config)).then(parseFasta)
+
+        function parseFasta(data) {
+
             self.chromosomeNames = [];
             self.chromosomes = {};
             self.sequences = {};
 
-            igv.xhr.load(self.file, igv.buildOptions(self.config))
-                .then(function (data) {
-
-                    var lines = data.splitLines(),
-                        len = lines.length,
-                        lineNo = 0,
-                        nextLine,
-                        currentSeq = "",
-                        currentChr,
-                        order = 0;
+            var lines = data.splitLines(),
+                len = lines.length,
+                lineNo = 0,
+                nextLine,
+                currentSeq = "",
+                currentChr,
+                order = 0;
 
 
-                    while (lineNo < len) {
-                        nextLine = lines[lineNo++].trim();
-                        if (nextLine.startsWith("#") || nextLine.length === 0) {
-                            continue;
-                        }
-                        else if (nextLine.startsWith(">")) {
-                            if (currentSeq) {
-                                self.chromosomeNames.push(currentChr);
-                                self.sequences[currentChr] = currentSeq;
-                                self.chromosomes[currentChr] = new igv.Chromosome(currentChr, order++, currentSeq.length);
-                            }
-                            currentChr = nextLine.substr(1).split("\\s+")[0];
-                            currentSeq = "";
-                        }
-                        else {
-                            currentSeq += nextLine;
-                        }
+            while (lineNo < len) {
+                nextLine = lines[lineNo++].trim();
+                if (nextLine.startsWith("#") || nextLine.length === 0) {
+                    continue;
+                }
+                else if (nextLine.startsWith(">")) {
+                    if (currentSeq) {
+                        self.chromosomeNames.push(currentChr);
+                        self.sequences[currentChr] = currentSeq;
+                        self.chromosomes[currentChr] = new igv.Chromosome(currentChr, order++, currentSeq.length);
                     }
-
-                    fulfill();
-
-                })
-                .catch(reject);
-        });
+                    currentChr = nextLine.substr(1).split("\\s+")[0];
+                    currentSeq = "";
+                }
+                else {
+                    currentSeq += nextLine;
+                }
+            }
+        }
     }
 
     igv.FastaSequence.prototype.readSequence = function (chr, qstart, qend) {
