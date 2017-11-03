@@ -27,6 +27,45 @@ var igv = (function (igv) {
 
     var self = this;
 
+    igv.genericContainer = function ($parent, config, closeHandler) {
+
+        var $generic_container,
+            $header,
+            $fa;
+
+        $generic_container = $('<div>', { class:'igv-generic-container' });
+        $parent.append($generic_container);
+
+        // width
+        if (config && config.width) {
+            $generic_container.width(config.width);
+        }
+
+        // height
+        if (config && config.height) {
+            $generic_container.height(config.height);
+        }
+
+        // height
+        if (config && config.classes) {
+            $generic_container.addClass( config.classes.join(' ') );
+        }
+
+        // header
+        $header = $('<div>');
+        $generic_container.append($header);
+
+        // close button
+        $fa = $("<i>", { class:'fa fa-times' });
+        $header.append($fa);
+
+        $fa.on('click', function (e) {
+            closeHandler();
+        });
+
+        return $generic_container;
+    };
+
     igv.makeDraggable = function ($target, $handle) {
         $handle.on('mousedown', function (event) {
 
