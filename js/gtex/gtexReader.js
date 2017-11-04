@@ -62,8 +62,8 @@ var igv = (function (igv) {
 
             var self=this,
                 queryChr = chr.startsWith("chr") ? chr.substr(3) : chr,
-                queryStart = bpStart,
-                queryEnd = bpEnd,
+                queryStart = Math.floor(bpStart),
+                queryEnd = Math.ceil(bpEnd),
                 queryURL = this.url + "?chromosome=" + queryChr + "&start=" + queryStart + "&end=" + queryEnd +
                     "&tissueName=" + this.tissueName;
 
