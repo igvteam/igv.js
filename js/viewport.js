@@ -390,6 +390,9 @@ var igv = (function (igv) {
         if (!this.tile ||
             this.tile.invalidate || !this.tile.containsRange(chr, refFrameStart, refFrameEnd, referenceFrame.bpPerPixel)) {
 
+            //TODO -- if bpPerPixel changed repaint image from cached data => new optional track method to return
+            //TODO -- cached features directly (not a promise for features).
+
             // Expand the requested range so we can pan a bit without reloading.  But not beyond chromosome bounds
             var chrLength = igv.browser.genome.getChromosome(chr).bpLength;
 
