@@ -45,6 +45,7 @@ var igv = (function (igv) {
         this.height = config.height || 100;
         this.autoHeight = false;
         this.disableButtons = config.disableButtons;
+        this.visibilityWindow = config.visibilityWindow;
 
         this.featureSource = new igv.FeatureSource(config);
 

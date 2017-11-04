@@ -18,28 +18,28 @@
     <div onclick="igv.browser.loadTrack({
                             type: 'eqtl',
                             sourceType: 'gtex-ws',
-                            url: 'https://gtexportal.org/rest/v1/association/singleTissueEqtlByLocation',
+                            url: 'https://dev.gtexportal.org/rest/v1/association/singleTissueEqtlByLocation',
                             tissueName: 'Adipose_Subcutaneous',
                             name: 'Adipose - Subcutaneous',
-                            visibilityWindow: 100000
+                            visibilityWindow: 1000000
                             })">Adipose - Subcutaneous
     </div>
     <div onclick="igv.browser.loadTrack({
                          type: 'eqtl',
                          sourceType: 'gtex-ws',
-                         url: 'https://gtexportal.org/rest/v1/association/singleTissueEqtlByLocation',
+                         url: 'https://dev.gtexportal.org/rest/v1/association/singleTissueEqtlByLocation',
                          tissueName: 'Brain_Cerebellar_Hemisphere',
                          name: 'Brain - Cerebellar Hemisphere',
-                         visibilityWindow: 100000
+                         visibilityWindow: 1000000
                          })">Brain - Cerebellar Hemisphere
     </div>
     <div onclick="igv.browser.loadTrack({
                          type: 'eqtl',
                          sourceType: 'gtex-ws',
-                         url: 'https://gtexportal.org/rest/v1/association/singleTissueEqtlByLocation',
+                         url: 'https://dev.gtexportal.org/rest/v1/association/singleTissueEqtlByLocation',
                          tissueName: 'Thyroid',
                          name: 'Thyroid',
-                         visibilityWindow: 100000
+                         visibilityWindow: 1000000
                          })">Thyroid
     </div>
 </div>
@@ -64,7 +64,7 @@
             locus: "chr1:1-50,000,000",
             flanking: 75000,
             search: {
-                url: "http://gtexportal.org/api/v6/features/$FEATURE$",
+                url: "http://dev.gtexportal.org/api/v6/features/$FEATURE$",
                 resultsField: "features"
             },
             formats: {
