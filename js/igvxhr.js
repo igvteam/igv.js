@@ -241,57 +241,12 @@ var igv = (function (igv) {
 
     igv.xhr.loadString = function (path, options) {
         if (path instanceof File) {
-            return loadFileHelper(path, options);
+            return loadStringFromFile(path, options);
         } else {
-            return loadURLHelper(path, options);
+            return loadStringFromUrl(path, options);
         }
     };
 
-    igv.xhr.arrayBufferToString = function (arraybuffer, compression) {
-
-        var plain, inflate;
-
-        if (compression === GZIP) {
-            inflate = new Zlib.Gunzip(new Uint8Array(arraybuffer));
-            plain = inflate.decompress();
-        }
-        else if (compression === BGZF) {
-            plain = new Uint8Array(igv.unbgzf(arraybuffer));
-        }
-        else {
-            plain = new Uint8Array(arraybuffer);
-        }
-
-        var result = "";
-        for (var i = 0, len = plain.length; i < len; i++) {
-            result = result + String.fromCharCode(plain[i]);
-        }
-        return result;
-    };
-
-    /**
-     * Crude test for google urls.  For optimization, nothing bad happens if this is wrong
-     */
-    function isGoogleURL(url) {
-        return url.includes("googleapis");
-    }
-
-    function arrayBufferToBits(arraybuffer, compression) {
-
-        var plain,
-            inflate;
-
-        if (compression === GZIP) {
-            inflate = new Zlib.Gunzip(new Uint8Array(arraybuffer));
-            plain = inflate.decompress();
-        } else if (compression === BGZF) {
-            plain = new Uint8Array(igv.unbgzf(arraybuffer));
-        } else {
-            plain = new Uint8Array(arraybuffer);
-        }
-
-        return plain;
-    }
 
     function loadFileSlice(localfile, options) {
 
@@ -340,7 +295,7 @@ var igv = (function (igv) {
 
     }
 
-    function loadFileHelper(localfile, options) {
+    function loadStringFromFile(localfile, options) {
 
         return new Promise(function (fullfill, reject) {
 
@@ -359,7 +314,7 @@ var igv = (function (igv) {
                     compression = NONE;
                 }
 
-                result = igv.xhr.arrayBufferToString(fileReader.result, compression);
+                result = arrayBufferToString(fileReader.result, compression);
 
                 fullfill(result);
 
@@ -376,7 +331,7 @@ var igv = (function (igv) {
 
     }
 
-    function loadURLHelper(url, options) {
+    function loadStringFromUrl(url, options) {
 
         var compression,
             fn,
@@ -402,20 +357,11 @@ var igv = (function (igv) {
             return igv.xhr.load(url, options);
         } else {
             options.responseType = "arraybuffer";
-
-            return new Promise(function (fullfill, reject) {
-
-                igv.xhr
-                    .load(url, options)
-                    .then(
-                        function (data) {
-                            var result = igv.xhr.arrayBufferToString(data, compression);
-                            fullfill(result);
-                        })
-                    .catch(reject)
-            })
+            return igv.xhr.load(url, options)
+                .then(function (data) {
+                    return arrayBufferToString(data, compression);
+                })
         }
-
     }
 
     function isCrossDomain(url) {
@@ -464,6 +410,36 @@ var igv = (function (igv) {
         else {
             return url;
         }
+    }
+
+
+    function arrayBufferToString(arraybuffer, compression) {
+
+        var plain, inflate;
+
+        if (compression === GZIP) {
+            inflate = new Zlib.Gunzip(new Uint8Array(arraybuffer));
+            plain = inflate.decompress();
+        }
+        else if (compression === BGZF) {
+            plain = new Uint8Array(igv.unbgzf(arraybuffer));
+        }
+        else {
+            plain = new Uint8Array(arraybuffer);
+        }
+
+        var result = "";
+        for (var i = 0, len = plain.length; i < len; i++) {
+            result = result + String.fromCharCode(plain[i]);
+        }
+        return result;
+    };
+
+    /**
+     * Crude test for google urls.  For optimization, nothing bad happens if this is wrong
+     */
+    function isGoogleURL(url) {
+        return url.includes("googleapis");
     }
 
 // Increments an anonymous usage count.  Count is anonymous, needed for our continued funding.  Please don't delete
