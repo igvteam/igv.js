@@ -215,9 +215,7 @@ var igv = (function (igv) {
                             i;
 
                         if (self.index.tabix) {
-
-                            inflated = igv.xhr.arrayBufferToString(igv.unbgzf(data));
-                            // need to decompress data
+                            inflated = new Uint8Array(igv.unbgzf(data));
                         } else {
                             inflated = data;
                         }

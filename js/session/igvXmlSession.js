@@ -30,11 +30,11 @@
  */
 
 var igv = (function (igv) {
-
+/*
     var stringAttributes = ["name"],
         colorAttributes = ["color", "altColor"],
         intAttributes = ["height", "featureVisibilityWindow"],
-        booleanAttributes = ["autoScale"];
+        booleanAttributes = ["autoScale"];*/
 
     igv.XMLSession = function (xmlString) {
 
@@ -113,7 +113,7 @@ var igv = (function (igv) {
 
         function extractTrackAttributes(track, config) {
 
-            var color, height, autoScale, altColor, dataRange, dataRangeCltn, windowFunction;
+            var color, height, autoScale, altColor, dataRange, dataRangeCltn, windowFunction, visWindow;
 
             config.name = track.getAttribute("name");
             color = track.getAttribute("color");
@@ -135,6 +135,10 @@ var igv = (function (igv) {
             windowFunction = track.getAttribute("windowFunction");
             if (windowFunction) {
                 config.windowFunction = windowFunction;
+            }
+            visWindow = track.getAttribute("visibilityWindow") || track.getAttribute("featureVisibilityWindow");
+            if (visWindow) {
+                config.visibilityWindow = visWindow;
             }
 
             dataRangeCltn = track.getElementsByTagName("DataRange");
