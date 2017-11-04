@@ -47,7 +47,7 @@ var igv = (function (igv) {
             igv.removeBrowser();
         }
 
-        if(undefined === config) config = {};
+        if (undefined === config) config = {};
 
         setDefaults(config);
 
@@ -104,8 +104,9 @@ var igv = (function (igv) {
         if (config.oauthToken) igv.setOauthToken(config.oauthToken);
 
 
-        // Potentially load a session file
         var width;
+
+        // Potentially load a session file
         loadSessionFile()
 
             .then(function (session) {
@@ -117,6 +118,10 @@ var igv = (function (igv) {
                 // Deal with legacy genome definition options
                 setReferenceConfiguration(config);
 
+                // Query parameter locus has precendence
+                var initialLocus = extractLocus();
+                if(initialLocus) config.locus = initialLocus;
+
                 return config;
             })
 
@@ -127,7 +132,6 @@ var igv = (function (igv) {
             })
 
             .then(function (genome) {
-
 
                 igv.browser.genome = genome;
                 igv.browser.genome.id = config.reference.genomeId;
@@ -544,8 +548,8 @@ var igv = (function (igv) {
 
     function loadSessionFile() {
 
-
         var query = extractQuery(window.location.href);
+
         if (query.hasOwnProperty("igvSessionXML")) {
 
             var igvSession = decodeURIComponent(query["igvSessionXML"]);
@@ -559,9 +563,15 @@ var igv = (function (igv) {
         else {
             return Promise.resolve(undefined);
         }
-
     }
 
+    function extractLocus() {
+
+        var query = extractQuery(window.location.href),
+            loc = query["locus"];
+
+        return loc ? decodeURIComponent(loc) : undefined;
+    }
 
     return igv;
 })
