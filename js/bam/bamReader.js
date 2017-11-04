@@ -90,6 +90,7 @@ var igv = (function (igv) {
                 } else {
 
                     return getIndex(self)
+
                         .then(function (bamIndex) {
 
                             var chunks = bamIndex.blocksForRange(chrId, bpStart, bpEnd),
@@ -97,13 +98,10 @@ var igv = (function (igv) {
 
 
                             if (!chunks) {
-                                fulfill(null);
-                                reject("Error reading bam index");
-                                return;
+                                return Promise.resolve(null);
                             }
                             if (chunks.length === 0) {
-                                fulfill(alignmentContainer);
-                                return;
+                                return Promise.resolve(alignmentContainer);
                             }
 
                             chunks.forEach(function (c) {
