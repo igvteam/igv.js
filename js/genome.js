@@ -61,14 +61,15 @@ var igv = (function (igv) {
                 return undefined;
             }
         }).then(function (aliases) {
-            return new igv.Genome(sequence, cytobands, aliases);
+            return new igv.Genome(reference.id, sequence, cytobands, aliases);
 
         })
     }
 
 
-    igv.Genome = function (sequence, ideograms, aliases) {
+    igv.Genome = function (id, sequence, ideograms, aliases) {
 
+        this.id = id;
         this.sequence = sequence;
         this.chromosomeNames = sequence.chromosomeNames;
         this.chromosomes = sequence.chromosomes;  // An object (functions as a dictionary)

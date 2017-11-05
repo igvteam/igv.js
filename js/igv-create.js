@@ -131,7 +131,6 @@ var igv = (function (igv) {
             .then(function (genome) {
 
                 igv.browser.genome = genome;
-                igv.browser.genome.id = config.reference.genomeId;
 
                 igv.browser.chromosomeSelectWidget.update(igv.browser.genome);
 
