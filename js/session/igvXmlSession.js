@@ -154,7 +154,7 @@ var igv = (function (igv) {
         }
 
         function processRootNode() {
-            var elements, session, genome, locus;
+            var elements, session, genome, locus, ucscID;
 
             elements = xmlDoc.getElementsByTagName("Session");
             if (!elements || elements.length === 0) {
@@ -163,6 +163,7 @@ var igv = (function (igv) {
             session = elements.item(0);
             genome = session.getAttribute("genome");
             locus = session.getAttribute("locus");
+            ucscID = session.getAttribute("ucscID");
 
             if (igv.Genome.KnownGenomes.hasOwnProperty(genome)) {
                 self.reference = {
@@ -175,6 +176,9 @@ var igv = (function (igv) {
             }
             if (locus) {
                 self.locus = locus;
+            }
+            if(ucscID) {
+                self.reference.id = ucscID;
             }
         }
 
