@@ -168,16 +168,7 @@
                                 isLog: true,
                                 name: 'GBM Copy # (TCGA Broad GDAC)'})">GBM Copy # (TCGA Broad GDAC)) (SEG)
     </div>
-
-
-    <div onclick="igv.browser.loadTrack({
-            url: '../test/data/bed/egfr_hg38.bed',
-            name: 'egfr',
-            format: 'bed',
-            indexed: false,
-            searchable: true
-        })">EGFR bed (searchable: true)
-    </div>
+    
 
     <div onclick="igv.browser.loadTrack({
                             url: 'https://s3.amazonaws.com/igv.broadinstitute.org/annotations/hg19/genes/gencode.v18.collapsed.bed.gz',
@@ -191,38 +182,6 @@
             name: 'dbSNP 137',
             visibilityWindow: 200000
         })">dbSNP 137 (bed tabix)
-    </div>
-
-    <div onclick="igv.browser.loadTrack({
-                    url:  '../test/data/wig/bedgraph-example-uscs.bedgraph',
-                    name: 'bedgraph example',
-                    format: 'bedgraph',
-                    height: 30
-                    });">UCSC bedgraph (chr19)
-    </div>
-
-
-    <div onclick="igv.browser.loadTrack({
-                    type: 'wig',
-                    url:  '../test/data/wig/bedgraph-example-uscs.bedgraph.gz',
-                    indexURL:  '../test/data/wig/bedgraph-example-uscs.bedgraph.gz.tbi',
-                    name: 'bedgraph example',
-                    format: 'bedgraph',
-                    height: 30
-                    });">UCSC bedgraph tabix indexed (chr19)
-    </div>
-
-
-    <div onclick="igv.browser.loadTrack({
-            url: '../test/data/wig/fixedStep-example.wig',
-            name: 'fixedStep'
-        })">Fixed step wig (chr 19)
-    </div>
-
-    <div onclick="igv.browser.loadTrack({
-            url: '../test/data/wig/variableStep-example.wig',
-            name: 'variableStep'
-        })">Variable step wig (chr 19)
     </div>
 
 
