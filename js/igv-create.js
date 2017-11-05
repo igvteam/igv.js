@@ -78,11 +78,11 @@ var igv = (function (igv) {
         browser.userFeedback = new igv.UserFeedback($content);
         browser.userFeedback.hide();
 
+        // TODO: Hack! ColorPicker dummy object.
+        igv.colorPicker = {};
+
         // Popover object -- singleton shared by all components
         igv.popover = new igv.Popover($content);
-
-        // ColorPicker dummy object
-        igv.colorPicker = {};
 
         // alert object -- singleton shared by all components
         igv.alert = new igv.AlertDialog(browser.$root, "igv-alert");
