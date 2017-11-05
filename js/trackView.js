@@ -94,7 +94,9 @@ var igv = (function (igv) {
                 self.setColor(rgb);
             });
 
-            igv.makeDraggable(this.$colorpicker_container, this.$colorpicker_container);
+            // igv.makeDraggable(this.$colorpicker_container, this.$colorpicker_container);
+            this.$colorpicker_container.draggable({ handle:this.$colorpicker_container.find('div:first-child').get(0) });
+
             this.$colorpicker_container.hide();
         }
 

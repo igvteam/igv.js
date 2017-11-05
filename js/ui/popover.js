@@ -56,7 +56,8 @@ var igv = (function (igv) {
         this.$popover.append(this.$popoverContent);
 
         if (igv.colorPicker) {
-            igv.makeDraggable(this.$popover, $popoverHeader);
+            // igv.makeDraggable(this.$popover, $popoverHeader);
+            this.$popover.draggable({ handle:$popoverHeader.get(0) });
         }
 
         return $parent;
