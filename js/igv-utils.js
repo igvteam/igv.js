@@ -123,29 +123,7 @@ var igv = (function (igv) {
 
         return index < 0 ? filename : filename.substr(1 + index);
     };
-
-    igv.geneNameLookupPathTemplate = function (genomeId) {
-
-        var path;
-
-        path = 'https://portals.broadinstitute.org/webservices/igv/locus?genome=' + genomeId + '&name=$FEATURE$';
-
-        return path;
-    };
-
-    igv.geneNameLookupServicePromise = function (name, genomeId) {
-
-        var pathTemplate,
-            path;
-
-        pathTemplate = igv.geneNameLookupPathTemplate(genomeId);
-
-        path = pathTemplate.replace("$FEATURE$", name);
-
-        return igv.xhr.loadString(path);
-
-    };
-
+    
     igv.filenameOrURLHasSuffix = function  (fileOrURL, suffix) {
         var str = (fileOrURL instanceof File) ? fileOrURL.name : fileOrURL;
         return str.toLowerCase().endsWith( suffix )
