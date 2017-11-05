@@ -32,7 +32,7 @@ var igv = (function (igv) {
         this.sequenceType = config.sequenceType || "dna";             //   dna | rna | prot
         this.height = 25;
         this.disableButtons = false;
-        this.order = config.order || 9999;
+        this.order = config.order || -Number.MAX_VALUE;
         this.ignoreTrackMenu = false;
         this.supportsWholeGenome = false;
 
@@ -186,7 +186,7 @@ var igv = (function (igv) {
             bpStart = options.bpStart,
             pixelWidth = options.pixelWidth,
             bpEnd = bpStart + pixelWidth * bpPerPixel + 1,
-            len, w, y, pos, offset, b, p0, p1, pc, c;
+            len, w, y, pos, offset, b, p0, p1, pc, c, h;
         var transSeq, aaS;
 
         if (sequence) {
@@ -194,7 +194,7 @@ var igv = (function (igv) {
             len = sequence.length;
             w = 1 / bpPerPixel;
 
-            y = 15; //Separate sequence height from view height.
+            h = 15; //Separate sequence height from view height.
             for (pos = bpStart; pos <= bpEnd; pos++) {
 
                 offset = pos - bpStart;
@@ -222,10 +222,10 @@ var igv = (function (igv) {
                     if (!c) c = "gray";
 
                     if (bpPerPixel > 1 / 10) {
-                        igv.graphics.fillRect(ctx, p0, 0, p1 - p0, y * 2, { fillStyle: c });
+                        igv.graphics.fillRect(ctx, p0, 5, p1 - p0, h-5, { fillStyle: c });
                     }
                     else {
-                        igv.graphics.strokeText(ctx, b, pc - (ctx.measureText(b).width / 2), 3 + y, { strokeStyle: c });
+                        igv.graphics.strokeText(ctx, b, pc - (ctx.measureText(b).width / 2), h, { strokeStyle: c });
                     }
                 }
             }
@@ -240,6 +240,7 @@ var igv = (function (igv) {
                     transSeq = sequence;
                 }
 
+                y = h;
                 this.translateSequence(transSeq).forEach(function(arr, i){
                     var fNum = i;
                     var h = 25;
