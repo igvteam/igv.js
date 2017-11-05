@@ -482,7 +482,7 @@ var igv = (function (igv) {
         }
 
         if (config.showSequence) {
-            config.tracks.push({type: "sequence", order: -9999});
+            config.tracks.push({type: "sequence", order: -Number.MAX_VALUE});
         }
 
     }
