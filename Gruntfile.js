@@ -18,6 +18,7 @@ module.exports = function (grunt) {
                 src: [
                     'wrapper/header.js',
                     'vendor/jquery-1.12.4.js',
+                    'vendor/jquery-ui.js',
                     'vendor/underscore.js',
                     'js/**/*.js',
                     'vendor/inflate.js',
