@@ -122,7 +122,7 @@ var igv = (function (igv) {
             this.searchConfig = {
                 // Legacy support -- deprecated
                 type: "plain",
-                url: igv.geneNameLookupPathTemplate(genomeId),
+                url:'https://portals.broadinstitute.org/webservices/igv/locus?genome=$GENOME$&name=$FEATURE$',
                 coords: 0,
                 chromosomeField: "chromosome",
                 startField: "start",
@@ -1038,7 +1038,7 @@ var igv = (function (igv) {
                     var path = searchConfig.url.replace("$FEATURE$", locus);
 
                     if (path.indexOf("$GENOME$") > -1) {
-                        path.replace("$GENOME$", (self.genome.id ? self.genome.id : "hg19"));
+                       path = path.replace("$GENOME$", (self.genome.id ? self.genome.id : "hg19"));
                     }
 
                     return igv.xhr.loadString(path);
@@ -1523,7 +1523,8 @@ var igv = (function (igv) {
             end,
             searchConfig,
             url,
-            result;
+            result,
+            genomeID;
 
         // See if we're ready to respond to a search, if not just queue it up and return
         if (igv.browser === undefined || igv.browser.genome === undefined) {
@@ -1551,6 +1552,7 @@ var igv = (function (igv) {
                 handleSearchResult(result.name, result.chrName, result.start, result.end, "");
 
             } else if (this.searchConfig) {
+
                 url = this.searchConfig.url.replace("$FEATURE$", feature);
                 searchConfig = this.searchConfig;
 
