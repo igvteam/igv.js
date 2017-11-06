@@ -477,7 +477,7 @@ var igv = (function (igv) {
     };
 
     igv.doProvideColoSwatchWidget = function (track) {
-        return igv.colorPicker && (track instanceof igv.BAMTrack || track instanceof igv.FeatureTrack || track instanceof igv.VariantTrack || track instanceof igv.WIGTrack);
+        return (track instanceof igv.BAMTrack || track instanceof igv.FeatureTrack || track instanceof igv.VariantTrack || track instanceof igv.WIGTrack);
     };
 
     igv.trackMenuItemListHelper = function (itemList) {
