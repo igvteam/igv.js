@@ -32,8 +32,6 @@ var igv = (function (igv) {
 
     igv.ModalTable = function (config, datasource) {
 
-        var self = this;
-
         this.config = config;
         this.datasource = datasource;
 
@@ -45,58 +43,6 @@ var igv = (function (igv) {
         this.$table.append(this.$spinner);
 
         this.$spinner.append($('<i class="fa fa-lg fa-spinner fa-spin"></i>'));
-
-        this.datasource
-            .retrieveData()
-            .then(function (data) {
-
-                self.$spinner.hide();
-
-                console.log('modaltable. then. received data ' + _.size(data) + '. begin building table ...');
-
-                self.datasource.data = data;
-                self.tableWithDataAndColumns(self.datasource.tableData(data), self.datasource.tableColumns());
-
-                console.log('... done building table');
-
-                config.$modal.on('show.bs.modal', function (e) {
-
-                    if (undefined === config.browserRetrievalFunction) {
-                        igv.presentAlert('ERROR: must provide browser retrieval function');
-                    }
-
-                });
-
-                config.$modal.on('shown.bs.modal', function (e) {
-
-                    if (undefined === config.browserRetrievalFunction) {
-                        config.$modal.modal('hide');
-                    }
-
-                });
-
-                config.$modalTopCloseButton.on('click', function () {
-                    $('tr.selected').removeClass('selected');
-                });
-
-                config.$modalBottomCloseButton.on('click', function () {
-                    $('tr.selected').removeClass('selected');
-                });
-
-                config.$modalGoButton.on('click', function () {
-                    var browser,
-                        selected;
-
-                    selected = getSelectedTableRowsData.call(self, self.$dataTables.$('tr.selected'));
-
-                    if (selected) {
-                        browser = config.browserRetrievalFunction();
-                        browser[ config.browserLoadFunction ](selected);
-                    }
-
-                });
-
-            });
     };
 
     function teardownModalDOM(configuration) {
@@ -138,8 +84,63 @@ var igv = (function (igv) {
         return result.length > 0 ? result : undefined;
     }
 
-    igv.ModalTable.prototype.genomeID = function () {
-        return this.datasource.config.genomeID;
+    igv.ModalTable.prototype.loadData = function () {
+
+        var self = this,
+            browser;
+
+        browser = this.config.browserRetrievalFunction();
+
+        this.datasource
+            .retrieveData(browser.genome.id)
+            .then(function (data) {
+
+                self.$spinner.hide();
+
+                console.log('modaltable. then. received data ' + _.size(data) + '. begin building table ...');
+
+                self.datasource.data = data;
+                self.tableWithDataAndColumns(self.datasource.tableData(data), self.datasource.tableColumns());
+
+                console.log('... done building table');
+
+                self.config.$modal.on('show.bs.modal', function (e) {
+
+                    if (undefined === browser) {
+                        igv.presentAlert('ERROR: must provide browser retrieval function');
+                    }
+
+                });
+
+                self.config.$modal.on('shown.bs.modal', function (e) {
+
+                    if (undefined === browser) {
+                        self.config.$modal.modal('hide');
+                    }
+
+                });
+
+                self.config.$modalTopCloseButton.on('click', function () {
+                    $('tr.selected').removeClass('selected');
+                });
+
+                self.config.$modalBottomCloseButton.on('click', function () {
+                    $('tr.selected').removeClass('selected');
+                });
+
+                self.config.$modalGoButton.on('click', function () {
+                    var selected;
+
+                    selected = getSelectedTableRowsData.call(self, self.$dataTables.$('tr.selected'));
+
+                    if (selected) {
+                        browser[ self.config.browserLoadFunction ](selected);
+                    }
+
+                });
+
+            });
+
     };
 
     igv.ModalTable.prototype.tableWithDataAndColumns = function (tableData, tableColumns) {

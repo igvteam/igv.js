@@ -131,6 +131,11 @@ var igv = (function (igv) {
             .then(function (genome) {
 
                 igv.browser.genome = genome;
+                igv.browser.genome.id = config.reference.id;
+
+                if (true === config.encodeEnabled) {
+                    igv.browser.encodeTable.loadData();
+                }
 
                 igv.browser.chromosomeSelectWidget.update(igv.browser.genome);
 
@@ -417,6 +422,10 @@ var igv = (function (igv) {
     }
 
     function setDefaults(config) {
+
+        if (undefined === config.encodeEnabled) {
+            config.encodeEnabled = false;
+        }
 
         if (undefined === config.showLoadFileWidget) {
             config.showLoadFileWidget = false;
