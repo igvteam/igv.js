@@ -32,7 +32,8 @@ var igv = (function (igv) {
 
     igv.ModalTable = function (config, datasource) {
 
-        var self = this;
+        var self = this,
+            browser;
 
         this.config = config;
         this.datasource = datasource;
@@ -46,8 +47,10 @@ var igv = (function (igv) {
 
         this.$spinner.append($('<i class="fa fa-lg fa-spinner fa-spin"></i>'));
 
+        browser = config.browserRetrievalFunction();
+
         this.datasource
-            .retrieveData()
+            .retrieveData(browser.genome.id)
             .then(function (data) {
 
                 self.$spinner.hide();
@@ -61,7 +64,7 @@ var igv = (function (igv) {
 
                 config.$modal.on('show.bs.modal', function (e) {
 
-                    if (undefined === config.browserRetrievalFunction) {
+                    if (undefined === browser) {
                         igv.presentAlert('ERROR: must provide browser retrieval function');
                     }
 
@@ -69,7 +72,7 @@ var igv = (function (igv) {
 
                 config.$modal.on('shown.bs.modal', function (e) {
 
-                    if (undefined === config.browserRetrievalFunction) {
+                    if (undefined === browser) {
                         config.$modal.modal('hide');
                     }
 
@@ -84,13 +87,11 @@ var igv = (function (igv) {
                 });
 
                 config.$modalGoButton.on('click', function () {
-                    var browser,
-                        selected;
+                    var selected;
 
                     selected = getSelectedTableRowsData.call(self, self.$dataTables.$('tr.selected'));
 
                     if (selected) {
-                        browser = config.browserRetrievalFunction();
                         browser[ config.browserLoadFunction ](selected);
                     }
 

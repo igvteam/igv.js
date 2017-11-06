@@ -80,7 +80,7 @@ var modal_table_example = (function (modal_table_example) {
 
             ];
 
-        encodeDatasource = new igv.EncodeDataSource({genomeID: 'hg19'}, columnFormat);
+        encodeDatasource = new igv.EncodeDataSource(columnFormat);
 
         config =
             {
