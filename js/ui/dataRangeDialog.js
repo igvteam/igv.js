@@ -49,10 +49,8 @@ var igv = (function (igv) {
         self.container.append(doLayout());
 
         self.container.append(doOKCancel());
-        if (igv.colorPicker) {
-            // igv.makeDraggable(this.container, this.header);
-            this.container.draggable({ handle:this.header.get(0) });
-        }
+
+        this.container.draggable({ handle:this.header.get(0) });
 
         function doOKCancel() {
 
