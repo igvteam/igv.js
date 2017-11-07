@@ -113,7 +113,7 @@ var igv = (function (igv) {
 
         function extractTrackAttributes(track, config) {
 
-            var color, height, autoScale, altColor, dataRange, dataRangeCltn, windowFunction, visWindow;
+            var color, height, autoScale, altColor, dataRange, dataRangeCltn, windowFunction, visWindow, indexed;
 
             config.name = track.getAttribute("name");
             color = track.getAttribute("color");
@@ -139,6 +139,10 @@ var igv = (function (igv) {
             visWindow = track.getAttribute("visibilityWindow") || track.getAttribute("featureVisibilityWindow");
             if (visWindow) {
                 config.visibilityWindow = visWindow;
+            }
+            indexed = track.getAttribute("indexed");
+            if(indexed) {
+                config.indexed = (indexed === "true");
             }
 
             dataRangeCltn = track.getElementsByTagName("DataRange");
