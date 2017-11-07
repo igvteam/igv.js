@@ -690,7 +690,7 @@ var igv = (function (igv) {
             }
 
             if (alignment.mq <= 0) {
-                alignmentColor = igv.addAlphaToRGB(alignmentColor, "0.15");
+                alignmentColor = igv.Color.addAlpha(alignmentColor, "0.15");
             }
 
             igv.graphics.setProperties(ctx, {fillStyle: alignmentColor, strokeStyle: alignmentColor});
@@ -713,7 +713,7 @@ var igv = (function (igv) {
             }
 
             if (alignment.mq <= 0) {
-                alignmentColor = igv.addAlphaToRGB(alignmentColor, "0.15");
+                alignmentColor = igv.Color.addAlpha(alignmentColor, "0.15");
             }
 
             igv.graphics.setProperties(ctx, {fillStyle: alignmentColor, strokeStyle: outlineColor});

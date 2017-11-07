@@ -757,7 +757,7 @@ var igv = (function (igv) {
             }
             if (tokens.length > 5) {
                 if (tokens[5] !== "." && tokens[5] !== "0")
-                    feature.color = igv.createColorString(tokens[5]);
+                    feature.color = igv.Color.createColorString(tokens[5]);
             }
             if (tokens.length > 8) {
                 exonCount = parseInt(tokens[6]);
