@@ -41,6 +41,9 @@ var igv = (function (igv) {
 
         if (igv.isFilePath(this.config.url)) {
             this.filename = this.config.url.name;
+        } else if (this.config.url.startsWith('data:')) {
+            this.indexed = false;  // by definition
+            this.dataURI = config.url;
         } else {
             uriParts = igv.parseUri(this.config.url);
             this.filename = uriParts.file;
@@ -64,6 +67,8 @@ var igv = (function (igv) {
 
         if (this.index) {
             return this.loadFeaturesWithIndex(chr, start, end);
+        } else if (this.dataURI) {
+            return this.loadFeaturesFromDataURI();
         } else {
             return this.loadFeaturesNoIndex()
         }
@@ -311,6 +316,29 @@ var igv = (function (igv) {
             self.indexed = false;
             return Promise.resolve(undefined);
         }
+    };
+
+    igv.FeatureFileReader.prototype.loadFeaturesFromDataURI = function() {
+        var bytes, inflate, plain, features,
+            split = this.dataUri.split(','),
+            info = split[0].split(':')[1],
+            dataString = split[1];
+
+        if (info.indexOf('base64') >= 0) {
+            dataString = atob(dataString);
+        } else {
+            dataString = decodeURI(dataString);
+        }
+
+        bytes = new Uint8Array(dataString.length);
+        for (var i = 0; i < dataString.length; i++) {
+            bytes[i] = dataString.charCodeAt(i);
+        }
+
+        inflate = new Zlib.Gunzip(bytes);
+        plain = inflate.decompress();
+        features = this.parser.parseFeatures(plain);
+        return Promise.resolve(features);
     };
 
     return igv;
