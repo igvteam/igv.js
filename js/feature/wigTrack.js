@@ -153,7 +153,14 @@ var igv = (function (igv) {
             featureValueMinimum,
             featureValueMaximum,
             featureValueRange,
-            defaultRange;
+            defaultRange,
+            baselineColor;
+
+
+        // Temp hack
+        if(self.color && self.color.startsWith("rgb(")) {
+            baselineColor =  igv.Color.addAlpha(self.color, 0.1);
+        }
 
 
         if (features && features.length > 0) {
@@ -186,6 +193,16 @@ var igv = (function (igv) {
             if (featureValueMaximum > featureValueMinimum) {
                 featureValueRange = featureValueMaximum - featureValueMinimum;
                 features.forEach(renderFeature);
+
+                // If the track includes negative values draw a baseline
+                if(featureValueMinimum < 0) {
+                    var alpha = ctx.lineWidth;
+                    ctx.lineWidth = 5;
+                    var basepx = (featureValueMaximum / (featureValueMaximum - featureValueMinimum)) * options.pixelHeight;
+                    ctx.lineWidth = alpha;
+                }
+                igv.graphics.strokeLine(ctx, 0, basepx, options.pixelWidth, basepx, {strokeStyle: baselineColor});
+
             }
         }
 
