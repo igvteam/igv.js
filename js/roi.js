@@ -26,7 +26,7 @@
 
 var igv = (function (igv) {
 
-    var defaultHighlightColor = igv.rgbaColor(68, 134, 247, 0.25);
+    var defaultHighlightColor = "rgba(68, 134, 247, 0.25)";
 
     igv.ROI = function (config) {
         this.config = config;

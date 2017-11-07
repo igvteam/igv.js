@@ -327,7 +327,7 @@ var igv = (function (igv) {
         }
         if (tokens.length > 8) {
             if (tokens[8] !== "." && tokens[8] !== "0")
-                feature.color = igv.createColorString(tokens[8]);
+                feature.color = igv.Color.createColorString(tokens[8]);
         }
         if (tokens.length > 11) {
             exonCount = parseInt(tokens[9]);
@@ -735,7 +735,7 @@ var igv = (function (igv) {
                 }
                 if ("ID" === t[0]) id = t[1];
                 else if ("Parent" === t[0]) parent = t[1];
-                else if ("color" === t[0].toLowerCase()) color = igv.createColorString(t[1]);
+                else if ("color" === t[0].toLowerCase()) color = igv.Color.createColorString(t[1]);
                 else if ("transcript_id" === t[0]) id = t[1];     // gtf format
                 attributes[key] = value;
             }
