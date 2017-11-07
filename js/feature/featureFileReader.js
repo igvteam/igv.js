@@ -345,10 +345,7 @@ var igv = (function (igv) {
         inflate = new Zlib.Gunzip(bytes);
         plain = inflate.decompress();
         features = this.parser.parseFeatures(plain);
-        return Promise.resolve(features)
-            .then(function(data) {
-
-            })
+        return Promise.resolve(features);
     };
 
     return igv;
