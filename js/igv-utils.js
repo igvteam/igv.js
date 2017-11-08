@@ -172,6 +172,8 @@ var igv = (function (igv) {
 
     igv.presentAlert = function (string) {
 
+        console.trace();
+        
         igv.alert.$dialogLabel.text(string);
         igv.alert.show(undefined);
 
