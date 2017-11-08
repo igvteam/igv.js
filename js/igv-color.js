@@ -70,8 +70,27 @@ var igv = (function (igv) {
         return $swatch;
     };
 
-
     igv.Color = {
+
+        rgbToHex: function (rgb) {
+            rgb = rgb.match(/^rgba?[\s+]?\([\s+]?(\d+)[\s+]?,[\s+]?(\d+)[\s+]?,[\s+]?(\d+)[\s+]?/i);
+            return (rgb && rgb.length === 4) ? "#" +
+                ("0" + parseInt(rgb[1], 10).toString(16)).slice(-2) +
+                ("0" + parseInt(rgb[2], 10).toString(16)).slice(-2) +
+                ("0" + parseInt(rgb[3], 10).toString(16)).slice(-2) : '';
+        },
+
+        hexToRgb: function (hex) {
+
+            var cooked = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
+
+            if (null === cooked) {
+                return undefined;
+            }
+
+            return "rgb(" + parseInt(cooked[1], 16) + "," + parseInt(cooked[2], 16) + "," + parseInt(cooked[3], 16) + ")";
+        },
+
         /**
          * Converts an HSV color value to RGB. Conversion formula
          * adapted from http://en.wikipedia.org/wiki/HSV_color_space.
@@ -80,10 +99,10 @@ var igv = (function (igv) {
          *
          * Credit: https://gist.githubusercontent.com/mjackson/5311256
          *
-         * @param   Number  h       The hue
-         * @param   Number  s       The saturation
-         * @param   Number  v       The value
-         * @return  Array           The RGB representation
+         * @param   h       The hue
+         * @param   s       The saturation
+         * @param   v       The value
+         * @return  Array   The RGB representation
          */
         hsvToRgb: function (h, s, v) {
             var r, g, b;
@@ -126,10 +145,10 @@ var igv = (function (igv) {
          *
          * Credit: https://gist.githubusercontent.com/mjackson/5311256
          *
-         * @param   Number  h       The hue
-         * @param   Number  s       The saturation
-         * @param   Number  l       The lightness
-         * @return  Array           The RGB representation
+         * @param   h       The hue
+         * @param   s       The saturation
+         * @param   l       The lightness
+         * @return  Array   The RGB representation
          */
         hslToRgb: function (h, s, l) {
             var r, g, b;
@@ -157,26 +176,65 @@ var igv = (function (igv) {
             return [r * 255, g * 255, b * 255];
         },
 
-        hexToRgb: function (hex) {
+        rgbaColor: function (r, g, b, a) {
 
-            var cooked = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
+            r = igv.Math.clamp(r, 0, 255);
+            g = igv.Math.clamp(g, 0, 255);
+            b = igv.Math.clamp(b, 0, 255);
+            a = igv.Math.clamp(a, 0.0, 1.0);
 
-            if (null === cooked) {
-                return undefined;
-            }
-
-            return "rgb(" + parseInt(cooked[1], 16) + "," + parseInt(cooked[2], 16) + "," + parseInt(cooked[3], 16) + ")";
+            return "rgba(" + r + "," + g + "," + b + "," + a + ")";
         },
 
+        rgbColor: function (r, g, b) {
 
-        rgbToHex: function (rgb) {
-            rgb = rgb.match(/^rgba?[\s+]?\([\s+]?(\d+)[\s+]?,[\s+]?(\d+)[\s+]?,[\s+]?(\d+)[\s+]?/i);
-            return (rgb && rgb.length === 4) ? "#" +
-            ("0" + parseInt(rgb[1], 10).toString(16)).slice(-2) +
-            ("0" + parseInt(rgb[2], 10).toString(16)).slice(-2) +
-            ("0" + parseInt(rgb[3], 10).toString(16)).slice(-2) : '';
+            r = igv.Math.clamp(r, 0, 255);
+            g = igv.Math.clamp(g, 0, 255);
+            b = igv.Math.clamp(b, 0, 255);
+
+            return "rgb(" + r + "," + g + "," + b + ")";
         },
 
+        greyScale: function (value) {
+
+            var grey = igv.Math.clamp(value, 0, 255);
+
+            return "rgb(" + grey + "," + grey + "," + grey + ")";
+        },
+
+        randomGrey: function (min, max) {
+
+            min = igv.Math.clamp(min, 0, 255);
+            max = igv.Math.clamp(max, 0, 255);
+
+            var g = Math.round(igv.random(min, max)).toString(10);
+
+            return "rgb(" + g + "," + g + "," + g + ")";
+        },
+
+        randomRGB: function (min, max) {
+
+            min = igv.Math.clamp(min, 0, 255);
+            max = igv.Math.clamp(max, 0, 255);
+
+            var r = Math.round(igv.random(min, max)).toString(10);
+            var g = Math.round(igv.random(min, max)).toString(10);
+            var b = Math.round(igv.random(min, max)).toString(10);
+
+            return "rgb(" + r + "," + g + "," + b + ")";
+        },
+
+        randomRGBConstantAlpha: function (min, max, alpha) {
+
+            min = igv.Math.clamp(min, 0, 255);
+            max = igv.Math.clamp(max, 0, 255);
+
+            var r = Math.round(igv.random(min, max)).toString(10);
+            var g = Math.round(igv.random(min, max)).toString(10);
+            var b = Math.round(igv.random(min, max)).toString(10);
+
+            return "rgba(" + r + "," + g + "," + b + "," + alpha + ")";
+        },
 
         addAlpha: function (color, alpha) {
 
@@ -199,24 +257,6 @@ var igv = (function (igv) {
 
         },
 
-        randomRGB: function (min, max) {
-
-            var r = Math.round(igv.random(min, max)).toString(10);
-            var g = Math.round(igv.random(min, max)).toString(10);
-            var b = Math.round(igv.random(min, max)).toString(10);
-
-            return "rgb(" + r + "," + g + "," + b + ")";
-        },
-
-        randomRGBAlpha: function (min, max, alpha) {
-
-
-            var r = Math.round(igv.random(min, max)).toString(10);
-            var g = Math.round(igv.random(min, max)).toString(10);
-            var b = Math.round(igv.random(min, max)).toString(10);
-
-            return "rgba(" + r + "," + g + "," + b + "," + alpha + ")";
-        },
 
         /**
          *
