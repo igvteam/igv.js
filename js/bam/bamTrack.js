@@ -741,6 +741,7 @@ var igv = (function (igv) {
             }
 
             function drawBlock(block) {
+
                 var seqOffset = block.start - alignmentContainer.start,
                     xBlockStart = (block.start - bpStart) / bpPerPixel,
                     xBlockEnd = ((block.start + block.len) - bpStart) / bpPerPixel,
@@ -837,6 +838,9 @@ var igv = (function (igv) {
                 // Only do mismatch coloring if a refseq exists to do the comparison
                 if (sequence && blockSeq !== "*") {
                     for (i = 0, len = blockSeq.length; i < len; i++) {
+
+                        if(seqOffset + i < 0) continue;
+
                         readChar = blockSeq.charAt(i);
                         refChar = sequence.charAt(seqOffset + i);
                         if (readChar === "=") {

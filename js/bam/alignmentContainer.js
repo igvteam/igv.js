@@ -25,7 +25,7 @@
  */
 
 var igv = (function (igv) {
-    
+
 
     function canBePaired(alignment) {
         return alignment.isPaired() &&
@@ -39,8 +39,8 @@ var igv = (function (igv) {
     igv.AlignmentContainer = function (chr, start, end, samplingWindowSize, samplingDepth, pairsSupported) {
 
         this.chr = chr;
-        this.start = start;
-        this.end = end;
+        this.start = Math.floor(start);
+        this.end = Math.ceil(end);
         this.length = (end - start);
 
         this.coverageMap = new CoverageMap(chr, start, end);
