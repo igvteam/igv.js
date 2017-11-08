@@ -11,18 +11,17 @@ var igv = (function (igv) {
 
 
     // Uncompress data,  assumed to be series of bgzipped blocks
-    // Code is based heavily on bam.js, part of the Dalliance Genome Explorer,  (c) Thomas Down 2006-2001.
     igv.unbgzf = function (data, lim) {
 
         var oBlockList = [],
-            ptr = [0],
+            ptr = 0,
             totalSize = 0;
 
         lim = lim || data.byteLength - 18;
 
-        while (ptr[0] < lim) {
+        while (ptr < lim) {
 
-            var ba = new Uint8Array(data, ptr[0], 18);
+            var ba = new Uint8Array(data, ptr);
 
             var xlen = (ba[11] << 8) | (ba[10]);
             var si1 = ba[12];
@@ -30,14 +29,23 @@ var igv = (function (igv) {
             var slen = (ba[15] << 8) | (ba[14]);
             var bsize = (ba[17] << 8) | (ba[16]) + 1;
 
-            var start = 12 + xlen + ptr[0];    // Start of CDATA
-            var length = data.byteLength - start;
+            //var start = 12 + xlen + ptr;    // Start of CDATA
+            // var length = data.byteLength - start;
 
-            if (length < (bsize + 8)) break;
+            if (ba.length < (bsize + 8)) break;
 
-            var unc = jszlib_inflate_buffer(data, start, length, ptr);
+            ba = new Uint8Array(data, ptr, bsize);
 
-            ptr[0] += 8;    // Skipping CRC-32 and size of uncompressed data
+            //var unc = jszlib_inflate_buffer(data, start, length, ptr);
+
+            //var deflatedSize = bsize - 18 - 8;
+
+            var inflate = new Zlib.Gunzip(ba);
+            var unc = inflate.decompress().buffer;
+
+            ptr += bsize;
+
+            // ptr += 8;    // Skipping CRC-32 and size of uncompressed data
 
             totalSize += unc.byteLength;
             oBlockList.push(unc);
@@ -49,15 +57,15 @@ var igv = (function (igv) {
         } else {
             var out = new Uint8Array(totalSize);
             var cursor = 0;
-            for (var i = 0; i < oBlockList.length; ++i) {
-                var b = new Uint8Array(oBlockList[i]);
-                arrayCopy(b, 0, out, cursor, b.length);
+            oBlockList.forEach(function (buffer) {
+                var b = new Uint8Array(buffer);
+                out.set(b, cursor);
                 cursor += b.length;
-            }
+            });
+
             return out.buffer;
         }
     }
-
 
 
     igv.BGZFile = function (config) {
@@ -71,34 +79,42 @@ var igv = (function (igv) {
 
         return new Promise(function (fulfill, reject) {
 
-            igv.xhr.loadArrayBuffer(self.path, igv.buildOptions(self.config, {range: {start: self.filePosition, size: BLOCK_HEADER_LENGTH}}))
+            igv.xhr.loadArrayBuffer(self.path, igv.buildOptions(self.config, {
+                range: {
+                    start: self.filePosition,
+                    size: BLOCK_HEADER_LENGTH
+                }
+            }))
                 .then(function (arrayBuffer) {
 
-                var ba = new Uint8Array(arrayBuffer);
-                var xlen = (ba[11] << 8) | (ba[10]);
-                var si1 = ba[12];
-                var si2 = ba[13];
-                var slen = (ba[15] << 8) | (ba[14]);
-                var bsize = (ba[17] << 8) | (ba[16]) + 1;
+                    var ba = new Uint8Array(arrayBuffer);
+                    var xlen = (ba[11] << 8) | (ba[10]);
+                    var si1 = ba[12];
+                    var si2 = ba[13];
+                    var slen = (ba[15] << 8) | (ba[14]);
+                    var bsize = (ba[17] << 8) | (ba[16]) + 1;
 
-                self.filePosition += BLOCK_HEADER_LENGTH;
+                    self.filePosition += BLOCK_HEADER_LENGTH;
 
-                igv.xhr.loadArrayBuffer(self.path, igv.buildOptions(self.config, {range: {start: self.filePosition, size: bsize}}))
-                    .then(function (arrayBuffer) {
+                    igv.xhr.loadArrayBuffer(self.path, igv.buildOptions(self.config, {
+                        range: {
+                            start: self.filePosition,
+                            size: bsize
+                        }
+                    }))
+                        .then(function (arrayBuffer) {
 
-                    var unc = jszlib_inflate_buffer(arrayBuffer);
+                            var unc = jszlib_inflate_buffer(arrayBuffer);
 
-                    self.filePosition += (bsize + 8);  // "8" for CRC-32 and size of uncompressed data
+                            self.filePosition += (bsize + 8);  // "8" for CRC-32 and size of uncompressed data
 
-                    fulfill(unc);
+                            fulfill(unc);
 
-                }).catch(reject)
-            }).catch(reject);
+                        }).catch(reject)
+                }).catch(reject);
         })
 
     }
-
-
 
 
     return igv;
