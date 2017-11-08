@@ -20,11 +20,11 @@ module.exports = function (grunt) {
                     'vendor/jquery-1.12.4.js',
                     'vendor/jquery-ui.js',
                     'vendor/underscore.js',
-                    'js/**/*.js',
                     'vendor/inflate.js',
                     'vendor/zlib_and_gzip.min.js',
                     'vendor/jquery.mousewheel.js',
                     'vendor/promise.js',
+                    'js/**/*.js',
                     'wrapper/footer.js'
                 ],
                 dest: 'dist/igv.js'
