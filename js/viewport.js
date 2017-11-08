@@ -398,8 +398,8 @@ var igv = (function (igv) {
 
             pixelWidth = 3 * this.canvas.width;
             bpWidth = referenceFrame.toBP(pixelWidth);
-            bpStart = Math.max(0, referenceFrame.start - bpWidth / 3);
-            bpEnd = Math.min(chrLength, bpStart + bpWidth);
+            bpStart = Math.floor(Math.max(0, referenceFrame.start - bpWidth / 3));
+            bpEnd = Math.ceil(Math.min(chrLength, bpStart + bpWidth));
 
             // Adjust pixel width in case bounds were clamped
             pixelWidth = (bpEnd - bpStart) / referenceFrame.bpPerPixel;
