@@ -389,11 +389,12 @@ var igv = (function (igv) {
 
             return menuItems;
 
-            function setColorBy(value) {
-                self.colorBy = value;
-                self.trackView.update();
-                config.popover.hide();
-            }
+        }
+
+        function setColorBy(value) {
+            self.colorBy = value;
+            self.trackView.update();
+            config.popover.hide();
         }
     };
 
@@ -842,11 +843,12 @@ var igv = (function (igv) {
 
             return menuItems;
 
-            function setColorBy(value) {
-                self.colorBy = value;
-                self.trackView.update();
-                config.popover.hide();
-            }
+        }
+
+        function setColorBy(value) {
+            self.colorBy = value;
+            self.trackView.update();
+            config.popover.hide();
         }
     };
 
