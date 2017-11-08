@@ -21,6 +21,7 @@ module.exports = function (grunt) {
                     'vendor/jquery-ui.js',
                     'vendor/underscore.js',
                     'vendor/zlib_and_gzip.js',
+                    'vendor/inflate.js',
                     'vendor/jquery.mousewheel.js',
                     'vendor/promise.js',
                     'js/**/*.js',
