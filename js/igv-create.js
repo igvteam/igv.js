@@ -154,7 +154,6 @@ var igv = (function (igv) {
                         genomicState.locusIndex = index;
                         genomicState.locusCount = genomicStateList.length;
                         genomicState.referenceFrame = new igv.ReferenceFrame(genomicState.chromosome.name, genomicState.start, (genomicState.end - genomicState.start) / (width / genomicState.locusCount));
-                        genomicState.initialReferenceFrame = new igv.ReferenceFrame(genomicState.chromosome.name, genomicState.start, (genomicState.end - genomicState.start) / (width / genomicState.locusCount));
                         return genomicState;
                     });
 

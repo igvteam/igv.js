@@ -918,12 +918,9 @@ var igv = (function (igv) {
             if (_.size(genomicStateList) > 0) {
 
                 _.each(genomicStateList, function (genomicState, index) {
-
                     genomicState.locusIndex = index;
                     genomicState.locusCount = _.size(genomicStateList);
-
                     genomicState.referenceFrame = new igv.ReferenceFrame(genomicState.chromosome.name, genomicState.start, (genomicState.end - genomicState.start) / (self.viewportContainerWidth() / genomicState.locusCount));
-                    genomicState.initialReferenceFrame = JSON.parse(JSON.stringify(genomicState.referenceFrame));
                 });
 
                 self.genomicStateList = genomicStateList;

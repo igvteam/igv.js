@@ -32,26 +32,32 @@ var igv = (function (igv) {
         this.chrName = chrName;
         this.start = start;
         this.bpPerPixel = bpPerPixel;
-    }
+    };
+
+    igv.ReferenceFrame.prototype.set = function (json) {
+        this.chrName = json.chrName;
+        this.start = json.start;
+        this.bpPerPixel = json.bpPerPixel;
+    };
 
     igv.ReferenceFrame.prototype.toPixels = function (bp) {
         // TODO -- do we really need ot round this?
         return bp / this.bpPerPixel;
-    }
+    };
 
     igv.ReferenceFrame.prototype.toBP = function(pixels) {
         return this.bpPerPixel * pixels;
-    }
+    };
 
     igv.ReferenceFrame.prototype.shiftPixels = function(pixels) {
         this.start += pixels * this.bpPerPixel;
-    }
+    };
 
     igv.ReferenceFrame.prototype.description = function() {
         return "ReferenceFrame " + this.chrName + " " + igv.numberFormatter(Math.floor(this.start)) + " bpp " + this.bpPerPixel;
-    }
+    };
 
 
     return igv;
 
-})(igv || {})
+})(igv || {});

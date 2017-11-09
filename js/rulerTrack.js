@@ -98,9 +98,10 @@ var igv = (function (igv) {
 
         $label = $('<div class = "igv-viewport-content-ruler-div">');
         $label.text(genomicState.locusSearchString);
+        $label.data('referenceFrame', JSON.parse(JSON.stringify(genomicState.referenceFrame)));
 
         $label.click(function (e) {
-            genomicState.referenceFrame = new igv.ReferenceFrame(genomicState.initialReferenceFrame.chrName, genomicState.initialReferenceFrame.start, genomicState.initialReferenceFrame.bpPerPixel);
+            genomicState.referenceFrame.set( $(this).data('referenceFrame') );
             igv.browser.selectMultiLocusPanelWithGenomicState(genomicState);
         });
 
