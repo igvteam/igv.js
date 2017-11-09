@@ -92,24 +92,19 @@ var igv = (function (igv) {
         this.rulerSweepers[genomicState.locusIndex.toString()] = new igv.RulerSweeper(viewport, $viewport, $viewportContent, genomicState);
     };
 
-    igv.RulerTrack.prototype.locusLabelWithViewport = function (viewport) {
+    igv.RulerTrack.prototype.locusLabelWithGenomicState = function (genomicState) {
 
-        var locusLabel = $('<div class = "igv-viewport-content-ruler-div">');
+        var $label;
 
-        locusLabel.text(viewport.genomicState.locusSearchString);
+        $label = $('<div class = "igv-viewport-content-ruler-div">');
+        $label.text(genomicState.locusSearchString);
 
-        locusLabel.click(function (e) {
-
-            var genomicState = viewport.genomicState,
-                initialReferenceFrame = genomicState.initialReferenceFrame;
-
-            genomicState.referenceFrame = new igv.ReferenceFrame(initialReferenceFrame.chrName, initialReferenceFrame.start, initialReferenceFrame.bpPerPixel);
-
-            // igv.browser.updateWithLocusIndex(genomicState.locusIndex);
+        $label.click(function (e) {
+            genomicState.referenceFrame = new igv.ReferenceFrame(genomicState.initialReferenceFrame.chrName, genomicState.initialReferenceFrame.start, genomicState.initialReferenceFrame.bpPerPixel);
             igv.browser.selectMultiLocusPanelWithGenomicState(genomicState);
         });
 
-        return locusLabel;
+        return $label;
     };
 
     igv.RulerTrack.prototype.getFeatures = function (chr, bpStart, bpEnd) {
