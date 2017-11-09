@@ -100,7 +100,14 @@ var igv = (function (igv) {
                                 return self.header
                             });
 
-                    } else {
+                    } else if (self.dataURI) {
+                        return self.loadFeaturesFromDataURI(self.dataURI)
+                            .then(function(features) {
+                                var header = self.header || {};
+                                header.features = features;
+                                return header;
+                            })
+                    }   else {
                         // If this is a non-indexed file we will load all features in advance
                         return self.loadFeaturesNoIndex()
                             .then(function (features) {
@@ -320,7 +327,7 @@ var igv = (function (igv) {
 
     igv.FeatureFileReader.prototype.loadFeaturesFromDataURI = function() {
         var bytes, inflate, plain, features,
-            split = this.dataUri.split(','),
+            split = this.dataURI.split(','),
             info = split[0].split(':')[1],
             dataString = split[1];
 
@@ -338,7 +345,10 @@ var igv = (function (igv) {
         inflate = new Zlib.Gunzip(bytes);
         plain = inflate.decompress();
         features = this.parser.parseFeatures(plain);
-        return Promise.resolve(features);
+        return Promise.resolve(features)
+            .then(function(data) {
+
+            })
     };
 
     return igv;
