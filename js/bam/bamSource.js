@@ -39,7 +39,12 @@ var igv = (function (igv) {
         } else if("htsget" === config.sourceType) {
             this.bamReader = new igv.HtsgetReader(config);
         } else {
-            this.bamReader = new igv.BamReader(config);
+            if(this.config.indexed === false) {
+                this.bamReader = new igv.BamReaderNonIndexed(config);
+            }
+            else {
+                this.bamReader = new igv.BamReader(config);
+            }
         }
 
         this.viewAsPairs = config.viewAsPairs;
