@@ -68,7 +68,7 @@ var igv = (function (igv) {
         this.ctx = this.canvas.getContext("2d");
 
         if (this.genomicState.locusCount > 1 && trackView.track instanceof igv.RulerTrack) {
-            $(this.contentDiv).append(igv.browser.rulerTrack.locusLabelWithViewport(this));
+            $(this.contentDiv).append(igv.browser.rulerTrack.locusLabelWithGenomicState(this.genomicState));
         }
 
         // zoom in to see features
