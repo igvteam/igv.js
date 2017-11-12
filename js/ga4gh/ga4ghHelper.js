@@ -32,6 +32,7 @@ var igv = (function (igv) {
     igv.ga4ghGet = function (options) {
 
         var url = options.url + "/" + options.entity + "/" + options.entityId;
+        options.headers = ga4ghHeaders();
 
         return igv.xhr.loadJson(url, options);      // Returns a promise
     }
