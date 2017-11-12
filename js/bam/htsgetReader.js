@@ -28,6 +28,8 @@ var igv = (function (igv) {
 
     igv.HtsgetReader = function (config) {
         this.config = config;
+
+        igv.BamUtils.setReaderDefaults(this, config);
     };
 
     igv.HtsgetReader.prototype.readAlignments = function (chr, start, end) {
@@ -64,8 +66,9 @@ var igv = (function (igv) {
 
 
                         chrIdx = self.header.chrToIndex[chr];
-                        alignmentContainer = new igv.AlignmentContainer(chr, start, end);
-                        igv.BamUtils.decodeBamRecords(ba, self.header.size, alignmentContainer, start, end, chrIdx, self.header.chrNames);
+                        alignmentContainer =  new igv.AlignmentContainer(chr, start, end, self.samplingWindowSize, self.samplingDepth, self.pairsSupported);
+
+                        igv.BamUtils.decodeBamRecords(ba, self.header.size, alignmentContainer, self.header.chrNames, chrIdx, start, end);
                         alignmentContainer.finish()
                         fulfill(alignmentContainer);
                     })

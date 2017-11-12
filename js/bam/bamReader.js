@@ -28,10 +28,7 @@ var igv = (function (igv) {
 
 
     const MAX_GZIP_BLOCK_SIZE = 65536; // See BGZF compression format in SAM format specification
-    const DEFAULT_SAMPLING_WINDOW_SIZE = 100;
-    const DEFAULT_SAMPLING_DEPTH = 50;
-    const MAXIMUM_SAMPLING_DEPTH = 2500;
-
+    
     /**
      * Class for reading a bam file
      *
@@ -42,29 +39,13 @@ var igv = (function (igv) {
 
         this.config = config;
 
-        this.filter = config.filter || new igv.BamFilter();
-
         this.bamPath = config.url;
 
         // Todo - deal with Picard convention.  WHY DOES THERE HAVE TO BE 2?
         this.baiPath = config.indexURL || igv.inferIndexPath(this.bamPath, "bai"); // If there is an indexURL provided, use it!
-        this.headPath = config.headURL || this.bamPath;
 
-
-        this.samplingWindowSize = config.samplingWindowSize === undefined ? DEFAULT_SAMPLING_WINDOW_SIZE : config.samplingWindowSize;
-        this.samplingDepth = config.samplingDepth === undefined ? DEFAULT_SAMPLING_DEPTH : config.samplingDepth;
-        if (this.samplingDepth > MAXIMUM_SAMPLING_DEPTH) {
-            igv.log("Warning: attempt to set sampling depth > maximum value of 2500");
-            this.samplingDepth = MAXIMUM_SAMPLING_DEPTH;
-        }
-
-        if (config.viewAsPairs) {
-            this.pairsSupported = true;
-        }
-        else {
-            this.pairsSupported = config.pairsSupported === undefined ? true : config.pairsSupported;
-        }
-
+        igv.BamUtils.setReaderDefaults(this, config);
+        
     };
 
     igv.BamReader.prototype.readAlignments = function (chr, bpStart, bpEnd) {
@@ -72,7 +53,7 @@ var igv = (function (igv) {
         var self = this;
 
 
-        return getChrIndex(self)
+        return getChrIndex.call(self)
 
             .then(function (chrToIndex) {
 
@@ -89,7 +70,7 @@ var igv = (function (igv) {
 
                 } else {
 
-                    return getIndex(self)
+                    return getIndex.call(self)
 
                         .then(function (bamIndex) {
 
@@ -116,7 +97,7 @@ var igv = (function (igv) {
                                         .then(function (compressed) {
 
                                             var ba = new Uint8Array(igv.unbgzf(compressed)); //new Uint8Array(igv.unbgzf(compressed)); //, c.maxv.block - c.minv.block + 1));
-                                            igv.BamUtils.decodeBamRecords(ba, c.minv.offset, alignmentContainer, bpStart, bpEnd, chrId, self.indexToChr, self.filter);
+                                            igv.BamUtils.decodeBamRecords(ba, c.minv.offset, alignmentContainer, self.indexToChr, chrId, bpStart, bpEnd, self.filter);
 
                                             fulfill(alignmentContainer);
 
@@ -136,11 +117,11 @@ var igv = (function (igv) {
             });
     };
 
-    igv.BamReader.prototype.readHeader = function () {
+    function readHeader() {
 
         var self = this;
 
-        return getIndex(self)
+        return getIndex.call(self)
 
             .then(function (index) {
 
@@ -155,31 +136,35 @@ var igv = (function (igv) {
             });
     };
 
-    function getIndex(bam) {
+    function getIndex() {
 
-        if (bam.index) {
-            return Promise.resolve(bam.index);
+        var self = this;
+
+        if (self.index) {
+            return Promise.resolve(self.index);
         }
         else {
-            return igv.loadBamIndex(bam.baiPath, bam.config)
+            return igv.loadBamIndex(self.baiPath, self.config)
                 .then(function (index) {
-                    bam.index = index;
-                    return bam.index;
+                    self.index = index;
+                    return self.index;
                 });
         }
     }
 
-    function getChrIndex(bam) {
+    function getChrIndex() {
 
-        if (bam.chrToIndex) {
-            return Promise.resolve(bam.chrToIndex);
+        var self = this;
+
+        if (this.chrToIndex) {
+            return Promise.resolve(this.chrToIndex);
         }
         else {
-            return bam.readHeader().then(function (header) {
-                bam.chrToIndex = header.chrToIndex;
-                bam.indexToChr = header.chrNames;
-                bam.chrAliasTable = header.chrAliasTable;
-                return bam.chrToIndex;
+            return readHeader.call(self).then(function (header) {
+                self.chrToIndex = header.chrToIndex;
+                self.indexToChr = header.chrNames;
+                self.chrAliasTable = header.chrAliasTable;
+                return self.chrToIndex;
             });
         }
     }
