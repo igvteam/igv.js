@@ -42,22 +42,7 @@ var igv = (function (igv) {
 
         this.config = config;
 
-        this.filter = config.filter || new igv.BamFilter();
-
-        this.samplingWindowSize = config.samplingWindowSize === undefined ? DEFAULT_SAMPLING_WINDOW_SIZE : config.samplingWindowSize;
-        this.samplingDepth = config.samplingDepth === undefined ? DEFAULT_SAMPLING_DEPTH : config.samplingDepth;
-
-        if (this.samplingDepth > MAXIMUM_SAMPLING_DEPTH) {
-            igv.log("Warning: attempt to set sampling depth > maximum value of 2500");
-            this.samplingDepth = MAXIMUM_SAMPLING_DEPTH;
-        }
-
-        if (config.viewAsPairs) {
-            this.pairsSupported = true;
-        }
-        else {
-            this.pairsSupported = config.pairsSupported === undefined ? true : config.pairsSupported;
-        }
+        igv.BamUtils.setReaderDefaults(this, config);
 
     };
 
@@ -76,7 +61,7 @@ var igv = (function (igv) {
 
                     queryChr = header.chrAliasTable.hasOwnProperty(chr) ? header.chrAliasTable[chr] : chr;
 
-                    url = self.config.url  +
+                    url = self.config.url +
                         "?reference=" + self.config.referenceFile +
                         "&file=" + self.config.alignmentFile + "" +
                         "&region=" + queryChr + ":" + bpStart + "-" + bpEnd;
@@ -89,9 +74,9 @@ var igv = (function (igv) {
 
                             chrId = header.chrToIndex[queryChr];
 
-                            alignmentContainer= new igv.AlignmentContainer(chr, bpStart, bpEnd, self.samplingWindowSize, self.samplingDepth, self.pairsSupported);
+                            alignmentContainer = new igv.AlignmentContainer(chr, bpStart, bpEnd, self.samplingWindowSize, self.samplingDepth, self.pairsSupported);
 
-                            igv.BamUtils.decodeSamRecords(sam, alignmentContainer, queryChr,  bpStart, bpEnd, self.filter);
+                            igv.BamUtils.decodeSamRecords(sam, alignmentContainer, queryChr, bpStart, bpEnd, self.filter);
 
                             fulfill(alignmentContainer);
 
