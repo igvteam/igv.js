@@ -35,6 +35,7 @@ var igv = (function (igv) {
             config.maxRows = 500;
         }
 
+        // tracklurl gets set to the url here (the data uri)
         igv.configTrack(this, config);
 
         this.displayMode = config.displayMode || "COLLAPSED";    // COLLAPSED | EXPANDED | SQUISHED
