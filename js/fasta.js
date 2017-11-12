@@ -31,10 +31,16 @@ var igv = (function (igv) {
 
     igv.FastaSequence = function (reference) {
 
-        this.file = reference.fastaURL;
-        this.indexed = reference.indexed !== false;   // Indexed unless it explicitly is not
-        if (this.indexed) {
-            this.indexFile = reference.indexURL || reference.indexFile || this.file + ".fai";
+        if (reference.fastaURL.startsWith('data:')) {
+            this.file = decodeDataUri(reference.fastaURL);
+            this.indexed = false;  // dataURI is by definition not indexed
+            this.isDataURI = true;
+        } else {
+            this.file = reference.fastaURL;
+            this.indexed = reference.indexed !== false;   // Indexed unless it explicitly is not
+            if (this.indexed) {
+                this.indexFile = reference.indexURL || reference.indexFile || this.file + ".fai";
+            }
         }
         this.withCredentials = reference.withCredentials;
         this.config = buildConfig(reference);
@@ -201,8 +207,11 @@ var igv = (function (igv) {
 
         var self = this;
 
-
-        return igv.xhr.load(self.file, igv.buildOptions(self.config)).then(parseFasta)
+        if(this.isDataURI) {
+            return Promise.resolve(parseFasta(this.file));
+        } else {
+            return igv.xhr.load(self.file, igv.buildOptions(self.config)).then(parseFasta)
+        }
 
         function parseFasta(data) {
 
@@ -236,6 +245,12 @@ var igv = (function (igv) {
                 else {
                     currentSeq += nextLine;
                 }
+            }
+            // add last seq
+            if (currentSeq) {
+                self.chromosomeNames.push(currentChr);
+                self.sequences[currentChr] = currentSeq;
+                self.chromosomes[currentChr] = new igv.Chromosome(currentChr, order++, currentSeq.length);
             }
         }
     }
@@ -311,6 +326,29 @@ var igv = (function (igv) {
                 }
             }).catch(reject)
         });
+    }
+
+    function decodeDataUri(dataUri) {
+        var bytes,
+            split = dataUri.split(','),
+            info = split[0].split(':')[1],
+            dataString = split[1];
+
+        if (info.indexOf('base64') >= 0) {
+            dataString = atob(dataString);
+        } else {
+            dataString = decodeURI(dataString);
+        }
+
+        bytes = new Uint8Array(dataString.length);
+        for (var i = 0; i < dataString.length; i++) {
+            bytes[i] = dataString.charCodeAt(i);
+        }
+
+        var inflate = new Zlib.Gunzip(bytes);
+        var plain = inflate.decompress();
+
+        return String.fromCharCode.apply(null, plain);
     }
 
 
