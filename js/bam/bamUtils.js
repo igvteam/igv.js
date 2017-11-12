@@ -35,6 +35,10 @@ var igv = (function (igv) {
     var BAM1_MAGIC_BYTES = new Uint8Array([0x42, 0x41, 0x4d, 0x01]); // BAM\1
     var BAM1_MAGIC_NUMBER = readInt(BAM1_MAGIC_BYTES, 0);
 
+    const DEFAULT_SAMPLING_WINDOW_SIZE = 100;
+    const DEFAULT_SAMPLING_DEPTH = 50;
+    const MAXIMUM_SAMPLING_DEPTH = 2500;
+
     igv.BamUtils = {
 
         readHeader: function (url, options, genome) {
@@ -189,7 +193,7 @@ var igv = (function (igv) {
          * @param chrNames            array of chromosome names
          * @param filter             a igv.BamFilter object
          */
-        decodeBamRecords: function (ba, offset, alignmentContainer, min, max, chrIdx, chrNames, filter) {
+        decodeBamRecords: function (ba, offset, alignmentContainer,  chrNames, chrIdx, min, max,  filter) {
 
             var blockSize, blockEnd, alignment, blocks, refID, pos, bin_mq_nl, bin, mq, nl, flag_nc, flag, nc, lseq, tlen,
                 mateChrIdx, matePos, readName, j, p, lengthOnRef, cigar, c, cigarArray, seq, seqBytes, qualArray;
@@ -211,10 +215,10 @@ var igv = (function (igv) {
                 if (refID < 0) {
                     continue;   // unmapped read
                 }
-                else if (refID > chrIdx || pos > max) {
+                else if (chrIdx && (refID > chrIdx || pos > max)) {
                     return;    // off right edge, we're done
                 }
-                else if (refID < chrIdx) {
+                else if (chrIdx && (refID < chrIdx)) {
                     continue;   // to left of start, not sure this is possible
                 }
 
@@ -266,7 +270,9 @@ var igv = (function (igv) {
 
                 igv.BamUtils.bam_tag2cigar(ba, blockEnd, p, lseq, alignment, cigarArray);
 
-                if (alignment.start + alignment.lengthOnRef < min) {
+                alignment.end = alignment.start + alignment.lengthOnRef;
+
+                if (alignment.end < min) {
                     offset = blockEnd;
                     continue;
                 }  // Record out-of-range "to the left", skip to next one
@@ -392,6 +398,26 @@ var igv = (function (igv) {
                     alignment.insertions = blocks.insertions;
                     alignmentContainer.push(alignment);
                 }
+            }
+        },
+
+        setReaderDefaults: function (reader, config) {
+
+            reader.filter = config.filter || new igv.BamFilter();
+
+            reader.samplingWindowSize = config.samplingWindowSize === undefined ? DEFAULT_SAMPLING_WINDOW_SIZE : config.samplingWindowSize;
+            reader.samplingDepth = config.samplingDepth === undefined ? DEFAULT_SAMPLING_DEPTH : config.samplingDepth;
+
+            if (reader.samplingDepth > MAXIMUM_SAMPLING_DEPTH) {
+                igv.log("Warning: attempt to set sampling depth > maximum value of 2500");
+                reader.samplingDepth = MAXIMUM_SAMPLING_DEPTH;
+            }
+
+            if (config.viewAsPairs) {
+                reader.pairsSupported = true;
+            }
+            else {
+                reader.pairsSupported = config.pairsSupported === undefined ? true : config.pairsSupported;
             }
         }
     };

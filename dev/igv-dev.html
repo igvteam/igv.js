@@ -31,6 +31,7 @@
     <!-- IGV JS -->
     <script src="../js/bam/coverageMap.js"></script>
     <script src="../js/bam/bamReader.js"></script>
+    <script src="../js/bam/bamReaderNonIndexed.js"></script>
     <script src="../js/bam/bgzf.js"></script>
     <script src="../js/bam/bamSource.js"></script>
     <script src="../js/bam/bamTrack.js"></script>
@@ -180,10 +181,13 @@
                         })">BAM File - deep coverage (Brain, BodyMap)
         </div>
 
+
+
         <div onclick="igv.browser.loadTrack({
                                 type: 'bam',
                                 url: '../test/data/bam/gstt1_sample.bam',
-                                name: 'GSTT1 BAM'})">GSTT1 sample bam
+                                indexed: false,
+                                name: 'GSTT1 BAM'})">GSTT1 sample bam - Not Indexed
         </div>
 
         <div onclick="igv.browser.loadTrack({
@@ -514,10 +518,6 @@
             palette: ["#00A0B0", "#6A4A3C", "#CC333F", "#EB6841"],
             tracks:
                 [
-                    {
-                        url: 'https://data.broadinstitute.org/igvdata/encode/hg19/broadHistone/wgEncodeBroadHistoneGm12878H3k4me2StdSig.wig.tdf',
-                        name: 'GM12878H3k4m3 (tdf)'
-                    },
                     {
                         name: "Genes",
                         searchable: false,
