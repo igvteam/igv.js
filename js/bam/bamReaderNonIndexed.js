@@ -45,7 +45,7 @@ var igv = (function (igv) {
 
         this.bamPath = config.url;
 
-        this.isDataUri = false;            // TODO -- fix this
+        this.isDataUri = this.bamPath.startsWith("data:");
 
         igv.BamUtils.setReaderDefaults(this, config);
 
@@ -59,17 +59,17 @@ var igv = (function (igv) {
 
         if (this.alignmentCache) {
 
-            return fetchAlignments(chr, bpStart, bpEend);
+            return fetchAlignments(chr, bpStart, bpEnd);
         }
 
         else {
 
             if(this.isDataUri)  {
 
-                // data =  decode the data (UInt8Array)
-                // parseAlignments(data)
-                // return Promise.resolve(fetchAlignments(chr, bpStart, bpEnd))
-
+                var data =  decodeDataURI(this.bamPath);
+                var unc = igv.unbgzf(data.buffer);
+                parseAlignments(new Uint8Array(unc));
+                return Promise.resolve(fetchAlignments(chr, bpStart, bpEnd));
             }
             else {
                 return igv.xhr.loadArrayBuffer(self.bamPath, igv.buildOptions(self.config))
@@ -121,9 +121,27 @@ var igv = (function (igv) {
         }
 
 
-
-
     };
+
+    function decodeDataURI(dataURI) {
+        var bytes,
+            split = dataURI.split(','),
+            info = split[0].split(':')[1],
+            dataString = split[1];
+
+        if (info.indexOf('base64') >= 0) {
+            dataString = atob(dataString);
+        } else {
+            dataString = decodeURI(dataString);
+        }
+
+        bytes = new Uint8Array(dataString.length);
+        for (var i = 0; i < dataString.length; i++) {
+            bytes[i] = dataString.charCodeAt(i);
+        }
+
+        return bytes;
+    }
 
 
     return igv;

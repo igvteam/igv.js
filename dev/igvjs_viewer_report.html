@@ -22,7 +22,7 @@
     <script src="../vendor/jquery.mousewheel.js"></script>
     <script src="../vendor/underscore.js"></script>
     <script src="../vendor/inflate.js"></script>
-    <script src="../vendor/zlib_and_gzip.min.js"></script>
+    <script src="../vendor/zlib_and_gzip.js"></script>
     <script src="../vendor/promise.js"></script>
     <script src="../vendor/jquery-ui.js"></script>
 
@@ -40,6 +40,7 @@
     <script src="../js/bam/bamUtils.js"></script>
     <script src="../js/bam/bamWebserviceReader.js"></script>
     <script src="../js/bam/htsgetReader.js"></script>
+    <script src="../js/bam/bamReaderNonIndexed.js"></script>
 
     <script src="../js/bigQuery/ccp.js"></script>
 
@@ -159,7 +160,7 @@
                             showKaryo: false,
                             showNavigation: true,
                             fastaURL: data["finspector.fa"],
-                            cytobandURL: "../test/data/cyto/cytoBand.txt",
+                            cytobandURL: data["cytoBand.txt"], //"../test/data/cyto/cytoBand.txt",
                             tracks: [
                                 {
                                     type: "sequence",
@@ -175,17 +176,16 @@
                                     type: "annotation",
                                     format: "bed"
 
+                                },
+                                {
+                                    url: data["finspector.star.sortedByCoord.out.bam"],
+                                    label: "SupportingReadsBam",
+                                    height: 100,
+                                    indexed: false,
+                                    visibilityWindow: 2000000,
+                                    order: 60,
+                                    type: 'alignment'
                                 }
-
-//                                {
-//                                    url: data["finspector.star.sortedByCoord.out.bam"],
-//                                    label: "SupportingReadsBam",
-//                                    height: 100,
-//                                    indexed: false,
-//                                    visibilityWindow: 2000000,
-//                                    order: 60
-//                                }
-
                             ]
                         };
 
