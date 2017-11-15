@@ -144,12 +144,13 @@ var igv = (function (igv) {
 
         var self = this;
 
-        return new Promise(function (fulfill, reject) {
-            var seq = self.sequences[chr];
-            if (seq && seq.length > end) {
-                fulfill(seq.substring(start, end));
-            }
-        });
+        var seq = self.sequences[chr];
+        if (seq && seq.length >= end) {
+            return Promise.resolve(seq.substring(start, end));
+        } else {
+            return Promise.resolve("");
+        }
+
 
     }
 
@@ -207,7 +208,7 @@ var igv = (function (igv) {
 
         var self = this;
 
-        if(this.isDataURI) {
+        if (this.isDataURI) {
             return Promise.resolve(parseFasta(this.file));
         } else {
             return igv.xhr.load(self.file, igv.buildOptions(self.config)).then(parseFasta)

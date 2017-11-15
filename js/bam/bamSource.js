@@ -32,6 +32,10 @@ var igv = (function (igv) {
         this.alignmentContainer = undefined;
         this.maxRows = config.maxRows || 1000;
 
+        if (config.url.startsWith("data:")) {
+            this.config.indexed = false;
+        }
+
         if ("ga4gh" === config.sourceType) {
             this.bamReader = new igv.Ga4ghAlignmentReader(config);
         } else if ("pysam" === config.sourceType) {
@@ -111,7 +115,9 @@ var igv = (function (igv) {
                             }
                         }).catch(reject);
 
-                }).catch(reject);
+                }).catch(function (error) {
+                    reject(error);
+                });
 
             });
         }

@@ -87,8 +87,14 @@ var igv = (function (igv) {
 
                     var options,
                         success;
-
-                    if (index) {
+                    if (self.dataURI) {
+                        return self.loadFeaturesFromDataURI(self.dataURI)
+                            .then(function (features) {
+                                var header = self.header || {};
+                                header.features = features;
+                                return header;
+                            })
+                    } else if (index) {
 
                         // Load the file header (not HTTP header) for an indexed file.
                         // TODO -- note this will fail if the file header is > 65kb in size
@@ -99,15 +105,7 @@ var igv = (function (igv) {
                                 self.header = self.parser.parseHeader(data);
                                 return self.header
                             });
-
-                    } else if (self.dataURI) {
-                        return self.loadFeaturesFromDataURI(self.dataURI)
-                            .then(function(features) {
-                                var header = self.header || {};
-                                header.features = features;
-                                return header;
-                            })
-                    }   else {
+                    } else {
                         // If this is a non-indexed file we will load all features in advance
                         return self.loadFeaturesNoIndex()
                             .then(function (features) {
@@ -325,7 +323,7 @@ var igv = (function (igv) {
         }
     };
 
-    igv.FeatureFileReader.prototype.loadFeaturesFromDataURI = function() {
+    igv.FeatureFileReader.prototype.loadFeaturesFromDataURI = function () {
         var bytes, inflate, plain, features,
             split = this.dataURI.split(','),
             info = split[0].split(':')[1],
@@ -345,10 +343,7 @@ var igv = (function (igv) {
         inflate = new Zlib.Gunzip(bytes);
         plain = inflate.decompress();
         features = this.parser.parseFeatures(plain);
-        return Promise.resolve(features)
-            .then(function(data) {
-
-            })
+        return Promise.resolve(features);
     };
 
     return igv;

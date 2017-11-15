@@ -279,45 +279,75 @@ var igv = (function (igv) {
     }
 
     function loadCytobands(cytobandUrl, config) {
+        if (cytobandUrl.startsWith("data:")) {
+            var data = decodeDataUri(cytobandUrl);
+            return Promise.resolve(getCytobands(data));
+        } else {
+            return igv.xhr.loadString(cytobandUrl, igv.buildOptions(config))
+                .then(function (data) {
+                    return getCytobands(data);
+                });
+        }
 
-        return igv.xhr.loadString(cytobandUrl, igv.buildOptions(config))
-            .then(function (data) {
+        function getCytobands(data) {
+            var bands = [],
+                lastChr,
+                n = 0,
+                c = 1,
+                lines = data.splitLines(),
+                len = lines.length,
+                cytobands = {};
 
-                var bands = [],
-                    lastChr,
-                    n = 0,
-                    c = 1,
-                    lines = data.splitLines(),
-                    len = lines.length,
-                    cytobands = {};
+            for (var i = 0; i < len; i++) {
+                var tokens = lines[i].split("\t");
+                var chr = tokens[0];
+                if (!lastChr) lastChr = chr;
 
-                for (var i = 0; i < len; i++) {
-                    var tokens = lines[i].split("\t");
-                    var chr = tokens[0];
-                    if (!lastChr) lastChr = chr;
+                if (chr != lastChr) {
 
-                    if (chr != lastChr) {
-
-                        cytobands[lastChr] = bands;
-                        bands = [];
-                        lastChr = chr;
-                        n = 0;
-                        c++;
-                    }
-
-                    if (tokens.length == 5) {
-                        //10	0	3000000	p15.3	gneg
-                        var chr = tokens[0];
-                        var start = parseInt(tokens[1]);
-                        var end = parseInt(tokens[2]);
-                        var name = tokens[3];
-                        var stain = tokens[4];
-                        bands[n++] = new igv.Cytoband(start, end, name, stain);
-                    }
+                    cytobands[lastChr] = bands;
+                    bands = [];
+                    lastChr = chr;
+                    n = 0;
+                    c++;
                 }
 
-                return cytobands;
-            });
+                if (tokens.length == 5) {
+                    //10	0	3000000	p15.3	gneg
+                    var chr = tokens[0];
+                    var start = parseInt(tokens[1]);
+                    var end = parseInt(tokens[2]);
+                    var name = tokens[3];
+                    var stain = tokens[4];
+                    bands[n++] = new igv.Cytoband(start, end, name, stain);
+                }
+            }
+
+            return cytobands;
+        }
+
+        function decodeDataUri(dataUri) {
+            var bytes,
+                split = dataUri.split(','),
+                info = split[0].split(':')[1],
+                dataString = split[1];
+
+            if (info.indexOf('base64') >= 0) {
+                dataString = atob(dataString);
+            } else {
+                dataString = decodeURI(dataString);
+            }
+
+            bytes = new Uint8Array(dataString.length);
+            for (var i = 0; i < dataString.length; i++) {
+                bytes[i] = dataString.charCodeAt(i);
+            }
+
+            var inflate = new Zlib.Gunzip(bytes);
+            var plain = inflate.decompress();
+
+            return String.fromCharCode.apply(null, plain);
+        }
     }
 
     function loadAliases(aliasURL, config) {
