@@ -974,7 +974,7 @@ var igv = (function (igv) {
      * @param viewportContainerWidth - viewport width in pixels
      * @param continuation - callback to received the list of genomic states
      */
-    igv.Browser.prototype.getGenomicStateList = function (loci, viewportContainerWidth, continuation) {
+    igv.Browser.prototype.getGenomicStateList = function (loci) {
 
         var self = this,
             searchConfig = igv.browser.searchConfig,
@@ -1505,9 +1505,11 @@ var igv = (function (igv) {
     }
 
 
-    ////////////////////////////////// legacy ///////////////////////////////////////////
+
+
 
     /**
+     * Public API search function
      *
      * @param feature
      * @param callback - function to call
@@ -1555,7 +1557,7 @@ var igv = (function (igv) {
 
                 if (url.indexOf("$GENOME$") > -1) {
                     var genomeId = this.genome.id ? this.genome.id : "hg19";
-                    url.replace("$GENOME$", genomeId);
+                    url = url.replace("$GENOME$", genomeId);
                 }
 
                 igv.xhr.loadString(url).then(function (data) {
