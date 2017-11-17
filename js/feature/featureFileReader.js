@@ -132,17 +132,7 @@ var igv = (function (igv) {
 
     };
 
-    igv.FeatureFileReader.prototype.isIndexable = function () {
-        var hasIndexURL,
-            isValidType,
-            isIndexed;
 
-        hasIndexURL = (undefined !== this.config.indexURL);
-        isValidType = (this.format !== 'wig' && this.format !== 'seg');
-        isIndexed = (false !== this.config.indexed);
-
-        return isIndexed && (hasIndexURL || isValidType);
-    };
 
     /**
      * Return a Promise for the async loaded index
@@ -297,7 +287,8 @@ var igv = (function (igv) {
             return Promise.resolve(self.index);
         }
 
-        if (self.isIndexable()) {
+        if (self.indexURL || self.indexed) {
+
             return self.loadIndex()
                 .then(function (indexOrUndefined) {
                     if (indexOrUndefined) {
@@ -311,8 +302,7 @@ var igv = (function (igv) {
                 .catch(function (error) {
                     self.indexed = false;
                     if (error.message === '404' && self.config.indexURL === undefined) {
-                        // This is an expected condition -- ignore
-                        return undefined;
+                        igv.presentAlert("Index file not found.  Check track configuration")
                     } else {
                         throw error;
                     }
