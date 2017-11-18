@@ -95,14 +95,9 @@ var igv = (function (igv) {
             .retrieveData(browser.genome.id)
             .then(function (data) {
 
-                self.$spinner.hide();
-
                 console.log('modaltable. then. received data ' + _.size(data) + '. begin building table ...');
 
                 self.datasource.data = data;
-                self.tableWithDataAndColumns(self.datasource.tableData(data), self.datasource.tableColumns());
-
-                console.log('... done building table');
 
                 self.config.$modal.on('show.bs.modal', function (e) {
 
@@ -116,6 +111,15 @@ var igv = (function (igv) {
 
                     if (undefined === browser) {
                         self.config.$modal.modal('hide');
+                    } else {
+
+                        console.log('building table ...');
+
+                        self.$spinner.hide();
+                        self.tableWithDataAndColumns(self.datasource.tableData(data), self.datasource.tableColumns());
+
+                        console.log('... done building table');
+
                     }
 
                 });
