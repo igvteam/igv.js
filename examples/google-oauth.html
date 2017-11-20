@@ -1,15 +1,24 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="utf-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
-    <meta name="description" content="">
-    <meta name="author" content="">
-    <link rel="shortcut icon" href=../img/favicon.ico>
-    <title>IGV - Dev</title>
-    <link rel="import" href="./shared-css.html">
-    <link rel="import" href="./shared-js.html">
+    <!-- jQuery UI CSS -->
+    <link rel="stylesheet" type="text/css"
+          href="https://ajax.googleapis.com/ajax/libs/jqueryui/1.11.2/themes/smoothness/jquery-ui.css"/>
+
+    <!-- Font Awesome CSS -->
+    <link rel="stylesheet" type="text/css" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.2.0/css/font-awesome.min.css">
+
+    <!-- IGV CSS -->
+    <link rel="stylesheet" type="text/css" href="https://igv.org/web/release/1.0.9/igv-1.0.9.css">
+
+    <!-- jQuery JS -->
+    <script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
+
+    <script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jqueryui/1.11.2/jquery-ui.min.js"></script>
+
+    <!-- IGV JS-->
+    <script type="text/javascript" src="https://igv.org/web/release/1.0.9/igv-1.0.9.js"></script>
+
     <script src="https://apis.google.com/js/platform.js"></script>
 </head>
 
@@ -20,13 +29,13 @@
     <script>
 
         function handleSignInClick(event) {
-
+            gapi.auth2.getAuthInstance().signIn();
         }
 
         function updateSigninStatus(isSignedIn) {
 
             var user = gapi.auth2.getAuthInstance().currentUser.get();
-            igv.setGoogleOauthToken(user.getAuthResponse().access_token);
+            oauth.google.access_token = user.getAuthResponse().access_token;
 
         }
 
@@ -34,11 +43,10 @@
 
             var auth2 = gapi.auth2.getAuthInstance();
             auth2.signOut().then(function () {
-                igv.setGoogleOauthToken(undefined);
+                oauth.google.access_token = undefined;
                 console.log('User signed out.');
             });
         }
-
     </script>
 
     <div id="signInButton" style="display:none;" class="g-signin2" data-onsuccess="handleSignInClick"></div>

@@ -44,7 +44,7 @@ var igv = (function (igv) {
                 url = options.url,
                 body = options.body,
                 decode = options.decode,
-                apiKey = oauth.google.apiKey,
+                apiKey = igv.oauth.google.apiKey,
                 paramSeparator = "?",
                 fields = options.fields;  // Partial response
 
@@ -254,7 +254,7 @@ var igv = (function (igv) {
     function ga4ghHeaders() {
 
         var headers = {},
-            acToken = oauth.google.access_token;
+            acToken = igv.oauth.google.access_token || oauth.google.access_token;
 
         headers["Cache-Control"] = "no-cache";
         if (acToken) {
