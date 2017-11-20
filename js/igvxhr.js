@@ -385,7 +385,7 @@ var igv = (function (igv) {
         {
             headers["Cache-Control"] = "no-cache";
 
-            var acToken = oauth.google.access_token;       // TODO -- generalize
+            var acToken = igv.oauth.google.access_token || oauth.google.access_token;
             if (acToken && !headers.hasOwnProperty("Authorization")) {
                 headers["Authorization"] = "Bearer " + acToken;
             }
