@@ -38,6 +38,7 @@ var igv = (function (igv) {
         teardownModalDOM(config);
         this.$table = $('<table cellpadding="0" cellspacing="0" border="0" class="display"></table>');
         config.$modalBody.append(this.$table);
+        this.doBuildTable = true;
 
         this.$spinner = $('<div>');
         this.$table.append(this.$spinner);
@@ -111,15 +112,15 @@ var igv = (function (igv) {
 
                     if (undefined === browser) {
                         self.config.$modal.modal('hide');
-                    } else {
+                    } else if (true === self.doBuildTable) {
 
                         console.log('building table ...');
-
-                        self.$spinner.hide();
                         self.tableWithDataAndColumns(self.datasource.tableData(data), self.datasource.tableColumns());
-
                         console.log('... done building table');
 
+                        self.$spinner.hide();
+
+                        self.doBuildTable = false;
                     }
 
                 });
