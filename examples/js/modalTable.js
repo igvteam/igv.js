@@ -95,7 +95,7 @@ var igv = (function (igv) {
             .retrieveData(browser.genome.id)
             .then(function (data) {
 
-                console.log('modaltable. then. received data ' + _.size(data) + '. begin building table ...');
+                console.log('modaltable. then. received data ' + _.size(data));
 
                 self.datasource.data = data;
 
