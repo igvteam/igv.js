@@ -62,7 +62,7 @@ var igv = (function (igv) {
             {
                 headers["Cache-Control"] = "no-cache";
 
-                var acToken = oauth.google.access_token;
+                var acToken = igv.oauth.google.access_token || oauth.google.access_token;
                 if (acToken && !headers.hasOwnProperty("Authorization")) {
                     headers["Authorization"] = "Bearer " + acToken;
                 }
@@ -74,7 +74,7 @@ var igv = (function (igv) {
 
         addApiKey: function (url) {
 
-            var apiKey = oauth.google.apiKey,
+            var apiKey = igv.oauth.google.apiKey,
                 paramSeparator = url.includes("?") ? "&" : "?";
 
             if (apiKey !== undefined && !url.includes("key=")) {

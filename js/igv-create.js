@@ -206,12 +206,22 @@ var igv = (function (igv) {
 
     };
 
+    //@deprecated -- user setGoogleApiKey
     igv.setApiKey = function (key) {
-        oauth.google.apiKey = key;
+        igv.oauth.google.apiKey = key;
     }
 
+    igv.setGoogleApiKey = function (key) {
+        igv.oauth.google.apiKey = key;
+    }
+
+    //@deprecated -- use setGoogleOauthToken
     igv.setOauthToken = function (token) {
-        oauth.google.access_token = token;
+        igv.oauth.google.access_token = token;
+    }
+
+    igv.setGoogleOauthToken = function (token) {
+        igv.oauth.google.access_token = token;
     }
 
     function setTrackOrder(conf) {

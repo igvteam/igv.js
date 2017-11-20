@@ -1,6 +1,6 @@
 function runGa4ghTests() {
 
-    oauth.google.apiKey = 'AIzaSyDUUAUFpQEN4mumeMNIRWXSiTh5cPtUAD0';
+    igv.oauth.google.apiKey = 'AIzaSyDUUAUFpQEN4mumeMNIRWXSiTh5cPtUAD0';
 
     asyncTest("variantSet metadata", function () {
 
