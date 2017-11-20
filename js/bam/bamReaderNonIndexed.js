@@ -45,7 +45,7 @@ var igv = (function (igv) {
 
         this.bamPath = config.url;
 
-        this.isDataUri = this.bamPath.startsWith("data:");
+        this.isDataUri = config.url && config.url.startsWith("data:");
 
         igv.BamUtils.setReaderDefaults(this, config);
 
