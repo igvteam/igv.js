@@ -440,10 +440,10 @@ var igv = (function (igv) {
     };
 
     /**
-     * Crude test for google urls.  For optimization, nothing bad happens if this is wrong
+     * Crude test for google urls.
      */
     function isGoogleURL(url) {
-        return url.includes("googleapis");
+        return url.includes("googleapis")  && !url.includes("urlshortener");
     }
 
 // Increments an anonymous usage count.  Count is anonymous, needed for our continued funding.  Please don't delete
