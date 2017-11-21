@@ -38,6 +38,7 @@ var igv = (function (igv) {
         teardownModalDOM(config);
         this.$table = $('<table cellpadding="0" cellspacing="0" border="0" class="display"></table>');
         config.$modalBody.append(this.$table);
+        this.doRetrieveData = true;
         this.doBuildTable = true;
 
         this.$spinner = $('<div>');
@@ -88,63 +89,83 @@ var igv = (function (igv) {
     igv.ModalTable.prototype.loadData = function () {
 
         var self = this,
-            browser;
+            browser,
+            $hic_track_dropdown;
+
+        $hic_track_dropdown = $('#hic-track-dropdown');
 
         browser = this.config.browserRetrievalFunction();
 
+        this.$spinner.show();
+        $hic_track_dropdown.prop('disabled', true);
         this.datasource
             .retrieveData(browser.genome.id)
             .then(function (data) {
-
                 console.log('modaltable. then. received data ' + _.size(data));
-
                 self.datasource.data = data;
+                self.doRetrieveData = false;
 
-                self.config.$modal.on('show.bs.modal', function (e) {
+                self.buildTable(true);
+                $hic_track_dropdown.prop('disabled', false);
+            })
+            .catch(function (e) {
+                self.$spinner.hide();
+                $hic_track_dropdown.prop('disabled', false);
+                self.buildTable(false);
+            });
+    };
 
-                    if (undefined === browser) {
-                        igv.presentAlert('ERROR: must provide browser retrieval function');
-                    }
+    igv.ModalTable.prototype.buildTable = function (success) {
 
-                });
+        var self = this;
 
-                self.config.$modal.on('shown.bs.modal', function (e) {
+        if (true === success) {
 
-                    if (undefined === browser) {
-                        self.config.$modal.modal('hide');
-                    } else if (true === self.doBuildTable) {
+            this.config.$modal.on('shown.bs.modal', function (e) {
 
-                        console.log('building table ...');
-                        self.tableWithDataAndColumns(self.datasource.tableData(data), self.datasource.tableColumns());
-                        console.log('... done building table');
+                if (true === self.doBuildTable) {
 
-                        self.$spinner.hide();
+                    console.log('building table ...');
+                    // self.$spinner.show();
 
-                        self.doBuildTable = false;
-                    }
+                    self.tableWithDataAndColumns(self.datasource.tableData(self.datasource.data), self.datasource.tableColumns());
 
-                });
+                    console.log('... done building table');
+                    self.$spinner.hide();
 
-                self.config.$modalTopCloseButton.on('click', function () {
-                    $('tr.selected').removeClass('selected');
-                });
-
-                self.config.$modalBottomCloseButton.on('click', function () {
-                    $('tr.selected').removeClass('selected');
-                });
-
-                self.config.$modalGoButton.on('click', function () {
-                    var selected;
-
-                    selected = getSelectedTableRowsData.call(self, self.$dataTables.$('tr.selected'));
-
-                    if (selected) {
-                        browser[ self.config.browserLoadFunction ](selected);
-                    }
-
-                });
+                    self.doBuildTable = false;
+                }
 
             });
+
+            this.config.$modalGoButton.on('click', function () {
+                var selected,
+                    browser;
+
+                selected = getSelectedTableRowsData.call(self, self.$dataTables.$('tr.selected'));
+
+                browser = self.config.browserRetrievalFunction();
+
+                if (selected) {
+                    browser[ self.config.browserLoadFunction ](selected);
+                }
+
+            });
+
+        } else {
+            this.config.$modal.on('shown.bs.modal', function (e) {
+                igv.presentAlert('No ENCODE data available');
+                self.config.$modal.modal('hide');
+            });
+        }
+
+        this.config.$modalTopCloseButton.on('click', function () {
+            $('tr.selected').removeClass('selected');
+        });
+
+        this.config.$modalBottomCloseButton.on('click', function () {
+            $('tr.selected').removeClass('selected');
+        });
 
     };
 

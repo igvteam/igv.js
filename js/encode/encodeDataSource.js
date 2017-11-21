@@ -50,13 +50,6 @@ var igv = (function (igv) {
             .then(function (data) {
                 data.sort(encodeSort);
                 return Promise.resolve(data);
-            })
-            .catch(function (e) {
-                var str;
-                str = e.toString() + ' unable to access Encode Project with assembly ' + genomeID;
-                igv.presentAlert(str);
-                continuation(undefined);
-
             });
     };
 
