@@ -38,6 +38,8 @@ var igv = (function (igv) {
         var uriParts;
 
         this.config = config || {};
+        this.indexURL = config.indexURL;
+        this.indexed = config.indexed;
 
         if (igv.isFilePath(this.config.url)) {
             this.filename = this.config.url.name;
@@ -283,7 +285,7 @@ var igv = (function (igv) {
     igv.FeatureFileReader.prototype.getIndex = function () {
 
         var self = this;
-        if (self.index !== undefined || self.config.indexed === false) {
+        if (self.index !== undefined || self.indexed === false) {
             return Promise.resolve(self.index);
         }
 
