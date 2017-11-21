@@ -146,6 +146,13 @@ var igv = (function (igv) {
             path = igv.isFilePath(config.url) ? config.url.name : config.url;
             fn = path.toLowerCase();
 
+            // Special case -- UCSC refgene files
+            if(fn.endsWith("refgene.txt.gz") || fn.endsWith("refgene.txt")) {
+                config.format = "refgene";
+                return;
+            }
+
+
             //Strip parameters -- handle local files later
             idx = fn.indexOf("?");
             if (idx > 0) {
@@ -155,7 +162,9 @@ var igv = (function (igv) {
             //Strip aux extensions .gz, .tab, and .txt
             if (fn.endsWith(".gz")) {
                 fn = fn.substr(0, fn.length - 3);
-            } else if (fn.endsWith(".txt") || fn.endsWith(".tab")) {
+            }
+
+            if (fn.endsWith(".txt") || fn.endsWith(".tab")) {
                 fn = fn.substr(0, fn.length - 4);
             }
 
@@ -164,7 +173,6 @@ var igv = (function (igv) {
             ext = idx < 0 ? fn : fn.substr(idx + 1);
 
             switch (ext.toLowerCase()) {
-
                 case "bw":
                     config.format = "bigwig";
                     break;
