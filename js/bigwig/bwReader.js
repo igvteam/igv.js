@@ -801,10 +801,6 @@ var igv = (function (igv) {
             chromStart = binaryParser.getInt();
             chromEnd = binaryParser.getInt();
 
-            if (chromId < chrIdx1 || (chromId === chrIdx1 && chromEnd < bpStart)) continue;
-            if (chromId > chrIdx2 || (chromId === chrIdx2 && chromStart >= bpEnd)) break;
-
-
             validCount = binaryParser.getInt();
             minVal = binaryParser.getFloat();
             maxVal = binaryParser.getFloat();
