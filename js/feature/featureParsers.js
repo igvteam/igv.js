@@ -835,7 +835,6 @@ var igv = (function (igv) {
     }
 
 
-
     // Data might be a string, or an UInt8Array
     var StringDataWrapper = function (string) {
         this.data = string;
@@ -846,9 +845,18 @@ var igv = (function (igv) {
         //return this.split(/\r\n|\n|\r/gm);
         var start = this.ptr,
             idx = this.data.indexOf('\n', start);
-        this.ptr = idx + 1;
-        return idx < 0 || idx === start ? undefined : this.data.substring(start, idx);
+
+        if (idx > 0) {
+            this.ptr = idx + 1;   // Advance pointer for next line
+            return idx === start ? undefined : this.data.substring(start, idx).trim();
+        }
+        else {
+            // Last line
+            this.ptr = this.data.length;
+            return (start >= this.data.length) ? undefined : this.data.substring(start).trim();
+        }
     }
+
 
     var ByteArrayDataWrapper = function (array) {
         this.data = array;

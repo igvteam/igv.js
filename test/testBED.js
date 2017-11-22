@@ -19,6 +19,86 @@ function runBedTests() {
         }
     };
 
+    // asyncTest("Missing line feed", function () {
+    //
+    //     var chr = "chr1",
+    //         bpStart = 0,
+    //         bpEnd = Number.MAX_VALUE,
+    //         featureSource = new igv.FeatureSource({
+    //             format: 'bed',
+    //             indexed: false,
+    //             url: 'data/bed/missing_linefeed.bed'
+    //         });
+    //
+    //     // Must get file header first
+    //     featureSource.getFeatures(chr, bpStart, bpEnd)
+    //         .then(function (features) {
+    //
+    //             equal(4, features.length);   // feature count. Determined by grepping file
+    //
+    //             start();
+    //         })
+    //         .catch(function (error) {
+    //             console.log(error);
+    //         });
+    // });
+
+    asyncTest("Missing line feed  - gzipped", function () {
+
+        var chr = "chr1",
+            bpStart = 0,
+            bpEnd = Number.MAX_VALUE,
+            featureSource = new igv.FeatureSource({
+                format: 'bed',
+                indexed: false,
+                url: 'data/bed/missing_linefeed.bed.gz'
+            });
+
+        // Must get file header first
+        featureSource.getFeatures(chr, bpStart, bpEnd)
+            .then(function (features) {
+
+                equal(4, features.length);   // feature count. Determined by grepping file
+
+                start();
+            })
+            .catch(function (error) {
+                console.log(error);
+            });
+    });
+
+    asyncTest("Missing line feed  - block gzipped", function () {
+        var config = {
+            format: 'bed',
+            url: 'data/bed/missing_linefeed.bed.gz',
+            indexURL: 'data/bed/missing_linefeed.bed.gz.tbi'
+        }
+
+        var tb = new igv.FeatureFileReader(config);
+
+        var chr = "chr1",
+            bpStart = 0,
+            bpEnd = Number.MAX_VALUE;
+
+        tb.readHeader()
+            .then(function (header) {
+
+                tb.readFeatures(chr, bpStart, bpEnd)
+                    .then(function (features) {
+
+                        equal(4, features.length);   // feature count. Determined by grepping file
+
+                        start();
+                    });
+            })
+            .catch(function (error) {
+                console.log(Error('query tabix error: ') + error);
+                console.log(error.stack);
+            });
+
+    });
+
+
     asyncTest("BED query", function () {
 
         var chr = "chr1",
