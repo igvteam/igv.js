@@ -45,7 +45,7 @@ var igv = (function (igv) {
 
         // add black
         dev_null = rgbs.shift();
-        rgbs.unshift(igv.Color.rgbColor(32, 32, 32));
+        rgbs.push(igv.Color.rgbColor(16, 16, 16));
 
         rgbs.forEach(function (rgb) {
             var $swatch;
