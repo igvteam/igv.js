@@ -44,7 +44,7 @@ var igv = (function (igv) {
         }
 
         // add black
-        dev_null = rgbs.shift();
+        dev_null = rgbs.pop();
         rgbs.push(igv.Color.rgbColor(16, 16, 16));
 
         rgbs.forEach(function (rgb) {
