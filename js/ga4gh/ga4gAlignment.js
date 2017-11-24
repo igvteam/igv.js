@@ -253,29 +253,6 @@ var igv = (function (igv) {
     }
 
 
-    function translateCigar(cigar) {
-
-        var cigarUnit, opLen, opLtr,
-            lengthOnRef = 0,
-            cigarArray = [];
-
-        for (i = 0; i < cigar.length; i++) {
-
-            cigarUnit = cigar[i];
-
-            opLtr = CigarOperationTable[cigarUnit.operation];
-            opLen = parseInt(cigarUnit.operationLength);    // TODO -- this should be a long by the spec
-
-            if (opLtr == 'M' || opLtr == 'EQ' || opLtr == 'X' || opLtr == 'D' || opLtr == 'N' || opLtr == '=')
-                lengthOnRef += opLen;
-
-            cigarArray.push({len: opLen, ltr: opLtr});
-
-        }
-
-        return {lengthOnRef: lengthOnRef, array: cigarArray};
-    }
-
 
     /**
      * Split the alignment record into blocks as specified in the cigarArray.  Each aligned block contains

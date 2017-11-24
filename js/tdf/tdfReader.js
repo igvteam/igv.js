@@ -94,7 +94,7 @@ var igv = (function (igv) {
             })
             .then(function (data) {
 
-                binaryParser = new igv.BinaryParser(new DataView(data));
+                var binaryParser = new igv.BinaryParser(new DataView(data));
 
                 self.datasetIndex = {};
                 var nEntries = binaryParser.getInt();
@@ -343,7 +343,7 @@ var igv = (function (igv) {
     }
 
     function createBed(binaryParser, nTracks, type) {
-        var nPositions, start, end, nS, data, name, n, nt;
+        var nPositions, start, end, nS, data, name, n, nt, np, dtrack;
 
         nPositions = binaryParser.getInt();
 

@@ -509,24 +509,23 @@ var igv = (function (igv) {
                     }
                 });
 
-            function renderControlCanvasWithTrackView(trackView) {
-                var buffer2;
+        }
 
-                buffer2 = document.createElement('canvas');
-                buffer2.width = trackView.controlCanvas.width;
-                buffer2.height = trackView.controlCanvas.height;
+        function renderControlCanvasWithTrackView(trackView) {
+            var buffer2;
 
-                trackView.track.paintAxis(buffer2.getContext('2d'), buffer2.width, buffer2.height);
+            buffer2 = document.createElement('canvas');
+            buffer2.width = trackView.controlCanvas.width;
+            buffer2.height = trackView.controlCanvas.height;
 
-                trackView.controlCtx.drawImage(buffer2, 0, 0);
+            trackView.track.paintAxis(buffer2.getContext('2d'), buffer2.width, buffer2.height);
 
-            }
+            trackView.controlCtx.drawImage(buffer2, 0, 0);
 
-            function doRenderControlCanvas(genomicState, trackView) {
-                return (/*0 === genomicState.locusIndex &&*/ trackView.track.paintAxis && trackView.controlCanvas.width > 0 && trackView.controlCanvas.height > 0);
-            }
+        }
 
-
+        function doRenderControlCanvas(genomicState, trackView) {
+            return (/*0 === genomicState.locusIndex &&*/ trackView.track.paintAxis && trackView.controlCanvas.width > 0 && trackView.controlCanvas.height > 0);
         }
 
         function viewIsReady() {
