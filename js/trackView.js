@@ -118,7 +118,8 @@ var igv = (function (igv) {
     igv.TrackScrollbar = function ($viewportContainer, viewports) {
 
         var self = this,
-            offY;
+            offY,
+            contentDivHeight;
 
         contentDivHeight = maxContentHeightWithViewports(viewports);
 

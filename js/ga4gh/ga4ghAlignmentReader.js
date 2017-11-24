@@ -194,7 +194,8 @@ var igv = (function (igv) {
                     cigarDecoded,
                     alignments = [],
                     genome = igv.browser.genome,
-                    mate;
+                    mate,
+                    blocks;
 
                 for (i = 0; i < len; i++) {
 
