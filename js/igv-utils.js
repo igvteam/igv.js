@@ -578,7 +578,7 @@ var igv = (function (igv) {
             oauth: config.oauth
         };
 
-        return _.extend(defaultOptions, options);
+        return options ? Object.assign(defaultOptions, options): defaultOptions;
     };
 
     return igv;
