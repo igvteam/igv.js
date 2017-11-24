@@ -492,6 +492,7 @@ var igv = (function (igv) {
             //log("=== loadfeatures of chr " + chr + ", x=" + guichrom.x);
 
             source.getSummary(chr, start, end, function (featureList) {
+                var len;
                 if (featureList) {
                     len = featureList.length;
                     //log(" -->- loaded: chrom " + chr + " with " + len + " summary features, drawing them");

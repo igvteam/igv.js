@@ -203,7 +203,7 @@ var igv = (function (igv) {
             vGap = (this.displayMode === 'EXPANDED') ? this.expandedVGap : this.squishedVGap,
             groupGap = (this.displayMode === 'EXPANDED') ? this.expandedGroupGap : this.squishedGroupGap,
             px, px1, pw, py, h, style, i, variant, call, callSet, j, k, group, allRef, allVar, callSets, nCalls,
-            firstAllele, secondAllele, lowColorScale, highColorScale, period, callsDrawn;
+            firstAllele, secondAllele, lowColorScale, highColorScale, period, callsDrawn, len, variantColors;
 
         this.variantBandHeight = 10 + this.nRows * (this.variantHeight + vGap);
 
@@ -344,15 +344,7 @@ var igv = (function (igv) {
                                         ctx.strokeRect(px, py, pw, h);
                                     }
 
-                                    function getFillColor(allele) {
-                                        if (allele.length < variant.referenceBases.length) {
-                                            return lowColorScale.getColor(allele.length);
-                                        } else if (allele.length > variant.referenceBases.length) {
-                                            return highColorScale.getColor(allele.length);
-                                        } else {
-                                            return "rgb(150,150,150)"; // gray for reference length
-                                        }
-                                    }
+
                                 }
                             }
                             callsDrawn++;
@@ -363,6 +355,16 @@ var igv = (function (igv) {
         }
         else {
             console.log("No feature list");
+        }
+
+        function getFillColor(allele) {
+            if (allele.length < variant.referenceBases.length) {
+                return lowColorScale.getColor(allele.length);
+            } else if (allele.length > variant.referenceBases.length) {
+                return highColorScale.getColor(allele.length);
+            } else {
+                return "rgb(150,150,150)"; // gray for reference length
+            }
         }
 
     };
