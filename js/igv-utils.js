@@ -170,9 +170,15 @@ var igv = (function (igv) {
         return $button;
     };
 
-    igv.presentAlert = function (string) {
+    igv.presentAlert = function (obj) {
 
-        console.trace();
+        //console.trace();
+
+        var string = obj.message || obj;
+
+        if(httpMessages.hasOwnProperty(string)) {
+            string = httpMessages[string];
+        }
         
         igv.alert.$dialogLabel.text(string);
         igv.alert.show(undefined);
@@ -180,6 +186,13 @@ var igv = (function (igv) {
         igv.popover.hide();
 
     };
+
+    var httpMessages = {
+        "401": "Access unauthorized",
+        "403": "Access forbidden",
+        "404": "Not found"
+    }
+
 
     igv.attachDialogCloseHandlerWithParent = function ($parent, closeHandler) {
 
