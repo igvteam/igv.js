@@ -35,7 +35,7 @@ var igv = (function (igv) {
 
         url = mapUrl(url);
 
-        if (!options) options = {};
+        options = options ||  {};
 
         if (!options.oauthToken) {
             return getLoadPromise(url, options);
@@ -62,6 +62,7 @@ var igv = (function (igv) {
         }
 
         function getLoadPromise(url, options) {
+
             return new Promise(function (fullfill, reject) {
 
                 var xhr = new XMLHttpRequest(),
@@ -207,10 +208,11 @@ var igv = (function (igv) {
 
     igv.xhr.loadArrayBuffer = function (url, options) {
 
+        options = options || {};
+
         if (url instanceof File) {
             return loadFileSlice(url, options);
         } else {
-            if (options === undefined) options = {};
             options.responseType = "arraybuffer";
             return igv.xhr.load(url, options);
         }
@@ -219,6 +221,8 @@ var igv = (function (igv) {
 
     igv.xhr.loadJson = function (url, options) {
 
+        options = options || {};
+        
         var method = options.method || (options.sendData ? "POST" : "GET");
 
         if (method == "POST") options.contentType = "application/json";
@@ -240,6 +244,9 @@ var igv = (function (igv) {
     };
 
     igv.xhr.loadString = function (path, options) {
+
+        options = options || {};
+
         if (path instanceof File) {
             return loadStringFromFile(path, options);
         } else {
