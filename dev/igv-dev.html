@@ -324,7 +324,7 @@
 
     $(document).ready(function () {
         var div,
-                options;
+            options;
 
         div = $("#myDiv")[0];
         options = {
@@ -336,8 +336,9 @@
             showCursorTrackingGuide: false,
             showRuler: true,
 //            locus: ['egfr', 'myc', 'pten'],
-            locus: 'all',
+//            locus: 'all',
 //            locus: '1:120,777,648-128,566,728',
+            locus: '1',
             reference: {
                 id: "hg19",
                 fastaURL: "https://s3.amazonaws.com/igv.broadinstitute.org/genomes/seq/1kg_v37/human_g1k_v37_decoy.fasta",
@@ -345,21 +346,33 @@
             },
             flanking: 1000,
             apiKey: 'AIzaSyDUUAUFpQEN4mumeMNIRWXSiTh5cPtUAD0',
-            palette: ["#00A0B0", "#6A4A3C", "#CC333F", "#EB6841"],
-            tracks: [
-                {
-                    name: "Genes",
-                    searchable: false,
-                    type: "annotation",
-                    format: "gtf",
-                    sourceType: "file",
-                    url: "https://s3.amazonaws.com/igv.broadinstitute.org/annotations/hg19/genes/gencode.v18.annotation.sorted.gtf.gz",
-                    indexURL: "https://s3.amazonaws.com/igv.broadinstitute.org/annotations/hg19/genes/gencode.v18.annotation.sorted.gtf.gz.tbi",
-                    visibilityWindow: 10000000,
-                    order: Number.MAX_VALUE,
-                    displayMode: "EXPANDED"
-                }
-            ]
+            palette:
+                [
+                    "#00A0B0",
+                    "#6A4A3C",
+                    "#CC333F",
+                    "#EB6841"
+                ],
+            tracks:
+                [
+                    {
+                        url: 'http://hgdownload.cse.ucsc.edu/goldenPath/hg19/encodeDCC/wgEncodeBroadHistone/wgEncodeBroadHistoneGm12878H3k4me3StdSig.bigWig',
+                        name: 'ENCODE - BigWig'
+                    },
+                    {
+
+                        name: "Genes",
+                        searchable: false,
+                        type: "annotation",
+                        format: "gtf",
+                        sourceType: "file",
+                        url: "https://s3.amazonaws.com/igv.broadinstitute.org/annotations/hg19/genes/gencode.v18.annotation.sorted.gtf.gz",
+                        indexURL: "https://s3.amazonaws.com/igv.broadinstitute.org/annotations/hg19/genes/gencode.v18.annotation.sorted.gtf.gz.tbi",
+                        visibilityWindow: 10000000,
+                        order: Number.MAX_VALUE,
+                        displayMode: "EXPANDED"
+                    }
+                ]
         };
 
         igv.createBrowser(div, options);
