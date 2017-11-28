@@ -88,13 +88,9 @@ var igv = (function (igv) {
                     p = [],
                     NTRACKS = 1;   // TODO read this
 
-                for (i = startTile; i <= endTile; i++) {
-                    if (dataset.tiles[i] !== undefined) {
-                        p.push(self.reader.readTile(dataset.tiles[i], NTRACKS));
-                    }
-                }
+                
+                return self.reader.readTiles(dataset.tiles.slice(startTile, endTile + 1), NTRACKS);
 
-                return Promise.all(p);
             })
 
             .then(function (tiles) {

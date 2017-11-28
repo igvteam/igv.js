@@ -392,6 +392,83 @@ var igv = (function (igv) {
 
     }
 
+    igv.TDFReader.prototype.readTiles = function (tileIndeces, nTracks) {
+
+        var self = this;
+        
+        tileIndeces.sort(function (a, b) {
+            return a.position - b.position;
+        })
+        
+        tileIndeces = tileIndeces.filter(function (idx) {return idx.size > 0;});
+
+        if(tileIndeces.length === 0) {
+            return Promise.resolve([]);
+        }
+
+        var firstEntry = tileIndeces[0];
+        var lastEntry = tileIndeces[tileIndeces.length - 1];
+        var position = firstEntry.position;
+        var size = (lastEntry.position + lastEntry.size) - position;
+
+
+
+        return igv.xhr.loadArrayBuffer(self.path, igv.buildOptions(self.config, {
+            range: {
+                start: position,
+                size: size
+            }
+        }))
+            .then(function (data) {
+
+                var tiles = [];
+
+                // Loop through and decode tiles
+                tileIndeces.forEach(function (indexEntry) {
+
+                    var start = indexEntry.position - position;
+                    var size = indexEntry.size;
+                    if (size > 0) {
+                        var tileData;
+
+                        if (self.compressed) {
+                            var inflate = new Zlib.Inflate(new Uint8Array(data, start, size));
+                            var plain = inflate.decompress();
+                            tileData = plain.buffer;
+                        } else {
+                            tileData = data.slice(start, start + size);
+                        }
+
+
+                        var binaryParser = new igv.BinaryParser(new DataView(tileData));
+                        var type = binaryParser.getString();
+                        var tile;
+
+                        switch (type) {
+                            case "fixedStep":
+                                tile = createFixedStep(binaryParser, nTracks);
+                                break;
+                            case "variableStep":
+                                tile = createVariableStep(binaryParser, nTracks);
+                                break;
+                            case "bed":
+                            case "bedWithName":
+                                tile = createBed(binaryParser, nTracks, type);
+                                break;
+                            default:
+                                throw "Unknown tile type: " + type;
+                        }
+
+                        tiles.push(tile);
+                    }
+                });
+
+                return tiles;
+
+            });
+
+        // Read raw data for all tiles into a buffer
+    }
 
     igv.TDFReader.prototype.readTile = function (indexEntry, nTracks) {
 
