@@ -35,18 +35,27 @@ var igv = (function (igv) {
 
         this.windowFunction = config.windowFunction || "mean";
         this.reader = new igv.TDFReader(config);
+        this.featureCache = [];
     };
 
     igv.TDFSource.prototype.getFeatures = function (chr, bpStart, bpEnd, bpPerPixel) {
 
         var self = this,
             featureCache = self.featureCache,
-            genomicInterval = new igv.GenomicInterval(chr, bpStart, bpEnd);
+            cache,
+            genomicInterval = new igv.GenomicInterval(chr, bpStart, bpEnd),
+            i;
 
         genomicInterval.bpPerPixel = bpPerPixel;
 
-        if (featureCache && featureCache.range.bpPerPixel === bpPerPixel && featureCache.range.containsRange(genomicInterval)) {
-            return Promise.resolve(self.featureCache.queryFeatures(chr, bpStart, bpEnd));
+        if (featureCache) {
+
+            for (i = 0; i < featureCache.length; i++) {
+                cache = featureCache[i];
+                if (cache.range.bpPerPixel === bpPerPixel && cache.range.containsRange(genomicInterval)) {
+                    return Promise.resolve(cache.queryFeatures(chr, bpStart, bpEnd));
+                }
+            }
         }
 
         return self.reader.readRootGroup()
@@ -92,7 +101,7 @@ var igv = (function (igv) {
 
                 var features = [];
 
-                tiles.forEach( function (tile) {
+                tiles.forEach(function (tile) {
                     switch (tile.type) {
                         case "bed":
                             decodeBedTile(tile, chr, bpStart, bpEnd, bpPerPixel, features);
@@ -107,13 +116,24 @@ var igv = (function (igv) {
                             reject("Unknown tile type: " + tile.type);
                             return;
                     }
+                });
+
+                features.sort(function (a, b) {
+                    return a.start - b.start;
                 })
 
-                // Note -- replacing feature cache
-                self.featureCache = new igv.FeatureCache(features, genomicInterval);
+                cache = new igv.FeatureCache(features, genomicInterval);
+
+                // Limit to 2 caches for now
+                if (self.featureCache.length < 2) {
+                    self.featureCache.push(cache);
+                }
+                else {
+                    self.featureCache[1] = self.featureCache[0];
+                    self.featureCache[0] = cache;
+                }
 
                 return features;
-
             })
     }
 
@@ -179,16 +199,18 @@ var igv = (function (igv) {
 
             var e = s + span;
 
-            if (e < bpStart) continue;
             if (s > bpEnd) break;
 
-            if (!Number.isNaN(data[i])) {
-                features.push({
-                    chr: chr,
-                    start: s,
-                    end: e,
-                    value: data[i]
-                });
+            if (e >= bpStart) {
+
+                if (!Number.isNaN(data[i])) {
+                    features.push({
+                        chr: chr,
+                        start: s,
+                        end: e,
+                        value: data[i]
+                    });
+                }
             }
 
             s = e;
