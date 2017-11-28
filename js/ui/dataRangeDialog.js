@@ -179,6 +179,11 @@ var igv = (function (igv) {
             if(isNaN(min) || isNaN(max)) {
                 igv.presentAlert("Must input numeric values");
             } else {
+
+                if (true === trackView.track.autoscale) {
+                    $('#datarange-autoscale').trigger('click');
+                }
+
                 trackView.setDataRange(min, max, false);
             }
 
