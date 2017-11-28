@@ -129,16 +129,16 @@ var igv = (function (igv) {
 
     };
 
+
     igv.FeatureParser.prototype.parseHeader = function (data) {
 
-        var lines = data.splitLines(),
-            len = lines.length,
-            line,
-            i,
-            header;
+        var line,
+            header,
+            dataWrapper;
 
-        for (i = 0; i < len; i++) {
-            line = lines[i];
+        dataWrapper = getDataWrapper(data);
+
+        while (line = dataWrapper.nextLine()) {
             if (line.startsWith("track") || line.startsWith("#") || line.startsWith("browser")) {
                 if (line.startsWith("track")) {
                     header = parseTrackLine(line);
@@ -160,10 +160,9 @@ var igv = (function (igv) {
 
         if (!data) return null;
 
-        var wig,
+        var dataWrapper,
+            wig,
             feature,
-            lines = data.splitLines(),
-            len = lines.length,
             tokens,
             allFeatures = [],
             line,
@@ -174,9 +173,12 @@ var igv = (function (igv) {
             format = this.format,
             delimiter = this.delimiter || "\t";
 
+        dataWrapper = getDataWrapper(data);
+        i = 0;
 
-        for (i = this.skipRows; i < len; i++) {
-            line = lines[i];
+        while (line = dataWrapper.nextLine()) {
+            if (i < this.skipRows) continue;
+
             if (line.startsWith("track") || line.startsWith("#") || line.startsWith("browser")) {
                 continue;
             }
@@ -189,7 +191,7 @@ var igv = (function (igv) {
                 continue;
             }
 
-            tokens = lines[i].split(delimiter);
+            tokens = line.split(delimiter);
             if (tokens.length < 1) {
                 continue;
             }
@@ -209,6 +211,7 @@ var igv = (function (igv) {
                 }
                 cnt++;
             }
+            i++;
         }
 
         return allFeatures;
@@ -324,7 +327,7 @@ var igv = (function (igv) {
         }
         if (tokens.length > 8) {
             if (tokens[8] !== "." && tokens[8] !== "0")
-                feature.color = igv.createColorString(tokens[8]);
+                feature.color = igv.Color.createColorString(tokens[8]);
         }
         if (tokens.length > 11) {
             exonCount = parseInt(tokens[9]);
@@ -369,7 +372,7 @@ var igv = (function (igv) {
 
         var shift = this.shift === undefined ? 0 : 1;
 
-        if(tokens.length < 9 + shift) return undefined;
+        if (tokens.length < 9 + shift) return undefined;
 
         var feature = {
                 name: tokens[0 + shift],
@@ -399,6 +402,7 @@ var igv = (function (igv) {
         return feature;
 
     }
+
     /**
      * Decode a UCSC "genePredExt" record.  refGene files are in this format.
      *
@@ -410,7 +414,7 @@ var igv = (function (igv) {
 
         var shift = this.shift === undefined ? 0 : 1;
 
-        if(tokens.length < 11 + shift) return undefined;
+        if (tokens.length < 11 + shift) return undefined;
 
         var feature = {
                 name: tokens[11 + shift],
@@ -451,7 +455,7 @@ var igv = (function (igv) {
 
         var shift = this.shift === undefined ? 0 : 1;
 
-        if(tokens.length < 10 + shift) return undefined;
+        if (tokens.length < 10 + shift) return undefined;
 
         var feature = {
                 name: tokens[0 + shift],
@@ -731,7 +735,7 @@ var igv = (function (igv) {
                 }
                 if ("ID" === t[0]) id = t[1];
                 else if ("Parent" === t[0]) parent = t[1];
-                else if ("color" === t[0].toLowerCase()) color = igv.createColorString(t[1]);
+                else if ("color" === t[0].toLowerCase()) color = igv.Color.createColorString(t[1]);
                 else if ("transcript_id" === t[0]) id = t[1];     // gtf format
                 attributes[key] = value;
             }
@@ -819,6 +823,63 @@ var igv = (function (igv) {
 
         return feature;
 
+    }
+
+    function getDataWrapper(data) {
+
+        if (typeof(data) == 'string' || data instanceof String) {
+            return new StringDataWrapper(data);
+        } else {
+            return new ByteArrayDataWrapper(data);
+        }
+    }
+
+
+    // Data might be a string, or an UInt8Array
+    var StringDataWrapper = function (string) {
+        this.data = string;
+        this.ptr = 0;
+    }
+
+    StringDataWrapper.prototype.nextLine = function () {
+        //return this.split(/\r\n|\n|\r/gm);
+        var start = this.ptr,
+            idx = this.data.indexOf('\n', start);
+
+        if (idx > 0) {
+            this.ptr = idx + 1;   // Advance pointer for next line
+            return idx === start ? undefined : this.data.substring(start, idx).trim();
+        }
+        else {
+            // Last line
+            this.ptr = this.data.length;
+            return (start >= this.data.length) ? undefined : this.data.substring(start).trim();
+        }
+    }
+
+
+    var ByteArrayDataWrapper = function (array) {
+        this.data = array;
+        this.length = this.data.length;
+        this.ptr = 0;
+    }
+
+    ByteArrayDataWrapper.prototype.nextLine = function () {
+
+        var c, result;
+        result = "";
+
+        if (this.ptr >= this.length) return undefined;
+
+        for (var i = this.ptr; i < this.length; i++) {
+            c = String.fromCharCode(this.data[i]);
+            if (c === '\r') continue;
+            if (c === '\n') break;
+            result = result + c;
+        }
+
+        this.ptr = i + 1;
+        return result;
     }
 
 

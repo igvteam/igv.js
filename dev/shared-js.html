@@ -1,20 +1,14 @@
-<!-- jQuery JS -->
-<script src="https://code.jquery.com/jquery-1.12.4.min.js"></script>
-
-<!-- jQuery UI JS -->
-<script src="https://code.jquery.com/ui/1.12.1/jquery-ui.min.js"></script>
-
-<!-- Underscore JS -->
+<!-- 3rd party JS -->
 <script src="../vendor/underscore.js"></script>
-
-<!-- Vendor JS -->
+<script type="text/javascript" src="../vendor/jquery-1.12.4.js"></script>
+<script type="text/javascript" src="../vendor/jquery-ui.js"></script>
+<script type="text/javascript" src="../vendor/zlib_and_gzip.js"></script>
 <script type="text/javascript" src="../vendor/inflate.js"></script>
-<script type="text/javascript" src="../vendor/zlib_and_gzip.min.js"></script>
 <script type="text/javascript" src="../vendor/jquery.mousewheel.js"></script>
 <script type="text/javascript" src="../vendor/promise.js"></script>
-<script type="text/javascript" src="../vendor/jquery.kinetic.min.js"></script>
 
 <!-- IGV JS -->
+<script type="text/javascript" src="../js/sampleInformation.js"></script>
 <script type="text/javascript" src="../js/igv-create.js"></script>
 <script type="text/javascript" src="../js/browser.js"></script>
 <script type="text/javascript" src="../js/ideogram.js"></script>
@@ -30,12 +24,14 @@
 
 <script type="text/javascript" src="../js/feature/featureTrack.js"></script>
 <script type="text/javascript" src="../js/variant/variantTrack.js"></script>
+<script type="text/javascript" src="../js/igv-math.js"></script>
 <script type="text/javascript" src="../js/igv-color.js"></script>
 <script type="text/javascript" src="../js/igv-utils.js"></script>
 <script type="text/javascript" src="../js/parseUtils.js"></script>
 <script type="text/javascript" src="../js/fasta.js"></script>
 <script type="text/javascript" src="../js/sequenceTrack.js"></script>
 <script type="text/javascript" src="../js/feature/wigTrack.js"></script>
+<script type="text/javascript" src="../js/feature/featureUtils.js"></script>
 
 <script type="text/javascript" src="../js/igv-exts.js"></script>
 <script type="text/javascript" src="../js/igvxhr.js"></script>
@@ -57,6 +53,9 @@
 <script type="text/javascript" src="../js/bam/bamIndex.js"></script>
 <script type="text/javascript" src="../js/bam/alignmentContainer.js"></script>
 <script type="text/javascript" src="../js/bam/pairedAlignment.js"></script>
+<script type="text/javascript" src="../js/bam/bamUtils.js"></script>
+<script type="text/javascript" src="../js/bam/bamWebserviceReader.js"></script>
+<script type="text/javascript" src="../js/bam/htsgetReader.js"></script>
 
 <script type="text/javascript" src="../js/ga4gh/ga4ghAlignmentReader.js"></script>
 <script type="text/javascript" src="../js/ga4gh/ga4ghVariantReader.js"></script>
@@ -72,9 +71,12 @@
 <script type="text/javascript" src="../js/feature/tribble.js"></script>
 <script type="text/javascript" src="../js/feature/featureFileReader.js"></script>
 <script type="text/javascript" src="../js/feature/customServiceReader.js"></script>
+<script type="text/javascript" src="../js/feature/ucscServiceReader.js"></script>
 
 <script type="text/javascript" src="../js/feature/aneuSource.js"></script>
 <script type="text/javascript" src="../js/feature/aneuTrack.js"></script>
+
+<script type="text/javascript" src="../js/feature/mergedTrack.js"></script>
 
 <script type="text/javascript" src="../js/karyo/karyo.js"></script>
 <script type="text/javascript" src="../js/gwas/t2dVariantSource.js"></script>
@@ -86,11 +88,8 @@
 <script type="text/javascript" src="../js/variant/variant.js"></script>
 
 <script type="text/javascript" src="../js/bigwig/bufferedReader.js"></script>
-<script type="text/javascript" src="../js/bigwig/bwBPTree.js"></script>
 <script type="text/javascript" src="../js/bigwig/bwReader.js"></script>
-<script type="text/javascript" src="../js/bigwig/bwRPTree.js"></script>
 <script type="text/javascript" src="../js/bigwig/bwSource.js"></script>
-<script type="text/javascript" src="../js/bigwig/bwTotalSummary.js"></script>
 
 <script type="text/javascript" src="../js/tdf/tdfReader.js"></script>
 <script type="text/javascript" src="../js/tdf/tdfSource.js"></script>
@@ -101,7 +100,6 @@
 <script type="text/javascript" src="../js/set.js"></script>
 
 <script type="text/javascript" src="../js/ui/trackMenuPopupDialog.js"></script>
-<script type="text/javascript" src="../js/ui/colorpicker.js"></script>
 <script type="text/javascript" src="../js/ui/dataRangeDialog.js"></script>
 <script type="text/javascript" src="../js/ui/dialog.js"></script>
 <script type="text/javascript" src="../js/ui/alertDialog.js"></script>
@@ -109,9 +107,15 @@
 <script type="text/javascript" src="../js/ui/userFeedback.js"></script>
 <script type="text/javascript" src="../js/ui/alertDialog.js"></script>
 <script type="text/javascript" src="../js/ui/popover.js"></script>
+<script type="text/javascript" src="../js/ui/chromosomeSelectWidget.js"></script>
 
 <script src="../js/encode/encodeDataSource.js"></script>
-<script src="../js/encode/encodeTableFormat.js"></script>
-<script src="../js/ui/igvModalTable.js"></script>
+<script src="../examples/js/modalTable.js"></script>
+
+<script type="text/javascript" src="../js/roi.js"></script>
+<script type="text/javascript" src="../js/roiSource.js"></script>
+
+<script type="text/javascript" src="../js/session/igvXmlSession.js"></script>
+
 
 <script src="../js/oauth/google.js"></script>

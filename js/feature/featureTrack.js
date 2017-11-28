@@ -27,6 +27,15 @@ var igv = (function (igv) {
 
     igv.FeatureTrack = function (config) {
 
+        if(config.height === undefined) {
+            config.height = 50;
+        }
+        // Set maxRows -- protects against pathological feature packing cases (# of rows of overlapping feaures)
+        if (config.maxRows === undefined) {
+            config.maxRows = 500;
+        }
+
+        // tracklurl gets set to the url here (the data uri)
         igv.configTrack(this, config);
 
         this.displayMode = config.displayMode || "COLLAPSED";    // COLLAPSED | EXPANDED | SQUISHED
@@ -38,13 +47,10 @@ var igv = (function (igv) {
 
         this.featureHeight = config.featureHeight || 14;
 
-        // Set maxRows -- protects against pathological feature packing cases (# of rows of overlapping feaures)
-        if (config.maxRows === undefined) {
-            config.maxRows = 500;
-        }
+
         this.maxRows = config.maxRows;
 
-        if ( config.url &&
+        if (config.url &&
             (
                 igv.filenameOrURLHasSuffix(config.url, '.bigbed') || igv.filenameOrURLHasSuffix(config.url, '.bb')
                 ||
@@ -63,11 +69,16 @@ var igv = (function (igv) {
             this.render = renderVariant;
             this.homvarColor = "rgb(17,248,254)";
             this.hetvarColor = "rgb(34,12,253)";
-        }
-        else if ("FusionJuncSpan" === config.type) {
+        } else if ("FusionJuncSpan" === config.type) {
             this.render = renderFusionJuncSpan;
             this.height = config.height || 50;
             this.autoHeight = false;
+        }
+        else if ('snp' === config.type) {
+            this.render = renderSnp;
+            // colors ordered based on priority least to greatest
+            this.snpColors = ['rgb(0,0,0)', 'rgb(0,0,255)', 'rgb(0,255,0)', 'rgb(255,0,0)'];
+            this.colorBy = 'function';
         }
         else {
             this.render = renderFeature;
@@ -80,44 +91,39 @@ var igv = (function (igv) {
     };
 
     igv.FeatureTrack.prototype.getFileHeader = function () {
+
         var self = this;
-        return new Promise(function (fulfill, reject) {
-            if (typeof self.featureSource.getFileHeader === "function") {
-                self.featureSource
-                    .getFileHeader()
-                    .then(function (header) {
 
-                        if (header) {
-                            // Header (from track line).  Set properties,unless set in the config (config takes precedence)
-                            if (header.name && !self.config.name) {
-                                self.name = header.name;
-                            }
-                            if (header.color && !self.config.color) {
-                                self.color = "rgb(" + header.color + ")";
-                            }
+        if (typeof self.featureSource.getFileHeader === "function") {
+
+            return self.featureSource.getFileHeader()
+
+                .then(function (header) {
+
+                    if (header) {
+                        // Header (from track line).  Set properties,unless set in the config (config takes precedence)
+                        if (header.name && !self.config.name) {
+                            self.name = header.name;
                         }
-                        fulfill(header);
+                        if (header.color && !self.config.color) {
+                            self.color = "rgb(" + header.color + ")";
+                        }
+                    }
+                    return header;
 
-                    })
-                    .catch(function (error) {
-                        reject(error);
-                    });
-            }
-            else {
-                fulfill(null);
-            }
-        });
+                })
+        }
+        else {
+            return null;
+        }
+
+
     };
 
     igv.FeatureTrack.prototype.getFeatures = function (chr, bpStart, bpEnd, bpPerPixel) {
 
-        var self = this;
+        return this.featureSource.getFeatures(chr, bpStart, bpEnd, bpPerPixel);
 
-        return new Promise(function (fulfill, reject) {
-
-            self.featureSource.getFeatures(chr, bpStart, bpEnd, bpPerPixel).then(fulfill).catch(reject);
-
-        });
     };
 
 
@@ -129,6 +135,7 @@ var igv = (function (igv) {
      * @returns {*}
      */
     igv.FeatureTrack.prototype.computePixelHeight = function (features) {
+        var height;
 
         if (this.displayMode === "COLLAPSED") {
             return this.variantHeight;
@@ -138,11 +145,15 @@ var igv = (function (igv) {
             if (features && (typeof features.forEach === "function")) {
                 features.forEach(function (feature) {
 
-                    if (feature.row && feature.row > maxRow) maxRow = feature.row;
+                    if (feature.row && feature.row > maxRow) {
+                        maxRow = feature.row;
+                    }
 
                 });
             }
-            return Math.max(this.variantHeight, (maxRow + 1) * (this.displayMode === "SQUISHED" ? this.squishedCallHeight : this.expandedCallHeight));
+
+            height = Math.max(this.variantHeight, (maxRow + 1) * ("SQUISHED" === this.displayMode ? this.squishedCallHeight : this.expandedCallHeight));
+            return height;
 
         }
 
@@ -173,7 +184,7 @@ var igv = (function (igv) {
                 if (gene.end < bpStart) continue;
                 if (gene.start > bpEnd) break;
 
-                if(!selectedFeature && selectedFeatureName && selectedFeatureName === gene.name.toUpperCase()) {
+                if (!selectedFeature && selectedFeatureName && selectedFeatureName === gene.name.toUpperCase()) {
                     selectedFeature = gene;
                 }
                 else {
@@ -181,7 +192,7 @@ var igv = (function (igv) {
                 }
             }
 
-            if(selectedFeature) {
+            if (selectedFeature) {
                 c = selectedFeature.color;
                 selectedFeature.color = "rgb(255,0,0)";
                 track.render.call(this, selectedFeature, bpStart, bpPerPixel, pixelHeight, ctx, options);
@@ -208,30 +219,51 @@ var igv = (function (igv) {
         // feature is not already loaded this won't work,  but the user wouldn't be mousing over it either.
         if (this.featureSource.featureCache) {
 
-            var chr = referenceFrame.chrName,
-                tolerance = 2 * referenceFrame.bpPerPixel,  // We need some tolerance around genomicLocation, start with +/- 2 pixels
-                featureList = this.featureSource.featureCache.queryFeatures(chr, genomicLocation - tolerance, genomicLocation + tolerance),
-                row;
+            var tolerance,
+                featureList,
+                row,
+                popupData,
+                ss,
+                ee,
+                str,
+                filtered,
+                mapped;
+
+            // We need some tolerance around genomicLocation, start with +/- 2 pixels
+            tolerance = 2 * referenceFrame.bpPerPixel;
+            ss = genomicLocation - tolerance;
+            ee = genomicLocation + tolerance;
+            featureList = this.featureSource.featureCache.queryFeatures(referenceFrame.chrName, ss, ee);
 
             if ('COLLAPSED' !== this.displayMode) {
-                row = 'SQUISHED' === this.displayMode ? Math.floor(yOffset / this.squishedCallHeight) : Math.floor(yOffset / this.expandedCallHeight);
+                row = 'SQUISHED' === this.displayMode ? Math.floor((yOffset - 2) / this.expandedCallHeight) : Math.floor((yOffset - 5) / this.squishedCallHeight);
             }
 
             if (featureList && featureList.length > 0) {
 
+                // filtered = _.filter(featureList, function (ff) {
+                //     return ff.end >= ss && ff.start <= ee;
+                // });
+                //
+                // mapped = _.map(filtered, function (f) {
+                //     return f.row;
+                // });
+                //
+                // str = mapped.join(' ');
 
-                var popupData = [];
+                popupData = [];
                 featureList.forEach(function (feature) {
-                    if (feature.end >= genomicLocation - tolerance &&
-                        feature.start <= genomicLocation + tolerance) {
+                    var featureData;
 
-                        // If row number is specified use it
+                    if (feature.end >= ss && feature.start <= ee) {
+
+                        // console.log('row ' + row + ' feature-rows ' + str + ' features ' + _.size(featureList));
+
                         if (row === undefined || feature.row === undefined || row === feature.row) {
-                            var featureData;
+
                             if (feature.popupData) {
                                 featureData = feature.popupData(genomicLocation);
-                            }
-                            else {
+                            } else {
                                 featureData = extractPopupData(feature);
                             }
                             if (featureData) {
@@ -276,9 +308,21 @@ var igv = (function (igv) {
             menuItems = [],
             mapped;
 
-        menuItems.push(igv.colorPickerMenuItem(popover, this.trackView));
+        if (this.render === renderSnp) {
+            var colorByItems = (["function", "class"]).map( function (colorScheme, index) {
+                return {
+                    object: $(colorSchemeMarkup(colorScheme, index, self.colorBy)),
+                    click: function () {
+                        popover.hide();
+                        self.colorBy = colorScheme;
+                        self.trackView.update();
+                    }
+                }
+            });
+            menuItems = menuItems.concat(colorByItems);
+        }
 
-        mapped = _.map(["COLLAPSED", "SQUISHED", "EXPANDED"], function(displayMode, index) {
+        mapped = (["COLLAPSED", "SQUISHED", "EXPANDED"]).map(function (displayMode, index) {
             return {
                 object: $(markupStringified(displayMode, index, self.displayMode)),
                 click: function () {
@@ -297,22 +341,87 @@ var igv = (function (igv) {
                 chosen;
 
             lut =
-                {
-                    "COLLAPSED": "Collapse",
-                    "SQUISHED": "Squish",
-                    "EXPANDED": "Expand"
-                };
+            {
+                "COLLAPSED": "Collapse",
+                "SQUISHED": "Squish",
+                "EXPANDED": "Expand"
+            };
 
             chosen = (0 === index) ? '<div class="igv-track-menu-border-top">' : '<div>';
             if (displayMode === selfDisplayMode) {
-                return chosen + '<i class="fa fa-check fa-check-shim"></i>' + lut[ displayMode ] + '</div>'
+                return chosen + '<i class="fa fa-check fa-check-shim"></i>' + lut[displayMode] + '</div>'
             } else {
-                return chosen + '<i class="fa fa-check fa-check-shim fa-check-hidden"></i>' + lut[ displayMode ] + '</div>';
+                return chosen + '<i class="fa fa-check fa-check-shim fa-check-hidden"></i>' + lut[displayMode] + '</div>';
             }
 
         }
 
+        function colorSchemeMarkup(colorScheme, index, selfColorScheme) {
+            var chosen = (0 === index) ? '<div class="igv-track-menu-border-top">' : '<div>';
+            if (colorScheme === selfColorScheme) {
+                return chosen + '<i class="fa fa-check fa-check-shim"></i>' + 'Color by ' + colorScheme + '</div>'
+            } else {
+                return chosen + '<i class="fa fa-check fa-check-shim fa-check-hidden"></i>' + 'Color by ' + colorScheme + '</div>';
+            }
+        }
+
         return menuItems;
+
+    };
+
+
+    igv.FeatureTrack.prototype.popupMenuItemList = function (config) {
+        if (this.render === renderSnp) {
+
+            var menuItems = [], self = this;
+
+            menuItems.push({
+                name: 'Color by function',
+                click: function () {
+                    setColorBy('function');
+                }
+            });
+            menuItems.push({
+                name: 'Color by class',
+                click: function () {
+                    setColorBy('class');
+                }
+            });
+
+            return menuItems;
+
+        }
+
+        function setColorBy(value) {
+            self.colorBy = value;
+            self.trackView.update();
+            config.popover.hide();
+        }
+    };
+
+    igv.FeatureTrack.prototype.description = function () {
+
+        var desc;
+
+        // if('snp' === this.type) {
+        if (renderSnp === this.render) {
+            desc = "<html>" + this.name + "<hr>";
+            desc += '<em>Color By Function:</em><br>';
+            desc += '<span style="color:red">Red</span>: Coding-Non-Synonymous, Splice Site<br>';
+            desc += '<span style="color:green">Green</span>: Coding-Synonymous<br>';
+            desc += '<span style="color:blue">Blue</span>: Untranslated<br>';
+            desc += '<span style="color:black">Black</span>: Intron, Locus, Unknown<br><br>';
+            desc += '<em>Color By Class:</em><br>';
+            desc += '<span style="color:red">Red</span>: Deletion<br>';
+            desc += '<span style="color:green">Green</span>: MNP<br>';
+            desc += '<span style="color:blue">Blue</span>: Microsatellite, Named<br>';
+            desc += '<span style="color:black">Black</span>: Indel, Insertion, SNP';
+            desc += "</html>";
+            return desc;
+        }
+        else {
+            return this.name;
+        }
 
     };
 
@@ -486,10 +595,9 @@ var igv = (function (igv) {
         }
 
 
-
         textFitsInBox = (boxX1 - boxX) > ctx.measureText(feature.name).width;
 
-        if ( (feature.name !== undefined && feature.name.toUpperCase() === selectedFeatureName) ||
+        if ((feature.name !== undefined && feature.name.toUpperCase() === selectedFeatureName) ||
             ((textFitsInBox || geneColor) && this.displayMode !== "SQUISHED" && feature.name !== undefined)) {
             geneFontStyle = {
                 font: '10px PT Sans',
@@ -646,6 +754,104 @@ var igv = (function (igv) {
 
     }
 
+    /**
+     *
+     * @param snp
+     * @param bpStart  genomic location of the left edge of the current canvas
+     * @param xScale  scale in base-pairs per pixel
+     * @param pixelHeight  pixel height of the current canvas
+     * @param ctx  the canvas 2d context
+     */
+    function renderSnp(snp, bpStart, xScale, pixelHeight, ctx) {
+
+        var coord = calculateFeatureCoordinates(snp, bpStart, xScale),
+            py = 20,
+            h = 10,
+            colorArrLength = this.snpColors.length,
+            colorPriority;
+
+        switch (this.colorBy) {
+            case 'function':
+                colorPriority = colorByFunc(snp.func);
+                break;
+            case 'class':
+                colorPriority = colorByClass(snp['class']);
+        }
+
+        ctx.fillStyle = this.snpColors[colorPriority];
+        ctx.fillRect(coord.px, py, coord.pw, h);
+
+        // Coloring functions, convert a value to a priority
+
+        function colorByFunc(theFunc) {
+            var funcArray = theFunc.split(',');
+            // possible func values
+            var codingNonSynonSet = new Set(['nonsense', 'missense', 'stop-loss', 'frameshift', 'cds-indel']),
+                codingSynonSet = new Set(['coding-synon']),
+                spliceSiteSet = new Set(['splice-3', 'splice-5']),
+                untranslatedSet = new Set(['untranslated-5', 'untranslated-3']),
+                priorities;
+            // locusSet = new Set(['near-gene-3', 'near-gene-5']);
+            // intronSet = new Set(['intron']);
+
+            priorities = funcArray.map(function (func) {
+                if (codingNonSynonSet.has(func) || spliceSiteSet.has(func)) {
+                    return colorArrLength - 1;
+                } else if (codingSynonSet.has(func)) {
+                    return colorArrLength - 2;
+                } else if (untranslatedSet.has(func)) {
+                    return colorArrLength - 3;
+                } else { // locusSet.has(func) || intronSet.has(func)
+                    return 0;
+                }
+            });
+
+            return priorities.reduce(function (a, b) {
+                return Math.max(a, b);
+            });
+        }
+
+        function colorByClass(cls) {
+            if (cls === 'deletion') {
+                return colorArrLength - 1;
+            } else if (cls === 'mnp') {
+                return colorArrLength - 2;
+            } else if (cls === 'microsatellite' || cls === 'named') {
+                return colorArrLength - 3;
+            } else { // cls === 'single' || cls === 'in-del' || cls === 'insertion'
+                return 0;
+            }
+        }
+    }
+
+    igv.FeatureTrack.prototype.popupMenuItemList = function (config) {
+        if (this.render === renderSnp) {
+
+            var menuItems = [], self = this;
+
+            menuItems.push({
+                name: 'Color by function',
+                click: function () {
+                    setColorBy('function');
+                }
+            });
+            menuItems.push({
+                name: 'Color by class',
+                click: function () {
+                    setColorBy('class');
+                }
+            });
+
+            return menuItems;
+
+        }
+
+        function setColorBy(value) {
+            self.colorBy = value;
+            self.trackView.update();
+            config.popover.hide();
+        }
+    };
 
     return igv;
 

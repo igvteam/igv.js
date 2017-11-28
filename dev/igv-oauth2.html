@@ -10,7 +10,7 @@
     <title>IGV - Dev</title>
     <link rel="import" href="./shared-css.html">
     <link rel="import" href="./shared-js.html">
-    <script src="https://apis.google.com/js/api.js"></script>
+    <script src="https://apis.google.com/js/platform.js"></script>
 </head>
 
 <body>
@@ -20,20 +20,29 @@
     <script>
 
         function handleSignInClick(event) {
-            // Ideally the button should only show up after gapi.client.init finishes, so that this
-            // handler won't be called before OAuth is initialized.
-            gapi.auth2.getAuthInstance().signIn();
+
         }
 
         function updateSigninStatus(isSignedIn) {
 
             var user = gapi.auth2.getAuthInstance().currentUser.get();
-            oauth.google.access_token = user.getAuthResponse().access_token;
+            igv.setGoogleOauthToken(user.getAuthResponse().access_token);
 
         }
 
+        function signOut() {
+
+            var auth2 = gapi.auth2.getAuthInstance();
+            auth2.signOut().then(function () {
+                igv.setGoogleOauthToken(undefined);
+                console.log('User signed out.');
+            });
+        }
+
     </script>
-    <button id="signinbutton" disabled='disabled' onclick="handleSignInClick()">Sign In</button>
+
+    <div id="signInButton" style="display:none;" class="g-signin2" data-onsuccess="handleSignInClick"></div>
+
 
     <p></p>
 
@@ -88,8 +97,7 @@
 
             }).then(function () {
 
-                var $b = $("#signinbutton");
-                $b.removeAttr('disabled');
+                $("#signInButton").show();
 
                 var div, options, browser;
 

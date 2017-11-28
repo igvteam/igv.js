@@ -35,7 +35,7 @@
             // load local file: test/data/bw/chr1.bw
             // or
             // load url: https://data.broadinstitute.org/igvdata/test/data/bigwig/chr1.bw
-            locus: '1:69,945-415,358',
+            locus: '1:67,655,272-67,684,468',
 
             reference: {
                 id: "hg19",
@@ -47,26 +47,19 @@
             palette: ["#00A0B0", "#6A4A3C", "#CC333F", "#EB6841"],
             tracks:
                 [
-//                    {
-//                        name: 'my big bed',
-//                        url: '../test/data/bb/bigBedExample.bb'
-////                        url: 'https://data.broadinstitute.org/igvdata/test/data/bigwig/bigBedExample.bb'
-//                    },
-//                    {
-//                    {
-//                        name: "Genes",
-//                        searchable: false,
-//                        type: "annotation",
-//                        format: "gtf",
-//                        sourceType: "file",
-//                        url: "https://s3.amazonaws.com/igv.broadinstitute.org/annotations/hg19/genes/gencode.v18.annotation.sorted.gtf.gz",
-//                        indexURL: "https://s3.amazonaws.com/igv.broadinstitute.org/annotations/hg19/genes/gencode.v18.annotation.sorted.gtf.gz.tbi",
-//                        visibilityWindow: 10000000,
-//                        order: Number.MAX_VALUE,
-//                        displayMode: "EXPANDED"
-//                    }
-
-            ]
+                    {
+                        name: "Genes",
+                        searchable: false,
+                        type: "annotation",
+                        format: "gtf",
+                        sourceType: "file",
+                        url: "https://s3.amazonaws.com/igv.broadinstitute.org/annotations/hg19/genes/gencode.v18.annotation.sorted.gtf.gz",
+                        indexURL: "https://s3.amazonaws.com/igv.broadinstitute.org/annotations/hg19/genes/gencode.v18.annotation.sorted.gtf.gz.tbi",
+                        visibilityWindow: 10000000,
+                        order: Number.MAX_VALUE,
+                        displayMode: "EXPANDED"
+                    }
+                ]
         };
 
         browser = igv.createBrowser(div, options);

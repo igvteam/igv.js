@@ -31,281 +31,90 @@
 var igv = (function (igv) {
 
     igv.BWSource = function (config) {
-
         this.reader = new igv.BWReader(config);
-        this.bufferedReader = new igv.BufferedReader(config);
+        this.cache = true;
+        this.wgValues = {};
     };
 
-    igv.BWSource.prototype.getFeatures = function (chr, bpStart, bpEnd, bpPerPixel) {
+    igv.BWSource.prototype.getFeatures = function (chr, bpStart, bpEnd, bpPerPixel, windowFunction) {
 
-        var self = this;
+        var self = this,
+            featureCache = self.featureCache,
+            genomicInterval = new igv.GenomicInterval(chr, bpStart, bpEnd);
 
-        return new Promise(function (fulfill, reject) {
+        genomicInterval.bpPerPixel = bpPerPixel;
 
-            self.reader.getZoomHeaders().then(function (zoomLevelHeaders) {
+        if (chr.toLowerCase() === "all") {
+            return self.getWGValues(windowFunction);
+        }
+        else if (featureCache && featureCache.range.bpPerPixel === bpPerPixel && featureCache.range.containsRange(genomicInterval)) {
+            return Promise.resolve(self.featureCache.queryFeatures(chr, bpStart, bpEnd));
+        }
+        else {
 
-                // Select a biwig "zoom level" appropriate for the current resolution
-                var bwReader = self.reader,
-                    bufferedReader = self.bufferedReader,
-                    zoomLevelHeader = zoomLevelForScale(bpPerPixel, zoomLevelHeaders),
-                    treeOffset,
-                    decodeFunction;
+            return self.reader.readFeatures(chr, bpStart, chr, bpEnd, bpPerPixel, windowFunction)
 
-                if (zoomLevelHeader) {
-                    treeOffset = zoomLevelHeader.indexOffset;
-                    decodeFunction = decodeZoomData;
-                } else {
-                    treeOffset = bwReader.header.fullIndexOffset;
-                    if (bwReader.type === "BigWig") {
-                        decodeFunction = decodeWigData;
-                    }
-                    else {
-                        decodeFunction = decodeBedData;
-                    }
-                }
+                .then(function (features) {
 
-                bwReader.loadRPTree(treeOffset).then(function (rpTree) {
+                    // Note -- replacing feature cache
+                    if (self.cache) self.featureCache = new igv.FeatureCache(features, genomicInterval);
 
-                    var chrIdx = self.reader.chromTree.dictionary[chr];
-                    if (chrIdx === undefined) {
-                        fulfill(null);
-                    }
-                    else {
+                    return features;
+                })
 
-                        rpTree.findLeafItemsOverlapping(chrIdx, bpStart, bpEnd).then(function (leafItems) {
-
-                            var promises = [];
-
-                            if (!leafItems || leafItems.length == 0) fulfill([]);
-
-                            leafItems.forEach(function (item) {
-
-                                promises.push(new Promise(function (fulfill, reject) {
-                                    var features = [];
-
-                                    bufferedReader.dataViewForRange({
-                                        start: item.dataOffset,
-                                        size: item.dataSize
-                                    }, true).then(function (uint8Array) {
-
-                                        var inflate = new Zlib.Inflate(uint8Array);
-                                        var plain = inflate.decompress();
-                                        decodeFunction(new DataView(plain.buffer), chr, chrIdx, bpStart, bpEnd, features);
-
-                                        fulfill(features);
-
-                                    }).catch(reject);
-                                }));
-                            });
-
-
-                            Promise.all(promises).then(function (featureArrays) {
-
-                                var i, allFeatures = featureArrays[0];
-                                if(featureArrays.length > 1) {
-                                   for(i=1; i<featureArrays.length; i++) {
-                                       allFeatures = allFeatures.concat(featureArrays[i]);
-                                   }
-                                }  
-                                allFeatures.sort(function (a, b) {
-                                    return a.start - b.start;
-                                })
-
-                                fulfill(allFeatures)
-                            }).catch(reject);
-
-                        }).catch(reject);
-                    }
-                }).catch(reject);
-            }).catch(reject);
-
-
-        });
+        }
     }
-    
-    
+
     igv.BWSource.prototype.getDefaultRange = function () {
-        
-        if(this.reader.totalSummary != undefined) {
+
+        if (this.reader.totalSummary != undefined) {
             return this.reader.totalSummary.defaultRange;
         }
         else {
             return undefined;
         }
-        
-    }
-
-
-    function zoomLevelForScale(bpPerPixel, zoomLevelHeaders) {
-
-        var level = null, i, zl;
-
-        for (i = 0; i < zoomLevelHeaders.length; i++) {
-
-            zl = zoomLevelHeaders[i];
-
-            if (zl.reductionLevel < bpPerPixel) {
-                level = zl;
-                break;
-            }
-        }
-
-        return level;
-    }
-
-    function decodeWigData(data, chr, chrIdx, bpStart, bpEnd, featureArray) {
-
-        var binaryParser = new igv.BinaryParser(data),
-            chromId = binaryParser.getInt(),
-            chromStart = binaryParser.getInt(),
-            chromEnd = binaryParser.getInt(),
-            itemStep = binaryParser.getInt(),
-            itemSpan = binaryParser.getInt(),
-            type = binaryParser.getByte(),
-            reserved = binaryParser.getByte(),
-            itemCount = binaryParser.getUShort(),
-            value;
-
-        if (chromId === chrIdx) {
-
-            while (itemCount-- > 0) {
-
-                switch (type) {
-                    case 1:
-                        chromStart = binaryParser.getInt();
-                        chromEnd = binaryParser.getInt();
-                        value = binaryParser.getFloat();
-                        break;
-                    case 2:
-                        chromStart = binaryParser.getInt();
-                        value = binaryParser.getFloat();
-                        chromEnd = chromStart + itemSpan;
-                        break;
-                    case 3:  // Fixed step
-                        value = binaryParser.getFloat();
-                        chromEnd = chromStart + itemSpan;
-                        chromStart += itemStep;
-                        break;
-
-                }
-
-                if (chromStart >= bpEnd) {
-                    break; // Out of interval
-                } else if (chromEnd > bpStart && Number.isFinite(value)) {
-                    featureArray.push({chr: chr, start: chromStart, end: chromEnd, value: value});
-                }
-
-
-            }
-        }
 
     }
 
-    function decodeZoomData(data, chr, chrIdx, bpStart, bpEnd, featureArray) {
+    igv.BWSource.prototype.getWGValues = function (windowFunction) {
+        var self = this,
+            bpPerPixel,
+            nominalScreenWidth = 500;      // This doesn't need to be precise
 
-        var binaryParser = new igv.BinaryParser(data),
-            minSize = 8 * 4,   // Minimum # of bytes required for a zoom record
-            chromId,
-            chromStart,
-            chromEnd,
-            validCount,
-            minVal,
-            maxVal,
-            sumData,
-            sumSquares,
-            value;
-
-        while (binaryParser.remLength() >= minSize) {
-            chromId = binaryParser.getInt();
-            if (chromId === chrIdx) {
-
-                chromStart = binaryParser.getInt();
-                chromEnd = binaryParser.getInt();
-                validCount = binaryParser.getInt();
-                minVal = binaryParser.getFloat();
-                maxVal = binaryParser.getFloat();
-                sumData = binaryParser.getFloat();
-                sumSquares = binaryParser.getFloat();
-                value = validCount == 0 ? 0 : sumData / validCount;
-
-                if (chromStart >= bpEnd) {
-                    break; // Out of interval
-
-                } else if (chromEnd > bpStart && Number.isFinite(value)) {
-                    featureArray.push({chr: chr, start: chromStart, end: chromEnd, value: value});
-                }
-
-            }
+        if (self.wgValues[windowFunction]) {
+            return Promise.resolve(self.wgValues[windowFunction]);
         }
+        else {
 
-    }
-    
-    function decodeBedData(data, chr, chrIdx, bpStart, bpEnd, featureArray) {
+            bpPerPixel = igv.browser.genome.getGenomeLength() / nominalScreenWidth;
 
-        var binaryParser = new igv.BinaryParser(data),
-            minSize = 3 * 4 + 1,   // Minimum # of bytes required for a bed record
-            chromId,
-            chromStart,
-            chromEnd,
-            rest,
-            tokens,
-            feature,
-            exonCount, exonSizes, exonStarts, exons, eStart, eEnd;
+            return self.reader.readWGFeatures(igv.browser.genome, bpPerPixel, windowFunction)
 
+                .then(function (features) {
 
-        while (binaryParser.remLength() >= minSize) {
+                    var wgValues = [];
 
-            chromId = binaryParser.getInt();
-            if (chromId != chrIdx) continue;
+                    features.forEach(function (f) {
 
-            chromStart = binaryParser.getInt();
-            chromEnd = binaryParser.getInt();
-            rest = binaryParser.getString();
+                        var wgFeature, offset, chr;
 
-            feature = {chr: chr, start: chromStart, end: chromEnd};
+                        chr = f.chr;
+                        offset = igv.browser.genome.getCumulativeOffset(chr);
 
-            if (chromStart < bpEnd && chromEnd >= bpStart) {
-                featureArray.push(feature);
+                        wgFeature = Object.assign({}, f);
+                        wgFeature.chr = "all";
+                        wgFeature.start = offset + f.start;
+                        wgFeature.end = offset + f.end;
+                        wgValues.push(wgFeature);
+                    })
 
-                tokens = rest.split("\t");
+                    self.wgValues[windowFunction] = wgValues;
 
-                if (tokens.length > 0) {
-                    feature.name = tokens[0];
-                }
+                    return wgValues;
 
-                if (tokens.length > 1) {
-                    feature.score = parseFloat(tokens[1]);
-                }
-                if (tokens.length > 2) {
-                    feature.strand = tokens[2];
-                }
-                if (tokens.length > 3) {
-                    feature.cdStart = parseInt(tokens[3]);
-                }
-                if (tokens.length > 4) {
-                    feature.cdEnd = parseInt(tokens[4]);
-                }
-                if (tokens.length > 5) {
-                    if (tokens[5] !== "." && tokens[5] !== "0")
-                        feature.color = igv.createColorString(tokens[5]);
-                }
-                if (tokens.length > 8) {
-                    exonCount = parseInt(tokens[6]);
-                    exonSizes = tokens[7].split(',');
-                    exonStarts = tokens[8].split(',');
-                    exons = [];
+                })
 
-                    for (var i = 0; i < exonCount; i++) {
-                        eStart = start + parseInt(exonStarts[i]);
-                        eEnd = eStart + parseInt(exonSizes[i]);
-                        exons.push({start: eStart, end: eEnd});
-                    }
-
-                    feature.exons = exons;
-                }
-            }
         }
-
     }
 
 

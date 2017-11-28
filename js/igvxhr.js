@@ -33,19 +33,23 @@ var igv = (function (igv) {
 
     igv.xhr.load = function (url, options) {
 
-        if (!options) options = {};
+        url = mapUrl(url);
+
+        options = options ||  {};
 
         if (!options.oauthToken) {
-            return applyOauthToken();
+            return getLoadPromise(url, options);
+        } else {
+
+            var token = _.isFunction(options.oauthToken) ? options.oauthToken() : options.oauthToken;
+
+            if (token.then && _.isFunction(token.then)) {
+                return token.then(applyOauthToken);
+            }
+            else {
+                return applyOauthToken(token);
+            }
         }
-
-        var token = _.isFunction(options.oauthToken) ? options.oauthToken() : options.oauthToken;
-
-        if (token.then && _.isFunction(token.then)) {
-            return token.then(applyOauthToken);
-        }
-
-        return applyOauthToken(token);
 
         ////////////
 
@@ -58,6 +62,7 @@ var igv = (function (igv) {
         }
 
         function getLoadPromise(url, options) {
+
             return new Promise(function (fullfill, reject) {
 
                 var xhr = new XMLHttpRequest(),
@@ -203,10 +208,11 @@ var igv = (function (igv) {
 
     igv.xhr.loadArrayBuffer = function (url, options) {
 
+        options = options || {};
+
         if (url instanceof File) {
             return loadFileSlice(url, options);
         } else {
-            if (options === undefined) options = {};
             options.responseType = "arraybuffer";
             return igv.xhr.load(url, options);
         }
@@ -215,77 +221,39 @@ var igv = (function (igv) {
 
     igv.xhr.loadJson = function (url, options) {
 
+        options = options || {};
+        
         var method = options.method || (options.sendData ? "POST" : "GET");
 
         if (method == "POST") options.contentType = "application/json";
 
         return new Promise(function (fullfill, reject) {
 
-            igv.xhr.load(url, options).then(
-                function (result) {
+            igv.xhr
+                .load(url, options)
+                .then(function (result) {
                     if (result) {
                         fullfill(JSON.parse(result));
                     }
                     else {
                         fullfill(result);
                     }
-                }).catch(reject);
+                })
+                .catch(reject);
         })
     };
 
     igv.xhr.loadString = function (path, options) {
+
+        options = options || {};
+
         if (path instanceof File) {
-            return loadFileHelper(path, options);
+            return loadStringFromFile(path, options);
         } else {
-            return loadURLHelper(path, options);
+            return loadStringFromUrl(path, options);
         }
     };
 
-    igv.xhr.arrayBufferToString = function (arraybuffer, compression) {
-
-        var plain, inflate;
-
-        if (compression === GZIP) {
-            inflate = new Zlib.Gunzip(new Uint8Array(arraybuffer));
-            plain = inflate.decompress();
-        }
-        else if (compression === BGZF) {
-            plain = new Uint8Array(igv.unbgzf(arraybuffer));
-        }
-        else {
-            plain = new Uint8Array(arraybuffer);
-        }
-
-        var result = "";
-        for (var i = 0, len = plain.length; i < len; i++) {
-            result = result + String.fromCharCode(plain[i]);
-        }
-        return result;
-    };
-
-    /**
-     * Crude test for google urls.  For optimization, nothing bad happens if this is wrong
-     */
-    function isGoogleURL(url) {
-        return url.includes("googleapis");
-    }
-
-    function arrayBufferToBits(arraybuffer, compression) {
-
-        var plain,
-            inflate;
-
-        if (compression === GZIP) {
-            inflate = new Zlib.Gunzip(new Uint8Array(arraybuffer));
-            plain = inflate.decompress();
-        } else if (compression === BGZF) {
-            plain = new Uint8Array(igv.unbgzf(arraybuffer));
-        } else {
-            plain = new Uint8Array(arraybuffer);
-        }
-
-        return plain;
-    }
 
     function loadFileSlice(localfile, options) {
 
@@ -334,7 +302,7 @@ var igv = (function (igv) {
 
     }
 
-    function loadFileHelper(localfile, options) {
+    function loadStringFromFile(localfile, options) {
 
         return new Promise(function (fullfill, reject) {
 
@@ -353,7 +321,7 @@ var igv = (function (igv) {
                     compression = NONE;
                 }
 
-                result = igv.xhr.arrayBufferToString(fileReader.result, compression);
+                result = arrayBufferToString(fileReader.result, compression);
 
                 fullfill(result);
 
@@ -370,7 +338,7 @@ var igv = (function (igv) {
 
     }
 
-    function loadURLHelper(url, options) {
+    function loadStringFromUrl(url, options) {
 
         var compression,
             fn,
@@ -396,20 +364,11 @@ var igv = (function (igv) {
             return igv.xhr.load(url, options);
         } else {
             options.responseType = "arraybuffer";
-
-            return new Promise(function (fullfill, reject) {
-
-                igv.xhr
-                    .load(url, options)
-                    .then(
-                        function (data) {
-                            var result = igv.xhr.arrayBufferToString(data, compression);
-                            fullfill(result);
-                        })
-                    .catch(reject)
-            })
+            return igv.xhr.load(url, options)
+                .then(function (data) {
+                    return arrayBufferToString(data, compression);
+                })
         }
-
     }
 
     function isCrossDomain(url) {
@@ -433,7 +392,11 @@ var igv = (function (igv) {
         {
             headers["Cache-Control"] = "no-cache";
 
-            var acToken = oauth.google.access_token;       // TODO -- generalize
+            var acToken = igv.oauth.google.access_token;
+            if (!acToken && typeof oauth !== "undefined") {
+                // Check legacy variable
+                acToken = oauth.google.access_token;
+            }
             if (acToken && !headers.hasOwnProperty("Authorization")) {
                 headers["Authorization"] = "Bearer " + acToken;
             }
@@ -441,6 +404,53 @@ var igv = (function (igv) {
             return headers;
 
         }
+    }
+
+    /**
+     * Perform some well-known url mappings.  For now just handles dropbox urls
+     * @param url
+     */
+    function mapUrl(url) {
+
+        if (url.includes("//www.dropbox.com")) {
+            return url.replace("//www.dropbox.com", "//dl.dropboxusercontent.com");
+        }
+        else if (url.includes("//drive.google.com")) {
+            return igv.Google.driveDownloadURL(url);
+        }
+        else {
+            return url;
+        }
+    }
+
+
+    function arrayBufferToString(arraybuffer, compression) {
+
+        var plain, inflate;
+
+        if (compression === GZIP) {
+            inflate = new Zlib.Gunzip(new Uint8Array(arraybuffer));
+            plain = inflate.decompress();
+        }
+        else if (compression === BGZF) {
+            plain = new Uint8Array(igv.unbgzf(arraybuffer));
+        }
+        else {
+            plain = new Uint8Array(arraybuffer);
+        }
+
+        var result = "";
+        for (var i = 0, len = plain.length; i < len; i++) {
+            result = result + String.fromCharCode(plain[i]);
+        }
+        return result;
+    };
+
+    /**
+     * Crude test for google urls.
+     */
+    function isGoogleURL(url) {
+        return url.includes("googleapis")  && !url.includes("urlshortener");
     }
 
 // Increments an anonymous usage count.  Count is anonymous, needed for our continued funding.  Please don't delete

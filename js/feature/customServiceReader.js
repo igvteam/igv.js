@@ -34,44 +34,48 @@ var igv = (function (igv) {
 
     igv.CustomServiceReader = function (config) {
         this.config = config;
-        
+
         this.supportsWholeGenome = true;
     }
 
     igv.CustomServiceReader.prototype.readFeatures = function (chr, start, end) {
 
 
-        var self = this;
+        var self = this,
+            url = self.config.url,
+            body = self.config.body;
 
-        return new Promise(function (fulfill, reject) {
+        if (chr.toLowerCase() !== "all") {
 
-            var url = self.config.url,
-                body = self.config.body;
+            url = url
+                .replace("$CHR", chr)
+                .replace("$START", start)
+                .replace("$END", end);
 
-            if(body !== undefined && chr.toLowerCase() !== "all") {
-                self.config.body = self.config.body.replace("$CHR", chr);
+            if (body !== undefined) {
+                self.config.body =
+                    self.config.body
+                        .replace("$CHR", chr)
+                        .replace("$START", start)
+                        .replace("$END", end);
+            }
+        }
+
+        return igv.xhr.load(url, self.config).then(function (data) {
+
+            if (data) {
+
+                var results = (typeof self.config.parser === "function") ? self.config.parser(data) : data;
+
+                return results;
+
+            }
+            else {
+                return null;
             }
 
-            igv.xhr.load(url, self.config).then(function (data) {
-
-                if (data) {
-
-                    var results = (typeof self.config.parser === "function") ? self.config.parser(data) : data;
-
-                    fulfill(results);
-
-                }
-                else {
-                    fulfill(null);
-                }
-
-            }).catch(function (error) {
-                reject(error);
-            });
-
-        });
+        })
     }
-
 
 
     return igv;

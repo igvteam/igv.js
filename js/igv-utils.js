@@ -25,6 +25,75 @@
 
 var igv = (function (igv) {
 
+    var self = this;
+
+    igv.genericContainer = function ($parent, config, closeHandler) {
+
+        var $generic_container,
+            $header,
+            $fa;
+
+        $generic_container = $('<div>', { class:'igv-generic-container' });
+        $parent.append($generic_container);
+
+        // width
+        if (config && config.width) {
+            $generic_container.width(config.width);
+        }
+
+        // height
+        if (config && config.height) {
+            $generic_container.height(config.height);
+        }
+
+        // height
+        if (config && config.classes) {
+            $generic_container.addClass( config.classes.join(' ') );
+        }
+
+        // header
+        $header = $('<div>');
+        $generic_container.append($header);
+
+        // close button
+        $fa = $("<i>", { class:'fa fa-times' });
+        $header.append($fa);
+
+        $fa.on('click', function (e) {
+            closeHandler();
+        });
+
+        return $generic_container;
+    };
+
+    igv.makeDraggable = function ($target, $handle) {
+        $handle.on('mousedown', function (event) {
+
+            event.preventDefault();
+            event.stopPropagation();
+
+            self.initX = $target.position().left;
+            self.initY = $target.position().top;
+
+            self.mousePressX = event.clientX;
+            self.mousePressY = event.clientY;
+
+            $handle.on('mousemove', move);
+
+            window.addEventListener('mouseup', function() {
+                $handle.off('mousemove');
+            }, false);
+
+            function move(e) {
+
+                e.preventDefault();
+                e.stopPropagation();
+
+                $target.css({ left:(self.initX + e.clientX - self.mousePressX), top:(self.initY + e.clientY - self.mousePressY) });
+            }
+        });
+    };
+
     igv.getExtension = function (config) {
         var path,
             filename,
@@ -54,29 +123,7 @@ var igv = (function (igv) {
 
         return index < 0 ? filename : filename.substr(1 + index);
     };
-
-    igv.geneNameLookupPathTemplate = function (genomeId) {
-
-        var path;
-
-        path = 'https://portals.broadinstitute.org/webservices/igv/locus?genome=' + genomeId + '&name=$FEATURE$';
-
-        return path;
-    };
-
-    igv.geneNameLookupServicePromise = function (name, genomeId) {
-
-        var pathTemplate,
-            path;
-
-        pathTemplate = igv.geneNameLookupPathTemplate(genomeId);
-
-        path = pathTemplate.replace("$FEATURE$", name);
-
-        return igv.xhr.loadString(path);
-
-    };
-
+    
     igv.filenameOrURLHasSuffix = function  (fileOrURL, suffix) {
         var str = (fileOrURL instanceof File) ? fileOrURL.name : fileOrURL;
         return str.toLowerCase().endsWith( suffix )
@@ -123,14 +170,29 @@ var igv = (function (igv) {
         return $button;
     };
 
-    igv.presentAlert = function (string) {
+    igv.presentAlert = function (obj) {
 
+        //console.trace();
+
+        var string = obj.message || obj;
+
+        if(httpMessages.hasOwnProperty(string)) {
+            string = httpMessages[string];
+        }
+        
         igv.alert.$dialogLabel.text(string);
         igv.alert.show(undefined);
 
         igv.popover.hide();
 
     };
+
+    var httpMessages = {
+        "401": "Access unauthorized",
+        "403": "Access forbidden",
+        "404": "Not found"
+    }
+
 
     igv.attachDialogCloseHandlerWithParent = function ($parent, closeHandler) {
 
@@ -529,7 +591,7 @@ var igv = (function (igv) {
             oauth: config.oauth
         };
 
-        return _.extend(defaultOptions, options);
+        return options ? Object.assign(defaultOptions, options): defaultOptions;
     };
 
     return igv;

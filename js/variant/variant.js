@@ -179,11 +179,11 @@ var igv = (function (igv) {
 
         function calcHeterozygosity(ac, an) {
             var sum = 0,
-                altFreqs = ac.split(','),
+                altFreqs = Array.isArray(ac) ? ac : ac.split(','),
                 altCount = 0,
                 refFrac;
 
-            an = parseInt(an);
+            an = Array.isArray(an) ? parseInt(an[0]) : parseInt(an);
             altFreqs.forEach(function (altFreq) {
                 var a = parseInt(altFreq),
                     altFrac = a / an;

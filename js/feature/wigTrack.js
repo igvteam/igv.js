@@ -33,7 +33,12 @@ var igv = (function (igv) {
         this.config = config;
         this.url = config.url;
 
-        if (config.color === undefined) config.color = "rgb(150,150,150)";   // Hack -- should set a default color per track type
+        if (config.color === undefined) {
+            config.color = "rgb(150,150,150)";
+        }
+        if(config.height === undefined) {
+            config.height = 50;
+        }
 
         igv.configTrack(this, config);
 
@@ -45,34 +50,30 @@ var igv = (function (igv) {
             this.featureSource = new igv.FeatureSource(config);
         }
 
+        //this.autoscale = config.autoscale;
         // Min and max values.  No defaults for these, if they aren't set track will autoscale.
-        this.autoscale = config.autoscale;
-
-        if(config.max) {
+        if (config.max !== undefined) {
             this.dataRange = {
                 min: config.min || 0,
                 max: config.max
             }
-        };
+        } else {
+            this.autoscale = true;
+        }
+        this.windowFunction = config.windowFunction || "mean";
 
         this.paintAxis = igv.paintAxis;
 
     };
 
     igv.WIGTrack.prototype.getFeatures = function (chr, bpStart, bpEnd, bpPerPixel) {
-
-        var self = this;
-        return new Promise(function (fulfill, reject) {
-            self.featureSource.getFeatures(chr, bpStart, bpEnd, bpPerPixel).then(fulfill).catch(reject);
-        });
+        return this.featureSource.getFeatures(chr, bpStart, bpEnd, bpPerPixel, this.windowFunction);
     };
 
     igv.WIGTrack.prototype.menuItemList = function (popover) {
 
         var self = this,
             menuItems = [];
-
-        menuItems.push(igv.colorPickerMenuItem(popover, this.trackView));
 
         menuItems.push(igv.dataRangeMenuItem(popover, this.trackView));
 
@@ -114,28 +115,29 @@ var igv = (function (igv) {
     igv.WIGTrack.prototype.getFileHeader = function () {
 
         var self = this;
-        return new Promise(function (fulfill, reject) {
-            if (typeof self.featureSource.getFileHeader === "function") {
 
-                self.featureSource.getFileHeader().then(function (header) {
+        if (typeof self.featureSource.getFileHeader === "function") {
 
-                    if (header) {
-                        // Header (from track line).  Set properties,unless set in the config (config takes precedence)
-                        if (header.name && !self.config.name) {
-                            self.name = header.name;
-                        }
-                        if (header.color && !self.config.color) {
-                            self.color = "rgb(" + header.color + ")";
-                        }
+            return self.featureSource.getFileHeader()
+                .then(function (header) {
+
+                if (header) {
+                    // Header (from track line).  Set properties,unless set in the config (config takes precedence)
+                    if (header.name && !self.config.name) {
+                        self.name = header.name;
                     }
-                    fulfill(header);
+                    if (header.color && !self.config.color) {
+                        self.color = "rgb(" + header.color + ")";
+                    }
+                }
+                return header;
 
-                }).catch(reject);
-            }
-            else {
-                fulfill(null);
-            }
-        });
+            })
+        }
+        else {
+            return Promise.resolve(null);
+        }
+
     };
 
     igv.WIGTrack.prototype.draw = function (options) {
@@ -151,16 +153,23 @@ var igv = (function (igv) {
             featureValueMinimum,
             featureValueMaximum,
             featureValueRange,
-            defaultRange;
+            defaultRange,
+            baselineColor;
+
+
+        // Temp hack
+        if(self.color && self.color.startsWith("rgb(")) {
+            baselineColor =  igv.Color.addAlpha(self.color, 0.1);
+        }
 
 
         if (features && features.length > 0) {
-            if(self.autoscale === undefined && self.dataRange === undefined && (typeof self.featureSource.getDefaultRange === "function")) {
-                defaultRange = self.featureSource.getDefaultRange();
-                if(!isNaN(defaultRange.min) && !isNaN(defaultRange.max)) {
-                    self.dataRange = defaultRange;
-                }
-            }
+            // if (self.autoscale === undefined && self.dataRange === undefined && (typeof self.featureSource.getDefaultRange === "function")) {
+            //     defaultRange = self.featureSource.getDefaultRange();
+            //     if (!isNaN(defaultRange.min) && !isNaN(defaultRange.max)) {
+            //         self.dataRange = defaultRange;
+            //     }
+            // }
             if (self.autoscale || self.dataRange === undefined) {
                 var s = autoscale(features);
                 featureValueMinimum = self.config.min || s.min;      // If min is explicitly set use it
@@ -181,9 +190,19 @@ var igv = (function (igv) {
 
             // Max can be less than min if config.min is set but max left to autoscale.   If that's the case there is
             // nothing to paint.
-            if(featureValueMaximum > featureValueMinimum) {
+            if (featureValueMaximum > featureValueMinimum) {
                 featureValueRange = featureValueMaximum - featureValueMinimum;
                 features.forEach(renderFeature);
+
+                // If the track includes negative values draw a baseline
+                if(featureValueMinimum < 0) {
+                    var alpha = ctx.lineWidth;
+                    ctx.lineWidth = 5;
+                    var basepx = (featureValueMaximum / (featureValueMaximum - featureValueMinimum)) * options.pixelHeight;
+                    ctx.lineWidth = alpha;
+                }
+                igv.graphics.strokeLine(ctx, 0, basepx, options.pixelWidth, basepx, {strokeStyle: baselineColor});
+
             }
         }
 
@@ -242,14 +261,13 @@ var igv = (function (igv) {
             max = -Number.MAX_VALUE;
 
         features.forEach(function (f) {
-            if(!Number.isNaN(f.value)) {
+            if (!Number.isNaN(f.value)) {
                 min = Math.min(min, f.value);
                 max = Math.max(max, f.value);
             }
         });
 
         return {min: min, max: max};
-
     }
 
     function signsDiffer(a, b) {

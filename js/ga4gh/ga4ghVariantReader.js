@@ -68,12 +68,12 @@ var igv = (function (igv) {
                         },
                         decode: function (json) {
                             // If specific callSetIds are specified filter to those
-                            if (self.callSetIds) {
+                             if (self.callSetIds) {
                                 var filteredCallSets = [],
                                     csIdSet = new Set();
 
                                 self.callSetIds.forEach(function (csid) {
-                                    csIdSet.add(m);
+                                    csIdSet.add(csid);
                                 })
                                 json.callSets.forEach(function (cs) {
                                     if (csIdSet.has(cs.id)) {
@@ -106,9 +106,9 @@ var igv = (function (igv) {
 
             self.readHeader().then(function (header) {
 
-                getChrNameMap().then(function (chrNameMap) {
+                getChrAliasTable().then(function (chrAliasTable) {
 
-                    var queryChr = chrNameMap.hasOwnProperty(chr) ? chrNameMap[chr] : chr,
+                    var queryChr = chrAliasTable.hasOwnProperty(chr) ? chrAliasTable[chr] : chr,
                         readURL = self.url + "/variants/search";
 
                     igv.ga4ghSearch({
@@ -137,28 +137,28 @@ var igv = (function (igv) {
         });
 
 
-        function getChrNameMap() {
+        function getChrAliasTable() {
 
             return new Promise(function (fulfill, reject) {
 
-                if (self.chrNameMap) {
-                    fulfill(self.chrNameMap);
+                if (self.chrAliasTable) {
+                    fulfill(self.chrAliasTable);
                 }
 
                 else {
                     self.readMetadata().then(function (json) {
 
                         self.metadata = json.metadata;
-                        self.chrNameMap = {};
+                        self.chrAliasTable = {};
                         if (json.referenceBounds && igv.browser) {
                             json.referenceBounds.forEach(function (rb) {
                                 var refName = rb.referenceName,
                                     alias = igv.browser.genome.getChromosomeName(refName);
-                                self.chrNameMap[alias] = refName;
+                                self.chrAliasTable[alias] = refName;
 
                             });
                         }
-                        fulfill(self.chrNameMap);
+                        fulfill(self.chrAliasTable);
 
                     })
                 }

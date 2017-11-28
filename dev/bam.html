@@ -8,8 +8,132 @@
     <meta name="author" content="">
     <link rel="shortcut icon" href=../img/favicon.ico>
     <title>BAM - Dev</title>
-    <link rel="import" href="./shared-css.html">
-    <link rel="import" href="./shared-js.html">
+
+    <!-- Font Awesome CSS -->
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.2.0/css/font-awesome.min.css">
+
+    <!-- IGV CSS -->
+    <link rel="stylesheet" type="text/css" href="https://igv.org/web/beta/igv.css">
+
+    <!-- Dev CSS -->
+    <link rel="stylesheet" type="text/css" href="../css/dev.css">
+
+    <!-- Vendor JS -->
+    <script src="../vendor/jquery-1.12.4.js"></script>
+    <script src="../vendor/jquery.mousewheel.js"></script>
+    <script src="../vendor/underscore.js"></script>
+    <script src="../vendor/zlib_and_gzip.js"></script>
+    <script src="../vendor/inflate.js"></script>
+    <script src="../vendor/promise.js"></script>
+
+    <!-- IGV JS -->
+    <script src="../js/bam/coverageMap.js"></script>
+    <script src="../js/bam/bamReader.js"></script>
+    <script src="../js/bam/bgzf.js"></script>
+    <script src="../js/bam/bamSource.js"></script>
+    <script src="../js/bam/bamTrack.js"></script>
+    <script src="../js/bam/bamAlignment.js"></script>
+    <script src="../js/bam/bamAlignmentRow.js"></script>
+    <script src="../js/bam/bamIndex.js"></script>
+    <script src="../js/bam/alignmentContainer.js"></script>
+    <script src="../js/bam/pairedAlignment.js"></script>
+    <script src="../js/bam/bamUtils.js"></script>
+    <script src="../js/bam/bamWebserviceReader.js"></script>
+    <script src="../js/bam/htsgetReader.js"></script>
+
+    <script src="../js/bigQuery/ccp.js"></script>
+
+    <script src="../js/bigwig/bufferedReader.js"></script>
+    <script src="../js/bigwig/bwReader.js"></script>
+    <script src="../js/bigwig/bwSource.js"></script>
+
+    <script src="../js/encode/encodeDataSource.js"></script>
+
+    <script src="../js/feature/featureCache.js"></script>
+    <script src="../js/feature/gffHelper.js"></script>
+    <script src="../js/feature/featureSource.js"></script>
+    <script src="../js/feature/featureParsers.js"></script>
+    <script src="../js/feature/tribble.js"></script>
+    <script src="../js/feature/featureFileReader.js"></script>
+    <script src="../js/feature/customServiceReader.js"></script>
+    <script src="../js/feature/aneuSource.js"></script>
+    <script src="../js/feature/aneuTrack.js"></script>
+    <script src="../js/feature/featureTrack.js"></script>
+    <script src="../js/feature/wigTrack.js"></script>
+    <script src="../js/feature/featureUtils.js"></script>
+    <script src="../js/feature/segParser.js"></script>
+    <script src="../js/feature/segTrack.js"></script>
+
+    <script src="../js/ga4gh/ga4ghAlignmentReader.js"></script>
+    <script src="../js/ga4gh/ga4ghVariantReader.js"></script>
+    <script src="../js/ga4gh/ga4ghHelper.js"></script>
+    <script src="../js/ga4gh/googleUtils.js"></script>
+
+    <script src="../js/gtex/eqtlTrack.js"></script>
+    <script src="../js/gtex/gtexFileReader.js"></script>
+    <script src="../js/gtex/gtexReader.js"></script>
+    <script src="../js/gtex/gtex.js"></script>
+    <script src="../js/gtex/immvarReader.js"></script>
+
+    <script src="../js/gwas/t2dVariantSource.js"></script>
+    <script src="../js/gwas/gwasTrack.js"></script>
+
+    <script src="../js/karyo/karyo.js"></script>
+
+    <script src="../js/oauth/google.js"></script>
+
+    <script src="../js/tdf/tdfReader.js"></script>
+    <script src="../js/tdf/tdfSource.js"></script>
+
+    <script src="../js/ui/trackMenuPopupDialog.js"></script>
+    <script src="../js/ui/dataRangeDialog.js"></script>
+    <script src="../js/ui/dialog.js"></script>
+    <script src="../js/ui/alertDialog.js"></script>
+    <script src="../js/ui/centerGuide.js"></script>
+    <script src="../js/ui/userFeedback.js"></script>
+    <script src="../js/ui/alertDialog.js"></script>
+    <script src="../js/ui/popover.js"></script>
+    <script src="../js/ui/chromosomeSelectWidget.js"></script>
+
+    <script src="../js/variant/vcfParser.js"></script>
+    <script src="../js/variant/variant.js"></script>
+    <script src="../js/variant/variantTrack.js"></script>
+
+    <script src="../js/sampleInformation.js"></script>
+    <script src="../js/igv-create.js"></script>
+    <script src="../js/browser.js"></script>
+    <script src="../js/ideogram.js"></script>
+    <script src="../js/windowSizePanel.js"></script>
+    <script src="../js/referenceFrame.js"></script>
+    <script src="../js/igv-canvas.js"></script>
+    <script src="../js/genome.js"></script>
+    <script src="../js/trackView.js"></script>
+    <script src="../js/viewport.js"></script>
+
+    <script src="../js/rulerTrack.js"></script>
+    <script src="../js/rulerSweeper.js"></script>
+
+    <script src="../js/igv-math.js"></script>
+    <script src="../js/igv-color.js"></script>
+    <script src="../js/igv-utils.js"></script>
+    <script src="../js/parseUtils.js"></script>
+    <script src="../js/fasta.js"></script>
+    <script src="../js/sequenceTrack.js"></script>
+
+    <script src="../js/igv-exts.js"></script>
+    <script src="../js/igvxhr.js"></script>
+    <script src="../js/binary.js"></script>
+
+    <script src="../js/intervalTree.js"></script>
+
+    <script src="../js/trackCore.js"></script>
+    <script src="../js/trackFileLoad.js"></script>
+
+    <script src="../js/set.js"></script>
+
+    <script src="../js/roi.js"></script>
+    <script src="../js/roiSource.js"></script>
+
 </head>
 
 <body>
@@ -50,9 +174,6 @@
         };
 
         igv.createBrowser($("#myDiv")[0], options);
-
-        console.log("Underscore defined ? " + (typeof _));
-
     })
 
 

@@ -5,7 +5,8 @@ function runBAMTests() {
     // Mock object
     igv.browser = {
         genome: {
-            sequence: new igv.FastaSequence("https://igvdata.broadinstitute.org/genomes/seq/hg19/hg19.fasta")
+            sequence: new igv.FastaSequence("https://igvdata.broadinstitute.org/genomes/seq/hg19/hg19.fasta"),
+            getChromosomeName: function(chr) {return chr}
         }
     };
 
@@ -30,6 +31,29 @@ function runBAMTests() {
             start();
         }).catch(function (error) {
             ok(false, error);  // failed
+        });
+    });
+
+    asyncTest("throws exception with wrong magic", function (assert) {
+        expect(3);
+        var bamReader = new igv.BamReader({
+            type: 'bam',
+            url: 'data/bam/wrong.magic.bam',
+            label: 'wrong BAM magic unit test'
+        });
+
+
+        bamReader.readHeader().then(function(header) {
+            strictEqual(typeof header, 'undefined', "shouldn't be unable to parse header");
+
+            start();
+        }).catch(function (error){
+            var re = /^BAM header contains an invalid BAM magic$/i;
+            ok(error, "error is thrown");
+            ok(error.message, 'error has a message');
+            ok(re.test(error.message), 'message matches expected');
+
+            start();
         });
     });
 

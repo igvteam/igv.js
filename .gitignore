@@ -1,15 +1,6 @@
-# Created by .gitignore support plugin (hsz.mobi)
-.DS_STORE
-.idea/workspace.xml
-node_modules
-dist
-
-docs/api.html
-oauth.json
-files
-local
-.idea/jsLibraryMappings.xml
-.idea/libraries
-/.idea/misc.xml
-
+.DS_Store
+/.idea/workspace.xml
+/dist
 /igv.js.iml
+/node_modules/.bin/cake
+/node_modules

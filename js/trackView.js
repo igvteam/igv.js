@@ -29,12 +29,15 @@ var igv = (function (igv) {
     igv.TrackView = function (browser, $container, track) {
 
         var self = this,
-            element;
+            element,
+            $track,
+            config;
 
         this.browser = browser;
 
-        this.trackDiv = $('<div class="igv-track-div">')[0];
-        $container.append(this.trackDiv);
+        $track = $('<div class="igv-track-div">');
+        this.trackDiv = $track.get(0);
+        $container.append($track);
 
         this.track = track;
         track.trackView = this;
@@ -73,6 +76,30 @@ var igv = (function (igv) {
         // Track order repositioning widget
         this.attachDragWidget();
 
+        if (igv.doProvideColoSwatchWidget(this.track)) {
+
+            config =
+                {
+                    // width = (29 * swatch-width) + border-width + border-width
+                    width: ((29 * 24) + 1 + 1),
+                    classes: [ 'igv-position-absolute' ]
+                };
+
+
+            this.$colorpicker_container = igv.genericContainer($track, config, function () {
+                self.$colorpicker_container.toggle();
+            });
+
+            igv.createColorSwatchSelector(this.$colorpicker_container, function (rgb) {
+                self.setColor(rgb);
+            });
+
+            // igv.makeDraggable(this.$colorpicker_container, this.$colorpicker_container);
+            this.$colorpicker_container.draggable({ handle:this.$colorpicker_container.find('div:first-child').get(0) });
+
+            this.$colorpicker_container.hide();
+        }
+
     };
 
     igv.TrackView.prototype.configureViewportContainer = function ($viewportContainer, viewports) {
@@ -91,7 +118,8 @@ var igv = (function (igv) {
     igv.TrackScrollbar = function ($viewportContainer, viewports) {
 
         var self = this,
-            offY;
+            offY,
+            contentDivHeight;
 
         contentDivHeight = maxContentHeightWithViewports(viewports);
 

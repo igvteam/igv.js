@@ -32,14 +32,26 @@ var igv = (function (igv) {
         this.alignmentContainer = undefined;
         this.maxRows = config.maxRows || 1000;
 
-        if (config.sourceType === "ga4gh") {
-            this.bamReader = new igv.Ga4ghAlignmentReader(config);
-        }
-        else {
-            this.bamReader = new igv.BamReader(config);
+        if (config.url && config.url.startsWith("data:")) {
+            this.config.indexed = false;
         }
 
-       this.viewAsPairs = config.viewAsPairs;
+        if ("ga4gh" === config.sourceType) {
+            this.bamReader = new igv.Ga4ghAlignmentReader(config);
+        } else if ("pysam" === config.sourceType) {
+            this.bamReader = new igv.BamWebserviceReader(config)
+        } else if("htsget" === config.sourceType) {
+            this.bamReader = new igv.HtsgetReader(config);
+        } else {
+            if(this.config.indexed === false) {
+                this.bamReader = new igv.BamReaderNonIndexed(config);
+            }
+            else {
+                this.bamReader = new igv.BamReader(config);
+            }
+        }
+
+        this.viewAsPairs = config.viewAsPairs;
     };
 
     igv.BamSource.prototype.setViewAsPairs = function (bool) {
@@ -67,11 +79,12 @@ var igv = (function (igv) {
     igv.BamSource.prototype.getAlignments = function (chr, bpStart, bpEnd) {
 
         var self = this;
-        return new Promise(function (fulfill, reject) {
 
-            if (self.alignmentContainer && self.alignmentContainer.contains(chr, bpStart, bpEnd)) {
-                fulfill(self.alignmentContainer);
-            } else {
+        if (self.alignmentContainer && self.alignmentContainer.contains(chr, bpStart, bpEnd)) {
+            return Promise.resolve(self.alignmentContainer);
+        } else {
+            return new Promise(function (fulfill, reject) {
+
 
                 self.bamReader.readAlignments(chr, bpStart, bpEnd).then(function (alignmentContainer) {
 
@@ -102,10 +115,13 @@ var igv = (function (igv) {
                             }
                         }).catch(reject);
 
-                }).catch(reject);
-            }
-        });
-    };
+                }).catch(function (error) {
+                    reject(error);
+                });
+
+            });
+        }
+    }
 
     function pairAlignments(rows) {
 
@@ -161,8 +177,7 @@ var igv = (function (igv) {
         return alignment.isPaired() &&
             alignment.isMateMapped() &&
             alignment.chr === alignment.mate.chr &&
-            (alignment.isFirstOfPair() || alignment.isSecondOfPair()) &&
-            !(alignment.isSecondary() || alignment.isSupplementary());
+            (alignment.isFirstOfPair() || alignment.isSecondOfPair()) && !(alignment.isSecondary() || alignment.isSupplementary());
     }
 
     function packAlignmentRows(alignments, start, end, maxRows) {
@@ -182,14 +197,17 @@ var igv = (function (igv) {
             var bucketList = [],
                 allocatedCount = 0,
                 lastAllocatedCount = 0,
-                nextStart = start,
+                nextStart,
                 alignmentRow,
                 index,
                 bucket,
                 alignment,
                 alignmentSpace = 4 * 2,
                 packedAlignmentRows = [],
-                bucketStart = Math.max(start, alignments[0].start);
+                bucketStart;
+
+            bucketStart = Math.max(start, alignments[0].start);
+            nextStart = bucketStart;
 
             alignments.forEach(function (alignment) {
 

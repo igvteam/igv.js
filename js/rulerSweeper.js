@@ -51,17 +51,19 @@ var igv = (function (igv) {
             $div,
             $e;
 
-        nameLast = _.last(igv.browser.genome.chromosomeNames);
+        nameLast = _.last(igv.browser.genome.wgChromosomeNames);
+
         chrLast = igv.browser.genome.getChromosome(nameLast);
+
         extent = Math.floor(chrLast.bpLength/1000) + igv.browser.genome.getCumulativeOffset(nameLast);
 
         viewportWidth = this.$viewport.width();
         scraps = 0;
-        _.each(igv.browser.genome.chromosomeNames, function (name) {
+        _.each(igv.browser.genome.wgChromosomeNames, function (name) {
             var w,
                 percentage;
 
-            percentage = (igv.browser.genome.getChromosome(name).bpLength/1000)/extent;
+            percentage = (igv.browser.genome.getChromosome(name).bpLength)/extent;
             if (percentage * viewportWidth < 1.0) {
                 scraps += percentage;
             } else {
@@ -119,8 +121,7 @@ var igv = (function (igv) {
     };
 
     igv.RulerSweeper.prototype.disableMouseHandlers = function () {
-        this.$viewportContent.off();
-        this.$viewport.off();
+         this.$viewport.off();
     };
 
     igv.RulerSweeper.prototype.addMouseHandlers = function () {
@@ -144,19 +145,8 @@ var igv = (function (igv) {
                 e.preventDefault();
                 e.stopPropagation();
 
-                self.$viewportContent.off();
+                isMouseDown = true;
 
-                self.$viewportContent.on({
-                    mousedown: function (e) {
-
-                        e.preventDefault();
-                        e.stopPropagation();
-
-                        isMouseDown = true;
-                    }
-                });
-
-                // mouseDownXY = igv.translateMouseCoordinates(e, self.contentDiv);
                 mouseDownXY = { x:e.offsetX, y:e.offsetY };
 
                 left = mouseDownXY.x;
@@ -166,14 +156,13 @@ var igv = (function (igv) {
                 isMouseIn = true;
             },
 
-            mousemove: function (e) {
+            mousemove: igv.throttle(function (e) {
 
                 e.preventDefault();
                 e.stopPropagation();
 
                 if (isMouseDown && isMouseIn) {
 
-                    // mouseMoveXY = igv.translateMouseCoordinates(e, self.contentDiv);
                     mouseMoveXY = { x:e.offsetX, y:e.offsetY };
 
                     dx = mouseMoveXY.x - mouseDownXY.x;
@@ -195,7 +184,7 @@ var igv = (function (igv) {
                         }
                     }
                 }
-            },
+            }, 10),
 
             mouseup: function (e) {
 

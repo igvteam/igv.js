@@ -49,46 +49,44 @@ var igv = (function (igv) {
 
         var self = this;
 
-        return new Promise(function (fulfill, reject) {
-            var hasData = (self.data && (self.range.start <= requestedRange.start) &&
-                ((self.range.start + self.range.size) >= (requestedRange.start + requestedRange.size))),
-                bufferSize,
-                loadRange;
+        var hasData = (self.data && (self.range.start <= requestedRange.start) &&
+            ((self.range.start + self.range.size) >= (requestedRange.start + requestedRange.size))),
+            bufferSize,
+            loadRange;
 
-            if (hasData) {
-                subbuffer(self, requestedRange, asUint8);
+        if (hasData) {
+            return Promise.resolve(subbuffer(self, requestedRange, asUint8));
+        }
+        else {
+            // Expand buffer size if needed, but not beyond content length
+            bufferSize = Math.max(self.bufferSize, requestedRange.size);
+
+            if (self.contentLength > 0 && requestedRange.start + bufferSize > self.contentLength) {
+                loadRange = {start: requestedRange.start};
             }
             else {
-                // Expand buffer size if needed, but not beyond content length
-                bufferSize = Math.max(self.bufferSize, requestedRange.size);
+                loadRange = {start: requestedRange.start, size: bufferSize};
+            }
 
-                if (self.contentLength > 0 && requestedRange.start + bufferSize > self.contentLength) {
-                    loadRange = {start: requestedRange.start};
-                }
-                else {
-                    loadRange = {start: requestedRange.start, size: bufferSize};
-                }
-
-                igv.xhr.loadArrayBuffer(self.path, igv.buildOptions(self.config, {range: loadRange}))
-                    .then(function (arrayBuffer) {
+            return igv.xhr.loadArrayBuffer(self.path, igv.buildOptions(self.config, {range: loadRange}))
+                .then(function (arrayBuffer) {
                     self.data = arrayBuffer;
                     self.range = loadRange;
-                    subbuffer(self, requestedRange, asUint8);
-                }).catch(reject);
+                    return subbuffer(self, requestedRange, asUint8);
+                })
+        }
 
-            }
 
+        function subbuffer(bufferedReader, requestedRange, asUint8) {
 
-            function subbuffer(bufferedReader, requestedRange, asUint8) {
+            var len = bufferedReader.data.byteLength,
+                bufferStart = requestedRange.start - bufferedReader.range.start,
+                result = asUint8 ?
+                    new Uint8Array(bufferedReader.data, bufferStart, len - bufferStart) :
+                    new DataView(bufferedReader.data, bufferStart, len - bufferStart);
+            return result;
+        }
 
-                var len = bufferedReader.data.byteLength,
-                    bufferStart = requestedRange.start - bufferedReader.range.start,
-                    result = asUint8 ?
-                        new Uint8Array(bufferedReader.data, bufferStart, len - bufferStart) :
-                        new DataView(bufferedReader.data, bufferStart, len - bufferStart);
-                fulfill(result);
-            }
-        });
 
     }
 

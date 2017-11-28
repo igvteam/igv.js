@@ -28,27 +28,39 @@
  * Created by dat on 4/18/17.
  */
 var igv = (function (igv) {
-    
-    /**
-     * @param config      dataSource configuration
-     * @param tableFormat table formatting object (see for example EncodeTableFormat)
-     */
-    igv.EncodeDataSource = function (config, tableFormat) {
-        this.config = config;
-        this.tableFormat = tableFormat;
+
+    igv.EncodeDataSource = function (columnFormat) {
+        this.columnFormat = columnFormat;
     };
 
-    igv.EncodeDataSource.prototype.retrieveData = function (continuation) {
+    igv.EncodeDataSource.prototype.retrieveData = function (genomeID) {
 
         var self = this,
             fileFormat,
-            assembly,
-            query;
+            assembly;
 
-        assembly = this.config.genomeID;
-        fileFormat = "bigWig";
+        fileFormat = 'bigWig';
+        assembly = genomeID;
 
-        query = "https://www.encodeproject.org/search/?" +
+        return igv.xhr
+            .loadJson(urlString(assembly, fileFormat), {})
+            .then(function(json){
+                return parseJSONData(json, assembly, fileFormat);
+            })
+            .then(function (data) {
+                data.sort(encodeSort);
+                return Promise.resolve(data);
+            });
+    };
+
+    function urlString (assembly, fileFormat) {
+
+        var str;
+
+        // TODO - Test Error Handling with this URL.
+        // str = "https://www.encodeproject.org/search/?type=experiment&assembly=/work/ea14/juicer/references/genome_collection/Hs2-HiC.chrom.sizes&files.file_format=bigWig&format=json&field=lab.title&field=biosample_term_name&field=assay_term_name&field=target.label&field=files.file_format&field=files.output_type&field=files.href&field=files.replicate.technical_replicate_number&field=files.replicate.biological_replicate_number&field=files.assembly&limit=all";
+
+        str = "https://www.encodeproject.org/search/?" +
             "type=experiment&" +
             "assembly=" + assembly + "&" +
             "files.file_format=" + fileFormat + "&" +
@@ -65,127 +77,142 @@ var igv = (function (igv) {
             "field=files.assembly&" +
             "limit=all";
 
+        return str;
+    }
 
-        igv.xhr
-            .loadJson(query, {})
-            .then(function (json) {
+    function parseJSONData(json, assembly, fileFormat) {
+        var rows;
 
-                var rows,
-                    obj;
+        rows = [];
+        _.each(json["@graph"], function (record) {
 
-                console.log('then - parse/sort json ...');
+            var cellType,
+                target,
+                filtered,
+                mapped;
 
-                rows = [];
-                _.each(json["@graph"], function (record) {
+            cellType = record["biosample_term_name"] || '';
 
-                    var cellType,
-                        target,
-                        filtered,
-                        mapped;
+            target = record.target ? record.target.label : '';
 
+            filtered = _.filter(record.files, function (file) {
+                return fileFormat === file.file_format && assembly === file.assembly;
+            });
 
-                    cellType = record["biosample_term_name"] || '';
+            mapped = _.map(filtered, function (file) {
 
-                    target = record.target ? record.target.label : '';
+                var bioRep = file.replicate ? file.replicate.bioligcal_replicate_number : undefined,
+                    techRep = file.replicate ? file.replicate.technical_replicate_number : undefined,
+                    name = cellType + " " + target;
 
-                    filtered = _.filter(record.files, function (file) {
-                        return fileFormat === file.file_format && assembly === file.assembly;
-                    });
+                if (bioRep) {
+                    name += " " + bioRep;
+                }
 
-                    mapped = _.map(filtered, function (file) {
+                if (techRep) {
+                    name += (bioRep ? ":" : "0:") + techRep;
+                }
 
-                        var bioRep = file.replicate ? file.replicate.bioligcal_replicate_number : undefined,
-                            techRep = file.replicate ? file.replicate.technical_replicate_number : undefined,
-                            name = cellType + " " + target;
-
-                        if (bioRep) {
-                            name += " " + bioRep;
-                        }
-
-                        if (techRep) {
-                            name += (bioRep ? ":" : "0:") + techRep;
-                        }
-
-                        return {
-                            "Assembly": file.assembly,
-                            "ExperimentID": record['@id'],
-                            "Cell Type": cellType,
-                            "Assay Type": record.assay_term_name,
-                            "Target": target,
-                            "Lab": record.lab ? record.lab.title : "",
-                            "Format": file.file_format,
-                            "Output Type": file.output_type,
-                            "url": "https://www.encodeproject.org" + file.href,
-                            "Bio Rep": bioRep,
-                            "Tech Rep": techRep,
-                            "Name": name
-                        };
-
-                    });
-
-                    Array.prototype.push.apply(rows, mapped);
-
-                });
-
-                rows.sort(function (a, b) {
-                    var a1 = a["Assembly"],
-                        a2 = b["Assembly"],
-                        ct1 = a["Cell Type"],
-                        ct2 = b["Cell Type"],
-                        t1 = a["Target"],
-                        t2 = b["Target"];
-
-                    if (a1 === a2) {
-                        if (ct1 === ct2) {
-                            if (t1 === t2) {
-                                return 0;
-                            }
-                            else if (t1 < t2) {
-                                return -1;
-                            }
-                            else {
-                                return 1;
-                            }
-                        }
-                        else if (ct1 < ct2) {
-                            return -1;
-                        }
-                        else {
-                            return 1;
-                        }
-                    }
-                    else {
-                        if (a1 < a2) {
-                            return -1;
-                        }
-                        else {
-                            return 1;
-                        }
-                    }
-                });
-
-                console.log('then - done');
-
-                obj = {
-                    columns: [ 'Assembly', 'Cell Type', 'Target', 'Assay Type', 'Output Type', 'Lab' ],
-                    rows: rows
+                return {
+                    "Assembly": file.assembly,
+                    "ExperimentID": record['@id'],
+                    "Cell Type": cellType,
+                    "Assay Type": record.assay_term_name,
+                    "Target": target,
+                    "Lab": record.lab ? record.lab.title : "",
+                    "Format": file.file_format,
+                    "Output Type": file.output_type,
+                    "url": "https://www.encodeproject.org" + file.href,
+                    "Bio Rep": bioRep,
+                    "Tech Rep": techRep,
+                    "Name": name
                 };
-
-                console.log('then - ingestData() ...');
-                ingestData.call(self, obj, function () {
-                    continuation();
-                });
-
 
             });
 
+            Array.prototype.push.apply(rows, mapped);
+
+        });
+
+        return _.map(rows, function (row) {
+            return _.mapObject(row, function (val) {
+                return (undefined === val || '' === val) ? '-' : val;
+            });
+        });
+
+    }
+
+    function encodeSort(a, b) {
+        var aa1,
+            aa2,
+            cc1,
+            cc2,
+            tt1,
+            tt2;
+
+        aa1 = a['Assembly' ]; aa2 = b['Assembly' ];
+        cc1 = a['Cell Type']; cc2 = b['Cell Type'];
+        tt1 = a['Target'   ]; tt2 = b['Target'   ];
+
+        if (aa1 === aa2) {
+            if (cc1 === cc2) {
+                if (tt1 === tt2) {
+                    return 0;
+                } else if (tt1 < tt2) {
+                    return -1;
+                } else {
+                    return 1;
+                }
+            } else if (cc1 < cc2) {
+                return -1;
+            } else {
+                return 1;
+            }
+        } else {
+            if (aa1 < aa2) {
+                return -1;
+            } else {
+                return 1;
+            }
+        }
+    }
+
+    igv.EncodeDataSource.prototype.tableData = function (data) {
+        var self = this,
+            mapped;
+
+        mapped = _.map(data, function (row) {
+
+            // Isolate the subset of the data for display in the table
+            return _.values(_.pick(row, _.map(self.columnFormat, function (column) {
+                return _.first(_.keys(column));
+            })));
+        });
+
+        return mapped;
     };
 
-    igv.EncodeDataSource.prototype.dataAtRowIndex = function (index) {
+    igv.EncodeDataSource.prototype.tableColumns = function () {
+
+        var columns;
+
+        columns = _.map(this.columnFormat, function (obj) {
+            var key,
+                val;
+
+            key = _.first(_.keys(obj));
+            val = _.first(_.values(obj));
+            return { title: key, width: val }
+        });
+
+        return columns;
+    };
+
+    igv.EncodeDataSource.prototype.dataAtRowIndex = function (data, index) {
         var row,
             obj;
 
-        row =  this.jSON.rows[ index ];
+        row =  data[ index ];
 
         obj =
             {
@@ -193,6 +220,8 @@ var igv = (function (igv) {
                 color: encodeAntibodyColor(row[ 'Target' ]),
                 name: row['Name']
             };
+
+        return obj;
 
         function encodeAntibodyColor (antibody) {
 
@@ -221,95 +250,7 @@ var igv = (function (igv) {
             return colors[ key ];
 
         }
-
-        return obj;
     };
-
-    igv.EncodeDataSource.prototype.tableData = function () {
-        return this.tableFormat.tableData(this.jSON);
-    };
-
-    igv.EncodeDataSource.prototype.tableColumns = function () {
-        return this.tableFormat.tableColumns(this.jSON);
-    };
-
-    function ingestData(data, continuation) {
-
-        if (data instanceof File) {
-            getFile.call(this, data, continuation);
-        } else if (data instanceof Object) {
-            getJSON.call(this, data, continuation);
-        }
-
-        function getJSON(json, continuation) {
-
-            var self = this;
-
-            this.jSON = json;
-
-            json.rows.forEach(function(row, i){
-
-                Object.keys(row).forEach(function(key){
-                    var item = row[ key ];
-                    self.jSON.rows[ i ][ key ] = (undefined === item || "" === item) ? "-" : item;
-                });
-
-            });
-
-            console.log('ingestJSON - done');
-
-            continuation();
-
-        }
-
-        function getFile(file, continuation) {
-
-            var self = this;
-
-            this.jSON = {};
-            igv.xhr.loadString(file).then(function (data) {
-
-                var lines = data.splitLines(),
-                    item;
-
-                // Raw data items order:
-                // path | cell | dataType | antibody | view | replicate | type | lab | hub
-                //
-                // Reorder to match desired order. Discard hub item.
-                //
-                self.jSON.columns = lines[0].split("\t");
-                self.jSON.columns.pop();
-                item = self.jSON.columns.shift();
-                self.jSON.columns.push(item);
-
-                self.jSON.rows = [];
-
-                lines.slice(1, lines.length - 1).forEach(function (line) {
-
-                    var tokens,
-                        row;
-
-                    tokens = line.split("\t");
-                    tokens.pop();
-                    item = tokens.shift();
-                    tokens.push(item);
-
-                    row = {};
-                    tokens.forEach(function (t, i, ts) {
-                        var key = self.jSON.columns[ i ];
-                        row[ key ] = (undefined === t || "" === t) ? "-" : t;
-                    });
-
-                    self.jSON.rows.push(row);
-
-                });
-
-                continuation();
-            });
-
-        }
-
-    }
 
     return igv;
 

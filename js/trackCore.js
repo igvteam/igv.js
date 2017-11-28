@@ -37,16 +37,17 @@ var igv = (function (igv) {
         if (undefined === igv.browser || undefined === igv.browser.formats) {
             return undefined;
         } else {
-            return igv.browser.formats[ name ];
+            return igv.browser.formats[name];
         }
 
     };
 
-    igv.createTrackWithConfiguration = function(conf) {
+    igv.createTrack = function (conf) {
 
         var type = (undefined === conf.type) ? 'unknown_type' : conf.type.toLowerCase();
 
         switch (type) {
+
             case "gwas":
                 return new igv.GWASTrack(conf);
                 break;
@@ -54,6 +55,7 @@ var igv = (function (igv) {
             case "annotation":
             case "genes":
             case "fusionjuncspan":
+            case "snp":
                 return new igv.FeatureTrack(conf);
                 break;
 
@@ -86,13 +88,16 @@ var igv = (function (igv) {
                 return new igv.AneuTrack(conf);
                 break;
 
+            case "merged":
+                return new igv.MergedTrack(conf);
+
             default:
                 return undefined;
         }
 
     };
 
-    igv.inferTrackTypes = function(config) {
+    igv.inferTrackTypes = function (config) {
 
         function translateDeprecatedTypes(config) {
 
@@ -141,6 +146,13 @@ var igv = (function (igv) {
             path = igv.isFilePath(config.url) ? config.url.name : config.url;
             fn = path.toLowerCase();
 
+            // Special case -- UCSC refgene files
+            if(fn.endsWith("refgene.txt.gz") || fn.endsWith("refgene.txt")) {
+                config.format = "refgene";
+                return;
+            }
+
+
             //Strip parameters -- handle local files later
             idx = fn.indexOf("?");
             if (idx > 0) {
@@ -150,7 +162,9 @@ var igv = (function (igv) {
             //Strip aux extensions .gz, .tab, and .txt
             if (fn.endsWith(".gz")) {
                 fn = fn.substr(0, fn.length - 3);
-            } else if (fn.endsWith(".txt") || fn.endsWith(".tab")) {
+            }
+
+            if (fn.endsWith(".txt") || fn.endsWith(".tab")) {
                 fn = fn.substr(0, fn.length - 4);
             }
 
@@ -159,7 +173,6 @@ var igv = (function (igv) {
             ext = idx < 0 ? fn : fn.substr(idx + 1);
 
             switch (ext.toLowerCase()) {
-
                 case "bw":
                     config.format = "bigwig";
                     break;
@@ -248,9 +261,9 @@ var igv = (function (igv) {
 
         track.removable = config.removable === undefined ? true : config.removable;      // Defaults to true
 
-        track.height = config.height || ('wig' === config.type ? 50 : 100);
+        track.height = config.height || 100;
 
-        if(config.autoHeight === undefined)  config.autoHeight = config.autoheight; // Some case confusion in the initial releasae
+        if (config.autoHeight === undefined)  config.autoHeight = config.autoheight; // Some case confusion in the initial releasae
 
         track.autoHeight = config.autoHeight === undefined ? (config.height === undefined) : config.autoHeight;
         track.minHeight = config.minHeight || Math.min(50, track.height);
@@ -260,7 +273,7 @@ var igv = (function (igv) {
             track.visibilityWindow = config.visibilityWindow;
         }
 
-        if(track.type === undefined) {
+        if (track.type === undefined) {
             track.type = config.type;
         }
 
@@ -279,17 +292,23 @@ var igv = (function (igv) {
         }
     };
 
-    // igv.setTrackColor = function (track, color) {
-    //
-    //     track.color = color;
-    //
-    //     if (track.trackView) {
-    //
-    //         track.trackView.repaint();
-    //
-    //     }
-    //
-    // };
+    igv.inferIndexPath = function (url, extension) {
+
+        var path, idx;
+
+        if (url instanceof File) {
+            throw new Error("Cannot infer an index path for a local File.  Please select explicitly")
+        }
+
+        if (url.includes("?")) {
+            idx = url.indexOf("?");
+            return url.substring(0, idx) + "." + extension + url.substring(idx);
+        } else {
+            return url + "." + extension;
+        }
+
+
+    };
 
     igv.paintAxis = function (ctx, pixelWidth, pixelHeight) {
 
@@ -370,13 +389,13 @@ var igv = (function (igv) {
             menuItems;
 
         config =
-            {
-                popover: popover,
-                viewport:viewport,
-                genomicLocation: genomicLocation,
-                x: xOffset,
-                y: yOffset
-            };
+        {
+            popover: popover,
+            viewport: viewport,
+            genomicLocation: genomicLocation,
+            x: xOffset,
+            y: yOffset
+        };
 
         menuItems = [];
         if (viewport.trackView.track.popupMenuItemList) {
@@ -396,53 +415,58 @@ var igv = (function (igv) {
         var menuItems = [],
             all;
 
-        menuItems.push(igv.trackMenuItem(popover, trackView, "Set track name", function () {
-            return "Track Name"
-        }, trackView.track.name, function () {
+        if (trackView.track.config.type != 'sequence') {
 
-            var alphanumeric = parseAlphanumeric(igv.dialog.$dialogInput.val());
+            menuItems.push(igv.trackMenuItem(popover, trackView, "Set track name", function () {
+                return "Track Name"
+            }, trackView.track.name, function () {
 
-            if (undefined !== alphanumeric) {
-                igv.setTrackLabel(trackView.track, alphanumeric);
-                trackView.update();
-            }
+                var alphanumeric = parseAlphanumeric(igv.dialog.$dialogInput.val());
 
-            function parseAlphanumeric(value) {
+                if (undefined !== alphanumeric) {
+                    igv.setTrackLabel(trackView.track, alphanumeric);
+                    trackView.update();
+                }
 
-                var alphanumeric_re = /(?=.*[a-zA-Z].*)([a-zA-Z0-9 ]+)/,
-                    alphanumeric = alphanumeric_re.exec(value);
+                function parseAlphanumeric(value) {
 
-                return (null !== alphanumeric) ? alphanumeric[0] : "untitled";
-            }
+                    var alphanumeric_re = /(?=.*[a-zA-Z].*)([a-zA-Z0-9 ]+)/,
+                        alphanumeric = alphanumeric_re.exec(value);
 
-        }, undefined));
+                    return (null !== alphanumeric) ? alphanumeric[0] : "untitled";
+                }
 
-        menuItems.push(igv.trackMenuItem(popover, trackView, "Set track height", function () {
-            return "Track Height"
-        }, trackView.trackDiv.clientHeight, function () {
+            }, undefined));
 
-            var number = parseFloat(igv.dialog.$dialogInput.val(), 10);
+            menuItems.push(igv.trackMenuItem(popover, trackView, "Set track height", function () {
+                return "Track Height"
+            }, trackView.trackDiv.clientHeight, function () {
 
-            if (undefined !== number) {
+                var number = parseFloat(igv.dialog.$dialogInput.val(), 10);
+
+                if (undefined !== number) {
 // If explicitly setting the height adust min or max, if neccessary.
-                if (trackView.track.minHeight !== undefined && trackView.track.minHeight > number) {
-                    trackView.track.minHeight = number;
-                }
-                if (trackView.track.maxHeight !== undefined && trackView.track.maxHeight < number) {
-                    trackView.track.minHeight = number;
-                }
-                trackView.setTrackHeight(number);
-                trackView.track.autoHeight = false;   // Explicitly setting track height turns off autoHeight
+                    if (trackView.track.minHeight !== undefined && trackView.track.minHeight > number) {
+                        trackView.track.minHeight = number;
+                    }
+                    if (trackView.track.maxHeight !== undefined && trackView.track.maxHeight < number) {
+                        trackView.track.minHeight = number;
+                    }
+                    trackView.setTrackHeight(number);
+                    trackView.track.autoHeight = false;   // Explicitly setting track height turns off autoHeight
 
+                }
+
+            }, undefined));
+        }
+            if (igv.doProvideColoSwatchWidget(trackView.track)) {
+                menuItems.push(igv.colorPickerMenuItem(popover, trackView))
             }
 
-        }, undefined));
-
-        all = [];
-        if (trackView.track.menuItemList) {
-            all = menuItems.concat( igv.trackMenuItemListHelper(trackView.track.menuItemList(popover)) );
-        }
-
+            all = [];
+            if (trackView.track.menuItemList) {
+                all = menuItems.concat(igv.trackMenuItemListHelper(trackView.track.menuItemList(popover)));
+            }
         if (trackView.track.removable !== false) {
 
             all.push(
@@ -460,13 +484,17 @@ var igv = (function (igv) {
         return all;
     };
 
-    igv.trackMenuItemListHelper = function(itemList) {
+    igv.doProvideColoSwatchWidget = function (track) {
+        return (track instanceof igv.BAMTrack || track instanceof igv.FeatureTrack || track instanceof igv.VariantTrack || track instanceof igv.WIGTrack);
+    };
+
+    igv.trackMenuItemListHelper = function (itemList) {
 
         var list = [];
 
         if (_.size(itemList) > 0) {
 
-            list = _.map(itemList, function(item, i) {
+            list = _.map(itemList, function (item, i) {
                 var $e;
 
                 if (item.name) {
@@ -484,7 +512,7 @@ var igv = (function (igv) {
                     $e.click(item.click);
                 }
 
-                return { object: $e, init: (item.init || undefined) };
+                return {object: $e, init: (item.init || undefined)};
             });
         }
 
@@ -515,7 +543,7 @@ var igv = (function (igv) {
         $e.text(menuItemLabel);
 
 
-        clickHandler = function(){
+        clickHandler = function () {
             var $element = $(trackView.trackDiv);
             igv.dialog.configure(dialogLabelHandler, dialogInputValue, dialogClickHandler, undefined, undefined);
             igv.dialog.show($element);
@@ -524,7 +552,7 @@ var igv = (function (igv) {
 
         $e.click(clickHandler);
 
-        return { object: $e, init: undefined };
+        return {object: $e, init: undefined};
     };
 
     igv.dataRangeMenuItem = function (popover, trackView) {
@@ -543,47 +571,21 @@ var igv = (function (igv) {
 
         $e.click(clickHandler);
 
-        return { object: $e, init: undefined };
+        return {object: $e, init: undefined};
     };
 
     igv.colorPickerMenuItem = function (popover, trackView) {
-        var $e,
-            clickHandler;
-
+        var $e;
 
         $e = $('<div>');
         $e.text('Set track color');
 
-        clickHandler = function () {
-            var defaultColor,
-                color,
-                offset,
-                colorUpdateHandler;
-
-            color = trackView.track.color;
-
-            defaultColor = trackView.track.config.color || igv.browser.constants.defaultColor;
-
-            offset =
-                {
-                    left: ($(trackView.trackDiv).offset().left + $(trackView.trackDiv).width()) - igv.colorPicker.$container.width(),
-                    top:  $(trackView.trackDiv).offset().top
-                };
-
-            colorUpdateHandler = function (color) {
-                trackView.setColor( color )
-            };
-
-            igv.colorPicker.configure(trackView, color, defaultColor, offset, colorUpdateHandler);
-
-            igv.colorPicker.presentAtOffset(offset);
-
+        $e.click(function () {
+            trackView.$colorpicker_container.toggle();
             popover.hide();
-        };
+        });
 
-        $e.click(clickHandler);
-
-        return { object: $e, init: undefined };
+        return { object: $e };
 
     };
 

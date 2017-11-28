@@ -203,7 +203,7 @@ var igv = (function (igv) {
             vGap = (this.displayMode === 'EXPANDED') ? this.expandedVGap : this.squishedVGap,
             groupGap = (this.displayMode === 'EXPANDED') ? this.expandedGroupGap : this.squishedGroupGap,
             px, px1, pw, py, h, style, i, variant, call, callSet, j, k, group, allRef, allVar, callSets, nCalls,
-            firstAllele, secondAllele, lowColorScale, highColorScale, period, callsDrawn;
+            firstAllele, secondAllele, lowColorScale, highColorScale, period, callsDrawn, len, variantColors;
 
         this.variantBandHeight = 10 + this.nRows * (this.variantHeight + vGap);
 
@@ -344,15 +344,7 @@ var igv = (function (igv) {
                                         ctx.strokeRect(px, py, pw, h);
                                     }
 
-                                    function getFillColor(allele) {
-                                        if (allele.length < variant.referenceBases.length) {
-                                            return lowColorScale.getColor(allele.length);
-                                        } else if (allele.length > variant.referenceBases.length) {
-                                            return highColorScale.getColor(allele.length);
-                                        } else {
-                                            return "rgb(150,150,150)"; // gray for reference length
-                                        }
-                                    }
+
                                 }
                             }
                             callsDrawn++;
@@ -363,6 +355,16 @@ var igv = (function (igv) {
         }
         else {
             console.log("No feature list");
+        }
+
+        function getFillColor(allele) {
+            if (allele.length < variant.referenceBases.length) {
+                return lowColorScale.getColor(allele.length);
+            } else if (allele.length > variant.referenceBases.length) {
+                return highColorScale.getColor(allele.length);
+            } else {
+                return "rgb(150,150,150)"; // gray for reference length
+            }
         }
 
     };
@@ -505,7 +507,7 @@ var igv = (function (igv) {
     };
 
     /**
-     * Default popup text function -- just extracts string and number properties in random order.
+     * Default popup text function
      * @param call
      * @param variant
      * @returns {Array}
@@ -515,7 +517,7 @@ var igv = (function (igv) {
         var gt = '', popupData, i, allele, numRepeats = '', alleleFrac = '';
         if ('str' === variant.type) {
             var info = variant.info;
-            var alt_ac = info.AC.split(',');
+            var alt_ac = (info.AC) ? info.AC.split(',') : undefined;
             if (!isNaN(call.genotype[0])) {
                 for (i = 0; i < call.genotype.length; i++) {
                     allele = getAlleleString(call, variant, i);
@@ -668,22 +670,9 @@ var igv = (function (igv) {
             menuItems = [],
             mapped, $color, colorClickHandler;
 
-        menuItems.push(igv.colorPickerMenuItem(popover, this.trackView));
-
-        var $displayMode = {
-            object: $('<div class="igv-track-menu-border-top">Display Mode:</div>')
-        };
-        menuItems.push($displayMode);
-
-        var displayModes = {
-            "COLLAPSED": "Collapse",
-            "SQUISHED": "Squish",
-            "EXPANDED": "Expand"
-        };
-
         mapped = _.map(["COLLAPSED", "SQUISHED", "EXPANDED"], function (displayMode, index) {
             return {
-                object: $(markupStringified(index, displayMode, self.displayMode, displayModes)),
+                object: $(displayModeMarkup(index, displayMode, self.displayMode)),
                 click: function () {
                     popover.hide();
                     self.displayMode = displayMode;
@@ -694,36 +683,38 @@ var igv = (function (igv) {
 
         menuItems = menuItems.concat(mapped);
 
-        var $groupBy = {
-            object: $('<div class="igv-track-menu-border-top">Group By:</div>')
-        };
+        if (igv.sampleInformation.hasAttributes()) {
+            var $groupBy = {
+                object: $('<div class="igv-track-menu-border-top">Group By:</div>')
+            };
 
-        menuItems.push($groupBy);
+            menuItems.push($groupBy);
 
-        var attrs = {};
-        var attributes = igv.sampleInformation.getAttributeNames();
-        attributes.forEach(function(attribute) {
-            var result = attribute.replace( /([A-Z])/g, " $1" );
-            result = result.charAt(0).toUpperCase() + result.slice(1);
-            attrs[attribute] = result;
-        });
+            var attrs = {};
+            var attributes = igv.sampleInformation.getAttributeNames();
+            attributes.forEach(function(attribute) {
+                var result = attribute.replace( /([A-Z])/g, " $1" );
+                result = result.charAt(0).toUpperCase() + result.slice(1);
+                attrs[attribute] = result;
+            });
 
-        attributes.push("NONE");
-        attrs.NONE = 'None';
+            attributes.push("NONE");
+            attrs.NONE = 'None';
 
-        var mappedAttrs = _.map(attributes, function(attr, index) {
-            return {
-                object: $(markupStringified(index, attr, self.groupBy, attrs)),
-                click: function() {
-                    popover.hide();
-                    self.groupCallSets(attr);
+            var mappedAttrs = _.map(attributes, function (attr, index) {
+                return {
+                    object: $(groupByMarkup(attr, self.groupBy, attrs)),
+                    click: function () {
+                        popover.hide();
+                        self.groupCallSets(attr);
+                    }
                 }
-            }
-        });
+            });
 
-        menuItems = menuItems.concat(mappedAttrs);
+            menuItems = menuItems.concat(mappedAttrs);
+        }
 
-        function markupStringified(index, buttonVal, selfVal, lut) {
+        function groupByMarkup(buttonVal, selfVal, lut) {
             if (buttonVal === selfVal) {
                 return '<div><i class="fa fa-check fa-check-shim"></i>' + lut[buttonVal] + '</div>'
             } else {
@@ -731,77 +722,30 @@ var igv = (function (igv) {
             }
         }
 
-        // function markupStringified(displayMode, index, selfDisplayMode) {
-        //
-        //     var lut,
-        //         chosen;
-        //
-        //     lut =
-        //     {
-        //         "COLLAPSED": "Collapse",
-        //         "SQUISHED": "Squish",
-        //         "EXPANDED": "Expand"
-        //     };
-        //
-        //     chosen = (0 === index) ? '<div class="igv-track-menu-border-top">' : '<div>';
-        //     if (displayMode === selfDisplayMode) {
-        //         return chosen + '<i class="fa fa-check fa-check-shim"></i>' + lut[displayMode] + '</div>'
-        //     } else {
-        //         return chosen + '<i class="fa fa-check fa-check-shim fa-check-hidden"></i>' + lut[displayMode] + '</div>';
-        //     }
-        //
-        // }
+        function displayModeMarkup(index, displayMode, selfDisplayMode) {
 
-        // $color = $('<div>');
-        // $color.text("Color Scheme");
-        // colorClickHandler = function() {
-        //     popover.hide();
-        //     self.colorScheme = (self.colorScheme === "GRADIENT") ? "INDEX" : "GRADIENT";
-        //     self.trackView.update();
-        // };
-        //
-        // menuItems.push({object: $color, click: colorClickHandler});
+            var lut,
+                chosen;
+
+            lut =
+            {
+                "COLLAPSED": "Collapse",
+                "SQUISHED": "Squish",
+                "EXPANDED": "Expand"
+            };
+
+            chosen = (0 === index) ? '<div class="igv-track-menu-border-top">' : '<div>';
+            if (displayMode === selfDisplayMode) {
+                return chosen + '<i class="fa fa-check fa-check-shim"></i>' + lut[displayMode] + '</div>'
+            } else {
+                return chosen + '<i class="fa fa-check fa-check-shim fa-check-hidden"></i>' + lut[displayMode] + '</div>';
+            }
+
+        }
 
         return menuItems;
 
     };
-
-
-    //      igv.VariantTrack.prototype.menuItemList = function (popover) {
-    //
-    //     var myself = this,
-    //         menuItems = [],
-    //         lut = {"COLLAPSED": "Collapse", "SQUISHED": "Squish", "EXPANDED": "Expand"},
-    //         checkMark = '<i class="fa fa-check fa-check-shim"></i>',
-    //         checkMarkNone = '<i class="fa fa-check fa-check-shim fa-check-hidden"></i>',
-    //         trackMenuItem = '<div class=\"igv-track-menu-item\">',
-    //         trackMenuItemFirst = '<div class=\"igv-track-menu-item igv-track-menu-border-top\">';
-    //
-    //     menuItems.push(igv.colorPickerMenuItem(popover, this.trackView));
-    //
-    //     ["COLLAPSED", "SQUISHED", "EXPANDED"].forEach(function (displayMode, index) {
-    //
-    //         var chosen,
-    //             str;
-    //
-    //         chosen = (0 === index) ? trackMenuItemFirst : trackMenuItem;
-    //         str = (displayMode === myself.displayMode) ? chosen + checkMark + lut[displayMode] + '</div>' : chosen + checkMarkNone + lut[displayMode] + '</div>';
-    //
-    //         menuItems.push({
-    //             object: $(str),
-    //             click: function () {
-    //                 popover.hide();
-    //                 myself.displayMode = displayMode;
-    //                 myself.trackView.update();
-    //             }
-    //         });
-    //
-    //     });
-    //
-    //     return menuItems;
-    //
-    // };
-
 
     return igv;
 

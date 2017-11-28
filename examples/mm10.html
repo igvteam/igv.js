@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+    <meta name="description" content="">
+    <meta name="author" content="">
+    <link rel="shortcut icon" href="//igv.org/web/img/favicon.ico">
+
+    <title>IGV Example - Copy Number</title>
+
+    <!-- Font Awesome CSS -->
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.2.0/css/font-awesome.min.css"/>
+
+    <!-- IGV CSS -->
+    <link rel="stylesheet" href="https://igv.org/web/test/dist/css/igv.css">
+
+    <!-- Shims for legacy browsers -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/es5-shim/4.5.7/es5-shim.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/es6-shim/0.35.3/es6-shim.js"></script>
+
+    <!-- IGV JS-->
+    <script src="https://igv.org/web/test/dist/igv.js"></script>
+
+</head>
+
+<body>
+
+<p>
+
+
+<div id="igvDiv" style="padding-top: 10px;padding-bottom: 10px; border:1px solid lightgray"></div>
+
+<script type="text/javascript">
+
+    document.addEventListener("DOMContentLoaded", function () {
+
+        var div = document.getElementById("igvDiv"),
+                options = {
+                    flanking: 2000,
+                    showKaryo: false,
+                    showNavigation: true,
+                    minimumBases: 5,
+                    showRuler: true,
+                    reference: {id: "mm10",
+                        fastaURL: "http://trena.systemsbiology.net/mm10/GRCm38.primary_assembly.genome.fa",
+                        cytobandURL: "http://trena.systemsbiology.net/mm10/cytoBand.txt"
+                    },
+                    tracks: [
+                        {name: 'Gencode vM14',
+                            url: "http://trena.systemsbiology.net/mm10/gencode.vM14.basic.annotation.sorted.gtf.gz",
+                            indexURL: "http://trena.systemsbiology.net/mm10/gencode.vM14.basic.annotation.sorted.gtf.gz.tbi",
+                            format: 'gtf',
+                            visibilityWindow: 2000000,
+                            displayMode: 'EXPANDED'
+                        },
+                    ]
+                };
+
+        igvBrowser = igv.createBrowser(div, options);
+
+    });
+
+</script>
+
+</body>
+
+</html>

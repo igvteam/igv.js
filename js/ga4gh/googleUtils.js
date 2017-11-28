@@ -34,16 +34,27 @@ var igv = (function (igv) {
 
         translateGoogleCloudURL: function (gsUrl) {
 
-            var i = gsUrl.indexOf('/', 5);
+            var i, bucket, object, qIdx, objectString, paramString;
+
+            i = gsUrl.indexOf('/', 5);
+            qIdx = gsUrl.indexOf('?');
+
             if (i < 0) {
                 console.log("Invalid gs url: " + gsUrl);
                 return gsUrl;
             }
 
-            var bucket = gsUrl.substring(5, i);
-            var object = encodeURIComponent(gsUrl.substring(i + 1));
+            bucket = gsUrl.substring(5, i);
 
-            return "https://www.googleapis.com/storage/v1/b/" + bucket + "/o/" + object + "?alt=media";
+            objectString = (qIdx < 0) ? gsUrl.substring(i + 1) : gsUrl.substring(i + 1, qIdx);
+            object = encodeURIComponent(objectString);
+
+            if (qIdx > 0) {
+                paramString = gsUrl.substring(qIdx);
+            }
+
+            return "https://www.googleapis.com/storage/v1/b/" + bucket + "/o/" + object +
+                (paramString ? paramString + "&alt=media" : "?alt=media");
 
         },
 
@@ -51,7 +62,11 @@ var igv = (function (igv) {
             {
                 headers["Cache-Control"] = "no-cache";
 
-                var acToken = oauth.google.access_token;
+                var acToken = igv.oauth.google.access_token;
+                if (!acToken && typeof oauth !== "undefined") {
+                    // Check legacy variable
+                    acToken = oauth.google.access_token;
+                }
                 if (acToken && !headers.hasOwnProperty("Authorization")) {
                     headers["Authorization"] = "Bearer " + acToken;
                 }
@@ -63,15 +78,45 @@ var igv = (function (igv) {
 
         addApiKey: function (url) {
 
-            var apiKey = oauth.google.apiKey,
+            var apiKey = igv.oauth.google.apiKey,
                 paramSeparator = url.includes("?") ? "&" : "?";
-            
+
             if (apiKey !== undefined && !url.includes("key=")) {
                 if (apiKey) {
                     url = url + paramSeparator + "key=" + apiKey;
                 }
             }
             return url;
+        },
+
+        driveDownloadURL: function (link) {
+            var i1, i2, id;
+            // Return a google drive download url for the sharable link
+            //https://drive.google.com/open?id=0B-lleX9c2pZFbDJ4VVRxakJzVGM
+            //https://drive.google.com/file/d/0B-lleX9c2pZFZVZyVTdkSFZ2cm8/view?usp=sharing
+            //https://drive.google.com/file/d/0B-lleX9c2pZFbDJ4VVRxakJzVGM/view?usp=sharing
+            // url: 'https://www.googleapis.com/drive/v3/files/0B-lleX9c2pZFZVZyVTdkSFZ2cm8/?alt=media',
+
+            if (link.includes("/open?id=")) {
+                i1 = link.indexOf("/open?id=") + 9;
+                i2 = link.indexOf("&");
+                if (i1 > 0 && i2 > i1) {
+                    id = link.substring(i1, i2)
+                }
+                else if (i1 > 0) {
+                    id = link.substring(i1);
+                }
+
+            }
+            else if (link.includes("/file/d/")) {
+                i1 = link.indexOf("/file/d/") + 8;
+                i2 = link.lastIndexOf("/");
+                id = link.substring(i1, i2);
+
+            }
+
+            return id ? "https://www.googleapis.com/drive/v3/files/" + id + "?alt=media" : link;
+
         }
     }
 

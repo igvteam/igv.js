@@ -17,17 +17,42 @@ module.exports = function (grunt) {
             igv: {
                 src: [
                     'wrapper/header.js',
+                    'vendor/jquery-1.12.4.js',
+                    'vendor/jquery-ui.js',
                     'vendor/underscore.js',
-                    'js/**/*.js',
+                    'vendor/zlib_and_gzip.js',
                     'vendor/inflate.js',
-                    'vendor/zlib_and_gzip.min.js',
                     'vendor/jquery.mousewheel.js',
                     'vendor/promise.js',
-                    'vendor/jquery.kinetic.min.js',
+                    'js/**/*.js',
                     'wrapper/footer.js'
                 ],
                 dest: 'dist/igv.js'
+            },
+            zlib: {
+                src: [
+                    'vendor/zlib/zlib.js',
+                    'vendor/zlib/zip.js',
+                    'vendor/zlib/huffman.js',
+                    'vendor/zlib/rawinflate.js',
+                    'vendor/zlib/rawinflate_stream.js',
+                    'vendor/zlib/inflate.js',
+                    'vendor/zlib/inflate_stream.js',
+                    'vendor/zlib/gunzip.js',
+                    'vendor/zlib/gunzip_member.js',
+                    'vendor/zlib/gzip.js',
+                    'vendor/zlib/heap.js',
+                    'vendor/zlib/rawdeflate.js',
+                    'vendor/zlib/unzip.js',
+                    'vendor/zlib/util.js',
+                    'vendor/zlib/adler32.js',
+                    'vendor/zlib/bitstream.js',
+                    'vendor/zlib/crc32.js',
+                    'vendor/zlib/deflate.js'
+                ],
+                dest: 'vendor/zlib_and_gzip.js'
             }
+
         },
 
         uglify: {

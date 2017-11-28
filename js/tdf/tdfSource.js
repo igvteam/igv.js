@@ -35,73 +35,106 @@ var igv = (function (igv) {
 
         this.windowFunction = config.windowFunction || "mean";
         this.reader = new igv.TDFReader(config);
+        this.featureCache = [];
     };
 
     igv.TDFSource.prototype.getFeatures = function (chr, bpStart, bpEnd, bpPerPixel) {
 
-        var self = this;
+        var self = this,
+            featureCache = self.featureCache,
+            cache,
+            genomicInterval = new igv.GenomicInterval(chr, bpStart, bpEnd),
+            i;
 
-        return new Promise(function (fulfill, reject) {
+        genomicInterval.bpPerPixel = bpPerPixel;
 
-            self.reader.readRootGroup().then(function (group) {
+        if (featureCache) {
+
+            for (i = 0; i < featureCache.length; i++) {
+                cache = featureCache[i];
+                if (cache.range.bpPerPixel === bpPerPixel && cache.range.containsRange(genomicInterval)) {
+                    return Promise.resolve(cache.queryFeatures(chr, bpStart, bpEnd));
+                }
+            }
+        }
+
+        return self.reader.readRootGroup()
+
+            .then(function (group) {
 
                 var zoom = zoomLevelForScale(chr, bpPerPixel),
-                    queryChr = self.reader.chrNameMap[chr],
+                    queryChr = self.reader.chrAliasTable[chr],
                     maxZoom = self.reader.maxZoom,
-                    wf,
-                    dataset;
+                    wf;
 
                 if (queryChr === undefined) queryChr = chr;
                 if (maxZoom === undefined) maxZoom = -1;
 
                 wf = zoom > maxZoom ? "raw" : self.windowFunction;
 
-                self.reader.readDataset(queryChr, wf, zoom).then(function (dataset) {
-
-                    if(dataset == null) {
-                        fulfill(null);
-                        return;
-                    }
-
-                    var tileWidth = dataset.tileWidth,
-                        startTile = Math.floor(bpStart / tileWidth),
-                        endTile = Math.floor(bpEnd / tileWidth),
-                        i,
-                        p = [],
-                        NTRACKS = 1;   // TODO read this
-
-                    for (i = startTile; i <= endTile; i++) {
-                        if(dataset.tiles[i] !== undefined) {
-                            p.push(self.reader.readTile(dataset.tiles[i], NTRACKS));
-                        }
-                    }
-
-                    Promise.all(p).then(function (tiles) {
-                        var features = [];
-                        _.each(tiles, function (tile) {
-                            switch (tile.type) {
-                                case "bed":
-                                    decodeBedTile(tile, chr, bpStart, bpEnd, bpPerPixel, features);
-                                    break;
-                                case "variableStep":
-                                    decodeVaryTile(tile, chr, bpStart, bpEnd, bpPerPixel, features);
-                                    break;
-                                case "fixedStep":
-                                    decodeFixedTile(tile, chr, bpStart, bpEnd, bpPerPixel, features);
-                                    break;
-                                default:
-                                    reject("Unknown tile type: " + tile.type);
-                                    return;
-                            }
-                        })
-                        fulfill(features);
-
-                    }).catch(reject)
-
-
-                }).catch(reject)
+                return self.reader.readDataset(queryChr, wf, zoom);
             })
-        });
+
+            .then(function (dataset) {
+
+                if (dataset == null) {
+                    return [];
+                }
+
+                var tileWidth = dataset.tileWidth,
+                    startTile = Math.floor(bpStart / tileWidth),
+                    endTile = Math.floor(bpEnd / tileWidth),
+                    i,
+                    p = [],
+                    NTRACKS = 1;   // TODO read this
+
+                for (i = startTile; i <= endTile; i++) {
+                    if (dataset.tiles[i] !== undefined) {
+                        p.push(self.reader.readTile(dataset.tiles[i], NTRACKS));
+                    }
+                }
+
+                return Promise.all(p);
+            })
+
+            .then(function (tiles) {
+
+                var features = [];
+
+                tiles.forEach(function (tile) {
+                    switch (tile.type) {
+                        case "bed":
+                            decodeBedTile(tile, chr, bpStart, bpEnd, bpPerPixel, features);
+                            break;
+                        case "variableStep":
+                            decodeVaryTile(tile, chr, bpStart, bpEnd, bpPerPixel, features);
+                            break;
+                        case "fixedStep":
+                            decodeFixedTile(tile, chr, bpStart, bpEnd, bpPerPixel, features);
+                            break;
+                        default:
+                            reject("Unknown tile type: " + tile.type);
+                            return;
+                    }
+                });
+
+                features.sort(function (a, b) {
+                    return a.start - b.start;
+                })
+
+                cache = new igv.FeatureCache(features, genomicInterval);
+
+                // Limit to 2 caches for now
+                if (self.featureCache.length < 2) {
+                    self.featureCache.push(cache);
+                }
+                else {
+                    self.featureCache[1] = self.featureCache[0];
+                    self.featureCache[0] = cache;
+                }
+
+                return features;
+            })
     }
 
     function decodeBedTile(tile, chr, bpStart, bpEnd, bpPerPixel, features) {
@@ -121,6 +154,7 @@ var igv = (function (igv) {
             if (s > bpEnd) break;
 
             features.push({
+                chr: chr,
                 start: s,
                 end: e,
                 value: data[i]
@@ -145,6 +179,7 @@ var igv = (function (igv) {
             if (s > bpEnd) break;
 
             features.push({
+                chr: chr,
                 start: s,
                 end: e,
                 value: data[i]
@@ -164,15 +199,18 @@ var igv = (function (igv) {
 
             var e = s + span;
 
-            if (e < bpStart) continue;
             if (s > bpEnd) break;
 
-            if(!Number.isNaN(data[i])) {
-                features.push({
-                    start: s,
-                    end: e,
-                    value: data[i]
-                });
+            if (e >= bpStart) {
+
+                if (!Number.isNaN(data[i])) {
+                    features.push({
+                        chr: chr,
+                        start: s,
+                        end: e,
+                        value: data[i]
+                    });
+                }
             }
 
             s = e;

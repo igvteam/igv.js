@@ -35,22 +35,22 @@ var igv = (function (igv) {
         this.container = $('<div class="igv-grid-container-dialog">');
         $parent.append(this.container);
 
-        this.container.draggable();
-
         this.header = $('<div class="igv-grid-header">');
-        this.headerBlurb = $('<div class="igv-grid-header-blurb">');
+        this.container.append(this.header);
 
+        this.headerBlurb = $('<div class="igv-grid-header-blurb">');
         this.header.append(this.headerBlurb);
 
         igv.attachDialogCloseHandlerWithParent(this.header, function () {
             self.hide();
         });
 
-        this.container.append(this.header);
 
         self.container.append(doLayout());
 
         self.container.append(doOKCancel());
+
+        this.container.draggable({ handle:this.header.get(0) });
 
         function doOKCancel() {
 

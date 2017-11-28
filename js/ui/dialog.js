@@ -46,6 +46,8 @@ var igv = (function (igv) {
 
         constructorHelper(this);
 
+        this.$container.draggable({ handle:$header.get(0) });
+
         igv.attachDialogCloseHandlerWithParent($header, function () {
             self.hide();
         });
@@ -60,7 +62,6 @@ var igv = (function (igv) {
 
         dialog.$container.append(dialog.rowOfOkCancel()[ 0 ]);
 
-        dialog.$container.draggable();
 
     };
 

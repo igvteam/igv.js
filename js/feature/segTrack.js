@@ -105,22 +105,28 @@ var igv = (function (igv) {
     igv.SegTrack.prototype.getFeatures = function (chr, bpStart, bpEnd) {
 
         var self = this;
-        return new Promise(function (fulfill, reject) {
-            // If no samples are defined, optionally query feature source.  This step was added to support the TCGA BigQuery
-            if (self.sampleCount === 0 && (typeof self.featureSource.reader.allSamples == "function")) {
-                self.featureSource.reader.allSamples().then(function (samples) {
+
+
+        // If no samples are defined, optionally query feature source.  This step was added to support the TCGA BigQuery
+        if (self.sampleCount === 0 && (typeof self.featureSource.reader.allSamples == "function")) {
+
+            return self.featureSource.reader.allSamples()
+
+                .then(function (samples) {
+
                     samples.forEach(function (sample) {
                         self.samples[sample] = self.sampleCount;
                         self.sampleNames.push(sample);
                         self.sampleCount++;
                     })
-                    self.featureSource.getFeatures(chr, bpStart, bpEnd).then(fulfill).catch(reject);
-                }).catch(reject);
-            }
-            else {
-                self.featureSource.getFeatures(chr, bpStart, bpEnd).then(fulfill).catch(reject);
-            }
-        });
+
+                    return self.featureSource.getFeatures(chr, bpStart, bpEnd);
+                });
+        }
+        else {
+            return self.featureSource.getFeatures(chr, bpStart, bpEnd);
+        }
+
     };
 
     igv.SegTrack.prototype.draw = function (options) {
@@ -242,64 +248,63 @@ var igv = (function (igv) {
         var self = this,
             d2 = (direction === "ASC" ? 1 : -1);
 
-        this.featureSource.getFeatures(chr, bpStart, bpEnd).then(function (featureList) {
+        this.featureSource.getFeatures(chr, bpStart, bpEnd)
+            .then(function (featureList) {
 
-            var segment,
-                min,
-                max,
-                f,
-                i,
-                s,
-                sampleNames,
-                scores = {},
-                bpLength = bpEnd - bpStart + 1;
+                var segment,
+                    min,
+                    max,
+                    f,
+                    i,
+                    s,
+                    sampleNames,
+                    scores = {},
+                    bpLength = bpEnd - bpStart + 1;
 
-            // Compute weighted average score for each sample
-            for (i = 0; i < featureList.length; i++) {
+                // Compute weighted average score for each sample
+                for (i = 0; i < featureList.length; i++) {
 
-                segment = featureList[i];
+                    segment = featureList[i];
 
-                if (segment.end < bpStart) continue;
-                if (segment.start > bpEnd) break;
+                    if (segment.end < bpStart) continue;
+                    if (segment.start > bpEnd) break;
 
-                min = Math.max(bpStart, segment.start);
-                max = Math.min(bpEnd, segment.end);
-                f = (max - min) / bpLength;
+                    min = Math.max(bpStart, segment.start);
+                    max = Math.min(bpEnd, segment.end);
+                    f = (max - min) / bpLength;
 
-                s = scores[segment.sample];
-                if (!s) s = 0;
-                scores[segment.sample] = s + f * segment.value;
+                    s = scores[segment.sample];
+                    if (!s) s = 0;
+                    scores[segment.sample] = s + f * segment.value;
 
-            }
+                }
 
-            // Now sort sample names by score
-            sampleNames = Object.keys(self.samples);
-            sampleNames.sort(function (a, b) {
+                // Now sort sample names by score
+                sampleNames = Object.keys(self.samples);
+                sampleNames.sort(function (a, b) {
 
-                var s1 = scores[a];
-                var s2 = scores[b];
-                if (!s1) s1 = Number.MAX_VALUE;
-                if (!s2) s2 = Number.MAX_VALUE;
+                    var s1 = scores[a];
+                    var s2 = scores[b];
+                    if (!s1) s1 = Number.MAX_VALUE;
+                    if (!s2) s2 = Number.MAX_VALUE;
 
-                if (s1 == s2) return 0;
-                else if (s1 > s2) return d2;
-                else return d2 * -1;
+                    if (s1 == s2) return 0;
+                    else if (s1 > s2) return d2;
+                    else return d2 * -1;
 
-            });
+                });
 
-            // Finally update sample hash
-            for (i = 0; i < sampleNames.length; i++) {
-                self.samples[sampleNames[i]] = i;
-            }
-            self.sampleNames = sampleNames;
+                // Finally update sample hash
+                for (i = 0; i < sampleNames.length; i++) {
+                    self.samples[sampleNames[i]] = i;
+                }
+                self.sampleNames = sampleNames;
 
-            self.trackView.update();
-            // self.trackView.$viewport.scrollTop(0);
+                self.trackView.update();
+                // self.trackView.$viewport.scrollTop(0);
 
 
-        }).catch(function(error) {
-            console.log(error);
-        });
+            })
     };
 
     /**
@@ -375,7 +380,7 @@ var igv = (function (igv) {
 
         };
 
-        return [{ name: undefined, object: $e, click: clickHandler, init: undefined }];
+        return [{name: undefined, object: $e, click: clickHandler, init: undefined}];
 
     };
 

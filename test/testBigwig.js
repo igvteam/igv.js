@@ -10,6 +10,25 @@ function runBigwigTests() {
 
     }
 
+    asyncTest("No data", function () {
+
+        var bw = new igv.BWSource(
+            {url: dataURL + 'bigwig/manyChromosomes.bigWig'}
+        );
+
+        bw.getFeatures('NoSuchChromosome', 0, 100)
+            .then(function (features) {
+                equal(0, features.length);
+
+                start();
+            })
+
+            .catch(function (error) {
+                console.log(Error('query bigWig error: ') + error);
+                ok(false);
+            });
+    });
+
     asyncTest("Many chromosomes", function () {
 
         var bw = new igv.BWSource(
@@ -71,7 +90,7 @@ function runBigwigTests() {
 
             // chrom lookup  == there's only 1 chromosome in this test file
             var chrName = "chr21";
-            var chrIdx = bwReader.chromTree.dictionary[chrName];
+            var chrIdx = bwReader.chromTree.chromToID[chrName];
             equal(0, chrIdx);
 
 
@@ -150,11 +169,12 @@ function runBigwigTests() {
 
         var bWSource = new igv.BWSource({url: url});
 
-        bWSource.getFeatures(chr, bpStart, bpEnd, bpPerPixel).then(function (features) {
+        bWSource.getFeatures(chr, bpStart, bpEnd, bpPerPixel)
+            .then(function (features) {
 
             ok(features);
 
-            equal(features.length, 324);   // Verified in iPad app
+            equal(features.length, 1293);   // Verified in iPad app
 
             start();
         }).catch(function (error) {

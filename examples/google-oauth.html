@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <!-- jQuery UI CSS -->
+    <link rel="stylesheet" type="text/css"
+          href="https://ajax.googleapis.com/ajax/libs/jqueryui/1.11.2/themes/smoothness/jquery-ui.css"/>
+
+    <!-- Font Awesome CSS -->
+    <link rel="stylesheet" type="text/css" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.2.0/css/font-awesome.min.css">
+
+    <!-- IGV CSS -->
+    <link rel="stylesheet" type="text/css" href="https://igv.org/web/release/1.0.9/igv-1.0.9.css">
+
+    <!-- jQuery JS -->
+    <script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
+
+    <script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jqueryui/1.11.2/jquery-ui.min.js"></script>
+
+    <!-- IGV JS-->
+    <script type="text/javascript" src="https://igv.org/web/release/1.0.9/igv-1.0.9.js"></script>
+
+    <script src="https://apis.google.com/js/platform.js"></script>
+</head>
+
+<body>
+
+<div id="myDiv" style="padding-top: 50px;padding-bottom: 20px; height: auto">
+
+    <script>
+
+        function handleSignInClick(event) {
+            gapi.auth2.getAuthInstance().signIn();
+        }
+
+        function updateSigninStatus(isSignedIn) {
+
+            var user = gapi.auth2.getAuthInstance().currentUser.get();
+            oauth.google.access_token = user.getAuthResponse().access_token;
+
+        }
+
+        function signOut() {
+
+            var auth2 = gapi.auth2.getAuthInstance();
+            auth2.signOut().then(function () {
+                oauth.google.access_token = undefined;
+                console.log('User signed out.');
+            });
+        }
+    </script>
+
+    <div id="signInButton" style="display:none;" class="g-signin2" data-onsuccess="handleSignInClick"></div>
+
+
+    <p></p>
+
+    <a href='#' onclick="igv.browser.loadTrack({
+                                sourceType: 'ga4gh',
+                                type: 'bam',
+                                url: 'https://genomics.googleapis.com/v1',
+                                readGroupSetIds: 'CMvnhpKTFhCqqcrDgqfqgyA',
+                                name: 'Ga4gh BAM'
+                                })">Click to load Ga4gh BAM
+
+    </a>
+
+    <p></p>
+
+    <a href='#' onclick="igv.browser.loadTrack({
+                                sourceType: 'ga4gh',
+                                type: 'vcf',
+                                url: 'https://genomics.googleapis.com/v1',
+                                variantSetId: '11847417162926684904',
+                                name: 'Ga4gh variants'
+                                })">Click to load Ga4gh Variants
+    </a>
+
+    <p></p>
+
+    <a href='#' onclick="igv.browser.loadTrack({
+                                type: 'bam',
+                                url: 'gs://igv-bam-test/NA12878.bam',
+                                indexURL: 'gs://igv-bam-test/NA12878.bam.bai',
+                                name: 'GCS bam'
+                                })">GCS bam
+    </a>
+
+
+</div>
+
+<script type="text/javascript">
+
+    $(document).ready(function () {
+
+        var scope = "https://www.googleapis.com/auth/cloud-platform https://www.googleapis.com/auth/genomics https://www.googleapis.com/auth/devstorage.read_only https://www.googleapis.com/auth/userinfo.profile",
+                client_id = "661332306814-8nt29308rppg325bkq372vli8nm3na14.apps.googleusercontent.com";
+
+        gapi.load('client:auth2', initClient);
+
+
+        function initClient() {
+            gapi.client.init({
+                'clientId': client_id,
+                'scope': scope
+
+            }).then(function () {
+
+                $("#signInButton").show();
+
+                var div, options, browser;
+
+                div = $("#myDiv")[0];
+                options = {
+
+                    genome: "hg19",
+                    locus: 'myc',
+                    apiKey: 'AIzaSyDUUAUFpQEN4mumeMNIRWXSiTh5cPtUAD0',
+                    tracks: [
+                        {
+                            url: "https://s3.amazonaws.com/igv.broadinstitute.org/annotations/hg19/genes/gencode.v18.collapsed.bed",
+                            name: "Genes",
+                            order: 10000
+                        }
+                    ]
+                };
+
+                browser = igv.createBrowser(div, options);
+
+                gapi.auth2.getAuthInstance().isSignedIn.listen(updateSigninStatus);
+            })
+
+        }
+
+    });
+
+</script>
+
+
+</body>
+
+</html>

@@ -109,6 +109,16 @@ var igv = (function (igv) {
 
     igv.BamAlignment.prototype.tags = function () {
 
+        if (!this.tagDict) {
+            if (this.tagBA) {
+                this.tagDict = decodeTags(this.tagBA);
+                this.tagBA = undefined;
+            } else {
+                this.tagDict = {};  // Mark so we don't try again.  The record has not tags
+            }
+        }
+        return this.tagDict;
+
         function decodeTags(ba) {
 
             var p = 0,
@@ -156,16 +166,6 @@ var igv = (function (igv) {
             }
             return tags;
         }
-
-        if (!this.tagDict) {
-            if (this.tagBA) {
-                this.tagDict = decodeTags(this.tagBA);
-                this.tagBA = undefined;
-            } else {
-                this.tagDict = {};  // Mark so we don't try again.  The record has not tags
-            }
-        }
-        return this.tagDict;
 
     }
 

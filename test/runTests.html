@@ -25,11 +25,15 @@
     <script type="text/javascript" src="testTabix.js"></script>
     <script type="text/javascript" src="testGenome.js"></script>
     <script type="text/javascript" src="testBufferedReader.js"></script>
-    <script type="text/javascript" src="testColor.js"></script>
     <script type="text/javascript" src="testCoverageColoredRendering.js"></script>
     <script type="text/javascript" src="testHiC.js"></script>
     <script type="text/javascript" src="testTDF.js"></script>
     <script type="text/javascript" src="testSampleInformation.js"></script>
+    <script type="text/javascript" src="testHtsgetReader.js"></script>
+    <script type="text/javascript" src="../js/bam/htsgetReader.js"></script>
+    <script type="text/javascript" src="testUcscService.js"></script>
+    <script type="text/javascript" src="testIgvSession.js"></script>
+
 
 
 
@@ -39,13 +43,13 @@
 <div id="qunit-fixture"></div>
 <script type="text/javascript">
     document.addEventListener('DOMContentLoaded', function () {
+
         runBigwigTests();
         runBAMTests();
         runBAMIndexTests();
         runBedTests();
         runBEDGraphTests();
         runBufferedReaderTests();
-        runColorTests();
         runCoverageColoredRenderingTests();
         runWigTests();
         runGFFTests();
@@ -53,9 +57,12 @@
         runSegTests();
         runTabixTests();
         runGenomeTests();
-        runHiCTests();
         runTDFTests();
         runSampleInformationTests();
+        runHtsgetTests();
+        runUcscTests();
+        runIgvSessionTests();
+
     });
 </script>
 </body>
