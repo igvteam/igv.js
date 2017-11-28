@@ -502,11 +502,8 @@ var igv = (function (igv) {
 
                     self.loading = false;
 
-                    if (error instanceof igv.AbortLoad) {
-                        console.log("Aborted ---");
-                    } else {
-                        igv.presentAlert(error);
-                    }
+                    igv.presentAlert(error);
+              
                 });
 
         }

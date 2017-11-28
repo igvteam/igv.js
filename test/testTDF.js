@@ -109,7 +109,9 @@ function runTDFTests() {
             var tileNumber = 30;
             var nTracks = 1;
 
-            tdfReader.readTile(dataset.tiles[tileNumber], nTracks).then(function (tile) {
+            tdfReader.readTiles(dataset.tiles.slice(tileNumber, tileNumber + 1), nTracks).then(function (tiles) {
+
+                var tile = tiles[0]
                 equal("variableStep", tile.type);
                 equal(24049020, tile.tileStart);
                 equal(24375399, tile.start[0]);
@@ -139,8 +141,9 @@ function runTDFTests() {
             var tileNumber = 243;
             var nTracks = 1;
 
-            tdfReader.readTile(dataset.tiles[tileNumber], nTracks).then(function (tile) {
-                ok(tile);
+            tdfReader.readTiles(dataset.tiles.slice(tileNumber, tileNumber + 1), nTracks).then(function (tiles) {
+                ok(tiles);
+                var tile = tiles[0];
                 equal("bed", tile.type);
                 equal(24376175, tile.start[0]);
                 equal(24376200, tile.end[0]);
