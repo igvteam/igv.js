@@ -18,13 +18,13 @@ function runHtsgetTests() {
 
     asyncTest('Load Urls', function () {
 
-        var url = 'http://htsnexus.rnd.dnanex.us/v1/reads/',
+        var url = 'http://htsnexus.rnd.dnanex.us/v1',
             id = 'BroadHiSeqX_b37/NA12878',
             chr = 'chr1',
             s = 10000,
             end = 10100;
 
-        var reader = new igv.HtsgetReader({url: url, id: id});
+        var reader = new igv.HtsgetReader({endpoint: url, id: id});
         reader.readAlignments(chr, s, end).then(function (alignmentContainer) {
 
             ok(alignmentContainer);
