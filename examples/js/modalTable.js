@@ -90,16 +90,18 @@ var igv = (function (igv) {
 
         var self = this,
             browser,
-            $hic_track_dropdown;
+            $hic_track_dropdown,
+            assembly;
 
         $hic_track_dropdown = $('#hic-track-dropdown');
 
         browser = this.config.browserRetrievalFunction();
-
+        // assembly = lut[ browser.genome.id ] || browser.genome.id;
+        assembly = igv.genomeIdLUT( browser.genome.id );
         this.$spinner.show();
         $hic_track_dropdown.prop('disabled', true);
         this.datasource
-            .retrieveData(browser.genome.id)
+            .retrieveData(assembly)
             .then(function (data) {
                 console.log('modaltable. then. received data ' + _.size(data));
                 self.datasource.data = data;
@@ -120,6 +122,8 @@ var igv = (function (igv) {
         var self = this;
 
         if (true === success) {
+
+            $('#hic-encode-modal-button').off('click');
 
             this.config.$modal.on('shown.bs.modal', function (e) {
 
@@ -153,9 +157,14 @@ var igv = (function (igv) {
             });
 
         } else {
-            this.config.$modal.on('shown.bs.modal', function (e) {
+            // this.config.$modal.on('shown.bs.modal', function (e) {
+            //     igv.presentAlert('No ENCODE data available');
+            //     self.config.$modal.modal('hide');
+            // });
+
+            $('#hic-encode-modal-button').on('click', function (e) {
                 igv.presentAlert('No ENCODE data available');
-                self.config.$modal.modal('hide');
+                return false;
             });
         }
 
