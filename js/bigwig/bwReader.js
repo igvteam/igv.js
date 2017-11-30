@@ -817,6 +817,9 @@ var igv = (function (igv) {
                     value = validCount == 0 ? 0 : sumData / validCount;
             }
 
+            if (chromId < chrIdx1 || (chromId === chrIdx1 && chromEnd < bpStart)) continue;
+            else if (chromId > chrIdx2 || (chromId === chrIdx2 && chromStart >= bpEnd))  break;
+
 
             if (Number.isFinite(value)) {
                 featureArray.push({chr: chr, start: chromStart, end: chromEnd, value: value});
