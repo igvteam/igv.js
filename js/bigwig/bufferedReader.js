@@ -58,8 +58,13 @@ var igv = (function (igv) {
             return Promise.resolve(subbuffer(self, requestedRange, asUint8));
         }
         else {
-            // Expand buffer size if needed, but not beyond content length
-            bufferSize = Math.max(self.bufferSize, requestedRange.size);
+            // If requested range size is specified, expand buffer size if needed, but not beyond content length
+            if(requestedRange.size) {
+                bufferSize = Math.max(self.bufferSize, requestedRange.size);
+            }
+            else {
+                bufferSize = self.bufferSize;
+            }
 
             if (self.contentLength > 0 && requestedRange.start + bufferSize > self.contentLength) {
                 loadRange = {start: requestedRange.start};
