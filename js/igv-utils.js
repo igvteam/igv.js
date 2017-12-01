@@ -584,14 +584,14 @@ var igv = (function (igv) {
     };
 
     igv.buildOptions = function(config, options) {
-        var defaultOptions = {
-            oauthToken: config.oauthToken || undefined,
-            headers: config.headers,
-            withCredentials: config.withCredentials,
-            oauth: config.oauth
-        };
+        // var defaultOptions = {
+        //     oauthToken: config.oauthToken || undefined,
+        //     headers: config.headers,
+        //     withCredentials: config.withCredentials,
+        //     oauth: config.oauth
+        // };
 
-        return options ? Object.assign(defaultOptions, options): defaultOptions;
+        return options ? Object.assign(config, options): config;
     };
 
     return igv;
