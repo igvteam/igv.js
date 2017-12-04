@@ -94,10 +94,15 @@ var igvxhr = (function (igvxhr) {
                     url += "someRandomSeed=" + Math.random().toString(36);
                 }
 
+                var rangeEnd = null;
+                if (range) {
+                    rangeEnd = range.size ? range.start + range.size - 1 : "";
+                    url = igv.Azure.addQueryParams(url, range.start, rangeEnd);
+                }
+
                 xhr.open(method, url);
 
-                if (range) {
-                    var rangeEnd = range.size ? range.start + range.size - 1 : "";
+                if (range && rangeEnd) {
                     xhr.setRequestHeader("Range", "bytes=" + range.start + "-" + rangeEnd);
                     //      xhr.setRequestHeader("Cache-Control", "no-cache");    <= This can cause CORS issues, disabled for now
                 }
@@ -128,8 +133,17 @@ var igvxhr = (function (igvxhr) {
                 xhr.onload = function (event) {
                     // when the url points to a local file, the status is 0 but that is no error
                     if (xhr.status == 0 || (xhr.status >= 200 && xhr.status <= 300)) {
+                        if (igv.Azure.isAzureURL(xhr.responseURL)) {
+                            headers = headers || {};
+                            headers['authorization'] = xhr.getResponseHeader("authorization");
+                            headers['content-type'] = xhr.getResponseHeader("Content-Type");
+                            options.headers = headers;
 
-                        if (range && xhr.status != 206) {
+                            url = xhr.getResponseHeader("location");
+                            igv.Azure.proxyDomainName = (new URL(url)).hostname;
+                            igvxhr.load(url, options).then(fulfill);
+                        }
+                        else if (range && xhr.status != 206 && !xhr.responseURL.contains(igv.Azure.proxyDomainName)) {
                             handleError("ERROR: range-byte header was ignored for url: " + url);
                         }
                         else {
