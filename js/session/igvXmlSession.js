@@ -53,6 +53,7 @@ var igv = (function (igv) {
         Array.from(elements).forEach(function (res, idx) {
             var res = {
                 url: res.getAttribute("path"),
+                indexURL: res.getAttribute("index"),
                 order: idx
             };
             self.tracks.push(res);
