@@ -289,9 +289,10 @@ var igv = (function (igv) {
             return Promise.resolve(self.index);
         }
 
-        if (self.indexURL || self.indexed) {
+        if (self.indexURL || self.indexed || (typeof self.config.url === 'string' && self.config.url.endsWith(".gz"))) {
 
             return self.loadIndex()
+
                 .then(function (indexOrUndefined) {
                     if (indexOrUndefined) {
                         self.index = indexOrUndefined;
