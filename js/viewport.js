@@ -522,7 +522,7 @@ var igv = (function (igv) {
         }
 
         function doRenderControlCanvas(genomicState, trackView) {
-            return (/*0 === genomicState.locusIndex &&*/ trackView.track.paintAxis && trackView.controlCanvas.width > 0 && trackView.controlCanvas.height > 0);
+            return (/*0 === genomicState.locusIndex &&*/ (typeof trackView.track.paintAxis === 'function') && trackView.controlCanvas.width > 0 && trackView.controlCanvas.height > 0);
         }
 
         function viewIsReady() {

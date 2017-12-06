@@ -110,6 +110,8 @@ var igv = (function (igv) {
 
                 if (session) {
                     config = Object.assign(config, session);
+                    if(undefined === config.tracks) config.tracks = [];
+                    config.tracks.push({type: "sequence", order: -Number.MAX_VALUE});
                 }
 
                 // Deal with legacy genome definition options
