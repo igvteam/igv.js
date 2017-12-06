@@ -90,6 +90,23 @@ var igv = (function (igv) {
 
     }
 
+    igv.MergedTrack.prototype.paintAxis = function (ctx, pixelWidth, pixelHeight) {
+
+        var i, len, autoscale, track;
+
+        autoscale = true;   // Hardcoded for now
+
+        for (i = 0, len = this.tracks.length; i < len; i++) {
+
+            track = this.tracks[i];
+
+            if (typeof track.paintAxis === 'function') {
+                track.paintAxis(ctx, pixelWidth, pixelHeight);
+                if (autoscale) break;
+            }
+        }
+    }
+
     function autoscale(chr, featureArrays) {
 
 
