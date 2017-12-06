@@ -37,6 +37,10 @@ var igv = (function (igv) {
         this.name = label;
         this.pValueField = config.pValueField || "pValue";
         this.geneField = config.geneField || "geneName";
+
+        this.autoscale = (config.autoScale === undefined ? true : config.autoScale);
+        this.percentile = (config.percentile === undefined ? 98 : config.percentile);
+
         this.minLogP = config.minLogP || 3.5;
         this.maxLogP = config.maxLogP || 25;
         this.background = config.background;    // No default
@@ -91,7 +95,7 @@ var igv = (function (igv) {
 
         font['textAlign'] = 'center';
 
-        igv.graphics.fillText(ctx, "-log10(pvalue)", pixelWidth/4, pixelHeight/2, font, {rotate: {angle: -90}});
+        igv.graphics.fillText(ctx, "-log10(pvalue)", pixelWidth / 4, pixelHeight / 2, font, {rotate: {angle: -90}});
 
     };
 
@@ -101,7 +105,7 @@ var igv = (function (igv) {
 
     igv.EqtlTrack.prototype.draw = function (options) {
 
-        var track = this,
+        var self = this,
             featureList = options.features,
             ctx = options.context,
             bpPerPixel = options.bpPerPixel,
@@ -109,7 +113,7 @@ var igv = (function (igv) {
             pixelWidth = options.pixelWidth,
             pixelHeight = options.pixelHeight,
             bpEnd = bpStart + pixelWidth * bpPerPixel + 1,
-            yScale = (track.maxLogP - track.minLogP) / pixelHeight;
+            yScale = (self.maxLogP - self.minLogP) / pixelHeight;
 
         // Background
         if (this.background) igv.graphics.fillRect(ctx, 0, 0, pixelWidth, pixelHeight, {'fillStyle': this.background});
@@ -118,16 +122,15 @@ var igv = (function (igv) {
         if (ctx) {
 
             var len = featureList.length;
-
-
+            
             ctx.save();
-
-
+            
+            self.maxLogP = autoscale(featureList, bpStart, bpEnd);
+            
             // Draw in two passes, with "selected" eqtls drawn last
             drawEqtls(false);
             drawEqtls(true);
-
-
+            
             ctx.restore();
 
         }
@@ -135,16 +138,10 @@ var igv = (function (igv) {
         function drawEqtls(drawSelected) {
 
             var radius = drawSelected ? 2 * track.dotSize : track.dotSize,
-                eqtl,
-                i,
-                px,
-                py,
-                color,
-                isSelected,
-                snp,
-                geneName,
-                selection;
+                eqtl, i, px, py, color, isSelected, snp, geneName, selection;
 
+
+            //ctx.fillStyle = igv.selection.colorForGene(eqtl.geneName);
             igv.graphics.setProperties(ctx, {
                 fillStyle: "rgb(180, 180, 180)",
                 strokeStyle: "rgb(180, 180, 180)"
@@ -155,7 +152,7 @@ var igv = (function (igv) {
                 eqtl = featureList[i];
                 snp = eqtl.snp.toUpperCase();
                 geneName = eqtl[track.geneField].toUpperCase();
-                selection = options.genomicState.selection;
+                selection = igv.browser.selection;
                 isSelected = selection &&
                 (selection.snp === snp || selection.gene === geneName);
 
@@ -233,7 +230,7 @@ var igv = (function (igv) {
                         feature.start <= genomicLocation + tolerance &&
                         feature.py - yOffset < 2 * dotSize) {
 
-                        if(popupData.length > 0) {
+                        if (popupData.length > 0) {
                             popupData.push("<hr>");
                         }
 
