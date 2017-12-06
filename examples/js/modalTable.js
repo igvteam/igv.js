@@ -86,7 +86,7 @@ var igv = (function (igv) {
         return result.length > 0 ? result : undefined;
     }
 
-    igv.ModalTable.prototype.loadData = function (genomeId) {
+    igv.ModalTable.prototype.loadData = function () {
 
         var self = this,
             browser,
@@ -97,7 +97,7 @@ var igv = (function (igv) {
 
         browser = this.config.browserRetrievalFunction();
         // assembly = lut[ browser.genome.id ] || browser.genome.id;
-        assembly = igv.genomeIdLUT( genomeId);
+        assembly = igv.genomeIdLUT( browser.genome.id );
         this.$spinner.show();
         $hic_track_dropdown.prop('disabled', true);
         this.datasource

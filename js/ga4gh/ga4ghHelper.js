@@ -44,8 +44,7 @@ var igv = (function (igv) {
                 url = options.url,
                 body = options.body,
                 decode = options.decode,
-                apiKey = igv.oauth.google.apiKey,
-                acToken = igv.oauth.google.access_token,
+                apiKey = (igv.oauth.google.apiKey),
                 paramSeparator = "?",
                 fields = options.fields;  // Partial response
 
