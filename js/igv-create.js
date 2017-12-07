@@ -103,23 +103,28 @@ var igv = (function (igv) {
 
         var width;
 
-        // Potentially load a session file
-        loadSessionFile()
+        // Load known genome table (make this optional)
+
+        igv.Genome.getKnownGenomes()
+            .then(function (genomeTable) {
+                // Potentially load a session file
+                return loadSessionFile();
+            })
 
             .then(function (session) {
 
                 if (session) {
                     config = Object.assign(config, session);
-                    if(undefined === config.tracks) config.tracks = [];
+                    if (undefined === config.tracks) config.tracks = [];
                     config.tracks.push({type: "sequence", order: -Number.MAX_VALUE});
                 }
 
-                // Deal with legacy genome definition options
+                // Expand genome IDs and deal with legacy genome definition options
                 setReferenceConfiguration(config);
 
                 // Query parameter locus has precendence
                 var initialLocus = extractLocus();
-                if(initialLocus) config.locus = initialLocus;
+                if (initialLocus) config.locus = initialLocus;
 
                 return config;
             })
