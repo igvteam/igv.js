@@ -34,7 +34,7 @@ var igv = (function (igv) {
         this.$container.append(this.$select);
 
         this.$select.on('change', function () {
-            browser.parseSearchInput( $(this).val() );
+            browser.search($(this).val());
         });
 
     };
