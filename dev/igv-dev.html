@@ -324,7 +324,7 @@
 
     $(document).ready(function () {
         var div,
-            options;
+                options;
 
         div = $("#myDiv")[0];
         options = {
@@ -346,33 +346,36 @@
             },
             flanking: 1000,
             apiKey: 'AIzaSyDUUAUFpQEN4mumeMNIRWXSiTh5cPtUAD0',
-            palette:
-                [
-                    "#00A0B0",
-                    "#6A4A3C",
-                    "#CC333F",
-                    "#EB6841"
-                ],
-            tracks:
-                [
-                    {
-                        url: 'http://hgdownload.cse.ucsc.edu/goldenPath/hg19/encodeDCC/wgEncodeBroadHistone/wgEncodeBroadHistoneGm12878H3k4me3StdSig.bigWig',
-                        name: 'ENCODE - BigWig'
-                    },
-                    {
-
-                        name: "Genes",
-                        searchable: false,
-                        type: "annotation",
-                        format: "gtf",
-                        sourceType: "file",
-                        url: "https://s3.amazonaws.com/igv.broadinstitute.org/annotations/hg19/genes/gencode.v18.annotation.sorted.gtf.gz",
-                        indexURL: "https://s3.amazonaws.com/igv.broadinstitute.org/annotations/hg19/genes/gencode.v18.annotation.sorted.gtf.gz.tbi",
-                        visibilityWindow: 10000000,
-                        order: Number.MAX_VALUE,
-                        displayMode: "EXPANDED"
+            palette: [
+                "#00A0B0",
+                "#6A4A3C",
+                "#CC333F",
+                "#EB6841"
+            ],
+            tracks: [
+                {
+                    url: 'http://hgdownload.cse.ucsc.edu/goldenPath/hg19/encodeDCC/wgEncodeBroadHistone/wgEncodeBroadHistoneGm12878H3k4me3StdSig.bigWig',
+                    name: 'ENCODE - BigWig',
+                    color: function (value) {
+                        var red = Math.min(255, Math.max(100, Math.round(value / 2))),
+                                blue = 255 - red;
+                        return "rgb(" + red + "," + blue + ",0)"
                     }
-                ]
+                },
+                {
+
+                    name: "Genes",
+                    searchable: false,
+                    type: "annotation",
+                    format: "gtf",
+                    sourceType: "file",
+                    url: "https://s3.amazonaws.com/igv.broadinstitute.org/annotations/hg19/genes/gencode.v18.annotation.sorted.gtf.gz",
+                    indexURL: "https://s3.amazonaws.com/igv.broadinstitute.org/annotations/hg19/genes/gencode.v18.annotation.sorted.gtf.gz.tbi",
+                    visibilityWindow: 10000000,
+                    order: Number.MAX_VALUE,
+                    displayMode: "EXPANDED"
+                }
+            ]
         };
 
         igv.createBrowser(div, options);
