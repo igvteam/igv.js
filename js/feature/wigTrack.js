@@ -158,7 +158,7 @@ var igv = (function (igv) {
 
 
         // Temp hack
-        if(self.color && self.color.startsWith("rgb(")) {
+        if(typeof self.color === "string" && self.color.startsWith("rgb(")) {
             baselineColor =  igv.Color.addAlpha(self.color, 0.1);
         }
 
@@ -214,9 +214,8 @@ var igv = (function (igv) {
                 x,
                 y,
                 width,
-                height,
-                rectEnd,
-                rectBaseline;
+                color,
+                rectEnd;
 
             if (feature.end < bpStart) return;
             if (feature.start > bpEnd) return;
@@ -250,7 +249,10 @@ var igv = (function (igv) {
             }
 
             //canvas.fillRect(x, yUnitless * pixelHeight, width, heightUnitLess * pixelHeight, { fillStyle: igv.randomRGB(64, 255) });
-            igv.graphics.fillRect(ctx, x, yUnitless * pixelHeight, width, heightUnitLess * pixelHeight, {fillStyle: self.color});
+
+            color = (typeof self.color === "function") ? self.color(feature.value) : self.color;
+
+            igv.graphics.fillRect(ctx, x, yUnitless * pixelHeight, width, heightUnitLess * pixelHeight, {fillStyle: color});
 
         }
 
