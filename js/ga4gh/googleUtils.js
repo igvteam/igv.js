@@ -93,30 +93,42 @@ var igv = (function (igv) {
             var i1, i2, id;
             // Return a google drive download url for the sharable link
             //https://drive.google.com/open?id=0B-lleX9c2pZFbDJ4VVRxakJzVGM
-            //https://drive.google.com/file/d/0B-lleX9c2pZFZVZyVTdkSFZ2cm8/view?usp=sharing
-            //https://drive.google.com/file/d/0B-lleX9c2pZFbDJ4VVRxakJzVGM/view?usp=sharing
-            // url: 'https://www.googleapis.com/drive/v3/files/0B-lleX9c2pZFZVZyVTdkSFZ2cm8/?alt=media',
+            //https://drive.google.com/file/d/1_FC4kCeO8E3V4dJ1yIW7A0sn1yURKIX-/view?usp=sharing
 
-            if (link.includes("/open?id=")) {
-                i1 = link.indexOf("/open?id=") + 9;
-                i2 = link.indexOf("&");
-                if (i1 > 0 && i2 > i1) {
-                    id = link.substring(i1, i2)
-                }
-                else if (i1 > 0) {
-                    id = link.substring(i1);
-                }
-
-            }
-            else if (link.includes("/file/d/")) {
-                i1 = link.indexOf("/file/d/") + 8;
-                i2 = link.lastIndexOf("/");
-                id = link.substring(i1, i2);
-
-            }
+            var id = getGoogleDriveFileID(link);
 
             return id ? "https://www.googleapis.com/drive/v3/files/" + id + "?alt=media" : link;
+        },
 
+        getDriveFileInfo: function (googleDriveURL) {
+
+            var id = getGoogleDriveFileID(googleDriveURL),
+                endPoint = "https://www.googleapis.com/drive/v2/files/" + id;
+
+            return igv.xhr.loadJson(endPoint, igv.buildOptions({}));
+        }
+    }
+
+    function getGoogleDriveFileID(link) {
+
+        //https://drive.google.com/file/d/1_FC4kCeO8E3V4dJ1yIW7A0sn1yURKIX-/view?usp=sharing
+        var i1, i2;
+
+        if (link.includes("/open?id=")) {
+            i1 = link.indexOf("/open?id=") + 9;
+            i2 = link.indexOf("&");
+            if (i1 > 0 && i2 > i1) {
+                return link.substring(i1, i2)
+            }
+            else if (i1 > 0) {
+                 return link.substring(i1);
+            }
+
+        }
+        else if (link.includes("/file/d/")) {
+            i1 = link.indexOf("/file/d/") + 8;
+            i2 = link.lastIndexOf("/");
+            return link.substring(i1, i2);
         }
     }
 
