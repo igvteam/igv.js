@@ -194,12 +194,12 @@ var igv = (function (igv) {
 
                 } else {
                     errorString = 'Unrecognized locus ' + config.locus;
-                    igv.presentAlert(errorString);
+                    igv.presentAlert(errorString, undefined);
                 }
 
             })
             .catch(function (error) {
-                igv.presentAlert(error);
+                igv.presentAlert(error, undefined);
                 console.log(error);
             });
 
@@ -256,7 +256,7 @@ var igv = (function (igv) {
 
         if (!(conf.reference && conf.reference.fastaURL)) {
             //alert("Fatal error:  reference must be defined");
-            igv.presentAlert("Fatal error:  reference must be defined");
+            igv.presentAlert("Fatal error:  reference must be defined", undefined);
             throw new Error("Fatal error:  reference must be defined");
         }
 
@@ -271,7 +271,7 @@ var igv = (function (igv) {
 
             var reference = igv.Genome.KnownGenomes[genomeId];
 
-            if (!reference)igv.presentAlert("Uknown genome id: " + genomeId);
+            if (!reference)igv.presentAlert("Uknown genome id: " + genomeId, undefined);
 
             return reference;
         }

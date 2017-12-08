@@ -502,7 +502,7 @@ var igv = (function (igv) {
 
                     self.loading = false;
 
-                    igv.presentAlert(error);
+                    igv.presentAlert(error, undefined);
               
                 });
 

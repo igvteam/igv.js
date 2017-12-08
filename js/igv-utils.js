@@ -170,7 +170,7 @@ var igv = (function (igv) {
         return $button;
     };
 
-    igv.presentAlert = function (alert) {
+    igv.presentAlert = function (alert, $parent) {
 
         var string;
 
@@ -181,7 +181,7 @@ var igv = (function (igv) {
         }
         
         igv.alert.$dialogLabel.text(string);
-        igv.alert.show();
+        igv.alert.show($parent);
 
         igv.popover.hide();
 

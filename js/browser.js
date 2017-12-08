@@ -224,7 +224,7 @@ var igv = (function (igv) {
         newTrack = igv.createTrack(config);
 
         if (undefined === newTrack) {
-            igv.presentAlert("Unknown file type: " + config.url);
+            igv.presentAlert("Unknown file type: " + config.url, undefined);
             return newTrack;
         }
 
@@ -238,7 +238,7 @@ var igv = (function (igv) {
             newTrack.getFileHeader().then(function (header) {
                 self.addTrack(newTrack);
             }).catch(function (error) {
-                igv.presentAlert(error);
+                igv.presentAlert(error, undefined);
             });
         } else {
             self.addTrack(newTrack);
@@ -944,7 +944,7 @@ var igv = (function (igv) {
                 self.update();
             } else {
                 errorString = 'Unrecognized locus ' + string;
-                igv.presentAlert(errorString);
+                igv.presentAlert(errorString, undefined);
             }
 
         });
@@ -1571,7 +1571,7 @@ var igv = (function (igv) {
 
                     if (results.length == 0) {
                         //alert('No feature found with name "' + feature + '"');
-                        igv.presentAlert('No feature found with name "' + feature + '"');
+                        igv.presentAlert('No feature found with name "' + feature + '"', undefined);
                     }
                     else if (results.length == 1) {
                         // Just take the first result for now
@@ -1643,7 +1643,7 @@ var igv = (function (igv) {
         }
 
         if (undefined === chr || isNaN(start) || (start > end)) {
-            igv.presentAlert("Unrecognized feature or locus: " + locusFeature);
+            igv.presentAlert("Unrecognized feature or locus: " + locusFeature, undefined);
             return false;
         }
 

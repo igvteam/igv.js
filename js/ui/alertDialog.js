@@ -108,14 +108,16 @@ var igv = (function (igv) {
         this.$container.hide();
     };
 
-    igv.AlertDialog.prototype.show = function () {
+    igv.AlertDialog.prototype.show = function ($alternativeParent) {
 
-        var obj;
+        var obj,
+            $p;
 
+        $p = $alternativeParent || this.$parent;
         obj =
             {
-                left: (this.$parent.width() - this.$container.width())/2,
-                top: (this.$parent.height() - this.$container.height())/2
+                left: ($p.width() - this.$container.width())/2,
+                top: ($p.height() - this.$container.height())/2
 
             };
         this.$container.css(obj);
