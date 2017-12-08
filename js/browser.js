@@ -184,7 +184,7 @@ var igv = (function (igv) {
         var self = this,
             loadedTracks = [];
 
-        _.each(configList, function (config) {
+        configList.forEach( function (config) {
             var track = self.loadTrack(config);
             if (track) {
                 loadedTracks.push(track);
@@ -192,7 +192,7 @@ var igv = (function (igv) {
         });
 
         // Really we should just resize the new trackViews, but currently there is no way to get a handle on those
-        _.each(this.trackViews, function (trackView) {
+        this.trackViews.forEach( function (trackView) {
             trackView.resize();
         });
 

@@ -40,10 +40,12 @@ var igv = (function (igv) {
             this.bamReader = new igv.Ga4ghAlignmentReader(config);
         } else if ("pysam" === config.sourceType) {
             this.bamReader = new igv.BamWebserviceReader(config)
-        } else if("htsget" === config.sourceType) {
+        } else if ("htsget" === config.sourceType) {
             this.bamReader = new igv.HtsgetReader(config);
+        } else if ("shardedBam" === config.sourceType) {
+            this.bamReader = new igv.ShardedBamReader(config);
         } else {
-            if(this.config.indexed === false) {
+            if (this.config.indexed === false) {
                 this.bamReader = new igv.BamReaderNonIndexed(config);
             }
             else {
@@ -78,15 +80,14 @@ var igv = (function (igv) {
 
     igv.BamSource.prototype.getAlignments = function (chr, bpStart, bpEnd) {
 
-        var self = this;
+        var self = this, hasAlignments;
 
         if (self.alignmentContainer && self.alignmentContainer.contains(chr, bpStart, bpEnd)) {
             return Promise.resolve(self.alignmentContainer);
         } else {
-            return new Promise(function (fulfill, reject) {
+            return self.bamReader.readAlignments(chr, bpStart, bpEnd)
 
-
-                self.bamReader.readAlignments(chr, bpStart, bpEnd).then(function (alignmentContainer) {
+                .then(function (alignmentContainer) {
 
                     var maxRows = self.config.maxRows || 500,
                         alignments = alignmentContainer.alignments;
@@ -95,31 +96,33 @@ var igv = (function (igv) {
                         alignments = unpairAlignments([{alignments: alignments}]);
                     }
 
+                    hasAlignments = alignments.length > 0;
+
                     alignmentContainer.packedAlignmentRows = packAlignmentRows(alignments, alignmentContainer.start, alignmentContainer.end, maxRows);
 
-
                     alignmentContainer.alignments = undefined;  // Don't need to hold onto these anymore
+
                     self.alignmentContainer = alignmentContainer;
 
-                    igv.browser.genome.sequence.getSequence(alignmentContainer.chr, alignmentContainer.start, alignmentContainer.end).then(
-                        function (sequence) {
+                    if (!hasAlignments) {
+                        return alignmentContainer;
+                    }
+                    else {
+                        return igv.browser.genome.sequence.getSequence(alignmentContainer.chr, alignmentContainer.start, alignmentContainer.end)
+
+                            .then(function (sequence) {
+
+                                if (sequence) {
+
+                                    alignmentContainer.coverageMap.refSeq = sequence;    // TODO -- fix this
+                                    alignmentContainer.sequence = sequence;           // TODO -- fix this
 
 
-                            if (sequence) {
-
-                                alignmentContainer.coverageMap.refSeq = sequence;    // TODO -- fix this
-                                alignmentContainer.sequence = sequence;           // TODO -- fix this
-
-
-                                fulfill(alignmentContainer);
-                            }
-                        }).catch(reject);
-
-                }).catch(function (error) {
-                    reject(error);
-                });
-
-            });
+                                    return alignmentContainer;
+                                }
+                            })
+                    }
+                })
         }
     }
 
@@ -184,14 +187,9 @@ var igv = (function (igv) {
 
         if (!alignments) return;
 
-        alignments.sort(function (a, b) {
-            return a.start - b.start;
-        });
 
         if (alignments.length === 0) {
-
             return [];
-
         } else {
 
             var bucketList = [],
@@ -205,6 +203,11 @@ var igv = (function (igv) {
                 alignmentSpace = 4 * 2,
                 packedAlignmentRows = [],
                 bucketStart;
+
+
+            alignments.sort(function (a, b) {
+                return a.start - b.start;
+            });
 
             bucketStart = Math.max(start, alignments[0].start);
             nextStart = bucketStart;
