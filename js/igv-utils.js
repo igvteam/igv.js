@@ -170,18 +170,18 @@ var igv = (function (igv) {
         return $button;
     };
 
-    igv.presentAlert = function (obj) {
+    igv.presentAlert = function (alert) {
 
-        //console.trace();
+        var string;
 
-        var string = obj.message || obj;
+        string = alert.message || alert;
 
         if(httpMessages.hasOwnProperty(string)) {
             string = httpMessages[string];
         }
         
         igv.alert.$dialogLabel.text(string);
-        igv.alert.show(undefined);
+        igv.alert.show();
 
         igv.popover.hide();
 
@@ -191,7 +191,7 @@ var igv = (function (igv) {
         "401": "Access unauthorized",
         "403": "Access forbidden",
         "404": "Not found"
-    }
+    };
 
 
     igv.attachDialogCloseHandlerWithParent = function ($parent, closeHandler) {
