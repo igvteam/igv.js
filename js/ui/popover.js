@@ -154,7 +154,7 @@ var igv = (function (igv) {
                 x: trackLocationState.x,
                 y: trackLocationState.y
             };
-        dataList = track.popupDataWithConfiguration(config);
+        dataList = track.popupData(config);
 
         popupClickHandlerResult = igv.browser.fireEvent('trackclick', [track, dataList]);
 

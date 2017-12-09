@@ -184,12 +184,12 @@ var igv = (function (igv) {
 
     };
 
-    igv.BAMTrack.prototype.popupDataWithConfiguration = function (config) {
+    igv.BAMTrack.prototype.popupData = function (config) {
 
         if (config.y >= this.coverageTrack.top && config.y < this.coverageTrack.height) {
-            return this.coverageTrack.popupDataWithConfiguration(config);
+            return this.coverageTrack.popupData(config);
         } else {
-            return this.alignmentTrack.popupDataWithConfiguration(config);
+            return this.alignmentTrack.popupData(config);
         }
 
     };
@@ -494,13 +494,13 @@ var igv = (function (igv) {
 
     };
 
-    CoverageTrack.prototype.popupDataWithConfiguration = function (config) {
-        return this.popupData(config.genomicLocation, config.x, this.top, config.viewport.genomicState.referenceFrame);
-    };
-
-    CoverageTrack.prototype.popupData = function (genomicLocation, xOffset, yOffset, referenceFrame) {
-
-        var coverageMap = this.featureSource.alignmentContainer.coverageMap,
+    CoverageTrack.prototype.popupData = function (config) {
+        
+        var genomicLocation = config.genomicLocation,
+            xOffset = config.x,
+            yOffset = config.y,
+            referenceFrame = config.viewport.genomicState.referenceFrame,
+            coverageMap = this.featureSource.alignmentContainer.coverageMap,
             coverageMapIndex,
             coverage,
             nameValues = [],
@@ -882,7 +882,7 @@ var igv = (function (igv) {
 
     };
 
-    AlignmentTrack.prototype.popupDataWithConfiguration = function (config) {
+    AlignmentTrack.prototype.popupData = function (config) {
 
         var clickedObject;
 
