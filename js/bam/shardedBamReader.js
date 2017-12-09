@@ -54,12 +54,12 @@ var igv = (function (igv) {
 
     igv.ShardedBamReader.prototype.readAlignments = function (chr, start, end) {
 
-        var self = this, queryChr,
-            reader;
+        var self = this,
+            queryChr, reader, tmp, bamConfig;
 
         queryChr = self.chrAliasTable.hasOwnProperty(chr) ? self.chrAliasTable[chr] : chr;
 
-        if (!this.bamReaders.hasOwnProperty(queryChr)) {
+        if (!this.bamReaders.hasOwnProperty(queryChr) || "none" === this.bamReaders[queryChr]) {
             return Promise.resolve(new igv.AlignmentContainer(chr, start, end));
         }
 
@@ -68,8 +68,13 @@ var igv = (function (igv) {
             reader = self.bamReaders[queryChr];
 
             if (!reader) {
-                var bamUrl = self.config.sources.url.replace("$CHR", queryChr);
-                var bamConfig = Object.assign(self.config, {url: bamUrl});
+                tmp = {
+                    url: self.config.sources.url.replace("$CHR", queryChr)
+                }
+                if (self.config.sources.indexURL) {
+                    tmp.indexURL = self.config.sources.indexURL.replace("$CHR", queryChr);
+                }
+                bamConfig = Object.assign(self.config, tmp);
                 reader = new igv.BamReader(bamConfig);
                 self.bamReaders[queryChr] = reader;
             }
@@ -77,8 +82,9 @@ var igv = (function (igv) {
             return reader.readAlignments(queryChr, start, end)
                 .catch(function (error) {
                     console.error(error);
+                    igv.presentAlert("Error reading BAM or index file for: " + tmp.url);
                     self.bamReaders[queryChr] = "none";
-                    return [];
+                    return new igv.AlignmentContainer(chr, start, end);   // Empty alignment container
                 })
         }
     }
