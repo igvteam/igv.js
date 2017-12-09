@@ -426,14 +426,15 @@ var igv = (function (igv) {
         }
     };
 
-    igv.VariantTrack.prototype.popupDataWithConfiguration = function (config) {
-        return this.popupData(config.genomicLocation, config.x, config.y, config.viewport.genomicState.referenceFrame)
-    };
-
     /**
      * Return "popup data" for feature @ genomic location.  Data is an array of key-value pairs
-     */
-    igv.VariantTrack.prototype.popupData = function (genomicLocation, xOffset, yOffset, referenceFrame) {
+     */   
+    igv.VariantTrack.prototype.popupData = function (config) {
+
+        var genomicLocation = config.genomicLocation,
+            xOffset = config.x,
+            yOffset = config.y,
+            referenceFrame = config.viewport.genomicState.referenceFrame;
 
         // We use the featureCache property rather than method to avoid async load.  If the
         // feature is not already loaded this won't work,  but the user wouldn't be mousing over it either.

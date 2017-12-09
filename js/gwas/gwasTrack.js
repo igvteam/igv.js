@@ -163,14 +163,13 @@ var igv = (function (igv) {
     };
 
 
-    igv.GWASTrack.prototype.popupDataWithConfiguration = function (config) {
-        return this.popupData(config.genomicLocation, config.x, config.y, config.viewport.genomicState.referenceFrame)
-    };
+    igv.GWASTrack.prototype.popupData = function (config) {
 
-
-    igv.GWASTrack.prototype.popupData = function (genomicLocation, xOffset, yOffset, referenceFrame) {
-
-        var i,
+        var genomicLocation = config.genomicLocation,
+            xOffset = config.x,
+            yOffset = config.y,
+            referenceFrame = config.viewport.genomicState.referenceFrame,
+            i,
             len,
             p,
             dbSnp,
@@ -219,10 +218,6 @@ var igv = (function (igv) {
 
         }
         return data;
-    };
-
-    igv.GWASTrack.prototype.popupDataWithConfiguration = function (config) {
-        return this.popupData(config.genomicLocation, config.x, config.y, config.viewport.genomicState.referenceFrame);
     };
 
     return igv;

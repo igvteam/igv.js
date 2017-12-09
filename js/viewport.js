@@ -273,7 +273,7 @@ var igv = (function (igv) {
                         self.trackView.track.altClick(genomicLocation, referenceFrame, e);
                     }
 
-                } else if (Math.abs(canvasCoords.x - mouseDownX) <= igv.browser.constants.dragThreshold && self.trackView.track.popupDataWithConfiguration) {
+                } else if (Math.abs(canvasCoords.x - mouseDownX) <= igv.browser.constants.dragThreshold && self.trackView.track.popupData) {
 
                     popupTimer = window.setTimeout(function () {
 
