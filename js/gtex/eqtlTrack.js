@@ -135,56 +135,83 @@ var igv = (function (igv) {
 
         }
 
+        function autoscale(featureList, start, end) {
+
+            var values = featureList
+                .filter(function (eqtl) {
+                    return eqtl.position >= start && eqtl.position <= end
+                })
+                .map(function (eqtl) {
+                    return -Math.log(eqtl[self.pValueField]) / Math.LN10
+                })
+
+            return igv.Math.percentile(values, self.percentile);
+            
+        }
+
         function drawEqtls(drawSelected) {
 
-            var radius = drawSelected ? 2 * track.dotSize : track.dotSize,
-                eqtl, i, px, py, color, isSelected, snp, geneName, selection;
-
-
-            //ctx.fillStyle = igv.selection.colorForGene(eqtl.geneName);
-            igv.graphics.setProperties(ctx, {
-                fillStyle: "rgb(180, 180, 180)",
-                strokeStyle: "rgb(180, 180, 180)"
-            });
+            var radius = drawSelected ? 2 * self.dotSize : self.dotSize,
+                eqtl,
+                i,
+                px,
+                py,
+                color,
+                isSelected,
+                snp,
+                geneName,
+                selection,
+                capped;
 
             for (i = 0; i < len; i++) {
 
                 eqtl = featureList[i];
-                snp = eqtl.snp.toUpperCase();
-                geneName = eqtl[track.geneField].toUpperCase();
-                selection = igv.browser.selection;
-                isSelected = selection &&
-                (selection.snp === snp || selection.gene === geneName);
-
-                if (drawSelected && !isSelected) continue;
-
-                // Add eqtl's gene to the selection if this is the selected snp.
-                // TODO -- this should not be done here in the rendering code.
-                if (selection && selection.snp === snp) {
-                    selection.addGene(geneName);
-                }
-
-                if (drawSelected && selection) {
-                    color = selection.colorForGene(geneName);
-                }
-
-                if (drawSelected && color === undefined) continue;   // This should be impossible
-
-
-                px = (Math.round(eqtl.position  - bpStart + 0.5)) / bpPerPixel;
+                px = (Math.round(eqtl.position - bpStart + 0.5)) / bpPerPixel;
                 if (px < 0) continue;
                 else if (px > pixelWidth) break;
 
-                var mLogP = -Math.log(eqtl[track.pValueField]) / Math.LN10;
-                if (mLogP < track.minLogP) continue;
 
-                py = Math.max(0 + radius, pixelHeight - Math.round((mLogP - track.minLogP) / yScale));
-                eqtl.px = px;
-                eqtl.py = py;
+                snp = eqtl.snp.toUpperCase();
+                geneName = eqtl[self.geneField].toUpperCase();
+                selection = options.genomicState.selection;
+                isSelected = selection &&
+                    (selection.snp === snp || selection.gene === geneName);
 
-                if (color) igv.graphics.setProperties(ctx, {fillStyle: color, strokeStyle: "black"});
-                igv.graphics.fillCircle(ctx, px, py, radius);
-                igv.graphics.strokeCircle(ctx, px, py, radius);
+                if (!drawSelected || isSelected) {
+
+                    // Add eqtl's gene to the selection if this is the selected snp.
+                    // TODO -- this should not be done here in the rendering code.
+                    if (selection && selection.snp === snp) {
+                        selection.addGene(geneName);
+                    }
+
+                    var mLogP = -Math.log(eqtl[self.pValueField]) / Math.LN10;
+                    if (mLogP >= self.minLogP) {
+
+                        if(mLogP > self.maxLogP) {
+                            mLogP = self.maxLogP;
+                            capped = true;
+                        } else {
+                            capped = false;
+
+                        }
+
+                        py = Math.max(0 + radius, pixelHeight - Math.round((mLogP - self.minLogP) / yScale));
+                        eqtl.px = px;
+                        eqtl.py = py;
+
+                        if (drawSelected && selection) {
+                            color = selection.colorForGene(geneName);
+                            igv.graphics.setProperties(ctx, {fillStyle: color, strokeStyle: "black"});
+                        } else {
+                            color = capped ? "rgb(150, 150, 150)" : "rgb(180, 180, 180)";
+                            igv.graphics.setProperties(ctx, {fillStyle: color, strokeStyle: color});
+                        }
+
+                        igv.graphics.fillCircle(ctx, px, py, radius);
+                        igv.graphics.strokeCircle(ctx, px, py, radius);
+                    }
+                }
             }
         }
 
@@ -200,16 +227,15 @@ var igv = (function (igv) {
         igv.browser.update();
     }
 
-
-    igv.EqtlTrack.prototype.popupDataWithConfiguration = function (config) {
-        return this.popupData(config.genomicLocation, config.x, config.y, config.viewport.genomicState.referenceFrame)
-    };
-
-
     /**
      * Return "popup data" for feature @ genomic location.  Data is an array of key-value pairs
      */
-    igv.EqtlTrack.prototype.popupData = function (genomicLocation, xOffset, yOffset, referenceFrame) {
+    igv.EqtlTrack.prototype.popupData = function (config) {
+    
+        var genomicLocation = config.genomicLocation,
+            xOffset = config.x,
+            yOffset = config.y,
+            referenceFrame = config.viewport.genomicState.referenceFrame;
 
         // We use the featureCache property rather than method to avoid async load.  If the
         // feature is not already loaded this won't work,  but the user wouldn't be mousing over it either.

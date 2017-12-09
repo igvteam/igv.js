@@ -528,13 +528,13 @@ var igv = (function (igv) {
     };
 
 
-    igv.AneuTrack.prototype.popupDataWithConfiguration = function (config) {
-        return this.popupData(config.genomicLocation, config.x, config.y, config.viewport.genomicState.referenceFrame)
-    };
+    igv.AneuTrack.prototype.popupData = function (config) {
 
-    igv.AneuTrack.prototype.popupData = function (genomicLocation, xOffset, yOffset, referenceFrame) {
-
-        var sampleName, row = Math.floor(yOffset / this.sampleHeight), items;
+        var genomicLocation = config.genomicLocation,
+            xOffset = config.x,
+            yOffset = config.y,
+            referenceFrame = config.viewport.genomicState.referenceFrame,
+            sampleName, row = Math.floor(yOffset / this.sampleHeight), items;
 
         log("popupData for row " + row + ", sampleNames=" + JSON.stringify(this.sampleNames));
         if (row < this.sampleNames.length) {
