@@ -928,7 +928,7 @@ var igv = (function (igv) {
                 Array.prototype.push.apply(head, tail);
             }
 
-            igv.browser.parseSearchInput(head.join(' '));
+            igv.browser.search(head.join(' '));
         }
 
         function locusPairWithAlignmentAndViewport(alignment, viewport) {
