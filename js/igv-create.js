@@ -38,8 +38,7 @@ var igv = (function (igv) {
      */
     igv.createBrowser = function (parentDiv, config) {
 
-        var $content,
-            $header,
+        var $header,
             browser;
 
         if (igv.browser) {
@@ -66,23 +65,23 @@ var igv = (function (igv) {
 
         setControls(browser, config);
 
-        $content = $('<div class="igv-content-div">');
-        browser.$root.append($content);
+        browser.$content = $('<div class="igv-content-div">');
+        browser.$root.append(browser.$content);
 
         $header = $('<div id="igv-content-header">');
-        $content.append($header);
+        browser.$content.append($header);
 
-        $content.append(browser.trackContainerDiv);
+        browser.$content.append(browser.trackContainerDiv);
 
         // user feedback
-        browser.userFeedback = new igv.UserFeedback($content);
+        browser.userFeedback = new igv.UserFeedback(browser.$content);
         browser.userFeedback.hide();
 
         // Popover object -- singleton shared by all components
-        igv.popover = new igv.Popover($content);
+        igv.popover = new igv.Popover(browser.$content);
 
         // alert object -- singleton shared by all components
-        igv.alert = new igv.AlertDialog(browser.$root, "igv-alert");
+        igv.alert = new igv.AlertDialog(browser.$content, "igv-alert");
         igv.alert.hide();
 
         // Dialog object -- singleton shared by all components
@@ -195,12 +194,12 @@ var igv = (function (igv) {
 
                 } else {
                     errorString = 'Unrecognized locus ' + config.locus;
-                    igv.presentAlert(errorString);
+                    igv.presentAlert(errorString, undefined);
                 }
 
             })
             .catch(function (error) {
-                igv.presentAlert(error);
+                igv.presentAlert(error, undefined);
                 console.log(error);
             });
 
@@ -257,7 +256,7 @@ var igv = (function (igv) {
 
         if (!(conf.reference && conf.reference.fastaURL)) {
             //alert("Fatal error:  reference must be defined");
-            igv.presentAlert("Fatal error:  reference must be defined");
+            igv.presentAlert("Fatal error:  reference must be defined", undefined);
             throw new Error("Fatal error:  reference must be defined");
         }
 
@@ -272,7 +271,7 @@ var igv = (function (igv) {
 
             var reference = igv.Genome.KnownGenomes[genomeId];
 
-            if (!reference)igv.presentAlert("Uknown genome id: " + genomeId);
+            if (!reference)igv.presentAlert("Uknown genome id: " + genomeId, undefined);
 
             return reference;
         }
