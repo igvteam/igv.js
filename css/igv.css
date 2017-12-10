@@ -752,18 +752,12 @@
 
 .igv-grid-container-alert-dialog {
   position: absolute;
-  left: 0;
-  right: 0;
-  top: 45%;
-  margin-left: auto;
-  margin-right: auto;
-  /*max-width: 740px;*/
   max-width: 300px;
   border-color: #7F7F7F;
   border-radius: 4px;
   border-style: solid;
   border-width: thin;
-  z-index: 1999;
+  z-index: 2048;
   background-color: white; }
 
 .igv-grid-header {
