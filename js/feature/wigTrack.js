@@ -36,7 +36,7 @@ var igv = (function (igv) {
         if (config.color === undefined) {
             config.color = "rgb(150,150,150)";
         }
-        if(config.height === undefined) {
+        if (config.height === undefined) {
             config.height = 50;
         }
 
@@ -121,18 +121,18 @@ var igv = (function (igv) {
             return self.featureSource.getFileHeader()
                 .then(function (header) {
 
-                if (header) {
-                    // Header (from track line).  Set properties,unless set in the config (config takes precedence)
-                    if (header.name && !self.config.name) {
-                        self.name = header.name;
+                    if (header) {
+                        // Header (from track line).  Set properties,unless set in the config (config takes precedence)
+                        if (header.name && !self.config.name) {
+                            self.name = header.name;
+                        }
+                        if (header.color && !self.config.color) {
+                            self.color = "rgb(" + header.color + ")";
+                        }
                     }
-                    if (header.color && !self.config.color) {
-                        self.color = "rgb(" + header.color + ")";
-                    }
-                }
-                return header;
+                    return header;
 
-            })
+                })
         }
         else {
             return Promise.resolve(null);
@@ -157,9 +157,11 @@ var igv = (function (igv) {
             baselineColor;
 
 
+        this.currentFeatures = options.features;    // Cache for popup text
+
         // Temp hack
-        if(typeof self.color === "string" && self.color.startsWith("rgb(")) {
-            baselineColor =  igv.Color.addAlpha(self.color, 0.1);
+        if (typeof self.color === "string" && self.color.startsWith("rgb(")) {
+            baselineColor = igv.Color.addAlpha(self.color, 0.1);
         }
 
 
@@ -195,7 +197,7 @@ var igv = (function (igv) {
                 features.forEach(renderFeature);
 
                 // If the track includes negative values draw a baseline
-                if(featureValueMinimum < 0) {
+                if (featureValueMinimum < 0) {
                     var alpha = ctx.lineWidth;
                     ctx.lineWidth = 5;
                     var basepx = (featureValueMaximum / (featureValueMaximum - featureValueMinimum)) * options.pixelHeight;
@@ -258,6 +260,44 @@ var igv = (function (igv) {
 
     };
 
+    igv.WIGTrack.prototype.popupData = function (config) {
+
+        // We use the featureCache property rather than method to avoid async load.  If the
+        // feature is not already loaded this won't work,  but the user wouldn't be mousing over it either.
+        if (this.currentFeatures) {
+
+            var genomicLocation = config.genomicLocation,
+
+                referenceFrame = config.viewport.genomicState.referenceFrame,
+                tolerance,
+                featureList,
+                popupData,
+                selectedFeature;
+
+            featureList = this.currentFeatures;
+
+            if (featureList.length > 0) {
+
+                popupData = [];
+
+                // We need some tolerance around genomicLocation, start with +/- 2 pixels
+                tolerance = 2 * referenceFrame.bpPerPixel;
+                selectedFeature = binarySearch(featureList, genomicLocation, tolerance);
+
+                if (selectedFeature) {
+                    popupData.push({name: "Position:", value: igv.numberFormatter(selectedFeature.start + 1) + "-" + igv.numberFormatter(selectedFeature.end)});
+                    popupData.push({name: "Value:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;", value: igv.numberFormatter(selectedFeature.value)});
+                }
+
+                return popupData;
+            }
+
+        }
+        else {
+            return null;
+        }
+    }
+
     function autoscale(features) {
         var min = 0,
             max = -Number.MAX_VALUE;
@@ -276,6 +316,79 @@ var igv = (function (igv) {
         return (a > 0 && b < 0 || a < 0 && b > 0);
     }
 
+    /**
+     * Return the closest feature to the genomic position +/- the specified tolerance.  Closest is defined
+     * by the minimum of the distance between position and start or end of the feature.
+     *
+     * @param features
+     * @param position
+     * @returns {*}
+     */
+    function binarySearch(features, position, tolerance) {
+        var startIndex = 0,
+            stopIndex = features.length - 1,
+            index = (startIndex + stopIndex) >> 1,
+            candidateFeature,
+            tmp, delta;
+
+
+        // Use binary search to get the index of at least 1 feature in the click tolerance bounds
+        while (!test(features[index], position, tolerance) && startIndex < stopIndex) {
+            if (position < features[index].start) {
+                stopIndex = index - 1;
+            } else if (position > features[index].end) {
+                startIndex = index + 1;
+            }
+
+            index = (startIndex + stopIndex) >> 1;
+        }
+
+        if (test(features[index], position, tolerance)) {
+
+            candidateFeature = features[index];
+            if (test(candidateFeature, position, 0)) return candidateFeature;
+
+            // Else, find closest feature to click
+            tmp = index;
+            while (tmp-- >= 0) {
+                if (!test(features[tmp]), position, tolerance) {
+                    break;
+                }
+                if (test(features[tmp], position, 0)) {
+                    return features[tmp];
+                }
+                if (delta(features[tmp], position) < delta(candidateFeature, position)) {
+                    candidateFeature = features[tmp];
+                }
+
+                tmp = index;
+                while (tmp++ < features.length) {
+                    if (!test(features[tmp]), position, tolerance) {
+                        break;
+                    }
+                    if (test(features[tmp], position, 0)) {
+                        return features[tmp];
+                    }
+                    if (delta(features[tmp], position) < delta(candidateFeature, position)) {
+                        candidateFeature = features[tmp];
+                    }
+                }
+            }
+            return candidateFeature;
+
+        } else {
+            console.log(position + ' not found!');
+            return undefined;
+        }
+
+        function test(feature, position, tolerance) {
+            return position >= (feature.start - tolerance) && position <= (feature.end + tolerance);
+        }
+
+        function delta(feature, position) {
+            return Math.min(Math.abs(feature.start - position), Math.abs(feature.end - position));
+        }
+    }
 
     return igv;
 
