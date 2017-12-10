@@ -314,7 +314,7 @@ var igv = (function (igv) {
             return (this.low <= other.high && other.low <= this.high);
         } catch (e) {
             //alert(e);
-            igv.presentAlert(e);
+            igv.presentAlert(e, undefined);
         }
     }
 

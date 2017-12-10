@@ -34,6 +34,7 @@ var igv = (function (igv) {
             $header,
             $headerBlurb;
 
+        this.$parent = $parent;
         this.$container = $('<div>', { "id": id, "class": "igv-grid-container-alert-dialog" });
         $parent.append(this.$container);
 
@@ -107,38 +108,21 @@ var igv = (function (igv) {
         this.$container.hide();
     };
 
-    igv.AlertDialog.prototype.show = function ($host) {
+    igv.AlertDialog.prototype.show = function ($alternativeParent) {
 
-        var body_scrolltop,
-            track_origin,
-            track_size,
-            offset,
-            _top,
-            _left;
+        var obj,
+            $p;
 
-        body_scrolltop = $('body').scrollTop();
+        $p = $alternativeParent || this.$parent;
+        obj =
+            {
+                left: ($p.width() - this.$container.width())/2,
+                top: ($p.height() - this.$container.height())/2
 
-        if (this.$container.hasClass('igv-grid-container-dialog')) {
-
-            offset = $host.offset();
-
-            _top = offset.top + body_scrolltop;
-            _left = $host.outerWidth() - 300;
-
-            this.$container.offset( { left: _left, top: _top } );
-
-            //track_origin = $host.offset();
-            //track_size =
-            //{
-            //    width: $host.outerWidth(),
-            //    height: $host.outerHeight()
-            //};
-            //this.$container.offset( { left: (track_size.width - 300), top: (track_origin.top + body_scrolltop) } );
-            //this.$container.offset( igv.constrainBBox(this.$container, $(igv.browser.trackContainerDiv)) );
-        }
+            };
+        this.$container.css(obj);
 
         this.$container.show();
-
     };
 
     return igv;

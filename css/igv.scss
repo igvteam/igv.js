@@ -964,13 +964,7 @@ $drag-drop-warning-color: red;
 .igv-grid-container-alert-dialog {
 
   position: absolute;
-  left: 0;
-  right: 0;
-  top: 45%;
 
-  margin-left: auto;
-  margin-right: auto;
-  /*max-width: 740px;*/
   max-width: 300px;
 
   border-color: $igv-grey-color;
@@ -978,7 +972,7 @@ $drag-drop-warning-color: red;
   border-style: solid;
   border-width: thin;
 
-  z-index: 1999;
+  z-index: 2048;
 
   background-color: white;
 }
