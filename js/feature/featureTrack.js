@@ -216,7 +216,6 @@ var igv = (function (igv) {
         if (this.featureSource.featureCache) {
 
             var genomicLocation = config.genomicLocation,
-                xOffset = config.x,
                 yOffset = config.y,
                 referenceFrame = config.viewport.genomicState.referenceFrame,
                 tolerance,
@@ -224,10 +223,7 @@ var igv = (function (igv) {
                 row,
                 popupData,
                 ss,
-                ee,
-                str,
-                filtered,
-                mapped;
+                ee;
 
             // We need some tolerance around genomicLocation, start with +/- 2 pixels
             tolerance = 2 * referenceFrame.bpPerPixel;
