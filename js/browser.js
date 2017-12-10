@@ -423,7 +423,7 @@ var igv = (function (igv) {
         if (true === resizeWillExceedChromosomeLength(this.trackViews)) {
 
             viewport = _.first((_.first(this.trackViews)).viewports);
-            this.parseSearchInput(viewport.genomicState.chromosome.name);
+            this.search(viewport.genomicState.chromosome.name);
         } else {
 
             _.each(_.union([this.ideoPanel, this.karyoPanel, this.centerGuide], this.trackViews), function (renderable) {
@@ -903,7 +903,7 @@ var igv = (function (igv) {
 
     };
 
-    igv.Browser.prototype.parseSearchInput = function (string) {
+    igv.Browser.prototype.search = function (string) {
 
         var self = this,
             loci = string.split(' ');
@@ -1515,7 +1515,7 @@ var igv = (function (igv) {
      * @param callback - function to call
      * @param force - force callback
      */
-    igv.Browser.prototype.search = function (feature, callback, force) {
+    igv.Browser.prototype.__depricated_search = function (feature, callback, force) {
         var type,
             chr,
             start,
