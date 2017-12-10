@@ -163,7 +163,7 @@ var igv = (function (igv) {
             // });
 
             $('#hic-encode-modal-button').on('click', function (e) {
-                igv.presentAlert('No ENCODE data available');
+                igv.presentAlert('No ENCODE data available', undefined);
                 return false;
             });
         }
