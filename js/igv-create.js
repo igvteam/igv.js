@@ -337,14 +337,14 @@ var igv = (function (igv) {
             $searchContainer.append(browser.$searchInput);
 
             browser.$searchInput.change(function (e) {
-                browser.parseSearchInput($(this).val());
+                browser.search($(this).val());
             });
 
             $faSearch = $('<i class="fa fa-search">');
             $searchContainer.append($faSearch);
 
             $faSearch.click(function () {
-                browser.parseSearchInput(browser.$searchInput.val());
+                browser.search(browser.$searchInput.val());
             });
 
 

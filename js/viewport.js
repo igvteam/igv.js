@@ -246,7 +246,7 @@ var igv = (function (igv) {
                             locusString = loci.join(' ');
                         }
 
-                        igv.browser.parseSearchInput(locusString);
+                        igv.browser.search(locusString);
 
                     } else {
                         self.genomicState.referenceFrame.bpPerPixel /= 2;
