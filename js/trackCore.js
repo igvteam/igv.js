@@ -423,7 +423,9 @@ var igv = (function (igv) {
 
                 var value;
 
-                value = igv.dialog.$dialogInput.val();
+                value = igv.dialog.$dialogInput.val().trim();
+                value = ('' === value || undefined === value) ? 'untitled' : value;
+
                 igv.setTrackLabel(trackView.track, value);
 
                 trackView.update();
