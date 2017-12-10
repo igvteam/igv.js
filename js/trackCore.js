@@ -415,26 +415,18 @@ var igv = (function (igv) {
         var menuItems = [],
             all;
 
-        if (trackView.track.config.type != 'sequence') {
+        if (trackView.track.config.type !== 'sequence') {
 
             menuItems.push(igv.trackMenuItem(popover, trackView, "Set track name", function () {
                 return "Track Name"
             }, trackView.track.name, function () {
 
-                var alphanumeric = parseAlphanumeric(igv.dialog.$dialogInput.val());
+                var value;
 
-                if (undefined !== alphanumeric) {
-                    igv.setTrackLabel(trackView.track, alphanumeric);
-                    trackView.update();
-                }
+                value = igv.dialog.$dialogInput.val();
+                igv.setTrackLabel(trackView.track, value);
 
-                function parseAlphanumeric(value) {
-
-                    var alphanumeric_re = /(?=.*[a-zA-Z].*)([a-zA-Z0-9 ]+)/,
-                        alphanumeric = alphanumeric_re.exec(value);
-
-                    return (null !== alphanumeric) ? alphanumeric[0] : "untitled";
-                }
+                trackView.update();
 
             }, undefined));
 
