@@ -71,8 +71,13 @@ var igv = (function (igv) {
         };
 
         igv.graphics.fillRect(ctx, 0, 0, pixelWidth, pixelHeight, {'fillStyle': "rgb(255, 255, 255)"});
+        
+        // Determine a tick spacing such that there is at least 10 pixels between ticks
+        
+        var n = Math.ceil((this.maxLogP - this.minLogP) * 10 / pixelHeight);
+        
 
-        for (var p = 4; p <= track.maxLogP; p += 2) {
+        for (var p = 4; p <= track.maxLogP; p += n) {
 
             var x1,
                 x2,
@@ -90,7 +95,9 @@ var igv = (function (igv) {
 
             igv.graphics.strokeLine(ctx, x1, y1, x2, y2, font); // Offset dashes up by 2 pixel
 
-            igv.graphics.fillText(ctx, p, x1 - 1, y1 + 2, font); // Offset numbers down by 2 pixels; TODO: error
+            if(y1 > 8) {
+                igv.graphics.fillText(ctx, p, x1 - 1, y1 + 2, font);
+            } // Offset numbers down by 2 pixels;
         }
 
         font['textAlign'] = 'center';
