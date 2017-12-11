@@ -136,7 +136,7 @@ var igv = (function (igv) {
             header,
             dataWrapper;
 
-        dataWrapper = getDataWrapper(data);
+        dataWrapper = igv.getDataWrapper(data);
 
         while (line = dataWrapper.nextLine()) {
             if (line.startsWith("track") || line.startsWith("#") || line.startsWith("browser")) {
@@ -173,7 +173,7 @@ var igv = (function (igv) {
             format = this.format,
             delimiter = this.delimiter || "\t";
 
-        dataWrapper = getDataWrapper(data);
+        dataWrapper = igv.getDataWrapper(data);
         i = 0;
 
         while (line = dataWrapper.nextLine()) {
@@ -825,62 +825,7 @@ var igv = (function (igv) {
 
     }
 
-    function getDataWrapper(data) {
 
-        if (typeof(data) == 'string' || data instanceof String) {
-            return new StringDataWrapper(data);
-        } else {
-            return new ByteArrayDataWrapper(data);
-        }
-    }
-
-
-    // Data might be a string, or an UInt8Array
-    var StringDataWrapper = function (string) {
-        this.data = string;
-        this.ptr = 0;
-    }
-
-    StringDataWrapper.prototype.nextLine = function () {
-        //return this.split(/\r\n|\n|\r/gm);
-        var start = this.ptr,
-            idx = this.data.indexOf('\n', start);
-
-        if (idx > 0) {
-            this.ptr = idx + 1;   // Advance pointer for next line
-            return idx === start ? undefined : this.data.substring(start, idx).trim();
-        }
-        else {
-            // Last line
-            this.ptr = this.data.length;
-            return (start >= this.data.length) ? undefined : this.data.substring(start).trim();
-        }
-    }
-
-
-    var ByteArrayDataWrapper = function (array) {
-        this.data = array;
-        this.length = this.data.length;
-        this.ptr = 0;
-    }
-
-    ByteArrayDataWrapper.prototype.nextLine = function () {
-
-        var c, result;
-        result = "";
-
-        if (this.ptr >= this.length) return undefined;
-
-        for (var i = this.ptr; i < this.length; i++) {
-            c = String.fromCharCode(this.data[i]);
-            if (c === '\r') continue;
-            if (c === '\n') break;
-            result = result + c;
-        }
-
-        this.ptr = i + 1;
-        return result;
-    }
 
 
     return igv;
