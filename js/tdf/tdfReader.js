@@ -233,8 +233,8 @@ var igv = (function (igv) {
             return Promise.resolve(group);
         }
         else {
-
             return self.readHeader()
+
                 .then(function (reader) {
 
                     var indexEntry = self.groupIndex[name];
@@ -395,14 +395,16 @@ var igv = (function (igv) {
     igv.TDFReader.prototype.readTiles = function (tileIndeces, nTracks) {
 
         var self = this;
-        
+
         tileIndeces.sort(function (a, b) {
             return a.position - b.position;
         })
-        
-        tileIndeces = tileIndeces.filter(function (idx) {return idx.size > 0;});
 
-        if(tileIndeces.length === 0) {
+        tileIndeces = tileIndeces.filter(function (idx) {
+            return idx.size > 0;
+        });
+
+        if (tileIndeces.length === 0) {
             return Promise.resolve([]);
         }
 
@@ -410,7 +412,6 @@ var igv = (function (igv) {
         var lastEntry = tileIndeces[tileIndeces.length - 1];
         var position = firstEntry.position;
         var size = (lastEntry.position + lastEntry.size) - position;
-
 
 
         return igv.xhr.loadArrayBuffer(self.path, igv.buildOptions(self.config, {
