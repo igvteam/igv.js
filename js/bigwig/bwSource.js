@@ -36,10 +36,12 @@ var igv = (function (igv) {
         this.wgValues = {};
     };
 
+
     igv.BWSource.prototype.getFeatures = function (chr, bpStart, bpEnd, bpPerPixel, windowFunction) {
 
-        var self = this,
-            featureCache = self.featureCache,
+        var self = this;
+
+        var featureCache = self.featureCache,
             genomicInterval = new igv.GenomicInterval(chr, bpStart, bpEnd);
 
         genomicInterval.bpPerPixel = bpPerPixel;
@@ -58,12 +60,13 @@ var igv = (function (igv) {
 
                     // Note -- replacing feature cache
                     if (self.cache) self.featureCache = new igv.FeatureCache(features, genomicInterval);
-
+                    
                     return features;
                 })
 
         }
     }
+
 
     igv.BWSource.prototype.getDefaultRange = function () {
 
