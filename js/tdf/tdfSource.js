@@ -46,6 +46,10 @@ var igv = (function (igv) {
             genomicInterval = new igv.GenomicInterval(chr, bpStart, bpEnd),
             i;
 
+        if(chr.toLowerCase() === "all") {
+            return Promise.resolve([]);      // Whole genome view not yet supported
+        }
+
         genomicInterval.bpPerPixel = bpPerPixel;
 
         if (featureCache) {
