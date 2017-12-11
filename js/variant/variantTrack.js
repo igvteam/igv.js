@@ -99,9 +99,10 @@ var igv = (function (igv) {
     }
 
     function getCallsetsLength() {
-        var length = 0, callSets = this.callSets;
+        var length = 0,
+            callSets = this.callSets;
         Object.keys(callSets).forEach(function(key) {
-           length += callSets[key].length;
+           if(callSets[key]) length += callSets[key].length;
         });
         return length;
     }
