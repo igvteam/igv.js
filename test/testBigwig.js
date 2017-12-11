@@ -103,7 +103,6 @@ function runBigwigTests() {
             start();
         }).catch(function (error) {
             console.log(error);
-            ok(false);
         });
     });
 
@@ -172,12 +171,12 @@ function runBigwigTests() {
         bWSource.getFeatures(chr, bpStart, bpEnd, bpPerPixel)
             .then(function (features) {
 
-            ok(features);
+                ok(features);
 
-            equal(features.length, 1293);   // Verified in iPad app
+                equal(features.length, 1293);   // Verified in iPad app
 
-            start();
-        }).catch(function (error) {
+                start();
+            }).catch(function (error) {
             console.log(error);
             ok(false);
         })
