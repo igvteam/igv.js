@@ -498,6 +498,8 @@ var igv = (function (igv) {
 
                 .catch(function (error) {
 
+                    console.error(error);
+                    
                     self.stopSpinner();
 
                     self.loading = false;
