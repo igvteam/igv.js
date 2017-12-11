@@ -37,12 +37,10 @@ var igv = (function (igv) {
 
     igv.VcfParser.prototype.parseHeader = function (data) {
 
-        var lines = data.splitLines(),
-            len = lines.length,
-            line,
-            i,
-            j,
+        var dataWrapper,
             tokens,
+            line,
+            j,
             header = {},
             id,
             values,
@@ -50,16 +48,19 @@ var igv = (function (igv) {
             gtIdx,
             type;
 
+        dataWrapper = igv.getDataWrapper(data);
+
         // First line must be file format
-        if (lines[0].startsWith("##fileformat")) {
-            header.version = lines[0].substr(13);
+        line = dataWrapper.nextLine();
+        if (line.startsWith("##fileformat")) {
+            header.version = line.substr(13);
         }
         else {
             throw new Error("Invalid VCF file: missing fileformat line");
         }
 
-        for (i = 1; i < len; i++) {
-            line = lines[i].trim();
+        while (line = dataWrapper.nextLine()) {
+
             if (line.startsWith("#")) {
 
                 id = null;
@@ -157,17 +158,20 @@ var igv = (function (igv) {
      */
     igv.VcfParser.prototype.parseFeatures = function (data) {
 
-        var lines = data.split("\n"),
+        var dataWrapper,
+            line,
             allFeatures = [],
-            callSets = this.header.callSets;
+            callSets = this.header.callSets,
+            variant,
+            tokens,
+            callFields,
+            index,
+            token;
 
-        lines.forEach(function (line) {
 
-            var variant,
-                tokens,
-                callFields,
-                index,
-                token;
+        dataWrapper = igv.getDataWrapper(data);
+
+        while (line = dataWrapper.nextLine()) {
 
             if (!line.startsWith("#")) {
 
@@ -217,126 +221,10 @@ var igv = (function (igv) {
 
                 }
             }
-        });
+        }
 
         return allFeatures;
-
     }
-
-    //  Variant class moved to variant.js
-    //
-    // function Variant(tokens) {
-    //
-    //     var self = this,
-    //         altTokens;
-    //
-    //     this.chr = tokens[0]; // TODO -- use genome aliases
-    //     this.pos = parseInt(tokens[1]);
-    //     this.names = tokens[2];    // id in VCF
-    //     this.referenceBases = tokens[3];
-    //     this.alternateBases = tokens[4];
-    //     this.quality = parseInt(tokens[5]);
-    //     this.filter = tokens[6];
-    //     this.info = tokens[7];
-    //
-    //     // "ids" ("names" in ga4gh)
-    //
-    //     //Alleles
-    //     altTokens = this.alternateBases.split(",");
-    //
-    //     if (altTokens.length > 0) {
-    //
-    //         this.alleles = [];
-    //
-    //         this.start = Number.MAX_VALUE;
-    //         this.end = 0;
-    //
-    //         altTokens.forEach(function (alt) {
-    //             var a, s, e, diff;
-    //             if (alt.length > 0) {
-    //
-    //                 diff = self.referenceBases.length - alt.length;
-    //
-    //                 if (diff > 0) {
-    //                     // deletion, assume left padded
-    //                     s = self.pos - 1 + alt.length;
-    //                     e = s + diff;
-    //                 } else if (diff < 0) {
-    //                     // Insertion, assume left padded, insertion begins to "right" of last ref base
-    //                     s = self.pos - 1 + self.referenceBases.length;
-    //                     e = s + 1;     // Insertion between s & 3
-    //                 }
-    //                 else {
-    //                     // Substitution, SNP if seq.length == 1
-    //                     s = self.pos - 1;
-    //                     e = s + alt.length;
-    //                 }
-    //                 self.alleles.push({allele: alt, start: s, end: e});
-    //                 self.start = Math.min(self.start, s);
-    //                 self.end = Math.max(self.end, e);
-    //             }
-    //
-    //         });
-    //     }
-    //     else {
-    //         // Is this even legal VCF?  (NO alt alleles)
-    //         this.start = this.pos - 1;
-    //         this.end = this.pos;
-    //     }
-    //
-    //     // TODO -- genotype fields
-    // }
-    //
-    // Variant.prototype.popupData = function (genomicLocation, type) {
-    //
-    //     var fields, infoFields, nameString;
-    //
-    //     //infoFields = this.info.split(";");
-    //     var info = this.getInfoObj(this.info);
-    //
-    //     fields = [
-    //         {name: "Names", value: this.names},
-    //         {name: "Ref", value: this.referenceBases},
-    //         {name: "Alt", value: this.alternateBases},
-    //         {name: "Qual", value: this.quality},
-    //         {name: "Filter", value: this.filter},
-    //     ];
-    //
-    //     if ('str' === type) {
-    //         fields.push({
-    //             name: "Heterozygosity",
-    //             value: (info.AC && info.AN) ? this.calcHeterozygosity(info.AC, info.AN).toFixed(3) : 1
-    //         });
-    //     }
-    //
-    //     Object.keys(info).forEach(function (key) {
-    //         fields.push({name: key, value: info[key]});
-    //     })
-    //
-    //
-    //     return fields;
-    //
-    // }
-    //
-    // Variant.prototype.getInfoObj = function (infoStr) {
-    //     var info = {};
-    //     infoStr.split(';').forEach(function (elem) {
-    //         var element = elem.split('=');
-    //         info[element[0]] = element[1];
-    //     });
-    //     return info;
-    // };
-    //
-    // Variant.prototype.calcHeterozygosity = function (ac, an) {
-    //     var sum = 0;
-    //     an = parseInt(an);
-    //     var altFreqs = ac.split(',');
-    //     altFreqs.forEach(function (altFreq) {
-    //         var altFrac = parseInt(altFreq) / an;
-    //         sum += altFrac * altFrac;
-    //     });
-    //     return 1 - sum;
-    // };
 
 
     return igv;
