@@ -307,22 +307,6 @@ var igv = (function (igv) {
             })
     };
 
-    /**
-     * Handle an alt-click.   TODO perhaps generalize this for all tracks (optional).
-     *
-     * @param genomicLocation
-     * @param referenceFrame
-     * @param event
-     */
-    igv.SegTrack.prototype.altClick = function (genomicLocation, referenceFrame, event) {
-
-        // Define a region 5 "pixels" wide in genomic coordinates
-        var bpWidth = referenceFrame.toBP(2.5);
-
-        this.sortSamples(referenceFrame.chrName, genomicLocation - bpWidth, genomicLocation + bpWidth, sortDirection);
-
-        sortDirection = (sortDirection === "ASC" ? "DESC" : "ASC");
-    };
 
     igv.SegTrack.prototype.popupData = function (config) {
 
@@ -374,7 +358,15 @@ var igv = (function (igv) {
 
         clickHandler = function () {
 
-            self.altClick(config.genomicLocation, config.viewport.genomicState.referenceFrame);
+            var genomicLocation = config.genomicLocation,
+                referenceFrame = config.viewport.genomicState.referenceFrame;
+
+            // Define a region 5 "pixels" wide in genomic coordinates
+            var bpWidth = referenceFrame.toBP(2.5);
+
+            self.sortSamples(referenceFrame.chrName, genomicLocation - bpWidth, genomicLocation + bpWidth, sortDirection);
+
+            sortDirection = (sortDirection === "ASC" ? "DESC" : "ASC");
 
             config.popover.hide();
 

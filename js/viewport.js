@@ -171,16 +171,6 @@ var igv = (function (igv) {
 
         doubleClickDelay = igv.browser.constants.doubleClickDelay;
 
-        // right-click
-        $(self.canvas).contextmenu(function (e) {
-
-            e.preventDefault();
-            e = $.event.fix(e);
-            e.stopPropagation();
-
-            igv.popover.presentTrackPopupMenu(e, self);
-
-        });
 
         $(self.canvas).mousedown(function (e) {
             var canvasCoords;
@@ -269,9 +259,16 @@ var igv = (function (igv) {
 
                 } else if (e.altKey) {
 
-                    if (self.trackView.track.altClick && self.tile) {
-                        self.trackView.track.altClick(genomicLocation, referenceFrame, e);
-                    }
+                    e.preventDefault();
+                    e = $.event.fix(e);
+                    e.stopPropagation();
+
+                    igv.popover.presentTrackPopupMenu(e, self);
+
+                    //
+                    // if (self.trackView.track.altClick && self.tile) {
+                    //     self.trackView.track.altClick(genomicLocation, referenceFrame, e);
+                    // }
 
                 } else if (Math.abs(canvasCoords.x - mouseDownX) <= igv.browser.constants.dragThreshold && self.trackView.track.popupData) {
 
@@ -499,13 +496,13 @@ var igv = (function (igv) {
                 .catch(function (error) {
 
                     console.error(error);
-                    
+
                     self.stopSpinner();
 
                     self.loading = false;
 
                     igv.presentAlert(error, undefined);
-              
+
                 });
 
         }
