@@ -51,6 +51,7 @@
     <script src="../js/bigwig/bwSource.js"></script>
 
     <script src="../js/encode/encodeDataSource.js"></script>
+    <script src="../js/feature/dataWrapper.js"></script>
 
     <script src="../js/feature/featureCache.js"></script>
     <script src="../js/feature/gffHelper.js"></script>
@@ -145,28 +146,28 @@
     <div onclick="igv.browser.loadTrack({
                             type: 'eqtl',
                             sourceType: 'gtex-ws',
-                            url: 'https://dev.gtexportal.org/rest/v1/association/singleTissueEqtlByLocation',
+                            url: 'https://gtexportal.org/rest/v1/association/singleTissueEqtlByLocation',
                             tissueName: 'Adipose_Subcutaneous',
                             name: 'Adipose - Subcutaneous',
-                            visibilityWindow: 1000000
+                            visibilityWindow: 200000
                             })">Adipose - Subcutaneous
     </div>
     <div onclick="igv.browser.loadTrack({
                          type: 'eqtl',
                          sourceType: 'gtex-ws',
-                         url: 'https://dev.gtexportal.org/rest/v1/association/singleTissueEqtlByLocation',
+                         url: 'https://gtexportal.org/rest/v1/association/singleTissueEqtlByLocation',
                          tissueName: 'Brain_Cerebellar_Hemisphere',
                          name: 'Brain - Cerebellar Hemisphere',
-                         visibilityWindow: 1000000
+                         visibilityWindow: 200000
                          })">Brain - Cerebellar Hemisphere
     </div>
     <div onclick="igv.browser.loadTrack({
                          type: 'eqtl',
                          sourceType: 'gtex-ws',
-                         url: 'https://dev.gtexportal.org/rest/v1/association/singleTissueEqtlByLocation',
+                         url: 'https://gtexportal.org/rest/v1/association/singleTissueEqtlByLocation',
                          tissueName: 'Thyroid',
                          name: 'Thyroid',
-                         visibilityWindow: 1000000
+                         visibilityWindow: 200000
                          })">Thyroid
     </div>
 </div>
