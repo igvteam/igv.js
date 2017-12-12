@@ -99,18 +99,6 @@ var igv = (function (igv) {
         }
     };
 
-    // Alt - Click to Sort alignment rows
-    igv.BAMTrack.prototype.altClick = function (genomicLocation, referenceFrame, event) {
-
-        this.alignmentTrack.sortAlignmentRows(genomicLocation, this.sortOption);
-
-        // TODO - dat. Temporary hack to stand up mult-locus implementation.
-        // TODO - dat. MUST identify viewport that was clicked in.
-        this.trackView.viewports[0].redrawTile(this.featureSource.alignmentContainer);
-        this.trackView.viewports[0].$viewport.scrollTop(0);
-
-        this.sortDirection = !this.sortDirection;
-    };
 
     /**
      * Optional method to compute pixel height to accomodate the list of features.  The implementation below
@@ -155,10 +143,8 @@ var igv = (function (igv) {
 
             self.alignmentTrack.sortAlignmentRows(config.genomicLocation, self.sortOption);
 
-            config.viewport.redrawTile(self.featureSource.alignmentContainer);
-
-            config.viewport.$viewport.scrollTop(0);
-
+            self.trackView.update();
+            
             self.sortDirection = !(self.sortDirection);
 
             config.popover.hide();
