@@ -230,7 +230,7 @@ var igv = (function (igv) {
         // TODO -- temporary hack, determine type from the source
         var type = source === "gtex" ? "snp" : "gene";
 
-        this.selection = new GtexSelection(type == 'gene' ? {gene: feature} : {snp: feature});
+        this.selection = new GtexSelection(type === 'gene' ? {gene: feature} : {snp: feature});
         igv.browser.update();
     }
 
@@ -309,7 +309,7 @@ var igv = (function (igv) {
         return this.geneColors[geneName.toUpperCase()];
     }
 
-    var brewer = new Array();
+    var brewer = [];
 // Set +!
     brewer.push("rgb(228,26,28)");
     brewer.push("rgb(55,126,184)");

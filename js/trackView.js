@@ -460,6 +460,12 @@ var igv = (function (igv) {
 
     };
 
+    igv.TrackView.prototype.onsearch = function (feature, type) {
+        _.each(this.viewports, function(viewport) {
+            viewport.onsearch(feature, type);
+        });
+    };
+
     return igv;
 
 

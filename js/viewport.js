@@ -530,6 +530,13 @@ var igv = (function (igv) {
 
     };
 
+    igv.Viewport.prototype.onsearch = function (feature, type) {
+
+        if (this.trackView.track.onsearch) {
+            this.trackView.track.onsearch(feature, type);
+        }
+    };
+
     igv.Viewport.prototype.setContentHeight = function (newHeight) {
 
         // Maximum height of a canvas is ~32,000 pixels on Chrome, possibly smaller on other platforms

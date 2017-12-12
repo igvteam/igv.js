@@ -612,11 +612,11 @@ var igv = (function (igv) {
         $track.append($viewportContainer);
 
         rect =
-        {
-            position: $viewportContainer.position(),
-            width: $viewportContainer.width(),
-            height: $viewportContainer.height()
-        };
+            {
+                position: $viewportContainer.position(),
+                width: $viewportContainer.width(),
+                height: $viewportContainer.height()
+            };
 
         // rect.position = $viewportContainer.position();
         // rect.width = $viewportContainer.width();
@@ -906,48 +906,55 @@ var igv = (function (igv) {
     igv.Browser.prototype.search = function (string) {
 
         var self = this,
-            loci = string.split(' ');
+            loci;
 
+        loci = string.split(' ');
         this.getGenomicStateList(loci, this.viewportContainerWidth())
             .then(function (genomicStateList) {
+                var $content_header;
 
-            var found,
-                errorString,
-                $content_header = $('#igv-content-header');
+                if (_.size(genomicStateList) > 0) {
 
-            if (_.size(genomicStateList) > 0) {
+                    _.each(genomicStateList, function (genomicState, index) {
+                        genomicState.locusIndex = index;
+                        genomicState.locusCount = _.size(genomicStateList);
+                        genomicState.referenceFrame = new igv.ReferenceFrame(genomicState.chromosome.name, genomicState.start, (genomicState.end - genomicState.start) / (self.viewportContainerWidth() / genomicState.locusCount));
+                    });
 
-                _.each(genomicStateList, function (genomicState, index) {
-                    genomicState.locusIndex = index;
-                    genomicState.locusCount = _.size(genomicStateList);
-                    genomicState.referenceFrame = new igv.ReferenceFrame(genomicState.chromosome.name, genomicState.start, (genomicState.end - genomicState.start) / (self.viewportContainerWidth() / genomicState.locusCount));
-                });
+                    self.genomicStateList = genomicStateList;
 
-                self.genomicStateList = genomicStateList;
+                    self.emptyViewportContainers();
 
-                self.emptyViewportContainers();
+                    self.updateLocusSearchWithGenomicState(_.first(self.genomicStateList));
 
-                self.updateLocusSearchWithGenomicState(_.first(self.genomicStateList));
+                    self.zoomWidgetLayout();
 
-                self.zoomWidgetLayout();
+                    self.toggleCenterGuide(self.genomicStateList);
+                    self.toggleCursorGuide(self.genomicStateList);
 
-                self.toggleCenterGuide(self.genomicStateList);
-                self.toggleCursorGuide(self.genomicStateList);
+                    if (true === self.config.showIdeogram) {
+                        $content_header = $('#igv-content-header');
+                        igv.IdeoPanel.$empty($content_header);
+                        self.ideoPanel.buildPanels($content_header);
+                    }
 
-                if (true === self.config.showIdeogram) {
-                    igv.IdeoPanel.$empty($content_header);
-                    self.ideoPanel.buildPanels($content_header);
+                    self.buildViewportsWithGenomicStateList(genomicStateList);
+
+                    self.update();
+
+                    return genomicStateList
+
+                } else {
+                    throw new Error('Unrecognized locus ' + string);
                 }
 
-                self.buildViewportsWithGenomicStateList(genomicStateList);
-
-                self.update();
-            } else {
-                errorString = 'Unrecognized locus ' + string;
-                igv.presentAlert(errorString, undefined);
-            }
-
-        });
+            })
+            .then(function (genomicStateList) {
+                fireOnsearch.call(igv.browser, string, 'gtex');
+            })
+            .catch(function (error) {
+                igv.presentAlert(error);
+            });
     };
 
     igv.Browser.prototype.zoomWidgetLayout = function () {
@@ -1035,14 +1042,14 @@ var igv = (function (igv) {
                     var path = searchConfig.url.replace("$FEATURE$", locus);
 
                     if (path.indexOf("$GENOME$") > -1) {
-                       path = path.replace("$GENOME$", (self.genome.id ? self.genome.id : "hg19"));
+                        path = path.replace("$GENOME$", (self.genome.id ? self.genome.id : "hg19"));
                     }
 
                     return igv.xhr.loadString(path);
                 });
 
-                return Promise .all(promises)
-
+                return Promise
+                    .all(promises)
                     .then(function (response) {
                         var filtered,
                             geneNameGenomicStates;
@@ -1504,9 +1511,15 @@ var igv = (function (igv) {
 
     }
 
+    // TODO: Replaces depricated version - dat
+    function fireOnsearch(feature, type) {
 
+        // Notify tracks (important for gtex).
+        this.trackViews.forEach(function (trackView) {
+            trackView.onsearch(feature, type);
+        });
 
-
+    }
 
     /**
      * Public API search function
@@ -1700,7 +1713,7 @@ var igv = (function (igv) {
         fireOnsearch.call(igv.browser, name, type);
     }
 
-    function fireOnsearch(feature, type) {
+    function __depricated_fireOnsearch(feature, type) {
         // Notify tracks (important for gtex).   TODO -- replace this with some sort of event model ?
         this.trackViews.forEach(function (tp) {
             var track = tp.track;
