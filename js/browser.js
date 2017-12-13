@@ -940,6 +940,7 @@ var igv = (function (igv) {
 
                     self.buildViewportsWithGenomicStateList(genomicStateList);
 
+                    console.log('then(browser.update)');
                     self.update();
 
                     return genomicStateList
@@ -950,7 +951,8 @@ var igv = (function (igv) {
 
             })
             .then(function (genomicStateList) {
-                fireOnsearch.call(igv.browser, string, 'gtex');
+                console.log('then(browser fire On Search)');
+                // fireOnsearchWithTrackViews(igv.browser.trackViews, string, 'gtex');
             })
             .catch(function (error) {
                 igv.presentAlert(error);
@@ -1050,12 +1052,12 @@ var igv = (function (igv) {
 
                 return Promise
                     .all(promises)
-                    .then(function (response) {
+                    .then(function (geneNameLookupResponses) {
                         var filtered,
                             geneNameGenomicStates;
 
-                        filtered = _.filter(response, function (geneNameLookupResult) {
-                            return geneNameLookupResult !== "";
+                        filtered = _.filter(geneNameLookupResponses, function (geneNameLookupResponse) {
+                            return geneNameLookupResponse !== "";
                         });
 
                         geneNameGenomicStates = _.filter(_.map(filtered, createGeneNameGenomicState), function (genomicState) {
@@ -1111,7 +1113,11 @@ var igv = (function (igv) {
                 string,
                 geneNameLocusObject;
 
-            results = ("plain" === searchConfig.type) ? parseSearchResults(geneNameLookupResponse) : JSON.parse(geneNameLookupResponse);
+            if ('type' === searchConfig.type) {
+                results = parseSearchResults(geneNameLookupResponse);
+            } else {
+                results = JSON.parse(geneNameLookupResponse);
+            }
 
             if (searchConfig.resultsField) {
                 results = results[searchConfig.resultsField];
@@ -1141,9 +1147,15 @@ var igv = (function (igv) {
                 geneNameLocusObject = {};
                 if (igv.Browser.isLocusChrNameStartEnd(string, self.genome, geneNameLocusObject)) {
 
-                    type = result["featureType"] || result["type"];
+                    type = undefined;
+                    if (result.featureType) {
+                        type = result.featureType;
 
-                    geneNameLocusObject.locusSearchString = _.first(geneNameLookupResponse.split('\t'));
+                    } else if (result.type) {
+                        type = result.type;
+                    }
+
+                    geneNameLocusObject.locusSearchString = result.geneSymbol;
                     geneNameLocusObject.selection = new igv.GtexSelection('gtex' === type || 'snp' === type ? {snp: result.gene} : {gene: result.gene});
                     return geneNameLocusObject;
                 } else {
@@ -1512,10 +1524,10 @@ var igv = (function (igv) {
     }
 
     // TODO: Replaces depricated version - dat
-    function fireOnsearch(feature, type) {
+    function fireOnsearchWithTrackViews(trackViews, feature, type) {
 
         // Notify tracks (important for gtex).
-        this.trackViews.forEach(function (trackView) {
+        trackViews.forEach(function (trackView) {
             trackView.onsearch(feature, type);
         });
 
@@ -1713,7 +1725,7 @@ var igv = (function (igv) {
         fireOnsearch.call(igv.browser, name, type);
     }
 
-    function __depricated_fireOnsearch(feature, type) {
+    function fireOnsearch(feature, type) {
         // Notify tracks (important for gtex).   TODO -- replace this with some sort of event model ?
         this.trackViews.forEach(function (tp) {
             var track = tp.track;
