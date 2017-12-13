@@ -329,16 +329,6 @@
 
         div = $("#myDiv")[0];
         options = {
-            minimumBases: 6,
-            showChromosomeWidget: true,
-            showIdeogram: true,
-            showKaryo: false,
-            showCenterGuide: false,
-            showCursorTrackingGuide: false,
-            showRuler: true,
-//            locus: ['egfr', 'myc', 'pten'],
-//            locus: 'all',
-//            locus: '1:120,777,648-128,566,728',
             locus: '1',
             reference: {
                 id: "hg19",
@@ -347,56 +337,30 @@
             },
             flanking: 1000,
             apiKey: 'AIzaSyDUUAUFpQEN4mumeMNIRWXSiTh5cPtUAD0',
-            palette: [
-                "#00A0B0",
-                "#6A4A3C",
-                "#CC333F",
-                "#EB6841"
-            ],
-
-
 
             tracks: [
-//                {
-//                    url: 'http://hgdownload.cse.ucsc.edu/goldenPath/hg19/encodeDCC/wgEncodeBroadHistone/wgEncodeBroadHistoneGm12878H3k4me3StdSig.bigWig',
-//                    name: 'ENCODE - BigWig',
-//                    color: function (value) {
-//                        var red = Math.min(255, Math.max(100, Math.round(value / 2))),
-//                                blue = 255 - red;
-//                        return "rgb(" + red + "," + blue + ",0)"
-//                    }
-//                },
+                {
+                    url: 'http://hgdownload.cse.ucsc.edu/goldenPath/hg19/encodeDCC/wgEncodeBroadHistone/wgEncodeBroadHistoneGm12878H3k4me3StdSig.bigWig',
+                    name: 'ENCODE - BigWig',
+                    color: function (value) {
+                        var red = Math.min(255, Math.max(100, Math.round(value / 2))),
+                                blue = 255 - red;
+                        return "rgb(" + red + "," + blue + ",0)"
+                    }
+                },
+                {
 
-
-                {name: "chr7 sub variants",
-                    format: "vcf",
-                    url: "http://trena.systemsbiology.net/misc/chr7-sub.vcf.gz",
-                    indexURL:  "http://trena.systemsbiology.net/misc/chr7-sub.vcf.gz.tbi",
-                    type: "variant"
+                    name: "Genes",
+                    searchable: false,
+                    type: "annotation",
+                    format: "gtf",
+                    sourceType: "file",
+                    url: "https://s3.amazonaws.com/igv.broadinstitute.org/annotations/hg19/genes/gencode.v18.annotation.sorted.gtf.gz",
+                    indexURL: "https://s3.amazonaws.com/igv.broadinstitute.org/annotations/hg19/genes/gencode.v18.annotation.sorted.gtf.gz.tbi",
+                    visibilityWindow: 10000000,
+                    order: Number.MAX_VALUE,
+                    displayMode: "EXPANDED"
                 }
-//
-//                {
-//                    name: "ClinVar functional pathogenics",
-//                    type: "variant",
-//                    url: "https://s3.us-east-2.amazonaws.com/ccrs/tracks/clinvar-functional-pathogenics.vcf.gz",
-//                    indexURL: "https://s3.us-east-2.amazonaws.com/ccrs/tracks/clinvar-functional-pathogenics.vcf.gz.tbi",
-//                    order: 4,
-//                    visibilityWindow: 500000
-//                }
-//                ,
-//                {
-//
-//                    name: "Genes",
-//                    searchable: false,
-//                    type: "annotation",
-//                    format: "gtf",
-//                    sourceType: "file",
-//                    url: "https://s3.amazonaws.com/igv.broadinstitute.org/annotations/hg19/genes/gencode.v18.annotation.sorted.gtf.gz",
-//                    indexURL: "https://s3.amazonaws.com/igv.broadinstitute.org/annotations/hg19/genes/gencode.v18.annotation.sorted.gtf.gz.tbi",
-//                    visibilityWindow: 10000000,
-//                    order: Number.MAX_VALUE,
-//                    displayMode: "EXPANDED"
-//                }
             ]
         };
 
