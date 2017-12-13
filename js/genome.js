@@ -430,7 +430,7 @@ var igv = (function (igv) {
             return Promise.resolve(igv.Genome.KnownGenomes)
         }
         else {
-            return igv.xhr.loadJson("../resources/genomes.json", {})
+            return igv.xhr.loadJson("https://s3.amazonaws.com/igv.org.genomes/genomes.json", {})
                 .then(function (jsonArray) {
 
                     var table = {};
@@ -447,41 +447,6 @@ var igv = (function (igv) {
         }
 
     }
-
-    // Static definition of known genome identifiers
-    // igv.Genome.KnownGenomes = {
-    //     "hg18": {
-    //         fastaURL: "https://s3.amazonaws.com/igv.broadinstitute.org/genomes/seq/hg18/hg18.fasta",
-    //         cytobandURL: "https://s3.amazonaws.com/igv.broadinstitute.org/genomes/seq/hg18/cytoBand.txt.gz"
-    //     },
-    //     "GRCh38": {
-    //         fastaURL: "https://s3.amazonaws.com/igv.broadinstitute.org/genomes/seq/hg38/hg38.fa",
-    //         cytobandURL: "https://s3.amazonaws.com/igv.broadinstitute.org/annotations/hg38/cytoBandIdeo.txt"
-    //     },
-    //     "hg38": {
-    //         fastaURL: "https://s3.amazonaws.com/igv.broadinstitute.org/genomes/seq/hg38/hg38.fa",
-    //         cytobandURL: "https://s3.amazonaws.com/igv.broadinstitute.org/annotations/hg38/cytoBandIdeo.txt"
-    //     },
-    //     "hg19": {
-    //         fastaURL: "https://s3.amazonaws.com/igv.broadinstitute.org/genomes/seq/hg19/hg19.fasta",
-    //         cytobandURL: "https://s3.amazonaws.com/igv.broadinstitute.org/genomes/seq/hg19/cytoBand.txt"
-    //     },
-    //     "GRCh37": {
-    //         fastaURL: "https://s3.amazonaws.com/igv.broadinstitute.org/genomes/seq/hg19/hg19.fasta",
-    //         cytobandURL: "https://s3.amazonaws.com/igv.broadinstitute.org/genomes/seq/hg19/cytoBand.txt"
-    //     },
-    //
-    //     "mm10": {
-    //         fastaURL: "https://s3.amazonaws.com/igv.broadinstitute.org/genomes/seq/mm10/mm10.fa",
-    //         indexURL: "https://s3.amazonaws.com/igv.broadinstitute.org/genomes/seq/mm10/mm10.fa.fai",
-    //         cytobandURL: "https://s3.amazonaws.com/igv.broadinstitute.org/annotations/mm10/cytoBandIdeo.txt.gz"
-    //     },
-    //     "GRCm38": {
-    //         fastaURL: "https://s3.amazonaws.com/igv.broadinstitute.org/genomes/seq/mm10/mm10.fa",
-    //         indexURL: "https://s3.amazonaws.com/igv.broadinstitute.org/genomes/seq/mm10/mm10.fa.fai",
-    //         cytobandURL: "https://s3.amazonaws.com/igv.broadinstitute.org/annotations/mm10/cytoBandIdeo.txt.gz"
-    //     }
-    // }
 
     return igv;
 

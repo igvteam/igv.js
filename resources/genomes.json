@@ -35,5 +35,19 @@
     "ucscId": "hg38",
     "fastaURL": "https://s3.amazonaws.com/igv.broadinstitute.org/genomes/seq/mm10/mm10.fa",
     "cytobandURL": "https://s3.amazonaws.com/igv.broadinstitute.org/annotations/mm10/cytoBandIdeo.txt.gz"
+  },
+  {
+    "id": "Zv9",
+    "ucscID": "danRer10",
+    "fastaURL": "http://igv.broadinstitute.org/genomes/seq/danRer7/danRer7.fa",
+    "indexURL": "http://igv.broadinstitute.org/genomes/seq/danRer7/danRer7.fa.fai",
+    "cytobandURL": "http://hgdownload.cse.ucsc.edu/goldenPath/danRer7/database/cytoBandIdeo.txt.gz",
+    "tracks": [
+      {
+        "name": "Refseq Genes",
+        "url": "http://hgdownload.cse.ucsc.edu/goldenPath/danRer7/database/refGene.txt.gz",
+        "indexed": false
+      }
+    ]
   }
 ]
