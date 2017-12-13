@@ -54,10 +54,10 @@ var igv = (function (igv) {
         this.featureSource = new igv.FeatureSource(config);
 
 
-        this.onsearch = function (feature, source) {
-            selectedFeature.call(this, feature, source);
+        this.onsearch = function (selection) {
+            selectedFeature.call(this, selection);
         }
-    }
+    };
 
     igv.EqtlTrack.prototype.paintAxis = function (ctx, pixelWidth, pixelHeight) {
 
@@ -108,7 +108,7 @@ var igv = (function (igv) {
 
     igv.EqtlTrack.prototype.getFeatures = function (chr, bpStart, bpEnd) {
         return this.featureSource.getFeatures(chr, bpStart, bpEnd);
-    }
+    };
 
     igv.EqtlTrack.prototype.draw = function (options) {
 
@@ -222,15 +222,10 @@ var igv = (function (igv) {
             }
         }
 
-    }
+    };
 
-    function selectedFeature(feature, source) {
-        console.log(feature + " " + source);
-
-        // TODO -- temporary hack, determine type from the source
-        var type = source === "gtex" ? "snp" : "gene";
-
-        this.selection = new GtexSelection(type === 'gene' ? {gene: feature} : {snp: feature});
+    function selectedFeature(selection) {
+        this.selection = selection;
         igv.browser.update();
     }
 

@@ -462,12 +462,7 @@ var igv = (function (igv) {
 
     igv.TrackView.prototype.onsearch = function (genomicStateList) {
         _.each(this.viewports, function(viewport, index) {
-            var feature,
-                type;
-
-            feature = genomicStateList[ index ].locusSearchString;
-            type = genomicStateList[ index ].type;
-            viewport.onsearch(feature, type);
+            viewport.onsearch(genomicStateList[ index ].selection);
         });
     };
 

@@ -533,10 +533,10 @@ var igv = (function (igv) {
 
     };
 
-    igv.Viewport.prototype.onsearch = function (feature, type) {
+    igv.Viewport.prototype.onsearch = function (selection) {
 
         if (this.trackView.track.onsearch) {
-            this.trackView.track.onsearch(feature, type);
+            this.trackView.track.onsearch(selection);
         }
     };
 
