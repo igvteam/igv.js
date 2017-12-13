@@ -952,7 +952,7 @@ var igv = (function (igv) {
             })
             .then(function (genomicStateList) {
                 console.log('then(browser fire On Search)');
-                // fireOnsearchWithTrackViews(igv.browser.trackViews, string, 'gtex');
+                fireOnsearchWithTrackViews(igv.browser.trackViews, genomicStateList, 'gtex');
             })
             .catch(function (error) {
                 igv.presentAlert(error);
@@ -1111,7 +1111,8 @@ var igv = (function (igv) {
                 end,
                 type,
                 string,
-                geneNameLocusObject;
+                geneNameLocusObject,
+                obj;
 
             if ('type' === searchConfig.type) {
                 results = parseSearchResults(geneNameLookupResponse);
@@ -1156,7 +1157,8 @@ var igv = (function (igv) {
                     }
 
                     geneNameLocusObject.locusSearchString = result.geneSymbol;
-                    geneNameLocusObject.selection = new igv.GtexSelection('gtex' === type || 'snp' === type ? {snp: result.gene} : {gene: result.gene});
+                    obj = ('gtex' === type || 'snp' === type) ? { snp: result.gene } : { gene: result.geneSymbol };
+                    geneNameLocusObject.selection = new igv.GtexSelection(obj);
                     return geneNameLocusObject;
                 } else {
                     return undefined;
