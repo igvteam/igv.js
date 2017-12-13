@@ -952,7 +952,7 @@ var igv = (function (igv) {
             })
             .then(function (genomicStateList) {
                 console.log('then(browser fire On Search)');
-                fireOnsearchWithTrackViews(igv.browser.trackViews, genomicStateList, 'gtex');
+                fireOnsearchWithTrackViews(igv.browser.trackViews, genomicStateList);
             })
             .catch(function (error) {
                 igv.presentAlert(error);
@@ -1002,6 +1002,7 @@ var igv = (function (igv) {
 
             locusGenomicState = {};
             if (igv.Browser.isLocusChrNameStartEnd(locus, self.genome, locusGenomicState)) {
+                locusGenomicState.type = 'locus';
                 locusGenomicState.selection = undefined;
                 locusGenomicState.locusSearchString = locus;
                 locusGenomicStates.push(locusGenomicState);
@@ -1027,6 +1028,8 @@ var igv = (function (igv) {
                 if (result) {
                     genomicState = createFeatureDBGenomicState(result);
                     if (genomicState) {
+                        genomicState.type = undefined;
+                        genomicState.selection = undefined;
                         genomicState.locusSearchString = locus;
                         featureDBGenomicStates.push(genomicState);
                     } else {
@@ -1114,7 +1117,7 @@ var igv = (function (igv) {
                 geneNameLocusObject,
                 obj;
 
-            if ('type' === searchConfig.type) {
+            if ('plain' === searchConfig.type) {
                 results = parseSearchResults(geneNameLookupResponse);
             } else {
                 results = JSON.parse(geneNameLookupResponse);
@@ -1148,17 +1151,19 @@ var igv = (function (igv) {
                 geneNameLocusObject = {};
                 if (igv.Browser.isLocusChrNameStartEnd(string, self.genome, geneNameLocusObject)) {
 
-                    type = undefined;
+                    geneNameLocusObject.type = undefined;
                     if (result.featureType) {
-                        type = result.featureType;
+                        geneNameLocusObject.type = result.featureType;
 
                     } else if (result.type) {
-                        type = result.type;
+                        geneNameLocusObject.type = result.type;
                     }
 
                     geneNameLocusObject.locusSearchString = result.geneSymbol;
-                    obj = ('gtex' === type || 'snp' === type) ? { snp: result.gene } : { gene: result.geneSymbol };
+
+                    obj = ('gtex' === geneNameLocusObject.type || 'snp' === geneNameLocusObject.type) ? { snp: result.gene } : { gene: result.geneSymbol };
                     geneNameLocusObject.selection = new igv.GtexSelection(obj);
+
                     return geneNameLocusObject;
                 } else {
                     return undefined;
@@ -1526,11 +1531,11 @@ var igv = (function (igv) {
     }
 
     // TODO: Replaces depricated version - dat
-    function fireOnsearchWithTrackViews(trackViews, feature, type) {
+    function fireOnsearchWithTrackViews(trackViews, genomicStateList) {
 
         // Notify tracks (important for gtex).
         trackViews.forEach(function (trackView) {
-            trackView.onsearch(feature, type);
+            trackView.onsearch(genomicStateList);
         });
 
     }
