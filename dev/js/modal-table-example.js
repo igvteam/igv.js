@@ -28,7 +28,8 @@ var modal_table_example = (function (modal_table_example) {
             config,
             browser,
             columnFormat,
-            encodeDatasource;
+            encodeDatasource,
+            loadTracks;
 
         options =
             {
@@ -36,14 +37,22 @@ var modal_table_example = (function (modal_table_example) {
                 minimumBases: 6,
                 showIdeogram: true,
                 showRuler: true,
-                locus: '1',
+                locus: 'brca1',
+                // locus: 'SLC25A3',
+                // locus: 'rs28372744',
+                // locus: ['egfr', 'myc', 'pten'],
+                // locus: ['2', '4', '8'],
                 reference:
                     {
                         id: "hg19",
                         fastaURL: "https://s3.amazonaws.com/igv.broadinstitute.org/genomes/seq/1kg_v37/human_g1k_v37_decoy.fasta",
                         cytobandURL: "https://s3.amazonaws.com/igv.broadinstitute.org/genomes/seq/b37/b37_cytoband.txt"
                     },
-                flanking: 1000,
+                flanking: 75000,
+                search: {
+                    url: "https://dev.gtexportal.org/rest/v1/reference/features/$FEATURE$",
+                    resultsField: "features"
+                },
                 apiKey: 'AIzaSyDUUAUFpQEN4mumeMNIRWXSiTh5cPtUAD0',
                 palette:
                     [
@@ -84,6 +93,9 @@ var modal_table_example = (function (modal_table_example) {
 
         encodeDatasource = new igv.EncodeDataSource(columnFormat);
 
+        loadTracks = function (configurationList) {
+          browser.loadTracksWithConfigList(configurationList);
+        };
         config =
             {
                 $modal:$('#encodeModal'),
@@ -91,11 +103,11 @@ var modal_table_example = (function (modal_table_example) {
                 $modalTopCloseButton: $('#encodeModalTopCloseButton'),
                 $modalBottomCloseButton: $('#encodeModalBottomCloseButton'),
                 $modalGoButton: $('#encodeModalGoButton'),
-                browserRetrievalFunction:function () { return browser; },
-                browserLoadFunction:'loadTracksWithConfigList'
+                datasource: encodeDatasource,
+                browserHandler: loadTracks
             };
 
-        browser.encodeTable = new igv.ModalTable(config, encodeDatasource);
+        browser.encodeTable = new igv.ModalTable(config);
 
     };
 
