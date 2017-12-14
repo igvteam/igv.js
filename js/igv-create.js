@@ -140,7 +140,7 @@ var igv = (function (igv) {
                 igv.browser.genome.id = config.reference.id;
 
                 if (true === config.encodeEnabled) {
-                    igv.browser.encodeTable.loadData();
+                    igv.browser.encodeTable.loadData(config.reference.id, undefined, undefined, undefined);
                 }
 
                 igv.browser.chromosomeSelectWidget.update(igv.browser.genome);
