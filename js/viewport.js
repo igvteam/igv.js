@@ -410,7 +410,9 @@ var igv = (function (igv) {
             self.startSpinner();
 
             // console.log('get features');
-            this.trackView.track.getFeatures(referenceFrame.chrName, bpStart, bpEnd, referenceFrame.bpPerPixel)
+            this.trackView.track
+
+                .getFeatures(referenceFrame.chrName, bpStart, bpEnd, referenceFrame.bpPerPixel)
 
                 .then(function (features) {
 
@@ -420,6 +422,7 @@ var igv = (function (igv) {
                     // self.loading = false;
                     self.loading = undefined;
 
+                    console.log('then(viewport.paint)');
                     self.stopSpinner();
 
                     buffer = document.createElement('canvas');
@@ -528,6 +531,13 @@ var igv = (function (igv) {
             return igv.browser && igv.browser.genomicStateList && igv.browser.genomicStateList[self.genomicState.locusIndex].referenceFrame;
         }
 
+    };
+
+    igv.Viewport.prototype.onsearch = function (selection) {
+
+        if (this.trackView.track.onsearch) {
+            this.trackView.track.onsearch(selection);
+        }
     };
 
     igv.Viewport.prototype.setContentHeight = function (newHeight) {

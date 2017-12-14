@@ -460,6 +460,12 @@ var igv = (function (igv) {
 
     };
 
+    igv.TrackView.prototype.onsearch = function (genomicStateList) {
+        _.each(this.viewports, function(viewport, index) {
+            viewport.onsearch(genomicStateList[ index ].selection);
+        });
+    };
+
     return igv;
 
 
