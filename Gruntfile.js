@@ -68,17 +68,38 @@ module.exports = function (grunt) {
         },
 
         copy: {
-            css: {
-                expand: true,
+            // css: {
+            //     expand: true,
+            //     src: 'css/igv.css',
+            //     dest: 'dist'
+            // },
+            // img: {
+            //     expand: true,
+            //     cwd: 'css/img',
+            //     src: '**',
+            //     dest: 'dist/img/'
+            // },
+            cssExample: {
                 src: 'css/igv.css',
-                dest: 'dist'
+                dest: 'examples/'
             },
-            img: {
+            imgExample: {
                 expand: true,
                 cwd: 'css/img',
-                src: '**',
-                dest: 'dist/img/'
+                src:'**',
+                dest:'examples/css/img/'
+            },
+            jsExample: {
+                expand: true,
+                cwd: 'dist',
+                src: 'igv*',
+                dest: 'examples/js/'
             }
+            // jsExample: {
+            //     cwd: 'dist',
+            //     src: 'igv*',
+            //     dest: 'examples/js/'
+            // }
         }
     });
 
