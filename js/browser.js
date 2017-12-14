@@ -1159,9 +1159,9 @@ var igv = (function (igv) {
                         geneNameLocusObject.type = result.type;
                     }
 
-                    geneNameLocusObject.locusSearchString = result.geneSymbol;
+                    geneNameLocusObject.locusSearchString = ('gtex' === geneNameLocusObject.type || 'snp' === geneNameLocusObject.type) ? result.snpId : result.geneSymbol;
 
-                    obj = ('gtex' === geneNameLocusObject.type || 'snp' === geneNameLocusObject.type) ? { snp: result.gene } : { gene: result.geneSymbol };
+                    obj = ('gtex' === geneNameLocusObject.type || 'snp' === geneNameLocusObject.type) ? { snp: result.snpId } : { gene: result.geneSymbol };
                     geneNameLocusObject.selection = new igv.GtexSelection(obj);
 
                     return geneNameLocusObject;
