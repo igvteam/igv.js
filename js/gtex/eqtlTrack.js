@@ -36,7 +36,7 @@ var igv = (function (igv) {
         this.url = url;
         this.name = label;
         this.pValueField = config.pValueField || "pValue";
-        this.geneField = config.geneField || "geneName";
+        this.geneField = config.geneField || "geneSymbol";
 
         this.autoscale = (config.autoScale === undefined ? true : config.autoScale);
         this.percentile = (config.percentile === undefined ? 98 : config.percentile);
