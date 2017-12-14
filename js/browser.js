@@ -1115,6 +1115,7 @@ var igv = (function (igv) {
                 type,
                 string,
                 geneNameLocusObject,
+                geneName,
                 obj;
 
             if ('plain' === searchConfig.type) {
@@ -1159,9 +1160,10 @@ var igv = (function (igv) {
                         geneNameLocusObject.type = result.type;
                     }
 
-                    geneNameLocusObject.locusSearchString = ('gtex' === geneNameLocusObject.type || 'snp' === geneNameLocusObject.type) ? result.snpId : result.geneSymbol;
+                    geneName = result.geneSymbol || result.gene;
+                    geneNameLocusObject.locusSearchString = ('gtex' === geneNameLocusObject.type || 'snp' === geneNameLocusObject.type) ? result.snpId : geneName;
 
-                    obj = ('gtex' === geneNameLocusObject.type || 'snp' === geneNameLocusObject.type) ? { snp: result.snpId } : { gene: result.geneSymbol };
+                    obj = ('gtex' === geneNameLocusObject.type || 'snp' === geneNameLocusObject.type) ? { snp: result.snpId } : { gene: geneName };
                     geneNameLocusObject.selection = new igv.GtexSelection(obj);
 
                     return geneNameLocusObject;
@@ -1342,9 +1344,11 @@ var igv = (function (igv) {
      */
     function parseSearchResults(data) {
 
-        var lines = data.splitLines(),
+        var lines,
             linesTrimmed = [],
             results = [];
+
+        lines = data.splitLines();
 
         lines.forEach(function (item) {
             if ("" === item) {
@@ -1359,7 +1363,8 @@ var igv = (function (igv) {
             var tokens = line.split("\t"),
                 source,
                 locusTokens,
-                rangeTokens;
+                rangeTokens,
+                obj;
 
             if (tokens.length >= 3) {
 
@@ -1367,13 +1372,16 @@ var igv = (function (igv) {
                 rangeTokens = locusTokens[1].split("-");
                 source = tokens[2].trim();
 
-                results.push({
-                    gene: tokens[0],
-                    chromosome: igv.browser.genome.getChromosomeName(locusTokens[0].trim()),
-                    start: parseInt(rangeTokens[0].replace(/,/g, '')),
-                    end: parseInt(rangeTokens[1].replace(/,/g, '')),
-                    type: ("gtex" === source ? "snp" : "gene")
-                });
+                obj =
+                    {
+                        gene: tokens[0],
+                        chromosome: igv.browser.genome.getChromosomeName(locusTokens[0].trim()),
+                        start: parseInt(rangeTokens[0].replace(/,/g, '')),
+                        end: parseInt(rangeTokens[1].replace(/,/g, '')),
+                        type: ("gtex" === source ? "snp" : "gene")
+                    };
+
+                results.push(obj);
 
             }
 
