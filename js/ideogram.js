@@ -358,7 +358,7 @@ var igv = (function (igv) {
         referenceFrame.start = Math.round((xPercentage - (chrCoveragePercentage/2.0)) * chr.bpLength);
         referenceFrame.bpPerPixel = (ee - ss)/ panel.$ideogram.width();
 
-        igv.browser.updateLocusSearchWithGenomicState(genomicState);
+        igv.browser.updateLocusSearchWidget(genomicState);
 
         igv.browser.repaintWithLocusIndex( panel.genomicState.locusIndex )
 
