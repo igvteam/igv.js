@@ -53,7 +53,7 @@ var igv = (function (igv) {
             variant.type = 'str';
         }
 
-        initAlleles(variant);
+        initAlleles(variant, true);
 
 
         return variant;
@@ -78,13 +78,19 @@ var igv = (function (igv) {
         var variant = new igv.Variant();
 
         variant.chr = json.referenceName;
-        variant.pos = parseInt(json.start);
+        variant.start = parseInt(json.start);
+        variant.end = parseInt(json.end);
+        variant.pos = variant.start + 1;      // GA4GH is not 0 based.
         variant.names = arrayToCommaString(json.names);
         variant.referenceBases = json.referenceBases + '';
         variant.alternateBases = json.alternateBases + '';
         variant.quality = json.quality;
         variant.filter = arrayToCommaString(json.filter);
         variant.info = json.info;
+
+        if(variant.pos === 155158842) {
+            console.log('');
+        }
 
         if (variant.info["PERIOD"]) {
             variant.type = 'str';
@@ -108,14 +114,14 @@ var igv = (function (igv) {
             })
         }
 
-        initAlleles(variant);
+        initAlleles(variant, false);
 
         return variant;
 
     }
 
 
-    function initAlleles(variant) {
+    function initAlleles(variant, computeStartEnd) {
 
         //Alleles
         var altTokens = variant.alternateBases.split(","),
@@ -143,7 +149,7 @@ var igv = (function (igv) {
 
                 // Adjust for padding, used for insertions and deletions, unless variant is a short tandem repeat.
 
-                if (!('str' === variant.type) && alt.length > 0) {
+                if (!('str' === variant.type) && alt.length > 0 && computeStartEnd) {
 
                     diff = variant.referenceBases.length - alt.length;
 

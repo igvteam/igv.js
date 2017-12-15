@@ -68,7 +68,7 @@ var igv = (function (igv) {
                         },
                         decode: function (json) {
                             // If specific callSetIds are specified filter to those
-                             if (self.callSetIds) {
+                            if (self.callSetIds) {
                                 var filteredCallSets = [],
                                     csIdSet = new Set();
 
@@ -102,39 +102,40 @@ var igv = (function (igv) {
 
         var self = this;
 
-        return new Promise(function (fulfill, reject) {
 
-            self.readHeader().then(function (header) {
+        return self.readHeader()
 
-                getChrAliasTable().then(function (chrAliasTable) {
+            .then(function (header) {
+                return getChrAliasTable()
+            })
 
-                    var queryChr = chrAliasTable.hasOwnProperty(chr) ? chrAliasTable[chr] : chr,
-                        readURL = self.url + "/variants/search";
+            .then(function (chrAliasTable) {
 
-                    igv.ga4ghSearch({
-                        url: readURL,
-                        fields: (self.includeCalls ? undefined : "nextPageToken,variants(id,variantSetId,names,referenceName,start,end,referenceBases,alternateBases,quality, filter, info)"),
-                        body: {
-                            "variantSetIds": (Array.isArray(self.variantSetId) ? self.variantSetId : [self.variantSetId]),
-                            "callSetIds": (self.callSetIds ? self.callSetIds : undefined),
-                            "referenceName": queryChr,
-                            "start": bpStart.toString(),
-                            "end": bpEnd.toString(),
-                            "pageSize": "10000"
-                        },
-                        decode: function (json) {
-                            var variants = [];
+                var queryChr = chrAliasTable.hasOwnProperty(chr) ? chrAliasTable[chr] : chr,
+                    readURL = self.url + "/variants/search";
 
-                            json.variants.forEach(function (json) {
-                                variants.push(igv.createGAVariant(json));
-                            });
+                return igv.ga4ghSearch({
+                    url: readURL,
+                    fields: (self.includeCalls ? undefined : "nextPageToken,variants(id,variantSetId,names,referenceName,start,end,referenceBases,alternateBases,quality, filter, info)"),
+                    body: {
+                        "variantSetIds": (Array.isArray(self.variantSetId) ? self.variantSetId : [self.variantSetId]),
+                        "callSetIds": (self.callSetIds ? self.callSetIds : undefined),
+                        "referenceName": queryChr,
+                        "start": bpStart.toString(),
+                        "end": bpEnd.toString(),
+                        "pageSize": "10000"
+                    },
+                    decode: function (json) {
+                        var variants = [];
 
-                            return variants;
-                        }
-                    }).then(fulfill).catch(reject);
-                }).catch(reject);  // chr name map
-            }).catch(reject);  // callsets
-        });
+                        json.variants.forEach(function (json) {
+                            variants.push(igv.createGAVariant(json));
+                        });
+
+                        return variants;
+                    }
+                })
+            })
 
 
         function getChrAliasTable() {

@@ -197,7 +197,7 @@ var igv = (function (igv) {
         tickDivisor = tickDivisors[tickKeys[index]];
 
         number = Math.round(tickLabelNumber / tickDivisor);
-        string = igv.numberFormatter(number) + tickUnit;
+        string = igv.numberFormatter(number) + ' ' + tickUnit;
 
         return string;
     }
@@ -250,10 +250,10 @@ var igv = (function (igv) {
         tickUnits[5e3.toString()] = 'kb';
         tickUnits[1e3.toString()] = 'kb';
 
-        tickUnits[5e2.toString()] = 'b';
-        tickUnits[1e2.toString()] = 'b';
-        tickUnits[5e1.toString()] = 'b';
-        tickUnits[1e1.toString()] = 'b';
+        tickUnits[5e2.toString()] = '';
+        tickUnits[1e2.toString()] = '';
+        tickUnits[5e1.toString()] = '';
+        tickUnits[1e1.toString()] = '';
 
         return tickUnits;
     }
