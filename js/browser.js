@@ -915,12 +915,17 @@ var igv = (function (igv) {
             .then(function (genomicStateList) {
                 var $content_header;
 
-                if (_.size(genomicStateList) > 0) {
+                if (genomicStateList.length > 0) {
 
-                    _.each(genomicStateList, function (genomicState, index) {
+                    genomicStateList.forEach(function (genomicState, index) {
+
                         genomicState.locusIndex = index;
                         genomicState.locusCount = _.size(genomicStateList);
-                        genomicState.referenceFrame = new igv.ReferenceFrame(genomicState.chromosome.name, genomicState.start, (genomicState.end - genomicState.start) / (self.viewportContainerWidth() / genomicState.locusCount));
+                        genomicState.referenceFrame =
+                            new igv.ReferenceFrame(
+                                genomicState.chromosome.name,
+                                genomicState.start,
+                                (genomicState.end - genomicState.start) / (self.viewportContainerWidth() / genomicState.locusCount));
                     });
 
                     self.genomicStateList = genomicStateList;
@@ -1158,7 +1163,7 @@ var igv = (function (igv) {
                 if (!chromosome) {
                     return false;          // Unknown chromosome
                 }
-                locusObject.chr = chromosome.name;     // Map chr to offical name from possible alias
+                locusObject.chromosome = chromosome;     // Map chr to offical name from possible alias
             }
 
             // if just a chromosome name we are done
