@@ -163,7 +163,7 @@ var igv = (function (igv) {
                         return genomicState;
                     });
 
-                    igv.browser.updateLocusSearchWithGenomicState(_.first(igv.browser.genomicStateList));
+                    igv.browser.updateLocusSearchWidget(_.first(igv.browser.genomicStateList));
 
                     igv.browser.zoomWidgetLayout();
 

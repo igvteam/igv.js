@@ -573,7 +573,8 @@ var igv = (function (igv) {
             boxX, boxX1,    // label should be centered between these two x-coordinates
             labelX, labelY,
             textFitsInBox,
-            selectedFeatureName = igv.FeatureTrack.selectedGene ? igv.FeatureTrack.selectedGene.toUpperCase() : undefined;
+            selectedFeatureName = igv.FeatureTrack.selectedGene ? igv.FeatureTrack.selectedGene.toUpperCase() : undefined,    // <= for juicebox
+            selection = options.selection;
 
         // feature outside of viewable window
         if (featureX1 < windowX || featureX > windowX1) {
