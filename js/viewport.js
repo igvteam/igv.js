@@ -422,7 +422,6 @@ var igv = (function (igv) {
                     // self.loading = false;
                     self.loading = undefined;
 
-                    console.log('then(viewport.paint)');
                     self.stopSpinner();
 
                     buffer = document.createElement('canvas');
@@ -439,6 +438,7 @@ var igv = (function (igv) {
                         bpPerPixel: referenceFrame.bpPerPixel,
                         referenceFrame: referenceFrame,
                         genomicState: genomicState,
+                        selection: self.selection,
                         viewport: self,
                         viewportWidth: self.$viewport.width(),
                         viewportContainerX: genomicState.referenceFrame.toPixels(genomicState.referenceFrame.start - bpStart),
@@ -533,12 +533,6 @@ var igv = (function (igv) {
 
     };
 
-    igv.Viewport.prototype.onsearch = function (selection) {
-
-        if (this.trackView.track.onsearch) {
-            this.trackView.track.onsearch(selection);
-        }
-    };
 
     igv.Viewport.prototype.setContentHeight = function (newHeight) {
 

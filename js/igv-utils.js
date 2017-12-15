@@ -172,6 +172,8 @@ var igv = (function (igv) {
 
     igv.presentAlert = function (alert, $parent) {
 
+        console.error(alert);
+
         var string;
 
         string = alert.message || alert;

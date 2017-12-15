@@ -26,20 +26,20 @@
 var igv = (function (igv) {
 
 
-    igv.GtexSelection = function (selection) {
+    igv.GtexSelection = function (gene, snp) {
 
         this.geneColors = {};
         this.gene = null;
         this.snp = null;
         this.genesCount = 0;
 
-        if (selection.gene) {
-            this.gene = selection.gene.toUpperCase();
+        if (gene) {
+            this.gene = gene.toUpperCase();
             this.geneColors[this.gene] = brewer[this.genesCount++];
 
         }
-        if (selection.snp) {
-            this.snp = selection.snp.toUpperCase();
+        if (snp) {
+            this.snp = snp.toUpperCase();
         }
 
     }
