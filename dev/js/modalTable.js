@@ -36,45 +36,96 @@ var igv = (function (igv) {
         this.datasource = config.datasource;
         this.browserHandler = config.browserHandler;
 
+        teardownModalDOM(config);
+        this.$table = $('<table cellpadding="0" cellspacing="0" border="0" class="display"></table>');
+        config.$modalBody.append(this.$table);
         this.doRetrieveData = true;
         this.doBuildTable = true;
 
-        this.rebuildDOM(config);
+        this.$spinner = $('<div>');
+        this.$table.append(this.$spinner);
+
+        this.$spinner.append($('<i class="fa fa-lg fa-spinner fa-spin"></i>'));
+    };
+
+    function teardownModalDOM(configuration) {
+
+        var list;
+
+        list =
+            [
+                configuration.$modal,
+                configuration.$modalTopCloseButton,
+                configuration.$modalBottomCloseButton,
+                configuration.$modalGoButton
+            ];
+
+        _.each(list, function ($e) {
+            $e.unbind();
+        });
+
+        configuration.$modalBody.empty();
+    }
+
+    function getSelectedTableRowsData($rows) {
+
+        var self = this,
+            dt,
+            result;
+
+        result = [];
+        if ($rows.length > 0) {
+
+            $rows.removeClass('selected');
+
+            dt = self.$table.DataTable();
+            $rows.each(function() {
+                result.push( self.datasource.dataAtRowIndex(self.datasource.data, dt.row(this).index()) );
+            });
+        }
+
+        return result.length > 0 ? result : undefined;
+    }
+
+    igv.ModalTable.prototype.willRetrieveData = function () {
+        this.$spinner.show();
+        $('#hic-encode-modal-button').hide();
+        $('#hic-encode-loading').show();
 
     };
 
-    igv.ModalTable.prototype.loadData = function (genomeId, willLoadDataHandler, didLoadDataHander, didFailToLoadDataHandler) {
+    igv.ModalTable.prototype.didRetrieveData = function () {
+        $('#hic-encode-loading').hide();
+        $('#hic-encode-modal-button').show();
+        this.buildTable(true);
+    };
+
+    igv.ModalTable.prototype.didFailToRetrieveData = function () {
+        $('#hic-encode-loading').hide();
+        $('#hic-encode-modal-button').show();
+        this.$spinner.hide();
+        this.buildTable(false);
+    };
+
+    igv.ModalTable.prototype.loadData = function (genomeId) {
 
         var self = this,
-            $hic_track_dropdown,
             assembly;
 
-        this.$spinner.show();
-
-        // TODO: JuiceboxJS specific
-        $hic_track_dropdown = $('#hic-track-dropdown');
-        $hic_track_dropdown.prop('disabled', true);
+        this.willRetrieveData();
 
         assembly = igv.genomeIdLUT( genomeId);
         this.datasource
             .retrieveData(assembly)
             .then(function (data) {
-                console.log('igv.ModalTable. then(received data ' + _.size(data) + ')');
+                console.log('modaltable. then. received data ' + _.size(data));
                 self.datasource.data = data;
                 self.doRetrieveData = false;
 
-                self.buildTable(true);
-
-                // TODO: JuiceboxJS specific
-                $hic_track_dropdown.prop('disabled', false);
+                self.didRetrieveData();
             })
             .catch(function (e) {
-
-                // TODO: JuiceboxJS specific
-                $hic_track_dropdown.prop('disabled', false);
-
-                self.$spinner.hide();
-                self.buildTable(false);
+                self.didFailToRetrieveData();
             });
     };
 
@@ -86,16 +137,16 @@ var igv = (function (igv) {
 
             $('#hic-encode-modal-button').off('click');
 
-            this.$modal.on('shown.bs.modal', function (e) {
+            this.config.$modal.on('shown.bs.modal', function (e) {
 
                 if (true === self.doBuildTable) {
 
                     console.log('building table ...');
+                    // self.$spinner.show();
 
                     self.tableWithDataAndColumns(self.datasource.tableData(self.datasource.data), self.datasource.tableColumns());
 
                     console.log('... done building table');
-
                     self.$spinner.hide();
 
                     self.doBuildTable = false;
@@ -103,7 +154,7 @@ var igv = (function (igv) {
 
             });
 
-            this.$modalGoButton.on('click', function () {
+            this.config.$modalGoButton.on('click', function () {
                 var selected;
 
                 selected = getSelectedTableRowsData.call(self, self.$dataTables.$('tr.selected'));
@@ -117,16 +168,16 @@ var igv = (function (igv) {
         } else {
 
             $('#hic-encode-modal-button').on('click', function (e) {
-                igv.presentAlert('No ENCODE data available', undefined);
+                igv.presentAlert('No ENCODE data available');
                 return false;
             });
         }
 
-        this.$modalTopCloseButton.on('click', function () {
+        this.config.$modalTopCloseButton.on('click', function () {
             $('tr.selected').removeClass('selected');
         });
 
-        this.$modalBottomCloseButton.on('click', function () {
+        this.config.$modalBottomCloseButton.on('click', function () {
             $('tr.selected').removeClass('selected');
         });
 
@@ -163,59 +214,6 @@ var igv = (function (igv) {
         });
 
     };
-
-    igv.ModalTable.prototype.rebuildDOM = function (config) {
-
-        teardownModalDOM(config);
-
-        this.$table = $('<table cellpadding="0" cellspacing="0" border="0" class="display"></table>');
-        config.$modalBody.append(this.$table);
-
-        this.$spinner = $('<div>');
-        this.$table.append(this.$spinner);
-        this.$spinner.append($('<i class="fa fa-lg fa-spinner fa-spin"></i>'));
-
-        this.$modal = config.$modal;
-        this.$modalGoButton = config.$modalGoButton;
-
-        this.$modalTopCloseButton = config.$modalTopCloseButton;
-        this.$modalBottomCloseButton = config.$modalBottomCloseButton;
-
-        function teardownModalDOM(config) {
-
-            [
-                config.$modal,
-                config.$modalTopCloseButton,
-                config.$modalBottomCloseButton,
-                config.$modalGoButton
-            ].forEach(function ($e) {
-                $e.unbind();
-            });
-
-            config.$modalBody.empty();
-        }
-
-    };
-
-    function getSelectedTableRowsData($rows) {
-
-        var self = this,
-            dt,
-            result;
-
-        result = [];
-        if ($rows.length > 0) {
-
-            $rows.removeClass('selected');
-
-            dt = self.$table.DataTable();
-            $rows.each(function() {
-                result.push( self.datasource.dataAtRowIndex(self.datasource.data, dt.row(this).index()) );
-            });
-        }
-
-        return result.length > 0 ? result : undefined;
-    }
 
     return igv;
 
