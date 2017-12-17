@@ -1164,6 +1164,8 @@ var igv = (function (igv) {
                     return false;          // Unknown chromosome
                 }
                 locusObject.chromosome = chromosome;     // Map chr to offical name from possible alias
+                locusObject.start = 0;
+                locusObject.end = chromosome.bpLength;
             }
 
             // if just a chromosome name we are done
