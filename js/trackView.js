@@ -369,11 +369,11 @@ var igv = (function (igv) {
 
     igv.TrackView.prototype.setDataRange = function (min, max, autoscale) {
 
-        if (min) {
+        if (min !== undefined) {
             this.track.dataRange.min = min;
         }
 
-        if (max) {
+        if (max !== undefined) {
             this.track.dataRange.max = max;
         }
 
