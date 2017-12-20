@@ -368,9 +368,17 @@ var igv = (function (igv) {
     };
 
     igv.TrackView.prototype.setDataRange = function (min, max, autoscale) {
-        this.track.dataRange.min = min;
-        this.track.dataRange.max = max;
+
+        if (min) {
+            this.track.dataRange.min = min;
+        }
+
+        if (max) {
+            this.track.dataRange.max = max;
+        }
+
         this.track.autoscale = autoscale;
+
         this.update();
     };
 
