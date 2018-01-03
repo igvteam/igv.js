@@ -249,7 +249,7 @@ var igv = (function (igv) {
                 ctx.fillRect(px, py, pw, h);
 
 
-                if (callSets && variant.calls && "COLLAPSED" !== this.displayMode) {
+                if (nCalls > 0 && variant.calls && "COLLAPSED" !== this.displayMode) {
 
                     h = callHeight;
 
