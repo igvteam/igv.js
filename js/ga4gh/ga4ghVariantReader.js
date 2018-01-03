@@ -116,7 +116,7 @@ var igv = (function (igv) {
 
                 return igv.ga4ghSearch({
                     url: readURL,
-                    fields: (self.includeCalls ? undefined : "nextPageToken,variants(id,variantSetId,names,referenceName,start,end,referenceBases,alternateBases,quality, filter, info)"),
+                    fields: (self.includeCalls ? undefined : "nextPageToken,variants(id,variantSetId,names,referenceName,start,end,referenceBases,alternateBases,quality,filter,info)"),
                     body: {
                         "variantSetIds": (Array.isArray(self.variantSetId) ? self.variantSetId : [self.variantSetId]),
                         "callSetIds": (self.callSetIds ? self.callSetIds : undefined),
