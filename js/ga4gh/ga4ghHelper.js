@@ -65,7 +65,7 @@ var igv = (function (igv) {
 
 
             // Start the recursive load cycle.  Data is fetched in chunks, if more data is available a "nextPageToken" is returned.
-            loadChunk();
+            return loadChunk();
 
             function loadChunk(pageToken) {
 
@@ -83,40 +83,42 @@ var igv = (function (igv) {
                         sendData: sendData,
                         contentType: "application/json",
                         headers: ga4ghHeaders()
-                    }).then(function (json) {
-                    var nextPageToken, tmp;
+                    })
+                    .then(function (json) {
+                        var nextPageToken, tmp;
 
-                    if (json) {
+                        if (json) {
 
-                        tmp = decode ? decode(json) : json;
+                            tmp = decode ? decode(json) : json;
 
-                        if (tmp) {
+                            if (tmp) {
 
-                            tmp.forEach(function (a) {
-                                var keep = true;           // TODO -- conditionally keep (downsample)
-                                if (keep) {
-                                    results.push(a);
-                                }
-                            });
-                        }
+                                tmp.forEach(function (a) {
+                                    var keep = true;           // TODO -- conditionally keep (downsample)
+                                    if (keep) {
+                                        results.push(a);
+                                    }
+                                });
+                            }
 
 
-                        nextPageToken = json["nextPageToken"];
+                            nextPageToken = json["nextPageToken"];
 
-                        if (nextPageToken) {
-                            loadChunk(nextPageToken);
+                            if (nextPageToken) {
+                                loadChunk(nextPageToken);
+                            }
+                            else {
+                                fulfill(results);
+                            }
                         }
                         else {
                             fulfill(results);
                         }
-                    }
-                    else {
-                        fulfill(results);
-                    }
 
-                }).catch(function (error) {
-                    reject(error);
-                });
+                    })
+                    .catch(function (error) {
+                        reject(error);
+                    });
             }
 
         });

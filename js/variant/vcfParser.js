@@ -180,8 +180,8 @@ var igv = (function (igv) {
                 if (tokens.length >= 8) {
                 
                     variant = igv.createVCFVariant(tokens);
-                    
-                    if("refblock" === variant.type) continue;     // Skip reference blocks
+
+                    if (variant.isRefBlock())  continue;     // Skip reference blocks
                    
                     variant.header = this.header;       // Keep a pointer to the header to interpret fields for popup text
                     allFeatures.push(variant);
