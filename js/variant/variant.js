@@ -54,7 +54,7 @@ var igv = (function (igv) {
             if (!infoStr) return undefined;
 
             var info = {};
-            infoStr.split(';').forEach(function (elem) {
+            infoStr.split('; ').forEach(function (elem) {
                 var element = elem.split('=');
                 info[element[0]] = element[1];
             });
@@ -72,11 +72,11 @@ var igv = (function (igv) {
         variant.start = parseInt(json.start);  // Might get overriden below
         variant.end = parseInt(json.end);      // Might get overriden below
         variant.pos = variant.start + 1;       // GA4GH is 0 based.
-        variant.names = arrayToCommaString(json.names);
-        variant.referenceBases = json.referenceBases + '';
-        variant.alternateBases = json.alternateBases + '';
+        variant.names = arrayToString(json.names, "; ");
+        variant.referenceBases = json.referenceBases;
+        variant.alternateBases = arrayToString(json.alternateBases);
         variant.quality = json.quality;
-        variant.filter = arrayToCommaString(json.filter);
+        variant.filter = arrayToString(json.filter);
         variant.info = json.info;
 
 
@@ -110,10 +110,11 @@ var igv = (function (igv) {
         //Alleles
         var altTokens = variant.alternateBases.split(","),
             minAltLength = variant.referenceBases.length,
-            maxAltLength = variant.referenceBases.length;
+            maxAltLength = variant.referenceBases.length,
+            start, end;
 
 
-        if (variant.info["PERIOD"]) {
+        if (variant.info && variant.info["PERIOD"]) {
             variant.type = 'str';
         }
 
@@ -127,7 +128,7 @@ var igv = (function (igv) {
             variant.start = variant.pos - 1;
             variant.end = variant.start + variant.referenceBases.length;
 
-        } else if (isRefBlock(variant.alternateBases)) {
+        } else if (isRef(variant.alternateBases)) {
             variant.type = "refblock";
         }
 
@@ -135,14 +136,16 @@ var igv = (function (igv) {
             variant.heterozygosity = 0;
 
         } else {
-            altTokens.forEach(function (alt) {
+
+            altTokens.forEach(function (alt, index) {
+
                 var a, s, e, diff;
 
                 variant.alleles.push(alt);
 
                 // Adjust for padding, used for insertions and deletions, unless variant is a short tandem repeat.
 
-                if (!("str" === variant.type) && alt.length > 0) {
+                if ("str" !== variant.type && alt.length > 0) {
 
                     diff = variant.referenceBases.length - alt.length;
 
@@ -153,20 +156,25 @@ var igv = (function (igv) {
                     } else if (diff < 0) {
                         // Insertion, assume left padded, insertion begins to "right" of last ref base
                         s = variant.pos - 1 + variant.referenceBases.length;
-                        e = s + 1;     // Insertion between s & 3
+                        e = s + 1;     // Insertion between s & e
                     } else {
                         s = variant.pos - 1;
                         e = s + 1;
                     }
-                    variant.start = variant.start === undefined ? s : Math.min(variant.start, s);
-                    variant.end = variant.end === undefined ? e : Math.max(variant.end, e);
+
+                    start = start === undefined ? s : Math.min(start, s);
+                    end = end === undefined ? e : Math.max(end, e);
                 }
 
                 minAltLength = Math.min(minAltLength, alt.length);
                 maxAltLength = Math.max(maxAltLength, alt.length);
 
             });
-            if (variant.info.AC && variant.info.AN) {
+
+            variant.start = start;
+            variant.end = end;
+
+            if (variant.info && variant.info.AC && variant.info.AN) {
                 variant.heterozygosity = calcHeterozygosity(variant.info.AC, variant.info.AN).toFixed(3);
             }
         }
@@ -193,6 +201,16 @@ var igv = (function (igv) {
             refFrac = (an - altCount) / an;
             sum += refFrac * refFrac;
             return 1 - sum;
+        };
+
+
+        function isRef(altAlleles) {
+
+            return !altAlleles ||
+                altAlleles.trim().length === 0 ||
+                altAlleles === "<NON_REF>" ||
+                altAlleles === "<*>";
+
         };
 
     }
@@ -231,29 +249,27 @@ var igv = (function (igv) {
         if (this.info) {
             fields.push('<hr>');
             Object.keys(this.info).forEach(function (key) {
-                fields.push({name: key, value: arrayToCommaString(self.info[key])});
+                fields.push({name: key, value: arrayToString(self.info[key])});
             });
         }
         return fields;
 
+
+
     };
-    
-    
-    function arrayToCommaString(value) {
+
+    igv.Variant.prototype.isRefBlock = function () {
+        return "refblock" === this.type;
+    }
+
+    function arrayToString(value, delim) {
+
+        if(delim === undefined) delim = ",";
+
         if (!(Array.isArray(value))) {
             return value;
         }
-        return value.join(',');
-    }
-
-
-    function isRefBlock(altAlleles) {
-
-        return !altAlleles ||
-            altAlleles.trim().length === 0 ||
-            altAlleles === "\u003cNON_REF\u003e" ||
-            altAlleles === "\u003c*\u003e";
-
+        return value.join(delim);
     }
 
     return igv;
