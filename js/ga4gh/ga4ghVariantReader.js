@@ -41,60 +41,56 @@ var igv = (function (igv) {
 
         var self = this;
 
-        return new Promise(function (fulfill, reject) {
 
+        if (self.header) {
+            return Promise.resolve(self.header);
+        }
 
-            if (self.header) {
-                fulfill(self.header);
+        else {
+
+            self.header = {};
+
+            if (self.includeCalls === false) {
+                return Promise.resolve(self.header);
             }
-
             else {
 
-                self.header = {};
+                var readURL = self.url + "/callsets/search";
 
-                if (self.includeCalls === false) {
-                    fulfill(self.header);
-                }
-                else {
+                return igv.ga4ghSearch({
+                    url: readURL,
+                    fields: "nextPageToken,callSets(id,name)",
+                    body: {
+                        "variantSetIds": (Array.isArray(self.variantSetId) ? self.variantSetId : [self.variantSetId]),
+                        "pageSize": "10000"
+                    },
+                    decode: function (json) {
+                        // If specific callSetIds are specified filter to those
+                        if (self.callSetIds) {
+                            var filteredCallSets = [],
+                                csIdSet = new Set();
 
-                    var readURL = self.url + "/callsets/search";
-
-                    igv.ga4ghSearch({
-                        url: readURL,
-                        fields: "nextPageToken,callSets(id,name)",
-                        body: {
-                            "variantSetIds": (Array.isArray(self.variantSetId) ? self.variantSetId : [self.variantSetId]),
-                            "pageSize": "10000"
-                        },
-                        decode: function (json) {
-                            // If specific callSetIds are specified filter to those
-                            if (self.callSetIds) {
-                                var filteredCallSets = [],
-                                    csIdSet = new Set();
-
-                                self.callSetIds.forEach(function (csid) {
-                                    csIdSet.add(csid);
-                                })
-                                json.callSets.forEach(function (cs) {
-                                    if (csIdSet.has(cs.id)) {
-                                        filteredCallSets.push(cs);
-                                    }
-                                });
-                                return filteredCallSets;
-                            }
-                            else {
-                                return json.callSets;
-                            }
+                            self.callSetIds.forEach(function (csid) {
+                                csIdSet.add(csid);
+                            })
+                            json.callSets.forEach(function (cs) {
+                                if (csIdSet.has(cs.id)) {
+                                    filteredCallSets.push(cs);
+                                }
+                            });
+                            return filteredCallSets;
                         }
-                    }).then(function (callSets) {
+                        else {
+                            return json.callSets;
+                        }
+                    }
+                })
+                    .then(function (callSets) {
                         self.header.callSets = callSets;
-                        fulfill(self.header);
-                    }).catch(reject);
-                }
+                        return self.header;
+                    })
             }
-
-        });
-
+        }
     }
 
 
@@ -126,10 +122,18 @@ var igv = (function (igv) {
                         "pageSize": "10000"
                     },
                     decode: function (json) {
+
+                        var v;
+
                         var variants = [];
 
                         json.variants.forEach(function (json) {
-                            variants.push(igv.createGAVariant(json));
+                         
+                            v = igv.createGAVariant(json);
+
+                            if (!v.isRefBlock()) {
+                                variants.push(v);
+                            }
                         });
 
                         return variants;
