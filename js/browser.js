@@ -983,8 +983,6 @@ var igv = (function (igv) {
      * Each mult-locus panel refers to a genomicState.
      *
      * @param loci - array of locus strings (e.g. chr1:1-100,  egfr)
-     * @param viewportContainerWidth - viewport width in pixels
-     * @param continuation - callback to received the list of genomic states
      */
     igv.Browser.prototype.getGenomicStateList = function (loci) {
 
@@ -1179,15 +1177,21 @@ var igv = (function (igv) {
                     return false;                 // Not a locus string
                 } else {
 
+                    locusObject.start = locusObject.end = undefined;
+
                     numeric = b[0].replace(/\,/g, '');
-                    if (isNaN(numeric)) return false;
+                    if (isNaN(numeric)) {
+                        return false;
+                    }
 
                     locusObject.start = parseInt(numeric, 10) - 1;
 
                     if (2 === b.length) {
 
                         numeric = b[1].replace(/\,/g, '');
-                        if (isNaN(numeric)) return false;
+                        if (isNaN(numeric)) {
+                            return false;
+                        }
 
                         locusObject.end = parseInt(numeric, 10);
                     }
@@ -1208,7 +1212,7 @@ var igv = (function (igv) {
 
         var ss = extent.start,
             ee = extent.end,
-            center
+            center;
 
         if (undefined === ee) {
 
