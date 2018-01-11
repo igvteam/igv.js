@@ -30,15 +30,13 @@ var igv = (function (igv) {
      * @param options
      */
     igv.ga4ghGet = function (options) {
-
+        options = igv.buildOptions(igv.browser.config, options);
         var url = options.url + "/" + options.entity + "/" + options.entityId;
-        options.headers = ga4ghHeaders();
 
         return igv.xhr.loadJson(url, options);      // Returns a promise
     }
 
     igv.ga4ghSearch = function (options) {
-
         return new Promise(function (fulfill, reject) {
             var results = options.results ? options.results : [],
                 url = options.url,
@@ -78,11 +76,11 @@ var igv = (function (igv) {
 
                 var sendData = JSON.stringify(body);
 
-                igv.xhr.loadJson(url,
-                    {
+                igv.xhr.loadJson(url, {
                         sendData: sendData,
                         contentType: "application/json",
-                        headers: ga4ghHeaders()
+                        oauthToken: acToken,
+                        headers: { "Cache-Control": "no-cache" }
                     })
                     .then(function (json) {
                         var nextPageToken, tmp;
@@ -255,25 +253,6 @@ var igv = (function (igv) {
                 });
             }
         });
-
-    }
-
-
-    function ga4ghHeaders() {
-
-        var headers = {},
-            acToken = igv.oauth.google.access_token;
-
-        if (!acToken && typeof oauth !== "undefined") {
-            // Check legacy variable
-            acToken = oauth.google.access_token;
-        }
-
-        headers["Cache-Control"] = "no-cache";
-        if (acToken) {
-            headers["Authorization"] = "Bearer " + acToken;
-        }
-        return headers;
 
     }
 
