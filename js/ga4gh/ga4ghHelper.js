@@ -30,9 +30,9 @@ var igv = (function (igv) {
      * @param options
      */
     igv.ga4ghGet = function (options) {
-        options = igv.buildOptions(igv.browser.config, options);
         var url = options.url + "/" + options.entity + "/" + options.entityId;
-
+        options.headers = ga4ghHeaders();
+        options.oauthToken = ga4ghToken();
         return igv.xhr.loadJson(url, options);      // Returns a promise
     }
 
@@ -79,8 +79,8 @@ var igv = (function (igv) {
                 igv.xhr.loadJson(url, {
                         sendData: sendData,
                         contentType: "application/json",
-                        oauthToken: acToken,
-                        headers: { "Cache-Control": "no-cache" }
+                        headers: ga4ghHeaders(),
+                        oauthToken: ga4ghToken()
                     })
                     .then(function (json) {
                         var nextPageToken, tmp;
@@ -255,6 +255,22 @@ var igv = (function (igv) {
         });
 
     }
+
+    function ga4ghToken() {
+        var acToken = igv.oauth.google.access_token;
+
+        if (!acToken && typeof oauth !== "undefined") {
+            // Check legacy variable
+            acToken = oauth.google.access_token;
+        }
+        return acToken;
+    }
+
+    function ga4ghHeaders() {
+        return {
+            "Cache-Control": "no-cache"
+        };
+	}
 
     return igv;
 
