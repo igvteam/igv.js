@@ -5,10 +5,36 @@ function runBAMTests() {
     // Mock object
     igv.browser = {
         genome: {
-            sequence: new igv.FastaSequence("https://igvdata.broadinstitute.org/genomes/seq/hg19/hg19.fasta"),
+            sequence: new igv.FastaSequence({
+                fastaURL: "https://igvdata.broadinstitute.org/genomes/seq/hg19/hg19.fasta"
+            }),
             getChromosomeName: function(chr) {return chr}
         }
     };
+
+    asyncTest("Bag magic bam", function () {
+
+        var chr = "1",
+            beg = 34000,
+            end = 36000,
+            bamReader;
+
+        bamReader = new igv.BamReader({
+            type: 'bam',
+            url: 'data/bam/trimmed_edited.bam',
+            label: 'BAM unit test'
+        });
+
+        bamReader.readAlignments(chr, beg, end).then(function (alignmentContainer) {
+            var alignments = alignmentContainer.alignments;
+            ok(alignments, "alignments");
+            equal(4, alignments.length, "alignments.length");
+
+            start();
+        }).catch(function (error) {
+            ok(false, error);  // failed
+        });
+    })
 
     asyncTest("4 alignment bam", function () {
 
