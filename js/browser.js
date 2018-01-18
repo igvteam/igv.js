@@ -1151,20 +1151,14 @@ var igv = (function (igv) {
             locusObject = {};
             a = locus.split(':');
 
-            chr = a[0];
-
-
-            if (chr.toLowerCase() === 'all') {
-                locusObject.chr = 'all';
-            } else {
-                chromosome = genome.getChromosome(chr);  // Map chr to official name from (possible) alias
-                if (!chromosome) {
-                    return false;          // Unknown chromosome
-                }
-                locusObject.chromosome = chromosome;     // Map chr to offical name from possible alias
-                locusObject.start = 0;
-                locusObject.end = chromosome.bpLength;
+            chr = a[ 0 ];
+            chromosome = genome.getChromosome(chr.toLowerCase());  // Map chr to official name from (possible) alias
+            if (!chromosome) {
+                return false;          // Unknown chromosome
             }
+            locusObject.chromosome = chromosome;     // Map chr to offical name from possible alias
+            locusObject.start = 0;
+            locusObject.end = chromosome.bpLength;
 
             // if just a chromosome name we are done
             if (1 === a.length) {
