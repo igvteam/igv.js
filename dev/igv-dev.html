@@ -329,10 +329,11 @@
 
         div = $("#myDiv")[0];
         options = {
+            locus: 'all',
             // locus: '1',
             // locus: 'SLC25A3',
             // locus: ['egfr', 'myc', 'pten'],
-            locus: ['myc'],
+            // locus: ['myc'],
             // locus: ['2', '4', '8'],
             reference: {
                 id: "hg19",
@@ -343,15 +344,15 @@
             apiKey: 'AIzaSyDUUAUFpQEN4mumeMNIRWXSiTh5cPtUAD0',
 
             tracks: [
-                {
-                    url: 'http://hgdownload.cse.ucsc.edu/goldenPath/hg19/encodeDCC/wgEncodeBroadHistone/wgEncodeBroadHistoneGm12878H3k4me3StdSig.bigWig',
-                    name: 'ENCODE - BigWig',
-                    color: function (value) {
-                        var red = Math.min(255, Math.max(100, Math.round(value / 2))),
-                                blue = 255 - red;
-                        return "rgb(" + red + "," + blue + ",0)"
-                    }
-                },
+                // {
+                //     url: 'http://hgdownload.cse.ucsc.edu/goldenPath/hg19/encodeDCC/wgEncodeBroadHistone/wgEncodeBroadHistoneGm12878H3k4me3StdSig.bigWig',
+                //     name: 'ENCODE - BigWig',
+                //     color: function (value) {
+                //         var red = Math.min(255, Math.max(100, Math.round(value / 2))),
+                //                 blue = 255 - red;
+                //         return "rgb(" + red + "," + blue + ",0)"
+                //     }
+                // },
                 {
 
                     name: "Genes",
