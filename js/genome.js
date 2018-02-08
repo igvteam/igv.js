@@ -121,6 +121,7 @@ var igv = (function (igv) {
                 if (defName) {
                     array.forEach(function (alias) {
                         if (alias !== defName) {
+                            chrAliasTable[alias.toLowerCase()] = defName;
                             chrAliasTable[alias] = defName;
                         }
                     });
@@ -364,7 +365,7 @@ var igv = (function (igv) {
 
     function loadAliases(aliasURL, config) {
 
-        igv.xhr.loadString(aliasURL, igv.buildOptions(config))
+        return igv.xhr.loadString(aliasURL, igv.buildOptions(config))
 
             .then(function (data) {
 
