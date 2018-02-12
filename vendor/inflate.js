@@ -827,7 +827,7 @@ InfBlocks.prototype.reset = function(z, c){
 	}
 	this.left = (b & 0xffff);
 	b = k = 0;                       // dump bits
-	this.mode = left!=0 ? IB_STORED : (this.last!=0 ? IB_DRY : IB_TYPE);
+	this.mode = this.left!=0 ? IB_STORED : (this.last!=0 ? IB_DRY : IB_TYPE);
 	break;
       case IB_STORED:
 	if (n == 0){
