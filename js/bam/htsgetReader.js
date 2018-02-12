@@ -83,7 +83,7 @@ var igv = (function (igv) {
                 // htsget does not specify a method to get the header alone.  specify a non-sensical range
                 // to return just the header
 
-                var url = self.config.endpoint + '/reads/' + self.config.id + '?referenceName=noSuchReference';
+                var url = self.config.endpoint + '/reads/' + self.config.id + '?referenceName=' + chr + '&start=0&end=1';
 
                 return igv.xhr.loadJson(url, self.config)
 
