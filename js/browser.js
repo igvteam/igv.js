@@ -1152,7 +1152,7 @@ var igv = (function (igv) {
             a = locus.split(':');
 
             chr = a[ 0 ];
-            chromosome = genome.getChromosome(chr.toLowerCase());  // Map chr to official name from (possible) alias
+            chromosome = genome.getChromosome(chr);  // Map chr to official name from (possible) alias
             if (!chromosome) {
                 return false;          // Unknown chromosome
             }
