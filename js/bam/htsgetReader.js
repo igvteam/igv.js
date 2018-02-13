@@ -32,25 +32,22 @@ var igv = (function (igv) {
         igv.BamUtils.setReaderDefaults(this, config);
     };
 
-    igv.HtsgetReader.prototype.readAlignments = function (chr, start, end) {
+    igv.HtsgetReader.prototype.readAlignments = function (chr, start, end, retryCount) {
 
-        var self = this;
+        var self = this, queryChr, url;
 
-        return getHeader()
+        if (self.header) {
+            queryChr = self.header.chrAliasTable.hasOwnProperty(chr) ? self.header.chrAliasTable[chr] : chr;
+        } else {
+            queryChr = chr;
+        }
 
-            .then(function (header) {
+        url = self.config.endpoint + '/reads/' + self.config.id +
+            '?referenceName=' + queryChr +
+            '&start=' + start +
+            '&end=' + end;
 
-                var queryChr, url;
-
-                queryChr = header.chrAliasTable.hasOwnProperty(chr) ? header.chrAliasTable[chr] : chr;
-
-                url = self.config.endpoint + '/reads/' + self.config.id +
-                    '?referenceName=' + queryChr +
-                    '&start=' + start +
-                    '&end=' + end;
-
-                return igv.xhr.loadJson(url, self.config)
-            })
+        return igv.xhr.loadJson(url, self.config)
             .then(function (data) {
                 return loadUrls(data.htsget.urls)
             })
@@ -62,60 +59,114 @@ var igv = (function (igv) {
                 unc = igv.unbgzf(compressedData.buffer);
                 ba = new Uint8Array(unc);
 
+                if (!self.header) {
+                    var genome = igv.browser ? igv.browser.genome : undefined;
+                    self.header = igv.BamUtils.decodeBamHeader(ba, genome);
+                }
+
 
                 chrIdx = self.header.chrToIndex[chr];
-                alignmentContainer = new igv.AlignmentContainer(chr, start, end, self.samplingWindowSize, self.samplingDepth, self.pairsSupported);
 
-                igv.BamUtils.decodeBamRecords(ba, self.header.size, alignmentContainer, self.header.chrNames, chrIdx, start, end);
-
-                alignmentContainer.finish()
-                return alignmentContainer;
+                if (chrIdx === undefined && queryChr !== self.header.chrAliasTable.hasOwnProperty(chr) && !retryCount) {
+                    queryChr = self.header.chrAliasTable[chr]
+                    return self.readAlignments(queryChr, start, end, 1);
+                }
+                else {
+                    alignmentContainer = new igv.AlignmentContainer(chr, start, end, self.samplingWindowSize, self.samplingDepth, self.pairsSupported);
+                    igv.BamUtils.decodeBamRecords(ba, self.header.size, alignmentContainer, self.header.chrNames, chrIdx, start, end);
+                    alignmentContainer.finish()
+                    return alignmentContainer;
+                }
             })
 
 
-        function getHeader() {
 
-            if (self.header) {
-                return Promise.resolve(self.header);
-            }
-            else {
 
-                // htsget does not specify a method to get the header alone.  specify a non-sensical range
-                // to return just the header
+        // Commented out code below assumes a method to get the bam header (meta data).
+        
+        // igv.HtsgetReader.prototype.readAlignments = function (chr, start, end) {
+        //
+        //     var self = this;
+        //
+        //     return getHeader()
+        //
+        //         .then(function (header) {
+        //
+        //             var queryChr, url;
+        //
+        //             queryChr = header.chrAliasTable.hasOwnProperty(chr) ? header.chrAliasTable[chr] : chr;
+        //
+        //             url = self.config.endpoint + '/reads/' + self.config.id +
+        //                 '?referenceName=' + queryChr +
+        //                 '&start=' + start +
+        //                 '&end=' + end;
+        //
+        //             return igv.xhr.loadJson(url, self.config)
+        //         })
+        //         .then(function (data) {
+        //             return loadUrls(data.htsget.urls)
+        //         })
+        //         .then(function (dataArr) {
+        //
+        //             var compressedData, unc, ba, alignmentContainer, chrIdx;
+        //
+        //             compressedData = concatArrays(dataArr);  // In essence a complete bam file
+        //             unc = igv.unbgzf(compressedData.buffer);
+        //             ba = new Uint8Array(unc);
+        //
+        //
+        //             chrIdx = self.header.chrToIndex[chr];
+        //             alignmentContainer = new igv.AlignmentContainer(chr, start, end, self.samplingWindowSize, self.samplingDepth, self.pairsSupported);
+        //
+        //             igv.BamUtils.decodeBamRecords(ba, self.header.size, alignmentContainer, self.header.chrNames, chrIdx, start, end);
+        //
+        //             alignmentContainer.finish()
+        //             return alignmentContainer;
+        //         })
 
-                var url = self.config.endpoint + '/reads/' + self.config.id + '?referenceName=' + chr + '&start=0&end=1';
-
-                return igv.xhr.loadJson(url, self.config)
-
-                    .then(function (data) {
-
-                        var genome = igv.browser ? igv.browser.genome : undefined;
-
-                        if (data && data.htsget && data.htsget.urls) {
-
-                            return loadUrls(data.htsget.urls)
-
-                                .then(function (dataArr) {
-
-                                    var compressedData, unc, ba, alignmentContainer, chrIdx;
-
-                                    compressedData = concatArrays(dataArr);  // In essence a complete bam file
-                                    unc = igv.unbgzf(compressedData.buffer);
-                                    ba = new Uint8Array(unc);
-
-                                    self.header = igv.BamUtils.decodeBamHeader(ba, genome);
-
-                                    return self.header;
-                                });
-                        }
-                        else {
-                            throw new Error("Error querying htsget: " + headerUrl);
-                        }
-                    });
-
-            }
-
-        }
+        // function getHeader() {
+        //
+        //     if (self.header) {
+        //         return Promise.resolve(self.header);
+        //     }
+        //     else {
+        //
+        //         // htsget does not specify a method to get the header alone.  specify a non-sensical range
+        //         // to return just the header
+        //
+        //         var url = self.config.endpoint + '/reads/' + self.config.id + '?referenceName=' + chr + '&start=0&end=1';
+        //
+        //         return igv.xhr.loadJson(url, self.config)
+        //
+        //             .then(function (data) {
+        //
+        //                 var genome = igv.browser ? igv.browser.genome : undefined;
+        //
+        //                 if (data && data.htsget && data.htsget.urls) {
+        //
+        //                     return loadUrls(data.htsget.urls)
+        //
+        //                         .then(function (dataArr) {
+        //
+        //                             var compressedData, unc, ba, alignmentContainer, chrIdx;
+        //
+        //                             compressedData = concatArrays(dataArr);  // In essence a complete bam file
+        //                             unc = igv.unbgzf(compressedData.buffer);
+        //                             ba = new Uint8Array(unc);
+        //
+        //                             self.header = igv.BamUtils.decodeBamHeader(ba, genome);
+        //
+        //                             return self.header;
+        //                         });
+        //                 }
+        //                 else {
+        //                     throw new Error("Error querying htsget: " + headerUrl);
+        //                 }
+        //             });
+        //
+        //     }
+        //
+        // }
 
     }
 
