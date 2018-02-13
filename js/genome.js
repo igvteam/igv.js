@@ -130,12 +130,17 @@ var igv = (function (igv) {
             });
         }
 
+        // Case insensitiviry
+        Object.keys(chrAliasTable).forEach(function (key) {
+            chrAliasTable[key.toLowerCase()] = chrAliasTable[key];
+        })
+
         this.chrAliasTable = chrAliasTable;
 
     }
 
     igv.Genome.prototype.getChromosomeName = function (str) {
-        var chr = this.chrAliasTable[str];
+        var chr = this.chrAliasTable[str.toLowerCase()];
         return chr ? chr : str;
     }
 
