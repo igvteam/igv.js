@@ -56,9 +56,9 @@ var igv = (function (igv) {
         $(this.trackDiv).append(this.$viewportContainer);
 
         this.viewports = [];
-        _.each(browser.genomicStateList, function(genomicState, i) {
+        browser.genomicStateList.forEach(function (genomicState, i) {
 
-            self.viewports.push(new igv.Viewport(self, self.$viewportContainer, i));
+            self.viewports.push(new igv.Viewport(self, self.$viewportContainer, genomicState));
 
             if (self.track instanceof igv.RulerTrack) {
                 self.track.createRulerSweeper(self.viewports[i], self.viewports[i].$viewport, $(self.viewports[i].contentDiv), genomicState);
@@ -79,11 +79,11 @@ var igv = (function (igv) {
         if (igv.doProvideColoSwatchWidget(this.track)) {
 
             config =
-                {
-                    // width = (29 * swatch-width) + border-width + border-width
-                    width: ((29 * 24) + 1 + 1),
-                    classes: [ 'igv-position-absolute' ]
-                };
+            {
+                // width = (29 * swatch-width) + border-width + border-width
+                width: ((29 * 24) + 1 + 1),
+                classes: ['igv-position-absolute']
+            };
 
 
             this.$colorpicker_container = igv.genericContainer($track, config, function () {
@@ -95,7 +95,7 @@ var igv = (function (igv) {
             });
 
             // igv.makeDraggable(this.$colorpicker_container, this.$colorpicker_container);
-            this.$colorpicker_container.draggable({ handle:this.$colorpicker_container.find('div:first-child').get(0) });
+            this.$colorpicker_container.draggable({handle: this.$colorpicker_container.find('div:first-child').get(0)});
 
             this.$colorpicker_container.hide();
         }
@@ -150,7 +150,7 @@ var igv = (function (igv) {
         });
 
         this.$outerScroll.click(function (event) {
-            moveScrollerTo(event.offsetY - self.$innerScroll.height()/2);
+            moveScrollerTo(event.offsetY - self.$innerScroll.height() / 2);
             event.stopPropagation();
 
         });
@@ -183,11 +183,11 @@ var igv = (function (igv) {
 
             contentDivHeight = maxContentHeightWithViewports(viewports);
 
-            contentTop = -Math.round(newTop * ( contentDivHeight/self.$viewportContainer.height() ));
+            contentTop = -Math.round(newTop * ( contentDivHeight / self.$viewportContainer.height() ));
 
             self.$innerScroll.css("top", newTop + "px");
 
-            _.each(viewports, function(viewport){
+            viewports.forEach(function (viewport) {
                 $(viewport.contentDiv).css("top", contentTop + "px");
             });
 
@@ -216,7 +216,7 @@ var igv = (function (igv) {
 
     function maxContentHeightWithViewports(viewports) {
         var height = 0;
-        _.each(viewports, function(viewport){
+        viewports.forEach(function (viewport) {
             var hgt = $(viewport.contentDiv).height();
             height = Math.max(hgt, height);
         });
@@ -389,12 +389,6 @@ var igv = (function (igv) {
 
     igv.TrackView.prototype.setTrackHeight = function (newHeight, update) {
 
-        setTrackHeight_.call(this, newHeight, update || true);
-
-    };
-
-    function setTrackHeight_(newHeight, update) {
-
         var trackHeightStr;
 
         if (this.track.minHeight) {
@@ -427,7 +421,7 @@ var igv = (function (igv) {
         var anyViewportIsLoading;
 
         anyViewportIsLoading = false;
-        _.each(this.viewports, function(v) {
+        this.viewports.forEach(function (v) {
             if (false === anyViewportIsLoading) {
                 anyViewportIsLoading = v.isLoading();
             }
@@ -438,7 +432,7 @@ var igv = (function (igv) {
 
     igv.TrackView.prototype.resize = function () {
 
-        _.each(this.viewports, function(viewport){
+        this.viewports.forEach(function (viewport) {
             viewport.resize();
         });
 
@@ -450,7 +444,7 @@ var igv = (function (igv) {
 
     igv.TrackView.prototype.update = function () {
 
-        _.each(this.viewports, function(viewport) {
+        this.viewports.forEach(function (viewport) {
             viewport.update();
         });
 
@@ -462,7 +456,7 @@ var igv = (function (igv) {
 
     igv.TrackView.prototype.repaint = function () {
 
-        _.each(this.viewports, function(viewport) {
+        this.viewports.forEach(function (viewport) {
             viewport.repaint();
         });
 

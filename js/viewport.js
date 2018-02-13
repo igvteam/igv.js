@@ -3,11 +3,11 @@
  */
 var igv = (function (igv) {
 
-    igv.Viewport = function (trackView, $container, locusIndex) {
-        this.initializationHelper(trackView, $container, locusIndex);
+    igv.Viewport = function (trackView, $container, genomicState) {
+        this.initializationHelper(trackView, $container, genomicState);
     };
 
-    igv.Viewport.prototype.initializationHelper = function (trackView, $container, locusIndex) {
+    igv.Viewport.prototype.initializationHelper = function (trackView, $container, genomicState) {
 
         var self = this,
             description,
@@ -18,7 +18,7 @@ var igv = (function (igv) {
 
         this.trackView = trackView;
         this.id = _.uniqueId('viewport_');
-        this.genomicState = igv.browser.genomicStateList[locusIndex];
+        this.genomicState = genomicState;
 
         this.$viewport = $('<div class="igv-viewport-div">');
         $container.append(this.$viewport);
@@ -26,7 +26,7 @@ var igv = (function (igv) {
         this.$viewport.data("viewport", this.id);
         this.$viewport.data("locusindex", this.genomicState.locusIndex);
 
-        addViewportBorders(this.$viewport, this.genomicState.locusIndex, _.size(igv.browser.genomicStateList));
+        addViewportBorders(this.$viewport, this.genomicState.locusIndex, igv.browser.genomicStateList.length);
 
         this.setWidth(igv.browser.viewportContainerWidth() / this.genomicState.locusCount);
 
@@ -228,10 +228,9 @@ var igv = (function (igv) {
                         if (1 === self.genomicState.locusCount) {
                             locusString = chr;
                         } else {
-                            loci = _.map(igv.browser.genomicStateList, function (g) {
+                            loci = igv.browser.genomicStateList.map(function (g) {
                                 return g.locusSearchString;
                             });
-
                             loci[self.genomicState.locusIndex] = chr;
                             locusString = loci.join(' ');
                         }
@@ -609,16 +608,16 @@ var igv = (function (igv) {
 
     igv.Viewport.viewportWidthAtLocusIndex = function (locusIndex) {
 
-        var viewport = _.first(igv.Viewport.viewportsWithLocusIndex(locusIndex));
+        var viewport = igv.Viewport.viewportsWithLocusIndex(locusIndex)[0];
         return viewport.$viewport.width();
     };
 
     igv.Viewport.viewportsWithLocusIndex = function (locusIndex) {
 
         var list = [];
-        _.each(igv.browser.trackViews, function (tv) {
+        igv.browser.trackViews.forEach(function (tv) {
 
-            _.each(tv.viewports, function (vp) {
+            tv.viewports.forEach(function (vp) {
 
                 if (locusIndex === vp.genomicState.locusIndex) {
                     list.push(vp);
@@ -634,9 +633,9 @@ var igv = (function (igv) {
 
         var result = undefined;
 
-        _.each(igv.browser.trackViews, function (tv) {
+        igv.browser.trackViews.forEach(function (tv) {
             if (undefined === result) {
-                _.each(tv.viewports, function (vp) {
+                tv.viewports.forEach( function (vp) {
                     if (id === vp.id) {
                         result = vp;
                     }

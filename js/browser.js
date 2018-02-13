@@ -840,13 +840,13 @@ var igv = (function (igv) {
 
         this.emptyViewportContainers();
 
-        filtered = _.filter(_.clone(this.genomicStateList), function (gs) {
+        filtered = this.genomicStateList.filter(function (gs) {
             return filterFunction(gs);
         });
 
-        this.genomicStateList = _.map(filtered, function (f, i, list) {
+        this.genomicStateList = filtered.map(function (f, i, list) {
             f.locusIndex = i;
-            f.locusCount = _.size(list);
+            f.locusCount = list.length;
             f.referenceFrame.bpPerPixel = (f.end - f.start) / (self.viewportContainerWidth() / f.locusCount);
             return f;
         });
@@ -888,11 +888,11 @@ var igv = (function (igv) {
 
     igv.Browser.prototype.buildViewportsWithGenomicStateList = function (genomicStateList) {
 
-        _.each(this.trackViews, function (trackView) {
+        this.trackViews.forEach(function (trackView) {
 
-            _.each(genomicStateList, function (genomicState, i) {
+            genomicStateList.forEach(function (genomicState, i) {
 
-                trackView.viewports.push(new igv.Viewport(trackView, trackView.$viewportContainer, i));
+                trackView.viewports.push(new igv.Viewport(trackView, trackView.$viewportContainer, genomicState));
 
                 if (trackView.track instanceof igv.RulerTrack) {
                     trackView.track.createRulerSweeper(trackView.viewports[i], trackView.viewports[i].$viewport, $(trackView.viewports[i].contentDiv), genomicState);
@@ -911,7 +911,9 @@ var igv = (function (igv) {
             loci;
 
         loci = string.split(' ');
+
         this.getGenomicStateList(loci, this.viewportContainerWidth())
+
             .then(function (genomicStateList) {
                 var $content_header;
 
@@ -946,8 +948,7 @@ var igv = (function (igv) {
                     }
 
                     self.buildViewportsWithGenomicStateList(genomicStateList);
-
-                    console.log('then(browser.update)');
+                    
                     self.update();
 
                     return genomicStateList
@@ -1000,6 +1001,7 @@ var igv = (function (igv) {
             genomicState = isLocusChrNameStartEnd(locus, self.genome);
             if (genomicState) {
                 genomicState.locusSearchString = locus;
+                genomicState.id = locus;
                 locusGenomicStates.push(genomicState);
             }
             else {
@@ -1118,6 +1120,7 @@ var igv = (function (igv) {
 
                 geneNameLocusObject = Object.assign({}, result);
 
+                geneNameLocusObject.id = locusSearchString;                         // Immutable indentifier.
                 geneNameLocusObject.chromosome = self.genome.getChromosome(chr);
                 geneNameLocusObject.start = start;
                 geneNameLocusObject.end = end;
@@ -1151,7 +1154,7 @@ var igv = (function (igv) {
             locusObject = {};
             a = locus.split(':');
 
-            chr = a[ 0 ];
+            chr = a[0];
             chromosome = genome.getChromosome(chr.toLowerCase());  // Map chr to official name from (possible) alias
             if (!chromosome) {
                 return false;          // Unknown chromosome
@@ -1296,6 +1299,18 @@ var igv = (function (igv) {
 
     }
 
+    igv.Browser.prototype.loadSampleInformation = function (url) {
+        var name = url;
+        if (url instanceof File) {
+            name = url.name;
+        }
+        var ext = name.substr(name.lastIndexOf('.') + 1);
+        if (ext === 'fam') {
+            igv.sampleInformation.loadPlinkFile(url);
+        }
+    };
+
+    // EVENTS 
 
     igv.Browser.prototype.on = function (eventName, fn) {
         if (!this.eventHandlers[eventName]) {
@@ -1330,17 +1345,6 @@ var igv = (function (igv) {
 
         return _.first(results);
 
-    };
-
-    igv.Browser.prototype.loadSampleInformation = function (url) {
-        var name = url;
-        if (url instanceof File) {
-            name = url.name;
-        }
-        var ext = name.substr(name.lastIndexOf('.') + 1);
-        if (ext === 'fam') {
-            igv.sampleInformation.loadPlinkFile(url);
-        }
     };
 
     function attachTrackContainerMouseHandlers(trackContainerDiv) {
