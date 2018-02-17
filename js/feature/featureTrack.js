@@ -213,7 +213,7 @@ var igv = (function (igv) {
 
         // We use the featureCache property rather than method to avoid async load.  If the
         // feature is not already loaded this won't work,  but the user wouldn't be mousing over it either.
-        if (this.featureSource.featureCache) {
+        if (config.viewport.cachedFeatures) {
 
             var genomicLocation = config.genomicLocation,
                 yOffset = config.y,
@@ -229,7 +229,9 @@ var igv = (function (igv) {
             tolerance = 2 * referenceFrame.bpPerPixel;
             ss = genomicLocation - tolerance;
             ee = genomicLocation + tolerance;
-            featureList = this.featureSource.featureCache.queryFeatures(referenceFrame.chrName, ss, ee);
+            //featureList = this.featureSource.featureCache.queryFeatures(referenceFrame.chrName, ss, ee);
+
+            featureList = config.viewport.cachedFeatures.features;
 
             if ('COLLAPSED' !== this.displayMode) {
                 row = 'SQUISHED' === this.displayMode ? Math.floor((yOffset - 2) / this.expandedCallHeight) : Math.floor((yOffset - 5) / this.squishedCallHeight);
@@ -367,6 +369,7 @@ var igv = (function (igv) {
 
 
     igv.FeatureTrack.prototype.popupMenuItemList = function (config) {
+  
         if (this.render === renderSnp) {
 
             var menuItems = [], self = this;
