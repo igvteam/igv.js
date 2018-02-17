@@ -110,9 +110,8 @@ var igv = (function (igv) {
 
     igv.RulerTrack.prototype.getFeatures = function (chr, bpStart, bpEnd) {
 
-        return new Promise(function (fulfill, reject) {
-            fulfill([]);
-        });
+        return Promise.resolve([]);
+
     };
 
     igv.RulerTrack.prototype.draw = function (options) {

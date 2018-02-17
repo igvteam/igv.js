@@ -185,11 +185,7 @@ var igv = (function (igv) {
             }
         }
 
-        else if (featureCache && (featureCache.range === undefined || featureCache.range.containsRange(genomicInterval))) {
-            return Promise.resolve(self.featureCache.queryFeatures(chr, bpStart, bpEnd));
-        }
         else {
-            // TODO -- reuse cached features that overelap new region
 
             if (self.sourceType === 'file' && (self.visibilityWindow === undefined || self.visibilityWindow <= 0)) {
                 // Expand genomic interval to grab entire chromosome
@@ -199,10 +195,12 @@ var igv = (function (igv) {
             }
 
             return self.reader.readFeatures(chr, genomicInterval.start, genomicInterval.end)
+
                 .then(
+
                     function (featureList) {
 
-                        if (featureList && typeof featureList.forEach === 'function') {  // Have result AND its an array type
+                        if (featureList) {
 
                             var isQueryable = self.reader.indexed || self.config.sourceType !== "file";
 
@@ -223,11 +221,10 @@ var igv = (function (igv) {
                                 addFeaturesToDB(featureList);
                             }
 
-                            // Finally pass features for query interval to continuation
-                            return self.featureCache.queryFeatures(chr, bpStart, bpEnd);
+                            return featureList;
                         }
                         else {
-                            return null;
+                            return undefined;
                         }
 
                     })
