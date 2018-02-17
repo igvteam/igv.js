@@ -1001,7 +1001,6 @@ var igv = (function (igv) {
             genomicState = isLocusChrNameStartEnd(locus, self.genome);
             if (genomicState) {
                 genomicState.locusSearchString = locus;
-                genomicState.id = locus;
                 locusGenomicStates.push(genomicState);
             }
             else {
@@ -1120,7 +1119,6 @@ var igv = (function (igv) {
 
                 geneNameLocusObject = Object.assign({}, result);
 
-                geneNameLocusObject.id = locusSearchString;                         // Immutable indentifier.
                 geneNameLocusObject.chromosome = self.genome.getChromosome(chr);
                 geneNameLocusObject.start = start;
                 geneNameLocusObject.end = end;
