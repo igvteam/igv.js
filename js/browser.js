@@ -948,7 +948,7 @@ var igv = (function (igv) {
                     }
 
                     self.buildViewportsWithGenomicStateList(genomicStateList);
-                    
+
                     self.update();
 
                     return genomicStateList
@@ -1332,18 +1332,19 @@ var igv = (function (igv) {
 
     igv.Browser.prototype.fireEvent = function (eventName, args, thisObj) {
         var scope,
-            results;
-
-        if (undefined === this.eventHandlers[eventName]) {
+            results,
+            eventHandler = this.eventHandlers[eventName];
+        
+        if (undefined === eventHandler || eventHandler.length === 0) {
             return undefined;
         }
 
         scope = thisObj || window;
-        results = _.map(this.eventHandlers[eventName], function (event) {
+        results = eventHandler.map(function (event) {
             return event.apply(scope, args);
         });
 
-        return _.first(results);
+        return results[0];
 
     };
 
