@@ -412,6 +412,16 @@ var igv = (function (igv) {
                     self.loading = undefined;
 
                     self.stopSpinner();
+                    
+                    if (features) {
+
+                        if (typeof self.trackView.track.computePixelHeight === 'function') {
+                            requiredHeight = self.trackView.track.computePixelHeight(features);
+                            if (requiredHeight != self.contentDiv.clientHeight) {
+                                self.trackView.setContentHeightForViewport(self, requiredHeight)
+                            }
+                        }
+                    }
 
                     buffer = document.createElement('canvas');
                     buffer.width = pixelWidth;
@@ -433,16 +443,8 @@ var igv = (function (igv) {
                         viewportContainerX: genomicState.referenceFrame.toPixels(genomicState.referenceFrame.start - bpStart),
                         viewportContainerWidth: igv.browser.viewportContainerWidth()
                     };
-                    
-                    if (features) {
 
-                        if (typeof self.trackView.track.computePixelHeight === 'function') {
-                            requiredHeight = self.trackView.track.computePixelHeight(features);
-                            if (requiredHeight != self.contentDiv.clientHeight) {
-                                // self.setContentHeight(requiredHeight);
-                                self.trackView.setContentHeightForViewport(self, requiredHeight)
-                            }
-                        }
+                    if(features) {
 
                         drawConfiguration.features = features;
 
