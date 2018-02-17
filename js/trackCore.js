@@ -392,13 +392,14 @@ var igv = (function (igv) {
         {
             popover: popover,
             viewport: viewport,
+            genomicState: viewport.genomicState,
             genomicLocation: genomicLocation,
             x: xOffset,
             y: yOffset
         };
 
         menuItems = [];
-        if (viewport.trackView.track.popupMenuItemList) {
+        if (typeof viewport.trackView.track.popupMenuItemList === "function") {
             menuItems = igv.trackMenuItemListHelper(viewport.trackView.track.popupMenuItemList(config));
         }
 

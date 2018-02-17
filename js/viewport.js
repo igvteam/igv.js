@@ -4,10 +4,6 @@
 var igv = (function (igv) {
 
     igv.Viewport = function (trackView, $container, genomicState) {
-        this.initializationHelper(trackView, $container, genomicState);
-    };
-
-    igv.Viewport.prototype.initializationHelper = function (trackView, $container, genomicState) {
 
         var self = this,
             description,
@@ -250,24 +246,18 @@ var igv = (function (igv) {
 
             } else {
 
-                if (e.shiftKey) {
-
-                    if (self.trackView.track.shiftClick && self.tile) {
-                        self.trackView.track.shiftClick(genomicLocation, e);
-                    }
+                if (e.shiftKey && typeof self.trackView.track.shiftClick === "function") {
+                    e.preventDefault();
+                    e = $.event.fix(e);
+                    e.stopPropagation();
+                    self.trackView.track.shiftClick(genomicLocation, e);
 
                 } else if (e.altKey) {
 
                     e.preventDefault();
                     e = $.event.fix(e);
                     e.stopPropagation();
-
                     igv.popover.presentTrackPopupMenu(e, self);
-
-                    //
-                    // if (self.trackView.track.altClick && self.tile) {
-                    //     self.trackView.track.altClick(genomicLocation, referenceFrame, e);
-                    // }
 
                 } else if (Math.abs(canvasCoords.x - mouseDownX) <= igv.browser.constants.dragThreshold && self.trackView.track.popupData) {
 
@@ -360,6 +350,7 @@ var igv = (function (igv) {
 
         // TODO -- show whole genome zoom in notice here
         if (this.$zoomInNotice && this.trackView.track.visibilityWindow !== undefined && this.trackView.track.visibilityWindow > 0) {
+
             if ((referenceFrame.bpPerPixel * this.$viewport.width() > this.trackView.track.visibilityWindow) ||
                 (referenceFrame.chrName.toLowerCase() === "all" && !this.trackView.track.supportsWholeGenome)) {
 
@@ -386,7 +377,7 @@ var igv = (function (igv) {
         if (!this.tile ||
             this.tile.invalidate || !this.tile.containsRange(chr, refFrameStart, refFrameEnd, referenceFrame.bpPerPixel)) {
 
-            //TODO -- if bpPerPixel changed repaint image from cached data => new optional track method to return
+            //TODO -- if bpPerPixel (zoom level) changed repaint image from cached data => new optional track method to return
             //TODO -- cached features directly (not a promise for features).
 
             // Expand the requested range so we can pan a bit without reloading.  But not beyond chromosome bounds
@@ -409,14 +400,13 @@ var igv = (function (igv) {
             self.startSpinner();
 
             // console.log('get features');
-            this.trackView.track
-
-                .getFeatures(referenceFrame.chrName, bpStart, bpEnd, referenceFrame.bpPerPixel)
+            getFeatures(referenceFrame.chrName, bpStart, bpEnd, referenceFrame.bpPerPixel)
 
                 .then(function (features) {
 
                     var requiredHeight,
                         roiPromises;
+
 
                     // self.loading = false;
                     self.loading = undefined;
@@ -443,9 +433,7 @@ var igv = (function (igv) {
                         viewportContainerX: genomicState.referenceFrame.toPixels(genomicState.referenceFrame.start - bpStart),
                         viewportContainerWidth: igv.browser.viewportContainerWidth()
                     };
-
-                    self.drawConfiguration = drawConfiguration;  //TODO -- only needed for bam track.  Very ugly backpointer, get rid of this.
-
+                    
                     if (features) {
 
                         if (typeof self.trackView.track.computePixelHeight === 'function') {
@@ -530,6 +518,28 @@ var igv = (function (igv) {
             return igv.browser && igv.browser.genomicStateList && igv.browser.genomicStateList[self.genomicState.locusIndex].referenceFrame;
         }
 
+
+        function getFeatures(chr, start, end, bpPerPixel) {
+
+            if (self.cachedFeatures && self.cachedFeatures.containsRange(chr, start, end, bpPerPixel)) {
+                return Promise.resolve(self.cachedFeatures.features)
+            }
+            else {
+                if(typeof self.trackView.track.getFeatures === "function") {
+                    return self.trackView.track.getFeatures(chr, start, end, bpPerPixel)
+                        .then(function (features) {
+                            self.cachedFeatures = new CachedFeatures(chr, start, end, bpPerPixel, features);
+                            return features;
+                        })
+                        .catch(function (error) {
+                            console.log(error);
+                        })
+                }
+                else {
+                    Promise.resolve(undefined);
+                }
+            }
+        }
     };
 
 
@@ -635,7 +645,7 @@ var igv = (function (igv) {
 
         igv.browser.trackViews.forEach(function (tv) {
             if (undefined === result) {
-                tv.viewports.forEach( function (vp) {
+                tv.viewports.forEach(function (vp) {
                     if (id === vp.id) {
                         result = vp;
                     }
@@ -646,7 +656,8 @@ var igv = (function (igv) {
         return result;
     };
 
-    Tile = function (chr, tileStart, tileEnd, bpPerPixel, image) {
+
+    var Tile = function (chr, tileStart, tileEnd, bpPerPixel, image) {
         this.chr = chr;
         this.startBP = tileStart;
         this.endBP = tileEnd;
@@ -662,32 +673,44 @@ var igv = (function (igv) {
         return this.chr === chr && end >= this.startBP && start <= this.endBP;
     }
 
-    // TODO: dat - Called from BAMTrack.altClick. Change call to redrawTile(viewPort, features)
-    igv.Viewport.prototype.redrawTile = function (features) {
-
-        var buffer;
-
-        if (!this.tile) {
-            return;
-        }
-
-        buffer = document.createElement('canvas');
-        buffer.width = this.tile.image.width;
-        buffer.height = this.tile.image.height;
-
-        this.trackView.track.draw({
-            features: features,
-            context: buffer.getContext('2d'),
-            bpStart: this.tile.startBP,
-            bpPerPixel: this.tile.bpPerPixel,
-            pixelWidth: buffer.width,
-            pixelHeight: buffer.height
-        });
-
-
-        this.tile = new Tile(this.tile.chr, this.tile.startBP, this.tile.endBP, this.tile.bpPerPixel, buffer);
-        this.paintImage(this.genomicState.referenceFrame);
+    var CachedFeatures = function (chr, tileStart, tileEnd, bpPerPixel, features) {
+        this.chr = chr;
+        this.startBP = tileStart;
+        this.endBP = tileEnd;
+        this.bpPerPixel = bpPerPixel;
+        this.features = features;
     };
+
+    CachedFeatures.prototype.containsRange = function (chr, start, end, bpPerPixel) {
+        return this.bpPerPixel === bpPerPixel && start >= this.startBP && end <= this.endBP && chr === this.chr;
+    };
+
+    // TODO: dat - Called from BAMTrack.altClick. Change call to redrawTile(viewPort, features)
+    // igv.Viewport.prototype.redrawTile = function (features) {
+    //
+    //     var buffer;
+    //
+    //     if (!this.tile) {
+    //         return;
+    //     }
+    //
+    //     buffer = document.createElement('canvas');
+    //     buffer.width = this.tile.image.width;
+    //     buffer.height = this.tile.image.height;
+    //
+    //     this.trackView.track.draw({
+    //         features: features,
+    //         context: buffer.getContext('2d'),
+    //         bpStart: this.tile.startBP,
+    //         bpPerPixel: this.tile.bpPerPixel,
+    //         pixelWidth: buffer.width,
+    //         pixelHeight: buffer.height
+    //     });
+    //
+    //
+    //     this.tile = new Tile(this.tile.chr, this.tile.startBP, this.tile.endBP, this.tile.bpPerPixel, buffer);
+    //     this.paintImage(this.genomicState.referenceFrame);
+    // };
 
     return igv;
 

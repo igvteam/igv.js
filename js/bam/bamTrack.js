@@ -897,7 +897,7 @@ var igv = (function (igv) {
 
             this.highlightedAlignmentReadNamed = alignment.readName;
 
-            loci = _.map(igv.browser.genomicStateList, function (gs) {
+            loci = igv.browser.genomicStateList.map(function (gs) {
                 return gs.locusSearchString;
             });
 
@@ -942,8 +942,8 @@ var igv = (function (igv) {
             packedAlignmentsIndex,
             alignmentRow, clicked, i;
 
-        packedAlignmentRows = viewport.drawConfiguration.features.packedAlignmentRows;
-        downsampledIntervals = viewport.drawConfiguration.features.downsampledIntervals;
+        packedAlignmentRows = viewport.cachedFeatures.features.packedAlignmentRows;
+        downsampledIntervals = viewport.cachedFeatures.features.downsampledIntervals;
 
         packedAlignmentsIndex = Math.floor((y - this.top - this.alignmentsYOffset) / this.alignmentRowHeight);
 
@@ -956,7 +956,7 @@ var igv = (function (igv) {
         } else if (packedAlignmentsIndex < packedAlignmentRows.length) {
 
             alignmentRow = packedAlignmentRows[packedAlignmentsIndex];
-            clicked = _.filter(alignmentRow.alignments, function (alignment) {
+            clicked = alignmentRow.alignments.filter(function (alignment) {
                 return (genomicLocation >= alignment.start && genomicLocation <= (alignment.start + alignment.lengthOnRef));
             });
 
