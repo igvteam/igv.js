@@ -101,7 +101,7 @@ var igv = (function (igv) {
             $trackLabel.html(trackView.track.name);
 
             $trackLabel.click(function (e) {
-                igv.popover.presentContent(e.pageX, e.pageY, description);
+                self.popover.presentContent(e.pageX, e.pageY, description);
             });
 
             this.$viewport.append($trackLabel);
@@ -129,6 +129,8 @@ var igv = (function (igv) {
             $spinner.append($('<i class="fa fa-spinner fa-spin fa-fw">'));
             this.$viewport.append($spinner);
             this.stopSpinner();
+
+            this.popover = new igv.Popover( igv.browser.$content );
 
         }
 
@@ -257,13 +259,13 @@ var igv = (function (igv) {
                     e.preventDefault();
                     e = $.event.fix(e);
                     e.stopPropagation();
-                    igv.popover.presentTrackPopupMenu(e, self);
+                    self.popover.presentTrackPopupMenu(e, self);
 
                 } else if (Math.abs(canvasCoords.x - mouseDownX) <= igv.browser.constants.dragThreshold && self.trackView.track.popupData) {
 
                     popupTimer = window.setTimeout(function () {
 
-                            igv.popover.presentTrackPopup(e, self);
+                            self.popover.presentTrackPopup(e, self);
 
                             mouseDownX = undefined;
                             popupTimer = undefined;
