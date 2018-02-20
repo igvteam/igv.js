@@ -24,6 +24,8 @@ module.exports = function (grunt) {
                     'vendor/inflate.js',
                     'vendor/jquery.mousewheel.js',
                     'vendor/promise.js',
+                    'vendor/rbtree.js',
+                    'vendor/tdigest.js',
                     'js/**/*.js',
                     'wrapper/footer.js'
                 ],
