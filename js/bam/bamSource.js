@@ -32,7 +32,10 @@ var igv = (function (igv) {
         this.alignmentContainer = undefined;
         this.maxRows = config.maxRows || 1000;
 
-        if (config.url && config.url.startsWith("data:")) {
+        if (igv.isFilePath(config.url)) {
+            // do nothing
+            console.log('ignore');
+        } else if (config.url && config.url.startsWith("data:")) {
             this.config.indexed = false;
         }
 
