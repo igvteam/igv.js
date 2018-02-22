@@ -106,7 +106,7 @@ var igv = (function (igv) {
                     alignmentContainer.alignments = undefined;  // Don't need to hold onto these anymore
 
                     self.alignmentContainer = alignmentContainer;
-
+                    
                     if (!hasAlignments) {
                         return alignmentContainer;
                     }

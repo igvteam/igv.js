@@ -63,10 +63,25 @@ var igv = (function (igv) {
         // filter alignments
         this.filterOption = config.filterOption || {name: "mappingQuality", params: [30, undefined]};
 
+        this.minInsertSize = config.minInsertSize;   // Optional, might be undefined
+        this.maxInsertSize = config.maxInsertSize;
+
     };
 
     igv.BAMTrack.prototype.getFeatures = function (chr, bpStart, bpEnd) {
-        return this.featureSource.getAlignments(chr, bpStart, bpEnd);
+        var self = this;
+        return this.featureSource.getAlignments(chr, bpStart, bpEnd)
+            .then(function (alignmentContainer) {
+
+                if (undefined === self.minInsertSize) {
+                    self.minInsertSize = alignmentContainer.pairedEndStats.lowerFragmentLength;
+                }
+                if (undefined === self.maxInsertSize) {
+                    self.maxInsertSize = alignmentContainer.pairedEndStats.upperFragmentLength;
+                }
+
+                return alignmentContainer;
+            });
     };
 
     igv.BAMTrack.filters = {
@@ -198,8 +213,9 @@ var igv = (function (igv) {
         colorByMenuItems.push({key: 'strand', label: 'read strand'});
 
         if (self.alignmentTrack.hasPairs) {
-            colorByMenuItems.push({key: 'pairOrientation', label: 'pair orientation'});
             colorByMenuItems.push({key: 'firstOfPairStrand', label: 'first-of-pair strand'});
+            colorByMenuItems.push({key: 'pairOrientation', label: 'pair orientation'});
+            colorByMenuItems.push({key: 'insertSize', label: 'fragment length'});
         }
 
         tagLabel = 'tag' + (self.alignmentTrack.colorByTag ? ' (' + self.alignmentTrack.colorByTag + ')' : '');
@@ -548,13 +564,16 @@ var igv = (function (igv) {
         this.deletionColor = config.deletionColor || "black";
         this.skippedColor = config.skippedColor || "rgb(150, 170, 170)";
 
+        this.smallInsertSizeColor = config.smallInsertSizeColor || "rgb(0, 0, 150)";
+        this.largeInsertSizeColor = config.largeInsertSizeColor || "rgb(200, 0, 0)";
+
         this.pairOrientation = config.pairOrienation || "fr";
         this.pairColors = {};
         this.pairColors["RL"] = config.rlColor || "rgb(0, 150, 0)";
         this.pairColors["RR"] = config.rrColor || "rgb(20, 50, 200)";
         this.pairColors["LL"] = config.llColor || "rgb(0, 150, 150)";
 
-        this.colorBy = config.colorBy || "none";
+        this.colorBy = config.colorBy || "pairOrientation";
         this.colorByTag = config.colorByTag;
         this.bamColorTag = config.bamColorTag === undefined ? "YC" : config.bamColorTag;
 
@@ -1010,6 +1029,16 @@ var igv = (function (igv) {
                     var oTypes = orientationTypes[self.pairOrientation];
                     var pairColor = self.pairColors[oTypes[alignment.pairOrientation]];
                     if (pairColor) color = pairColor;
+                }
+                break;
+
+            case "insertSize":
+                if (alignment.pairOrientation) {
+                    if (self.parent.minInsertSize && Math.abs(alignment.fragmentLength) < self.parent.minInsertSize) {
+                        color = self.smallInsertSizeColor;
+                    } else if (self.parent.maxInsertSize && Math.abs(alignment.fragmentLength) > self.parent.maxInsertSize) {
+                        color = self.largeInsertSizeColor;
+                    }
                 }
                 break;
 
