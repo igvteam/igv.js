@@ -144,7 +144,7 @@ var igv = (function (igv) {
             self.alignmentTrack.sortAlignmentRows(config.genomicLocation, self.sortOption);
 
             self.trackView.update();
-            
+
             self.sortDirection = !(self.sortDirection);
 
             config.popover.hide();
@@ -195,11 +195,10 @@ var igv = (function (igv) {
 
         colorByMenuItems.push({key: 'none', label: 'track color'});
 
-        if (!self.viewAsPairs) {
-            colorByMenuItems.push({key: 'strand', label: 'read strand'});
-        }
+        colorByMenuItems.push({key: 'strand', label: 'read strand'});
 
-        if (self.pairsSupported && self.alignmentTrack.hasPairs) {
+        if (self.alignmentTrack.hasPairs) {
+            colorByMenuItems.push({key: 'pairOrientation', label: 'pair orientation'});
             colorByMenuItems.push({key: 'firstOfPairStrand', label: 'first-of-pair strand'});
         }
 
@@ -481,7 +480,7 @@ var igv = (function (igv) {
     };
 
     CoverageTrack.prototype.popupData = function (config) {
-        
+
         var genomicLocation = config.genomicLocation,
             xOffset = config.x,
             yOffset = config.y,
@@ -548,6 +547,12 @@ var igv = (function (igv) {
         this.insertionColor = config.insertionColor || "rgb(138, 94, 161)";
         this.deletionColor = config.deletionColor || "black";
         this.skippedColor = config.skippedColor || "rgb(150, 170, 170)";
+
+        this.pairOrientation = config.pairOrienation || "fr";
+        this.pairColors = {};
+        this.pairColors["RL"] = config.rlColor || "rgb(0, 150, 0)";
+        this.pairColors["RR"] = config.rrColor || "rgb(20, 50, 200)";
+        this.pairColors["LL"] = config.llColor || "rgb(0, 150, 150)";
 
         this.colorBy = config.colorBy || "none";
         this.colorByTag = config.colorByTag;
@@ -825,7 +830,7 @@ var igv = (function (igv) {
                 if (sequence && blockSeq !== "*") {
                     for (i = 0, len = blockSeq.length; i < len; i++) {
 
-                        if(seqOffset + i < 0) continue;
+                        if (seqOffset + i < 0) continue;
 
                         readChar = blockSeq.charAt(i);
                         refChar = sequence.charAt(seqOffset + i);
@@ -969,30 +974,30 @@ var igv = (function (igv) {
 
     function getAlignmentColor(alignment) {
 
-        var alignmentTrack = this,
-            option = alignmentTrack.colorBy,
+        var self = this,
+            option = self.colorBy,
             tagValue, color,
             strand;
 
-        color = alignmentTrack.parent.color;
+        color = self.parent.color;
 
         switch (option) {
 
             case "strand":
-                color = alignment.strand ? alignmentTrack.posStrandColor : alignmentTrack.negStrandColor;
+                color = alignment.strand ? self.posStrandColor : self.negStrandColor;
                 break;
 
             case "firstOfPairStrand":
                 if (alignment instanceof igv.PairedAlignment) {
-                    color = alignment.firstOfPairStrand() ? alignmentTrack.posStrandColor : alignmentTrack.negStrandColor;
+                    color = alignment.firstOfPairStrand() ? self.posStrandColor : self.negStrandColor;
                 }
                 else if (alignment.isPaired()) {
 
                     if (alignment.isFirstOfPair()) {
-                        color = alignment.strand ? alignmentTrack.posStrandColor : alignmentTrack.negStrandColor;
+                        color = alignment.strand ? self.posStrandColor : self.negStrandColor;
                     }
                     else if (alignment.isSecondOfPair()) {
-                        color = alignment.strand ? alignmentTrack.negStrandColor : alignmentTrack.posStrandColor;
+                        color = alignment.strand ? self.negStrandColor : self.posStrandColor;
                     }
                     else {
                         console.log("ERROR. Paired alignments are either first or second.")
@@ -1000,26 +1005,82 @@ var igv = (function (igv) {
                 }
                 break;
 
+            case "pairOrientation":
+                if (alignment.pairOrientation) {
+                    var oTypes = orientationTypes[self.pairOrientation];
+                    var pairColor = self.pairColors[oTypes[alignment.pairOrientation]];
+                    if (pairColor) color = pairColor;
+                }
+                break;
+
             case "tag":
-                tagValue = alignment.tags()[alignmentTrack.colorByTag];
+                tagValue = alignment.tags()[self.colorByTag];
                 if (tagValue !== undefined) {
 
-                    if (alignmentTrack.bamColorTag === alignmentTrack.colorByTag) {
+                    if (self.bamColorTag === self.colorByTag) {
                         // UCSC style color option
                         color = "rgb(" + tagValue + ")";
                     }
                     else {
-                        color = alignmentTrack.tagColors.getColor(tagValue);
+                        color = self.tagColors.getColor(tagValue);
                     }
                 }
                 break;
 
             default:
-                color = alignmentTrack.parent.color;
+                color = self.parent.color;
         }
 
         return color;
 
+    }
+
+    var orientationTypes = {
+
+        "fr": {
+
+            "F1R2": "LR",
+            "F2R1": "LR",
+
+            "F1F2": "LL",
+            "F2F1": "LL",
+
+            "R1R2": "RR",
+            "R2R1": "RR",
+
+            "R1F2": "RL",
+            "R2F1": "RL"
+        },
+
+        "rf": {
+
+            "R1F2": "LR",
+            "R2F1": "LR",
+
+            "R1R2": "LL",
+            "R2R1": "LL",
+
+            "F1F2": "RR",
+            "F2F1": "RR",
+
+            "F1R2": "RL",
+            "F2R1": "RL"
+        },
+
+        "ff": {
+
+            "F2F1": "LR",
+            "R1R2": "LR",
+
+            "F2R1": "LL",
+            "R1F2": "LL",
+
+            "R2F1": "RR",
+            "F1R2": "RR",
+
+            "R2R1": "RL",
+            "F1F2": "RL"
+        }
     }
 
     return igv;
