@@ -108,6 +108,8 @@ var igv = (function (igv) {
 
             this.info = json.info;
         }
+        
+        igv.BamUtils.setPairOrientation(this);
 
     }
 
@@ -189,7 +191,10 @@ var igv = (function (igv) {
             nameValues.push("<hr>");
             nameValues.push({name: 'First in Pair', value: !this.isSecondOfPair(), borderTop: true});
             nameValues.push({name: 'Mate is Mapped', value: yesNo(this.isMateMapped())});
-            if (this.isMapped()) {
+            if(this.pairOrientation) {
+                nameValues.push({name: 'Pair Orientation', value: this.pairOrientation});
+            }
+            if (this.isMateMapped()) {
                 nameValues.push({name: 'Mate Start', value: this.matePos});
                 nameValues.push({name: 'Mate Strand', value: (this.mateStrand() ? '(-)' : '(+)')});
                 nameValues.push({name: 'Insert Size', value: this.fragmentLength});
@@ -199,7 +204,6 @@ var igv = (function (igv) {
             }
             // First in Pair
             // Pair Orientation
-
         }
 
         nameValues.push("<hr>");
