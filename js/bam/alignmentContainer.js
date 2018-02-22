@@ -315,7 +315,7 @@ var igv = (function (igv) {
 
     };
 
-    DownsampledInterval = function (start, end, counts) {
+    function DownsampledInterval (start, end, counts) {
         this.start = start;
         this.end = end;
         this.counts = counts;
@@ -327,6 +327,53 @@ var igv = (function (igv) {
             {name: "end", value: this.end},
             {name: "# downsampled:", value: this.counts}]
     }
+    
+    function PairedEndStats() {
+        this.count = 0;
+        this.frcount = 0;
+        this.rfcount = 0;
+        this.f1f2count = 0;
+        this.f2f1count = 0;
+        this.minInsertSize = 0;
+        this.maxInsertSize = Number.MAX_VALUE;
+        this.orienation = undefined;
+    }
+
+    // PariendEndStats.prototype.update = function (alignment) {
+    //
+    //     if (alignment.isProperPair()) {
+    //
+    //         insertSizes.add(Math.abs(alignment.getInferredInsertSize()));
+    //
+    //         var po = alignment.getPairOrientation();
+    //
+    //         if (po && po.length == 4) {
+    //             if (po.charAt(0) == 'F') {
+    //                 if (po.charAt(2) == 'F') {
+    //                     if (po.charAt(1) == '1') {
+    //                         f1f2Count++;
+    //                     } else {
+    //                         f2f1Count++;
+    //                     }
+    //                 } else if (po.charAt(2) == 'R') {
+    //                     frCount++;
+    //
+    //                 }
+    //             } else if (po.charAt(0) == 'R') {
+    //                 if (po.charAt(2) == 'F') {
+    //                     rfCount++;
+    //                 } else if (po.charAt(2) == 'R') {
+    //                     if (po.charAt(1) == '1') {
+    //                         f2f1Count++;
+    //                     } else {
+    //                         f1f2Count++;
+    //                     }
+    //                 }
+    //             }
+    //         }
+    //         totalCount++;
+    //     }
+    // }
 
 
     return igv;
