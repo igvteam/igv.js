@@ -187,12 +187,6 @@ var igv = (function (igv) {
             refId = tabix ? self.index.sequenceIndexMap[chr] : chr,
             promises = [];
 
-        // Hack for tabix until index support is fully implemented
-        if(self.featureCache && self.featureCache.containsRange(chr, start, end)) {
-            return Promise.resolve(self.featureCache.queryFeatureschr, start, end);
-        }
-
-
         blocks = self.index.blocksForRange(refId, start, end);
 
         if (!blocks || blocks.length === 0) {
@@ -237,7 +231,7 @@ var igv = (function (igv) {
                         slicedFeatures = self.parser.parseFeatures(slicedData);
 
                         // Filter features not in requested range.
-
+                        // TODO remove if(tabix) test when tribble index is fixed
                         if(tabix) {
                             filteredFeatures = [];
                             for (i = 0; i < slicedFeatures.length; i++) {
