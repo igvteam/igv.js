@@ -139,6 +139,8 @@ var igv = (function (igv) {
 
     /**
      * Fetch blocks for a particular genomic range.
+     * 
+     * TODO -- currently this returns all blocks for the chromosome, min and max are ignored.  Fix this.
      *
      * @param queryChr the sequence dictionary index of the chromosome
      * @param min  genomic start position
