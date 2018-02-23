@@ -114,7 +114,7 @@ var igv = (function (igv) {
                 })
         }
         else {
-            return null;
+            return Promise.resolve(undefined);
         }
 
 

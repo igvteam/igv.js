@@ -237,11 +237,13 @@ var igv = (function (igv) {
 
         // If defined, attempt to load the file header before adding the track.  This will catch some errors early
         if (typeof newTrack.getFileHeader === "function") {
-            newTrack.getFileHeader().then(function (header) {
-                self.addTrack(newTrack);
-            }).catch(function (error) {
-                igv.presentAlert(error, undefined);
-            });
+            newTrack.getFileHeader()
+                .then(function (header) {
+                    self.addTrack(newTrack);
+                })
+                .catch(function (error) {
+                    igv.presentAlert(error);
+                });
         } else {
             self.addTrack(newTrack);
         }
@@ -1332,7 +1334,7 @@ var igv = (function (igv) {
         var scope,
             results,
             eventHandler = this.eventHandlers[eventName];
-        
+
         if (undefined === eventHandler || eventHandler.length === 0) {
             return undefined;
         }
