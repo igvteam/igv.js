@@ -130,7 +130,7 @@ var igv = (function (igv) {
             this.$viewport.append($spinner);
             this.stopSpinner();
 
-            this.popover = new igv.Popover( igv.browser.$content );
+            this.popover = new igv.Popover(igv.browser.$content);
 
         }
 
@@ -402,7 +402,7 @@ var igv = (function (igv) {
             self.startSpinner();
 
             // console.log('get features');
-            getFeatures(referenceFrame.chrName, bpStart, bpEnd, referenceFrame.bpPerPixel)
+            getFeatures.call(self, referenceFrame.chrName, bpStart, bpEnd, referenceFrame.bpPerPixel)
 
                 .then(function (features) {
 
@@ -414,7 +414,7 @@ var igv = (function (igv) {
                     self.loading = undefined;
 
                     self.stopSpinner();
-                    
+
                     if (features) {
 
                         if (typeof self.trackView.track.computePixelHeight === 'function') {
@@ -446,7 +446,7 @@ var igv = (function (igv) {
                         viewportContainerWidth: igv.browser.viewportContainerWidth()
                     };
 
-                    if(features) {
+                    if (features) {
 
                         drawConfiguration.features = features;
 
@@ -524,12 +524,12 @@ var igv = (function (igv) {
 
 
         function getFeatures(chr, start, end, bpPerPixel) {
-
+            var self = this;
             if (self.cachedFeatures && self.cachedFeatures.containsRange(chr, start, end, bpPerPixel)) {
                 return Promise.resolve(self.cachedFeatures.features)
             }
             else {
-                if(typeof self.trackView.track.getFeatures === "function") {
+                if (typeof self.trackView.track.getFeatures === "function") {
                     return self.trackView.track.getFeatures(chr, start, end, bpPerPixel)
                         .then(function (features) {
                             self.cachedFeatures = new CachedFeatures(chr, start, end, bpPerPixel, features);
