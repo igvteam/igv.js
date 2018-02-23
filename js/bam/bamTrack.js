@@ -63,8 +63,8 @@ var igv = (function (igv) {
         // filter alignments
         this.filterOption = config.filterOption || {name: "mappingQuality", params: [30, undefined]};
 
-        this.minInsertSize = config.minInsertSize;   // Optional, might be undefined
-        this.maxInsertSize = config.maxInsertSize;
+        this.minFragmentLength = config.minFragmentLength;   // Optional, might be undefined
+        this.maxFragmentLength = config.maxFragmentLength;
 
     };
 
@@ -73,11 +73,11 @@ var igv = (function (igv) {
         return this.featureSource.getAlignments(chr, bpStart, bpEnd)
             .then(function (alignmentContainer) {
 
-                if (undefined === self.minInsertSize) {
-                    self.minInsertSize = alignmentContainer.pairedEndStats.lowerFragmentLength;
+                if (undefined === self.minFragmentLength) {
+                    self.minFragmentLength = alignmentContainer.pairedEndStats.lowerFragmentLength;
                 }
-                if (undefined === self.maxInsertSize) {
-                    self.maxInsertSize = alignmentContainer.pairedEndStats.upperFragmentLength;
+                if (undefined === self.maxFragmentLength) {
+                    self.maxFragmentLength = alignmentContainer.pairedEndStats.upperFragmentLength;
                 }
 
                 return alignmentContainer;
@@ -215,7 +215,7 @@ var igv = (function (igv) {
         if (self.alignmentTrack.hasPairs) {
             colorByMenuItems.push({key: 'firstOfPairStrand', label: 'first-of-pair strand'});
             colorByMenuItems.push({key: 'pairOrientation', label: 'pair orientation'});
-            colorByMenuItems.push({key: 'insertSize', label: 'fragment length'});
+            colorByMenuItems.push({key: 'fragmentLength', label: 'fragment length'});
         }
 
         tagLabel = 'tag' + (self.alignmentTrack.colorByTag ? ' (' + self.alignmentTrack.colorByTag + ')' : '');
@@ -564,10 +564,10 @@ var igv = (function (igv) {
         this.deletionColor = config.deletionColor || "black";
         this.skippedColor = config.skippedColor || "rgb(150, 170, 170)";
 
-        this.smallInsertSizeColor = config.smallInsertSizeColor || "rgb(0, 0, 150)";
-        this.largeInsertSizeColor = config.largeInsertSizeColor || "rgb(200, 0, 0)";
+        this.smallFragmentLengthColor = config.smallFragmentLengthColor || "rgb(0, 0, 150)";
+        this.largeFragmentLengthColor = config.largeFragmentLengthColor || "rgb(200, 0, 0)";
 
-        this.pairOrientation = config.pairOrienation || "fr";
+        this.pairOrientation = config.pairOrienation;
         this.pairColors = {};
         this.pairColors["RL"] = config.rlColor || "rgb(0, 150, 0)";
         this.pairColors["RR"] = config.rrColor || "rgb(20, 50, 200)";
@@ -1032,12 +1032,12 @@ var igv = (function (igv) {
                 }
                 break;
 
-            case "insertSize":
+            case "fragmentLength":
                 if (alignment.pairOrientation) {
-                    if (self.parent.minInsertSize && Math.abs(alignment.fragmentLength) < self.parent.minInsertSize) {
-                        color = self.smallInsertSizeColor;
-                    } else if (self.parent.maxInsertSize && Math.abs(alignment.fragmentLength) > self.parent.maxInsertSize) {
-                        color = self.largeInsertSizeColor;
+                    if (self.parent.minFragmentLength && Math.abs(alignment.fragmentLength) < self.parent.minFragmentLength) {
+                        color = self.smallFragmentLengthColor;
+                    } else if (self.parent.maxFragmentLength && Math.abs(alignment.fragmentLength) > self.parent.maxFragmentLength) {
+                        color = self.largeFragmentLengthColor;
                     }
                 }
                 break;
