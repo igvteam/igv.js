@@ -187,37 +187,47 @@ var igv = (function (igv) {
             }, 10),
 
             mouseup: function (e) {
+                mouseUpMouseOut.call(self, e);
+            },
 
-                var extent,
-                    referenceFrame;
-
-                e.preventDefault();
-                e.stopPropagation();
-
-                if (isMouseDown) {
-
-                    // End sweep
-                    isMouseDown = false;
-                    isMouseIn = false;
-
-                    self.$rulerSweeper.css({ "display": "none", "left": 0 + "px", "width": 0 + "px" });
-
-                    referenceFrame = self.genomicState.referenceFrame;
-
-                    extent = {};
-                    extent.start = referenceFrame.start + (left * referenceFrame.bpPerPixel);
-                    extent.end = extent.start + rulerSweepWidth * referenceFrame.bpPerPixel;
-
-                    if (rulerSweepWidth > rulerSweepThreshold) {
-                        igv.Browser.validateLocusExtent(igv.browser.genome.getChromosome(referenceFrame.chrName), extent);
-                        self.viewport.goto(referenceFrame.chrName, extent.start, extent.end);
-                    }
-                }
-
+            mouseout: function (e) {
+                // mouseUpMouseOut.call(self, e);
             }
         });
 
+        function mouseUpMouseOut(event) {
+
+            var extent,
+                referenceFrame;
+
+            event.preventDefault();
+            event.stopPropagation();
+
+            if (isMouseDown) {
+
+                // End sweep
+                isMouseDown = false;
+                isMouseIn = false;
+
+                this.$rulerSweeper.css({ "display": "none", "left": 0 + "px", "width": 0 + "px" });
+
+                referenceFrame = this.genomicState.referenceFrame;
+
+                extent = {};
+                extent.start = referenceFrame.start + (left * referenceFrame.bpPerPixel);
+                extent.end = extent.start + rulerSweepWidth * referenceFrame.bpPerPixel;
+
+                if (rulerSweepWidth > rulerSweepThreshold) {
+                    igv.Browser.validateLocusExtent(igv.browser.genome.getChromosome(referenceFrame.chrName), extent);
+                    this.viewport.goto(referenceFrame.chrName, extent.start, extent.end);
+                }
+            }
+
+
+        }
     };
+
+
 
     return igv;
 
