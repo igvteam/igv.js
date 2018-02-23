@@ -67,6 +67,11 @@ var igv = (function (igv) {
      */
     igv.FeatureFileReader.prototype.readFeatures = function (chr, start, end) {
 
+        // TODO -- Tribble hack, features should not be cached here.  Remove when tribble index is fully supported
+        if(this.featureCache && this.featureCache.containsRange(chr, start, end)) {
+            return Promise.resolve(this.featureCache.queryFeatures(chr, start, end));
+        }
+
         if (this.index) {
             return this.loadFeaturesWithIndex(chr, start, end);
         } else if (this.dataURI) {
@@ -182,6 +187,12 @@ var igv = (function (igv) {
             refId = tabix ? self.index.sequenceIndexMap[chr] : chr,
             promises = [];
 
+        // Hack for tabix until index support is fully implemented
+        if(self.featureCache && self.featureCache.containsRange(chr, start, end)) {
+            return Promise.resolve(self.featureCache.queryFeatureschr, start, end);
+        }
+
+
         blocks = self.index.blocksForRange(refId, start, end);
 
         if (!blocks || blocks.length === 0) {
@@ -198,7 +209,7 @@ var igv = (function (igv) {
                         options,
                         success;
 
-                    endPos = endPos = block.maxv.block + MAX_GZIP_BLOCK_SIZE;
+                    endPos = block.maxv.block + MAX_GZIP_BLOCK_SIZE;
 
                     options = igv.buildOptions(self.config, {
                         range: {
@@ -225,15 +236,19 @@ var igv = (function (igv) {
                         slicedData = startOffset ? inflated.slice(startOffset) : inflated;
                         slicedFeatures = self.parser.parseFeatures(slicedData);
 
-                        // Filter features not in requested range.  Pity to waste these, but they weren't requested
-                        // We use an old-fashioned for loop to take advantage of known sort order (can break)
-                        filteredFeatures = [];
-                        for (i = 0; i < slicedFeatures.length; i++) {
-                            f = slicedFeatures[i];
-                            if (f.start > end) break;
-                            if (f.end >= start && f.start <= end) {
-                                filteredFeatures.push(f);
+                        // Filter features not in requested range.
+
+                        if(tabix) {
+                            filteredFeatures = [];
+                            for (i = 0; i < slicedFeatures.length; i++) {
+                                f = slicedFeatures[i];
+                                if (f.start > end) break;
+                                if (f.end >= start && f.start <= end) {
+                                    filteredFeatures.push(f);
+                                }
                             }
+                        } else {
+                            filteredFeatures = slicedFeatures;   // TODO -- tribble index hack
                         }
 
                         fullfill(filteredFeatures);
@@ -257,6 +272,7 @@ var igv = (function (igv) {
             });
 
             return Promise.all(promises)
+
                 .then(function (featureArrays) {
 
                     var i,
@@ -274,6 +290,13 @@ var igv = (function (igv) {
                         allFeatures.sort(function (a, b) {
                             return a.start - b.start;
                         });
+                    }
+
+                    // TODO -- hack for tabix until index is fully implemented.  Cache features since entire chromosome is fetched
+                    if(!tabix) {
+                        var tribbleInterval = new igv.GenomicInterval(chr, 0, Number.MAX_VALUE);
+                        self.featureCache = new igv.FeatureCache(allFeatures, tribbleInterval);
+
                     }
 
                     return allFeatures;
