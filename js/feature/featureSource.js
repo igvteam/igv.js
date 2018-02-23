@@ -150,9 +150,12 @@ var igv = (function (igv) {
         var genomicInterval,
             featureCache,
             maxRows,
-            str;
+            str,
+            queryChr;
 
-        genomicInterval = new igv.GenomicInterval(chr, bpStart, bpEnd);
+        queryChr = (igv.browser && igv.browser.genome) ? igv.browser.genome.getChromosomeName(chr) : chr;
+
+        genomicInterval = new igv.GenomicInterval(queryChr, bpStart, bpEnd);
         featureCache = self.featureCache;
         maxRows = self.config.maxRows || 500;
         str = chr.toLowerCase();
@@ -164,7 +167,7 @@ var igv = (function (igv) {
                     return Promise.resolve(getWGFeatures(featureCache.allFeatures()));
                 }
                 else {
-                    return self.reader.readFeatures(chr)
+                    return self.reader.readFeatures(queryChr)
 
                         .then(function (featureList) {
 
@@ -185,6 +188,10 @@ var igv = (function (igv) {
             }
         }
 
+        else if (featureCache && (featureCache.range === undefined || featureCache.range.containsRange(genomicInterval))) {
+            return Promise.resolve(self.featureCache.queryFeatures(queryChr, bpStart, bpEnd));
+        }
+
         else {
 
             if (self.sourceType === 'file' && (self.visibilityWindow === undefined || self.visibilityWindow <= 0)) {
@@ -194,7 +201,7 @@ var igv = (function (igv) {
                 genomicInterval.end = (chromosome === undefined ? Number.MAX_VALUE : chromosome.bpLength);
             }
 
-            return self.reader.readFeatures(chr, genomicInterval.start, genomicInterval.end)
+            return self.reader.readFeatures(queryChr, genomicInterval.start, genomicInterval.end)
 
                 .then(
 
