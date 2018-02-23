@@ -38,6 +38,13 @@ var igv = (function (igv) {
         this.range = range;
     }
 
+    igv.FeatureCache.prototype.containsRange = function (chr, start, end) {
+
+        // No range means cache contains all features
+        return(this.range === undefined || this.range.contains(chr, start, end));
+
+    }
+
     igv.FeatureCache.prototype.queryFeatures = function (chr, start, end) {
 
         var featureList, intervalFeatures, feature, len, i, tree, intervals;
