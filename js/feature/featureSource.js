@@ -189,7 +189,7 @@ var igv = (function (igv) {
 
                             var isQueryable = self.reader.indexed || self.config.sourceType !== "file";
                             self.featureCache = isQueryable ?
-                                undefined :                     //new igv.FeatureCache(featureList, genomicInterval) :
+                                new igv.FeatureCache(featureList, genomicInterval) :
                                 new igv.FeatureCache(featureList);   // Note - replacing previous cache with new one
 
 

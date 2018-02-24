@@ -67,11 +67,6 @@ var igv = (function (igv) {
      */
     igv.FeatureFileReader.prototype.readFeatures = function (chr, start, end) {
 
-        // TODO -- Tribble hack, features should not be cached here.  Remove when tribble index is fully supported
-        if(this.featureCache && this.featureCache.containsRange(chr, start, end)) {
-            return Promise.resolve(this.featureCache.queryFeatures(chr, start, end));
-        }
-
         if (this.index) {
             return this.loadFeaturesWithIndex(chr, start, end);
         } else if (this.dataURI) {
@@ -138,7 +133,6 @@ var igv = (function (igv) {
         }
 
     };
-
 
 
     /**
@@ -231,19 +225,15 @@ var igv = (function (igv) {
                         slicedFeatures = self.parser.parseFeatures(slicedData);
 
                         // Filter features not in requested range.
-                        // TODO remove if(tabix) test when tribble index is fixed
-                        if(tabix) {
-                            filteredFeatures = [];
-                            for (i = 0; i < slicedFeatures.length; i++) {
-                                f = slicedFeatures[i];
-                                if (f.start > end) break;
-                                if (f.end >= start && f.start <= end) {
-                                    filteredFeatures.push(f);
-                                }
+                        filteredFeatures = [];
+                        for (i = 0; i < slicedFeatures.length; i++) {
+                            f = slicedFeatures[i];
+                            if (f.start > end) break;
+                            if (f.end >= start && f.start <= end) {
+                                filteredFeatures.push(f);
                             }
-                        } else {
-                            filteredFeatures = slicedFeatures;   // TODO -- tribble index hack
                         }
+
 
                         fullfill(filteredFeatures);
                     };
@@ -284,13 +274,6 @@ var igv = (function (igv) {
                         allFeatures.sort(function (a, b) {
                             return a.start - b.start;
                         });
-                    }
-
-                    // TODO -- hack for tabix until index is fully implemented.  Cache features since entire chromosome is fetched
-                    if(!tabix) {
-                        var tribbleInterval = new igv.GenomicInterval(chr, 0, Number.MAX_VALUE);
-                        self.featureCache = new igv.FeatureCache(allFeatures, tribbleInterval);
-
                     }
 
                     return allFeatures;
