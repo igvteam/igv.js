@@ -38,10 +38,10 @@ var igv = (function (igv) {
         this.range = range;
     }
 
-    igv.FeatureCache.prototype.containsRange = function (chr, start, end) {
+    igv.FeatureCache.prototype.containsRange = function (genomicRange) {
 
         // No range means cache contains all features
-        return(this.range === undefined || this.range.contains(chr, start, end));
+        return(this.range === undefined || this.range.contains(genomicRange.chr, genomicRange.start, genomicRange.end));
 
     }
 

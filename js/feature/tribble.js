@@ -33,7 +33,9 @@ var igv = (function (igv) {
      */
     igv.loadTribbleIndex = function (indexFile, config) {
 
+
         var genome = igv.browser ? igv.browser.genome : null;
+
 
         return new Promise(function (fullfill) {
 
@@ -112,7 +114,6 @@ var igv = (function (igv) {
                 var nFeatures = parser.getInt();
 
                 // note the code below accounts for > 60% of the total time to read an index
-                var blocks = new Array();
                 var pos = parser.getLong();
                 var chrBegPos = pos;
 
@@ -126,7 +127,7 @@ var igv = (function (igv) {
                     if (nextPos > blockMax) blockMax = nextPos;
                 }
 
-                return {chr: chr, blocks: blocks};
+                return {chr: chr, blocks: blocks, longestFeature: longestFeature, binWidth: binWidth};
 
             }
 
@@ -139,7 +140,7 @@ var igv = (function (igv) {
 
     /**
      * Fetch blocks for a particular genomic range.
-     * 
+     *
      * TODO -- currently this returns all blocks for the chromosome, min and max are ignored.  Fix this.
      *
      * @param queryChr the sequence dictionary index of the chromosome
@@ -148,20 +149,45 @@ var igv = (function (igv) {
      */
     igv.TribbleIndex.prototype.blocksForRange = function (queryChr, min, max) { //function (refId, min, max) {
 
+        var self = this;
         var chrIdx = this.chrIndex[queryChr];
 
         if (chrIdx) {
-            var blocks = chrIdx.blocks,
-                lastBlock = blocks[blocks.length - 1],
-                mergedBlock = {minv: {block: blocks[0].min, offset: 0}, maxv: {block: lastBlock.max, offset: 0}};
+            var blocks = chrIdx.blocks;
+            var longestFeature = chrIdx.longestFeature;
+            var binWidth = chrIdx.binWidth;
+            var adjustedPosition = Math.max(min - longestFeature, 0);
+            var startBinNumber = Math.floor(adjustedPosition / binWidth);
 
-            return [mergedBlock];
+            if (startBinNumber >= blocks.length) // are we off the end of the bin list, so return nothing
+                return [];
+            else {
+
+                var endBinNumber = Math.min(Math.floor((max - 1) / binWidth), blocks.length - 1);
+
+                // By definition blocks are adjacent for the liner index.  Combine them into one merged block
+
+                var startPos = blocks[startBinNumber].min;
+                var endPos = blocks[endBinNumber].max;
+                var size = endPos - startPos;
+                if (size == 0) {
+                    return [];
+                } else {
+                    var mergedBlock = {minv: {block: startPos, offset: 0}, maxv: {block: endPos, offset: 0}};
+                    return [mergedBlock];
+                }
+
+
+                //  var blocks = chrIdx.blocks,
+                //      lastBlock = blocks[blocks.length - 1],
+                //     mergedBlock = {minv: {block: blocks[0].min, offset: 0}, maxv: {block: lastBlock.max, offset: 0}};
+                // return [mergedBlock];
+            }
         } else {
             return null;
         }
-
-
     };
+
 
     return igv;
 })(igv || {});
