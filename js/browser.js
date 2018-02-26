@@ -60,11 +60,11 @@ var igv = (function (igv) {
             igv.browser.resize();
         }, 10);
 
-        $(document).mousedown(function (e) {
+        $(document).on('mousedown.browser', function (e) {
             igv.browser.isMouseDown = true;
         });
 
-        $(document).mouseup(function (e) {
+        $(document).on('mouseup.browser', function (e) {
 
             igv.browser.isMouseDown = undefined;
 
@@ -76,7 +76,7 @@ var igv = (function (igv) {
 
         });
 
-        $(document).click(function (e) {
+        $(document).on('click.browser', function (e) {
             var target = e.target;
             if (!igv.browser.$root.get(0).contains(target)) {
                 // We've clicked outside the IGV div.  Close any open popovers.
