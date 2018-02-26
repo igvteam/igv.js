@@ -157,132 +157,6 @@ var igv = (function (igv) {
         this.$viewport.width(Math.floor(percentage * width));
     };
 
-    igv.Viewport.prototype.addMouseHandlers = function () {
-
-        var self = this,
-            isMouseDown = false,
-            lastMouseX = undefined,
-            mouseDownX = undefined,
-            lastClickTime = 0,
-            popupTimer,
-            doubleClickDelay;
-
-        doubleClickDelay = igv.browser.constants.doubleClickDelay;
-
-
-        $(self.canvas).mousedown(function (e) {
-            var canvasCoords;
-
-            e.preventDefault();
-
-            isMouseDown = true;
-            canvasCoords = igv.translateMouseCoordinates(e, self.canvas);
-            lastMouseX = canvasCoords.x;
-            mouseDownX = lastMouseX;
-        });
-
-        $(self.canvas).click(function (e) {
-
-            var canvasCoords,
-                referenceFrame,
-                genomicLocation,
-                time,
-                newCenter,
-                locusString,
-                loci,
-                chr;
-
-            e.preventDefault();
-            e = $.event.fix(e);
-            e.stopPropagation();
-
-            referenceFrame = self.genomicState.referenceFrame;
-            if (undefined === referenceFrame) {
-                console.log('undefined === referenceFrame');
-                return;
-            }
-
-            canvasCoords = igv.translateMouseCoordinates(e, self.canvas);
-            genomicLocation = Math.floor((referenceFrame.start) + referenceFrame.toBP(canvasCoords.x));
-            time = Date.now();
-
-            if (time - lastClickTime < doubleClickDelay) {
-                // This is a double-click
-
-                if (popupTimer) {
-                    // Cancel previous timer
-                    window.clearTimeout(popupTimer);
-                    popupTimer = undefined;
-                }
-
-                if (igv.browser.minimumBasesExtent() > Math.floor(self.$viewport.width() * referenceFrame.bpPerPixel / 2.0)) {
-                    // do nothing
-                } else {
-                    newCenter = Math.round(referenceFrame.start + canvasCoords.x * referenceFrame.bpPerPixel);
-                    if ('all' === referenceFrame.chrName.toLowerCase()) {
-
-                        chr = igv.browser.genome.getChromosomeCoordinate(newCenter).chr;
-
-                        if (1 === self.genomicState.locusCount) {
-                            locusString = chr;
-                        } else {
-                            loci = igv.browser.genomicStateList.map(function (g) {
-                                return g.locusSearchString;
-                            });
-                            loci[self.genomicState.locusIndex] = chr;
-                            locusString = loci.join(' ');
-                        }
-
-                        igv.browser.search(locusString);
-
-                    } else {
-                        self.genomicState.referenceFrame.bpPerPixel /= 2;
-                        self.genomicState.referenceFrame.start = Math.round((newCenter + self.genomicState.referenceFrame.start) / 2.0);
-                        igv.browser.updateWithLocusIndex(self.genomicState.locusIndex);
-
-                    }
-
-                }
-
-                // }
-
-            } else {
-
-                if (e.shiftKey && typeof self.trackView.track.shiftClick === "function") {
-                    e.preventDefault();
-                    e = $.event.fix(e);
-                    e.stopPropagation();
-                    self.trackView.track.shiftClick(genomicLocation, e);
-
-                } else if (e.altKey) {
-
-                    e.preventDefault();
-                    e = $.event.fix(e);
-                    e.stopPropagation();
-                    self.popover.presentTrackPopupMenu(e, self);
-
-                } else if (Math.abs(canvasCoords.x - mouseDownX) <= igv.browser.constants.dragThreshold && self.trackView.track.popupData) {
-
-                    popupTimer = window.setTimeout(function () {
-
-                            self.popover.presentTrackPopup(e, self);
-
-                            mouseDownX = undefined;
-                            popupTimer = undefined;
-                        },
-                        doubleClickDelay);
-                }
-            }
-
-            mouseDownX = undefined;
-            isMouseDown = false;
-            lastMouseX = undefined;
-            lastClickTime = time;
-
-        });
-
-    };
-
     igv.Viewport.prototype.goto = function (chr, start, end) {
 
         if (igv.popover) {
@@ -429,22 +303,22 @@ var igv = (function (igv) {
                     buffer.width = pixelWidth;
                     buffer.height = self.canvas.height;
                     drawConfiguration =
-                    {
-                        features: features,
-                        context: buffer.getContext('2d'),
-                        pixelWidth: buffer.width,
-                        pixelHeight: buffer.height,
-                        bpStart: bpStart,
-                        bpEnd: bpEnd,
-                        bpPerPixel: referenceFrame.bpPerPixel,
-                        referenceFrame: referenceFrame,
-                        genomicState: genomicState,
-                        selection: self.selection,
-                        viewport: self,
-                        viewportWidth: self.$viewport.width(),
-                        viewportContainerX: genomicState.referenceFrame.toPixels(genomicState.referenceFrame.start - bpStart),
-                        viewportContainerWidth: igv.browser.viewportContainerWidth()
-                    };
+                        {
+                            features: features,
+                            context: buffer.getContext('2d'),
+                            pixelWidth: buffer.width,
+                            pixelHeight: buffer.height,
+                            bpStart: bpStart,
+                            bpEnd: bpEnd,
+                            bpPerPixel: referenceFrame.bpPerPixel,
+                            referenceFrame: referenceFrame,
+                            genomicState: genomicState,
+                            selection: self.selection,
+                            viewport: self,
+                            viewportWidth: self.$viewport.width(),
+                            viewportContainerX: genomicState.referenceFrame.toPixels(genomicState.referenceFrame.start - bpStart),
+                            viewportContainerWidth: igv.browser.viewportContainerWidth()
+                        };
 
                     if (features) {
 
@@ -546,7 +420,6 @@ var igv = (function (igv) {
         }
     };
 
-
     igv.Viewport.prototype.setContentHeight = function (newHeight) {
 
         // Maximum height of a canvas is ~32,000 pixels on Chrome, possibly smaller on other platforms
@@ -618,6 +491,199 @@ var igv = (function (igv) {
 
     igv.Viewport.prototype.isLoading = function () {
         return !(undefined === this.loading);
+    };
+
+    igv.Viewport.prototype.addMouseHandlers = function () {
+
+        var self = this,
+            referenceFrame,
+            isMouseDown,
+            isDragging,
+            lastMouseX,
+            mouseDownX,
+            canvasMouseDownX,
+            lastClickTime,
+            popupTimer;
+
+        referenceFrame = lastMouseX = mouseDownX = undefined;
+        isMouseDown = isDragging = false;
+
+        this.$viewport.on('mousedown.viewport.pan', function (e) {
+
+            var coords;
+
+            e.preventDefault();
+
+            if (igv.popover) {
+                igv.popover.hide();
+            }
+
+            isMouseDown = true;
+
+            coords = igv.translateMouseCoordinates(e, self.$viewport.get(0));
+            mouseDownX = lastMouseX = coords.x;
+
+            referenceFrame = self.genomicState.referenceFrame;
+        });
+
+        this.$viewport.on('mousemove.viewport.pan', igv.throttle(function (e) {
+
+            var chromosome,
+                coords,
+                maxEnd,
+                maxStart;
+
+            e.preventDefault();
+
+            coords = igv.translateMouseCoordinates(e, self.$viewport.get(0));
+
+            if (referenceFrame && (true === isMouseDown)) {
+
+                if (mouseDownX && Math.abs(coords.x - mouseDownX) > igv.browser.constants.dragThreshold) {
+
+                    if (igv.browser.loadInProgress()) {
+                        return;
+                    }
+
+                    isDragging = true;
+
+                    referenceFrame.shiftPixels(lastMouseX - coords.x);
+
+                    // clamp left
+                    referenceFrame.start = Math.max(0, referenceFrame.start);
+
+                    // clamp
+                    chromosome = igv.browser.genome.getChromosome(referenceFrame.chrName);
+                    maxEnd = chromosome.bpLength;
+                    maxStart = maxEnd - (self.$viewport.width() * referenceFrame.bpPerPixel);
+
+                    if (referenceFrame.start > maxStart) {
+                        referenceFrame.start = maxStart;
+                    }
+
+                    igv.browser.updateLocusSearchWidget(_.first(igv.browser.genomicStateList));
+
+                    igv.browser.repaintWithLocusIndex(self.genomicState.locusIndex);
+
+                    igv.browser.fireEvent('trackdrag');
+                }
+
+                lastMouseX = coords.x;
+
+            }
+
+        }, 10));
+
+        this.$viewport.on('mouseup.viewport.pan', mouseUpOrOut);
+
+        this.$viewport.on('mouseleave.viewport.pan', mouseUpOrOut);
+
+        $(self.canvas).on('mousedown.viewport.canvas', function (e) {
+            e.preventDefault();
+            canvasMouseDownX = igv.translateMouseCoordinates(e, self.canvas).x;
+            console.log('canvas x ' + canvasMouseDownX);
+        });
+
+        lastClickTime = 0;
+        $(self.canvas).on('click.viewport.canvas', function (e) {
+
+            var canvasMouseX,
+                frame,
+                location,
+                time,
+                newCenter,
+                string,
+                loci,
+                chr;
+
+            e.preventDefault();
+
+            console.log('click.viewport.canvas');
+
+            canvasMouseX = igv.translateMouseCoordinates(e, self.canvas).x;
+            frame = self.genomicState.referenceFrame;
+            location = Math.floor((frame.start) + frame.toBP(canvasMouseX));
+
+            time = Date.now();
+
+            if (time - lastClickTime < igv.browser.constants.doubleClickDelay) {
+
+                // double-click
+
+                if (popupTimer) {
+                    window.clearTimeout(popupTimer);
+                    popupTimer = undefined;
+                }
+
+                if (igv.browser.minimumBasesExtent() > Math.floor(self.$viewport.width() * frame.bpPerPixel / 2.0)) {
+
+                    // do nothing
+
+                } else {
+                    newCenter = Math.round(frame.start + canvasMouseX * frame.bpPerPixel);
+                    if ('all' === frame.chrName.toLowerCase()) {
+
+                        chr = igv.browser.genome.getChromosomeCoordinate(newCenter).chr;
+
+                        if (1 === self.genomicState.locusCount) {
+                            string = chr;
+                        } else {
+                            loci = igv.browser.genomicStateList.map(function (g) {
+                                return g.locusSearchString;
+                            });
+                            loci[self.genomicState.locusIndex] = chr;
+                            string = loci.join(' ');
+                        }
+
+                        igv.browser.search(string);
+
+                    } else {
+                        frame.bpPerPixel /= 2;
+                        frame.start = Math.round((newCenter + frame.start) / 2.0);
+                        igv.browser.updateWithLocusIndex(self.genomicState.locusIndex);
+                    }
+
+                }
+
+            } else {
+
+                if (e.shiftKey && typeof self.trackView.track.shiftClick === "function") {
+
+                    self.trackView.track.shiftClick(location, e);
+                } else if (e.altKey) {
+
+                    self.popover.presentTrackPopupMenu(e, self);
+                } else if (Math.abs(canvasMouseX - canvasMouseDownX) <= igv.browser.constants.dragThreshold && self.trackView.track.popupData) {
+
+                    popupTimer = window.setTimeout(function () {
+
+                            self.popover.presentTrackPopup(e, self);
+
+                            canvasMouseDownX = undefined;
+                            popupTimer = undefined;
+                        },
+                        igv.browser.constants.doubleClickDelay);
+                }
+            }
+
+            canvasMouseDownX = undefined;
+            lastClickTime = time;
+        });
+
+        function mouseUpOrOut(e) {
+
+            e.preventDefault();
+
+            if (true === isDragging) {
+                igv.browser.fireEvent('trackdragend');
+                isDragging = false;
+            }
+
+            isMouseDown = false;
+            mouseDownX = lastMouseX = undefined;
+            referenceFrame = undefined;
+        }
+
     };
 
     igv.Viewport.viewportWidthAtLocusIndex = function (locusIndex) {
