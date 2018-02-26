@@ -292,8 +292,11 @@ var igv = (function (igv) {
                     if (features) {
 
                         if (typeof self.trackView.track.computePixelHeight === 'function') {
+
                             requiredHeight = self.trackView.track.computePixelHeight(features);
-                            if (requiredHeight != self.contentDiv.clientHeight) {
+                            console.log('viewport ' + self.trackView.track.id + ' locus index ' + self.genomicState.locusIndex + ' height ' + requiredHeight);
+
+                            if (requiredHeight !== self.contentDiv.clientHeight) {
                                 self.trackView.setContentHeightForViewport(self, requiredHeight)
                             }
                         }
