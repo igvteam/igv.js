@@ -344,8 +344,11 @@
         options = {
             // locus: 'all',
             // locus: '1',
-            // locus: 'SLC25A3',
-            locus: ['egfr', 'myc', 'pten'],
+            locus: 'SLC25A3',
+            // locus: ['egfr', 'pten', 'SLC25A3', 'myc'],
+            // locus: ['egfr', 'pten', 'myc'],
+            // locus: ['egfr'],
+            // locus: ['pten'],
             // locus: ['myc'],
             // locus: ['1', '2'],
             // locus: ['2', '4', '8'],
@@ -370,6 +373,7 @@
                 {
 
                     name: "Genes",
+                    autoHeight: true,
                     searchable: false,
                     type: "annotation",
                     format: "gtf",

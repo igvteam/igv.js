@@ -389,8 +389,6 @@ var igv = (function (igv) {
 
     igv.TrackView.prototype.setTrackHeight = function (newHeight, update) {
 
-        var trackHeightStr;
-
         if (this.track.minHeight) {
             newHeight = Math.max(this.track.minHeight, newHeight);
         }
@@ -399,15 +397,12 @@ var igv = (function (igv) {
             newHeight = Math.min(this.track.maxHeight, newHeight);
         }
 
-        trackHeightStr = newHeight + "px";
-
         this.track.height = newHeight;
-
         $(this.trackDiv).height(newHeight);
 
         if (this.track.paintAxis) {
-            this.controlCanvas.style.height = trackHeightStr;
-            this.controlCanvas.setAttribute("height", $(this.trackDiv).height());
+            $(this.controlCanvas).height(newHeight);
+            this.controlCanvas.setAttribute('height', $(this.trackDiv).height());
         }
 
         if (update === undefined || update === true) {
@@ -434,7 +429,7 @@ var igv = (function (igv) {
         var self = this;
 
         this.viewports.forEach(function (viewport) {
-            console.log('--- resize viewport ' + self.track.id + ' locus index ' + viewport.genomicState.locusIndex + ' ---');
+            // console.log('--- resize viewport ' + self.track.id + ' locus index ' + viewport.genomicState.locusIndex + ' ---');
             viewport.resize();
         });
 
@@ -448,7 +443,7 @@ var igv = (function (igv) {
         var self = this;
 
         this.viewports.forEach(function (viewport) {
-            console.log('--- update viewport ' + self.track.id + ' locus index ' + viewport.genomicState.locusIndex + ' ---');
+            // console.log('--- update viewport ' + self.track.id + ' locus index ' + viewport.genomicState.locusIndex + ' ---');
             viewport.update();
         });
 
@@ -462,7 +457,7 @@ var igv = (function (igv) {
         var self = this;
 
         this.viewports.forEach(function (viewport) {
-            console.log('--- repaint viewport ' + self.track.id + ' locus index ' + viewport.genomicState.locusIndex + ' ---');
+            // console.log('--- repaint viewport ' + self.track.id + ' locus index ' + viewport.genomicState.locusIndex + ' ---');
             viewport.repaint();
         });
 
