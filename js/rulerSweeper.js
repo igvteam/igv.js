@@ -37,6 +37,21 @@ var igv = (function (igv) {
 
         this.wholeGenomeLayout(this.$viewportContent.find('.igv-whole-genome-container'));
 
+        this.mouseHandlers =
+            {
+                document:
+                    {
+                        down:'mousedown.rulersweeper.' + this.genomicState.locusIndex,
+                        move:'mousemove.rulersweeper.' + this.genomicState.locusIndex,
+                          up:'mouseup.rulersweeper.' + this.genomicState.locusIndex
+                    },
+                viewport:
+                    {
+                        down:'mousedown.rulersweeper.viewport.' + this.genomicState.locusIndex
+                    }
+
+            };
+
         this.addMouseHandlers();
     };
 
@@ -122,11 +137,11 @@ var igv = (function (igv) {
 
     igv.RulerSweeper.prototype.disableMouseHandlers = function () {
 
-        $(document).off('mousedown.rulersweeper');
-        $(document).off('mousemove.rulersweeper');
-        $(document).off('mouseup.rulersweeper');
+        $(document).off(this.mouseHandlers.document.down);
+        $(document).off(this.mouseHandlers.document.move);
+        $(document).off(this.mouseHandlers.document.up);
 
-        this.$viewport.off('mousedown.viewport.rulersweeper');
+        this.$viewport.off(this.mouseHandlers.viewport.down);
     };
 
     igv.RulerSweeper.prototype.addMouseHandlers = function () {
@@ -146,7 +161,7 @@ var igv = (function (igv) {
 
         threshold = 1;
 
-        $(document).on('mousedown.rulersweeper', function (e) {
+        $(document).on(this.mouseHandlers.document.down, function (e) {
 
             isMouseIn = true;
 
@@ -165,7 +180,7 @@ var igv = (function (igv) {
 
         });
 
-        $(document).on('mousemove.rulersweeper', igv.throttle(function (e) {
+        $(document).on(this.mouseHandlers.document.move, igv.throttle(function (e) {
             var mouseCurrent;
 
             if (isMouseDown && isMouseIn) {
@@ -188,7 +203,7 @@ var igv = (function (igv) {
 
         }, 10));
 
-        $(document).on('mouseup.rulersweeper', function (e) {
+        $(document).on(this.mouseHandlers.document.up, function (e) {
 
             var extent;
 
@@ -212,7 +227,7 @@ var igv = (function (igv) {
 
         });
 
-        this.$viewport.on('mousedown.viewport.rulersweeper', function (e) {
+        this.$viewport.on(this.mouseHandlers.viewport.down, function (e) {
 
             isMouseDown = true;
         });
