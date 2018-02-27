@@ -211,7 +211,6 @@ var igv = (function (igv) {
             bpWidth,
             bpStart,
             bpEnd,
-            ctx,
             genomicState = self.genomicState,
             referenceFrame = genomicState.referenceFrame,
             chr,
@@ -280,7 +279,8 @@ var igv = (function (igv) {
 
                 .then(function (features) {
 
-                    var requiredHeight,
+                    var currentContentHeight,
+                        requiredContentHeight,
                         roiPromises;
 
 
@@ -292,9 +292,14 @@ var igv = (function (igv) {
                     if (features) {
 
                         if (typeof self.trackView.track.computePixelHeight === 'function') {
-                            requiredHeight = self.trackView.track.computePixelHeight(features);
-                            if (requiredHeight != self.contentDiv.clientHeight) {
-                                self.trackView.setContentHeightForViewport(self, requiredHeight)
+
+                            // Height of content div and content canvas
+                            requiredContentHeight = self.trackView.track.computePixelHeight(features);
+                            currentContentHeight = $(self.contentDiv).height();
+
+
+                            if (requiredContentHeight !== currentContentHeight) {
+                                self.trackView.setContentHeightForViewport(self, requiredContentHeight)
                             }
                         }
                     }
@@ -420,34 +425,59 @@ var igv = (function (igv) {
         }
     };
 
-    igv.Viewport.prototype.setContentHeight = function (newHeight) {
-
+    igv.Viewport.prototype.setContentHeight = function (contentHeight) {
         // Maximum height of a canvas is ~32,000 pixels on Chrome, possibly smaller on other platforms
-        newHeight = Math.min(newHeight, 32000);
+        contentHeight = Math.min(contentHeight, 32000);
 
         if (this.trackView.track.minHeight) {
-            newHeight = Math.max(this.trackView.track.minHeight, newHeight);
+            contentHeight = Math.max(this.trackView.track.minHeight, contentHeight);
         }
 
-        var contentHeightStr = newHeight + "px";
 
-        // TODO: dat - implement this for viewport. Was in trackView .
+
         // Optionally adjust the trackDiv and viewport height to fit the content height, within min/max bounds
-        // if (this.trackView.track.autoHeight) {
-        //     setTrackHeight_.call(this, newHeight, false);
-        // }
+        if (this.trackView.track.autoHeight) {
+            setTrackViewHeight.call(this, contentHeight, false);
+        }
 
-        $(this.contentDiv).height(newHeight);
-        this.canvas.style.height = contentHeightStr;
-        this.canvas.setAttribute("height", newHeight);
+        $(this.contentDiv).height(contentHeight);
+        $(this.canvas).height(contentHeight);
+        this.canvas.setAttribute("height", contentHeight);
 
-        // TODO: dat - implement this for viewport. Was in trackView .
-        // if (this.track.paintAxis) {
-        //     this.controlCanvas.style.height = contentHeightStr;
-        //     this.controlCanvas.setAttribute("height", newHeight);
-        // }
+        if (this.trackView.track.paintAxis) {
+            $(this.trackView.controlCanvas).height(contentHeight);
+            this.trackView.controlCanvas.setAttribute("height", contentHeight);
+        }
 
     };
+
+    function setTrackViewHeight(height, doUpdate) {
+
+        if ((1 === this.genomicState.locusCount) || (height > $(this.trackView.trackDiv).height())) {
+
+            if (this.trackView.track.minHeight) height = Math.max(this.trackView.track.minHeight, height);
+            if (this.trackView.track.maxHeight) height = Math.min(this.trackView.track.maxHeight, height);
+
+            console.log('set trackView height ' + this.trackView.track.id + ' locus index ' + this.genomicState.locusIndex + ' requested / current ' + height + ' / ' + $(this.trackView.trackDiv).height());
+
+            this.trackView.track.height = height;
+
+            $(this.trackView.trackDiv).height(height);
+
+            if (this.trackView.track.paintAxis) {
+                $(this.trackView.controlCanvas).height(height);
+                this.trackView.controlCanvas.setAttribute("height", height);
+            }
+
+            this.$viewport.height(height);
+
+            if (doUpdate === undefined || doUpdate === true) {
+                this.update();
+            }
+
+        }
+
+    }
 
     igv.Viewport.prototype.paintImage = function (chr, start, end, bpPerPixel) {
 
@@ -487,7 +517,7 @@ var igv = (function (igv) {
             this.ctx.save();
             this.ctx.restore();
         }
-    }
+    };
 
     igv.Viewport.prototype.isLoading = function () {
         return !(undefined === this.loading);
