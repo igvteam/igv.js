@@ -567,7 +567,7 @@ var igv = (function (igv) {
         this.smallFragmentLengthColor = config.smallFragmentLengthColor || "rgb(0, 0, 150)";
         this.largeFragmentLengthColor = config.largeFragmentLengthColor || "rgb(200, 0, 0)";
 
-        this.pairOrientation = config.pairOrienation;
+        this.pairOrientation = config.pairOrienation || 'fr';
         this.pairColors = {};
         this.pairColors["RL"] = config.rlColor || "rgb(0, 150, 0)";
         this.pairColors["RR"] = config.rrColor || "rgb(20, 50, 200)";
@@ -1025,10 +1025,15 @@ var igv = (function (igv) {
                 break;
 
             case "pairOrientation":
-                if (alignment.pairOrientation) {
+                if (self.pairOrientation && alignment.pairOrientation) {
                     var oTypes = orientationTypes[self.pairOrientation];
-                    var pairColor = self.pairColors[oTypes[alignment.pairOrientation]];
-                    if (pairColor) color = pairColor;
+                    if (oTypes) {
+                        var pairColor = self.pairColors[oTypes[alignment.pairOrientation]];
+                        if (pairColor) color = pairColor;
+                    } else {
+                        console.log("No orientation types for " + self.pairOrientation);
+                    }
+
                 }
                 break;
 
