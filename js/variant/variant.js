@@ -132,44 +132,52 @@ var igv = (function (igv) {
             variant.type = "refblock";
         }
 
-        if (variant.type === "refblock" || variant.alternateBases === ".") {     // "." => no alternate alleles
+        if (variant.type === "refblock") {     // "." => no alternate alleles
             variant.heterozygosity = 0;
 
         } else {
 
-            altTokens.forEach(function (alt, index) {
+            if ("." === variant.alternateBases) {
+                // No alternate alleles.  Not sure how to interpret this
+                start = variant.pos - 1;
+                end = start + variant.referenceBases.length;
+            }
 
-                var a, s, e, diff;
+            else {
+                altTokens.forEach(function (alt, index) {
+                    var a, s, e, diff;
 
-                variant.alleles.push(alt);
+                    variant.alleles.push(alt);
 
-                // Adjust for padding, used for insertions and deletions, unless variant is a short tandem repeat.
+                    // Adjust for padding, used for insertions and deletions, unless variant is a short tandem repeat.
 
-                if ("str" !== variant.type && alt.length > 0) {
+                    if ("str" !== variant.type && alt.length > 0) {
 
-                    diff = variant.referenceBases.length - alt.length;
+                        diff = variant.referenceBases.length - alt.length;
 
-                    if (diff > 0) {
-                        // deletion, assume left padded
-                        s = variant.pos - 1 + alt.length;
-                        e = s + diff;
-                    } else if (diff < 0) {
-                        // Insertion, assume left padded, insertion begins to "right" of last ref base
-                        s = variant.pos - 1 + variant.referenceBases.length;
-                        e = s + 1;     // Insertion between s & e
-                    } else {
-                        s = variant.pos - 1;
-                        e = s + 1;
+                        if (diff > 0) {
+                            // deletion, assume left padded
+                            s = variant.pos - 1 + alt.length;
+                            e = s + diff;
+                        } else if (diff < 0) {
+                            // Insertion, assume left padded, insertion begins to "right" of last ref base
+                            s = variant.pos - 1 + variant.referenceBases.length;
+                            e = s + 1;     // Insertion between s & e
+                        } else {
+                            s = variant.pos - 1;
+                            e = s + 1;
+                        }
+
+                        start = start === undefined ? s : Math.min(start, s);
+                        end = end === undefined ? e : Math.max(end, e);
                     }
 
-                    start = start === undefined ? s : Math.min(start, s);
-                    end = end === undefined ? e : Math.max(end, e);
-                }
+                    minAltLength = Math.min(minAltLength, alt.length);
+                    maxAltLength = Math.max(maxAltLength, alt.length);
 
-                minAltLength = Math.min(minAltLength, alt.length);
-                maxAltLength = Math.max(maxAltLength, alt.length);
 
-            });
+                });
+            }
 
             variant.start = start;
             variant.end = end;
@@ -255,7 +263,6 @@ var igv = (function (igv) {
         return fields;
 
 
-
     };
 
     igv.Variant.prototype.isRefBlock = function () {
@@ -264,7 +271,7 @@ var igv = (function (igv) {
 
     function arrayToString(value, delim) {
 
-        if(delim === undefined) delim = ",";
+        if (delim === undefined) delim = ",";
 
         if (!(Array.isArray(value))) {
             return value;
