@@ -97,12 +97,14 @@ var igv = (function (igv) {
         var chrAliasTable = {},
             self = this;
 
+
         // The standard mappings
         this.chromosomeNames.forEach(function (name) {
             var alias = name.startsWith("chr") ? name.substring(3) : "chr" + name;
             chrAliasTable[alias] = name;
-            if (name === "chrM") chrAliasTable["MT"] = "chrM";
-            if (name === "MT") chrAliasTable["chrM"] = "MT";
+            if (name === "chrM") chrAliasTable["mt"] = "chrM";
+            if (name === "MT") chrAliasTable["chrm"] = "MT";
+            chrAliasTable[name.toLowerCase()] = name;
         });
 
         // Custom mappings
@@ -122,18 +124,13 @@ var igv = (function (igv) {
                     array.forEach(function (alias) {
                         if (alias !== defName) {
                             chrAliasTable[alias.toLowerCase()] = defName;
-                            chrAliasTable[alias] = defName;
+                            chrAliasTable[alias] = defName;      // Should not be needed
                         }
                     });
                 }
 
             });
         }
-
-        // Case insensitiviry
-        Object.keys(chrAliasTable).forEach(function (key) {
-            chrAliasTable[key.toLowerCase()] = chrAliasTable[key];
-        })
 
         this.chrAliasTable = chrAliasTable;
 
