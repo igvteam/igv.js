@@ -62,6 +62,8 @@ var igv = (function (igv) {
 
         this.nRows = 1;  // Computed dynamically
         this.groupBy = "NONE";
+        this.filters = [];
+        this.filterBy = undefined;
     };
 
 
@@ -102,9 +104,8 @@ var igv = (function (igv) {
 
     }
 
-    function getCallsetsLength() {
-        var length = 0,
-            callSets = this.callSets;
+    function getCallsetsLength(callSets) {
+        var length = 0;
         Object.keys(callSets).forEach(function (key) {
             if (callSets[key]) length += callSets[key].length;
         });
@@ -115,7 +116,7 @@ var igv = (function (igv) {
     function computeVisibilityWindow() {
 
         if (this.callSets) {
-            var length = getCallsetsLength.call(this);
+            var length = getCallsetsLength(this.callSets);
             if (length < 10) {
                 this.visibilityWindow = DEFAULT_VISIBILITY_WINDOW;
             }
@@ -147,11 +148,12 @@ var igv = (function (igv) {
     igv.VariantTrack.prototype.computePixelHeight = function (features) {
 
         var callSets = this.callSets,
-            nCalls = callSets ? getCallsetsLength.call(this) : 0,
+            nCalls = callSets ? getCallsetsLength(this.callSets) : 0,
             callHeight = (this.displayMode === "EXPANDED" ? this.expandedCallHeight : this.squishedCallHeight),
             vGap = (this.displayMode === 'EXPANDED') ? this.expandedVGap : this.squishedVGap,
             groupGap = (this.displayMode === 'EXPANDED') ? this.expandedGroupGap : this.squishedGroupGap,
-            groupSpace = Object.keys(callSets).length * groupGap,
+            groupsLength = Object.keys(callSets).length,
+            groupSpace = (groupsLength-1) * groupGap,
             nRows,
             h;
 
@@ -178,7 +180,7 @@ var igv = (function (igv) {
             //     this.expandedCallHeight = Math.max(1, 2000 / (nCalls * nRows));
             // }
 
-            return h + vGap + groupSpace + nCalls * (callHeight + vGap);
+            return h + vGap + groupSpace + (nCalls- groupsLength + 1) * (callHeight + vGap);
             //return h + vGap + nCalls * nRows * (this.displayMode === "EXPANDED" ? this.expandedCallHeight : this.squishedCallHeight);
 
         }
@@ -197,13 +199,33 @@ var igv = (function (igv) {
             callHeight = ("EXPANDED" === this.displayMode ? this.expandedCallHeight : this.squishedCallHeight),
             vGap = (this.displayMode === 'EXPANDED') ? this.expandedVGap : this.squishedVGap,
             groupGap = (this.displayMode === 'EXPANDED') ? this.expandedGroupGap : this.squishedGroupGap,
-            px, px1, pw, py, h, style, i, variant, call, callSet, j, k, group, allRef, allVar, callSets, nCalls,
+            px, px1, pw, py, h, style, i, variant, call, callSet, j, k, group, allRef, allVar, callSets, callSetGroups, nCalls,
             firstAllele, secondAllele, lowColorScale, highColorScale, period, callsDrawn, len, variantColors;
 
         this.variantBandHeight = 10 + this.nRows * (this.variantHeight + vGap);
 
-        callSets = this.callSets;
-        nCalls = getCallsetsLength.call(this);
+        if (this.filterBy) {
+            callSets = {};
+            callSetGroups = []
+            Object.keys(this.callSets).forEach(function(groupName) {
+                var group = self.callSets[groupName];
+                group.forEach(function(callSet) {
+                    var attrs = igv.sampleInformation.getAttributes(callSet.name);
+                    var attribute = attrs[self.filterBy];
+                    if (self.filters.indexOf(attribute) !== -1) {
+                        if (!callSets.hasOwnProperty(group)) {
+                            callSets[group] = [];
+                            callSetGroups.push(group);
+                        }
+                        callSets[group].push(callSet);
+                    }
+                });
+            });
+        } else {
+            callSets = this.callSets;
+            callSetGroups = this.callSetGroups;
+        }
+        nCalls = getCallsetsLength(callSets);
 
         igv.graphics.fillRect(ctx, 0, 0, pixelWidth, pixelHeight, {'fillStyle': "rgb(255, 255, 255)"});
 
@@ -281,8 +303,8 @@ var igv = (function (igv) {
                     }
 
                     callsDrawn = 0;
-                    for (j = 0; j < this.callSetGroups.length; j++) {
-                        group = callSets[this.callSetGroups[j]];
+                    for (j = 0; j < callSetGroups.length; j++) {
+                        group = callSets[callSetGroups[j]];
                         for (k = 0; k < group.length; k++) {
                             callSet = group[k];
                             call = variant.calls[callSet.id];
@@ -654,10 +676,67 @@ var igv = (function (igv) {
             })
         });
 
+        // group families in order: father, mother, then children
+        if ("familyId" === attribute) {
+            Object.keys(groupedCallSets).forEach(function (i) {
+                group = groupedCallSets[i];
+                group.sort(function (a, b) {
+                    var attrA = igv.sampleInformation.getAttributes(a.name);
+                    var attrB = igv.sampleInformation.getAttributes(b.name);
+                    if (attrA["fatherId"] === "0" && attrA["motherId"] === "0") {
+                        if (attrB["fatherId"] === "0" && attrB["motherId"] === "0") {
+                            if (attrA["sex"] === "1") {
+                                if (attrB["sex"] === "1") {
+                                    return 0;
+                                } else {
+                                    return -1;
+                                }
+                            } else if (attrB["sex"] === "1") {
+                                return 1;
+                            } else {
+                                return parseInt(attrB["sex"]) - parseInt(attrA["sex"]);
+                            }
+                        } else {
+                            return -1;
+                        }
+                    } else if (attrB["fatherId"] === "0" && attrB["motherId"] === "0") {
+                        return 1;
+                    } else {
+                        if (attrA["sex"] === "1") {
+                            if (attrB["sex"] === "1") {
+                                return 0;
+                            } else {
+                                return -1;
+                            }
+                        } else if (attrB["sex"] === "1") {
+                            return 1;
+                        } else {
+                            return parseInt(attrB["sex"]) - parseInt(attrA["sex"]);
+                        }
+                    }
+                });
+            })
+        }
+
         this.callSets = groupedCallSets;
         this.callSetGroups = callSetGroups;
         this.groupBy = attribute;
         this.trackView.update();
+    };
+
+    igv.VariantTrack.prototype.filterByFamily = function(value) {
+        var self = this;
+        if ("" === value || undefined === value) {
+            self.filters.empty();
+            self.filterBy = undefined;
+        } else {
+            try {
+                self.filters = value.split(",");
+                self.filterBy = "familyId";
+            } catch (err) {
+                console.log(err);
+            }
+        }
     };
 
     igv.VariantTrack.prototype.menuItemList = function (popover) {
@@ -678,6 +757,27 @@ var igv = (function (igv) {
         });
 
         menuItems = menuItems.concat(mapped);
+
+        // option to filter by family ids, could be extended to filter by other attributes
+        if (igv.sampleInformation.getAttributeNames().indexOf("familyId") !== -1) {
+            menuItems.push(igv.trackMenuItem(popover, this.trackView, "Filter by Family ID", function () {
+                return "Family IDs"
+            }, this.filters.join(","), function () {
+
+                var value;
+
+                value = igv.dialog.$dialogInput.val().trim();
+
+                console.log(value);
+
+                if ('' !== value && undefined !== value) {
+                    self.filterByFamily(value);
+                    self.trackView.update();
+                }
+
+
+            }, undefined));
+        }
 
         if (igv.sampleInformation.hasAttributes()) {
             var $groupBy = {
