@@ -32,6 +32,7 @@ var igv = (function (igv) {
 
     var DEFAULT_VISIBILITY_WINDOW = 100000;
     var sortDirection = "ASC";
+    var strColors = ["rgb(150,150,150)", "rgb(255,0,0)", "rgb(255,255,0)", "rgb(0,0,255)", "rgb(0,255,0)", "rgb(128,0,128)"];
 
     igv.VariantTrack = function (config) {
 
@@ -187,6 +188,7 @@ var igv = (function (igv) {
     };
 
     igv.VariantTrack.prototype.draw = function (options) {
+
         var self = this,
             featureList = options.features,
             ctx = options.context,
@@ -216,6 +218,7 @@ var igv = (function (igv) {
         if (featureList) {
 
             for (i = 0, len = featureList.length; i < len; i++) {
+
                 variant = featureList[i];
                 if (variant.end < bpStart) continue;
                 if (variant.start > bpEnd) break;
@@ -223,6 +226,7 @@ var igv = (function (igv) {
                 py = 10 + ("COLLAPSED" === this.displayMode ? 0 : variant.row * (this.variantHeight + vGap));
                 h = this.variantHeight;
 
+                // Compute pixel width.   Minimum width is 3 pixels,  if > 5 pixels create gap between variants
                 px = Math.round((variant.start - bpStart) / bpPerPixel);
                 px1 = Math.round((variant.end - bpStart) / bpPerPixel);
                 pw = Math.max(1, px1 - px);
@@ -235,16 +239,7 @@ var igv = (function (igv) {
                 }
 
                 if ('str' === variant.type) {
-                    period = parseInt(variant.info["PERIOD"]),
-                        variantColors = ["rgb(150,150,150)", "rgb(255,0,0)", "rgb(255,255,0)",
-                            "rgb(0,0,255)", "rgb(0,255,0)", "rgb(128,0,128)"
-                        ];
-                    if (period < 1) {
-                        period = 1;
-                    } else if (period > 6) {
-                        period = 6;
-                    }
-                    ctx.fillStyle = variantColors[period - 1];
+                    ctx.fillStyle = getSTRColor(variant);
                 } else {
                     ctx.fillStyle = this.color;
                 }
@@ -258,9 +253,7 @@ var igv = (function (igv) {
                     if ('str' === variant.type) {
                         lowColorScale = new igv.GradientColorScale(
                             {
-                                low: variant.minAltLength,
-                                lowR: 135,
-                                lowG: 206,
+                                low: variant.minAltLength, lowR: 135, lowG: 206,
                                 lowB: 250,
                                 high: variant.referenceBases.length,
                                 highR: 150,
@@ -292,30 +285,8 @@ var igv = (function (igv) {
 
                                 py = self.variantBandHeight + vGap + (callsDrawn + variant.row) * (h + vGap) + (j * groupGap);
 
-                                if (!('str' === variant.type)) {
+                                if ('str' === variant.type) {
 
-                                    // Not STR -- color by zygosity
-
-                                    allVar = allRef = true;  // until proven otherwise
-                                    call.genotype.forEach(function (g) {
-                                        if (g != 0) allRef = false;
-                                        if (g == 0) allVar = false;
-                                    });
-
-                                    if (allRef) {
-                                        ctx.fillStyle = this.homrefColor;
-                                    } else if (allVar) {
-                                        ctx.fillStyle = this.homvarColor;
-                                    } else {
-                                        ctx.fillStyle = this.hetvarColor;
-                                    }
-
-                                    ctx.fillRect(px, py, pw, h);
-
-                                } else {
-                                    // variant -> 'str'
-
-                                    //console.log(py);
                                     if (!isNaN(call.genotype[0])) {
                                         firstAllele = getAlleleString(call, variant, 0);
                                         secondAllele = getAlleleString(call, variant, 1);
@@ -334,14 +305,28 @@ var igv = (function (igv) {
                                         }
 
                                     } else {
-                                        // console.log("no call made, set fill to white");
-                                        //ctx.fillStyle = "#FFFFFF";
                                         ctx.strokeStyle = "#B0B0B0";
-                                        //ctx.lineWidth = 0.8;
-                                        ctx.strokeRect(px, py, pw, h);
                                     }
 
 
+                                } else {
+                                    // Not STR -- color by zygosity
+
+                                    allVar = allRef = true;  // until proven otherwise
+                                    call.genotype.forEach(function (g) {
+                                        if (g != 0) allRef = false;
+                                        if (g == 0) allVar = false;
+                                    });
+
+                                    if (allRef) {
+                                        ctx.fillStyle = this.homrefColor;
+                                    } else if (allVar) {
+                                        ctx.fillStyle = this.homvarColor;
+                                    } else {
+                                        ctx.fillStyle = this.hetvarColor;
+                                    }
+
+                                    ctx.fillRect(px, py, pw, h);
                                 }
                             }
                             callsDrawn++;
@@ -362,6 +347,17 @@ var igv = (function (igv) {
             } else {
                 return "rgb(150,150,150)"; // gray for reference length
             }
+        }
+
+        function getSTRColor(variant) {
+
+            var period, idx = 0;
+            if (variant.info["PERIOD"]) {
+                period = parseInt(variant.info["PERIOD"]);
+                idx = Math.max(0, Math.min(period, strColors.length - 1));
+            }
+            return strColors[idx];
+
         }
 
     };
@@ -514,7 +510,9 @@ var igv = (function (igv) {
     function extractPopupData(call, variant) {
 
         var gt = '', popupData, i, allele, numRepeats = '', alleleFrac = '';
+
         if ('str' === variant.type) {
+
             var info = variant.info;
             var alt_ac = (info.AC) ? info.AC.split(',') : undefined;
             if (!isNaN(call.genotype[0])) {
@@ -532,6 +530,9 @@ var igv = (function (igv) {
                 }
             }
         } else {
+
+            // Not STR
+
             call.genotype.forEach(function (i) {
                 if (i === 0) {
                     gt += variant.referenceBases;
@@ -614,12 +615,10 @@ var igv = (function (igv) {
             featureList.forEach(function (variant) {
 
 
-                if ((variant.start <= genomicLocation + tolerance) &&
-                    (variant.end > genomicLocation - tolerance)) {
-                    // var content = igv.formatPopoverText(['Ascending', 'Descending', 'Repeat Number']);
-                    //igv.popover.presentContent(event.pageX, event.pageY, [$asc, $desc]);
+                if ((variant.start <= genomicLocation + tolerance) &&  (variant.end > genomicLocation - tolerance)) {
 
                     if ('str' === variant.type) {
+
                         menuItems.push({
                             name: 'Sort by allele length',
                             click: function () {
@@ -629,6 +628,7 @@ var igv = (function (igv) {
                                 config.popover.hide();
                             }
                         });
+
                     }
                 }
             });
@@ -639,19 +639,31 @@ var igv = (function (igv) {
     };
 
     igv.VariantTrack.prototype.groupCallSets = function (attribute) {
-        var groupedCallSets = {}, callSetGroups = [], group, attr, key, self = this;
+
+        var self = this,
+            groupedCallSets = {},
+            callSetGroups = [],
+            group, attr, key;
+
         Object.keys(this.callSets).forEach(function (i) {
+
             group = self.callSets[i];
             group.forEach(function (callSet) {
+
                 key = 'NONE';
+
                 if (attribute !== 'NONE') {
                     attr = igv.sampleInformation.getAttributes(callSet.name);
-                    if (attr && attr[attribute]) key = attr[attribute];
+                    if (attr && attr[attribute]) {
+                        key = attr[attribute];
+                    }
                 }
+
                 if (!groupedCallSets.hasOwnProperty(key)) {
                     groupedCallSets[key] = [];
                     callSetGroups.push(key);
                 }
+
                 groupedCallSets[key].push(callSet);
             })
         });
@@ -708,10 +720,12 @@ var igv = (function (igv) {
 
         var self = this,
             menuItems = [],
-            mapped, $color, colorClickHandler;
+            mapped;
 
-        mapped = _.map(["COLLAPSED", "SQUISHED", "EXPANDED"], function (displayMode, index) {
+        mapped = ["COLLAPSED", "SQUISHED", "EXPANDED"].map(function (displayMode, index) {
+
             return {
+
                 object: $(displayModeMarkup(index, displayMode, self.displayMode)),
                 click: function () {
                     popover.hide();
@@ -732,6 +746,7 @@ var igv = (function (igv) {
 
             var attrs = {};
             var attributes = igv.sampleInformation.getAttributeNames();
+
             attributes.forEach(function (attribute) {
                 var result = attribute.replace(/([A-Z])/g, " $1");
                 result = result.charAt(0).toUpperCase() + result.slice(1);
@@ -755,6 +770,7 @@ var igv = (function (igv) {
         }
 
         function groupByMarkup(buttonVal, selfVal, lut) {
+            
             if (buttonVal === selfVal) {
                 return '<div><i class="fa fa-check fa-check-shim"></i>' + lut[buttonVal] + '</div>'
             } else {

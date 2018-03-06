@@ -7,13 +7,13 @@
     <meta name="description" content="">
     <meta name="author" content="">
     <link rel="shortcut icon" href=../img/favicon.ico>
-    <title>BAM - Dev</title>
+    <title>IGV - Dev</title>
 
     <!-- Font Awesome CSS -->
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.2.0/css/font-awesome.min.css">
 
     <!-- IGV CSS -->
-    <link rel="stylesheet" type="text/css" href="https://igv.org/web/beta/igv.css">
+    <link rel="stylesheet" type="text/css" href="../css/igv.css">
 
     <!-- Dev CSS -->
     <link rel="stylesheet" type="text/css" href="../css/dev.css">
@@ -142,45 +142,29 @@
 
 <body>
 
-<div id="myDiv" style="padding-top: 50px;padding-bottom: 20px; height: auto">
-</div>
+<div id="myDiv"/>
 
 <script type="text/javascript">
 
+
     $(document).ready(function () {
-        var options;
+        var div,
+                options;
 
+        div = $("#myDiv")[0];
         options = {
-            showKaryo: false,
-            showIdeogram: true,
-            showNavigation: true,
-            showRuler: true,
-            genome: "hg19",
-            locus: "chr8:128,747,267-128,754,546",
-            tracks: [
-                {
-                    name: "Genes",
-                    type: "annotation",
-                    format: "gtf",
-                    sourceType: "file",
-                    url: "https://s3.amazonaws.com/igv.broadinstitute.org/annotations/hg19/genes/gencode.v18.annotation.sorted.gtf.gz",
-                    indexURL: "https://s3.amazonaws.com/igv.broadinstitute.org/annotations/hg19/genes/gencode.v18.annotation.sorted.gtf.gz.tbi",
-                    visibilityWindow: 10000000,
-                    order: Number.MAX_VALUE,
-                    displayMode: "EXPANDED"
-                },
-                {
-                    url: 'gs://genomics-public-data/platinum-genomes/bam/NA12877_S1.bam',
-                   // url: 'https://data.broadinstitute.org/igvdata/BodyMap/hg19/IlluminaHiSeq2000_BodySites/brain_merged/accepted_hits.bam',
-                    name: '1KG NA12877'
-                }
+            reference: {
+                id: "hg38",
+                fastaURL: "https://s3.amazonaws.com/igv.broadinstitute.org/genomes/seq/hg38/hg38.fa",
+                cytobandURL: "https://s3.amazonaws.com/igv.broadinstitute.org/annotations/hg38/cytoBandIdeo.txt",
+                aliasURL: "http://trena.systemsbiology.net/hg38/chromosomeAliases.txt"
+            }
 
-            ]
         };
 
-        igv.createBrowser($("#myDiv")[0], options);
-    })
+        igv.createBrowser(div, options);
 
+    })
 
 </script>
 

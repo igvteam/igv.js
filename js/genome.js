@@ -121,6 +121,7 @@ var igv = (function (igv) {
                 if (defName) {
                     array.forEach(function (alias) {
                         if (alias !== defName) {
+                            chrAliasTable[alias.toLowerCase()] = defName;
                             chrAliasTable[alias] = defName;
                         }
                     });
@@ -129,12 +130,17 @@ var igv = (function (igv) {
             });
         }
 
+        // Case insensitiviry
+        Object.keys(chrAliasTable).forEach(function (key) {
+            chrAliasTable[key.toLowerCase()] = chrAliasTable[key];
+        })
+
         this.chrAliasTable = chrAliasTable;
 
     }
 
     igv.Genome.prototype.getChromosomeName = function (str) {
-        var chr = this.chrAliasTable[str];
+        var chr = this.chrAliasTable[str.toLowerCase()];
         return chr ? chr : str;
     }
 
@@ -364,7 +370,7 @@ var igv = (function (igv) {
 
     function loadAliases(aliasURL, config) {
 
-        igv.xhr.loadString(aliasURL, igv.buildOptions(config))
+        return igv.xhr.loadString(aliasURL, igv.buildOptions(config))
 
             .then(function (data) {
 

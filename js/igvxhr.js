@@ -74,6 +74,7 @@ var igv = (function (igv) {
                     mimeType = options.mimeType,
                     headers = options.headers || {},
                     isSafari = navigator.vendor.indexOf("Apple") == 0 && /\sSafari\//.test(navigator.userAgent),
+                    isChrome = navigator.userAgent.indexOf('Chrome') > -1,
                     withCredentials = options.withCredentials,
                     header_keys, key, value, i;
 
@@ -97,7 +98,7 @@ var igv = (function (igv) {
                     addOauthHeaders(headers)
                 }
 
-                if (range) {
+                if (range && isChrome && !isAmazonV4Signed(url)) {
                     // Hack to prevent caching for byte-ranges. Attempt to fix net:err-cache errors in Chrome
                     url += url.includes("?") ? "&" : "?";
                     url += "someRandomSeed=" + Math.random().toString(36);
@@ -377,6 +378,11 @@ var igv = (function (igv) {
 
         return !url.startsWith(origin);
 
+    }
+
+
+    function isAmazonV4Signed(url) {
+        return url.indexOf("X-Amz-Signature") > -1;
     }
 
     /**

@@ -38,6 +38,7 @@ var igv = (function (igv) {
         this.config = config;
         this.path = config.url;
         this.groupCache = {};
+        this.datasetCache = {};
     };
 
 
@@ -123,71 +124,84 @@ var igv = (function (igv) {
     igv.TDFReader.prototype.readDataset = function (chr, windowFunction, zoom) {
 
         var self = this,
-            dsName;
+            dsName,
+            key;
 
-        return self.readHeader()
+        key = chr + "_" + windowFunction + "_" + zoom;
 
-            .then(function (ignore) {
+        if(self.datasetCache[key]) {
+            return Promise.resolve(self.datasetCache[key]);
+        }
 
-                var wf = (self.version < 2) ? "" : "/" + windowFunction,
-                    zoomString = (chr.toLowerCase() === "all" || zoom === undefined) ? "0" : zoom.toString(),
-                    indexEntry;
+        else {
+            return self.readHeader()
 
-                if (windowFunction === "raw") {
-                    dsName = "/" + chr + "/raw";
-                }
-                else {
-                    dsName = "/" + chr + "/z" + zoomString + wf;
-                }
-                indexEntry = self.datasetIndex[dsName];
+                .then(function (ignore) {
 
-                if (indexEntry === undefined) {
-                    return undefined;
-                }
-                else {
+                    var wf = (self.version < 2) ? "" : "/" + windowFunction,
+                        zoomString = (chr.toLowerCase() === "all" || zoom === undefined) ? "0" : zoom.toString(),
+                        indexEntry;
 
-                    return igv.xhr.loadArrayBuffer(self.path, igv.buildOptions(self.config, {
-                        range: {
-                            start: indexEntry.position,
-                            size: indexEntry.size
-                        }
-                    }))
-                }
-            })
-            .then(function (data) {
+                    if (windowFunction === "raw") {
+                        dsName = "/" + chr + "/raw";
+                    }
+                    else {
+                        dsName = "/" + chr + "/z" + zoomString + wf;
+                    }
+                    indexEntry = self.datasetIndex[dsName];
 
-                if (!data) {
-                    return undefined;
-                }
+                    if (indexEntry === undefined) {
+                        return undefined;
+                    }
+                    else {
 
-                var binaryParser = new igv.BinaryParser(new DataView(data));
+                        return igv.xhr.loadArrayBuffer(self.path, igv.buildOptions(self.config, {
+                            range: {
+                                start: indexEntry.position,
+                                size: indexEntry.size
+                            }
+                        }))
+                    }
+                })
+                .then(function (data) {
 
-                var nAttributes = binaryParser.getInt();
-                var attributes = {};
-                while (nAttributes-- > 0) {
-                    attributes[binaryParser.getString()] = binaryParser.getString();
-                }
+                    if (!data) {
+                        return undefined;
+                    }
 
-                var dataType = binaryParser.getString();
-                var tileWidth = binaryParser.getFloat();
+                    var binaryParser = new igv.BinaryParser(new DataView(data));
 
-                var nTiles = binaryParser.getInt();
-                var tiles = [];
-                while (nTiles-- > 0) {
-                    tiles.push({position: binaryParser.getLong(), size: binaryParser.getInt()});
-                }
+                    var nAttributes = binaryParser.getInt();
+                    var attributes = {};
+                    while (nAttributes-- > 0) {
+                        attributes[binaryParser.getString()] = binaryParser.getString();
+                    }
 
-                var dataset = {
-                    name: dsName,
-                    attributes: attributes,
-                    dataType: dataType,
-                    tileWidth: tileWidth,
-                    tiles: tiles
-                };
+                    var dataType = binaryParser.getString();
+                    var tileWidth = binaryParser.getFloat();
 
-                return dataset;
+                    var nTiles = binaryParser.getInt();
+                    var tiles = [];
+                    while (nTiles-- > 0) {
+                        tiles.push({position: binaryParser.getLong(), size: binaryParser.getInt()});
+                    }
 
-            })
+                    var dataset = {
+                        name: dsName,
+                        attributes: attributes,
+                        dataType: dataType,
+                        tileWidth: tileWidth,
+                        tiles: tiles
+                    };
+
+                    self.datasetCache[key] = dataset;
+
+                    return dataset;
+
+                })
+        }
+
+
 
     }
 

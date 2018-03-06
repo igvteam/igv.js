@@ -38,6 +38,13 @@ var igv = (function (igv) {
         this.range = range;
     }
 
+    igv.FeatureCache.prototype.containsRange = function (genomicRange) {
+
+        // No range means cache contains all features
+        return(this.range === undefined || this.range.contains(genomicRange.chr, genomicRange.start, genomicRange.end));
+
+    }
+
     igv.FeatureCache.prototype.queryFeatures = function (chr, start, end) {
 
         var featureList, intervalFeatures, feature, len, i, tree, intervals;
@@ -70,6 +77,10 @@ var igv = (function (igv) {
                 }
             });
 
+            featureList.sort(function (a, b) {
+                return a.start - b.start;
+            });
+
             return featureList;
         }
 
@@ -90,6 +101,11 @@ var igv = (function (igv) {
                 }
             }
         }
+
+        allFeatures.sort(function (a, b) {
+            return a.start - b.start;
+        });
+
         return allFeatures;
 
     }

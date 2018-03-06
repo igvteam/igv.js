@@ -135,7 +135,6 @@ var igv = (function (igv) {
     };
 
 
-
     /**
      * Return a Promise for the async loaded index
      */
@@ -198,7 +197,7 @@ var igv = (function (igv) {
                         options,
                         success;
 
-                    endPos = endPos = block.maxv.block + MAX_GZIP_BLOCK_SIZE;
+                    endPos = block.maxv.block + MAX_GZIP_BLOCK_SIZE;
 
                     options = igv.buildOptions(self.config, {
                         range: {
@@ -225,8 +224,7 @@ var igv = (function (igv) {
                         slicedData = startOffset ? inflated.slice(startOffset) : inflated;
                         slicedFeatures = self.parser.parseFeatures(slicedData);
 
-                        // Filter features not in requested range.  Pity to waste these, but they weren't requested
-                        // We use an old-fashioned for loop to take advantage of known sort order (can break)
+                        // Filter features not in requested range.
                         filteredFeatures = [];
                         for (i = 0; i < slicedFeatures.length; i++) {
                             f = slicedFeatures[i];
@@ -235,6 +233,7 @@ var igv = (function (igv) {
                                 filteredFeatures.push(f);
                             }
                         }
+
 
                         fullfill(filteredFeatures);
                     };
@@ -257,6 +256,7 @@ var igv = (function (igv) {
             });
 
             return Promise.all(promises)
+
                 .then(function (featureArrays) {
 
                     var i,

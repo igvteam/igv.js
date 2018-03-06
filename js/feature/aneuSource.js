@@ -78,7 +78,7 @@ var igv = (function (igv) {
             range = new igv.GenomicInterval(chr, bpStart, bpEnd),
             featureCache = this.featureCache;
 
-        if (featureCache && (featureCache.range === undefined || featureCache.range.containsRange(range))) {//}   featureCache.range.contains(queryChr, bpStart, bpEnd))) {
+        if (featureCache && featureCache.containsRange(range)) {//}   featureCache.range.contains(queryChr, bpStart, bpEnd))) {
             var features = this.featureCache.queryFeatures(chr, bpStart, bpEnd);
             // console.log("getFeatures: got "+features.length+" cached features on chr "+chr);
             success(features);

@@ -39,8 +39,6 @@ var igv = (function (igv) {
 
         this.trackContainerDiv = trackContainerDiv;
 
-        attachTrackContainerMouseHandlers(this.trackContainerDiv);
-
         this.trackViews = [];
 
         this.trackLabelsVisible = true;
@@ -56,34 +54,7 @@ var igv = (function (igv) {
         // Map of event name -> [ handlerFn, ... ]
         this.eventHandlers = {};
 
-        window.onresize = igv.throttle(function () {
-            igv.browser.resize();
-        }, 10);
-
-        $(document).mousedown(function (e) {
-            igv.browser.isMouseDown = true;
-        });
-
-        $(document).mouseup(function (e) {
-
-            igv.browser.isMouseDown = undefined;
-
-            if (igv.browser.dragTrackView) {
-                igv.browser.dragTrackView.$trackDragScrim.hide();
-            }
-
-            igv.browser.dragTrackView = undefined;
-
-        });
-
-        $(document).click(function (e) {
-            var target = e.target;
-            if (!igv.browser.$root.get(0).contains(target)) {
-                // We've clicked outside the IGV div.  Close any open popovers.
-                igv.popover.hide();
-            }
-        });
-
+        attachMouseHandlers.call(this);
 
     };
 
@@ -132,6 +103,52 @@ var igv = (function (igv) {
 
             }
         }
+    }
+
+    function attachMouseHandlers() {
+
+        var self = this;
+
+        window.onresize = igv.throttle(function () {
+            self.resize();
+        }, 10);
+
+        $(document).on('mousedown.browser', function (e) {
+            self.isMouseDown = true;
+        });
+
+        $(document).on('mouseup.browser', function (e) {
+
+            self.isMouseDown = undefined;
+
+            if (self.dragTrackView) {
+                self.dragTrackView.$trackDragScrim.hide();
+            }
+
+            self.dragTrackView = undefined;
+
+        });
+
+        $(document).on('click.browser', function (e) {
+            var target = e.target;
+            if (!self.$root.get(0).contains(target)) {
+                // We've clicked outside the IGV div.  Close any open popovers.
+                igv.popover.hide();
+            }
+        });
+
+        // Guide line is bound within track area, and offset by 5 pixels so as not to interfere mouse clicks.
+        $(this.trackContainerDiv).on('mousemove.cursorTrackingGuide', igv.throttle(function (e) {
+            var exe;
+
+            e.preventDefault();
+
+            exe = Math.max(50, igv.translateMouseCoordinates(e, self.trackContainerDiv).x - 5);
+            exe = Math.min(self.trackContainerDiv.clientWidth - 65, exe);
+
+            self.$cursorTrackingGuide.css({ left: exe + 'px' });
+        }, 10));
+
     }
 
     igv.Browser.hasKnownFileExtension = function (config) {
@@ -237,11 +254,13 @@ var igv = (function (igv) {
 
         // If defined, attempt to load the file header before adding the track.  This will catch some errors early
         if (typeof newTrack.getFileHeader === "function") {
-            newTrack.getFileHeader().then(function (header) {
-                self.addTrack(newTrack);
-            }).catch(function (error) {
-                igv.presentAlert(error, undefined);
-            });
+            newTrack.getFileHeader()
+                .then(function (header) {
+                    self.addTrack(newTrack);
+                })
+                .catch(function (error) {
+                    igv.presentAlert(error);
+                });
         } else {
             self.addTrack(newTrack);
         }
@@ -840,13 +859,13 @@ var igv = (function (igv) {
 
         this.emptyViewportContainers();
 
-        filtered = _.filter(_.clone(this.genomicStateList), function (gs) {
+        filtered = this.genomicStateList.filter(function (gs) {
             return filterFunction(gs);
         });
 
-        this.genomicStateList = _.map(filtered, function (f, i, list) {
+        this.genomicStateList = filtered.map(function (f, i, list) {
             f.locusIndex = i;
-            f.locusCount = _.size(list);
+            f.locusCount = list.length;
             f.referenceFrame.bpPerPixel = (f.end - f.start) / (self.viewportContainerWidth() / f.locusCount);
             return f;
         });
@@ -888,11 +907,11 @@ var igv = (function (igv) {
 
     igv.Browser.prototype.buildViewportsWithGenomicStateList = function (genomicStateList) {
 
-        _.each(this.trackViews, function (trackView) {
+        this.trackViews.forEach(function (trackView) {
 
-            _.each(genomicStateList, function (genomicState, i) {
+            genomicStateList.forEach(function (genomicState, i) {
 
-                trackView.viewports.push(new igv.Viewport(trackView, trackView.$viewportContainer, i));
+                trackView.viewports.push(new igv.Viewport(trackView, trackView.$viewportContainer, genomicState));
 
                 if (trackView.track instanceof igv.RulerTrack) {
                     trackView.track.createRulerSweeper(trackView.viewports[i], trackView.viewports[i].$viewport, $(trackView.viewports[i].contentDiv), genomicState);
@@ -911,7 +930,9 @@ var igv = (function (igv) {
             loci;
 
         loci = string.split(' ');
+
         this.getGenomicStateList(loci, this.viewportContainerWidth())
+
             .then(function (genomicStateList) {
                 var $content_header;
 
@@ -947,7 +968,6 @@ var igv = (function (igv) {
 
                     self.buildViewportsWithGenomicStateList(genomicStateList);
 
-                    console.log('then(browser.update)');
                     self.update();
 
                     return genomicStateList
@@ -1007,7 +1027,7 @@ var igv = (function (igv) {
             }
         });
 
-        if (geneNameLoci.length == 0)
+        if (geneNameLoci.length === 0)
             return Promise.resolve(locusGenomicStates);
 
         else {
@@ -1151,8 +1171,8 @@ var igv = (function (igv) {
             locusObject = {};
             a = locus.split(':');
 
-            chr = a[ 0 ];
-            chromosome = genome.getChromosome(chr.toLowerCase());  // Map chr to official name from (possible) alias
+            chr = a[0];
+            chromosome = genome.getChromosome(chr);  // Map chr to official name from (possible) alias
             if (!chromosome) {
                 return false;          // Unknown chromosome
             }
@@ -1296,6 +1316,18 @@ var igv = (function (igv) {
 
     }
 
+    igv.Browser.prototype.loadSampleInformation = function (url) {
+        var name = url;
+        if (url instanceof File) {
+            name = url.name;
+        }
+        var ext = name.substr(name.lastIndexOf('.') + 1);
+        if (ext === 'fam') {
+            igv.sampleInformation.loadPlinkFile(url);
+        }
+    };
+
+    // EVENTS 
 
     igv.Browser.prototype.on = function (eventName, fn) {
         if (!this.eventHandlers[eventName]) {
@@ -1317,178 +1349,21 @@ var igv = (function (igv) {
 
     igv.Browser.prototype.fireEvent = function (eventName, args, thisObj) {
         var scope,
-            results;
+            results,
+            eventHandler = this.eventHandlers[eventName];
 
-        if (undefined === this.eventHandlers[eventName]) {
+        if (undefined === eventHandler || eventHandler.length === 0) {
             return undefined;
         }
 
         scope = thisObj || window;
-        results = _.map(this.eventHandlers[eventName], function (event) {
+        results = eventHandler.map(function (event) {
             return event.apply(scope, args);
         });
 
-        return _.first(results);
+        return results[0];
 
     };
-
-    igv.Browser.prototype.loadSampleInformation = function (url) {
-        var name = url;
-        if (url instanceof File) {
-            name = url.name;
-        }
-        var ext = name.substr(name.lastIndexOf('.') + 1);
-        if (ext === 'fam') {
-            igv.sampleInformation.loadPlinkFile(url);
-        }
-    };
-
-    function attachTrackContainerMouseHandlers(trackContainerDiv) {
-
-        var $viewport,
-            viewport,
-            viewports,
-            referenceFrame,
-            isRulerTrack = false,
-            isMouseDown = false,
-            isDragging = false,
-            lastMouseX = undefined,
-            mouseDownX = undefined;
-
-        $(trackContainerDiv).mousedown(function (e) {
-
-            var coords,
-                $target;
-
-            e.preventDefault();
-
-            if (igv.popover) {
-                igv.popover.hide();
-            }
-
-            $target = $(e.target);
-            $viewport = $target.parents('.igv-viewport-div');
-
-            if (0 === _.size($viewport)) {
-                $viewport = undefined;
-                return;
-            }
-
-            isRulerTrack = $target.parents("div[data-ruler-track='rulerTrack']").get(0) ? true : false;
-            if (isRulerTrack) {
-                return;
-            }
-
-            isMouseDown = true;
-            coords = igv.translateMouseCoordinates(e, $viewport.get(0));
-            mouseDownX = lastMouseX = coords.x;
-
-            // viewport object we are panning
-            viewport = igv.Viewport.viewportWithID($viewport.data('viewport'));
-            referenceFrame = viewport.genomicState.referenceFrame;
-
-            // list of all viewports in the locus 'column' containing the panning viewport
-            viewports = igv.Viewport.viewportsWithLocusIndex($viewport.data('locusindex'));
-
-        });
-
-        // Guide line is bound within track area, and offset by 5 pixels so as not to interfere mouse clicks.
-        $(trackContainerDiv).mousemove(function (e) {
-            var xy,
-                _left,
-                $element = igv.browser.$cursorTrackingGuide;
-
-            e.preventDefault();
-
-            xy = igv.translateMouseCoordinates(e, trackContainerDiv);
-            _left = Math.max(50, xy.x - 5);
-
-            _left = Math.min(igv.browser.trackContainerDiv.clientWidth - 65, _left);
-            $element.css({left: _left + 'px'});
-        });
-
-        $(trackContainerDiv).mousemove(igv.throttle(function (e) {
-
-            var coords,
-                maxEnd,
-                maxStart;
-
-            e.preventDefault();
-
-            if (true === isRulerTrack || undefined === $viewport) {
-                return;
-            }
-
-            if ($viewport) {
-                coords = igv.translateMouseCoordinates(e, $viewport.get(0));
-            }
-
-            if (referenceFrame && isMouseDown) { // Possibly dragging
-
-                if (mouseDownX && Math.abs(coords.x - mouseDownX) > igv.browser.constants.dragThreshold) {
-
-                    if (igv.browser.loadInProgress()) {
-                        return;
-                    }
-
-                    isDragging = true;
-
-                    referenceFrame.shiftPixels(lastMouseX - coords.x);
-
-                    // clamp left
-                    referenceFrame.start = Math.max(0, referenceFrame.start);
-
-                    // clamp right
-                    var chromosome = igv.browser.genome.getChromosome(referenceFrame.chrName);
-                    maxEnd = chromosome.bpLength;
-                    maxStart = maxEnd - viewport.$viewport.width() * referenceFrame.bpPerPixel;
-
-                    if (referenceFrame.start > maxStart) {
-                        referenceFrame.start = maxStart;
-                    }
-
-                    igv.browser.updateLocusSearchWidget(_.first(igv.browser.genomicStateList));
-
-                    // igv.browser.repaint();
-                    igv.browser.repaintWithLocusIndex(viewport.genomicState.locusIndex);
-
-                    igv.browser.fireEvent('trackdrag');
-                }
-
-                lastMouseX = coords.x;
-
-            }
-
-        }, 10));
-
-        $(trackContainerDiv).mouseup(mouseUpOrOut);
-
-        $(trackContainerDiv).mouseleave(mouseUpOrOut);
-
-        function mouseUpOrOut(e) {
-
-            if (isRulerTrack) {
-                return;
-            }
-
-            // Don't let vertical line interfere with dragging
-            if (igv.browser.$cursorTrackingGuide && e.toElement === igv.browser.$cursorTrackingGuide.get(0) && e.type === 'mouseleave') {
-                return;
-            }
-
-            if (isDragging) {
-                igv.browser.fireEvent('trackdragend');
-                isDragging = false;
-            }
-
-            isMouseDown = false;
-            mouseDownX = lastMouseX = undefined;
-            $viewport = viewport = undefined;
-            referenceFrame = undefined;
-
-        }
-
-    }
 
     return igv;
 })

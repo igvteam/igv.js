@@ -35,34 +35,22 @@ var igv = (function (igv) {
 
         this.windowFunction = config.windowFunction || "mean";
         this.reader = new igv.TDFReader(config);
-        this.featureCache = [];
     };
 
     igv.TDFSource.prototype.getFeatures = function (chr, bpStart, bpEnd, bpPerPixel) {
 
         var self = this,
-            featureCache = self.featureCache,
-            cache,
             genomicInterval = new igv.GenomicInterval(chr, bpStart, bpEnd),
             i;
 
-        if(chr.toLowerCase() === "all") {
+        if (chr.toLowerCase() === "all") {
             return Promise.resolve([]);      // Whole genome view not yet supported
         }
 
         genomicInterval.bpPerPixel = bpPerPixel;
 
-        if (featureCache) {
 
-            for (i = 0; i < featureCache.length; i++) {
-                cache = featureCache[i];
-                if (cache.range.bpPerPixel === bpPerPixel && cache.range.containsRange(genomicInterval)) {
-                    return Promise.resolve(cache.queryFeatures(chr, bpStart, bpEnd));
-                }
-            }
-        }
-
-        return self.reader.readRootGroup()
+        return getRootGroup()
 
             .then(function (group) {
 
@@ -92,7 +80,7 @@ var igv = (function (igv) {
                     p = [],
                     NTRACKS = 1;   // TODO read this
 
-                
+
                 return self.reader.readTiles(dataset.tiles.slice(startTile, endTile + 1), NTRACKS);
 
             })
@@ -122,19 +110,22 @@ var igv = (function (igv) {
                     return a.start - b.start;
                 })
 
-                cache = new igv.FeatureCache(features, genomicInterval);
-
-                // Limit to 2 caches for now
-                if (self.featureCache.length < 2) {
-                    self.featureCache.push(cache);
-                }
-                else {
-                    self.featureCache[1] = self.featureCache[0];
-                    self.featureCache[0] = cache;
-                }
 
                 return features;
             })
+
+
+        function getRootGroup() {
+            if (self.rootGroup) {
+                return Promise.resolve(self.rootGroup);
+            } else {
+                return self.reader.readRootGroup()
+                    .then(function (rootGroup) {
+                        self.rootGroup = rootGroup;
+                        return rootGroup;
+                    });
+            }
+        }
     }
 
     function decodeBedTile(tile, chr, bpStart, bpEnd, bpPerPixel, features) {

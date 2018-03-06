@@ -179,14 +179,14 @@
                             })">VCF file with genotypes (chr 22)
         </div>
 
-        <!--        <div onclick="igv.browser.loadTrack({
-                                    url: 'https://data.broadinstitute.org/igvdata/BodyMap/hg19/IlluminaHiSeq2000_BodySites/brain_merged/accepted_hits.bam',
-                                    name: 'Brain (BodyMap)',
-                                    maxRows: 3000,
-                                    samplingDepth: 10000,
-                                    height: 200
-                                })">BAM File - deep coverage (Brain, BodyMap)
-                </div>-->
+<!--        <div onclick="igv.browser.loadTrack({
+                            url: 'https://data.broadinstitute.org/igvdata/BodyMap/hg19/IlluminaHiSeq2000_BodySites/brain_merged/accepted_hits.bam',
+                            name: 'Brain (BodyMap)',
+                            maxRows: 3000,
+                            samplingDepth: 10000,
+                            height: 200
+                        })">BAM File - deep coverage (Brain, BodyMap)
+        </div>-->
 
 
         <div onclick="igv.browser.loadTrack({
@@ -325,40 +325,36 @@
 
     $(document).ready(function () {
         var div,
-            options;
+                options;
 
         div = $("#myDiv")[0];
         options = {
+            showLoadFileWidget:true,
+            locus: '1:67,655,272-67,684,468',
             // locus: 'all',
             // locus: '1',
             // locus: 'SLC25A3',
             // locus: ['egfr', 'myc', 'pten'],
-            locus: ['myc', 'muc1'],
             // locus: ['myc'],
             // locus: ['2', '4', '8'],
             reference: {
                 id: "hg19",
-                //      fastaURL: "https://s3.amazonaws.com/igv.broadinstitute.org/genomes/seq/1kg_v37/human_g1k_v37_decoy.fasta",
-                //      cytobandURL: "https://s3.amazonaws.com/igv.broadinstitute.org/genomes/seq/b37/b37_cytoband.txt"
+               fastaURL: "https://s3.amazonaws.com/igv.broadinstitute.org/genomes/seq/1kg_v37/human_g1k_v37_decoy.fasta",
+               cytobandURL: "https://s3.amazonaws.com/igv.broadinstitute.org/genomes/seq/b37/b37_cytoband.txt"
             },
             flanking: 1000,
             apiKey: 'AIzaSyDUUAUFpQEN4mumeMNIRWXSiTh5cPtUAD0',
 
             tracks: [
-                {
-                    url: 'https://data.broadinstitute.org/igvdata/encode/hg19/broadHistone/wgEncodeBroadHistoneGm12878H3k4me2StdSig.wig.tdf',
-                    name: 'GM12878H3k4m3 (tdf)'
-                },
-                {
-                    sourceType: 'gcs',
-                    type: 'bam',
-                    url: 'gs://genomics-public-data/platinum-genomes/bam/NA12877_S1.bam',
-                    height: 500,
-                    maxHeight: 2000,
-                    autoHeight: true,
-                    viewAsPairs: true,
-                    name: 'NA12877'
-                },
+                // {
+                //     url: 'http://hgdownload.cse.ucsc.edu/goldenPath/hg19/encodeDCC/wgEncodeBroadHistone/wgEncodeBroadHistoneGm12878H3k4me3StdSig.bigWig',
+                //     name: 'ENCODE - BigWig',
+                //     color: function (value) {
+                //         var red = Math.min(255, Math.max(100, Math.round(value / 2))),
+                //                 blue = 255 - red;
+                //         return "rgb(" + red + "," + blue + ",0)"
+                //     }
+                // },
                 {
 
                     name: "Genes",

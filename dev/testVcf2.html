@@ -7,13 +7,13 @@
     <meta name="description" content="">
     <meta name="author" content="">
     <link rel="shortcut icon" href=../img/favicon.ico>
-    <title>BAM - Dev</title>
+    <title>IGV - Dev</title>
 
     <!-- Font Awesome CSS -->
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.2.0/css/font-awesome.min.css">
 
     <!-- IGV CSS -->
-    <link rel="stylesheet" type="text/css" href="https://igv.org/web/beta/igv.css">
+    <link rel="stylesheet" type="text/css" href="../css/igv.css">
 
     <!-- Dev CSS -->
     <link rel="stylesheet" type="text/css" href="../css/dev.css">
@@ -137,50 +137,50 @@
 
     <script src="../js/roi.js"></script>
     <script src="../js/roiSource.js"></script>
+    <script src="../vendor/tdigest.js"></script>
+    <script src="../vendor/rbtree.js"></script>
 
 </head>
 
 <body>
 
-<div id="myDiv" style="padding-top: 50px;padding-bottom: 20px; height: auto">
-</div>
+<div id="igvDiv" class="container-fluid" style="padding-top: 10px;padding-bottom: 10px; border:1px solid lightgray"></div>
 
 <script type="text/javascript">
 
-    $(document).ready(function () {
-        var options;
+    // Tests a vcf variant with no alternate alleles
 
-        options = {
-            showKaryo: false,
-            showIdeogram: true,
-            showNavigation: true,
-            showRuler: true,
-            genome: "hg19",
-            locus: "chr8:128,747,267-128,754,546",
-            tracks: [
-                {
-                    name: "Genes",
-                    type: "annotation",
-                    format: "gtf",
-                    sourceType: "file",
-                    url: "https://s3.amazonaws.com/igv.broadinstitute.org/annotations/hg19/genes/gencode.v18.annotation.sorted.gtf.gz",
-                    indexURL: "https://s3.amazonaws.com/igv.broadinstitute.org/annotations/hg19/genes/gencode.v18.annotation.sorted.gtf.gz.tbi",
-                    visibilityWindow: 10000000,
-                    order: Number.MAX_VALUE,
-                    displayMode: "EXPANDED"
-                },
-                {
-                    url: 'gs://genomics-public-data/platinum-genomes/bam/NA12877_S1.bam',
-                   // url: 'https://data.broadinstitute.org/igvdata/BodyMap/hg19/IlluminaHiSeq2000_BodySites/brain_merged/accepted_hits.bam',
-                    name: '1KG NA12877'
-                }
-
-            ]
-        };
-
-        igv.createBrowser($("#myDiv")[0], options);
-    })
-
+    var div = document.getElementById('igvDiv');
+    var options = {
+        showNavigation: true,
+        showRuler: true,
+        reference: {
+            id: "hg19",
+            fastaURL: "https://s3.amazonaws.com/igv.broadinstitute.org/genomes/seq/1kg_v37/human_g1k_v37_decoy.fasta",
+            cytobandURL: "https://s3.amazonaws.com/igv.broadinstitute.org/genomes/seq/b37/b37_cytoband.txt"
+        },
+        locus: "chr13:32915413",
+        tracks: [
+            {
+                name: "Genes",
+                type: "annotation",
+                format: "bed",
+                sourceType: "file",
+                url: "https://s3.amazonaws.com/igv.broadinstitute.org/annotations/hg19/genes/refGene.hg19.bed.gz",
+                indexURL: "https://s3.amazonaws.com/igv.broadinstitute.org/annotations/hg19/genes/refGene.hg19.bed.gz.tbi",
+                order: Number.MIN_VALUE,
+                displayMode: "EXPANDED"
+            },
+            {
+                name: "Phase 3 WGS variants",
+                format: "vcf",
+                url: "../test/data/vcf/testvcf2.vcf",
+                indexed: false,
+                type: "variant"
+            }
+        ]
+    };
+    var browser = igv.createBrowser(div, options);
 
 </script>
 

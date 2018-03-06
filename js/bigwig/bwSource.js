@@ -32,7 +32,6 @@ var igv = (function (igv) {
 
     igv.BWSource = function (config) {
         this.reader = new igv.BWReader(config);
-        this.cache = true;
         this.wgValues = {};
     };
 
@@ -41,29 +40,10 @@ var igv = (function (igv) {
 
         var self = this;
 
-        var featureCache = self.featureCache,
-            genomicInterval = new igv.GenomicInterval(chr, bpStart, bpEnd);
-
-        genomicInterval.bpPerPixel = bpPerPixel;
-
         if (chr.toLowerCase() === "all") {
             return self.getWGValues(windowFunction);
-        }
-        else if (featureCache && featureCache.range.bpPerPixel === bpPerPixel && featureCache.range.containsRange(genomicInterval)) {
-            return Promise.resolve(self.featureCache.queryFeatures(chr, bpStart, bpEnd));
-        }
-        else {
-
-            return self.reader.readFeatures(chr, bpStart, chr, bpEnd, bpPerPixel, windowFunction)
-
-                .then(function (features) {
-
-                    // Note -- replacing feature cache
-                    if (self.cache) self.featureCache = new igv.FeatureCache(features, genomicInterval);
-                    
-                    return features;
-                })
-
+        } else {
+            return self.reader.readFeatures(chr, bpStart, chr, bpEnd, bpPerPixel, windowFunction);
         }
     }
 

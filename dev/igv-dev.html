@@ -137,6 +137,8 @@
 
     <script src="../js/roi.js"></script>
     <script src="../js/roiSource.js"></script>
+    <script src="../vendor/tdigest.js"></script>
+    <script src="../vendor/rbtree.js"></script>
 
 </head>
 
@@ -148,6 +150,17 @@
 
     <div id="trackList">
 
+        <div onclick="igv.browser.loadTrack({
+                            url: '../test/data/bed/dhsGE05.bed',
+                            name: 'GE05'
+                        })"> GE05
+        </div>
+
+        <div onclick="igv.browser.loadTrack({
+                            url: '../test/data/bed/dhsGE10.bed',
+                            name: 'GE10'
+                        })"> GE10
+        </div>
 
         <div onclick="igv.browser.loadTrack({
                             url: 'https://s3-us-west-2.amazonaws.com/ilmn.igv-test/test2.bigWig',
@@ -179,14 +192,14 @@
                             })">VCF file with genotypes (chr 22)
         </div>
 
-        <div onclick="igv.browser.loadTrack({
+<!--        <div onclick="igv.browser.loadTrack({
                             url: 'https://data.broadinstitute.org/igvdata/BodyMap/hg19/IlluminaHiSeq2000_BodySites/brain_merged/accepted_hits.bam',
                             name: 'Brain (BodyMap)',
                             maxRows: 3000,
                             samplingDepth: 10000,
                             height: 200
                         })">BAM File - deep coverage (Brain, BodyMap)
-        </div>
+        </div>-->
 
 
         <div onclick="igv.browser.loadTrack({
@@ -329,11 +342,16 @@
 
         div = $("#myDiv")[0];
         options = {
-            locus: 'all',
+            // locus: 'all',
             // locus: '1',
             // locus: 'SLC25A3',
-            // locus: ['egfr', 'myc', 'pten'],
+            locus: 'chrX:138633329-138633330',
+            // locus: ['egfr', 'pten', 'SLC25A3', 'myc'],
+            // locus: ['egfr', 'pten', 'myc'],
+            // locus: ['egfr'],
+            // locus: ['pten'],
             // locus: ['myc'],
+            // locus: ['1', '2'],
             // locus: ['2', '4', '8'],
             reference: {
                 id: "hg19",
@@ -356,6 +374,7 @@
                 {
 
                     name: "Genes",
+                    autoHeight: true,
                     searchable: false,
                     type: "annotation",
                     format: "gtf",

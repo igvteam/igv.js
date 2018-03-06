@@ -125,7 +125,7 @@ var igv = (function (igv) {
 
         },
 
-        bam_tag2cigar: function(ba, block_end, seq_offset, lseq, al, cigarArray) {
+        bam_tag2cigar: function (ba, block_end, seq_offset, lseq, al, cigarArray) {
 
             function type2size(x) {
                 if (x == 'C' || x == 'c' || x == 'A') return 1;
@@ -138,26 +138,27 @@ var igv = (function (igv) {
             if (cigarArray.length != 1 || al.start < 0) return false;
             var p = seq_offset + ((lseq + 1) >> 1) + lseq;
             while (p + 4 < block_end) {
-                var tag = String.fromCharCode(ba[p]) + String.fromCharCode(ba[p+1]);
+                var tag = String.fromCharCode(ba[p]) + String.fromCharCode(ba[p + 1]);
                 if (tag == 'CG') break;
-                var type = String.fromCharCode(ba[p+2]);
+                var type = String.fromCharCode(ba[p + 2]);
                 if (type == 'B') { // the binary array type
-                    type = String.fromCharCode(ba[p+3]);
+                    type = String.fromCharCode(ba[p + 3]);
                     var size = type2size(type);
-                    var len = readInt(ba, p+4);
+                    var len = readInt(ba, p + 4);
                     p += 8 + size * len;
                 } else if (type == 'Z' || type == 'H') { // 0-terminated string
                     p += 3;
-                    while (ba[p++] != 0) {}
+                    while (ba[p++] != 0) {
+                    }
                 } else { // other atomic types
                     p += 3 + type2size(type);
                 }
             }
             if (p >= block_end) return false; // no CG tag
-            if (String.fromCharCode(ba[p+2]) != 'B' || String.fromCharCode(ba[p+3]) != 'I') return false; // not of type B,I
+            if (String.fromCharCode(ba[p + 2]) != 'B' || String.fromCharCode(ba[p + 3]) != 'I') return false; // not of type B,I
 
             // now we know the real CIGAR length and its offset in the binary array
-            var cigar_len = readInt(ba, p+4);
+            var cigar_len = readInt(ba, p + 4);
             var cigar_offset = p + 8; // 4 for "CGBI" and 4 for length
             if (cigar_offset + cigar_len * 4 > block_end) return false; // out of bound
 
@@ -193,7 +194,7 @@ var igv = (function (igv) {
          * @param chrNames            array of chromosome names
          * @param filter             a igv.BamFilter object
          */
-        decodeBamRecords: function (ba, offset, alignmentContainer,  chrNames, chrIdx, min, max,  filter) {
+        decodeBamRecords: function (ba, offset, alignmentContainer, chrNames, chrIdx, min, max, filter) {
 
             var blockSize, blockEnd, alignment, blocks, refID, pos, bin_mq_nl, bin, mq, nl, flag_nc, flag, nc, lseq, tlen,
                 mateChrIdx, matePos, readName, j, p, lengthOnRef, cigar, c, cigarArray, seq, seqBytes, qualArray;
@@ -312,6 +313,8 @@ var igv = (function (igv) {
                 alignment.qual = qualArray;
                 alignment.tagBA = new Uint8Array(ba.buffer.slice(p, blockEnd));  // decode these on demand
 
+                this.setPairOrientation(alignment);
+
                 if (!min || alignment.start <= max &&
                     alignment.start + alignment.lengthOnRef >= min &&
                     (undefined === filter || filter.pass(alignment))) {
@@ -392,6 +395,8 @@ var igv = (function (igv) {
                     };
                 }
 
+                this.setPairOrientation(alignment);
+
                 if (undefined === filter || filter.pass(alignment)) {
                     blocks = makeBlocks(alignment, cigarArray);
                     alignment.blocks = blocks.blocks;
@@ -419,6 +424,53 @@ var igv = (function (igv) {
             else {
                 reader.pairsSupported = config.pairsSupported === undefined ? true : config.pairsSupported;
             }
+        },
+
+        setPairOrientation: function (alignment) {
+
+            if (alignment.isMapped() && alignment.mate && alignment.isMateMapped() && alignment.mate.chr === alignment.chr) {
+                var s1 = alignment.strand ? 'F' : 'R';
+
+                var mate = alignment.mate;
+                var s2 = mate.strand ? 'F' : 'R';
+                var o1 = ' ';
+                var o2 = ' ';
+                if (alignment.isFirstOfPair()) {
+                    o1 = '1';
+                    o2 = '2';
+                } else if (alignment.isSecondOfPair()) {
+                    o1 = '2';
+                    o2 = '1';
+                }
+
+                var tmp = [];
+                var isize = alignment.fragmentLength;
+                var estReadLen = alignment.end - alignment.start;
+                if (isize == 0) {
+                    //isize not recorded.  Need to estimate.  This calculation was validated against an Illumina
+                    // -> <- library bam.
+                    var estMateEnd = alignment.start < mate.start ?
+                    mate.start + estReadLen : mate.start - estReadLen;
+                    isize = estMateEnd - alignment.start;
+                }
+
+                //if (isize > estReadLen) {
+                if (isize > 0) {
+                    tmp[0] = s1;
+                    tmp[1] = o1;
+                    tmp[2] = s2;
+                    tmp[3] = o2;
+
+                } else {
+                    tmp[2] = s1;
+                    tmp[3] = o1;
+                    tmp[0] = s2;
+                    tmp[1] = o2;
+                }
+                // }
+                alignment.pairOrientation = tmp.join('');
+            }
+
         }
     };
 

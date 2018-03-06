@@ -62,11 +62,17 @@ var igv = (function (igv) {
             return alignment.isMapped() && !alignment.isFailsVendorQualityCheck();
         }
 
+        this.pairedEndStats = new PairedEndStats();
+
     }
 
     igv.AlignmentContainer.prototype.push = function (alignment) {
 
         if (this.filter(alignment) === false) return;
+
+        if (alignment.isPaired()) {
+            this.pairedEndStats.push(alignment);
+        }
 
         this.coverageMap.incCounts(alignment);   // Count coverage before any downsampling
 
@@ -94,7 +100,7 @@ var igv = (function (igv) {
         }
 
         // Need to remove partial pairs whose mate was downsampled
-        if(this.pairsSupported) {
+        if (this.pairsSupported) {
             var tmp = [], ds = this.downsampledReads;
 
             this.alignments.forEach(function (a) {
@@ -111,6 +117,8 @@ var igv = (function (igv) {
 
         this.pairsCache = undefined;
         this.downsampledReads = undefined;
+
+        this.pairedEndStats.compute();
     }
 
     igv.AlignmentContainer.prototype.contains = function (chr, start, end) {
@@ -182,7 +190,7 @@ var igv = (function (igv) {
 
                 if (this.pairsSupported && canBePaired(alignment)) {
 
-                    if(this.pairsCache[replacedAlignment.readName] !== undefined) {
+                    if (this.pairsCache[replacedAlignment.readName] !== undefined) {
                         this.pairsCache[replacedAlignment.readName] = undefined;
                     }
 
@@ -315,7 +323,7 @@ var igv = (function (igv) {
 
     };
 
-    DownsampledInterval = function (start, end, counts) {
+    function DownsampledInterval(start, end, counts) {
         this.start = start;
         this.end = end;
         this.counts = counts;
@@ -326,6 +334,67 @@ var igv = (function (igv) {
             {name: "start", value: this.start + 1},
             {name: "end", value: this.end},
             {name: "# downsampled:", value: this.counts}]
+    }
+
+    function PairedEndStats(lowerPercentile, upperPercentile) {
+        this.totalCount = 0;
+        this.frCount = 0;
+        this.rfCount = 0;
+        this.ffCount = 0;
+        this.sumF = 0;
+        this.sumF2 = 0;
+        //this.lp = lowerPercentile === undefined ? 0.005 : lowerPercentile;
+        //this.up = upperPercentile === undefined ? 0.995 : upperPercentile;
+        //this.digest = new Digest();
+    }
+
+    PairedEndStats.prototype.push = function (alignment) {
+
+        if (alignment.isProperPair()) {
+
+            var fragmentLength = Math.abs(alignment.fragmentLength);
+            //this.digest.push(fragmentLength);
+            this.sumF += fragmentLength;
+            this.sumF2 += fragmentLength * fragmentLength;
+
+            var po = alignment.pairOrientation;
+
+            if (typeof po === "string" && po.length == 4) {
+                var tmp = '' + po.charAt(0) + po.charAt(2);
+                switch (tmp) {
+                    case 'FF':
+                    case 'RR':
+                        this.ffCount++;
+                        break;
+                    case "FR":
+                        this.frCount++;
+                        break;
+                    case"RF":
+                        this.rfCount++;
+                }
+            }
+            this.totalCount++;
+        }
+    }
+
+    PairedEndStats.prototype.compute = function () {
+
+        if (this.totalCount > 100) {
+            if (this.ffCount / this.totalCount > 0.9) this.orienation = "ff";
+            else if (this.frCount / this.totalCount > 0.9) this.orienation = "fr";
+            else if (this.rfCount / this.totalCount > 0.9) this.orienation = "rf";
+
+
+            var fMean = this.sumF / this.totalCount;
+            var stdDev = Math.sqrt((this.totalCount * this.sumF2 - this.sumF * this.sumF) / (this.totalCount * this.totalCount));
+            this.lowerFragmentLength = fMean - 3*stdDev;
+            this.upperFragmentLength = fMean + 3*stdDev;
+
+            //this.lowerFragmentLength = this.digest.percentile(this.lp);
+            //this.upperFragmentLength = this.digest.percentile(this.up);
+            //this.digest = undefined;
+        }
+
     }
 
 
