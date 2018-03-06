@@ -37,7 +37,7 @@ var igv = (function (igv) {
 
         $parent.append($('<div class="igv-ideogram-left-shim"></div>'));
 
-        this.panels = _.map(igv.browser.genomicStateList, function(genomicState) {
+        this.panels = igv.browser.genomicStateList.map(function(genomicState) {
 
             var viewportContainerWidth = igv.browser.viewportContainerWidth(),
                 panel = {};
@@ -46,9 +46,9 @@ var igv = (function (igv) {
 
             panel.$ideogram = $('<div class="igv-ideogram-content-div"></div>');
 
-            addBorders(panel.$ideogram, genomicState.locusIndex, genomicState.locusCount);
+            addBorders(panel.$ideogram, igv.browser.genomicStateList.indexOf(genomicState), igv.browser.genomicStateList.length);
 
-            setWidth(panel.$ideogram, viewportContainerWidth/genomicState.locusCount);
+            setWidth(panel.$ideogram, viewportContainerWidth/igv.browser.genomicStateList.length);
 
             $parent.append(panel.$ideogram);
 
@@ -83,14 +83,7 @@ var igv = (function (igv) {
     };
 
     igv.IdeoPanel.prototype.panelWithLocusIndex = function (index) {
-
-        var panels;
-
-        panels = _.filter(this.panels, function(panel){
-            return index === panel.genomicState.locusIndex;
-        });
-
-        return panels[ 0 ];
+        return this.panels[ index ];
     };
 
     igv.IdeoPanel.prototype.resize = function () {
@@ -99,7 +92,7 @@ var igv = (function (igv) {
 
         _.each(this.panels, function(panel, index) {
             var genomicState = igv.browser.genomicStateList[ index ];
-            panel.$ideogram.width(Math.floor(viewportContainerWidth/genomicState.locusCount));
+            panel.$ideogram.width(Math.floor(viewportContainerWidth/igv.browser.genomicStateList.length));
             panel.$canvas.attr('width', panel.$ideogram.width());
             panel.ideograms = {};
         });
@@ -124,16 +117,8 @@ var igv = (function (igv) {
     };
 
     igv.IdeoPanel.prototype.removePanelWithLocusIndex = function (index) {
-        var self = this;
-
         this.panelWithLocusIndex(index).$ideogram.remove();
         this.panels.splice(index, 1);
-
-        // reset genomic state indices
-        this.panels.forEach(function (panel, index) {
-            panel.genomicState.locusIndex = index;
-            panel.genomicState.locusCount = self.panels.length;
-        });
     };
 
     igv.IdeoPanel.prototype.repaintPanelWithLocusIndex = function (index) {
@@ -382,7 +367,7 @@ var igv = (function (igv) {
 
         igv.browser.updateLocusSearchWidget(genomicState);
 
-        igv.browser.repaintWithLocusIndex( panel.genomicState.locusIndex )
+        igv.browser.repaintWithLocusIndex( igv.browser.genomicStateList.indexOf(panel.genomicState) )
 
     }
 

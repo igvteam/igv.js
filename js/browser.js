@@ -583,7 +583,8 @@ var igv = (function (igv) {
             end,
             chromosome;
 
-        if (0 === genomicState.locusIndex && 1 === genomicState.locusCount) {
+
+        if (0 === this.genomicStateList.indexOf(genomicState) && 1 === this.genomicStateList.length) {
 
             if ('all' === genomicState.locusSearchString.toLowerCase()) {
 
@@ -596,7 +597,7 @@ var igv = (function (igv) {
 
                 if (this.$searchInput) {
 
-                    end = referenceFrame.start + referenceFrame.bpPerPixel * (self.viewportContainerWidth() / genomicState.locusCount);
+                    end = referenceFrame.start + referenceFrame.bpPerPixel * (self.viewportContainerWidth() / this.genomicStateList.length);
 
                     if (this.genome) {
                         chromosome = this.genome.getChromosome(referenceFrame.chrName);
@@ -681,9 +682,9 @@ var igv = (function (igv) {
             return;
         }
 
-        genomicState = _.first(this.genomicStateList);
+        genomicState = this.genomicStateList[ 0 ];
         genomicState.chromosome = this.genome.getChromosome(chrName);
-        viewportWidth = igv.browser.viewportContainerWidth() / genomicState.locusCount;
+        viewportWidth = igv.browser.viewportContainerWidth() / this.genomicStateList.length;
 
         referenceFrame = genomicState.referenceFrame;
         referenceFrame.chrName = genomicState.chromosome.name;
@@ -744,7 +745,7 @@ var igv = (function (igv) {
 
             var genomicState = browser.genomicStateList[locusIndex],
                 referenceFrame = genomicState.referenceFrame,
-                viewportWidth = Math.floor(browser.viewportContainerWidth() / genomicState.locusCount),
+                viewportWidth = Math.floor(browser.viewportContainerWidth() / browser.genomicStateList.length),
                 centerBP,
                 mbe,
                 be;
@@ -790,9 +791,9 @@ var igv = (function (igv) {
 
         function zoomOutWithLocusIndex(browser, locusIndex) {
 
-            var genomicState = igv.browser.genomicStateList[locusIndex],
+            var genomicState = browser.genomicStateList[locusIndex],
                 referenceFrame = genomicState.referenceFrame,
-                viewportWidth = Math.floor(browser.viewportContainerWidth() / genomicState.locusCount),
+                viewportWidth = Math.floor(browser.viewportContainerWidth() / browser.genomicStateList.length),
                 chromosome,
                 newScale,
                 maxScale,
@@ -840,13 +841,13 @@ var igv = (function (igv) {
     };
 
     igv.Browser.prototype.removeMultiLocusPanelWithGenomicState = function (genomicState) {
-
+        var self = this;
         if (true === this.config.showIdeogram) {
-            this.ideoPanel.removePanelWithLocusIndex(genomicState.locusIndex);
+            this.ideoPanel.removePanelWithLocusIndex(this.genomicStateList.indexOf(genomicState));
         }
 
         this.trackViews.forEach(function (trackView) {
-            trackView.removeViewportWithLocusIndex(genomicState.locusIndex);
+            trackView.removeViewportWithLocusIndex(self.genomicStateList.indexOf(genomicState));
         });
 
         this.resize();
@@ -869,9 +870,7 @@ var igv = (function (igv) {
         });
 
         this.genomicStateList = filtered.map(function (f, i, list) {
-            f.locusIndex = i;
-            f.locusCount = list.length;
-            f.referenceFrame.bpPerPixel = (f.end - f.start) / (self.viewportContainerWidth() / f.locusCount);
+            f.referenceFrame.bpPerPixel = (f.end - f.start) / (self.viewportContainerWidth() / list.length);
             return f;
         });
 
@@ -939,15 +938,8 @@ var igv = (function (igv) {
 
                 if (genomicStateList.length > 0) {
 
-                    genomicStateList.forEach(function (genomicState, index) {
-
-                        genomicState.locusIndex = index;
-                        genomicState.locusCount = _.size(genomicStateList);
-                        genomicState.referenceFrame =
-                            new igv.ReferenceFrame(
-                                genomicState.chromosome.name,
-                                genomicState.start,
-                                (genomicState.end - genomicState.start) / (self.viewportContainerWidth() / genomicState.locusCount));
+                    genomicStateList.forEach(function (gs) {
+                        gs.referenceFrame = new igv.ReferenceFrame(gs.chromosome.name, gs.start, (gs.end - gs.start) (self.viewportContainerWidth()/genomicStateList.length));
                     });
 
                     self.genomicStateList = genomicStateList;

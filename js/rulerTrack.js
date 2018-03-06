@@ -71,9 +71,6 @@ var igv = (function (igv) {
     igv.RulerTrack = function () {
 
         this.height = 40;
-        // this.height = 50;
-        // this.height = 24;
-
         this.name = "";
         this.id = "ruler";
         this.disableButtons = true;
@@ -89,7 +86,7 @@ var igv = (function (igv) {
             this.rulerSweepers = {};
         }
 
-        this.rulerSweepers[genomicState.locusIndex.toString()] = new igv.RulerSweeper(viewport, $viewport, $viewportContent, genomicState);
+        this.rulerSweepers[ igv.browser.genomicStateList.indexOf(genomicState).toString() ] = new igv.RulerSweeper(viewport, $viewport, $viewportContent, genomicState);
     };
 
     igv.RulerTrack.prototype.locusLabelWithGenomicState = function (genomicState) {
@@ -133,7 +130,7 @@ var igv = (function (igv) {
             bp;
 
 
-        rulerSweeper = this.rulerSweepers[options.genomicState.locusIndex.toString()];
+        rulerSweeper = this.rulerSweepers[ igv.browser.genomicStateList.indexOf(options.genomicState).toString() ];
 
         if ('all' === options.referenceFrame.chrName.toLowerCase()) {
 

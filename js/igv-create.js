@@ -156,18 +156,15 @@ var igv = (function (igv) {
 
                 if (genomicStateList.length > 0) {
 
-                    igv.browser.genomicStateList = genomicStateList.map(function (genomicState, index) {
-                        genomicState.locusIndex = index;
-                        genomicState.locusCount = genomicStateList.length;
-                        genomicState.referenceFrame = new igv.ReferenceFrame(genomicState.chromosome.name, genomicState.start, (genomicState.end - genomicState.start) / (width / genomicState.locusCount));
-                        return genomicState;
+                    igv.browser.genomicStateList = genomicStateList.map(function (gs) {
+                        gs.referenceFrame = new igv.ReferenceFrame(gs.chromosome.name, gs.start, (gs.end - gs.start) / (width / genomicStateList.length));
+                        return gs;
                     });
 
                     igv.browser.updateLocusSearchWidget(_.first(igv.browser.genomicStateList));
 
                     igv.browser.zoomWidgetLayout();
 
-                    // igv.browser.toggleCursorGuide(igv.browser.genomicStateList);
                     igv.browser.toggleCenterGuide(igv.browser.genomicStateList);
 
                     if (igv.browser.karyoPanel) {

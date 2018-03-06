@@ -328,14 +328,14 @@ var igv = (function (igv) {
             $e.text('Sort by base');
 
             clickHandler = function () {
-                var genomicState = _.first(igv.browser.genomicStateList),
+                var genomicState = igv.browser.genomicStateList[ 0 ],
                     referenceFrame = genomicState.referenceFrame,
                     genomicLocation,
                     viewportHalfWidth;
 
                 popover.hide();
 
-                viewportHalfWidth = Math.floor(0.5 * (igv.browser.viewportContainerWidth() / genomicState.locusCount));
+                viewportHalfWidth = Math.floor(0.5 * (igv.browser.viewportContainerWidth() / igv.browser.genomicStateList.length));
                 genomicLocation = Math.floor((referenceFrame.start) + referenceFrame.toBP(viewportHalfWidth));
 
                 self.altClick(genomicLocation, undefined, undefined);
@@ -925,7 +925,7 @@ var igv = (function (igv) {
                 return gs.locusSearchString;
             });
 
-            index = config.viewport.genomicState.locusIndex;
+            index = igv.browser.genomicStateList.indexOf(config.viewport.genomicState);
             head = _.first(loci, 1 + index);
             tail = _.size(loci) === 1 ? undefined : _.last(loci, _.size(loci) - (1 + index));
 

@@ -235,10 +235,7 @@ var igv = (function (igv) {
 
         // reset genomic state indices
         this.viewports.forEach(function (viewport, index) {
-            viewport.genomicState.locusIndex = index;
-            viewport.genomicState.locusCount = self.viewports.length;
-            viewport.$viewport.data("locusindex", index);
-            viewport.setWidth(igv.browser.viewportContainerWidth()/viewport.genomicState.locusCount);
+            viewport.setWidth(igv.browser.viewportContainerWidth()/igv.browser.genomicStateList.length);
         });
 
     };
@@ -448,7 +445,6 @@ var igv = (function (igv) {
         var self = this;
 
         this.viewports.forEach(function (viewport) {
-            // console.log('--- resize viewport ' + self.track.id + ' locus index ' + viewport.genomicState.locusIndex + ' ---');
             viewport.resize();
         });
 
@@ -462,7 +458,6 @@ var igv = (function (igv) {
         var self = this;
 
         this.viewports.forEach(function (viewport) {
-            // console.log('--- update viewport ' + self.track.id + ' locus index ' + viewport.genomicState.locusIndex + ' ---');
             viewport.update();
         });
 
@@ -476,7 +471,6 @@ var igv = (function (igv) {
         var self = this;
 
         this.viewports.forEach(function (viewport) {
-            // console.log('--- repaint viewport ' + self.track.id + ' locus index ' + viewport.genomicState.locusIndex + ' ---');
             viewport.repaint();
         });
 

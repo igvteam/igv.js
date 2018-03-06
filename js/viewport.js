@@ -20,11 +20,10 @@ var igv = (function (igv) {
         $container.append(this.$viewport);
 
         this.$viewport.data("viewport", this.id);
-        this.$viewport.data("locusindex", this.genomicState.locusIndex);
 
-        addViewportBorders(this.$viewport, this.genomicState.locusIndex, igv.browser.genomicStateList.length);
+        addViewportBorders(this.$viewport, igv.browser.genomicStateList.indexOf(genomicState), igv.browser.genomicStateList.length);
 
-        this.setWidth(igv.browser.viewportContainerWidth() / this.genomicState.locusCount);
+        this.setWidth(igv.browser.viewportContainerWidth() / igv.browser.genomicStateList.length);
 
         this.contentDiv = $('<div class="igv-viewport-content-div">')[0];
         this.$viewport.append(this.contentDiv);
@@ -39,7 +38,7 @@ var igv = (function (igv) {
             $div.hide();
         }
 
-        if (this.genomicState.locusCount > 1 && trackView.track instanceof igv.RulerTrack) {
+        if (igv.browser.genomicStateList.length > 1 && trackView.track instanceof igv.RulerTrack) {
 
             this.$viewport.addClass('igv-viewport-ruler');
 
@@ -63,7 +62,7 @@ var igv = (function (igv) {
         this.canvas.setAttribute('height', this.contentDiv.clientHeight);
         this.ctx = this.canvas.getContext("2d");
 
-        if (this.genomicState.locusCount > 1 && trackView.track instanceof igv.RulerTrack) {
+        if (igv.browser.genomicStateList.length > 1 && trackView.track instanceof igv.RulerTrack) {
             $(this.contentDiv).append(igv.browser.rulerTrack.locusLabelWithGenomicState(this.genomicState));
         }
 
@@ -88,7 +87,7 @@ var igv = (function (igv) {
             return $container;
         }
 
-        if (trackView.track.name && 0 === this.genomicState.locusIndex) {
+        if (trackView.track.name && 0 === igv.browser.genomicStateList.indexOf(this.genomicState)) {
 
             if (typeof trackView.track.description === 'function') {
                 description = trackView.track.description();
@@ -166,7 +165,7 @@ var igv = (function (igv) {
         this.genomicState.referenceFrame.bpPerPixel = (Math.round(end) - Math.round(start)) / this.$viewport.width();
         this.genomicState.referenceFrame.start = Math.round(start);
 
-        igv.browser.updateWithLocusIndex(this.genomicState.locusIndex);
+        igv.browser.updateWithLocusIndex(igv.browser.genomicStateList.indexOf(this.genomicState));
 
     };
 
@@ -184,7 +183,7 @@ var igv = (function (igv) {
 
     igv.Viewport.prototype.resize = function () {
 
-        var contentWidth = igv.browser.viewportContainerWidth() / this.genomicState.locusCount;
+        var contentWidth = igv.browser.viewportContainerWidth() / igv.browser.genomicStateList.length;
 
         // console.log('viewport(' + this.id + ').resize - width: ' + contentWidth);
 
@@ -394,11 +393,13 @@ var igv = (function (igv) {
         }
 
         function doRenderControlCanvas(genomicState, trackView) {
-            return (/*0 === genomicState.locusIndex &&*/ (typeof trackView.track.paintAxis === 'function') && trackView.controlCanvas.width > 0 && trackView.controlCanvas.height > 0);
+            return ( (typeof trackView.track.paintAxis === 'function') && trackView.controlCanvas.width > 0 && trackView.controlCanvas.height > 0);
         }
 
         function viewIsReady() {
-            return igv.browser && igv.browser.genomicStateList && igv.browser.genomicStateList[self.genomicState.locusIndex].referenceFrame;
+            var genomicStateList;
+            genomicStateList = igv.browser.genomicStateList;
+            return igv.browser && genomicStateList && genomicStateList[ genomicStateList.indexOf(self.genomicState) ].referenceFrame;
         }
 
 
@@ -453,12 +454,10 @@ var igv = (function (igv) {
 
     function setTrackViewHeight(height, doUpdate) {
 
-        if ((1 === this.genomicState.locusCount) || (height > $(this.trackView.trackDiv).height())) {
+        if ((1 === igv.browser.genomicStateList.length) || (height > $(this.trackView.trackDiv).height())) {
 
             if (this.trackView.track.minHeight) height = Math.max(this.trackView.track.minHeight, height);
             if (this.trackView.track.maxHeight) height = Math.min(this.trackView.track.maxHeight, height);
-
-            console.log('set trackView height ' + this.trackView.track.id + ' locus index ' + this.genomicState.locusIndex + ' requested / current ' + height + ' / ' + $(this.trackView.trackDiv).height());
 
             this.trackView.track.height = height;
 
@@ -591,9 +590,9 @@ var igv = (function (igv) {
                         referenceFrame.start = maxStart;
                     }
 
-                    igv.browser.updateLocusSearchWidget(_.first(igv.browser.genomicStateList));
+                    igv.browser.updateLocusSearchWidget(igv.browser.genomicStateList[ 0 ]);
 
-                    igv.browser.repaintWithLocusIndex(self.genomicState.locusIndex);
+                    igv.browser.repaintWithLocusIndex(igv.browser.genomicStateList.indexOf(self.genomicState));
 
                     igv.browser.fireEvent('trackdrag');
                 }
@@ -655,13 +654,13 @@ var igv = (function (igv) {
 
                         chr = igv.browser.genome.getChromosomeCoordinate(newCenter).chr;
 
-                        if (1 === self.genomicState.locusCount) {
+                        if (1 === igv.browser.genomicStateList.length) {
                             string = chr;
                         } else {
                             loci = igv.browser.genomicStateList.map(function (g) {
                                 return g.locusSearchString;
                             });
-                            loci[self.genomicState.locusIndex] = chr;
+                            loci[ igv.browser.genomicStateList.indexOf(self.genomicState) ] = chr;
                             string = loci.join(' ');
                         }
 
@@ -670,7 +669,7 @@ var igv = (function (igv) {
                     } else {
                         frame.bpPerPixel /= 2;
                         frame.start = Math.round((newCenter + frame.start) / 2.0);
-                        igv.browser.updateWithLocusIndex(self.genomicState.locusIndex);
+                        igv.browser.updateWithLocusIndex( igv.browser.genomicStateList.indexOf(self.genomicState) );
                     }
 
                 }
@@ -729,7 +728,7 @@ var igv = (function (igv) {
 
             tv.viewports.forEach(function (vp) {
 
-                if (locusIndex === vp.genomicState.locusIndex) {
+                if (locusIndex === igv.browser.genomicStateList.indexOf(vp.genomicState)) {
                     list.push(vp);
                 }
 

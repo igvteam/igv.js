@@ -27,6 +27,9 @@ var igv = (function (igv) {
 
     igv.RulerSweeper = function (viewport, $viewport, $viewportContent, genomicState) {
 
+        var index;
+
+
         this.viewport = viewport;
         this.$viewport = $viewport;
         this.$viewportContent = $viewportContent;
@@ -37,17 +40,18 @@ var igv = (function (igv) {
 
         this.wholeGenomeLayout(this.$viewportContent.find('.igv-whole-genome-container'));
 
+        index = igv.browser.genomicStateList.indexOf(genomicState);
         this.mouseHandlers =
             {
                 document:
                     {
-                        down:'mousedown.rulersweeper.' + this.genomicState.locusIndex,
-                        move:'mousemove.rulersweeper.' + this.genomicState.locusIndex,
-                          up:'mouseup.rulersweeper.' + this.genomicState.locusIndex
+                        down:'mousedown.rulersweeper.' + index,
+                        move:'mousemove.rulersweeper.' + index,
+                          up:'mouseup.rulersweeper.' + index
                     },
                 viewport:
                     {
-                        down:'mousedown.rulersweeper.viewport.' + this.genomicState.locusIndex
+                        down:'mousedown.rulersweeper.viewport.' + index
                     }
 
             };
@@ -100,14 +104,14 @@ var igv = (function (igv) {
                     self.$viewportContent.find('.igv-whole-genome-container').hide();
                     self.$viewportContent.find('canvas').show();
 
-                    if (1 === self.genomicState.locusCount) {
+                    if (1 === igv.browser.genomicStateList.length) {
                         locusString = name;
                     } else {
                         loci = _.map(igv.browser.genomicStateList, function (g) {
                             return g.locusSearchString;
                         });
 
-                        loci[ self.genomicState.locusIndex ] = name;
+                        loci[ igv.browser.genomicStateList.indexOf(self.genomicState) ] = name;
                         locusString = loci.join(' ');
                     }
 
