@@ -180,7 +180,7 @@ var igv = (function (igv) {
             //     this.expandedCallHeight = Math.max(1, 2000 / (nCalls * nRows));
             // }
 
-            return h + vGap + groupSpace + (nCalls - groupsLength + 1) * (callHeight + vGap);
+            return h + vGap + groupSpace + (nCalls + 1) * (callHeight + vGap);
             //return h + vGap + nCalls * nRows * (this.displayMode === "EXPANDED" ? this.expandedCallHeight : this.squishedCallHeight);
 
         }
