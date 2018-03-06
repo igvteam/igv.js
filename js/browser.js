@@ -506,7 +506,7 @@ var igv = (function (igv) {
         }
 
         if (this.ideoPanel) {
-            igv.IdeoPanel.repaintPanel(this.ideoPanel.panelWithLocusIndex(locusIndex));
+            this.ideoPanel.repaintWithLocusIndex(locusIndex);
         }
 
         _.each(igv.Viewport.viewportsWithLocusIndex(locusIndex), function (viewport) {
@@ -542,7 +542,7 @@ var igv = (function (igv) {
         }
 
         if (this.ideoPanel) {
-            igv.IdeoPanel.repaintPanel(this.ideoPanel.panelWithLocusIndex(locusIndex));
+            this.ideoPanel.repaintWithLocusIndex(locusIndex);
         }
 
         if (this.karyoPanel) {
@@ -833,7 +833,7 @@ var igv = (function (igv) {
 
     igv.Browser.prototype.selectMultiLocusPanelWithGenomicState = function (genomicState) {
 
-        this.multiLocusPanelLayoutWithTruthFunction(function (candidate) {
+        this.multiLocusPanelLayoutWithTruthFunction(undefined, function (candidate) {
             return _.isEqual(candidate, genomicState);
         });
 
@@ -841,20 +841,21 @@ var igv = (function (igv) {
 
     igv.Browser.prototype.closeMultiLocusPanelWithGenomicState = function (genomicState) {
 
-        this.multiLocusPanelLayoutWithTruthFunction(function (candidate) {
+        this.multiLocusPanelLayoutWithTruthFunction(genomicState, function (candidate) {
             return !_.isEqual(candidate, genomicState);
         });
 
     };
 
-    igv.Browser.prototype.multiLocusPanelLayoutWithTruthFunction = function (filterFunction) {
+    igv.Browser.prototype.multiLocusPanelLayoutWithTruthFunction = function (genomicState, filterFunction) {
 
         var self = this,
-            $content_header = $('#igv-content-header'),
+            $content_header,
             filtered;
 
+        $content_header = $('#igv-content-header');
         if (true === this.config.showIdeogram) {
-            igv.IdeoPanel.$empty($content_header);
+            self.ideoPanel.removePanelWithLocusIndex(genomicState.locusIndex);
         }
 
         this.emptyViewportContainers();
@@ -870,9 +871,9 @@ var igv = (function (igv) {
             return f;
         });
 
-        if (true === this.config.showIdeogram) {
-            this.ideoPanel.buildPanels($content_header);
-        }
+        // if (true === this.config.showIdeogram) {
+        //     this.ideoPanel.buildPanels($content_header);
+        // }
 
         this.buildViewportsWithGenomicStateList(this.genomicStateList);
 
@@ -962,7 +963,7 @@ var igv = (function (igv) {
 
                     if (true === self.config.showIdeogram) {
                         $content_header = $('#igv-content-header');
-                        igv.IdeoPanel.$empty($content_header);
+                        self.ideoPanel.removeAllPanels();
                         self.ideoPanel.buildPanels($content_header);
                     }
 
