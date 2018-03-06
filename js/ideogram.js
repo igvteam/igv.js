@@ -108,21 +108,23 @@ var igv = (function (igv) {
 
     };
 
-    igv.IdeoPanel.prototype.removeAllPanels = function () {
+    igv.IdeoPanel.prototype.discardPanels = function () {
 
         this.panels.forEach(function (panel) {
             panel.$ideogram.remove();
         });
 
+        this.panels = undefined;
+
     };
 
     igv.IdeoPanel.prototype.removePanelWithLocusIndex = function (index) {
-        this.panelWithLocusIndex(index).$ideogram.remove();
+        this.panels[ index ].$ideogram.remove();
         this.panels.splice(index, 1);
     };
 
     igv.IdeoPanel.prototype.repaintPanelWithLocusIndex = function (index) {
-        repaintPanel( this.panelWithLocusIndex(index) );
+        repaintPanel( this.panels[ index ] );
     };
 
     function setWidth ($ideogram, width) {

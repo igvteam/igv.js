@@ -634,11 +634,11 @@ var igv = (function (igv) {
         $track.append($viewportContainer);
 
         rect =
-        {
-            position: $viewportContainer.position(),
-            width: $viewportContainer.width(),
-            height: $viewportContainer.height()
-        };
+            {
+                position: $viewportContainer.position(),
+                width: $viewportContainer.width(),
+                height: $viewportContainer.height()
+            };
 
         // rect.position = $viewportContainer.position();
         // rect.width = $viewportContainer.width();
@@ -841,20 +841,28 @@ var igv = (function (igv) {
     };
 
     igv.Browser.prototype.removeMultiLocusPanelWithGenomicState = function (genomicState) {
-        var self = this;
+        var self = this,
+            index;
+
+        index = this.genomicStateList.indexOf(genomicState);
+
         if (true === this.config.showIdeogram) {
-            this.ideoPanel.removePanelWithLocusIndex(this.genomicStateList.indexOf(genomicState));
+            this.ideoPanel.removePanelWithLocusIndex(index);
         }
 
         this.trackViews.forEach(function (trackView) {
-            trackView.removeViewportWithLocusIndex(self.genomicStateList.indexOf(genomicState));
+            trackView.removeViewportWithLocusIndex(index);
+        });
+
+        this.genomicStateList.splice(index, 1);
+
+        this.trackViews.forEach(function (trackView) {
+            trackView.viewports.forEach(function (viewport) {
+                viewport.setWidth(self.viewportContainerWidth()/self.genomicStateList.length);
+            });
         });
 
         this.resize();
-
-        // this.multiLocusPanelLayoutWithTruthFunction(genomicState, function (candidate) {
-        //     return !_.isEqual(candidate, genomicState);
-        // });
 
     };
 
@@ -888,6 +896,7 @@ var igv = (function (igv) {
 
     igv.Browser.prototype.emptyViewportContainers = function () {
 
+        $('#igv-content-header').empty();
         $('.igv-scrollbar-outer-div').remove();
         $('.igv-viewport-div').remove();
         $('.igv-ruler-sweeper-div').remove();
@@ -934,17 +943,20 @@ var igv = (function (igv) {
         this.getGenomicStateList(loci, this.viewportContainerWidth())
 
             .then(function (genomicStateList) {
-                var $content_header;
 
                 if (genomicStateList.length > 0) {
 
+                    self.emptyViewportContainers();
+
+                    if (true === self.config.showIdeogram) {
+                        self.ideoPanel.discardPanels();
+                    }
+
                     genomicStateList.forEach(function (gs) {
-                        gs.referenceFrame = new igv.ReferenceFrame(gs.chromosome.name, gs.start, (gs.end - gs.start) (self.viewportContainerWidth()/genomicStateList.length));
+                        gs.referenceFrame = new igv.ReferenceFrame(gs.chromosome.name, gs.start, (gs.end - gs.start), (self.viewportContainerWidth()/genomicStateList.length));
                     });
 
                     self.genomicStateList = genomicStateList;
-
-                    self.emptyViewportContainers();
 
                     self.updateLocusSearchWidget(_.first(self.genomicStateList));
 
@@ -954,9 +966,7 @@ var igv = (function (igv) {
                     self.toggleCursorGuide(self.genomicStateList);
 
                     if (true === self.config.showIdeogram) {
-                        $content_header = $('#igv-content-header');
-                        self.ideoPanel.removeAllPanels();
-                        self.ideoPanel.buildPanels($content_header);
+                        self.ideoPanel.buildPanels($('#igv-content-header'));
                     }
 
                     self.buildViewportsWithGenomicStateList(genomicStateList);
@@ -1291,13 +1301,13 @@ var igv = (function (igv) {
                 source = tokens[2].trim();
 
                 obj =
-                {
-                    gene: tokens[0],
-                    chromosome: igv.browser.genome.getChromosomeName(locusTokens[0].trim()),
-                    start: parseInt(rangeTokens[0].replace(/,/g, '')),
-                    end: parseInt(rangeTokens[1].replace(/,/g, '')),
-                    type: ("gtex" === source ? "snp" : "gene")
-                };
+                    {
+                        gene: tokens[0],
+                        chromosome: igv.browser.genome.getChromosomeName(locusTokens[0].trim()),
+                        start: parseInt(rangeTokens[0].replace(/,/g, '')),
+                        end: parseInt(rangeTokens[1].replace(/,/g, '')),
+                        type: ("gtex" === source ? "snp" : "gene")
+                    };
 
                 results.push(obj);
 

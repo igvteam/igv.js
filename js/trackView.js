@@ -225,19 +225,8 @@ var igv = (function (igv) {
     }
 
     igv.TrackView.prototype.removeViewportWithLocusIndex = function (index) {
-        var self = this,
-            discard;
-
-        discard = this.viewports[ index ];
+        this.viewports[ index ].$viewport.remove();
         this.viewports.splice(index, 1);
-
-        discard.$viewport.remove();
-
-        // reset genomic state indices
-        this.viewports.forEach(function (viewport, index) {
-            viewport.setWidth(igv.browser.viewportContainerWidth()/igv.browser.genomicStateList.length);
-        });
-
     };
 
     igv.TrackView.prototype.attachDragWidget = function () {

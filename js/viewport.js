@@ -610,7 +610,7 @@ var igv = (function (igv) {
         $(self.canvas).on('mousedown.viewport.canvas', function (e) {
             e.preventDefault();
             canvasMouseDownX = igv.translateMouseCoordinates(e, self.canvas).x;
-            console.log('canvas x ' + canvasMouseDownX);
+            // console.log('canvas x ' + canvasMouseDownX);
         });
 
         lastClickTime = 0;
@@ -627,7 +627,7 @@ var igv = (function (igv) {
 
             e.preventDefault();
 
-            console.log('click.viewport.canvas');
+            // console.log('click.viewport.canvas');
 
             canvasMouseX = igv.translateMouseCoordinates(e, self.canvas).x;
             frame = self.genomicState.referenceFrame;
