@@ -113,19 +113,13 @@ var igv = (function (igv) {
             maxAltLength = variant.referenceBases.length,
             start, end;
 
-        // console.log(variant);
-        if (variant.referenceBases.length > 1) {
+        if (variant.info && variant.info["VT"]) {
+            variant.type = variant.info["VT"].toLowerCase();
+        } else if (variant.info && variant.info["PERIOD"]) {
+            variant.type = 'str';
+        } else if (variant.referenceBases.length > 1) {
             variant.type = 'str';
         }
-
-        // if (variant.info && variant.info["VT"]) {
-        //     // console.log(variant, variant.info.VT, variant.info["VT"]);
-        //     variant.type = variant.info["VT"].toLowerCase();
-        // } else if (variant.info && variant.info["PERIOD"]) {
-        //     variant.type = 'str';
-        // } else if (variant.referenceBases.length > 1) {
-        //     variant.type = 'str';
-        // }
 
 
         variant.alleles = [];

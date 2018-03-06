@@ -62,8 +62,6 @@ var igv = (function (igv) {
 
         this.nRows = 1;  // Computed dynamically
         this.groupBy = "NONE";
-        this.filters = [];
-        this.filterBy = undefined;
     };
 
 
@@ -104,8 +102,9 @@ var igv = (function (igv) {
 
     }
 
-    function getCallsetsLength(callSets) {
-        var length = 0;
+    function getCallsetsLength() {
+        var length = 0,
+            callSets = this.callSets;
         Object.keys(callSets).forEach(function (key) {
             if (callSets[key]) length += callSets[key].length;
         });
@@ -116,7 +115,7 @@ var igv = (function (igv) {
     function computeVisibilityWindow() {
 
         if (this.callSets) {
-            var length = getCallsetsLength(this.callSets);
+            var length = getCallsetsLength.call(this);
             if (length < 10) {
                 this.visibilityWindow = DEFAULT_VISIBILITY_WINDOW;
             }
@@ -148,7 +147,7 @@ var igv = (function (igv) {
     igv.VariantTrack.prototype.computePixelHeight = function (features) {
 
         var callSets = this.callSets,
-            nCalls = callSets ? getCallsetsLength(this.callSets) : 0,
+            nCalls = callSets ? getCallsetsLength.call(this) : 0,
             callHeight = (this.displayMode === "EXPANDED" ? this.expandedCallHeight : this.squishedCallHeight),
             vGap = (this.displayMode === 'EXPANDED') ? this.expandedVGap : this.squishedVGap,
             groupGap = (this.displayMode === 'EXPANDED') ? this.expandedGroupGap : this.squishedGroupGap,
@@ -180,7 +179,7 @@ var igv = (function (igv) {
             //     this.expandedCallHeight = Math.max(1, 2000 / (nCalls * nRows));
             // }
 
-            return h + vGap + groupSpace + (nCalls- groupsLength + 1) * (callHeight + vGap);
+            return h + vGap + groupSpace + (nCalls - groupsLength + 1) * (callHeight + vGap);
             //return h + vGap + nCalls * nRows * (this.displayMode === "EXPANDED" ? this.expandedCallHeight : this.squishedCallHeight);
 
         }
@@ -204,28 +203,9 @@ var igv = (function (igv) {
 
         this.variantBandHeight = 10 + this.nRows * (this.variantHeight + vGap);
 
-        if (this.filterBy) {
-            callSets = {};
-            callSetGroups = []
-            Object.keys(this.callSets).forEach(function(groupName) {
-                var group = self.callSets[groupName];
-                group.forEach(function(callSet) {
-                    var attrs = igv.sampleInformation.getAttributes(callSet.name);
-                    var attribute = attrs[self.filterBy];
-                    if (self.filters.indexOf(attribute) !== -1) {
-                        if (!callSets.hasOwnProperty(group)) {
-                            callSets[group] = [];
-                            callSetGroups.push(group);
-                        }
-                        callSets[group].push(callSet);
-                    }
-                });
-            });
-        } else {
-            callSets = this.callSets;
-            callSetGroups = this.callSetGroups;
-        }
-        nCalls = getCallsetsLength(callSets);
+        callSets = this.callSets;
+        callSetGroups = this.callSetGroups;
+        nCalls = getCallsetsLength.call(this);
 
         igv.graphics.fillRect(ctx, 0, 0, pixelWidth, pixelHeight, {'fillStyle': "rgb(255, 255, 255)"});
 
@@ -715,28 +695,13 @@ var igv = (function (igv) {
                         }
                     }
                 });
-            })
+            });
         }
 
         this.callSets = groupedCallSets;
         this.callSetGroups = callSetGroups;
         this.groupBy = attribute;
         this.trackView.update();
-    };
-
-    igv.VariantTrack.prototype.filterByFamily = function(value) {
-        var self = this;
-        if ("" === value || undefined === value) {
-            self.filters.empty();
-            self.filterBy = undefined;
-        } else {
-            try {
-                self.filters = value.split(",");
-                self.filterBy = "familyId";
-            } catch (err) {
-                console.log(err);
-            }
-        }
     };
 
     igv.VariantTrack.prototype.menuItemList = function (popover) {
@@ -757,27 +722,6 @@ var igv = (function (igv) {
         });
 
         menuItems = menuItems.concat(mapped);
-
-        // option to filter by family ids, could be extended to filter by other attributes
-        if (igv.sampleInformation.getAttributeNames().indexOf("familyId") !== -1) {
-            menuItems.push(igv.trackMenuItem(popover, this.trackView, "Filter by Family ID", function () {
-                return "Family IDs"
-            }, this.filters.join(","), function () {
-
-                var value;
-
-                value = igv.dialog.$dialogInput.val().trim();
-
-                console.log(value);
-
-                if ('' !== value && undefined !== value) {
-                    self.filterByFamily(value);
-                    self.trackView.update();
-                }
-
-
-            }, undefined));
-        }
 
         if (igv.sampleInformation.hasAttributes()) {
             var $groupBy = {
