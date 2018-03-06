@@ -517,9 +517,9 @@ var igv = (function (igv) {
 
     igv.Browser.prototype.update = function () {
 
-        this.updateLocusSearchWidget(_.first(this.genomicStateList));
+        this.updateLocusSearchWidget(this.genomicStateList[0]);
 
-        this.windowSizePanel.updateWithGenomicState(_.first(this.genomicStateList));
+        this.windowSizePanel.updateWithGenomicState(this.genomicStateList[0]);
 
         _.each([this.ideoPanel, this.karyoPanel, this.centerGuide], function (renderable) {
             if (renderable) {
@@ -943,6 +943,7 @@ var igv = (function (igv) {
         this.getGenomicStateList(loci, this.viewportContainerWidth())
 
             .then(function (genomicStateList) {
+                var width;
 
                 if (genomicStateList.length > 0) {
 
@@ -952,13 +953,15 @@ var igv = (function (igv) {
                         self.ideoPanel.discardPanels();
                     }
 
+                    width = self.viewportContainerWidth();
+
                     genomicStateList.forEach(function (gs) {
-                        gs.referenceFrame = new igv.ReferenceFrame(gs.chromosome.name, gs.start, (gs.end - gs.start), (self.viewportContainerWidth()/genomicStateList.length));
+                        gs.referenceFrame = new igv.ReferenceFrame(gs.chromosome.name, gs.start, (gs.end - gs.start) / (width / genomicStateList.length));
                     });
 
                     self.genomicStateList = genomicStateList;
 
-                    self.updateLocusSearchWidget(_.first(self.genomicStateList));
+                    // self.updateLocusSearchWidget(self.genomicStateList[ 0 ]);
 
                     self.zoomWidgetLayout();
 
@@ -971,14 +974,15 @@ var igv = (function (igv) {
 
                     self.buildViewportsWithGenomicStateList(genomicStateList);
 
-                    self.update();
-
                     return genomicStateList
 
                 } else {
                     throw new Error('Unrecognized locus ' + string);
                 }
 
+            })
+            .then(function (genomicStateList) {
+                self.update();
             })
             .catch(function (error) {
                 igv.presentAlert(error);
