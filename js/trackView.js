@@ -224,6 +224,25 @@ var igv = (function (igv) {
         return height;
     }
 
+    igv.TrackView.prototype.removeViewportWithLocusIndex = function (index) {
+        var self = this,
+            discard;
+
+        discard = this.viewports[ index ];
+        this.viewports.splice(index, 1);
+
+        discard.$viewport.remove();
+
+        // reset genomic state indices
+        this.viewports.forEach(function (viewport, index) {
+            viewport.genomicState.locusIndex = index;
+            viewport.genomicState.locusCount = self.viewports.length;
+            viewport.$viewport.data("locusindex", index);
+            viewport.setWidth(igv.browser.viewportContainerWidth()/viewport.genomicState.locusCount);
+        });
+
+    };
+
     igv.TrackView.prototype.attachDragWidget = function () {
 
         var self = this;

@@ -48,7 +48,7 @@ var igv = (function (igv) {
             this.$close.append(this.$closeButton);
 
             this.$close.click(function (e) {
-                igv.browser.closeMultiLocusPanelWithGenomicState(self.genomicState);
+                igv.browser.removeMultiLocusPanelWithGenomicState(self.genomicState);
             });
 
             this.$viewport.append(this.$close);

@@ -124,8 +124,20 @@ var igv = (function (igv) {
     };
 
     igv.IdeoPanel.prototype.removePanelWithLocusIndex = function (index) {
+        var self = this;
+
         this.panelWithLocusIndex(index).$ideogram.remove();
         this.panels.splice(index, 1);
+
+        // reset genomic state indices
+        this.panels.forEach(function (panel, index) {
+            panel.genomicState.locusIndex = index;
+            panel.genomicState.locusCount = self.panels.length;
+        });
+    };
+
+    igv.IdeoPanel.prototype.repaintPanelWithLocusIndex = function (index) {
+        repaintPanel( this.panelWithLocusIndex(index) );
     };
 
     function setWidth ($ideogram, width) {

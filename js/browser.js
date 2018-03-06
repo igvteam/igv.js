@@ -506,7 +506,7 @@ var igv = (function (igv) {
         }
 
         if (this.ideoPanel) {
-            this.ideoPanel.repaintWithLocusIndex(locusIndex);
+            this.ideoPanel.repaintPanelWithLocusIndex(locusIndex);
         }
 
         _.each(igv.Viewport.viewportsWithLocusIndex(locusIndex), function (viewport) {
@@ -535,14 +535,14 @@ var igv = (function (igv) {
 
     igv.Browser.prototype.updateWithLocusIndex = function (locusIndex) {
 
-        igv.browser.updateLocusSearchWidget(_.first(this.genomicStateList));
+        igv.browser.updateLocusSearchWidget(this.genomicStateList[ 0 ]);
 
         if (0 === locusIndex) {
             this.windowSizePanel.updateWithGenomicState(this.genomicStateList[locusIndex]);
         }
 
         if (this.ideoPanel) {
-            this.ideoPanel.repaintWithLocusIndex(locusIndex);
+            this.ideoPanel.repaintPanelWithLocusIndex(locusIndex);
         }
 
         if (this.karyoPanel) {
@@ -839,24 +839,28 @@ var igv = (function (igv) {
 
     };
 
-    igv.Browser.prototype.closeMultiLocusPanelWithGenomicState = function (genomicState) {
+    igv.Browser.prototype.removeMultiLocusPanelWithGenomicState = function (genomicState) {
 
-        this.multiLocusPanelLayoutWithTruthFunction(genomicState, function (candidate) {
-            return !_.isEqual(candidate, genomicState);
+        if (true === this.config.showIdeogram) {
+            this.ideoPanel.removePanelWithLocusIndex(genomicState.locusIndex);
+        }
+
+        this.trackViews.forEach(function (trackView) {
+            trackView.removeViewportWithLocusIndex(genomicState.locusIndex);
         });
+
+        this.resize();
+
+        // this.multiLocusPanelLayoutWithTruthFunction(genomicState, function (candidate) {
+        //     return !_.isEqual(candidate, genomicState);
+        // });
 
     };
 
     igv.Browser.prototype.multiLocusPanelLayoutWithTruthFunction = function (genomicState, filterFunction) {
 
         var self = this,
-            $content_header,
             filtered;
-
-        $content_header = $('#igv-content-header');
-        if (true === this.config.showIdeogram) {
-            self.ideoPanel.removePanelWithLocusIndex(genomicState.locusIndex);
-        }
 
         this.emptyViewportContainers();
 
@@ -870,10 +874,6 @@ var igv = (function (igv) {
             f.referenceFrame.bpPerPixel = (f.end - f.start) / (self.viewportContainerWidth() / f.locusCount);
             return f;
         });
-
-        // if (true === this.config.showIdeogram) {
-        //     this.ideoPanel.buildPanels($content_header);
-        // }
 
         this.buildViewportsWithGenomicStateList(this.genomicStateList);
 
