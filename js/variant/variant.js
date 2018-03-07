@@ -54,7 +54,7 @@ var igv = (function (igv) {
             if (!infoStr) return undefined;
 
             var info = {};
-            infoStr.split('; ').forEach(function (elem) {
+            infoStr.split(';').forEach(function (elem) {
                 var element = elem.split('=');
                 info[element[0]] = element[1];
             });
@@ -113,22 +113,16 @@ var igv = (function (igv) {
             maxAltLength = variant.referenceBases.length,
             start, end;
 
-
-        if (variant.info && variant.info["PERIOD"]) {
+        if (variant.info && variant.info["VT"]) {
+            variant.type = variant.info["VT"].toLowerCase();
+        } else if (variant.info && variant.info["PERIOD"]) {
             variant.type = 'str';
         }
 
 
         variant.alleles = [];
 
-        // If an STR define start and end based on reference allele.  Otherwise start and end computed below based
-        // on alternate allele type (snp, insertion, deletion)
-
-        if ('str' === variant.type) {
-            variant.start = variant.pos - 1;
-            variant.end = variant.start + variant.referenceBases.length;
-
-        } else if (isRef(variant.alternateBases)) {
+        if (isRef(variant.alternateBases)) {
             variant.type = "refblock";
         }
 
@@ -177,6 +171,11 @@ var igv = (function (igv) {
 
 
                 });
+            }
+
+            if ("str" === variant.type) {
+                start = variant.pos - 1;
+                end = start + variant.referenceBases.length;
             }
 
             variant.start = start;
