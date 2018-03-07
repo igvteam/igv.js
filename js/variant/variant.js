@@ -117,8 +117,6 @@ var igv = (function (igv) {
             variant.type = variant.info["VT"].toLowerCase();
         } else if (variant.info && variant.info["PERIOD"]) {
             variant.type = 'str';
-        } else if (variant.referenceBases.length > 1) {
-            variant.type = 'str';
         }
 
 
