@@ -433,26 +433,48 @@ var igv = (function (igv) {
             viewport.resize();
         });
 
-        if (this.scrollbar) {
-            this.scrollbar.update();
-        }
+        this.update();
 
     };
 
+    /**
+     * Call update when the content of the track has changed,  e.g. by loading or changing location.
+     */
     igv.TrackView.prototype.update = function () {
-        var self = this;
+
+        var maxContentHeight, heightPromises = [], self = this;
 
         this.viewports.forEach(function (viewport) {
-            // console.log('--- update viewport ' + self.track.id + ' locus index ' + viewport.genomicState.locusIndex + ' ---');
-            viewport.update();
+            heightPromises.push(viewport.adjustContentHeight());
         });
+        Promise.all(heightPromises)
+            .then(function (contentHeights) {
+                maxContentHeight = contentHeights.reduce(function (accumulator, currentValue) {
+                    return Math.max(accumulator, currentValue);
+                });
 
-        if (this.scrollbar) {
-            this.scrollbar.update();
-        }
+                if (self.track.autoHeight) {
+                    self.setTrackHeight(maxContentHeight, false);
+                } else if (self.track.paintAxis) {
+                    $(self.controlCanvas).height(maxContentHeight);
+                    self.controlCanvas.setAttribute("height", maxContentHeight);
+                }
 
+                if (self.scrollbar) {
+                    self.scrollbar.update();
+                }
+            })
+            .then(function () {
+                self.viewports.forEach(function (viewport) {
+                    viewport.update();
+                })
+            })
     };
 
+
+    /**
+     * Repaint existing features (e.g. a color, resort, or display mode change).
+     */
     igv.TrackView.prototype.repaint = function () {
         var self = this;
 
