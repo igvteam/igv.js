@@ -68,10 +68,9 @@ var igv = (function (igv) {
         }
 
         // zoom in to see features
-        if (trackView.track.visibilityWindow !== undefined || !trackView.track.supportsWholeGenome) {
-            self.$zoomInNotice = createZoomInNotice();
-            $(this.contentDiv).append(self.$zoomInNotice);
-        }
+        self.$zoomInNotice = createZoomInNotice();
+        $(this.contentDiv).append(self.$zoomInNotice);
+
 
         function createZoomInNotice() {
             var $container,
@@ -196,10 +195,70 @@ var igv = (function (igv) {
         }
     };
 
+
+    /**
+     * Return a promise to adjust content height to accomodate features for current genomic state
+     *
+     * @returns {*}
+     */
+    igv.Viewport.prototype.adjustContentHeight = function () {
+
+        var self = this,
+            pixelWidth,
+            bpWidth,
+            bpStart,
+            bpEnd,
+            genomicState = self.genomicState,
+            referenceFrame = genomicState.referenceFrame,
+            chr,
+            refFrameStart,
+            chrLength;
+
+        if (!viewIsReady.call(this) || !(typeof self.trackView.track.computePixelHeight === 'function') || showZoomInNotice.call(this)) {
+            return Promise.resolve(this.getContentHeight());
+        }
+
+        chr = referenceFrame.chrName;
+
+        // Expand the requested range so we can pan a bit without reloading.  But not beyond chromosome bounds
+        chrLength = igv.browser.genome.getChromosome(chr).bpLength;
+        pixelWidth = 3 * this.canvas.width;
+        bpWidth = referenceFrame.toBP(pixelWidth);
+        bpStart = Math.floor(Math.max(0, referenceFrame.start - bpWidth / 3));
+        bpEnd = Math.ceil(Math.min(chrLength, bpStart + bpWidth));
+
+        self.startSpinner();
+
+        // console.log('get features');
+        return getFeatures.call(self, chr, bpStart, bpEnd, referenceFrame.bpPerPixel)
+
+            .then(function (features) {
+
+                var currentContentHeight,
+                    requiredContentHeight;
+
+                self.stopSpinner();
+
+                if (features) {
+
+                    // Height of content div and content canvas
+                    requiredContentHeight = self.trackView.track.computePixelHeight(features);
+                    currentContentHeight = $(self.contentDiv).height();
+
+                    if (requiredContentHeight !== currentContentHeight) {
+                        self.setContentHeight(requiredContentHeight);
+                    }
+
+                    return self.getContentHeight();
+                }
+            })
+    }
+
     igv.Viewport.prototype.update = function () {
 
-        //console.trace();
-        if (this.tile) this.tile.invalidate = true;
+        if (this.tile) {
+            this.tile.invalidate = true;
+        }
         this.repaint();
 
     };
@@ -224,33 +283,23 @@ var igv = (function (igv) {
         }
 
         // TODO -- show whole genome zoom in notice here
-        if (this.$zoomInNotice && this.trackView.track.visibilityWindow !== undefined && this.trackView.track.visibilityWindow > 0) {
-
-            if ((referenceFrame.bpPerPixel * this.$viewport.width() > this.trackView.track.visibilityWindow) ||
-                (referenceFrame.chrName.toLowerCase() === "all" && !this.trackView.track.supportsWholeGenome)) {
-
-                this.tile = null;
-                this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
-
-                self.stopSpinner();
-
-                this.$zoomInNotice.show();
-                return;
-            } else {
-                this.$zoomInNotice.hide();
-            }
+        if (showZoomInNotice.call(this)) {
+            this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
+            this.$zoomInNotice.show();
+            return;
+        } else {
+            this.$zoomInNotice.hide();
         }
+
 
         chr = referenceFrame.chrName;
         refFrameStart = referenceFrame.start;
         refFrameEnd = refFrameStart + referenceFrame.toBP(this.canvas.width);
 
-        //  if (this.tile && this.tile.containsRange(chr, refFrameStart, refFrameEnd, referenceFrame.bpPerPixel)) {
-        // console.log('paint pre-existing canvas');
+        // Paint existing cached image, if any, while data loads.
         this.paintImage(chr, refFrameStart, refFrameEnd, referenceFrame.bpPerPixel);
 
-        if (!this.tile ||
-            this.tile.invalidate || !this.tile.containsRange(chr, refFrameStart, refFrameEnd, referenceFrame.bpPerPixel)) {
+        if (!tileIsValid.call(chr, refFrameStart, refFrameEnd, referenceFrame.bpPerPixel)) {
 
             //TODO -- if bpPerPixel (zoom level) changed repaint image from cached data => new optional track method to return
             //TODO -- cached features directly (not a promise for features).
@@ -266,12 +315,6 @@ var igv = (function (igv) {
             // Adjust pixel width in case bounds were clamped
             pixelWidth = (bpEnd - bpStart) / referenceFrame.bpPerPixel;
 
-            if (self.loading && self.loading.start === bpStart && self.loading.end === bpEnd) {
-                return;
-            }
-
-            self.loading = {start: bpStart, end: bpEnd};
-
             self.startSpinner();
 
             // console.log('get features');
@@ -279,51 +322,30 @@ var igv = (function (igv) {
 
                 .then(function (features) {
 
-                    var currentContentHeight,
-                        requiredContentHeight,
-                        roiPromises;
-
-
-                    // self.loading = false;
-                    self.loading = undefined;
+                    var roiPromises;
 
                     self.stopSpinner();
-
-                    if (features) {
-
-                        if (typeof self.trackView.track.computePixelHeight === 'function') {
-
-                            // Height of content div and content canvas
-                            requiredContentHeight = self.trackView.track.computePixelHeight(features);
-                            currentContentHeight = $(self.contentDiv).height();
-
-
-                            if (requiredContentHeight !== currentContentHeight) {
-                                self.trackView.setContentHeightForViewport(self, requiredContentHeight)
-                            }
-                        }
-                    }
 
                     buffer = document.createElement('canvas');
                     buffer.width = pixelWidth;
                     buffer.height = self.canvas.height;
                     drawConfiguration =
-                        {
-                            features: features,
-                            context: buffer.getContext('2d'),
-                            pixelWidth: buffer.width,
-                            pixelHeight: buffer.height,
-                            bpStart: bpStart,
-                            bpEnd: bpEnd,
-                            bpPerPixel: referenceFrame.bpPerPixel,
-                            referenceFrame: referenceFrame,
-                            genomicState: genomicState,
-                            selection: self.selection,
-                            viewport: self,
-                            viewportWidth: self.$viewport.width(),
-                            viewportContainerX: genomicState.referenceFrame.toPixels(genomicState.referenceFrame.start - bpStart),
-                            viewportContainerWidth: igv.browser.viewportContainerWidth()
-                        };
+                    {
+                        features: features,
+                        context: buffer.getContext('2d'),
+                        pixelWidth: buffer.width,
+                        pixelHeight: buffer.height,
+                        bpStart: bpStart,
+                        bpEnd: bpEnd,
+                        bpPerPixel: referenceFrame.bpPerPixel,
+                        referenceFrame: referenceFrame,
+                        genomicState: genomicState,
+                        selection: self.selection,
+                        viewport: self,
+                        viewportWidth: self.$viewport.width(),
+                        viewportContainerX: genomicState.referenceFrame.toPixels(genomicState.referenceFrame.start - bpStart),
+                        viewportContainerWidth: igv.browser.viewportContainerWidth()
+                    };
 
                     if (features) {
 
@@ -397,33 +419,44 @@ var igv = (function (igv) {
             return (/*0 === genomicState.locusIndex &&*/ (typeof trackView.track.paintAxis === 'function') && trackView.controlCanvas.width > 0 && trackView.controlCanvas.height > 0);
         }
 
-        function viewIsReady() {
-            return igv.browser && igv.browser.genomicStateList && igv.browser.genomicStateList[self.genomicState.locusIndex].referenceFrame;
-        }
-
-
-        function getFeatures(chr, start, end, bpPerPixel) {
-            var self = this;
-            if (self.cachedFeatures && self.cachedFeatures.containsRange(chr, start, end, bpPerPixel)) {
-                return Promise.resolve(self.cachedFeatures.features)
-            }
-            else {
-                if (typeof self.trackView.track.getFeatures === "function") {
-                    return self.trackView.track.getFeatures(chr, start, end, bpPerPixel)
-                        .then(function (features) {
-                            self.cachedFeatures = new CachedFeatures(chr, start, end, bpPerPixel, features);
-                            return features;
-                        })
-                        .catch(function (error) {
-                            console.log(error);
-                        })
-                }
-                else {
-                    Promise.resolve(undefined);
-                }
-            }
+        function tileIsValid(chr, start, end, bpPerPixel) {
+            return this.tile && !this.tile.invalidate && this.tile.containsRange(chr, start, end, bpPerPixel)
         }
     };
+
+
+    function showZoomInNotice() {
+        var referenceFrame = this.genomicState.referenceFrame;
+        return (this.trackView.track.visibilityWindow !== undefined && this.trackView.track.visibilityWindow > 0 &&
+            (referenceFrame.bpPerPixel * this.$viewport.width() > this.trackView.track.visibilityWindow)) ||
+            (referenceFrame.chrName.toLowerCase() === "all" && !this.trackView.track.supportsWholeGenome);
+    }
+
+    function viewIsReady() {
+        return igv.browser && igv.browser.genomicStateList && igv.browser.genomicStateList[this.genomicState.locusIndex].referenceFrame;
+    }
+
+    function getFeatures(chr, start, end, bpPerPixel) {
+        var self = this;
+        if (self.cachedFeatures && self.cachedFeatures.containsRange(chr, start, end, bpPerPixel)) {
+            return Promise.resolve(self.cachedFeatures.features)
+        }
+        else {
+            if (typeof self.trackView.track.getFeatures === "function") {
+                return self.trackView.track.getFeatures(chr, start, end, bpPerPixel)
+                    .then(function (features) {
+                        self.cachedFeatures = new CachedFeatures(chr, start, end, bpPerPixel, features);
+                        return features;
+                    })
+                    .catch(function (error) {
+                        console.log(error);
+                    })
+            }
+            else {
+                Promise.resolve(undefined);
+            }
+        }
+    }
 
     igv.Viewport.prototype.setContentHeight = function (contentHeight) {
         // Maximum height of a canvas is ~32,000 pixels on Chrome, possibly smaller on other platforms
@@ -432,50 +465,18 @@ var igv = (function (igv) {
         if (this.trackView.track.minHeight) {
             contentHeight = Math.max(this.trackView.track.minHeight, contentHeight);
         }
-
-
-
-        // Optionally adjust the trackDiv and viewport height to fit the content height, within min/max bounds
-        if (this.trackView.track.autoHeight) {
-            setTrackViewHeight.call(this, contentHeight, false);
+        if (this.trackView.track.maxHeight) {
+            contentHeight = Math.min(this.trackView.track.maxHeight, contentHeight);
         }
 
         $(this.contentDiv).height(contentHeight);
         $(this.canvas).height(contentHeight);
         this.canvas.setAttribute("height", contentHeight);
-
-        if (this.trackView.track.paintAxis) {
-            $(this.trackView.controlCanvas).height(contentHeight);
-            this.trackView.controlCanvas.setAttribute("height", contentHeight);
-        }
-
     };
 
-    function setTrackViewHeight(height, doUpdate) {
+    igv.Viewport.prototype.getContentHeight = function () {
 
-        if ((1 === this.genomicState.locusCount) || (height > $(this.trackView.trackDiv).height())) {
-
-            if (this.trackView.track.minHeight) height = Math.max(this.trackView.track.minHeight, height);
-            if (this.trackView.track.maxHeight) height = Math.min(this.trackView.track.maxHeight, height);
-
-            console.log('set trackView height ' + this.trackView.track.id + ' locus index ' + this.genomicState.locusIndex + ' requested / current ' + height + ' / ' + $(this.trackView.trackDiv).height());
-
-            this.trackView.track.height = height;
-
-            $(this.trackView.trackDiv).height(height);
-
-            if (this.trackView.track.paintAxis) {
-                $(this.trackView.controlCanvas).height(height);
-                this.trackView.controlCanvas.setAttribute("height", height);
-            }
-
-            this.$viewport.height(height);
-
-            if (doUpdate === undefined || doUpdate === true) {
-                this.update();
-            }
-
-        }
+        return $(this.contentDiv).height();
 
     }
 
@@ -785,32 +786,6 @@ var igv = (function (igv) {
         return this.bpPerPixel === bpPerPixel && start >= this.startBP && end <= this.endBP && chr === this.chr;
     };
 
-    // TODO: dat - Called from BAMTrack.altClick. Change call to redrawTile(viewPort, features)
-    // igv.Viewport.prototype.redrawTile = function (features) {
-    //
-    //     var buffer;
-    //
-    //     if (!this.tile) {
-    //         return;
-    //     }
-    //
-    //     buffer = document.createElement('canvas');
-    //     buffer.width = this.tile.image.width;
-    //     buffer.height = this.tile.image.height;
-    //
-    //     this.trackView.track.draw({
-    //         features: features,
-    //         context: buffer.getContext('2d'),
-    //         bpStart: this.tile.startBP,
-    //         bpPerPixel: this.tile.bpPerPixel,
-    //         pixelWidth: buffer.width,
-    //         pixelHeight: buffer.height
-    //     });
-    //
-    //
-    //     this.tile = new Tile(this.tile.chr, this.tile.startBP, this.tile.endBP, this.tile.bpPerPixel, buffer);
-    //     this.paintImage(this.genomicState.referenceFrame);
-    // };
 
     return igv;
 
