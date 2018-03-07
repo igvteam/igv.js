@@ -147,7 +147,7 @@ var igv = (function (igv) {
 
                 width = browser.viewportContainerWidth();
 
-                return browser.getGenomicStateList(getInitialLocus(config), width)
+                return browser.getGenomicStateList(getInitialLocus(config), undefined)
             })
 
             .then(function (genomicStateList) {
@@ -157,8 +157,10 @@ var igv = (function (igv) {
                 if (genomicStateList.length > 0) {
 
                     browser.genomicStateList = genomicStateList.map(function (gs) {
+                        var obj;
                         gs.referenceFrame = new igv.ReferenceFrame(gs.chromosome.name, gs.start, (gs.end - gs.start) / (width / genomicStateList.length));
-                        return gs;
+                        obj = _.omit(gs, 'start', 'end');
+                        return obj;
                     });
 
                     browser.updateLocusSearchWidget(browser.genomicStateList[ 0 ]);

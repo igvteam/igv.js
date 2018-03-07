@@ -851,12 +851,10 @@ var igv = (function (igv) {
     igv.Browser.prototype.removeMultiLocusPanelWithGenomicState = function (genomicState, doResize) {
         var self = this,
             index,
-            width,
+            viewportContainerWidth,
             previousGenomicStateListLength;
 
         index = this.genomicStateList.indexOf(genomicState);
-        width = self.viewportContainerWidth();
-        previousGenomicStateListLength = this.genomicStateList.length;
 
         if (true === this.config.showIdeogram) {
             this.ideoPanel.removePanelWithLocusIndex(index);
@@ -866,17 +864,23 @@ var igv = (function (igv) {
             trackView.removeViewportWithLocusIndex(index);
         });
 
+        viewportContainerWidth = self.viewportContainerWidth();
+        previousGenomicStateListLength = this.genomicStateList.length;
+
         this.genomicStateList.splice(index, 1);
 
         this.genomicStateList.forEach(function (gs, i) {
             var bpp,
-                ss,
                 ee;
 
-            ss = gs.referenceFrame.start;
-            ee = ss + gs.referenceFrame.bpPerPixel * (width / previousGenomicStateListLength);
-            bpp = (ee - ss) / (width / self.genomicStateList.length);
-            self.genomicStateList[ i ].referenceFrame = new igv.ReferenceFrame(gs.chromosome.name, ss, bpp);
+            // ss = gs.referenceFrame.start;
+            // ee = ss + gs.referenceFrame.bpPerPixel * (viewportContainerWidth / previousGenomicStateListLength);
+            // bpp = (ee - ss) / (viewportContainerWidth / self.genomicStateList.length);
+
+            ee = gs.referenceFrame.calculateEnd(viewportContainerWidth / previousGenomicStateListLength);
+            bpp = gs.referenceFrame.calculateBPP(ee, viewportContainerWidth / self.genomicStateList.length);
+
+            self.genomicStateList[ i ].referenceFrame = new igv.ReferenceFrame(gs.chromosome.name, gs.referenceFrame.start, bpp);
         });
 
         this.trackViews.forEach(function (trackView) {
@@ -953,7 +957,10 @@ var igv = (function (igv) {
                     width = self.viewportContainerWidth();
 
                     self.genomicStateList = genomicStateList.map(function (gs) {
+                        var obj;
+
                         gs.referenceFrame = new igv.ReferenceFrame(gs.chromosome.name, gs.start, (gs.end - gs.start) / (width / genomicStateList.length));
+                        obj = _.omit(gs, 'start', 'end');
                         return gs;
                     });
 
@@ -1002,8 +1009,9 @@ var igv = (function (igv) {
      * Each mult-locus panel refers to a genomicState.
      *
      * @param loci - array of locus strings (e.g. chr1:1-100,  egfr)
+     * @param viewportContainerWidth
      */
-    igv.Browser.prototype.getGenomicStateList = function (loci) {
+    igv.Browser.prototype.getGenomicStateList = function (loci, viewportContainerWidth) {
 
         var self = this,
             searchConfig = igv.browser.searchConfig,
@@ -1062,7 +1070,7 @@ var igv = (function (igv) {
                             if (genomicState) {
                                 locusGenomicStates.push(genomicState);
                             }
-                        })
+                        });
 
                         return locusGenomicStates;
                     });
@@ -1219,7 +1227,7 @@ var igv = (function (igv) {
 
         }
 
-    }
+    };
 
     igv.Browser.validateLocusExtent = function (chromosome, extent) {
 
