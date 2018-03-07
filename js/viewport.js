@@ -299,7 +299,7 @@ var igv = (function (igv) {
         // Paint existing cached image, if any, while data loads.
         this.paintImage(chr, refFrameStart, refFrameEnd, referenceFrame.bpPerPixel);
 
-        if (!tileIsValid.call(chr, refFrameStart, refFrameEnd, referenceFrame.bpPerPixel)) {
+        if (!tileIsValid.call(self, chr, refFrameStart, refFrameEnd, referenceFrame.bpPerPixel)) {
 
             //TODO -- if bpPerPixel (zoom level) changed repaint image from cached data => new optional track method to return
             //TODO -- cached features directly (not a promise for features).
@@ -315,6 +315,12 @@ var igv = (function (igv) {
             // Adjust pixel width in case bounds were clamped
             pixelWidth = (bpEnd - bpStart) / referenceFrame.bpPerPixel;
 
+            if (self.loading && self.loading.start === bpStart && self.loading.end === bpEnd) {
+                return;
+            }
+
+            self.loading = {start: bpStart, end: bpEnd};
+
             self.startSpinner();
 
             // console.log('get features');
@@ -323,6 +329,8 @@ var igv = (function (igv) {
                 .then(function (features) {
 
                     var roiPromises;
+
+                    self.loading = undefined;
 
                     self.stopSpinner();
 
