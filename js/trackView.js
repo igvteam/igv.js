@@ -229,6 +229,10 @@ var igv = (function (igv) {
         this.viewports.splice(index, 1);
     };
 
+    igv.TrackView.prototype.addViewportWithGenomicStateAfterIndex = function (genomicState, index) {
+
+    };
+
     igv.TrackView.prototype.attachDragWidget = function () {
 
         var self = this;

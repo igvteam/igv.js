@@ -864,7 +864,7 @@ var igv = (function (igv) {
             trackView.removeViewportWithLocusIndex(index);
         });
 
-        viewportContainerWidth = self.viewportContainerWidth();
+        viewportContainerWidth = this.viewportContainerWidth();
         previousGenomicStateListLength = this.genomicStateList.length;
 
         this.genomicStateList.splice(index, 1);
@@ -885,7 +885,7 @@ var igv = (function (igv) {
 
         this.trackViews.forEach(function (trackView) {
             trackView.viewports.forEach(function (viewport) {
-                viewport.setWidth(self.viewportContainerWidth()/self.genomicStateList.length);
+                viewport.setWidth(self.viewportContainerWidth() / self.genomicStateList.length);
             });
         });
 
@@ -893,6 +893,26 @@ var igv = (function (igv) {
             this.resize();
         }
 
+    };
+
+    igv.Browser.prototype.addMultiLocusPanelWithGenomicStateAfterIndex = function (genomicState, index) {
+
+        var self = this,
+            viewportWidth;
+
+        // viewportWidth = this.viewportContainerWidth()/(1 + self.genomicStateList.length);
+        //
+        // if (true === this.config.showIdeogram) {
+        //     this.ideoPanel.setWidth(viewportWidth, false);
+        // }
+        //
+        // this.trackViews.forEach(function (trackView) {
+        //     trackView.viewports.forEach(function (viewport) {
+        //         viewport.setWidth(viewportWidth);
+        //     });
+        // });
+
+        this.repaint();
     };
 
     igv.Browser.prototype.emptyViewportContainers = function () {

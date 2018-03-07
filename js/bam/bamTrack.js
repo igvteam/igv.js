@@ -901,15 +901,17 @@ var igv = (function (igv) {
         return clickedObject ? clickedObject.popupData(config.genomicLocation) : undefined;
     };
 
-
     AlignmentTrack.prototype.popupMenuItemList = function (config) {
 
         var alignment,
+            locusStrings,
             loci,
-            mateLoci,
-            index,
-            head,
-            tail;
+            genomicState,
+            referenceFrame,
+            viewportWidth,
+            centroidBP,
+            alignmentCentriodBP,
+            deltaBP;
 
         this.highlightedAlignmentReadNamed = undefined;
 
@@ -921,43 +923,71 @@ var igv = (function (igv) {
 
             this.highlightedAlignmentReadNamed = alignment.readName;
 
-            loci = igv.browser.genomicStateList.map(function (gs) {
-                return gs.locusSearchString;
-            });
+            config.viewport.trackView.update();
 
-            index = igv.browser.genomicStateList.indexOf(config.viewport.genomicState);
-            head = _.first(loci, 1 + index);
-            tail = _.size(loci) === 1 ? undefined : _.last(loci, _.size(loci) - (1 + index));
+            genomicState = config.viewport.genomicState;
 
-            mateLoci = locusPairWithAlignmentAndViewport(alignment, config.viewport);
+            referenceFrame = genomicState.referenceFrame;
 
-            // discard last element of head and replace with mateLoci
-            head.splice(-1, 1);
-            Array.prototype.push.apply(head, mateLoci);
-            if (tail) {
-                Array.prototype.push.apply(head, tail);
-            }
+            viewportWidth = config.viewport.$viewport.width();
+            centroidBP = referenceFrame.start + referenceFrame.toBP(viewportWidth/2);
 
-            igv.browser.search(head.join(' '));
-        }
+            alignmentCentriodBP = (alignment.start + (alignment.start + alignment.lengthOnRef))/2;
 
-        function locusPairWithAlignmentAndViewport(alignment, viewport) {
-            var left,
-                right,
-                centroid,
-                widthBP;
+            deltaBP = (alignmentCentriodBP - centroidBP);
 
-            widthBP = viewport.$viewport.width() * viewport.genomicState.referenceFrame.bpPerPixel;
+            referenceFrame.start -= deltaBP;
 
-            centroid = (alignment.start + (alignment.start + alignment.lengthOnRef)) / 2;
-            left = alignment.chr + ':' + Math.round(centroid - widthBP / 2.0).toString() + '-' + Math.round(centroid + widthBP / 2.0).toString();
-
-            centroid = (alignment.mate.position + (alignment.mate.position + alignment.lengthOnRef)) / 2;
-            right = alignment.chr + ':' + Math.round(centroid - widthBP / 2.0).toString() + '-' + Math.round(centroid + widthBP / 2.0).toString();
-
-            return [left, right];
+            igv.browser.addMultiLocusPanelWithGenomicStateAfterIndex(genomicState, (igv.browser.genomicStateList.indexOf(config.viewport.genomicState)));
         }
     };
+
+    function matePairLocusStrings(alignment, referenceFrame, viewportWidth) {
+
+        var leftLocusString,
+            rightLocusString,
+            alignmentCentriodBP,
+            widthBP;
+
+        widthBP = referenceFrame.toBP(viewportWidth);
+
+        alignmentCentriodBP = (alignment.start + (alignment.start + alignment.lengthOnRef)) / 2;
+        leftLocusString = alignment.chr + ':' + Math.round(alignmentCentriodBP - widthBP / 2.0) + '-' + Math.round(alignmentCentriodBP + widthBP / 2.0);
+
+        alignmentCentriodBP = (alignment.mate.position + (alignment.mate.position + alignment.lengthOnRef)) / 2;
+        rightLocusString = alignment.chr + ':' + Math.round(alignmentCentriodBP - widthBP / 2.0) + '-' + Math.round(alignmentCentriodBP + widthBP / 2.0);
+
+        return [leftLocusString, rightLocusString];
+    }
+
+    function createGenomicState(locusString) {
+        var locus,
+            genomicState,
+            ss,
+            ee,
+            bpp;
+
+        locus = parse(locusString);
+
+        genomicState = {};
+
+        genomicState.locusSearchString = locusString;
+
+        genomicState.chromosome = igv.browser.genome.getChromosome(locus[ 0 ]);
+
+        ss = locus[ 1 ];
+        ee = locus[ 2 ];
+        bpp = (ee - ss)/(igv.browser.viewportContainerWidth() / (1 + igv.browser.genomicStateList.length));
+        genomicState.referenceFrame = new igv.ReferenceFrame(locus[ 0 ], ss, bpp);
+
+        return genomicState;
+    }
+
+    function parse(locusString) {
+        return locusString.split(/[^a-zA-Z0-9]/).map(function (value, index) {
+            return 0 === index ? value : parseInt(value, 10);
+        });
+    }
 
     AlignmentTrack.prototype.getClickedObject = function (viewport, y, genomicLocation) {
 
@@ -989,7 +1019,7 @@ var igv = (function (igv) {
 
         return undefined;
 
-    }
+    };
 
     function getAlignmentColor(alignment) {
 
@@ -1115,7 +1145,7 @@ var igv = (function (igv) {
             "R2R1": "RL",
             "F1F2": "RL"
         }
-    }
+    };
 
     return igv;
 

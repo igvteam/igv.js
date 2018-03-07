@@ -55,7 +55,7 @@ var igv = (function (igv) {
 
         addBorders(panel.$ideogram, igv.browser.genomicStateList.indexOf(genomicState), igv.browser.genomicStateList.length);
 
-        setWidth(panel.$ideogram, viewportContainerWidth/igv.browser.genomicStateList.length);
+        setWidth(panel.$ideogram, true);
 
         panel.$canvas = $('<canvas>');
         panel.$ideogram.append(panel.$canvas);
@@ -83,10 +83,25 @@ var igv = (function (igv) {
         $ideogram.addClass('igv-ideogram-content-div-border-right');
     }
 
+    igv.IdeoPanel.prototype.setWidth = function (width, doRepaint) {
+
+        this.panels.forEach(function (panel) {
+            panel.$ideogram.width(width);
+            panel.$canvas.attr('width', width);
+            panel.ideograms = {};
+        });
+
+        if (true === doRepaint) {
+            this.repaint();
+        }
+
+    };
+
     igv.IdeoPanel.prototype.resize = function () {
 
-        var viewportContainerWidth = igv.browser.syntheticViewportContainerWidth();
+        var viewportContainerWidth;
 
+        viewportContainerWidth = igv.browser.viewportContainerWidth();
         _.each(this.panels, function(panel, index) {
             var genomicState = igv.browser.genomicStateList[ index ];
             panel.$ideogram.width(Math.floor(viewportContainerWidth/igv.browser.genomicStateList.length));
@@ -115,7 +130,7 @@ var igv = (function (igv) {
 
     };
 
-    igv.IdeoPanel.prototype.addPanelAtIndexWithGenomicState = function (index, genomicState) {
+    igv.IdeoPanel.prototype.addPanelWithGenomicStateAfterIndex = function (genomicState, index) {
         // do stuff
     };
 

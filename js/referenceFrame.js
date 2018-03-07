@@ -57,7 +57,7 @@ var igv = (function (igv) {
         return this.bpPerPixel * pixels;
     };
 
-    igv.ReferenceFrame.prototype.shiftPixels = function(pixels) {
+    igv.ReferenceFrame.prototype.shiftBP = function (pixels) {
         this.start += pixels * this.bpPerPixel;
     };
 

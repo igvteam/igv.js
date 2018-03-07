@@ -23,7 +23,7 @@ var igv = (function (igv) {
 
         addViewportBorders(this.$viewport, igv.browser.genomicStateList.indexOf(genomicState), igv.browser.genomicStateList.length);
 
-        this.setWidth(igv.browser.viewportContainerWidth() / igv.browser.genomicStateList.length);
+        this.setWidth(igv.browser.viewportContainerWidth() / igv.browser.genomicStateList.length, true);
 
         this.contentDiv = $('<div class="igv-viewport-content-div">')[0];
         this.$viewport.append(this.contentDiv);
@@ -188,7 +188,7 @@ var igv = (function (igv) {
         // console.log('viewport(' + this.id + ').resize - width: ' + contentWidth);
 
         if (contentWidth > 0) {
-            this.setWidth(contentWidth);
+            this.setWidth(contentWidth, true);
             this.canvas.style.width = this.$viewport.width() + "px";
             this.canvas.setAttribute('width', this.$viewport.width());
             this.update();
@@ -248,8 +248,13 @@ var igv = (function (igv) {
         // console.log('paint pre-existing canvas');
         this.paintImage(chr, refFrameStart, refFrameEnd, referenceFrame.bpPerPixel);
 
-        if (!this.tile ||
-            this.tile.invalidate || !this.tile.containsRange(chr, refFrameStart, refFrameEnd, referenceFrame.bpPerPixel)) {
+        if (
+            !this.tile
+            ||
+            this.tile.invalidate
+            ||
+            !this.tile.containsRange(chr, refFrameStart, refFrameEnd, referenceFrame.bpPerPixel)
+        ) {
 
             //TODO -- if bpPerPixel (zoom level) changed repaint image from cached data => new optional track method to return
             //TODO -- cached features directly (not a promise for features).
@@ -576,7 +581,7 @@ var igv = (function (igv) {
 
                     isDragging = true;
 
-                    referenceFrame.shiftPixels(lastMouseX - coords.x);
+                    referenceFrame.shiftBP(lastMouseX - coords.x);
 
                     // clamp left
                     referenceFrame.start = Math.max(0, referenceFrame.start);
