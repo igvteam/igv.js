@@ -850,9 +850,13 @@ var igv = (function (igv) {
 
     igv.Browser.prototype.removeMultiLocusPanelWithGenomicState = function (genomicState, doResize) {
         var self = this,
-            index;
+            index,
+            width,
+            previousGenomicStateListLength;
 
         index = this.genomicStateList.indexOf(genomicState);
+        width = self.viewportContainerWidth();
+        previousGenomicStateListLength = this.genomicStateList.length;
 
         if (true === this.config.showIdeogram) {
             this.ideoPanel.removePanelWithLocusIndex(index);
@@ -865,7 +869,14 @@ var igv = (function (igv) {
         this.genomicStateList.splice(index, 1);
 
         this.genomicStateList.forEach(function (gs, i) {
-            self.genomicStateList[ i ].referenceFrame = new igv.ReferenceFrame(gs.chromosome.name, gs.start, (gs.end - gs.start) / (self.viewportContainerWidth() / self.genomicStateList.length));
+            var bpp,
+                ss,
+                ee;
+
+            ss = gs.referenceFrame.start;
+            ee = ss + gs.referenceFrame.bpPerPixel * (width / previousGenomicStateListLength);
+            bpp = (ee - ss) / (width / self.genomicStateList.length);
+            self.genomicStateList[ i ].referenceFrame = new igv.ReferenceFrame(gs.chromosome.name, ss, bpp);
         });
 
         this.trackViews.forEach(function (trackView) {
