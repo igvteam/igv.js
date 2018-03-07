@@ -42,8 +42,8 @@ var igv = (function (igv) {
         this.labelDisplayMode = config.labelDisplayMode;
 
         this.variantHeight = config.variantHeight || this.height;
-        this.squishedCallHeight = config.squishedCallHeight || 30;
-        this.expandedCallHeight = config.expandedCallHeight || 15;
+        this.squishedCallHeight = config.squishedCallHeight || 15;
+        this.expandedCallHeight = config.expandedCallHeight || 30;
 
         this.featureHeight = config.featureHeight || 14;
 
@@ -482,9 +482,9 @@ var igv = (function (igv) {
 
         if (this.displayMode === "SQUISHED" && feature.row !== undefined) {
             h = this.featureHeight / 2;
-            py = this.expandedCallHeight * feature.row + 2;
+            py = this.squishedCallHeight * feature.row + 2;
         } else if (this.displayMode === "EXPANDED" && feature.row !== undefined) {
-            py = this.squishedCallHeight * feature.row + 5;
+            py = this.expandedCallHeight * feature.row + 5;
         } else {  // collapsed
             py = 5;
         }
