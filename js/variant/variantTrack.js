@@ -63,6 +63,8 @@ var igv = (function (igv) {
 
         this.nRows = 1;  // Computed dynamically
         this.groupBy = "NONE";
+        this.filterBy = undefined;
+        this.filters = [];
     };
 
 
@@ -105,7 +107,7 @@ var igv = (function (igv) {
 
     function getCallsetsLength() {
         var length = 0,
-            callSets = this.callSets;
+            callSets = (this.filterBy) ? this.filteredCallSets : this.callSets;
         Object.keys(callSets).forEach(function (key) {
             if (callSets[key]) length += callSets[key].length;
         });
@@ -147,7 +149,7 @@ var igv = (function (igv) {
      */
     igv.VariantTrack.prototype.computePixelHeight = function (features) {
 
-        var callSets = this.callSets,
+        var callSets = (this.filterBy) ? this.filteredCallSets : this.callSets,
             nCalls = callSets ? getCallsetsLength.call(this) : 0,
             callHeight = (this.displayMode === "EXPANDED" ? this.expandedCallHeight : this.squishedCallHeight),
             vGap = (this.displayMode === 'EXPANDED') ? this.expandedVGap : this.squishedVGap,
@@ -205,8 +207,8 @@ var igv = (function (igv) {
 
         this.variantBandHeight = 10 + this.nRows * (this.variantHeight + vGap);
 
-        callSets = this.callSets;
-        callSetGroups = this.callSetGroups;
+        callSets = (this.filterBy) ? this.filteredCallSets : this.callSets;
+        callSetGroups = (this.filterBy) ? this.filteredCallSetGroups : this.callSetGroups;
         nCalls = getCallsetsLength.call(this);
 
         igv.graphics.fillRect(ctx, 0, 0, pixelWidth, pixelHeight, {'fillStyle': "rgb(255, 255, 255)"});
@@ -400,9 +402,10 @@ var igv = (function (igv) {
         var chr = referenceFrame.chrName,
             tolerance = Math.floor(2 * referenceFrame.bpPerPixel),  // We need some tolerance around genomicLocation, start with +/- 2 pixels
             featureList = this.featureSource.featureCache.queryFeatures(chr, genomicLocation - tolerance, genomicLocation + tolerance),
-            self = this;
+            self = this,
+            callSets = (this.filterBy) ? this.filteredCallSets : this.callSets;
 
-        if (this.callSets && featureList && featureList.length > 0) {
+        if (callSets && featureList && featureList.length > 0) {
 
             featureList.forEach(function (variant) {
 
@@ -412,7 +415,7 @@ var igv = (function (igv) {
                     // var content = igv.formatPopoverText(['Ascending', 'Descending', 'Repeat Number']);
                     //igv.popover.presentContent(event.pageX, event.pageY, [$asc, $desc]);
 
-                    sortCallSets(self.callSets, variant, sortDirection);
+                    sortCallSets(callSets, variant, sortDirection);
                     sortDirection = (sortDirection === "ASC") ? "DESC" : "ASC";
                     self.trackView.update();
                 }
@@ -446,7 +449,7 @@ var igv = (function (igv) {
 
                 featureList.forEach(function (variant) {
 
-                    var row, callHeight, callSets, cs, call;
+                    var row, callHeight, callSets, callSetGroups, cs, call;
 
                     if ((variant.start <= genomicLocation + tolerance) &&
                         (variant.end > genomicLocation - tolerance)) {
@@ -468,14 +471,15 @@ var igv = (function (igv) {
                             }
                             else {
                                 // Call
-                                callSets = self.callSets;
+                                callSets = (self.filterBy) ? self.filteredCallSets : self.callSets;
+                                callSetGroups = (self.filterBy) ? self.filteredCallSetGroups : self.callSetGroups;
                                 if (callSets && variant.calls) {
                                     callHeight = ("SQUISHED" === self.displayMode ? self.squishedCallHeight : self.expandedCallHeight);
                                     // console.log("call height: ", callHeight);
                                     // console.log("nRows: ", self.nRows);
                                     var totalCalls = 0;
-                                    for (group = 0; group < self.callSetGroups.length; group++) {
-                                        var groupName = self.callSetGroups[group];
+                                    for (group = 0; group < callSetGroups.length; group++) {
+                                        var groupName = callSetGroups[group];
                                         var groupCalls = callSets[groupName].length;
                                         if (yOffset <= self.variantBandHeight + vGap + (totalCalls + groupCalls) *
                                             (callHeight + vGap) + (group * groupGap)) {
@@ -608,9 +612,10 @@ var igv = (function (igv) {
             genomicLocation = config.genomicLocation,
             chr = referenceFrame.chrName,
             tolerance = Math.floor(2 * referenceFrame.bpPerPixel),  // We need some tolerance around genomicLocation, start with +/- 2 pixels
-            featureList = this.featureSource.featureCache.queryFeatures(chr, genomicLocation - tolerance, genomicLocation + tolerance);
+            featureList = this.featureSource.featureCache.queryFeatures(chr, genomicLocation - tolerance, genomicLocation + tolerance),
+            callSets = (this.filterBy) ? this.filteredCallSets : this.callSets;
 
-        if (this.callSets && featureList && featureList.length > 0) {
+        if (callSets && featureList && featureList.length > 0) {
 
             featureList.forEach(function (variant) {
 
@@ -622,7 +627,7 @@ var igv = (function (igv) {
                         menuItems.push({
                             name: 'Sort by allele length',
                             click: function () {
-                                sortCallSets(self.callSets, variant, sortDirection);
+                                sortCallSets(callSets, variant, sortDirection);
                                 sortDirection = (sortDirection === "ASC") ? "DESC" : "ASC";
                                 self.trackView.update();
                                 config.popover.hide();
@@ -643,11 +648,12 @@ var igv = (function (igv) {
         var self = this,
             groupedCallSets = {},
             callSetGroups = [],
+            callSets = (this.filterBy) ? this.filteredCallSets : this.callSets,
             group, attr, key;
 
-        Object.keys(this.callSets).forEach(function (i) {
+        Object.keys(callSets).forEach(function (i) {
 
-            group = self.callSets[i];
+            group = callSets[i];
             group.forEach(function (callSet) {
 
                 key = 'NONE';
@@ -710,11 +716,50 @@ var igv = (function (igv) {
             });
         }
 
-        this.callSets = groupedCallSets;
-        this.callSetGroups = callSetGroups;
+        if (this.filterBy) {
+            this.filteredCallSets = groupedCallSets;
+            this.filteredCallSetGroups = callSetGroups;
+        } else {
+            this.callSets = groupedCallSets;
+            this.callSetGroups = callSetGroups;
+        }
+
         this.groupBy = attribute;
         this.trackView.update();
     };
+
+
+    igv.VariantTrack.prototype.filterByFamily = function(value) {
+        var self = this;
+        if ("" === value) {
+            self.filters = [];
+            self.filterBy = undefined;
+        } else {
+            try {
+                self.filters = value.split(",");
+                self.filterBy = "familyId";
+                self.filteredCallSets = {};
+                self.filteredCallSetGroups = [];
+                Object.keys(this.callSets).forEach(function(groupName) {
+                    var group = self.callSets[groupName];
+                        group.forEach(function(callSet) {
+                            var attrs = igv.sampleInformation.getAttributes(callSet.name);
+                            var attribute = attrs[self.filterBy];
+                            if (self.filters.indexOf(attribute) !== -1) {
+                                if (!self.filteredCallSets.hasOwnProperty(groupName)) {
+                                    self.filteredCallSets[groupName] = [];
+                                    self.filteredCallSetGroups.push(groupName);
+                                }
+                                self.filteredCallSets[groupName].push(callSet);
+                            }
+                        });
+                });
+            } catch (err) {
+                console.log(err);
+            }
+        }
+    };
+
 
     igv.VariantTrack.prototype.menuItemList = function (popover) {
 
@@ -736,6 +781,7 @@ var igv = (function (igv) {
         });
 
         menuItems = menuItems.concat(mapped);
+
 
         if (igv.sampleInformation.hasAttributes()) {
             var $groupBy = {
@@ -767,6 +813,23 @@ var igv = (function (igv) {
             });
 
             menuItems = menuItems.concat(mappedAttrs);
+        }
+
+        if (igv.sampleInformation.getAttributeNames().indexOf("familyId") !== -1) {
+            menuItems.push(igv.trackMenuItem(popover, this.trackView, "Filter by Family ID", function () {
+                return "Family IDs"
+            }, this.filters.join(","), function () {
+
+                var value;
+
+                value = igv.dialog.$dialogInput.val().trim();
+
+                if (undefined !== value) {
+                    self.filterByFamily(value);
+                    self.trackView.update();
+                }
+
+            }, true));
         }
 
         function groupByMarkup(buttonVal, selfVal, lut) {
