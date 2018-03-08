@@ -124,7 +124,7 @@ var igv = (function (igv) {
 
         featureList.forEach(function (feature) {
             if (feature.name) {
-                igv.browser.featureDB[feature.name.toUpperCase()] = feature;
+                igv.browser.featureDB[feature.name.toLowerCase()] = feature;
             }
         });
 
