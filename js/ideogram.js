@@ -30,52 +30,19 @@
 var igv = (function (igv) {
 
     igv.IdeoPanel = function ($parent) {
+        this.$parent = $parent;
         this.buildPanels($parent);
     };
 
     igv.IdeoPanel.prototype.buildPanels = function ($parent) {
+
+        var self = this;
+
         $parent.append($('<div class="igv-ideogram-left-shim"></div>'));
         this.panels = igv.browser.genomicStateList.map(function (genomicState) {
-            return panelWithGenomicState($parent, genomicState)
+            return panelWithGenomicState.call(self, $parent, genomicState, undefined)
         });
     };
-
-    function panelWithGenomicState($parent, genomicState) {
-
-        var viewportContainerWidth,
-            percentage,
-            panel;
-
-        viewportContainerWidth = igv.browser.viewportContainerWidth();
-        panel = {};
-
-        panel.genomicState = genomicState;
-
-        panel.$ideogram = $('<div class="igv-ideogram-content-div"></div>');
-        $parent.append(panel.$ideogram);
-
-        addBorders(panel.$ideogram, igv.browser.genomicStateList.indexOf(genomicState), igv.browser.genomicStateList.length);
-
-        panel.$ideogram.width(Math.floor(viewportContainerWidth/igv.browser.genomicStateList.length));
-        percentage = panel.$ideogram.width()/panel.$ideogram.outerWidth();
-        panel.$ideogram.width(Math.floor(percentage * (viewportContainerWidth/igv.browser.genomicStateList.length)));
-
-        panel.$canvas = $('<canvas>');
-        panel.$ideogram.append(panel.$canvas);
-
-        panel.$canvas.attr('width', panel.$ideogram.width());
-        panel.$canvas.attr('height', panel.$ideogram.height());
-
-        panel.ctx = panel.$canvas.get(0).getContext("2d");
-
-        panel.ideograms = {};
-
-        panel.$ideogram.on('click', function (e) {
-            clickHandler(panel, e);
-        });
-
-        return panel;
-    }
 
     function addBorders($ideogram, locusIndex, lociCount) {
 
@@ -133,8 +100,16 @@ var igv = (function (igv) {
 
     };
 
-    igv.IdeoPanel.prototype.addPanelWithGenomicStateAfterIndex = function (genomicState, index) {
+    igv.IdeoPanel.prototype.addPanelWithGenomicStateAtIndex = function (genomicState, index) {
+        var panel;
+
         // do stuff
+        if (1 === this.panels.length) {
+            this.panels.push( panelWithGenomicState.call(this, this.$parent, genomicState, undefined) );
+        } else {
+            panel = panelWithGenomicState.call(this, this.$parent, genomicState, this.panels[ index - 1 ].$ideogram);
+            this.panels.splice((index), 0, panel);
+        }
     };
 
     igv.IdeoPanel.prototype.removePanelWithLocusIndex = function (index) {
@@ -145,6 +120,48 @@ var igv = (function (igv) {
     igv.IdeoPanel.prototype.repaintPanelWithLocusIndex = function (index) {
         repaintPanel( this.panels[ index ] );
     };
+
+    function panelWithGenomicState($parent, genomicState, $previousPanelOrUndefined) {
+
+        var viewportContainerWidth,
+            percentage,
+            panel;
+
+        viewportContainerWidth = igv.browser.viewportContainerWidth();
+        panel = {};
+
+        panel.genomicState = genomicState;
+
+        panel.$ideogram = $('<div class="igv-ideogram-content-div"></div>');
+
+        if ($previousPanelOrUndefined) {
+            panel.$ideogram.insertAfter($previousPanelOrUndefined);
+        } else {
+            $parent.append(panel.$ideogram);
+        }
+
+        addBorders(panel.$ideogram, igv.browser.genomicStateList.indexOf(genomicState), igv.browser.genomicStateList.length);
+
+        panel.$ideogram.width(Math.floor(viewportContainerWidth/igv.browser.genomicStateList.length));
+        percentage = panel.$ideogram.width()/panel.$ideogram.outerWidth();
+        panel.$ideogram.width(Math.floor(percentage * (viewportContainerWidth/igv.browser.genomicStateList.length)));
+
+        panel.$canvas = $('<canvas>');
+        panel.$ideogram.append(panel.$canvas);
+
+        panel.$canvas.attr('width', panel.$ideogram.width());
+        panel.$canvas.attr('height', panel.$ideogram.height());
+
+        panel.ctx = panel.$canvas.get(0).getContext("2d");
+
+        panel.ideograms = {};
+
+        panel.$ideogram.on('click', function (e) {
+            clickHandler(panel, e);
+        });
+
+        return panel;
+    }
 
     function repaintPanel (panel) {
 

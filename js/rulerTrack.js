@@ -77,16 +77,26 @@ var igv = (function (igv) {
         this.ignoreTrackMenu = true;
         this.order = -Number.MAX_VALUE;
         this.supportsWholeGenome = true;
+        this.rulerSweepers = [];
+    };
+
+    igv.RulerTrack.prototype.addRulerSweeperWithGenomicState = function (genomicState, viewport, $viewport, $viewportContent) {
+
+        var rulerSweeper,
+            index;
+        rulerSweeper = new igv.RulerSweeper(viewport, $viewport, $viewportContent, genomicState);
+
+        if (1 === this.rulerSweepers) {
+            this.rulerSweepers.push(rulerSweeper);
+        } else {
+            index = igv.browser.genomicStateList.indexOf(genomicState);
+            this.rulerSweepers.splice(index, 0, rulerSweeper);
+        }
 
     };
 
-    igv.RulerTrack.prototype.createRulerSweeper = function (viewport, $viewport, $viewportContent, genomicState) {
-
-        if (undefined === this.rulerSweepers) {
-            this.rulerSweepers = {};
-        }
-
-        this.rulerSweepers[ igv.browser.genomicStateList.indexOf(genomicState).toString() ] = new igv.RulerSweeper(viewport, $viewport, $viewportContent, genomicState);
+    igv.RulerTrack.prototype.removeRulerSweeperWithLocusIndex = function (index) {
+        this.rulerSweepers.splice(index, 1);
     };
 
     igv.RulerTrack.prototype.locusLabelWithGenomicState = function (genomicState) {
@@ -127,10 +137,11 @@ var igv = (function (igv) {
             center,
             size,
             maximumLabelWidthPixel,
+            key,
             bp;
 
-
-        rulerSweeper = this.rulerSweepers[ igv.browser.genomicStateList.indexOf(options.genomicState).toString() ];
+        key = igv.browser.genomicStateList.indexOf(options.genomicState).toString();
+        rulerSweeper = this.rulerSweepers[ key ];
 
         if ('all' === options.referenceFrame.chrName.toLowerCase()) {
 

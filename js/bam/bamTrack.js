@@ -906,7 +906,8 @@ var igv = (function (igv) {
         var alignment,
             referenceFrame,
             viewportWidth,
-            leftMatePairGenomicState;
+            leftMatePairGenomicState,
+            rightMatePairGenomicState;
 
         config.popover.hide();
         alignment = this.getClickedObject(config.viewport, config.y, config.genomicLocation);
@@ -919,9 +920,13 @@ var igv = (function (igv) {
 
             leftMatePairGenomicState = config.viewport.genomicState;
             referenceFrame = leftMatePairGenomicState.referenceFrame;
-            leftMatePairGenomicState.referenceFrame = createReferenceFrame(referenceFrame.chrName, referenceFrame.bpPerPixel, viewportWidth, alignment.start, alignment.lengthOnRef);
+            leftMatePairGenomicState.referenceFrame = createReferenceFrame(alignment.chr, referenceFrame.bpPerPixel, viewportWidth, alignment.start, alignment.lengthOnRef);
 
-            igv.browser.addMultiLocusPanelWithGenomicStateAfterIndex(leftMatePairGenomicState, (igv.browser.genomicStateList.indexOf(leftMatePairGenomicState)), viewportWidth);
+            rightMatePairGenomicState = {};
+            rightMatePairGenomicState.chromosome = leftMatePairGenomicState.chromosome;
+            rightMatePairGenomicState.referenceFrame = createReferenceFrame(alignment.mate.chr, referenceFrame.bpPerPixel, viewportWidth, alignment.mate.position, alignment.lengthOnRef);
+
+            igv.browser.addMultiLocusPanelWithGenomicStateAtIndex(rightMatePairGenomicState, 1 + (igv.browser.genomicStateList.indexOf(leftMatePairGenomicState)), viewportWidth);
 
         } else {
             this.highlightedAlignmentReadNamed = undefined;

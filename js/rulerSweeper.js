@@ -29,7 +29,6 @@ var igv = (function (igv) {
 
         var index;
 
-
         this.viewport = viewport;
         this.$viewport = $viewport;
         this.$viewportContent = $viewportContent;

@@ -856,7 +856,7 @@ var igv = (function (igv) {
 
         index = this.genomicStateList.indexOf(genomicState);
 
-        if (true === this.config.showIdeogram) {
+        if (this.ideoPanel) {
             this.ideoPanel.removePanelWithLocusIndex(index);
         }
 
@@ -895,11 +895,11 @@ var igv = (function (igv) {
 
     };
 
-    igv.Browser.prototype.addMultiLocusPanelWithGenomicStateAfterIndex = function (genomicState, index, viewportWidth) {
+    igv.Browser.prototype.addMultiLocusPanelWithGenomicStateAtIndex = function (genomicState, index, viewportWidth) {
 
         var self = this;
 
-        if (true === this.config.showIdeogram) {
+        if (this.ideoPanel) {
             this.ideoPanel.setWidth(viewportWidth, false);
         }
 
@@ -909,25 +909,74 @@ var igv = (function (igv) {
             });
         });
 
+        if (1 === this.genomicStateList.length) {
+
+            this.genomicStateList.push(genomicState);
+
+            if (this.ideoPanel) {
+                this.ideoPanel.addPanelWithGenomicStateAtIndex(genomicState, index);
+            }
+
+            this.trackViews.forEach(function (trackView) {
+
+                var viewport;
+
+                viewport = new igv.Viewport(trackView, trackView.$viewportContainer, genomicState, undefined);
+
+                trackView.viewports.push(viewport);
+
+                if (trackView.track instanceof igv.RulerTrack) {
+                    trackView.track.addRulerSweeperWithGenomicState(genomicState, viewport, viewport.$viewport, $(viewport.contentDiv));
+                }
+
+                trackView.configureViewportContainer(trackView.$viewportContainer, trackView.viewports);
+            });
+
+        } else {
+
+            this.genomicStateList.splice(index, 0, genomicState);
+
+            if (this.ideoPanel) {
+                this.ideoPanel.addPanelWithGenomicStateAtIndex(genomicState, index);
+            }
+
+            this.trackViews.forEach(function (trackView) {
+
+                var viewport;
+
+                viewport = new igv.Viewport(trackView, trackView.$viewportContainer, genomicState, trackView.viewports[ index - 1 ].$viewport);
+
+                trackView.viewports.splice(index, 0, viewport);
+
+                if (trackView.track instanceof igv.RulerTrack) {
+                    trackView.track.addRulerSweeperWithGenomicState(genomicState, viewport, viewport.$viewport, $(viewport.contentDiv));
+                }
+
+                trackView.configureViewportContainer(trackView.$viewportContainer, trackView.viewports);
+            });
+
+        }
+
         this.update();
     };
 
     igv.Browser.prototype.emptyViewportContainers = function () {
 
-        $('#igv-content-header').empty();
         $('.igv-scrollbar-outer-div').remove();
         $('.igv-viewport-div').remove();
         $('.igv-ruler-sweeper-div').remove();
 
-        _.each(this.trackViews, function (trackView) {
+        $('#igv-content-header').empty();
+
+        this.trackViews.forEach(function (trackView) {
+
+            if (trackView.track instanceof igv.RulerTrack) {
+                trackView.track.rulerSweepers = [];
+            }
+
             trackView.viewports = [];
             trackView.scrollbar = undefined;
 
-            _.each(_.keys(trackView.track.rulerSweepers), function (key) {
-                trackView.track.rulerSweepers[key] = undefined;
-            });
-
-            trackView.track.rulerSweepers = undefined;
         });
 
     };
@@ -938,10 +987,10 @@ var igv = (function (igv) {
 
             genomicStateList.forEach(function (genomicState, i) {
 
-                trackView.viewports.push(new igv.Viewport(trackView, trackView.$viewportContainer, genomicState));
+                trackView.viewports.push(new igv.Viewport(trackView, trackView.$viewportContainer, genomicState, undefined));
 
                 if (trackView.track instanceof igv.RulerTrack) {
-                    trackView.track.createRulerSweeper(trackView.viewports[i], trackView.viewports[i].$viewport, $(trackView.viewports[i].contentDiv), genomicState);
+                    trackView.track.addRulerSweeperWithGenomicState(genomicState, trackView.viewports[i], trackView.viewports[i].$viewport, $(trackView.viewports[i].contentDiv));
                 }
 
             });
@@ -965,7 +1014,7 @@ var igv = (function (igv) {
 
                 if (genomicStateList.length > 0) {
 
-                    if (true === self.config.showIdeogram) {
+                    if (self.ideoPanel) {
                         self.ideoPanel.discardPanels();
                     }
 
@@ -984,7 +1033,7 @@ var igv = (function (igv) {
                     self.toggleCenterGuide(self.genomicStateList);
                     self.toggleCursorGuide(self.genomicStateList);
 
-                    if (true === self.config.showIdeogram) {
+                    if (self.ideoPanel) {
                         self.ideoPanel.buildPanels($('#igv-content-header'));
                     }
 

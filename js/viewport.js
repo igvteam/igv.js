@@ -3,7 +3,7 @@
  */
 var igv = (function (igv) {
 
-    igv.Viewport = function (trackView, $container, genomicState) {
+    igv.Viewport = function (trackView, $container, genomicState, $previousViewportOrUndefined) {
 
         var self = this,
             description,
@@ -17,7 +17,12 @@ var igv = (function (igv) {
         this.genomicState = genomicState;
 
         this.$viewport = $('<div class="igv-viewport-div">');
-        $container.append(this.$viewport);
+
+        if ($previousViewportOrUndefined) {
+            this.$viewport.insertAfter($previousViewportOrUndefined);
+        } else {
+            $container.append(this.$viewport);
+        }
 
         this.$viewport.data("viewport", this.id);
 
@@ -760,7 +765,6 @@ var igv = (function (igv) {
         return result;
     };
 
-
     var Tile = function (chr, tileStart, tileEnd, bpPerPixel, image) {
         this.chr = chr;
         this.startBP = tileStart;
@@ -775,7 +779,7 @@ var igv = (function (igv) {
 
     Tile.prototype.overlapsRange = function (chr, start, end) {
         return this.chr === chr && end >= this.startBP && start <= this.endBP;
-    }
+    };
 
     var CachedFeatures = function (chr, tileStart, tileEnd, bpPerPixel, features) {
         this.chr = chr;
