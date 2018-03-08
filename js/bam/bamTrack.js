@@ -904,6 +904,7 @@ var igv = (function (igv) {
     AlignmentTrack.prototype.popupMenuItemList = function (config) {
 
         var alignment,
+            viewportWidth,
             leftMatePairGenomicState;
 
         config.popover.hide();
@@ -912,10 +913,14 @@ var igv = (function (igv) {
 
             this.highlightedAlignmentReadNamed = alignment.readName;
 
-            leftMatePairGenomicState = config.viewport.genomicState;
-            updateGenomicState(leftMatePairGenomicState, config.viewport.$viewport.width(), alignment);
+            // account for reduced viewport width as a result of adding right mate pair panel
+            viewportWidth = (igv.browser.viewportContainerWidth()/(1 + igv.browser.genomicStateList.length));
 
-            igv.browser.addMultiLocusPanelWithGenomicStateAfterIndex(leftMatePairGenomicState, (igv.browser.genomicStateList.indexOf(leftMatePairGenomicState)));
+            leftMatePairGenomicState = config.viewport.genomicState;
+
+            updateGenomicState(leftMatePairGenomicState, viewportWidth, alignment);
+
+            igv.browser.addMultiLocusPanelWithGenomicStateAfterIndex(leftMatePairGenomicState, (igv.browser.genomicStateList.indexOf(leftMatePairGenomicState)), viewportWidth);
 
         } else {
             this.highlightedAlignmentReadNamed = undefined;

@@ -895,22 +895,19 @@ var igv = (function (igv) {
 
     };
 
-    igv.Browser.prototype.addMultiLocusPanelWithGenomicStateAfterIndex = function (genomicState, index) {
+    igv.Browser.prototype.addMultiLocusPanelWithGenomicStateAfterIndex = function (genomicState, index, viewportWidth) {
 
-        var self = this,
-            viewportWidth;
+        var self = this;
 
-        // viewportWidth = this.viewportContainerWidth()/(1 + self.genomicStateList.length);
-        //
-        // if (true === this.config.showIdeogram) {
-        //     this.ideoPanel.setWidth(viewportWidth, false);
-        // }
-        //
-        // this.trackViews.forEach(function (trackView) {
-        //     trackView.viewports.forEach(function (viewport) {
-        //         viewport.setWidth(viewportWidth);
-        //     });
-        // });
+        if (true === this.config.showIdeogram) {
+            this.ideoPanel.setWidth(viewportWidth, false);
+        }
+
+        this.trackViews.forEach(function (trackView) {
+            trackView.viewports.forEach(function (viewport) {
+                viewport.setWidth(viewportWidth);
+            });
+        });
 
         this.update();
     };
