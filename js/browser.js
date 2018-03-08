@@ -1039,7 +1039,7 @@ var igv = (function (igv) {
                 var result,
                     genomicState;
 
-                result = self.featureDB[locus.toUpperCase()];
+                result = self.featureDB[locus.toLowerCase()];
                 if (result) {
                     genomicState = processSearchResult(result, locus);
                     if (genomicState) {
