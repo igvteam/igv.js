@@ -89,7 +89,8 @@ var igv = (function (igv) {
                         self.callSetGroups = ['NONE'];
                         self.callSets.NONE = header.callSets;
 
-                        if ('compute' === self.visibilityWindow) {
+                        // header.features => file is not index, all features loaded
+                        if (!header.features && 'compute' === self.visibilityWindow) {
                             computeVisibilityWindow.call(self);
                         }
                     }
