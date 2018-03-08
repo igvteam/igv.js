@@ -232,7 +232,7 @@ var igv = (function (igv) {
 
         this.viewports[ index ].$viewport.remove();
         this.viewports.splice(index, 1);
-        igv.Viewport.addViewportBordersWithContainer(this.$viewportContainer);
+        igv.Viewport.decorateViewportWithContainer(this.$viewportContainer);
     };
 
     igv.TrackView.prototype.attachDragWidget = function () {

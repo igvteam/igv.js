@@ -362,7 +362,7 @@
     height: 100%; }
 
 .igv-viewport-div-border-right {
-  border-right-color: #00ff00;
+  border-right-color: white;
   border-right-style: solid;
   border-right-width: 4px; }
 

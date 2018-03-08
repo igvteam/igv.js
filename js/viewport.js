@@ -26,8 +26,6 @@ var igv = (function (igv) {
 
         this.$viewport.data("viewport", this.id);
 
-        igv.Viewport.addViewportBordersWithContainer($container);
-
         this.setWidth(igv.browser.viewportContainerWidth() / igv.browser.genomicStateList.length, true);
 
         this.contentDiv = $('<div class="igv-viewport-content-div">')[0];
@@ -43,7 +41,7 @@ var igv = (function (igv) {
             $div.hide();
         }
 
-        if (igv.browser.genomicStateList.length > 1 && trackView.track instanceof igv.RulerTrack) {
+        if (trackView.track instanceof igv.RulerTrack) {
 
             this.$viewport.addClass('igv-viewport-ruler');
 
@@ -57,6 +55,8 @@ var igv = (function (igv) {
 
             this.$viewport.append(this.$close);
         }
+
+        igv.Viewport.decorateViewportWithContainer($container);
 
         // track content canvas
         this.canvas = $('<canvas>')[0];
@@ -711,18 +711,26 @@ var igv = (function (igv) {
 
     };
 
-    igv.Viewport.addViewportBordersWithContainer = function ($container) {
+    igv.Viewport.decorateViewportWithContainer = function ($container) {
 
         var $viewports;
 
         $viewports = $container.find('.igv-viewport-div');
 
         $viewports.each(function (index) {
+
             if (index < $viewports.length && (1 + index) !== $viewports.length) {
                 $(this).addClass('igv-viewport-div-border-right');
             } else {
                 $(this).removeClass('igv-viewport-div-border-right');
             }
+
+            if ($viewports.length > 1) {
+                $(this).find('.igv-viewport-fa-close').show();
+            } else {
+                $(this).find('.igv-viewport-fa-close').hide();
+            }
+
         });
 
     };

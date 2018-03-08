@@ -957,7 +957,8 @@ var igv = (function (igv) {
 
         }
 
-        this.update();
+        // this.update();
+        this.repaint();
     };
 
     igv.Browser.prototype.emptyViewportContainers = function () {
