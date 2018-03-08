@@ -917,8 +917,9 @@ var igv = (function (igv) {
             // account for reduced viewport width as a result of adding right mate pair panel
             viewportWidth = (igv.browser.viewportContainerWidth()/(1 + igv.browser.genomicStateList.length));
 
-            referenceFrame = config.viewport.genomicState.referenceFrame;
-            leftMatePairGenomicState = createGenomicState(referenceFrame.chrName, referenceFrame.bpPerPixel, viewportWidth, alignment.start, alignment.lengthOnRef);
+            leftMatePairGenomicState = config.viewport.genomicState;
+            referenceFrame = leftMatePairGenomicState.referenceFrame;
+            leftMatePairGenomicState.referenceFrame = createReferenceFrame(referenceFrame.chrName, referenceFrame.bpPerPixel, viewportWidth, alignment.start, alignment.lengthOnRef);
 
             igv.browser.addMultiLocusPanelWithGenomicStateAfterIndex(leftMatePairGenomicState, (igv.browser.genomicStateList.indexOf(leftMatePairGenomicState)), viewportWidth);
 
@@ -927,29 +928,20 @@ var igv = (function (igv) {
         }
     };
 
-    function createGenomicState(chromosomeName, bpp, viewportWidth, alignmentStart, alignmentLength) {
+    function createReferenceFrame(chromosomeName, bpp, viewportWidth, alignmentStart, alignmentLength) {
 
         var ss,
             ee,
-            alignmentSS,
             alignmentEE,
-            alignmentCC,
-            genomicState;
+            alignmentCC;
 
-        alignmentSS = alignmentStart;
         alignmentEE = alignmentStart + alignmentLength;
-        alignmentCC = (alignmentSS + alignmentEE)/2;
+        alignmentCC = (alignmentStart + alignmentEE)/2;
 
         ss = alignmentCC - (bpp * (viewportWidth/2));
         ee = ss + (bpp * viewportWidth);
 
-        genomicState =
-            {
-                referenceFrame: new igv.ReferenceFrame(chromosomeName, ss, bpp),
-                chromosome: igv.browser.genome.getChromosome(chromosomeName)
-            };
-
-        return genomicState;
+        return new igv.ReferenceFrame(chromosomeName, ss, bpp);
     }
 
     function matePairLocusStrings(alignment, referenceFrame, viewportWidth) {
