@@ -904,43 +904,52 @@ var igv = (function (igv) {
     AlignmentTrack.prototype.popupMenuItemList = function (config) {
 
         var alignment,
-            locusStrings,
-            loci,
-            genomicState,
-            referenceFrame,
-            viewportWidth,
-            centroidBP,
-            alignmentCentriodBP,
-            deltaBP;
-
-        this.highlightedAlignmentReadNamed = undefined;
+            leftMatePairGenomicState;
 
         config.popover.hide();
-
         alignment = this.getClickedObject(config.viewport, config.y, config.genomicLocation);
-
         if (alignment) {
 
             this.highlightedAlignmentReadNamed = alignment.readName;
 
-            config.viewport.trackView.update();
+            leftMatePairGenomicState = config.viewport.genomicState;
+            updateGenomicState(leftMatePairGenomicState, config.viewport.$viewport.width(), alignment);
 
-            genomicState = config.viewport.genomicState;
+            igv.browser.addMultiLocusPanelWithGenomicStateAfterIndex(leftMatePairGenomicState, (igv.browser.genomicStateList.indexOf(leftMatePairGenomicState)));
 
-            referenceFrame = genomicState.referenceFrame;
-
-            viewportWidth = config.viewport.$viewport.width();
-            centroidBP = referenceFrame.start + referenceFrame.toBP(viewportWidth/2);
-
-            alignmentCentriodBP = (alignment.start + (alignment.start + alignment.lengthOnRef))/2;
-
-            deltaBP = (alignmentCentriodBP - centroidBP);
-
-            referenceFrame.start -= deltaBP;
-
-            igv.browser.addMultiLocusPanelWithGenomicStateAfterIndex(genomicState, (igv.browser.genomicStateList.indexOf(config.viewport.genomicState)));
+        } else {
+            this.highlightedAlignmentReadNamed = undefined;
         }
     };
+
+    function updateGenomicState(genomicState, viewportWidth, alignment) {
+
+        var referenceFrame,
+            ss,
+            ee,
+            cc,
+            alignmentSS,
+            alignmentEE,
+            alignmentCC,
+            delta;
+
+        referenceFrame = genomicState.referenceFrame;
+
+        ss = referenceFrame.start;
+        ee = referenceFrame.start + referenceFrame.toBP(viewportWidth);
+        cc = (ss + ee)/2;
+
+        alignmentSS = alignment.start;
+        alignmentEE = alignment.start + alignment.lengthOnRef;
+        alignmentCC = (alignmentSS + alignmentEE)/2;
+
+        delta = alignmentCC - cc;
+
+        referenceFrame.start += delta;
+
+        genomicState.locusSearchString = alignment.chr + ':' + igv.numberFormatter(Math.round(referenceFrame.start)) + '-' + igv.numberFormatter(Math.round(referenceFrame.start + referenceFrame.toBP(viewportWidth)));
+
+    }
 
     function matePairLocusStrings(alignment, referenceFrame, viewportWidth) {
 

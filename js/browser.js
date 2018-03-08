@@ -912,7 +912,7 @@ var igv = (function (igv) {
         //     });
         // });
 
-        this.repaint();
+        this.update();
     };
 
     igv.Browser.prototype.emptyViewportContainers = function () {
