@@ -266,8 +266,17 @@
 
         <div onclick="igv.browser.loadTrack({
                             url: 'https://s3.amazonaws.com/igv.broadinstitute.org/annotations/hg19/genes/gencode.v18.collapsed.bed.gz',
+                            indexURL: 'https://s3.amazonaws.com/igv.broadinstitute.org/annotations/hg19/genes/gencode.v18.collapsed.bed.gz.tbi',
                             name: 'gencode'
                         })"> gencode collapsed (tabix)
+        </div>
+
+        <div onclick="igv.browser.loadTrack({
+            type: 'bed',
+            url: '../test/data/bed/gencode.v18.collapsed.bed',
+            indexURL: '../test/data/bed/gencode.v18.collapsed.bed.idx',
+            name: 'Gencode v18'
+        })">Gencode v18 (tribble)
         </div>
 
         <div onclick="igv.browser.loadTrack({
@@ -376,6 +385,7 @@
                     name: "Genes",
                     autoHeight: true,
                     searchable: false,
+                    autoHeight: true,
                     type: "annotation",
                     format: "gtf",
                     sourceType: "file",
