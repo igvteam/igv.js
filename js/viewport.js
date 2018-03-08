@@ -26,7 +26,7 @@ var igv = (function (igv) {
 
         this.$viewport.data("viewport", this.id);
 
-        addViewportBorders(this.$viewport, igv.browser.genomicStateList.indexOf(genomicState), igv.browser.genomicStateList.length);
+        igv.Viewport.addViewportBordersWithContainer($container);
 
         this.setWidth(igv.browser.viewportContainerWidth() / igv.browser.genomicStateList.length, true);
 
@@ -135,20 +135,6 @@ var igv = (function (igv) {
             this.stopSpinner();
 
             this.popover = new igv.Popover(igv.browser.$content);
-
-        }
-
-        function addViewportBorders($viewport, locusIndex, lociCount) {
-
-            if (1 === lociCount || locusIndex === lociCount - 1) {
-                return;
-            }
-
-            $viewport.addClass('igv-viewport-div-border-right');
-
-            // if (1 === lociCount || 0 === locusIndex) {
-            //     $viewport.addClass('igv-viewport-div-border-left');
-            // }
 
         }
     };
@@ -722,6 +708,22 @@ var igv = (function (igv) {
             mouseDownX = lastMouseX = undefined;
             referenceFrame = undefined;
         }
+
+    };
+
+    igv.Viewport.addViewportBordersWithContainer = function ($container) {
+
+        var $viewports;
+
+        $viewports = $container.find('.igv-viewport-div');
+
+        $viewports.each(function (index) {
+            if (index < $viewports.length && (1 + index) !== $viewports.length) {
+                $(this).addClass('igv-viewport-div-border-right');
+            } else {
+                $(this).removeClass('igv-viewport-div-border-right');
+            }
+        });
 
     };
 
