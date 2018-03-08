@@ -904,6 +904,7 @@ var igv = (function (igv) {
     AlignmentTrack.prototype.popupMenuItemList = function (config) {
 
         var alignment,
+            referenceFrame,
             viewportWidth,
             leftMatePairGenomicState;
 
@@ -916,9 +917,8 @@ var igv = (function (igv) {
             // account for reduced viewport width as a result of adding right mate pair panel
             viewportWidth = (igv.browser.viewportContainerWidth()/(1 + igv.browser.genomicStateList.length));
 
-            leftMatePairGenomicState = config.viewport.genomicState;
-
-            updateGenomicState(leftMatePairGenomicState, viewportWidth, alignment);
+            referenceFrame = config.viewport.genomicState.referenceFrame;
+            leftMatePairGenomicState = createGenomicState(referenceFrame.chrName, referenceFrame.bpPerPixel, viewportWidth, alignment.start, alignment.lengthOnRef);
 
             igv.browser.addMultiLocusPanelWithGenomicStateAfterIndex(leftMatePairGenomicState, (igv.browser.genomicStateList.indexOf(leftMatePairGenomicState)), viewportWidth);
 
@@ -927,33 +927,29 @@ var igv = (function (igv) {
         }
     };
 
-    function updateGenomicState(genomicState, viewportWidth, alignment) {
+    function createGenomicState(chromosomeName, bpp, viewportWidth, alignmentStart, alignmentLength) {
 
-        var referenceFrame,
-            ss,
+        var ss,
             ee,
-            cc,
             alignmentSS,
             alignmentEE,
             alignmentCC,
-            delta;
+            genomicState;
 
-        referenceFrame = genomicState.referenceFrame;
-
-        ss = referenceFrame.start;
-        ee = referenceFrame.start + referenceFrame.toBP(viewportWidth);
-        cc = (ss + ee)/2;
-
-        alignmentSS = alignment.start;
-        alignmentEE = alignment.start + alignment.lengthOnRef;
+        alignmentSS = alignmentStart;
+        alignmentEE = alignmentStart + alignmentLength;
         alignmentCC = (alignmentSS + alignmentEE)/2;
 
-        delta = alignmentCC - cc;
+        ss = alignmentCC - (bpp * (viewportWidth/2));
+        ee = ss + (bpp * viewportWidth);
 
-        referenceFrame.start += delta;
+        genomicState =
+            {
+                referenceFrame: new igv.ReferenceFrame(chromosomeName, ss, bpp),
+                chromosome: igv.browser.genome.getChromosome(chromosomeName)
+            };
 
-        genomicState.locusSearchString = alignment.chr + ':' + igv.numberFormatter(Math.round(referenceFrame.start)) + '-' + igv.numberFormatter(Math.round(referenceFrame.start + referenceFrame.toBP(viewportWidth)));
-
+        return genomicState;
     }
 
     function matePairLocusStrings(alignment, referenceFrame, viewportWidth) {
@@ -972,29 +968,6 @@ var igv = (function (igv) {
         rightLocusString = alignment.chr + ':' + Math.round(alignmentCentriodBP - widthBP / 2.0) + '-' + Math.round(alignmentCentriodBP + widthBP / 2.0);
 
         return [leftLocusString, rightLocusString];
-    }
-
-    function createGenomicState(locusString) {
-        var locus,
-            genomicState,
-            ss,
-            ee,
-            bpp;
-
-        locus = parse(locusString);
-
-        genomicState = {};
-
-        genomicState.locusSearchString = locusString;
-
-        genomicState.chromosome = igv.browser.genome.getChromosome(locus[ 0 ]);
-
-        ss = locus[ 1 ];
-        ee = locus[ 2 ];
-        bpp = (ee - ss)/(igv.browser.viewportContainerWidth() / (1 + igv.browser.genomicStateList.length));
-        genomicState.referenceFrame = new igv.ReferenceFrame(locus[ 0 ], ss, bpp);
-
-        return genomicState;
     }
 
     function parse(locusString) {
