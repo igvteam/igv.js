@@ -36,27 +36,9 @@ var igv = (function (igv) {
         }
 
         if (trackView.track instanceof igv.RulerTrack) {
-            $div = $('<div>', {class: 'igv-whole-genome-container'});
-            $(this.contentDiv).append($div);
-            $div.hide();
+            trackView.track.appendWholeGenomeContainer($(this.contentDiv));
+            trackView.track.appendMultiPanelCloseButton(this.$viewport, this.genomicState);
         }
-
-        if (trackView.track instanceof igv.RulerTrack) {
-
-            this.$viewport.addClass('igv-viewport-ruler');
-
-            this.$close = $('<div class="igv-viewport-fa-close">');
-            this.$closeButton = $('<i class="fa fa-times-circle">');
-            this.$close.append(this.$closeButton);
-
-            this.$close.click(function (e) {
-                igv.browser.removeMultiLocusPanelWithGenomicState(self.genomicState, true);
-            });
-
-            this.$viewport.append(this.$close);
-        }
-
-        igv.Viewport.decorateViewportWithContainer($container);
 
         // track content canvas
         this.canvas = $('<canvas>')[0];
@@ -67,8 +49,8 @@ var igv = (function (igv) {
         this.canvas.setAttribute('height', this.contentDiv.clientHeight);
         this.ctx = this.canvas.getContext("2d");
 
-        if (igv.browser.genomicStateList.length > 1 && trackView.track instanceof igv.RulerTrack) {
-            $(this.contentDiv).append(igv.browser.rulerTrack.locusLabelWithGenomicState(this.genomicState));
+        if (trackView.track instanceof igv.RulerTrack) {
+            trackView.track.appendLocusLabel($(this.contentDiv), this.genomicState);
         }
 
         // zoom in to see features
@@ -137,6 +119,9 @@ var igv = (function (igv) {
             this.popover = new igv.Popover(igv.browser.$content);
 
         }
+
+        igv.Viewport.decorateViewportWithContainer($container);
+
     };
 
     igv.Viewport.prototype.setWidth = function (width) {
@@ -727,8 +712,10 @@ var igv = (function (igv) {
 
             if ($viewports.length > 1) {
                 $(this).find('.igv-viewport-fa-close').show();
+                $(this).find('.igv-viewport-content-ruler-div').show();
             } else {
                 $(this).find('.igv-viewport-fa-close').hide();
+                $(this).find('.igv-viewport-content-ruler-div').hide();
             }
 
         });

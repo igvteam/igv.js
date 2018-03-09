@@ -78,6 +78,45 @@ var igv = (function (igv) {
         this.order = -Number.MAX_VALUE;
         this.supportsWholeGenome = true;
         this.rulerSweepers = [];
+
+    };
+
+    igv.RulerTrack.prototype.appendLocusLabel = function ($parent, genomicState) {
+
+        this.$label = $('<div class = "igv-viewport-content-ruler-div">');
+        $parent.append(this.$label);
+
+        this.$label.text(genomicState.locusSearchString || '---');
+        this.$label.data('referenceFrame', JSON.parse(JSON.stringify(genomicState.referenceFrame)));
+
+        this.$label.click(function (e) {
+            genomicState.referenceFrame.set( $(this).data('referenceFrame') );
+            igv.browser.selectMultiLocusPanelWithGenomicState(genomicState);
+        });
+
+    };
+
+    igv.RulerTrack.prototype.appendMultiPanelCloseButton = function ($viewport, genomicState) {
+
+        var $close,
+            $closeButton;
+
+        $viewport.addClass('igv-viewport-ruler');
+
+        $close = $('<div class="igv-viewport-fa-close">');
+        $viewport.append($close);
+
+        $closeButton = $('<i class="fa fa-times-circle">');
+        $close.append($closeButton);
+
+        $close.click(function (e) {
+            igv.browser.removeMultiLocusPanelWithGenomicState(genomicState, true);
+        });
+
+    };
+
+    igv.RulerTrack.prototype.appendWholeGenomeContainer = function ($parent) {
+        $parent.append( $('<div>', { class: 'igv-whole-genome-container' }) );
     };
 
     igv.RulerTrack.prototype.addRulerSweeperWithGenomicState = function (genomicState, viewport, $viewport, $viewportContent) {
@@ -97,22 +136,6 @@ var igv = (function (igv) {
 
     igv.RulerTrack.prototype.removeRulerSweeperWithLocusIndex = function (index) {
         this.rulerSweepers.splice(index, 1);
-    };
-
-    igv.RulerTrack.prototype.locusLabelWithGenomicState = function (genomicState) {
-
-        var $label;
-
-        $label = $('<div class = "igv-viewport-content-ruler-div">');
-        $label.text(genomicState.locusSearchString);
-        $label.data('referenceFrame', JSON.parse(JSON.stringify(genomicState.referenceFrame)));
-
-        $label.click(function (e) {
-            genomicState.referenceFrame.set( $(this).data('referenceFrame') );
-            igv.browser.selectMultiLocusPanelWithGenomicState(genomicState);
-        });
-
-        return $label;
     };
 
     igv.RulerTrack.prototype.getFeatures = function (chr, bpStart, bpEnd) {
