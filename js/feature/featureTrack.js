@@ -554,7 +554,7 @@ var igv = (function (igv) {
             }
         }
         windowX = Math.round(options.viewportContainerX);
-        windowX1 = windowX + options.viewportContainerWidth / (options.genomicState.locusCount || 1);
+        windowX1 = windowX + options.viewportContainerWidth / (igv.browser.genomicStateList.length || 1);
 
         renderFeatureLabels.call(this, ctx, feature, coord.px, coord.px1, py, windowX, windowX1, options.genomicState, options);
     }

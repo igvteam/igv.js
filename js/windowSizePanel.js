@@ -46,13 +46,13 @@ var igv = (function (igv) {
             referenceFrame,
             length;
 
-        if (1 === genomicState.locusCount && 'all' !== genomicState.locusSearchString.toLowerCase()) {
+        if (1 === igv.browser.genomicStateList.length && genomicState.locusSearchString && 'all' !== genomicState.locusSearchString.toLowerCase()) {
             this.show();
         } else {
             this.hide();
         }
 
-        viewportWidth = igv.Viewport.viewportWidthAtLocusIndex(genomicState.locusIndex);
+        viewportWidth = igv.Viewport.viewportWidthAtLocusIndex(igv.browser.genomicStateList.indexOf(genomicState));
         referenceFrame = genomicState.referenceFrame;
 
         length = viewportWidth * referenceFrame.bpPerPixel;
