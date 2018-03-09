@@ -586,7 +586,7 @@ var igv = (function (igv) {
 
         if (0 === this.genomicStateList.indexOf(genomicState) && 1 === this.genomicStateList.length) {
 
-            if ('all' === genomicState.locusSearchString.toLowerCase()) {
+            if (genomicState.locusSearchString && 'all' === genomicState.locusSearchString.toLowerCase()) {
 
                 this.$searchInput.val(genomicState.locusSearchString);
                 this.chromosomeSelectWidget.$select.val('all');
@@ -958,7 +958,8 @@ var igv = (function (igv) {
         }
 
         // this.update();
-        this.repaint();
+        this.resize();
+        // this.repaint();
     };
 
     igv.Browser.prototype.emptyViewportContainers = function () {

@@ -208,7 +208,7 @@
                                 url: 'gs://genomics-public-data/platinum-genomes/bam/NA12877_S1.bam',
                                 height: 500,
                                 autoHeight: false,
-                                viewAsPairs: true,
+                                viewAsPairs: false,
                                 name: 'NA12877'})">Google Cloud Storage - NA12877_S1.bam
         </div>
 
@@ -220,6 +220,7 @@
                                 readGroupSetIds: 'CMvnhpKTFhCjz9_25e_lCw',
                                 height: 200,
                                 autoHeight: false,
+                                viewAsPairs: false,
                                 name: 'Ga4gh alignments'})">GA4Gh Alignments (Global Alliance, Google server)
         </div>
 
@@ -384,11 +385,20 @@
                     name: 'NA12877'
                 },
                 {
+                    sourceType: 'ga4gh',
+                    type: 'bam',
+                    url: 'https://genomics.googleapis.com/v1',
+                    readGroupSetIds: 'CMvnhpKTFhCjz9_25e_lCw',
+                    height: 200,
+                    autoHeight: false,
+                    viewAsPairs: false,
+                    name: 'Ga4gh alignments'
+                },
+                {
 
                     name: "Genes",
                     autoHeight: false,
                     searchable: false,
-                    autoHeight: true,
                     type: "annotation",
                     format: "gtf",
                     sourceType: "file",

@@ -924,7 +924,7 @@ var igv = (function (igv) {
 
             rightMatePairGenomicState = {};
             rightMatePairGenomicState.chromosome = leftMatePairGenomicState.chromosome;
-            rightMatePairGenomicState.referenceFrame = createReferenceFrame(alignment.mate.chr, referenceFrame.bpPerPixel, viewportWidth, alignment.mate.position, alignment.lengthOnRef);
+            rightMatePairGenomicState.referenceFrame = createReferenceFrame(alignment.chr, referenceFrame.bpPerPixel, viewportWidth, alignment.mate.position, alignment.lengthOnRef);
 
             igv.browser.addMultiLocusPanelWithGenomicStateAtIndex(rightMatePairGenomicState, 1 + (igv.browser.genomicStateList.indexOf(leftMatePairGenomicState)), viewportWidth);
 

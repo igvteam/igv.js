@@ -416,7 +416,7 @@ var igv = (function (igv) {
     }
 
     function viewIsReady() {
-        return igv.browser && igv.browser.genomicStateList && igv.browser.genomicStateList[this.genomicState.locusIndex].referenceFrame;
+        return igv.browser && igv.browser.genomicStateList && this.genomicState.referenceFrame;
     }
 
     function getFeatures(chr, start, end, bpPerPixel) {
