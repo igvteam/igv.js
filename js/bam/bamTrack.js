@@ -328,14 +328,14 @@ var igv = (function (igv) {
             $e.text('Sort by base');
 
             clickHandler = function () {
-                var genomicState = _.first(igv.browser.genomicStateList),
+                var genomicState = igv.browser.genomicStateList[ 0 ],
                     referenceFrame = genomicState.referenceFrame,
                     genomicLocation,
                     viewportHalfWidth;
 
                 popover.hide();
 
-                viewportHalfWidth = Math.floor(0.5 * (igv.browser.viewportContainerWidth() / genomicState.locusCount));
+                viewportHalfWidth = Math.floor(0.5 * (igv.browser.viewportContainerWidth() / igv.browser.genomicStateList.length));
                 genomicLocation = Math.floor((referenceFrame.start) + referenceFrame.toBP(viewportHalfWidth));
 
                 self.altClick(genomicLocation, undefined, undefined);
@@ -901,63 +901,77 @@ var igv = (function (igv) {
         return clickedObject ? clickedObject.popupData(config.genomicLocation) : undefined;
     };
 
-
     AlignmentTrack.prototype.popupMenuItemList = function (config) {
 
         var alignment,
-            loci,
-            mateLoci,
-            index,
-            head,
-            tail;
-
-        this.highlightedAlignmentReadNamed = undefined;
+            referenceFrame,
+            viewportWidth,
+            leftMatePairGenomicState,
+            rightMatePairGenomicState;
 
         config.popover.hide();
-
         alignment = this.getClickedObject(config.viewport, config.y, config.genomicLocation);
-
         if (alignment) {
 
             this.highlightedAlignmentReadNamed = alignment.readName;
 
-            loci = igv.browser.genomicStateList.map(function (gs) {
-                return gs.locusSearchString;
-            });
+            // account for reduced viewport width as a result of adding right mate pair panel
+            viewportWidth = (igv.browser.viewportContainerWidth()/(1 + igv.browser.genomicStateList.length));
 
-            index = config.viewport.genomicState.locusIndex;
-            head = _.first(loci, 1 + index);
-            tail = _.size(loci) === 1 ? undefined : _.last(loci, _.size(loci) - (1 + index));
+            leftMatePairGenomicState = config.viewport.genomicState;
+            referenceFrame = leftMatePairGenomicState.referenceFrame;
+            leftMatePairGenomicState.referenceFrame = createReferenceFrame(alignment.chr, referenceFrame.bpPerPixel, viewportWidth, alignment.start, alignment.lengthOnRef);
 
-            mateLoci = locusPairWithAlignmentAndViewport(alignment, config.viewport);
+            rightMatePairGenomicState = {};
+            rightMatePairGenomicState.chromosome = leftMatePairGenomicState.chromosome;
+            rightMatePairGenomicState.referenceFrame = createReferenceFrame(alignment.mate.chr, referenceFrame.bpPerPixel, viewportWidth, alignment.mate.position, alignment.lengthOnRef);
 
-            // discard last element of head and replace with mateLoci
-            head.splice(-1, 1);
-            Array.prototype.push.apply(head, mateLoci);
-            if (tail) {
-                Array.prototype.push.apply(head, tail);
-            }
+            igv.browser.addMultiLocusPanelWithGenomicStateAtIndex(rightMatePairGenomicState, 1 + (igv.browser.genomicStateList.indexOf(leftMatePairGenomicState)), viewportWidth);
 
-            igv.browser.search(head.join(' '));
-        }
-
-        function locusPairWithAlignmentAndViewport(alignment, viewport) {
-            var left,
-                right,
-                centroid,
-                widthBP;
-
-            widthBP = viewport.$viewport.width() * viewport.genomicState.referenceFrame.bpPerPixel;
-
-            centroid = (alignment.start + (alignment.start + alignment.lengthOnRef)) / 2;
-            left = alignment.chr + ':' + Math.round(centroid - widthBP / 2.0).toString() + '-' + Math.round(centroid + widthBP / 2.0).toString();
-
-            centroid = (alignment.mate.position + (alignment.mate.position + alignment.lengthOnRef)) / 2;
-            right = alignment.chr + ':' + Math.round(centroid - widthBP / 2.0).toString() + '-' + Math.round(centroid + widthBP / 2.0).toString();
-
-            return [left, right];
+        } else {
+            this.highlightedAlignmentReadNamed = undefined;
         }
     };
+
+    function createReferenceFrame(chromosomeName, bpp, viewportWidth, alignmentStart, alignmentLength) {
+
+        var ss,
+            ee,
+            alignmentEE,
+            alignmentCC;
+
+        alignmentEE = alignmentStart + alignmentLength;
+        alignmentCC = (alignmentStart + alignmentEE)/2;
+
+        ss = alignmentCC - (bpp * (viewportWidth/2));
+        ee = ss + (bpp * viewportWidth);
+
+        return new igv.ReferenceFrame(chromosomeName, ss, bpp);
+    }
+
+    function matePairLocusStrings(alignment, referenceFrame, viewportWidth) {
+
+        var leftLocusString,
+            rightLocusString,
+            alignmentCentriodBP,
+            widthBP;
+
+        widthBP = referenceFrame.toBP(viewportWidth);
+
+        alignmentCentriodBP = (alignment.start + (alignment.start + alignment.lengthOnRef)) / 2;
+        leftLocusString = alignment.chr + ':' + Math.round(alignmentCentriodBP - widthBP / 2.0) + '-' + Math.round(alignmentCentriodBP + widthBP / 2.0);
+
+        alignmentCentriodBP = (alignment.mate.position + (alignment.mate.position + alignment.lengthOnRef)) / 2;
+        rightLocusString = alignment.chr + ':' + Math.round(alignmentCentriodBP - widthBP / 2.0) + '-' + Math.round(alignmentCentriodBP + widthBP / 2.0);
+
+        return [leftLocusString, rightLocusString];
+    }
+
+    function parse(locusString) {
+        return locusString.split(/[^a-zA-Z0-9]/).map(function (value, index) {
+            return 0 === index ? value : parseInt(value, 10);
+        });
+    }
 
     AlignmentTrack.prototype.getClickedObject = function (viewport, y, genomicLocation) {
 
@@ -989,7 +1003,7 @@ var igv = (function (igv) {
 
         return undefined;
 
-    }
+    };
 
     function getAlignmentColor(alignment) {
 
@@ -1115,7 +1129,7 @@ var igv = (function (igv) {
             "R2R1": "RL",
             "F1F2": "RL"
         }
-    }
+    };
 
     return igv;
 

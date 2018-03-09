@@ -71,41 +71,71 @@ var igv = (function (igv) {
     igv.RulerTrack = function () {
 
         this.height = 40;
-        // this.height = 50;
-        // this.height = 24;
-
         this.name = "";
         this.id = "ruler";
         this.disableButtons = true;
         this.ignoreTrackMenu = true;
         this.order = -Number.MAX_VALUE;
         this.supportsWholeGenome = true;
+        this.rulerSweepers = [];
 
     };
 
-    igv.RulerTrack.prototype.createRulerSweeper = function (viewport, $viewport, $viewportContent, genomicState) {
+    igv.RulerTrack.prototype.appendLocusLabel = function ($parent, genomicState) {
 
-        if (undefined === this.rulerSweepers) {
-            this.rulerSweepers = {};
-        }
+        this.$label = $('<div class = "igv-viewport-content-ruler-div">');
+        $parent.append(this.$label);
 
-        this.rulerSweepers[genomicState.locusIndex.toString()] = new igv.RulerSweeper(viewport, $viewport, $viewportContent, genomicState);
-    };
+        this.$label.text(genomicState.locusSearchString || '---');
+        this.$label.data('referenceFrame', JSON.parse(JSON.stringify(genomicState.referenceFrame)));
 
-    igv.RulerTrack.prototype.locusLabelWithGenomicState = function (genomicState) {
-
-        var $label;
-
-        $label = $('<div class = "igv-viewport-content-ruler-div">');
-        $label.text(genomicState.locusSearchString);
-        $label.data('referenceFrame', JSON.parse(JSON.stringify(genomicState.referenceFrame)));
-
-        $label.click(function (e) {
+        this.$label.click(function (e) {
             genomicState.referenceFrame.set( $(this).data('referenceFrame') );
             igv.browser.selectMultiLocusPanelWithGenomicState(genomicState);
         });
 
-        return $label;
+    };
+
+    igv.RulerTrack.prototype.appendMultiPanelCloseButton = function ($viewport, genomicState) {
+
+        var $close,
+            $closeButton;
+
+        $viewport.addClass('igv-viewport-ruler');
+
+        $close = $('<div class="igv-viewport-fa-close">');
+        $viewport.append($close);
+
+        $closeButton = $('<i class="fa fa-times-circle">');
+        $close.append($closeButton);
+
+        $close.click(function (e) {
+            igv.browser.removeMultiLocusPanelWithGenomicState(genomicState, true);
+        });
+
+    };
+
+    igv.RulerTrack.prototype.appendWholeGenomeContainer = function ($parent) {
+        $parent.append( $('<div>', { class: 'igv-whole-genome-container' }) );
+    };
+
+    igv.RulerTrack.prototype.addRulerSweeperWithGenomicState = function (genomicState, viewport, $viewport, $viewportContent) {
+
+        var rulerSweeper,
+            index;
+        rulerSweeper = new igv.RulerSweeper(viewport, $viewport, $viewportContent, genomicState);
+
+        if (1 === this.rulerSweepers) {
+            this.rulerSweepers.push(rulerSweeper);
+        } else {
+            index = igv.browser.genomicStateList.indexOf(genomicState);
+            this.rulerSweepers.splice(index, 0, rulerSweeper);
+        }
+
+    };
+
+    igv.RulerTrack.prototype.removeRulerSweeperWithLocusIndex = function (index) {
+        this.rulerSweepers.splice(index, 1);
     };
 
     igv.RulerTrack.prototype.getFeatures = function (chr, bpStart, bpEnd) {
@@ -130,10 +160,11 @@ var igv = (function (igv) {
             center,
             size,
             maximumLabelWidthPixel,
+            key,
             bp;
 
-
-        rulerSweeper = this.rulerSweepers[options.genomicState.locusIndex.toString()];
+        key = igv.browser.genomicStateList.indexOf(options.genomicState).toString();
+        rulerSweeper = this.rulerSweepers[ key ];
 
         if ('all' === options.referenceFrame.chrName.toLowerCase()) {
 

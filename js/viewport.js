@@ -3,7 +3,7 @@
  */
 var igv = (function (igv) {
 
-    igv.Viewport = function (trackView, $container, genomicState) {
+    igv.Viewport = function (trackView, $container, genomicState, $previousViewportOrUndefined) {
 
         var self = this,
             description,
@@ -17,14 +17,16 @@ var igv = (function (igv) {
         this.genomicState = genomicState;
 
         this.$viewport = $('<div class="igv-viewport-div">');
-        $container.append(this.$viewport);
+
+        if ($previousViewportOrUndefined) {
+            this.$viewport.insertAfter($previousViewportOrUndefined);
+        } else {
+            $container.append(this.$viewport);
+        }
 
         this.$viewport.data("viewport", this.id);
-        this.$viewport.data("locusindex", this.genomicState.locusIndex);
 
-        addViewportBorders(this.$viewport, this.genomicState.locusIndex, igv.browser.genomicStateList.length);
-
-        this.setWidth(igv.browser.viewportContainerWidth() / this.genomicState.locusCount);
+        this.setWidth(igv.browser.viewportContainerWidth() / igv.browser.genomicStateList.length, true);
 
         this.contentDiv = $('<div class="igv-viewport-content-div">')[0];
         this.$viewport.append(this.contentDiv);
@@ -34,24 +36,8 @@ var igv = (function (igv) {
         }
 
         if (trackView.track instanceof igv.RulerTrack) {
-            $div = $('<div>', {class: 'igv-whole-genome-container'});
-            $(this.contentDiv).append($div);
-            $div.hide();
-        }
-
-        if (this.genomicState.locusCount > 1 && trackView.track instanceof igv.RulerTrack) {
-
-            this.$viewport.addClass('igv-viewport-ruler');
-
-            this.$close = $('<div class="igv-viewport-fa-close">');
-            this.$closeButton = $('<i class="fa fa-times-circle">');
-            this.$close.append(this.$closeButton);
-
-            this.$close.click(function (e) {
-                igv.browser.closeMultiLocusPanelWithGenomicState(self.genomicState);
-            });
-
-            this.$viewport.append(this.$close);
+            trackView.track.appendWholeGenomeContainer($(this.contentDiv));
+            trackView.track.appendMultiPanelCloseButton(this.$viewport, this.genomicState);
         }
 
         // track content canvas
@@ -63,8 +49,8 @@ var igv = (function (igv) {
         this.canvas.setAttribute('height', this.contentDiv.clientHeight);
         this.ctx = this.canvas.getContext("2d");
 
-        if (this.genomicState.locusCount > 1 && trackView.track instanceof igv.RulerTrack) {
-            $(this.contentDiv).append(igv.browser.rulerTrack.locusLabelWithGenomicState(this.genomicState));
+        if (trackView.track instanceof igv.RulerTrack) {
+            trackView.track.appendLocusLabel($(this.contentDiv), this.genomicState);
         }
 
         // zoom in to see features
@@ -87,7 +73,7 @@ var igv = (function (igv) {
             return $container;
         }
 
-        if (trackView.track.name && 0 === this.genomicState.locusIndex) {
+        if (trackView.track.name && 0 === igv.browser.genomicStateList.indexOf(this.genomicState)) {
 
             if (typeof trackView.track.description === 'function') {
                 description = trackView.track.description();
@@ -133,19 +119,8 @@ var igv = (function (igv) {
 
         }
 
-        function addViewportBorders($viewport, locusIndex, lociCount) {
+        igv.Viewport.decorateViewportWithContainer($container);
 
-            if (1 === lociCount || locusIndex === lociCount - 1) {
-                return;
-            }
-
-            $viewport.addClass('igv-viewport-div-border-right');
-
-            // if (1 === lociCount || 0 === locusIndex) {
-            //     $viewport.addClass('igv-viewport-div-border-left');
-            // }
-
-        }
     };
 
     igv.Viewport.prototype.setWidth = function (width) {
@@ -165,7 +140,7 @@ var igv = (function (igv) {
         this.genomicState.referenceFrame.bpPerPixel = (Math.round(end) - Math.round(start)) / this.$viewport.width();
         this.genomicState.referenceFrame.start = Math.round(start);
 
-        igv.browser.updateWithLocusIndex(this.genomicState.locusIndex);
+        igv.browser.updateWithLocusIndex(igv.browser.genomicStateList.indexOf(this.genomicState));
 
     };
 
@@ -183,12 +158,12 @@ var igv = (function (igv) {
 
     igv.Viewport.prototype.resize = function () {
 
-        var contentWidth = igv.browser.viewportContainerWidth() / this.genomicState.locusCount;
+        var contentWidth = igv.browser.viewportContainerWidth() / igv.browser.genomicStateList.length;
 
         // console.log('viewport(' + this.id + ').resize - width: ' + contentWidth);
 
         if (contentWidth > 0) {
-            this.setWidth(contentWidth);
+            this.setWidth(contentWidth, true);
             this.canvas.style.width = this.$viewport.width() + "px";
             this.canvas.setAttribute('width', this.$viewport.width());
             this.update();
@@ -252,7 +227,7 @@ var igv = (function (igv) {
                     return self.getContentHeight();
                 }
             })
-    }
+    };
 
     igv.Viewport.prototype.update = function () {
 
@@ -424,7 +399,7 @@ var igv = (function (igv) {
         }
 
         function doRenderControlCanvas(genomicState, trackView) {
-            return (/*0 === genomicState.locusIndex &&*/ (typeof trackView.track.paintAxis === 'function') && trackView.controlCanvas.width > 0 && trackView.controlCanvas.height > 0);
+            return ( (typeof trackView.track.paintAxis === 'function') && trackView.controlCanvas.width > 0 && trackView.controlCanvas.height > 0);
         }
 
         function tileIsValid(chr, start, end, bpPerPixel) {
@@ -485,8 +460,7 @@ var igv = (function (igv) {
     igv.Viewport.prototype.getContentHeight = function () {
 
         return $(this.contentDiv).height();
-
-    }
+    };
 
     igv.Viewport.prototype.paintImage = function (chr, start, end, bpPerPixel) {
 
@@ -502,7 +476,7 @@ var igv = (function (igv) {
             this.ctx.restore();
         } else if (tile && tile.overlapsRange(chr, start, end)) {
 
-            var offset = Math.round((start - tile.startBP) / tile.bpPerPixel);
+            offset = Math.round((start - tile.startBP) / tile.bpPerPixel);
             if (offset > 0) {
                 sx = offset;
                 dx = 0;
@@ -586,7 +560,7 @@ var igv = (function (igv) {
 
                     isDragging = true;
 
-                    referenceFrame.shiftPixels(lastMouseX - coords.x);
+                    referenceFrame.shiftBP(lastMouseX - coords.x);
 
                     // clamp left
                     referenceFrame.start = Math.max(0, referenceFrame.start);
@@ -600,9 +574,9 @@ var igv = (function (igv) {
                         referenceFrame.start = maxStart;
                     }
 
-                    igv.browser.updateLocusSearchWidget(_.first(igv.browser.genomicStateList));
+                    igv.browser.updateLocusSearchWidget(igv.browser.genomicStateList[ 0 ]);
 
-                    igv.browser.repaintWithLocusIndex(self.genomicState.locusIndex);
+                    igv.browser.repaintWithLocusIndex(igv.browser.genomicStateList.indexOf(self.genomicState));
 
                     igv.browser.fireEvent('trackdrag');
                 }
@@ -620,7 +594,7 @@ var igv = (function (igv) {
         $(self.canvas).on('mousedown.viewport.canvas', function (e) {
             e.preventDefault();
             canvasMouseDownX = igv.translateMouseCoordinates(e, self.canvas).x;
-            console.log('canvas x ' + canvasMouseDownX);
+            // console.log('canvas x ' + canvasMouseDownX);
         });
 
         lastClickTime = 0;
@@ -637,7 +611,7 @@ var igv = (function (igv) {
 
             e.preventDefault();
 
-            console.log('click.viewport.canvas');
+            // console.log('click.viewport.canvas');
 
             canvasMouseX = igv.translateMouseCoordinates(e, self.canvas).x;
             frame = self.genomicState.referenceFrame;
@@ -664,13 +638,13 @@ var igv = (function (igv) {
 
                         chr = igv.browser.genome.getChromosomeCoordinate(newCenter).chr;
 
-                        if (1 === self.genomicState.locusCount) {
+                        if (1 === igv.browser.genomicStateList.length) {
                             string = chr;
                         } else {
                             loci = igv.browser.genomicStateList.map(function (g) {
                                 return g.locusSearchString;
                             });
-                            loci[self.genomicState.locusIndex] = chr;
+                            loci[ igv.browser.genomicStateList.indexOf(self.genomicState) ] = chr;
                             string = loci.join(' ');
                         }
 
@@ -679,7 +653,7 @@ var igv = (function (igv) {
                     } else {
                         frame.bpPerPixel /= 2;
                         frame.start = Math.round((newCenter + frame.start) / 2.0);
-                        igv.browser.updateWithLocusIndex(self.genomicState.locusIndex);
+                        igv.browser.updateWithLocusIndex( igv.browser.genomicStateList.indexOf(self.genomicState) );
                     }
 
                 }
@@ -725,6 +699,32 @@ var igv = (function (igv) {
 
     };
 
+    igv.Viewport.decorateViewportWithContainer = function ($container) {
+
+        var $viewports;
+
+        $viewports = $container.find('.igv-viewport-div');
+
+        $viewports.each(function (index) {
+
+            if (index < $viewports.length && (1 + index) !== $viewports.length) {
+                $(this).addClass('igv-viewport-div-border-right');
+            } else {
+                $(this).removeClass('igv-viewport-div-border-right');
+            }
+
+            if ($viewports.length > 1) {
+                $(this).find('.igv-viewport-fa-close').show();
+                $(this).find('.igv-viewport-content-ruler-div').show();
+            } else {
+                $(this).find('.igv-viewport-fa-close').hide();
+                $(this).find('.igv-viewport-content-ruler-div').hide();
+            }
+
+        });
+
+    };
+
     igv.Viewport.viewportWidthAtLocusIndex = function (locusIndex) {
 
         var viewport = igv.Viewport.viewportsWithLocusIndex(locusIndex)[0];
@@ -738,7 +738,7 @@ var igv = (function (igv) {
 
             tv.viewports.forEach(function (vp) {
 
-                if (locusIndex === vp.genomicState.locusIndex) {
+                if (locusIndex === igv.browser.genomicStateList.indexOf(vp.genomicState)) {
                     list.push(vp);
                 }
 
@@ -765,7 +765,6 @@ var igv = (function (igv) {
         return result;
     };
 
-
     var Tile = function (chr, tileStart, tileEnd, bpPerPixel, image) {
         this.chr = chr;
         this.startBP = tileStart;
@@ -780,7 +779,7 @@ var igv = (function (igv) {
 
     Tile.prototype.overlapsRange = function (chr, start, end) {
         return this.chr === chr && end >= this.startBP && start <= this.endBP;
-    }
+    };
 
     var CachedFeatures = function (chr, tileStart, tileEnd, bpPerPixel, features) {
         this.chr = chr;

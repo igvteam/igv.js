@@ -58,10 +58,10 @@ var igv = (function (igv) {
         this.viewports = [];
         browser.genomicStateList.forEach(function (genomicState, i) {
 
-            self.viewports.push(new igv.Viewport(self, self.$viewportContainer, genomicState));
+            self.viewports.push(new igv.Viewport(self, self.$viewportContainer, genomicState, undefined));
 
             if (self.track instanceof igv.RulerTrack) {
-                self.track.createRulerSweeper(self.viewports[i], self.viewports[i].$viewport, $(self.viewports[i].contentDiv), genomicState);
+                self.track.addRulerSweeperWithGenomicState(genomicState, self.viewports[i], self.viewports[i].$viewport, $(self.viewports[i].contentDiv));
             }
 
         });
@@ -223,6 +223,17 @@ var igv = (function (igv) {
 
         return height;
     }
+
+    igv.TrackView.prototype.removeViewportWithLocusIndex = function (index) {
+
+        if (this.track instanceof igv.RulerTrack) {
+            this.track.removeRulerSweeperWithLocusIndex(index);
+        }
+
+        this.viewports[ index ].$viewport.remove();
+        this.viewports.splice(index, 1);
+        igv.Viewport.decorateViewportWithContainer(this.$viewportContainer);
+    };
 
     igv.TrackView.prototype.attachDragWidget = function () {
 
@@ -429,7 +440,6 @@ var igv = (function (igv) {
         var self = this;
 
         this.viewports.forEach(function (viewport) {
-            // console.log('--- resize viewport ' + self.track.id + ' locus index ' + viewport.genomicState.locusIndex + ' ---');
             viewport.resize();
         });
 
@@ -479,7 +489,6 @@ var igv = (function (igv) {
         var self = this;
 
         this.viewports.forEach(function (viewport) {
-            // console.log('--- repaint viewport ' + self.track.id + ' locus index ' + viewport.genomicState.locusIndex + ' ---');
             viewport.repaint();
         });
 
