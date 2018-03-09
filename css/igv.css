@@ -324,7 +324,7 @@
   overflow-x: hidden;
   overflow-y: hidden; }
 
-.igv-viewport-content-div .igv-whole-genome-container {
+.igv-whole-genome-container {
   display: flex;
   flex-flow: row;
   flex-wrap: nowrap;
@@ -332,7 +332,7 @@
   width: 100%;
   height: 100%;
   background-color: white; }
-  .igv-viewport-content-div .igv-whole-genome-container div {
+  .igv-whole-genome-container div {
     font-family: "Open Sans", sans-serif;
     font-size: 10px;
     font-weight: 400;
@@ -342,20 +342,17 @@
     border-right-color: #bfbfbf;
     border-right-style: solid;
     border-right-width: thin; }
-    .igv-viewport-content-div .igv-whole-genome-container div span {
+    .igv-whole-genome-container div span {
       display: block;
       padding-top: 6px;
       text-overflow: ellipsis; }
-  .igv-viewport-content-div .igv-whole-genome-container div:last-child {
+  .igv-whole-genome-container div:last-child {
     border-right-color: transparent; }
-  .igv-viewport-content-div .igv-whole-genome-container div:hover,
-  .igv-viewport-content-div .igv-whole-genome-container div:focus,
-  .igv-viewport-content-div .igv-whole-genome-container div:active {
+  .igv-whole-genome-container div:hover,
+  .igv-whole-genome-container div:focus,
+  .igv-whole-genome-container div:active {
     cursor: pointer;
     background-color: #efefef; }
-.igv-viewport-content-div canvas {
-  width: 100%;
-  height: 100%; }
 
 .igv-viewport-div-border-right {
   border-right-color: white;
@@ -400,6 +397,8 @@
   font-size: 10px;
   font-weight: 200;
   text-align: center; }
+  .igv-viewport-ruler > div {
+    height: 100%; }
 
 .igv-viewport-sequence {
   font-family: "Open Sans", sans-serif;

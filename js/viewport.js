@@ -28,7 +28,7 @@ var igv = (function (igv) {
 
         this.setWidth(igv.browser.viewportContainerWidth() / igv.browser.genomicStateList.length, true);
 
-        this.contentDiv = $('<div class="igv-viewport-content-div">')[0];
+        this.contentDiv = $('<div>')[0];
         this.$viewport.append(this.contentDiv);
 
         if (trackView.track instanceof igv.SequenceTrack) {
