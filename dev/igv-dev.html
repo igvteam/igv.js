@@ -208,7 +208,7 @@
                                 url: 'gs://genomics-public-data/platinum-genomes/bam/NA12877_S1.bam',
                                 height: 500,
                                 autoHeight: false,
-                                viewAsPairs: true,
+                                viewAsPairs: false,
                                 name: 'NA12877'})">Google Cloud Storage - NA12877_S1.bam
         </div>
 
@@ -220,6 +220,7 @@
                                 readGroupSetIds: 'CMvnhpKTFhCjz9_25e_lCw',
                                 height: 200,
                                 autoHeight: false,
+                                viewAsPairs: false,
                                 name: 'Ga4gh alignments'})">GA4Gh Alignments (Global Alliance, Google server)
         </div>
 
@@ -351,15 +352,16 @@
 
         div = $("#myDiv")[0];
         options = {
+            showRuler: true,
             // locus: 'all',
             // locus: '1',
             // locus: 'SLC25A3',
-            locus: 'chrX:138633329-138633330',
+            // locus: 'brca1',
+            // locus: 'chrX:138633329-138633330',
             // locus: ['egfr', 'pten', 'SLC25A3', 'myc'],
-            // locus: ['egfr', 'pten', 'myc'],
-            // locus: ['egfr'],
-            // locus: ['pten'],
-            // locus: ['myc'],
+            // locus: 'chr8:128,748,263-128,748,621',
+            locus: ['myc'],
+            // locus: ['myc', 'egfr'],
             // locus: ['1', '2'],
             // locus: ['2', '4', '8'],
             reference: {
@@ -371,21 +373,31 @@
             apiKey: 'AIzaSyDUUAUFpQEN4mumeMNIRWXSiTh5cPtUAD0',
 
             tracks: [
-                // {
-                //     url: 'http://hgdownload.cse.ucsc.edu/goldenPath/hg19/encodeDCC/wgEncodeBroadHistone/wgEncodeBroadHistoneGm12878H3k4me3StdSig.bigWig',
-                //     name: 'ENCODE - BigWig',
-                //     color: function (value) {
-                //         var red = Math.min(255, Math.max(100, Math.round(value / 2))),
-                //                 blue = 255 - red;
-                //         return "rgb(" + red + "," + blue + ",0)"
-                //     }
-                // },
+//                {
+//                    sourceType: 'gcs',
+//                    type: 'bam',
+//                    url: 'gs://genomics-public-data/platinum-genomes/bam/NA12877_S1.bam',
+//                    height: 500,
+//                    maxHeight: 2000,
+//                    autoHeight: false,
+//                    viewAsPairs: false,
+//                    name: 'NA12877'
+//                },
+//                {
+//                    sourceType: 'ga4gh',
+//                    type: 'bam',
+//                    url: 'https://genomics.googleapis.com/v1',
+//                    readGroupSetIds: 'CMvnhpKTFhCjz9_25e_lCw',
+//                    height: 200,
+//                    autoHeight: false,
+//                    viewAsPairs: false,
+//                    name: 'Ga4gh alignments'
+//                },
                 {
 
                     name: "Genes",
                     autoHeight: true,
                     searchable: false,
-                    autoHeight: true,
                     type: "annotation",
                     format: "gtf",
                     sourceType: "file",

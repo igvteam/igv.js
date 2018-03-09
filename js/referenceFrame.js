@@ -34,6 +34,14 @@ var igv = (function (igv) {
         this.bpPerPixel = bpPerPixel;
     };
 
+    igv.ReferenceFrame.prototype.calculateEnd = function (pixels) {
+        return this.start + this.bpPerPixel * pixels;
+    };
+
+    igv.ReferenceFrame.prototype.calculateBPP = function (end, pixels) {
+        return (end - this.start) / pixels;
+    };
+
     igv.ReferenceFrame.prototype.set = function (json) {
         this.chrName = json.chrName;
         this.start = json.start;
@@ -49,7 +57,7 @@ var igv = (function (igv) {
         return this.bpPerPixel * pixels;
     };
 
-    igv.ReferenceFrame.prototype.shiftPixels = function(pixels) {
+    igv.ReferenceFrame.prototype.shiftBP = function (pixels) {
         this.start += pixels * this.bpPerPixel;
     };
 
