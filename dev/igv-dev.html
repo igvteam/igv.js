@@ -374,26 +374,26 @@
             apiKey: 'AIzaSyDUUAUFpQEN4mumeMNIRWXSiTh5cPtUAD0',
 
             tracks: [
-                {
-                    sourceType: 'gcs',
-                    type: 'bam',
-                    url: 'gs://genomics-public-data/platinum-genomes/bam/NA12877_S1.bam',
-                    height: 500,
-                    maxHeight: 2000,
-                    autoHeight: false,
-                    viewAsPairs: false,
-                    name: 'NA12877'
-                },
-                {
-                    sourceType: 'ga4gh',
-                    type: 'bam',
-                    url: 'https://genomics.googleapis.com/v1',
-                    readGroupSetIds: 'CMvnhpKTFhCjz9_25e_lCw',
-                    height: 200,
-                    autoHeight: false,
-                    viewAsPairs: false,
-                    name: 'Ga4gh alignments'
-                },
+//                {
+//                    sourceType: 'gcs',
+//                    type: 'bam',
+//                    url: 'gs://genomics-public-data/platinum-genomes/bam/NA12877_S1.bam',
+//                    height: 500,
+//                    maxHeight: 2000,
+//                    autoHeight: false,
+//                    viewAsPairs: false,
+//                    name: 'NA12877'
+//                },
+//                {
+//                    sourceType: 'ga4gh',
+//                    type: 'bam',
+//                    url: 'https://genomics.googleapis.com/v1',
+//                    readGroupSetIds: 'CMvnhpKTFhCjz9_25e_lCw',
+//                    height: 200,
+//                    autoHeight: false,
+//                    viewAsPairs: false,
+//                    name: 'Ga4gh alignments'
+//                },
                 {
 
                     name: "Genes",
@@ -406,6 +406,7 @@
                     indexURL: "https://s3.amazonaws.com/igv.broadinstitute.org/annotations/hg19/genes/gencode.v18.annotation.sorted.gtf.gz.tbi",
                     visibilityWindow: 10000000,
                     order: Number.MAX_VALUE,
+                    autoHeight: true,
                     displayMode: "EXPANDED"
                 }
             ]

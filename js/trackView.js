@@ -364,16 +364,7 @@ var igv = (function (igv) {
         return this.rightHandGutter;
 
     };
-
-    igv.TrackView.prototype.setContentHeightForViewport = function (viewport, height) {
-        viewport.setContentHeight(height);
-
-        if (this.scrollbar) {
-            this.scrollbar.update();
-        }
-
-    };
-
+    
     igv.TrackView.prototype.dataRange = function () {
         return this.track.dataRange ? this.track.dataRange : undefined;
     };
