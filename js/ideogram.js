@@ -29,6 +29,8 @@
 
 var igv = (function (igv) {
 
+    var devicePixelRatio = window.devicePixelRatio;
+
     igv.IdeoPanel = function ($parent) {
         this.$parent = $parent;
         this.buildPanels($parent);
@@ -149,10 +151,19 @@ var igv = (function (igv) {
         panel.$canvas = $('<canvas>');
         panel.$ideogram.append(panel.$canvas);
 
-        panel.$canvas.attr('width', panel.$ideogram.width());
-        panel.$canvas.attr('height', panel.$ideogram.height());
+        //panel.$canvas.attr('width', panel.$ideogram.width());
+        //panel.$canvas.attr('height', panel.$ideogram.height());
+        //panel.ctx = panel.$canvas.get(0).getContext("2d");
 
-        panel.ctx = panel.$canvas.get(0).getContext("2d");
+        var canvas = panel.$canvas.get(0);
+        var w = +panel.$ideogram.width();
+        var h = +panel.$ideogram.height();
+        canvas.style.width = w;
+        canvas.style.height = h;
+        canvas.width = devicePixelRatio * w;
+        canvas.height = devicePixelRatio * h;
+        panel.ctx = canvas.getContext("2d");
+        panel.ctx.scale(devicePixelRatio, devicePixelRatio);
 
         panel.ideograms = {};
 
@@ -198,26 +209,28 @@ var igv = (function (igv) {
                 return;
             }
 
-            image = panel.ideograms[ referenceFrame.chrName ];
+            // image = panel.ideograms[ referenceFrame.chrName ];
+            //
+            // if (undefined === image) {
+            //
+            //     image = document.createElement('canvas');
+            //     image.width = canvasWidth;
+            //     image.height = canvasHeight;
+            //     // image.height = 13;
+            //
+            //     drawIdeogram(image.getContext('2d'), image.width, image.height);
+            //
+            //     panel.ideograms[ referenceFrame.chrName ] = image;
+            // }
+            //
+            // // y = (canvasHeight - image.height) / 2.0;
+            // // panel.ctx.drawImage(image, 0, y);
+            //
+            // panel.ctx.drawImage(image, 0, 0);
 
-            if (undefined === image) {
+            drawIdeogram(panel.ctx, canvasWidth, canvasHeight);
 
-                image = document.createElement('canvas');
-                image.width = canvasWidth;
-                image.height = canvasHeight;
-                // image.height = 13;
-
-                drawIdeogram(image.getContext('2d'), image.width, image.height);
-
-                panel.ideograms[ referenceFrame.chrName ] = image;
-            }
-
-            // y = (canvasHeight - image.height) / 2.0;
-            // panel.ctx.drawImage(image, 0, y);
-            y = 0;
-            panel.ctx.drawImage(image, 0, 0);
-
-            // panel.ctx.save();
+            y = 0;           // panel.ctx.save();
 
             chromosome = igv.browser.genome.getChromosome(referenceFrame.chrName);
 
@@ -246,7 +259,7 @@ var igv = (function (igv) {
                 ww = (width < 2) ? 1 : width - panel.ctx.lineWidth;
 
                 yy = y + (panel.ctx.lineWidth)/2;
-                hh = image.height - panel.ctx.lineWidth;
+                hh = canvasHeight - panel.ctx.lineWidth;
 
                 panel.ctx.strokeRect(xx, yy, ww, hh);
 
