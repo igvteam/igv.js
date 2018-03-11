@@ -921,10 +921,12 @@ var igv = (function (igv) {
             leftMatePairGenomicState = config.viewport.genomicState;
             referenceFrame = leftMatePairGenomicState.referenceFrame;
             leftMatePairGenomicState.referenceFrame = createReferenceFrame(alignment.chr, referenceFrame.bpPerPixel, viewportWidth, alignment.start, alignment.lengthOnRef);
+            leftMatePairGenomicState.locusSearchString = leftMatePairGenomicState.referenceFrame.chrName;
 
             rightMatePairGenomicState = {};
             rightMatePairGenomicState.chromosome = leftMatePairGenomicState.chromosome;
             rightMatePairGenomicState.referenceFrame = createReferenceFrame(alignment.chr, referenceFrame.bpPerPixel, viewportWidth, alignment.mate.position, alignment.lengthOnRef);
+            rightMatePairGenomicState.locusSearchString = rightMatePairGenomicState.referenceFrame.chrName;
 
             igv.browser.addMultiLocusPanelWithGenomicStateAtIndex(rightMatePairGenomicState, 1 + (igv.browser.genomicStateList.indexOf(leftMatePairGenomicState)), viewportWidth);
 

@@ -86,7 +86,7 @@ var igv = (function (igv) {
         this.$label = $('<div class = "igv-viewport-content-ruler-div">');
         $parent.append(this.$label);
 
-        this.$label.text(genomicState.locusSearchString || '---');
+        this.$label.text(genomicState.locusSearchString || genomicState.referenceFrame.chrName);
         this.$label.data('referenceFrame', JSON.parse(JSON.stringify(genomicState.referenceFrame)));
 
         this.$label.click(function (e) {
