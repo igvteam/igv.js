@@ -203,6 +203,10 @@ var igv = (function (igv) {
             stainColors = [];
             canvasWidth = panel.$canvas.width();
             canvasHeight = panel.$canvas.height();
+            panel.$canvas.get(0).width = devicePixelRatio * canvasWidth;
+            panel.$canvas.get(0).height = devicePixelRatio * canvasHeight;
+            panel.ctx.scale(devicePixelRatio, devicePixelRatio);
+
             panel.ctx.clearRect(0, 0, canvasWidth, canvasHeight);
             
             if(referenceFrame.chrName.toLowerCase() === "all") {
