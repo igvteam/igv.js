@@ -444,7 +444,7 @@ var igv = (function (igv) {
         if (true === resizeWillExceedChromosomeLength(this.trackViews)) {
 
             viewport = _.first((_.first(this.trackViews)).viewports);
-            this.search(viewport.genomicState.chromosome.name);
+            this.search(viewport.genomicState.referenceFrame.chrName);
         } else {
 
             _.each(_.union([this.ideoPanel, this.karyoPanel, this.centerGuide], this.trackViews), function (renderable) {
@@ -472,7 +472,7 @@ var igv = (function (igv) {
                     bpp = viewport.genomicState.referenceFrame.bpPerPixel;
                     bp = pixel * bpp;
 
-                    result = (bp > viewport.genomicState.chromosome.bpLength);
+                    result = (bp >  igv.browser.genome.getChromosome(viewport.genomicState.referenceFrame.chrName).bpLength);
 
                 } else {
                     result = false;
@@ -481,8 +481,6 @@ var igv = (function (igv) {
             } else {
                 result = false;
             }
-
-            // console.log('resize(' + igv.prettyBasePairNumber(bp) + ') will exceed chromosomeLength(' + igv.prettyBasePairNumber(viewport.genomicState.chromosome.bpLength) + ') ' + ((true === result) ? 'YES' : 'NO'));
 
             return result;
         }
@@ -670,7 +668,8 @@ var igv = (function (igv) {
             viewportWidth,
             referenceFrame,
             width,
-            maxBpPerPixel;
+            maxBpPerPixel,
+            chromosome;
 
         if (igv.popover) {
             igv.popover.hide();
@@ -683,11 +682,11 @@ var igv = (function (igv) {
         }
 
         genomicState = this.genomicStateList[ 0 ];
-        genomicState.chromosome = this.genome.getChromosome(chrName);
+        chromosome = this.genome.getChromosome(chrName);
         viewportWidth = igv.browser.viewportContainerWidth() / this.genomicStateList.length;
 
         referenceFrame = genomicState.referenceFrame;
-        referenceFrame.chrName = genomicState.chromosome.name;
+        referenceFrame.chrName = chrName;
 
         // If end is undefined,  interpret start as the new center, otherwise compute scale.
         if (undefined === end) {
@@ -697,18 +696,18 @@ var igv = (function (igv) {
             referenceFrame.bpPerPixel = (end - start) / viewportWidth;
         }
 
-        if (!genomicState.chromosome) {
+        if (!chromosome) {
 
             if (console && console.log) {
                 console.log("Could not find chromsome " + referenceFrame.chrName);
             }
         } else {
 
-            if (!genomicState.chromosome.bpLength) {
-                genomicState.chromosome.bpLength = 1;
+            if (!chromosome.bpLength) {
+                chromosome.bpLength = 1;
             }
 
-            maxBpPerPixel = genomicState.chromosome.bpLength / viewportWidth;
+            maxBpPerPixel = chromosome.bpLength / viewportWidth;
             if (referenceFrame.bpPerPixel > maxBpPerPixel) {
                 referenceFrame.bpPerPixel = maxBpPerPixel;
             }
@@ -717,8 +716,8 @@ var igv = (function (igv) {
                 end = start + viewportWidth * referenceFrame.bpPerPixel;
             }
 
-            if (genomicState.chromosome && end > genomicState.chromosome.bpLength) {
-                start -= (end - genomicState.chromosome.bpLength);
+            if (chromosome && end > chromosome.bpLength) {
+                start -= (end - chromosome.bpLength);
             }
         }
 
@@ -873,14 +872,10 @@ var igv = (function (igv) {
             var bpp,
                 ee;
 
-            // ss = gs.referenceFrame.start;
-            // ee = ss + gs.referenceFrame.bpPerPixel * (viewportContainerWidth / previousGenomicStateListLength);
-            // bpp = (ee - ss) / (viewportContainerWidth / self.genomicStateList.length);
-
             ee = gs.referenceFrame.calculateEnd(viewportContainerWidth / previousGenomicStateListLength);
             bpp = gs.referenceFrame.calculateBPP(ee, viewportContainerWidth / self.genomicStateList.length);
 
-            self.genomicStateList[ i ].referenceFrame = new igv.ReferenceFrame(gs.chromosome.name, gs.referenceFrame.start, bpp);
+            self.genomicStateList[ i ].referenceFrame = new igv.ReferenceFrame(gs.referenceFrame.chrName, gs.referenceFrame.start, bpp);
         });
 
         this.trackViews.forEach(function (trackView) {
@@ -1025,11 +1020,11 @@ var igv = (function (igv) {
                     width = self.viewportContainerWidth();
 
                     self.genomicStateList = genomicStateList.map(function (gs) {
-                        var obj;
 
-                        gs.referenceFrame = new igv.ReferenceFrame(gs.chromosome.name, gs.start, (gs.end - gs.start) / (width / genomicStateList.length));
-                        obj = _.omit(gs, 'start', 'end');
-                        return gs;
+                        var referenceFrame;
+                        referenceFrame = new igv.ReferenceFrame(gs.chromosome.name, gs.start, (gs.end - gs.start) / (width / genomicStateList.length));
+
+                        return { locusSearchString: gs.locusSearchString, referenceFrame: referenceFrame };
                     });
 
                     self.toggleCenterGuide(self.genomicStateList);
@@ -1039,9 +1034,9 @@ var igv = (function (igv) {
                         self.ideoPanel.buildPanels($('#igv-content-header'));
                     }
 
-                    self.buildViewportsWithGenomicStateList(genomicStateList);
+                    self.buildViewportsWithGenomicStateList(self.genomicStateList);
 
-                    return genomicStateList
+                    return self.genomicStateList
 
                 } else {
                     throw new Error('Unrecognized locus ' + string);
@@ -1220,16 +1215,7 @@ var igv = (function (igv) {
 
                 geneNameLocusObject.selection = new igv.GtexSelection(result[searchConfig.geneField], result[searchConfig.snpField]);
 
-
-                // geneName = result.geneSymbol || result.gene;
-                // geneNameLocusObject.locusSearchString = ('gtex' === geneNameLocusObject.type || 'snp' === geneNameLocusObject.type) ? result.snpId : geneName;
-                //
-                // obj = ('gtex' === geneNameLocusObject.type || 'snp' === geneNameLocusObject.type) ? {snp: result.snpId} : {gene: geneName};
-                // geneNameLocusObject.selection = new igv.GtexSelection(obj);
-
                 return geneNameLocusObject;
-
-
             }
 
         }

@@ -924,7 +924,6 @@ var igv = (function (igv) {
             leftMatePairGenomicState.locusSearchString = leftMatePairGenomicState.referenceFrame.chrName;
 
             rightMatePairGenomicState = {};
-            rightMatePairGenomicState.chromosome = leftMatePairGenomicState.chromosome;
             rightMatePairGenomicState.referenceFrame = createReferenceFrame(alignment.chr, referenceFrame.bpPerPixel, viewportWidth, alignment.mate.position, alignment.lengthOnRef);
             rightMatePairGenomicState.locusSearchString = rightMatePairGenomicState.referenceFrame.chrName;
 

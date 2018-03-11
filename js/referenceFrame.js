@@ -27,7 +27,6 @@
 
 var igv = (function (igv) {
 
-
     igv.ReferenceFrame = function (chrName, start, bpPerPixel) {
         this.chrName = chrName;
         this.start = start;

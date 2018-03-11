@@ -191,7 +191,7 @@ var igv = (function (igv) {
             shim = 2;
             tickHeight = 6;
             bp = options.bpStart + options.referenceFrame.toBP(options.pixelWidth);
-            bp = Math.min(options.genomicState.chromosome.bpLength, bp);
+            bp = Math.min(igv.browser.genome.getChromosome(options.genomicState.referenceFrame.chrName).bpLength, bp);
             maximumLabelWidthPixel = options.context.measureText(tickLabelString(bp, index)).width;
             // console.log('width metric ' + Math.round(maximumLabelWidthPixel) + ' width ' + Math.round(tickSeparationPixel));
             for (pixel = 0, toggle = 0, tickLabelNumber = options.bpStart; pixel < options.pixelWidth; pixel += tickSeparationPixel, toggle++, tickLabelNumber += tickValues[tickKeys[index]]) {

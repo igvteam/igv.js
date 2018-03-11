@@ -78,7 +78,7 @@ var igv = (function (igv) {
 
         mergedFeatures = options.features;    // Array of feature arrays, 1 for each track
 
-        dataRange = autoscale(options.genomicState.chromosome.name, mergedFeatures);
+        dataRange = autoscale(options.genomicState.referenceFrame.chrName, mergedFeatures);
 
         for (i = 0, len = this.tracks.length; i < len; i++) {
 

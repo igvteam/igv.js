@@ -157,10 +157,12 @@ var igv = (function (igv) {
                 if (genomicStateList.length > 0) {
 
                     browser.genomicStateList = genomicStateList.map(function (gs) {
-                        var obj;
-                        gs.referenceFrame = new igv.ReferenceFrame(gs.chromosome.name, gs.start, (gs.end - gs.start) / (width / genomicStateList.length));
-                        obj = _.omit(gs, 'start', 'end');
-                        return obj;
+
+                        var referenceFrame;
+                        referenceFrame = new igv.ReferenceFrame(gs.chromosome.name, gs.start, (gs.end - gs.start) / (width / genomicStateList.length));
+
+                        return { locusSearchString: gs.locusSearchString, referenceFrame: referenceFrame };
+
                     });
 
                     browser.updateLocusSearchWidget(browser.genomicStateList[ 0 ]);
