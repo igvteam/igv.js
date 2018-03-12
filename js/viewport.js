@@ -28,8 +28,10 @@ var igv = (function (igv) {
 
         this.setWidth(igv.browser.viewportContainerWidth() / igv.browser.genomicStateList.length, true);
 
-        this.contentDiv = $('<div>')[0];
-        this.$viewport.append(this.contentDiv);
+        $div = $('<div>');
+        this.$viewport.append($div);
+        $div.height( this.$viewport.height() );
+        this.contentDiv = $div.get(0);
 
         if (trackView.track instanceof igv.SequenceTrack) {
             this.$viewport.addClass('igv-viewport-sequence');
@@ -118,8 +120,6 @@ var igv = (function (igv) {
             this.popover = new igv.Popover(igv.browser.$content);
 
         }
-
-        igv.Viewport.decorateViewportWithContainer($container);
 
     };
 
@@ -696,32 +696,6 @@ var igv = (function (igv) {
             mouseDownX = lastMouseX = undefined;
             referenceFrame = undefined;
         }
-
-    };
-
-    igv.Viewport.decorateViewportWithContainer = function ($container) {
-
-        var $viewports;
-
-        $viewports = $container.find('.igv-viewport-div');
-
-        $viewports.each(function (index) {
-
-            if (index < $viewports.length && (1 + index) !== $viewports.length) {
-                $(this).addClass('igv-viewport-div-border-right');
-            } else {
-                $(this).removeClass('igv-viewport-div-border-right');
-            }
-
-            if ($viewports.length > 1) {
-                $(this).find('.igv-viewport-fa-close').show();
-                $(this).find('.igv-viewport-content-ruler-div').show();
-            } else {
-                $(this).find('.igv-viewport-fa-close').hide();
-                $(this).find('.igv-viewport-content-ruler-div').hide();
-            }
-
-        });
 
     };
 

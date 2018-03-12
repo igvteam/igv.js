@@ -66,6 +66,8 @@ var igv = (function (igv) {
 
         });
 
+        this.decorateViewports();
+
         this.configureViewportContainer(this.$viewportContainer, this.viewports);
 
         element = this.createRightHandGutter();
@@ -232,7 +234,34 @@ var igv = (function (igv) {
 
         this.viewports[ index ].$viewport.remove();
         this.viewports.splice(index, 1);
-        igv.Viewport.decorateViewportWithContainer(this.$viewportContainer);
+
+        this.decorateViewports();
+    };
+
+    igv.TrackView.prototype.decorateViewports = function () {
+        var self = this;
+
+        this.viewports.forEach(function (viewport, index) {
+            var $viewport;
+
+            $viewport = viewport.$viewport;
+
+            if (index < self.viewports.length && (1 + index) !== self.viewports.length) {
+                $viewport.addClass('igv-viewport-div-border-right');
+            } else {
+                $viewport.removeClass('igv-viewport-div-border-right');
+            }
+
+            if (self.viewports.length > 1) {
+                $viewport.find('.igv-viewport-fa-close').show();
+                $viewport.find('.igv-viewport-content-ruler-div').show();
+            } else {
+                $viewport.find('.igv-viewport-fa-close').hide();
+                $viewport.find('.igv-viewport-content-ruler-div').hide();
+            }
+
+        });
+
     };
 
     igv.TrackView.prototype.attachDragWidget = function () {
