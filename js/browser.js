@@ -499,17 +499,28 @@ var igv = (function (igv) {
 
     };
 
-    igv.Browser.prototype.repaintWithLocusIndex = function (locusIndex) {
+    igv.Browser.prototype.repaintWithGenomicState = function (genomicState) {
+
+        var viewports;
 
         if (this.karyoPanel) {
             this.karyoPanel.repaint();
         }
 
         if (this.ideoPanel) {
-            this.ideoPanel.repaintPanelWithLocusIndex(locusIndex);
+            this.ideoPanel.repaintPanelWithGenomicState(genomicState);
         }
 
-        _.each(igv.Viewport.viewportsWithLocusIndex(locusIndex), function (viewport) {
+        viewports = [];
+        this.trackViews.forEach(function (trackView) {
+            var viewport;
+            viewport = trackView.viewportWithGenomicState(genomicState);
+            if (viewport) {
+                viewports.push(viewport);
+            }
+        });
+
+        viewports.forEach(function (viewport) {
             viewport.repaint();
         });
 
@@ -533,23 +544,34 @@ var igv = (function (igv) {
 
     };
 
-    igv.Browser.prototype.updateWithLocusIndex = function (locusIndex) {
+    igv.Browser.prototype.updateWithGenomicState = function (genomicState) {
+
+        var viewports;
 
         igv.browser.updateLocusSearchWidget(this.genomicStateList[ 0 ]);
 
-        if (0 === locusIndex) {
-            this.windowSizePanel.updateWithGenomicState(this.genomicStateList[locusIndex]);
+        if (0 === genomicState) {
+            this.windowSizePanel.updateWithGenomicState(genomicState);
         }
 
         if (this.ideoPanel) {
-            this.ideoPanel.repaintPanelWithLocusIndex(locusIndex);
+            this.ideoPanel.repaintPanelWithGenomicState(genomicState);
         }
 
         if (this.karyoPanel) {
             this.karyoPanel.repaint();
         }
 
-        _.each(igv.Viewport.viewportsWithLocusIndex(locusIndex), function (viewport) {
+        viewports = [];
+        this.trackViews.forEach(function (trackView) {
+            var viewport;
+            viewport = trackView.viewportWithGenomicState(genomicState);
+            if (viewport) {
+                viewports.push(viewport);
+            }
+        });
+
+        viewports.forEach(function (viewport) {
             viewport.update();
         });
 
@@ -660,6 +682,16 @@ var igv = (function (igv) {
         return (this.trackViews && this.trackViews.length > 0) ? this.trackViews[0].$viewportContainer.width() : this.syntheticViewportContainerWidth();
     };
 
+    igv.Browser.prototype.viewportWidth = function () {
+        var cw,
+            vw;
+
+        cw = this.viewportContainerWidth();
+        vw = (undefined === this.genomicStateList || 1 === this.genomicStateList.length) ? cw : Math.round(cw/this.genomicStateList.length);
+
+        return vw;
+    };
+
     igv.Browser.prototype.minimumBasesExtent = function () {
         return this.config.minimumBases;
     };
@@ -767,7 +799,7 @@ var igv = (function (igv) {
             // halve the bases-per-pixel
             referenceFrame.bpPerPixel /= 2.0;
 
-            browser.updateWithLocusIndex(locusIndex);
+            browser.updateWithGenomicState(genomicState);
 
             function basesExtent(width, bpp) {
                 return Math.floor(width * bpp);
@@ -827,7 +859,7 @@ var igv = (function (igv) {
 
             referenceFrame.bpPerPixel = newScale;
 
-            browser.updateWithLocusIndex(locusIndex);
+            browser.updateWithGenomicState(genomicState);
 
         }
     };
