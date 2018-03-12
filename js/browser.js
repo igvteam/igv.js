@@ -929,6 +929,8 @@ var igv = (function (igv) {
                     trackView.track.addRulerSweeperWithGenomicState(genomicState, viewport, viewport.$viewport, $(viewport.contentDiv));
                 }
 
+                trackView.decorateViewports();
+
                 trackView.configureViewportContainer(trackView.$viewportContainer, trackView.viewports);
             });
 
@@ -951,6 +953,8 @@ var igv = (function (igv) {
                 if (trackView.track instanceof igv.RulerTrack) {
                     trackView.track.addRulerSweeperWithGenomicState(genomicState, viewport, viewport.$viewport, $(viewport.contentDiv));
                 }
+
+                trackView.decorateViewports();
 
                 trackView.configureViewportContainer(trackView.$viewportContainer, trackView.viewports);
             });
@@ -996,6 +1000,8 @@ var igv = (function (igv) {
                 }
 
             });
+
+            trackView.decorateViewports();
 
             trackView.configureViewportContainer(trackView.$viewportContainer, trackView.viewports);
         });
