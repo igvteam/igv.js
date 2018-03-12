@@ -140,7 +140,7 @@ var igv = (function (igv) {
         this.genomicState.referenceFrame.bpPerPixel = (Math.round(end) - Math.round(start)) / this.$viewport.width();
         this.genomicState.referenceFrame.start = Math.round(start);
 
-        igv.browser.updateWithLocusIndex(igv.browser.genomicStateList.indexOf(this.genomicState));
+        igv.browser.updateWithGenomicState(this.genomicState);
 
     };
 
@@ -576,7 +576,7 @@ var igv = (function (igv) {
 
                     igv.browser.updateLocusSearchWidget(igv.browser.genomicStateList[ 0 ]);
 
-                    igv.browser.repaintWithLocusIndex(igv.browser.genomicStateList.indexOf(self.genomicState));
+                    igv.browser.repaintWithGenomicState( self.genomicState );
 
                     igv.browser.fireEvent('trackdrag');
                 }
@@ -653,7 +653,7 @@ var igv = (function (igv) {
                     } else {
                         frame.bpPerPixel /= 2;
                         frame.start = Math.round((newCenter + frame.start) / 2.0);
-                        igv.browser.updateWithLocusIndex( igv.browser.genomicStateList.indexOf(self.genomicState) );
+                        igv.browser.updateWithGenomicState(self.genomicState);
                     }
 
                 }
@@ -697,46 +697,6 @@ var igv = (function (igv) {
             referenceFrame = undefined;
         }
 
-    };
-
-    igv.Viewport.viewportWidthAtLocusIndex = function (locusIndex) {
-
-        var viewport = igv.Viewport.viewportsWithLocusIndex(locusIndex)[0];
-        return viewport.$viewport.width();
-    };
-
-    igv.Viewport.viewportsWithLocusIndex = function (locusIndex) {
-
-        var list = [];
-        igv.browser.trackViews.forEach(function (tv) {
-
-            tv.viewports.forEach(function (vp) {
-
-                if (locusIndex === igv.browser.genomicStateList.indexOf(vp.genomicState)) {
-                    list.push(vp);
-                }
-
-            });
-        });
-
-        return list;
-    };
-
-    igv.Viewport.viewportWithID = function (id) {
-
-        var result = undefined;
-
-        igv.browser.trackViews.forEach(function (tv) {
-            if (undefined === result) {
-                tv.viewports.forEach(function (vp) {
-                    if (id === vp.id) {
-                        result = vp;
-                    }
-                });
-            }
-        });
-
-        return result;
     };
 
     var Tile = function (chr, tileStart, tileEnd, bpPerPixel, image) {
