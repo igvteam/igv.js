@@ -278,7 +278,8 @@ var igv = (function (igv) {
         function drawIdeogram(bufferCtx, ideogramWidth, ideogramHeight) {
 
             var shim = 1,
-                ideogramTop = 0;
+              ideogramTop = 0,
+              shim2 = 2;
 
             if (!igv.browser.genome) {
                 return;
@@ -340,7 +341,7 @@ var igv = (function (igv) {
                             // fillRect: function (ctx, x, y, w, h, properties)
 
                             // bufferCtx.fillRect(start, ideogramTop, (end - start), ideogramHeight);
-                            bufferCtx.fillRect(start, shim + ideogramTop, (end - start), ideogramHeight - 2*shim);
+                            bufferCtx.fillRect(start, ideogramTop, (end - start), ideogramHeight);
                         }
                     }
                 }
