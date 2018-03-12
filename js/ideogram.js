@@ -279,7 +279,7 @@ var igv = (function (igv) {
 
             var shim = 1,
               ideogramTop = 0,
-              shim2 = 2;
+              shim2 = 0.5;
 
             if (!igv.browser.genome) {
                 return;
@@ -316,16 +316,16 @@ var igv = (function (igv) {
 
                             if (cytoband.name.charAt(0) === 'p') {
                                 xC[0] = start;
-                                yC[0] = ideogramHeight + ideogramTop;
+                                yC[0] = ideogramHeight + ideogramTop - shim;
                                 xC[1] = start;
-                                yC[1] = ideogramTop;
+                                yC[1] = ideogramTop + shim;
                                 xC[2] = end;
                                 yC[2] = center;
                             } else {
                                 xC[0] = end;
-                                yC[0] = ideogramHeight + ideogramTop;
+                                yC[0] = ideogramHeight + ideogramTop - shim;
                                 xC[1] = end;
-                                yC[1] = ideogramTop;
+                                yC[1] = ideogramTop + shim;
                                 xC[2] = start;
                                 yC[2] = center;
                             }
@@ -341,18 +341,18 @@ var igv = (function (igv) {
                             // fillRect: function (ctx, x, y, w, h, properties)
 
                             // bufferCtx.fillRect(start, ideogramTop, (end - start), ideogramHeight);
-                            bufferCtx.fillRect(start, ideogramTop, (end - start), ideogramHeight);
+                            bufferCtx.fillRect(start, ideogramTop + shim, (end - start), ideogramHeight - 2*shim);
                         }
                     }
                 }
             }
-            bufferCtx.strokeStyle = "rgba(0, 0, 0, 0.5)";
-            bufferCtx.lineWidth = 2;
+            bufferCtx.strokeStyle = "black";
+            bufferCtx.lineWidth = 1;
 
             // roundRect(x, y, width, height, radius, fill, stroke)
 
             // bufferCtx.roundRect(0, ideogramTop, ideogramWidth, ideogramHeight, ideogramHeight / 2, 0, 1);
-            bufferCtx.roundRect(shim, shim + ideogramTop, ideogramWidth - 2 * shim, ideogramHeight - 2*shim, (ideogramHeight - 2*shim)/2, 0, 1);
+            bufferCtx.roundRect(shim2, shim2 + ideogramTop, ideogramWidth - 2 * shim2, ideogramHeight - 2*shim2, (ideogramHeight - 2*shim2)/2, 0, 1);
             lastPX = end;
         }
 
