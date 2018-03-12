@@ -77,7 +77,7 @@ var igv = (function (igv) {
         _.each(this.panels, function(panel, index) {
             var genomicState = igv.browser.genomicStateList[ index ];
             panel.$ideogram.width(Math.floor(viewportContainerWidth/igv.browser.genomicStateList.length));
-            panel.$canvas.attr('width', panel.$ideogram.width());
+            setupCanvasSize(panel);
             panel.ideograms = {};
         });
 
@@ -123,6 +123,18 @@ var igv = (function (igv) {
         repaintPanel( this.panels[ index ] );
     };
 
+    function setupCanvasSize(panel) {
+        var canvas = panel.$canvas.get(0);
+        var w = +panel.$ideogram.width();
+        var h = +panel.$ideogram.height();
+        canvas.style.width = w;
+        canvas.style.height = h;
+        canvas.width = devicePixelRatio * w;
+        canvas.height = devicePixelRatio * h;
+        panel.ctx = canvas.getContext("2d");
+        panel.ctx.scale(devicePixelRatio, devicePixelRatio);
+    }
+
     function panelWithGenomicState($parent, genomicState, $previousPanelOrUndefined) {
 
         var viewportContainerWidth,
@@ -155,16 +167,7 @@ var igv = (function (igv) {
         //panel.$canvas.attr('height', panel.$ideogram.height());
         //panel.ctx = panel.$canvas.get(0).getContext("2d");
 
-        var canvas = panel.$canvas.get(0);
-        var w = +panel.$ideogram.width();
-        var h = +panel.$ideogram.height();
-        canvas.style.width = w;
-        canvas.style.height = h;
-        canvas.width = devicePixelRatio * w;
-        canvas.height = devicePixelRatio * h;
-        panel.ctx = canvas.getContext("2d");
-        panel.ctx.scale(devicePixelRatio, devicePixelRatio);
-
+        setupCanvasSize(panel);
         panel.ideograms = {};
 
         panel.$ideogram.on('click', function (e) {
@@ -203,12 +206,9 @@ var igv = (function (igv) {
             stainColors = [];
             canvasWidth = panel.$canvas.width();
             canvasHeight = panel.$canvas.height();
-            panel.$canvas.get(0).width = devicePixelRatio * canvasWidth;
-            panel.$canvas.get(0).height = devicePixelRatio * canvasHeight;
-            panel.ctx.scale(devicePixelRatio, devicePixelRatio);
 
             panel.ctx.clearRect(0, 0, canvasWidth, canvasHeight);
-            
+
             if(referenceFrame.chrName.toLowerCase() === "all") {
                 return;
             }
