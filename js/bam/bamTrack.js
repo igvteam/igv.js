@@ -949,24 +949,6 @@ var igv = (function (igv) {
         return new igv.ReferenceFrame(chromosomeName, ss, bpp);
     }
 
-    function matePairLocusStrings(alignment, referenceFrame, viewportWidth) {
-
-        var leftLocusString,
-            rightLocusString,
-            alignmentCentriodBP,
-            widthBP;
-
-        widthBP = referenceFrame.toBP(viewportWidth);
-
-        alignmentCentriodBP = (alignment.start + (alignment.start + alignment.lengthOnRef)) / 2;
-        leftLocusString = alignment.chr + ':' + Math.round(alignmentCentriodBP - widthBP / 2.0) + '-' + Math.round(alignmentCentriodBP + widthBP / 2.0);
-
-        alignmentCentriodBP = (alignment.mate.position + (alignment.mate.position + alignment.lengthOnRef)) / 2;
-        rightLocusString = alignment.chr + ':' + Math.round(alignmentCentriodBP - widthBP / 2.0) + '-' + Math.round(alignmentCentriodBP + widthBP / 2.0);
-
-        return [leftLocusString, rightLocusString];
-    }
-
     function parse(locusString) {
         return locusString.split(/[^a-zA-Z0-9]/).map(function (value, index) {
             return 0 === index ? value : parseInt(value, 10);
