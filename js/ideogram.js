@@ -117,7 +117,10 @@ var igv = (function (igv) {
         this.panels.splice(index, 1);
     };
 
-    igv.IdeoPanel.prototype.repaintPanelWithLocusIndex = function (index) {
+    igv.IdeoPanel.prototype.repaintPanelWithGenomicState = function (genomicState) {
+
+        var index;
+        index = igv.browser.genomicStateList.indexOf(genomicState);
         repaintPanel( this.panels[ index ] );
     };
 
@@ -397,7 +400,7 @@ var igv = (function (igv) {
 
         igv.browser.updateLocusSearchWidget(genomicState);
 
-        igv.browser.repaintWithLocusIndex( igv.browser.genomicStateList.indexOf(panel.genomicState) )
+        igv.browser.repaintWithGenomicState(panel.genomicState)
 
     }
 
