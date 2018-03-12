@@ -345,7 +345,8 @@ var igv = (function (igv) {
                     }
                 }
             }
-            bufferCtx.strokeStyle = "black";
+            bufferCtx.strokeStyle = "rgba(0, 0, 0, 0.5)";
+            bufferCtx.lineWidth = 2;
 
             // roundRect(x, y, width, height, radius, fill, stroke)
 
