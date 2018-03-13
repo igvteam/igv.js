@@ -58,15 +58,14 @@ var igv = (function (igv) {
         $(this.trackDiv).append(this.$viewportContainer);
 
         this.viewports = [];
-        browser.genomicStateList.forEach(function (genomicState, i) {
+        browser.genomicStateList.forEach(function (genomicState) {
 
             var viewport ;
-            viewport = new igv.Viewport(self, self.$viewportContainer, genomicState, undefined);
-
+            viewport = new igv.Viewport(self, self.$viewportContainer, genomicState);
             self.viewports.push(viewport);
 
             if (self.track instanceof igv.RulerTrack) {
-                self.track.addRulerSweeperWithGenomicState(genomicState, self.viewports[i], self.viewports[i].$viewport, $(self.viewports[i].contentDiv));
+                self.track.addRulerSweeperWithGenomicState(genomicState, viewport, viewport.$viewport, $(viewport.contentDiv));
             }
 
         });
