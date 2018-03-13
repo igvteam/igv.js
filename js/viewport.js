@@ -56,24 +56,10 @@ var igv = (function (igv) {
         }
 
         // zoom in to see features
-        self.$zoomInNotice = createZoomInNotice();
+
+        createZoomInNotice.call(this, $(this.contentDiv));
+
         $(this.contentDiv).append(self.$zoomInNotice);
-
-
-        function createZoomInNotice() {
-            var $container,
-                $child;
-
-            $child = $('<div>');
-            $child.text('Zoom in to see features');
-
-            $container = $('<div class="zoom-in-notice-container">');
-            $container.append($child);
-
-            $container.hide();
-
-            return $container;
-        }
 
         if (trackView.track.name && 0 === igv.browser.genomicStateList.indexOf(this.genomicState)) {
 
@@ -122,6 +108,17 @@ var igv = (function (igv) {
         }
 
     };
+
+    function createZoomInNotice($parent) {
+        var $e;
+
+        this.$zoomInNotice = $('<div class="zoom-in-notice-container">');
+        $parent.append(this.$zoomInNotice);
+
+        $e = $('<div>');
+        this.$zoomInNotice.append($e);
+        $e.text('Zoom in to see features');
+    }
 
     igv.Viewport.prototype.setWidth = function (width) {
         var percentage;
