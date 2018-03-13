@@ -38,7 +38,6 @@ var igv = (function (igv) {
             trackView.track.appendMultiPanelCloseButton(this.$viewport, this.genomicState);
         }
 
-        // track content canvas
         this.canvas = $('<canvas>')[0];
 
         $(this.contentDiv).append(this.canvas);
@@ -50,8 +49,6 @@ var igv = (function (igv) {
         if (trackView.track instanceof igv.RulerTrack) {
             trackView.track.appendLocusLabel($(this.contentDiv), this.genomicState);
         }
-
-        // zoom in to see features
 
         createZoomInNotice.call(this, $(this.contentDiv));
 
@@ -101,6 +98,10 @@ var igv = (function (igv) {
 
             this.popover = new igv.Popover(igv.browser.$content);
 
+        }
+
+        if (trackView.track instanceof igv.RulerTrack) {
+            trackView.track.addRulerSweeperWithGenomicState(genomicState, this, this.$viewport, $(this.contentDiv));
         }
 
     };
