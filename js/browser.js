@@ -955,10 +955,6 @@ var igv = (function (igv) {
                 viewport = new igv.Viewport(trackView, trackView.$viewportContainer, genomicState);
                 trackView.viewports.push(viewport);
 
-                if (trackView.track instanceof igv.RulerTrack) {
-                    trackView.track.addRulerSweeperWithGenomicState(genomicState, viewport, viewport.$viewport, $(viewport.contentDiv));
-                }
-
                 trackView.decorateViewports();
 
                 trackView.configureViewportContainer(trackView.$viewportContainer, trackView.viewports);
@@ -983,10 +979,6 @@ var igv = (function (igv) {
                 // The viewport constructor always appends. Reorder here.
                 $detached = viewport.$viewport.detach();
                 $detached.insertAfter(trackView.viewports[ index - 1 ].$viewport);
-
-                if (trackView.track instanceof igv.RulerTrack) {
-                    trackView.track.addRulerSweeperWithGenomicState(genomicState, viewport, viewport.$viewport, $(viewport.contentDiv));
-                }
 
                 trackView.decorateViewports();
 
@@ -1030,10 +1022,6 @@ var igv = (function (igv) {
                 var viewport ;
                 viewport = new igv.Viewport(trackView, trackView.$viewportContainer, genomicState);
                 trackView.viewports.push(viewport);
-
-                if (trackView.track instanceof igv.RulerTrack) {
-                    trackView.track.addRulerSweeperWithGenomicState(genomicState, trackView.viewports[i], trackView.viewports[i].$viewport, $(trackView.viewports[i].contentDiv));
-                }
 
             });
 
