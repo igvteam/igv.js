@@ -952,7 +952,6 @@ var igv = (function (igv) {
             this.trackViews.forEach(function (trackView) {
 
                 var viewport;
-
                 viewport = new igv.Viewport(trackView, trackView.$viewportContainer, genomicState, undefined);
 
                 trackView.viewports.push(viewport);
@@ -977,7 +976,6 @@ var igv = (function (igv) {
             this.trackViews.forEach(function (trackView) {
 
                 var viewport;
-
                 viewport = new igv.Viewport(trackView, trackView.$viewportContainer, genomicState, trackView.viewports[ index - 1 ].$viewport);
 
                 trackView.viewports.splice(index, 0, viewport);
@@ -1025,7 +1023,10 @@ var igv = (function (igv) {
 
             genomicStateList.forEach(function (genomicState, i) {
 
-                trackView.viewports.push(new igv.Viewport(trackView, trackView.$viewportContainer, genomicState, undefined));
+                var viewport ;
+                viewport = new igv.Viewport(trackView, trackView.$viewportContainer, genomicState, undefined);
+
+                trackView.viewports.push(viewport);
 
                 if (trackView.track instanceof igv.RulerTrack) {
                     trackView.track.addRulerSweeperWithGenomicState(genomicState, trackView.viewports[i], trackView.viewports[i].$viewport, $(trackView.viewports[i].contentDiv));
