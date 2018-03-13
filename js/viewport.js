@@ -3,7 +3,7 @@
  */
 var igv = (function (igv) {
 
-    igv.Viewport = function (trackView, $container, genomicState, $previousViewportOrUndefined) {
+    igv.Viewport = function (trackView, $container, genomicState) {
 
         var self = this,
             description,
@@ -17,12 +17,7 @@ var igv = (function (igv) {
         this.genomicState = genomicState;
 
         this.$viewport = $('<div class="igv-viewport-div">');
-
-        if ($previousViewportOrUndefined) {
-            this.$viewport.insertAfter($previousViewportOrUndefined);
-        } else {
-            $container.append(this.$viewport);
-        }
+        $container.append(this.$viewport);
 
         this.$viewport.data("viewport", this.id);
 
@@ -30,6 +25,7 @@ var igv = (function (igv) {
 
         $div = $('<div>');
         this.$viewport.append($div);
+
         $div.height( this.$viewport.height() );
         this.contentDiv = $div.get(0);
 
