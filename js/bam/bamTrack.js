@@ -911,7 +911,7 @@ var igv = (function (igv) {
 
         config.popover.hide();
         alignment = this.getClickedObject(config.viewport, config.y, config.genomicLocation);
-        if (alignment) {
+        if (alignment && alignment.mate) {
 
             this.highlightedAlignmentReadNamed = alignment.readName;
 
