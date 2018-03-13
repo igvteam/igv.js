@@ -64,10 +64,6 @@ var igv = (function (igv) {
             viewport = new igv.Viewport(self, self.$viewportContainer, genomicState);
             self.viewports.push(viewport);
 
-            if (self.track instanceof igv.RulerTrack) {
-                self.track.addRulerSweeperWithGenomicState(genomicState, viewport, viewport.$viewport, $(viewport.contentDiv));
-            }
-
         });
 
         this.decorateViewports();
