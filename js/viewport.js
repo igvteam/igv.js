@@ -3,7 +3,7 @@
  */
 var igv = (function (igv) {
 
-    igv.Viewport = function (trackView, $container, genomicState) {
+    igv.Viewport = function (trackView, $container, genomicState, width) {
 
         var self = this,
             description,
@@ -18,7 +18,7 @@ var igv = (function (igv) {
 
         this.$viewport = $('<div class="igv-viewport-div">');
         $container.append(this.$viewport);
-        this.setWidth(igv.browser.viewportContainerWidth() / igv.browser.genomicStateList.length);
+        this.setWidth(width);
 
         this.$viewport.data("viewport", this.id);
 
