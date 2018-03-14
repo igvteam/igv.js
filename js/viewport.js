@@ -18,14 +18,14 @@ var igv = (function (igv) {
 
         this.$viewport = $('<div class="igv-viewport-div">');
         $container.append(this.$viewport);
+        this.setWidth(igv.browser.viewportContainerWidth() / igv.browser.genomicStateList.length);
 
         this.$viewport.data("viewport", this.id);
 
-        this.setWidth(igv.browser.viewportContainerWidth() / igv.browser.genomicStateList.length, true);
 
-        $div = $('<div>');
+        // $div = $('<div>');
+        $div = $("<div>", { class: 'igv-viewport-content-div' });
         this.$viewport.append($div);
-
         $div.height( this.$viewport.height() );
         this.contentDiv = $div.get(0);
 
@@ -157,7 +157,7 @@ var igv = (function (igv) {
         // console.log('viewport(' + this.id + ').resize - width: ' + contentWidth);
 
         if (contentWidth > 0) {
-            this.setWidth(contentWidth, true);
+            this.setWidth(contentWidth);
             this.canvas.style.width = this.$viewport.width() + "px";
             this.canvas.setAttribute('width', this.$viewport.width());
             this.update();
