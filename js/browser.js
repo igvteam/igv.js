@@ -1037,19 +1037,20 @@ var igv = (function (igv) {
     igv.Browser.prototype.search = function (string) {
 
         var self = this,
-            loci,
-            viewportWidth;
+            loci;
 
         loci = string.split(' ');
-        viewportWidth = this.viewportContainerWidth() / genomicStateList.length;
+
         this.getGenomicStateList(loci)
 
             .then(function (genomicStateList) {
+                var viewportWidth;
 
                 if (genomicStateList.length > 0) {
 
                     self.emptyViewportContainers();
 
+                    viewportWidth = self.viewportContainerWidth() / genomicStateList.length;
                     self.genomicStateList = genomicStateList.map(function (gs) {
                         gs.referenceFrame = new igv.ReferenceFrame(gs.chromosome.name, gs.start, (gs.end - gs.start) / viewportWidth);
                         return gs;
