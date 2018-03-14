@@ -99,6 +99,9 @@ var igv = (function (igv) {
         if (config.apiKey) igv.setApiKey(config.apiKey);
         if (config.oauthToken) igv.setOauthToken(config.oauthToken);
 
+
+        var width;
+
         // Load known genome table (make this optional)
 
         igv.Genome.getKnownGenomes()
@@ -143,7 +146,6 @@ var igv = (function (igv) {
                 browser.chromosomeSelectWidget.update(browser.genome);
 
                 return browser.getGenomicStateList(getInitialLocus(config))
-
             })
 
             .then(function (genomicStateList) {
@@ -151,21 +153,15 @@ var igv = (function (igv) {
                 var viewportWidth,
                     errorString;
 
-
                 if (genomicStateList.length > 0) {
 
-                    viewportWidth = browser.viewportContainerWidth() / genomicStateList.length;
-
-                    // browser.genomicStateList = genomicStateList.map(function (gs) {
-                    //     var obj;
-                    //     gs.referenceFrame = new igv.ReferenceFrame(gs.chromosome.name, gs.start, (gs.end - gs.start) / viewportWidth);
-                    //     obj = _.omit(gs, 'start', 'end');
-                    //     return obj;
-                    // });
+                    viewportWidth = browser.viewportContainerWidth()/genomicStateList.length;
 
                     browser.genomicStateList = genomicStateList.map(function (gs) {
-                        gs.referenceFrame = new igv.ReferenceFrame(gs.chromosome.name, gs.start, (gs.end - gs.start) / viewportWidth);
-                        return gs;
+                        var obj;
+                        gs.referenceFrame = new igv.ReferenceFrame(gs.chromosome.name, gs.start, (gs.end - gs.start)/viewportWidth);
+                        obj = _.omit(gs, 'start', 'end');
+                        return obj;
                     });
 
                     browser.updateLocusSearchWidget(browser.genomicStateList[ 0 ]);
@@ -196,7 +192,8 @@ var igv = (function (igv) {
 
                     browser.windowSizePanel.updateWithGenomicState(browser.genomicStateList[ 0 ]);
 
-                    return genomicStateList;
+                    return browser.genomicStateList;
+
                 } else {
                     errorString = 'Unrecognized locus ' + config.locus;
                     igv.presentAlert(errorString, undefined);
@@ -206,9 +203,8 @@ var igv = (function (igv) {
             .then(function (genomicStateList) {
                 var panelWidth;
 
-                panelWidth = browser.viewportContainerWidth() / genomicStateList.length;
-
                 if (true === config.showIdeogram) {
+                    panelWidth = browser.viewportContainerWidth() / genomicStateList.length;
                     browser.ideoPanel = new igv.IdeoPanel($header, panelWidth);
                     browser.ideoPanel.repaint();
                 }
