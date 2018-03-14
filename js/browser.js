@@ -952,7 +952,7 @@ var igv = (function (igv) {
             this.trackViews.forEach(function (trackView) {
 
                 var viewport;
-                viewport = new igv.Viewport(trackView, trackView.$viewportContainer, genomicState);
+                viewport = new igv.Viewport(trackView, trackView.$viewportContainer, genomicState, viewportWidth);
                 trackView.viewports.push(viewport);
 
                 trackView.decorateViewports();
@@ -973,7 +973,7 @@ var igv = (function (igv) {
                 var viewport,
                 $detached;
 
-                viewport = new igv.Viewport(trackView, trackView.$viewportContainer, genomicState);
+                viewport = new igv.Viewport(trackView, trackView.$viewportContainer, genomicState, viewportWidth);
                 trackView.viewports.splice(index, 0, viewport);
 
                 // The viewport constructor always appends. Reorder here.
@@ -1014,13 +1014,15 @@ var igv = (function (igv) {
     };
 
     igv.Browser.prototype.buildViewportsWithGenomicStateList = function (genomicStateList) {
+        var width;
 
+        width = this.viewportContainerWidth() / this.genomicStateList.length;
         this.trackViews.forEach(function (trackView) {
 
             genomicStateList.forEach(function (genomicState, i) {
 
                 var viewport ;
-                viewport = new igv.Viewport(trackView, trackView.$viewportContainer, genomicState);
+                viewport = new igv.Viewport(trackView, trackView.$viewportContainer, genomicState, width);
                 trackView.viewports.push(viewport);
 
             });
