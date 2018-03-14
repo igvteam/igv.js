@@ -29,7 +29,7 @@ var igv = (function (igv) {
     igv.TrackView = function (browser, $container, track) {
 
         var self = this,
-            element,
+            width,
             $track,
             config;
 
@@ -58,10 +58,11 @@ var igv = (function (igv) {
         $(this.trackDiv).append(this.$viewportContainer);
 
         this.viewports = [];
+        width = this.browser.viewportContainerWidth() / this.browser.genomicStateList.length;
         browser.genomicStateList.forEach(function (genomicState) {
 
             var viewport ;
-            viewport = new igv.Viewport(self, self.$viewportContainer, genomicState);
+            viewport = new igv.Viewport(self, self.$viewportContainer, genomicState, width);
             self.viewports.push(viewport);
 
         });
