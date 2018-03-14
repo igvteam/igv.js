@@ -99,9 +99,6 @@ var igv = (function (igv) {
         if (config.apiKey) igv.setApiKey(config.apiKey);
         if (config.oauthToken) igv.setOauthToken(config.oauthToken);
 
-
-        var width;
-
         // Load known genome table (make this optional)
 
         igv.Genome.getKnownGenomes()
@@ -145,22 +142,30 @@ var igv = (function (igv) {
 
                 browser.chromosomeSelectWidget.update(browser.genome);
 
-                width = browser.viewportContainerWidth();
+                return browser.getGenomicStateList(getInitialLocus(config))
 
-                return browser.getGenomicStateList(getInitialLocus(config), undefined)
             })
 
             .then(function (genomicStateList) {
 
-                var errorString;
+                var viewportWidth,
+                    errorString;
+
 
                 if (genomicStateList.length > 0) {
 
+                    viewportWidth = browser.viewportContainerWidth() / genomicStateList.length;
+
+                    // browser.genomicStateList = genomicStateList.map(function (gs) {
+                    //     var obj;
+                    //     gs.referenceFrame = new igv.ReferenceFrame(gs.chromosome.name, gs.start, (gs.end - gs.start) / viewportWidth);
+                    //     obj = _.omit(gs, 'start', 'end');
+                    //     return obj;
+                    // });
+
                     browser.genomicStateList = genomicStateList.map(function (gs) {
-                        var obj;
-                        gs.referenceFrame = new igv.ReferenceFrame(gs.chromosome.name, gs.start, (gs.end - gs.start) / (width / genomicStateList.length));
-                        obj = _.omit(gs, 'start', 'end');
-                        return obj;
+                        gs.referenceFrame = new igv.ReferenceFrame(gs.chromosome.name, gs.start, (gs.end - gs.start) / viewportWidth);
+                        return gs;
                     });
 
                     browser.updateLocusSearchWidget(browser.genomicStateList[ 0 ]);
@@ -171,11 +176,6 @@ var igv = (function (igv) {
 
                     if (browser.karyoPanel) {
                         browser.karyoPanel.resize();
-                    }
-
-                    if (true === config.showIdeogram) {
-                        browser.ideoPanel = new igv.IdeoPanel($header);
-                        browser.ideoPanel.repaint();
                     }
 
                     if (config.showRuler) {
@@ -196,9 +196,21 @@ var igv = (function (igv) {
 
                     browser.windowSizePanel.updateWithGenomicState(browser.genomicStateList[ 0 ]);
 
+                    return genomicStateList;
                 } else {
                     errorString = 'Unrecognized locus ' + config.locus;
                     igv.presentAlert(errorString, undefined);
+                }
+
+            })
+            .then(function (genomicStateList) {
+                var panelWidth;
+
+                panelWidth = browser.viewportContainerWidth() / genomicStateList.length;
+
+                if (true === config.showIdeogram) {
+                    browser.ideoPanel = new igv.IdeoPanel($header, panelWidth);
+                    browser.ideoPanel.repaint();
                 }
 
             })

@@ -254,43 +254,6 @@ $drag-drop-warning-color: red;
   height:100%;
 }
 
-// ideogram
-.igv-ideogram-left-shim {
-  position: relative;
-  float: left;
-  height: 14px;
-  margin-top: 2px;
-  margin-bottom: 2px;
-  width: 50px;
-}
-
-.igv-ideogram-content-div {
-  position: relative;
-  float: left;
-  height: 14px;
-  margin-top: 2px;
-  margin-bottom: 2px;
-  background-color: white;
-
-  canvas {
-    width:100%;
-    height:100%;
-  }
-
-}
-
-.igv-ideogram-content-div-border-right {
-  border-right-color: white;
-  border-right-style: solid;
-  border-right-width: 4px;
-}
-
-.igv-ideogram-content-div-border-left {
-  border-left-color: white;
-  border-left-style: solid;
-  border-left-width: thin;
-}
-
 // root container
 .igv-root-div {
 
@@ -307,6 +270,49 @@ $drag-drop-warning-color: red;
   padding-top:4px;
 }
 
+#igv-content-header {
+
+  white-space: nowrap;
+
+  .igv-ideogram-left-shim {
+    position: relative;
+
+    height: 14px;
+    width: 50px;
+
+    //float: left;
+    display: inline-block;
+
+    margin-top: 2px;
+    margin-bottom: 2px;
+
+    background-color: white;
+
+  }
+
+  .igv-ideogram-content-div {
+    position: relative;
+
+    height: 14px;
+
+    //float: left;
+    display: inline-block;
+
+    margin-top: 2px;
+    margin-bottom: 2px;
+
+    background-color: white;
+
+  }
+
+  .igv-ideogram-content-div-border-right {
+    border-right-color: white;
+    border-right-style: solid;
+    border-right-width: 4px;
+  }
+
+}
+
 .igv-content-div {
   position: relative;
   width: 100%;
@@ -321,37 +327,31 @@ $drag-drop-warning-color: red;
 .igv-track-div {
   position: relative;
   width: 100%;
-  //overflow:hidden;
 }
 
 .igv-viewport-container {
   position: absolute;
-  left:  0;
+  left:  50px;
   right: 50px;
   height: 100%;
 
-  /*overflow: hidden;*/
+  white-space: nowrap;
 
   overflow-x: hidden;
   overflow-y: hidden;
 
 }
 
-.igv-viewport-container-shim {
-  left:  50px;
-}
-
 .igv-viewport-div {
-
-  float: left;
-
   position: relative;
-  /*width: 100%;*/
+
+  //float: left;
+  display: inline-block;
+
   height: 100%;
 
   overflow-x: hidden;
   overflow-y: hidden;
-
 }
 
 .igv-viewport-content-div {
