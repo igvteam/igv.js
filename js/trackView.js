@@ -54,7 +54,7 @@ var igv = (function (igv) {
             appendLeftHandGutter.call(this, $(this.trackDiv));
         }
 
-        this.$viewportContainer = $('<div class="igv-viewport-container igv-viewport-container-shim">');
+        this.$viewportContainer = $('<div class="igv-viewport-container">');
         $(this.trackDiv).append(this.$viewportContainer);
 
         this.viewports = [];

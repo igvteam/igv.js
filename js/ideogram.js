@@ -29,18 +29,19 @@
 
 var igv = (function (igv) {
 
-    igv.IdeoPanel = function ($parent) {
+    igv.IdeoPanel = function ($parent, panelWidth) {
         this.$parent = $parent;
-        this.buildPanels($parent);
+        this.buildPanels($parent, panelWidth);
     };
 
-    igv.IdeoPanel.prototype.buildPanels = function ($parent) {
+    igv.IdeoPanel.prototype.buildPanels = function ($parent, width) {
 
         var self = this;
 
         $parent.append($('<div class="igv-ideogram-left-shim"></div>'));
+
         this.panels = igv.browser.genomicStateList.map(function (genomicState) {
-            return panelWithGenomicState.call(self, $parent, genomicState, undefined)
+            return panelWithGenomicState.call(self, $parent, genomicState, width, undefined)
         });
     };
 
@@ -100,14 +101,14 @@ var igv = (function (igv) {
 
     };
 
-    igv.IdeoPanel.prototype.addPanelWithGenomicStateAtIndex = function (genomicState, index) {
+    igv.IdeoPanel.prototype.addPanelWithGenomicStateAtIndex = function (genomicState, index, width) {
         var panel;
 
         // do stuff
         if (1 === this.panels.length) {
-            this.panels.push( panelWithGenomicState.call(this, this.$parent, genomicState, undefined) );
+            this.panels.push( panelWithGenomicState.call(this, this.$parent, genomicState, width, undefined) );
         } else {
-            panel = panelWithGenomicState.call(this, this.$parent, genomicState, this.panels[ index - 1 ].$ideogram);
+            panel = panelWithGenomicState.call(this, this.$parent, genomicState, width, this.panels[ index - 1 ].$ideogram);
             this.panels.splice((index), 0, panel);
         }
     };
@@ -124,13 +125,11 @@ var igv = (function (igv) {
         repaintPanel( this.panels[ index ] );
     };
 
-    function panelWithGenomicState($parent, genomicState, $previousPanelOrUndefined) {
+    function panelWithGenomicState($parent, genomicState, width, $previousPanelOrUndefined) {
 
-        var viewportContainerWidth,
-            percentage,
+        var percentage,
             panel;
 
-        viewportContainerWidth = igv.browser.viewportContainerWidth();
         panel = {};
 
         panel.genomicState = genomicState;
@@ -145,9 +144,9 @@ var igv = (function (igv) {
 
         addBorders(panel.$ideogram, igv.browser.genomicStateList.indexOf(genomicState), igv.browser.genomicStateList.length);
 
-        panel.$ideogram.width(Math.floor(viewportContainerWidth/igv.browser.genomicStateList.length));
+        panel.$ideogram.width(width);
         percentage = panel.$ideogram.width()/panel.$ideogram.outerWidth();
-        panel.$ideogram.width(Math.floor(percentage * (viewportContainerWidth/igv.browser.genomicStateList.length)));
+        panel.$ideogram.width(Math.floor(percentage * (width)));
 
         panel.$canvas = $('<canvas>');
         panel.$ideogram.append(panel.$canvas);
