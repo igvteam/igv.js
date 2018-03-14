@@ -647,7 +647,7 @@ var igv = (function (igv) {
 
         var $trackContainer = $(this.trackContainerDiv),
             $track = $('<div class="igv-track-div">'),
-            $viewportContainer = $('<div class="igv-viewport-container igv-viewport-container-shim">'),
+            $viewportContainer = $('<div class="igv-viewport-containe">'),
             rect = {},
             trackContainerWidth,
             trackWidth;
@@ -946,7 +946,7 @@ var igv = (function (igv) {
             this.genomicStateList.push(genomicState);
 
             if (this.ideoPanel) {
-                this.ideoPanel.addPanelWithGenomicStateAtIndex(genomicState, index);
+                this.ideoPanel.addPanelWithGenomicStateAtIndex(genomicState, index, viewportWidth);
             }
 
             this.trackViews.forEach(function (trackView) {
@@ -965,7 +965,7 @@ var igv = (function (igv) {
             this.genomicStateList.splice(index, 0, genomicState);
 
             if (this.ideoPanel) {
-                this.ideoPanel.addPanelWithGenomicStateAtIndex(genomicState, index);
+                this.ideoPanel.addPanelWithGenomicStateAtIndex(genomicState, index, viewportWidth);
             }
 
             this.trackViews.forEach(function (trackView) {
@@ -1037,39 +1037,26 @@ var igv = (function (igv) {
     igv.Browser.prototype.search = function (string) {
 
         var self = this,
-            loci;
+            loci,
+            viewportWidth;
 
         loci = string.split(' ');
-
-        this.getGenomicStateList(loci, this.viewportContainerWidth())
+        viewportWidth = this.viewportContainerWidth() / genomicStateList.length;
+        this.getGenomicStateList(loci)
 
             .then(function (genomicStateList) {
-                var width;
 
                 if (genomicStateList.length > 0) {
 
-                    if (self.ideoPanel) {
-                        self.ideoPanel.discardPanels();
-                    }
-
                     self.emptyViewportContainers();
 
-                    width = self.viewportContainerWidth();
-
                     self.genomicStateList = genomicStateList.map(function (gs) {
-                        var obj;
-
-                        gs.referenceFrame = new igv.ReferenceFrame(gs.chromosome.name, gs.start, (gs.end - gs.start) / (width / genomicStateList.length));
-                        obj = _.omit(gs, 'start', 'end');
+                        gs.referenceFrame = new igv.ReferenceFrame(gs.chromosome.name, gs.start, (gs.end - gs.start) / viewportWidth);
                         return gs;
                     });
 
                     self.toggleCenterGuide(self.genomicStateList);
                     self.toggleCursorGuide(self.genomicStateList);
-
-                    if (self.ideoPanel) {
-                        self.ideoPanel.buildPanels($('#igv-content-header'));
-                    }
 
                     self.buildViewportsWithGenomicStateList(genomicStateList);
 
@@ -1081,6 +1068,14 @@ var igv = (function (igv) {
 
             })
             .then(function (genomicStateList) {
+                var panelWidth;
+
+                if (self.ideoPanel) {
+                    self.ideoPanel.discardPanels();
+                    panelWidth = self.viewportContainerWidth()/genomicStateList.length;
+                    self.ideoPanel.buildPanels($('#igv-content-header'), panelWidth);
+                }
+
                 self.update();
             })
             .catch(function (error) {
@@ -1109,9 +1104,8 @@ var igv = (function (igv) {
      * Each mult-locus panel refers to a genomicState.
      *
      * @param loci - array of locus strings (e.g. chr1:1-100,  egfr)
-     * @param viewportContainerWidth
      */
-    igv.Browser.prototype.getGenomicStateList = function (loci, viewportContainerWidth) {
+    igv.Browser.prototype.getGenomicStateList = function (loci) {
 
         var self = this,
             searchConfig = igv.browser.searchConfig,
