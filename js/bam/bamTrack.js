@@ -144,44 +144,14 @@ var igv = (function (igv) {
 
     };
 
-    igv.BAMTrack.prototype.popupMenuItemList = function (config) {
+    igv.BAMTrack.prototype.contextMenuItemList = function (config) {
 
-        var self = this,
-            $e,
-            clickHandler,
-            list = [];
-
-        $e = $('<div>');
-        $e.text('Sort by base');
-
-        clickHandler = function () {
-
-            self.alignmentTrack.sortAlignmentRows(config.genomicLocation, self.sortOption);
-
-            self.trackView.update();
-
-            self.sortDirection = !(self.sortDirection);
-
-            config.popover.hide();
-
-        };
-
-        list.push({name: undefined, object: $e, click: clickHandler, init: undefined});
-
-        if (false === self.viewAsPairs) {
-
-            $e = $('<div>');
-            $e.text('View mate in split screen');
-
-            clickHandler = function () {
-                self.alignmentTrack.popupMenuItemList(config);
-            };
-
-            list.push({name: undefined, object: $e, click: clickHandler, init: undefined});
-
+        if (config.y >= this.coverageTrack.top && config.y < this.coverageTrack.height) {
+            return undefined;
+        } else {
+            return this.alignmentTrack.contextMenuItemList(config);
         }
 
-        return list;
 
     };
 
@@ -328,7 +298,7 @@ var igv = (function (igv) {
             $e.text('Sort by base');
 
             clickHandler = function () {
-                var genomicState = igv.browser.genomicStateList[ 0 ],
+                var genomicState = igv.browser.genomicStateList[0],
                     referenceFrame = genomicState.referenceFrame,
                     genomicLocation,
                     viewportHalfWidth;
@@ -901,22 +871,42 @@ var igv = (function (igv) {
         return clickedObject ? clickedObject.popupData(config.genomicLocation) : undefined;
     };
 
-    AlignmentTrack.prototype.popupMenuItemList = function (config) {
+    AlignmentTrack.prototype.contextMenuItemList = function (config) {
 
-        var alignment,
-            referenceFrame,
-            viewportWidth,
-            leftMatePairGenomicState,
-            rightMatePairGenomicState;
+        var self = this,
+            clickHandler,
+            list = [];
 
-        config.popover.hide();
-        alignment = this.getClickedObject(config.viewport, config.y, config.genomicLocation);
-        if (alignment && alignment.mate) {
+        list.push({label: 'Sort by base', click: sortRows, init: undefined});
 
-            this.highlightedAlignmentReadNamed = alignment.readName;
+        var alignment = this.getClickedObject(config.viewport, config.y, config.genomicLocation);
+        if (alignment && alignment.isPaired() && alignment.isMateMapped()) {
+            list.push({label: 'View mate in split screen', click: viewMateInSplitScreen, init: undefined});
+        }
+
+        return list;
+
+        function sortRows() {
+            self.alignmentTrack.sortAlignmentRows(config.genomicLocation, self.sortOption);
+            self.trackView.update();
+            self.sortDirection = !(self.sortDirection);
+            config.popover.hide();
+
+        };
+
+        function viewMateInSplitScreen() {
+
+            var referenceFrame,
+                viewportWidth,
+                leftMatePairGenomicState,
+                rightMatePairGenomicState;
+
+            config.popover.hide();
+
+            self.highlightedAlignmentReadNamed = alignment.readName;
 
             // account for reduced viewport width as a result of adding right mate pair panel
-            viewportWidth = (igv.browser.viewportContainerWidth()/(1 + igv.browser.genomicStateList.length));
+            viewportWidth = (igv.browser.viewportContainerWidth() / (1 + igv.browser.genomicStateList.length));
 
             leftMatePairGenomicState = config.viewport.genomicState;
             referenceFrame = leftMatePairGenomicState.referenceFrame;
@@ -928,8 +918,7 @@ var igv = (function (igv) {
 
             igv.browser.addMultiLocusPanelWithGenomicStateAtIndex(rightMatePairGenomicState, 1 + (igv.browser.genomicStateList.indexOf(leftMatePairGenomicState)), viewportWidth);
 
-        } else {
-            this.highlightedAlignmentReadNamed = undefined;
+
         }
     };
 
@@ -941,9 +930,9 @@ var igv = (function (igv) {
             alignmentCC;
 
         alignmentEE = alignmentStart + alignmentLength;
-        alignmentCC = (alignmentStart + alignmentEE)/2;
+        alignmentCC = (alignmentStart + alignmentEE) / 2;
 
-        ss = alignmentCC - (bpp * (viewportWidth/2));
+        ss = alignmentCC - (bpp * (viewportWidth / 2));
         ee = ss + (bpp * viewportWidth);
 
         return new igv.ReferenceFrame(chromosomeName, ss, bpp);
