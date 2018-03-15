@@ -77,7 +77,21 @@ var igv = (function (igv) {
         variant.alternateBases = arrayToString(json.alternateBases);
         variant.quality = json.quality;
         variant.filter = arrayToString(json.filter);
-        variant.info = json.info;
+
+
+        // Flatten GA4GH attributes array
+        variant.info = {};
+        Object.getOwnPropertyNames(json.info).forEach(function (key) {
+            var value,
+                valueArray = json.info[key];
+
+            if (Array.isArray(valueArray)) {
+                value = valueArray.join(",");
+            } else {
+                value = valueArray;
+            }
+            variant.info[key] = value;
+        });
 
 
         // Need to build a hash of calls for fast lookup
