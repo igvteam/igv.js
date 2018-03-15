@@ -81,17 +81,15 @@ var igv = (function (igv) {
 
     };
 
-    igv.RulerTrack.prototype.appendLocusLabel = function ($parent, genomicState) {
+    igv.RulerTrack.prototype.updateLocusLabel = function () {
+        var self = this;
 
-        this.$label = $('<div class = "igv-viewport-content-ruler-div">');
-        $parent.append(this.$label);
+        this.trackView.viewports.forEach(function (viewport) {
+            var str;
+            str = viewport.genomicState.referenceFrame.showLocus(viewport.$viewport.width());
 
-        this.$label.text(genomicState.locusSearchString || '---');
-        this.$label.data('referenceFrame', JSON.parse(JSON.stringify(genomicState.referenceFrame)));
-
-        this.$label.click(function (e) {
-            genomicState.referenceFrame.set( $(this).data('referenceFrame') );
-            igv.browser.selectMultiLocusPanelWithGenomicState(genomicState);
+            // console.log('ruler update label - viewport ' + viewport.id + ' ' + str);
+            viewport.$rulerLabel.text( str );
         });
 
     };
@@ -177,10 +175,8 @@ var igv = (function (igv) {
             rulerSweeper.$viewportContent.find('canvas').show();
             rulerSweeper.addMouseHandlers();
 
-            updateLocusLabelWithGenomicState(options.viewport.$viewport.find('.igv-viewport-content-ruler-div'), options.genomicState);
-
             index = 0;
-            for (var i = 0; i < _.size(tickKeys); i++) {
+            for (var i = 0; i < tickKeys.length; i++) {
                 tickSeparationPixel = options.referenceFrame.toPixels(tickValues[tickKeys[i]]);
                 if (tickSeparationPixel > TickSeparationThreshold) {
                     index = i;
@@ -193,7 +189,7 @@ var igv = (function (igv) {
             bp = options.bpStart + options.referenceFrame.toBP(options.pixelWidth);
             bp = Math.min(options.genomicState.chromosome.bpLength, bp);
             maximumLabelWidthPixel = options.context.measureText(tickLabelString(bp, index)).width;
-            // console.log('width metric ' + Math.round(maximumLabelWidthPixel) + ' width ' + Math.round(tickSeparationPixel));
+
             for (pixel = 0, toggle = 0, tickLabelNumber = options.bpStart; pixel < options.pixelWidth; pixel += tickSeparationPixel, toggle++, tickLabelNumber += tickValues[tickKeys[index]]) {
 
                 if (0 === toggle % 2 || maximumLabelWidthPixel < tickSeparationPixel) {
@@ -288,14 +284,10 @@ var igv = (function (igv) {
         return tickUnits;
     }
 
-    function updateLocusLabelWithGenomicState($label, state) {
-        $label.text(state.locusSearchString);
-    }
-
     function rectWithCenterAndSize(center, size) {
         var halfSize = sizeMake(size.width / 2.0, size.height / 2.0);
         return rectMake(center.x - halfSize.width, center.y - halfSize.height, size.width, size.height);
-    };
+    }
 
     function rectMake(x, y, width, height) {
         var rect = {origin: {}, size: {}};
@@ -307,12 +299,11 @@ var igv = (function (igv) {
         rect.size.height = height;
 
         return rect;
-    };
-
+    }
 
     function sizeMake(width, height) {
         return {width: width, height: height};
-    };
+    }
 
 
     return igv;
