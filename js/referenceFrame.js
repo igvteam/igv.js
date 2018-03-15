@@ -61,6 +61,19 @@ var igv = (function (igv) {
         this.start += pixels * this.bpPerPixel;
     };
 
+    igv.ReferenceFrame.prototype.showLocus = function (pixels) {
+        var ss,
+            ee;
+
+        if ('all' === this.chrName.toLowerCase()) {
+            return this.chrName.toLowerCase();
+        } else {
+            ss = igv.numberFormatter(Math.round(this.start));
+            ee = igv.numberFormatter(Math.round(this.start + this.bpPerPixel * pixels));
+            return this.chrName + ':' + ss + '-' + ee;
+        }
+    };
+
     igv.ReferenceFrame.prototype.description = function() {
         return "ReferenceFrame " + this.chrName + " " + igv.numberFormatter(Math.floor(this.start)) + " bpp " + this.bpPerPixel;
     };

@@ -43,7 +43,13 @@ var igv = (function (igv) {
         this.ctx = this.canvas.getContext("2d");
 
         if (trackView.track instanceof igv.RulerTrack) {
-            trackView.track.appendLocusLabel($(this.contentDiv), this.genomicState);
+
+            this.$rulerLabel = $('<div class = "igv-viewport-content-ruler-div">');
+            $(this.contentDiv).append(this.$rulerLabel);
+
+            this.$rulerLabel.click(function (e) {
+                igv.browser.selectMultiLocusPanelWithGenomicState(self.genomicState);
+            });
         }
 
         createZoomInNotice.call(this, $(this.contentDiv));

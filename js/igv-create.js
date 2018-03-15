@@ -164,8 +164,6 @@ var igv = (function (igv) {
                         return obj;
                     });
 
-                    browser.updateLocusSearchWidget(browser.genomicStateList[ 0 ]);
-
                     browser.zoomWidgetLayout();
 
                     browser.toggleCenterGuide(browser.genomicStateList);
@@ -190,8 +188,6 @@ var igv = (function (igv) {
                         browser.loadTracksWithConfigList(config.tracks);
                     }
 
-                    browser.windowSizePanel.updateWithGenomicState(browser.genomicStateList[ 0 ]);
-
                     return browser.genomicStateList;
 
                 } else {
@@ -208,6 +204,10 @@ var igv = (function (igv) {
                     browser.ideoPanel = new igv.IdeoPanel($header, panelWidth);
                     browser.ideoPanel.repaint();
                 }
+
+                browser.updateLocusSearchWidget(genomicStateList[ 0 ]);
+
+                browser.windowSizePanel.updateWithGenomicState(genomicStateList[ 0 ]);
 
             })
             .catch(function (error) {
