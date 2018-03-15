@@ -20,10 +20,6 @@ var igv = (function (igv) {
         $container.append(this.$viewport);
         this.setWidth(width);
 
-        this.$viewport.data("viewport", this.id);
-
-
-        // $div = $('<div>');
         $div = $("<div>", {class: 'igv-viewport-content-div'});
         this.$viewport.append($div);
         $div.height(this.$viewport.height());
