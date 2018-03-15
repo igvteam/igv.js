@@ -606,6 +606,10 @@ var igv = (function (igv) {
             chromosome;
 
 
+        if (this.rulerTrack) {
+            this.rulerTrack.updateLocusLabel();
+        }
+
         if (0 === this.genomicStateList.indexOf(genomicState) && 1 === this.genomicStateList.length) {
 
             if (genomicState.locusSearchString && 'all' === genomicState.locusSearchString.toLowerCase()) {
@@ -975,7 +979,6 @@ var igv = (function (igv) {
             });
         });
 
-
         if (index === this.genomicStateList.length) {
 
             this.genomicStateList.push(genomicState);
@@ -1020,6 +1023,10 @@ var igv = (function (igv) {
                 trackView.configureViewportContainer(trackView.$viewportContainer, trackView.viewports);
             });
 
+        }
+
+        if (this.rulerTrack) {
+            this.rulerTrack.updateLocusLabel();
         }
 
         this.resize();
