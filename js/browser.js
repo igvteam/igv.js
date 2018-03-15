@@ -864,6 +864,47 @@ var igv = (function (igv) {
         }
     };
 
+    igv.Browser.prototype.presentAlignmentMatePair = function (alignment, genomicState) {
+
+        var referenceFrame,
+            viewportWidth,
+            leftMatePairGenomicState,
+            rightMatePairGenomicState;
+
+        // account for reduced viewport width as a result of adding right mate pair panel
+        viewportWidth = (this.viewportContainerWidth() / (1 + this.genomicStateList.length));
+
+        // adjust left mate pair reference frame
+        leftMatePairGenomicState = genomicState;
+        referenceFrame = leftMatePairGenomicState.referenceFrame;
+        leftMatePairGenomicState.referenceFrame = createReferenceFrame(alignment.chr, referenceFrame.bpPerPixel, viewportWidth, alignment.start, alignment.lengthOnRef);
+
+        // create right mate pair reference frame
+        rightMatePairGenomicState = {};
+        rightMatePairGenomicState.chromosome = leftMatePairGenomicState.chromosome;
+        rightMatePairGenomicState.referenceFrame = createReferenceFrame(alignment.chr, referenceFrame.bpPerPixel, viewportWidth, alignment.mate.position, alignment.lengthOnRef);
+
+        // add right mate panel beside left mate panel
+        this.addMultiLocusPanelWithGenomicStateAtIndex(rightMatePairGenomicState, 1 + (this.genomicStateList.indexOf(leftMatePairGenomicState)), viewportWidth);
+
+        function createReferenceFrame(chromosomeName, bpp, viewportWidth, alignmentStart, alignmentLength) {
+
+            var ss,
+                ee,
+                alignmentEE,
+                alignmentCC;
+
+            alignmentEE = alignmentStart + alignmentLength;
+            alignmentCC = (alignmentStart + alignmentEE) / 2;
+
+            ss = alignmentCC - (bpp * (viewportWidth / 2));
+            ee = ss + (bpp * viewportWidth);
+
+            return new igv.ReferenceFrame(chromosomeName, ss, bpp);
+        }
+
+    };
+
     igv.Browser.prototype.selectMultiLocusPanelWithGenomicState = function (selectedGenomicState) {
         var self = this,
             removable;
