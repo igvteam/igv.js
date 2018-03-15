@@ -896,50 +896,15 @@ var igv = (function (igv) {
             self.parent.trackView.update();
             self.sortDirection = !(self.sortDirection);
 
-        };
+        }
 
         function viewMateInSplitScreen() {
-
-            var referenceFrame,
-                viewportWidth,
-                leftMatePairGenomicState,
-                rightMatePairGenomicState;
-
-
-            self.highlightedAlignmentReadNamed = alignment.readName;
-
-            // account for reduced viewport width as a result of adding right mate pair panel
-            viewportWidth = (igv.browser.viewportContainerWidth() / (1 + igv.browser.genomicStateList.length));
-
-            leftMatePairGenomicState = config.viewport.genomicState;
-            referenceFrame = leftMatePairGenomicState.referenceFrame;
-            leftMatePairGenomicState.referenceFrame = createReferenceFrame(alignment.chr, referenceFrame.bpPerPixel, viewportWidth, alignment.start, alignment.lengthOnRef);
-
-            rightMatePairGenomicState = {};
-            rightMatePairGenomicState.chromosome = leftMatePairGenomicState.chromosome;
-            rightMatePairGenomicState.referenceFrame = createReferenceFrame(alignment.chr, referenceFrame.bpPerPixel, viewportWidth, alignment.mate.position, alignment.lengthOnRef);
-
-            igv.browser.addMultiLocusPanelWithGenomicStateAtIndex(rightMatePairGenomicState, 1 + (igv.browser.genomicStateList.indexOf(leftMatePairGenomicState)), viewportWidth);
-
-
+            if (alignment.mate) {
+                self.highlightedAlignmentReadNamed = alignment.readName;
+                igv.browser.presentAlignmentMatePair(alignment, config.viewport.genomicState);
+            }
         }
     };
-
-    function createReferenceFrame(chromosomeName, bpp, viewportWidth, alignmentStart, alignmentLength) {
-
-        var ss,
-            ee,
-            alignmentEE,
-            alignmentCC;
-
-        alignmentEE = alignmentStart + alignmentLength;
-        alignmentCC = (alignmentStart + alignmentEE) / 2;
-
-        ss = alignmentCC - (bpp * (viewportWidth / 2));
-        ee = ss + (bpp * viewportWidth);
-
-        return new igv.ReferenceFrame(chromosomeName, ss, bpp);
-    }
 
     function parse(locusString) {
         return locusString.split(/[^a-zA-Z0-9]/).map(function (value, index) {
