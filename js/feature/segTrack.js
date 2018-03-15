@@ -347,14 +347,12 @@ var igv = (function (igv) {
         return null;
     };
 
-    igv.SegTrack.prototype.popupMenuItemList = function (config) {
+    igv.SegTrack.prototype.contextMenuItemList = function (config) {
 
         var self = this,
-            $e,
             clickHandler;
 
-        $e = $('<div>');
-        $e.text('Sort by value');
+
 
         clickHandler = function () {
 
@@ -372,7 +370,7 @@ var igv = (function (igv) {
 
         };
 
-        return [{name: undefined, object: $e, click: clickHandler, init: undefined}];
+        return [{label: 'Sort by value',  click: clickHandler, init: undefined}];
 
     };
 
