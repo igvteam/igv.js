@@ -366,7 +366,6 @@ var igv = (function (igv) {
 
             sortDirection = (sortDirection === "ASC" ? "DESC" : "ASC");
 
-            config.popover.hide();
 
         };
 

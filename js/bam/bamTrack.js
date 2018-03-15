@@ -58,7 +58,6 @@ var igv = (function (igv) {
 
         // sort alignment rows
         this.sortOption = config.sortOption || {sort: "NUCLEOTIDE"};
-        this.sortDirection = true;
 
         // filter alignments
         this.filterOption = config.filterOption || {name: "mappingQuality", params: [30, undefined]};
@@ -887,10 +886,9 @@ var igv = (function (igv) {
         return list;
 
         function sortRows() {
-            self.alignmentTrack.sortAlignmentRows(config.genomicLocation, self.sortOption);
-            self.trackView.update();
+            self.sortAlignmentRows(config.genomicLocation, self.sortOption);
+            self.parent.trackView.update();
             self.sortDirection = !(self.sortDirection);
-            config.popover.hide();
 
         };
 
@@ -901,7 +899,6 @@ var igv = (function (igv) {
                 leftMatePairGenomicState,
                 rightMatePairGenomicState;
 
-            config.popover.hide();
 
             self.highlightedAlignmentReadNamed = alignment.readName;
 
