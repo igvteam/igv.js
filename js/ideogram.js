@@ -41,7 +41,7 @@ var igv = (function (igv) {
         $parent.append($('<div class="igv-ideogram-left-shim"></div>'));
 
         this.panels = igv.browser.genomicStateList.map(function (genomicState) {
-            return panelWithGenomicState.call(self, $parent, genomicState, width, undefined)
+            return panelWithGenomicState.call(self, $parent, genomicState, width)
         });
     };
 
@@ -102,14 +102,21 @@ var igv = (function (igv) {
     };
 
     igv.IdeoPanel.prototype.addPanelWithGenomicStateAtIndex = function (genomicState, index, width) {
-        var panel;
+        var panel,
+            $detached;
 
-        // do stuff
-        if (1 === this.panels.length) {
-            this.panels.push( panelWithGenomicState.call(this, this.$parent, genomicState, width, undefined) );
+        panel = panelWithGenomicState.call(this, this.$parent, genomicState, width);
+
+        if (index === this.panels.length) {
+            this.panels.push( panel );
         } else {
-            panel = panelWithGenomicState.call(this, this.$parent, genomicState, width, this.panels[ index - 1 ].$ideogram);
-            this.panels.splice((index), 0, panel);
+
+            this.panels.splice(index, 0, panel);
+
+            // The viewport constructor always appends. Reorder here.
+            $detached = panel.$ideogram.detach();
+            $detached.insertAfter(this.panels[ index - 1 ].$ideogram);
+
         }
     };
 
@@ -125,7 +132,7 @@ var igv = (function (igv) {
         repaintPanel( this.panels[ index ] );
     };
 
-    function panelWithGenomicState($parent, genomicState, width, $previousPanelOrUndefined) {
+    function panelWithGenomicState($parent, genomicState, width) {
 
         var percentage,
             panel;
@@ -136,11 +143,7 @@ var igv = (function (igv) {
 
         panel.$ideogram = $('<div class="igv-ideogram-content-div"></div>');
 
-        if ($previousPanelOrUndefined) {
-            panel.$ideogram.insertAfter($previousPanelOrUndefined);
-        } else {
-            $parent.append(panel.$ideogram);
-        }
+        $parent.append(panel.$ideogram);
 
         addBorders(panel.$ideogram, igv.browser.genomicStateList.indexOf(genomicState), igv.browser.genomicStateList.length);
 

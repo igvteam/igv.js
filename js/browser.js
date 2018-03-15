@@ -864,7 +864,7 @@ var igv = (function (igv) {
         }
     };
 
-    igv.Browser.prototype.presentAlignmentMatePair = function (alignment, genomicState) {
+    igv.Browser.prototype.presentSplitScreenMultiLocusPanel = function (alignment, genomicState) {
 
         var referenceFrame,
             viewportWidth,
@@ -887,7 +887,7 @@ var igv = (function (igv) {
         // add right mate panel beside left mate panel
         this.addMultiLocusPanelWithGenomicStateAtIndex(rightMatePairGenomicState, 1 + (this.genomicStateList.indexOf(leftMatePairGenomicState)), viewportWidth);
 
-        function createReferenceFrame(chromosomeName, bpp, viewportWidth, alignmentStart, alignmentLength) {
+        function createReferenceFrame(chromosomeName, bpp, pixels, alignmentStart, alignmentLength) {
 
             var ss,
                 ee,
@@ -897,8 +897,8 @@ var igv = (function (igv) {
             alignmentEE = alignmentStart + alignmentLength;
             alignmentCC = (alignmentStart + alignmentEE) / 2;
 
-            ss = alignmentCC - (bpp * (viewportWidth / 2));
-            ee = ss + (bpp * viewportWidth);
+            ss = alignmentCC - (bpp * (pixels / 2));
+            ee = ss + (bpp * pixels);
 
             return new igv.ReferenceFrame(chromosomeName, ss, bpp);
         }
@@ -982,7 +982,8 @@ var igv = (function (igv) {
             });
         });
 
-        if (1 === this.genomicStateList.length) {
+
+        if (index === this.genomicStateList.length) {
 
             this.genomicStateList.push(genomicState);
 
@@ -1028,9 +1029,7 @@ var igv = (function (igv) {
 
         }
 
-        // this.update();
         this.resize();
-        // this.repaint();
     };
 
     igv.Browser.prototype.emptyViewportContainers = function () {
